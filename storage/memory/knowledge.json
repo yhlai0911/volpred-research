@@ -41769,5 +41769,44 @@
   },
   "results_sha256": "a0cd334eaecb3fc856bcbdd55b1f535fba4a9811595c378d2271c28ec66f8ad4",
   "created_at": "2026-07-15T23:43:54.073184+08:00"
+ },
+ {
+  "item_id": "k1717_india_vix_gate_20260715",
+  "category": "experiment_result",
+  "content": "K1717 [NULL/MIXED]: India VIX在2020-2026 NIFTY日波動OOS中，GJR-GARCH-X與HAR-X平均QLIKE皆低於US VIX，但GARCH primary canonical HAC DM t=-2.868未達預註冊t<-3，資訊gate失敗；依規則跳過VT，沒有交易結論。資料為yfinance ^NSEI/^INDIAVIX/^VIX；OOS n=1,616、共同正值mask n=1,615；16個vendor-calendar gap targets排除。India GARCH-X每年alpha落下界，故optimizer success不等於參數識別無疑慮。",
+  "evidence": [
+   "experiments/k1717/k1717_results.json",
+   "experiments/k1717/README.md",
+   "experiments/k1717/review_certification_20260715.md"
+  ],
+  "confidence": 0.95,
+  "verdict": "NULL_MIXED_INFORMATION_GATE_FAIL",
+  "review_verdict": "PASS",
+  "experiment_id": "k1717",
+  "k_id": "K1717",
+  "experiment_path": "experiments/k1717/",
+  "reviewer_source": "Codex CLI v0.144.1 / gpt-5.6-sol / effort=ultra; frozen-byte PASS plus independent fresh-context PASS",
+  "sample": {
+   "oos_start": "2020-01-01",
+   "oos_end": "2026-07-15",
+   "n_oos": 1616,
+   "n_eval": 1615,
+   "calendar_gap_targets_excluded": 16
+  },
+  "qlike_oos": {
+   "garch_x_india": 1.4330131193954971,
+   "garch_x_us": 1.4898469055871102,
+   "har_x_india": 2.0241721100296775,
+   "har_x_us": 2.2767816925518574
+  },
+  "dm_stats": {
+   "hac_lag": 12,
+   "garch_india_vs_us_t": -2.867961692404011,
+   "garch_harvey_pass": false,
+   "har_india_vs_us_t": -14.727126187791411,
+   "har_harvey_pass": true
+  },
+  "snapshot_sha256": "c8eb6b30189bbe7d74b2139f2e7320be40b7ebdb9ce7b5ae7fcab664aff64fca",
+  "created_at": "2026-07-15T23:58:00+08:00"
  }
 ]

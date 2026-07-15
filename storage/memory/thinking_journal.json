@@ -5921,5 +5921,14 @@
     "experiment_ids": [
       "K1695"
     ]
+  },
+  {
+    "id": "42bfa462",
+    "timestamp": "2026-07-15T23:58:42.689667",
+    "thought": "K1717的平均loss其實偏向India VIX，但預註冊gate刻意要求兩個family都跨過Harvey效果量門檻。GARCH canonical HAC從短lag的t<-3降到lag12的-2.868，正是不能在看到結果後改bandwidth或放寬門檻的案例；應保留NULL/MIXED並跳過VT。另一個關鍵是vendor-calendar gap數量必須由snapshot動態診斷，不能把初步下載的17硬編碼到正式限制。",
+    "context": "K1717 final review and closure",
+    "experiment_ids": [
+      "k1717"
+    ]
   }
 ]

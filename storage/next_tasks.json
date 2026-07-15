@@ -36723,13 +36723,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T14:48:04.234331+00:00",
+    "completed_at": "2026-07-15T15:47:26.533756+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T14:48:04.234331+00:00",
-      "last_clean_observed_at": "2026-07-15T14:48:04.234331+00:00"
+      "resolved_at": "2026-07-15T15:47:26.533756+00:00",
+      "last_clean_observed_at": "2026-07-15T15:47:26.533756+00:00"
     }
   },
   {
@@ -39050,12 +39050,9 @@
     "description": "面向 ASIA（research_program.md 2026-07-15 用戶指示成立）第一棒。^NSEI + ^INDIAVIX（yfinance 2026-07-15 smoke test 驗證可用）：(1) India VIX vs 美 VIX 對 NIFTY 次日波動的資訊含量 — Granger + GARCH-X/HAR-X OOS QLIKE + Harvey/DM，完全對照台股 R12（VIX 優於 VXEEM）設計；(2) 若 India VIX 勝出，續做 c/IndiaVIX ratio VT 策略 sweep（對照台股 8.63/VIX，Q1/R15 慣例）。資料期間：^NSEI 2007 起（含 2008 空頭）、^INDIAVIX 起始日開工時診斷。硬規則：開工先讀 docs/error_log.md + 搜 knowledge.json 相似 K + 至少 3 篇文獻；先做資料期間診斷（smoke test 只驗 2y，實驗要拉最長可得樣本，OOS 必含至少一次空頭）；跨市場假日 alignment 依 methodology.md；signal.shift(1) 明確 lag；DM 用 canonical volpred.stats.model_evaluation.dm_test（HAC bandwidth 規則）；收工跑 experiment_gates.py。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user_directive_20260715_market_diversification",
     "created_at": "2026-07-15T07:59:24.440660+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-15T14:38:20.913101+00:00",
-    "claim_session_id": "11eacd933b19",
     "status_history": [
       {
         "ts": "2026-07-15T14:38:20.913116+00:00",
@@ -39068,9 +39065,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-15T15:58:58.017548+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-15T14:38:21.198315+00:00"
+    "started_at": "2026-07-15T14:38:21.198315+00:00",
+    "completed_at": "2026-07-15T15:58:58.017530+00:00",
+    "result": "K1717 完成並通過 frozen-byte Codex certification。OOS 2020-2026：India VIX 在 GARCH-X/HAR-X 平均 QLIKE 較低，但 GARCH canonical DM t=-2.868 未達預註冊 t<-3，資訊 gate FAIL；VT 依規則跳過。結果、snapshot、兩張圖、knowledge 與 E080 已同步。"
   },
   {
     "id": "asia2_japan_vt_baseline",
@@ -39564,7 +39569,7 @@
       "episode_started_at": "2026-07-15T07:26:00.838284+00:00",
       "attempt_number": 3,
       "last_seen_at": "2026-07-15T11:28:18.661638+00:00",
-      "consecutive_remediation_failures": 2,
+      "consecutive_remediation_failures": 3,
       "attempt_history": [
         {
           "observed_at": "2026-07-15T09:25:28.550316+00:00",
@@ -39577,12 +39582,19 @@
           "completed_at": "2026-07-15T10:14:28.946406+00:00",
           "status": "succeeded",
           "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：root_cause=pre-commit silent-fallback gate 擋下 scripts/taifex_tick_inventory.py:86(except OSError→continue, inventory rglob/stat race) 與 :277(except decode→continue, 多編碼嘗試迴圈; 全失敗回 error dict) 兩個未標記合法 silent path，導致 17:24 taifexdata_dropbox_organize fire 的 PHASE-Z commit_nonzero×3。 repair=兩處加 '# silent-ok: <reason>' 標記；audit_silent_fallbacks.py 對 taifex_tick_inventory.py/collect_taifex_tick.py/taifex_tick_to_canonical.py 全 findings=0 exit0，self-healing alert 條件(gate 阻擋)已於 working tree 清除。 note: 這些"
+        },
+        {
+          "observed_at": "2026-07-15T15:45:15.152580+00:00",
+          "completed_at": "2026-07-15T11:34:21.246406+00:00",
+          "status": "succeeded",
+          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：Alert was generated from the first blocked K1378 commit attempt. Root cause scripts/build_publication_candidates.py:165 malformed-timestamp fallback lacked an auditable rationale. Added precise silent-ok annotation; strict audit findings=0, 10 selector tests pass, and pre-commit accepted [codex] commit 70877b0c0. No additional mutation required; warning was stale by claim time."
         }
       ],
       "escalation_due": true,
-      "last_failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：root_cause=pre-commit silent-fallback gate 擋下 scripts/taifex_tick_inventory.py:86(except OSError→continue, inventory rglob/stat race) 與 :277(except decode→continue, 多編碼嘗試迴圈; 全失敗回 error dict) 兩個未標記合法 silent path，導致 17:24 taifexdata_dropbox_organize fire 的 PHASE-Z commit_nonzero×3。 repair=兩處加 '# silent-ok: <reason>' 標記；audit_silent_fallbacks.py 對 taifex_tick_inventory.py/collect_taifex_tick.py/taifex_tick_to_canonical.py 全 findings=0 exit0，self-healing alert 條件(gate 阻擋)已於 working tree 清除。 note: 這些",
+      "last_failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：Alert was generated from the first blocked K1378 commit attempt. Root cause scripts/build_publication_candidates.py:165 malformed-timestamp fallback lacked an auditable rationale. Added precise silent-ok annotation; strict audit findings=0, 10 selector tests pass, and pre-commit accepted [codex] commit 70877b0c0. No additional mutation required; warning was stale by claim time.",
       "escalation_sent_at": "2026-07-15T11:27:43.808050+00:00",
-      "escalation_notification_id": "e8bb2005"
+      "escalation_notification_id": "e8bb2005",
+      "counted_as_failure_at": "2026-07-15T15:45:15.152580+00:00"
     },
     "status_history": [
       {
@@ -39842,21 +39854,27 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "claimed",
+    "status": "pending",
     "created_at": "2026-07-15T13:09:38.079861+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 840）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n徹查為什麼會誤判？\n這是重大疏漏要從底層去修正\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "claimed_by": "telegram_responder",
-    "claimed_at": "2026-07-15T13:10:36.069806+00:00",
-    "claim_session_id": "688cde1367c7",
     "status_history": [
       {
         "ts": "2026-07-15T13:10:36.069825+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-15T15:50:04.418874+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "telegram_responder",
+        "note": "auto_release_stale_2h"
       }
-    ]
+    ],
+    "last_released_at": "2026-07-15T15:50:04.418865+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "telegram-843",
@@ -39891,5 +39909,58 @@
     "created_at": "2026-07-15T15:00:06.868630+00:00",
     "title": "CI 紅燈修復（run 29421677446, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29421677446\nattempt: 1\nhead_sha: 78115830d\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29421677446 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。"
+  },
+  {
+    "id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a4",
+    "title": "[internal alert] PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 發生什麼\nPHASE-Z 連續 3 次無法完成這班的自動 commit（原因：commit_nonzero）。已停止重試 —— 同一班不再重跑。\n檔案仍在工作區、沒有遺失。\n\n## 現在該做什麼\n確認未提交檔案的作者後由該作者 commit。若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。\n\n## git commit 輸出（尾段）\niv8Cd baseline_findings=64 new=2 resolved=64\n[pre-commit]   NEW experiments/k1259/build_dm_ledger.py:136 except Exception: pass\n[pre-commit]   NEW experiments/k1259/build_dm_ledger.py:368 except Exception: return []\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-15T15:45:15.152580+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "silent_fallback_new"
+    ],
+    "alert_key": "silent_fallback_new",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260715T072600838284Z",
+      "episode_started_at": "2026-07-15T07:26:00.838284+00:00",
+      "attempt_number": 4,
+      "last_seen_at": "2026-07-15T15:47:32.178225+00:00",
+      "consecutive_remediation_failures": 3,
+      "attempt_history": [
+        {
+          "observed_at": "2026-07-15T09:25:28.550316+00:00",
+          "completed_at": "2026-07-15T08:15:14.858470+00:00",
+          "status": "succeeded",
+          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因=PHASE-Z ownership race：某 07:xx fire 在 codex 07:13 dirty k1379.py 前起跑→誤判 owned→試 commit codex 在途未完成檔(3 bare silent-fallback)→gate 正確拒→3 retry→alert。現場確認 codex-vscode 活躍 review/repair k1379(live codex exec 3:48PM)，非孤兒。處置:為 3 處合法 best-effort fallback(k1379.py:148/201/248, caller 皆 check None) 補 silent-ok 註解→audit 0 findings，作者 codex commit 時 gate 會過；本 fire 不 commit(禁 steal 活躍作者檔)。自限:k1379.py 對後續 fire 皆 pre-fire-dirty→race 不重演。"
+        },
+        {
+          "observed_at": "2026-07-15T11:27:43.808050+00:00",
+          "completed_at": "2026-07-15T10:14:28.946406+00:00",
+          "status": "succeeded",
+          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：root_cause=pre-commit silent-fallback gate 擋下 scripts/taifex_tick_inventory.py:86(except OSError→continue, inventory rglob/stat race) 與 :277(except decode→continue, 多編碼嘗試迴圈; 全失敗回 error dict) 兩個未標記合法 silent path，導致 17:24 taifexdata_dropbox_organize fire 的 PHASE-Z commit_nonzero×3。 repair=兩處加 '# silent-ok: <reason>' 標記；audit_silent_fallbacks.py 對 taifex_tick_inventory.py/collect_taifex_tick.py/taifex_tick_to_canonical.py 全 findings=0 exit0，self-healing alert 條件(gate 阻擋)已於 working tree 清除。 note: 這些"
+        },
+        {
+          "observed_at": "2026-07-15T15:45:15.152580+00:00",
+          "completed_at": "2026-07-15T11:34:21.246406+00:00",
+          "status": "succeeded",
+          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：Alert was generated from the first blocked K1378 commit attempt. Root cause scripts/build_publication_candidates.py:165 malformed-timestamp fallback lacked an auditable rationale. Added precise silent-ok annotation; strict audit findings=0, 10 selector tests pass, and pre-commit accepted [codex] commit 70877b0c0. No additional mutation required; warning was stale by claim time."
+        }
+      ],
+      "escalation_due": true,
+      "fingerprint": [
+        "experiments/k1259/build_dm_ledger.py:136",
+        "experiments/k1259/build_dm_ledger.py:368"
+      ],
+      "last_failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：Alert was generated from the first blocked K1378 commit attempt. Root cause scripts/build_publication_candidates.py:165 malformed-timestamp fallback lacked an auditable rationale. Added precise silent-ok annotation; strict audit findings=0, 10 selector tests pass, and pre-commit accepted [codex] commit 70877b0c0. No additional mutation required; warning was stale by claim time.",
+      "escalation_sent_at": "2026-07-15T15:45:15.152580+00:00",
+      "escalation_notification_id": "e8bb2005"
+    }
   }
 ]

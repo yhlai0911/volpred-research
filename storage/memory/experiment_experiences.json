@@ -1129,5 +1129,21 @@
       "research_friday_triple_witching_closing_auction_concentra"
     ],
     "created_at": "2026-06-23T23:24:00+08:00"
+  },
+  {
+    "id": "E080",
+    "title": "跨市場IV研究先做交易日曆完整性診斷，再談signal lag",
+    "category": "methodology",
+    "lesson": "K1717顯示，row-based signal.shift(1)在資料供應商漏掉本地指數session時不等於嚴格calendar as-of：最新本地IV可能落在聚合的close-to-close return window內，形成隱性lookahead。正確流程是同時保留row-shift診斷與strict backward as-of source date；若source date晚於前一個實際觀測到的target-market date，該multi-session target必須排除，不能改用更舊訊號掩蓋缺口。",
+    "examples": [
+      "K1717最終快照有16個India VIX來源日晚於previous observed NIFTY date的targets。",
+      "Forecast model、HAR lag state與Granger皆沿排除後clean observations；策略僅排除真正跨gap的holding interval並在缺口前平倉、缺口後重新進場。",
+      "初步資料下載曾出現不同gap count；最終結論與README必綁定committed snapshot SHA，而不可硬編碼診斷數量。"
+    ],
+    "recommendation": "所有跨市場或同市場多ticker日頻研究，開模前輸出source_date、signal_age與previous-target-date比較；calendar mismatch數量由診斷動態寫入結果與限制。任何gap state處理都需合成測試涵蓋model、strategy、baseline與null path。",
+    "source_experiments": [
+      "K1717"
+    ],
+    "created_at": "2026-07-15T23:59:00+08:00"
   }
 ]

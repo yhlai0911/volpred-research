@@ -1,0 +1,2556 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "k1717",
+  "task_id": "asia1_india_vt_indiavix",
+  "generated_at_utc": "2026-07-15T15:48:01.701485+00:00",
+  "seed": 42,
+  "methodology_type": "empirical",
+  "data_source": {
+    "provider": "yfinance",
+    "tickers": [
+      "^NSEI",
+      "^INDIAVIX",
+      "^VIX"
+    ],
+    "requested_period": {
+      "start": "2007-09-01",
+      "india_end_exclusive": "2026-07-16",
+      "us_end_exclusive": "2026-07-15",
+      "us_cutoff_reason": "2026-07-15 US session was incomplete at execution time; last eligible US close is 2026-07-14."
+    },
+    "snapshot_file": "k1717_data.csv",
+    "snapshot_sha256": "c8eb6b30189bbe7d74b2139f2e7320be40b7ebdb9ce7b5ae7fcab664aff64fca",
+    "retrieval_note": "Yahoo Finance is a mutable vendor source; the committed snapshot is the byte-level reproduction source."
+  },
+  "pre_registered_design": {
+    "forecast_target": "NIFTY close-to-close squared log return on Indian target date t",
+    "information_set": "India VIX or latest US VIX close strictly before target date t; HAR return features end at t-1",
+    "forecast_protocol": "Annual expanding-origin refit, one-day forecasts, OOS calendar years 2020-2026",
+    "primary_loss": "Patton QLIKE(actual/predicted) on r2",
+    "inference": "volpred.stats.model_evaluation.dm_test with canonical Newey-West bandwidth; Harvey |t|>3 plus Holm correction",
+    "strategy_gate": "India VIX must have lower OOS QLIKE in both GJR-GARCH-X and HAR-style-X; both local-vs-US canonical DM tests must have t<-3 and Holm p<0.05 across the two primary non-nested comparisons; no opposing significant win is allowed."
+  },
+  "references": [
+    {
+      "authors": "Shaikh, I. and Padhi, P.",
+      "year": 2014,
+      "title": "The forecasting performance of implied volatility index: evidence from India VIX",
+      "venue": "Economic Change and Restructuring 47(4), 251-274",
+      "doi": "10.1007/s10644-014-9149-z",
+      "design_relevance": "Compares India VIX with RiskMetrics and GJR-GARCH forecasts."
+    },
+    {
+      "authors": "Pati, P. C., Barai, P., and Rajib, P.",
+      "year": 2018,
+      "title": "Forecasting stock market volatility and information content of implied volatility index",
+      "venue": "Applied Economics 50(23), 2552-2568",
+      "doi": "10.1080/00036846.2017.1403557",
+      "design_relevance": "Tests incremental implied-volatility information in India and other Asia-Pacific markets."
+    },
+    {
+      "authors": "Patton, A. J.",
+      "year": 2011,
+      "title": "Volatility forecast comparison using imperfect volatility proxies",
+      "venue": "Journal of Econometrics 160(1), 246-256",
+      "doi": "10.1016/j.jeconom.2010.03.034",
+      "design_relevance": "Justifies proxy-robust QLIKE with squared returns as the noisy variance proxy."
+    },
+    {
+      "authors": "Corsi, F.",
+      "year": 2009,
+      "title": "A Simple Approximate Long-Memory Model of Realized Volatility",
+      "venue": "Journal of Financial Econometrics 7(2), 174-196",
+      "doi": "10.1093/jjfinec/nbp001",
+      "design_relevance": "Motivates daily, weekly, and monthly heterogeneous volatility components."
+    },
+    {
+      "authors": "Diebold, F. X. and Mariano, R. S.",
+      "year": 1995,
+      "title": "Comparing Predictive Accuracy",
+      "venue": "Journal of Business & Economic Statistics 13(3), 253-263",
+      "doi": "10.1080/07350015.1995.10524599",
+      "design_relevance": "Forecast-loss comparison with serial-correlation-robust inference."
+    },
+    {
+      "authors": "National Stock Exchange of India",
+      "year": 2023,
+      "title": "India VIX computation methodology and white paper",
+      "venue": "NSE official methodology",
+      "url": "https://www.nseindia.com/static/products-services/indices-indiavix-index",
+      "design_relevance": "Defines India VIX as 30-calendar-day annualized implied volatility from NIFTY options."
+    }
+  ],
+  "data_diagnostics": {
+    "nifty": {
+      "start": "2007-09-17T00:00:00",
+      "end": "2026-07-15T00:00:00",
+      "n_obs_close": 4617,
+      "n_obs_returns": 4616,
+      "duplicate_dates": 0
+    },
+    "india_vix": {
+      "start": "2008-03-03T00:00:00",
+      "end": "2026-07-15T00:00:00",
+      "n_obs": 4498,
+      "duplicate_dates": 0
+    },
+    "us_vix": {
+      "start": "2007-09-04T00:00:00",
+      "end": "2026-07-14T00:00:00",
+      "n_obs": 4745,
+      "duplicate_dates": 0
+    },
+    "common_model_sample": {
+      "start": "2008-03-04T00:00:00",
+      "end": "2026-07-15T00:00:00",
+      "n_obs": 4484,
+      "local_signal_age_days": {
+        "min": 1,
+        "median": 1.0,
+        "max": 6
+      },
+      "us_signal_age_days": {
+        "min": 1,
+        "median": 1.0,
+        "max": 5
+      }
+    },
+    "vendor_calendar_integrity": {
+      "india_row_shift_vs_strict_asof_disagreements": 16,
+      "excluded_multi_session_nifty_targets": 16,
+      "excluded_target_dates": [
+        "2011-06-01",
+        "2011-07-15",
+        "2011-11-25",
+        "2011-12-27",
+        "2012-01-03",
+        "2012-05-22",
+        "2012-08-29",
+        "2013-01-02",
+        "2014-01-02",
+        "2014-02-18",
+        "2015-01-02",
+        "2015-04-16",
+        "2016-01-04",
+        "2016-08-16",
+        "2018-01-02",
+        "2019-01-02"
+      ],
+      "rule": "Exclude a NIFTY target when the latest prior India VIX source date is later than the previous observed NIFTY date; that target return spans a vendor-calendar gap and would otherwise contain the predictor inside its return window."
+    },
+    "return_diagnostics": {
+      "mean_daily": 0.0003468832445430243,
+      "annualized_vol": 0.1993870725513312,
+      "skewness": -0.274599112720981,
+      "excess_kurtosis": 16.568598521171996,
+      "acf_r2_lag1": 0.1427564314644457,
+      "acf_r2_lag5": 0.1944606323905259,
+      "zero_close_to_close_returns": 4
+    },
+    "bear_market_oos_coverage": {
+      "covid_2020_obs": 250,
+      "inflation_bear_2022_obs": 248,
+      "gfc_2008_descriptive_only": 200,
+      "note": "2008 is retained for diagnostics/training; formal OOS includes 2020 and 2022 because India VIX begins in 2008."
+    }
+  },
+  "granger_diagnostic": {
+    "sample_start": "2008-03-04T00:00:00",
+    "sample_end": "2026-07-14T00:00:00",
+    "n_obs": 4352,
+    "excluded_vendor_calendar_gap_targets": 16,
+    "selected_lag_aic": 5,
+    "lag_selected_on_pre_oos_sample": {
+      "end": "2019-12-31T00:00:00",
+      "n_obs": 2796
+    },
+    "tests": {
+      "india_log_vix": {
+        "f_stat": 22.14537276665704,
+        "p_value": 3.592089045917635e-22,
+        "df": [
+          5,
+          12993
+        ],
+        "direction": "india_log_vix -> next NIFTY log r2 conditional on the other VIX",
+        "holm_p_value": 7.18417809183527e-22,
+        "holm_reject_5pct": true
+      },
+      "us_log_vix": {
+        "f_stat": 12.239412784281507,
+        "p_value": 7.336858640755457e-12,
+        "df": [
+          5,
+          12993
+        ],
+        "direction": "us_log_vix -> next NIFTY log r2 conditional on the other VIX",
+        "holm_p_value": 7.336858640755457e-12,
+        "holm_reject_5pct": true
+      }
+    },
+    "adf_levels": {
+      "nifty_log_r2": {
+        "stat": -6.253891772766112,
+        "p_value": 4.386456194990931e-08,
+        "used_lag": 30,
+        "n_obs": 4321
+      },
+      "india_log_vix": {
+        "stat": -3.614629794901448,
+        "p_value": 0.005487418826248508,
+        "used_lag": 29,
+        "n_obs": 4322
+      },
+      "us_log_vix": {
+        "stat": -5.471697312875752,
+        "p_value": 2.3907113802619755e-06,
+        "used_lag": 7,
+        "n_obs": 4344
+      }
+    },
+    "caveat": "Granger predictability is not structural causality; daily log-r2 is noisy, and daily r2 OOS QLIKE is primary."
+  },
+  "oos": {
+    "start": "2020-01-01T00:00:00",
+    "end": "2026-07-15T00:00:00",
+    "n_obs": 1616,
+    "contains_covid_2020": true,
+    "contains_bear_2022": true,
+    "metrics": {
+      "garch_base": {
+        "qlike": 1.4839962387962402,
+        "mse": 3.4193480407457056e-07,
+        "spearman_rho": 0.29069388769285026,
+        "spearman_p_value": 8.092604286772605e-33,
+        "mean_forecast_annualized_vol": 0.19378515249704656,
+        "n_obs_shared_positive_mask": 1615
+      },
+      "garch_x_india": {
+        "qlike": 1.4330131193954971,
+        "mse": 3.267909258633214e-07,
+        "spearman_rho": 0.3232415010551727,
+        "spearman_p_value": 1.358289190776563e-40,
+        "mean_forecast_annualized_vol": 0.17777438995144051,
+        "n_obs_shared_positive_mask": 1615
+      },
+      "garch_x_us": {
+        "qlike": 1.4898469055871102,
+        "mse": 3.314877363095534e-07,
+        "spearman_rho": 0.30627040412387113,
+        "spearman_p_value": 2.0416901578143466e-36,
+        "mean_forecast_annualized_vol": 0.19699086534445107,
+        "n_obs_shared_positive_mask": 1615
+      },
+      "har_base": {
+        "qlike": 2.160877863641197,
+        "mse": 9.043556916676564e-07,
+        "spearman_rho": 0.26273495882863374,
+        "spearman_p_value": 6.633505931306268e-27,
+        "mean_forecast_annualized_vol": 0.3579994200923851,
+        "n_obs_shared_positive_mask": 1615
+      },
+      "har_x_india": {
+        "qlike": 2.0241721100296775,
+        "mse": 7.492027122626746e-07,
+        "spearman_rho": 0.30032619206863753,
+        "spearman_p_value": 5.120283825390016e-35,
+        "mean_forecast_annualized_vol": 0.3369226207741121,
+        "n_obs_shared_positive_mask": 1615
+      },
+      "har_x_us": {
+        "qlike": 2.2767816925518574,
+        "mse": 1.0172967843898894e-06,
+        "spearman_rho": 0.29867719553879785,
+        "spearman_p_value": 1.2351362829886362e-34,
+        "mean_forecast_annualized_vol": 0.3883646222067785,
+        "n_obs_shared_positive_mask": 1615
+      },
+      "direct_india_iv": {
+        "qlike": 1.4566531055636152,
+        "mse": 3.2888959921393983e-07,
+        "spearman_rho": 0.30761495080554935,
+        "spearman_p_value": 9.74851671792092e-37,
+        "mean_forecast_annualized_vol": 0.17247412647909682,
+        "n_obs_shared_positive_mask": 1615
+      },
+      "direct_us_iv": {
+        "qlike": 1.6403133979492468,
+        "mse": 3.251274826554129e-07,
+        "spearman_rho": 0.2903721308512563,
+        "spearman_p_value": 9.551786523756638e-33,
+        "mean_forecast_annualized_vol": 0.21321638384608066,
+        "n_obs_shared_positive_mask": 1615
+      }
+    },
+    "dm_comparisons": {
+      "primary_local_vs_us_garch": {
+        "model_1": "garch_x_india",
+        "model_2": "garch_x_us",
+        "t_stat": -2.867961692404011,
+        "p_value": 0.004184939159185941,
+        "direction": "negative favors model_1; positive favors model_2",
+        "harvey_abs_t_gt_3": false,
+        "n_obs": 1615,
+        "canonical_hac_lag": 12,
+        "loss_diff_acf": {
+          "lag_1": 0.2396841178392353,
+          "lag_5": -0.03079314059102477,
+          "lag_10": 0.015480434447978263
+        },
+        "hac_lag_sensitivity_dm_t": {
+          "lag_0": {
+            "t_stat": -3.540682608118492,
+            "hac_applied": false,
+            "is_canonical_bandwidth": false
+          },
+          "lag_1": {
+            "t_stat": -3.179858507978958,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_5": {
+            "t_stat": -3.0054948110195365,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_10": {
+            "t_stat": -2.911977430532075,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_12": {
+            "t_stat": -2.867961692404011,
+            "hac_applied": true,
+            "is_canonical_bandwidth": true
+          },
+          "lag_20": {
+            "t_stat": -2.7363544476530515,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_30": {
+            "t_stat": -2.6176208787926596,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          }
+        },
+        "inference_role": "primary non-nested forecast comparison",
+        "holm_p_value_2_primary_tests": 0.004184939159185941,
+        "holm_reject_5pct_2_primary_tests": true
+      },
+      "primary_local_vs_us_har": {
+        "model_1": "har_x_india",
+        "model_2": "har_x_us",
+        "t_stat": -14.727126187791411,
+        "p_value": 0.0,
+        "direction": "negative favors model_1; positive favors model_2",
+        "harvey_abs_t_gt_3": true,
+        "n_obs": 1615,
+        "canonical_hac_lag": 12,
+        "loss_diff_acf": {
+          "lag_1": 0.4858478179454852,
+          "lag_5": 0.21187592957739343,
+          "lag_10": 0.18028560353728823
+        },
+        "hac_lag_sensitivity_dm_t": {
+          "lag_0": {
+            "t_stat": -31.168354977490285,
+            "hac_applied": false,
+            "is_canonical_bandwidth": false
+          },
+          "lag_1": {
+            "t_stat": -25.567384182070434,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_5": {
+            "t_stat": -18.71193977487963,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_10": {
+            "t_stat": -15.494001736054255,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_12": {
+            "t_stat": -14.727126187791411,
+            "hac_applied": true,
+            "is_canonical_bandwidth": true
+          },
+          "lag_20": {
+            "t_stat": -12.876897239087883,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_30": {
+            "t_stat": -11.651223172121178,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          }
+        },
+        "inference_role": "primary non-nested forecast comparison",
+        "holm_p_value_2_primary_tests": 0.0,
+        "holm_reject_5pct_2_primary_tests": true
+      },
+      "local_vs_base_garch": {
+        "model_1": "garch_x_india",
+        "model_2": "garch_base",
+        "t_stat": -3.1963991033333543,
+        "p_value": 0.0014184809530926046,
+        "direction": "negative favors model_1; positive favors model_2",
+        "harvey_abs_t_gt_3": true,
+        "n_obs": 1615,
+        "canonical_hac_lag": 12,
+        "loss_diff_acf": {
+          "lag_1": 0.21756406120919855,
+          "lag_5": -0.01590699270831497,
+          "lag_10": 0.028337026223667617
+        },
+        "hac_lag_sensitivity_dm_t": {
+          "lag_0": {
+            "t_stat": -3.9749796019650505,
+            "hac_applied": false,
+            "is_canonical_bandwidth": false
+          },
+          "lag_1": {
+            "t_stat": -3.602200756814823,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_5": {
+            "t_stat": -3.3973491066116983,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_10": {
+            "t_stat": -3.26585658434917,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_12": {
+            "t_stat": -3.1963991033333543,
+            "hac_applied": true,
+            "is_canonical_bandwidth": true
+          },
+          "lag_20": {
+            "t_stat": -3.0017226942141892,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_30": {
+            "t_stat": -2.8289169477990304,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          }
+        },
+        "inference_role": "nested diagnostic DM; Clark-West MSE test is also reported"
+      },
+      "us_vs_base_garch": {
+        "model_1": "garch_x_us",
+        "model_2": "garch_base",
+        "t_stat": 0.6435570458495333,
+        "p_value": 0.519954140095507,
+        "direction": "negative favors model_1; positive favors model_2",
+        "harvey_abs_t_gt_3": false,
+        "n_obs": 1615,
+        "canonical_hac_lag": 12,
+        "loss_diff_acf": {
+          "lag_1": 0.02205040973568276,
+          "lag_5": -0.031246134500760584,
+          "lag_10": -0.0059075022161955565
+        },
+        "hac_lag_sensitivity_dm_t": {
+          "lag_0": {
+            "t_stat": 0.6493267119823974,
+            "hac_applied": false,
+            "is_canonical_bandwidth": false
+          },
+          "lag_1": {
+            "t_stat": 0.6422797464104918,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_5": {
+            "t_stat": 0.6423796072689321,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_10": {
+            "t_stat": 0.6427376500996983,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_12": {
+            "t_stat": 0.6435570458495333,
+            "hac_applied": true,
+            "is_canonical_bandwidth": true
+          },
+          "lag_20": {
+            "t_stat": 0.6367876333732653,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_30": {
+            "t_stat": 0.6102897955384278,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          }
+        },
+        "inference_role": "nested diagnostic DM; Clark-West MSE test is also reported"
+      },
+      "local_vs_base_har": {
+        "model_1": "har_x_india",
+        "model_2": "har_base",
+        "t_stat": -8.234362102979999,
+        "p_value": 4.440892098500626e-16,
+        "direction": "negative favors model_1; positive favors model_2",
+        "harvey_abs_t_gt_3": true,
+        "n_obs": 1615,
+        "canonical_hac_lag": 12,
+        "loss_diff_acf": {
+          "lag_1": 0.6878038129801357,
+          "lag_5": 0.4215410136099365,
+          "lag_10": 0.232079168651333
+        },
+        "hac_lag_sensitivity_dm_t": {
+          "lag_0": {
+            "t_stat": -21.317174930794764,
+            "hac_applied": false,
+            "is_canonical_bandwidth": false
+          },
+          "lag_1": {
+            "t_stat": -16.409278675028116,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_5": {
+            "t_stat": -10.668683402692286,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_10": {
+            "t_stat": -8.652056846201074,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_12": {
+            "t_stat": -8.234362102979999,
+            "hac_applied": true,
+            "is_canonical_bandwidth": true
+          },
+          "lag_20": {
+            "t_stat": -7.38557495102268,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_30": {
+            "t_stat": -7.126415189332303,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          }
+        },
+        "inference_role": "nested diagnostic DM; Clark-West MSE test is also reported"
+      },
+      "us_vs_base_har": {
+        "model_1": "har_x_us",
+        "model_2": "har_base",
+        "t_stat": 5.921068008595928,
+        "p_value": 3.900084033503504e-09,
+        "direction": "negative favors model_1; positive favors model_2",
+        "harvey_abs_t_gt_3": true,
+        "n_obs": 1615,
+        "canonical_hac_lag": 12,
+        "loss_diff_acf": {
+          "lag_1": 0.529549659773966,
+          "lag_5": 0.34159152793452724,
+          "lag_10": 0.30536595830388114
+        },
+        "hac_lag_sensitivity_dm_t": {
+          "lag_0": {
+            "t_stat": 14.244149512376687,
+            "hac_applied": false,
+            "is_canonical_bandwidth": false
+          },
+          "lag_1": {
+            "t_stat": 11.516691650811973,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_5": {
+            "t_stat": 7.842200219493796,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_10": {
+            "t_stat": 6.2938906192731645,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_12": {
+            "t_stat": 5.921068008595928,
+            "hac_applied": true,
+            "is_canonical_bandwidth": true
+          },
+          "lag_20": {
+            "t_stat": 4.980259611437672,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          },
+          "lag_30": {
+            "t_stat": 4.349536432755775,
+            "hac_applied": true,
+            "is_canonical_bandwidth": false
+          }
+        },
+        "inference_role": "nested diagnostic DM; Clark-West MSE test is also reported"
+      },
+      "nested_clark_west_mse": {
+        "local_vs_base_garch": {
+          "test": "Clark-West (2007) nested MSPE-adjusted",
+          "status": "ok",
+          "n_obs": 1615,
+          "t_stat": 1.4124851984127529,
+          "p_value_one_sided": 0.07890357295574446,
+          "p_value_two_sided": 0.15780714591148892,
+          "mean_adjusted_loss_diff": 2.390640355294064e-08,
+          "hac_lag": 12,
+          "alternative": "larger nested model has incremental predictive content",
+          "direction": "positive t favors the larger nested model"
+        },
+        "us_vs_base_garch": {
+          "test": "Clark-West (2007) nested MSPE-adjusted",
+          "status": "ok",
+          "n_obs": 1615,
+          "t_stat": 1.8009192137041434,
+          "p_value_one_sided": 0.03585780706089457,
+          "p_value_two_sided": 0.07171561412178915,
+          "mean_adjusted_loss_diff": 1.2608276598130171e-08,
+          "hac_lag": 12,
+          "alternative": "larger nested model has incremental predictive content",
+          "direction": "positive t favors the larger nested model"
+        },
+        "local_vs_base_har": {
+          "test": "Clark-West (2007) nested MSPE-adjusted",
+          "status": "ok",
+          "n_obs": 1615,
+          "t_stat": 1.3378541002494486,
+          "p_value_one_sided": 0.09047200105647146,
+          "p_value_two_sided": 0.18094400211294293,
+          "mean_adjusted_loss_diff": 2.73713948572568e-07,
+          "hac_lag": 12,
+          "alternative": "larger nested model has incremental predictive content",
+          "direction": "positive t favors the larger nested model"
+        },
+        "us_vs_base_har": {
+          "test": "Clark-West (2007) nested MSPE-adjusted",
+          "status": "ok",
+          "n_obs": 1615,
+          "t_stat": 0.522885335195614,
+          "p_value_one_sided": 0.3005270251774585,
+          "p_value_two_sided": 0.601054050354917,
+          "mean_adjusted_loss_diff": 5.763542422756572e-08,
+          "hac_lag": 12,
+          "alternative": "larger nested model has incremental predictive content",
+          "direction": "positive t favors the larger nested model"
+        }
+      },
+      "nested_clark_west_inference_note": {
+        "role": "exploratory nested-model diagnostics; never feeds the pre-registered India-vs-US gate",
+        "multiplicity": "individual unadjusted p-values across four diagnostics; no familywise claim is made"
+      },
+      "shared_evaluation_mask": {
+        "rule": "actual_r2 and every model forecast must be finite and strictly positive",
+        "n_raw_oos": 1616,
+        "n_evaluated": 1615,
+        "n_dropped": 1
+      }
+    },
+    "annual_metrics": {
+      "2020": {
+        "n_obs": 250,
+        "qlike": {
+          "garch_x_india": 1.4531640765569955,
+          "garch_x_us": 1.4357308522615009,
+          "har_x_india": 2.0482704455414433,
+          "har_x_us": 2.2284624239679696
+        }
+      },
+      "2021": {
+        "n_obs": 248,
+        "qlike": {
+          "garch_x_india": 1.4062576423734487,
+          "garch_x_us": 1.4355160494373445,
+          "har_x_india": 2.1015466908789215,
+          "har_x_us": 2.2707500835030006
+        }
+      },
+      "2022": {
+        "n_obs": 248,
+        "qlike": {
+          "garch_x_india": 1.2914965194544736,
+          "garch_x_us": 1.3510279743676852,
+          "har_x_india": 1.9292609150906004,
+          "har_x_us": 2.3060454548625287
+        }
+      },
+      "2023": {
+        "n_obs": 245,
+        "qlike": {
+          "garch_x_india": 1.2668929851500284,
+          "garch_x_us": 1.3309196787174213,
+          "har_x_india": 1.8505098024863842,
+          "har_x_us": 2.1811986021181085
+        }
+      },
+      "2024": {
+        "n_obs": 246,
+        "qlike": {
+          "garch_x_india": 1.8658757455256034,
+          "garch_x_us": 2.034563923442124,
+          "har_x_india": 2.3225376359973118,
+          "har_x_us": 2.461081269972432
+        }
+      },
+      "2025": {
+        "n_obs": 249,
+        "qlike": {
+          "garch_x_india": 1.3759896046719458,
+          "garch_x_us": 1.4517216793243441,
+          "har_x_india": 2.036958469149416,
+          "har_x_us": 2.3796717944928223
+        }
+      },
+      "2026": {
+        "n_obs": 130,
+        "qlike": {
+          "garch_x_india": 1.3217875844023808,
+          "garch_x_us": 1.3083456990254594,
+          "har_x_india": 1.7517752214262878,
+          "har_x_us": 1.961112988259314
+        }
+      }
+    },
+    "fit_log": {
+      "2020": {
+        "train_start": "2008-03-04T00:00:00",
+        "train_end": "2019-12-31T00:00:00",
+        "n_train": 2868,
+        "test_start": "2020-01-01T00:00:00",
+        "test_end": "2020-12-31T00:00:00",
+        "n_test": 250,
+        "models": {
+          "garch_base": {
+            "params": [
+              0.014968326956176415,
+              0.022685390711146624,
+              0.11438009638847804,
+              0.9138448179793189
+            ],
+            "last_variance_pct2": 0.3993463843405234,
+            "last_return_pct": -0.715678957499577,
+            "objective": 3624.903591318167,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 3,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              3624.903591318167,
+              3624.9035913181788,
+              3625.573090984955
+            ],
+            "best_objective_gap_to_second": 1.1823431123048067e-11,
+            "optimizer_gradient_max_abs": 0.001220703125,
+            "constraint_slack": 0.004279743115295442,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9937202568847046,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 2616,
+              "mean": 0.04237914826744403,
+              "std": 0.9992926258428105,
+              "skewness": 0.12270595660364463,
+              "excess_kurtosis": 3.427899483970838,
+              "acf_lag_1": 0.07717957075494335,
+              "squared_acf_lag_1": -0.019035390931463874,
+              "squared_acf_lag_5": -0.01692090537874378
+            }
+          },
+          "garch_x_india": {
+            "params": [
+              1e-08,
+              0.0,
+              0.15708435895770098,
+              0.8272089254740512,
+              0.07157596840051768
+            ],
+            "last_variance_pct2": 0.3226577040983064,
+            "last_return_pct": -0.715678957499577,
+            "objective": 3575.949141709425,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              3575.949141709425,
+              3575.9491417094296,
+              3575.9491417094305,
+              3575.949141715965,
+              3575.949141728478
+            ],
+            "best_objective_gap_to_second": 4.547473508864641e-12,
+            "optimizer_gradient_max_abs": 310.0549011230469,
+            "constraint_slack": 0.09224889504709832,
+            "bound_hits": {
+              "omega": {
+                "lower": true,
+                "upper": false
+              },
+              "alpha": {
+                "lower": true,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9057511049529017,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 2616,
+              "mean": 0.04185350935392272,
+              "std": 0.9993148030389358,
+              "skewness": -0.07950850970301848,
+              "excess_kurtosis": 1.7903321316488552,
+              "acf_lag_1": 0.0793777597043851,
+              "squared_acf_lag_1": -0.03232099453575522,
+              "squared_acf_lag_5": -0.031930100155120274
+            }
+          },
+          "garch_x_us": {
+            "params": [
+              0.010135901875955087,
+              0.010889413793995308,
+              0.1392943052113448,
+              0.8862655315054482,
+              0.02720470606905071
+            ],
+            "last_variance_pct2": 0.4117901684948303,
+            "last_return_pct": -0.715678957499577,
+            "objective": 3615.747306855916,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              3615.747306855916,
+              3615.7473068559198,
+              3615.747306855922,
+              3615.7473068559334,
+              3615.7619976912906
+            ],
+            "best_objective_gap_to_second": 3.637978807091713e-12,
+            "optimizer_gradient_max_abs": 0.001373291015625,
+            "constraint_slack": 0.031197902094884045,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.966802097905116,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 2616,
+              "mean": 0.04268244971977549,
+              "std": 0.999279707339257,
+              "skewness": 0.10947251826191529,
+              "excess_kurtosis": 3.4156637462042547,
+              "acf_lag_1": 0.0797233753063542,
+              "squared_acf_lag_1": -0.01760207431438515,
+              "squared_acf_lag_5": -0.021241392228257015
+            }
+          },
+          "har_base": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m"
+            ],
+            "coefficients": [
+              -2.885634837736377,
+              -0.02720077539409264,
+              0.08341903052784605,
+              0.7816775267061995
+            ],
+            "residual_variance": 5.831460804229846,
+            "rank": 4,
+            "n_train": 2868
+          },
+          "har_x_india": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_india_iv"
+            ],
+            "coefficients": [
+              -0.8508722839039123,
+              -0.02945390032021149,
+              0.00859760856775833,
+              0.2617281539528967,
+              0.8588350410421199
+            ],
+            "residual_variance": 5.735242525535021,
+            "rank": 5,
+            "n_train": 2868
+          },
+          "har_x_us": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_us_iv"
+            ],
+            "coefficients": [
+              -0.5617563574636029,
+              -0.03686555935215734,
+              0.02096552308948476,
+              0.4298405942281255,
+              0.6952823223439033
+            ],
+            "residual_variance": 5.7125721939177145,
+            "rank": 5,
+            "n_train": 2868
+          },
+          "direct_india_iv": {
+            "train_only_scale": 0.8114107167544113
+          },
+          "direct_us_iv": {
+            "train_only_scale": 0.9620504649566681
+          }
+        }
+      },
+      "2021": {
+        "train_start": "2008-03-04T00:00:00",
+        "train_end": "2020-12-31T00:00:00",
+        "n_train": 3118,
+        "test_start": "2021-01-01T00:00:00",
+        "test_end": "2021-12-31T00:00:00",
+        "n_test": 248,
+        "models": {
+          "garch_base": {
+            "params": [
+              0.019955743687278624,
+              0.02285906049450572,
+              0.12880311469717734,
+              0.9034585581596035
+            ],
+            "last_variance_pct2": 1.234251870603359,
+            "last_return_pct": -0.0014318227638199232,
+            "objective": 4069.315195770117,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4069.315195770117,
+              4069.3151957701175,
+              4069.315195770119,
+              4069.3151957701325,
+              4071.9919642158748
+            ],
+            "best_objective_gap_to_second": 4.547473508864641e-13,
+            "optimizer_gradient_max_abs": 9.1552734375e-05,
+            "constraint_slack": 0.007280823997302122,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9907191760026979,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 2866,
+              "mean": 0.04206691555029588,
+              "std": 0.9992891826781024,
+              "skewness": -0.0024977043129497845,
+              "excess_kurtosis": 3.5297007479186036,
+              "acf_lag_1": 0.068642467865954,
+              "squared_acf_lag_1": -0.022860708674819527,
+              "squared_acf_lag_5": -0.019486280602105218
+            }
+          },
+          "garch_x_india": {
+            "params": [
+              0.0006687226047231639,
+              0.0,
+              0.16648649865333484,
+              0.8218765072934967,
+              0.07331444420439481
+            ],
+            "last_variance_pct2": 1.2210351311078615,
+            "last_return_pct": -0.0014318227638199232,
+            "objective": 4016.8253977021045,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4016.8253977021045,
+              4016.825397702116,
+              4016.825397702145,
+              4016.8253977026175,
+              4016.8253977031445
+            ],
+            "best_objective_gap_to_second": 1.1368683772161603e-11,
+            "optimizer_gradient_max_abs": 341.31671142578125,
+            "constraint_slack": 0.09288024337983591,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": true,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9051197566201641,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 2866,
+              "mean": 0.041254905513774184,
+              "std": 0.9993230202330717,
+              "skewness": -0.195338075112697,
+              "excess_kurtosis": 1.82238405919533,
+              "acf_lag_1": 0.07180636338374176,
+              "squared_acf_lag_1": -0.03707849483836191,
+              "squared_acf_lag_5": -0.03343026478435814
+            }
+          },
+          "garch_x_us": {
+            "params": [
+              0.013198691911741776,
+              0.008399881004780273,
+              0.15589600590660488,
+              0.870813982376122,
+              0.03310693930226665
+            ],
+            "last_variance_pct2": 1.4201806821369907,
+            "last_return_pct": -0.0014318227638199232,
+            "objective": 4053.8101088293897,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4053.8101088293897,
+              4053.81010882939,
+              4053.8101088293906,
+              4053.8101088293924,
+              4053.810108829397
+            ],
+            "best_objective_gap_to_second": 4.547473508864641e-13,
+            "optimizer_gradient_max_abs": 6.103515625e-05,
+            "constraint_slack": 0.04083813366579536,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9571618663342046,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 2866,
+              "mean": 0.042514303575683546,
+              "std": 0.9992702345591872,
+              "skewness": 0.023473256826659954,
+              "excess_kurtosis": 3.4421493104923355,
+              "acf_lag_1": 0.07215171991356437,
+              "squared_acf_lag_1": -0.01982337976978738,
+              "squared_acf_lag_5": -0.022846303497689683
+            }
+          },
+          "har_base": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m"
+            ],
+            "coefficients": [
+              -2.8677654339964276,
+              -0.029078991314583136,
+              0.09791667235228797,
+              0.7694445169587797
+            ],
+            "residual_variance": 5.76169482855149,
+            "rank": 4,
+            "n_train": 3118
+          },
+          "har_x_india": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_india_iv"
+            ],
+            "coefficients": [
+              -0.8085567976886238,
+              -0.03150275131140257,
+              0.019623434888153938,
+              0.24520824817242726,
+              0.8707056807869182
+            ],
+            "residual_variance": 5.664063699438244,
+            "rank": 5,
+            "n_train": 3118
+          },
+          "har_x_us": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_us_iv"
+            ],
+            "coefficients": [
+              -0.6930297665332289,
+              -0.03890341067694584,
+              0.028864533749732347,
+              0.425082592824043,
+              0.6811501568731688
+            ],
+            "residual_variance": 5.63911293162067,
+            "rank": 5,
+            "n_train": 3118
+          },
+          "direct_india_iv": {
+            "train_only_scale": 0.8520458067969069
+          },
+          "direct_us_iv": {
+            "train_only_scale": 0.9733949222780539
+          }
+        }
+      },
+      "2022": {
+        "train_start": "2008-03-04T00:00:00",
+        "train_end": "2021-12-31T00:00:00",
+        "n_train": 3366,
+        "test_start": "2022-01-03T00:00:00",
+        "test_end": "2022-12-30T00:00:00",
+        "n_test": 248,
+        "models": {
+          "garch_base": {
+            "params": [
+              0.021471186148793717,
+              0.02208684838876511,
+              0.13747824170368755,
+              0.8990547726593259
+            ],
+            "last_variance_pct2": 1.0966989462865027,
+            "last_return_pct": 0.8686990360265767,
+            "objective": 4397.264445774599,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4397.264445774599,
+              4397.2644457746,
+              4397.264445774614,
+              4397.2644457746155,
+              4397.264445774632
+            ],
+            "best_objective_gap_to_second": 9.094947017729282e-13,
+            "optimizer_gradient_max_abs": 0.0001220703125,
+            "constraint_slack": 0.008119258100065307,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9898807418999348,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3114,
+              "mean": 0.045926842984273755,
+              "std": 0.9991052750740236,
+              "skewness": -0.024272796721300175,
+              "excess_kurtosis": 3.407203205000894,
+              "acf_lag_1": 0.07476146836526809,
+              "squared_acf_lag_1": -0.021720692251930795,
+              "squared_acf_lag_5": -0.019272850301390424
+            }
+          },
+          "garch_x_india": {
+            "params": [
+              0.0005077865150358067,
+              0.0,
+              0.1717648735383436,
+              0.8163153662151121,
+              0.0756547594942376
+            ],
+            "last_variance_pct2": 0.7521131420951338,
+            "last_return_pct": 0.8686990360265767,
+            "objective": 4340.92928407993,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4340.92928407993,
+              4340.929284079932,
+              4340.929284080101,
+              4340.929284081863,
+              4340.929284766022
+            ],
+            "best_objective_gap_to_second": 1.8189894035458565e-12,
+            "optimizer_gradient_max_abs": 371.67279052734375,
+            "constraint_slack": 0.09580219701571602,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": true,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.902197802984284,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3114,
+              "mean": 0.04541964635812996,
+              "std": 0.999128446547065,
+              "skewness": -0.21107898033337913,
+              "excess_kurtosis": 1.7450622486840408,
+              "acf_lag_1": 0.0782795421694481,
+              "squared_acf_lag_1": -0.03497830597357867,
+              "squared_acf_lag_5": -0.03369529735236984
+            }
+          },
+          "garch_x_us": {
+            "params": [
+              0.013498733835433641,
+              0.007991873795595402,
+              0.16103102046797607,
+              0.871699412924411,
+              0.02975282258181512
+            ],
+            "last_variance_pct2": 1.0516664201968606,
+            "last_return_pct": 0.8686990360265767,
+            "objective": 4381.235804281605,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4381.235804281605,
+              4381.235804281616,
+              4381.235804281621,
+              4381.235804281641,
+              4404.177099418136
+            ],
+            "best_objective_gap_to_second": 1.0913936421275139e-11,
+            "optimizer_gradient_max_abs": 6.103515625e-05,
+            "constraint_slack": 0.03779320304600553,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9602067969539945,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3114,
+              "mean": 0.045694261943578604,
+              "std": 0.9991159388032574,
+              "skewness": -0.007474972630445093,
+              "excess_kurtosis": 3.3417559754889115,
+              "acf_lag_1": 0.07666499032520943,
+              "squared_acf_lag_1": -0.019363505394198437,
+              "squared_acf_lag_5": -0.02198375597798367
+            }
+          },
+          "har_base": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m"
+            ],
+            "coefficients": [
+              -2.886735919476819,
+              -0.022741578634556135,
+              0.11937790248157552,
+              0.7385334747363762
+            ],
+            "residual_variance": 5.758186675097478,
+            "rank": 4,
+            "n_train": 3366
+          },
+          "har_x_india": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_india_iv"
+            ],
+            "coefficients": [
+              -0.7601888489073411,
+              -0.025020466764507587,
+              0.04379575398351253,
+              0.21823055550633855,
+              0.8710104597172266
+            ],
+            "residual_variance": 5.663807537524415,
+            "rank": 5,
+            "n_train": 3366
+          },
+          "har_x_us": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_us_iv"
+            ],
+            "coefficients": [
+              -0.6256022719543107,
+              -0.03218990003707468,
+              0.0563493749130372,
+              0.4162149154053298,
+              0.6631055302539743
+            ],
+            "residual_variance": 5.642087725280511,
+            "rank": 5,
+            "n_train": 3366
+          },
+          "direct_india_iv": {
+            "train_only_scale": 0.8461725410620408
+          },
+          "direct_us_iv": {
+            "train_only_scale": 0.9519174313383064
+          }
+        }
+      },
+      "2023": {
+        "train_start": "2008-03-04T00:00:00",
+        "train_end": "2022-12-30T00:00:00",
+        "n_train": 3614,
+        "test_start": "2023-01-02T00:00:00",
+        "test_end": "2023-12-29T00:00:00",
+        "n_test": 245,
+        "models": {
+          "garch_base": {
+            "params": [
+              0.02248170410202605,
+              0.019854179099949423,
+              0.1428327360070607,
+              0.8976483037846595
+            ],
+            "last_variance_pct2": 0.8836230894671975,
+            "last_return_pct": -0.4722210041123276,
+            "objective": 4756.74501977607,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 4,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4756.74501977607,
+              4756.74501977608,
+              4756.745019776086,
+              4756.745019776117
+            ],
+            "best_objective_gap_to_second": 1.000444171950221e-11,
+            "optimizer_gradient_max_abs": 0.0018310546875,
+            "constraint_slack": 0.009081149111860642,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9889188508881394,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3362,
+              "mean": 0.04354040474925709,
+              "std": 0.9992002805194917,
+              "skewness": -0.042997233604975454,
+              "excess_kurtosis": 3.3019431055212007,
+              "acf_lag_1": 0.07555937174237086,
+              "squared_acf_lag_1": -0.019428997132375544,
+              "squared_acf_lag_5": -0.02106556675045623
+            }
+          },
+          "garch_x_india": {
+            "params": [
+              0.0002596191880907927,
+              0.0,
+              0.17522370629171935,
+              0.8142938314377407,
+              0.07648762027559707
+            ],
+            "last_variance_pct2": 0.7437196929903443,
+            "last_return_pct": -0.4722210041123276,
+            "objective": 4697.984672726199,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4697.984672726199,
+              4697.9846727262,
+              4697.984672726203,
+              4697.984672726207,
+              4697.984672726985
+            ],
+            "best_objective_gap_to_second": 9.094947017729282e-13,
+            "optimizer_gradient_max_abs": 421.86236572265625,
+            "constraint_slack": 0.09609431541639968,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": true,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9019056845836004,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3362,
+              "mean": 0.04295003568113749,
+              "std": 0.9992258520445572,
+              "skewness": -0.22745258002479626,
+              "excess_kurtosis": 1.6527724011998157,
+              "acf_lag_1": 0.07915412852656223,
+              "squared_acf_lag_1": -0.03309410494971607,
+              "squared_acf_lag_5": -0.03693588110948944
+            }
+          },
+          "garch_x_us": {
+            "params": [
+              0.01638601583493883,
+              0.009440577037008093,
+              0.16168696383958978,
+              0.8753594418373144,
+              0.02199509961038247
+            ],
+            "last_variance_pct2": 1.0344080224626404,
+            "last_return_pct": -0.4722210041123276,
+            "objective": 4744.554167534519,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4744.554167534519,
+              4744.554167534523,
+              4744.554167534534,
+              4744.554167534555,
+              4744.554167534563
+            ],
+            "best_objective_gap_to_second": 3.637978807091713e-12,
+            "optimizer_gradient_max_abs": 0.0008544921875,
+            "constraint_slack": 0.03235649920588268,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9656435007941174,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3362,
+              "mean": 0.04328235435194697,
+              "std": 0.9992115077373691,
+              "skewness": -0.025960942741558937,
+              "excess_kurtosis": 3.3054079184999856,
+              "acf_lag_1": 0.07679944308633237,
+              "squared_acf_lag_1": -0.018308456632309768,
+              "squared_acf_lag_5": -0.022590994851555097
+            }
+          },
+          "har_base": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m"
+            ],
+            "coefficients": [
+              -2.909133831809119,
+              -0.019480401588545176,
+              0.10272533717258073,
+              0.7486084128897593
+            ],
+            "residual_variance": 5.692311022204745,
+            "rank": 4,
+            "n_train": 3614
+          },
+          "har_x_india": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_india_iv"
+            ],
+            "coefficients": [
+              -0.7264063678390102,
+              -0.021573138642934676,
+              0.027969781927311053,
+              0.22533895631242298,
+              0.8789284999641499
+            ],
+            "residual_variance": 5.600677434700131,
+            "rank": 5,
+            "n_train": 3614
+          },
+          "har_x_us": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_us_iv"
+            ],
+            "coefficients": [
+              -0.8003988319435263,
+              -0.02794835766550582,
+              0.045479210280009195,
+              0.4562137206104898,
+              0.6109325480339627
+            ],
+            "residual_variance": 5.588035214208368,
+            "rank": 5,
+            "n_train": 3614
+          },
+          "direct_india_iv": {
+            "train_only_scale": 0.8428397598548019
+          },
+          "direct_us_iv": {
+            "train_only_scale": 0.9056853932875258
+          }
+        }
+      },
+      "2024": {
+        "train_start": "2008-03-04T00:00:00",
+        "train_end": "2023-12-29T00:00:00",
+        "n_train": 3859,
+        "test_start": "2024-01-01T00:00:00",
+        "test_end": "2024-12-31T00:00:00",
+        "n_test": 246,
+        "models": {
+          "garch_base": {
+            "params": [
+              0.019990601412857467,
+              0.022110296472014474,
+              0.12935882476690458,
+              0.9020115059306018
+            ],
+            "last_variance_pct2": 0.5073275011021185,
+            "last_return_pct": -0.21741548367497643,
+            "objective": 4994.334714432548,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4994.334714432548,
+              4994.334714432553,
+              4994.334714432565,
+              4994.334714432574,
+              4994.961874116832
+            ],
+            "best_objective_gap_to_second": 4.547473508864641e-12,
+            "optimizer_gradient_max_abs": 0.00115966796875,
+            "constraint_slack": 0.00919878521393147,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9888012147860685,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3607,
+              "mean": 0.04889864834206188,
+              "std": 0.9989422530359086,
+              "skewness": -0.05831013476032155,
+              "excess_kurtosis": 3.084831191068208,
+              "acf_lag_1": 0.08107088498430848,
+              "squared_acf_lag_1": -0.016419140192218042,
+              "squared_acf_lag_5": -0.021493026859393905
+            }
+          },
+          "garch_x_india": {
+            "params": [
+              0.002766466168354901,
+              0.0,
+              0.1669434620960126,
+              0.8049307039789081,
+              0.08279476664585451
+            ],
+            "last_variance_pct2": 0.47802714661294005,
+            "last_return_pct": -0.21741548367497643,
+            "objective": 4932.197413236607,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4932.197413236607,
+              4932.197413236608,
+              4932.197413236615,
+              4932.197413236807,
+              4932.197413237235
+            ],
+            "best_objective_gap_to_second": 9.094947017729282e-13,
+            "optimizer_gradient_max_abs": 377.4483642578125,
+            "constraint_slack": 0.10959756497308559,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": true,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.8884024350269144,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3607,
+              "mean": 0.049212354365860064,
+              "std": 0.9989268301118348,
+              "skewness": -0.22029671277029486,
+              "excess_kurtosis": 1.5970539689585168,
+              "acf_lag_1": 0.08602671141455202,
+              "squared_acf_lag_1": -0.024882399055032166,
+              "squared_acf_lag_5": -0.03734628196319049
+            }
+          },
+          "garch_x_us": {
+            "params": [
+              0.015783549049655083,
+              0.014919003347681137,
+              0.1437348141197199,
+              0.8846839622822418,
+              0.015565680893115488
+            ],
+            "last_variance_pct2": 0.4710014843899322,
+            "last_return_pct": -0.21741548367497643,
+            "objective": 4986.090360590335,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              4986.090360590335,
+              4986.090360590342,
+              4986.090360590347,
+              4986.090360590357,
+              4986.090360590377
+            ],
+            "best_objective_gap_to_second": 7.275957614183426e-12,
+            "optimizer_gradient_max_abs": 0.000732421875,
+            "constraint_slack": 0.02652962731021713,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9714703726897829,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3607,
+              "mean": 0.0486964995620419,
+              "std": 0.9989521353971582,
+              "skewness": -0.04402314444651857,
+              "excess_kurtosis": 3.126687761466081,
+              "acf_lag_1": 0.08212488574846544,
+              "squared_acf_lag_1": -0.016107993490923064,
+              "squared_acf_lag_5": -0.022784158566932795
+            }
+          },
+          "har_base": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m"
+            ],
+            "coefficients": [
+              -2.971446832421504,
+              -0.013961252814011695,
+              0.09229663234815008,
+              0.7461770662381266
+            ],
+            "residual_variance": 5.652751063887768,
+            "rank": 4,
+            "n_train": 3859
+          },
+          "har_x_india": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_india_iv"
+            ],
+            "coefficients": [
+              -0.9336473935504952,
+              -0.015498826024915206,
+              0.021166244032189457,
+              0.21958257123929337,
+              0.8599822453652926
+            ],
+            "residual_variance": 5.566448334306724,
+            "rank": 5,
+            "n_train": 3859
+          },
+          "har_x_us": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_us_iv"
+            ],
+            "coefficients": [
+              -0.7771275385820602,
+              -0.02216771119923929,
+              0.0388742671566597,
+              0.4724773349033191,
+              0.598264499950857
+            ],
+            "residual_variance": 5.554244934967278,
+            "rank": 5,
+            "n_train": 3859
+          },
+          "direct_india_iv": {
+            "train_only_scale": 0.8384629485949183
+          },
+          "direct_us_iv": {
+            "train_only_scale": 0.8835014689619749
+          }
+        }
+      },
+      "2025": {
+        "train_start": "2008-03-04T00:00:00",
+        "train_end": "2024-12-31T00:00:00",
+        "n_train": 4105,
+        "test_start": "2025-01-01T00:00:00",
+        "test_end": "2025-12-31T00:00:00",
+        "n_test": 249,
+        "models": {
+          "garch_base": {
+            "params": [
+              0.023900757048929844,
+              0.03478213451045239,
+              0.123089869453801,
+              0.8890190611677516
+            ],
+            "last_variance_pct2": 0.8460423307035884,
+            "last_return_pct": -0.00042127301522754124,
+            "objective": 5319.122714158599,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              5319.122714158599,
+              5319.1227141586005,
+              5319.122714158607,
+              5319.122714158608,
+              5319.122714158617
+            ],
+            "best_objective_gap_to_second": 1.8189894035458565e-12,
+            "optimizer_gradient_max_abs": 0.0035400390625,
+            "constraint_slack": 0.01265386959489545,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9853461304051045,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3853,
+              "mean": 0.045489899721460066,
+              "std": 0.9990944451528277,
+              "skewness": -0.14183062615589717,
+              "excess_kurtosis": 3.239391225642738,
+              "acf_lag_1": 0.06814199404612445,
+              "squared_acf_lag_1": 0.012647173057642286,
+              "squared_acf_lag_5": -0.02694844669368512
+            }
+          },
+          "garch_x_india": {
+            "params": [
+              1e-08,
+              0.0,
+              0.1763471760623821,
+              0.7461373371567545,
+              0.12472164707841812
+            ],
+            "last_variance_pct2": 0.6331080089906125,
+            "last_return_pct": -0.00042127301522754124,
+            "objective": 5236.685561351296,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              5236.685561351296,
+              5236.685561351296,
+              5236.685561351391,
+              5236.685561351612,
+              5236.685561357057
+            ],
+            "best_objective_gap_to_second": 0.0,
+            "optimizer_gradient_max_abs": 226.876953125,
+            "constraint_slack": 0.16368907481205452,
+            "bound_hits": {
+              "omega": {
+                "lower": true,
+                "upper": false
+              },
+              "alpha": {
+                "lower": true,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.8343109251879455,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3853,
+              "mean": 0.04679808692605246,
+              "std": 0.9990340389824652,
+              "skewness": -0.2857188043553632,
+              "excess_kurtosis": 1.7213711948023742,
+              "acf_lag_1": 0.07636095740197558,
+              "squared_acf_lag_1": -0.007876478754580495,
+              "squared_acf_lag_5": -0.03792314489809051
+            }
+          },
+          "garch_x_us": {
+            "params": [
+              0.01978944937283211,
+              0.031676659682570045,
+              0.1388126490665438,
+              0.8620324346686647,
+              0.01952869025488226
+            ],
+            "last_variance_pct2": 0.8437696658618775,
+            "last_return_pct": -0.00042127301522754124,
+            "objective": 5310.365535858141,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              5310.365535858141,
+              5310.365535858144,
+              5310.365535858153,
+              5310.365535858154,
+              5310.365535858156
+            ],
+            "best_objective_gap_to_second": 2.7284841053187847e-12,
+            "optimizer_gradient_max_abs": 0.0062255859375,
+            "constraint_slack": 0.03488458111549331,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9631154188845067,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 3853,
+              "mean": 0.045410742822062415,
+              "std": 0.9990980648553203,
+              "skewness": -0.13548631812987352,
+              "excess_kurtosis": 3.312139947735196,
+              "acf_lag_1": 0.06824327290067497,
+              "squared_acf_lag_1": 0.014617225055395873,
+              "squared_acf_lag_5": -0.028264565982897134
+            }
+          },
+          "har_base": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m"
+            ],
+            "coefficients": [
+              -3.0512311736739983,
+              -0.019401648464464655,
+              0.14924278885876754,
+              0.6888978402724214
+            ],
+            "residual_variance": 5.826600485755235,
+            "rank": 4,
+            "n_train": 4105
+          },
+          "har_x_india": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_india_iv"
+            ],
+            "coefficients": [
+              -0.776065117830751,
+              -0.021697893078338838,
+              0.051716786453478304,
+              0.14903695699475591,
+              0.928336181746477
+            ],
+            "residual_variance": 5.717988318453621,
+            "rank": 5,
+            "n_train": 4105
+          },
+          "har_x_us": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_us_iv"
+            ],
+            "coefficients": [
+              -0.6566676879607315,
+              -0.028071947839529134,
+              0.08272303570248349,
+              0.4168315670234464,
+              0.6329581111369151
+            ],
+            "residual_variance": 5.715719678389394,
+            "rank": 5,
+            "n_train": 4105
+          },
+          "direct_india_iv": {
+            "train_only_scale": 0.8401388014823622
+          },
+          "direct_us_iv": {
+            "train_only_scale": 0.8803721671695138
+          }
+        }
+      },
+      "2026": {
+        "train_start": "2008-03-04T00:00:00",
+        "train_end": "2025-12-31T00:00:00",
+        "n_train": 4354,
+        "test_start": "2026-01-01T00:00:00",
+        "test_end": "2026-07-15T00:00:00",
+        "n_test": 130,
+        "models": {
+          "garch_base": {
+            "params": [
+              0.021043947615718067,
+              0.034080839622169706,
+              0.12140672953661891,
+              0.8924529629775902
+            ],
+            "last_variance_pct2": 0.33911102866204135,
+            "last_return_pct": 0.7326926621049168,
+            "objective": 5581.415062298924,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              5581.415062298924,
+              5581.415062298927,
+              5581.415062298934,
+              5581.4150622989555,
+              5581.415062298958
+            ],
+            "best_objective_gap_to_second": 3.637978807091713e-12,
+            "optimizer_gradient_max_abs": 6.103515625e-05,
+            "constraint_slack": 0.010762832631930563,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9872371673680694,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 4102,
+              "mean": 0.04495028601133616,
+              "std": 0.9991110500909406,
+              "skewness": -0.13440081725007982,
+              "excess_kurtosis": 3.120231666000972,
+              "acf_lag_1": 0.0683142217404558,
+              "squared_acf_lag_1": 0.01522132086334076,
+              "squared_acf_lag_5": -0.027474718075159065
+            }
+          },
+          "garch_x_india": {
+            "params": [
+              1e-08,
+              0.0,
+              0.18178070145752867,
+              0.7373758880612737,
+              0.12911734779416403
+            ],
+            "last_variance_pct2": 0.2230059889089255,
+            "last_return_pct": 0.7326926621049168,
+            "objective": 5491.809397910114,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              5491.809397910114,
+              5491.809397910231,
+              5491.809397920299,
+              5491.809397927048,
+              5491.809397930757
+            ],
+            "best_objective_gap_to_second": 1.1732481652870774e-10,
+            "optimizer_gradient_max_abs": 224.3675537109375,
+            "constraint_slack": 0.16973376120996186,
+            "bound_hits": {
+              "omega": {
+                "lower": true,
+                "upper": false
+              },
+              "alpha": {
+                "lower": true,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.8282662387900381,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 4102,
+              "mean": 0.046500249783889835,
+              "std": 0.9990400482259567,
+              "skewness": -0.2656708905182251,
+              "excess_kurtosis": 1.6483660133359734,
+              "acf_lag_1": 0.07742661237246266,
+              "squared_acf_lag_1": -0.007254175491397161,
+              "squared_acf_lag_5": -0.03786677002632828
+            }
+          },
+          "garch_x_us": {
+            "params": [
+              0.017561504629607642,
+              0.03197133285836682,
+              0.1347073767127099,
+              0.8701016683514996,
+              0.01528320804534739
+            ],
+            "last_variance_pct2": 0.36117918910170116,
+            "last_return_pct": 0.7326926621049168,
+            "objective": 5574.169505700533,
+            "converged": true,
+            "message": "Optimization terminated successfully",
+            "n_starts": 5,
+            "n_successful_starts": 5,
+            "burn_in_not_scored": 252,
+            "successful_objectives_sorted": [
+              5574.169505700533,
+              5574.169505700538,
+              5574.169505700544,
+              5574.169505700553,
+              5576.602116692184
+            ],
+            "best_objective_gap_to_second": 5.4569682106375694e-12,
+            "optimizer_gradient_max_abs": 0.000244140625,
+            "constraint_slack": 0.028573310433778643,
+            "bound_hits": {
+              "omega": {
+                "lower": false,
+                "upper": false
+              },
+              "alpha": {
+                "lower": false,
+                "upper": false
+              },
+              "gamma": {
+                "lower": false,
+                "upper": false
+              },
+              "beta": {
+                "lower": false,
+                "upper": false
+              },
+              "delta": {
+                "lower": false,
+                "upper": false
+              }
+            },
+            "persistence": 0.9694266895662214,
+            "near_persistence_boundary": false,
+            "standardized_residual_diagnostics": {
+              "n_obs": 4102,
+              "mean": 0.044655166868017966,
+              "std": 0.9991242819470221,
+              "skewness": -0.13124384265978706,
+              "excess_kurtosis": 3.183548265708577,
+              "acf_lag_1": 0.06848389766728888,
+              "squared_acf_lag_1": 0.016110040791145735,
+              "squared_acf_lag_5": -0.028233475409629862
+            }
+          },
+          "har_base": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m"
+            ],
+            "coefficients": [
+              -3.0943167182959357,
+              -0.01173913231494504,
+              0.15317480578416076,
+              0.6721670677080063
+            ],
+            "residual_variance": 5.811714065698709,
+            "rank": 4,
+            "n_train": 4354
+          },
+          "har_x_india": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_india_iv"
+            ],
+            "coefficients": [
+              -0.8308083156694636,
+              -0.014144531000587903,
+              0.058196755829887536,
+              0.11902683304903207,
+              0.9371048878695096
+            ],
+            "residual_variance": 5.702888533440804,
+            "rank": 5,
+            "n_train": 4354
+          },
+          "har_x_us": {
+            "columns": [
+              "intercept",
+              "har_d",
+              "har_w",
+              "har_m",
+              "log_us_iv"
+            ],
+            "coefficients": [
+              -0.6374928313791853,
+              -0.01983852637766495,
+              0.08958441295998038,
+              0.42069980705577803,
+              0.6161907511327837
+            ],
+            "residual_variance": 5.70639097200643,
+            "rank": 5,
+            "n_train": 4354
+          },
+          "direct_india_iv": {
+            "train_only_scale": 0.8379795798986981
+          },
+          "direct_us_iv": {
+            "train_only_scale": 0.8567375651365654
+          }
+        }
+      }
+    },
+    "garch_convergence_by_year": {
+      "2020": {
+        "garch_base": true,
+        "garch_x_india": true,
+        "garch_x_us": true
+      },
+      "2021": {
+        "garch_base": true,
+        "garch_x_india": true,
+        "garch_x_us": true
+      },
+      "2022": {
+        "garch_base": true,
+        "garch_x_india": true,
+        "garch_x_us": true
+      },
+      "2023": {
+        "garch_base": true,
+        "garch_x_india": true,
+        "garch_x_us": true
+      },
+      "2024": {
+        "garch_base": true,
+        "garch_x_india": true,
+        "garch_x_us": true
+      },
+      "2025": {
+        "garch_base": true,
+        "garch_x_india": true,
+        "garch_x_us": true
+      },
+      "2026": {
+        "garch_base": true,
+        "garch_x_india": true,
+        "garch_x_us": true
+      }
+    },
+    "all_garch_fits_converged": true
+  },
+  "information_gate": {
+    "passed": false,
+    "pre_registered_rule": "India VIX must have lower OOS QLIKE in both GJR-GARCH-X and HAR-style-X; both local-vs-US canonical DM tests must have t<-3 and Holm p<0.05 across the two primary non-nested comparisons; no opposing significant win is allowed.",
+    "local_lower_qlike_both_families": true,
+    "both_families_significant_local_win": false,
+    "no_significant_opposing_win": true
+  },
+  "strategy": {
+    "status": "skipped_by_pre_registered_information_gate",
+    "reason": {
+      "passed": false,
+      "pre_registered_rule": "India VIX must have lower OOS QLIKE in both GJR-GARCH-X and HAR-style-X; both local-vs-US canonical DM tests must have t<-3 and Holm p<0.05 across the two primary non-nested comparisons; no opposing significant win is allowed.",
+      "local_lower_qlike_both_families": true,
+      "both_families_significant_local_win": false,
+      "no_significant_opposing_win": true
+    }
+  },
+  "key_numbers": {
+    "garch_x_india_qlike": 1.4330131193954971,
+    "garch_x_us_qlike": 1.4898469055871102,
+    "garch_local_vs_us_dm_t": -2.867961692404011,
+    "har_x_india_qlike": 2.0241721100296775,
+    "har_x_us_qlike": 2.2767816925518574,
+    "har_local_vs_us_dm_t": -14.727126187791411
+  },
+  "charts": [
+    "k1717_oos_qlike.png",
+    "k1717_annual_stability.png"
+  ],
+  "limitations": [
+    "Daily squared return is an unbiased but very noisy variance proxy; QLIKE is used for proxy robustness.",
+    "The HAR specification is a low-frequency HAR proxy on lagged daily squared returns, not a high-frequency realized-volatility HAR-RV claim.",
+    "Annual rather than daily parameter refits balance genuine expanding-origin OOS evaluation with numerical stability; within-year parameters are fixed.",
+    "India VIX and US VIX are 30-calendar-day implied volatility measures used to forecast a one-day variance target; scale is learned only from past data where applicable.",
+    "Granger predictability is not causal identification.",
+    "The NIFTY index-return simulation omits an investable vehicle, dividends, financing, taxes, and official Indian trading costs; it cannot support strategy listing.",
+    "The forecast target is close-to-close squared return, while a gated strategy holds from one open to the next; forecast ranking is only a screening gate and does not itself prove timing relevance for the strategy holding interval.",
+    "The 16 vendor-calendar gap targets are omitted from forecast estimation and scoring. GARCH/HAR state updates then advance across the remaining clean observations rather than reconstructing unobserved one-session NIFTY returns."
+  ],
+  "verdict": "NULL_OR_MIXED_INFORMATION_GATE_FAIL",
+  "conclusion": "India VIX does not pass the strict pre-registered relative standalone forecast-performance gate versus US VIX. The c/IndiaVIX VT sweep is therefore not run, and no trading conclusion is drawn."
+}

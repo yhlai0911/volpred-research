@@ -17705,5 +17705,374 @@
     "owner": "hourly-05",
     "commit": null,
     "summary": "派出 K1695 exposure-matched 更正（compute queue agent job agent-brief_k1695_correction-c841cc，opus/xhigh）：重跑走 canonical compare_max_drawdown、results.json 補 exposure 欄位、補 seeded circular-shift null（沒 null 前只能說「約等於零」不得說「顯著為負」）、同曝險口徑重算 90% CI 與 kill_triggered、Codex 審。走 queue 不在 fire 內 spawn（3000s cap，2026-07-12 3-STRIKE）。\n\nClass sweep 額外發現（本 fire 最重要的一件事）：這個 artifact 已經流到讀者端，不只卡在實驗與論文。feed 有 3 篇 published（mile_0d595dfb「13 個國際市場實測：美國 VIX 是全球股票的通用避險信號嗎？」整篇、mile_2d4edb65、mile_ee473d5a）+ 2 篇 archived 的結論建立在 raw 口徑上。數字沒造假、被推翻的是因果解讀 —— 掃 code 的機械 gate 永遠掃不到已經發出去的散文。已建 P1 task feed_correction_k1695_exposure_artifact（blocked 等認證）並補進 error_log §G。"
+  },
+  {
+    "timestamp": "2026-07-15T06:24:00+08:00",
+    "task_type": "ops_fix",
+    "task_id": "fix_reap_orphan_deliverables_gap",
+    "outcome": "completed",
+    "actor": "hourly-06",
+    "owner": "hourly-06",
+    "commit": "3b2c10375",
+    "summary": "修好 reaper 漏收草稿成品的根因。\n\n根因（有證據，非推測）：reap_orphan_deliverables 對草稿只問一個問題 —— 「這份草稿在不在 feed 裡」。已發佈的草稿答「在」→ 被記成 skipped[registered] → 檔案就永遠裸躺在工作區沒人 commit。而 lazypack plan 與 assets/*.png 連掃都沒掃到（scan() 只 glob 頂層 storage/drafts/*.md）。沒有第二個人會收：publish_draft.py 只寫 feed.json、完全不碰 git（grep 零 git 呼叫），PHASE-Z 只收自己這班產的檔 —— 所以 crash 掉的 producer 留下的成品「不屬於任何人」，每一班都重新報一次 alert，報的還是早就做完的工作（K1572/K1681/K1685，最後 26 檔由人工 b361c967f 掃走）。\n\n排除的假設：baseline 沒有誤含這三個 K（grep 過）；不是豁免 bug。\n\n修法：補上缺的那個 recognizer —— scan_draft_artifacts + collect_draft_artifacts，問的是「有沒有交付給 git」（對照既有的「有沒有交付給讀者」）。形狀沿用同檔兩天前才建的 paper recognizer，一個刻意的差異：這裡收 untracked —— 孤兒草稿/圖表本來就是以 untracked 形式出現的。不變式全保住：永不刪除、不 checkout、不 commit 刪除、認不出的 held 並回報、grace 2h 內或有 live task 認領的不碰。\n\n驗證：tests/test_reap_draft_artifacts.py 5 cases（含事故原形 + 三條拒收路徑）全綠；e2e 造同形狀孤兒檔跑真 CLI，三類檔案全被認出；main 落地後線上 dry-run 零誤抓。silent-fallback strict audit new=0。\n\n落地方式：worktree commit 9555e21ba → cherry-pick 到 main 3b2c10375。刻意不走 merge_worktree.sh —— main checkout 當時有 slot-1 的 K1695 在途工作，該腳本會 stash 掉其他 slot 的在途檔（queue 裡 P2 platform_ops_merge_worktree_stashes_other_slots_wip 記的地雷）。cherry-pick 只帶我的 2 個檔，別人的工作零接觸。\n\n順帶查出並立案（未夾帶進本 commit）：tests/test_draft_pool_refill.py 在任何 worktree 都是 4 red（CanonicalWriteBlocked，寫到 worktree 自己的 storage/next_tasks.json），只有 main 綠。用 stash 排除法證明是 pre-existing。CI 只跑 main 所以永遠看不到 → agent 會學會忽略紅燈。已建 P2 fix_draft_pool_refill_tests_red_in_worktree。"
+  },
+  {
+    "timestamp": "2026-07-15T07:22:46+08:00",
+    "task_type": "experiment",
+    "task_id": "k1695_exposure_matched_correction",
+    "outcome": "completed",
+    "actor": "hourly-07",
+    "owner": "hourly-07",
+    "commit": "bdf6b451f",
+    "summary": "K1695 exposure-artifact 更正 collect_completed followup 完整收尾（研究誠實 P1）。\n主線程獨立重算兩樣本確認撤回：common ΔMDD raw +12.61pp(13/13) → exposure-matched -0.87pp(7/13)，circular-shift null p=0.559；inception raw +27.50pp → matched +4.96pp(12/13)，p=0.212；Holm 0/13；vol ratio 0.52-0.66x 全 13 市場 mismatch。數字 byte 對齊 results.json。\n認證：fresh-context code-reviewer PASS（7/7 checklist 無 blocking defect），寫 review_verdict.json（PASS，pin 現行 sha）+ review_certification_20260715.md，experiment_gates certify PASS。\n下游：(1) knowledge append 更正條目 8f80b2ee（撤回 f4a73c83 假 PASS）；(2) paper vt-trend-following blocker 更新 + 決定撤除第三 contribution，建 paper_body_vt_trend_withdraw_k1695_contribution；(3) feed_correction_k1695 解除 blocked→pending P1；(4) 收尾 k1695_exposure_matched_correction=succeeded + compute followup dispatched；(5) enqueue Codex primary-path re-verify（agent-brief_k1695_codex_reverify-be9cd6）作 closure belt-and-suspenders。"
+  },
+  {
+    "timestamp": "2026-07-15T07:33:44+08:00",
+    "task_type": "experiment",
+    "task_id": "k1695_exposure_matched_correction",
+    "outcome": "completed",
+    "actor": "hourly-07",
+    "owner": "hourly-07",
+    "commit": null,
+    "summary": "K1695 exposure-artifact 更正鏈（PHASE A followup collection）：收 compute followup agent-brief_k1695_correction-c841cc，核對 rerun(06:13) 同曝險數字（primary block=252：raw +11.83pp P≤0=0.0006 → exposure-matched −1.70pp CI90[−7.02,+3.59] P≤0=0.7075 跨零；common −0.87pp/7-13/null p=0.559；inception +4.96pp/12-13/p=0.212；0/13 Holm）。knowledge.json K1695(f4a73c83) verdict PASS→RETRACTED、kill_triggered→True、加 exposure-matched 欄位+correction provenance、raw 保留；索引 update(+1/-1)。父任務 k1695_exposure_matched_correction→succeeded、followup mark-dispatched。feed_correction_k1695_exposure_artifact→pending P1（解封+認證數字）。新建 paper_vt_trend_table5_retraction_rewrite(paper_body P2)。Codex review(a96e64c50bf469879) 審 wording 中，發稿仍在跑；retraction 已三重驗證故先寫 canonical，verdict 落地再對照。"
+  },
+  {
+    "timestamp": "2026-07-15T08:11:50+08:00",
+    "task_type": "platform_ops",
+    "task_id": "agent-brief_k1695_codex_reverify-be9cd6",
+    "outcome": "completed",
+    "actor": "hourly-08",
+    "owner": "hourly-08",
+    "commit": null,
+    "summary": "PHASE A triage_failed followup：K1695 belt-and-suspenders Codex primary-path re-verify job 失敗（exit_code=1）。根因＝enqueue 用不存在 model alias --model gpt-5.6-sol，agent 在 model-selection 階段即中止，未產出 codex_reverify_verdict.md。worktree k1695-codex-reverify 僅含與 main 位元相同的已 commit K1695 檔（k1695.py/k1695_results.json/README.md/codex_review.md 全部 sha256 match、0 commits ahead of main）→ 無可救援、無可合併。判定不需 re-enqueue：primary-path Codex 驗證早已在 main experiments/k1695/codex_review.md（Codex PASS 2026-07-12，含 pre-run source review + 獨立 B=10,000 bootstrap seed 42 重算）覆蓋同一批位元相同檔。K1695 closure 成立於兩份獨立 PASS（Codex 2026-07-12 + fresh-context code-reviewer 2026-07-15）。已更新 review_verdict.json 加 codex_reverify.status=satisfied_by_existing 記錄 provenance；mark-followup-dispatched 防重派；pending-followup 歸零。worktree 未動 git（clean/0-commit，留標準 cleanup 回收，遵守 never force-remove）。"
+  },
+  {
+    "timestamp": "2026-07-15T09:18:14+08:00",
+    "task_type": "daily_article",
+    "task_id": "feed_correction_k1695_exposure_artifact",
+    "outcome": "completed",
+    "actor": "hourly-09",
+    "owner": "hourly-09",
+    "commit": null,
+    "summary": "P1 回溯更正 feed_correction_k1695_exposure_artifact 完整收尾（研究誠實 #13）。K1695 招牌「US VIX 全球抗跌信號」在同曝險口徑下崩為 −0.87pp(7/13)、null p=0.559。3 篇 published（mile_0d595dfb 招牌篇 / mile_2d4edb65 / mile_ee473d5a VT完全指南）於 feed.json content 前置「編者更正聲明」：保留原數字未刪、明寫舊結論被推翻＋推翻理由（曝險假象＝VT 實現波動 0.61–0.68×B&H、固定減碼複製 85%），嚴守強度邊界（不寫「擇時有害」、不宣稱 inception +4.96pp 被否證）。2 篇 archived（mile_f2e26f43/mile_9eaadbd1）加「更正註記」。驗證：anti_ai_gate PASS(warn 1/3)；feed.json JSON valid；storage/reports/<id>.json（存在的 2 檔）鏡像；supabase_sync full 推平台（5 篇皆入 sync log、reconcile no_drift 1810=1810）；docs/error_log.md Class G closure。blast radius 從 code→paper→feed 全數收口。"
+  },
+  {
+    "timestamp": "2026-07-15T09:22:05+08:00",
+    "task_type": "experiment",
+    "task_id": "K1692_K1694_starvation_dispatch",
+    "outcome": "completed",
+    "actor": "hourly-09",
+    "owner": "hourly-09",
+    "commit": null,
+    "summary": "STARVATION LOCKOUT 清理：K1692（原油vol spillover/vol-of-vol傳導）、K1694（FCM清算集中度HHI排擠小型交易者+商品流動性風險）兩個 aged>72h 的 starved worktree experiment 已 dispatch。依禁 inline spawn 規則（3-STRIKE）走 compute_queue enqueue-agent（opus/xhigh，各建 registered worktree dispatch-slot-1-f53bca44-k1692/k1694 經 git_writer_lock canonical 建立）。brief 內建研究誠實必讀（AGENTS.md 13條、experiments.md 方法論硬規則、error_log Class F/G）、明確 lag/shift(1)、固定 seed、DM-HAC(acf定lag)、三件套+gate。job id: agent-brief_K1692-3458bb / agent-brief_K1694-10e82d。實驗由 */15 detached compute worker 執行，結果由未來 fire PHASE A followup(experiment,P3) 收件驗證+合併 worktree。"
+  },
+  {
+    "timestamp": "2026-07-15T10:21",
+    "actor": "hourly-10",
+    "task_type": "email_reply",
+    "task": "email_12104_lazypack_codex_exec_over_notebooklm",
+    "summary": "Boss email 糾正懶人包生成工具：codex exec 首選、NotebookLM 僅 fallback。修 alerts.py 第5條 remediation 文字 + lazypack-infographic SKILL.md legacy 段（原兩工具同級→明確排序）。close email 已寄(needs-reply)，附確定性 renderer vs codex bespoke poster primary 選擇一問。",
+    "files": [
+      "src/volpred/ops/alerts.py",
+      ".claude/skills/lazypack-infographic/SKILL.md"
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T10:24:00+08:00",
+    "actor": "hourly-10",
+    "task_type": "ops_fix",
+    "task_id": "fix_draft_pool_refill_tests_red_in_worktree",
+    "summary": "draft-pool refill 測試 worktree 紅燈：確認根因已由 c2c088fca(03:06 補 guard)+873cfb274(06:10 autouse 隔離 fixture)修好；task 是 hourly-06 在未拉 fix 的舊 worktree 觀察到瞬時紅。驗證 main + 全新 HEAD worktree 皆綠；補 worktree regression gate（test_promote_starved_articles_blocks_canonical_write_target，負向測試鎖 promote 寫入被 canonical guard 擋），mutation 檢查證 guard load-bearing。21 passed，main/worktree parity。",
+    "artifacts": [
+      "tests/test_draft_pool_refill.py"
+    ],
+    "verification": "pytest tests/test_draft_pool_refill.py -> 21 passed (main + fresh HEAD worktree); guard-bypass mutation reproduces canonical write (gate is load-bearing)"
+  },
+  {
+    "timestamp": "2026-07-15T10:36:00+08:00",
+    "actor": "hourly-10",
+    "task_type": "email_reply",
+    "task_id": "email-12109-9109fb",
+    "summary": "老闆回信授權「你決定」+ 確認 NotebookLM 降後備、Codex 畫圖好太多。ops 決策拍板：懶人包 reader-facing 視覺三層排序 — routine 走確定性 renderer(零LLM/可重跑/預設)、旗艦視覺篇 codex exec bespoke poster 升為 sanctioned primary(從 legacy/manual escape hatch 提升)、NotebookLM 最後備援。codify 進 SKILL.md『視覺分層(boss decision 2026-07-15)』段。寄 close email(含未來全面換 codex 的一鍵選項)。async pipeline 全面換 codex 留為未來 platform_ops(非本次範圍，深綁 hash-receipt 驗證)。",
+    "artifacts": [
+      ".claude/skills/lazypack-infographic/SKILL.md"
+    ],
+    "verification": "close email sent=true (notification ce6c3679, telegram msg 787); SKILL.md 三層排序 codified"
+  },
+  {
+    "timestamp": "2026-07-15T10:36:51+08:00",
+    "task_type": "daily_digest",
+    "task_id": "daily_digest_20260715",
+    "outcome": "completed",
+    "actor": "hourly-10",
+    "owner": "codex-vscode",
+    "commit": null,
+    "summary": "已發布 mile_ee178213〈紐約踩煞車、PJM 開備援：AI 電力股還能當防禦資產嗎？〉。以 AI 供電四格驗電表串聯 5 篇跨 65 天 archive 來源，4 張 inline 證據圖與 2 張 data-bound 懶人包；修正 PJM backstop 定義後通過獨立審查、anti-AI、60 項 publisher 測試、feed sync、live SSR 與 content-quality 驗證。"
+  },
+  {
+    "timestamp": "2026-07-15T11:15:07+08:00",
+    "task_type": "platform_ops",
+    "task_id": "agent-brief_K1692-3458bb",
+    "outcome": "completed",
+    "actor": "hourly-11",
+    "owner": "hourly-11",
+    "commit": "86255ebdc",
+    "summary": "PHASE A triage_failed 救援 K1692（agent job 因 wrapper 3479s timeout 誤判 failed，但實驗已跑完整）。查證：results.json(39KB)/3 圖/README/Codex review 皆齊，review_verdict=PASS（gpt-5.6-sol ultra 3-4 輪，修 EWMA lookahead / vov 漏報 / GFEVD 方向 / ADF 4 blocking 後重跑數字一致）。決策：不走 merge_worktree.sh（該 branch 含 50 個發散 commit，K1684/K1686/K1683/K1682 已另循 codex commit 進 main，full merge 會製造衝突/回退），改只取 experiments/K1692/ 已驗證檔案。修一個 silent-fallback marker 放錯行（Round-4 marker 寫在 except 下方 comment，audit 逐行檢查看不到 → 移到 except 行 inline，output-neutral，更新 verdict sha + post_review_edits 留痕）。experiment_gates run 4 關全清。git_writer_lock commit exact paths → main 86255ebdc。主線程寫 K1692 NULL knowledge d57401c0（原油波動對 SPY/XLE/XOP 無穩健增量傳導，同期共動被油報酬+VIX 吸收）→ commit c858c454a。compute followup 標 dispatched。worktree 未動（不 force-rm）。K1694（另一 triage_failed，僅 .py+data+figures 無 results/verdict = 真 partial）留下輪處理。"
+  },
+  {
+    "timestamp": "2026-07-15T11:30:17+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29383038432",
+    "outcome": "completed",
+    "actor": "hourly-11",
+    "owner": "hourly-11",
+    "commit": "6a7e64816",
+    "summary": "CI 紅燈修復（run 29383038432, main Test Suite）：43 個既有測試在 commit a16840bd0（git single-writer 重構）落地時被打破——該重構加入新 invariants（mutation-guard deny、canonical writer 強制 main branch、_spawn/run_agent_job 新增 cwd/--cwd）卻未同步更新 8 個既有測試檔。修復（class fix，非 surface patch）：(1) git_mutation_guard.classify 在 --root 非 git repo 時改 fail OPEN（無 canonical checkout 可保護；與 main() 的 syntax-fallback 原則一致，避免誤擋 read-only git status）；(2) phase_z 測試 repo 改 git init -b main 滿足 writer main-branch invariant；(3) worker fake _capture_spawn 接受 cwd= kwarg；(4) run_agent_job auth-class 測試補 --cwd 並 stub is_registered_linked_worktree。驗證：96/96 目標測試 green + 194/194 deny 迴歸 + 37 writer-lock 相鄰測試。repair_commit=6a7e64816 已 push main；由 CI watcher 獨立驗證 GitHub 綠燈。"
+  },
+  {
+    "timestamp": "2026-07-15T12:05:12+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29385452603",
+    "outcome": "completed",
+    "actor": "hourly-12",
+    "owner": "hourly-12",
+    "commit": "pending-phase-z",
+    "summary": "CI 紅燈修復（run 29385452603, SHA d9720f77c, 43 failed）收尾。該 run 為 stale——跑在舊 SHA d9720f77c，其後 6a7e64816 + fa4cbfbc6（hourly-11）已修 39/43。剩 4 個 tests/test_cron_auth_preflight.py 在 HEAD 仍紅：a16840bd0 single-writer 重構把 git-writer-lock canonical-main guard（cron_hourly_dispatch.sh:87-103）加到 script 最頂端、早於 auth-preflight，於是 HOURLY_PREFLIGHT_ONLY=1 的純 auth 測試路徑（在 scratch tmp repo、非 canonical symbolic main）被 exit 2 擋掉。Class fix：把 writer-lock 再入 + canonical-main guard 整塊 gate 在 HOURLY_PREFLIGHT_ONLY != 1 之下——preflight-only 在 line 618 就 exit、不做任何 git mutation，guard 對它無意義；HOURLY_PREFLIGHT_ONLY 生產環境從不設定（grep 僅 script 自身 + 測試），故對真實 dispatch 的 single-writer invariant 零影響。驗證：46/46 目標三檔 green（test_cron_auth_preflight + test_hook_bash_optimizer + test_phase_z_ownership）+ bash -n 語法 OK。commit 由 PHASE-Z 收、CI watcher 獨立驗證綠燈。"
+  },
+  {
+    "timestamp": "2026-07-15T12:10:36+08:00",
+    "task_type": "governance",
+    "task_id": "alert_content_quality_20260715",
+    "outcome": "completed",
+    "actor": "hourly-11",
+    "owner": "codex-vscode",
+    "commit": "3e716aa1f",
+    "summary": "Root-fixed the true 29.14m publish burst: all release-pool promotions now fresh-read, CAS, throttle, and atomically persist; duplicate host cron owner removed; stale alerts require revalidation; daily_digest excluded from discretionary cadence. 225 relevant tests passed, 2 skipped; no article published or unpublished."
+  },
+  {
+    "timestamp": "2026-07-15T12:12:34+08:00",
+    "task_type": "platform_ops",
+    "task_id": "K1694-script-rerun-1211",
+    "outcome": "completed",
+    "actor": "hourly-12",
+    "topology": "compute_queue",
+    "summary": "PHASE A triage_failed: failed agent-job agent-brief_K1694-10e82d (background 驗證未收尾、K1694_results.json 從未產出) 轉為 compute script-job。K1694.py 已由前 agent 寫好且方法論護欄齊全(merge_asof+shift(1) 防 Class F lookahead、Driscoll-Kraay/cluster SE、HAC bandwidth by acf K1655、block bootstrap seed=1694)、py_compile 通過。改由 compute worker 同步直跑腳本到完成(timeout 3600)，result_artifact 為 gate，followup=experiment 收件時驗數字/gates/Codex審/merge/寫knowledge。mark-followup-dispatched 已標，pending-followup 歸 0。未動 P1 trending(FB MCP auth-blocked 無法乾淨雙發佈)。"
+  },
+  {
+    "timestamp": "2026-07-15T13:16:00+08:00",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_15_晶片雙雄",
+    "outcome": "completed",
+    "actor": "hourly-13",
+    "topology": "inline",
+    "summary": "P1 trending starving 7.1h。查重發現 storage/drafts/tsmc_earnings_iv_20260708 已有完整同題稿（7/8寫、卡池一週、type=trending_repost 本應直發卻沒發），法說會 7/16 明天→時效臨界。決策：不寫重複稿（避 K1586/K1605 白工），改驗證+補齊+直發現有稿。數字全對 event_study_results.json（baseline 1.35% / day0 2.43% / 1.8倍 / t=3.01 p=0.005 / paired t=2.40 p=0.023 / 66.7% / bootstrap CI[1.77,3.15] / VIX 36.89@74pct）。建 4-panel deterministic 懶人包(lazypack_render，0 LLM，layout guard pass)、補 title frontmatter、anti_ai_gate PASS→publish_draft --status published=mile_5a20a332（general，6圖上架 supabase）。FB 文案已寫+過 anti_ai_gate exit0，排 followup fb_post_tsmc_earnings_iv_20260715（event_article，需互動 Chrome，不算 trending cap）。今日 trending 已計 0→本篇算直發不進 cap 統計但主題已消化。"
+  },
+  {
+    "timestamp": "2026-07-15T14:12:01+08:00",
+    "task_type": "platform_ops",
+    "task_id": "content_audience_mislabel_backlog_45",
+    "outcome": "completed",
+    "actor": "codex-vscode",
+    "owner": "codex-vscode",
+    "commit": "2bd3e06ddfe41c046764e0b2be1446016f2aff31",
+    "summary": "Corrected 29 canonical feed audience mismatches, synced Supabase, queued 12 general rewrites, rebuilt publication candidates, and added CI/guarded regression coverage."
+  },
+  {
+    "timestamp": "2026-07-15T14:22:00+08:00",
+    "actor": "hourly-14",
+    "task_type": "platform_ops",
+    "task_id": "alert_host_cron_fail_20260715",
+    "summary": "P1 critical host_cron_fail 修復：daily_update_intraday 14:00 exit=1 因 feed.json dirty (release 後未及 commit) 撞 scheduled_writer_commit guard。feed.json 已由 codex session commit 乾淨，重跑 wrapper exit 0 (14:21:13) 刷新 marker，detector 重驗清除。本班零 git mutation。",
+    "status": "succeeded",
+    "topology": "inline"
+  },
+  {
+    "timestamp": "2026-07-15T14:33:00+08:00",
+    "actor": "hourly-14",
+    "task_type": "platform_ops",
+    "task_id": "dm_hac_auditor_false_negative_regex",
+    "summary": "DM-HAC 稽核器 false-negative 修復：新增手算變異數 idiom 偵測 regex，全母體重掃 k1379 unknown->no_hac（唯一翻轉、零 false positive），更新 baseline + 2 regression test，pytest 14 passed。subagent 執行、主線程獨立復核一致。",
+    "status": "succeeded",
+    "topology": "subagent"
+  },
+  {
+    "timestamp": "2026-07-15T15:24:16+08:00",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_15_ai基建",
+    "outcome": "completed",
+    "actor": "hourly-15",
+    "owner": "hourly-15",
+    "commit": null,
+    "summary": "發佈 trending_repost feed mile_50ce135b（general）：『AI 瓶頸轉電力，波動率還沒買單』。反直覺發現 — 板塊波動率零重定價（XLU 15.6% vs 中位14.2），真正翻倍在半導體（SMH 61.1% vs 33）；訊號在橫斷面離散度：GEV YTD +57.2%/vol 68.7 vs CEG -29.8%；power-SMH 60d corr 0.6 一年穩定。資料 yfinance 8檔 2024-09~2026-07。過 arc-dedup(clean)+anti_ai_gate(pass)+image(5)+lazypack(3 panels data-bound) gates。FB 雙發佈需 Chrome→已建 followup fb_post_ai_power_vol_20260715。"
+  },
+  {
+    "timestamp": "2026-07-15T16:07:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29387887860",
+    "outcome": "completed",
+    "actor": "hourly-16",
+    "owner": "hourly-16",
+    "commit": null,
+    "summary": "CI red 修復 (run 29387887860). 兩個獨立紅燈：(a) cron_wrapper_manifest stale — cron_hourly_dispatch.sh 被改但沒跑 sync_cron_wrappers.py --apply → 修：--apply 同步 canonical/manifest/~/.volpred/bin lockstep；(b) reference-transaction hook 對 refs/heads/main 即使 no-op (old==new) 也要求 lease，某些 git 版本在 'git worktree add' side branch 時 transaction 會帶入 main no-op entry → 錯誤 block 非 main 的 worktree 建立 (exit 128)。修：hook 改成只有 main 實際移動 (old!=new) 才需 lease，並 reinstall live .git/hooks (install.sh via canonical lease)。本地 23 相關測試全綠 (manifest/reference-transaction/auth-preflight)。真正 main 移動的封鎖測試不受影響 (皆 old!=new)。commit/push 由 PHASE-Z 收；最終 GitHub 綠燈由 CI watcher 獨立驗證。"
+  },
+  {
+    "timestamp": "2026-07-15T16:18:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a1",
+    "outcome": "completed",
+    "actor": "hourly-16",
+    "owner": "hourly-16",
+    "commit": null,
+    "summary": "P1 self-heal: PHASE-Z 連 3 次 commit_nonzero 收班失敗根因排查。根因 = PHASE-Z ownership race — 某 07:xx fire 在 codex-vscode 於 07:13 claim/dirty experiments/k1379/k1379.py 之前起跑，故該 fire 的 pre-fire baseline 視 k1379.py 為『本班新產出』→ PHASE-Z 試圖 commit codex 尚未完成(含 3 個 bare silent-fallback)的檔 → no-silent-fallback pre-commit gate 正確拒絕 → 3 retry → 固定 P1 alert。驗證: 現場 ps 確認 codex-vscode 仍活著 (live `codex exec --sandbox read-only` 3:48PM 正在 review k1379.py/README/results.json 的 QLIKE/HAC DM 修復)，dm_hac_fix_k1379_paper9 in_progress claimed_by=codex-vscode。故 k1379 dirty set = 活躍作者在途檔，非孤兒，禁由本 fire commit(=incident#3 class)。處置: (1) 依 gate 指示為 3 處合法 best-effort fallback 補 `# silent-ok:` 註解 (experiments/k1379/k1379.py:148 multistart GJR-MLE、:201 GARCH-X-VIX MLE、:248 OLS lstsq；三者 caller 皆 checks is not None) → audit 由 3 findings 降為 0，作者 codex commit 時 gate 會過。(2) 不 commit 任何檔，作者(codex-vscode) commit。自限性: k1379.py 現對每個後續 fire 皆 pre-fire-dirty → 永不再被誤判 owned → race 不會重演。alert_key 已設不再通知。本 fire 只改註解，PHASE-Z ownership 不含 pre-fire-dirty 的 k1379，故 receipt 不 commit k1379。"
+  },
+  {
+    "timestamp": "2026-07-15T17:09:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-fix-stragglers-20260715",
+    "outcome": "completed",
+    "actor": "hourly-17",
+    "owner": "hourly-17",
+    "commit": null,
+    "summary": "P1 CI 紅燈根治(~18h main Test Suite 紅)。剩 2 測試: (1) test_cron_wrapper_manifest 已由 HEAD 30489d5dc sync manifest 修好(現 lockstep)。(2) test_git_reference_transaction_hook::test_non_main_branch_ref_is_not_subject_to_main_lease 根因非測試放水，是 git 版本行為差異: git worktree add -b side 時，git>=2.50(Apple)/CI 把新 linked worktree 的 HEAD 當 symref 創建 (old=null-OID, new=ref:refs/heads/side) 且從 MAIN worktree toplevel 回報 -> 觸發 hook touches_head 守衛(current_root==main_root) -> 索取 main-lease -> 無 lease -> worktree add abort exit128；本機 homebrew git 2.43 把同一 HEAD 當 no-op(old==new) 且從 side toplevel 回報 -> 守衛不觸發 -> 故 pytest 本機綠、CI 紅。實測 /tmp probe 對比 2.43 vs 2.50 reference-transaction stdin + 用真 hook 重現 exit128。修法: scripts/git_hooks/reference-transaction 的 HEAD 分支加 old!=new 且 old 非 null-OID (case *[!0]*) 才 arm touches_head，對齊既有 refs/heads/main 語意 — null-old = 新 worktree HEAD init 不算 main 移動。驗證(/usr/bin/git 2.50): CASE1 worktree add side -> SUCCESS; CASE2 無 lease detach main HEAD -> 仍 BLOCKED(HEAD 留 refs/heads/main)，保護未退化; target 兩檔 19 passed。同步刷新 live .git/hooks 複本。class sweep: 唯一同型守衛點即此 HEAD guard，已修。repair 由 PHASE-Z commit scripts/git_hooks/reference-transaction。"
+  },
+  {
+    "timestamp": "2026-07-15T17:23:01+08:00",
+    "task_type": "platform_ops",
+    "task_id": "taifexdata_dropbox_organize",
+    "outcome": "completed",
+    "actor": "hourly-17",
+    "owner": "hourly-17",
+    "commit": null,
+    "summary": "整理 dropbox/taifexdata → TAIFEX tick canonical layout。Dropbox 全程唯讀，產出全寫進 repo。交付：(1) scripts/taifex_tick_inventory.py → data/intraday/taifex_tick_manifest.json（唯讀掃描：子目錄同步狀態、TX/TX1/TX2 檔數/日期/缺口、實測 era）；(2) scripts/taifex_tick_to_canonical.py → data/intraday/taifex_tick/<contract>/<yyyymm>.parquet（raw→canonical schema + 驗證，--full-rebuild 走 compute_queue）；(3) data/intraday/taifex_tick/README.md。小重構 collect_taifex_tick.py 抽出可 import 的 map_semantic_columns + SOURCE_ENCODINGS（行為不變，既有 10 測試全過），兩層共用同一 era-normalization。\n\n實掃關鍵數字（更正 brief 線索）：python/ 已同步 10,644 檔 ~33.5G；TX/TX1/TX2 各 3,548 交易日 2012-01-02..2026-07-14；缺 258 個工作日（=台灣假日，17 段長缺口皆農曆年，非資料洞）；cross-contract 不一致=0（無真缺口）；raw {year}/csv 4,046 檔全 0-byte placeholder（雲端未下載）；OPTIONDATA 1,024/13,093 partial ~41G；vix synced 4,313；證交所 1/5,381。實測 3 個 era：A 2012-01-02..06-13 9欄無集合競價日盤; B 2012-06-14..2017-05-15 10欄+集合競價; C 2017-05-16+ 加夜盤（9→10欄界=2012-06-14 非 2013/2014；夜盤首日 2017-05-16 實測）。\n\nSample 驗證：9/9 通過（跨全部 3 era + TX1），out-of-session=0。全量 33G 未在此跑，註明走 compute_queue。未 git commit（PHASE-Z 統一收）。"
+  },
+  {
+    "timestamp": "2026-07-15T18:08:18+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29399240558",
+    "outcome": "completed",
+    "actor": "hourly-18",
+    "owner": "hourly-18",
+    "commit": null,
+    "summary": "CI 紅燈修復（run 29399240558 / 最新 29406571212）。根因鏈：最新 CI run 只失敗在「Validate feed audience consistency」步驟（在 test suite 之前 fail-fast）——feed item mile_8a9ae3c8「波動率預測不是把指標愈疊愈多就會愈準」原生為 general（'一般讀者'），但 2026-07-15 K1379 public sync（codex commits 752731af4/024b31c74）把 body 灌入 QLIKE 公式 / HAC-DM / A4f recursion 等 research 訊號，觸發 publisher-inference upcast → general→research mismatch，fail-closed invariant 擋下。既有 audience_correction_plan_20260715.json（13:28 建、29 筆已 apply）未涵蓋此稍晚產生的新 mismatch。修法（走 guarded workflow，未手改 feed.json）：plan 補一筆 mile_8a9ae3c8 → expected=research / disposition=rewrite_general / refs=[K1379]（文內明言「這個提醒本身仍然成立」，一般讀者教訓仍有效 → 更正版留 research，另 queue 白話 companion），backfill_feed_audience.py --apply（publisher_feed lock + canonical_write guard）。結果：validate_feed_audience PASS（1815 entries / 430 general / 0 mismatch, exit 0）；queue 出 daily_article task K1379_article_general_audience_rewrite_8a9ae3c8（P3 pending）。回歸驗證：DM-HAC ratchet 14 passed、git_reference_transaction_hook 9 passed（舊 run 的 DM-HAC/worktree 失敗來自更早 commit，已被 codex k1379 修復 + 本地綠）。commit/push 由 PHASE-Z + push pipeline 收（本班未跑 git）。"
+  },
+  {
+    "timestamp": "2026-07-15T18:15:53+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a2",
+    "outcome": "completed",
+    "actor": "hourly-18",
+    "owner": "hourly-18",
+    "commit": null,
+    "summary": "P1 self-healing alert (silent_fallback_new) 修復。根因：17:24 fire (taifexdata_dropbox_organize) 的 PHASE-Z commit_nonzero×3，因 pre-commit silent-fallback gate 擋下 scripts/taifex_tick_inventory.py 兩個未標記合法 silent path — L86 `except OSError: continue`（inventory rglob 與 stat 間檔案消失/不可讀，跳過以免扭曲 placeholder 比率）、L277 `except (UnicodeDecodeError,...): continue`（SOURCE_ENCODINGS 多編碼嘗試迴圈，全失敗時 frame=None → 回明確 error dict，非真靜默）。修法：兩處加 `# silent-ok: <reason>` inline 標記（符合 .claude/rules/no-silent-fallback.md）。驗證：audit_silent_fallbacks.py 對 taifex_tick_inventory.py / collect_taifex_tick.py / taifex_tick_to_canonical.py 全 findings=0 exit0，gate blocker 於 working tree 清除。orphaned taifex 檔（產於 17:24 早於本班 18:00 fire baseline，且 shared index 現有他 slot staged 檔）依 CLAUDE.md + slot-context 硬規不自行 git commit，committal 交 cohort-drained PHASE-Z；檔案在 shared working tree 安全（reaper 保證永不刪除/checkout）。CI-red-29399240558（本 fire 觸發原因）已由 slot-1/hourly-18 同步處理完，未重複。baseline 64-finding 縮減為 warn-only separate cleanup，非 blocker。"
+  },
+  {
+    "timestamp": "2026-07-15T19:21:39+08:00",
+    "task_type": "platform_ops",
+    "task_id": "dreaming_memory_hygiene_consolidation_review",
+    "outcome": "completed",
+    "actor": "hourly-19-slot2",
+    "owner": "hourly-19-slot2",
+    "commit": null,
+    "summary": "月度 feedback 記憶整併審查（dreaming propose-only 任務）。對象 = ~/.claude/projects/-Users-yhlai0911-volpred-research/memory/ 的 98 條 feedback 記憶（觸發門檻 ≥45）。產出 storage/ops/memory_consolidation_review_20260715.md：(1) 98 條歸 10 主題群；(2) 核心發現 — 「條數≥45 該整併」對本記憶系統是錯度量，dreaming_review.py:119-130 作者已自認偵測 structurally near-permanent；重疊≠浪費，finish/act/alert 群 8 條是刻意防禦縱深（feedback_fix_verify_then_report 一天內被糾正兩次）→ 明確不併；(3) 真整併候選 = FB 群 6→1~2（actionable content 已被 fb-publishing SKILL.md 承載，grep 24 命中，違反 feedback_skill_structure，保留事故錨點）+ dedup/email 各 2→1（低優先）；(4) 根因建議 — 給 dreaming memory_hygiene 偵測加 30 天 cooldown 或改量語意重疊，止住每晚重報。未在背景 fire 單方刪改操作記憶（propose-only 設計 + 每 session 載入 + 本機並行 slot-1 session；FB 整併另涉改 skill 需寄信老闆 per feedback_skill_autonomy）→ 建議另開 followup 執行。本 fire 為 ci_red 觸發，ci-red-29406571212 由 slot-1/hourly-19 認領（本 slot claim 得 already_claimed），本 slot 轉做此餓死任務（STARVATION LOCKOUT 生效，僅可挑餓死清單）。附帶診斷 ci_red 根因：HEAD 已含 reference-transaction hook 的 audience 修復，pytest 換成 test_git_reference_transaction_hook.py::test_non_main_branch_ref_is_not_subject_to_main_lease 在 CI(git≥2.50) exit128（本地 git2.43 不觸發）；修正已在工作區未 commit（hook null-old HEAD 判斷），屬 slot-1 職責範圍。"
+  },
+  {
+    "timestamp": "2026-07-15T19:26:14+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29406571212",
+    "outcome": "completed",
+    "actor": "hourly-19",
+    "owner": "hourly-19",
+    "commit": "69498a865",
+    "summary": "P1 CI 紅燈修復（run 29406571212 → 徹底轉綠 run 29410950263）。根因兩層：\n\n(1) Feed audience mismatch mile_8a9ae3c8（general→research，signals K-id/QLIKE/HAR-RV）— 原 failed run 29406571212 跑的是 stale commit cef1eb1e；修正早已由 codex commit 024b31c74「sync K1379 public correction」landing 進 HEAD，本地 validate_feed_audience.py 已 PASS（430 general / 0 mismatch）。此層無需再動。\n\n(2) Audience step 綠後，暴露先前被 fail-fast 遮蔽的真實 test 失敗：scripts/tests/test_git_reference_transaction_hook.py::test_non_main_branch_ref_is_not_subject_to_main_lease 在 CI（git>=2.50）exit 128。stderr:「[reference-transaction] BLOCKED: refs/heads/main requires an active canonical Git-writer lease」。根因 = committed HEAD 的 scripts/git_hooks/reference-transaction 對 HEAD ref 無條件 touches_head=1；git worktree add -b side 在 git>=2.50 把新 linked worktree 的 HEAD 當 symref creation（old=0000）從 main toplevel 上報，被誤判成 main 移動 → 要求 lease → BLOCK。修正（HEAD 僅在 old 非全零才 arm lease）先前寫在工作區但未 commit（PHASE-Z ownership race 擱置，屬 slot-1 職責 per slot2 work_log 交接）。\n\n處置：git_writer_lock.py commit --actor hourly-19 只提交 scripts/git_hooks/reference-transaction 單檔（commit 69498a865，9+/2-，不動其他 17 staged 檔與 codex lazypack WIP）→ VOLPRED_SUPPRESS_PUSH_ALERTS=1 cron_git_push_backup.sh push origin/main。\n\n驗證：本地 pytest 該檔 9/9 pass；push 觸發 CI run 29410950263 全 step 綠（Validate feed audience consistency + Run test suite 3117 pass + Assert suite mutated no repo state），conclusion=success。"
+  },
+  {
+    "timestamp": "2026-07-15T20:05:10.301540+08:00",
+    "actor": "hourly-20",
+    "task_type": "email_reply",
+    "task_id": "email-12126-702c4b",
+    "summary": "回覆老闆質疑『repo 已搬 ~/volpred-research 為何 alert 還講 Desktop』：查證 repo 確已完整搬離 Desktop 且系統正常運作；根因=warm_tcc_authorization.sh SessionStart hook 的 Desktop-TCC 警報文案是 07-02 搬家後未退役的殘留（實際 stat ~/volpred-research 未碰 Desktop，卻每次 CLI 更新散播『排程全滅』假警報）。修：移除誤導 INFO email 改 log-only，保留版本追蹤供 auth-preflight 診斷。bash -n + dry-run 通過。close email 已寄。",
+    "files_changed": [
+      "scripts/warm_tcc_authorization.sh"
+    ]
+  },
+  {
+    "timestamp": "2026-07-15T20:05:19+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12121-d98299",
+    "outcome": "completed",
+    "actor": "hourly-19",
+    "owner": "hourly-19",
+    "commit": "phase-z-pending",
+    "summary": "P1 email_reply（老闆 email-12121）：silent_fallback_new「自動修復連續失敗」誤報，老闆要求「從底層解決不要再用修補的方式」。\n\n根因（非同一 bug 修不好）：episode 20260715T072600838284Z 的 a1/a2/a3 是三個不同檔案各出現一次的 silent fallback（k1379.py:148/201/248、taifex_tick_inventory.py:86/277、build_publication_candidates.py:165），每次修復都成功。真正缺陷在 escalation 邏輯：silent_fallback_new 是粗粒度 alert_key，任何檔案任何新 fallback 都觸發同一 key，於是三個不同事件被計為「同一修復連續失敗 3 次」→ 累計 2 次寄升級信給老闆。\n\n底層修法（fingerprint-aware，非再標檔案）：\n1. phase_z.py 從 gate 輸出擷取每個 NEW file:line 當指紋，傳給警報路由（_silent_fallback_fingerprints + _default_internal_alert fingerprint 參數）。\n2. alerts.route_internal_remediable_alert 新增 fingerprint 參數 → 寫入 condition。\n3. alert_remediation._route_internal_task：新增 distinct-incident guard — 當入指紋與前一 episode 指紋 disjoint（不同檔案）時，判為新事件，另開 episode、consecutive 計數歸零、不升級；被取代的舊 episode 標 resolved。只有同一 file:line 在宣稱修好後再現才 +1 → 升級。_build_internal_attempt 儲存指紋。\n\n驗證：新增 2 測試（不同指紋不誤升級、相同指紋仍升級）；回歸 alert_remediation 22 passed、alerts 62 passed、phase_z_ownership+drain 106 passed。改動檔 alert_remediation.py / alerts.py / phase_z.py + 測試。已寄 close email（含確切原因）。commit 由 PHASE-Z 收。"
+  },
+  {
+    "timestamp": "2026-07-15T20:05:19+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12122-257979",
+    "outcome": "completed",
+    "actor": "hourly-19",
+    "owner": "hourly-19",
+    "commit": "phase-z-pending",
+    "summary": "P1 email_reply（老闆 email-12122）：PHASE-Z「沒交代原因」警報開頭是空泛樣板「系統偵測到需要處理的營運風險」，老闆要求「告訴我確切的原因，不要模稜兩可要我猜」。\n\n根因：boss_facing._infer_plain_summary() 產生白話結論時先比對關鍵字表，未命中任何一條即退回通用樣板。PHASE-Z receipt-missing 標題不在關鍵字表 → 白話結論被塞通用句，真正原因（12 個檔案已 commit、agent 沒留 receipt）被壓到下面「## 發生什麼」。\n\n修法：未命中關鍵字時不再吐通用樣板，改由新 helper _body_lead_sentence(body) 從警報自身「## 發生什麼」段抓第一句具體原因當白話結論（去 ** / meta 行、只留第一句、過長截斷）。對所有走通用退路的警報都生效。\n\n驗證：新增測試 test_boss_facing_lead_surfaces_concrete_reason_not_boilerplate；更新既有 INFO-prefix 測試反映改善行為；alerts 62 passed。改動檔 boss_facing.py + test_alerts.py。已寄 close email（含確切原因）。commit 由 PHASE-Z 收。"
+  },
+  {
+    "timestamp": "2026-07-15T20:20:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "dreaming_missing_retry_strategy_fable0711_ftd_e1_scale_gating",
+    "outcome": "completed",
+    "actor": "hourly-20",
+    "owner": "hourly-20",
+    "commit": "phase-z-pending",
+    "summary": "STARVATION-clear：dreaming 誤報 failed task fable0711_ftd_e1_scale_gating 無 retry/follow-up。查證：該任務實已完整 rescue 承接為 K1684（2026-07-12 hourly-21 從孤兒 worktree 收回 agent 未 commit 的第4個 Codex-found defect 修正 → commit 3976e1fd4 → 重跑 84s seed 20260712 → resync README ad208d984 → k1684_r3_codex_primary_review 二審過 → 已寫 knowledge.json experiment_id=K1684）。原 fable0711_* task 已 tombstone+archived。dreaming 因 follow-up 落在 k1684_* 命名空間未跨域辨識，無實質缺口。標 succeeded，無需 retry。"
+  },
+  {
+    "timestamp": "2026-07-15T20:21:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "dreaming_persistent_alert_e1aa596aac4a2172",
+    "outcome": "completed",
+    "actor": "hourly-20",
+    "owner": "hourly-20",
+    "commit": "phase-z-pending",
+    "summary": "STARVATION-clear + 3-STRIKE RESOLVED：persistent alert 發文脫班補救失敗:force-release/refill皆為0（連9次5.8d）。治本根因=refill 塞爆單一連載cluster→池有稿但全不可釋出→雙0升critical。已於 commit e96554041(07-13) 修 refill_task_pool.py per-cluster budget + content.py + 回歸測試 test_refill_cluster_budget.py。Alert 07-10已停火48h自清，dry-run=no drought。已於 docs/error_log.md Class K 補代表 incident 補齊 audit trail，無需另開 refactor_plan。"
+  },
+  {
+    "timestamp": "2026-07-15T20:26:00+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1677",
+    "outcome": "completed",
+    "actor": "hourly-20",
+    "owner": "hourly-20",
+    "commit": "phase-z-pending",
+    "summary": "孤兒實驗 K1677-rev 收尾：詐欺/執法揭露同業 peer contagion NULL。Codex gpt-5-codex 二審 CONDITIONAL PASS,數字 README-一致。controlled RV 未偵測(cluster BH .7047);CS spread primary exact sign-flip BH=.0752 未過 gate,僅 available-peer sensitivity(t 4.206) robustness association 受 survivor bias。寫 knowledge.json item_id=ebd78e8c(含 reviewer provenance),null 照實記不升格,無 feed/paper route。"
+  },
+  {
+    "timestamp": "2026-07-15T21:12:00+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1680",
+    "outcome": "completed",
+    "actor": "hourly-21",
+    "owner": "hourly-21",
+    "commit": "phase-z-pending",
+    "summary": "孤兒實驗 K1680 收尾：驗證 knowledge entry 已於 2026-07-14 backfill 補齊（verdict=NULL/RETROSPECTIVE_NULL，Codex PASS_RETROSPECTIVE_NULL，含 experiment_id+reviewer provenance）。dreaming 偵測(7/12)早於 backfill(7/14) → 孤兒已解。RETROSPECTIVE_NULL 不發文。標 succeeded。"
+  },
+  {
+    "timestamp": "2026-07-15T21:12:00+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1686",
+    "outcome": "completed",
+    "actor": "hourly-21",
+    "owner": "hourly-21",
+    "commit": "phase-z-pending",
+    "summary": "孤兒實驗 K1686 收尾：主線程寫 knowledge entry(0105308b)。Codex R2 PASS，ambient-fear-shock gate 通過關閉 Paper8 P0-1 同期共動識別缺陷。ambient-up SAR decline 1.0465, CI95[0.3286,1.7625]不含0, same-seed null MC p=0.0327。provenance validate 0 violations。標 succeeded。"
+  },
+  {
+    "timestamp": "2026-07-15T23:59:04+08:00",
+    "task_type": "experiment",
+    "task_id": "asia1_india_vt_indiavix",
+    "outcome": "completed",
+    "actor": "codex-vscode",
+    "owner": "codex-vscode",
+    "commit": null,
+    "summary": "K1717 India VIX vs US VIX NIFTY OOS 完成；GARCH DM 未達 t<-3，gate FAIL，VT 跳過；雙重 Codex review、certification、knowledge 與 E080 已完成。"
   }
 ]

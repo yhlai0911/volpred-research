@@ -393,7 +393,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - 時區優勢：亞洲市場收盤在美股開盤前 → 隔夜 spillover 的 timing 合法性天然成立（同 T5b / K1664 慣例）；smoke test 只驗 2y，**每個 K 開工先做資料期間診斷**（^N225 可回溯數十年、^NSEI 2007 起含 2008 空頭，OOS 含空頭要求可滿足）
 
 **K backlog（依序派工；每 K 完成即評估轉對應市場 TA 的一般讀者文章）**：
-- [ ] ★ **ASIA-1 印度 VT + India VIX**：^NSEI + ^INDIAVIX 複製 R12 設計（India VIX vs 美 VIX 資訊含量：Granger + GARCH-X/HAR-X OOS QLIKE + Harvey）；若 India VIX 勝出，續作 c/VIX ratio VT 策略（對照台股 8.63/VIX）
+- [x] ★ **ASIA-1 印度 VT + India VIX** — **K1717 completed 2026-07-15，NULL/MIXED、VT gate FAIL**：yfinance `^NSEI/^INDIAVIX/^VIX`，formal OOS 2020-01-01→2026-07-15（n=1,616；共同正值 mask n=1,615）。India VIX 在 GJR-GARCH-X 與 HAR-X 的平均 QLIKE 都低於 US VIX（1.4330<1.4898；2.0242<2.2768），但 GARCH family canonical HAC DM t=-2.868，未達預註冊 t<-3；HAR t=-14.727。故嚴格資訊 gate 未全過，依規則完全跳過 c/IndiaVIX VT，不得形成交易或上架結論。16 個 vendor-calendar gap targets 已排除；India GARCH-X 每年 alpha 下界亦列為限制。Codex frozen-byte review + certification PASS；詳見 `experiments/k1717/`。
 - [ ] ★ **ASIA-2 日股 VT 基礎**：^N225/1306.T baseline sweep（GARCH/GJR/HAR）+ 美 VIX exogenous 增量 — 台股 R12 結論（VIX 優於本地 proxy）的日本複製；^NKVI 不可得改用 VIX spillover 角度
 - [ ] **ASIA-3 台股產業波動溢出**：電子/金融/航運/塑化產業代表股 DY spillover index + Granger 網絡 — 產業輪動 TA 的內容線；對照 T5a gamma 結構
 - [ ] **ASIA-4 日股產業 EAV**：日本盤後決算公告制度 → 複製 K1060 T+1 發現（產業代表股 [-5,+5] 異常波動）；若 T+1 效應成立 = 跨市場制度性結論（Paper 候選）
