@@ -219,8 +219,8 @@ def _reaction_already_covered(
     Matching (published articles only):
       1. EXACT metadata — article.event_type + event_date + a reaction slot
          (activates once the part-b publisher metadata write lands).
-      2. FUZZY fallback (current reality: feed has no event metadata) — an
-         event-type alias appears in title/tags, the article published within
+      2. Legacy fallback — an event-type alias appears explicitly in the title
+         (tags are too broad to prove event identity), the article published within
          [event_date - EARLY, event_date + POST], and the title is NOT a
          forward-looking preview (excludes T-7/T-2 pieces).
     Any exception returns None so a real event task is still generated.
@@ -243,10 +243,11 @@ def _reaction_already_covered(
             if a_type and et and a_type == et and ev_iso and art.get("event_date") == ev_iso:
                 if _slot_is_reaction(art.get("event_series_slot") or ""):
                     return {"id": str(art.get("id") or ""), "match": "metadata"}
-            # 2. fuzzy fallback on title/tags + reaction publish-window
+            # 2. legacy fallback on explicit title keyword + reaction window.
+            # Tags are intentionally excluded: a generic `通膨` tag on an
+            # oil/gold digest once suppressed an unrelated CPI T+0 article.
             title = str(art.get("title") or "")
-            tags = " ".join(str(t) for t in (art.get("tags") or []))
-            hay = (title + " " + tags).lower()
+            hay = title.lower()
             if not any(a in hay for a in aliases):
                 continue
             if _looks_forward(title):
@@ -262,7 +263,7 @@ def _reaction_already_covered(
                 continue
             pub_date = pub_dt.astimezone(LOCAL_TZ).date()
             if lo <= pub_date <= hi:
-                return {"id": str(art.get("id") or ""), "match": "fuzzy"}
+                return {"id": str(art.get("id") or ""), "match": "title_keyword"}
         return None
     except Exception as exc:  # fail-open: never block generating a real article
         warn("reader_facing_refill", "reaction coverage check failed (fail-open)",

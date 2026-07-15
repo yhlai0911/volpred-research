@@ -2193,6 +2193,30 @@ class Publisher:
             ][:5]
 
         details_clean = {k: v for k, v in (details or {}).items() if k not in ('content', 'description', 'title')}
+        # Event dedup can be exact only if every newly published event article
+        # carries its canonical identity.  Allowing a live event write without
+        # these fields silently pushes the next materializer back to title
+        # heuristics — the 2026-07-14 CPI T+0 article was suppressed by an
+        # unrelated oil/gold digest whose generic tag happened to say `通膨`.
+        # Keep audit_strict=False as the established batch-migration escape, but
+        # never permit a normal live event publish to omit structured identity.
+        _is_event_article = category == 'event_article' or audience == 'event'
+        if _is_event_article:
+            _event_fields = ('event_key', 'event_type', 'event_date', 'event_series_slot')
+            _missing_event_fields = [
+                key for key in _event_fields
+                if details_clean.get(key) in (None, '')
+            ]
+            if _missing_event_fields:
+                _event_identity_issue = (
+                    "event article is missing canonical metadata: "
+                    + ", ".join(_missing_event_fields)
+                    + ". Pass the event task payload fields through details so "
+                    "future T-series dedup can match event_key/type/date/slot exactly."
+                )
+                if audit_strict:
+                    raise ValueError(_event_identity_issue)
+                print(f"  ⚠️ {_event_identity_issue} (audit_strict=False bypass)")
         # 2026-06-18: persist release-layer arc schema for future dedup/backfill.
         # Historical feed entries may lack this and are recomputed on demand by
         # arc_dedup; new writes should carry the schema explicitly.

@@ -740,6 +740,66 @@ def test_reaction_coverage_is_preserved_in_single_owner(tmp_path: Path, monkeypa
     assert "event_reaction_coverage" in audit
 
 
+def test_unrelated_article_tag_cannot_cover_cpi_reaction(tmp_path: Path, monkeypatch):
+    """Regression: generic `通膨` tag on oil/gold must not suppress CPI T+0."""
+    now = datetime(2026, 7, 14, 14, 0, tzinfo=timezone.utc)
+    item = _event_item(
+        "cpi-us-2026-07-14-t0",
+        event_type="CPI_US",
+        event_date="2026-07-14",
+        slot="T+0",
+        not_before=(now - timedelta(minutes=1)).isoformat(),
+        deadline=(now + timedelta(hours=36)).isoformat(),
+    )
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(config_path, event_items=[item])
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+    storage_dir = tmp_path / "storage"
+    feed_path = storage_dir / "reports" / "feed.json"
+    feed_path.parent.mkdir(parents=True, exist_ok=True)
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_5dd7c135",
+                    "status": "published",
+                    "title": "油價跳漲，金價卻連摔兩天：避風港有沒有上班",
+                    "tags": ["黃金", "避險", "通膨", "風險管理"],
+                    "published_at": "2026-07-14T03:24:06+00:00",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    result = expand_due_event_jobs(storage_dir=str(storage_dir), now=now)
+
+    assert len(result["created"]) == 1
+    assert result["created"][0]["task"]["id"] == "event_article_cpi_us_2026-07-14_tplus0"
+    queue = json.loads((storage_dir / "next_tasks.json").read_text(encoding="utf-8"))
+    assert [row["id"] for row in queue] == ["event_article_cpi_us_2026-07-14_tplus0"]
+
+
+def test_explicit_cpi_title_keyword_still_covers_legacy_reaction():
+    feed = [
+        {
+            "id": "mile_cpi_reaction",
+            "status": "published",
+            "title": "美國 CPI 低於預期，公債殖利率回落",
+            "tags": [],
+            "published_at": "2026-07-14T14:30:00+00:00",
+        }
+    ]
+
+    hit = event_jobs.reaction_already_covered(
+        "CPI_US", datetime(2026, 7, 14, 12, 30, tzinfo=timezone.utc), feed,
+    )
+
+    assert hit == {"id": "mile_cpi_reaction", "match": "title_keyword"}
+
+
 def test_reaction_coverage_supersedes_existing_pending_row(tmp_path: Path, monkeypatch):
     now = datetime(2026, 7, 3, 0, 0, tzinfo=timezone.utc)
     item = _event_item(

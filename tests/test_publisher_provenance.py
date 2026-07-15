@@ -9,6 +9,8 @@ from pathlib import Path
 from types import ModuleType
 from contextlib import contextmanager
 
+import pytest
+
 from volpred.publisher.publisher import Publisher
 
 
@@ -55,6 +57,21 @@ def _install_test_stubs(monkeypatch):
     live_verify_mod.stamp_verified = lambda item, verified=True: item.update({"live_verified": verified})
     live_verify_mod.emit_verify_alert = lambda *args, **kwargs: None
     monkeypatch.setitem(sys.modules, "volpred.publisher.live_verify", live_verify_mod)
+
+    # Publishing imports EmailNotifier lazily after the feed write.  Stub the
+    # module itself so hermetic tests never probe the developer machine's
+    # untracked .env/.env.local files (which clean CI does not have).
+    email_notifier_mod = ModuleType("volpred.publisher.email_notifier")
+
+    class _EmailNotifier:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def notify_article_published(self, *args, **kwargs):
+            return None
+
+    email_notifier_mod.EmailNotifier = _EmailNotifier
+    monkeypatch.setitem(sys.modules, "volpred.publisher.email_notifier", email_notifier_mod)
 
 
 def test_append_to_feed_writes_provenance_entry(tmp_path: Path, monkeypatch):
@@ -221,3 +238,34 @@ def test_publish_milestone_stamps_event_metadata_top_level(tmp_path: Path, monke
     assert item["event_date"] == "2026-07-03"
     assert item["event_series_slot"] == "T+0"
     assert item["details"]["event_key"] == "NFP_US_2026_07_03"
+
+
+def test_live_event_publish_requires_complete_canonical_metadata(tmp_path: Path, monkeypatch):
+    _install_test_stubs(monkeypatch)
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
+    monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+    monkeypatch.setattr(Publisher, "_sync_to_remote", lambda self, *a, **kw: None, raising=False)
+    monkeypatch.setattr(Publisher, "_find_similar_articles", lambda self, *a, **kw: [], raising=False)
+    monkeypatch.setattr(
+        "volpred.publisher.publisher.cluster_gate_status",
+        lambda cluster: {"count": 0, "cap": 999, "ratio": 0.0, "blocked": False},
+    )
+    monkeypatch.setattr(
+        "volpred.publisher.publisher.classify_topic_cluster",
+        lambda title, tags, description: None,
+    )
+
+    with pytest.raises(ValueError, match="event article is missing canonical metadata"):
+        Publisher(storage_dir=str(tmp_path)).publish_milestone(
+            title="CPI reaction article",
+            description="event-driven analysis",
+            phase="event_article",
+            details={"content_type": "event_article", "event_type": "CPI_US"},
+            tags=["event_article", "CPI"],
+            audience="event",
+            category="event_article",
+            audit_strict=True,
+        )
+
+    assert not (tmp_path / "reports" / "feed.json").exists()

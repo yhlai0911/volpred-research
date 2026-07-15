@@ -157,10 +157,13 @@ def reaction_already_covered(
 ) -> dict[str, str] | None:
     """Return an existing published reaction article, conservatively.
 
-    Exact event metadata wins.  The fuzzy fallback mirrors the prior
-    reader-facing refiller gate and is deliberately fail-open: a false positive
-    would suppress a time-sensitive article, while a false negative is still
-    caught by the publisher's arc-dedup gate.
+    Exact event metadata wins.  Legacy articles without metadata may cover the
+    event only when an event alias appears in the *title*.  Tags are deliberately
+    excluded: broad portfolio tags such as ``通膨`` describe many unrelated
+    articles and previously let an oil/gold digest suppress a CPI T+0 article.
+    The fallback is fail-open because a false positive would suppress a
+    time-sensitive article, while a false negative is still caught by the
+    publisher's arc-dedup gate.
     """
 
     try:
@@ -187,9 +190,8 @@ def reaction_already_covered(
                 return {"id": str(article.get("id") or ""), "match": "metadata"}
 
             title = str(article.get("title") or "")
-            tags = " ".join(str(tag) for tag in (article.get("tags") or []))
-            haystack = f"{title} {tags}".lower()
-            if not any(alias in haystack for alias in aliases) or _looks_forward(title):
+            title_lower = title.lower()
+            if not any(alias in title_lower for alias in aliases) or _looks_forward(title):
                 continue
             published_raw = article.get("published_at") or article.get("created_at")
             if not published_raw:
@@ -206,7 +208,10 @@ def reaction_already_covered(
                 continue
             published_day = published.astimezone(_runtime_timezone()).date()
             if lower <= published_day <= upper:
-                return {"id": str(article.get("id") or ""), "match": "fuzzy"}
+                return {
+                    "id": str(article.get("id") or ""),
+                    "match": "title_keyword",
+                }
     except Exception as exc:  # noqa: BLE001 - coverage is intentionally fail-open
         _warn_event_jobs("reaction coverage check failed; allowing event task", exc)
     return None

@@ -204,7 +204,21 @@ def test_reaction_already_covered_fuzzy_early_release():
     hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
     assert hit is not None
     assert hit["id"] == "mile_35eef830"
-    assert hit["match"] == "fuzzy"
+    assert hit["match"] == "title_keyword"
+
+
+def test_reaction_coverage_does_not_use_generic_tags_as_event_identity():
+    feed = [{
+        "id": "mile_5dd7c135",
+        "status": "published",
+        "title": "油價跳漲，金價卻連摔兩天：避風港有沒有上班",
+        "tags": ["黃金", "避險", "通膨"],
+        "published_at": "2026-07-14T03:24:06+00:00",
+    }]
+
+    hit = MODULE._reaction_already_covered("CPI_US", MODULE.date(2026, 7, 14), feed)
+
+    assert hit is None
 
 
 def test_reaction_already_covered_exact_event_metadata():
