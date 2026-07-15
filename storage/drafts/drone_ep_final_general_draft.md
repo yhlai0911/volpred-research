@@ -14,6 +14,17 @@ series: 無人載具
 
 六集查完，把空中與海域代表一起納入的核心版本，是將雷虎、漢翔、亞航、長榮航太、中光電、龍德造船六檔每天等權持有。2025 年 6 月 30 日到 2026 年 7 月 9 日，這個回顧性組合報酬 **+104.0%**，同期加權指數 **+103.8%**，只多 **0.2 個百分點**。
 
+## 📚 無人載具系列・六集一次補齊
+
+這是六集系列的最後一集。前五集把台灣無人載具產業鏈從名冊、上游、中游、下游到個股逐層拆開，這一集收在投資組合、風險與定位。錯過的可以從這裡補：
+
+- **[EP0・名冊與題材](https://volpred.zeabur.app/v3/reports/mile_a8d79d6a)**：29 檔台廠全鏈名冊、2,100 億預算，題材一年下來卻跑輸大盤。
+- **[EP1・上游晶片](https://volpred.zeabur.app/v3/reports/mile_7bd0f673)**：上游 87% 營收集中在三家晶片廠，但市場的無人機錢一塊也沒買它們。
+- **[EP2・中游機體](https://volpred.zeabur.app/v3/reports/mile_cdc7f6e8)**：八家都碰得到機體、電池或馬達，零家拆得出無人機營收。
+- **[EP3・下游整機與造船](https://volpred.zeabur.app/v3/reports/mile_abd517ba)**：2,100 億仍是草案，十家下游廠只有兩家真的量產或交船。
+- **[EP4・六檔龍頭六面向](https://volpred.zeabur.app/v3/reports/mile_aa4713db)**：看多的理由全是熱度，六面向撐得住的只有兩檔。
+- **EP-Final（本篇）・投組與定位**：核心六檔剛好追上大盤，代價是兩倍波動與三倍回撤。
+
 代價很清楚。六檔組合年化波動 **45.3%**，加權指數 **23.5%**；一年內最大回撤 **35.6%**，指數 **10.4%**。把權重改成每月重設，六檔報酬降為 **+102.2%**，原本那 0.2 個百分點的領先就消失了。每日重設權重還累積約 **175.3% 單邊換手**，本文沒有扣交易成本。
 
 這不是一條可以拿去下單的策略。六檔名單使用 2026 年 7 月 13 日才完成的證據回頭挑選，起點當時的投資人並不知道終點會選出誰。這組數字只回答一件事：題材最核心的六家公司，在這段大漲行情裡勉強跟上大盤，承擔的路徑風險卻高出很多。
@@ -34,7 +45,7 @@ series: 無人載具
 | 海域 3 檔等權 | +26.6% | 39.6% | -35.5% | 0.28 |
 | 加權指數 | +103.8% | 23.5% | -10.4% | 1.00 |
 
-![同一共同窗口的八種無人載具曝險](storage/drafts/assets/drone_ep_final_basket_comparison.png)
+![同一共同窗口的八種無人載具曝險](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/drone_ep_final_basket_comparison.png)
 
 三層各配三分之一，結果跟 29 檔直接等權幾乎相同。報酬只從 +69.1% 變成 +67.7%，波動都在 29.4% 左右。換一種產業鏈分配方式，沒有改變這段期間「落後大盤、波動更高」的主結論。
 
@@ -44,7 +55,7 @@ series: 無人載具
 
 分散效果到這裡為止。29 檔裡只有 **6 檔**跑贏加權指數，**29 檔全部**比指數更波動；全名冊組合的最大回撤仍有 22.8%，是指數的兩倍以上。核心六檔彼此的平均相關升到 0.63，與名單收窄後題材與資金熱度集中在少數公司一致；這是描述性對照，不是因果檢定。
 
-![六檔核心股的共同窗口風險報酬](storage/drafts/assets/drone_ep_final_core_risk_map.png)
+![六檔核心股的共同窗口風險報酬](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/drone_ep_final_core_risk_map.png)
 
 圖上的六檔只有雷虎與長榮航太跑贏大盤，其餘四檔落後。圓點大小代表最大回撤：即使雷虎一年漲了 280.9%，期間也曾回撤 41.2%；中光電的回撤接近 49.5%。終點報酬很亮眼，不表示中間那條路容易持有。
 
@@ -60,7 +71,7 @@ EP2 與 EP3 一共逐家查了 18 家公司。公開階段有高低：EP2 查核
 
 財務證據沒有跟上。查核來源中，拆出無人載具營收占比的是 **0/18**；公開可核對具約束力無人載具訂單金額的也是 **0/18**。這兩個零只限本系列實際查過的公開文件，不等於公司沒有未公開合約。它們代表投資人目前不能把公司總營收、供應商資格或合作備忘錄直接算成無人載具訂單。
 
-![EP2／EP3 查核公司的公開階段與財務證據缺口](storage/drafts/assets/drone_ep_final_disclosure_gap.png)
+![EP2／EP3 查核公司的公開階段與財務證據缺口](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/drone_ep_final_disclosure_gap.png)
 
 政策也還在同一條證據階梯上。2,100 億元是行政院通過、送立法院付委的草案上限；查核日 7 月 13 日時，三委員會聯席審查排在 7 月 16 日，尚未完成立法。法案上限要依序走到法律、特別預算、採購公告、決標、交貨，最後才可能進入公司營收。1,320 艘小型自殺無人艇同樣是規畫數量，不能先分配給任何造船廠。
 
@@ -103,3 +114,13 @@ EP2 與 EP3 一共逐家查了 18 家公司。公開階段有高低：EP2 查核
 計算程式為 `scripts/drone_ep_final_portfolio_evidence.py`，輸出證據包 `storage/drafts/drone_ep_final_portfolio_evidence.json`。Universe 取 EP0 名冊，核心六檔取 EP4、海域三檔取 EP3；公司階段與財務缺口取 EP2／EP3。官方產業定位數字查核日為 2026-07-13，來源連結已附在證據包。
 
 本文是描述性統計，不構成投資建議。它沒有預測價格，也沒有用形成日可得資訊做可交易回測。歷史報酬、波動與回撤不代表未來；法案可能修正或未通過，產品可能無法轉成訂單，已出貨業務也可能只占公司營收很小一部分。
+
+## 懶人包圖組
+
+![無人載具投資組合的三層風險：公司、題材、政策訂單](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mile_b6a46796_lazypack_codex_1.png)
+
+![EP-Final 統一共同窗口與每日等權重算法](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mile_b6a46796_lazypack_codex_2.png)
+
+![核心六檔報酬剛好追上大盤，但波動與最大回撤大幅較高](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mile_b6a46796_lazypack_codex_3.png)
+
+![台灣已是民主供應鏈節點，但可投資性仍卡在營收與訂單證據](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/mile_b6a46796_lazypack_codex_4.png)
