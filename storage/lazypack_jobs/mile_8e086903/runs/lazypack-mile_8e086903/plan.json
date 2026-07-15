@@ -15,14 +15,14 @@
       "info": "results",
       "style": "bento-grid",
       "title": "同一批隔日預測，HAR 損失最低",
-      "alt": "三種模型的樣本外 QLIKE 成績",
+      "alt": "三種模型的樣本外預測損失成績",
       "sources": [
         "result"
       ],
       "blocks": [
         {
           "kind": "metric",
-          "label": "HAR QLIKE",
+          "label": "HAR 預測損失",
           "value": {
             "source": "result",
             "path": "qlike_oos.HAR",
@@ -146,7 +146,7 @@
           "kind": "text",
           "heading": "分開兩個問題",
           "body": [
-            "粗糙度描述路徑形狀，QLIKE 才回答隔日預測是否更準。"
+            "粗糙度描述路徑形狀，預測損失才回答隔日預測是否更準。"
           ]
         },
         {

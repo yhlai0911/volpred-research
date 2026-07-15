@@ -15,10 +15,10 @@
       "info": "results",
       "style": "bento-grid",
       "title": "同一批隔日預測，HAR 損失最低",
-      "alt": "三種模型的樣本外 QLIKE 成績",
+      "alt": "三種模型的樣本外預測損失成績",
       "sources": ["result"],
       "blocks": [
-        {"kind": "metric", "label": "HAR QLIKE", "value": {"source": "result", "path": "qlike_oos.HAR", "format": {"kind": "number", "digits": 3}}},
+        {"kind": "metric", "label": "HAR 預測損失", "value": {"source": "result", "path": "qlike_oos.HAR", "format": {"kind": "number", "digits": 3}}},
         {"kind": "metric", "label": "單市場近似", "value": {"source": "result", "path": "qlike_oos.fGN_univariate", "format": {"kind": "number", "digits": 3}}},
         {"kind": "metric", "label": "跨市場近似", "value": {"source": "result", "path": "qlike_oos.fGN_multivariate", "format": {"kind": "number", "digits": 3}}},
         {"kind": "metric", "label": "可評分預測", "value": {"source": "result", "path": "data.n_eval", "format": {"kind": "integer", "suffix": " 次"}}}
@@ -46,7 +46,7 @@
       "alt": "閱讀模型比較結果的三個原則",
       "sources": ["result"],
       "blocks": [
-        {"kind": "text", "heading": "分開兩個問題", "body": ["粗糙度描述路徑形狀，QLIKE 才回答隔日預測是否更準。"]},
+        {"kind": "text", "heading": "分開兩個問題", "body": ["粗糙度描述路徑形狀，預測損失才回答隔日預測是否更準。"]},
         {"kind": "text", "heading": "守住時間順序", "body": ["預測只讀起點以前資料，成績對照下一交易日。"]},
         {"kind": "text", "heading": "不要過度外推", "body": ["本次只測 SPY、日高低價代理與兩個線性近似。"]},
         {"kind": "metric", "label": "固定隨機種子", "value": {"source": "result", "path": "seed", "format": {"kind": "integer"}}}
