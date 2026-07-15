@@ -1,0 +1,18 @@
+{
+  "accepted_rows": 4651666,
+  "aggregation": "Order_Shares_Ct weighted WA_NBBO_Spd by Symbol",
+  "filters": [
+    "Order_Type <= 14",
+    "Spcl_Hndlg_Ind != Y",
+    "Multiday_Order != Y",
+    "Order_Shares_Ct > 0",
+    "finite non-negative WA_NBBO_Spd"
+  ],
+  "source_bytes": 409321838,
+  "source_file": "K1706_201609_full.dat.gzip",
+  "source_month": "2016-09",
+  "source_sha256": "a48d5ab76b75a029edf37f6984b0dc99bd0f3eae49abd9aedf43039ed46bf9d0",
+  "source_url": "https://tsp.finra.org/finra_org/ticksizepilot/TSPAppendixBCStatistics/BI/201609/v1/FINRA_CHX_MKTQUALITYSTATS_201609.dat.gzip",
+  "symbols": 3074,
+  "total_data_rows": 13223365
+}

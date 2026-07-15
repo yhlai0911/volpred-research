@@ -1,0 +1,781 @@
+{
+  "analysis_date": "2026-07-16",
+  "confirmatory_outcomes": [
+    "range_bps"
+  ],
+  "data": {
+    "october_excluded": true,
+    "official_assignment_url": "https://www.finra.org/sites/default/files/Tick_Pilot_Test_Group_Assignments.txt",
+    "official_bi": {
+      "accepted_rows": 4651666,
+      "aggregation": "Order_Shares_Ct weighted WA_NBBO_Spd by Symbol",
+      "filters": [
+        "Order_Type <= 14",
+        "Spcl_Hndlg_Ind != Y",
+        "Multiday_Order != Y",
+        "Order_Shares_Ct > 0",
+        "finite non-negative WA_NBBO_Spd"
+      ],
+      "source_bytes": 409321838,
+      "source_file": "K1706_201609_full.dat.gzip",
+      "source_month": "2016-09",
+      "source_sha256": "a48d5ab76b75a029edf37f6984b0dc99bd0f3eae49abd9aedf43039ed46bf9d0",
+      "source_url": "https://tsp.finra.org/finra_org/ticksizepilot/TSPAppendixBCStatistics/BI/201609/v1/FINRA_CHX_MKTQUALITYSTATS_201609.dat.gzip",
+      "symbols": 3074,
+      "total_data_rows": 13223365
+    },
+    "ohlcv": {
+      "adjustment": "adj_close used for returns; raw OHLC and volume used for range/dollar volume",
+      "archive_set_sha256": "77b3ba2c9e09468047b8849e4be23c063a9a2e2a50e4a64e8f62a531c0cad9c3",
+      "archives": 198,
+      "cache_sha256": "5b0895519d2243ec020c70b51d8751fd313a53e4953981e5c4ac0b88f68bd13b",
+      "missing_symbols": [
+        "AGM A",
+        "AXON",
+        "BIO B",
+        "BWL A",
+        "CRD A",
+        "CRD B",
+        "ECOM",
+        "GEF B",
+        "GTN A",
+        "HVT A",
+        "JW A",
+        "JW B",
+        "MOG A",
+        "MOG B",
+        "NYLD A",
+        "SNFCA",
+        "TORM",
+        "WSO B"
+      ],
+      "requested_end_exclusive": "2017-03-01",
+      "requested_start": "2016-05-20",
+      "requested_symbols": 2106,
+      "returned_symbols": 2088,
+      "rows": 402822,
+      "skipped_empty_or_invalid_archives": [
+        "2016/20161010.tar.gz",
+        "2016/20161117.tar.gz"
+      ],
+      "source": "eliangcs/pystock-data daily archived Yahoo Finance OHLCV",
+      "source_license": "CC BY-SA 4.0",
+      "source_repo": "https://github.com/eliangcs/pystock-data",
+      "source_repo_commit": "79fd5f4d805c8b45768225fe2a7c7eb1e5bd8cba"
+    },
+    "panel_end": "2017-02-28",
+    "panel_rows": 340283,
+    "panel_start": "2016-06-02",
+    "panel_stocks": 2064,
+    "post_window": [
+      "2016-11-01",
+      "2017-02-28"
+    ],
+    "pre_window": [
+      "2016-06-01",
+      "2016-09-30"
+    ],
+    "rv5_resets_at_pre_post_boundaries": true
+  },
+  "design_status": "FROZEN_BRIEF",
+  "empirical_status": "CONFIRMATORY",
+  "event_study": {
+    "narrow": {
+      "amihud_1e9": {
+        "coefficients": {
+          "event_2016-06": {
+            "cluster_se": 42.487793194220835,
+            "estimate": 2.2098599945354804,
+            "p": 0.9585261868408703,
+            "t": 0.05201164448418715
+          },
+          "event_2016-07": {
+            "cluster_se": 37.83114524820352,
+            "estimate": -2.994302655945148,
+            "p": 0.9369243203462472,
+            "t": -0.07914914117191148
+          },
+          "event_2016-08": {
+            "cluster_se": 17.1759540744723,
+            "estimate": 7.532490077720951,
+            "p": 0.661050424053645,
+            "t": 0.43854856883415205
+          },
+          "event_2016-11": {
+            "cluster_se": 45.55223963262495,
+            "estimate": 41.91174459116213,
+            "p": 0.35767515691133395,
+            "t": 0.9200808770145418
+          },
+          "event_2016-12": {
+            "cluster_se": 27.19640130952317,
+            "estimate": -18.788957175596007,
+            "p": 0.48975686242115274,
+            "t": -0.6908618887388167
+          },
+          "event_2017-01": {
+            "cluster_se": 26.896256780374568,
+            "estimate": -11.889193115658875,
+            "p": 0.6585233302269834,
+            "t": -0.4420389503543884
+          },
+          "event_2017-02": {
+            "cluster_se": 43.30939073465809,
+            "estimate": -20.470886278008585,
+            "p": 0.6365185655606801,
+            "t": -0.4726662262100787
+          }
+        },
+        "n_obs": 251979,
+        "n_stocks": 1535
+      },
+      "log_dollar_volume": {
+        "coefficients": {
+          "event_2016-06": {
+            "cluster_se": 0.03137007339486766,
+            "estimate": -0.03613650404837011,
+            "p": 0.2495244164268092,
+            "t": -1.1519419669028341
+          },
+          "event_2016-07": {
+            "cluster_se": 0.03029905857760645,
+            "estimate": -0.022314248428205192,
+            "p": 0.4615593183754397,
+            "t": -0.7364667245700266
+          },
+          "event_2016-08": {
+            "cluster_se": 0.022698026628709456,
+            "estimate": -0.03997542194439501,
+            "p": 0.07840631660197052,
+            "t": -1.7611849081995679
+          },
+          "event_2016-11": {
+            "cluster_se": 0.027122293838920192,
+            "estimate": -0.06530195129086874,
+            "p": 0.016171423578071182,
+            "t": -2.407685414762418
+          },
+          "event_2016-12": {
+            "cluster_se": 0.030744090382408135,
+            "estimate": -0.06153542499564411,
+            "p": 0.045510429806667856,
+            "t": -2.0015366930763014
+          },
+          "event_2017-01": {
+            "cluster_se": 0.03543081227390411,
+            "estimate": -0.05675980772718914,
+            "p": 0.10936370037394179,
+            "t": -1.6019900218035503
+          },
+          "event_2017-02": {
+            "cluster_se": 0.037375376793569386,
+            "estimate": -0.07785190544136743,
+            "p": 0.03741895382940354,
+            "t": -2.0829731261669107
+          }
+        },
+        "n_obs": 251979,
+        "n_stocks": 1535
+      },
+      "range_bps": {
+        "coefficients": {
+          "event_2016-06": {
+            "cluster_se": 6.0249035710419285,
+            "estimate": -1.4694264909889654,
+            "p": 0.8073469871948625,
+            "t": -0.24389211771813424
+          },
+          "event_2016-07": {
+            "cluster_se": 5.9083068693014855,
+            "estimate": 3.848637379637875,
+            "p": 0.5148895629706202,
+            "t": 0.6513942936232227
+          },
+          "event_2016-08": {
+            "cluster_se": 5.218450246105,
+            "estimate": -5.072927424427185,
+            "p": 0.3311472007623859,
+            "t": -0.9721137857381256
+          },
+          "event_2016-11": {
+            "cluster_se": 7.871632148488554,
+            "estimate": 28.16846225693034,
+            "p": 0.00035635224692357864,
+            "t": 3.578477973254761
+          },
+          "event_2016-12": {
+            "cluster_se": 6.793280472659228,
+            "estimate": 18.147292257931365,
+            "p": 0.007634388387535234,
+            "t": 2.67135919545327
+          },
+          "event_2017-01": {
+            "cluster_se": 7.255935453929849,
+            "estimate": 14.184300574746246,
+            "p": 0.05078160412725404,
+            "t": 1.9548548446725722
+          },
+          "event_2017-02": {
+            "cluster_se": 7.350065975102013,
+            "estimate": 14.293192826973009,
+            "p": 0.0520015261298589,
+            "t": 1.9446346298646155
+          }
+        },
+        "n_obs": 253052,
+        "n_stocks": 1535
+      },
+      "rv5_bps2": {
+        "coefficients": {
+          "event_2016-06": {
+            "cluster_se": 5.20880555895875,
+            "estimate": 5.35921683531546,
+            "p": 0.3036999826186783,
+            "t": 1.0288763469194995
+          },
+          "event_2016-07": {
+            "cluster_se": 5.392837120708245,
+            "estimate": 4.337269260393488,
+            "p": 0.4213686609412349,
+            "t": 0.804264835616595
+          },
+          "event_2016-08": {
+            "cluster_se": 5.2191656558521275,
+            "estimate": 7.561506246526882,
+            "p": 0.14759894029912815,
+            "t": 1.4487959848617458
+          },
+          "event_2016-11": {
+            "cluster_se": 10.016745165509656,
+            "estimate": 13.936755340144384,
+            "p": 0.16432236060928473,
+            "t": 1.3913457026073075
+          },
+          "event_2016-12": {
+            "cluster_se": 8.256367144589404,
+            "estimate": -7.230739627727392,
+            "p": 0.38128817642557794,
+            "t": -0.8757773850289432
+          },
+          "event_2017-01": {
+            "cluster_se": 8.303294290800258,
+            "estimate": 8.667098798365892,
+            "p": 0.29673569361718577,
+            "t": 1.0438144783051608
+          },
+          "event_2017-02": {
+            "cluster_se": 12.238394373142231,
+            "estimate": -2.094627150518283,
+            "p": 0.8641267265339607,
+            "t": -0.17115212066666582
+          }
+        },
+        "n_obs": 242296,
+        "n_stocks": 1535
+      }
+    },
+    "wide": {
+      "amihud_1e9": {
+        "coefficients": {
+          "event_2016-06": {
+            "cluster_se": 218.5963537256707,
+            "estimate": 36.38266977638537,
+            "p": 0.8678762392092975,
+            "t": 0.1664376791117207
+          },
+          "event_2016-07": {
+            "cluster_se": 241.3986730674836,
+            "estimate": -56.52389356813797,
+            "p": 0.8149580259328569,
+            "t": -0.23415163327072877
+          },
+          "event_2016-08": {
+            "cluster_se": 149.41631251404638,
+            "estimate": -117.91236373829629,
+            "p": 0.43037667052870165,
+            "t": -0.7891532173049147
+          },
+          "event_2016-11": {
+            "cluster_se": 179.90627770041345,
+            "estimate": -347.7411205683737,
+            "p": 0.05378271800941897,
+            "t": -1.9329015363624218
+          },
+          "event_2016-12": {
+            "cluster_se": 136.62412391805393,
+            "estimate": -172.89109918542357,
+            "p": 0.20626793258186876,
+            "t": -1.2654507434508586
+          },
+          "event_2017-01": {
+            "cluster_se": 150.47039608670357,
+            "estimate": 11.715584104471208,
+            "p": 0.9379691306147397,
+            "t": 0.07785972795419832
+          },
+          "event_2017-02": {
+            "cluster_se": 167.82572841324762,
+            "estimate": -96.61635344098892,
+            "p": 0.5650669479174799,
+            "t": -0.5756945276178663
+          }
+        },
+        "n_obs": 81687,
+        "n_stocks": 529
+      },
+      "log_dollar_volume": {
+        "coefficients": {
+          "event_2016-06": {
+            "cluster_se": 0.06075679767033727,
+            "estimate": -0.009730990463223899,
+            "p": 0.8728139353968289,
+            "t": -0.1601629914075404
+          },
+          "event_2016-07": {
+            "cluster_se": 0.059042236857004056,
+            "estimate": -0.009065842464538499,
+            "p": 0.8780244717425003,
+            "t": -0.1535484247742053
+          },
+          "event_2016-08": {
+            "cluster_se": 0.045039351449427105,
+            "estimate": -0.007011842428772539,
+            "p": 0.8763427292457487,
+            "t": -0.15568257985787956
+          },
+          "event_2016-11": {
+            "cluster_se": 0.055874764584982736,
+            "estimate": -0.018696078139365583,
+            "p": 0.7380545640589115,
+            "t": -0.33460683509332334
+          },
+          "event_2016-12": {
+            "cluster_se": 0.06179367417368873,
+            "estimate": -0.019528270008814682,
+            "p": 0.7521093493055196,
+            "t": -0.3160237721732635
+          },
+          "event_2017-01": {
+            "cluster_se": 0.06774934739510999,
+            "estimate": -0.030401503974784246,
+            "p": 0.6538069310416472,
+            "t": -0.44873500843461356
+          },
+          "event_2017-02": {
+            "cluster_se": 0.07073144741407313,
+            "estimate": 0.043188738758412115,
+            "p": 0.5417260640711635,
+            "t": 0.6106016536828149
+          }
+        },
+        "n_obs": 81687,
+        "n_stocks": 529
+      },
+      "range_bps": {
+        "coefficients": {
+          "event_2016-06": {
+            "cluster_se": 12.115250738432712,
+            "estimate": -11.40829773789729,
+            "p": 0.34680367214652297,
+            "t": -0.9416476789627816
+          },
+          "event_2016-07": {
+            "cluster_se": 11.342482856618336,
+            "estimate": -2.5520970186870198,
+            "p": 0.8220636950833355,
+            "t": -0.22500338338160872
+          },
+          "event_2016-08": {
+            "cluster_se": 9.31755922975893,
+            "estimate": -11.490580379500209,
+            "p": 0.21804323429248892,
+            "t": -1.233217852031567
+          },
+          "event_2016-11": {
+            "cluster_se": 12.304198932021448,
+            "estimate": -12.771225963585007,
+            "p": 0.2997653004804193,
+            "t": -1.0379567198274184
+          },
+          "event_2016-12": {
+            "cluster_se": 12.256676341491092,
+            "estimate": -19.319857401247358,
+            "p": 0.11556203359166023,
+            "t": -1.576272136341408
+          },
+          "event_2017-01": {
+            "cluster_se": 12.027304114039044,
+            "estimate": -16.0671832116374,
+            "p": 0.18215997406470913,
+            "t": -1.3358923212794418
+          },
+          "event_2017-02": {
+            "cluster_se": 11.470841755722342,
+            "estimate": -15.549004167227253,
+            "p": 0.1758301188335944,
+            "t": -1.355524249950574
+          }
+        },
+        "n_obs": 87231,
+        "n_stocks": 529
+      },
+      "rv5_bps2": {
+        "coefficients": {
+          "event_2016-06": {
+            "cluster_se": 3.962515356051362,
+            "estimate": -2.6132700382590874,
+            "p": 0.5098637174991151,
+            "t": -0.6594977693318532
+          },
+          "event_2016-07": {
+            "cluster_se": 4.64778899513642,
+            "estimate": 1.1460066117013672,
+            "p": 0.8053366430458143,
+            "t": 0.24657027522131092
+          },
+          "event_2016-08": {
+            "cluster_se": 3.319983386536833,
+            "estimate": -3.990003408651268,
+            "p": 0.22997424716863804,
+            "t": -1.2018142695627618
+          },
+          "event_2016-11": {
+            "cluster_se": 10.482814349872456,
+            "estimate": -3.990156306935522,
+            "p": 0.7036250524809041,
+            "t": -0.3806378872849227
+          },
+          "event_2016-12": {
+            "cluster_se": 18.35554730721393,
+            "estimate": 4.406284459147281,
+            "p": 0.810383170199606,
+            "t": 0.24005192465253072
+          },
+          "event_2017-01": {
+            "cluster_se": 5.8621322012523125,
+            "estimate": -8.514136773079606,
+            "p": 0.146985534192968,
+            "t": -1.4523958997821225
+          },
+          "event_2017-02": {
+            "cluster_se": 4.96660118262794,
+            "estimate": -4.175329575297831,
+            "p": 0.4009069431751649,
+            "t": -0.8406814684259731
+          }
+        },
+        "n_obs": 83528,
+        "n_stocks": 529
+      }
+    }
+  },
+  "experiment_id": "K1706",
+  "fixed_strata": {
+    "middle_excluded": "0.10 <= pre_spread_usd <= 0.15",
+    "narrow": "pre_spread_usd < 0.10",
+    "wide": "pre_spread_usd > 0.15"
+  },
+  "heterogeneity_tests": [
+    {
+      "narrow_minus_wide": -0.008655693292112687,
+      "outcome": "rv5_bps2",
+      "ri_p": 0.999,
+      "ri_p_holm_4": 1.0
+    },
+    {
+      "narrow_minus_wide": 29.746545129793876,
+      "outcome": "range_bps",
+      "ri_p": 0.001,
+      "ri_p_holm_4": 0.004
+    },
+    {
+      "narrow_minus_wide": -0.03412271761781149,
+      "outcome": "log_dollar_volume",
+      "ri_p": 0.565,
+      "ri_p_holm_4": 1.0
+    },
+    {
+      "narrow_minus_wide": 42.38866606547998,
+      "outcome": "amihud_1e9",
+      "ri_p": 0.791,
+      "ri_p_holm_4": 1.0
+    }
+  ],
+  "limitations": [
+    "Daily OHLCV proxies from the frozen pystock-data/Yahoo archive are not TAQ/CRSP/MIDAS intraday measures.",
+    "rv5_bps2 is a backward five-day corporate-action-clean daily realized-variance proxy.",
+    "RI preserves treatment counts within frozen spread strata but cannot reconstruct every official selection stratum.",
+    "Survivorship/data-availability selection may arise because some 2016 pilot tickers are unavailable from Yahoo in 2026.",
+    "Appendix B.I pre-spread is FINRA/CHX-reported order data, not a full consolidated TAQ quote spread."
+  ],
+  "lookahead_audit": {
+    "corporate_action_boundary_rows": 31,
+    "corporate_action_boundary_rule": "if abs(diff(log(adj_close/close))) > 0.2, use the smaller-absolute of raw and adjusted log returns",
+    "explicit_signal_shift_1": true,
+    "rolling_rv_direction": "backward-looking t-4 through t within each frozen pre/post period",
+    "same_day_signal_times_outcome": false,
+    "signal_expression": "panel.groupby('symbol')['raw_signal'].shift(1)"
+  },
+  "method_audit": {
+    "cluster_covariance": "stock-clustered finite-sample corrected sandwich",
+    "fixed_effects": "stock and date effects absorbed by alternating projections to 1e-12 tolerance"
+  },
+  "placebo_pre_period": [
+    {
+      "cluster_se": 3.5540298167845523,
+      "estimate": -0.9731776946681425,
+      "n_obs": 125168,
+      "n_stocks": 1535,
+      "outcome": "rv5_bps2",
+      "p": 0.7842569521777529,
+      "p_holm_8": 1.0,
+      "stratum": "narrow"
+    },
+    {
+      "cluster_se": 3.2250818254570373,
+      "estimate": -1.498206687739074,
+      "n_obs": 43036,
+      "n_stocks": 529,
+      "outcome": "rv5_bps2",
+      "p": 0.6424463668628566,
+      "p_holm_8": 1.0,
+      "stratum": "wide"
+    },
+    {
+      "cluster_se": 4.520877590545122,
+      "estimate": -3.9948615564581247,
+      "n_obs": 129784,
+      "n_stocks": 1535,
+      "outcome": "range_bps",
+      "p": 0.3770250675361495,
+      "p_holm_8": 1.0,
+      "stratum": "narrow"
+    },
+    {
+      "cluster_se": 8.740399326493957,
+      "estimate": 1.0677786727138,
+      "n_obs": 44623,
+      "n_stocks": 529,
+      "outcome": "range_bps",
+      "p": 0.9028141210076627,
+      "p_holm_8": 1.0,
+      "stratum": "wide"
+    },
+    {
+      "cluster_se": 0.024376535629278398,
+      "estimate": 0.00859266332023263,
+      "n_obs": 129171,
+      "n_stocks": 1535,
+      "outcome": "log_dollar_volume",
+      "p": 0.7245137562251796,
+      "p_holm_8": 1.0,
+      "stratum": "narrow"
+    },
+    {
+      "cluster_se": 0.04701998580166598,
+      "estimate": 0.010065886927553879,
+      "n_obs": 41724,
+      "n_stocks": 529,
+      "outcome": "log_dollar_volume",
+      "p": 0.8305698320171766,
+      "p_holm_8": 1.0,
+      "stratum": "wide"
+    },
+    {
+      "cluster_se": 35.619126899940575,
+      "estimate": 5.773810712628676,
+      "n_obs": 129171,
+      "n_stocks": 1535,
+      "outcome": "amihud_1e9",
+      "p": 0.8712495542034204,
+      "p_holm_8": 1.0,
+      "stratum": "narrow"
+    },
+    {
+      "cluster_se": 188.3912608155411,
+      "estimate": -67.96986349713396,
+      "n_obs": 41724,
+      "n_stocks": 529,
+      "outcome": "amihud_1e9",
+      "p": 0.7184000221680866,
+      "p_holm_8": 1.0,
+      "stratum": "wide"
+    }
+  ],
+  "primary_did": [
+    {
+      "fe_cluster_se": 5.325008309343429,
+      "fe_estimate": -1.5066986874847854,
+      "fe_p": 0.7772551281859268,
+      "n_control": 778,
+      "n_obs": 242296,
+      "n_stocks": 1535,
+      "n_treated": 757,
+      "outcome": "rv5_bps2",
+      "ri_estimate_stock_delta": -1.8600662586171364,
+      "ri_p": 0.756,
+      "ri_p_holm_8": 1.0,
+      "stratum": "narrow"
+    },
+    {
+      "fe_cluster_se": 6.460561146662135,
+      "fe_estimate": -1.4835990000235213,
+      "fe_p": 0.8184609654582762,
+      "n_control": 260,
+      "n_obs": 83528,
+      "n_stocks": 529,
+      "n_treated": 269,
+      "outcome": "rv5_bps2",
+      "ri_estimate_stock_delta": -1.8514105653250237,
+      "ri_p": 0.773,
+      "ri_p_holm_8": 1.0,
+      "stratum": "wide"
+    },
+    {
+      "fe_cluster_se": 5.201773880641817,
+      "fe_estimate": 19.74157388285771,
+      "fe_p": 0.00015328769466004525,
+      "n_control": 778,
+      "n_obs": 253052,
+      "n_stocks": 1535,
+      "n_treated": 757,
+      "outcome": "range_bps",
+      "ri_estimate_stock_delta": 19.700647231081184,
+      "ri_p": 0.002,
+      "ri_p_holm_8": 0.016,
+      "stratum": "narrow"
+    },
+    {
+      "fe_cluster_se": 8.32236011281392,
+      "fe_estimate": -9.352397826952616,
+      "fe_p": 0.26162233578515426,
+      "n_control": 260,
+      "n_obs": 87231,
+      "n_stocks": 529,
+      "n_treated": 269,
+      "outcome": "range_bps",
+      "ri_estimate_stock_delta": -10.045897898712692,
+      "ri_p": 0.228,
+      "ri_p_holm_8": 1.0,
+      "stratum": "wide"
+    },
+    {
+      "fe_cluster_se": 0.027065014751569364,
+      "fe_estimate": -0.04006415749805764,
+      "fe_p": 0.1390003576296922,
+      "n_control": 778,
+      "n_obs": 251979,
+      "n_stocks": 1535,
+      "n_treated": 757,
+      "outcome": "log_dollar_volume",
+      "ri_estimate_stock_delta": -0.04128025977512628,
+      "ri_p": 0.147,
+      "ri_p_holm_8": 1.0,
+      "stratum": "narrow"
+    },
+    {
+      "fe_cluster_se": 0.049256512920367174,
+      "fe_estimate": -0.0009269629040183911,
+      "fe_p": 0.9849925315682594,
+      "n_control": 260,
+      "n_obs": 81687,
+      "n_stocks": 529,
+      "n_treated": 269,
+      "outcome": "log_dollar_volume",
+      "ri_estimate_stock_delta": -0.007157542157314789,
+      "ri_p": 0.892,
+      "ri_p_holm_8": 1.0,
+      "stratum": "wide"
+    },
+    {
+      "fe_cluster_se": 33.01640026866175,
+      "fe_estimate": -3.4711265108327423,
+      "fe_p": 0.916283699152559,
+      "n_control": 778,
+      "n_obs": 251979,
+      "n_stocks": 1535,
+      "n_treated": 757,
+      "outcome": "amihud_1e9",
+      "ri_estimate_stock_delta": -28.019126668110818,
+      "ri_p": 0.739,
+      "ri_p_holm_8": 1.0,
+      "stratum": "narrow"
+    },
+    {
+      "fe_cluster_se": 125.12512281511984,
+      "fe_estimate": -119.1714794299697,
+      "fe_p": 0.3413205774343508,
+      "n_control": 260,
+      "n_obs": 81687,
+      "n_stocks": 529,
+      "n_treated": 269,
+      "outcome": "amihud_1e9",
+      "ri_estimate_stock_delta": -70.4077927335908,
+      "ri_p": 0.628,
+      "ri_p_holm_8": 1.0,
+      "stratum": "wide"
+    }
+  ],
+  "randomization_permutations": 999,
+  "sample_balance": [
+    {
+      "group": "C",
+      "mean_pre_spread": 0.0467197092048164,
+      "spread_stratum": "narrow",
+      "stocks": 778
+    },
+    {
+      "group": "G1",
+      "mean_pre_spread": 0.04615256379673307,
+      "spread_stratum": "narrow",
+      "stocks": 254
+    },
+    {
+      "group": "G2",
+      "mean_pre_spread": 0.04651643491816626,
+      "spread_stratum": "narrow",
+      "stocks": 246
+    },
+    {
+      "group": "G3",
+      "mean_pre_spread": 0.04393694061770077,
+      "spread_stratum": "narrow",
+      "stocks": 257
+    },
+    {
+      "group": "C",
+      "mean_pre_spread": 0.5430793662313808,
+      "spread_stratum": "wide",
+      "stocks": 260
+    },
+    {
+      "group": "G1",
+      "mean_pre_spread": 0.4632222479234396,
+      "spread_stratum": "wide",
+      "stocks": 91
+    },
+    {
+      "group": "G2",
+      "mean_pre_spread": 0.48169138101930853,
+      "spread_stratum": "wide",
+      "stocks": 94
+    },
+    {
+      "group": "G3",
+      "mean_pre_spread": 0.5704491571710476,
+      "spread_stratum": "wide",
+      "stocks": 84
+    }
+  ],
+  "seed": 42,
+  "source_manifest": {
+    "analysis_panel_sha256": "675048c67c01f18082dec816e12d36e84b0ed17450e552d3aefd9352d45c69b2",
+    "assignment_sha256": "cb6abbff5770797a24e49af4291b62e7bb38601625315cd93ad925d1f2dfc383",
+    "assignment_url": "https://www.finra.org/sites/default/files/Tick_Pilot_Test_Group_Assignments.txt",
+    "bi_raw_sha256": "a48d5ab76b75a029edf37f6984b0dc99bd0f3eae49abd9aedf43039ed46bf9d0",
+    "bi_url": "https://tsp.finra.org/finra_org/ticksizepilot/TSPAppendixBCStatistics/BI/201609/v1/FINRA_CHX_MKTQUALITYSTATS_201609.dat.gzip",
+    "ohlcv_cache_sha256": "5b0895519d2243ec020c70b51d8751fd313a53e4953981e5c4ac0b88f68bd13b",
+    "pre_spread_csv_sha256": "d93162dfc7570d48ff130644648c9d325f8c2f00fd94be825c58bc2d5e5c3350",
+    "script_sha256_before_results_write": "4aba315258ab2ae5c551ba3f35239903a81fb89a7d0534ad39ff5e7dbde52b51"
+  }
+}
