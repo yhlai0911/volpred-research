@@ -18503,5 +18503,15 @@
     "owner": "codex-desktop",
     "commit": null,
     "summary": "K1396 scope correction completed through the formal publication path. The Codex bespoke lazypack renderer failed after three bounded repair rounds, so the documented deterministic renderer fallback was used and strict validation passed for all three panels. Both corrected articles were synced and verified live by HTTP and Chrome; knowledge supersession remains Claude-main-thread-only."
+  },
+  {
+    "timestamp": "2026-07-16T03:47:27+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops-hourly-dispatch-tcc-desktop-copy-retire-20260715",
+    "outcome": "succeeded",
+    "actor": "codex-desktop",
+    "owner": "codex-desktop",
+    "commit": "c45d82c0d",
+    "summary": "退役 legacy hourly-dispatch 的過時 Desktop-TCC 警報敘事。EPERM/getcwd/EINTR 分支保留症狀分類，但不再以 Claude CLI 更新、symlink mtime 或歷史 Desktop 權限推定根因；改發中性 runtime/filesystem WARN，明寫 Codex failover 接手與下輪自然重試，僅在復發時檢查 cwd、WorkingDirectory、filesystem/mount 與 system load。補回歸測試、cutover mapping 清理及治理紀錄。bash -n PASS，172 targeted tests PASS，獨立只讀審查 PASS；commit c45d82c0d。"
   }
 ]
