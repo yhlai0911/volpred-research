@@ -598,6 +598,28 @@ def build_milestone_description(strat_list, sigma_gjr_ann, vix_level, spy_date,
     return desc
 
 
+def daily_publish_decision(last_spy_date, spy_date, tw_closed_reason):
+    """(skip_publish, reason) for the daily bulletin pair — the SOLE publish gate.
+
+    Monotone rule (2026-07-15 stale-data double-publish incident): publish only
+    when spy_date strictly ADVANCED past the last published spy_date. Equality =
+    intraday rerun on the same US close (skip, by design since 2026-06-30);
+    regression = upstream returned stale/truncated history (skip loudly — the
+    old equality-only check let a 7/13-data pair publish hours after the
+    7/14-data pair, because 7/13 != 7/14 read as "data changed"). ISO date
+    strings compare correctly as strings. The near-dup gate is waived for these
+    intentionally-templated bulletins, so this decision must not fail open.
+    """
+    if tw_closed_reason:
+        return True, f"tw_closed:{tw_closed_reason}"
+    if last_spy_date and spy_date:
+        if spy_date == last_spy_date:
+            return True, "unchanged"
+        if str(spy_date) < str(last_spy_date):
+            return True, f"data_regressed:{spy_date}<{last_spy_date}"
+    return False, "fresh"
+
+
 def main():
     today = datetime.now().strftime("%Y-%m-%d")
     print(f"=== Daily Update: {today} ===")
@@ -1155,24 +1177,29 @@ def main():
     guard_canonical_write(pt_file)
     pt_file.write_text(json.dumps(pt, indent=2, ensure_ascii=False))
 
-    # --- Check if data is fresh (skip publish if spy_date unchanged since last run) ---
+    # --- Check if data is fresh (skip publish unless spy_date ADVANCED past last run) ---
+    # 2026-07-15 incident (boss: 一天兩組每日更新、7/15 的操作依據 7/13 資料): the
+    # 14:15 intraday retry got a stale/truncated yfinance response (last row =
+    # 7/13) while the morning run had already published on 7/14 data. The old
+    # `last_spy_date == spy_date` guard only catches UNCHANGED data — a stale
+    # response that goes BACKWARDS reads as "changed" and sails through, and the
+    # near-dup gate is intentionally waived (dup_waiver) for daily bulletins, so
+    # this guard is the only gate. Rule now: publish only on monotone progress
+    # (spy_date > last published spy_date). See daily_publish_decision().
     feed_path = Path("storage/reports/feed.json")
     last_spy_date = None
     if feed_path.exists():
         feed = _load_json_retry(feed_path, [])
         for p in feed:
-            if p.get("phase") == "daily_update" and p.get("details", {}).get("spy_date"):
+            # Anchor on PUBLISHED entries only: an unpublished/retracted stale pair
+            # (e.g. today's retracted 7/13 twins) must not weaken the monotone gate.
+            if (
+                p.get("phase") == "daily_update"
+                and p.get("status") == "published"
+                and p.get("details", {}).get("spy_date")
+            ):
                 last_spy_date = p["details"]["spy_date"]
                 break
-        if last_spy_date == spy_date:
-            print(f"  ⚠️ 數據未更新（spy_date={spy_date} 與上次相同），跳過發布")
-            # Still do Supabase sync + metrics recalc, just skip feed publish
-            feed = feed  # keep existing
-        else:
-            # Remove old daily_update for today
-            feed = [p for p in feed if not (p.get("phase") == "daily_update" and today in p.get("title", ""))]
-            guard_canonical_write(feed_path)
-            feed_path.write_text(json.dumps(feed, indent=2, ensure_ascii=False))
     else:
         feed = []
 
@@ -1193,13 +1220,25 @@ def main():
         # fail-open: keep prior behaviour if the calendar lookup breaks, but log it.
         print(f"  ⚠️ market_calendar 查詢失敗，無法判斷 TW 是否休市（沿用舊行為）：{e}")
 
-    skip_publish = (last_spy_date == spy_date) or (tw_closed_reason is not None)
+    skip_publish, skip_reason = daily_publish_decision(last_spy_date, spy_date, tw_closed_reason)
+    if skip_reason == "unchanged":
+        print(f"  ⚠️ 數據未更新（spy_date={spy_date} 與上次相同），跳過發布")
+    elif skip_reason.startswith("data_regressed"):
+        print(
+            f"  ❌ 數據倒退（spy_date={spy_date} < 上次已發布 {last_spy_date}）— "
+            "upstream 回傳過期/截斷資料，跳過發布並保留早班文章。"
+        )
+    if not skip_publish and feed_path.exists():
+        # Re-publish path only: replace any earlier daily_update for today.
+        feed = [p for p in feed if not (p.get("phase") == "daily_update" and today in p.get("title", ""))]
+        guard_canonical_write(feed_path)
+        feed_path.write_text(json.dumps(feed, indent=2, ensure_ascii=False))
 
-    # --- Publish signal for each strategy (skip if data unchanged / TW closed) ---
+    # --- Publish signal for each strategy (skip if data unchanged/regressed / TW closed) ---
     if tw_closed_reason:
         print(f"  🌀 台股今日休市（{tw_closed_reason}）→ 跳過本日持倉/策略建議發佈")
     elif skip_publish:
-        print(f"  跳過發布（數據與上次相同）")
+        print(f"  跳過發布（{skip_reason}）")
     else:
         gap_section = ""
         if gap_alert_level:
