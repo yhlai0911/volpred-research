@@ -36774,13 +36774,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T20:01:08.885850+00:00",
+    "completed_at": "2026-07-15T21:01:08.241499+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T20:01:08.885850+00:00",
-      "last_clean_observed_at": "2026-07-15T20:01:08.885850+00:00"
+      "resolved_at": "2026-07-15T21:01:08.241499+00:00",
+      "last_clean_observed_at": "2026-07-15T21:01:08.241499+00:00"
     }
   },
   {
@@ -38604,7 +38604,7 @@
     "title": "Audience correction: rewrite a true general companion for 同一個指數好幾檔 ETF，短線交易全擠在最老那一檔——拿來當風險訊號靈不靈？",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_c16d94b7. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1365']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38619,7 +38619,25 @@
       "content-quality"
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1365"
+    "k_id": "K1365",
+    "claimed_by": "codex-desktop-k1365-audience",
+    "claimed_at": "2026-07-15T20:51:47.757816+00:00",
+    "claim_session_id": "d7012c295d28",
+    "status_history": [
+      {
+        "ts": "2026-07-15T20:51:47.757832+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1365-audience"
+      },
+      {
+        "ts": "2026-07-15T20:51:47.985411+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1365-audience"
+      }
+    ],
+    "started_at": "2026-07-15T20:51:47.985396+00:00"
   },
   {
     "id": "K1575_article_general_audience_rewrite_9839822d",
@@ -40746,5 +40764,42 @@
     "started_at": "2026-07-15T20:00:59.534312+00:00",
     "completed_at": "2026-07-15T20:12:56.321015+00:00",
     "result": "root_cause=merge 22422d2ee brought k1709 and k1711 archived results onto main before canonical reviewed findings were recorded, so the zero-baseline knowledge ratchet correctly rejected both; repair_commit=a06d64daf4c343e9d84dc7724b273c0b92659d33; verification=knowledge class sweep 32 passed and provenance 0/2656 violations; subsequent run 29446641414 passes original ratchet but exposes two unrelated CI debts"
+  },
+  {
+    "id": "ci-red-29446641414",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29421677446",
+    "ci_run_key": "29446641414:1",
+    "created_at": "2026-07-15T21:00:04.311497+00:00",
+    "title": "CI 紅燈修復（run 29446641414, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29446641414\nattempt: 1\nhead_sha: 1e2c5a534\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29446641414 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T21:00:50.886802+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-381bd58c79e34d6dbd40c9634f484ad0"
+      },
+      {
+        "ts": "2026-07-15T21:00:56.209078+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-381bd58c79e34d6dbd40c9634f484ad0"
+      },
+      {
+        "ts": "2026-07-15T21:05:55.310256+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-381bd58c79e34d6dbd40c9634f484ad0"
+      }
+    ],
+    "started_at": "2026-07-15T21:00:56.209066+00:00",
+    "completed_at": "2026-07-15T21:05:55.310244+00:00",
+    "result": "root_cause=cron_hourly_dispatch.sh changed in c45d82c0d without regenerating config/cron_wrapper_manifest.json or the launchd copy; repair_commit=3e36eac3f; validation=117 targeted tests passed and canonical/manifest/runtime SHA-256 all match; note=K1396 ratchet failure was already repaired by later HEAD; push=deferred to git_push_backup per supervisor policy"
   }
 ]
