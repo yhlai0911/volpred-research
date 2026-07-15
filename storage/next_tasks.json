@@ -30771,28 +30771,15 @@
   },
   {
     "id": "fable0711_levdir_evidence_wiring",
-    "title": "paper_body: leverage-direction K1592/K1591 證據進稿 + HM rebind（IJF）",
-    "description": "深審 P0 前 3：K1592 horse race 進稿（新小節+新表+methodology 程序）、K1591 gold regime 雙軌誠實報告、HM 數字 rebind K1256 canonical、26/14-asset 宣稱處置。估 6-8 工作天。Brief=paper/leverage-direction/review_history/fable_deep_review_20260711/README.md §5。主線程執行。",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "paper_body",
-    "dispatch_lane": "main_thread",
+    "title": "paper_body: leverage-direction K1592/K1591 證據進稿 + HM rebind（IJF）",
+    "priority": 1,
     "source": "fable_deep_review_20260711",
-    "tags": [
-      "fable-deep-review",
-      "paper-gating"
-    ],
     "created_at": "2026-07-11T14:53:58.104564+00:00",
     "completed_at": "2026-07-12T10:02:44.078709+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-12T10:02:44.078725+00:00",
-        "from": "pending",
-        "to": "succeeded",
-        "by": "complete"
-      }
-    ],
-    "result": "P0-1..P0-4 landed main-thread: K1592 prespec section+table, K1591 dual-track gold, K1256 HM rebind, 26/14-asset trim. Commit 46f1766c3. P1 remains via EXECUTION.md."
+    "tombstone": true,
+    "archived_at": "2026-07-15T10:08:28.055747+00:00"
   },
   {
     "id": "fable0711_abm_honesty_pass",
@@ -31251,293 +31238,87 @@
   },
   {
     "id": "daily_digest_20260712",
-    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
-    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
-    "task_type": "daily_digest",
-    "priority": 1,
     "status": "succeeded",
-    "dispatch_lane": "agent",
-    "created_at": "2026-07-12T09:00:00.869006+08:00",
+    "task_type": "daily_digest",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "priority": 1,
     "source": "scheduled",
-    "tags": [
-      "daily_digest",
-      "reader_facing",
-      "精選導讀"
-    ],
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-12T08:37:19.096227+00:00",
-    "claim_session_id": "0f5700e461a0",
-    "status_history": [
-      {
-        "ts": "2026-07-12T08:37:19.096243+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-12T08:37:22.083734+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-12T08:59:29.432691+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-12T08:37:22.083719+00:00",
+    "created_at": "2026-07-12T09:00:00.869006+08:00",
     "completed_at": "2026-07-12T08:59:29.432676+00:00",
-    "result": "已發佈每日精選導讀 mile_93bb316e：以油震斷鏈圖解析停火後油價、OVX、股市傳導與避險配置，六篇 archive 跨 113 日。anti-AI／publisher gate／3 張懶人包視覺檢查皆通過；feed-sync failed=0，文章頁與首頁 live 200。"
+    "tombstone": true,
+    "archived_at": "2026-07-15T09:07:48.856103+00:00"
   },
   {
     "id": "telegram-530",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 530）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-12T01:22:14.016907+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 530）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n這到底又要出現幾次孤兒 立刻從底層改好\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] PHASE-Z 09:17: 11 個檔案已連續 8 班沒人收 — 遺留變成堆積\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響文章品質、讀者信任與流量表現。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n📌 發生什麼\n這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 8 班都還在工作區。單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— 它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。\n\n📌 現在該做什麼\n人工判斷後二選一：確認內容正確就 git add <檔案> && git commit；是廢棄的半成品就 git checkout HEAD -- <檔案> 丟掉。（PHASE-Z 不自動收養 —— 自動收養正是先前三次事故的成因。）\n\n📌 卡住的檔案（連續班數）\n• storage/reports/token_usage/weekly_2026-07-05.json — 8 班\n• storage/reports/token_usage/weekly_2026-07-05.md — 8 班\n• storage/reports/feed.json — 5 班\n• ops/claude_user_backup/settings.json.ref — 4 班\n• storage/ops/autonomous_decisions.jsonl — 4 班\n• storage/ops/daily_reader_facing_scan_state.json — 4 班\n• storage/ops/dreaming/2026-07-11.json — 4 班\n• storage/ops/dreaming/baseline.json — 4 班\n•\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "claimed_by": "hourly-17",
-    "claimed_at": "2026-07-12T09:09:16.400804+00:00",
-    "claim_session_id": "dd79e0536282",
-    "status_history": [
-      {
-        "ts": "2026-07-12T09:09:16.400822+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-17"
-      },
-      {
-        "ts": "2026-07-12T09:09:16.668587+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-17"
-      },
-      {
-        "ts": "2026-07-12T09:19:06.031352+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-17"
-      }
-    ],
-    "started_at": "2026-07-12T09:09:16.668572+00:00",
     "completed_at": "2026-07-12T09:19:06.031336+00:00",
-    "result": "孤兒根因修復：成果所有權由 process 改綁 task。dreaming 新增 detect_orphaned_experiments reaper（auto_dispatch/experiment），做完沒人消費的實驗自動變收尾任務而非警報。實測 30 天內 67 個孤兒，首跑派 5 張收尾單，backlog 67→61 且冪等。10 條回歸測試。commit e23fc0b82 + 51d631930。Telegram msg 555 已回。"
+    "tombstone": true,
+    "archived_at": "2026-07-15T10:01:27.498246+00:00"
   },
   {
     "id": "telegram-531",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 531）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-12T01:23:02.979060+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 531）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n做了研究結果一直變孤兒浪費\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "claimed_by": "hourly-17",
-    "claimed_at": "2026-07-12T09:09:16.937242+00:00",
-    "claim_session_id": "574c43463ab0",
-    "status_history": [
-      {
-        "ts": "2026-07-12T09:09:16.937263+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-17"
-      },
-      {
-        "ts": "2026-07-12T09:09:17.204936+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-17"
-      },
-      {
-        "ts": "2026-07-12T09:19:06.295140+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-17"
-      }
-    ],
-    "started_at": "2026-07-12T09:09:17.204921+00:00",
     "completed_at": "2026-07-12T09:19:06.295124+00:00",
-    "result": "孤兒根因修復：成果所有權由 process 改綁 task。dreaming 新增 detect_orphaned_experiments reaper（auto_dispatch/experiment），做完沒人消費的實驗自動變收尾任務而非警報。實測 30 天內 67 個孤兒，首跑派 5 張收尾單，backlog 67→61 且冪等。10 條回歸測試。commit e23fc0b82 + 51d631930。Telegram msg 555 已回。"
+    "tombstone": true,
+    "archived_at": "2026-07-15T10:01:27.498246+00:00"
   },
   {
     "id": "email-12127-d196f6",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] Claude→Codex failover 接手失敗（Claude 端：quota）",
-    "description": "Gmail UID: 12127\nMessage-ID: <8A1623DC-122B-4AEE-9D69-068D5E4B1FA2@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sun, 12 Jul 2026 09:28:22 +0800\nSubject: Re: [VolPred Alert][CRITICAL] Claude→Codex failover 接手失敗（Claude 端：quota）\n\n--- 用戶回信內容 ---\n立刻找出原因 為什麼codex exec不能用\r\n是不是改版之後有改指令上網查\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月12日 05:28 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Claude→Codex failover 接手失敗（Claude 端：quota）\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> Claude 這班派不了工，Codex 也接不了\r\n> \r\n> 發生什麼事\r\n> \r\n> Claude 端：Claude Code 額度用完（會在額度重置時自行恢復）\r\n> Codex 端：codex exec 逾時（600s 上限）——ChatGPT 端可能同時不可用（exit code 142）\r\n> 影響\r\n> \r\n> 本班的 hourly slot 沒有產出；兩邊都不可用\r\n> 需要你做什麼\r\n> \r\n> 不用做什麼；額度恢復後下一班自動回到 Claude\r\n> Codex 輸出片段\r\n> \r\n> (無輸出)\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-12T01:30:07.849633+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] Claude→Codex failover 接手失敗（Claude 端：quota）",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12127,
-    "email_message_id": "<8A1623DC-122B-4AEE-9D69-068D5E4B1FA2@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] Claude→Codex failover 接手失敗（Claude 端：quota）",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-07-12T08:07:45.474613+00:00",
-    "claim_session_id": "4ff7ecac4a2c",
-    "status_history": [
-      {
-        "ts": "2026-07-12T08:07:45.474629+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-12T08:07:45.746097+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-12T08:32:11.662803+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "interactive-claude"
-      }
-    ],
-    "started_at": "2026-07-12T08:07:45.746082+00:00",
+    "created_at": "2026-07-12T01:30:07.849633+00:00",
     "completed_at": "2026-07-12T08:32:11.662787+00:00",
-    "result": "codex 未壞（13s smoke 通過）。根因=failover 600s cap 砍健康工作 + 逾時分支謊報『ChatGPT 不可用』（從未探測過 API）。修：加真可達性探測、cap→2400s、誠實訊息。commit 528fd58eb"
+    "tombstone": true,
+    "archived_at": "2026-07-15T09:07:48.856103+00:00"
   },
   {
     "id": "email-12126-671e23",
-    "title": "[email_reply] Re: [VolPred Alert][WARN] Dreaming review 2026-07-11 — 2 new / 0 escalations",
-    "description": "Gmail UID: 12126\nMessage-ID: <7A7E6E0D-EF5F-4E1C-B1C0-EB8398995483@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sun, 12 Jul 2026 09:27:22 +0800\nSubject: Re: [VolPred Alert][WARN] Dreaming review 2026-07-11 — 2 new / 0 escalations\n\n--- 用戶回信內容 ---\n那你dreaming到底在做什麼？\r\n你有在立刻優化嗎？\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月12日 06:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Dreaming review 2026-07-11 — 2 new / 0 escalations\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響研究結論累積與論文推進。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> 觸發條件\r\n> \r\n> findings=11（new=2, resolved=3, escalations=0）；loop-health overall=ok\r\n> [warn] missing_retry_strategy: missing_retry_strategy:K1679 (×2)\r\n> [warn] missing_retry_strategy: missing_retry_strategy:fable0711_ftd_e1_scale_gating (×1)\r\n> [info] memory_skill_gap: memory_skill_gap:uncodified_process (×15) → propose .claude/skills/\r\n> [info] memory_hygiene: memory_hygiene:consolidation_review (×15) → propose memory/\r\n> [warn] persistent_alert: persistent_alert:a4a7ca551f8626b2 (×2) → propose docs/error_log.md\r\n> [warn] persistent_alert: persistent_alert:4415ad115dc02afc (×1) → propose docs/error_log.md\r\n> [warn] persistent_alert: persistent_alert:aa6c059b3dc7e00d (×2) → propose docs/error_log.md\r\n> [warn] persistent_alert: persistent_alert:23ea72a6b5e1a28a (×1) → propose docs/error_log.md\r\n> 影響\r\n> \r\n> Dreaming 是 loop-engineering 的慢 loop：跨 session 找重複失敗模式，避免「該被系統先抓到、卻靠老闆人工抓到」的結構性問題。escalations = 連 3 次 dreaming run 仍未解 → Three-Strike 根治候選。直接服務 Mission #2/#4（研究品質 + 運營穩定）。\r\n> \r\n> 建議行動\r\n> \r\n> 看完整報告：storage/ops/dreaming/2026-07-11.json。\r\n> 治理類 findings（error_log / rules / knowledge.json）為 propose-only — 主線程審 proposal 後手動決定是否套用，dreaming 不自動改。\r\n> escalations(critical) → 開 docs/refactor_plan_<topic>.md 走 Three-Strike 根治。\r\n> auto_dispatch 類（orphaned failure）→ --apply-auto 才會派修復 task（預設關，先人工審）。\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-12T01:30:13.201625+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] Dreaming review 2026-07-11 — 2 new / 0 escalations",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12126,
-    "email_message_id": "<7A7E6E0D-EF5F-4E1C-B1C0-EB8398995483@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][WARN] Dreaming review 2026-07-11 — 2 new / 0 escalations",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-07-12T08:07:44.896281+00:00",
-    "claim_session_id": "6358e6593beb",
-    "status_history": [
-      {
-        "ts": "2026-07-12T08:07:44.896296+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-12T08:07:45.206600+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-12T08:32:11.931874+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "interactive-claude"
-      }
-    ],
-    "started_at": "2026-07-12T08:07:45.206585+00:00",
+    "created_at": "2026-07-12T01:30:13.201625+00:00",
     "completed_at": "2026-07-12T08:32:11.931860+00:00",
-    "result": "dreaming 致動器兩端皆斷：cron 入口未傳 apply_auto + create_task 寫 receipts 目錄非派工池。findings 連提 15 晚零執行。修：接進 next_tasks.json，實跑 5 條入池。治理檔仍 propose-only。commit 528fd58eb"
+    "tombstone": true,
+    "archived_at": "2026-07-15T09:07:48.856103+00:00"
   },
   {
     "id": "email-12124-61dd07",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z 09:17: 11 個檔案已連續 8 班沒人收 — 遺留變成堆積",
-    "description": "Gmail UID: 12124\nMessage-ID: <AFD1D98B-FEE8-415B-9407-AB6AF1A79B81@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sun, 12 Jul 2026 09:25:00 +0800\nSubject: Re: [VolPred Alert][CRITICAL] PHASE-Z 09:17: 11 個檔案已連續 8 班沒人收 — 遺留變成堆積\n\n--- 用戶回信內容 ---\n立刻從底層架構流程程式邏輯去徹底解決，不要再有這種做了以後浪費掉的狀況\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月12日 09:17 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> PHASE-Z 09:17: 11 個檔案已連續 8 班沒人收 — 遺留變成堆積\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> 發生什麼\r\n> \r\n> 這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 8 班都還在工作區。單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— 它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。\r\n> \r\n> 現在該做什麼\r\n> \r\n> 人工判斷後二選一：確認內容正確就 git add <檔案> && git commit；是廢棄的半成品就 git checkout HEAD -- <檔案> 丟掉。（PHASE-Z 不自動收養 —— 自動收養正是先前三次事故的成因。）\r\n> \r\n> 卡住的檔案（連續班數）\r\n> \r\n> storage/reports/token_usage/weekly_2026-07-05.json — 8 班\r\n> storage/reports/token_usage/weekly_2026-07-05.md — 8 班\r\n> storage/reports/feed.json — 5 班\r\n> ops/claude_user_backup/settings.json.ref — 4 班\r\n> storage/ops/autonomous_decisions.jsonl — 4 班\r\n> storage/ops/daily_reader_facing_scan_state.json — 4 班\r\n> storage/ops/dreaming/2026-07-11.json — 4 班\r\n> storage/ops/dreaming/baseline.json — 4 班\r\n> storage/publication_candidates.json — 4 班\r\n> storage/analytics/latest.json — 3 班\r\n> storage/analytics/reader_metrics_2026-07-11.json — 3 班\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-12T01:30:18.778511+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z 09:17: 11 個檔案已連續 8 班沒人收 — 遺留變成堆積",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12124,
-    "email_message_id": "<AFD1D98B-FEE8-415B-9407-AB6AF1A79B81@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] PHASE-Z 09:17: 11 個檔案已連續 8 班沒人收 — 遺留變成堆積",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-07-12T08:07:44.383925+00:00",
-    "claim_session_id": "dffc4c64369a",
-    "status_history": [
-      {
-        "ts": "2026-07-12T08:07:44.383941+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-12T08:07:44.641349+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-12T08:32:12.204335+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "interactive-claude"
-      }
-    ],
-    "started_at": "2026-07-12T08:07:44.641334+00:00",
+    "created_at": "2026-07-12T01:30:18.778511+00:00",
     "completed_at": "2026-07-12T08:32:12.204320+00:00",
-    "result": "PHASE-Z 擁有權清單只列 1 個檔名→其餘 daemon 狀態檔全成孤兒。改為 namespace 推導 + 補刪除路徑。17 檔已收，工作區清空。commit 528fd58eb + 658e02790"
+    "tombstone": true,
+    "archived_at": "2026-07-15T09:07:48.856103+00:00"
   },
   {
     "id": "email-12123-3bae22",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z 08:17: 9 個檔案已連續 7 班沒人收 — 遺留變成堆積",
-    "description": "Gmail UID: 12123\nMessage-ID: <2787B691-6253-4668-9DD6-477CA0F2EDD7@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sun, 12 Jul 2026 09:24:25 +0800\nSubject: Re: [VolPred Alert][CRITICAL] PHASE-Z 08:17: 9 個檔案已連續 7 班沒人收 — 遺留變成堆積\n\n--- 用戶回信內容 ---\n立刻從底層徹底解決，不要再有這種做了以後浪費掉的狀況\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月12日 08:17 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> PHASE-Z 08:17: 9 個檔案已連續 7 班沒人收 — 遺留變成堆積\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> 發生什麼\r\n> \r\n> 這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 7 班都還在工作區。單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— 它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。\r\n> \r\n> 現在該做什麼\r\n> \r\n> 人工判斷後二選一：確認內容正確就 git add <檔案> && git commit；是廢棄的半成品就 git checkout HEAD -- <檔案> 丟掉。（PHASE-Z 不自動收養 —— 自動收養正是先前三次事故的成因。）\r\n> \r\n> 卡住的檔案（連續班數）\r\n> \r\n> storage/reports/token_usage/weekly_2026-07-05.json — 7 班\r\n> storage/reports/token_usage/weekly_2026-07-05.md — 7 班\r\n> storage/reports/feed.json — 4 班\r\n> ops/claude_user_backup/settings.json.ref — 3 班\r\n> storage/ops/autonomous_decisions.jsonl — 3 班\r\n> storage/ops/daily_reader_facing_scan_state.json — 3 班\r\n> storage/ops/dreaming/2026-07-11.json — 3 班\r\n> storage/ops/dreaming/baseline.json — 3 班\r\n> storage/publication_candidates.json — 3 班\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-12T01:30:23.630204+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z 08:17: 9 個檔案已連續 7 班沒人收 — 遺留變成堆積",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12123,
-    "email_message_id": "<2787B691-6253-4668-9DD6-477CA0F2EDD7@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] PHASE-Z 08:17: 9 個檔案已連續 7 班沒人收 — 遺留變成堆積",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-07-12T08:07:43.882153+00:00",
-    "claim_session_id": "4c7c0291fdbb",
-    "status_history": [
-      {
-        "ts": "2026-07-12T08:07:43.882167+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-12T08:07:44.127481+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-12T08:32:12.475802+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "interactive-claude"
-      }
-    ],
-    "started_at": "2026-07-12T08:07:44.127464+00:00",
+    "created_at": "2026-07-12T01:30:23.630204+00:00",
     "completed_at": "2026-07-12T08:32:12.475784+00:00",
-    "result": "同 email-12124 根因（PHASE-Z namespace 擁有權）。另：兩個 code 檔測試紅，工作保存至分支 wip/nested-dm-fp-narrowing + P2 稽核任務，未草率縮 baseline。"
+    "tombstone": true,
+    "archived_at": "2026-07-15T09:07:48.856103+00:00"
   },
   {
     "id": "dreaming_missing_retry_strategy_k1679",
@@ -31827,31 +31608,15 @@
   },
   {
     "id": "telegram-556",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 556）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-12T09:39:28.536540+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 556）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n額度應該已經恢復所有問題請徹底解決，立刻\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "claimed_by": "telegram-responder",
-    "claimed_at": "2026-07-12T09:39:53.530465+00:00",
-    "claim_session_id": "37bb89d20ccb",
-    "status_history": [
-      {
-        "ts": "2026-07-12T09:39:53.530493+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-12T09:44:49.898690+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-12T09:44:49.898674+00:00"
+    "completed_at": "2026-07-12T09:44:49.898674+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-15T10:01:27.498246+00:00"
   },
   {
     "id": "platform_ops_event_receipt_to_next_tasks_bridge",
@@ -36438,10 +36203,33 @@
     "title": "整理 dropbox/taifexdata：TAIFEX 期貨/選擇權 tick → canonical layout",
     "description": "Owner 2026-07-14 裁決：不買 paid US intraday，intraday 研究改用自有 TAIFEX tick 資料（位置/格式/夜盤時間見 user memory reference_taifex_data；現況『很亂』）。任務：盤點 dropbox/taifexdata 檔案結構 → 定 canonical layout（建議 data/intraday/taifex_tick/<contract>/<yyyymm>.parquet 或沿用既有 collect_taifex_tick.py 慣例）→ 寫轉換/驗證 script（校驗筆數/時間範圍/夜盤標記）→ 產 README 記 schema 與缺口清單。禁止改動 Dropbox 原始檔（唯讀源）。完成後 K1268b/K1310 類 intraday 題目可在 TW 市場重開。",
     "task_type": "platform_ops",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 2,
     "source": "owner_decision_20260714",
-    "created_at": "2026-07-14T08:19:42.370583+00:00"
+    "created_at": "2026-07-14T08:19:42.370583+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-15T09:09:01.744686+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-15T09:09:11.127058+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-15T09:24:18.261829+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-17"
+      }
+    ],
+    "started_at": "2026-07-15T09:09:11.127041+00:00",
+    "completed_at": "2026-07-15T09:24:18.261814+00:00",
+    "result": "盤點+canonical layout 完成：taifex_tick_inventory.py→manifest(10644檔/35.9GB, TX/TX1/TX2 各3548交易日 2012-01-02~2026-07-14, 258 缺口=國定假日非資料洞, era 9→10欄邊界實測2012-06-14, 夜盤2017-05-16啟用)；taifex_tick_to_canonical.py→data/intraday/taifex_tick/<contract>/<yyyymm>.parquet, sample 9/9 驗證通過；README 含 schema/缺口/consumer guide；重用 collect_taifex_tick 抽 map_semantic_columns（10 tests pass）。全量33G註明走compute_queue。Dropbox 唯讀未動。"
   },
   {
     "id": "research_taifex_intraday_rv_line",
@@ -36887,13 +36675,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T08:02:18.024018+00:00",
+    "completed_at": "2026-07-15T10:00:55.395651+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T08:02:18.024018+00:00",
-      "last_clean_observed_at": "2026-07-15T08:02:18.024018+00:00"
+      "resolved_at": "2026-07-15T10:00:55.395651+00:00",
+      "last_clean_observed_at": "2026-07-15T10:00:55.395651+00:00"
     }
   },
   {
@@ -36905,13 +36693,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T08:16:49.023502+00:00",
+    "completed_at": "2026-07-15T10:16:54.802009+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T08:16:49.023502+00:00",
-      "last_clean_observed_at": "2026-07-15T08:16:49.023502+00:00"
+      "resolved_at": "2026-07-15T10:16:54.802009+00:00",
+      "last_clean_observed_at": "2026-07-15T10:16:54.802009+00:00"
     }
   },
   {
@@ -37121,12 +36909,9 @@
     "id": "dm_hac_fix_k1379_paper9",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-15T01:28:07+08:00",
     "description": "K1655 bug class 必修 #1（最高曝險）：experiments/k1379/k1379.py:359 的 dm_test **完全沒有 autocovariance 迴圈** — `gamma0 = np.mean(d**2) - d_bar**2` 直接當長期變異數，等於零 HAC 修正（已由主線程開檔抽驗確認）。此檢定餵 **Paper 9 (garch-x-vix) horse race** + 6 篇 feed 文章。另有第二 bug：HLN 因子寫成 `(T+1-2+1/T)/T`，h=1 的正確式是 `(T-1)/T`。做法：改用 canonical `volpred.stats.model_evaluation.dm_test`（bandwidth=max(1,min(ceil(h^(1/3)n^(1/3)), n//4))），先量 loss differential 的 acf(1) 再重跑，回報哪些 Harvey-significant 翻轉；若結論有變，必回溯更正 Paper 9 與 feed 文章（研究誠實 §6）。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-15T07:13:29.726677+00:00",
-    "claim_session_id": "69e1a3bf4695",
     "status_history": [
       {
         "ts": "2026-07-15T07:13:29.726695+00:00",
@@ -37139,9 +36924,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-15T09:08:17.705974+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-15T07:13:55.935914+00:00"
+    "started_at": "2026-07-15T07:13:55.935914+00:00",
+    "completed_at": "2026-07-15T09:08:17.705959+00:00",
+    "result": "K1379 rerun corrected QLIKE orientation, Bartlett-HAC DM, A4f timing, fail-closed fitting, and pinned clean input; independent Codex ultra review PASS with no defects. Corrected Paper 9, published article, and memory provenance; synced article/paper/memory and verified tests, gates, PDF, and publication-candidate routing."
   },
   {
     "id": "dm_hac_fix_k1386_borderline",
@@ -39053,9 +38846,18 @@
       "episode_started_at": "2026-07-15T07:26:00.838284+00:00",
       "attempt_number": 1,
       "last_seen_at": "2026-07-15T07:27:51.732560+00:00",
-      "consecutive_remediation_failures": 0,
-      "attempt_history": [],
-      "escalation_due": false
+      "consecutive_remediation_failures": 1,
+      "attempt_history": [
+        {
+          "observed_at": "2026-07-15T09:25:28.550316+00:00",
+          "completed_at": "2026-07-15T08:15:14.858470+00:00",
+          "status": "succeeded",
+          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因=PHASE-Z ownership race：某 07:xx fire 在 codex 07:13 dirty k1379.py 前起跑→誤判 owned→試 commit codex 在途未完成檔(3 bare silent-fallback)→gate 正確拒→3 retry→alert。現場確認 codex-vscode 活躍 review/repair k1379(live codex exec 3:48PM)，非孤兒。處置:為 3 處合法 best-effort fallback(k1379.py:148/201/248, caller 皆 check None) 補 silent-ok 註解→audit 0 findings，作者 codex commit 時 gate 會過；本 fire 不 commit(禁 steal 活躍作者檔)。自限:k1379.py 對後續 fire 皆 pre-fire-dirty→race 不重演。"
+        }
+      ],
+      "escalation_due": false,
+      "counted_as_failure_at": "2026-07-15T09:25:28.550316+00:00",
+      "last_failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因=PHASE-Z ownership race：某 07:xx fire 在 codex 07:13 dirty k1379.py 前起跑→誤判 owned→試 commit codex 在途未完成檔(3 bare silent-fallback)→gate 正確拒→3 retry→alert。現場確認 codex-vscode 活躍 review/repair k1379(live codex exec 3:48PM)，非孤兒。處置:為 3 處合法 best-effort fallback(k1379.py:148/201/248, caller 皆 check None) 補 silent-ok 註解→audit 0 findings，作者 codex commit 時 gate 會過；本 fire 不 commit(禁 steal 活躍作者檔)。自限:k1379.py 對後續 fire 皆 pre-fire-dirty→race 不重演。"
     },
     "status_history": [
       {
@@ -39227,39 +39029,305 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T08:14:04.739516+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 815）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nGitHub\n[yhlai0911/volpred-research] Test Suite workflow run\n \n\n \nTest Suite: All jobs have failed\n \n \nStatus Job Annotations\npytest \nTest Suite / pytest\nFailed in 9 minutes and 19 seconds\nannotations for Test Suite / pytest 2 \n \n \n—\nYou are receiving this because you are subscribed to this thread.\nManage your GitHub Actions notifications\n\n \nGitHub, Inc. ・88 Colin P Kelly Jr Street ・San Francisco, CA 94107\n\n又來？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nGitHub\n[yhlai0911/volpred-research] Test Suite workflow run\n \n\n \nTest Suite: All jobs have failed\n \n \nStatus Job Annotations\npytest \nTest Suite / pytest\nFailed in 9 minutes and 19 seconds\nannotations for Test Suite / pytest 2 \n \n \n—\nYou are receiving this because you are subscribed to this thread.\nManage your GitHub Actions notifications\n\n \nGitHub, Inc. ・88 Colin P Kelly Jr Street ・San Francisco, CA 94107\n\n又來？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T08:20:58.756122+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-15T08:22:51.874390+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-15T08:22:51.874376+00:00",
+    "result": "已診斷 CI 紅燈根因（2 測試: cron_wrapper_manifest 過期 + git ref hook 誤套 main-lease；auto-remediation 只 push 沒真修）；targeted 修復排入任務池 ci-red-fix-stragglers-20260715 交 dispatch；已 Telegram 回覆老闆 msg 819。"
   },
   {
     "id": "telegram-816",
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T08:14:19.452263+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 816）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nVolPred Boss Report · 2026-07-15 16:10 台灣時間 · Overall CRITICAL\n\n⓪ 本 cycle 意圖 / 目標 / 規劃\n\n意圖 Intent 從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\n本週目標 Weekly Goal • Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\n• Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\n• Mission 3: Paper 4 body_v4 完成 rewrite gate\n• Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\n本 cycle 計劃 Plan • Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\n• Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\n• Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\n• Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\n成功標準 Success Criteria • 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\n• 每 4h boss email 自動寄出無 fail\n• 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\n已知風險 Known Risks • main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\n• FB MCP root cause 可能要花 ≥2 cycles 才找到\n• Paper 4 rewrite 過長吃掉太多 main thread bandwidth\n① 平台狀態\n\n區段 狀態 說明 建議行動\n任務池狀態 ok 73 pending tasks + 4 pending_main_thread + 2 in-flight (top types: [('研究實驗', 35), ('平台維運', 16), ('日常文章', 15)]) dispatch top P1-P3 if slots free\n發文產量 ok 8 articles published last 24h (target 6/day) —\n網站資料同步 ok 8/8 last-24h articles synced —\n線上網站檢查 ok 3/3 sample report URLs ok; 3/3 core pages content-ok —\nFacebook 同步流程 warn 1 FB posts pending sync handoff doc + manual paste or retry MCP\n定時任務健康 ok 0 定時任務 jobs stale (over max-age) —\nhealth_ci_watch critical CI incident ci-red-29383038432 phase=escalated failures=7 CI watcher owns repair/verification; inspect task + failed log only if phase is escalated\n目前未處理警報 warn 1 current warn/critical 警報 conditions ingest alerts → run remediation per alert.md auto-action table\n自主循環健康度 ok overall=ok | 首次完成率=ok 任務完成率=ok error_recurrence=ok 返工/修正趨勢=ok —\n①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\n\n每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\n\n=== cron 成果掌握 review — 2026-07-15 16:10:13（台灣時間）===\n\n  hourly_dispatch   daemon=alive exit=0 running | last: 2026-07-15 16:09:50 (daemon-state)\n  compute_worker    runs=1178 exit=0 idle | last: 2026-07-15 16:00:02 (log-mtime)\n  check_alerts      runs=653 exit=0 idle | last: 2026-07-15 16:02:39 (log-mtime)\n  collect_tw        runs=20 exit=0 idle | last: 2026-07-15 15:00:10 (log-mtime)\n  collect_us        runs=19 exit=0 idle | last: 2026-07-15 07:03:10 (log-mtime)\n  daily_update      runs=23 exit=0 idle | last: 2026-07-15 08:07:44 (log-mtime)\n  daily_update_intraday runs=12 exit=1 idle | last: 2026-07-15 14:21:13 (log-mtime)  🔴 last exit 1\n  daily_checkup     runs=3 exit=0 idle | last: 2026-07-15 09:40:34 (log-mtime)\n  publication_candidates runs=None exit=None idle | last: 2026-07-15 15:22:39 (log-mtime)\n  release_pool      runs=109 exit=0 idle | last: 2026-07-15 12:07:03 (log-mtime)\n  market_cal        runs=4 exit=0 idle | last: 2026-07-13 08:00:04 (log-mtime)\n  memory_health     runs=27 exit=0 idle | last: 2026-07-15 05:30:02 (log-mtime)\n  work_summary      runs=1 exit=0 idle | last: 2026-07-14 20:05:15 (log-mtime)\n\n近 75 分鐘 git commits（hourly_dispatch 產出代理）：2 筆\n  dd97711e4 direction(asia): Asia-Pacific multi-market expansion line - TW sectors/JP/India/SEA per boss 2026-07-15 directive; non-US quota in topic selection (research_program ASIA facet + publication-candidates Step4 + research-topic-discovery batch axis); tasks asia1/2/3 queued; skill-change email c6526a18. Co-Authored-By: Claude Fable 5 <noreply@anthropic.com> Claude-Session: https://claude.ai/code/session_01QyfCuxwkQYuLAE6v4HsV7D\n  44afe99ea fix(daily-update): monotone publish gate - stale yfinance regression must not double-publish; unpublish stale twins, restore wrongly-removed morning article, anchor on published only; regression tests x5\n\n🔴 需要掌握/處理：\n  - daily_update_intraday: 🔴 last exit 1\n② 本 cycle 活動（過去 4h）\n\n9 commits\n\nSHA Subject Time\ndd97711e4 direction(asia): Asia-Pacific multi-market expansion line - TW sectors/JP/India/SEA per boss 2026-07-15 directive; non-US quota in topic selection (research_program ASIA facet + publication-candidates Step4 +\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nVolPred Boss Report · 2026-07-15 16:10 台灣時間 · Overall CRITICAL\n\n⓪ 本 cycle 意圖 / 目標 / 規劃\n\n意圖 Intent 從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\n本週目標 Weekly Goal • Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\n• Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\n• Mission 3: Paper 4 body_v4 完成 rewrite gate\n• Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\n本 cycle 計劃 Plan • Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\n• Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\n• Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\n• Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\n成功標準 Success Criteria • 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\n• 每 4h boss email 自動寄出無 fail\n• 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\n已知風險 Known Risks • main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\n• FB MCP root cause 可能要花 ≥2 cycles 才找到\n• Paper 4 rewrite 過長吃掉太多 main thread bandwidth\n① 平台狀態\n\n區段 狀態 說明 建議行動\n任務池狀態 ok 73 pending tasks + 4 pending_main_thread + 2 in-flight (top types: [('研究實驗', 35), ('平台維運', 16), ('日常文章', 15)]) dispatch top P1-P3 if slots free\n發文產量 ok 8 articles published last 24h (target 6/day) —\n網站資料同步 ok 8/8 last-24h articles synced —\n線上網站檢查 ok 3/3 sample report URLs ok; 3/3 core pages content-ok —\nFacebook 同步流程 warn 1 FB posts pending sync handoff doc + manual paste or retry MCP\n定時任務健康 ok 0 定時任務 jobs stale (over max-age) —\nhealth_ci_watch critical CI incident ci-red-29383038432 phase=escalated failures=7 CI watcher owns repair/verification; inspect task + failed log only if phase is escalated\n目前未處理警報 warn 1 current warn/critical 警報 conditions ingest alerts → run remediation per alert.md auto-action table\n自主循環健康度 ok overall=ok | 首次完成率=ok 任務完成率=ok error_recurrence=ok 返工/修正趨勢=ok —\n①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\n\n每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\n\n=== cron 成果掌握 review — 2026-07-15 16:10:13（台灣時間）===\n\n  hourly_dispatch   daemon=alive exit=0 running | last: 2026-07-15 16:09:50 (daemon-state)\n  compute_worker    runs=1178 exit=0 idle | last: 2026-07-15 16:00:02 (log-mtime)\n  check_alerts      runs=653 exit=0 idle | last: 2026-07-15 16:02:39 (log-mtime)\n  collect_tw        runs=20 exit=0 idle | last: 2026-07-15 15:00:10 (log-mtime)\n  collect_us        runs=19 exit=0 idle | last: 2026-07-15 07:03:10 (log-mtime)\n  daily_update      runs=23 exit=0 idle | last: 2026-07-15 08:07:44 (log-mtime)\n  daily_update_intraday runs=12 exit=1 idle | last: 2026-07-15 14:21:13 (log-mtime)  🔴 last exit 1\n  daily_checkup     runs=3 exit=0 idle | last: 2026-07-15 09:40:34 (log-mtime)\n  publication_candidates runs=None exit=None idle | last: 2026-07-15 15:22:39 (log-mtime)\n  release_pool      runs=109 exit=0 idle | last: 2026-07-15 12:07:03 (log-mtime)\n  market_cal        runs=4 exit=0 idle | last: 2026-07-13 08:00:04 (log-mtime)\n  memory_health     runs=27 exit=0 idle | last: 2026-07-15 05:30:02 (log-mtime)\n  work_summary      runs=1 exit=0 idle | last: 2026-07-14 20:05:15 (log-mtime)\n\n近 75 分鐘 git commits（hourly_dispatch 產出代理）：2 筆\n  dd97711e4 direction(asia): Asia-Pacific multi-market expansion line - TW sectors/JP/India/SEA per boss 2026-07-15 directive; non-US quota in topic selection (research_program ASIA facet + publication-candidates Step4 + research-topic-discovery batch axis); tasks asia1/2/3 queued; skill-change email c6526a18. Co-Authored-By: Claude Fable 5 <noreply@anthropic.com> Claude-Session: https://claude.ai/code/session_01QyfCuxwkQYuLAE6v4HsV7D\n  44afe99ea fix(daily-update): monotone publish gate - stale yfinance regression must not double-publish; unpublish stale twins, restore wrongly-removed morning article, anchor on published only; regression tests x5\n\n🔴 需要掌握/處理：\n  - daily_update_intraday: 🔴 last exit 1\n② 本 cycle 活動（過去 4h）\n\n9 commits\n\nSHA Subject Time\ndd97711e4 direction(asia): Asia-Pacific multi-market expansion line - TW sectors/JP/India/SEA per boss 2026-07-15 directive; non-US quota in topic selection (research_program ASIA facet + publication-candidates Step4 +\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T08:20:58.998191+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-15T08:22:52.113619+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-15T08:22:52.113605+00:00",
+    "result": "已診斷 CI 紅燈根因（2 測試: cron_wrapper_manifest 過期 + git ref hook 誤套 main-lease；auto-remediation 只 push 沒真修）；targeted 修復排入任務池 ci-red-fix-stragglers-20260715 交 dispatch；已 Telegram 回覆老闆 msg 819。"
   },
   {
     "id": "telegram-817",
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T08:14:22.539801+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 817）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nresearch-topic-discovery batch axis); tasks asia1/2/3 queued; skill-change email c6526a18. Co-Authored-By: Claude Fable 5 <noreply@anthropic.com> Claude-Session: https://claude.ai/code/session_01QyfCuxwkQYuLAE6v4HsV7D 16:02\n44afe99ea fix(daily-update): monotone publish gate - stale yfinance regression must not double-publish; unpublish stale twins, restore wrongly-removed morning article, anchor on published only; regression tests x5 15:08\n1d41b726e dispatch(14:35): fix DM-HAC auditor false-negative + recover host_cron_fail  idi\no088f3e5b6 ops(daily-update): refresh tracked outputs for 2026-07-15 14:2\n12bd3e06dd [codex] repair feed audience correction flow 14:1\n04277009a1 dispatch(13:21): publish stuck TSMC-earnings-IV draft before 7/16 法說會  pli\nca33b9bd579 ops(dispatch-supervisor 13:04): PHASE-Z state churn (no agent output this fire) 13:\n0404402484e dispatch(12:13): K1694 triage_failed → 重派為 compute script-job  沒把\n腳本跑3e716aa1f [codex] harden release pool cadence 12\n:10③ Pending 池與論\n\n文組合Pending tasks:\n\n 73By type: 研究實驗 · 35平台維運 · 16日常文章 · 15paper_body · 2流程治理 · 2paper_review \n\n· 1論\n\n文組合Paper Sta\ntusbtc-gas-negative major_revision — 2026-06-10 audit H\nIGHcrypto-fear-channel MAJOR REVISION (2026-06-11 audit \nsyneav-universal-magnitude 🔶 **MAJOR_REVISION（2026-06-10 全組合審查，5\n HIforecast-tail-divergenc\ne ?garch-x-vix submitted (under review) | Reproduce \ngatleverage-direction 🟢 **REVISION COMPLETE — v12 確認輪通過（202\n6-0prg-periodic-garch v7 major rewrite (2026-07-14) — headl\ninetaiwan-vt Major Revision Required — 2 HIGH \nblovix-sufficiency MAJOR_REVISION after audit 2026-06-\n10.volatility-absorption MAJOR REVISION in progress — P0 gate \nclovt-crowding-abm 🔶 **VT-only revision in progress（2026\n-07vt-insurance-cost REVISION — 2026-07-11 Fable finish\ning vt-trend-following Paper3_v4_revision_gemini_2h 已整合進 \n`bod⑤ 下個 cycle 行動（無需\n\n你決策）1. [pending] Wire audit + dashboard into runtime_schedules.json \n定時任務2. [pending] Add live_verify_failed alerting on draft → published transition (done by agent a67763789e702d1da, commit nee\nded)3. [pending] Backfill live_verify_failed=False stamps for last 30 days of published arti\ncles4. [pending] Build analytics ingestion (Mission 1/5 visibility \ngap)5. [pending] Build monetization funnel tracking (Mission ultimate g\noal)⑥ 方向建議（你的決策可\n\n能改變）# Boss Direction Recommendations (我給老闆的方\n\n向建議)**Updated**: 2026-06-22 (rolling — 我每 cycle\n 更新)**目的**: 給老闆做平台方向決策用的當前建議，可隨時 ig\n\nnor\n\ne---## 1. 論文投稿優先序（自主排程，除\n\n非你改）- Paper 4 body_v4 rewrite — gate UNLOCKED via K1116c/f + K1201 + K1203 4-experiment. 先做最 unblock 的這一個。目標期刊：JBF 或 \nIJF。- Paper 2 §5 rewrite (taiwan-vt) — K1204 synthesis materials ready (commit cf5188eb)，跨市場 §5 改寫；EAV universal-magnitude 是 spinoff。目標：\nJBF。- Paper 1 errata (leverage-direction) — 15 no-source rows + 4 個新 K 實驗待補；不是 BLOCKER 但要排第 3\n 順位。- Paper 6 prg-periodic-garch / Paper 10 crypto-fear-channel — 還在 outline/draft 階段，下一輪 cycle \n\n再規劃。## 2. 網站功能優先序（修正：先衝免費會員基數，不\n\n談付費）**修正自前版**：先前列「付費 tier 入口」是 premature monetization — 還沒幾個會員就想收費 = 平台運營錯誤順序。先設**免費階段目標**，達標後再\n\n談收費。### 免費階段目標（自主設定，\n會調整）- **3 個月內**：註冊會員 ≥100、weekly active ≥40、回訪率 \n≥30%- **6 個月內**：註冊 ≥500、提問池 active ≥10/week、外部分享 ≥20/\n\nweek### 為達標需建的功能（按\n優先序）- 🔴 P1: Reader analytics（CTR / 停留時間 / 跳出率 / 回訪 cohort） — 沒這個我盲打\n文章品質- 🔴 P1: 註冊 / 登入 flow（如果還沒）+ welcome onboar\nding- 🟡 P2: 文章 share button + 社群 OG meta（Mission 5 曝光直接 le\nver）- 🟡 P2: Member dashboard 改版（提問 → 研究進度視覺化、增加回\n訪誘因）- 🟡 P2: Email subscription（weekly digest = 留\n客武器）- 🟢 P3: 策略 sparkline 升級到 interactive c\nhart- **🟢 P3 之後**：付費 tier 入口（達到上面 6 個月目標\n\n再規劃）我會自主寫 docs/free_tier_growth_plan.md spec，1-2 週上 P1 \n\nMVP。## 3. 開發中的結\n\n構性改善- ✅ ops_dashboard.py — 7 區段健康儀表板（本 cycle\n 落地）- ✅ live_verify gate — 發文後驗證 live URL（本 cycle 落地，agent a677637\n 完成）- ✅ audit_publish_sync / audit_fb_pipeline — 兩個 standing audit script（本 cycle\n 落地）- 🔄 Reader analytics ingestion — spec\n 撰寫中- 🔄 Monetization funnel —\n 規劃中- 🟡 FB 個人帳號發文流程 — Page/Graph API 已永久撤回；保留 Claude-in-Chrome interactive path + 72h auto-expire/au\n\ndit。## 4.\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nresearch-topic-discovery batch axis); tasks asia1/2/3 queued; skill-change email c6526a18. Co-Authored-By: Claude Fable 5 <noreply@anthropic.com> Claude-Session: https://claude.ai/code/session_01QyfCuxwkQYuLAE6v4HsV7D 16:02\n44afe99ea fix(daily-update): monotone publish gate - stale yfinance regression must not double-publish; unpublish stale twins, restore wrongly-removed morning article, anchor on published only; regression tests x5 15:08\n1d41b726e dispatch(14:35): fix DM-HAC auditor false-negative + recover host_cron_fail  idi\no088f3e5b6 ops(daily-update): refresh tracked outputs for 2026-07-15 14:2\n12bd3e06dd [codex] repair feed audience correction flow 14:1\n04277009a1 dispatch(13:21): publish stuck TSMC-earnings-IV draft before 7/16 法說會  pli\nca33b9bd579 ops(dispatch-supervisor 13:04): PHASE-Z state churn (no agent output this fire) 13:\n0404402484e dispatch(12:13): K1694 triage_failed → 重派為 compute script-job  沒把\n腳本跑3e716aa1f [codex] harden release pool cadence 12\n:10③ Pending 池與論\n\n文組合Pending tasks:\n\n 73By type: 研究實驗 · 35平台維運 · 16日常文章 · 15paper_body · 2流程治理 · 2paper_review \n\n· 1論\n\n文組合Paper Sta\ntusbtc-gas-negative major_revision — 2026-06-10 audit H\nIGHcrypto-fear-channel MAJOR REVISION (2026-06-11 audit \nsyneav-universal-magnitude 🔶 **MAJOR_REVISION（2026-06-10 全組合審查，5\n HIforecast-tail-divergenc\ne ?garch-x-vix submitted (under review) | Reproduce \ngatleverage-direction 🟢 **REVISION COMPLETE — v12 確認輪通過（202\n6-0prg-periodic-garch v7 major rewrite (2026-07-14) — headl\ninetaiwan-vt Major Revision Required — 2 HIGH \nblovix-sufficiency MAJOR_REVISION after audit 2026-06-\n10.volatility-absorption MAJOR REVISION in progress — P0 gate \nclovt-crowding-abm 🔶 **VT-only revision in progress（2026\n-07vt-insurance-cost REVISION — 2026-07-11 Fable finish\ning vt-trend-following Paper3_v4_revision_gemini_2h 已整合進 \n`bod⑤ 下個 cycle 行動（無需\n\n你決策）1. [pending] Wire audit + dashboard into runtime_schedules.json \n定時任務2. [pending] Add live_verify_failed alerting on draft → published transition (done by agent a67763789e702d1da, commit nee\nded)3. [pending] Backfill live_verify_failed=False stamps for last 30 days of published arti\ncles4. [pending] Build analytics ingestion (Mission 1/5 visibility \ngap)5. [pending] Build monetization funnel tracking (Mission ultimate g\noal)⑥ 方向建議（你的決策可\n\n能改變）# Boss Direction Recommendations (我給老闆的方\n\n向建議)**Updated**: 2026-06-22 (rolling — 我每 cycle\n 更新)**目的**: 給老闆做平台方向決策用的當前建議，可隨時 ig\n\nnor\n\ne---## 1. 論文投稿優先序（自主排程，除\n\n非你改）- Paper 4 body_v4 rewrite — gate UNLOCKED via K1116c/f + K1201 + K1203 4-experiment. 先做最 unblock 的這一個。目標期刊：JBF 或 \nIJF。- Paper 2 §5 rewrite (taiwan-vt) — K1204 synthesis materials ready (commit cf5188eb)，跨市場 §5 改寫；EAV universal-magnitude 是 spinoff。目標：\nJBF。- Paper 1 errata (leverage-direction) — 15 no-source rows + 4 個新 K 實驗待補；不是 BLOCKER 但要排第 3\n 順位。- Paper 6 prg-periodic-garch / Paper 10 crypto-fear-channel — 還在 outline/draft 階段，下一輪 cycle \n\n再規劃。## 2. 網站功能優先序（修正：先衝免費會員基數，不\n\n談付費）**修正自前版**：先前列「付費 tier 入口」是 premature monetization — 還沒幾個會員就想收費 = 平台運營錯誤順序。先設**免費階段目標**，達標後再\n\n談收費。### 免費階段目標（自主設定，\n會調整）- **3 個月內**：註冊會員 ≥100、weekly active ≥40、回訪率 \n≥30%- **6 個月內**：註冊 ≥500、提問池 active ≥10/week、外部分享 ≥20/\n\nweek### 為達標需建的功能（按\n優先序）- 🔴 P1: Reader analytics（CTR / 停留時間 / 跳出率 / 回訪 cohort） — 沒這個我盲打\n文章品質- 🔴 P1: 註冊 / 登入 flow（如果還沒）+ welcome onboar\nding- 🟡 P2: 文章 share button + 社群 OG meta（Mission 5 曝光直接 le\nver）- 🟡 P2: Member dashboard 改版（提問 → 研究進度視覺化、增加回\n訪誘因）- 🟡 P2: Email subscription（weekly digest = 留\n客武器）- 🟢 P3: 策略 sparkline 升級到 interactive c\nhart- **🟢 P3 之後**：付費 tier 入口（達到上面 6 個月目標\n\n再規劃）我會自主寫 docs/free_tier_growth_plan.md spec，1-2 週上 P1 \n\nMVP。## 3. 開發中的結\n\n構性改善- ✅ ops_dashboard.py — 7 區段健康儀表板（本 cycle\n 落地）- ✅ live_verify gate — 發文後驗證 live URL（本 cycle 落地，agent a677637\n 完成）- ✅ audit_publish_sync / audit_fb_pipeline — 兩個 standing audit script（本 cycle\n 落地）- 🔄 Reader analytics ingestion — spec\n 撰寫中- 🔄 Monetization funnel —\n 規劃中- 🟡 FB 個人帳號發文流程 — Page/Graph API 已永久撤回；保留 Claude-in-Chrome interactive path + 72h auto-expire/au\n\ndit。## 4.\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T08:20:59.258969+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-15T08:22:52.365493+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-15T08:22:52.365479+00:00",
+    "result": "已診斷 CI 紅燈根因（2 測試: cron_wrapper_manifest 過期 + git ref hook 誤套 main-lease；auto-remediation 只 push 沒真修）；targeted 修復排入任務池 ci-red-fix-stragglers-20260715 交 dispatch；已 Telegram 回覆老闆 msg 819。"
   },
   {
     "id": "telegram-818",
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T08:14:22.576140+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 818）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n需要你決策的策\n\n略性事項只標出來，你不回我也會\n\n自主走。- **目標期刊**：我預設 JBF（top-tier finance），如果你想往 RFS / JFE 衝需要拉高 contribution c\nlaim- **FB 路線**：已決定 personal account only；Page/Graph API 不再作為 active 建議或 fallb\nack。- **付費 tier 命名與定價**：你 vs 我寫 mock-up（我可以做但市場價格判斷你比\n較知道）- **策略上架節奏**：active 11 個都 healthy，是否擴張到 15-20 個 strategy univ\n\ners\n\ne---**這份 doc 我每 cycle 更新**。建議過時的會劃掉、新建議\n加上來。Report generated 2026-07-15 16:10:00 台灣時間 · Window 4h · Source: scripts/boss_report.py\n\n還是出現criticle?\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n需要你決策的策\n\n略性事項只標出來，你不回我也會\n\n自主走。- **目標期刊**：我預設 JBF（top-tier finance），如果你想往 RFS / JFE 衝需要拉高 contribution c\nlaim- **FB 路線**：已決定 personal account only；Page/Graph API 不再作為 active 建議或 fallb\nack。- **付費 tier 命名與定價**：你 vs 我寫 mock-up（我可以做但市場價格判斷你比\n較知道）- **策略上架節奏**：active 11 個都 healthy，是否擴張到 15-20 個 strategy univ\n\ners\n\ne---**這份 doc 我每 cycle 更新**。建議過時的會劃掉、新建議\n加上來。Report generated 2026-07-15 16:10:00 台灣時間 · Window 4h · Source: scripts/boss_report.py\n\n還是出現criticle?\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T08:20:59.517163+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-15T08:22:52.607313+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-15T08:22:52.607295+00:00",
+    "result": "已診斷 CI 紅燈根因（2 測試: cron_wrapper_manifest 過期 + git ref hook 誤套 main-lease；auto-remediation 只 push 沒真修）；targeted 修復排入任務池 ci-red-fix-stragglers-20260715 交 dispatch；已 Telegram 回覆老闆 msg 819。"
+  },
+  {
+    "id": "ci-red-fix-stragglers-20260715",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "user",
+    "status": "succeeded",
+    "created_at": "2026-07-15T08:20:00+00:00",
+    "created_by": "telegram_responder",
+    "preferred_agent": "auto",
+    "fallback_allowed": true,
+    "title": "CI 紅燈根治：修好剩下 2 個持續失敗的測試（auto-remediation 只 push 沒真修）",
+    "description": "背景：main Test Suite 從 2026-07-14 22:33（run 29373377712 之後）連續紅到現在（~18h）。ci_watch auto-remediation 每小時建 ci-red-* 任務但只做 push 就標 succeeded，沒有真的修好測試，所以 boss report 持續 CRITICAL。\n\n最新 run 29399240558 log-failed 顯示只剩 2 個測試失敗（3113 passed, 2 failed）：\n\n1) scripts/tests/test_cron_wrapper_manifest.py::test_manifest_matches_canonical_wrappers\n   根因：有人改了 scripts/cron_*.sh（近期 daily-update commit 動過 wrapper）沒重生 manifest。\n   修法：`uv run python scripts/sync_cron_wrappers.py --apply`，commit 更新後的 config/cron_wrapper_manifest.json。\n\n2) scripts/tests/test_git_reference_transaction_hook.py::test_non_main_branch_ref_is_not_subject_to_main_lease\n   現象：`git worktree add -b side <path>` 回傳 exit 128。\n   疑似根因：git reference transaction hook 把非 main 分支的 ref 也套用 main-lease 守衛，擋掉了 side 分支的 worktree/ref 建立（正是此測試要保證不該發生的事）。需 reproduce 後修 hook 邏輯讓非 main ref 不受 main lease 限制；勿改測試放水。\n\n驗收：本機 `uv run --extra dev python -m pytest scripts/tests/test_cron_wrapper_manifest.py scripts/tests/test_git_reference_transaction_hook.py -q` 全綠，push 後確認 main Test Suite 轉綠。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T09:00:58.461810+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-15T09:01:04.074587+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-15T09:08:42.762432+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-17"
+      }
+    ],
+    "started_at": "2026-07-15T09:01:04.074570+00:00",
+    "completed_at": "2026-07-15T09:08:42.762418+00:00",
+    "result": "root_cause=git-version-dependent reference-transaction: git>=2.50/CI reports new linked-worktree HEAD as symref creation (old=null-OID) from the MAIN toplevel, tripping the hook touches_head guard -> main-lease demanded -> 'git worktree add -b side' aborts exit128; git 2.43 reported it as a no-op from the side toplevel so local pytest passed. test1(manifest) already fixed in HEAD 30489d5dc (lockstep). Fix: gate HEAD in scripts/git_hooks/reference-transaction on old!=new AND non-null old (case *[!0]*), mirroring refs/heads/main semantics; verified under /usr/bin/git 2.50 that worktree-add now SUCCEEDS and HEAD-detach without lease still BLOCKS (HEAD stays refs/heads/main); 19 passed in target test files. repair_commit=pending-PHASE-Z"
+  },
+  {
+    "id": "dm_hac_fix_k1378_covid_split",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-15T08:34:29.171934+00:00",
+    "source": "dm_hac_fix_k1379_paper9_exposure_audit",
+    "description": "Rerun K1378 leave-COVID-out and subperiod comparisons with actual-first QLIKE, canonical Bartlett-HAC DM, aligned A4f recursion, and pinned unique-date input. Correct knowledge/feed mile_54f79768 only from its own rerun; do not transplant K1379 values."
+  },
+  {
+    "id": "k1396_scope_repair_daily_r2",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-15T08:34:29.171934+00:00",
+    "source": "dm_hac_fix_k1379_paper9_exposure_audit",
+    "description": "Audit K1396 independent protocol and public claims. Relabel daily-r-squared and steady-state A4f approximations accurately, withdraw canonical HAR-RV/non-inferiority wording unless supported, then update K1396 knowledge and feeds mile_7825c8a2 and mile_7fbc61c8."
+  },
+  {
+    "id": "ci-red-29399240558",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29383038432",
+    "ci_run_key": "29399240558:1",
+    "created_at": "2026-07-15T09:00:08.075757+00:00",
+    "title": "CI 紅燈修復（run 29399240558, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29399240558\nattempt: 1\nhead_sha: 44afe99ea\n偵測摘要（仍須讀完整 failed log）：2026-07-15T02:10:18.2460417Z E AssertionError: assert 2 == 0\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29399240558 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T10:02:31.832970+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-15T10:02:32.089132+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-15T10:08:25.400067+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-18"
+      }
+    ],
+    "started_at": "2026-07-15T10:02:32.089115+00:00",
+    "completed_at": "2026-07-15T10:08:25.400048+00:00",
+    "result": "CI 紅燈根因=feed audience mismatch (mile_8a9ae3c8 general→research，K1379 public sync 灌入 QLIKE/HAC-DM 訊號)。透過 guarded backfill_feed_audience.py --apply 修正(plan 補 rewrite_general/K1379)，validate_feed_audience 0 mismatch/exit0，DM-HAC+git-hook 測試本地綠，queue 出白話 companion K1379_article_general_audience_rewrite_8a9ae3c8"
+  },
+  {
+    "id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a2",
+    "title": "[internal alert] PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n## 發生什麼\nPHASE-Z 連續 3 次無法完成這班的自動 commit（原因：commit_nonzero）。已停止重試 —— 同一班不再重跑。\n檔案仍在工作區、沒有遺失。\n\n## 現在該做什麼\n確認未提交檔案的作者後由該作者 commit。若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。\n\n## git commit 輸出（尾段）\nresolved=64\n[pre-commit]   NEW scripts/taifex_tick_inventory.py:86 except OSError: continue\n[pre-commit]   NEW scripts/taifex_tick_inventory.py:276 except UnicodeDecodeError|UnicodeError|SourceFormatError: continue\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-07-15T09:25:28.550316+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "silent_fallback_new"
+    ],
+    "alert_key": "silent_fallback_new",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260715T072600838284Z",
+      "episode_started_at": "2026-07-15T07:26:00.838284+00:00",
+      "attempt_number": 2,
+      "last_seen_at": "2026-07-15T09:27:29.150692+00:00",
+      "consecutive_remediation_failures": 1,
+      "attempt_history": [
+        {
+          "observed_at": "2026-07-15T09:25:28.550316+00:00",
+          "completed_at": "2026-07-15T08:15:14.858470+00:00",
+          "status": "succeeded",
+          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因=PHASE-Z ownership race：某 07:xx fire 在 codex 07:13 dirty k1379.py 前起跑→誤判 owned→試 commit codex 在途未完成檔(3 bare silent-fallback)→gate 正確拒→3 retry→alert。現場確認 codex-vscode 活躍 review/repair k1379(live codex exec 3:48PM)，非孤兒。處置:為 3 處合法 best-effort fallback(k1379.py:148/201/248, caller 皆 check None) 補 silent-ok 註解→audit 0 findings，作者 codex commit 時 gate 會過；本 fire 不 commit(禁 steal 活躍作者檔)。自限:k1379.py 對後續 fire 皆 pre-fire-dirty→race 不重演。"
+        }
+      ],
+      "escalation_due": false,
+      "last_failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因=PHASE-Z ownership race：某 07:xx fire 在 codex 07:13 dirty k1379.py 前起跑→誤判 owned→試 commit codex 在途未完成檔(3 bare silent-fallback)→gate 正確拒→3 retry→alert。現場確認 codex-vscode 活躍 review/repair k1379(live codex exec 3:48PM)，非孤兒。處置:為 3 處合法 best-effort fallback(k1379.py:148/201/248, caller 皆 check None) 補 silent-ok 註解→audit 0 findings，作者 codex commit 時 gate 會過；本 fire 不 commit(禁 steal 活躍作者檔)。自限:k1379.py 對後續 fire 皆 pre-fire-dirty→race 不重演。"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-15T10:09:12.608009+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-15T10:09:20.024379+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-18"
+      },
+      {
+        "ts": "2026-07-15T10:14:28.946421+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-18"
+      }
+    ],
+    "started_at": "2026-07-15T10:09:20.024360+00:00",
+    "completed_at": "2026-07-15T10:14:28.946406+00:00",
+    "result": "root_cause=pre-commit silent-fallback gate 擋下 scripts/taifex_tick_inventory.py:86(except OSError→continue, inventory rglob/stat race) 與 :277(except decode→continue, 多編碼嘗試迴圈; 全失敗回 error dict) 兩個未標記合法 silent path，導致 17:24 taifexdata_dropbox_organize fire 的 PHASE-Z commit_nonzero×3。 repair=兩處加 '# silent-ok: <reason>' 標記；audit_silent_fallbacks.py 對 taifex_tick_inventory.py/collect_taifex_tick.py/taifex_tick_to_canonical.py 全 findings=0 exit0，self-healing alert 條件(gate 阻擋)已於 working tree 清除。 note: 這些 taifex 檔為 pre-baseline orphan(產於17:24 早於本班18:00 fire baseline)，且 shared index 現有他 slot staged 檔，依 CLAUDE.md/slot-context 硬規不自行 git commit；committal 交 cohort-drained PHASE-Z。baseline 64-finding 縮減為 warn-only separate cleanup，非 blocker。"
+  },
+  {
+    "id": "K1379_article_general_audience_rewrite_8a9ae3c8",
+    "title": "Audience correction: rewrite a true general companion for 波動率預測不是把指標愈疊愈多就會愈準",
+    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_8a9ae3c8. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1379']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "dispatch_lane": "agent",
+    "source": "audience_correction_backfill",
+    "article_id": "mile_8a9ae3c8",
+    "experiment_refs": [
+      "K1379"
+    ],
+    "parent_task_id": "content_audience_mislabel_backlog_45",
+    "tags": [
+      "audience-correction",
+      "rewrite-general",
+      "content-quality"
+    ],
+    "created_at": "2026-07-15T10:06:41.746915+00:00",
+    "k_id": "K1379"
+  },
+  {
+    "id": "telegram-820",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "claimed",
+    "created_at": "2026-07-15T10:14:36.084266+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 820）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nGitHub\n[yhlai0911/volpred-research] Test Suite workflow run\n \n\n \nTest Suite: All jobs have failed\n \n \nStatus Job Annotations\npytest \nTest Suite / pytest\nFailed in 2 minutes\nannotations for Test Suite / pytest 2 \n \n \n—\nYou are receiving this because you are subscribed to this thread.\nManage your GitHub Actions notifications\n\n \nGitHub, Inc. ・88 Colin P Kelly Jr Street ・San Francisco, CA 94107\n\n你他媽就幾分鐘前又出現錯誤\n你不要跟我說你已經改好 這只是改好前的狀態\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram_responder",
+    "claimed_at": "2026-07-15T10:15:19.712694+00:00",
+    "claim_session_id": "8ceebe3e8b22",
+    "status_history": [
+      {
+        "ts": "2026-07-15T10:15:19.712711+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      }
+    ]
+  },
+  {
+    "id": "market_daily_stale_spygld_backfill_verify",
+    "title": "market_daily SPY/GLD stale carry-forward 回填驗證 + 寫入端 flag 行為檢查（yfinance 7/14-15 無值）",
+    "description": "2026-07-15 v3 報頭修復時發現：market_daily 7/14 與 7/15 列的 spy_close/gld_close 與 7/13 完全同值（749.17/367.13）— yfinance 7/14 起 SPY/GLD 回 NaN（同 44afe99ea stale-yfinance regression 線），寫入端把前值 carry-forward 進表且無 stale flag，造成前端 ticker change 顯示 0.00%。任務：(1) 驗 yfinance 是否已恢復供 7/14+ 真值；恢復則讓既有資料流程（daily_update/collect_us）重跑回填 market_daily 7/14-15 正確 close（不手改 DB，修流程重寫）；(2) 檢查寫入端 carry-forward 行為：無新值時應寫 NULL 或帶 stale flag，不可無標記複製前值（誠實原則 — 假裝有收盤值）；若要改行為先查 44afe99ea 的 monotone gate 設計避免疊床架屋；(3) 完成後 curl https://volpred.zeabur.app/api/strategy-overview 驗 spy_change_pct 非 0（若市場真有變動）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "main_thread_20260715_v3_masthead_fix",
+    "created_at": "2026-07-15T10:16:06.095808+00:00"
   }
 ]
