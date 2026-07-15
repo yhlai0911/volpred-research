@@ -1,0 +1,35 @@
+{
+  "id": "K1694-script-rerun-1211",
+  "title": "K1694 FCM清算集中度 HHI 排擠小型交易者（script-job：直接跑已寫好的 K1694.py 到完成）",
+  "script_path": ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/K1694.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-15T04:11:51Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/K1694-script-rerun-1211.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/K1694-script-rerun-1211.stderr",
+  "result_artifact": ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/K1694_results.json",
+  "output_paths": [
+    ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/K1694_results.json",
+    ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/figures/fig1_fcm_hhi_timeseries.png",
+    ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/figures/fig2_regime_2x2.png",
+    ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/figures/fig3_interaction_coef.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1694 收件（triage_failed 重跑後）：腳本 K1694.py 已由前 agent 寫好（as-of merge_asof + shift(1) 防 Class F lookahead、Driscoll-Kraay/cluster-by-month SE、HAC bandwidth 由 acf 決定 K1655、block bootstrap seed=1694）。收件動作：(1) 驗數字—發布日 lag(FCM 月底+45天 as-of)、seed=1694、HAC bandwidth；(2) 跑 experiment_gates run；(3) 審 provenance+誠實邊界（同期相關非因果、單一月度序列有效自由度低，結論須節制、Null 如實）；(4) Codex 二審 code；(5) 過審才寫 knowledge（主線程寫，非 agent）；(6) merge_worktree.sh 合併 dispatch-slot-1-f53bca44-k1694。原 agent-job agent-brief_K1694-10e82d 因 background 驗證未收尾、results.json 未產出而 failed → 本次改用 compute worker 直接同步跑腳本到完成。",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600,
+  "brief_source": null,
+  "brief_snapshot": null
+}
