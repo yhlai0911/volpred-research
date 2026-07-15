@@ -38702,7 +38702,7 @@
     "title": "Audience correction: rewrite a true general companion for 私募信貸看不到帳本，市場還是會先動：一個只對高收益債有用的影子訊號",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_1b511caa. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1332', 'K1499']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38719,7 +38719,25 @@
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
     "k_id": "K1332",
-    "experiment_id": "K1499"
+    "experiment_id": "K1499",
+    "claimed_by": "codex-desktop-k1332-audience",
+    "claimed_at": "2026-07-15T20:35:21.098899+00:00",
+    "claim_session_id": "a23eead7aae5",
+    "status_history": [
+      {
+        "ts": "2026-07-15T20:35:21.098923+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1332-audience"
+      },
+      {
+        "ts": "2026-07-15T20:35:21.347987+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1332-audience"
+      }
+    ],
+    "started_at": "2026-07-15T20:35:21.347971+00:00"
   },
   {
     "id": "K740_article_general_audience_rewrite_2fb1dfb3",
@@ -38748,7 +38766,7 @@
     "title": "Audience correction: rewrite a true general companion for 明知道 VIX 在比特幣恐慌時會失靈，為什麼把它關掉還是沒救？",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_4e5a221e. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1096']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38764,9 +38782,6 @@
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
     "k_id": "K1096",
-    "claimed_by": "codex-desktop-k1096-audience",
-    "claimed_at": "2026-07-15T20:31:15.459904+00:00",
-    "claim_session_id": "1ffa8cdf5da5",
     "status_history": [
       {
         "ts": "2026-07-15T20:31:15.459916+00:00",
@@ -38779,9 +38794,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-k1096-audience"
+      },
+      {
+        "ts": "2026-07-15T20:50:42.232861+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-k1096-audience"
       }
     ],
-    "started_at": "2026-07-15T20:31:15.687592+00:00"
+    "started_at": "2026-07-15T20:31:15.687592+00:00",
+    "completed_at": "2026-07-15T20:50:42.232844+00:00",
+    "result": "Created true general companion mile_e565b810 (draft/general) from K1096 with 2 verified evidence charts, all source numbers/null result/limits/t-1 no-lookahead/date clarification preserved. publish_draft dry-run and publish both sanitize_applied=0; cross-model FACT/STYLE PASS; audience validator 1820 entries/0 mismatches; 187 targeted tests passed. Source mile_4e5a221e now records K1096 general coverage; bespoke Codex lazypack queued as lazypack-mile_e565b810. Content commit fabbf76c0."
   },
   {
     "id": "K1427_article_general_audience_rewrite_c07025d2",
