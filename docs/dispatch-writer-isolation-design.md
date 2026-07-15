@@ -8,8 +8,9 @@
 ## 1. 決策摘要
 
 建議採用「**每 task 一個 registered worktree，repo patch 與 canonical／external side effect 分段**」；
-但不可把現有 experiment `merge_worktree.sh` 原封不動擴到所有 task。它會 stash 整個 main checkout，
-而且混有 experiment-only certification 與歷史救援分支，正是多 slot 下要消除的 landing 風險。
+但不可把現有 experiment `merge_worktree.sh` 原封不動擴到所有 task。該工具在 2026-07-16 前會 stash
+整個 main checkout；目前已改成 staged／同路徑 WIP fail-closed、不相交 WIP 原地保留且零 stash，
+但仍混有 experiment-only certification 與歷史救援分支，不是通用 landing surface。
 
 第一階段只做 `platform_ops` repo-patch shadow/pilot；`governance` 在 pilot 穩定後才加入。worker 不再靠
 prompt 自己建 worktree：allocator 在 agent 啟動前建立並記錄 workspace，worker 的 `cwd` 直接指向它。
@@ -141,7 +142,7 @@ compatibility tests 審，再經 owner-approved post-merge activation；普通 t
 
 ## 6. Landing protocol（目標態）
 
-landing 必須是單一 owner，且不以現行 `merge_worktree.sh` 的全樹 stash 作前置條件。
+landing 必須是單一 owner，且不可回歸 2026-07-16 前 `merge_worktree.sh` 的全樹 stash 前置條件。
 
 1. 取得 integration lock，重讀 `main` HEAD、task branch、workspace receipt。
 2. 驗 registered worktree/branch identity、unique commits、declared-path subset、denied-path zero、gate SHA fresh。

@@ -437,16 +437,6 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
         local main_branch_orig
         main_branch_orig=$(git rev-parse HEAD)
 
-        # 確保 main 沒有未提交的變更（否則 merge 會被拒絕）
-        local main_dirty=false
-        local main_status
-        main_status=$(git status --porcelain 2>/dev/null || true)
-        if [[ -n "$main_status" ]]; then
-            main_dirty=true
-            echo "  [PREP] main 有未提交變更，先 stash..."
-            git stash push -m "merge_worktree: temp stash before merging $wt_name" 2>/dev/null || true
-        fi
-
         # 檢查 agent 是否修改了共享 JSON（違反規則的早期警告）
         # K1262-v4 (2026-04-27): git diff 用 -C "$MAIN_DIR" 強制 ref 解析在主 repo
         # 2026-05-18 K-worktree-stash-pop fix: 加 runtime/operational state 檔
@@ -485,22 +475,52 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
             echo "         1. 檢視 git diff $main_branch...$branch -- $shared_files"
             echo "         2. 決定把 agent 的有價值變更手動 apply 到 main（或直接 drop）"
             echo "         3. 再跑 bash scripts/merge_worktree.sh $wt_name 續做合併"
-            # 還原 stash 才退出（避免 silent stash）
-            if $main_dirty; then
-                echo "  [RESTORE] 還原剛才的 stash..."
-                # 不可寫成 `git stash pop 2>&1 | head -5 || echo 失敗`：set -o pipefail (L16) 下
-                # head 讀滿 5 行就關管線 → git 收到 SIGPIPE → rc=141 → pop 明明成功也走 `||`。
-                # 那個假警告還教人跑 `git stash apply stash@{0}`；此時 pop 已成功、stash 已彈出，
-                # stash@{0} 是別人幾個月前的 stash —— 照做等於把陳年 stash 蓋回 main。(2026-07-10)
-                local pop_out pop_rc=0
-                pop_out=$(git stash pop 2>&1) || pop_rc=$?
-                printf '%s\n' "$pop_out" | head -5 || true
-                if (( pop_rc != 0 )); then
-                    echo "  [⚠️] stash pop 失敗 (rc=$pop_rc)。該 stash 仍在，用訊息定位（不要用 stash@{0}）："
-                    echo "       git stash list | grep 'merge_worktree: temp stash before merging $wt_name'"
-                fi
-            fi
             return 1
+        fi
+
+        # Multi-slot main checkout 不屬於本次 merge transaction；其中的 WIP 可能來自
+        # 另一個 slot 或互動 session。絕不 stash / reset / checkout 它。先拒絕任何
+        # foreign staged state（否則 merge/fallback commit 可能把別人的 index 一起提交），
+        # 再只對「agent 會碰到的同一路徑」fail-closed。互不相交的 unstaged/untracked
+        # WIP 交給 Git 原生保留，讓 unrelated slot 不必為每次 integration 全面停機。
+        local main_staged_paths main_unstaged_paths main_untracked_paths
+        local main_dirty_paths branch_touched_paths dirty_overlap
+        if ! main_staged_paths=$(git -C "$MAIN_DIR" diff --cached --name-only); then
+            echo "  [ABORT] 無法讀取 main staged paths；拒絕在未知 index 狀態下合併"
+            return 1
+        fi
+        if [[ -n "$main_staged_paths" ]]; then
+            echo "  [ABORT] main index 已有 staged 內容；拒絕把其他 writer 的 index 捲入 merge commit："
+            printf '%s\n' "$main_staged_paths" | sed -n '1,20{s/^/      /;p;}'
+            echo "  [HINT] 等 staged 內容由原 owner commit/unstage 後再重跑；本工具不 stash、不 reset。"
+            return 1
+        fi
+        if ! main_unstaged_paths=$(git -C "$MAIN_DIR" diff --name-only); then
+            echo "  [ABORT] 無法讀取 main unstaged paths；拒絕合併"
+            return 1
+        fi
+        if ! main_untracked_paths=$(git -C "$MAIN_DIR" ls-files --others --exclude-standard); then
+            echo "  [ABORT] 無法讀取 main untracked paths；拒絕合併"
+            return 1
+        fi
+        if ! branch_touched_paths=$(git -C "$MAIN_DIR" diff --name-only "$main_branch...$branch"); then
+            echo "  [ABORT] 無法計算 agent touched paths；拒絕合併"
+            return 1
+        fi
+        main_dirty_paths=$(printf '%s\n%s\n' "$main_unstaged_paths" "$main_untracked_paths" \
+            | sed '/^$/d' | sort -u)
+        dirty_overlap=$(comm -12 \
+            <(printf '%s\n' "$main_dirty_paths" | sed '/^$/d' | sort -u) \
+            <(printf '%s\n' "$branch_touched_paths" | sed '/^$/d' | sort -u))
+        if [[ -n "$dirty_overlap" ]]; then
+            echo "  [ABORT] main 未提交 WIP 與 agent 變更路徑重疊；拒絕觸碰其他 slot 的工作："
+            printf '%s\n' "$dirty_overlap" | sed -n '1,20{s/^/      /;p;}'
+            echo "  [HINT] 等原 owner 收尾，或由主線程人工整合；本工具不 stash、不覆寫。"
+            return 1
+        fi
+        if [[ -n "$main_dirty_paths" ]]; then
+            echo "  [PREP] main 有不相交的未提交 WIP；原地保留，不 stash："
+            printf '%s\n' "$main_dirty_paths" | sed -n '1,20{s/^/      /;p;}'
         fi
 
         # 用 -X ours 自動解決衝突：新檔案照常加入，衝突部分保留 main 版本
@@ -550,51 +570,6 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
                 fi
             else
                 echo "  [INFO] agent 沒有新增檔案，nothing to fallback"
-            fi
-        fi
-
-        # 還原 main 的 stash
-        if $main_dirty; then
-            echo "  [PREP] 還原 main 的 stash..."
-            if ! git stash pop 2>&1 | tee /tmp/merge_worktree_stash_pop.log; then
-                echo ""
-                echo "  ⚠️  STASH POP 衝突 — 自動 surgical restore runtime 檔（2026-05-18 K-worktree-stash-pop fix）"
-                # 自動救回 runtime/operational state 檔案（worktree merge 不應該覆蓋這些）
-                # 這些檔案的 worktree 版本是 stale（從 checkout 時凍結），main 版本才是 live
-                local runtime_files=(
-                    "storage/.release_settings.json"
-                    "storage/logs/cron/release_pool.log"
-                    "storage/logs/cron/check_alerts.log"
-                    "storage/logs/cron/collect_us.log"
-                    "storage/logs/cron/collect_tw.log"
-                    "storage/logs/cron/daily_update.log"
-                    "storage/logs/cron/continue_task_stub.log"
-                    "storage/market_status.json"
-                    "storage/session_state.json"
-                    "storage/ops/cron_last_run.json"
-                    "storage/ops/pending_sessions.json"
-                )
-                local restored=0
-                for rf in "${runtime_files[@]}"; do
-                    # 只還原 stash@{0} 內確實有的 runtime 檔（避免 noisy error）
-                    if git stash show stash@{0} --name-only 2>/dev/null | grep -qx "$rf"; then
-                        if git checkout stash@{0} -- "$rf" 2>/dev/null; then
-                            echo "    [✓ RESTORED] $rf"
-                            restored=$((restored + 1))
-                        fi
-                    fi
-                done
-                echo "  [OK] 自動還原 $restored 個 runtime 檔"
-                echo ""
-                echo "  🚨 ============================================="
-                echo "  🚨 但 stash@{0} 內可能還有其他主線程未提交變更需手動處理"
-                echo "  🚨 不要關掉這個 session 以免遺忘。"
-                echo "  🚨 救回方法："
-                echo "  🚨   git stash show stash@{0} --name-only   # 看有哪些檔"
-                echo "  🚨   git checkout stash@{0} -- <path>       # 救特定檔"
-                echo "  🚨   git stash apply stash@{0}              # 全部 apply"
-                echo "  🚨 ============================================="
-                echo ""
             fi
         fi
 

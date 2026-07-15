@@ -742,11 +742,9 @@ test_case_11_stale_base_no_false_abort() {
 }
 
 # ============================================================
-# Test Case 12 (2026-07-10): guard 真的該響時要響，且 stash 還原不可假警報
+# Test Case 12 (2026-07-10; 2026-07-16 收斂): guard 真的該響時要響，且
 #   agent 真的改了 feed.json → 必 ABORT（Case 11 不能把 guard 修成永遠不響）。
-#   且 main 有未提交變更時：stash pop 成功就不准印「stash pop 失敗」。
-#   舊版 `git stash pop | head -5 || echo 失敗` 在 pipefail 下被 SIGPIPE 打成 rc=141，
-#   pop 成功也印失敗，還叫人 `git stash apply stash@{0}` —— 那已是別人的舊 stash。
+#   main WIP 必須原地保留；merge_worktree 不得再建立/套用任何 temp stash。
 # ============================================================
 test_case_13_unregistered_standalone_repo_dir() {
     # K1684 (2026-07-12), STRIKE 3 of the K1032 class. A directory under .claude/worktrees/ that
@@ -802,8 +800,8 @@ test_case_13_unregistered_standalone_repo_dir() {
     fi
 }
 
-test_case_12_real_violation_aborts_and_stash_restores() {
-    echo "=== Case 12: agent 真改 feed.json → ABORT；且 stash 還原不假警報 ==="
+test_case_12_real_violation_aborts_without_stash() {
+    echo "=== Case 12: agent 真改 feed.json → ABORT；main WIP 原地保留、不 stash ==="
     local test_dir
     test_dir=$(setup_test_env "case12")
     cd "$test_dir"
@@ -819,7 +817,7 @@ test_case_12_real_violation_aborts_and_stash_restores() {
     echo '{"articles": ["agent 不該碰這支"]}' > "$wt/storage/reports/feed.json"
     (cd "$wt" && git add -A && git commit -qm "agent 違規改 feed.json")
 
-    # main 有一堆未提交變更 → 觸發 stash；夠多行才能讓舊版的 head -5 提早關管線
+    # main 有一堆未提交變更；新契約必須原地保留，不可 stash。
     # 只 stage dirty_*.txt：`git add -A` 會把測試用的 worktree 當 embedded repo 加進 index
     local i
     for i in $(seq 1 12); do echo "dirty $i" > "dirty_$i.txt"; done
@@ -836,25 +834,32 @@ test_case_12_real_violation_aborts_and_stash_restores() {
         fail "12-1: agent 改了 feed.json 卻沒 ABORT（guard 失效）"
     fi
 
-    # 12-2: pop 成功就不准印失敗
-    if echo "$output" | grep -q "stash pop 失敗"; then
-        fail "12-2: 假警報「stash pop 失敗」（pipefail + head -5 的 SIGPIPE 回歸）"
+    # 12-2: 不得建立 temp stash。
+    if git stash list | grep -q "merge_worktree: temp stash"; then
+        fail "12-2: merge_worktree 建立了 temp stash（仍會觸碰其他 slot WIP）"
     else
-        pass "12-2: stash pop 成功，無假警報"
+        pass "12-2: 沒有建立 temp stash"
     fi
 
-    # 12-3: 絕不可教人跑 stash@{0}（pop 已成功，那是別人的 stash）
-    if echo "$output" | grep -q "stash apply stash@{0}"; then
-        fail "12-3: 提示 stash@{0} —— 照做會把陳年 stash 蓋回 main"
+    # 12-3: 輸出也不可再提供任何 stash recovery 路徑。
+    if echo "$output" | grep -q "stash@{0}\|stash pop\|temp stash"; then
+        fail "12-3: 輸出仍含 stash recovery 路徑"
     else
-        pass "12-3: 未提示危險的 stash@{0}"
+        pass "12-3: 無 stash recovery 路徑"
     fi
 
-    # 12-4: main 的未提交變更必須真的回到工作區（不可 silent stash）
+    # 12-4: main 的未提交變更全程留在工作區。
     if [[ -f "$test_dir/dirty_12.txt" ]]; then
-        pass "12-4: main 的未提交變更已還原"
+        pass "12-4: main 的未提交變更原地保留"
     else
-        fail "12-4: dirty_12.txt 不見了（stash 沒還原，工作被吞）"
+        fail "12-4: dirty_12.txt 不見了（其他 slot 工作被吞）"
+    fi
+
+    # 12-5: class-level static gate；不是只期待某個 fixture 剛好沒走到 stash branch。
+    if grep -Eq 'git[[:space:]]+stash[[:space:]]+(push|pop|apply)' "$MERGE_SCRIPT"; then
+        fail "12-5: production merge script 仍含 runtime stash mutation"
+    else
+        pass "12-5: production merge script 無 runtime stash mutation"
     fi
 }
 
@@ -972,6 +977,150 @@ test_case_16_stale_pass_verdict_blocked() {
     fi
 }
 
+# ============================================================
+# Case 17/18 (2026-07-16): multi-slot dirty-main contract
+#   - 同一路徑 WIP：fail-closed，原 bytes / worktree / branch 全保留，零 stash。
+#   - 不相交 WIP：允許 integration，WIP 不進 commit 且仍留在 working tree。
+# ============================================================
+test_case_17_overlapping_dirty_main_aborts_without_stash() {
+    echo "=== Case 17: main 同檔 WIP 與 agent 重疊 → ABORT、零 stash ==="
+    local test_dir
+    test_dir=$(setup_test_env "case17")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase17"
+    local branch="worktree-agent-testcase17"
+
+    mkdir -p experiments/k17overlap
+    echo "print('base')" > experiments/k17overlap/k17overlap.py
+    echo "# K17 overlap" > experiments/k17overlap/README.md
+    echo "{}" > experiments/k17overlap/k17overlap_results.json
+    git add experiments/k17overlap
+    git commit -qm "seed shared experiment file"
+    (cd "$wt" && git merge main --no-edit -q)
+
+    echo "print('agent version')" > "$wt/experiments/k17overlap/k17overlap.py"
+    (cd "$wt" && git add experiments/k17overlap && git commit -qm "agent edits shared file")
+    certify_all_experiments "$wt"
+
+    # 另一個 slot 在 main 同一路徑有未提交內容。
+    echo "print('interactive WIP')" > experiments/k17overlap/k17overlap.py
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir")
+
+    if echo "$output" | grep -q "WIP 與 agent 變更路徑重疊"; then
+        pass "17-1: 同一路徑 dirty WIP 被 fail-closed 擋下"
+    else
+        fail "17-1: 沒有明確偵測同一路徑 overlap"
+    fi
+    if [[ "$(cat experiments/k17overlap/k17overlap.py)" == "print('interactive WIP')" ]]; then
+        pass "17-2: main 上其他 slot 的 bytes 原封不動"
+    else
+        fail "17-2: main WIP 被 merge/stash 流程改寫"
+    fi
+    if [[ -d "$wt" ]] && ! git merge-base --is-ancestor "$branch" main 2>/dev/null; then
+        pass "17-3: worktree/branch 保留且未假裝 merged"
+    else
+        fail "17-3: overlap abort 後 worktree 或 branch 狀態不安全"
+    fi
+    if git stash list | grep -q "merge_worktree: temp stash"; then
+        fail "17-4: overlap 路徑仍建立 temp stash"
+    else
+        pass "17-4: overlap 路徑零 stash"
+    fi
+}
+
+test_case_18_unrelated_dirty_main_merges_in_place() {
+    echo "=== Case 18: main 不相交 WIP → 原地保留並完成 merge、零 stash ==="
+    local test_dir
+    test_dir=$(setup_test_env "case18")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase18"
+
+    echo "base note" > operator_notes.txt
+    git add operator_notes.txt
+    git commit -qm "seed unrelated tracked file"
+    (cd "$wt" && git merge main --no-edit -q)
+
+    mkdir -p "$wt/experiments/k18clean"
+    echo "print('agent experiment')" > "$wt/experiments/k18clean/k18clean.py"
+    echo "# K18 clean" > "$wt/experiments/k18clean/README.md"
+    echo "{}" > "$wt/experiments/k18clean/k18clean_results.json"
+    certify_all_experiments "$wt"
+
+    echo "operator WIP" > operator_notes.txt
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir")
+
+    if git -C "$test_dir" cat-file -e "main:experiments/k18clean/k18clean.py" 2>/dev/null; then
+        pass "18-1: 不相交 dirty main 仍完成 agent integration"
+    else
+        fail "18-1: 不相交 WIP 不必要地阻塞 merge"
+    fi
+    if [[ "$(cat operator_notes.txt)" == "operator WIP" ]] && \
+       [[ "$(git show main:operator_notes.txt)" == "base note" ]]; then
+        pass "18-2: WIP 留在 working tree，未混入 merge commit"
+    else
+        fail "18-2: 不相交 WIP 被覆寫或捲入 commit"
+    fi
+    if git stash list | grep -q "merge_worktree: temp stash"; then
+        fail "18-3: 不相交路徑仍建立 temp stash"
+    else
+        pass "18-3: 不相交路徑零 stash"
+    fi
+    if echo "$output" | grep -q "原地保留，不 stash"; then
+        pass "18-4: 輸出明確揭露保留 dirty WIP 的決策"
+    else
+        fail "18-4: 缺少 dirty-WIP 決策訊息"
+    fi
+}
+
+test_case_19_foreign_staged_index_aborts_unchanged() {
+    echo "=== Case 19: main foreign staged index → ABORT、index 原封不動 ==="
+    local test_dir
+    test_dir=$(setup_test_env "case19")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase19"
+    mkdir -p "$wt/experiments/k19staged"
+    echo "print('agent experiment')" > "$wt/experiments/k19staged/k19staged.py"
+    echo "# K19 staged" > "$wt/experiments/k19staged/README.md"
+    echo "{}" > "$wt/experiments/k19staged/k19staged_results.json"
+    certify_all_experiments "$wt"
+
+    echo "foreign staged bytes" > foreign_owner.txt
+    git add foreign_owner.txt
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir")
+
+    if echo "$output" | grep -q "main index 已有 staged 內容"; then
+        pass "19-1: foreign staged index 被 fail-closed 擋下"
+    else
+        fail "19-1: staged preflight 沒有觸發"
+    fi
+    if git diff --cached --name-only | grep -qx "foreign_owner.txt" && \
+       [[ "$(cat foreign_owner.txt)" == "foreign staged bytes" ]]; then
+        pass "19-2: foreign index 與 working bytes 原封不動"
+    else
+        fail "19-2: merge 流程改寫/unstage 了 foreign owner 內容"
+    fi
+    if ! git -C "$test_dir" cat-file -e "main:experiments/k19staged/k19staged.py" 2>/dev/null && \
+       [[ -d "$wt" ]]; then
+        pass "19-3: agent branch 未假裝 merged，worktree 保留"
+    else
+        fail "19-3: staged abort 後 agent/worktree 狀態不安全"
+    fi
+    if git stash list | grep -q "merge_worktree: temp stash"; then
+        fail "19-4: staged abort 路徑仍建立 temp stash"
+    else
+        pass "19-4: staged abort 路徑零 stash"
+    fi
+}
+
 
 test_case_a
 echo ""
@@ -995,7 +1144,7 @@ test_case_10_cross_repo_cwd_anchor
 echo ""
 test_case_11_stale_base_no_false_abort
 echo ""
-test_case_12_real_violation_aborts_and_stash_restores
+test_case_12_real_violation_aborts_without_stash
 echo ""
 test_case_13_unregistered_standalone_repo_dir
 echo ""
@@ -1006,12 +1155,18 @@ test_case_15_fail_verdict_blocked
 echo ""
 test_case_16_stale_pass_verdict_blocked
 echo ""
+test_case_17_overlapping_dirty_main_aborts_without_stash
+echo ""
+test_case_18_unrelated_dirty_main_merges_in_place
+echo ""
+test_case_19_foreign_staged_index_aborts_unchanged
+echo ""
 
 echo "================================"
 echo "Assertions PASS: $PASS"
 echo "Assertions FAIL: $FAIL"
-# Test case-level summary（16 cases = A/B/C/D + 5/6/7 + 8/9/10 + 11/12 + 13 + 14/15/16 認證 gate）
-TOTAL_CASES=16
+# Test case-level summary（19 cases；17/18/19 pin multi-slot dirty-main/index contract）
+TOTAL_CASES=19
 if [[ $FAIL -eq 0 ]]; then
     echo "Test cases: PASS $TOTAL_CASES/$TOTAL_CASES"
 else
