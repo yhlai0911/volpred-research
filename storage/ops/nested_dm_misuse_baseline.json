@@ -6,11 +6,11 @@
   "scan_scope": [
     "experiments/**/*.py"
   ],
-  "frozen_at": "2026-07-14",
+  "frozen_at": "2026-07-14; paired k1525/k1526 nested historical-mean sites retired 2026-07-16 after Clark-West rerun",
   "scanned_python_files": 1826,
-  "count": 196,
-  "exposed_count": 104,
-  "diagnostic_only_count": 92,
+  "count": 193,
+  "exposed_count": 103,
+  "diagnostic_only_count": 90,
   "active": {
     "exposed": [
       "experiments/K1038/k1038.py",
@@ -65,7 +65,6 @@
       "experiments/k1315/k1315_forecast_combination.py",
       "experiments/k1332/k1332.py",
       "experiments/k1351/k1351.py",
-      "experiments/k1396/k1396.py",
       "experiments/k1421/k1421.py",
       "experiments/k1530_tw_retail_interaction_rv/k1530_tw_retail_interaction_rv.py",
       "experiments/k1558/k1558.py",
@@ -166,8 +165,6 @@
       "experiments/k152/k152_liquidity_ms_garch.py",
       "experiments/k1523_realized_kurtosis_vol/k1523.py",
       "experiments/k1525/k1525.py",
-      "experiments/k1525_hf_tail_risk_premium_vrp/k1525_hf_tail_risk_premium_vrp.py",
-      "experiments/k1526_hf_tail_risk_premium_vrp/k1526_hf_tail_risk_premium_vrp.py",
       "experiments/k1529_credit_spread_fomc_vol/k1529_credit_spread_fomc_vol.py",
       "experiments/k1538_bond_fund_run_proxy_credit_etf_vol/k1538_bond_fund_run_proxy_credit_etf_vol.py",
       "experiments/k1539_corporate_bond_news_sentiment_rv_only/k1539_corporate_bond_news_sentiment_rv_only.py",
@@ -213,7 +210,26 @@
       "experiments/vix_sufficiency_boundary/vix_sufficiency_boundary.py"
     ]
   },
-  "retired": [],
+  "retired": [
+    {
+      "site": "experiments/k1525_hf_tail_risk_premium_vrp/k1525_hf_tail_risk_premium_vrp.py",
+      "date": "2026-07-16",
+      "reason": "historical-mean baseline is the slope-zero restriction of ES+VIX; raw DM removed and primary squared-error inference rerun with canonical Clark-West",
+      "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
+    },
+    {
+      "site": "experiments/k1526_hf_tail_risk_premium_vrp/k1526_hf_tail_risk_premium_vrp.py",
+      "date": "2026-07-16",
+      "reason": "paired duplicate of k1525 repaired in the same transaction; canonical Clark-West statistics are identical",
+      "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
+    },
+    {
+      "site": "experiments/k1396/k1396.py",
+      "date": "2026-07-16",
+      "reason": "public nested-model claim was withdrawn by K1379 and the remaining raw-loss statistic is explicitly diagnostic-only; stale exposed baseline entry pruned after commit 36eb1e512",
+      "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
+    }
+  ],
   "reviewed_nonnested": [
     {
       "site": "experiments/K1049/K1049.py",

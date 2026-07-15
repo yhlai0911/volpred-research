@@ -154,16 +154,28 @@ def test_baseline_metadata_matches_frozen_cohorts(baseline_payload: dict) -> Non
     assert baseline_payload["count"] == len(original) + len(blindspots) + len(unknown_triage)
 
 
-def test_unknown_triage_sites_are_frozen_after_inline_floor_detection(findings, baseline) -> None:
-    """Known pre-existing max(1,h) debt is frozen when the auditor learns it."""
-    verdicts = {_site_key(f): f.verdict for f in findings}
+def test_k1525_k1526_paired_dm_repair_is_retired(
+    affected_sites, baseline, retired
+) -> None:
+    """The duplicate h=1-degenerate helpers cannot return after the paired rerun."""
     sites = {
-        "experiments/k1525_hf_tail_risk_premium_vrp/k1525_hf_tail_risk_premium_vrp.py::dm_test",
-        "experiments/k1526_hf_tail_risk_premium_vrp/k1526_hf_tail_risk_premium_vrp.py::dm_test",
+        "k1525": "experiments/k1525_hf_tail_risk_premium_vrp/k1525_hf_tail_risk_premium_vrp.py::dm_test",
+        "k1526": "experiments/k1526_hf_tail_risk_premium_vrp/k1526_hf_tail_risk_premium_vrp.py::dm_test",
     }
-    for site in sites:
-        assert verdicts[site] == DEGENERATE
-        assert site in baseline
+    for kid, site in sites.items():
+        assert site not in affected_sites
+        assert site not in baseline
+        assert site in retired
+        source = (
+            REPO_ROOT
+            / "experiments"
+            / f"{kid}_hf_tail_risk_premium_vrp"
+            / f"{kid}_hf_tail_risk_premium_vrp.py"
+        ).read_text(encoding="utf-8")
+        assert "def dm_test(" not in source
+        assert "from volpred.stats.model_evaluation import clark_west_test" in source
+        assert "cw = clark_west_test(" in source
+        assert '"nested_test_vs_baseline": cw' in source
 
 
 def test_known_blind_spots_are_now_classified(findings) -> None:
