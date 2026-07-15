@@ -31619,7 +31619,7 @@
     "description": "收尾 experiments/K1678/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T09:16:48.626840+00:00）。\n證據：experiments/K1678/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1678'); finished 1.4 days ago; orphan backlog this run: 67 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "source": "dreaming",
     "created_at": "2026-07-12T09:16:48.626840+00:00",
     "dreaming": {
@@ -31628,9 +31628,6 @@
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
     },
-    "claimed_by": "hourly-20",
-    "claimed_at": "2026-07-15T12:12:57.643518+00:00",
-    "claim_session_id": "29fe0ec9661a",
     "status_history": [
       {
         "ts": "2026-07-15T12:12:57.643535+00:00",
@@ -31643,9 +31640,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-20"
+      },
+      {
+        "ts": "2026-07-15T14:50:02.492878+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-20",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-15T12:13:06.197230+00:00"
+    "started_at": "2026-07-15T12:13:06.197230+00:00",
+    "last_released_at": "2026-07-15T14:50:02.492869+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "dreaming_orphaned_experiment_k1677",
@@ -36699,13 +36705,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T14:00:49.215449+00:00",
+    "completed_at": "2026-07-15T15:01:20.689585+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T14:00:49.215449+00:00",
-      "last_clean_observed_at": "2026-07-15T14:00:49.215449+00:00"
+      "resolved_at": "2026-07-15T15:01:20.689585+00:00",
+      "last_clean_observed_at": "2026-07-15T15:01:20.689585+00:00"
     }
   },
   {
@@ -36995,12 +37001,9 @@
     "id": "dm_hac_fix_k841_strategy_dm",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-15T01:28:07+08:00",
     "description": "K1655 bug class 必修 #3：experiments/k841/k841_futures_realtime_vt.py:436 用 `for k in range(h)`（正確應為 range(1,h+1)）→ h=1 時只取 gamma[0]，無 HAC。這是**策略報酬差的 DM**，自相關是常態不是例外。results.json 目前標 harvey_significant=True（t=10.82/−7.13/−1.97），曝險 feed×5。做法同上。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md",
-    "claimed_by": "codex-failover",
-    "claimed_at": "2026-07-15T13:15:09.902595+00:00",
-    "claim_session_id": "498b8fe0cab1",
     "status_history": [
       {
         "ts": "2026-07-15T13:15:09.902611+00:00",
@@ -37013,9 +37016,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T15:44:34.571890+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
       }
     ],
-    "started_at": "2026-07-15T13:15:21.983705+00:00"
+    "started_at": "2026-07-15T13:15:21.983705+00:00",
+    "completed_at": "2026-07-15T15:44:34.571874+00:00",
+    "result": "K841 repaired: canonical variance-risk HAC-DM lag 13 over n=2157; all 7 legacy t-statistics changed with 0 |t|>3 classification flips. Timing, cost, and session defects were rerun with byte-bound independent PASS review; 31 focused tests plus experiment gates and certify PASS. Two public articles were corrected and synced, and knowledge item a0f5af26 was superseded. Commits 9f868e41f cb3247d7e b2188a70c."
   },
   {
     "id": "dm_hac_fix_k1525_k1526_pair",
@@ -39866,5 +39877,19 @@
     "created_at": "2026-07-15T14:32:20.707117+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 846）",
     "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nVOLPRED 管理通知\nClaude→Codex failover 接手失敗（Claude 端：quota）\nAlert level: critical\n✖\nCRITICAL\n白話結論\n\nClaude 端：Claude Code 額度用完（會在額度重置時自行恢復） - Codex 端：Codex 接手了，但任務沒在 40 分鐘內做完（ChatGPT 本身是通的——接手前已測過）。\n影響\n\n影響平台自動運作的穩定性。\n\n行動\n\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\nClaude 這班派不了工，Codex 也接不了\n\n發生什麼事\n\nClaude 端：Claude Code 額度用完（會在額度重置時自行恢復）\nCodex 端：Codex 接手了，但任務沒在 40 分鐘內做完（ChatGPT 本身是通的——接手前已測過）。任務可能太大，需要切小或改走 compute queue（exit code -5）\n影響\n\n本班的 hourly slot 沒有產出；兩邊都不可用\n需要你做什麼\n\n不用做什麼；額度恢復後下一班自動回到 Claude\nCodex 輸出片段\n\n    loss1 = evidence[f\"{key}_loss1\"]\n+            loss2 = evidence[f\"{key}_loss2\"]\n+            t_stat, p_value = K841.canonical_dm_test(loss1, loss2, h=1)\n+            assert np.isclose(t_stat, reported[\"t_stat\"], atol=1e-12)\n+            assert np.isclose(p_value, reported[\"p_value\"], atol=1e-15)\n+            assert reported[\"hac_lag\"] == K841.canonical_hac_lag(len(loss1), h=1)\n+\n+\n+def test_monday_file_uses_saturday_am_night_continuation(tmp_path):\n+    source = pd.DataFrame(\n+        {\n+            \"商品代號\": [\"TX\"] * 6,\n+            \"到期月份(週別)\": [202603] * 6,\n+            \"成交數量(B+S)\": [1] * 6,\n+            \"成交日期\": [20260313, 20260313, 20260314, 20260314, 20260316, 20260316],\n+            \"成交時間\": [150000, 235900, 100, 45900, 84500, 134500],\n+            \"成交價格\": [100.0, 101.0, 102.0, 103.0, 104.0, 105.0],\n+            \"時間戳記\": [\n+                \"2026-03-13 15:00:00\",\n+                \"2026-03-13 23:59:00\",\n+                \"2026-03-14 00:01:00\",\n+                \"2026-03-14 04:59:00\",\n+                \"2026-03-16 08:45:00\",\n+                \"2026-03-16 13:45:00\",\n+            ],\n+        }\n+    )\n+    path = tmp_path / \"Daily_2026_03_16TX.csv\"\n+    source.to_csv(path, index=False, encoding=\"big5\")\n+\n+    parsed = K841.parse_single_tx_file(path)\n+\n+    assert parsed[\"night_start_date\"] == 20260313\n+    assert parsed[\"night_continuation_date\"] == 20260314\n+    assert parsed[\"night_open\"] == 100.0\n+    assert parsed[\"night_close\"] == 103.0\n+    assert parsed[\"night_ticks\"] == 4\n\n\n為什麼codex app不能用？執行太久被timeout嗎？ 如果是 那就分段執行？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+  },
+  {
+    "id": "ci-red-29421677446",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29421677446",
+    "ci_run_key": "29421677446:1",
+    "created_at": "2026-07-15T15:00:06.868630+00:00",
+    "title": "CI 紅燈修復（run 29421677446, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29421677446\nattempt: 1\nhead_sha: 78115830d\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29421677446 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。"
   }
 ]
