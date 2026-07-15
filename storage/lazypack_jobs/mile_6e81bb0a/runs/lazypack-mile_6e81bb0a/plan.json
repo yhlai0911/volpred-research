@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "title": "多加資訊，不等於更可靠的波動預測",
+  "subtitle": "先看平均罰分，再看模型有沒有做出不合理預測",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1379/k1379_results.json",
+      "sha256": "bc430da7b03ba23a0090b246641a0a5899b712281c80dc8551befe1b844b8517",
+      "label": "certified corrected volatility forecast comparison"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_stable_ranking",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "三個穩定做法，同場比平均罰分",
+      "alt": "三個沒有非正預測的波動模型平均罰分比較",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "長短期拆開的做法",
+          "value": {
+            "source": "result",
+            "path": "qlike_means.A4f",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "三個穩定做法中最低"
+        },
+        {
+          "kind": "metric",
+          "label": "讓壞消息影響更久的做法",
+          "value": {
+            "source": "result",
+            "path": "qlike_means.GJR",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "日報酬平方基準",
+          "value": {
+            "source": "result",
+            "path": "qlike_means.HAR_RV",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最低者相對日報酬平方基準",
+          "value": {
+            "source": "result",
+            "path": "/dm_tests/A4f vs HAR-RV/model1_qlike_advantage_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          },
+          "note": "罰分較低；只代表這套固定協議"
+        }
+      ]
+    },
+    {
+      "name": "2_unstable_extra_signal",
+      "info": "concept",
+      "style": "editorial",
+      "title": "加入市場恐慌指標後，先出現基本錯誤",
+      "alt": "加入市場恐慌指標的版本出現非正預測與數值下限失真",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "非正波動預測",
+          "value": {
+            "source": "result",
+            "path": "metadata.forecast_diagnostics.HAR_RV_VIX.raw_nonpositive_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "發生日期",
+          "body": [
+            {
+              "template": "{d1}、{d2}、{d3} 的原始預測不合理。",
+              "bindings": {
+                "d1": {
+                  "source": "result",
+                  "path": "/metadata/forecast_diagnostics/HAR_RV_VIX/raw_nonpositive_dates/0",
+                  "format": {
+                    "kind": "date"
+                  }
+                },
+                "d2": {
+                  "source": "result",
+                  "path": "/metadata/forecast_diagnostics/HAR_RV_VIX/raw_nonpositive_dates/1",
+                  "format": {
+                    "kind": "date"
+                  }
+                },
+                "d3": {
+                  "source": "result",
+                  "path": "/metadata/forecast_diagnostics/HAR_RV_VIX/raw_nonpositive_dates/2",
+                  "format": {
+                    "kind": "date"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "完整樣本平均罰分",
+          "value": {
+            "source": "result",
+            "path": "qlike_means.HAR_RV_VIX",
+            "format": {
+              "kind": "number",
+              "digits": 0,
+              "thousands": true
+            }
+          },
+          "note": "被數值下限主導，不能當經濟幅度"
+        },
+        {
+          "kind": "metric",
+          "label": "排除異常日的診斷罰分",
+          "value": {
+            "source": "result",
+            "path": "positive_raw_forecast_robustness.qlike_means.HAR_RV_VIX",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "只作診斷，不是主要比較樣本"
+        }
+      ]
+    },
+    {
+      "name": "3_honest_boundary",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "更正後，結論能走到哪裡",
+      "alt": "修正版共同樣本主要比較結果與仍未完成的研究範圍",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "共同有效樣本",
+          "value": {
+            "source": "result",
+            "path": "metadata.n_valid_oos",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最低者對壞消息模型的比較強度",
+          "value": {
+            "source": "result",
+            "path": "/dm_tests/A4f vs GJR/dm_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最低者對日報酬平方基準的比較強度",
+          "value": {
+            "source": "result",
+            "path": "/dm_tests/A4f vs HAR-RV/dm_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "可以支持",
+          "body": [
+            "固定期間與同一套日資料代理下，最低者勝過兩個穩定基準。",
+            "每個預測只使用前一日以前可見的資訊。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "仍不能支持",
+          "body": [
+            "沒有盤中高頻資料，不能回答更精細的經典基準比較。",
+            "沒有跨線不等於已證明兩個方法實質相同。"
+          ]
+        }
+      ]
+    }
+  ]
+}
