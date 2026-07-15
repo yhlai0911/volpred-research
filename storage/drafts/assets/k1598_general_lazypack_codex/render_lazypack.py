@@ -183,7 +183,25 @@ def rounded_box(ax, x: float, y: float, w: float, h: float, face: str, edge: str
 
 
 def wrapped(text: str, width: int) -> str:
-    return "\n".join(textwrap.wrap(text, width=width, break_long_words=False))
+    """Wrap prose by character count, including Chinese text without spaces."""
+    return "\n".join(
+        textwrap.wrap(
+            text,
+            width=width,
+            break_long_words=True,
+            break_on_hyphens=False,
+        )
+    )
+
+
+def bullet_block(items: list[str], width: int) -> str:
+    """Build compact, hanging-indent bullets that stay inside narrow cards."""
+    lines: list[str] = []
+    for item in items:
+        item_lines = wrapped(item, width).splitlines()
+        lines.append(f"• {item_lines[0]}")
+        lines.extend(f"  {line}" for line in item_lines[1:])
+    return "\n".join(lines)
 
 
 def metric_card(
@@ -377,12 +395,12 @@ def render_two_scores(data: dict[str, Any]) -> None:
     ax.text(
         0.625,
         0.305,
-        wrapped("UP-lite 修正了滾動門檻容易漏太多的問題，仍沒有在整體區間品質上超過較強基準。", 22),
-        fontsize=12.5,
+        wrapped("UP-lite 修正了滾動門檻容易漏太多的問題，仍沒有在整體區間品質上超過較強基準。", 18),
+        fontsize=11.5,
         color="white",
         ha="left",
         va="top",
-        linespacing=1.45,
+        linespacing=1.35,
     )
     add_footer(ax)
     save_panel(fig, "2_two_scores.png", alt)
@@ -395,7 +413,7 @@ def render_honest_boundary(data: dict[str, Any]) -> None:
     add_header(ax, title, alt, AMBER)
 
     # Editorial hero: one cell-level result, with the adjusted threshold beside it.
-    rounded_box(ax, 0.055, 0.355, 0.405, 0.385, NAVY, NAVY)
+    rounded_box(ax, 0.055, 0.355, 0.330, 0.385, NAVY, NAVY)
     ax.text(0.085, 0.690, "材料類股｜較寬目標", fontsize=12, color="#C8D8EA", ha="left", va="center")
     ax.text(0.085, 0.635, "比較強度", fontsize=14, fontweight="bold", color="white", ha="left", va="center")
     ax.text(
@@ -416,7 +434,7 @@ def render_honest_boundary(data: dict[str, Any]) -> None:
     ax.text(0.085, 0.430, "負值代表 UP-lite 區間損失較低", fontsize=10.5, color="#DDE7F3", ha="left", va="center")
 
     metric_card(
-        ax, 0.490, 0.560, 0.215, 0.180,
+        ax, 0.415, 0.560, 0.255, 0.180,
         "多重比較後門檻值",
         percent(
             data,
@@ -426,48 +444,49 @@ def render_honest_boundary(data: dict[str, Any]) -> None:
         face=AMBER_SOFT, accent=AMBER, value_size=25,
     )
     metric_card(
-        ax, 0.730, 0.560, 0.215, 0.180,
+        ax, 0.690, 0.560, 0.255, 0.180,
         "UP-lite 平均半寬",
         percent(data, "summary.method_summary.UP_AggACI_lite.mean_radius", 2),
         face=BLUE_SOFT, accent=BLUE, value_size=25,
     )
 
     # Two annotation columns make the evidence boundary explicit.
-    rounded_box(ax, 0.490, 0.355, 0.215, 0.170, GREEN_SOFT, LINE)
-    ax.text(0.515, 0.492, "可以支持", fontsize=13, fontweight="bold", color=GREEN, ha="left", va="center")
+    rounded_box(ax, 0.415, 0.355, 0.255, 0.170, GREEN_SOFT, LINE)
+    ax.text(0.440, 0.492, "可以支持", fontsize=13, fontweight="bold", color=GREEN, ha="left", va="center")
     ax.text(
-        0.515,
+        0.440,
         0.458,
-        "• " + wrapped("用多種更新速度混合，能改善老舊滾動門檻的覆蓋追蹤。", 15).replace("\n", "\n  "),
+        bullet_block(
+            [
+                "用多種更新速度混合，能改善老舊滾動門檻的覆蓋追蹤。",
+                "本次沒有任何嚴格失利。",
+            ],
+            15,
+        ),
         fontsize=9.5,
         color=INK,
         ha="left",
         va="top",
-        linespacing=1.3,
+        linespacing=1.2,
     )
-    ax.text(0.515, 0.377, "• 本次沒有任何嚴格失利。", fontsize=9.5, color=INK, ha="left", va="bottom")
 
-    rounded_box(ax, 0.730, 0.355, 0.215, 0.170, RED_SOFT, LINE)
-    ax.text(0.755, 0.492, "仍不能支持", fontsize=13, fontweight="bold", color=RED, ha="left", va="center")
+    rounded_box(ax, 0.690, 0.355, 0.255, 0.170, RED_SOFT, LINE)
+    ax.text(0.715, 0.492, "仍不能支持", fontsize=13, fontweight="bold", color=RED, ha="left", va="center")
     ax.text(
-        0.755,
+        0.715,
         0.458,
-        "• " + wrapped("本次只是近似版混合，不是原論文的完整演算法。", 15).replace("\n", "\n  "),
+        bullet_block(
+            [
+                "本次只是近似版混合，不是原論文的完整演算法。",
+                "區間左右對稱，尚未檢驗單邊最大損失或實際交易成績。",
+            ],
+            15,
+        ),
         fontsize=9.5,
         color=INK,
         ha="left",
         va="top",
-        linespacing=1.3,
-    )
-    ax.text(
-        0.755,
-        0.393,
-        "• " + wrapped("區間左右對稱，尚未檢驗單邊最大損失或實際交易成績。", 15).replace("\n", "\n  "),
-        fontsize=9.5,
-        color=INK,
-        ha="left",
-        va="top",
-        linespacing=1.3,
+        linespacing=1.2,
     )
 
     ax.text(
