@@ -37194,12 +37194,9 @@
     "id": "dm_hac_fix_k1525_k1526_pair",
     "task_type": "experiment",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-15T01:28:07+08:00",
     "description": "K1655 bug class 必修 #4/#5（必須同輪修，否則兩份 README 數字分岔）：k1525.py:265 與 k1526.py:265（逐字複製）雙重退化 — 空迴圈 + Newey-West 權重 `1-k/h` 在 h=1,k=1 時歸零。k1525 README 的 headline null（t=-0.85, p=0.397）就建在這上面。注意：null 不代表安全 —— k621 前例是負自協方差讓 |t| 由 2.26 升到 3.64、p 由 0.0237 掉到 0.0003，補 HAC 後 null 可能翻成顯著。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md",
-    "claimed_by": "codex-failover-slot-2-6248c6031dd8485aa71ab6a0f6f51f7a",
-    "claimed_at": "2026-07-15T20:08:34.791536+00:00",
-    "claim_session_id": "253f4e1d412e",
     "status_history": [
       {
         "ts": "2026-07-15T20:08:34.791551+00:00",
@@ -37212,9 +37209,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-2-6248c6031dd8485aa71ab6a0f6f51f7a"
+      },
+      {
+        "ts": "2026-07-15T20:28:25.049025+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-6248c6031dd8485aa71ab6a0f6f51f7a"
       }
     ],
-    "started_at": "2026-07-15T20:08:35.023294+00:00"
+    "started_at": "2026-07-15T20:08:35.023294+00:00",
+    "completed_at": "2026-07-15T20:28:25.049010+00:00",
+    "result": "Removed both h=1-degenerate local DM helpers and reran the nested historical-mean vs ES+VIX comparison with canonical Clark-West HAC (lag 6). K1525/K1526 match: n=138, t=-0.213, one-sided p=0.584, R2_OOS=-4.57%; OOS NULL unchanged. Added frozen ledgers, SHA-pinned PASS verdicts; 123 ratchet tests passed."
   },
   {
     "id": "dm_hac_auditor_false_negative_regex",
@@ -40664,7 +40669,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29421677446",
@@ -40672,9 +40677,6 @@
     "created_at": "2026-07-15T20:00:07.985734+00:00",
     "title": "CI 紅燈修復（run 29442836650, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29442836650\nattempt: 1\nhead_sha: 22422d2ee\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29442836650 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "claimed_by": "codex-desktop-ci-29442836650",
-    "claimed_at": "2026-07-15T20:00:59.309201+00:00",
-    "claim_session_id": "c70f56492f09",
     "status_history": [
       {
         "ts": "2026-07-15T20:00:59.309218+00:00",
@@ -40687,8 +40689,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-ci-29442836650"
+      },
+      {
+        "ts": "2026-07-15T20:12:56.321030+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-ci-29442836650"
       }
     ],
-    "started_at": "2026-07-15T20:00:59.534312+00:00"
+    "started_at": "2026-07-15T20:00:59.534312+00:00",
+    "completed_at": "2026-07-15T20:12:56.321015+00:00",
+    "result": "root_cause=merge 22422d2ee brought k1709 and k1711 archived results onto main before canonical reviewed findings were recorded, so the zero-baseline knowledge ratchet correctly rejected both; repair_commit=a06d64daf4c343e9d84dc7724b273c0b92659d33; verification=knowledge class sweep 32 passed and provenance 0/2656 violations; subsequent run 29446641414 passes original ratchet but exposes two unrelated CI debts"
   }
 ]
