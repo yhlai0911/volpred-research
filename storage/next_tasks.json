@@ -35482,7 +35482,7 @@
     "title": "K1705: 相依結構預測評分的誠實度回溯稽核** — 對既有 Joe、DCC 結果重建單邊滾動 marginal PIT，先驗證邊際，再用 lexicographic 邊際＋相依分數與 two-step predictive-ability 檢定，並做",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1604). Original: 相依結構預測評分的誠實度回溯稽核** — 對既有 Joe、DCC 結果重建單邊滾動 marginal PIT，先驗證邊際，再用 lexicographic 邊際＋相依分數與 two-step predictive-ability 檢定，並做非同步收盤敏感度。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1705.py with signal.shift(1) + seed=42, (c) K1705_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35491,7 +35491,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-13T23:52:31Z"
+    "created_at": "2026-07-13T23:52:31Z",
+    "claimed_by": "codex-failover-slot-2-8de6e96e924b4634ab107b311a353e3d",
+    "claimed_at": "2026-07-15T22:08:18.996082+00:00",
+    "claim_session_id": "60f632f26aed",
+    "status_history": [
+      {
+        "ts": "2026-07-15T22:08:18.996101+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-8de6e96e924b4634ab107b311a353e3d"
+      },
+      {
+        "ts": "2026-07-15T22:08:51.223024+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-8de6e96e924b4634ab107b311a353e3d"
+      }
+    ],
+    "started_at": "2026-07-15T22:08:51.223008+00:00"
   },
   {
     "id": "K1706",
@@ -40961,14 +40979,37 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29421677446",
     "ci_run_key": "29450374699:1",
     "created_at": "2026-07-15T22:00:06.114050+00:00",
     "title": "CI 紅燈修復（run 29450374699, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29450374699\nattempt: 1\nhead_sha: d4e004f03\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29450374699 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。"
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29450374699\nattempt: 1\nhead_sha: d4e004f03\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29450374699 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T22:04:50.720373+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-ci-29450374699"
+      },
+      {
+        "ts": "2026-07-15T22:04:50.964764+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-ci-29450374699"
+      },
+      {
+        "ts": "2026-07-15T22:14:52.820670+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-ci-29450374699"
+      }
+    ],
+    "started_at": "2026-07-15T22:04:50.964750+00:00",
+    "completed_at": "2026-07-15T22:14:52.820659+00:00",
+    "result": "root_cause=refill cluster planner read production storage despite a redirected task pool, while reviewed K1718 was closed before its required knowledge append; repair_commit=8ab81cb28; verification=61 focused tests passed, knowledge provenance 0/2657, wrapper manifest clean, Mirror+Supabase synced; latest run 29453904758 confirms exactly these two residual failures; push=deferred per repository policy"
   },
   {
     "id": "trending_repost_2026_07_16_ai資本支出",
