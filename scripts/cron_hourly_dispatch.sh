@@ -88,18 +88,25 @@ cd "$REPO_ROOT" || exit 1
 # main-checkout lifetime is a single Git transaction so it cannot race the
 # supervisor/codex/reaper writers.  The inner invocation inherits the validated
 # lease token; no short-lived child pretends to hold a shell lock.
-if ! "$UV_BIN" run python "$REPO_ROOT/scripts/git_writer_lock.py" \
-    validate-inherited --repo "$REPO_ROOT" --actor "legacy-hourly-child" \
-    >/dev/null 2>&1; then
-  exec "$UV_BIN" run python "$REPO_ROOT/scripts/git_writer_lock.py" run \
-      --repo "$REPO_ROOT" \
-      --actor "legacy-hourly-dispatch" \
-      --timeout 60 \
-      -- /bin/bash "$REPO_ROOT/scripts/cron_hourly_dispatch.sh" "$@"
-fi
-if [ "$(/usr/bin/git -C "$REPO_ROOT" symbolic-ref -q HEAD 2>/dev/null || true)" != "refs/heads/main" ]; then
-  echo "[git-writer-lock] BLOCKED: legacy dispatch requires canonical symbolic main" >&2
-  exit 2
+#
+# HOURLY_PREFLIGHT_ONLY exits at the auth-preflight gate below (before any
+# dispatch or git mutation), so the single-writer lock/canonical-main guard is
+# irrelevant there — skip it so the pure auth-preflight path (and its tests)
+# can run against a scratch repo that is not the canonical symbolic main.
+if [ "${HOURLY_PREFLIGHT_ONLY:-0}" != "1" ]; then
+  if ! "$UV_BIN" run python "$REPO_ROOT/scripts/git_writer_lock.py" \
+      validate-inherited --repo "$REPO_ROOT" --actor "legacy-hourly-child" \
+      >/dev/null 2>&1; then
+    exec "$UV_BIN" run python "$REPO_ROOT/scripts/git_writer_lock.py" run \
+        --repo "$REPO_ROOT" \
+        --actor "legacy-hourly-dispatch" \
+        --timeout 60 \
+        -- /bin/bash "$REPO_ROOT/scripts/cron_hourly_dispatch.sh" "$@"
+  fi
+  if [ "$(/usr/bin/git -C "$REPO_ROOT" symbolic-ref -q HEAD 2>/dev/null || true)" != "refs/heads/main" ]; then
+    echo "[git-writer-lock] BLOCKED: legacy dispatch requires canonical symbolic main" >&2
+    exit 2
+  fi
 fi
 
 # Raise file-descriptor SOFT limit. LaunchAgent-spawned processes inherit

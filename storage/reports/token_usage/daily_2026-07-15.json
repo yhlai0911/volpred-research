@@ -1,0 +1,179 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-07-15",
+  "week_range": "2026-07-12 → 2026-07-19",
+  "totals": {
+    "input_tokens": 12378,
+    "output_tokens": 12821,
+    "cache_read_tokens": 1017884,
+    "cache_create_tokens": 220182,
+    "billable_total": 245381,
+    "assistant_messages": 20,
+    "unique_sessions": 4,
+    "estimated_cost_usd": 6.8025
+  },
+  "by_model": {
+    "claude-opus-4-7": {
+      "input_tokens": 180,
+      "output_tokens": 11103,
+      "cache_read_tokens": 1017884,
+      "cache_create_tokens": 179170,
+      "messages": 19,
+      "estimated_cost_usd": 5.7217
+    },
+    "claude-fable-5": {
+      "input_tokens": 12198,
+      "output_tokens": 1718,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 41012,
+      "messages": 1,
+      "estimated_cost_usd": 1.0808
+    }
+  },
+  "by_category": {
+    "investigation": {
+      "input_tokens": 178,
+      "output_tokens": 7785,
+      "cache_read_tokens": 886321,
+      "cache_create_tokens": 176963,
+      "messages": 17,
+      "billable_total": 184926,
+      "estimated_cost_usd": 5.2341,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "text_only": {
+      "input_tokens": 12200,
+      "output_tokens": 5036,
+      "cache_read_tokens": 131563,
+      "cache_create_tokens": 43219,
+      "messages": 3,
+      "billable_total": 60455,
+      "estimated_cost_usd": 1.5684,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 17,
+      "billable_total": 373612,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 15,
+          "billable_total": 296485
+        },
+        {
+          "name": "200-800 chars",
+          "messages": 1,
+          "billable_total": 75015
+        },
+        {
+          "name": "2000+ chars",
+          "messages": 1,
+          "billable_total": 2112
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 14,
+          "billable_total": 293070
+        },
+        {
+          "name": "reviews/findings",
+          "messages": 3,
+          "billable_total": 80542
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 11,
+          "billable_total": 232615
+        },
+        {
+          "name": "Looking at this change: it's a standalone research/experiment script (`K1692.py`) that performs statistical analysis on financial time-series data, plus its res",
+          "messages": 1,
+          "billable_total": 75015
+        },
+        {
+          "name": "(content types: tool_use)",
+          "messages": 3,
+          "billable_total": 60455
+        },
+        {
+          "name": "Based on my review, the code change in `git_mutation_guard.py` is the primary security-relevant one. The test files and knowledge.json changes have no security ",
+          "messages": 1,
+          "billable_total": 3415
+        },
+        {
+          "name": "I've read every changed file. Assessment: **Entry points touched by this diff:** None. `K1692.py` is a standalone `__main__` script executed manually / by an op",
+          "messages": 1,
+          "billable_total": 2112
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 0,
+      "billable_total": 0,
+      "family_breakdown": [],
+      "prefix_breakdown": [],
+      "top_first_lines": []
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 4,
+      "cache_create_tokens": 517463,
+      "billable_total": 571487,
+      "cache_create_share_pct": 90.5,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "af984007-75c1-439a-a096-b32b9caf7242",
+          "messages": 5,
+          "billable_total": 229269,
+          "cache_create_tokens": 224184,
+          "cache_read_tokens": 147768,
+          "duration_minutes": 0.3,
+          "cache_create_share_pct": 97.8,
+          "first_ts": "2026-07-15T03:13:43.655000+00:00",
+          "last_ts": "2026-07-15T03:14:03.474000+00:00"
+        },
+        {
+          "session_id": "74952a74-d916-4b3e-b58c-33c17ac061d8",
+          "messages": 9,
+          "billable_total": 140772,
+          "cache_create_tokens": 127964,
+          "cache_read_tokens": 363008,
+          "duration_minutes": 1.2,
+          "cache_create_share_pct": 90.9,
+          "first_ts": "2026-07-15T03:26:41.773000+00:00",
+          "last_ts": "2026-07-15T03:27:56.234000+00:00"
+        },
+        {
+          "session_id": "6ba37ee8-ba88-4a6b-a4ed-aa6336d118ac",
+          "messages": 19,
+          "billable_total": 91590,
+          "cache_create_tokens": 83291,
+          "cache_read_tokens": 1114880,
+          "duration_minutes": 1.6,
+          "cache_create_share_pct": 90.9,
+          "first_ts": "2026-07-15T03:28:01.793000+00:00",
+          "last_ts": "2026-07-15T03:29:39.482000+00:00"
+        },
+        {
+          "session_id": "7192504e-bb20-4317-9677-505c9a411e48",
+          "messages": 2,
+          "billable_total": 109856,
+          "cache_create_tokens": 82024,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.1,
+          "cache_create_share_pct": 74.7,
+          "first_ts": "2026-07-15T03:18:51.599000+00:00",
+          "last_ts": "2026-07-15T03:18:59.674000+00:00"
+        }
+      ]
+    }
+  }
+}
