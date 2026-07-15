@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "title": "懶人包｜AI 瓶頸轉電力，波動率買單了嗎？",
+  "subtitle": "板塊很平靜、個股在打架：訊號藏在橫斷面離散度",
+  "evidence": {
+    "vol": {
+      "path": "storage/drafts/assets/trending_ai_power_vol_20260715_data.json",
+      "sha256": "18d3f8e09ff04010819a9c8465906cae9d163d40979e60d144fe878a23790711",
+      "label": "AI 電力波動率分析資料（yfinance 2024-09～2026-07）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "口號很響，板塊卻沒動",
+      "alt": "概念：市場都說 AI 瓶頸從晶片轉向電力，但公用事業板塊的波動率仍在歷史低位，真正翻倍的還是半導體",
+      "sources": [
+        "vol"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "共識故事",
+          "body": [
+            "GPU 不再是 AI 的瓶頸，電力才是。錢應該從晶片流向公用事業、核電、電力設備。",
+            "聽起來很順。但把波動率攤開，這個故事在板塊層級還沒發生。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "半導體 SMH 目前已實現波動率",
+          "value": {
+            "source": "vol",
+            "path": "SMH.rv20_current",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          },
+          "note": "一年中位大約只有一半，幾乎翻倍——AI 交易真正的熱點還在晶片"
+        },
+        {
+          "kind": "metric",
+          "label": "公用事業 XLU 目前已實現波動率",
+          "value": {
+            "source": "vol",
+            "path": "XLU.rv20_current",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          },
+          "note": "安靜到像什麼都沒發生，市場仍把它當防禦資產"
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "板塊看不出的東西，去看離散度",
+      "alt": "方法：ETF 把個股漲跌互相抵消，板塊波動率會誤導；真正該看的是成分股之間的橫斷面離散度",
+      "sources": [
+        "vol"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "ETF 的波動率會騙人",
+          "body": [
+            "XLU 裡幾十檔成分股，AI 概念那幾檔權重不高，個股漲跌互相抵消，指數就顯得風平浪靜。",
+            "你看到低波動率會以為市場很淡定，底下其實是明星股與落難股在對撞。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "XLU 過去一年波動率中位",
+          "value": {
+            "source": "vol",
+            "path": "XLU.rv20_median_1y",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          },
+          "note": "跟目前幾乎沒差——板塊層級零重定價"
+        },
+        {
+          "kind": "metric",
+          "label": "電力籃子與半導體 SMH 的滾動相關係數",
+          "value": {
+            "source": "vol",
+            "path": "_power_vs_SMH_corr60.current",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "三個月前與一年中位都在同一水準——相關性沒升高，市場還沒把電力和晶片綁成同一筆交易"
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "同樣掛 AI 電力，命運天差地別",
+      "alt": "結果：GE Vernova 賣鏟子被當純 AI beta 飆漲、波動率爆表，Constellation 核電卻崩三成——離散度大到誇張",
+      "sources": [
+        "vol"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "GE Vernova（電力設備）今年以來報酬",
+          "value": {
+            "source": "vol",
+            "path": "GEV.ytd_return_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "show_plus": true
+            }
+          },
+          "note": "賣渦輪機與電網的「鏟子商」，被市場當純 AI beta 在買"
+        },
+        {
+          "kind": "metric",
+          "label": "GE Vernova 目前波動率",
+          "value": {
+            "source": "vol",
+            "path": "GEV.rv20_current",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          },
+          "note": "比半導體還高"
+        },
+        {
+          "kind": "metric",
+          "label": "Constellation（核電）今年以來報酬",
+          "value": {
+            "source": "vol",
+            "path": "CEG.ytd_return_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "show_plus": true
+            }
+          },
+          "note": "實際供電的核電商，被丟在角落"
+        },
+        {
+          "kind": "metric",
+          "label": "半導體 SMH 目前波動率",
+          "value": {
+            "source": "vol",
+            "path": "SMH.rv20_current",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          },
+          "note": "晶片的波動率還是比電力誠實得多"
+        }
+      ]
+    }
+  ]
+}
