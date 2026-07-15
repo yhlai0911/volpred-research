@@ -1,0 +1,25 @@
+{
+  "schema": "experiment_integration_receipt.v1",
+  "experiment_id": "k1709",
+  "integrated_at": "2026-07-15T17:14:22Z",
+  "actor": "codex-failover",
+  "source_tip": "a47fc0abef564d9b760a0320f96f613e7926d706",
+  "merge_commit": "0f5feec09",
+  "merge_worktree": "dispatch-slot-2-c873d04d-k1709",
+  "worktree_removed": true,
+  "review_verdict": "PASS",
+  "review_receipt": "storage/ops/codex_reviews/k1709_rev6_fixed_memory_receipt.json",
+  "verification": {
+    "full_test_suite": "74 passed in 104.80s",
+    "experiment_certification": "PASS",
+    "claim_object_tests": "4 passed in 2.87s",
+    "figure_claim_tests": "2 passed in 2.69s",
+    "fig3_sha256": "19caee986a3f3dc223a67562693f590d9d659842e59e2cb3ad943e405029717b",
+    "fig4_sha256": "d4ea4d1b0543bf2c8d9f7ce9ab28f708e163a3f1c982f36448a21d2559a22792"
+  },
+  "completed_task_ids": [
+    "k1709_rev4_nameerror",
+    "k1709_rev4_claim_object",
+    "k1709_rev4_figure_labels"
+  ]
+}
