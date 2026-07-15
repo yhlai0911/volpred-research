@@ -1,0 +1,398 @@
+{
+  "experiment_id": "K1705",
+  "created_at": "2026-07-15T22:24:16.479156+00:00",
+  "seed": 42,
+  "question": "Does K1100c's Joe advantage survive honest marginal-first and dependence-score evaluation?",
+  "data": {
+    "source": "repository-pinned yfinance adjusted-close snapshot",
+    "path": "paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv",
+    "sha256": "467de79295c7afbaae1e6ba97b9240ee9a4bfbc0a9a191e61128b013f5f71e97",
+    "first_date": "2005-01-03",
+    "last_date": "2026-07-10",
+    "rows": 5426
+  },
+  "design": {
+    "window": 1250,
+    "refit_every": 63,
+    "oos_start": "2013-06-03",
+    "margins": "common one-sided EWMA variance plus rolling unit-variance Student-t PIT",
+    "dependence": "rolling Gaussian DCC score versus rolling Joe copula score on identical PITs",
+    "inference": "canonical volpred.stats.model_evaluation.dm_test with h=1 and automatic HAC bandwidth",
+    "asynchrony": "second asset return delayed one trading day; conservative stress test because both ETFs share the US close"
+  },
+  "parent_artifacts": {
+    "results_path": "experiments/k1100c/k1100c_results.json",
+    "results_sha256": "57990a06b8b887c27ec46d2b84e741d9935abfdf1a5dc09d1937873adce2dd32",
+    "script_path": "experiments/k1100c/k1100c.py",
+    "script_sha256": "2f3c970874b473ec236c16fa8e799bd56000a9ee34cd1b9499e49b53fee60b5d"
+  },
+  "parent_claim_audit": {
+    "pairs": {
+      "SPY-TLT": {
+        "reported_dm_t": 10.361798062330058,
+        "reported_mean_loss_diff_joe_minus_dcc": 0.23814866062935344,
+        "mean_qlike_joe": -9.192757780904337,
+        "mean_qlike_dcc": -9.43090644153369,
+        "mechanical_interpretation": "positive Joe-minus-DCC loss and higher mean QLIKE mean Joe is worse",
+        "readme_interpretation": "positive t was labeled Joe/copyula better",
+        "sign_reversal_confirmed": true
+      },
+      "SPY-GLD": {
+        "reported_dm_t": 7.660124502088543,
+        "reported_mean_loss_diff_joe_minus_dcc": 0.11359534759163245,
+        "mean_qlike_joe": -9.000070468458375,
+        "mean_qlike_dcc": -9.113665816050007,
+        "mechanical_interpretation": "positive Joe-minus-DCC loss and higher mean QLIKE mean Joe is worse",
+        "readme_interpretation": "positive t was labeled Joe/copyula better",
+        "sign_reversal_confirmed": true
+      }
+    },
+    "code_evidence": {
+      "loss_differential_definition_found": true,
+      "call_order_is_joe_then_dcc": true,
+      "same_A4f_marginals_for_all_models": true,
+      "archived_joe_density_fails_independence_limit": true,
+      "independence_requirement": "Joe theta=1 must have pointwise log density 0 for every u,v"
+    }
+  },
+  "synchronous_close": [
+    {
+      "pair": "SPY-TLT",
+      "second_asset_shift_days": 0,
+      "oos_first": "2014-05-30",
+      "oos_last": "2026-07-10",
+      "n_scored": 3056,
+      "marginal_diagnostics": {
+        "SPY": {
+          "n": 3306,
+          "mean": 0.531696167780146,
+          "variance": 0.08476911128106415,
+          "ks_stat": 0.06248690206199048,
+          "ks_p_value": 1.1524210470207412e-11,
+          "berkowitz_components": {
+            "z_mean": 0.0795351771345626,
+            "z_variance": 1.0758062143913163
+          },
+          "ljung_box_pit": {
+            "lag": 10,
+            "q_stat": 7.447697312492928,
+            "p_value": 0.682610670567727,
+            "acf1": -0.02875912107290026
+          },
+          "ljung_box_squared_z": {
+            "lag": 10,
+            "q_stat": 111.88356983776339,
+            "p_value": 2.2239583013426065e-19,
+            "acf1": 0.09082116214417613
+          },
+          "passes_joint_gate": false
+        },
+        "TLT": {
+          "n": 3306,
+          "mean": 0.5054902832652046,
+          "variance": 0.08651314281281457,
+          "ks_stat": 0.02762343522120403,
+          "ks_p_value": 0.012637293337000387,
+          "berkowitz_components": {
+            "z_mean": 0.01021010374983974,
+            "z_variance": 1.06000151389604
+          },
+          "ljung_box_pit": {
+            "lag": 10,
+            "q_stat": 14.533395029547592,
+            "p_value": 0.15002194642436645,
+            "acf1": -0.04320410755351351
+          },
+          "ljung_box_squared_z": {
+            "lag": 10,
+            "q_stat": 5.290676629089161,
+            "p_value": 0.8709340663733081,
+            "acf1": 0.01694988477436108
+          },
+          "passes_joint_gate": false
+        },
+        "models_share_identical_margins": true,
+        "median_fitted_df": {
+          "SPY": 6.191204443191514,
+          "TLT": 15.564272322178557
+        }
+      },
+      "dependence_scores": {
+        "mean_negative_log_score": {
+          "DCC_Gaussian": -0.03698171452143732,
+          "Joe": -0.0007335285545552559
+        },
+        "joe_minus_dcc_mean": 0.03624818596688206,
+        "canonical_dm_dcc_minus_joe": {
+          "t_stat": -4.914135235716289,
+          "p_value": 9.387369446223204e-07,
+          "direction": "negative favors DCC; positive favors Joe"
+        },
+        "harvey_abs_t_gt_3": true,
+        "loss_differential_acf1": 0.05204466716018328,
+        "mean_dcc_rho": -0.17659363876991346,
+        "mean_joe_theta": 1.0072456033574233
+      },
+      "two_step_decision": "STOP_AT_MARGINS"
+    },
+    {
+      "pair": "SPY-GLD",
+      "second_asset_shift_days": 0,
+      "oos_first": "2014-05-30",
+      "oos_last": "2026-07-10",
+      "n_scored": 3056,
+      "marginal_diagnostics": {
+        "SPY": {
+          "n": 3306,
+          "mean": 0.531696167780146,
+          "variance": 0.08476911128106415,
+          "ks_stat": 0.06248690206199048,
+          "ks_p_value": 1.1524210470207412e-11,
+          "berkowitz_components": {
+            "z_mean": 0.0795351771345626,
+            "z_variance": 1.0758062143913163
+          },
+          "ljung_box_pit": {
+            "lag": 10,
+            "q_stat": 7.447697312492928,
+            "p_value": 0.682610670567727,
+            "acf1": -0.02875912107290026
+          },
+          "ljung_box_squared_z": {
+            "lag": 10,
+            "q_stat": 111.88356983776339,
+            "p_value": 2.2239583013426065e-19,
+            "acf1": 0.09082116214417613
+          },
+          "passes_joint_gate": false
+        },
+        "GLD": {
+          "n": 3306,
+          "mean": 0.5148909630768116,
+          "variance": 0.08654333880603916,
+          "ks_stat": 0.03099631059263752,
+          "ks_p_value": 0.0034099009294377993,
+          "berkowitz_components": {
+            "z_mean": 0.04249514905289608,
+            "z_variance": 1.087123223565648
+          },
+          "ljung_box_pit": {
+            "lag": 10,
+            "q_stat": 15.022733451430975,
+            "p_value": 0.13123523121859834,
+            "acf1": -0.011675698038145688
+          },
+          "ljung_box_squared_z": {
+            "lag": 10,
+            "q_stat": 10.789088239833998,
+            "p_value": 0.37418443701887594,
+            "acf1": -0.029882680458889494
+          },
+          "passes_joint_gate": false
+        },
+        "models_share_identical_margins": true,
+        "median_fitted_df": {
+          "SPY": 6.191204443191514,
+          "GLD": 5.6979158953764815
+        }
+      },
+      "dependence_scores": {
+        "mean_negative_log_score": {
+          "DCC_Gaussian": -0.016707285364144026,
+          "Joe": -0.0047210135150198874
+        },
+        "joe_minus_dcc_mean": 0.01198627184912414,
+        "canonical_dm_dcc_minus_joe": {
+          "t_stat": -2.5551294915528535,
+          "p_value": 0.010662881718179529,
+          "direction": "negative favors DCC; positive favors Joe"
+        },
+        "harvey_abs_t_gt_3": false,
+        "loss_differential_acf1": 0.033254769275664724,
+        "mean_dcc_rho": 0.00214612092651296,
+        "mean_joe_theta": 1.0284358902791564
+      },
+      "two_step_decision": "STOP_AT_MARGINS"
+    }
+  ],
+  "asynchronous_sensitivity": [
+    {
+      "pair": "SPY-TLT",
+      "second_asset_shift_days": 1,
+      "oos_first": "2014-05-30",
+      "oos_last": "2026-07-10",
+      "n_scored": 3056,
+      "marginal_diagnostics": {
+        "SPY": {
+          "n": 3306,
+          "mean": 0.531696167780146,
+          "variance": 0.08476911128106415,
+          "ks_stat": 0.06248690206199048,
+          "ks_p_value": 1.1524210470207412e-11,
+          "berkowitz_components": {
+            "z_mean": 0.0795351771345626,
+            "z_variance": 1.0758062143913163
+          },
+          "ljung_box_pit": {
+            "lag": 10,
+            "q_stat": 7.447697312492928,
+            "p_value": 0.682610670567727,
+            "acf1": -0.02875912107290026
+          },
+          "ljung_box_squared_z": {
+            "lag": 10,
+            "q_stat": 111.88356983776339,
+            "p_value": 2.2239583013426065e-19,
+            "acf1": 0.09082116214417613
+          },
+          "passes_joint_gate": false
+        },
+        "TLT": {
+          "n": 3306,
+          "mean": 0.5054546003998667,
+          "variance": 0.08652163818199245,
+          "ks_stat": 0.02762642707889784,
+          "ks_p_value": 0.012623459853333489,
+          "berkowitz_components": {
+            "z_mean": 0.01011867322649828,
+            "z_variance": 1.0600401165598397
+          },
+          "ljung_box_pit": {
+            "lag": 10,
+            "q_stat": 14.589107783114745,
+            "p_value": 0.14777571536410394,
+            "acf1": -0.0432982281706134
+          },
+          "ljung_box_squared_z": {
+            "lag": 10,
+            "q_stat": 5.244682297939705,
+            "p_value": 0.8742450378867477,
+            "acf1": 0.016912971189869907
+          },
+          "passes_joint_gate": false
+        },
+        "models_share_identical_margins": true,
+        "median_fitted_df": {
+          "SPY": 6.191204443191514,
+          "TLT": 15.576654362121577
+        }
+      },
+      "dependence_scores": {
+        "mean_negative_log_score": {
+          "DCC_Gaussian": 0.001212144987176056,
+          "Joe": -0.0018480659511475716
+        },
+        "joe_minus_dcc_mean": -0.0030602109383236283,
+        "canonical_dm_dcc_minus_joe": {
+          "t_stat": 2.2463625837303143,
+          "p_value": 0.02475195454844048,
+          "direction": "negative favors DCC; positive favors Joe"
+        },
+        "harvey_abs_t_gt_3": false,
+        "loss_differential_acf1": -0.004711378841486564,
+        "mean_dcc_rho": 0.03477608473169105,
+        "mean_joe_theta": 1.0585593519467773
+      },
+      "two_step_decision": "STOP_AT_MARGINS"
+    },
+    {
+      "pair": "SPY-GLD",
+      "second_asset_shift_days": 1,
+      "oos_first": "2014-05-30",
+      "oos_last": "2026-07-10",
+      "n_scored": 3056,
+      "marginal_diagnostics": {
+        "SPY": {
+          "n": 3306,
+          "mean": 0.531696167780146,
+          "variance": 0.08476911128106415,
+          "ks_stat": 0.06248690206199048,
+          "ks_p_value": 1.1524210470207412e-11,
+          "berkowitz_components": {
+            "z_mean": 0.0795351771345626,
+            "z_variance": 1.0758062143913163
+          },
+          "ljung_box_pit": {
+            "lag": 10,
+            "q_stat": 7.447697312492928,
+            "p_value": 0.682610670567727,
+            "acf1": -0.02875912107290026
+          },
+          "ljung_box_squared_z": {
+            "lag": 10,
+            "q_stat": 111.88356983776339,
+            "p_value": 2.2239583013426065e-19,
+            "acf1": 0.09082116214417613
+          },
+          "passes_joint_gate": false
+        },
+        "GLD": {
+          "n": 3306,
+          "mean": 0.5147849402200185,
+          "variance": 0.08660495644558691,
+          "ks_stat": 0.03094118905405774,
+          "ks_p_value": 0.00348790787508483,
+          "berkowitz_components": {
+            "z_mean": 0.04212389608225667,
+            "z_variance": 1.0878407429201742
+          },
+          "ljung_box_pit": {
+            "lag": 10,
+            "q_stat": 15.00401055761762,
+            "p_value": 0.13191570698374952,
+            "acf1": -0.012133598262369786
+          },
+          "ljung_box_squared_z": {
+            "lag": 10,
+            "q_stat": 10.786928852975286,
+            "p_value": 0.37435747764133814,
+            "acf1": -0.02988001586428166
+          },
+          "passes_joint_gate": false
+        },
+        "models_share_identical_margins": true,
+        "median_fitted_df": {
+          "SPY": 6.191204443191514,
+          "GLD": 5.695512870791931
+        }
+      },
+      "dependence_scores": {
+        "mean_negative_log_score": {
+          "DCC_Gaussian": 0.002151212024087348,
+          "Joe": -8.107154607029824e-05
+        },
+        "joe_minus_dcc_mean": -0.002232283570157647,
+        "canonical_dm_dcc_minus_joe": {
+          "t_stat": 1.757555690659689,
+          "p_value": 0.0789232837358671,
+          "direction": "negative favors DCC; positive favors Joe"
+        },
+        "harvey_abs_t_gt_3": false,
+        "loss_differential_acf1": -0.03485890729179136,
+        "mean_dcc_rho": 0.007777334092366309,
+        "mean_joe_theta": 1.0308423178513069
+      },
+      "two_step_decision": "STOP_AT_MARGINS"
+    }
+  ],
+  "verdict": "PARENT_JOE_SUPERIORITY_SIGN_REVERSED_INVALID_JOE_DENSITY_AND_DEPENDENCE_ATTRIBUTION_NOT_ESTABLISHED",
+  "limitations": [
+    "The PIT reconstruction is an auditable common-margin proxy, not a byte-identical replay of K1100c A4f internals because K1100c did not persist PIT or forecast ledgers.",
+    "Joe only represents nonnegative upper-tail dependence; it is structurally ill-suited to negative stock-bond dependence.",
+    "Both ETFs share a US close; the one-day delay is a stress test, not an assertion about actual timestamp mismatch."
+  ],
+  "references": [
+    {
+      "citation": "Fissler and Hoga (2026), How to Compare Copula Forecasts?",
+      "url": "https://arxiv.org/abs/2410.04165"
+    },
+    {
+      "citation": "Patton (2006), Modelling Asymmetric Exchange Rate Dependence",
+      "url": "https://public.econ.duke.edu/~ap172/Patton_IER_2006.pdf"
+    },
+    {
+      "citation": "Giacomini and White (2006), Tests of Conditional Predictive Ability",
+      "url": "https://doi.org/10.1111/j.1468-0262.2006.00718.x"
+    }
+  ]
+}
