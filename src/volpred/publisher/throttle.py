@@ -8,14 +8,14 @@ apart inside the same script run (mile_44ab1acc / mile_f5f4cb43) tripped the
 (exempt digest + trending fixtures), but the source of legitimate-burst risk
 remained: nothing actually stopped two *discretionary* publishes from clumping.
 
-This module is the prevention half: a canonical-write-site gate inside
-`Publisher._append_to_feed`. A publish whose `is_rhythm_controlled(item)` is
-True and whose gap to the most recent rhythm-controlled feed entry is below
-RHYTHM_BURST_GAP_MIN is rejected with PublishThrottleError — caller defers,
-reschedules, or drops the work item. Fixtures (`digest` / `daily_update` /
-`daily_recommendation`) and event-driven publishes (`trending_repost` /
-`event_article`) bypass through the shared cadence policy in
-`volpred.ops.release_cadence`.
+This module is the prevention half: the shared gate called from both canonical
+publish transitions, `Publisher._append_to_feed` and release-pool promotion. A
+publish whose `is_rhythm_controlled(item)` is True and whose gap to the most
+recent rhythm-controlled feed entry is below RHYTHM_BURST_GAP_MIN is rejected
+with PublishThrottleError — caller defers, reschedules, or drops the work item.
+Fixtures (`daily_digest` / `daily_update` / `daily_recommendation`) and
+event-driven publishes (`trending_repost` / `event_article`) bypass through the
+shared cadence policy in `volpred.ops.release_cadence`.
 
 Audit: every gate decision (pass / block) writes a record to
 `storage/logs/dedup_decisions.jsonl` per `.claude/rules/dedup-gate-audit.md`.
@@ -159,7 +159,7 @@ def check_publish_throttle(
     Pass-through (no-op + audit `pass`) when:
       * `item` is not being published now (status draft / scheduled / etc.) — a
         draft is not reader-facing at ingestion; release_pool governs its release
-        cadence, and *that* flip re-enters this gate as status="published". Only a
+        cadence, and *that* flip explicitly calls this gate as status="published". Only a
         published discretionary article can create a reader-facing burst, and this
         gate only ever compares against published entries. Throttling draft
         ingestion here double-gates and wedges draft-pool refill for up to the

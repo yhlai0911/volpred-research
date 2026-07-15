@@ -80,6 +80,10 @@ _INTERNAL_ATTEMPT_HISTORY_LIMIT = 8
 
 _SUGGEST_HEADING = "## 建議行動"
 _AUDIT_HEADING = "## 處理步驟（任務已自動建立，以下供執行者稽核）"
+_REVALIDATION_INSTRUCTION = (
+    "執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證"
+    "警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。"
+)
 
 
 def _tasks_path(storage_dir: str) -> Path:
@@ -145,6 +149,7 @@ def _internal_task_description(condition: dict[str, Any], alert_key: str) -> str
         f"由內部可自癒 alert_key `{alert_key}` 自動建立（固定 P1）。\n"
         "這是系統自己的修復工作；首次與修復進行中都不通知老闆。"
         "只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n"
+        f"{_REVALIDATION_INSTRUCTION}\n\n"
         f"{condition.get('body') or ''}"
     )
 
@@ -620,6 +625,7 @@ def _enqueue(
         "description": (
             f"由 alert `{alert_id}` 自動建立（level={level}）。\n"
             f"這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n"
+            f"{_REVALIDATION_INSTRUCTION}\n\n"
             f"{condition.get('body') or ''}"
         ),
         "task_type": ALERT_TASK_TYPE.get(alert_id, "platform_ops"),

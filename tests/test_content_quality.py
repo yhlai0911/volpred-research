@@ -341,6 +341,43 @@ def test_rhythm_paired_siblings_excluded_from_burst(tmp_path):
     assert result["burst_pairs"] == []
 
 
+def test_rhythm_daily_digest_is_excluded_from_discretionary_burst(tmp_path):
+    now_tpe = datetime(2026, 7, 15, 11, 0, tzinfo=TPE)
+    storage = _write_feed(
+        tmp_path,
+        [
+            {
+                **_entry(
+                    "mile_digest",
+                    published_at=now_tpe - timedelta(minutes=5),
+                    content_type="daily_digest",
+                ),
+                "audience": "general",
+                "phase": "daily_digest",
+                "details": {"content_type": "daily_digest"},
+            },
+            {
+                **_entry("mile_general", published_at=now_tpe - timedelta(minutes=10)),
+                "audience": "general",
+                "phase": "research",
+            },
+            {
+                **_entry("mile_older", published_at=now_tpe - timedelta(minutes=60)),
+                "audience": "general",
+                "phase": "research",
+            },
+        ],
+    )
+
+    result = cq.check_publish_rhythm(
+        str(storage),
+        now=now_tpe.astimezone(timezone.utc),
+    )
+
+    assert result["status"] == "ok"
+    assert result["burst_pairs"] == []
+
+
 def test_rhythm_different_group_keys_still_burst(tmp_path):
     """Sibling exclusion must not weaken real burst detection.
 

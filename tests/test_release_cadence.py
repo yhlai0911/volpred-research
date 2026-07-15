@@ -13,6 +13,7 @@ from volpred.ops.release_cadence import (
     DEFAULT_RELEASE_INTERVAL_MINUTES,
     get_release_interval_hours,
     get_release_interval_minutes,
+    is_rhythm_controlled,
 )
 
 TPE = timezone(timedelta(hours=8))
@@ -69,6 +70,27 @@ def test_release_interval_helper_reads_settings_and_defaults(tmp_path: Path) -> 
     _write_settings(storage, interval_minutes=180)
     assert get_release_interval_minutes(str(storage)) == 180
     assert get_release_interval_hours(str(storage)) == 3.0
+
+
+def test_daily_digest_is_not_rhythm_controlled_by_phase_or_content_type() -> None:
+    assert is_rhythm_controlled({"audience": "general", "phase": "daily_digest"}) is False
+    assert is_rhythm_controlled({"audience": "general", "content_type": "daily_digest"}) is False
+    assert is_rhythm_controlled(
+        {"audience": "general", "details": {"content_type": "daily_digest"}}
+    ) is False
+    assert is_rhythm_controlled({"audience": "general", "phase": "research"}) is True
+
+
+def test_release_pool_schedule_has_one_direct_host_owner() -> None:
+    config_path = Path(__file__).resolve().parents[1] / "config" / "runtime_schedules.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    item = next(
+        row for row in config["system_crontab"]["items"] if row.get("id") == "release_pool"
+    )
+
+    assert item["host_crontab_managed"] is False
+    assert item["mechanism"] == "launchd"
+    assert item["launchagent_label"] == "com.volpred.release-pool"
 
 
 def test_release_cadence_thresholds_move_with_interval(tmp_path: Path) -> None:

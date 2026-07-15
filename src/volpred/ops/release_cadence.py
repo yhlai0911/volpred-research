@@ -20,6 +20,7 @@ RHYTHM_BURST_GAP_MIN = 30
 NON_RHYTHM_PHASES = frozenset(
     {
         "digest",
+        "daily_digest",
         "daily_update",
         "daily_recommendation",
         "trending_repost",
@@ -118,6 +119,16 @@ def is_rhythm_controlled(item: dict[str, Any]) -> bool:
         return False
     phase = (item.get("phase") or "").lower()
     if phase in NON_RHYTHM_PHASES:
+        return False
+    details = item.get("details")
+    content_type = (
+        str(
+            item.get("content_type")
+            or (details.get("content_type") if isinstance(details, dict) else "")
+            or ""
+        ).lower()
+    )
+    if content_type in NON_RHYTHM_PHASES:
         return False
     cat = (item.get("category") or "").lower()
     if cat in NON_RHYTHM_CATEGORIES:

@@ -4,6 +4,7 @@ import fcntl
 import json
 import re
 from collections import Counter
+from copy import deepcopy
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
@@ -1111,6 +1112,254 @@ def _release_dedup_flag_active(item: dict, *, now: datetime) -> bool:
         return False
 
 
+def _release_publish_throttle(
+    item: dict,
+    feed: list[dict],
+    *,
+    now: datetime,
+    storage_dir: str,
+    route: str,
+) -> dict | None:
+    """Return an audit summary when a draft-to-published transition is blocked.
+
+    Draft ingestion intentionally bypasses the publisher throttle because it is
+    not reader-facing. Every release-pool path must therefore call the gate at
+    the actual status transition, including explicit ``pub_id`` releases and
+    the drought override. The published copy prevents the draft-ingestion
+    bypass from short-circuiting this release-time check.
+    """
+    from volpred.publisher.throttle import (
+        PublishThrottleError,
+        check_publish_throttle,
+    )
+
+    candidate = dict(item)
+    candidate["status"] = "published"
+    try:
+        check_publish_throttle(
+            candidate,
+            feed,
+            storage_dir=storage_dir,
+            now=now,
+        )
+    except PublishThrottleError as exc:
+        blocked = {
+            "id": item.get("id"),
+            "title": item.get("title"),
+            "route": route,
+            "previous_id": exc.previous_id,
+            "gap_minutes": exc.gap_minutes,
+            "threshold_minutes": exc.threshold_minutes,
+        }
+        print(
+            f"  [release_pool] THROTTLE-SKIP {item.get('id')} — "
+            f"gap={exc.gap_minutes}min < {exc.threshold_minutes}min "
+            f"after {exc.previous_id}; kept unpublished."
+        )
+        return blocked
+    return None
+
+
+def _write_feed_locked(feed: list[dict], *, storage_dir: str) -> None:
+    """Atomically replace feed.json; caller must hold ``publisher_feed`` lock."""
+    path = _feed_path(storage_dir)
+    guard_canonical_write(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(f".{path.name}.release-pool.tmp")
+    try:
+        tmp_path.write_text(
+            json.dumps(feed, indent=2, ensure_ascii=False, default=str),
+            encoding="utf-8",
+        )
+        parsed = json.loads(tmp_path.read_text(encoding="utf-8"))
+        if not isinstance(parsed, list):
+            raise ValueError("release-pool feed write must contain a list")
+        tmp_path.replace(path)
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()
+
+
+def _atomic_promote_release_item(
+    item: dict,
+    *,
+    now: datetime,
+    released_at: str,
+    storage_dir: str,
+    route: str,
+    expected_item: dict,
+    require_reader_drought: bool = False,
+) -> dict:
+    """Fresh-read, throttle, promote and persist one feed entry under one lock.
+
+    The lock boundary is deliberately short: remote sync, notification and live
+    verification stay outside it. This closes both release-vs-release and
+    release-vs-Publisher TOCTOU races without holding the canonical feed lock
+    across network I/O.
+    """
+    from volpred.ops.shared_lock import shared_state_lock
+
+    item_id = str(item.get("id") or "")
+    with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+        fresh_feed = load_feed(storage_dir)
+        index = next(
+            (idx for idx, current in enumerate(fresh_feed) if current.get("id") == item_id),
+            None,
+        )
+        if index is None:
+            return {"outcome": "conflict", "id": item_id, "reason": "missing_from_fresh_feed"}
+
+        current = fresh_feed[index]
+        current_status = str(current.get("status") or "")
+        if current_status not in {"draft", "scheduled"}:
+            return {
+                "outcome": "conflict",
+                "id": item_id,
+                "reason": f"fresh_status:{current_status or 'missing'}",
+            }
+        if current != expected_item:
+            return {
+                "outcome": "conflict",
+                "id": item_id,
+                "reason": "fresh_item_changed_since_selection",
+            }
+
+        if require_reader_drought:
+            reader_times = [
+                stamp
+                for stamp in (
+                    _parse_datetime(entry.get("published_at"))
+                    for entry in fresh_feed
+                    if _is_reader_facing_published(entry)
+                )
+                if stamp is not None
+            ]
+            newest_reader = max(reader_times) if reader_times else None
+            fresh_gap_hours = (
+                (now - newest_reader).total_seconds() / 3600.0
+                if newest_reader is not None
+                else None
+            )
+            if fresh_gap_hours is not None and fresh_gap_hours <= _RELEASE_DROUGHT_HOURS:
+                return {
+                    "outcome": "condition_cleared",
+                    "id": item_id,
+                    "reason": "reader_drought_resolved_before_promotion",
+                    "gap_hours": round(fresh_gap_hours, 2),
+                }
+
+            override_times = [
+                stamp
+                for stamp in (
+                    _parse_datetime((entry.get("details") or {}).get("release_drought_override_at"))
+                    for entry in fresh_feed
+                    if isinstance(entry.get("details"), dict)
+                )
+                if stamp is not None
+            ]
+            last_override = max(override_times) if override_times else None
+            if (
+                last_override is not None
+                and (now - last_override).total_seconds() / 3600.0
+                < _RELEASE_DROUGHT_HOURS
+            ):
+                return {
+                    "outcome": "condition_cleared",
+                    "id": item_id,
+                    "reason": "fresh_drought_override_inside_anti_thrash_window",
+                    "last_override_at": last_override.isoformat(),
+                }
+
+        prospective = {**current, **item}
+        prospective["status"] = "published"
+        prospective["published_at"] = released_at
+        throttle_block = _release_publish_throttle(
+            prospective,
+            fresh_feed,
+            now=now,
+            storage_dir=storage_dir,
+            route=route,
+        )
+        if throttle_block is not None:
+            return {"outcome": "throttled", "block": throttle_block}
+
+        fresh_feed[index] = prospective
+        _write_feed_locked(fresh_feed, storage_dir=storage_dir)
+        persisted = load_feed(storage_dir)
+        persisted_item = next(
+            (entry for entry in persisted if entry.get("id") == item_id),
+            None,
+        )
+        if not isinstance(persisted_item, dict) or persisted_item.get("status") != "published":
+            raise RuntimeError(
+                f"release-pool promotion read-back failed: id={item_id} status not published"
+            )
+        return {"outcome": "promoted", "item": prospective}
+
+
+def _atomic_patch_feed_entries(
+    patches: list[dict],
+    *,
+    storage_dir: str,
+) -> list[dict]:
+    """Apply small, status-guarded feed patches without stale whole-file writes."""
+    if not patches:
+        return []
+    from volpred.ops.shared_lock import shared_state_lock
+
+    with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+        fresh_feed = load_feed(storage_dir)
+        by_id = {
+            str(entry.get("id") or ""): entry
+            for entry in fresh_feed
+            if isinstance(entry, dict)
+        }
+        changed = False
+        conflicts: list[dict] = []
+        for patch in patches:
+            patch_id = str(patch.get("id") or "")
+            target = by_id.get(patch_id)
+            if target is None:
+                conflicts.append(
+                    {"outcome": "conflict", "id": patch_id, "reason": "missing_from_fresh_feed"}
+                )
+                continue
+            expected_status = patch.get("expected_status")
+            if expected_status is not None and target.get("status") != expected_status:
+                conflicts.append(
+                    {
+                        "outcome": "conflict",
+                        "id": patch_id,
+                        "reason": f"fresh_status:{target.get('status') or 'missing'}",
+                    }
+                )
+                continue
+            expected_item = patch.get("expected_item")
+            if expected_item is not None and target != expected_item:
+                conflicts.append(
+                    {
+                        "outcome": "conflict",
+                        "id": patch_id,
+                        "reason": "fresh_item_changed_before_metadata_patch",
+                    }
+                )
+                continue
+            for key, value in (patch.get("fields") or {}).items():
+                if (
+                    key == "details"
+                    and expected_item is None
+                    and isinstance(target.get(key), dict)
+                    and isinstance(value, dict)
+                ):
+                    target[key] = {**target[key], **value}
+                else:
+                    target[key] = value
+                changed = True
+        if changed:
+            _write_feed_locked(fresh_feed, storage_dir=storage_dir)
+        return conflicts
+
+
 def _maybe_drought_release(
     *,
     blocked_items: list[dict],
@@ -1121,6 +1370,8 @@ def _maybe_drought_release(
     publisher: Publisher,
     storage_dir: str,
     released: list[dict],
+    publish_throttled: list[dict] | None = None,
+    expected_items_by_id: dict[str, dict] | None = None,
 ) -> dict | None:
     """Force-release exactly ONE dedup-blocked draft when the feed is in a
     reader-facing drought.
@@ -1233,6 +1484,45 @@ def _maybe_drought_release(
         f"force-released least dup-like blocked draft (max Jaccard={chosen_jaccard})"
     )
 
+    # Build the intended override on a copy. A fresh-read drought revalidation
+    # and the rhythm throttle still have to pass atomically before any stamp is
+    # committed to the canonical feed.
+    chosen_for_release = dict(chosen)
+    details = chosen.get("details")
+    details = dict(details) if isinstance(details, dict) else {}
+    chosen_for_release["details"] = details
+    details["release_drought_override"] = True
+    details["release_drought_override_at"] = now.isoformat()
+    details["release_drought_override_reason"] = reason
+    # We are intentionally publishing this draft; clear the dedup COOLDOWN flag
+    # so the now-published item carries a clean state (the override reason and
+    # the original release_dedup_of/jaccard audit fields remain for provenance).
+    details.pop("release_dedup_skipped", None)
+
+    chosen_id = str(chosen.get("id") or "")
+    expected_chosen = (expected_items_by_id or {}).get(chosen_id, deepcopy(chosen))
+    promotion = _atomic_promote_release_item(
+        chosen_for_release,
+        now=now,
+        released_at=released_at,
+        storage_dir=storage_dir,
+        route="drought_override",
+        require_reader_drought=True,
+        expected_item=expected_chosen,
+    )
+    if promotion["outcome"] == "throttled":
+        if publish_throttled is not None:
+            publish_throttled.append(promotion["block"])
+        return None
+    if promotion["outcome"] != "promoted":
+        print(
+            f"  [release_pool] DROUGHT-NOOP {chosen.get('id')} — "
+            f"{promotion.get('reason')}; fresh condition no longer authorizes release."
+        )
+        return None
+
+    chosen.clear()
+    chosen.update(promotion["item"])
     warn(
         "release_drought",
         "forcing one release to break a reader-facing publishing drought",
@@ -1243,20 +1533,6 @@ def _maybe_drought_release(
     )
     print(f"  [release_pool] DROUGHT-OVERRIDE {chosen.get('id')} — {reason}; releasing.")
 
-    details = chosen.get("details")
-    if not isinstance(details, dict):
-        details = {}
-        chosen["details"] = details
-    details["release_drought_override"] = True
-    details["release_drought_override_at"] = now.isoformat()
-    details["release_drought_override_reason"] = reason
-    # We are intentionally publishing this draft; clear the dedup COOLDOWN flag
-    # so the now-published item carries a clean state (the override reason and
-    # the original release_dedup_of/jaccard audit fields remain for provenance).
-    details.pop("release_dedup_skipped", None)
-
-    chosen["status"] = "published"
-    chosen["published_at"] = released_at
     article_slug = str(chosen.get("id", ""))
     # Publish finalization mirrors the normal release loop (sync → failed-sync
     # ledger → answer linked questions → notify). Kept inline (not shared) so a
@@ -1324,6 +1600,11 @@ def release_pool_articles(
 ) -> dict:
     publisher = Publisher(storage_dir=storage_dir)
     feed = load_feed(storage_dir)
+    expected_items_by_id = {
+        str(item.get("id") or ""): deepcopy(item)
+        for item in feed
+        if isinstance(item, dict) and item.get("id")
+    }
     now = datetime.now(timezone.utc)
     effective_include_drafts = include_drafts if include_drafts is not None else (not due_only)
     audience_priority = {
@@ -1496,6 +1777,9 @@ def release_pool_articles(
     audit_skipped: list[dict] = []
     audit_materialized: list[dict] = []
     dedup_skipped: list[dict] = []
+    publish_throttled: list[dict] = []
+    release_conflicts: list[dict] = []
+    metadata_patches: list[dict] = []
     # Content-clean drafts blocked purely by the dedup gates this run — the only
     # pool the drought breaker may force-release from (audit-blocked drafts are
     # excluded so a drought can never publish low-quality content).
@@ -1659,6 +1943,18 @@ def release_pool_articles(
             if materialized is not None:
                 skipped_entry["materialized_task"] = materialized
             audit_skipped.append(skipped_entry)
+            metadata_patches.append(
+                {
+                    "id": item.get("id"),
+                    "expected_status": item.get("status"),
+                    "expected_item": expected_items_by_id.get(str(item.get("id") or "")),
+                    "fields": {
+                        key: deepcopy(item[key])
+                        for key in ("details", "tags")
+                        if key in item
+                    },
+                }
+            )
             continue
 
         _mark_release_audit_resolved(item, now=now)
@@ -1888,6 +2184,18 @@ def release_pool_articles(
                         "theme_recent_count": flood["recent_count"] if flood else None,
                     }
                 )
+                metadata_patches.append(
+                    {
+                        "id": item.get("id"),
+                        "expected_status": item.get("status"),
+                        "expected_item": expected_items_by_id.get(str(item.get("id") or "")),
+                        "fields": {
+                            key: deepcopy(item[key])
+                            for key in ("details", "tags")
+                            if key in item
+                        },
+                    }
+                )
                 # Eligible for drought-breaker rescue (content-clean, blocked
                 # only for surface similarity / theme flood / arc overlap).
                 dedup_blocked_items.append(item)
@@ -1899,8 +2207,27 @@ def release_pool_articles(
                 print(f"  [release_pool] DEDUP-SKIP {item.get('id')} — {reason}; kept as draft.")
                 continue
 
-        item["status"] = "published"
-        item["published_at"] = released_at
+        promotion = _atomic_promote_release_item(
+            item,
+            now=now,
+            released_at=released_at,
+            storage_dir=storage_dir,
+            route="explicit_pub_id" if pub_id else "release_pool",
+            expected_item=expected_items_by_id.get(str(item.get("id") or "")),
+        )
+        if promotion["outcome"] == "throttled":
+            publish_throttled.append(promotion["block"])
+            continue
+        if promotion["outcome"] != "promoted":
+            release_conflicts.append(promotion)
+            print(
+                f"  [release_pool] RELEASE-NOOP {item.get('id')} — "
+                f"{promotion.get('reason')}; fresh canonical state won."
+            )
+            continue
+
+        item.clear()
+        item.update(promotion["item"])
         _released_paced = _item_paced_series(item)
         if _released_paced:
             _paced_series_released_this_run.add(_released_paced)
@@ -1976,22 +2303,26 @@ def release_pool_articles(
             publisher=publisher,
             storage_dir=storage_dir,
             released=released,
+            publish_throttled=publish_throttled,
+            expected_items_by_id=expected_items_by_id,
         )
 
-    if (dedup_skipped or audit_skipped) and not released:
-        # Persist release skip metadata even when nothing was released, so
-        # future runs see dedup TTLs and audit skip counters.
-        from volpred.ops.shared_lock import shared_state_lock
-        with shared_state_lock("publisher_feed", storage_dir=storage_dir):
-            dump_json(_feed_path(storage_dir), feed)
+    # Persist only the audit/dedup fields touched by this run. A stale whole-feed
+    # dump here used to overwrite concurrent Publisher/release-pool writes.
+    released_ids = {str(entry.get("id") or "") for entry in released}
+    pending_metadata_patches = [
+        patch
+        for patch in metadata_patches
+        if str(patch.get("id") or "") not in released_ids
+    ]
+    release_conflicts.extend(
+        _atomic_patch_feed_entries(pending_metadata_patches, storage_dir=storage_dir)
+    )
 
     if released:
-        # 2026-05-04 finding #17 修整：feed.json 寫入須與 publisher._append_to_feed
-        # 同一 lock namespace 防 race（之前直接 dump_json 沒 lock，並發時可能與
-        # publisher 的 lock-protected write 互相覆蓋）
-        from volpred.ops.shared_lock import shared_state_lock
-        with shared_state_lock("publisher_feed", storage_dir=storage_dir):
-            dump_json(_feed_path(storage_dir), feed)
+        # Local canonical promotion already committed atomically under the
+        # publisher_feed lock. Network side effects deliberately happen after
+        # that short critical section.
         for released_entry in released:
             article_id = released_entry.get("id")
             if article_id:
@@ -2008,6 +2339,7 @@ def release_pool_articles(
                 emit_verify_alert,
             )
 
+            verify_patches: list[dict] = []
             for released_entry in released:
                 article_id = released_entry.get("id")
                 if not article_id:
@@ -2019,6 +2351,18 @@ def release_pool_articles(
                 )
                 if target is not None:
                     stamp_verified(target, verified=live_ok)
+                    verify_fields = {}
+                    if "verified_live_at" in target:
+                        verify_fields["verified_live_at"] = target["verified_live_at"]
+                    if "live_verify_failed" in target:
+                        verify_fields["live_verify_failed"] = target["live_verify_failed"]
+                    verify_patches.append(
+                        {
+                            "id": article_id,
+                            "expected_status": "published",
+                            "fields": verify_fields,
+                        }
+                    )
                 released_entry["verified_live"] = bool(live_ok)
                 if not live_ok:
                     emit_verify_alert(
@@ -2027,9 +2371,7 @@ def release_pool_articles(
                         storage_dir=storage_dir,
                     )
 
-            # Re-persist feed with verify stamps under the same lock namespace.
-            with shared_state_lock("publisher_feed", storage_dir=storage_dir):
-                dump_json(_feed_path(storage_dir), feed)
+            _atomic_patch_feed_entries(verify_patches, storage_dir=storage_dir)
             for released_entry in released:
                 article_id = released_entry.get("id")
                 if not article_id:
@@ -2055,6 +2397,8 @@ def release_pool_articles(
         "audit_skipped": audit_skipped,
         "audit_materialized": audit_materialized,
         "dedup_skipped": dedup_skipped,
+        "publish_throttled": publish_throttled,
+        "release_conflicts": release_conflicts,
         "theme_valves": theme_valves,
         "drought_override": drought_override,
         "narrative_cluster_pressure": narrative_pressure,

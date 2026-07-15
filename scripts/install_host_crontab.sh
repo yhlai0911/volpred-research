@@ -26,25 +26,36 @@
 # Usage:
 #   bash scripts/install_host_crontab.sh          # install
 #   bash scripts/install_host_crontab.sh --dry-run  # print plan only
-#   bash scripts/install_host_crontab.sh --diff     # show diff vs current
+#   bash scripts/install_host_crontab.sh --diff     # show full diff vs current
+#   bash scripts/install_host_crontab.sh --id release_pool  # reconcile one item only
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CONFIG_PATH="${REPO_ROOT}/config/runtime_schedules.json"
+SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_ROOT="${VOLPRED_REPO_ROOT:-$SCRIPT_ROOT}"
+CONFIG_PATH="${VOLPRED_RUNTIME_SCHEDULES_PATH:-${REPO_ROOT}/config/runtime_schedules.json}"
 HEADER="# volpred canonical system crontab (config/runtime_schedules.json)"
 
 DRY_RUN=0
 SHOW_DIFF=0
-for arg in "$@"; do
-  case "$arg" in
-    --dry-run) DRY_RUN=1 ;;
-    --diff)    SHOW_DIFF=1 ;;
+TARGET_ID=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run) DRY_RUN=1; shift ;;
+    --diff)    SHOW_DIFF=1; shift ;;
+    --id)
+      if [[ $# -lt 2 || -z "$2" ]]; then
+        echo "ERROR: --id requires a schedule id" >&2
+        exit 2
+      fi
+      TARGET_ID="$2"
+      shift 2
+      ;;
     -h|--help)
-      sed -n '1,30p' "${BASH_SOURCE[0]}"
+      sed -n '1,35p' "${BASH_SOURCE[0]}"
       exit 0
       ;;
-    *) echo "Unknown arg: $arg" >&2; exit 2 ;;
+    *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
 
@@ -65,8 +76,8 @@ build_volpred_block() {
     .system_crontab.items[]
     | select(.host_crontab_managed != false)
     | select(.wrapper_script != null)
-    | [.cron, .wrapper_script, .log_path, .id] | @tsv
-  ' "$CONFIG_PATH" | while IFS=$'\t' read -r cron wrapper log_path id; do
+    | [.cron, .wrapper_script, (.log_path // ""), .id] | join("\u001f")
+  ' "$CONFIG_PATH" | while IFS=$'\x1f' read -r cron wrapper log_path id; do
     # Absolute path → use as-is; relative → resolve against REPO_ROOT.
     # (Absolute paths are required for host-cron wrappers to sit in
     # ~/.volpred/bin/ and avoid macOS TCC FDA blocks on Desktop/.)
@@ -91,26 +102,81 @@ build_volpred_block() {
 # Capture current crontab (empty string if none).
 CURRENT="$(crontab -l 2>/dev/null || true)"
 
-# Strip old volpred section: drop header line + any line ending with "# volpred-*".
-STRIPPED="$(printf '%s\n' "$CURRENT" | awk '
-  /^# volpred canonical system crontab/ { next }
-  /# volpred-[A-Za-z0-9-]+$/            { next }
-  { print }
-')"
+if [[ -n "$TARGET_ID" ]]; then
+  if ! jq -e --arg id "$TARGET_ID" '.system_crontab.items[] | select(.id == $id)' \
+      "$CONFIG_PATH" >/dev/null; then
+    echo "ERROR: schedule id not found: $TARGET_ID" >&2
+    exit 2
+  fi
 
-NEW_VOLPRED="$(build_volpred_block)"
+  # Targeted reconciliation is the safe operational path when another config
+  # change is waiting in the full canonical diff. Remove/rebuild only this
+  # exact managed line and preserve every unrelated crontab entry.
+  TARGET_TAG="# volpred-${TARGET_ID//_/-}"
+  TARGET_WRAPPER="$(jq -r --arg id "$TARGET_ID" '
+    .system_crontab.items[] | select(.id == $id) | .wrapper_script // ""
+  ' "$CONFIG_PATH")"
+  STRIPPED_TARGET="$(printf '%s\n' "$CURRENT" | awk \
+      -v tag="$TARGET_TAG" -v wrapper="$TARGET_WRAPPER" '
+    {
+      line=$0
+      sub(/[[:space:]]+$/, "", line)
+      if (length(line) >= length(tag) && substr(line, length(line)-length(tag)+1) == tag) next
+      if (wrapper != "" && index(line, wrapper) > 0 && line ~ /# volpred-[A-Za-z0-9-]*$/) next
+      print
+    }
+  ')"
+  TARGET_ENTRY="$(jq -r --arg id "$TARGET_ID" '
+      .system_crontab.items[]
+      | select(.id == $id)
+      | select(.host_crontab_managed != false)
+      | select(.wrapper_script != null)
+      | [.cron, .wrapper_script, (.log_path // ""), .id] | join("\u001f")
+    ' "$CONFIG_PATH" | while IFS=$'\x1f' read -r cron wrapper log_path id; do
+      if [[ "$wrapper" = /* ]]; then
+        wrapper_abs="$wrapper"
+      else
+        wrapper_abs="${REPO_ROOT}/${wrapper}"
+      fi
+      if [[ ! -x "$wrapper_abs" ]]; then
+        echo "ERROR: wrapper not executable: $wrapper_abs" >&2
+        exit 1
+      fi
+      if [[ -z "$log_path" || "$log_path" == "null" ]]; then
+        log_path="storage/logs/cron/${id}.log"
+      fi
+      log_abs="${REPO_ROOT}/${log_path}"
+      mkdir -p "$(dirname "$log_abs")"
+      echo "${cron} ${wrapper_abs} >> ${log_abs} 2>&1 # volpred-${id//_/-}"
+    done)"
+  FINAL="${STRIPPED_TARGET}"
+  if [[ -n "$TARGET_ENTRY" ]]; then
+    FINAL="${FINAL}"$'\n'"${TARGET_ENTRY}"
+  fi
+else
+  # Full reconciliation: drop the canonical header plus every generated entry.
+  # `*` also removes one legacy malformed `# volpred-` suffix instead of
+  # preserving it and generating a duplicate line.
+  STRIPPED="$(printf '%s\n' "$CURRENT" | awk '
+    /^# volpred canonical system crontab/ { next }
+    /# volpred-[A-Za-z0-9-]*$/            { next }
+    { print }
+  ')"
 
-# Compose the final crontab: preserved entries, then a blank line (if any), then volpred.
-if [[ -n "$STRIPPED" ]]; then
-  # Trim trailing blank lines from STRIPPED, then one blank separator.
-  STRIPPED_TRIMMED="$(printf '%s\n' "$STRIPPED" | awk 'BEGIN{n=0} {a[n++]=$0} END{while(n>0 && a[n-1]=="") n--; for(i=0;i<n;i++) print a[i]}')"
-  if [[ -n "$STRIPPED_TRIMMED" ]]; then
-    FINAL="${STRIPPED_TRIMMED}"$'\n\n'"${NEW_VOLPRED}"
+  NEW_VOLPRED="$(build_volpred_block)"
+
+  # Compose the final crontab: preserved entries, then a blank line (if any), then volpred.
+  if [[ -n "$STRIPPED" ]]; then
+    # Trim trailing blank lines from STRIPPED, then one blank separator.
+    STRIPPED_TRIMMED="$(printf '%s\n' "$STRIPPED" | awk 'BEGIN{n=0} {a[n++]=$0} END{while(n>0 && a[n-1]=="") n--; for(i=0;i<n;i++) print a[i]}')"
+    if [[ -n "$STRIPPED_TRIMMED" ]]; then
+      FINAL="${STRIPPED_TRIMMED}"$'\n\n'"${NEW_VOLPRED}"
+    else
+      FINAL="$NEW_VOLPRED"
+    fi
   else
     FINAL="$NEW_VOLPRED"
   fi
-else
-  FINAL="$NEW_VOLPRED"
 fi
 
 # Ensure trailing newline.

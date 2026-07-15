@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -473,8 +475,9 @@ def test_release_pool_theme_flood_gate_throttles_saturated_theme(tmp_path: Path,
     """2026-06-19 follow-up: saturated themes are throttled, not sealed.
 
     4 published model-comparison articles already exist. The oldest same-theme
-    draft gets one per-run valve release; a second same-theme draft is skipped,
-    while a distinct-theme draft releases normally.
+    draft gets one per-run valve release; a second same-theme draft is skipped.
+    Even a distinct draft must wait once that first discretionary article has
+    consumed the run's 30-minute rhythm slot.
     """
     storage_dir = tmp_path / "storage"
     frozen_now = datetime(2026, 6, 16, 8, 0, tzinfo=timezone.utc)
@@ -519,7 +522,8 @@ def test_release_pool_theme_flood_gate_throttles_saturated_theme(tmp_path: Path,
     assert "mile_draftmodel_old" in released_ids, "oldest saturated-theme draft gets valve release"
     assert "mile_draftmodel_old" in valve_ids
     assert "mile_draftmodel_new" in skipped_ids, "second same-theme draft must be throttled"
-    assert "mile_draftdistinct" in released_ids, "distinct-theme draft must release normally"
+    assert "mile_draftdistinct" not in released_ids
+    assert [item["id"] for item in res["publish_throttled"]] == ["mile_draftdistinct"]
 
     feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
     valve = next(a for a in feed_after if a["id"] == "mile_draftmodel_old")
@@ -823,7 +827,7 @@ def test_release_pool_last3_narrative_cluster_filters_saturated_cluster(tmp_path
             "id": "mile_recent_garch_1",
             "status": "published",
             "audience": "general",
-            "published_at": (frozen_now - timedelta(minutes=10)).isoformat(),
+            "published_at": (frozen_now - timedelta(minutes=40)).isoformat(),
             "title": "近期模型文章一",
             "details": {"experiment_refs": ["K431"]},
         },
@@ -831,7 +835,7 @@ def test_release_pool_last3_narrative_cluster_filters_saturated_cluster(tmp_path
             "id": "mile_recent_vrp",
             "status": "published",
             "audience": "general",
-            "published_at": (frozen_now - timedelta(minutes=20)).isoformat(),
+            "published_at": (frozen_now - timedelta(minutes=50)).isoformat(),
             "title": "近期風險溢酬文章",
             "details": {"experiment_refs": ["K800"]},
         },
@@ -839,7 +843,7 @@ def test_release_pool_last3_narrative_cluster_filters_saturated_cluster(tmp_path
             "id": "mile_recent_garch_2",
             "status": "published",
             "audience": "research",
-            "published_at": (frozen_now - timedelta(minutes=30)).isoformat(),
+            "published_at": (frozen_now - timedelta(minutes=60)).isoformat(),
             "title": "近期模型文章二",
             "details": {"experiment_refs": ["K998"]},
         },
@@ -901,21 +905,21 @@ def test_release_pool_pub_id_bypasses_narrative_cluster_filter_for_manual_repair
             "id": "mile_recent_garch_1",
             "status": "published",
             "audience": "general",
-            "published_at": (frozen_now - timedelta(minutes=10)).isoformat(),
+            "published_at": (frozen_now - timedelta(minutes=40)).isoformat(),
             "title": "GARCH 模型近期文章一",
         },
         {
             "id": "mile_recent_vrp",
             "status": "published",
             "audience": "general",
-            "published_at": (frozen_now - timedelta(minutes=20)).isoformat(),
+            "published_at": (frozen_now - timedelta(minutes=50)).isoformat(),
             "title": "VRP 近期文章",
         },
         {
             "id": "mile_recent_garch_2",
             "status": "published",
             "audience": "research",
-            "published_at": (frozen_now - timedelta(minutes=30)).isoformat(),
+            "published_at": (frozen_now - timedelta(minutes=60)).isoformat(),
             "title": "GARCH 模型近期文章二",
         },
         {
@@ -954,6 +958,360 @@ def test_release_pool_pub_id_bypasses_narrative_cluster_filter_for_manual_repair
     assert target["details"]["release_audit_status"] == "resolved"
     assert target["details"]["release_audit_resolved_issues"] == ["general 內容含禁用統計術語"]
     assert "release_audit_issues" not in target["details"]
+
+
+def test_release_pool_throttles_normal_draft_against_recent_publish(
+    tmp_path: Path,
+    monkeypatch,
+):
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 7, 15, 4, 30, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_recent",
+                "status": "published",
+                "audience": "general",
+                "phase": "research",
+                "published_at": (frozen_now - timedelta(minutes=5)).isoformat(),
+                "title": "Recent discretionary article",
+            },
+            {
+                "id": "mile_draft",
+                "status": "draft",
+                "audience": "general",
+                "phase": "research",
+                "created_at": (frozen_now - timedelta(days=1)).isoformat(),
+                "title": "Next discretionary article",
+                "content": "A distinct reader-facing article." + _LZ,
+            },
+        ],
+    )
+
+    result = content.release_pool_articles(
+        limit=1,
+        due_only=False,
+        include_drafts=True,
+        storage_dir=str(storage_dir),
+    )
+
+    assert result["released_count"] == 0
+    assert result["publish_throttled"] == [
+        {
+            "id": "mile_draft",
+            "title": "Next discretionary article",
+            "route": "release_pool",
+            "previous_id": "mile_recent",
+            "gap_minutes": 5.0,
+            "threshold_minutes": 30,
+        }
+    ]
+    feed_after = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )
+    assert next(item for item in feed_after if item["id"] == "mile_draft")["status"] == "draft"
+
+
+def test_release_pool_explicit_pub_id_does_not_bypass_safety_throttle(
+    tmp_path: Path,
+    monkeypatch,
+):
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 7, 15, 4, 30, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_recent",
+                "status": "published",
+                "audience": "general",
+                "published_at": (frozen_now - timedelta(minutes=29)).isoformat(),
+                "title": "Already released",
+            },
+            {
+                "id": "mile_target",
+                "status": "draft",
+                "audience": "general",
+                "created_at": (frozen_now - timedelta(days=1)).isoformat(),
+                "title": "Explicit repair target",
+                "content": "A repaired and otherwise releasable article." + _LZ,
+            },
+        ],
+    )
+
+    result = content.release_pool_articles(
+        pub_id="mile_target",
+        limit=1,
+        due_only=False,
+        include_drafts=True,
+        storage_dir=str(storage_dir),
+    )
+
+    assert result["released_count"] == 0
+    assert result["publish_throttled"][0]["route"] == "explicit_pub_id"
+    assert result["publish_throttled"][0]["gap_minutes"] == 29.0
+    feed_after = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )
+    assert next(item for item in feed_after if item["id"] == "mile_target")["status"] == "draft"
+
+
+def test_atomic_release_promotion_serializes_competing_drafts(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 15, 4, 30, tzinfo=timezone.utc)
+    drafts = [
+        {
+            "id": f"mile_race_{index}",
+            "status": "draft",
+            "audience": "general",
+            "phase": "research",
+            "title": f"Concurrent draft {index}",
+        }
+        for index in range(2)
+    ]
+    _write_json(storage_dir / "reports" / "feed.json", drafts)
+
+    def promote(item: dict) -> dict:
+        return content._atomic_promote_release_item(
+            item,
+            now=now,
+            released_at=now.isoformat(),
+            storage_dir=str(storage_dir),
+            route="release_pool",
+            expected_item=item,
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        outcomes = list(executor.map(promote, drafts))
+
+    assert sorted(outcome["outcome"] for outcome in outcomes) == ["promoted", "throttled"]
+    feed_after = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )
+    assert sum(item["status"] == "published" for item in feed_after) == 1
+    assert sum(item["status"] == "draft" for item in feed_after) == 1
+
+
+def test_atomic_promotion_preserves_fresh_same_item_edit(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 15, 4, 30, tzinfo=timezone.utc)
+    baseline = {
+        "id": "mile_edited_during_release",
+        "status": "draft",
+        "audience": "general",
+        "phase": "research",
+        "title": "Draft before edit",
+        "content": "old content",
+        "details": {"revision": 1},
+    }
+    selected = deepcopy(baseline)
+    fresh_edit = {
+        **baseline,
+        "content": "fresh editor content",
+        "details": {"revision": 2},
+    }
+    _write_json(storage_dir / "reports" / "feed.json", [fresh_edit])
+
+    outcome = content._atomic_promote_release_item(
+        selected,
+        now=now,
+        released_at=now.isoformat(),
+        storage_dir=str(storage_dir),
+        route="release_pool",
+        expected_item=baseline,
+    )
+
+    assert outcome["outcome"] == "conflict"
+    assert outcome["reason"] == "fresh_item_changed_since_selection"
+    persisted = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )[0]
+    assert persisted == fresh_edit
+
+
+def test_metadata_patch_preserves_fresh_same_item_edit(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    baseline = {
+        "id": "mile_metadata_race",
+        "status": "draft",
+        "tags": ["baseline"],
+        "details": {"revision": 1},
+    }
+    fresh_edit = {
+        **baseline,
+        "tags": ["editor"],
+        "details": {"revision": 2},
+    }
+    _write_json(storage_dir / "reports" / "feed.json", [fresh_edit])
+
+    conflicts = content._atomic_patch_feed_entries(
+        [
+            {
+                "id": baseline["id"],
+                "expected_status": "draft",
+                "expected_item": baseline,
+                "fields": {
+                    "tags": ["stale-release-worker"],
+                    "details": {"release_dedup_skipped": True},
+                },
+            }
+        ],
+        storage_dir=str(storage_dir),
+    )
+
+    assert conflicts == [
+        {
+            "outcome": "conflict",
+            "id": baseline["id"],
+            "reason": "fresh_item_changed_before_metadata_patch",
+        }
+    ]
+    persisted = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )[0]
+    assert persisted == fresh_edit
+
+
+def test_guarded_metadata_patch_persists_detail_key_deletion(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    baseline = {
+        "id": "mile_resolved_audit_metadata",
+        "status": "draft",
+        "details": {
+            "release_audit_issues": ["old issue"],
+            "release_audit_skipped_count": 2,
+        },
+    }
+    _write_json(storage_dir / "reports" / "feed.json", [baseline])
+    resolved_details = {
+        "release_audit_status": "resolved",
+        "release_audit_resolved_issues": ["old issue"],
+        "release_dedup_skipped": True,
+    }
+
+    conflicts = content._atomic_patch_feed_entries(
+        [
+            {
+                "id": baseline["id"],
+                "expected_status": "draft",
+                "expected_item": baseline,
+                "fields": {"details": resolved_details},
+            }
+        ],
+        storage_dir=str(storage_dir),
+    )
+
+    assert conflicts == []
+    persisted = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )[0]
+    assert persisted["details"] == resolved_details
+    assert "release_audit_issues" not in persisted["details"]
+
+
+def test_atomic_drought_promotion_noops_when_fresh_publish_resolves_gap(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 15, 4, 30, tzinfo=timezone.utc)
+    draft = {
+        "id": "mile_stale_drought_target",
+        "status": "draft",
+        "audience": "general",
+        "phase": "research",
+        "title": "Stale drought target",
+    }
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_fresh_reader_article",
+                "status": "published",
+                "audience": "general",
+                "phase": "research",
+                "published_at": (now - timedelta(minutes=5)).isoformat(),
+                "title": "Fresh reader-facing article",
+            },
+            draft,
+        ],
+    )
+
+    outcome = content._atomic_promote_release_item(
+        draft,
+        now=now,
+        released_at=now.isoformat(),
+        storage_dir=str(storage_dir),
+        route="drought_override",
+        expected_item=draft,
+        require_reader_drought=True,
+    )
+
+    assert outcome["outcome"] == "condition_cleared"
+    assert outcome["reason"] == "reader_drought_resolved_before_promotion"
+    feed_after = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )
+    assert next(item for item in feed_after if item["id"] == draft["id"])["status"] == "draft"
+
+
+def test_drought_override_still_runs_publish_throttle(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 7, 15, 4, 30, tzinfo=timezone.utc)
+    draft = {
+        "id": "mile_drought_candidate",
+        "status": "draft",
+        "audience": "general",
+        "phase": "research",
+        "created_at": (now - timedelta(days=1)).isoformat(),
+        "title": "Drought candidate",
+    }
+    feed = [
+        {
+            "id": "mile_old_reader_article",
+            "status": "published",
+            "audience": "general",
+            "phase": "research",
+            "published_at": (now - timedelta(hours=10)).isoformat(),
+            "title": "Old reader-facing article",
+        },
+        {
+            # Not part of the drought reader corpus, but still rhythm-controlled.
+            "id": "mile_recent_member_article",
+            "status": "published",
+            "audience": "member",
+            "phase": "research",
+            "published_at": (now - timedelta(minutes=5)).isoformat(),
+            "title": "Recent member article",
+        },
+        draft,
+    ]
+    _write_json(storage_dir / "reports" / "feed.json", feed)
+    throttled: list[dict] = []
+
+    result = content._maybe_drought_release(
+        blocked_items=[draft],
+        feed=feed,
+        recent_pub=[],
+        now=now,
+        released_at=now.isoformat(),
+        publisher=None,
+        storage_dir=str(storage_dir),
+        released=[],
+        publish_throttled=throttled,
+    )
+
+    assert result is None
+    assert throttled[0]["route"] == "drought_override"
+    assert throttled[0]["previous_id"] == "mile_recent_member_article"
+    feed_after = json.loads(
+        (storage_dir / "reports" / "feed.json").read_text(encoding="utf-8")
+    )
+    candidate = next(item for item in feed_after if item["id"] == draft["id"])
+    assert candidate["status"] == "draft"
+    assert "release_drought_override_at" not in candidate.get("details", {})
 
 
 def test_release_prefers_under_cap_cluster_over_fifo(tmp_path: Path, monkeypatch):

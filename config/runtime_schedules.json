@@ -147,7 +147,11 @@
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_release_pool.sh",
         "log_path": "storage/logs/cron/release_pool.log",
         "command_deprecated": "release-pool-by-settings",
-        "description": "每 4 小時依節奏設定釋出文章池內容（2026-06-30 用戶指定 3h→6h；2026-07-02 用戶指定 6h→4h 加快曝光）。對應 .release_settings.json interval_minutes=240。實際 fire 走 piggy-back via check_alerts hourly tick（host cron 只可靠執行 0 * * * *，crontab entry 不 fire 故不需改 crontab）。",
+        "description": "依節奏設定釋出文章池內容（2026-06-30 用戶指定 3h→6h；2026-07-02 用戶指定 6h→4h 加快曝光）。對應 .release_settings.json interval_minutes=240；LaunchAgent com.volpred.release-pool 是 direct schedule owner，check_alerts hourly 僅作 settings-aware fallback。2026-07-15 稽核確認 host crontab 與 LaunchAgent 在 :07 雙 fire，故 host_crontab_managed=false；release promotion 另以 publisher_feed lock 原子重驗，fallback 重疊時只允許一篇成功。",
+        "host_crontab_managed": false,
+        "host_crontab_managed_note": "2026-07-15: LaunchAgent com.volpred.release-pool 為 direct owner；移除 host crontab 重複源（歷史 release_pool.log 已證實同篇重複 release/sync/notify）。",
+        "mechanism": "launchd",
+        "launchagent_label": "com.volpred.release-pool",
         "matchers": [
           "release-pool-by-settings",
           "cron_release_pool.sh"

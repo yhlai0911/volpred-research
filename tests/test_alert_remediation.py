@@ -83,6 +83,15 @@ def test_member_qa_stale_the_incident_alert_now_queues_work(pool) -> None:
     assert _tasks(pool)[0]["task_type"] == "member_qa"
 
 
+def test_alert_task_requires_fresh_revalidation_before_state_change(pool) -> None:
+    ar.remediate_condition(_condition("release_pool_gap"), storage_dir=str(pool), now=NOW)
+
+    description = _tasks(pool)[0]["description"]
+    assert "原 detector 重新驗證" in description
+    assert "若已自然解除" in description
+    assert "不得照舊快照執行" in description
+
+
 def test_body_leads_with_what_was_done_and_demotes_the_todo_list(pool) -> None:
     cond = _condition("member_qa_stale")
 
