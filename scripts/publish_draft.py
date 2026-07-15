@@ -1188,6 +1188,46 @@ def apply_update(args) -> int:
     if audience == "general" and not args.no_sanitize:
         body, applied = sanitize_general(body)
 
+    # The new-publish path already refuses a declared general article when the
+    # canonical Publisher inference would classify the final text as research.
+    # Updates must enforce the same invariant before any image upload or feed
+    # write.  Without this mirror gate, a methodology correction can replace a
+    # plain-language article with research-grade content while silently keeping
+    # its historical ``audience=general`` label (CI run 29421677446).
+    new_title = args.update_title if args.update_title else old_title
+    update_inference_tags = [
+        tag for tag in capped_tags_update if not re.match(r"^K\d", tag)
+    ]
+    update_content_type = str(
+        info.get("content_type")
+        or details_patch.get("content_type")
+        or old_details.get("content_type")
+        or art.get("content_type")
+        or art.get("category")
+        or ""
+    )
+    if audience == "general":
+        inferred_audience = infer_publish_audience(
+            new_title,
+            body,
+            update_inference_tags,
+            content_type=update_content_type,
+        )
+        if inferred_audience != "general":
+            print(
+                "\n[publish_draft] AUDIENCE GATE: update would keep "
+                "audience=general but publisher inference now returns "
+                f"'{inferred_audience}'.",
+                file=sys.stderr,
+            )
+            print(
+                "  Refusing to update. Rewrite in general-reader language or "
+                "run the guarded audience-correction workflow before applying "
+                "research-grade replacement content.",
+                file=sys.stderr,
+            )
+            return 7
+
     # 2026-05-08 P2 platform_ops: enforce HTTPS image URLs by auto-uploading
     # any local relative paths in the body BEFORE the image gate runs. This
     # eliminates the agent-level inconsistency that produced 101 broken-image
@@ -1236,9 +1276,6 @@ def apply_update(args) -> int:
                              status=str(art.get("status") or "published"))
     if rc != 0:
         return rc
-
-    # Title override (optional)
-    new_title = args.update_title if args.update_title else old_title
 
     # Description sync (2026-05-08, K703 mile_6c2bd99e edge case).
     # Resolution priority (first non-empty wins):

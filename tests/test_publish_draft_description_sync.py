@@ -276,6 +276,49 @@ def test_no_update_description_preserves_old(tmp_path, monkeypatch):
     assert feed[0]["description"] == "Curated SEO meta — do not touch."
 
 
+def test_general_update_that_now_infers_research_fails_before_write(
+    tmp_path, monkeypatch, capsys,
+):
+    """A correction rewrite may not retain a stale general-audience label."""
+    mile_id = "mile_audience_drift"
+    feed_path = _stage_feed(
+        tmp_path,
+        mile_id,
+        audience="general",
+        category="general",
+        tags=["一般讀者", "波動率"],
+        details={"experiment_refs": ["K1386"]},
+    )
+    before = feed_path.read_bytes()
+    draft = _write_draft(
+        tmp_path,
+        "更新後比較 QLIKE 與 GARCH 預測損失。\n\n"
+        "![chart](https://example.com/a.png)\n"
+        "![chart](https://example.com/b.png)\n\n"
+        "## 懶人包圖組\n\n"
+        "![概念](https://example.com/lz.png)\n",
+    )
+
+    import publish_draft
+
+    monkeypatch.setattr(publish_draft, "ROOT", tmp_path)
+    refresh_reasons = []
+    monkeypatch.setattr(
+        publish_draft,
+        "_refresh_publication_candidates_after_feed_change",
+        lambda reason: refresh_reasons.append(reason),
+    )
+
+    rc = apply_update(_make_args(draft, mile_id))
+
+    assert rc == 7
+    assert feed_path.read_bytes() == before
+    assert refresh_reasons == []
+    err = capsys.readouterr().err
+    assert "AUDIENCE GATE" in err
+    assert "guarded audience-correction workflow" in err
+
+
 def test_frontmatter_description_override(tmp_path, monkeypatch):
     """Frontmatter `description: "..."` overrides default extraction."""
     mile_id = "mile_fm"
