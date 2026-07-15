@@ -340,3 +340,44 @@ def test_maybe_refill_promotes_starved_articles_when_pool_dry(monkeypatch, isola
 
     tasks = json.loads(isolated_next_tasks.read_text(encoding="utf-8"))
     assert tasks[0]["priority"] == 1
+
+
+# --- worktree-parity regression gate (2026-07-15 hourly-10) -----------------
+# History: `fix_draft_pool_refill_tests_red_in_worktree`. The 01:23 batch-promote
+# commit (f708ad938) added a canonical write to `_promote_starved_article_tasks`
+# with no guard, so these tests went red inside linked worktrees (where
+# `<worktree>/storage/next_tasks.json` is canonical) while main stayed green —
+# a red-that-only-shows-in-worktrees trains agents to ignore red. The 03:06 guard
+# (c2c088fca) + 06:10 module-wide isolation fixture (873cfb274) fixed it. The
+# tests below LOCK that fix so the class can't recur: the positive tests above all
+# redirect NEXT_TASKS to a non-canonical tmp path, which means none of them would
+# fail if the guard silently stopped firing. This negative test reproduces the
+# worktree condition deterministically — a *canonical* write target — and proves
+# the guard is load-bearing on the promote write path, without needing a real
+# git worktree (path resolution is worktree-agnostic; canonical-ness is what
+# differs, and here we make tmp_path canonical directly).
+def test_promote_starved_articles_blocks_canonical_write_target(monkeypatch, tmp_path):
+    import volpred.canonical_write as canonical_write
+
+    # Make tmp_path the "repo root" so tmp_path/storage/* is canonical, then point
+    # NEXT_TASKS at it: this is exactly the state a linked worktree presents.
+    monkeypatch.setattr(canonical_write, "_repo_root", lambda: tmp_path)
+    storage = tmp_path / "storage"
+    storage.mkdir()
+    canonical_next_tasks = storage / "next_tasks.json"
+    canonical_next_tasks.write_text(
+        json.dumps([{"id": "x", "task_type": "daily_article", "status": "pending", "priority": 3}]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", canonical_next_tasks)
+
+    # The guard is armed by tests/conftest (VOLPRED_NO_CANONICAL_WRITE=1); the
+    # promote path must abort rather than mutate shared state. CanonicalWriteBlocked
+    # derives from BaseException on purpose, so it can't be swallowed by fail-open
+    # except Exception boundaries — assert it propagates.
+    with pytest.raises(canonical_write.CanonicalWriteBlocked):
+        MODULE._promote_starved_article_tasks(limit=6)
+
+    # And the file was left untouched — no partial canonical write slipped through.
+    left = json.loads(canonical_next_tasks.read_text(encoding="utf-8"))
+    assert left == [{"id": "x", "task_type": "daily_article", "status": "pending", "priority": 3}]

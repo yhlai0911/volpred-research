@@ -125,7 +125,12 @@ Root 必填 `schema_version: 1`、`title`、`evidence`、`panels`。`evidence` �
 
 ## Legacy / manual only
 
-`scripts/gen_lazypack_codex.py` 是歷史相容的 manual codegen 工具，`scripts/gen_lazypack_infographic.py` 是歷史 AI-poster 工具；兩者都不在 primary 或 async production path。只有明確的歷史修復任務、人工授權且人工覆核時才可使用，**不得**因 plan 驗證或 layout 失敗而自動 fallback。
+當確定性 renderer 的 plan → 模板路徑無法滿足、必須靠 LLM codegen 補圖時，工具排序由 boss directive（2026-06-30、2026-07-15 重申）固定：**`codex exec` 為首選，NotebookLM 僅為 fallback、不得當首選**。
+
+- `scripts/gen_lazypack_codex.py` — codex exec（ChatGPT 訂閱制、flat-rate）讓 codex **寫**一支 data-bound Pillow/matplotlib render 腳本，本 process 再本地執行；每個數字由 evidence JSON 讀出、可重跑，是 LLM codegen 路徑的**首選**。
+- `scripts/gen_lazypack_infographic.py` — 歷史 NotebookLM AI-poster 工具，僅為 codex exec 之下的 **fallback**（免費 notebooklm-py，不呼叫付費影像 API）。
+
+兩者都不在 primary 或 async production path。只有明確的歷史修復任務、人工授權且人工覆核時才可使用，**不得**因 plan 驗證或 layout 失敗而自動 fallback。
 
 按張計費影像 API（`gpt-image-2`、付費 Gemini key 等）仍禁止用於此流程。
 

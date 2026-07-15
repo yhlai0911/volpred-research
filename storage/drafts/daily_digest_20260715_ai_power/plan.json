@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "title": "AI 供電四格驗電表",
+  "subtitle": "從電網可交付性，到電力股是否仍有防禦性",
+  "evidence": {
+    "chain": {
+      "path": "experiments/k1413/k1413_results.json",
+      "sha256": "0d8bcf867d76d969b2e2494f6a0697c57ae3a9a3fd606e16b755150aa46354de",
+      "label": "AI 產業鏈波動率與跨層相關性"
+    },
+    "rotation": {
+      "path": "experiments/trending_ai_capex_defensive_20260707/results.json",
+      "sha256": "8a4a5e6df2ac356576582c8ff316b948673975a7fc75f9701930ec0f1dc80830",
+      "label": "科技與防禦板塊已實現波動率"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "AI 供電四格驗電表",
+      "alt": "懶人包框架：用負載、交付、付款與風險四格檢查 AI 供電投資",
+      "sources": [
+        "chain",
+        "rotation"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "負載格｜需求有多真",
+          "body": [
+            "先找實際用電量與尖峰負載，別拿資料中心申請案直接當成已發生的需求。",
+            "需求增幅若遠小於電價與容量成本增幅，市場正在替稀缺性付錢。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "交付格｜何時能送到",
+          "body": [
+            "核對併網排隊、變電設備、輸電線與備援機組。紙上容量沒有交付日期，就還不是可用容量。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "付款格｜帳單誰承擔",
+          "body": [
+            "看資料中心、電力公司、一般用戶與地方政府之間怎麼分攤發電、輸電、備援與環境成本。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "風險格｜股票像哪一類",
+          "body": [
+            "用實現波動率、對大盤敏感度與半導體共振程度重新分類。掛著電力標籤，不保證仍有防禦性。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "產業鏈共同樣本",
+          "value": {
+            "source": "chain",
+            "path": "data.n_trading_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個交易日"
+            }
+          },
+          "note": "能源電力、晶片、基礎設施、模型應用與大盤"
+        }
+      ]
+    },
+    {
+      "name": "2_readings",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "驗電結果：供電題材已帶著成長股風險",
+      "alt": "懶人包結果：AI 能源與基礎設施波動率、跨層相關及科技防禦板塊讀數",
+      "sources": [
+        "chain",
+        "rotation"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "能源電力層年化波動",
+          "value": {
+            "source": "chain",
+            "path": "full_period_annualized_vol.L1 能源電力",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": "等權籃子，全樣本描述統計"
+        },
+        {
+          "kind": "metric",
+          "label": "基礎設施層年化波動",
+          "value": {
+            "source": "chain",
+            "path": "full_period_annualized_vol.L3 基礎設施",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": "同一期間的大盤僅約一成半"
+        },
+        {
+          "kind": "metric",
+          "label": "大盤年化波動",
+          "value": {
+            "source": "chain",
+            "path": "full_period_annualized_vol.SPY",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "近段平均跨層相關",
+          "value": {
+            "source": "chain",
+            "path": "avg_cross_layer_corr_by_period.2025至今",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "四個 AI 層級的平均同日相關"
+        },
+        {
+          "kind": "metric",
+          "label": "科技 ETF 短窗已實現波動",
+          "value": {
+            "source": "rotation",
+            "path": "latest_rv20_pct.QQQ",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "公用事業 ETF 短窗已實現波動",
+          "value": {
+            "source": "rotation",
+            "path": "latest_rv20_pct.XLU",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "科技減防禦波動差",
+          "value": {
+            "source": "rotation",
+            "path": "qqq_minus_defensive_rv_spread.now",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 個百分點"
+            }
+          },
+          "note": "防禦籃為醫療、必需消費、公用事業等權"
+        },
+        {
+          "kind": "text",
+          "heading": "使用邊界",
+          "body": [
+            "產業鏈籃子採等權，涵蓋資本支出上行週期；相關性只描述同日共振，不代表因果。",
+            "短窗讀數會快速變動，套用驗電表時要更新日期與資料。"
+          ]
+        }
+      ]
+    }
+  ]
+}

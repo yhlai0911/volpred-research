@@ -3877,8 +3877,11 @@ def _parse_content_quality_state(
             "4. `title_format:digest_prefix` → 前端 header 與 title 擇一移除前綴；"
             "前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。",
             "5. `content_completeness:lazypack_gap` → 針對 missing_examples 走 "
-            "`lazypack-infographic`/NotebookLM 生圖，append `## 懶人包圖組` 後 "
-            "用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。",
+            "`lazypack-infographic` skill 補圖：primary=確定性 renderer "
+            "（`lazypack_render.py`，plan.json 綁 evidence、零 LLM）；需 LLM codegen "
+            "時用 `codex exec`（boss 2026-06-30/07-15 directive），NotebookLM 僅為 "
+            "fallback，不得當首選。append `## 懶人包圖組` 後用正式 publish/update "
+            "流程同步；新 general 文會被 publish gate 阻擋。",
         ]
     )
 

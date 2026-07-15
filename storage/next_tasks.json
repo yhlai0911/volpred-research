@@ -31175,38 +31175,14 @@
   },
   {
     "id": "hook_commit_m_nonascii_false_positive",
-    "title": "修 PreToolUse commit -m 非 ASCII 判定的 false positive",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "修 PreToolUse commit -m 非 ASCII 判定的 false positive",
+    "priority": 2,
     "created_at": "2026-07-11T17:50:16.779365+00:00",
-    "description": "_commit_message_has_non_ascii() 檢查整條 COMMAND 是否含非 ASCII，而非 -m 引數本身。於是「Python heredoc 含中文 + 同指令內有純 ASCII 的 git commit -m」被誤擋（2026-07-12 hourly-01 實際踩到）。正確修法：精準抽出 -m/--message 的引數值再判斷。⚠️ 這是 strike-3 guard，放寬前必須先補足測試（非 UTF-8 commit push 出去不可回復）。regression: scripts/tests/test_pretooluse_deny.sh（現 86 assertions）。",
-    "claimed_by": "codex-failover",
-    "claimed_at": "2026-07-12T00:08:57.076082+00:00",
-    "claim_session_id": "f8a71586d590",
-    "status_history": [
-      {
-        "ts": "2026-07-12T00:08:57.076096+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-12T00:09:02.737714+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-12T01:22:05.141840+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover"
-      }
-    ],
-    "started_at": "2026-07-12T00:09:02.737701+00:00",
     "completed_at": "2026-07-12T01:22:05.141823+00:00",
-    "result": "PreToolUse now inspects actual inline commit-message argv without flagging unrelated Unicode/heredocs; 150/150 regression assertions pass. Added an installed prepare-commit-msg hard gate for strict UTF-8, U+FFFD/control rejection, and --no-verify resistance; 9/9 integration tests pass."
+    "tombstone": true,
+    "archived_at": "2026-07-15T02:08:25.354608+00:00"
   },
   {
     "id": "email-12083-62a2a3",
@@ -31234,39 +31210,15 @@
   },
   {
     "id": "k1684_reenqueue_with_fresh_worktree",
-    "title": "K1684 重排：worktree 被清掉導致 job 秒退，需重建 worktree 再 enqueue",
-    "description": "k1684_ftd_e1_review_blocked_rerun 排進 compute queue 時指向 .claude/worktrees/k1684-ftd-e1-rerun，但該 worktree 在 orphan recovery（commit 4b5550cb0）時被移除 → runner 找不到 cwd，exit 2 秒退，工作完全沒跑。enqueue-agent 現已加 cwd preflight（同樣的錯今後在 enqueue 當下就擋下）。重排：git worktree add 重建 → 重寫 brief（原 /tmp/k1684_ftd_e1_review_blocked_rerun.md 可能已被清） → compute_queue.py enqueue-agent --timeout 5400。",
-    "task_type": "experiment",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "K1684 重排：worktree 被清掉導致 job 秒退，需重建 worktree 再 enqueue",
+    "priority": 1,
     "source": "agent_discovered",
     "created_at": "2026-07-11T20:21:53.374757+00:00",
-    "claimed_by": "codex-failover",
-    "claimed_at": "2026-07-12T01:32:33.730129+00:00",
-    "claim_session_id": "d855ef13ef91",
-    "started_at": "2026-07-12T01:32:39.614241+00:00",
     "completed_at": "2026-07-12T01:38:05.611277+00:00",
-    "result": "K1684 R2 已重建隔離 checkout 並以新 ID 排入 compute queue；job=queued、timeout=5400、cwd/result preflight 通過。新 receipt gate 要求 canonical JSON hash 變更與七項 review gate，舊 failed receipt 保留；實驗本身尚待 worker 與獨立 Codex review。",
-    "status_history": [
-      {
-        "ts": "2026-07-12T01:32:33.730145+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-12T01:32:39.614254+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-12T01:38:05.611296+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-15T02:08:25.354608+00:00"
   },
   {
     "id": "platform_ops_execution_brief_killpg",
@@ -31282,39 +31234,15 @@
   },
   {
     "id": "platform_ops_failed_agent_job_still_needs_collection",
-    "title": "逾時/失敗的 agent job 也要產生 collection followup（worktree 可能有半成品）",
-    "description": "compute_queue 只對 status=completed 的 job 派 followup（list --completed-pending-followup）。但 agent job 逾時被砍時，它的 worktree 裡通常已經有實質產出（腳本、資料、部分結果、甚至完整結果）—— K1685 就是：job 標 failed，沒有任何 followup，37KB 的真結果在 worktree 裡躺著等人發現。現在 killpg 修好後不會再有『孤兒寫完整結果』的情況，但『agent 被砍時 worktree 已有半成品』這件事仍然成立，而且沒有任何機制會去看它。\n\n改法方向：job 失敗且 kind=agent 且 cwd 是 worktree 時，仍 enqueue 一個 collection followup（brief = 『檢視 worktree 有什麼、值不值得續跑或保留、不值得就清掉 worktree』），或至少在 dashboard 浮出一條 alert。判準是『不要讓工作靜靜躺著沒人知道』。\n\n注意 followup 語意要區分 collect-completed vs triage-failed，不要讓失敗的 job 被當成成功的收。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "逾時/失敗的 agent job 也要產生 collection followup（worktree 可能有半成品）",
+    "priority": 2,
     "source": "agent_discovered",
     "created_at": "2026-07-11T20:35:24.751061+00:00",
-    "claimed_by": "codex-failover",
-    "claimed_at": "2026-07-12T01:25:10.694257+00:00",
-    "claim_session_id": "c923a7870341",
-    "started_at": "2026-07-12T01:25:14.775577+00:00",
     "completed_at": "2026-07-12T01:30:49.514748+00:00",
-    "result": "Unified compute-queue followups now distinguish collect_completed from triage_failed; failed agent jobs with explicit worktree cwd generate a platform_ops salvage/re-enqueue brief instead of disappearing. Hourly Phase A uses --pending-followup and branches by mode; 15 targeted tests pass. Live reconciliation linked K1684/K1685 failed receipts to their existing formal tasks, leaving no duplicate failed-agent backlog.",
-    "status_history": [
-      {
-        "ts": "2026-07-12T01:25:10.694272+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-12T01:25:14.775592+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-12T01:30:49.514763+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-15T02:08:25.354608+00:00"
   },
   {
     "id": "platform_ops_run_agent_job_stub_clobbers_results",
@@ -37154,13 +37082,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T01:00:04+00:00",
+    "completed_at": "2026-07-15T02:00:44.945742+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T01:00:04+00:00",
-      "last_clean_observed_at": "2026-07-15T01:00:04+00:00"
+      "resolved_at": "2026-07-15T02:00:44.945742+00:00",
+      "last_clean_observed_at": "2026-07-15T02:00:44.945742+00:00"
     }
   },
   {
@@ -37172,13 +37100,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T01:23:37.404049+00:00",
+    "completed_at": "2026-07-15T02:24:59.425912+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T01:23:37.404049+00:00",
-      "last_clean_observed_at": "2026-07-15T01:23:37.404049+00:00"
+      "resolved_at": "2026-07-15T02:24:59.425912+00:00",
+      "last_clean_observed_at": "2026-07-15T02:24:59.425912+00:00"
     }
   },
   {
@@ -37190,13 +37118,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-14T16:50:55.915472+00:00",
+    "completed_at": "2026-07-15T01:23:44.675479+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-14T16:50:55.915472+00:00",
-      "last_clean_observed_at": "2026-07-14T16:50:55.915472+00:00"
+      "resolved_at": "2026-07-15T01:23:44.675479+00:00",
+      "last_clean_observed_at": "2026-07-15T01:23:44.675479+00:00"
     }
   },
   {
@@ -38078,12 +38006,35 @@
     "id": "fix_draft_pool_refill_tests_red_in_worktree",
     "priority": 2,
     "task_type": "ops_fix",
-    "status": "pending",
+    "status": "succeeded",
     "title": "tests/test_draft_pool_refill.py 在任何 worktree 都紅（CanonicalWriteBlocked），只有 main 綠",
     "description": "發現於 2026-07-15 hourly-06（執行 fix_reap_orphan_deliverables_gap 時順帶查出）。\n\n症狀：在 .claude/worktrees/* 內跑 `uv run --extra dev python -m pytest tests/test_draft_pool_refill.py` → 4 failed（test_maybe_refill_fires_when_pool_all_unreleasable / _reports_accurate_by_type_on_fallback / _handles_refill_failure / _handles_timeout），全數 CanonicalWriteBlocked，錯誤路徑指向 <worktree>/storage/next_tasks.json。同一組測試在 main checkout 20 passed。\n\n已證明為 pre-existing：用 git stash 把當時的改動全部排除後重跑，照樣 4 red → 與該改動無關。\n\n影響：CI 只跑 main 所以永遠綠，但每個 worktree agent 跑測試都會看到紅燈。真正的成本不是這 4 個 test，而是 agent 會學會忽略紅燈 —— 紅燈一旦變成雜訊，測試就不再是 gate。\n\n根因方向：某個 writer path 在 worktree 內沒被 monkeypatch 導向 tmp_path，很可能是用 Path(__file__).parents[N] 或 git-common-dir 解析 ROOT，worktree 下解析結果與 main 不同。\n\n修法：把該 writer 的路徑解析收斂到單一可注入來源，讓測試在 worktree 與 main 行為一致；並補一條「在 worktree 內跑」的 regression gate，否則同類問題只會再犯。",
     "created_at": "2026-07-14T22:24:03.682471+00:00",
     "source": "agent-discovered",
-    "created_by": "hourly-06"
+    "created_by": "hourly-06",
+    "status_history": [
+      {
+        "ts": "2026-07-15T02:12:09.808125+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-10"
+      },
+      {
+        "ts": "2026-07-15T02:12:21.167955+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-10"
+      },
+      {
+        "ts": "2026-07-15T02:23:26.039768+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-10"
+      }
+    ],
+    "started_at": "2026-07-15T02:12:21.167939+00:00",
+    "completed_at": "2026-07-15T02:23:26.039751+00:00",
+    "result": "根因已由先前 commit 修好（c2c088fca 03:06 補 canonical guard + 873cfb274 06:10 加 module-wide autouse 隔離 fixture）；hourly-06 06:24 是在未拉到 06:10 fix 的舊 worktree 觀察到瞬時紅燈才建 task。驗證：main + 全新 HEAD worktree 皆 20 passed。補上真正缺的 worktree regression gate：test_promote_starved_articles_blocks_canonical_write_target（負向測試，把 tmp 偽裝成 canonical root 重現 worktree 條件，斷言 promote 寫入被 guard 擋下 CanonicalWriteBlocked 且檔案未被污染）。mutation 檢查證明 guard 為 load-bearing（拿掉 guard 則 canonical 被寫）。現 21 passed，main/worktree parity 確立。"
   },
   {
     "id": "ci-red-29371532833",
@@ -38147,7 +38098,9 @@
       "last_seen_at": "2026-07-14T23:42:14.555562+00:00",
       "consecutive_remediation_failures": 0,
       "attempt_history": [],
-      "escalation_due": false
+      "escalation_due": false,
+      "resolved_at": "2026-07-15T01:23:44.675479+00:00",
+      "final_consecutive_remediation_failures": 0
     },
     "status_history": [
       {
@@ -38259,7 +38212,7 @@
     "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
     "task_type": "daily_digest",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "agent",
     "created_at": "2026-07-15T09:00:01.139174+08:00",
     "source": "scheduled",
@@ -38267,7 +38220,25 @@
       "daily_digest",
       "reader_facing",
       "精選導讀"
-    ]
+    ],
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-15T02:15:55.260448+00:00",
+    "claim_session_id": "4b011f69585b",
+    "status_history": [
+      {
+        "ts": "2026-07-15T02:15:55.260468+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-15T02:15:55.494146+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-15T02:15:55.494132+00:00"
   },
   {
     "id": "alert_content_quality_20260715",
@@ -38282,5 +38253,46 @@
       "alert",
       "content_quality"
     ]
+  },
+  {
+    "id": "email-12104-01db21",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] 內容品質巡檢：發文太密集",
+    "description": "Gmail UID: 12104\nMessage-ID: <6123B504-AA7D-424E-8A93-D950A4BD0E05@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 15 Jul 2026 10:02:01 +0800\nSubject: Re: [VolPred Alert][WARN] 內容品質巡檢：發文太密集\n\n--- 用戶回信內容 ---\n懶人包圖應該是用Codex app的codex exec生成 notebooklm只是備援 立刻處理\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月15日 09:01 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 內容品質巡檢：發文太密集\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> 系統偵測到讀者端內容更新可能中斷，需要先恢復發文節奏。\r\n> \r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> \r\n> 行動\r\n> \r\n> 先補一篇可發佈文章或觸發釋出流程，再追查為什麼排程沒接上。\r\n> \r\n> 已自動處理\r\n> \r\n> 已建立任務 alert_content_quality_20260715（流程治理, P2），下一班 dispatch 會認領執行。任務逾時未被認領時，dispatcher 的 starvation lockout 會強制把它推上候選清單。老闆無需動作。\r\n> \r\n> 觸發條件\r\n> \r\n> 發文節奏: 發文太密集 — 1 對 間距 < 30min（最新間距列表：[57.71, 0.16, 213.19]）\r\n> 影響\r\n> \r\n> 內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\r\n> \r\n> 處理步驟（任務已自動建立，以下供執行者稽核）（主線程 auto-remediation）\r\n> \r\n> 同一天出現超過一篇每日精選導讀 → 檢視 storage/ops/content_quality_report.json items，挑 1 篇 retract：uv run volpred ops unpublish --mile-id <id>；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\r\n> 發文太密集 → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\r\n> 發文間隔過久 → 立即 release-pool-by-settings 或派 fresh-arc 日常文章 補位；同時查 release deadlock (docs/refactor_plan_release_layer_deadlock.md)。\r\n> 標題前綴重複 → 前端 header 與 title 擇一移除前綴；前端在 frontend-v2-fix/src/app/page.tsx + digest/[id]/page.tsx。\r\n> 懶人包覆蓋不足 → 針對 missing_examples 走 lazypack-infographic/NotebookLM 生圖，append ## 懶人包圖組 後 用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-15T02:15:07.768016+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12104,
+    "email_message_id": "<6123B504-AA7D-424E-8A93-D950A4BD0E05@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] 內容品質巡檢：發文太密集",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-15T02:16:47.790277+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-15T02:16:48.065075+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-15T02:21:35.048575+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-claude"
+      }
+    ],
+    "started_at": "2026-07-15T02:16:48.065060+00:00",
+    "completed_at": "2026-07-15T02:21:35.048561+00:00",
+    "result": "修正 lazypack 生成工具排序：alerts.py remediation 文字 + lazypack-infographic SKILL.md legacy 段，codex exec 首選、NotebookLM 降 fallback（依 boss 2026-06-30 directive）。close email 已寄（needs-reply，附確定性 renderer vs codex bespoke 一問）。"
   }
 ]

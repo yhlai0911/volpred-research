@@ -1,30 +1,36 @@
 {
-  "generated_at": "2026-07-13T16:14:41.755933+00:00",
+  "generated_at": "2026-07-15T02:09:39.703713+00:00",
   "publish_rhythm": {
-    "status": "inactive_window",
-    "in_active_window": false,
-    "tpe_hour": 0,
+    "status": "burst",
+    "in_active_window": true,
+    "tpe_hour": 10,
     "recent_count": 10,
-    "newest_published_at": "2026-07-13T14:00:34.516092+00:00",
-    "age_since_newest_min": 134.12,
+    "newest_published_at": "2026-07-15T01:01:03.412003+00:00",
+    "age_since_newest_min": 68.6,
     "gaps_min_newest_first": [
-      266.83,
-      421.72,
-      31.54,
-      117.22,
+      57.71,
       0.16,
-      181.85,
-      325.63,
-      154.98,
-      246.58
+      213.19,
+      29.14,
+      719.91,
+      276.84,
+      200.84,
+      0.14,
+      39.49
     ],
-    "burst_pairs": [],
+    "burst_pairs": [
+      {
+        "newer_id": "mile_ff4069d3",
+        "older_id": "mile_0f710450",
+        "gap_minutes": 29.14
+      }
+    ],
     "burst_gap_threshold_min": 30,
     "drought_gap_threshold_hours": 6.0
   },
   "daily_digest_uniqueness": {
     "status": "ok",
-    "date_tpe": "2026-07-14",
+    "date_tpe": "2026-07-15",
     "published_count": 0,
     "items": []
   },
@@ -37,30 +43,24 @@
   "arc_diversity": {
     "status": "ok",
     "sample": 20,
-    "distinct_axes": 19,
+    "distinct_axes": 13,
     "top_axis": "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive",
-    "top_share": 0.1,
+    "top_share": 0.3,
     "threshold": 0.5,
     "distribution": {
-      "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive": 2,
-      "TW_EQUITY::descriptive": 1,
+      "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive": 6,
+      "TW_EQUITY|US_EQUITY::null_no_info": 2,
+      "TW_EQUITY::descriptive": 2,
+      "CREDIT_SPREAD|HIGH_YIELD|LONG_BOND|US_BOND|VIX::null_no_info": 1,
+      "GOLD|LONG_BOND|NASDAQ|US_EQUITY|US_SMALLCAP::null_no_info": 1,
+      "SILVER|US_EQUITY|VIX::descriptive": 1,
+      "SILVER|US_BOND::descriptive": 1,
+      "BITCOIN|GOLD|LONG_BOND|NASDAQ|OIL|SEMIS|SILVER|TW_EQUITY|USD|US_BOND|US_EQUITY|UTILITIES|VIX::null_no_info": 1,
+      "TW_EQUITY::null_no_info": 1,
       "SEMIS|TW_EQUITY::null_no_info": 1,
       "CREDIT_SPREAD|FOMC|GOLD|HIGH_YIELD|LONG_BOND|MID_BOND|NASDAQ|SILVER|TSMC|USD|US_EQUITY|VIX|VVIX::null_no_info": 1,
       "SEMIS|TW_EQUITY|USD::descriptive": 1,
-      "NASDAQ|TSMC|TW_EQUITY|US_EQUITY|US_SMALLCAP::descriptive": 1,
-      "TW_EQUITY|US_EQUITY::null_no_info": 1,
-      "US_EQUITY|VIX::null_no_info": 1,
-      "CREDIT_SPREAD|ENERGY_SECTOR|GOLD|LONG_BOND|OIL|USD|US_EQUITY|VIX::null_no_info": 1,
-      "COMMODITY_BROAD|GOLD|HIGH_YIELD|IG_CREDIT|LONG_BOND|MID_BOND|NASDAQ|RISK_PARITY|US_BOND|US_EQUITY|US_SMALLCAP::null_no_info": 1,
-      "TW_EQUITY|US_EQUITY|VIX::null_no_info": 1,
-      "LONG_BOND|MANAGED_FUTURES|MID_BOND|USD|US_BOND|US_EQUITY::null_no_info": 1,
-      "HIGH_YIELD|MERGER_ARB|US_EQUITY|US_SMALLCAP|VIX::descriptive": 1,
-      "FIN_SECTOR|SILVER::descriptive": 1,
-      "SILVER|US_EQUITY|VIX::descriptive": 1,
-      "LOW_VOL_FACTOR|USD|US_EQUITY::null_no_info": 1,
-      "FIN_SECTOR|JAPAN_EQ|NASDAQ|SEMIS|SILVER|TSMC|TW_EQUITY|US_EQUITY|US_SMALLCAP|VIX|VOL_TARGETING::null_no_info": 1,
-      "SEMIS|US_EQUITY|UTILITIES|VOL_TARGETING::descriptive": 1,
-      "TW_EQUITY|VIX|YIELD_CURVE::null_no_info": 1
+      "NASDAQ|TSMC|TW_EQUITY|US_EQUITY|US_SMALLCAP::descriptive": 1
     }
   },
   "content_completeness": {
@@ -68,8 +68,8 @@
     "scanned": 12,
     "findings": [],
     "lazypack": {
-      "general_total": 9,
-      "with_lazypack": 9,
+      "general_total": 8,
+      "with_lazypack": 8,
       "coverage": 1.0,
       "threshold": 0.6,
       "below_threshold": false,
@@ -80,10 +80,10 @@
     "status": "ok",
     "exists": true,
     "candidate_counts": {
-      "candidates": 697,
+      "candidates": 811,
       "top_10_uncovered": 10
     },
-    "total": 707
+    "total": 821
   },
   "frontend_render": {
     "status": "unknown",
