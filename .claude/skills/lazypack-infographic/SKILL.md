@@ -3,9 +3,11 @@ name: lazypack-infographic
 description: |
   Use this skill when producing a 懶人包 (cheat-sheet) infographic SET for a
   reader-facing article (audience='general', including reader-facing event,
-  daily, digest, and trending pieces). The primary path is a strict data-bound
-  plan.json rendered by scripts/lazypack_render.py; an LLM may draft wording and
-  select evidence paths, but never writes or repairs rendering code.
+  daily, digest, and trending pieces). PRIMARY path (boss 2026-07-15): codex
+  exec writes a data-bound bespoke poster script (scripts/gen_lazypack_codex.py)
+  executed locally; deterministic scripts/lazypack_render.py is the FALLBACK
+  (template look — boss-flagged as ugly). Numbers must always bind to evidence
+  JSON; the main-thread LLM never writes or repairs rendering code itself.
 ---
 
 # lazypack-infographic — 確定性懶人包圖組
@@ -123,17 +125,17 @@ Root 必填 `schema_version: 1`、`title`、`evidence`、`panels`。`evidence` �
 - renderer 完成後必跑 layout guard；任何 clipping、文字碰撞或卡片溢位都視為失敗，不准帶病發布。
 - 人工檢視 PNG，逐項核對 evidence path、格式化結果、來源 label 與 alt；歷史結果不得憑記憶填入。
 
-## 視覺分層（boss decision 2026-07-15：ops manager 拍板）
+## 視覺分層（boss directive 2026-07-15 晚間升級：codex = 所有 reader-facing 預設）
 
-老闆 2026-07-15 回信（email-12109）：「你決定。但 NotebookLM 已放到後面這是確定的，畢竟 Codex 畫的圖好太多了。」據此，reader-facing 懶人包視覺採三層排序：
+老闆 2026-07-15 晚間直接指令：「懶人包圖不是改走 codex 生成嗎？現在的懶人包圖還是 render 得很醜」— 據此，原「未來選項」正式啟動，**`codex exec` bespoke poster（`scripts/gen_lazypack_codex.py`）成為所有 reader-facing 懶人包的預設 primary**（不再限旗艦篇）：
 
-1. **routine / 高量 draft-pool 文章 → 確定性 renderer（`lazypack_render.py`）為預設**：async production path、零 LLM、可重跑、秒級。模板（concept/method/results）足以承載時一律走這條（throughput + 研究誠實）。
-2. **旗艦 / 視覺即產品的 reader-facing 篇 → `codex exec` bespoke poster 為 sanctioned primary**（`scripts/gen_lazypack_codex.py`）：codex **寫**一支 data-bound Pillow/matplotlib 腳本、本 process 本地執行；每個數字由 evidence JSON 讀出、腳本存檔可重跑；ChatGPT 訂閱 flat-rate 零增量成本。當固定模板明顯 undersell 內容、或需要 bento-grid／大數字等客製版面時，這是**首選**、不再只是 legacy/manual escape hatch。品質遠勝 NotebookLM（老闆親評「好太多了」）。
-3. **NotebookLM AI-poster（`scripts/gen_lazypack_infographic.py`）→ 最後備援**：僅在前兩條都不可用時人工授權 + 覆核使用；不得當首選、不得因 plan/layout fail 自動 fallback。免費 notebooklm-py，不呼叫付費影像 API。
+1. **PRIMARY = `codex exec` bespoke poster**（`scripts/gen_lazypack_codex.py`）：codex **寫**一支 data-bound Pillow/matplotlib 腳本、本 process 本地執行；每個數字由 evidence JSON 讀出、腳本存檔可重跑（研究誠實不變）；ChatGPT 訂閱 flat-rate 零增量成本。CLI：`--article-id <mile_id> --source <evidence.json> --plan <plan.json> --out-dir <dir>`。
+2. **FALLBACK = 確定性 renderer（`lazypack_render.py`）**：codex 不可用（CLI 故障 / 逾時 / 修復輪耗盡）時的可靠退路 — 零 LLM、秒級、零幻覺，但視覺是模板級（老闆已兩度嫌醜），**只准當 fallback，fallback 使用必須在 work_log 註記**（不得 silent）。
+3. **NotebookLM AI-poster → 最後備援**：僅在前兩條都不可用時人工授權 + 覆核；不得自動 fallback。
 
 按張計費影像 API（`gpt-image-2`、付費 Gemini key 等）仍禁止用於此流程。
 
-> **未來選項（非本次範圍）**：若老闆要 codex exec 成為**所有**文章（含 routine draft-pool）的預設，需改寫 `lazypack_async_render.py`（目前深度綁定 deterministic renderer 的 strict plan + hash-receipt 驗證）+ 測試，屬另立 platform_ops 任務。目前刻意保留 deterministic renderer 為 routine 預設以保 throughput 與零幻覺。
+> **管線改寫（進行中）**：`lazypack_async_render.py` 目前仍深度綁定 deterministic renderer（strict plan + hash-receipt）；改接 codex 路徑屬 platform_ops task `lazypack_async_codex_primary`（2026-07-15 建）。管線改完前：**互動 session / dispatch agent 發佈 reader-facing 文章時直接呼叫 `gen_lazypack_codex.py`（PRIMARY），不要 enqueue 舊 async 佇列**；async 佇列只服務歷史 backlog。
 
 ## 發佈後處理
 
