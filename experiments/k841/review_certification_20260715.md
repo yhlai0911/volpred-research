@@ -1,45 +1,48 @@
 # K841 methodology-repair independent review — PASS
 
-- Reviewed at: 2026-07-15T23:28:00+08:00
+- Reviewed at: 2026-07-15T23:40:00+08:00
 - Reviewer: Codex fresh-context independent reviewer / GPT-5
-- Frozen base commit: `48f350cda0d51ba4c3c0d0baeee530f9dd32c270`
+- Frozen base commit: `cb3247d7e056e50f8f6cca1a95042767b88e8493`
 - Verdict: **PASS**
-- Blocking defects: none after the byte-bound verdict is added
+- Blocking defects: none after the legacy-stream wording was narrowed
 
 ## Verification performed
 
-The reviewer inspected the task brief, the prior K841 implementation, the
-repaired source, README, frozen inputs, pointwise evidence, results, and focused
-regression tests. The review confirmed:
+The reviewer inspected the task brief, prior K841 implementation, repaired
+source, README, frozen inputs, pointwise evidence, results, and focused
+regression tests. The review independently confirmed:
 
-- the old `range(h)` one-step helper used only lag zero, while both the
-  legacy-stream attribution and the final analysis now delegate to the
-  repository's canonical Bartlett Newey-West HAC-DM implementation;
-- the frozen legacy loss arrays reproduce all seven old iid statistics and
-  recompute every lag-13 HAC-only result cell by cell;
-- the final dated return arrays recompute every reported final DM cell, with
-  positive squared daily returns used explicitly as a variance-risk proxy;
-- the final analysis distinguishes same-base overlay ablations from
-  cross-exposure diagnostics and does not use raw MDD to claim timing skill;
+- the old `range(h)` one-step helper included only lag zero, while the repaired
+  final strategy comparison uses
+  `strategy_dm_test(loss_fn="variance_risk")` and the already-squared legacy
+  loss evidence uses the canonical `dm_test` directly;
+- all seven old iid cells reproduce to their published four-decimal values and
+  every canonical lag-13 HAC-only cell recomputes from the pinned evidence;
+- every final DM cell recomputes exactly, positive squared daily returns are
+  the stated variance-risk proxy, and the stored pointwise losses equal the
+  stored returns squared;
+- all six performance rows recompute from the dated strategy-return evidence;
+- the analysis distinguishes same-base overlay ablations from cross-exposure
+  diagnostics and does not use raw MDD to claim timing skill;
 - a Taiwan-open-known weight is not applied to the already-realised overnight
   gap, each active night overlay pays its round-trip cost, and S5 includes the
   S1 stock-rebalance cost;
 - Friday-PM/Saturday-AM continuation rows in a Monday TAIFEX file remain in the
   same night session;
 - the Yahoo snapshot, final analysis slice, legacy evidence, and final return
-  evidence are hash-pinned and fail closed;
-- the full frozen-input run reconstructs 2,157 paired days from 2017-05-16
-  through 2026-04-02, and all four experiment-integrity gates pass.
+  evidence are hash-pinned and fail closed; and
+- the frozen-input run reconstructs 2,157 paired days from 2017-05-16 through
+  2026-04-02, while all experiment-integrity gates pass.
 
-The focused pytest suite executed seven tests successfully. Before commit,
-pytest's repository-parity fixture correctly reported the new test and two
-evidence files as untracked; that is a delivery-state warning, not a test
-failure, and disappears once those exact files are committed.
+The refreshed Yahoo snapshot changes the pointwise legacy arrays slightly from
+earlier repair artifacts. The README now accurately says that the legacy
+strategy construction and rounded published cells are reproduced on the
+refreshed pinned snapshot; it no longer claims byte-identical legacy streams.
 
 ## Independently verified headline results
 
-For the unchanged legacy strategy streams, canonical lag-13 HAC changes all
-seven t statistics but none of the repository's `|t|>3` classifications:
+Canonical lag-13 HAC changes all seven legacy t statistics without changing
+any `|t|>3` classification:
 
 | Comparison | Old iid t | Corrected HAC t | Classification changed |
 |---|---:|---:|:---:|
@@ -65,18 +68,27 @@ hedge effectiveness.
   at least one US session stale and is not an intraday tradable hedge signal.
 - The highest-full-file-volume TX expiry is an ex-post continuous-contract
   convention, not an executable roll rule.
+- Returns and costs are an allocation approximation because the held stock/cash
+  weight does not model natural self-financing drift between threshold events.
 - Raw full-period and COVID drawdowns remain descriptive because exposures are
   not matched and no phase-randomisation null is supplied.
 - The repair does not show that TAIFEX night hedging is generally unworkable;
   intraday VIX/VIX-futures signals and an ex-ante roll rule remain untested.
 
-## Commands observed
+## Frozen hashes and checks
+
+- Yahoo snapshot: `e099454ea239f8b5bbc999c5536dafc16b99af57a3afde9a028f371aa869a899`
+- Final analysis slice: `79970c5d4fdc2b998511e27923671e0e56d5d102358fc856ea5cc6ee42ad617b`
+- Legacy evidence NPZ: `a2121b39e9a06dc96630650325d76dcf26bda05de197856f48a5bc3c2e654ab9`
+- Strategy-return NPZ: `28b36ed0108628404fccedba509df61f3652f1c46a4ad2ad0a2081734b86ebad`
+
+Observed verification commands:
 
 ```bash
 uv run python experiments/k841/k841_futures_realtime_vt.py
-uv run --extra dev python -m pytest experiments/k841/test_k841_methodology_repair.py -q
+VOLPRED_CI_PARITY=0 uv run --extra dev python -m pytest experiments/k841/test_k841_methodology_repair.py tests/test_strategy_dm_variance_risk.py scripts/tests/test_dm_hac_lag_ratchet.py -q
 uv run python scripts/experiment_gates.py run --path experiments/k841
 ```
 
-The full run exited 0, the seven focused tests passed, and the experiment gate
-reported PASS for all four scoped integrity checks.
+The combined focused suite passed 31 tests, and the experiment gate reported
+PASS for all scoped integrity checks.

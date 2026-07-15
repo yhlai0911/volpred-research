@@ -564,35 +564,47 @@ def _scan_function(
             _, lag_expr = default
 
     # A HAC loop written inline as `for lag in range(1, h)` binds no name but is
-    # the same defect -- range(1, 1) is empty.
+    # the same defect -- range(1, 1) is empty.  The zero-based variant
+    # ``range(h)`` is also degenerate: at h=1 it includes gamma[0] but no
+    # positive-lag serial covariance (the K841 blind spot).
     if lag_expr is None:
         for node in ast.walk(fn):
             if isinstance(node, ast.For) and isinstance(node.iter, ast.Call):
                 callee = node.iter.func
                 if isinstance(callee, ast.Name) and callee.id == "range":
                     args = node.iter.args
-                    if len(args) < 2:
+                    if not args:
                         continue
-                    upper_node = args[1]
+                    zero_based = len(args) == 1
+                    upper_node = args[0] if zero_based else args[1]
                     upper = ast.unparse(upper_node)
                     range_kind = _horizon_range_kind(upper_node)
                     if range_kind is None:
                         continue
+                    formatted_range = (
+                        f"range({upper})" if zero_based else f"range(1, {upper})"
+                    )
                     if range_kind == "exclusive":
                         verdict = DEGENERATE
-                        notes = [
-                            f"inline `range(1, {upper})`: HAC loop is empty when h == 1"
-                        ]
+                        if zero_based:
+                            notes = [
+                                f"inline `range({upper})`: h == 1 includes lag zero "
+                                "but no positive-lag HAC covariance"
+                            ]
+                        else:
+                            notes = [
+                                f"inline `range(1, {upper})`: HAC loop is empty when h == 1"
+                            ]
                     elif range_kind == "inclusive":
                         verdict = H_INCLUSIVE
                         notes = [
-                            "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC "
+                            f"inline `{formatted_range}` keeps lag 1 at h == 1, so no zero-HAC "
                             "degeneracy, but the bandwidth never grows with the sample"
                         ]
                     else:
                         verdict = H_INCLUSIVE
                         notes = [
-                            f"inline `range(1, {upper})` has a positive lag floor, so it "
+                            f"inline `{formatted_range}` has a positive lag floor, so it "
                             "does not degenerate at h == 1, but it never scales with the sample"
                         ]
                     return Finding(
@@ -600,7 +612,7 @@ def _scan_function(
                         function=fn.name,
                         lineno=fn.lineno,
                         verdict=verdict,
-                        lag_expr=f"range(1, {upper})",
+                        lag_expr=formatted_range,
                         exercises_h1=exercises_h1,
                         notes=notes,
                     )

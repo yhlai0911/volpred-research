@@ -50,6 +50,15 @@ EXPECTED_OLD_T = {
     "s5_vs_s1": -0.7583,
 }
 
+EXPECTED_OLD_METRICS = {
+    "s0": {"cagr": 0.1947, "ann_vol": 0.1974, "sharpe": 1.0006, "mdd": -0.3383},
+    "s1": {"cagr": 0.1199, "ann_vol": 0.0861, "sharpe": 1.3589, "mdd": -0.1232},
+    "s2": {"cagr": 0.1234, "ann_vol": 0.1706, "sharpe": 0.7683, "mdd": -0.3580},
+    "s3": {"cagr": 0.1705, "ann_vol": 0.1929, "sharpe": 0.9133, "mdd": -0.3341},
+    "s4": {"cagr": 0.1348, "ann_vol": 0.1818, "sharpe": 0.7875, "mdd": -0.3591},
+    "s5": {"cagr": 0.0610, "ann_vol": 0.0843, "sharpe": 0.7440, "mdd": -0.1776},
+}
+
 _LEGACY_WORKER: dict | None = None
 
 
@@ -97,11 +106,11 @@ def _current_module():
     return module
 
 
-def _legacy_files(legacy: dict) -> list[str]:
+def _legacy_files(legacy: dict, directory: str) -> list[str]:
     import glob
 
     paths: list[str] = []
-    pattern = os.path.join(legacy["TAIFEX_DIR"], "Daily_*TX.csv")
+    pattern = os.path.join(directory, "Daily_*TX.csv")
     for path in glob.glob(pattern):
         stem = os.path.basename(path).replace("Daily_", "").replace("TX.csv", "")
         try:
@@ -117,7 +126,7 @@ def main() -> None:
     source = _legacy_source()
     legacy = _load_legacy_namespace(source)
     current = _current_module()
-    paths = _legacy_files(legacy)
+    paths = _legacy_files(legacy, current.TAIFEX_DIR)
     if len(paths) != 2163:
         raise RuntimeError(f"Expected 2163 frozen TAIFEX files, found {len(paths)}")
 
@@ -142,6 +151,20 @@ def main() -> None:
         or merged.index.duplicated().any()
     ):
         raise RuntimeError("legacy reconstruction sample identity changed")
+
+    for strategy, expected in EXPECTED_OLD_METRICS.items():
+        observed = legacy["compute_metrics"](
+            merged[f"{strategy}_ret"], f"legacy {strategy}"
+        )
+        drift = {
+            metric: (observed[metric], value)
+            for metric, value in expected.items()
+            if observed[metric] != value
+        }
+        if drift:
+            raise RuntimeError(
+                f"Legacy published metrics did not reproduce for {strategy}: {drift}"
+            )
 
     arrays: dict[str, np.ndarray] = {
         "date_ordinal": merged.index.to_numpy(dtype="datetime64[D]").astype(np.int64)

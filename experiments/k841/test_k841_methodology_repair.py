@@ -97,6 +97,19 @@ def test_positive_serial_dependence_changes_iid_t_diagnostic():
     assert abs(diagnostic["t_stat"]) < abs(iid_t)
 
 
+def test_variance_risk_strategy_dm_matches_positive_squared_loss_dm():
+    returns1 = np.array([0.02, -0.01, 0.03, -0.04] * 30, dtype=float)
+    returns2 = np.array([0.01, -0.02, 0.01, -0.02] * 30, dtype=float)
+
+    strategy_t, strategy_p = K841.strategy_dm_test(
+        returns1, returns2, h=1, loss_fn="variance_risk"
+    )
+    loss_t, loss_p = K841.canonical_dm_test(returns1**2, returns2**2, h=1)
+
+    assert np.isclose(strategy_t, loss_t, atol=1e-15)
+    assert np.isclose(strategy_p, loss_p, atol=1e-15)
+
+
 def test_saved_evidence_recomputes_every_reported_dm_cell():
     results_path = HERE / "k841_futures_realtime_vt_results.json"
     artifact_path = HERE / "k841_strategy_returns.npz"
@@ -162,6 +175,20 @@ def test_primary_source_and_results_are_hash_pinned_fail_closed():
     for reported in results["dm_tests"].values():
         assert type(reported["significant_at_5pct"]) is bool
         assert type(reported["harvey_significant"]) is bool
+
+
+def test_night_session_diagnostic_keeps_legitimate_zero_returns():
+    results = json.loads(
+        (HERE / "k841_futures_realtime_vt_results.json").read_text(encoding="utf-8")
+    )
+    diagnostic = results["night_session_diagnostics"]
+
+    assert "basis_analysis" not in results
+    assert diagnostic["sample_days"] == 2157
+    assert diagnostic["available_night_sessions"] == 2152
+    assert diagnostic["availability_pct"] == 99.8
+    assert diagnostic["legitimate_zero_return_sessions"] == 10
+    assert results["strategies"]["S2"].startswith("Buy & Hold 0050.TW")
 
 
 def test_monday_file_uses_saturday_am_night_continuation(tmp_path):

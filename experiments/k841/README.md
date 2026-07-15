@@ -6,8 +6,10 @@ This 2026-07-15 rerun supersedes K841's pre-repair statistics and the old
 reader-facing interpretation of its raw drawdowns. The original one-day
 Diebold-Mariano helper used `for k in range(h)`. At `h=1` it included only
 lag zero, so all seven reported tests used an iid variance estimate instead of
-HAC. The corrected analysis delegates the positive squared-return loss streams
-to `volpred.stats.model_evaluation.dm_test`; with 2,157 paired days the
+HAC. The final strategy comparison delegates return construction to
+`volpred.stats.model_evaluation.strategy_dm_test(loss_fn="variance_risk")`;
+the HAC-only legacy evidence is already expressed as positive squared-return
+losses and therefore uses `dm_test` directly. With 2,157 paired days the
 canonical Bartlett Newey-West bandwidth is 13.
 
 The rerun also fixes three defects encountered while reconstructing the
@@ -21,9 +23,11 @@ strategy returns:
 3. A Monday TAIFEX file can contain Friday PM, Saturday AM, and Monday day
    rows. The old first/last-date shortcut dropped the Saturday continuation.
 
-The HAC-only reconstruction keeps the legacy strategy streams unchanged and
-therefore isolates the inference defect. The final tables incorporate all four
-repairs. These are two distinct comparisons and must not be conflated.
+The HAC-only reconstruction keeps the legacy strategy construction and
+reproduces the rounded published metrics and iid DM cells on the refreshed,
+pinned Yahoo snapshot before changing only the variance estimator. The final
+tables incorporate all four code repairs. These are two distinct comparisons
+and must not be conflated.
 
 ## Research question
 
@@ -41,17 +45,17 @@ investor welfare.
 - TAIFEX TX all-contract tick files from
   `/Users/yhlai0911/Dropbox/TAIFEXDATA/TAIFEXDATA/python`.
 - Within each file, the expiry with the highest full-file volume is selected.
-  This is an ex-post continuous-contract convention, not an executable roll
-  rule; no roll-date sensitivity is claimed.
+  This is the legacy ex-post continuous-contract convention, not a canonical
+  or executable roll rule; no roll-date sensitivity is claimed.
 - VIX and 0050.TW adjusted Open/Close are stored in
   `data/k841_yfinance_snapshot.csv` rather than downloaded during the primary
   run.
 - Analysis period: 2017-05-16 through 2026-04-02.
 - Paired trading days: 2,157.
 - Frozen Yahoo snapshot SHA-256:
-  `0465e20e98d0c82814fd36407b84aefe6e2edacfb604a5e4d8b55335e363c8ed`.
+  `e099454ea239f8b5bbc999c5536dafc16b99af57a3afde9a028f371aa869a899`.
 - Frozen final analysis-slice SHA-256:
-  `452cdfa03edbd0c7d0b2f0a03dfa4024f8a3e842d74b74c58a2f66da4f8aad0d`.
+  `79970c5d4fdc2b998511e27923671e0e56d5d102358fc856ea5cc6ee42ad617b`.
 
 The signal used for a night session is the last VIX close strictly before the
 actual TX night-start date. It is therefore at least one US session stale and
@@ -75,6 +79,11 @@ The stock trade threshold is five percentage points. Stock turnover costs
 ratio. An unavailable night session carries no overlay position, P&L, or cost;
 the stock leg remains invested and the missing night return is never imputed as
 zero.
+
+Between threshold-triggered rebalances, S1 carries the last stock/cash weight
+unchanged; it does not model natural self-financing weight drift. Returns and
+costs are therefore a transparent allocation approximation, not exact portfolio
+accounting.
 
 ## HAC-only repair on the legacy strategy streams
 
@@ -158,6 +167,13 @@ uv run python experiments/k841/k841_futures_realtime_vt.py
 uv run --extra dev python -m pytest experiments/k841/test_k841_methodology_repair.py -q
 uv run python scripts/experiment_gates.py run --path experiments/k841
 ```
+
+The raw rebuild requires the 2,163 TAIFEX Big5 daily files available on the
+research host. `VOLPRED_TAIFEX_DIR` overrides the default Dropbox directory.
+The checked-in snapshot and dated NPZ evidence make every reported statistic
+independently recomputable without those raw files; rebuilding the strategy
+inputs themselves remains host-data dependent and is pinned by the final
+analysis-slice hash rather than a 12.7 GB raw-file manifest.
 
 Primary artifacts:
 

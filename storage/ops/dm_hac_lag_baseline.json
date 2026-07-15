@@ -4,7 +4,7 @@
   "auditor": "scripts/audit_dm_hac_lag.py",
   "canonical": "volpred.stats.model_evaluation.dm_test",
   "policy": "Three frozen cohorts. Each set may only shrink -- new entries fail CI; repaired sites move to retired and cannot resurrect.",
-  "frozen_at": "2026-07-11 (K1655 class sweep); blindspot cohort refrozen 2026-07-12 after AST coverage and false-positive correction; unknown-triage cohort frozen 2026-07-15 when max(1,h) inline loops became mechanically classifiable; k1379 manual-variance blind spot plus k1378/k1386 h=1-degenerate sites retired 2026-07-15 after canonical HAC repairs",
+  "frozen_at": "2026-07-11 (K1655 class sweep); blindspot cohort refrozen 2026-07-12 after AST coverage and false-positive correction; unknown-triage cohort frozen 2026-07-15 when max(1,h) inline loops became mechanically classifiable; k1379 manual-variance blind spot plus k1378/k1386/k841 h=1-degenerate sites retired 2026-07-15 after canonical HAC repairs",
   "count": 229,
   "original_cohort_count": 127,
   "blindspot_cohort_count": 100,
@@ -314,6 +314,11 @@
       "site": "experiments/k1386/k1386.py::dm_test_harvey",
       "date": "2026-07-15",
       "note": "canonical Bartlett-HAC and actual-first Patton QLIKE re-run complete on a hash-pinned unique-date window with the HAR IS/OOS target boundary repaired — fGN-uni/multi versus HAR t = 3.44/3.45, both remain beyond |t|>3 in HAR's direction; NULL_NO_FGN_IMPROVEMENT conclusion unchanged"
+    },
+    {
+      "site": "experiments/k841/k841_futures_realtime_vt.py::dm_test",
+      "date": "2026-07-15",
+      "note": "canonical Bartlett-HAC re-run complete on frozen positive squared-return risk losses (n=2157, lag=13), with open-gap timing, nightly cost, S5 stock cost, and Monday Saturday-AM parsing repaired — all seven HAC-only t magnitudes changed but no |t|>3 classification flipped; old best-VT and general night-hedging claims were narrowed"
     }
   ]
 }

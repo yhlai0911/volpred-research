@@ -242,6 +242,7 @@ def strategy_dm_test(
         loss_fn: Loss function. Options:
             - "negative_return": L = -r (higher return = lower loss)
             - "squared_return": L = -r² (penalizes low absolute returns)
+            - "variance_risk": L = r² (penalizes high absolute returns)
             - "downside": L = max(0, -r)² (penalizes downside only)
 
     Returns:
@@ -255,6 +256,8 @@ def strategy_dm_test(
         loss1, loss2 = -r1, -r2
     elif loss_fn == "squared_return":
         loss1, loss2 = -(r1 ** 2), -(r2 ** 2)
+    elif loss_fn == "variance_risk":
+        loss1, loss2 = r1 ** 2, r2 ** 2
     elif loss_fn == "downside":
         loss1 = np.where(r1 < 0, r1 ** 2, 0.0)
         loss2 = np.where(r2 < 0, r2 ** 2, 0.0)

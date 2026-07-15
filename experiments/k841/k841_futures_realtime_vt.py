@@ -12,7 +12,7 @@ Original hypothesis (proposed by user, 2026-04-03):
 Strategies:
   S0: Buy & Hold 0050.TW (baseline)
   S1: 8.63/VIX next-day adjustment (existing strategy)
-  S2: 8.63/VIX with night session hedge (new: use TX short to reduce overnight exposure)
+  S2: Buy-and-hold 0050.TW plus an always-on TX night hedge
   S3: VIX spike guard (only hedge when VIX jumps > +2 points)
 
 Data:
@@ -28,7 +28,7 @@ References:
 Error log rules:
   - 0050.TW: must use clean_tw50_data
   - signal.shift(1): VIX uses previous day
-  - Futures-spot basis to be monitored
+  - The legacy full-file-volume contract rule is ex-post, not executable
   - Night session liquidity ~57% of day session
   - Only use data from 2017-05-16 onwards
 """
@@ -46,12 +46,18 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timezone
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from volpred.stats.model_evaluation import dm_test as canonical_dm_test
+from volpred.stats.model_evaluation import (
+    dm_test as canonical_dm_test,
+    strategy_dm_test,
+)
 
 warnings.filterwarnings('ignore')
 
 # Constants
-TAIFEX_DIR = '/Users/yhlai0911/Dropbox/TAIFEXDATA/TAIFEXDATA/python'
+TAIFEX_DIR = os.environ.get(
+    'VOLPRED_TAIFEX_DIR',
+    '/Users/yhlai0911/Dropbox/TAIFEXDATA/TAIFEXDATA/python',
+)
 NIGHT_SESSION_START = 20170516  # First day with night session data
 ANALYSIS_END = 20260402  # Freeze the published sample for methodology-only repair
 YFINANCE_END_EXCLUSIVE = '2026-04-03'
@@ -62,12 +68,12 @@ WEIGHT_CHANGE_THRESHOLD = 0.05  # Only trade if weight change > 5%
 FORECAST_HORIZON = 1
 HARVEY_LIU_ZHU_THRESHOLD = 3.0
 HAC_LAG_SENSITIVITY = (0, 1, 5, 10, 20)
-EXPECTED_ANALYSIS_SLICE_SHA256 = '452cdfa03edbd0c7d0b2f0a03dfa4024f8a3e842d74b74c58a2f66da4f8aad0d'
+EXPECTED_ANALYSIS_SLICE_SHA256 = '79970c5d4fdc2b998511e27923671e0e56d5d102358fc856ea5cc6ee42ad617b'
 SCRIPT_DIR = Path(__file__).resolve().parent
 YFINANCE_SNAPSHOT_PATH = SCRIPT_DIR / 'data' / 'k841_yfinance_snapshot.csv'
-EXPECTED_YFINANCE_SNAPSHOT_SHA256 = '0465e20e98d0c82814fd36407b84aefe6e2edacfb604a5e4d8b55335e363c8ed'
+EXPECTED_YFINANCE_SNAPSHOT_SHA256 = 'e099454ea239f8b5bbc999c5536dafc16b99af57a3afde9a028f371aa869a899'
 LEGACY_DM_EVIDENCE_PATH = SCRIPT_DIR / 'k841_legacy_dm_losses.npz'
-EXPECTED_LEGACY_DM_EVIDENCE_SHA256 = 'f2de797eb3b99c57adb6b21bc1d4da66dc6634f51f0ec97cafbde8ebe86e7170'
+EXPECTED_LEGACY_DM_EVIDENCE_SHA256 = 'a2121b3923942c45ae3de97dd6d938cab4fed99eeeb2858fb5510de4b02b7352'
 LEGACY_SOURCE_COMMIT = '76aa426d0fee034cf012d21c89489c033cdae58e'
 
 # Time boundaries (HHMMSS format integer)
@@ -274,7 +280,7 @@ def refresh_yfinance_snapshot():
     payload = snapshot.to_csv(
         index=True,
         date_format='%Y-%m-%d',
-        float_format='%.17g',
+        float_format='%.10f',
         lineterminator='\n',
     )
     YFINANCE_SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -700,6 +706,7 @@ def loss_dm_diagnostics(loss1, loss2, h=FORECAST_HORIZON):
     return {
         't_stat': float(t_stat),
         'p_value': float(p_value),
+        'asset': '0050.TW|TX',
         'n': int(n),
         'horizon': int(h),
         'hac_lag': int(hac_lag),
@@ -738,9 +745,26 @@ def risk_loss_dm_diagnostics(returns1, returns2, h=FORECAST_HORIZON):
         [pd.Series(returns1, name='returns1'), pd.Series(returns2, name='returns2')],
         axis=1,
     ).dropna()
-    loss1 = aligned['returns1'].to_numpy(dtype=np.float64) ** 2
-    loss2 = aligned['returns2'].to_numpy(dtype=np.float64) ** 2
-    return loss_dm_diagnostics(loss1, loss2, h=h), loss1, loss2
+    returns1_array = aligned['returns1'].to_numpy(dtype=np.float64)
+    returns2_array = aligned['returns2'].to_numpy(dtype=np.float64)
+    loss1 = returns1_array ** 2
+    loss2 = returns2_array ** 2
+    diagnostic = loss_dm_diagnostics(loss1, loss2, h=h)
+    strategy_t, strategy_p = strategy_dm_test(
+        returns1_array,
+        returns2_array,
+        h=h,
+        loss_fn='variance_risk',
+    )
+    if not (
+        np.isclose(strategy_t, diagnostic['t_stat'], atol=1e-15, rtol=0.0)
+        and np.isclose(strategy_p, diagnostic['p_value'], atol=1e-15, rtol=0.0)
+    ):
+        raise RuntimeError('strategy_dm_test variance_risk diverged from saved pointwise losses')
+    diagnostic['implementation'] = (
+        "volpred.stats.model_evaluation.strategy_dm_test(loss_fn='variance_risk')"
+    )
+    return diagnostic, loss1, loss2
 
 
 def dataframe_sha256(frame):
@@ -830,6 +854,7 @@ def load_legacy_dm_evidence(expected_dates):
             diagnostics[key] = loss_dm_diagnostics(
                 evidence[f'{key}_loss1'], evidence[f'{key}_loss2'], h=1
             )
+            diagnostics[key]['ledger_exclude'] = True
     return diagnostics, artifact_hash
 
 
@@ -899,31 +924,23 @@ def analyze_vix_regimes(merged):
     return results
 
 
-def analyze_basis(merged):
-    """Analyze futures-spot basis."""
-    # Basis = futures day_close - spot (0050.TW proxy)
-    # TX is index-level, 0050.TW is ETF price. We can compare returns.
-    has_both = merged.dropna(subset=['day_close', 'tw50_close'])
-    if len(has_both) < 50:
-        return {'error': 'insufficient data'}
-
-    # Compute futures return
-    has_both = has_both.copy()
-    has_both['tx_day_ret'] = has_both['day_close'].pct_change()
-
-    corr = has_both[['tw50_ret', 'tx_day_ret']].corr().iloc[0, 1]
-    tracking_error = (has_both['tw50_ret'] - has_both['tx_day_ret']).std() * np.sqrt(252)
-
-    # Night return statistics
-    night_valid = has_both[has_both['night_ret'].notna() & (has_both['night_ret'] != 0)]
+def analyze_night_session_diagnostics(merged):
+    """Summarise explicit session availability without filtering zero returns."""
+    night_valid = merged.loc[merged['night_available']].copy()
+    if night_valid.empty:
+        return {'error': 'no available night sessions'}
 
     return {
-        'spot_futures_corr': round(corr, 4),
-        'tracking_error_ann': round(tracking_error, 4),
-        'night_ret_mean': round(night_valid['night_ret'].mean(), 6) if len(night_valid) > 0 else None,
-        'night_ret_std': round(night_valid['night_ret'].std(), 6) if len(night_valid) > 0 else None,
-        'night_sessions': len(night_valid),
-        'pct_with_night_data': round(len(night_valid) / len(has_both) * 100, 1),
+        'sample_days': len(merged),
+        'available_night_sessions': len(night_valid),
+        'availability_pct': round(len(night_valid) / len(merged) * 100, 1),
+        'legitimate_zero_return_sessions': int(night_valid['night_ret'].eq(0.0).sum()),
+        'night_ret_mean': round(night_valid['night_ret'].mean(), 6),
+        'night_ret_std': round(night_valid['night_ret'].std(), 6),
+        'scope': (
+            'Within-session TX returns only. No spot-futures basis or tracking-error '
+            'claim is made because the legacy selected-contract series can switch expiry.'
+        ),
     }
 
 
@@ -1054,12 +1071,12 @@ def main():
         for k, v in data.items():
             print(f"    {k}: {v}")
 
-    # Step 8: Basis analysis
+    # Step 8: Night-session data diagnostics
     print("\n" + "=" * 70)
-    print("FUTURES-SPOT BASIS ANALYSIS")
+    print("NIGHT-SESSION DATA DIAGNOSTICS")
     print("=" * 70)
-    basis_results = analyze_basis(merged)
-    for k, v in basis_results.items():
+    night_session_results = analyze_night_session_diagnostics(merged)
+    for k, v in night_session_results.items():
         print(f"  {k}: {v}")
 
     # Step 9: Trading statistics
@@ -1121,7 +1138,7 @@ def main():
         'data_source_details': {
             'taifex_contract_rule': 'TX all-contract tick files; choose the highest-volume expiry within each file',
             'taifex_contract_rule_scope': (
-                'Canonical ex-post continuous-contract construction, not an '
+                'Legacy ex-post continuous-contract construction, not a canonical or '
                 'ex-ante executable roll rule; full-file volume includes the '
                 'following day session and roll-date sensitivity is not supplied.'
             ),
@@ -1146,7 +1163,7 @@ def main():
         'strategies': {
             'S0': 'Buy & Hold 0050.TW',
             'S1': '8.63/VIX rebalance at Taiwan open; prior weight remains on overnight gap',
-            'S2': '8.63/VIX + TX night session hedge (always)',
+            'S2': 'Buy & Hold 0050.TW + TX night session hedge (always)',
             'S3': 'VIX spike guard (hedge when VIX > +2)',
             'S4': 'Conditional night hedge (VIX > 20 only)',
             'S5': 'Full VT: S1 day scaling + S2 night hedge',
@@ -1155,7 +1172,7 @@ def main():
         'dm_tests': dm_results,
         'covid_analysis': covid_results,
         'vix_regime_analysis': regime_results,
-        'basis_analysis': basis_results,
+        'night_session_diagnostics': night_session_results,
         'trading_stats': {
             's2_hedged_days': len(hedged_days),
             's2_hedged_pct': round(len(hedged_days) / len(merged) * 100, 1),
@@ -1197,8 +1214,15 @@ def main():
                     'each observation closes at 05:00 and reopens at 15:00; S5 also '
                     'omitted the S1 stock rebalance cost.'
                 ),
+                (
+                    'The first/last-date session shortcut dropped Saturday-AM '
+                    'continuations stored in Monday TAIFEX files.'
+                ),
             ],
-            'primary_dm_implementation': 'volpred.stats.model_evaluation.dm_test',
+            'primary_dm_implementation': (
+                "volpred.stats.model_evaluation.strategy_dm_test(loss_fn='variance_risk')"
+            ),
+            'legacy_loss_dm_implementation': 'volpred.stats.model_evaluation.dm_test',
             'primary_bandwidth_rule': 'max(1, min(ceil(h^(1/3) * n^(1/3)), n//4))',
             'pre_repair_t_statistics': pre_repair_t,
             'hac_only_repair_on_legacy_return_streams': legacy_dm_results,
@@ -1259,6 +1283,7 @@ def main():
             't_stat': dm_results[key]['t_stat'],
             'harvey_significant': dm_results[key]['harvey_significant'],
             'direction': dm_results[key]['harvey_direction'],
+            'ledger_exclude': True,
         }
         for key in primary_keys
     }
@@ -1275,6 +1300,7 @@ def main():
                 't_stat': dm_results[key]['t_stat'],
                 'harvey_significant': dm_results[key]['harvey_significant'],
                 'direction': dm_results[key]['harvey_direction'],
+                'ledger_exclude': True,
             }
             for key in ['s2_vs_s1', 's3_vs_s1', 's4_vs_s1']
         },
@@ -1312,6 +1338,12 @@ def main():
             'mean return, Sharpe, utility, or causal hedge effectiveness. The '
             'highest-full-file-volume expiry is an ex-post continuous-contract '
             'convention, not a deployable roll rule.'
+        ),
+        'execution_approximation': (
+            'The thresholded S1 stock/cash weight is carried unchanged between '
+            'rebalance dates; natural self-financing weight drift is not modelled. '
+            'Reported costs and returns therefore remain a transparent allocation '
+            'approximation rather than exact portfolio accounting.'
         ),
     }
     results['conclusions'] = conclusions

@@ -86,7 +86,7 @@
 | 66 | `experiments/k785/k785_mf2_garch.py:285` | `dm_test` | c | for k in range(1, max(h,2))（無權重） | no | dm_stat/p_value | no |
 | 67 | `experiments/k796v2/k796v2_vix_spike_taiwan.py:299` | `dm_test` | c | hardcoded lag-1 | no | t/p | no |
 | 68 | `experiments/k821/k821_ssvs_variance_equation.py:795` | `dm_test` | c | max_lag = min(10, n//5) | no（除非 n<5） | dm_stat/p_val | no |
-| 69 | `experiments/k841/k841_futures_realtime_vt.py:436` | `dm_test` | c | for k in range(h) —— h=1 -> 只取 gamma[0]（= 樣本變異數），var_d = gamma[0]/n | YES | k841_results.json: dm_tests.*.t_stat 與 harvey_significant=True（s2_vs_s1 t=10.82、s2_vs_s0 t=-7.13、s3_vs_s0 t=-1.97）；feed×5 + knowledge×2 | **YES** |
+| 69 | `experiments/k841/k841_futures_realtime_vt.py:436` | `dm_test` | c | for k in range(h) —— h=1 -> 只取 gamma[0]（= 樣本變異數），var_d = gamma[0]/n | YES | 舊 k841_results.json: dm_tests.*.t_stat 與 harvey_significant（s2_vs_s1 t=10.82、s2_vs_s0 t=-7.13、s3_vs_s0 t=-1.97）；字串命中 feed×5 + knowledge×2，實際為兩篇文章與同一筆 knowledge | **YES（已修）** |
 | 70 | `experiments/k895/k895_ssvs_arx_garch.py:876` | `dm_test_qlike` | c | bw = int(n^(1/3)) | no | t/p | no |
 | 71 | `experiments/k910/k910_tci_vt_overlay.py:525` | `dm_test` | c | max_lag = int(n^(1/3)) | no | dm_stat/p_value | no |
 | 72 | `experiments/k923/k923_copula_hedge_ratio.py:561` | `dm_test_hedge` | c | h_bw = floor(T^(1/3))（T>=30 guard） | no | t_stat/p_value/harvey_significant | no |
@@ -109,19 +109,27 @@ K1386 已改用 `volpred.stats.model_evaluation.dm_test` 並重跑。重跑同�
 
 原表的 `feed×6` 是 grep 字串命中數，不是六篇文章：實際 blast radius 是一篇 `mile_f3ade114`，另有一筆 knowledge `cf7e62d9`。兩者均已用 2026-07-15 correction / superseding entry 回溯更正。稽核器也已補上 `range(1, max(1, h))` / `max(h, 1)` 的 h=1 退化辨識與 K1386 retirement regression；因此新辨識出的既有 K1525/K1526 站點已凍結在 `unknown_triage_sites` cohort，待其獨立 paired task 重跑後只准移入 retired，不在本輪越界修理。
 
+### 2026-07-15 K841 修復追蹤
+
+K841 已移除 local `range(h)` helper。HAC-only evidence 用原始舊策略 returns 重建正平方報酬 loss；固定樣本 2017-05-16 至 2026-04-02、n=2,157，canonical Bartlett-HAC lag=13。七格舊 iid→HAC t 分別為 10.8213→6.7855、-7.1306→-8.1976、-1.9712→-2.3880、14.0087→8.2635、-4.4320→-5.5126、12.1384→7.6436、-0.7583→-0.4931；所有數值改變，但沒有任何 `|t|>3` 分類翻轉。
+
+完整 rerun 另修正四個 return-construction 問題：開盤才知道的新權重不可套到已實現的 overnight gap；每晚 05:00 平倉、15:00 再開倉時每個 active notional 都須計成本；S5 必須包含 S1 stock rebalance cost；Monday TAIFEX 檔內的 Saturday-AM continuation 不得被 first/last-date shortcut 丟棄。修正後 S1 Sharpe 1.3589→0.9628，S5 0.7440→0.0205。因此舊「S1 是最佳 VT」與「TAIFEX 夜盤避險普遍不可行」不再成立；可保留的結論只有：這支至少一個美股 session stale 的 daily-VIX signal 不是 real-time hedge，且本實驗未測 intraday VIX/VIX-futures signal 或 ex-ante executable TX roll。
+
+原 `feed×5 + knowledge×2` 也是 grep 命中數：實際 blast radius 為兩篇文章 `mile_179df5f5` / `mile_b4304948` 與同一筆 knowledge `a0f5af26`。公開文章已加 editor correction，knowledge 以 append-only methodology correction supersede 舊條目；deprecated archive singles 保留不動。K841 的 raw MDD 仍只准做 descriptive diagnostic，另有 exposure-scale adjudication 未結案，不能因本輪 HAC 修復宣告全面 PASS。稽核器已補 `range(h)` blind-spot regression，舊站點移入 retired ledger。
+
 ### 必修清單（依實質影響排序）
 
 | 優先 | 站點 | 失效機制 | 對外結論 | 為什麼會改變已發表結論 |
 |---|---|---|---|---|
 | **P1（已修）** | `experiments/k1386/k1386.py`（舊 line 367）`dm_test_harvey` | `for k in range(1, max(1, h))`，呼叫端 `h=1` → `range(1,1)` 空迴圈 | 舊 README：`DM \|t\|=3.26 > 3.0`；一篇 feed 文章中有 6 次字串命中 | 實測 ACF(1)<0，canonical lag=11 後兩格 t=3.437/3.452，質性結論未翻；舊精確數字與樣本口徑已回溯更正。 |
-| **P1** | `experiments/k841/k841_futures_realtime_vt.py:436` `dm_test` | `for k in range(h)`（不是 `range(1,h+1)`）→ h=1 只取 `gamma[0]`，即樣本變異數 | `k841_results.json`：`t_stat=10.82 / -7.13 / -1.97`，`harvey_significant=True`；**feed×5 + knowledge×2** | 這是**策略報酬差**的 DM（VT overlay），報酬差序列自相關是常態。整組 t 與 `harvey_significant` 旗標都建立在無 HAC 的變異數上；`t=-1.97` 這格離 2.0 只差 1.5%，補 HAC 後兩個方向都可能翻。 |
+| **P1（已修）** | `experiments/k841/k841_futures_realtime_vt.py`（舊 line 436）`dm_test` | `for k in range(h)` → h=1 只取 gamma0、無正 lag covariance | 舊 results 七格 iid t；兩篇 feed + 一筆 knowledge | HAC-only 七格 t 全變、`|t|>3` 分類 0/7 翻轉；但 timing/cost/session 修復撤回「S1 最佳」並把「夜盤不可行」收窄為「stale daily VIX 不是 real-time signal」。DM estimand 是正平方報酬風險 loss，不是策略報酬差或總效用排名。 |
 | **P2** | `experiments/k1379/k1379.py:359` `dm_test` | **完全沒有 autocovariance 迴圈** —— `gamma0 = mean(d²)-d̄²` 直接當長期變異數 | `k1379_results.json`：`dm_t=-1.19, p=0.234`（A4f vs HAR-RV，null）；**餵 Paper 9 (garch-x-vix) horse race** + feed×4 + knowledge×2 | 「本來就 null 所以安全」是錯的：負自協方差會讓 `\|t\|` 變**大**（k621 前例：acf(1)=-0.18 → `\|t\|` 2.26→3.64）。這支餵的是投稿中的論文 horse race，null 若翻成顯著，Paper 9 的 contribution 敘事要改。**另有第二個 bug**：HLN 因子寫成 `(T+1-2+1/T)/T`，h=1 的正確式是 `(T-1)/T`。 |
 | **P2** | `experiments/k1525_hf_tail_risk_premium_vrp/...py:265` `dm_test` | `for k in range(1, max(1, h))` 空迴圈；且權重 `1-k/h` 在 h=1、k=1 時 =0（雙重退化） | README §4.3：`DM (HLN-corrected): t=-0.85, p=0.397, n=137` —— 「焦點 spec ES+VIX 未過 OOS gate」的核心論據 | 同上，null≠安全。月頻 RV、n=137，補 HAC 後 `\|t\|` 若上升到顯著，整篇的 headline 結論（RDSV 訊號無法轉成 OOS 預測力）就站不住。 |
 | **P2** | `experiments/k1526_hf_tail_risk_premium_vrp/...py:265` `dm_test` | 與 k1525 逐字相同 | 同 k1525（README t=-0.85, p=0.397）；knowledge×1 | k1525 的重跑版。**修 k1525 必須同一輪修這支**，否則兩份 README 會分岔成不同數字。 |
 
 ### 原 triage 判為可能改變已發表結論的：3 個（k1386、k841、k1379）
 
-k1386 已完成重跑，質性結論未變；k841 尚待重跑。原「合計 11 次引用」是 grep 字串命中數，不能解讀為 11 篇文章；K1386 的 6 次命中集中在同一篇。k1379 除 feed 外還餵 Paper 9 的 horse race 表。k1525/k1526 目前只在 knowledge，尚未進 feed，但 k1525 是那條研究線的 headline null —— 修完若翻轉，整個 K 的 verdict 要回溯更正。
+k1386 與 k841 均已完成重跑；兩者 HAC-only 的 `|t|>3` 質性分類都未翻，但 K841 的其他 timing/cost/session 缺陷使舊策略排名與廣泛夜盤結論失效。原「合計 11 次引用」是 grep 字串命中數，不能解讀為 11 篇文章：K1386 的 6 次命中集中在一篇，K841 的 5 次集中在兩篇；兩者 knowledge 也各只有一筆舊條目。k1379 除 feed 外還餵 Paper 9 的 horse race 表。k1525/k1526 目前只在 knowledge，尚未進 feed，但 k1525 是那條研究線的 headline null —— 修完若翻轉，整個 K 的 verdict 要回溯更正。
 
 ### 一個 latent（不必現在修，但要記）
 

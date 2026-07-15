@@ -315,6 +315,26 @@ def test_inline_max_horizon_floor_classification() -> None:
     assert _verdict_of_source(source("max(2, h)"), "dm_test") == H_INCLUSIVE
 
 
+def test_inline_zero_based_horizon_range_classification() -> None:
+    """`range(h)` has gamma0 only at h=1; `range(h+1)` reaches lag one."""
+
+    def source(upper: str) -> str:
+        return (
+            "import numpy as np\n"
+            "def dm_test(loss1, loss2, h=1):\n"
+            "    d = np.asarray(loss1) - np.asarray(loss2)\n"
+            "    gamma = []\n"
+            f"    for lag in range({upper}):\n"
+            "        gamma.append(np.mean((d[lag:] - d.mean()) * (d[:len(d)-lag] - d.mean())))\n"
+            "    variance = (gamma[0] + 2.0 * sum(gamma[1:])) / len(d)\n"
+            "    t_stat = d.mean() / np.sqrt(variance)\n"
+            "    return t_stat\n"
+        )
+
+    assert _verdict_of_source(source("h"), "dm_test") == DEGENERATE
+    assert _verdict_of_source(source("h + 1"), "dm_test") == H_INCLUSIVE
+
+
 def test_k1379_manual_dm_repair_is_retired(
     affected_sites, baseline, retired
 ) -> None:
@@ -382,6 +402,27 @@ def test_k1386_degenerate_dm_repair_is_retired(
     assert 'validate="one_to_one"' in source
     assert "target_is_mask = train_mask & train_mask.shift(-1, fill_value=False)" in source
     assert ".reindex(eval_idx).ffill()" not in source
+
+
+def test_k841_degenerate_dm_repair_is_retired(
+    affected_sites, baseline, retired
+) -> None:
+    """K841 routes strategy risk losses through the canonical HAC helpers."""
+    site = "experiments/k841/k841_futures_realtime_vt.py::dm_test"
+    assert site not in affected_sites
+    assert site not in baseline
+    assert site in retired
+
+    source = (
+        REPO_ROOT / "experiments" / "k841" / "k841_futures_realtime_vt.py"
+    ).read_text(encoding="utf-8")
+    assert "def dm_test(" not in source
+    assert "strategy_dm_test(" in source
+    assert "loss_fn='variance_risk'" in source
+    assert "canonical_dm_test(loss1, loss2, h=h)" in source
+    assert "EXPECTED_YFINANCE_SNAPSHOT_SHA256" in source
+    assert "EXPECTED_ANALYSIS_SLICE_SHA256" in source
+    assert "Saturday-AM" in source
 
 
 def test_manual_variance_regex_regression() -> None:
