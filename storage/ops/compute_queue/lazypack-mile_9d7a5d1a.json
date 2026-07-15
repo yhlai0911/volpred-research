@@ -1,0 +1,51 @@
+{
+  "id": "lazypack-mile_9d7a5d1a",
+  "title": "lazypack render mile_9d7a5d1a",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_9d7a5d1a",
+    "--article-id",
+    "mile_9d7a5d1a",
+    "--plan",
+    "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "大盤急跌時，先分清輪動與清算",
+    "--experiment",
+    "K1427"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-15T21:50:15Z",
+  "started_at": "2026-07-15T21:50:31Z",
+  "completed_at": "2026-07-15T21:54:19Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_9d7a5d1a.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_9d7a5d1a.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/plan.json",
+    "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/1_latest_day.png",
+    "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/2_history_split.png",
+    "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/3_reading_rule.png",
+    "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/render_lazypack.py"
+  ],
+  "output_paths_updated_at": "2026-07-15T21:54:16Z",
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}

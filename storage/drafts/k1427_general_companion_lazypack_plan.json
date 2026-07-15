@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "title": "大盤急跌時，先分清輪動與清算",
+  "subtitle": "跌幅分歧只是第一關，還要看有沒有板塊翻紅",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1427/k1427_results.json",
+      "sha256": "3908f03e96c940c045e246bd4c94136db72d741e4ce451ba0925425b2328d8ae",
+      "label": "K1427 independently reviewed sector-dispersion results"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_latest_day",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "同一個大跌日，板塊方向完全不同",
+      "alt": "最近大跌日大盤與四個板塊的報酬比較",
+      "sources": ["result"],
+      "blocks": [
+        {"kind": "metric", "label": "大盤", "value": {"source": "result", "path": "q4_latest_selloff.episode.spy_cum_ret_on_selloff_days", "format": {"kind": "percent", "digits": 2}}},
+        {"kind": "metric", "label": "科技", "value": {"source": "result", "path": "q4_latest_selloff.episode.sector_cum_ret.XLK", "format": {"kind": "percent", "digits": 2}}},
+        {"kind": "metric", "label": "必需消費", "value": {"source": "result", "path": "q4_latest_selloff.episode.sector_cum_ret.XLP", "format": {"kind": "percent", "digits": 2, "show_plus": true}}},
+        {"kind": "metric", "label": "能源", "value": {"source": "result", "path": "q4_latest_selloff.episode.sector_cum_ret.XLE", "format": {"kind": "percent", "digits": 2}}}
+      ]
+    },
+    {
+      "name": "2_history_split",
+      "info": "results",
+      "style": "professional",
+      "title": "歷史上，真輪動只占少數",
+      "alt": "歷史大跌段落依輪動與清算型態分類",
+      "sources": ["result"],
+      "blocks": [
+        {"kind": "metric", "label": "大跌段落", "value": {"source": "result", "path": "q2_regime_classification.n_episodes", "format": {"kind": "integer", "suffix": " 段"}}},
+        {"kind": "metric", "label": "真輪動", "value": {"source": "result", "path": "q2_regime_classification.n_rotation", "format": {"kind": "integer", "suffix": " 段"}}},
+        {"kind": "metric", "label": "全跌但跌幅不同", "value": {"source": "result", "path": "q2_regime_classification.n_broad_selloff_high_disp", "format": {"kind": "integer", "suffix": " 段"}}},
+        {"kind": "metric", "label": "同步清算", "value": {"source": "result", "path": "q2_regime_classification.n_liquidation", "format": {"kind": "integer", "suffix": " 段"}}}
+      ]
+    },
+    {
+      "name": "3_reading_rule",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "三步拆解輪動故事",
+      "alt": "判讀大跌時資金輪動的三個檢查步驟",
+      "sources": ["result"],
+      "blocks": [
+        {"kind": "text", "heading": "拆開大盤", "body": ["把科技、能源與防禦板塊分開看，先確認方向。"]},
+        {"kind": "text", "heading": "找出翻紅者", "body": ["跌得少仍是下跌；有板塊高於零，才有資金輪入的證據。"]},
+        {"kind": "text", "heading": "拉長整段行情", "body": ["單日翻紅可能很短，累積報酬能減少一天雜訊。"]},
+        {"kind": "metric", "label": "大跌日差距倍數", "value": {"source": "result", "path": "q1_dispersion_selloff_vs_normal.ratio_selloff_over_normal", "format": {"kind": "number", "digits": 2, "suffix": " 倍"}}}
+      ]
+    }
+  ]
+}
