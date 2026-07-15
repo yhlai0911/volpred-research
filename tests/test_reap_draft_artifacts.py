@@ -135,3 +135,20 @@ def test_deletion_is_never_committed(repo):
     assert scan["held"][0]["reason"] == "deletion_not_owned"
     # Still in HEAD: the reaper reported the deletion, it did not ratify it.
     assert _git(root, "cat-file", "-e", "HEAD:storage/drafts/K8_general_draft.md").returncode == 0
+
+
+def test_draft_collector_refuses_late_prestaged_collision(repo):
+    mod, root = repo
+    target = root / "storage" / "drafts" / "K10_general_draft.md"
+    _write(target, "first complete draft", mtime=OLD)
+    entries = mod.scan_draft_artifacts()["collectable"]
+    assert entries
+
+    _git(root, "add", "storage/drafts/K10_general_draft.md")
+    staged = _git(root, "show", ":storage/drafts/K10_general_draft.md").stdout
+    _write(target, "later working bytes", mtime=OLD)
+    out = mod.collect_draft_artifacts(entries)
+    assert out[0]["committed"] is False
+    assert out[0]["err"] == "pre_staged_collision"
+    assert _git(root, "show", ":storage/drafts/K10_general_draft.md").stdout == staged
+    assert target.read_text(encoding="utf-8") == "later working bytes"

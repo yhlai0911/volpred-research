@@ -41,8 +41,17 @@ git_auth() {
 
 echo "=== git-push-backup $(ts) ===" >> "$LOG"
 
+# Freeze the exact object this fire audits and may push.  refs/heads/main may
+# legitimately advance under the canonical writer lease while network/audit
+# work is in flight; a later commit belongs to the next backup fire.
+PUSH_SHA=$(git rev-parse refs/heads/main 2>/dev/null)
+if [ -z "$PUSH_SHA" ]; then
+  echo "[$(ts)] cannot resolve refs/heads/main — NOT pushing" >> "$LOG"
+  exit 1
+fi
+
 # 1) 只在有未 push commit 時才動作
-ahead=$(git rev-list --count origin/main..main 2>/dev/null)
+ahead=$(git rev-list --count "origin/main..$PUSH_SHA" 2>/dev/null)
 if [ -z "$ahead" ] || [ "$ahead" = "0" ]; then
   echo "[$(ts)] nothing to push (ahead=${ahead:-?})" >> "$LOG"
   exit 0
@@ -50,7 +59,7 @@ fi
 
 # 2) fetch 確認沒有未知 push 源造成分岔（雲端已關，理論上永遠 0）
 git_auth fetch origin main >> "$LOG" 2>&1
-behind=$(git rev-list --count main..origin/main 2>/dev/null)
+behind=$(git rev-list --count "$PUSH_SHA..origin/main" 2>/dev/null)
 if [ -n "$behind" ] && [ "$behind" != "0" ]; then
   # 偵測到分岔 → 不強推，發 alert 讓主線程處理（絕不 force / 絕不自動複雜 merge）
   echo "[$(ts)] WARN: remote ahead by $behind — divergence, NOT pushing" >> "$LOG"
@@ -79,7 +88,7 @@ fi
 # 假陽性 hold + 假的 P1 修復任務。
 AUDIT_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 AUDIT_OUT=$("$UV_BIN" run python "$REPO/scripts/audit_silent_fallbacks.py" --strict \
-  --rev HEAD \
+  --rev "$PUSH_SHA" \
   --baseline "$REPO/storage/qa/silent_fallback_baseline.json" 2>&1)
 AUDIT_RC=$?
 AUDIT_FINISHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -123,8 +132,8 @@ if [ "$AUDIT_RC" -eq 0 ] && [ "${NEW_COUNT:-0}" = "0" ]; then
 fi
 
 # 3) fast-forward push
-if git_auth push origin main >> "$LOG" 2>&1; then
-  echo "[$(ts)] pushed ${ahead} commit(s) OK" >> "$LOG"
+if git_auth push origin "${PUSH_SHA}:refs/heads/main" >> "$LOG" 2>&1; then
+  echo "[$(ts)] pushed ${ahead} commit(s) OK through ${PUSH_SHA}" >> "$LOG"
   exit 0
 else
   echo "[$(ts)] PUSH FAILED" >> "$LOG"

@@ -12,7 +12,7 @@ def _run(*args: str, cwd: Path):
 def test_create_and_restore_rollback_point(tmp_path: Path, monkeypatch):
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run("git", "init", cwd=repo)
+    _run("git", "init", "-b", "main", cwd=repo)
     _run("git", "config", "user.email", "test@example.com", cwd=repo)
     _run("git", "config", "user.name", "Test User", cwd=repo)
 
@@ -53,7 +53,7 @@ def test_create_and_restore_rollback_point(tmp_path: Path, monkeypatch):
 def test_create_rollback_point_excludes_rollback_archives_from_storage_snapshot(tmp_path: Path, monkeypatch):
     repo = tmp_path / "repo"
     repo.mkdir()
-    _run("git", "init", cwd=repo)
+    _run("git", "init", "-b", "main", cwd=repo)
     _run("git", "config", "user.email", "test@example.com", cwd=repo)
     _run("git", "config", "user.name", "Test User", cwd=repo)
 

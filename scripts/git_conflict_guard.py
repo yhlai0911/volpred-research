@@ -1,26 +1,17 @@
 #!/usr/bin/env python3
-"""AUTO_MERGE / conflict-marker watchdog (2026-06-28).
+"""Read-first AUTO_MERGE / conflict-marker watchdog.
 
-Root cause (docs/error_log.md 2026-06-28): two dispatchers write the same git
-branch concurrently — the Claude hourly LaunchAgent and the always-on
-codex_loop.sh — so a 3-way merge (or codex's internal git) can leave an orphaned
-`.git/AUTO_MERGE` (no `.git/MERGE_HEAD`) and inject `<<<<<<<` conflict markers
-into constantly-rewritten state files (feed.json / next_tasks.json /
-work_log.json). Those files are then read by the live site + dispatcher =
-corruption.
+The preserved 2026-06-28 AUTO_MERGE tree contains Git's ``Updated upstream`` /
+``Stashed changes`` markers: the direct producer was an unresolved
+``stash pop/apply`` conflict.  Multiple writers sharing one checkout were the
+structural condition that made the surrounding stash transaction unsafe.
 
-This guard is the deterministic backstop. It is fail-OPEN (never aborts the
-caller) and idempotent (no-op on a clean tree):
-
-  1. Re-assert `merge.ours.driver=true` so the `.gitattributes merge=ours`
-     protection on canonical state files is always active.
-  2. If `.git/AUTO_MERGE` exists but `.git/MERGE_HEAD` does not → orphaned
-     half-merge: `git reset -q` (unstage) then remove `.git/AUTO_MERGE`.
-  3. Scan tracked files for conflict markers (`git diff --check` +
-     marker grep). Any tracked file carrying markers → restore the canonical
-     HEAD blob (`git checkout HEAD -- <file>`).
-  4. If anything was cleaned, emit a warn alert (visibility) and print a
-     summary. Exit 0 always (a guard must not break the dispatch it guards).
+This guard is deliberately *not* a repair writer.  It never resets the shared
+index and never checks out HEAD over an author's working bytes.  It may remove
+only a provably empty orphan AUTO_MERGE pseudo-ref: no MERGE_HEAD/rebase, no
+unmerged index entries, and no tracked conflict markers.  That tiny mutation is
+performed under the repository-wide Git-writer lease.  Anything ambiguous is
+left byte-for-byte intact and reported for investigation.
 
 Wire-in: run at the START of cron_hourly_dispatch.sh (every hour, before the
 Claude/Codex dispatch) and standalone via cron. Safe to run anytime.
@@ -33,12 +24,28 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
 
+# This script is copied into hermetic incident probes whose Git status is itself
+# evidence. Dynamic-loading the owner must not create an untracked __pycache__
+# and make a second read-only guard fire look dirty.
+sys.dont_write_bytecode = True
+
 ROOT = Path(__file__).resolve().parents[1]
-GIT_DIR = ROOT / ".git"
+_OWNER_PATH = ROOT / "src/volpred/ops/git_writer_lock.py"
+_SPEC = importlib.util.spec_from_file_location("_volpred_guard_git_lock", _OWNER_PATH)
+if _SPEC is None or _SPEC.loader is None:  # pragma: no cover - corrupt deploy
+    raise SystemExit(f"cannot load Git writer lock owner: {_OWNER_PATH}")
+_OWNER = importlib.util.module_from_spec(_SPEC)
+sys.modules[_SPEC.name] = _OWNER
+_SPEC.loader.exec_module(_OWNER)
+GitWriterLockError = _OWNER.GitWriterLockError
+git_writer_lock = _OWNER.git_writer_lock
+git_writer_subprocess_kwargs = _OWNER.git_writer_subprocess_kwargs
+
 CONFLICT_MARKERS = ("<<<<<<< ", "=======", ">>>>>>> ")
 
 
@@ -48,6 +55,7 @@ def _run(args: list[str], check: bool = False) -> subprocess.CompletedProcess:
         capture_output=True,
         text=True,
         check=check,
+        **git_writer_subprocess_kwargs(),
     )
 
 
@@ -55,22 +63,22 @@ def _log(msg: str) -> None:
     print(f"[git-conflict-guard] {msg}", flush=True)
 
 
-def _ensure_ours_driver() -> None:
-    """Idempotently assert the local `ours` merge driver the .gitattributes
-    `merge=ours` rules depend on. Without it those rules silently no-op."""
-    try:
-        cur = _run(["config", "--get", "merge.ours.driver"]).stdout.strip()
-        if cur != "true":
-            _run(["config", "merge.ours.driver", "true"])
-            _log("set merge.ours.driver=true")
-    except Exception as exc:  # noqa: BLE001 - guard must not raise
-        _log(f"WARN could not assert merge.ours.driver: {exc}")
+def _git_dir() -> Path | None:
+    probe = _run(["rev-parse", "--path-format=absolute", "--git-dir"])
+    value = (probe.stdout or "").strip()
+    if probe.returncode != 0 or not value:
+        return None
+    path = Path(value)
+    return path if path.is_absolute() else ROOT / path
 
 
 def _orphaned_automerge() -> bool:
-    automerge = GIT_DIR / "AUTO_MERGE"
-    merge_head = GIT_DIR / "MERGE_HEAD"
-    rebase = (GIT_DIR / "rebase-merge").exists() or (GIT_DIR / "rebase-apply").exists()
+    git_dir = _git_dir()
+    if git_dir is None:
+        return False
+    automerge = git_dir / "AUTO_MERGE"
+    merge_head = git_dir / "MERGE_HEAD"
+    rebase = (git_dir / "rebase-merge").exists() or (git_dir / "rebase-apply").exists()
     # AUTO_MERGE without MERGE_HEAD and not mid-rebase = an interrupted/aborted
     # 3-way merge that git never finished — the corruption source.
     return automerge.exists() and not merge_head.exists() and not rebase
@@ -97,28 +105,25 @@ def _files_with_markers() -> list[str]:
     return sorted(flagged)
 
 
-def _send_alert(cleaned: list[str], orphan: bool) -> None:
-    # 沒有任何 marker 檔被還原 = guard 清掉一個空的 half-merge state，無資料受污染。
-    # 這是自我修復的 no-op，不佔用老闆的收件匣。
-    if not cleaned:
-        _log("orphan-only cleanup (0 marker files) — no owner alert")
+def _send_alert(marker_files: list[str], orphan: bool, *, cleared: bool) -> None:
+    if cleared and not marker_files:
+        _log("empty orphan-only cleanup — no owner alert")
         return
     try:
         body = "\n".join(
             [
                 "## 觸發條件",
                 f"- git_conflict_guard 偵測到 {'orphaned AUTO_MERGE + ' if orphan else ''}"
-                f"{len(cleaned)} 個 conflict-marker 檔",
-                "- 受影響檔案：" + ", ".join(cleaned),
+                f"{len(marker_files)} 個 conflict-marker 檔",
+                "- 受影響檔案：" + (", ".join(marker_files) or "(無 marker；index 狀態不明)"),
                 "",
                 "## 影響",
                 "- 這些是 live 站 + dispatcher 讀的 canonical 狀態檔；未清理會被下一次 commit "
                 "永久污染。",
                 "",
-                "## 已自動處理",
-                "- 已還原每個受污染檔的 HEAD canonical 版本，平台運作未中斷，老闆無須動作。",
-                "- 結構根因（雙 dispatcher 並發寫同分支）由任務池的 single-writer / commit-lock "
-                "任務負責收斂；本 guard 只做止血。",
+                "## 保全處理",
+                "- guard 沒有 reset index，也沒有 checkout/覆寫任何檔案；現場 bytes 完整保留。",
+                "- single-writer transaction lock 防止新的 writer 與現場交錯；請由作者檢視後收斂。",
             ]
         )
         tmp = ROOT / "storage" / "logs" / "_git_guard_alert.md"
@@ -128,7 +133,7 @@ def _send_alert(cleaned: list[str], orphan: bool) -> None:
             [
                 "uv", "run", "volpred", "ops", "send-alert",
                 "--level", "warn",
-                "--title", f"git_conflict_guard 自動清理 {len(cleaned)} 衝突檔",
+                "--title", f"git_conflict_guard 保留 {len(marker_files)} 個衝突檔待查",
                 "--body-md", str(tmp), "--force",
             ],
             cwd=str(ROOT), capture_output=True, text=True,
@@ -144,11 +149,9 @@ def main() -> int:
     ap.add_argument("--quiet", action="store_true", help="terse output")
     args = ap.parse_args()
 
-    if not GIT_DIR.exists():
-        _log("no .git dir — skip")
+    if _git_dir() is None:
+        _log("no git dir — skip")
         return 0
-
-    _ensure_ours_driver()
 
     orphan = _orphaned_automerge()
     marker_files = _files_with_markers()
@@ -166,27 +169,35 @@ def main() -> int:
         _log("--dry-run: not mutating")
         return 0
 
-    # 1) Clear orphaned half-merge state.
-    if orphan:
-        _run(["reset", "-q"])  # unstage any conflict-staged entries
-        try:
-            (GIT_DIR / "AUTO_MERGE").unlink(missing_ok=True)
-            _log("removed orphaned .git/AUTO_MERGE")
-        except Exception as exc:  # noqa: BLE001
-            _log(f"WARN could not remove AUTO_MERGE: {exc}")
+    cleared = False
+    has_unmerged = False
+    try:
+        with git_writer_lock(ROOT, actor="git-conflict-guard", timeout_s=5):
+            # Recheck after acquiring: the producer may have resolved the state
+            # while this watchdog waited.
+            orphan = _orphaned_automerge()
+            marker_files = _files_with_markers()
+            unmerged = _run(["ls-files", "-u"])
+            has_unmerged = unmerged.returncode != 0 or bool(unmerged.stdout.strip())
+            if orphan and not marker_files and not has_unmerged:
+                git_dir = _git_dir()
+                if git_dir is not None:
+                    (git_dir / "AUTO_MERGE").unlink(missing_ok=True)
+                    cleared = True
+                    _log("removed provably empty orphan AUTO_MERGE")
+            elif orphan or marker_files or has_unmerged:
+                _log(
+                    "PRESERVED ambiguous conflict state — no reset/checkout; "
+                    f"markers={len(marker_files)} unmerged={has_unmerged}"
+                )
+    except (GitWriterLockError, OSError) as exc:
+        _log(f"WARN could not obtain safe cleanup lease; preserved state: {exc}")
 
-    # 2) Restore canonical HEAD blob for every marker-laden tracked file.
-    cleaned: list[str] = []
-    for path in marker_files:
-        res = _run(["checkout", "HEAD", "--", path])
-        if res.returncode == 0:
-            cleaned.append(path)
-            _log(f"restored canonical: {path}")
-        else:
-            _log(f"WARN could not restore {path}: {res.stderr.strip()[:120]}")
-
-    _send_alert(cleaned, orphan)
-    _log(f"DONE — cleaned {len(cleaned)} file(s), orphan_cleared={orphan}")
+    if not orphan and not marker_files and not has_unmerged:
+        _log("state resolved before cleanup lease; nothing to report")
+        return 0
+    _send_alert(marker_files, orphan, cleared=cleared)
+    _log(f"DONE — preserved {len(marker_files)} marker file(s), orphan_cleared={cleared}")
     return 0
 
 

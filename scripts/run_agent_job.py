@@ -39,7 +39,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from scripts.dispatch_supervisor import failure_class, procutil  # noqa: E402
+from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CLAUDE_BIN = os.environ.get("VOLPRED_CLAUDE_BIN", "claude")
@@ -154,7 +156,11 @@ def main() -> int:
     ap.add_argument("--brief-file", required=True, help="Path to the agent brief (markdown).")
     ap.add_argument("--model", default="claude-opus-4-8")
     ap.add_argument("--effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
-    ap.add_argument("--cwd", default=None, help="Working dir (e.g. a git worktree). Defaults to repo root.")
+    ap.add_argument(
+        "--cwd",
+        required=True,
+        help="Registered non-main git worktree where the agent is allowed to write.",
+    )
     ap.add_argument(
         "--result-artifact",
         default=None,
@@ -198,11 +204,17 @@ def main() -> int:
         return 2
     brief = brief_path.read_text()
 
-    workdir = Path(args.cwd) if args.cwd else ROOT
+    workdir = Path(args.cwd)
     if not workdir.is_absolute():
         workdir = ROOT / workdir
     if not workdir.exists():
         print(f"[run_agent_job] cwd not found: {workdir}", file=sys.stderr)
+        return 2
+    if not is_registered_linked_worktree(ROOT, workdir):
+        print(
+            f"[run_agent_job] refusing non-worktree/main cwd: {workdir}",
+            file=sys.stderr,
+        )
         return 2
 
     result_artifact = None

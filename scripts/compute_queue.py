@@ -59,6 +59,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
+from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
 
 QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
 LOCK_FILE = QUEUE_DIR / ".worker.lock"
@@ -388,15 +389,26 @@ def enqueue_agent(args) -> int:
     # the job cannot possibly run — fail here, where a human is watching, instead of
     # 60 minutes later inside the worker (K1684, 2026-07-12: enqueued against a
     # worktree that orphan-recovery had already removed → instant exit 2, work lost).
-    workdir = ROOT
-    if args.cwd:
-        cwd_path = Path(args.cwd)
-        if not cwd_path.is_absolute():
-            cwd_path = ROOT / cwd_path
-        if not cwd_path.is_dir():
-            print(f"error: --cwd does not exist: {cwd_path}", file=sys.stderr)
-            return 2
-        workdir = cwd_path
+    if not args.cwd:
+        print(
+            "error: enqueue-agent requires --cwd pointing to a registered linked worktree; "
+            "the shared main checkout is not an agent workspace",
+            file=sys.stderr,
+        )
+        return 2
+    cwd_path = Path(args.cwd)
+    if not cwd_path.is_absolute():
+        cwd_path = ROOT / cwd_path
+    if not cwd_path.is_dir():
+        print(f"error: --cwd does not exist: {cwd_path}", file=sys.stderr)
+        return 2
+    if not is_registered_linked_worktree(ROOT, cwd_path):
+        print(
+            f"error: --cwd must be a registered non-main linked worktree: {cwd_path}",
+            file=sys.stderr,
+        )
+        return 2
+    workdir = cwd_path.resolve()
 
     job_id = args.id or f"agent-{brief_path.stem}-{uuid.uuid4().hex[:6]}"
 
@@ -431,8 +443,7 @@ def enqueue_agent(args) -> int:
         "--model", args.model,
         "--effort", args.effort,
     ]
-    if args.cwd:
-        script_args += ["--cwd", args.cwd]
+    script_args += ["--cwd", str(workdir)]
     if artifact_path is not None:
         script_args += ["--result-artifact", str(artifact_path)]
     script_args += ["--job-metadata", str(metadata_path)]
@@ -919,7 +930,11 @@ def main():
     ea.add_argument("--brief-file", required=True, help="Agent brief markdown (write it with the Write tool first).")
     ea.add_argument("--model", default="claude-opus-4-8")
     ea.add_argument("--effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
-    ea.add_argument("--cwd", help="Working dir for the agent, e.g. a git worktree path.")
+    ea.add_argument(
+        "--cwd",
+        required=True,
+        help="Registered non-main git worktree where the agent is allowed to write.",
+    )
     ea.add_argument("--result-artifact")
     ea.add_argument("--followup-brief")
     ea.add_argument("--followup-task-type")

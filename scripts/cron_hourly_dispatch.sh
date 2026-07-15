@@ -84,6 +84,24 @@ mkdir -p "$(dirname "$HOURLY_LOG_PATH")"
 exec >> "$HOURLY_LOG_PATH" 2>&1
 cd "$REPO_ROOT" || exit 1
 
+# Rollback-only legacy dispatcher.  If it is ever re-enabled, its entire
+# main-checkout lifetime is a single Git transaction so it cannot race the
+# supervisor/codex/reaper writers.  The inner invocation inherits the validated
+# lease token; no short-lived child pretends to hold a shell lock.
+if ! "$UV_BIN" run python "$REPO_ROOT/scripts/git_writer_lock.py" \
+    validate-inherited --repo "$REPO_ROOT" --actor "legacy-hourly-child" \
+    >/dev/null 2>&1; then
+  exec "$UV_BIN" run python "$REPO_ROOT/scripts/git_writer_lock.py" run \
+      --repo "$REPO_ROOT" \
+      --actor "legacy-hourly-dispatch" \
+      --timeout 60 \
+      -- /bin/bash "$REPO_ROOT/scripts/cron_hourly_dispatch.sh" "$@"
+fi
+if [ "$(/usr/bin/git -C "$REPO_ROOT" symbolic-ref -q HEAD 2>/dev/null || true)" != "refs/heads/main" ]; then
+  echo "[git-writer-lock] BLOCKED: legacy dispatch requires canonical symbolic main" >&2
+  exit 2
+fi
+
 # Raise file-descriptor SOFT limit. LaunchAgent-spawned processes inherit
 # launchd's default (soft 256 / hard unlimited — `launchctl limit maxfiles`)
 # and DO NOT source the login profile, so claude -p crashes instantly with

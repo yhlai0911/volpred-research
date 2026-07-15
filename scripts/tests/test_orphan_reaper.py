@@ -210,7 +210,7 @@ def _repo_git(root: Path, *args: str, check: bool = True) -> subprocess.Complete
 
 def _init_git_repo(root: Path) -> None:
     root.mkdir(parents=True)
-    _repo_git(root, "init", "-q")
+    _repo_git(root, "init", "-q", "-b", "main")
     _repo_git(root, "config", "user.email", "reaper@test.local")
     _repo_git(root, "config", "user.name", "orphan-reaper-test")
     _repo_git(root, "config", "commit.gpgsign", "false")

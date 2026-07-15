@@ -32,6 +32,7 @@ import logging
 import os
 import subprocess
 import sys
+import tempfile
 import traceback
 from datetime import datetime
 from pathlib import Path
@@ -199,16 +200,56 @@ def _slot_log_path(base: Path, *, slot_id: str, job_id: str) -> Path:
     return base.with_name(f"{base.stem}.{slot_id}.{job_id[:8]}{suffix}")
 
 
-def _slot_prompt(prompt: str, *, slot_id: str, job_id: str) -> str:
-    """Inject the stable namespace that every nested worktree must carry."""
+def _slot_workdir(
+    log_path: Path, *, slot_id: str, job_id: str, repo_root: Path
+) -> Path:
+    """Create a non-repository cwd so an agent cannot mutate main by default."""
+    prefix = f"dispatch-{slot_id}-{job_id[:8]}"
+    parent = log_path.parent
+    root = (
+        parent.parent / "run" / "dispatch_workdirs"
+        if parent.name == "logs"
+        else parent / ".dispatch-workdirs"
+    )
+    resolved_repo = repo_root.resolve()
+    candidate = (root / prefix).resolve()
+    if candidate == resolved_repo or resolved_repo in candidate.parents:
+        root = Path(tempfile.gettempdir()) / "volpred-dispatch-workdirs" / resolved_repo.name
+        candidate = (root / prefix).resolve()
+    path = candidate
+    path.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(path, 0o700)
+    probe = subprocess.run(
+        ["/usr/bin/git", "-C", str(path), "rev-parse", "--show-toplevel"],
+        capture_output=True, text=True, timeout=5, check=False,
+    )
+    if probe.returncode == 0:
+        raise RuntimeError(f"dispatch scratch cwd unexpectedly belongs to Git: {path}")
+    return path
+
+
+def _slot_prompt(
+    prompt: str,
+    *,
+    slot_id: str,
+    job_id: str,
+    workdir: Path,
+    repo_root: Path,
+) -> str:
+    """Inject the stable namespace and non-main launch boundary."""
     prefix = f"dispatch-{slot_id}-{job_id[:8]}"
     return (
         "[Supervisor multi-slot context]\n"
         f"slot_id={slot_id}; job_id={job_id}; worktree_prefix={prefix}.\n"
-        "此段隔離規則優先於後文 PHASE-Z：任何會改 repo 的 task 都必須先建立"
-        "名稱含 worktree_prefix 的 git worktree，在該 worktree 完成與 commit；"
-        "不得直接編輯共享 main checkout，也不得移除或操作其他 slot 的 worktree。"
-        "task-pool claim/complete 等有 fcntl 的 control-plane CLI 可在 canonical root 執行。\n\n"
+        f"launcher_cwd={workdir}（刻意不是 Git repo）；canonical_root={repo_root}.\n"
+        "此段規則優先於後文 PHASE-Z：先從 canonical_root 讀 AGENTS.md 與 handoff。"
+        "inline task 可用絕對路徑編輯 canonical_root，但禁止 cd 回 shared checkout 後裸跑"
+        "任何 Git mutation；本班 canonical 變更由 cohort-drained PHASE-Z 單一提交。"
+        "若 task routing 明定 worktree，才用 canonical git_writer_lock.py run 建立名稱含"
+        "worktree_prefix 的 registered linked worktree，並在本班結束前透過正式"
+        "merge_worktree.sh 完整整合；不得留下未合併 branch/worktree。"
+        "task-pool claim/complete 必須用 canonical_root 的絕對 script path，讓 fcntl control"
+        "plane 寫 canonical queue。最後依原 PHASE Z 只留 fire receipt，不自行 git add/commit。\n\n"
         + prompt
     )
 
@@ -250,6 +291,7 @@ async def _run_reserved_fire(
     log_path: Path,
     state_path: Path,
     repo_root: Path,
+    workdir: Path | None = None,
 ) -> dict[str, Any]:
     """Run one already-admitted logical fire and close its cohort safely."""
     phase_z_outcome: dict | None = None
@@ -262,6 +304,7 @@ async def _run_reserved_fire(
             scheduled_for=scheduled_for, fire_reason=fire_reason,
             log_path=log_path, state_path=state_path,
             job_id=job_id, slot_id=slot_id,
+            workdir=workdir,
         )
         LOG.info(
             "worker returned job_id=%s slot=%s outcome=%s attempts=%d duration=%.1fs",
@@ -704,7 +747,21 @@ async def _tick_once(
     job_id = lease.job_id
     slot_id = f"slot-{lease.slot_id}"
     job_log_path = _slot_log_path(log_path, slot_id=slot_id, job_id=job_id)
-    prompt = _slot_prompt(prompt, slot_id=slot_id, job_id=job_id)
+    try:
+        workdir = _slot_workdir(
+            job_log_path, slot_id=slot_id, job_id=job_id, repo_root=repo_root
+        )
+    except (OSError, subprocess.TimeoutExpired, RuntimeError) as exc:
+        state.release_reservation(job_id=job_id, path=state_path)
+        LOG.error("cannot create repo-external dispatch cwd job_id=%s: %s", job_id, exc)
+        return {"action": "skip", "reason": "scratch_workdir_error", "error": str(exc)}
+    prompt = _slot_prompt(
+        prompt,
+        slot_id=slot_id,
+        job_id=job_id,
+        workdir=workdir,
+        repo_root=repo_root,
+    )
     LOG.info(
         "firing worker job_id=%s slot=%s prev_scheduled=%s log=%s",
         job_id, slot_id, prev_fire.isoformat(), job_log_path,
@@ -714,8 +771,8 @@ async def _tick_once(
     # of worker outcome — success / hang / failure AND the case where the worker
     # call itself raises (Codex review #2): a crashed worker is exactly when the
     # tree is most likely left dirty, so PHASE-Z lives in `finally`. The
-    # dispatched agent's own PHASE Z is prompt-discretion (~90% reliable), so
-    # this wrapper-level commit captures whatever it left. Run in a thread (git
+    # dispatched agent now leaves a receipt and never runs Git; this owner
+    # captures only its attributed paths. Run in a thread (git
     # subprocess) so the event loop stays responsive; a git hiccup is logged,
     # never crashes the tick (run_phase_z is itself no-raise, belt-and-suspenders
     # here too). If the worker raised, PHASE-Z still runs, then the exception
@@ -724,6 +781,7 @@ async def _tick_once(
         job_id=job_id, cohort_id=lease.cohort_id, slot_id=slot_id, prompt=prompt,
         scheduled_for=prev_fire.isoformat(), fire_reason=fire_reason,
         log_path=job_log_path, state_path=state_path, repo_root=repo_root,
+        workdir=workdir,
     )
     if not background:
         return await coro

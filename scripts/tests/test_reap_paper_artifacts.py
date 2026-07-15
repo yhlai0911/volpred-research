@@ -29,7 +29,7 @@ def _git(cwd: Path, *args: str) -> None:
 
 @pytest.fixture()
 def fake_repo(tmp_path: Path, monkeypatch) -> Path:
-    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "init", "-q", "-b", "main")
     # Identity belongs to the throwaway repo, not to _git()'s env: the code under
     # test shells out to `git commit` with the ambient environment, which on a CI
     # runner carries no user.name/user.email. Without this the production commit
@@ -85,3 +85,24 @@ def test_pdf_with_dirty_tex_is_held(fake_repo: Path) -> None:
     held = [e for e in scan["held"] if e["path"] == "paper/demo/main.pdf"]
     assert held and held[0]["reason"].startswith("sources_dirty")
     assert not any(e["path"].endswith(".pdf") for e in scan["collectable"])
+
+
+def test_paper_collector_refuses_late_prestaged_collision(fake_repo: Path) -> None:
+    target = fake_repo / "paper" / "demo" / "main.pdf"
+    target.write_bytes(b"%PDF-rebuilt")
+    scan = reap.scan_paper_build_artifacts()
+    entries = [e for e in scan["collectable"] if e["path"].endswith("main.pdf")]
+    assert entries
+
+    _git(fake_repo, "add", "paper/demo/main.pdf")
+    staged = subprocess.run(
+        ["git", "show", ":paper/demo/main.pdf"], cwd=fake_repo, capture_output=True
+    ).stdout
+    target.write_bytes(b"%PDF-later-working")
+    out = reap.collect_paper_artifacts(entries)
+    assert out[0]["committed"] is False
+    assert out[0]["err"] == "pre_staged_collision"
+    assert subprocess.run(
+        ["git", "show", ":paper/demo/main.pdf"], cwd=fake_repo, capture_output=True
+    ).stdout == staged
+    assert target.read_bytes() == b"%PDF-later-working"

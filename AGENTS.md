@@ -302,6 +302,9 @@ complete/release 自動退回 pending**。所以 VSCode 關掉或 crash 不會�
 ### Commit 慣例
 
 - 改動 commit 訊息開頭加 `[codex]` 與 Claude 區分
+- 共用 main checkout 禁止裸跑 `git add` / `git commit`；完整交易一律走：
+  `uv run python scripts/git_writer_lock.py commit --actor <owner> --message '<ASCII message>' -- <exact paths>`
+  （worktree 整合走 `bash scripts/merge_worktree.sh`，它會持有同一把 common-dir lock）
 - **不要 `git push`** — 由用戶或 Claude 主線程統一推
 
 ---

@@ -9,10 +9,12 @@
 # 與 hourly-dispatch 共用 task pool 契約（claim/complete），先到先做、互不重工。
 set -u
 exec >> /Users/yhlai0911/.volpred/logs/telegram_responder.log 2>&1
-cd /Users/yhlai0911/volpred-research || exit 1
+REPO_ROOT=/Users/yhlai0911/volpred-research
+cd "$REPO_ROOT" || exit 1
 
 CLAUDE_BIN="${CLAUDE_BIN:-/Users/yhlai0911/.local/bin/claude}"
 LOCK_DIR="/Users/yhlai0911/.volpred/run/telegram_responder.lock"
+RESPONDER_WORKDIR="/Users/yhlai0911/.volpred/run/telegram_responder_workdir"
 CAP_SEC=900  # 15 min hard cap — TG 是即時聊天，答不完的部分留 hourly 接手
 # Model 政策（config/models.json single source of truth）：這是 boss-facing 通道，
 # 回答品質優先於 token — 與 hourly-dispatch 同款 opus primary；owner 若要降速換快，
@@ -23,7 +25,19 @@ RESPONDER_MODEL="${TELEGRAM_RESPONDER_MODEL:-claude-opus-4-8}"
 # 調 low|medium|high|xhigh|max（CLI fail-opens 亂值 → 警告後用 default，安全）。
 RESPONDER_EFFORT="${TELEGRAM_RESPONDER_EFFORT:-high}"
 
-mkdir -p "$(dirname "$LOCK_DIR")"
+mkdir -p "$(dirname "$LOCK_DIR")" "$RESPONDER_WORKDIR"
+chmod 700 "$RESPONDER_WORKDIR"
+RESPONDER_REAL="$(cd "$RESPONDER_WORKDIR" && pwd -P)" || exit 1
+REPO_REAL="$(cd "$REPO_ROOT" && pwd -P)" || exit 1
+case "$RESPONDER_REAL" in
+    "$REPO_REAL"|"$REPO_REAL"/*)
+        echo "[FATAL] responder scratch resolves inside canonical repo: $RESPONDER_REAL"
+        exit 1 ;;
+esac
+if /usr/bin/git -C "$RESPONDER_REAL" rev-parse --show-toplevel >/dev/null 2>&1; then
+    echo "[FATAL] responder scratch belongs to a Git working tree: $RESPONDER_REAL"
+    exit 1
+fi
 if ! mkdir "$LOCK_DIR" 2>/dev/null; then
     LOCK_PID=$(cat "$LOCK_DIR/pid" 2>/dev/null || echo "")
     if [ -n "$LOCK_PID" ] && kill -0 "$LOCK_PID" 2>/dev/null; then
@@ -42,24 +56,28 @@ echo "=== telegram responder start $(date '+%F %T') ==="
 PROMPT='你是 VolPred 平台的 Telegram 即時回應者。唯一任務：處理老闆經 Telegram 傳來的待辦訊息，然後結束。
 
 流程（嚴格照做）：
-0. 先 `uv run python scripts/telegram_memory.py list` —— Telegram 專用長期記憶（老闆過去透過 Telegram 交代的長期偏好/指示）。處理任務時遵守這些偏好。若本次老闆訊息是「記住：…」「以後都…」類長期指示，用 `uv run python scripts/telegram_memory.py add "…"` 寫入後再回覆確認。
-1. 讀 storage/next_tasks.json，找出全部 status=="pending" 且 task_type=="telegram_reply" 的任務（可能多筆，全部處理）。沒有 → 直接結束，不做別的事。
-2. 逐筆：`uv run python scripts/task_pool_claim.py claim --id <id> --owner telegram-responder` → 完成任務要求的實事（查數據就真查、要修就真修小事；大工程不要在這裡做 — 先回覆老闆「已排入任務池，預計何時」並把後續工作留給 hourly dispatch，可用 refill 或直接 append 對應任務）→ 用 `uv run volpred ops telegram-send --text "..."` 回覆老闆 → `uv run python scripts/task_pool_claim.py complete --id <id>`。
+0. launcher cwd 是 repo 外的隔離目錄。canonical root 固定 `/Users/yhlai0911/volpred-research`；先讀該處 AGENTS.md。用 `uv --project /Users/yhlai0911/volpred-research run python /Users/yhlai0911/volpred-research/scripts/telegram_memory.py list` 讀 Telegram 長期記憶。若本次是「記住：…」類長期指示，用同一絕對入口的 `add` 寫入。
+1. 從 canonical root 讀 storage/next_tasks.json，找出全部 status=="pending" 且 task_type=="telegram_reply" 的任務（可能多筆，全部處理）。沒有 → 直接結束，不做別的事。
+2. 逐筆用 canonical 絕對入口執行 task_pool_claim.py claim/complete（`uv --project /Users/yhlai0911/volpred-research run python /Users/yhlai0911/volpred-research/scripts/task_pool_claim.py ...`）→ 查詢/診斷可直接完成；任何 repo 程式、文件、Git/index/ref 修改一律不在 responder 做，改用正式 task-pool writer建立後續任務交 hourly dispatch（禁止直接 append JSON），並回覆老闆「已排入任務池」→ 用 `uv --project /Users/yhlai0911/volpred-research run volpred ops telegram-send --text "..."` 回覆老闆。
 3. 回覆風格：短、直接、口語 — 這是即時聊天。結論先講；細節一行帶過或說在哪。禁止長報告。
 4. 研究誠實原則適用：數字必須真查真算，不確定就說不確定。時間戳用 `TZ=Asia/Taipei date`。
-5. 全部 drain 完就結束。不進 ops loop、不派 agent、不碰 feed/paper。15 分鐘內收尾。'
+5. 全部 drain 完就結束。不進 ops loop、不派 agent、不碰 feed/paper、不執行任何 git mutation。15 分鐘內收尾。'
 
 pending_count() {
-    /opt/homebrew/bin/uv run --no-sync python -c "
+    (cd "$REPO_ROOT" && /opt/homebrew/bin/uv run --no-sync python -c "
 import json
 tasks = json.load(open('storage/next_tasks.json'))
-print(sum(1 for t in tasks if t.get('task_type')=='telegram_reply' and t.get('status')=='pending'))" 2>/dev/null || echo 0
+print(sum(1 for t in tasks if t.get('task_type')=='telegram_reply' and t.get('status')=='pending'))") 2>/dev/null || echo 0
 }
 
 run_claude_pass() {
     # watchdog：CAP_SEC 後殺 responder
     (
-        "$CLAUDE_BIN" -p --dangerously-skip-permissions --effort "$RESPONDER_EFFORT" --model "$RESPONDER_MODEL" "$PROMPT" 2>&1 &
+        cd "$RESPONDER_WORKDIR" || exit 1
+        "$CLAUDE_BIN" -p --dangerously-skip-permissions \
+            --effort "$RESPONDER_EFFORT" --model "$RESPONDER_MODEL" \
+            --add-dir "$REPO_ROOT" --settings "$REPO_ROOT/.claude/settings.json" \
+            "$PROMPT" 2>&1 &
         CPID=$!
         (
             sleep "$CAP_SEC"

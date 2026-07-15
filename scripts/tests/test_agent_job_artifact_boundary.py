@@ -12,7 +12,16 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 from scripts import compute_queue, run_agent_job
+
+
+@pytest.fixture(autouse=True)
+def _registered_worktree_fixture(monkeypatch):
+    """These ownership tests use lightweight dirs; worktree validity is separate."""
+    monkeypatch.setattr(compute_queue, "is_registered_linked_worktree", lambda *_: True)
+    monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_: True)
 
 
 def _fake_agent(path: Path, body: str) -> Path:
@@ -236,3 +245,50 @@ def test_enqueue_agent_without_result_does_not_invent_a_fake_artifact(
     assert job["cwd"] == str(worktree)
     assert "--result-artifact" not in job["args"]
     assert job["job_metadata"].endswith("storage/ops/agent_jobs/agent-code-only.json")
+
+
+def test_enqueue_agent_rejects_shared_main_before_freezing_brief(
+    monkeypatch, tmp_path: Path
+) -> None:
+    root = tmp_path / "main"
+    root.mkdir()
+    brief = root / "brief.md"
+    brief.write_text("must not run in main")
+    _patch_queue_paths(monkeypatch, root)
+    monkeypatch.setattr(compute_queue, "is_registered_linked_worktree", lambda *_: False)
+    args = _enqueue_args(
+        brief=brief,
+        cwd=str(root),
+        result_artifact=None,
+        job_id="agent-main-rejected",
+    )
+
+    assert compute_queue.enqueue_agent(args) == 2
+    assert not (root / "storage/ops/agent_briefs/agent-main-rejected.md").exists()
+    assert not (root / "storage/ops/compute_queue/agent-main-rejected.json").exists()
+
+
+def test_runner_defense_in_depth_rejects_non_worktree_cwd(
+    monkeypatch, tmp_path: Path
+) -> None:
+    main = tmp_path / "main"
+    main.mkdir()
+    brief = main / "brief.md"
+    brief.write_text("do not start")
+    fake = _fake_agent(tmp_path / "fake-claude", "exit 99\n")
+    monkeypatch.setattr(run_agent_job, "ROOT", main)
+    monkeypatch.setattr(run_agent_job, "CLAUDE_BIN", str(fake))
+    monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_: False)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        _runner_argv(
+            brief,
+            main,
+            main / "metadata.json",
+            "experiments/forbidden.json",
+        ),
+    )
+
+    assert run_agent_job.main() == 2
+    assert not (main / "metadata.json").exists()

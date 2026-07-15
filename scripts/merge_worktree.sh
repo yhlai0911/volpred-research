@@ -66,11 +66,11 @@ MAIN_DIR="$(resolve_main_dir)" || {
 # 待移除的 worktree 內執行（cwd 失效會連鎖污染 git 指令 → K1618 root cause）。
 cd "$MAIN_DIR" || { echo "[FATAL] 無法 cd 至 MAIN_DIR=$MAIN_DIR"; exit 1; }
 
-# Sanity：MAIN_DIR 的 HEAD 不可是 worktree-agent 分支（若是 → 解析仍錯，fail-loud 拒絕）
+# Sanity：所有 non-dry main mutation 都只准 canonical symbolic main。
 _mdir_head="$(git -C "$MAIN_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo UNKNOWN)"
-if [[ "$_mdir_head" == worktree-agent-* ]]; then
-    echo "[FATAL] MAIN_DIR=$MAIN_DIR 的 HEAD=$_mdir_head 是 worktree 分支 —"
-    echo "        代表主 repo 解析錯誤（cwd 汙染），拒絕繼續以防 K1618 STRIKE-2 資料遺失。"
+if [[ "$_mdir_head" != "main" ]]; then
+    echo "[FATAL] MAIN_DIR=$MAIN_DIR 的 HEAD=$_mdir_head，不是 canonical main —"
+    echo "        拒絕在 side/detached HEAD 執行 shared-checkout transaction。"
     exit 1
 fi
 
@@ -99,6 +99,23 @@ for arg in "$@"; do
         *) TARGET="$(basename "$arg")" ;;  # 只取 basename，確保匹配一致
     esac
 done
+
+# Every non-dry integration is one Git transaction: worktree auto-commit,
+# main-checkout ownership/stash, cherry-pick/merge, verification, and stash
+# restoration must not be interleaved with another writer.  The Python owner
+# derives its sentinel from git-common-dir, so this also serialises linked
+# worktrees.  Descendants inherit a validated lease token and do not recurse.
+if ! $DRY_RUN; then
+    if ! /usr/bin/python3 "$MAIN_DIR/scripts/git_writer_lock.py" \
+        validate-inherited --repo "$MAIN_DIR" --actor "merge-worktree-child" \
+        >/dev/null 2>&1; then
+        exec /usr/bin/python3 "$MAIN_DIR/scripts/git_writer_lock.py" run \
+            --repo "$MAIN_DIR" \
+            --actor "merge-worktree:${TARGET:-all}" \
+            --timeout 300 \
+            -- /bin/bash "$SCRIPT_PATH" "$@"
+    fi
+fi
 
 echo "=== Worktree Merge Tool ==="
 echo ""

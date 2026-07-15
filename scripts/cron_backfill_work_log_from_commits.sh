@@ -33,8 +33,11 @@ PY
 RC=$?
 
 if [ "$RC" -eq 0 ] && [ -n "$(/usr/bin/git status --porcelain -- storage/work_log.json 2>/dev/null)" ]; then
-  /usr/bin/git add -- storage/work_log.json
-  /usr/bin/git commit --only -m "ops(codex-loop): daily work_log backfill" -- storage/work_log.json
+  "$UV_BIN" run python "$REPO_ROOT/scripts/git_writer_lock.py" commit \
+    --repo "$REPO_ROOT" \
+    --actor "cron:daily-work-log-backfill" \
+    --message "ops(codex-loop): daily work_log backfill" \
+    -- storage/work_log.json
 fi
 
 echo "=== [codex_work_log_backfill] exit $RC at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="

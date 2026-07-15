@@ -85,9 +85,9 @@ def test_preflight_timeout_is_not_reported_as_broken_binary(monkeypatch) -> None
 # apart because the whole 2026-07-12 bug was the code failing to:
 #   1. `codex --version`   — is the binary here?           (local, says nothing about the API)
 #   2. `codex exec <probe>`— does ChatGPT answer?          (the only call that knows)
-#   3. `codex exec -s workspace-write <task>` — do the work.
+#   3. `codex exec -s danger-full-access <task>` — do the work from an isolated cwd.
 def _is_work_call(argv: list[str]) -> bool:
-    return "workspace-write" in argv
+    return "danger-full-access" in argv
 
 
 def _fake_codex(*, probe=None, work=None):
@@ -123,8 +123,8 @@ def test_exec_success_marks_recovered(monkeypatch) -> None:
     result = codex_failover.run_codex_failover(reason="quota", enabled=True)
     assert (result.attempted, result.recovered, result.exit_code) == (True, True, 0)
     assert calls[1][1] == "exec", "reachability is probed before the slot is bet on it"
-    assert "workspace-write" not in calls[1], "the probe must not be able to write"
-    assert "workspace-write" in calls[2]
+    assert "danger-full-access" not in calls[1], "the probe must not be able to write"
+    assert "danger-full-access" in calls[2]
     assert "claimed task X" in result.output_tail
 
 

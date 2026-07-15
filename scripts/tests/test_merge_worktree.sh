@@ -91,6 +91,10 @@ setup_test_env() {
     local test_dir="$TMP_BASE/$test_name"
     mkdir -p "$test_dir/scripts" "$test_dir/storage/ops"
     cp "$MERGE_SCRIPT" "$test_dir/scripts/merge_worktree.sh"
+    cp "$PROJECT_ROOT/scripts/git_writer_lock.py" "$test_dir/scripts/git_writer_lock.py"
+    mkdir -p "$test_dir/src/volpred/ops"
+    cp "$PROJECT_ROOT/src/volpred/ops/git_writer_lock.py" \
+        "$test_dir/src/volpred/ops/git_writer_lock.py"
     chmod +x "$test_dir/scripts/merge_worktree.sh"
     # merge 路徑會呼叫 trusted certify gate；gate 或其 stdlib dependency
     # 不存在時 merge_worktree.sh 會 fail-closed。certify 目前 arm MDD owner；

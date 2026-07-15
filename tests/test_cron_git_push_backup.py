@@ -15,7 +15,7 @@ def test_git_push_backup_uses_cron_safe_auth_helpers() -> None:
     assert 'GH_BIN="${GH_BIN:-/opt/homebrew/bin/gh}"' in script
     assert "$GH_BIN auth git-credential" in script
     assert "git_auth fetch origin main" in script
-    assert "git_auth push origin main" in script
+    assert 'git_auth push origin "${PUSH_SHA}:refs/heads/main"' in script
     assert "\n  uv run volpred ops send-alert" not in script
     assert "--body-md \"git push origin main 失敗" not in script
     assert "--body-md \"origin/main 領先本地" not in script
@@ -52,3 +52,14 @@ def test_silent_fallback_hold_routes_to_stable_p1_before_any_notification() -> N
     # the guard-held, mechanically repairable branch is suppressed.
     assert 'title "git-push-backup: 偵測到 origin 分岔"' in script
     assert 'title "git-push-backup: push 失敗"' in script
+
+
+def test_audit_and_push_are_bound_to_one_immutable_sha() -> None:
+    script = (ROOT / "scripts" / "cron_git_push_backup.sh").read_text(encoding="utf-8")
+
+    assert "PUSH_SHA=$(git rev-parse refs/heads/main" in script
+    assert '--rev "$PUSH_SHA"' in script
+    assert 'origin/main..$PUSH_SHA' in script
+    assert '$PUSH_SHA..origin/main' in script
+    assert 'git_auth push origin "${PUSH_SHA}:refs/heads/main"' in script
+    assert "git_auth push origin main" not in script

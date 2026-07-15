@@ -326,6 +326,40 @@ def test_scheduler_fire_runs_worker_when_due(tmp_path: Path, monkeypatch) -> Non
     assert decision["outcome"] == "success"
     assert received and received[0]["prompt_text"].endswith("prompt-body")
     assert "worktree_prefix=dispatch-slot-1-" in received[0]["prompt_text"]
+    assert received[0]["workdir"].is_dir()
+    assert tmp_path.resolve() not in received[0]["workdir"].resolve().parents
+    scratch_probe = subprocess.run(
+        ["git", "-C", str(received[0]["workdir"]), "rev-parse", "--show-toplevel"],
+        capture_output=True, text=True, check=False,
+    )
+    assert scratch_probe.returncode != 0
+    assert f"launcher_cwd={received[0]['workdir']}" in received[0]["prompt_text"]
+    assert "inline task 可用絕對路徑編輯 canonical_root" in received[0]["prompt_text"]
+
+
+def test_scheduler_scratch_failure_releases_reserved_slot(tmp_path: Path, monkeypatch) -> None:
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    _stub_pregate(monkeypatch)
+    monkeypatch.setattr(
+        scheduler,
+        "_slot_workdir",
+        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("scratch boom")),
+    )
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+    ))
+
+    assert decision["reason"] == "scratch_workdir_error"
+    assert state.read_state(state_path)["current_jobs"] == []
 
 
 # ── PHASE-Z safety net (Deliverable 7 cutover port of cron_hourly_dispatch.sh) ──
@@ -340,7 +374,7 @@ def _git_init_repo(root: Path) -> None:
             capture_output=True, text=True, check=True,
         )
         return cp
-    g("init", "-q")
+    g("init", "-q", "-b", "main")
     g("config", "user.email", "test@volpred.local")
     g("config", "user.name", "phase-z-test")
     g("config", "commit.gpgsign", "false")
@@ -931,12 +965,12 @@ def test_pre_fire_guard_is_idempotent_on_a_clean_tree(tmp_path: Path) -> None:
     (repo / "scripts" / "git_conflict_guard.py").write_text(
         real_guard.read_text(encoding="utf-8"), encoding="utf-8"
     )
+    owner = Path(__file__).resolve().parents[1] / "src/volpred/ops/git_writer_lock.py"
+    copied_owner = repo / "src/volpred/ops/git_writer_lock.py"
+    copied_owner.parent.mkdir(parents=True)
+    copied_owner.write_text(owner.read_text(encoding="utf-8"), encoding="utf-8")
     for args in (
         ["init", "-q"],
-        # pre-assert the driver the guard would otherwise set on its first run:
-        # _ensure_ours_driver() logs "set merge.ours.driver=true" and that print
-        # is NOT suppressed by --quiet, which would make run #1 != run #2.
-        ["config", "merge.ours.driver", "true"],
         ["add", "-A"],
     ):
         subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True)
@@ -1992,7 +2026,26 @@ def test_supervisor_main_writes_only_to_patched_state_path(tmp_path: Path, monke
     """
     patched_path = tmp_path / "test_state.json"
     default_path = state.STATE_PATH  # the real production path — must stay untouched
+    real_read_state = state.read_state
+    real_mark_started = state.mark_supervisor_started
+    observed_paths: list[Path] = []
+
+    def guarded_read(path=default_path):
+        resolved = Path(path)
+        assert resolved == patched_path, f"main read production state: {resolved}"
+        observed_paths.append(resolved)
+        return real_read_state(resolved)
+
+    def guarded_mark(path=default_path):
+        resolved = Path(path)
+        assert resolved == patched_path, f"main wrote production state: {resolved}"
+        observed_paths.append(resolved)
+        return real_mark_started(resolved)
+
     monkeypatch.setattr(supervisor.state, "STATE_PATH", patched_path)
+    monkeypatch.setattr(supervisor.state, "read_state", guarded_read)
+    monkeypatch.setattr(supervisor.state, "mark_supervisor_started", guarded_mark)
+    monkeypatch.setattr(supervisor.state, "consume_planned_restart_marker", lambda: None)
     monkeypatch.setattr(supervisor, "_set_runtime_env", lambda: None)
     monkeypatch.setattr(supervisor, "_setup_logging", lambda level: None)
     monkeypatch.setattr(supervisor, "_handle_restart_orphan", lambda: None)
@@ -2004,14 +2057,8 @@ def test_supervisor_main_writes_only_to_patched_state_path(tmp_path: Path, monke
     # Under the old definition-time default this file was never created, because
     # main() wrote to `default_path` instead.
     assert patched_path.exists(), "main() ignored the patched STATE_PATH"
-    assert state.read_state(patched_path)["supervisor_pid"] == os.getpid()
-    # Deliberately NOT a byte-compare of `default_path`: on the dev host a live
-    # daemon heartbeats into it every 30s, which would make that flaky. Stamping
-    # OUR pid there is the exact corruption this regression guards, and it is
-    # unambiguous — a running daemon can never share this process's pid.
-    assert state.read_state(default_path).get("supervisor_pid") != os.getpid(), (
-        f"main() stamped the pytest pid into the production state at {default_path}"
-    )
+    assert real_read_state(patched_path)["supervisor_pid"] == os.getpid()
+    assert observed_paths == [patched_path, patched_path]
 
 
 # ---------------------------------------------------------------------------
@@ -2159,14 +2206,26 @@ def test_stale_auth_line_in_shared_log_does_not_freeze_loop(tmp_path: Path, monk
                 f.write(b"boom: unrelated crash\n")
             return 1
 
-    monkeypatch.setattr(worker, "_spawn", lambda **kwargs: FakeProc())
+    spawned: list[dict] = []
+    monkeypatch.setattr(
+        worker,
+        "_spawn",
+        lambda **kwargs: spawned.append(kwargs) or FakeProc(),
+    )
     monkeypatch.setattr(worker.os, "getpgid", lambda pid: 4242)
     monkeypatch.setattr(worker.procutil, "get_process_start_wall", lambda pid: "Wed Jan  1 00:00:00 2026")
 
+    scratch = tmp_path / "scratch"
+    scratch.mkdir()
     exit_code, _dur, attempt_output = worker._run_one_attempt(
         prompt_text="p", model=worker.OPUS_MODEL, timeout_s=5,
         log_path=log_path, attempt=1, schedule_id="hourly_dispatch",
-        state_path=state_path, claude_bin="/tmp/claude",
+        state_path=state_path, claude_bin="/tmp/claude", workdir=scratch,
+    )
+    assert spawned[0]["cwd"] == scratch
+    assert spawned[0]["argv"][spawned[0]["argv"].index("--add-dir") + 1] == str(worker.PROJECT_ROOT)
+    assert spawned[0]["argv"][spawned[0]["argv"].index("--settings") + 1] == str(
+        worker.PROJECT_ROOT / ".claude" / "settings.json"
     )
     assert "Not logged in" not in attempt_output, "stale auth line must not leak into classification input"
     assert worker._classify(exit_code, attempt_output) == "hard_failure"

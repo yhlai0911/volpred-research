@@ -50,30 +50,38 @@ ZEABUR_BIN='([^[:space:];&|()]*/)?zeabur(@[^[:space:]]+)?'
 # grep / jq / head 是 CLAUDE.md 明文放行的取用方式，不列入。
 FULL_READERS='(cat|bat|less|more|most|nl|od|tac|strings|view)'
 
-# 2026-07-10 hourly-23：主 checkout 是共用的 —— dispatch worker、codex-vscode、rescue agent
-# 會同時在 /Users/yhlai0911/volpred-research 上 commit。`git commit --amend` 假設「HEAD 是我剛做的」，
-# 這個假設在共用 checkout 裡不成立：當班 amend 打在 1c7275bae 上，把別的 agent 的 commit message
-# 換成自己的，並把它尚未提交的 5 個在途檔案一起吞進來。amend 沒有「只有我碰過 HEAD」的檢查，
-# 而 reflog 顯示兩個 actor 的 commit 是交錯的。worktree 內 amend 自己的分支無此風險（單一 owner），
-# 故只擋「目標 repo == 共用 main checkout 且在 main 分支」這一格。
-# 補救不是 amend 而是「再疊一個 commit」——歷史多一行，勝過覆蓋別人的一行。
-# git parse-options 收長選項不歧義縮寫：`--amend` 之外 `--am/--ame/--amen` git 全收（commit 沒有
-# 其他 `--am` 開頭選項）。引號內字串先剝掉，否則 `git commit -m 'fix --amend hazard'` 會被誤擋。
-AMEND_FLAG='--am[[:alpha:]]*'
+# 2026-07-15 single-writer cutover：共用 main 的每個 commit（不只 amend）都必須走
+# scripts/git_writer_lock.py。pretool 提早給人類可讀的正確出口，真正 fail-closed owner
+# 是 common-dir reference-transaction hook；linked worktree 的非 main branch 保持可直接 commit。
+# 引號先剝掉，避免 message 裡提到 `git commit` 被誤認為第二個 command segment。
 COMMAND_NOQ="$(printf '%s' "$COMMAND" | sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g")"
 
 # `git -C <dir> commit --amend` 從 worktree 也能打到 main checkout —— 目標目錄以 `-C` 為準
 # （必須落在子命令 `commit` 之前；`git commit -C <commit>` 的 -C 是「沿用某 commit 的 message」，
 # 語意完全不同，不可誤取）。無 `-C` 時目標即本次 Bash 的 cwd。
-_amend_target_is_shared_main() {
-  local target toplevel branch root_real
-  target="$(printf '%s' "$COMMAND_NOQ" | sed -nE 's|.*git[[:space:]]+-C[[:space:]]+([^[:space:]]+)[[:space:]]+commit.*|\1|p' | head -1)"
+_git_target_is_shared_checkout() {
+  local target toplevel root_real
+  target="$(printf '%s' "$COMMAND_NOQ" | sed -nE 's|.*git[[:space:]]+-C[[:space:]]+([^[:space:]]+)[[:space:]]+.*|\1|p' | head -1)"
   [[ -z "$target" ]] && target="$HOOK_CWD"
   toplevel="$(git -C "$target" rev-parse --show-toplevel 2>/dev/null)" || return 1
-  branch="$(git -C "$target" rev-parse --abbrev-ref HEAD 2>/dev/null)" || return 1
   root_real="$(cd "$ROOT" 2>/dev/null && pwd -P)" || return 1
   toplevel="$(cd "$toplevel" 2>/dev/null && pwd -P)" || return 1
-  [[ "$toplevel" == "$root_real" && "$branch" == "main" ]]
+  [[ "$toplevel" == "$root_real" ]]
+}
+
+GIT_MUTATION_GUARD="${BASH_SOURCE[0]%/*}/../../scripts/hooks/git_mutation_guard.py"
+_git_mutation_targets_shared_checkout() {
+  local rc
+  if printf '%s' "$COMMAND" | /usr/bin/python3 "$GIT_MUTATION_GUARD" \
+      --root "$ROOT" --cwd "$HOOK_CWD"; then
+    return 0
+  else
+    rc=$?
+  fi
+  # The classifier has one explicit ALLOW sentinel (10). Missing/corrupt
+  # helper, timeout, or an unknown return code must not silently reopen raw Git.
+  [[ "$rc" -eq 10 ]] && return 1
+  return 0
 }
 
 # 2026-07-11 hourly-22（strike 3）：`git commit -m` 內嵌非 ASCII 會產出非 UTF-8 的 commit 訊息
@@ -129,7 +137,7 @@ _inside_dispatch_fire() {
 DENY_REASON=""
 if _inside_dispatch_fire \
    && printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}${BIN_PREFIX}(${CLAUDE_HEADLESS}|${AGY_HEADLESS})"; then
-  DENY_REASON="🚫 禁止在 dispatch fire 內 spawn headless agent（claude -p / agy -p）。這是 2026-07-12 三次 hang_killed 的 root cause：fire 有 3000s hard cap，研究 agent 要跑 20-60min —— 父等子就燒完 cap 被 SIGKILL（三次 duration 全是 3001.3s），父先走子就變 ppid=1 孤兒、worktree 成果沒人收（K1681 白做）。這不是 timeout 調太小，是把 60 分鐘的工作塞進 50 分鐘的容器。改法：把 brief 用 Write 寫成檔案，再 uv run python scripts/compute_queue.py enqueue-agent --brief-file /tmp/brief.md --model claude-opus-4-8 --effort xhigh [--cwd <worktree>] --followup-brief '<收件時要做什麼>' --followup-task-type experiment。agent 由 */15 的 detached compute worker 執行（不受 fire cap 限制），成果由後續某一班 fire 在 PHASE A 收 —— 這正是 heavy compute 一直在走的路。本班 fire 的職責是 enqueue 後立刻結束，不是坐在那裡等。"
+  DENY_REASON="🚫 禁止在 dispatch fire 內 spawn headless agent（claude -p / agy -p）。這是 2026-07-12 三次 hang_killed 的 root cause：fire 有 3000s hard cap，研究 agent 要跑 20-60min —— 父等子就燒完 cap 被 SIGKILL（三次 duration 全是 3001.3s），父先走子就變 ppid=1 孤兒、worktree 成果沒人收（K1681 白做）。這不是 timeout 調太小，是把 60 分鐘的工作塞進 50 分鐘的容器。改法：把 brief 用 Write 寫成檔案，再 uv run python scripts/compute_queue.py enqueue-agent --brief-file /tmp/brief.md --model claude-opus-4-8 --effort xhigh --cwd <registered-worktree> --followup-brief '<收件時要做什麼>' --followup-task-type experiment。agent 由 */15 的 detached compute worker 執行（不受 fire cap 限制），成果由後續某一班 fire 在 PHASE A 收 —— 這正是 heavy compute 一直在走的路。本班 fire 的職責是 enqueue 後立刻結束，不是坐在那裡等。"
 elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}git${GIT_GLOBAL_OPTS}[[:space:]]+worktree[[:space:]]+remove${SEG_TAIL}[[:space:]]${FORCE_FLAG}([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止 git worktree remove --force（CLAUDE.md『絕對禁止』；K1032/K1618 誤刪未合併實驗事故）。改用 bash scripts/merge_worktree.sh 正常合併；worktree 從 stale base 分出時用 git checkout <branch> -- experiments/kXXXX/ path-scoped 抽取。"
 elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${PKG_RUNNER}${ZEABUR_BIN}[[:space:]]+deploy([[:space:]]|\$)"; then
@@ -138,9 +146,8 @@ elif printf '%s' "$COMMAND" | grep -qE "${CMD_START}${FULL_READERS}[[:space:]].*
   DENY_REASON="🚫 禁止整檔讀取 feed.json / knowledge.json（CLAUDE.md Token 紀律）。改用 grep / jq / 單篇 storage/reports/<id>.json；jq、grep、head 皆不受此攔截。"
 elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}${BIN_PREFIX}codex[[:space:]]+exec([[:space:]]|\$)"; then
   DENY_REASON="🚫 禁止裸跑 codex exec（2026-07-11 事故：hourly agent 在 session 內直接 codex exec 補渲染 lazypack，卡住 >30min 無輸出，agent 阻塞在無 timeout 的 Bash → 撞 supervisor 3000s hard cap → SIGKILL → hang_killed）。codex exec 是 agentic loop，可以跑很久而且不會自己停；Bash tool 沒有 timeout，macOS 也沒有 coreutils timeout 指令，所以「裸跑」= 把整個 fire 的命運交給一個沒有上界的呼叫。改法二選一：(1) 互動 / review 等你會盯著的短工作 → bash scripts/codex_exec_bounded.sh --timeout 300 <args>（有界，逾時 exit 124）；(2) 重活（渲染、長 review、任何你不會坐著等的）→ uv run python scripts/compute_queue.py enqueue --script <path> --timeout 1800，交給 */15 async worker。Python 內用 subprocess.run(timeout=) 呼叫 codex 不受此攔截（那本來就有界）。"
-elif printf '%s' "$COMMAND_NOQ" | grep -qE "${CMD_START}git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit${SEG_TAIL}[[:space:]]${AMEND_FLAG}([[:space:]]|\$)" \
-     && _amend_target_is_shared_main; then
-  DENY_REASON="🚫 禁止在共用 main checkout 的 main 分支上 git commit --amend（2026-07-10 hourly-23 事故：amend 打在另一個 agent 剛做的 commit 上，覆蓋其 message 並吞掉它 5 個未提交的在途檔案）。主 checkout 同時有 dispatch worker / codex-vscode / rescue agent 在 commit，HEAD 不保證是你做的。改法：要修訊息或補內容，就再疊一個 commit（歷史多一行，勝過覆蓋別人的一行）。在自己的 worktree 分支上 amend 不受此攔截。"
+elif _git_mutation_targets_shared_checkout; then
+  DENY_REASON="🚫 共用 main checkout 禁止裸 Git mutation（stage/merge/checkout/ref 全 transaction 都算）：reference hook 只能在 ref 階段擋，太晚，raw merge/add 已可能先污染 index 或留下 AUTO_MERGE。commit exact files 請用 uv run python scripts/git_writer_lock.py commit --actor <owner> --message '<ASCII>' -- <paths>；merge/worktree/restore 類請用 canonical helper 的 run 或正式 merge_worktree.sh。registered linked worktree 不受此攔截。"
 # Candidate detection must not repeat a partial shell parser.  In particular,
 # `git \\` + newline + `commit ...` and a quoted executable (`'git' commit`)
 # are valid shell but defeated the old line-oriented/quote-stripped grep.

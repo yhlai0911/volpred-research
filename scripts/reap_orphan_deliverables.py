@@ -62,6 +62,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.diagnostics import warn  # noqa: E402
+from volpred.ops.git_writer_lock import (  # noqa: E402
+    GitWriterLockError,
+    git_writer_lock,
+    git_writer_subprocess_kwargs,
+    require_canonical_main_checkout,
+)
 
 DRAFTS_DIR = ROOT / "storage" / "drafts"
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
@@ -165,12 +171,13 @@ def _git(*args: str) -> subprocess.CompletedProcess[str]:
     command = ["git", *args] if args and args[0] == "check-ignore" else [
         "git", "--literal-pathspecs", *args,
     ]
+    locked_kwargs = git_writer_subprocess_kwargs(env)
     return subprocess.run(
         command,
         cwd=str(ROOT),
-        env=env,
         capture_output=True,
         text=True,
+        **locked_kwargs,
     )
 
 
@@ -184,6 +191,31 @@ def _receipt_lock():
             yield
         finally:
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+@contextmanager
+def _git_transaction(actor: str):
+    """Yield False on ordinary contention; never fall back to unlocked Git."""
+    manager = git_writer_lock(ROOT, actor=actor, timeout_s=30)
+    entered = False
+    try:
+        manager.__enter__()
+        entered = True
+        require_canonical_main_checkout(ROOT)
+    except GitWriterLockError as exc:
+        if entered:
+            manager.__exit__(None, None, None)
+        warn("reap_orphan", "git writer transaction busy — deferred",
+             actor=actor, err=str(exc))
+        yield False
+        return
+    try:
+        yield True
+    except BaseException:
+        manager.__exit__(*sys.exc_info())
+        raise
+    else:
+        manager.__exit__(None, None, None)
 
 
 def _write_job_receipt(path: Path, payload: dict) -> None:
@@ -307,7 +339,13 @@ def deliver_job_outputs(candidate: dict) -> dict:
     requested_paths = list(candidate["paths"])
     outcome = {"job_id": job_id, "paths": requested_paths, "delivered": False}
 
-    with _receipt_lock():
+    # Receipt ownership and Git adoption are one transaction.  Holding the
+    # receipt lock first preserves the existing reaper ordering; the Git lease
+    # then prevents any other writer from interleaving preflight/add/commit.
+    with _receipt_lock(), _git_transaction(f"orphan-reaper:job:{job_id}") as locked:
+        if not locked:
+            outcome["reason"] = "git_writer_lock_busy"
+            return outcome
         latest = json.loads(job_path.read_text(encoding="utf-8"))
         previous = latest.get("delivered_paths") or []
         if not isinstance(previous, list):
@@ -547,18 +585,35 @@ def collect_paper_artifacts(entries: list[dict]) -> list[dict]:
     if not entries:
         return out
     paths = [e["path"] for e in entries]
-    add = _git("add", "--", *paths)
-    if add.returncode != 0:
-        warn("reap_orphan", "paper artifact add failed", err=add.stderr[:150])
-        return [{"paths": paths, "committed": False, "err": add.stderr[:150]}]
-    msg = ("chore(paper-reap): collect verification byproducts "
-           f"({', '.join(sorted({Path(p).parts[1] for p in paths}))})\n\n"
-           "Auto-collected by reap_orphan_deliverables: results diffs are "
-           "volatile-only (timestamp/runtime) and PDFs rebuild HEAD sources. "
-           "Root-cause: reproduce.py verification dirties tracked artifacts "
-           "that explicit-path session commits necessarily miss.\n\n"
-           "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>")
-    commit = _git("commit", "-m", msg, "--", *paths)
+    with _git_transaction("orphan-reaper:paper") as locked:
+        if not locked:
+            return [{"paths": paths, "committed": False,
+                     "err": "git_writer_lock_busy"}]
+        pre_staged = _git("diff", "--cached", "--name-only", "--", *paths)
+        collisions = [line for line in pre_staged.stdout.splitlines() if line]
+        if pre_staged.returncode != 0 or collisions:
+            err = "pre_staged_collision" if collisions else "git_preflight_failed"
+            return [{"paths": paths, "committed": False, "err": err,
+                     "collisions": collisions}]
+        index_owned = True
+        try:
+            add = _git("add", "--", *paths)
+            if add.returncode != 0:
+                warn("reap_orphan", "paper artifact add failed", err=add.stderr[:150])
+                return [{"paths": paths, "committed": False, "err": add.stderr[:150]}]
+            msg = ("chore(paper-reap): collect verification byproducts "
+                   f"({', '.join(sorted({Path(p).parts[1] for p in paths}))})\n\n"
+                   "Auto-collected by reap_orphan_deliverables: results diffs are "
+                   "volatile-only (timestamp/runtime) and PDFs rebuild HEAD sources. "
+                   "Root-cause: reproduce.py verification dirties tracked artifacts "
+                   "that explicit-path session commits necessarily miss.\n\n"
+                   "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>")
+            commit = _git("commit", "--only", "-m", msg, "--", *paths)
+            if commit.returncode == 0:
+                index_owned = False
+        finally:
+            if index_owned:
+                _git("reset", "-q", "HEAD", "--", *paths)
     ok = commit.returncode == 0
     if not ok:
         warn("reap_orphan", "paper artifact commit failed", err=commit.stderr[:150])
@@ -654,20 +709,37 @@ def collect_draft_artifacts(entries: list[dict]) -> list[dict]:
     if not entries:
         return out
     paths = [e["path"] for e in entries]
-    add = _git("add", "--", *paths)
-    if add.returncode != 0:
-        warn("reap_orphan", "draft artifact add failed", err=add.stderr[:150])
-        return [{"paths": paths, "committed": False, "err": add.stderr[:150]}]
-    msg = ("chore(draft-reap): collect orphaned draft artifacts "
-           f"({len(paths)} files)\n\n"
-           "Auto-collected by reap_orphan_deliverables: drafts, lazypack plans "
-           "and figures left untracked in storage/drafts/. Root-cause: "
-           "publish_draft.py registers a draft in feed.json but never commits "
-           "the files, and PHASE-Z only commits what its own fire produced — so "
-           "output from a crashed or out-of-lane producer was owned by no one "
-           "and re-alerted every fire.\n\n"
-           "Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>")
-    commit = _git("commit", "-m", msg, "--", *paths)
+    with _git_transaction("orphan-reaper:drafts") as locked:
+        if not locked:
+            return [{"paths": paths, "committed": False,
+                     "err": "git_writer_lock_busy"}]
+        pre_staged = _git("diff", "--cached", "--name-only", "--", *paths)
+        collisions = [line for line in pre_staged.stdout.splitlines() if line]
+        if pre_staged.returncode != 0 or collisions:
+            err = "pre_staged_collision" if collisions else "git_preflight_failed"
+            return [{"paths": paths, "committed": False, "err": err,
+                     "collisions": collisions}]
+        index_owned = True
+        try:
+            add = _git("add", "--", *paths)
+            if add.returncode != 0:
+                warn("reap_orphan", "draft artifact add failed", err=add.stderr[:150])
+                return [{"paths": paths, "committed": False, "err": add.stderr[:150]}]
+            msg = ("chore(draft-reap): collect orphaned draft artifacts "
+                   f"({len(paths)} files)\n\n"
+                   "Auto-collected by reap_orphan_deliverables: drafts, lazypack plans "
+                   "and figures left untracked in storage/drafts/. Root-cause: "
+                   "publish_draft.py registers a draft in feed.json but never commits "
+                   "the files, and PHASE-Z only commits what its own fire produced — so "
+                   "output from a crashed or out-of-lane producer was owned by no one "
+                   "and re-alerted every fire.\n\n"
+                   "Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>")
+            commit = _git("commit", "--only", "-m", msg, "--", *paths)
+            if commit.returncode == 0:
+                index_owned = False
+        finally:
+            if index_owned:
+                _git("reset", "-q", "HEAD", "--", *paths)
     ok = commit.returncode == 0
     if not ok:
         warn("reap_orphan", "draft artifact commit failed", err=commit.stderr[:150])

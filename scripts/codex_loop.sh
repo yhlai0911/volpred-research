@@ -14,7 +14,10 @@
 #   FIRST_PROMPT_OVERRIDE='...' bash scripts/codex_loop.sh
 
 set -m
-cd "$(dirname "$0")/.." || exit 1
+SCRIPT_REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)" || exit 1
+REPO_ROOT="${VOLPRED_REPO_ROOT:-$SCRIPT_REPO_ROOT}"
+cd "$REPO_ROOT" || exit 1
+REPO_ROOT="$(pwd -P)"
 
 SELF=$$
 LOCK_DIR="${CODEX_LOOP_LOCK_DIR:-${TMPDIR:-/tmp}/volpred_codex_loop.lock}"
@@ -109,7 +112,7 @@ FIRST_PROMPT="${FIRST_PROMPT_OVERRIDE:-讀 AGENTS.md「Codex 每小時任務池�
 3. uv run python scripts/task_pool_claim.py claim --id <id> --owner ${OWNER}
 4. already_claimed → 換下一筆；全被 claim → 找 docs/error_log.md 近 7 天 actionable lint/refactor
 5. start → 完整完成（50min 內收尾，不留半成品）→ complete
-6. commit 訊息開頭加 [codex]，不 push
+6. 用 scripts/git_writer_lock.py commit + exact paths 提交；訊息開頭加 [codex]，不 push
 7. 結束回報：完成項目 + commit hash}"
 
 # ────────────────────────────────────────────────────────────
@@ -174,8 +177,11 @@ backfill_codex_work_log_after_tick() {
 
   local short_after
   short_after="$(/usr/bin/git rev-parse --short "$after_head" 2>/dev/null || printf '%s' "${after_head:0:9}")"
-  /usr/bin/git add storage/work_log.json
-  if /usr/bin/git commit -m "ops(codex-loop): backfill work_log after ${short_after}"; then
+  if "$UV_BIN" run python "$REPO_ROOT/scripts/git_writer_lock.py" commit \
+      --repo "$REPO_ROOT" \
+      --actor "codex-loop:work-log-backfill" \
+      --message "ops(codex-loop): backfill work_log after ${short_after}" \
+      -- storage/work_log.json; then
     echo "[work-log-hook] committed work_log backfill for ${short_after}"
   else
     echo "[work-log-hook] WARN git commit failed after backfill"
@@ -205,10 +211,10 @@ while true; do
   if [ "$TICK" -eq 1 ]; then
     # 2026-06-18: dropped `-s workspace-write` — it overrode the global
     # config.toml `sandbox_mode = "danger-full-access"` and downgraded to a
-    # mode that write-protects .git, so codex's own `git commit` silently
+    # mode that write-protects .git, so the locked commit helper silently
     # failed (.git/index.lock unwritable) and left every tick's work
     # uncommitted (K1501 incident). No flag = inherit config's full-access
-    # mode → codex can commit its own [codex] work as AGENTS.md instructs.
+    # mode → codex can use the Git writer lease as AGENTS.md instructs.
     "$CODEX" exec --skip-git-repo-check "$FIRST_PROMPT"
   else
     # resume inherits sandbox from parent session; no -s flag needed (not accepted)

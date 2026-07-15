@@ -65,7 +65,8 @@ PROMPT_PATH = ROOT / "scripts" / "cron_hourly_dispatch_codex_failover_prompt.md"
 # skipping the slot over a deleted file.
 FALLBACK_PROMPT = (
     "新一輪 hourly tick（Claude dispatch 失敗 failover）。cat storage/ops/handoff_latest.md，"
-    "依同樣流程 claim 下一個 Codex-eligible pending task → 完整完成 → complete → commit [codex]。"
+    "依同樣流程 claim 下一個 Codex-eligible pending task → 完整完成 → complete → "
+    "用 scripts/git_writer_lock.py commit 提交 [codex]。"
     "reader-facing / email_reply / FB / paper_body 類留給 Claude，不要碰。"
 )
 
@@ -204,6 +205,7 @@ def run_codex_failover(
     job_id: str | None = None,
     on_process_started: Callable[[int, int], bool] | None = None,
     on_process_finished: Callable[[int], None] | None = None,
+    workdir: Path | None = None,
 ) -> FailoverResult:
     """Try to let `codex exec` cover this hourly slot. Never raises."""
     if enabled is None:
@@ -236,22 +238,26 @@ def run_codex_failover(
     LOG.info("codex failover start reason=%s cap=%ds version=%s", reason, cap_s, version)
     started = time.time()
     prompt = _read_prompt(prompt_path)
+    launch_cwd = (workdir or ROOT).resolve()
     if slot_id and job_id:
         prefix = f"dispatch-{slot_id}-{job_id[:8]}"
         prompt = (
             "[Supervisor multi-slot context]\n"
             f"slot_id={slot_id}; job_id={job_id}; worktree_prefix={prefix}.\n"
-            "任何 repo 寫入都必須在名稱含 worktree_prefix 的 worktree 完成；"
-            "不得直接修改共享 main checkout。\n\n"
+            f"launcher_cwd={launch_cwd}（刻意不是 shared main）；canonical_root={ROOT}.\n"
+            "用絕對路徑在 canonical_root 完成 task，禁止裸 Git mutation；依下方第 5 步"
+            "用 canonical exact-path locked commit helper 提交。只有 routing 明定 experiment/"
+            "worktree 時才建立 worktree，且本輪須用正式 merge_worktree.sh 整合完畢。"
+            "task-pool CLI 必須使用 canonical_root 的絕對 script path。\n\n"
             + prompt
         )
-    argv = [codex_bin, "exec", "--skip-git-repo-check", "-s", "workspace-write", prompt]
+    argv = [codex_bin, "exec", "--skip-git-repo-check", "-s", "danger-full-access", prompt]
     tracked_pid: int | None = None
     process_confirmed_finished = False
     try:
         if on_process_started is None:
             result = subprocess.run(
-                argv, cwd=str(ROOT), capture_output=True, text=True, timeout=cap_s,
+                argv, cwd=str(launch_cwd), capture_output=True, text=True, timeout=cap_s,
             )
         else:
             env = {
@@ -261,7 +267,7 @@ def run_codex_failover(
                 "VOLPRED_DISPATCH_JOB_ID": job_id or "",
             }
             proc = subprocess.Popen(
-                argv, cwd=str(ROOT), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                argv, cwd=str(launch_cwd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 stdin=subprocess.DEVNULL, text=True, start_new_session=True, env=env,
             )
             tracked_pid = proc.pid

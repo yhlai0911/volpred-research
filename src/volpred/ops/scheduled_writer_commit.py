@@ -7,7 +7,7 @@ another session's work.  This module gives those jobs one narrow contract:
 1. snapshot whether each declared output path was dirty *before* the write;
 2. exclude dirty paths from the producer's write set;
 3. after a successful write, commit only paths that were clean at the snapshot;
-3. fail closed when Git cannot establish ownership.
+4. fail closed when Git cannot establish ownership or the shared lease.
 
 Callers remain responsible for declaring their complete output population.  The
 ratchet for that declaration lives in
@@ -19,6 +19,13 @@ import subprocess
 import sys
 from collections.abc import Iterable
 from pathlib import Path
+
+from volpred.ops.git_writer_lock import (
+    GitWriterLockError,
+    git_writer_lock,
+    git_writer_subprocess_kwargs,
+    require_canonical_main_checkout,
+)
 
 
 def _relative_paths(repo_root: Path, paths: Iterable[str | Path]) -> list[str]:
@@ -56,6 +63,7 @@ def dirty_paths_before_write(
             proc = subprocess.run(
                 [
                     "git",
+                    "--literal-pathspecs",
                     "status",
                     "--porcelain=v1",
                     "--untracked-files=all",
@@ -144,35 +152,102 @@ def commit_owned_outputs(
     if not safe:
         return []
 
+    staged: list[str] = []
     try:
-        subprocess.run(
-            ["git", "add", "-A", "--", *safe],
-            cwd=str(repo_root),
-            capture_output=True,
-            text=True,
-            timeout=30,
-            check=True,
-        )
-        staged_proc = subprocess.run(
-            ["git", "diff", "--cached", "--name-only", "--", *safe],
-            cwd=str(repo_root),
-            capture_output=True,
-            text=True,
-            timeout=20,
-            check=True,
-        )
-        staged = [line for line in staged_proc.stdout.splitlines() if line]
-        if not staged:
-            return []
-        subprocess.run(
-            ["git", "commit", "--only", "-m", message, "--", *staged],
-            cwd=str(repo_root),
-            capture_output=True,
-            text=True,
-            timeout=60,
-            check=True,
-        )
-    except (OSError, subprocess.TimeoutExpired, subprocess.CalledProcessError) as exc:
+        # Ownership was sampled before the producer wrote.  Recheck and commit
+        # under the same repo-wide lease so no other writer can interleave an
+        # index/HEAD transaction between staging and adoption.
+        with git_writer_lock(repo_root, actor=f"scheduled-writer:{label}"):
+            require_canonical_main_checkout(repo_root)
+            locked_kwargs = git_writer_subprocess_kwargs()
+            preflight = subprocess.run(
+                [
+                    "git", "--literal-pathspecs", "diff", "--cached", "--quiet",
+                    "--", *safe,
+                ],
+                cwd=str(repo_root),
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+                **locked_kwargs,
+            )
+            if preflight.returncode == 1:
+                print(
+                    f"[{label}] WARN: target became staged after ownership "
+                    "snapshot; refusing ambiguous index ownership",
+                    file=sys.stderr,
+                )
+                return []
+            if preflight.returncode != 0:
+                raise subprocess.CalledProcessError(
+                    preflight.returncode,
+                    preflight.args,
+                    output=preflight.stdout,
+                    stderr=preflight.stderr,
+                )
+
+            index_owned = True
+            committed = False
+            try:
+                subprocess.run(
+                    ["git", "--literal-pathspecs", "add", "-A", "--", *safe],
+                    cwd=str(repo_root),
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    check=True,
+                    **locked_kwargs,
+                )
+                staged_proc = subprocess.run(
+                    [
+                        "git", "--literal-pathspecs", "diff", "--cached",
+                        "--name-only", "--", *safe,
+                    ],
+                    cwd=str(repo_root),
+                    capture_output=True,
+                    text=True,
+                    timeout=20,
+                    check=True,
+                    **locked_kwargs,
+                )
+                staged = [line for line in staged_proc.stdout.splitlines() if line]
+                if not staged:
+                    return []
+                subprocess.run(
+                    [
+                        "git", "--literal-pathspecs", "commit", "--only", "-m",
+                        message, "--", *staged,
+                    ],
+                    cwd=str(repo_root),
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                    check=True,
+                    **locked_kwargs,
+                )
+                committed = True
+                index_owned = False
+            finally:
+                if index_owned and not committed:
+                    subprocess.run(
+                        [
+                            "git", "--literal-pathspecs", "reset", "-q", "HEAD",
+                            "--", *safe,
+                        ],
+                        cwd=str(repo_root),
+                        capture_output=True,
+                        text=True,
+                        timeout=20,
+                        check=False,
+                        **locked_kwargs,
+                    )
+    except (
+        GitWriterLockError,
+        OSError,
+        subprocess.TimeoutExpired,
+        subprocess.CalledProcessError,
+    ) as exc:
         detail = ""
         if isinstance(exc, subprocess.CalledProcessError):
             detail = (exc.stderr or exc.stdout or "").strip()[-300:]

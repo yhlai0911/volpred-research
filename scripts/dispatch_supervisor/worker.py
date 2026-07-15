@@ -58,6 +58,7 @@ SONNET_MODEL = "claude-sonnet-5"
 CODEX_MODEL_LABEL = "codex-failover"
 
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "/Users/yhlai0911/.local/bin/claude")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 # Reasoning effort for the spawned orchestrator session (2026-07-05: effort was
 # previously computed by model_router but NEVER passed to any `claude -p` — it
@@ -227,7 +228,11 @@ def _dispatch_actor(
 
 
 def _spawn(
-    *, argv: Sequence[str], log_path: Path, env: dict[str, str] | None = None
+    *,
+    argv: Sequence[str],
+    log_path: Path,
+    env: dict[str, str] | None = None,
+    cwd: Path | None = None,
 ) -> subprocess.Popen:
     """Spawn child in its own process group; redirect combined stdout+stderr to log_path.
 
@@ -246,6 +251,7 @@ def _spawn(
         start_new_session=True,  # new PGID — clean SIGKILL group
         close_fds=True,
         env=env,
+        cwd=str(cwd) if cwd is not None else None,
     )
 
 
@@ -264,6 +270,7 @@ def _run_one_attempt(
     slot_id: str | None = None,
     claude_bin: str = CLAUDE_BIN,
     effort: str = DISPATCH_EFFORT,
+    workdir: Path | None = None,
 ) -> tuple[int, float]:
     """Single Popen attempt. Returns (exit_code, duration_s, attempt_output).
 
@@ -276,7 +283,10 @@ def _run_one_attempt(
     """
     argv = [
         claude_bin, "-p", "--dangerously-skip-permissions",
-        "--effort", effort, "--model", model, prompt_text,
+        "--effort", effort, "--model", model,
+        "--add-dir", str(PROJECT_ROOT),
+        "--settings", str(PROJECT_ROOT / ".claude" / "settings.json"),
+        prompt_text,
     ]
     managed_state = True
     if job_id is None:
@@ -323,7 +333,7 @@ def _run_one_attempt(
         "VOLPRED_DISPATCH_JOB_ID": job_id,
     }
     try:
-        proc = _spawn(argv=argv, log_path=log_path, env=child_env)
+        proc = _spawn(argv=argv, log_path=log_path, env=child_env, cwd=workdir)
     except OSError:
         # Spawn itself failed (e.g. claude_bin missing) — free the slot we
         # just reserved so it doesn't wedge forever with no process behind it.
@@ -398,6 +408,7 @@ def _attempt_codex_failover(
     state_path: Path,
     job_id: str,
     slot_id: str,
+    workdir: Path | None = None,
 ) -> WorkerResult | None:
     """Hand this hourly slot to Codex. Returns a WorkerResult only if Codex recovered it.
 
@@ -437,6 +448,7 @@ def _attempt_codex_failover(
             reason=reason, slot_id=slot_id, job_id=job_id,
             on_process_started=_track_started,
             on_process_finished=_track_finished,
+            workdir=workdir,
         )
     except Exception as exc:  # failover must never take the supervisor down
         LOG.exception("codex failover raised unexpectedly reason=%s", reason)
@@ -488,6 +500,7 @@ def run_worker(
     job_id: str | None = None,
     slot_id: str | None = None,
     max_slots: int = 2,
+    workdir: Path | None = None,
 ) -> WorkerResult:
     """Run prompt through claude -p with retry ladder.
 
@@ -539,6 +552,7 @@ def run_worker(
             scheduled_for=scheduled_for, fire_reason=fire_reason,
             state_path=state_path, claude_bin=claude_bin,
             job_id=job_id, slot_id=slot_id,
+            workdir=workdir,
         )
         total_duration += duration
         final_exit = exit_code
@@ -664,6 +678,7 @@ def run_worker(
                 reason="auth", attempt=attempt, total_duration=total_duration,
                 fallback_exit=exit_code, model=model, log_tail=log_tail,
                 state_path=state_path, job_id=job_id, slot_id=slot_id,
+                workdir=workdir,
             )
             if recovered is not None:
                 if recovered.outcome == "kill_failed_orphan":
@@ -712,6 +727,7 @@ def run_worker(
                 reason="quota", attempt=attempt, total_duration=total_duration,
                 fallback_exit=exit_code, model=model, log_tail=log_tail,
                 state_path=state_path, job_id=job_id, slot_id=slot_id,
+                workdir=workdir,
             )
             if recovered is not None:
                 if recovered.outcome == "kill_failed_orphan":

@@ -1,0 +1,43 @@
+#!/bin/sh
+# Main may move only inside an already-held canonical Git-writer lease.
+# This hook validates but never acquires the lease: taking flock while Git holds
+# its ref lock would invert lock order and deadlock.
+set -eu
+
+state=${1:-}
+needs_main_lease=0
+touches_head=0
+while IFS=' ' read -r _old _new ref_name; do
+  if [ "$ref_name" = "refs/heads/main" ]; then
+    needs_main_lease=1
+  elif [ "$ref_name" = "HEAD" ]; then
+    touches_head=1
+  fi
+done
+
+[ "$state" = "prepared" ] || exit 0
+
+common_dir=$(/usr/bin/git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || {
+  echo "[reference-transaction] BLOCKED: cannot resolve Git common dir" >&2
+  exit 1
+}
+main_root=${common_dir%/*}
+current_root=$(/usr/bin/git rev-parse --path-format=absolute --show-toplevel 2>/dev/null || true)
+if [ "$touches_head" -eq 1 ] && [ "$current_root" = "$main_root" ]; then
+  needs_main_lease=1
+fi
+[ "$needs_main_lease" -eq 1 ] || exit 0
+
+hook_parent=${0%/*}
+[ "$hook_parent" != "$0" ] || hook_parent=.
+hook_dir=$(CDPATH= cd -- "$hook_parent" && pwd -P)
+verifier="$hook_dir/git-writer-lease-verify.py"
+[ -f "$verifier" ] || {
+  echo "[reference-transaction] BLOCKED: missing installed lease verifier: $verifier" >&2
+  exit 1
+}
+
+/usr/bin/python3 "$verifier" "$common_dir" || {
+    echo "[reference-transaction] BLOCKED: refs/heads/main requires an active canonical Git-writer lease" >&2
+    exit 1
+  }

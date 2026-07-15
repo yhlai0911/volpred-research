@@ -38,6 +38,7 @@ def queue(tmp_path, monkeypatch):
     monkeypatch.setattr(compute_queue, "LOG_DIR", tmp_path / "logs")
     monkeypatch.setattr(compute_queue, "AGENT_JOB_DIR", tmp_path / "agent_jobs")
     monkeypatch.setattr(compute_queue, "AGENT_BRIEF_DIR", bdir)
+    monkeypatch.setattr(compute_queue, "is_registered_linked_worktree", lambda *_: True)
     qdir.mkdir(parents=True)
     return qdir
 
@@ -45,7 +46,7 @@ def queue(tmp_path, monkeypatch):
 def _enqueue_agent(brief: Path, job_id: str = "j1", **over) -> int:
     args = argparse.Namespace(
         id=job_id, title=None, brief_file=str(brief), model="claude-opus-4-8",
-        effort="xhigh", cwd=None, result_artifact=None,
+        effort="xhigh", cwd=str(brief.parent), result_artifact=None,
         followup_brief=over.get("followup_brief", "collect it"),
         followup_task_type="experiment", followup_priority=1, timeout=600,
     )

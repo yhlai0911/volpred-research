@@ -60,6 +60,20 @@ def test_codex_loop_guard_reclaims_stale_lock(tmp_path):
 
 def test_codex_loop_hook_invokes_work_log_backfill_after_new_commit(tmp_path):
     lock_dir = tmp_path / "codex-loop.lock"
+    repo = tmp_path / "repo"
+    (repo / "storage").mkdir(parents=True)
+    (repo / "storage" / "work_log.json").write_text("[]\n", encoding="utf-8")
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "storage/work_log.json"], cwd=repo, check=True)
+    subprocess.run(
+        [
+            "git", "-c", "user.name=Codex Loop Test",
+            "-c", "user.email=codex-loop@example.invalid",
+            "commit", "-qm", "base",
+        ],
+        cwd=repo,
+        check=True,
+    )
     uv = tmp_path / "uv"
     uv_args = tmp_path / "uv_args.txt"
     uv.write_text(
@@ -83,12 +97,13 @@ def test_codex_loop_hook_invokes_work_log_backfill_after_new_commit(tmp_path):
             "CODEX_WORK_LOG_BACKFILL_AUTOCOMMIT": "0",
             "UV_BIN": str(uv),
             "UV_ARGS_OUT": str(uv_args),
+            "VOLPRED_REPO_ROOT": str(repo),
         }
     )
 
     result = subprocess.run(
         ["bash", str(SCRIPT)],
-        cwd=REPO_ROOT,
+        cwd=repo,
         env=env,
         text=True,
         capture_output=True,

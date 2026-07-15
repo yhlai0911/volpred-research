@@ -64,7 +64,7 @@ def _git(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
 
 
 def _init_repo(path: Path) -> None:
-    _git(path, "init")
+    _git(path, "init", "-b", "main")
     _git(path, "config", "user.email", "scheduled-writer-test@example.com")
     _git(path, "config", "user.name", "Scheduled Writer Test")
 
@@ -123,8 +123,15 @@ def test_self_commit_rows_have_guard_and_path_scoped_commit() -> None:
         shell_guard = "git status --porcelain" in text
         helper_commit = "commit_owned_outputs" in text
         shell_commit = "git commit --only" in text and " -- " in text
+        lock_cli_commit = "scripts/git_writer_lock.py" in text and " commit " in text
         assert helper_guard or shell_guard, f"no staged+unstaged pre-write guard: {job_id}"
-        assert helper_commit or shell_commit, f"commit is not exact-path/--only scoped: {job_id}"
+        assert helper_commit or shell_commit or lock_cli_commit, (
+            f"commit is not exact-path/--only scoped: {job_id}"
+        )
+        assert helper_commit or lock_cli_commit, f"commit bypasses Git writer lease: {job_id}"
+
+    helper_text = (ROOT / "src/volpred/ops/scheduled_writer_commit.py").read_text()
+    assert "with git_writer_lock(" in helper_text
 
 
 def test_phase_z_exemptions_are_inside_the_declared_authorship_boundary() -> None:
@@ -326,6 +333,35 @@ def test_helper_can_commit_a_new_declared_output_without_sweeping_other_dirt(tmp
     assert _git(repo, "status", "--short").stdout.splitlines() == [" M tracked.txt"]
 
 
+def test_helper_refuses_canonical_checkout_on_side_or_detached_head(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    target = repo / "owned.txt"
+    target.write_text("base\n", encoding="utf-8")
+    _git(repo, "add", "owned.txt")
+    _git(repo, "commit", "-m", "base")
+
+    _git(repo, "switch", "-c", "side")
+    target.write_text("side output\n", encoding="utf-8")
+    before = _git(repo, "rev-parse", "HEAD").stdout.strip()
+    assert commit_owned_outputs(
+        repo, ["owned.txt"], dirty_before=(), message="must reject", label="side"
+    ) == []
+    assert _git(repo, "rev-parse", "HEAD").stdout.strip() == before
+    assert target.read_text(encoding="utf-8") == "side output\n"
+
+    _git(repo, "switch", "main")
+    _git(repo, "checkout", "--detach", "HEAD")
+    target.write_text("detached output\n", encoding="utf-8")
+    before = _git(repo, "rev-parse", "HEAD").stdout.strip()
+    assert commit_owned_outputs(
+        repo, ["owned.txt"], dirty_before=(), message="must reject", label="detached"
+    ) == []
+    assert _git(repo, "rev-parse", "HEAD").stdout.strip() == before
+    assert target.read_text(encoding="utf-8") == "detached output\n"
+
+
 def test_helper_git_probe_failure_blocks_the_write(monkeypatch, tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -342,3 +378,55 @@ def test_helper_git_probe_failure_blocks_the_write(monkeypatch, tmp_path: Path) 
         dirty_before=dirty,
         label="test-writer",
     ) == []
+
+
+def test_helper_refuses_path_staged_after_initial_snapshot(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    target = repo / "owned.txt"
+    target.write_text("base\n", encoding="utf-8")
+    _git(repo, "add", "owned.txt")
+    _git(repo, "commit", "-m", "base")
+
+    dirty = dirty_paths_before_write(repo, ["owned.txt"], label="race-writer")
+    assert dirty == frozenset()
+    target.write_text("foreign staged\n", encoding="utf-8")
+    _git(repo, "add", "owned.txt")
+    staged_before = _git(repo, "show", ":owned.txt").stdout
+    target.write_text("scheduled output\n", encoding="utf-8")
+
+    assert commit_owned_outputs(
+        repo,
+        ["owned.txt"],
+        dirty_before=dirty,
+        message="must not adopt race",
+        label="race-writer",
+    ) == []
+    assert _git(repo, "show", ":owned.txt").stdout == staged_before
+    assert target.read_text(encoding="utf-8") == "scheduled output\n"
+    assert _git(repo, "log", "-1", "--format=%s").stdout.strip() == "base"
+
+
+def test_helper_commit_failure_restores_only_owned_index_entry(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _init_repo(repo)
+    target = repo / "owned.txt"
+    target.write_text("base\n", encoding="utf-8")
+    _git(repo, "add", "owned.txt")
+    _git(repo, "commit", "-m", "base")
+    target.write_text("scheduled output\n", encoding="utf-8")
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+    hook.chmod(0o755)
+
+    assert commit_owned_outputs(
+        repo,
+        ["owned.txt"],
+        dirty_before=frozenset(),
+        message="blocked by hook",
+        label="hook-writer",
+    ) == []
+    assert _git(repo, "diff", "--cached", "--name-only").stdout == ""
+    assert target.read_text(encoding="utf-8") == "scheduled output\n"

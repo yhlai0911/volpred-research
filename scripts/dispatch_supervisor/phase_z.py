@@ -17,13 +17,12 @@ PHASE-Z safety net — deterministic post-fire commit of whatever the
 dispatched agent left uncommitted.
 
 Port of the `scripts/cron_hourly_dispatch.sh` PHASE-Z block (2026-05-29) into
-the supervisor runtime (Deliverable 7 cutover, 2026-07-04). The dispatch
-prompt asks the agent to run its own PHASE Z (`git add -A` + commit) but that
-is agent-discretion → ~90% reliable: real fires (e.g. 2026-07-04 07:26 + 14:57)
-leave real work untracked. Without this wrapper-level commit, once the
-supervisor becomes the real dispatcher a dirty working tree would accumulate
-between fires with nobody to clean it — the exact protection the legacy shell
-provided and that fired twice on cutover day.
+the supervisor runtime (Deliverable 7 cutover, 2026-07-04). The dispatch prompt
+now explicitly forbids agent-side Git; the agent leaves a fire receipt and this
+owner adopts only paths attributed to that fire. Without this wrapper-level
+commit, a dirty working tree would accumulate between fires with nobody to
+clean it — the exact protection the legacy shell provided and that fired twice
+on cutover day.
 
 Semantics (legacy, minus the `git add -A` that made it steal — see the ownership
 block below and docs/error_log.md 2026-07-10):
@@ -64,6 +63,13 @@ import tempfile
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
+
+from volpred.ops.git_writer_lock import (
+    GitWriterLockError,
+    git_writer_lock,
+    git_writer_subprocess_kwargs,
+    require_canonical_main_checkout,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -680,8 +686,7 @@ def _git(
         "timeout": timeout_s,
         "check": False,
     }
-    if env is not None:
-        kwargs["env"] = env
+    kwargs.update(git_writer_subprocess_kwargs(env))
     return runner(["git", "-C", str(repo_root), *args], **kwargs)
 
 
@@ -1490,6 +1495,7 @@ def run_phase_z(
     # index, and all working bytes remain byte-for-byte untouched.
     untracked: list[str] = []
     candidate_paths: list[str] = []
+    refresh: dict | None = None
     try:
         with tempfile.TemporaryDirectory(prefix="volpred-phase-z-index-") as tx:
             tx_root = Path(tx)
@@ -1734,10 +1740,37 @@ def run_phase_z(
                 committed_sha = ""
             else:
                 committed_sha = (commit_object.stdout or "").strip()
-                adopted = _git(
-                    repo_root, "update-ref", "HEAD", committed_sha, base_sha,
-                    timeout_s=_SHORT_TIMEOUT_S, runner=runner,
-                )
+                try:
+                    # Candidate construction is isolated in GIT_INDEX_FILE and
+                    # may run concurrently.  Serialise the one shared mutation:
+                    # HEAD adoption plus the matching shared-index refresh.
+                    # Keeping both under one lease prevents another writer from
+                    # observing the new HEAD with a stale index in between.
+                    with git_writer_lock(
+                        repo_root,
+                        actor=f"dispatch-phase-z:{hhmm}",
+                        timeout_s=_COMMIT_TIMEOUT_S,
+                    ):
+                        require_canonical_main_checkout(repo_root)
+                        adopted = _git(
+                            repo_root, "update-ref", "refs/heads/main", committed_sha, base_sha,
+                            timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+                        )
+                        if adopted.returncode == 0:
+                            refresh = _refresh_shared_index_cas(
+                                repo_root,
+                                base_sha=base_sha,
+                                committed_sha=committed_sha,
+                                candidate_paths=candidate_paths,
+                                runner=runner,
+                            )
+                except GitWriterLockError as exc:
+                    adopted = subprocess.CompletedProcess(
+                        args=["git", "update-ref", "refs/heads/main", committed_sha, base_sha],
+                        returncode=75,
+                        stdout="",
+                        stderr=f"git writer transaction lock unavailable: {exc}",
+                    )
                 if adopted.returncode == 0:
                     commit = subprocess.CompletedProcess(
                         args=adopted.args,
@@ -1763,13 +1796,8 @@ def run_phase_z(
 
     out = ((commit.stdout or "") + (commit.stderr or "")).strip()
     if commit.returncode == 0:
-        refresh = _refresh_shared_index_cas(
-            repo_root,
-            base_sha=base_sha,
-            committed_sha=committed_sha,
-            candidate_paths=candidate_paths,
-            runner=runner,
-        )
+        if refresh is None:
+            refresh = {"ok": False, "reason": "index_refresh_not_run"}
         if not refresh.get("ok"):
             detail = f"{refresh.get('reason')}: {refresh.get('detail', '')}".strip()
             alert_fn(

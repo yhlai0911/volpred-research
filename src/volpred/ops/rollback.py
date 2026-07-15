@@ -11,6 +11,11 @@ from pathlib import Path
 from typing import Any
 
 from .common import project_path
+from .git_writer_lock import (
+    git_writer_lock,
+    git_writer_subprocess_kwargs,
+    require_canonical_main_checkout,
+)
 
 
 def _utc_now() -> str:
@@ -24,6 +29,7 @@ def _git(*args: str, text: bool = True) -> str:
         check=True,
         capture_output=True,
         text=text,
+        **git_writer_subprocess_kwargs(),
     )
     return result.stdout if text else result.stdout.decode()
 
@@ -91,6 +97,7 @@ def create_rollback_point(*, point_id: str | None = None, storage_dir: str = "st
         ["git", "diff", "--binary"],
         cwd=project_path(),
         check=True,
+        **git_writer_subprocess_kwargs(),
         capture_output=True,
     ).stdout
     (point_dir / "tracked.patch").write_bytes(tracked_patch)
@@ -157,7 +164,7 @@ def list_rollback_points(*, storage_dir: str = "storage") -> list[dict[str, Any]
     return manifests
 
 
-def restore_rollback_point(
+def _restore_rollback_point_unlocked(
     point_id: str,
     *,
     storage_dir: str = "storage",
@@ -201,6 +208,7 @@ def restore_rollback_point(
         ["git", "restore", "--source", str(manifest["head_sha"]), "--worktree", "--staged", "."],
         cwd=project_path(),
         check=True,
+        **git_writer_subprocess_kwargs(),
     )
 
     for relative in extra_untracked:
@@ -216,6 +224,7 @@ def restore_rollback_point(
         ["git", "apply", str(point_dir / str(manifest["tracked_patch_path"]))],
         cwd=project_path(),
         check=True,
+        **git_writer_subprocess_kwargs(),
     )
 
     for archive_key in ("storage_archive_path", "config_archive_path", "untracked_archive_path"):
@@ -239,3 +248,24 @@ def restore_rollback_point(
         )
     )
     return result
+
+
+def restore_rollback_point(
+    point_id: str,
+    *,
+    storage_dir: str = "storage",
+    force: bool = False,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Restore one point without racing another shared-checkout Git writer."""
+    if dry_run:
+        return _restore_rollback_point_unlocked(
+            point_id, storage_dir=storage_dir, force=force, dry_run=True
+        )
+    with git_writer_lock(
+        project_path(), actor=f"rollback-restore:{point_id}", timeout_s=120
+    ):
+        require_canonical_main_checkout(project_path())
+        return _restore_rollback_point_unlocked(
+            point_id, storage_dir=storage_dir, force=force, dry_run=False
+        )

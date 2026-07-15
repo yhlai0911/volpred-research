@@ -10,9 +10,13 @@ set -uo pipefail
 HOOK="/Users/yhlai0911/volpred-research/.claude/hooks/pretooluse-bash-optimizer.sh"
 PASS=0
 FAIL=0
+DEFAULT_CWD="$(mktemp -d)"
+trap 'rm -rf "$DEFAULT_CWD"' EXIT
 
 run() {  # $1=command string → hook stdout
-  printf '{"tool_input":{"command":%s}}' "$(printf '%s' "$1" | jq -Rs .)" | bash "$HOOK"
+  printf '{"cwd":%s,"tool_input":{"command":%s}}' \
+    "$(printf '%s' "$DEFAULT_CWD" | jq -Rs .)" \
+    "$(printf '%s' "$1" | jq -Rs .)" | bash "$HOOK"
 }
 
 decision() {  # $1=command → permissionDecision 或 "none"
@@ -34,6 +38,7 @@ assert_allow() {  # $1=label $2=command
 # ── 應 deny（第一批既往事故項）──
 assert_deny "worktree remove --force"      "git worktree remove --force .claude/worktrees/foo"
 assert_deny "worktree remove -f"           "git worktree remove -f .claude/worktrees/foo"
+assert_deny "global hook-path from scratch" "git config --global core.hooksPath /tmp/no-hooks"
 assert_deny "npx zeabur deploy"            "npx zeabur deploy"
 assert_deny "zeabur deploy direct"         "zeabur deploy --project abc"
 # 2026-07-10 class sweep：舊 pattern 只認 `zeabur` / `npx zeabur`，以下 7 種全放行。
@@ -105,16 +110,19 @@ assert_allow "plain echo"                  "echo hello"
 assert_allow "pytest advisory rewrite"     "uv run pytest tests/"
 assert_allow "cat unrelated file"          "cat storage/reports/mile_abc123.json"
 
-# ── git commit --amend on 共用 main checkout（2026-07-10 hourly-23 事故）──
-# 這條 deny 依賴「目標 repo 的 toplevel/branch」，不能靠真實 repo 當下狀態（會隨分支漂移）。
+# ── 共用 main checkout 的裸 Git mutation（2026-07-15 single-writer）──
+# 這條 deny 依賴目標 repo 的 toplevel，不能靠真實 repo 當下狀態（會隨 cwd 漂移）。
 # 起一個一次性 repo 當 ROOT，worktree 當「agent 自己的 checkout」，兩者對照。
 AMEND_TMP="$(mktemp -d)"
-trap 'rm -rf "$AMEND_TMP"' EXIT
+trap 'rm -rf "$DEFAULT_CWD" "$AMEND_TMP"' EXIT
 git init -q -b main "$AMEND_TMP/shared" 2>/dev/null
 git -C "$AMEND_TMP/shared" -c user.email=t@t -c user.name=t commit -q --allow-empty -m base
 git -C "$AMEND_TMP/shared" worktree add -q -b agent-branch "$AMEND_TMP/wt" 2>/dev/null
 SHARED="$AMEND_TMP/shared"
 WT="$AMEND_TMP/wt"
+git -C "$SHARED" config alias.put add
+git -C "$SHARED" config alias.nuke '!git reset --hard'
+git -C "$SHARED" config alias.st status
 
 run_cwd() {  # $1=cwd $2=command → hook stdout（ROOT 指向一次性 shared repo）
   printf '{"cwd":%s,"tool_input":{"command":%s}}' \
@@ -141,16 +149,59 @@ assert_deny_cwd  "amend after &&"              "$SHARED" "git add -A && git comm
 # 從 worktree 用 `git -C <main>` 打回共用 checkout —— cwd 看起來安全，目標不安全
 assert_deny_cwd  "git -C shared from worktree" "$WT"     "git -C $SHARED commit --amend --no-edit"
 
-# agent 在自己的 worktree 分支上 amend：單一 owner，無覆蓋他人之虞
+# agent 在自己的 worktree 分支上 mutation：單一 owner，無覆蓋他人之虞
 assert_allow_cwd "amend in own worktree"       "$WT"     "git commit --amend --no-edit"
-# 主 checkout 但不在 main 分支
+# shared checkout 即使暫時切到 side branch，仍共用同一份 index/worktree，必須 deny
 git -C "$SHARED" checkout -q -b side
-assert_allow_cwd "amend on shared side-branch" "$SHARED" "git commit --amend --no-edit"
+assert_deny_cwd  "amend on shared side-branch" "$SHARED" "git commit --amend --no-edit"
 git -C "$SHARED" checkout -q main
 # false positive 防護：引號內提到 --amend、以及 `git commit -C <commit>`（沿用 message，非 amend）
-assert_allow_cwd "commit msg mentions amend"   "$SHARED" "git commit -m 'ban --amend on shared main'"
-assert_allow_cwd "commit -C reuse message"     "$SHARED" "git commit -C HEAD~1"
-assert_allow_cwd "plain commit on shared main" "$SHARED" "git commit -m normal"
+assert_deny_cwd  "commit msg mentions amend"   "$SHARED" "git commit -m 'ban --amend on shared main'"
+assert_deny_cwd  "commit -C reuse message"     "$SHARED" "git commit -C HEAD~1"
+assert_deny_cwd  "plain commit on shared main" "$SHARED" "git commit -m normal"
+assert_deny_cwd  "add on shared checkout"      "$SHARED" "git add owned.txt"
+assert_deny_cwd  "merge on shared checkout"    "$SHARED" "git merge agent-branch"
+assert_deny_cwd  "checkout on shared checkout" "$SHARED" "git checkout agent-branch"
+assert_deny_cwd  "reset on shared checkout"    "$SHARED" "git reset --hard HEAD"
+assert_deny_cwd  "stash on shared checkout"    "$SHARED" "git stash push"
+assert_deny_cwd  "update-ref on shared"        "$SHARED" "git update-ref refs/heads/main HEAD"
+assert_deny_cwd  "update-index on shared"      "$SHARED" "git update-index --assume-unchanged owned.txt"
+assert_deny_cwd  "sparse checkout on shared"   "$SHARED" "git sparse-checkout set docs"
+assert_deny_cwd  "bisect on shared"            "$SHARED" "git bisect start HEAD HEAD~1"
+assert_deny_cwd  "mergetool on shared"         "$SHARED" "git mergetool"
+assert_deny_cwd  "worktree add on shared"      "$SHARED" "git worktree add /tmp/new-wt -b new"
+assert_deny_cwd  "worktree prune on shared"    "$SHARED" "git worktree prune"
+assert_deny_cwd  "git -C shared add from wt"   "$WT"     "git -C $SHARED add owned.txt"
+assert_deny_cwd  "quoted git -C shared"        "$WT"     "git -C \"$SHARED\" add owned.txt"
+assert_deny_cwd  "cd shared then add"          "$WT"     "cd $SHARED && git add owned.txt"
+assert_deny_cwd  "pushd shared then add"       "$WT"     "pushd '$SHARED' >/dev/null; git add owned.txt"
+assert_deny_cwd  "builtin cd shared then add"  "$WT"     "builtin cd '$SHARED'; git add owned.txt"
+assert_deny_cwd  "HOME bare cd then add"        "$WT"     "HOME='$SHARED' cd; git add owned.txt"
+assert_deny_cwd  "popd before shared add"      "$SHARED" "popd; git add owned.txt"
+assert_deny_cwd  "failed cd then shared add"   "$SHARED" "cd /definitely/missing/volpred-dir; git add owned.txt"
+assert_deny_cwd  "command wrapper add"         "$SHARED" "command git add owned.txt"
+assert_deny_cwd  "env wrapper add"             "$SHARED" "env git add owned.txt"
+assert_deny_cwd  "explicit git-dir/work-tree"  "$WT"     "git --git-dir=$SHARED/.git --work-tree=$SHARED add owned.txt"
+assert_deny_cwd  "shared local config write"   "$SHARED" "git config core.hooksPath /tmp/no-hooks"
+assert_deny_cwd  "global hook-path override"    "$SHARED" "git config --global core.hooksPath /tmp/no-hooks"
+assert_deny_cwd  "one-shot hook-path bypass"    "$SHARED" "git -c core.hooksPath=/tmp/no-hooks update-ref refs/heads/main HEAD"
+assert_deny_cwd  "one-shot mutating alias"      "$WT"     "git -C '$SHARED' -c alias.stage=add stage owned.txt"
+assert_deny_cwd  "one-shot custom mutating alias" "$WT"   "git -C '$SHARED' -c alias.put=add put owned.txt"
+assert_deny_cwd  "dynamic one-shot alias"       "$WT"     "BODY=add; git -C '$SHARED' -c 'alias.put=\$BODY' put owned.txt"
+assert_deny_cwd  "one-shot shell alias"         "$WT"     "git -C '$SHARED' -c alias.nuke='!git reset --hard' nuke"
+assert_deny_cwd  "effective local mutating alias" "$SHARED" "git put owned.txt"
+assert_deny_cwd  "effective local shell alias"  "$SHARED" "git nuke"
+assert_deny_cwd  "worktree mutation from wt"   "$WT"     "git worktree prune"
+assert_allow_cwd "status on shared checkout"   "$SHARED" "git status --short"
+assert_allow_cwd "diff on shared checkout"     "$SHARED" "git diff --stat"
+assert_allow_cwd "read-only alias on shared"    "$SHARED" "git st --short"
+assert_allow_cwd "local config read"            "$SHARED" "git config --get user.name"
+assert_allow_cwd "global hook-path read"         "$SHARED" "git config --global --get core.hooksPath"
+assert_allow_cwd "worktree list on shared"     "$SHARED" "git worktree list"
+assert_allow_cwd "add in own worktree"         "$WT"     "git add owned.txt"
+assert_allow_cwd "mutating alias in own worktree" "$WT"   "git put owned.txt"
+assert_allow_cwd "merge in own worktree"       "$WT"     "git merge main"
+assert_allow_cwd "canonical locked helper"     "$SHARED" "uv run python scripts/git_writer_lock.py commit --actor test --message normal -- owned.txt"
 
 # 2026-07-11 strike 3：git commit -m 內嵌非 ASCII → 非 UTF-8 commit message，push 後不可回復
 assert_deny  "commit -m 中文"              "git commit -m '修正波動率計算'"

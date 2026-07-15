@@ -44,6 +44,10 @@ if str(REPO / "src") not in sys.path:
 import dispatch_slot_budget as slot_budget  # noqa: E402
 
 from volpred.ops.diagnostics import warn  # noqa: E402
+from volpred.ops.git_writer_lock import (  # noqa: E402
+    git_writer_lock,
+    git_writer_subprocess_kwargs,
+)
 
 
 def _holder_pids(worktree: Path) -> list[int]:
@@ -70,6 +74,7 @@ def _is_dirty(worktree: Path) -> bool:
         out = subprocess.run(
             ["git", "-C", str(worktree), "status", "--porcelain"],
             capture_output=True, text=True, timeout=20, check=True,
+            **git_writer_subprocess_kwargs(),
         ).stdout.strip()
         return bool(out)
     except (subprocess.SubprocessError, OSError) as exc:
@@ -83,6 +88,7 @@ def _branch_of(worktree: Path) -> str | None:
         return subprocess.run(
             ["git", "-C", str(worktree), "rev-parse", "--abbrev-ref", "HEAD"],
             capture_output=True, text=True, timeout=10, check=True,
+            **git_writer_subprocess_kwargs(),
         ).stdout.strip() or None
     except (subprocess.SubprocessError, OSError) as exc:
         warn("reclaim", f"讀不到 {worktree.name} 的 branch ({exc})")
@@ -109,30 +115,44 @@ def reclaim(apply: bool) -> dict:
             "removed": False,
         }
 
-        if dirty:
+        if dirty and not apply:
             action["skipped"] = "dirty — 有未提交工作，保留待人工裁決"
             results.append(action)
             continue
 
         if apply:
-            for pid in pids:
+            with git_writer_lock(
+                REPO, actor=f"reclaim-worktree:{wt['name']}", timeout_s=30
+            ):
+                # Re-evaluate every destructive precondition inside the same
+                # lease as common-dir metadata removal.
+                branch = _branch_of(path)
+                dirty = _is_dirty(path)
+                pids = _holder_pids(path)
+                action.update(branch=branch, dirty=dirty, holder_pids=pids)
+                if dirty:
+                    action["skipped"] = "dirty — 有未提交工作，保留待人工裁決"
+                    results.append(action)
+                    continue
+                for pid in pids:
+                    try:
+                        os.kill(pid, signal.SIGTERM)
+                        action["killed"].append(pid)
+                    except OSError as exc:
+                        warn("reclaim", f"kill {pid} 失敗 ({exc}) — worktree 仍會嘗試移除")
                 try:
-                    os.kill(pid, signal.SIGTERM)
-                    action["killed"].append(pid)
-                except OSError as exc:
-                    warn("reclaim", f"kill {pid} 失敗 ({exc}) — worktree 仍會嘗試移除")
-            try:
-                # No --force, ever (CLAUDE.md hard rule). Clean tree => plain remove
-                # succeeds; the branch survives, so nothing is lost.
-                subprocess.run(
-                    ["git", "-C", str(REPO), "worktree", "remove", str(path)],
-                    capture_output=True, text=True, timeout=60, check=True,
-                )
-                action["removed"] = True
-            except subprocess.CalledProcessError as exc:
-                action["skipped"] = f"worktree remove 失敗（不 --force）: {exc.stderr.strip()[:160]}"
-            except (subprocess.SubprocessError, OSError) as exc:
-                action["skipped"] = f"worktree remove 失敗: {exc}"
+                    # No --force, ever (CLAUDE.md hard rule). Clean tree => plain remove
+                    # succeeds; the branch survives, so nothing is lost.
+                    subprocess.run(
+                        ["git", "-C", str(REPO), "worktree", "remove", str(path)],
+                        capture_output=True, text=True, timeout=60, check=True,
+                        **git_writer_subprocess_kwargs(),
+                    )
+                    action["removed"] = True
+                except subprocess.CalledProcessError as exc:
+                    action["skipped"] = f"worktree remove 失敗（不 --force）: {exc.stderr.strip()[:160]}"
+                except (subprocess.SubprocessError, OSError) as exc:
+                    action["skipped"] = f"worktree remove 失敗: {exc}"
 
         results.append(action)
 
