@@ -18543,5 +18543,15 @@
     "owner": "codex-desktop",
     "commit": "4a9495f8c",
     "summary": "完成 K1010 研究文章的大眾讀者 companion，建立 draft `mile_e58dc338`，保留來源數字、null result、lookahead 防線、限制與舊文更正。\n\n正文與兩張資料圖通過 cross-model 事實／反 AI 風格審查；`sanitize_applied=0`。Supabase 回讀確認 `draft/general`、結構化引用 `K1010`，兩個圖檔均 HTTP 200。另建立三頁 lazypack 計畫並排入 `lazypack-mile_e58dc338`。\n\n驗證：37 項 lazypack pipeline tests、72 項 audience/citation/image tests、feed audience 1818 筆 0 mismatch，以及 render script compile 全部通過。"
+  },
+  {
+    "timestamp": "2026-07-16T04:33:57+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1010_article_general_audience_rewrite_94a0a999",
+    "outcome": "succeeded",
+    "actor": "codex-desktop",
+    "owner": "codex-desktop",
+    "commit": "ba93f584f",
+    "summary": "K1010 companion 的非同步 lazypack job `lazypack-mile_e58dc338` 已完成（exit 0，Codex bespoke renderer）。三張 panel 通過視覺 QA，文章只保留一個懶人包 section、三個遠端圖檔均 HTTP 200，Supabase 同步成功。\n\n完成輸出 commit：`ba93f584f`。生成過程第一版 renderer rc=1，依正式 pipeline 自動修復一次後成功；沒有手改 canonical feed 資料。"
   }
 ]
