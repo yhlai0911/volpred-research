@@ -19,7 +19,7 @@ Test surface:
     - extract_description: paragraph extraction, length cap, link strip,
       heading skip, blockquote handling, image-only line skip, emphasis strip
     - apply_update: default extraction, CLI override, preserve flag,
-      frontmatter override, single-article JSON parity (storage/reports/<id>.json)
+      frontmatter override, and feed-only Contentlayer persistence
     - Existing test files (citation_sanitizer / experiment_refs) unaffected
 """
 from __future__ import annotations
@@ -304,8 +304,8 @@ def test_frontmatter_description_override(tmp_path, monkeypatch):
     assert feed[0]["description"] == "Frontmatter-specified meta description."
 
 
-def test_single_article_json_mirrors_feed(tmp_path, monkeypatch):
-    """storage/reports/<mile_id>.json must have same description as feed.json."""
+def test_update_keeps_feed_as_only_canonical_article_file(tmp_path, monkeypatch):
+    """Update mode must not recreate the retired per-article JSON surface."""
     mile_id = "mile_parity"
     feed_path = _stage_feed(tmp_path, mile_id)
 
@@ -325,12 +325,9 @@ def test_single_article_json_mirrors_feed(tmp_path, monkeypatch):
 
     feed = json.loads(feed_path.read_text(encoding="utf-8"))
     single_path = tmp_path / "storage" / "reports" / f"{mile_id}.json"
-    assert single_path.exists()
-    single = json.loads(single_path.read_text(encoding="utf-8"))
-    # Both surfaces must have identical description
-    assert feed[0]["description"] == single["description"]
-    assert feed[0]["content"] == single["content"]
-    assert single["description"] == "Updated first paragraph for parity check."
+    assert not single_path.exists()
+    assert feed[0]["description"] == "Updated first paragraph for parity check."
+    assert "Updated first paragraph for parity check." in feed[0]["content"]
 
 
 def test_cli_override_beats_frontmatter(tmp_path, monkeypatch):
@@ -448,8 +445,7 @@ def test_update_can_clear_content_audit_flag(tmp_path, monkeypatch):
     assert history[-1]["content_audit_flag_cleared"] is True
 
     single_path = tmp_path / "storage" / "reports" / f"{mile_id}.json"
-    single = json.loads(single_path.read_text(encoding="utf-8"))
-    assert "content_audit_flagged" not in single
+    assert not single_path.exists()
 
 
 def test_parse_draft_extracts_description_from_frontmatter(tmp_path):

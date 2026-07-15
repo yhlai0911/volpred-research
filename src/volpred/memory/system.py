@@ -332,8 +332,12 @@ class MemorySystem:
                 data = self._load_index(filename)
                 data.append(record)
                 tmp_path = filepath.with_name(f".{filepath.name}.tmp")
+                # knowledge.json is a large, long-lived canonical index whose
+                # repository format uses one-space indentation.  Preserve that
+                # format so a single append does not rewrite the entire file.
+                indent = 1 if filename == "knowledge.json" else 2
                 with open(tmp_path, "w", encoding="utf-8") as f:
-                    json.dump(data, f, indent=2, default=str, ensure_ascii=False)
+                    json.dump(data, f, indent=indent, default=str, ensure_ascii=False)
                 # Post-write sanity: reject write if result is not parseable (2026-04-17 guard)
                 with open(tmp_path) as f:
                     json.load(f)

@@ -54,6 +54,25 @@ def test_append_to_index_writes_provenance_entry(tmp_path: Path, monkeypatch):
         assert entry["ts"].endswith("+00:00") or entry["ts"].endswith("Z")
 
 
+def test_append_to_knowledge_preserves_canonical_one_space_indent(tmp_path: Path, monkeypatch):
+    memory = MemorySystem(storage_dir=str(tmp_path))
+    memory.memory_dir.mkdir(parents=True, exist_ok=True)
+    original = {"item_id": "K_existing", "note": "existing"}
+    (memory.memory_dir / "knowledge.json").write_text(
+        json.dumps([original], indent=1, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(MemorySystem, "MIRROR_URL", "")
+    monkeypatch.setattr(MemorySystem, "MIRROR_TOKEN", "")
+
+    added = {"item_id": "K_added", "note": "new"}
+    memory._append_to_index("knowledge.json", added)
+
+    assert (memory.memory_dir / "knowledge.json").read_text(encoding="utf-8") == json.dumps(
+        [original, added], indent=1, default=str, ensure_ascii=False
+    )
+
+
 def test_reconcile_remote_reports_failures(tmp_path: Path, monkeypatch, capsys):
     memory = MemorySystem(storage_dir=str(tmp_path))
     for filename in MemorySystem.SUPPORTED_MIRROR_FILES:

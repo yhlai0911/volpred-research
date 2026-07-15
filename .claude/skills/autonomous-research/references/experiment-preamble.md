@@ -64,7 +64,7 @@
 
 ## 4. 防錯規則
 
-- **DM test**：用 `from volpred.stats.model_evaluation import strategy_dm_test`，不自己寫
+- **DM test**：forecast pointwise losses 用 `from volpred.stats.model_evaluation import dm_test`；交易策略報酬比較才用 `strategy_dm_test`。兩者都不可在實驗內另寫 helper
 - **0050.TW**：必須 `from volpred.utils import clean_tw50_data`
 - **Lookahead**：`signal = signal.shift(1)` 寫在代碼裡，不靠記憶
 - **GARCH OOS**：逐日遞迴 h[t]=f(h[t-1],r²[t-1])，不用 stale variance

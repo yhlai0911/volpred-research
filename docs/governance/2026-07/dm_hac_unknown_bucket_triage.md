@@ -35,7 +35,7 @@
 | 15 | `experiments/k1337_v2/K1337_v2.py:295` | `dm_test_hac` | a | lag 為參數；呼叫端 line 483: lag = max(H-1, 1) | no | t/p | no |
 | 16 | `experiments/k1371/k1371.py:146` | `dm_test` | c | statsmodels OLS cov_type='HAC', maxlags=NW_LAGS=22 | no | dm_stat/p_value | no |
 | 17 | `experiments/k1379/k1379.py:359` | `dm_test` | c | 無 —— gamma0 = mean(d^2)-dbar^2，完全沒有 autocovariance 迴圈 | YES（任何 h 都沒有 HAC） | dm_t/dm_p 寫進 k1379_results.json -> Paper 9 (garch-x-vix) horse race + feed×4 + knowledge×2 | **YES** |
-| 18 | `experiments/k1386/k1386.py:367` | `dm_test_harvey` | c | for k in range(1, max(1, h))；呼叫端 h=1 -> range(1,1) 空迴圈 | YES | README \|t\|=3.26 -> 「HAR 顯著優於 fGN（>3.0 Harvey 門檻）」；feed×6 + knowledge×1 | **YES** |
+| 18 | `experiments/k1386/k1386.py:367` | `dm_test_harvey` | c | for k in range(1, max(1, h))；呼叫端 h=1 -> range(1,1) 空迴圈 | YES | README \|t\|=3.26 -> 「HAR 顯著優於 fGN（>3.0 Harvey 門檻）」；feed 字串命中×6（實為同一篇文章）+ knowledge×1 | **YES** |
 | 19 | `experiments/k1399/k1399_vix_decomp.py:269` | `dm_hln_test` | c | bw = int(T^(1/3)) | no | dm_stat (HLN) / p | no |
 | 20 | `experiments/k144/k144_mf2_cross_bond.py:512` | `dm_test_onesided` | c | bw = max(1, int(n^(1/3))) | no | dm/p | no |
 | 21 | `experiments/k151/k151_sectoral_vol_dispersion.py:528` | `dm_test` | c | max_lag = min(5, n//5) | no（除非 n<5） | dm_stat/p_val | no |
@@ -101,19 +101,27 @@
 
 **78 個裡真正需要修的有 5 個。** 全部是 K1655 bug class 的實例：h=1 時 HAC 迴圈空轉或權重歸零，長期變異數退化成 iid 樣本變異數。
 
+### 2026-07-15 K1386 修復追蹤
+
+K1386 已改用 `volpred.stats.model_evaluation.dm_test` 並重跑。重跑同時找出兩個原 triage 未涵蓋的缺陷：兩份來源 CSV 各有 10 個相同日期的完全相同重複列，舊 inner merge 因此產生 2×2 many-to-many 膨脹；HAR 的最後一個 IS feature row 又誤用了第一個 OOS target。修復後只允許值完全相同的重複列去重、強制 one-to-one merge，並以 `train_mask & train_mask.shift(-1, fill_value=False)` 把 HAR target 留在 IS 內。
+
+固定到 2026-05-19 的乾淨樣本為 IS 3,021、OOS origins 1,098、可評分 1,097。canonical HAC lag=11；fGN-univariate minus HAR 的 loss differential ACF(1)=-0.044616，DM t=3.437383、p=0.000609；fGN-multivariate 對 HAR 為 ACF(1)=-0.050840，t=3.452342、p=0.000577。負自相關使修正後的 |t| 略升，兩格仍超過 3，因此 `NULL_NO_FGN_IMPROVEMENT` 的質性結論不變；舊樣本數、QLIKE 與 DM 數字已作廢，由 `experiments/k1386/k1386_results.json` 取代。
+
+原表的 `feed×6` 是 grep 字串命中數，不是六篇文章：實際 blast radius 是一篇 `mile_f3ade114`，另有一筆 knowledge `cf7e62d9`。兩者均已用 2026-07-15 correction / superseding entry 回溯更正。稽核器也已補上 `range(1, max(1, h))` / `max(h, 1)` 的 h=1 退化辨識與 K1386 retirement regression；因此新辨識出的既有 K1525/K1526 站點已凍結在 `unknown_triage_sites` cohort，待其獨立 paired task 重跑後只准移入 retired，不在本輪越界修理。
+
 ### 必修清單（依實質影響排序）
 
 | 優先 | 站點 | 失效機制 | 對外結論 | 為什麼會改變已發表結論 |
 |---|---|---|---|---|
-| **P1** | `experiments/k1386/k1386.py:367` `dm_test_harvey` | `for k in range(1, max(1, h))`，呼叫端 `h=1` → `range(1,1)` 空迴圈 | README：`DM \|t\|=3.26 > 3.0`，宣告「HAR 顯著優於 fGN」（Harvey 門檻）；**feed×6** | `\|t\|=3.26` 只超過門檻 8%。QLIKE loss differential 若 acf(1)>0，補 HAC 後 `\|t\|` 下修即跌破 3.0 → 「顯著」變「不顯著」，已發表文章的核心宣稱直接翻掉。 |
+| **P1（已修）** | `experiments/k1386/k1386.py`（舊 line 367）`dm_test_harvey` | `for k in range(1, max(1, h))`，呼叫端 `h=1` → `range(1,1)` 空迴圈 | 舊 README：`DM \|t\|=3.26 > 3.0`；一篇 feed 文章中有 6 次字串命中 | 實測 ACF(1)<0，canonical lag=11 後兩格 t=3.437/3.452，質性結論未翻；舊精確數字與樣本口徑已回溯更正。 |
 | **P1** | `experiments/k841/k841_futures_realtime_vt.py:436` `dm_test` | `for k in range(h)`（不是 `range(1,h+1)`）→ h=1 只取 `gamma[0]`，即樣本變異數 | `k841_results.json`：`t_stat=10.82 / -7.13 / -1.97`，`harvey_significant=True`；**feed×5 + knowledge×2** | 這是**策略報酬差**的 DM（VT overlay），報酬差序列自相關是常態。整組 t 與 `harvey_significant` 旗標都建立在無 HAC 的變異數上；`t=-1.97` 這格離 2.0 只差 1.5%，補 HAC 後兩個方向都可能翻。 |
 | **P2** | `experiments/k1379/k1379.py:359` `dm_test` | **完全沒有 autocovariance 迴圈** —— `gamma0 = mean(d²)-d̄²` 直接當長期變異數 | `k1379_results.json`：`dm_t=-1.19, p=0.234`（A4f vs HAR-RV，null）；**餵 Paper 9 (garch-x-vix) horse race** + feed×4 + knowledge×2 | 「本來就 null 所以安全」是錯的：負自協方差會讓 `\|t\|` 變**大**（k621 前例：acf(1)=-0.18 → `\|t\|` 2.26→3.64）。這支餵的是投稿中的論文 horse race，null 若翻成顯著，Paper 9 的 contribution 敘事要改。**另有第二個 bug**：HLN 因子寫成 `(T+1-2+1/T)/T`，h=1 的正確式是 `(T-1)/T`。 |
 | **P2** | `experiments/k1525_hf_tail_risk_premium_vrp/...py:265` `dm_test` | `for k in range(1, max(1, h))` 空迴圈；且權重 `1-k/h` 在 h=1、k=1 時 =0（雙重退化） | README §4.3：`DM (HLN-corrected): t=-0.85, p=0.397, n=137` —— 「焦點 spec ES+VIX 未過 OOS gate」的核心論據 | 同上，null≠安全。月頻 RV、n=137，補 HAC 後 `\|t\|` 若上升到顯著，整篇的 headline 結論（RDSV 訊號無法轉成 OOS 預測力）就站不住。 |
 | **P2** | `experiments/k1526_hf_tail_risk_premium_vrp/...py:265` `dm_test` | 與 k1525 逐字相同 | 同 k1525（README t=-0.85, p=0.397）；knowledge×1 | k1525 的重跑版。**修 k1525 必須同一輪修這支**，否則兩份 README 會分岔成不同數字。 |
 
-### 會改變已發表結論的：3 個（k1386、k841、k1379）
+### 原 triage 判為可能改變已發表結論的：3 個（k1386、k841、k1379）
 
-k1386 與 k841 已進 feed（合計 11 次引用）；k1379 除 feed 外還餵 Paper 9 的 horse race 表。k1525/k1526 目前只在 knowledge，尚未進 feed，但 k1525 是那條研究線的 headline null —— 修完若翻轉，整個 K 的 verdict 要回溯更正。
+k1386 已完成重跑，質性結論未變；k841 尚待重跑。原「合計 11 次引用」是 grep 字串命中數，不能解讀為 11 篇文章；K1386 的 6 次命中集中在同一篇。k1379 除 feed 外還餵 Paper 9 的 horse race 表。k1525/k1526 目前只在 knowledge，尚未進 feed，但 k1525 是那條研究線的 headline null —— 修完若翻轉，整個 K 的 verdict 要回溯更正。
 
 ### 一個 latent（不必現在修，但要記）
 

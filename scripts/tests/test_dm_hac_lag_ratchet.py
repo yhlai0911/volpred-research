@@ -42,6 +42,7 @@ from audit_dm_hac_lag import (  # noqa: E402
     DEGENERATE,
     DELEGATES,
     DEPENDENCE_ROBUST,
+    H_INCLUSIVE,
     NO_HAC,
     NOT_A_TEST,
     RATCHET_VERDICTS,
@@ -93,7 +94,7 @@ def baseline_payload() -> dict:
 def baseline(baseline_payload: dict) -> set[str]:
     return set(baseline_payload["degenerate_sites"]) | set(
         baseline_payload.get("blindspot_sites", [])
-    )
+    ) | set(baseline_payload.get("unknown_triage_sites", []))
 
 
 @pytest.fixture(scope="module")
@@ -136,16 +137,33 @@ def test_retired_sites_cannot_resurrect(
 
 
 def test_baseline_metadata_matches_frozen_cohorts(baseline_payload: dict) -> None:
-    """The one-time blind-spot expansion stays explicit and auditable."""
+    """One-time auditor coverage expansions stay explicit and auditable."""
     original = baseline_payload["degenerate_sites"]
     blindspots = baseline_payload["blindspot_sites"]
+    unknown_triage = baseline_payload["unknown_triage_sites"]
 
     assert original == sorted(set(original))
     assert blindspots == sorted(set(blindspots))
+    assert unknown_triage == sorted(set(unknown_triage))
     assert set(original).isdisjoint(blindspots)
+    assert set(original).isdisjoint(unknown_triage)
+    assert set(blindspots).isdisjoint(unknown_triage)
     assert baseline_payload["original_cohort_count"] == len(original)
     assert baseline_payload["blindspot_cohort_count"] == len(blindspots)
-    assert baseline_payload["count"] == len(original) + len(blindspots)
+    assert baseline_payload["unknown_triage_cohort_count"] == len(unknown_triage)
+    assert baseline_payload["count"] == len(original) + len(blindspots) + len(unknown_triage)
+
+
+def test_unknown_triage_sites_are_frozen_after_inline_floor_detection(findings, baseline) -> None:
+    """Known pre-existing max(1,h) debt is frozen when the auditor learns it."""
+    verdicts = {_site_key(f): f.verdict for f in findings}
+    sites = {
+        "experiments/k1525_hf_tail_risk_premium_vrp/k1525_hf_tail_risk_premium_vrp.py::dm_test",
+        "experiments/k1526_hf_tail_risk_premium_vrp/k1526_hf_tail_risk_premium_vrp.py::dm_test",
+    }
+    for site in sites:
+        assert verdicts[site] == DEGENERATE
+        assert site in baseline
 
 
 def test_known_blind_spots_are_now_classified(findings) -> None:
@@ -275,6 +293,28 @@ def test_canonical_dm_does_not_degenerate_at_h1() -> None:
     )
 
 
+def test_inline_max_horizon_floor_classification() -> None:
+    """`max(1, h)` is empty at h=1; a floor of two keeps lag one."""
+
+    def source(upper: str) -> str:
+        return (
+            "import numpy as np\n"
+            "def dm_test(loss1, loss2, h=1):\n"
+            "    d = np.asarray(loss1) - np.asarray(loss2)\n"
+            "    gamma0 = np.mean((d - d.mean()) ** 2)\n"
+            "    gamma_sum = 0.0\n"
+            f"    for lag in range(1, {upper}):\n"
+            "        gamma_sum += np.mean((d[lag:] - d.mean()) * (d[:-lag] - d.mean()))\n"
+            "    variance = gamma0 + 2.0 * gamma_sum\n"
+            "    t_stat = d.mean() / np.sqrt(variance / len(d))\n"
+            "    return t_stat\n"
+        )
+
+    assert _verdict_of_source(source("max(1, h)"), "dm_test") == DEGENERATE
+    assert _verdict_of_source(source("max(h, 1)"), "dm_test") == DEGENERATE
+    assert _verdict_of_source(source("max(2, h)"), "dm_test") == H_INCLUSIVE
+
+
 def test_k1379_manual_dm_repair_is_retired(
     affected_sites, baseline, retired
 ) -> None:
@@ -319,6 +359,29 @@ def test_k1378_degenerate_dm_repair_is_retired(
     assert "All GJR optimizer starts failed" in source
     assert "All A4f optimizer starts failed" in source
     assert "os.replace(temporary, path)" in source
+
+
+def test_k1386_degenerate_dm_repair_is_retired(
+    affected_sites, baseline, retired
+) -> None:
+    """K1386 delegates forecast losses to canonical HAC-DM after a clean rerun."""
+    site = "experiments/k1386/k1386.py::dm_test_harvey"
+    assert site not in affected_sites
+    assert site not in baseline
+    assert site in retired
+
+    source = (REPO_ROOT / "experiments" / "k1386" / "k1386.py").read_text(
+        encoding="utf-8"
+    )
+    assert "dm_test(loss_model, loss_har, h=h)" in source
+    assert "qlike_pointwise(actual_rv, har_f)" in source
+    assert "def dm_test_harvey" not in source
+    assert "strategy_dm_test" not in source
+    assert 'OOS_END = "2026-05-19"' in source
+    assert "EXPECTED_ANALYSIS_SLICE_SHA256" in source
+    assert 'validate="one_to_one"' in source
+    assert "target_is_mask = train_mask & train_mask.shift(-1, fill_value=False)" in source
+    assert ".reindex(eval_idx).ffill()" not in source
 
 
 def test_manual_variance_regex_regression() -> None:

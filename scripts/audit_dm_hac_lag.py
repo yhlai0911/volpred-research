@@ -452,6 +452,23 @@ def _horizon_range_kind(node: ast.AST) -> str | None:
             for arg in node.args
         ):
             return "exclusive"
+        if node.func.id == "max":
+            has_horizon = any(
+                isinstance(arg, ast.Name) and HORIZON_NAME_RE.match(arg.id)
+                for arg in node.args
+            )
+            numeric_arms = [
+                value
+                for arg in node.args
+                if (value := _numeric_constant(arg)) is not None
+            ]
+            # `range(1, max(1, h))` is still empty at h=1. A floor of
+            # two or more keeps at least lag 1, but remains horizon-based and
+            # does not scale with sample size.
+            if has_horizon and numeric_arms:
+                if max(numeric_arms) <= 1.0:
+                    return "exclusive"
+                return "positive_floor"
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
         pairs = ((node.left, node.right), (node.right, node.left))
         if any(
@@ -566,11 +583,17 @@ def _scan_function(
                         notes = [
                             f"inline `range(1, {upper})`: HAC loop is empty when h == 1"
                         ]
-                    else:
+                    elif range_kind == "inclusive":
                         verdict = H_INCLUSIVE
                         notes = [
                             "inline `range(1, h+1)`: keeps lag 1 at h == 1, so no zero-HAC "
                             "degeneracy, but the bandwidth never grows with the sample"
+                        ]
+                    else:
+                        verdict = H_INCLUSIVE
+                        notes = [
+                            f"inline `range(1, {upper})` has a positive lag floor, so it "
+                            "does not degenerate at h == 1, but it never scales with the sample"
                         ]
                     return Finding(
                         file=str(path.relative_to(REPO_ROOT)),

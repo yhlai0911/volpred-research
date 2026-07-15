@@ -1107,7 +1107,7 @@ def apply_update(args) -> int:
       4. Replace .content; optionally .title (--update-title)
       5. Append errata audit-trail fields (update_action / update_at / update_summary)
       6. Optionally update details.cluster_waiver / details.dup_waiver
-      7. Write feed.json + storage/reports/<mile_id>.json (parallel single-file)
+      7. Atomically rewrite feed.json (the only Contentlayer source)
       8. Optionally invoke feed-sync (--sync-supabase) — default is decoupled
     """
     draft_path = Path(args.draft_path)
@@ -1393,15 +1393,6 @@ def apply_update(args) -> int:
         tmp_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8")
         tmp_path.replace(feed_path)
     print(f"[publish_draft] wrote {feed_path.relative_to(ROOT)}")
-
-    # Write parallel single-article file
-    single_path = ROOT / "storage" / "reports" / f"{mile_id}.json"
-    guard_canonical_write(single_path)
-    single_path.write_text(
-        json.dumps(copy.deepcopy(art), ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    print(f"[publish_draft] wrote {single_path.relative_to(ROOT)}")
 
     _refresh_publication_candidates_after_feed_change("update")
 
