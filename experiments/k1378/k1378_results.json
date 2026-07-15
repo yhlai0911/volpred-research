@@ -1,41 +1,571 @@
 {
   "experiment_id": "k1378",
-  "title": "Paper 9 Leave-COVID-out DM Test (SF1 Robustness Fix)",
+  "title": "Corrected broad-window leave-COVID-out A4f versus GJR comparison",
+  "run_at": "2026-07-15T10:37:55.040643+00:00",
+  "elapsed_seconds": 105.0,
   "metadata": {
-    "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
-    "oos_start": "2019-01-01",
-    "covid_exclusion": "2020-03-01 to 2021-06-30",
+    "methodology_type": "empirical one-step-ahead forecast comparison",
+    "data_source": "experiments/k1685/data/k1685_spy_vix_snapshot.csv",
+    "data_source_provenance": "Independent yfinance 1.2.0 SPY/^VIX fetch pinned by K1685 on 2026-07-11; unique dates verified before analysis.",
+    "input_columns": {
+      "price": "spy_close (unadjusted close; matches corrected K1379 protocol)",
+      "volatility_index": "vix_close"
+    },
+    "snapshot_expected_sha256": "eee7f9c62ce3ed3ee68d2bffeb3c9386fb8a6343e1a053379cfc89058518e3fb",
+    "code_sha256": "dd143a220cffa3ee27c3df54bfee564809733aaf9ea4a801ed1d38cbe030bf21",
+    "snapshot_sha256": "eee7f9c62ce3ed3ee68d2bffeb3c9386fb8a6343e1a053379cfc89058518e3fb",
+    "snapshot_start": "2000-01-03",
+    "snapshot_end": "2026-07-10",
+    "analysis_slice_sha256": "c74fb12f046513fd705f9dc0c301a8fd726454f6509ca4e754e0689204a60e65",
+    "data_start": "2000-01-04",
+    "data_end": "2026-05-18",
+    "n_data": 6632,
+    "oos_policy_start": "2019-01-01",
+    "oos_end": "2026-05-18",
+    "first_forecast_date": "2019-01-02",
+    "last_forecast_date": "2026-05-18",
+    "first_valid_oos_date": "2019-01-02",
+    "last_valid_oos_date": "2026-05-18",
+    "n_oos_forecast_dates": 1854,
+    "n_valid_oos": 1852,
+    "n_zero_return_excluded": 2,
+    "zero_return_excluded_dates": [
+      "2022-08-11",
+      "2023-07-21"
+    ],
+    "zero_return_policy": "Exclude r_squared <= 1e-16 from the shared QLIKE/DM mask for both models.",
+    "covid_exclusion_start": "2020-03-01",
+    "covid_exclusion_end": "2021-06-30",
+    "covid_window_scope": "K1378 broad sensitivity window; K1393 uses the narrower Paper 9 window 2020-02-01 to 2020-06-30.",
+    "covid_exclusion_semantics": "Scoring-only exclusion: post-COVID rolling fits may contain COVID observations in their trailing estimation window.",
     "window": 2000,
     "refit_every": 63,
-    "harvey_threshold": 3.0,
-    "qlike_proxy": "r_squared (squared log return)",
-    "elapsed_seconds": 83.8,
-    "timestamp": "2026-05-19T12:31:46.807027+00:00"
+    "refit_count": 30,
+    "forecast_horizon_days": 1,
+    "seed": 42,
+    "qlike_proxy": "daily squared log return",
+    "qlike_formula": "actual/predicted - log(actual/predicted) - 1",
+    "proxy_caveat": "Daily squared return is a noisy proxy; Patton robustness is an expected-loss result under conditional-unbiasedness assumptions, not a guarantee for every finite sample.",
+    "a4f_information_set": "sigma_t uses VIX_{t-1} and r_{t-1}; no day-t information",
+    "a4f_normalization": "u_{t-1}=r_{t-1}/sqrt(tau_t), where tau_t is predetermined by VIX_{t-1}; identical in fit and OOS recursion.",
+    "dm_method": "volpred.stats.model_evaluation.dm_test with Bartlett Newey-West HAC",
+    "dm_hac_bandwidth_rule": "max(1, min(ceil(h^(1/3) * n^(1/3)), n//4)) applied separately to each period",
+    "dm_sign_convention": "A4f loss minus GJR loss; negative t favors A4f",
+    "dm_small_sample_correction": "none for primary; correct HLN factor reported diagnostically",
+    "harvey_reporting_threshold": 3.0,
+    "saved_array_sha256": {
+      "k1378_losses_gjr.npy": "3b69a6100aace1b96c83ab762c5818ea22e0cf0d95467830deaccf05e8dd868c",
+      "k1378_losses_a4f.npy": "fb3cc5c3c84558e80da4491b0e87c03245b8fe07fd91106be62bca4577ab43e1",
+      "k1378_valid_mask.npy": "c77fef52457a4a360a75b0f91074f17e45aa9c396fa8c02dae028356d8a8215c",
+      "k1378_no_covid_mask.npy": "a7e5d3557dae5827296760a987d8cb5838448a8fa6a775103cd49d29c80dfd9a"
+    }
+  },
+  "periods": {
+    "full_oos": {
+      "label": "Full OOS",
+      "n": 1852,
+      "start": "2019-01-02",
+      "end": "2026-05-18",
+      "a4f_qlike_mean": 1.3998120447667672,
+      "gjr_qlike_mean": 1.4795030214805047,
+      "loss_differential": "A4f_minus_GJR",
+      "mean_loss_differential": -0.07969097671373734,
+      "a4f_qlike_advantage_pct": 5.386334164697585,
+      "loss_differential_acf": {
+        "lag_1": -0.022755635833611114,
+        "lag_2": 0.0005566006866588849,
+        "lag_3": -0.020249923717247275,
+        "lag_4": 0.05413621383164864,
+        "lag_5": -0.010089179759904754
+      },
+      "hac_max_lag": 13,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": -4.231945178772862,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": -4.28096007572618,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": -4.285175485722557,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": -4.316568776849115,
+          "hac_applied": true
+        },
+        "lag_13": {
+          "dm_t": -4.370344202941814,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": -4.503692378801965,
+          "hac_applied": true
+        }
+      },
+      "dm_t": -4.370344202941814,
+      "dm_p": 1.309302972885007e-05,
+      "dm_sign_convention": "A4f loss minus GJR loss; negative t favors A4f",
+      "harvey_threshold": 3.0,
+      "harvey_pass": true,
+      "harvey_winner": "A4f",
+      "hln_diagnostic": {
+        "factor": 0.9997299851442609,
+        "dm_t": -4.369164145082326,
+        "dm_p": 1.3163243903463738e-05,
+        "primary": false
+      }
+    },
+    "no_covid_oos": {
+      "label": "OOS excluding broad COVID window",
+      "n": 1515,
+      "start": "2019-01-02",
+      "end": "2026-05-18",
+      "a4f_qlike_mean": 1.4082791517506839,
+      "gjr_qlike_mean": 1.480788282457891,
+      "loss_differential": "A4f_minus_GJR",
+      "mean_loss_differential": -0.07250913070720695,
+      "a4f_qlike_advantage_pct": 4.896657514526837,
+      "loss_differential_acf": {
+        "lag_1": -0.05460530752712308,
+        "lag_2": -0.036430932328087126,
+        "lag_3": -0.0185552646434917,
+        "lag_4": 0.010767426052514639,
+        "lag_5": -7.420059992401681e-05
+      },
+      "hac_max_lag": 12,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": -5.052212677151311,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": -5.196169731024528,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": -5.483531648589564,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": -5.580212487442541,
+          "hac_applied": true
+        },
+        "lag_12": {
+          "dm_t": -5.603420132769345,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": -5.783425795390693,
+          "hac_applied": true
+        }
+      },
+      "dm_t": -5.603420132769345,
+      "dm_p": 2.4928297204240835e-08,
+      "dm_sign_convention": "A4f loss minus GJR loss; negative t favors A4f",
+      "harvey_threshold": 3.0,
+      "harvey_pass": true,
+      "harvey_winner": "A4f",
+      "hln_diagnostic": {
+        "factor": 0.9996699125178268,
+        "dm_t": -5.60157051392616,
+        "dm_p": 2.519034433928118e-08,
+        "primary": false
+      }
+    },
+    "pre_covid_oos": {
+      "label": "Pre-COVID OOS",
+      "n": 292,
+      "start": "2019-01-02",
+      "end": "2020-02-28",
+      "a4f_qlike_mean": 1.5079450720131045,
+      "gjr_qlike_mean": 1.5766795825513926,
+      "loss_differential": "A4f_minus_GJR",
+      "mean_loss_differential": -0.0687345105382883,
+      "a4f_qlike_advantage_pct": 4.359446985865166,
+      "loss_differential_acf": {
+        "lag_1": -0.004861052499435503,
+        "lag_2": 0.014618482684995457,
+        "lag_3": 0.038309991137635856,
+        "lag_4": -0.014358617572926223,
+        "lag_5": -0.013308735018097623
+      },
+      "hac_max_lag": 7,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": -2.6578808214691017,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": -2.664386880987891,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": -2.611312136021761,
+          "hac_applied": true
+        },
+        "lag_7": {
+          "dm_t": -2.6402360238131135,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": -2.7151721492837657,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": -2.8289099088236136,
+          "hac_applied": true
+        }
+      },
+      "dm_t": -2.6402360238131135,
+      "dm_p": 0.00873187936869213,
+      "dm_sign_convention": "A4f loss minus GJR loss; negative t favors A4f",
+      "harvey_threshold": 3.0,
+      "harvey_pass": false,
+      "harvey_winner": null,
+      "hln_diagnostic": {
+        "factor": 0.9982862026822535,
+        "dm_t": -2.635711194397285,
+        "dm_p": 0.008846356248359203,
+        "primary": false
+      }
+    },
+    "covid_only_oos": {
+      "label": "Broad COVID window only",
+      "n": 337,
+      "start": "2020-03-02",
+      "end": "2021-06-30",
+      "a4f_qlike_mean": 1.3617477507589515,
+      "gjr_qlike_mean": 1.473725067828456,
+      "loss_differential": "A4f_minus_GJR",
+      "mean_loss_differential": -0.1119773170695045,
+      "a4f_qlike_advantage_pct": 7.5982501427151385,
+      "loss_differential_acf": {
+        "lag_1": -0.002516427116747532,
+        "lag_2": 0.022344471078178083,
+        "lag_3": -0.021355519764379927,
+        "lag_4": 0.080549702590242,
+        "lag_5": -0.02342101196705083
+      },
+      "hac_max_lag": 7,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": -1.3843699162566179,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": -1.3861202472465133,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": -1.350597149917773,
+          "hac_applied": true
+        },
+        "lag_7": {
+          "dm_t": -1.3441564506768602,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": -1.3614684311127399,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": -1.4476458071925298,
+          "hac_applied": true
+        }
+      },
+      "dm_t": -1.3441564506768602,
+      "dm_p": 0.17980464559016607,
+      "dm_sign_convention": "A4f loss minus GJR loss; negative t favors A4f",
+      "harvey_threshold": 3.0,
+      "harvey_pass": false,
+      "harvey_winner": null,
+      "hln_diagnostic": {
+        "factor": 0.9985152181862602,
+        "dm_t": -1.3421606716240742,
+        "dm_p": 0.18045009871218815,
+        "primary": false
+      }
+    },
+    "post_covid_oos": {
+      "label": "Post-COVID OOS",
+      "n": 1223,
+      "start": "2021-07-01",
+      "end": "2026-05-18",
+      "a4f_qlike_mean": 1.3844832002244154,
+      "gjr_qlike_mean": 1.457893548502615,
+      "loss_differential": "A4f_minus_GJR",
+      "mean_loss_differential": -0.07341034827819981,
+      "a4f_qlike_advantage_pct": 5.035370953770834,
+      "loss_differential_acf": {
+        "lag_1": -0.06157461294279973,
+        "lag_2": -0.04313594018824319,
+        "lag_3": -0.026584018204525,
+        "lag_4": 0.014106783502339263,
+        "lag_5": 0.003926454657391382
+      },
+      "hac_max_lag": 11,
+      "hac_lag_sensitivity": {
+        "lag_0": {
+          "dm_t": -4.403245512625488,
+          "hac_applied": false
+        },
+        "lag_1": {
+          "dm_t": -4.545531660425426,
+          "hac_applied": true
+        },
+        "lag_5": {
+          "dm_t": -4.851393193120994,
+          "hac_applied": true
+        },
+        "lag_10": {
+          "dm_t": -4.915611207261302,
+          "hac_applied": true
+        },
+        "lag_11": {
+          "dm_t": -4.921907053777633,
+          "hac_applied": true
+        },
+        "lag_20": {
+          "dm_t": -5.106077935743914,
+          "hac_applied": true
+        }
+      },
+      "dm_t": -4.921907053777633,
+      "dm_p": 9.742372704124591e-07,
+      "dm_sign_convention": "A4f loss minus GJR loss; negative t favors A4f",
+      "harvey_threshold": 3.0,
+      "harvey_pass": true,
+      "harvey_winner": "A4f",
+      "hln_diagnostic": {
+        "factor": 0.9995910856504554,
+        "dm_t": -4.919894415356219,
+        "dm_p": 9.841114486858543e-07,
+        "primary": false
+      }
+    }
   },
   "full_oos": {
+    "label": "Full OOS",
     "n": 1852,
-    "gjr_qlike_mean": 624.3266721124259,
-    "a4f_qlike_mean": 688.4875400369174,
-    "dm_t_stat": -1.1911402440214907,
-    "dm_t_stat_abs": 1.1911402440214907,
-    "dm_p_value": 0.2337512493307039,
-    "harvey_pass": false
+    "start": "2019-01-02",
+    "end": "2026-05-18",
+    "a4f_qlike_mean": 1.3998120447667672,
+    "gjr_qlike_mean": 1.4795030214805047,
+    "loss_differential": "A4f_minus_GJR",
+    "mean_loss_differential": -0.07969097671373734,
+    "a4f_qlike_advantage_pct": 5.386334164697585,
+    "loss_differential_acf": {
+      "lag_1": -0.022755635833611114,
+      "lag_2": 0.0005566006866588849,
+      "lag_3": -0.020249923717247275,
+      "lag_4": 0.05413621383164864,
+      "lag_5": -0.010089179759904754
+    },
+    "hac_max_lag": 13,
+    "hac_lag_sensitivity": {
+      "lag_0": {
+        "dm_t": -4.231945178772862,
+        "hac_applied": false
+      },
+      "lag_1": {
+        "dm_t": -4.28096007572618,
+        "hac_applied": true
+      },
+      "lag_5": {
+        "dm_t": -4.285175485722557,
+        "hac_applied": true
+      },
+      "lag_10": {
+        "dm_t": -4.316568776849115,
+        "hac_applied": true
+      },
+      "lag_13": {
+        "dm_t": -4.370344202941814,
+        "hac_applied": true
+      },
+      "lag_20": {
+        "dm_t": -4.503692378801965,
+        "hac_applied": true
+      }
+    },
+    "dm_t": -4.370344202941814,
+    "dm_p": 1.309302972885007e-05,
+    "dm_sign_convention": "A4f loss minus GJR loss; negative t favors A4f",
+    "harvey_threshold": 3.0,
+    "harvey_pass": true,
+    "harvey_winner": "A4f",
+    "hln_diagnostic": {
+      "factor": 0.9997299851442609,
+      "dm_t": -4.369164145082326,
+      "dm_p": 1.3163243903463738e-05,
+      "primary": false
+    }
   },
   "no_covid_oos": {
+    "label": "OOS excluding broad COVID window",
     "n": 1515,
-    "gjr_qlike_mean": 643.4576432338923,
-    "a4f_qlike_mean": 662.8330951136666,
-    "dm_t_stat": -0.36166793813847603,
-    "dm_t_stat_abs": 0.36166793813847603,
-    "dm_p_value": 0.7176506560801825,
-    "harvey_pass": false,
-    "sf1_verdict": "CONFIRMED"
+    "start": "2019-01-02",
+    "end": "2026-05-18",
+    "a4f_qlike_mean": 1.4082791517506839,
+    "gjr_qlike_mean": 1.480788282457891,
+    "loss_differential": "A4f_minus_GJR",
+    "mean_loss_differential": -0.07250913070720695,
+    "a4f_qlike_advantage_pct": 4.896657514526837,
+    "loss_differential_acf": {
+      "lag_1": -0.05460530752712308,
+      "lag_2": -0.036430932328087126,
+      "lag_3": -0.0185552646434917,
+      "lag_4": 0.010767426052514639,
+      "lag_5": -7.420059992401681e-05
+    },
+    "hac_max_lag": 12,
+    "hac_lag_sensitivity": {
+      "lag_0": {
+        "dm_t": -5.052212677151311,
+        "hac_applied": false
+      },
+      "lag_1": {
+        "dm_t": -5.196169731024528,
+        "hac_applied": true
+      },
+      "lag_5": {
+        "dm_t": -5.483531648589564,
+        "hac_applied": true
+      },
+      "lag_10": {
+        "dm_t": -5.580212487442541,
+        "hac_applied": true
+      },
+      "lag_12": {
+        "dm_t": -5.603420132769345,
+        "hac_applied": true
+      },
+      "lag_20": {
+        "dm_t": -5.783425795390693,
+        "hac_applied": true
+      }
+    },
+    "dm_t": -5.603420132769345,
+    "dm_p": 2.4928297204240835e-08,
+    "dm_sign_convention": "A4f loss minus GJR loss; negative t favors A4f",
+    "harvey_threshold": 3.0,
+    "harvey_pass": true,
+    "harvey_winner": "A4f",
+    "hln_diagnostic": {
+      "factor": 0.9996699125178268,
+      "dm_t": -5.60157051392616,
+      "dm_p": 2.519034433928118e-08,
+      "primary": false
+    }
   },
   "covid_only_oos": {
+    "label": "Broad COVID window only",
     "n": 337,
-    "dm_t_stat": -1.5443226250387558,
-    "dm_t_stat_abs": 1.5443226250387558,
-    "dm_p_value": 0.12345148303782394,
-    "harvey_pass": false
-  }
+    "start": "2020-03-02",
+    "end": "2021-06-30",
+    "a4f_qlike_mean": 1.3617477507589515,
+    "gjr_qlike_mean": 1.473725067828456,
+    "loss_differential": "A4f_minus_GJR",
+    "mean_loss_differential": -0.1119773170695045,
+    "a4f_qlike_advantage_pct": 7.5982501427151385,
+    "loss_differential_acf": {
+      "lag_1": -0.002516427116747532,
+      "lag_2": 0.022344471078178083,
+      "lag_3": -0.021355519764379927,
+      "lag_4": 0.080549702590242,
+      "lag_5": -0.02342101196705083
+    },
+    "hac_max_lag": 7,
+    "hac_lag_sensitivity": {
+      "lag_0": {
+        "dm_t": -1.3843699162566179,
+        "hac_applied": false
+      },
+      "lag_1": {
+        "dm_t": -1.3861202472465133,
+        "hac_applied": true
+      },
+      "lag_5": {
+        "dm_t": -1.350597149917773,
+        "hac_applied": true
+      },
+      "lag_7": {
+        "dm_t": -1.3441564506768602,
+        "hac_applied": true
+      },
+      "lag_10": {
+        "dm_t": -1.3614684311127399,
+        "hac_applied": true
+      },
+      "lag_20": {
+        "dm_t": -1.4476458071925298,
+        "hac_applied": true
+      }
+    },
+    "dm_t": -1.3441564506768602,
+    "dm_p": 0.17980464559016607,
+    "dm_sign_convention": "A4f loss minus GJR loss; negative t favors A4f",
+    "harvey_threshold": 3.0,
+    "harvey_pass": false,
+    "harvey_winner": null,
+    "hln_diagnostic": {
+      "factor": 0.9985152181862602,
+      "dm_t": -1.3421606716240742,
+      "dm_p": 0.18045009871218815,
+      "primary": false
+    }
+  },
+  "verdict": {
+    "primary_period": "no_covid_oos",
+    "classification": "A4F_ROBUST_OUTSIDE_BROAD_COVID_WINDOW",
+    "harvey_winner": "A4f",
+    "interpretation": "A4f retains a Harvey-screened lower QLIKE outside K1378's broad COVID window."
+  },
+  "methodology_repair": {
+    "supersedes_k1378_pre_repair_artifact": true,
+    "pre_repair_knowledge_item": "k1378_sf1",
+    "pre_repair_issues": [
+      "QLIKE ratio was inverted as predicted/actual",
+      "h=1 DM variance omitted all autocovariances and became iid",
+      "A4f fit normalized by tau_t while OOS recursion normalized by tau_{t-1}",
+      "mutable Paper 9 CSV was not protected against duplicate dates",
+      "optimizer success, finite objectives, and infeasible penalty were not fail-closed",
+      "results JSON was written non-atomically"
+    ],
+    "comparison_caveat": "The rerun jointly changes loss orientation, HAC inference, A4f recursion, optimizer acceptance, and input provenance; old/new differences cannot be attributed to any one repair.",
+    "relation_to_k1393": "K1393 remains the Paper 9 narrow-COVID-window result. This corrected K1378 uses its original broader 2020-03-01 to 2021-06-30 sensitivity window and must not replace K1393's paper table."
+  },
+  "references": [
+    {
+      "authors": "Patton, A.J.",
+      "year": 2011,
+      "title": "Volatility forecast comparison using imperfect volatility proxies",
+      "journal": "Journal of Econometrics 160(1), 246-256",
+      "doi": "10.1016/j.jeconom.2010.03.034"
+    },
+    {
+      "authors": "Diebold, F.X.; Mariano, R.S.",
+      "year": 1995,
+      "title": "Comparing Predictive Accuracy",
+      "journal": "Journal of Business & Economic Statistics 13(3), 253-263",
+      "doi": "10.1080/07350015.1995.10524599"
+    },
+    {
+      "authors": "Newey, W.K.; West, K.D.",
+      "year": 1987,
+      "title": "A Simple, Positive Semi-definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix",
+      "journal": "Econometrica 55(3), 703-708",
+      "doi": "10.2307/1913610"
+    },
+    {
+      "authors": "Harvey, D.; Leybourne, S.; Newbold, P.",
+      "year": 1997,
+      "title": "Testing the equality of prediction mean squared errors",
+      "journal": "International Journal of Forecasting 13(2), 281-291",
+      "doi": "10.1016/S0169-2070(96)00719-4"
+    }
+  ]
 }

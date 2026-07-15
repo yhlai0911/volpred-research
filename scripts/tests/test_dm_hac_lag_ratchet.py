@@ -298,6 +298,29 @@ def test_k1379_manual_dm_repair_is_retired(
     assert "All A4f optimization starts failed" in source
 
 
+def test_k1378_degenerate_dm_repair_is_retired(
+    affected_sites, baseline, retired
+) -> None:
+    """K1378 now delegates to canonical HAC-DM and pins the repaired protocol."""
+    site = "experiments/k1378/k1378.py::dm_test"
+    assert site not in affected_sites
+    assert site not in baseline
+    assert site in retired
+
+    source = (REPO_ROOT / "experiments" / "k1378" / "k1378.py").read_text(
+        encoding="utf-8"
+    )
+    assert "canonical_dm_test(a4f, gjr, h=HORIZON)" in source
+    assert "qlike_pointwise(actual_oos, forecast_a4f)" in source
+    assert "u_prev = returns[absolute_index - 1] / np.sqrt(tau_t)" in source
+    assert 'OOS_END = "2026-05-18"' in source
+    assert "EXPECTED_SNAPSHOT_SHA256" in source
+    assert "if not np.all(forecast_valid)" in source
+    assert "All GJR optimizer starts failed" in source
+    assert "All A4f optimizer starts failed" in source
+    assert "os.replace(temporary, path)" in source
+
+
 def test_manual_variance_regex_regression() -> None:
     """The E[X^2]-E[X]^2 idiom is no_hac; the deviation form + HAC loop is not."""
     # Every equivalent way to write the squared mean must classify as no_hac.

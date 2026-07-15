@@ -98,6 +98,16 @@ def test_release_attempt_receipts_do_not_fabricate_audience_coverage(
                     "content": "",
                     "details": {"experiment_refs": ["K3004"]},
                 },
+                {
+                    "id": "mile_k3004_wont_fix_general",
+                    "title": "K3004 superseded general audit trail",
+                    "status": "wont_fix",
+                    "audience": "general",
+                    "tags": [],
+                    "description": "",
+                    "content": "",
+                    "details": {"experiment_refs": ["K3004"]},
+                },
             ],
             ensure_ascii=False,
         ),
@@ -266,3 +276,103 @@ def test_output_write_is_atomic(tmp_path: Path, monkeypatch) -> None:
     assert seen["dst_before_replace"] == '{"generated_at": "old"}'
     assert json.loads(out.read_text(encoding="utf-8"))["generated_at"] == "new"
     assert not out.with_name(out.name + ".tmp").exists()
+
+
+def test_latest_knowledge_uses_created_at_and_explicit_supersedes() -> None:
+    """A correction must replace an older item even when updated_at is absent."""
+    mod = _load_module()
+    old = {
+        "item_id": "k1378_sf1",
+        "experiment_id": "k1378",
+        "created_at": "2026-05-19T21:07:00",
+        "content": "old invalid K1378 conclusion",
+    }
+    correction = {
+        "item_id": "k1378_dm_hac_correction_20260715",
+        "experiment_id": "k1378",
+        "created_at": "2026-07-15T10:59:32+00:00",
+        "supersedes": ["k1378_sf1"],
+        "content": "fresh corrected K1378 conclusion",
+    }
+
+    selected = mod._latest_knowledge_by_k([old, correction])
+
+    assert selected["K1378"] is correction
+
+    reversed_selected = mod._latest_knowledge_by_k([correction, old])
+    assert reversed_selected["K1378"] is correction
+
+
+def test_latest_knowledge_uses_created_at_when_no_supersedes_edge() -> None:
+    mod = _load_module()
+    old = {
+        "experiment_id": "K3000",
+        "created_at": "2026-05-19T21:07:00",
+        "content": "old",
+    }
+    new = {
+        "experiment_id": "K3000",
+        "created_at": "2026-07-15T10:59:32+00:00",
+        "content": "new",
+    }
+
+    assert mod._latest_knowledge_by_k([new, old])["K3000"] is new
+
+
+def test_naive_knowledge_timestamp_is_interpreted_as_taipei_time() -> None:
+    mod = _load_module()
+    naive_local = {
+        "experiment_id": "K3005",
+        # Asia/Taipei 11:50 is 03:50 UTC.
+        "created_at": "2026-05-26T11:50:00",
+    }
+    aware_utc = {
+        "experiment_id": "K3005",
+        "created_at": "2026-05-26T04:00:00+00:00",
+    }
+
+    assert mod._latest_knowledge_by_k([aware_utc, naive_local])["K3005"] is aware_utc
+
+
+def test_latest_knowledge_falls_back_to_append_order_without_timestamps() -> None:
+    mod = _load_module()
+    old = {"experiment_id": "K3001", "content": "first"}
+    new = {"experiment_id": "K3001", "content": "second"}
+
+    assert mod._latest_knowledge_by_k([old, new])["K3001"] is new
+
+
+def test_explicit_supersedes_outweighs_timestamp_order() -> None:
+    """A dated backfill can still explicitly retire a later-timestamped item."""
+    mod = _load_module()
+    incumbent = {
+        "item_id": "old",
+        "experiment_id": "K3002",
+        "created_at": "2026-07-15T12:00:00+00:00",
+    }
+    correction = {
+        "item_id": "correction",
+        "experiment_id": "K3002",
+        "created_at": "2026-07-15T11:00:00+00:00",
+        "supersedes": ["old"],
+    }
+
+    assert mod._latest_knowledge_by_k([incumbent, correction])["K3002"] is correction
+
+
+def test_transitive_supersedes_chain_is_order_independent() -> None:
+    mod = _load_module()
+    first = {"item_id": "a", "experiment_id": "K3006"}
+    second = {
+        "item_id": "b",
+        "experiment_id": "K3006",
+        "supersedes": ["a"],
+    }
+    third = {
+        "item_id": "c",
+        "experiment_id": "K3006",
+        "supersedes": ["b"],
+    }
+
+    for entries in ([first, second, third], [third, first, second]):
+        assert mod._latest_knowledge_by_k(entries)["K3006"] is third

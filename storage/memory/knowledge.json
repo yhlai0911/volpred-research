@@ -41603,5 +41603,29 @@
     "created_at": "2026-07-15T17:03:54.708053+08:00",
     "timestamp": "2026-07-15T17:03:54.708053+08:00",
     "updated_at": "2026-07-15T17:03:54.708053+08:00"
+  },
+  {
+    "item_id": "k1378_dm_hac_correction_20260715",
+    "category": "methodology_correction",
+    "content": "K1378 methodology correction (2026-07-15) SUPERSEDES item k1378_sf1. The old 2026-05-19 K1378 numbers and conclusion are invalid because they used predicted/actual QLIKE, an h=1 local DM implementation with zero HAC autocovariances, inconsistent A4f tau timing between fit and OOS, and a mutable input later containing duplicate dates. Fresh rerun uses hash-pinned unique-date SPY/VIX data, fixed OOS end 2026-05-18, actual-first Patton QLIKE, canonical Bartlett-HAC DM, identical predetermined tau_t(VIX_{t-1}) normalization in fit/OOS, fail-closed optimizers, and atomic outputs. On 1,852 valid OOS days, full-period A4f versus GJR QLIKE is 1.399812 versus 1.479503, DM t=-4.3703, p=1.309e-05. Excluding K1378's broad COVID scoring window (2020-03-01 to 2021-06-30), n=1,515, A4f versus GJR QLIKE is 1.408279 versus 1.480788, DM t=-5.6034, p=2.493e-08: A4f is the sign-aware winner for this explicit pair at the |t|>3 reporting screen outside the window. For A4f versus GJR, COVID-only is n=337, DM t=-1.3442, p=0.1798, so it does not pass |t|>3; pre-COVID also fails the strict screen (t=-2.6402), while post-COVID passes in A4f's direction (t=-4.9219). Therefore the old public claim that A4f fails outside COVID is reversed; the evidence supports robustness outside this broad window, not crisis-specific superiority. This is a scoring-only exclusion and a noisy daily-r-squared proxy. K1393 remains Paper 9's separate narrow-window canonical evidence and is not overwritten or numerically imported.",
+    "evidence": [
+      "experiments/k1378/k1378_results.json",
+      "experiments/k1378/k1378.py",
+      "experiments/k1378/README.md",
+      "experiments/k1378/review_certification_20260715.md",
+      "storage/reports/feed.json::mile_54f79768"
+    ],
+    "confidence": 0.97,
+    "verdict": "PASS",
+    "experiment_id": "k1378",
+    "k_id": "K1378",
+    "experiment_path": "experiments/k1378/",
+    "reviewer_source": "Codex fresh-context independent post-run review PASS; deterministic replay and independent array recomputation",
+    "supersedes": [
+      "k1378_sf1"
+    ],
+    "supersedes_reason": "Old loss orientation, DM inference, A4f timing, and input provenance were invalid.",
+    "public_article_id": "mile_54f79768",
+    "created_at": "2026-07-15T10:59:32.627699+00:00"
   }
 ]

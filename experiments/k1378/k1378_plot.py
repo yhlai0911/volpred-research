@@ -1,83 +1,209 @@
-"""
-K1378 — DM t-stat across 3 sub-periods bar chart.
-Harvey ±3.0 threshold lines included.
-Output: experiments/k1378/k1378_dm_subperiods.png
-"""
+#!/usr/bin/env python3
+"""Render K1378's corrected, result-driven diagnostic and article charts."""
+
+from __future__ import annotations
+
+import hashlib
 import json
+import os
 import sys
-import numpy as np
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 from pathlib import Path
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
-from plot_style import apply_cjk_style
+from plot_style import apply_cjk_style  # noqa: E402
 
-apply_cjk_style()
+from k1378 import OOS_END, OOS_START, load_analysis_data  # noqa: E402
 
-HERE = Path(__file__).parent
-results_path = HERE / "k1378_results.json"
-out_path = HERE / "k1378_dm_subperiods.png"
 
-with open(results_path) as f:
-    res = json.load(f)
+HERE = Path(__file__).resolve().parent
+PROJECT_ROOT = HERE.parents[1]
+ASSET_DIR = PROJECT_ROOT / "storage" / "drafts" / "assets"
+RESULTS_PATH = HERE / "k1378_results.json"
+PERIOD_KEYS = (
+    "full_oos",
+    "pre_covid_oos",
+    "covid_only_oos",
+    "post_covid_oos",
+    "no_covid_oos",
+)
+PERIOD_LABELS = {
+    "full_oos": "全期",
+    "pre_covid_oos": "疫情前",
+    "covid_only_oos": "廣義疫情窗",
+    "post_covid_oos": "疫情後",
+    "no_covid_oos": "排除疫情窗",
+}
+COLORS = ["#4C72B0", "#55A868", "#C44E52", "#8172B3", "#DD8452"]
 
-# ---- Data ----------------------------------------------------------------
-labels = ["全期 OOS\n(n=1,852)", "排除 COVID\n(n=1,515)", "僅 COVID\n(n=337)"]
-dm_vals = [
-    res["full_oos"]["dm_t_stat"],
-    res["no_covid_oos"]["dm_t_stat"],
-    res["covid_only_oos"]["dm_t_stat"],
-]
-# DM t < 0 means A4f better than GJR (lower QLIKE)
-colors = ["#4C72B0", "#DD8452", "#55A868"]
 
-# ---- Plot ----------------------------------------------------------------
-fig, ax = plt.subplots(figsize=(8, 5))
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
-bars = ax.bar(labels, dm_vals, color=colors, width=0.5, zorder=3,
-              edgecolor="white", linewidth=0.8)
 
-# Harvey threshold lines
-for y, ls, label in [
-    (3.0,  "--", "Harvey 門檻 +3.0"),
-    (-3.0, "--", "Harvey 門檻 -3.0"),
-]:
-    ax.axhline(y, linestyle=ls, color="#CC0000", linewidth=1.4,
-               zorder=4, label=label)
+def _save_atomic(fig: plt.Figure, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_name(f".{destination.stem}.tmp{destination.suffix}")
+    fig.savefig(temporary, dpi=180, bbox_inches="tight", facecolor="white")
+    image = plt.imread(temporary)
+    if image.ndim not in (2, 3) or min(image.shape[:2]) < 100:
+        temporary.unlink(missing_ok=True)
+        raise RuntimeError(f"Rendered chart failed verification: {destination.name}")
+    os.replace(temporary, destination)
+    plt.close(fig)
+    print(f"Saved: {destination}")
 
-# Zero line
-ax.axhline(0, color="#999999", linewidth=0.8, zorder=2)
 
-# Value labels on bars
-for bar, v in zip(bars, dm_vals):
-    va_off = 0.07 if v >= 0 else -0.12
-    ax.text(bar.get_x() + bar.get_width() / 2,
-            v + va_off, f"{v:.2f}",
-            ha="center", va="bottom" if v >= 0 else "top",
-            fontsize=11, fontweight="bold", color="#222222")
+def _load_inputs() -> tuple[dict, pd.DatetimeIndex, np.ndarray, np.ndarray, np.ndarray]:
+    results = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
+    if results.get("experiment_id") != "k1378":
+        raise RuntimeError("Unexpected results artifact")
+    if set(PERIOD_KEYS) - set(results.get("periods", {})):
+        raise RuntimeError("Corrected period schema is incomplete; rerun k1378.py first")
 
-# Shade "need to reach" zone (|t| > 3 for A4f to win)
-ax.axhspan(-3.0, -5.0, alpha=0.06, color="#CC0000",
-           label="A4f 須超越區（DM t < -3）")
+    filenames = {
+        "gjr": "k1378_losses_gjr.npy",
+        "a4f": "k1378_losses_a4f.npy",
+        "valid": "k1378_valid_mask.npy",
+    }
+    expected_hashes = results["metadata"]["saved_array_sha256"]
+    for filename in filenames.values():
+        path = HERE / filename
+        if _sha256(path) != expected_hashes[filename]:
+            raise RuntimeError(f"Array hash mismatch: {filename}")
 
-ax.set_ylim(-3.5, 1.5)
-ax.set_ylabel("DM t 統計量（A4f vs GJR-GARCH）", fontsize=11)
-ax.set_title("K1378：三段期間 DM 統計量比較\nA4f 拿掉 COVID 後優勢消失", fontsize=12)
-ax.tick_params(axis="x", labelsize=10)
-ax.tick_params(axis="y", labelsize=10)
-ax.grid(axis="y", alpha=0.3, zorder=0)
+    loss_gjr = np.load(HERE / filenames["gjr"], allow_pickle=False)
+    loss_a4f = np.load(HERE / filenames["a4f"], allow_pickle=False)
+    valid = np.load(HERE / filenames["valid"], allow_pickle=False)
+    frame, _ = load_analysis_data()
+    oos_dates = frame.index[(frame.index >= OOS_START) & (frame.index <= OOS_END)]
+    if not (len(oos_dates) == len(loss_gjr) == len(loss_a4f) == len(valid)):
+        raise RuntimeError("Date/loss array lengths disagree")
+    return results, oos_dates, loss_a4f, loss_gjr, valid
 
-# Legend
-handles, leg_labels = ax.get_legend_handles_labels()
-# add custom bar patch for note
-note_patch = mpatches.Patch(color="none", label="DM t < 0 = A4f 較佳")
-ax.legend(handles=handles + [note_patch],
-          labels=leg_labels + ["DM t < 0 = A4f 較佳"],
-          fontsize=9, loc="upper right", framealpha=0.8)
 
-fig.tight_layout()
-fig.savefig(out_path, dpi=150, bbox_inches="tight")
-print(f"Saved: {out_path}")
+def _period_axis_labels(results: dict) -> list[str]:
+    return [
+        f"{PERIOD_LABELS[key]}\n(n={results['periods'][key]['n']:,})"
+        for key in PERIOD_KEYS
+    ]
+
+
+def render_dm_chart(results: dict) -> None:
+    values = [results["periods"][key]["dm_t"] for key in PERIOD_KEYS]
+    fig, axis = plt.subplots(figsize=(10.2, 5.8))
+    bars = axis.bar(_period_axis_labels(results), values, color=COLORS, width=0.62)
+    axis.axhline(0.0, color="#777777", linewidth=0.9)
+    axis.axhline(3.0, color="#B22222", linestyle="--", linewidth=1.25)
+    axis.axhline(-3.0, color="#B22222", linestyle="--", linewidth=1.25)
+    for bar, value in zip(bars, values, strict=True):
+        offset = 0.10 if value >= 0 else -0.10
+        axis.text(
+            bar.get_x() + bar.get_width() / 2,
+            value + offset,
+            f"{value:+.2f}",
+            ha="center",
+            va="bottom" if value >= 0 else "top",
+            fontsize=10,
+            fontweight="bold",
+        )
+    margin = max(0.8, 0.12 * max(abs(value) for value in values))
+    axis.set_ylim(min(-3.0, min(values)) - margin, max(3.0, max(values)) + margin)
+    axis.set_ylabel("Bartlett-HAC DM t（A4f loss − GJR loss）")
+    axis.set_title("K1378：修正後的分期預測損失比較")
+    axis.text(
+        0.01,
+        0.02,
+        "負值偏向 A4f；正值偏向 GJR。紅色虛線為 |t|=3 報告門檻。",
+        transform=axis.transAxes,
+        fontsize=9,
+        color="#444444",
+    )
+    axis.grid(axis="y", alpha=0.25)
+    fig.tight_layout()
+    _save_atomic(fig, HERE / "k1378_dm_subperiods.png")
+
+
+def render_rolling_gap(
+    results: dict,
+    dates: pd.DatetimeIndex,
+    loss_a4f: np.ndarray,
+    loss_gjr: np.ndarray,
+    valid: np.ndarray,
+) -> None:
+    difference = np.where(valid, loss_a4f - loss_gjr, np.nan)
+    rolling = pd.Series(difference, index=dates).rolling(63, min_periods=40).mean()
+    fig, axis = plt.subplots(figsize=(11.0, 5.6))
+    axis.plot(rolling.index, rolling, color="#355C7D", linewidth=1.25)
+    axis.axhline(0.0, color="#333333", linewidth=0.9)
+    axis.axvspan(
+        pd.Timestamp(results["metadata"]["covid_exclusion_start"]),
+        pd.Timestamp(results["metadata"]["covid_exclusion_end"]),
+        color="#C44E52",
+        alpha=0.12,
+        label="K1378 廣義疫情窗",
+    )
+    axis.set_ylabel("63 日平均 QLIKE 差（A4f − GJR）")
+    axis.set_title("修正後的相對預測損失隨時間變化")
+    axis.text(
+        0.01,
+        0.02,
+        "0 以下代表 A4f 在該段期間平均損失較低；單日平方報酬是噪音較高的波動代理。",
+        transform=axis.transAxes,
+        fontsize=9,
+        color="#444444",
+    )
+    axis.legend(frameon=False, loc="upper right")
+    axis.grid(axis="y", alpha=0.23)
+    fig.tight_layout()
+    _save_atomic(fig, ASSET_DIR / "k1378_loss_gap_rolling.png")
+
+
+def render_period_gap(results: dict) -> None:
+    values = [
+        results["periods"][key]["mean_loss_differential"] for key in PERIOD_KEYS
+    ]
+    fig, axis = plt.subplots(figsize=(10.2, 5.8))
+    bars = axis.bar(_period_axis_labels(results), values, color=COLORS, width=0.62)
+    axis.axhline(0.0, color="#333333", linewidth=0.9)
+    for bar, value in zip(bars, values, strict=True):
+        axis.text(
+            bar.get_x() + bar.get_width() / 2,
+            value,
+            f"{value:+.3f}",
+            ha="center",
+            va="bottom" if value >= 0 else "top",
+            fontsize=9,
+            fontweight="bold",
+        )
+    axis.set_ylabel("平均 QLIKE 差（A4f − GJR）")
+    axis.set_title("修正後的分期平均損失差")
+    axis.text(
+        0.01,
+        0.02,
+        "負值代表 A4f 平均損失較低；是否穩健仍以 Bartlett-HAC DM 檢定判讀。",
+        transform=axis.transAxes,
+        fontsize=9,
+        color="#444444",
+    )
+    axis.grid(axis="y", alpha=0.23)
+    fig.tight_layout()
+    _save_atomic(fig, ASSET_DIR / "k1378_period_gap_bars.png")
+
+
+def main() -> None:
+    apply_cjk_style()
+    results, dates, loss_a4f, loss_gjr, valid = _load_inputs()
+    render_dm_chart(results)
+    render_rolling_gap(results, dates, loss_a4f, loss_gjr, valid)
+    render_period_gap(results)
+
+
+if __name__ == "__main__":
+    main()

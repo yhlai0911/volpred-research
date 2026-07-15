@@ -1,0 +1,87 @@
+{
+  "id": "mile_54f79768",
+  "title": "更正：拿掉疫情後，複雜模型的優勢沒有消失",
+  "description": "我們重跑了疫情排除檢驗，發現舊文核心結論顛倒：拿掉 2020 至 2021 年中的廣義疫情窗口後，納入恐慌指標的模型仍有約 4.9% 較低預測損失，而且通過嚴格統計檢驗。",
+  "content": "# 更正：拿掉疫情後，複雜模型的優勢沒有消失\n\n> **更正說明（2026-07-15）**：這篇文章的舊版結論是錯的。舊計算把預測損失公式的\n> 分子分母放反，統計比較漏掉時間相依性，也讓同一模型在估計與預測時用了不一致的尺度。\n> 我們已用固定、無重複日期的資料重新估計全部 1,854 個樣本外預測。新結果推翻舊文所稱\n> 「拿掉疫情後，複雜模型仍未翻身」。下文已完整改寫，保留這段更正而不掩蓋錯誤。\n\n[提出: Codex, 執行: Codex]\n\n想像你拿一把刻度印反的尺量桌子。讀數看似精確，甚至可以算到小數點後三位，但「精確」\n沒有意義，因為尺本身錯了。這次的模型比較就是同一種問題：不是多跑一次就好，而是要先把\n尺修正，再從原始預測一路重算。\n\n修正後的答案很清楚：把 2020 年 3 月到 2021 年 6 月這段廣義疫情窗口拿掉，會參考前一天\n恐慌指標的模型，預測損失仍比傳統模型低約 4.9%，而且差異通過嚴格統計檢驗。它的優勢並\n不是靠疫情那一段歷史撐起來。\n\n## 這次到底在比什麼\n\n兩個模型都在猜「明天市場會有多大波動」，不是猜股價漲跌，也不是比較投資報酬。\n\n傳統模型主要看過去的價格震盪；較複雜的模型還會讀取前一天的 VIX。可以把 VIX 想成市場\n每天更新的恐懼溫度計：它不只記錄價格剛剛震了多大，也濃縮了選擇權市場對未來風險的定價。\n\n每一天的預測都只能使用前一天已知的報酬與 VIX，再拿隔天實際發生的平方報酬評分。分數越\n低越好。整個樣本外期間從 2019-01-02 到 2026-05-18，共有 1,854 個預測日；扣除兩個平方\n報酬接近零、無法安全計分的日期後，兩個模型在完全相同的 1,852 天上比較。\n\n## 五段資料給出的答案\n\n| 評分區間 | 有效天數 | 恐慌指標模型 | 傳統模型 | 前者損失降低 | 嚴格檢驗 |\n|---|---:|---:|---:|---:|---|\n| 全期間 | 1,852 | 1.400 | 1.480 | 5.4% | 通過（強度 4.37） |\n| 疫情前 | 292 | 1.508 | 1.577 | 4.4% | 未過嚴格門檻（2.64） |\n| 廣義疫情窗口 | 337 | 1.362 | 1.474 | 7.6% | 未達顯著（1.34） |\n| 疫情後 | 1,223 | 1.384 | 1.458 | 5.0% | 通過（強度 4.92） |\n| 排除疫情窗口 | 1,515 | 1.408 | 1.481 | 4.9% | 通過（強度 5.60） |\n\n最重要的是最後一列。拿掉廣義疫情窗口後，差距沒有消失，統計證據反而更穩。舊文把這一列\n寫成「複雜模型沒有翻身」，如今必須明確撤回。\n\n另一個反直覺細節是：COVID 那一列的平均差距最大，卻沒有通過檢驗。原因不是數字互相矛盾，\n而是疫情期間每天的誤差差異也特別劇烈。平均領先很多，不等於我們能可靠地排除「只是高噪音\n下的偶然」。相反地，疫情後的平均改善只有約 5.0%，但 1,223 天累積出的證據更穩定。\n\n這正是為什麼不能只看柱子長短。效果有多大，和效果有多可靠，是兩個問題。\n\n## 為什麼疫情外仍可能有幫助\n\n一個合理但尚未被因果識別的解釋是：VIX 不只是危機警報器。即使市場沒有崩盤，選擇權價格\n仍持續反映避險需求、事件風險與風險承擔意願。把這個每天變動的市場狀態放進波動模型，可能\n比單看歷史報酬多一層資訊。\n\n不過，這次實驗只能說「使用前一天 VIX 的模型在這段固定樣本裡預測損失較低」，不能說 VIX\n造成了改善，也不能直接推導成可交易策略。波動預測較準，和扣除成本後能否賺錢，仍是兩件事。\n\n## 舊版為什麼會得出相反答案\n\n這次不是一般的數字更新，而是四個方法問題疊在一起：\n\n1. 預測損失本應以「實際值除以預測值」計算，舊版卻反過來。\n2. 舊統計程式在一天期預測時，沒有真正處理連續日期之間的相依性。\n3. 恐慌指標模型在估計與樣本外預測時，對同一個當日尺度用了不同時點。\n4. 舊資料檔後來出現重複日期，卻沒有內容雜湊與唯一日期檢查來阻止漂移。\n\n新版把資料內容鎖定，固定分析終點，並要求每次最佳化、每一筆預測、每一個輸出檔都通過完整\n檢查才落盤。五段結果全部從新產生的逐日損失重新計算，沒有沿用另一個實驗的數字。\n\n## 讀者真正可以帶走什麼\n\n第一，看到「某模型只在危機有用」或「某模型全靠危機撐場」時，最好的檢查不是爭辯，而是把\n危機窗口拿掉後，用相同預測、相同評分規則重算。這次重算後，優勢仍在。\n\n第二，平均差距和統計可靠度要分開看。COVID 段的平均改善最大，卻最不穩；疫情後的改善較小，\n反而最可靠。只挑最好看的百分比，很容易寫出過度自信的故事。\n\n第三，更正研究結果不能只在角落補一句。只要公式、資料或推論方法改變了結論，公開文章、圖表\n和知識紀錄就都應同步修正。保留更正軌跡，比假裝舊版沒有存在過更重要。\n\n## 局限\n\n這仍是 SPY 的單一資料版本、單一模型對與一個預先指定的廣義疫情窗口。實際波動看不見，我們\n用每日平方報酬做代理，因此單日噪音很高。排除疫情也只發生在最後評分：疫情後重新估計模型時，\n過去的疫情資料仍可能留在 2,000 日滾動視窗裡。所以這不是「假設疫情從未發生」的反事實實驗。\n\n## 懶人包圖組\n\n第一張圖顯示 63 日平均損失差。0 以下代表恐慌指標模型的平均預測損失較低；粉紅底是本次排除\n的廣義疫情窗口。曲線不是每天都在同一邊，但多數較長區段落在 0 以下。\n\n![修正後的 63 日平均相對預測損失](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1378_loss_gap_rolling.png)\n\n第二張圖列出五段平均差。每根柱子都在 0 以下，代表點估計方向一致；是否可靠仍須搭配上表的\n嚴格檢驗，不應只看柱高。\n\n![修正後五個評分區間的平均預測損失差](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1378_period_gap_bars.png)\n\n## 資料來源與重現\n\n- 本文所有數字只來自修正後的 `experiments/k1378/k1378_results.json`。\n- 計算入口：`experiments/k1378/k1378.py`；圖表入口：`experiments/k1378/k1378_plot.py`。\n- 資料來源：獨立下載並鎖定內容雜湊的 SPY 與 VIX 日資料快照；分析期至 2026-05-18。\n- 方法脈絡可參考 `experiments/k1379/`；Paper 9 的不同窄疫情窗口則由\n  `experiments/k1393/` 維持。兩者沒有提供本文數字，也沒有被移植進本次結果。\n\n一句話帶走：**拿掉疫情後，恐慌指標模型的優勢沒有消失；真正被拿掉的，是舊計算錯誤造成的\n相反故事。**\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1378"
+    ],
+    "image_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1378_loss_gap_rolling.png",
+    "cluster_waiver": "auto-discovered uncovered K1378 needs first general-audience coverage; draft-only methodology article, not event-chasing SPY repetition",
+    "topic_cluster": "spy",
+    "topic_cluster_30d": {
+      "count": 40,
+      "cap": 10,
+      "ratio": 0.146,
+      "exempt": false
+    },
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "US_EQUITY",
+        "VIX"
+      ],
+      "conclusion_class": "robust_model_improvement",
+      "mechanisms": [
+        "volatility_state_signal"
+      ],
+      "time_horizon": "one_day"
+    },
+    "arc_signature_backfill": {
+      "reason": "release_layer_arc_upgrade_a1",
+      "script": "scripts/backfill_arc_dedup_metadata.py",
+      "applied_at": "2026-06-18T02:13:29.530955+00:00"
+    },
+    "methodology_correction": {
+      "experiment_id": "K1378",
+      "results_code_sha256": "dd143a220cffa3ee27c3df54bfee564809733aaf9ea4a801ed1d38cbe030bf21",
+      "corrected_on": "2026-07-15",
+      "old_claim_withdrawn": true
+    }
+  },
+  "tags": [
+    "一般讀者",
+    "波動率",
+    "美股",
+    "模型比較",
+    "COVID",
+    "研究誠實"
+  ],
+  "related_articles": [],
+  "created_at": "2026-05-29T09:18:38.452986+00:00",
+  "published_at": "2026-06-05T10:07:14.208737+00:00",
+  "status": "published",
+  "verified_live_at": "2026-06-05T10:07:22.879281+00:00",
+  "errata": {
+    "update_at": "2026-07-15T10:45:47.675403+00:00",
+    "update_action": "k1378_methodology_correction",
+    "update_summary": "K1378 fresh rerun修正反向QLIKE、h=1 iid DM、A4f timing與重複日期輸入；排除廣義疫情窗後A4f仍通過嚴格門檻，撤回舊文相反敘事並重畫兩張圖。",
+    "update_history": [
+      {
+        "at": "2026-07-15T10:45:47.675403+00:00",
+        "action": "k1378_methodology_correction",
+        "summary": "K1378 fresh rerun修正反向QLIKE、h=1 iid DM、A4f timing與重複日期輸入；排除廣義疫情窗後A4f仍通過嚴格門檻，撤回舊文相反敘事並重畫兩張圖。",
+        "old_content_chars": 1646,
+        "new_content_chars": 2991,
+        "title_changed": true,
+        "description_changed": true,
+        "description_source": "frontmatter override",
+        "details_waiver_changed": false,
+        "details_metadata_changed": true,
+        "details_metadata_fields": [
+          "arc_signature",
+          "methodology_correction"
+        ],
+        "image_paths_normalized": 2,
+        "image_url_changed": true,
+        "content_audit_flag_cleared": false
+      }
+    ]
+  },
+  "image_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1378_loss_gap_rolling.png",
+  "last_updated_at": "2026-07-15T10:45:47.675403+00:00"
+}

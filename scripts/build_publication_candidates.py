@@ -25,6 +25,7 @@ import re
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).parent.parent
 KNOWLEDGE_PATH = ROOT / "storage/memory/knowledge.json"
@@ -32,6 +33,17 @@ FEED_PATH = ROOT / "storage/reports/feed.json"
 OUTPUT_PATH = ROOT / "storage/publication_candidates.json"
 READER_METRICS_LATEST_PATH = ROOT / "storage/analytics/latest.json"
 NEXT_TASKS_PATH = ROOT / "storage/next_tasks.json"
+
+# Rows carrying these audit-only states do not prove reader-visible coverage.
+# In particular, K1378's superseded research article is intentionally
+# ``wont_fix`` and must not hide the need for corrected research coverage.
+NON_RELEASE_ARTICLE_STATUSES = {
+    "unpublished",
+    "retracted",
+    "wont_fix",
+    "superseded",
+}
+KNOWLEDGE_NAIVE_TIMEZONE = ZoneInfo("Asia/Taipei")
 
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -132,6 +144,80 @@ def extract_k_id(experiment_id: str) -> str | None:
     if not m:
         return None
     return f"K{m.group(1)}"
+
+
+def _entry_datetime(entry: dict) -> datetime:
+    """Best available knowledge-entry timestamp, normalized to UTC.
+
+    KnowledgeSystem historically wrote ``created_at`` while some maintenance
+    jobs wrote ``updated_at`` or ``timestamp``. Comparing only ``updated_at``
+    makes two normal append-only entries tie at ``""`` and silently keeps the
+    oldest one — exactly how K1378's superseding correction was omitted from
+    publication_candidates.json.
+    """
+    parsed: list[datetime] = []
+    for field in ("updated_at", "created_at", "timestamp"):
+        raw = str(entry.get(field) or "").strip()
+        if not raw:
+            continue
+        try:
+            value = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except ValueError:  # silent-ok: malformed legacy timestamps fall through to other fields and deterministic append order.
+            continue
+        if value.tzinfo is None:
+            # MemorySystem historically emitted datetime.now().isoformat()
+            # without an offset. Those records are host-local Asia/Taipei
+            # times (several entries also carry an aware UTC timestamp exactly
+            # eight hours earlier), not UTC wall times.
+            value = value.replace(tzinfo=KNOWLEDGE_NAIVE_TIMEZONE)
+        parsed.append(value.astimezone(timezone.utc))
+    return max(parsed) if parsed else datetime.min.replace(tzinfo=timezone.utc)
+
+
+def _entry_ids(entry: dict) -> set[str]:
+    return {
+        str(value)
+        for value in (entry.get("item_id"), entry.get("id"))
+        if value is not None and str(value).strip()
+    }
+
+
+def _latest_knowledge_by_k(knowledge: list) -> dict[str, dict]:
+    """Choose the canonical latest knowledge item per K.
+
+    Explicit ``supersedes`` edges outrank timestamps. Otherwise compare the
+    best available timestamp and finally append order, which is the canonical
+    MemorySystem ordering when legacy records carry no timestamp at all.
+    """
+    grouped: dict[str, list[tuple[dict, int]]] = {}
+    for position, entry in enumerate(knowledge):
+        if not isinstance(entry, dict):
+            continue
+        k_id = extract_k_id(entry.get("experiment_id", ""))
+        if not k_id:
+            continue
+        grouped.setdefault(k_id, []).append((entry, position))
+
+    selected: dict[str, dict] = {}
+    for k_id, pairs in grouped.items():
+        superseded_ids: set[str] = set()
+        for entry, _ in pairs:
+            targets = entry.get("supersedes") or []
+            if isinstance(targets, str):
+                targets = [targets]
+            if isinstance(targets, list):
+                superseded_ids.update(str(value) for value in targets)
+        survivors = [
+            pair for pair in pairs if not (_entry_ids(pair[0]) & superseded_ids)
+        ]
+        # A malformed cycle can supersede every item. Fail soft to timestamp /
+        # append order rather than dropping the K entirely.
+        pool = survivors or pairs
+        selected[k_id] = max(
+            pool,
+            key=lambda pair: (_entry_datetime(pair[0]), pair[1]),
+        )[0]
+    return selected
 
 
 def derive_title(entry: dict) -> str:
@@ -306,7 +392,7 @@ def _feed_experiment_ref_families(feed: list[dict]) -> set[str]:
         if not isinstance(refs, list):
             continue
         status = str(article.get("status") or "").lower()
-        if status in {"unpublished", "retracted"}:
+        if status in NON_RELEASE_ARTICLE_STATUSES:
             continue
         for ref in refs:
             ref_s = str(ref or "").strip()
@@ -442,15 +528,10 @@ def main():
     reader_signal_map = _load_reader_signal_map()
     pref_high_tags, pref_research_higher = _load_preference_signals()
 
-    # Deduplicate knowledge by experiment_id (keep latest)
-    by_k: dict[str, dict] = {}
-    for entry in knowledge:
-        k_id = extract_k_id(entry.get("experiment_id", ""))
-        if not k_id:
-            continue
-        existing = by_k.get(k_id)
-        if existing is None or entry.get("updated_at", "") > existing.get("updated_at", ""):
-            by_k[k_id] = entry
+    # Deduplicate knowledge by experiment_id. MemorySystem writes created_at,
+    # not updated_at, and explicit correction records can supersede an older
+    # item. Route all precedence through one tested selector.
+    by_k = _latest_knowledge_by_k(knowledge)
 
     # For each K, check feed coverage
     incomplete_research_count = 0
@@ -489,7 +570,10 @@ def main():
             # to the release layer.  Three K1365 general drafts were explicitly
             # unpublished, yet the old loop counted them and hid the real
             # missing-general gap after an audience correction.
-            if str(article.get("status") or "").lower() in {"unpublished", "retracted"}:
+            if (
+                str(article.get("status") or "").lower()
+                in NON_RELEASE_ARTICLE_STATUSES
+            ):
                 continue
             if k_covered_by_article(k_id, article):
                 requires_general_rewrite = _article_requires_general_rewrite(
