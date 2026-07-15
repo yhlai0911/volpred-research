@@ -5,6 +5,7 @@
 - [reference_taifex_data.md](reference_taifex_data.md) — TAIFEX 數據位置/格式/夜盤時間
 - [reference_lai_prs_paper.md](reference_lai_prs_paper.md) — PRS 論文 metadata + 延伸方向
 - [reference_anthropic_cache_ttl.md](reference_anthropic_cache_ttl.md) — cache TTL 依 tier（Max=1h）
+- [reference_advisor_fable_bug.md](reference_advisor_fable_bug.md) — advisor=fable 撞 CC #76199（tool_use 後必 unavailable）；升級後重測
 - [reference_notebooklm_rag_workflow.md](reference_notebooklm_rag_workflow.md) — 外部文獻 RAG 走 NotebookLM 的觸發時機
 - [reference_publisher_strict_audit_tag_rules.md](reference_publisher_strict_audit_tag_rules.md) — K-id 自動移到 metadata；tag ≤8 禁統計術語
 - [reference_hourly_dispatch_via_os_cron.md](reference_hourly_dispatch_via_os_cron.md) — SUPERSEDED：派工改 dispatch-supervisor daemon
@@ -55,6 +56,7 @@
 - [feedback_paper_autonomy_optimize_acceptance.md](feedback_paper_autonomy_optimize_acceptance.md) — 論文方法/期刊/投稿時機自主判斷
 - [feedback_3spec_disambiguation.md](feedback_3spec_disambiguation.md) — 同 symbol 多 spec 的 footnote 消歧
 - [feedback_journal_topic_discovery.md](feedback_journal_topic_discovery.md) — 研究方向從頂尖期刊挖，不手寫
+- [feedback_market_diversification_asia.md](feedback_market_diversification_asia.md) — 主題擴及台/日/印度/東南亞，美股不可壟斷（選題 quota）
 - [feedback_proactive_research_posture.md](feedback_proactive_research_posture.md) — 喚醒=主動生議題，非 reactive 派舊 brief
 - [feedback_strategy_dev_over_audit.md](feedback_strategy_dev_over_audit.md) — 重開發新策略 > audit 舊策略
 - [feedback_execute_means_implement_plan.md](feedback_execute_means_implement_plan.md) — 「開始執行」=實作計劃，非跑既有任務
@@ -69,6 +71,7 @@
 - [feedback_recycling_is_release_layer_not_research.md](feedback_recycling_is_release_layer_not_research.md) — 鬼打牆根因在釋出端非研究端
 - [feedback_report_content_sync.md](feedback_report_content_sync.md) — feed.json 與 reports/{id}.json 必同步
 - [feedback_lazypack_infographic.md](feedback_lazypack_infographic.md) — 一般讀者文章文末附懶人包圖組
+- [feedback_notebooklm_deprioritized_codex_figures.md](feedback_notebooklm_deprioritized_codex_figures.md) — 圖走 Codex primary path；NotebookLM 放後面（老闆定調）
 - [feedback_trending_repost_route.md](feedback_trending_repost_route.md) — trending_repost 規格：≤2/日、雙發佈
 - [feedback_member_qa_evidence_based_prediction.md](feedback_member_qa_evidence_based_prediction.md) — 預測題要做不 decline；誠實線在方法
 - [feedback_content_quality_patrol_gap.md](feedback_content_quality_patrol_gap.md) — 只有老闆會發現的問題=缺巡檢
@@ -91,7 +94,7 @@
 - [feedback_dont_deflect_act_on_repeated_complaints.md](feedback_dont_deflect_act_on_repeated_complaints.md) — 反覆被點名的問題要實做，不 deflect
 - [feedback_repeated_done_question_means_finish_now.md](feedback_repeated_done_question_means_finish_now.md) — 連問「都完成了嗎」=當回合做完
 - [feedback_finish_task_before_standby.md](feedback_finish_task_before_standby.md) — 任務不得做一半待機；完成含部署+線上驗證
-- [feedback_fix_verify_then_report.md](feedback_fix_verify_then_report.md) — 先修好+測過+驗證，才回報；不丟待辦給老闆
+- [feedback_fix_verify_then_report.md](feedback_fix_verify_then_report.md) — 先修好+測過+驗證，才回報；不丟待辦給老闆（msg 736→796 兩次糾正，硬規則）
 - [feedback_resume_ops_loop_after_user.md](feedback_resume_ops_loop_after_user.md) — 回完用戶要流回 ops loop
 - [feedback_continuous_work_and_read_mail.md](feedback_continuous_work_and_read_mail.md) — tick 要做實事不空轉；直接讀 Gmail
 - [feedback_one_dispatch_per_hour.md](feedback_one_dispatch_per_hour.md) — hourly 派 1 agent，scope ≤50min，heavy 走 queue
@@ -114,6 +117,7 @@
 - [feedback_verify_before_restructure.md](feedback_verify_before_restructure.md) — 重構前通盤查證權威來源
 - [feedback_check_existing_mechanism_before_building.md](feedback_check_existing_mechanism_before_building.md) — 建新機制前先查同 concern 是否已存在但未啟用
 - [feedback_test_before_deploy.md](feedback_test_before_deploy.md) — 前端改動要 build + 測所有 tab
+- [feedback_v3_presentation_layer_only.md](feedback_v3_presentation_layer_only.md) — 原版=核心內容數據，v3=美化呈現，不能脫鉤
 - [feedback_hermetic_git_in_tests.md](feedback_hermetic_git_in_tests.md) — 驅動 git 的測試須隔離，否則誤操作真 repo
 - [feedback_autocommit_poisons_before_after.md](feedback_autocommit_poisons_before_after.md) — `git add -A` 會捲進別人的檔，毀掉 before/after 對照
 - [feedback_parallel_impl_and_worktree_liveness.md](feedback_parallel_impl_and_worktree_liveness.md) — 無 claim 致平行實作；liveness 用 lsof
@@ -136,6 +140,7 @@
 - [feedback_decision_email_html_form.md](feedback_decision_email_html_form.md) — 決策 email 用 mailto 連結，不用 form
 - [feedback_autonomous_loop_email_summary.md](feedback_autonomous_loop_email_summary.md) — autonomous fire 結尾必寄 summary + 排下次
 - [feedback_telegram_emoji_formatting.md](feedback_telegram_emoji_formatting.md) — Telegram 用 emoji 區隔段落
+- [feedback_structured_stage_report_format.md](feedback_structured_stage_report_format.md) — 程序回報用結構化模板（程序/狀態/結論/產物/阻塞/下一程序/回報單），非散文（msg 798→800）
 - [feedback_cross_machine_file_links.md](feedback_cross_machine_file_links.md) — 給用戶的檔用 SendUserFile/Tailscale，非本機路徑
 
 ## Feedback — Skills 與治理

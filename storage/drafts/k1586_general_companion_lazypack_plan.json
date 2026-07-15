@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "title": "穩定幣壓力下的短債差異",
+  "subtitle": "平常沒預警，單一事件裡不同期限反應分岔",
+  "evidence": {
+    "result": {
+      "path": "experiments/K1586/K1586_results.json",
+      "sha256": "520a6b0afea2e1fbf52567cb1e1def6e4602d8f0fdef682bf575228843f7b44d",
+      "label": "穩定幣與短債事件窗重跑結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_two_short_bonds",
+      "info": "concept",
+      "style": "editorial",
+      "title": "同樣叫短債，到期區間差很多",
+      "alt": "一至三年與一至三個月短債在 USDC 事件窗的反應差異",
+      "sources": ["result"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "讀法",
+          "body": ["先看 ETF 持有的到期區間，再看壓力期間的價格反應；短債兩個字沒有保證同幅度波動。"]
+        },
+        {
+          "kind": "metric",
+          "label": "事件窗交易日",
+          "value": {
+            "source": "result",
+            "path": "hypotheses.H2_USDC_SVB_event.SHY.event_n",
+            "format": {"kind": "integer", "suffix": " 天"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "對照期交易日",
+          "value": {
+            "source": "result",
+            "path": "hypotheses.H2_USDC_SVB_event.SHY.control_n",
+            "format": {"kind": "integer", "suffix": " 天"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_event_split",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "一檔放大，另一檔沒有過門檻",
+      "alt": "SHY 與 BIL 在事件窗內的每日絕對變動倍率與顯著性",
+      "sources": ["result"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "SHY 事件窗倍率",
+          "value": {
+            "source": "result",
+            "path": "hypotheses.H2_USDC_SVB_event.SHY.ratio",
+            "format": {"kind": "number", "digits": 2, "suffix": " 倍"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "SHY 分組重抽調整值",
+          "value": {
+            "source": "result",
+            "path": "hypotheses.H2_USDC_SVB_event.SHY.block_bootstrap.p_bonf_n2",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "BIL 事件窗倍率",
+          "value": {
+            "source": "result",
+            "path": "hypotheses.H2_USDC_SVB_event.BIL.ratio",
+            "format": {"kind": "number", "digits": 2, "suffix": " 倍"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "BIL 分組重抽調整值",
+          "value": {
+            "source": "result",
+            "path": "hypotheses.H2_USDC_SVB_event.BIL.block_bootstrap.p_bonf_n2",
+            "format": {"kind": "number", "digits": 3}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_honest_boundary",
+      "info": "results",
+      "style": "professional",
+      "title": "平常沒預警，事件也不能寫成規律",
+      "alt": "穩定幣日常領先性檢查與單一事件的研究限制",
+      "sources": ["result"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "日常檢查最低顯著性數字",
+          "value": {
+            "source": "result",
+            "path": "hypotheses.H1_lead_lag.DGS3MO_RV.granger.lag_5.p_value",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "完整樣本營業日",
+          "value": {
+            "source": "result",
+            "path": "sample.n_business_days",
+            "format": {"kind": "integer", "suffix": " 天"}
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "研究邊界",
+          "body": ["只有一場脫鉤事件，沒有逐日賣券紀錄；存續期、流動性與利率環境都可能解釋短債反應差異。"]
+        }
+      ]
+    }
+  ]
+}

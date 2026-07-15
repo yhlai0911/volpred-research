@@ -1,0 +1,49 @@
+{
+  "id": "lazypack-mile_d288539b",
+  "title": "lazypack render mile_d288539b",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_d288539b",
+    "--article-id",
+    "mile_d288539b",
+    "--plan",
+    "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "穩定幣壓力下的短債差異"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-15T22:30:40Z",
+  "started_at": "2026-07-15T22:30:52Z",
+  "completed_at": "2026-07-15T22:37:18Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_d288539b.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_d288539b.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/plan.json",
+    "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/1_two_short_bonds.png",
+    "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/2_event_split.png",
+    "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/3_honest_boundary.png",
+    "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/render_lazypack.py"
+  ],
+  "output_paths_updated_at": "2026-07-15T22:37:15Z",
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}

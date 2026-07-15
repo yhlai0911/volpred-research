@@ -1,0 +1,333 @@
+{
+  "schema": "dreaming_review.v1",
+  "generated_at": "2026-07-15T21:25:00.515638+00:00",
+  "window_days": 14,
+  "dry_run": false,
+  "loop_health": {
+    "generated_at": "2026-07-15T21:25:00.515638+00:00",
+    "window_days": 14,
+    "overall": "warn",
+    "first_pass_success": {
+      "status": "ok",
+      "signal": "derived",
+      "window_days": 14,
+      "total_succeeded": 664,
+      "traced": 359,
+      "coverage": 0.541,
+      "first_pass": 343,
+      "retried": 16,
+      "first_pass_rate": 0.955,
+      "retry_rate": 0.045
+    },
+    "task_outcome": {
+      "status": "ok",
+      "signal": "supported",
+      "window_days": 14,
+      "success": 664,
+      "fail": 9,
+      "blocked": 10,
+      "other": 84,
+      "success_rate": 0.972
+    },
+    "error_recurrence": {
+      "status": "warn",
+      "signal": "supported",
+      "window_days": 14,
+      "distinct_signatures": 3,
+      "recurring": 2,
+      "recurrence_rate": 0.667,
+      "distinct_signatures_all": 15,
+      "recurring_all": 9,
+      "recurrence_rate_all": 0.6,
+      "top_recurring": [
+        {
+          "signature": "dispatch_supervisor:codex_failover_recovered:exit0",
+          "count": 11,
+          "first_seen": "2026-07-15T15:45:09.050947+00:00",
+          "last_seen": "2026-07-15T21:11:37.283991+00:00",
+          "source": "dispatch_state.completions",
+          "span_days": 0.23,
+          "known": false,
+          "recovered": false
+        },
+        {
+          "signature": "dispatch_supervisor:quota_blocked:exit1",
+          "count": 4,
+          "first_seen": "2026-07-15T13:52:05.526338+00:00",
+          "last_seen": "2026-07-15T17:48:07.231036+00:00",
+          "source": "dispatch_state.completions",
+          "span_days": 0.16,
+          "known": false,
+          "recovered": false
+        },
+        {
+          "signature": "dispatch_supervisor:kill_failed_orphan_drained:exit-1",
+          "count": 1,
+          "first_seen": "2026-07-15T20:31:03.621650+00:00",
+          "last_seen": "2026-07-15T20:31:03.621650+00:00",
+          "source": "dispatch_state.completions",
+          "span_days": 0.0,
+          "known": false,
+          "recovered": false
+        },
+        {
+          "signature": "git_push_backup.log:exit1:push_held_guard",
+          "count": 5,
+          "first_seen": "2026-07-02T08:00:27+00:00",
+          "last_seen": "2026-07-03T02:00:19+00:00",
+          "source": "cron_log",
+          "root_cause": "push_held_guard",
+          "recovered": true,
+          "span_days": 0.75,
+          "known": false
+        },
+        {
+          "signature": "codex_work_log_backfill.log:exit1",
+          "count": 4,
+          "first_seen": "2026-07-09T21:00:30.332468+00:00",
+          "last_seen": "2026-07-09T23:10:07.211324+00:00",
+          "source": "cron_log",
+          "recovered": true,
+          "span_days": 0.09,
+          "known": false
+        }
+      ]
+    },
+    "correction_trend": {
+      "status": "ok",
+      "signal": "supported",
+      "weeks": 4,
+      "weekly_counts_recent_first": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "slope_per_week": 0.0,
+      "trend": "flat",
+      "current_correction_report_high": null,
+      "current_correction_report_medium": null
+    }
+  },
+  "findings": [
+    {
+      "pattern_type": "repeated_tool_failure",
+      "signature": "repeated_tool_failure:dispatch_supervisor:codex_failover_recovered:exit0",
+      "severity": "warn",
+      "evidence": [
+        "dispatch_supervisor:codex_failover_recovered:exit0 ×11 over 0.23d (first 2026-07-15T15:45:09.050947+00:00 → last 2026-07-15T21:11:37.283991+00:00)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Cron job `dispatch_supervisor` returned a non-zero exit 11× in the window. Investigate the wrapper/script root cause (API death / auth / path). If sustained, open docs/refactor_plan_<job>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-15T21:25:00.515638+00:00",
+      "last_seen": "2026-07-15T21:25:00.515638+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "memory_skill_gap",
+      "signature": "memory_skill_gap:uncodified_process",
+      "severity": "info",
+      "evidence": [
+        "- [reference_notebooklm_rag_workflow.md](reference_notebooklm_rag_workflow.md) — 外部文獻 RAG 走 NotebookLM 的觸發時機",
+        "- [reference_fb_chrome_browser_autoselect.md](reference_fb_chrome_browser_autoselect.md) — FB 發文自選 Chrome，中文用 pbcopy 貼上",
+        "- [project_strategy_lifecycle_standing_directive.md](project_strategy_lifecycle_standing_directive.md) — 策略持續增減走既有 gate",
+        "- [feedback_paper_autonomy_optimize_acceptance.md](feedback_paper_autonomy_optimize_acceptance.md) — 論文方法/期刊/投稿時機自主判斷",
+        "- [feedback_content_quality_patrol_gap.md](feedback_content_quality_patrol_gap.md) — 只有老闆會發現的問題=缺巡檢",
+        "- [feedback_handoff_routine_maintenance.md](feedback_handoff_routine_maintenance.md) — handoff 平常持續維護，非 compact 才寫"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "這些記憶描述 recurring process/cadence 但無對應 skill；評估 promote 成 skill 或加排程/cadence（見 pdca-operations 技能治理 + operations-cadence）。",
+      "subject_task_id": null,
+      "governance_target": ".claude/skills/",
+      "occurrences": 21,
+      "first_seen": "2026-06-30T12:29:57.114601+00:00",
+      "last_seen": "2026-07-15T21:25:00.515638+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "memory_hygiene",
+      "signature": "memory_hygiene:consolidation_review",
+      "severity": "info",
+      "evidence": [
+        "98 條 feedback 記憶（>=45，疑有重疊）"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "feedback 記憶量大：月度做整併/去重/澄清，讓記憶更清楚易用（避免垃圾桶化）。",
+      "subject_task_id": null,
+      "governance_target": "memory/",
+      "occurrences": 21,
+      "first_seen": "2026-06-30T12:29:57.114601+00:00",
+      "last_seen": "2026-07-15T21:25:00.515638+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:52425890cc2f99a1",
+      "severity": "critical",
+      "evidence": [
+        "alert_key=52425890cc2f99a1 title='git-push-backup: push 失敗' send_count=6 span=17.1d (first 2026-06-28T10:28:38.987914+00:00 → last 2026-07-15T14:00:04.899579+00:00) — no fire in 7.4h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_persistent_alert_52425890cc2f99a1",
+      "proposal": "Alert `git-push-backup: push 失敗` fired 6× over 17.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 3,
+      "first_seen": "2026-07-12T22:00:14.861047+00:00",
+      "last_seen": "2026-07-15T21:25:00.515638+00:00",
+      "activity_marker": "2026-07-15T14:00:04.899579+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:4415ad115dc02afc",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=4415ad115dc02afc title='git-push-backup: push held — 2 new silent fallback(s)' send_count=5 span=15.2d (first 2026-06-29T02:17:03.756492+00:00 → last 2026-07-14T08:00:51.873206+00:00) — no fire in 37.4h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `git-push-backup: push held — 2 new silent fallback(s)` fired 5× over 15.2d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-14T21:25:00.835031+00:00",
+      "last_seen": "2026-07-15T21:25:00.515638+00:00",
+      "activity_marker": "2026-07-14T08:00:51.873206+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:aa6c059b3dc7e00d",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=aa6c059b3dc7e00d title='git-push-backup: push held — 1 new silent fallback(s)' send_count=8 span=14.1d (first 2026-06-30T06:17:03.289879+00:00 → last 2026-07-14T08:00:03.901139+00:00) — no fire in 37.4h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `git-push-backup: push held — 1 new silent fallback(s)` fired 8× over 14.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-14T21:25:00.835031+00:00",
+      "last_seen": "2026-07-15T21:25:00.515638+00:00",
+      "activity_marker": "2026-07-14T08:00:03.901139+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:739fcf1bb7ffd6f1",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=739fcf1bb7ffd6f1 title='Release pool starved > 8.0h (cron healthy)' send_count=4 span=10.6d (first 2026-07-04T01:00:41.430041+00:00 → last 2026-07-14T16:01:10.868589+00:00) — no fire in 29.4h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `Release pool starved > 8.0h (cron healthy)` fired 4× over 10.6d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-14T21:25:00.835031+00:00",
+      "last_seen": "2026-07-15T21:25:00.515638+00:00",
+      "activity_marker": "2026-07-14T16:01:10.868589+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:e46b1923cd3787a9",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=e46b1923cd3787a9 title='supervisor quota_blocked（額度恢復後自動復工）' send_count=7 span=9.1d (first 2026-07-06T11:08:02.667095+00:00 → last 2026-07-15T13:11:47.461081+00:00) — no fire in 8.2h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `supervisor quota_blocked（額度恢復後自動復工）` fired 7× over 9.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-15T21:25:00.515638+00:00",
+      "last_seen": "2026-07-15T21:25:00.515638+00:00",
+      "activity_marker": "2026-07-15T13:11:47.461081+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:b74691d14763e77c",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=b74691d14763e77c title='Claude→Codex failover 接手失敗（Claude 端：quota）' send_count=19 span=5.0d (first 2026-07-10T14:25:34.143753+00:00 → last 2026-07-15T13:51:58.314173+00:00) — no fire in 7.6h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `Claude→Codex failover 接手失敗（Claude 端：quota）` fired 19× over 5.0d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-15T21:25:00.515638+00:00",
+      "last_seen": "2026-07-15T21:25:00.515638+00:00",
+      "activity_marker": "2026-07-15T13:51:58.314173+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:800782d7aa16a35c",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=800782d7aa16a35c title='supervisor hang_killed' send_count=4 span=3.4d (first 2026-07-11T06:57:41.105045+00:00 → last 2026-07-14T16:50:24.726104+00:00) — no fire in 28.6h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `supervisor hang_killed` fired 4× over 3.4d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-14T21:25:00.835031+00:00",
+      "last_seen": "2026-07-15T21:25:00.515638+00:00",
+      "activity_marker": "2026-07-14T16:50:24.726104+00:00",
+      "task_type": "platform_ops"
+    }
+  ],
+  "new_findings": [
+    "repeated_tool_failure:dispatch_supervisor:codex_failover_recovered:exit0",
+    "persistent_alert:e46b1923cd3787a9",
+    "persistent_alert:b74691d14763e77c"
+  ],
+  "resolved_findings": [
+    "persistent_alert:542378afb7b6a3b9",
+    "persistent_alert:2d99bdcd3277e3cc",
+    "persistent_alert:e1aa596aac4a2172",
+    "missing_retry_strategy:K267_article_general_v2",
+    "missing_retry_strategy:research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
+    "missing_retry_strategy:research_private_market_rv_correlation_regime",
+    "missing_retry_strategy:K1695",
+    "missing_retry_strategy:K1684",
+    "missing_retry_strategy:trending_repost_2026_07_14_ai資本"
+  ],
+  "escalations": [
+    "persistent_alert:52425890cc2f99a1"
+  ],
+  "auto_remediation": [
+    {
+      "signature": "persistent_alert:52425890cc2f99a1",
+      "action": "queued",
+      "task_id": "dreaming_persistent_alert_52425890cc2f99a1"
+    }
+  ],
+  "counts": {
+    "findings": 10,
+    "new": 3,
+    "resolved": 9,
+    "escalations": 1,
+    "propose_only": 10,
+    "auto_dispatch_eligible": 0
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "title": "風險區間天天調，成績要分兩科看",
+  "subtitle": "罩得準，也要避免把範圍畫得太寬",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1598/k1598_results.json",
+      "sha256": "26eaebff52d8f41d8b8ea5f5473cc57effa04faa829ccd880dc4a24bc8deeeb2",
+      "label": "K1598 independently reviewed online interval results"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_daily_update",
+      "info": "concept",
+      "style": "professional",
+      "title": "每天先交答案，再用結果調整明天",
+      "alt": "線上風險區間只使用當日前可見資料並在收盤後更新",
+      "sources": ["result"],
+      "blocks": [
+        {"kind": "text", "heading": "先畫範圍", "body": ["用前一天以前的波動與歷史誤差，先決定今天報酬的上下界。"]},
+        {"kind": "text", "heading": "再看有沒有漏", "body": ["當天結束後才知道報酬是否超出範圍，結果只拿來更新下一天。"]},
+        {"kind": "metric", "label": "每檔樣本外預測", "value": {"source": "result", "path": "dataset.sample_by_asset.SPY.n_oos_candidate", "format": {"kind": "integer", "suffix": " 天"}}},
+        {"kind": "metric", "label": "較寬目標的容許漏網率", "value": {"source": "result", "path": "/primary_test/coverage_levels/0", "format": {"kind": "percent", "digits": 0}}},
+        {"kind": "metric", "label": "較保守目標的容許漏網率", "value": {"source": "result", "path": "/primary_test/coverage_levels/1", "format": {"kind": "percent", "digits": 0}}}
+      ]
+    },
+    {
+      "name": "2_two_scores",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "覆蓋追蹤變好，整體損失沒有領先",
+      "alt": "UP lite 與滾動門檻及自適應方法的漏網率差距與區間損失比較",
+      "sources": ["result"],
+      "blocks": [
+        {"kind": "metric", "label": "滾動門檻平均偏差", "value": {"source": "result", "path": "summary.method_summary.Rolling252.mean_abs_miss_gap", "format": {"kind": "percent", "digits": 2}}},
+        {"kind": "metric", "label": "UP-lite 平均偏差", "value": {"source": "result", "path": "summary.method_summary.UP_AggACI_lite.mean_abs_miss_gap", "format": {"kind": "percent", "digits": 2}}, "note": "更貼近目標漏網率"},
+        {"kind": "metric", "label": "單一自適應法平均偏差", "value": {"source": "result", "path": "summary.method_summary.ACI_eta_0p01.mean_abs_miss_gap", "format": {"kind": "percent", "digits": 2}}, "note": "仍低於 UP-lite"},
+        {"kind": "metric", "label": "UP-lite 區間損失", "value": {"source": "result", "path": "summary.method_summary.UP_AggACI_lite.mean_pinball_loss", "format": {"kind": "number", "digits": 3}}},
+        {"kind": "metric", "label": "固定門檻區間損失", "value": {"source": "result", "path": "summary.method_summary.FixedIS.mean_pinball_loss", "format": {"kind": "number", "digits": 3}}, "note": "數值略低；較低較好"},
+        {"kind": "text", "heading": "判讀", "body": ["UP-lite 修正了滾動門檻容易漏太多的問題，仍沒有在整體區間品質上超過較強基準。"]}
+      ]
+    },
+    {
+      "name": "3_honest_boundary",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "局部勝出，還不能接管整套風控",
+      "alt": "材料類股在較寬目標下的單一嚴格勝出與研究適用邊界",
+      "sources": ["result"],
+      "blocks": [
+        {"kind": "metric", "label": "XLB 比較強度", "value": {"source": "result", "path": "/summary/dm_tests_up_vs_baselines/XLB_a0.10_UP_AggACI_lite_vs_Rolling252/t_stat", "format": {"kind": "number", "digits": 2, "show_plus": true}}, "note": "負值代表 UP-lite 區間損失較低"},
+        {"kind": "metric", "label": "多重比較後門檻值", "value": {"source": "result", "path": "/summary/dm_tests_up_vs_baselines/XLB_a0.10_UP_AggACI_lite_vs_Rolling252/holm_p_value", "format": {"kind": "percent", "digits": 2}}},
+        {"kind": "metric", "label": "UP-lite 平均半寬", "value": {"source": "result", "path": "summary.method_summary.UP_AggACI_lite.mean_radius", "format": {"kind": "percent", "digits": 2}}},
+        {"kind": "text", "heading": "可以支持", "body": ["用多種更新速度混合，能改善老舊滾動門檻的覆蓋追蹤。", "本次沒有任何嚴格失利。"]},
+        {"kind": "text", "heading": "仍不能支持", "body": ["本次只是近似版混合，不是原論文的完整演算法。", "區間左右對稱，尚未檢驗單邊最大損失或實際交易成績。"]}
+      ]
+    }
+  ]
+}
