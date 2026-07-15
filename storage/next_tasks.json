@@ -38641,7 +38641,7 @@
     "title": "Audience correction: rewrite a true general companion for USDC 脫鉤那幾天：1-3 年短券日波動飆 2.8 倍，1-3 個月卻沒事",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_c1ce6550. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1586']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38656,7 +38656,25 @@
       "content-quality"
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1586"
+    "k_id": "K1586",
+    "claimed_by": "codex-desktop-k1586-audience",
+    "claimed_at": "2026-07-15T22:19:58.979125+00:00",
+    "claim_session_id": "c7639979832f",
+    "status_history": [
+      {
+        "ts": "2026-07-15T22:19:58.979138+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1586-audience"
+      },
+      {
+        "ts": "2026-07-15T22:19:59.240686+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1586-audience"
+      }
+    ],
+    "started_at": "2026-07-15T22:19:59.240669+00:00"
   },
   {
     "id": "K1365_article_general_audience_rewrite_c16d94b7",
@@ -38708,7 +38726,7 @@
     "title": "Audience correction: rewrite a true general companion for 政策標題嚇人，數據沒這麼怕：八次稀土管制公告之後，礦業 ETF 都怎麼走？",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_9839822d. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1575']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38724,9 +38742,6 @@
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
     "k_id": "K1575",
-    "claimed_by": "codex-desktop-k1575-audience",
-    "claimed_at": "2026-07-15T22:17:30.364186+00:00",
-    "claim_session_id": "11a39dad970c",
     "status_history": [
       {
         "ts": "2026-07-15T22:17:30.364199+00:00",
@@ -38739,9 +38754,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-k1575-audience"
+      },
+      {
+        "ts": "2026-07-15T22:29:48.773734+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-k1575-audience"
       }
     ],
-    "started_at": "2026-07-15T22:17:30.596686+00:00"
+    "started_at": "2026-07-15T22:17:30.596686+00:00",
+    "completed_at": "2026-07-15T22:29:48.773717+00:00",
+    "result": "Created general-reader companion mile_009a85c8 as draft with exact K1575 refs, sanitize_applied=0, and three data-bound Codex bespoke panels; source mile_9839822d remains research. Verified anti-AI/audience/provenance gates, 3/3 image HTTP 200, Supabase content SHA exact match, and 124 focused tests passed (local parity wrapper separately flags pre-existing .env reads). Duplicate retry mile_e2e39e6c was formally unpublished."
   },
   {
     "id": "K824_article_general_audience_rewrite_328ced24",
