@@ -64,8 +64,8 @@ for _f in ["Arial Unicode MS", "PingFang TC", "Heiti TC", "Hiragino Sans GB"]:
         font_manager.findfont(_f, fallback_to_default=False)
         plt.rcParams["font.sans-serif"] = [_f]
         break
-    except Exception:
-        continue
+    except ValueError:
+        continue  # silent-ok: optional CJK font probe; first installed family wins
 plt.rcParams["axes.unicode_minus"] = False
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -110,17 +110,32 @@ def fetch(name, symbol, refresh=False):
     return px
 
 
-def monthly_returns(px):
-    """Resample 至月末取最後成交價、pct_change。**排除未完成的尾端月**
-    （若資料最後一筆觀察落在當前日曆月，視為 partial-month → 剔除），
-    避免把不完整月當成整月報酬污染統計。
-    Codex review 2026-06-01 catch：原版把 TWII 2026-06-01 單日當 6 月月末。"""
+def monthly_returns(px, *, as_of=None):
+    """Resample 至月末取最後成交價、pct_change，排除未完成的尾端月。
+
+    只比對「是否仍在目前日曆月」不夠：快取跨月後，歷史 partial month 會
+    被重新視為完整月份。尾月因此同時通過兩個資料本身可驗證的條件才保留：
+    至少 10 個交易觀測，且最後觀測距日曆月末不超過 4 天。目前日曆月一律
+    保守排除，等下個月再納入。這個 guard 不依賴重跑日期來判斷歷史尾月。
+
+    Codex review 2026-06-01 catch：原版把 TWII 2026-06-01 單日當 6 月月末。
+    Codex rerun audit 2026-07-16 catch：舊 guard 跨月後會讓同一錯誤復活。
+    ``as_of`` 只供 hermetic test 注入；正式執行取本機當日。
+    """
+    px = px.sort_index()
     m = px.resample("ME").last()
     if len(m) >= 1:
-        last_obs = px.index.max()
-        today = pd.Timestamp.today().normalize()
-        # 若最後觀察在當前日曆月內 → partial → 剔最後一個 resampled month
-        if (last_obs.year == today.year) and (last_obs.month == today.month):
+        last_obs = pd.Timestamp(px.index.max()).tz_localize(None).normalize()
+        today = pd.Timestamp(as_of if as_of is not None else pd.Timestamp.today())
+        today = today.tz_localize(None).normalize()
+        last_period = last_obs.to_period("M")
+        tail_mask = px.index.to_period("M") == last_period
+        tail_obs = int(tail_mask.sum())
+        calendar_end = last_period.end_time.normalize()
+        days_to_month_end = int((calendar_end - last_obs).days)
+        is_current_month = last_period == today.to_period("M")
+        is_obviously_partial = tail_obs < 10 or days_to_month_end > 4
+        if is_current_month or is_obviously_partial:
             m = m.iloc[:-1]
     return m.pct_change().dropna()
 

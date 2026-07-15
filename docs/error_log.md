@@ -219,6 +219,7 @@
 **機械 owner**：`data-collection-ops` skill（新鮮度判準 + recovery）+ market calendar。
 **規則 2 — 等值檢查不是 freshness 檢查**：發布 gate 對抗「上游資料倒退」必須用**單調規則**（資料日期只准前進），`==` 只擋 rerun 擋不住 stale 回應；被 dup_waiver 豁免其他 gate 的內容，僅存 gate 必須獨自扛住所有失效模式。owner：`scripts/daily_update.py::daily_publish_decision` + `tests/test_daily_publish_decision.py`。
 **代表 incident**：
+- 2026-07-16 K1410 partial-month guard 依賴「目前月份」，快取跨月後讓已排除的 TWII 2026-06-01 單日資料復活；改為資料本身的尾月完整度判斷並加跨月回歸測試 — 全文：`docs/error_log_archive/2026-Q3-k1410-partial-month.md`
 - 2026-07-15 15:10 每日更新一天雙發：yfinance 回傳倒退資料（7/13）繞過等值 guard，還誤刪早班正確文（owner 抓包；stale 對 unpublish + 誤刪文 git 還原 + guard 改單調）— Q3
 - 2026-07-14 10:15 live_freshness 拿日曆天當交易日曆，同時誤報與漏報 — Q3
 - 2026-07-11 0050 五分鐘 RV 把隔夜跳空混入日內第一筆報酬 — Q3
