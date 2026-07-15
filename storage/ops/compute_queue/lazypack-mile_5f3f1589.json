@@ -1,0 +1,51 @@
+{
+  "id": "lazypack-mile_5f3f1589",
+  "title": "lazypack render mile_5f3f1589",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_5f3f1589",
+    "--article-id",
+    "mile_5f3f1589",
+    "--plan",
+    "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "市場很熱，仍不等於能預告下一場急跌",
+    "--experiment",
+    "K1678"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-15T23:14:31Z",
+  "started_at": "2026-07-15T23:14:35Z",
+  "completed_at": "2026-07-15T23:21:35Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_5f3f1589.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_5f3f1589.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/plan.json",
+    "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/1_data_funnel.png",
+    "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/2_attention_gate.png",
+    "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/3_honest_boundary.png",
+    "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/render_lazypack.py"
+  ],
+  "output_paths_updated_at": "2026-07-15T23:21:26Z",
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "timeout_seconds": 1500,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}

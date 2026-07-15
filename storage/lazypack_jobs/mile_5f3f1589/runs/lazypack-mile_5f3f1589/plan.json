@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "title": "市場很熱，仍不等於能預告下一場急跌",
+  "subtitle": "事件風險與注意力排序，要分成兩個問題",
+  "evidence": {
+    "result": {
+      "path": "experiments/K1678/K1678_results.json",
+      "sha256": "687eef1c3c187c84e3342200fd735960c18acfa1da6d46c811f1b655dfbefd78",
+      "label": "SEC 指控事件與公眾注意力重跑結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_data_funnel",
+      "info": "method",
+      "style": "professional",
+      "title": "從起訴附件走到可比較事件",
+      "alt": "SEC 起訴附件標記經價格可得性與配對後的樣本漏斗",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "附件中的股票日期",
+          "value": {
+            "source": "result",
+            "path": "data.coverage.sec_label_ticker_dates",
+            "format": {
+              "kind": "integer",
+              "suffix": " 組"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "價格面板實際看見",
+          "value": {
+            "source": "result",
+            "path": "data.coverage.exact_label_ticker_dates_observed_in_price_panel",
+            "format": {
+              "kind": "integer",
+              "suffix": " 組"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "隔日風險完成配對",
+          "value": {
+            "source": "result",
+            "path": "/data/coverage/matched_rows_by_horizon/1",
+            "format": {
+              "kind": "integer",
+              "suffix": " 組"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "五日風險完成配對",
+          "value": {
+            "source": "result",
+            "path": "/data/coverage/matched_rows_by_horizon/5",
+            "format": {
+              "kind": "integer",
+              "suffix": " 組"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "配對原則",
+          "body": [
+            "每個事件最多找三個同股票、時間相近的普通交易日；多檔股票同日發生時，先按日期平均。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2_attention_gate",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "Wikipedia 熱度的八格檢查全未過關",
+      "alt": "Wikipedia 市場注意力對隔日與五日風險的嚴格檢查結果",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "事前指定檢查",
+          "value": {
+            "source": "result",
+            "path": "design.primary_family.m",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "嚴格通過",
+          "value": {
+            "source": "result",
+            "path": "verdict.strict_primary_pass_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最接近門檻的一格",
+          "value": {
+            "source": "result",
+            "path": "/primary_results/7/t_hac",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "正負號表示方向；絕對值為八格中最高"
+        },
+        {
+          "kind": "metric",
+          "label": "該格一起校正後數字",
+          "value": {
+            "source": "result",
+            "path": "/primary_results/7/bonferroni_p",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "讀法",
+          "body": [
+            "市場級百科熱度無法穩定排序事件後風險。這否定目前的代理，不代表注意力永遠沒有用。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_honest_boundary",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "事件較危險，熱度仍分不出哪場更糟",
+      "alt": "SEC 指控日期的極端跌幅與向下跳空差距，以及 Wikipedia 注意力代理的研究邊界",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "隔日最大跌幅差距",
+          "value": {
+            "source": "result",
+            "path": "/primary_results/2/direct_event_minus_control_mean",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " 個百分點"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "隔日向下跳空差距",
+          "value": {
+            "source": "result",
+            "path": "/primary_results/3/direct_event_minus_control_mean",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " 個百分點"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "五日最大跌幅差距",
+          "value": {
+            "source": "result",
+            "path": "/primary_results/6/direct_event_minus_control_mean",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " 個百分點"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "五日向下跳空差距",
+          "value": {
+            "source": "result",
+            "path": "/primary_results/7/direct_event_minus_control_mean",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " 個百分點"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "能支持",
+          "body": [
+            "事後標記日期伴隨較大的極端跌幅與向下跳空；市場級免費熱度可用來找題與安排人工複核。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "不能支持",
+          "body": [
+            "起訴指控不是定罪；研究不是即時偵測，也不能把差距歸因於百科瀏覽或單一操縱機制。"
+          ]
+        }
+      ]
+    }
+  ]
+}
