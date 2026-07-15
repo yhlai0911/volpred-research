@@ -105,6 +105,21 @@ STAT_TARGET_NAMES = frozenset(
 PLAIN_VARIANCE_RE = re.compile(
     r"np\.(?:var|std)\s*\(|\.(?:var|std)\s*\(", re.IGNORECASE
 )
+# Hand-rolled sample variance used as the long-run variance, e.g.
+# ``gamma0 = np.mean(d**2) - d_bar**2`` (the E[X^2] - E[X]^2 computational
+# formula). PLAIN_VARIANCE_RE only recognises np.var / np.std, so this idiom --
+# treating the plain sample variance as the DM long-run variance, i.e. zero HAC
+# correction -- otherwise falls through to ``unknown`` (k1379.py:359 blind spot).
+# The left term is a second raw moment ``mean(<x>**2)``; the right term is a
+# squared mean (``d_bar**2``, ``np.mean(d)**2``, ``d.mean()**2``, ``** 2`` etc).
+# The deviation form ``np.mean((d - d_bar)**2)`` has inner parens after ``mean(``
+# and deliberately does NOT match, so a genuine gamma0-plus-autocovariance loop
+# is not misread; the HAC_MACHINERY_RE / serial-lag-loop guards in
+# _plain_variance_only remain the backstop against false positives.
+MANUAL_VARIANCE_RE = re.compile(
+    r"(?:np\.)?mean\s*\(\s*[^()]*\*\*\s*2[^()]*\)\s*-\s*[^-+]*?\*\*\s*2",
+    re.IGNORECASE,
+)
 HAC_MACHINERY_RE = re.compile(
     r"np\.cov|\.cov\(|autocov|\bcov_hac\b|gamma(?:_[kl]|\[)|newey_west|bartlett"
     r"|\bnw_var\b|\b_?hac_var\s*\(|\b_?dm_lrv\s*\(|\blong_run_var\b"
@@ -263,7 +278,7 @@ def _function_has_serial_lag_loop(fn: ast.FunctionDef) -> bool:
 def _plain_variance_only(fn: ast.FunctionDef, body_src: str) -> bool:
     """Recognise iid variance used as the DM long-run variance."""
     return (
-        bool(PLAIN_VARIANCE_RE.search(body_src))
+        bool(PLAIN_VARIANCE_RE.search(body_src) or MANUAL_VARIANCE_RE.search(body_src))
         and not bool(HAC_MACHINERY_RE.search(body_src))
         and not _function_has_serial_lag_loop(fn)
     )

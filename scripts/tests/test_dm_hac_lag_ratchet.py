@@ -27,6 +27,7 @@ To retire a site after fixing and re-running it:
 
 from __future__ import annotations
 
+import ast
 import json
 import sys
 from pathlib import Path
@@ -46,8 +47,25 @@ from audit_dm_hac_lag import (  # noqa: E402
     RATCHET_VERDICTS,
     UNKNOWN,
     _classify_lag_expr,
+    _scan_function,
     scan_population,
 )
+from audit_dm_hac_lag import REPO_ROOT as AUDIT_REPO_ROOT  # noqa: E402
+
+
+def _verdict_of_source(src: str, fn_name: str) -> str:
+    """Classify a single synthetic DM helper the way scan_file would."""
+    tree = ast.parse(src)
+    fn = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == fn_name
+    )
+    finding = _scan_function(
+        fn, AUDIT_REPO_ROOT / "experiments" / "synthetic.py", False, set()
+    )
+    assert finding is not None
+    return finding.verdict
 
 BASELINE_PATH = REPO_ROOT / "storage" / "ops" / "dm_hac_lag_baseline.json"
 
@@ -255,3 +273,51 @@ def test_canonical_dm_does_not_degenerate_at_h1() -> None:
         f"the no-HAC |t|={abs(t_naive):.2f}); if it does not, the canonical "
         "bandwidth floor has regressed."
     )
+
+
+def test_manual_variance_idiom_is_no_hac(findings, baseline) -> None:
+    """k1379 hand-computes gamma0 = np.mean(d**2) - d_bar**2 with no HAC loop.
+
+    PLAIN_VARIANCE_RE only saw np.var / np.std, so this idiom -- treating the
+    plain sample variance as the DM long-run variance (zero HAC correction) --
+    fell through to ``unknown``. Freeze the classification so the extended
+    detection cannot silently regress back into the blind spot.
+    """
+    verdicts = {_site_key(f): f.verdict for f in findings}
+    site = "experiments/k1379/k1379.py::dm_test"
+    assert verdicts[site] == NO_HAC
+    assert site in baseline
+
+
+def test_manual_variance_regex_regression() -> None:
+    """The E[X^2]-E[X]^2 idiom is no_hac; the deviation form + HAC loop is not."""
+    # Every equivalent way to write the squared mean must classify as no_hac.
+    for squared_mean in ("d_bar**2", "np.mean(d)**2", "d.mean()**2", "d_bar ** 2"):
+        src = (
+            "import numpy as np\n"
+            "from scipy import stats\n"
+            "def dm_test(d):\n"
+            "    T = len(d)\n"
+            "    d_bar = np.mean(d)\n"
+            f"    gamma0 = np.mean(d**2) - {squared_mean}\n"
+            "    dm_stat = d_bar / np.sqrt(gamma0 / T)\n"
+            "    p_val = 2 * (1 - stats.t.cdf(abs(dm_stat), df=T - 1))\n"
+            "    return float(dm_stat), float(p_val)\n"
+        )
+        assert _verdict_of_source(src, "dm_test") == NO_HAC, squared_mean
+
+    # A genuine gamma0 + Bartlett autocovariance loop must NOT be mistaken for
+    # no_hac just because gamma0 is written out longhand: the deviation form has
+    # inner parens after mean( and the serial-lag loop is the backstop guard.
+    hac_src = (
+        "import numpy as np\n"
+        "def dm_test(d, h):\n"
+        "    d_bar = np.mean(d)\n"
+        "    gamma0 = np.mean((d - d_bar)**2)\n"
+        "    for k in range(1, h + 1):\n"
+        "        gamma_k = np.mean((d[k:] - d_bar) * (d[:-k] - d_bar))\n"
+        "        gamma0 += 2 * (1 - k / (h + 1)) * gamma_k\n"
+        "    dm_stat = d_bar / np.sqrt(gamma0 / len(d))\n"
+        "    return float(dm_stat)\n"
+    )
+    assert _verdict_of_source(hac_src, "dm_test") != NO_HAC

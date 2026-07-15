@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T09:40:05.236037",
+  "generated_at": "2026-07-15T14:21:21.397972",
   "overall": "warn",
   "critical_count": 0,
   "warn_count": 7,
@@ -37,7 +37,7 @@
     {
       "dimension": "reproducibility",
       "severity": "warn",
-      "message": "PRIORITY_UNVERIFIED: 227 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1023, k1025, k1025b）",
+      "message": "PRIORITY_UNVERIFIED: 225 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1023, k1025, k1025b）",
       "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
     },
     {
