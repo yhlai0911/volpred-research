@@ -37623,7 +37623,7 @@
     "title": "K1678: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1678 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1678：以 SEC Litigation Release 26532（2026-04-20 立案，*SEC v. Harsh V. Patel*，解析 439 筆表格列/412 個股票代碼/1079 個唯一 ticker-date 配對）作操縱交易弱標籤，配合 Wikimedia Analytics 公開 topic pageviews（Pump_and_dump/WallStreetBets/Short_squeeze 等）過去 126 日 z-score 作公眾關注度 shock，檢驗是否放大操縱標籤後 t+1/t+5 崩盤風險。yfinance",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1678",
@@ -37633,9 +37633,6 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-14T19:08:03+00:00",
-    "claimed_by": "codex-desktop-k1678-article",
-    "claimed_at": "2026-07-15T22:52:38.107956+00:00",
-    "claim_session_id": "5fe69eded007",
     "status_history": [
       {
         "ts": "2026-07-15T22:52:38.107971+00:00",
@@ -37648,9 +37645,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-k1678-article"
+      },
+      {
+        "ts": "2026-07-15T23:30:24.057574+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-k1678-article"
       }
     ],
-    "started_at": "2026-07-15T22:52:38.341549+00:00"
+    "started_at": "2026-07-15T22:52:38.341549+00:00",
+    "completed_at": "2026-07-15T23:30:24.057558+00:00",
+    "result": "完成一般讀者草稿 mile_5f3f1589：依正式 NULL 結果撰寫，正文零 K 編號，5 張 PNG（含 3 張 Codex-bespoke 懶人包）。事實與 anti-AI 跨模型審查 PASS，受眾/圖檔/同步/340 項乾淨測試通過；publication candidate 的 PASS 理由為生成器誤分類，未採入正文。"
   },
   {
     "id": "K1348_article_general",
@@ -38310,7 +38315,7 @@
     "title": "K1716: 0DTE 時代的日內 vs 隔夜波動結構轉變 — SPY 日 OHLC 拆 intraday range vol vs c2c vol，斷點檢定 2022-Q2 前後 + expiration-day 效應（來源：Cboe research",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 548). Original: 0DTE 時代的日內 vs 隔夜波動結構轉變 — SPY 日 OHLC 拆 intraday range vol vs c2c vol，斷點檢定 2022-Q2 前後 + expiration-day 效應（來源：Cboe research + SSRN/J.Derivatives 2025；0DTE 佔 SPX 量 59%）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1716.py with signal.shift(1) + seed=42, (c) K1716_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38320,9 +38325,6 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-15T00:00:02Z",
-    "claimed_by": "codex-failover-slot-2-18d5ef2794c14a9b81624320f3bf4467",
-    "claimed_at": "2026-07-15T23:08:24.547042+00:00",
-    "claim_session_id": "245dae83a240",
     "status_history": [
       {
         "ts": "2026-07-15T23:08:24.547057+00:00",
@@ -38335,9 +38337,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-2-18d5ef2794c14a9b81624320f3bf4467"
+      },
+      {
+        "ts": "2026-07-15T23:30:50.113832+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-18d5ef2794c14a9b81624320f3bf4467"
       }
     ],
-    "started_at": "2026-07-15T23:08:24.821611+00:00"
+    "started_at": "2026-07-15T23:08:24.821611+00:00",
+    "completed_at": "2026-07-15T23:30:50.113816+00:00",
+    "result": "Completed K1716 stricter K1477 re-verification on SPY daily OHLC (2018-01-02 to 2026-07-15, n=2,144). Tue/Thu post-expansion DiD is null: Parkinson t=0.591 and intraday-share t=-0.190; Holm p=1.0 and bootstrap CIs cross zero. Added frozen data/results/figure, restricted-era placebos, pretrend tests, atomic provenance, 4 passing tests, methodology gate PASS, and primary Codex review PASS; merged via merge_worktree.sh."
   },
   {
     "id": "daily_digest_20260715",
