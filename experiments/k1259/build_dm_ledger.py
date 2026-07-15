@@ -18,6 +18,8 @@ from pathlib import Path
 from statistics import mean, median, stdev
 from typing import Any, Iterable
 
+from volpred.ops.diagnostics import warn
+
 ROOT = Path(__file__).resolve().parents[2]
 EXP_DIR = ROOT / "experiments"
 OUT_DIR = ROOT / "experiments" / "k1259"
@@ -133,8 +135,14 @@ def get_numeric(d: dict | None, *keys: str) -> float | None:
             if isinstance(v, str):
                 try:
                     return float(v)
-                except Exception:
-                    pass
+                except ValueError as exc:
+                    warn(
+                        "k1259_dm_ledger",
+                        "numeric field is not parseable; trying the next alias",
+                        field=k,
+                        value=v,
+                        err=str(exc),
+                    )
     return None
 
 
@@ -254,6 +262,8 @@ def iter_pair_entries(node: Any, context: list[str]):
     a dict whose values are such dicts (mapping).
     """
     if isinstance(node, dict):
+        if node.get("ledger_exclude") is True:
+            return
         # Case A: dict is itself a DM pair entry (has dm_stat + p_value and NOT just container)
         if get_dm_stat(node) is not None and not _path_is_non_dm(context):
             p, _ = get_p_value(node)
@@ -263,7 +273,8 @@ def iter_pair_entries(node: Any, context: list[str]):
             for k, v in node.items():
                 new_ctx = context + [str(k)]
                 # Case B: a dict mapping "A_vs_B" -> pair dict
-                if isinstance(v, dict) and get_dm_stat(v) is not None \
+                if isinstance(v, dict) and v.get("ledger_exclude") is not True \
+                        and get_dm_stat(v) is not None \
                         and not _path_is_non_dm(new_ctx):
                     yield (v, str(k), new_ctx)
                 elif isinstance(v, list):
@@ -362,7 +373,13 @@ def extract_rows_from_file(jf: Path) -> list[dict]:
     try:
         with jf.open() as fh:
             data = json.load(fh)
-    except Exception:
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        warn(
+            "k1259_dm_ledger",
+            "result JSON is unreadable; skipping file",
+            path=str(jf),
+            err=str(exc),
+        )
         return []
     if not isinstance(data, dict):
         return []
@@ -492,10 +509,7 @@ def write_summary(rows: list[dict], scanned_files: list[Path], missing: list[str
     p_vals = [r["p_value"] for r in rows if isinstance(r["p_value"], (int, float))]
 
     def safe_stat(xs, fn):
-        try:
-            return fn(xs) if xs else float("nan")
-        except Exception:
-            return float("nan")
+        return fn(xs) if xs else float("nan")
 
     # Model × Asset coverage
     from collections import Counter

@@ -4,28 +4,28 @@
 
 ## Overview
 
-- **Total DM rows**: 2718
-- **Unique K experiments contributing rows**: 228
-- **Unique model names**: 781
-- **Unique assets**: 16
-- **Loss functions observed**: ES, FZ, FZ1%, MSE, Parkinson, QLIKE
-- **Files scanned**: 711 | **without DM content**: 481
+- **Total DM rows**: 2749
+- **Unique K experiments contributing rows**: 229
+- **Unique model names**: 787
+- **Unique assets**: 17
+- **Loss functions observed**: ES, FZ, FZ1%, MSE, Parkinson, QLIKE, daily squared strategy return (variance-risk proxy)
+- **Files scanned**: 723 | **without DM content**: 489
 
 ## DM statistic distribution
 
-- Mean dm_stat: 0.3123
-- Median dm_stat: 0.1866
-- Std dm_stat: 4.2242
-- Mean |dm_stat|: 2.7547
-- Share |dm_stat| > 3 (Harvey-sig): 827/2718 = 30.4%
-- p-values available: 2457/2718
+- Mean dm_stat: 0.2973
+- Median dm_stat: 0.1720
+- Std dm_stat: 4.2048
+- Mean |dm_stat|: 2.7512
+- Share |dm_stat| > 3 (Harvey-sig): 841/2749 = 30.6%
+- p-values available: 2488/2749
 
 ## Top 20 models by row frequency
 
 | Model | Row count |
 |---|---:|
-| GJR | 266 |
-| gjr | 207 |
+| GJR | 267 |
+| gjr | 212 |
 | GARCH | 136 |
 | M1 | 124 |
 | har | 109 |
@@ -38,18 +38,18 @@
 | M3 | 51 |
 | iv | 48 |
 | VIX | 46 |
-| PRG_Extended | 44 |
+| PRG_Extended | 45 |
 | base | 43 |
 | DCC-GJR | 42 |
 | DCC-A4f-ASYM | 42 |
-| HAR | 39 |
-| M2_AR1_IV | 39 |
+| amem | 42 |
+| HAR | 41 |
 
 ## Asset coverage
 
 | Asset | Row count |
 |---|---:|
-| SPY | 459 |
+| SPY | 467 |
 | QQQ | 140 |
 | GLD | 112 |
 | 0050.TW | 73 |
@@ -61,20 +61,22 @@
 | BTC-USD | 16 |
 | XLE | 10 |
 | XLF | 10 |
+| 0050.TW|TX | 7 |
 | EWH | 6 |
 | SLV | 3 |
 | EWZ | 3 |
 | 2330.TW | 1 |
-| (no asset tag) | 1678 |
+| (no asset tag) | 1694 |
 
 ## Loss function coverage
 
 | Loss | Row count |
 |---|---:|
-| QLIKE | 2240 |
+| QLIKE | 2261 |
 | MSE | 321 |
-| Parkinson | 86 |
+| Parkinson | 89 |
 | FZ | 64 |
+| daily squared strategy return (variance-risk proxy) | 7 |
 | ES | 6 |
 | FZ1% | 1 |
 
@@ -98,10 +100,10 @@
 | K465 | 30 |
 | K468 | 30 |
 | K770 | 30 |
+| K772 | 30 |
 | K881 | 30 |
 | K883 | 30 |
 | K884 | 30 |
-| K482 | 29 |
 
 ## Model × Asset coverage matrix (top 15 models × top 6 assets)
 
@@ -130,7 +132,7 @@
 - `SLV` : 3 rows
 - `EWZ` : 3 rows
 
-**Models appearing in <=2 DM rows**: 330 (listing first 40)
+**Models appearing in <=2 DM rows**: 335 (listing first 40)
 - dm_gjr
 - dm_test_base
 - ssvs
@@ -171,9 +173,9 @@
 - A4f_close__r2_close
 - A4f_close__r2_oc
 - HAR-RSk
-- ... (+290 more)
+- ... (+295 more)
 
-**1678 rows have no asset tag.** These inherit single-asset K defaults (often SPY) but were not machine-tagged. Phase 2 MCS should re-inspect and backfill.
+**1694 rows have no asset tag.** These inherit single-asset K defaults (often SPY) but were not machine-tagged. Phase 2 MCS should re-inspect and backfill.
 
 ## 3 representative rows
 

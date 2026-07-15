@@ -36705,13 +36705,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T15:01:20.689585+00:00",
+    "completed_at": "2026-07-15T16:01:01.739592+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T15:01:20.689585+00:00",
-      "last_clean_observed_at": "2026-07-15T15:01:20.689585+00:00"
+      "resolved_at": "2026-07-15T16:01:01.739592+00:00",
+      "last_clean_observed_at": "2026-07-15T16:01:01.739592+00:00"
     }
   },
   {
@@ -39901,14 +39901,32 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29421677446",
     "ci_run_key": "29421677446:1",
     "created_at": "2026-07-15T15:00:06.868630+00:00",
     "title": "CI 紅燈修復（run 29421677446, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29421677446\nattempt: 1\nhead_sha: 78115830d\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29421677446 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。"
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29421677446\nattempt: 1\nhead_sha: 78115830d\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29421677446 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "claimed_by": "codex-failover",
+    "claimed_at": "2026-07-15T16:08:45.237458+00:00",
+    "claim_session_id": "eb714d864e3e",
+    "status_history": [
+      {
+        "ts": "2026-07-15T16:08:45.237471+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T16:08:58.524339+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-15T16:08:58.524326+00:00"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a4",
@@ -39917,7 +39935,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T15:45:15.152580+00:00",
     "source": "internal_alert_remediation_router",
     "tags": [
@@ -39961,6 +39979,29 @@
       "last_failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：Alert was generated from the first blocked K1378 commit attempt. Root cause scripts/build_publication_candidates.py:165 malformed-timestamp fallback lacked an auditable rationale. Added precise silent-ok annotation; strict audit findings=0, 10 selector tests pass, and pre-commit accepted [codex] commit 70877b0c0. No additional mutation required; warning was stale by claim time.",
       "escalation_sent_at": "2026-07-15T15:45:15.152580+00:00",
       "escalation_notification_id": "e8bb2005"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-15T16:02:08.422916+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T16:02:15.220927+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T16:12:29.639933+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-15T16:02:15.220911+00:00",
+    "completed_at": "2026-07-15T16:12:29.639920+00:00",
+    "result": "Fresh detector recheck found 2 K1259 silent fallbacks. Added structured warnings and narrow exceptions, removed a missed catch-all, preserved ledger_exclude, and regenerated Phase 1 plus Phase 1.5 artifacts idempotently; strict audit new=0. Regression: 3 K1259, 4 retry/fingerprint, and 9 K841 tests passed; distinct-fingerprint root fix already landed in a9d1df03e."
   }
 ]
