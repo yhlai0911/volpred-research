@@ -50,3 +50,13 @@ def test_point_in_time_controls_are_lagged():
     daily, _ = K1716.prepare_daily(raw)
     expected = np.log(daily["proxy_total_var"].clip(lower=K1716.EPS)).rolling(5).mean().shift(1)
     pd.testing.assert_series_equal(daily["lag5_log_total"], expected, check_names=False)
+
+
+def test_atomic_json_writer_round_trips(tmp_path):
+    path = tmp_path / "result.json"
+    payload = {"verdict": "NULL", "values": [1, 2, 3]}
+    K1716.atomic_write_json(path, payload)
+    assert path.read_text(encoding="utf-8").endswith("\n")
+    import json
+
+    assert json.loads(path.read_text(encoding="utf-8")) == payload

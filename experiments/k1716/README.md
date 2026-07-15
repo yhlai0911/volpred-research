@@ -4,7 +4,7 @@
 
 Cboe 在 2022 年第二季把 SPX Weeklys 的到期日由週一、週三、週五擴到每個交易日：週二契約於 2022-04-18 上市，週四契約於 2022-05-11 上市。這提供一個比單純切 2022-Q2 更有辨識力的日曆對照：若每日到期選擇權主要改變盤中價格形成，週二／週四相對既有到期日的日內波動代理應在擴張後改變，而隔夜代理不一定同向。
 
-本庫既有 overnight/intraday 研究多半研究報酬、VRP 或預測力；K1716 的差異是固定制度日期、以 weekday DiD 檢查波動「發生時段」是否重分配。它不是選擇權成交資料研究，也不宣稱辨識 dealer gamma 或 0DTE 成交量的因果效果。
+本庫已有高度重疊的 K1477：同樣用 SPY 日 OHLC、2022-Q2 breakpoint 與 Tue/Thu interaction，得到 weekday interaction 不顯著。K1716 不是新題，而是較嚴格的獨立再驗證：改用官方上市過渡期、log outcomes、weekday fixed effects、落後控制、canonical HAC bandwidth、Holm、block bootstrap、restricted-era placebo 與 pretrend。它不是選擇權成交資料研究，也不宣稱辨識 dealer gamma 或 0DTE 成交量的因果效果。
 
 ## 文獻與制度背景（檢索於 2026-07-16）
 
@@ -19,7 +19,7 @@ Cboe 在 2022 年第二季把 SPX Weeklys 的到期日由週一、週三、週�
 
 - 來源：Yahoo Finance，透過 `yfinance` 下載 SPY 未調整日 OHLCV。
 - 請求期：2018-01-01 至 2026-07-16（右端不含）；實際交易日、樣本數與 SHA-256 寫入 `K1716_results.json`。
-- 凍結快照：`data/SPY_ohlcv.csv`。結果重跑預設讀此快照，不會靜默抓新資料；只有顯式 `--refresh` 才更新。
+- 凍結快照：`data/SPY_ohlcv.csv`。結果重跑預設以 pandas `float_precision='round_trip'` 讀此快照，不會靜默抓新資料；只有顯式 `--refresh` 才更新。
 - SPY 在研究期沒有 split，但仍刻意使用 raw OHLC，避免 adjusted Close 與 raw Open 混搭。所有價格一致性檢查都在腳本內。
 
 ## 觀察先於估計
@@ -36,7 +36,7 @@ Cboe 在 2022 年第二季把 SPX Weeklys 的到期日由週一、週三、週�
 - transition：2022-04-18 至 2022-05-18 不進主回歸；post 自首個週四到期日 2022-05-19 起。
 - 回歸：`outcome ~ post + post×TueThu + weekday FE + lagged controls + month seasonality`。
 - outcomes：log Parkinson variance、log overnight variance、log close-to-close variance、logit intraday share。
-- 推論：Newey–West HAC，lag=`ceil(n^(1/3))`；10 日 moving-block pairs bootstrap 1,000 次，seed=42；四 outcome 的 HAC p-value 做 Holm 校正；另做 2021-05-19 與 2023-05-19 placebo break。
+- 推論：Newey–West HAC，lag=`ceil(n^(1/3))`；10 日 moving-block pairs bootstrap 1,000 次，seed=42；四 outcome 的 HAC p-value 做 Holm 校正；另做 2021-05-19 pre-treatment-only 與 2023-05-19 post-treatment-only placebo break，以及 treatment 前的 Tue/Thu differential linear-trend test。
 - 主要成功標準：log Parkinson 與 logit intraday share 的 interaction 同方向，兩者均滿足 Harvey `|t|>=3` 且四 outcome family 的 Holm p<0.05。否則報 NULL，不改門檻或斷點。
 
 ## Lookahead policy
@@ -64,6 +64,6 @@ uv run python scripts/experiment_gates.py run --path experiments/k1716
 - log Parkinson variance：係數 +0.0407，HAC t=0.591，raw p=0.555，Holm p=1.000，block-bootstrap 95% CI [-0.0863, +0.1776]。
 - logit intraday share：係數 -0.0363，HAC t=-0.190，raw p=0.850，Holm p=1.000，block-bootstrap 95% CI [-0.4054, +0.3296]。
 - log overnight variance：係數 +0.0651，HAC t=0.326；log close-to-close variance：係數 +0.1325，HAC t=0.624；兩者 Holm p 也都是 1.000。
-- 2021 與 2023 placebo 的兩個日內 outcome interaction 同樣都不顯著（|t|≤0.803）。
+- restricted-era placebo 與 treatment 前 differential-trend 的兩個日內 outcome interaction 同樣都不顯著（所有 |t|<0.66）。
 
-因此預註冊成功條件未成立，裁決為 `NULL_PROXY_DIAGNOSTIC`。描述均值雖顯示 post 期間兩組的日內占比都較高（Tue/Thu 0.7040→0.7240；Mon/Wed/Fri 0.6850→0.7060），差中之差幾乎沒有可辨識訊號；不能把共同的 regime 移動歸因於每日到期選擇權。這個 NULL 也與文獻中正負方向皆有的機制證據相容，但不裁決任何一方。
+因此預註冊成功條件未成立，裁決為 `NULL_PROXY_DIAGNOSTIC`。描述均值雖顯示 post 期間兩組的日內占比都較高（Tue/Thu 0.7040→0.7240；Mon/Wed/Fri 0.6850→0.7060），差中之差幾乎沒有可辨識訊號；不能把共同的 regime 移動歸因於每日到期選擇權。這重現並加強了 K1477 的「Tue/Thu 無額外 interaction」結果，但 K1716 的較嚴格門檻不承接 K1477 對共同 pre/post shift 的 CONDITIONAL_PASS。這個 NULL 也與文獻中正負方向皆有的機制證據相容，但不裁決任何一方。

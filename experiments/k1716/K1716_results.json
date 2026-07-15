@@ -1,6 +1,6 @@
 {
   "experiment_id": "K1716",
-  "generated_at_utc": "2026-07-15T23:15:17.956962+00:00",
+  "generated_at_utc": "2026-07-15T23:24:51.440635+00:00",
   "seed": 42,
   "data": {
     "source": "Yahoo Finance via yfinance; SPY unadjusted daily OHLCV",
@@ -10,10 +10,19 @@
     "effective_end": "2026-07-15",
     "snapshot_path": "data/SPY_ohlcv.csv",
     "snapshot_sha256": "4c76aabed84a838e25a05950a710b0f420a044b23e0cabe730b06011d0a10335",
+    "reader": "pandas.read_csv(float_precision='round_trip')",
     "downloaded_rows": 2144,
     "deduplicated_valid_rows": 2144,
     "invalid_ohlc_rows_removed": 0,
     "duplicate_dates_removed": 0
+  },
+  "provenance": {
+    "script_sha256": "c4a4d8c5b94b15e0b98f940284dab196c695e3939b2465e5bd377dafdde13ff8",
+    "figure_sha256": "5ca53fe58d95ae160efa1a9de3ddf0e0e7488468eef4c34fdf94d76e62e4afcf",
+    "numpy_version": "2.4.3",
+    "pandas_version": "3.0.1",
+    "statsmodels_version": "0.14.6",
+    "yfinance_version": "1.2.0"
   },
   "design": {
     "treatment_weekdays": [
@@ -139,48 +148,74 @@
   "placebo_breaks": {
     "2021-05-19": {
       "log_parkinson_var": {
-        "n": 2138,
-        "coefficient": 0.05650624480577466,
-        "standard_error_hac": 0.07034801403282612,
-        "t_stat_hac": 0.8032386639857019,
-        "p_value_hac": 0.42183680199177764,
-        "hac_lag": 13,
-        "r_squared": 0.4398730695549842,
-        "post_main_effect": 0.02702177869330391
+        "n": 1074,
+        "coefficient": 0.06752885347753255,
+        "standard_error_hac": 0.10574032147226015,
+        "t_stat_hac": 0.6386291675427527,
+        "p_value_hac": 0.5230642019698966,
+        "hac_lag": 11,
+        "r_squared": 0.483681404246574,
+        "post_main_effect": 0.03306553919537025,
+        "sample_scope": "pre-treatment-only"
       },
       "logit_intraday_share": {
-        "n": 2138,
-        "coefficient": -0.11183377282396703,
-        "standard_error_hac": 0.1980961127673604,
-        "t_stat_hac": -0.564542995123292,
-        "p_value_hac": 0.5723846480024188,
-        "hac_lag": 13,
-        "r_squared": 0.01854963476553262,
-        "post_main_effect": 0.33833104797820496
+        "n": 1074,
+        "coefficient": -0.20230065635166875,
+        "standard_error_hac": 0.31189070108039474,
+        "t_stat_hac": -0.6486267646034197,
+        "p_value_hac": 0.5165796514880696,
+        "hac_lag": 11,
+        "r_squared": 0.020049162381289176,
+        "post_main_effect": 0.3799446208044439,
+        "sample_scope": "pre-treatment-only"
       }
     },
     "2023-05-19": {
       "log_parkinson_var": {
-        "n": 2138,
-        "coefficient": -0.0074013035861870205,
-        "standard_error_hac": 0.07028495449252395,
-        "t_stat_hac": -0.10530423814920846,
-        "p_value_hac": 0.916134400119095,
-        "hac_lag": 13,
-        "r_squared": 0.4402097813546193,
-        "post_main_effect": -0.07215995399509278
+        "n": 1041,
+        "coefficient": -0.07895796883537082,
+        "standard_error_hac": 0.12404491464383172,
+        "t_stat_hac": -0.6365272535523253,
+        "p_value_hac": 0.5244328232995991,
+        "hac_lag": 11,
+        "r_squared": 0.37840588264926867,
+        "post_main_effect": -0.2736366790264414,
+        "sample_scope": "post-treatment-only"
       },
       "logit_intraday_share": {
-        "n": 2138,
-        "coefficient": -0.004237379498785698,
-        "standard_error_hac": 0.19685356028350917,
-        "t_stat_hac": -0.021525541588798342,
-        "p_value_hac": 0.9828264289396115,
-        "hac_lag": 13,
-        "r_squared": 0.01599253162254599,
-        "post_main_effect": 0.18216549018220168
+        "n": 1041,
+        "coefficient": 0.028510976853712764,
+        "standard_error_hac": 0.30248358389735286,
+        "t_stat_hac": 0.09425627826265078,
+        "p_value_hac": 0.9249055801247374,
+        "hac_lag": 11,
+        "r_squared": 0.019173294523053386,
+        "post_main_effect": 0.04972566447284924,
+        "sample_scope": "post-treatment-only"
       }
     }
+  },
+  "pre_treatment_differential_trends": {
+    "log_parkinson_var": {
+      "n": 1074,
+      "coefficient_per_year": 0.019138441813659108,
+      "t_stat_hac": 0.533420801044051,
+      "p_value_hac": 0.5937423215361262,
+      "hac_lag": 11
+    },
+    "logit_intraday_share": {
+      "n": 1074,
+      "coefficient_per_year": 0.03997124533927522,
+      "t_stat_hac": 0.34561676941990754,
+      "p_value_hac": 0.7296307416054566,
+      "hac_lag": 11
+    }
+  },
+  "prior_replication": {
+    "experiment": "K1477",
+    "relationship": "independent stricter re-verification of the same SPY daily-OHLC question",
+    "incremental_design": "official listing transition exclusion, log outcomes, weekday fixed effects, lagged controls, canonical HAC bandwidth, Holm, block bootstrap, restricted-era placebos, and pretrend tests",
+    "qualitative_consistency": "both K1477 and K1716 find no Tue/Thu-specific post-expansion interaction"
   },
   "verdict": "NULL_PROXY_DIAGNOSTIC",
   "primary_success_criteria_met": false,

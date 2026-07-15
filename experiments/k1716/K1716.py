@@ -12,6 +12,8 @@ import argparse
 import hashlib
 import json
 import math
+import os
+import tempfile
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -44,6 +46,20 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def atomic_write_json(path: Path, payload: dict) -> None:
+    """Write a validated JSON artifact atomically in its destination directory."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent, delete=False) as handle:
+        json.dump(payload, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+        temporary = Path(handle.name)
+    try:
+        json.loads(temporary.read_text(encoding="utf-8"))
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def refresh_snapshot(path: Path = DATA_PATH) -> pd.DataFrame:
     raw = yf.download(
         "SPY",
@@ -64,14 +80,23 @@ def refresh_snapshot(path: Path = DATA_PATH) -> pd.DataFrame:
     out = raw.loc[:, keep].copy().reset_index()
     out["Date"] = pd.to_datetime(out["Date"]).dt.strftime("%Y-%m-%d")
     path.parent.mkdir(parents=True, exist_ok=True)
-    out.to_csv(path, index=False, float_format="%.10g")
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent, delete=False) as handle:
+        temporary = Path(handle.name)
+        out.to_csv(handle, index=False, float_format="%.10g")
+    try:
+        check = pd.read_csv(temporary, float_precision="round_trip")
+        if len(check) != len(out):
+            raise RuntimeError(f"snapshot validation row mismatch: {len(check)} != {len(out)}")
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
     return out
 
 
 def load_snapshot(path: Path = DATA_PATH, refresh: bool = False) -> pd.DataFrame:
     if refresh or not path.exists():
         refresh_snapshot(path)
-    frame = pd.read_csv(path, parse_dates=["Date"])
+    frame = pd.read_csv(path, parse_dates=["Date"], float_precision="round_trip")
     required = {"Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"}
     if not required.issubset(frame.columns):
         raise ValueError(f"snapshot lacks columns: {sorted(required - set(frame.columns))}")
@@ -213,11 +238,55 @@ def holm_adjust(p_values: dict[str, float]) -> dict[str, float]:
 
 
 def placebo_fit(df: pd.DataFrame, outcome: str, break_date: pd.Timestamp) -> dict[str, float | int]:
-    placebo = df.copy()
+    if break_date < TUESDAY_LISTING:
+        placebo = df.loc[df["Date"] < TUESDAY_LISTING].copy()
+        scope = "pre-treatment-only"
+    else:
+        placebo = df.loc[df["Date"] >= POST_START].copy()
+        scope = "post-treatment-only"
     placebo["post"] = (placebo["Date"] >= break_date).astype(float)
     placebo["post_x_tue_thu"] = placebo["post"] * placebo["tue_thu"]
     result, _, _ = fit_did(placebo, outcome)
+    result["sample_scope"] = scope
     return result
+
+
+def pretrend_fit(df: pd.DataFrame, outcome: str) -> dict[str, float | int]:
+    """Test differential linear trends using only never-yet-treated dates."""
+    pre = df.loc[df["Date"] < TUESDAY_LISTING].copy()
+    pre["trend_years"] = (pre["Date"] - pre["Date"].min()).dt.days / 365.25
+    pre["trend_x_tue_thu"] = pre["trend_years"] * pre["tue_thu"]
+    cols = [
+        outcome,
+        "trend_years",
+        "trend_x_tue_thu",
+        "lag5_log_total",
+        "lag1_abs_return",
+        "month_sin",
+        "month_cos",
+        "dow",
+    ]
+    sample = pre.loc[:, cols].replace([np.inf, -np.inf], np.nan).dropna().copy()
+    dow = pd.get_dummies(sample["dow"].astype(int), prefix="dow", drop_first=True, dtype=float)
+    x = pd.concat(
+        [
+            sample[["trend_years", "trend_x_tue_thu", "lag5_log_total", "lag1_abs_return", "month_sin", "month_cos"]],
+            dow,
+        ],
+        axis=1,
+    )
+    x = sm.add_constant(x.astype(float), has_constant="add")
+    hac_lag = max(1, int(math.ceil(len(sample) ** (1.0 / 3.0))))
+    fitted = sm.OLS(sample[outcome].astype(float), x).fit(cov_type="HAC", cov_kwds={"maxlags": hac_lag})
+    term = "trend_x_tue_thu"
+    t_stat = float(fitted.tvalues[term])
+    return {
+        "n": int(len(sample)),
+        "coefficient_per_year": float(fitted.params[term]),
+        "t_stat_hac": t_stat,
+        "p_value_hac": float(2.0 * norm.sf(abs(t_stat))),
+        "hac_lag": hac_lag,
+    }
 
 
 def descriptive_table(df: pd.DataFrame) -> dict[str, dict[str, float | int]]:
@@ -294,6 +363,10 @@ def main() -> None:
         }
         for date in [pd.Timestamp("2021-05-19"), pd.Timestamp("2023-05-19")]
     }
+    pretrends = {
+        outcome: pretrend_fit(daily, outcome)
+        for outcome in ["log_parkinson_var", "logit_intraday_share"]
+    }
     make_figure(daily)
 
     result_payload = {
@@ -308,7 +381,16 @@ def main() -> None:
             "effective_end": daily["Date"].max().strftime("%Y-%m-%d"),
             "snapshot_path": str(DATA_PATH.relative_to(ROOT)),
             "snapshot_sha256": sha256(DATA_PATH),
+            "reader": "pandas.read_csv(float_precision='round_trip')",
             **data_checks,
+        },
+        "provenance": {
+            "script_sha256": sha256(Path(__file__)),
+            "figure_sha256": sha256(FIGURE_PATH),
+            "numpy_version": np.__version__,
+            "pandas_version": pd.__version__,
+            "statsmodels_version": sm.__version__,
+            "yfinance_version": yf.__version__,
         },
         "design": {
             "treatment_weekdays": ["Tuesday", "Thursday"],
@@ -324,6 +406,13 @@ def main() -> None:
         "descriptive": descriptive_table(daily),
         "regressions": regressions,
         "placebo_breaks": placebos,
+        "pre_treatment_differential_trends": pretrends,
+        "prior_replication": {
+            "experiment": "K1477",
+            "relationship": "independent stricter re-verification of the same SPY daily-OHLC question",
+            "incremental_design": "official listing transition exclusion, log outcomes, weekday fixed effects, lagged controls, canonical HAC bandwidth, Holm, block bootstrap, restricted-era placebos, and pretrend tests",
+            "qualitative_consistency": "both K1477 and K1716 find no Tue/Thu-specific post-expansion interaction",
+        },
         "verdict": "CONDITIONAL_PROXY_BREAK" if primary_consistent else "NULL_PROXY_DIAGNOSTIC",
         "primary_success_criteria_met": bool(primary_consistent),
         "limitations": [
@@ -334,7 +423,7 @@ def main() -> None:
         ],
         "artifacts": {"figure": FIGURE_PATH.name},
     }
-    RESULTS_PATH.write_text(json.dumps(result_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_json(RESULTS_PATH, result_payload)
     print(json.dumps({"verdict": result_payload["verdict"], "results": str(RESULTS_PATH), "snapshot_sha256": result_payload["data"]["snapshot_sha256"]}, indent=2))
 
 
