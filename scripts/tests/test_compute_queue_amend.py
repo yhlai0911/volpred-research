@@ -35,6 +35,7 @@ def queue(tmp_path, monkeypatch):
     qdir = tmp_path / "queue"
     bdir = tmp_path / "briefs"
     monkeypatch.setattr(compute_queue, "QUEUE_DIR", qdir)
+    monkeypatch.setattr(compute_queue, "LOCK_FILE", qdir / ".worker.lock")
     monkeypatch.setattr(compute_queue, "LOG_DIR", tmp_path / "logs")
     monkeypatch.setattr(compute_queue, "AGENT_JOB_DIR", tmp_path / "agent_jobs")
     monkeypatch.setattr(compute_queue, "AGENT_BRIEF_DIR", bdir)
@@ -151,7 +152,9 @@ def test_amend_with_no_fields_is_an_error(queue, tmp_path):
     assert rc == 2
 
 
-def test_cancel_removes_a_queued_job_from_both_run_and_followup(queue, tmp_path):
+def test_cancel_removes_a_queued_job_from_both_run_and_followup(
+    queue, tmp_path, capsys
+):
     src = tmp_path / "brief.md"
     src.write_text("v1")
     _enqueue_agent(src)
@@ -162,8 +165,30 @@ def test_cancel_removes_a_queued_job_from_both_run_and_followup(queue, tmp_path)
     job = _job(queue)
     assert job["status"] == "cancelled"
     assert job["cancel_reason"] == "superseded"
+    assert job["cancelled_at"] == job["completed_at"]
     # A job that never ran has no result to triage — it must not surface as pending followup.
     assert job["followup_dispatched"] is True
+
+    capsys.readouterr()
+    assert compute_queue.list_jobs(argparse.Namespace(
+        status=None, pending_followup=True,
+        completed_pending_followup=False, json=True,
+    )) == 0
+    assert json.loads(capsys.readouterr().out) == []
+
+    # run-next only consumes queued receipts; cancellation remains terminal.
+    assert compute_queue.run_next(argparse.Namespace()) == 0
+    assert "no queued jobs" in capsys.readouterr().out
+    assert _job(queue)["status"] == "cancelled"
+
+
+def test_cancel_requires_an_auditable_reason(queue, tmp_path):
+    src = tmp_path / "brief.md"
+    src.write_text("v1")
+    _enqueue_agent(src)
+
+    assert compute_queue.cancel(argparse.Namespace(id="j1", reason="  ")) == 2
+    assert _job(queue)["status"] == "queued"
 
 
 def test_cancel_refuses_a_running_job(queue, tmp_path):
@@ -175,7 +200,7 @@ def test_cancel_refuses_a_running_job(queue, tmp_path):
     job["status"] = "running"
     path.write_text(json.dumps(job))
 
-    assert compute_queue.cancel(argparse.Namespace(id="j1", reason=None)) == 2
+    assert compute_queue.cancel(argparse.Namespace(id="j1", reason="too late")) == 2
     assert _job(queue)["status"] == "running"
 
 

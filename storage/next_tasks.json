@@ -32944,13 +32944,10 @@
     "task_type": "platform_ops",
     "priority": 3,
     "description": "2026-07-13 hourly-04：queue 了一個 Codex review job，隨後因 revert 讓它的審查對象消失，job 變成必然撲空。compute_queue.py 的子命令只有 {enqueue, enqueue-agent, list, show, run-next, mark-followup-dispatched} —— 沒有 cancel。唯一能做的是直接 rm 掉 storage/ops/compute_queue/<id>.json，這正是「修資料不修流程」的反模式，而且不留任何 audit trail（沒人知道有 job 被撤、為何撤）。\n\n要做：加 `cancel --id <job_id> --reason <why>` 子命令，把 status 改成 cancelled 並記 cancelled_at / cancel_reason，pending-followup 與 run-next 都要跳過 cancelled。已 running 的 job 是否可 cancel 一併想清楚（至少要能標記，不必真的殺 process）。",
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "agent_discovered",
     "created_at": "2026-07-12T20:36:58.646978+00:00",
     "created_by": "hourly-04",
-    "claimed_by": "codex-failover-slot-2-32dd5c53698b406e991d669c0a162efc",
-    "claimed_at": "2026-07-15T19:08:40.110371+00:00",
-    "claim_session_id": "7732f8df5684",
     "status_history": [
       {
         "ts": "2026-07-15T19:08:40.110389+00:00",
@@ -32963,9 +32960,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-2-32dd5c53698b406e991d669c0a162efc"
+      },
+      {
+        "ts": "2026-07-15T19:10:35.735867+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-32dd5c53698b406e991d669c0a162efc"
       }
     ],
-    "started_at": "2026-07-15T19:08:40.401374+00:00"
+    "started_at": "2026-07-15T19:08:40.401374+00:00",
+    "completed_at": "2026-07-15T19:10:35.735855+00:00",
+    "result": "Closed stale implementation gap: cancel now records cancelled_at plus completed_at, requires a non-empty audit reason, skips cancelled receipts in followup and run-next, and refuses running jobs. Validation: 35 targeted tests passed; silent-fallback audit returned []."
   },
   {
     "id": "K1684_article_general",

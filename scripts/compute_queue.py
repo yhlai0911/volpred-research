@@ -14,7 +14,7 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
     interpreter (str)  — e.g. "uv run python" or "bash"
     args (list[str])
     env (dict[str,str])
-    status (str)       — queued / running / completed / failed
+    status (str)       — queued / running / completed / failed / cancelled
     queued_at / started_at / completed_at (ISO UTC)
     exit_code (int|null)       — job-level code (includes queue postconditions)
     process_exit_code (int|null, optional) — raw rc when a postcondition fails
@@ -28,6 +28,8 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
     claude_followup (dict|null) — { brief, task_type, priority }
     followup_dispatched (bool)  — true after hourly_dispatch creates next_task
     timeout_seconds (int)
+    cancelled_at (ISO UTC, optional) — operator cancellation timestamp
+    cancel_reason (str, optional)    — required audit reason for cancellation
 
 Usage:
     enqueue:   uv run python scripts/compute_queue.py enqueue --script X --title Y ...
@@ -36,6 +38,7 @@ Usage:
     list --completed-pending-followup: legacy completed-only view
     run-next:  uv run python scripts/compute_queue.py run-next
     show:      uv run python scripts/compute_queue.py show <id>
+    cancel:    uv run python scripts/compute_queue.py cancel --id ID --reason WHY
     mark-followup-dispatched: ... --id <id>
 """
 from __future__ import annotations
@@ -873,14 +876,22 @@ def amend(args) -> int:
 
 def cancel(args) -> int:
     """Drop a queued job before the worker sees it."""
+    reason = str(getattr(args, "reason", "") or "").strip()
+    if not reason:
+        print("error: cancel requires a non-empty --reason for the audit trail", file=sys.stderr)
+        return 2
     with _receipt_lock():
         loaded = _load_queued_job(args.id, "cancel")
         if loaded is None:
             return 2
         path, job = loaded
         job["status"] = "cancelled"
-        job["completed_at"] = utc_now()
-        job["cancel_reason"] = args.reason or "cancelled by operator"
+        cancelled_at = utc_now()
+        job["cancelled_at"] = cancelled_at
+        # Keep completed_at populated for generic terminal-state consumers while
+        # preserving the semantically precise cancellation timestamp for audit.
+        job["completed_at"] = cancelled_at
+        job["cancel_reason"] = reason
         # A cancelled job has no result, so it has nothing to follow up on. Saying so
         # explicitly keeps it out of `list --pending-followup` instead of relying on the
         # collector to infer that "cancelled" means "do not triage me".
@@ -956,7 +967,7 @@ def main():
 
     cx = sub.add_parser("cancel", help="Drop a QUEUED job before the worker picks it up.")
     cx.add_argument("--id", required=True)
-    cx.add_argument("--reason")
+    cx.add_argument("--reason", required=True, help="Audit reason for cancelling this work order.")
     cx.set_defaults(func=cancel)
 
     l = sub.add_parser("list")
