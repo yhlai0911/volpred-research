@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "title": "私募信貸影子警報，只剩一個短期格過關",
+  "subtitle": "先分清楚共同市場波動與相對折價訊號",
+  "evidence": {
+    "initial": {
+      "path": "experiments/k1332/k1332_results.json",
+      "sha256": "ff1bc52cd341a9192258cae5d4404baa528f9878f1a717d0393a32dd887d7091",
+      "label": "K1332 certified public proxy results"
+    },
+    "robustness": {
+      "path": "experiments/k1499/k1499_results.json",
+      "sha256": "2852108e662ae6af5116d8f9b84ad34f8c70b985fb71bb67bb7aab694f5fc78e",
+      "label": "K1499 certified multi-horizon robustness results"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_initial_signal",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "第一輪：改善只靠近信用資產",
+      "alt": "第一輪私募信貸公開代理對四個標的的往前預測改善",
+      "sources": ["initial"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "貸款 ETF 誤差改善",
+          "value": {
+            "source": "initial",
+            "path": "rolling_oos.BKLN.pairwise.har_vs_har_pc.qlike_improvement_pct",
+            "format": {"kind": "number", "digits": 2, "suffix": "%"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "高收益債誤差改善",
+          "value": {
+            "source": "initial",
+            "path": "rolling_oos.HYG.pairwise.har_vs_har_pc.qlike_improvement_pct",
+            "format": {"kind": "number", "digits": 2, "suffix": "%"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "區域銀行誤差變化",
+          "value": {
+            "source": "initial",
+            "path": "rolling_oos.KRE.pairwise.har_vs_har_pc.qlike_improvement_pct",
+            "format": {"kind": "number", "digits": 2, "suffix": "%"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "往前預測樣本",
+          "value": {
+            "source": "initial",
+            "path": "rolling_oos.HYG.models.har.n_oos",
+            "format": {"kind": "integer", "suffix": " 日"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_robustness_filter",
+      "info": "results",
+      "style": "professional",
+      "title": "扣掉大盤後，只剩高收益債短期格",
+      "alt": "相對折價代理對高收益債不同期程的統計強度",
+      "sources": ["robustness"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "存活期程",
+          "value": {
+            "source": "robustness",
+            "path": "nav_discount_wins_after_spy_control.HYG.0",
+            "format": {"kind": "integer", "suffix": " 日"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "短期統計強度",
+          "value": {
+            "source": "robustness",
+            "path": "hac_regressions.HYG.h5.modelC_navproxy_plus_spy.nav_discount_z.t",
+            "format": {"kind": "number", "digits": 2}
+          },
+          "note": "跨過嚴格門檻"
+        },
+        {
+          "kind": "metric",
+          "label": "中期統計強度",
+          "value": {
+            "source": "robustness",
+            "path": "hac_regressions.HYG.h10.modelC_navproxy_plus_spy.nav_discount_z.t",
+            "format": {"kind": "number", "digits": 2}
+          },
+          "note": "未過嚴格門檻"
+        },
+        {
+          "kind": "metric",
+          "label": "長期統計強度",
+          "value": {
+            "source": "robustness",
+            "path": "hac_regressions.HYG.h21.modelC_navproxy_plus_spy.nav_discount_z.t",
+            "format": {"kind": "number", "digits": 2}
+          },
+          "note": "訊號繼續衰減"
+        }
+      ]
+    },
+    {
+      "name": "3_honest_use",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "把它當檢查起點，不當危機預報器",
+      "alt": "私募信貸公開代理的使用方式與研究邊界",
+      "sources": ["initial", "robustness"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "先比較相對價格",
+          "body": ["大盤一起緊張時，整體波動沒有新增資訊；相對折價才值得再查。"]
+        },
+        {
+          "kind": "text",
+          "heading": "用途保持很窄",
+          "body": ["證據只支持高收益債的短期風險監看，區域銀行與小型股都沒有通過。"]
+        },
+        {
+          "kind": "text",
+          "heading": "公開價格不是帳本",
+          "body": ["研究沒有逐筆放款、未上市基金淨值、贖回流量或借款人違約資料。"]
+        },
+        {
+          "kind": "metric",
+          "label": "隨機程序種子",
+          "value": {
+            "source": "robustness",
+            "path": "seed",
+            "format": {"kind": "integer"}
+          }
+        }
+      ]
+    }
+  ]
+}
