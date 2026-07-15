@@ -1,0 +1,51 @@
+{
+  "id": "lazypack-mile_6e81bb0a-r2",
+  "title": "lazypack render mile_6e81bb0a",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_6e81bb0a-r2",
+    "--article-id",
+    "mile_6e81bb0a",
+    "--plan",
+    "storage/lazypack_jobs/mile_6e81bb0a/runs/lazypack-mile_6e81bb0a-r2/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_6e81bb0a/runs/lazypack-mile_6e81bb0a-r2/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "多加資訊，不等於更可靠的波動預測",
+    "--experiment",
+    "K1379"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-15T20:15:35Z",
+  "started_at": "2026-07-15T20:16:57Z",
+  "completed_at": "2026-07-15T20:21:27Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_6e81bb0a-r2.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_6e81bb0a-r2.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_6e81bb0a/runs/lazypack-mile_6e81bb0a-r2/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_6e81bb0a/runs/lazypack-mile_6e81bb0a-r2/plan.json",
+    "storage/lazypack_jobs/mile_6e81bb0a/runs/lazypack-mile_6e81bb0a-r2/panels/1_stable_ranking.png",
+    "storage/lazypack_jobs/mile_6e81bb0a/runs/lazypack-mile_6e81bb0a-r2/panels/2_unstable_extra_signal.png",
+    "storage/lazypack_jobs/mile_6e81bb0a/runs/lazypack-mile_6e81bb0a-r2/panels/3_honest_boundary.png",
+    "storage/lazypack_jobs/mile_6e81bb0a/runs/lazypack-mile_6e81bb0a-r2/panels/render_lazypack.py"
+  ],
+  "output_paths_updated_at": "2026-07-15T20:21:24Z",
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}
