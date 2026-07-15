@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "title": "老牌 ETF 很熱門，卻沒有變成風險警報",
+  "subtitle": "先分清楚市場結構的事實與真正的預測能力",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1365/K1365_results.json",
+      "sha256": "7e81d459dfef04713be8cd43281c21471ae53dd7090e9ffa1462767f13d15679",
+      "label": "certified same-index ETF concentration results"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concentration_facts",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "交易確實集中在老牌 ETF",
+      "alt": "四組同指數 ETF 的老牌成交量占比",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "SPY 占比",
+          "value": {
+            "source": "result",
+            "path": "groups.sp500.mean_leader_volume_share",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "QQQ 占比",
+          "value": {
+            "source": "result",
+            "path": "groups.nasdaq100.mean_leader_volume_share",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "IWM 占比",
+          "value": {
+            "source": "result",
+            "path": "groups.russell2000.mean_leader_volume_share",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "EEM 占比",
+          "value": {
+            "source": "result",
+            "path": "groups.em.mean_leader_volume_share",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_prediction_result",
+      "info": "results",
+      "style": "professional",
+      "title": "所有主要檢查，正向通過數是零",
+      "alt": "ETF 交易集中度的主要預測結果與新興市場反向值",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "主要檢查",
+          "value": {
+            "source": "result",
+            "path": "primary_summary.n_primary_tests",
+            "format": {
+              "kind": "integer",
+              "suffix": " 項"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "正向跨過嚴格線",
+          "value": {
+            "source": "result",
+            "path": "primary_summary.n_positive_harvey_t_ge_3",
+            "format": {
+              "kind": "integer",
+              "suffix": " 項"
+            }
+          },
+          "note": "熱門度沒有變成風險警報"
+        },
+        {
+          "kind": "metric",
+          "label": "新興市場隔日",
+          "value": {
+            "source": "result",
+            "path": "regressions.74.hac_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "反向跨過門檻"
+        },
+        {
+          "kind": "metric",
+          "label": "新興市場五日",
+          "value": {
+            "source": "result",
+            "path": "regressions.75.hac_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "修正後不再過線"
+        }
+      ]
+    },
+    {
+      "name": "3_honest_boundary",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "市場結構是真的，預測用途仍很窄",
+      "alt": "ETF 成交量集中度研究的使用方式與限制",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "守住時間順序",
+          "body": [
+            "訊號先看固定窗口的近期常態，再延後一日；預測今天只讀昨天以前的資料。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "舊版已修正",
+          "body": [
+            "五日控制項改讀前一個完整區塊，未來資訊已移除。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "資料看不到機制",
+          "body": [
+            "每日成交量沒有淨值折溢價、申購贖回、投資人類型或盤中報價。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "訊號觀察窗口",
+          "value": {
+            "source": "result",
+            "path": "method.signal_window_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 日"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
