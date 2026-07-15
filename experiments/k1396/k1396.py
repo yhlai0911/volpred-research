@@ -1,28 +1,35 @@
 #!/usr/bin/env python3
-"""
-K1396: HAR-RV vs A4f — C4 Benchmark for Paper 9 (garch-x-vix)
-================================================================
-Implements HAR-RV (Corsi 2009) and HAR-RV-VIX benchmarks and runs
-Diebold-Mariano tests against A4f using the same OOS protocol as
-the main horse race (K988/compute_mcs_dm.py).
+"""K1396 legacy daily-r-squared / steady-state-A4f diagnostic.
 
-Models:
-  HAR:     RV(d,w,m) OLS — no VIX
-  HAR-VIX: RV(d,w,m) + VIX²/252 OLS
+This program is retained only to explain the historical 2026-05-22 artifact.
+It does **not** implement canonical HAR-RV: the target and HAR-style regressors
+use close-to-close daily squared returns rather than intraday realized
+variance.  Its A4f forecast resets ``g`` to its unconditional steady state on
+every OOS date instead of carrying the canonical recursion forward.  The
+custom raw-loss DM calculations are also legacy diagnostics, not equivalence
+or non-inferiority tests.  K1379 supersedes the public K1396 interpretation.
 
-Protocol (must match K988 exactly):
+Running this file writes ``k1396_legacy_rerun_results.json`` and never
+overwrites the frozen ``k1396_results.json`` audit artifact.
+
+Models (accurate historical labels):
+  HAR-style daily-r²:     daily/weekly/monthly lagged r² NNLS — no VIX
+  HAR-style daily-r²-VIX: preceding regressors + VIX²/252 NNLS
+  A4f approximation:      blockwise fit, steady-state g on every OOS date
+
+Legacy protocol (does not match K988 exactly):
   DATA_FILE: paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv
   DATA_START: 2005-01-01
   OOS_START:  2019-01-01
   WINDOW:     2000 (rolling IS)
   REFIT_EVERY: 63 days
   LOSS:       QLIKE (Patton 2011)
-  DM THRESHOLD: Harvey et al. (2016) |t| > 3.0
+  REPORTING SCREEN: Harvey, Liu & Zhu (2016) |t| > 3.0
 
 References:
-  Corsi (2009). J Fin Econometrics 7(2):174-196. HAR-RV.
+  Corsi (2009). J Fin Econometrics 7(2):174-196. Canonical HAR-RV definition.
   Diebold & Mariano (1995). JBES 13(3):253-263.
-  Harvey, Leybourne & Newbold (2016). t > 3.0.
+  Harvey, Liu & Zhu (2016). Review of Financial Studies 29(1):5-68.
   Patton (2011). J Econometrics 160:246-256.
 
 Author: VolPred Research System
@@ -39,6 +46,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timezone
 from scipy import stats, optimize
+from volpred.ops.diagnostics import warn
 
 warnings.filterwarnings('ignore')
 np.random.seed(42)
@@ -46,7 +54,10 @@ np.random.seed(42)
 START_TIME = time.time()
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 DATA_FILE = os.path.join(PROJECT_ROOT, 'paper', 'garch-x-vix', 'data', 'spy_vix_qqq_eem_fez_2000-2026.csv')
-RESULT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'k1396_results.json')
+RESULT_FILE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    'k1396_legacy_rerun_results.json',
+)
 
 DATA_START = '2005-01-01'
 OOS_START = '2019-01-01'
@@ -54,7 +65,8 @@ WINDOW = 2000
 REFIT_EVERY = 63
 
 print("=" * 70)
-print("K1396: HAR-RV vs A4f — Paper 9 C4 Benchmark")
+print("K1396 LEGACY DIAGNOSTIC — daily-r² HAR-style vs steady-state A4f approximation")
+print("WARNING: superseded by K1379; no canonical HAR-RV or non-inferiority claim")
 print("=" * 70)
 
 # ============================================================
@@ -94,17 +106,17 @@ def qlike(forecast, actual):
 
 
 # ============================================================
-# 3. HAR-RV MODEL (Corsi 2009)
+# 3. HAR-STYLE DAILY-r² MODEL (NOT CANONICAL CORSI HAR-RV)
 # ============================================================
 
 def make_har_features(r2_vals, vix_sq=None):
     """
-    Build HAR-RV feature matrix (daily, weekly, monthly RV).
-    Uses lagged squared returns as daily RV proxy.
+    Build daily/weekly/monthly features from lagged squared daily returns.
+    Daily r² is a noisy volatility proxy, not intraday realized variance.
     Features are all lagged to avoid lookahead.
     """
     n = len(r2_vals)
-    rv_d = r2_vals  # daily RV proxy
+    rv_d = r2_vals  # daily r² volatility proxy; not intraday RV
     rv_w = np.full(n, np.nan)
     rv_m = np.full(n, np.nan)
     for t in range(4, n):
@@ -120,7 +132,7 @@ def make_har_features(r2_vals, vix_sq=None):
 
 
 def fit_har(X, y):
-    """OLS with non-negativity constraint on coefficients (lstsq)."""
+    """Fit coefficients by non-negative least squares (NNLS)."""
     from scipy.optimize import nnls
     coef, _ = nnls(X, y)
     return coef
@@ -135,7 +147,7 @@ def har_forecast_1step(coef, rv_d_t, rv_w_t, rv_m_t, vix_sq_t=None):
 
 
 # ============================================================
-# 4. A4f MODEL (copied exactly from compute_mcs_dm.py)
+# 4. A4f FIT + UNUSED CANONICAL-LIKE RECURSION HELPER
 # ============================================================
 
 def fit_mfgjr_a4f(returns, vix_vals_is):
@@ -190,8 +202,13 @@ def fit_mfgjr_a4f(returns, vix_vals_is):
                                     options={'maxiter': 1000})
             if res.fun < best_ll:
                 best_ll, best_p = res.fun, res.x
-        except Exception:
-            pass
+        except Exception as exc:
+            warn(
+                "k1396",
+                "legacy A4f optimization start failed",
+                start=s,
+                err=str(exc),
+            )
     return best_p
 
 
@@ -314,21 +331,24 @@ for j, t in enumerate(oos_indices):
         vix_lag_t = vix_vals[t - 1]
         tau_t = max(th0 + th1 * vix_lag_t**2, 1e-16)
         a4f_forecasts[j] = tau_t * max(omg / (1.0 - alp - gam/2.0 - bet), 1e-10)
-        # Note: this uses steady-state g; a proper recursion would continue from IS
-        # For the refit boundary, steady-state g ≈ unconditional mean
+        # Legacy approximation: every OOS date resets g to its unconditional
+        # steady state. This is not limited to refit boundaries and is not the
+        # canonical K988 recursion, which carries the short-run state forward.
     else:
-        a4f_forecasts[j] = np.mean(actual_r2[:max(j, 1)])  # fallback
+        raise RuntimeError(
+            "all legacy A4f optimization starts failed; refusing a proxy fallback"
+        )
 
 print(f"  OOS complete. Mean refit time: {np.mean(refit_times):.1f}s ({len(refit_times)} refits)")
 
 # ============================================================
-# 6. DM TESTS (Harvey et al. 2016)
+# 6. LEGACY RAW-LOSS DM DIAGNOSTICS + |t|>3 REPORTING SCREEN
 # ============================================================
 print("\n[3] Computing DM tests...")
 
 
-def dm_test_harvey(loss1, loss2, n):
-    """DM test with Harvey et al. (2016) correction for finite samples."""
+def legacy_dm_hac_screen(loss1, loss2, n):
+    """Historical custom HAC-DM diagnostic; no HLN small-sample correction."""
     d = loss1 - loss2  # positive = loss1 > loss2 (loss2 is better)
     mean_d = np.mean(d)
     # HAC variance (Newey-West with lags=min(n^(1/3), 12))
@@ -343,8 +363,8 @@ def dm_test_harvey(loss1, loss2, n):
         var_d = gamma0 / n
     t_stat = mean_d / np.sqrt(var_d)
     p_val = 2 * stats.t.sf(abs(t_stat), df=n - 1)
-    harvey_sig = abs(t_stat) > 3.0
-    return float(t_stat), float(p_val), bool(harvey_sig)
+    screen_pass = abs(t_stat) > 3.0
+    return float(t_stat), float(p_val), bool(screen_pass)
 
 
 har_loss = qlike(har_forecasts, actual_r2)
@@ -353,16 +373,16 @@ a4f_loss = qlike(a4f_forecasts, actual_r2)
 n = len(actual_r2)
 
 # HAR vs A4f (positive t = A4f has lower loss = A4f better)
-dm_har_vs_a4f = dm_test_harvey(har_loss, a4f_loss, n)
+dm_har_vs_a4f = legacy_dm_hac_screen(har_loss, a4f_loss, n)
 # HAR-VIX vs A4f
-dm_harvix_vs_a4f = dm_test_harvey(harvix_loss, a4f_loss, n)
+dm_harvix_vs_a4f = legacy_dm_hac_screen(harvix_loss, a4f_loss, n)
 # HAR-VIX vs HAR
-dm_harvix_vs_har = dm_test_harvey(harvix_loss, har_loss, n)
+dm_harvix_vs_har = legacy_dm_hac_screen(harvix_loss, har_loss, n)
 
 print(f"  Mean QLIKE — HAR: {np.mean(har_loss):.6f} | HAR-VIX: {np.mean(harvix_loss):.6f} | A4f: {np.mean(a4f_loss):.6f}")
-print(f"  DM(HAR vs A4f):     t={dm_har_vs_a4f[0]:.3f}  p={dm_har_vs_a4f[1]:.4f}  Harvey-sig={dm_har_vs_a4f[2]}")
-print(f"  DM(HAR-VIX vs A4f): t={dm_harvix_vs_a4f[0]:.3f}  p={dm_harvix_vs_a4f[1]:.4f}  Harvey-sig={dm_harvix_vs_a4f[2]}")
-print(f"  DM(HAR-VIX vs HAR): t={dm_harvix_vs_har[0]:.3f}  p={dm_harvix_vs_har[1]:.4f}  Harvey-sig={dm_harvix_vs_har[2]}")
+print(f"  legacy DM(daily-r² HAR vs A4f approx): t={dm_har_vs_a4f[0]:.3f}  p={dm_har_vs_a4f[1]:.4f}  |t|>3={dm_har_vs_a4f[2]}")
+print(f"  legacy DM(daily-r²-VIX HAR vs A4f approx): t={dm_harvix_vs_a4f[0]:.3f}  p={dm_harvix_vs_a4f[1]:.4f}  |t|>3={dm_harvix_vs_a4f[2]}")
+print(f"  nested raw-loss diagnostic(daily-r²-VIX vs daily-r²): t={dm_harvix_vs_har[0]:.3f}  p={dm_harvix_vs_har[1]:.4f}  |t|>3={dm_harvix_vs_har[2]}")
 
 # ============================================================
 # 7. SAVE RESULTS
@@ -394,32 +414,37 @@ results = {
         "HAR_vs_A4f": {
             "t_stat": dm_har_vs_a4f[0],
             "p_value": dm_har_vs_a4f[1],
-            "harvey_significant": dm_har_vs_a4f[2],
-            "interpretation": "positive t = A4f has lower QLIKE (A4f better)"
+            "legacy_abs_t_gt_3_screen": dm_har_vs_a4f[2],
+            "interpretation": "historical diagnostic; positive t = approximation has lower QLIKE"
         },
         "HAR_VIX_vs_A4f": {
             "t_stat": dm_harvix_vs_a4f[0],
             "p_value": dm_harvix_vs_a4f[1],
-            "harvey_significant": dm_harvix_vs_a4f[2],
-            "interpretation": "positive t = A4f has lower QLIKE (A4f better)"
+            "legacy_abs_t_gt_3_screen": dm_harvix_vs_a4f[2],
+            "interpretation": "historical diagnostic; positive t = approximation has lower QLIKE"
         },
         "HAR_VIX_vs_HAR": {
             "t_stat": dm_harvix_vs_har[0],
             "p_value": dm_harvix_vs_har[1],
-            "harvey_significant": dm_harvix_vs_har[2],
-            "interpretation": "positive t = HAR has lower QLIKE (HAR better)"
+            "legacy_abs_t_gt_3_screen": dm_harvix_vs_har[2],
+            "interpretation": "nested raw-loss diagnostic only; positive t = daily-r² HAR has lower QLIKE"
         }
     },
     "notes": [
-        "C4 Paper 9 benchmark: HAR-RV (Corsi 2009) vs A4f (GARCH-X-VIX champion)",
-        "A4f forecast uses steady-state g at each refit boundary (approximation)",
-        "For full recursion-based A4f forecasts, compare with K988/compute_mcs_dm results",
-        "HAR features: rv_d=r²_{t-1}, rv_w=5-day avg, rv_m=22-day avg (no lookahead)"
+        "SUPERSEDED historical diagnostic; public interpretation withdrawn by K1379",
+        "HAR-style regressions use daily r², not canonical intraday realized variance",
+        "A4f approximation uses steady-state g on every OOS date, not only at refits",
+        "Failure to reject equal predictive accuracy is not non-inferiority or equivalence",
+        "HAR-style daily-r²-VIX vs HAR-style daily-r² is nested; raw QLIKE DM is diagnostic only",
+        "Features are lagged and pass the lookahead audit"
     ]
 }
 
-with open(RESULT_FILE, 'w') as f:
+tmp_result = RESULT_FILE + ".tmp"
+with open(tmp_result, 'w') as f:
     json.dump(results, f, indent=2)
+    f.write("\n")
+os.replace(tmp_result, RESULT_FILE)
 
 print(f"\n[4] Results saved: {RESULT_FILE}")
 print(f"    Total elapsed: {elapsed:.0f}s")
