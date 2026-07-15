@@ -38846,7 +38846,7 @@
     "title": "Audience correction: rewrite a true general companion for 預測波動率有多準？用天氣預報的標準驗證——簡單方法竟然最精確",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_94a0a999. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1010']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38862,9 +38862,6 @@
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
     "k_id": "K1010",
-    "claimed_by": "codex-desktop",
-    "claimed_at": "2026-07-15T20:06:39.377911+00:00",
-    "claim_session_id": "7e4130630aba",
     "status_history": [
       {
         "ts": "2026-07-15T20:06:39.377926+00:00",
@@ -38877,9 +38874,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T20:29:23.873040+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop"
       }
     ],
-    "started_at": "2026-07-15T20:06:39.653835+00:00"
+    "started_at": "2026-07-15T20:06:39.653835+00:00",
+    "completed_at": "2026-07-15T20:29:23.873026+00:00",
+    "result": "Created true general-audience K1010 companion as draft mile_e58dc338. Source figures and correction were verified; sanitize_applied=0; cross-model review PASS; Supabase read-back and image HTTP 200 verified; lazypack job queued. Content commit 4a9495f8c."
   },
   {
     "id": "K942_article_general_audience_rewrite_2cfa32a4",
