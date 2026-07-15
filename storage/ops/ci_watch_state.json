@@ -1,45 +1,45 @@
 {
-  "last_seen_run_id": 29413616748,
-  "last_seen_conclusion": "success",
+  "last_seen_run_id": 29426145730,
+  "last_seen_conclusion": "failure",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
-  "last_task_id": "ci-red-29410098604",
+  "last_task_id": "ci-red-29421677446",
   "last_push_remediation": {
     "attempted": true,
-    "ahead": 4,
-    "head_sha": "5058724fc76bf11382b152c56fed0ea680d5dafc",
-    "pushed": true,
+    "ahead": 7,
+    "head_sha": "49f4c5dcf56296949585e5e09c75ff8ece71d7ee",
+    "pushed": false,
     "rc": 0,
-    "outcome": "pushed",
-    "ahead_after": 0
+    "outcome": "push_unverified",
+    "ahead_after": 1
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "29413616748:1",
-    "run_id": 29413616748,
+    "key": "29426145730:1",
+    "run_id": 29426145730,
     "attempt": 1,
     "status": "completed",
-    "conclusion": "success",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29413616748",
-    "head_sha": "5058724fc76bf11382b152c56fed0ea680d5dafc",
-    "created_at": "2026-07-15T12:00:20Z",
-    "started_at": "2026-07-15T12:00:20Z",
-    "updated_at": "2026-07-15T12:09:50Z",
+    "conclusion": "failure",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29426145730",
+    "head_sha": "bfb95f16949cd38fbb5d02dbc871a568cbef7f4d",
+    "created_at": "2026-07-15T15:00:26Z",
+    "started_at": "2026-07-15T15:00:26Z",
+    "updated_at": "2026-07-15T15:02:31Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "29413616748:1",
-    "run_id": 29413616748,
+    "key": "29426145730:1",
+    "run_id": 29426145730,
     "attempt": 1,
     "status": "completed",
-    "conclusion": "success",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29413616748",
-    "head_sha": "5058724fc76bf11382b152c56fed0ea680d5dafc",
-    "created_at": "2026-07-15T12:00:20Z",
-    "started_at": "2026-07-15T12:00:20Z",
-    "updated_at": "2026-07-15T12:09:50Z",
+    "conclusion": "failure",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29426145730",
+    "head_sha": "bfb95f16949cd38fbb5d02dbc871a568cbef7f4d",
+    "created_at": "2026-07-15T15:00:26Z",
+    "started_at": "2026-07-15T15:00:26Z",
+    "updated_at": "2026-07-15T15:02:31Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-07-15T13:00:06.401278+00:00",
+  "updated_at": "2026-07-15T16:00:07.165121+00:00",
   "processed_run_keys": [
     "29304886936:1",
     "29307406826:1",
@@ -78,7 +78,9 @@
     "29406571212:1",
     "29410098604:1",
     "29410950263:1",
-    "29413616748:1"
+    "29413616748:1",
+    "29421677446:1",
+    "29426145730:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -274,5 +276,80 @@
       "updated_at": "2026-07-15T11:24:36Z",
       "attempt_history_complete": true
     }
+  },
+  "active_incident": {
+    "incident_id": "ci-red-29421677446",
+    "phase": "verifying",
+    "opened_at": "2026-07-15T15:00:06.868630+00:00",
+    "first_failure": {
+      "key": "29421677446:1",
+      "run_id": 29421677446,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29421677446",
+      "head_sha": "78115830d43adc330f108762cbe1448120a8b900",
+      "created_at": "2026-07-15T14:00:50Z",
+      "started_at": "2026-07-15T14:00:50Z",
+      "updated_at": "2026-07-15T14:03:55Z",
+      "attempt_history_complete": true
+    },
+    "root_cause": "failed log 未提供可解析的一行根因；請見 GitHub run",
+    "root_cause_status": "complete",
+    "failure_run_keys": [
+      "29421677446:1",
+      "29426145730:1"
+    ],
+    "repair_task_ids": [
+      "ci-red-29421677446"
+    ],
+    "dispatch_requested_task_ids": [
+      "ci-red-29421677446"
+    ],
+    "notifications": {},
+    "latest_failure": {
+      "key": "29426145730:1",
+      "run_id": 29426145730,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29426145730",
+      "head_sha": "bfb95f16949cd38fbb5d02dbc871a568cbef7f4d",
+      "created_at": "2026-07-15T15:00:26Z",
+      "started_at": "2026-07-15T15:00:26Z",
+      "updated_at": "2026-07-15T15:02:31Z",
+      "attempt_history_complete": true
+    },
+    "failure_heads": [
+      "78115830d43adc330f108762cbe1448120a8b900",
+      "bfb95f16949cd38fbb5d02dbc871a568cbef7f4d"
+    ],
+    "failure_cycles": 2,
+    "repair_task_statuses": {
+      "ci-red-29421677446": "pending"
+    },
+    "dispatch_request_count": 2,
+    "last_dispatch_request_at": "2026-07-15T16:00:07.165121+00:00",
+    "push_intent": {
+      "head_sha": "49f4c5dcf56296949585e5e09c75ff8ece71d7ee",
+      "run_key": "29426145730:1",
+      "recorded_at": "2026-07-15T16:00:07.165121+00:00"
+    },
+    "last_push_remediation": {
+      "attempted": true,
+      "ahead": 7,
+      "head_sha": "49f4c5dcf56296949585e5e09c75ff8ece71d7ee",
+      "pushed": false,
+      "rc": 0,
+      "outcome": "push_unverified",
+      "ahead_after": 1
+    },
+    "last_push_remediation_at": "2026-07-15T16:00:07.165121+00:00",
+    "last_verified_push_head": "bfb95f16949cd38fbb5d02dbc871a568cbef7f4d",
+    "remediation_poll_keys": [
+      "2026-07-15T15",
+      "2026-07-15T16"
+    ],
+    "remediation_checks": 2
   }
 }

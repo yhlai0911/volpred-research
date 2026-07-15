@@ -36723,13 +36723,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T15:47:26.533756+00:00",
+    "completed_at": "2026-07-15T16:19:40.596636+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T15:47:26.533756+00:00",
-      "last_clean_observed_at": "2026-07-15T15:47:26.533756+00:00"
+      "resolved_at": "2026-07-15T16:19:40.596636+00:00",
+      "last_clean_observed_at": "2026-07-15T16:19:40.596636+00:00"
     }
   },
   {
@@ -39901,7 +39901,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29421677446",
@@ -39909,9 +39909,6 @@
     "created_at": "2026-07-15T15:00:06.868630+00:00",
     "title": "CI 紅燈修復（run 29421677446, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29421677446\nattempt: 1\nhead_sha: 78115830d\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29421677446 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "claimed_by": "codex-failover",
-    "claimed_at": "2026-07-15T16:08:45.237458+00:00",
-    "claim_session_id": "eb714d864e3e",
     "status_history": [
       {
         "ts": "2026-07-15T16:08:45.237471+00:00",
@@ -39924,9 +39921,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T16:19:13.308737+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
       }
     ],
-    "started_at": "2026-07-15T16:08:58.524326+00:00"
+    "started_at": "2026-07-15T16:08:58.524326+00:00",
+    "completed_at": "2026-07-15T16:19:13.308724+00:00",
+    "result": "root_cause=publish_draft update mode skipped canonical audience inference, so the K1386 methodology rewrite retained audience=general; repair_commit=48bdf37b8; guard_commit=c53cd4470; class_sweep=1816 entries and 0 mismatches; tests=139 passed; push=deferred per supervisor"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a4",
@@ -40003,5 +40008,27 @@
     "started_at": "2026-07-15T16:02:15.220911+00:00",
     "completed_at": "2026-07-15T16:12:29.639920+00:00",
     "result": "Fresh detector recheck found 2 K1259 silent fallbacks. Added structured warnings and narrow exceptions, removed a missed catch-all, preserved ledger_exclude, and regenerated Phase 1 plus Phase 1.5 artifacts idempotently; strict audit new=0. Regression: 3 K1259, 4 retry/fingerprint, and 9 K841 tests passed; distinct-fingerprint root fix already landed in a9d1df03e."
+  },
+  {
+    "id": "K1386_article_general_audience_rewrite_f3ade114",
+    "title": "Audience correction: rewrite a true general companion for 市場真的很「粗糙」，但更複雜的模型還是沒贏",
+    "description": "parent_task_id=ci-red-29421677446; source_article=mile_f3ade114. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1386']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "dispatch_lane": "agent",
+    "source": "audience_correction_backfill",
+    "article_id": "mile_f3ade114",
+    "experiment_refs": [
+      "K1386"
+    ],
+    "parent_task_id": "ci-red-29421677446",
+    "tags": [
+      "audience-correction",
+      "rewrite-general",
+      "content-quality"
+    ],
+    "created_at": "2026-07-15T16:16:33.771681+00:00",
+    "k_id": "K1386"
   }
 ]
