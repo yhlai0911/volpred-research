@@ -13,8 +13,15 @@ while IFS=' ' read -r _old _new ref_name; do
   # of a side branch); gating those would wrongly block non-main writes.
   if [ "$ref_name" = "refs/heads/main" ] && [ "$_old" != "$_new" ]; then
     needs_main_lease=1
-  elif [ "$ref_name" = "HEAD" ]; then
-    touches_head=1
+  elif [ "$ref_name" = "HEAD" ] && [ "$_old" != "$_new" ]; then
+    # A *moving* main-worktree HEAD (e.g. a detach: symref->commit) has a
+    # real, non-null old value.  `git worktree add` of a side branch, on newer
+    # Git (>=2.50/CI), reports the new linked worktree's HEAD as a symref
+    # *creation* (old=0000..) from the main toplevel; that is not main moving,
+    # so a null old must not arm the lease requirement (mirrors the main check).
+    case "$_old" in
+      *[!0]*) touches_head=1 ;;
+    esac
   fi
 done
 
