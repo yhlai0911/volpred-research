@@ -231,6 +231,19 @@ def test_run_due_jobs_skips_piggy_back_skip_items(tmp_path, monkeypatch):
                     "wrapper_script": "/nonexistent/wrapper.sh",
                     "log_path": "storage/logs/cron/test2.log",
                 },
+                {
+                    "id": "piggy_only_test",
+                    "cron": "0 * * * *",
+                    "wrapper_script": "/nonexistent/piggy-only.sh",
+                    "host_crontab_managed": False,
+                    "piggy_back_enabled": True,
+                },
+                {
+                    "id": "fully_disabled_test",
+                    "cron": "0 * * * *",
+                    "wrapper_script": "/nonexistent/disabled.sh",
+                    "host_crontab_managed": False,
+                },
             ]
         }
     }))
@@ -251,3 +264,7 @@ def test_run_due_jobs_skips_piggy_back_skip_items(tmp_path, monkeypatch):
     assert jobs["collect_us_test"]["reason"] == "piggy_back_skip_host_managed"
     # regular_test fails wrapper_missing (not piggy_back_skip) — confirms flag isolation
     assert jobs["regular_test"]["reason"] != "piggy_back_skip_host_managed"
+    # Explicit piggy-back ownership survives host_crontab_managed=false.
+    assert jobs["piggy_only_test"]["reason"] == "wrapper_missing"
+    # Legacy managed=false entries remain excluded unless they opt in.
+    assert "fully_disabled_test" not in jobs

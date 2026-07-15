@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import stat
 import subprocess
@@ -7,6 +8,46 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_git_push_backup_has_one_canonical_schedule_owner() -> None:
+    config = json.loads((ROOT / "config" / "runtime_schedules.json").read_text(encoding="utf-8"))
+    item = next(
+        entry
+        for entry in config["system_crontab"]["items"]
+        if entry["id"] == "git_push_backup"
+    )
+
+    assert item["host_crontab_managed"] is False
+    assert item["piggy_back_enabled"] is True
+
+
+def test_targeted_reconcile_removes_git_push_host_leg(tmp_path: Path) -> None:
+    state = tmp_path / "crontab.txt"
+    state.write_text(
+        "15 1 * * * /usr/bin/true # personal\n"
+        "0 * * * * /Users/yhlai0911/.volpred/bin/cron_git_push_backup.sh "
+        ">> /tmp/git_push.log 2>&1 # volpred-git-push-backup\n"
+        "10 8,14,20 * * * /tmp/boss >> /tmp/boss.log 2>&1 "
+        "# volpred-boss-report-4h\n",
+        encoding="utf-8",
+    )
+    env = _fake_crontab_env(tmp_path, state)
+
+    result = subprocess.run(
+        ["bash", "scripts/install_host_crontab.sh", "--id", "git_push_backup"],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    installed = state.read_text(encoding="utf-8")
+    assert "# volpred-git-push-backup" not in installed
+    assert "15 1 * * * /usr/bin/true # personal" in installed
+    assert "# volpred-boss-report-4h" in installed
 
 
 def _fake_crontab_env(tmp_path: Path, state: Path) -> dict[str, str]:

@@ -509,9 +509,9 @@
         "cron": "0 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_git_push_backup.sh",
         "log_path": "storage/logs/cron/git_push_backup.log",
-        "description": "每小時：本機研究 commit fast-forward push 到 origin/main 備份（2026-06-24 建，雲端 routines 停用後本地為唯一 push 源；偵測分岔則發 alert 不強推）。2026-07-01 3-STRIKE 修正：直接 host crontab `17 */2 * * *` 因 macOS Keychain 在無登入 session 的 cron 環境下不可讀（`could not read Username for 'https://github.com': Device not configured`）100% 結構性失敗；`check_alerts` LaunchAgent 觸發的 piggy-back fire（`run_due_jobs.py`，繼承有登入 session 的 Keychain 存取）100% 成功。**已移除**壞掉的直接 host crontab entry（`crontab -l` 不再含 `volpred-git-push-backup`），純靠 `host_crontab_managed: true` + piggy-back 覆蓋（cadence 從 2h 提升為 1h，是改善不是降級）。注意：`run_due_jobs.py` 對 `host_crontab_managed is False` 的 item 會整個跳過 dispatch（見 SKIP_JOB_IDS 旁的 managed-check），故此欄位刻意維持 `true`（代表『可由 host cron 管理』的抽象語意，不是『目前有 host crontab entry』）——真正的 canonical 執行路徑是 piggy-back，host crontab 這條 leg 已拔除。",
-        "host_crontab_managed": true,
-        "host_crontab_managed_note": "2026-07-01 3-STRIKE：直接 host crontab leg（`17 */2 * * *`）因 Keychain-under-cron 100% 失敗已從 crontab 移除；canonical 執行路徑改為純 piggy-back（run_due_jobs.py 經 check_alerts LaunchAgent hourly 觸發）。`host_crontab_managed` 維持 true 是為了不讓 run_due_jobs.py 把此 job 排除在 piggy-back dispatch 之外（該旗標同時控制『是否允許 host crontab 管理』與『是否讓 piggy-back dispatch』兩個語意，是既有程式碼的耦合限制，非本次新增）。",
+        "description": "每小時：本機研究 commit fast-forward push 到 origin/main 備份（2026-06-24 建，雲端 routines 停用後本地為唯一 push 源；偵測分岔則發 alert 不強推）。Canonical owner 是 `check_alerts` LaunchAgent 觸發的 `run_due_jobs.py` piggy-back；直接 host crontab 在無登入 cron 環境無法讀 macOS Keychain（`could not read Username for 'https://github.com': Device not configured`），不得安裝。2026-07-16 根因修正：以 `host_crontab_managed: false` 明確禁止 host leg，並由獨立的 `piggy_back_enabled: true` 保留 hourly dispatch，解除兩種執行權原本共用一個旗標的語意耦合。",
+        "host_crontab_managed": false,
+        "host_crontab_managed_note": "2026-07-16 Three-Strike：host cron leg 因 Keychain-under-cron 結構性失敗，canonical reconcile 曾把手動移除的 entry 重建。此旗標只控制 install_host_crontab.sh，必須為 false；piggy-back 執行權由 piggy_back_enabled 獨立控制。",
         "piggy_back_enabled": true
       },
       {

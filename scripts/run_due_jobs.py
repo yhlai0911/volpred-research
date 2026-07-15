@@ -331,6 +331,7 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
         cron_expr = item.get("cron")
         wrapper = item.get("wrapper_script")
         managed = item.get("host_crontab_managed")
+        piggy_back_enabled = item.get("piggy_back_enabled")
         piggy_back_skip = item.get("piggy_back_skip")
         log_rel = item.get("log_path") or f"storage/logs/cron/{job_id}.log"
 
@@ -338,7 +339,15 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
             continue
         if job_id in SKIP_JOB_IDS:
             continue
-        if managed is False:
+        # Host-crontab ownership and piggy-back ownership are independent.
+        # Historically `managed=false` disabled both, which forced jobs that
+        # must never run under cron (notably git_push_backup: no Keychain in
+        # that environment) to stay host-managed just to remain dispatchable.
+        # An explicit piggy_back_enabled=true is the narrow opt-in that breaks
+        # that coupling; legacy managed=false items remain skipped by default.
+        if piggy_back_enabled is False:
+            continue
+        if managed is False and piggy_back_enabled is not True:
             continue
         # piggy_back_skip=true means host crontab already fires this item
         # reliably; piggy-back must not double-fire. Distinct from
