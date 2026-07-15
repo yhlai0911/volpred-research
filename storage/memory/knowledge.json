@@ -41661,5 +41661,55 @@
   "seed": 42,
   "results_sha256": "068e69949f64bc38209c99ab25805051112555a1944ae93e16bc3229707d28b5",
   "created_at": "2026-07-15T12:25:00+00:00"
+ },
+ {
+  "item_id": "k1386_dm_hac_correction_20260715",
+  "category": "methodology_correction",
+  "content": "K1386 methodology correction (2026-07-15) SUPERSEDES item cf7e62d9. The published sample statistics were invalidated by three jointly repaired defects: the local h=1 DM loop included zero HAC autocovariances; identical duplicate dates in both source CSVs produced a 2x2 many-to-many merge expansion; and the final HAR IS feature row used the first OOS target. The corrected run rejects conflicting duplicates, deduplicates only value-identical rows, validates a one-to-one merge, keeps HAR targets inside IS, freezes OOS at 2026-05-19, pins the cleaned slice hash, and uses canonical Bartlett-Newey-West HAC-DM. Clean sample: IS n=3,021, OOS origins n=1,098, evaluated n=1,097. QLIKE is HAR 0.37534907, fGN-univariate 0.47163477, fGN-multivariate 0.47314873. With loss differential fGN minus HAR and HAC lag 11, DM t/p are +3.437383/0.000609 and +3.452342/0.000577; ACF(1) is -0.044616/-0.050840. Both remain beyond the |t|>3 reporting screen in HAR's direction, so the qualitative verdict remains NULL_NO_FGN_IMPROVEMENT. This protocol-specific result covers SPY, one frozen window, a Parkinson range proxy, and linear fGN-motivated approximations; it does not reject continuous-time rough-volatility theory or richer intraday implementations.",
+  "evidence": [
+   "experiments/k1386/k1386_results.json",
+   "experiments/k1386/k1386.py",
+   "experiments/k1386/README.md",
+   "experiments/k1386/review_certification_20260715.md",
+   "storage/reports/feed.json::mile_f3ade114"
+  ],
+  "confidence": 0.97,
+  "verdict": "NULL",
+  "review_verdict": "PASS",
+  "experiment_id": "k1386",
+  "k_id": "K1386",
+  "experiment_path": "experiments/k1386/",
+  "reviewer_source": "Codex fresh-context independent reviewer / GPT-5; PASS with independent rerun and artifact-hash verification",
+  "supersedes": [
+   "cf7e62d9"
+  ],
+  "supersedes_reason": "Old DM inference, source merge cardinality, HAR train-target boundary, sample counts, and exact statistics were invalid.",
+  "qualitative_conclusion_changed": false,
+  "public_article_id": "mile_f3ade114",
+  "sample": {
+   "n_is": 3021,
+   "n_oos_origins": 1098,
+   "n_eval": 1097,
+   "oos_end": "2026-05-19"
+  },
+  "qlike_oos": {
+   "HAR": 0.37534907,
+   "fGN_univariate": 0.47163477,
+   "fGN_multivariate": 0.47314873
+  },
+  "dm_stats": {
+   "hac_lag": 11,
+   "fGN_uni_vs_HAR": {
+    "t": 3.43738258763435,
+    "p": 0.0006094113467929319,
+    "acf1": -0.044616090153652886
+   },
+   "fGN_multi_vs_HAR": {
+    "t": 3.4523422466974565,
+    "p": 0.0005769463570843847,
+    "acf1": -0.050840036349680186
+   }
+  },
+  "created_at": "2026-07-15T21:21:27.104435+08:00"
  }
 ]
