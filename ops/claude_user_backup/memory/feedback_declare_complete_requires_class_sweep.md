@@ -26,4 +26,6 @@ metadata:
 
 規則正文已在 `.claude/rules/control-plane.md` §控制面 audit 的完成門檻立指標；paths 補上 `scripts/dispatch_supervisor/**` / `cron_review.py` / `check_alerts.py` 讓它在審 daemon 程式碼時就 surface。
 
+**2026-07-14 變體（用戶糾正「你不是只補做決策 你發現流程問題就要去解決流程問題」）**：發現「漏掉的決策 / stale state」時，補做那個決策 = 修資料；交付物必須是**讓這類遺漏不可能再發生的機械 gate**。實例：K1686 gating task 完成 43h 無人裁決 + handoff 抄到已撤回裁定 —— 我先只補了裁決並回報，被糾正後才交付 `paper_adjudication_gap` alert（check_alerts owner、remediation 自動建 task）+ handoff pointer 規則 + regression tests。而且 gate 一寫出來就在現行 population 掃出 2 個同類引用需要收窄契約（provenance vs 活依賴）—— 再次證明 class sweep 不是形式。教訓入 error_log 2026-07-14 15:30。
+
 相關：[[feedback_path_narrowing_audit]]（改 paths 前填 workflow stage × paths 矩陣）、[[feedback_verify_before_restructure]]、[[feedback_dont_deflect_act_on_repeated_complaints]]

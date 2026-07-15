@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1708,
+  "last_k_id": 1716,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -810,8 +810,58 @@
       "status": "reserved",
       "topic": "時變狀態空間 HAR 是否勝過固定／滾動 HAR** — 在 SPY/QQQ 與本機台指期相同 target、window、ledger 下比較 HAR、rolling HAR、SHARP/SHARP-SV；每個 origin 的 filtering 只看窗內資料，超參數由內層滾動驗證決定，再用 QLIKE/MSE、DM-HLN、GW、MCS 與 regime breakdown 檢定。",
       "topic_hash": "9a49cb6578e83855"
+    },
+    {
+      "claimed_at": "2026-07-15T00:00:01.322548+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1712",
+      "number": 1712,
+      "source_max": 1711,
+      "status": "reserved",
+      "topic": "Wild Bootstrap OHR — JRFM 2024",
+      "topic_hash": "3c13187f652bc088"
+    },
+    {
+      "claimed_at": "2026-07-15T00:00:01.515724+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1713",
+      "number": 1713,
+      "source_max": 1712,
+      "status": "reserved",
+      "topic": "反直覺：HARQ 測量誤差加權在「高噪音日頻 OHLC 代理」下是否反效果？ — 用 Garman-Klass range 近似 realized quarticity，檢定當 proxy 測量誤差本身很大時誤差加權是幫助還是傷害 OOS（HARQ vs HAR，DM-HLN，SPY/0050.TW/TX）；yfinance OHLC（來源：BPQ JoE HARQ 家族仍為 RV 建模主流）。差異化：庫內 HARQ 未落地實作，且此題是 contrarian「代理噪音下反轉」角度。",
+      "topic_hash": "865db6ac52d17627"
+    },
+    {
+      "claimed_at": "2026-07-15T00:00:01.692491+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1714",
+      "number": 1714,
+      "source_max": 1713,
+      "status": "reserved",
+      "topic": "已實現共變異數 HAR → 最小變異組合的樣本外檢定 — 對多資產（TW0050/TSMC/金融股 或 SPY/QQQ/GLD/TLT）用 HAR 直接建模 realized covariance 矩陣（Cholesky/log-matrix 參數化），比對 shrinkage/EWMA 共變異數在 GMV 組合的 OOS 波動與換手；yfinance 日資料（來源：2024-26 HAR-type realized covariance forecasting）。差異化：庫內幾乎全單變量，realized-cov-matrix→組合是新面向，直接服務組合構建產品。",
+      "topic_hash": "0b4ca932609a642b"
+    },
+    {
+      "claimed_at": "2026-07-15T00:00:01.881142+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1715",
+      "number": 1715,
+      "source_max": 1714,
+      "status": "reserved",
+      "topic": "Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Christoffersen/e-backtest；平台無 score-driven 類（來源：J. Econometrics 2026 Catania 等 + IJASEIT 2025 GAS-1F）",
+      "topic_hash": "01ceb62e0c548e0a"
+    },
+    {
+      "claimed_at": "2026-07-15T00:00:02.038266+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1716",
+      "number": 1716,
+      "source_max": 1715,
+      "status": "reserved",
+      "topic": "0DTE 時代的日內 vs 隔夜波動結構轉變 — SPY 日 OHLC 拆 intraday range vol vs c2c vol，斷點檢定 2022-Q2 前後 + expiration-day 效應（來源：Cboe research + SSRN/J.Derivatives 2025；0DTE 佔 SPX 量 59%）",
+      "topic_hash": "e84a01bad2cf4f64"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-13T23:52:32.191799+00:00"
+  "updated_at": "2026-07-15T00:00:02.038266+00:00"
 }

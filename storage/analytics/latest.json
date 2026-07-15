@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-07-13T22:30:00.514753+00:00",
+  "generated_at": "2026-07-14T22:30:03.460348+00:00",
   "window_days": 30,
-  "since_date": "2026-06-13",
+  "since_date": "2026-06-14",
   "top_n": 20,
-  "articles_with_activity": 191,
-  "raw_impression_rows": 370,
+  "articles_with_activity": 196,
+  "raw_impression_rows": 401,
   "raw_reaction_rows": 0,
   "data_source_errors": {
     "article_impressions": null,
@@ -14,7 +14,7 @@
     "read_time_is_proxy": true,
     "read_time_bounce_filter_sec": 5,
     "read_time_outlier_cap_sec": 1200,
-    "read_time_outliers_excluded_total": 26,
+    "read_time_outliers_excluded_total": 29,
     "engaged_threshold_sec": 30,
     "score_formula": "impressions*10 + likes*25 + bookmarks*40 + shares*60 + avg_read_time_sec/10 (mirrors frontend admin-analytics.ts weighted_views)"
   },
@@ -54,6 +54,24 @@
         "share": 0
       },
       "score": 150
+    },
+    {
+      "article_id": "19a832ec-92ae-4872-b880-1cf4590d4255",
+      "slug": "mile_3ef6edd5",
+      "title": "你買的不是台股，你買的是台積電的七折波動",
+      "audience": "general",
+      "impressions": 12,
+      "avg_read_time_sec": null,
+      "median_read_time_sec": null,
+      "read_completion_rate_proxy": 0.0,
+      "read_time_is_proxy": true,
+      "read_time_outliers_excluded": 0,
+      "reactions": {
+        "like": 0,
+        "bookmark": 0,
+        "share": 0
+      },
+      "score": 120
     },
     {
       "article_id": "aa978dc4-6e7c-4f37-92f0-bd4e78134fda",
@@ -200,24 +218,6 @@
       "score": 80
     },
     {
-      "article_id": "19a832ec-92ae-4872-b880-1cf4590d4255",
-      "slug": "mile_3ef6edd5",
-      "title": "你買的不是台股，你買的是台積電的七折波動",
-      "audience": "general",
-      "impressions": 8,
-      "avg_read_time_sec": null,
-      "median_read_time_sec": null,
-      "read_completion_rate_proxy": 0.0,
-      "read_time_is_proxy": true,
-      "read_time_outliers_excluded": 0,
-      "reactions": {
-        "like": 0,
-        "bookmark": 0,
-        "share": 0
-      },
-      "score": 80
-    },
-    {
       "article_id": "155468b6-4e5f-4add-ad93-7d1adddb55ff",
       "slug": "mile_f5f4cb43",
       "title": "科技巨頭資本支出爆表，AI 變現期的隱含波動率拐點",
@@ -308,6 +308,24 @@
       "score": 56
     },
     {
+      "article_id": "7222b4ac-92c7-4a6d-b3e6-f9aaf87f27de",
+      "slug": "mile_5399bf01",
+      "title": "你買 MTUM 真的買到 Momentum 嗎？7 檔因子 ETF 對紙上學術因子的 13 年體檢",
+      "audience": "research",
+      "impressions": 2,
+      "avg_read_time_sec": 346,
+      "median_read_time_sec": 346,
+      "read_completion_rate_proxy": 0.5,
+      "read_time_is_proxy": true,
+      "read_time_outliers_excluded": 0,
+      "reactions": {
+        "like": 0,
+        "bookmark": 0,
+        "share": 0
+      },
+      "score": 55
+    },
+    {
       "article_id": "534f9f30-09a5-4510-9a2d-f7bb61e54c55",
       "slug": "mile_9def57ab",
       "title": "SpaceX 還沒上市，被動資金的買單已經在排隊：指數納入正在變成一場可以倒數的波動率事件",
@@ -360,24 +378,6 @@
         "share": 0
       },
       "score": 50
-    },
-    {
-      "article_id": "d196a56e-a807-49d4-b8e1-b6eb2c18b83b",
-      "slug": "mile_fbc8af54",
-      "title": "兩個都有用的指標，加在一起卻沒更厲害",
-      "audience": "research",
-      "impressions": 1,
-      "avg_read_time_sec": 382,
-      "median_read_time_sec": 382,
-      "read_completion_rate_proxy": 1.0,
-      "read_time_is_proxy": true,
-      "read_time_outliers_excluded": 0,
-      "reactions": {
-        "like": 0,
-        "bookmark": 0,
-        "share": 0
-      },
-      "score": 48
     }
   ]
 }

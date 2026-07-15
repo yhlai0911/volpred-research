@@ -20,6 +20,7 @@
 - [reference_frontend_nested_git_repo.md](reference_frontend_nested_git_repo.md) — frontend-v2-fix 是巢狀 repo，commit 要 cd 進去
 - [reference_worktree_pytest_wrong_interpreter.md](reference_worktree_pytest_wrong_interpreter.md) — worktree 內用 `uv run --extra dev python -m pytest`
 - [reference_fb_chrome_browser_autoselect.md](reference_fb_chrome_browser_autoselect.md) — FB 發文自選 Chrome，中文用 pbcopy 貼上
+- [reference_chrome_browser_identity_map.md](reference_chrome_browser_identity_map.md) — Chrome deviceId 身分對照；禁止用裸 id 問老闆選瀏覽器
 
 ## Projects
 - [project_platform_profitability_goal.md](project_platform_profitability_goal.md) — 終極目標=盈利；5-mission 是手段
@@ -35,6 +36,7 @@
 - [project_paper_portfolio_decisions_2026_04_27.md](project_paper_portfolio_decisions_2026_04_27.md) — 論文 A/B/C/D tier 分級
 - [project_codex_audit_20260710_disposition.md](project_codex_audit_20260710_disposition.md) — Codex 稽核裁決：做什麼、不做什麼
 - [project_fb_page_operation.md](project_fb_page_operation.md) — VolPred 粉專由 AI 全權經營
+- [project_reader_preference_feedback_loop.md](project_reader_preference_feedback_loop.md) — 讀者偏好自動分析=常態運營輸入（選題/圖文表）
 - [project_prepublish_content_gate.md](project_prepublish_content_gate.md) — 發佈前 content-vs-source gate
 - [project_papers_awaiting_submit_decision.md](project_papers_awaiting_submit_decision.md) — M3 瓶頸=revision 收斂，非投稿決策
 - [project_strategy_lifecycle_standing_directive.md](project_strategy_lifecycle_standing_directive.md) — 策略持續增減走既有 gate
@@ -89,6 +91,7 @@
 - [feedback_dont_deflect_act_on_repeated_complaints.md](feedback_dont_deflect_act_on_repeated_complaints.md) — 反覆被點名的問題要實做，不 deflect
 - [feedback_repeated_done_question_means_finish_now.md](feedback_repeated_done_question_means_finish_now.md) — 連問「都完成了嗎」=當回合做完
 - [feedback_finish_task_before_standby.md](feedback_finish_task_before_standby.md) — 任務不得做一半待機；完成含部署+線上驗證
+- [feedback_fix_verify_then_report.md](feedback_fix_verify_then_report.md) — 先修好+測過+驗證，才回報；不丟待辦給老闆
 - [feedback_resume_ops_loop_after_user.md](feedback_resume_ops_loop_after_user.md) — 回完用戶要流回 ops loop
 - [feedback_continuous_work_and_read_mail.md](feedback_continuous_work_and_read_mail.md) — tick 要做實事不空轉；直接讀 Gmail
 - [feedback_one_dispatch_per_hour.md](feedback_one_dispatch_per_hour.md) — hourly 派 1 agent，scope ≤50min，heavy 走 queue
@@ -109,6 +112,7 @@
 - [feedback_fix_silent_fallback_immediately.md](feedback_fix_silent_fallback_immediately.md) — silent fallback 當場修，不丟下一班
 - [feedback_audit_no_passive_terminal.md](feedback_audit_no_passive_terminal.md) — audit terminal set 不可含 awaiting_*/pending_*
 - [feedback_verify_before_restructure.md](feedback_verify_before_restructure.md) — 重構前通盤查證權威來源
+- [feedback_check_existing_mechanism_before_building.md](feedback_check_existing_mechanism_before_building.md) — 建新機制前先查同 concern 是否已存在但未啟用
 - [feedback_test_before_deploy.md](feedback_test_before_deploy.md) — 前端改動要 build + 測所有 tab
 - [feedback_hermetic_git_in_tests.md](feedback_hermetic_git_in_tests.md) — 驅動 git 的測試須隔離，否則誤操作真 repo
 - [feedback_autocommit_poisons_before_after.md](feedback_autocommit_poisons_before_after.md) — `git add -A` 會捲進別人的檔，毀掉 before/after 對照
