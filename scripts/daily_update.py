@@ -108,6 +108,115 @@ def _previous_or_same_us_trading_day(date_str: str) -> str | None:
     return None
 
 
+def _expected_market_source_date(run_date: str) -> str | None:
+    """Return the US close that should be available at the 08:03 Taipei run."""
+    try:
+        prior_calendar_day = date.fromisoformat(run_date) - timedelta(days=1)
+    except ValueError as exc:
+        _warn_daily_update(f"invalid market_daily run date: {run_date!r}", exc)
+        return None
+    return _previous_or_same_us_trading_day(prior_calendar_day.isoformat())
+
+
+def _market_frame_rows_by_date(frame) -> dict[str, object]:
+    """Index a DataManager frame by ISO date without assuming its timezone."""
+    rows: dict[str, object] = {}
+    for idx, row in frame.iterrows():
+        try:
+            source_date = str(idx.date())
+        except AttributeError:
+            source_date = str(idx)[:10]
+        if _iso_date(source_date):
+            rows[source_date] = row
+    return rows
+
+
+def reconcile_market_daily_sources(
+    market_daily: dict,
+    spy_frame,
+    gld_frame,
+    *,
+    limit: int = 30,
+) -> dict[str, int]:
+    """Recompute recent SPY/GLD rows from source frames and expose freshness.
+
+    ``market_daily`` is keyed by the Taipei daily-run date.  At 08:03 Taipei,
+    the expected US source is the most recent NYSE session on or before the
+    prior calendar day.  When an exact source row is unavailable, we retain
+    the latest earlier source price but mark it stale instead of silently
+    presenting a copied close as a zero daily move.
+    """
+    if not isinstance(market_daily, dict):
+        return {"rows": 0, "stale_spy": 0, "stale_gld": 0}
+
+    source_rows = {
+        "spy": _market_frame_rows_by_date(spy_frame),
+        "gld": _market_frame_rows_by_date(gld_frame),
+    }
+    valid_dates = sorted(d for d in market_daily if _iso_date(d))[-limit:]
+    stale_counts = {"spy": 0, "gld": 0}
+
+    for run_date in valid_dates:
+        row = market_daily.get(run_date)
+        if not isinstance(row, dict):
+            continue
+        expected = _expected_market_source_date(run_date)
+        for asset in ("spy", "gld"):
+            dated_rows = source_rows[asset]
+            available = [d for d in dated_rows if expected and d <= expected]
+            source_date = max(available) if available else None
+            if source_date:
+                source = dated_rows[source_date]
+                row[f"{asset}_open"] = round(float(source["open"]), 2)
+                row[f"{asset}_close"] = round(float(source["close"]), 2)
+            row[f"{asset}_data_date"] = source_date
+            is_stale = not source_date or source_date != expected
+            row[f"{asset}_stale"] = is_stale
+            stale_counts[asset] += int(is_stale)
+
+    return {
+        "rows": len(valid_dates),
+        "stale_spy": stale_counts["spy"],
+        "stale_gld": stale_counts["gld"],
+    }
+
+
+def reconcile_market_daily_from_sources(*, limit: int = 30) -> int:
+    """Operator recovery path: rebuild recent rows, persist, then upsert them.
+
+    This deliberately uses the same DataManager and Supabase helper as the
+    scheduled daily flow.  It is safe to rerun after an upstream provider
+    recovers and avoids ad-hoc edits to either JSON or the database.
+    """
+    pt_file = ROOT / "storage" / "paper_trading.json"
+    pt = _load_json_retry(pt_file, {})
+    market_daily = pt.get("_market_daily")
+    if not isinstance(market_daily, dict):
+        print("  market_daily reconcile failed: _market_daily is missing")
+        return 1
+
+    dm = DataManager()
+    spy = dm.get_model_data("SPY", "2016-01-01", "2026-12-31", force_refresh=True)
+    gld = dm.get_model_data("GLD", "2016-01-01", "2026-12-31", force_refresh=True)
+    freshness = reconcile_market_daily_sources(market_daily, spy, gld, limit=limit)
+
+    guard_canonical_write(pt_file)
+    pt_file.write_text(json.dumps(pt, indent=2, ensure_ascii=False))
+    print(
+        "  market_daily rebuilt from source: "
+        f"rows={freshness['rows']}, stale_spy={freshness['stale_spy']}, "
+        f"stale_gld={freshness['stale_gld']}"
+    )
+
+    from supabase_sync import sync_market_daily_backfill
+
+    recent_dates = sorted(market_daily)[-limit:]
+    recent = {d: market_daily[d] for d in recent_dates}
+    synced, failed = sync_market_daily_backfill(recent)
+    print(f"  Supabase market_daily reconcile: synced={synced}, failed={failed}")
+    return 1 if failed else 0
+
+
 def _build_sync_health_local_state(pt: dict) -> dict:
     """Summarize local paper-trading dates for calendar-aware sync checks."""
     trade_dates: set[str] = set()
@@ -690,6 +799,7 @@ def main():
     gld_open = round(float(gld.iloc[-1]["open"]), 2)
     gld_ret = round(float(gld.iloc[-1]["returns"]), 6)
     spy_date = str(spy.index[-1].date())
+    gld_date = str(gld.index[-1].date())
 
     # Overnight gap tiered alert (Phase I4 findings)
     # | Level    | Condition              | VaR Lift | Action       |
@@ -1173,6 +1283,13 @@ def main():
         "overnight_gap": round(overnight_gap, 6) if overnight_gap is not None else None,
         "gap_alert_level": gap_alert_level,
     }
+    freshness = reconcile_market_daily_sources(pt["_market_daily"], spy, gld, limit=30)
+    print(
+        "  Market source freshness: "
+        f"rows={freshness['rows']}, stale_spy={freshness['stale_spy']}, "
+        f"stale_gld={freshness['stale_gld']} "
+        f"(latest SPY={spy_date}, GLD={gld_date})"
+    )
 
     guard_canonical_write(pt_file)
     pt_file.write_text(json.dumps(pt, indent=2, ensure_ascii=False))
@@ -1653,4 +1770,6 @@ def _run_alert_checks() -> None:
 
 
 if __name__ == "__main__":
+    if "--reconcile-market-daily-only" in sys.argv:
+        raise SystemExit(reconcile_market_daily_from_sources())
     raise SystemExit(main() or 0)

@@ -192,6 +192,8 @@ _MARKET_DAILY_COLUMNS = {
     "trade_date",
     "spy_close", "spy_open",
     "gld_close", "gld_open",
+    "spy_data_date", "gld_data_date",
+    "spy_stale", "gld_stale",
     "tw50_close", "tw50_open",
     "vix_level",
     "sigma_spy_ann", "sigma_gld_ann",
