@@ -38680,10 +38680,10 @@
     "item_id": "f4a73c83",
     "category": "volatility_targeting_international",
     "experiment_id": "K1695",
-    "verdict": "PASS",
-    "research_verdict": "AVERAGE_PROTECTION_PASS_MECHANISM_SAMPLE_DEPENDENT",
-    "title": "K1695: 國際 VT 平均 MDD 保護通過 joint bootstrap，但 VIX-sensitivity mechanism 不穩健",
-    "content": "[提出: Fable deep review P0-1, 執行: Codex failover] K1695 以 pinned yfinance auto_adjust=False snapshot（paper cutoff 2026-03-31）、Close+distributions 明示 total return、前月末 12/VIX 月頻 lag、SHY cash sleeve、10bps turnover cost、prior-day IRX Sharpe 與跨 13 市場同步 stationary bootstrap 重建 vt-trend-following Table 5。Inception-aware 13/13 市場 MDD 改善，平均 +27.5034pp；平均 ΔSharpe=-0.0440，平均 CAGR cost=-1.1741pp/year。共同樣本 2012-02-07..2026-03-31、N=3557，平均 ΔMDD=12.6139pp；joint bootstrap B=10000、mean block=252 的 90% CI=[4.2207,19.3018]pp，P(avg≤0)=0.0006，預註冊 kill gate 未觸發。Block 63/126/504 sensitivity 下界均 >4pp。但 VIX-sensitivity vs ΔMDD 關聯只在 inception-aware 截面顯著；共同樣本 Pearson r=+0.3048 (p=0.3113)、Spearman rho=+0.1484 (p=0.6286)，因此 mechanism 只能標 sample-dependent descriptive pattern，不可稱 causal pricing mechanism。個別市場 CI 亦非全數排除 0（EWA 含 0），對外只主張平均 dependence-robust protection。",
+    "verdict": "RETRACTED",
+    "research_verdict": "EXPOSURE_ARTIFACT_RETRACTED",
+    "title": "K1695: 國際 VT 的「drawdown protection」= EXPOSURE ARTIFACT（已撤回）— raw 13/13 MDD 改善在同曝險口徑下崩為不顯著",
+    "content": "[提出: Fable deep review P0-1, 執行: Codex failover] K1695 以 pinned yfinance auto_adjust=False snapshot（paper cutoff 2026-03-31）、Close+distributions 明示 total return、前月末 12/VIX 月頻 lag、SHY cash sleeve、10bps turnover cost、prior-day IRX Sharpe 與跨 13 市場同步 stationary bootstrap 重建 vt-trend-following Table 5。Inception-aware 13/13 市場 MDD 改善，平均 +27.5034pp；平均 ΔSharpe=-0.0440，平均 CAGR cost=-1.1741pp/year。共同樣本 2012-02-07..2026-03-31、N=3557，平均 ΔMDD=12.6139pp；joint bootstrap B=10000、mean block=252 的 90% CI=[4.2207,19.3018]pp，P(avg≤0)=0.0006，預註冊 kill gate 未觸發。Block 63/126/504 sensitivity 下界均 >4pp。但 VIX-sensitivity vs ΔMDD 關聯只在 inception-aware 截面顯著；共同樣本 Pearson r=+0.3048 (p=0.3113)、Spearman rho=+0.1484 (p=0.6286)，因此 mechanism 只能標 sample-dependent descriptive pattern，不可稱 causal pricing mechanism。個別市場 CI 亦非全數排除 0（EWA 含 0），對外只主張平均 dependence-robust protection。\n\n【2026-07-15 更正 — 結論撤回】此條原標 verdict=PASS（raw joint-bootstrap kill gate 未觸發）。一次 exposure-matched rerun 推翻之：raw 平均 ΔMDD +11.83pp（block=252，CI90 [4.22,19.30]，P≤0=0.0006）在**同曝險口徑**下崩為 −1.70pp（CI90 [−7.02,+3.59]，P≤0=0.7075，跨零）。共同樣本 exposure-matched −0.87pp（7/13，no-timing 循環位移 null p=0.559），inception-aware +4.96pp（12/13，p=0.212），兩樣本皆 0/13 通過 Holm、皆不拒 no-timing null。根因：VT 實現波動只有 buy-and-hold 的 0.61–0.68x（13/13 市場觸發 compare_max_drawdown 的 exposure_mismatch，遠超 .claude/rules/experiments.md:140 的 20% 門檻），raw MDD 差衡量的是 de-levering（少放部位），不是 volatility timing。一個「永遠只放 ~73% 股票、完全不看 VIX」的常數減碼策略能重現絕大多數 raw gap，exposure-matched gap 得分近零。pre-registered kill gate 建在非 scale-invariant 的 raw ΔMDD 上（常數減碼也 13/13 通過），故「未觸發 kill」不構成支持證據，屬 mis-specified。**raw 數字如實保留供 auditability，但不得單獨對外報告為 protection 證據。** 獨立驗證：storage/ops/k1695_exposure_artifact_verification.md（主線程 02:35 canonical 重算）+ rerun 06:13（k1695_results.json .decision claim_status=retracted）。連帶：paper vt-trend-following Table 5 + 第三項 contribution 已 HOLD 待改寫；feed 回溯更正任務 feed_correction_k1695_exposure_artifact。同 bug class：K1265b / K1702。研究誠實原則第 6 條（推翻舊結論必回溯更正）。",
     "evidence": [
       "experiments/k1695/k1695_results.json",
       "experiments/k1695/table5_rows.csv",
@@ -38707,9 +38707,23 @@
     "bootstrap_ci90_lower_pp": 4.220717849686448,
     "bootstrap_ci90_upper_pp": 19.301780054907805,
     "bootstrap_probability_le_zero": 0.0006,
-    "kill_triggered": false,
+    "kill_triggered": true,
     "snapshot_sha256": "38cb3a0bd286cbf27992caefda6b67fb558f460c125261366060e9c1ec7f7751",
-    "created_at": "2026-07-12T06:49:01.299146+00:00"
+    "created_at": "2026-07-12T06:49:01.299146+00:00",
+    "exposure_matched_primary_block_days": 252,
+    "exposure_matched_avg_delta_mdd_pp_mean": -1.6991570515113736,
+    "exposure_matched_ci90_lower_pp": -7.019416564157701,
+    "exposure_matched_ci90_upper_pp": 3.588093306108739,
+    "exposure_matched_probability_le_zero": 0.7075,
+    "common_exposure_matched_avg_delta_mdd_pp": -0.8654178693546898,
+    "common_exposure_matched_n_positive": 7,
+    "common_no_timing_null_p": 0.5588235294117647,
+    "inception_exposure_matched_avg_delta_mdd_pp": 4.955627276524926,
+    "inception_exposure_matched_n_positive": 12,
+    "inception_no_timing_null_p": 0.21212121212121213,
+    "holm_survivors": 0,
+    "corrected_at": "2026-07-14T23:31:22.937296+00:00",
+    "correction_reviewer": "Codex independent review (APPROVE_CORRECTION) + main-thread triple verification"
   },
   {
     "item_id": "0143902c",
@@ -41524,5 +41538,34 @@
     "needs_human": false,
     "gap": "",
     "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  },
+  {
+    "item_id": "8f80b2ee",
+    "category": "experiment_correction",
+    "content": "[K1695 EXPOSURE-ARTIFACT RETRACTION — 更正 knowledge 條目 f4a73c83] 研究誠實原則第 6 條回溯更正。原條目 f4a73c83（verdict=PASS, confidence 0.92）宣稱『國際 VT 在 13 個市場平均 MDD 保護 +12.61pp（共同樣本 13/13）、joint bootstrap 90% CI=[4.22,19.30] 排除 0、pre-registered kill gate 未觸發』。此宣稱是 EXPOSURE ARTIFACT，已撤回。根因：12/VIX 平均只放 72.6% 股票，VT 實現波動只有 buy-and-hold 的 0.52-0.68x（低 32-48%），遠超 .claude/rules/experiments.md:140 的 20% 門檻 —— raw MDD 非 scale-invariant，任何等比例減碼都能複製整個『改善』，衡量的是『少冒險』不是『會擇時』。更正後（2026-07-15 rerun, commit bdf6b451f，走 canonical volpred.stats.drawdown.compare_max_drawdown）：exposure-matched 平均 ΔMDD 在共同樣本 = -0.87pp（7/13 為正，接近擲硬幣）、inception-aware = +4.96pp（12/13）；exact circular-shift/phase-randomized null（保留 12/VIX 權重路徑與自相關、只打散與 return 對齊）觀察值對照自身 null：common p=0.559、inception p=0.212，均未拒絕 no-timing null；Holm 校正 13 個 per-market 檢定 0/13 存活。一個『永遠只放 72.6% 股票、完全不看 VIX』的常數減碼 reference strategy 複製了 59-85% 的 raw MDD『改善』、matched gap ~0，直接證明是曝險而非擇時。raw 數字全數保留於 results.json/README（可審計），只是不再單獨當宣稱。認證：experiments/k1695/review_verdict.json verdict=PASS（fresh-context code-reviewer，7 項 checklist 全過、無 blocking defect，數字 byte 對齊到 12 位小數；primary-path Codex re-verify 已 enqueue）；experiment_gates.py certify PASS。下游：paper vt-trend-following 第三項 contribution（international drawdown protection）+ Table 5 + abstract 該句撤除/改寫（見 paper_pipeline_status.json）；feed 回溯更正 5 篇文章（mile_0d595dfb 招牌那篇 + mile_2d4edb65 + mile_ee473d5a + archived mile_f2e26f43/mile_9eaadbd1，見 task feed_correction_k1695_exposure_artifact）。同 bug class：K1265b（SPY VIX-managed raw 50-62% → 同風險 9.8-22.1pp、Holm 後 0/3）、K1702（因子動物園 raw 5/6 → vol-normalized 1/6）。canonical 修正 = volpred.stats.drawdown.compare_max_drawdown（>20% 波動差亮旗）；ratchet gate = scripts/tests/test_mdd_scale_artifact_ratchet.py。",
+    "evidence": [
+      "experiments/k1695/k1695_results.json",
+      "experiments/k1695/review_verdict.json",
+      "experiments/k1695/review_certification_20260715.md",
+      "storage/ops/k1695_exposure_artifact_verification.md",
+      "corrects knowledge item_id f4a73c83",
+      ".claude/rules/experiments.md#raw-mdd-scale-artifact",
+      "K1265b",
+      "K1702"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-07-15T07:17:09.419212"
+  },
+  {
+    "item_id": "d57401c0",
+    "category": "cross_asset_spillover",
+    "content": "K1692 — 原油波動對股市/能源股波動的傳導：NULL。在 EWMA(λ=0.94) 因果 vol proxy、日頻、n=4985(2006-09~2026-07)、OOS 2023-07 起、data-driven HAC + lag sensitivity、油報酬-控制、VIX-控制、Clark-West 一步 OOS、排序不變 GFEVD 連結度 下，原油波動對 SPY/XLE/XOP 波動無穩健、可增量、可預測、能過嚴格門檻(Harvey t>3 或 Bonferroni p<0.0083)的傳導；一階 vol 與二階 vol-of-vol 皆然。三處誠實揭露皆未升級為 positive：(1) 一階 in-sample blip USO->SPY 控制油報酬後 p=0.0057；(2) 二階 vov 2/6 in-sample 過 Bonferroni，但油報酬/VIX 控制後全歸零；(3) Clark-West 3 對邊際 one-sided 增量 p≈0.036-0.049，無一過嚴格門檻、XOP 兩對為負。同期相關與危機共動確實存在(total connectedness 61-63%)，但被油報酬與 VIX 共同因子吸收；GFEVD 淨方向 proxy-dependent 且量級小(一階油淨接收 -0.10 / 二階油淨傳出 +0.07)，不作方向性因果宣稱。增量: 首次控制油自身報酬做 vol-of-vol 識別(一階+二階)、補 XOP、用正確排序不變 GFEVD 避開 K1025 Cholesky bug。Verdict=NULL。Codex primary-path(gpt-5.6-sol, ultra) 3輪 FAIL->PASS(修 EWMA lookahead / vov 漏報 / GFEVD 方向 / ADF 不可驗證 4 blocking)。",
+    "evidence": [
+      "experiments/K1692/K1692_results.json",
+      "experiments/K1692/README.md",
+      "experiments/K1692/review_verdict.json (Codex PASS)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-07-15T11:14:06.044294"
   }
 ]
