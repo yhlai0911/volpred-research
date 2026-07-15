@@ -1,9 +1,23 @@
 # Backlog Task Resolution — `research_wild_bootstrap_ohr`
 
-- **Task ID**: `research_wild_bootstrap_ohr`
+- **Task IDs**: `research_wild_bootstrap_ohr`, `K1712`
 - **Resolved at**: 2026-06-08 台灣時間
 - **Resolver**: Codex CLI
 - **Resolution**: `duplicate_already_covered`
+
+## Follow-up closure — 2026-07-16
+
+The auto-generated task `K1712` repeated the same unchecked
+`research_program.md` backlog line. A second byte-level check confirmed that the
+tracked K965 triplet and its knowledge entry still cover the requested method,
+data setting, comparisons, and conclusion. The literature chain was also
+rechecked against the JRFM article DOI `10.3390/jrfm17070310`, Mammen (1993),
+and Ederington (1979).
+
+The recurrence was a control-plane omission: the original duplicate resolution
+documented closure here but did not check off the canonical backlog item. The
+source checkbox is now closed so `research_backlog_auto` will not generate a
+third duplicate. No experiment bytes or empirical conclusions were changed.
 
 ## Why this task is closed without a new experiment
 

@@ -38123,7 +38123,7 @@
     "title": "K1712: Wild Bootstrap OHR — JRFM 2024",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 443). Original: Wild Bootstrap OHR — JRFM 2024\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1712.py with signal.shift(1) + seed=42, (c) K1712_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38132,7 +38132,30 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-15T00:00:01Z"
+    "created_at": "2026-07-15T00:00:01Z",
+    "status_history": [
+      {
+        "ts": "2026-07-15T21:09:25.100607+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-f6220ef247e74d1ebd065eec134c33b1"
+      },
+      {
+        "ts": "2026-07-15T21:09:32.763538+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-f6220ef247e74d1ebd065eec134c33b1"
+      },
+      {
+        "ts": "2026-07-15T21:11:03.449293+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-f6220ef247e74d1ebd065eec134c33b1"
+      }
+    ],
+    "started_at": "2026-07-15T21:09:32.763523+00:00",
+    "completed_at": "2026-07-15T21:11:03.449279+00:00",
+    "result": "duplicate_already_covered; root_cause=canonical research_program checkbox remained open after prior resolution; evidence=K965 tracked triplet + knowledge entry + JRFM/Mammen/Ederington literature chain; fix=closed source checkbox and documented K1712 recurrence; validation=experiment_gates PASS, backlog scanner excludes Wild Bootstrap OHR, generator tests 8 passed"
   },
   {
     "id": "K1713",
@@ -40542,7 +40565,7 @@
     "title": "Audience correction: rewrite a true general companion for 市場真的很「粗糙」，但更複雜的模型還是沒贏",
     "description": "parent_task_id=ci-red-29421677446; source_article=mile_f3ade114. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1386']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -40557,7 +40580,25 @@
       "content-quality"
     ],
     "created_at": "2026-07-15T16:16:33.771681+00:00",
-    "k_id": "K1386"
+    "k_id": "K1386",
+    "claimed_by": "codex-desktop-k1386-audience",
+    "claimed_at": "2026-07-15T21:08:05.704139+00:00",
+    "claim_session_id": "d8a609eff4d4",
+    "status_history": [
+      {
+        "ts": "2026-07-15T21:08:05.704153+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1386-audience"
+      },
+      {
+        "ts": "2026-07-15T21:08:05.962947+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1386-audience"
+      }
+    ],
+    "started_at": "2026-07-15T21:08:05.962930+00:00"
   },
   {
     "id": "ci-red-29430567843",

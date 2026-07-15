@@ -462,7 +462,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 ### 期貨避險方法論
 - [ ] Quadratic Hedging under GARCH — Ma, J. Futures Markets 2026
 - [ ] Copula-based GARCH Hedge — Hsu et al.
-- [ ] Wild Bootstrap OHR — JRFM 2024
+- [x] ~~Wild Bootstrap OHR — JRFM 2024~~ → **K965 已完整覆蓋；K1712 duplicate backlog closed 2026-07-16**。K965 已實作 Mammen wild bootstrap（B=10,000, seed=42），以 SPY/ES=F OOS 比較 percentile OHR、OLS、rolling OLS、naive 與 DCC-GARCH；WB 對 OLS 的 DM 均不顯著，增益主要是不確定性量化。後續僅在低相關 cross-hedge、商品/外匯或交易成本納入時另立差異化 extension。
 - [ ] Partial Cointegration Hedging — RQFA 2023
 - [ ] Regime-Switching Correlation Hedging
 
