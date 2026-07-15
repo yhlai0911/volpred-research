@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T04:01:33.882324+00:00",
+  "generated_at": "2026-07-15T05:00:46.050649+00:00",
   "adoptable": [],
   "held": [
     {
@@ -10,8 +10,8 @@
   ],
   "skipped": {
     "baseline": 519,
-    "registered": 7,
-    "grace": 1,
+    "registered": 8,
+    "grace": 0,
     "inflight": 0
   },
   "orphan_count": 1,
@@ -19,6 +19,28 @@
   "applied": true,
   "job_deliverable_candidates": [],
   "job_deliverable_held": [
+    {
+      "job_id": "K1694-script-rerun-1211",
+      "reason": "no_existing_declared_files",
+      "rejected": [
+        {
+          "path": ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/K1694_results.json",
+          "reason": "missing_or_not_regular_file"
+        },
+        {
+          "path": ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/figures/fig1_fcm_hhi_timeseries.png",
+          "reason": "missing_or_not_regular_file"
+        },
+        {
+          "path": ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/figures/fig2_regime_2x2.png",
+          "reason": "missing_or_not_regular_file"
+        },
+        {
+          "path": ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/figures/fig3_interaction_coef.png",
+          "reason": "missing_or_not_regular_file"
+        }
+      ]
+    },
     {
       "job_id": "lazypack-mile_a8d79d6a-r2",
       "reason": "declared_outputs_not_yet_deliverable",

@@ -30556,38 +30556,14 @@
   },
   {
     "id": "nested_dm_misuse_class_sweep",
-    "title": "全庫稽核：巢狀模型比較誤用 raw DM（與 K1655 DM/HAC 同家族）",
-    "description": "K1681 撞出一個 bug class：兩個模型是巢狀關係（大模型 = 小模型 + 新增欄位）時，raw Diebold-Mariano 在虛無假設下非標準常態、且系統性偏向懲罰大模型；因此「DM 沒過門檻」不能反推「新變數沒有增量預測內容」，正確檢定是 Clark & West (2007)。這與 K1655 的 DM/HAC lag 稽核是同一家族（真正的失效點不是程式寫錯，而是錯的檢定變體被拿去支撐對外宣稱）。任務：(1) 全量掃 experiments/** 找出「巢狀比較 + raw DM/HLN 當 primary claim」的站點，分類 exposed（有 knowledge / 文章 / 論文宣稱）vs diagnostic-only；(2) 產出 docs/governance/2026-07/nested_dm_misuse_sweep.md，含掃描範圍與盲區分析；(3) 立機械 gate（比照 scripts/tests/test_dm_hac_lag_ratchet.py 的 ratchet 形式）+ 凍結 baseline，只准變少。反面案例參考：CW 顯著只代表母體係數不為零，不代表有限樣本 MSPE 會改善 —— 稽核報告要寫清這個區別，不要把 sweep 變成「把所有 NULL 翻成 PASS」。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "全庫稽核：巢狀模型比較誤用 raw DM（與 K1655 DM/HAC 同家族）",
+    "priority": 2,
     "source": "hourly-22",
-    "claimed_by": "codex-failover",
-    "claimed_at": "2026-07-12T03:08:31.497424+00:00",
-    "claim_session_id": "78866aad45cd",
-    "status_history": [
-      {
-        "ts": "2026-07-12T03:08:31.497438+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-12T03:08:31.791261+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-12T04:12:21.650458+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover"
-      }
-    ],
-    "started_at": "2026-07-12T03:08:31.791248+00:00",
     "completed_at": "2026-07-12T04:12:21.650442+00:00",
-    "result": "Full sweep parsed 1,807 experiment Python files: 220 affected paths frozen (111 knowledge-exposed, 109 contained) and 5 CW-primary controls. Added the single-owner auditor/ratchet/report; 13 tests pass and a planted new violation is rejected."
+    "tombstone": true,
+    "archived_at": "2026-07-15T05:01:13.476718+00:00"
   },
   {
     "id": "k1655_dm_sweep_rerun_article_bound_b02",
@@ -36993,13 +36969,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T04:01:34.600848+00:00",
+    "completed_at": "2026-07-15T05:00:46.698824+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T04:01:34.600848+00:00",
-      "last_clean_observed_at": "2026-07-15T04:01:34.600848+00:00"
+      "resolved_at": "2026-07-15T05:00:46.698824+00:00",
+      "last_clean_observed_at": "2026-07-15T05:00:46.698824+00:00"
     }
   },
   {
@@ -37011,13 +36987,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T04:13:34.971746+00:00",
+    "completed_at": "2026-07-15T05:04:07.518479+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T04:13:34.971746+00:00",
-      "last_clean_observed_at": "2026-07-15T04:13:34.971746+00:00"
+      "resolved_at": "2026-07-15T05:04:07.518479+00:00",
+      "last_clean_observed_at": "2026-07-15T05:04:07.518479+00:00"
     }
   },
   {
@@ -37029,13 +37005,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-15T03:31:20.240851+00:00",
+    "completed_at": "2026-07-15T04:13:41.814859+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T03:31:20.240851+00:00",
-      "last_clean_observed_at": "2026-07-15T03:31:20.240851+00:00"
+      "resolved_at": "2026-07-15T04:13:41.814859+00:00",
+      "last_clean_observed_at": "2026-07-15T04:13:41.814859+00:00"
     }
   },
   {
@@ -38400,5 +38376,63 @@
     ],
     "completed_at": "2026-07-15T04:12:47.152905+00:00",
     "result": "已回覆老闆(Telegram msg 790)。診斷：CI 卡在 5 個測試(cron_auth_preflight ×4 + git_reference_transaction_hook ×1)本地綠只在 CI 紅，auto-repair 迴圈本地綠即標假成功空轉 3+ cycles。已建針對性修復任務(code family, parent=telegram-789)交 dispatch。"
+  },
+  {
+    "id": "telegram-791",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-15T04:25:38.507832+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 791）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nhealth_ci_watchcriticalCI incident ci-red-29383038432 phase=escalated failures=3CI watcher owns repair/verification; inspect task + failed log only if phase is escalated目前未\n處理警報warn1 current warn/critical 警報 conditionsingest alerts → run remediation per alert.md auto-action table自主循環健康\n度okoverall=ok | 首次完成率=ok 任務完成率=ok error_recurrence=ok 返工/修正趨勢=ok—\n\n\n \nGitHub\n[yhlai0911/volpred-research] Test Suite workflow run\n \n\n \nTest Suite: All jobs have failed\n \n \nStatus Job Annotations\npytest \nTest Suite / pytest\nFailed in 9 minutes and 49 seconds\nannotations for Test Suite / pytest 2 \n \n \n—\nYou are receiving this because you are subscribed to this thread.\nManage your GitHub Actions notifications\n\n \nGitHub, Inc. ・88 Colin P Kelly Jr Street ・San Francisco, CA 94107\n\n12:10訊息\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T04:26:31.411620+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-15T04:29:16.866364+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-15T04:29:16.866346+00:00",
+    "result": "診斷 CI 紅燈：single-writer refactor 打壞測試，本地已修好 5 個殘留失敗全綠（5 passed），但 3 個 commit 未 push。已建立後續 push+驗證任務交 hourly dispatch；已用 Telegram 回覆老闆。"
+  },
+  {
+    "id": "ci-red-29387887860",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29383038432",
+    "ci_run_key": "29387887860:1",
+    "created_at": "2026-07-15T05:00:07.046498+00:00",
+    "title": "CI 紅燈修復（run 29387887860, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29387887860\nattempt: 1\nhead_sha: fa4cbfbc6\n偵測摘要（仍須讀完整 failed log）：2026-07-15T02:10:18.2460417Z E AssertionError: assert 2 == 0\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29387887860 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-07-15T05:01:31.661253+00:00",
+    "claim_session_id": "bf9547a281f5",
+    "status_history": [
+      {
+        "ts": "2026-07-15T05:01:31.661268+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-15T05:01:39.525856+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-13"
+      }
+    ],
+    "started_at": "2026-07-15T05:01:39.525834+00:00"
   }
 ]
