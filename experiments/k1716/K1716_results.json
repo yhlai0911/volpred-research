@@ -1,0 +1,196 @@
+{
+  "experiment_id": "K1716",
+  "generated_at_utc": "2026-07-15T23:15:17.956962+00:00",
+  "seed": 42,
+  "data": {
+    "source": "Yahoo Finance via yfinance; SPY unadjusted daily OHLCV",
+    "requested_start": "2018-01-01",
+    "requested_end_exclusive": "2026-07-16",
+    "effective_start": "2018-01-02",
+    "effective_end": "2026-07-15",
+    "snapshot_path": "data/SPY_ohlcv.csv",
+    "snapshot_sha256": "4c76aabed84a838e25a05950a710b0f420a044b23e0cabe730b06011d0a10335",
+    "downloaded_rows": 2144,
+    "deduplicated_valid_rows": 2144,
+    "invalid_ohlc_rows_removed": 0,
+    "duplicate_dates_removed": 0
+  },
+  "design": {
+    "treatment_weekdays": [
+      "Tuesday",
+      "Thursday"
+    ],
+    "control_weekdays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "tuesday_listing_date": "2022-04-18",
+    "thursday_listing_date": "2022-05-11",
+    "post_start_first_full_thursday_expiry": "2022-05-19",
+    "transition_dates_excluded": [
+      "2022-04-18",
+      "2022-05-18"
+    ],
+    "interaction": "post x Tue/Thu, conditional on weekday FE, lagged proxy variance, lagged absolute return, and month seasonality",
+    "lookahead_policy": "lag5_log_total and lag1_abs_return use explicit shift(1); outcome is contemporaneous diagnostic, not a forecast",
+    "inference": "Newey-West HAC with ceil(n^(1/3)) lag; 1,000-rep 10-day moving-block bootstrap; Holm family across four outcomes; Harvey |t|>=3"
+  },
+  "descriptive": {
+    "pre_tue_thu": {
+      "n": 441,
+      "mean_parkinson_var": 9.28608443209652e-05,
+      "mean_overnight_var": 6.074031008022021e-05,
+      "mean_c2c_var": 0.00016549084285094511,
+      "mean_intraday_share": 0.7040103989734771
+    },
+    "pre_mon_wed_fri": {
+      "n": 639,
+      "mean_parkinson_var": 0.0001003253115861526,
+      "mean_overnight_var": 9.298321120836961e-05,
+      "mean_c2c_var": 0.000181592946278238,
+      "mean_intraday_share": 0.6849937983415338
+    },
+    "post_tue_thu": {
+      "n": 424,
+      "mean_parkinson_var": 6.765561133092379e-05,
+      "mean_overnight_var": 4.557441023917499e-05,
+      "mean_c2c_var": 0.00010510496392804017,
+      "mean_intraday_share": 0.7239628831233275
+    },
+    "post_mon_wed_fri": {
+      "n": 617,
+      "mean_parkinson_var": 7.087987460317669e-05,
+      "mean_overnight_var": 4.077250959597368e-05,
+      "mean_c2c_var": 0.000116621662582693,
+      "mean_intraday_share": 0.7060363734112244
+    }
+  },
+  "regressions": {
+    "log_parkinson_var": {
+      "n": 2115,
+      "coefficient": 0.040733025956971425,
+      "standard_error_hac": 0.06892062325439384,
+      "t_stat_hac": 0.5910136042534208,
+      "p_value_hac": 0.5545113057267083,
+      "hac_lag": 13,
+      "r_squared": 0.4327304941928031,
+      "post_main_effect": 0.006427757727984207,
+      "bootstrap_95_ci": [
+        -0.08633694787618428,
+        0.17761194730068952
+      ],
+      "bootstrap_valid_reps": 1000,
+      "holm_p_value": 1.0,
+      "harvey_abs_t_ge_3": false
+    },
+    "log_overnight_var": {
+      "n": 2115,
+      "coefficient": 0.0651285767971081,
+      "standard_error_hac": 0.19961075800927552,
+      "t_stat_hac": 0.32627788926126766,
+      "p_value_hac": 0.7442141154868034,
+      "hac_lag": 13,
+      "r_squared": 0.13575408333385564,
+      "post_main_effect": -0.22451124125174626,
+      "bootstrap_95_ci": [
+        -0.30499680335237617,
+        0.46147430715633087
+      ],
+      "bootstrap_valid_reps": 1000,
+      "holm_p_value": 1.0,
+      "harvey_abs_t_ge_3": false
+    },
+    "log_c2c_var": {
+      "n": 2115,
+      "coefficient": 0.13254256981948037,
+      "standard_error_hac": 0.21229509276443392,
+      "t_stat_hac": 0.6243317643076741,
+      "p_value_hac": 0.5324097274069362,
+      "hac_lag": 13,
+      "r_squared": 0.1284715420415352,
+      "post_main_effect": -0.1310637379559525,
+      "bootstrap_95_ci": [
+        -0.2904294767094455,
+        0.565087868591475
+      ],
+      "bootstrap_valid_reps": 1000,
+      "holm_p_value": 1.0,
+      "harvey_abs_t_ge_3": false
+    },
+    "logit_intraday_share": {
+      "n": 2115,
+      "coefficient": -0.036326210936964226,
+      "standard_error_hac": 0.19165429937049094,
+      "t_stat_hac": -0.1895402871539097,
+      "p_value_hac": 0.8496693827269394,
+      "hac_lag": 13,
+      "r_squared": 0.01773911214497559,
+      "post_main_effect": 0.22941818112389384,
+      "bootstrap_95_ci": [
+        -0.40538918166922827,
+        0.3295607947709485
+      ],
+      "bootstrap_valid_reps": 1000,
+      "holm_p_value": 1.0,
+      "harvey_abs_t_ge_3": false
+    }
+  },
+  "placebo_breaks": {
+    "2021-05-19": {
+      "log_parkinson_var": {
+        "n": 2138,
+        "coefficient": 0.05650624480577466,
+        "standard_error_hac": 0.07034801403282612,
+        "t_stat_hac": 0.8032386639857019,
+        "p_value_hac": 0.42183680199177764,
+        "hac_lag": 13,
+        "r_squared": 0.4398730695549842,
+        "post_main_effect": 0.02702177869330391
+      },
+      "logit_intraday_share": {
+        "n": 2138,
+        "coefficient": -0.11183377282396703,
+        "standard_error_hac": 0.1980961127673604,
+        "t_stat_hac": -0.564542995123292,
+        "p_value_hac": 0.5723846480024188,
+        "hac_lag": 13,
+        "r_squared": 0.01854963476553262,
+        "post_main_effect": 0.33833104797820496
+      }
+    },
+    "2023-05-19": {
+      "log_parkinson_var": {
+        "n": 2138,
+        "coefficient": -0.0074013035861870205,
+        "standard_error_hac": 0.07028495449252395,
+        "t_stat_hac": -0.10530423814920846,
+        "p_value_hac": 0.916134400119095,
+        "hac_lag": 13,
+        "r_squared": 0.4402097813546193,
+        "post_main_effect": -0.07215995399509278
+      },
+      "logit_intraday_share": {
+        "n": 2138,
+        "coefficient": -0.004237379498785698,
+        "standard_error_hac": 0.19685356028350917,
+        "t_stat_hac": -0.021525541588798342,
+        "p_value_hac": 0.9828264289396115,
+        "hac_lag": 13,
+        "r_squared": 0.01599253162254599,
+        "post_main_effect": 0.18216549018220168
+      }
+    }
+  },
+  "verdict": "NULL_PROXY_DIAGNOSTIC",
+  "primary_success_criteria_met": false,
+  "limitations": [
+    "SPY daily OHLC is not SPX intraday realized variance or options order flow.",
+    "The fixed 2022-Q2 breakpoint coincides with monetary-policy and volatility-regime changes.",
+    "The Tue/Thu interaction improves on a raw pre/post comparison but does not identify 0DTE volume or dealer gamma causally.",
+    "Daily range estimators lose the intraday timing needed to test market-maker hedging mechanisms."
+  ],
+  "artifacts": {
+    "figure": "k1716_intraday_share.png"
+  }
+}

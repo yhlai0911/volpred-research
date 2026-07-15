@@ -54,3 +54,16 @@ uv run python scripts/experiment_gates.py run --path experiments/k1716
 ## 結論邊界
 
 這只能稱為 SPY daily-OHLC proxy break diagnostic。2022-Q2 同時包含升息、熊市與波動 regime 變化；weekday interaction 雖比 raw pre/post 更能隔離共同 regime，仍沒有 0DTE 成交、OPRA、dealer position 或高頻 realized variance，不能宣稱 0DTE 造成波動增加／下降。圖 `k1716_intraday_share.png` 只呈現 proxy 的時間路徑，不替代正式檢定。
+
+## 實際結果
+
+凍結快照涵蓋 2018-01-02 至 2026-07-15，共 2,144 個交易日；OHLC 一致性檢查未剔除任何列，SHA-256 為 `4c76aabed84a838e25a05950a710b0f420a044b23e0cabe730b06011d0a10335`。排除 transition 並完成 lag 後，主回歸有 2,115 列。
+
+主要 interaction 全數未達門檻：
+
+- log Parkinson variance：係數 +0.0407，HAC t=0.591，raw p=0.555，Holm p=1.000，block-bootstrap 95% CI [-0.0863, +0.1776]。
+- logit intraday share：係數 -0.0363，HAC t=-0.190，raw p=0.850，Holm p=1.000，block-bootstrap 95% CI [-0.4054, +0.3296]。
+- log overnight variance：係數 +0.0651，HAC t=0.326；log close-to-close variance：係數 +0.1325，HAC t=0.624；兩者 Holm p 也都是 1.000。
+- 2021 與 2023 placebo 的兩個日內 outcome interaction 同樣都不顯著（|t|≤0.803）。
+
+因此預註冊成功條件未成立，裁決為 `NULL_PROXY_DIAGNOSTIC`。描述均值雖顯示 post 期間兩組的日內占比都較高（Tue/Thu 0.7040→0.7240；Mon/Wed/Fri 0.6850→0.7060），差中之差幾乎沒有可辨識訊號；不能把共同的 regime 移動歸因於每日到期選擇權。這個 NULL 也與文獻中正負方向皆有的機制證據相容，但不裁決任何一方。
