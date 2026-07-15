@@ -1,0 +1,63 @@
+{
+  "id": "lazypack-mile_3c0ea15f-r2",
+  "title": "lazypack render mile_3c0ea15f",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_3c0ea15f-r2",
+    "--article-id",
+    "mile_3c0ea15f",
+    "--plan",
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "退休提款的順序風險",
+    "--experiment",
+    "K1410"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-15T21:50:28Z",
+  "started_at": "2026-07-15T21:54:32Z",
+  "completed_at": "2026-07-15T21:59:10Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_3c0ea15f-r2.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_3c0ea15f-r2.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/plan.json",
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/1_same_returns.png",
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/2_crash_timing.png",
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/3_withdrawal_rule.png",
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/render_lazypack.py"
+  ],
+  "output_paths_updated_at": "2026-07-15T21:59:08Z",
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "0cba8ca4a60f6b2636670354147ad610e1f17bb1",
+  "delivered_paths": [
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/1_same_returns.png",
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/2_crash_timing.png",
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/3_withdrawal_rule.png",
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/render_lazypack.py",
+    "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/plan.json"
+  ],
+  "delivered_at": "2026-07-15T22:01:22.127511+00:00",
+  "delivery_source": "reap_orphan_deliverables"
+}

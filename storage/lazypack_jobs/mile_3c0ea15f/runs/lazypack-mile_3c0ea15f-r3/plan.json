@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "title": "退休提款的順序風險",
+  "subtitle": "同一籃報酬，提款時機會改變結局",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1410/k1410_results.json",
+      "sha256": "6b3d329bc2f848c460d9cb6a3c2a9e772a37aab25d13f7fb55bc01022337ed46",
+      "label": "報酬順序風險重跑結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_same_returns",
+      "info": "concept",
+      "style": "editorial",
+      "title": "同一籃報酬，有提款就會分岔",
+      "alt": "同一籃報酬在無提款與固定提款下的終值差異",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "沒有提款",
+          "body": [
+            "報酬只做連續乘法，調換好年與壞年的先後不會改變終值。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "固定籃子的報酬乘積",
+          "value": {
+            "source": "result",
+            "path": "permutation_demo.gspc_8y_exhaustive.basket_gross_product_order_invariant",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "固定提款後最好終值",
+          "value": {
+            "source": "result",
+            "path": "permutation_demo.gspc_8y_exhaustive.best_terminal",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "固定提款後最差終值",
+          "value": {
+            "source": "result",
+            "path": "permutation_demo.gspc_8y_exhaustive.worst_terminal",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_crash_timing",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "大跌越早來，耗盡率越高",
+      "alt": "退休第一年與最後一年遇到大跌的資產耗盡率",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "美股第一年大跌",
+          "value": {
+            "source": "result",
+            "path": "/crash_year_risk/gspc/curve/0/fail_prob",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "美股最後一年大跌",
+          "value": {
+            "source": "result",
+            "path": "/crash_year_risk/gspc/curve/29/fail_prob",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股第一年大跌",
+          "value": {
+            "source": "result",
+            "path": "/crash_year_risk/twii/curve/0/fail_prob",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股最後一年大跌",
+          "value": {
+            "source": "result",
+            "path": "/crash_year_risk/twii/curve/29/fail_prob",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_withdrawal_rule",
+      "info": "results",
+      "style": "professional",
+      "title": "能調整生活費，模擬存活率最高",
+      "alt": "固定提款與動態提款的資產未耗盡比例",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "美股固定提款",
+          "value": {
+            "source": "result",
+            "path": "/strategy_evaluation/gspc/WR4.0%_100stock/success_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "美股動態提款",
+          "value": {
+            "source": "result",
+            "path": "/strategy_evaluation/gspc/WR4.0%_dynamic_GK/success_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股固定提款",
+          "value": {
+            "source": "result",
+            "path": "/strategy_evaluation/twii/WR4.0%_100stock/success_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股動態提款",
+          "value": {
+            "source": "result",
+            "path": "/strategy_evaluation/twii/WR4.0%_dynamic_GK/success_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "代價",
+          "body": [
+            "動態規則靠市場差時減少生活費換取較高存活率；模型沒有衡量生活品質。"
+          ]
+        }
+      ]
+    }
+  ]
+}
