@@ -8,7 +8,10 @@ state=${1:-}
 needs_main_lease=0
 touches_head=0
 while IFS=' ' read -r _old _new ref_name; do
-  if [ "$ref_name" = "refs/heads/main" ]; then
+  # Only a *moving* main needs the lease.  Some Git versions list main as a
+  # no-op (old==new) inside unrelated transactions (e.g. `git worktree add`
+  # of a side branch); gating those would wrongly block non-main writes.
+  if [ "$ref_name" = "refs/heads/main" ] && [ "$_old" != "$_new" ]; then
     needs_main_lease=1
   elif [ "$ref_name" = "HEAD" ]; then
     touches_head=1

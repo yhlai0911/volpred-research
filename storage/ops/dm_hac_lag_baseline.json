@@ -4,10 +4,10 @@
   "auditor": "scripts/audit_dm_hac_lag.py",
   "canonical": "volpred.stats.model_evaluation.dm_test",
   "policy": "Two frozen cohorts. Each set may only shrink -- new entries fail CI; repaired sites move to retired and cannot resurrect.",
-  "frozen_at": "2026-07-11 (K1655 class sweep); blindspot cohort refrozen 2026-07-12 after AST coverage and false-positive correction; k1379 manual-variance blind spot added 2026-07-15 after PLAIN_VARIANCE_RE extended to the E[X^2]-E[X]^2 idiom",
-  "count": 229,
+  "frozen_at": "2026-07-11 (K1655 class sweep); blindspot cohort refrozen 2026-07-12 after AST coverage and false-positive correction; k1379 manual-variance blind spot added then retired 2026-07-15 after canonical HAC repair",
+  "count": 228,
   "original_cohort_count": 128,
-  "blindspot_cohort_count": 101,
+  "blindspot_cohort_count": 100,
   "degenerate_sites": [
     "experiments/K1048/k1048.py::dm_test",
     "experiments/K158/K158_wavelet_garch_modwt.py::dm_test",
@@ -177,7 +177,6 @@
     "experiments/k1309/k1309.py::dm_hln",
     "experiments/k1316/k1316.py::dm_hln",
     "experiments/k1319/k1319.py::dm_test",
-    "experiments/k1379/k1379.py::dm_test",
     "experiments/k1398/k1398.py::dm_test",
     "experiments/k1432/k1432_tw_financial_stress.py::dm_test",
     "experiments/k1433/k1433.py::dm_test",
@@ -296,6 +295,11 @@
       "site": "experiments/k969/k969_bespoke_rv.py::dm_test",
       "date": "2026-07-11",
       "note": "canonical HAC re-run complete — core HAR-Bespoke result remains; Ridge t shrinks 6.63 → 3.16 with acf(1)=0.380 and still narrowly clears Harvey t>3"
+    },
+    {
+      "site": "experiments/k1379/k1379.py::dm_test",
+      "date": "2026-07-15",
+      "note": "canonical HAC, actual-first Patton QLIKE, aligned A4f normalization, and clean unique-date input re-run complete — A4f vs GJR and daily-r² HAR-style t = -4.37/-7.70 now clear Harvey |t|>3; three of six legacy screens flip FAIL to PASS; VIX-augmented OLS comparator remains unstable"
     }
   ]
 }
