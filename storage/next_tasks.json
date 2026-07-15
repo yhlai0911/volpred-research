@@ -36728,13 +36728,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T17:00:50.942214+00:00",
+    "completed_at": "2026-07-15T18:00:54.803587+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T17:00:50.942214+00:00",
-      "last_clean_observed_at": "2026-07-15T17:00:50.942214+00:00"
+      "resolved_at": "2026-07-15T18:00:54.803587+00:00",
+      "last_clean_observed_at": "2026-07-15T18:00:54.803587+00:00"
     }
   },
   {
@@ -37023,9 +37023,27 @@
     "description": "K1711（TimesFM/TTM vs HAR 的 MCS 評估）研究線卡住：agent job agent-brief_tsfm_har_mcs-54e6f9 於 5280s cap 超時、salvage commit 750631d915a9 搶救部分產出；follow-up compute job k1711-mcs-eval 又於 3600s timeout（stderr=[TIMEOUT]，script 指向已清除的 worktree dispatch-slot-1-671aaa12-tsfm-har）。重派要求：(1) 先 git show 750631d915a9 定位 salvage 產出實際位置；(2) 評估 script 落到主 repo experiments/k1711/；(3) compute job timeout ≥7200s 或拆段跑；(4) 完成後三件套 + Codex 審。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "main_thread",
-    "created_at": "2026-07-14T17:13:16.384826+00:00"
+    "created_at": "2026-07-14T17:13:16.384826+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-07-15T18:17:51.469210+00:00",
+    "claim_session_id": "4c88b5e7795f",
+    "status_history": [
+      {
+        "ts": "2026-07-15T18:17:51.469226+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T18:17:51.697942+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop"
+      }
+    ],
+    "started_at": "2026-07-15T18:17:51.697926+00:00"
   },
   {
     "id": "dm_hac_fix_k1379_paper9",
@@ -39593,7 +39611,7 @@
     "description": "2026-07-15 v3 報頭修復時發現：market_daily 7/14 與 7/15 列的 spy_close/gld_close 與 7/13 完全同值（749.17/367.13）— yfinance 7/14 起 SPY/GLD 回 NaN（同 44afe99ea stale-yfinance regression 線），寫入端把前值 carry-forward 進表且無 stale flag，造成前端 ticker change 顯示 0.00%。任務：(1) 驗 yfinance 是否已恢復供 7/14+ 真值；恢復則讓既有資料流程（daily_update/collect_us）重跑回填 market_daily 7/14-15 正確 close（不手改 DB，修流程重寫）；(2) 檢查寫入端 carry-forward 行為：無新值時應寫 NULL 或帶 stale flag，不可無標記複製前值（誠實原則 — 假裝有收盤值）；若要改行為先查 44afe99ea 的 monotone gate 設計避免疊床架屋；(3) 完成後 curl https://volpred.zeabur.app/api/strategy-overview 驗 spy_change_pct 非 0（若市場真有變動）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "main_thread_20260715_v3_masthead_fix",
     "created_at": "2026-07-15T10:16:06.095808+00:00",
     "status_history": [
@@ -39627,13 +39645,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T18:00:27.447434+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop"
       }
     ],
     "started_at": "2026-07-15T17:43:49.534867+00:00",
     "last_released_at": "2026-07-15T17:05:09.106462+00:00",
-    "claimed_by": "codex-desktop",
-    "claimed_at": "2026-07-15T17:43:49.257380+00:00",
-    "claim_session_id": "e9058ef9654a"
+    "completed_at": "2026-07-15T18:00:27.447416+00:00",
+    "result": "新增 SPY/GLD source date + stale schema/寫入端，正式來源重算回填近 30 列並同步 Supabase；7/15 修正為 SPY 751.83、GLD 372.15。前端 326a4b1 已安全部署，live API 顯示 SPY +0.3551%、GLD +1.3674%，兩者 stale=false。"
   },
   {
     "id": "telegram-822",
@@ -39667,9 +39690,32 @@
     "description": "3-STRIKE TRIGGER（第 4 次同 class）：2026-03-18 paper_trades、2026-04-17 knowledge summary、2026-06-23 article_tags、2026-07-15 fetchArticleSummaries+fetchMarketDaily（boss 抓到 v3 報頭「1000 篇研究」，真值 1612）。root cause = 每個新 supabase query 都要記得分頁，無結構性防護。任務（frontend-v2-fix repo）：(1) 建統一 fetchAllRows(queryBuilder) helper（range 分頁 loop），現有 5 處手寫 loop 收編；(2) 逐點評估剩餘 10 個無分頁站點（audit 清單見主 repo docs/error_log.md 2026-07-15 Class M entry：L714 article_relations / L759 member_qa articles / L1645 article_reactions / L1687+L1919 questions / L1801 digest slugs / L2047+L2169 paper_trades / L2184+L2198 question_articles）— 會增長的表全部接 helper，≤11 列小表（strategy_signals/strategy_metrics_cache）加註解豁免；(3) 機械 gate：test 或 lint script 掃 data-server.ts `.from().select` chain 無 .range/.limit/.single/.in 者 fail（豁免需 `// row-cap-exempt: <reason>` 註記）；(4) build + deploy + 線上驗證 total/tags/市場數據。注意 frontend-v2-fix 是巢狀 git repo。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "3strike_20260715_row_cap",
-    "created_at": "2026-07-15T10:46:29.744853+00:00"
+    "created_at": "2026-07-15T10:46:29.744853+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-15T18:08:50.041765+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-10a58dcb81fe495195f8dc60f4f8fe64"
+      },
+      {
+        "ts": "2026-07-15T18:08:50.258608+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-10a58dcb81fe495195f8dc60f4f8fe64"
+      },
+      {
+        "ts": "2026-07-15T18:19:22.455556+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-10a58dcb81fe495195f8dc60f4f8fe64"
+      }
+    ],
+    "started_at": "2026-07-15T18:17:07.032741+00:00",
+    "completed_at": "2026-07-15T18:19:22.455542+00:00",
+    "result": "Unified growing Supabase reads behind fetchAllRows and added a mechanical row-cap gate with negative tests. Node 22 typecheck/build passed; deployed 6a57ce173d3d099ed2f12794 and verified cluster total=1614, tagCounts=2082, latest market=2026-07-15. Existing unrelated verify:regressions paper.updated_at guard remains baseline-failing."
   },
   {
     "id": "ci-red-29406571212",
@@ -39714,9 +39760,27 @@
     "description": "boss 2026-07-15 晚間指令：懶人包圖走 codex 生成，deterministic renderer 模板『render 得很醜』降為 fallback。skill 政策已改（.claude/skills/lazypack-infographic/SKILL.md 視覺分層段）。本 task 改管線：(1) `scripts/lazypack_async_render.py` 改為先走 `scripts/gen_lazypack_codex.py`（codex 寫 data-bound 腳本→ 本地執行 → PNG 驗證 → bounded repair），codex 失敗才 fallback deterministic `lazypack_render.py` 並在 work_log 註記 fallback（不得 silent — 依 no-silent-fallback rule）；(2) 保留 hash-receipt / evidence 驗證等研究誠實 gate（codex 腳本的數字也必須 data-bound 自 evidence JSON）；(3) 更新對應 tests；(4) 用一篇 pending queue 文章端到端驗證（enqueue → compute worker → PNG 品質 + upload + append）。注意 gen_lazypack_codex.py 頭部 docstring 的 LEGACY 標示要同步改掉（它現在是 primary）。參考 incident：2026-07-15 trending_ai_power_vol 懶人包（deterministic 模板）被 boss 嫌醜，已用 codex 重生。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "boss_directive_20260715_lazypack_codex",
-    "created_at": "2026-07-15T11:14:45.382258+00:00"
+    "created_at": "2026-07-15T11:14:45.382258+00:00",
+    "claimed_by": "codex-failover-slot-1-a9c7dc5ce95e4ed5896a6d516af9aa5b",
+    "claimed_at": "2026-07-15T18:01:43.246219+00:00",
+    "claim_session_id": "a3a01096a4e3",
+    "status_history": [
+      {
+        "ts": "2026-07-15T18:01:43.246234+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-a9c7dc5ce95e4ed5896a6d516af9aa5b"
+      },
+      {
+        "ts": "2026-07-15T18:01:43.467874+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-a9c7dc5ce95e4ed5896a6d516af9aa5b"
+      }
+    ],
+    "started_at": "2026-07-15T18:01:43.467859+00:00"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a3",
@@ -40261,5 +40325,95 @@
     "started_at": "2026-07-15T17:01:12.540781+00:00",
     "completed_at": "2026-07-15T17:31:51.503929+00:00",
     "result": "root_cause=CI run 29430567843 predated the audience repair; the repair-after run then exposed K1386 pandas default C float parsing with 1-2 ULP cross-architecture drift; repair_commit=06e7152ee; prior_audience_commits=c53cd4470,48bdf37b8; verification=ARM+x86 hash 9bce8a54, 8 targeted tests PASS, experiment gate PASS, independent review PASS; push=deferred per repository policy"
+  },
+  {
+    "id": "ci-red-29434728578",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "pending_main_thread",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29421677446",
+    "ci_run_key": "29434728578:1",
+    "created_at": "2026-07-15T18:00:07.481033+00:00",
+    "title": "CI 紅燈修復（run 29434728578, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29434728578\nattempt: 1\nhead_sha: 007610de6\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29434728578 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T18:00:48.100628+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T18:00:48.335143+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop"
+      },
+      {
+        "ts": "2026-07-15T18:16:53.209358+00:00",
+        "from": "in_progress",
+        "to": "pending_main_thread",
+        "by": "codex-desktop",
+        "note": "CI run 29438793681 exposed two K1709 issues. Fixed false nested-DM failure by making pytest checkout fetch full history (commit 7e1fad06e; local gate passes). Remaining blocker is K1709 results_without_knowledge: per K1259/AGENTS Codex must not write storage/memory/knowledge.json. Claude main thread must add the reviewed K1709 INCONCLUSIVE entry through the formal MemorySystem/Python writer, then rerun scripts/tests/test_knowledge_unrecorded_ratchet.py and latest Test Suite."
+      }
+    ],
+    "started_at": "2026-07-15T18:00:48.335127+00:00",
+    "handoff_note": "CI run 29438793681 exposed two K1709 issues. Fixed false nested-DM failure by making pytest checkout fetch full history (commit 7e1fad06e; local gate passes). Remaining blocker is K1709 results_without_knowledge: per K1259/AGENTS Codex must not write storage/memory/knowledge.json. Claude main thread must add the reviewed K1709 INCONCLUSIVE entry through the formal MemorySystem/Python writer, then rerun scripts/tests/test_knowledge_unrecorded_ratchet.py and latest Test Suite.",
+    "handoff_at": "2026-07-15T18:16:53.209344+00:00"
+  },
+  {
+    "id": "event_article_cpi_us_2026-07-14_tplus0",
+    "title": "[event_article] Event article: CPI_US 2026-07-14 T+0",
+    "description": "Auto-generated by event_jobs single-owner materializer.\nref_event_job_id: cpi-us-2026-07-14-t0\nevent_key: CPI_US_2026_07_14\nevent_type: cpi_us\nevent_date: 2026-07-14\nevent_series_slot: T+0\n\nAuto-populated by populate_upcoming_events.py. CPI_US 2026-07-14 T+0 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+    "task_type": "event_article",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "created_at": "2026-07-15T18:00:52.742402+00:00",
+    "source": "event_expander",
+    "preferred_agent": "claude",
+    "public_effect": "published",
+    "payload": {
+      "audience": "general",
+      "event_series_slot": "T+0",
+      "event_date": "2026-07-14",
+      "event_type": "CPI_US",
+      "event_key": "CPI_US_2026_07_14",
+      "event_job_id": "cpi-us-2026-07-14-t0",
+      "preconditions": []
+    },
+    "ref_event_job_id": "cpi-us-2026-07-14-t0",
+    "event_key": "CPI_US_2026_07_14",
+    "event_type": "cpi_us",
+    "event_date": "2026-07-14",
+    "event_series_slot": "T+0",
+    "not_before": "2026-07-14T13:30:00+00:00",
+    "deadline": "2026-07-16T01:30:00+00:00",
+    "tags": [
+      "event_article",
+      "reader_facing",
+      "cpi_us",
+      "T+0",
+      "main-thread-only"
+    ],
+    "dedup_screen": {
+      "verdict": "unjudged_thin_signature",
+      "blocked": false,
+      "reason": "arc gate had no anchor (no distinctive entity, no experiment ref) — it did not look; theme saturation 0 < 5 is the only signal that ran. Caller must do the 3-layer dedup check.",
+      "saturation": 0,
+      "theme_terms": [
+        "event",
+        "cpi",
+        "research",
+        "may",
+        "audience",
+        "auto"
+      ],
+      "near_misses": [],
+      "screened_at": "2026-07-15T18:00:52+00:00"
+    }
   }
 ]
