@@ -46,6 +46,9 @@ def _run(monkeypatch, tmp_path, attempts, extra_argv=()):
     fake = _FakeAgent(attempts)
     monkeypatch.setattr(run_agent_job, "_run_attempt", fake)
     monkeypatch.setattr(run_agent_job.time, "sleep", lambda _s: None)  # don't really wait
+    # These tests exercise auth-retry classification, not the cwd guard; accept
+    # the tmp workdir as if it were a registered linked worktree.
+    monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_a, **_k: True)
 
     brief = tmp_path / "brief.md"
     brief.write_text("do the thing")
@@ -53,6 +56,7 @@ def _run(monkeypatch, tmp_path, attempts, extra_argv=()):
     argv = [
         "--brief-file", str(brief),
         "--job-metadata", str(meta),
+        "--cwd", str(tmp_path),
         "--timeout", "3600",
         *extra_argv,
     ]

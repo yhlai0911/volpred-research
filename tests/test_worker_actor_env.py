@@ -64,7 +64,7 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
 
     captured: dict[str, dict[str, str]] = {}
 
-    def _capture_spawn(*, argv, log_path, env=None):
+    def _capture_spawn(*, argv, log_path, env=None, cwd=None):
         captured["env"] = env
         return _FakeProc(os.getpid())
 

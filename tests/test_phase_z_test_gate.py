@@ -24,7 +24,7 @@ def _git(root: Path, *args: str) -> subprocess.CompletedProcess:
 
 def _init_repo(root: Path, seed: dict[str, str]) -> None:
     """Hermetic repo seeded with `seed` (relpath → contents), all committed."""
-    _git(root, "init", "-q")
+    _git(root, "init", "-q", "-b", "main")
     _git(root, "config", "user.email", "test@volpred.local")
     _git(root, "config", "user.name", "phase-z-gate-test")
     _git(root, "config", "commit.gpgsign", "false")

@@ -33,7 +33,7 @@ def repo(tmp_path: Path) -> Path:
     """A hermetic repo — never the real one (per feedback_hermetic_git_in_tests)."""
     r = tmp_path / "repo"
     r.mkdir()
-    _git(r.parent, "init", "-q", str(r))
+    _git(r.parent, "init", "-q", "-b", "main", str(r))
     _git(r, "config", "user.email", "t@t.t")
     _git(r, "config", "user.name", "t")
     hook = r / ".git" / "hooks" / "pre-commit"

@@ -34,7 +34,7 @@ def _git(root: Path, *args: str) -> subprocess.CompletedProcess:
 
 
 def _init_repo(root: Path) -> None:
-    _git(root, "init", "-q")
+    _git(root, "init", "-q", "-b", "main")
     _git(root, "config", "user.email", "test@volpred.local")
     _git(root, "config", "user.name", "phase-z-ownership-test")
     _git(root, "config", "commit.gpgsign", "false")

@@ -442,7 +442,13 @@ def classify(command: str, *, cwd: Path, root: Path) -> int:
         capture_output=True, text=True, timeout=5, check=False,
     )
     if root_common_proc.returncode != 0 or not root_common_proc.stdout.strip():
-        return INDETERMINATE
+        # No canonical checkout exists at ``root`` (not a git repo), so no command
+        # can mutate the shared checkout we are here to protect.  Fail OPEN — the
+        # same principle the syntax-fallback path already uses (see ``main``): only
+        # fail closed when cwd actually shares root's canonical common dir.
+        # Returning INDETERMINATE here would deny *every* command (even read-only
+        # ``git status``) whenever VOLPRED_HOOK_ROOT is misconfigured.
+        return ALLOW
     root_common = Path(root_common_proc.stdout.strip()).resolve()
     shell_cwd: Path | None = cwd
     prepared = _strip_shell_comments(
