@@ -763,6 +763,19 @@ def _is_research_saturated(cand: dict) -> bool:
     return research_count >= _SATURATION_THRESHOLD
 
 
+def _is_general_correction_rewrite(cand: dict) -> bool:
+    """True only for an explicit missing-general audience correction.
+
+    The marker is emitted by build_publication_candidates when feed metadata
+    says an earlier general article was reclassified and needs a genuine
+    general-audience replacement.  It must never waive gates for research
+    tasks merely because stale metadata happens to retain the marker.
+    """
+    audiences_covered = cand.get("audiences_covered") or []
+    needed_audience = "general" if "general" not in audiences_covered else "research"
+    return needed_audience == "general" and cand.get("audience_correction_gap") is True
+
+
 def _make_article_task(
     cand: dict,
     priority: int,
@@ -773,13 +786,26 @@ def _make_article_task(
     k_id = cand["k_id"]
     audiences_covered = cand.get("audiences_covered") or []
     needed_audience = "general" if "general" not in audiences_covered else "research"
+    correction_rewrite = _is_general_correction_rewrite(cand)
     task_id = f"{k_id}_article_{needed_audience}"
     if retry_suffix:
         task_id = f"{task_id}_{retry_suffix}"
     title_prefix = f"{k_id}"
     retry_note = f" [retry-{retry_suffix}]" if retry_suffix else ""
-    source = "auto_publish_drought_emergency" if emergency else "auto_discovered"
+    correction_note = (
+        "Historical general coverage was reclassified as research; produce a "
+        "genuinely plain-language general rewrite. This is an audience-correction "
+        "replacement, not a blind duplicate retry. "
+        if correction_rewrite
+        else ""
+    )
+    if correction_rewrite:
+        source = "auto_audience_correction_rewrite"
+    else:
+        source = "auto_publish_drought_emergency" if emergency else "auto_discovered"
     tags = (cand.get("tags") or []) + ["auto-discovered", f"audience-{needed_audience}"]
+    if correction_rewrite:
+        tags.append("audience-correction-rewrite")
     if emergency:
         tags.extend(["publish-drought-emergency", "reader-facing"])
     if retry_suffix:
@@ -790,14 +816,16 @@ def _make_article_task(
         "description": (
             f"K {k_id} has verdict signal (score={cand.get('score')}, reasons={cand.get('reasons')}) "
             f"but no {needed_audience} article in feed.json. "
+            f"{correction_note}"
             f"{'Emergency reader-facing publish-drought remediation; dispatch immediately. ' if emergency else ''}"
-            f"{'Prior task terminal but feed lacks coverage — retry.' if retry_suffix else ''} "
+            f"{'Prior task terminal but feed lacks coverage — retry.' if retry_suffix and not correction_rewrite else ''} "
             f"Verdict preview: {(cand.get('verdict_preview') or '')[:280]}"
         ),
         "priority": 1 if emergency else priority,
         "status": "pending",
         "task_type": "daily_article",
         "source": source,
+        "audience_correction_rewrite": correction_rewrite,
         "k_id": k_id,
         "tags": tags,
         "topic_cluster": cand.get("topic_cluster"),
@@ -1483,6 +1511,7 @@ def refill(
         kid = cand["k_id"]
         audiences_covered = cand.get("audiences_covered") or []
         needed_audience = "general" if "general" not in audiences_covered else "research"
+        correction_rewrite = _is_general_correction_rewrite(cand)
         if reader_facing_only and needed_audience == "research":
             continue
         if _is_invalidated_artifact_candidate(cand):
@@ -1516,9 +1545,16 @@ def refill(
         # K's with any terminal article task + any feed coverage from getting
         # cross-audience refills (K1509 incident: succeeded general task +
         # general coverage perfectly aligned, yet research refill blocked).
+        # A feed-authored audience_correction_gap is different: it explicitly
+        # requests a replacement general rewrite, so it bypasses this blind-
+        # retry belt while every other gate remains active.
         kid_u = kid.upper()
         if needed_audience == "general":
-            if kid_u in succeeded_general_kids and kid_u not in already_covered_general:
+            if (
+                not correction_rewrite
+                and kid_u in succeeded_general_kids
+                and kid_u not in already_covered_general
+            ):
                 continue
         else:
             succeeded_research_kids = succeeded_research_kids_cache
@@ -1547,8 +1583,9 @@ def refill(
         # (research-only → general) is a real signal only when the K has 1
         # research article worth a reader-facing reframe. ≥2 research articles
         # means the story has been told, reframed, possibly retracted — the
-        # narrative-arc dedup will reject any new general draft.
-        if _is_research_saturated(cand):
+        # narrative-arc dedup will reject any new general draft. Explicit
+        # audience-correction replacements are the narrow exception.
+        if not correction_rewrite and _is_research_saturated(cand):
             continue
         # 9th belt (2026-06-14 K1333/K1334 incident): publisher-side arc-dedup
         # gate will reject the draft if entities × conclusion class match an
@@ -1572,7 +1609,8 @@ def refill(
         # Pick retry suffix if base id already used by terminal task
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
         if (
-            needed_audience == "general"
+            not correction_rewrite
+            and needed_audience == "general"
             and retry_suffix
             and kid.upper() in any_feed_kids
             and kid.upper() in succeeded_general_kids
@@ -1587,11 +1625,12 @@ def refill(
         if len(new_entries) >= target:
             break
         kid = cand["k_id"]
+        correction_rewrite = _is_general_correction_rewrite(cand)
         if kid.upper() in failed_experiment_kids:
             print(f"  [refill] skip {kid}: source experiment task status=failed")
             continue
         # 8th belt also applies to deferred dominant pool (2026-06-08).
-        if _is_research_saturated(cand):
+        if not correction_rewrite and _is_research_saturated(cand):
             continue
         # 9th belt also applies to deferred dominant pool.
         if _is_arc_duplicate_candidate(cand):
@@ -1608,7 +1647,8 @@ def refill(
         priority = _score_to_priority(int(cand.get("score") or 0))
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
         if (
-            needed_audience == "general"
+            not correction_rewrite
+            and needed_audience == "general"
             and retry_suffix
             and kid.upper() in any_feed_kids
             and kid.upper() in succeeded_general_kids
@@ -1625,6 +1665,7 @@ def refill(
         if len(new_entries) >= target:
             break
         kid = cand["k_id"]
+        correction_rewrite = _is_general_correction_rewrite(cand)
         cluster = budget.cluster_of(cand)
         if not budget.allows(cluster):
             budget.reject(kid, str(cluster))
@@ -1636,7 +1677,8 @@ def refill(
         priority = _score_to_priority(int(cand.get("score") or 0))
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
         if (
-            needed_audience == "general"
+            not correction_rewrite
+            and needed_audience == "general"
             and retry_suffix
             and kid.upper() in any_feed_kids
             and kid.upper() in succeeded_general_kids

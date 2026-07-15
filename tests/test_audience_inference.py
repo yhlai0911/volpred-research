@@ -154,6 +154,18 @@ class TestInferAudienceContentTypeOverrides:
         content = "K1512 bootstrap QLIKE Harvey p-value t-stat DM test"
         assert _infer_audience("每日精選導讀", content, [], content_type="daily_digest") == "general"
 
+    @pytest.mark.parametrize("content_type", ["daily", "daily_update", "daily-update"])
+    def test_daily_content_type_preserved(self, content_type):
+        content = "GARCH 與 VaR / Sharpe 是每日模板欄位。"
+        assert _infer_audience(
+            "每日策略建議", content, [], content_type=content_type
+        ) == "daily"
+
+    @pytest.mark.parametrize("tag", ["每日建議", "daily-update"])
+    def test_daily_tag_preserved_without_content_type(self, tag):
+        content = "GARCH 與 VaR / Sharpe 是每日模板欄位。"
+        assert _infer_audience("每日策略建議", content, [tag]) == "daily"
+
     def test_none_content_type_uses_keyword_inference(self):
         content = "bootstrap QLIKE p-value"
         assert _infer_audience("分析", content, [], content_type=None) == "research"
@@ -190,7 +202,7 @@ class TestInferAudiencePublishMilestoneIntegration:
                 if hasattr(mod, "_post"):
                     monkeypatch.setattr(mod, "_post", lambda *a, **kw: False, raising=False)
             except (ImportError, ModuleNotFoundError):
-                pass
+                pass  # silent-ok: optional sync module may be absent in isolated tests
         return Publisher(storage_dir=str(tmp_path))
 
     def test_explicit_general_overridden_when_content_is_research(
@@ -295,7 +307,7 @@ class TestInferAudienceDailyPreservation:
                 if hasattr(mod, "_post"):
                     monkeypatch.setattr(mod, "_post", lambda *a, **kw: False, raising=False)
             except (ImportError, ModuleNotFoundError):
-                pass
+                pass  # silent-ok: optional sync module may be absent in isolated tests
         return Publisher(storage_dir=str(tmp_path))
 
     def test_mile_a91f19be_daily_strategy_preserved(self, pub, tmp_path):

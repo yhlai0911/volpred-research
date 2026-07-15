@@ -50,6 +50,7 @@ def test_compute_diff_detects_content_change_even_when_metadata_identical(tmp_pa
         "slug": "mile_test001",
         "title": "Test Article",
         "status": "published",
+        "audience": "research",
         "published_at": "2026-04-20T00:00:00+00:00",
         "content": "Extended content v2 with more analysis",  # Post-publish extension
     }
@@ -86,6 +87,7 @@ def test_compute_diff_no_change_when_content_identical(tmp_path, monkeypatch):
         "slug": "mile_same",
         "title": "Same",
         "status": "published",
+        "audience": "research",
         "published_at": "2026-04-20T00:00:00+00:00",
         "content": identical_content,
     }
@@ -109,12 +111,53 @@ def test_compute_diff_still_detects_title_change(tmp_path, monkeypatch):
         "slug": "mile_t2",
         "title": "Old Title",  # DIFFERENT
         "status": "published",
+        "audience": "research",
         "published_at": "2026-04-20T00:00:00+00:00",
         "content": "Same content",
     }
     with patch("volpred.ops.feed_sync._fetch_supabase_articles", return_value={"mile_t2": db_row}):
         diff = compute_diff(storage_dir=str(tmp_path / "storage"))
     assert "mile_t2" in diff["update"]
+
+
+def test_compute_diff_detects_audience_only_change(tmp_path, monkeypatch):
+    """A local audience correction must update the remote projection.
+
+    Regression: feed-sync previously omitted ``audience`` from both its remote
+    SELECT and comparison, so a general -> research backfill looked clean when
+    every other article field matched.
+    """
+    feed_path_dir = tmp_path / "storage" / "reports"
+    feed_path_dir.mkdir(parents=True)
+    (feed_path_dir / "feed.json").write_text(
+        '[{"id": "mile_audience", "title": "Same", "status": "published", '
+        '"audience": "research", '
+        '"published_at": "2026-04-20T00:00:00+00:00", '
+        '"content": "Same content"}]'
+    )
+    db_row = {
+        "slug": "mile_audience",
+        "title": "Same",
+        "status": "published",
+        "audience": "general",  # only drift
+        "published_at": "2026-04-20T00:00:00+00:00",
+        "content": "Same content",
+    }
+
+    selects: list[str] = []
+
+    def fake_select(table, *, select="*", order_by=None, **filters):
+        assert table == "articles"
+        selects.append(select)
+        return [db_row]
+
+    monkeypatch.setattr("volpred.ops.feed_sync._select_rows", fake_select)
+    diff = compute_diff(storage_dir=str(tmp_path / "storage"))
+
+    assert diff["update"] == ["mile_audience"]
+    assert selects == [
+        "slug,status,title,published_at,updated_at,content,details,audience"
+    ]
 
 
 def test_compute_diff_description_fallback_for_content(tmp_path, monkeypatch):
@@ -130,6 +173,7 @@ def test_compute_diff_description_fallback_for_content(tmp_path, monkeypatch):
         "slug": "mile_t3",
         "title": "T3",
         "status": "published",
+        "audience": "research",
         "published_at": "2026-04-20T00:00:00+00:00",
         "content": "content-as-description",
     }

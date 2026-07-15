@@ -20,7 +20,7 @@ def _write_result(root: Path, kid: str) -> None:
     (exp_dir / f"{kid.lower()}_results.json").write_text("{}", encoding="utf-8")
 
 
-def test_release_layer_coverage_filters_stale_publication_gaps(
+def test_release_attempt_receipts_do_not_fabricate_audience_coverage(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -31,7 +31,7 @@ def test_release_layer_coverage_filters_stale_publication_gaps(
     output_path = tmp_path / "publication_candidates.json"
     reader_metrics_path = tmp_path / "latest.json"
 
-    for kid in ("K3001", "K3002", "K3003"):
+    for kid in ("K3001", "K3002", "K3003", "K3004"):
         _write_result(tmp_path, kid)
 
     knowledge_path.write_text(
@@ -44,7 +44,7 @@ def test_release_layer_coverage_filters_stale_publication_gaps(
                     "updated_at": f"2026-07-06T00:0{i}:00+00:00",
                     "tags": [],
                 }
-                for i, kid in enumerate(("K3001", "K3002", "K3003"), start=1)
+                for i, kid in enumerate(("K3001", "K3002", "K3003", "K3004"), start=1)
             ],
             ensure_ascii=False,
         ),
@@ -61,7 +61,12 @@ def test_release_layer_coverage_filters_stale_publication_gaps(
                     "tags": [],
                     "description": "",
                     "content": "",
-                    "details": {"experiment_refs": ["K3002"]},
+                    "details": {
+                        "experiment_refs": ["K3002"],
+                        "audience_correction": {
+                            "requires_general_rewrite": True,
+                        },
+                    },
                 },
                 {
                     "id": "mile_k3003",
@@ -72,6 +77,26 @@ def test_release_layer_coverage_filters_stale_publication_gaps(
                     "description": "",
                     "content": "",
                     "details": {},
+                },
+                {
+                    "id": "mile_k3004_research",
+                    "title": "K3004 research coverage",
+                    "status": "published",
+                    "audience": "research",
+                    "tags": [],
+                    "description": "",
+                    "content": "",
+                    "details": {"experiment_refs": ["K3004"]},
+                },
+                {
+                    "id": "mile_k3004_unpublished_general",
+                    "title": "K3004 unpublished general draft",
+                    "status": "unpublished",
+                    "audience": "general",
+                    "tags": [],
+                    "description": "",
+                    "content": "",
+                    "details": {"experiment_refs": ["K3004"]},
                 },
             ],
             ensure_ascii=False,
@@ -86,7 +111,13 @@ def test_release_layer_coverage_filters_stale_publication_gaps(
                     "task_type": "daily_article",
                     "status": "succeeded",
                     "title": "K3001 succeeded general article task",
-                }
+                },
+                {
+                    "id": "K3002_article_general",
+                    "task_type": "daily_article",
+                    "status": "succeeded",
+                    "title": "K3002 succeeded general article task before reclassification",
+                },
             ],
             ensure_ascii=False,
         ),
@@ -118,18 +149,60 @@ def test_release_layer_coverage_filters_stale_publication_gaps(
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     by_kid = {candidate["k_id"]: candidate for candidate in payload["candidates"]}
     uncovered_ids = {row["k_id"] for row in payload["top_10_uncovered"]}
-    missing_general_ids = {row["k_id"] for row in payload["missing_general_top5"]}
+    missing_general_by_kid = {
+        row["k_id"]: row for row in payload["missing_general_top5"]
+    }
+    missing_general_ids = set(missing_general_by_kid)
 
-    assert by_kid["K3001"]["uncovered"] is False
-    assert by_kid["K3001"]["audiences_covered"] == ["general"]
-    assert by_kid["K3001"]["covered_by"][0]["source"] == "next_tasks_succeeded_daily_article"
+    assert by_kid["K3001"]["uncovered"] is True
+    assert by_kid["K3001"]["audiences_covered"] == []
+    assert by_kid["K3001"]["covered_by"] == []
+    assert by_kid["K3001"]["release_attempted_by"][0]["source"] == (
+        "next_tasks_succeeded_daily_article"
+    )
+    assert by_kid["K3001"]["release_layer_covered"] is True
     assert "K3001" not in uncovered_ids
 
     assert by_kid["K3002"]["release_layer_covered"] is True
-    assert "K3002" not in missing_general_ids
+    assert by_kid["K3002"]["audience_correction_gap"] is True
+    assert len(by_kid["K3002"]["covered_by"]) == 1
+    assert len(by_kid["K3002"]["release_attempted_by"]) == 1
+    assert "K3002" in missing_general_ids
+    assert missing_general_by_kid["K3002"]["audience_correction_gap"] is True
+    assert len(missing_general_by_kid["K3002"]["release_attempted_by"]) == 1
 
     assert by_kid["K3003"]["release_layer_covered"] is False
     assert "K3003" in missing_general_ids
+
+    assert by_kid["K3004"]["audiences_covered"] == ["research"]
+    assert "K3004" in missing_general_ids
+
+
+def test_general_rewrite_marker_supports_both_correction_metadata_names() -> None:
+    mod = _load_module()
+
+    for key in ("audience_correction", "audience_backfill"):
+        assert mod._article_requires_general_rewrite(
+            {"details": {key: {"requires_general_rewrite": True}}}
+        )
+        assert not mod._article_requires_general_rewrite(
+            {"details": {key: {"requires_general_rewrite": False}}}
+        )
+
+    assert not mod._article_requires_general_rewrite(
+        {"details": {"audience_correction": {"reason": "metadata only"}}}
+    )
+
+    scoped = {
+        "details": {
+            "audience_correction": {
+                "requires_general_rewrite": True,
+                "uncovered_experiment_refs": ["K3001"],
+            }
+        }
+    }
+    assert mod._article_requires_general_rewrite(scoped, k_id="K3001")
+    assert not mod._article_requires_general_rewrite(scoped, k_id="K3002")
 
 
 def test_preference_bonus_reads_qualified_conclusions(tmp_path: Path, monkeypatch) -> None:

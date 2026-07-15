@@ -607,30 +607,34 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     # incident (release_pool's second sync_article call left Supabase status
     # at 'draft' while local feed was 'published') showed _post can succeed
     # at the HTTP layer while the row state diverges. Read the row back and
-    # if `status` / `published_at` mismatch the row we sent, force an
+    # if `status` / `published_at` / `audience` mismatch the row we sent, force an
     # explicit PATCH via _patch_where as recovery.
     if ok and row["slug"]:
         try:
             actual = _select_rows(
                 "articles",
-                select="slug,status,published_at",
+                select="slug,status,published_at,audience",
                 slug=row["slug"],
             )
             if actual:
                 got = actual[0]
                 want_status = row["status"]
                 want_pub = row.get("published_at")
+                want_audience = row["audience"]
                 status_diverged = got.get("status") != want_status
                 pub_diverged = (
                     want_pub is not None and got.get("published_at") != want_pub
                 )
-                if status_diverged or pub_diverged:
+                audience_diverged = got.get("audience") != want_audience
+                if status_diverged or pub_diverged or audience_diverged:
                     print(
                         f"  [supabase_sync] read-back diverged for {row['slug']}: "
                         f"got status={got.get('status')!r} published_at={got.get('published_at')!r} "
-                        f"want status={want_status!r} published_at={want_pub!r} -- patching"
+                        f"audience={got.get('audience')!r} "
+                        f"want status={want_status!r} published_at={want_pub!r} "
+                        f"audience={want_audience!r} -- patching"
                     )
-                    fix = {"status": want_status}
+                    fix = {"status": want_status, "audience": want_audience}
                     if want_pub is not None:
                         fix["published_at"] = want_pub
                     patched = _patch_where("articles", {"slug": row["slug"]}, fix)

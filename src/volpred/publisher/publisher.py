@@ -643,6 +643,53 @@ _ACADEMIC_KEYWORDS: list[tuple[re.Pattern, str]] = [
 _ACADEMIC_KEYWORD_THRESHOLD = 2  # ≥2 matches → infer research
 
 
+_MARKDOWN_IMAGE_URL_RE = re.compile(r'!\[([^\]]*)\]\([^)]+\)')
+_DAILY_AUDIENCE_CONTENT_TYPES = frozenset({'daily', 'daily_update', 'daily-update'})
+_DAILY_AUDIENCE_TAGS = frozenset({'每日建議', 'daily-update'})
+
+
+def _is_daily_audience_signal(
+    tags: list[str] | None,
+    content_type: str | None = None,
+) -> bool:
+    """Return whether canonical metadata type-locks an article as daily."""
+    normalized_type = str(content_type or '').strip()
+    return (
+        normalized_type in _DAILY_AUDIENCE_CONTENT_TYPES
+        or bool(_DAILY_AUDIENCE_TAGS.intersection(tags or []))
+    )
+
+
+def _academic_keyword_hits(
+    title: str,
+    content: str,
+    tags: list[str] | None,
+) -> list[str]:
+    """Return the distinct audience-inference signals in publisher order.
+
+    This helper is deliberately shared with the feed invariant checker.  The
+    old checker copied ``_ACADEMIC_KEYWORDS`` and then drifted from the actual
+    publisher in two important ways: it ignored tags and counted K-ids in image
+    URLs.  Keeping the normalization here makes the publish-time decision and
+    the historical audit the same decision.
+    """
+    # Image filenames often carry experiment ids / metric names (for example
+    # ``k1685_qlike.png``).  They are provenance, not reader-visible prose.
+    content_no_img_urls = _MARKDOWN_IMAGE_URL_RE.sub(r'![\1]()', content or '')
+    combined = ' '.join(
+        filter(None, [title or '', content_no_img_urls, ' '.join(tags or [])])
+    )
+    hits: list[str] = []
+    seen: set[str] = set()
+    for pattern, label in _ACADEMIC_KEYWORDS:
+        if label in seen:
+            continue
+        if pattern.search(combined):
+            hits.append(label)
+            seen.add(label)
+    return hits
+
+
 def _load_publish_draft_image_helpers():
     """Load canonical image normalization helpers from publish_draft.py."""
     import sys
@@ -767,9 +814,10 @@ def _infer_audience(
     1. content_type == 'member_qa'  → 'member_qa' (always preserve)
     2. content_type == 'event_article' → 'event' (always preserve)
     3. content_type == 'daily_digest' → 'general' (curated reader-facing column)
-    3. Title contains K\\d+ regex match → 'research'
-    4. title + content + tags combined contain ≥2 academic keywords → 'research'
-    5. Default → 'general'
+    4. daily content type / tag → 'daily' (retail daily bulletin)
+    5. Title contains K\\d+ regex match → 'research'
+    6. title + content + tags combined contain ≥2 academic keywords → 'research'
+    7. Default → 'general'
 
     Academic keyword list: K\\d+, p-value, t-stat, QLIKE, Sharpe, Bonferroni,
     bootstrap, MLE, cointegration, GARCH-X, Harvey, Diebold-Mariano, DM test,
@@ -782,33 +830,16 @@ def _infer_audience(
         return 'event'
     if content_type == 'daily_digest':
         return 'general'
+    if _is_daily_audience_signal(tags, content_type):
+        return 'daily'
 
-    # Rule 3: K-id in title → research
+    # Rule 5: K-id in title → research
     if re.search(r'K\d+', title or ''):
         return 'research'
 
-    # Rule 4: count academic keywords across title + content + tags.
-    # Strip image markdown URLs before checking: `![alt](url)` → `![alt]()`.
-    # Image filenames often contain K-ids (e.g. k1024_qlike.png) but are not
-    # editorial content — counting them as academic jargon would incorrectly
-    # upcast legitimate general articles that embed experiment charts.
-    _img_url_strip = re.compile(r'!\[([^\]]*)\]\([^)]+\)')
-    content_no_img_urls = _img_url_strip.sub(r'![\1]()', content or '')
-    combined = ' '.join(filter(None, [title or '', content_no_img_urls, ' '.join(tags or [])]))
-    hit_count = 0
-    hit_labels: list[str] = []
-    seen: set[str] = set()
-    for pattern, label in _ACADEMIC_KEYWORDS:
-        if label in seen:
-            continue
-        if pattern.search(combined):
-            hit_count += 1
-            hit_labels.append(label)
-            seen.add(label)
-        if hit_count >= _ACADEMIC_KEYWORD_THRESHOLD:
-            break
-
-    if hit_count >= _ACADEMIC_KEYWORD_THRESHOLD:
+    # Rule 6: count academic keywords across title + content + tags using the
+    # same normalizer consumed by the historical feed validator.
+    if len(_academic_keyword_hits(title, content, tags)) >= _ACADEMIC_KEYWORD_THRESHOLD:
         return 'research'
 
     return 'general'
@@ -1974,6 +2005,9 @@ class Publisher:
         # EXCEPT for type-locked audiences (daily / member_qa / event) which are
         # always preserved (like member_qa/event_article in _infer_audience itself).
         tag_list = tags or []
+        explicit_content_type = str(
+            (details or {}).get('content_type') or category or ''
+        ).strip()
         # 2026-05-27 fix (mile_a91f19be incident): daily preservation.
         # Caller-supplied audience='daily' OR tag-detected '每日建議' / 'daily-update'
         # must skip the academic-keyword inference. daily_update.py boilerplate
@@ -1981,8 +2015,7 @@ class Publisher:
         # but these articles target retail readers, not researchers.
         is_daily_signal = (
             audience == 'daily'
-            or '每日建議' in tag_list
-            or 'daily-update' in tag_list
+            or _is_daily_audience_signal(tag_list, explicit_content_type)
         )
         # 2026-06-11 fix (mile_9b76989e incident): member 回答文必含學術詞 →
         # _infer_audience 會強制改 research → badge 變「研究」、不進會員提問 tab。
@@ -1992,7 +2025,6 @@ class Publisher:
         # member_qa 的 proxy 會把帶署名的一般讀者文錯分成會員提問。改以「顯式
         # member_qa（audience/category）」判斷；僅保留 proposer-only(無 audience)
         # 的 legacy member_qa 呼叫相容性。
-        explicit_content_type = str((details or {}).get('content_type') or category or '').strip()
         if explicit_content_type == 'daily_digest':
             audience = audience or 'general'
             category = category or 'general'

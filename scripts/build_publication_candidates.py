@@ -259,14 +259,15 @@ def _load_next_tasks() -> list[dict]:
     return data if isinstance(data, list) else []
 
 
-def _succeeded_article_task_coverage(tasks: list[dict]) -> dict[str, list[dict]]:
-    """K-family -> synthetic coverage rows from completed article tasks.
+def _succeeded_article_task_attempts(tasks: list[dict]) -> dict[str, list[dict]]:
+    """K-family -> release-attempt receipts from completed article tasks.
 
     2026-07-06 C8 follow-up: publication_candidates could keep treating a K as
     uncovered/missing-general even after the article task had succeeded, when
     feed metadata lagged or the article was later reclassified. The task receipt
-    is not a content source, but it is a release-layer coverage signal that must
-    stop refill treadmill loops.
+    is not a content source. Keep it as an audit/release-attempt signal that may
+    suppress the fully-uncovered queue, but never mix it into ``covered_by`` or
+    ``audiences_covered``: only canonical feed rows can prove audience coverage.
     """
     coverage: dict[str, list[dict]] = {}
     for task in tasks:
@@ -312,6 +313,41 @@ def _feed_experiment_ref_families(feed: list[dict]) -> set[str]:
             if ref_s:
                 families.add(_k_id_family(ref_s))
     return families
+
+
+def _article_requires_general_rewrite(
+    article: dict,
+    *,
+    k_id: str | None = None,
+) -> bool:
+    """Whether an audience correction explicitly requires a new general draft.
+
+    Historical correction writers have used both ``details.audience_correction``
+    and ``details.audience_backfill``. Only the explicit boolean marker is
+    actionable; the mere presence of correction metadata must not reopen old
+    article tasks.
+    """
+    details = article.get("details") or {}
+    if not isinstance(details, dict):
+        return False
+    for key in ("audience_correction", "audience_backfill"):
+        marker = details.get(key)
+        if not (
+            isinstance(marker, dict)
+            and marker.get("requires_general_rewrite") is True
+        ):
+            continue
+        if k_id is None or "uncovered_experiment_refs" not in marker:
+            return True
+        refs = marker.get("uncovered_experiment_refs")
+        if not isinstance(refs, list):
+            continue
+        target_family = _k_id_family(k_id)
+        if target_family in {
+            _k_id_family(str(ref)) for ref in refs if str(ref).strip()
+        }:
+            return True
+    return False
 
 
 def _extract_overturned_map(knowledge: list) -> dict[str, list[str]]:
@@ -398,8 +434,10 @@ def main():
     knowledge = json.loads(KNOWLEDGE_PATH.read_text())
     feed = json.loads(FEED_PATH.read_text())
     next_tasks = _load_next_tasks()
-    task_coverage_by_family = _succeeded_article_task_coverage(next_tasks)
-    release_layer_covered_families = _feed_experiment_ref_families(feed) | set(task_coverage_by_family)
+    release_attempts_by_family = _succeeded_article_task_attempts(next_tasks)
+    release_layer_covered_families = (
+        _feed_experiment_ref_families(feed) | set(release_attempts_by_family)
+    )
     overturned_map = _extract_overturned_map(knowledge)
     reader_signal_map = _load_reader_signal_map()
     pref_high_tags, pref_research_higher = _load_preference_signals()
@@ -445,15 +483,32 @@ def main():
             })
             continue
         covering_articles = []
+        audience_correction_gap = False
         for article in feed:
+            # Content/audience coverage must come from a row that still belongs
+            # to the release layer.  Three K1365 general drafts were explicitly
+            # unpublished, yet the old loop counted them and hid the real
+            # missing-general gap after an audience correction.
+            if str(article.get("status") or "").lower() in {"unpublished", "retracted"}:
+                continue
             if k_covered_by_article(k_id, article):
+                requires_general_rewrite = _article_requires_general_rewrite(
+                    article,
+                    k_id=k_id,
+                )
+                audience_correction_gap = (
+                    audience_correction_gap or requires_general_rewrite
+                )
                 covering_articles.append({
                     "id": article.get("id"),
                     "title": article.get("title", ""),
                     "status": article.get("status"),
                     "audience": article.get("audience"),
+                    "requires_general_rewrite": requires_general_rewrite,
                 })
-        covering_articles.extend(task_coverage_by_family.get(_k_id_family(k_id), []))
+        release_attempted_by = list(
+            release_attempts_by_family.get(_k_id_family(k_id), [])
+        )
         score, reasons = score_priority(entry)
         cluster = classify_topic_cluster(
             entry.get("title", ""),
@@ -511,6 +566,8 @@ def main():
             "verdict_preview": entry.get("content", "")[:300],
             "covered_by": covering_articles,
             "uncovered": len(covering_articles) == 0,
+            "release_attempted_by": release_attempted_by,
+            "audience_correction_gap": audience_correction_gap,
             "topic_cluster": cluster,
             "topic_cluster_30d": {
                 "count": cluster_gate["count"],
@@ -633,7 +690,6 @@ def main():
         if c["covered_by"]
         and "general" not in c["audiences_covered"]
         and c["score"] >= 4
-        and not c["release_layer_covered"]
         and not c["topic_family_collisions"]["general"]  # exclude topic-family clashes
         and not c["overturned_by"]  # 2026-06-06: skip explicitly-overturned K's
         and not _self_overturned(c)
@@ -656,6 +712,8 @@ def main():
             "missing_target_audience": target_audience,
             "coverage_status": "covered_for_other_audiences",
             "already_covered_for": candidate["audiences_covered"],
+            "release_attempted_by": candidate.get("release_attempted_by", []),
+            "audience_correction_gap": bool(candidate.get("audience_correction_gap")),
         }
 
     candidates_with_reader_signal = sum(1 for c in candidates if c.get("reader_signal"))
@@ -667,9 +725,9 @@ def main():
         "notes": {
             "missing_general_top5": (
                 "Covered by at least one published article, but still missing "
-                "a general-audience article; excludes K's already covered at "
-                "the release layer by structured feed experiment_refs or a "
-                "succeeded daily_article task."
+                "a general-audience article. Audience coverage comes only from "
+                "canonical feed rows; succeeded task receipts are audit metadata, "
+                "not proof that the requested audience was delivered."
             ),
             "missing_research_top5": (
                 "Covered by at least one published article, but still missing "
@@ -696,8 +754,13 @@ def main():
                 "True when storage/reports/feed.json carries structured "
                 "details.experiment_refs for the K-family, or storage/next_tasks.json "
                 "has a succeeded *_article_general/research daily_article task. "
-                "These K's are excluded from top_10_uncovered and missing_general_top5 "
-                "to avoid refill treadmill loops."
+                "This suppresses only the fully-uncovered queue; it does not erase "
+                "an audience gap established by canonical feed metadata."
+            ),
+            "release_attempted_by": (
+                "Succeeded daily_article task receipts retained separately from "
+                "covered_by/audiences_covered so operational history cannot fabricate "
+                "content or audience coverage."
             ),
         },
         "publication_blocked": publication_blocked,

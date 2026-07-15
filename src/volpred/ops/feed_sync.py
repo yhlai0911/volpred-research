@@ -46,6 +46,7 @@ if str(_SCRIPTS_DIR) not in sys.path:
 
 from supabase_sync import (  # noqa: E402
     _select_rows,
+    classify_audience,
     reconcile_article_deletes,
     sync_article,
 )
@@ -125,10 +126,14 @@ def _fetch_supabase_articles() -> dict[str, dict]:
     the `details` jsonb (notably `experiment_refs` after the K-id retroactive
     migration). tags live in a separate join table — fetched by
     _fetch_supabase_article_tags().
+
+    2026-07-15: added `audience`. Audience is reader-facing routing metadata,
+    and a local audience correction must propagate even when title, status,
+    timestamps, body, tags, and experiment refs are otherwise unchanged.
     """
     rows = _select_rows(
         "articles",
-        select="slug,status,title,published_at,updated_at,content,details",
+        select="slug,status,title,published_at,updated_at,content,details,audience",
         order_by="id",
     )
     return {r["slug"]: r for r in rows if r.get("slug")}
@@ -181,7 +186,7 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
     Returns dict with:
       - insert: slugs in feed but not DB
       - update: slugs in both but differ on
-        (status/title/published_at/content/tags/experiment_refs)
+        (status/title/published_at/content/tags/experiment_refs/audience)
       - delete: slugs in DB but not feed
       - feed_count, db_count
     """
@@ -226,9 +231,18 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
         db_refs = _experiment_refs(d.get("details"))
         refs_changed = feed_refs != db_refs
 
+        # Compare the exact projection sync_article() writes, rather than the
+        # raw optional field. Seventy-five legacy published feed entries omit
+        # top-level audience and are classified during sync; comparing raw
+        # None to that derived remote value would enqueue them forever.
+        feed_audience = classify_audience(f)
+        db_audience = str(d.get("audience") or "")
+        audience_changed = feed_audience != db_audience
+
         if (
             (f.get("title") or "") != (d.get("title") or "")
             or (f.get("status") or "") != (d.get("status") or "")
+            or audience_changed
             or _norm_ts(f.get("published_at")) != _norm_ts(d.get("published_at"))
             or content_changed
             or tags_changed

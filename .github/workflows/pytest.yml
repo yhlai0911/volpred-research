@@ -101,6 +101,11 @@ jobs:
       - name: Stamp a sentinel before the suite runs
         # Kept outside the checkout so the sentinel itself never dirties the tree.
         run: touch "$RUNNER_TEMP/pre-suite"
+      - name: Validate feed audience consistency
+        # Replay the same inference used by Publisher against the canonical
+        # feed.  This is a corpus invariant, not just a unit test: a new
+        # hand-written/general row must not silently bypass the publish gate.
+        run: uv run python scripts/validate_feed_audience.py
       - name: Run test suite
         # testpaths = ["tests", "scripts/tests"] (pyproject.toml). No credentials
         # are provided on purpose: a reintroduced import-time raise must fail here,

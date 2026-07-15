@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "task_id": "content_audience_mislabel_backlog_45",
+  "reviewed_at": "2026-07-15T13:30:00+08:00",
+  "review_basis": "Replay canonical publisher._infer_audience over the full visible feed, then human-review reader fit. The original 45-item validator list contained type-lock/image-URL false positives and missed title/tag mismatches.",
+  "disposition_notes": {
+    "research_only": "Technical method, correction, or audit is the article's core; keep it as research without creating a second general version.",
+    "rewrite_general": "Topic remains useful to non-technical readers, but the corrected source stays research while a new evidence-equivalent plain-language companion is queued.",
+    "type_correction": "Publisher content-type lock requires member_qa/event metadata rather than research."
+  },
+  "corrections": [
+    {"id": "mile_c1ce6550", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K1586"]},
+    {"id": "mile_c16d94b7", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K1365"]},
+    {"id": "mile_9839822d", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K1575"]},
+    {"id": "mile_190c7e3c", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K566"]},
+    {"id": "mile_81df26b0", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K1314"]},
+    {"id": "mile_1bff1fe5", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K935"]},
+    {"id": "mile_328ced24", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K824"]},
+    {"id": "mile_95ae93fa", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K930"]},
+    {"id": "mile_b97c5c33", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K1038"]},
+    {"id": "mile_67b3714d", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K698"]},
+    {"id": "mile_1b511caa", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K1332", "K1499"]},
+    {"id": "mile_b70e8480", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K538"]},
+    {"id": "mile_c11a2ced", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K1095"]},
+    {"id": "mile_483425f2", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K536"]},
+    {"id": "mile_40c66bef", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K905"]},
+    {"id": "mile_e4002f4f", "expected_audience": "member_qa", "disposition": "type_correction", "experiment_refs": ["K1466"]},
+    {"id": "mile_2fb1dfb3", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K740"]},
+    {"id": "mile_c26fcd8e", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K189"]},
+    {"id": "mile_4e5a221e", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K1096"]},
+    {"id": "mile_166eda01", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K1442"]},
+    {"id": "mile_c07025d2", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K1427"]},
+    {"id": "mile_8d8b8877", "expected_audience": "event", "disposition": "type_correction", "experiment_refs": ["K129", "K207", "K182"]},
+    {"id": "mile_858690fd", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K1157"]},
+    {"id": "mile_e5f33cfa", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K1317"]},
+    {"id": "mile_c2020d8c", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K1410"]},
+    {"id": "mile_94a0a999", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K1010"]},
+    {"id": "mile_2cfa32a4", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": ["K942", "K943"]},
+    {"id": "mile_f572cc94", "expected_audience": "research", "disposition": "research_only", "experiment_refs": ["K184"]},
+    {"id": "mile_92ec8a9f", "expected_audience": "research", "disposition": "rewrite_general", "experiment_refs": []}
+  ]
+}

@@ -662,6 +662,102 @@ def test_refill_skips_general_retry_v2_when_feed_already_has_k_coverage(tmp_path
     assert [t["id"] for t in data] == ["K676_article_general"]
 
 
+def test_refill_allows_targeted_general_correction_rewrite(tmp_path, monkeypatch):
+    """An explicit correction gap waives only the three blind-retry belts.
+
+    This fixture simultaneously exercises an earlier succeeded general task,
+    an existing retry suffix, feed coverage, and research saturation. The same
+    shape without ``audience_correction_gap`` remains blocked by the regression
+    test above and the saturation test below.
+    """
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    candidates = tmp_path / "storage" / "publication_candidates.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "K676_article_general",
+                    "status": "succeeded",
+                    "task_type": "daily_article",
+                    "k_id": "K676",
+                    "completed_at": "2026-07-14T07:13:00+00:00",
+                }
+            ],
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    correction_candidate = {
+        "k_id": "K676",
+        "title": "K676 tax optimization correction rewrite",
+        "score": 4,
+        "reasons": ["PASS", "audience correction"],
+        "verdict_preview": "Prior general article was reclassified as research.",
+        "audience_correction_gap": True,
+        "audiences_covered": ["research"],
+        "covered_by": [
+            {
+                "id": "research_a",
+                "title": "a",
+                "status": "published",
+                "audience": "research",
+            },
+            {
+                "id": "research_b",
+                "title": "b",
+                "status": "archived",
+                "audience": "research",
+            },
+        ],
+        "topic_family_collisions": {"general": [], "research": []},
+    }
+    candidates.write_text(
+        json.dumps(
+            {
+                "top_10_uncovered": [],
+                "missing_research_top5": [],
+                "missing_general_top5": [correction_candidate],
+                "candidates": [correction_candidate],
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(
+        MODULE,
+        "_ensure_candidates_fresh",
+        lambda: {"rebuilt": False, "reason": "test"},
+    )
+    monkeypatch.setattr(MODULE, "_kids_with_audience_article", lambda audience: set())
+    monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: {"K676"})
+    monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+    monkeypatch.setattr(MODULE, "_is_arc_duplicate_candidate", lambda cand: False)
+    monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
+    monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
+
+    result = MODULE.refill(target=3, dry_run=False)
+
+    assert result["ok"] is True
+    assert result["added_ids"] == ["K676_article_general_v2"]
+    data = json.loads(next_tasks.read_text(encoding="utf-8"))
+    task = next(t for t in data if t["id"] == "K676_article_general_v2")
+    assert task["source"] == "auto_audience_correction_rewrite"
+    assert task["audience_correction_rewrite"] is True
+    assert "audience-correction-rewrite" in task["tags"]
+    assert "audience-correction replacement" in task["description"]
+    assert "blind duplicate retry" in task["description"]
+
+    assert not MODULE._is_general_correction_rewrite(
+        {"audience_correction_gap": True, "audiences_covered": ["general"]}
+    )
+
+
 def test_refill_fallback_audience_gap_requires_score_threshold(tmp_path, monkeypatch):
     """Regression: 2026-06-08 low-signal audience-gap leakage.
 

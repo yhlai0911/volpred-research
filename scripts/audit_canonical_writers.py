@@ -62,6 +62,12 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "scripts/append_work_log.py:append_entries": {
         "mkdir": 1, "open-write": 1, "os.replace": 1, "unlink": 1,
     },
+    "scripts/backfill_feed_audience.py:_atomic_write_feed": {
+        "os.replace": 1, "write_text": 1,
+    },
+    "scripts/backfill_feed_audience.py:reconcile_rewrite_tasks": {
+        "mkdir": 1, "open-write": 1, "write_text": 1,
+    },
     "scripts/backfill_arc_dedup_metadata.py:_write_json_atomic": {
         "os.replace": 1, "unlink": 1, "write_text": 1,
     },
@@ -138,6 +144,9 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "src/volpred/ops/content.py:_materialize_release_audit_fix_task": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
     },
+    "src/volpred/ops/content.py:_write_feed_locked": {
+        "mkdir": 1, "replace": 1, "unlink": 1, "write_text": 1,
+    },
     "src/volpred/ops/event_jobs.py:_event_ledger_root": {"mkdir": 1},
     "src/volpred/ops/event_jobs.py:_ensure_next_task": {"mkdir": 1, "open-write": 1},
     "src/volpred/ops/event_jobs.py:_expire_next_tasks": {"open-write": 1},
@@ -182,6 +191,10 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
 # turns every unrelated write in a broad ``main()`` into canonical state.
 GENERIC_OWNER_TARGETS: Mapping[str, frozenset[str]] = {
     "scripts/append_work_log.py:append_entries": frozenset({"path", "lock_path"}),
+    "scripts/backfill_feed_audience.py:_atomic_write_feed": frozenset({"path", "tmp"}),
+    "scripts/backfill_feed_audience.py:reconcile_rewrite_tasks": frozenset(
+        {"tasks_path"}
+    ),
     "scripts/backfill_arc_dedup_metadata.py:_write_json_atomic": frozenset({"path"}),
     "scripts/check_alerts.py:_append_next_task_locked": frozenset({"next_tasks_path"}),
     "scripts/check_alerts.py:_ci_close_pending_repair_tasks": frozenset(

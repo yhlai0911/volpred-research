@@ -1,149 +1,151 @@
 #!/usr/bin/env python3
-"""CI invariant: validate feed.json audience consistency.
+"""Fail-closed invariant for feed audience metadata.
 
-Scans storage/reports/feed.json for entries where audience='general' but
-title/content contains ≥2 academic keywords. These are mis-tagged entries
-that should be 'research' but slipped through as 'general'.
+For every visible entry declared ``audience='general'``, replay the canonical
+publisher inference with the stored title, body, tags, and content type.  The
+validator intentionally imports the publisher implementation instead of
+copying its keyword table: type locks (daily bulletin / daily digest / member QA /
+event), image URL normalization, title rules, and tags must make the same
+decision at publish time and in CI.
 
 Exit codes:
-  0 — PASS (no violations found)
-  1 — FAIL (violations found, list printed to stdout)
-
-Invocation examples:
-  # Ad-hoc check:
-  uv run python scripts/validate_feed_audience.py
-
-  # From hourly cron (suggested addition to audit_publish_sync):
-  uv run python scripts/validate_feed_audience.py || echo "FEED AUDIENCE VIOLATIONS DETECTED"
-
-  # From CI:
-  uv run python scripts/validate_feed_audience.py
-  # exit 1 if violations present
+  0 -- feed is readable and no declared-general entry disagrees with publisher
+  1 -- metadata mismatch or feed read/shape error
 """
 from __future__ import annotations
 
 import json
-import re
 import sys
 from pathlib import Path
+from typing import Any
 
-# Duplicate of publisher._ACADEMIC_KEYWORDS to avoid import side effects.
-# Keep in sync with src/volpred/publisher/publisher.py _ACADEMIC_KEYWORDS.
-_ACADEMIC_PATTERNS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r'K\d+', re.IGNORECASE), 'K-id'),
-    (re.compile(r'\bp[\s-]?value\b', re.IGNORECASE), 'p-value'),
-    (re.compile(r'\bt[-\s]?stat\b', re.IGNORECASE), 't-stat'),
-    (re.compile(r'\bQlike\b', re.IGNORECASE), 'QLIKE'),
-    (re.compile(r'\bSharpe\b', re.IGNORECASE), 'Sharpe'),
-    (re.compile(r'\bBonferroni\b', re.IGNORECASE), 'Bonferroni'),
-    (re.compile(r'\bbootstrap\b', re.IGNORECASE), 'bootstrap'),
-    (re.compile(r'\bMLE\b'), 'MLE'),
-    (re.compile(r'\bcointegration\b', re.IGNORECASE), 'cointegration'),
-    (re.compile(r'\bGARCH[-\s]?X\b', re.IGNORECASE), 'GARCH-X'),
-    (re.compile(r'\bHarvey\b'), 'Harvey'),
-    (re.compile(r'\bDiebold[-\s]?Mariano\b', re.IGNORECASE), 'Diebold-Mariano'),
-    (re.compile(r'\bDM\s+test\b', re.IGNORECASE), 'DM test'),
-    (re.compile(r'\bHAR[-\s]?RV\b', re.IGNORECASE), 'HAR-RV'),
-    (re.compile(r'\bGJR[-\s]?GARCH\b', re.IGNORECASE), 'GJR-GARCH'),
-    (re.compile(r'\bEGARCH\b', re.IGNORECASE), 'EGARCH'),
-    (re.compile(r'\bGARCH\b', re.IGNORECASE), 'GARCH'),
-    (re.compile(r'\bMCS\b'), 'MCS'),
-    (re.compile(r'\bVaR\b'), 'VaR'),
-]
-_THRESHOLD = 2
+from volpred.publisher.publisher import _academic_keyword_hits, _infer_audience
 
 
-def count_academic_hits(text: str) -> tuple[int, list[str]]:
-    """Count distinct academic keyword hits in text. Returns (count, labels)."""
-    hits: list[str] = []
-    seen: set[str] = set()
-    for pattern, label in _ACADEMIC_PATTERNS:
-        if label in seen:
-            continue
-        if pattern.search(text):
-            hits.append(label)
-            seen.add(label)
-    return len(hits), hits
+_NON_VISIBLE_STATUSES = frozenset({"unpublished", "archived", "retracted"})
 
 
-def check_entry(entry: dict) -> tuple[bool, list[str]]:
-    """Return (is_violation, hit_labels) for a single feed entry.
+def _stored_content_type(entry: dict[str, Any]) -> str | None:
+    """Mirror ``Publisher.publish_milestone`` content-type resolution."""
+    details = entry.get("details")
+    details_type = details.get("content_type") if isinstance(details, dict) else None
+    value = details_type or entry.get("content_type") or entry.get("category")
+    normalized = str(value or "").strip()
+    return normalized or None
 
-    Violation = audience=='general' AND ≥2 academic keywords in combined
-    title + content + description text.
+
+def infer_entry_audience(entry: dict[str, Any]) -> str:
+    """Replay publisher audience inference for a stored feed row."""
+    content = entry.get("content") or entry.get("description") or ""
+    tags = entry.get("tags")
+    if not isinstance(tags, list):
+        tags = []
+    return _infer_audience(
+        str(entry.get("title") or ""),
+        str(content),
+        [str(tag) for tag in tags if tag is not None],
+        content_type=_stored_content_type(entry),
+    )
+
+
+def check_entry(entry: dict[str, Any]) -> tuple[bool, list[str]]:
+    """Return ``(is_mismatch, academic_signals)`` for one stored feed row.
+
+    This invariant is scoped to rows declared ``general`` because inference is
+    an upcast/type-lock gate, not a downcast engine for explicitly research
+    content.  A type-locked general row whose publisher result is ``member_qa``
+    or ``event`` is also a mismatch and must be corrected to that type.
     """
-    if entry.get('audience') != 'general':
+    if entry.get("audience") != "general":
         return False, []
-    if entry.get('status') in ('unpublished', 'archived', 'retracted'):
-        return False, []  # skip non-visible entries
+    if str(entry.get("status") or "").lower() in _NON_VISIBLE_STATUSES:
+        return False, []
 
-    combined = ' '.join(filter(None, [
-        entry.get('title', ''),
-        entry.get('content', ''),
-        entry.get('description', ''),
-    ]))
-    count, labels = count_academic_hits(combined)
-    if count >= _THRESHOLD:
-        return True, labels
-    return False, []
+    inferred = infer_entry_audience(entry)
+    if inferred == "general":
+        return False, []
+
+    content = entry.get("content") or entry.get("description") or ""
+    tags = entry.get("tags")
+    if not isinstance(tags, list):
+        tags = []
+    labels = _academic_keyword_hits(
+        str(entry.get("title") or ""),
+        str(content),
+        [str(tag) for tag in tags if tag is not None],
+    )
+    return True, labels
 
 
 def main(feed_path: str | None = None) -> int:
-    """Scan feed.json and report violations. Returns exit code."""
+    """Scan a feed and return a process-style status code."""
     if feed_path is None:
-        # Default: project root / storage/reports/feed.json
         project_root = Path(__file__).resolve().parent.parent
-        feed_path = str(project_root / 'storage' / 'reports' / 'feed.json')
+        feed_path = str(project_root / "storage" / "reports" / "feed.json")
 
     path = Path(feed_path)
     if not path.exists():
-        print(f"[validate_feed_audience] feed.json not found at {path}")
-        print("PASS (no feed to validate)")
-        return 0
+        print(f"[validate_feed_audience] ERROR -- feed.json not found at {path}")
+        return 1
 
     try:
-        with open(path) as f:
-            feed = json.load(f)
-    except Exception as e:
-        print(f"[validate_feed_audience] ERROR reading feed.json: {e}")
-        return 1
-
-    violations: list[dict] = []
-    for entry in feed:
-        is_violation, labels = check_entry(entry)
-        if is_violation:
-            violations.append({
-                'id': entry.get('id', '?'),
-                'title': entry.get('title', '')[:80],
-                'audience': entry.get('audience'),
-                'status': entry.get('status'),
-                'academic_keywords': labels,
-            })
-
-    if violations:
-        print(f"[validate_feed_audience] FAIL — {len(violations)} violation(s) found:")
-        print()
-        for v in violations:
-            print(f"  id={v['id']}")
-            print(f"    title   : {v['title']}")
-            print(f"    audience: {v['audience']}  (should be 'research')")
-            print(f"    status  : {v['status']}")
-            print(f"    keywords: {v['academic_keywords']}")
-            print()
-        print(f"Total violations: {len(violations)}")
-        print("These entries have audience='general' but contain ≥2 academic keywords.")
-        print("Fix: re-publish with audience='research', or backfill via patch script.")
-        return 1
-    else:
-        total = len(feed)
-        general_count = sum(1 for e in feed if e.get('audience') == 'general')
+        feed = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
         print(
-            f"[validate_feed_audience] PASS — {total} total entries, "
-            f"{general_count} general, 0 violations."
+            "[validate_feed_audience] ERROR reading feed.json: "
+            f"{type(exc).__name__}: {exc}"
         )
-        return 0
+        return 1
+    if not isinstance(feed, list):
+        print(
+            "[validate_feed_audience] ERROR -- feed.json top level must be a list, "
+            f"got {type(feed).__name__}"
+        )
+        return 1
+
+    mismatches: list[dict[str, Any]] = []
+    for entry in feed:
+        if not isinstance(entry, dict):
+            print("[validate_feed_audience] ERROR -- feed contains a non-object row")
+            return 1
+        is_mismatch, labels = check_entry(entry)
+        if is_mismatch:
+            mismatches.append(
+                {
+                    "id": entry.get("id", "?"),
+                    "title": str(entry.get("title") or "")[:80],
+                    "declared_audience": entry.get("audience"),
+                    "inferred_audience": infer_entry_audience(entry),
+                    "status": entry.get("status"),
+                    "academic_signals": labels,
+                }
+            )
+
+    if mismatches:
+        print(
+            f"[validate_feed_audience] FAIL -- {len(mismatches)} "
+            "publisher-inference mismatch(es) found:\n"
+        )
+        for mismatch in mismatches:
+            print(f"  id={mismatch['id']}")
+            print(f"    title   : {mismatch['title']}")
+            print(
+                "    audience: "
+                f"{mismatch['declared_audience']} -> {mismatch['inferred_audience']}"
+            )
+            print(f"    status  : {mismatch['status']}")
+            print(f"    signals : {mismatch['academic_signals']}\n")
+        print(f"Total mismatches: {len(mismatches)}")
+        print("Fix through the guarded audience-correction workflow; do not hand-edit feed.json.")
+        return 1
+
+    general_count = sum(1 for entry in feed if entry.get("audience") == "general")
+    print(
+        f"[validate_feed_audience] PASS -- {len(feed)} total entries, "
+        f"{general_count} declared general, 0 mismatches."
+    )
+    return 0
 
 
-if __name__ == '__main__':
-    feed_arg = sys.argv[1] if len(sys.argv) > 1 else None
-    sys.exit(main(feed_arg))
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else None))

@@ -179,5 +179,58 @@ def test_select_rows_single_short_page(monkeypatch):
     assert len(urls) == 1  # short first page stops immediately
 
 
+def test_sync_article_readback_repairs_audience_only_drift(monkeypatch):
+    """HTTP-successful upsert is not enough: verify reader routing metadata."""
+    selected: list[tuple[str, str]] = []
+    patches: list[tuple[str, dict, dict]] = []
+
+    monkeypatch.setattr(supabase_sync, "_post", lambda *args, **kwargs: True)
+
+    def fake_select(table, *, select="*", order_by=None, **filters):
+        selected.append((table, select))
+        return [
+            {
+                "slug": "mile_audience_readback",
+                "status": "published",
+                "published_at": "2026-07-15T00:00:00+00:00",
+                "audience": "general",
+            }
+        ]
+
+    def fake_patch(table, filters, row):
+        patches.append((table, filters, row))
+        return True
+
+    monkeypatch.setattr(supabase_sync, "_select_rows", fake_select)
+    monkeypatch.setattr(supabase_sync, "_patch_where", fake_patch)
+
+    ok = supabase_sync.sync_article(
+        {
+            "id": "mile_audience_readback",
+            "title": "Audience correction",
+            "content": "Body",
+            "status": "published",
+            "audience": "research",
+            "published_at": "2026-07-15T00:00:00+00:00",
+        }
+    )
+
+    assert ok is True
+    assert selected == [
+        ("articles", "slug,status,published_at,audience")
+    ]
+    assert patches == [
+        (
+            "articles",
+            {"slug": "mile_audience_readback"},
+            {
+                "status": "published",
+                "audience": "research",
+                "published_at": "2026-07-15T00:00:00+00:00",
+            },
+        )
+    ]
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))
