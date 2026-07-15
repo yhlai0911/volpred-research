@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "title": "K1396 更正｜舊版小差距故事為何撤回",
+  "subtitle": "保留歷史數字，撤回超出協議能支持的模型結論",
+  "evidence": {
+    "audit": {
+      "path": "experiments/k1396/k1396_scope_audit.json",
+      "sha256": "9d1431e27918fe3221fd6231344247f66150dbd4aac5a45a6841cfd9b771b375",
+      "label": "K1396 scope correction audit"
+    },
+    "k1379": {
+      "path": "experiments/k1379/k1379_results.json",
+      "sha256": "bc430da7b03ba23a0090b246641a0a5899b712281c80dc8551befe1b844b8517",
+      "label": "K1379 certified corrected daily-r-squared result"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_scope",
+      "info": "concept",
+      "style": "editorial",
+      "title": "同樣談波動，資料物件仍要分清楚",
+      "alt": "每日收盤報酬平方與日內實現波動率的資料範圍不同",
+      "sources": [
+        "audit"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "每日收盤報酬平方",
+          "body": [
+            "一天只有一個收盤報酬，再把它平方，得到一個很吵的波動代理。",
+            "K1396 的輸入和對答案都屬於這一類。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "日內實現波動率",
+          "body": [
+            "一天切成很多時段，把每段報酬平方後加總。",
+            "K1396 沒有這類日內資料，因此不能掛標準模型名稱。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "舊檔保存的測試樣本",
+          "value": {
+            "source": "audit",
+            "path": "historical_artifact.stored_n_oos",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          },
+          "note": "原始輸入版本未留下雜湊，這是歷史稽核值"
+        }
+      ]
+    },
+    {
+      "name": "2_protocol",
+      "info": "method",
+      "style": "professional",
+      "title": "舊協議有三個不能跨過的邊界",
+      "alt": "K1396 舊協議的資料名稱模型遞迴與推論三項限制",
+      "sources": [
+        "audit"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "資料名稱",
+          "body": [
+            "daily-r² proxy 不能直接改稱 intraday realized variance。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "模型路徑",
+          "body": [
+            "舊版每天把短期狀態放回長期平均，沒有逐日延續完整遞迴。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "推論語意",
+          "body": [
+            "沒有拒絕相同表現，只代表證據不足，不能寫成已證明不劣於。",
+            "包含關係的兩個版本，也不能靠 raw-loss 比較宣稱新增指標有效。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_correction",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "修正版讓舊文章的主敘事失效",
+      "alt": "K1396 歷史比較分數與 K1379 修正版誤差差距及檢定結果",
+      "sources": [
+        "audit",
+        "k1379"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "K1396 歷史比較分數",
+          "value": {
+            "source": "audit",
+            "path": "historical_values.dm_tests.HAR_vs_A4f.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "已撤回的近似協議，只作稽核"
+        },
+        {
+          "kind": "metric",
+          "label": "修正版較新方法誤差",
+          "value": {
+            "source": "k1379",
+            "path": "qlike_means.A4f",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "修正版 daily-r² 舊式方法誤差",
+          "value": {
+            "source": "k1379",
+            "path": "qlike_means.HAR_RV",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "修正版誤差差距",
+          "value": {
+            "source": "audit",
+            "path": "superseded_by.a4f_vs_daily_r2_har.qlike_advantage_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "修正版比較分數",
+          "value": {
+            "source": "audit",
+            "path": "superseded_by.a4f_vs_daily_r2_har.dm_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "負值代表第一個方法的誤差較低"
+        },
+        {
+          "kind": "metric",
+          "label": "修正版共同有效樣本",
+          "value": {
+            "source": "k1379",
+            "path": "metadata.n_valid_oos",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": "協議同時修了多項，不能歸因於單一改動"
+        }
+      ]
+    }
+  ]
+}
