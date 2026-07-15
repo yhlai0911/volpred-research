@@ -18513,5 +18513,15 @@
     "owner": "codex-desktop",
     "commit": "c45d82c0d",
     "summary": "退役 legacy hourly-dispatch 的過時 Desktop-TCC 警報敘事。EPERM/getcwd/EINTR 分支保留症狀分類，但不再以 Claude CLI 更新、symlink mtime 或歷史 Desktop 權限推定根因；改發中性 runtime/filesystem WARN，明寫 Codex failover 接手與下輪自然重試，僅在復發時檢查 cwd、WorkingDirectory、filesystem/mount 與 system load。補回歸測試、cutover mapping 清理及治理紀錄。bash -n PASS，172 targeted tests PASS，獨立只讀審查 PASS；commit c45d82c0d。"
+  },
+  {
+    "timestamp": "2026-07-16T04:00:07+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1379_article_general_audience_rewrite_8a9ae3c8",
+    "outcome": "succeeded",
+    "actor": "codex-desktop-k1379-audience",
+    "owner": "codex-desktop-k1379-audience",
+    "commit": "43cdeb9a2",
+    "summary": "Created the true general-audience companion mile_6e81bb0a as a draft without relabeling or weakening the research source mile_8a9ae3c8. The article passed anti-AI, audience inference, sanitize_applied=0, deterministic content provenance, image URL, CJK font, and feed-audience gates. Linked the companion back to the research source so audience_correction_gap is false. A strict three-panel evidence-bound lazypack plan is validated and queued as lazypack-mile_6e81bb0a."
   }
 ]
