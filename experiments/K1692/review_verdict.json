@@ -1,0 +1,20 @@
+{
+  "kid": "K1692",
+  "verdict": "PASS",
+  "reviewer": "Codex CLI 0.144.1 / gpt-5.6-sol / effort=ultra (primary-path, 3 rounds: FAIL -> PASS-with-minors -> PASS confirm)",
+  "reviewed_at": "2026-07-15T10:21:25+08:00",
+  "reviewed_commit": "47b1815c61c4720f8e98c504bdea45065da63f7a",
+  "review_artifact": "experiments/K1692/review_codex.md",
+  "blocking_defects": [],
+  "reviewed_sha256": {
+    "K1692.py": "d12822f24fb63cec239aeb6b849ef818b0bcdb3deb558a3a0accee60cb22d351",
+    "K1692_fig1_vol_overlay.png": "bd899498b7937f5400ff2554acd6655389964ec341317cb5811a96e700186613",
+    "K1692_fig2_dy_net_spillover.png": "28c9a768364c17a8ebdf95d5743e3d770e0aefcb7aad0f8ae98725b24c7c866d",
+    "K1692_fig3_gfevd_heatmap.png": "e713240ce92ded3872827e386042a17cb3fbb54aa8402a5117dedb88ef17cb46",
+    "K1692_results.json": "733b213a578e79fea741cff1ec1740a4eb66f7d323ac39f4665bed96f489ac16",
+    "README.md": "9a29a6afd22a9dd3b87d057e9e54c9881f4f87a0542aede924cc149aa56d1f4d"
+  },
+  "post_review_edits": [
+    "main-thread hourly-11 (2026-07-15): moved the '# silent-ok:' marker inline onto the 'except Exception:' line at K1692.py L363 so the silent-fallback audit recognises it (Codex Round-4 had placed the marker on the following comment lines, which the audit checks per-line and could not see). Comment-only, output-neutral, no rerun; results.json unchanged."
+  ]
+}
