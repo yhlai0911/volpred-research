@@ -36792,13 +36792,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T19:11:20.515492+00:00",
+    "completed_at": "2026-07-15T20:31:41.265623+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T19:11:20.515492+00:00",
-      "last_clean_observed_at": "2026-07-15T19:11:20.515492+00:00"
+      "resolved_at": "2026-07-15T20:31:41.265623+00:00",
+      "last_clean_observed_at": "2026-07-15T20:31:41.265623+00:00"
     }
   },
   {
@@ -38748,7 +38748,7 @@
     "title": "Audience correction: rewrite a true general companion for 明知道 VIX 在比特幣恐慌時會失靈，為什麼把它關掉還是沒救？",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_4e5a221e. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1096']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -38763,7 +38763,25 @@
       "content-quality"
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1096"
+    "k_id": "K1096",
+    "claimed_by": "codex-desktop-k1096-audience",
+    "claimed_at": "2026-07-15T20:31:15.459904+00:00",
+    "claim_session_id": "1ffa8cdf5da5",
+    "status_history": [
+      {
+        "ts": "2026-07-15T20:31:15.459916+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1096-audience"
+      },
+      {
+        "ts": "2026-07-15T20:31:15.687606+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1096-audience"
+      }
+    ],
+    "started_at": "2026-07-15T20:31:15.687592+00:00"
   },
   {
     "id": "K1427_article_general_audience_rewrite_c07025d2",
