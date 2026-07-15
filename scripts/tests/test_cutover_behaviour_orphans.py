@@ -64,10 +64,6 @@ _BEHAVIOUR_RETIRED_BY_DESIGN: dict[str, str] = {
     # and kills the group directly — see worker._kill_pgid + procutil. There is no
     # trap-driven cleanup left to carry.
     "cleanup": "PGID-isolated kill replaces the shell exit trap (worker._kill_pgid)",
-    # Read a file's mtime in shell to decide staleness. The supervisor's
-    # equivalent lives in the stale-code alert, which compares supervisor_started_at
-    # against the package mtimes in Python — no shell helper needed.
-    "file_mtime_epoch": "stale-code detection moved into volpred.ops.alerts (Python mtime compare)",
 }
 
 

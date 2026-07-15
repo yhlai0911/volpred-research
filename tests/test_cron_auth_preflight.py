@@ -178,12 +178,11 @@ def test_auth_preflight_sends_actionable_alert_on_double_failure(tmp_path: Path)
     assert "Not logged in · Please run /login" in body_text
 
 
-def test_auth_preflight_tcc_shaped_failure_diagnoses_claude_update(tmp_path: Path) -> None:
-    # 2026-07-02 fix (c) regression: a TCC-shaped launchd failure (Operation not
-    # permitted / getcwd / EINTR) after a claude CLI auto-update must be diagnosed
-    # as a TCC-authorization loss — NOT as an auth-credential failure or a load
-    # timeout — and must recommend opening an interactive session (not reboot,
-    # not keychain hotfix).
+def test_auth_preflight_runtime_fs_failure_uses_neutral_diagnosis(tmp_path: Path) -> None:
+    # 2026-07-15 correction: Operation-not-permitted / getcwd / EINTR are
+    # low-level runtime/filesystem evidence, not proof that a claude update lost
+    # Desktop TCC access. The repo moved out of Desktop on 2026-07-02, so the
+    # legacy causal claim and interactive-session remediation must not return.
     claude = tmp_path / "claude"
     codex = tmp_path / "codex"
     uv = tmp_path / "uv"
@@ -240,13 +239,19 @@ def test_auth_preflight_tcc_shaped_failure_diagnoses_claude_update(tmp_path: Pat
     args_text = (tmp_path / "uv_args.txt").read_text(encoding="utf-8")
     body_text = (tmp_path / "uv_body.txt").read_text(encoding="utf-8")
     assert "send-alert" in args_text
-    # TCC branch chosen — title flags TCC/claude-update, not generic auth-failed.
-    assert "TCC 授權失效" in args_text
+    # Runtime/filesystem branch chosen — visible but non-critical because Codex
+    # failover still owns the slot and the next tick retries automatically.
+    assert "transient runtime/filesystem failure" in args_text
+    assert "--level warn" in args_text
     assert "hourly-dispatch auth preflight failed" not in args_text
-    # Body must steer to interactive-session fix, explicitly away from reboot/keychain.
-    assert "開一個互動 Claude session" in body_text
-    assert "不要" in body_text and "重開機" in body_text
-    # Stub claude was just written → symlink-age heuristic flags a fresh update.
-    assert "這就是根因" in body_text
-    # Must NOT recommend the keychain hotfix for a TCC failure.
+    assert "暫時性 runtime/filesystem 失敗" in body_text
+    assert "單憑 preflight 輸出無法決定根因" in body_text
+    assert "Codex failover" in body_text
+    # Mechanical anti-regression gate for the retired Desktop-TCC copy.
+    assert "TCC 授權失效" not in args_text + body_text
+    assert "開一個互動 Claude session" not in body_text
+    assert "新版 binary 尚未取得 Desktop TCC 授權" not in body_text
+    assert "這就是根因" not in body_text
+    # Runtime failure without explicit auth rejection must not recommend the
+    # credential hotfix either.
     assert "security set-generic-password-partition-list" not in body_text

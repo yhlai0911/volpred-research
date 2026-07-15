@@ -230,22 +230,6 @@ run_auth_preflight() {
   return $?
 }
 
-# Portable file mtime for the diagnostic below. BSD/macOS stat uses `-f %m`;
-# GNU/Linux stat uses `-c %Y`. GNU stat accepts `-f` with a different meaning
-# and prints a multi-line filesystem report, so a successful exit code alone is
-# not enough — accept only a digits-only epoch before choosing the fallback.
-file_mtime_epoch() {
-  local target=$1 value
-  value=$(/usr/bin/stat -f %m "$target" 2>/dev/null)
-  case "$value" in
-    ""|*[!0-9]*) value=$(/usr/bin/stat -c %Y "$target" 2>/dev/null) ;;
-  esac
-  case "$value" in
-    ""|*[!0-9]*) return 1 ;;
-  esac
-  printf '%s\n' "$value"
-}
-
 # 2026-07-02 fix — see SEND_ALERT_TIMEOUT_SEC comment above. Every
 # `send-alert` call in this script must go through this wrapper, never call
 # "$UV_BIN" run volpred ops send-alert directly.
@@ -281,48 +265,33 @@ send_auth_preflight_alert() {
     looks_like_real_auth_failure=1
   fi
 
-  # 2026-07-02 fix (c) — TCC-shaped failure recognition (docs/error_log.md 10:55 entry).
-  # When claude CLI auto-updates, the new binary loses its per-binary macOS TCC
-  # Desktop-folder grant; launchd-context jobs (cwd in ~/Desktop) then fail with
-  # Operation-not-permitted / getcwd / EINTR signatures — NOT auth, NOT load.
-  # Reboot and keychain hotfix are both wrong here; the fix is: open an
-  # interactive session (authorized context) to re-trigger the grant.
-  local looks_like_tcc_failure=0
+  # 2026-07-15 correction to the 2026-07-02 TCC incident diagnostic: the repo
+  # has since moved out of ~/Desktop, so these low-level syscall signatures no
+  # longer identify Desktop TCC or a claude-update root cause. Keep a separate
+  # branch because they are also not credential rejection, but report only the
+  # evidence available: a transient runtime/filesystem-context failure whose
+  # exact cause cannot be inferred from auth-preflight output alone.
+  local looks_like_transient_runtime_failure=0
   if printf '%s' "$combined" | grep -qiE "operation not permitted|getcwd|cannot access parent director|interrupted system call|EINTR|current directory does not exist"; then
-    looks_like_tcc_failure=1
-  fi
-  # Did the claude symlink switch recently (~<=18h)? Strong corroboration that a
-  # CLI auto-update just invalidated the TCC grant.
-  local claude_link_age_h=999
-  local _link_mtime
-  _link_mtime=$(file_mtime_epoch "$CLAUDE_BIN")
-  if [ -n "$_link_mtime" ]; then
-    claude_link_age_h=$(( ( $(date +%s) - _link_mtime ) / 3600 ))
+    looks_like_transient_runtime_failure=1
   fi
 
-  if [ "$looks_like_tcc_failure" -eq 1 ]; then
-    local _updated_note
-    if [ "$claude_link_age_h" -le 18 ]; then
-      _updated_note="claude symlink 在約 ${claude_link_age_h}h 前才切換過（=CLI 剛自動更新）——**這就是根因**：新版 binary 尚未取得 Desktop TCC 授權。"
-    else
-      _updated_note="claude symlink 已 ${claude_link_age_h}h 未變更；TCC Desktop 授權可能因其他原因失效（仍非 auth/load 問題）。"
-    fi
+  if [ "$looks_like_transient_runtime_failure" -eq 1 ]; then
     auth_body=$(printf '%s\n' \
-"## 觸發條件（TCC-shaped 失敗，非 auth、非負載）" \
-"- auth-preflight 輸出含 \`Operation not permitted\` / \`getcwd\` / \`Interrupted system call (EINTR)\` / \`Current directory does not exist\` 特徵" \
-"- ${_updated_note}" \
+"## 觸發條件（暫時性 runtime/filesystem 失敗，非 auth 判定）" \
+"- auth-preflight 輸出含 \`Operation not permitted\` / \`getcwd\` / \`Interrupted system call (EINTR)\` / \`Current directory does not exist\` 等低階 runtime/filesystem 特徵" \
 "" \
-"## 根因（已於 2026-07-02 決定性實驗確認）" \
-"- macOS TCC 的 Desktop 資料夾授權**綁定 binary 路徑+雜湊**；claude CLI 每 1-2 天自動更新，新版 binary 對 \`~/Desktop\` 預設**無授權**" \
-"- 歷史事故（2026-07-02，當時 repo 還在 ~/Desktop/volpred-research TCC 保護區；現已搬至 ~/volpred-research，正常情況不應再出現此類失敗）→ launchd context 無 UI 可跳授權 → TCC 請求懸置 → 拖累 tccd → 跨行程逾時/EINTR 全滅" \
-"- 互動 session 不受影響（走已授權 parent app 快速路徑）" \
+"## 判讀" \
+"- 這些字樣只證明目前 process 無法穩定取得 cwd 或完成 filesystem syscall；可能來自 cwd 暫時不可用、路徑/掛載狀態、OS policy、資源壓力或 syscall 被中斷" \
+"- 單憑 preflight 輸出無法決定根因，也不能把 CLI 版本變更的時間相關性當成因果證據" \
+"- repo 現址是 \`${REPO_ROOT}\`；先確認實際 cwd 與路徑存在性，不套用已退役的歷史環境診斷" \
 "" \
-"## 正確處置（**不要**重開機、**不要**跑 keychain 指令）" \
-"1. **開一個互動 Claude session**（在 Desktop 下）即可從授權 context 重新觸發 TCC 授權，launchd 排程隨即自癒——這是唯一有效且必要的動作" \
-"2. SessionStart hook \`warm_tcc_authorization.sh\` 已會在偵測到版本變更時自動暖授權；若此信仍出現，代表更新後尚無互動 session 開啟" \
-"3. 重開機無效：TCC.db 是持久化資料庫，重開機不會補回缺失授權" \
+"## 自動處置與後續診斷" \
+"- 本輪 primary dispatch 停止，交由 Codex failover 接手；下一個排程週期會自然重試" \
+"- 若連續復發，再檢查 \`pwd\`、\`test -d \"${REPO_ROOT}\"\`、wrapper/LaunchAgent 的 WorkingDirectory、filesystem/mount 狀態與同時段 system load" \
+"- 沒有明確 auth 拒絕文字，不執行 keychain credential 修復" \
 "" \
-"詳見 docs/error_log.md 2026-07-02 10:55「ROOT CAUSE CONFIRMED」條目。")
+"歷史背景：docs/error_log_archive/2026-Q3.md 的 2026-07-02 10:55 條目只適用於 repo 尚在受保護目錄時；不可外推到目前環境。")
   elif [ "$looks_like_real_auth_failure" -eq 1 ]; then
     auth_body=$(printf '%s\n' \
 "## 觸發條件" \
@@ -376,9 +345,12 @@ send_auth_preflight_alert() {
   tmp=$(mktemp -t hourly_auth_fail.XXXXXX).md
   echo "$auth_body" > "$tmp"
   local alert_level alert_title
-  if [ "$looks_like_tcc_failure" -eq 1 ]; then
-    alert_level="critical"
-    alert_title="hourly-dispatch TCC 授權失效 (claude 更新 → Desktop 無授權，開互動 session 修復) $(date '+%H:%M')"
+  if [ "$looks_like_transient_runtime_failure" -eq 1 ]; then
+    # The primary path failed, but Codex failover still owns this slot and the
+    # next tick retries automatically. WARN preserves visibility without
+    # asserting the systemic outage implied by the retired Desktop diagnosis.
+    alert_level="warn"
+    alert_title="hourly-dispatch transient runtime/filesystem failure (EINTR/getcwd/operation-not-permitted) $(date '+%H:%M')"
   elif [ "$looks_like_real_auth_failure" -eq 1 ]; then
     alert_level="critical"
     alert_title="hourly-dispatch auth preflight failed $(date '+%H:%M')"

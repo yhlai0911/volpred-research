@@ -163,6 +163,7 @@
 **規則**：detector 的 dedup key 必須是 root-cause identity（不是 umbrella / 帶 {hhmm} 的 title，否則 24h dedup 永不命中 → 轟炸老闆）。detector 要看得見自己派的補救任務（否則假 critical）。「N findings 全 severity=critical」是 detector 設計缺陷。無界重試 + snapshot 消耗時機錯 = 每 64 秒連發。
 **機械 owner**：`src/volpred/ops/alerts.py`（check_alerts 每小時，condition-based）+ dreaming detector（dedup key = root-cause identity）。
 **代表 incident**：
+- 2026-07-16 legacy hourly-dispatch 把 EPERM/getcwd/EINTR 硬判成已退役的 Desktop TCC 根因，會寄錯誤 CRITICAL 與誤導處置；改為中性 runtime/filesystem WARN + Codex failover（全文：`docs/governance/2026-07/hourly_dispatch_tcc_copy_retirement.md`）
 - 2026-07-01 **3-STRIKE** dreaming-run 7 findings 全 severity=critical + occurrence 灌水 — Q3
 - 2026-07-13 21:55 PHASE-Z「沒有 fire 起始基線」warn 每 64 秒轟炸（snapshot 時機 + 無界重試）— Q3
 - 2026-07-13 22:10 PHASE-Z title 帶 {hhmm} 使 24h dedup 永不命中 — Q3
