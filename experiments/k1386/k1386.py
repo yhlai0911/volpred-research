@@ -8,11 +8,12 @@ Method:
      then reconstruct level: log_RV_{t+1} = log_RV_t + AR-pred(d_{t+1})
   3. fGN multivariate: univariate + OLS cross-asset lagged-increment correction
   4. HAR-RV baseline: standard HAR on Parkinson RV (daily/weekly/monthly avg)
-  5. OOS evaluation: Patton QLIKE on Parkinson RV; DM test (Harvey 1997)
+  5. OOS evaluation: canonical Patton QLIKE and Bartlett Newey-West HAC-DM;
+     Harvey, Liu, and Zhu (2016) |t|>3 reporting screen
 
 Assets: SPY (primary), QQQ, GLD
 IS:  2010-01-01 ~ 2021-12-31   (~3021 obs)
-OOS: 2022-01-01 ~ 2026-05-19   (~1128 obs)
+OOS: 2022-01-01 ~ 2026-05-19   (1098 forecast origins)
 
 Key methodological notes:
 - log-RV LEVEL has positive ACF (persistent), so fGN theory applies to INCREMENTS
@@ -25,17 +26,25 @@ References:
   - Gatheral et al. (2018) QF: rough volatility, H estimation via structure function
   - arXiv:2412.14353 (Feb 2026): multivariate fractional OU + moment estimation
   - Patton (2011): QLIKE loss function, proxy-robust ranking
-  - Harvey (1997): DM test small-sample correction
+  - Diebold and Mariano (1995): equal predictive-accuracy test
+  - Harvey, Leybourne, and Newbold (1997): small-sample diagnostic
+  - Harvey, Liu, and Zhu (2016): conservative |t|>3 reporting screen
+  - Newey and West (1987): HAC long-run variance
 """
 
-import numpy as np
-import pandas as pd
+import hashlib
 import json
+import os
 import warnings
+from pathlib import Path
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from pathlib import Path
+import numpy as np
+import pandas as pd
+
+from volpred.stats.model_evaluation import dm_test, qlike, qlike_pointwise
 
 warnings.filterwarnings("ignore")
 np.random.seed(42)
@@ -48,18 +57,110 @@ DATA_SPY = ROOT / "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv"
 DATA_GLD = ROOT / "paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv"
 OUT_DIR = Path(__file__).resolve().parent
 
+IS_END = "2021-12-31"
+OOS_START = "2022-01-01"
+OOS_END = "2026-05-19"
+FORECAST_HORIZON = 1
+HAC_LAG_SENSITIVITY = (0, 1, 5, 10, 20)
+EXPECTED_ANALYSIS_SLICE_SHA256 = (
+    "45160dbaf14b010c942af2af1d41cc4477bb166fa76e25b24dd9f91d8a2b5d48"
+)
+
+
+def file_sha256(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def atomic_write_json(path, payload):
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    try:
+        with tmp.open("w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2, ensure_ascii=False)
+            handle.write("\n")
+        with tmp.open(encoding="utf-8") as handle:
+            json.load(handle)
+        os.replace(tmp, path)
+    finally:
+        if tmp.exists():
+            tmp.unlink()
+
+
+def atomic_save_npy(path, values):
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        with tmp.open("wb") as handle:
+            np.save(handle, values)
+        os.replace(tmp, path)
+    finally:
+        if tmp.exists():
+            tmp.unlink()
+
+
+def dataframe_sha256(frame):
+    """Hash a canonical CSV serialization of the analysis frame."""
+    payload = frame.to_csv(index=False, date_format="%Y-%m-%d", lineterminator="\n")
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
 # ─────────────────────────────────────────────────
 # 1. Load & Prepare Data
 # ─────────────────────────────────────────────────
+def _deduplicate_identical_dates(frame, source_name):
+    """Collapse identical duplicate-date rows; reject conflicting observations."""
+    frame = frame.sort_values("date", kind="stable").reset_index(drop=True)
+    duplicate_mask = frame.duplicated("date", keep=False)
+    duplicate_dates = frame.loc[duplicate_mask, "date"].drop_duplicates().tolist()
+    conflicting_dates = []
+    for date in duplicate_dates:
+        values = frame.loc[frame["date"].eq(date)].drop(columns="date")
+        if len(values.drop_duplicates()) != 1:
+            conflicting_dates.append(date.strftime("%Y-%m-%d"))
+    if conflicting_dates:
+        raise ValueError(
+            f"{source_name} has conflicting rows for duplicate dates: {conflicting_dates}"
+        )
+
+    deduplicated = frame.drop_duplicates("date", keep="first").reset_index(drop=True)
+    if deduplicated["date"].duplicated().any():
+        raise AssertionError(f"{source_name} date deduplication failed")
+    audit = {
+        "raw_rows": int(len(frame)),
+        "unique_dates": int(frame["date"].nunique()),
+        "duplicate_rows_removed": int(len(frame) - len(deduplicated)),
+        "duplicate_date_count": int(len(duplicate_dates)),
+        "duplicate_dates": [date.strftime("%Y-%m-%d") for date in duplicate_dates],
+        "duplicate_values_identical": True,
+    }
+    return deduplicated, audit
+
+
 def load_data():
     spy_df = pd.read_csv(DATA_SPY, parse_dates=["date"])
     gld_df = pd.read_csv(DATA_GLD, parse_dates=["date"])
+    # Audit only the frozen analysis window. Later appended rows must not alter
+    # a methodology-repair rerun, while historical changes fail the slice hash.
+    spy_df = spy_df[spy_df["date"].between("2010-01-01", OOS_END)].copy()
+    gld_df = gld_df[gld_df["date"].between("2010-01-01", OOS_END)].copy()
+    spy_df, spy_audit = _deduplicate_identical_dates(spy_df, DATA_SPY.name)
+    gld_df, gld_audit = _deduplicate_identical_dates(gld_df, DATA_GLD.name)
     df = spy_df[["date", "spy_adj_close", "spy_high", "spy_low",
                  "qqq_adj_close", "qqq_high", "qqq_low"]].copy()
     gld_cols = gld_df[["date", "gld_adj_close", "gld_high", "gld_low"]].copy()
-    df = df.merge(gld_cols, on="date", how="inner")
+    df = df.merge(gld_cols, on="date", how="inner", validate="one_to_one")
     df = df.sort_values("date").reset_index(drop=True)
-    return df
+    if df["date"].duplicated().any() or not df["date"].is_monotonic_increasing:
+        raise AssertionError("Merged analysis dates must be unique and increasing")
+    data_audit = {
+        "spy_qqq_source": spy_audit,
+        "gld_source": gld_audit,
+        "merge_validation": "one_to_one",
+        "analysis_window_merged_rows": int(len(df)),
+        "analysis_window_unique_dates": int(df["date"].nunique()),
+    }
+    return df, data_audit
 
 
 def add_parkinson_rv(df, assets):
@@ -131,9 +232,12 @@ def har_rv_predict(rv_series, train_mask, test_mask):
 
     X = pd.DataFrame({"const": 1.0, "rv_d": rv_d, "rv_w": rv_w, "rv_m": rv_m})
 
-    # IS fit
-    X_train = X[train_mask]
-    y_train = target[train_mask]
+    # IS fit. An origin is eligible only when its t+1 target also remains IS;
+    # this excludes the final IS origin and prevents the first OOS observation
+    # from entering the baseline fit.
+    target_is_mask = train_mask & train_mask.shift(-1, fill_value=False)
+    X_train = X[target_is_mask]
+    y_train = target[target_is_mask]
     valid = X_train.dropna().index.intersection(y_train.dropna().index)
     X_tr = X_train.loc[valid].values
     y_tr = y_train.loc[valid].values
@@ -142,7 +246,7 @@ def har_rv_predict(rv_series, train_mask, test_mask):
     # OOS prediction: use features at time t to predict rv_{t+1}
     X_oos = X[test_mask].ffill()
     preds = np.maximum(X_oos.values @ beta, 1e-10)
-    return pd.Series(preds, index=X[test_mask].index), beta
+    return pd.Series(preds, index=X[test_mask].index), beta, valid
 
 
 # ─────────────────────────────────────────────────
@@ -340,58 +444,70 @@ def fgn_multi_predict(log_rv_dict, train_mask, test_mask, primary="SPY",
 
 
 # ─────────────────────────────────────────────────
-# 6. Evaluation Functions
+# 6. Evaluation diagnostics
 # ─────────────────────────────────────────────────
-def qlike_loss(actual, forecast):
-    """
-    Patton (2011) QLIKE: E[y/f - log(y/f) - 1]
-    Proxy-robust: consistent ranking even under noisy proxy.
-    Lower = better.
-    """
-    eps = 1e-10
-    actual = np.maximum(actual, eps)
-    forecast = np.maximum(forecast, eps)
-    ratio = actual / forecast
-    return float(np.mean(ratio - np.log(ratio) - 1))
+def canonical_hac_lag(n, h=FORECAST_HORIZON):
+    """Mirror the repository canonical bandwidth for recorded diagnostics."""
+    return max(1, min(int(np.ceil(h ** (1 / 3) * n ** (1 / 3))), n // 4))
 
 
-def qlike_pointwise(actual, forecast):
-    """Pointwise QLIKE losses for DM test."""
-    eps = 1e-10
-    actual = np.maximum(actual, eps)
-    forecast = np.maximum(forecast, eps)
-    ratio = actual / forecast
-    return ratio - np.log(ratio) - 1
+def serial_acf(values, max_lag=20):
+    """Sample autocorrelation of a loss differential, lags 1..max_lag."""
+    values = np.asarray(values, dtype=float)
+    centered = values - values.mean()
+    denominator = float(np.mean(centered**2))
+    if denominator <= 0.0:
+        return {str(lag): None for lag in range(1, max_lag + 1)}
+    return {
+        str(lag): float(np.mean(centered[lag:] * centered[:-lag]) / denominator)
+        for lag in range(1, min(max_lag, len(values) - 1) + 1)
+    }
 
 
-def dm_test_harvey(loss1, loss2, h=1):
-    """
-    Diebold-Mariano test with Harvey (1997) small-sample correction.
-    H0: E[loss1] = E[loss2]
-    Positive t-stat: model2 better than model1 (loss1 > loss2).
-    Negative t-stat: model1 better than model2 (loss1 < loss2).
-    Harvey (1997) threshold: |t| > 2.0 (5%), |t| > 3.0 (strong, multiple-test robust)
-    """
-    d = loss1 - loss2  # positive d = model1 worse
-    n = len(d)
-    d_bar = float(d.mean())
+def newey_west_mean_t(values, max_lag):
+    """Bartlett Newey-West mean t-stat for non-primary lag sensitivity."""
+    values = np.asarray(values, dtype=float)
+    centered = values - values.mean()
+    n = len(values)
+    long_run_variance = float(np.mean(centered**2))
+    for lag in range(1, max_lag + 1):
+        weight = 1.0 - lag / (max_lag + 1.0)
+        autocovariance = float(np.mean(centered[lag:] * centered[:-lag]))
+        long_run_variance += 2.0 * weight * autocovariance
+    if long_run_variance <= 0.0:
+        return None
+    return float(values.mean() / np.sqrt(long_run_variance / n))
 
-    # Newey-West HAC variance, bandwidth h-1
-    gamma0 = float(np.var(d, ddof=1))
-    gamma_sum = 0.0
-    for k in range(1, max(1, h)):
-        gk = float(np.cov(d[k:], d[:-k])[0, 1])
-        gamma_sum += 2.0 * gk
-    var_d_bar = (gamma0 + gamma_sum) / n
 
-    if var_d_bar <= 0:
-        return float("nan")
-
-    dm_raw = d_bar / np.sqrt(var_d_bar)
-    # Harvey small-sample correction factor
-    harvey_factor = np.sqrt((n + 1.0 - 2.0 * h + h * (h - 1.0) / n) / n)
-    t_stat = dm_raw * harvey_factor
-    return float(t_stat)
+def forecast_dm_diagnostics(loss_model, loss_har, h=FORECAST_HORIZON):
+    """Canonical DM result plus dependence diagnostics and lag sensitivity."""
+    loss_model = np.asarray(loss_model, dtype=float)
+    loss_har = np.asarray(loss_har, dtype=float)
+    loss_diff = loss_model - loss_har
+    n = len(loss_diff)
+    lag = canonical_hac_lag(n, h=h)
+    t_stat, p_value = dm_test(loss_model, loss_har, h=h)
+    sensitivity_lags = sorted(set((*HAC_LAG_SENSITIVITY, lag)))
+    hln_factor = float(np.sqrt((n + 1.0 - 2.0 * h + h * (h - 1.0) / n) / n))
+    return {
+        "t_stat": float(t_stat),
+        "p_value_two_sided": float(p_value),
+        "n": n,
+        "horizon": h,
+        "hac_lag": lag,
+        "loss_diff_mean": float(loss_diff.mean()),
+        "loss_diff_acf": serial_acf(loss_diff, max_lag=20),
+        "lag_sensitivity_t": {
+            str(candidate_lag): newey_west_mean_t(loss_diff, candidate_lag)
+            for candidate_lag in sensitivity_lags
+        },
+        "hln_factor_diagnostic": hln_factor,
+        "hln_t_diagnostic": float(t_stat * hln_factor),
+        "harvey_liu_zhu_2016_pass": bool(abs(t_stat) > 3.0),
+        "sign_convention": (
+            "loss_diff = loss_fGN - loss_HAR; t>0 means fGN has higher QLIKE loss"
+        ),
+    }
 
 
 # ─────────────────────────────────────────────────
@@ -399,18 +515,32 @@ def dm_test_harvey(loss1, loss2, h=1):
 # ─────────────────────────────────────────────────
 def main():
     print("=" * 60)
-    print("K1386: Multivariate Rough Volatility Model (fGN + GMM)")
+    print("K1386: Multivariate fGN-motivated Rough-Volatility Forecast")
     print("=" * 60)
 
     # ── Load data ──
-    df = load_data()
+    df, source_audit = load_data()
     df = add_parkinson_rv(df, ["spy", "qqq", "gld"])
-    df = df[df["date"] >= "2010-01-01"].reset_index(drop=True)
+    # Freeze the original publication endpoint so a methodology-only rerun is
+    # not confounded by later rows appended to the shared paper data files.
+    df = df[df["date"].between("2010-01-01", OOS_END)].reset_index(drop=True)
     df = df.dropna(subset=["spy_rv_pk", "qqq_rv_pk", "gld_rv_pk"]).reset_index(drop=True)
+    if df["date"].duplicated().any() or not df["date"].is_monotonic_increasing:
+        raise AssertionError("Filtered analysis dates must be unique and increasing")
+    analysis_slice_hash = dataframe_sha256(
+        df[[
+            "date", "spy_adj_close", "spy_high", "spy_low",
+            "qqq_adj_close", "qqq_high", "qqq_low",
+            "gld_adj_close", "gld_high", "gld_low",
+        ]]
+    )
+    if analysis_slice_hash != EXPECTED_ANALYSIS_SLICE_SHA256:
+        raise AssertionError(
+            "Frozen K1386 analysis slice changed: "
+            f"expected {EXPECTED_ANALYSIS_SLICE_SHA256}, got {analysis_slice_hash}"
+        )
     print(f"Total obs: {len(df)}")
 
-    IS_END = "2021-12-31"
-    OOS_START = "2022-01-01"
     train_mask = df["date"] <= IS_END
     test_mask = df["date"] >= OOS_START
     n_is = int(train_mask.sum())
@@ -458,7 +588,13 @@ def main():
     print("\n--- HAR-RV Baseline (SPY, Parkinson RV) ---")
     spy_rv_pk = rv_pk_dict["SPY"].copy()
     spy_rv_pk.index = df.index
-    har_preds, har_beta = har_rv_predict(spy_rv_pk, train_mask, test_mask)
+    har_preds, har_beta, har_train_rows = har_rv_predict(
+        spy_rv_pk, train_mask, test_mask
+    )
+    har_last_origin = int(har_train_rows[-1])
+    har_last_target = har_last_origin + 1
+    assert df.loc[har_last_origin, "date"] <= pd.Timestamp(IS_END)
+    assert df.loc[har_last_target, "date"] <= pd.Timestamp(IS_END)
     print(f"  HAR betas (const, rv_d, rv_w, rv_m): {har_beta.round(4).tolist()}")
 
     # ── fGN Univariate (SPY) ──
@@ -490,26 +626,39 @@ def main():
     eval_idx = oos_idx[:-1]  # drop last OOS date (rv[T+1] unknown)
     actual_rv = rv_shifted.loc[eval_idx].values
 
-    har_f = har_preds.reindex(eval_idx).ffill().values
-    uni_f = fgn_uni_preds.reindex(eval_idx).ffill().values
-    multi_f = fgn_multi_preds.reindex(eval_idx).ffill().values
+    forecast_series = {
+        "HAR": har_preds,
+        "fGN_univariate": fgn_uni_preds,
+        "fGN_multivariate": fgn_multi_preds,
+    }
+    for model_name, forecasts in forecast_series.items():
+        if not forecasts.index.equals(oos_idx):
+            raise AssertionError(f"{model_name} forecast origins do not match OOS origins")
+        evaluated = forecasts.loc[eval_idx].to_numpy(dtype=float)
+        if not np.isfinite(evaluated).all() or not (evaluated > 0.0).all():
+            raise AssertionError(f"{model_name} forecasts must be finite and positive")
+    har_f = har_preds.loc[eval_idx].to_numpy(dtype=float)
+    uni_f = fgn_uni_preds.loc[eval_idx].to_numpy(dtype=float)
+    multi_f = fgn_multi_preds.loc[eval_idx].to_numpy(dtype=float)
 
-    ql_har = qlike_loss(actual_rv, har_f)
-    ql_uni = qlike_loss(actual_rv, uni_f)
-    ql_multi = qlike_loss(actual_rv, multi_f)
+    ql_har = qlike(actual_rv, har_f)
+    ql_uni = qlike(actual_rv, uni_f)
+    ql_multi = qlike(actual_rv, multi_f)
 
     print(f"  QLIKE HAR-RV:         {ql_har:.6f}")
     print(f"  QLIKE fGN-univariate: {ql_uni:.6f}")
     print(f"  QLIKE fGN-multi:      {ql_multi:.6f}")
 
     # ── DM Tests ──
-    print("\n--- DM Tests (Harvey 1997 small-sample correction) ---")
+    print("\n--- Canonical HAC-DM Tests (Harvey-Liu-Zhu |t|>3 screen) ---")
     loss_har = qlike_pointwise(actual_rv, har_f)
     loss_uni = qlike_pointwise(actual_rv, uni_f)
     loss_multi = qlike_pointwise(actual_rv, multi_f)
 
-    dm_uni = dm_test_harvey(loss_uni, loss_har, h=1)
-    dm_multi = dm_test_harvey(loss_multi, loss_har, h=1)
+    dm_uni_result = forecast_dm_diagnostics(loss_uni, loss_har)
+    dm_multi_result = forecast_dm_diagnostics(loss_multi, loss_har)
+    dm_uni = dm_uni_result["t_stat"]
+    dm_multi = dm_multi_result["t_stat"]
 
     print(f"  DM(fGN-uni, HAR):   t = {dm_uni:.4f}  (t>0 = fGN-uni WORSE; t<0 = fGN-uni BETTER)")
     print(f"  DM(fGN-multi, HAR): t = {dm_multi:.4f}  (t>0 = fGN-multi WORSE; t<0 = fGN-multi BETTER)")
@@ -539,6 +688,14 @@ def main():
     caveats.append(
         "H2: fGN-multi cross-asset correction uses realized (not predicted) lag-1 residuals of other assets; "
         "feasible since these are one-period lagged values known at forecast time."
+    )
+    caveats.append(
+        "2026-07-15 methodology repair: the primary comparison delegates to the repository canonical "
+        "Bartlett Newey-West HAC DM test; the superseded local h=1 implementation used zero HAC lags."
+    )
+    caveats.append(
+        "The repair also validates and removes identical duplicate-date source rows before a one-to-one "
+        "merge, and keeps every HAR training target inside the in-sample period."
     )
     if not any(c.startswith("None") for c in caveats):
         pass
@@ -591,8 +748,15 @@ def main():
 
     plt.tight_layout()
     plot_path = OUT_DIR / "k1386_forecast_comparison.png"
-    plt.savefig(plot_path, dpi=150, bbox_inches="tight")
-    plt.close()
+    plot_tmp_path = plot_path.with_name(plot_path.stem + ".tmp" + plot_path.suffix)
+    try:
+        plt.savefig(plot_tmp_path, dpi=150, bbox_inches="tight")
+        plt.close()
+        os.replace(plot_tmp_path, plot_path)
+    finally:
+        plt.close()
+        if plot_tmp_path.exists():
+            plot_tmp_path.unlink()
     print(f"  Plot saved: {plot_path}")
 
     # ── Save results JSON ──
@@ -603,11 +767,31 @@ def main():
             "primary_asset": "SPY",
             "rv_proxy": "Parkinson range: (log(H/L))^2 / (4*log(2))",
             "log_rv_target_for_fgn": "log(RV_pk)",
-            "is_period": "2010-01-01 ~ 2021-12-31",
-            "oos_period": "2022-01-01 ~ 2026-05-19",
+            "source_files": {
+                str(DATA_SPY.relative_to(ROOT)): file_sha256(DATA_SPY),
+                str(DATA_GLD.relative_to(ROOT)): file_sha256(DATA_GLD),
+            },
+            "source_duplicate_audit": source_audit,
+            "analysis_slice_sha256": analysis_slice_hash,
+            "is_period": (
+                f"{df.loc[train_mask, 'date'].iloc[0].date()} ~ "
+                f"{df.loc[train_mask, 'date'].iloc[-1].date()}"
+            ),
+            "oos_period": (
+                f"{df.loc[test_mask, 'date'].iloc[0].date()} ~ "
+                f"{df.loc[test_mask, 'date'].iloc[-1].date()}"
+            ),
+            "oos_end_frozen_for_methodology_repair": OOS_END,
             "n_is": n_is,
             "n_oos": n_oos,
-            "n_eval": n_oos - 1,
+            "n_eval": len(eval_idx),
+            "analysis_dates_unique_and_increasing": True,
+            "har_training": {
+                "n_rows_after_rolling_na_filter": int(len(har_train_rows)),
+                "last_origin": str(df.loc[har_last_origin, "date"].date()),
+                "last_target": str(df.loc[har_last_target, "date"].date()),
+                "first_oos_target_used_in_fit": False,
+            },
         },
         "hurst_estimates": {
             "SPY": round(hurst_estimates["SPY"], 6),
@@ -631,30 +815,91 @@ def main():
             "fGN_multivariate": round(ql_multi, 8),
         },
         "dm_test": {
+            "method": (
+                "volpred.stats.model_evaluation.dm_test; Bartlett Newey-West HAC with "
+                "max(1, min(ceil(h^(1/3)*n^(1/3)), n//4)); unscaled canonical t is primary"
+            ),
+            "reporting_screen": "Harvey, Liu, and Zhu (2016): |t| > 3.0",
             "fGN_uni_vs_HAR": {
-                "t_stat": round(dm_uni, 6),
-                "sign_convention": "d = loss_fGN_uni - loss_HAR; t>0 => fGN-uni WORSE; t<0 => fGN-uni BETTER",
-                "verdict": "H0 rejected (|t|>2.0)" if abs(dm_uni) > 2.0 else "H0 not rejected",
+                **dm_uni_result,
+                "interpretation": (
+                    "HAR has lower QLIKE and passes the |t|>3 reporting screen"
+                    if dm_uni > 3.0 and ql_har < ql_uni
+                    else "No robust HAR advantage under the |t|>3 reporting screen"
+                ),
             },
             "fGN_multi_vs_HAR": {
-                "t_stat": round(dm_multi, 6),
-                "sign_convention": "d = loss_fGN_multi - loss_HAR; t>0 => fGN-multi WORSE; t<0 => fGN-multi BETTER",
-                "verdict": "H0 rejected (|t|>2.0)" if abs(dm_multi) > 2.0 else "H0 not rejected",
+                **dm_multi_result,
+                "interpretation": (
+                    "HAR has lower QLIKE and passes the |t|>3 reporting screen"
+                    if dm_multi > 3.0 and ql_har < ql_multi
+                    else "No robust HAR advantage under the |t|>3 reporting screen"
+                ),
             },
         },
         "verdict": verdict,
+        "verdict_detail": (
+            "NULL_NO_FGN_IMPROVEMENT; HAR_LOWER_QLIKE_IN_BOTH_HARVEY_SCREEN_COMPARISONS"
+        ),
+        "supersession": {
+            "reason": (
+                "The legacy local h=1 DM helper used no HAC autocovariance terms. "
+                "The legacy inner merge also multiplied identical duplicate-date rows, "
+                "and the HAR fit used the first OOS target at the IS boundary. This rerun "
+                "deduplicates validated-identical dates, enforces a one-to-one merge, "
+                "keeps HAR targets inside IS, and delegates DM to the canonical implementation."
+            ),
+            "public_values_superseded": {
+                "n_oos": 1128,
+                "n_eval": 1127,
+                "qlike_oos": {
+                    "HAR": 0.36879574,
+                    "fGN_univariate": 0.461357,
+                    "fGN_multivariate": 0.46271202,
+                },
+                "dm_t": {
+                    "fGN_uni_vs_HAR": 3.268827,
+                    "fGN_multi_vs_HAR": 3.257408,
+                },
+            },
+            "drifted_results_artifact_superseded": {
+                "n_oos": 1135,
+                "n_eval": 1134,
+                "qlike_oos": {
+                    "HAR": 0.36866513,
+                    "fGN_univariate": 0.46001163,
+                    "fGN_multivariate": 0.461349,
+                },
+                "dm_t": {
+                    "fGN_uni_vs_HAR": 3.245095,
+                    "fGN_multi_vs_HAR": 3.233787,
+                },
+            },
+            "qualitative_conclusion_changed": False,
+        },
         "caveats": caveats,
         "lookahead_prevention": (
             "HAR: features at t (rv_d/rv_w/rv_m ending at t), target rv_{t+1}. "
             "fGN-uni: AR on increments d_t..d_{t-p+1} to predict d_{t+1}, anchor at log_rv_t. "
             "fGN-multi: cross-asset uses lag-1 residuals (t-1), no contemporaneous cross info."
         ),
+        "references": [
+            "Gatheral, Jaisson, and Rosenbaum (2018), Quantitative Finance 18(6)",
+            "Corsi (2009), Journal of Financial Econometrics 7(2)",
+            "Diebold and Mariano (1995), Journal of Business & Economic Statistics 13(3)",
+            "Harvey, Leybourne, and Newbold (1997), International Journal of Forecasting 13(2)",
+            "Harvey, Liu, and Zhu (2016), Review of Financial Studies 29(1)",
+            "Newey and West (1987), Econometrica 55(3)",
+            "Patton (2011), Journal of Econometrics 160(1)",
+        ],
         "seed": 42,
     }
 
     results_path = OUT_DIR / "k1386_results.json"
-    with open(results_path, "w") as f:
-        json.dump(results, f, indent=2)
+    atomic_save_npy(OUT_DIR / "k1386_loss_har.npy", loss_har)
+    atomic_save_npy(OUT_DIR / "k1386_loss_fgn_uni.npy", loss_uni)
+    atomic_save_npy(OUT_DIR / "k1386_loss_fgn_multi.npy", loss_multi)
+    atomic_write_json(results_path, results)
     print(f"\nResults JSON saved: {results_path}")
 
     # ── Summary ──

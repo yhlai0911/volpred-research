@@ -9,17 +9,73 @@
     "primary_asset": "SPY",
     "rv_proxy": "Parkinson range: (log(H/L))^2 / (4*log(2))",
     "log_rv_target_for_fgn": "log(RV_pk)",
-    "is_period": "2010-01-01 ~ 2021-12-31",
-    "oos_period": "2022-01-01 ~ 2026-05-19",
+    "source_files": {
+      "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv": "b30ba6b9bc90d12482fe90431bc4798cd489810af0fdbd5b6a5c97bbbe778007",
+      "paper/garch-x-vix/data/gld_vix_gvz_2000-2026.csv": "33b7abf1d7e5b1df00f0fdcb16684ffae7cf7e0052fd863e4ce7a4b01246ff8c"
+    },
+    "source_duplicate_audit": {
+      "spy_qqq_source": {
+        "raw_rows": 4129,
+        "unique_dates": 4119,
+        "duplicate_rows_removed": 10,
+        "duplicate_date_count": 10,
+        "duplicate_dates": [
+          "2026-05-04",
+          "2026-05-05",
+          "2026-05-06",
+          "2026-05-07",
+          "2026-05-08",
+          "2026-05-11",
+          "2026-05-12",
+          "2026-05-13",
+          "2026-05-14",
+          "2026-05-15"
+        ],
+        "duplicate_values_identical": true
+      },
+      "gld_source": {
+        "raw_rows": 4129,
+        "unique_dates": 4119,
+        "duplicate_rows_removed": 10,
+        "duplicate_date_count": 10,
+        "duplicate_dates": [
+          "2026-05-04",
+          "2026-05-05",
+          "2026-05-06",
+          "2026-05-07",
+          "2026-05-08",
+          "2026-05-11",
+          "2026-05-12",
+          "2026-05-13",
+          "2026-05-14",
+          "2026-05-15"
+        ],
+        "duplicate_values_identical": true
+      },
+      "merge_validation": "one_to_one",
+      "analysis_window_merged_rows": 4119,
+      "analysis_window_unique_dates": 4119
+    },
+    "analysis_slice_sha256": "45160dbaf14b010c942af2af1d41cc4477bb166fa76e25b24dd9f91d8a2b5d48",
+    "is_period": "2010-01-04 ~ 2021-12-31",
+    "oos_period": "2022-01-03 ~ 2026-05-19",
+    "oos_end_frozen_for_methodology_repair": "2026-05-19",
     "n_is": 3021,
-    "n_oos": 1135,
-    "n_eval": 1134
+    "n_oos": 1098,
+    "n_eval": 1097,
+    "analysis_dates_unique_and_increasing": true,
+    "har_training": {
+      "n_rows_after_rolling_na_filter": 2999,
+      "last_origin": "2021-12-30",
+      "last_target": "2021-12-31",
+      "first_oos_target_used_in_fit": false
+    }
   },
   "hurst_estimates": {
     "SPY": 0.103081,
     "QQQ": 0.093565,
     "GLD": 0.029357,
-    "method": "Log-structure function: slope of log E[|\u0394_h log_RV|^2] vs log(h), lags 1-20, IS only",
+    "method": "Log-structure function: slope of log E[|Δ_h log_RV|^2] vs log(h), lags 1-20, IS only",
     "reference": "Gatheral et al. (2018), arXiv:2412.14353"
   },
   "log_rv_correlation_matrix_is": {
@@ -34,27 +90,147 @@
   },
   "model_ar_lag_p": 20,
   "qlike_oos": {
-    "HAR": 0.36866513,
-    "fGN_univariate": 0.46001163,
-    "fGN_multivariate": 0.461349
+    "HAR": 0.37534907,
+    "fGN_univariate": 0.47163477,
+    "fGN_multivariate": 0.47314873
   },
   "dm_test": {
+    "method": "volpred.stats.model_evaluation.dm_test; Bartlett Newey-West HAC with max(1, min(ceil(h^(1/3)*n^(1/3)), n//4)); unscaled canonical t is primary",
+    "reporting_screen": "Harvey, Liu, and Zhu (2016): |t| > 3.0",
     "fGN_uni_vs_HAR": {
-      "t_stat": 3.245095,
-      "sign_convention": "d = loss_fGN_uni - loss_HAR; t>0 => fGN-uni WORSE; t<0 => fGN-uni BETTER",
-      "verdict": "H0 rejected (|t|>2.0)"
+      "t_stat": 3.43738258763435,
+      "p_value_two_sided": 0.0006094113467929319,
+      "n": 1097,
+      "horizon": 1,
+      "hac_lag": 11,
+      "loss_diff_mean": 0.09628569509709325,
+      "loss_diff_acf": {
+        "1": -0.044616090153652886,
+        "2": 0.06825187721972763,
+        "3": -0.019263958025588408,
+        "4": -0.0364238097324456,
+        "5": -0.016676612194950795,
+        "6": 0.018842393754465624,
+        "7": 0.004953948567172148,
+        "8": -0.01959779170036399,
+        "9": -0.011422986114036781,
+        "10": -0.016506831467187347,
+        "11": -0.02092804808767896,
+        "12": 0.010209718843691526,
+        "13": -0.010211543645284201,
+        "14": -0.02195279378713473,
+        "15": -0.018898567294061454,
+        "16": -0.006280728969113575,
+        "17": 0.00604365199996651,
+        "18": -0.009291216298295981,
+        "19": -0.001661987266079868,
+        "20": -0.01244529218249873
+      },
+      "lag_sensitivity_t": {
+        "0": 3.3153258552458915,
+        "1": 3.3918548519870426,
+        "5": 3.370485267124066,
+        "10": 3.4178948713374755,
+        "11": 3.43738258763435,
+        "20": 3.5943184039598335
+      },
+      "hln_factor_diagnostic": 0.9995441075669154,
+      "hln_t_diagnostic": 3.435815510923031,
+      "harvey_liu_zhu_2016_pass": true,
+      "sign_convention": "loss_diff = loss_fGN - loss_HAR; t>0 means fGN has higher QLIKE loss",
+      "interpretation": "HAR has lower QLIKE and passes the |t|>3 reporting screen"
     },
     "fGN_multi_vs_HAR": {
-      "t_stat": 3.233787,
-      "sign_convention": "d = loss_fGN_multi - loss_HAR; t>0 => fGN-multi WORSE; t<0 => fGN-multi BETTER",
-      "verdict": "H0 rejected (|t|>2.0)"
+      "t_stat": 3.4523422466974565,
+      "p_value_two_sided": 0.0005769463570843847,
+      "n": 1097,
+      "horizon": 1,
+      "hac_lag": 11,
+      "loss_diff_mean": 0.0977996525720098,
+      "loss_diff_acf": {
+        "1": -0.050840036349680186,
+        "2": 0.06850428924085206,
+        "3": -0.01985522645909322,
+        "4": -0.035784402984930574,
+        "5": -0.01798523241898879,
+        "6": 0.020323669469845356,
+        "7": 0.0030709793823127805,
+        "8": -0.020039262295605823,
+        "9": -0.010697448375519574,
+        "10": -0.016795786429052505,
+        "11": -0.01979384129081834,
+        "12": 0.009672097816396795,
+        "13": -0.010943035184292162,
+        "14": -0.022327749791580892,
+        "15": -0.017296625225020092,
+        "16": -0.005919059490001313,
+        "17": 0.004554410311425165,
+        "18": -0.009525119994600253,
+        "19": -0.0014034383284280952,
+        "20": -0.009402838221502322
+      },
+      "lag_sensitivity_t": {
+        "0": 3.307347388609308,
+        "1": 3.3947680652552554,
+        "5": 3.3810122459541514,
+        "10": 3.4324166517542314,
+        "11": 3.4523422466974565,
+        "20": 3.6137713227545993
+      },
+      "hln_factor_diagnostic": 0.9995441075669154,
+      "hln_t_diagnostic": 3.450768349990769,
+      "harvey_liu_zhu_2016_pass": true,
+      "sign_convention": "loss_diff = loss_fGN - loss_HAR; t>0 means fGN has higher QLIKE loss",
+      "interpretation": "HAR has lower QLIKE and passes the |t|>3 reporting screen"
     }
   },
   "verdict": "NULL",
+  "verdict_detail": "NULL_NO_FGN_IMPROVEMENT; HAR_LOWER_QLIKE_IN_BOTH_HARVEY_SCREEN_COMPARISONS",
+  "supersession": {
+    "reason": "The legacy local h=1 DM helper used no HAC autocovariance terms. The legacy inner merge also multiplied identical duplicate-date rows, and the HAR fit used the first OOS target at the IS boundary. This rerun deduplicates validated-identical dates, enforces a one-to-one merge, keeps HAR targets inside IS, and delegates DM to the canonical implementation.",
+    "public_values_superseded": {
+      "n_oos": 1128,
+      "n_eval": 1127,
+      "qlike_oos": {
+        "HAR": 0.36879574,
+        "fGN_univariate": 0.461357,
+        "fGN_multivariate": 0.46271202
+      },
+      "dm_t": {
+        "fGN_uni_vs_HAR": 3.268827,
+        "fGN_multi_vs_HAR": 3.257408
+      }
+    },
+    "drifted_results_artifact_superseded": {
+      "n_oos": 1135,
+      "n_eval": 1134,
+      "qlike_oos": {
+        "HAR": 0.36866513,
+        "fGN_univariate": 0.46001163,
+        "fGN_multivariate": 0.461349
+      },
+      "dm_t": {
+        "fGN_uni_vs_HAR": 3.245095,
+        "fGN_multi_vs_HAR": 3.233787
+      }
+    },
+    "qualitative_conclusion_changed": false
+  },
   "caveats": [
     "Evaluation alignment fix (H1): predictions at index t represent forecast for t+1; actual_rv uses shift(-1) to compare against rv[t+1]. n_eval = n_oos - 1.",
-    "H2: fGN-multi cross-asset correction uses realized (not predicted) lag-1 residuals of other assets; feasible since these are one-period lagged values known at forecast time."
+    "H2: fGN-multi cross-asset correction uses realized (not predicted) lag-1 residuals of other assets; feasible since these are one-period lagged values known at forecast time.",
+    "2026-07-15 methodology repair: the primary comparison delegates to the repository canonical Bartlett Newey-West HAC DM test; the superseded local h=1 implementation used zero HAC lags.",
+    "The repair also validates and removes identical duplicate-date source rows before a one-to-one merge, and keeps every HAR training target inside the in-sample period."
   ],
   "lookahead_prevention": "HAR: features at t (rv_d/rv_w/rv_m ending at t), target rv_{t+1}. fGN-uni: AR on increments d_t..d_{t-p+1} to predict d_{t+1}, anchor at log_rv_t. fGN-multi: cross-asset uses lag-1 residuals (t-1), no contemporaneous cross info.",
+  "references": [
+    "Gatheral, Jaisson, and Rosenbaum (2018), Quantitative Finance 18(6)",
+    "Corsi (2009), Journal of Financial Econometrics 7(2)",
+    "Diebold and Mariano (1995), Journal of Business & Economic Statistics 13(3)",
+    "Harvey, Leybourne, and Newbold (1997), International Journal of Forecasting 13(2)",
+    "Harvey, Liu, and Zhu (2016), Review of Financial Studies 29(1)",
+    "Newey and West (1987), Econometrica 55(3)",
+    "Patton (2011), Journal of Econometrics 160(1)"
+  ],
   "seed": 42
 }
