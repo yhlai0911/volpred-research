@@ -41808,5 +41808,52 @@
   },
   "snapshot_sha256": "c8eb6b30189bbe7d74b2139f2e7320be40b7ebdb9ce7b5ae7fcab664aff64fca",
   "created_at": "2026-07-15T23:58:00+08:00"
+ },
+ {
+  "item_id": "k1709_reviewed_20260716",
+  "category": "crypto_etf_flow_volatility_forecast",
+  "content": "K1709 [INCONCLUSIVE]: Spot BTC/ETH ETF flow did not provide robust incremental UNCONDITIONAL average OOS QLIKE predictive evidence over HAR-RV in 10 pre-specified cells (2024-01-11/2024-07-23 through 2026-07-13; paired fixed 250-day rolling methods). No cell survived the one-sided Holm detection gate. Only 5/10 cells excluded a pre-specified 1% average QLIKE gain, so the bounded null is not established and failure to reject is not evidence of exact zero. A simultaneous Bonferroni inversion bounds the unconditional average relative QLIKE gain at <=4.2% across the family; conditional or regime-specific gains are outside the design. Raw nested DM statistics are diagnostic-only; the claim gate uses the reviewed fixed-memory GW unconditional special case.",
+  "evidence": [
+   "experiments/k1709/k1709_results.json",
+   "experiments/k1709/README.md",
+   "experiments/k1709/review_verdict.json",
+   "storage/ops/codex_reviews/k1709_rev6_fixed_memory_receipt.json"
+  ],
+  "confidence": 0.95,
+  "created_at": "2026-07-15T19:06:06.441897+00:00",
+  "created_at_source": "system_clock_utc",
+  "k_id": "K1709",
+  "experiment_id": "k1709",
+  "experiment_path": "experiments/k1709",
+  "verdict": "INCONCLUSIVE_NO_EXACT_NULL_CLAIM",
+  "reviewer": "codex-k1709-rev6-independent",
+  "provenance": {
+   "reviewed_commit": "dba627028aec9924d4ee0e167a9d7b99b6c8de77",
+   "review_artifact": "storage/ops/codex_reviews/k1709_rev6_fixed_memory_receipt.json"
+  }
+ },
+ {
+  "item_id": "k1711_reviewed_20260716",
+  "category": "foundation_model_volatility_forecast_pool",
+  "content": "K1711 [PASS, narrow claim]: In retrospective pseudo-OOS QLIKE MCS tests (2016-07 onward; alpha=0.10), at least one calibrated or HAR-combination TSFM-bearing forecast survived in each of SPY, 0050.TW and TX; pooled across 2,344 common dates the superior set was {HAR-A, COMB-MZ}. This is MCS non-rejection, not a TSFM win or proof of incremental predictive content. Raw TimesFM and TTM survived none of the three primary per-asset sets; survivors were recalibrated or HAR-combination forecasts. Nested QLIKE comparisons remain INCONCLUSIVE_NO_VALID_GENERAL_LOSS_NESTED_TEST; raw nested DM/HLN is diagnostic-only and Clark-West is restricted to secondary MSE inference.",
+  "evidence": [
+   "experiments/k1711/k1711_results.json",
+   "experiments/k1711/k1711_series.json",
+   "experiments/k1711/README.md",
+   "experiments/k1711/codex_review_20260716.md",
+   "experiments/k1711/review_verdict.json"
+  ],
+  "confidence": 0.95,
+  "created_at": "2026-07-15T19:06:06.442163+00:00",
+  "created_at_source": "system_clock_utc",
+  "k_id": "K1711",
+  "experiment_id": "k1711",
+  "experiment_path": "experiments/k1711",
+  "verdict": "PASS",
+  "reviewer": "codex/gpt-5 independent full-surface review",
+  "provenance": {
+   "reviewed_commit": "63520b4dae8b62d55650904ed51fab1739386f65",
+   "review_artifact": "experiments/k1711/codex_review_20260716.md"
+  }
  }
 ]
