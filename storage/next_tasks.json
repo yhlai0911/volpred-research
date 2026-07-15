@@ -31499,7 +31499,7 @@
     "description": "收尾 experiments/k1686/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T09:16:48.626840+00:00）。\n證據：experiments/k1686/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1686'); finished 0.5 days ago; orphan backlog this run: 67 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-12T09:16:48.626840+00:00",
     "dreaming": {
@@ -31507,7 +31507,30 @@
       "pattern_type": "orphaned_experiment",
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-15T13:09:21.529512+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-15T13:10:37.535478+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-15T13:11:31.945004+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-21"
+      }
+    ],
+    "started_at": "2026-07-15T13:10:37.535459+00:00",
+    "completed_at": "2026-07-15T13:11:31.944988+00:00",
+    "result": "K1686 孤兒收尾：主線程寫 knowledge entry 0105308b(PASS,ambient-fear-shock gate 通過關閉 Paper8 P0-1)，provenance 0 violations"
   },
   {
     "id": "dreaming_orphaned_experiment_k1684",
@@ -31557,7 +31580,7 @@
     "description": "收尾 experiments/k1680/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T09:16:48.626840+00:00）。\n證據：experiments/k1680/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1680'); finished 1.2 days ago; orphan backlog this run: 67 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-12T09:16:48.626840+00:00",
     "dreaming": {
@@ -31565,7 +31588,30 @@
       "pattern_type": "orphaned_experiment",
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-15T13:09:21.289773+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-15T13:10:37.282525+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-21"
+      },
+      {
+        "ts": "2026-07-15T13:11:31.679574+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-21"
+      }
+    ],
+    "started_at": "2026-07-15T13:10:37.282507+00:00",
+    "completed_at": "2026-07-15T13:11:31.679559+00:00",
+    "result": "K1680 孤兒收尾：knowledge entry 已於 7/14 backfill 補齊(NULL/RETROSPECTIVE_NULL,Codex PASS)，孤兒已解，null 不發文"
   },
   {
     "id": "dreaming_orphaned_experiment_k1678",
@@ -31833,40 +31879,15 @@
   },
   {
     "id": "email-12143-2de65b",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] 主機定時任務 failure detected",
-    "description": "Gmail UID: 12143\nMessage-ID: <812B1C58-F616-4EDB-AEA0-78DEA6860B9C@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sun, 12 Jul 2026 19:13:42 +0800\nSubject: Re: [VolPred Alert][CRITICAL] 主機定時任務 failure detected\n\n--- 用戶回信內容 ---\n你要馬上行動\r\n立刻底層修好\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月12日 19:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 主機定時任務 failure detected\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 系統偵測到讀者端內容更新可能中斷，需要先恢復發文節奏。\r\n> \r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> \r\n> 行動\r\n> \r\n> 先補一篇可發佈文章或觸發釋出流程，再追查為什麼排程沒接上。\r\n> \r\n> 觸發條件\r\n> \r\n> 偵測到 主機定時任務 失敗（最新 exit code != 0）。severity=critical（max_consecutive_failures=2；non_hang_failure=True）。\r\n> 註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／文章釋出排程停擺 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\r\n> \r\n> scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\r\n> scheduler_last_status: ok\r\n> scheduler_age_minutes: 121335.3\r\n> failing_logs:\r\n> storage/logs/cron/git_push_backup.log exit=1 at 2026-07-12T11:00:32.984756+00:00 recency=fresh_or_unscheduled\r\n> 影響\r\n> \r\n> 資料收集 / daily_update / 文章釋出排程 等 主機定時任務 斷鏈 → 下游 metrics、前端顯示、\r\n> Supabase mirror sync 可能顯示過期資料；若失敗的是 文章釋出排程，會同步觸發\r\n> 文章釋出排程停擺 警報，發文節奏中斷。\r\n> \r\n> 建議行動\r\n> \r\n> 查失敗 log： tail -20 <failing_log 路徑>\r\n> 權限問題（exit=126）： chmod +x scripts/<script>.sh\r\n> macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\r\n> System Settings > Privacy & Security > Full Disk Access 加 script 路徑\r\n> 手動跑 failed command 驗證修復： uv run <command>\r\n> 比對 canonical schedule： crontab -l vs config/runtime_schedules.json\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-12T11:15:07.726817+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] 主機定時任務 failure detected",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12143,
-    "email_message_id": "<812B1C58-F616-4EDB-AEA0-78DEA6860B9C@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] 主機定時任務 failure detected",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "hourly-20",
-    "claimed_at": "2026-07-12T12:07:34.542247+00:00",
-    "claim_session_id": "03244f073337",
-    "status_history": [
-      {
-        "ts": "2026-07-12T12:07:34.542262+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-12T12:17:34.641382+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "hourly-20"
-      }
-    ],
+    "created_at": "2026-07-12T11:15:07.726817+00:00",
     "completed_at": "2026-07-12T12:17:34.641366+00:00",
-    "result": "備份 push 被 mojibake .py 卡死 9h。修 tests/test_dreaming_review.py 5 行亂碼(byte-level 復原自 commit msg 原文)→push 恢復(f2ba64f5a)；底層: encoding gate 搬進既有 pre-commit(2859a4788, 同 msg481 class 復發)；全 repo sweep 0 殘留；cron exit=0；close email 已寄"
+    "tombstone": true,
+    "archived_at": "2026-07-15T13:08:06.440769+00:00"
   },
   {
     "id": "k1442_recheck_official_cpi_dates",
@@ -36678,13 +36699,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T12:01:11.262445+00:00",
+    "completed_at": "2026-07-15T13:00:03+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T12:01:11.262445+00:00",
-      "last_clean_observed_at": "2026-07-15T12:01:11.262445+00:00"
+      "resolved_at": "2026-07-15T13:00:03+00:00",
+      "last_clean_observed_at": "2026-07-15T13:00:03+00:00"
     }
   },
   {
@@ -36696,13 +36717,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T12:33:36.729518+00:00",
+    "completed_at": "2026-07-15T13:52:05.772378+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T12:33:36.729518+00:00",
-      "last_clean_observed_at": "2026-07-15T12:33:36.729518+00:00"
+      "resolved_at": "2026-07-15T13:52:05.772378+00:00",
+      "last_clean_observed_at": "2026-07-15T13:52:05.772378+00:00"
     }
   },
   {
@@ -36943,17 +36964,58 @@
     "id": "dm_hac_fix_k1386_borderline",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T01:28:07+08:00",
-    "description": "K1655 bug class 必修 #2（門檻邊緣，最可能翻盤）：experiments/k1386/k1386.py:367 `for k in range(1, max(1, h))` 在 h=1 是空迴圈 → gamma_sum=0 → 零 HAC（已抽驗確認）。README 報 |t|=3.26，只超 Harvey 門檻 3.0 八個百分點 —— 補 HAC 後極可能跌破。曝險：feed×6。做法同上：改 canonical dm_test、先量 acf、重跑、若翻轉則回溯更正 README 與 6 篇文章。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md"
+    "description": "K1655 bug class 必修 #2（門檻邊緣，最可能翻盤）：experiments/k1386/k1386.py:367 `for k in range(1, max(1, h))` 在 h=1 是空迴圈 → gamma_sum=0 → 零 HAC（已抽驗確認）。README 報 |t|=3.26，只超 Harvey 門檻 3.0 八個百分點 —— 補 HAC 後極可能跌破。曝險：feed×6。做法同上：改 canonical dm_test、先量 acf、重跑、若翻轉則回溯更正 README 與 6 篇文章。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md",
+    "status_history": [
+      {
+        "ts": "2026-07-15T12:36:00.443746+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode-k1386"
+      },
+      {
+        "ts": "2026-07-15T12:36:03.759307+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode-k1386"
+      },
+      {
+        "ts": "2026-07-15T13:34:09.166219+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode-k1386"
+      }
+    ],
+    "started_at": "2026-07-15T12:36:03.759293+00:00",
+    "completed_at": "2026-07-15T13:34:09.166203+00:00",
+    "result": "K1386 已改用 canonical HAC-DM，並修復 duplicate-date many-to-many merge 與 HAR IS/OOS target leakage；固定樣本重跑 n_eval=1097，DM t=3.437/3.452，NULL_NO_FGN_IMPROVEMENT 質性結論不變。獨立 PASS review、knowledge supersede、單篇 feed 更正與 live sync、auditor regression/retirement 均完成。"
   },
   {
     "id": "dm_hac_fix_k841_strategy_dm",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-15T01:28:07+08:00",
-    "description": "K1655 bug class 必修 #3：experiments/k841/k841_futures_realtime_vt.py:436 用 `for k in range(h)`（正確應為 range(1,h+1)）→ h=1 時只取 gamma[0]，無 HAC。這是**策略報酬差的 DM**，自相關是常態不是例外。results.json 目前標 harvey_significant=True（t=10.82/−7.13/−1.97），曝險 feed×5。做法同上。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md"
+    "description": "K1655 bug class 必修 #3：experiments/k841/k841_futures_realtime_vt.py:436 用 `for k in range(h)`（正確應為 range(1,h+1)）→ h=1 時只取 gamma[0]，無 HAC。這是**策略報酬差的 DM**，自相關是常態不是例外。results.json 目前標 harvey_significant=True（t=10.82/−7.13/−1.97），曝險 feed×5。做法同上。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md",
+    "claimed_by": "codex-failover",
+    "claimed_at": "2026-07-15T13:15:09.902595+00:00",
+    "claim_session_id": "498b8fe0cab1",
+    "status_history": [
+      {
+        "ts": "2026-07-15T13:15:09.902611+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-15T13:15:21.983720+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-15T13:15:21.983705+00:00"
   },
   {
     "id": "dm_hac_fix_k1525_k1526_pair",
@@ -39692,5 +39754,79 @@
     "created_at": "2026-07-15T12:10:24.273595+00:00",
     "title": "退役 cron_hourly_dispatch.sh TCC/Desktop 過時警報文案",
     "description": "排查來源：老闆 Telegram msg 836「徹底排查是否還有這種路徑問題」（承接 warm_tcc_authorization.sh 過時 Desktop 文案議題）。\n\n排查結論（telegram_responder 2026-07-15 20:06 完成）：\n路徑層全乾淨 — 20 個 launchd plist WorkingDirectory 全指向 ~/volpred-research；~/Desktop/volpred-research 目錄與 symlink 已不存在；src/volpred/publisher/prepublish_audit.py 的 Desktop 引用是防禦性 stale-path 偵測（保留）；cron_*.sh header 提到 Desktop 只是歷史註解與 log 目錄說明，不影響行為。\n\n唯一同類殘留（需修）：scripts/cron_hourly_dispatch.sh 的 TCC-shaped failure alert 分支（約 line 291, 303-325, 379-381）。repo 已於 2026-07-02 搬離 ~/Desktop、TCC 對 repo 不再適用，但此分支的標題、內文根因與處置步驟仍寫死「新版 binary 尚未取得 Desktop TCC 授權 / 請在 Desktop 下開互動 session 修復」的過時敘事。若因系統負載等其他原因出現 EINTR / operation not permitted / getcwd 特徵而誤觸發，會發一封 CRITICAL 假警報並給出誤導處置。\n\n建議：比照 warm_tcc_authorization.sh 已退役 email alert 的做法，退役或改寫此分支 —— 移除 Desktop-TCC 專屬敘事與「在 Desktop 下開 session」步驟，改為中性描述（EINTR/資源競爭類暫時失敗），或降級不發 CRITICAL。修前先讀 docs/error_log.md 2026-07-02 條目確認語意。"
+  },
+  {
+    "id": "telegram-838",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-15T12:59:43.503194+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 838）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n最近的重要經濟指標宣告你都沒做嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-15T13:00:35.553247+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-15T13:05:18.053431+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-15T13:05:18.053412+00:00",
+    "result": "診斷完成：近期經濟指標多已覆蓋(NFP 7/3 三篇、CPI 7/14 T-2、TSMC 7/10)，但 CPI 7/14 T+0 反應文被 event dedup false-positive(fuzzy 配到無關黃金文 mile_5dd7c135)誤判覆蓋而漏發。已建 2 任務進池：補發 CPI T+0 反應文 + 修 dedup 誤判。已 Telegram 回覆。"
+  },
+  {
+    "id": "platform_ops_event_dedup_false_positive_cpi_20260714",
+    "title": "修 event 反應文 dedup false-positive：CPI 07/14 T+0 被無關黃金/油價文誤判覆蓋而沒發",
+    "task_type": "platform_ops",
+    "task_family": "ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "telegram-838",
+    "preferred_agent": "claude",
+    "parent_task_id": "telegram-838",
+    "created_at": "2026-07-15T13:00:00+00:00",
+    "description": "根因：event_ledger receipt 2e795b4a...json 顯示 dedupe_key=cpi-us-2026-07-14-t0:one_shot disposition=reaction_already_covered，covered_by=mile_5dd7c135（match=fuzzy）。但 mile_5dd7c135 實為 2026-07-14『油價跳漲、金價連摔／避風港出勤表』文，與 CPI 完全無關 → CPI 07/14 T+0 實際數字反應文因誤判被跳過，從未發佈。\n修流程（不修資料）：event materializer 的 T+0 反應文覆蓋判定不得只靠寬鬆標題相似度；必須要求結構化匹配（event_type + event_date/slot 命中，或標題明確含該事件關鍵詞如 CPI/通膨/物價）才算 reaction_already_covered。加回歸測試（無關財經文不得 fuzzy-cover 一個 econ event T+0），並確保發 event 文時有回寫 event_key/type/date/slot 讓 dedup 有結構欄位可比。相關檔：src/volpred/ops/event_jobs.py、scripts/populate_upcoming_events.py、event_ledger receipts。"
+  },
+  {
+    "id": "event_article_cpi_us_2026-07-14_tplus0_backfill",
+    "title": "補發 Event article: CPI_US 2026-07-14 T+0（實際數字 vs 共識 + 市場反應）",
+    "task_type": "event_article",
+    "task_family": "content",
+    "priority": 1,
+    "status": "pending",
+    "source": "telegram-838",
+    "preferred_agent": "claude",
+    "public_effect": "published",
+    "parent_task_id": "telegram-838",
+    "created_at": "2026-07-15T13:00:00+00:00",
+    "description": "7/14 BLS CPI 實際數字的市場反應文漏發（被 dedup false-positive 跳過，見兄弟任務 platform_ops_event_dedup_false_positive_cpi_20260714）。已發的只有 7/12 T-2 預告 mile_9560b9cc。\n補寫 T+0：actual headline/core CPI vs 共識、surprise size、SPY/VIX 當日與 T+1 反應，與 T-2 預告銜接。數字必須真查真算（BLS 官方發布 + yfinance），不確定就說不確定。audience=general；事件驅動 status=published。走 feed-publisher，含真實圖表 + 懶人包。發前 3-layer dedup（已確認 T+0 尚無真實覆蓋）。"
+  },
+  {
+    "id": "telegram-840",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "claimed",
+    "created_at": "2026-07-15T13:09:38.079861+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 840）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n徹查為什麼會誤判？\n這是重大疏漏要從底層去修正\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram_responder",
+    "claimed_at": "2026-07-15T13:10:36.069806+00:00",
+    "claim_session_id": "688cde1367c7",
+    "status_history": [
+      {
+        "ts": "2026-07-15T13:10:36.069825+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      }
+    ]
   }
 ]

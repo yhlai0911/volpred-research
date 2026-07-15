@@ -41663,6 +41663,26 @@
   "created_at": "2026-07-15T12:25:00+00:00"
  },
  {
+  "item_id": "0105308b",
+  "category": "experiment_result",
+  "experiment_id": "K1686",
+  "k_id": "K1686",
+  "verdict": "PASS",
+  "research_verdict": "ABSORPTION_SURVIVES_AMBIENT_FEAR_SHOCK_GATE_IDENTIFICATION_CLOSED",
+  "title": "K1686：波動吸收 contemporaneous-null 重跑——ambient-fear-shock gate 通過，關閉 K897 同期共動識別缺陷（Paper 8）",
+  "content": "[提出: dreaming orphan-closure, 執行: hourly-21 主線程收尾, 二審: Codex primary-path (codex-vscode) R2 PASS 2026-07-12] K1686 關閉 Paper 8（volatility-absorption）的核心識別缺陷 P0-1。前身 K897 的 GJR-GARCH null 用 h[t]（F_{t-1}-可測、不對當日 r_t 反應）當 vol proxy，於是模擬把 shock 標在大跌『隔天』；但實證的 ΔVIX_t=VIX_t-VIX_{t-1} 中 VIX_t 是當日收盤、與 r_t 同期共動，shock 是大跌『當天』——null 世界的 shock 定義抓不到當日大波動，質疑 K897 的 NULL REJECTED 是同期共動假象。K1686 重建 ambient-fear-shock gate：以 |r_t|、pre-shock VIX_{t-1}、signed ΔVIX_t 與 pooled 非 shock 分母定義，並用 same-seed（K897 路徑，seed 0..9999）null 與 paired circular moving-block bootstrap（primary block=20d，10/40/63d 敏感度一致）重測。結果 verdict=ABSORPTION SURVIVES AMBIENT-FEAR-SHOCK GATE（識別 CLOSED）：ambient-up SAR decline 實證點估 1.0465、bootstrap CI95 [0.3286,1.7625] 不含 0；same-seed null sim mean 0.2917、95% null CI [-0.6554,0.9887]、實證落在外、MC p=0.0327、z=1.80。K897 replication mean/sd=0.1734/0.2105 不變。樣本 2006-01-05~2026-04-02、n=5092、n_sim=10000。限制（Codex 明列）：此 gate 通過不等於已建立結構性因果通道，B/C/G variant 的 calibration 失敗與 null-calibration 局限仍未關閉；NOT_EVALUABLE 有獨立 verdict 不落入負向結論。",
+  "evidence": "['experiments/k1686/k1686_contemporaneous_null_results.json', 'experiments/k1686/README.md', 'experiments/k1686/codex_review_r2.md', 'experiments/k1686/k1686_null_distributions.png']",
+  "confidence": "0.75",
+  "created_at": "2026-07-12T00:00:00",
+  "created_at_source": "artifact:k1686_contemporaneous_null_results.json",
+  "experiment_path": "experiments/k1686/",
+  "needs_human": false,
+  "gap": "B/C/G variant calibration 未關閉；結構性因果通道未建立",
+  "provenance": "dreaming_orphaned_experiment_k1686 主線程收尾 (hourly-21, 2026-07-15)",
+  "reviewer": "experiments/k1686/codex_review_r2.md",
+  "tags": null
+ },
+ {
   "item_id": "k1386_dm_hac_correction_20260715",
   "category": "methodology_correction",
   "content": "K1386 methodology correction (2026-07-15) SUPERSEDES item cf7e62d9. The published sample statistics were invalidated by three jointly repaired defects: the local h=1 DM loop included zero HAC autocovariances; identical duplicate dates in both source CSVs produced a 2x2 many-to-many merge expansion; and the final HAR IS feature row used the first OOS target. The corrected run rejects conflicting duplicates, deduplicates only value-identical rows, validates a one-to-one merge, keeps HAR targets inside IS, freezes OOS at 2026-05-19, pins the cleaned slice hash, and uses canonical Bartlett-Newey-West HAC-DM. Clean sample: IS n=3,021, OOS origins n=1,098, evaluated n=1,097. QLIKE is HAR 0.37534907, fGN-univariate 0.47163477, fGN-multivariate 0.47314873. With loss differential fGN minus HAR and HAC lag 11, DM t/p are +3.437383/0.000609 and +3.452342/0.000577; ACF(1) is -0.044616/-0.050840. Both remain beyond the |t|>3 reporting screen in HAR's direction, so the qualitative verdict remains NULL_NO_FGN_IMPROVEMENT. This protocol-specific result covers SPY, one frozen window, a Parkinson range proxy, and linear fGN-motivated approximations; it does not reject continuous-time rough-volatility theory or richer intraday implementations.",
