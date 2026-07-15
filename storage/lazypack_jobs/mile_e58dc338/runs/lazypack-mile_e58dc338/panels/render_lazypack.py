@@ -322,7 +322,7 @@ def render_probability_promise(
             edgecolor="none",
         )
     )
-    fig.text(0.785, 0.700, wrapped(metrics[2]["label"], 10), ha="center", va="center", fontsize=17, color=MUTED, linespacing=1.25)
+    fig.text(0.835, 0.700, wrapped(metrics[2]["label"], 6), ha="center", va="center", fontsize=17, color=MUTED, linespacing=1.25)
     fig.text(0.815, 0.535, metrics[2]["rendered"], ha="center", va="center", fontsize=52, fontweight="bold", color=RED)
     if not metrics[2]["note"]:
         raise KeyError("Panel 1 rolling-calibration metric note is required")
@@ -422,7 +422,7 @@ def render_honest_boundary(
     for item, y, accent in zip(texts, y_positions, accents):
         fig.add_artist(Circle((0.435, y + 0.073), 0.010, transform=fig.transFigure, facecolor=accent, edgecolor="none"))
         fig.text(0.462, y + 0.075, item["heading"], ha="left", va="center", fontsize=21, fontweight="bold", color=INK)
-        fig.text(0.462, y - 0.005, wrapped(item["body"], 25), ha="left", va="center", fontsize=17, color=MUTED, linespacing=1.35)
+        fig.text(0.462, y - 0.005, wrapped(item["body"], 21), ha="left", va="center", fontsize=17, color=MUTED, linespacing=1.35)
         if y > y_positions[-1]:
             add_line(fig, 0.425, y - 0.095, 0.94, y - 0.095, LINE, 1.0)
 

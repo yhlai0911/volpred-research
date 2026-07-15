@@ -21,11 +21,11 @@
     "K1010"
   ],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queued_at": "2026-07-15T20:24:19Z",
   "started_at": "2026-07-15T20:27:50Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-15T20:32:33Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_e58dc338.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_e58dc338.stderr",
   "result_artifact": "storage/lazypack_jobs/mile_e58dc338/runs/lazypack-mile_e58dc338/panels",
@@ -33,9 +33,10 @@
     "storage/lazypack_jobs/mile_e58dc338/runs/lazypack-mile_e58dc338/plan.json",
     "storage/lazypack_jobs/mile_e58dc338/runs/lazypack-mile_e58dc338/panels/1_probability_promise.png",
     "storage/lazypack_jobs/mile_e58dc338/runs/lazypack-mile_e58dc338/panels/2_calibration_ranking.png",
-    "storage/lazypack_jobs/mile_e58dc338/runs/lazypack-mile_e58dc338/panels/3_honest_boundary.png"
+    "storage/lazypack_jobs/mile_e58dc338/runs/lazypack-mile_e58dc338/panels/3_honest_boundary.png",
+    "storage/lazypack_jobs/mile_e58dc338/runs/lazypack-mile_e58dc338/panels/render_lazypack.py"
   ],
-  "output_paths_updated_at": null,
+  "output_paths_updated_at": "2026-07-15T20:32:30Z",
   "job_metadata": null,
   "kind": "compute",
   "cwd": null,
@@ -43,5 +44,8 @@
   "followup_dispatched": false,
   "timeout_seconds": 1800,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
 }
