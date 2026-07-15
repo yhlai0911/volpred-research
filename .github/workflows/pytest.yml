@@ -81,6 +81,12 @@ jobs:
       VOLPRED_NO_REMOTE_READ: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The nested-DM fixed-memory gate verifies an external review receipt
+          # against its exact reviewed commit. A depth-1 checkout makes that
+          # trusted commit look nonexistent and turns a valid K1709 receipt
+          # into a false methodology failure.
+          fetch-depth: 0
       - name: Install system test dependencies
         # `volpred.ops.experiments` shells out to `rg` to find references to an
         # experiment's files before moving them. It is a real runtime dependency
