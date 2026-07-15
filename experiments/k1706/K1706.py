@@ -396,14 +396,24 @@ def prepare_panel(ohlcv: pd.DataFrame, design: pd.DataFrame) -> pd.DataFrame:
         validate="many_to_one",
     )
     panel = panel.sort_values(["symbol", "date"])
-    panel["raw_log_return"] = panel.groupby("symbol", observed=True)["close"].transform(
+    panel["analysis_period"] = np.select(
+        [
+            panel["date"].between("2016-06-01", "2016-09-30"),
+            panel["date"].between("2016-11-01", "2017-02-28"),
+        ],
+        ["pre", "post"],
+        default="excluded",
+    )
+    panel = panel[panel["analysis_period"].ne("excluded")].copy()
+    period_groups = [panel["symbol"], panel["analysis_period"]]
+    panel["raw_log_return"] = panel.groupby(period_groups, observed=True)["close"].transform(
         lambda s: np.log(s).diff()
     )
-    panel["adjusted_log_return"] = panel.groupby("symbol", observed=True)["adj_close"].transform(
+    panel["adjusted_log_return"] = panel.groupby(period_groups, observed=True)["adj_close"].transform(
         lambda s: np.log(s).diff()
     )
     adjustment_factor = panel["adj_close"] / panel["close"]
-    factor_change = adjustment_factor.groupby(panel["symbol"], observed=True).transform(
+    factor_change = adjustment_factor.groupby(period_groups, observed=True).transform(
         lambda s: np.log(s).diff().abs()
     )
     panel["corporate_action_boundary"] = factor_change > 0.2
@@ -413,16 +423,8 @@ def prepare_panel(ohlcv: pd.DataFrame, design: pd.DataFrame) -> pd.DataFrame:
         panel["raw_log_return"].abs() < panel["adjusted_log_return"].abs()
     )
     panel.loc[choose_raw, "log_return"] = panel.loc[choose_raw, "raw_log_return"]
-    panel["analysis_period"] = np.select(
-        [
-            panel["date"].between("2016-06-01", "2016-09-30"),
-            panel["date"].between("2016-11-01", "2017-02-28"),
-        ],
-        ["pre", "post"],
-        default="excluded",
-    )
     panel["rv5_bps2"] = panel.groupby(
-        ["symbol", "analysis_period"], observed=True
+        period_groups, observed=True
     )["log_return"].transform(
         lambda s: s.pow(2).rolling(5, min_periods=5).sum() * 10_000
     )
@@ -431,7 +433,6 @@ def prepare_panel(ohlcv: pd.DataFrame, design: pd.DataFrame) -> pd.DataFrame:
     panel["log_dollar_volume"] = np.log(dollar_volume.where(dollar_volume > 0))
     panel["amihud_1e9"] = panel["log_return"].abs() / dollar_volume.where(dollar_volume > 0) * 1e9
     panel["month"] = panel["date"].dt.strftime("%Y-%m")
-    panel = panel[panel["month"].isin(["2016-06", "2016-07", "2016-08", "2016-09", "2016-11", "2016-12", "2017-01", "2017-02"])].copy()
     panel["post"] = panel["date"] >= pd.Timestamp("2016-11-01")
     panel["treated"] = panel["group"].ne("C")
     panel["raw_signal"] = panel["treated"].astype(float)
@@ -592,6 +593,7 @@ def analyze(panel: pd.DataFrame, spread_audit: dict, ohlcv_audit: dict) -> dict:
             "panel_start": panel["date"].min().strftime("%Y-%m-%d"),
             "panel_end": panel["date"].max().strftime("%Y-%m-%d"),
             "rv5_resets_at_pre_post_boundaries": True,
+            "returns_reset_at_pre_post_boundaries": True,
         },
         "lookahead_audit": {
             "explicit_signal_shift_1": True,
@@ -600,6 +602,9 @@ def analyze(panel: pd.DataFrame, spread_audit: dict, ohlcv_audit: dict) -> dict:
                 "backward-looking t-4 through t within each frozen pre/post period"
             ),
             "same_day_signal_times_outcome": False,
+            "period_boundary_reset": (
+                "returns, adjustment-factor changes, and rolling RV grouped by symbol x analysis_period"
+            ),
             "corporate_action_boundary_rule": (
                 "if abs(diff(log(adj_close/close))) > 0.2, use the smaller-absolute "
                 "of raw and adjusted log returns"

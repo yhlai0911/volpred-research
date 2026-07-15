@@ -33,6 +33,12 @@ raw-return 與 adjusted-return 中取絕對值較小者，避免把 adjustment-f
 rolling window 在 frozen pre/post 邊界各自重啟。審查者以替代重算驗證 range
 方向與顯著性未被這兩項修正推翻；正式數字仍以修正後完整重跑為準。
 
+第二次限時裁決給 `CONDITIONAL_PASS`（range-only），因當時版本雖已重啟 RV
+rolling，單日 return 與 adjustment-factor change 仍在完整日期序列先算，11 月
+第一筆因此跨越 October。最終修正把 return、adjustment-factor change、RV 三者
+全部改在 `symbol × analysis_period` 內計算後重跑；本段保留該 blocking defect
+與修復軌跡，不把舊 conditional verdict 冒充最終 PASS。
+
 ## 動機與差異化
 
 美國 Tick Size Pilot 將約 1,200 檔小型股隨機分到三個測試組；控制組維持
