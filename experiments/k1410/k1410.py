@@ -21,7 +21,8 @@ K1410 — 報酬順序風險（Sequence of Returns Risk, SORR）的真實資料�
 1. 資料：yfinance 月報酬。
    - ^GSPC（S&P500 指數，1928 起，含大蕭條/二戰/停滯性通膨/2000/2008/2020）
    - ^TWII（台股加權指數，1997 起，含 2000 網路泡沫/2008/2020/2022）
-   報酬用 auto_adjust=True 的月底收盤 pct_change（含息總報酬近似）。
+   報酬用 auto_adjust=True 取得的指數月底收盤 pct_change；快取只有價格指數
+   Close，未含股息或配息再投入，不能視為可投資產品的總報酬。
 2. 退休模擬：起始資產正規化為 1,000（正規化單位，等價於本金=1）。
    30 年期，年初提領，提領金額逐年依通膨（CPI 假設）成長 → 固定「實質」
    提領率。本金不足以支付當年提領即破產（耗盡）。
@@ -82,9 +83,9 @@ INIT_WEALTH = 1000.0           # 起始資產（正規化）
 CPI = 0.02                     # 通膨假設（年），提領金額逐年成長以維持實質購買力
 BASE_WR = 0.04                 # 基準提領率（佔起始資產，年初提）
 
-# Bond / 防禦資產 proxy：用長債總報酬長期經驗值近似（避免再抓一條不同期間/
-# 缺漏的債券序列造成對齊問題）。實質報酬低、波動小、與股市低相關。這是模型
-# 假設，README/results 明記。
+# Bond / 防禦資產 proxy：用固定常態假設（避免再抓一條不同期間／缺漏的債券
+# 序列造成對齊問題）。它不是實際債券歷史，零股債相關也不代表保守；不同市場
+# 時期可能高估或低估分散效果。README/results 明記此模型邊界。
 BOND_MEAN_M = 0.04 / 12.0      # 年化名目 ~4%
 BOND_VOL_M = 0.05 / np.sqrt(12)  # 年化波動 ~5%
 
@@ -403,7 +404,8 @@ def _simulate_defer(eq_all, bond, eq_w, init_wealth, base_wr, cpi, horizon_y, de
 
 def evaluate_strategies(returns, label, init_wealth, cpi, horizon_y, rng):
     eq_all = stationary_bootstrap_paths(returns, N_SIM, horizon_y * 12, MEAN_BLOCK_M, rng)
-    # 債：獨立常態 proxy，與股市設 0 相關（保守，不誇大分散效果）
+    # 債：獨立常態 proxy，與股市設 0 相關；這是中性模型假設，可能高估或低估
+    # 不同時期的分散效果。
     bond = rng.normal(BOND_MEAN_M, BOND_VOL_M, size=eq_all.shape)
 
     all_eq_w = np.ones(horizon_y)
@@ -618,7 +620,7 @@ def main():
             "crash_year_risk_n_sim": 5000,
             "bond_proxy": {"ann_mean": round(BOND_MEAN_M * 12, 4),
                            "ann_vol": round(BOND_VOL_M * np.sqrt(12), 4),
-                           "note": "獨立常態 proxy，與股市設 0 相關（保守，不誇大分散效果）"},
+                           "note": "獨立常態 proxy，與股市設 0 相關；非實際債券歷史，分散效果可能被高估或低估"},
             "withdrawal_timing": "年初提領（先扣再投資該年市場報酬）",
             "lookahead_check": "bootstrap 路徑僅由歷史月報酬 resample；提領決策只用當期/過去淨值",
         },
@@ -635,7 +637,8 @@ def main():
         "data_limitations": [
             "債券報酬用獨立常態 proxy（年化~4%/vol~5%，與股市 0 相關），非真實債券序列；"
             "真實股債相關隨時期變動，bond tent / 60/40 的分散效果可能被高/低估。",
-            "股票月報酬用指數 auto_adjust 收盤近似總報酬，未扣管理費/稅/交易成本。",
+            "股票月報酬來自 ^GSPC / ^TWII 價格指數 Close，未含股息或配息再投入，"
+            "也未扣管理費/稅/交易成本；絕對成功率不等同可投資產品的退休預測。",
             "stationary bootstrap 假設未來月報酬與歷史同分布；結構性轉變（長期低報酬、"
             "高通膨）下實際破產風險可能更高。",
             "CPI 固定 2%，實際通膨波動會額外加重提領期壓力（未建模通膨不確定性）。",
