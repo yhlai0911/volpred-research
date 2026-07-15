@@ -6,7 +6,7 @@ Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-con
 
 **統一任務池 + claim 流程（HARD RULE，2026-05-25 用戶要求）**：
 1. **第一動作 = 一次定位，禁止翻抽屜**：`uv run python scripts/ops_snapshot.py`（0.4s 回傳 backbone/queue/pool/alerts/git 全狀態 JSON）+ 讀 `storage/ops/handoff_latest.md`（敘事脈絡）。**之後不得再用零散 ls / git status / jq 重複定位**（2026-07-14 WS1b：repo-navigation bash 一週 1,945 則 / 10.1M tokens 的根治）。
-2. **派工前先 claim**：`uv run python scripts/task_pool_claim.py claim --id <id> --owner hourly-$(date +%H)` — 拒絕 `wrong_status` / `already_claimed` 時換另一 task，禁強推。
+2. **派工前先 claim**：先確認 `$VOLPRED_TASK_CLAIM_OWNER` 非空，再跑 `uv run python scripts/task_pool_claim.py claim --id <id> --owner "$VOLPRED_TASK_CLAIM_OWNER"`。這是 supervisor 依 slot_id + job_id 產生的唯一且 retry-stable ownership token；缺值必須停止並回報 dispatcher identity error，禁止退回日期/小時或自訂名稱。拒絕 `wrong_status` / `already_claimed` 時換另一 task，禁強推。
 3. 開工標 in_progress：`uv run python scripts/task_pool_claim.py start --id <id>`
 4. 完工標 succeeded/failed：`uv run python scripts/task_pool_claim.py complete --id <id> --status succeeded --result "<摘要>"`
 5. 雙 session 撞題保護：claim 機制已 cross-session atomic（fcntl LOCK_EX on next_tasks.json）— 互動 session 與 hourly session claim 同 id 時後者得 `already_claimed`，自動換工。
@@ -56,7 +56,7 @@ uv run python scripts/task_pool_claim.py list --status pending --limit 50 2>/dev
 ```
 若有最舊一條 → 走 5 步：
 
-1. **CLAIM**: `uv run python scripts/task_pool_claim.py claim --id <id> --owner hourly-$(date +%H)` → `start`
+1. **CLAIM**: `uv run python scripts/task_pool_claim.py claim --id <id> --owner "$VOLPRED_TASK_CLAIM_OWNER"` → `start`
 2. **ANALYZE**: 讀 description 內「用戶回信內容」+「原始助理寄出內容」→ 分類 (question / command / dispatch / observation / urgent)
 3. **PLAN**: 寫 1-5 個 bullet 計畫 — 每 bullet 含「動作 / 預期產出 / ETA」。對需要 sub-task 的動作，下 `task_pool_claim.py claim` 建 linked sub-task（task_type 對應；description 含 parent_email_task_id 反向追蹤）
 4. **(SKIP — ack 已由 gmail-poll 寄)** ❌ 不要再寄 plan email。用戶在收信當下已收到 ack（含 task_id / type / priority / ETA / 完成 email 承諾）— 你只負責執行 + close。
@@ -211,7 +211,7 @@ PHASE B — 派新工:
 7. 派完 end summary 格式（per memory feedback_task_end_summary_format）: 結束時間 / 總時間 / 本次 token / 完成項目 / 本週 Max 20x quota % (`uv run python scripts/weekly_quota_estimate.py`) / 下次任務時間。
 8. 若 last-3 涵蓋所有 candidates 的 type → 派沒做過的 type，必要時主動生 brief / 文章 / compute job。沒事做永不可接受。
 9. 嚴禁: force push, --no-verify, 寫 knowledge.json from agent (K1259), 假數字。研究誠實 > 一切。
-10. **完整完成 gate**：本 fire 結束前驗證 — (a) agent 跑完 + 結果 verify、(b) knowledge.json 或 work_log 已寫，**且本 fire 寫入的每筆 work_log entry 必含 `"actor": "hourly-<HH>"`（<HH> = 本班台北時兩位數，如 `hourly-14`；2026-07-10 pregate 歸因硬規 — 缺 actor 的 entry 無法被 skip-vs-產出交叉核對歸因，視同 (b) 未完成）**、(c) commit 已 push 主線 OR worktree merged、(d) 派出的 task next_tasks status 已標 succeeded/failed（不留 in_progress 殘留）。任一未完成 = 本 fire 未真正結束，繼續做完。下一輪 4h 後才開始下個新任務。
+10. **完整完成 gate**：本 fire 結束前驗證 — (a) agent 跑完 + 結果 verify、(b) knowledge.json 或 work_log 已寫，**且本 fire 寫入的每筆 work_log entry 的 `actor` 或 `owner` 必須逐字等於 `$VOLPRED_TASK_CLAIM_OWNER`；這個 supervisor-issued token 可精確歸因到 slot_id + job_id，缺少或自行改寫視同 (b) 未完成**、(c) commit 已 push 主線 OR worktree merged、(d) 派出的 task next_tasks status 已標 succeeded/failed（不留 in_progress 殘留）。任一未完成 = 本 fire 未真正結束，繼續做完。下一輪 4h 後才開始下個新任務。
 
 PHASE Z — **本班收尾：交代「為什麼」**（2026-07-13 3-strike 重構；取代舊的「自己 git add + commit」）:
 

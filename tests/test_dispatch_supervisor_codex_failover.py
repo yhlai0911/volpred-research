@@ -107,6 +107,7 @@ _PROBE_OK = SimpleNamespace(returncode=0, stdout="OK", stderr="")
 
 def test_exec_success_marks_recovered(monkeypatch) -> None:
     calls: list[list[str]] = []
+    work_envs: list[dict[str, str]] = []
 
     inner = _fake_codex(
         probe=_PROBE_OK,
@@ -115,6 +116,8 @@ def test_exec_success_marks_recovered(monkeypatch) -> None:
 
     def _run(argv, **kwargs):
         calls.append(argv)
+        if _is_work_call(argv):
+            work_envs.append(kwargs["env"])
         return inner(argv, **kwargs)
 
     monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
@@ -126,6 +129,7 @@ def test_exec_success_marks_recovered(monkeypatch) -> None:
     assert "danger-full-access" not in calls[1], "the probe must not be able to write"
     assert "danger-full-access" in calls[2]
     assert "claimed task X" in result.output_tail
+    assert work_envs == [dict(codex_failover.os.environ)]
 
 
 def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:
@@ -140,7 +144,13 @@ def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:
         def communicate(self, timeout=None):
             return "tracked work", None
 
-    monkeypatch.setattr(codex_failover.subprocess, "Popen", lambda *a, **k: FakeProc())
+    launched: dict = {}
+
+    def _popen(*args, **kwargs):
+        launched.update(kwargs)
+        return FakeProc()
+
+    monkeypatch.setattr(codex_failover.subprocess, "Popen", _popen)
     monkeypatch.setattr(codex_failover.os, "getpgid", lambda pid: 888)
     monkeypatch.setattr(codex_failover.procutil, "pgid_members_checked", lambda pgid: [])
     seen: list[tuple] = []
@@ -153,6 +163,9 @@ def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:
 
     assert result.recovered is True
     assert seen == [("start", 777, 888), ("finish", 777)]
+    assert launched["env"]["VOLPRED_TASK_CLAIM_OWNER"] == (
+        "codex-failover-slot-2-abcdef123456"
+    )
 
 
 def test_tracked_failover_keeps_pid_attached_when_timeout_kill_is_unverified(

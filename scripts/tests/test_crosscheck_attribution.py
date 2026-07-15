@@ -40,6 +40,9 @@ def test_is_hourly_attributed_reads_both_fields() -> None:
     assert cc._is_hourly_attributed(
         "dispatch-worker:volpred-hourly-dispatch:1600:slot-1:abcd1234", ""
     ) is True
+    # supervisor-issued unique claim tokens: primary Claude and Codex failover
+    assert cc._is_hourly_attributed("", "hourly-slot-1-job-a") is True
+    assert cc._is_hourly_attributed("codex-failover-slot-2-job-b", "") is True
     # concurrent codex / interactive work is NOT hourly
     assert cc._is_hourly_attributed("", "codex") is False
     assert cc._is_hourly_attributed("codex-vscode", "codex-vscode") is False

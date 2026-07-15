@@ -37,7 +37,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
-from . import alerts, codex_failover, failure_class, procutil, state
+from . import alerts, codex_failover, failure_class, identity, procutil, state
 
 LOG = logging.getLogger(__name__)
 
@@ -331,6 +331,9 @@ def _run_one_attempt(
         ),
         "VOLPRED_DISPATCH_SLOT": slot_id,
         "VOLPRED_DISPATCH_JOB_ID": job_id,
+        "VOLPRED_TASK_CLAIM_OWNER": identity.task_claim_owner(
+            role="hourly", slot_id=slot_id, job_id=job_id,
+        ),
     }
     try:
         proc = _spawn(argv=argv, log_path=log_path, env=child_env, cwd=workdir)

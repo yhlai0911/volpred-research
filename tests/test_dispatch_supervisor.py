@@ -326,6 +326,8 @@ def test_scheduler_fire_runs_worker_when_due(tmp_path: Path, monkeypatch) -> Non
     assert decision["outcome"] == "success"
     assert received and received[0]["prompt_text"].endswith("prompt-body")
     assert "worktree_prefix=dispatch-slot-1-" in received[0]["prompt_text"]
+    assert "$VOLPRED_TASK_CLAIM_OWNER" in received[0]["prompt_text"]
+    assert "禁止退回日期/小時或自訂名稱" in received[0]["prompt_text"]
     assert received[0]["workdir"].is_dir()
     assert tmp_path.resolve() not in received[0]["workdir"].resolve().parents
     scratch_probe = subprocess.run(

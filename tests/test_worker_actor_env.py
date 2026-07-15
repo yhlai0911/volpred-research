@@ -17,7 +17,7 @@ import json
 import os
 from pathlib import Path
 
-from scripts.dispatch_supervisor import supervisor, worker
+from scripts.dispatch_supervisor import identity, supervisor, worker
 from volpred.ops import writer_log
 
 
@@ -88,16 +88,57 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
     # extension, not replacement — PATH (auth, HOME, …) survive or the child
     # would lose its ability to exec / authenticate.
     assert env["PATH"] == "/usr/bin:/bin"
-    # The two keys the worker OWNS: it stamps both to locate the fire. Listing
+    assert env["VOLPRED_TASK_CLAIM_OWNER"] == "hourly-slot-1-direct-smoke"
+    # The keys the worker OWNS: it stamps them to locate the fire. Listing
     # only VOLPRED_ACTOR made this test pass everywhere except inside a real
     # dispatch fire — where VOLPRED_DISPATCH_JOB_ID is already in the ambient
     # environment, so the loop compared the supervisor's job id against the one
     # the worker just stamped. It went red the first time the hourly agent ran
     # the suite (2026-07-14). A test must not depend on who is running it.
     for key, value in os.environ.items():
-        if key in ("VOLPRED_ACTOR", "VOLPRED_DISPATCH_JOB_ID"):
+        if key in (
+            "VOLPRED_ACTOR", "VOLPRED_DISPATCH_SLOT",
+            "VOLPRED_DISPATCH_JOB_ID", "VOLPRED_TASK_CLAIM_OWNER",
+        ):
             continue
         assert env.get(key) == value
+
+
+def test_task_claim_owner_is_unique_across_same_hour_slots_and_stable_on_retry() -> None:
+    slot_1_attempt_1 = identity.task_claim_owner(
+        role="hourly", slot_id="slot-1", job_id="job-a",
+    )
+    slot_1_attempt_2 = identity.task_claim_owner(
+        role="hourly", slot_id="slot-1", job_id="job-a",
+    )
+    slot_2_same_hour = identity.task_claim_owner(
+        role="hourly", slot_id="slot-2", job_id="job-b",
+    )
+    assert slot_1_attempt_1 == slot_1_attempt_2
+    assert slot_1_attempt_1 != slot_2_same_hour
+    assert slot_1_attempt_1 == "hourly-slot-1-job-a"
+
+
+def test_codex_failover_owner_retains_codex_eligibility_prefix() -> None:
+    owner = identity.task_claim_owner(
+        role="codex-failover", slot_id="slot-2", job_id="abcdef123456",
+    )
+    assert owner == "codex-failover-slot-2-abcdef123456"
+
+
+def test_dispatch_prompts_use_only_supervisor_issued_claim_owner() -> None:
+    root = Path(__file__).resolve().parents[1]
+    primary = (root / "scripts" / "cron_hourly_dispatch_prompt.md").read_text(
+        encoding="utf-8",
+    )
+    failover = (
+        root / "scripts" / "cron_hourly_dispatch_codex_failover_prompt.md"
+    ).read_text(encoding="utf-8")
+    assert "VOLPRED_TASK_CLAIM_OWNER" in primary
+    assert "VOLPRED_TASK_CLAIM_OWNER" in failover
+    assert "hourly-$(date +%H)" not in primary
+    assert "--owner codex-failover" not in failover
+    assert "--actor codex-failover" not in failover
 
 
 def test_spawn_env_reaches_child_process(tmp_path: Path) -> None:

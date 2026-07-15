@@ -60,8 +60,10 @@ def _is_hourly_attributed(actor: str, owner: str) -> bool:
     """True when a substantive work_log entry is attributable to an hourly fire.
 
     A fire stamps its output two ways, so attribution can land in EITHER field:
-      - the dispatched agent's work_log convention: actor/owner == "hourly-<HH>"
-        (the prompt tells the agent to stamp the local dispatch hour).
+      - the dispatched agent's work_log convention: actor/owner is the unique
+        supervisor-issued ``hourly-slot-<N>-<job_id>`` ownership token.
+      - Codex failover uses the equivalent ``codex-failover-slot-<N>-<job_id>``
+        token; it still belongs to the same hourly fire.
       - worker._dispatch_actor's VOLPRED_ACTOR default, which reaches shared-state
         writers as "dispatch-worker:volpred-hourly-dispatch:<HHMM>:...". That
         string already carries "hourly" (the schedule id), but the prefix is
@@ -76,8 +78,13 @@ def _is_hourly_attributed(actor: str, owner: str) -> bool:
     and must never be counted as the fire's output — doing so would be false
     attribution, not higher coverage.
     """
-    blob = f"{actor} {owner}"
-    return "hourly" in blob or "dispatch-worker" in actor
+    values = (str(actor or ""), str(owner or ""))
+    return any(
+        # ``hourly-<HH>`` is retained for historical rows produced before the
+        # slot/job identity fix; new rows use the more specific hourly-slot-*.
+        value.startswith("hourly-") or value.startswith("codex-failover-slot-")
+        for value in values
+    ) or str(actor or "").startswith("dispatch-worker:volpred-hourly-dispatch:")
 
 
 def _load_pregate(since: datetime | None, invoker: str | None) -> list[dict]:

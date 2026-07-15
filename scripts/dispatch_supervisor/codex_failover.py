@@ -49,7 +49,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from . import procutil
+from . import identity, procutil
 
 LOG = logging.getLogger(__name__)
 
@@ -252,23 +252,28 @@ def run_codex_failover(
             + prompt
         )
     argv = [codex_bin, "exec", "--skip-git-repo-check", "-s", "danger-full-access", prompt]
+    child_env = {**os.environ}
+    if slot_id and job_id:
+        child_env.update({
+            "VOLPRED_ACTOR": f"codex-failover:{slot_id}:{job_id[:8]}",
+            "VOLPRED_DISPATCH_SLOT": slot_id,
+            "VOLPRED_DISPATCH_JOB_ID": job_id,
+            "VOLPRED_TASK_CLAIM_OWNER": identity.task_claim_owner(
+                role="codex-failover", slot_id=slot_id, job_id=job_id,
+            ),
+        })
     tracked_pid: int | None = None
     process_confirmed_finished = False
     try:
         if on_process_started is None:
             result = subprocess.run(
-                argv, cwd=str(launch_cwd), capture_output=True, text=True, timeout=cap_s,
+                argv, cwd=str(launch_cwd), capture_output=True, text=True,
+                timeout=cap_s, env=child_env,
             )
         else:
-            env = {
-                **os.environ,
-                "VOLPRED_ACTOR": f"codex-failover:{slot_id or 'slot'}:{(job_id or '')[:8]}",
-                "VOLPRED_DISPATCH_SLOT": slot_id or "",
-                "VOLPRED_DISPATCH_JOB_ID": job_id or "",
-            }
             proc = subprocess.Popen(
                 argv, cwd=str(launch_cwd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                stdin=subprocess.DEVNULL, text=True, start_new_session=True, env=env,
+                stdin=subprocess.DEVNULL, text=True, start_new_session=True, env=child_env,
             )
             tracked_pid = proc.pid
             pgid = os.getpgid(proc.pid)
