@@ -54,7 +54,10 @@ def test_sentinel_is_exempt_from_host_cron_fail():
 def test_dirty_guard_does_not_return_bare_one():
     """Pin the call site: returning 1 here is the bug this file exists to stop."""
     src = (ROOT / "scripts" / "daily_update.py").read_text(encoding="utf-8")
-    marker = "tracked output already dirty"
+    # 2026-07-16: the hold condition narrowed from "any tracked output is dirty" to
+    # "another writer actually holds one" (adoptable_churn), so the message moved.
+    # What this test pins is unchanged: the hold path returns the sentinel, not 1.
+    marker = "another writer holds a tracked output"
     assert marker in src, "guard message changed — re-point this test at the new hold path"
     hold_block = src[src.index(marker) : src.index(marker) + 400]
     assert "return GUARD_HELD_EXIT_CODE" in hold_block

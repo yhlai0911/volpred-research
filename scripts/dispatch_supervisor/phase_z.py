@@ -65,6 +65,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
+from volpred.ops.machine_churn import classify_machine_churn
 from volpred.ops.git_writer_lock import (
     GitWriterLockError,
     git_writer_lock,
@@ -732,66 +733,12 @@ def _bump_foreign_streaks(repo_root: Path, runner, foreign: list[str]) -> dict[s
 def _classify_machine_churn(repo_root: Path, candidates: list[str]) -> tuple[list[str], list[str], list[str]]:
     """Split declared machine-churn paths into (committable, deferred, corrupt).
 
-    Adopting a daemon-written file is only safe when nobody is mid-write. Two gates:
-
-    1. the writers' own lock (``fcntl`` ``LOCK_EX`` across every read-modify-write of
-       next_tasks.json — see scripts/task_pool_claim.py:87). If a shared lock cannot
-       be taken without blocking, a writer holds it right now → defer to the next
-       fire. This is the guard incident #1 lacked.
-    2. the content parses. A canonical control file that does not parse is a real
-       problem worth escalating, but committing it is how a truncated queue became
-       "valid history" once already.
-
-    ``.json`` and ``.jsonl`` candidates are parse-checked; any other churn path still
-    gets the lock gate.
-
-    A candidate that no longer exists is a deletion, and deletions are how the
-    machine state garbage-collects itself (``gc_event_ledger`` expiring a ledger
-    entry). Staging one is the whole point; there is nothing to lock or parse. Until
-    2026-07-12 the open() below raised ENOENT on exactly these paths and filed them
-    as ``deferred`` — "leave it for the next fire" — which for a file that will never
-    come back means every fire, forever. One had been cycling that way for eight.
+    The lock/parse gates moved to ``volpred.ops.machine_churn`` on 2026-07-16 so the
+    scheduled writers in ``scripts/`` could ask the same question this module asks —
+    daily_update's dirty-guard was answering it with a bare dirty flag and latching
+    itself shut. One implementation, two callers; see that module for the reasoning.
     """
-    committable: list[str] = []
-    deferred: list[str] = []
-    corrupt: list[str] = []
-    for rel in candidates:
-        if not (repo_root / rel).exists():
-            committable.append(rel)
-            continue
-        try:
-            with open(repo_root / rel, "r", encoding="utf-8") as fh:
-                try:
-                    fcntl.flock(fh.fileno(), fcntl.LOCK_SH | fcntl.LOCK_NB)
-                except OSError:
-                    LOG.info("phase_z: %s is locked by a writer right now — leaving it "
-                             "for the next fire", rel)
-                    deferred.append(rel)
-                    continue
-                try:
-                    if rel.endswith(".json"):
-                        json.load(fh)
-                    elif rel.endswith(".jsonl"):
-                        # The queue archive is appended to, not replaced by rename, so
-                        # a writer killed mid-append leaves a truncated final line —
-                        # the .json gate's exact failure mode in a file the gate did
-                        # not cover. Parse every record; a bad one escalates instead
-                        # of entering history.
-                        for line in fh:
-                            if line.strip():
-                                json.loads(line)
-                except (json.JSONDecodeError, UnicodeDecodeError) as exc:
-                    LOG.warning("phase_z: %s does not parse (%s) — refusing to commit it", rel, exc)
-                    corrupt.append(rel)
-                    continue
-                finally:
-                    fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
-        except OSError as exc:
-            LOG.warning("phase_z: cannot read machine-churn path %s (%s) — leaving it dirty", rel, exc)
-            deferred.append(rel)
-            continue
-        committable.append(rel)
-    return committable, deferred, corrupt
+    return classify_machine_churn(repo_root, candidates, label="phase_z")
 
 
 # ── pre-fire guard ───────────────────────────────────────────────────────────

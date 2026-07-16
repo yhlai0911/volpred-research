@@ -5,9 +5,17 @@ plain ``git add -A`` is nevertheless unsafe in the shared checkout: it can adopt
 another session's work.  This module gives those jobs one narrow contract:
 
 1. snapshot whether each declared output path was dirty *before* the write;
-2. exclude dirty paths from the producer's write set;
-3. after a successful write, commit only paths that were clean at the snapshot;
+2. establish who that dirt belongs to — a sibling daemon that never committed,
+   or a writer holding the file open right now (:func:`adoptable_churn`);
+3. exclude only the second kind from the producer's write set, and commit the
+   rest, including dirt this job did not itself create;
 4. fail closed when Git cannot establish ownership or the shared lease.
+
+Step 2 is not decoration.  Until 2026-07-16 steps 1 and 3 were wired straight
+together — dirty meant excluded — and because a path excluded from the write set
+is excluded from the commit set by the same flag, the guard latched: the only job
+that would ever have committed the path was the one refusing to touch it.  See
+``docs/fix_56ddf72b_dirty_guard.md``.
 
 Callers remain responsible for declaring their complete output population.  The
 ratchet for that declaration lives in
@@ -26,6 +34,7 @@ from volpred.ops.git_writer_lock import (
     git_writer_subprocess_kwargs,
     require_canonical_main_checkout,
 )
+from volpred.ops.machine_churn import classify_machine_churn
 
 
 def _relative_paths(repo_root: Path, paths: Iterable[str | Path]) -> list[str]:
@@ -43,13 +52,22 @@ def _relative_paths(repo_root: Path, paths: Iterable[str | Path]) -> list[str]:
     return relative
 
 
-def dirty_paths_before_write(
+def probe_dirty_outputs(
     repo_root: Path,
     paths: Iterable[str | Path],
     *,
     label: str,
-) -> frozenset[str]:
-    """Return declared output paths that are already dirty, failing closed.
+) -> tuple[frozenset[str], frozenset[str]]:
+    """Return (dirty, unprobed) for declared output paths.
+
+    Split because the two mean different things and only one of them can ever be
+    reasoned about further.  ``dirty`` is a fact about content — Git looked and
+    saw a difference, and a caller may go on to ask *whose* difference it is
+    (:func:`adoptable_churn`).  ``unprobed`` is the absence of a fact: Git could
+    not answer, so nothing downstream may assume anything.  Merging them, as this
+    module did until 2026-07-16, silently promotes "I don't know" to "someone
+    owns it", which is the strictly safe reading for one and the latching one for
+    the other.
 
     One path per Git probe keeps the ownership decision exact: a pre-existing
     edit to one FRED series must not prevent the job from committing the other
@@ -58,6 +76,7 @@ def dirty_paths_before_write(
     """
     rels = _relative_paths(repo_root, paths)
     dirty: set[str] = set()
+    unprobed: set[str] = set()
     for rel in rels:
         try:
             proc = subprocess.run(
@@ -82,7 +101,7 @@ def dirty_paths_before_write(
                 "self-commit will skip this path",
                 file=sys.stderr,
             )
-            dirty.add(rel)
+            unprobed.add(rel)
             continue
         if proc.returncode != 0:
             detail = (proc.stderr or proc.stdout or "").strip()[:200]
@@ -91,10 +110,64 @@ def dirty_paths_before_write(
                 f"{rel} ({detail}); self-commit will skip this path",
                 file=sys.stderr,
             )
-            dirty.add(rel)
+            unprobed.add(rel)
         elif proc.stdout.strip():
             dirty.add(rel)
-    return frozenset(dirty)
+    return frozenset(dirty), frozenset(unprobed)
+
+
+def dirty_paths_before_write(
+    repo_root: Path,
+    paths: Iterable[str | Path],
+    *,
+    label: str,
+) -> frozenset[str]:
+    """Every declared output path this writer must not touch, failing closed.
+
+    The union of "Git saw a change" and "Git would not say" — the conservative
+    set, and the right default for a caller that does not go on to establish
+    authorship.  Callers that do want that distinction take
+    :func:`probe_dirty_outputs` and :func:`adoptable_churn` instead.
+    """
+    dirty, unprobed = probe_dirty_outputs(repo_root, paths, label=label)
+    return dirty | unprobed
+
+
+def adoptable_churn(
+    repo_root: Path,
+    dirty: Iterable[str],
+    unprobed: Iterable[str],
+    *,
+    label: str,
+) -> tuple[frozenset[str], frozenset[str]]:
+    """Split a pre-existing dirty set into (churn, conflict).
+
+    A dirty declared output is not evidence that anyone still wants it.  These
+    files have no hand-authors — governance forbids editing them by hand
+    (CLAUDE.md "永遠修流程，不修資料"; publishing.md on paper_trading.json) — so
+    the realistic causes of dirt are a sibling daemon that wrote and did not
+    commit, or a writer mid-write *right now*.  Only the second is a conflict,
+    and :func:`classify_machine_churn` can tell them apart for real: it takes the
+    writers' own advisory lock and parses the content.
+
+    Treating both as conflict is what latched this guard shut.  A path excluded
+    from the write set is excluded from the commit set by the same flag, and for
+    outputs whose only committer is the very job being held, "skip it this run"
+    means "skip it every run": ``frontend-v2-fix/data/strategy_metrics.json``
+    went 11 days without a commit that way, in silence, because nothing else in
+    the system was ever going to come along and commit it.
+    """
+    committable, deferred, corrupt = classify_machine_churn(
+        repo_root, sorted(dirty), label=label
+    )
+    conflict = frozenset(deferred) | frozenset(corrupt) | frozenset(unprobed)
+    if conflict:
+        print(
+            f"[{label}] WARN: holding output(s) with a live writer, unreadable "
+            f"content, or an unresolved Git probe: {sorted(conflict)}",
+            file=sys.stderr,
+        )
+    return frozenset(committable), conflict
 
 
 def writable_output_paths(
