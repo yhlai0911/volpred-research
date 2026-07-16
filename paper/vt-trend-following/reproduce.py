@@ -79,6 +79,7 @@ class Audit:
             "scope": [
                 "Table 2 full-sample, split-sample, and K1457 continuous-vs-dummy checks",
                 "Table 3 / Figure 1 / K1417 / Table 6 canonical MDD-retention numbers",
+                "Table 5 international raw + exposure-matched decomposition (K1695 v4 retraction rewrite)",
                 "Bundled figure artifacts after regeneration",
             ],
             "alert_level": alert_level,
@@ -211,6 +212,58 @@ def verify_k1417(audit: Audit, k1192: dict, k1417: dict) -> None:
     audit.check(section, "Median lower-bound shift", 11.1, median_shift, tol=0.1)
 
 
+def verify_table5_international(audit: Audit, k1695: dict) -> None:
+    # v4 retraction rewrite: Table 5 raw + exposure-matched decomposition (experiment K1695).
+    section = "Table 5 / Section international (K1695)"
+    inc = k1695["samples"]["inception_aware"]["summary"]
+    primary = k1695["inference"]["primary"]
+    decision = k1695["decision"]
+    no_timing = k1695["inference"]["no_timing_reference"]["common_period"]
+
+    audit.check(section, "inception raw average dMDD pp (27.5)", 27.5, round(inc["average_delta_mdd_pp"], 1))
+    audit.check(section, "inception matched average dMDD pp (5.0)", 5.0, round(inc["average_exposure_matched_delta_mdd_pp"], 1))
+    audit.check(section, "inception average vol ratio (0.56)", 0.56, round(inc["average_vol_ratio"], 2))
+    audit.check(section, "inception min vol ratio (0.52)", 0.52, round(inc["min_vol_ratio"], 2))
+    audit.check(section, "inception max vol ratio (0.66)", 0.66, round(inc["max_vol_ratio"], 2))
+    audit.check(section, "n exposure mismatch (13)", 13, inc["n_exposure_mismatch"])
+    audit.check(section, "n raw improved (13)", 13, inc["n_mdd_improved"])
+    audit.check(section, "n matched improved inception (12)", 12, inc["n_exposure_matched_improved"])
+    audit.check(section, "n sharpe improved (1)", 1, inc["n_sharpe_improved"])
+    audit.check(section, "DM matched average pp (7.5)", 7.5, round(inc["dm_average_exposure_matched_delta_mdd_pp"], 1))
+    audit.check(section, "EM matched average pp (2.0)", 2.0, round(inc["em_average_exposure_matched_delta_mdd_pp"], 1))
+    audit.check(section, "DM raw average pp (31.3)", 31.3, round(inc["dm_average_delta_mdd_pp"], 1))
+    audit.check(section, "EM raw average pp (23.0)", 23.0, round(inc["em_average_delta_mdd_pp"], 1))
+    audit.check(section, "VIX sens vs raw dMDD pearson r (-0.817)", -0.817, round(inc["vix_sensitivity_vs_delta_mdd"]["pearson_r"], 3))
+    audit.check(section, "VIX sens vs raw dMDD spearman rho (-0.775)", -0.775, round(inc["vix_sensitivity_vs_delta_mdd"]["spearman_rho"], 3))
+
+    raw_ci = primary["average_delta_mdd_pp"]
+    matched_ci = primary["average_exposure_matched_delta_mdd_pp"]
+    audit.check(section, "common raw CI lower (4.2)", 4.2, round(raw_ci["lower"], 1))
+    audit.check(section, "common raw CI upper (19.3)", 19.3, round(raw_ci["upper"], 1))
+    audit.check(section, "common raw P(<=0) (0.0006)", 0.0006, raw_ci["probability_le_zero"], tol=1e-6)
+    audit.check(section, "common matched CI lower (-7.0)", -7.0, round(matched_ci["lower"], 1))
+    audit.check(section, "common matched CI upper (3.6)", 3.6, round(matched_ci["upper"], 1))
+    audit.check(section, "common matched P(<=0) (0.7075)", 0.7075, matched_ci["probability_le_zero"], tol=1e-6)
+    audit.check(section, "common n_obs (3557)", 3557, primary["n_obs"])
+
+    common = decision["per_sample"]["common_period"]
+    inception = decision["per_sample"]["inception_aware"]
+    audit.check(section, "common raw observed average (12.6)", 12.6, round(common["raw_average_delta_mdd_pp"], 1))
+    audit.check(section, "common matched observed average (-0.9)", -0.9, round(common["exposure_matched_average_delta_mdd_pp"], 1))
+    audit.check(section, "common null p (0.559)", 0.559, round(common["null_p_one_sided"], 3))
+    audit.check(section, "inception null p (0.212)", 0.212, round(inception["null_p_one_sided"], 3))
+    audit.check(section, "common holm survivors (0)", 0, common["holm_survivors"])
+    audit.check(section, "inception holm survivors (0)", 0, inception["holm_survivors"])
+    audit.check(section, "common matched positive count (7)", 7, common["n_exposure_matched_positive"])
+
+    audit.check(section, "no-timing raw average common (10.7)", 10.7, round(no_timing["average_raw_delta_mdd_pp"], 1))
+    audit.check(section, "no-timing matched average common (0.01)", 0.01, round(no_timing["average_exposure_matched_delta_mdd_pp"], 2))
+    audit.check(section, "no-timing raw improved count (13)", 13, no_timing["n_raw_improved"])
+
+    audit.bool_check(section, "raw dMDD not reportable alone", True, inc["raw_delta_mdd_reportable_alone"] is False)
+    audit.bool_check(section, "decision claim_status is retracted", True, decision["claim_status"] == "retracted")
+
+
 def verify_figures(audit: Audit) -> None:
     section = "Figure artifacts"
     figures_dir = PAPER_DIR / "figures"
@@ -226,12 +279,14 @@ def main() -> int:
     k1376 = load_json(ROOT / "experiments" / "k1376" / "k1376_results.json")
     k1417 = load_json(ROOT / "experiments" / "k1417" / "k1417_results.json")
     k1457 = load_json(ROOT / "experiments" / "k1457" / "k1457_results.json")
+    k1695 = load_json(ROOT / "experiments" / "k1695" / "k1695_results.json")
 
     audit = Audit()
     verify_table2(audit, k55, k1193, k1457)
     verify_table3_and_figure1(audit, k1192)
     verify_table6(audit, k1376)
     verify_k1417(audit, k1192, k1417)
+    verify_table5_international(audit, k1695)
     verify_figures(audit)
 
     report = audit.finalize()
