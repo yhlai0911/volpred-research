@@ -6,6 +6,10 @@
 #  3. stop_hook_active=true → 放行（防無窮迴圈）
 #  4. transcript 缺失 → fail-open 放行
 #  5. 最後 assistant 行是空 text → block
+#  6. canonical interactive completion → say short task label
+#  7. same turn re-fired → no duplicate speech
+#  8. worktree/background cwd → no speech
+#  9. blocked final text → no false completion speech
 set -euo pipefail
 HOOK="$(cd "$(dirname "$0")/../.." && pwd)/scripts/hooks/enforce_final_text.py"
 TMP="$(mktemp -d)"
@@ -49,6 +53,60 @@ cat > "$TMP/t5.jsonl" <<'EOF'
 {"type":"assistant","isSidechain":false,"message":{"role":"assistant","content":[{"type":"text","text":"   "}]}}
 EOF
 run_case "空文字收尾必 block" "$TMP/t5.jsonl" false true
+
+# Speech contract: fake /usr/bin/say replacement captures argv without producing audio.
+mkdir -p "$TMP/canonical" "$TMP/worktree"
+cat > "$TMP/fake-say" <<'EOF'
+#!/bin/bash
+printf '%s\n' "$1" >> "$SAY_CAPTURE"
+EOF
+chmod +x "$TMP/fake-say"
+export VOLPRED_SAY_BIN="$TMP/fake-say"
+export VOLPRED_SPEECH_STATE_PATH="$TMP/speech-state.json"
+export VOLPRED_SPEECH_CANONICAL_CWD="$TMP/canonical"
+export SAY_CAPTURE="$TMP/say-capture.txt"
+
+cat > "$TMP/t6.jsonl" <<'EOF'
+{"type":"user","isSidechain":false,"message":{"role":"user","content":"額度恢復後，請接續我最後指定的「(b) 設 Stop hook 機械執行」。"}}
+{"type":"assistant","isSidechain":false,"message":{"role":"assistant","content":[{"type":"text","text":"已完成 Stop hook，測試全部通過。"}]}}
+EOF
+printf '{"session_id":"speech-1","cwd":"%s","transcript_path":"%s","stop_hook_active":false}' \
+  "$TMP/canonical" "$TMP/t6.jsonl" | python3 "$HOOK" >/dev/null
+if [[ "$(cat "$SAY_CAPTURE")" == "主人，設 Stop hook 機械執行任務已完成" ]]; then
+  echo "PASS: canonical completion 播極簡 task brief"; PASS=$((PASS+1))
+else
+  echo "FAIL: speech phrase 不符"; FAIL=$((FAIL+1))
+fi
+
+# Same session/final text fingerprint must not speak twice.
+printf '{"session_id":"speech-1","cwd":"%s","transcript_path":"%s","stop_hook_active":false}' \
+  "$TMP/canonical" "$TMP/t6.jsonl" | python3 "$HOOK" >/dev/null
+if [[ "$(wc -l < "$SAY_CAPTURE" | tr -d ' ')" == "1" ]]; then
+  echo "PASS: same turn speech 去重"; PASS=$((PASS+1))
+else
+  echo "FAIL: same turn 重複 speech"; FAIL=$((FAIL+1))
+fi
+
+# Background/worktree cwd must stay silent.
+printf '{"session_id":"speech-2","cwd":"%s","transcript_path":"%s","stop_hook_active":false}' \
+  "$TMP/worktree" "$TMP/t6.jsonl" | python3 "$HOOK" >/dev/null
+if [[ "$(wc -l < "$SAY_CAPTURE" | tr -d ' ')" == "1" ]]; then
+  echo "PASS: background cwd 不播報"; PASS=$((PASS+1))
+else
+  echo "FAIL: background cwd 誤播報"; FAIL=$((FAIL+1))
+fi
+
+cat > "$TMP/t9.jsonl" <<'EOF'
+{"type":"user","isSidechain":false,"message":{"role":"user","content":"部署正式站"}}
+{"type":"assistant","isSidechain":false,"message":{"role":"assistant","content":[{"type":"text","text":"目前無法完成，需要你提供登入權限。"}]}}
+EOF
+printf '{"session_id":"speech-3","cwd":"%s","transcript_path":"%s","stop_hook_active":false}' \
+  "$TMP/canonical" "$TMP/t9.jsonl" | python3 "$HOOK" >/dev/null
+if [[ "$(wc -l < "$SAY_CAPTURE" | tr -d ' ')" == "1" ]]; then
+  echo "PASS: blocker 不誤報完成"; PASS=$((PASS+1))
+else
+  echo "FAIL: blocker 誤播完成"; FAIL=$((FAIL+1))
+fi
 
 echo "----"
 echo "PASS $PASS / FAIL $FAIL"

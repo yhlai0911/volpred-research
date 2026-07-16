@@ -19,5 +19,6 @@ description: "任務收尾與 context 決策建議。用法: /task-done [任務�
    - `normal_max_pct - clear_min_pct`：建議 `/compact`
    - `> clear_min_pct` 或下一輪要切換 task family：建議 `/clear`
 
-最後執行：
-`bash say "主人 <任務簡短名稱或當前任務> 任務已完成"`
+語音完成提示已由既有 Stop hook 機械執行；本 command **不要再手動呼叫 `say`**，避免同一
+turn 重複播報。Stop hook 只在 canonical main 的互動 session、有完成型最終文字時播
+「主人，<極簡任務名>任務已完成」，background/worktree/blocker 會跳過。

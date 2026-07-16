@@ -1,9 +1,14 @@
 {
-  "generated_at": "2026-07-16T08:00:58.796020+00:00",
+  "generated_at": "2026-07-16T09:02:27.868100+00:00",
   "adoptable": [],
   "held": [
     {
       "path": "storage/drafts/digest_20260714.md",
+      "reason": "no_title",
+      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
+    },
+    {
+      "path": "storage/drafts/fb_mile_5a20a332.md",
       "reason": "no_title",
       "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
     },
@@ -26,13 +31,27 @@
   "skipped": {
     "baseline": 519,
     "registered": 23,
-    "grace": 3,
+    "grace": 2,
     "inflight": 0
   },
-  "orphan_count": 4,
+  "orphan_count": 5,
   "adopted": [],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_a.json"
+      ],
+      "existing_paths": [
+        "experiments/k1426/k1426_oos_shard_a.json"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [
     {
       "job_id": "K1694-script-rerun-1211",
@@ -125,20 +144,25 @@
       ]
     }
   ],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_a.json"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "56d180d801aa3136c393edaf7bc9d8a4d4590c82",
+      "reason": "committed"
+    }
+  ],
   "paper_artifact_collectable": [],
   "paper_artifact_held": [],
   "paper_collections": [],
   "draft_artifact_collectable": [],
-  "draft_artifact_held": [
-    {
-      "path": "storage/drafts/assets/drone_series_guide_lazypack_codex/render_lazypack.py",
-      "kind": "unknown",
-      "reason": "unrecognised_suffix:.py"
-    }
-  ],
+  "draft_artifact_held": [],
   "draft_artifact_skipped": {
-    "grace": 2,
+    "grace": 0,
     "inflight": 0
   },
   "draft_collections": []

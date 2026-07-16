@@ -25052,7 +25052,7 @@
     "description": "Follow-up for platform_ops_graphify_codeonly_pilot_20260702. After the 14-day observation window, compare post-install platform_ops/hourly-dispatch token proxy against storage/ops/graphify_codeonly/token_baseline.json. If reduction is <10%, remove the MCP registration and Graphify pilot. If reduction is >=10%, write the knowledge entry and propose expansion. Do not claim before blocked_until expires.",
     "task_type": "platform_ops",
     "priority": 4,
-    "status": "pending",
+    "status": "in_progress",
     "tags": [
       "platform_ops",
       "graphify",
@@ -25069,8 +25069,24 @@
         "from": "blocked",
         "to": "pending",
         "reason": "blocked_until_expired (2026-07-16T00:00:00+00:00)"
+      },
+      {
+        "ts": "2026-07-16T09:11:08.866599+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-6bc163dd4cdf477e8d6f3b57b906dab3"
+      },
+      {
+        "ts": "2026-07-16T09:11:16.512063+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-6bc163dd4cdf477e8d6f3b57b906dab3"
       }
-    ]
+    ],
+    "claimed_by": "codex-failover-slot-1-6bc163dd4cdf477e8d6f3b57b906dab3",
+    "claimed_at": "2026-07-16T09:11:08.866582+00:00",
+    "claim_session_id": "2ec6aff0470d",
+    "started_at": "2026-07-16T09:11:16.512046+00:00"
   },
   {
     "id": "email-12509-55a736",
@@ -30935,7 +30951,7 @@
     "description": "這些記憶描述 recurring process/cadence 但無對應 skill；評估 promote 成 skill 或加排程/cadence（見 pdca-operations 技能治理 + operations-cadence）。\n\n— dreaming 連續 16 晚偵測到此模式（首見 2026-06-30T12:29:57.114601+00:00）。\n證據：- [reference_notebooklm_rag_workflow.md](reference_notebooklm_rag_workflow.md) — NotebookLM 作為論文 / 文件 RAG 資料庫；cross-pape; - [reference_unified_memory_one_brain.md](reference_unified_memory_one_brain.md) — Telegram 與本機 session 是同一個大腦（共用 auto-m; - [project_loop_engineering_layer.md](project_loop_engineering_layer.md) — 2026-06-29 上線 loop-engineering 閉環：loop-health; - [project_fb_page_operation.md](project_fb_page_operation.md) — VolPred 粉專(id 61590464616031)由 AI 全權經營+優化+固定巡檢；Chrome 發; - [project_strategy_lifecycle_standing_directive.md](project_strategy_lifecycle_standing_directive.md) — boss standing d; - [feedback_paper_autonomy_optimize_acceptance.md](feedback_paper_autonomy_optimize_acceptance.md) — 老闆 msg 309(7/9)授權：論\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-12T08:28:40.700993+00:00",
     "dreaming": {
@@ -30943,7 +30959,30 @@
       "pattern_type": "memory_skill_gap",
       "occurrences": 16,
       "governance_target": ".claude/skills/"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-16T08:35:25.566897+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-recovery-governance"
+      },
+      {
+        "ts": "2026-07-16T08:35:25.844113+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-recovery-governance"
+      },
+      {
+        "ts": "2026-07-16T08:51:26.367396+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-recovery-governance"
+      }
+    ],
+    "started_at": "2026-07-16T08:35:25.844095+00:00",
+    "completed_at": "2026-07-16T08:51:26.367377+00:00",
+    "result": "Root-cause fixed in 867120c2b: memory process gaps now use per-memory signatures and verifiable process_owner paths, preventing aggregate queue-once suppression; live audit returns zero unowned processes. Reconciled true drift in Telegram canonical autoMemoryDirectory, paper submission autonomy, and dreaming actuator docs; 46+1 targeted tests passed."
   },
   {
     "id": "dreaming_memory_hygiene_consolidation_review",
@@ -31988,7 +32027,7 @@
     "description": "Failed task research_rp_4855ddb7a9 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：task research_rp_4855ddb7a9 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-12T22:00:14.861047+00:00",
     "dreaming": {
@@ -31997,7 +32036,30 @@
       "occurrences": 1,
       "governance_target": null
     },
-    "follows_up_on": "research_rp_4855ddb7a9"
+    "follows_up_on": "research_rp_4855ddb7a9",
+    "status_history": [
+      {
+        "ts": "2026-07-16T08:30:59.983559+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:31:00.332529+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:31:00.686679+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      }
+    ],
+    "started_at": "2026-07-16T08:31:00.332505+00:00",
+    "completed_at": "2026-07-16T08:31:00.686661+00:00",
+    "result": "Resolved by K1701 revision sibling k1701_primary_inference_nested_general_loss: succeeded with formal INCONCLUSIVE_NO_EXACT_NULL_CLAIM verdict."
   },
   {
     "id": "dreaming_persistent_alert_a4a7ca551f8626b2",
@@ -35812,13 +35874,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T08:01:03.278441+00:00",
+    "completed_at": "2026-07-16T09:02:36.252093+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T08:01:03.278441+00:00",
-      "last_clean_observed_at": "2026-07-16T08:01:03.278441+00:00"
+      "resolved_at": "2026-07-16T09:02:36.252093+00:00",
+      "last_clean_observed_at": "2026-07-16T09:02:36.252093+00:00"
     }
   },
   {
@@ -35830,13 +35892,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T07:16:40.507223+00:00",
+    "completed_at": "2026-07-16T09:11:20.303432+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T07:16:40.507223+00:00",
-      "last_clean_observed_at": "2026-07-16T07:16:40.507223+00:00"
+      "resolved_at": "2026-07-16T09:11:20.303432+00:00",
+      "last_clean_observed_at": "2026-07-16T09:11:20.303432+00:00"
     }
   },
   {
@@ -36785,7 +36847,7 @@
     "description": "Failed task K267_article_general_v2 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task K267_article_general_v2 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
     "dreaming": {
@@ -36794,7 +36856,30 @@
       "occurrences": 1,
       "governance_target": null
     },
-    "follows_up_on": "K267_article_general_v2"
+    "follows_up_on": "K267_article_general_v2",
+    "status_history": [
+      {
+        "ts": "2026-07-16T08:30:57.890117+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:30:58.257139+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:30:58.609605+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      }
+    ],
+    "started_at": "2026-07-16T08:30:58.257122+00:00",
+    "completed_at": "2026-07-16T08:30:58.609589+00:00",
+    "result": "Resolved by retry K267_article_general_v3: succeeded; article mile_736c76d3 is published and live verified."
   },
   {
     "id": "dreaming_missing_retry_strategy_research_spot_bitcoin_etf_flow_shock_",
@@ -36802,7 +36887,7 @@
     "description": "Failed task research_spot_bitcoin_etf_flow_shock_btc_eth_vol has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task research_spot_bitcoin_etf_flow_shock_btc_eth_vol (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
     "dreaming": {
@@ -36811,7 +36896,30 @@
       "occurrences": 1,
       "governance_target": null
     },
-    "follows_up_on": "research_spot_bitcoin_etf_flow_shock_btc_eth_vol"
+    "follows_up_on": "research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
+    "status_history": [
+      {
+        "ts": "2026-07-16T08:31:01.023955+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:31:01.382495+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:31:01.722608+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      }
+    ],
+    "started_at": "2026-07-16T08:31:01.382477+00:00",
+    "completed_at": "2026-07-16T08:31:01.722594+00:00",
+    "result": "Resolved by K1709 revision chain: k1709-redo and rev4 fixes succeeded; rev6 reached certified merge."
   },
   {
     "id": "dreaming_missing_retry_strategy_research_private_market_rv_correlatio",
@@ -36819,7 +36927,7 @@
     "description": "Failed task research_private_market_rv_correlation_regime has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task research_private_market_rv_correlation_regime (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
     "dreaming": {
@@ -36828,7 +36936,30 @@
       "occurrences": 1,
       "governance_target": null
     },
-    "follows_up_on": "research_private_market_rv_correlation_regime"
+    "follows_up_on": "research_private_market_rv_correlation_regime",
+    "status_history": [
+      {
+        "ts": "2026-07-16T08:30:58.933090+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:30:59.293005+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:30:59.652921+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      }
+    ],
+    "started_at": "2026-07-16T08:30:59.292985+00:00",
+    "completed_at": "2026-07-16T08:30:59.652906+00:00",
+    "result": "Resolved as controlled no-retry: original task concluded INFEASIBLE AS SPECIFIED because annual or quarterly allocation data are insufficient; a daily-proxy design is a different research task."
   },
   {
     "id": "dreaming_missing_retry_strategy_k1695",
@@ -36836,7 +36967,7 @@
     "description": "Failed task K1695_article_general has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task K1695_article_general (k_id=K1695) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
     "dreaming": {
@@ -36845,7 +36976,30 @@
       "occurrences": 1,
       "governance_target": null
     },
-    "follows_up_on": "K1695_article_general"
+    "follows_up_on": "K1695_article_general",
+    "status_history": [
+      {
+        "ts": "2026-07-16T08:24:29.504928+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-recovery-k1695-retry-closure"
+      },
+      {
+        "ts": "2026-07-16T08:24:29.821647+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-recovery-k1695-retry-closure"
+      },
+      {
+        "ts": "2026-07-16T08:25:09.922489+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-recovery-k1695-retry-closure"
+      }
+    ],
+    "started_at": "2026-07-16T08:24:29.821633+00:00",
+    "completed_at": "2026-07-16T08:25:09.922474+00:00",
+    "result": "Resolved by controlled retry K1695_article_general_retry1: succeeded with draft mile_badbc47b after certification, provenance, anti-AI, cross-model, and lazypack gates. Original failed task remains preserved as audit history; no blind rerun was used."
   },
   {
     "id": "dreaming_missing_retry_strategy_k1684",
@@ -36853,7 +37007,7 @@
     "description": "Failed task K1684_article_general has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task K1684_article_general (k_id=K1684) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
     "dreaming": {
@@ -36862,7 +37016,30 @@
       "occurrences": 1,
       "governance_target": null
     },
-    "follows_up_on": "K1684_article_general"
+    "follows_up_on": "K1684_article_general",
+    "status_history": [
+      {
+        "ts": "2026-07-16T08:30:56.817786+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:30:57.201207+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:30:57.556389+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      }
+    ],
+    "started_at": "2026-07-16T08:30:57.201190+00:00",
+    "completed_at": "2026-07-16T08:30:57.556372+00:00",
+    "result": "Resolved as controlled no-retry: K1684_article_general explicitly forbids publication until E2 completes; publication gate fix and 11 tests preserve the hold."
   },
   {
     "id": "dreaming_missing_retry_strategy_trending_repost_2026_07_14_ai",
@@ -36870,7 +37047,7 @@
     "description": "Failed task trending_repost_2026_07_14_ai資本 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task trending_repost_2026_07_14_ai資本 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
     "dreaming": {
@@ -36879,7 +37056,30 @@
       "occurrences": 1,
       "governance_target": null
     },
-    "follows_up_on": "trending_repost_2026_07_14_ai資本"
+    "follows_up_on": "trending_repost_2026_07_14_ai資本",
+    "status_history": [
+      {
+        "ts": "2026-07-16T08:31:02.110789+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:31:02.473972+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      },
+      {
+        "ts": "2026-07-16T08:31:02.811563+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-recovery-retry-ghosts"
+      }
+    ],
+    "started_at": "2026-07-16T08:31:02.473955+00:00",
+    "completed_at": "2026-07-16T08:31:02.811547+00:00",
+    "result": "Resolved by replacement trending_repost_2026_07_14_replacement: succeeded and published as mile_2b424e20 after the original AI CapEx arc was correctly rejected as duplicate."
   },
   {
     "id": "telegram-774",
@@ -41005,13 +41205,10 @@
     "description": "K1695_article_general 原 HELD 原因（修正未認證）已於 2026-07-16 全部解除：k1695_exposure_matched_correction succeeded、認證 PASS（experiments/k1695/review_verdict.json，certify 驗證綁定現行 bytes）、feed 更正已發。draft 與資產已 merge 進 main：storage/drafts/K1695_general_draft.md（93 行誠實撤回敘事）+ k1695_fig1_exposure_matched.png + k1695_fig2_cost_and_mechanism.png + K1695_lazypack_plan.json + k1695_article_evidence.json。剩餘工作：(1) 對照 experiments/k1695/review_certification_20260715.md 核對 draft 數字（common matched -0.87pp、inception +4.96pp、raw 12.61/27.50、Holm 0/13）；(2) 3-layer 查重（與 feed_correction_k1695 更正文區隔：本篇是完整敘事長文非更正通知）；(3) lazypack 走 codex primary path（plan 已備）；(4) feed-publisher 發佈（audience=general，draft 進池即可非即時）。",
     "task_type": "daily_article",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "main_thread_triage",
     "k_id": "K1695",
     "created_at": "2026-07-16T06:43:49.836447+00:00",
-    "claimed_by": "codex-desktop-recovery-k1695-article",
-    "claimed_at": "2026-07-16T07:53:44.441419+00:00",
-    "claim_session_id": "f92412690528",
     "status_history": [
       {
         "ts": "2026-07-16T07:53:44.441435+00:00",
@@ -41024,9 +41221,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-recovery-k1695-article"
+      },
+      {
+        "ts": "2026-07-16T08:23:40.997069+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-recovery-k1695-article"
       }
     ],
-    "started_at": "2026-07-16T07:53:44.835249+00:00"
+    "started_at": "2026-07-16T07:53:44.835249+00:00",
+    "completed_at": "2026-07-16T08:23:40.997053+00:00",
+    "result": "Created general-audience correction draft mile_badbc47b (status=draft): 4,457 chars, 2 evidence charts, 4 Codex data-bound lazypack panels. Provenance audit passed 21/21 claims, anti-AI and cross-model review passed; committed final draft/feed/assets in 96b4b3a05."
   },
   {
     "id": "ci-red-29475505993",
