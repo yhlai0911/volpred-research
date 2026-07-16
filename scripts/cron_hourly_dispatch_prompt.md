@@ -85,6 +85,24 @@ PHASE 0.5 — **verify-only：reader-facing badge pool refill 狀態檢查**（2
 
 這樣做的目的：把 reader-facing pool top-up 從 prompt-level 紀律改成 repo-level script + host cron，可測試、可重跑、可觀測。
 
+PHASE A0 — **時效 P1 優先檢查**（2026-07-16 加，治本 daily_digest 脫班案例）:
+
+**Why**：CLAUDE.md 上位規則「時效性 P1（event_article / trending_repost / daily_digest / user-assigned P1）插隊所有 scheduled」。舊流程 PHASE A 命中 followup 就「本小時派工結束」，followup backlog 連續存在時 P1 被永久餓死（2026-07-16 實例：上午 5 班 quota_blocked，下午恢復的 3 班全被 compute followup 吃掉，daily_digest_20260716 從 09:00 積壓到 14:38 才被 boss 點名）。
+
+1. 查 pending 時效 P1：
+   ```bash
+   python3 -c "
+   import json
+   d=json.load(open('storage/next_tasks.json'))
+   ts=d if isinstance(d,list) else d.get('tasks',d)
+   hot=[t for t in ts if isinstance(t,dict) and t.get('status')=='pending' and t.get('priority')==1
+        and (t.get('task_type') in ('event_article','trending_repost','daily_digest') or t.get('source')=='user')]
+   print(json.dumps([{k:t.get(k) for k in ('id','task_type','created_at')} for t in sorted(hot,key=lambda x:x.get('created_at',''))],ensure_ascii=False))
+   "
+   ```
+2. 若有 → **本班主產出 = 最舊那個時效 P1**（依 task-routing capability：這些 type 都是 Claude-only 主線程紀律，本 fire 就是主線程，直接執行；daily_digest/trending_repost 遵守各自 skill 與 daily cap）。PHASE A 的 followup 本班只在執行完 P1 後仍有時間預算時才處理最舊一條，否則留給下一班 — followup 是研究收尾，無時效，可等；P1 時效過了價值歸零。
+3. 若無時效 P1 → 進 PHASE A。
+
 PHASE A — 檢查 compute queue 有無 completed collection / failed-agent triage followup:
 1. 跑 `uv run python scripts/compute_queue.py list --pending-followup --json`
 2. 若有 entries → 優先處理最舊一條，依 `followup_mode` 分流：
