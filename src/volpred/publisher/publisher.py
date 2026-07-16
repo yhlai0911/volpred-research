@@ -4,6 +4,7 @@ import os
 import re
 from datetime import date, datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from volpred.canonical_write import guard_canonical_write
 from volpred.config.runtime import get_default_remote_url
@@ -22,6 +23,20 @@ from volpred.topic_clusters import classify_topic_cluster, cluster_gate_status
 # which is also the conventional semantic of a "description" (list preview / SEO
 # meta). ``content`` stays the canonical full body; nothing downstream regresses.
 _EXCERPT_MAX_CHARS = 300
+_TAIPEI_TZ = ZoneInfo("Asia/Taipei")
+
+
+def _taipei_publish_date(raw: str | None) -> date | None:
+    """Return a feed timestamp's Taipei-local date, or ``None`` if invalid."""
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+    except (TypeError, ValueError):  # silent-ok: invalid legacy timestamps cannot establish a same-day match
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(_TAIPEI_TZ).date()
 
 
 def _make_excerpt(body: str | None, max_chars: int = _EXCERPT_MAX_CHARS) -> str:
@@ -2120,6 +2135,40 @@ class Publisher:
                 )
             for issue in depth_issues:
                 print(f"  ⚠️ depth issue (audit_strict=False bypass): {issue}")
+
+        # 2026-07-16: enqueue_daily_digest.py already prevents a second daily
+        # task, but a direct Publisher call bypassed that lifecycle owner and
+        # created two same-day digests (mile_9f5151dc + mile_f9c70bd0). Enforce
+        # the invariant again at the universal immediate-publish chokepoint.
+        # Drafts/scheduled items remain allowed; uniqueness is reader-visible.
+        if _depth_ct == 'daily_digest' and normalized_status == 'published':
+            candidate_date = _taipei_publish_date(
+                publish_at or datetime.now(timezone.utc).isoformat()
+            )
+            if candidate_date is not None:
+                for existing in feed:
+                    existing_details = existing.get('details') or {}
+                    existing_date = _taipei_publish_date(
+                        existing.get('published_at') or existing.get('created_at')
+                    )
+                    if (
+                        existing.get('status') == 'published'
+                        and str(existing_details.get('content_type') or '') == 'daily_digest'
+                        and existing_date == candidate_date
+                    ):
+                        existing_id = str(existing.get('id') or '')
+                        _log_dedup_decision(
+                            str(self.reports_dir.parent),
+                            'block_duplicate_daily_digest',
+                            title,
+                            existing_id or None,
+                            f"Taipei date {candidate_date.isoformat()} already has a published daily_digest",
+                        )
+                        print(
+                            "  ⚠️ Daily digest already published for "
+                            f"TPE {candidate_date.isoformat()} (existing: {existing_id}). Skipping."
+                        )
+                        return existing_id
 
         # 2026-07-05 (boss): daily_digest must curate ACROSS THE ARCHIVE by a
         # current-event-driven theme, not recap the last week or two. This

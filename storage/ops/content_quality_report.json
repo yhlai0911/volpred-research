@@ -1,42 +1,36 @@
 {
-  "generated_at": "2026-07-15T03:59:14.884962+00:00",
+  "generated_at": "2026-07-16T13:11:28.958799+00:00",
   "publish_rhythm": {
-    "status": "burst",
+    "status": "ok",
     "in_active_window": true,
-    "tpe_hour": 11,
+    "tpe_hour": 21,
     "recent_count": 10,
-    "newest_published_at": "2026-07-15T02:33:44.570461+00:00",
-    "age_since_newest_min": 85.51,
+    "newest_published_at": "2026-07-16T10:30:13.282825+00:00",
+    "age_since_newest_min": 161.26,
     "gaps_min_newest_first": [
-      92.69,
-      57.71,
-      0.16,
-      213.19,
-      29.14,
-      719.91,
-      276.84,
-      200.84,
-      0.14
+      3.67,
+      166.83,
+      98.39,
+      0.45,
+      113.85,
+      245.77,
+      240.38,
+      240.07,
+      269.74
     ],
-    "burst_pairs": [
-      {
-        "newer_id": "mile_ff4069d3",
-        "older_id": "mile_0f710450",
-        "gap_minutes": 29.14
-      }
-    ],
+    "burst_pairs": [],
     "burst_gap_threshold_min": 30,
     "drought_gap_threshold_hours": 6.0
   },
   "daily_digest_uniqueness": {
     "status": "ok",
-    "date_tpe": "2026-07-15",
+    "date_tpe": "2026-07-16",
     "published_count": 1,
     "items": [
       {
-        "id": "mile_ee178213",
-        "title": "紐約踩煞車、PJM 開備援：AI 電力股還能當防禦資產嗎？",
-        "published_at": "2026-07-15T02:33:44.570461+00:00"
+        "id": "mile_9f5151dc",
+        "title": "VIX 先退、OVX 還沒過半：美伊衝突的「恐慌半衰期」要怎麼更新",
+        "published_at": "2026-07-16T07:39:43.683488+00:00"
       }
     ]
   },
@@ -49,25 +43,28 @@
   "arc_diversity": {
     "status": "ok",
     "sample": 20,
-    "distinct_axes": 14,
+    "distinct_axes": 17,
     "top_axis": "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive",
-    "top_share": 0.3,
+    "top_share": 0.2,
     "threshold": 0.5,
     "distribution": {
-      "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive": 6,
-      "TW_EQUITY::descriptive": 2,
+      "GOLD|RISK_PARITY|TW_EQUITY|US_EQUITY|VIX::descriptive": 4,
+      "SEMIS|TSMC|TW_EQUITY|USD|US_EQUITY::null_no_info": 1,
+      "OIL|USD|US_EQUITY|VIX::descriptive": 1,
+      "GOLD|JAPAN_EQ|OIL|TW_EQUITY|USD|US_EQUITY|VIX::null_no_info": 1,
+      "US_EQUITY|VIX::descriptive": 1,
+      "US_EQUITY|VIX::null_no_info": 1,
+      "TW_EQUITY|US_EQUITY|VIX::null_no_info": 1,
+      "VIX::null_no_info": 1,
+      "SEMIS|TW_EQUITY::descriptive": 1,
+      "SEMIS|TW_EQUITY|USD::descriptive": 1,
+      "ENERGY_SECTOR|SEMIS|TECH_SECTOR|UTILITIES::null_no_info": 1,
+      "TSMC|TW_EQUITY|VIX::null_no_info": 1,
       "GOLD|NASDAQ|SEMIS|STAPLES|USD|US_EQUITY|UTILITIES|VIX::systemic_crowding": 1,
       "CREDIT_SPREAD|HIGH_YIELD|LONG_BOND|US_BOND|VIX::null_no_info": 1,
       "GOLD|LONG_BOND|NASDAQ|US_EQUITY|US_SMALLCAP::null_no_info": 1,
       "SILVER|US_EQUITY|VIX::descriptive": 1,
-      "SILVER|US_BOND::descriptive": 1,
-      "BITCOIN|GOLD|LONG_BOND|NASDAQ|OIL|SEMIS|SILVER|TW_EQUITY|USD|US_BOND|US_EQUITY|UTILITIES|VIX::null_no_info": 1,
-      "TW_EQUITY|US_EQUITY::null_no_info": 1,
-      "TW_EQUITY::null_no_info": 1,
-      "SEMIS|TW_EQUITY::null_no_info": 1,
-      "CREDIT_SPREAD|FOMC|GOLD|HIGH_YIELD|LONG_BOND|MID_BOND|NASDAQ|SILVER|TSMC|USD|US_EQUITY|VIX|VVIX::null_no_info": 1,
-      "SEMIS|TW_EQUITY|USD::descriptive": 1,
-      "NASDAQ|TSMC|TW_EQUITY|US_EQUITY|US_SMALLCAP::descriptive": 1
+      "SILVER|US_BOND::descriptive": 1
     }
   },
   "content_completeness": {
@@ -75,8 +72,8 @@
     "scanned": 12,
     "findings": [],
     "lazypack": {
-      "general_total": 8,
-      "with_lazypack": 8,
+      "general_total": 10,
+      "with_lazypack": 10,
       "coverage": 1.0,
       "threshold": 0.6,
       "below_threshold": false,
@@ -87,10 +84,10 @@
     "status": "ok",
     "exists": true,
     "candidate_counts": {
-      "candidates": 811,
+      "candidates": 823,
       "top_10_uncovered": 10
     },
-    "total": 821
+    "total": 833
   },
   "frontend_render": {
     "status": "unknown",

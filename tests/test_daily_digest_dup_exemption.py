@@ -143,14 +143,14 @@ def _stub_network(monkeypatch, tmp_path: Path) -> None:
         from volpred.publisher import live_verify  # type: ignore
         for fn, ret in (("verify_article_live", True), ("stamp_verified", None), ("emit_verify_alert", None)):
             monkeypatch.setattr(live_verify, fn, (lambda *a, **k: ret), raising=False)
-    except Exception:
+    except Exception:  # silent-ok: optional live-verify module is absent in some test installs
         pass
 
     import importlib
     for mod_name in ("supabase_sync", "scripts.supabase_sync"):
         try:
             mod = importlib.import_module(mod_name)
-        except ModuleNotFoundError:
+        except ModuleNotFoundError:  # silent-ok: both optional sync import paths are probed
             continue
         monkeypatch.setattr(mod, "sync_article", lambda *a, **k: True, raising=False)
         monkeypatch.setattr(mod, "_post", lambda *a, **k: False, raising=False)
@@ -237,3 +237,52 @@ def test_daily_digest_bypasses_recycle(tmp_path: Path, monkeypatch) -> None:
     assert ret != _SEED_ID
     ids = _feed_ids(reports)
     assert _SEED_ID in ids and ret in ids and len(ids) == 2
+
+
+def test_second_daily_digest_same_tpe_day_is_blocked(tmp_path: Path, monkeypatch) -> None:
+    """The publisher chokepoint enforces the daily digest's calendar invariant."""
+    reports = _seed_storage(tmp_path)
+    feed_path = reports / "feed.json"
+    feed = json.loads(feed_path.read_text())
+    feed[0]["details"]["content_type"] = "daily_digest"
+    feed_path.write_text(json.dumps(feed, ensure_ascii=False))
+    _stub_network(monkeypatch, tmp_path)
+
+    pub = Publisher(storage_dir=str(tmp_path))
+    ret = pub.publish_milestone(
+        title="第二篇同日精選導讀",
+        description=_DIFF_DESC + _LAZYPACK,
+        phase="daily_digest",
+        details={"content_type": "daily_digest", "digest_articles": [_SEED_ID]},
+        tags=["一般讀者", "精選導讀"],
+        status="published",
+        audience="general",
+    )
+
+    assert ret == _SEED_ID
+    assert _feed_ids(reports) == [_SEED_ID]
+
+
+def test_daily_digest_on_next_tpe_day_is_allowed(tmp_path: Path, monkeypatch) -> None:
+    """The uniqueness gate does not turn a daily invariant into a permanent lock."""
+    reports = _seed_storage(tmp_path)
+    feed_path = reports / "feed.json"
+    feed = json.loads(feed_path.read_text())
+    feed[0]["details"]["content_type"] = "daily_digest"
+    feed[0]["published_at"] = "2020-01-01T00:00:00+00:00"
+    feed_path.write_text(json.dumps(feed, ensure_ascii=False))
+    _stub_network(monkeypatch, tmp_path)
+
+    pub = Publisher(storage_dir=str(tmp_path))
+    ret = pub.publish_milestone(
+        title="隔日精選導讀",
+        description=_DIFF_DESC + _LAZYPACK,
+        phase="daily_digest",
+        details={"content_type": "daily_digest", "digest_articles": [_SEED_ID]},
+        tags=["一般讀者", "精選導讀"],
+        status="published",
+        audience="general",
+    )
+
+    assert ret != _SEED_ID
+    assert len(_feed_ids(reports)) == 2

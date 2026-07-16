@@ -35490,13 +35490,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T12:01:03.001215+00:00",
+    "completed_at": "2026-07-16T13:01:19.508165+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T12:01:03.001215+00:00",
-      "last_clean_observed_at": "2026-07-16T12:01:03.001215+00:00"
+      "resolved_at": "2026-07-16T13:01:19.508165+00:00",
+      "last_clean_observed_at": "2026-07-16T13:01:19.508165+00:00"
     }
   },
   {
@@ -40982,12 +40982,60 @@
     "description": "由 alert `content_quality` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- 每日精選導讀: 同日（TPE 2026-07-16）published 2 篇 `每日精選導讀`: mile_f9c70bd0, mile_9f5151dc\n\n## 影響\n內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\n\n## 建議行動（主線程 auto-remediation）\n1. 同一天出現超過一篇每日精選導讀 → 檢視 `storage/ops/content_quality_report.json` items，挑 1 篇 retract：`uv run volpred ops unpublish --mile-id <id>`；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\n2. 發文太密集 → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\n3. 發文間隔過久 → 立即 `release-pool-by-settings` 或派 fresh-arc 日常文章 補位；同時查 release deadlock (`docs/refactor_plan_release_layer_deadlock.md`)。\n4. 標題前綴重複 → 前端 header 與 title 擇一移除前綴；前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。\n5. 懶人包覆蓋不足 → 針對 missing_examples 走 `lazypack-infographic` skill 補圖：primary=確定性 renderer （`lazypack_render.py`，plan.json 綁 evidence、零 LLM）；需 LLM codegen 時用 `codex exec`（boss 2026-06-30/07-15 directive），NotebookLM 僅為 fallback，不得當首選。append `## 懶人包圖組` 後用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。",
     "task_type": "governance",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-16T11:02:11.277004+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "content_quality"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-16T13:08:45.288706+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-4a0a6b015ca94253be4cc10497015e2d"
+      },
+      {
+        "ts": "2026-07-16T13:08:45.542517+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-4a0a6b015ca94253be4cc10497015e2d"
+      },
+      {
+        "ts": "2026-07-16T13:12:04.061644+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-4a0a6b015ca94253be4cc10497015e2d"
+      }
+    ],
+    "started_at": "2026-07-16T13:08:45.542500+00:00",
+    "completed_at": "2026-07-16T13:12:04.061628+00:00",
+    "result": "Fresh patrol confirmed duplicate. Kept canonical daily_digest mile_9f5151dc, unpublished later catch-up mile_f9c70bd0, added publisher TPE same-day uniqueness gate and regression tests. Patrol now digest=ok count=1; kept route 200, retracted route 404; 37 targeted tests passed."
+  },
+  {
+    "id": "telegram-873",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-16T12:33:07.257419+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 873）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\n\n每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\n\n=== cron 成果掌握 review — 2026-07-16 20:10:16（台灣時間）===\n\n  hourly_dispatch   daemon=alive exit=0 running | last: 2026-07-16 19:22:51 (daemon-state)\n  compute_worker    runs=1270 exit=0 running | last: 2026-07-16 18:30:04 (log-mtime)\n  check_alerts      runs=681 exit=0 idle | last: 2026-07-16 20:01:14 (log-mtime)\n  collect_tw        runs=21 exit=0 idle | last: 2026-07-16 15:01:36 (log-mtime)\n  collect_us        runs=20 exit=0 idle | last: 2026-07-16 07:03:22 (log-mtime)\n  daily_update      runs=24 exit=1 idle | last: 2026-07-16 15:14:47 (log-mtime)  🔴 last exit 1\n  daily_update_intraday runs=13 exit=142 idle | last: 2026-07-16 14:10:04 (log-mtime)  🔴 last exit 142\n  daily_checkup     runs=4 exit=0 idle | last: 2026-07-16 09:40:32 (log-mtime)\n  publication_candidates runs=None exit=None idle | last: 2026-07-16 16:22:30 (log-mtime)\n  release_pool      runs=114 exit=0 idle | last: 2026-07-16 18:07:04 (log-mtime)\n  market_cal        runs=4 exit=0 idle | last: 2026-07-13 08:00:04 (log-mtime)\n  memory_health     runs=28 exit=0 idle | last: 2026-07-16 05:30:01 (log-mtime)\n  work_summary      runs=3 exit=0 idle | last: 2026-07-16 20:05:22 (log-mtime)\n\n近 75 分鐘 git commits（hourly_dispatch 產出代理）：3 筆\n  2de6cba3b chore(draft-reap): collect orphaned draft artifacts (6 files)\n  50c24cc57 dispatch(19:22): feat(ops): 逐程序進度回報改由 checker 強制驗證欄 | 老闆 msg 796 無法分辨「做完」與「下輪再說」\n  01f2a73ca chore(deliverables): commit compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380 outputs\n\n🔴 需要掌握/處理：\n  - daily_update: 🔴 last exit 1\n  - daily_update_intraday: 🔴 last exit 142\n\n\n這需要立即處理嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-16T12:42:19.210199+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-16T12:44:11.764085+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-16T12:44:11.764070+00:00"
   }
 ]
