@@ -186,6 +186,47 @@ def cached_inventory_hash(frame: pd.DataFrame) -> str:
     return hashlib.sha256(payload.encode()).hexdigest()
 
 
+def verify_cached_source_bytes(frame: pd.DataFrame, source_dir: Path) -> dict[str, Any]:
+    """Re-read every cached source file and fail closed on any byte drift."""
+    if frame["source_file"].duplicated().any():
+        duplicates = sorted(frame.loc[frame["source_file"].duplicated(), "source_file"].unique())
+        raise RuntimeError(f"proxy cache has duplicate source files: {duplicates[:5]}")
+
+    expected_names = set(frame["source_file"].astype(str))
+    listed = collector.list_source_files(source_dir)
+    listed_names = {path.name for path in listed}
+    missing = sorted(expected_names - listed_names)
+    if missing:
+        raise RuntimeError(f"cached raw source files are missing: {missing[:5]}")
+
+    current_lines: list[str] = []
+    for row in frame[["source_file", "source_size", "source_sha256"]].itertuples(index=False):
+        path = source_dir / str(row.source_file)
+        observed_size = path.stat().st_size
+        if observed_size != int(row.source_size):
+            raise RuntimeError(
+                f"cached raw source size mismatch for {path.name}: "
+                f"expected={int(row.source_size)} observed={observed_size}"
+            )
+        observed_hash = sha256_file(path)
+        if observed_hash != str(row.source_sha256):
+            raise RuntimeError(
+                f"cached raw source SHA256 mismatch for {path.name}: "
+                f"expected={row.source_sha256} observed={observed_hash}"
+            )
+        current_lines.append(f"{path.name}\t{observed_hash}\n")
+
+    return {
+        "raw_bytes_reverified": True,
+        "listed_source_file_count": len(listed),
+        "expected_source_file_count": len(expected_names),
+        "extra_source_files_not_in_cache": sorted(listed_names - expected_names),
+        "current_source_byte_inventory_sha256": hashlib.sha256(
+            "".join(sorted(current_lines)).encode()
+        ).hexdigest(),
+    }
+
+
 def proxy_builder_code_sha256() -> str:
     functions = (
         _rv_from_ticks,
@@ -298,7 +339,11 @@ def build_proxy_cache(
     return out, audit
 
 
-def load_proxy_cache(cache_path: Path, canonical_rv_path: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
+def load_proxy_cache(
+    cache_path: Path,
+    canonical_rv_path: Path,
+    source_dir: Path,
+) -> tuple[pd.DataFrame, dict[str, Any]]:
     frame = pd.read_csv(cache_path, float_precision="round_trip")
     required = {
         "date", "active_contract", "day_return", "source_file", "source_size",
@@ -354,6 +399,7 @@ def load_proxy_cache(cache_path: Path, canonical_rv_path: Path) -> tuple[pd.Data
         raise RuntimeError(
             f"cached day-return parity failed: max_abs_gap={float(return_gap.max())}"
         )
+    raw_byte_audit = verify_cached_source_bytes(frame, source_dir)
     audit = {
         "source_file_count": int(len(frame)),
         "source_inventory_sha256": cached_inventory_hash(frame),
@@ -367,6 +413,7 @@ def load_proxy_cache(cache_path: Path, canonical_rv_path: Path) -> tuple[pd.Data
         "contract_mismatches": contract_mismatch,
         "max_abs_canonical_rv5_parity_gap": float(canonical_rv_gap.max()),
         "max_abs_day_return_parity_gap": float(return_gap.max()),
+        **raw_byte_audit,
     }
     return frame, audit
 
@@ -475,9 +522,19 @@ def point_in_time_composite(
         history = log_proxies.iloc[start:origin].dropna()
         if len(history) < 252:
             continue
-        row_consensus = history.median(axis=1)
-        bias = history.sub(row_consensus, axis=0).mean(axis=0)
-        residual = history.sub(bias, axis=1).sub(row_consensus, axis=0)
+        # Estimate each proxy's residual against a leave-one-proxy-out centre.
+        # This prevents a proxy from mechanically improving its own reliability
+        # score through inclusion in the same-day median. Correlated errors among
+        # the three RV grids remain a documented limitation.
+        leave_one_out = pd.DataFrame(
+            {
+                column: history.drop(columns=column).median(axis=1)
+                for column in PROXY_COLUMNS
+            },
+            index=history.index,
+        )
+        bias = (history - leave_one_out).mean(axis=0)
+        residual = history.sub(bias, axis=1) - leave_one_out
         mse = residual.pow(2).mean(axis=0).clip(lower=1e-8)
         weight = (1.0 / mse) / (1.0 / mse).sum()
         current = log_proxies.iloc[origin] - bias
@@ -525,12 +582,60 @@ def calibrate_forecasts_to_target(
     return calibrated, audit
 
 
-def evaluate_target(actual: np.ndarray, forecasts: dict[str, np.ndarray]) -> dict[str, Any]:
-    common = np.isfinite(actual) & (actual > 0)
-    for values in forecasts.values():
-        common &= np.isfinite(values) & (values > 0)
-    y = actual[common]
-    model_fc = {name: values[common] for name, values in forecasts.items()}
+def build_common_evaluation_mask(
+    actuals: dict[str, np.ndarray],
+    forecasts_by_target: dict[str, dict[str, np.ndarray]],
+    oos_start: int,
+) -> np.ndarray:
+    """Freeze one cross-target OOS ledger and fail on forecast coverage gaps."""
+    lengths = {len(values) for values in actuals.values()}
+    if len(lengths) != 1:
+        raise RuntimeError(f"target length mismatch: {sorted(lengths)}")
+    n_obs = lengths.pop()
+    eligible = np.arange(n_obs) >= oos_start
+    for values in actuals.values():
+        eligible &= np.isfinite(values) & (values > 0)
+    if int(eligible.sum()) < 252:
+        raise RuntimeError(f"common positive-target OOS ledger too short: {int(eligible.sum())}")
+
+    for target_name, forecasts in forecasts_by_target.items():
+        if set(forecasts) != set(MODEL_NAMES):
+            raise RuntimeError(f"unexpected model set for {target_name}: {sorted(forecasts)}")
+        for model_name, values in forecasts.items():
+            if len(values) != n_obs:
+                raise RuntimeError(
+                    f"forecast length mismatch for {target_name}/{model_name}: {len(values)} != {n_obs}"
+                )
+            invalid = eligible & (~np.isfinite(values) | (values <= 0))
+            if invalid.any():
+                positions = np.flatnonzero(invalid)
+                raise RuntimeError(
+                    f"forecast coverage failure for {target_name}/{model_name}: "
+                    f"{len(positions)} eligible origins, first={positions[:5].tolist()}"
+                )
+    return eligible
+
+
+def evaluate_target(
+    actual: np.ndarray,
+    forecasts: dict[str, np.ndarray],
+    evaluation_mask: np.ndarray,
+) -> dict[str, Any]:
+    if len(evaluation_mask) != len(actual):
+        raise RuntimeError("evaluation mask length mismatch")
+    mask = np.asarray(evaluation_mask, dtype=bool)
+    if not mask.any():
+        raise RuntimeError("evaluation mask is empty")
+    if (~np.isfinite(actual[mask]) | (actual[mask] <= 0)).any():
+        raise RuntimeError("evaluation ledger contains invalid target values")
+    for name, values in forecasts.items():
+        if len(values) != len(actual):
+            raise RuntimeError(f"forecast length mismatch for {name}")
+        if (~np.isfinite(values[mask]) | (values[mask] <= 0)).any():
+            raise RuntimeError(f"evaluation ledger contains invalid forecasts for {name}")
+
+    y = actual[mask]
+    model_fc = {name: values[mask] for name, values in forecasts.items()}
     losses = {name: qlike_pointwise(y, values) for name, values in model_fc.items()}
     metrics = {}
     for name, values in model_fc.items():
@@ -555,10 +660,10 @@ def evaluate_target(actual: np.ndarray, forecasts: dict[str, np.ndarray]) -> dic
     mcs = model_confidence_set(losses, alpha=0.10, n_boot=1000, seed=SEED)
     mcs["eliminated"] = [list(item) for item in mcs["eliminated"]]
     return {
-        "n_oos": int(common.sum()),
+        "n_oos": int(mask.sum()),
         "metrics": metrics,
         "ranking_qlike": ranking,
-        "dm_hln_hac": dm,
+        "dm_newey_west_hac": dm,
         "mcs_alpha_0_10_1000_stationary_bootstrap": mcs,
     }
 
@@ -647,7 +752,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             args.source_dir, args.canonical_rv, cache_path, args.workers
         )
     else:
-        frame, source_audit = load_proxy_cache(cache_path, args.canonical_rv)
+        frame, source_audit = load_proxy_cache(cache_path, args.canonical_rv, args.source_dir)
     frame["date"] = pd.to_datetime(frame["date"])
     frame = frame.sort_values("date").reset_index(drop=True)
     for column in [*PROXY_COLUMNS, "day_return"]:
@@ -669,20 +774,35 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         frame, forecast_start, args.calibration_window
     )
 
-    targets: dict[str, dict[str, Any]] = {}
+    actuals: dict[str, np.ndarray] = {
+        name: frame[name].to_numpy(dtype=float) for name in PROXY_COLUMNS
+    }
+    actuals["consensus_weighted"] = composite
+    forecasts_by_target: dict[str, dict[str, np.ndarray]] = {}
     scale_calibration: dict[str, Any] = {}
     for name in PROXY_COLUMNS:
-        actual = frame[name].to_numpy(dtype=float)
         forecasts, scale_audit = calibrate_forecasts_to_target(
-            actual, raw_forecasts, args.oos_start, args.calibration_window
+            actuals[name], raw_forecasts, args.oos_start, args.calibration_window
         )
-        targets[name] = evaluate_target(actual, forecasts)
+        forecasts_by_target[name] = forecasts
         scale_calibration[name] = scale_audit
     consensus_forecasts, consensus_scale_audit = calibrate_forecasts_to_target(
         composite, raw_forecasts, args.oos_start, args.calibration_window
     )
-    targets["consensus_weighted"] = evaluate_target(composite, consensus_forecasts)
+    forecasts_by_target["consensus_weighted"] = consensus_forecasts
     scale_calibration["consensus_weighted"] = consensus_scale_audit
+
+    common_mask = build_common_evaluation_mask(
+        actuals, forecasts_by_target, args.oos_start
+    )
+    common_dates = frame.loc[common_mask, "date"].dt.date.astype(str).tolist()
+    common_ledger_hash = hashlib.sha256(
+        "\n".join(common_dates).encode()
+    ).hexdigest()
+    targets: dict[str, dict[str, Any]] = {
+        name: evaluate_target(actuals[name], forecasts_by_target[name], common_mask)
+        for name in [*PROXY_COLUMNS, "consensus_weighted"]
+    }
 
     verdict, sensitivity = infer_verdict(targets)
     weight_valid = weights.dropna()
@@ -697,7 +817,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "date_start": frame["date"].iloc[slc.start].date().isoformat(),
             "date_end": frame["date"].iloc[slc.stop - 1].date().isoformat(),
             "consensus_target": evaluate_target(
-                composite[slc], {k: v[slc] for k, v in consensus_forecasts.items()}
+                composite[slc],
+                {k: v[slc] for k, v in consensus_forecasts.items()},
+                common_mask[slc],
             ),
         }
 
@@ -721,6 +843,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "oos_start_index": args.oos_start,
             "oos_start_date": frame["date"].iloc[args.oos_start].date().isoformat(),
             "oos_end_date": frame["date"].iloc[-1].date().isoformat(),
+            "common_evaluation_n": int(common_mask.sum()),
+            "common_evaluation_date_start": common_dates[0],
+            "common_evaluation_date_end": common_dates[-1],
+            "common_evaluation_date_sha256": common_ledger_hash,
+            "common_evaluation_dates": common_dates,
             "train_window": args.train_window,
             "calibration_window": args.calibration_window,
             "forecast_horizon_days": 1,
@@ -728,7 +855,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 "HAR features and EWMA use explicit shift(1); GJR at origin t is fit/filtered "
                 "only through return t-1; composite bias and weights use [t-window,t) only"
             ),
-            "proxy_bias_method": "past-window mean log deviation from same-day cross-proxy median",
+            "proxy_bias_method": (
+                "past-window mean log deviation from a leave-one-proxy-out same-day median"
+            ),
             "proxy_weight_method": (
                 "consensus heuristic: inverse past-window residual log-MSE around cross-proxy median"
             ),
@@ -757,15 +886,16 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "Hansen and Lunde (2006), JBES 24, 127-161, doi:10.1198/073500106000000071",
             "Patton (2011), Journal of Econometrics 160, 246-256, doi:10.1016/j.jeconom.2010.03.034",
             "Hansen, Lunde and Nason (2011), Econometrica 79, 453-497, doi:10.3982/ECTA5771",
-            "Liu, Patton and Sheppard (2015), Journal of Econometrics 187, 293-311, doi:10.1016/j.jeconom.2015.02.014",
+            "Liu, Patton and Sheppard (2015), Journal of Econometrics 187, 293-311, doi:10.1016/j.jeconom.2015.02.008",
         ],
         "prior_knowledge": [
-            "K777: target-native home-field advantage motivates multi-target evaluation",
+            "K1057: rankings flip across RV and r-squared native targets, motivating a common multi-target ledger",
             "K1072: 5-minute RV was practically close to noise-robust alternatives in a short SPY sample",
             "Patton2011-proxy-robust: robust loss still requires a conditionally unbiased proxy",
         ],
         "limitations": [
             "The consensus weights are a heuristic, not identified optimal measurement-error weights; latent integrated variance remains unobserved.",
+            "Leave-one-proxy-out residual centres remove direct self-inclusion, but 1/5/10-minute RV share ticks and correlated measurement errors remain unidentified.",
             "Same-day maximum-volume contract selection is valid for end-of-day measurement, not intraday trading.",
             "Only the homogeneous TX day session is studied; night-session conclusions do not follow.",
             "Parkinson and squared-return proxies retain jump, drift, and microstructure assumptions.",
