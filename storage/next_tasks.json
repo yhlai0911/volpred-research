@@ -35766,13 +35766,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T06:01:49.902438+00:00",
+    "completed_at": "2026-07-16T06:37:57+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T06:01:49.902438+00:00",
-      "last_clean_observed_at": "2026-07-16T06:01:49.902438+00:00"
+      "resolved_at": "2026-07-16T06:37:57+00:00",
+      "last_clean_observed_at": "2026-07-16T06:37:57+00:00"
     }
   },
   {
@@ -40863,5 +40863,16 @@
       "compute-k1380-paper-9-white-rc-hansen-spa-test-17-spec-multiple-test-1779189466"
     ],
     "result_artifact": "experiments/k1380/k1380_results.json"
+  },
+  {
+    "id": "K1695_article_general_retry1",
+    "title": "K1695 誠信更正公開文章：抗跌策略重做後發現不抗跌（draft 已寫好，走發佈流程）",
+    "description": "K1695_article_general 原 HELD 原因（修正未認證）已於 2026-07-16 全部解除：k1695_exposure_matched_correction succeeded、認證 PASS（experiments/k1695/review_verdict.json，certify 驗證綁定現行 bytes）、feed 更正已發。draft 與資產已 merge 進 main：storage/drafts/K1695_general_draft.md（93 行誠實撤回敘事）+ k1695_fig1_exposure_matched.png + k1695_fig2_cost_and_mechanism.png + K1695_lazypack_plan.json + k1695_article_evidence.json。剩餘工作：(1) 對照 experiments/k1695/review_certification_20260715.md 核對 draft 數字（common matched -0.87pp、inception +4.96pp、raw 12.61/27.50、Holm 0/13）；(2) 3-layer 查重（與 feed_correction_k1695 更正文區隔：本篇是完整敘事長文非更正通知）；(3) lazypack 走 codex primary path（plan 已備）；(4) feed-publisher 發佈（audience=general，draft 進池即可非即時）。",
+    "task_type": "daily_article",
+    "priority": 2,
+    "status": "pending",
+    "source": "main_thread_triage",
+    "k_id": "K1695",
+    "created_at": "2026-07-16T06:43:49.836447+00:00"
   }
 ]
