@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stop hook: enforce final text and speak one short interactive completion brief.
+"""Stop hook runner: project final-text gate + user-global completion speech mode.
 
 3-STRIKE 結構性修正（2026-07-02）：「turn 以 tool call 收尾、無最終文字回報」
 同日第三波復發（2026-06 首糾 → 2026-07-02 上午 6 連問 → 13:15 再犯 → 14:16
@@ -13,38 +13,28 @@ symlink 移除後又無回報）。memory 提醒（strike 1）與 CLAUDE.md 固�
 - 只讀 transcript 尾端 512KB（transcript 可達數十 MB）
 - 最後一條 main-chain assistant 行的最後 content block 是非空 text → 放行
 - 否則輸出 {"decision":"block","reason":...} 擋下，讓 Claude 補文字
-- 合規文字只在 canonical main cwd 的互動 session 播報一次；worktree / scratch /
-  hourly / Telegram responder 不播，避免背景 agent 噪音
-- 播報用 argv 直呼 `/usr/bin/say`，不經 shell；task label 會去標記、去敏感字、截長
+- default mode 只做既有 project final-text gate
+- `--speech-only` 由 user-level Stop hook 呼叫；只接受 Desktop/VSCode final text 尾端的
+  `<!-- task-done:極簡任務名 -->` 明確完成訊號，SDK/headless/API error 全部靜音
+- speech 以 assistant UUID 去重，鎖外 detached argv 直呼 `/usr/bin/say`，不經 shell
 
 任何解析失敗一律 fail-open（放行）+ stderr 留 trace（no-silent-fallback）。
 Regression test: scripts/tests/test_enforce_final_text.sh
 """
 import fcntl
-import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
+import unicodedata
 from pathlib import Path
 
 TAIL_BYTES = 512 * 1024
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_SPEECH_STATE = Path.home() / ".volpred" / "run" / "claude_stop_speech.json"
+DEFAULT_SPEECH_STATE = Path.home() / ".claude" / "state" / "task_completion_speech.json"
 SPEECH_MAX_LABEL_CHARS = 24
-
-_NON_COMPLETION_MARKERS = (
-    "尚未完成",
-    "目前無法",
-    "無法繼續",
-    "需要你提供",
-    "請先提供",
-    "等待你的",
-    "blocked on",
-    "session limit",
-    "額度未恢復",
-)
+INTERACTIVE_ENTRYPOINTS = frozenset({"claude-desktop", "claude-vscode"})
+TASK_DONE_MARKER = re.compile(r"<!--\s*task-done:\s*([^<>\r\n]{1,80}?)\s*-->\s*$", re.IGNORECASE)
 _SENSITIVE_LABEL_MARKERS = (
     "password", "passwd", "secret", "token", "api key", "apikey",
     "密碼", "金鑰", "驗證碼", "信用卡", "私鑰",
@@ -81,90 +71,59 @@ def _tail_records(transcript_path: str):
 
 def _last_assistant_block(transcript_path: str):
     """Return the last content block of the last main-chain assistant line."""
+    rec = _last_assistant_record(transcript_path)
+    return _last_content_block(rec) if rec is not None else None
+
+
+def _last_assistant_record(transcript_path: str):
     for rec in _tail_records(transcript_path):
-        if rec.get("type") != "assistant" or rec.get("isSidechain"):
-            continue
-        content = (rec.get("message") or {}).get("content")
-        if isinstance(content, str):
-            return {"type": "text", "text": content}
-        if isinstance(content, list) and content:
-            return content[-1]
-        return None
+        if rec.get("type") == "assistant" and not rec.get("isSidechain"):
+            return rec
     return None
 
 
-def _last_user_text(transcript_path: str) -> str:
-    """Return the latest real user text, ignoring tool-result pseudo-user rows."""
-    for rec in _tail_records(transcript_path):
-        if rec.get("type") != "user" or rec.get("isSidechain"):
-            continue
-        content = (rec.get("message") or {}).get("content")
-        if isinstance(content, str) and content.strip():
-            return content.strip()
-        if not isinstance(content, list):
-            continue
-        parts = [
-            str(block.get("text", "")).strip()
-            for block in content
-            if isinstance(block, dict) and block.get("type") == "text"
-            and str(block.get("text", "")).strip()
-        ]
-        if parts:
-            return " ".join(parts)
-    return ""
+def _last_content_block(rec: dict):
+    content = (rec.get("message") or {}).get("content")
+    if isinstance(content, str):
+        return {"type": "text", "text": content}
+    if isinstance(content, list) and content:
+        return content[-1]
+    return None
 
 
-def _task_label(user_text: str) -> str:
-    """Derive a short, local-only spoken label without shell interpretation."""
-    quoted = re.findall(r"「([^」]{2,80})」", user_text)
-    candidate = quoted[0] if quoted else next(
-        (line.strip() for line in user_text.splitlines() if line.strip()),
-        "目前任務",
-    )
-    candidate = re.sub(r"<[^>]+>", " ", candidate)
+def _safe_marker_label(raw: str) -> str:
+    candidate = unicodedata.normalize("NFKC", raw)
+    candidate = "".join(ch for ch in candidate if not unicodedata.category(ch).startswith("C"))
     candidate = re.sub(r"https?://\S+|/[A-Za-z0-9_.~/-]+", " ", candidate)
-    candidate = re.sub(r"^\s*\([A-Za-z0-9]+\)\s*", "", candidate)
-    candidate = re.sub(r"^[#>*_`\-\s]+", "", candidate)
-    candidate = re.sub(r"^(?:請你|請|幫我|麻煩|你要|現在)\s*", "", candidate)
-    candidate = re.split(r"[。！？!?；;]\s*", candidate, maxsplit=1)[0]
     candidate = re.sub(r"[^0-9A-Za-z\u3400-\u9fff +_.-]", " ", candidate)
     candidate = re.sub(r"\s+", " ", candidate).strip(" ._-")
+    candidate = re.sub(r"(?:任務|工作)$", "", candidate).rstrip()
     lowered = candidate.lower()
     if not candidate or any(marker in lowered for marker in _SENSITIVE_LABEL_MARKERS):
         return "目前"
     return candidate[:SPEECH_MAX_LABEL_CHARS].rstrip()
 
 
-def _looks_complete(final_text: str) -> bool:
-    lowered = final_text.strip().lower()
-    if not lowered:
-        return False
-    if any(marker in lowered for marker in _NON_COMPLETION_MARKERS):
-        return False
-    if lowered.endswith(("?", "？")) and "已完成" not in lowered:
-        return False
-    return True
-
-
-def _speak_completion(payload: dict, transcript_path: str, final_text: str) -> None:
-    """Speak at most once per completed interactive turn; all failures fail-open."""
-    if os.environ.get("VOLPRED_DISABLE_TASK_SPEECH", "").lower() in {"1", "true", "yes"}:
+def _speak_marked_completion(payload: dict, rec: dict, final_text: str) -> None:
+    """Consume one explicit completion marker and launch nonblocking local speech."""
+    if os.environ.get("CLAUDE_DISABLE_TASK_SPEECH", "").lower() in {"1", "true", "yes"}:
         return
-    canonical = Path(os.environ.get("VOLPRED_SPEECH_CANONICAL_CWD", str(REPO_ROOT))).resolve()
-    cwd_text = str(payload.get("cwd") or "")
-    if not cwd_text or Path(cwd_text).resolve() != canonical:
+    if payload.get("agent_id") or rec.get("isApiErrorMessage"):
         return
-    if not _looks_complete(final_text):
+    if payload.get("background_tasks") or payload.get("session_crons"):
         return
-    try:
-        user_text = _last_user_text(transcript_path)
-    except OSError as exc:
-        print(f"enforce_final_text: speech user-text read failed: {exc}", file=sys.stderr)
+    if rec.get("entrypoint") not in INTERACTIVE_ENTRYPOINTS:
         return
-    label = _task_label(user_text)
-    phrase = f"主人，{label}任務已完成"
-    session_id = str(payload.get("session_id") or "unknown")
-    fingerprint = hashlib.sha256(f"{session_id}\0{final_text}".encode("utf-8")).hexdigest()
+    marker = TASK_DONE_MARKER.search(final_text)
+    if not marker:
+        return
+    label = _safe_marker_label(marker.group(1))
+    session_id = str(payload.get("session_id") or rec.get("sessionId") or "")
+    assistant_uuid = str(rec.get("uuid") or "")
+    if not session_id or not assistant_uuid:
+        print("enforce_final_text: speech missing session/assistant identity; skip", file=sys.stderr)
+        return
+    fingerprint = f"{session_id}:{assistant_uuid}"
     state_path = Path(os.environ.get("VOLPRED_SPEECH_STATE_PATH", str(DEFAULT_SPEECH_STATE)))
     lock_path = state_path.with_suffix(state_path.suffix + ".lock")
     say_bin = os.environ.get("VOLPRED_SAY_BIN", "/usr/bin/say")
@@ -184,46 +143,59 @@ def _speak_completion(payload: dict, transcript_path: str, final_text: str) -> N
                     print(f"enforce_final_text: speech state read failed; rebuilding: {exc}", file=sys.stderr)
             if fingerprint in recent:
                 return
-            subprocess.run(
-                [say_bin, phrase],
-                check=True,
-                timeout=6,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
             next_state = {"recent": (recent + [fingerprint])[-50:]}
             tmp_path = state_path.with_suffix(state_path.suffix + f".{os.getpid()}.tmp")
             tmp_path.write_text(json.dumps(next_state, ensure_ascii=False), encoding="utf-8")
             tmp_path.replace(state_path)
-    except (OSError, subprocess.SubprocessError) as exc:
-        print(f"enforce_final_text: speech failed, fail-open: {exc}", file=sys.stderr)
+    except OSError as exc:
+        print(f"enforce_final_text: speech state failed, fail-open: {exc}", file=sys.stderr)
+        return
+
+    phrase = f"主人，{label}任務已完成"
+    try:
+        subprocess.Popen(
+            [say_bin, phrase],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+            close_fds=True,
+        )
+    except OSError as exc:
+        print(f"enforce_final_text: speech launch failed, fail-open: {exc}", file=sys.stderr)
 
 
-def main() -> int:
+def main(*, speech_only: bool = False) -> int:
     try:
         payload = json.load(sys.stdin)
     except ValueError as exc:
         print(f"enforce_final_text: bad hook input, fail-open: {exc}", file=sys.stderr)
         return 0
-    if payload.get("stop_hook_active"):
-        return 0  # 已 block 過一次 — 放行避免迴圈
     transcript_path = payload.get("transcript_path") or ""
     if not transcript_path or not os.path.isfile(transcript_path):
         print("enforce_final_text: no transcript, fail-open", file=sys.stderr)
         return 0
     try:
-        block = _last_assistant_block(transcript_path)
+        rec = _last_assistant_record(transcript_path)
     except OSError as exc:
         print(f"enforce_final_text: read error, fail-open: {exc}", file=sys.stderr)
         return 0
+    block = _last_content_block(rec) if rec is not None else None
+    if speech_only:
+        if block is not None and block.get("type") == "text" and str(block.get("text", "")).strip():
+            _speak_marked_completion(payload, rec, str(block.get("text", "")).strip())
+        return 0
+    if payload.get("stop_hook_active"):
+        return 0  # project final-text gate 已 block 過一次 — 放行避免迴圈
     if block is not None and block.get("type") == "text" and str(block.get("text", "")).strip():
-        final_text = str(block.get("text", "")).strip()
-        _speak_completion(payload, transcript_path, final_text)
         return 0  # 最終輸出是非空文字 → 合規
     print(json.dumps({"decision": "block", "reason": REASON}, ensure_ascii=False))
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    args = sys.argv[1:]
+    if args not in ([], ["--speech-only"]):
+        print(f"enforce_final_text: unsupported arguments {args}; fail-open", file=sys.stderr)
+        sys.exit(0)
+    sys.exit(main(speech_only=(args == ["--speech-only"])))

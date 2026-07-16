@@ -2,6 +2,23 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3",
+            "args": [
+              "/Users/yhlai0911/volpred-research/scripts/hooks/enforce_final_text.py",
+              "--speech-only"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(./node_modules/.bin/next build:*)",
@@ -120,7 +137,10 @@
       "Read(//Users/yhlai0911/.local/bin/**)",
       "Bash(curl -fsSL https://antigravity.google/cli/install.sh)",
       "Bash(bash)",
-      "Read(//Users/yhlai0911/volpred-research/**)"
+      "Read(//Users/yhlai0911/volpred-research/**)",
+      "Read(//Users/yhlai0911/.claude/**)",
+      "Bash(echo \"---exit $?\")",
+      "Bash(rg -rn -l -i \"say\" /Users/yhlai0911/.claude/projects/-Users-yhlai0911-volpred-research/memory/)"
     ],
     "defaultMode": "dontAsk"
   },

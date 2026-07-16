@@ -327,11 +327,13 @@ namespace；同一大腦契約要在 runtime setting 明確綁定。
 `/task-done`；歷史 session 沒有實際 invocation，等同功能消失。直接新增另一支 Stop hook 又會
 違反 L1 單一 owner，且背景 hourly/worktree agent 每次 stop 都播會形成噪音風暴。
 
-**修復**：擴充既有 `scripts/hooks/enforce_final_text.py`：final text 合規後才處理語音；只接受
-canonical main cwd，blocker/question/worktree/scratch 皆跳過；task label 去 markup/URL/敏感字並
-限 24 字，以 argv 直呼 `/usr/bin/say`（不經 shell）；`session_id + final_text` 指紋加 fcntl state
-lock 防重播。`/task-done` 改為不再手動 say。Regression 9/9 覆蓋 tool-only、正常文字、hook
-迴圈、缺 transcript、空文字、正確 briefing、去重、background 靜音、blocker 靜音。
+**修復**：project `enforce_final_text.py` 恢復只管 final text；同一 runner 的 `--speech-only`
+由 user-level Stop hook 全域呼叫。`~/.claude/CLAUDE.md` 只在真正完成且驗證通過時產 hidden
+`task-done` receipt；hook 獨立驗最後 block、只允許 `claude-desktop|claude-vscode`、排除 API
+error/subagent/background/cron，使用 `session_id + assistant.uuid` one-shot 去重。任務名 NFKC、去
+控制字/URL/敏感字、限 24 字；鎖內先 persist receipt，鎖外 detached argv 直呼 `/usr/bin/say`
+（不經 shell、不阻塞 Stop）。`/task-done` 不再手動 say。user settings/CLAUDE 雙寫到
+`ops/claude_user_backup/`。
 
-**教訓**：移出 always-loaded 指引可以省 token，但若沒有機械 owner，on-demand command 可能永遠
-沒人呼叫。完成事件只能有一個 Stop owner；外部文字不可拼 shell command。
+**教訓**：Stop 是 turn-end，不是 task-completed；任何非空文字都算完成會把 no-op、拒絕、timeout
+誤播。語意層必須提供明確 receipt，機械層才 consume；外部文字不可拼 shell command。
