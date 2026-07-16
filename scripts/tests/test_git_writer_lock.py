@@ -562,7 +562,9 @@ def test_repo_owned_writers_route_through_canonical_lease() -> None:
     telegram = (ROOT / "scripts/telegram_responder.sh").read_text()
     assert 'git -C "$RESPONDER_REAL" rev-parse --show-toplevel' in telegram
     assert 'AUTO_MEMORY_DIR="/Users/yhlai0911/.claude/projects/-Users-yhlai0911-volpred-research/memory"' in telegram
-    assert ".autoMemoryDirectory = $directory" in telegram
+    assert "/usr/bin/python3 -c" in telegram
+    assert 'cfg["autoMemoryDirectory"] = sys.argv[2]' in telegram
+    assert "/opt/homebrew/bin/jq" not in telegram
     assert '--add-dir "$REPO_ROOT" --add-dir "$AUTO_MEMORY_DIR"' in telegram
     assert '--settings "$RESPONDER_SETTINGS_JSON"' in telegram
     assert "telegram_memory.py list" not in telegram
