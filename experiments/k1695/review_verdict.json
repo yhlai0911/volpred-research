@@ -1,0 +1,24 @@
+{
+  "kid": "k1695",
+  "verdict": "PASS",
+  "reviewer": "feature-dev:code-reviewer subagent (fresh-context), main-thread dispatched; primary-path Codex re-verify satisfied (see codex_reverify)",
+  "reviewed_at": "2026-07-15T07:14:49+0800",
+  "reviewed_commit": "bdf6b451f",
+  "review_artifact": "experiments/k1695/review_certification_20260715.md",
+  "blocking_defects": [],
+  "codex_reverify": {
+    "status": "satisfied_by_existing",
+    "resolved_at": "2026-07-15T08:15:00+0800",
+    "resolved_by": "hourly-08",
+    "note": "Belt-and-suspenders Codex primary-path re-verify job agent-brief_k1695_codex_reverify-be9cd6 FAILED (exit_code=1) purely on a bad model alias (--model gpt-5.6-sol non-existent); it aborted at model selection and produced no verdict. Worktree k1695-codex-reverify held only byte-identical copies of already-committed main artifacts (all sha256 match, 0 commits ahead of main) — nothing salvageable. No re-enqueue needed: the primary-path Codex verdict already exists on main at experiments/k1695/codex_review.md (Codex PASS, 2026-07-12), performing pre-run source review + post-run numerical verification incl. independent B=10,000 bootstrap recomputation (seed 42) on identical artifacts. K1695 closure stands on two independent PASS verdicts (Codex 2026-07-12 + fresh-context code-reviewer 2026-07-15) over byte-identical files.",
+    "codex_verdict_artifact": "experiments/k1695/codex_review.md"
+  },
+  "reviewed_sha256": {
+    "README.md": "dafa40c2923527e84a991797296d4ca32136689e58c88b5473a03086081c1ced",
+    "figure_cross_asset.png": "08b410aad36ca066be11febce71e464daf212771dda4206b2d3ef692ce076df5",
+    "figure_exposure_matched.png": "fd0ce972ed5dd8b427489b3fa641e68df81507b9614b28dd367f54caa0efe492",
+    "k1695.py": "84821998548126bbaac9dda8f1880d18991d085b087faad14eec2a0c9878d49b",
+    "k1695_results.json": "357a9aeb20f61fc00438943b365c3cac3cd2fc4b0fa225d17a54d046dba537a6",
+    "test_k1695.py": "f1e2ebd56a08b2365e2425f99af8c1f02a711b04fbc3adf0a2feb70f7e5fa46e"
+  }
+}
