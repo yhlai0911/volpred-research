@@ -143,3 +143,19 @@ def test_release_pool_strict_uses_anti_ai_gate_before_publish(
     assert _feed(storage)[0]["status"] == "draft"
     decision = next(d for d in _decisions(storage) if d.get("gate") == "anti_ai_style")
     assert decision["decision"] == "block"
+
+
+def test_fb_mode_never_applies_to_feed_items():
+    """2026-07-16 regression: FB caption layout checks (short paragraph /
+    list structure) must not run on feed articles. A digest whose spec
+    requires a curated link list was blocked at 3 cumulative WARNs once the
+    gate turned strict; feed text always audits with fb_mode=False."""
+    from volpred.publisher.publisher import _anti_ai_fb_mode
+
+    for item in (
+        {"audience": "general", "details": {"content_type": "daily_digest"}},
+        {"audience": "event", "details": {"content_type": "event_article"}},
+        {"audience": "general", "details": {"content_type": "trending_repost"}},
+        {"audience": "research", "details": {}},
+    ):
+        assert _anti_ai_fb_mode(item) is False

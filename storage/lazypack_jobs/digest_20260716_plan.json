@@ -1,0 +1,209 @@
+{
+ "schema_version": 1,
+ "title": "恐慌半衰期：油價衝關、股市沒理，市場在賭什麼",
+ "subtitle": "四個問題判斷這次驚嚇是短命還是長命",
+ "evidence": {
+  "ev": {
+   "path": "storage/drafts/assets/digest_20260716/evidence.json",
+   "sha256": "ae680f4d66e88bb251bb6fc4b705b7e889dd3d6c3af6b75a82b1e3c08bd5f576",
+   "label": "2026-07-16 VIX/OVX/WTI 半衰期計算 evidence"
+  }
+ },
+ "panels": [
+  {
+   "name": "1_concept_today",
+   "info": "concept",
+   "style": "editorial",
+   "title": "恐慌不是開關，是一條衰減曲線",
+   "alt": "恐慌半衰期概念與今日油市股市分歧的關鍵讀數",
+   "sources": [
+    "ev"
+   ],
+   "blocks": [
+    {
+     "kind": "text",
+     "heading": "恐慌半衰期",
+     "body": [
+      "事件把恐慌指數打上去之後，它照某種速度衰減",
+      "「跌多深」事前測不到，「嚇多久」有結構可循",
+      "今天的分工：油市在消化驚嚇，股市幾乎沒理"
+     ]
+    },
+    {
+     "kind": "metric",
+     "label": "VIX 最新收盤",
+     "value": {
+      "source": "ev",
+      "path": "/latest/vix_close",
+      "format": {
+       "kind": "number",
+       "digits": 2
+      }
+     },
+     "note": "已低於事件前基線"
+    },
+    {
+     "kind": "metric",
+     "label": "OVX 油市恐慌最新收盤",
+     "value": {
+      "source": "ev",
+      "path": "/latest/ovx_close",
+      "format": {
+       "kind": "number",
+       "digits": 2
+      }
+     },
+     "note": "仍在半衰線之上，衰減進行中"
+    },
+    {
+     "kind": "metric",
+     "label": "WTI 原油最新價",
+     "value": {
+      "source": "ev",
+      "path": "/latest/wti_close",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": " 美元"
+      }
+     },
+     "note": "兩個多月來首見的高位關口"
+    }
+   ]
+  },
+  {
+   "name": "2_method_four_questions",
+   "info": "method",
+   "style": "professional",
+   "title": "半衰期四問",
+   "alt": "判斷驚嚇短命或長命的四個檢查問題",
+   "sources": [
+    "ev"
+   ],
+   "blocks": [
+    {
+     "kind": "text",
+     "heading": "第一問：源頭的恐慌在收斂還是擴散？",
+     "body": [
+      "看衝擊源自己的市場，不是盯著股市猜",
+      "油市出事先看 OVX，盯它的重啟門檻"
+     ]
+    },
+    {
+     "kind": "text",
+     "heading": "第二問：傳到你資產的路有實據嗎？",
+     "body": [
+      "歷史日資料驗過：昨天油波動對今天股波動無預測力",
+      "同日共振強，但那是共振，不是接力賽"
+     ]
+    },
+    {
+     "kind": "text",
+     "heading": "第三問：單點事件，還是連環劇？",
+     "body": [
+      "放完就結束（颱風假、數據日）：半衰期以天計",
+      "每天長新劇情（關稅戰）：半衰期以週、月計"
+     ]
+    },
+    {
+     "kind": "text",
+     "heading": "第四問：答錯的代價付得起嗎？",
+     "body": [
+      "部位跟著波動率呼吸，判斷錯只是顛簸",
+      "滿倉單一市場，前三問一題都錯不起"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "3_results_three_events",
+   "info": "results",
+   "style": "bento-grid",
+   "title": "三次驚嚇，三種半衰期",
+   "alt": "關稅戰、中東衝突、本次油市衝擊的半衰期對比",
+   "sources": [
+    "ev"
+   ],
+   "blocks": [
+    {
+     "kind": "metric",
+     "label": "關稅戰那次的峰值 VIX",
+     "value": {
+      "source": "ev",
+      "path": "/events/0/peak_close",
+      "format": {
+       "kind": "number",
+       "digits": 1
+      }
+     },
+     "note": "遠高於基線，連環劇型"
+    },
+    {
+     "kind": "metric",
+     "label": "關稅戰回到基線",
+     "value": {
+      "source": "ev",
+      "path": "/events/0/return_to_baseline_trading_days",
+      "format": {
+       "kind": "integer",
+       "suffix": " 個交易日"
+      }
+     },
+     "note": "首破半衰線很快，是政策反轉的假象"
+    },
+    {
+     "kind": "metric",
+     "label": "上月中東衝突峰值 VIX",
+     "value": {
+      "source": "ev",
+      "path": "/events/1/peak_close",
+      "format": {
+       "kind": "number",
+       "digits": 1
+      }
+     },
+     "note": "中等驚嚇，單點型"
+    },
+    {
+     "kind": "metric",
+     "label": "中東衝突回到基線",
+     "value": {
+      "source": "ev",
+      "path": "/events/1/return_to_baseline_trading_days",
+      "format": {
+       "kind": "integer",
+       "suffix": " 個交易日"
+      }
+     },
+     "note": "一週內消化完畢"
+    },
+    {
+     "kind": "metric",
+     "label": "這次的峰值 VIX",
+     "value": {
+      "source": "ev",
+      "path": "/events/2/peak_close",
+      "format": {
+       "kind": "number",
+       "digits": 1
+      }
+     },
+     "note": "幾乎沒高出基線，股市根本沒被嚇到"
+    },
+    {
+     "kind": "metric",
+     "label": "這次 OVX 峰值（油市）",
+     "value": {
+      "source": "ev",
+      "path": "/supplementary_ovx_event/peak_close",
+      "format": {
+       "kind": "number",
+       "digits": 1
+      }
+     },
+     "note": "半衰還沒走完，真正的戰場在油市"
+    }
+   ]
+  }
+ ]
+}

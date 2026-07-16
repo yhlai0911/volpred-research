@@ -181,6 +181,8 @@
 - 2026-06-14 pool warn 反覆復現 → journal-discovery 冷卻對齊消耗 — Q2
 - 2026-06-19 三根因：release pool 枯竭 / member_qa dispatch 誤分類 / M2 供給斷 — Q2
 - 2026-07-13 **3-STRIKE RESOLVED**（dreaming persistent_alert e1aa596aac4a2172，連 9 次 5.8d）「發文脫班補救失敗：force-release/refill 皆為 0」— 根因不是補救失效，是**refill 把一整個連載 cluster 塞爆 → 池裡有稿但全不可釋出（同 cluster 節奏鎖）→ force-release 見無 releasable=0、refill added>0 但淨釋出=0**，dead-man 判為雙 0 升 critical。修：`refill_task_pool.py` 加 per-cluster budget，補池「看得見釋出閘門」不再自製單一 cluster 死鎖 + 回歸測試 `test_refill_cluster_budget.py`（commit e96554041，另動 `src/volpred/ops/content.py`）。alert 07-10 已停火、48h 自清；驗證 `remediate_publish_drought.py --dry-run` = no drought — Q3
+- 2026-07-16 daily_digest 脫班（boss 點名）— 兩層根因：(a) 上午 09:00–11:47 五班 dispatch 全 quota_blocked（外部）；(b) 下午恢復的三班全被 compute followup 吃掉 — 舊 PHASE A「命中 followup 即本小時派工結束」使 followup backlog 持續時 P1 時效任務被無限餓死（priority inversion，違反 CLAUDE.md「時效 P1 插隊所有 scheduled」）。修：dispatch prompt 加 **PHASE A0 時效 P1 優先**（event_article/trending_repost/daily_digest/user P1 先於 followup；commit 7e1a180ec）；digest 由主線程當場補發（mile_f9c70bd0）— Q3
+- 2026-07-16 anti-AI publish gate `_anti_ai_fb_mode` 把所有 general/digest feed 長文誤套 **FB 短文排版檢查**（3.2 段落 ≤4 行、3.4 列表 ≥3 項即 WARN）→ 與 digest 規格「文末必列 5-8 篇精選清單」結構性矛盾，兩檢查恆貢獻 2 WARN、再加任一風格 WARN 即達 3-WARN hard-block。warn-only 遷移期（至 07-13）掩蓋了矛盾，strict 生效後第一篇 digest（07-16 補發）即被擋。修：feed 文章一律 `fb_mode=False`（FB 文案走 fb-publishing 流程不經 publish_milestone）+ regression `test_fb_mode_never_applies_to_feed_items`。教訓：**gate 從 warn-only 轉 strict 前，必須拿受影響 content_type 的真實樣本（尤其規格強制含列表/長段的類型）跑 dry-run 校準** — Q3
 
 ## L. Paper narrative / 裁決 / review-cert SHA-pin / 規格漂移
 

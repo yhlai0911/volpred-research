@@ -264,13 +264,15 @@ def _anti_ai_gate_applies(item: dict, *, target_status: str | None = None) -> bo
 
 
 def _anti_ai_fb_mode(item: dict) -> bool:
-    audience = str(item.get("audience") or "").strip().lower()
-    content_type = _anti_ai_content_type(item)
-    return audience in {"general", "event"} or content_type in {
-        "daily_digest",
-        "event_article",
-        "trending_repost",
-    }
+    # 2026-07-16: feed articles are never FB posts. The fb_mode checks
+    # (3.2 short-paragraph / 3.4 list-structure) encode FB-caption layout
+    # rules; applying them to long-form feed content made every digest
+    # (whose spec REQUIRES a curated link list) start 2 WARNs deep and
+    # blocked daily_digest_20260716 once the gate turned strict on
+    # 2026-07-13. FB captions are written in the fb-publishing flow, not
+    # via publish_milestone, so this gate always audits feed text.
+    del item
+    return False
 
 
 def _normalize_anti_ai_template_phrases(text: str) -> tuple[str, list[str]]:
