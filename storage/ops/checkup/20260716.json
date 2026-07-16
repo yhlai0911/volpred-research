@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T09:40:05.133025",
+  "generated_at": "2026-07-16T11:07:20.087423",
   "overall": "critical",
   "critical_count": 1,
   "warn_count": 9,
@@ -31,7 +31,7 @@
     {
       "dimension": "alert_conditions",
       "severity": "warn",
-      "message": "event_receipt_watchdog: Event receipt watchdog stale (queued_past_deadline)",
+      "message": "strategy_metrics_freshness: 策略 metrics 過期（strategy_metrics.json 停止更新）",
       "recovery": "uv run volpred ops check-alerts --storage-dir storage"
     },
     {

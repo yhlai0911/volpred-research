@@ -1,0 +1,37 @@
+{
+  "id": "k1704-primary-prerun-review-20260716",
+  "title": "K1704 primary pre-run Codex review",
+  "script_path": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/K1704/pre_run_review_prompt.md",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/K1704/pre_run_review.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-16T03:11:50Z",
+  "started_at": "2026-07-16T03:12:03Z",
+  "completed_at": "2026-07-16T03:18:20Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1704-primary-prerun-review-20260716.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1704-primary-prerun-review-20260716.stderr",
+  "result_artifact": null,
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "Collect K1704 primary pre-run review; if PASS/CONDITIONAL_PASS apply findings, rerun from pinned cache, then final review and certify. Task K1704 remains owned by codex-desktop-recovery-k1704.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}
