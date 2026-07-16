@@ -1,0 +1,143 @@
+{
+  "experiment_id": "k1426_oos_return_benchmark",
+  "title": "K1426 OOS \u2014 return-regression hedge benchmark vs levels beta and PCH",
+  "data_range": {
+    "start": "2015-01-01",
+    "end": "2024-12-31"
+  },
+  "spec": {
+    "min_train": 756,
+    "refit_every": 63,
+    "lookahead_rule": "Train on [:i], apply beta to return spanning i-1 -> i."
+  },
+  "caveats": [
+    "The return-OLS vs PCH comparison is a POINT ESTIMATE, not a test. k1426_oos_results.json stores no PCH hedged-return series and truncates refit snapshots to the head, so a paired DM / block-bootstrap of return-OLS vs PCH requires re-running the PCH MLE and is out of scope here.",
+    "The DM test reported here compares return-beta vs levels-beta only, and uses squared hedged returns (second moment) while HE uses de-meaned variance; when the two hedges differ in mean these are not the same estimand. Same convention as oos.py, kept for comparability.",
+    "PCH HE is read from the earlier run while levels/return HE are recomputed from a fresh yfinance download; sample_matches_merged and levels_beta_replicates_merged record whether that comparison is valid."
+  ],
+  "pairs": {
+    "pair_1_SPY_IVV": {
+      "symbols": {
+        "x": "SPY",
+        "y": "IVV"
+      },
+      "n_obs_oos": 1759,
+      "n_refits": 28,
+      "hedge_effectiveness": {
+        "ols_levels_beta": 0.998124053142667,
+        "ols_return_beta": 0.9982213720412598,
+        "pch_from_merged": 0.9983437329579633
+      },
+      "mean_beta": {
+        "levels": 1.0028941429056348,
+        "returns": 0.9879704084770407
+      },
+      "dm_return_beta_vs_levels_beta": {
+        "t_stat": -0.5888706843892536,
+        "p_value": 0.5560236787577666
+      },
+      "sample_matches_merged": true,
+      "levels_beta_replicates_merged": true,
+      "return_beta_beats_pch_point_estimate_only": false
+    },
+    "pair_2_USO_BNO": {
+      "symbols": {
+        "x": "USO",
+        "y": "BNO"
+      },
+      "n_obs_oos": 1759,
+      "n_refits": 28,
+      "hedge_effectiveness": {
+        "ols_levels_beta": 0.8043751864717914,
+        "ols_return_beta": 0.8834457413944412,
+        "pch_from_merged": 0.8834613922282876
+      },
+      "mean_beta": {
+        "levels": 0.9471999745218868,
+        "returns": 0.9976146980054127
+      },
+      "dm_return_beta_vs_levels_beta": {
+        "t_stat": -6.710326364119501,
+        "p_value": 2.610889282550488e-11
+      },
+      "sample_matches_merged": true,
+      "levels_beta_replicates_merged": true,
+      "return_beta_beats_pch_point_estimate_only": false
+    },
+    "pair_3_GLD_IAU": {
+      "error": "skipped; merged results carry: yfinance returned empty for GLD/IAU"
+    },
+    "pair_4_GLD_SLV": {
+      "symbols": {
+        "x": "GLD",
+        "y": "SLV"
+      },
+      "n_obs_oos": 1759,
+      "n_refits": 28,
+      "hedge_effectiveness": {
+        "ols_levels_beta": 0.24045051123325156,
+        "ols_return_beta": 0.6026611238421122,
+        "pch_from_merged": 0.6026749741988451
+      },
+      "mean_beta": {
+        "levels": 0.6661992378093421,
+        "returns": 0.44129958752403553
+      },
+      "dm_return_beta_vs_levels_beta": {
+        "t_stat": -6.5266221762231105,
+        "p_value": 8.77504735541379e-11
+      },
+      "sample_matches_merged": true,
+      "levels_beta_replicates_merged": true,
+      "return_beta_beats_pch_point_estimate_only": false
+    },
+    "pair_5_XLE_USO": {
+      "symbols": {
+        "x": "XLE",
+        "y": "USO"
+      },
+      "n_obs_oos": 1759,
+      "n_refits": 28,
+      "hedge_effectiveness": {
+        "ols_levels_beta": 0.2949515958038017,
+        "ols_return_beta": 0.3579001330010021,
+        "pch_from_merged": 0.3581469073734669
+      },
+      "mean_beta": {
+        "levels": 0.28970432827989356,
+        "returns": 0.4572528484508969
+      },
+      "dm_return_beta_vs_levels_beta": {
+        "t_stat": -1.4269677682357929,
+        "p_value": 0.15376676394953326
+      },
+      "sample_matches_merged": true,
+      "levels_beta_replicates_merged": true,
+      "return_beta_beats_pch_point_estimate_only": false
+    },
+    "pair_6_XLF_XLK": {
+      "symbols": {
+        "x": "XLF",
+        "y": "XLK"
+      },
+      "n_obs_oos": 1759,
+      "n_refits": 28,
+      "hedge_effectiveness": {
+        "ols_levels_beta": 0.4868503722488128,
+        "ols_return_beta": 0.4405297761784712,
+        "pch_from_merged": 0.4410640893790386
+      },
+      "mean_beta": {
+        "levels": 0.5927160001594165,
+        "returns": 0.7269322724757468
+      },
+      "dm_return_beta_vs_levels_beta": {
+        "t_stat": 3.943255967577766,
+        "p_value": 8.353716446873882e-05
+      },
+      "sample_matches_merged": true,
+      "levels_beta_replicates_merged": true,
+      "return_beta_beats_pch_point_estimate_only": false
+    }
+  }
+}

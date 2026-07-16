@@ -27,7 +27,7 @@
     "task_type": "platform_ops",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "timeout_seconds": 14400,
   "brief_source": null,
   "brief_snapshot": null,
@@ -44,5 +44,7 @@
     "experiments/k1426/k1426_oos_shard_c.json"
   ],
   "delivered_at": "2026-07-16T13:01:19.427040+00:00",
-  "delivery_source": "reap_orphan_deliverables"
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-16T16:18:59Z",
+  "followup_next_task_id": "assign_k1426_oos_residuals"
 }

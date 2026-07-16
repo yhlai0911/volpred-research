@@ -19358,5 +19358,13 @@
     "actor": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
     "owner": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
     "summary": "運營回報排版架構感 — 驗證已由 commit 50c24cc57 實作後 close。progress_report.py docstring 明載 msg808 refinement；實跑 render 對照 4 條要求皆滿足。字面「分隔線/單行標題」未做（與 task 自身「不得變長」衝突且現行更符標題階層意圖），不擅改正確格式以免回歸。"
+  },
+  {
+    "task_type": "experiment",
+    "task_id": "compute-k1426-oos-split-shard-c (followup collect)",
+    "timestamp": "2026-07-17T00:19:59.308247+08:00",
+    "actor": "hourly-slot-1-63816151dde64af1acfec8a4e532c8b4",
+    "owner": "hourly-slot-1-63816151dde64af1acfec8a4e532c8b4",
+    "summary": "K1426 OOS 收尾 = NULL。3 個 shard 到齊後以新增的 merge_shards.py（idempotent）合併為 k1426_oos_results.json。表面判準顯示 PCH 在 2/6 pairs 兩 gate 皆過（USO/BNO +0.0791 t=-6.70；GLD/SLV +0.3622 t=-6.53），但那是 benchmark 假象：fit_ols_hedge 在 log 價格水準回歸得共整合 beta，oos.py:200 卻拿去避險日報酬。以相同 OOS 協定補上報酬迴歸對照組（oos_return_benchmark.py，levels 臂逐字複製原數字、樣本數相符）後，PCH 的 beta 就是報酬迴歸 beta（差 0.0001~0.0072），HE 差全部 ≤0.0005（GLD/SLV 0.6027 vs 0.6027）。故 PCH 對報酬避險無增益 → multivariate PCH 否決。pair_3 GLD/IAU 因 yfinance 回空無資料（非 null result，照實記）。Codex 審 oos_return_benchmark.py：lookahead/公平比較 PASS；採納其收斂修正（levels OLS 仍是有效的共整合估計量控制組，不宜稱純 straw man）與 Critical finding（return-OLS vs PCH 僅點估計，artifact 未存 PCH 每日避險報酬序列 → 無法配對檢定）。殘留開 assign_k1426_oos_residuals（GLD/IAU 補抓、配對檢定、oos.py docstring 21日/63日 矛盾修正）。followup 已 mark-followup-dispatched。"
   }
 ]

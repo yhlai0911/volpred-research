@@ -132,7 +132,91 @@ high (our Pair 1 R²_MR = 0.81), the ρ may be uninformative.
 5. **未做 statsmodels coint test 對照** — 自寫 MLE 已是按方法論硬規則（套件
    不支援 PCH state-space → 必自寫），不再額外跑套件。
 
+## OOS 結果（2026-07-17 收尾）— NULL：PCH 對報酬避險無增益
+
+上節「OOS 後續方向」第 2-4 點已執行完畢（`oos.py`，分 3 個 shard 跑完 6 pairs，
+`merge_shards.py` 合併為 `k1426_oos_results.json`）。**結論是 null result：PCH 相對
+於一個兩行的報酬迴歸沒有任何增量價值。**
+
+### 表面結果（對照組 = levels OLS）
+
+判準：block-bootstrap 95% CI 排除 0 **且** DM |t| > 3.0（Harvey 多重檢定門檻）。
+
+| pair | HE_ols | HE_pch | diff | boot 95% CI | DM t | 判定 |
+|---|---|---|---|---|---|---|
+| SPY/IVV | 0.9981 | 0.9983 | +0.0002 | [0.0000, 0.0004] | −1.36 | null（t 未過） |
+| USO/BNO | 0.8044 | 0.8835 | +0.0791 | [0.0562, 0.1155] | −6.70 | 兩 gate 皆過 |
+| GLD/IAU | — | — | — | — | — | **無資料**（yfinance 回空） |
+| GLD/SLV | 0.2405 | 0.6027 | +0.3622 | [0.2407, 0.5125] | −6.53 | 兩 gate 皆過 |
+| XLE/USO | 0.2950 | 0.3581 | +0.0632 | [−0.0144, 0.1240] | −1.44 | null（CI 含 0） |
+| XLF/XLK | 0.4869 | 0.4411 | −0.0458 | [−0.0974, −0.0169] | +3.91 | PCH 顯著**較差** |
+
+若停在這裡，會得出「PCH 在 2/6 pairs 顯著勝出」的結論。**那是錯的。**
+
+### 為什麼表面結果不成立
+
+`fit_ols_hedge`（`k1426.py:251`）是在 log **價格水準**上回歸，得到的是共整合 beta；
+`oos.py:200` 卻把該 beta 拿去避險**日報酬**。水準 beta 不是報酬變異數最小化的 beta，
+所以這個對照組沒有被 scored 的損失函數所最適化。報酬避險的正確對照組是
+**報酬對報酬的迴歸 beta**。
+
+`oos_return_benchmark.py` 用**完全相同**的 OOS 協定（擴張窗、min_train=756、
+refit_every=63、beta 由 `[:i]` 訓練後套用到 i−1→i 的報酬）補上這個對照組。
+其 levels-OLS 逐字複製了原始數字（`levels_beta_replicates_merged=true`）、
+OOS 樣本數相符（`sample_matches_merged=true`），故比較有效：
+
+| pair | beta_PCH | beta_報酬OLS | 差 | HE_PCH | HE_報酬OLS | 差 |
+|---|---|---|---|---|---|---|
+| SPY/IVV | 0.9951 | 0.9880 | 0.0072 | 0.9983 | 0.9982 | 0.00012 |
+| USO/BNO | 1.0009 | 0.9976 | 0.0033 | 0.8835 | 0.8834 | 0.00002 |
+| GLD/SLV | 0.4414 | 0.4413 | 0.0001 | 0.6027 | 0.6027 | 0.00001 |
+| XLE/USO | 0.4556 | 0.4573 | −0.0016 | 0.3581 | 0.3579 | 0.00025 |
+| XLF/XLK | 0.7261 | 0.7269 | −0.0008 | 0.4411 | 0.4405 | 0.00053 |
+
+**PCH 的 beta 就是報酬迴歸 beta**（GLD/SLV 差 0.0001），HE 差距全部 ≤ 0.0005 —— 
+相對於 GLD/SLV 那個 +0.3622 的標題數字等於零。PCH 的 levels likelihood 恰好回收了
+報酬最適 beta，而對照組用了不適合該任務的水準 beta；「勝出」全部來自這個落差，
+與 partial cointegration 機制無關。
+
+XLF/XLK 的反向證據同樣支持這個解釋：PCH 在該對「輸」給 levels OLS，而報酬 OLS
+也一樣輸（0.4405 vs 0.4869）—— 那對的水準 beta 只是 OOS 碰巧較好。決定 HE 的
+是「用哪個 beta」，不是「有沒有 PCH」。
+
+機制診斷與此一致：兩個「勝出」pair 的均值回歸成分幾乎不存在
+（USO/BNO：mean_rho = −0.374、R²_MR = 0.072；GLD/SLV：rho = 0.216、R²_MR = 0.116）。
+負 rho 是振盪而非均值回歸，PCH 實質退化為 random walk + noise。
+
+### 判定與後續
+
+- **K1426 OOS = NULL**：PCH 對報酬避險相對報酬 OLS 無增量價值。
+- **Multivariate PCH 不排入 queue**（原第 5 點）。在 PCH 能勝過報酬 OLS 之前，
+  把它擴到 3+ assets 只是把一個無增益的方法變複雜。門檻應為：先在單 pair 上
+  對報酬 OLS 顯示增益，才談 multivariate。
+- 已知殘留（已開 child task，不影響上述結論）：GLD/IAU 資料缺、
+  return-OLS vs PCH 只有點估計而無配對檢定（artifact 未存 PCH 每日避險報酬序列、
+  refit snapshots 被截斷為 head，要配對檢定須重跑當初 timeout 的 PCH MLE）。
+  因 HE 差距 ≤0.0005 而 PCH-vs-levels 差距達 0.36，此殘留不改變 null 判定。
+
+### Codex 審查
+
+`oos_return_benchmark.py` 經 codex exec 審查：lookahead PASS（beta 僅用 `[:i]`，
+`np.diff(train_x)` 最後一筆為 log_x[i−1]−log_x[i−2]，無洩漏）、公平比較 PASS
+（同訓練窗/同 refit 節奏/同 OOS 觀測/HE 同 ddof=1）。Codex 對本文主張的收斂修正
+已採納：levels OLS 作為「共整合估計量 vs 共整合估計量」的控制組**仍有效**
+（PCH 本身也從 levels likelihood 估 beta），故不宜稱其為全然的 straw man；
+準確結論是**它不足以支持 return-hedging superiority 的宣稱**。
+
+### spec 修正
+
+shard notes 寫「Monthly (21-day) refit cadence」與 `spec.refit_every=63`（季度）矛盾。
+`merge_shards.py` 以 spec 為準（那是代碼實際消費的值）並在合併輸出中更正該註記。
+`oos.py:8,273,345` 的 docstring 仍寫 21 日/monthly，為 reproducibility metadata 錯誤，
+已記於 child task。
+
 ## OOS 後續方向（→ compute_queue followup brief）
+
+> ⚠️ 下列為 2026-06-09 撰寫的原始方向；第 2-4 點已於 2026-07-17 執行完畢並得出
+> null（見上節），第 5 點 multivariate 已依該結論**否決**。保留供脈絡。
 
 1. **Pair 2/3 full 100-multistart PCH** — 確認 loglik basin
 2. **OOS rolling-window** — expanding window 估 (beta, rho)，shift(1) 後計算
@@ -163,6 +247,12 @@ uv run python experiments/k1426/k1426.py
 - `README.md` — 本檔
 - `k1426.py` — PCH/Kalman/MLE/baseline canonical implementation
 - `run_fast.py` — scope-cut runner（pair 2/3 用 20-start MLE）
-- `k1426_results.json` — 數字結果
+- `k1426_results.json` — 數字結果（in-sample）
+- `oos.py` — OOS 擴張窗 runner（分 shard 執行）
+- `k1426_oos_shard_{a,b,c}.json` — 3 個 shard 的原始輸出（parent job 6h timeout 後拆分）
+- `merge_shards.py` — shard 合併（idempotent）
+- `k1426_oos_results.json` — 合併後 OOS 結果
+- `oos_return_benchmark.py` — 報酬迴歸對照組（推翻表面 OOS 結論的關鍵檢查）
+- `k1426_oos_return_benchmark.json` — 對照組結果
 - `figures/` — spread 比較 + state decomposition 圖
 - `references.md` — 3 篇文獻 APA + DOI + 核心 quote
