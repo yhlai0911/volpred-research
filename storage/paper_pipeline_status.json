@@ -237,8 +237,8 @@
       "journal_target": "JPM/FAJ",
       "stage": "revision",
       "stage_entered_at": "2026-07-01T03:18:00+08:00",
-      "last_advance_at": "2026-07-01T04:15:00+08:00",
-      "blocker": "HOLD (2026-07-15 05:17, hourly-05): the international drawdown-protection claim is an EXPOSURE ARTIFACT — Table 5, the third contribution, and the abstract sentence built on it are awaiting_correction and MUST NOT be advanced, re-claimed, or strengthened in the body until experiment K1695 is re-certified. Independently verified by main thread (storage/ops/k1695_exposure_artifact_verification.md): raw common-sample average dMDD +12.61pp (13/13 positive) collapses to -0.87pp (7/13) under exposure matching; volpred.stats.drawdown.compare_max_drawdown flags exposure_mismatch on 13/13 markets (VT realized vol is only 0.61-0.68x buy-and-hold, far past the 20% threshold in .claude/rules/experiments.md:140, which forbids reporting raw MDD differences alone). The paper currently reports the raw 12.6pp with a joint stationary-bootstrap 90% CI of [4.2, 19.3] pp — a significant-looking interval around a number that does not survive exposure matching. PRIOR blocker (still open): codex contribution-gate (gpt-5.x) verdict BORDERLINE — Major revision required; NOT arXiv-ready. 10 reframing items remaining (K-id scrub item resolved 04:15): stale Figure 2, pending Calmar cells in Table 3, BAB source/sample conflict, abstract overload, missing cover letter.",
+      "last_advance_at": "2026-07-15T07:15:00+08:00",
+      "blocker": "K1695 exposure-artifact HOLD RESOLVED 2026-07-15 07:15 (hourly-07): correction certified (review_verdict.json PASS, certify PASS, commit bdf6b451f). DECISION = WITHDRAW the international drawdown-protection contribution (exposure-matched dMDD common -0.87pp/7-13, null p=0.559 NOT rejected). Routed to main-thread task paper_body_vt_trend_withdraw_k1695_contribution. REMAINING BLOCKER (still open, gates arXiv): codex contribution-gate (gpt-5.x) verdict BORDERLINE — Major revision required; NOT arXiv-ready. Reframing items remaining: stale Figure 2, pending Calmar cells in Table 3, BAB source/sample conflict, abstract overload (partly relieved by the K1695 withdrawal), missing cover letter. The withdrawal must be executed in body/tables before the next fresh contribution gate.",
       "awaiting_correction": {
         "declared_at": "2026-07-15T05:17:00+08:00",
         "declared_by": "hourly-05",
@@ -253,7 +253,15 @@
         "blocked_on": "k1695_exposure_matched_correction (P1; dispatched to compute queue as agent-brief_k1695_correction-c841cc)",
         "release_condition": "K1695 re-run reports raw AND exposure-matched dMDD with exposure fields, a seeded circular-shift/phase-randomized null, exposure-matched 90% CI, and passes Codex review. Then either rewrite Table 5 on the exposure-matched basis or withdraw the contribution.",
         "bug_class": "raw MDD compared across mismatched exposure (same class as K1265b / K1702); canonical fix = volpred.stats.drawdown.compare_max_drawdown",
-        "note": "The 5-asset TSMOM-retention claims (Tables 3-4) are a DIFFERENT comparison (VT vs TSMOM-hedged VT) and are not directly voided by this finding, but they have NOT been exposure-audited — do not treat them as cleared."
+        "note": "The 5-asset TSMOM-retention claims (Tables 3-4) are a DIFFERENT comparison (VT vs TSMOM-hedged VT) and are not directly voided by this finding, but they have NOT been exposure-audited — do not treat them as cleared.",
+        "resolution": {
+          "resolved_at": "2026-07-15T07:15:00+08:00",
+          "resolved_by": "hourly-07 (main thread)",
+          "certification": "experiments/k1695/review_verdict.json verdict=PASS; experiment_gates.py certify PASS; commit bdf6b451f; fresh-context code-reviewer 7/7 checklist no blocking defect; primary-path Codex re-verify enqueued",
+          "corrected_numbers": "exposure-matched avg dMDD common=-0.87pp (7/13), inception=+4.96pp (12/13); circular-shift null p=0.559/0.212 (NOT rejected); Holm 0/13 survivors; constant-72.6%-weight no-timing reference reproduces 59-85% of the raw gap with ~0 matched gap",
+          "decision": "WITHDRAW the international drawdown-protection contribution (3rd contribution). exposure-matched result is a NULL — protection does not survive risk-matching, so it cannot be presented as a finding. Remove Table 5 international panel, the 3rd-contribution 'US VIX as global de-risking signal / insurance pricing r=-0.817' claim, the abstract sentence (12.6pp / CI [4.2,19.3]), and the Section 4 international panel. This also relieves the codex contribution-gate 'abstract overload / rewrite around ONE claim' finding.",
+          "routed_to": "paper_body_vt_trend_withdraw_k1695_contribution (main-thread .tex work)"
+        }
       },
       "owner_decision_pending": false,
       "compliance_scrub_done": true,
