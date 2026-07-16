@@ -1,0 +1,362 @@
+{
+  "experiment_id": "k1426_oos",
+  "title": "K1426 follow-up \u2014 expanding-window OOS partial cointegration hedging",
+  "seed": 42,
+  "data_range": {
+    "start": "2015-01-01",
+    "end": "2024-12-31"
+  },
+  "spec": {
+    "min_train": 756,
+    "refit_every": 63,
+    "n_starts": 50,
+    "n_boot": 1000,
+    "block_len": 20,
+    "lookahead_rule": "Train on [:t-1], apply hedge beta to return t via shift(1)."
+  },
+  "pairs": {
+    "pair_5_XLE_USO": {
+      "symbols": {
+        "x": "XLE",
+        "y": "USO"
+      },
+      "date_start": "2015-01-02",
+      "date_end": "2024-12-30",
+      "n_obs_total": 2515,
+      "n_obs_oos": 1759,
+      "min_train": 756,
+      "refit_every": 63,
+      "n_refits": 28,
+      "n_multistart": 50,
+      "oos_window": {
+        "start": "2018-01-03",
+        "end": "2024-12-30"
+      },
+      "hedge_effectiveness": {
+        "ols": 0.2949518439878367,
+        "eg_vecm": 0.2949518439878367,
+        "pch": 0.3581469073734669,
+        "pch_minus_ols": 0.06319506338563019
+      },
+      "dm_squared_hedge_loss_pch_vs_ols": {
+        "t_stat": -1.4384540006529738,
+        "p_value": 0.1504832756154899,
+        "harvey_threshold_note": "Use |t| > 3.0 for strong claim under multiple testing."
+      },
+      "bootstrap_he_diff": {
+        "point_diff": 0.06319506338563019,
+        "ci_95": [
+          -0.014389998159931049,
+          0.1240367036667747
+        ],
+        "bootstrap_median": 0.060854256580930965,
+        "n_boot": 1000,
+        "block_len": 20,
+        "seed": 42
+      },
+      "pch_refit_diagnostics": {
+        "mean_beta": 0.4556202332413992,
+        "mean_rho": 0.3400484563831547,
+        "mean_r2_mr": 0.3605202509396844,
+        "median_half_life_days": 16.942382720310796
+      },
+      "refit_snapshots_head": [
+        {
+          "oos_date": "2018-01-03",
+          "train_end_date": "2018-01-02",
+          "train_n": 756,
+          "beta_ols": 0.18349525417912355,
+          "beta_eg": 0.18349525417912355,
+          "beta_pch": 0.42669323407632104,
+          "rho_pch": 0.9328398413862113,
+          "r2_mr_pch": 0.4918321653292867,
+          "half_life_days": 9.970220164499793,
+          "n_starts_converged": 49
+        },
+        {
+          "oos_date": "2018-04-05",
+          "train_end_date": "2018-04-04",
+          "train_n": 819,
+          "beta_ols": 0.1874918552760852,
+          "beta_eg": 0.1874918552760852,
+          "beta_pch": 0.43584328197630084,
+          "rho_pch": 0.9339729226529255,
+          "r2_mr_pch": 0.494775268375046,
+          "half_life_days": 10.147404202225866,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2018-07-05",
+          "train_end_date": "2018-07-03",
+          "train_n": 882,
+          "beta_ols": 0.20524077332608767,
+          "beta_eg": 0.20524077332608767,
+          "beta_pch": 0.44051065503650616,
+          "rho_pch": 0.9344039079973844,
+          "r2_mr_pch": 0.49521334851606114,
+          "half_life_days": 10.216405243231334,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2018-10-03",
+          "train_end_date": "2018-10-02",
+          "train_n": 945,
+          "beta_ols": 0.22560480053384271,
+          "beta_eg": 0.22560480053384271,
+          "beta_pch": 0.4399257811596827,
+          "rho_pch": 0.9285818966945099,
+          "r2_mr_pch": 0.38139058986310004,
+          "half_life_days": 9.354629710646256,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-01-04",
+          "train_end_date": "2019-01-03",
+          "train_n": 1008,
+          "beta_ols": 0.23397338675725193,
+          "beta_eg": 0.23397338675725193,
+          "beta_pch": 0.443808867353029,
+          "rho_pch": 0.9360465397753748,
+          "r2_mr_pch": 0.40517380261716684,
+          "half_life_days": 10.48791531373476,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-04-05",
+          "train_end_date": "2019-04-04",
+          "train_n": 1071,
+          "beta_ols": 0.23447508389644373,
+          "beta_eg": 0.23447508389644373,
+          "beta_pch": 0.4424726487208001,
+          "rho_pch": 0.9506158827555893,
+          "r2_mr_pch": 0.5905192242447879,
+          "half_life_days": 13.686333303750487,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-07-08",
+          "train_end_date": "2019-07-05",
+          "train_n": 1134,
+          "beta_ols": 0.23597419820820964,
+          "beta_eg": 0.23597419820820964,
+          "beta_pch": 0.44115302821556834,
+          "rho_pch": 0.9662652655644629,
+          "r2_mr_pch": 0.7049879879133302,
+          "half_life_days": 20.198432136871105,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-10-04",
+          "train_end_date": "2019-10-03",
+          "train_n": 1197,
+          "beta_ols": 0.2401349678584643,
+          "beta_eg": 0.2401349678584643,
+          "beta_pch": 0.4358430907723136,
+          "rho_pch": 0.9347084006047608,
+          "r2_mr_pch": 0.5018146019888925,
+          "half_life_days": 10.265703632248577,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2020-01-06",
+          "train_end_date": "2020-01-03",
+          "train_n": 1260,
+          "beta_ols": 0.24294171874819312,
+          "beta_eg": 0.24294171874819312,
+          "beta_pch": 0.43548108582942274,
+          "rho_pch": 0.9345966084606583,
+          "r2_mr_pch": 0.5031097612158552,
+          "half_life_days": 10.247550797543507,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2020-04-06",
+          "train_end_date": "2020-04-03",
+          "train_n": 1323,
+          "beta_ols": 0.3852014807098488,
+          "beta_eg": 0.3852014807098488,
+          "beta_pch": 0.5012080393610875,
+          "rho_pch": -0.49601199840326643,
+          "r2_mr_pch": 0.04399703530326628,
+          "half_life_days": null,
+          "n_starts_converged": 50
+        }
+      ]
+    },
+    "pair_6_XLF_XLK": {
+      "symbols": {
+        "x": "XLF",
+        "y": "XLK"
+      },
+      "date_start": "2015-01-02",
+      "date_end": "2024-12-30",
+      "n_obs_total": 2515,
+      "n_obs_oos": 1759,
+      "min_train": 756,
+      "refit_every": 63,
+      "n_refits": 28,
+      "n_multistart": 50,
+      "oos_window": {
+        "start": "2018-01-03",
+        "end": "2024-12-30"
+      },
+      "hedge_effectiveness": {
+        "ols": 0.48685074015674545,
+        "eg_vecm": 0.48685074015674545,
+        "pch": 0.4410640893790386,
+        "pch_minus_ols": -0.04578665077770683
+      },
+      "dm_squared_hedge_loss_pch_vs_ols": {
+        "t_stat": 3.914376838854994,
+        "p_value": 9.409585648878505e-05,
+        "harvey_threshold_note": "Use |t| > 3.0 for strong claim under multiple testing."
+      },
+      "bootstrap_he_diff": {
+        "point_diff": -0.04578665077770683,
+        "ci_95": [
+          -0.09744613721619474,
+          -0.016922540141603954
+        ],
+        "bootstrap_median": -0.045053411983831115,
+        "n_boot": 1000,
+        "block_len": 20,
+        "seed": 42
+      },
+      "pch_refit_diagnostics": {
+        "mean_beta": 0.7261011350878755,
+        "mean_rho": 0.6984720190651631,
+        "mean_r2_mr": 0.12944102653101272,
+        "median_half_life_days": 17.329834818131385
+      },
+      "refit_snapshots_head": [
+        {
+          "oos_date": "2018-01-03",
+          "train_end_date": "2018-01-02",
+          "train_n": 756,
+          "beta_ols": 0.8747597718678148,
+          "beta_eg": 0.8747597718678148,
+          "beta_pch": 0.7618734858223742,
+          "rho_pch": 0.9770687837760295,
+          "r2_mr_pch": 0.1157787961671806,
+          "half_life_days": 29.879317903941615,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2018-04-05",
+          "train_end_date": "2018-04-04",
+          "train_n": 819,
+          "beta_ols": 0.8834617236713628,
+          "beta_eg": 0.8834617236713628,
+          "beta_pch": 0.7839123557381417,
+          "rho_pch": 0.9759443931963255,
+          "r2_mr_pch": 0.17206494157452984,
+          "half_life_days": 28.46639099350757,
+          "n_starts_converged": 49
+        },
+        {
+          "oos_date": "2018-07-05",
+          "train_end_date": "2018-07-03",
+          "train_n": 882,
+          "beta_ols": 0.8460049057209629,
+          "beta_eg": 0.8460049057209629,
+          "beta_pch": 0.768680672967971,
+          "rho_pch": 0.9786165519266322,
+          "r2_mr_pch": 0.11520922307351558,
+          "half_life_days": 32.06730465830653,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2018-10-03",
+          "train_end_date": "2018-10-02",
+          "train_n": 945,
+          "beta_ols": 0.8031840574196543,
+          "beta_eg": 0.8031840574196543,
+          "beta_pch": 0.7498142340531568,
+          "rho_pch": 0.9701252933604883,
+          "r2_mr_pch": 0.15029991616338673,
+          "half_life_days": 22.85348160236414,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-01-04",
+          "train_end_date": "2019-01-03",
+          "train_n": 1008,
+          "beta_ols": 0.7814930462218422,
+          "beta_eg": 0.7814930462218422,
+          "beta_pch": 0.6960647613778923,
+          "rho_pch": 0.9638738067502618,
+          "r2_mr_pch": 0.25374569245496625,
+          "half_life_days": 18.838132543978258,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-04-05",
+          "train_end_date": "2019-04-04",
+          "train_n": 1071,
+          "beta_ols": 0.7573154222885842,
+          "beta_eg": 0.7573154222885842,
+          "beta_pch": 0.6869355253121888,
+          "rho_pch": 0.9633967962422972,
+          "r2_mr_pch": 0.2375126101084801,
+          "half_life_days": 18.588062446386946,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-07-08",
+          "train_end_date": "2019-07-05",
+          "train_n": 1134,
+          "beta_ols": 0.726668094944457,
+          "beta_eg": 0.726668094944457,
+          "beta_pch": 0.6817650242222643,
+          "rho_pch": 0.9613863881127622,
+          "r2_mr_pch": 0.31186051156831657,
+          "half_life_days": 17.602002518423607,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-10-04",
+          "train_end_date": "2019-10-03",
+          "train_n": 1197,
+          "beta_ols": 0.6988491900551901,
+          "beta_eg": 0.6988491900551901,
+          "beta_pch": 0.6826929101939312,
+          "rho_pch": 0.9607920012205746,
+          "r2_mr_pch": 0.33101000347166304,
+          "half_life_days": 17.329834818131385,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2020-01-06",
+          "train_end_date": "2020-01-03",
+          "train_n": 1260,
+          "beta_ols": 0.6835453008407976,
+          "beta_eg": 0.6835453008407976,
+          "beta_pch": 0.6852930733733533,
+          "rho_pch": 0.9616853110639244,
+          "r2_mr_pch": 0.31241980567125266,
+          "half_life_days": 17.742069144978675,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2020-04-06",
+          "train_end_date": "2020-04-03",
+          "train_n": 1323,
+          "beta_ols": 0.6420125072351298,
+          "beta_eg": 0.6420125072351298,
+          "beta_pch": 0.8282039161145192,
+          "rho_pch": 0.9999882509353407,
+          "r2_mr_pch": 4.119763564127731e-07,
+          "half_life_days": null,
+          "n_starts_converged": 50
+        }
+      ]
+    }
+  },
+  "notes": [
+    "OOS HE is computed from hedged daily returns, not in-sample spread variance.",
+    "EG-VECM hedge ratio equals stage-1 OLS beta here; alpha is omitted because OOS return hedge uses beta only.",
+    "DM uses squared hedged returns as variance-loss proxy; negative t means PCH lower variance than OLS.",
+    "Monthly (21-day) refit cadence is a compute tractability choice; parameters remain strictly lagged."
+  ],
+  "reproduce": "uv run python experiments/k1426/oos.py"
+}
