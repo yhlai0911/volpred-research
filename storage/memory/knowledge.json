@@ -41901,5 +41901,28 @@
    "reviewed_commit": "65c3e3199",
    "review_artifact": "experiments/k1705/codex_review.md"
   }
+ },
+ {
+  "item_id": "k1706_reviewed_20260716",
+  "category": "tick_size_market_quality_heterogeneity",
+  "content": "K1706 [reviewed range-only confirmatory]: Using official Tick Size Pilot group assignments and September 2016 FINRA/CHX pre-pilot spread records, a fixed pre-spread design split 2,064 covered stocks into <10-cent and >15-cent strata and compared the five-cent groups with controls in an exact stock/date fixed-effect event design. The post-pilot daily high-low range rose by 19.74 bps in the narrow-spread stratum (RI p=.002; Holm=.016), versus -9.35 bps in the wide-spread stratum; the narrow-minus-wide stock-level contrast was +29.75 bps (RI p=.001; Holm=.004), while both range placebos had Holm p=1.0. This supports heterogeneous range widening only. RV5, log dollar volume, and Amihud were non-rejections after Holm correction and are diagnostics, not evidence of equivalence or zero economic effect. Daily public OHLCV proxies are not TAQ/MIDAS intraday measures; the randomization inference preserves treatment counts within the frozen spread strata but does not reconstruct every official assignment stratum, and public-price coverage may create data-availability or survivorship limitations.",
+  "evidence": [
+   "experiments/k1706/K1706_results.json",
+   "experiments/k1706/README.md",
+   "experiments/k1706/review_verdict.json",
+   "storage/ops/codex_reviews/k1706_post_boundary_review.md"
+  ],
+  "confidence": 0.95,
+  "created_at": "2026-07-16T00:01:50.526327+00:00",
+  "created_at_source": "system_clock_utc",
+  "k_id": "K1706",
+  "experiment_id": "k1706",
+  "experiment_path": "experiments/k1706",
+  "verdict": "PASS",
+  "reviewer": "Codex CLI gpt-5.6-sol final post-boundary review",
+  "provenance": {
+   "reviewed_commit": "071fdc73a287 (working-tree surfaces pinned by review_verdict SHA256)",
+   "review_artifact": "storage/ops/codex_reviews/k1706_post_boundary_review.md"
+  }
  }
 ]

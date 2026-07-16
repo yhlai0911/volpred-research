@@ -35521,7 +35521,7 @@
     "title": "K1706: 美國最小跳動單位試驗的 pre-spread 波動異質性** — 用官方隨機分組與市場品質表，按事前 spread `<10¢`／`>15¢` 固定分層，估 1¢→5¢ 對 small-cap RV、區間與流動性的 DiD／事件研究，配 r",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1608). Original: 美國最小跳動單位試驗的 pre-spread 波動異質性** — 用官方隨機分組與市場品質表，按事前 spread `<10¢`／`>15¢` 固定分層，估 1¢→5¢ 對 small-cap RV、區間與流動性的 DiD／事件研究，配 randomization inference、placebo 與 Holm 檢定；不得事後改分箱。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1706.py with signal.shift(1) + seed=42, (c) K1706_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35550,11 +35550,31 @@
         "to": "pending_main_thread",
         "by": "codex-desktop-k1706",
         "note": "Experiment + final post-boundary Codex PASS complete. Frozen commits a72242809, 071fdc73a, e0a18e2be; certify gate PASS. Range-only confirmatory: narrow RI Holm .016, narrow-wide Holm .004; other outcomes non-rejection diagnostics. Main-thread-only remaining: canonical knowledge writer + research_program/work_log closure, then complete K1706 before any push (avoid knowledge ratchet)."
+      },
+      {
+        "ts": "2026-07-16T00:03:21.650313+00:00",
+        "from": "pending_main_thread",
+        "to": "claimed",
+        "by": "main-thread-k1706"
+      },
+      {
+        "ts": "2026-07-16T00:03:21.890092+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "main-thread-k1706"
+      },
+      {
+        "ts": "2026-07-16T00:03:39.604003+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "main-thread-k1706"
       }
     ],
-    "started_at": "2026-07-15T22:55:01.434937+00:00",
+    "started_at": "2026-07-16T00:03:21.890078+00:00",
     "handoff_note": "Experiment + final post-boundary Codex PASS complete. Frozen commits a72242809, 071fdc73a, e0a18e2be; certify gate PASS. Range-only confirmatory: narrow RI Holm .016, narrow-wide Holm .004; other outcomes non-rejection diagnostics. Main-thread-only remaining: canonical knowledge writer + research_program/work_log closure, then complete K1706 before any push (avoid knowledge ratchet).",
-    "handoff_at": "2026-07-16T00:01:48.901785+00:00"
+    "handoff_at": "2026-07-16T00:01:48.901785+00:00",
+    "completed_at": "2026-07-16T00:03:39.603988+00:00",
+    "result": "K1706 fully closed: official assignment/pre-spread DiD experiment frozen and certified by post-boundary Codex PASS. Range-only confirmatory result: narrow RI Holm=.016 and narrow-minus-wide RI Holm=.004; RV5/volume/Amihud remain non-rejection diagnostics. Knowledge entry k1706_reviewed_20260716 synced to Mirror+Supabase; research_program and work_log updated."
   },
   {
     "id": "K1707",
