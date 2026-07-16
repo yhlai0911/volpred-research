@@ -54,8 +54,17 @@ uv run python experiments/k1704/K1704.py \
   --canonical-rv /Users/yhlai0911/volpred-research/data/intraday/taifex_5min_rv.csv
 ```
 
-## 恢復狀態（尚未形成科學結論）
+## 結果（待 post-run review / certification）
 
-額度中斷前曾生成一份未經 primary-path pre-run review 的 provisional cache／results；該結果不採信。2026-07-16 primary review 在正式 rerun 前攔下共同 ledger、raw-byte cache 驗證與 forecast coverage 問題。只有修正通過 delta review、重新執行、再完成 post-run review 與 certification 後，本節才可改寫為正式結果。
+- Raw tick archive：2012-01-02 至 2026-07-14，共 3,548 日；contract parity mismatch = 0，canonical RV5 最大絕對差 `1.39e-16`。cache 所引用的 3,548 個 raw files 已逐檔重新核對 size / SHA-256；來源目錄另有尚未納入 canonical ledger 的 `Daily_2026_07_15TX.csv`，明確列為 extra。
+- 共同 OOS ledger：2018-02-01 至 2026-07-14，共 2,016 日，六個 targets 與三模型完全共用；date-ledger SHA-256 為 `8d778f2407d606cbee63a903412dcc4527e50baeb83a141762eeb12266df75d6`。
+- 2,048 個 OOS candidates 中，8 個因至少一個 target 無效、25 個因 HAR lagged RV input 不足而排除（1 日重疊，合計排除 32 日）；GJR 與 EWMA 沒有 input-unavailable origin。HAR 排除 index hash 為 `03d8a8fec3dd1f999aa5fe0699725c16ba097a1770d5daef2b1f4a33a1abfff9`。
+- 1/5/10 分鐘 RV、Parkinson、日報酬平方與 consensus 六個 targets 的 QLIKE 排序都為 `HAR_RV5 < EWMA_R2 < GJR_GARCH`，而且每個 10% stationary-bootstrap MCS 都是 singleton `{HAR_RV5}`；兩個半樣本 consensus MCS 亦相同。
+- Consensus QLIKE：HAR `0.1839`、EWMA `0.2405`、GJR `0.2593`；HAR 相對低約 23.5% 與 29.1%。Full-OOS HAC DM 的 HAR-vs-EWMA `t=-4.63`、HAR-vs-GJR `t=-4.24`，都通過預設 `|t|>3` screen。
+- Verdict：`PROXY_ROBUST_STATISTICAL_RANKING`。這只表示在本研究的六個**已觀察**代理與共同 ledger 下，HAR 的統計排名沒有因 proxy 選擇翻轉；不能推出 HAR 對 latent integrated variance 全域最優，也不能把 consensus 當真值。
 
-即使後續得到一致排名，也只能解釋為「模型排名對這組已觀察 proxy 的選擇穩健」。Leave-one-proxy-out residual centre 只移除直接 self-inclusion；1/5/10 分鐘 RV 共用 ticks，相關 measurement error 與共同偏誤仍無法識別，因此 consensus 不是 latent integrated variance。
+圖：`K1704_qlike_by_proxy.png`。所有數字來自 `K1704_results.json`；本節只有在 post-run primary review 與 `experiment_gates certify` 通過後才可寫入知識庫。
+
+## 局限
+
+Leave-one-proxy-out residual centre 只移除直接 self-inclusion；1/5/10 分鐘 RV 共用 ticks，相關 measurement error 與共同偏誤仍無法識別，因此 consensus 不是 latent integrated variance。MCS 只有 1,000 次 bootstrap；early-OOS consensus 的兩個淘汰 p-value 都為 `0.093`，靠近 10% 門檻，singleton 結論對抽樣誤差仍需保守解讀。日報酬平方代理非常吵（與 RV5 的 log correlation 約 `0.389`），其一致排名不代表代理品質相同。
