@@ -19316,5 +19316,47 @@
     "owner": "claude-main-interactive",
     "commit": null,
     "summary": "老闆下令「該單一關口的就單一關口」後的 3-strike 級重構：(1) 根因=volpred ops assign 寫入的 storage/ops/tasks queue 無人消費，16+1 任務黑洞 5 天；兩並行 session 各用一套入口 → msg877 矛盾雙回覆。(2) assign 重定向為 next_tasks.json thin wrapper（append_next_task+flock）；(3) 存量 triage：13 遷入 canonical、1 deprecated（K1695 舊結論文章，執行有害）、3 superseded/duplicate；credit 題合併雙方判斷成單一 brief（aggregate NULL 教訓+firm-level 差異化+控制 VIX 硬門檻）。(4) reply-right guard：telegram-send --reply-to-task 拒發已完成任務（break-then-verify）。(5) 機械 gate test_ops_tasks_receipts_only.py 先咬後綠。(6) 澄清訊息 msg882 已送。32 tests passed。"
+  },
+  {
+    "timestamp": "2026-07-16T23:14:32+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_5e030431",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-181fb4df7656482db60b8930f241d37b",
+    "owner": "hourly-slot-2-181fb4df7656482db60b8930f241d37b",
+    "commit": null,
+    "summary": "PHASE-Z orphan 重複告警根因修復：`storage/work_log.json` + `storage/next_tasks_archive/` 納入 machine-state 收養名單；parse gate 擴到 `.jsonl`。\n\n**根因**（boss msg 806「為什麼又出現一樣的錯誤」）：不是缺 allowlist 機制 — namespace-based machine-state 收養早就存在，是這兩個檔漏在名單外：\n- `storage/work_log.json`：由 `append_work_log.py` 與 04:35 cron backfill 寫；backfill 的 `dirty_paths_before_write` guard 拒收「寫入前就髒」的檔（正確設計），PHASE-Z 又判它 foreign → 兩邊都不收，streak 累到 35 班 critical，且沒有任何作者會來收。\n- `storage/next_tasks_archive/*.jsonl`：PRE-PHASE-0 queue compactor 附加，本質是 `next_tasks.json` 的溢流，但名單只列了 queue 本身 → 同樣 35 班。\n\n**安全性**：archive 是 append 而非 atomic rename，writer 被砍會留半行 → 補 `.jsonl` 逐行 parse gate（原本只 parse `.json`），壞檔 escalate 為 corrupt、不進歷史（截斷的 next_tasks.json 進歷史正是 incident #1）。`work_log.json` 走 os.replace，讀者只會看到完整舊版或完整新版，收養更安全。\n\n**與任務描述不符的一項**：`storage/paper_pipeline_status.json` 經查是論文 stage 的 decision-of-record，由 agent 手動改並帶訊息 commit（見其 git log），`paper_pipeline_check.py` 只讀不寫、無排程 writer → 不是 runtime state，維持 foreign（收養它等於讓 PHASE-Z 用通用訊息偷偷提交作者改到一半的 stage）。`experiments/k1695/review_*` 同理維持作者 commit 路徑（任務原就如此要求）。任務另提的 `market_closure_detect` 是 cron 失敗告警（`storage/logs/cron/*.log` 已 gitignore、非 phase_z 路徑），屬 assign_56ddf72b 的 host_cron_fail 範圍，不在本次改動。\n\n**驗證**：新增 `scripts/tests/test_phase_z_runtime_state_ownership.py`（收養邊界 / 真 orphan 仍被抓 / 截斷 jsonl 拒收 / 空行非壞檔）+ 既有 phase_z drain-retry、receipt、scheduled-writer ownership policy、orphan-reaper、git-writer-lock 共 163 tests 全綠；並對當下工作區實跑分類：`2026-07.jsonl` 由 foreign→committable，agent 產出（drafts assets、scripts）仍 foreign。\n\n**topology_override**: subagent→inline — 診斷（定位 `_is_machine_state`、查三個檔的實際 writer、驗 `append_work_log` 原子性）已在主線程完成，改寫 brief 交棒的成本高於直接改 ~20 行。"
+  },
+  {
+    "task_type": "platform_ops",
+    "task_id": "assign_56ddf72b",
+    "timestamp": "2026-07-16T23:15:34.773179+08:00",
+    "actor": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
+    "owner": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
+    "summary": "daily_update dirty-guard 三層根因修復（老闆 msg794 指示 max depth）→ enqueue-agent job agent-brief_56ddf72b_dirtyguard-1937ca (opus/max, timeout 5400s) 至 worktree dispatch-slot-1-a9b8c1b6-dirtyguard，由 detached compute worker 執行；本班職責到 enqueue 為止（研究類 max effort 不可塞進 50min fire cap）。task 留 in_progress 待 PHASE A followup 收。"
+  },
+  {
+    "task_type": "platform_ops",
+    "task_id": "assign_8aa98ff0",
+    "timestamp": "2026-07-16T23:15:34.773179+08:00",
+    "actor": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
+    "owner": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
+    "summary": "CI red feed audience mismatch — 驗證後 close（非本班修）。本地 validate_feed_audience.py exit=0 PASS 1838 entries/0 mismatches + CI step ✓ 雙證據，mile_8a9ae3c8 mismatch 已不存在。未手改 feed.json。"
+  },
+  {
+    "task_type": "platform_ops",
+    "task_id": "assign_a458fc01",
+    "timestamp": "2026-07-16T23:15:34.773179+08:00",
+    "actor": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
+    "owner": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
+    "summary": "CI 卡死 5 測試 — 只採信 CI 證據（task 明訂不許本地宣稱）後 close。run 29507491552 = 3230 passed/0 failed；run 29509162624 (dc402ad25) = 3243 passed/0 failed 無回歸。auto-repair 迴圈終止。"
+  },
+  {
+    "task_type": "platform_ops",
+    "task_id": "assign_bfde715f",
+    "timestamp": "2026-07-16T23:15:34.773179+08:00",
+    "actor": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
+    "owner": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
+    "summary": "運營回報排版架構感 — 驗證已由 commit 50c24cc57 實作後 close。progress_report.py docstring 明載 msg808 refinement；實跑 render 對照 4 條要求皆滿足。字面「分隔線/單行標題」未做（與 task 自身「不得變長」衝突且現行更符標題階層意圖），不擅改正確格式以免回歸。"
   }
 ]

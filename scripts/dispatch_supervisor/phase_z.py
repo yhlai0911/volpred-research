@@ -185,11 +185,25 @@ _MACHINE_STATE_PREFIXES = (
     # state does not have an author to go ask.
     "storage/research/",         # arxiv candidate scans
     "storage/indicator_arena/",  # indicator review ledger
+    # 2026-07-16 (boss msg 806「為什麼又出現一樣的錯誤」). The queue compactor
+    # (scripts/unblock_expired_blocked_tasks.py) appends terminal task records here
+    # from PRE-PHASE-0 of every fire. Same authorship test as next_tasks.json — it
+    # IS next_tasks.json's overflow — but the file list only named the queue itself,
+    # so the archive stayed foreign and the streak counter had been re-reporting it
+    # as「沒人收」for 35 consecutive fires. Nobody was ever coming: the writer is a
+    # machine and the fire that runs it has no reason to think it authored anything.
+    "storage/next_tasks_archive/",
 )
 _MACHINE_STATE_FILES = (
     "storage/.failed_supabase_syncs.json",  # shared publisher/drain retry queue
     "storage/.knowledge_index_state.json",  # scheduled index freshness ledger
     "storage/next_tasks.json",       # the pending queue
+    # Append-only ledger written through scripts/append_work_log.py — by fires, and
+    # at 04:35 by a cron backfilling it from commits. No single author to hand it
+    # back to, which is why it too was foreign for 35 fires. Adoption is safer here
+    # than for the queue: append_work_log serializes on a sidecar lock and lands the
+    # file with os.replace, so a reader sees a whole old version or a whole new one.
+    "storage/work_log.json",
     "storage/publication_candidates.json",
     "storage/reports/feed.json",     # scheduled-release cron writes it; only agents commit it
     "storage/paper_trading.json",    # forward-tracking recalc; never hand-edited (publishing.md)
@@ -728,7 +742,7 @@ def _classify_machine_churn(repo_root: Path, candidates: list[str]) -> tuple[lis
        problem worth escalating, but committing it is how a truncated queue became
        "valid history" once already.
 
-    Only ``.json`` candidates are parse-checked; a future non-JSON churn path still
+    ``.json`` and ``.jsonl`` candidates are parse-checked; any other churn path still
     gets the lock gate.
 
     A candidate that no longer exists is a deletion, and deletions are how the
@@ -757,6 +771,15 @@ def _classify_machine_churn(repo_root: Path, candidates: list[str]) -> tuple[lis
                 try:
                     if rel.endswith(".json"):
                         json.load(fh)
+                    elif rel.endswith(".jsonl"):
+                        # The queue archive is appended to, not replaced by rename, so
+                        # a writer killed mid-append leaves a truncated final line —
+                        # the .json gate's exact failure mode in a file the gate did
+                        # not cover. Parse every record; a bad one escalates instead
+                        # of entering history.
+                        for line in fh:
+                            if line.strip():
+                                json.loads(line)
                 except (json.JSONDecodeError, UnicodeDecodeError) as exc:
                     LOG.warning("phase_z: %s does not parse (%s) — refusing to commit it", rel, exc)
                     corrupt.append(rel)
