@@ -22,6 +22,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import stat
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -180,3 +181,27 @@ def test_missing_codex_binary_reports_rc3(tmp_path, monkeypatch):
     rc, tail = glc._run_codex("prompt", tmp_path, timeout_s=5.0, model=None)
 
     assert rc == 3, f"a missing codex CLI must stay rc=3, got {rc}: {tail}"
+
+
+@pytest.mark.parametrize(
+    "relative_path",
+    [
+        "storage/lazypack_jobs/mile_direct/panels/mile_direct_article.md",
+        (
+            "storage/lazypack_jobs/mile_isolated/runs/lazypack-mile_isolated/"
+            "panels/mile_isolated_article.md"
+        ),
+    ],
+)
+def test_derived_article_snapshot_is_gitignored_in_every_job_layout(relative_path):
+    """Run isolation added one directory level; scratch inputs must stay ignored."""
+
+    result = subprocess.run(
+        ["git", "check-ignore", "--quiet", relative_path],
+        cwd=ROOT,
+        check=False,
+    )
+
+    assert result.returncode == 0, (
+        f"derived lazypack article snapshot is not ignored: {relative_path}"
+    )
