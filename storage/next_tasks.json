@@ -31096,7 +31096,7 @@
     "description": "收尾 experiments/K1678/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T09:16:48.626840+00:00）。\n證據：experiments/K1678/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1678'); finished 1.4 days ago; orphan backlog this run: 67 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-12T09:16:48.626840+00:00",
     "dreaming": {
@@ -31143,11 +31143,31 @@
         "to": "pending",
         "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-16T20:11:20.558824+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9d70c0ab89414704ae285e9db1c568d0"
+      },
+      {
+        "ts": "2026-07-16T20:11:20.793073+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9d70c0ab89414704ae285e9db1c568d0"
+      },
+      {
+        "ts": "2026-07-16T20:11:21.023487+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-9d70c0ab89414704ae285e9db1c568d0"
       }
     ],
-    "started_at": "2026-07-16T11:11:40.170580+00:00",
+    "started_at": "2026-07-16T20:11:20.793057+00:00",
     "last_released_at": "2026-07-16T13:50:03.509197+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-16T20:11:21.023470+00:00",
+    "result": "K1678 closeout 驗證通過並合併：(1) worktree dispatch-slot-1-215e3e27-k1678 有 1 個實質 commit（059cade61 HAC bandwidth 補掃），過 merge_worktree.sh [cert] PASS gate 後合併進 main（merge commit 7b787bac3），worktree 已正式移除非 force；(2) knowledge item_id=67693360 存在，verdict=NULL，reviewer=experiments/K1678/codex_review.md（review_verdict.json：codex gpt-5.6-sol 3 輪 FAIL/FAIL/PASS，blocking_defects=[]，sha256 綁定當前 bytes）；(3) 抽驗 3 組數字對 K1678_results.json 逐字相符：8 primary cells 係數 min=-0.79785296/max=71.56518397（knowledge 記 -0.798/+71.565）、max|t_hac|=1.2580452（記 1.258）、SEC LR-26532 439 列/412 代碼/1079 配對全部命中；(4) 原 K1678.py 用 maxlags=horizon-1 致 H=1 cells 跑在 maxlags=0（等同 White SE 無序列相關修正），closeout 從快取 panel 掃描多組 bandwidth 實測而非假設，primary 8 cells 在任一 bandwidth 皆 0/8 達 Harvey |t|>=3，NULL_NO_ROBUST_SALIENCY_AMPLIFICATION 結論不變 → knowledge entry 無需更正。"
   },
   {
     "id": "dreaming_orphaned_experiment_k1677",
@@ -31546,39 +31566,15 @@
   },
   {
     "id": "platform_ops_trending_topic_dedup_at_generation",
-    "title": "trending/event 任務在『生成當下』就要查重，不是等派工才發現",
-    "description": "2026-07-13 incident: refill 產出的 trending task 'AI營收不如預期？科技股選擇權偏斜率（Skew）洩天機' 是 90 天內第 5 篇同 arc （mile_f5f4cb43 / mile_8a5e80b0 / mile_0941e2f0 / mile_49616ac2 / mile_622a2b73），在池裡躺了 20h 才被 hourly-02 手動 grep 抓出來、標 deprecated。\n\n本班已修 write-step gate（check_arc_dedup 的 thin-signature guard，無 K-id/無 ticker 的題目不再假裝乾淨）——那擋住了『寫出重複文章』。但生產端仍會持續產生重複題目：refill_reader_facing_pool._build_trending_task 與 event_jobs.build_pending_event_task 建 task 時完全不查 feed。\n\n要做：建 task 前跑一次 dedup（至少 lexical hints + 有 K 時的 K-coverage），命中就換題或不建。注意 dedup-gate-audit.md：這裡是『要不要建任務』不是『要不要發文』，可以比 publish gate 嚴格，但仍要寫 audit trail、不可 silent skip。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "trending/event 任務在『生成當下』就要查重，不是等派工才發現",
+    "priority": 2,
     "source": "hourly-02",
     "created_at": "2026-07-12T18:15:27.043396+00:00",
-    "claimed_by": "hourly-03",
-    "claimed_at": "2026-07-13T19:09:11.857124+00:00",
-    "claim_session_id": "71b9acb4f1cc",
-    "status_history": [
-      {
-        "ts": "2026-07-13T19:09:11.857142+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-03"
-      },
-      {
-        "ts": "2026-07-13T19:09:12.119910+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-03"
-      },
-      {
-        "ts": "2026-07-13T19:36:15.274767+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-03"
-      }
-    ],
-    "started_at": "2026-07-13T19:09:12.119895+00:00",
     "completed_at": "2026-07-13T19:36:15.274752+00:00",
-    "result": "生成端 theme-saturation dedup gate 落地（topic_dedup.py 單一 owner）；trending=block/event=warn；真實語料校準 threshold=5；17 tests 綠；commit 62b256940"
+    "tombstone": true,
+    "archived_at": "2026-07-16T20:07:29.258328+00:00"
   },
   {
     "id": "ops_slot_capacity_and_zombie_worktrees",
@@ -31642,39 +31638,15 @@
   },
   {
     "id": "platform_ops_migrate_work_log_writers_to_locked_append",
-    "title": "work_log.json 的其餘 writer 全部改走帶鎖入口（lost-update / 截斷讀 race）",
-    "description": "2026-07-13 hourly-02 實地踩到：append 兩筆 work_log entry → git add → commit 時檔案已回到前一個 writer 的快照，兩筆靜默消失（lost update）。\n\n根因：work_log.json 有約 12 個 writer（continue_task_dispatch / codex_loop / backfill_work_log_from_commits / hourly_dispatch_pregate / work_dashboard_server / generate_handoff / git_conflict_guard / work_summary_6h / crosscheck_pregate_outcomes ...），每個都對整個 array 做 read-modify-write，且**全部無鎖**。next_tasks.json 自 cross-session claim race 後就用 fcntl.LOCK_EX，這個教訓從未套到 work log。\n\n實測（/tmp teeth check）：無鎖版在 6 行程 × 12 筆併發下不只丟 entry，還會讓 reader 讀到被截斷的檔案而 JSONDecodeError — 也就是說 canonical log 可能被寫成半截 JSON。這同時違反 control-plane.md 的『canonical JSON writes must be pre-serializable and recoverable』。\n\n已做：建 scripts/append_work_log.py（flock + 全量預序列化 + os.replace 原子寫）+ tests/test_append_work_log.py（6 tests，含 12 行程併發不丟 entry）。\n\n要做：把上述所有 writer 逐一改走 append_work_log.append_entry()（或等價的 locked 讀改寫），並加一個機械 gate（AST/grep 掃 scripts/ 與 src/ 內對 work_log.json 的直接 write，只允許經由該 helper）——否則下一個新 writer 又會繞過。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "work_log.json 的其餘 writer 全部改走帶鎖入口（lost-update / 截斷讀 race）",
+    "priority": 2,
     "source": "hourly-02",
     "created_at": "2026-07-12T18:23:56.448937+00:00",
-    "claimed_by": "hourly-03",
-    "claimed_at": "2026-07-13T19:09:12.391061+00:00",
-    "claim_session_id": "9b1cb039217a",
-    "status_history": [
-      {
-        "ts": "2026-07-13T19:09:12.391077+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-03"
-      },
-      {
-        "ts": "2026-07-13T19:09:12.664833+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-03"
-      },
-      {
-        "ts": "2026-07-13T19:36:15.546626+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-03"
-      }
-    ],
-    "started_at": "2026-07-13T19:09:12.664816+00:00",
     "completed_at": "2026-07-13T19:36:15.546609+00:00",
-    "result": "class sweep 完成：唯一活 writer 遷移到 flock 入口 + AST 機械 gate（含 ratchet）；13 tests 綠；commit ff2813588"
+    "tombstone": true,
+    "archived_at": "2026-07-16T20:07:29.258328+00:00"
   },
   {
     "id": "telegram-600",
@@ -31714,39 +31686,15 @@
   },
   {
     "id": "governance_self_revise_operating_docs",
+    "status": "succeeded",
     "task_type": "governance",
+    "title": "自我修訂運作指示文件（週期性 doc drift audit）",
     "priority": 2,
     "source": "owner_directive_telegram_604",
-    "status": "succeeded",
     "created_at": "2026-07-12T18:45:12.894270+00:00",
-    "title": "自我修訂運作指示文件（週期性 doc drift audit）",
-    "description": "老闆 Telegram msg 604 standing directive：運作指示文件要主動自我優化/自我修訂。\nEnforcement owner = pdca-operations skill 的 A(Act) 階段；本任務是它的週期性派工入口，不新增機制。\n每輪做四件事：\n1. drift audit — CLAUDE.md / .claude/rules / .claude/skills 的規則 vs 實際行為（規則寫了但沒在做 / 在做但沒寫）\n2. path-trigger 時序檢查 — rules 的 paths: 是否真的會在該 workflow 階段 auto-load（見 CLAUDE.md Rule path-trigger 時序原則）\n3. 已機械化的 prose 縮成一行 pointer（anti-stacking）\n4. 矛盾 / 重複規則合併\n產出：修訂 diff + 一頁 governance report 到 docs/governance/<YYYY-MM>/；改既有 skill 必寄 email 通知老闆。\n節奏：每週一次（完成後把本任務重新 append 為 pending，維持週期）。",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-13T18:51:37.431779+00:00",
-    "claim_session_id": "b3b25f0fca8b",
-    "status_history": [
-      {
-        "ts": "2026-07-13T18:51:37.431796+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T18:51:37.730132+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T19:41:43.060650+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-13T18:51:37.730114+00:00",
     "completed_at": "2026-07-13T19:41:43.060635+00:00",
-    "result": "完成 2026-07-14 operating-doc drift audit：修正 9 類 drift，對齊 interactive/autonomous、path-trigger、routing/model/topology、email lifecycle 與 canonical queue；報告 docs/governance/2026-07/operating_docs_drift_audit_2026-07-14.md。13 routing/agent-spec tests + 5/5 wakeup hook + skill/JSON/whitespace gates 全綠；skill 修改通知 58b8f79d 已寄。已建立 2026-07-21 blocked successor 與兩個 P2 residual follow-up。"
+    "tombstone": true,
+    "archived_at": "2026-07-16T20:07:29.258328+00:00"
   },
   {
     "id": "telegram-606",
@@ -32049,7 +31997,7 @@
     "description": "收尾 experiments/k1625/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：experiments/k1625/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1625'); finished 8.4 days ago; orphan backlog this run: 63 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-12T22:00:14.861047+00:00",
     "dreaming": {
@@ -32077,11 +32025,31 @@
         "to": "pending",
         "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-16T20:09:49.662803+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9d70c0ab89414704ae285e9db1c568d0"
+      },
+      {
+        "ts": "2026-07-16T20:09:49.919448+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9d70c0ab89414704ae285e9db1c568d0"
+      },
+      {
+        "ts": "2026-07-16T20:10:00.234143+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-9d70c0ab89414704ae285e9db1c568d0"
       }
     ],
-    "started_at": "2026-07-16T11:11:40.436008+00:00",
+    "started_at": "2026-07-16T20:09:49.919425+00:00",
     "last_released_at": "2026-07-16T13:50:03.509221+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-16T20:10:00.234128+00:00",
+    "result": "K1625 closeout 驗證通過：(1) 產出已在 main (a9c74b590)，worktree dispatch-slot-1-215e3e27-k1625 rev-list=0 且與 main diff 全等，經正式 merge_worktree.sh 安全移除（非 force）；(2) knowledge item_id=ecb0885a 存在，verdict=INCONCLUSIVE，reviewer=experiments/k1625/codex_review.md（Codex CONDITIONAL_PASS, 無 blocking issue）；(3) 抽驗 3 組數字對 k1625_results.json 逐字相符：BTC h=5 high_rv5_lpm funding_z_lag1 coef=0.068152/t=3.7892/p=0.000151、ETH 同項 t=1.3619/p=0.1732 未複製、asymmetry BTC t=-1.5812/p=0.1138；N=2490/2411 相符。結論 MIXED_WEAK_SINGLE_CELL（僅 1 cell 達 |t|>=3，未達 >=2 門檻）誠實無誇大。"
   },
   {
     "id": "k1702_codex_primary_path_reverify",
@@ -34820,13 +34788,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T19:00:52.458965+00:00",
+    "completed_at": "2026-07-16T20:01:00.921797+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T19:00:52.458965+00:00",
-      "last_clean_observed_at": "2026-07-16T19:00:52.458965+00:00"
+      "resolved_at": "2026-07-16T20:01:00.921797+00:00",
+      "last_clean_observed_at": "2026-07-16T20:01:00.921797+00:00"
     }
   },
   {
@@ -34838,13 +34806,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T19:16:19.013989+00:00",
+    "completed_at": "2026-07-16T20:19:23.089720+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T19:16:19.013989+00:00",
-      "last_clean_observed_at": "2026-07-16T19:16:19.013989+00:00"
+      "resolved_at": "2026-07-16T20:19:23.089720+00:00",
+      "last_clean_observed_at": "2026-07-16T20:19:23.089720+00:00"
     }
   },
   {

@@ -1,0 +1,1008 @@
+{
+  "experiment_id": "k1649",
+  "verdict": "CONDITIONAL PASS",
+  "research_verdict": "NULL",
+  "verdict_rationale": "兩個層次要分開讀。(1) 研究結論層 = NULL：K1649 自身的 authoritative verdict 是 NULL_NO_EXPECTILE_EDGE_VS_LINEARQR，8 個 expectile-vs-LinearQR DM 檢定無一達 Harvey |t|>3.0（max|t|=1.911）。(2) 審查裁決層 = CONDITIONAL PASS（Codex primary-path）：對『在本實驗的資料、實作、unconditional tau mapping 與固定 α pinball 評分下，沒有 expectile 模型相對 LinearQR 達到 |t|>3 的 OOS 優勢』這個狹義結論，未發現會推翻結果的 code/data defect；但若把它一般化成『expectile/CARE 方法本身不如 quantile regression』，則有兩個 blocking 限制（CARE 混淆設計、tau mapping 非 Taylor canonical 程序）。CONDITIONAL PASS >= 寫入 knowledge 的門檻（.claude/rules/experiments.md），故可寫入，但必須帶下列 caveats 且結論範圍必須收窄。",
+  "reviewer_provenance": {
+    "reviewer": "codex",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "high",
+    "cli_version": "codex-cli 0.144.1",
+    "auth_mode": "ChatGPT account",
+    "invocation": "bash scripts/codex_exec_bounded.sh --timeout 850 --skip-git-repo-check -s read-only - （bounded wrapper；裸 codex exec 被 pretooluse hook 依 2026-07-11 事故規則攔截）",
+    "verdict": "CONDITIONAL PASS",
+    "reviewed_at": "2026-07-16T19:54:41Z",
+    "reviewed_at_taipei": "2026-07-17 03:54:41",
+    "reviewed_commit": "2de6cba3b",
+    "primary_path": true,
+    "review_artifact": "/tmp/k1649_codex_review.log (3671 lines, 156,082 tokens)",
+    "tokens_used": 156082,
+    "note": "primary-path Codex review，非 subagent fallback。Codex 不只覆核主線程的驗證，還做了三件獨立的事：(1) 推翻主線程的疑點 (a) —— 引 Ehm et al. 指出 pinball 是 α-quantile 的 strictly consistent score，只要輸出宣告為 α-VaR 就應接受 pinball 評分，null 不含結構性偏誤；(2) 自行跑 conditional-tau 敏感度（ALS-vs-LinearQR DM t = -1.19/+1.45/+2.61/+1.30，仍無 |t|>3），證明狹義 ALS null 對 tau 校準方式穩健；(3) 自行跑 25-multistart 對照，證實 fit_care 的 5 起點未通過 basin robustness。Codex 同意主線程的疑點 (b)(d)(e)，並獨立發現既有 backfill entry 968b552d 的存在、建議修訂而非新增。既有 entry 的『4/4 優於 LinearQR』事實錯誤是主線程發現的，Codex 未提及 —— 兩者互補。"
+  },
+  "proposed_entry": {
+    "write_to_knowledge": true,
+    "write_gate_reason": "Codex primary-path verdict = CONDITIONAL PASS，達到 .claude/rules/experiments.md 的 「CONDITIONAL PASS 以上才可寫 knowledge」門檻。但 **不可新增 entry** —— K1649 已由 kb_backfill_unrecorded_experiments (2026-07-14) 寫入 item_id=968b552d。主線程應以正式 writer 修訂該筆，不可 jq/Edit 直改（會繞過 provenance validator）。",
+    "revises_existing_item_id": "968b552d",
+    "title": "K1649 [NULL]：expectile-VaR / CARE 未能相對 quantile-VaR baseline 顯示 Harvey-level OOS 優勢（TLT/HYG）",
+    "summary": "檢驗 expectile 型風險測度是否在 TLT/HYG 日報酬 VaR backtest 中，以 OOS pinball loss 穩健打敗 quantile-VaR baseline。資料 Yahoo Finance adjusted close 2010-01-04~2026-07-02，OOS 自 2015-01-01（每 asset-alpha common obs=2,891），quarterly expanding refit，VaR alpha=5%/1%，seed=42，Harvey 門檻 |t|>3.0。四個模型：HS250（rolling 250d 經驗分位數）、LinearQR（QuantReg + 7 covariates）、ALSExpectile-VaR（同 7 covariates 的 expectile regression + alpha-mapped tau）、CARE-SAV（e_t = b0 + b1|r_(t-1)| + b2 e_(t-1)）。**結果：8 個 expectile-vs-LinearQR DM 檢定無一達 Harvey |t|>3.0（max|t|=1.911，TLT 1% ALS，p=0.056）。**mean pinball 上 8 個（模型×cell）配對中有 4 個優於 LinearQR —— 即 2/4 個 cell（TLT 5%、HYG 1%）兩個 expectile 模型都勝出，另 2/4（TLT 1%、HYG 5%）都落敗；LinearQR 仍在 4 個 cell 中拿下 2 個最佳（best_mean_pinball_counts = CARE-SAV:2, LinearQR:2）。**這是『未偵測到 robust edge』，不是『兩者等價』** —— 實驗未做 equivalence test，也未設最小經濟效果界線。結論範圍限於：本實驗實作的 ALS expectile-derived VaR 與 CARE forecasting system、pinball 對固定 α VaR target 的評分、TLT/HYG 兩資產、1%/5% 兩個 alpha、2015-2026 單一 OOS 時段。校準是 mixed 而非可控：Kupiec@5% 在 4 個 cell 中的拒絕次數為 HS250=2、LinearQR=2、ALSExpectile-VaR=1、CARE-SAV=1，型態 asset-dependent（HYG 兩個 alpha 上 quantile baseline 被拒、expectile 通過；TLT 1% 反之）。",
+    "key_numbers": {
+      "oos_obs_per_asset_alpha": 2891,
+      "expectile_vs_linearqr_dm_tests": 8,
+      "expectile_harvey_wins_vs_linearqr": 0,
+      "max_abs_dm_t_expectile_vs_linearqr_at_nw_lag_21": 1.9107673185966891,
+      "max_abs_dm_t_across_lag_sweep_5_15_21_40": 2.185,
+      "harvey_abs_t_threshold": 3.0,
+      "best_mean_pinball_counts": {
+        "CARE-SAV": 2,
+        "LinearQR": 2
+      },
+      "expectile_pairs_better_than_linearqr_by_mean_loss_of_8": 4,
+      "cells_where_both_expectile_beat_linearqr_of_4": 2,
+      "dm_t_expectile_vs_linearqr": {
+        "TLT_05_ALSExpectile": -0.865496480891008,
+        "TLT_05_CARE": -1.4852246704795495,
+        "TLT_01_ALSExpectile": 1.9107673185966891,
+        "TLT_01_CARE": 1.11104644261226,
+        "HYG_05_ALSExpectile": 0.5390512382671773,
+        "HYG_05_CARE": 0.8582306840967017,
+        "HYG_01_ALSExpectile": -0.09743039107772639,
+        "HYG_01_CARE": -0.43633714757774633
+      },
+      "mean_pinball": {
+        "TLT_05": {
+          "HS250": 0.0010038064493899657,
+          "LinearQR": 0.0009774137465029089,
+          "ALSExpectile-VaR": 0.0009726613830981772,
+          "CARE-SAV": 0.0009579578942196651
+        },
+        "TLT_01": {
+          "HS250": 0.00031485067868004883,
+          "LinearQR": 0.00025326388049120825,
+          "ALSExpectile-VaR": 0.00026727580601461636,
+          "CARE-SAV": 0.0002610341483714554
+        },
+        "HYG_05": {
+          "HS250": 0.000600862409252291,
+          "LinearQR": 0.00048402255321718324,
+          "ALSExpectile-VaR": 0.0004883529833942,
+          "CARE-SAV": 0.0004909610940871733
+        },
+        "HYG_01": {
+          "HS250": 0.0002193461740353846,
+          "LinearQR": 0.00014790879273321805,
+          "ALSExpectile-VaR": 0.00014744140634244705,
+          "CARE-SAV": 0.0001442794798390665
+        }
+      },
+      "violation_rate": {
+        "TLT_05": {
+          "HS250": 0.0574195780006918,
+          "LinearQR": 0.051539259771705294,
+          "ALSExpectile-VaR": 0.05499827049463853,
+          "CARE-SAV": 0.05084745762711865
+        },
+        "TLT_01": {
+          "HS250": 0.01349014181943964,
+          "LinearQR": 0.012798339674852992,
+          "ALSExpectile-VaR": 0.0186786579038395,
+          "CARE-SAV": 0.014181943964026288
+        },
+        "HYG_05": {
+          "HS250": 0.0588031822898651,
+          "LinearQR": 0.039778623313732275,
+          "ALSExpectile-VaR": 0.05430646835005189,
+          "CARE-SAV": 0.05811138014527845
+        },
+        "HYG_01": {
+          "HS250": 0.016257350397786235,
+          "LinearQR": 0.006572120373573158,
+          "ALSExpectile-VaR": 0.012798339674852992,
+          "CARE-SAV": 0.00933932895191975
+        }
+      },
+      "kupiec_p": {
+        "TLT_05": {
+          "HS250": 0.07344698251295112,
+          "LinearQR": 0.7054898695042241,
+          "ALSExpectile-VaR": 0.2245903034040173,
+          "CARE-SAV": 0.8348259757727973
+        },
+        "TLT_01": {
+          "HS250": 0.07333312702808459,
+          "LinearQR": 0.1472090751623174,
+          "ALSExpectile-VaR": 2.845086508274086e-05,
+          "CARE-SAV": 0.03348766890509136
+        },
+        "HYG_05": {
+          "HS250": 0.034386680168716155,
+          "LinearQR": 0.009027712468980265,
+          "ALSExpectile-VaR": 0.2944178754137531,
+          "CARE-SAV": 0.050809706841606905
+        },
+        "HYG_01": {
+          "HS250": 0.0019301287451727323,
+          "LinearQR": 0.04817621987246268,
+          "ALSExpectile-VaR": 0.1472090751623174,
+          "CARE-SAV": 0.7180827952168825
+        }
+      },
+      "kupiec_rejections_at_5pct_of_4_cells": {
+        "HS250": 2,
+        "LinearQR": 2,
+        "ALSExpectile-VaR": 1,
+        "CARE-SAV": 1
+      },
+      "als_vs_linearqr_dm_t_under_codex_conditional_tau_sensitivity": [
+        -1.19,
+        1.45,
+        2.61,
+        1.3
+      ],
+      "oos_bear_market_coverage": {
+        "TLT_oos_mdd": -0.484,
+        "TLT_2022_return": -0.312,
+        "HYG_oos_mdd": -0.22
+      }
+    },
+    "method": "四模型 VaR backtest，quarterly expanding refit，pinball loss + DM 檢定（自寫 HAC helper，Bartlett 權重，nw_lag = floor(1.5*n^(1/3)) = 21 >= repo canonical ceil(h^(1/3)*n^(1/3)) = 15；h=1 故 HLN 修正 = 1.0）。Lookahead 控制：covariates 用 signal = features.shift(1)、HS250 用 y.shift(1).rolling(250).quantile(alpha)、所有 parametric refit 用 df[df.index < ts]。校準檢定：Kupiec POF + Christoffersen independence。tau 選取：每次 refit 前以 constant（unconditional）expectile 在 grid 上選使 in-sample violation rate 最接近 alpha 的 tau。",
+    "data_window": "2010-01-04 ~ 2026-07-02（Yahoo Finance adjusted close via yfinance）；OOS 2015-01-01 起，每 asset-alpha 2,891 obs",
+    "caveats": [
+      "【Codex 必列】結論是 failure to detect robust edge，不是 equivalence。|t|>3 是保守 gate；實驗沒有 equivalence test，也沒有最小經濟效果界線。不可寫成「兩者一樣好」或「證明 expectile 沒用」。",
+      "【Codex 必列】pinball 結論只針對固定 α 的 VaR target。pinball 是 α-quantile 的 strictly consistent score（Ehm et al.），所以用它評 ALS/CARE 輸出的 α-VaR 是正確對齊、不含結構性偏誤；但它不評價 native τ-expectile / Kuan 式 EVaR functional 本身 —— 那需要 expectile-consistent asymmetric quadratic score。null 只能限定為 VaR predictive-performance null。",
+      "【Codex 必列 / blocking 一般化】tau 用 unconditional constant-expectile mapping 選出後才套到 conditional ALS/CARE（K1649.py:166），這**不是** Taylor (2008) CARE 的 conditional calibration 程序（該程序對每個 tau 擬合 conditional CARE，再用該模型的 in-sample hit rate 選 tau）。只有在「conditional 分布是固定形狀的 location-scale family、標準化 innovation 分布不隨時間變」時才近似成立，而 K1649 未陳述或檢驗此假設。實測落差：HYG 2015 α=1% constant mapping rate 1.04% vs conditional ALS training rate 2.56%。因此負結果**不可一般化到正規校準的 CARE / expectile-VaR**。（Codex 的 conditional-tau 敏感度顯示 ALS 狹義 null 方向穩健：DM t = -1.19/+1.45/+2.61/+1.30，仍無 |t|>3；但該診斷未進 authoritative output，且不替 CARE 解套。）",
+      "【Codex 必列 / blocking 一般化】CARE-SAV vs LinearQR 是混淆比較：CARE-SAV 只用 lagged |return| 與自身 expectile，LinearQR 用 7 個 covariates —— 估計準則、遞迴結構、資訊集三者同時不同，無法識別 expectile-vs-quantile 效果。缺少同 recursion 的 CAViaR-SAV 對照。CARE 半邊只能當「兩個完整 forecasting systems 的 horse race」。**狹義 null 應優先依靠 ALSExpectile-VaR vs LinearQR 那 4 個 cell**（同 7 covariates，較接近可識別的準則比較）。",
+      "【Codex 必列】CARE optimization 尚未 robustness-certified：fit_care 只有 4 個固定起點 + 1 個同 seed 隨機起點，未要求 res.success，未保存 basin/objective/convergence diagnostics。Codex 加 25 個起點後，TLT 5% / HYG 5% 找到 training objective 低約 0.13% / 0.56% 的解且參數明顯不同；25 起點收斂到 25 個相異參數組。不足以斷言 OOS verdict 會翻轉，但足以否定「5 starts 已證明 basin 穩定」。CARE 結果只能列為 provisional supporting diagnostic。",
+      "【Codex 必列】校準是 mixed，不是「可控」：TLT 1% 的 ALSExpectile Kupiec p=2.85e-5、CARE p=0.0335（皆拒絕）。Kupiec@5% 拒絕次數（4 cells）：HS250=2、LinearQR=2、ALSExpectile-VaR=1、CARE-SAV=1，型態 asset-dependent。不可因 tau 經 grid mapping 就宣稱 OOS calibration 可控。",
+      "【Codex 必列】外推範圍：只有 TLT/HYG、兩個 alpha、單一 OOS 時段、quarterly expanding refit。不可外推到股票、其他尾部分布、其他 CARE specifications 或 ES forecasting。",
+      "【主線程補充】自寫 DM helper（K1649.py:469）未呼叫 repo canonical volpred.stats.model_evaluation.dm_test，違反 .claude/rules/experiments.md 的 canonical-first 規則。因 lag 21 >= canonical 15 且 lag sweep {5,15,21,40} 下 null 不變（max|t|=2.19），**不是實質結果缺陷**；但 README 未報告規則要求的 lag sensitivity，正式版本應改用 canonical helper 或把 canonical 對照與 sensitivity 寫進 authoritative output。（Codex 裁定此條不必進 knowledge caveats，屬程式治理；此處保留供主線程決定。）",
+      "【主線程補充】fit_quantreg (K1649.py:237-240) 有 `except Exception` -> 退化成 unconditional constant quantile 的 silent fallback。實測 **0/192 次觸發**（Codex 獨立複核 188 個季度 refit 亦 0 次、0 warning、最大 298 iterations），**未污染本次結果**；但屬 latent silent-fallback 隱患，若未來資料變動觸發會靜默降級 baseline 而無任何紀錄。",
+      "【主線程補充】無條件覆蓋率全樣本通過，但覆蓋率有明顯時間變異：TLT 5% CARE-SAV 逐年違反率在 2022 債券空頭為 0.100（target 0.05 的 2 倍），2017 僅 0.016。Christoffersen 只檢定連續違反的聚集（TLT_05 CARE-SAV p=0.557 通過），不檢定年度層級的覆蓋率穩定性。實驗未做 time-varying coverage 檢定。",
+      "【主線程補充】8 個 expectile-vs-LinearQR DM 檢定未做 multiple-testing 校正。因結論是 null（0 個顯著），此缺口不影響 verdict 方向 —— 校正只會讓門檻更嚴。但若未來重跑後出現 Harvey win，必須補 Holm/BH 校正才能宣稱。"
+    ],
+    "artifacts": [
+      "experiments/K1649/README.md",
+      "experiments/K1649/K1649.py",
+      "experiments/K1649/K1649_results.json",
+      "experiments/K1649/K1649_forecasts.parquet",
+      "experiments/K1649/K1649_ohlc_cache.parquet",
+      "experiments/K1649/fig_k1649_mean_pinball.png",
+      "experiments/K1649/fig_k1649_coverage.png"
+    ],
+    "confidence": 0.68,
+    "confidence_rationale": "Codex 建議自現有 0.85 降至 0.65-0.70：狹義 null 的數字面極乾淨（86/86 README 宣稱對得上、16 cell + 20 DM 全可從 parquet 重算、lookahead 三重檢查通過、lag sweep 穩健、conditional-tau sensitivity 亦穩健），但 CARE 半邊未通過 basin robustness、tau mapping 非 canonical 程序、且未做 equivalence test。取 0.68。",
+    "verdict_field": "NULL",
+    "reviewer": "codex (gpt-5.6-sol, high, primary-path)",
+    "reviewer_source": "Codex review",
+    "experiment_id": "K1649",
+    "k_id": "K1649",
+    "experiment_path": "experiments/K1649/"
+  },
+  "number_verification": [
+    {
+      "claim": "README best model for TLT 5%",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.best_mean_pinball_model",
+      "matches": true,
+      "claimed": "CARE-SAV",
+      "json_value": "CARE-SAV"
+    },
+    {
+      "claim": "README mean_pinball TLT 5% HS250",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.per_model.HS250.mean_pinball",
+      "matches": true,
+      "claimed": 0.001003806,
+      "json_value": 0.0010038064493899657
+    },
+    {
+      "claim": "README violation_rate TLT 5% HS250",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.per_model.HS250.violation_rate",
+      "matches": true,
+      "claimed": 0.05742,
+      "json_value": 0.0574195780006918
+    },
+    {
+      "claim": "README mean_pinball TLT 5% LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.per_model.LinearQR.mean_pinball",
+      "matches": true,
+      "claimed": 0.000977414,
+      "json_value": 0.0009774137465029089
+    },
+    {
+      "claim": "README violation_rate TLT 5% LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.per_model.LinearQR.violation_rate",
+      "matches": true,
+      "claimed": 0.051539,
+      "json_value": 0.051539259771705294
+    },
+    {
+      "claim": "README mean_pinball TLT 5% ALSExpectile-VaR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.per_model.ALSExpectile-VaR.mean_pinball",
+      "matches": true,
+      "claimed": 0.000972661,
+      "json_value": 0.0009726613830981772
+    },
+    {
+      "claim": "README violation_rate TLT 5% ALSExpectile-VaR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.per_model.ALSExpectile-VaR.violation_rate",
+      "matches": true,
+      "claimed": 0.054998,
+      "json_value": 0.05499827049463853
+    },
+    {
+      "claim": "README mean_pinball TLT 5% CARE-SAV",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.per_model.CARE-SAV.mean_pinball",
+      "matches": true,
+      "claimed": 0.000957958,
+      "json_value": 0.0009579578942196651
+    },
+    {
+      "claim": "README violation_rate TLT 5% CARE-SAV",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.per_model.CARE-SAV.violation_rate",
+      "matches": true,
+      "claimed": 0.050847,
+      "json_value": 0.05084745762711865
+    },
+    {
+      "claim": "README best model for TLT 1%",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.best_mean_pinball_model",
+      "matches": true,
+      "claimed": "LinearQR",
+      "json_value": "LinearQR"
+    },
+    {
+      "claim": "README mean_pinball TLT 1% HS250",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.per_model.HS250.mean_pinball",
+      "matches": true,
+      "claimed": 0.000314851,
+      "json_value": 0.00031485067868004883
+    },
+    {
+      "claim": "README violation_rate TLT 1% HS250",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.per_model.HS250.violation_rate",
+      "matches": true,
+      "claimed": 0.01349,
+      "json_value": 0.01349014181943964
+    },
+    {
+      "claim": "README mean_pinball TLT 1% LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.per_model.LinearQR.mean_pinball",
+      "matches": true,
+      "claimed": 0.000253264,
+      "json_value": 0.00025326388049120825
+    },
+    {
+      "claim": "README violation_rate TLT 1% LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.per_model.LinearQR.violation_rate",
+      "matches": true,
+      "claimed": 0.012798,
+      "json_value": 0.012798339674852992
+    },
+    {
+      "claim": "README mean_pinball TLT 1% ALSExpectile-VaR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.per_model.ALSExpectile-VaR.mean_pinball",
+      "matches": true,
+      "claimed": 0.000267276,
+      "json_value": 0.00026727580601461636
+    },
+    {
+      "claim": "README violation_rate TLT 1% ALSExpectile-VaR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.per_model.ALSExpectile-VaR.violation_rate",
+      "matches": true,
+      "claimed": 0.018679,
+      "json_value": 0.0186786579038395
+    },
+    {
+      "claim": "README mean_pinball TLT 1% CARE-SAV",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.per_model.CARE-SAV.mean_pinball",
+      "matches": true,
+      "claimed": 0.000261034,
+      "json_value": 0.0002610341483714554
+    },
+    {
+      "claim": "README violation_rate TLT 1% CARE-SAV",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.per_model.CARE-SAV.violation_rate",
+      "matches": true,
+      "claimed": 0.014182,
+      "json_value": 0.014181943964026288
+    },
+    {
+      "claim": "README best model for HYG 5%",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.best_mean_pinball_model",
+      "matches": true,
+      "claimed": "LinearQR",
+      "json_value": "LinearQR"
+    },
+    {
+      "claim": "README mean_pinball HYG 5% HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.per_model.HS250.mean_pinball",
+      "matches": true,
+      "claimed": 0.000600862,
+      "json_value": 0.000600862409252291
+    },
+    {
+      "claim": "README violation_rate HYG 5% HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.per_model.HS250.violation_rate",
+      "matches": true,
+      "claimed": 0.058803,
+      "json_value": 0.0588031822898651
+    },
+    {
+      "claim": "README mean_pinball HYG 5% LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.per_model.LinearQR.mean_pinball",
+      "matches": true,
+      "claimed": 0.000484023,
+      "json_value": 0.00048402255321718324
+    },
+    {
+      "claim": "README violation_rate HYG 5% LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.per_model.LinearQR.violation_rate",
+      "matches": true,
+      "claimed": 0.039779,
+      "json_value": 0.039778623313732275
+    },
+    {
+      "claim": "README mean_pinball HYG 5% ALSExpectile-VaR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.per_model.ALSExpectile-VaR.mean_pinball",
+      "matches": true,
+      "claimed": 0.000488353,
+      "json_value": 0.0004883529833942
+    },
+    {
+      "claim": "README violation_rate HYG 5% ALSExpectile-VaR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.per_model.ALSExpectile-VaR.violation_rate",
+      "matches": true,
+      "claimed": 0.054306,
+      "json_value": 0.05430646835005189
+    },
+    {
+      "claim": "README mean_pinball HYG 5% CARE-SAV",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.per_model.CARE-SAV.mean_pinball",
+      "matches": true,
+      "claimed": 0.000490961,
+      "json_value": 0.0004909610940871733
+    },
+    {
+      "claim": "README violation_rate HYG 5% CARE-SAV",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.per_model.CARE-SAV.violation_rate",
+      "matches": true,
+      "claimed": 0.058111,
+      "json_value": 0.05811138014527845
+    },
+    {
+      "claim": "README best model for HYG 1%",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.best_mean_pinball_model",
+      "matches": true,
+      "claimed": "CARE-SAV",
+      "json_value": "CARE-SAV"
+    },
+    {
+      "claim": "README mean_pinball HYG 1% HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.per_model.HS250.mean_pinball",
+      "matches": true,
+      "claimed": 0.000219346,
+      "json_value": 0.0002193461740353846
+    },
+    {
+      "claim": "README violation_rate HYG 1% HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.per_model.HS250.violation_rate",
+      "matches": true,
+      "claimed": 0.016257,
+      "json_value": 0.016257350397786235
+    },
+    {
+      "claim": "README mean_pinball HYG 1% LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.per_model.LinearQR.mean_pinball",
+      "matches": true,
+      "claimed": 0.000147909,
+      "json_value": 0.00014790879273321805
+    },
+    {
+      "claim": "README violation_rate HYG 1% LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.per_model.LinearQR.violation_rate",
+      "matches": true,
+      "claimed": 0.006572,
+      "json_value": 0.006572120373573158
+    },
+    {
+      "claim": "README mean_pinball HYG 1% ALSExpectile-VaR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.per_model.ALSExpectile-VaR.mean_pinball",
+      "matches": true,
+      "claimed": 0.000147441,
+      "json_value": 0.00014744140634244705
+    },
+    {
+      "claim": "README violation_rate HYG 1% ALSExpectile-VaR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.per_model.ALSExpectile-VaR.violation_rate",
+      "matches": true,
+      "claimed": 0.012798,
+      "json_value": 0.012798339674852992
+    },
+    {
+      "claim": "README mean_pinball HYG 1% CARE-SAV",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.per_model.CARE-SAV.mean_pinball",
+      "matches": true,
+      "claimed": 0.000144279,
+      "json_value": 0.0001442794798390665
+    },
+    {
+      "claim": "README violation_rate HYG 1% CARE-SAV",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.per_model.CARE-SAV.violation_rate",
+      "matches": true,
+      "claimed": 0.009339,
+      "json_value": 0.00933932895191975
+    },
+    {
+      "claim": "README DM t TLT 5% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.dm_pairs.ALSExpectile-VaR_vs_LinearQR.stat",
+      "matches": true,
+      "claimed": -0.865496,
+      "json_value": -0.865496480891008
+    },
+    {
+      "claim": "README DM p TLT 5% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.dm_pairs.ALSExpectile-VaR_vs_LinearQR.p",
+      "matches": true,
+      "claimed": 0.386838,
+      "json_value": 0.3868381860615655
+    },
+    {
+      "claim": "README DM dbar TLT 5% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.dm_pairs.ALSExpectile-VaR_vs_LinearQR.dbar",
+      "matches": true,
+      "claimed": -4.752e-06,
+      "json_value": -4.752363404731552e-06
+    },
+    {
+      "claim": "README Harvey pass TLT 5% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.dm_pairs.ALSExpectile-VaR_vs_LinearQR.harvey_abs_t_gt_3",
+      "matches": true,
+      "claimed": false,
+      "json_value": false
+    },
+    {
+      "claim": "README DM t TLT 5% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.dm_pairs.CARE-SAV_vs_LinearQR.stat",
+      "matches": true,
+      "claimed": -1.485225,
+      "json_value": -1.4852246704795495
+    },
+    {
+      "claim": "README DM p TLT 5% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.dm_pairs.CARE-SAV_vs_LinearQR.p",
+      "matches": true,
+      "claimed": 0.137593,
+      "json_value": 0.13759338474435512
+    },
+    {
+      "claim": "README DM dbar TLT 5% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.dm_pairs.CARE-SAV_vs_LinearQR.dbar",
+      "matches": true,
+      "claimed": -1.9456e-05,
+      "json_value": -1.945585228324381e-05
+    },
+    {
+      "claim": "README Harvey pass TLT 5% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_05.dm_pairs.CARE-SAV_vs_LinearQR.harvey_abs_t_gt_3",
+      "matches": true,
+      "claimed": false,
+      "json_value": false
+    },
+    {
+      "claim": "README DM t TLT 1% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.dm_pairs.ALSExpectile-VaR_vs_LinearQR.stat",
+      "matches": true,
+      "claimed": 1.910767,
+      "json_value": 1.9107673185966891
+    },
+    {
+      "claim": "README DM p TLT 1% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.dm_pairs.ALSExpectile-VaR_vs_LinearQR.p",
+      "matches": true,
+      "claimed": 0.056133,
+      "json_value": 0.05613333784166841
+    },
+    {
+      "claim": "README DM dbar TLT 1% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.dm_pairs.ALSExpectile-VaR_vs_LinearQR.dbar",
+      "matches": true,
+      "claimed": 1.4012e-05,
+      "json_value": 1.4011925523408103e-05
+    },
+    {
+      "claim": "README Harvey pass TLT 1% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.dm_pairs.ALSExpectile-VaR_vs_LinearQR.harvey_abs_t_gt_3",
+      "matches": true,
+      "claimed": false,
+      "json_value": false
+    },
+    {
+      "claim": "README DM t TLT 1% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.dm_pairs.CARE-SAV_vs_LinearQR.stat",
+      "matches": true,
+      "claimed": 1.111046,
+      "json_value": 1.11104644261226
+    },
+    {
+      "claim": "README DM p TLT 1% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.dm_pairs.CARE-SAV_vs_LinearQR.p",
+      "matches": true,
+      "claimed": 0.266641,
+      "json_value": 0.26664078394219626
+    },
+    {
+      "claim": "README DM dbar TLT 1% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.dm_pairs.CARE-SAV_vs_LinearQR.dbar",
+      "matches": true,
+      "claimed": 7.77e-06,
+      "json_value": 7.770267880247158e-06
+    },
+    {
+      "claim": "README Harvey pass TLT 1% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.TLT_01.dm_pairs.CARE-SAV_vs_LinearQR.harvey_abs_t_gt_3",
+      "matches": true,
+      "claimed": false,
+      "json_value": false
+    },
+    {
+      "claim": "README DM t HYG 5% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.ALSExpectile-VaR_vs_LinearQR.stat",
+      "matches": true,
+      "claimed": 0.539051,
+      "json_value": 0.5390512382671773
+    },
+    {
+      "claim": "README DM p HYG 5% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.ALSExpectile-VaR_vs_LinearQR.p",
+      "matches": true,
+      "claimed": 0.589893,
+      "json_value": 0.5898930218115801
+    },
+    {
+      "claim": "README DM dbar HYG 5% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.ALSExpectile-VaR_vs_LinearQR.dbar",
+      "matches": true,
+      "claimed": 4.33e-06,
+      "json_value": 4.330430177016702e-06
+    },
+    {
+      "claim": "README Harvey pass HYG 5% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.ALSExpectile-VaR_vs_LinearQR.harvey_abs_t_gt_3",
+      "matches": true,
+      "claimed": false,
+      "json_value": false
+    },
+    {
+      "claim": "README DM t HYG 5% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.CARE-SAV_vs_LinearQR.stat",
+      "matches": true,
+      "claimed": 0.858231,
+      "json_value": 0.8582306840967017
+    },
+    {
+      "claim": "README DM p HYG 5% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.CARE-SAV_vs_LinearQR.p",
+      "matches": true,
+      "claimed": 0.390836,
+      "json_value": 0.3908362664867464
+    },
+    {
+      "claim": "README DM dbar HYG 5% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.CARE-SAV_vs_LinearQR.dbar",
+      "matches": true,
+      "claimed": 6.939e-06,
+      "json_value": 6.938540869990018e-06
+    },
+    {
+      "claim": "README Harvey pass HYG 5% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.CARE-SAV_vs_LinearQR.harvey_abs_t_gt_3",
+      "matches": true,
+      "claimed": false,
+      "json_value": false
+    },
+    {
+      "claim": "README DM t HYG 1% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.ALSExpectile-VaR_vs_LinearQR.stat",
+      "matches": true,
+      "claimed": -0.09743,
+      "json_value": -0.09743039107772639
+    },
+    {
+      "claim": "README DM p HYG 1% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.ALSExpectile-VaR_vs_LinearQR.p",
+      "matches": true,
+      "claimed": 0.922391,
+      "json_value": 0.9223913670970842
+    },
+    {
+      "claim": "README DM dbar HYG 1% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.ALSExpectile-VaR_vs_LinearQR.dbar",
+      "matches": true,
+      "claimed": -4.67e-07,
+      "json_value": -4.6738639077099055e-07
+    },
+    {
+      "claim": "README Harvey pass HYG 1% ALSExpectile-VaR_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.ALSExpectile-VaR_vs_LinearQR.harvey_abs_t_gt_3",
+      "matches": true,
+      "claimed": false,
+      "json_value": false
+    },
+    {
+      "claim": "README DM t HYG 1% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.CARE-SAV_vs_LinearQR.stat",
+      "matches": true,
+      "claimed": -0.436337,
+      "json_value": -0.43633714757774633
+    },
+    {
+      "claim": "README DM p HYG 1% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.CARE-SAV_vs_LinearQR.p",
+      "matches": true,
+      "claimed": 0.662625,
+      "json_value": 0.6626247269190357
+    },
+    {
+      "claim": "README DM dbar HYG 1% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.CARE-SAV_vs_LinearQR.dbar",
+      "matches": true,
+      "claimed": -3.629e-06,
+      "json_value": -3.629312894151554e-06
+    },
+    {
+      "claim": "README Harvey pass HYG 1% CARE-SAV_vs_LinearQR",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.CARE-SAV_vs_LinearQR.harvey_abs_t_gt_3",
+      "matches": true,
+      "claimed": false,
+      "json_value": false
+    },
+    {
+      "claim": "README prose t HYG 5% ALSExpectile-VaR_vs_HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.ALSExpectile-VaR_vs_HS250.stat",
+      "matches": true,
+      "claimed": -2.401131,
+      "json_value": -2.4011305264611793
+    },
+    {
+      "claim": "README prose p HYG 5% ALSExpectile-VaR_vs_HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.ALSExpectile-VaR_vs_HS250.p",
+      "matches": true,
+      "claimed": 0.016407,
+      "json_value": 0.016407315952143176
+    },
+    {
+      "claim": "README prose t HYG 5% CARE-SAV_vs_HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.CARE-SAV_vs_HS250.stat",
+      "matches": true,
+      "claimed": -2.269933,
+      "json_value": -2.2699325651239404
+    },
+    {
+      "claim": "README prose p HYG 5% CARE-SAV_vs_HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.CARE-SAV_vs_HS250.p",
+      "matches": true,
+      "claimed": 0.023285,
+      "json_value": 0.023285021651372473
+    },
+    {
+      "claim": "README prose t HYG 5% LinearQR_vs_HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.LinearQR_vs_HS250.stat",
+      "matches": true,
+      "claimed": -2.269704,
+      "json_value": -2.2697039591970922
+    },
+    {
+      "claim": "README prose p HYG 5% LinearQR_vs_HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_05.dm_pairs.LinearQR_vs_HS250.p",
+      "matches": true,
+      "claimed": 0.023299,
+      "json_value": 0.023298916070337183
+    },
+    {
+      "claim": "README prose t HYG 1% CARE-SAV_vs_HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.CARE-SAV_vs_HS250.stat",
+      "matches": true,
+      "claimed": -2.161456,
+      "json_value": -2.1614561452628336
+    },
+    {
+      "claim": "README prose p HYG 1% CARE-SAV_vs_HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.CARE-SAV_vs_HS250.p",
+      "matches": true,
+      "claimed": 0.030742,
+      "json_value": 0.03074198789226834
+    },
+    {
+      "claim": "README prose t HYG 1% LinearQR_vs_HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.LinearQR_vs_HS250.stat",
+      "matches": true,
+      "claimed": -1.777542,
+      "json_value": -1.777541959793228
+    },
+    {
+      "claim": "README prose p HYG 1% LinearQR_vs_HS250",
+      "source": "K1649_results.json:by_asset_alpha.HYG_01.dm_pairs.LinearQR_vs_HS250.p",
+      "matches": true,
+      "claimed": 0.075584,
+      "json_value": 0.07558425109752709
+    },
+    {
+      "claim": "README common obs = 2891 per asset-alpha",
+      "source": "K1649_results.json:by_asset_alpha.*.per_model.*.obs",
+      "matches": true,
+      "claimed": true,
+      "json_value": true
+    },
+    {
+      "claim": "README data window 2010-01-04~2026-07-02",
+      "source": "K1649_results.json:meta.data_start/data_end",
+      "matches": true,
+      "claimed": "2010-01-04~2026-07-02",
+      "json_value": "2010-01-04~2026-07-02"
+    },
+    {
+      "claim": "README OOS start 2015-01-01",
+      "source": "K1649_results.json:meta.oos_start",
+      "matches": true,
+      "claimed": "2015-01-01",
+      "json_value": "2015-01-01"
+    },
+    {
+      "claim": "README seed 42",
+      "source": "K1649_results.json:meta.seed",
+      "matches": true,
+      "claimed": 42,
+      "json_value": 42
+    },
+    {
+      "claim": "README Harvey threshold 3.0",
+      "source": "K1649_results.json:overall.harvey_abs_t_threshold",
+      "matches": true,
+      "claimed": 3.0,
+      "json_value": 3.0
+    },
+    {
+      "claim": "README refit quarterly expanding",
+      "source": "K1649_results.json:meta.refit_cadence",
+      "matches": true,
+      "claimed": "quarter_expanding",
+      "json_value": "quarter_expanding"
+    },
+    {
+      "claim": "README verdict NULL_NO_EXPECTILE_EDGE_VS_LINEARQR",
+      "source": "K1649_results.json:overall.verdict",
+      "matches": true,
+      "claimed": "NULL_NO_EXPECTILE_EDGE_VS_LINEARQR",
+      "json_value": "NULL_NO_EXPECTILE_EDGE_VS_LINEARQR"
+    },
+    {
+      "claim": "README: 無任何 expectile-vs-LinearQR DM 達 Harvey |t|>3",
+      "source": "K1649_results.json:overall.expectile_harvey_wins_vs_linearqr",
+      "matches": true,
+      "claimed": 0,
+      "json_value": 0
+    },
+    {
+      "claim": "16 個 cell 的 mean_pinball 可從 parquet 原始 y/var 用 pinball 公式重算",
+      "source": "K1649_forecasts.parquet:(y,var) -> recompute vs K1649_results.json:by_asset_alpha.*.per_model.*.mean_pinball",
+      "matches": true,
+      "note": "主線程重算，16/16 相符，最大絕對誤差 < 1e-12。JSON 非手寫。"
+    },
+    {
+      "claim": "16 個 cell 的 violation_rate 可從 parquet 原始 y/var 重算",
+      "source": "K1649_forecasts.parquet:(y,var) -> recompute vs K1649_results.json:by_asset_alpha.*.per_model.*.violation_rate",
+      "matches": true,
+      "note": "主線程重算，16/16 相符，誤差 < 1e-12。"
+    },
+    {
+      "claim": "20 個 DM 統計量可用腳本自身 HAC 公式從 parquet 的 pinball_loss 重算",
+      "source": "K1649_forecasts.parquet:pinball_loss -> recompute vs K1649_results.json:by_asset_alpha.*.dm_pairs.*.stat",
+      "matches": true,
+      "note": "主線程重算，20/20 相符，誤差 < 1e-8。"
+    },
+    {
+      "claim": "nw_lag=21 的來源 = floor(1.5 * n^(1/3))，n=2891",
+      "source": "K1649.py:475 vs K1649_results.json:by_asset_alpha.*.dm_pairs.*.nw_lag",
+      "matches": true,
+      "note": "floor(1.5*2891^(1/3))=floor(21.37)=21，與 JSON 全部 20 個 dm_pairs 的 nw_lag 相符。 repo canonical bandwidth = ceil(h^(1/3)*n^(1/3)) = 15；21 >= 15，符合 .claude/rules/experiments.md 「lag = max(h-1, repo canonical bandwidth)」的下限要求。",
+      "claimed": 21,
+      "actual": 21
+    },
+    {
+      "claim": "主結論（8 個 expectile-vs-LinearQR DM）對 HAC lag 選擇穩健",
+      "source": "K1649_forecasts.parquet:pinball_loss -> lag sweep {5,15,21,40}",
+      "matches": true,
+      "note": "主線程 lag sensitivity：8 個 pair 在 4 個 lag 下 max|t| = 2.19（TLT 1% ALS @lag=5），全部遠低於 Harvey 門檻 3.0。NULL verdict 不因 lag 選擇改變。README 未報告此 sensitivity（規則要求報告）。",
+      "actual": {
+        "max_abs_t_over_lags_5_15_21_40": 2.185
+      }
+    },
+    {
+      "claim": "expectile_harvey_wins_vs_linearqr = 0",
+      "source": "K1649_results.json:overall.expectile_harvey_wins_vs_linearqr",
+      "matches": true,
+      "note": "逐一核對 8 個 dm_pairs 的 harvey_abs_t_gt_3 全為 false；max|t|=1.911（TLT 1% ALS @lag=21）。",
+      "claimed": 0,
+      "actual": 0
+    },
+    {
+      "claim": "overall.expectile_cases_better_than_linearqr_by_mean_loss = 4 的正確語意",
+      "source": "K1649_results.json:overall.expectile_cases_better_than_linearqr_by_mean_loss",
+      "matches": true,
+      "note": "值本身正確（K1649.py:665-668 迴圈數的是 2 個 expectile 模型 x 4 個 cell = 8 個 pair 中 dbar<0 的個數）。但此欄位極易被誤讀為『4 個 asset-alpha 組合全部優於 LinearQR』—— 既有 knowledge entry 968b552d 正是這樣誤讀。真相：2/4 個 cell（TLT 5%、HYG 1%）兩個 expectile 模型都勝出；另 2/4（TLT 1%、HYG 5%）兩個都落敗。",
+      "claimed": 4,
+      "actual": {
+        "pairs_better_of_8": 4,
+        "cells_where_both_expectile_beat_linearqr_of_4": 2
+      }
+    },
+    {
+      "claim": "既有 knowledge entry 968b552d 宣稱「4個asset-alpha組合中有4個優於LinearQR」",
+      "source": "K1649_results.json:overall.best_mean_pinball_counts",
+      "matches": false,
+      "note": "**不符 —— 這是既有 entry 的事實錯誤（非 README 或 results.json 的錯誤）**。同一份 JSON 的 best_mean_pinball_counts = {'CARE-SAV': 2, 'LinearQR': 2} 直接反證：LinearQR 在 4 個 cell 中有 2 個是最佳。逐 cell 實測：TLT 5% ALS/CARE 皆勝、TLT 1% 皆敗、HYG 5% 皆敗、HYG 1% 皆勝。主線程修訂 entry 時必須改掉。",
+      "claimed": "4/4 個 asset-alpha 組合優於 LinearQR",
+      "actual": {
+        "best_mean_pinball_counts": {
+          "CARE-SAV": 2,
+          "LinearQR": 2
+        },
+        "cells_both_expectile_win": [
+          "TLT_05",
+          "HYG_01"
+        ],
+        "cells_both_expectile_lose": [
+          "TLT_01",
+          "HYG_05"
+        ]
+      }
+    },
+    {
+      "claim": "Lookahead：HS250 可從 OHLC cache 獨立重建",
+      "source": "K1649_ohlc_cache.parquet -> y.shift(1).rolling(250).quantile(alpha) vs K1649_forecasts.parquet:var[model=HS250]",
+      "matches": true,
+      "note": "主線程獨立重建 4 個 asset-alpha，max|diff| = 0.000e+00（2891 obs each）。shift(1) 確實生效。"
+    },
+    {
+      "claim": "Lookahead：所有模型的 VaR 對『昨日』報酬的相關強於對『當日』",
+      "source": "K1649_forecasts.parquet:(var,y) -> corr(var_t,|y_t|) vs corr(var_t,|y_(t-1)|)",
+      "matches": true,
+      "note": "8/8 個 (asset,model) 組合皆為 |corr(var_t,|y_(t-1)|)| > |corr(var_t,|y_t|)|（例：HYG CARE-SAV -0.805 vs -0.548）。若有同日洩漏，方向會相反。"
+    },
+    {
+      "claim": "fit_quantreg 的 `except Exception` silent fallback 是否污染 LinearQR baseline",
+      "source": "K1649.py:237-240 -> 主線程重跑全部 refit",
+      "matches": true,
+      "note": "主線程對 192 個 refit（2 assets x 2 alphas x (1 初始 + 47 季度)）逐一重跑 QuantReg：0 次觸發 fallback。Codex 獨立重跑 188 個季度 refit：0 次 iteration-limit、0 warning、最大 298 iterations。結論：baseline 全程是真正的 QuantReg，未被靜默降級成 unconditional quantile。此 except 子句是潛在隱患但未實際發生。",
+      "actual": {
+        "mainthread_refits_probed": 192,
+        "fallbacks_triggered": 0,
+        "codex_refits_probed": 188,
+        "codex_warnings": 0
+      }
+    },
+    {
+      "claim": "tau grid 邊界：選出的 tau 是否被 grid 截斷",
+      "source": "K1649.py:62-65 (TAU_GRIDS) vs K1649_forecasts.parquet:tau",
+      "matches": true,
+      "note": "4 個 asset-alpha 的 tau 皆落在 grid 內部，未觸及上下界。alpha=5% grid [0.0025,0.18] 實用 {0.015},{0.025,0.04}；alpha=1% grid [0.0005,0.04] 實用 {0.002,0.0035,0.005},{0.0035,0.005,0.0075}。tau mapping 未被 grid 截斷（但 mapping 本身是 unconditional — 見 caveats）。"
+    },
+    {
+      "claim": "OOS 窗口是否含空頭（feedback_long_sample_period）",
+      "source": "K1649_ohlc_cache.parquet -> OOS drawdown",
+      "matches": true,
+      "note": "TLT OOS MDD = -48.4%（2020-08-04 峰 -> 2023-10-19 谷），2022 年度 -31.2%；HYG OOS MDD = -22.0%（2020-03-23 COVID 谷）。OOS 2015-2026 涵蓋 2020 COVID、2022 債券空頭、2023 SVB。規則滿足。"
+    },
+    {
+      "claim": "README 完全未報告 Kupiec / Christoffersen 結果",
+      "source": "K1649_results.json:by_asset_alpha.*.per_model.*.kupiec",
+      "matches": false,
+      "note": "**README 遺漏（非數字錯誤，是完整性缺口）**。JSON 對 16 個 cell 全都有 kupiec 與 christoffersen_ind，README 只列 violation_rate、從未提及檢定 p 值。Kupiec@5% 拒絕次數（4 cells 中）：HS250=2、LinearQR=2、ALSExpectile-VaR=1、CARE-SAV=1。型態是 asset-dependent 的 mixed（HYG 兩個 alpha 上 quantile baseline 被拒、expectile 通過；TLT 1% 恰好相反），不是乾淨的 expectile 校準優勢。README 據此寫「calibration 可控」屬 overclaim（Codex 裁決 (e)）。",
+      "actual": {
+        "kupiec_rejections_at_5pct_of_4_cells": {
+          "HS250": 2,
+          "LinearQR": 2,
+          "ALSExpectile-VaR": 1,
+          "CARE-SAV": 1
+        }
+      }
+    },
+    {
+      "claim": "Codex conditional-tau 敏感度：修掉 tau mapping 缺陷後 ALS 的 null 是否仍成立",
+      "source": "Codex 獨立重跑（每次 refit 對已擬合 ALS 的 conditional hit rate 選 tau）",
+      "matches": true,
+      "note": "4 個 ALS-vs-LinearQR DM t = {-1.19, +1.45, +2.61, +1.30}，仍無 |t|>3。狹義 ALS null 對 tau 校準方式穩健。但此診斷尚未成為 authoritative output，且不替 CARE 解套。",
+      "actual": {
+        "als_vs_linearqr_dm_t_under_conditional_tau": [
+          -1.19,
+          1.45,
+          2.61,
+          1.3
+        ]
+      }
+    },
+    {
+      "claim": "Codex 25-multistart 對照：fit_care 的 5 起點是否落在穩定 basin",
+      "source": "Codex 獨立重跑 fit_care with 25 random starts",
+      "matches": false,
+      "note": "**未通過 robustness**。25 起點後 TLT 5% / HYG 5% 找到 training objective 低約 0.13% / 0.56% 的解，且參數明顯不同；25 個起點收斂到 25 個相異參數組（objective 差 <5%，顯示 loss surface 平坦/脊狀而非尖銳多峰）。尚不足以說 OOS verdict 會翻轉，但足以否定「5 starts 已證明 basin 穩定」。CARE 結果只能列 provisional。",
+      "actual": {
+        "rel_objective_gap_vs_25start_best": {
+          "TLT_05": 0.00133,
+          "TLT_01": -0.0226,
+          "HYG_05": 0.00559,
+          "HYG_01": -0.0476
+        },
+        "distinct_solutions_of_25": 25
+      }
+    }
+  ],
+  "verification_summary": {
+    "readme_claims_auto_parsed": 86,
+    "readme_claims_matching_json": 86,
+    "readme_claim_mismatches": 0,
+    "total_verification_records": 102,
+    "records_matching": 99,
+    "records_not_matching": 3,
+    "not_matching_are_about": "3 筆 matches=false **不是 README 或 results.json 的數字錯誤**：(1) 既有 knowledge entry 968b552d 的『4/4 優於 LinearQR』事實錯誤；(2) README 遺漏 Kupiec/Christoffersen 整個維度（完整性缺口）；(3) Codex 25-multistart 對照顯示 fit_care 未通過 basin robustness。README 自身的 86 個宣稱數字對 results.json 是 86/86 零誤差。"
+  },
+  "recompute_provenance": {
+    "method": "主線程不信任 results.json，改從 K1649_forecasts.parquet 的原始 y/var 欄位重算 pinball 與 violation，並從 pinball_loss 欄位重算全部 DM 統計量；HS250 另從 K1649_ohlc_cache.parquet 完全獨立重建。",
+    "mean_pinball_cells_recomputed": 16,
+    "violation_rate_cells_recomputed": 16,
+    "dm_stats_recomputed": 20,
+    "max_abs_error": "< 1e-12 (loss/rate), < 1e-8 (DM t)",
+    "hs250_independent_rebuild_max_diff": 0.0,
+    "quantreg_refits_probed_mainthread": 192,
+    "quantreg_refits_probed_codex": 188,
+    "lag_sensitivity_lags_tested": [
+      5,
+      15,
+      21,
+      40
+    ],
+    "figures_visually_verified": "fig_k1649_coverage.png 與 fig_k1649_mean_pinball.png 皆為真實 matplotlib 圖表，bar 高度與 JSON 的 violation_rate / mean_pinball 一致；無 ASCII 冒充。"
+  },
+  "orphan_premise_status": {
+    "task_brief_claim": "knowledge.json / feed.json / paper / open task 都沒提到 K1649，實驗跑完就沒人收",
+    "actual": "**部分不成立**。knowledge.json 已有 item_id=968b552d（provenance='kb_backfill_unrecorded_experiments (2026-07-14)'），next_tasks.json 有 K1649（status=succeeded）與 dreaming_orphaned_experiment_k1649。feed.json / experiment_experiences.json / research_program.md / paper/ 確實 0 命中。",
+    "why_it_still_mattered": "backfill entry 是機械掃描產物，有三個真實缺口，本次任務正好補上：(1) **零 reviewer provenance** —— 該 entry 只有 provenance='kb_backfill...'，沒有任何 reviewer 欄位。它能寫進去是因為 verdict='NULL' 不受 src/volpred/memory/provenance.py 的 K1259 gate 管制（只有 PASS 需要 reviewer）。所以 K1649 在本次之前**從未被任何人或模型審查過**。(2) **entry 內含事實錯誤** —— 『4個asset-alpha組合中有4個優於LinearQR』誤讀了 overall 欄位語意，被同一份 JSON 的 best_mean_pinball_counts={'CARE-SAV':2,'LinearQR':2} 直接反證。(3) **零 caveats** —— entry 完全沒有 Codex 現在裁定「必須」的 7 條 caveats，且『calibration 可控』沿用了 README 的 overclaim。",
+    "implication_for_ops": "kb_backfill_unrecorded_experiments 這類機械 backfill 會產生「看起來已收、實際未審且可能寫錯」的 entry —— 它把 orphan 從『沒人收』變成『收了但沒審』，反而讓 dreaming 的 orphan 偵測器看不見。建議主線程評估：backfill 產生的 entry 應標記 needs_review=true，或讓 orphan 偵測器把 「有 entry 但無 reviewer 欄位」也算成 orphan。此為 process 建議，非本任務 scope 內的改動。"
+  },
+  "blocking_defects": [],
+  "blocking_generalization_limits": [
+    "CARE-SAV 同時改變模型結構與資訊集，不能識別 expectile-vs-quantile 效果 —— 缺 CAViaR-SAV 對照。",
+    "tau mapping 並非 Taylor (2008) CARE 的 conditional calibration 程序，因此負結果不可一般化到正規校準的 CARE / expectile-VaR。"
+  ],
+  "publishable": false,
+  "publish_rationale": "**現階段不值得寫成讀者向文章 —— 但這是 conditional false，不是永久否決。**\n\n不publish 的理由（研究誠實 > 補池）：唯一能吸引讀者的角度是「理論上最漂亮的風險測度（expectile 是唯一同時 coherent + elicitable 的尾部量，還進了 Basel III→IV 討論），實測沒打敗最樸素的分位數迴歸」。但 Codex 的兩個 blocking generalization limits 正好打在這個角度的心臟上：本實驗的 tau mapping 不是 Taylor (2008) 的正規 conditional calibration 程序，CARE 半邊又混淆了資訊集。誠實的標題只能是「我們實作的一個非正規近似版 expectile-VaR 在兩檔債券 ETF 上沒贏」—— 這對讀者近乎沒有價值；而任何讀起來有價值的寫法（「expectile 沒用」「理論漂亮但實務不行」）都會讓讀者過度一般化到正規方法，那就是 overclaim。null 可以發，但**不能發一個建立在非 canonical 實作上的 null**。\n\n另外兩個備選角度也不成立：(1)「expectile 校準比較好」—— Codex 明確裁定校準是 asset-dependent 的 mixed（TLT 1% 兩個 expectile 模型都被 Kupiec 拒絕），不支持；(2)「loss 最低 ≠ 校準最好」（HYG 5% LinearQR 的 mean pinball 最低 0.000484，但 violation rate 只有 3.98%、Kupiec p=0.009 被拒 —— 它靠過度保守贏了 loss）—— 這個觀察是真的、可驗證、也有教學價值，但它是**通用計量教學點**，不依賴 K1649，用一個未經 canonical 校準的實驗當它的門面反而拖累它。若要寫，應獨立設計一個乾淨的示範實驗。\n\n**翻成 publishable=true 的條件**（三項全做完，任一未完成都不該發）：(1) tau 改用 Taylor conditional calibration 並進 authoritative output；(2) 補 CAViaR-SAV 對照（同 recursion / 資料窗 / 初值 / optimizer budget），使 expectile-vs-quantile 效果可識別；(3) fit_care 補足 multistart + 保存 basin/convergence diagnostics + warm-start，通過 robustness。屆時「正規實作的 expectile-VaR 仍沒贏 quantile-VaR」會是一個乾淨、有份量、可安全一般化的 null，適合 迷思實驗室 系列，且對平台的學術可信度（mission 2/3）有正貢獻。\n\n**注意**：本欄只做「值不值得寫」的判斷。即使未來翻成 true，發佈前仍須依 feedback_dedup_3_layers_mainthread 由主線程完成 3-layer 查重（本 agent 未執行查重，不在 scope 內）。",
+  "recommended_disposition": {
+    "primary": "修訂既有 knowledge entry 968b552d（**不要新增重複 entry** —— Codex 與主線程獨立同意此點）",
+    "actions_for_main_thread": [
+      "1. 用正式 Python writer（src/volpred/memory/system.py 路徑）修訂 item_id=968b552d，**禁止 jq/Edit 直改**（會繞過 src/volpred/memory/provenance.py 的 validator，且 scripts/validate_knowledge_provenance.py 的 baseline=284 會抓到）。",
+      "2. **修掉事實錯誤**：把「mean pinball loss 上 expectile 類模型在4個asset-alpha組合中有4個優於LinearQR」改成「8 個（模型×cell）配對中 4 個優於 LinearQR，即 2/4 個 cell（TLT 5%、HYG 1%）兩個 expectile 模型都勝出，另 2/4 都落敗；LinearQR 在 4 個 cell 中仍拿下 2 個最佳」。",
+      "3. **刪掉 overclaim**：entry 現有的「calibration可控」沿用自 README，Codex 裁定必須改成「calibration mixed」。",
+      "4. **補 reviewer provenance**：reviewer='codex (gpt-5.6-sol, high, primary-path)'、reviewer_source='Codex review'、review verdict='CONDITIONAL PASS'、reviewed_at='2026-07-16T19:54:41Z'、reviewed_commit='2de6cba3b'。",
+      "5. **補上 proposed_entry.caveats 的 11 條**（其中 7 條 Codex 標「必須」）。",
+      "6. **confidence 0.85 -> 0.68**（Codex 建議 0.65-0.70）。",
+      "7. **修 README overclaim**（Codex 裁決 (e) 的三處）：README:91 的「calibration 可控」-> 「calibration mixed，TLT 1% 兩個 expectile models 拒絕 Kupiec coverage」；「也能改善 HS250」-> 「mean pinball point estimates 較低；沒有 comparison 達 Harvey threshold」；「expectile 對 quantile-VaR」-> 收窄為「本實驗所實作的 ALS expectile-derived VaR 與 CARE forecasting system，未相對 LinearQR 顯示 Harvey-level pinball edge」。**注意**：改 README 會使 claim surface sha256 漂移；若之後要走 experiment_gates.py certify，需重新產 review_verdict.json。"
+    ],
+    "followup_research_backlog": [
+      "【高價值】補 CAViaR-SAV vs CARE-SAV 對照（同 recursion / 資料窗 / 初值 / optimizer budget）—— 這是唯一能真正隔離 ALS objective vs quantile objective 的設計。目前 K1649 的 CARE 半邊完全無法回答它宣稱要回答的問題。",
+      "【高價值】tau 改用 Taylor (2008) conditional calibration 並進 authoritative output。Codex 的 sensitivity 顯示 ALS 狹義 null 方向不變（DM t = -1.19/+1.45/+2.61/+1.30），所以這件事的價值不在翻案，而在讓結論可以安全一般化 —— 也是 publishable 翻正的必要條件。",
+      "【中】fit_care 補 multistart + 保存每次 refit 的 success/status/fun/params + warm-start + 報 objective 分布。",
+      "【中】K1649.py:469 的自寫 dm_test_hac 改呼叫 canonical volpred.stats.model_evaluation.dm_test，或把 canonical 對照 + lag sensitivity 寫進 results.json。",
+      "【低】fit_quantreg 的 silent except 改成 fail-loud 或至少記錄觸發次數到 results.json。",
+      "【process】評估讓 orphan 偵測器把「有 knowledge entry 但無 reviewer 欄位」也算成 orphan —— 否則 kb_backfill 產生的未審 entry 會永久隱形。"
+    ]
+  },
+  "scope_compliance": {
+    "touched_knowledge_json": false,
+    "touched_feed_json": false,
+    "published_anything": false,
+    "force_push_or_no_verify": false,
+    "fabricated_numbers": false,
+    "note": "本 agent 只讀 knowledge.json（診斷既有 entry），未寫入。所有數字皆來自 K1649_results.json、K1649_forecasts.parquet、K1649_ohlc_cache.parquet 的實際重算，或 Codex review log 的實際輸出。唯一寫入的檔案是本提案 JSON。K1259 禁令遵守。"
+  },
+  "generated_at": "2026-07-16T19:54:41Z",
+  "generated_at_taipei": "2026-07-17 03:54:41",
+  "generated_by": "claude-opus-4-8 (dispatch-slot-1-957aa2f2-k1649 worktree agent), task=dreaming_orphaned_experiment_k1649"
+}
