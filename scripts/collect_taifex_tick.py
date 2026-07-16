@@ -131,23 +131,45 @@ def list_source_files(source_dir: Path) -> list[Path]:
     )
 
 
+# The five semantic fields every TAIFEX daily file must carry, in every era.
+REQUIRED_SEMANTICS = ("trade_date", "contract", "trade_time", "price", "volume")
+# Encoding fallbacks, most-likely first.  Shared so every reader of the archive
+# decodes the Big5/CP950 files the same way.
+SOURCE_ENCODINGS = ("big5", "cp950", "utf-8-sig")
+
+
 def _normalize_header(value: object) -> str:
     return str(value).lstrip("\ufeff").strip()
 
 
-def _header_mapping(columns: Iterable[object]) -> dict[str, object]:
+def map_semantic_columns(
+    columns: Iterable[object],
+    aliases: "dict[str, tuple[str, ...]]" = HEADER_ALIASES,
+    required: Iterable[str] = REQUIRED_SEMANTICS,
+) -> dict[str, object]:
+    """Map raw TAIFEX header labels to stable semantic names.
+
+    This is the header-based era-normalization shared by the 5-minute RV
+    collector and the canonical tick converter, so both stay in lockstep as the
+    column layout changes across the 2012 (auction column) and 2017 (night
+    session) format eras.  Callers pass their own ``aliases``/``required`` to
+    keep or drop optional fields such as near/far price and the raw timestamp.
+    """
     normalized = {_normalize_header(column): column for column in columns}
     mapped: dict[str, object] = {}
-    for semantic, aliases in HEADER_ALIASES.items():
-        for alias in aliases:
+    for semantic, alias_options in aliases.items():
+        for alias in alias_options:
             if alias in normalized:
                 mapped[semantic] = normalized[alias]
                 break
-    required = {"trade_date", "contract", "trade_time", "price", "volume"}
-    missing = sorted(required - mapped.keys())
+    missing = sorted(set(required) - mapped.keys())
     if missing:
         raise SourceFormatError(f"missing semantic columns: {', '.join(missing)}")
     return mapped
+
+
+def _header_mapping(columns: Iterable[object]) -> dict[str, object]:
+    return map_semantic_columns(columns)
 
 
 def _read_with_encoding(path: Path, encoding: str) -> pd.DataFrame:
@@ -172,7 +194,7 @@ def read_taifex_ticks(path: Path) -> pd.DataFrame:
 
     last_error: Exception | None = None
     frame: pd.DataFrame | None = None
-    for encoding in ("big5", "cp950", "utf-8-sig"):
+    for encoding in SOURCE_ENCODINGS:
         try:
             frame = _read_with_encoding(path, encoding)
             break
