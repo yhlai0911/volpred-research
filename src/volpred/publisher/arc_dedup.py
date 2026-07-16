@@ -130,6 +130,52 @@ _ENTITY_SURFACE: dict[str, str] = {
     "risk arbitrage": "MERGER_ARB", "risk-arbitrage": "MERGER_ARB",
     "deal spread": "MERGER_ARB", "deal-spread": "MERGER_ARB",
     "deal break": "MERGER_ARB", "deal-break": "MERGER_ARB", "套利價差": "MERGER_ARB",
+    # Mega-cap tech / AI-capex cluster (2026-07-17). Same failure as
+    # VOL_TARGETING (2026-06-14) and MERGER_ARB (2026-07-01): the gate is
+    # entity-anchored and this cluster had NO surface at all, so the whole
+    # AI-capex story family was invisible to it. The 2026-07-13 incident note
+    # (see "Theme saturation" below) MEASURED this: five same-story articles
+    # scattered across {USD} / {NASDAQ,USD} / {SEMIS,VIX} / {US_EQUITY} / {USD}
+    # -- 0 of 10 pairs arc-matched. `theme_saturation` was the 2026-07-14
+    # answer, but on 2026-07-16 three more arc repeats scored only 2/3/4 against
+    # a threshold of 5 and all three shipped. A counter cannot substitute for the
+    # missing vocabulary; this registers the cluster so the gate can see it.
+    #
+    # ONE canonical entity, not one per ticker. The dedup purpose is to make
+    # articles telling the SAME AI-capex story match EACH OTHER. Per-ticker
+    # entities would reproduce the exact fragmentation measured above:
+    # 「微軟與 Google」 -> {MSFT, GOOGL} vs 「四大科技巨頭」 -> {collective}
+    # share nothing. The reader-facing arc is "the mega-cap AI complex", and the
+    # individual names are interchangeable instances of it.
+    #
+    # Collective surfaces only -- deliberately NOT bare 「科技股」 (79/844 live
+    # articles, 9.4%): it is overwhelmingly a comparison BENCHMARK ("跟科技股比"),
+    # not a subject. That is the same proxy risk that made SPY/HYG falsely
+    # arc-block K1590 merger-arb, and the same shape as the bare 「銀」 -> SILVER
+    # bug. Bare 「巨頭」 is likewise out (石油巨頭 etc.).
+    "科技巨頭": "BIG_TECH", "科技四巨頭": "BIG_TECH", "四大科技": "BIG_TECH",
+    "雲端巨頭": "BIG_TECH", "七巨頭": "BIG_TECH", "五巨頭": "BIG_TECH",
+    "ai 巨頭": "BIG_TECH", "ai巨頭": "BIG_TECH", "大型科技股": "BIG_TECH",
+    "mag 7": "BIG_TECH", "mag7": "BIG_TECH", "magnificent seven": "BIG_TECH",
+    "big tech": "BIG_TECH", "hyperscaler": "BIG_TECH", "hyperscalers": "BIG_TECH",
+    # The capex CYCLE is the second half of this arc's anchor, and it is needed:
+    # BIG_TECH alone is a SINGLE distinctive entity, and `_is_significant_overlap`
+    # only honours a single distinctive overlap when VIX is also shared or both
+    # sides are exactly that one entity. 「科技巨頭 AI 變現期延遲」 names no VIX, so
+    # BIG_TECH alone left it unmatched -- and, being distinctive, it also flipped
+    # `is_arc_anchorless` to False, downgrading the CLI from an honest
+    # "SIGNATURE TOO THIN" to a FALSE "clean". Registering the mechanism gives the
+    # pair {BIG_TECH, CAPEX_CYCLE} -> two distinctive entities -> the gate looks.
+    #
+    # Named CAPEX_CYCLE, not AI_CAPEX: the surfaces are generic capital-expenditure
+    # vocabulary and a TSMC/semis capex piece extracts it too. That is correct --
+    # such a piece pairs it with TSMC/SEMIS, not BIG_TECH, so it dedupes against
+    # other fab-capex pieces rather than against the mega-cap AI story. Following
+    # INDEX_RECONSTITUTION, it is a _MECHANISM_ENTITIES member: on its own it is
+    # never a topic anchor, it only sharpens a pairing that an asset entity already
+    # anchors.
+    "資本支出": "CAPEX_CYCLE", "capex": "CAPEX_CYCLE",
+    "capital expenditure": "CAPEX_CYCLE", "變現缺口": "CAPEX_CYCLE",
     # EM / regional
     "vnm": "VIETNAM", "越南": "VIETNAM", "eido": "INDONESIA", "印尼": "INDONESIA",
     "thd": "THAILAND", "泰國": "THAILAND", "ephe": "PHILIPPINES", "菲律賓": "PHILIPPINES",
@@ -140,7 +186,10 @@ _ENTITY_SURFACE: dict[str, str] = {
 # Entities too ubiquitous to be distinctive on their own.
 _CORE_ENTITIES = {"US_EQUITY", "VIX", "TW_EQUITY"}
 _BROAD_MARKET_ENTITIES = {"NASDAQ", "US_SMALLCAP", "LONG_BOND", "US_BOND", "MID_BOND"}
-_MECHANISM_ENTITIES = {"INDEX_RECONSTITUTION", "VOL_TARGETING", "RISK_PARITY", "YIELD_CURVE", "FOMC"}
+_MECHANISM_ENTITIES = {
+    "INDEX_RECONSTITUTION", "VOL_TARGETING", "RISK_PARITY", "YIELD_CURVE", "FOMC",
+    "CAPEX_CYCLE",
+}
 _LEGACY_FUZZY_CONFIRM_ENTITIES = _CORE_ENTITIES | _BROAD_MARKET_ENTITIES | {
     "USD", "RATES", "US_BOND", "LONG_BOND", "MID_BOND",
 }
@@ -243,6 +292,21 @@ _MECHANISM_KEYWORDS: dict[str, list[str]] = {
     ],
     "vol_term_structure": [
         "vix9d", "vix3m", "vvix", "move", "skew", "iv-rv",
+        # NOT added, 2026-07-17, and the measurement is worth keeping: 「期權」
+        # (54/844 live) and 「隱含波動率」 (129/844) are the zh-Hant halves of
+        # "option" / "implied volatility", which ARE here, so an article's
+        # mechanism currently depends on which synonym the writer picked. Closing
+        # that asymmetry looks obviously right and is not: measured over 30
+        # sampled live general articles it created THREE new HARD blocks, e.g.
+        # 「測了 16 個模型組合…資料時序用錯了」 (a lookahead-bias post-mortem)
+        # hard-blocked against 「VIX 掉回 16.9 的假平靜」 (market commentary) --
+        # different arcs, same null verdict. 「隱含波動率」 is instrument
+        # boilerplate on this platform (it is already in _THEME_GENERIC_PHRASES
+        # for that reason), so promoting it to a SPECIFIC mechanism lets
+        # vol_term_structure win the argmax on articles whose real mechanism is
+        # something else, and `_mechanisms_compatible` then stops separating them.
+        # Fixing this needs mechanism scoring that is not winner-take-all, not
+        # more keywords.
         "implied volatility", "option", "選擇權",
     ],
     "cross_asset_spillover": [
@@ -752,14 +816,21 @@ def arc_match_anchors(sig: dict, refs: set[str] | list[str] | None = None) -> di
         never produce a significant overlap.
       * experiment ref — the same-K short-circuit.
 
-    Mechanisms are deliberately NOT an anchor. They can corroborate a soft
-    near-miss, but never make a hard match without an entity/ref anchor.
+    Mechanisms are deliberately NOT an anchor on their own. They can corroborate
+    a soft near-miss, but never make a hard match without an entity/ref anchor.
+    They ARE reported here because on the `descriptive` path they are a
+    NECESSARY co-anchor: `find_arc_duplicates` only reaches its fuzzy branch via
+    `specific_shared = (new & ex) - _GENERIC_MECHANISMS - {"unspecified"}`, so a
+    descriptive piece with no specific mechanism cannot produce a hit no matter
+    how many distinctive entities it has (see `is_arc_anchorless`).
     """
     ents = _entities_for_matching(sig)
     ref_set = {_normalize_ref(r) for r in (refs or []) if str(r or "").strip()}
+    mechs = _axis_values(sig.get("mechanisms"))
     return {
         "distinctive_entities": sorted(ents - _CORE_ENTITIES),
         "experiment_refs": sorted(ref_set),
+        "specific_mechanisms": sorted(mechs - _GENERIC_MECHANISMS - {"unspecified"}),
     }
 
 
@@ -787,11 +858,35 @@ def is_arc_anchorless(sig: dict, refs: set[str] | list[str] | None = None) -> bo
     near-identical-title check, which catches a byte-recycle but cannot see a
     same-arc piece written fresh — that is a recycle detector, not an arc gate.
 
+      2026-07-17 — entities=[BIG_TECH, CAPEX_CYCLE, US_EQUITY], mechanisms=
+      [unspecified]. Registering the mega-cap vocabulary below gave 「AI變現挑戰:
+      從期權波動率解析科技巨頭的資本定價分歧」 two distinctive entities, so this
+      predicate said "anchored" and the CLI printed `clean` for the THIRD time --
+      against those same articles. But that piece is `descriptive`, and the
+      descriptive branch of `find_arc_duplicates` needs a specific shared
+      MECHANISM on top of the entity overlap; with mechanisms=[unspecified] it
+      can never hit. The predicate was reading only half of the matcher it claims
+      to mirror, and new vocabulary is exactly what makes that half-read
+      reachable: more entities, still no mechanism.
+
     Callers stay fail-OPEN (`.claude/rules/dedup-gate-audit.md`): anchor-less is
-    not evidence of duplication. It just must never be reported as clean.
+    not evidence of duplication. It just must never be reported as clean. Note
+    the asymmetry is safe in one direction only -- every caller treats this as
+    advisory and none of them block on it, so widening it can cost an unnecessary
+    "go check by hand", while narrowing it costs a silent duplicate.
     """
     anchors = arc_match_anchors(sig, refs)
-    return not anchors["distinctive_entities"] and not anchors["experiment_refs"]
+    if anchors["experiment_refs"]:
+        return False  # the same-K short-circuit needs nothing else
+    if not anchors["distinctive_entities"]:
+        return True
+    # Entities alone are enough ONLY where the matcher treats them as enough.
+    # `descriptive` means "no readable conclusion", and there the matcher demands
+    # a specific mechanism as well (`_mechanisms_compatible`'s unspecified-passes
+    # rule does NOT apply on that branch).
+    if str(sig.get("conclusion_class") or "") == "descriptive":
+        return not anchors["specific_mechanisms"]
+    return False
 
 
 def _title_tokens(title: str) -> set[str]:

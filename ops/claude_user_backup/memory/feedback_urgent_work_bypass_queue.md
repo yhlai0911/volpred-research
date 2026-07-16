@@ -1,6 +1,7 @@
 ---
 name: feedback_urgent_work_bypass_queue
 description: 急件不進一般排程 — 該立刻做的事當場開工，不丟 hourly queue 排隊
+process_owner: .claude/skills/platform-ops-manager/SKILL.md
 metadata: 
   node_type: memory
   type: feedback

@@ -1,6 +1,7 @@
 ---
 name: project_loop_engineering_layer
 description: Loop-engineering 閉環層（loop-health 指標 + dreaming 慢 loop + 內容巡檢補完）2026-06-29 上線
+process_owner: .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md
 metadata: 
   node_type: memory
   type: project

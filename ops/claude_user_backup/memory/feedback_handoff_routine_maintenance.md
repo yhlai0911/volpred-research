@@ -1,6 +1,7 @@
 ---
 name: feedback_handoff_routine_maintenance
 description: handoff 文件與接續提示詞要平常持續維護，不只 compact 時才寫
+process_owner: config/runtime_schedules.json
 metadata: 
   node_type: memory
   type: feedback

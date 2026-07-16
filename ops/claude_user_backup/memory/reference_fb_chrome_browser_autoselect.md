@@ -22,9 +22,10 @@ metadata:
 3. 直接操作那個 tab 發文
 4. 連線會 flapping（中途掉線要重 list+select）；MAX STUDIO 掉線就等它回來再抓
 
-## 中文輸入（已驗證可行 2026-06-08）
+## 中文輸入（已驗證可行 2026-06-08；⚠️ 2026-07-16 重大限定）
 - FB composer 用 `type` 會中文亂碼 → **改 `pbcopy`（agent 本機）寫剪貼簿 + 瀏覽器 Cmd+V**。2026-06-08 實測：貼上的中文完全正確、連結預覽卡正常生成。
 - 發文流程：點「在想些什麼?」composer → 點文字區 → Cmd+V → 按「繼續」→ 貼文設定頁（受眾/排程）→ 按「發佈」。
+- **⚠️ pbcopy 只對「本機」Chrome 有效（2026-07-16 incident）**：MCP extension 連的 `398dcdba`（老闆主力 Chrome）在**另一台機器** — 本機 `pbcopy` 到不了它的剪貼簿，Cmd+V 貼出來的是**老闆那台機器剪貼簿裡的私人內容**（當時是研究溝通英文長文，差點貼進公開 FB 留言，當場 cmd+a Delete 清除未送出）。規則：(a) MCP Chrome 上**貼上後必截圖驗證內容再送出**；(b) 純 ASCII（URL）直接用 `type`，不走剪貼簿；(c) 中文長文只能走本機 CDP Chrome（`fb_realchrome_post.py`，port 9222，pbcopy 同機有效且有 pbpaste+回讀雙驗證）。
 
 ## 安全邊界
 - **不能替用戶輸入 FB 密碼**（硬規則，即使他說「妳幫我做」）。所以只能用「已登入」的瀏覽器；若都登出只能請用戶登入一次。

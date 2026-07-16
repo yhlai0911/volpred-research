@@ -32724,36 +32724,15 @@
   },
   {
     "id": "worktree-pytest-guards-unarmed-20260713",
-    "title": "worktree agent 跑 pytest 時四道 side-effect guard 全沒武裝（可真寄信 / 真寫 Supabase / 真改 canonical storage）",
-    "description": "發現於 2026-07-13 hourly-21（release starvation layer-2 fire 的副產物）。\n\nroot cause：四道 guard（VOLPRED_NO_EMAIL / NO_REMOTE_WRITE / NO_REMOTE_READ /\nNO_CANONICAL_WRITE）由 repo-root conftest.py 設定，但 conftest.py 被 .gitignore:125 刻意排除版控。\nCI 另在 .github/workflows/pytest.yml 直接設 env 所以安全；**worktree 兩者皆無**\n→ 任何 worktree agent 跑 pytest 都在無防護狀態下執行。\n\n證據：在 .claude/worktrees/dispatch-slot-1-cf303785 跑 scripts/tests/ →\ntest_dispatch_state.py::test_side_effect_guards_are_armed_outside_the_tests_tree 與\ntest_writer_gate_refuses_the_canonical_state_under_test 兩者 FAIL；同兩測試在 main checkout PASS。\n也就是說：這兩個測試正確地在回報「本環境沒有 guard」，我們一直沒讀懂它。\n\n風險：我們每天派 worktree agent，agent 常跑 pytest。一個測試若不小心寫 canonical storage /\n打 Supabase / 寄信，在 worktree 內不會被擋（正是 memory project_canonical_write_test_leak_gate 的 class）。\n\n修法方向（需判斷擇一）：\n(a) 把 guard 移到版控內的設定（pyproject/pytest.ini + pytest-env），或版控一份 conftest 並改 .gitignore；\n(b) 在 worktree 建立流程（merge_worktree.sh / bootstrap_agent_session.sh）自動提供 conftest。\n注意 anti-stacking：guard 只能有一個 enforcement owner，不要三處各設一份。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "worktree agent 跑 pytest 時四道 side-effect guard 全沒武裝（可真寄信 / 真寫 Supabase / 真改 canonical storage）",
+    "priority": 2,
     "source": "agent_discovered",
     "created_at": "2026-07-13T13:21:30.101699+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-13T21:59:03.662297+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T21:59:03.929668+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T22:07:51.918775+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-13T21:59:03.929653+00:00",
     "completed_at": "2026-07-13T22:07:51.918761+00:00",
-    "result": "確認核心修復 e51c28f3f 已讓 root conftest 進版控；本輪移除 nested 四份重複 guard，root 成為唯一 Python owner，並新增 Git-tracked/existence/exact-assignment 靜態 gate。乾淨 worktree 113 passed, 1 skipped；隱藏 root conftest 且預設 CI env 的負控制如期 FAIL。"
+    "tombstone": true,
+    "archived_at": "2026-07-16T22:07:55.358373+00:00"
   },
   {
     "id": "telegram-677",
@@ -33030,36 +33009,15 @@
   },
   {
     "id": "ci-red-29280674231",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29280674231）— main Test Suite 最新班次 failure",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
     "created_at": "2026-07-13T21:00:19.510427+00:00",
-    "title": "CI 紅燈修復（run 29280674231）— main Test Suite 最新班次 failure",
-    "description": "GitHub Actions Test Suite 於 main 最新完成班次 failure。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29280674231\nhead_sha: f03043333\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29280674231 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push 後 `gh run watch` 盯到綠燈才 finish\n成功標準：main 最新 Test Suite run conclusion=success。",
-    "status_history": [
-      {
-        "ts": "2026-07-13T21:08:07.022226+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-05"
-      },
-      {
-        "ts": "2026-07-13T21:08:10.318723+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-05"
-      },
-      {
-        "ts": "2026-07-13T21:46:31.932943+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-05"
-      }
-    ],
-    "started_at": "2026-07-13T21:08:10.318708+00:00",
     "completed_at": "2026-07-13T21:46:31.932928+00:00",
-    "result": "CI 綠燈。根因=dedup_decisions.jsonl 的 6 個 writer 缺 canonical-write 護欄（唯一有的 event_jobs 還把 guard 放在 fail-open try 內被吞掉）；6 個全補 guard 並移到 try 外 loud fail，順帶修 3 個真的在寫真 storage 的測試 + refill 傳相對 storage_dir 的潛在 bug。commit 797c98446；main Test Suite run 29286983116 = success。"
+    "tombstone": true,
+    "archived_at": "2026-07-16T22:07:55.358373+00:00"
   },
   {
     "id": "dreaming_orphaned_experiment_k1701",
@@ -34741,13 +34699,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T21:00:54.703308+00:00",
+    "completed_at": "2026-07-16T22:01:08.013021+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T21:00:54.703308+00:00",
-      "last_clean_observed_at": "2026-07-16T21:00:54.703308+00:00"
+      "resolved_at": "2026-07-16T22:01:08.013021+00:00",
+      "last_clean_observed_at": "2026-07-16T22:01:08.013021+00:00"
     }
   },
   {
@@ -34759,13 +34717,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T21:24:16.655400+00:00",
+    "completed_at": "2026-07-16T22:57:44.547508+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T21:24:16.655400+00:00",
-      "last_clean_observed_at": "2026-07-16T21:24:16.655400+00:00"
+      "resolved_at": "2026-07-16T22:57:44.547508+00:00",
+      "last_clean_observed_at": "2026-07-16T22:57:44.547508+00:00"
     }
   },
   {
@@ -40860,5 +40818,231 @@
     "started_at": "2026-07-16T21:08:48.375060+00:00",
     "completed_at": "2026-07-16T21:22:16.032121+00:00",
     "result": "收件完成：數字驗證 PASS（零假數字、ledger 全列重算相符、verdict 機械推導、15 測試過），Codex primary review REQUEST_CHANGES 2 BLOCKER（stale sigma2 / MLE-production init mismatch）→ 不 merge、NULL 結論待修正後重跑確認。修正 job 已 enqueue: agent-brief_k1708_fix-e2b3f0（timeout 5400s，followup 會收件 re-review + merge）。"
+  },
+  {
+    "id": "trending_repost_2026_07_17_ai變現",
+    "title": "[trending_repost] 科技巨頭AI變現期延遲？期權市場定價的雙向尾部風險",
+    "description": "針對微軟與 Google 等巨頭的 AI 研發回報率進行評估，結合 CapEx 與營收增速。可量化：IV skew 與科技股遠期波動率之期限結構，評估市場對 AI 泡沫破裂或加速爆發的溢價定價。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "failed",
+    "created_at": "2026-07-16T22:00:14+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "unjudged_thin_signature",
+      "blocked": false,
+      "reason": "arc gate had no anchor (no distinctive entity, no experiment ref) — it did not look; theme saturation 4 < 5 is the only signal that ran. Caller must do the 3-layer dedup check.",
+      "saturation": 4,
+      "theme_terms": [
+        "結構",
+        "尾部",
+        "科技",
+        "技股",
+        "部風",
+        "capex"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_e1ff7ef9",
+          "title": "監管警告 AI 估值太貴，那選擇權市場自己怕不怕？一個反直覺的答案"
+        },
+        {
+          "id": "mile_f5f4cb43",
+          "title": "科技巨頭資本支出爆表，AI 變現期的隱含波動率拐點"
+        },
+        {
+          "id": "mile_312204b2",
+          "title": "砍人和燒錢同時進行：為什麼大型科技股的波動率是 SPY 的兩倍半"
+        },
+        {
+          "id": "mile_ed39c127",
+          "title": "四大巨頭單季 CapEx 年增 80%：AI 軍備賽先推高的，是科技股的波動率門檻"
+        }
+      ],
+      "screened_at": "2026-07-16T22:00:14+00:00"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-16T22:08:10.021952+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
+      },
+      {
+        "ts": "2026-07-16T22:10:10.956941+00:00",
+        "from": "claimed",
+        "to": "failed",
+        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
+      }
+    ],
+    "completed_at": "2026-07-16T22:10:10.956928+00:00",
+    "result": "ARC-COVERED，不寫。手動 3-layer 查重（gate 回 unjudged_thin_signature = 沒看）確認撞 mile_f5f4cb43『科技巨頭資本支出爆表，AI 變現期的隱含波動率拐點』(general, published 2026-06-30, 17天前)：同資產(MSFT/GOOGL/META/AMZN)、同機制(CapEx vs 營收增速變現缺口 → IV skew)、同結論類(尾部定價 descriptive)。題目差異僅『雙向尾部/期限結構』vs 已發文的 spot skew = 同 arc 變奏，per publishing.md 不得寫。"
+  },
+  {
+    "id": "trending_repost_2026_07_17_債市波動度",
+    "title": "[trending_repost] 通膨降溫與降息角力，MOVE指數如何透露美債避險買盤？",
+    "description": "探討通膨放緩但利率維持高檔對債市的衝擊。利用美債選擇權隱含波動率（MOVE指數）變化，量化利率政策不確定性下的避險交易策略。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "failed",
+    "created_at": "2026-07-16T22:00:18+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "warn_arc_near_miss",
+      "blocked": false,
+      "reason": "fuzzy descriptive arc near-miss of mile_d12825bb, mile_487275d0, mile_b0654561; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
+      "saturation": 3,
+      "theme_terms": [
+        "指數",
+        "交易",
+        "利率",
+        "避險",
+        "move",
+        "通膨"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_d12825bb",
+          "title": "同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感"
+        },
+        {
+          "id": "mile_487275d0",
+          "title": "資料版本洗到最乾淨後，黃金美債比特幣的波動還是先看自己"
+        },
+        {
+          "id": "mile_b0654561",
+          "title": "VIX 17，CAPE 41：股市在定價什麼，又沒定價什麼"
+        }
+      ],
+      "screened_at": "2026-07-16T22:00:20+00:00"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-16T22:10:11.429613+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
+      },
+      {
+        "ts": "2026-07-16T22:10:23.611375+00:00",
+        "from": "claimed",
+        "to": "failed",
+        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
+      }
+    ],
+    "completed_at": "2026-07-16T22:10:23.611358+00:00",
+    "result": "ARC-COVERED，不寫。撞 mile_d12825bb『同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感』(general, published 2026-07-06, 11天前)：同資產(MOVE/美債)、同機制(higher-for-longer 利率政策不確定性 → 債市 IV 不對稱定價)、同結論類(descriptive regime signal)，已發文甚至已含通膨黏著/降息退路被壓住的角力框架。題目的『避險買盤』只是同 arc 換句話說。"
+  },
+  {
+    "id": "trending_repost_2026_07_17_ai支出",
+    "title": "[trending_repost] 雲端四巨頭年燒六千億，AI波動率偏斜如何避險？",
+    "description": "從四大科技巨頭2026年資本支出飆升至6000億美元切入，分析市場對ROI疑慮引發的科技股波動率偏斜。可量化分析：科技股隱含波動率Skew與CapEx支出指引修正的相關性。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "failed",
+    "created_at": "2026-07-16T22:00:18+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "warn_arc_near_miss",
+      "blocked": false,
+      "reason": "fuzzy descriptive arc near-miss of mile_0fa841ed, mile_9def57ab, mile_49616ac2; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
+      "saturation": 2,
+      "theme_terms": [
+        "科技",
+        "技股",
+        "修正",
+        "相關",
+        "股波",
+        "避險"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_0fa841ed",
+          "title": "燒最多錢的科技巨頭，選擇權市場現在沒有多收「下跌保費」"
+        },
+        {
+          "id": "mile_9def57ab",
+          "title": "SpaceX 還沒上市，被動資金的買單已經在排隊：指數納入正在變成一場可以倒數的波動率事件"
+        },
+        {
+          "id": "mile_49616ac2",
+          "title": "AI 資本支出狂潮下，期權市場押的是上行而不是下行"
+        },
+        {
+          "id": "mile_622a2b73",
+          "title": "資本支出暴增八成，股票卻平靜如水：AI 巨頭的波動率定價迷局"
+        },
+        {
+          "id": "mile_7e3767a1",
+          "title": "NVIDIA 財報夜：選擇權押 8%，VIX 還在睡"
+        }
+      ],
+      "screened_at": "2026-07-16T22:00:20+00:00"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-16T22:10:11.191940+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
+      },
+      {
+        "ts": "2026-07-16T22:10:23.384121+00:00",
+        "from": "claimed",
+        "to": "failed",
+        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
+      }
+    ],
+    "completed_at": "2026-07-16T22:10:23.384105+00:00",
+    "result": "ARC-COVERED，不寫。撞 mile_0fa841ed『燒最多錢的科技巨頭，選擇權市場現在沒有多收下跌保費』(general, published 2026-07-05, 12天前)：同題材(四大巨頭 AI CapEx)、同機制(CapEx 指引 → 科技股 IV skew)、同結論類。此 arc 30日內另有 mile_f5f4cb43(06-30)、更早 mile_49616ac2(06-02)、mile_622a2b73(05-31)、mile_ed39c127(05-15) — AI-CapEx×vol-skew 已嚴重飽和。"
+  },
+  {
+    "id": "assign_arcdedup_bigtech_vocab_20260717",
+    "title": "[platform_ops] arc-dedup entity 詞表補大型科技股/AI-CapEx cluster — 修 refill 3/3 產重複題",
+    "description": "根因（2026-07-17 06:0x fire 實證）：昨晚 22:00 reader_facing_refill 產的 3 條 P1 trending topic 全部是 30 日內 general 已發文的 arc 重複（ai變現→mile_f5f4cb43 06-30；ai支出→mile_0fa841ed 07-05；債市→mile_d12825bb 07-06），每條都吃掉一個 fire 的主 slot 才被人工查出來。\n\narc gate 是 entity-anchored，但 src/volpred/publisher/arc_dedup.py 的 _ENTITY_SURFACE 完全沒有大型科技股/AI-CapEx cluster 詞彙：『微軟與 Google…科技股 IV skew』抽出 entities=[]（thin signature → gate 根本沒看）；『雲端四巨頭年燒六千億…科技股波動率偏斜』只抽到 USD（來自「六千億美元」的誤抽），撈回不相干的 SpaceX 文當 near-miss、漏掉真 dup。\n\narc_dedup.py line ~1439 註解自己已量到這件事（五篇同故事文章散成 {USD}/{NASDAQ,USD}/{SEMIS,VIX}/{US_EQUITY}/{USD}），當時的對策是 theme_saturation(門檻5)，但今天三題 saturation 只有 2/3/4 → 全部溜過。2026-07-13 事故三天後原樣重演。\n\n修法：比照 VOL_TARGETING(2026-06-14) / MERGER_ARB(2026-07-01) 前例，把 cluster 註冊成可見 entity，讓 arc gate 依設計運作，而非依賴 saturation 計數器。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "created_at": "2026-07-16T22:12:57+00:00",
+    "source": "hourly_dispatch_root_cause",
+    "tags": [
+      "platform_ops",
+      "arc_dedup",
+      "content_pipeline",
+      "root_cause"
+    ],
+    "claimed_by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117",
+    "claimed_at": "2026-07-16T22:13:03.494667+00:00",
+    "claim_session_id": "48489be1898e",
+    "status_history": [
+      {
+        "ts": "2026-07-16T22:13:03.494687+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
+      },
+      {
+        "ts": "2026-07-16T22:13:03.726729+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
+      }
+    ],
+    "started_at": "2026-07-16T22:13:03.726716+00:00"
   }
 ]

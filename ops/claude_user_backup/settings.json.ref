@@ -2,23 +2,6 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/python3",
-            "args": [
-              "/Users/yhlai0911/volpred-research/scripts/hooks/enforce_final_text.py",
-              "--speech-only"
-            ],
-            "timeout": 5
-          }
-        ]
-      }
-    ]
-  },
   "permissions": {
     "allow": [
       "Bash(./node_modules/.bin/next build:*)",
@@ -140,9 +123,28 @@
       "Read(//Users/yhlai0911/volpred-research/**)",
       "Read(//Users/yhlai0911/.claude/**)",
       "Bash(echo \"---exit $?\")",
-      "Bash(rg -rn -l -i \"say\" /Users/yhlai0911/.claude/projects/-Users-yhlai0911-volpred-research/memory/)"
+      "Bash(rg -rn -l -i \"say\" /Users/yhlai0911/.claude/projects/-Users-yhlai0911-volpred-research/memory/)",
+      "Bash(xargs -I {} ls \"~/.claude/projects/{}\"/*.jsonl)",
+      "Bash(bash scripts/tests/test_enforce_final_text.sh)"
     ],
     "defaultMode": "dontAsk"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3",
+            "args": [
+              "/Users/yhlai0911/volpred-research/scripts/hooks/enforce_final_text.py",
+              "--speech-only"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ]
   },
   "statusLine": {
     "type": "command",
@@ -200,6 +202,5 @@
     "mcp__claude-in-chrome__switch_browser",
     "mcp__claude-in-chrome__tabs_context_mcp",
     "mcp__claude-in-chrome__tabs_create_mcp"
-  ],
-  "model": "fable"
+  ]
 }

@@ -11,7 +11,7 @@ metadata:
 
 **唯一大腦 = auto-memory**：`~/.claude/projects/-Users-yhlai0911-volpred-research/memory/`（MEMORY.md 索引 + 各 memory 檔）。兩個管道共讀共寫同一份，無平行記憶、無同步。
 
-**機制（實測依據）**：headless `claude -p`（`telegram_responder` 用的模式，cd 到同一 repo）**預設自動載入 auto-memory + CLAUDE.md**；只有 `--bare` 才跳過。auto-memory 綁 git repo、同 repo 共享一份。2026-07-10 實測：headless 禁用所有工具下，逐字答出 MEMORY.md 索引裡的哨兵事實 → 證明自動載入。
+**機制（實測依據）**：互動 session 的 auto-memory 綁 git repo；`telegram_responder` 則刻意從 repo 外 scratch cwd 啟動，故不能靠 `--add-dir`（它只授權工具存取）。Responder runtime settings 以 `autoMemoryDirectory` 明確指向本 canonical memory，確保仍是同一大腦；只有 `--bare` 才跳過。2026-07-10 的 repo-cwd headless 實測證明預設載入，2026-07-16 再補 scratch-cwd namespace override。
 
 **已廢棄的平行記憶**（原基於「headless 沒有記憶注入」的錯誤假設，該假設 2026-07-10 被實測推翻）：
 - `storage/ops/telegram_memory.md` → tombstone（內容已 migrate 進 auto-memory）

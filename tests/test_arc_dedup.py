@@ -1006,3 +1006,123 @@ def test_series_exemption_off_when_experiment_refs_shared():
     b = "🧪 迷思實驗室｜恐慌指數衝高就進場？十年資料說不行"
     assert _same_series_different_episode(a, b, set()) is True
     assert _same_series_different_episode(a, b, {"K1633"}) is False
+
+
+# --- 2026-07-16 trending refill: the mega-cap AI-capex vocabulary hole -------
+# Three P1 trending topics shipped in one fire, all three narrative-arc repeats
+# of live general articles inside 30 days. Root cause (measured, not inferred):
+# `_ENTITY_SURFACE` carried NO mega-cap / AI-capex surface at all, so the
+# entity-anchored gate could not see the cluster. 「科技巨頭AI變現期延遲？」
+# extracted entities=[] -> the matcher declined to look; 「雲端四巨頭年燒六千億」
+# extracted only [USD] from 「六千億美元」 -- an anchor on the CURRENCY, which
+# dragged in unrelated dollar articles while the real story stayed invisible.
+#
+# Same shape as VOL_TARGETING (2026-06-14) and MERGER_ARB (2026-07-01), and the
+# third strike of the AI-capex family specifically (07-13, 07-14, 07-16).
+# `theme_saturation` was the 2026-07-14 answer and it scored these 2/3/4 against
+# a threshold of 5 -- a counter cannot substitute for missing vocabulary.
+
+AI_CAPEX_TOPIC_TITLE = "科技巨頭AI變現期延遲？期權市場定價的雙向尾部風險"
+AI_CAPEX_TOPIC_TEXT = (
+    "針對微軟與 Google 等巨頭的 AI 研發回報率進行評估，結合 CapEx 與營收增速。"
+    "可量化：IV skew 與科技股遠期波動率之期限結構，評估市場對 AI 泡沫破裂或加速爆發的溢價定價。"
+)
+
+CLOUD_CAPEX_TOPIC_TITLE = "雲端四巨頭年燒六千億，AI波動率偏斜如何避險？"
+CLOUD_CAPEX_TOPIC_TEXT = (
+    "從四大科技巨頭2026年資本支出飆升至6000億美元切入，分析市場對ROI疑慮引發的科技股波動率偏斜。"
+    "可量化分析：科技股隱含波動率Skew與CapEx支出指引修正的相關性。"
+)
+
+# The two live general articles these repeated (abridged real feed text).
+MILE_F5F4CB43 = {
+    "id": "mile_f5f4cb43",
+    "title": "科技巨頭資本支出爆表，AI 變現期的隱含波動率拐點",
+    "description": (
+        "四家公司累計砸進超過 4500 億美元的 AI 資本支出。Microsoft FY2025 的 CapEx 是 646 億美元，"
+        "成長 45%，同期營收增速約 15%。Meta 的變現缺口高達近 65 個百分點。"
+        "選擇權市場的隱含波動率期限結構怎麼定價這個落差。"
+    ),
+    "status": "published",
+    "audience": "general",
+    "published_at": _ts(days_ago=17),
+}
+
+MILE_0FA841ED = {
+    "id": "mile_0fa841ed",
+    "title": "燒最多錢的科技巨頭，選擇權市場現在沒有多收「下跌保費」",
+    "description": (
+        "Meta、微軟、Google、亞馬遜四家公司最近一年的資本支出加起來超過四千五百億美元。"
+        "把 Mag 7 七檔的選擇權鏈用同一個到期日比對，資本支出佔營收比重最高的三家，"
+        "下檔偏斜反而是七檔裡最便宜的。CapEx 強度與 IV skew 的關係跟直覺相反。"
+    ),
+    "status": "published",
+    "audience": "general",
+    "published_at": _ts(days_ago=12),
+}
+
+
+def test_ai_capex_topic_extracts_the_cluster():
+    """entities=[] was the bug: the gate could not see mega-cap AI capex at all."""
+    sig = arc_signature(AI_CAPEX_TOPIC_TITLE, AI_CAPEX_TOPIC_TEXT)
+    assert "BIG_TECH" in sig["entities"]
+    assert "CAPEX_CYCLE" in sig["entities"]
+
+
+def test_cloud_capex_topic_no_longer_anchors_on_the_currency_alone():
+    """「六千億美元」 used to yield entities=[USD] — an anchor on the unit."""
+    sig = arc_signature(CLOUD_CAPEX_TOPIC_TITLE, CLOUD_CAPEX_TOPIC_TEXT)
+    assert "BIG_TECH" in sig["entities"]
+    assert set(sig["entities"]) - {"USD"} != set()
+
+
+def test_ai_capex_topic_matches_the_live_article_it_repeats():
+    """Behaviour, not vocabulary bookkeeping: it must reach mile_f5f4cb43."""
+    matches = find_arc_duplicates(
+        AI_CAPEX_TOPIC_TITLE, AI_CAPEX_TOPIC_TEXT,
+        [MILE_F5F4CB43, MILE_0FA841ED], days=30,
+        audience="general", include_fuzzy=True,
+    )
+    hits = {m["id"]: m for m in matches}
+    assert "mile_f5f4cb43" in hits, "the arc gate must at least SEE the piece it repeats"
+    assert "BIG_TECH" in hits["mile_f5f4cb43"]["shared_entities"]
+
+
+def test_cloud_capex_topic_matches_the_live_article_it_repeats():
+    matches = find_arc_duplicates(
+        CLOUD_CAPEX_TOPIC_TITLE, CLOUD_CAPEX_TOPIC_TEXT,
+        [MILE_F5F4CB43, MILE_0FA841ED], days=30,
+        audience="general", include_fuzzy=True,
+    )
+    hits = {m["id"]: m for m in matches}
+    assert "mile_0fa841ed" in hits
+    shared = hits["mile_0fa841ed"]["shared_entities"]
+    assert "BIG_TECH" in shared and "CAPEX_CYCLE" in shared
+
+
+def test_bare_tech_stock_is_not_the_big_tech_cluster():
+    """寧可窄而準: 「科技股」 is a comparison BENCHMARK in 79/844 live articles.
+
+    Mapping it to BIG_TECH would repeat the bare-「銀」→SILVER bug and the
+    SPY/HYG-proxy false block that hit K1590 merger-arb.
+    """
+    assert "BIG_TECH" not in extract_entities(
+        "台股修正時，科技股的波動率比金融股高多少？以科技股為對照組。"
+    )
+
+
+def test_bare_giant_is_not_the_big_tech_cluster():
+    """「巨頭」 alone spans 石油巨頭 / 銀行巨頭 — only 科技/雲端/七 qualify."""
+    assert "BIG_TECH" not in extract_entities("石油巨頭減產，原油波動率怎麼走")
+
+
+def test_capex_cycle_alone_does_not_link_unrelated_industries():
+    """CAPEX_CYCLE is a mechanism entity: it sharpens, it never anchors alone."""
+    fab = arc_signature("台積電資本支出上修", "台積電 CapEx 與晶圓廠的波動率。")
+    assert "CAPEX_CYCLE" in fab["entities"]
+    matches = find_arc_duplicates(
+        "台積電資本支出上修", "台積電 CapEx 與晶圓廠 SEMIS 的波動率。",
+        [MILE_F5F4CB43], days=30, audience="general", include_fuzzy=True,
+    )
+    assert not matches, "a fab-capex piece must not arc-match the mega-cap AI story"
+

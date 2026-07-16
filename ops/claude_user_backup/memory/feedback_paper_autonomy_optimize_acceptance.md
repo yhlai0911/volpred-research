@@ -1,6 +1,7 @@
 ---
 name: feedback_paper_autonomy_optimize_acceptance
 description: 老闆 2026-07-09 Telegram msg 309 論文線授權 — 依專業判斷優化 acceptance probability，不再逐次問「要不要投稿」，真 ready 就自主推進投稿流程
+process_owner: .claude/skills/paper-submission-pipeline/SKILL.md
 metadata: 
   node_type: memory
   type: feedback

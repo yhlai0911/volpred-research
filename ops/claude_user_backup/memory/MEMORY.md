@@ -104,6 +104,7 @@
 - [feedback_no_user_policy_block.md](feedback_no_user_policy_block.md) — policy task 一律自主，不當 plateau 藉口
 - [feedback_dont_ask_do.md](feedback_dont_ask_do.md) — 判斷該做就直接做，不問選擇題
 - [feedback_urgent_work_bypass_queue.md](feedback_urgent_work_bypass_queue.md) — 急件不進排程，當場開工
+- [feedback_responder_cannot_be_a_queue_excuse.md](feedback_responder_cannot_be_a_queue_excuse.md) — responder 不能改 repo ≠ 可以把 P1 修正變排隊
 - [feedback_time_sensitive_work_is_p1.md](feedback_time_sensitive_work_is_p1.md) — 時效性研究/發文 = P1，與 user-assigned 同級
 - [feedback_own_judgment_dont_credit_user.md](feedback_own_judgment_dont_credit_user.md) — 自主決策不歸因用戶、不等 ack
 - [feedback_tasks_survive_session_close.md](feedback_tasks_survive_session_close.md) — backbone 須 session-independent

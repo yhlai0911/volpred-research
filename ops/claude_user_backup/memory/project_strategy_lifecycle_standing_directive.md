@@ -1,6 +1,7 @@
 ---
 name: project_strategy_lifecycle_standing_directive
 description: boss 2026-06-21 standing directive：交易策略持續增加，表現好上架觀察、不好下架，走既有 gate；3 檔高 Sharpe inactive 的 lookahead audit 已完成（6/21 全 reject：c2c artifact，維持 inactive）
+process_owner: .claude/skills/admin-ops/references/strategy-lifecycle.md
 metadata: 
   node_type: memory
   type: project

@@ -1,6 +1,7 @@
 ---
 name: project_fb_page_operation
 description: VolPred FB 粉專(id 61590464616031)由 AI 全權經營+優化+固定巡檢；個人優先於粉專；headless API 發文卡 App Review
+process_owner: .claude/skills/trending-repost/references/fb-page-operations.md
 metadata: 
   node_type: memory
   type: project

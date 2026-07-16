@@ -1,6 +1,7 @@
 ---
 name: NotebookLM 在 volpred-research 的 RAG 用途
 description: 何時用 /notebooklm 建主題式筆記本作 RAG；commands SOP 在 ~/.claude/skills/notebooklm/SKILL.md
+process_owner: ~/.claude/skills/notebooklm/SKILL.md
 type: reference
 originSessionId: 91283b9e-7227-43f5-88bb-9d92168d243a
 ---

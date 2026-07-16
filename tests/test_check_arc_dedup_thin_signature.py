@@ -38,7 +38,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "src"))
 
-from volpred.publisher.arc_dedup import arc_signature, is_arc_anchorless  # noqa: E402
+from volpred.publisher.arc_dedup import (  # noqa: E402
+    arc_signature,
+    find_arc_duplicates,
+    is_arc_anchorless,
+    is_arc_near_miss,
+)
 
 from check_arc_dedup import _tokens, find_lexical_hints  # noqa: E402
 
@@ -128,31 +133,140 @@ CAPEX_TEXT = (
 )
 
 
-def test_2026_07_13_incident_topic_is_anchorless():
-    """No K-id, no ticker -> entities=[] -> the matcher never looked."""
-    assert is_arc_anchorless(arc_signature(TOPIC_TITLE, TOPIC_TEXT), None) is True
+def _verdict(title, text, feed):
+    """The CLI's verdict ladder, reproduced over an explicit feed.
+
+    `check_arc_dedup.main` derives this from find_arc_duplicates + the anchor
+    predicate; the tests below only care that the incident topics never reach
+    `clean`.
+    """
+    matches = find_arc_duplicates(
+        title, text, feed, days=3650, audience="general", include_fuzzy=True
+    )
+    dups = [m for m in matches if not is_arc_near_miss(m)]
+    near = [m for m in matches if is_arc_near_miss(m)]
+    if dups:
+        return "block_arc_dup"
+    if near:
+        return "warn_arc_near_miss"
+    if is_arc_anchorless(arc_signature(title, text), None):
+        return "unjudged_thin_signature"
+    return "clean"
 
 
-def test_2026_07_14_core_only_entities_is_anchorless():
-    """THE REGRESSION. entities=[US_EQUITY] is non-empty but core-only.
+# Both incident topics were waved through as `clean`. THAT is the invariant, and
+# these assert it end-to-end rather than via a proxy. The two tests here used to
+# pin the proxy instead — "entities are empty" / "entities are core-only" — which
+# made them fixtures of the VOCABULARY HOLE rather than of the guarantee. When
+# 2026-07-17 registered the mega-cap vocabulary (the fix for that very hole),
+# both proxies went stale and the topics became anchorable; asserting the verdict
+# keeps the guarantee pinned no matter what the entity table learns to see next.
 
-    `_is_significant_overlap` subtracts _CORE_ENTITIES before matching, so this
-    signature can never produce an arc hit — it is exactly as unanchorable as an
-    empty one. The old CLI-local rule (`not entities and not refs`) called this
-    False and printed `clean` against four live twins.
+
+def test_2026_07_13_incident_topic_is_never_clean():
+    """It is a duplicate of the live twins; the gate must not say otherwise."""
+    assert _verdict(TOPIC_TITLE, TOPIC_TEXT, FEED) != "clean"
+
+
+def test_2026_07_13_incident_topic_now_names_its_twins():
+    """The 2026-07-17 vocabulary upgrade: the gate stopped shrugging and looked.
+
+    Pre-fix this topic scored entities=[] -> `unjudged_thin_signature`, an honest
+    "I could not look" that still left the caller to find the twins by hand. With
+    BIG_TECH/CAPEX_CYCLE registered it now names them.
+    """
+    sig = arc_signature(TOPIC_TITLE, TOPIC_TEXT)
+    assert "BIG_TECH" in sig["entities"]
+    assert is_arc_anchorless(sig, None) is False
+    hit_ids = {
+        m["id"]
+        for m in find_arc_duplicates(
+            TOPIC_TITLE, TOPIC_TEXT, FEED, days=3650,
+            audience="general", include_fuzzy=True,
+        )
+    }
+    assert "mile_f5f4cb43" in hit_ids
+    # Retracted articles are not reader-visible, so they cannot constitute a dup.
+    assert "mile_dead0001" not in hit_ids
+    # ... and an unrelated copper piece must not be swept in by the new vocabulary.
+    assert "mile_unrelated" not in hit_ids
+    # NOT asserted: mile_622a2b73. These FEED rows carry a title and nothing else,
+    # and its title alone yields no mechanism, which the descriptive branch needs.
+    # Against the real feed (full body text) the topic does reach it. Pinning it
+    # here would pin the fixture's thinness, not the gate.
+
+
+def test_2026_07_14_descriptive_without_mechanism_is_anchorless():
+    """THE REGRESSION, in its 2026-07-17 form.
+
+    This topic now extracts distinctive entities (BIG_TECH/CAPEX_CYCLE), so the
+    old "core-only" reasoning no longer applies — but it is still unanchorable,
+    for the OTHER half of the matcher: it is `descriptive` and writes 「期權」/
+    「隱含波動率」, neither of which is a mechanism keyword, so mechanisms is
+    [unspecified] — and the descriptive branch requires a specific one.
+
+    This is why the vocabulary fix alone was not enough. Registering BIG_TECH
+    flipped this topic from "no anchor" to "anchored", and had the predicate kept
+    reading only the entity half, the CLI would have printed `clean` for the THIRD
+    time against the same twins. New vocabulary is precisely what makes a
+    half-read predicate reachable: more entities, still no mechanism.
     """
     sig = arc_signature(CAPEX_TITLE, CAPEX_TEXT)
-    assert set(sig["entities"]) <= {"US_EQUITY", "VIX", "TW_EQUITY"}, (
-        "fixture drifted: this topic is only a regression while it stays core-only"
+    assert sig["conclusion_class"] == "descriptive"
+    assert sig["mechanisms"] == ["unspecified"]
+    assert set(sig["entities"]) - {"US_EQUITY", "VIX", "TW_EQUITY"}, (
+        "fixture premise: this topic DOES now carry distinctive entities"
     )
     assert is_arc_anchorless(sig, None) is True
 
 
+def test_2026_07_14_incident_topic_is_never_clean():
+    assert _verdict(CAPEX_TITLE, CAPEX_TEXT, FEED) != "clean"
+
+
+def test_descriptive_with_specific_mechanism_is_anchorable():
+    """The tightening must not swallow the anchored case it is carved out of."""
+    sig = {
+        "entities": ["COPPER", "VIX"],
+        "conclusion_class": "descriptive",
+        "mechanisms": ["carry_regime"],
+    }
+    assert is_arc_anchorless(sig, None) is False
+
+
+def test_generic_mechanism_does_not_anchor_a_descriptive_piece():
+    """`model_forecast`/`cross_asset_spillover` are subtracted by the matcher too."""
+    sig = {
+        "entities": ["COPPER"],
+        "conclusion_class": "descriptive",
+        "mechanisms": ["model_forecast"],
+    }
+    assert is_arc_anchorless(sig, None) is True
+
+
+def test_non_descriptive_piece_anchors_on_entities_alone():
+    """Outside the descriptive branch, `unspecified` mechanisms stay compatible."""
+    sig = {
+        "entities": ["COPPER"],
+        "conclusion_class": "null_no_info",
+        "mechanisms": ["unspecified"],
+    }
+    assert is_arc_anchorless(sig, None) is False
+
+
 def test_distinctive_entity_is_anchorable():
-    """A non-core entity gives the matcher something to compare on -> not thin."""
+    """A non-core entity gives the matcher something to compare on -> not thin.
+
+    2026-07-17: this fixture used to carry no mechanism keyword and still expected
+    `False`, which the matcher never actually honoured on the descriptive path —
+    it needs a specific shared mechanism there. The fixture now says 「選擇權
+    偏斜」 so the piece is anchorable for the reason the test claims. The
+    no-mechanism case it used to assert by accident is pinned explicitly in
+    `test_generic_mechanism_does_not_anchor_a_descriptive_piece`.
+    """
     sig = arc_signature(
         "銅博士的波動率版本：金屬與股市的尾部連動",
-        "分析 HG=F 銅期貨與 SPY 的尾部相關性與波動率外溢。",
+        "分析 HG=F 銅期貨與 SPY 的尾部相關性，以及選擇權偏斜（skew）的波動率外溢。",
     )
     assert set(sig["entities"]) - {"US_EQUITY", "VIX", "TW_EQUITY"}
     assert is_arc_anchorless(sig, None) is False
