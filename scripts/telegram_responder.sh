@@ -12,6 +12,18 @@ exec >> /Users/yhlai0911/.volpred/logs/telegram_responder.log 2>&1
 REPO_ROOT=/Users/yhlai0911/volpred-research
 cd "$REPO_ROOT" || exit 1
 
+# node 裝在 nvm 底下，不在 LaunchAgent 的 PATH 上（telegram_poll daemon spawn 我們，
+# 所以我們繼承的是那個窄 PATH）。claude CLI 的 SessionEnd hook 會 shell out 到
+# `node`，找不到就每次噴一行紅字 —— non-fatal，但 2026-07-16 診斷 responder 為何
+# 不回話時，這行紅字一度被誤當成根因。不寫死版本號：nvm 一升級，pin 住的路徑就消失。
+for _nvm_bin in "$HOME"/.nvm/versions/node/*/bin; do
+    if [ -x "$_nvm_bin/node" ]; then
+        export PATH="$_nvm_bin:$PATH"
+        break
+    fi
+done
+unset _nvm_bin
+
 CLAUDE_BIN="${CLAUDE_BIN:-/Users/yhlai0911/.local/bin/claude}"
 LOCK_DIR="/Users/yhlai0911/.volpred/run/telegram_responder.lock"
 RESPONDER_WORKDIR="/Users/yhlai0911/.volpred/run/telegram_responder_workdir"
