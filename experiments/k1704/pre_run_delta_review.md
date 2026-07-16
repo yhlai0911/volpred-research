@@ -1,0 +1,17 @@
+# PASS
+
+嚴重度：無 blocker／high／medium findings。
+
+審查 frozen HEAD `7f63de5f1d30e3f5d0d9dc3e1ea6f464475a4e13`；未採信三個 untracked cache/results/review 檔。
+
+- 單一共同 OOS mask 套用至六個 targets、三個 models；eligible date 的 forecast gap 會直接中止。完整日期與 ledger SHA-256 均寫入結果。[K1704.py:585](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704.py:585)、[K1704.py:795](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704.py:795)、[K1704.py:846](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704.py:846)
+- Cache reuse 會重新列舉來源目錄，逐一核對 cache 所引用 raw files 的存在、size 與當前 bytes SHA-256；排序後的 byte-inventory hash 穩定，非 canonical 新檔明確列入 excluded audit。[K1704.py:169](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704.py:169)、[K1704.py:189](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704.py:189)、[K1704.py:342](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704.py:342)
+- README 僅記錄 provisional outputs 不可信及重新認證條件，沒有 K1704 科學結果。[README.md:57](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/README.md:57)
+- 專屬測試已覆蓋 session open/close、1/5/10-minute sparse grid、PIT invariance、HAR/GJR origins、共同 ledger、forecast gaps、MCS lengths 與 same-size raw mutation。[test_K1704.py:19](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/test_K1704.py:19)、[test_K1704.py:38](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/test_K1704.py:38)、[test_K1704.py:62](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/test_K1704.py:62)、[test_K1704.py:99](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/test_K1704.py:99)、[test_K1704.py:140](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/test_K1704.py:140)
+- DM 正確標示為 canonical Newey–West HAC；HLN 僅用於 MCS。[K1704.py:650](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704.py:650)、[README.md:27](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/README.md:27)
+- Consensus 使用 leave-one-proxy-out residual centres；相關 RV measurement errors 仍明確列為限制。[K1704.py:509](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704.py:509)、[README.md:61](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/README.md:61)
+- Prior reference 已改為 K1057；Liu et al. DOI `10.1016/j.jeconom.2015.02.008` 正確。[README.md:13](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/README.md:13)、[README.md:38](/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/README.md:38)、[Oxford publication record](https://www.economics.ox.ac.uk/publication/526815/dimensions)
+
+五個純唯讀 tests 實際通過；raw-mutation test 因本次禁止寫入 `tmp_path` 而以靜態方式驗證。未發現新增 lookahead、mask misalignment、hash-ordering 或不可滿足的 fresh-cache requirement。
+
+此 verdict 僅授權從 raw data fresh rerun，不驗證任何既有或後續結果。
