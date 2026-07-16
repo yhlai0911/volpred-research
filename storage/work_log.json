@@ -19086,5 +19086,35 @@
     "owner": "codex-desktop-k1707",
     "commit": null,
     "summary": "Public pseudo-data adequacy audit found 16 dates, 0 high-stress dates, 3 symbols, and 6 weekends. All support gates failed; no interaction or null claim. Process review/certification PASS; scientific status INSUFFICIENT_STRESS_SUPPORT; no knowledge entry."
+  },
+  {
+    "timestamp": "2026-07-16T12:08:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29467915128",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-8bb1d0c5941a4642b5b852426b9eb252",
+    "owner": "hourly-slot-1-8bb1d0c5941a4642b5b852426b9eb252",
+    "commit": null,
+    "summary": "CI red root fix: k1707+k1713 finished experiments had archived results but no knowledge.json entry -> test_knowledge_unrecorded_ratchet red. Wrote both entries from main thread per ratchet docstring (agents forbidden K1259). K1707=INSUFFICIENT_STRESS_SUPPORT (pseudo-data 16 dates/0 high-stress/3 symbols fails support gate), K1713=DUPLICATE_CLOSURE_PASS of K1661. Ratchet test now green."
+  },
+  {
+    "timestamp": "2026-07-16T12:08:00+08:00",
+    "task_type": "telegram_reply",
+    "task_id": "telegram-840/843/846/849/855",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-8bb1d0c5941a4642b5b852426b9eb252",
+    "owner": "hourly-slot-1-8bb1d0c5941a4642b5b852426b9eb252",
+    "commit": null,
+    "summary": "Answered 5 boss Telegram P1s (msg857/858/859). Root-caused Codex failover misdiagnosis: work-cap was misused as API-uptime judge (fixed 7/12 via separate reachability probe). Real remaining gap fixed this fire: failover prompt now routes heavy compute to compute_queue instead of inline SIGKILL at 40min cap, and states the 40min cap (was falsely 50min). 849=Claude-only work reserved by design. 855=queued honest direction-predictability experiment (research_direction_predictability_signforecast)."
+  },
+  {
+    "timestamp": "2026-07-16T12:17:17+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29467915128",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-678c9634c8ce47e3bc75000950803910",
+    "owner": "hourly-slot-2-678c9634c8ce47e3bc75000950803910",
+    "commit": "8ff130c2e",
+    "summary": "CI red 修綠落地：ci-red-29467915128 根因 = k1707/k1713 finished experiments 有 archived *_results.json 但缺 knowledge.json entry → test_knowledge_unrecorded_ratchet 紅。並行 slot-1 已補寫兩筆 entry 但 commit:null（未落地 main）。本 slot-2 fire 經 git_writer_lock 外科式 commit 單檔 storage/memory/knowledge.json → 8ff130c2e → push origin/main，讓修復真正上 main。Class sweep：另掃 2 個 sibling ci-red —— 29460210634（同 ratchet 缺 k1706/k1716，已在先前 commit 補入 HEAD KB）、29434728578（test_k1386_methodology_repair hash-pin，current main 8 passed），皆 stale 且已修復於 main，一併 complete=succeeded。驗證：ratchet test 1 passed、build_inventory results_without_knowledge=[]、k1386 8 passed。GitHub 綠燈由 CI watcher 獨立驗證。"
   }
 ]
