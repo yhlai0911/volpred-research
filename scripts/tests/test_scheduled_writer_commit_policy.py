@@ -116,8 +116,12 @@ def test_self_commit_rows_have_guard_and_path_scoped_commit() -> None:
             continue
         owner = ROOT / row["commit_owner"]
         text = owner.read_text(encoding="utf-8")
+        # Either probe API satisfies the ratchet. `dirty_paths_before_write` is the
+        # conservative union (dirty + unprobed); `probe_dirty_outputs` keeps them
+        # apart so the caller can establish authorship via adoptable_churn instead
+        # of latching on its own uncommitted output. Both are a real pre-write guard.
         helper_guard = (
-            "dirty_paths_before_write" in text
+            ("dirty_paths_before_write" in text or "probe_dirty_outputs" in text)
             and "writable_output_paths" in text
         )
         shell_guard = "git status --porcelain" in text

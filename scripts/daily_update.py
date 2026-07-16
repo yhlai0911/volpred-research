@@ -26,8 +26,9 @@ from volpred.config.runtime import (
 )
 from volpred.data.manager import DataManager
 from volpred.ops.scheduled_writer_commit import (
+    adoptable_churn,
     commit_owned_outputs,
-    dirty_paths_before_write,
+    probe_dirty_outputs,
     writable_output_paths,
 )
 from volpred.publisher.publisher import Publisher
@@ -44,6 +45,13 @@ ROOT = Path(__file__).resolve().parent.parent
 # from a held run (data going stale) surfaces through the data_freshness checks,
 # which measure the outcome instead of guessing from an exit code.
 # Pinned to the alerts.py sentinel by tests/test_daily_update_guard_held_exit.py.
+#
+# 2026-07-16, second pass: the sentinel silenced the alert but the hold itself was
+# usually wrong. "Dirty" was standing in for "someone else's in-flight edit" when
+# it almost always meant "a sibling daemon wrote this and nothing has committed it
+# yet" — see adoptable_churn(). A hold now requires a live writer, unreadable
+# content, or an unresolved Git probe, so reaching this exit means the guard has
+# something real to say.
 GUARD_HELD_EXIT_CODE = 120
 
 DAILY_TRACKED_OUTPUTS = (
@@ -745,34 +753,62 @@ def daily_publish_decision(last_spy_date, spy_date, tw_closed_reason):
 def main():
     today = datetime.now().strftime("%Y-%m-%d")
     print(f"=== Daily Update: {today} ===")
-    dirty_before = dirty_paths_before_write(
+    probed_dirty, unprobed = probe_dirty_outputs(
         ROOT,
         DAILY_TRACKED_OUTPUTS,
         label="daily_update",
     )
+    # An uncommitted feed.json is the normal resting state of this repo, not a
+    # conflict: release_pool publishes on its own cadence and PHASE-Z sweeps up
+    # afterwards. Holding the whole run on it meant the 08:03/14:00 refresh lost a
+    # coin-flip against whether an agent happened to commit in between (2026-07-15
+    # 14:00 and 2026-07-16 08:03 both lost). Ask who the dirt belongs to instead.
+    churn, conflict = adoptable_churn(
+        ROOT, probed_dirty, unprobed, label="daily_update"
+    )
+    if churn:
+        print(f"  ↻ adopting uncommitted machine output: {sorted(churn)}")
+    if conflict:
+        print(
+            "  ⏸️  another writer holds a tracked output; holding daily writes "
+            f"(guard-held, exit {GUARD_HELD_EXIT_CODE}): {sorted(conflict)}"
+        )
+        return GUARD_HELD_EXIT_CODE
+    # Churn is adoptable, so nothing is off-limits: this run regenerates every
+    # declared output and commits it, which is also what unlatches whatever the
+    # previous run left behind.
     writable_parent_paths = writable_output_paths(
         ROOT,
         DAILY_TRACKED_OUTPUTS,
-        dirty_before=dirty_before,
+        dirty_before=conflict,
         label="daily_update",
     )
-    if len(writable_parent_paths) != len(DAILY_TRACKED_OUTPUTS):
-        print(
-            "  ⏸️  tracked output already dirty; holding daily writes "
-            f"(guard-held, exit {GUARD_HELD_EXIT_CODE})"
-        )
-        return GUARD_HELD_EXIT_CODE
     frontend_root = get_frontend_path()
     frontend_metrics = get_strategy_metrics_sync_paths(active_only=True)
-    frontend_dirty_before = (
-        dirty_paths_before_write(
+    # The nested frontend repo is where this bug was worst. PHASE-Z's churn sweep
+    # only reaches the parent checkout, so daily_update is the *only* thing that
+    # ever commits data/strategy_metrics.json — and it was excluding it for being
+    # dirty. Nothing else was coming: last commit 2026-07-05, skipped on every run
+    # from 2026-07-13 on, exit 0 each time, no alert. Same guard, same latch, no
+    # rescuer, so it never surfaced.
+    frontend_dirty_before = frozenset()
+    if frontend_metrics and frontend_root.is_dir():
+        frontend_probed, frontend_unprobed = probe_dirty_outputs(
             frontend_root,
             frontend_metrics,
             label="daily_update_frontend",
         )
-        if frontend_metrics and frontend_root.is_dir()
-        else frozenset()
-    )
+        frontend_churn, frontend_dirty_before = adoptable_churn(
+            frontend_root,
+            frontend_probed,
+            frontend_unprobed,
+            label="daily_update_frontend",
+        )
+        if frontend_churn:
+            print(
+                "  ↻ adopting uncommitted frontend metrics: "
+                f"{sorted(frontend_churn)}"
+            )
     writable_frontend_metrics = (
         [
             frontend_root / rel
@@ -1663,10 +1699,13 @@ def main():
     # --- Ops alert checks (2026-04-19: release_pool gap / draft pool low / host cron fail) ---
     _run_alert_checks()
 
+    # `conflict` is empty here — a non-empty one returned above. Passing it rather
+    # than an empty literal keeps the commit filter tied to the same decision the
+    # guard made, instead of asserting the emptiness a refactor could quietly break.
     commit_owned_outputs(
         ROOT,
         DAILY_TRACKED_OUTPUTS,
-        dirty_before=dirty_before,
+        dirty_before=conflict,
         message=f"ops(daily-update): refresh tracked outputs for {today}",
         label="daily_update",
     )
