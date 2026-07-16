@@ -1,0 +1,36 @@
+{
+  "id": "compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380",
+  "title": "K1426 OOS split shard_a (pair_1 SPY/IVV, pair_2 USO/BNO)",
+  "script_path": "experiments/k1426/oos.py",
+  "interpreter": "uv run python",
+  "args": [
+    "a"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-16T06:13:00Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380.stderr",
+  "result_artifact": "experiments/k1426/k1426_oos_shard_a.json",
+  "output_paths": [
+    "experiments/k1426/k1426_oos_shard_a.json"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1426 OOS shard done (refit-every=63, n-starts=50 tractability reduction vs original 21/100; parent job timed out at 6h before pair_1 finished). MERGE STEP (idempotent): if all three shard files exist — experiments/k1426/k1426_oos_shard_a.json, _shard_b.json, _shard_c.json — combine their .pairs dicts into experiments/k1426/k1426_oos_results.json (keep spec/notes, record refit_every=63 & n_starts=50 in spec), then INTERPRET: for each of 6 pairs check OOS HE_PCH>HE_OLS with block-bootstrap 95% CI excluding 0 AND DM |t|>3.0 after multiple-testing caution. If all pairs NULL/weak, write a null-result interpretation into experiments/k1426/README.md and decide whether multivariate PCH is still worth queueing. If NOT all three shard files exist yet, just note this shard complete and STOP (do not merge partial); a later sibling shard fires this same followup and does the merge.",
+    "task_type": "platform_ops",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 14400,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "parent_timeout_job_id": "compute-k1426-oos-partial-cointegration-hedging-1780934756",
+  "split_stage": "shard_a"
+}

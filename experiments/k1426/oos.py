@@ -266,19 +266,48 @@ def analyze_pair(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--min-train", type=int, default=756)
-    parser.add_argument("--refit-every", type=int, default=21)
-    parser.add_argument("--n-starts", type=int, default=100)
+    # Tractability reduction vs the original 21/100 spec: the parent full-grid
+    # job (compute-k1426-oos-...-1780934756) timed out at 6h before pair_1 even
+    # finished (~120 refits x 100 multistarts per pair). Quarterly refit (63)
+    # with 50 multistarts is ~6x cheaper and is the split-retry configuration.
+    parser.add_argument("--refit-every", type=int, default=63)
+    parser.add_argument("--n-starts", type=int, default=50)
     parser.add_argument("--n-boot", type=int, default=1000)
     parser.add_argument("--block-len", type=int, default=20)
     parser.add_argument("--seed", type=int, default=SEED)
-    parser.add_argument("--result-path", type=Path, default=RESULT_PATH)
+    parser.add_argument("--result-path", type=Path, default=None)
+    # Positional shard selector (no leading dash -> safe through
+    # compute_queue.py --script-args). Each shard runs 2 pairs and writes its
+    # own result file; a later merge followup combines the three shard files.
+    parser.add_argument(
+        "shard",
+        nargs="?",
+        default="all",
+        choices=["all", "a", "b", "c"],
+        help="a=pairs 1,2  b=pairs 3,4  c=pairs 5,6  all=every pair (default).",
+    )
     return parser.parse_args()
+
+
+SHARDS = {
+    "a": ["pair_1", "pair_2"],
+    "b": ["pair_3", "pair_4"],
+    "c": ["pair_5", "pair_6"],
+}
 
 
 def main() -> None:
     args = parse_args()
     results: Dict[str, Dict] = {}
-    for pair_name, sym_x, sym_y in PAIRS:
+    if args.shard == "all":
+        selected = PAIRS
+        result_path = args.result_path or RESULT_PATH
+    else:
+        wanted = SHARDS[args.shard]
+        selected = [p for p in PAIRS if any(w in p[0] for w in wanted)]
+        result_path = args.result_path or (OUT_DIR / f"k1426_oos_shard_{args.shard}.json")
+        print(f"[shard {args.shard}] running {len(selected)} pair(s): {[p[0] for p in selected]}", flush=True)
+    for pair_name, sym_x, sym_y in selected:
         try:
             results[pair_name] = analyze_pair(
                 pair_name,
@@ -317,8 +346,8 @@ def main() -> None:
         ],
         "reproduce": "uv run python experiments/k1426/oos.py",
     }
-    args.result_path.write_text(json.dumps(payload, indent=2))
-    print(f"Wrote {args.result_path}", flush=True)
+    result_path.write_text(json.dumps(payload, indent=2))
+    print(f"Wrote {result_path}", flush=True)
 
 
 if __name__ == "__main__":
