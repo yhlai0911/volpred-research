@@ -36941,14 +36941,11 @@
     "id": "paper_vt_trend_table5_retraction_rewrite",
     "task_type": "paper_body",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-14T23:27:39.435551+00:00",
     "created_by": "hourly-07 (K1695 exposure-artifact certified)",
     "title": "vt-trend Table 5 + 第三項 contribution：依同曝險認證數字改寫或撤回（main-thread only）",
     "description": "K1695 rerun 已認證：vt-trend-following「13 市場 drawdown protection」是 exposure artifact。paper vt-trend-following 目前 HOLD（paper_pipeline_status blocker 05:17）。此任務執行實際 body 改寫（禁 background agent 寫 .tex）。\n\n同曝險認證數字（block=252）：raw +11.83pp CI90[4.22,19.30] P≤0=0.0006 → exposure-matched −1.70pp CI90[−7.02,+3.59] P≤0=0.7075（跨零）；common −0.87pp(7/13) null p=0.559；inception +4.96pp(12/13) p=0.212；兩樣本 0/13 Holm。根因 VT vol 0.61–0.68x BH（experiments.md:140 20% 門檻）。\n\nnarrative 決策（主線程判斷 + 視情況 email 老闆）：(A) 完全撤回第三項 contribution，或 (B) 重構為『raw MDD 下降是真的風險降低、但不是 volatility timing / 不是 same-risk protection』——後者較誠實保留 signal 的真實性質（VIX 確實 forecast vol、12/VIX de-lever 進真正動盪期，phase rank 1/231）。建議 (B) 但明標其為 risk-reduction 而非 timing-alpha，且不得單獨報 raw MDD。\n\n完成後：body 重編譯 → paper-update CLI → 解除 paper_pipeline_status HOLD → 同步。證據：experiments/k1695/k1695_results.json .decision；storage/ops/k1695_exposure_artifact_verification.md。",
-    "claimed_by": "claude-main-interactive",
-    "claimed_at": "2026-07-16T10:02:00.019507+00:00",
-    "claim_session_id": "eefb37a87886",
     "status_history": [
       {
         "ts": "2026-07-16T10:02:00.019522+00:00",
@@ -36961,9 +36958,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "claude-main-interactive"
+      },
+      {
+        "ts": "2026-07-16T10:25:16.297688+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "claude-main-interactive"
       }
     ],
-    "started_at": "2026-07-16T10:02:00.366655+00:00"
+    "started_at": "2026-07-16T10:02:00.366655+00:00",
+    "completed_at": "2026-07-16T10:25:16.297673+00:00",
+    "result": "body_v4 完成（narrative 決策 B）：international drawdown-protection claim 全文撤回（abstract/contribution 3/§international/Table 5/Fig 2/discussion/limitations/conclusion 共 10 處），重構為 exposure-matched de-levering decomposition — raw MDD 改善是真實風險降低（vol ratio 0.52-0.66、phase rank 1/231）但非 timing（matched -0.9pp p=0.559、+5.0pp p=0.212、0/13 Holm；no-timing 常權重重現 +10.7/+12.6pp）。Table 5 加 Vol ratio + Matched ΔMDD 兩欄。reproduce.py +33 K1695 byte-match checks（含 claim_status=retracted），gate 100% green；xelatex 42pp 0 error；paper-update 同步成功（pdf_url=main_v4.pdf 線上 200 驗證）；pipeline blocker 更新（決策 B 取代 7/15 remove-entirely 措辭，null 如實保留per誠實原則§6）。NotebookLM refresh 跳過（notebook 已不存在）。剩餘 arXiv blocker = codex contribution-gate reframing agenda。"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260714T233927781273Z_a1",

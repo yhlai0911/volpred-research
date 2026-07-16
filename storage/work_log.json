@@ -19236,5 +19236,15 @@
     "owner": "hourly-slot-1-741271037a6445a496f846878ba41cb7",
     "commit": null,
     "summary": "Restore scripts/weekly_quota_estimate.py from scripts/_legacy/ — it was retired as an orphan but is called\nby every hourly fire, and has been broken for 2 days.\n\nHow it surfaced: this fire's end-summary step (hourly prompt rule 7) calls\n`uv run python scripts/weekly_quota_estimate.py` to report the weekly Max 20x quota %. The file was not\nthere. The copy in _legacy/ then failed too, with:\n  can't open file '.../scripts/scripts/token_usage_report.py'\n\nRoot cause: commit f96482a6a (2026-07-14 15:19, \"refactor(token-ops): WS1b/WS3/WS4d\") moved\n\"10 confirmed orphan scripts\" to _legacy/. weekly_quota_estimate.py is not an orphan — the orphan scan looks\nfor code references, and this script's only caller is scripts/cron_hourly_dispatch_prompt.md, a MARKDOWN\nprompt doc. A doc that invokes a script is a real dependency that no import/reference scan will see.\n\nThe move also broke the script itself: ROOT = Path(__file__).resolve().parents[1]. From scripts/ that is the\nrepo root; from scripts/_legacy/ it is scripts/, so cwd became scripts/ and the relative call to\n\"scripts/token_usage_report.py\" resolved to scripts/scripts/. Moving it back fixes the path derivation with\nno code change.\n\nImpact: since 2026-07-14 15:19 (~48 fires) every fire's end summary silently could not report quota %.\nNothing alerted, because the prompt asks the agent for the number and an agent that cannot get one just\nomits it.\n\nFix: plain `mv` back to scripts/ (PHASE-Z owns the commit; git shows it as D _legacy/... + ?? scripts/...,\nboth attributable to this fire). No other references to the _legacy path exist.\n\nVerified after restore: `uv run python scripts/weekly_quota_estimate.py` runs and reports\n30.4% used / 69.6% remaining (65,374,381 billable of an estimated 215,038,146 cap).\n\nLeft for the owner, deliberately not touched: the script warns its calibration anchor is 16 days stale\n(> 10 day threshold; anchor 54.0% at 2026-06-30). Re-anchoring needs an official Settings -> Usage weekly\nscreenshot from the boss — per memory, the per-record summation method is correct and matches the official\nnumber, and I previously got this wrong by \"fixing\" it from guesswork. So the 30.4% carries anchor-drift\nuncertainty and should be re-anchored from a screenshot, not adjusted by inference."
+  },
+  {
+    "timestamp": "2026-07-16T18:25:16+08:00",
+    "task_type": "paper_body",
+    "task_id": "paper_vt_trend_table5_retraction_rewrite",
+    "outcome": "completed",
+    "actor": "claude-main-interactive",
+    "owner": "claude-main-interactive",
+    "commit": null,
+    "summary": "vt-trend-following v4 撤回重寫：K1695 exposure artifact 的論文端收尾。決策 B（撤 protection claim、保留誠實 decomposition + null）。10 處改寫、Table 5 擴 2 欄、reproduce +33 checks 100% green、42pp 編譯乾淨、平台同步 + 線上驗證完成、pipeline 更新。"
   }
 ]
