@@ -1,25 +1,32 @@
 # Feed Index
 
-_Last built: 2026-07-16 07:11 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-16 14:40 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1831**  (with thumbnail: 80)
-- Last 30 days: **284**
-- Total chars (content): 5,618,038
+- Total articles: **1838**  (with thumbnail: 81)
+- Last 30 days: **288**
+- Total chars (content): 5,646,902
 
-**Status**: published=1619, archived=124, unpublished=65, retracted=12, draft=10, wont_fix=1
+**Status**: published=1623, archived=124, unpublished=66, draft=12, retracted=12, wont_fix=1
 
-**Audience**: research=1142, general=443, daily=148, unknown=77, member_qa=14, event=7
+**Audience**: research=1142, general=449, daily=149, unknown=77, member_qa=14, event=7
 
-**Category**: milestone=906, general=805, unknown=73, member_qa=14, research=10, daily_article=8, event_article=5, qa=5, experiment=4, diary=1
+**Category**: milestone=906, general=812, unknown=73, member_qa=14, research=10, daily_article=8, event_article=5, qa=5, experiment=4, diary=1
 
-## 最近 30 天 (284)
+## 最近 30 天 (288)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-17 | `mile_aff342df` | 五檔股票扛起大盤 27.8% 權重：這種市場的保險，整張買太貴，用價差買省一半 | general | general | draft | 2904 |  | 一般讀者, 集中度, 避險, 選擇權, 資產配置 |
+| 2026-07-16 | `mile_ff902b53` | 每日策略建議：VIX 15.92（正常）— 2026-07-16 | daily | general | published | 1518 | Y | 每日建議, VIX, 策略配置 |
+| 2026-07-16 | `mile_6f260b0d` | 2026-07-16 本日持倉比率建議（依據 2026-07-16 收盤數據） | daily | milestone | published | 941 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
+| 2026-07-16 | `mile_f78be848` | 台積電法說開完：成績單每項都贏，ADR 盤前卻跌近 4%，跌的是哪兩個數字？ | general | general | published | 3154 |  | 一般讀者, 台積電, 法說會, 選擇權, 半導體 |
+| 2026-07-16 | `mile_e4803162` | 事件溫度計｜CPI 出爐複盤：我們說市場沒給保費，結果保費前一天才進場、兩天就退光 | general | general | published | 3044 |  | 一般讀者, CPI, 事件研究, 通膨, 恐慌指數 |
+| 2026-07-16 | `mile_f9c70bd0` | 油價衝上 80 美元、飛彈重飛，股市卻沒理：市場在賭「恐慌半衰期」很短，它賭得對嗎？ | general | general | unpublished | 6500 |  | 一般讀者, 精選導讀, 原油, 地緣風險, 恐慌指數, 風險管理 |
+| 2026-07-16 | `mile_badbc47b` | 我們把自家的抗跌策略重做了一遍：漂亮的 12.61 個百分點，主要是減碼買來的 | general | general | draft | 4457 |  | 一般讀者, 研究誠實, 回撤, 波動率目標, 風險管理, VIX |
+| 2026-07-16 | `mile_9f5151dc` | VIX 先退、OVX 還沒過半：美伊衝突的「恐慌半衰期」要怎麼更新 | general | general | published | 7287 |  | 一般讀者, 精選導讀, VIX, OVX, 原油, 地緣政治 |
 | 2026-07-16 | `mile_88a5e47d` | 每日策略建議：VIX 15.67（正常）— 2026-07-16 | daily | general | published | 1518 | Y | 每日建議, VIX, 策略配置 |
-| 2026-07-16 | `mile_20a94524` | 2026-07-16 本日持倉比率建議（依據 2026-07-15 收盤數據） | daily | milestone | published | 941 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-16 | `mile_e58dc338` | 模型說百日才破線一次，實際十一天就一次：風險警報怎麼驗收？ | general | general | published | 3361 |  | 一般讀者, SPY, VIX, 波動率預測, 機率校準, 尾端風險 |
 | 2026-07-16 | `mile_6e81bb0a` | 多加一個恐慌指標，波動預測竟有三天變成負數 | general | general | published | 2968 |  | 一般讀者, 波動率預測, VIX, 模型比較, 研究更正, 投資研究 |
 | 2026-07-15 | `mile_5f3f1589` | Wikipedia 熱度暴增，隔天更容易崩盤嗎？525 組配對，八格都沒過 | general | general | draft | 2737 |  | 一般讀者, 市場注意力, Wikipedia, 崩盤風險, SEC |
@@ -299,14 +306,14 @@ _Last built: 2026-07-16 07:11 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-16 | `mile_ec0e72ee` | 風險模型該回頭看 1 年還是 8 年？答案其實要先看市場現在安不安靜 | general | general | published | 2351 |  | 一般讀者, SPY, 風險模型, 訓練視窗, 市況, 波動率 |
 | 2026-06-16 | `mile_9c7f4c7f` | 一個波動率模型如果連 2008 金融海嘯都撐得住，才比較像真的有用 | general | general | published | 2786 |  | 一般讀者, 波動率預測, SPY, VIX, 金融海嘯, 風險模型 |
 | 2026-06-16 | `mile_328ced24` | 風險模型不是愈高級愈安全：最土的方法反而最少踩線 | research | milestone | published | 2494 |  | 研究, 風險管理, 極端風險, 歷史模擬, SPY, 分配假設 |
-| 2026-06-16 | `mile_6f3e2b1a` | 抗通膨債券真的比較穩嗎？高通膨時，答案要看期限 | general | milestone | published | 2158 |  | 一般讀者, TIPS, 通膨, 債券, 美國公債, 波動率 |
-| 2026-06-16 | `mile_cbf8ba62` | 統計檢定通過了，監管機關還是會亮黃燈：換個分配假設，差距就出來了 | research | milestone | published | 2752 |  | 研究, VaR, 風險管理, GJR-GARCH, SPY, 尾端風險 |
-| 2026-06-16 | `mile_c725b44c` | 真正先變吵的，是除息前那 10 天 | general | general | published | 1805 |  | 一般讀者, 台股, 除息, 波動, 事件研究, 金融股 |
 
-<details><summary>## 2026-Q2 (875)</summary>
+<details><summary>## 2026-Q2 (878)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-16 | `mile_6f3e2b1a` | 抗通膨債券真的比較穩嗎？高通膨時，答案要看期限 | general | milestone | published | 2158 |  | 一般讀者, TIPS, 通膨, 債券, 美國公債, 波動率 |
+| 2026-06-16 | `mile_cbf8ba62` | 統計檢定通過了，監管機關還是會亮黃燈：換個分配假設，差距就出來了 | research | milestone | published | 2752 |  | 研究, VaR, 風險管理, GJR-GARCH, SPY, 尾端風險 |
+| 2026-06-16 | `mile_c725b44c` | 真正先變吵的，是除息前那 10 天 | general | general | published | 1805 |  | 一般讀者, 台股, 除息, 波動, 事件研究, 金融股 |
 | 2026-06-16 | `mile_764012ef` | 把 GARCH 改聰明反而更笨：3 種 STGARCH 在 SPY 上全輸給老派 GJR | research | milestone | published | 3118 |  | 研究, 美股, SPY, 波動率, GARCH, 模型比較 |
 | 2026-06-16 | `mile_a95a2285` | 比特幣「漲時更波動」是真的嗎？11 年 4,101 天告訴你：時有時無 | research | milestone | published | 2702 |  | 研究, btc, 波動率, leverage-effect, 時變性, 非對稱效應 |
 | 2026-06-15 | `mile_53caca1a` | 點陣圖分歧，MOVE 卻跌到 P34：債市選擇權在打折賣保險嗎？ | general | general | published | 3361 |  | 一般讀者, FOMC, MOVE, VIX, 利率, 尾部對沖 |
