@@ -19306,5 +19306,15 @@
     "owner": "hourly-slot-1-957aa2f211884eb686da1bf745527936",
     "commit": null,
     "summary": "餓死 86h 孤兒實驗收尾：建 registered worktree dispatch-slot-1-957aa2f2-k1649 + enqueue agent job agent-brief_k1649_orphan-119eee（opus/xhigh per model_router）。同 k1630 契約：驗數字 + Codex 二審 + knowledge proposal 檔，主線程負責寫入。成果由後續 fire PHASE A followup 收。"
+  },
+  {
+    "timestamp": "2026-07-16T22:47:32+08:00",
+    "task_type": "platform_ops",
+    "task_id": "single_gateway_refactor_20260716",
+    "outcome": "completed",
+    "actor": "claude-main-interactive",
+    "owner": "claude-main-interactive",
+    "commit": null,
+    "summary": "老闆下令「該單一關口的就單一關口」後的 3-strike 級重構：(1) 根因=volpred ops assign 寫入的 storage/ops/tasks queue 無人消費，16+1 任務黑洞 5 天；兩並行 session 各用一套入口 → msg877 矛盾雙回覆。(2) assign 重定向為 next_tasks.json thin wrapper（append_next_task+flock）；(3) 存量 triage：13 遷入 canonical、1 deprecated（K1695 舊結論文章，執行有害）、3 superseded/duplicate；credit 題合併雙方判斷成單一 brief（aggregate NULL 教訓+firm-level 差異化+控制 VIX 硬門檻）。(4) reply-right guard：telegram-send --reply-to-task 拒發已完成任務（break-then-verify）。(5) 機械 gate test_ops_tasks_receipts_only.py 先咬後綠。(6) 澄清訊息 msg882 已送。32 tests passed。"
   }
 ]

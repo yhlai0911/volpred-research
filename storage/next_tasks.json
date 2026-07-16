@@ -35500,13 +35500,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T14:00:54.195304+00:00",
+    "completed_at": "2026-07-16T14:45:21.920591+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T14:00:54.195304+00:00",
-      "last_clean_observed_at": "2026-07-16T14:00:54.195304+00:00"
+      "resolved_at": "2026-07-16T14:45:21.920591+00:00",
+      "last_clean_observed_at": "2026-07-16T14:45:21.920591+00:00"
     }
   },
   {
@@ -35518,13 +35518,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T13:13:43.992723+00:00",
+    "completed_at": "2026-07-16T14:21:27.277845+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T13:13:43.992723+00:00",
-      "last_clean_observed_at": "2026-07-16T13:13:43.992723+00:00"
+      "resolved_at": "2026-07-16T14:21:27.277845+00:00",
+      "last_clean_observed_at": "2026-07-16T14:21:27.277845+00:00"
     }
   },
   {
@@ -41091,10 +41091,26 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-16T13:46:16.763287+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 877）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n今天大家都在討論韓國記憶體、台積電財報，但真正值得警惕的，可能是另一件事：SpaceX 跌破 135 美元的發行價！\n​\n從最高點已經下跌 40%......如果上市首日進場追價，到現在也已經吃下 20% 的修正跌幅。\n​\n那麼為什麼上市前人人喊買、擁有無限前景的太空資料中心，到現在卻甚至破發呢？這對於近期震盪的 AI 行情來說，是什麼樣的訊號嗎？\n​\n<財經捕手｜今日總經拆解：SpaceX 跌破發行價！為什麼市場不追捧了？>\n​\n​\n■「債務壓力」是現在市場最不能接受的因子之一\n​\n回顧 SPCX 這一個月以來的走勢，可以發現導致破發的關鍵時間點落在 6/22，當天大跌高達 16.5%！主要原因是：\n​\n在 IPO 後馬上就發行規模高達 250 億美元的公司債！一開始很順利，認購額接近 4 倍約 900 億美元，顯示市場對債券的需求相當旺盛。\n​\n但當這筆債券進入二級市場交易後馬上出現快速下跌：僅不到一個月居然就下跌超過 8%！\n​\n甚至殖利率高達 7.5%，幾乎相當於是「垃圾債」的等級！CDS 也上升不少……\n​\n現在市場對於「債務壓力」的容忍度很低，因為開始更為關注投資回報。那些債務壓力大的公司比如：甲骨文、CoreWeave等，股價也都相當疲軟。\n​\n所以股價的疲軟，可能來自於公司債市場價格下跌的溢出效應導致！也可以從這方面關注 Hyperscalers 的變動，畢竟 CDS 也都有上升跡象。\n​\n所以未來除了關注 AI 公司財報之外，也必須追蹤公司債價格、CDS 是否持續惡化等。\n​\n​\n■ 重磅公司 IPO 往往是觀察市場情緒的好指標\n​\n以下是我在 5/31 報告的部分分析內容：\n​\n從情緒面角度思考，這樣的重磅公司 IPO（SPCX）如果出現利多不漲，或是拉出週線等級的長上影線，可能是市場上漲動能暫時休息的訊號！\n​\n一個比較明顯的例子是 ARM 在 2023/9/14 正式上市，當天大漲 13%，隔天一度大漲 8.5% 後翻黑收跌 4.5%，結果 S&P500 就一路下跌近 10%，甚至跌破年線......\n​\n雖然當時的背景是美債殖利率飆升所導致，但重要 IPO 公司是否出現利多不漲，也是觀察情緒面的重要參考之一。\n​\n當時也包括這層考量，才能成功掌握到震盪盤的轉折變化！\n​\n所以現在也要重點關注剛在美股上市的SK海力士（SKHY），是一個衡量短期情緒面不錯的參考指標。\n\n\n這篇文章，你能拆解出哪些研究議題？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n今天大家都在討論韓國記憶體、台積電財報，但真正值得警惕的，可能是另一件事：SpaceX 跌破 135 美元的發行價！\n​\n從最高點已經下跌 40%......如果上市首日進場追價，到現在也已經吃下 20% 的修正跌幅。\n​\n那麼為什麼上市前人人喊買、擁有無限前景的太空資料中心，到現在卻甚至破發呢？這對於近期震盪的 AI 行情來說，是什麼樣的訊號嗎？\n​\n<財經捕手｜今日總經拆解：SpaceX 跌破發行價！為什麼市場不追捧了？>\n​\n​\n■「債務壓力」是現在市場最不能接受的因子之一\n​\n回顧 SPCX 這一個月以來的走勢，可以發現導致破發的關鍵時間點落在 6/22，當天大跌高達 16.5%！主要原因是：\n​\n在 IPO 後馬上就發行規模高達 250 億美元的公司債！一開始很順利，認購額接近 4 倍約 900 億美元，顯示市場對債券的需求相當旺盛。\n​\n但當這筆債券進入二級市場交易後馬上出現快速下跌：僅不到一個月居然就下跌超過 8%！\n​\n甚至殖利率高達 7.5%，幾乎相當於是「垃圾債」的等級！CDS 也上升不少……\n​\n現在市場對於「債務壓力」的容忍度很低，因為開始更為關注投資回報。那些債務壓力大的公司比如：甲骨文、CoreWeave等，股價也都相當疲軟。\n​\n所以股價的疲軟，可能來自於公司債市場價格下跌的溢出效應導致！也可以從這方面關注 Hyperscalers 的變動，畢竟 CDS 也都有上升跡象。\n​\n所以未來除了關注 AI 公司財報之外，也必須追蹤公司債價格、CDS 是否持續惡化等。\n​\n​\n■ 重磅公司 IPO 往往是觀察市場情緒的好指標\n​\n以下是我在 5/31 報告的部分分析內容：\n​\n從情緒面角度思考，這樣的重磅公司 IPO（SPCX）如果出現利多不漲，或是拉出週線等級的長上影線，可能是市場上漲動能暫時休息的訊號！\n​\n一個比較明顯的例子是 ARM 在 2023/9/14 正式上市，當天大漲 13%，隔天一度大漲 8.5% 後翻黑收跌 4.5%，結果 S&P500 就一路下跌近 10%，甚至跌破年線......\n​\n雖然當時的背景是美債殖利率飆升所導致，但重要 IPO 公司是否出現利多不漲，也是觀察情緒面的重要參考之一。\n​\n當時也包括這層考量，才能成功掌握到震盪盤的轉折變化！\n​\n所以現在也要重點關注剛在美股上市的SK海力士（SKHY），是一個衡量短期情緒面不錯的參考指標。\n\n\n這篇文章，你能拆解出哪些研究議題？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-16T14:29:02.188831+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-16T14:30:32.751018+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-16T14:30:32.751003+00:00",
+    "result": "已拆解 5 個研究議題並經 Telegram msg 879 回覆；最扎實的信用利差→AI股波動率溢出議題已用 volpred ops assign 排入任務池（priority 30）"
   },
   {
     "id": "ci-red-29500450690",
@@ -41132,5 +41148,162 @@
     "started_at": "2026-07-16T14:02:31.819746+00:00",
     "completed_at": "2026-07-16T14:13:57.849384+00:00",
     "result": "root_cause=telegram responder migrated from vanished Homebrew jq to system Python, but test_git_writer_lock retained the removed jq expression; repair_commit=e1e618ab9; verification=26 targeted tests passed and obsolete jq invariant has zero repo occurrences; full local suite reached 3206 passed with 7 unrelated canonical-checkout isolation failures absent from clean CI"
+  },
+  {
+    "id": "alert_telegram_reply_backlog_20260716",
+    "title": "[alert] 老闆 Telegram 訊息沒被回（responder 停擺）",
+    "description": "由 alert `telegram_reply_backlog` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n老闆經 Telegram 傳來的訊息有 1 則沒被回，最久一則已等 39.3 分鐘（狀態 pending）。\n- telegram-877: pending, 已等 39.3 分鐘\n- 門檻: warn>30.0分 / critical>120.0分\n\n## 影響\n老闆以為訊息送出就會被處理，但實際上沒有任何回覆 —— 這個故障面從外部完全看不出來（訊息照收、任務照排），只有老闆本人會發現。\n\n## 診斷指引（此條無自動修復：根因分歧，盲目重啟不對症）\n1. tail -20 /Users/yhlai0911/.volpred/logs/telegram_responder.log\n   — 看是 FATAL（缺依賴 / 環境漂移）還是 exit=1（Claude 額度用盡）。\n2. 額度爆 → 等 reset 或改 TELEGRAM_RESPONDER_MODEL；缺依賴 → 修 scripts/telegram_responder.sh 的啟動關卡。\n3. hourly dispatch 是兜底（~1h）；critical 代表連兜底都沒接到。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-16T14:25:49.726166+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "telegram_reply_backlog"
+    ]
+  },
+  {
+    "id": "assign_168aeaf8",
+    "title": "K1684 E2：own-market realized target 的 forecast-tail divergence cross-OOS gate",
+    "description": "K1684 R3 primary Codex review 為 CONDITIONAL_PASS，但 E1 是 H2_UNSUPPORTED，不能選 paper route。執行 E2：選擇 forecast 與 realized target 為同一市場/標的的資料，OOS n>=2500；對 HAR-RV 與 GJR 使用相同資訊集、相同 lag、相同共同樣本，做 QLIKE + canonical DM/HAC/Harvey、1%/5% Kupiec+Christoffersen CC+Basel、Acerbi-Szekely Z1、FZ0。至少做跨 OOS/regime，scale/delta-c uncertainty 加 moving/block-bootstrap sensitivity。先讀 docs/error_log.md、knowledge K1684、experiment-preamble，檢索至少 3 篇文獻；固定 seed；不得用 cross-asset RV plug-in 冒充 own-market test。成功標準：三件套齊、lookahead mechanical audit、結果不論正負皆誠實報告、Codex review 後才決定 paper route。\n\n[migrated 2026-07-16 from task_18c9c0bd9722 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T14:48:11.761939+00:00]",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-16T14:42:55.569435+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_a458fc01",
+    "title": "CI 卡死 5 個測試：本地綠、只在 CI 紅（single-writer 迴圈修不掉）",
+    "description": "根因：a16840bd0 single-writer 重構加的 git-writer-lock / mutation-guard / main-lease worktree invariant，這 5 個舊測試在 CI 的 git 狀態下觸發封鎖，但本地重現全過 → auto-repair 迴圈每次本地綠就標 succeeded、push、CI 同 5 個又紅，已連燒 3+ cycles（commits 6a7e64816、fa4cbfbc6 都沒解掉）。\n\n卡住的 5 個（run 29387887860 --log-failed 確認）：\n- tests/test_cron_auth_preflight.py::test_auth_preflight_passes_without_fallback（assert 2==0）\n- tests/test_cron_auth_preflight.py::test_auth_preflight_recovers_after_sourcing_zshrc\n- tests/test_cron_auth_preflight.py::test_auth_preflight_sends_actionable_alert_on_double_failure（[git-writer-lock] BLOCKED: legacy dispatch requires canonical symbolic main）\n- tests/test_cron_auth_preflight.py::test_auth_preflight_tcc_shaped_failure_diagnoses_claude_update（同上 git-writer-lock BLOCKED）\n- scripts/tests/test_git_reference_transaction_hook.py::test_non_main_branch_ref_is_not_subject_to_main_lease（git worktree add -b side exit 128）\n\n必做（否則會再進迴圈）：\n1. 不許只本地重現就宣稱修好 — 這 5 個本地就是綠的。必須在 CI-like 條件（detached HEAD / 非 canonical symbolic main / fresh checkout / 無 worktree 前置）重現封鎖，或直接讀 git-writer-lock 與 reference-transaction hook 在 CI git 狀態的分支邏輯。\n2. 判斷是『測試沒對齊新 invariant』還是『invariant 本身在 CI 環境誤判』，對症修 — 若是後者要修 guard 不是改測試。\n3. 修完本地綠 + 推 main 後，必須確認新 CI run 真的全綠才可標 succeeded（別再標假成功）。\n4. 順手看能否收斂 auto-repair 迴圈的『本地綠即標 succeeded』漏洞（根因防再犯）。\n\n[migrated 2026-07-16 from task_28650497a155 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T04:12:09.549976+00:00]",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-16T14:42:55.609061+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_43a2ee48",
+    "title": "信用壓力→高槓桿 AI 股波動率：firm-level 分組檢定（aggregate 版已 NULL，控制 VIX 為硬門檻）",
+    "description": "來源：老闆 2026-07-16 Telegram msg877（財經捕手 SpaceX 破發文）。本 brief 是兩個並行 session 的判斷合併版（原 storage/ops/tasks/task_31d75ca61913 + research_program.md msg877 拆解段），取代雙方各自的版本。\n\n【必讀先前 NULL 教訓 — aggregate 版已做過且全 NULL，不得重做】K872：FRED HY OAS 對 fwd vol raw r=0.55，但與 VIX corr=0.77，控制 VIX 後 delta-R²=0。T14：credit+yield 僅 +1.6% incremental R²（econ trivial）。K1621：EM sovereign credit vol proxies 不 lead EM equity vol。另 K1529/K1515/K1538 同軸皆弱。\n\n【本題唯一差異化空間 = firm-level 分組對比】文章真正的主張是 issuer-specific：高槓桿公司（ORCL、CRWV 等）自己的信用壓力 → 自己的 equity vol。設計：高槓桿 AI 標的 vs 低槓桿 hyperscaler（MSFT/GOOGL）對照組，HAR-RV baseline vs HAR-RV-X（lagged credit spread Δ），樣本 2015-2026 含兩次空頭；嚴格 signal shift(1)；QLIKE + DM-HLN + Harvey |t|>3 + canonical HAC bandwidth。\n\n【硬性成功門檻（比一般更嚴）】主檢定必須是「控制 VIX 之後」的增量（加 VIX 當第二 exogenous 或先對 VIX 正交化），且高槓桿組的增量必須顯著大於低槓桿對照組（分組差異才是文章的可檢定含義）。單純 raw 相關顯著 = 直接 NULL 結論（K872 已證那是 VIX 的影子）。個股 CDS 需 Markit（付費）不可得 → 用 HY/IG OAS + 個別公司債 ETF proxy，限制如實揭露。SPCX n=22 天樣本不足，只能當 case illustration 不得入檢定。文章的具體數字（-40%、6/22 -16.5%、250 億美元、7.5% 殖利率）未經查證，不得引用為事實。null 如實報告。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-16T14:42:55.644818+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_4470644e",
+    "title": "修正已發布 CPI T-2/T-7 事件研究的官方日期污染",
+    "description": "K1442 日期稽核追查發現 storage/event_articles/us_cpi_2026_06_11_t2 與 us_cpi_2026_06_13_t7 皆硬編錯誤 CPI 日期，且已發布為 mile_0fa9c7f5、mile_ebb5d6f5。改用 volpred.data.event_dates.cpi_release_dates，將輸出路徑改為 Path(__file__).resolve().parent，封存舊證據後完整重跑統計與受影響圖片；依新結果正式原地更正兩篇文章並 sync，保留 errata audit trail。T-7 舊均值 +2.184% 已知會翻為約 -0.847%；不得沿用舊敘事。完成 source-level review、數值獨立核對、anti-ai 與 live URL 驗證。稽核來源：K1442 related_event_date_audit。\n\n[migrated 2026-07-16 from task_4751e8957898 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T13:13:41.766815+00:00]",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-16T14:42:55.681601+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_09984c91",
+    "title": "修 paper snapshot refresh 並行 append 重複日期",
+    "description": "K1685 發現 paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv 在 2026-05-04..05-15 各重複兩列。Root hypothesis: scripts/refresh_paper_snapshots.py append-only path 無 per-file cross-process lock，兩個 refresh 可同時讀同一 old_last 並重複 append。修流程、不手改 CSV：加 per-file lock，lock 內重讀 current last date，new_only date 去重/排序，write 前後 unique-date fail-closed；新增兩 process 同批 append regression test；再走 canonical snapshot regeneration/refresh 修復受污染檔並驗證 consumers。Evidence: experiments/k1685/README.md + k1685 results data_integrity_finding。\n\n[migrated 2026-07-16 from task_64b5bcc0a23f (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-11T21:34:48.572870+00:00]",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-16T14:42:55.724940+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_56ddf72b",
+    "title": "[code] 根因修復：daily_update dirty-guard 硬中止導致 host_cron_fail 反覆 critical（老闆指示最高模型/最大深度）",
+    "description": "老闆經 Telegram（msg 794）針對『為什麼一直出現各種錯誤』，指示：解決不了就用最高模型與最大深度去解。此任務即該深度修復，請以 max depth / 高 effort 執行，不要只補當日 alert。\n\n## 已驗證的具體證據（telegram_responder 只讀診斷，未改任何檔）\n1. 今天 2026-07-15 14:00 CST，cron daily_update_intraday exit=1，log 明說：\n   'refusing to overwrite output(s) already dirty before this run: [storage/reports/feed.json]' → 'tracked output already dirty; aborting before daily writes'。\n2. 這是硬失敗 exit=1（非 142 SIGALRM / 非 75 quota 這類自我恢復碼），所以直接升 host_cron_fail=critical。\n3. host_cron_fail signature 已跨 13 天（first_seen 2026-07-02 → last_seen 2026-07-15），屬慢性反覆，不是一次性。\n4. 當下 working tree：storage/reports/feed.json 為 unstaged-modified（dirty），全樹 21 changed / 18 staged。\n5. git_push_backup 有正常 commit/push（14:00:15 pushed 2 commits OK），但 feed.json 這類 publish 輸出仍被留在未提交狀態；且 daily_update 與 git_push_backup 都在 :00 同分鐘觸發，存在對 git working tree / canonical Git-writer lease 的競態。\n\n## 根因假說（需你深度查證後定案）\ndaily_update 的 dirty-guard 只要 fire 當下 tracked output（feed.json）dirty 就硬 abort exit=1。而 feed.json 常被 publish/release 寫入後未即時 commit，或與同分鐘的 git_push_backup commit 撞在一起 → 每天可穩定重踩。它其實是良性/暫態（下一輪多半自我恢復），卻用硬 exit=1 觸發 critical，就是老闆看到的『一直出錯』噪音。\n\n## 要交付的三層修復（請全部處理，附驗證）\nA. 正確性：讓 daily_update 的 dirty-guard 不要對『暫態 dirty』硬 abort — 改成等 lease/短 retry，或把 guard 收斂到真正的內容衝突，讓良性未提交的 feed.json 不會殺掉整輪。\nB. 根因：確保 feed.json 等 publish 輸出在發佈後即時被 commit，讓 working tree 不再慢性 dirty；並/或把 :00 同時觸碰 git tree 的 cron 錯開/序列化，消除競態。\nC. Alert 語意：評估這種『暫態 abort、下輪自我恢復』是否該升 critical。若不該，調整 host_cron_fail 判準（比照 142/75 自我恢復處理），停止 critical 噪音；真正持續斷線交給 outcome-level dead-man switch 抓。\n\n## 約束\n- 遵守 AGENTS.md『永遠修流程，不修資料』：不要手動 commit feed.json 收尾，要追到產生 dirty 的程式與 cron 時序並修流程。\n- 修完寫入 docs/error_log.md，並在 storage 對應設定/程式落地。\n- 參考既有 docs/refactor_plan_hourly_dispatch.md（142 結構根因）與 platform_ops_host_cron_recency_gate（先前 recency gate 修法）。\n\n[migrated 2026-07-16 from task_79833d7bcb46 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T06:06:42.999868+00:00]",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-16T14:42:55.764579+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_358decfa",
+    "title": "改用官方 NFP 發布日並修正線上事件 metadata",
+    "description": "K1442 同類污染掃描發現 experiments/event_article_nfp_2026_07_03_t1 用 first-Friday proxy；13 個歷史樣本至少 7 筆錯，2026-07 目標發布日是 07-02 而非 07-03。改用 volpred.data.event_dates.nfp_release_dates，保留 AS_OF=2026-07-01 的正確 T-1 快照，重跑 README/results/歷史 CSV、受影響的 fig2 與 lazypack 2/3，並做官方日曆 regression tests。live mile_35eef830 正文已在 07-03 改為正確 07-02 且主要引用 K528/K513；勿發第二篇更正文，只透過正式 publisher 修正 details.event 與 phase metadata，核對正文是否仍有受污染數字，最後 sync 與 live verify。稽核來源：K1442 related_event_date_audit。\n\n[migrated 2026-07-16 from task_7ef956506564 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T13:14:00.066923+00:00]",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-16T14:42:55.800884+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_1fa7f2f4",
+    "title": "CI 失敗通知要附白話根因（別只轉『All jobs failed』）",
+    "description": "老闆回饋（Telegram msg 822）：GitHub「Test Suite: All jobs have failed」原始通知只有失敗狀態＋技術術語，沒說錯在哪。要改 CI-failure 通知轉發流程：偵測到 Test Suite / workflow 失敗時，自動抓 gh run view --log-failed，抽出實際 FAIL/AssertionError 那一行，在推 Telegram/通知前面加一句白話根因（例：『feed audience 一致性測試掛：某篇文章 audience 標錯』）。要求：(1) 一句白話原因擺最前面；(2) 保留原始連結給要看細節的人；(3) 抽不到就標『原因待查』不要靜默。實測樣本：run 29406571212=feed audience mismatch、29402856478=DM test 缺 HAC、29399240558=cron wrapper manifest 過期——三次各不同因，正好證明需要逐次抽因。改的是通知轉發程式，走正式流程勿在 responder 動。\n\n[migrated 2026-07-16 from task_978eaaac9793 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T10:22:12.234306+00:00]",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-16T14:42:55.841240+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_a31a311d",
+    "title": "修正 CPI T+0 內部事件研究的官方日期污染",
+    "description": "K1442 日期稽核追查發現 storage/event_articles/us_cpi_2026_06_11_t0 的當次 2026-06-10 窗口正確，但歷史比較硬編 7 個錯誤日期與 1 個 phantom event；文章未曾發布。改用 volpred.data.event_dates.cpi_release_dates，輸出路徑改為 Path(__file__).resolve().parent，封存舊證據後重跑 analysis/evidence/article/details。重算後 2026-06-10 VIX +11.827% 應是 13 場官方發布中的最大值，不是舊文第 4；確認兩張只含當次窗口的 PNG 是否可保留。補 regression tests 與 source-level review，不得發布重複文章。稽核來源：K1442 related_event_date_audit。\n\n[migrated 2026-07-16 from task_b3b91831f5a3 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T13:13:51.226709+00:00]",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-16T14:42:55.878259+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_5e030431",
+    "title": "PHASE-Z orphan 警報：對 runtime-state 檔停止重複報警（根因修復）",
+    "description": "來源：老闆 Ivan Telegram msg 806（2026-07-15）『為什麼又出現一樣的錯誤』。\n\n現象：PHASE-Z orphan-deliverable 警報每班重複點名同一批檔（15:25 fire：market_closure_detect 38 班、storage/next_tasks_archive/2026-07.jsonl 35 班、storage/work_log.json 35 班、experiments/k1695/review_*.{md,json} 11 班、storage/paper_pipeline_status.json）。\n\n根因：PHASE-Z 刻意不自動收養（盲收養是先前 3 次事故成因，正確設計）。但其中 work_log.json / next_tasks_archive/*.jsonl / paper_pipeline_status.json 是『系統自己持續寫、本就不該由某一班 commit』的 runtime-state 檔 —— 它們永遠不會被作者 commit，所以每班都會再報一次，變成永久 noise，稀釋警報可信度。\n\n任務：在 check_alerts / PHASE-Z orphan 偵測加一份 runtime-state allowlist（glob：storage/work_log.json、storage/next_tasks_archive/*.jsonl、storage/paper_pipeline_status.json 等系統寫入檔），這類檔不計入 orphan-deliverable 告警（或改由既有 flush 機制正規落盤），使警報只點『真的沒人收的成品』。k1695 review 檔則走正常『作者 commit』路徑。改 alert 邏輯前先 commit snapshot（snapshot: 前綴）。成功標準：下一班 check_alerts 對這批 runtime 檔不再 fire，且真 orphan 仍會被抓。\n\n[migrated 2026-07-16 from task_ca7b979da7db (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T07:37:04.467173+00:00]",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-16T14:42:55.915398+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_8aa98ff0",
+    "title": "修 CI red：feed audience mismatch mile_8a9ae3c8（走 guarded backfill）",
+    "description": "Test Suite/pytest 每小時紅燈，真因只剩 1 個：scripts/validate_feed_audience.py 判 mile_8a9ae3c8（title「波動率預測不是把指標愈疊愈多就會愈準」, status=published, audience=general）內文含研究訊號 K-id/QLIKE/HAR-RV，publisher inference 判它該是 research。這是資料不一致非程式 bug。禁止手改 feed.json / storage/reports/*.json。走 guarded workflow：先 uv run python scripts/backfill_feed_audience.py（dry-run 預設）產出 review plan，決定是 reclassify→research 還是 rewrite_general（保留 evidence-rich 版為 research，並經 canonical task-queue lock materialize 一篇 reader-facing companion daily_article），再 --apply。完成後本地跑 uv run python scripts/validate_feed_audience.py 應 exit 0，commit push 讓 Test Suite 轉綠。背景：先前 commit 2bd3e06dd 修的是 correction flow 本身，這篇是漏網 entry。來源 telegram-820。\n\n[migrated 2026-07-16 from task_db5658975e1e (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T10:17:43.965712+00:00]",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-16T14:42:55.957606+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_bfde715f",
+    "title": "運營回報排版加『架構感』：視覺分區塊+標題階層+條列（refine 格式治理任務）",
+    "description": "來源：老闆 Ivan 經 Telegram msg 808（2026-07-15），回覆 msg 806 的新格式運營回報後說『排版可不可以有架構一點？』。\n\n這是對既有任務 governance_telegram_structured_progress_report_format 的排版細化，不是新格式規格。痛點：現行『結論/驗證/產物/阻塞/下一步』雖有標籤，但整則仍是一長串貼在一起、視覺上偏平，老闆要更明顯的『架構感』。\n\n要制度化的排版規則（併入運營經理 telegram reporting SOP，改 governance 檔前先 snapshot commit）：\n1. 明確分區塊：標題列 + 分隔線 + 逐欄條列，欄與欄之間視覺分開，不要 run-on prose。\n2. 標題階層：頂部一行標題（【VolPred 運營回報｜台北時間｜程序名】），下方各欄用固定順序編號/emoji 前綴（結論→驗證→產物→阻塞→下一步）。\n3. 每欄一行到位、結論先講；仍維持短、可稽核、留 message id。不得因為加排版而變長報告。\n4. 在 Telegram 能正常 render（避免過度 box-drawing 造成手機端錯亂）。\n\n成功標準：SOP/skill 更新並 commit（snapshot 先行），下次運營回報即依此更有架構的排版；回寫格式來源一句到 docs。dispatch_lane=main_thread（運營回報語義，主線程處理）。\n\n[migrated 2026-07-16 from task_e1c2a1c65163 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T07:57:46.009547+00:00]",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-16T14:42:55.994529+00:00",
+    "created_by": "single-gateway-migration"
+  },
+  {
+    "id": "assign_2398cbfe",
+    "title": "[P35-retry] Codex K1258 review (BLOCKED: gpt-5.5 infrastructure issue)",
+    "description": "Re-queue of task_d0c8e2ce75c0 (K1258 forgetting-factor BMA Codex review). Prior attempt 2026-04-24 04:44 UTC failed with 'The model gpt-5.5 does not exist or you do not have access to it' (log /Users/yhlai0911/.claude/plugins/data/codex-openai-codex/state/volpred-research-1e72882300c5a437/jobs/task-mocffgjn-ydq0m4.log). Root cause: ~/.codex/config.toml has model='gpt-5.5' which is unavailable on this account. User decision needed: (a) change ~/.codex/config.toml model to an available model (e.g. 'gpt-5-codex', 'o3', or 'spark' alias), (b) provide model override flag, or (c) skip codex review for K1258 and accept main-thread agent-result-verification (round 18 byte-exact already passed). Review scope unchanged from original task_d0c8e2 description. Run this task only after config fix or explicit skip directive.\n\n[migrated 2026-07-16 from task_f6d3c7a84418 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-04-24T04:47:43.636650+00:00]",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-16T14:42:56.035630+00:00",
+    "created_by": "single-gateway-migration"
   }
 ]

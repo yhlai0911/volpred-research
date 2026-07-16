@@ -112,10 +112,12 @@ def _append_task(text: str, msg_id: int, sender: str, reply_context: str = "") -
         "title": f"回覆老闆 Telegram 訊息（msg {msg_id}）",
         "description": (
             f"老闆（{sender}）經 Telegram 傳來訊息，全文：\n---\n{text}\n---\n{ctx_block}"
-            "處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 "
-            "Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 "
-            "python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — "
-            "這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+            "處理規則：與 email_reply 同級（user-assigned P1）。**先 claim 本任務再開工**"
+            "（task_pool_claim.py claim + start；claim 被拒 = 另一個 session 在處理，立刻停手不得回覆）。"
+            "完成實事後**必須用 Telegram 回覆**，且一律帶 reply-right guard：\n"
+            f"`uv run volpred ops telegram-send --reply-to-task telegram-{msg_id} --text \"...\"`\n"
+            "（guard 會在任務已被別的 session 完成時拒發，防雙回覆。）回覆要短、直接、口語 — "
+            "這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。回覆送出後才 complete 本任務。"
         ),
     })
     normalize_task_priorities(tasks)

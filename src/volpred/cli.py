@@ -907,8 +907,10 @@ def ops_assign(
     storage_dir: str,
 ) -> None:
     """Create a task in the local file-backed control plane."""
-    from volpred.ops import create_task
-
+    # 2026-07-16 single-gateway refactor (docs/refactor_plan_single_gateway_task_system.md):
+    # assign used to write storage/ops/tasks/*.json — a queue NO dispatcher consumes
+    # (16 tasks silently black-holed 07-11..07-16). The only pending queue is
+    # storage/next_tasks.json; this command is now a thin wrapper over it.
     payload = _parse_json_input(payload_json, default={})
     if not isinstance(payload, dict):
         raise click.ClickException("--payload-json must decode to an object")
@@ -921,23 +923,23 @@ def ops_assign(
             raise click.ClickException("--schedule-proposal-json must decode to an object")
         payload["schedule_proposal"] = schedule_proposal
         payload.setdefault("governance_area", "schedule")
-    task = create_task(
+
+    from volpred.ops.next_tasks import append_next_task
+
+    task = append_next_task(
         title=title,
         description=description,
         source=source,
         task_family=task_family,
-        priority=priority,
-        preferred_agent=preferred_agent,
-        fallback_allowed=fallback_allowed,
-        approval_mode=approval_mode,
-        risk_level=risk_level,
-        public_effect=public_effect,
+        legacy_priority=priority,
         payload=payload,
         parent_task_id=parent_task_id,
         created_by=created_by,
-        storage_dir=storage_dir,
     )
-    console.print(f"[green]Queued local task[/green] {task['id']} ({task['status']})")
+    console.print(
+        f"[green]Queued task[/green] {task['id']} (P{task['priority']}, {task['task_type']}) "
+        f"→ storage/next_tasks.json"
+    )
     _print_json(task)
 
 
@@ -2435,9 +2437,62 @@ def ops_send_daily_digest(target_date: str | None, force_send: bool, storage_dir
 @ops.command("telegram-send")
 @click.option("--text", required=True, help="Message text (auto-chunked at 4096 chars)")
 @click.option("--silent", is_flag=True, help="Send without notification sound")
-def ops_telegram_send(text: str, silent: bool) -> None:
+@click.option(
+    "--reply-to-task",
+    default=None,
+    help=(
+        "telegram_reply task id this message answers. Reply-right guard "
+        "(single gateway, 2026-07-16): refuses to send when that task is "
+        "already succeeded or claimed by another owner — prevents two "
+        "parallel sessions from double-replying to the same boss message."
+    ),
+)
+@click.option(
+    "--owner",
+    default=None,
+    help="Claim owner to match when --reply-to-task is set (defaults to any claim held).",
+)
+def ops_telegram_send(text: str, silent: bool, reply_to_task: str | None, owner: str | None) -> None:
     """Send a message to the boss via Telegram (@Volpred_manager_bot)."""
     from volpred.ops.telegram import send_telegram
+
+    if reply_to_task:
+        import fcntl as _fcntl
+        from pathlib import Path as _Path
+
+        queue = _Path("storage/next_tasks.json")
+        task = None
+        if queue.exists():
+            with queue.open("r", encoding="utf-8") as fh:
+                _fcntl.flock(fh.fileno(), _fcntl.LOCK_SH)
+                try:
+                    rows = json.load(fh)
+                finally:
+                    _fcntl.flock(fh.fileno(), _fcntl.LOCK_UN)
+            for row in rows if isinstance(rows, list) else []:
+                if isinstance(row, dict) and row.get("id") == reply_to_task:
+                    task = row
+                    break
+        if task is None:
+            raise click.ClickException(
+                f"reply-right guard: task {reply_to_task} not found in storage/next_tasks.json"
+            )
+        status = str(task.get("status") or "").strip().lower()
+        claimed_by = task.get("claimed_by")
+        if status == "succeeded":
+            raise click.ClickException(
+                f"reply-right guard: {reply_to_task} already succeeded "
+                f"(another session replied; result: {str(task.get('result'))[:120]}). NOT sending."
+            )
+        if status in {"claimed", "in_progress"} and owner and claimed_by and claimed_by != owner:
+            raise click.ClickException(
+                f"reply-right guard: {reply_to_task} is claimed by {claimed_by!r}, not {owner!r}. NOT sending."
+            )
+        if status not in {"claimed", "in_progress"}:
+            raise click.ClickException(
+                f"reply-right guard: {reply_to_task} status={status!r} — claim it first "
+                "(uv run python scripts/task_pool_claim.py claim/start), then reply."
+            )
 
     result = send_telegram(text, disable_notification=silent)
     click.echo(json.dumps(result, ensure_ascii=False))

@@ -24,6 +24,7 @@ paths:
 - 正式 runtime：**單一主線程 Claude Code** + **按需啟動的 Codex rescue / subagent**；不把 `claude-worker` / `codex-worker` 視為 standing worker runtime
 - 排程唯一來源 `config/runtime_schedules.json`；不讓舊 guide / 歷史報告成為另類 source of truth
 - `storage/ops/` 內 task / approval / execution / rollback 檔案是控制面資料，**不手動亂改收尾**；`storage/ops/tasks/` 內 TaskRecord 是 **execution receipts / audit trail**（已完成 history），**不是 pending queue**
+- **任務唯一入口 = `storage/next_tasks.json`（2026-07-16 single-gateway refactor）**：`volpred ops assign` 已重定向為 next_tasks.json 的 thin wrapper（不再寫 `storage/ops/tasks/`）。歷史教訓：assign 原寫入的 queue 無任何 dispatcher 消費，16 個任務黑洞 5 天（含結論已推翻仍排隊的 K1695 舊文章）；兩個並行 session 各用一套入口 → 對老闆同一則訊息矛盾雙回覆。**機械 owner（唯一）**：`scripts/tests/test_ops_tasks_receipts_only.py`（CI 斷言 ops/tasks 非終態=0）。老闆訊息的**回覆權綁 claim**：`telegram-send --reply-to-task <id>` guard 對已完成/他人持有的任務拒發（防雙回覆）。設計全文：`docs/refactor_plan_single_gateway_task_system.md`。
 - `storage/next_tasks.json` = de-facto **pending queue**（2026-05-04 audit 後確認的實際分工：唯一有 pending P1-P4 的池，dispatcher `scripts/continue_task_dispatch.py` 從這挑工）— 完成的 task 同步靠 `scripts/sync_next_tasks_status.py` 反查 experiments + knowledge.json 標 succeeded；原 v12 設計把它標 legacy 但 `storage/ops/tasks/` 從未被任何 caller 用作 pending queue（全是 receipts）→ 2026-05-04 改規則承認此分工
 - `uv run volpred ops scheduler-tick` executor lane **目前只做 advisory snapshot**；正式 task claim/finish 必須來自主線程 direct dispatch 或明確 bootstrapped session
 - Session cron 與 system crontab **需與 canonical runtime schedule 一致**

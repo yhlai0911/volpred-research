@@ -424,3 +424,88 @@ def write_tasks_locked(path: str | Path, tasks: list[Any]) -> None:
             write_tasks_to_handle(fh, tasks)
         finally:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+
+# --- Single-gateway append (2026-07-16 refactor) -----------------------------
+# docs/refactor_plan_single_gateway_task_system.md: `volpred ops assign` used to
+# write storage/ops/tasks/*.json — a queue no dispatcher consumes. This is the
+# one canonical append path it now routes through.
+
+_ASSIGN_FAMILY_TO_TASK_TYPE = {
+    "ops": "platform_ops",
+    "research": "experiment",
+    "article": "daily_article",
+    "paper": "paper_review",
+    "content": "daily_article",
+    "strategy": "strategy_lifecycle",
+}
+
+
+def _legacy_priority_to_p(legacy: int) -> int:
+    """Map local-control-plane large-number priority (30/80/100…) to P1-P4."""
+    if legacy <= 10:
+        return 1
+    if legacy <= 50:
+        return 2
+    if legacy <= 100:
+        return 3
+    return 4
+
+
+def append_next_task(
+    *,
+    title: str,
+    description: str,
+    source: str = "user",
+    task_family: str = "ops",
+    legacy_priority: int = 100,
+    payload: dict[str, Any] | None = None,
+    parent_task_id: str | None = None,
+    created_by: str | None = None,
+    path: str | Path = "storage/next_tasks.json",
+) -> dict[str, Any]:
+    """Append one pending task to the canonical queue under LOCK_EX.
+
+    Returns the created record. Raises ValueError on duplicate id (uuid4-based,
+    practically unreachable) so callers never silently double-queue.
+    """
+    import uuid
+    from datetime import datetime, timezone
+
+    task_type = _ASSIGN_FAMILY_TO_TASK_TYPE.get(task_family, "platform_ops")
+    record: dict[str, Any] = {
+        "id": f"assign_{uuid.uuid4().hex[:8]}",
+        "title": title,
+        "description": description,
+        "task_type": task_type,
+        "priority": _legacy_priority_to_p(int(legacy_priority)),
+        "status": "pending",
+        "source": source,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    if payload:
+        record["payload"] = payload
+    if parent_task_id:
+        record["parent_task_id"] = parent_task_id
+    if created_by:
+        record["created_by"] = created_by
+
+    p = Path(path)
+    guard_canonical_write(p)
+    if not p.exists():
+        p.write_text("[]\n", encoding="utf-8")
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            raw = fh.read()
+            tasks = json.loads(raw) if raw.strip() else []
+            if not isinstance(tasks, list):
+                raise ValueError("next_tasks.json root is not a list")
+            existing = {t.get("id") for t in tasks if isinstance(t, dict)}
+            if record["id"] in existing:
+                raise ValueError(f"duplicate task id {record['id']}")
+            tasks.append(record)
+            write_tasks_to_handle(fh, tasks)
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    return record
