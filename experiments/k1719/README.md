@@ -48,17 +48,20 @@ not intraday realized variance.
 
 ## Method
 
-For every target, the baseline rolling model predicts log variance from its
-own lag-1 variance and trailing 5/22-session variance averages.  The ladder
-model adds lagged upstream information:
+For every target, the rolling model predicts log variance from its own lag-1
+variance and trailing 5/22-session variance averages.  Each comparison owns
+one incremental ladder rung rather than comparing the entire upstream bundle
+with an own-history-only baseline:
 
-- Japan: SPY variance and VIX level.
-- Taiwan: SPY, VIX, and Japan variance.
-- Singapore, Indonesia, Malaysia, Thailand: SPY, VIX, Japan, and Taiwan.
+- Japan: own-history baseline → add SPY variance and VIX level.
+- Taiwan: own history + SPY/VIX baseline → add Japan variance.
+- Singapore, Indonesia, Malaysia, Thailand: own history + SPY/VIX/Japan
+  baseline → add Taiwan variance.
 
-All predictor series are created with an explicit `signal.shift(1)` before the
-cross-market inner join.  Each forecast origin uses at most the previous 756
-common observations and is fit only on rows strictly before the forecast row.
+Returns, rolling means, and `signal.shift(1)` are first computed on each
+market's own non-missing session series, before the cross-market inner join.
+Each forecast origin uses at most the previous 756 common observations and is
+fit only on rows strictly before the forecast row.
 Forecasts are clipped to the training sample's 1st–99th percentile variance
 range to prevent exponentiation from producing numerical outliers.
 
@@ -73,8 +76,8 @@ ordinary p-values are descriptive only.
 ## Lookahead policy
 
 - `signal = signal.shift(1)` is literal in `k1719.py`.
-- The common-date join happens only after every signal has been lagged within
-  its own market series.
+- Missing union-calendar rows are removed market by market before return,
+  rolling, and lag operations.  The common-date join happens only afterward.
 - At forecast row `i`, the rolling fit ends at `i-1`; the target at `i` is
   never in the training window.
 - We deliberately do not use same-date Japan returns for Taiwan or same-date
@@ -86,13 +89,34 @@ ordinary p-values are descriptive only.
 
 The ladder is considered supported only if:
 
-1. QLIKE improves for at least 4 of 6 targets; and
+1. Incremental-rung QLIKE improves for at least 4 of 6 targets; and
 2. at least 2 target-level Clark–West comparisons pass `|t| > 3`; and
 3. the date-aggregated Southeast-Asia panel Clark–West statistic also passes
    `|t| > 3`.
 
 Otherwise the result is MIXED or NULL and must be reported as such.  A positive
 in-sample coefficient or an unadjusted p-value is not sufficient.
+
+## Results
+
+The pre-registered full-ladder criterion is **not met**, so the experiment
+verdict is **MIXED**.
+
+| Incremental rung | OOS n | QLIKE improvement | Clark–West t | Harvey-strength? |
+|---|---:|---:|---:|---|
+| US (SPY/VIX) → Japan | 4,438 | +7.67% | 11.59 | Yes |
+| Japan → Taiwan, conditional on US | 4,154 | −0.66% | 0.27 | No |
+| Taiwan → Singapore, conditional on US/Japan | 4,059 | −0.45% | 0.14 | No |
+| Taiwan → Indonesia, conditional on US/Japan | 3,900 | +0.10% | 0.32 | No |
+| Taiwan → Malaysia, conditional on US/Japan | 3,959 | −0.23% | −0.28 | No |
+| Taiwan → Thailand, conditional on US/Japan | 3,894 | −0.26% | −0.18 | No |
+
+The four-market Southeast-Asia panel has 3,567 common OOS dates and Clark–West
+t=0.18.  Thus previous-session US information adds clear daily-volatility
+forecast content for Japan, but this design finds no incremental Japan →
+Taiwan or Taiwan → Southeast-Asia rung after earlier upstream information is
+already included.  This is predictive association, not a causal or intraday
+transmission claim.
 
 ## Run
 

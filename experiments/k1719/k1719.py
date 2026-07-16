@@ -54,6 +54,14 @@ TARGETS = {
     "MALAYSIA": ["SPY", "VIX", "JAPAN", "TAIWAN"],
     "THAILAND": ["SPY", "VIX", "JAPAN", "TAIWAN"],
 }
+BASELINE_UPSTREAM = {
+    "JAPAN": [],
+    "TAIWAN": ["SPY", "VIX"],
+    "SINGAPORE": ["SPY", "VIX", "JAPAN"],
+    "INDONESIA": ["SPY", "VIX", "JAPAN"],
+    "MALAYSIA": ["SPY", "VIX", "JAPAN"],
+    "THAILAND": ["SPY", "VIX", "JAPAN"],
+}
 
 
 def _atomic_write_text(path: Path, text: str) -> None:
@@ -110,7 +118,8 @@ def load_or_download_snapshot() -> pd.DataFrame:
 def build_model_frame(close: pd.DataFrame, target: str, upstream: list[str]) -> pd.DataFrame:
     """Build an inner-joined frame after market-local signal lagging."""
     series: dict[str, pd.Series] = {}
-    target_ret = np.log(close[target]).diff()
+    target_close = close[target].dropna()
+    target_ret = np.log(target_close).diff()
     target_variance = target_ret.pow(2)
     series["actual_variance"] = target_variance
 
@@ -122,10 +131,11 @@ def build_model_frame(close: pd.DataFrame, target: str, upstream: list[str]) -> 
     series["own_mean22"] = signal.rolling(22, min_periods=22).mean().shift(1)
 
     for name in upstream:
+        local_close = close[name].dropna()
         if name == "VIX":
-            signal = np.log(close[name].clip(lower=1.0))
+            signal = np.log(local_close.clip(lower=1.0))
         else:
-            signal = np.log(close[name]).diff().pow(2)
+            signal = np.log(local_close).diff().pow(2)
         series[f"upstream_{name}"] = signal.shift(1)
 
     frame = pd.concat(series, axis=1, join="inner").dropna()
@@ -141,9 +151,14 @@ def _ols_predict(x_train: np.ndarray, y_train: np.ndarray, x_test: np.ndarray) -
     return float(np.r_[1.0, x_test] @ beta)
 
 
-def walk_forward(frame: pd.DataFrame, upstream: list[str]) -> pd.DataFrame:
-    baseline_cols = ["own_lag1", "own_mean5", "own_mean22"]
-    full_cols = baseline_cols + [f"upstream_{name}" for name in upstream]
+def walk_forward(
+    frame: pd.DataFrame,
+    baseline_upstream: list[str],
+    added_upstream: list[str],
+) -> pd.DataFrame:
+    own_cols = ["own_lag1", "own_mean5", "own_mean22"]
+    baseline_cols = own_cols + [f"upstream_{name}" for name in baseline_upstream]
+    full_cols = baseline_cols + [f"upstream_{name}" for name in added_upstream]
     log_features = [col for col in full_cols if col != "upstream_VIX"]
     model = frame.copy()
     model[log_features] = np.log(model[log_features].clip(lower=EPSILON))
@@ -252,7 +267,7 @@ def render_chart(target_results: dict[str, dict[str, Any]]) -> None:
     ax.bar(names, values, color=colors)
     ax.axhline(0.0, color="black", linewidth=0.8)
     ax.set_ylabel("QLIKE improvement vs own-history baseline (%)")
-    ax.set_title("K1719: previous-session upstream information")
+    ax.set_title("K1719: incremental previous-session ladder rung")
     ax.tick_params(axis="x", rotation=25)
     fig.tight_layout()
     fig.savefig(CHART, dpi=160)
@@ -265,10 +280,25 @@ def main() -> None:
     target_results: dict[str, dict[str, Any]] = {}
     sea_forecasts: dict[str, pd.DataFrame] = {}
     sample_counts = {name: int(close[name].notna().sum()) for name in TICKERS}
+    data_diagnostics = {}
+    for name in TICKERS:
+        local = close[name].dropna()
+        returns = np.log(local).diff().dropna()
+        data_diagnostics[name] = {
+            "first_date": local.index.min().date().isoformat(),
+            "last_date": local.index.max().date().isoformat(),
+            "non_missing_prices": int(len(local)),
+            "missing_pct_on_union_calendar": 100.0 * float(close[name].isna().mean()),
+            "zero_return_count": int((returns == 0).sum()),
+            "daily_return_mean": float(returns.mean()),
+            "daily_return_std": float(returns.std(ddof=1)),
+        }
 
     for target, upstream in TARGETS.items():
         frame = build_model_frame(close, target, upstream)
-        forecasts = walk_forward(frame, upstream)
+        baseline_upstream = BASELINE_UPSTREAM[target]
+        added_upstream = [name for name in upstream if name not in baseline_upstream]
+        forecasts = walk_forward(frame, baseline_upstream, added_upstream)
         metrics, _losses = evaluate_target(forecasts)
         target_results[target] = metrics
         if target in {"SINGAPORE", "INDONESIA", "MALAYSIA", "THAILAND"}:
@@ -299,6 +329,7 @@ def main() -> None:
             "request_end_exclusive": END,
             "tickers": TICKERS,
             "observations_by_ticker": sample_counts,
+            "diagnostics_by_ticker": data_diagnostics,
             "snapshot_file": SNAPSHOT.name,
             "snapshot_sha256": _sha256(SNAPSHOT),
         },
@@ -307,10 +338,17 @@ def main() -> None:
             "forecast_target": "log variance; evaluated on variance scale",
             "window": WINDOW,
             "minimum_training_observations": MIN_TRAIN,
-            "information_set": "all own/upstream signals shifted one market-local observation before date join",
+            "information_set": "returns, rolling means, and signals computed/shifted on each market-local session series before date join",
             "dm": "volpred.stats.model_evaluation.dm_test, h=1, diagnostic-only under nesting",
             "formal_nested_test": "volpred.stats.model_evaluation.clark_west_test on log variance",
             "harvey_threshold": 3.0,
+            "rung_definitions": {
+                target: {
+                    "baseline_upstream": BASELINE_UPSTREAM[target],
+                    "added_upstream": [name for name in upstream if name not in BASELINE_UPSTREAM[target]],
+                }
+                for target, upstream in TARGETS.items()
+            },
         },
         "targets": target_results,
         "southeast_asia_panel": panel,
