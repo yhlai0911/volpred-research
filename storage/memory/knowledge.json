@@ -41924,5 +41924,30 @@
    "reviewed_commit": "071fdc73a287 (working-tree surfaces pinned by review_verdict SHA256)",
    "review_artifact": "storage/ops/codex_reviews/k1706_post_boundary_review.md"
   }
+ },
+ {
+  "item_id": "k1716_reviewed_20260716",
+  "category": "zero_dte_intraday_volatility_proxy",
+  "title": "K1716: no Tue/Thu-specific daily-OHLC volatility break after daily SPX expiries",
+  "content": "K1716 [NULL_PROXY_DIAGNOSTIC, independently reviewed]: Using frozen SPY raw daily OHLC from 2018-01-02 through 2026-07-15 (2,144 trading days), the stricter re-verification finds no Tue/Thu-specific volatility break after Cboe expanded SPX Weeklys to daily expiries. The main post x Tue/Thu interactions are small and non-significant for log Parkinson variance (coef +0.0407, HAC t=0.591, Holm p=1.000, 1,000-rep block-bootstrap 95% CI [-0.0863, +0.1776]) and logit intraday share (coef -0.0363, HAC t=-0.190, Holm p=1.000, 95% CI [-0.4054, +0.3296]); overnight and close-to-close proxy interactions also have Holm p=1.000. Restricted-era placebo breaks and pre-treatment differential trends likewise show no signal. This independently strengthens K1477's null interaction finding, but it is only a daily-OHLC proxy diagnostic: without option flow, dealer positions, or intraday realized variance it cannot identify a causal 0DTE or dealer-gamma mechanism.",
+  "evidence": [
+   "experiments/k1716/K1716_results.json",
+   "experiments/k1716/README.md",
+   "experiments/k1716/review_verdict.json",
+   "experiments/k1716/review_primary_20260715.md"
+  ],
+  "confidence": 0.93,
+  "created_at": "2026-07-16T00:05:00+00:00",
+  "created_at_source": "system_clock_utc",
+  "k_id": "K1716",
+  "experiment_id": "k1716",
+  "experiment_path": "experiments/k1716",
+  "verdict": "NULL_PROXY_DIAGNOSTIC",
+  "reviewer": "Codex CLI 0.144.1 / gpt-5.6-sol / high / primary-path",
+  "provenance": {
+   "reviewed_commit": "a6702bd987820d51555cb3c36b722982293413b7",
+   "review_artifact": "experiments/k1716/review_primary_20260715.md",
+   "results_sha256": "898a2dc21add3439be8c80bfa18a7c59bc5e9b932ba3d2d3551ac64c9dc872ff8"
+  }
  }
 ]

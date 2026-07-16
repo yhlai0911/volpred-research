@@ -35581,7 +35581,7 @@
     "title": "K1707: 選擇權競價的 price-improvement／liquidity benefit 是否在壓力期崩解** — 用作者公開 replication sample 對接事前已知 VIX，預註冊競價×高波動 interaction，檢定 exe",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1616). Original: 選擇權競價的 price-improvement／liquidity benefit 是否在壓力期崩解** — 用作者公開 replication sample 對接事前已知 VIX，預註冊競價×高波動 interaction，檢定 execution quality 與 dispersion；若公開樣本不含完整 OPRA 欄位，只稱 replication-sample stress diagnostic。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1707.py with signal.shift(1) + seed=42, (c) K1707_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35590,7 +35590,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-13T23:52:32Z"
+    "created_at": "2026-07-13T23:52:32Z",
+    "claimed_by": "codex-desktop-k1707",
+    "claimed_at": "2026-07-16T00:09:59.109892+00:00",
+    "claim_session_id": "074bd9040f61",
+    "status_history": [
+      {
+        "ts": "2026-07-16T00:09:59.109906+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-desktop-k1707"
+      },
+      {
+        "ts": "2026-07-16T00:09:59.473642+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-desktop-k1707"
+      }
+    ],
+    "started_at": "2026-07-16T00:09:59.473626+00:00"
   },
   {
     "id": "K1708",
@@ -36859,13 +36877,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T00:00:08+00:00",
+    "completed_at": "2026-07-16T00:01:44.567880+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T00:00:08+00:00",
-      "last_clean_observed_at": "2026-07-16T00:00:08+00:00"
+      "resolved_at": "2026-07-16T00:01:44.567880+00:00",
+      "last_clean_observed_at": "2026-07-16T00:01:44.567880+00:00"
     }
   },
   {
@@ -38293,7 +38311,7 @@
     "title": "K1713: 反直覺：HARQ 測量誤差加權在「高噪音日頻 OHLC 代理」下是否反效果？ — 用 Garman-Klass range 近似 realized quarticity，檢定當 proxy 測量誤差本身很大時誤差加權是幫助還是傷害 OOS（",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 494). Original: 反直覺：HARQ 測量誤差加權在「高噪音日頻 OHLC 代理」下是否反效果？ — 用 Garman-Klass range 近似 realized quarticity，檢定當 proxy 測量誤差本身很大時誤差加權是幫助還是傷害 OOS（HARQ vs HAR，DM-HLN，SPY/0050.TW/TX）；yfinance OHLC（來源：BPQ JoE HARQ 家族仍為 RV 建模主流）。差異化：庫內 HARQ 未落地實作，且此題是 contrarian「代理噪音下反轉」角度。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1713.py with signal.shift(1) + seed=42, (c) K1713_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38302,7 +38320,25 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-15T00:00:01Z"
+    "created_at": "2026-07-15T00:00:01Z",
+    "claimed_by": "codex-failover-slot-2-27e13678b64948629cdf1f667d07a93c",
+    "claimed_at": "2026-07-16T00:09:23.526165+00:00",
+    "claim_session_id": "11894fdfc52c",
+    "status_history": [
+      {
+        "ts": "2026-07-16T00:09:23.526179+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-27e13678b64948629cdf1f667d07a93c"
+      },
+      {
+        "ts": "2026-07-16T00:09:23.781161+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-27e13678b64948629cdf1f667d07a93c"
+      }
+    ],
+    "started_at": "2026-07-16T00:09:23.781149+00:00"
   },
   {
     "id": "K1714",
@@ -41488,7 +41524,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29421677446",
@@ -41496,9 +41532,6 @@
     "created_at": "2026-07-16T00:00:05.116939+00:00",
     "title": "CI 紅燈修復（run 29457218773, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29457218773\nattempt: 1\nhead_sha: 0b90b1c1b\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29457218773 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "claimed_by": "codex-failover-slot-1-635dd2c9597f4356859ff16b00497556",
-    "claimed_at": "2026-07-16T00:01:28.729489+00:00",
-    "claim_session_id": "161494d7f6d9",
     "status_history": [
       {
         "ts": "2026-07-16T00:01:28.729502+00:00",
@@ -41511,8 +41544,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-1-635dd2c9597f4356859ff16b00497556"
+      },
+      {
+        "ts": "2026-07-16T00:15:02.133622+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-635dd2c9597f4356859ff16b00497556"
       }
     ],
-    "started_at": "2026-07-16T00:01:33.576409+00:00"
+    "started_at": "2026-07-16T00:01:33.576409+00:00",
+    "completed_at": "2026-07-16T00:15:02.133606+00:00",
+    "result": "root_cause=finished experiment knowledge registration raced CI checkout (K1705, then K1716 in class sweep); repair_commit=5c40b59ce; class_sweep=results_without_knowledge empty after canonical K1716 writer append; verification=3177 passed, 6 skipped; push=deferred to git_push_backup cron per supervisor"
   }
 ]
