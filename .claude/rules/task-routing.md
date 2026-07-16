@@ -87,7 +87,7 @@ tree below and then to free-text markers. Do not encode ownership solely in
 - 每個 child stage 必須有：`parent_timeout_job_id`、不同的 `split_stage`、單一明確 artifact、可驗證 success criterion，以及短於 parent 的 timeout budget。
 - `scripts/compute_queue.py` 會替 outer timeout 與 agent inner timeout 寫入 `failure_reason=timeout`、`split_required=true`，followup mode 改為 `split_required`，並拒絕 unchanged retry。
 - 登入／模型額度阻擋若 agent 根本未開始工作，不算執行 timeout；恢復後可照原 brief 重試。
-- 已知案例：K1711 已 timeout 兩次，下一步只能先 materialize 分段計畫，不得再派完整 TSFM-HAR MCS 任務；K1704 已按 pre-review → fix → rerun → post-review 分段接續。
+- 已知案例：K1711 timeout 後已透過 salvage → evaluation → review 分段完成並合併，不得再 whole-task rerun；K1704 已按 pre-review → fix → rerun → post-review 分段接續。
 
 ## Email reply 的 ACK + close 流程
 
