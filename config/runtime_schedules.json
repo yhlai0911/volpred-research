@@ -577,8 +577,9 @@
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_market_closure.sh",
         "launchd_label": "com.volpred.market-closure-detect",
         "mechanism": "launchd",
+        "host_crontab_managed": false,
         "command_deprecated": "python scripts/detect_market_closure.py",
-        "description": "每小時 :00 讀 NCDR/人事行政總處停班停課 RSS，臺北市全日停止上班→自動寫 config/market_closures_adhoc.json + resync Supabase + alert。08:00 那班=台股開盤前 1 小時的確認閘門。2026-07-10 颱風巴威休市 incident 建立（exchange_calendars 對當天才宣布的緊急休市盲目）。",
+        "description": "每小時 :00 由 LaunchAgent 單一 owner 讀 NCDR/人事行政總處停班停課 RSS，臺北市全日停止上班→自動寫 config/market_closures_adhoc.json + resync Supabase + alert。host crontab 明確停用，避免整點雙觸發與 NCDR 429。08:00 那班=台股開盤前 1 小時的確認閘門。2026-07-10 颱風巴威休市 incident 建立（exchange_calendars 對當天才宣布的緊急休市盲目）。",
         "matchers": [
           "market_closure",
           "detect_market_closure.py"

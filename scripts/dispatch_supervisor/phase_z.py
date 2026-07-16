@@ -52,6 +52,7 @@ Differences from legacy (deliberate, same behaviour):
 from __future__ import annotations
 
 import fcntl
+import hashlib
 import json
 import logging
 import os
@@ -229,6 +230,12 @@ def _is_machine_state(rel: str) -> bool:
 # reported by `git status`, and can never be committed by anyone. One less rule
 # to drift.
 _SNAPSHOT_BASENAME = "volpred_phase_z_pre_fire_dirty.json"
+# A failed candidate already has stronger ownership evidence than a later
+# fire-start baseline: PHASE-Z itself computed the exact owned path set. Keep
+# that evidence after the bounded drain gives up, hash-pinned to the bytes that
+# the rejected candidate contained, so a later pre-fire pass can close it out
+# without ever adopting an unrelated dirty path.
+_FAILED_CLOSEOUT_BASENAME = "volpred_phase_z_failed_closeout.json"
 # A fire is bounded by the worker timeout (~50min). A snapshot older than this is
 # from a fire whose PHASE-Z never ran (daemon killed mid-fire); trusting it would
 # mean judging today's dirt against yesterday's baseline.
@@ -354,6 +361,206 @@ def _consume_pre_fire_snapshot(repo_root: Path, runner) -> None:
         path.unlink(missing_ok=True)
     except OSError as exc:  # pragma: no cover — unlink of our own file
         LOG.warning("phase_z: cannot remove pre-fire snapshot (%s)", exc)
+
+
+def _failed_closeout_path(repo_root: Path, runner) -> Path | None:
+    snapshot = _snapshot_path(repo_root, runner)
+    return snapshot.with_name(_FAILED_CLOSEOUT_BASENAME) if snapshot is not None else None
+
+
+def _path_fingerprint(path: Path) -> dict[str, object] | None:
+    """Stable working-tree fingerprint, including deletions and symlinks."""
+    try:
+        if path.is_symlink():
+            return {"kind": "symlink", "target": os.readlink(path)}
+        if not path.exists():
+            return {"kind": "missing"}
+        if not path.is_file():
+            return {"kind": "other", "mode": path.stat().st_mode}
+        digest = hashlib.sha256()
+        size = 0
+        with path.open("rb") as handle:
+            while chunk := handle.read(1024 * 1024):
+                digest.update(chunk)
+                size += len(chunk)
+        return {"kind": "file", "sha256": digest.hexdigest(), "size": size}
+    except OSError as exc:
+        LOG.warning("phase_z: cannot fingerprint closeout path %s (%s)", path, exc)
+        return None
+
+
+def _read_failed_closeout(repo_root: Path, runner) -> dict | None:
+    path = _failed_closeout_path(repo_root, runner)
+    if path is None or not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        entries = payload["paths"]
+        if not isinstance(entries, list) or not entries:
+            raise TypeError("paths must be a non-empty list")
+        for entry in entries:
+            if not isinstance(entry, dict) or not isinstance(entry.get("path"), str):
+                raise TypeError("invalid path entry")
+            rel = Path(entry["path"])
+            if rel.is_absolute() or ".." in rel.parts:
+                raise TypeError("closeout path escapes repo root")
+            if not isinstance(entry.get("fingerprint"), dict):
+                raise TypeError("invalid fingerprint entry")
+        return payload
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        LOG.warning("phase_z: failed-closeout receipt unreadable (%s) — fail closed", exc)
+        return None
+
+
+def _ensure_failed_closeout(
+    repo_root: Path,
+    *,
+    owned: list[str],
+    reason: str,
+    commit_tail: str,
+    receipt: dict | None,
+    runner,
+) -> bool:
+    """Persist first-failure ownership once; never re-pin later edited bytes."""
+    if not owned:
+        return False
+    dest = _failed_closeout_path(repo_root, runner)
+    if dest is None:
+        return False
+    existing_payload = _read_failed_closeout(repo_root, runner) if dest.exists() else None
+    if dest.exists() and existing_payload is None:
+        return False
+    existing_entries = {
+        entry["path"]: entry["fingerprint"]
+        for entry in (existing_payload or {}).get("paths", [])
+    }
+    entries: list[dict[str, object]] = []
+    for rel in owned:
+        fingerprint = _path_fingerprint(repo_root / rel)
+        if fingerprint is None:
+            return False
+        if rel in existing_entries:
+            # The first rejected candidate is the authority. Re-pinning an
+            # overlapping path would bless bytes edited after that failure.
+            if fingerprint != existing_entries[rel]:
+                LOG.error("phase_z: failed-closeout path changed before a later failure: %s", rel)
+                return False
+            continue
+        entries.append({"path": rel, "fingerprint": fingerprint})
+    if existing_payload is not None:
+        payload = existing_payload
+        payload["paths"].extend(entries)
+        payload.setdefault("receipts", []).append(receipt)
+        payload["last_failure_at"] = datetime.now(timezone.utc).isoformat()
+        payload["last_reason"] = reason
+        payload["last_commit_tail"] = commit_tail[-1200:]
+    else:
+        payload = {
+            "version": 1,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "last_failure_at": datetime.now(timezone.utc).isoformat(),
+            "last_reason": reason,
+            "last_commit_tail": commit_tail[-1200:],
+            "receipts": [receipt],
+            "paths": entries,
+        }
+    try:
+        tmp = dest.with_suffix(".tmp")
+        tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp.replace(dest)
+        LOG.warning(
+            "phase_z: preserved hash-pinned failed closeout for %d total path(s)",
+            len(payload["paths"]),
+        )
+        return True
+    except OSError as exc:
+        LOG.warning("phase_z: cannot persist failed-closeout receipt (%s)", exc)
+        return False
+
+
+def _clear_failed_closeout(repo_root: Path, runner) -> None:
+    path = _failed_closeout_path(repo_root, runner)
+    if path is None:
+        return
+    try:
+        path.unlink(missing_ok=True)
+    except OSError as exc:
+        LOG.warning("phase_z: cannot clear failed-closeout receipt (%s)", exc)
+
+
+def recover_failed_closeout(
+    *,
+    repo_root: Path,
+    runner=subprocess.run,
+    test_runner=None,
+    alert_fn=None,
+) -> dict:
+    """Retry a rejected fire's exact, unchanged paths before the next fire.
+
+    This is not orphan adoption. The durable receipt was written by PHASE-Z at
+    the original candidate failure and pins every path to its bytes (or deletion
+    state). Any mismatch refuses recovery and leaves both bytes and receipt for
+    human review.
+    """
+    repo_root = Path(repo_root)
+    payload = _read_failed_closeout(repo_root, runner)
+    if payload is None:
+        return {"committed": False, "reason": "no_failed_closeout"}
+    dirty = _dirty_paths(repo_root, runner)
+    if dirty is None:
+        return {"committed": False, "reason": "status_error"}
+
+    unresolved: list[str] = []
+    conflicts: list[str] = []
+    for entry in payload["paths"]:
+        rel = entry["path"]
+        current = _path_fingerprint(repo_root / rel)
+        if current != entry["fingerprint"]:
+            conflicts.append(rel)
+        elif rel in dirty:
+            unresolved.append(rel)
+
+    if conflicts:
+        (alert_fn or _default_alert)(
+            level="critical",
+            title="PHASE-Z failed-closeout 內容已變更，拒絕跨班提交",
+            body="\n".join([
+                "原 fire 的 ownership receipt 還在，但下列路徑已不再等於被 gate 擋下時的 bytes。",
+                "為避免把後來 session 的修改冒充原 fire 產出，系統沒有 commit 或覆蓋任何檔案。",
+                "",
+                *[f"- {path}" for path in conflicts],
+            ]),
+        )
+        return {"committed": False, "reason": "hash_mismatch", "conflicts": conflicts}
+    if not unresolved:
+        _clear_failed_closeout(repo_root, runner)
+        return {"committed": False, "reason": "already_closed"}
+
+    subjects = [
+        str(item.get("subject") or "").strip()
+        for item in (payload.get("receipts") or [])
+        if isinstance(item, dict) and str(item.get("subject") or "").strip()
+    ]
+    stored_receipt = {
+        "subject": "recover hash-pinned PHASE-Z closeout",
+        "body": "\n".join([
+            "Original candidate(s) failed their commit gate; every recovered path remained byte-identical.",
+            *[f"- {subject}" for subject in subjects[:20]],
+        ]),
+        "task_id": "",
+    }
+    result = run_phase_z(
+        repo_root=repo_root,
+        runner=runner,
+        test_runner=test_runner,
+        alert_fn=alert_fn,
+        pre_fire_dirty=dirty - set(unresolved),
+        commit_receipt_override=stored_receipt,
+        recovery_mode=True,
+    )
+    if result.get("committed"):
+        _clear_failed_closeout(repo_root, runner)
+    return result
 
 
 # ── fire commit receipt ──────────────────────────────────────────────────────
@@ -1283,6 +1490,8 @@ def run_phase_z(
     internal_alert_fn=None,
     internal_resolve_fn=None,
     pre_fire_dirty: set[str] | list[str] | None = None,
+    commit_receipt_override: dict | None = None,
+    recovery_mode: bool = False,
 ) -> dict:
     """Deterministic post-fire commit. Returns an observability dict.
 
@@ -1327,7 +1536,8 @@ def run_phase_z(
         )
     # Read-and-consume up front: every exit path below is now incapable of leaving
     # a receipt behind to caption the next fire's commit. See the receipt block above.
-    receipt = _read_and_consume_fire_receipt(repo_root, runner)
+    consumed_receipt = _read_and_consume_fire_receipt(repo_root, runner)
+    receipt = commit_receipt_override or consumed_receipt
 
     dirty_now = _dirty_paths(repo_root, runner)
     if dirty_now is None:
@@ -1427,7 +1637,9 @@ def run_phase_z(
             ]),
         )
 
-    streaks = _bump_foreign_streaks(repo_root, runner, foreign)
+    # A recovery pass runs immediately before the real pre-fire snapshot. It
+    # must not count the same unrelated dirty paths as another hourly shift.
+    streaks = {} if recovery_mode else _bump_foreign_streaks(repo_root, runner, foreign)
     stuck = sorted((p for p, n in streaks.items() if n >= _FOREIGN_STREAK_CRITICAL),
                    key=lambda p: (-streaks[p], p))
     worst_streak = max(streaks.values(), default=0)
@@ -1698,7 +1910,16 @@ def run_phase_z(
                     )
                 else:
                     alert_fn(**alert_payload)
+                _ensure_failed_closeout(
+                    repo_root,
+                    owned=owned,
+                    reason="commit_nonzero",
+                    commit_tail=hook_out,
+                    receipt=receipt,
+                    runner=runner,
+                )
                 return {"committed": False, "reason": "commit_nonzero", "untracked": untracked,
+                        "owned": owned,
                         "commit_tail": hook_out[-600:], "rolled_back": True,
                         "internal_alert_observed_at": hook_observed_at.isoformat(),
                         "internal_alert_key": (
@@ -1860,7 +2081,7 @@ def run_phase_z(
                     "`uv run python scripts/fire_receipt.py --task-id <id> --subject '<一句話 what | why>'`",
                 ]),
             )
-        if foreign:
+        if foreign and not recovery_mode:
             alert_fn(
                 level="warn",
                 title="PHASE-Z 有檔案不是這班產出的，已略過",
@@ -1894,5 +2115,13 @@ def run_phase_z(
     # the one actionable fact (2026-07-13: the boss got 12 "no baseline" warns
     # and zero mention of the silent-fallback gate that actually blocked it).
     LOG.warning("phase_z: git commit rc=%d: %s", commit.returncode, out[:300])
+    _ensure_failed_closeout(
+        repo_root,
+        owned=owned,
+        reason="commit_nonzero",
+        commit_tail=out,
+        receipt=receipt,
+        runner=runner,
+    )
     return {"committed": False, "reason": "commit_nonzero", "untracked": untracked,
-            "commit_tail": out[-600:], "rolled_back": True}
+            "owned": owned, "commit_tail": out[-600:], "rolled_back": True}

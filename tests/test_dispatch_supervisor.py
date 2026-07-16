@@ -716,6 +716,11 @@ def test_scheduler_pre_fire_guard_runs_once_before_worker(tmp_path: Path, monkey
     order: list[str] = []
 
     monkeypatch.setattr(
+        scheduler.phase_z, "recover_failed_closeout",
+        lambda **kwargs: order.append(f"recovery:{kwargs['repo_root']}")
+        or {"committed": False, "reason": "no_failed_closeout"},
+    )
+    monkeypatch.setattr(
         scheduler.phase_z, "run_pre_fire_guard",
         lambda **kwargs: order.append(f"guard:{kwargs['repo_root']}") or {"ran": True, "reason": "ok"},
     )
@@ -739,7 +744,51 @@ def test_scheduler_pre_fire_guard_runs_once_before_worker(tmp_path: Path, monkey
 
     assert decision["action"] == "fired"
     # exactly once, strictly before the worker spawns, against the given repo_root
-    assert order == [f"guard:{tmp_path}", "worker", "phase_z"]
+    assert order == [f"recovery:{tmp_path}", f"guard:{tmp_path}", "worker", "phase_z"]
+
+
+def test_scheduler_closeout_recovery_crash_does_not_suppress_guard(
+    tmp_path: Path, monkeypatch
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    _stub_pregate(monkeypatch)
+    called = {"guard": 0, "worker": 0}
+
+    monkeypatch.setattr(
+        scheduler.phase_z,
+        "recover_failed_closeout",
+        lambda **_kwargs: (_ for _ in ()).throw(RuntimeError("bad closeout receipt")),
+    )
+    monkeypatch.setattr(
+        scheduler.phase_z,
+        "run_pre_fire_guard",
+        lambda **_kwargs: called.__setitem__("guard", called["guard"] + 1) or {},
+    )
+    monkeypatch.setattr(
+        scheduler.worker,
+        "run_worker",
+        lambda **_kwargs: called.__setitem__("worker", called["worker"] + 1) or _ok_worker(),
+    )
+    monkeypatch.setattr(
+        scheduler.phase_z,
+        "run_phase_z",
+        lambda **_kwargs: {"committed": False, "reason": "clean"},
+    )
+
+    decision = asyncio.run(scheduler._tick_once(
+        state_path=state_path,
+        cron_expr="7 * * * *",
+        prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log",
+        dry_run=False,
+        repo_root=tmp_path,
+    ))
+
+    assert decision["action"] == "fired"
+    assert called == {"guard": 1, "worker": 1}
 
 
 def test_scheduler_pre_fire_guard_crash_does_not_prevent_fire(tmp_path: Path, monkeypatch) -> None:

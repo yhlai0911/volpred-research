@@ -706,6 +706,15 @@ async def _tick_once(
     # guards (same rationale as the phase_z call below).
     if not dry_run and not current_jobs:
         try:
+            recovery_outcome = await asyncio.to_thread(
+                phase_z.recover_failed_closeout, repo_root=repo_root,
+            )
+            LOG.info("phase_z failed-closeout recovery outcome=%s", recovery_outcome)
+        except Exception as exc:  # noqa: BLE001
+            # Recovery is additive. It must never suppress the pre-existing
+            # conflict guard or veto the fire if its own receipt is damaged.
+            LOG.warning("phase_z failed-closeout recovery failed (non-fatal): %s", exc)
+        try:
             guard_outcome = await asyncio.to_thread(phase_z.run_pre_fire_guard, repo_root=repo_root)
             LOG.info("pre_fire_guard outcome=%s", guard_outcome)
         except Exception as exc:  # noqa: BLE001

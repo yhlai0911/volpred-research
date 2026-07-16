@@ -57,6 +57,10 @@ def _snapshot_file(repo: Path) -> Path:
     return repo / ".git" / phase_z._SNAPSHOT_BASENAME
 
 
+def _failed_closeout_file(repo: Path) -> Path:
+    return repo / ".git" / phase_z._FAILED_CLOSEOUT_BASENAME
+
+
 def _run(repo: Path, alerts: list[dict]) -> dict:
     """run_phase_z reading the REAL on-disk snapshot (pre_fire_dirty not injected)."""
     return phase_z.run_phase_z(
@@ -79,11 +83,70 @@ def test_blocked_commit_keeps_baseline_and_never_degrades(repo: Path):
     assert first["reason"] == "commit_nonzero"
     assert "BLOCKED" in first["commit_tail"]  # the actionable fact travels with the outcome
     assert _snapshot_file(repo).exists(), "failed commit must not consume the baseline"
+    assert _failed_closeout_file(repo).exists(), "failed ownership must survive the drain cap"
 
     second = _run(repo, alerts)
     assert second["reason"] == "commit_nonzero", (
         f"retry degraded to {second['reason']!r} — baseline was lost")
     assert not any("沒有 fire 起始基線" in a.get("title", "") for a in alerts)
+
+
+def test_hash_pinned_closeout_recovers_after_gate_is_fixed(repo: Path):
+    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
+    (repo / "out.txt").write_text("agent output\n")
+    _install_blocking_hook(repo)
+    assert _run(repo, [])["reason"] == "commit_nonzero"
+
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 0\n")
+    hook.chmod(0o755)
+    recovered = phase_z.recover_failed_closeout(
+        repo_root=repo,
+        test_runner=lambda *a, **k: subprocess.CompletedProcess([], 0, "", ""),
+        alert_fn=lambda **k: {},
+    )
+
+    assert recovered["committed"] is True
+    assert "out.txt" in _git(repo, "show", "--name-only", "--format=", "HEAD").split()
+    assert not _failed_closeout_file(repo).exists()
+    assert not _git(repo, "status", "--porcelain").strip()
+
+
+def test_hash_pinned_closeout_refuses_later_edits(repo: Path):
+    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
+    (repo / "out.txt").write_text("agent output\n")
+    _install_blocking_hook(repo)
+    assert _run(repo, [])["reason"] == "commit_nonzero"
+    before_head = _git(repo, "rev-parse", "HEAD").strip()
+
+    (repo / "out.txt").write_text("edited by a later session\n")
+    alerts: list[dict] = []
+    recovered = phase_z.recover_failed_closeout(
+        repo_root=repo,
+        alert_fn=lambda **k: alerts.append(k) or {},
+    )
+
+    assert recovered["reason"] == "hash_mismatch"
+    assert _git(repo, "rev-parse", "HEAD").strip() == before_head
+    assert _failed_closeout_file(repo).exists()
+    assert alerts and alerts[0]["level"] == "critical"
+
+
+def test_failed_closeout_accumulates_distinct_later_batches(repo: Path):
+    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
+    (repo / "first.txt").write_text("first\n")
+    _install_blocking_hook(repo)
+    assert _run(repo, [])["reason"] == "commit_nonzero"
+
+    # A later cohort starts with the first batch already dirty and produces a
+    # distinct path. Its ownership must append, not erase the first receipt.
+    assert phase_z._write_pre_fire_snapshot(repo, {"first.txt"}, subprocess.run)
+    (repo / "second.txt").write_text("second\n")
+    assert _run(repo, [])["reason"] == "commit_nonzero"
+
+    payload = json.loads(_failed_closeout_file(repo).read_text())
+    assert {entry["path"] for entry in payload["paths"]} == {"first.txt", "second.txt"}
+    assert len(payload["receipts"]) == 2
 
 
 def test_blocked_candidate_preserves_head_index_and_working_bytes(repo: Path):

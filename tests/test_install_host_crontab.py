@@ -22,6 +22,19 @@ def test_git_push_backup_has_one_canonical_schedule_owner() -> None:
     assert item["piggy_back_enabled"] is True
 
 
+def test_market_closure_detector_has_one_canonical_schedule_owner() -> None:
+    """The :00 host-cron fallback really fires on macOS and duplicated launchd."""
+    config = json.loads((ROOT / "config" / "runtime_schedules.json").read_text(encoding="utf-8"))
+    item = next(
+        entry
+        for entry in config["system_crontab"]["items"]
+        if entry["id"] == "market_closure_detect"
+    )
+
+    assert item["mechanism"] == "launchd"
+    assert item["host_crontab_managed"] is False
+
+
 def test_targeted_reconcile_removes_git_push_host_leg(tmp_path: Path) -> None:
     state = tmp_path / "crontab.txt"
     state.write_text(
