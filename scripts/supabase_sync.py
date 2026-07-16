@@ -10,10 +10,12 @@ import hashlib
 import json
 import os
 import re
+import socket
+import time
 from collections.abc import Mapping
 from pathlib import Path
 from urllib.request import Request, urlopen
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 
 try:
@@ -102,11 +104,47 @@ def _remote_reads_blocked() -> bool:
     return os.environ.get("VOLPRED_NO_REMOTE_READ") == "1"
 
 
+_RETRY_MAX_ATTEMPTS = 3
+_RETRY_HTTP_STATUS = frozenset({429, 500, 502, 503, 504})
+
+
+def _is_replay_safe(req) -> bool:
+    """Whether re-sending this request can add a second row.
+
+    GET/PATCH/DELETE address rows by filter and a POST carrying ``on_conflict``
+    is an upsert, so replaying any of them converges on the same state. A bare
+    POST does not: if the timeout struck after the server had committed the
+    insert, a retry would duplicate the row.
+    """
+    method = req.get_method()
+    if method in {"GET", "PATCH", "DELETE"}:
+        return True
+    if method == "POST":
+        return "on_conflict=" in req.full_url
+    return False
+
+
+def _is_transient(exc: BaseException) -> bool:
+    """Whether the failure is the network flaking rather than a real rejection."""
+    if isinstance(exc, HTTPError):  # subclass of URLError — must be checked first
+        return exc.code in _RETRY_HTTP_STATUS
+    if isinstance(exc, URLError):
+        return isinstance(exc.reason, (socket.timeout, TimeoutError, ConnectionError, OSError))
+    return isinstance(exc, (socket.timeout, TimeoutError, ConnectionError))
+
+
 def _urlopen(req, timeout: int = 15):
     """Single egress chokepoint for every Supabase HTTP call.
 
     Gating here rather than at each of the seven request helpers means a newly added
     read cannot forget the switch — the same reasoning as the HEADERS guard below.
+
+    The same chokepoint absorbs transient network failures. A single timed-out
+    socket used to abort whichever caller happened to be running: on 2026-07-16
+    it exited `paper_sync_all` non-zero (raising a critical host_cron_fail for a
+    blip that cured itself) and failed the publish read-back of an article that
+    had in fact synced. Only replay-safe requests are retried, so absorbing a
+    flake can never duplicate a row.
     """
     if req.get_method() == "GET" and _remote_reads_blocked():
         raise RuntimeError(
@@ -115,7 +153,20 @@ def _urlopen(req, timeout: int = 15):
             "production Supabase, which makes its result depend on live data. Stub "
             "the fetch helper this call path uses instead of relaxing the switch."
         )
-    return urlopen(req, timeout=timeout)
+    for attempt in range(1, _RETRY_MAX_ATTEMPTS + 1):
+        try:
+            return urlopen(req, timeout=timeout)
+        except Exception as exc:
+            last = attempt == _RETRY_MAX_ATTEMPTS
+            if last or not _is_transient(exc) or not _is_replay_safe(req):
+                raise
+            delay = 2 ** (attempt - 1)
+            print(
+                f"  [supabase_sync] WARN transient {type(exc).__name__} on "
+                f"{req.get_method()} {req.full_url.split('?')[0]} "
+                f"(attempt {attempt}/{_RETRY_MAX_ATTEMPTS}, retry in {delay}s): {exc}"
+            )
+            time.sleep(delay)
 
 class _GuardedHeaders(Mapping):
     """Request headers that refuse to materialise without credentials.
