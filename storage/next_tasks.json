@@ -31096,7 +31096,7 @@
     "description": "收尾 experiments/K1678/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T09:16:48.626840+00:00）。\n證據：experiments/K1678/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1678'); finished 1.4 days ago; orphan backlog this run: 67 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "source": "dreaming",
     "created_at": "2026-07-12T09:16:48.626840+00:00",
     "dreaming": {
@@ -31136,14 +31136,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
+      },
+      {
+        "ts": "2026-07-16T13:50:03.509209+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-16T11:11:40.170580+00:00",
-    "last_released_at": "2026-07-15T14:50:02.492869+00:00",
-    "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
-    "claimed_at": "2026-07-16T11:09:29.695847+00:00",
-    "claim_session_id": "31ed79b536b9"
+    "last_released_at": "2026-07-16T13:50:03.509197+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "dreaming_orphaned_experiment_k1677",
@@ -32124,7 +32128,7 @@
     "description": "收尾 experiments/k1625/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：experiments/k1625/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1625'); finished 8.4 days ago; orphan backlog this run: 63 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "source": "dreaming",
     "created_at": "2026-07-12T22:00:14.861047+00:00",
     "dreaming": {
@@ -32133,9 +32137,6 @@
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
     },
-    "claimed_by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
-    "claimed_at": "2026-07-16T11:09:29.972362+00:00",
-    "claim_session_id": "ba44b8efa786",
     "status_history": [
       {
         "ts": "2026-07-16T11:09:29.972379+00:00",
@@ -32148,9 +32149,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
+      },
+      {
+        "ts": "2026-07-16T13:50:03.509223+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-16T11:11:40.436008+00:00"
+    "started_at": "2026-07-16T11:11:40.436008+00:00",
+    "last_released_at": "2026-07-16T13:50:03.509221+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "k1702_codex_primary_path_reverify",
@@ -35490,13 +35500,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T13:01:19.508165+00:00",
+    "completed_at": "2026-07-16T14:00:54.195304+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T13:01:19.508165+00:00",
-      "last_clean_observed_at": "2026-07-16T13:01:19.508165+00:00"
+      "resolved_at": "2026-07-16T14:00:54.195304+00:00",
+      "last_clean_observed_at": "2026-07-16T14:00:54.195304+00:00"
     }
   },
   {
@@ -35508,13 +35518,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T12:20:01.300076+00:00",
+    "completed_at": "2026-07-16T13:13:43.992723+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T12:20:01.300076+00:00",
-      "last_clean_observed_at": "2026-07-16T12:20:01.300076+00:00"
+      "resolved_at": "2026-07-16T13:13:43.992723+00:00",
+      "last_clean_observed_at": "2026-07-16T13:13:43.992723+00:00"
     }
   },
   {
@@ -37161,10 +37171,29 @@
         "to": "pending",
         "by": "codex-failover-slot-1-288354348003490e955397e456cbb166",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-16T14:01:35.082970+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-4294c373e4f14dc98444830fd9dbc591"
+      },
+      {
+        "ts": "2026-07-16T14:01:44.124918+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-4294c373e4f14dc98444830fd9dbc591"
+      },
+      {
+        "ts": "2026-07-16T14:02:22.602338+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover-slot-1-4294c373e4f14dc98444830fd9dbc591",
+        "note": "manual_release"
       }
     ],
-    "started_at": "2026-07-16T08:08:55.845523+00:00",
-    "last_released_at": "2026-07-16T08:10:20.633549+00:00"
+    "started_at": "2026-07-16T14:01:44.124903+00:00",
+    "last_released_at": "2026-07-16T14:02:22.602323+00:00"
   },
   {
     "id": "K1715",
@@ -40504,10 +40533,29 @@
         "to": "pending",
         "by": "codex-failover-slot-1-a56566ffb1624435bfc9191fc165edbc",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-16T14:08:37.607915+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-a0188e79c303407c92e7dd6466489cd0"
+      },
+      {
+        "ts": "2026-07-16T14:08:37.836796+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-a0188e79c303407c92e7dd6466489cd0"
+      },
+      {
+        "ts": "2026-07-16T14:20:54.698745+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover-slot-2-a0188e79c303407c92e7dd6466489cd0",
+        "note": "manual_release"
       }
     ],
-    "started_at": "2026-07-16T03:09:30.795668+00:00",
-    "last_released_at": "2026-07-16T05:50:03.391214+00:00",
+    "started_at": "2026-07-16T14:08:37.836781+00:00",
+    "last_released_at": "2026-07-16T14:20:54.698731+00:00",
     "last_release_reason": "auto_release_stale_2h"
   },
   {
@@ -41037,5 +41085,52 @@
       }
     ],
     "completed_at": "2026-07-16T12:44:11.764070+00:00"
+  },
+  {
+    "id": "telegram-877",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "pending",
+    "created_at": "2026-07-16T13:46:16.763287+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 877）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n今天大家都在討論韓國記憶體、台積電財報，但真正值得警惕的，可能是另一件事：SpaceX 跌破 135 美元的發行價！\n​\n從最高點已經下跌 40%......如果上市首日進場追價，到現在也已經吃下 20% 的修正跌幅。\n​\n那麼為什麼上市前人人喊買、擁有無限前景的太空資料中心，到現在卻甚至破發呢？這對於近期震盪的 AI 行情來說，是什麼樣的訊號嗎？\n​\n<財經捕手｜今日總經拆解：SpaceX 跌破發行價！為什麼市場不追捧了？>\n​\n​\n■「債務壓力」是現在市場最不能接受的因子之一\n​\n回顧 SPCX 這一個月以來的走勢，可以發現導致破發的關鍵時間點落在 6/22，當天大跌高達 16.5%！主要原因是：\n​\n在 IPO 後馬上就發行規模高達 250 億美元的公司債！一開始很順利，認購額接近 4 倍約 900 億美元，顯示市場對債券的需求相當旺盛。\n​\n但當這筆債券進入二級市場交易後馬上出現快速下跌：僅不到一個月居然就下跌超過 8%！\n​\n甚至殖利率高達 7.5%，幾乎相當於是「垃圾債」的等級！CDS 也上升不少……\n​\n現在市場對於「債務壓力」的容忍度很低，因為開始更為關注投資回報。那些債務壓力大的公司比如：甲骨文、CoreWeave等，股價也都相當疲軟。\n​\n所以股價的疲軟，可能來自於公司債市場價格下跌的溢出效應導致！也可以從這方面關注 Hyperscalers 的變動，畢竟 CDS 也都有上升跡象。\n​\n所以未來除了關注 AI 公司財報之外，也必須追蹤公司債價格、CDS 是否持續惡化等。\n​\n​\n■ 重磅公司 IPO 往往是觀察市場情緒的好指標\n​\n以下是我在 5/31 報告的部分分析內容：\n​\n從情緒面角度思考，這樣的重磅公司 IPO（SPCX）如果出現利多不漲，或是拉出週線等級的長上影線，可能是市場上漲動能暫時休息的訊號！\n​\n一個比較明顯的例子是 ARM 在 2023/9/14 正式上市，當天大漲 13%，隔天一度大漲 8.5% 後翻黑收跌 4.5%，結果 S&P500 就一路下跌近 10%，甚至跌破年線......\n​\n雖然當時的背景是美債殖利率飆升所導致，但重要 IPO 公司是否出現利多不漲，也是觀察情緒面的重要參考之一。\n​\n當時也包括這層考量，才能成功掌握到震盪盤的轉折變化！\n​\n所以現在也要重點關注剛在美股上市的SK海力士（SKHY），是一個衡量短期情緒面不錯的參考指標。\n\n\n這篇文章，你能拆解出哪些研究議題？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+  },
+  {
+    "id": "ci-red-29500450690",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29500450690",
+    "ci_run_key": "29500450690:1",
+    "created_at": "2026-07-16T14:00:05.649767+00:00",
+    "title": "CI 紅燈修復（run 29500450690, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29500450690\nattempt: 1\nhead_sha: 7b47adb07\n偵測摘要（仍須讀完整 failed log）：2026-07-16T13:12:15.8997528Z scripts/tests/test_git_writer_lock.py:565: AssertionError\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29500450690 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-16T14:02:31.586327+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-4294c373e4f14dc98444830fd9dbc591"
+      },
+      {
+        "ts": "2026-07-16T14:02:31.819759+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-4294c373e4f14dc98444830fd9dbc591"
+      },
+      {
+        "ts": "2026-07-16T14:13:57.849397+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-4294c373e4f14dc98444830fd9dbc591"
+      }
+    ],
+    "started_at": "2026-07-16T14:02:31.819746+00:00",
+    "completed_at": "2026-07-16T14:13:57.849384+00:00",
+    "result": "root_cause=telegram responder migrated from vanished Homebrew jq to system Python, but test_git_writer_lock retained the removed jq expression; repair_commit=e1e618ab9; verification=26 targeted tests passed and obsolete jq invariant has zero repo occurrences; full local suite reached 3206 passed with 7 unrelated canonical-checkout isolation failures absent from clean CI"
   }
 ]
