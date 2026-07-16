@@ -301,3 +301,22 @@
 - 明確 `3-STRIKE TRIGGER` 標記 entry：**26 條**（含大小寫變體共 36 條提及）。Q2=12、Q3=14、Q1=0。全文在對應季 archive。
 - 依 class（明確標記為主）：**§A 並發/dispatch** 最密集（2026-06-23 META、07-12 ×2、07-01 hourly-auth 等）；**§B git-owner/canonical-write**（07-10 ×2）；**§D silent-fallback**（06-20、06-23 test-hook）；**§E dedup/K-id**（06-10、06-23）；**§H final-text**（07-02 ×2）；**§I chart**（07-14、07-13）；**§J dreaming**（07-01）；**§K pool**（06-14）；**§L paper**（05-22）；**§M series**（07-06）；**§C worktree**（07-12 K1032）。
 - 查全部：`grep -rn '3-STRIKE' docs/error_log_archive/`。
+
+## 2026-07-16 dreaming memory-skill gap 聚合 signature 吞掉新問題，且 owner 只靠名稱猜測 — FIXED
+
+**根因**：`detect_memory_governance` 把所有候選聚成固定
+`memory_skill_gap:uncodified_process`。Task queue 又按 signature-derived id 去重，因此舊 task
+一旦 succeeded，往後不同的 memory gap 會被永久視為「已處理」。Coverage 只檢查 index 文字
+是否含 skill 資料夾名，且把泛用 `auto` 當 cadence，造成已有 skill/reference 的流程連續入池，
+同時沒有驗證 owner 內容是否已 drift。
+
+**修復**：每個 memory stem 使用獨立 signature；memory 可宣告指向實存檔案的
+`process_owner`，並保留既有 skill cross-link 掃描；移除 `auto` 泛關鍵字。逐筆稽核時另修出三個
+真 drift：Telegram responder 以 responder-only `autoMemoryDirectory` 綁回 canonical memory、
+paper submission 同步 2026-07-09 自主投稿授權、platform-ops dreaming 文件同步 7/12 actuator
+預設開啟。`detect_memory_governance` 對真實 memory 回傳 0 個未歸屬流程；46 個 dreaming tests、
+1 個 responder canonical-lease test、shell syntax、Python compile、`git diff --check` 全通過。
+
+**教訓**：會漂移的 evidence 不得共用固定 dedup identity；「owner 存在」必須是可驗證路徑，
+而不是名字相似。隔離 cwd 的 agent，`--add-dir` 只授權工具存取，不等於切換 auto-memory
+namespace；同一大腦契約要在 runtime setting 明確綁定。

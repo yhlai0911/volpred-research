@@ -2,8 +2,9 @@
 """DEPRECATED (2026-07-10 memory-unify)：Telegram 專用長期記憶已廢棄。
 
 記憶已統一到 **auto-memory**（`~/.claude/projects/-Users-yhlai0911-volpred-research/memory/`）——
-headless `telegram_responder` 啟動時 `claude -p` 會自動載入同一份大腦（MEMORY.md 索引 +
-CLAUDE.md），與老闆在 VS Code 互動 session 用的是**同一份記憶**。老闆經 Telegram 交代的
+headless `telegram_responder` 雖從 repo 外 scratch cwd 啟動，但 runtime settings 明確用
+`autoMemoryDirectory` 指向同一份大腦（MEMORY.md 索引 + CLAUDE.md），與老闆在 VS Code
+互動 session 用的是**同一份記憶**。老闆經 Telegram 交代的
 長期指示，由 responder 用其 system 內建的 memory 系統寫進 auto-memory（一檔一事實 +
 MEMORY.md pointer），不再走這個平行 append-only 檔。
 
@@ -27,7 +28,7 @@ DEPRECATION_LOG = ROOT / "storage" / "ops" / "telegram_memory_deprecated_writes.
 MEM_DIR = "~/.claude/projects/-Users-yhlai0911-volpred-research/memory/"
 MSG = (
     "[telegram_memory.py DEPRECATED 2026-07-10] 記憶已統一到 auto-memory "
-    f"({MEM_DIR})。telegram_responder 啟動時自動載入同一份大腦；長期指示改用內建 "
+    f"({MEM_DIR})。telegram_responder 以 autoMemoryDirectory 明確載入同一份大腦；長期指示改用內建 "
     "memory 系統寫入（一檔一事實 + MEMORY.md pointer）。"
 )
 

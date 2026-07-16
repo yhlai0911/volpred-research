@@ -44,9 +44,9 @@ DEFAULT_STATUS_PATH = REPO_ROOT / "storage" / "paper_pipeline_status.json"
 
 # Terminal stages do not "stall" — a paper legitimately rests here.
 TERMINAL_STAGES = {"accepted", "rejected"}
-# Stages where the next move is owner-timed (submission decision); we still report
-# days-in-stage but do not scream STALL purely on age, to avoid nagging on
-# owner-gated waits. Stall is reported but tagged owner_gated for context.
+# Legacy field name retained for report compatibility. `under_journal_review` is an
+# external journal wait, not an owner-timed submission decision (superseded 2026-07-09).
+# Stall is still reported, tagged as an external wait for human-readable context.
 OWNER_GATED_STAGES = {"under_journal_review"}
 
 
@@ -144,7 +144,7 @@ def _format_alert_body(report: dict[str, Any]) -> str:
         "",
     ]
     for row in report["stalled_papers"]:
-        gated = " [owner-gated]" if row["owner_gated"] else ""
+        gated = " [external-wait]" if row["owner_gated"] else ""
         lines.append(
             f"- **{row['paper']}** ({row['journal_target']}) — stage `{row['stage']}`, "
             f"{row['days_in_stage']}d in stage{gated}\n  blocker: {row['blocker']}"

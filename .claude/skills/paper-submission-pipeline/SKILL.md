@@ -17,7 +17,7 @@ description: >
 
 **Root problem this solves**: the owner felt "papers are stalled." Diagnosis: papers
 are NOT short of findings — they stall at two ungoverned gates (experiment→narrative
-synthesis, and submission decision). The fix is to make each paper's progress
+synthesis, and submission execution). The fix is to make each paper's progress
 **observable** (stage tracker) and **driven** (gates + a stall detector that alerts
 when a paper sits at one stage too long), so stalls surface automatically.
 
@@ -39,7 +39,8 @@ draft -> revision -> compliance_scrub -> multi_round_review -> review_converged
 ```
 
 Each paper carries: `paper`, `journal_target`, `stage`, `stage_entered_at`,
-`blocker`, `last_advance_at`, `owner_decision_pending`.
+`blocker`, `last_advance_at`, `owner_decision_pending`（legacy compatibility；依
+2026-07-09 standing authorization，投稿本身不得再把它設為 true）.
 
 ---
 
@@ -74,7 +75,7 @@ posted to arXiv.** 最終版先丟 arXiv 佔位，找機會再丟目標期刊。
 | `-> review_converged` | **(a) CONTRIBUTION GATE first** (hard rule i), **then (b)** latex-academic-reviewer + citation-verifier + journal-review(target-specific) ALL pass with **0 HIGH findings**, iterated until convergence |
 | `-> arxiv_ready` | only papers past `review_converged` reach here; final manuscript compiles clean; all gates green; compliance re-verified |
 | `-> arxiv_posted` | post to arXiv first (hard rule ii — ready-for-submission only) |
-| `-> journal_submitted` | owner approval + target-journal portal submission (owner-timed: 找機會再丟) |
+| `-> journal_submitted` | gates 全綠後由主線程自主完成 target-journal portal submission；不逐篇再問 owner。若缺登入、付款或法律聲明等外部輸入，寫入 `blocker`，不是重開投稿決策 |
 
 ### Compliance gate (the `-> multi_round_review` bar)
 Compliance prose 的唯一 owner = **`journal-review` Step 6**（authorship = Yi-Hao Lai only;
@@ -142,7 +143,8 @@ This makes "decision changed but website not synced" an auto-surfaced signal.
 1. Paper clears `review_converged` (contribution + reviews + compliance).
 2. `arxiv_ready`: final manuscript compiles clean, compliance re-verified.
 3. `arxiv_posted`: post to arXiv to claim priority — **ready-for-submission papers only**.
-4. `journal_submitted`: owner approval + portal submission, owner-timed.
+4. `journal_submitted`: gates 全綠後自主 portal submission；7/9 standing authorization
+   已取代逐篇 owner approval。只有客觀外部輸入缺口才 block。
 
 Drafts / in-revision papers never skip ahead to arXiv. Priority claiming only protects
 a manuscript that is genuinely ready.
@@ -152,6 +154,7 @@ a manuscript that is genuinely ready.
 ## Tracker update conventions
 - One stage advance = update `stage`, set `stage_entered_at` + `last_advance_at` to now
   (ISO-8601 with `+08:00`), and replace `blocker` with the next gate's blocker (or "").
-- Set `owner_decision_pending: true` when the next move is owner-timed (submit decisions).
+- `owner_decision_pending` 為 legacy 欄位，投稿決策一律維持 `false`。缺 portal credential、
+  payment 或法律聲明時，精確寫 `blocker`；不得用此欄把已授權的投稿工作退回 owner。
 - Never hand-edit to skip a gate's CHECK criteria — that defeats the observability the
   process exists to provide. Advance only after the gate verifiably passes.

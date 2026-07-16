@@ -172,6 +172,7 @@
 - **若新任務與當前上下文、已載入 skills、或目前正在處理的專案文件無直接關聯，必須另開一個乾淨的 sub-agent 處理。**
 - 用 sub-agent 的目的是隔離大搜尋、大量 logs、文件探索與無關 side task，減少 context 汙染與 token 損耗。
 - **外部論文 / 文件 / 法規 / 大型網頁 RAG → `/notebooklm`**（不要拉整篇 PDF/HTML 進 context）。觸發時機：cross-paper meta-eval、prior-art audit、reviewer R1 drafting、開新方向深挖文獻、paper intro 寫作、法規/公告查詢。**主線程已被授權自主**判斷需要哪些文獻、自主下載 PDF 上傳建主題式 notebook、自主 query 作 RAG（不必逐次徵詢）— 只有大量 quota 消耗（≥10 notebook 或 ≥50 sources）/ audio·video 生成 / 投稿決策仍需確認。完整 SOP 見 `~/.claude/skills/notebooklm/SKILL.md`；專案觸發時機 + 授權範圍細節見 user memory `reference_notebooklm_rag_workflow`。對比：自家 `knowledge.json` / experiments 用 LanceDB（`scripts/build_knowledge_index.py update`），不混用。
+- **2026-07-09 投稿授權 supersession**：上句末尾「投稿決策仍需確認」已被老闆 msg 309 取代；方法、敘事、期刊與投稿時機由主線程以 acceptance probability 為目標自主決定，ready 後直接推進。只有登入/MFA、付款、法律聲明或作者親簽等不可代理外部輸入才回報 blocker。Canonical SOP：`paper-submission-pipeline`；memory：`feedback_paper_autonomy_optimize_acceptance`。
 - `context_window.used_percentage` 行為邊界：
   - `<55%`：正常工作
   - `55-62%`：避免開新 noisy side task；優先 fork subagent 或先收斂

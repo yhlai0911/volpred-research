@@ -24,16 +24,19 @@
 
 `overall` = 最差子狀態（`unknown`/`low_coverage` 不升級）。
 
-## Dreaming 的 5 類 detector
+## Dreaming detector
 
-repeated_tool_failure / recurring_error / stale_knowledge / missing_retry_strategy / loop_metric_regression。每個 fail-open（warn 後 skip）。輸出 `storage/ops/dreaming/<date>.json` + 滾動 `baseline.json`（per-signature 連續 run strike count）。
+目前涵蓋 repeated_tool_failure / recurring_error / stale_knowledge /
+missing_retry_strategy / loop_metric_regression / semantic_concentration /
+memory_governance / persistent_alert / orphaned_experiment。每個 fail-open（warn 後 skip）。
+輸出 `storage/ops/dreaming/<date>.json` + 滾動 `baseline.json`（per-signature 連續 run strike count）。
 
 ## Auto vs Propose — 硬邊界（研究誠實 + 永遠修流程不修資料）
 
 讀 dreaming report 時依 `remediation` 欄判斷：
 
 - **AUTO（一律安全，dreaming 自己做）**：寫 dated report、append `autonomous_decisions.jsonl`、寄 email。
-- **AUTO-DISPATCH（低風險衍生狀態，建修復 task）**：gate 在 `--apply-auto`（**預設關**），且只對 three-strike escalation。預設 daily run 不派工 → 先人工審。
+- **AUTO-DISPATCH（低風險衍生狀態，建修復 task）**：actuator 自 2026-07-12 **預設開啟**。`auto_dispatch` finding（如 missing retry / orphan）在 warn 即進 `storage/next_tasks.json`；`propose_only` finding 連續 3 晚仍存在才進 queue，且 task 只要求 agent 審核，不直接改治理檔。`--dry-run` 才不派工。
 - **PROPOSE-ONLY（治理檔，絕不自動改）**：`docs/error_log.md` / `.claude/rules/*` / `CLAUDE.md` / `storage/memory/knowledge.json` / `docs/refactor_plan_*`。dreaming 只把建議寫進 report 的 `proposal` 欄 + `governance_target` + email。**主線程審完才手動套用。**
 
 ## Three-strike 升級

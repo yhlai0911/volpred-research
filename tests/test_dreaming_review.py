@@ -650,6 +650,63 @@ def test_a_warn_level_orphaned_failure_still_gets_queued(tmp_path):
     assert queued[0]["priority"] == 3, "warn is P3; critical would be P2"
 
 
+def test_memory_governance_only_flags_unowned_recurring_processes(tmp_path, monkeypatch):
+    """Coverage is an audited owner, not a skill-name substring coincidence.
+
+    This locks the 2026-07-16 regression: five already-codified workflows were
+    re-queued nightly, while `auto-memory` (an architecture noun) was mistaken for
+    a recurring process solely because the old keyword list contained `auto`.
+    """
+    storage = _storage(tmp_path)
+    project = tmp_path / "claude-project"
+    memory = project / "memory"
+    memory.mkdir(parents=True)
+    monkeypatch.setattr(dr, "detect_claude_projects_dir", lambda: project)
+
+    owner = tmp_path / ".claude" / "skills" / "owned" / "SKILL.md"
+    owner.parent.mkdir(parents=True)
+    owner.write_text("# owner\n\nCross-link: crosslinked_process.md\n", encoding="utf-8")
+
+    (memory / "MEMORY.md").write_text(
+        "\n".join(
+            [
+                "- [architecture.md](architecture.md) — shared auto-memory invariant",
+                "- [owned.md](owned.md) — 每日 workflow",
+                "- [crosslinked_process.md](crosslinked_process.md) — 每週巡檢",
+                "- [invalid_owner.md](invalid_owner.md) — 每月流程",
+                "- [unowned.md](unowned.md) — 每日排程",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (memory / "architecture.md").write_text("architecture only", encoding="utf-8")
+    (memory / "owned.md").write_text(
+        "---\nprocess_owner: .claude/skills/owned/SKILL.md\n---\n",
+        encoding="utf-8",
+    )
+    (memory / "crosslinked_process.md").write_text("recurring process", encoding="utf-8")
+    (memory / "invalid_owner.md").write_text(
+        "---\nprocess_owner: .claude/skills/missing/SKILL.md\n---\n",
+        encoding="utf-8",
+    )
+    (memory / "unowned.md").write_text("recurring process", encoding="utf-8")
+
+    findings = dr.detect_memory_governance(str(storage), {}, NOW)
+
+    gaps = [f for f in findings if f.pattern_type == "memory_skill_gap"]
+    evidence = "\n".join(item for gap in gaps for item in gap.evidence)
+    signatures = {gap.signature for gap in gaps}
+    assert signatures == {
+        "memory_skill_gap:invalid_owner",
+        "memory_skill_gap:unowned",
+    }, "each process needs its own durable task identity"
+    assert "invalid_owner.md" in evidence, "a stale owner path must not suppress the gap"
+    assert "unowned.md" in evidence
+    assert "architecture.md" not in evidence, "`auto-memory` is not a cadence signal"
+    assert "[owned.md]" not in evidence
+    assert "[crosslinked_process.md]" not in evidence
+
+
 def test_main_exits_zero_even_when_all_detectors_fail(tmp_path, monkeypatch):
     storage = _storage(tmp_path)
 

@@ -124,6 +124,10 @@ boss 原話：「你應該不是建議行動 而是你應該要直接行動吧�
 boss-facing 決策段，且須明標「## 需老闆決策」而非「建議行動」。此為 boss-facing 措辭原則，
 與 `feedback_plain_language_boss_facing`（白話化）並列。
 
+**2026-07-09 supersession**：上段的「投稿與否」不再是 owner-policy 例外；msg 309 已授權主線程
+自主選期刊與投稿時機。只有登入/MFA、付款、法律聲明、作者親簽等不可代理外部輸入才可發
+needs-reply，且 blocker 必須寫具體缺口，不得泛稱「等待投稿決策」。
+
 ## Body 三段結構（用戶 2026-04-19 要求）
 
 每個 alert body 必須是 **三段結構**，不要只 dump 事實數字：

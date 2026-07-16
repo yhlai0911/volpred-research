@@ -117,11 +117,9 @@ PERSISTENT_ALERT_DELEGATED_OWNERS = {
 }
 
 # 2026-07-01 fix (boss email-12419: CRITICAL email for something already fixed):
-# memory_skill_gap / memory_hygiene are periodic-curation findings, not acute
-# bug recurrences — their trigger condition (some memory line uses a process
-# keyword without an exact skill-name substring match; feedback-memory count
-# >= 45) is structurally near-permanent given this project's memory system
-# naturally grows past these thresholds and stays there. Feeding them through
+# memory_skill_gap / memory_hygiene are governance-curation findings, not acute
+# runtime failures. A real unowned process may remain open for several reviews,
+# while feedback-memory count naturally stays above its threshold. Feeding them through
 # the SAME three-strike → critical escalation ladder as detect_repeated_tool_
 # failures/detect_persistent_alerts (designed for things that SHOULD reach
 # zero) guarantees a false "critical, unresolved" alarm every ~3 runs forever,
@@ -540,6 +538,81 @@ def detect_semantic_concentration(
     return out
 
 
+_PROCESS_MEMORY_KEYWORDS = (
+    "流程", "排程", "每日", "每週", "每月", "cadence", "持續", "patrol", "巡檢", "workflow",
+)
+_MEMORY_LINK_RE = re.compile(r"\]\(([^)]+\.md)\)")
+_SKILL_PATH_RE = re.compile(r"(?:~/)?\.claude/skills/[A-Za-z0-9_./-]+")
+
+
+def _process_owner_exists(raw_owner: str, repo_root: Path) -> bool:
+    """Resolve an audited process owner declared by a memory note.
+
+    `process_owner` is deliberately a path, not a free-text skill label: the
+    detector can verify that the canonical skill/rule/schedule still exists.
+    Relative owners are repo-relative; user-level Claude skills may use `~/`.
+    """
+    value = raw_owner.strip().strip("`\"'").rstrip(".,;:，。；：")
+    if not value:
+        return False
+    owner = Path(value).expanduser()
+    if not owner.is_absolute():
+        owner = repo_root / owner
+    return owner.exists()
+
+
+def _memory_process_is_covered(
+    line: str,
+    *,
+    mem_dir: Path,
+    repo_root: Path,
+    skill_names: set[str],
+    skill_corpus: str,
+) -> bool:
+    """Return True only when a recurring-process memory has a verifiable owner.
+
+    The old detector considered a memory covered only when its index line happened
+    to contain a skill *directory name*. That missed references and user-level
+    skills, so already-codified workflows became the same nightly backlog item.
+    """
+    normalized_line = line.lower().replace("-", "").replace("_", "")
+    if any(
+        name.replace("-", "").replace("_", "") in normalized_line
+        for name in skill_names
+        if len(name) > 5
+    ):
+        return True
+
+    link = _MEMORY_LINK_RE.search(line)
+    if not link:
+        return False
+    memory_path = mem_dir / Path(link.group(1)).name
+    memory_stem = memory_path.stem.lower()
+    if memory_stem and memory_stem in skill_corpus:
+        return True
+    try:
+        body = memory_path.read_text(encoding="utf-8", errors="replace")
+    except OSError as exc:
+        warn(
+            "dreaming",
+            "memory process note read failed; treating as unowned",
+            path=str(memory_path),
+            err=str(exc),
+        )
+        return False
+
+    declared = re.search(r"(?m)^process_owner:\s*(.+?)\s*$", body)
+    if declared and _process_owner_exists(declared.group(1), repo_root):
+        return True
+
+    # Backward compatibility for notes that already point directly at their
+    # canonical skill but predate the structured `process_owner` field.
+    return any(
+        _process_owner_exists(match.group(0), repo_root)
+        for match in _SKILL_PATH_RE.finditer(body)
+    )
+
+
 def detect_memory_governance(
     storage_dir: str, snapshot: dict[str, Any], now: datetime
 ) -> list[DreamFinding]:
@@ -551,37 +624,56 @@ def detect_memory_governance(
     index = mem_dir / "MEMORY.md"
     if not index.exists():
         return out  # silent-ok: auto-memory 不在此機就跳過（fail-open）
-    skills_dir = Path(storage_dir).resolve().parent / ".claude" / "skills"
+    repo_root = Path(storage_dir).resolve().parent
+    skills_dir = repo_root / ".claude" / "skills"
     skills = (
         {p.name.lower() for p in skills_dir.iterdir() if p.is_dir()}
         if skills_dir.exists() else set()
     )
+    skill_corpus_parts: list[str] = []
+    if skills_dir.exists():
+        for path in skills_dir.rglob("*.md"):
+            try:
+                skill_corpus_parts.append(path.read_text(encoding="utf-8", errors="replace").lower())
+            except OSError as exc:
+                warn(
+                    "dreaming",
+                    "skill coverage file read failed; excluding from owner index",
+                    path=str(path),
+                    err=str(exc),
+                )
+                continue
+    skill_corpus = "\n".join(skill_corpus_parts)
     lines = [
         ln.strip() for ln in index.read_text(errors="replace").splitlines()
         if ln.strip().startswith("- [")
     ]
-    proc_kw = ("流程", "排程", "每日", "每週", "cadence", "持續", "patrol", "巡檢", "workflow", "auto")
-    candidates: list[str] = []
+    candidates: list[tuple[str, str]] = []
     for ln in lines:
         low = ln.lower()
-        if not any(k in ln or k in low for k in proc_kw):
+        if not any(k in ln or k in low for k in _PROCESS_MEMORY_KEYWORDS):
             continue
-        covered = any(
-            s.replace("-", "").replace("_", "") in low.replace("-", "").replace("_", "")
-            for s in skills if len(s) > 5
-        )
-        if not covered:
-            candidates.append(ln[:120])
-    if candidates:
+        if not _memory_process_is_covered(
+            ln,
+            mem_dir=mem_dir,
+            repo_root=repo_root,
+            skill_names=skills,
+            skill_corpus=skill_corpus,
+        ):
+            link = _MEMORY_LINK_RE.search(ln)
+            identity = Path(link.group(1)).stem if link else re.sub(r"[^a-z0-9]+", "_", low)[:60]
+            candidates.append((identity, ln[:120]))
+    for identity, evidence in candidates:
         out.append(DreamFinding(
             pattern_type="memory_skill_gap",
-            signature="memory_skill_gap:uncodified_process",
+            # One process per signature/task. The old aggregate signature meant a
+            # succeeded July task permanently swallowed every future, unrelated gap.
+            signature=f"memory_skill_gap:{identity}",
             severity="info",
-            evidence=candidates[:6],
-            proposal="這些記憶描述 recurring process/cadence 但無對應 skill；評估 promote 成 "
+            evidence=[evidence],
+            proposal="這筆記憶描述 recurring process/cadence 但無對應 owner；評估 promote 成 "
                      "skill 或加排程/cadence（見 pdca-operations 技能治理 + operations-cadence）。",
             governance_target=".claude/skills/",
-            occurrences=len(candidates),
         ))
     feedback = [ln for ln in lines if "feedback_" in ln]
     if len(feedback) >= 45:
