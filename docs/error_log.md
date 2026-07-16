@@ -320,3 +320,18 @@ paper submission 同步 2026-07-09 自主投稿授權、platform-ops dreaming �
 **教訓**：會漂移的 evidence 不得共用固定 dedup identity；「owner 存在」必須是可驗證路徑，
 而不是名字相似。隔離 cwd 的 agent，`--add-dir` 只授權工具存取，不等於切換 auto-memory
 namespace；同一大腦契約要在 runtime setting 明確綁定。
+
+## 2026-07-16 完成語音從 always-loaded prose 降成從未觸發的 command — FIXED
+
+**現象 / 根因**：2026-04-26 為省 context，把「完成後 `say`」從 CLAUDE.md 移到
+`/task-done`；歷史 session 沒有實際 invocation，等同功能消失。直接新增另一支 Stop hook 又會
+違反 L1 單一 owner，且背景 hourly/worktree agent 每次 stop 都播會形成噪音風暴。
+
+**修復**：擴充既有 `scripts/hooks/enforce_final_text.py`：final text 合規後才處理語音；只接受
+canonical main cwd，blocker/question/worktree/scratch 皆跳過；task label 去 markup/URL/敏感字並
+限 24 字，以 argv 直呼 `/usr/bin/say`（不經 shell）；`session_id + final_text` 指紋加 fcntl state
+lock 防重播。`/task-done` 改為不再手動 say。Regression 9/9 覆蓋 tool-only、正常文字、hook
+迴圈、缺 transcript、空文字、正確 briefing、去重、background 靜音、blocker 靜音。
+
+**教訓**：移出 always-loaded 指引可以省 token，但若沒有機械 owner，on-demand command 可能永遠
+沒人呼叫。完成事件只能有一個 Stop owner；外部文字不可拼 shell command。
