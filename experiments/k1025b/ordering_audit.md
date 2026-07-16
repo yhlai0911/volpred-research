@@ -257,6 +257,9 @@ Pesaran & Shin (1998) Econ. Letters 58(1)；同類缺陷：K865b、K628b、K1025
 4. §2.2「全樣本」表混入 rolling mean。**已修**：表格加「口徑」欄，補 full-sample 誤切值 −88.62pp / 90.02%。
 5. `k1025b.py` print label `Net BTC (from - to)` 與內容相反（正是本次被稽核的同類缺陷）。**已修**：改 `Net BTC (to - from; DY convention)`。
 
-⚠️ **Closure 尚未成立**：per K1259 教訓，**subagent fallback PASS ≠ primary-path Codex PASS**。
-Codex 恢復後必須對本份做一次 primary-path 二次驗證才能立 closure
-（follow-up task 已入池：`k1025b_v2_codex_primary_path_verify`）。
+✅ **Closure 已成立（2026-07-16）**：Codex primary path 已完成二次驗證，裁決
+**PASS**，無 blocking defect。Fresh full-sample 重算對上 `N=2812`、lag `5`、
+KPPS NET_BTC `+2.7047629663pp`、permutation gap `3.20e-12pp`與 NET 公式誤差
+`8.88e-16pp`；experiment gates PASS，FEVD ratchet `2 passed`。審查回執：
+`storage/ops/codex_reviews/k1025b_v2_primary_verify.md`。Knowledge entry `e3e4b1fa`
+的 K1259 closure gate 因此滿足。
