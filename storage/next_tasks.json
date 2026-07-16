@@ -35784,13 +35784,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T05:16:59.823689+00:00",
+    "completed_at": "2026-07-16T06:14:26.784422+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T05:16:59.823689+00:00",
-      "last_clean_observed_at": "2026-07-16T05:16:59.823689+00:00"
+      "resolved_at": "2026-07-16T06:14:26.784422+00:00",
+      "last_clean_observed_at": "2026-07-16T06:14:26.784422+00:00"
     }
   },
   {
@@ -37686,11 +37686,21 @@
     "title": "FB 雙發佈：台積電法說會前夕波動輪廓（mile_5a20a332）",
     "task_type": "event_article",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T05:15:00+00:00",
     "description": "feed 文章 mile_5a20a332（台積電法說會前夕：波動輪廓）已 published（general，含 4 張懶人包 + chart1/chart2）。做 FB 雙發佈到 Ivan Lai 個人 FB。\n\nFB 文案已寫好且過 anti_ai_gate exit 0：storage/event_articles/tsmc_earnings_iv_20260708/fb_draft.md\n主貼文附圖：storage/article_assets/tsmc_earnings_iv_20260708/chart1_event_profile.png + 懶人包 03_results.png（storage/article_assets/tsmc_earnings_iv_20260708/lazypack/）。\nSOP: .claude/skills/fb-publishing/SKILL.md — 主貼文不放連結、VolPred 連結放第一則留言；發前查重（老闆可能已手動發過）。需互動 Chrome session。\n\n背景：本文原是 7/8 卡在 draft pool 的 trending_repost 稿，hourly-13 於 7/15 法說會前夕（法說會 7/16）驗數字後同步發佈上架。event_article 的 FB 發佈強制但不算入 trending daily cap。\nparent_task_id: trending_repost_2026_07_15_晶片雙雄",
     "task_family": "content",
-    "preferred_agent": "claude"
+    "preferred_agent": "claude",
+    "completed_at": "2026-07-16T06:24:30.025209+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-16T06:24:30.025232+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "complete"
+      }
+    ],
+    "result": "FB 雙發佈完成：主貼文（368字+chart1+懶人包03共2圖）由 fb_realchrome_post.py 發出、fb_post_status=success；第一則留言連結由互動 session 於 MCP Chrome 補上並截圖驗證（預覽卡正常）。文案時間校正：明天→今天（法說會7/16當日發）。"
   },
   {
     "id": "K1586_article_general_audience_rewrite_c1ce6550",
@@ -38400,12 +38410,22 @@
     "id": "fb_post_ai_power_vol_20260715",
     "task_type": "trending_repost",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "title": "FB 雙發佈：AI 瓶頸轉電力，波動率還沒買單（mile_50ce135b）",
     "description": "feed 文章 mile_50ce135b（「AI 瓶頸轉電力」的口號很響，但波動率還沒買單）已於 2026-07-15 published（general，含 chart×2 + 3 張懶人包）。做 FB 雙發佈到 Ivan Lai 個人 FB。\n\nSOP: .claude/skills/fb-publishing/SKILL.md + trending-repost/references/fb-ivanlai-tone.md — 主貼文不放連結、附結果圖（storage/drafts/assets/trending_ai_power_vol_20260715.png + 懶人包 3_results.png）、VolPred 連結放第一則留言；發前 get_page_text 查重（老闆可能已手動發過）。需互動 Chrome session（headless hourly fire 無法執行）。\n\nFB 文案需重寫成 200-400 字 Ivan Lai 口吻（先個人觀察→短句短段→留白），過 anti_ai_gate exit 0 才發。\nparent_task_id: trending_repost_2026_07_15_ai基建 / actor 建立者: hourly-15",
     "topology": "inline",
     "created_at": "2026-07-15T07:23:48.920563+00:00",
-    "created_by": "hourly-15"
+    "created_by": "hourly-15",
+    "completed_at": "2026-07-16T06:24:30.285552+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-16T06:24:30.285568+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "complete"
+      }
+    ],
+    "result": "查重命中：Ivan Lai 時間軸已有本文（老闆/他管道於 ~10-18h 前手動發佈，含 AI 供電驗電表懶人包），依 SOP 硬規則不重發；fb_post_status 已標 success 附 note。"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a1",

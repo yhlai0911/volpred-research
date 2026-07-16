@@ -19136,5 +19136,25 @@
     "owner": "claude-main-interactive",
     "commit": "5704f7cfd",
     "summary": "K1704 偏誤波動代理可靠度加權評估目標：獨立 Codex post-run review PASS（frozen 89644f5、零 blocking defects）→ verdict 認證 → tests 6 passed + gates/certify PASS → merge 進 main（5704f7cfd）→ knowledge k1704_certified_20260716 寫入（K1259-gated writer）。結論 PROXY_ROBUST_STATISTICAL_RANKING：TX 六個代理 target 共同 ledger 2016 天上 HAR_RV5 QLIKE 全勝、MCS 全 singleton、DM t=-4.63/-4.24；early-OOS MCS p=0.093 限制已揭露。"
+  },
+  {
+    "timestamp": "2026-07-16T14:13:31+08:00",
+    "task_type": "platform_ops",
+    "task_id": "compute-k1426-oos-split",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-fb4ac7d032b74a6ea3187c64e4418e3b",
+    "owner": "hourly-slot-1-fb4ac7d032b74a6ea3187c64e4418e3b",
+    "commit": "pending-phase-z",
+    "summary": "PHASE A split_required followup 收尾：K1426 OOS partial-cointegration hedging job（2026-06-08 timeout，6h 內連 pair_1 SPY/IVV 都沒跑完，瓶頸=120 refits×100 multistart MLE/對）。診斷後把 oos.py 加位置參數 shard(a/b/c) 分片、預設降到 refit-every=63(季度)/n-starts=50(~6x 加速，identical-retry-prohibited 下的合法 split config)。enqueue 3 個 bounded child（各 2 對、timeout 14400s<21600s parent、distinct --split-stage、各寫自己 shard.json），followup 掛 idempotent merge-if-all-3-exist + null/CI/DM 解讀。mark-followup-dispatched 防重派。argparse 已驗證解析正確。"
+  },
+  {
+    "timestamp": "2026-07-16T14:24:44+08:00",
+    "task_type": "trending_repost",
+    "task_id": "fb_dual_publish_20260716",
+    "outcome": "completed",
+    "actor": "claude-main-interactive",
+    "owner": "claude-main-interactive",
+    "commit": null,
+    "summary": "FB 雙發佈收尾×2：(1) mile_5a20a332 台積電法說 IV — 主貼文+2圖經 fb_realchrome_post.py 發出（文案「明天」校正為「今天」），留言連結經 MCP Chrome 補上並截圖驗證；(2) mile_50ce135b AI 電力 — 查重命中（老闆已手動發），標 success 不重發。教訓：MCP Chrome=老闆主力機，本機 pbcopy 不達其剪貼簿，貼上會漏老闆私人剪貼簿內容（當場清除未送出）；ASCII 連結改用 type。"
   }
 ]

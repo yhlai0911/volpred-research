@@ -208,6 +208,7 @@
 **規則**：outward-facing 動作必須有冪等 guard；發 FB 前查老闆是否已手動發過。主貼文必附圖（結果圖 + 懶人包）；連結放第一則留言（壓觸及）。FB 完稿要持久化到 canonical draft 位置（非只 /tmp）。
 **機械 owner**：FB idempotency guard + `fb-publishing` skill（CDP-attach 持久 profile Chrome）。
 **代表 incident**：
+- 2026-07-16 MCP Chrome 剪貼簿跨機器：本機 pbcopy ≠ 老闆主力機剪貼簿，Cmd+V 貼出老闆私人研究文字進 FB 留言框（送出前截圖驗證抓到、當場清除）。規則：MCP extension Chrome 上貼上後**必截圖驗證再送出**；ASCII URL 用 `type` 不走剪貼簿；中文長文只走本機 CDP Chrome（pbcopy 同機 + 雙驗證）。memory `reference_fb_chrome_browser_autoselect` 已更新 — Q3
 - 2026-07-08 fb_realchrome_post 附圖偵測器連 4 次假 ABORT（縮圖 count mismatch + 跨 dialog 洩漏）— Q3
 - 2026-07-07 FB real-Chrome CDP-attach 接的其實是假 profile — Q3
 - 2026-07-07 FB 完稿未持久化到 canonical draft 位置（text-only-in-tmp）— Q3
