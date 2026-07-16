@@ -33,6 +33,19 @@ from volpred.ops.scheduled_writer_commit import (
 from volpred.publisher.publisher import Publisher
 
 ROOT = Path(__file__).resolve().parent.parent
+
+# Refusing to overwrite someone else's in-flight edit is the guard WORKING, not a
+# failure — but exiting 1 made it indistinguishable from a real infra failure, so
+# host_cron_fail escalated it to CRITICAL (2026-07-16: feed.json was dirty at the
+# 08:03 fire; the alert's own recovery advice was "chmod +x / check Full Disk
+# Access", i.e. it had no idea what happened). 120 is the repo-wide guard-held
+# sentinel, already emitted by cron_git_push_backup.sh for its held-push path and
+# exempted from host_cron_fail by alerts._BENIGN_FINDINGS_EXIT_CODES. Real damage
+# from a held run (data going stale) surfaces through the data_freshness checks,
+# which measure the outcome instead of guessing from an exit code.
+# Pinned to the alerts.py sentinel by tests/test_daily_update_guard_held_exit.py.
+GUARD_HELD_EXIT_CODE = 120
+
 DAILY_TRACKED_OUTPUTS = (
     ROOT / "storage" / "paper_trading.json",
     ROOT / "storage" / "reports" / "feed.json",
@@ -744,8 +757,11 @@ def main():
         label="daily_update",
     )
     if len(writable_parent_paths) != len(DAILY_TRACKED_OUTPUTS):
-        print("  ❌ tracked output already dirty; aborting before daily writes")
-        return 1
+        print(
+            "  ⏸️  tracked output already dirty; holding daily writes "
+            f"(guard-held, exit {GUARD_HELD_EXIT_CODE})"
+        )
+        return GUARD_HELD_EXIT_CODE
     frontend_root = get_frontend_path()
     frontend_metrics = get_strategy_metrics_sync_paths(active_only=True)
     frontend_dirty_before = (
