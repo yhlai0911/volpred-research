@@ -19126,5 +19126,15 @@
     "owner": "hourly-slot-1-4967d2a57f7e4c818802942d3cb5fcd1",
     "commit": null,
     "summary": "PHASE A followup — K1380 Hansen SPA / White RC 多重檢定（Paper 9 C3 CRITICAL）從快取 loss matrix 收尾。\n\n原 compute job `k1380-spa-test`（2026-05-19 timeout）與其重試 `compute-k1380-...-1779189466` 皆 split_required 卡 pending-followup 近 2 個月。診斷：昂貴的 17-spec 滾動 OOS 已完成並快取於 `experiments/k1380/k1380_losses_all.npy` (17×1864)；崩潰主因是 C1 (idx 13) 全 NaN 導致 `valid_all=np.all(~isnan)` 塌成 n_valid=0，SPA bootstrap 對空陣列爆掉。\n\n派同步 agent（opus/high，禁 re-fit）從快取矩陣排除非收斂 spec（C1 全 NaN；A5/C2/C3 發散，mean QLIKE 255122/9349/3904，皆記錄理由），對收斂子集（13/17）跑 Hansen SPA + White RC 定態 bootstrap（B=499, seed=42）。**主線程獨立驗證**所有數字（load npy 重算）：n_valid=1852、B0(GJR) mean QLIKE 623.7 為最低、A4f=644.0、A4f 對 B0 的 d_bar=-20.29 t=-0.272、nominal superior set 為空、SPA p=1.000、White RC(A4f) p=1.000 — 全部吻合 agent 回報。\n\n誠實結論：多重檢定校正後，無任何 VIX-augmented / MIDAS spec 顯著勝過純 GJR，A4f 的表面「最佳」不成立（GJR 本身 QLIKE 最低）。C3 CRITICAL 已實質處理。產出 `experiments/k1380/k1380_results.json`（含 excluded_specs + caveat + c3_critical_addressed=true）+ helper `k1380_spa_from_cache.py`。未碰 knowledge.json（K1259）。\n\n建 follow-up task `paper9_c3_multiple_testing_subsection_k1380`（paper_body, P2）並對兩個 compute followup 皆 mark-followup-dispatched。"
+  },
+  {
+    "timestamp": "2026-07-16T14:06:45+08:00",
+    "task_type": "experiment",
+    "task_id": "K1704",
+    "outcome": "completed",
+    "actor": "claude-main-interactive",
+    "owner": "claude-main-interactive",
+    "commit": "5704f7cfd",
+    "summary": "K1704 偏誤波動代理可靠度加權評估目標：獨立 Codex post-run review PASS（frozen 89644f5、零 blocking defects）→ verdict 認證 → tests 6 passed + gates/certify PASS → merge 進 main（5704f7cfd）→ knowledge k1704_certified_20260716 寫入（K1259-gated writer）。結論 PROXY_ROBUST_STATISTICAL_RANKING：TX 六個代理 target 共同 ledger 2016 天上 HAR_RV5 QLIKE 全勝、MCS 全 singleton、DM t=-4.63/-4.24；early-OOS MCS p=0.093 限制已揭露。"
   }
 ]

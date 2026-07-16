@@ -28824,52 +28824,15 @@
   },
   {
     "id": "drone_series_ep3_downstream",
-    "title": "無人機系列 EP3 下游深度：整機整合/系統商/地面站/無人艇",
-    "description": "聚焦下游整機與系統整合上市櫃公司（如雷虎8033、漢翔2634、亞航2630、長榮航太2645、中光電5371、神基3005、融程電3416）＋無人艇邊界（龍德6753、台船2208、中信造船2644）。整合國防採購與海外訂單題材。無人艇【已定調正式納入系列，非邊界延伸】(老闆 2026-07-09 回信「無人艇這種同類型的也可以包含進來」)：龍德6753/台船2208/中信造船2644 給海域無人載具完整深度，比照空中無人機規格處理（不再寫成邊界或可選）。 研究地基（已驗證公司名冊/產業鏈地圖/PEST/SWOT）見 storage/pending_series/taiwan_drone_series_ep0_research.md。走 feed-publisher + anti-ai-style（寫前讀 3 canonical + evidence-package 先於 prose，寫後跑 anti_ai_gate.py + arc-dedup gate）。個股面向數據走 external-data-sources（yfinance/TWSE 真查真算，標來源與日期）。個股分析用方法透明線：真數據 + 假設 + 不確定性 + 免責聲明 + 可複現，不做保證報酬/內線式宣稱。",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "無人機系列 EP3 下游深度：整機整合/系統商/地面站/無人艇",
+    "priority": 1,
     "source": "boss-telegram-msg302-series-decompose",
-    "series": "taiwan_drone_industry",
-    "series_order": 3,
-    "tags": [
-      "series-taiwan-drone",
-      "reader-facing",
-      "investment-thematic"
-    ],
     "created_at": "2026-07-09T08:20:31+00:00",
-    "status_history": [
-      {
-        "at": "2026-07-13T01:07:35.973991+00:00",
-        "from": "blocked",
-        "to": "pending",
-        "reason": "blocked_until_expired (2026-07-13T09:00:00+08:00)"
-      },
-      {
-        "ts": "2026-07-13T03:53:22.548321+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T03:53:22.837098+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T05:44:08.845530+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-13T03:53:22.548306+00:00",
-    "claim_session_id": "d41147b7569c",
-    "started_at": "2026-07-13T03:53:22.837082+00:00",
     "completed_at": "2026-07-13T05:44:08.845514+00:00",
-    "result": "EP3 evidence/article complete: corrected EP0 Blue UAS claim and EP3 legislative/certification wording through formal publisher errata + Supabase sync; evidence generator and series registry updated; 3 article images HTTP 200; lazypack-mile_abd517ba queued from evidence-bound 4-panel plan."
+    "tombstone": true,
+    "archived_at": "2026-07-16T06:08:24.867482+00:00"
   },
   {
     "id": "drone_series_ep4_core_stocks_six_dim",
@@ -32314,39 +32277,15 @@
   },
   {
     "id": "ops-orphan-autoadopt",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "3-strike 重構：產出即交付 — orphan 檔案不得再走人工丟棄路徑",
     "priority": 1,
     "source": "user-assigned",
-    "status": "succeeded",
     "created_at": "2026-07-13T04:37:21.252418+00:00",
-    "title": "3-strike 重構：產出即交付 — orphan 檔案不得再走人工丟棄路徑",
-    "description": "老闆 Telegram msg 624：完成的產出最後只能棄用 = 浪費 token；要求從底層邏輯修。\n根因（同 class 第 2 次，lazypack 59a5e4e 已修過一次 → 立刻重構不等 strike 3）：\n(1) producer 寫檔到 storage/drafts/ 但不 commit、不註冊進 feed/draft pool → 對系統不存在，只有 git status 看得到。\n(2) orphan detector 的 resolution 把決策丟回老闆（『人工二選一：commit 或丟棄』），預設出口是棄用 → 完成的工作被浪費（違反 feedback_alerts_auto_act_not_suggest）。\n要做：\nA. 產出即交付 contract：任何寫 storage/drafts/ 或 experiments/ 的 job/agent 收尾必須自己 commit + 註冊（publish_draft.py 入池）。加機械 gate（run_agent_job / dispatch 收尾檢查 working tree 是否有自己 path 的 untracked 檔，有就自動收）。\nB. orphan detector 改 auto-adopt：依 path pattern 認來源 → 自動 commit + 入池；只有真的認不出來源才 alert，且 alert 不得寫『請老闆判斷丟棄』。\nC. class sweep：掃其他 untracked 產出（storage/lazypack_jobs/*, compute_queue/*）決定 gitignore 或收編。\n已即時處理：drone EP3 已救回入池 mile_abd517ba + commit 5c176db1e。",
-    "claimed_by": "hourly-13",
-    "claimed_at": "2026-07-13T05:08:29.532477+00:00",
-    "claim_session_id": "8a2b8f6c77c1",
-    "status_history": [
-      {
-        "ts": "2026-07-13T05:08:29.532492+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-13"
-      },
-      {
-        "ts": "2026-07-13T05:08:29.798364+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-13"
-      },
-      {
-        "ts": "2026-07-13T05:23:22.652215+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-13"
-      }
-    ],
-    "started_at": "2026-07-13T05:08:29.798349+00:00",
     "completed_at": "2026-07-13T05:23:22.652199+00:00",
-    "result": "產出即交付重構落地 commit d4995914a：(1) reap_orphan_deliverables.py 把孤兒成品走正規入池、永不刪檔；(2) publish_draft 寫 details.source_draft 交付憑證；(3) check_alerts 每小時直接收編；(4) phase_z alert 移除「丟棄」出口（git 語意未動）+ machine-state 白名單收編 lazypack_jobs/research/indicator_arena/paper_trading；(5) baseline 凍結 519 份 cutover 前草稿。13 tests pass，含 2 條對舊版驗過會 FAIL 的 ratchet。supervisor deferred reload 已掛。"
+    "tombstone": true,
+    "archived_at": "2026-07-16T06:08:24.867482+00:00"
   },
   {
     "id": "telegram-632",
@@ -34346,7 +34285,7 @@
     "title": "K1704: 偏誤波動代理的可靠度加權評估目標** — 以本機台指期逐筆資料同步產生 1/5/10 分鐘 RV、區間與日報酬代理；每個預測起點只用過去樣本估偏誤與權重，再以相同 HAR/GJR ledger 比較 ranking、DM-HLN 與 MCS",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1600). Original: 偏誤波動代理的可靠度加權評估目標** — 以本機台指期逐筆資料同步產生 1/5/10 分鐘 RV、區間與日報酬代理；每個預測起點只用過去樣本估偏誤與權重，再以相同 HAR/GJR ledger 比較 ranking、DM-HLN 與 MCS，檢定模型優劣是否依賴單一不可靠目標。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1704.py with signal.shift(1) + seed=42, (c) K1704_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34387,14 +34326,40 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-recovery-k1704"
+      },
+      {
+        "ts": "2026-07-16T05:41:54.590158+00:00",
+        "from": "in_progress",
+        "to": "pending_main_thread",
+        "by": "codex-desktop-recovery-k1704",
+        "note": "Claude quota/runtime verified restored at 2026-07-16 13:39 TPE (direct Opus probe rc=0 CLAUDE_READY). Codex stopped new work. Full durable continuation: storage/ops/k1704_codex_to_claude_handoff_20260716.md. Worktree dispatch-slot-1-f217aefb-k1704 HEAD b1dd7fb4c; frozen claim surface 89644f548; formal results/tests/gate verified, pending independent post-run review → verdict/certify → merge → Claude-only knowledge/research closure. Do not whole-task redispatch."
+      },
+      {
+        "ts": "2026-07-16T05:44:56.874710+00:00",
+        "from": "pending_main_thread",
+        "to": "claimed",
+        "by": "claude-main-thread-k1704-restore"
+      },
+      {
+        "ts": "2026-07-16T05:45:00.408863+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "claude-main-thread-k1704-restore"
+      },
+      {
+        "ts": "2026-07-16T06:06:55.157084+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "claude-main-thread-k1704-restore"
       }
     ],
-    "started_at": "2026-07-16T03:10:04.200846+00:00",
+    "started_at": "2026-07-16T05:45:00.408850+00:00",
     "last_released_at": "2026-07-16T00:50:04.442981+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "codex-desktop-recovery-k1704",
-    "claimed_at": "2026-07-16T03:10:03.935470+00:00",
-    "claim_session_id": "4131001de321"
+    "handoff_note": "Claude quota/runtime verified restored at 2026-07-16 13:39 TPE (direct Opus probe rc=0 CLAUDE_READY). Codex stopped new work. Full durable continuation: storage/ops/k1704_codex_to_claude_handoff_20260716.md. Worktree dispatch-slot-1-f217aefb-k1704 HEAD b1dd7fb4c; frozen claim surface 89644f548; formal results/tests/gate verified, pending independent post-run review → verdict/certify → merge → Claude-only knowledge/research closure. Do not whole-task redispatch.",
+    "handoff_at": "2026-07-16T05:41:54.590142+00:00",
+    "completed_at": "2026-07-16T06:06:55.157066+00:00",
+    "result": "K1704 完成並認證：Codex 獨立 post-run review PASS（frozen 89644f5）；PROXY_ROBUST_STATISTICAL_RANKING — TX 3548 天、共同 OOS ledger 2016 天、六代理 target QLIKE 排名 HAR_RV5<EWMA_R2<GJR_GARCH 全部一致、MCS 全 singleton {HAR_RV5}、consensus DM t=-4.63/-4.24；已 merge main（5704f7cfd）、knowledge=k1704_certified_20260716、research_program 已更新。限制：early-OOS MCS p=0.093、latent-IV 不可識別已揭露。"
   },
   {
     "id": "K1705",
@@ -35801,13 +35766,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T05:00:55.219606+00:00",
+    "completed_at": "2026-07-16T06:01:49.902438+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T05:00:55.219606+00:00",
-      "last_clean_observed_at": "2026-07-16T05:00:55.219606+00:00"
+      "resolved_at": "2026-07-16T06:01:49.902438+00:00",
+      "last_clean_observed_at": "2026-07-16T06:01:49.902438+00:00"
     }
   },
   {
@@ -40495,7 +40460,7 @@
     "title": "K1719: ASIA-5 亞太時區階梯 spillover**：美(SPY/VIX) → 日(^N225) → 台(^TWII) → 東南亞(^STI/^JKSE/^KLSE/^SET.BK) 的隔夜傳遞鏈；T5b（SPY→台）的多市場擴展",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 400). Original: ASIA-5 亞太時區階梯 spillover**：美(SPY/VIX) → 日(^N225) → 台(^TWII) → 東南亞(^STI/^JKSE/^KLSE/^SET.BK) 的隔夜傳遞鏈；T5b（SPY→台）的多市場擴展\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1719.py with signal.shift(1) + seed=42, (c) K1719_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -40505,9 +40470,6 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-16T00:00:02Z",
-    "claimed_by": "codex-failover-slot-1-a56566ffb1624435bfc9191fc165edbc",
-    "claimed_at": "2026-07-16T03:09:30.502694+00:00",
-    "claim_session_id": "ef7a07875688",
     "status_history": [
       {
         "ts": "2026-07-16T03:09:30.502713+00:00",
@@ -40520,9 +40482,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-1-a56566ffb1624435bfc9191fc165edbc"
+      },
+      {
+        "ts": "2026-07-16T05:50:03.391225+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover-slot-1-a56566ffb1624435bfc9191fc165edbc",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-16T03:09:30.795668+00:00"
+    "started_at": "2026-07-16T03:09:30.795668+00:00",
+    "last_released_at": "2026-07-16T05:50:03.391214+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "K1720",

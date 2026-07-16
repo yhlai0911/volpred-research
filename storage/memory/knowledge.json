@@ -42000,5 +42000,32 @@
    "duplicate_of": "K1661",
    "backfill_reason": "ci-red-29467915128 knowledge_unrecorded_ratchet"
   }
+ },
+ {
+  "item_id": "k1704_certified_20260716",
+  "category": "volatility_proxy_robustness",
+  "title": "K1704: TX HAR_RV5 ranking is robust to observed volatility-proxy choice — singleton MCS on all six targets over a common OOS ledger",
+  "content": "K1704 [PROXY_ROBUST_STATISTICAL_RANKING]: On 3,548 TAIFEX TX day-session days (2012-01-02..2026-07-14; raw bytes re-verified file-by-file, 3,548/3,548 size+SHA-256 match) with a single common OOS ledger of 2,016 days (2018-02-01..2026-07-14, ledger sha256 8d778f2407d606cbee63a903412dcc4527e50baeb83a141762eeb12266df75d6), HAR_RV5 has lower QLIKE than EWMA_R2 and GJR_GARCH on all six observed volatility-proxy targets (1/5/10-min RV, daily range, squared day return, reliability-weighted consensus): identical order HAR<EWMA<GJR on every target with identical n_oos=2016; every 10% stationary-bootstrap MCS (HLN T_R, 1,000 reps, seed 42) is singleton {HAR_RV5}; early/late consensus splits also singleton. Consensus QLIKE: HAR 0.1839, EWMA 0.2405, GJR 0.2593 (HAR lower by 23.5%/29.1%); full-OOS HAC DM t=-4.63 vs EWMA, t=-4.24 vs GJR (both pass Harvey |t|>3 screen). Reliability weights and proxy-bias centres use only past data with leave-one-proxy-out residual centres; input-availability eligibility masks freeze before calibration and fail closed on invalid forecasts. Scope limits (per pre-registered rule): ranking robustness holds for OBSERVED proxies on this ledger only — it does not establish HAR optimality for latent integrated variance, nor that the consensus proxy equals the latent target; early-OOS MCS elimination p-values are 0.093 (would not eliminate at a 5% threshold); correlated 1/5/10-min RV measurement errors share ticks and remain unidentified. Independent Codex post-run review PASS on frozen commit 89644f5 with zero blocking defects; independent recomputation of ledger hash, QLIKE ranks, split counts and MCS partitions all matched.",
+  "evidence": [
+   "experiments/k1704/K1704_results.json",
+   "experiments/k1704/README.md",
+   "experiments/k1704/post_run_review.md",
+   "experiments/k1704/review_verdict.json"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-16T06:05:12.318763+00:00",
+  "created_at_source": "main_thread_k1704_certification",
+  "k_id": "K1704",
+  "experiment_id": "k1704",
+  "experiment_path": "experiments/k1704",
+  "verdict": "PASS",
+  "reviewer": "codex/gpt-5 independent K1704 post-run review (2026-07-16T05:56:19Z)",
+  "provenance": {
+   "review_artifact": "experiments/k1704/post_run_review.md",
+   "review_verdict": "experiments/k1704/review_verdict.json",
+   "reviewed_commit": "89644f548adac795ed28e4d336bc74ad6bc13585",
+   "ledger_sha256": "8d778f2407d606cbee63a903412dcc4527e50baeb83a141762eeb12266df75d6",
+   "results_sha256": "a412e7969f76879a4565a01b4713f2d270f3406505d38a7fd98c2921da5bbb06"
+  }
  }
 ]
