@@ -38311,7 +38311,7 @@
     "title": "K1713: 反直覺：HARQ 測量誤差加權在「高噪音日頻 OHLC 代理」下是否反效果？ — 用 Garman-Klass range 近似 realized quarticity，檢定當 proxy 測量誤差本身很大時誤差加權是幫助還是傷害 OOS（",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 494). Original: 反直覺：HARQ 測量誤差加權在「高噪音日頻 OHLC 代理」下是否反效果？ — 用 Garman-Klass range 近似 realized quarticity，檢定當 proxy 測量誤差本身很大時誤差加權是幫助還是傷害 OOS（HARQ vs HAR，DM-HLN，SPY/0050.TW/TX）；yfinance OHLC（來源：BPQ JoE HARQ 家族仍為 RV 建模主流）。差異化：庫內 HARQ 未落地實作，且此題是 contrarian「代理噪音下反轉」角度。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1713.py with signal.shift(1) + seed=42, (c) K1713_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38321,9 +38321,6 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-15T00:00:01Z",
-    "claimed_by": "codex-failover-slot-2-27e13678b64948629cdf1f667d07a93c",
-    "claimed_at": "2026-07-16T00:09:23.526165+00:00",
-    "claim_session_id": "11894fdfc52c",
     "status_history": [
       {
         "ts": "2026-07-16T00:09:23.526179+00:00",
@@ -38336,9 +38333,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-2-27e13678b64948629cdf1f667d07a93c"
+      },
+      {
+        "ts": "2026-07-16T00:26:17.776342+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-27e13678b64948629cdf1f667d07a93c"
       }
     ],
-    "started_at": "2026-07-16T00:09:23.781149+00:00"
+    "started_at": "2026-07-16T00:09:23.781149+00:00",
+    "completed_at": "2026-07-16T00:26:17.776327+00:00",
+    "result": "Verified duplicate closure of K1661: 3 markets x 4 models and 30 stored metrics replayed; canonical HAC lag=15 kept every HARQ-vs-HAR test NULL; fallback review PASS; no duplicate knowledge entry."
   },
   {
     "id": "K1714",
