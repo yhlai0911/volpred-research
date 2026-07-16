@@ -35,6 +35,17 @@
 
 **硬規則**（用戶 2026-04-19 指示）：
 
+### 0. Timeout 後不得原樣重派
+
+任何 task / agent / compute job 只要發生一次執行 timeout，就先停止 whole-task redispatch。主線程必須：
+
+1. 檢查並保留可驗證的 partial artifact／checkpoint；
+2. 把剩餘工作拆成至少 2 個 bounded stages；
+3. 每段寫清楚 parent timeout job、stage 名稱、唯一產物、成功判準與較短時限；
+4. 分段完成後才做整體驗證與 merge。
+
+登入或模型額度阻擋且 agent 未開始執行時，不屬於 execution timeout；此時允許額度恢復後重試原 brief。compute queue 的 receipt 與 followup contract 以 `.claude/rules/task-routing.md` 的「Timeout 後強制切割」為 canonical。
+
 ### 1. 主任務必先規劃子任務
 大 task（paper audit / feature build / 多篇文章補池）前，**主線程先規劃子任務結構**，不直接派一個 agent 扛全部：
 

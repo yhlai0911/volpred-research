@@ -45,6 +45,7 @@ from __future__ import annotations
 
 import argparse
 import fcntl
+import hashlib
 import json
 import os
 import re
@@ -315,6 +316,135 @@ def slug(s: str) -> str:
     return s[:60] or uuid.uuid4().hex[:8]
 
 
+def _file_sha256(raw_path: Any) -> str | None:
+    if not raw_path:
+        return None
+    path = Path(str(raw_path))
+    if not path.is_absolute():
+        path = ROOT / path
+    if not path.is_file():
+        return None
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError as exc:
+        warn(
+            "compute_queue",
+            "brief snapshot unreadable while building retry signature",
+            path=str(path),
+            err=str(exc),
+        )
+        return None
+
+
+def _job_signature(job: dict[str, Any]) -> str:
+    """Stable work identity used to reject an unchanged retry after timeout."""
+    kind = str(job.get("kind") or "compute")
+    if kind == "agent" or job.get("script_path") == "scripts/run_agent_job.py":
+        args = job.get("args") or []
+        cwd = Path(str(job.get("cwd") or _arg_value(args, "--cwd") or ROOT))
+        raw_artifact = job.get("result_artifact")
+        artifact_identity = raw_artifact
+        if raw_artifact:
+            try:
+                artifact_identity = str(Path(str(raw_artifact)).relative_to(cwd))
+            except ValueError:
+                artifact_identity = str(raw_artifact)
+        identity = {
+            "kind": "agent",
+            "model": _arg_value(args, "--model"),
+            "effort": _arg_value(args, "--effort"),
+            "brief_sha256": _file_sha256(
+                job.get("brief_snapshot") or _arg_value(args, "--brief-file")
+            ),
+            "result_artifact": artifact_identity,
+        }
+    else:
+        identity = {
+            "kind": kind,
+            "script_path": job.get("script_path"),
+            "interpreter": job.get("interpreter"),
+            "args": job.get("args") or [],
+            "cwd": job.get("cwd"),
+            "result_artifact": job.get("result_artifact"),
+        }
+    return hashlib.sha256(
+        json.dumps(identity, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+
+def _runner_timed_out(job: dict[str, Any]) -> bool:
+    meta_path = job.get("job_metadata")
+    if not meta_path:
+        return False
+    path = Path(str(meta_path))
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        metadata = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        warn(
+            "compute_queue",
+            "runner metadata unreadable while checking timeout",
+            job=job.get("id"),
+            path=str(path),
+            err=str(exc),
+        )
+        return False
+    return metadata.get("timed_out") is True
+
+
+def _job_timed_out(job: dict[str, Any]) -> bool:
+    return (
+        job.get("failure_reason") == "timeout"
+        or job.get("split_required") is True
+        or job.get("exit_code") == -1
+        or _runner_timed_out(job)
+    )
+
+
+def _mark_timeout(job: dict[str, Any]) -> None:
+    job["failure_reason"] = "timeout"
+    job["split_required"] = True
+    job["timed_out_at"] = utc_now()
+
+
+def _validate_timeout_split(entry: dict[str, Any], args: Any) -> str | None:
+    """Validate parent tracing and reject an unchanged timed-out work order."""
+    parent_id = getattr(args, "timeout_parent_job_id", None)
+    split_stage = getattr(args, "split_stage", None)
+    if bool(parent_id) != bool(split_stage):
+        return "--timeout-parent-job-id and --split-stage must be provided together"
+
+    if parent_id:
+        parent_path = QUEUE_DIR / f"{parent_id}.json"
+        parent = (
+            _read_job_file(parent_path, context="timeout-split-parent")
+            if parent_path.exists()
+            else None
+        )
+        if parent is None:
+            return f"timeout parent job not found or unreadable: {parent_id}"
+        if parent.get("status") != "failed" or not _job_timed_out(parent):
+            return f"timeout parent is not a failed timeout receipt: {parent_id}"
+        if entry["timeout_seconds"] >= int(parent.get("timeout_seconds") or 3600):
+            return "split child timeout must be shorter than its timed-out parent"
+        entry["parent_timeout_job_id"] = parent_id
+        entry["split_stage"] = str(split_stage)
+
+    signature = _job_signature(entry)
+    for path in sorted(QUEUE_DIR.glob("*.json")):
+        previous = _read_job_file(path, context="timeout-retry-guard")
+        if previous is None or previous.get("status") != "failed" or not _job_timed_out(previous):
+            continue
+        if _job_signature(previous) == signature:
+            return (
+                f"unchanged retry of timed-out job {previous.get('id')} is prohibited; "
+                "split the scope/arguments or brief, use a shorter timeout, and pass "
+                "--timeout-parent-job-id plus --split-stage"
+            )
+    return None
+
+
 def enqueue(args) -> int:
     ensure_dirs()
     job_id = args.id or f"compute-{slug(args.title or args.script)}-{int(time.time())}"
@@ -367,6 +497,10 @@ def enqueue(args) -> int:
         "brief_source": getattr(args, "brief_source", None),
         "brief_snapshot": getattr(args, "brief_snapshot", None),
     }
+    split_error = _validate_timeout_split(entry, args)
+    if split_error:
+        print(f"error: {split_error}", file=sys.stderr)
+        return 2
     _write_job_file(job_path, entry)
     print(f"enqueued: {job_id}")
     return 0
@@ -477,6 +611,8 @@ def enqueue_agent(args) -> int:
         timeout=outer_timeout,
         brief_source=str(brief_path),
         brief_snapshot=str(frozen_brief),
+        timeout_parent_job_id=getattr(args, "timeout_parent_job_id", None),
+        split_stage=getattr(args, "split_stage", None),
     )
     return enqueue(inner)
 
@@ -542,8 +678,9 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
 
     if job.get("status") != "failed":
         return None
+    timed_out = _job_timed_out(job)
     workdir = _agent_workdir(job)
-    if not workdir:
+    if not workdir and not timed_out:
         return None
 
     original = job.get("claude_followup") or {}
@@ -555,7 +692,24 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
     # retries against a login wall and the agent never started. Sending a fire to
     # "inspect what exists in the worktree" would waste it: nothing exists. Say so,
     # and ask for the one action that can help.
-    if _runner_failure_class(job) == "auth":
+    if timed_out:
+        timeout_seconds = int(job.get("timeout_seconds") or 3600)
+        triage_lines = [
+            "TIMEOUT — SPLIT REQUIRED. This work order reached an execution deadline.",
+            f"Parent job: {job.get('id')} (budget={timeout_seconds}s, exit_code={job.get('exit_code')})",
+            f"Worktree/cwd (if any): {workdir}",
+            f"Result artifact (may be missing, partial, or stale): {job.get('result_artifact')}",
+            f"stdout/stderr: {job.get('stdout_file')} | {job.get('stderr_file')}",
+            "First inspect and preserve any valid partial outputs. Do not treat them as final results.",
+            "Do NOT re-enqueue the same script arguments or unchanged agent brief. Materialize at least "
+            "two bounded child stages (for example: data preparation, implementation/checkpoint, compute "
+            "shard, validation/review, merge), each with one explicit artifact and success criterion.",
+            f"Every compute child must use a timeout shorter than {timeout_seconds}s and record "
+            f"--timeout-parent-job-id {job.get('id')} plus a distinct --split-stage value.",
+        ]
+        if original_brief:
+            triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
+    elif _runner_failure_class(job) == "auth":
         triage_lines = [
             "AGENT JOB BLOCKED ON AUTH — the `claude` CLI was not logged in, so the agent never ran.",
             f"Job: {job.get('id')} (exit_code={job.get('exit_code')})",
@@ -585,7 +739,14 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
             triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
 
     row = dict(job)
-    row["followup_mode"] = "triage_failed"
+    row["followup_mode"] = "split_required" if timed_out else "triage_failed"
+    if timed_out:
+        row["split_contract"] = {
+            "parent_timeout_job_id": job.get("id"),
+            "minimum_child_stages": 2,
+            "child_timeout_lt_seconds": int(job.get("timeout_seconds") or 3600),
+            "identical_retry_prohibited": True,
+        }
     original_priority = original.get("priority")
     triage_priority = original_priority if isinstance(original_priority, int) else 2
     row["claude_followup"] = {
@@ -715,6 +876,8 @@ def run_next(args) -> int:
             job["exit_code"] = proc.returncode
             if proc.returncode != 0:
                 job["status"] = "failed"
+                if _runner_timed_out(job):
+                    _mark_timeout(job)
             else:
                 artifact_path = _declared_result_artifact(job)
                 if artifact_path is not None and not artifact_path.exists():
@@ -747,6 +910,7 @@ def run_next(args) -> int:
         except subprocess.TimeoutExpired:
             job["status"] = "failed"
             job["exit_code"] = -1
+            _mark_timeout(job)
             stderr_p.write_text(stderr_p.read_text() + "\n[TIMEOUT]\n")
         except Exception as e:
             job["status"] = "failed"
@@ -930,6 +1094,8 @@ def main():
     e.add_argument("--followup-task-type")
     e.add_argument("--followup-priority", type=int)
     e.add_argument("--timeout", type=int)
+    e.add_argument("--timeout-parent-job-id")
+    e.add_argument("--split-stage")
     e.set_defaults(func=enqueue)
 
     ea = sub.add_parser(
@@ -951,6 +1117,8 @@ def main():
     ea.add_argument("--followup-task-type")
     ea.add_argument("--followup-priority", type=int)
     ea.add_argument("--timeout", type=int)
+    ea.add_argument("--timeout-parent-job-id")
+    ea.add_argument("--split-stage")
     ea.set_defaults(func=enqueue_agent)
 
     am = sub.add_parser(

@@ -80,6 +80,15 @@ tree below and then to free-text markers. Do not encode ownership solely in
   - paper_*: serialize per paper（同篇論文同時只一個 agent 動）
   - trending_repost: 2/day（daily cap，per `.claude/skills/trending-repost/SKILL.md`）
 
+## Timeout 後強制切割（2026-07-16 user hard rule）
+
+- 任務第一次發生**執行 timeout**，立即標記 `split_required`；禁止把相同 script arguments 或未改動的 agent brief 原封不動重派。
+- 先盤點並保留可驗證的 partial outputs，再拆成至少 2 個有界 child stages。常用邊界：資料準備／實作與 checkpoint／compute shard／驗證或 review／merge。
+- 每個 child stage 必須有：`parent_timeout_job_id`、不同的 `split_stage`、單一明確 artifact、可驗證 success criterion，以及短於 parent 的 timeout budget。
+- `scripts/compute_queue.py` 會替 outer timeout 與 agent inner timeout 寫入 `failure_reason=timeout`、`split_required=true`，followup mode 改為 `split_required`，並拒絕 unchanged retry。
+- 登入／模型額度阻擋若 agent 根本未開始工作，不算執行 timeout；恢復後可照原 brief 重試。
+- 已知案例：K1711 已 timeout 兩次，下一步只能先 materialize 分段計畫，不得再派完整 TSFM-HAR MCS 任務；K1704 已按 pre-review → fix → rerun → post-review 分段接續。
+
 ## Email reply 的 ACK + close 流程
 
 `email_reply` 是唯一 lifecycle 跨 multiple ticks 的類型。ACK 的唯一 owner
@@ -101,3 +110,4 @@ Linked sub-tasks 用一般 task_type（描述含 `parent_email_task_id` 反向�
 | 2026-05-25 | 初版 — backfill 60 個 null/experiment_review tasks；email_reply 加入；本表落地 |
 | 2026-07-10 | topology 機械路由（topology-audit）— `TASK_TYPE_TO_TOPOLOGY` + `pick_topology()` 落地 `scripts/model_router.py`；`continue_task_dispatch.py` candidate 帶 `topology` 欄位；orchestrator prompt step 5 改讀欄位、override 記 work_log |
 | 2026-07-14 | 移除 model/effort/topology 重複表；補 code_review/telegram_reply；email lifecycle 對齊 gmail-poll ACK + hourly CLOSE |
+| 2026-07-16 | Timeout 後強制切割：首度 timeout 即 split_required，禁止 unchanged retry；auth/quota 未開工例外 |

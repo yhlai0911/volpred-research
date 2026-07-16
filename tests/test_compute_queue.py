@@ -99,6 +99,8 @@ def _enqueue_args(**over):
         "followup_task_type": None,
         "followup_priority": None,
         "timeout": 60,
+        "timeout_parent_job_id": None,
+        "split_stage": None,
     }
     values.update(over)
     return SimpleNamespace(**values)
@@ -194,6 +196,28 @@ def test_run_next_completes_when_artifact_exists_or_is_not_declared(
     assert json.loads(no_artifact_job.read_text())["status"] == "completed"
 
 
+def test_run_next_marks_timeout_as_split_required(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    job_path = _queued_job(queue_dir, module.LOG_DIR, artifact=None)
+
+    def time_out(*args, **kwargs):
+        raise module.subprocess.TimeoutExpired(cmd=args[0], timeout=10)
+
+    monkeypatch.setattr(module.subprocess, "run", time_out)
+
+    assert module.run_next(SimpleNamespace()) == 0
+    job = json.loads(job_path.read_text())
+    assert job["status"] == "failed"
+    assert job["exit_code"] == -1
+    assert job["failure_reason"] == "timeout"
+    assert job["split_required"] is True
+    assert job["timed_out_at"]
+
+
 def test_worker_preserves_child_output_writeback_on_nonzero_exit(
     tmp_path: Path,
     monkeypatch,
@@ -255,6 +279,15 @@ def test_pending_followup_distinguishes_completed_collection_and_failed_agent_tr
             "stderr_file": "/repo/storage/logs/compute/failed-agent.stderr",
         },
         {**base, "id": "failed-compute", "status": "failed", "kind": "compute", "cwd": None},
+        {
+            **base,
+            "id": "timeout-compute",
+            "status": "failed",
+            "kind": "compute",
+            "failure_reason": "timeout",
+            "split_required": True,
+            "timeout_seconds": 3600,
+        },
         {**base, "id": "failed-agent-main", "status": "failed", "kind": "agent", "cwd": "/repo"},
         {
             **base,
@@ -281,14 +314,56 @@ def test_pending_followup_distinguishes_completed_collection_and_failed_agent_tr
     payload = json.loads(capsys.readouterr().out)
     assert [(row["id"], row["followup_mode"]) for row in payload] == [
         ("completed-agent", "collect_completed"),
-        ("failed-agent", "triage_failed"),
+        ("failed-agent", "split_required"),
+        ("timeout-compute", "split_required"),
     ]
     failed = payload[1]
     assert failed["claude_followup"]["task_type"] == "platform_ops"
     assert failed["claude_followup"]["priority"] == 1
-    assert "did not complete successfully" in failed["claude_followup"]["brief"]
-    assert "Do not treat any artifact as a successful result" in failed["claude_followup"]["brief"]
+    assert "SPLIT REQUIRED" in failed["claude_followup"]["brief"]
+    assert "Do NOT re-enqueue" in failed["claude_followup"]["brief"]
     assert "/repo/.claude/worktrees/partial" in failed["claude_followup"]["brief"]
+    assert failed["split_contract"]["minimum_child_stages"] == 2
+
+
+def test_enqueue_rejects_unchanged_retry_after_timeout_and_accepts_split_child(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    parent = {
+        "id": "timed-out-parent",
+        "status": "failed",
+        "failure_reason": "timeout",
+        "split_required": True,
+        "timeout_seconds": 60,
+        "kind": "compute",
+        "script_path": "scripts/example.py",
+        "interpreter": "python",
+        "args": [],
+        "cwd": None,
+        "result_artifact": "results/final.json",
+    }
+    (queue_dir / "timed-out-parent.json").write_text(json.dumps(parent), encoding="utf-8")
+
+    assert module.enqueue(_enqueue_args(id="unchanged-retry")) == 2
+    assert "unchanged retry" in capsys.readouterr().err
+    assert not (queue_dir / "unchanged-retry.json").exists()
+
+    split = _enqueue_args(
+        id="split-child",
+        script_args=["--shard", "1"],
+        timeout=30,
+        timeout_parent_job_id="timed-out-parent",
+        split_stage="compute-shard-1",
+    )
+    assert module.enqueue(split) == 0
+    child = json.loads((queue_dir / "split-child.json").read_text())
+    assert child["parent_timeout_job_id"] == "timed-out-parent"
+    assert child["split_stage"] == "compute-shard-1"
 
 
 def test_pending_followup_triages_legacy_failed_agent_with_cwd_arg(
@@ -319,6 +394,32 @@ def test_pending_followup_triages_legacy_failed_agent_with_cwd_arg(
     payload = json.loads(capsys.readouterr().out)
     assert payload[0]["followup_mode"] == "triage_failed"
     assert payload[0]["claude_followup"]["priority"] == 2
+
+
+def test_pending_followup_detects_agent_inner_timeout_from_runner_metadata(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    metadata = tmp_path / "agent-metadata.json"
+    metadata.write_text(json.dumps({"timed_out": True}), encoding="utf-8")
+    worktree = tmp_path / ".claude" / "worktrees" / "inner-timeout"
+    job = {
+        "id": "inner-timeout-agent",
+        "status": "failed",
+        "exit_code": 1,
+        "kind": "agent",
+        "cwd": str(worktree),
+        "job_metadata": str(metadata),
+        "followup_dispatched": False,
+        "timeout_seconds": 5400,
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None
+    assert view["followup_mode"] == "split_required"
+    assert view["split_contract"]["child_timeout_lt_seconds"] == 5400
 
 
 def test_legacy_completed_only_filter_does_not_return_failed_agent(
@@ -354,5 +455,6 @@ def test_hourly_prompt_routes_both_followup_modes() -> None:
 
     assert "list --pending-followup --json" in prompt
     assert "collect_completed" in prompt
+    assert "split_required" in prompt
     assert "triage_failed" in prompt
     assert "不得把 failed job 或殘留 artifact 當成功結果" in prompt

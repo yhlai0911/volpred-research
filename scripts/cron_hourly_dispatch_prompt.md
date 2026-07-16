@@ -89,8 +89,9 @@ PHASE A — 檢查 compute queue 有無 completed collection / failed-agent tria
 1. 跑 `uv run python scripts/compute_queue.py list --pending-followup --json`
 2. 若有 entries → 優先處理最舊一條，依 `followup_mode` 分流：
    - `collect_completed`：讀 `result_artifact`（若非 null，這是 agent 真正產出的檔）+ `job_metadata`（若非 null，這是 runner lifecycle receipt）+ `claude_followup.brief`，派 interpretation/collection agent 解讀（~25K tokens, light），不再做 compute。**禁止把 `job_metadata` 當研究結果**。
+   - `split_required`：job 已 timeout；先盤點 partial outputs，禁止原樣重派。依 `split_contract` materialize 至少 2 個 bounded child stages；每段都要有 parent id、不同 stage、單一 artifact、success criterion，且 timeout 短於 parent。compute child 用 `--timeout-parent-job-id <parent>` + `--split-stage <name>` 留 receipt。
    - `triage_failed`：job **沒有成功**；派 platform_ops triage，照衍生的 `claude_followup.brief` 檢查 worktree/cwd 裡究竟有無可保留的腳本、partial result 或完整但未驗證的結果，再決定續跑 / fresh-worktree re-enqueue / 記錄無可救援。**不得把 failed job 或殘留 artifact 當成功結果，亦不得 force-remove worktree**。
-   兩種 mode 都在成功建出 next task 後跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。本小時派工結束。
+   三種 mode 都在成功建出 next task 後跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。本小時派工結束。
 3. 若無待 followup → 進 PHASE B。
 
 PHASE B-PARALLEL — 草稿池低水位並行補寫（boss msg143 2026-07-04 硬性要求；2026-07-05 落地）:
