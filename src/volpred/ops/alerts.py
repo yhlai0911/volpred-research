@@ -3267,6 +3267,16 @@ GMAIL_POLL_STALE_WARN_HOURS = 2.0
 GMAIL_POLL_STALE_CRITICAL_HOURS = 6.0
 TELEGRAM_POLL_STALE_WARN_HOURS = 2.0
 TELEGRAM_POLL_STALE_CRITICAL_HOURS = 6.0
+# 2026-07-16: poll freshness 量的是「收得到」，responder 量的是「回得出去」。
+# responder 正常 15min 內收尾（CAP_SEC=900，最多 3 輪）；hourly dispatch 兜底 ~1h。
+# warn>30min = responder 該回而沒回；critical>2h = 連兜底都沒接到。
+TELEGRAM_REPLY_BACKLOG_WARN_MINUTES = 30.0
+TELEGRAM_REPLY_BACKLOG_CRITICAL_MINUTES = 120.0
+# 白名單而非 terminal 黑名單：per feedback_audit_no_passive_terminal，
+# 用「還沒回完的狀態」正面表列，新增 awaiting_*/pending_* 變體不會靜默漏掉。
+TELEGRAM_REPLY_ACTIVE_STATUSES = frozenset(
+    {"pending", "queued", "claimed", "in_progress", "running"}
+)
 
 
 def _parse_dispatch_supervisor_heartbeat_state(storage_dir: str, now: datetime) -> dict[str, Any]:
@@ -3522,6 +3532,132 @@ def _parse_telegram_poll_freshness_state(storage_dir: str, now: datetime) -> dic
             "critical_hours": TELEGRAM_POLL_STALE_CRITICAL_HOURS,
             "read_error": read_error,
             "invalid_timestamp": invalid_timestamp,
+        },
+    }
+
+
+def _parse_telegram_reply_backlog_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """老闆 Telegram 訊息進來了但沒被回 —— outcome dead-man switch（2026-07-16）。
+
+    2026-07-16 incident：telegram_poll 心跳全程健康（訊息照收、任務照排），但
+    telegram_responder.sh 先因 Claude 週額度用盡連續 exit=1、後因硬編碼的
+    `/opt/homebrew/bin/jq` 被 brew 移除而 FATAL —— 老闆訊息靜默 20 小時無人回，
+    最後是老闆自己問「我的 telegram 送進來的消息沒動作？」才被發現。
+
+    既有 `telegram_poll_freshness` 量的是「收得到」，responder 死掉時它依然全綠：
+    inbound 心跳與 outbound 回覆是兩個獨立故障面。這條量的是 outcome（老闆的訊息
+    到底有沒有被回），因此 responder 掛掉、Claude 額度爆掉、claim 後卡死三種
+    根因都會浮現 —— 不必為每個根因各立一個探針。
+
+    無訊息時 backlog=0，自然 no-op，不製造噪音。
+    """
+    tasks_path = _storage_root(storage_dir) / "next_tasks.json"
+    read_error: str | None = None
+    tasks: list[Any] = []
+
+    try:
+        with tasks_path.open("r", encoding="utf-8") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
+            try:
+                loaded = json.load(handle)
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        if isinstance(loaded, list):
+            tasks = loaded
+        else:
+            read_error = f"expected list, got {type(loaded).__name__}"
+    except FileNotFoundError:
+        read_error = "missing_next_tasks"
+    except Exception as exc:  # noqa: BLE001 - alert parser must stay non-fatal
+        read_error = f"{type(exc).__name__}: {exc}"
+        warn(
+            "telegram_reply_backlog",
+            "next_tasks read failed",
+            path=_relative_repo_path(tasks_path),
+            err=read_error,
+        )
+
+    stuck: list[dict[str, Any]] = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        if task.get("task_type") != "telegram_reply":
+            continue
+        if task.get("status") not in TELEGRAM_REPLY_ACTIVE_STATUSES:
+            continue
+        created_at = _parse_iso_datetime(task.get("created_at"))
+        if created_at is None:
+            continue
+        age_minutes = round((now - created_at).total_seconds() / 60.0, 1)
+        stuck.append(
+            {
+                "id": task.get("id"),
+                "status": task.get("status"),
+                "created_at": task.get("created_at"),
+                "age_minutes": age_minutes,
+            }
+        )
+
+    stuck.sort(key=lambda item: item["age_minutes"], reverse=True)
+    oldest_minutes = stuck[0]["age_minutes"] if stuck else None
+
+    is_critical = (
+        oldest_minutes is not None
+        and oldest_minutes > TELEGRAM_REPLY_BACKLOG_CRITICAL_MINUTES
+    )
+    breached = oldest_minutes is not None and (
+        oldest_minutes > TELEGRAM_REPLY_BACKLOG_WARN_MINUTES
+    )
+    level = "critical" if is_critical else ("warn" if breached else "info")
+
+    if breached:
+        oldest = stuck[0]
+        detail_lines = [
+            f"- {item['id']}: {item['status']}, 已等 {item['age_minutes']} 分鐘"
+            for item in stuck[:5]
+        ]
+        body = "\n".join(
+            [
+                "## 觸發條件",
+                f"老闆經 Telegram 傳來的訊息有 {len(stuck)} 則沒被回，最久一則已等 "
+                f"{oldest_minutes} 分鐘（狀態 {oldest['status']}）。",
+                *detail_lines,
+                f"- 門檻: warn>{TELEGRAM_REPLY_BACKLOG_WARN_MINUTES}分 / "
+                f"critical>{TELEGRAM_REPLY_BACKLOG_CRITICAL_MINUTES}分",
+                "",
+                "## 影響",
+                "老闆以為訊息送出就會被處理，但實際上沒有任何回覆 —— 這個故障面"
+                "從外部完全看不出來（訊息照收、任務照排），只有老闆本人會發現。",
+                "",
+                "## 診斷指引（此條無自動修復：根因分歧，盲目重啟不對症）",
+                "1. tail -20 /Users/yhlai0911/.volpred/logs/telegram_responder.log",
+                "   — 看是 FATAL（缺依賴 / 環境漂移）還是 exit=1（Claude 額度用盡）。",
+                "2. 額度爆 → 等 reset 或改 TELEGRAM_RESPONDER_MODEL；"
+                "缺依賴 → 修 scripts/telegram_responder.sh 的啟動關卡。",
+                "3. hourly dispatch 是兜底（~1h）；critical 代表連兜底都沒接到。",
+            ]
+        )
+    else:
+        body = ""
+
+    return {
+        "id": "telegram_reply_backlog",
+        "breached": breached,
+        "level": level,
+        "title": (
+            "老闆 Telegram 訊息沒被回（responder 停擺）"
+            if breached
+            else "telegram_reply_backlog ok"
+        ),
+        "body": body,
+        "details": {
+            "tasks_path": str(tasks_path),
+            "stuck_count": len(stuck),
+            "oldest_age_minutes": oldest_minutes,
+            "stuck": stuck[:5],
+            "warn_minutes": TELEGRAM_REPLY_BACKLOG_WARN_MINUTES,
+            "critical_minutes": TELEGRAM_REPLY_BACKLOG_CRITICAL_MINUTES,
+            "read_error": read_error,
         },
     }
 
@@ -4647,6 +4783,7 @@ def build_alert_condition_report(
         _parse_gmail_poll_freshness_state(storage_dir, current),  # 2026-06-22 boss-email pipeline dead-man switch
         _parse_lazypack_render_state(storage_dir, current),  # 2026-07-11 render 失敗 → 文章卡草稿出不去，此前完全無訊號
         _parse_telegram_poll_freshness_state(storage_dir, current),  # 2026-07-06 boss-request: Telegram poller dead-man switch
+        _parse_telegram_reply_backlog_state(storage_dir, current),   # 2026-07-16 poll 綠燈但 responder 死了 → 老闆訊息靜默 20h（收訊 ≠ 回訊）
         _parse_host_cron_state(storage_dir, current),
         _parse_push_backlog_state(storage_dir, current),          # 2026-07-04 26h push-hold incident: persistent unpushed-backlog escalation
         _parse_orphan_branch_state(storage_dir, current),         # 2026-07-10 worktree 清掉、branch 留下未合併工作，無人接手

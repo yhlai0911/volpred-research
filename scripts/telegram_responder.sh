@@ -43,9 +43,16 @@ if [ ! -r "$AUTO_MEMORY_DIR/MEMORY.md" ]; then
     echo "[FATAL] canonical auto-memory index missing: $AUTO_MEMORY_DIR/MEMORY.md"
     exit 1
 fi
+# /usr/bin/python3 (macOS system, stdlib-only) — 不用 brew jq：brew 二進位會隨
+# upgrade/uninstall 消失，launchd 下無 PATH fallback 就 FATAL（2026-07-16 事故）。
 if ! RESPONDER_SETTINGS_JSON=$(
-    /opt/homebrew/bin/jq -c --arg directory "$AUTO_MEMORY_DIR" \
-        '.autoMemoryDirectory = $directory' "$REPO_ROOT/.claude/settings.json"
+    /usr/bin/python3 -c '
+import json, sys
+with open(sys.argv[1]) as f:
+    cfg = json.load(f)
+cfg["autoMemoryDirectory"] = sys.argv[2]
+json.dump(cfg, sys.stdout, ensure_ascii=False, separators=(",", ":"))
+' "$REPO_ROOT/.claude/settings.json" "$AUTO_MEMORY_DIR"
 ); then
     echo "[FATAL] cannot bind responder settings to canonical auto-memory"
     exit 1
