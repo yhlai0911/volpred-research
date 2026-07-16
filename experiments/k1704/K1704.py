@@ -418,12 +418,12 @@ def load_proxy_cache(
     return frame, audit
 
 
-def har_forecasts(frame: pd.DataFrame, oos_start: int, train_window: int) -> np.ndarray:
+def har_feature_frame(frame: pd.DataFrame) -> pd.DataFrame:
     positive_rv = frame["rv_5min"].where(frame["rv_5min"] > 0)
     log_rv = np.log(positive_rv)
     # Explicit lag surface: every feature at t is built only from RV through t-1.
     lagged_rv5 = log_rv.shift(1)
-    features = pd.DataFrame(
+    return pd.DataFrame(
         {
             "const": 1.0,
             "daily_lag": lagged_rv5,
@@ -431,6 +431,12 @@ def har_forecasts(frame: pd.DataFrame, oos_start: int, train_window: int) -> np.
             "monthly_lag": lagged_rv5.rolling(22).mean(),
         }
     )
+
+
+def har_forecasts(frame: pd.DataFrame, oos_start: int, train_window: int) -> np.ndarray:
+    positive_rv = frame["rv_5min"].where(frame["rv_5min"] > 0)
+    log_rv = np.log(positive_rv)
+    features = har_feature_frame(frame)
     forecasts = np.full(len(frame), np.nan)
     for origin in range(oos_start, len(frame)):
         start = max(22, origin - train_window)
@@ -448,6 +454,32 @@ def ewma_forecasts(frame: pd.DataFrame) -> np.ndarray:
     squared = frame["day_return"].pow(2)
     # Forecast at t uses returns only through t-1; this is the required lag.
     return squared.shift(1).ewm(alpha=0.06, adjust=False, min_periods=22).mean().to_numpy()
+
+
+def model_input_availability(
+    frame: pd.DataFrame,
+    oos_start: int,
+    train_window: int,
+) -> dict[str, np.ndarray]:
+    """Forecastability from model inputs only, never from forecast outputs."""
+    n_obs = len(frame)
+    oos = np.arange(n_obs) >= oos_start
+    har_available = np.isfinite(har_feature_frame(frame).to_numpy(dtype=float)).all(axis=1)
+
+    shifted_return_valid = frame["day_return"].shift(1).notna().to_numpy()
+    ewma_available = np.cumsum(shifted_return_valid) >= 22
+
+    returns = frame["day_return"].to_numpy(dtype=float)
+    gjr_available = np.zeros(n_obs, dtype=bool)
+    for origin in range(oos_start, n_obs):
+        start = max(0, origin - train_window)
+        gjr_available[origin] = bool(np.isfinite(returns[start:origin]).all())
+
+    return {
+        "HAR_RV5": oos & har_available,
+        "GJR_GARCH": oos & gjr_available,
+        "EWMA_R2": oos & ewma_available,
+    }
 
 
 def gjr_forecasts(
@@ -629,10 +661,24 @@ def build_common_evaluation_mask(
 def build_origin_eligibility_mask(
     actuals: dict[str, np.ndarray],
     raw_forecasts: dict[str, np.ndarray],
+    input_availability: dict[str, np.ndarray],
     oos_start: int,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """Predeclare origins evaluable from targets and lagged model information."""
-    lengths = {len(values) for values in [*actuals.values(), *raw_forecasts.values()]}
+    if set(raw_forecasts) != set(MODEL_NAMES):
+        raise RuntimeError(f"unexpected raw model set: {sorted(raw_forecasts)}")
+    if set(input_availability) != set(MODEL_NAMES):
+        raise RuntimeError(
+            f"unexpected input-availability model set: {sorted(input_availability)}"
+        )
+    lengths = {
+        len(values)
+        for values in [
+            *actuals.values(),
+            *raw_forecasts.values(),
+            *input_availability.values(),
+        ]
+    }
     if len(lengths) != 1:
         raise RuntimeError(f"origin eligibility length mismatch: {sorted(lengths)}")
     n_obs = lengths.pop()
@@ -640,28 +686,43 @@ def build_origin_eligibility_mask(
     target_valid = np.ones(n_obs, dtype=bool)
     for values in actuals.values():
         target_valid &= np.isfinite(values) & (values > 0)
-    forecast_valid_by_model = {
-        name: np.isfinite(values) & (values > 0)
-        for name, values in raw_forecasts.items()
-    }
-    forecast_valid = np.ones(n_obs, dtype=bool)
-    for values in forecast_valid_by_model.values():
-        forecast_valid &= values
-    eligible = oos & target_valid & forecast_valid
+
+    all_inputs_valid = np.ones(n_obs, dtype=bool)
+    exclusions: dict[str, Any] = {}
+    for name in MODEL_NAMES:
+        model_inputs_valid = np.asarray(input_availability[name], dtype=bool)
+        if model_inputs_valid[:oos_start].any():
+            raise RuntimeError(f"{name} input availability includes pre-OOS origins")
+        raw_valid = np.isfinite(raw_forecasts[name]) & (raw_forecasts[name] > 0)
+        invalid_output = oos & model_inputs_valid & ~raw_valid
+        if invalid_output.any():
+            positions = np.flatnonzero(invalid_output)
+            raise RuntimeError(
+                f"raw forecast failure despite available inputs for {name}: "
+                f"{len(positions)} origins, first={positions[:5].tolist()}"
+            )
+        all_inputs_valid &= model_inputs_valid
+        excluded = np.flatnonzero(oos & ~model_inputs_valid).tolist()
+        exclusions[name] = {
+            "count": len(excluded),
+            "indices": excluded,
+            "indices_sha256": hashlib.sha256(
+                "\n".join(map(str, excluded)).encode()
+            ).hexdigest(),
+        }
+
+    eligible = oos & target_valid & all_inputs_valid
     if int(eligible.sum()) < 252:
         raise RuntimeError(f"common origin eligibility too short: {int(eligible.sum())}")
     audit = {
         "oos_candidates": int(oos.sum()),
         "eligible": int(eligible.sum()),
         "excluded_invalid_target": int((oos & ~target_valid).sum()),
-        "excluded_unavailable_raw_forecast_by_model": {
-            name: int((oos & ~values).sum())
-            for name, values in forecast_valid_by_model.items()
-        },
+        "excluded_input_unavailable_by_model": exclusions,
         "policy": (
-            "predeclare the intersection of positive observed targets and raw one-step "
-            "forecasts available from lagged information; any calibrated forecast gap "
-            "inside this frozen set fails closed"
+            "predeclare the intersection of positive observed targets and model-input "
+            "availability from t-1 or earlier; raw and calibrated forecast failures "
+            "inside their input-available sets fail closed"
         ),
     }
     return eligible, audit
@@ -829,6 +890,15 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         name: frame[name].to_numpy(dtype=float) for name in PROXY_COLUMNS
     }
     actuals["consensus_weighted"] = composite
+    input_availability = model_input_availability(
+        frame, args.oos_start, args.train_window
+    )
+    origin_eligibility, origin_eligibility_audit = build_origin_eligibility_mask(
+        actuals,
+        raw_forecasts,
+        input_availability,
+        args.oos_start,
+    )
     forecasts_by_target: dict[str, dict[str, np.ndarray]] = {}
     scale_calibration: dict[str, Any] = {}
     for name in PROXY_COLUMNS:
@@ -843,9 +913,6 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     forecasts_by_target["consensus_weighted"] = consensus_forecasts
     scale_calibration["consensus_weighted"] = consensus_scale_audit
 
-    origin_eligibility, origin_eligibility_audit = build_origin_eligibility_mask(
-        actuals, raw_forecasts, args.oos_start
-    )
     common_mask = build_common_evaluation_mask(
         actuals,
         forecasts_by_target,

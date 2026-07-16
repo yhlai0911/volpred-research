@@ -99,11 +99,20 @@ def test_gjr_refit_and_non_refit_origin_alignment(monkeypatch: pytest.MonkeyPatc
 def test_common_ledger_fails_on_forecast_gap_and_is_shared(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    n_obs = 300
+    n_obs = 400
     actuals = {
         name: np.linspace(1.0, 2.0, n_obs) for name in [*k1704.PROXY_COLUMNS, "consensus_weighted"]
     }
-    actuals["r2_day"][7] = 0.0
+    actuals["rv_5min"][107] = np.nan
+    frame = pd.DataFrame(
+        {
+            "rv_5min": actuals["rv_5min"],
+            "day_return": np.linspace(-0.02, 0.02, n_obs),
+        }
+    )
+    input_availability = k1704.model_input_availability(
+        frame, oos_start=100, train_window=50
+    )
     forecasts = {
         target: {name: np.linspace(1.1, 2.1, n_obs) for name in k1704.MODEL_NAMES}
         for target in actuals
@@ -111,34 +120,48 @@ def test_common_ledger_fails_on_forecast_gap_and_is_shared(
     raw_forecasts = {
         name: np.linspace(1.1, 2.1, n_obs) for name in k1704.MODEL_NAMES
     }
-    raw_forecasts["HAR_RV5"][8] = np.nan
+    raw_forecasts["HAR_RV5"][~input_availability["HAR_RV5"]] = np.nan
     origin_eligibility, audit = k1704.build_origin_eligibility_mask(
-        actuals, raw_forecasts, oos_start=5
+        actuals,
+        raw_forecasts,
+        input_availability,
+        oos_start=100,
     )
     for target in forecasts:
-        forecasts[target]["HAR_RV5"][8] = np.nan
+        forecasts[target]["HAR_RV5"][~input_availability["HAR_RV5"]] = np.nan
     mask = k1704.build_common_evaluation_mask(
         actuals,
         forecasts,
-        oos_start=5,
+        oos_start=100,
         origin_eligibility=origin_eligibility,
     )
-    assert int(mask.sum()) == 293
-    assert mask[7] == np.False_
-    assert mask[8] == np.False_
+    assert int(mask.sum()) == 277
+    assert mask[107] == np.False_
+    assert mask[108] == np.False_
+    assert mask[130] == np.True_
     assert audit["excluded_invalid_target"] == 1
-    assert audit["excluded_unavailable_raw_forecast_by_model"]["HAR_RV5"] == 1
+    assert audit["excluded_input_unavailable_by_model"]["HAR_RV5"]["count"] == 22
+
+    raw_failure = {name: values.copy() for name, values in raw_forecasts.items()}
+    raw_failure["HAR_RV5"][130] = np.nan
+    with pytest.raises(RuntimeError, match="raw forecast failure despite available inputs"):
+        k1704.build_origin_eligibility_mask(
+            actuals,
+            raw_failure,
+            input_availability,
+            oos_start=100,
+        )
 
     broken = {
         target: {name: values.copy() for name, values in model_values.items()}
         for target, model_values in forecasts.items()
     }
-    broken["rv_5min"]["HAR_RV5"][9] = np.nan
+    broken["rv_5min"]["HAR_RV5"][130] = np.nan
     with pytest.raises(RuntimeError, match="forecast coverage failure"):
         k1704.build_common_evaluation_mask(
             actuals,
             broken,
-            oos_start=5,
+            oos_start=100,
             origin_eligibility=origin_eligibility,
         )
 
@@ -154,8 +177,8 @@ def test_common_ledger_fails_on_forecast_gap_and_is_shared(
 
     monkeypatch.setattr(k1704, "model_confidence_set", fake_mcs)
     result = k1704.evaluate_target(actuals["rv_1min"], forecasts["rv_1min"], mask)
-    assert result["n_oos"] == 293
-    assert observed_lengths == [293, 293, 293]
+    assert result["n_oos"] == 277
+    assert observed_lengths == [277, 277, 277]
 
 
 def test_cached_raw_bytes_are_reverified(tmp_path: Path) -> None:
