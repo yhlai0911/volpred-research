@@ -1,0 +1,74 @@
+{
+  "generated_at": "2026-07-16T09:40:05.133025",
+  "overall": "critical",
+  "critical_count": 1,
+  "warn_count": 9,
+  "findings": [
+    {
+      "dimension": "cron_completion",
+      "severity": "warn",
+      "message": "daily_update: 最近一輪 exit=1（非 0）",
+      "recovery": "tail storage/logs/cron/daily_update.log"
+    },
+    {
+      "dimension": "live_freshness",
+      "severity": "warn",
+      "message": "線上績效最新 data_date=2026-07-14，但應已收到 2026-07-15（落後 1 個交易日）—— 頁面顯示舊資料",
+      "recovery": "查 collect_us 是否漏班（storage/logs/cron/collect_us.log）→ 跑 daily_update + 確認頁面非靜態快取（見 live_cache）"
+    },
+    {
+      "dimension": "mission_progress",
+      "severity": "warn",
+      "message": "12 筆 blocked 任務滯留 >30 天且無 blocked_until 出口（前 5：['K1169', 'Paper3_expansion_synthesis_decision_meta', 'email-11836-9833be', 'K492_article_general_v2', 'fb_page_graph_api_integration']）—— escalate-or-close，不可無限停放",
+      "recovery": "逐筆裁決：可自主解的解、需 owner 的併決策 email、死的 closed_no_action/expired"
+    },
+    {
+      "dimension": "alert_conditions",
+      "severity": "critical",
+      "message": "host_cron_fail: Host cron failure detected",
+      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
+    },
+    {
+      "dimension": "alert_conditions",
+      "severity": "warn",
+      "message": "event_receipt_watchdog: Event receipt watchdog stale (queued_past_deadline)",
+      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
+    },
+    {
+      "dimension": "reader_metrics",
+      "severity": "info",
+      "message": "top-3 讀者互動: VIX 在 2026 衝到 31，標普同期漲 8(score=333); K1006: 台指期隔夜跳空累計 83.6% 卻(score=170); 六月科技股回檔實錄：QQQ 只跌 7%，你的持股(score=150)",
+      "recovery": null
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "REPORT_STALE: 3 priority report(s) no longer match their audited subject hashes（例：k1683, k1699, K1710）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "PRIORITY_UNVERIFIED: 227 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1023, k1025, k1025b）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "PRIORITY_REFERENCE_UNRESOLVED: 5 paper/feed reference(s) do not resolve to an experiment directory（例：K1685_garchx_oos_extension, K54, K55, K71, K79）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "CODE_WITHOUT_RESULTS: 168 K-family directories have code but no archived *_results.json（例：k1212, k1267, k1380, k144, k150）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "reproducibility",
+      "severity": "warn",
+      "message": "KNOWLEDGE_UNRECORDED: 2 finished experiment(s) never reached knowledge.json — invisible to dedup/topic selection, so the pipeline can re-run them（例：k1707, k1713）",
+      "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    }
+  ]
+}
