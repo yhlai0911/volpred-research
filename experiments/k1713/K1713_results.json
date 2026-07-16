@@ -1,0 +1,394 @@
+{
+  "experiment_id": "K1713",
+  "seed": 42,
+  "task_disposition": "duplicate_closure",
+  "duplicate_of": "K1661",
+  "source_experiment_commit": "cdb875946",
+  "verdict": "DUPLICATE_CLOSURE_PASS",
+  "creates_new_empirical_claim": false,
+  "reason": "K1661 already implements the full queued design: daily-OHLC Garman-Klass RV, range-quarticity proxy, HAR/HARQ, rolling W=1000 one-step forecasts, QLIKE, DM-HLN, and SPY/0050.TW/TWII (documented TX proxy).",
+  "source_hashes": {
+    "k1661_harq_ohlc.py": "ef816d448c064743f040ce51419ac2e548e24ae733db156542f593a1ff3920ec",
+    "k1661_results.json": "f7827ff86f7fad49374a6cbd4995540a2bef0706fc3931952c0ac364d74b912e",
+    "reviews/codex_review.md": "3a22312228a89e4c220abb80fa7312a3cbe1e3d2d31a3f119a0c5abbf4aaec58"
+  },
+  "contract_checks": {
+    "queued_markets_present": true,
+    "garman_klass_present": true,
+    "range_quarticity_present": true,
+    "explicit_feature_shift_present": true,
+    "rolling_window_1000_present": true,
+    "qlike_actual_over_predicted": true,
+    "dm_hln_horizon_one": true,
+    "har_and_harq_present": true,
+    "review_pass_present": true,
+    "canonical_null_not_overclaimed": true
+  },
+  "replay": [
+    {
+      "asset": "SPY",
+      "input_sha256": "cea15e8d4ea098c8084cf5efc8c3f203aa242afbdc645e45a0c4eae0f51a8dbf",
+      "n_ohlc_rows": 4151,
+      "n_design_rows": 4129,
+      "independent_design_byte_equal": true,
+      "models": {
+        "HAR": {
+          "qlike": 0.43037255155097714,
+          "mse": 2.240094036860279e-08,
+          "n_oos": 3129,
+          "n_insanity_filter": 1,
+          "first_forecast_date": "2014-01-27",
+          "last_forecast_date": "2026-07-07"
+        },
+        "HARQ": {
+          "qlike": 0.43932114738998185,
+          "mse": 2.6665637700384504e-08,
+          "n_oos": 3129,
+          "n_insanity_filter": 4,
+          "first_forecast_date": "2014-01-27",
+          "last_forecast_date": "2026-07-07"
+        },
+        "HARQ-F": {
+          "qlike": 0.48059532575865255,
+          "mse": 3.253300328231397e-08,
+          "n_oos": 3129,
+          "n_insanity_filter": 5,
+          "first_forecast_date": "2014-01-27",
+          "last_forecast_date": "2026-07-07"
+        },
+        "HARQ-smooth": {
+          "qlike": 0.42767947494569597,
+          "mse": 2.5258367494933664e-08,
+          "n_oos": 3129,
+          "n_insanity_filter": 3,
+          "first_forecast_date": "2014-01-27",
+          "last_forecast_date": "2026-07-07"
+        }
+      },
+      "dm_hln_HARQ_vs_HAR": {
+        "T": 3129,
+        "dm": 0.49335587268250775,
+        "dm_hln": 0.4932770303531697,
+        "p_two": 0.6218514842080358,
+        "p_one_a_better": 0.6890742578959821,
+        "mean_diff": 0.008948595839004751
+      }
+    },
+    {
+      "asset": "0050.TW",
+      "input_sha256": "53ce729d99c15d97f7cfe0f499f502a4b7eb96f5cd1b2a6df9c89b30d9578f06",
+      "n_ohlc_rows": 4034,
+      "n_design_rows": 4012,
+      "independent_design_byte_equal": true,
+      "models": {
+        "HAR": {
+          "qlike": 0.5083624168654826,
+          "mse": 1.2233888052774007e-08,
+          "n_oos": 3012,
+          "n_insanity_filter": 0,
+          "first_forecast_date": "2014-02-27",
+          "last_forecast_date": "2026-07-07"
+        },
+        "HARQ": {
+          "qlike": 0.5137919811781744,
+          "mse": 1.2314981629781719e-08,
+          "n_oos": 3012,
+          "n_insanity_filter": 2,
+          "first_forecast_date": "2014-02-27",
+          "last_forecast_date": "2026-07-07"
+        },
+        "HARQ-F": {
+          "qlike": 0.526520916862994,
+          "mse": 1.3389550074266997e-08,
+          "n_oos": 3012,
+          "n_insanity_filter": 4,
+          "first_forecast_date": "2014-02-27",
+          "last_forecast_date": "2026-07-07"
+        },
+        "HARQ-smooth": {
+          "qlike": 0.5194090398546505,
+          "mse": 1.2145649499468416e-08,
+          "n_oos": 3012,
+          "n_insanity_filter": 3,
+          "first_forecast_date": "2014-02-27",
+          "last_forecast_date": "2026-07-07"
+        }
+      },
+      "dm_hln_HARQ_vs_HAR": {
+        "T": 3012,
+        "dm": 0.7102137064596076,
+        "dm_hln": 0.7100957993107151,
+        "p_two": 0.477699720751263,
+        "p_one_a_better": 0.7611501396243685,
+        "mean_diff": 0.005429564312691782
+      }
+    },
+    {
+      "asset": "TWII",
+      "input_sha256": "937ae58fd357df5e9f655732805b27ae27b1c9e9dc8e2d54e757c9606970fef2",
+      "n_ohlc_rows": 4029,
+      "n_design_rows": 4007,
+      "independent_design_byte_equal": true,
+      "models": {
+        "HAR": {
+          "qlike": 0.3740073283315468,
+          "mse": 9.76685922242125e-09,
+          "n_oos": 3007,
+          "n_insanity_filter": 0,
+          "first_forecast_date": "2014-03-03",
+          "last_forecast_date": "2026-07-07"
+        },
+        "HARQ": {
+          "qlike": 0.37858058094012814,
+          "mse": 1.0005301876667797e-08,
+          "n_oos": 3007,
+          "n_insanity_filter": 6,
+          "first_forecast_date": "2014-03-03",
+          "last_forecast_date": "2026-07-07"
+        },
+        "HARQ-F": {
+          "qlike": 0.44819680653898164,
+          "mse": 9.958249103267887e-09,
+          "n_oos": 3007,
+          "n_insanity_filter": 27,
+          "first_forecast_date": "2014-03-03",
+          "last_forecast_date": "2026-07-07"
+        },
+        "HARQ-smooth": {
+          "qlike": 0.38825462234325314,
+          "mse": 9.873526687531201e-09,
+          "n_oos": 3007,
+          "n_insanity_filter": 6,
+          "first_forecast_date": "2014-03-03",
+          "last_forecast_date": "2026-07-07"
+        }
+      },
+      "dm_hln_HARQ_vs_HAR": {
+        "T": 3007,
+        "dm": 0.5412348351921695,
+        "dm_hln": 0.5411448318931034,
+        "p_two": 0.5884478585778741,
+        "p_one_a_better": 0.705776070711063,
+        "mean_diff": 0.00457325260858134
+      }
+    }
+  ],
+  "metric_comparisons": [
+    {
+      "label": "SPY.HAR.qlike",
+      "actual": 0.43037255155097714,
+      "expected": 0.43037255155097753,
+      "abs_diff": 3.885780586188048e-16,
+      "passed": true
+    },
+    {
+      "label": "SPY.HAR.mse",
+      "actual": 2.240094036860279e-08,
+      "expected": 2.2400940368602812e-08,
+      "abs_diff": 2.3161057151484775e-23,
+      "passed": true
+    },
+    {
+      "label": "SPY.HARQ.qlike",
+      "actual": 0.43932114738998185,
+      "expected": 0.43932114738998157,
+      "abs_diff": 2.7755575615628914e-16,
+      "passed": true
+    },
+    {
+      "label": "SPY.HARQ.mse",
+      "actual": 2.6665637700384504e-08,
+      "expected": 2.666563770038449e-08,
+      "abs_diff": 1.3234889800848443e-23,
+      "passed": true
+    },
+    {
+      "label": "SPY.HARQ-F.qlike",
+      "actual": 0.48059532575865255,
+      "expected": 0.4805953257586519,
+      "abs_diff": 6.661338147750939e-16,
+      "passed": true
+    },
+    {
+      "label": "SPY.HARQ-F.mse",
+      "actual": 3.253300328231397e-08,
+      "expected": 3.2533003282314085e-08,
+      "abs_diff": 1.1249656330721176e-22,
+      "passed": true
+    },
+    {
+      "label": "SPY.HARQ-smooth.qlike",
+      "actual": 0.42767947494569597,
+      "expected": 0.42767947494569547,
+      "abs_diff": 4.996003610813204e-16,
+      "passed": true
+    },
+    {
+      "label": "SPY.HARQ-smooth.mse",
+      "actual": 2.5258367494933664e-08,
+      "expected": 2.5258367494933668e-08,
+      "abs_diff": 3.308722450212111e-24,
+      "passed": true
+    },
+    {
+      "label": "SPY.HARQ_vs_HAR.dm_hln",
+      "actual": 0.4932770303531697,
+      "expected": 0.49327703035313114,
+      "abs_diff": 3.858025010572419e-14,
+      "passed": true
+    },
+    {
+      "label": "SPY.HARQ_vs_HAR.p_two",
+      "actual": 0.6218514842080358,
+      "expected": 0.6218514842080634,
+      "abs_diff": 2.7533531010703882e-14,
+      "passed": true
+    },
+    {
+      "label": "0050.TW.HAR.qlike",
+      "actual": 0.5083624168654826,
+      "expected": 0.5083624168654831,
+      "abs_diff": 5.551115123125783e-16,
+      "passed": true
+    },
+    {
+      "label": "0050.TW.HAR.mse",
+      "actual": 1.2233888052774007e-08,
+      "expected": 1.2233888052774043e-08,
+      "abs_diff": 3.639594695233322e-23,
+      "passed": true
+    },
+    {
+      "label": "0050.TW.HARQ.qlike",
+      "actual": 0.5137919811781744,
+      "expected": 0.5137919811781747,
+      "abs_diff": 3.3306690738754696e-16,
+      "passed": true
+    },
+    {
+      "label": "0050.TW.HARQ.mse",
+      "actual": 1.2314981629781719e-08,
+      "expected": 1.2314981629781765e-08,
+      "abs_diff": 4.632211430296955e-23,
+      "passed": true
+    },
+    {
+      "label": "0050.TW.HARQ-F.qlike",
+      "actual": 0.526520916862994,
+      "expected": 0.5265209168629938,
+      "abs_diff": 1.1102230246251565e-16,
+      "passed": true
+    },
+    {
+      "label": "0050.TW.HARQ-F.mse",
+      "actual": 1.3389550074266997e-08,
+      "expected": 1.3389550074267055e-08,
+      "abs_diff": 5.790264287871194e-23,
+      "passed": true
+    },
+    {
+      "label": "0050.TW.HARQ-smooth.qlike",
+      "actual": 0.5194090398546505,
+      "expected": 0.5194090398546507,
+      "abs_diff": 2.220446049250313e-16,
+      "passed": true
+    },
+    {
+      "label": "0050.TW.HARQ-smooth.mse",
+      "actual": 1.2145649499468416e-08,
+      "expected": 1.2145649499468453e-08,
+      "abs_diff": 3.639594695233322e-23,
+      "passed": true
+    },
+    {
+      "label": "0050.TW.HARQ_vs_HAR.dm_hln",
+      "actual": 0.7100957993107151,
+      "expected": 0.7100957993106936,
+      "abs_diff": 2.1538326677728037e-14,
+      "passed": true
+    },
+    {
+      "label": "0050.TW.HARQ_vs_HAR.p_two",
+      "actual": 0.477699720751263,
+      "expected": 0.4776997207512763,
+      "abs_diff": 1.3322676295501878e-14,
+      "passed": true
+    },
+    {
+      "label": "TWII.HAR.qlike",
+      "actual": 0.3740073283315468,
+      "expected": 0.3740073283315468,
+      "abs_diff": 0.0,
+      "passed": true
+    },
+    {
+      "label": "TWII.HAR.mse",
+      "actual": 9.76685922242125e-09,
+      "expected": 9.76685922242125e-09,
+      "abs_diff": 0.0,
+      "passed": true
+    },
+    {
+      "label": "TWII.HARQ.qlike",
+      "actual": 0.37858058094012814,
+      "expected": 0.37858058094012814,
+      "abs_diff": 0.0,
+      "passed": true
+    },
+    {
+      "label": "TWII.HARQ.mse",
+      "actual": 1.0005301876667797e-08,
+      "expected": 1.0005301876667797e-08,
+      "abs_diff": 0.0,
+      "passed": true
+    },
+    {
+      "label": "TWII.HARQ-F.qlike",
+      "actual": 0.44819680653898164,
+      "expected": 0.44819680653898164,
+      "abs_diff": 0.0,
+      "passed": true
+    },
+    {
+      "label": "TWII.HARQ-F.mse",
+      "actual": 9.958249103267887e-09,
+      "expected": 9.958249103267887e-09,
+      "abs_diff": 0.0,
+      "passed": true
+    },
+    {
+      "label": "TWII.HARQ-smooth.qlike",
+      "actual": 0.38825462234325314,
+      "expected": 0.38825462234325314,
+      "abs_diff": 0.0,
+      "passed": true
+    },
+    {
+      "label": "TWII.HARQ-smooth.mse",
+      "actual": 9.873526687531201e-09,
+      "expected": 9.873526687531201e-09,
+      "abs_diff": 0.0,
+      "passed": true
+    },
+    {
+      "label": "TWII.HARQ_vs_HAR.dm_hln",
+      "actual": 0.5411448318931034,
+      "expected": 0.5411448318931034,
+      "abs_diff": 0.0,
+      "passed": true
+    },
+    {
+      "label": "TWII.HARQ_vs_HAR.p_two",
+      "actual": 0.5884478585778741,
+      "expected": 0.5884478585778741,
+      "abs_diff": 0.0,
+      "passed": true
+    }
+  ],
+  "tolerance": {
+    "absolute": 1e-12,
+    "relative": 1e-10
+  },
+  "lookahead_policy": "Independent ledger uses signal.shift(1) for daily, weekly, monthly RV and sqrt(RQ); rolling training targets end strictly before each forecast origin.",
+  "conclusion": "Close K1713 as a verified duplicate of K1661. Do not count it as an independent replication or add a second knowledge finding."
+}
