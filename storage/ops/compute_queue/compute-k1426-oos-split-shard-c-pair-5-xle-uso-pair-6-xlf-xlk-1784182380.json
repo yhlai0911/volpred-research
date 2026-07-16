@@ -7,11 +7,11 @@
     "c"
   ],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queued_at": "2026-07-16T06:13:00Z",
   "started_at": "2026-07-16T10:30:05Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-16T12:43:53Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380.stderr",
   "result_artifact": "experiments/k1426/k1426_oos_shard_c.json",
@@ -32,5 +32,17 @@
   "brief_source": null,
   "brief_snapshot": null,
   "parent_timeout_job_id": "compute-k1426-oos-partial-cointegration-hedging-1780934756",
-  "split_stage": "shard_c"
+  "split_stage": "shard_c",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/experiments/k1426"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "505cef612189f4cacc09cdd092dfbb0787c9bf22",
+  "delivered_paths": [
+    "experiments/k1426/k1426_oos_shard_c.json"
+  ],
+  "delivered_at": "2026-07-16T13:01:19.427040+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }

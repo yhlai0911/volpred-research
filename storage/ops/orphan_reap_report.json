@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T12:00:57.297408+00:00",
+  "generated_at": "2026-07-16T13:01:12.222611+00:00",
   "adoptable": [],
   "held": [
     {
@@ -9,6 +9,11 @@
     },
     {
       "path": "storage/drafts/fb_mile_5a20a332.md",
+      "reason": "no_title",
+      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
+    },
+    {
+      "path": "storage/drafts/fb_mile_f78be848.md",
       "reason": "no_title",
       "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
     },
@@ -31,13 +36,27 @@
   "skipped": {
     "baseline": 519,
     "registered": 25,
-    "grace": 1,
+    "grace": 0,
     "inflight": 0
   },
-  "orphan_count": 5,
+  "orphan_count": 6,
   "adopted": [],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_c.json"
+      ],
+      "existing_paths": [
+        "experiments/k1426/k1426_oos_shard_c.json"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [
     {
       "job_id": "K1694-script-rerun-1211",
@@ -130,38 +149,99 @@
       ]
     }
   ],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_c.json"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "505cef612189f4cacc09cdd092dfbb0787c9bf22",
+      "reason": "committed"
+    }
+  ],
   "paper_artifact_collectable": [],
   "paper_artifact_held": [],
   "paper_collections": [],
   "draft_artifact_collectable": [
     {
-      "path": "storage/drafts/assets/digest_20260716/lazypack/1_concept_today.png",
+      "path": "storage/drafts/assets/event_cpi_20260714_t0/lazypack/cpi20260714_1_concept_scorecard.png",
       "kind": "png",
       "reason": "untracked"
     },
     {
-      "path": "storage/drafts/assets/digest_20260716/lazypack/2_method_four_questions.png",
+      "path": "storage/drafts/assets/event_cpi_20260714_t0/lazypack/cpi20260714_2_method_premium_timeline.png",
       "kind": "png",
       "reason": "untracked"
     },
     {
-      "path": "storage/drafts/assets/digest_20260716/lazypack/3_results_three_events.png",
+      "path": "storage/drafts/assets/event_cpi_20260714_t0/lazypack/cpi20260714_3_results_takeaway.png",
       "kind": "png",
       "reason": "untracked"
     },
     {
-      "path": "storage/drafts/assets/digest_20260716/lazypack/digest20260716_1_concept_today.png",
+      "path": "storage/drafts/assets/event_cpi_20260714_t0/market_raw.json",
+      "kind": "json",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/1_concept_concentration.png",
       "kind": "png",
       "reason": "untracked"
     },
     {
-      "path": "storage/drafts/assets/digest_20260716/lazypack/digest20260716_2_method_four_questions.png",
+      "path": "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/2_method_hedge.png",
       "kind": "png",
       "reason": "untracked"
     },
     {
-      "path": "storage/drafts/assets/digest_20260716/lazypack/digest20260716_3_results_three_events.png",
+      "path": "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/3_takeaway.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/aiconc20260716_1_concept_concentration.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/aiconc20260716_2_method_hedge.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/aiconc20260716_3_takeaway.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/1_concept_beat_but_down.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/2_method_capex_margin.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/3_results_options_scorecard.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/tsmc20260716_1_concept_beat_but_down.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/tsmc20260716_2_method_capex_margin.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/tsmc20260716_3_results_options_scorecard.png",
       "kind": "png",
       "reason": "untracked"
     }
@@ -184,21 +264,31 @@
     }
   ],
   "draft_artifact_skipped": {
-    "grace": 16,
+    "grace": 0,
     "inflight": 0
   },
   "draft_collections": [
     {
       "paths": [
-        "storage/drafts/assets/digest_20260716/lazypack/1_concept_today.png",
-        "storage/drafts/assets/digest_20260716/lazypack/2_method_four_questions.png",
-        "storage/drafts/assets/digest_20260716/lazypack/3_results_three_events.png",
-        "storage/drafts/assets/digest_20260716/lazypack/digest20260716_1_concept_today.png",
-        "storage/drafts/assets/digest_20260716/lazypack/digest20260716_2_method_four_questions.png",
-        "storage/drafts/assets/digest_20260716/lazypack/digest20260716_3_results_three_events.png"
+        "storage/drafts/assets/event_cpi_20260714_t0/lazypack/cpi20260714_1_concept_scorecard.png",
+        "storage/drafts/assets/event_cpi_20260714_t0/lazypack/cpi20260714_2_method_premium_timeline.png",
+        "storage/drafts/assets/event_cpi_20260714_t0/lazypack/cpi20260714_3_results_takeaway.png",
+        "storage/drafts/assets/event_cpi_20260714_t0/market_raw.json",
+        "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/1_concept_concentration.png",
+        "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/2_method_hedge.png",
+        "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/3_takeaway.png",
+        "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/aiconc20260716_1_concept_concentration.png",
+        "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/aiconc20260716_2_method_hedge.png",
+        "storage/drafts/assets/trending_ai_concentration_20260716/lazypack/aiconc20260716_3_takeaway.png",
+        "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/1_concept_beat_but_down.png",
+        "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/2_method_capex_margin.png",
+        "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/3_results_options_scorecard.png",
+        "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/tsmc20260716_1_concept_beat_but_down.png",
+        "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/tsmc20260716_2_method_capex_margin.png",
+        "storage/drafts/assets/trending_tsmc_call_20260716/lazypack/tsmc20260716_3_results_options_scorecard.png"
       ],
       "committed": true,
-      "detail": "[main 2de6cba3b] chore(draft-reap): collect orphaned draft artifacts (6 files)\n 6 files changed, 0 insertions(+), 0 deletions(-)\n create mode 100644 s"
+      "detail": "[main ce156bfc8] chore(draft-reap): collect orphaned draft artifacts (16 files)\n 16 files changed, 68 insertions(+)\n create mode 100644 storage/drafts"
     }
   ]
 }
