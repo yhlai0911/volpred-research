@@ -1,0 +1,180 @@
+{
+  "method": "BS bisection on 7/15 lastPrice, spot=419.48, r=4%",
+  "computed_at_utc": "2026-07-16T10:11:23.497495+00:00",
+  "front_incl_earnings_aftermath": {
+    "expiry": "2026-07-17",
+    "T_years": 0.00594,
+    "strikes": {
+      "call": [
+        {
+          "strike": 417.5,
+          "lastPrice": 9.85,
+          "lastTrade": "2026-07-15 19:59:31+00:00",
+          "volume": 662,
+          "bs_iv_pct": 68.21
+        },
+        {
+          "strike": 420.0,
+          "lastPrice": 8.8,
+          "lastTrade": "2026-07-15 19:59:55+00:00",
+          "volume": 8295,
+          "bs_iv_pct": 69.84
+        },
+        {
+          "strike": 422.5,
+          "lastPrice": 7.55,
+          "lastTrade": "2026-07-15 19:59:40+00:00",
+          "volume": 3494,
+          "bs_iv_pct": 69.06
+        }
+      ],
+      "put": [
+        {
+          "strike": 417.5,
+          "lastPrice": 7.71,
+          "lastTrade": "2026-07-15 19:59:56+00:00",
+          "volume": 281,
+          "bs_iv_pct": 67.73
+        },
+        {
+          "strike": 420.0,
+          "lastPrice": 8.95,
+          "lastTrade": "2026-07-15 19:59:48+00:00",
+          "volume": 3919,
+          "bs_iv_pct": 67.75
+        },
+        {
+          "strike": 422.5,
+          "lastPrice": 10.45,
+          "lastTrade": "2026-07-15 19:59:31+00:00",
+          "volume": 434,
+          "bs_iv_pct": 68.91
+        }
+      ]
+    },
+    "atm_straddle": {
+      "strike": 420.0,
+      "price": 17.75,
+      "implied_move_pct_of_spot": 4.23
+    }
+  },
+  "next_week": {
+    "expiry": "2026-07-24",
+    "T_years": 0.02511,
+    "strikes": {
+      "call": [
+        {
+          "strike": 417.5,
+          "lastPrice": 15.07,
+          "lastTrade": "2026-07-15 19:59:38+00:00",
+          "volume": 99,
+          "bs_iv_pct": 52.34
+        },
+        {
+          "strike": 420.0,
+          "lastPrice": 14.18,
+          "lastTrade": "2026-07-15 19:59:49+00:00",
+          "volume": 588,
+          "bs_iv_pct": 53.66
+        },
+        {
+          "strike": 422.5,
+          "lastPrice": 12.95,
+          "lastTrade": "2026-07-15 19:58:23+00:00",
+          "volume": 229,
+          "bs_iv_pct": 53.43
+        }
+      ],
+      "put": [
+        {
+          "strike": 417.5,
+          "lastPrice": 11.97,
+          "lastTrade": "2026-07-15 19:47:46+00:00",
+          "volume": 51,
+          "bs_iv_pct": 49.68
+        },
+        {
+          "strike": 420.0,
+          "lastPrice": 14.34,
+          "lastTrade": "2026-07-15 19:59:11+00:00",
+          "volume": 363,
+          "bs_iv_pct": 53.9
+        },
+        {
+          "strike": 422.5,
+          "lastPrice": 14.72,
+          "lastTrade": "2026-07-15 19:56:18+00:00",
+          "volume": 49,
+          "bs_iv_pct": 50.32
+        }
+      ]
+    },
+    "atm_straddle": {
+      "strike": 420.0,
+      "price": 28.52,
+      "implied_move_pct_of_spot": 6.8
+    }
+  },
+  "monthly_aug": {
+    "expiry": "2026-08-21",
+    "T_years": 0.10183,
+    "strikes": {
+      "call": [
+        {
+          "strike": 410.0,
+          "lastPrice": 34.0,
+          "lastTrade": "2026-07-15 19:59:58+00:00",
+          "volume": 112,
+          "bs_iv_pct": 53.35
+        },
+        {
+          "strike": 420.0,
+          "lastPrice": 28.15,
+          "lastTrade": "2026-07-15 19:59:31+00:00",
+          "volume": 362,
+          "bs_iv_pct": 51.73
+        },
+        {
+          "strike": 430.0,
+          "lastPrice": 23.76,
+          "lastTrade": "2026-07-15 19:59:20+00:00",
+          "volume": 555,
+          "bs_iv_pct": 51.82
+        }
+      ],
+      "put": [
+        {
+          "strike": 410.0,
+          "lastPrice": 22.3,
+          "lastTrade": "2026-07-15 19:59:34+00:00",
+          "volume": 166,
+          "bs_iv_pct": 52.28
+        },
+        {
+          "strike": 420.0,
+          "lastPrice": 27.0,
+          "lastTrade": "2026-07-15 19:58:31+00:00",
+          "volume": 759,
+          "bs_iv_pct": 51.8
+        },
+        {
+          "strike": 430.0,
+          "lastPrice": 31.25,
+          "lastTrade": "2026-07-15 19:53:17+00:00",
+          "volume": 203,
+          "bs_iv_pct": 49.41
+        }
+      ]
+    },
+    "atm_straddle": {
+      "strike": 420.0,
+      "price": 55.15,
+      "implied_move_pct_of_spot": 13.15
+    }
+  },
+  "tsm_realized_vol": {
+    "rv20_annualized_pct": 59.1,
+    "rv5_annualized_pct": 19.1,
+    "window_end": "2026-07-15"
+  }
+}

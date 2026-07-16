@@ -666,14 +666,79 @@ def _agent_workdir(job: dict[str, Any]) -> str | None:
     return str(path)
 
 
+_EXPERIMENT_ID_RE = re.compile(r"k(\d{3,5})", re.IGNORECASE)
+
+
+def _certified_verdict_for_job(job: dict[str, Any]) -> dict[str, Any] | None:
+    """Advisory: does this job's K-experiment already carry a certified PASS verdict?
+
+    A job's work can be finished outside this queue — the codex salvage/review paths
+    do exactly that — and nothing writes back here. The followup then keeps reading as
+    work-to-do. On 2026-07-16 two of three pending followups were in that state:
+    k1711-mcs-eval had sat for two days asking a fire to split and re-run an evaluation
+    that was already merged and PASS-certified, and k1704's collect/rerun/certify chain
+    was likewise complete.
+
+    This only ANNOTATES the row; it never drops it. A verdict can predate the job (a
+    re-run of an already-adjudicated experiment is legitimate), so only a reader looking
+    at the commits can settle whether the followup is truly stale.
+    """
+    haystack = f"{job.get('id') or ''} {job.get('title') or ''}"
+    match = _EXPERIMENT_ID_RE.search(haystack)
+    if not match:
+        return None
+    experiment = f"k{match.group(1)}"
+    verdict_path = ROOT / "experiments" / experiment / "review_verdict.json"
+    if not verdict_path.is_file():
+        return None
+    try:
+        payload = json.loads(verdict_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        warn(
+            "compute_queue",
+            "review_verdict unreadable; skipping stale-followup annotation",
+            path=str(verdict_path),
+            error=str(exc),
+        )
+        return None
+    if not isinstance(payload, dict):
+        warn(
+            "compute_queue",
+            "review_verdict is not a JSON object; skipping stale-followup annotation",
+            path=str(verdict_path),
+        )
+        return None
+    # Key names and the normalisation below follow the canonical certificate written by
+    # `experiment_gates.py verdict-template` (kid / verdict / reviewed_at / reviewed_commit).
+    if str(payload.get("verdict") or "").strip().upper() != "PASS":
+        return None
+    return {
+        "experiment": experiment,
+        "kid": payload.get("kid"),
+        "verdict_path": str(verdict_path.relative_to(ROOT)),
+        "reviewer": payload.get("reviewer"),
+        "certified_at": payload.get("reviewed_at"),
+        "reviewed_commit": payload.get("reviewed_commit"),
+        "advice": (
+            f"{experiment} already carries a certified PASS verdict. Check its commits and "
+            "knowledge entries to see whether this followup's work is already done BEFORE "
+            "executing its brief; if it is, close it out instead of re-running certified work."
+        ),
+    }
+
+
 def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
     """Return a dispatch view with explicit success-vs-failure semantics."""
     if job.get("followup_dispatched"):
         return None
 
+    certified = _certified_verdict_for_job(job)
+
     if job.get("status") == "completed" and job.get("claude_followup"):
         row = dict(job)
         row["followup_mode"] = "collect_completed"
+        if certified:
+            row["possibly_superseded"] = certified
         return row
 
     if job.get("status") != "failed":
@@ -754,6 +819,8 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
         "task_type": "platform_ops",
         "priority": min(triage_priority, 2),
     }
+    if certified:
+        row["possibly_superseded"] = certified
     return row
 
 

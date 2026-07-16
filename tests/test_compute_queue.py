@@ -458,3 +458,128 @@ def test_hourly_prompt_routes_both_followup_modes() -> None:
     assert "split_required" in prompt
     assert "triage_failed" in prompt
     assert "不得把 failed job 或殘留 artifact 當成功結果" in prompt
+
+
+def _write_verdict(root: Path, experiment: str, payload: dict) -> None:
+    d = root / "experiments" / experiment
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "review_verdict.json").write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_pending_followup_annotates_job_whose_experiment_is_already_certified(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    # k1711-mcs-eval sat pending for two days asking a fire to split and re-run an
+    # evaluation codex had already merged and certified. Surface that, don't hide it.
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    _write_verdict(
+        tmp_path,
+        "k1711",
+        {
+            "kid": "k1711",
+            "verdict": "PASS",
+            "reviewer": "codex/gpt-5 independent full-surface review",
+            "reviewed_at": "2026-07-16T02:46:31+08:00",
+            "reviewed_commit": "63520b4dae8b62d55650904ed51fab1739386f65",
+        },
+    )
+    job = {
+        "id": "k1711-mcs-eval",
+        "title": "K1711 evaluation: MCS + DM over cached forecasts",
+        "status": "failed",
+        "exit_code": -1,
+        "timeout_seconds": 3600,
+        "followup_dispatched": False,
+        "claude_followup": {"brief": "collect", "task_type": "experiment", "priority": 2},
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None, "annotation must never drop the row"
+    assert view["followup_mode"] == "split_required"
+    superseded = view["possibly_superseded"]
+    assert superseded["experiment"] == "k1711"
+    assert superseded["certified_at"] == "2026-07-16T02:46:31+08:00"
+    assert superseded["reviewed_commit"] == "63520b4dae8b62d55650904ed51fab1739386f65"
+    assert superseded["kid"] == "k1711"
+    assert "BEFORE" in superseded["advice"]
+
+
+def test_pending_followup_annotates_completed_collection_row(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    _write_verdict(
+        tmp_path,
+        "k1704",
+        {"kid": "k1704", "verdict": "PASS", "reviewer": "codex/gpt-5", "reviewed_at": "2026-07-16T05:56:19Z"},
+    )
+    job = {
+        "id": "k1704-primary-prerun-review-20260716",
+        "title": "K1704 primary pre-run Codex review",
+        "status": "completed",
+        "followup_dispatched": False,
+        "claude_followup": {"brief": "collect review", "task_type": "experiment", "priority": 3},
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None
+    assert view["followup_mode"] == "collect_completed"
+    assert view["possibly_superseded"]["experiment"] == "k1704"
+
+
+def test_pending_followup_does_not_annotate_without_a_pass_verdict(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    _write_verdict(
+        tmp_path,
+        "k1799",
+        {"kid": "k1799", "verdict": "FAIL", "reviewer": "codex/gpt-5", "reviewed_at": "2026-07-16T05:56:19Z"},
+    )
+    job = {
+        "id": "k1799-eval",
+        "title": "K1799 evaluation",
+        "status": "completed",
+        "followup_dispatched": False,
+        "claude_followup": {"brief": "collect", "task_type": "experiment", "priority": 3},
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None
+    assert "possibly_superseded" not in view
+
+
+def test_pending_followup_without_experiment_id_or_verdict_is_unannotated(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    job = {
+        "id": "refresh-market-panel",
+        "title": "nightly data refresh",
+        "status": "completed",
+        "followup_dispatched": False,
+        "claude_followup": {"brief": "collect", "task_type": "platform_ops", "priority": 3},
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None
+    assert "possibly_superseded" not in view
+
+
+def test_unreadable_verdict_warns_instead_of_silently_skipping(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    d = tmp_path / "experiments" / "k1650"
+    d.mkdir(parents=True)
+    (d / "review_verdict.json").write_text("{truncated", encoding="utf-8")
+    job = {
+        "id": "k1650-eval",
+        "title": "K1650 evaluation",
+        "status": "completed",
+        "followup_dispatched": False,
+        "claude_followup": {"brief": "collect", "task_type": "experiment", "priority": 3},
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None
+    assert "possibly_superseded" not in view
+    assert "review_verdict unreadable" in capsys.readouterr().err

@@ -1,0 +1,94 @@
+{
+  "pulled_at_utc": "2026-07-16T10:10:04.036344+00:00",
+  "tsm_daily": {
+    "name": "TSM ADR",
+    "first_date": "2026-06-01",
+    "last_date": "2026-07-15",
+    "n_days": 31,
+    "last_close": 419.48
+  },
+  "twn_daily": {
+    "name": "2330.TW",
+    "first_date": "2026-06-01",
+    "last_date": "2026-07-16",
+    "n_days": 33,
+    "last_close": 2470.0
+  },
+  "pre_call_5d_cumret": {
+    "tsm_through_0715": -4.0,
+    "twn2330_through_0715": -1.01,
+    "note": "5 個交易日累積報酬(%), 終點 2026-07-15 收盤"
+  },
+  "twn2330_0716": {
+    "close": 2470.0,
+    "pct_change": 1.23,
+    "note": "台股 13:30 收盤早於 14:00 法說, 此為法說前交易; 真正反應日=7/17"
+  },
+  "tsm_prev_close_0715": 419.48,
+  "tsm_premarket": {
+    "preMarketPrice": 403.3,
+    "preMarketChangePercent": -3.9006898,
+    "regularMarketPrice": 419.48,
+    "regularMarketPreviousClose": 420.39,
+    "marketState": "PRE"
+  },
+  "tsm_options": {
+    "expiries_available": [
+      "2026-07-17",
+      "2026-07-24",
+      "2026-07-31",
+      "2026-08-07",
+      "2026-08-14",
+      "2026-08-21"
+    ],
+    "spot_used": 403.3,
+    "atm_2026-07-17": {
+      "call": {
+        "strike": 422.5,
+        "iv": 3.13,
+        "lastTradeDate": "2026-07-15 19:59:40+00:00",
+        "bid": 0.0,
+        "ask": 0.0
+      },
+      "put": {
+        "strike": 402.5,
+        "iv": 12.5,
+        "lastTradeDate": "2026-07-15 19:58:57+00:00",
+        "bid": 0.0,
+        "ask": 0.0
+      }
+    },
+    "atm_2026-07-24": {
+      "call": {
+        "strike": 422.5,
+        "iv": 1.56,
+        "lastTradeDate": "2026-07-15 19:58:23+00:00",
+        "bid": 0.0,
+        "ask": 0.0
+      },
+      "put": {
+        "strike": 402.5,
+        "iv": 6.25,
+        "lastTradeDate": "2026-07-15 19:59:22+00:00",
+        "bid": 0.0,
+        "ask": 0.0
+      }
+    },
+    "atm_2026-07-31": {
+      "call": {
+        "strike": 425.0,
+        "iv": 1.56,
+        "lastTradeDate": "2026-07-15 19:58:30+00:00",
+        "bid": 0.0,
+        "ask": 0.0
+      },
+      "put": {
+        "strike": 405.0,
+        "iv": 3.13,
+        "lastTradeDate": "2026-07-15 19:58:13+00:00",
+        "bid": 0.0,
+        "ask": 0.0
+      }
+    }
+  }
+}

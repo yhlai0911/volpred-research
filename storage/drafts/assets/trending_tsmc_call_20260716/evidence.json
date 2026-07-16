@@ -1,0 +1,140 @@
+{
+  "prepared_at_taipei": "2026-07-16 18:20 (約)",
+  "purpose": "台積電 2026 Q2 法說會 T+0 trending 文素材",
+  "prior_articles": {
+    "mile_5a20a332": {
+      "title": "事件溫度計｜海外擴廠拖累毛利？台積電法說會前夕，市場到底在怕什麼",
+      "published_at": "2026-07-15T05:15:32Z",
+      "key_numbers": {
+        "vixtwn_0706": 36.89,
+        "vixtwn_percentile": "第 74 百分位（樣本 2025/12 起約 7 個月）",
+        "reaction_day_avg_abs_move_pct": 2.43,
+        "normal_day_avg_abs_move_pct": 1.35,
+        "pre10d_avg_abs_move_pct": 1.43,
+        "n_calls": 30,
+        "sample": "2330.TW 2019/01–2026/04"
+      }
+    },
+    "mile_aee1c78c": {
+      "title": "台積電法說會前，選擇權市場替『法說行情』加了多少價？答案：幾乎沒有",
+      "data_cutoff": "2026-07-08 盤後",
+      "key_numbers": {
+        "iv_expiry_0710_no_event_pct": 59.9,
+        "iv_expiry_0717_incl_event_pct": 63.5,
+        "earnings_bump_pp": 3.6,
+        "implied_single_day_move_pct": 4.0,
+        "hist_8_calls_avg_move_pct": 4.89,
+        "hist_8_calls_median_move_pct": 3.73,
+        "rv20_at_0708_pct": 64,
+        "skew_otm5_put_iv_pct": 64.05,
+        "skew_otm5_call_iv_pct": 64.58,
+        "experiment_dir": "experiments/tsmc_earnings_iv_20260708/"
+      }
+    }
+  },
+  "earnings_call_results": {
+    "call_datetime_taipei": "2026-07-16 14:00",
+    "q2_2026_actuals": {
+      "revenue_usd_bn": 40.2,
+      "revenue_yoy_pct": 33.7,
+      "revenue_vs_consensus": "高於預期約 9 億美元（consensus 39.63B）",
+      "revenue_vs_guidance": "落在指引 39.0–40.2B 上緣",
+      "gross_margin_pct": 67.7,
+      "gross_margin_guidance_was": "65.5–67.5%（超出上緣）",
+      "operating_margin_pct": 60.3,
+      "net_margin_pct": 55.6,
+      "eps_ntd": 27.25,
+      "eps_adr_usd": 4.31,
+      "eps_consensus_usd": 3.87,
+      "net_income_ntd_bn": 706.56,
+      "net_income_usd_bn": 22.36,
+      "note_n2": "2 奈米（N2）本季開始貢獻營收（壹蘋）"
+    },
+    "q3_2026_guidance": {
+      "revenue_usd_bn_range": [44.6, 45.8],
+      "revenue_qoq_pct_midpoint": "約 +12%",
+      "gross_margin_pct_range": [65, 67],
+      "gross_margin_vs_q2": "中位數 66%，較 Q2 的 67.7% 季減",
+      "operating_margin_pct_range": [56, 58],
+      "fx_assumption": "NT$32 / USD（Yahoo 台股報導）"
+    },
+    "capex_2026": {
+      "previous_guidance_usd_bn": [52, 56],
+      "new_guidance_usd_bn": [60, 64],
+      "revision": "上修約 7%–14.3%（中點約 +15%），歷史新高",
+      "reason": "魏哲家：支持客戶需求，投入先進製程（N2/A14）與先進封裝"
+    },
+    "full_year_2026": {
+      "usd_revenue_growth_guidance": "上修至「略高於 40%」（先前約 30% 以上）"
+    },
+    "margin_dilution_comments": {
+      "n2_ramp": "CFO 黃仁昭：2 奈米快速量產，預估稀釋 Q3 毛利率約 3–4 個百分點",
+      "overseas_fabs": "海外廠初期稀釋約 2–3 個百分點，後續可能擴大至 3–4 個百分點"
+    },
+    "sources": [
+      "https://www.gurufocus.com/news/8961819/ (Q2 rev 40.2B, GM 67.7%, OPM 60.3%, EPS 4.31)",
+      "https://wtop.com/news/2026/07/tsmc-q2-earnings-snapshot/ (AP snapshot: rev 40.2B, NI 22.36B, EPS 4.31 vs est 3.87)",
+      "https://udn.com/news/story/7252/9631818 (EPS NT$27.25, NI NT$7,065.6億, capex 600-640億美元, 全年成長略高於40%)",
+      "https://finance.ettoday.net/news/3202256 (Q3 營收季增12%, capex 上修)",
+      "https://tw.stock.yahoo.com/ (Q3 GM 65-67%, OPM 56-58%, 匯率假設 NT$32, N2 稀釋 3-4pp, 海外廠 2-3pp→3-4pp)",
+      "https://www.benzinga.com/.../60489128 (盤前 -3.76% 至 403.71)"
+    ]
+  },
+  "market_reaction": {
+    "tsm_pre_call_5d_cumret_pct": -4.0,
+    "twn2330_pre_call_5d_cumret_pct": -1.01,
+    "pre_call_window": "5 個交易日，終點 2026-07-15 收盤（yfinance 日線）",
+    "tsm_close_0715": 419.48,
+    "tsm_premarket_0716": {
+      "price": 403.3,
+      "change_pct_yfinance": -3.9,
+      "snapshot_taipei": "2026-07-16 約 18:05（美東 06:05 盤前）",
+      "benzinga_earlier_snapshot": "-3.76% 至 403.71"
+    },
+    "twn2330_0716": {
+      "close": 2470.0,
+      "change_pct": 1.23,
+      "note": "台股 13:30 收盤早於 14:00 法說 → 7/16 的 +1.23% 是法說『前』交易；2330 真正反應日 = 7/17"
+    },
+    "divergence_note": "法說前夕 ADR 已先跌（5日 -4.0%），台股現貨相對抗跌（-1.0%）且 7/16 盤中還漲 1.23%；法說後 ADR 盤前再跌 3.9% → 7/17 台股開盤有補跌壓力"
+  },
+  "options_verification": {
+    "claim_under_test": "前夕文（mile_aee1c78c，7/8 定價）：選擇權替法說行情加的價幾乎沒有；隱含單日 move 約 ±4.0%",
+    "iv_0715_close": {
+      "method": "yfinance 期權鏈 7/15 最後成交價 + spot 419.48 + r=4%，自行 BS bisection 反推（盤前 yfinance IV 欄位失真：bid/ask=0）",
+      "expiry_0717_atm420_call_iv_pct": 69.84,
+      "expiry_0717_atm420_put_iv_pct": 67.75,
+      "expiry_0717_atm_avg_iv_pct": 68.8,
+      "expiry_0724_atm420_avg_iv_pct": 53.8,
+      "expiry_0821_atm420_avg_iv_pct": 51.8,
+      "rv20_to_0715_pct": 59.1,
+      "rv5_to_0715_pct": 19.1
+    },
+    "implied_move_0715_close": {
+      "atm420_straddle_price": 17.75,
+      "straddle_implied_move_pct": 4.23,
+      "note": "涵蓋 7/16（法說後首個美股交易日）+ 7/17 兩日"
+    },
+    "verdict": {
+      "iv_evolution": "7/17 到期 ATM IV 由 7/8 的 63.5% 升至 7/15 收盤的 68.8%（+5.3pp），事件溢價在最後一週有加碼但幅度溫和；7/24 到期僅 53.8% → 溢價高度集中在跨事件的最前端合約",
+      "implied_vs_actual": "隱含 move ±4.23%（7/15 straddle）/ ±4.0%（7/8 拆解）vs 實際盤前 -3.9% → 實際跳動落在隱含範圍之內、貼著下緣，選擇權定價大致準確；straddle 買方（成本 4.23%）目前約損益兩平偏虧",
+      "no_premium_claim": "前夕文『沒加價』的結論站得住：市場沒有超額加價，實際 move 也沒有超出隱含 move；這次不是『市場低估法說』的案例",
+      "iv_crush": "無法在 T+0 台北時間驗證——美股 21:30（台北）才開盤，盤前期權報價停留在 7/15 收盤水位；IV crush 幅度需盤後補測"
+    }
+  },
+  "figures": {
+    "fig_a": "fig_a_price_30d.png — TSM vs 2330.TW 近 30 交易日標準化走勢，標 7/16 法說日與 TSM 盤前點",
+    "fig_b": "fig_b_implied_vs_actual.png — 左：隱含 move（7/8 拆解 4.0%、7/15 straddle 4.23%）vs 歷史（4.89%/3.73%）vs 實際盤前 3.9%；右：ATM IV 期限結構與時間演變"
+  },
+  "caveats": [
+    "TSM『今日反應』目前只有盤前價（403.30，-3.9%）；美股 7/16 正式開盤在台北 21:30，收盤反應與 IV crush 都要盤後才能定案，文中須明確標註為盤前數字",
+    "yfinance preMarketChangePercent=-3.90% 與自算 403.30/419.48-1=-3.86% 有 4bp 差（Yahoo 用未調整前收盤 419.67），文中用『約 -3.9%』",
+    "盤前抓的期權鏈 impliedVolatility 欄位失真（bid/ask=0、IV 3%），已改用 7/15 最後成交價自行 BS 反推；成交價含買賣價差雜訊，IV 有 ±1-2pp 誤差帶",
+    "7/15 straddle 隱含 move ±4.23% 涵蓋 7/16+7/17 兩個交易日（非純事件日），與前夕文 7/8 的『事件單日 ±4.0%』口徑不完全相同；用變異數拆解（68.8% vs 53.8% 背景）估的純事件 move 約 ±3.3%",
+    "Q3 匯率假設 NT$32/USD 僅單一來源（Yahoo 台股報導）引述，未直接核對台積電官方簡報；Q2 隱含匯率（NT$706.56B/22.36B≈31.6）方向一致",
+    "capex 舊指引：多數來源作 52–56B，udn 文字寫『520-560億美元』一致；早前 Seeking Alpha 預期文（call 前）與實際宣佈值不同，已以 call 後多來源交叉為準",
+    "2330.TW 7/16 收盤 +1.23% 發生在法說『之前』（台股 13:30 收盤 vs 14:00 法說），不可寫成台股對法說的反應；台股反應日是 7/17",
+    "淨利年增 77%（Benzinga 摘要）未逐字核對原文，如引用建議寫『約 77%』或省略",
+    "無隨機程序，故無 seed 需求；所有價格數據 yfinance 快照時間台北 7/16 18:02–18:15"
+  ]
+}

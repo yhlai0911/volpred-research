@@ -1,0 +1,93 @@
+{
+  "event": "US CPI June 2026 release, 2026-07-14 08:30 ET (T+0 backfill)",
+  "built_at_taipei": "2026-07-16 18:09:19",
+  "cpi_release": {
+    "source": [
+      "BLS Consumer Price Index Summary June 2026 (bls.gov/news.release/cpi.nr0.htm; direct fetch blocked 403, numbers via web search summary)",
+      "FRED series CPIAUCSL/CPILFESL/CPIAUCNS/CPILFENS (fredgraph.csv, downloaded 2026-07-16) — independent recomputation",
+      "CNBC 2026-07-14 consumer-price-index-inflation-report-june-2026 (Dow Jones consensus; via web search summary, direct fetch 403)",
+      "FactSet insight (headline consensus YoY 3.8% cross-check)"
+    ],
+    "actual": {
+      "headline_mom_sa_pct": -0.4,
+      "headline_yoy_pct": 3.5,
+      "core_mom_sa_pct": 0.0,
+      "core_yoy_pct": 2.6,
+      "fred_recomputed": {
+        "headline_mom_sa_pct": -0.4225,
+        "core_mom_sa_pct": -0.0167,
+        "headline_yoy_nsa_pct": 3.5314,
+        "core_yoy_nsa_pct": 2.5941,
+        "headline_yoy_prev_month_may_pct": 4.2487
+      },
+      "notes": "最大單月跌幅自 2020-04（當時 -0.8%）以來；能源指數 -5.7%（5 月 +3.9%）是主因，油價因伊朗戰爭結束協議下跌"
+    },
+    "consensus_dow_jones": {
+      "headline_mom_pct": -0.2,
+      "headline_yoy_pct": 3.8,
+      "core_mom_pct": 0.2,
+      "core_yoy_pct": 2.9
+    },
+    "surprise": {
+      "direction": "dovish (雙雙低於預期)",
+      "headline_mom_surprise_pp": -0.2,
+      "headline_yoy_surprise_pp": -0.3,
+      "core_mom_surprise_pp": -0.2,
+      "core_yoy_surprise_pp": -0.3
+    }
+  },
+  "market_reaction": {
+    "source": "yfinance daily close, SPY (Close, auto_adjust=False) and ^VIX, downloaded 2026-07-16",
+    "t_minus_2_baseline_2026_07_10": {
+      "vix_close": 15.03,
+      "spy_close": 754.95,
+      "spy_ret_pct": 0.431,
+      "rv20_log_annualized_pct_recomputed": 14.5683,
+      "t2_article_mile_9560b9cc_quoted": {
+        "vix": 15.03,
+        "rv20_pct": 14.77,
+        "iv_rv_spread": 0.26
+      }
+    },
+    "t_minus_1_2026_07_13": {
+      "spy_ret_pct": -0.7656,
+      "vix_close": 17.16,
+      "vix_chg_pct": 14.1717
+    },
+    "t0_2026_07_14": {
+      "spy_close": 751.83,
+      "spy_ret_pct": 0.3551,
+      "vix_close": 16.5,
+      "vix_chg_pct": -3.8462
+    },
+    "t_plus_1_2026_07_15": {
+      "spy_close": 754.81,
+      "spy_ret_pct": 0.3964,
+      "vix_close": 15.67,
+      "vix_chg_pct": -5.0303
+    },
+    "past_4_official_cpi_days_vix_chg_pct": {
+      "2026-03-11": -2.8079,
+      "2026-04-10": -1.334,
+      "2026-05-12": -2.1219,
+      "2026-06-10": 11.8269,
+      "avg": 1.3908
+    },
+    "past_4_official_cpi_days_spy_ret_pct": {
+      "2026-03-11": -0.1255,
+      "2026-04-10": -0.0662,
+      "2026-05-12": -0.1515,
+      "2026-06-10": -1.5766
+    }
+  },
+  "figures": [
+    "fig1_spy_vix_around_cpi.png",
+    "fig2_cpi_day_vix_change.png"
+  ],
+  "caveats": [
+    "BLS 官方頁與 CNBC/Morningstar/Stocktwits 直接抓取皆 403，CPI actual 以 FRED 官方序列獨立重算驗證（headline MoM -0.4225% / core MoM -0.0167% / headline YoY 3.5314% / core YoY 2.5941%，與媒體報導的 -0.4%/0.0%/3.5%/2.6% 一致）；consensus 數字來自 web search 摘要（CNBC 引 Dow Jones 調查），YoY 3.8% 另有 FactSet 標題交叉確認，但未能直接開啟原文頁面",
+    "SPY 20 日已實現波動重算值為 14.57%（log return）/ 14.60%（simple return），與 T-2 文（mile_9560b9cc）引用的 14.77% 有約 0.2pp 差異，可能是 adjusted close 或資料 vintage 差異；VIX 15.03 與近 4 次 CPI 日 VIX 平均 +1.39% 皆與 T-2 文完全吻合",
+    "yfinance 回傳的 2026-07-16 VIX 值（15.95）為未收盤 partial quote（建檔時美股 07-16 尚未收盤），已排除於圖表與統計外；SPY 資料最後完整日為 2026-07-15",
+    "市場反應為日頻收盤口徑；CPI 為美東 08:30 盤前發布，當日盤中高頻反應本資料看不到"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+ "schema_version": 1,
+ "title": "CPI 出爐複盤：保費遲到又早退",
+ "subtitle": "四項全低於預期，事件保費前一天進場、兩天內退光",
+ "evidence": {
+  "ev": {
+   "path": "storage/drafts/assets/event_cpi_20260714_t0/evidence.json",
+   "sha256": "77302422aee46e0817e89684047495c9874a9eaa1a2652bce28af71ad93704df",
+   "label": "US CPI 2026-06 T+0 事實與市場反應 evidence"
+  }
+ },
+ "panels": [
+  {
+   "name": "1_concept_scorecard",
+   "info": "concept",
+   "style": "editorial",
+   "title": "四項全部低於預期的鴿派成績單",
+   "alt": "六月 CPI 實際值與市場共識對照",
+   "sources": ["ev"],
+   "blocks": [
+    {"kind": "text", "heading": "這份 CPI 特別在哪", "body": ["總指數單月跌幅為疫情初期以來最大", "主因是停戰後的能源價格回落", "四個關鍵數字全部低於市場共識"]},
+    {"kind": "metric", "label": "總指數單月變動", "value": {"source": "ev", "path": "/cpi_release/actual/headline_mom_sa_pct", "format": {"kind": "number", "digits": 1, "suffix": "%"}}, "note": "共識預期較高，實際更低"},
+    {"kind": "metric", "label": "總指數年增率", "value": {"source": "ev", "path": "/cpi_release/actual/headline_yoy_pct", "format": {"kind": "number", "digits": 1, "suffix": "%"}}, "note": "自上月明顯回落"},
+    {"kind": "metric", "label": "核心年增率", "value": {"source": "ev", "path": "/cpi_release/actual/core_yoy_pct", "format": {"kind": "number", "digits": 1, "suffix": "%"}}, "note": "低於共識預期"}
+   ]
+  },
+  {
+   "name": "2_method_premium_timeline",
+   "info": "method",
+   "style": "professional",
+   "title": "保費的進出時間線",
+   "alt": "恐慌指數在發布前後的水位變化",
+   "sources": ["ev"],
+   "blocks": [
+    {"kind": "metric", "label": "發布前基準（週五）VIX", "value": {"source": "ev", "path": "/market_reaction/t_minus_2_baseline_2026_07_10/vix_close", "format": {"kind": "number", "digits": 2}}, "note": "當時完全沒有事件保費"},
+    {"kind": "metric", "label": "前一天（週一）VIX 跳升", "value": {"source": "ev", "path": "/market_reaction/t_minus_1_2026_07_13/vix_chg_pct", "format": {"kind": "number", "digits": 1, "suffix": "%"}}, "note": "保費一天進場"},
+    {"kind": "metric", "label": "發布日 VIX 變動", "value": {"source": "ev", "path": "/market_reaction/t0_2026_07_14/vix_chg_pct", "format": {"kind": "number", "digits": 1, "suffix": "%"}}, "note": "鴿派數字，保費開始退場"},
+    {"kind": "metric", "label": "隔天 VIX 收盤", "value": {"source": "ev", "path": "/market_reaction/t_plus_1_2026_07_15/vix_close", "format": {"kind": "number", "digits": 2}}, "note": "兩天內幾乎退回起點"}
+   ]
+  },
+  {
+   "name": "3_results_takeaway",
+   "info": "takeaway",
+   "style": "bento-grid",
+   "title": "考卷對完：一對一錯半",
+   "alt": "前瞻文兩個主張的事後驗證",
+   "sources": ["ev"],
+   "blocks": [
+    {"kind": "text", "heading": "主張一：發布日方向是抽籤", "body": ["成立。這次下跌是數字低於預期的結果，不是規律"]},
+    {"kind": "text", "heading": "主張二：市場沒給事件保費", "body": ["當時對，事後要補一句：保費前一個交易日一口氣進場", "事件落地後兩天內離場；用日曆等保費會撲空"]},
+    {"kind": "metric", "label": "這次發布日 VIX 降幅在近五次的深度排名", "value": {"source": "ev", "path": "/market_reaction/t0_2026_07_14/vix_chg_pct", "format": {"kind": "number", "digits": 1, "suffix": "%"}}, "note": "近五次中第二深；前四次平均接近零"},
+    {"kind": "text", "heading": "伏筆", "body": ["這份成績單最鴿的能源項，原料已在反轉", "油價已衝回關口，下月數字值得盯"]}
+   ]
+  }
+ ]
+}

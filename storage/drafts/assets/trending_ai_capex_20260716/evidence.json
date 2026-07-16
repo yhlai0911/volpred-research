@@ -1,0 +1,257 @@
+{
+  "asset_id": "trending_ai_capex_20260716",
+  "generated_at_taipei": "2026-07-16 18:21:10",
+  "angle": "AI 資本支出 vs 營收落差的尾部風險定價",
+  "fundamentals_q1_2026": {
+    "MSFT": {
+      "label": "Microsoft",
+      "quarter": "FY26Q3 (2026-01~03)",
+      "capex_q_usd_bn": 31.9,
+      "capex_yoy_pct": 49.0,
+      "capex_note": "含 finance leases；低於分析師共識 34.9B",
+      "fy_capex_guidance": "CY2026 約 1,900 億美元（含約 250 億元件漲價影響）",
+      "rev_proxy_label": "Microsoft Cloud 營收",
+      "rev_proxy_yoy_pct": 29.0,
+      "rev_proxy_level": "54.5B USD",
+      "total_rev_yoy_pct": 18.0,
+      "sources": [
+        "https://www.cnbc.com/2026/04/29/microsoft-msft-q3-earnings-report-2026.html",
+        "https://rbnenergy.com/daily-posts/analyst-insight/2026-earnings-calls-microsofts-ai-boom-drives-record-quarter-capital"
+      ]
+    },
+    "GOOGL": {
+      "label": "Alphabet",
+      "quarter": "2026Q1",
+      "capex_q_usd_bn": 35.7,
+      "capex_yoy_pct": 107.0,
+      "capex_note": "vs 2025Q1 的 17.2B",
+      "fy_capex_guidance": "CY2026 指引 1,800–1,900 億美元（自 1,750–1,850 億上修）；2027 預告續增",
+      "rev_proxy_label": "Google Cloud 營收",
+      "rev_proxy_yoy_pct": 63.0,
+      "rev_proxy_level": "20.0B USD",
+      "total_rev_yoy_pct": null,
+      "sources": [
+        "https://www.cnbc.com/2026/04/29/alphabet-googl-q1-2026-earnings.html",
+        "https://www.investing.com/news/company-news/alphabet-q1-2026-slides-cloud-surges-63-ai-investments-accelerate-93CH-4654872"
+      ]
+    },
+    "AMZN": {
+      "label": "Amazon",
+      "quarter": "2026Q1",
+      "capex_q_usd_bn": 44.2,
+      "capex_yoy_pct": 77.0,
+      "capex_note": "vs 2025Q1 約 25B；TTM capex 147.3B (+67%)",
+      "fy_capex_guidance": "CY2026 全公司 capex 計畫約 2,000 億美元，絕大多數投向 AWS/AI",
+      "rev_proxy_label": "AWS 營收",
+      "rev_proxy_yoy_pct": 28.0,
+      "rev_proxy_level": "37.6B USD",
+      "total_rev_yoy_pct": null,
+      "sources": [
+        "https://www.cnbc.com/2026/04/29/amazon-amzn-q1-earnings-report-2026.html",
+        "https://www.investing.com/news/company-news/amazon-q1-2026-slides-aws-surges-28-record-margins-offset-by-capex-93CH-4647447"
+      ]
+    },
+    "META": {
+      "label": "Meta",
+      "quarter": "2026Q1",
+      "capex_q_usd_bn": 19.84,
+      "capex_yoy_pct": 44.9,
+      "capex_note": "YoY 為自行計算（19.84 vs 13.69B），基期含 finance-lease 本金",
+      "fy_capex_guidance": "CY2026 指引上修至 1,250–1,450 億美元（原 1,150–1,350 億）；盤後股價跌逾 6%",
+      "rev_proxy_label": "總營收（無雲端分部）",
+      "rev_proxy_yoy_pct": 33.0,
+      "rev_proxy_level": "56.3B USD",
+      "total_rev_yoy_pct": 33.0,
+      "sources": [
+        "https://www.cnbc.com/2026/04/29/meta-q1-earnings-report-2026.html",
+        "https://fortune.com/2026/04/29/meta-zuckerberg-145-billion-ai-spending-roi/"
+      ]
+    }
+  },
+  "prices": {
+    "source": "yfinance daily close (auto_adjust=True), 2025-01-01 起",
+    "tickers": {
+      "MSFT": {
+        "last_date": "2026-07-15",
+        "last_close": 395.63,
+        "rv20_now_pct": 38.03,
+        "rv20_1m_ago_pct": 37.12,
+        "rv20_2025_median_pct": 20.22,
+        "ret_90d_pct": -5.66,
+        "ret_ytd_pct": -15.97,
+        "n_obs": 383
+      },
+      "GOOGL": {
+        "last_date": "2026-07-15",
+        "last_close": 370.92,
+        "rv20_now_pct": 33.77,
+        "rv20_1m_ago_pct": 25.72,
+        "rv20_2025_median_pct": 32.27,
+        "ret_90d_pct": 10.45,
+        "ret_ytd_pct": 17.85,
+        "n_obs": 383
+      },
+      "AMZN": {
+        "last_date": "2026-07-15",
+        "last_close": 254.96,
+        "rv20_now_pct": 33.83,
+        "rv20_1m_ago_pct": 28.09,
+        "rv20_2025_median_pct": 28.0,
+        "ret_90d_pct": 2.11,
+        "ret_ytd_pct": 12.57,
+        "n_obs": 383
+      },
+      "META": {
+        "last_date": "2026-07-15",
+        "last_close": 681.31,
+        "rv20_now_pct": 55.18,
+        "rv20_1m_ago_pct": 36.04,
+        "rv20_2025_median_pct": 27.55,
+        "ret_90d_pct": 0.75,
+        "ret_ytd_pct": 4.94,
+        "n_obs": 383
+      },
+      "NVDA": {
+        "last_date": "2026-07-15",
+        "last_close": 212.5,
+        "rv20_now_pct": 38.32,
+        "rv20_1m_ago_pct": 43.66,
+        "rv20_2025_median_pct": 36.31,
+        "ret_90d_pct": 7.26,
+        "ret_ytd_pct": 12.66,
+        "n_obs": 383
+      },
+      "QQQ": {
+        "last_date": "2026-07-15",
+        "last_close": 717.74,
+        "rv20_now_pct": 26.25,
+        "rv20_1m_ago_pct": 26.76,
+        "rv20_2025_median_pct": 17.77,
+        "ret_90d_pct": 12.19,
+        "ret_ytd_pct": 17.34,
+        "n_obs": 383
+      }
+    }
+  },
+  "options_snapshot": {
+    "source": "yfinance option_chain",
+    "method": "IV 由合約 lastPrice 以 Black-Scholes 反推（brentq，r=0.04、無股息；盤前時段 Yahoo 鏈上 IV/bid/ask/OI 欄位無效，故用前一交易日實際成交價）；僅保留 2026-07-15 有成交的合約，spot 用同日收盤價保持 timing 一致；25-delta 由 BS delta 對 delta 內插；ATM 取最近 spot 履約價 call/put IV 平均；另計 90/110 moneyness skew 以與 2026-07-02 舊快照可比",
+    "risk_free_assumption": 0.04,
+    "tickers": {
+      "QQQ": {
+        "spot": 717.74,
+        "expiry": "2026-08-07",
+        "dte": 22,
+        "atm_iv_pct": 23.73,
+        "call25d": {
+          "iv_pct": 20.68,
+          "strike_approx": 745.5
+        },
+        "put25d": {
+          "iv_pct": 27.64,
+          "strike_approx": 688.9
+        },
+        "n_calls_used": 83,
+        "n_puts_used": 84,
+        "put_iv_90m_pct": 32.54,
+        "call_iv_110m_pct": 19.24,
+        "skew_90_110_pp": 13.3,
+        "skew_25d_pp": 6.96,
+        "skew_norm_pct_of_atm": 29.3
+      },
+      "NVDA": {
+        "spot": 212.5,
+        "expiry": "2026-08-07",
+        "dte": 22,
+        "atm_iv_pct": 40.94,
+        "call25d": {
+          "iv_pct": 40.12,
+          "strike_approx": 228.8
+        },
+        "put25d": {
+          "iv_pct": 42.62,
+          "strike_approx": 199.6
+        },
+        "n_calls_used": 22,
+        "n_puts_used": 19,
+        "put_iv_90m_pct": 44.48,
+        "call_iv_110m_pct": 40.18,
+        "skew_90_110_pp": 4.3,
+        "skew_25d_pp": 2.5,
+        "skew_norm_pct_of_atm": 6.1
+      },
+      "META": {
+        "spot": 681.31,
+        "expiry": "2026-08-07",
+        "dte": 22,
+        "atm_iv_pct": 61.19,
+        "call25d": {
+          "iv_pct": 59.89,
+          "strike_approx": 762.4
+        },
+        "put25d": {
+          "iv_pct": 59.89,
+          "strike_approx": 625.2
+        },
+        "n_calls_used": 68,
+        "n_puts_used": 50,
+        "put_iv_90m_pct": 60.75,
+        "call_iv_110m_pct": 62.7,
+        "skew_90_110_pp": -1.95,
+        "skew_25d_pp": 0.0,
+        "skew_norm_pct_of_atm": 0.0
+      },
+      "MSFT": {
+        "spot": 395.63,
+        "expiry": "2026-08-07",
+        "dte": 22,
+        "atm_iv_pct": 51.1,
+        "call25d": {
+          "iv_pct": 51.86,
+          "strike_approx": 435.7
+        },
+        "put25d": {
+          "iv_pct": 50.73,
+          "strike_approx": 367.4
+        },
+        "n_calls_used": 39,
+        "n_puts_used": 30,
+        "put_iv_90m_pct": 51.28,
+        "call_iv_110m_pct": 51.79,
+        "skew_90_110_pp": -0.51,
+        "skew_25d_pp": -1.13,
+        "skew_norm_pct_of_atm": -2.2
+      }
+    },
+    "caveats": []
+  },
+  "historical_skew_comparison": {
+    "source": "storage/data/skew_series/mega_cap_skew_series.json（2026-07-02 快照，同 90/110 moneyness 定義）",
+    "note": "7/02 快照約 29 DTE、本次 22 DTE，非嚴格同 maturity；方向對比仍有效",
+    "skew_90_110_pp_2026_07_02": {
+      "QQQ": 11.05,
+      "NVDA": 4.51,
+      "META": -3.09,
+      "MSFT": -1.8
+    },
+    "skew_90_110_pp_2026_07_16": {
+      "QQQ": 13.3,
+      "NVDA": 4.3,
+      "META": -1.95,
+      "MSFT": -0.51
+    }
+  },
+  "caveats": [
+    "期權 IV 由前一交易日（2026-07-15）合約 lastPrice 以 BS 反推：盤前時段 Yahoo 鏈上 IV/bid/ask/OI 欄位無效。last trade 時間非同步，低流動性履約價可能 stale。",
+    "BS 反推假設 r=4%、無股息；對 22 DTE 短天期影響小。",
+    "MSFT 季度 capex 為含 finance leases 口徑（31.9B, +49%）；四家公司 capex 口徑不完全一致。",
+    "Meta capex 年增率 44.9% 為自行計算：2026Q1 19.84B vs 2025Q1 13.69B（Meta 2025Q1 財報，含 finance-lease 本金）。",
+    "2026-08-07 到期鏈涵蓋 MSFT/META 等 7 月底財報日，個股 ATM IV 含財報事件溢價（MSFT ATM 51%、META 61% 遠高於 QQQ 24% 的部分原因）。",
+    "put/call OI ratio 本次無法計算（盤前 OI 欄位為 0）。",
+    "與 2026-07-02 歷史快照對比時 DTE 不同（29 vs 22 天）。"
+  ],
+  "figures": [
+    "fig_capex_vs_revenue.png",
+    "fig_skew_snapshot.png"
+  ]
+}
