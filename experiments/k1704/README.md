@@ -42,7 +42,7 @@ K1057 顯示 HAR-RV 與 GJR 在各自 native target 上的排名會翻轉；K107
 首次由 raw tick 重建 proxy cache：
 
 ```bash
-uv run python experiments/K1704/K1704.py \
+uv run python experiments/k1704/K1704.py \
   --canonical-rv /Users/yhlai0911/volpred-research/data/intraday/taifex_5min_rv.csv \
   --rebuild-proxies --workers 6
 ```
@@ -50,7 +50,7 @@ uv run python experiments/K1704/K1704.py \
 之後可直接使用已 pin 的 `K1704_daily_proxies.csv`：
 
 ```bash
-uv run python experiments/K1704/K1704.py \
+uv run python experiments/k1704/K1704.py \
   --canonical-rv /Users/yhlai0911/volpred-research/data/intraday/taifex_5min_rv.csv
 ```
 
