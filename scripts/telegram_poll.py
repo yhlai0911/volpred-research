@@ -186,8 +186,11 @@ def _spawn_responder(model: str = "claude-opus-4-8") -> bool:
     """即時 spawn headless responder 處理剛進池的 telegram_reply 任務。
 
     單飛鎖在 responder script 內（同時多訊息 → 一個 responder drain 全部）。
-    Fail-open：spawn 失敗不影響訊息入池（hourly dispatch 兜底，最壞 ~1h）。
-    回傳 True=spawn 成功、False=失敗（caller 據此決定要不要發 fallback ack）。
+    回傳 True=spawn 成功、False=**連 spawn 都失敗**（caller 據此發 fallback ack）。
+
+    ⚠️ True 只代表 Popen 成功，**不代表 responder 會成功回覆** —— 它之後 exit=1
+    （額度耗盡）或 FATAL（缺依賴）我們在這裡看不到。訊息是否真的被回，由
+    `_retry_stuck_replies()` 以佇列殘留量測，不靠這個回傳值。
     """
     import os
     import subprocess
@@ -202,9 +205,91 @@ def _spawn_responder(model: str = "claude-opus-4-8") -> bool:
         )
         _log(f"responder spawned (model={model})")
         return True
-    except Exception as exc:  # noqa: BLE001 — hourly dispatch 兜底
-        _log(f"responder spawn failed (hourly 兜底): {exc}")
-        return False  # silent-ok: 上一行 _log 已留 trace；spawn 失敗 fail-open，hourly dispatch 兜底
+    except Exception as exc:  # noqa: BLE001 — 訊息已入池，retry loop 會接手
+        _log(f"responder spawn failed (retry loop 會接手): {exc}")
+        return False  # silent-ok: 上一行 _log 已留 trace；訊息已入池，_retry_stuck_replies 負責重試
+
+
+# responder spawn 後 2 分鐘內應該已 claim 到任務；仍 pending = 它沒接住。
+RETRY_AGE_THRESHOLD_SEC = 120
+# 額度耗盡時每 ~25s 一次 poll pass，不能每 pass 都重燒一次 opus。
+RETRY_MIN_INTERVAL_SEC = 300
+_last_retry_spawn: datetime | None = None
+
+
+def _retry_stuck_replies() -> None:
+    """老闆的訊息躺在佇列沒被回 → 重新 spawn responder（2026-07-16）。
+
+    responder 是純 event-driven：只在**新訊息進來**時被 spawn。它一旦失敗
+    （Claude 額度耗盡 exit=1 / 缺依賴 FATAL / crash），沒有任何東西會重試 ——
+    訊息就一直躺著，直到老闆**再傳一則**才被下一個 responder 的 drain loop
+    順便清掉。額度恢復了也不會自動重跑。
+
+    原本的程式碼註解宣稱「hourly dispatch 兜底，最壞 ~1h」，**那個兜底不存在**：
+    `.claude/rules/task-routing.md` 明確把 telegram_reply 標為「不進一般
+    hourly/Codex claim」。老闆 2026-07-16 21:46 的訊息就是這樣卡住的 —— 撞
+    session limit 三輪 exit=1，額度 22:20 恢復後仍無人重試，41 分鐘後由老闆
+    自己追問才被發現。
+
+    poll daemon 本來就在 while-loop 裡，是天然的 retry driver；把重試收編進來，
+    不新增排程層（anti-stacking）。responder 自帶單飛鎖，重複 spawn 安全。
+    """
+    global _last_retry_spawn
+    now = datetime.now(timezone.utc)
+    if (
+        _last_retry_spawn is not None
+        and (now - _last_retry_spawn).total_seconds() < RETRY_MIN_INTERVAL_SEC
+    ):
+        return
+
+    tasks_path = ROOT / "storage" / "next_tasks.json"
+    try:
+        tasks = json.loads(tasks_path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 — daemon 不能因佇列讀取失敗而死
+        warn(
+            "telegram_poll_retry",
+            "next_tasks read failed",
+            path=str(tasks_path),
+            err=f"{type(exc).__name__}: {exc}",
+        )
+        return
+    if not isinstance(tasks, list):
+        warn(
+            "telegram_poll_retry",
+            "next_tasks not a list",
+            got=type(tasks).__name__,
+        )
+        return
+
+    stuck = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        if task.get("task_type") != "telegram_reply" or task.get("status") != "pending":
+            continue
+        raw_created = task.get("created_at")
+        if not isinstance(raw_created, str):
+            continue
+        try:
+            created = datetime.fromisoformat(raw_created.replace("Z", "+00:00"))
+        except ValueError:
+            warn(
+                "telegram_poll_retry",
+                "unparseable created_at on reply task",
+                task_id=str(task.get("id")),
+                raw=raw_created[:40],
+            )
+            continue
+        if created.tzinfo is None:
+            created = created.replace(tzinfo=timezone.utc)
+        if (now - created).total_seconds() >= RETRY_AGE_THRESHOLD_SEC:
+            stuck.append(task.get("id"))
+
+    if not stuck:
+        return
+    _last_retry_spawn = now
+    _log(f"retry: {len(stuck)} unanswered reply task(s) {stuck[:3]} — respawning responder")
+    _spawn_responder()
 
 
 def poll_pass(timeout: int = 25) -> int:
@@ -248,6 +333,9 @@ def main() -> int:
     while True:
         try:
             poll_pass()
+            # responder 失敗（額度 / 缺依賴）不會自己重試 —— poll loop 兼任
+            # retry driver。放在 poll_pass 之後：新訊息先入池，再統一檢查殘留。
+            _retry_stuck_replies()
         except Exception as exc:  # noqa: BLE001 — daemon must survive transient errors
             _log(f"poll_pass error: {exc}")
             time.sleep(10)
