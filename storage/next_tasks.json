@@ -31486,32 +31486,15 @@
   },
   {
     "id": "platform-ops-loophealth-signature-granularity",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "loop-health error_recurrence 訊號粒度改善",
+    "priority": 2,
     "source": "telegram-583-followup",
     "created_at": "2026-07-12T16:27:24.377892+00:00",
-    "title": "loop-health error_recurrence 訊號粒度改善",
-    "description": "loop-health 的 error_recurrence signature 目前只用 \"log名:exit碼\"（如 git_push_backup.log:exit1），把不同根因（7/1 credential 錯誤、7/12 mojibake gate、transient 網路）混成同一 recurring 訊號，已修好的舊根因讓 14 天窗口持續顯示 degrading 誤導。改成根因級 signature（抓 log 內 fatal/error 行 normalize）並讓已標 recovered 的根因不再計入 recurrence_rate。驗證：修完後 loop-health error_recurrence 對 git_push_backup 應拆出 >=3 個獨立 signature 且 credential 類標 recovered。背景：老闆 telegram-583（2026-07-13 00:22）要求每個關卡徹底修好；此項是防「假 degrading」誤報。",
-    "claimed_by": "hourly-02",
-    "claimed_at": "2026-07-13T18:07:57.160192+00:00",
-    "claim_session_id": "3f714c1be2e0",
-    "status_history": [
-      {
-        "ts": "2026-07-13T18:07:57.160206+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-02"
-      },
-      {
-        "ts": "2026-07-13T18:17:47.271673+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "hourly-02"
-      }
-    ],
     "completed_at": "2026-07-13T18:17:47.271658+00:00",
-    "result": "error_recurrence 改根因級 signature：git_push_backup 由 1 桶(exit1 count=33)拆成 3 個獨立 signature(push_held_guard=15/auth=3/mojibake=2)，auth 正確標 recovered；recurrence_rate 只算 active(0.583→0.0，假 degrading 消失)；順帶修 duplicate exit banner 灌水 2x 與 top_recurring 擠掉 active 訊號。tests 24 passed(6/7 新測試在舊碼 FAIL)，dreaming 下游 67 passed。commit 4541e1266"
+    "tombstone": true,
+    "archived_at": "2026-07-16T19:07:23.348575+00:00"
   },
   {
     "id": "telegram-586",
@@ -34837,13 +34820,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T18:00:51.585881+00:00",
+    "completed_at": "2026-07-16T19:00:52.458965+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T18:00:51.585881+00:00",
-      "last_clean_observed_at": "2026-07-16T18:00:51.585881+00:00"
+      "resolved_at": "2026-07-16T19:00:52.458965+00:00",
+      "last_clean_observed_at": "2026-07-16T19:00:52.458965+00:00"
     }
   },
   {
@@ -34855,13 +34838,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T18:14:43.108155+00:00",
+    "completed_at": "2026-07-16T19:16:19.013989+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T18:14:43.108155+00:00",
-      "last_clean_observed_at": "2026-07-16T18:14:43.108155+00:00"
+      "resolved_at": "2026-07-16T19:16:19.013989+00:00",
+      "last_clean_observed_at": "2026-07-16T19:16:19.013989+00:00"
     }
   },
   {
