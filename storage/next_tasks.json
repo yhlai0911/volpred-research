@@ -39488,24 +39488,29 @@
     "task_type": "event_article",
     "task_family": "content",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "source": "telegram-838",
     "preferred_agent": "claude",
     "public_effect": "published",
     "parent_task_id": "telegram-838",
     "created_at": "2026-07-15T13:00:00+00:00",
     "description": "7/14 BLS CPI 實際數字的市場反應文漏發（被 dedup false-positive 跳過，見兄弟任務 platform_ops_event_dedup_false_positive_cpi_20260714）。已發的只有 7/12 T-2 預告 mile_9560b9cc。\n補寫 T+0：actual headline/core CPI vs 共識、surprise size、SPY/VIX 當日與 T+1 反應，與 T-2 預告銜接。數字必須真查真算（BLS 官方發布 + yfinance），不確定就說不確定。audience=general；事件驅動 status=published。走 feed-publisher，含真實圖表 + 懶人包。發前 3-layer dedup（已確認 T+0 尚無真實覆蓋）。",
-    "claimed_by": "main-session-interactive",
-    "claimed_at": "2026-07-16T10:00:03.940998+00:00",
-    "claim_session_id": "363c3d3271ed",
     "status_history": [
       {
         "ts": "2026-07-16T10:00:03.941010+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "main-session-interactive"
+      },
+      {
+        "ts": "2026-07-16T10:27:03.277465+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-session-interactive"
       }
-    ]
+    ],
+    "completed_at": "2026-07-16T10:27:03.277442+00:00",
+    "result": "Published mile_e4803162：CPI T+0 複盤（四項全低於預期、保費 T-1 進場兩天退光、近 5 次第 2 深）；銜接 T-2 文 mile_9560b9cc 主張驗證；BLS+FRED 獨立重算、2 正文圖 + 懶人包 3 圖；線上驗證待批"
   },
   {
     "id": "telegram-840",
@@ -40214,7 +40219,7 @@
     "description": "從今日 Q2 法說會的 Capex 指引與 N2 量產進度切入，分析期權市場隱含波動率 (IV) 與歷史波動率 (HV) 的偏離度。可量化：利用法說會前後的 IV Skew (偏斜度) 變化，驗證市場對下行風險與上行溢價的期權定價效率。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-07-15T22:00:24+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -40243,17 +40248,22 @@
       ],
       "screened_at": "2026-07-15T22:00:26+00:00"
     },
-    "claimed_by": "main-session-interactive",
-    "claimed_at": "2026-07-16T10:00:04.236970+00:00",
-    "claim_session_id": "9baca0d130d4",
     "status_history": [
       {
         "ts": "2026-07-16T10:00:04.236984+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "main-session-interactive"
+      },
+      {
+        "ts": "2026-07-16T10:32:13.938882+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-session-interactive"
       }
-    ]
+    ],
+    "completed_at": "2026-07-16T10:32:13.938864+00:00",
+    "result": "Published mile_f78be848：法說 T+0 對帳文（Q2 全超標但 ADR 盤前 -3.9%，跌在 capex 上修 60-64B 歷史新高 + Q3 毛利率稀釋 N2/海外廠；期權定價驗證：幅度 ±4.2% 內貼下緣=7/8 文『沒加價』成立、方向 call>put 押錯）；銜接 mile_aee1c78c + mile_5a20a332；2 圖 + 對照表 + 懶人包 3 圖；美股收盤與台股 7/17 反應日待後續追蹤。FB 雙發佈另行處理"
   },
   {
     "id": "trending_repost_2026_07_16_ai_集中度",
@@ -40261,7 +40271,7 @@
     "description": "從 2026 年 AI 溢價引導的窄幅市場上漲切入，探討極端權重集中下的尾部風險。可量化：分析科技巨頭的隱含波動率偏斜（skew）與權重集中度之相關性，並評估賣權價差避險策略的成本效益。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-07-15T22:00:30+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -40302,17 +40312,22 @@
       ],
       "screened_at": "2026-07-15T22:00:30+00:00"
     },
-    "claimed_by": "main-session-interactive",
-    "claimed_at": "2026-07-16T10:00:04.819772+00:00",
-    "claim_session_id": "c5df6d0f1962",
     "status_history": [
       {
         "ts": "2026-07-16T10:00:04.819788+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "main-session-interactive"
+      },
+      {
+        "ts": "2026-07-16T10:37:24.493476+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-session-interactive"
       }
-    ]
+    ],
+    "completed_at": "2026-07-16T10:37:24.493458+00:00",
+    "result": "Drafted mile_aff342df 排程 2026-07-17T09:00+08 釋出（trending 2/day cap 今日用滿）：前五大 27.8% 權重（2020 年初 14.6%）、個股-指數波動缺口 23.5pp vs 六年均 16.5pp、避險成本效益（裸 put 年化 5.05% vs 95/90 價差 3.01% 省 40-49%）；差異化 vs mile_123a3855（6/4，前十大口徑）已 inline 引用；2 圖 + 成本對照表 + 懶人包 3 圖"
   },
   {
     "id": "ci-red-29453904758",

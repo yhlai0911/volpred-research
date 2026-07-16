@@ -1,0 +1,182 @@
+{
+ "schema_version": 1,
+ "title": "台積電法說對帳：好成績單為什麼開跌",
+ "subtitle": "跌的不是第二季，是資本支出與毛利率的「之後」",
+ "evidence": {
+  "ev": {
+   "path": "storage/drafts/assets/trending_tsmc_call_20260716/evidence.json",
+   "sha256": "cbeeacc6a7fcefc528cb6fc0ed56ccaa3a8d4944646da44a2c3fa412b5a8263c",
+   "label": "台積電 2026Q2 法說 T+0 事實與期權驗證 evidence"
+  }
+ },
+ "panels": [
+  {
+   "name": "1_concept_beat_but_down",
+   "info": "concept",
+   "style": "editorial",
+   "title": "每一項都超標，盤前卻往下",
+   "alt": "第二季實際成績與盤前反應對照",
+   "sources": [
+    "ev"
+   ],
+   "blocks": [
+    {
+     "kind": "metric",
+     "label": "第二季營收（億美元）",
+     "value": {
+      "source": "ev",
+      "path": "/earnings_call_results/q2_2026_actuals/revenue_usd_bn",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "scale": 10
+      }
+     },
+     "note": "年增三成三，貼指引上緣"
+    },
+    {
+     "kind": "metric",
+     "label": "毛利率",
+     "value": {
+      "source": "ev",
+      "path": "/earnings_call_results/q2_2026_actuals/gross_margin_pct",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": "%"
+      }
+     },
+     "note": "越過自家指引天花板"
+    },
+    {
+     "kind": "metric",
+     "label": "ADR 盤前反應",
+     "value": {
+      "source": "ev",
+      "path": "/market_reaction/tsm_premarket_0716/change_pct_yfinance",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": "%"
+      }
+     },
+     "note": "好成績單配下跌開局"
+    },
+    {
+     "kind": "text",
+     "heading": "為什麼",
+     "body": [
+      "跌的不是本季，是之後：資本支出上修 + 毛利率往下走",
+      "回收時程再往後推一步"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "2_method_capex_margin",
+   "info": "method",
+   "style": "professional",
+   "title": "兩個「之後」的數字",
+   "alt": "資本支出上修與毛利率稀釋來源",
+   "sources": [
+    "ev"
+   ],
+   "blocks": [
+    {
+     "kind": "metric",
+     "label": "全年資本支出新指引上緣（億美元）",
+     "value": {
+      "source": "ev",
+      "path": "/earnings_call_results/capex_2026/new_guidance_usd_bn/1",
+      "format": {
+       "kind": "number",
+       "digits": 0,
+       "scale": 10
+      }
+     },
+     "note": "自舊指引一口氣上修，歷史新高"
+    },
+    {
+     "kind": "metric",
+     "label": "第三季毛利率指引下緣",
+     "value": {
+      "source": "ev",
+      "path": "/earnings_call_results/q3_2026_guidance/gross_margin_pct_range/0",
+      "format": {
+       "kind": "number",
+       "digits": 0,
+       "suffix": "%"
+      }
+     },
+     "note": "自本季高點往下走"
+    },
+    {
+     "kind": "text",
+     "heading": "稀釋從哪來",
+     "body": [
+      "最先進製程快速拉產能，初期稀釋毛利率數個百分點",
+      "海外廠爬坡再讓一截，之後還可能擴大",
+      "營收在衝、毛利率在讓：擴張期的正常體質"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "3_results_options_scorecard",
+   "info": "results",
+   "style": "bento-grid",
+   "title": "一週前選擇權標的價，對帳結果",
+   "alt": "隱含跳動與實際盤前反應的對照",
+   "sources": [
+    "ev"
+   ],
+   "blocks": [
+    {
+     "kind": "metric",
+     "label": "一週前隱含的單日跳動（±，%）",
+     "value": {
+      "source": "ev",
+      "path": "/prior_articles/mile_aee1c78c/key_numbers/implied_single_day_move_pct",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": "%"
+      }
+     },
+     "note": "當時判定：沒有超收保費"
+    },
+    {
+     "kind": "metric",
+     "label": "實際盤前跳動",
+     "value": {
+      "source": "ev",
+      "path": "/market_reaction/tsm_premarket_0716/change_pct_yfinance",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": "%"
+      }
+     },
+     "note": "落在隱含範圍內、貼下緣"
+    },
+    {
+     "kind": "text",
+     "heading": "三個結論",
+     "body": [
+      "幅度標對了：買跨式的人約損益兩平偏虧",
+      "方向押錯了：買權貴過賣權的上行押注被打臉",
+      "肥保費依舊是幻覺：別賣它，也別付溢價買它"
+     ]
+    },
+    {
+     "kind": "text",
+     "heading": "待驗證",
+     "body": [
+      "美股今晚才開盤，收盤數字後續追蹤",
+      "台股反應日是明天：歷史基準為平常日的近兩倍跳動"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,196 @@
+{
+ "schema_version": 1,
+ "title": "五檔股票扛起大盤四分之一：保險怎麼買才不冤枉",
+ "subtitle": "集中度風險的量法，與價差保單省一半的算法",
+ "evidence": {
+  "ev": {
+   "path": "storage/drafts/assets/trending_ai_concentration_20260716/evidence.json",
+   "sha256": "8e2101d92faf9f871b64074745e4d426672130a8b3aceaf8239504601f7484b1",
+   "label": "AI 集中度與避險成本 evidence"
+  }
+ },
+ "panels": [
+  {
+   "name": "1_concept_concentration",
+   "info": "concept",
+   "style": "editorial",
+   "title": "指數的平靜是借來的",
+   "alt": "前五大權重與個股-指數波動缺口",
+   "sources": [
+    "ev"
+   ],
+   "blocks": [
+    {
+     "kind": "metric",
+     "label": "前五大公司合計權重",
+     "value": {
+      "source": "ev",
+      "path": "/top5_official_weights_pct/top5_companies_combined",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": "%"
+      }
+     },
+     "note": "六年半前約一半不到，翻了近一倍"
+    },
+    {
+     "kind": "metric",
+     "label": "大盤 ETF 已實現波動",
+     "value": {
+      "source": "ev",
+      "path": "/vol_gap_stats/latest_spy_rv20_pct",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": "%"
+      }
+     },
+     "note": "看起來歲月靜好"
+    },
+    {
+     "kind": "metric",
+     "label": "五巨頭平均個股波動",
+     "value": {
+      "source": "ev",
+      "path": "/vol_gap_stats/latest_top5avg_rv20_pct",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": "%"
+      }
+     },
+     "note": "平靜靠成分間低相關撐著"
+    },
+    {
+     "kind": "text",
+     "heading": "還款條件",
+     "body": [
+      "只要巨頭們同方向動，抵消消失",
+      "共同題材現成：AI 資本支出回收"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "2_method_hedge",
+   "info": "method",
+   "style": "bento-grid",
+   "title": "兩種保險買法",
+   "alt": "裸買賣權與價差保單的成本結構",
+   "sources": [
+    "ev"
+   ],
+   "blocks": [
+    {
+     "kind": "metric",
+     "label": "整張保單年化",
+     "value": {
+      "source": "ev",
+      "path": "/hedge_cost/front_month/naked_put_annualized_pct",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": "%"
+      }
+     }
+    },
+    {
+     "kind": "metric",
+     "label": "價差保單年化",
+     "value": {
+      "source": "ev",
+      "path": "/hedge_cost/front_month/spread_annualized_pct",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": "%"
+      }
+     }
+    },
+    {
+     "kind": "metric",
+     "label": "省下的保費",
+     "value": {
+      "source": "ev",
+      "path": "/hedge_cost/back_month/cost_saving_pct",
+      "format": {
+       "kind": "number",
+       "digits": 0,
+       "suffix": "%"
+      }
+     }
+    },
+    {
+     "kind": "text",
+     "heading": "判斷法",
+     "body": [
+      "集中度風險的典型劇本是急跌一段，不是無底洞",
+      "深淵情境撐不起就減部位，不是買更貴的保險"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "3_takeaway",
+   "info": "takeaway",
+   "style": "professional",
+   "title": "三個帶走的數字",
+   "alt": "集中度、波動缺口與保費節省摘要",
+   "sources": [
+    "ev"
+   ],
+   "blocks": [
+    {
+     "kind": "metric",
+     "label": "五家公司的大盤權重",
+     "value": {
+      "source": "ev",
+      "path": "/top5_official_weights_pct/top5_companies_combined",
+      "format": {
+       "kind": "number",
+       "digits": 1,
+       "suffix": "%"
+      }
+     },
+     "note": "你買的分散，四分之一是同一個題材"
+    },
+    {
+     "kind": "metric",
+     "label": "個股與指數的波動缺口（百分點）",
+     "value": {
+      "source": "ev",
+      "path": "/vol_gap_stats/latest_gap_pct",
+      "format": {
+       "kind": "number",
+       "digits": 1
+      }
+     },
+     "note": "遠高於六年平均"
+    },
+    {
+     "kind": "metric",
+     "label": "價差替你省下的保費（最近月）",
+     "value": {
+      "source": "ev",
+      "path": "/hedge_cost/front_month/cost_saving_pct",
+      "format": {
+       "kind": "number",
+       "digits": 0,
+       "suffix": "%"
+      }
+     },
+     "note": "保險買在最可能的那一層"
+    },
+    {
+     "kind": "text",
+     "heading": "一句話",
+     "body": [
+      "集中度高的市場，風險是「一起跌」",
+      "保險用價差買，別付整張的錢"
+     ]
+    }
+   ]
+  }
+ ]
+}
