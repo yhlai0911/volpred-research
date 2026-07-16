@@ -17,7 +17,7 @@ K1057 顯示 HAR-RV 與 GJR 在各自 native target 上的排名會翻轉；K107
 1. 先把 raw 檔鎖到 canonical 5 分鐘 RV 已驗證的日期集合（較新的未驗證 raw 檔列入 excluded audit），再用既有 collector 的 header normalization 與 completed-day active-contract rule，另算含 session-open 左端點的 1/5/10 分鐘 RV、Parkinson 與日報酬平方。快取另存 collector 原本的 close-only 5 分鐘口徑，用來逐日驗證 active contract、canonical RV 與 signed day return；該欄不作模型 target。
 2. HAR-RV5、GJR-GARCH(1,1) 與 EWMA 使用相同日期 ledger。HAR feature 與 EWMA 在程式中明確 `shift(1)`；GJR origin `t` 只使用到 `t-1`。因三者 native scale 不同，每個 target/origin 另用至少 252 組、最多 500 組 past-only actual/forecast ratio 做乘法尺度校準。
 3. 每個 origin 的 proxy bias/weight 只使用 `[t-500,t)`；每個 proxy 的可靠度 residual 以不包含自己的 leave-one-proxy-out median 為中心。當日 proxy 只能作評分 target，不能進權重估計。
-4. 先固定五個 raw proxies、consensus target 與三模型全部有效的單一 OOS 日期 ledger；任何模型在合格 target 日期缺 forecast 都 fail closed。六個 target 在完全相同日期上報 actual/predicted QLIKE、Spearman、repo canonical Newey-West HAC DM（h=1）及 stationary-bootstrap MCS（seed=42、1,000 reps）；實際值非正的日期在模型 feature、consensus calibration 與共同評估 ledger 都視為缺值，不得 clip 成極小正數。
+4. 先固定五個 raw proxies、consensus target 皆為正值，且三個 raw 模型能以截至 `t-1` 的可用資訊產生預測的單一 OOS origin ledger；原始輸入缺日造成的不可預測 origin 會在 calibration 前明確排除並按模型計數，之後任何 calibrated forecast 缺口都 fail closed。六個 target 在完全相同日期上報 actual/predicted QLIKE、Spearman、repo canonical Newey-West HAC DM（h=1）及 stationary-bootstrap MCS（seed=42、1,000 reps）；實際值非正的日期在模型 feature、consensus calibration 與共同評估 ledger 都視為缺值，不得 clip 成極小正數。
 5. `PROXY_ROBUST_STATISTICAL_RANKING`：所有 raw/consensus QLIKE winner 相同，且每個 target 的 MCS 都是相同 singleton。`PROXY_DEPENDENT_STATISTICAL_RANKING`：至少兩個 target 有不同 singleton MCS winner。其他情況一律 `INCONCLUSIVE_RANKING_SENSITIVITY`。點排名差異不能單獨觸發結論。
 
 ## 防錯規則

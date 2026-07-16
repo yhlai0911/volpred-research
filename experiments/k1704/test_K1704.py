@@ -108,18 +108,39 @@ def test_common_ledger_fails_on_forecast_gap_and_is_shared(
         target: {name: np.linspace(1.1, 2.1, n_obs) for name in k1704.MODEL_NAMES}
         for target in actuals
     }
-    mask = k1704.build_common_evaluation_mask(actuals, forecasts, oos_start=5)
-    assert int(mask.sum()) == 294
+    raw_forecasts = {
+        name: np.linspace(1.1, 2.1, n_obs) for name in k1704.MODEL_NAMES
+    }
+    raw_forecasts["HAR_RV5"][8] = np.nan
+    origin_eligibility, audit = k1704.build_origin_eligibility_mask(
+        actuals, raw_forecasts, oos_start=5
+    )
+    for target in forecasts:
+        forecasts[target]["HAR_RV5"][8] = np.nan
+    mask = k1704.build_common_evaluation_mask(
+        actuals,
+        forecasts,
+        oos_start=5,
+        origin_eligibility=origin_eligibility,
+    )
+    assert int(mask.sum()) == 293
     assert mask[7] == np.False_
-    assert mask[8] == np.True_
+    assert mask[8] == np.False_
+    assert audit["excluded_invalid_target"] == 1
+    assert audit["excluded_unavailable_raw_forecast_by_model"]["HAR_RV5"] == 1
 
     broken = {
         target: {name: values.copy() for name, values in model_values.items()}
         for target, model_values in forecasts.items()
     }
-    broken["rv_5min"]["HAR_RV5"][8] = np.nan
+    broken["rv_5min"]["HAR_RV5"][9] = np.nan
     with pytest.raises(RuntimeError, match="forecast coverage failure"):
-        k1704.build_common_evaluation_mask(actuals, broken, oos_start=5)
+        k1704.build_common_evaluation_mask(
+            actuals,
+            broken,
+            oos_start=5,
+            origin_eligibility=origin_eligibility,
+        )
 
     observed_lengths: list[int] = []
     monkeypatch.setattr(k1704, "qlike_pointwise", lambda y, f: np.square(y - f))
@@ -133,8 +154,8 @@ def test_common_ledger_fails_on_forecast_gap_and_is_shared(
 
     monkeypatch.setattr(k1704, "model_confidence_set", fake_mcs)
     result = k1704.evaluate_target(actuals["rv_1min"], forecasts["rv_1min"], mask)
-    assert result["n_oos"] == 294
-    assert observed_lengths == [294, 294, 294]
+    assert result["n_oos"] == 293
+    assert observed_lengths == [293, 293, 293]
 
 
 def test_cached_raw_bytes_are_reverified(tmp_path: Path) -> None:

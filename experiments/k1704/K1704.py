@@ -586,15 +586,25 @@ def build_common_evaluation_mask(
     actuals: dict[str, np.ndarray],
     forecasts_by_target: dict[str, dict[str, np.ndarray]],
     oos_start: int,
+    origin_eligibility: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Freeze one cross-target OOS ledger and fail on forecast coverage gaps."""
+    """Freeze one cross-target OOS ledger and fail on post-eligibility gaps."""
     lengths = {len(values) for values in actuals.values()}
     if len(lengths) != 1:
         raise RuntimeError(f"target length mismatch: {sorted(lengths)}")
     n_obs = lengths.pop()
-    eligible = np.arange(n_obs) >= oos_start
+    if origin_eligibility is None:
+        eligible = np.arange(n_obs) >= oos_start
+    else:
+        eligible = np.asarray(origin_eligibility, dtype=bool).copy()
+        if len(eligible) != n_obs:
+            raise RuntimeError("origin eligibility length mismatch")
+        if eligible[:oos_start].any():
+            raise RuntimeError("origin eligibility includes pre-OOS observations")
     for values in actuals.values():
-        eligible &= np.isfinite(values) & (values > 0)
+        invalid = eligible & (~np.isfinite(values) | (values <= 0))
+        if invalid.any():
+            raise RuntimeError("origin eligibility contains invalid target values")
     if int(eligible.sum()) < 252:
         raise RuntimeError(f"common positive-target OOS ledger too short: {int(eligible.sum())}")
 
@@ -614,6 +624,47 @@ def build_common_evaluation_mask(
                     f"{len(positions)} eligible origins, first={positions[:5].tolist()}"
                 )
     return eligible
+
+
+def build_origin_eligibility_mask(
+    actuals: dict[str, np.ndarray],
+    raw_forecasts: dict[str, np.ndarray],
+    oos_start: int,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Predeclare origins evaluable from targets and lagged model information."""
+    lengths = {len(values) for values in [*actuals.values(), *raw_forecasts.values()]}
+    if len(lengths) != 1:
+        raise RuntimeError(f"origin eligibility length mismatch: {sorted(lengths)}")
+    n_obs = lengths.pop()
+    oos = np.arange(n_obs) >= oos_start
+    target_valid = np.ones(n_obs, dtype=bool)
+    for values in actuals.values():
+        target_valid &= np.isfinite(values) & (values > 0)
+    forecast_valid_by_model = {
+        name: np.isfinite(values) & (values > 0)
+        for name, values in raw_forecasts.items()
+    }
+    forecast_valid = np.ones(n_obs, dtype=bool)
+    for values in forecast_valid_by_model.values():
+        forecast_valid &= values
+    eligible = oos & target_valid & forecast_valid
+    if int(eligible.sum()) < 252:
+        raise RuntimeError(f"common origin eligibility too short: {int(eligible.sum())}")
+    audit = {
+        "oos_candidates": int(oos.sum()),
+        "eligible": int(eligible.sum()),
+        "excluded_invalid_target": int((oos & ~target_valid).sum()),
+        "excluded_unavailable_raw_forecast_by_model": {
+            name: int((oos & ~values).sum())
+            for name, values in forecast_valid_by_model.items()
+        },
+        "policy": (
+            "predeclare the intersection of positive observed targets and raw one-step "
+            "forecasts available from lagged information; any calibrated forecast gap "
+            "inside this frozen set fails closed"
+        ),
+    }
+    return eligible, audit
 
 
 def evaluate_target(
@@ -792,8 +843,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     forecasts_by_target["consensus_weighted"] = consensus_forecasts
     scale_calibration["consensus_weighted"] = consensus_scale_audit
 
+    origin_eligibility, origin_eligibility_audit = build_origin_eligibility_mask(
+        actuals, raw_forecasts, args.oos_start
+    )
     common_mask = build_common_evaluation_mask(
-        actuals, forecasts_by_target, args.oos_start
+        actuals,
+        forecasts_by_target,
+        args.oos_start,
+        origin_eligibility=origin_eligibility,
     )
     common_dates = frame.loc[common_mask, "date"].dt.date.astype(str).tolist()
     common_ledger_hash = hashlib.sha256(
@@ -848,6 +905,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "common_evaluation_date_end": common_dates[-1],
             "common_evaluation_date_sha256": common_ledger_hash,
             "common_evaluation_dates": common_dates,
+            "origin_eligibility": origin_eligibility_audit,
             "train_window": args.train_window,
             "calibration_window": args.calibration_window,
             "forecast_horizon_days": 1,
