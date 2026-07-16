@@ -3,7 +3,7 @@
   "seed": 42,
   "task_disposition": "duplicate_closure",
   "duplicate_of": "K1661",
-  "source_experiment_commit": "cdb875946",
+  "source_experiment_commit": "cdb8759466e082aa5565f5df9796a2f85dc08221",
   "verdict": "DUPLICATE_CLOSURE_PASS",
   "creates_new_empirical_claim": false,
   "reason": "K1661 already implements the full queued design: daily-OHLC Garman-Klass RV, range-quarticity proxy, HAR/HARQ, rolling W=1000 one-step forecasts, QLIKE, DM-HLN, and SPY/0050.TW/TWII (documented TX proxy).",
@@ -12,6 +12,12 @@
     "k1661_results.json": "f7827ff86f7fad49374a6cbd4995540a2bef0706fc3931952c0ac364d74b912e",
     "reviews/codex_review.md": "3a22312228a89e4c220abb80fa7312a3cbe1e3d2d31a3f119a0c5abbf4aaec58"
   },
+  "pinned_commit_hashes": {
+    "k1661_harq_ohlc.py": "ef816d448c064743f040ce51419ac2e548e24ae733db156542f593a1ff3920ec",
+    "k1661_results.json": "f7827ff86f7fad49374a6cbd4995540a2bef0706fc3931952c0ac364d74b912e",
+    "reviews/codex_review.md": "3a22312228a89e4c220abb80fa7312a3cbe1e3d2d31a3f119a0c5abbf4aaec58"
+  },
+  "pinned_source_unchanged": true,
   "contract_checks": {
     "queued_markets_present": true,
     "garman_klass_present": true,
@@ -19,9 +25,9 @@
     "explicit_feature_shift_present": true,
     "rolling_window_1000_present": true,
     "qlike_actual_over_predicted": true,
-    "dm_hln_horizon_one": true,
+    "legacy_dm_hln_horizon_one_identified": true,
     "har_and_harq_present": true,
-    "review_pass_present": true,
+    "source_review_pass_but_fallback_disclosed": true,
     "canonical_null_not_overclaimed": true
   },
   "replay": [
@@ -65,14 +71,54 @@
           "last_forecast_date": "2026-07-07"
         }
       },
-      "dm_hln_HARQ_vs_HAR": {
+      "legacy_dm_hln_HARQ_vs_HAR_diagnostic": {
         "T": 3129,
         "dm": 0.49335587268250775,
         "dm_hln": 0.4932770303531697,
         "p_two": 0.6218514842080358,
         "p_one_a_better": 0.6890742578959821,
         "mean_diff": 0.008948595839004751
-      }
+      },
+      "loss_diff_acf_1": 0.03176210582929351,
+      "canonical_dm_hac_HARQ_vs_HAR": {
+        "t_stat": 0.4754240448342361,
+        "p_value_two_sided": 0.6345179560315573,
+        "hac_lag": 15,
+        "candidate_better_direction": "negative",
+        "harvey_abs_t_gt_3": false
+      },
+      "dm_hac_lag_sensitivity": [
+        {
+          "lag": 0,
+          "t_stat": 0.49335587268250775,
+          "long_run_var": 1.0294250832455185
+        },
+        {
+          "lag": 1,
+          "t_stat": 0.4857003105929221,
+          "long_run_var": 1.0621322316492157
+        },
+        {
+          "lag": 5,
+          "t_stat": 0.4790433042497928,
+          "long_run_var": 1.091857098870281
+        },
+        {
+          "lag": 10,
+          "t_stat": 0.4766829289791764,
+          "long_run_var": 1.1026968963039834
+        },
+        {
+          "lag": 15,
+          "t_stat": 0.4754240448342361,
+          "long_run_var": 1.1085443309550198
+        },
+        {
+          "lag": 20,
+          "t_stat": 0.47420485106395166,
+          "long_run_var": 1.1142518548247944
+        }
+      ]
     },
     {
       "asset": "0050.TW",
@@ -114,14 +160,54 @@
           "last_forecast_date": "2026-07-07"
         }
       },
-      "dm_hln_HARQ_vs_HAR": {
+      "legacy_dm_hln_HARQ_vs_HAR_diagnostic": {
         "T": 3012,
         "dm": 0.7102137064596076,
         "dm_hln": 0.7100957993107151,
         "p_two": 0.477699720751263,
         "p_one_a_better": 0.7611501396243685,
         "mean_diff": 0.005429564312691782
-      }
+      },
+      "loss_diff_acf_1": -0.2214111957466189,
+      "canonical_dm_hac_HARQ_vs_HAR": {
+        "t_stat": 0.751555360909196,
+        "p_value_two_sided": 0.4523772343044925,
+        "hac_lag": 15,
+        "candidate_better_direction": "negative",
+        "harvey_abs_t_gt_3": false
+      },
+      "dm_hac_lag_sensitivity": [
+        {
+          "lag": 0,
+          "t_stat": 0.7102137064596076,
+          "long_run_var": 0.1760381645721222
+        },
+        {
+          "lag": 1,
+          "t_stat": 0.8049234914636433,
+          "long_run_var": 0.137048954309243
+        },
+        {
+          "lag": 5,
+          "t_stat": 0.784710424217528,
+          "long_run_var": 0.14420027449905612
+        },
+        {
+          "lag": 10,
+          "t_stat": 0.7580881367177779,
+          "long_run_var": 0.15450606430557018
+        },
+        {
+          "lag": 15,
+          "t_stat": 0.751555360909196,
+          "long_run_var": 0.1572037772205201
+        },
+        {
+          "lag": 20,
+          "t_stat": 0.7464379116343052,
+          "long_run_var": 0.1593666900070751
+        }
+      ]
     },
     {
       "asset": "TWII",
@@ -163,14 +249,54 @@
           "last_forecast_date": "2026-07-07"
         }
       },
-      "dm_hln_HARQ_vs_HAR": {
+      "legacy_dm_hln_HARQ_vs_HAR_diagnostic": {
         "T": 3007,
         "dm": 0.5412348351921695,
         "dm_hln": 0.5411448318931034,
         "p_two": 0.5884478585778741,
         "p_one_a_better": 0.705776070711063,
         "mean_diff": 0.00457325260858134
-      }
+      },
+      "loss_diff_acf_1": -0.0614424047098984,
+      "canonical_dm_hac_HARQ_vs_HAR": {
+        "t_stat": 0.4727013677591234,
+        "p_value_two_sided": 0.6364605685116218,
+        "hac_lag": 15,
+        "candidate_better_direction": "negative",
+        "harvey_abs_t_gt_3": false
+      },
+      "dm_hac_lag_sensitivity": [
+        {
+          "lag": 0,
+          "t_stat": 0.5412348351921695,
+          "long_run_var": 0.21469025285349558
+        },
+        {
+          "lag": 1,
+          "t_stat": 0.5586716241075624,
+          "long_run_var": 0.2014979271985126
+        },
+        {
+          "lag": 5,
+          "t_stat": 0.4989338227320528,
+          "long_run_var": 0.2526375599335059
+        },
+        {
+          "lag": 10,
+          "t_stat": 0.480391949718263,
+          "long_run_var": 0.2725162271022246
+        },
+        {
+          "lag": 15,
+          "t_stat": 0.4727013677591234,
+          "long_run_var": 0.28145572814038533
+        },
+        {
+          "lag": 20,
+          "t_stat": 0.48737963421636227,
+          "long_run_var": 0.264757977171693
+        }
+      ]
     }
   ],
   "metric_comparisons": [
@@ -390,5 +516,6 @@
     "relative": 1e-10
   },
   "lookahead_policy": "Independent ledger uses signal.shift(1) for daily, weekly, monthly RV and sqrt(RQ); rolling training targets end strictly before each forecast origin.",
-  "conclusion": "Close K1713 as a verified duplicate of K1661. Do not count it as an independent replication or add a second knowledge finding."
+  "inference_retrofit": "K1661's legacy h=1 DM-HLN has HAC lag 0 and is retained only for byte-replay. K1713's primary inference uses volpred.stats.model_evaluation.dm_test with the canonical ceil(n^(1/3)) Bartlett-HAC bandwidth and reports lag sensitivity.",
+  "conclusion": "Close K1713 as a verified duplicate and current-HAC-rule retrofit of K1661. Do not count it as an independent replication or add a second knowledge finding."
 }
