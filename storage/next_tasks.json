@@ -35521,7 +35521,7 @@
     "title": "K1706: 美國最小跳動單位試驗的 pre-spread 波動異質性** — 用官方隨機分組與市場品質表，按事前 spread `<10¢`／`>15¢` 固定分層，估 1¢→5¢ 對 small-cap RV、區間與流動性的 DiD／事件研究，配 r",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1608). Original: 美國最小跳動單位試驗的 pre-spread 波動異質性** — 用官方隨機分組與市場品質表，按事前 spread `<10¢`／`>15¢` 固定分層，估 1¢→5¢ 對 small-cap RV、區間與流動性的 DiD／事件研究，配 randomization inference、placebo 與 Holm 檢定；不得事後改分箱。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1706.py with signal.shift(1) + seed=42, (c) K1706_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "pending_main_thread",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35531,9 +35531,6 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-13T23:52:32Z",
-    "claimed_by": "codex-desktop-k1706",
-    "claimed_at": "2026-07-15T22:55:01.102684+00:00",
-    "claim_session_id": "ca60bd71745b",
     "status_history": [
       {
         "ts": "2026-07-15T22:55:01.102700+00:00",
@@ -35546,9 +35543,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-k1706"
+      },
+      {
+        "ts": "2026-07-16T00:01:48.901800+00:00",
+        "from": "in_progress",
+        "to": "pending_main_thread",
+        "by": "codex-desktop-k1706",
+        "note": "Experiment + final post-boundary Codex PASS complete. Frozen commits a72242809, 071fdc73a, e0a18e2be; certify gate PASS. Range-only confirmatory: narrow RI Holm .016, narrow-wide Holm .004; other outcomes non-rejection diagnostics. Main-thread-only remaining: canonical knowledge writer + research_program/work_log closure, then complete K1706 before any push (avoid knowledge ratchet)."
       }
     ],
-    "started_at": "2026-07-15T22:55:01.434937+00:00"
+    "started_at": "2026-07-15T22:55:01.434937+00:00",
+    "handoff_note": "Experiment + final post-boundary Codex PASS complete. Frozen commits a72242809, 071fdc73a, e0a18e2be; certify gate PASS. Range-only confirmatory: narrow RI Holm .016, narrow-wide Holm .004; other outcomes non-rejection diagnostics. Main-thread-only remaining: canonical knowledge writer + research_program/work_log closure, then complete K1706 before any push (avoid knowledge ratchet).",
+    "handoff_at": "2026-07-16T00:01:48.901785+00:00"
   },
   {
     "id": "K1707",
@@ -36833,13 +36839,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-15T23:01:10.562596+00:00",
+    "completed_at": "2026-07-16T00:00:08+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T23:01:10.562596+00:00",
-      "last_clean_observed_at": "2026-07-15T23:01:10.562596+00:00"
+      "resolved_at": "2026-07-16T00:00:08+00:00",
+      "last_clean_observed_at": "2026-07-16T00:00:08+00:00"
     }
   },
   {
@@ -41376,5 +41382,117 @@
     "started_at": "2026-07-15T23:38:02.086593+00:00",
     "completed_at": "2026-07-15T23:50:05.611497+00:00",
     "result": "Fresh strict audit new=0. K1706 malformed-row and unusable-archive fallbacks now emit structured diagnostics; fix committed in a72242809. No analytical filters or estimates were silently changed."
+  },
+  {
+    "id": "K1719",
+    "title": "K1719: ASIA-5 亞太時區階梯 spillover**：美(SPY/VIX) → 日(^N225) → 台(^TWII) → 東南亞(^STI/^JKSE/^KLSE/^SET.BK) 的隔夜傳遞鏈；T5b（SPY→台）的多市場擴展",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 400). Original: ASIA-5 亞太時區階梯 spillover**：美(SPY/VIX) → 日(^N225) → 台(^TWII) → 東南亞(^STI/^JKSE/^KLSE/^SET.BK) 的隔夜傳遞鏈；T5b（SPY→台）的多市場擴展\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1719.py with signal.shift(1) + seed=42, (c) K1719_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 400,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-16T00:00:02Z"
+  },
+  {
+    "id": "K1720",
+    "title": "K1720: 槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arX",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 571). Original: 槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arXiv/JPM 2025 beyond volatility drag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1720.py with signal.shift(1) + seed=42, (c) K1720_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 571,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-16T00:00:02Z"
+  },
+  {
+    "id": "K1721",
+    "title": "K1721: GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測 — Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，檢定對 SPY/GLD/XLE/ITA 不同 horizon 預測力（",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 574). Original: GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測 — Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，檢定對 SPY/GLD/XLE/ITA 不同 horizon 預測力（來源：AER 2022 + IMF GFSR 2025-04 Ch.2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1721.py with signal.shift(1) + seed=42, (c) K1721_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 574,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-16T00:00:02Z"
+  },
+  {
+    "id": "K1722",
+    "title": "K1722: 極端高溫/颶風對保險與公用 ETF 的 vol event study — NOAA 事件日期 + KIE/KBWP/XLU RV，dose-response（來源：PLOS One 2025 + JIFM 2025 climate-vol",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 576). Original: 極端高溫/颶風對保險與公用 ETF 的 vol event study — NOAA 事件日期 + KIE/KBWP/XLU RV，dose-response（來源：PLOS One 2025 + JIFM 2025 climate-vol；physical>transition 是 2025 共識）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1722.py with signal.shift(1) + seed=42, (c) K1722_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 576,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-16T00:00:02Z"
+  },
+  {
+    "id": "K1723",
+    "title": "K1723: 颱風登陸與台股波動：颱風假的 vol 機制 — CWB 警報/登陸資料 + TAIEX/台指期，停市後復市日 gap vol 系統性檢定、與一般連假區分；台灣特有制度國際空白（來源：physical-risk event-study 202",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 578). Original: 颱風登陸與台股波動：颱風假的 vol 機制 — CWB 警報/登陸資料 + TAIEX/台指期，停市後復市日 gap vol 系統性檢定、與一般連假區分；台灣特有制度國際空白（來源：physical-risk event-study 2025 方法移植）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1723.py with signal.shift(1) + seed=42, (c) K1723_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 578,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-16T00:00:02Z"
+  },
+  {
+    "id": "ci-red-29457218773",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29421677446",
+    "ci_run_key": "29457218773:1",
+    "created_at": "2026-07-16T00:00:05.116939+00:00",
+    "title": "CI 紅燈修復（run 29457218773, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29457218773\nattempt: 1\nhead_sha: 0b90b1c1b\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29457218773 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "claimed_by": "codex-failover-slot-1-635dd2c9597f4356859ff16b00497556",
+    "claimed_at": "2026-07-16T00:01:28.729489+00:00",
+    "claim_session_id": "161494d7f6d9",
+    "status_history": [
+      {
+        "ts": "2026-07-16T00:01:28.729502+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-635dd2c9597f4356859ff16b00497556"
+      },
+      {
+        "ts": "2026-07-16T00:01:33.576424+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-635dd2c9597f4356859ff16b00497556"
+      }
+    ],
+    "started_at": "2026-07-16T00:01:33.576409+00:00"
   }
 ]
