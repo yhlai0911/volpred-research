@@ -33006,74 +33006,27 @@
   },
   {
     "id": "platform_ops_materialize_daily_checkup_schedule",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "把 daily_checkup wrapper materialize 為 canonical 每日排程",
     "priority": 2,
     "source": "governance_doc_drift_audit_20260714",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
     "created_at": "2026-07-13T19:40:55.371841+00:00",
-    "title": "把 daily_checkup wrapper materialize 為 canonical 每日排程",
-    "description": "2026-07-14 governance audit 發現 scripts/daily_checkup.py / wrapper 已存在，但 config/runtime_schedules.json、host crontab 與 LaunchAgent 均無 canonical daily schedule；pdca skill 原文因此 overclaim。依 schedule-governance 流程選定唯一 owner，更新 canonical spec 與 wrapper/install sync，補 regression test，做一次真實 fire / state 驗證，再把 operations-cadence 的 GAP 改為已落地。禁只改 prose 或手改 runtime state。",
-    "status_history": [
-      {
-        "ts": "2026-07-13T20:44:03.420785+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T20:44:03.688902+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T20:55:54.319755+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-13T20:44:03.688888+00:00",
     "completed_at": "2026-07-13T20:55:54.319740+00:00",
-    "result": "Daily checkup 已 materialize 為每日 09:40 com.volpred.daily-checkup 單一 LaunchAgent；host cron/piggy-back 排除，wrapper sync、ownership/cadence/cron_review 與 targeted installer gate 全補齊。\n實機 kickstart runs=1 / last exit=0 / 12s，report + marker 更新；focused tests 86 passed。驗證另抓到 run_due_jobs 未拒絕未知 --dry-run，已改 fail-fast 並補 regression。"
+    "tombstone": true,
+    "archived_at": "2026-07-16T21:07:32.816264+00:00"
   },
   {
     "id": "governance_agent_surface_model_config_parity",
+    "status": "succeeded",
     "task_type": "governance",
+    "title": "收斂 Claude/Codex skill surface 與 model config parity",
     "priority": 2,
     "source": "governance_doc_drift_audit_20260714",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
     "created_at": "2026-07-13T19:40:55.371841+00:00",
-    "title": "收斂 Claude/Codex skill surface 與 model config parity",
-    "description": "2026-07-14 audit：.agents/skills 是 Codex discovery surface 但目前被 gitignore，26 個共享 skill 中 18 個與 .claude/skills 不同；agent-specs canonical source 幾乎為空。先定義單一 canonical source + 可重建 render gate，再修 parity，禁止直接手補 ignored render 當最終解。同任務釐清 config/models.json 對 Fable live availability 的互相矛盾敘述，讓機械 router、smoke 與治理文件一致。",
-    "claimed_by": "hourly-04",
-    "claimed_at": "2026-07-13T20:08:17.878443+00:00",
-    "claim_session_id": "e3de2d65f85b",
-    "status_history": [
-      {
-        "ts": "2026-07-13T20:08:17.878457+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-13T20:08:34.822785+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-13T20:32:07.243278+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-04"
-      }
-    ],
-    "started_at": "2026-07-13T20:08:34.822771+00:00",
     "completed_at": "2026-07-13T20:32:07.243261+00:00",
-    "result": "�?��?? agent-specs render �?��??�?.claude/ �?�?��?��? agent surface�?.agents/skills 實測�?� consumer�?Codex �?�走 plugin marketplace�?�?�?��?� ops agent-spec �??令群 + execution_brief �?? check_agent_specs preflight�?canonical 已�?� e64a19072 �?��?��?preflight 實�??�??�? FileNotFoundError�?�??�??測試�?� monkeypatch �??�??以�?�?��?��?�?�??�?� gate tests/test_skill_surface_single_source.py �?��?? test_agent_spec.py �?置�?�?�?��?第�?層�?CI + pre-push �?��??�? tests/�?�??�??�?? research_program.md �??�?��?��? archive�?byte-identical from e64a19072^�?�??models.json fable �??�??�??�?��?��?��?live probe 確�? AVAILABLE�?根�?��?��?? policy�?�?�?� default rotation�?寫�?� availability �?�?�??merged 898a216be"
+    "tombstone": true,
+    "archived_at": "2026-07-16T21:07:32.816264+00:00"
   },
   {
     "id": "ci-red-29280674231",
@@ -34788,13 +34741,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T20:01:00.921797+00:00",
+    "completed_at": "2026-07-16T21:00:54.703308+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T20:01:00.921797+00:00",
-      "last_clean_observed_at": "2026-07-16T20:01:00.921797+00:00"
+      "resolved_at": "2026-07-16T21:00:54.703308+00:00",
+      "last_clean_observed_at": "2026-07-16T21:00:54.703308+00:00"
     }
   },
   {
@@ -34806,13 +34759,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T20:19:23.089720+00:00",
+    "completed_at": "2026-07-16T21:24:16.655400+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T20:19:23.089720+00:00",
-      "last_clean_observed_at": "2026-07-16T20:19:23.089720+00:00"
+      "resolved_at": "2026-07-16T21:24:16.655400+00:00",
+      "last_clean_observed_at": "2026-07-16T21:24:16.655400+00:00"
     }
   },
   {
@@ -40866,5 +40819,46 @@
     "created_at": "2026-07-16T18:12:31.947860+00:00",
     "parent_task_id": "assign_56ddf72b",
     "created_by": "hourly-slot-1-a439b41013384a93ba3994b6c6e48e56"
+  },
+  {
+    "id": "k1708_collect_fullrun_20260717",
+    "title": "[experiment] K1708 全樣本 run 收件：驗數字 + Codex 審 + merge worktree",
+    "description": "collect_completed followup for compute job k1708-fullrun-salvage-20260717 (exit 0, artifact present, quick_mode=false, verdict=NULL). 依 claude_followup.brief 七步：(1) artifact/quick_mode 確認 (2) 抽驗數字與 README 逐字相符 (3) 審 Clark-West 取代 DM-HLN 的 criterion_substitution + MC size 驗證 (4) 檢查 tuning.log 邊界解與 README §12 遵守 (5) Codex primary review (6) 正式 merge_worktree.sh dispatch-slot-2-8dda242d-k1708 (7) 依 verdict 寫 knowledge / 標 status。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "succeeded",
+    "tags": [
+      "experiment",
+      "k1708",
+      "collection",
+      "followup"
+    ],
+    "source": "compute_queue_followup",
+    "created_at": "2026-07-16T21:08:43.979790+00:00",
+    "parent_task_id": "k1708-fullrun-salvage-20260717",
+    "dispatch_lane": "agent",
+    "status_history": [
+      {
+        "ts": "2026-07-16T21:08:48.138085+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-741484dd5d544845806da1672d6804cd"
+      },
+      {
+        "ts": "2026-07-16T21:08:48.375075+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-741484dd5d544845806da1672d6804cd"
+      },
+      {
+        "ts": "2026-07-16T21:22:16.032136+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-741484dd5d544845806da1672d6804cd"
+      }
+    ],
+    "started_at": "2026-07-16T21:08:48.375060+00:00",
+    "completed_at": "2026-07-16T21:22:16.032121+00:00",
+    "result": "收件完成：數字驗證 PASS（零假數字、ledger 全列重算相符、verdict 機械推導、15 測試過），Codex primary review REQUEST_CHANGES 2 BLOCKER（stale sigma2 / MLE-production init mismatch）→ 不 merge、NULL 結論待修正後重跑確認。修正 job 已 enqueue: agent-brief_k1708_fix-e2b3f0（timeout 5400s，followup 會收件 re-review + merge）。"
   }
 ]

@@ -20488,5 +20488,15 @@
     "backfilled_at": "2026-07-16T20:35:01.379131+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1719"
+  },
+  {
+    "timestamp": "2026-07-17T05:22:10+08:00",
+    "task_type": "experiment",
+    "task_id": "k1708_collect_fullrun_20260717",
+    "outcome": "succeeded",
+    "summary": "K1708 全樣本 run 收件：數字驗證 PASS（ledger 2273 列重算全中、零假數字、verdict 機械推導、code/data sha256 相符、15 測試過），但 Codex primary review = REQUEST_CHANGES 兩個 BLOCKER（HAR_KF_DISC 用 select_discount 回傳的 stale sigma2 跑外層 OOS；HAR_KF_MLE 的 MLE 估計與 production forecast 用不同 initial state，rp=2006 重播 loglik -1666.27 vs -1667.32）→ NULL 結論不可信、不 merge。已 enqueue 修正 agent job agent-brief_k1708_fix-e2b3f0（含 GW 邊界降級未實作、README §11 空 placeholder、MC size 措辭 0.075 三處必修）。worktree dispatch-slot-2-8dda242d-k1708 保留未合併。",
+    "owner": "hourly-slot-1-741484dd5d544845806da1672d6804cd",
+    "actor": "hourly-slot-1-741484dd5d544845806da1672d6804cd",
+    "k_id": "K1708"
   }
 ]
