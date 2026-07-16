@@ -19276,5 +19276,35 @@
     "owner": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
     "commit": null,
     "summary": "餓死孤兒實驗收尾：已建 registered worktree 並 enqueue agent job agent-brief_k1625_closeout-3d866a（opus/xhigh，per model_router）。本班不等待（fire cap 50min < agent 工時）；成果與 worktree 合併由後續 fire PHASE A followup 收。"
+  },
+  {
+    "timestamp": "2026-07-16T20:18:30+08:00",
+    "task_type": "paper_body",
+    "task_id": "abm_p0_5_mechanical_batch",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-957aa2f211884eb686da1bf745527936",
+    "owner": "hourly-slot-1-957aa2f211884eb686da1bf745527936",
+    "commit": null,
+    "summary": "P0-5 機械修正批次收官（餓死 77h 的主線程任務）。盤點 B7+Major 11 條後發現多數已由 ea191161e 修掉，真正殘留 3 條並已修：(1) §3.7 流動性歸因方向倒置——0.13/0.25=52% 是固定流動性下殘存的 crowding 份額，流動性蒸發份額是 48%，原文寫成「52% 由流動性蒸發驅動」方向反了，改寫為 48% 並把 0.13/0.12 兩段拆解寫明；(2) §2.1 seed 說明——brief 要求補 common-random-numbers 配對描述，但查 k1471_vt_crowding_redesign.py:158-166 實情相反（RR_VT 用 offset 7,000,003 刻意與 treatment 不相交），故如實寫「不做 CRN 配對」+ 交代其推論後果（between-sample 而非變異數縮減的配對比較，M=500 且 cell 對比≥0.36 Sharpe 單位下 SE 偏保守）；(3) README key results 對回 k1471_full_results.json——原寫 p≤0.003（實為 RR_VT 的 p 值誤植成 VT）與 RR_VT +0.06~0.09（過時），實測 VT p=0.001 in 5/5、RR_VT +0.080~+0.098 mean +0.091 vs VT mean −0.722；頁數 35→34。驗證：正文所有 headline 數字逐一對過 JSON 全部吻合；xelatex 兩趟 exit=0、34 頁、無 undefined reference；reproduce.py gate 173/173 = 100% GREEN；volpred ops paper-update 同步 pages=34/citations=22。"
+  },
+  {
+    "timestamp": "2026-07-16T20:18:30+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1630",
+    "outcome": "queued",
+    "actor": "hourly-slot-1-957aa2f211884eb686da1bf745527936",
+    "owner": "hourly-slot-1-957aa2f211884eb686da1bf745527936",
+    "commit": null,
+    "summary": "餓死 86h 孤兒實驗收尾：建 registered worktree dispatch-slot-1-957aa2f2-k1630 + enqueue agent job agent-brief_k1630_orphan-a94269（opus/xhigh per model_router）。Brief 要求 results 驗數字 + Codex 二審 + 產 knowledge proposal 檔（agent 禁寫 knowledge.json，K1259）。本班不等待（fire cap 50min < agent 工時）；merge + knowledge 寫入由後續 fire PHASE A followup 收。"
+  },
+  {
+    "timestamp": "2026-07-16T20:18:30+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1649",
+    "outcome": "queued",
+    "actor": "hourly-slot-1-957aa2f211884eb686da1bf745527936",
+    "owner": "hourly-slot-1-957aa2f211884eb686da1bf745527936",
+    "commit": null,
+    "summary": "餓死 86h 孤兒實驗收尾：建 registered worktree dispatch-slot-1-957aa2f2-k1649 + enqueue agent job agent-brief_k1649_orphan-119eee（opus/xhigh per model_router）。同 k1630 契約：驗數字 + Codex 二審 + knowledge proposal 檔，主線程負責寫入。成果由後續 fire PHASE A followup 收。"
   }
 ]

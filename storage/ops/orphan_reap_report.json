@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T11:01:52.658489+00:00",
+  "generated_at": "2026-07-16T12:00:57.297408+00:00",
   "adoptable": [],
   "held": [
     {
@@ -37,21 +37,7 @@
   "orphan_count": 5,
   "adopted": [],
   "applied": true,
-  "job_deliverable_candidates": [
-    {
-      "job_id": "compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380.json",
-      "execution_status": "completed",
-      "paths": [
-        "experiments/k1426/k1426_oos_shard_b.json"
-      ],
-      "existing_paths": [
-        "experiments/k1426/k1426_oos_shard_b.json"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    }
-  ],
+  "job_deliverable_candidates": [],
   "job_deliverable_held": [
     {
       "job_id": "K1694-script-rerun-1211",
@@ -144,22 +130,42 @@
       ]
     }
   ],
-  "job_deliveries": [
-    {
-      "job_id": "compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380",
-      "paths": [
-        "experiments/k1426/k1426_oos_shard_b.json"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "01f2a73ca9edd17ba3c3c738f7d5c9eed1db887d",
-      "reason": "committed"
-    }
-  ],
+  "job_deliveries": [],
   "paper_artifact_collectable": [],
   "paper_artifact_held": [],
   "paper_collections": [],
-  "draft_artifact_collectable": [],
+  "draft_artifact_collectable": [
+    {
+      "path": "storage/drafts/assets/digest_20260716/lazypack/1_concept_today.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/digest_20260716/lazypack/2_method_four_questions.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/digest_20260716/lazypack/3_results_three_events.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/digest_20260716/lazypack/digest20260716_1_concept_today.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/digest_20260716/lazypack/digest20260716_2_method_four_questions.png",
+      "kind": "png",
+      "reason": "untracked"
+    },
+    {
+      "path": "storage/drafts/assets/digest_20260716/lazypack/digest20260716_3_results_three_events.png",
+      "kind": "png",
+      "reason": "untracked"
+    }
+  ],
   "draft_artifact_held": [
     {
       "path": "storage/drafts/assets/event_cpi_20260714_t0/spy_close.csv",
@@ -178,8 +184,21 @@
     }
   ],
   "draft_artifact_skipped": {
-    "grace": 22,
+    "grace": 16,
     "inflight": 0
   },
-  "draft_collections": []
+  "draft_collections": [
+    {
+      "paths": [
+        "storage/drafts/assets/digest_20260716/lazypack/1_concept_today.png",
+        "storage/drafts/assets/digest_20260716/lazypack/2_method_four_questions.png",
+        "storage/drafts/assets/digest_20260716/lazypack/3_results_three_events.png",
+        "storage/drafts/assets/digest_20260716/lazypack/digest20260716_1_concept_today.png",
+        "storage/drafts/assets/digest_20260716/lazypack/digest20260716_2_method_four_questions.png",
+        "storage/drafts/assets/digest_20260716/lazypack/digest20260716_3_results_three_events.png"
+      ],
+      "committed": true,
+      "detail": "[main 2de6cba3b] chore(draft-reap): collect orphaned draft artifacts (6 files)\n 6 files changed, 0 insertions(+), 0 deletions(-)\n create mode 100644 s"
+    }
+  ]
 }

@@ -3,14 +3,14 @@
   "source": "claude_code_jsonl",
   "week_range": "2026-07-12 → 2026-07-19",
   "totals": {
-    "input_tokens": 5938140,
-    "output_tokens": 6627107,
-    "cache_read_tokens": 1557275201,
-    "cache_create_tokens": 52944540,
-    "billable_total": 65509787,
-    "assistant_messages": 9990,
+    "input_tokens": 5938147,
+    "output_tokens": 6628623,
+    "cache_read_tokens": 1558315953,
+    "cache_create_tokens": 53292916,
+    "billable_total": 65859686,
+    "assistant_messages": 9994,
     "unique_sessions": 370,
-    "estimated_cost_usd": 3766.7813
+    "estimated_cost_usd": 3774.9883
   },
   "by_model": {
     "claude-opus-4-7": {
@@ -22,12 +22,12 @@
       "estimated_cost_usd": 188.264
     },
     "claude-opus-4-8": {
-      "input_tokens": 4753017,
-      "output_tokens": 4476161,
-      "cache_read_tokens": 897916122,
-      "cache_create_tokens": 28382361,
-      "messages": 6895,
-      "estimated_cost_usd": 2286.0508
+      "input_tokens": 4753024,
+      "output_tokens": 4477677,
+      "cache_read_tokens": 898956874,
+      "cache_create_tokens": 28730737,
+      "messages": 6899,
+      "estimated_cost_usd": 2294.2578
     },
     "claude-fable-5": {
       "input_tokens": 653367,
@@ -64,35 +64,35 @@
   },
   "by_category": {
     "bash_other": {
-      "input_tokens": 3685068,
-      "output_tokens": 2651978,
-      "cache_read_tokens": 744282679,
-      "cache_create_tokens": 28938053,
-      "messages": 5120,
-      "billable_total": 35275099,
-      "estimated_cost_usd": 1913.1869,
+      "input_tokens": 3685072,
+      "output_tokens": 2652582,
+      "cache_read_tokens": 744628895,
+      "cache_create_tokens": 29285020,
+      "messages": 5122,
+      "billable_total": 35622674,
+      "estimated_cost_usd": 1920.2572,
       "emoji": "💭",
       "description": "其他 Bash 操作"
     },
     "investigation": {
-      "input_tokens": 1068848,
-      "output_tokens": 756201,
-      "cache_read_tokens": 231366145,
-      "cache_create_tokens": 12682527,
-      "messages": 1697,
-      "billable_total": 14507576,
-      "estimated_cost_usd": 657.5944,
+      "input_tokens": 1068849,
+      "output_tokens": 756713,
+      "cache_read_tokens": 231713112,
+      "cache_create_tokens": 12683129,
+      "messages": 1698,
+      "billable_total": 14508691,
+      "estimated_cost_usd": 658.1645,
       "emoji": "🔍",
       "description": "閱讀 / 搜尋檔案"
     },
     "text_only": {
-      "input_tokens": 137088,
-      "output_tokens": 765024,
-      "cache_read_tokens": 139230216,
-      "cache_create_tokens": 3951245,
-      "messages": 717,
-      "billable_total": 4853357,
-      "estimated_cost_usd": 342.3643,
+      "input_tokens": 137090,
+      "output_tokens": 765424,
+      "cache_read_tokens": 139577785,
+      "cache_create_tokens": 3952052,
+      "messages": 718,
+      "billable_total": 4854566,
+      "estimated_cost_usd": 342.9308,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
@@ -336,7 +336,7 @@
       "cache_create_tokens": 13679523,
       "messages": 2080,
       "billable_total": 16229879,
-      "estimated_cost_usd": 933.2102
+      "estimated_cost_usd": 930.2748
     },
     "2026-07-13": {
       "input_tokens": 1943733,
@@ -345,7 +345,7 @@
       "cache_create_tokens": 11818040,
       "messages": 2481,
       "billable_total": 15305358,
-      "estimated_cost_usd": 880.0507
+      "estimated_cost_usd": 877.2825
     },
     "2026-07-14": {
       "input_tokens": 2787100,
@@ -354,7 +354,7 @@
       "cache_create_tokens": 21762711,
       "messages": 4449,
       "billable_total": 27367528,
-      "estimated_cost_usd": 1573.6197
+      "estimated_cost_usd": 1568.6698
     },
     "2026-07-15": {
       "input_tokens": 120092,
@@ -363,32 +363,32 @@
       "cache_create_tokens": 2989881,
       "messages": 532,
       "billable_total": 3589259,
-      "estimated_cost_usd": 206.3807
+      "estimated_cost_usd": 205.7315
     },
     "2026-07-16": {
-      "input_tokens": 6956,
-      "output_tokens": 316422,
-      "cache_read_tokens": 105834618,
-      "cache_create_tokens": 2694385,
-      "messages": 448,
-      "billable_total": 3017763,
-      "estimated_cost_usd": 173.5199
+      "input_tokens": 6963,
+      "output_tokens": 317938,
+      "cache_read_tokens": 106875370,
+      "cache_create_tokens": 3042761,
+      "messages": 452,
+      "billable_total": 3367662,
+      "estimated_cost_usd": 193.0298
     }
   },
   "drilldown": {
     "text_only": {
-      "messages": 9557,
-      "billable_total": 76026950,
+      "messages": 9562,
+      "billable_total": 76723322,
       "length_buckets": [
         {
           "name": "<200 chars",
-          "messages": 8834,
-          "billable_total": 70447987
+          "messages": 8838,
+          "billable_total": 71143150
         },
         {
           "name": "200-800 chars",
-          "messages": 348,
-          "billable_total": 3725017
+          "messages": 349,
+          "billable_total": 3726226
         },
         {
           "name": "800-2000 chars",
@@ -404,13 +404,13 @@
       "reason_groups": [
         {
           "name": "non-text assistant message",
-          "messages": 6061,
-          "billable_total": 47350615
+          "messages": 6064,
+          "billable_total": 47699305
         },
         {
           "name": "other",
-          "messages": 2324,
-          "billable_total": 17425224
+          "messages": 2325,
+          "billable_total": 17771697
         },
         {
           "name": "status/summary",
@@ -424,8 +424,8 @@
         },
         {
           "name": "experiment/result narration",
-          "messages": 228,
-          "billable_total": 1569717
+          "messages": 229,
+          "billable_total": 1570926
         },
         {
           "name": "context/compact",
@@ -456,8 +456,8 @@
       "top_signatures": [
         {
           "name": "(content types: thinking)",
-          "messages": 5566,
-          "billable_total": 43013663
+          "messages": 5569,
+          "billable_total": 43362353
         },
         {
           "name": "(content types: tool_use)",
@@ -517,13 +517,13 @@
       ]
     },
     "bash_other": {
-      "messages": 5585,
-      "billable_total": 43278536,
+      "messages": 5587,
+      "billable_total": 43626111,
       "family_breakdown": [
         {
           "name": "other bash",
-          "messages": 1345,
-          "billable_total": 15941852
+          "messages": 1346,
+          "billable_total": 16288325
         },
         {
           "name": "repo navigation",
@@ -532,8 +532,8 @@
         },
         {
           "name": "inline parsing/json inspection",
-          "messages": 591,
-          "billable_total": 6786900
+          "messages": 592,
+          "billable_total": 6788002
         },
         {
           "name": "log tailing",
@@ -574,8 +574,8 @@
         },
         {
           "name": "TZ='Asia/Taipei'",
-          "messages": 173,
-          "billable_total": 8065532
+          "messages": 174,
+          "billable_total": 8412005
         },
         {
           "name": "uv run python",
@@ -693,9 +693,9 @@
     },
     "cache_diagnostics": {
       "sessions_in_window": 370,
-      "cache_create_tokens": 139645079,
-      "billable_total": 177256392,
-      "cache_create_share_pct": 78.8,
+      "cache_create_tokens": 140687240,
+      "billable_total": 178301454,
+      "cache_create_share_pct": 78.9,
       "top_sessions_by_cache_create": [
         {
           "session_id": "25a39e0f-0980-4766-aee9-2b366d55a049",
@@ -729,6 +729,17 @@
           "cache_create_share_pct": 81.5,
           "first_ts": "2026-07-14T06:44:03.356000+00:00",
           "last_ts": "2026-07-14T17:08:54.254000+00:00"
+        },
+        {
+          "session_id": "d776a899-c34d-467d-b204-79cf6fb66279",
+          "messages": 368,
+          "billable_total": 3060840,
+          "cache_create_tokens": 2658692,
+          "cache_read_tokens": 90231173,
+          "duration_minutes": 319.6,
+          "cache_create_share_pct": 86.9,
+          "first_ts": "2026-07-16T06:38:22.093000+00:00",
+          "last_ts": "2026-07-16T11:57:56.763000+00:00"
         },
         {
           "session_id": "25a39e0f-0980-4766-aee9-2b366d55a049/agent-ak1698-ftd-e1v2-352e2cb4ae30477c",
@@ -773,17 +784,6 @@
           "cache_create_share_pct": 92.1,
           "first_ts": "2026-07-12T10:03:21.821000+00:00",
           "last_ts": "2026-07-12T10:42:33.869000+00:00"
-        },
-        {
-          "session_id": "d776a899-c34d-467d-b204-79cf6fb66279",
-          "messages": 360,
-          "billable_total": 2015778,
-          "cache_create_tokens": 1616531,
-          "cache_read_tokens": 88497238,
-          "duration_minutes": 245.6,
-          "cache_create_share_pct": 80.2,
-          "first_ts": "2026-07-16T06:38:22.093000+00:00",
-          "last_ts": "2026-07-16T10:43:58.765000+00:00"
         },
         {
           "session_id": "40f4b681-da72-483e-a52f-8156c40af7f7",

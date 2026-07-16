@@ -25052,7 +25052,7 @@
     "description": "Follow-up for platform_ops_graphify_codeonly_pilot_20260702. After the 14-day observation window, compare post-install platform_ops/hourly-dispatch token proxy against storage/ops/graphify_codeonly/token_baseline.json. If reduction is <10%, remove the MCP registration and Graphify pilot. If reduction is >=10%, write the knowledge entry and propose expansion. Do not claim before blocked_until expires.",
     "task_type": "platform_ops",
     "priority": 4,
-    "status": "in_progress",
+    "status": "pending",
     "tags": [
       "platform_ops",
       "graphify",
@@ -25081,12 +25081,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-1-6bc163dd4cdf477e8d6f3b57b906dab3"
+      },
+      {
+        "ts": "2026-07-16T11:50:05.907899+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover-slot-1-6bc163dd4cdf477e8d6f3b57b906dab3",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "claimed_by": "codex-failover-slot-1-6bc163dd4cdf477e8d6f3b57b906dab3",
-    "claimed_at": "2026-07-16T09:11:08.866582+00:00",
-    "claim_session_id": "2ec6aff0470d",
-    "started_at": "2026-07-16T09:11:16.512046+00:00"
+    "started_at": "2026-07-16T09:11:16.512046+00:00",
+    "last_released_at": "2026-07-16T11:50:05.907889+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "email-12509-55a736",
@@ -32040,7 +32046,7 @@
     "description": "收尾 experiments/K1649/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：experiments/K1649/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1649'); finished 6.7 days ago; orphan backlog this run: 63 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-12T22:00:14.861047+00:00",
     "dreaming": {
@@ -32048,7 +32054,30 @@
       "pattern_type": "orphaned_experiment",
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-16T12:09:04.965647+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-957aa2f211884eb686da1bf745527936"
+      },
+      {
+        "ts": "2026-07-16T12:09:10.111450+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-957aa2f211884eb686da1bf745527936"
+      },
+      {
+        "ts": "2026-07-16T12:18:36.596054+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-957aa2f211884eb686da1bf745527936"
+      }
+    ],
+    "started_at": "2026-07-16T12:09:10.111431+00:00",
+    "completed_at": "2026-07-16T12:18:36.596035+00:00",
+    "result": "已建 worktree dispatch-slot-1-957aa2f2-k1649 + enqueue agent job agent-brief_k1649_orphan-119eee（opus/xhigh）。收尾同 k1630 契約，由後續 fire PHASE A followup 接。"
   },
   {
     "id": "dreaming_orphaned_experiment_k1630",
@@ -32056,7 +32085,7 @@
     "description": "收尾 experiments/k1630/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：experiments/k1630/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1630'); finished 8.2 days ago; orphan backlog this run: 63 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-12T22:00:14.861047+00:00",
     "dreaming": {
@@ -32064,7 +32093,30 @@
       "pattern_type": "orphaned_experiment",
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-16T12:09:04.691901+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-957aa2f211884eb686da1bf745527936"
+      },
+      {
+        "ts": "2026-07-16T12:09:09.841869+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-957aa2f211884eb686da1bf745527936"
+      },
+      {
+        "ts": "2026-07-16T12:18:36.328545+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-957aa2f211884eb686da1bf745527936"
+      }
+    ],
+    "started_at": "2026-07-16T12:09:09.841853+00:00",
+    "completed_at": "2026-07-16T12:18:36.328532+00:00",
+    "result": "已建 worktree dispatch-slot-1-957aa2f2-k1630 + enqueue agent job agent-brief_k1630_orphan-a94269（opus/xhigh）。收尾（驗數字/Codex 二審/knowledge proposal → 主線程寫入 + merge）由後續 fire PHASE A followup 接。"
   },
   {
     "id": "dreaming_orphaned_experiment_k1625",
@@ -32362,39 +32414,15 @@
   },
   {
     "id": "refactor-lazypack-deterministic-renderer",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "3-STRIKE 重構：懶人包 renderer 改為確定性模板（LLM 只產內容，不產程式）",
     "priority": 1,
     "source": "telegram-boss-msg640",
-    "status": "succeeded",
     "created_at": "2026-07-13T06:47:00.558143+00:00",
-    "title": "3-STRIKE 重構：懶人包 renderer 改為確定性模板（LLM 只產內容，不產程式）",
-    "description": "Root cause（老闆 msg 632/635/640 追問的底層問題）：lazypack 目前把「畫圖」外包給 LLM 寫 render script（scripts/gen_lazypack_codex.py），每次 render 都要 codex/Fable 現寫一份 matplotlib 程式，成敗取決於模型肯不肯交稿；codex 常把 1200s 花在核對 evidence 而不寫檔 → timeout rc=2（2026-07-13 mile_b6a46796 最新一次；同 root 已 ≥3 次）。加 fallback writer / 調 timeout 都是 surface patch。\n\nDomain model 錯在：panel 的內容（標題、數字、bullet）是**資料**，版面是**固定模板** — 沒有任何理由每次重寫程式。\n\n重構（三層）：\n1. 底層邏輯：plan.json（已含 panel spec + evidence JSON path）→ 直接餵給 repo 內確定性 renderer；LLM 只負責產 plan（內容/文案），不產程式碼。\n2. 流程：render 從「20 分鐘 LLM 賭博 + repair rounds」變成「秒級確定性執行」；layout guard 由 renderer 內建（自動縮字/換行/擴 card），不再靠 repair round 修 LLM 寫壞的版面。\n3. 架構：新 scripts/lazypack_render.py（template engine：concept / method / results 三種 panel type，吃 spec dict），gen_lazypack_codex.py 的 codex-writes-code 路徑降級為 legacy 並移出主線。\n\n驗收：mile_b6a46796 + mile_a8d79d6a 兩篇用新 renderer 出圖成功、layout guard 通過、無任何 LLM 呼叫；regression test 覆蓋「plan 缺欄位 → 明確 raise」與「長中文標題不溢出」。完成後 docs/error_log.md 標 3-STRIKE TRIGGER。",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-13T10:59:45.462428+00:00",
-    "claim_session_id": "104fd3e2a720",
-    "status_history": [
-      {
-        "ts": "2026-07-13T10:59:45.462445+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T10:59:45.755880+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T11:49:09.461371+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-13T10:59:45.755866+00:00",
     "completed_at": "2026-07-13T11:49:09.461356+00:00",
-    "result": "完成 strict plan.json + hash-pinned evidence 的確定性 renderer 與 async job 隔離／fresh receipt cutover，主路徑零 LLM、零 repair。遷移並重畫 mile_b6a46796 與 mile_a8d79d6a 共 7 張；121+50 項回歸、layout/視覺檢查與獨立 code review 全通過。"
+    "tombstone": true,
+    "archived_at": "2026-07-16T12:08:13.781795+00:00"
   },
   {
     "id": "platform-ops-deliverable-autocommit",
@@ -32548,14 +32576,37 @@
     "title": "paper_body P0-5: 機械修正批次（B7 + Major 群）",
     "description": "abstract 因式分解（7x27x500）、§2.1 補 K1471 grid 描述、52%→48%（或統一 'approximately half'）、14,000/10,500 口徑、phi=100% accounting 重定義、'heterogeneous'→'heterogeneous types'、Kyle 頁碼、bib 排序、README metadata、§2.1 補 coherent-block 描述與 common-random-numbers seed pairing、加一句多重檢定（Bonferroni(35) 下 p=0.001 仍過）。 主線程執行（平台規則：論文 .tex 不派 background agent）。Brief=paper/vt-crowding-abm/review_history/fable_deep_review_20260711/README.md §5。父任務 fable0711_abm_honesty_pass 的第 N 段；完成後 xelatex 編譯 + uv run volpred ops paper-update --paper-id vt-crowding-abm。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_body",
     "topology": "inline",
     "source": "decompose:fable0711_abm_honesty_pass",
     "parent_task_id": "fable0711_abm_honesty_pass",
     "series_order": 4,
     "paper_id": "vt-crowding-abm",
-    "created_at": "2026-07-13T07:10:29+00:00"
+    "created_at": "2026-07-13T07:10:29+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-16T12:09:05.233015+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-957aa2f211884eb686da1bf745527936"
+      },
+      {
+        "ts": "2026-07-16T12:09:10.382173+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-957aa2f211884eb686da1bf745527936"
+      },
+      {
+        "ts": "2026-07-16T12:18:36.055168+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-957aa2f211884eb686da1bf745527936"
+      }
+    ],
+    "started_at": "2026-07-16T12:09:10.382153+00:00",
+    "completed_at": "2026-07-16T12:18:36.055148+00:00",
+    "result": "P0-5 收官：殘留 3 條全修（§3.7 52%→48% 歸因方向倒置；§2.1 如實寫明不做 CRN seed 配對 + 推論後果；README key results 對回 JSON、頁數 35→34）。xelatex 34 頁 exit=0、reproduce gate 173/173 GREEN、paper-update 已同步。剩 v6 跨模型 review → QF compliance gate。"
   },
   {
     "id": "telegram-647",
@@ -32595,32 +32646,15 @@
   },
   {
     "id": "k628b_fake_gfevd_label_rerun",
-    "title": "K628b 掛假 GFEVD 標籤：註解寫 Pesaran-Shin，實際呼叫 statsmodels Cholesky .fevd() — 方向性結論需用真 KPPS 重跑",
-    "description": "K865b class sweep 查出。experiments/k628b/k628b_vol_spillover.py:282 docstring 宣稱 'generalized FEVD'，:299 卻直接 results.fevd(h)（statsmodels = Cholesky，無內建 GFEVD）。其 directional spillover 因此排序相依，且假標籤會誤導下游。**K628b 被 live 文章 mile_1597b341 引用**故列 P1。做法：照 experiments/k865b/k865b_gfevd_robustness.py 的手刻 KPPS（sigma_u + ma_rep）重算 directional，比對原結論；若方向性翻掉 → 回溯更正 knowledge K628b + mile_1597b341。註：k628b 的 TRANSMITTER/RECEIVER 角色標籤來自 Granger network（out-in degree），不受排序影響，該部分可能倖存 — 需分別確認。修好後從 storage/ops/fevd_ordering_baseline.json 移除該站點（ratchet test 會擋）。",
-    "task_type": "experiment",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "K628b 掛假 GFEVD 標籤：註解寫 Pesaran-Shin，實際呼叫 statsmodels Cholesky .fevd() — 方向性結論需用真 KPPS 重跑",
+    "priority": 1,
     "source": "agent_discovered",
     "created_at": "2026-07-13T16:55:00+08:00",
-    "claimed_by": "hourly-18",
-    "claimed_at": "2026-07-13T10:13:00.359584+00:00",
-    "claim_session_id": "888bb24adc57",
-    "status_history": [
-      {
-        "ts": "2026-07-13T10:13:00.359600+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-18"
-      },
-      {
-        "ts": "2026-07-13T11:21:16.428446+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "hourly-18"
-      }
-    ],
     "completed_at": "2026-07-13T11:21:16.428432+00:00",
-    "result": "KPPS GFEVD 重估完成：SPY +43.7→+14.6pp（方向存活、量級為排序假象）、USO 角色翻盤。knowledge + 2 篇文章已回溯更正並同步上線；FEVD ratchet 綠。"
+    "tombstone": true,
+    "archived_at": "2026-07-16T12:08:13.781795+00:00"
   },
   {
     "id": "k1025_family_cholesky_fevd_ordering",
@@ -32844,31 +32878,15 @@
   },
   {
     "id": "telegram-669",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 669）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-13T11:11:25.113417+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 669）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你不是說你修好了嗎？為什麼在你說修好之後還一直寄來？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "claimed_by": "telegram-responder",
-    "claimed_at": "2026-07-13T11:13:36.635256+00:00",
-    "claim_session_id": "8c5382132ac4",
-    "status_history": [
-      {
-        "ts": "2026-07-13T11:13:36.635273+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-13T11:22:40.146854+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-13T11:22:40.146840+00:00"
+    "completed_at": "2026-07-13T11:22:40.146840+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-16T12:08:13.781795+00:00"
   },
   {
     "id": "ci-parity-local-only-paths",
@@ -35472,13 +35490,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T11:01:58.036951+00:00",
+    "completed_at": "2026-07-16T12:01:03.001215+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T11:01:58.036951+00:00",
-      "last_clean_observed_at": "2026-07-16T11:01:58.036951+00:00"
+      "resolved_at": "2026-07-16T12:01:03.001215+00:00",
+      "last_clean_observed_at": "2026-07-16T12:01:03.001215+00:00"
     }
   },
   {
@@ -35490,13 +35508,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T11:22:51.633320+00:00",
+    "completed_at": "2026-07-16T12:20:01.300076+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T11:22:51.633320+00:00",
-      "last_clean_observed_at": "2026-07-16T11:22:51.633320+00:00"
+      "resolved_at": "2026-07-16T12:20:01.300076+00:00",
+      "last_clean_observed_at": "2026-07-16T12:20:01.300076+00:00"
     }
   },
   {
