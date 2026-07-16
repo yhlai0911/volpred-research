@@ -33101,56 +33101,15 @@
   },
   {
     "id": "trending_repost_2026_07_14_ai資本",
-    "title": "[trending_repost] AI變現挑戰：從期權波動率解析科技巨頭的資本定價分歧",
-    "description": "隨著市場對 AI 變現速度的審視，高額資本支出面臨考驗。可量化角度：分析美股七巨頭的歷史 CapEx 宣告日前後，其隱含波動率（IV）與歷史波動率（HV）的溢價擴張程度。",
-    "task_type": "trending_repost",
-    "priority": 1,
     "status": "failed",
-    "created_at": "2026-07-13T22:00:27+00:00",
+    "task_type": "trending_repost",
+    "title": "[trending_repost] AI變現挑戰：從期權波動率解析科技巨頭的資本定價分歧",
+    "priority": 1,
     "source": "reader_facing_refill",
-    "tags": [
-      "trending_repost",
-      "reader_facing",
-      "auto_refill"
-    ],
-    "dedup_screen": {
-      "verdict": "clean",
-      "reason": "no K coverage, no arc dup, theme saturation 4 < 5",
-      "saturation": 4,
-      "theme_terms": [
-        "美股",
-        "trending",
-        "分析",
-        "科技",
-        "歷史",
-        "資本"
-      ],
-      "near_misses": [],
-      "screened_at": "2026-07-13T22:00:28+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-13T22:14:05.545006+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-06"
-      },
-      {
-        "ts": "2026-07-13T22:14:05.820085+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-06"
-      },
-      {
-        "ts": "2026-07-13T22:29:27.798427+00:00",
-        "from": "in_progress",
-        "to": "failed",
-        "by": "hourly-06"
-      }
-    ],
-    "started_at": "2026-07-13T22:14:05.820066+00:00",
+    "created_at": "2026-07-13T22:00:27+00:00",
     "completed_at": "2026-07-13T22:29:27.798408+00:00",
-    "result": "REJECTED as narrative-arc duplicate（主線程 3-layer 查重，layer-2 grep feed）。同 arc「AI 資本支出 × 波動率定價」的 general 文章已有 5 篇：mile_f5f4cb43 / mile_8a5e80b0 / mile_49616ac2 / mile_622a2b73 / mile_ed9e4626。本題（七巨頭 CapEx 宣告日前後 IV/HV 溢價）是換外殼的第 6 篇，per memory feedback_narrative_arc_dedup 判定重複，不寫。兩道 gate（生成端 dedup_screen + pre-write CLI）都誤放行 → 已根治，見 commit ecc5e9bc7 + error_log 2026-07-14 06:20（STRIKE 2）。"
+    "tombstone": true,
+    "archived_at": "2026-07-16T23:07:57.792189+00:00"
   },
   {
     "id": "trending_repost_2026_07_14_replacement",
@@ -34699,13 +34658,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T22:01:08.013021+00:00",
+    "completed_at": "2026-07-16T23:00:50.767195+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T22:01:08.013021+00:00",
-      "last_clean_observed_at": "2026-07-16T22:01:08.013021+00:00"
+      "resolved_at": "2026-07-16T23:00:50.767195+00:00",
+      "last_clean_observed_at": "2026-07-16T23:00:50.767195+00:00"
     }
   },
   {
@@ -34717,13 +34676,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T22:57:44.547508+00:00",
+    "completed_at": "2026-07-16T23:14:21.230744+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T22:57:44.547508+00:00",
-      "last_clean_observed_at": "2026-07-16T22:57:44.547508+00:00"
+      "resolved_at": "2026-07-16T23:14:21.230744+00:00",
+      "last_clean_observed_at": "2026-07-16T23:14:21.230744+00:00"
     }
   },
   {

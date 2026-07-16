@@ -20498,5 +20498,14 @@
     "owner": "hourly-slot-1-741484dd5d544845806da1672d6804cd",
     "actor": "hourly-slot-1-741484dd5d544845806da1672d6804cd",
     "k_id": "K1708"
+  },
+  {
+    "timestamp": "2026-07-17T07:26:00+08:00",
+    "task_type": "experiment",
+    "task_id": "agent-brief_k1708_fix-e2b3f0",
+    "outcome": "succeeded",
+    "summary": "PHASE A split_required 處理：K1708 修正 agent job 逾時（5279s，exit 1），但 runner 報 artifact_ok=true 是假象 —— K1708_results.json 的 code_trace sha256=1b374a4(89369B) 與現行 K1708.py sha256=43bffdd(91752B) 不符，即 agent 先跑完全樣本(generated_at 22:11Z, runtime 1546s)、之後又改了 K1708.py(06:46)、只來得及跑 quick mode 就被砍。該份 full-run 數字相對最終程式碼已過期，provenance trace 自相矛盾，不可直接驗數字/Codex審/merge。依 split_contract 切 2 個 bounded child stages（均帶 parent_timeout_job_id + distinct split_stage + 單一 artifact + timeout<5400）：(1) k1708-split-verify-freeze [xhigh, 2400s] 獨立查核兩個 BLOCKER 修正、跑測試、查新 look-ahead、凍結 sha256、刪 quick-mode 殘留 → K1708_verify_report.json；(2) k1708-split-gated-rerun [high, 5100s] 以 verify report verdict=PASS + sha256 相符為 gate，通過才用凍結程式碼重跑全樣本並對帳 verdict 是否翻轉 → K1708_rerun_report.json。compute worker 單線程 FIFO 保證順序。Codex re-review + merge + knowledge 刻意留到數字為真之後（審過期數字正是上一輪失守處）。partial outputs 全數保留未重做。",
+    "owner": "hourly-slot-1-173998aa607741c0b36cfa9c3c0d0539",
+    "actor": "hourly-slot-1-173998aa607741c0b36cfa9c3c0d0539"
   }
 ]
