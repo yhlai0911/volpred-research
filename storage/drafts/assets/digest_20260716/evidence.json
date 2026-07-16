@@ -1,0 +1,129 @@
+{
+  "generated_at_taipei": "2026-07-16 (data as of latest available close)",
+  "data_source": "Yahoo Finance via yfinance, auto_adjust=True, daily close",
+  "tickers": {
+    "vix": "^VIX",
+    "ovx": "^OVX",
+    "wti": "CL=F"
+  },
+  "sample": {
+    "vix": {
+      "start": "2025-02-03",
+      "end": "2026-07-15",
+      "n": 364
+    },
+    "ovx": {
+      "start": "2025-02-03",
+      "end": "2026-07-15",
+      "n": 363
+    },
+    "wti": {
+      "start": "2026-05-01",
+      "end": "2026-07-16",
+      "n": 52
+    }
+  },
+  "latest": {
+    "vix_close": 15.67,
+    "vix_date": "2026-07-15",
+    "ovx_close": 58.96,
+    "ovx_date": "2026-07-15",
+    "wti_close": 79.5,
+    "wti_date": "2026-07-16",
+    "vix_recent_high_close": 17.16,
+    "vix_recent_high_date": "2026-07-13",
+    "ovx_recent_high_close": 60.25,
+    "ovx_recent_high_date": "2026-07-13"
+  },
+  "half_life_definition": "baseline = 事件起始日前 20 個交易日收盤中位數; peak = 事件窗口內最高收盤; half_level = (peak+baseline)/2; half_life = 峰值日之後首次收盤 < half_level 所需交易日數。補充指標: sustained_half_life = 首次收破 half_level 且此後不再收回其上; return_to_baseline = 峰值後首次收盤 <= baseline 所需交易日數",
+  "events": [
+    {
+      "event_start": "2025-04-02",
+      "window": [
+        "2025-04-01",
+        "2025-07-31"
+      ],
+      "baseline_median_20d_pre_event": 21.74,
+      "peak_close": 52.33,
+      "peak_date": "2025-04-08",
+      "half_level": 37.03,
+      "half_life_trading_days": 1,
+      "half_life_hit_date": "2025-04-09",
+      "completed": true,
+      "sustained_half_life_trading_days": 4,
+      "sustained_half_life_date": "2025-04-14",
+      "return_to_baseline_trading_days": 23,
+      "return_to_baseline_date": "2025-05-12",
+      "days_elapsed_since_peak": 318,
+      "label": "2025-04 關稅戰"
+    },
+    {
+      "event_start": "2026-06-05",
+      "window": [
+        "2026-06-01",
+        "2026-07-10"
+      ],
+      "baseline_median_20d_pre_event": 16.89,
+      "peak_close": 22.22,
+      "peak_date": "2026-06-10",
+      "half_level": 19.55,
+      "half_life_trading_days": 1,
+      "half_life_hit_date": "2026-06-11",
+      "completed": true,
+      "sustained_half_life_trading_days": 1,
+      "sustained_half_life_date": "2026-06-11",
+      "return_to_baseline_trading_days": 3,
+      "return_to_baseline_date": "2026-06-15",
+      "days_elapsed_since_peak": 23,
+      "label": "2026-06 中東衝突"
+    },
+    {
+      "event_start": "2026-07-13",
+      "window": [
+        "2026-07-13",
+        "2026-07-15"
+      ],
+      "baseline_median_20d_pre_event": 16.74,
+      "peak_close": 17.16,
+      "peak_date": "2026-07-13",
+      "half_level": 16.95,
+      "half_life_trading_days": 1,
+      "half_life_hit_date": "2026-07-14",
+      "completed": true,
+      "sustained_half_life_trading_days": 1,
+      "sustained_half_life_date": "2026-07-14",
+      "return_to_baseline_trading_days": 1,
+      "return_to_baseline_date": "2026-07-14",
+      "days_elapsed_since_peak": 2,
+      "label": "2026-07 油市衝擊"
+    }
+  ],
+  "supplementary_ovx_event": {
+    "event_start": "2026-07-13",
+    "window": [
+      "2026-07-13",
+      "2026-07-15"
+    ],
+    "baseline_median_20d_pre_event": 47.27,
+    "peak_close": 60.25,
+    "peak_date": "2026-07-13",
+    "half_level": 53.76,
+    "half_life_trading_days": null,
+    "half_life_hit_date": null,
+    "completed": false,
+    "sustained_half_life_trading_days": null,
+    "sustained_half_life_date": null,
+    "return_to_baseline_trading_days": null,
+    "return_to_baseline_date": null,
+    "days_elapsed_since_peak": 2,
+    "label": "2026-07 油市衝擊（OVX，補充）"
+  },
+  "caveats": [
+    "2025-04 關稅戰：依定義的首次跌破 half_level 只花 1 天（4/9 暫停關稅 90 天消息使 VIX 單日崩落），但 4/10、4/11 又收回 half_level 之上，持續性跌破（sustained）為 4 天，回到基線更需 23 個交易日。首次跌破指標對單日政策反轉敏感。",
+    "VIX/OVX 最新收盤為 2026-07-15（美股 7/16 尚未收盤）；WTI (CL=F) 最新值為 2026-07-16 盤中/最近成交價。",
+    "任務假設 2026-07-15 有 VIX 峰值，但實際資料顯示 VIX 近期高點在 2026-07-13（收 17.16），且 7/15 收 15.67 已低於事件前基線水準；本次事件的波動率衝擊主要體現在 OVX（原油波動率），非 VIX。",
+    "2026-07 事件的 VIX 峰值僅高於基線 2.5%，spike 幅度極小，半衰期 1 天在統計上意義有限（雜訊等級），解讀需保守。",
+    "OVX 半衰期尚未完成：峰值 60.25（2026-07-13），half_level=53.76，截至 2026-07-15 收 58.96 仍在其上；進行中，目前已 2 個交易日。",
+    "2026-06 中東衝突的 VIX 峰值 22.22（2026-06-10）僅高於基線 31.6%，屬中等偏小的 spike（對比 2025-04 關稅戰峰值高於基線 141%）。"
+  ]
+}

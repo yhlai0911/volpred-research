@@ -185,6 +185,9 @@ paths:
    - `grep -i "關鍵詞" storage/reports/feed.json | head` 或
    - LanceDB semantic search（dist < 0.45 視為 hard duplicate，需換角度或放棄）
 6. **數字必對齊實驗檔**：文章中每個統計量要能 byte-for-byte 對應到 `experiments/kXXX/kXXX_results.json` 或公開數據源。
+   - **跨時點硬規則**：每個市場序列都要標自己的 as-of。若最新事件發生在某市場最後收盤之後，該收盤只能描述「事件前定價」，禁止寫成市場已消化／忽略／回應最新事件；等下一個完整收盤再更新。事件後若創新峰，半衰期等 path-dependent 指標必須從新峰重算。
+   - **樣本與視窗分開**：全樣本起訖／筆數不可套到 rolling-window 係數上；引用 60 日、120 日等局部統計時，正文必須明寫視窗。
+   - **門檻逐值核對**：聲稱某 trigger 已觸發時，正文同時列出 canonical 門檻與目前值；只寫「回到前高」等模糊口徑不得發佈。
 7. **所有讀者向文章都必跑 `anti-ai-style`**：
    - `feed-publisher` / `trending_repost` / `daily_article` / 社群貼文文案，全部都要 co-run `.claude/skills/anti-ai-style/SKILL.md`
    - 若仍有明顯 AI 味、翻譯腔、套路式昇華、空泛評論，**不得 publish**
