@@ -32636,39 +32636,15 @@
   },
   {
     "id": "k1025_family_cholesky_fevd_ordering",
-    "title": "K1025 家族排序假象：k1025 / k1025_v2 / k1025b 用 Cholesky FEVD 下方向性結論（v3 已自行改用 KPPS）",
-    "description": "K865b class sweep 查出。experiments/k1025/k1025.py、k1025_v2.py、k1025b/k1025b.py 皆 Cholesky FEVD + NET transmitter/receiver 結論，未做排序置換。注意 k1025_v3 已手刻 KPPS（sigma_u + ma_rep）→ 可能 v1/v2 的結論已被 v3 取代。做法：(1) 先查 knowledge K1025 / K1025b 現行 entry 引用的是哪一版數字；(2) 若引用 v1/v2 的方向性數字 → 用 v3 的 KPPS 結果回溯更正；(3) 若 v3 已取代 → 把 v1/v2 標 SUPERSEDED 並從 fevd_ordering_baseline.json 移除。ratchet test = scripts/tests/test_fevd_ordering_ratchet.py。",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "K1025 家族排序假象：k1025 / k1025_v2 / k1025b 用 Cholesky FEVD 下方向性結論（v3 已自行改用 KPPS）",
+    "priority": 2,
     "source": "agent_discovered",
     "created_at": "2026-07-13T16:55:00+08:00",
-    "claimed_by": "hourly-23",
-    "claimed_at": "2026-07-13T15:08:46.599814+00:00",
-    "claim_session_id": "b83c0ea43da5",
-    "status_history": [
-      {
-        "ts": "2026-07-13T15:08:46.599829+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-23"
-      },
-      {
-        "ts": "2026-07-13T15:08:46.870844+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-23"
-      },
-      {
-        "ts": "2026-07-13T16:29:07.340633+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-23"
-      }
-    ],
-    "started_at": "2026-07-13T15:08:46.870827+00:00",
     "completed_at": "2026-07-13T16:29:07.340615+00:00",
-    "result": "K1025b v2 KPPS 重估推翻發表結論『BTC 淨接收者 -76.64pp』：三缺陷中 FEVD 陣列誤切是主因，Cholesky 排序（本次觸發點）反而最小。order-invariant NET_BTC=+2.70pp（翻號、縮 28 倍，p=0.005 vs no-contagion null），誠實讀法=不可反稱淨傳播者（rolling 65% 視窗為負、符號不穩）。回溯更正已落地：main.tex 撤回 net-receiver 敘事+新增 Erratum、reproduce.py 投稿 gate 從假象值改綁 KPPS(35/35 green)、research_program 標撤回、baseline 4->1 站點、ratchet 2 passed、論文已 sync 平台。Reviewer=code-reviewer subagent fallback CONDITIONAL PASS，5 條件全修（含 Critical: k1025b.py 會覆寫發表紀錄->加 write guard）。knowledge=e3e4b1fa。Codex primary-path 二次驗證已入池。"
+    "tombstone": true,
+    "archived_at": "2026-07-16T17:07:58.828831+00:00"
   },
   {
     "id": "telegram-653",
@@ -32696,43 +32672,15 @@
   },
   {
     "id": "alert_content_quality_20260713",
-    "title": "[alert] 內容品質巡檢：發文間隔過久",
-    "description": "由 alert `content_quality` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n## 觸發條件\n- 發文節奏: 發文空窗 — 距最新發文 388.66min > 6.0h 門檻（作用窗 TPE hour=17）\n- (context) 文章配套完整度: 1/12 篇缺圖表或來源 marker（heuristic，可能含 frontend-rendered chart 誤判，供人工複查）\n\n## 影響\n內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\n\n## 建議行動（主線程 auto-remediation）\n1. 同一天出現超過一篇每日精選導讀 → 檢視 `storage/ops/content_quality_report.json` items，挑 1 篇 retract：`uv run volpred ops unpublish --mile-id <id>`；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\n2. 發文太密集 → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\n3. 發文間隔過久 → 立即 `release-pool-by-settings` 或派 fresh-arc 日常文章 補位；同時查 release deadlock (`docs/refactor_plan_release_layer_deadlock.md`)。\n4. 標題前綴重複 → 前端 header 與 title 擇一移除前綴；前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。\n5. 懶人包覆蓋不足 → 針對 missing_examples 走 `lazypack-infographic`/NotebookLM 生圖，append `## 懶人包圖組` 後 用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。",
-    "task_type": "governance",
-    "priority": 2,
     "status": "succeeded",
-    "created_at": "2026-07-13T09:00:44.564693+00:00",
+    "task_type": "governance",
+    "title": "[alert] 內容品質巡檢：發文間隔過久",
+    "priority": 2,
     "source": "alert_remediation_bridge",
-    "tags": [
-      "alert",
-      "content_quality"
-    ],
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-13T16:02:47.268292+00:00",
-    "claim_session_id": "f4008f636223",
-    "status_history": [
-      {
-        "ts": "2026-07-13T16:02:47.268311+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T16:02:47.544285+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T16:16:00.946726+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-13T16:02:47.544270+00:00",
+    "created_at": "2026-07-13T09:00:44.564693+00:00",
     "completed_at": "2026-07-13T16:16:00.946711+00:00",
-    "result": "原 6h 發文空窗已由排程自然解除；目前 release_due=false、無 deadlock，故未強制插播。根因修正 daily_update 短版持倉文固定標示 yfinance／主計總處／VolPred 來源，62 項相關測試通過；mile_0363ef48 已走正式 update + feed-sync（failed=0），公開 API 與 content-quality 12/12 均驗證通過。另發現下一輪 preview 會讓 EP4 早於未發布 EP3，應另做 episode-aware release ordering P2。"
+    "tombstone": true,
+    "archived_at": "2026-07-16T17:07:58.828831+00:00"
   },
   {
     "id": "telegram-660",
@@ -35255,13 +35203,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T16:00:49.393563+00:00",
+    "completed_at": "2026-07-16T17:00:55.125144+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T16:00:49.393563+00:00",
-      "last_clean_observed_at": "2026-07-16T16:00:49.393563+00:00"
+      "resolved_at": "2026-07-16T17:00:55.125144+00:00",
+      "last_clean_observed_at": "2026-07-16T17:00:55.125144+00:00"
     }
   },
   {
@@ -35273,13 +35221,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T16:21:46.543320+00:00",
+    "completed_at": "2026-07-16T17:16:19.419511+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T16:21:46.543320+00:00",
-      "last_clean_observed_at": "2026-07-16T16:21:46.543320+00:00"
+      "resolved_at": "2026-07-16T17:16:19.419511+00:00",
+      "last_clean_observed_at": "2026-07-16T17:16:19.419511+00:00"
     }
   },
   {
@@ -41261,5 +41209,39 @@
     "created_by": "hourly-slot-1-63816151dde64af1acfec8a4e532c8b4",
     "title": "K1426 OOS 殘留：GLD/IAU 資料缺 + return-OLS vs PCH 配對檢定 + oos.py docstring 修正",
     "description": "K1426 OOS 已收尾為 NULL（PCH 對報酬避險相對報酬 OLS 無增益，見 experiments/k1426/README.md 『OOS 結果（2026-07-17 收尾）』）。以下殘留不改變該 null 判定，但為完整性應補：\n(1) pair_3 GLD/IAU 在 shard_b 因 yfinance 回空而無資料 → 重抓後跑 oos.py 單 pair + oos_return_benchmark.py，補進 merged 結果。\n(2) return-OLS vs PCH 目前只有點估計（HE 差 ≤0.0005），無配對 DM/bootstrap，因為 k1426_oos_results.json 未存 PCH 每日避險報酬序列且 refit_snapshots 只留 head。若要正式的等價性宣稱，需重跑 PCH MLE 並保留每日 hedged return 序列（走 compute_queue，原 parent job 曾 6h timeout，務必分 shard）。\n(3) oos.py:8,273,345 docstring 仍寫 21 日/monthly refit，實際預設 refit_every=63（季度）→ reproducibility metadata 錯誤，修正 docstring。merge_shards.py 已在合併輸出更正該註記。\n來源：Codex 審查 oos_return_benchmark.py 時提出的 Critical/High/Low findings。"
+  },
+  {
+    "id": "assign_quota_requeue_agentjobs",
+    "title": "compute queue: quota-blocked agent job 應自動重排，而非當成研究失敗燒掉一個 fire",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "discovered",
+    "created_at": "2026-07-16T17:11:07.713254+00:00",
+    "created_by": "hourly-slot-1-b653f182d0764cffab917bf659127739",
+    "description": "2026-07-16 20:45-22:00 CST 連 5 個 agent job 全掛在同一面牆：'You've hit your session limit · resets 10:20pm'。agent 一啟動就被打回，零 token、零運算、worktree 未動。\n\n根因：run_agent_job.py 已正確把它分類成 failure_class=quota，但 compute_queue._pending_followup_view 只對 auth 特判，quota 落到泛用 triage_failed brief（『去 worktree 看看留下什麼』）——那裡什麼都沒有。等於每個 quota 死掉的 job 都要燒掉一整個 fire 去發現『它從沒跑過』，×5。\n\n修法：quota 是時鐘問題不是動作問題（failure_class 模組 docstring 已明說），queue 自己按時間重排即可，不需要 fire 介入。",
+    "status_history": [
+      {
+        "ts": "2026-07-16T17:11:07.979987+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-b653f182d0764cffab917bf659127739"
+      },
+      {
+        "ts": "2026-07-16T17:11:08.225642+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-b653f182d0764cffab917bf659127739"
+      },
+      {
+        "ts": "2026-07-16T17:15:18.866396+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-b653f182d0764cffab917bf659127739"
+      }
+    ],
+    "started_at": "2026-07-16T17:11:08.225624+00:00",
+    "completed_at": "2026-07-16T17:15:18.866377+00:00",
+    "result": "quota-blocked agent job 改由 queue 自動按時鐘重排（not_before + 16 次上限），不再偽裝成研究失敗燒 fire；新增 requeue CLI（只收 auth/quota）；11 新測試全過；5 個受害 job 已回 queued，pending-followup 6→1"
   }
 ]

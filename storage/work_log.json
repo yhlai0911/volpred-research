@@ -19366,5 +19366,14 @@
     "actor": "hourly-slot-1-63816151dde64af1acfec8a4e532c8b4",
     "owner": "hourly-slot-1-63816151dde64af1acfec8a4e532c8b4",
     "summary": "K1426 OOS 收尾 = NULL。3 個 shard 到齊後以新增的 merge_shards.py（idempotent）合併為 k1426_oos_results.json。表面判準顯示 PCH 在 2/6 pairs 兩 gate 皆過（USO/BNO +0.0791 t=-6.70；GLD/SLV +0.3622 t=-6.53），但那是 benchmark 假象：fit_ols_hedge 在 log 價格水準回歸得共整合 beta，oos.py:200 卻拿去避險日報酬。以相同 OOS 協定補上報酬迴歸對照組（oos_return_benchmark.py，levels 臂逐字複製原數字、樣本數相符）後，PCH 的 beta 就是報酬迴歸 beta（差 0.0001~0.0072），HE 差全部 ≤0.0005（GLD/SLV 0.6027 vs 0.6027）。故 PCH 對報酬避險無增益 → multivariate PCH 否決。pair_3 GLD/IAU 因 yfinance 回空無資料（非 null result，照實記）。Codex 審 oos_return_benchmark.py：lookahead/公平比較 PASS；採納其收斂修正（levels OLS 仍是有效的共整合估計量控制組，不宜稱純 straw man）與 Critical finding（return-OLS vs PCH 僅點估計，artifact 未存 PCH 每日避險報酬序列 → 無法配對檢定）。殘留開 assign_k1426_oos_residuals（GLD/IAU 補抓、配對檢定、oos.py docstring 21日/63日 矛盾修正）。followup 已 mark-followup-dispatched。"
+  },
+  {
+    "task_type": "platform_ops",
+    "task_id": "assign_quota_requeue_agentjobs",
+    "timestamp": "2026-07-17T01:15:03.904372+08:00",
+    "actor": "hourly-slot-1-b653f182d0764cffab917bf659127739",
+    "owner": "hourly-slot-1-b653f182d0764cffab917bf659127739",
+    "topology_override": "subagent→inline（platform_ops 預設 subagent；診斷已在主線程手上，轉述 brief 比直接改貴）",
+    "summary": "compute queue：quota-blocked agent job 改為自動重排，不再當成研究失敗。根因：2026-07-16 20:45-22:00 CST session 額度用完，接連 5 個 agent job（k1708 + k1625/k1630/k1649/k1678 closeout）都在啟動後 ~5 秒被 CLI 以 'You've hit your session limit · resets 10:20pm' 打回 —— 零運算、零 token、worktree 未動。run_agent_job.py 自 2026-07-14 起已把這類死法正確標成 failure_class=quota 並寫進 receipt，但沒有任何 reader：compute_queue._pending_followup_view 只對 auth 特判，quota 落到泛用 triage_failed brief（『去 worktree 看看留下什麼』），而那裡什麼都沒有 → 5 個 fire 各燒一整班去重新發現同一個時鐘。修法（quota 是時鐘問題不是動作問題，failure_class docstring 已明說）：(1) run_next 失敗路徑改呼叫 _requeue_quota_blocked() → status 退回 queued、清掉沒發生過的 exit_code/started_at/completed_at、保留 queued_at（不排到隊尾）、設 not_before=+30min；(2) run_next 選 job 時 honour not_before（_sleeping_until，parse 失敗 warn 後視同不限制，避免壞 timestamp 把 job 永久卡死，依 no-silent-fallback.md Pattern B）；(3) 耐心有限 QUOTA_REQUEUE_MAX=16 × 30min ≈ 8h — 週/月額度撐不過去時才真的 failed，且 triage brief 改寫成 quota 專用（明說沒有東西可 salvage、別記研究結論）；(4) 新增 `requeue --id` CLI，只收 failure_class ∈ {auth, quota} 的 failed job（只有這兩類保證 agent 從沒啟動、worktree 乾淨），其餘一律拒絕以免與 salvage 競態。驗證：新增 scripts/tests/test_compute_queue_quota_requeue.py 11 tests 全過（含 run_next 端到端接線、not_before skip、壞 timestamp 不卡死、耐心耗盡 brief 內容、CLI 拒絕真失敗）；既有 test_compute_queue_amend.py 11 tests 未回歸。回收：5 個 job 已用新 CLI requeue 回 queued（額度昨 22:20 已重置），pending-followup 6 → 1（只剩真正該收的 56ddf72b dirtyguard 成果）；compute worker 01:00 存活，01:15 起依序接手。"
   }
 ]

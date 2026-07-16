@@ -30,6 +30,9 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
     timeout_seconds (int)
     cancelled_at (ISO UTC, optional) — operator cancellation timestamp
     cancel_reason (str, optional)    — required audit reason for cancellation
+    not_before (ISO UTC|null, optional) — worker must not start it before this
+    quota_requeues (int, optional)      — times the quota wall bounced this job
+    requeue_history (list, optional)    — one record per bounced attempt
 
 Usage:
     enqueue:   uv run python scripts/compute_queue.py enqueue --script X --title Y ...
@@ -39,6 +42,7 @@ Usage:
     run-next:  uv run python scripts/compute_queue.py run-next
     show:      uv run python scripts/compute_queue.py show <id>
     cancel:    uv run python scripts/compute_queue.py cancel --id ID --reason WHY
+    requeue:   uv run python scripts/compute_queue.py requeue --id ID  (auth/quota only)
     mark-followup-dispatched: ... --id <id>
 """
 from __future__ import annotations
@@ -55,7 +59,7 @@ import sys
 import time
 import uuid
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -64,6 +68,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
+from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
 LOCK_FILE = QUEUE_DIR / ".worker.lock"
@@ -77,6 +82,30 @@ AGENT_BRIEF_DIR = ROOT / "storage" / "ops" / "agent_briefs"
 # fires, leaving it time to write a diagnosis before the worker kills the script.
 AGENT_DEFAULT_TIMEOUT = 5400  # 90 min
 AGENT_TIMEOUT_GRACE = 120
+
+# Quota re-queue. A quota-class death is not a failure of the work: the CLI
+# answers "You've hit your session limit · resets 10:20pm" in about five seconds
+# and the agent never exists. Nothing ran, nothing was spent, the worktree is
+# untouched.
+#
+# `run_agent_job.py` has said so in its receipt since 2026-07-14, and nothing
+# read it. On 2026-07-16 the session window closed at 20:45 CST and the next five
+# agent jobs — k1708, and the k1625/k1630/k1649/k1678 closeouts — each died on
+# that same wall and each was filed as `triage_failed`, i.e. as five separate
+# work orders asking a fire to go inspect a worktree that nobody had written to.
+# Five fires to rediscover one clock.
+#
+# Waiting is the whole remedy, so the queue does the waiting itself. This is not
+# the retry ladder that failure_class.py warns against — a ladder re-attempts
+# against an unchanged wall, whereas this re-attempts against a moved clock, at
+# a cost of ~5s and zero tokens per bounce.
+#
+# The cap exists because not every quota window is a session window: a weekly
+# limit can outlast any sane wait. When the bounces run out the job fails for
+# real, and its triage brief says which wall it died on and how long it waited —
+# which is the point at which a person genuinely is the next step.
+QUOTA_REQUEUE_MAX = 16
+QUOTA_REQUEUE_BACKOFF_S = 1800  # 30 min × 16 ≈ 8h of patience
 
 
 def utc_now() -> str:
@@ -648,6 +677,58 @@ def _runner_failure_class(job: dict[str, Any]) -> str | None:
     return value if isinstance(value, str) else None
 
 
+def _sleeping_until(job: dict[str, Any]) -> datetime | None:
+    """The job's `not_before`, if it is still in the future. Else None.
+
+    An unparseable `not_before` warns and reads as "no restriction": a corrupt
+    timestamp must not strand a job in the queue forever (no-silent-fallback.md
+    Pattern B — the fallback is caller-chosen, and here running late beats never).
+    """
+    raw = job.get("not_before")
+    if not raw:
+        return None
+    when = parse_iso_warn(
+        raw, tag="compute_queue", field_name="not_before", fallback=None,
+        job_id=job.get("id"),
+    )
+    if when is None:
+        return None
+    return when if when > datetime.now(timezone.utc) else None
+
+
+def _requeue_quota_blocked(job: dict[str, Any]) -> bool:
+    """Send a quota-killed agent job back to the queue to wait out the window.
+
+    Returns True if the job was re-queued (caller must not mark it failed), False
+    if it should fail normally — either because the wall was not quota, or because
+    the job has already spent its patience.
+    """
+    if _runner_failure_class(job) != "quota":
+        return False
+    bounces = job.get("quota_requeues") or 0
+    if bounces >= QUOTA_REQUEUE_MAX:
+        return False
+
+    job["quota_requeues"] = bounces + 1
+    job.setdefault("requeue_history", []).append({
+        "at": utc_now(),
+        "reason": "quota",
+        "exit_code": job.get("exit_code"),
+        "started_at": job.get("started_at"),
+    })
+    job["not_before"] = (
+        datetime.now(timezone.utc) + timedelta(seconds=QUOTA_REQUEUE_BACKOFF_S)
+    ).isoformat()
+    # Back to a clean work order: the attempt that just bounced computed nothing,
+    # so leaving its exit code or timestamps on the job would describe a run that
+    # never happened. `queued_at` stays put — the job keeps its place in line.
+    job["status"] = "queued"
+    job["started_at"] = None
+    job["completed_at"] = None
+    job["exit_code"] = None
+    return True
+
+
 def _agent_workdir(job: dict[str, Any]) -> str | None:
     """Read new schema first, then infer legacy run_agent_job receipts."""
     raw = None
@@ -788,6 +869,24 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
         ]
         if original_brief:
             triage_lines.append(f"Followup to run once it completes (context only): {original_brief}")
+    elif _runner_failure_class(job) == "quota":
+        waited_h = round(job.get("quota_requeues", 0) * QUOTA_REQUEUE_BACKOFF_S / 3600, 1)
+        triage_lines = [
+            "AGENT JOB OUT OF PATIENCE ON QUOTA — the model window never reopened, "
+            "so the agent never ran.",
+            f"Job: {job.get('id')} (exit_code={job.get('exit_code')})",
+            f"The queue already re-queued it {job.get('quota_requeues', 0)} times over ~{waited_h}h "
+            f"and it hit the same wall every time (see requeue_history in its job file).",
+            f"Runner metadata (failure_class): {job.get('job_metadata')}",
+            f"stdout/stderr: {job.get('stdout_file')} | {job.get('stderr_file')}",
+            f"Worktree/cwd is untouched and still holds the pre-job state: {workdir}",
+            "A window this long is a weekly/monthly limit, not a session one — it outlasts what "
+            "the queue can wait out. Confirm the current quota state, then RE-ENQUEUE the same "
+            "brief with enqueue-agent once it is back. Do NOT triage the worktree for salvage and "
+            "do NOT record any research verdict: no work was performed.",
+        ]
+        if original_brief:
+            triage_lines.append(f"Followup to run once it completes (context only): {original_brief}")
     else:
         triage_lines = [
             "TRIAGE FAILED AGENT JOB — this job did not complete successfully.",
@@ -900,16 +999,25 @@ def run_next(args) -> int:
         return 0
 
     try:
-        # Find oldest queued job
+        # Find oldest queued job that is allowed to start now
         queued = []
+        sleeping = 0
         for p in sorted(QUEUE_DIR.glob("*.json")):
             j = _read_job_file(p, context="run-next")
             if j is None:
                 continue
-            if j.get("status") == "queued":
-                queued.append((j.get("queued_at", ""), p, j))
+            if j.get("status") != "queued":
+                continue
+            until = _sleeping_until(j)
+            if until is not None:
+                # Waiting out a quota window. Starting it now would just burn the
+                # same five seconds against the same wall.
+                sleeping += 1
+                continue
+            queued.append((j.get("queued_at", ""), p, j))
         if not queued:
-            print("no queued jobs")
+            print(f"no queued jobs ready ({sleeping} waiting on not_before)"
+                  if sleeping else "no queued jobs")
             return 0
         queued.sort()
         _, job_path, job = queued[0]
@@ -945,6 +1053,10 @@ def run_next(args) -> int:
                 job["status"] = "failed"
                 if _runner_timed_out(job):
                     _mark_timeout(job)
+                elif _requeue_quota_blocked(job):
+                    print(f"quota-blocked: {job['id']} never started — re-queued "
+                          f"(bounce {job['quota_requeues']}/{QUOTA_REQUEUE_MAX}, "
+                          f"not_before={job['not_before']})")
             else:
                 artifact_path = _declared_result_artifact(job)
                 if artifact_path is not None and not artifact_path.exists():
@@ -986,7 +1098,10 @@ def run_next(args) -> int:
 
         with _receipt_lock():
             _merge_runtime_output_paths(job_path, job)
-            job["completed_at"] = utc_now()
+            # A re-queued job did not finish; stamping completed_at would make an
+            # attempt that never ran look like a run.
+            if job["status"] != "queued":
+                job["completed_at"] = utc_now()
             _write_job_file(job_path, job)
         print(f"done: {job['id']} status={job['status']} exit={job['exit_code']}")
         return 0
@@ -1132,6 +1247,59 @@ def cancel(args) -> int:
     return 0
 
 
+def requeue(args) -> int:
+    """Put a failed agent job back in line — only if it never actually ran.
+
+    The worker now re-queues quota-blocked jobs on its own, so this exists for the
+    two cases it cannot cover: jobs that failed before that logic landed, and
+    auth-class deaths, where the runner's retry ladder is exhausted and a person
+    had to log back in before a retry could mean anything.
+
+    The failure class is the gate, and it comes from the runner's own receipt
+    rather than from the operator's belief about the job. `auth` and `quota` both
+    mean the CLI turned the agent away at the door: no compute, no tokens, an
+    untouched worktree. Every other class has a worktree whose state is the whole
+    question — re-running it would race the salvage, so this refuses.
+    """
+    path = QUEUE_DIR / f"{args.id}.json"
+    with _receipt_lock():
+        if not path.exists():
+            print(f"error: not found {args.id}", file=sys.stderr)
+            return 2
+        job = _read_job_file(path, context="requeue")
+        if job is None:
+            return 2
+        if job.get("status") != "failed":
+            print(f"error: cannot requeue {args.id} — status={job.get('status')}, not failed.",
+                  file=sys.stderr)
+            return 2
+        failure = _runner_failure_class(job)
+        if failure not in ("auth", "quota"):
+            print(
+                f"error: cannot requeue {args.id} — failure_class={failure}. Only auth/quota "
+                f"deaths are safe to re-run blind, because only they guarantee the agent never "
+                f"started. Triage this one's worktree instead.",
+                file=sys.stderr,
+            )
+            return 2
+
+        job.setdefault("requeue_history", []).append({
+            "at": utc_now(),
+            "reason": f"manual:{failure}",
+            "exit_code": job.get("exit_code"),
+            "started_at": job.get("started_at"),
+            "by": os.environ.get("VOLPRED_ACTOR") or os.environ.get("VOLPRED_TASK_CLAIM_OWNER"),
+        })
+        job["status"] = "queued"
+        job["started_at"] = None
+        job["completed_at"] = None
+        job["exit_code"] = None
+        job["not_before"] = None
+        _write_job_file(path, job)
+    print(f"requeued: {args.id} (was {failure}-blocked; the agent never ran)")
+    return 0
+
+
 def record_output_paths_cli(args) -> int:
     if not record_output_paths(args.id, args.path):
         return 2
@@ -1204,6 +1372,13 @@ def main():
     cx.add_argument("--id", required=True)
     cx.add_argument("--reason", required=True, help="Audit reason for cancelling this work order.")
     cx.set_defaults(func=cancel)
+
+    rq = sub.add_parser(
+        "requeue",
+        help="Re-queue an auth/quota-blocked FAILED agent job (one that never ran). Refuses any other failure.",
+    )
+    rq.add_argument("--id", required=True)
+    rq.set_defaults(func=requeue)
 
     l = sub.add_parser("list")
     l.add_argument("--status")
