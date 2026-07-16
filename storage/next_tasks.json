@@ -35819,13 +35819,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T05:03:38.636479+00:00",
+    "completed_at": "2026-07-16T05:16:59.823689+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T05:03:38.636479+00:00",
-      "last_clean_observed_at": "2026-07-16T05:03:38.636479+00:00"
+      "resolved_at": "2026-07-16T05:16:59.823689+00:00",
+      "last_clean_observed_at": "2026-07-16T05:16:59.823689+00:00"
     }
   },
   {
@@ -40847,5 +40847,30 @@
     "completed_at": "2026-07-16T05:00:04.875650+00:00",
     "result": "CI watcher verified recovery before this repair task started; green_run=29470851135; no action required",
     "ci_closed_after_green": true
+  },
+  {
+    "id": "paper9_c3_multiple_testing_subsection_k1380",
+    "title": "Paper 9 (garch-x-vix) C3: 加入 Multiple Testing 子節（K1380 SPA/RC 結果）",
+    "description": "Paper 9 review C3 (CRITICAL) 需要多重檢定校正。K1380 已用快取 loss matrix 完成 Hansen (2005) SPA + White (2000) RC 檢定（experiments/k1380/k1380_results.json）。結果：13/17 spec 收斂（C1 全 NaN、A5/C2/C3 發散已排除並記錄理由），GJR benchmark (B0) mean QLIKE 最低 (623.7)，A4f=644.0，所有 spec 對 B0 的 loss differential 皆負、nominal superior set 為空 → SPA p=1.000、White RC(A4f) t=-0.272 p=1.000，兩者於 10% 皆不拒絕 H0。誠實結論：多重檢定校正後無任何 VIX-augmented spec 顯著勝過純 GJR。任務：在 Paper 9 body.tex 加「Multiple Testing」子節，含 SPA/RC 結果表 + 排除 spec 註記 + 經濟詮釋；過 finance-paper-quality claim-evidence gate；不得誇大。parent=k1380 compute followup。",
+    "task_type": "paper_body",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "paper9",
+      "garch-x-vix",
+      "C3",
+      "multiple-testing",
+      "k1380",
+      "spa",
+      "white-rc"
+    ],
+    "source": "compute_followup_k1380_spa",
+    "created_at": "2026-07-16T05:15:13.500889+00:00",
+    "generated_at": "2026-07-16T05:15:13.500889+00:00",
+    "parent_compute_job_ids": [
+      "k1380-spa-test",
+      "compute-k1380-paper-9-white-rc-hansen-spa-test-17-spec-multiple-test-1779189466"
+    ],
+    "result_artifact": "experiments/k1380/k1380_results.json"
   }
 ]

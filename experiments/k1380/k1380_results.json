@@ -1,0 +1,186 @@
+{
+  "experiment_id": "k1380",
+  "title": "Paper 9 White RC / Hansen SPA Test \u2014 17-Spec Horse Race (convergent subset)",
+  "metadata": {
+    "data_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "bootstrap_B": 499,
+    "bootstrap_seed": 42,
+    "harvey_threshold": 3.0,
+    "qlike_proxy": "r_squared (Patton 2011 proxy-robust)",
+    "n_valid_oos": 1852,
+    "computed_from_cache": "k1380_losses_all.npy (no re-fitting)",
+    "timestamp": "2026-07-16T05:13:34.185983+00:00",
+    "lookahead_free": "signal.shift(1): vix[abs_idx-1] for t-1 VIX lag",
+    "c3_critical_addressed": true
+  },
+  "caveat": "Horse race is over the convergent subset only: 13 of 17 specs (12 candidates + GJR benchmark); 4 excluded for non-convergence (C1 all-NaN; A5/C2/C3 divergent).",
+  "excluded_specs": [
+    {
+      "spec": "C1",
+      "reason": "all-NaN across full OOS (fixed-span MIDAS produced zero valid forecasts); non-convergent",
+      "mean_qlike": null
+    },
+    {
+      "spec": "A5",
+      "reason": "mean QLIKE 255122.2 is orders of magnitude above the well-behaved cluster (~620-740); numerically divergent",
+      "mean_qlike": 255122.22026022334
+    },
+    {
+      "spec": "C2",
+      "reason": "mean QLIKE 9349.0 is orders of magnitude above the well-behaved cluster (~620-740); numerically divergent",
+      "mean_qlike": 9348.999955811303
+    },
+    {
+      "spec": "C3",
+      "reason": "mean QLIKE 3904.2 is orders of magnitude above the well-behaved cluster (~620-740); numerically divergent",
+      "mean_qlike": 3904.2165163049694
+    }
+  ],
+  "mean_qlike_ranking": [
+    {
+      "rank": 1,
+      "spec": "B0",
+      "mean_qlike": 623.733034260785
+    },
+    {
+      "rank": 2,
+      "spec": "A4f",
+      "mean_qlike": 644.0229973091165
+    },
+    {
+      "rank": 3,
+      "spec": "A4",
+      "mean_qlike": 644.5876992386349
+    },
+    {
+      "rank": 4,
+      "spec": "A4n",
+      "mean_qlike": 644.5876992386349
+    },
+    {
+      "rank": 5,
+      "spec": "A3f",
+      "mean_qlike": 661.1232511763714
+    },
+    {
+      "rank": 6,
+      "spec": "B3",
+      "mean_qlike": 695.633938998749
+    },
+    {
+      "rank": 7,
+      "spec": "B2",
+      "mean_qlike": 702.4109244912886
+    },
+    {
+      "rank": 8,
+      "spec": "A2f",
+      "mean_qlike": 706.089952759928
+    },
+    {
+      "rank": 9,
+      "spec": "A2",
+      "mean_qlike": 709.3336396196295
+    },
+    {
+      "rank": 10,
+      "spec": "A2n",
+      "mean_qlike": 709.3336396196295
+    },
+    {
+      "rank": 11,
+      "spec": "B1",
+      "mean_qlike": 727.8663705588084
+    },
+    {
+      "rank": 12,
+      "spec": "A1",
+      "mean_qlike": 736.7340360016225
+    },
+    {
+      "rank": 13,
+      "spec": "A3",
+      "mean_qlike": 736.7340360016225
+    }
+  ],
+  "hansen_spa_test": {
+    "stat": 0.0,
+    "pval": 1.0,
+    "reject_h0_p10": false,
+    "interpretation": "Cannot reject H0: no model significantly beats GJR after data snooping",
+    "superior_set_nominal": []
+  },
+  "white_rc_test": {
+    "spec": "A4f",
+    "t_stat": -0.2723889274723672,
+    "pval": 1.0,
+    "reject_h0_p10": false,
+    "interpretation": "RC test: cannot confirm A4f beats GJR after data snooping"
+  },
+  "individual_dm_stats": {
+    "A1": {
+      "t_stat": -1.103932946401614,
+      "d_bar": -113.00100174083748,
+      "harvey_pass": false
+    },
+    "A2": {
+      "t_stat": -0.8504194282754346,
+      "d_bar": -85.60060535884455,
+      "harvey_pass": false
+    },
+    "A3": {
+      "t_stat": -1.103932946401614,
+      "d_bar": -113.00100174083748,
+      "harvey_pass": false
+    },
+    "A4": {
+      "t_stat": -0.2798817304634257,
+      "d_bar": -20.854664977849893,
+      "harvey_pass": false
+    },
+    "A2f": {
+      "t_stat": -0.7152528049897565,
+      "d_bar": -82.35691849914302,
+      "harvey_pass": false
+    },
+    "A4f": {
+      "t_stat": -0.2723889274723672,
+      "d_bar": -20.289963048331515,
+      "harvey_pass": false
+    },
+    "A3f": {
+      "t_stat": -0.48904091671164884,
+      "d_bar": -37.39021691558647,
+      "harvey_pass": false
+    },
+    "A2n": {
+      "t_stat": -0.8504194282754346,
+      "d_bar": -85.60060535884455,
+      "harvey_pass": false
+    },
+    "A4n": {
+      "t_stat": -0.2798817304634257,
+      "d_bar": -20.854664977849893,
+      "harvey_pass": false
+    },
+    "B1": {
+      "t_stat": -1.9584630263395886,
+      "d_bar": -104.13333629802327,
+      "harvey_pass": false
+    },
+    "B2": {
+      "t_stat": -1.2707013031030894,
+      "d_bar": -78.67789023050376,
+      "harvey_pass": false
+    },
+    "B3": {
+      "t_stat": -1.3462885060668426,
+      "d_bar": -71.90090473796411,
+      "harvey_pass": false
+    }
+  },
+  "c3_verdict": "C3 ADDRESSED: SPA/RC fail to reject H0 \u2014 no GARCH-X/MIDAS spec significantly beats GJR after multiple-testing correction; GJR has lowest mean QLIKE"
+}

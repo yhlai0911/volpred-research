@@ -1,0 +1,185 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-07-16",
+  "week_range": "2026-07-12 → 2026-07-19",
+  "totals": {
+    "input_tokens": 8,
+    "output_tokens": 819,
+    "cache_read_tokens": 80755,
+    "cache_create_tokens": 40929,
+    "billable_total": 41756,
+    "assistant_messages": 7,
+    "unique_sessions": 5,
+    "estimated_cost_usd": 0.9501
+  },
+  "by_model": {
+    "<synthetic>": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 0,
+      "messages": 4,
+      "estimated_cost_usd": 0.0
+    },
+    "claude-opus-4-7": {
+      "input_tokens": 8,
+      "output_tokens": 819,
+      "cache_read_tokens": 80755,
+      "cache_create_tokens": 40929,
+      "messages": 3,
+      "estimated_cost_usd": 0.9501
+    }
+  },
+  "by_category": {
+    "investigation": {
+      "input_tokens": 7,
+      "output_tokens": 429,
+      "cache_read_tokens": 40175,
+      "cache_create_tokens": 40580,
+      "messages": 2,
+      "billable_total": 41016,
+      "estimated_cost_usd": 0.8534,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "text_only": {
+      "input_tokens": 1,
+      "output_tokens": 390,
+      "cache_read_tokens": 40580,
+      "cache_create_tokens": 349,
+      "messages": 5,
+      "billable_total": 740,
+      "estimated_cost_usd": 0.0967,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 8,
+      "billable_total": 42670,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 7,
+          "billable_total": 41930
+        },
+        {
+          "name": "200-800 chars",
+          "messages": 1,
+          "billable_total": 740
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 3,
+          "billable_total": 41930
+        },
+        {
+          "name": "reviews/findings",
+          "messages": 1,
+          "billable_total": 740
+        },
+        {
+          "name": "quota/rate-limit",
+          "messages": 4,
+          "billable_total": 0
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 2,
+          "billable_total": 41190
+        },
+        {
+          "name": "(content types: tool_use)",
+          "messages": 1,
+          "billable_total": 740
+        },
+        {
+          "name": "The change is a pure data addition to a knowledge/memory JSON file — two entries recording research experiment reviews (K1707 and K1713). The added content is d",
+          "messages": 1,
+          "billable_total": 740
+        },
+        {
+          "name": "You've hit your weekly limit · resets Jul 19 at 4pm (Asia/Taipei)",
+          "messages": 4,
+          "billable_total": 0
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 0,
+      "billable_total": 0,
+      "family_breakdown": [],
+      "prefix_breakdown": [],
+      "top_first_lines": []
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 5,
+      "cache_create_tokens": 81802,
+      "billable_total": 83686,
+      "cache_create_share_pct": 97.7,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "c93618b8-1708-491b-9c03-1acf89641c37",
+          "messages": 6,
+          "billable_total": 83686,
+          "cache_create_tokens": 81802,
+          "cache_read_tokens": 161915,
+          "duration_minutes": 0.3,
+          "cache_create_share_pct": 97.7,
+          "first_ts": "2026-07-16T04:13:32.793000+00:00",
+          "last_ts": "2026-07-16T04:13:49.977000+00:00"
+        },
+        {
+          "session_id": "1741ada1-3e8a-4673-8b09-7d6328b67893",
+          "messages": 1,
+          "billable_total": 0,
+          "cache_create_tokens": 0,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.0,
+          "cache_create_share_pct": 0.0,
+          "first_ts": "2026-07-16T00:07:20.612000+00:00",
+          "last_ts": "2026-07-16T00:07:20.612000+00:00"
+        },
+        {
+          "session_id": "2b144520-47d1-46ed-a6c9-377c84124135",
+          "messages": 1,
+          "billable_total": 0,
+          "cache_create_tokens": 0,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.0,
+          "cache_create_share_pct": 0.0,
+          "first_ts": "2026-07-16T00:07:25.493000+00:00",
+          "last_ts": "2026-07-16T00:07:25.493000+00:00"
+        },
+        {
+          "session_id": "7ac9989c-2501-4342-8795-0ad8d6973a31",
+          "messages": 1,
+          "billable_total": 0,
+          "cache_create_tokens": 0,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.0,
+          "cache_create_share_pct": 0.0,
+          "first_ts": "2026-07-16T00:07:28.967000+00:00",
+          "last_ts": "2026-07-16T00:07:28.967000+00:00"
+        },
+        {
+          "session_id": "fc9d13b0-233a-44ae-b6b4-e02792d7b97a",
+          "messages": 1,
+          "billable_total": 0,
+          "cache_create_tokens": 0,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.0,
+          "cache_create_share_pct": 0.0,
+          "first_ts": "2026-07-16T00:09:22.446000+00:00",
+          "last_ts": "2026-07-16T00:09:22.446000+00:00"
+        }
+      ]
+    }
+  }
+}
