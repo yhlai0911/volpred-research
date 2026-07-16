@@ -41949,5 +41949,56 @@
    "review_artifact": "experiments/k1716/review_primary_20260715.md",
    "results_sha256": "898a2dc21add3439be8c80bfa18a7c59bc5e9b932ba3d2d3551ac64c9dc872ff8"
   }
+ },
+ {
+  "item_id": "k1707_reviewed_20260716",
+  "category": "option_auction_execution_quality_stress",
+  "title": "K1707: public option-auction pseudo-data cannot support the high-VIX execution-benefit collapse test",
+  "content": "K1707 [INSUFFICIENT_STRESS_SUPPORT]: Testing whether option price-improvement auction execution-quality benefit collapses in pre-known high-VIX states, using the authors' public Harvard Dataverse pseudo-sample (doi:10.7910/DVN/LMB13N, CC0, raw md5 f15b6286...; 1,161,488 rows, 384,580 auction rows = 33.1% share). The pre-registered data-support gate failed all four checks and no confirmatory auction x 1[VIX_lag1>=30] interaction was estimated: only 16 distinct pseudo dates (need >=80), 0 dates reaching the fixed VIX>=30 threshold (VIX range 22.52-26.46, median 25.0; need >=30 stress dates), 3 anonymized underlyings (need >=10), and 37.5% weekend pseudo dates (need 0). Descriptive-only pooled auction benefits are reported for reference but are NOT market evidence (author-noised pseudo-data, altered timestamps): PIMP_C +4.91c, EffectiveSpread_C +5.24c, EQ +0.396, auction-only multiple-bidder rate 5.07%. VIX signal used lag-1 only (VIXCLS.ffill().shift(1); no same-day look-ahead). Absence of support is not a null estimate: the public replication sample simply cannot establish whether the execution benefit persists or collapses in stress. Source Khan-Hendershott-Riordan (2026, RFS 39(3):783-834, doi:10.1093/rfs/hhaf043).",
+  "evidence": [
+   "experiments/k1707/K1707_results.json",
+   "experiments/k1707/README.md",
+   "experiments/k1707/post_run_review.md"
+  ],
+  "confidence": 0.6,
+  "created_at": "2026-07-16T04:10:00+00:00",
+  "created_at_source": "main_thread_ci_ratchet_backfill",
+  "k_id": "K1707",
+  "experiment_id": "k1707",
+  "experiment_path": "experiments/k1707",
+  "verdict": "INSUFFICIENT_STRESS_SUPPORT",
+  "reviewer": "source-level review (post_run_review.md) + main-thread CI ratchet backfill",
+  "provenance": {
+   "review_artifact": "experiments/k1707/post_run_review.md",
+   "results_sha256": "aa2705d7cea1a7ac3bd48292ca65aa2922c71578bba9dec50e1d577697c7f0cd",
+   "backfill_reason": "ci-red-29467915128 knowledge_unrecorded_ratchet"
+  }
+ },
+ {
+  "item_id": "k1713_reviewed_20260716",
+  "category": "harq_daily_ohlc_duplicate_closure",
+  "title": "K1713: verified duplicate-closure of the daily-OHLC HARQ test (superseded by K1661)",
+  "content": "K1713 [DUPLICATE_CLOSURE_PASS, creates no new empirical claim]: The queued K1713 brief (noisy daily-OHLC realized-quarticity proxy making HARQ measurement-error weighting ineffective vs HAR) is already fully implemented by K1661, so K1713 closes the stale queue item with a byte-traceable replay audit rather than a spurious independent replication. K1661 provides the full queued design: Garman-Klass daily variance, range-based quarticity proxy, HAR/HARQ, rolling W=1000 one-step forecasts, QLIKE (actual/predicted), and DM-HLN, on SPY / 0050.TW / TWII (documented TX proxy). K1713 pins and re-verifies K1661 source hashes (k1661_harq_ohlc.py ef816d44..., results f7827ff8..., codex_review 3a223122...; pinned_source_unchanged=true), passes all 11 contract checks, and retrofits the superseded DM bandwidth. The queue premise 'HARQ not yet implemented' went stale when K1661 completed 2026-07-08. Independent review PASS (fresh-context code-reviewer fallback after Codex CLI usage-limit, reviewed_commit cd4e5c25..., no blocking defects).",
+  "evidence": [
+   "experiments/k1713/K1713_results.json",
+   "experiments/k1713/README.md",
+   "experiments/k1713/review_verdict.json",
+   "experiments/k1713/review_fallback_20260716.md"
+  ],
+  "confidence": 0.9,
+  "created_at": "2026-07-16T04:10:00+00:00",
+  "created_at_source": "main_thread_ci_ratchet_backfill",
+  "k_id": "K1713",
+  "experiment_id": "k1713",
+  "experiment_path": "experiments/k1713",
+  "verdict": "DUPLICATE_CLOSURE_PASS",
+  "reviewer": "fresh-context code-reviewer fallback after Codex CLI usage-limit failure",
+  "provenance": {
+   "reviewed_commit": "cd4e5c259f88c545825b1ee8ccb68e73df142fcb",
+   "review_artifact": "experiments/k1713/review_fallback_20260716.md",
+   "results_sha256": "b7e4c22477b375596c8384431466ca18496ffded4367297a2904b25b701ab2ed",
+   "duplicate_of": "K1661",
+   "backfill_reason": "ci-red-29467915128 knowledge_unrecorded_ratchet"
+  }
  }
 ]
