@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T10:04:54.056424+00:00",
+  "generated_at": "2026-07-16T11:01:52.658489+00:00",
   "adoptable": [],
   "held": [
     {
@@ -30,14 +30,28 @@
   ],
   "skipped": {
     "baseline": 519,
-    "registered": 24,
+    "registered": 25,
     "grace": 1,
     "inflight": 0
   },
   "orphan_count": 5,
   "adopted": [],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_b.json"
+      ],
+      "existing_paths": [
+        "experiments/k1426/k1426_oos_shard_b.json"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [
     {
       "job_id": "K1694-script-rerun-1211",
@@ -130,14 +144,41 @@
       ]
     }
   ],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_b.json"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "01f2a73ca9edd17ba3c3c738f7d5c9eed1db887d",
+      "reason": "committed"
+    }
+  ],
   "paper_artifact_collectable": [],
   "paper_artifact_held": [],
   "paper_collections": [],
   "draft_artifact_collectable": [],
-  "draft_artifact_held": [],
+  "draft_artifact_held": [
+    {
+      "path": "storage/drafts/assets/event_cpi_20260714_t0/spy_close.csv",
+      "kind": "unknown",
+      "reason": "unrecognised_suffix:.csv"
+    },
+    {
+      "path": "storage/drafts/assets/event_cpi_20260714_t0/vix_close.csv",
+      "kind": "unknown",
+      "reason": "unrecognised_suffix:.csv"
+    },
+    {
+      "path": "storage/drafts/assets/trending_ai_capex_20260716/build_assets.py",
+      "kind": "unknown",
+      "reason": "unrecognised_suffix:.py"
+    }
+  ],
   "draft_artifact_skipped": {
-    "grace": 6,
+    "grace": 22,
     "inflight": 0
   },
   "draft_collections": []

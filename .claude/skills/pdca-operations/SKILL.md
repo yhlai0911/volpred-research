@@ -68,6 +68,9 @@ PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調�
 - 注意快取延遲（unstable_cache / CDN）→ 等過期再 Check，別過早宣告。
 - agent 回報不照抄 → 跑 `agent-result-verification`。
 - Check 沒過 → 退回 D 或 P，不准標完成。
+- **每個程序做完個別回報老闆**，格式與強制驗證欄的 enforcement owner =
+  `scripts/progress_report.py`（`--status done` 沒 `--verified` 直接 exit 1）。
+  不要手打回報格式，也不要在本檔複製欄位定義 —— 跑 `--help` 看契約。
 
 ### A — Act（把贏固化 + 不行就調整，然後回 P）
 - 成功 → **標準化**：新建/調整/優化 **skill**、修正**指引文件**（CLAUDE.md / rules / docs）、
@@ -96,6 +99,9 @@ PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調�
 - ✗ 發現問題只寄 email 不修（你已知解法 → 直接做）。
 - ✗ 沒 critical 就停、空轉、心跳 heartbeat（沒錯誤要找別的做）。
 - ✗ Plan-Do 就說「done」，跳過 Check（過早宣告 → 同類錯反覆犯）。
+- ✗ **把「已建任務、下輪解決」回報成「已處理」**（老闆 msg 796，2026-07-15：他無從得知到底做完沒、
+  驗證沒）。這兩件事在 `scripts/progress_report.py` 是不同 status（`queued` vs `done`），
+  不是同一件事的兩種講法；`done` 一定要附得出實測指令與結果。
 - ✗ 繞過正規流程自寫一次性 script（K1580 文章圖放 metadata 沒嵌正文 = 0 圖）。
 - ✗ 內容越寫越短當預設（金融文最佳 2200-2800 英文字 ≈ 中文 ~3000-4500 字，要深度+圖表+數據+詮釋，非湊字）。
 - ✗ 凡事問用戶（你是運營經理，知道 missions 與目標就該知道做什麼）。

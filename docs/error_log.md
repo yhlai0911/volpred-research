@@ -143,8 +143,9 @@
 ## H. Turn final-text / notify-first / boss-facing report / alert-as-task
 
 **規則**：互動 turn 收尾必須是**給用戶的文字**（email 不能替代 session 內回覆）；ScheduleWakeup 互動 turn 禁用。不要把修復中間狀態 / 待辦丟給老闆（alert body 寫「已自動修復」非「建議老闆行動」）；alert 預設自動變 task。回報禁列「還需要你做 X」。
-**機械 owner**：`scripts/hooks/enforce_final_text.py`（Stop hook）+ `scripts/hooks/deny_wakeup_interactive.py`（互動 turn 擋 wakeup）；alert→task remediation bridge。
+**機械 owner**：`scripts/hooks/enforce_final_text.py`（Stop hook）+ `scripts/hooks/deny_wakeup_interactive.py`（互動 turn 擋 wakeup）；alert→task remediation bridge；逐程序進度回報格式 = `scripts/progress_report.py`（`--status done` 沒 `--verified` / `--verified-cmd` 直接 exit 1，白話欄貼指令也擋）。
 **代表 incident**：
+- 2026-07-15 老闆 msg 796/808/810 「發現問題→設計任務→下輪解決，我無從得知做完沒、驗證沒」→ 回報格式機械化：`done` 與 `queued` 是不同 status 不是不同講法；驗證欄白話先於指令 — Q3
 - 2026-07-02 14:25 **3-STRIKE** 「turn 結尾無文字回報」同日第三波 → Stop hook 機械化 — Q3
 - 2026-07-02 13:58 turn 結尾無最終文字回覆（同日復發，3-STRIKE TRIGGER）— Q3
 - 2026-07-14 12:41 CI 紅燈 notify-first：把修復中間狀態丟給老闆 — Q3

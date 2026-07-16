@@ -19246,5 +19246,35 @@
     "owner": "claude-main-interactive",
     "commit": null,
     "summary": "vt-trend-following v4 撤回重寫：K1695 exposure artifact 的論文端收尾。決策 B（撤 protection claim、保留誠實 decomposition + null）。10 處改寫、Table 5 擴 2 欄、reproduce +33 checks 100% green、42pp 編譯乾淨、平台同步 + 線上驗證完成、pipeline 更新。"
+  },
+  {
+    "timestamp": "2026-07-16T19:19:50+08:00",
+    "task_type": "governance",
+    "task_id": "governance_telegram_structured_progress_report_format",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
+    "owner": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
+    "commit": null,
+    "summary": "逐程序 Telegram 進度回報格式制度化（老闆 msg 796/808/810）。新增 scripts/progress_report.py 為格式唯一 enforcement owner：--status done 缺 --verified/--verified-cmd/--artifacts 一律 exit 1，白話欄貼指令亦擋（msg 810）；done vs queued 為不同 status，杜絕『已建任務下輪解決』被講成已處理（msg 796 痛點）。排版改 emoji 分欄 + 全形縮排（msg 808）。tests/test_progress_report.py 8 passed 固化契約。SOP 依 anti-stacking 只留 pointer（pdca-operations SKILL.md / CLAUDE.md 回報段 / error_log §H）。首則新格式回報已送達老闆 Telegram message id 872。"
+  },
+  {
+    "timestamp": "2026-07-16T19:19:50+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1678",
+    "outcome": "queued",
+    "actor": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
+    "owner": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
+    "commit": null,
+    "summary": "餓死孤兒實驗收尾：已建 registered worktree 並 enqueue agent job agent-brief_k1678_closeout-c4e4cb（opus/xhigh，per model_router）。本班不等待（fire cap 50min < agent 工時）；成果與 worktree 合併由後續 fire PHASE A followup 收。"
+  },
+  {
+    "timestamp": "2026-07-16T19:19:50+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1625",
+    "outcome": "queued",
+    "actor": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
+    "owner": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
+    "commit": null,
+    "summary": "餓死孤兒實驗收尾：已建 registered worktree 並 enqueue agent job agent-brief_k1625_closeout-3d866a（opus/xhigh，per model_router）。本班不等待（fire cap 50min < agent 工時）；成果與 worktree 合併由後續 fire PHASE A followup 收。"
   }
 ]

@@ -30972,39 +30972,15 @@
   },
   {
     "id": "nested_dm_fp_narrowing_baseline_audit",
-    "title": "nested-DM 偵測器收窄後：145 個站點的 false-positive 稽核（工作已保存在分支）",
-    "description": "分支 `wip/nested-dm-fp-narrowing` 保存了 audit_nested_dm_misuse.py 的偵測器收窄（把 restricted/unrestricted、full sample、large samples 等通用統計散文排除，只在 AST 證明一個 feature/design container 由另一個構成時才認定 nesting）。\n\n現況：ratchet 測試 3 紅。收窄後有 145 個站點不再被判為 nested-DM 誤用，而 storage/ops/nested_dm_misuse_baseline.json 仍列著它們。\n\n**這是研究誠實判斷，不可為了讓測試變綠而直接縮 baseline。**必須逐一確認：每個不再被 flag 的站點，究竟是 (a) 真的 false positive（通用散文誤判），還是 (b) 真實的巢狀模型誤用而被收窄的 regex 漏掉。(b) 類必須留在 baseline。\n交付：full-population 稽核報告（掃描範圍 / 盲區分析 / 可驗證證據，per .claude/rules/experiments.md『Audit methodology hard rule』）+ 測試轉綠 + 合併分支。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "nested-DM 偵測器收窄後：145 個站點的 false-positive 稽核（工作已保存在分支）",
+    "priority": 2,
     "source": "interactive-claude",
     "created_at": "2026-07-12T08:30:39.807233+00:00",
-    "claimed_by": "hourly-17",
-    "claimed_at": "2026-07-13T09:10:04.291913+00:00",
-    "claim_session_id": "faaaedd3814f",
-    "status_history": [
-      {
-        "ts": "2026-07-13T09:10:04.291928+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-17"
-      },
-      {
-        "ts": "2026-07-13T09:10:04.562677+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-17"
-      },
-      {
-        "ts": "2026-07-13T10:10:44.028571+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-17"
-      }
-    ],
-    "started_at": "2026-07-13T09:10:04.562661+00:00",
     "completed_at": "2026-07-13T10:10:44.028557+00:00",
-    "result": "全量稽核 141 站點：否決收窄提案（會靜默抹掉 109 筆真巢狀誤用）。改為偵測器維持保守 + 32 筆 FP 具名 adjudicated allowlist 退場。baseline 220→188 active + 32 allowlist（invariant 對帳通過）。ratchet 新增 4 測試擋未來重演收窄，21 passed。報告 docs/governance/2026-07/nested_dm_fp_narrowing_audit.md。commit a2d58ecc3"
+    "tombstone": true,
+    "archived_at": "2026-07-16T11:08:21.278872+00:00"
   },
   {
     "id": "supervisor_hang_alert_tests_red_on_main",
@@ -31114,7 +31090,7 @@
     "description": "收尾 experiments/K1678/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T09:16:48.626840+00:00）。\n證據：experiments/K1678/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1678'); finished 1.4 days ago; orphan backlog this run: 67 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "source": "dreaming",
     "created_at": "2026-07-12T09:16:48.626840+00:00",
     "dreaming": {
@@ -31142,11 +31118,26 @@
         "to": "pending",
         "by": "hourly-20",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-16T11:09:29.695867+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
+      },
+      {
+        "ts": "2026-07-16T11:11:40.170593+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
       }
     ],
-    "started_at": "2026-07-15T12:13:06.197230+00:00",
+    "started_at": "2026-07-16T11:11:40.170580+00:00",
     "last_released_at": "2026-07-15T14:50:02.492869+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
+    "claimed_at": "2026-07-16T11:09:29.695847+00:00",
+    "claim_session_id": "31ed79b536b9"
   },
   {
     "id": "dreaming_orphaned_experiment_k1677",
@@ -32081,7 +32072,7 @@
     "description": "收尾 experiments/k1625/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：experiments/k1625/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1625'); finished 8.4 days ago; orphan backlog this run: 63 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "source": "dreaming",
     "created_at": "2026-07-12T22:00:14.861047+00:00",
     "dreaming": {
@@ -32089,7 +32080,25 @@
       "pattern_type": "orphaned_experiment",
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
-    }
+    },
+    "claimed_by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633",
+    "claimed_at": "2026-07-16T11:09:29.972362+00:00",
+    "claim_session_id": "ba44b8efa786",
+    "status_history": [
+      {
+        "ts": "2026-07-16T11:09:29.972379+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
+      },
+      {
+        "ts": "2026-07-16T11:11:40.436024+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
+      }
+    ],
+    "started_at": "2026-07-16T11:11:40.436008+00:00"
   },
   {
     "id": "k1702_codex_primary_path_reverify",
@@ -35463,13 +35472,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T10:04:46+00:00",
+    "completed_at": "2026-07-16T11:01:58.036951+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T10:04:46+00:00",
-      "last_clean_observed_at": "2026-07-16T10:04:46+00:00"
+      "resolved_at": "2026-07-16T11:01:58.036951+00:00",
+      "last_clean_observed_at": "2026-07-16T11:01:58.036951+00:00"
     }
   },
   {
@@ -35481,13 +35490,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T10:25:10.961202+00:00",
+    "completed_at": "2026-07-16T11:22:51.633320+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T10:25:10.961202+00:00",
-      "last_clean_observed_at": "2026-07-16T10:25:10.961202+00:00"
+      "resolved_at": "2026-07-16T11:22:51.633320+00:00",
+      "last_clean_observed_at": "2026-07-16T11:22:51.633320+00:00"
     }
   },
   {
@@ -38276,7 +38285,7 @@
     "description": "來源：老闆 Ivan 經 Telegram（msg 796/798/800/802，2026-07-15）。\n\n老闆痛點（msg 796）：運營經理常「發現問題→告訴老闆有問題→設計任務→下輪解決」，老闆無法得知到底有沒有做完、驗證了沒。他貼了一個逐程序結構化回報範例（msg 798「葉小金重點觀察」格式：程序/狀態/結論/產物/阻塞/下一程序/message id），問能不能做出類似或更優化的版本（msg 800/802）。\n\n任務：把「逐程序結構化進度回報格式」制度化進運營經理 SOP（canonical：ops manager / telegram reporting 相關 skill + docs；例如 pdca-operations 或新建 telegram-progress-report reference）。改 governance 檔前先 commit snapshot（snapshot: prefix）。\n\n必須採用的優化格式（比範例多一個關鍵欄「驗證」——直接回應 msg 796 痛點：證明真的做完+實測，不是「已建任務下輪解決」）：\n\n【VolPred 運營回報｜<台北時間>｜<程序名>】\n結論：<一句話，做完/沒做完，先講>\n驗證：<實測指令 + 結果/exit code；沒驗證就寫「未驗證：原因」>\n產物：<檔案/commit/msg id，可點可查>\n阻塞：<無 / 具體阻塞 + 需老闆決策的點>\n下一步：<下一程序@時間>\n\n規則：\n1. 每個程序完成後個別回報並留下 Telegram message id（可稽核）。\n2. 「驗證」欄強制——沒有實測結果不得宣稱完成；區分「已修並驗證」vs「已建任務待下輪」。\n3. 短、結論先講、可追蹤；不是長報告。\n4. 漏報由 strict checker 阻擋（可參考老闆範例的 stage reporting contract 概念）。\n\n成功標準：ops manager 相關 skill/docs 更新完成並 commit（snapshot 先行）；下次運營回報即依此格式；回寫一句到 docs/error_log.md 或 research_program.md 註明格式來源。dispatch_lane=main_thread（涉及運營經理回報語義，主線程處理）。\n\n---\n[細化 2026-07-15 老闆經 Telegram msg 808/810] 老闆核准此結構化回報方向（msg 810「可以」），並追加兩點要求：(1) msg 808『排版要更有架構一點』——欄位要有清楚視覺層次/分隔（可用 emoji 或縮排分段），不要糊成一團；(2) msg 810『但要說明清楚』——結論與驗證欄的說明要讓非工程背景也一眼看懂，白話先於術語，不可只丟指令/exit code 而無解讀。落地時把這兩點併入前述格式規範。",
     "task_type": "governance",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-15T06:55:19.962441+00:00",
     "source": "telegram_msg_802",
     "dispatch_lane": "main_thread",
@@ -38285,7 +38294,30 @@
       "governance",
       "reporting",
       "from_boss"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-16T11:09:29.425805+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
+      },
+      {
+        "ts": "2026-07-16T11:11:40.777113+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
+      },
+      {
+        "ts": "2026-07-16T11:19:58.176326+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
+      }
+    ],
+    "started_at": "2026-07-16T11:11:40.777098+00:00",
+    "completed_at": "2026-07-16T11:19:58.176312+00:00",
+    "result": "格式 owner = scripts/progress_report.py（done 無實測即 exit 1；done/queued 分流；emoji 分欄 + 白話先於術語，涵蓋 msg 796/808/810 三點）。tests/test_progress_report.py 8 passed。SOP 收 pointer：pdca-operations SKILL.md、CLAUDE.md 回報段、docs/error_log.md §H。首則新格式回報已送達 Telegram msg id 872。"
   },
   {
     "id": "fb_post_ai_power_vol_20260715",
@@ -40925,5 +40957,19 @@
     "completed_at": "2026-07-16T07:00:06.011679+00:00",
     "result": "CI watcher verified recovery before this repair task started; green_run=29477295356; no action required",
     "ci_closed_after_green": true
+  },
+  {
+    "id": "alert_content_quality_20260716",
+    "title": "[alert] 內容品質巡檢：每日精選導讀重複檢查",
+    "description": "由 alert `content_quality` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- 每日精選導讀: 同日（TPE 2026-07-16）published 2 篇 `每日精選導讀`: mile_f9c70bd0, mile_9f5151dc\n\n## 影響\n內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\n\n## 建議行動（主線程 auto-remediation）\n1. 同一天出現超過一篇每日精選導讀 → 檢視 `storage/ops/content_quality_report.json` items，挑 1 篇 retract：`uv run volpred ops unpublish --mile-id <id>`；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\n2. 發文太密集 → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\n3. 發文間隔過久 → 立即 `release-pool-by-settings` 或派 fresh-arc 日常文章 補位；同時查 release deadlock (`docs/refactor_plan_release_layer_deadlock.md`)。\n4. 標題前綴重複 → 前端 header 與 title 擇一移除前綴；前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。\n5. 懶人包覆蓋不足 → 針對 missing_examples 走 `lazypack-infographic` skill 補圖：primary=確定性 renderer （`lazypack_render.py`，plan.json 綁 evidence、零 LLM）；需 LLM codegen 時用 `codex exec`（boss 2026-06-30/07-15 directive），NotebookLM 僅為 fallback，不得當首選。append `## 懶人包圖組` 後用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。",
+    "task_type": "governance",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-16T11:02:11.277004+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "content_quality"
+    ]
   }
 ]
