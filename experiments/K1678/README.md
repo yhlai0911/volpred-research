@@ -95,10 +95,67 @@ Cell pass requires a positive coefficient, HAC t ≥ 3, Bonferroni p < 0.05, BH 
 - Cheng, F., Wang, C., Chiao, C., Yao, S., and Fang, Z. (2021), “Retail attention, retail trades, and stock price crash risk,” *Emerging Markets Review*, 49, 100821. [DOI](https://doi.org/10.1016/j.ememar.2021.100821)
 - Da, Z., Engelberg, J., and Gao, P. (2011), “In Search of Attention,” *Journal of Finance*, 66(5), 1461–1499. [DOI](https://doi.org/10.1111/j.1540-6261.2011.01679.x)
 
+## HAC bandwidth: known deviation from the repo rule, and why the verdict survives it
+
+`K1678.py:872` sets `maxlags = horizon - 1` for every date-clustered HAC fit. At H=1 that is
+`maxlags = 0`, which truncates the Bartlett kernel at zero lags and leaves White
+heteroskedasticity-robust standard errors — robust to heteroskedasticity, but carrying **no
+serial-correlation correction whatsoever**. The repo's canonical bandwidth rule (`.claude/rules/experiments.md`, from the K1655 lesson) is
+`lag = max(h-1, ceil(h^(1/3) * n^(1/3)))` and names `h-1` at `h=1` as a degenerate case to catch on
+sight. That rule was mechanised on 2026-07-11, one day after this experiment ran, and its ratchet
+(`scripts/tests/test_dm_hac_lag_ratchet.py`) classifies hand-written DM loops rather than a
+statsmodels `cov_type="HAC"` call, so nothing flagged this site.
+
+Omitting the correction is a two-sided misspecification, not a one-way inflation: positive residual
+autocorrelation inflates `|t|`, but negative autocorrelation deflates it, so a null cannot be
+assumed safe without measuring. `hac_bandwidth_check.py` therefore re-fits all eight predeclared
+cells from the cached matched-event panel across `maxlags ∈ {as-run, canonical, 4, 8, 12, 20}`
+(canonical = 7 at H=1 with n=302 clusters, 11 at H=5 with n=242).
+
+- The as-run bandwidth replicates the stored cells to a maximum `|t|` discrepancy of `2.16e-15`.
+- Residual first-order autocorrelation is small in every cell: `-0.079` to `+0.292`.
+- Maximum `|t|` over all eight cells **and every bandwidth** is `1.258` (downside gap, H=5, as-run),
+  against a Harvey gate of `t ≥ 3`; 0/8 cells reach the strict gate at any bandwidth, and the
+  smallest Bonferroni-adjusted p at the canonical bandwidth is `1.0`.
+
+Every fit that went through `fit_date_hac` inherited the same bandwidth, so all three families are
+swept rather than argued away from their as-run `|t|`:
+
+The grid is discrete, not continuous: `maxlags ∈ {as-run, canonical, 4, 8, 12, 20}` per cell, so
+every statement below is scoped to the **tested** bandwidths and claims nothing about the values in
+between.
+
+| Family | Cells | Max \|t\| over tested bandwidths | Reaches Harvey t ≥ 3 |
+|---|---:|---:|---|
+| Primary `saliency_diff` (predeclared, defines the verdict) | 8 | 1.258 | 0/8 at every tested bandwidth |
+| Sensitivity `pump_diff` / `saliency21_diff` | 16 | 1.672 | 0/16 at every tested bandwidth |
+| Direct event-minus-control diagnostic (intercept-only, secondary) | 8 | 4.129 | 4/8 at every tested bandwidth |
+
+The sensitivity family is worth the sweep rather than an appeal to its stored `|t| = 1.536`: the
+maximum rises to `1.672` once bandwidth varies. It stays far from the gate, but that is a measured
+result, not an assumption — assuming it would repeat the exact reasoning error this check exists to
+catch.
+
+The direct diagnostic is the one place where `|t|` sits above 3, and this is **not** a discovery of
+the sweep: the four cells concerned (left-tail and downside gap, both horizons) already carry those
+values in `K1678_results.json` at the as-run bandwidth. What the sweep adds is that they stay above
+the gate at every tested bandwidth, spanning `3.305` to `4.129`.
+This diagnostic is intercept-only, is not part of the predeclared family, and carries no
+multiple-testing correction, so it cannot be promoted to a headline claim — but it is the reason
+this experiment's null is narrow. SEC-labelled dates are followed by materially worse tails than
+their matched same-ticker controls (H=5 left-tail loss: 16.399% on labelled dates versus 10.391% on
+controls). What fails is the attempt to explain **which** labelled events turn out worse using a
+free market-wide attention proxy — not the proposition that the labelled dates are risky.
+
+The bandwidth deviation is real methodology debt and is recorded as such, but it does not move this
+experiment's verdict: `NULL_NO_ROBUST_SALIENCY_AMPLIFICATION` holds under the canonical rule.
+Results are in `K1678_hac_bandwidth_check.json`.
+
 ## Reproduction
 
 ```bash
 uv run python experiments/K1678/K1678.py
+uv run python experiments/K1678/hac_bandwidth_check.py   # closeout robustness check, cached panel only
 ```
 
 Artifacts:
@@ -108,6 +165,7 @@ Artifacts:
 - `K1678_primary_results.csv`
 - `K1678_matched_events.csv.gz`
 - `K1678_saliency_crash_risk.png`
+- `hac_bandwidth_check.py` / `K1678_hac_bandwidth_check.json`
 - `data/` source snapshots, parser output, and analysis panel
 
 ## Result

@@ -1,0 +1,17 @@
+{
+  "kid": "K1678",
+  "verdict": "PASS",
+  "reviewer": "codex gpt-5.6-sol (CLI 0.144.1) primary path, 3 rounds 2026-07-17: FAIL, FAIL, PASS — each FAIL raised a real defect that was fixed (see review_artifact). Round-1 fallback by feature-dev:code-reviewer opus subagent while the codex invocation was debugged; the PASS rests on the primary path, not the fallback. Original K1678.py carries a separate codex PASS from 2026-07-10 and is unchanged by this closeout.",
+  "reviewed_at": "2026-07-17T02:55:30+08:00",
+  "reviewed_commit": "01f2a73ca9edd17ba3c3c738f7d5c9eed1db887d",
+  "review_artifact": "experiments/K1678/codex_review.md",
+  "blocking_defects": [],
+  "reviewed_sha256": {
+    "K1678.py": "981f4235de0daeadfd3e157cbd1402b52558ba691c7a27849bba283d5e6b751e",
+    "K1678_results.json": "687eef1c3c187c84e3342200fd735960c18acfa1da6d46c811f1b655dfbefd78",
+    "K1678_saliency_crash_risk.png": "9fa60b13515abd3f63f7a46608c171ed75c7ceebf12001e49fcb12157471700e",
+    "README.md": "6d21f599becee994a2a123da1776361f7dbfb02236d5c167a4df97c3116836e9",
+    "data/sec_comp26532.pdf": "ad8a8cbaec9c6648dca74323f017c0742d9e4301ab0a6abd6f3e97c8c0e7dc80",
+    "hac_bandwidth_check.py": "357119aef6dd1dbf31e7b948ec5b6a77319d630b3feb600c3fc0eb6775bf6bb4"
+  }
+}

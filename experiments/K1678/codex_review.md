@@ -55,3 +55,66 @@ It does **not** show that alleged manipulation dates lack crash risk. Secondary 
 - A no-label matched day is not verified manipulation-free.
 
 Final review verdict: `PASS`.
+
+---
+
+# K1678 Closeout Review Round 2 (2026-07-17)
+
+Scope: the closeout addition only — `hac_bandwidth_check.py`, `K1678_hac_bandwidth_check.json`, and
+the new README §"HAC bandwidth". The original `K1678.py` was not re-reviewed; the 2026-07-10 `PASS`
+above still stands and its artifacts are unchanged.
+
+## Why this round happened
+
+`K1678.py:872` sets `maxlags = horizon - 1` for every date-clustered HAC fit. The repo's canonical
+bandwidth rule (`.claude/rules/experiments.md`, K1655) requires `max(h-1, ceil(h^(1/3)·n^(1/3)))`
+and names `h-1` at `h=1` as a degenerate case. That rule was mechanised on 2026-07-11 — one day
+after K1678 ran — and its ratchet only classifies hand-written DM loops, so a statsmodels
+`cov_type="HAC"` call with `maxlags = horizon - 1` was never in scope of any gate. The closeout
+measured the impact instead of assuming a null was safe.
+
+## Reviewers
+
+- **Primary path**: Codex (`gpt-5.6-sol`, CLI 0.144.1), three rounds, 2026-07-17.
+- **Fallback**: `feature-dev:code-reviewer` fresh-context subagent (opus), one round, used while the
+  Codex invocation was being debugged. Not a substitute for the primary path; recorded for audit.
+
+The first two Codex attempts timed out. Root cause was the caller, not the CLI: a multi-line prompt
+passed as an argv string leaves `codex exec` blocking on stdin. The documented form
+(`printf '%s' "$PROMPT" | scripts/codex_exec_bounded.sh --timeout N -s read-only -`) works.
+
+## Round-by-round defects, all found and fixed
+
+1. **Round 1 (subagent, PASS with a factual defect)**: the prose claimed `maxlags=0` leaves "plain
+   OLS standard errors". False — truncating the Bartlett kernel at zero lags leaves White
+   heteroskedasticity-robust SEs. The error overstated the debt. Fixed in README and docstring.
+2. **Round 2 (Codex, FAIL)**: the README asserted the 16 unswept sensitivity fits could not approach
+   the gate "under any bandwidth", resting on their as-run `|t| = 1.536`. That is the reasoning
+   error the check exists to catch. Fixed by sweeping them: max `|t|` rises to `1.672` — still far
+   from the gate, but now measured. The 8 intercept-only direct diagnostics were swept for the same
+   reason.
+3. **Round 3 (Codex, FAIL)**: "`3.3`–`4.0` across `maxlags` 0 to 20" overstated on two counts — the
+   tested range tops at `4.129`, and the grid is discrete, not a continuous 0–20 sweep. Fixed: the
+   range now reads `3.305`–`4.129`, the grid is stated up front, and every claim is scoped to
+   *tested* bandwidths (JSON field names renamed to match).
+
+## Round 3 verification (Codex, PASS)
+
+- Every README number re-checked against the JSON: `3.305`, `4.129`, `1.258`, `1.672`, `1.536`,
+  `2.16e-15`, acf1 range `-0.079`–`+0.292`, and `16.399%` / `10.391%` against
+  `K1678_results.json` (`16.398721...` / `10.390582...`).
+- "4/8 direct cells above the gate" verified at *every* tested lag, not merely at the maximum; the
+  other four never exceed 3.
+- No wording implies interpolation between grid points; no inferential claim rests on an as-run
+  statistic.
+
+## Outcome
+
+The bandwidth deviation is real methodology debt and is now documented in the README rather than
+silently carried. It does not move the verdict: `NULL_NO_ROBUST_SALIENCY_AMPLIFICATION` holds, with
+0/8 primary cells reaching Harvey `t ≥ 3` at any tested bandwidth (max `|t| = 1.258`).
+
+Non-blocking, deliberately not acted on: `resid_acf1` is stored inside each `by_maxlags` entry
+although residuals are invariant to `cov_type`; a skimmer could misread it as bandwidth-dependent.
+
+Final review verdict: `PASS`.
