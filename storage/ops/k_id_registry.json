@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1718,
+  "last_k_id": 1723,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -880,8 +880,58 @@
       "status": "reserved",
       "topic": "ASIA-2 Japan N225 TOPIX ETF baseline sweep with lagged US VIX",
       "topic_hash": "91093b6f2c262c4e"
+    },
+    {
+      "claimed_at": "2026-07-16T00:00:02.156439+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1719",
+      "number": 1719,
+      "source_max": 1718,
+      "status": "reserved",
+      "topic": "ASIA-5 亞太時區階梯 spillover**：美(SPY/VIX) → 日(^N225) → 台(^TWII) → 東南亞(^STI/^JKSE/^KLSE/^SET.BK) 的隔夜傳遞鏈；T5b（SPY→台）的多市場擴展",
+      "topic_hash": "418b988c68d5291f"
+    },
+    {
+      "claimed_at": "2026-07-16T00:00:02.334847+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1720",
+      "number": 1720,
+      "source_max": 1719,
+      "status": "reserved",
+      "topic": "槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arXiv/JPM 2025 beyond volatility drag）",
+      "topic_hash": "af175461dd2c4603"
+    },
+    {
+      "claimed_at": "2026-07-16T00:00:02.491206+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1721",
+      "number": 1721,
+      "source_max": 1720,
+      "status": "reserved",
+      "topic": "GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測 — Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，檢定對 SPY/GLD/XLE/ITA 不同 horizon 預測力（來源：AER 2022 + IMF GFSR 2025-04 Ch.2）",
+      "topic_hash": "f0450de93425cb08"
+    },
+    {
+      "claimed_at": "2026-07-16T00:00:02.640037+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1722",
+      "number": 1722,
+      "source_max": 1721,
+      "status": "reserved",
+      "topic": "極端高溫/颶風對保險與公用 ETF 的 vol event study — NOAA 事件日期 + KIE/KBWP/XLU RV，dose-response（來源：PLOS One 2025 + JIFM 2025 climate-vol；physical>transition 是 2025 共識）",
+      "topic_hash": "34963e6b3b40a166"
+    },
+    {
+      "claimed_at": "2026-07-16T00:00:02.780494+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1723",
+      "number": 1723,
+      "source_max": 1722,
+      "status": "reserved",
+      "topic": "颱風登陸與台股波動：颱風假的 vol 機制 — CWB 警報/登陸資料 + TAIEX/台指期，停市後復市日 gap vol 系統性檢定、與一般連假區分；台灣特有制度國際空白（來源：physical-risk event-study 2025 方法移植）",
+      "topic_hash": "bd146ad928c8f018"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-15T17:13:15.609596+00:00"
+  "updated_at": "2026-07-16T00:00:02.780494+00:00"
 }

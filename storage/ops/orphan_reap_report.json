@@ -1,9 +1,14 @@
 {
-  "generated_at": "2026-07-15T22:01:06.114499+00:00",
+  "generated_at": "2026-07-16T00:01:27.593130+00:00",
   "adoptable": [],
   "held": [
     {
       "path": "storage/drafts/digest_20260714.md",
+      "reason": "no_title",
+      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
+    },
+    {
+      "path": "storage/drafts/k1410_source_provenance_update.md",
       "reason": "no_title",
       "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
     },
@@ -20,136 +25,31 @@
   ],
   "skipped": {
     "baseline": 519,
-    "registered": 12,
-    "grace": 8,
+    "registered": 19,
+    "grace": 4,
     "inflight": 0
   },
-  "orphan_count": 3,
+  "orphan_count": 4,
   "adopted": [],
   "applied": true,
   "job_deliverable_candidates": [
     {
-      "job_id": "lazypack-mile_3c0ea15f-r2",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_3c0ea15f-r2.json",
+      "job_id": "lazypack-mile_5f3f1589",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_5f3f1589.json",
       "execution_status": "completed",
       "paths": [
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/plan.json",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/1_same_returns.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/2_crash_timing.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/3_withdrawal_rule.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/render_lazypack.py"
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/plan.json",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/1_data_funnel.png",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/2_attention_gate.png",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/3_honest_boundary.png",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/render_lazypack.py"
       ],
       "existing_paths": [
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/plan.json",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/1_same_returns.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/2_crash_timing.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/3_withdrawal_rule.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/render_lazypack.py"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    },
-    {
-      "job_id": "lazypack-mile_3c0ea15f",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_3c0ea15f.json",
-      "execution_status": "completed",
-      "paths": [
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/plan.json",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/1_same_returns.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/2_crash_timing.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/3_withdrawal_rule.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/render_lazypack.py"
-      ],
-      "existing_paths": [
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/plan.json",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/1_same_returns.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/2_crash_timing.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/3_withdrawal_rule.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/render_lazypack.py"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    },
-    {
-      "job_id": "lazypack-mile_8e086903-r2",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_8e086903-r2.json",
-      "execution_status": "completed",
-      "paths": [
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/plan.json",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/1_scoreboard.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/2_rough_not_better.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/3_reading_rule.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/render_lazypack.py"
-      ],
-      "existing_paths": [
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/plan.json",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/1_scoreboard.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/2_rough_not_better.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/3_reading_rule.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/render_lazypack.py"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    },
-    {
-      "job_id": "lazypack-mile_8e086903",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_8e086903.json",
-      "execution_status": "completed",
-      "paths": [
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/plan.json",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/1_scoreboard.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/2_rough_not_better.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/3_reading_rule.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/render_lazypack.py"
-      ],
-      "existing_paths": [
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/plan.json",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/1_scoreboard.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/2_rough_not_better.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/3_reading_rule.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/render_lazypack.py"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    },
-    {
-      "job_id": "lazypack-mile_9d7a5d1a",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_9d7a5d1a.json",
-      "execution_status": "completed",
-      "paths": [
-        "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/plan.json",
-        "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/1_latest_day.png",
-        "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/2_history_split.png",
-        "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/3_reading_rule.png",
-        "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/render_lazypack.py"
-      ],
-      "existing_paths": [
-        "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/plan.json",
-        "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/1_latest_day.png",
-        "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/2_history_split.png",
-        "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/3_reading_rule.png",
-        "storage/lazypack_jobs/mile_9d7a5d1a/runs/lazypack-mile_9d7a5d1a/panels/render_lazypack.py"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    },
-    {
-      "job_id": "lazypack-mile_a89bdd96",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_a89bdd96.json",
-      "execution_status": "completed",
-      "paths": [
-        "storage/lazypack_jobs/mile_a89bdd96/runs/lazypack-mile_a89bdd96/plan.json",
-        "storage/lazypack_jobs/mile_a89bdd96/runs/lazypack-mile_a89bdd96/panels/1_initial_signal.png",
-        "storage/lazypack_jobs/mile_a89bdd96/runs/lazypack-mile_a89bdd96/panels/2_robustness_filter.png",
-        "storage/lazypack_jobs/mile_a89bdd96/runs/lazypack-mile_a89bdd96/panels/3_honest_use.png",
-        "storage/lazypack_jobs/mile_a89bdd96/runs/lazypack-mile_a89bdd96/panels/render_lazypack.py"
-      ],
-      "existing_paths": [
-        "storage/lazypack_jobs/mile_a89bdd96/runs/lazypack-mile_a89bdd96/plan.json",
-        "storage/lazypack_jobs/mile_a89bdd96/runs/lazypack-mile_a89bdd96/panels/1_initial_signal.png",
-        "storage/lazypack_jobs/mile_a89bdd96/runs/lazypack-mile_a89bdd96/panels/2_robustness_filter.png",
-        "storage/lazypack_jobs/mile_a89bdd96/runs/lazypack-mile_a89bdd96/panels/3_honest_use.png",
-        "storage/lazypack_jobs/mile_a89bdd96/runs/lazypack-mile_a89bdd96/panels/render_lazypack.py"
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/plan.json",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/1_data_funnel.png",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/2_attention_gate.png",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/3_honest_boundary.png",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/render_lazypack.py"
       ],
       "previously_delivered_paths": [],
       "rejected": []
@@ -171,6 +71,27 @@
         "storage/lazypack_jobs/mile_bb33fd72/runs/lazypack-mile_bb33fd72/panels/2_prediction_result.png",
         "storage/lazypack_jobs/mile_bb33fd72/runs/lazypack-mile_bb33fd72/panels/3_honest_boundary.png",
         "storage/lazypack_jobs/mile_bb33fd72/runs/lazypack-mile_bb33fd72/panels/render_lazypack.py"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    },
+    {
+      "job_id": "lazypack-mile_d288539b",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_d288539b.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/plan.json",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/1_two_short_bonds.png",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/2_event_split.png",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/3_honest_boundary.png",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/render_lazypack.py"
+      ],
+      "existing_paths": [
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/plan.json",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/1_two_short_bonds.png",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/2_event_split.png",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/3_honest_boundary.png",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/render_lazypack.py"
       ],
       "previously_delivered_paths": [],
       "rejected": []
@@ -216,59 +137,45 @@
   ],
   "job_deliveries": [
     {
-      "job_id": "lazypack-mile_3c0ea15f-r2",
+      "job_id": "lazypack-mile_5f3f1589",
       "paths": [
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/plan.json",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/1_same_returns.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/2_crash_timing.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/3_withdrawal_rule.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f-r2/panels/render_lazypack.py"
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/plan.json",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/1_data_funnel.png",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/2_attention_gate.png",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/3_honest_boundary.png",
+        "storage/lazypack_jobs/mile_5f3f1589/runs/lazypack-mile_5f3f1589/panels/render_lazypack.py"
       ],
       "delivered": true,
       "delivery_status": "delivered",
-      "delivery_commit": "0cba8ca4a60f6b2636670354147ad610e1f17bb1",
-      "reason": "committed"
-    },
-    {
-      "job_id": "lazypack-mile_3c0ea15f",
-      "paths": [
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/plan.json",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/1_same_returns.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/2_crash_timing.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/3_withdrawal_rule.png",
-        "storage/lazypack_jobs/mile_3c0ea15f/runs/lazypack-mile_3c0ea15f/panels/render_lazypack.py"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "aca6c9e1d0b23e2c151859aeb3f95e5a85683795",
-      "reason": "committed"
-    },
-    {
-      "job_id": "lazypack-mile_8e086903-r2",
-      "paths": [
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/plan.json",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/1_scoreboard.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/2_rough_not_better.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/3_reading_rule.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903-r2/panels/render_lazypack.py"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "1f3d4f33b80e704a1be2e3a280fbc2e56de98362",
+      "delivery_commit": "690fa05cfa2c647ffe2f8e404c15ac850f153eb6",
       "reason": "already_committed"
     },
     {
-      "job_id": "lazypack-mile_8e086903",
+      "job_id": "lazypack-mile_bb33fd72",
       "paths": [
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/plan.json",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/1_scoreboard.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/2_rough_not_better.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/3_reading_rule.png",
-        "storage/lazypack_jobs/mile_8e086903/runs/lazypack-mile_8e086903/panels/render_lazypack.py"
+        "storage/lazypack_jobs/mile_bb33fd72/runs/lazypack-mile_bb33fd72/plan.json",
+        "storage/lazypack_jobs/mile_bb33fd72/runs/lazypack-mile_bb33fd72/panels/1_concentration_facts.png",
+        "storage/lazypack_jobs/mile_bb33fd72/runs/lazypack-mile_bb33fd72/panels/2_prediction_result.png",
+        "storage/lazypack_jobs/mile_bb33fd72/runs/lazypack-mile_bb33fd72/panels/3_honest_boundary.png",
+        "storage/lazypack_jobs/mile_bb33fd72/runs/lazypack-mile_bb33fd72/panels/render_lazypack.py"
       ],
       "delivered": true,
       "delivery_status": "delivered",
-      "delivery_commit": "1f3d4f33b80e704a1be2e3a280fbc2e56de98362",
+      "delivery_commit": "ab0825ace362e0f532f52ac68f3cdfb152f0174b",
+      "reason": "committed"
+    },
+    {
+      "job_id": "lazypack-mile_d288539b",
+      "paths": [
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/plan.json",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/1_two_short_bonds.png",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/2_event_split.png",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/3_honest_boundary.png",
+        "storage/lazypack_jobs/mile_d288539b/runs/lazypack-mile_d288539b/panels/render_lazypack.py"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "012ca5e14d9e6ecdaffe85a7d75ee196752e7594",
       "reason": "already_committed"
     }
   ],
@@ -281,15 +188,10 @@
       "path": "storage/drafts/assets/drone_series_guide_lazypack_codex/render_lazypack.py",
       "kind": "unknown",
       "reason": "unrecognised_suffix:.py"
-    },
-    {
-      "path": "storage/drafts/assets/k1410_general_companion/render_charts.py",
-      "kind": "unknown",
-      "reason": "unrecognised_suffix:.py"
     }
   ],
   "draft_artifact_skipped": {
-    "grace": 5,
+    "grace": 0,
     "inflight": 0
   },
   "draft_collections": []

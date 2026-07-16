@@ -1,12 +1,12 @@
 {
-  "last_seen_run_id": 29450374699,
+  "last_seen_run_id": 29457218773,
   "last_seen_conclusion": "failure",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
-  "last_task_id": "ci-red-29450374699",
+  "last_task_id": "ci-red-29457218773",
   "last_push_remediation": {
     "attempted": true,
-    "ahead": 19,
-    "head_sha": "f1e20db65f72026c17d2b34085bca5e65469f92b",
+    "ahead": 12,
+    "head_sha": "071fdc73a287dad615cbd731f84920d33c5031af",
     "pushed": true,
     "rc": 0,
     "outcome": "pushed",
@@ -14,32 +14,32 @@
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "29450374699:1",
-    "run_id": 29450374699,
+    "key": "29457218773:1",
+    "run_id": 29457218773,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29450374699",
-    "head_sha": "d4e004f034abe1de24dc188d199886ed79914dd0",
-    "created_at": "2026-07-15T21:00:18Z",
-    "started_at": "2026-07-15T21:00:18Z",
-    "updated_at": "2026-07-15T21:11:17Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29457218773",
+    "head_sha": "0b90b1c1bcbadb23c6ae45e301726aede7207296",
+    "created_at": "2026-07-15T23:00:21Z",
+    "started_at": "2026-07-15T23:00:21Z",
+    "updated_at": "2026-07-15T23:11:51Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "29450374699:1",
-    "run_id": 29450374699,
+    "key": "29457218773:1",
+    "run_id": 29457218773,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29450374699",
-    "head_sha": "d4e004f034abe1de24dc188d199886ed79914dd0",
-    "created_at": "2026-07-15T21:00:18Z",
-    "started_at": "2026-07-15T21:00:18Z",
-    "updated_at": "2026-07-15T21:11:17Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29457218773",
+    "head_sha": "0b90b1c1bcbadb23c6ae45e301726aede7207296",
+    "created_at": "2026-07-15T23:00:21Z",
+    "started_at": "2026-07-15T23:00:21Z",
+    "updated_at": "2026-07-15T23:11:51Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-07-15T22:00:06.114050+00:00",
+  "updated_at": "2026-07-16T00:00:05.116939+00:00",
   "processed_run_keys": [
     "29304886936:1",
     "29307406826:1",
@@ -86,7 +86,9 @@
     "29438793681:1",
     "29442836650:1",
     "29446641414:1",
-    "29450374699:1"
+    "29450374699:1",
+    "29453904758:1",
+    "29457218773:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -310,7 +312,9 @@
       "29438793681:1",
       "29442836650:1",
       "29446641414:1",
-      "29450374699:1"
+      "29450374699:1",
+      "29453904758:1",
+      "29457218773:1"
     ],
     "repair_task_ids": [
       "ci-red-29421677446",
@@ -319,7 +323,9 @@
       "ci-red-29438793681",
       "ci-red-29442836650",
       "ci-red-29446641414",
-      "ci-red-29450374699"
+      "ci-red-29450374699",
+      "ci-red-29453904758",
+      "ci-red-29457218773"
     ],
     "dispatch_requested_task_ids": [
       "ci-red-29421677446",
@@ -328,7 +334,9 @@
       "ci-red-29438793681",
       "ci-red-29442836650",
       "ci-red-29446641414",
-      "ci-red-29450374699"
+      "ci-red-29450374699",
+      "ci-red-29453904758",
+      "ci-red-29457218773"
     ],
     "notifications": {
       "escalation": {
@@ -347,16 +355,16 @@
       }
     },
     "latest_failure": {
-      "key": "29450374699:1",
-      "run_id": 29450374699,
+      "key": "29457218773:1",
+      "run_id": 29457218773,
       "attempt": 1,
       "status": "completed",
       "conclusion": "failure",
-      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29450374699",
-      "head_sha": "d4e004f034abe1de24dc188d199886ed79914dd0",
-      "created_at": "2026-07-15T21:00:18Z",
-      "started_at": "2026-07-15T21:00:18Z",
-      "updated_at": "2026-07-15T21:11:17Z",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29457218773",
+      "head_sha": "0b90b1c1bcbadb23c6ae45e301726aede7207296",
+      "created_at": "2026-07-15T23:00:21Z",
+      "started_at": "2026-07-15T23:00:21Z",
+      "updated_at": "2026-07-15T23:11:51Z",
       "attempt_history_complete": true
     },
     "failure_heads": [
@@ -367,9 +375,11 @@
       "ea38aa75ab915ad6e7b9708d790b061444e13744",
       "22422d2eed6ef8a244b3a9ca23b569d11edfc429",
       "1e2c5a5340408f4f5a33184a4a756946d019f736",
-      "d4e004f034abe1de24dc188d199886ed79914dd0"
+      "d4e004f034abe1de24dc188d199886ed79914dd0",
+      "f1e20db65f72026c17d2b34085bca5e65469f92b",
+      "0b90b1c1bcbadb23c6ae45e301726aede7207296"
     ],
-    "failure_cycles": 8,
+    "failure_cycles": 10,
     "repair_task_statuses": {
       "ci-red-29421677446": "succeeded",
       "ci-red-29430567843": "succeeded",
@@ -377,26 +387,28 @@
       "ci-red-29438793681": "succeeded",
       "ci-red-29442836650": "succeeded",
       "ci-red-29446641414": "succeeded",
-      "ci-red-29450374699": "pending"
+      "ci-red-29450374699": "succeeded",
+      "ci-red-29453904758": "succeeded",
+      "ci-red-29457218773": "pending"
     },
-    "dispatch_request_count": 8,
-    "last_dispatch_request_at": "2026-07-15T22:00:06.114050+00:00",
+    "dispatch_request_count": 10,
+    "last_dispatch_request_at": "2026-07-16T00:00:05.116939+00:00",
     "push_intent": {
-      "head_sha": "f1e20db65f72026c17d2b34085bca5e65469f92b",
-      "run_key": "29450374699:1",
-      "recorded_at": "2026-07-15T22:00:06.114050+00:00"
+      "head_sha": "071fdc73a287dad615cbd731f84920d33c5031af",
+      "run_key": "29457218773:1",
+      "recorded_at": "2026-07-16T00:00:05.116939+00:00"
     },
     "last_push_remediation": {
       "attempted": true,
-      "ahead": 19,
-      "head_sha": "f1e20db65f72026c17d2b34085bca5e65469f92b",
+      "ahead": 12,
+      "head_sha": "071fdc73a287dad615cbd731f84920d33c5031af",
       "pushed": true,
       "rc": 0,
       "outcome": "pushed",
       "ahead_after": 0
     },
-    "last_push_remediation_at": "2026-07-15T22:00:06.114050+00:00",
-    "last_verified_push_head": "f1e20db65f72026c17d2b34085bca5e65469f92b",
+    "last_push_remediation_at": "2026-07-16T00:00:05.116939+00:00",
+    "last_verified_push_head": "071fdc73a287dad615cbd731f84920d33c5031af",
     "remediation_poll_keys": [
       "2026-07-15T15",
       "2026-07-15T16",
@@ -405,13 +417,15 @@
       "2026-07-15T19",
       "2026-07-15T20",
       "2026-07-15T21",
-      "2026-07-15T22"
+      "2026-07-15T22",
+      "2026-07-15T23",
+      "2026-07-16T00"
     ],
-    "remediation_checks": 8,
-    "repair_commit": "3e36eac3f",
+    "remediation_checks": 10,
+    "repair_commit": "5c40b59ce",
     "repair_commit_source": "task_result",
-    "confirmed_root_cause": "cron_hourly_dispatch.sh changed in c45d82c0d without regenerating config/cron_wrapper_manifest.json or the launchd copy",
+    "confirmed_root_cause": "refill cluster planner read live storage despite redirected fixtures",
     "root_cause_source": "task_result",
-    "escalation_reason": "ci_failed_more_than_two_cycles: 8"
+    "escalation_reason": "ci_failed_more_than_two_cycles: 10"
   }
 }
