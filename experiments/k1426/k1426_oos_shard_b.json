@@ -1,0 +1,197 @@
+{
+  "experiment_id": "k1426_oos",
+  "title": "K1426 follow-up \u2014 expanding-window OOS partial cointegration hedging",
+  "seed": 42,
+  "data_range": {
+    "start": "2015-01-01",
+    "end": "2024-12-31"
+  },
+  "spec": {
+    "min_train": 756,
+    "refit_every": 63,
+    "n_starts": 50,
+    "n_boot": 1000,
+    "block_len": 20,
+    "lookahead_rule": "Train on [:t-1], apply hedge beta to return t via shift(1)."
+  },
+  "pairs": {
+    "pair_3_GLD_IAU": {
+      "error": "yfinance returned empty for GLD/IAU"
+    },
+    "pair_4_GLD_SLV": {
+      "symbols": {
+        "x": "GLD",
+        "y": "SLV"
+      },
+      "date_start": "2015-01-02",
+      "date_end": "2024-12-30",
+      "n_obs_total": 2515,
+      "n_obs_oos": 1759,
+      "min_train": 756,
+      "refit_every": 63,
+      "n_refits": 28,
+      "n_multistart": 50,
+      "oos_window": {
+        "start": "2018-01-03",
+        "end": "2024-12-30"
+      },
+      "hedge_effectiveness": {
+        "ols": 0.24045051123325156,
+        "eg_vecm": 0.24045051123325156,
+        "pch": 0.6026749741988451,
+        "pch_minus_ols": 0.3622244629655935
+      },
+      "dm_squared_hedge_loss_pch_vs_ols": {
+        "t_stat": -6.52667606701125,
+        "p_value": 8.771960935405332e-11,
+        "harvey_threshold_note": "Use |t| > 3.0 for strong claim under multiple testing."
+      },
+      "bootstrap_he_diff": {
+        "point_diff": 0.3622244629655935,
+        "ci_95": [
+          0.24069599900742256,
+          0.5125202170109987
+        ],
+        "bootstrap_median": 0.36153857935023276,
+        "n_boot": 1000,
+        "block_len": 20,
+        "seed": 42
+      },
+      "pch_refit_diagnostics": {
+        "mean_beta": 0.4413688429324564,
+        "mean_rho": 0.21622760776514469,
+        "mean_r2_mr": 0.1162086814723087,
+        "median_half_life_days": 0.8475321099917366
+      },
+      "refit_snapshots_head": [
+        {
+          "oos_date": "2018-01-03",
+          "train_end_date": "2018-01-02",
+          "train_n": 756,
+          "beta_ols": 0.5957363326815984,
+          "beta_eg": 0.5957363326815984,
+          "beta_pch": 0.48630452049089545,
+          "rho_pch": 0.9736236106896923,
+          "r2_mr_pch": 0.4528019144921701,
+          "half_life_days": 25.930959979260574,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2018-04-05",
+          "train_end_date": "2018-04-04",
+          "train_n": 819,
+          "beta_ols": 0.5946727935051761,
+          "beta_eg": 0.5946727935051761,
+          "beta_pch": 0.4913160622419326,
+          "rho_pch": 0.9830858958243425,
+          "r2_mr_pch": 0.5241292884011933,
+          "half_life_days": 40.63286623489611,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2018-07-05",
+          "train_end_date": "2018-07-03",
+          "train_n": 882,
+          "beta_ols": 0.5873732858311786,
+          "beta_eg": 0.5873732858311786,
+          "beta_pch": 0.4844924994407094,
+          "rho_pch": 0.9879369645104901,
+          "r2_mr_pch": 0.4603763770769712,
+          "half_life_days": 57.113153249900016,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2018-10-03",
+          "train_end_date": "2018-10-02",
+          "train_n": 945,
+          "beta_ols": 0.540608105349033,
+          "beta_eg": 0.540608105349033,
+          "beta_pch": 0.48621566561304125,
+          "rho_pch": 0.9852066031108176,
+          "r2_mr_pch": 0.5240055177695911,
+          "half_life_days": 46.50773920929035,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-01-04",
+          "train_end_date": "2019-01-03",
+          "train_n": 1008,
+          "beta_ols": 0.47499064267430996,
+          "beta_eg": 0.47499064267430996,
+          "beta_pch": 0.4856984838193764,
+          "rho_pch": 0.34707472221504365,
+          "r2_mr_pch": 0.0740170545826798,
+          "half_life_days": 0.6550153416469773,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-04-05",
+          "train_end_date": "2019-04-04",
+          "train_n": 1071,
+          "beta_ols": 0.4378278247176883,
+          "beta_eg": 0.4378278247176883,
+          "beta_pch": 0.4892555977005651,
+          "rho_pch": 0.31538056974478895,
+          "r2_mr_pch": 0.07589901981780829,
+          "half_life_days": 0.6006603726571901,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-07-08",
+          "train_end_date": "2019-07-05",
+          "train_n": 1134,
+          "beta_ols": 0.36898562120717704,
+          "beta_eg": 0.36898562120717704,
+          "beta_pch": 0.49392080053463494,
+          "rho_pch": -0.8923774487315589,
+          "r2_mr_pch": 0.000788652887929488,
+          "half_life_days": null,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2019-10-04",
+          "train_end_date": "2019-10-03",
+          "train_n": 1197,
+          "beta_ols": 0.4151912574719149,
+          "beta_eg": 0.4151912574719149,
+          "beta_pch": 0.48563055134256794,
+          "rho_pch": 0.16596254241021993,
+          "r2_mr_pch": 0.039792725460436315,
+          "half_life_days": 0.3859408790463297,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2020-01-06",
+          "train_end_date": "2020-01-03",
+          "train_n": 1260,
+          "beta_ols": 0.4651480790818399,
+          "beta_eg": 0.4651480790818399,
+          "beta_pch": 0.4851730929517309,
+          "rho_pch": 0.16072675105134182,
+          "r2_mr_pch": 0.03913463139992713,
+          "half_life_days": 0.3791730803609279,
+          "n_starts_converged": 50
+        },
+        {
+          "oos_date": "2020-04-06",
+          "train_end_date": "2020-04-03",
+          "train_n": 1323,
+          "beta_ols": 0.4312879642406821,
+          "beta_eg": 0.4312879642406821,
+          "beta_pch": 0.4640363864751831,
+          "rho_pch": -0.8490497131176946,
+          "r2_mr_pch": 0.0026933805754997524,
+          "half_life_days": null,
+          "n_starts_converged": 49
+        }
+      ]
+    }
+  },
+  "notes": [
+    "OOS HE is computed from hedged daily returns, not in-sample spread variance.",
+    "EG-VECM hedge ratio equals stage-1 OLS beta here; alpha is omitted because OOS return hedge uses beta only.",
+    "DM uses squared hedged returns as variance-loss proxy; negative t means PCH lower variance than OLS.",
+    "Monthly (21-day) refit cadence is a compute tractability choice; parameters remain strictly lagged."
+  ],
+  "reproduce": "uv run python experiments/k1426/oos.py"
+}
