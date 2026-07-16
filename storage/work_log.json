@@ -19166,5 +19166,25 @@
     "owner": "claude-main-interactive",
     "commit": "33927b4a5",
     "summary": "K1695 孤兒收尾 triage：(1) 補 commit 撤回修正的認證檔（review_verdict PASS + certification，certify 驗證綁定現行 bytes，e7651e04f）；(2) 收成 HELD 文章 worktree（誠實撤回敘事 draft + 2 圖 + lazypack plan，merge 33927b4a5）；(3) HELD 原因已解除 → 建 K1695_article_general_retry1 P2 排回發佈流程；(4) 回收 k1695-codex-reverify 空 worktree。"
+  },
+  {
+    "timestamp": "2026-07-16T14:50:52+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29475505993",
+    "outcome": "completed",
+    "actor": "claude-main-interactive",
+    "owner": "claude-main-interactive",
+    "commit": "79b310e37",
+    "summary": "CI 紅燈修復（run 29475505993, K1704 merge commit）：根因=push 時序（merge 先上 origin、knowledge entry commit 還在本地）→ knowledge_unrecorded_ratchet 正確攔截。修復=本地驗證 test 過 + canonical push wrapper 推 3 commits（79b310e37）→ 新 run 29477295356 GREEN 驗證。無代碼缺陷、無需 gate 變更。"
+  },
+  {
+    "timestamp": "2026-07-16T15:15:54+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_strategy_metrics_freshness_20260716",
+    "outcome": "completed",
+    "actor": "codex-failover-slot-1-da6dbdc69757420cb1601e46c154eac5",
+    "owner": "codex-failover-slot-1-da6dbdc69757420cb1601e46c154eac5",
+    "commit": null,
+    "summary": "Recovered stale strategy metrics after scheduled daily_update aborted on a transient dirty-output guard. Refreshed and validated 14 strategies, synced 14/14 cache rows, detector now clear; full wrapper later hit its 600s watchdog after downstream market sync."
   }
 ]
