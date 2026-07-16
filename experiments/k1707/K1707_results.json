@@ -1,0 +1,170 @@
+{
+  "experiment_id": "K1707",
+  "status": "INSUFFICIENT_STRESS_SUPPORT",
+  "methodology_type": "descriptive pseudo-data adequacy audit",
+  "run_timestamp_policy": "omitted_for_byte_reproducibility",
+  "seed": 42,
+  "research_question": "Does option-auction execution-quality benefit collapse in pre-known high-VIX states?",
+  "data": {
+    "source": "Harvard Dataverse author pseudo-data",
+    "doi": "doi:10.7910/DVN/LMB13N",
+    "license": "CC0-1.0",
+    "raw_datafile_id": 10844401,
+    "raw_md5": "f15b6286a6954f059bb59c31227eeb66",
+    "raw_bytes": 420675584,
+    "author_caveat": "Randomized, independently noised, anonymized and smaller pseudo-data; cannot reproduce paper results; timestamps differ from original OPRA.",
+    "raw_rows": 1161488,
+    "auction_rows": 384580,
+    "auction_share": 0.33110974887385836,
+    "distinct_dates": 16,
+    "date_min": "2020-09-18",
+    "date_max": "2020-12-14",
+    "distinct_symbols": 3,
+    "symbols": [
+      "Stock1",
+      "Stock2",
+      "Stock3"
+    ],
+    "signal_formula": "VIXCLS.ffill().shift(1)",
+    "threshold": 30.0,
+    "high_stress_dates": 0,
+    "vix_min": 22.52,
+    "vix_max": 26.46,
+    "vix_median": 25.0,
+    "weekend_dates": [
+      "2020-09-19",
+      "2020-09-20",
+      "2020-10-11",
+      "2020-11-14",
+      "2020-12-12",
+      "2020-12-13"
+    ],
+    "weekend_share": 0.375
+  },
+  "pre_registered_support_gate": {
+    "passed": false,
+    "checks": {
+      "distinct_dates_at_least_80": false,
+      "high_stress_dates_at_least_30": false,
+      "distinct_symbols_at_least_10": false,
+      "no_weekend_pseudo_dates": false
+    }
+  },
+  "confirmatory_analysis": {
+    "executed": false,
+    "fixed_high_stress_threshold": 30.0,
+    "interaction": "AUCTION_IND x 1[VIX_signal_lag1 >= 30]",
+    "reason_not_executed": "One or more pre-registered data-support checks failed.",
+    "holm_family": [
+      "PIMP_C",
+      "EffectiveSpread_C",
+      "EQ",
+      "dispersion"
+    ],
+    "placebo_and_randomization_inference": "required only if support gate passes"
+  },
+  "descriptive_only": {
+    "auction_benefits": [
+      {
+        "outcome": "PIMP_C",
+        "statistic": "mean",
+        "auction_benefit": 4.908838706730881,
+        "auction_n": 384580,
+        "continuous_n": 776908
+      },
+      {
+        "outcome": "EffectiveSpread_C",
+        "statistic": "mean",
+        "auction_benefit": 5.241782601371843,
+        "auction_n": 384580,
+        "continuous_n": 776908
+      },
+      {
+        "outcome": "EQ",
+        "statistic": "mean",
+        "auction_benefit": 0.39574692081530377,
+        "auction_n": 384580,
+        "continuous_n": 776908
+      },
+      {
+        "outcome": "PIMP_C",
+        "statistic": "sd",
+        "auction_benefit": -1.527496245098387,
+        "auction_n": 384580,
+        "continuous_n": 776908
+      },
+      {
+        "outcome": "EffectiveSpread_C",
+        "statistic": "sd",
+        "auction_benefit": 10.961237046668648,
+        "auction_n": 384580,
+        "continuous_n": 776908
+      },
+      {
+        "outcome": "EQ",
+        "statistic": "sd",
+        "auction_benefit": 0.08558953936735986,
+        "auction_n": 384580,
+        "continuous_n": 776908
+      }
+    ],
+    "auction_only_multiple_bidder_rate": {
+      "outcome": "MULTIPLE_IND",
+      "statistic": "auction_only_rate",
+      "rate": 0.05070466482916428,
+      "n": 384580
+    },
+    "weighting": "all available pseudo trades; pooled sufficient statistics, not date-equal weighting",
+    "warning": "No VIX slopes or p-values. These values describe independently noised pseudo-data and are not evidence about real option-market stress states."
+  },
+  "lookahead_policy": {
+    "explicit_signal_code": "calendar['vix_signal_lag1'] = calendar['VIXCLS'].ffill().shift(1)",
+    "same_day_vix_used": false
+  },
+  "limitations": [
+    "Public file is pseudo-data, not original OPRA observations.",
+    "Only 16 pseudo dates and 3 anonymized underlyings are present.",
+    "Pseudo dates include weekends and differ from original timestamps.",
+    "No pseudo date reaches the fixed pre-registered VIX>=30 stress threshold.",
+    "Absence of support is not a null estimate and cannot establish that auction benefits persist or collapse in stress."
+  ],
+  "references": [
+    {
+      "authors": "Khan, Hendershott, Riordan",
+      "year": 2026,
+      "title": "Option Auctions",
+      "journal": "Review of Financial Studies 39(3):783-834",
+      "doi": "10.1093/rfs/hhaf043"
+    },
+    {
+      "authors": "Bryzgalova, Pavlova, Sikorskaya",
+      "year": 2023,
+      "title": "Retail Trading in Options and the Rise of the Big Three Wholesalers",
+      "journal": "Journal of Finance",
+      "doi": "10.1111/jofi.13285"
+    },
+    {
+      "authors": "Anand, Muravyev",
+      "year": 2024,
+      "title": "Does Internalization Impact Quote Competition?",
+      "journal": "SSRN",
+      "ssrn": "4891227"
+    },
+    {
+      "authors": "Battalio, Jennings",
+      "year": 2024,
+      "title": "On the Potential Cost of Mandating Qualified Auctions for Marketable Retail Orders",
+      "journal": "Journal of Investing 33(1):69-99",
+      "doi": "10.3905/joi.2023.1.287"
+    }
+  ],
+  "artifacts": {
+    "analysis_panel": "experiments/k1707/data/daily_auction_panel.csv.gz",
+    "vix": "experiments/k1707/data/vix_fred_2020.csv",
+    "figures": [
+      "experiments/k1707/figures/k1707_stress_support.png",
+      "experiments/k1707/figures/k1707_descriptive_benefits.png"
+    ],
+    "source_manifest": "experiments/k1707/data/source_manifest.json"
+  }
+}

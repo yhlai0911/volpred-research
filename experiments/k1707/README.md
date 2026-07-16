@@ -45,7 +45,7 @@ confirmatory `auction × high_stress` interaction 只有在以下條件全部滿
 - `PIMP_C`：price improvement（cents），越高越好。
 - `EffectiveSpread_C`：effective spread（cents），越低越好。
 - `EQ`：effective/quoted spread ratio，越低越好。
-- `MULTIPLE_IND`：auction 內多 bidder 指標。
+- `MULTIPLE_IND`：auction-only 多 bidder rate，與 auction/continuous benefit 分開報告。
 - dispersion：每個 pseudo date × auction cell 的 trade-level outcome 標準差。
 
 描述性的 auction benefit 定義為：
@@ -53,7 +53,7 @@ confirmatory `auction × high_stress` interaction 只有在以下條件全部滿
 - price improvement：`auction - continuous`；
 - effective spread / EQ / dispersion：`continuous - auction`。
 
-正值表示 auction execution quality 較佳。pseudo date 對接 VIX 只用來稽核 stress support，不承載效果估計。
+正值表示 auction execution quality 較佳。全樣本 benefit 直接用全部可用 pseudo trades 的 pooled sufficient statistics 計算，不對 pseudo dates 等權。完整 raw date roster（包括 outcome 全缺的日期）才用來對接 VIX 與稽核 stress support；VIX 不進入描述效果產物。
 
 ## Lookahead policy
 
@@ -84,3 +84,11 @@ uv run python experiments/k1707/K1707.py
 ```
 
 大型 Dataverse raw file 放在 gitignored 的 `storage/cache/k1707/`；若不存在，程式會從 pinned datafile ID 下載並驗 MD5。可提交的 aggregate panel 足以重算本次 adequacy audit 與描述統計。
+
+## 結果（2026-07-16）
+
+科學 verdict：`INSUFFICIENT_STRESS_SUPPORT`。公開 pseudo-data 有 1,161,488 筆，其中 auction 384,580 筆（33.11%），但只有 16 個 pseudo dates、3 個匿名標的、0 個 `VIX>=30` dates，且 6 個日期落在週末。四項預註冊 support gate 因而全數失敗；confirmatory `auction × high_stress` interaction 未執行。
+
+全樣本 pooled pseudo-data 描述量顯示：price improvement benefit 4.909 cents、effective-spread benefit 5.242 cents、EQ benefit 0.396，auction-only multiple-bidder rate 5.07%。這些數字只描述經獨立加噪且縮小的公開檔，不能當作真實 OPRA、市場壓力效果或 null evidence。
+
+兩次完整重跑的 results JSON、aggregate panel、manifest、frozen VIX 與兩張 PNG SHA-256 全部一致。若未來取得真實 timestamp 的 OPRA 樣本，只有在至少 80 個交易日、30 個事前 `VIX>=30` 日與 10 個標的都滿足後，才可啟動預註冊 interaction inference。

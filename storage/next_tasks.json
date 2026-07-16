@@ -35581,7 +35581,7 @@
     "title": "K1707: 選擇權競價的 price-improvement／liquidity benefit 是否在壓力期崩解** — 用作者公開 replication sample 對接事前已知 VIX，預註冊競價×高波動 interaction，檢定 exe",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1616). Original: 選擇權競價的 price-improvement／liquidity benefit 是否在壓力期崩解** — 用作者公開 replication sample 對接事前已知 VIX，預註冊競價×高波動 interaction，檢定 execution quality 與 dispersion；若公開樣本不含完整 OPRA 欄位，只稱 replication-sample stress diagnostic。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1707.py with signal.shift(1) + seed=42, (c) K1707_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35591,9 +35591,6 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-13T23:52:32Z",
-    "claimed_by": "codex-desktop-k1707",
-    "claimed_at": "2026-07-16T00:09:59.109892+00:00",
-    "claim_session_id": "074bd9040f61",
     "status_history": [
       {
         "ts": "2026-07-16T00:09:59.109906+00:00",
@@ -35606,9 +35603,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-desktop-k1707"
+      },
+      {
+        "ts": "2026-07-16T00:39:47.228404+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-desktop-k1707"
       }
     ],
-    "started_at": "2026-07-16T00:09:59.473626+00:00"
+    "started_at": "2026-07-16T00:09:59.473626+00:00",
+    "completed_at": "2026-07-16T00:39:47.228390+00:00",
+    "result": "K1707 public pseudo-data adequacy audit completed: 16 dates, 0 high-stress dates, 3 symbols, 6 weekends; all support gates failed, so no confirmatory interaction was run. Scientific verdict INSUFFICIENT_STRESS_SUPPORT; process review and certification PASS; no knowledge entry."
   },
   {
     "id": "K1708",
@@ -36895,13 +36900,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-15T23:33:20.826022+00:00",
+    "completed_at": "2026-07-16T00:26:46.640471+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-15T23:33:20.826022+00:00",
-      "last_clean_observed_at": "2026-07-15T23:33:20.826022+00:00"
+      "resolved_at": "2026-07-16T00:26:46.640471+00:00",
+      "last_clean_observed_at": "2026-07-16T00:26:46.640471+00:00"
     }
   },
   {

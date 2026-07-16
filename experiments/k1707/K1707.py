@@ -53,6 +53,7 @@ MIN_HIGH_DATES = 30
 MIN_SYMBOLS = 10
 CHUNK_SIZE = 250_000
 OUTCOMES = ("PIMP_C", "EffectiveSpread_C", "EQ", "MULTIPLE_IND")
+BENEFIT_OUTCOMES = ("PIMP_C", "EffectiveSpread_C", "EQ")
 
 REFERENCES = [
     {
@@ -147,7 +148,7 @@ def ensure_sources(refresh: bool = False) -> None:
         )
 
 
-def _add_stats(target: dict[tuple[pd.Timestamp, int, str], list[float]], key: tuple[pd.Timestamp, int, str], values: pd.Series) -> None:
+def _add_stats(target: dict[Any, list[float]], key: Any, values: pd.Series) -> None:
     x = pd.to_numeric(values, errors="coerce").replace([np.inf, -np.inf], np.nan).dropna()
     if x.empty:
         return
@@ -157,9 +158,32 @@ def _add_stats(target: dict[tuple[pd.Timestamp, int, str], list[float]], key: tu
     row[2] += float(np.square(x.to_numpy(dtype=float)).sum())
 
 
-def aggregate_raw(path: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
+def _stats_frame(stats: dict[Any, list[float]], key_names: list[str]) -> pd.DataFrame:
+    rows: list[dict[str, Any]] = []
+    for key, (count, total, total_sq) in sorted(stats.items()):
+        keys = key if isinstance(key, tuple) else (key,)
+        mean = total / count
+        variance = (
+            max(0.0, (total_sq - total * total / count) / (count - 1))
+            if count > 1
+            else math.nan
+        )
+        row = dict(zip(key_names, keys, strict=True))
+        row.update(
+            {
+                "n": int(count),
+                "mean": mean,
+                "sd": math.sqrt(variance) if count > 1 else math.nan,
+            }
+        )
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def aggregate_raw(path: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, Any]]:
     needed = ["DATE", "SYMBOL_ONLY", "AUCTION_IND", *OUTCOMES]
     stats: dict[tuple[pd.Timestamp, int, str], list[float]] = defaultdict(lambda: [0.0, 0.0, 0.0])
+    pooled_stats: dict[tuple[int, str], list[float]] = defaultdict(lambda: [0.0, 0.0, 0.0])
     dates: set[pd.Timestamp] = set()
     symbols: set[str] = set()
     total_rows = 0
@@ -193,22 +217,11 @@ def aggregate_raw(path: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
             a = int(auction)
             for outcome in OUTCOMES:
                 _add_stats(stats, (pd.Timestamp(date), a, outcome), group[outcome])
+                _add_stats(pooled_stats, (a, outcome), group[outcome])
 
-    rows: list[dict[str, Any]] = []
-    for (date, auction, outcome), (count, total, total_sq) in sorted(stats.items()):
-        mean = total / count
-        variance = max(0.0, (total_sq - total * total / count) / (count - 1)) if count > 1 else math.nan
-        rows.append(
-            {
-                "date": date,
-                "auction": auction,
-                "outcome": outcome,
-                "n": int(count),
-                "mean": mean,
-                "sd": math.sqrt(variance) if count > 1 else math.nan,
-            }
-        )
-    panel = pd.DataFrame(rows)
+    panel = _stats_frame(stats, ["date", "auction", "outcome"])
+    pooled = _stats_frame(pooled_stats, ["auction", "outcome"])
+    date_roster = pd.DataFrame({"date": sorted(dates)})
     audit = {
         "raw_rows": total_rows,
         "auction_rows": auction_rows,
@@ -219,17 +232,17 @@ def aggregate_raw(path: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
         "distinct_symbols": len(symbols),
         "symbols": sorted(symbols),
     }
-    return panel, audit
+    return panel, pooled, date_roster, audit
 
 
-def attach_lagged_vix(panel: pd.DataFrame, vix_path: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
+def build_stress_audit(date_roster: pd.DataFrame, vix_path: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
     vix = pd.read_csv(vix_path)
     if list(vix.columns) != ["observation_date", "VIXCLS"]:
         raise RuntimeError(f"unexpected FRED columns: {list(vix.columns)}")
     vix["observation_date"] = pd.to_datetime(vix["observation_date"], errors="raise")
     vix["VIXCLS"] = pd.to_numeric(vix["VIXCLS"], errors="coerce")
-    date_min = min(panel["date"].min(), vix["observation_date"].min())
-    date_max = max(panel["date"].max(), vix["observation_date"].max())
+    date_min = min(date_roster["date"].min(), vix["observation_date"].min())
+    date_max = max(date_roster["date"].max(), vix["observation_date"].max())
     calendar = pd.DataFrame({"date": pd.date_range(date_min, date_max, freq="D")})
     calendar = calendar.merge(
         vix.rename(columns={"observation_date": "date"}), on="date", how="left", validate="one_to_one"
@@ -237,12 +250,13 @@ def attach_lagged_vix(panel: pd.DataFrame, vix_path: Path) -> tuple[pd.DataFrame
     # Explicit lookahead guard: the signal known on calendar day t is the last
     # available VIX close strictly before t. Weekend ffill occurs before lagging.
     calendar["vix_signal_lag1"] = calendar["VIXCLS"].ffill().shift(1)
-    panel = panel.merge(calendar[["date", "vix_signal_lag1"]], on="date", how="left", validate="many_to_one")
-    if panel["vix_signal_lag1"].isna().any():
+    dates = date_roster.merge(
+        calendar[["date", "vix_signal_lag1"]], on="date", how="left", validate="one_to_one"
+    )
+    if dates["vix_signal_lag1"].isna().any():
         raise RuntimeError("lagged VIX missing for one or more pseudo dates")
-    panel["high_stress"] = (panel["vix_signal_lag1"] >= HIGH_STRESS_VIX).astype(int)
+    dates["high_stress"] = (dates["vix_signal_lag1"] >= HIGH_STRESS_VIX).astype(int)
 
-    dates = panel[["date", "vix_signal_lag1", "high_stress"]].drop_duplicates()
     weekend = dates[dates["date"].dt.dayofweek >= 5]
     audit = {
         "signal_formula": "VIXCLS.ffill().shift(1)",
@@ -254,7 +268,7 @@ def attach_lagged_vix(panel: pd.DataFrame, vix_path: Path) -> tuple[pd.DataFrame
         "weekend_dates": [d.strftime("%Y-%m-%d") for d in weekend["date"]],
         "weekend_share": len(weekend) / len(dates),
     }
-    return panel, audit
+    return dates, audit
 
 
 def support_gate(data_audit: dict[str, Any], vix_audit: dict[str, Any]) -> dict[str, Any]:
@@ -267,38 +281,33 @@ def support_gate(data_audit: dict[str, Any], vix_audit: dict[str, Any]) -> dict[
     return {"passed": all(checks.values()), "checks": checks}
 
 
-def descriptive_benefits(panel: pd.DataFrame) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def descriptive_benefits(pooled: pd.DataFrame) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     overall: list[dict[str, Any]] = []
-    daily: list[dict[str, Any]] = []
     for metric in ("mean", "sd"):
-        for outcome in OUTCOMES:
-            subset = panel[panel["outcome"] == outcome]
-            pivot = subset.pivot(index="date", columns="auction", values=metric)
-            if not {0, 1}.issubset(pivot.columns):
-                continue
+        for outcome in BENEFIT_OUTCOMES:
+            subset = pooled[pooled["outcome"] == outcome].set_index("auction")
+            if not {0, 1}.issubset(subset.index):
+                raise RuntimeError(f"missing auction or continuous observations for {outcome}")
             sign = 1.0 if outcome == "PIMP_C" and metric == "mean" else -1.0
-            benefit = sign * (pivot[1] - pivot[0])
-            vix = subset.drop_duplicates("date").set_index("date")["vix_signal_lag1"].reindex(benefit.index)
-            valid = benefit.notna() & vix.notna()
             overall.append(
                 {
                     "outcome": outcome,
                     "statistic": metric,
-                    "auction_benefit_mean": float(benefit[valid].mean()),
-                    "n_dates": int(valid.sum()),
+                    "auction_benefit": float(sign * (subset.loc[1, metric] - subset.loc[0, metric])),
+                    "auction_n": int(subset.loc[1, "n"]),
+                    "continuous_n": int(subset.loc[0, "n"]),
                 }
             )
-            for date in benefit.index[valid]:
-                daily.append(
-                    {
-                        "date": date.strftime("%Y-%m-%d"),
-                        "outcome": outcome,
-                        "statistic": metric,
-                        "auction_benefit": float(benefit.loc[date]),
-                        "vix_signal_lag1": float(vix.loc[date]),
-                    }
-                )
-    return overall, daily
+    multiple = pooled[(pooled["outcome"] == "MULTIPLE_IND") & (pooled["auction"] == 1)]
+    if len(multiple) != 1:
+        raise RuntimeError("missing or duplicate auction-only MULTIPLE_IND statistics")
+    auction_only = {
+        "outcome": "MULTIPLE_IND",
+        "statistic": "auction_only_rate",
+        "rate": float(multiple.iloc[0]["mean"]),
+        "n": int(multiple.iloc[0]["n"]),
+    }
+    return overall, auction_only
 
 
 def write_panel(panel: pd.DataFrame) -> Path:
@@ -312,9 +321,9 @@ def write_panel(panel: pd.DataFrame) -> Path:
     return path
 
 
-def make_figures(panel: pd.DataFrame, gate: dict[str, Any], overall: list[dict[str, Any]]) -> list[Path]:
+def make_figures(stress_dates: pd.DataFrame, gate: dict[str, Any], overall: list[dict[str, Any]]) -> list[Path]:
     FIGURES.mkdir(parents=True, exist_ok=True)
-    dates = panel[["date", "vix_signal_lag1"]].drop_duplicates().sort_values("date")
+    dates = stress_dates.sort_values("date")
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
     axes[0].plot(dates["date"], dates["vix_signal_lag1"], marker="o", color="#2563eb")
@@ -325,12 +334,15 @@ def make_figures(panel: pd.DataFrame, gate: dict[str, Any], overall: list[dict[s
     axes[0].legend(frameon=False)
 
     labels = [x.replace("_", "\n") for x in gate["checks"]]
-    values = [1 if x else 0 for x in gate["checks"].values()]
-    colors = ["#16a34a" if x else "#dc2626" for x in values]
-    axes[1].bar(range(len(values)), values, color=colors)
+    values = list(gate["checks"].values())
+    colors = ["#16a34a" if passed else "#dc2626" for passed in values]
+    markers = ["o" if passed else "x" for passed in values]
+    for i, (passed, color, marker) in enumerate(zip(values, colors, markers, strict=True)):
+        axes[1].scatter(i, 0, color=color, marker=marker, s=170, linewidths=3)
+        axes[1].text(i, -0.15, "PASS" if passed else "FAIL", ha="center", color=color)
     axes[1].set_xticks(range(len(values)), labels, fontsize=8)
-    axes[1].set_ylim(0, 1.15)
-    axes[1].set_yticks([0, 1], ["FAIL", "PASS"])
+    axes[1].set_ylim(-0.35, 0.35)
+    axes[1].set_yticks([])
     axes[1].set_title("Pre-registered data-support gates")
     fig.tight_layout()
     support_path = FIGURES / "k1707_stress_support.png"
@@ -338,12 +350,15 @@ def make_figures(panel: pd.DataFrame, gate: dict[str, Any], overall: list[dict[s
     plt.close(fig)
 
     means = [x for x in overall if x["statistic"] == "mean" and x["outcome"] != "MULTIPLE_IND"]
-    fig, ax = plt.subplots(figsize=(8, 4.8))
-    ax.bar([x["outcome"] for x in means], [x["auction_benefit_mean"] for x in means], color="#7c3aed")
-    ax.axhline(0, color="black", linewidth=0.8)
-    ax.set_title("Pseudo-data auction benefit (descriptive only)")
-    ax.set_ylabel("Benefit; positive means auction is better")
-    ax.tick_params(axis="x", rotation=20)
+    fig, axes = plt.subplots(1, len(means), figsize=(11, 4.5))
+    for ax, item in zip(axes, means, strict=True):
+        value = item["auction_benefit"]
+        ax.bar(["Auction benefit"], [value], color="#7c3aed", width=0.55)
+        ax.axhline(0, color="black", linewidth=0.8)
+        ax.set_title(item["outcome"])
+        ax.set_ylabel("Cents" if item["outcome"] != "EQ" else "Ratio")
+        ax.text(0, value, f"{value:.3f}", ha="center", va="bottom")
+    fig.suptitle("Pseudo-data pooled auction benefit (descriptive only)\nPositive means auction is better")
     fig.tight_layout()
     desc_path = FIGURES / "k1707_descriptive_benefits.png"
     fig.savefig(desc_path, dpi=170, bbox_inches="tight", metadata={"Software": "matplotlib"})
@@ -354,20 +369,22 @@ def make_figures(panel: pd.DataFrame, gate: dict[str, Any], overall: list[dict[s
 def run(refresh_source: bool = False) -> dict[str, Any]:
     np.random.seed(SEED)
     ensure_sources(refresh=refresh_source)
-    panel, data_audit = aggregate_raw(RAW)
-    panel, vix_audit = attach_lagged_vix(panel, VIX_CACHE)
+    panel, pooled, date_roster, data_audit = aggregate_raw(RAW)
+    stress_dates, vix_audit = build_stress_audit(date_roster, VIX_CACHE)
     gate = support_gate(data_audit, vix_audit)
     if gate["passed"]:
         raise RuntimeError(
             "Pinned pseudo-data unexpectedly passed the support gate; the confirmatory "
             "interaction estimator must be implemented and independently reviewed before use."
         )
-    overall, daily = descriptive_benefits(panel)
+    overall, auction_only = descriptive_benefits(pooled)
     panel_path = write_panel(panel)
     DATA.mkdir(parents=True, exist_ok=True)
     frozen_vix = DATA / "vix_fred_2020.csv"
-    shutil.copyfile(VIX_CACHE, frozen_vix)
-    figures = make_figures(panel, gate, overall)
+    frozen_vix_tmp = frozen_vix.with_name(f".{frozen_vix.name}.tmp")
+    shutil.copyfile(VIX_CACHE, frozen_vix_tmp)
+    os.replace(frozen_vix_tmp, frozen_vix)
+    figures = make_figures(stress_dates, gate, overall)
 
     verdict = "INSUFFICIENT_STRESS_SUPPORT"
     result: dict[str, Any] = {
@@ -399,7 +416,8 @@ def run(refresh_source: bool = False) -> dict[str, Any]:
         },
         "descriptive_only": {
             "auction_benefits": overall,
-            "daily_benefits": daily,
+            "auction_only_multiple_bidder_rate": auction_only,
+            "weighting": "all available pseudo trades; pooled sufficient statistics, not date-equal weighting",
             "warning": "No VIX slopes or p-values. These values describe independently noised pseudo-data and are not evidence about real option-market stress states.",
         },
         "lookahead_policy": {
