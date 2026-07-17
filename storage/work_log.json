@@ -20868,5 +20868,13 @@
     "owner": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c",
     "task_id": "alert_telegram_reply_backlog_20260716",
     "summary": "治本修 ordinary-alert bridge cleanup gap：新增 _sweep_cleared_ordinary_tasks，remediate_report 現會關掉『condition 已清除但仍 pending』的 bridge 任務（與 internal-alert self-resolve 對稱，取代 push_backlog 個案）。收掉本班 starved telegram_reply_backlog no-op + 過期 host_cron_fail 任務。加 2 regression tests（25 passed），canonical-writer audit 註冊新 writer 並 PASS。"
+  },
+  {
+    "timestamp": "2026-07-17T23:11:33.289644+08:00",
+    "task_type": "platform_ops",
+    "actor": "hourly-slot-1-065a3adc36174665b72683f3a4534377",
+    "owner": "hourly-slot-1-065a3adc36174665b72683f3a4534377",
+    "task_id": "alert_internal_silent_fallback_new_c67bec28dd_20260717T111834524387Z_a1",
+    "summary": "解除 P1 self-healing alert：gen_codex_cli_reference.py 3 個 silent fallback 修正 → run_help/npm_latest 加 warn() 可觀測 trace，parse_subcommands StopIteration 標 # silent-ok（leaf 無 Commands: 區塊屬預期控制流）。audit findings 3→0，--check smoke 通過（drift 偵測正常），PHASE-Z candidate 現可過 pre-commit no-silent-fallback gate。"
   }
 ]

@@ -33662,36 +33662,15 @@
   },
   {
     "id": "dispatch_writer_isolation_design",
-    "title": "Dispatch writer 隔離設計：platform_ops/governance 類比照實驗走 worktree + gate-green 才 merge",
-    "description": "refactor_plan_write_boundary_quality.md WS#6（架構層）。先出設計文件不動 code：盤點各 task_type 的寫入面 → worktree 隔離的成本（setup 時間/磁碟/merge 複雜度）與收益（PHASE-Z 基線問題天生消失、gate 在 merge 邊界跑）→ 分階段 cutover 方案。動 supervisor 前需 owner 過目設計。",
-    "task_type": "governance",
     "status": "succeeded",
+    "task_type": "governance",
+    "title": "Dispatch writer 隔離設計：platform_ops/governance 類比照實驗走 worktree + gate-green 才 merge",
     "priority": 2,
     "source": "owner_correction_20260714_evening",
     "created_at": "2026-07-14T11:16:52.864957+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-14T14:45:04.647204+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T14:45:04.876486+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T14:58:23.740694+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-14T14:45:04.876466+00:00",
     "completed_at": "2026-07-14T14:58:23.740672+00:00",
-    "result": "完成 WS#6 架構設計：盤點全 task_type 寫入面，量測當下 worktree/磁碟成本，定義 write_intent、non-stashing landing、gate receipt 與分階段 cutover。獨立架構終驗 APPROVE；文件明示 runtime 尚未改動，動 supervisor 前仍需 owner 核准。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T15:08:46.794126+00:00"
   },
   {
     "id": "ci-red-29328352646",
@@ -33810,13 +33789,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T15:05:41.337529+00:00",
+    "completed_at": "2026-07-17T15:12:35.588061+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T15:05:41.337529+00:00",
-      "last_clean_observed_at": "2026-07-17T15:05:41.337529+00:00"
+      "resolved_at": "2026-07-17T15:12:35.588061+00:00",
+      "last_clean_observed_at": "2026-07-17T15:12:35.588061+00:00"
     }
   },
   {
@@ -41334,11 +41313,11 @@
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260717T111834524387Z_a1",
     "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=3 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.VacPX1 baseline_findings=64 new=3 resolved=64\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:53 except TimeoutExpired|FileNotFoundError: return None\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:64 except StopIteration: return []\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:102 except URLError|TimeoutError|JSONDecodeError|OSError: return None\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=3 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.fRuWal baseline_findings=64 new=3 resolved=64\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:53 except TimeoutExpired|FileNotFoundError: return None\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:64 except StopIteration: return []\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:102 except URLError|TimeoutError|JSONDecodeError|OSError: return None\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-17T11:18:34.524387+00:00",
     "source": "internal_alert_remediation_router",
     "tags": [
@@ -41352,7 +41331,7 @@
       "episode_id": "20260717T111834524387Z",
       "episode_started_at": "2026-07-17T11:18:34.524387+00:00",
       "attempt_number": 1,
-      "last_seen_at": "2026-07-17T14:07:55.225786+00:00",
+      "last_seen_at": "2026-07-17T15:08:06.220685+00:00",
       "consecutive_remediation_failures": 0,
       "attempt_history": [],
       "escalation_due": false,
@@ -41362,7 +41341,30 @@
         "experiments/k1380/k1380.py:292",
         "experiments/k1380/k1380.py:362"
       ]
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-17T15:09:50.145744+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-065a3adc36174665b72683f3a4534377"
+      },
+      {
+        "ts": "2026-07-17T15:09:55.160326+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-065a3adc36174665b72683f3a4534377"
+      },
+      {
+        "ts": "2026-07-17T15:11:37.643387+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-065a3adc36174665b72683f3a4534377"
+      }
+    ],
+    "started_at": "2026-07-17T15:09:55.160311+00:00",
+    "completed_at": "2026-07-17T15:11:37.643370+00:00",
+    "result": "gen_codex_cli_reference.py 3 silent fallbacks fixed (warn×2 + silent-ok×1); audit findings 3→0; --check smoke OK; PHASE-Z candidate now passes pre-commit gate"
   },
   {
     "id": "email-12130-a433ec",
