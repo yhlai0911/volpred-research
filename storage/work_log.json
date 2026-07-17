@@ -20541,5 +20541,35 @@
     "owner": "hourly-slot-1-ff8b66b6eb9c4d85af4fc3399ad5f992",
     "commit": null,
     "summary": "daily_digest_20260717 完成並發佈：`mile_28f844aa`「財報不是成績單，是換錨日：台積電每項都贏卻跌 4%，用四個問題重讀一場法說」。\n\n時事錨 = 台積電 2026-07-16 法說（營收/毛利率/EPS 全 beat、ADR 盤前跌近 4%）；議題 = 「成績單全贏卻跌，怎麼替一場法說定價」。具名框架「換錨日」+ 骨幹檢查表「換錨日四問」（已知數還是錨／市場有沒有先付保費／別看 beat 幅度／看 T+5 不是 T+0），四問各由 archive 證據撐起。\n\n主線程做選題 + 3-layer 查重（`check_arc_dedup.py --audience general` → verdict=clean，k_coverage/arc_duplicates 皆空；layer-2 grep feed 確認 7/11 那期「財報控制盤」問的是開跑前哪些訊號會亮，與本期「開完之後 beat 卻跌」不同題），writer subagent（opus/medium, per model_router）執行寫作 + 發佈。\n\n主線程獨立驗證（未採信 agent 自述）：feed.json status=published、details.content_type='daily_digest'、digest_articles 9 個 slug 全部對應真實已發佈文章、來源跨度 **45 天**（2026-06-01→07-16，遠超 `_audit_digest_archive_span` 的 14 天 gate）、內文 18 處 inline 來源標註（非只列文末）、14 張圖；`/v3/reports/mile_28f844aa` curl 回 200 且內文可見「換錨日」。anti_ai_gate exit 0（MUST=0，1 WARN 為 markdown 表格觸發的長段落誤判）。\n\n順帶發現並入池（P1 `assign_digest_surface_404_20260717`）：導讀讀者入口全掛 — `/v3/digest/<id>` 對今日新發與 7/16、7/15 三期**全部 404**，`/v3` 首頁 grep「精選導讀」= 0。資料面正常（Supabase/feed 記錄正確、reports 頁 200），所以是前端 route/查詢問題，調查起點 `getDigestColumn` 與 `/v3/digest/[id]`。影響：每天一整班 fire 產的 5,000+ 字策展文，讀者只能靠 reports 頁撞到，導讀專欄產品面等同不存在。本班不自行動手是因為前端改動需 build + 兩版同步 + 線上驗證，剩餘 ~15 分鐘無法完整收尾，依「禁止 partial 提交」入池而非硬做。"
+  },
+  {
+    "timestamp": "2026-07-17T10:18:07+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_bec6bcd1",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18",
+    "owner": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18",
+    "commit": null,
+    "summary": "修 fire receipt 覆蓋率（老闆 msg 886「為什麼沒有理由？為什麼總是會有這樣的情形？」）。實測基線：近 14 天 dispatch commit 中 186/266（有產出的 fire 約 70%）沒有 receipt，那則「agent 沒交代原因」warn 因此每小時都響 = 噪音。\n\n根因不是 agent 懶，是責任結構：做完事直接結束 = 零成本預設路徑；跑 receipt = 需要額外自律，而 prompt 第 252 行還明寫「漏跑不會掉工作」。一個「每個 agent 都得記得、但沒有任何東西檢查」的步驟，不是罕見失誤，是預設行為。與 enforce_final_text.py 同型（prose 自律 → 升級 Stop hook）。\n\n選 (c) 兩者併用：\n(1) 機械 gate — 新增 scripts/hooks/enforce_fire_receipt.py（Stop hook，已註冊進 .claude/settings.json；worker.py:288 明確 --settings 指這支，故 fire 一定載入）。有產出且無 receipt → block 一次要 agent 補跑。stop_hook_active=true 放行（絕不迴圈）；任何 import/probe/解析失敗一律 fail-open —— 漏擋代價是醜 subject，擋錯代價是整班燒 3000s cap 被 SIGKILL，兩者不對稱。\n(2) 降級但不空白 — phase_z 新增 fire_output_needs_receipt()（唯讀，絕不 consume receipt/snapshot，那兩個屬於稍後才跑的 PHASE-Z）與 _generated_subject()；fallback subject 從「本班產出未附說明」改成從 diff 生成「動到 experiments/k1/(2)…」（說得出 what，仍說不出 why）。\n(3) 文案 — 修正 phase_z.py 與實測不符的 'Rare by design' 註解、warn body、fire_receipt.py docstring、dispatch prompt 第 252 行的「漏跑不會掉工作」。\n\n驗證：新測 scripts/tests/test_enforce_fire_receipt.py 13 項全綠（含 block / 已有 receipt 放行 / 不迴圈 / repo 外 fail-open / 唯讀不吃 receipt / foreign 檔非本班產出 / machine churn 免 receipt）；既有 phase_z 測試 38 passed（兩個斷言舊文案的測試已更新，其守護的性質不變）。**端對端實測**：對本班 fire 自己跑 gate → 正確回 decision=block 並列出本班真實產出檔案。\n\n驗收（task 要求「連續 10 班 receipt 覆蓋率 ≥90%」）需累積後續班次才能判定；gate 已就位且有 regression test 防回歸。"
+  },
+  {
+    "timestamp": "2026-07-17T10:18:07+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_4470644e",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18",
+    "owner": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18",
+    "commit": null,
+    "summary": "CPI T-2/T-7 官方日期污染 errata（P1，已餓死 11.4h）— enqueue 給 async agent worker：job `agent-brief_assign_4470644e_cpi_dates-36c589`（opus/xhigh per model_router，worktree .claude/worktrees/dispatch-slot-1-4036423d-cpidates，timeout 5400s）。\n\n不在 fire 內跑的原因：router 判 xhigh + worktree = 研究級長工作，fire 只有 3000s cap，父等子必被 SIGKILL（7/12 三次 hang 的教訓）。\n\nScope 切分：worktree agent 只做到「證據為止」（封存舊證據 → 改用 volpred.data.event_dates.cpi_release_dates 取代硬編日期 → 修 cwd 依賴的輸出路徑 → 完整重跑統計與圖 → 獨立核對 → 產 errata 對照表）。兩篇已發布文章（mile_0fa9c7f5、mile_ebb5d6f5）的原地更正 + sync 留給 followup 主線程，因為 worktree agent 禁碰 feed.json 等共享狀態。已知 T-7 舊均值 +2.184% 會翻為約 -0.847%（符號反轉），brief 明令不得沿用舊敘事。"
+  },
+  {
+    "timestamp": "2026-07-17T11:15:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_09984c91",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-164b2297fd004cc0af310af58f636d87",
+    "owner": "hourly-slot-1-164b2297fd004cc0af310af58f636d87",
+    "commit": null,
+    "summary": "修 refresh_paper_snapshots.py 並行 double-append（K1685 資料完整性）。\n\n根因：append path 在 download 前讀 old_last，然後花數分鐘跑 yfinance，再無鎖 append —— TOCTOU 窗開了整個下載時間。兩個 refresh 重疊時各自拿到同一個過期 old_last、各自 append 同一批 → byte-identical 重複列。\n\n修法（流程層，未手改 CSV）：(1) per-file fcntl lock（shared_state_lock('paper_snapshot_<relpath>')），download 仍在鎖外（慢且無副作用）；(2) 鎖內重讀 boundary —— pre-download 的 old_last 降級為 dry-run 估計值；(3) new_only 對已存在日期 isin 過濾 + frame 內 drop_duplicates + sort；(4) 寫前 fail-closed（檔已污染就拒絕 append，不再往傷口上疊）、寫後驗證 unique-date，違反則 truncate 回 pre-append byte size 回滾。\n\nClass sweep：污染不只 K1685 指出的 1 檔 —— 全 20 個 paper snapshot 掃描後 6 篇 paper 共 9 檔全中，同一批 2026-05-04..05-15、同一次事故。新增 --repair-duplicates（僅在重複列 byte-identical 時才動手，keep first；非同構重複拒絕修並要求人工裁決），9 檔全修，逐檔比對 HEAD 確認存活列 byte-for-byte 未變、只掉重複列（append-only 政策未破）。\n\nRegression test：tests/test_refresh_paper_snapshots_concurrent_append.py（8 tests, all pass）。two-process fork test 用 Barrier 讓兩個 worker 都先讀到過期 boundary 再同時 append —— 真的重現事故時序。另跑 mutation check 確認 pre-fix 邏輯在同一時序下必產生 dup（['2026-05-04','2026-05-05']），證明測試不是空跑。\n\nConsumer 驗證：summary_stats.py 修復後正常執行；既有 paper-vs-snapshot 差異是 snapshot 隨時間延長的已知老化問題（n_full 5410 vs paper claim 5347），非本次改動造成。\n\n未收口（已開 followup assign_7f508612 P2 experiment）：git history 顯示 3ea7dbb9d(05-04) 乾淨、f1bdea2d1(05-20) 已污染 → 約 2 個月的曝險窗，期間讀這些 CSV 的實驗都拿到序列中間多 10 天重複列（對 rolling estimation 是整條時間軸位移，不只是多 10 筆）。需逐一稽核 + 重跑，不在本班 scope。\n\n順帶發現（未修）：next_tasks.append_next_task 對未知 task_family 靜默 fallback 成 platform_ops —— 本班就踩到（傳 'experiment' 實際 canonical 是 'research'），事後修正 record。屬 silent-fallback 反模式。"
   }
 ]

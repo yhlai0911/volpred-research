@@ -40,6 +40,37 @@ from volpred.ops.scheduled_writer_commit import (  # noqa: E402
     dirty_paths_before_write,
     writable_output_paths,
 )
+from volpred.ops.shared_lock import shared_state_lock  # noqa: E402
+
+
+def _rel(csv_path: Path) -> str:
+    """Repo-relative path, tolerating paths outside the checkout (tests)."""
+    try:
+        return csv_path.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return csv_path.resolve().as_posix().lstrip("/")
+
+
+def _snapshot_lock_name(csv_path: Path) -> str:
+    """Per-file lock key. Flattened relpath so two papers never collide."""
+    return "paper_snapshot_" + re.sub(r"[^A-Za-z0-9_.-]", "_", _rel(csv_path))
+
+
+def _read_dates(csv_path: Path) -> list[str]:
+    """Date column as raw strings, in file order. Cheap: no full parse."""
+    with csv_path.open("r", encoding="utf-8") as fp:
+        rows = fp.read().splitlines()
+    return [line.split(",", 1)[0] for line in rows[1:] if line.strip()]
+
+
+def _duplicate_dates(dates: list[str]) -> list[str]:
+    seen: set[str] = set()
+    dups: list[str] = []
+    for d in dates:
+        if d in seen and d not in dups:
+            dups.append(d)
+        seen.add(d)
+    return dups
 
 # Per paper-workflow.md: yfinance pulls MUST use auto_adjust=False so
 # unadjusted close + adj_close coexist in the same snapshot. Splits/divs
@@ -214,37 +245,161 @@ def _refresh_yf_snapshot(csv_path: Path, *, dry_run: bool) -> dict:
         result["written"] = False
         return result
 
+    # Everything above (yfinance download) is slow and side-effect free, so it
+    # runs unlocked. Everything below re-reads and mutates the CSV, so it must
+    # hold the per-file lock: `old_last` was read minutes ago, before the
+    # download, and a concurrent refresh may have appended in the meantime.
+    # Without the lock both processes see the same stale `old_last`, both
+    # append the same block, and the file ends up with byte-identical duplicate
+    # dates (K1685 found 2026-05-04..05-15 doubled in the Paper 9 snapshot).
+    with shared_state_lock(_snapshot_lock_name(csv_path)):
+        return _append_new_rows_locked(csv_path, flat, list(df_old.columns), result)
+
+
+def _append_new_rows_locked(
+    csv_path: Path, flat: pd.DataFrame, target_cols: list[str], result: dict
+) -> dict:
+    """Append strictly-new dated rows. Caller MUST hold the per-file lock."""
+    # Fail closed on a contaminated file: appending to it would bury the
+    # damage under more rows and every consumer keeps reading dupes. Repair
+    # via --repair-duplicates first.
+    dates_before = _read_dates(csv_path)
+    preexisting_dupes = _duplicate_dates(dates_before)
+    if preexisting_dupes:
+        result["written"] = False
+        result["error"] = (
+            f"preexisting_duplicate_dates:{len(preexisting_dupes)} "
+            f"(first={preexisting_dupes[0]}) — run --repair-duplicates"
+        )
+        return result
+
+    # Re-read the boundary UNDER the lock. This is the value that matters;
+    # the pre-download `old_last` is only a dry-run estimate.
+    current_last = pd.Timestamp(max(dates_before)) if dates_before else None
+    existing = set(dates_before)
+
     # APPEND-ONLY policy (2026-05-04 hard rule): paper reproduction depends
     # on byte-stable historical rows. yfinance refetch can return values
     # that differ in low-significance digits even for old dates (rounding,
     # adjustment timing) and pandas to_csv float-format also loses
-    # precision on round-trip. So we DO NOT rewrite df_old at all — we
+    # precision on round-trip. So we DO NOT rewrite existing rows at all — we
     # open the CSV in text-append mode and write only NEW rows after the
     # existing last date.
-    new_only = flat[flat["date"] > old_last].copy()
+    new_only = flat if current_last is None else flat[flat["date"] > current_last]
+    new_only = new_only.copy()
+    new_only["_date_str"] = new_only["date"].dt.strftime("%Y-%m-%d")
+    # Belt and braces: drop anything already on file (a date can be present
+    # out of order) and any dupes inside the fetched frame itself.
+    new_only = new_only[~new_only["_date_str"].isin(existing)]
+    new_only = new_only.drop_duplicates(subset="_date_str", keep="first")
+    new_only = new_only.sort_values("date")
+
     if new_only.empty:
         result["written"] = False
         result["append_only_note"] = "no_strictly_new_dates"
+        result["n_added"] = 0
         return result
 
-    target_cols = list(df_old.columns)
     aligned = pd.DataFrame()
     for col in target_cols:
         aligned[col] = new_only[col] if col in new_only.columns else pd.NA
-    aligned["date"] = new_only["date"].dt.strftime("%Y-%m-%d").values
+    aligned["date"] = new_only["_date_str"].values
     aligned = aligned[target_cols]
 
     # Write rows verbatim using csv module — bypass pandas float-format.
     # New rows use yfinance's default float repr; old rows are untouched
     # so their original float repr survives.
     import csv as _csv
+    size_before = csv_path.stat().st_size
     with csv_path.open("a", newline="", encoding="utf-8") as fp:
         writer = _csv.writer(fp)
         for _, row in aligned.iterrows():
             writer.writerow(["" if pd.isna(v) else v for v in row.tolist()])
+        fp.flush()
+
+    # Post-write verification, still under the lock: if we somehow produced a
+    # duplicate date, roll the file back to its exact pre-append bytes rather
+    # than leave a corrupt snapshot on disk.
+    dupes_after = _duplicate_dates(_read_dates(csv_path))
+    if dupes_after:
+        with csv_path.open("r+", encoding="utf-8") as fp:
+            fp.truncate(size_before)
+        result["written"] = False
+        result["error"] = f"post_write_duplicate_dates:{dupes_after} — rolled back"
+        return result
+
     result["written"] = True
     result["append_only_appended"] = len(aligned)
+    result["n_added"] = len(aligned)
     return result
+
+
+def _repair_duplicate_dates(csv_path: Path, *, dry_run: bool) -> dict:
+    """Drop byte-identical duplicate rows, keeping the first occurrence.
+
+    Only safe when the dupes are byte-identical: that is the signature of the
+    concurrent double-append, and dropping a byte-identical copy leaves every
+    surviving row exactly as originally written (append-only policy intact).
+    Non-identical dupes mean something else went wrong — refuse and report.
+    """
+    rel = _rel(csv_path)
+    with shared_state_lock(_snapshot_lock_name(csv_path)):
+        text = csv_path.read_text(encoding="utf-8")
+        lines = text.splitlines()
+        if not lines:
+            return {"file": rel, "skipped": "empty_csv"}
+        header, body = lines[0], [l for l in lines[1:] if l.strip()]
+
+        by_date: dict[str, list[str]] = {}
+        for line in body:
+            by_date.setdefault(line.split(",", 1)[0], []).append(line)
+        dupes = {d: rows for d, rows in by_date.items() if len(rows) > 1}
+        if not dupes:
+            return {"file": rel, "repaired": False, "note": "no_duplicate_dates"}
+
+        conflicting = {d: rows for d, rows in dupes.items() if len(set(rows)) > 1}
+        if conflicting:
+            return {
+                "file": rel,
+                "repaired": False,
+                "error": (
+                    f"non_identical_duplicate_dates:{sorted(conflicting)} — "
+                    "not a double-append; needs manual adjudication"
+                ),
+            }
+
+        kept: list[str] = []
+        seen: set[str] = set()
+        for line in body:
+            date = line.split(",", 1)[0]
+            if date in seen:
+                continue
+            seen.add(date)
+            kept.append(line)
+
+        report = {
+            "file": rel,
+            "duplicate_dates": sorted(dupes),
+            "rows_before": len(body),
+            "rows_after": len(kept),
+            "rows_dropped": len(body) - len(kept),
+        }
+        if dry_run:
+            report["dry_run"] = True
+            report["repaired"] = False
+            return report
+
+        tmp = csv_path.with_suffix(csv_path.suffix + ".repair.tmp")
+        tmp.write_text("\n".join([header, *kept]) + "\n", encoding="utf-8")
+        tmp.replace(csv_path)
+
+        remaining = _duplicate_dates(_read_dates(csv_path))
+        if remaining:  # pragma: no cover — defensive
+            report["repaired"] = False
+            report["error"] = f"still_duplicated_after_repair:{remaining}"
+            return report
+        report["repaired"] = True
+        return report
 
 
 def _iter_paper_csvs(paper_filter: str | None) -> list[Path]:
@@ -268,6 +423,11 @@ def main() -> int:
     parser.add_argument("--apply", action="store_true", help="write refreshed CSVs")
     parser.add_argument("--paper", default=None, help="restrict to one paper (e.g. garch-x-vix)")
     parser.add_argument("--json", action="store_true", help="emit JSON report")
+    parser.add_argument(
+        "--repair-duplicates",
+        action="store_true",
+        help="drop byte-identical duplicate-date rows left by a concurrent double-append",
+    )
     args = parser.parse_args()
 
     if not (args.dry_run or args.apply):
@@ -275,6 +435,22 @@ def main() -> int:
         return 2
 
     csvs = _iter_paper_csvs(args.paper)
+
+    if args.repair_duplicates:
+        reports = [_repair_duplicate_dates(c, dry_run=args.dry_run) for c in csvs]
+        touched = [r for r in reports if r.get("duplicate_dates") or "error" in r]
+        if args.json:
+            print(json.dumps({"results": touched}, ensure_ascii=False, indent=2))
+        else:
+            print(f"[repair] checked={len(reports)} affected={len(touched)}")
+            for r in touched:
+                if "error" in r:
+                    print(f"  ERROR  {r['file']}: {r['error']}")
+                else:
+                    verb = "WOULD-DROP" if r.get("dry_run") else "DROPPED"
+                    print(f"  {verb} {r['file']}: {r['rows_dropped']} row(s), "
+                          f"dates={r['duplicate_dates']}")
+        return 1 if any("error" in r for r in touched) else 0
     dirty_before = (
         dirty_paths_before_write(ROOT, csvs, label="refresh") if args.apply else frozenset()
     )

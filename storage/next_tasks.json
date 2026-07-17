@@ -29689,42 +29689,15 @@
   },
   {
     "id": "research_private_market_rv_correlation_regime",
-    "title": "研究 backlog fallback: 主權財富基金 private-market 配置上升是否改變公共市場 RV / correlation regime",
-    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 主權財富基金 private-market 配置上升是否改變公共市場 RV / correlation regime — 用公開 SWF allocation / annual report / Global SWF summary（dispatch 前驗證歷史覆蓋）建 sovereign-allocator private-market share proxy，對 public equity / credit / REIT / infrastructure ETF basket（SPY/EFA/EEM/HYG/VNQ/PAVE/IGF）做 regime compare，檢定 allocati | 來源 section: 期刊主題挖掘 batch 2026-07-05（journal_discovery_20260705_0；websearch fed/feds/imf gfsr/faj/cfa/ssrn 2025-26 趨勢層級；task pool json 修復後派 fresh-context general-purpose agent；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
-    "priority": 3,
     "status": "failed",
     "task_type": "experiment",
-    "dispatch_lane": "agent",
+    "title": "研究 backlog fallback: 主權財富基金 private-market 配置上升是否改變公共市場 RV / correlation regime",
+    "priority": 3,
     "source": "auto_research_fallback",
-    "research_slug": "private_market_rv_correlation_regime",
-    "tags": [
-      "auto-research-fallback",
-      "research-program-backlog"
-    ],
     "created_at": "2026-07-11T00:36:11+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-14T02:15:16.735329+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-10-slot2"
-      },
-      {
-        "ts": "2026-07-14T02:15:17.001095+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-10-slot2"
-      },
-      {
-        "ts": "2026-07-14T02:15:17.276949+00:00",
-        "from": "in_progress",
-        "to": "failed",
-        "by": "hourly-10-slot2"
-      }
-    ],
-    "started_at": "2026-07-14T02:15:17.001080+00:00",
     "completed_at": "2026-07-14T02:15:17.276929+00:00",
-    "result": "INFEASIBLE AS SPECIFIED — dispatch 前資料覆蓋驗證未過（任務描述自己要求『dispatch 前驗證覆蓋』）。根因：treatment 變數不可行，非執行失敗。任務指定的資料源『SWF allocation / annual report / Global SWF summary』是年頻揭露（最多十餘個觀測）；即使改用最勤揭露的 NBIM / GPIF 季報也僅數十個觀測。以慢速年度趨勢變數解釋日頻 public-market RV / correlation regime = spurious-trend 陷阱，且距 ≥500 樣本門檻（feedback_research_rigor）與 Harvey |t|>3 差 1-2 個數量級，無論怎麼跑都不可能誠實地產出可信結論。派 xhigh agent 去跑等於預先保證一份不可信的研究。研究誠實 > 有產出。不 dispatch。RE-SCOPE 建議（研究意圖保留，需經正式 research-direction pass 重新設計後再入池）：若要保留『private-market 配置變化 → 公開市場 vol/correlation』的核心提問，treatment 必須換成日頻、市場定價的代理 —— 例如上市另類資產管理人（BX/KKR/APO/ARES）或 private-equity ETF（PSP/PEX）的相對表現/流動性作為 private-market 風險偏好代理，對 SPY/HYG/VNQ/IGF basket 做 regime 檢定。但這已是實質不同的研究問題（市場定價代理 ≠ 實際配置比重），須另行立題、另查既有覆蓋，不可直接沿用本 task 的假說。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T03:07:52.436623+00:00"
   },
   {
     "id": "daily_digest_20260711",
@@ -32882,37 +32855,15 @@
   },
   {
     "id": "platform_ops_arc_gate_macro_false_positive_trending_lane",
-    "title": "trending lane 的 arc gate 對總經主題過度攔截（內容黑洞風險）",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "trending lane 的 arc gate 對總經主題過度攔截（內容黑洞風險）",
+    "priority": 2,
     "source": "agent_discovered",
-    "topology": "subagent",
     "created_at": "2026-07-13T19:36:56.266526+00:00",
-    "description": "2026-07-14 hourly-03 把生成端 dedup 落地時（commit 62b256940），subagent 實測發現既有 arc gate 有 false positive：真實 feed 上 FOMC 類 trending 主題會被 descriptive_strict 擋下 —— 它 match 到的是非農文與 VIX 科普文，並非同一個故事。已驗證 30d 與 90d 窗口結果相同，所以這不是新 regression，是既有行為。\n\n但風險現在升高了：本班已把 trending lane 設成 block（event lane 維持 warn）。既有 arc gate 的過度攔截 + 新的 block policy = 總經類 trending 題目可能整類生不出來，正是 dedup-gate-audit.md 警告過的內容黑洞。\n\n要做：(1) 在真實語料上量化 trending lane 被 descriptive_strict 擋掉的比例與命中樣本，分辨真 dup 與 macro false positive；(2) 修 publish-time arc gate 的 descriptive_strict 校準（注意這是不同 enforcement owner，改它會同時影響發文端，需重新校準、不可只顧生成端）；(3) 順帶處理 theme-saturation threshold=5 只在單一語料快照（2026-07-14, 832 篇）校準、無漂移偵測的問題 —— 測試用合成 fixture pin，抓不到真實語料漂移。\n\n禁止的解法：把 trending lane 從 block 降回不查重（那是退回 incident 原狀）。\n\n---\n**2026-07-14 hourly-06 併入（勿另開 task —— anti-stacking，這兩項與本 task 的 (2)(3) 同一個 gate）**\n\n追查 P1 題目 `trending_repost_2026_07_14_ai資本` 被兩道 gate 同時誤放行時挖出（root fix 見\ncommit ecc5e9bc7 / error_log 2026-07-14 06:20，該 commit 只修 fail-open 那一半，**校準刻意不碰**\n—— 動 saturation 會同時影響發文端，須與本 task 的 false-positive 一起重新校準）：\n\n(4) **實體詞彙表對加密資產全盲**：`extract_entities` 不認得 USDT / USDC / DeFi / 穩定幣 →\n    任何加密題目 entities=[] → arc gate **從未真正審查過任何一篇加密文章**。這件事現在首次可見：\n    `tests/test_topic_dedup_at_generation.py::test_novel_topic_passes` 的穩定幣案例 verdict 已從\n    `clean` 變成 `unjudged_thin_signature`（誠實了，但代表該資產類完全沒有 arc 防護）。\n    修的時候注意：補詞彙會讓一批原本 unjudged 的題目變成可判 → 可能一次冒出新的 block，\n    要跟 (2) 的 false-positive 校準一起看。\n\n(5) **theme_saturation 的 probe 被 task-type 前綴污染**：probe 直接吃 task title，而 title 帶著\n    `[trending_repost]` → `trending` 被當成主題詞。本次事故 task 實際算出的 theme_terms 是\n    `[\"美股\",\"trending\",\"分析\",\"科技\",\"歷史\",\"資本\"]` —— 固定 6 格的主題向量被 task-type 前綴與\n    `分析`/`歷史` 這類泛用詞佔掉一半，擠掉 `支出`/`隱含`/`波動率` 等真訊號 → saturation 只數到 4，\n    差一篇沒過 threshold 5。**這是 (3) 說的「threshold 只在單一語料快照校準」的另一面**：\n    threshold 沒錯，是 probe 髒。先洗 probe（剝掉 `[task_type]` 前綴 + 泛用動詞 stopword）再談\n    threshold 校準，否則會用髒訊號去調門檻。\n\n\n---\n## 2026-07-14 hourly-07 實測重現（trending 選題時撞到，兩種失敗模式都踩）\n\n**根因（新證據）**：`check_arc_dedup` 的實體抽取會把主題摘要裡的**否定式排除清單**當成實體來源。\n\n重現：摘要最後一句寫「結論軸：選擇權到期日曆效應，**不涉及油價、財報、Fed、VIX** 與其他資產的波動傳導」\n→ gate 回 `block_arc_dup`，signature 標出 `entities=[FOMC, US_EQUITY, VIX]`、`mechanisms=[macro_policy, vol_term_structure]`，\n拿去比對後錨到 10 篇 FOMC/VIX 文（mile_d12825bb、mile_35eef830、mile_76475146…），全部 `match_reason=descriptive_strict`。\n**摘要全文沒有出現過 FOMC。** 實體純粹來自那句「不涉及」。\n\n把否定句刪掉重跑同一份摘要 → 變成 `unjudged_thin_signature`（signature 為 null）。\n所以同一個題目在兩種寫法下分別觸發兩種失敗模式，沒有一次是真判斷。\n\n**影響面**：trending lane 的選題摘要幾乎一定會寫「本文不做 X」來跟既有文章區隔（這是 arc-dedup 規則本身要求的），\n於是越是認真做區隔的摘要，越容易被自己的排除清單反殺 → 內容黑洞。\n\n**修的方向**（給接手的人）：實體抽取前先剝除否定作用域（「不涉及/非/禁做/不是」後面的名詞片語），\n或改成只從「主張句」抽實體。同時 `unjudged_thin_signature` 不可被任何 caller 當綠燈（現況 CLI 已警告，但要確認 publisher 端一致）。\n\n**繞道方式（本次採用）**：摘要不寫排除清單，拿到 unjudged 後由主線程自己做 layer-2 grep 查重。\n",
-    "status_history": [
-      {
-        "ts": "2026-07-14T00:54:32.554981+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T00:54:32.822395+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T03:03:25.317496+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-14T00:54:32.822375+00:00",
     "completed_at": "2026-07-14T03:03:25.317479+00:00",
-    "result": "Real 90d audit: pre-fix labelled topics TP4/FP4/TN4/FN1 (50% block precision, 50% novel FPR); final hard CM TP4/FP0/TN8/FN1, with the remaining true duplicate surfaced as a near-miss warning. Fixed v4 entity/negation/input migration, hard-vs-near policy, macro recurring allowlist, all production callers, and daily live drift sentinel; live corpus=830, AI=12 blocked, NFP=3 nonblocking, FOMC hard=0/theme=8 warning. Validation: 2663 passed, 6 skipped; backfill dry-run planned 1802 rows without applying data changes."
+    "tombstone": true,
+    "archived_at": "2026-07-17T03:07:52.436623+00:00"
   },
   {
     "id": "governance_self_revise_operating_docs_20260721",
@@ -33368,127 +33319,51 @@
   },
   {
     "id": "ci-red-29294703782",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29294703782）— main Test Suite 最新班次 failure",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
     "created_at": "2026-07-14T01:00:44.676604+00:00",
-    "title": "CI 紅燈修復（run 29294703782）— main Test Suite 最新班次 failure",
-    "description": "GitHub Actions Test Suite 於 main 最新完成班次 failure。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29294703782\nhead_sha: 112811a3c\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29294703782 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push 後 `gh run watch` 盯到綠燈才 finish\n成功標準：main 最新 Test Suite run conclusion=success。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T01:09:04.029990+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-09"
-      },
-      {
-        "ts": "2026-07-14T01:09:04.307558+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-09"
-      },
-      {
-        "ts": "2026-07-14T01:34:38.132479+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-09"
-      }
-    ],
-    "started_at": "2026-07-14T01:09:04.307545+00:00",
     "completed_at": "2026-07-14T01:34:38.132456+00:00",
-    "result": "CI 綠燈（run 29298521097）。兩個 failure：(A) k1703 豆腐字圖表 — 已補 apply_cjk_style + 重跑產圖 + 覆蓋線上 Supabase 三張圖；判準搬進 publish gate（prepublish_audit.audit_chart_cjk_fonts），3-strike 結構性修正。(B) starvation 測試時間炸彈 — build_report(now=) 讓時鐘可注入。全套 2607 passed。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T02:07:54.663469+00:00"
   },
   {
     "id": "telegram-727",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 727）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-14T01:48:50.104127+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 727）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻從底層流程改好 不要只修補\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] 每日大體檢 07-14: 0 critical / 2 warn\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n📌 每日大體檢 — overall=warn\n\n• [warn][live_freshness] 線上績效最新 data_date=2026-07-10（已 4 天）—— 頁面顯示舊資料\n• recovery: 跑 daily_update + 確認頁面非靜態快取（見 live_cache）\n• [warn][alert_conditions] series_registry: 文章系列品牌漂移（3 處）\n• recovery: uv run volpred ops check-alerts --storage-dir storage\n• [info][reader_metrics] top-3 讀者互動: VIX 在 2026 衝到 31，標普同期漲 8(score=343); 六月科技股回檔實錄：QQQ 只跌 7%，你的持股(score=150); 為什麼 NVDA 每天都讓人心跳加速？不是業績，(score=118)\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T01:49:16.519478+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-14T01:54:13.315445+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-14T01:54:13.315431+00:00"
+    "completed_at": "2026-07-14T01:54:13.315431+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T02:07:54.663469+00:00"
   },
   {
     "id": "telegram-728",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 728）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-14T01:49:54.836615+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 728）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n不是建議 要立刻從底層邏輯修復 不要只表面修補\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] Dreaming review 2026-07-13 — 8 new / 1 escalations\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響研究結論累積與論文推進。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\n• findings=13（new=8, resolved=10, escalations=1）；loop-health overall=ok\n• [warn] missing_retry_strategy: missing_retry_strategy:research_rp_4855ddb7a9 (×2)\n• [critical] missing_retry_strategy: missing_retry_strategy:fable0711_ftd_e1_scale_gating (×5)\n• [info] memory_skill_gap: memory_skill_gap:uncodified_process (×19) → propose .claude/skills/\n• [info] memory_hygiene: memory_hygiene:consolidation_review (×19) → propose memory/\n• [warn] persistent_alert: persistent_alert:52425890cc2f99a1 (×1) → propose docs/error_log.md\n• [warn] persistent_alert: persistent_alert:542378afb7b6a3b9 (×1) → propose docs/error_log.md\n• [warn] persistent_alert\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T01:54:24.768467+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-14T01:59:09.922818+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-14T01:59:09.922804+00:00"
+    "completed_at": "2026-07-14T01:59:09.922804+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T02:07:54.663469+00:00"
   },
   {
     "id": "email-12095-33466d",
-    "title": "[email_reply] Re: [VolPred Alert][WARN] 每日大體檢 07-14: 0 critical / 2 warn",
-    "description": "Gmail UID: 12095\nMessage-ID: <3015E51E-5999-473B-814A-B5CD6797A343@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 14 Jul 2026 09:53:47 +0800\nSubject: Re: [VolPred Alert][WARN] 每日大體檢 07-14: 0 critical / 2 warn\n\n--- 用戶回信內容 ---\n立刻從底層邏輯流程去修復 不要只是表面修補有這麼難嗎？\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月14日 04:52 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 每日大體檢 07-14: 0 critical / 2 warn\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> 每日大體檢 — overall=warn\r\n> \r\n> [warn][live_freshness] 線上績效最新 data_date=2026-07-10（已 4 天）—— 頁面顯示舊資料\r\n> recovery: 跑 daily_update + 確認頁面非靜態快取（見 live_cache）\r\n> [warn][alert_conditions] series_registry: 文章系列品牌漂移（3 處）\r\n> recovery: uv run volpred ops check-alerts --storage-dir storage\r\n> [info][reader_metrics] top-3 讀者互動: VIX 在 2026 衝到 31，標普同期漲 8(score=343); 六月科技股回檔實錄：QQQ 只跌 7%，你的持股(score=150); 為什麼 NVDA 每天都讓人心跳加速？不是業績，(score=118)\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-14T02:00:04.917751+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] 每日大體檢 07-14: 0 critical / 2 warn",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12095,
-    "email_message_id": "<3015E51E-5999-473B-814A-B5CD6797A343@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][WARN] 每日大體檢 07-14: 0 critical / 2 warn",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-14T02:01:06.156977+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-10"
-      },
-      {
-        "ts": "2026-07-14T02:01:06.431024+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-10"
-      },
-      {
-        "ts": "2026-07-14T02:17:55.896100+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-10"
-      }
-    ],
-    "started_at": "2026-07-14T02:01:06.431008+00:00",
+    "created_at": "2026-07-14T02:00:04.917751+00:00",
     "completed_at": "2026-07-14T02:17:55.896082+00:00",
-    "result": "live_freshness 判準從『數日曆天』換成『排程+NYSE交易日曆』(commit 4356f520c，5 回歸測試)；series_registry 由 3b5e4effb 拆 dual-source 根治，drift=0。close email 已寄。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T03:07:52.436623+00:00"
   },
   {
     "id": "platform_ops_merge_worktree_stashes_other_slots_wip",
@@ -33530,28 +33405,15 @@
   },
   {
     "id": "telegram-733",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 733）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-14T02:30:14.767996+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 733）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n所以現在所有的研究實證結果和文章的數據分析要復現是做得到的嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T02:30:41.584335+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-14T02:32:57.049364+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-14T02:32:57.049347+00:00"
+    "completed_at": "2026-07-14T02:32:57.049347+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T03:07:52.436623+00:00"
   },
   {
     "id": "repro-audit-001",
@@ -34578,13 +34440,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T01:01:06.232949+00:00",
+    "completed_at": "2026-07-17T03:00:43.213885+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T01:01:06.232949+00:00",
-      "last_clean_observed_at": "2026-07-17T01:01:06.232949+00:00"
+      "resolved_at": "2026-07-17T03:00:43.213885+00:00",
+      "last_clean_observed_at": "2026-07-17T03:00:43.213885+00:00"
     }
   },
   {
@@ -34596,13 +34458,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T01:39:05.150288+00:00",
+    "completed_at": "2026-07-17T03:26:42.373175+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T01:39:05.150288+00:00",
-      "last_clean_observed_at": "2026-07-17T01:39:05.150288+00:00"
+      "resolved_at": "2026-07-17T03:26:42.373175+00:00",
+      "last_clean_observed_at": "2026-07-17T03:26:42.373175+00:00"
     }
   },
   {
@@ -39551,7 +39413,10 @@
       "fingerprint": [
         "experiments/k1706/K1706.py:132",
         "experiments/k1706/K1706.py:221"
-      ]
+      ],
+      "resolved_at": "2026-07-17T02:21:24.408654+00:00",
+      "final_consecutive_remediation_failures": 0,
+      "superseded_by_distinct_incident_at": "2026-07-17T02:21:24.408654+00:00"
     },
     "status_history": [
       {
@@ -40303,10 +40168,28 @@
     "description": "K1442 日期稽核追查發現 storage/event_articles/us_cpi_2026_06_11_t2 與 us_cpi_2026_06_13_t7 皆硬編錯誤 CPI 日期，且已發布為 mile_0fa9c7f5、mile_ebb5d6f5。改用 volpred.data.event_dates.cpi_release_dates，將輸出路徑改為 Path(__file__).resolve().parent，封存舊證據後完整重跑統計與受影響圖片；依新結果正式原地更正兩篇文章並 sync，保留 errata audit trail。T-7 舊均值 +2.184% 已知會翻為約 -0.847%；不得沿用舊敘事。完成 source-level review、數值獨立核對、anti-ai 與 live URL 驗證。稽核來源：K1442 related_event_date_audit。\n\n[migrated 2026-07-16 from task_4751e8957898 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T13:13:41.766815+00:00]",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "created_at": "2026-07-16T14:42:55.681601+00:00",
-    "created_by": "single-gateway-migration"
+    "created_by": "single-gateway-migration",
+    "claimed_by": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18",
+    "claimed_at": "2026-07-17T02:08:58.070830+00:00",
+    "claim_session_id": "4eef5037ce31",
+    "status_history": [
+      {
+        "ts": "2026-07-17T02:08:58.070848+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18"
+      },
+      {
+        "ts": "2026-07-17T02:09:15.786901+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18"
+      }
+    ],
+    "started_at": "2026-07-17T02:09:15.786881+00:00"
   },
   {
     "id": "assign_09984c91",
@@ -40314,10 +40197,33 @@
     "description": "K1685 發現 paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv 在 2026-05-04..05-15 各重複兩列。Root hypothesis: scripts/refresh_paper_snapshots.py append-only path 無 per-file cross-process lock，兩個 refresh 可同時讀同一 old_last 並重複 append。修流程、不手改 CSV：加 per-file lock，lock 內重讀 current last date，new_only date 去重/排序，write 前後 unique-date fail-closed；新增兩 process 同批 append regression test；再走 canonical snapshot regeneration/refresh 修復受污染檔並驗證 consumers。Evidence: experiments/k1685/README.md + k1685 results data_integrity_finding。\n\n[migrated 2026-07-16 from task_64b5bcc0a23f (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-11T21:34:48.572870+00:00]",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-16T14:42:55.724940+00:00",
-    "created_by": "single-gateway-migration"
+    "created_by": "single-gateway-migration",
+    "status_history": [
+      {
+        "ts": "2026-07-17T03:08:24.027090+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87"
+      },
+      {
+        "ts": "2026-07-17T03:08:29.000301+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87"
+      },
+      {
+        "ts": "2026-07-17T03:15:05.597261+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87"
+      }
+    ],
+    "started_at": "2026-07-17T03:08:29.000286+00:00",
+    "completed_at": "2026-07-17T03:15:05.597242+00:00",
+    "result": "root_cause=append path 讀 old_last 後跨越整個 yfinance download 才無鎖 append，TOCTOU 窗導致並行 refresh 各自用過期 boundary 重複 append 同批日期。fix=per-file fcntl lock + 鎖內重讀 boundary + isin/drop_duplicates 過濾 + 寫前寫後 unique-date fail-closed（違反則 truncate 回滾）。class_sweep=污染達 6 papers/9 files（非 K1685 指出的 1 檔），全數以新增的 --repair-duplicates 修復，逐檔比對 HEAD 確認存活列 byte-identical。tests=tests/test_refresh_paper_snapshots_concurrent_append.py 8 passed（含 Barrier 重現事故時序的 two-process test；另跑 mutation check 確認 pre-fix 邏輯會產 dup）。followup=assign_7f508612（2026-05-20~07-17 曝險窗的 consumer 結果稽核）。"
   },
   {
     "id": "assign_56ddf72b",
@@ -40569,11 +40475,34 @@
     "description": "老闆 2026-07-16 Telegram msg 886 追問：「為什麼沒有理由？為什麼總是會有這樣的情形？」\n\n## 實測數據（responder 查證，近 14 天 git log）\n- 有 receipt 的 dispatch commit: 80\n- 無 receipt（`本班產出未附說明` / 舊文案 `safety-net auto-commit`）: 186\n- state churn（無產出，本來就不用 receipt）: 16\n→ **有產出的 fire 中約 70% 漏 receipt**。\n\n## 根因\n1. receipt 純靠 agent 自覺跑 `scripts/fire_receipt.py`，**沒有任何機械 gate**。\n   agent 做完事就結束 = 預設路徑，跑 receipt = 需要額外自律。\n2. `scripts/cron_hourly_dispatch_prompt.md` 共 269 行，PHASE Z 在第 235 行（最尾端），\n   而且第 252 行明寫「漏跑不會掉工作」→ 等於告訴 agent 這步可選。\n3. `scripts/dispatch_supervisor/phase_z.py:2084` 的 code comment 寫\n   \"Rare by design: the only way here is an agent that produced output and skipped one CLI call.\"\n   —— 這個假設與實測 70% 不符，warn 因此變成常態噪音（老闆看到的正是這個）。\n\n## 要做的\n- 決定機制：把 receipt 從「靠自覺」改成「機械 gate」。候選：\n  (a) dispatch agent 的 Stop hook 檢查 receipt 檔存在，缺就擋/自動補；\n  (b) PHASE-Z 在 commit 前若無 receipt，主動用 diff 生成一句 what（降級但不空白）；\n  (c) 兩者併用。選一個並實作。\n- 同步修正 phase_z.py 的 \"Rare by design\" 註解與 warn 文案（現況不 rare）。\n- 修正 dispatch prompt 第 252 行的「漏跑不會掉工作」措辭（別再暗示可選）。\n- 驗收：實作後連續 10 班 fire 的 receipt 覆蓋率 ≥ 90%，並留機械 gate 防回歸。\n\n參考：docs/refactor_plan_agent_output_ownership.md（2026-07-13 重構）\n",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "telegram",
     "created_at": "2026-07-16T15:26:49.481578+00:00",
     "parent_task_id": "telegram-886",
-    "created_by": "telegram-responder"
+    "created_by": "telegram-responder",
+    "status_history": [
+      {
+        "ts": "2026-07-17T02:08:57.845811+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18"
+      },
+      {
+        "ts": "2026-07-17T02:09:15.554902+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18"
+      },
+      {
+        "ts": "2026-07-17T02:18:23.187278+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18"
+      }
+    ],
+    "started_at": "2026-07-17T02:09:15.554887+00:00",
+    "completed_at": "2026-07-17T02:18:23.187262+00:00",
+    "result": "receipt 從『靠自覺』升級為機械 gate：新增 Stop hook scripts/hooks/enforce_fire_receipt.py（已註冊 .claude/settings.json；有產出無 receipt→block 一次，stop_hook_active 放行不迴圈，任何錯誤 fail-open）+ phase_z 新增唯讀 fire_output_needs_receipt() 與 _generated_subject()（fallback subject 改為從 diff 生成，說得出 what）+ 修正 'Rare by design' 註解/warn 文案/fire_receipt docstring/prompt 第252行『漏跑不會掉工作』。新測 13 綠 + 既有 phase_z 38 passed + 對本班 fire 端對端實測回 decision=block。10 班覆蓋率驗收待後續累積。"
   },
   {
     "id": "telegram-888",
@@ -41022,9 +40951,6 @@
     "created_at": "2026-07-17T00:00:06.940400+00:00",
     "title": "CI 紅燈修復（run 29541122360, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29541122360\nattempt: 1\nhead_sha: 53f601b7b\n偵測摘要（仍須讀完整 failed log）：2026-07-16T23:11:50.6878886Z E AssertionError: assert 'clean' != 'clean'\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29541122360 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "claimed_by": "hourly-slot-1-627e9ed2cb1f4504b97d786973d1dd39",
-    "claimed_at": "2026-07-17T00:01:07.270827+00:00",
-    "claim_session_id": "1aeabc15b2a0",
     "status_history": [
       {
         "ts": "2026-07-17T00:01:07.270841+00:00",
@@ -41037,9 +40963,33 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-627e9ed2cb1f4504b97d786973d1dd39"
+      },
+      {
+        "ts": "2026-07-17T02:50:05.312442+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-627e9ed2cb1f4504b97d786973d1dd39",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-17T03:08:24.256487+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87"
+      },
+      {
+        "ts": "2026-07-17T03:08:29.237841+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87"
       }
     ],
-    "started_at": "2026-07-17T00:01:07.495151+00:00"
+    "started_at": "2026-07-17T03:08:29.237826+00:00",
+    "last_released_at": "2026-07-17T02:50:05.312433+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87",
+    "claimed_at": "2026-07-17T03:08:24.256472+00:00",
+    "claim_session_id": "b88842d93565"
   },
   {
     "id": "alert_host_cron_fail_20260717",
@@ -41257,5 +41207,49 @@
       "reader_facing",
       "daily_digest"
     ]
+  },
+  {
+    "id": "alert_internal_silent_fallback_new_c67bec28dd_20260717T022124408654Z_a1",
+    "title": "[internal alert] PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 發生什麼\nPHASE-Z 連續 3 次無法完成這班的自動 commit（原因：commit_nonzero）。已停止重試 —— 同一班不再重跑。\n檔案仍在工作區、沒有遺失。\n\n## 現在該做什麼\n確認未提交檔案的作者後由該作者 commit。若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。\n\n## git commit 輸出（尾段）\npt ValueError|OSError: return None\n[pre-commit]   NEW scripts/hooks/enforce_fire_receipt.py:99 except Exception: return None\n[pre-commit]   NEW scripts/hooks/enforce_fire_receipt.py:105 except Exception: return None\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-17T02:21:24.408654+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "silent_fallback_new"
+    ],
+    "alert_key": "silent_fallback_new",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260717T022124408654Z",
+      "episode_started_at": "2026-07-17T02:21:24.408654+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-17T02:24:14.319518+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false,
+      "fingerprint": [
+        "scripts/hooks/enforce_fire_receipt.py:105",
+        "scripts/hooks/enforce_fire_receipt.py:86",
+        "scripts/hooks/enforce_fire_receipt.py:99"
+      ]
+    }
+  },
+  {
+    "id": "assign_7f508612",
+    "title": "稽核 2026-05-20~07-17 期間讀到重複 snapshot 的實驗結果",
+    "description": "背景：assign_09984c91 修好 refresh_paper_snapshots.py 的並行 double-append 後，發現污染範圍不只 K1685 指出的 1 檔 —— 6 篇 paper 共 9 個 live snapshot 全數在 2026-05-04..05-15 被重複 append 10 天（byte-identical，同一次事故）。\n\n污染窗：git history 顯示 3ea7dbb9d (2026-05-04) 乾淨、f1bdea2d1 (2026-05-20) 已有 dup，至今日修復為止約 2 個月。期間任何讀這些 CSV 的 consumer 都會拿到序列中間多 10 天重複列 —— 對 rolling estimation / OOS split 而言不只是多 10 筆，是 05-04 之後的整條時間軸位移。\n\n受影響檔（已修復，surviving rows byte-identical，見 fire receipt）：\n  paper/garch-x-vix/data/{spy_vix_qqq_eem_fez_2000-2026,gld_vix_gvz_2000-2026,uso_vix_ovx_2005-2026}.csv\n  paper/leverage-direction/data/{spy_vix_2004-2026,spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026,vix_daily}.csv\n  paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv\n  paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv\n  paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv\n\n要做的事：\n1. 盤點 2026-05-20 後跑過、且 OOS 期間涵蓋 2026-05-04 之後、且直接讀上列 CSV（非自帶 pinned snapshot）   的實驗 / paper results。已知讀檔者：paper/garch-x-vix/reproduce.py、paper/garch-x-vix/scripts/summary_stats.py、   experiments/{k1392,K1380_v4,k1393,K1394,k1489,k1662,k1585}。\n2. 對每一個判定「是否受影響」：多數 consumer 沒有 drop_duplicates，需逐一確認。   K1685 用自己的 pinned data/k1685_spy_vix_snapshot.csv，初判不受影響 —— 仍請覆核。\n3. 受影響者在修好的 snapshot 上重跑，比對數字是否改變；有變動且已發表 / 在審 → 回報並修正。\n4. 誠實記錄：沒受影響也要寫明判定依據，不要只列受影響的。\n\n禁止：假設『反正只有 10 天、影響很小』就跳過重跑 —— 那是猜測不是驗證。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-17T03:13:54.767921+00:00",
+    "parent_task_id": "assign_09984c91",
+    "created_by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87"
   }
 ]
