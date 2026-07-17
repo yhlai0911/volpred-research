@@ -29626,42 +29626,15 @@
   },
   {
     "id": "research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
-    "title": "研究 backlog fallback: Spot Bitcoin ETF flow shock 對 BTC/ETH vol 的影響",
-    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Spot Bitcoin ETF flow shock 對 BTC/ETH vol 的影響 — 用 IBIT/FBTC/ARKB/GBTC 等公開 AUM/net-flow/volume（issuer / ETF.com / Farside fallback，dispatch 前驗證覆蓋）+ BTC-USD/ETH-USD，flow shock `shift(1)` 後檢定 t+1/t+5 RV、週末 gap、BTC-ETH beta 與 basis proxy；與既有 BTC ETF 時段結構題正交——那是 ETF-ization 改變交易時鐘，這裡是 ETF 資金流/creation-re | 來源 section: 期刊主題挖掘 batch 2026-07-05（journal_discovery_20260705_0；websearch fed/feds/imf gfsr/faj/cfa/ssrn 2025-26 趨勢層級；task pool json 修復後派 fresh-context general-purpose agent；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
-    "priority": 3,
     "status": "failed",
     "task_type": "experiment",
-    "dispatch_lane": "agent",
+    "title": "研究 backlog fallback: Spot Bitcoin ETF flow shock 對 BTC/ETH vol 的影響",
+    "priority": 3,
     "source": "auto_research_fallback",
-    "research_slug": "spot_bitcoin_etf_flow_shock_btc_eth_vol",
-    "tags": [
-      "auto-research-fallback",
-      "research-program-backlog"
-    ],
     "created_at": "2026-07-11T00:36:11+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-14T02:09:02.970484+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-10-slot2"
-      },
-      {
-        "ts": "2026-07-14T02:12:32.165205+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-10-slot2"
-      },
-      {
-        "ts": "2026-07-14T04:29:30.360414+00:00",
-        "from": "in_progress",
-        "to": "failed",
-        "by": "hourly-10-slot2"
-      }
-    ],
-    "started_at": "2026-07-14T02:12:32.165184+00:00",
     "completed_at": "2026-07-14T04:29:30.360396+00:00",
-    "result": "K1709 跑完但 Codex 審查 FAIL，未通過 knowledge gate。2 個 CRITICAL：(1) 巢狀比較用 raw DM + 混口徑 CW 承載 verdict — 重犯 2026-07-13 才修好的 K1701 教訓，專案自己的 nested-DM ratchet test 對 k1709.py 也 FAIL；(2) MDE 不是功效分析（單一噪音路徑、無重複模擬、結果非單調），不能支撐『可排除 ≥16% RV 效果』的宣稱。另有 3 個 MAJOR（16/10 個美股休市日的 Total=0.0 被當真實 flow day；pub_lag=2 robustness 誤 lag HAR controls；非真正 HLN modified DM）。未寫 knowledge.json、未發文。修訂版已 enqueue: agent-brief_k1709_rev-b4a0a9（複用 K1701 的 paired fixed-window GW engine）。Codex 審查全文存於 experiments/k1709/codex_review_20260714.md。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T05:08:15.170030+00:00"
   },
   {
     "id": "research_crypto_arbitrage_spread_rv",
@@ -34367,13 +34340,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T04:00:56.561486+00:00",
+    "completed_at": "2026-07-17T05:00:54.776694+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T04:00:56.561486+00:00",
-      "last_clean_observed_at": "2026-07-17T04:00:56.561486+00:00"
+      "resolved_at": "2026-07-17T05:00:54.776694+00:00",
+      "last_clean_observed_at": "2026-07-17T05:00:54.776694+00:00"
     }
   },
   {
@@ -34385,13 +34358,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T04:16:09.437298+00:00",
+    "completed_at": "2026-07-17T05:26:50.489794+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T04:16:09.437298+00:00",
-      "last_clean_observed_at": "2026-07-17T04:16:09.437298+00:00"
+      "resolved_at": "2026-07-17T05:26:50.489794+00:00",
+      "last_clean_observed_at": "2026-07-17T05:26:50.489794+00:00"
     }
   },
   {
@@ -40095,13 +40068,10 @@
     "description": "K1442 日期稽核追查發現 storage/event_articles/us_cpi_2026_06_11_t2 與 us_cpi_2026_06_13_t7 皆硬編錯誤 CPI 日期，且已發布為 mile_0fa9c7f5、mile_ebb5d6f5。改用 volpred.data.event_dates.cpi_release_dates，將輸出路徑改為 Path(__file__).resolve().parent，封存舊證據後完整重跑統計與受影響圖片；依新結果正式原地更正兩篇文章並 sync，保留 errata audit trail。T-7 舊均值 +2.184% 已知會翻為約 -0.847%；不得沿用舊敘事。完成 source-level review、數值獨立核對、anti-ai 與 live URL 驗證。稽核來源：K1442 related_event_date_audit。\n\n[migrated 2026-07-16 from task_4751e8957898 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T13:13:41.766815+00:00]",
     "task_type": "experiment",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "source": "agent",
     "created_at": "2026-07-16T14:42:55.681601+00:00",
     "created_by": "single-gateway-migration",
-    "claimed_by": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18",
-    "claimed_at": "2026-07-17T02:08:58.070830+00:00",
-    "claim_session_id": "4eef5037ce31",
     "status_history": [
       {
         "ts": "2026-07-17T02:08:58.070848+00:00",
@@ -40114,6 +40084,13 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18"
+      },
+      {
+        "ts": "2026-07-17T04:50:05.275174+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-4036423d27db436d8e12dc722c44ec18",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-17T02:09:15.786881+00:00",
@@ -40122,7 +40099,9 @@
       "assign_4470644e_s2_t2_rewrite"
     ],
     "split_note": "[2026-07-17 12:28 hourly-slot-2-f86ed3a5490b4cf783d502754ed1654a] SPLIT — 分析階段已完成，勿重跑。\ncompute job agent-brief_assign_4470644e_cpi_dates-36c589 於 88min timeout 被砍，但 artifact 在被砍前已產出（artifact_ok=True）。\nerrata artifact + 驗證腳本已 merge 進 main（commit 7322c1330）；本班親自重跑 verify_errata_cpi_dates_20260717.py = 198 checks PASS / 0 FAIL / exit 0。\n剩餘工作 = 兩篇已發布文章的更正，已切為 child tasks：assign_4470644e_s1_t7_retract（mile_ebb5d6f5, retract-or-rewrite）、assign_4470644e_s2_t2_rewrite（mile_0fa9c7f5, rewrite）。\n⚠️ 本 task description 內「T-7 +2.184% 會翻為約 -0.847%」已被推翻：原資料窗正確值為 -1.90%；-0.847% 是含 2026-06-10 的延伸窗（對應 mile_9560b9cc）。勿據舊描述「對齊」數字。\n若本 task 被 stale-release：只需接手/追蹤兩個 child，不要重跑 analysis。",
-    "result": "[2026-07-17 12:28 hourly-slot-2-f86ed3a5490b4cf783d502754ed1654a] SPLIT — 分析階段已完成，勿重跑。\ncompute job agent-brief_assign_4470644e_cpi_dates-36c589 於 88min timeout 被砍，但 artifact 在被砍前已產出（artifact_ok=True）。\nerrata artifact + 驗證腳本已 merge 進 main（commit 7322c1330）；本班親自重跑 verify_errata_cpi_dates_20260717.py = 198 checks PASS / 0 FAIL / exit 0。\n剩餘工作 = 兩篇已發布文章的更正，已切為 child tasks：assign_4470644e_s1_t7_retract（mile_ebb5d6f5, retract-or-rewrite）、assign_4470644e_s2_t2_rewrite（mile_0fa9c7f5, rewrite）。\n⚠️ 本 task description 內「T-7 +2.184% 會翻為約 -0.847%」已被推翻：原資料窗正確值為 -1.90%；-0.847% 是含 2026-06-10 的延伸窗（對應 mile_9560b9cc）。勿據舊描述「對齊」數字。\n若本 task 被 stale-release：只需接手/追蹤兩個 child，不要重跑 analysis。"
+    "result": "[2026-07-17 12:28 hourly-slot-2-f86ed3a5490b4cf783d502754ed1654a] SPLIT — 分析階段已完成，勿重跑。\ncompute job agent-brief_assign_4470644e_cpi_dates-36c589 於 88min timeout 被砍，但 artifact 在被砍前已產出（artifact_ok=True）。\nerrata artifact + 驗證腳本已 merge 進 main（commit 7322c1330）；本班親自重跑 verify_errata_cpi_dates_20260717.py = 198 checks PASS / 0 FAIL / exit 0。\n剩餘工作 = 兩篇已發布文章的更正，已切為 child tasks：assign_4470644e_s1_t7_retract（mile_ebb5d6f5, retract-or-rewrite）、assign_4470644e_s2_t2_rewrite（mile_0fa9c7f5, rewrite）。\n⚠️ 本 task description 內「T-7 +2.184% 會翻為約 -0.847%」已被推翻：原資料窗正確值為 -1.90%；-0.847% 是含 2026-06-10 的延伸窗（對應 mile_9560b9cc）。勿據舊描述「對齊」數字。\n若本 task 被 stale-release：只需接手/追蹤兩個 child，不要重跑 analysis。",
+    "last_released_at": "2026-07-17T04:50:05.275164+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "assign_09984c91",
@@ -41232,18 +41211,41 @@
     "description": "依已驗證的 errata artifact 正式處理已發布文章 mile_ebb5d6f5（🌡️ 事件溫度計｜US CPI 2026-06-13 預覽（T-7））。\n\nseverity = **retract-or-rewrite**（artifact 判定，非本任務可下修）。理由不只是數字錯：\n1. 文章宣告的發布日 2026-06-13 是**星期六** — 不可能的發布日；\n2. 文章敘述了一次**從未發生的發布**（phantom release，CPIAUCSL 2025-10-01 == '.' 已於 source 直接證實）；\n3. 文章兩次聲稱「CPI 發布日期據 BLS 官方行事曆」— **此 provenance 聲明不實**（實際是硬編的每月 13 號 proxy）。\n→ artifact 明示：sentence-level 改數字無法修復，必須撤稿或重寫。\n\n核心數字反轉（12 events，原資料窗）：均值 +2.184% → **-1.90%**；方向 7 up/6 down（原文稱「抽籤」）→ 3 up/9 down（sign test 兩尾 p=0.146，偏下但 N=12 不顯著）。\n顯著性一律引用 **null-imposed stationary block bootstrap**（Politis & Romano 1994, 10000 reps, block=5, seed 20260717, ratio p=0.4823），**不要引 t-test**（artifact 已載明其 IID 假設低估 SE，僅為與舊版可比而保留）。\n\n成功判準（single artifact）：mile_ebb5d6f5 在線上已撤稿或已重寫且 live URL 可驗；anti_ai_gate exit 0；errata audit trail 保留；不得沿用舊敘事。\n\n【上游已完成 — 不要重跑分析】errata artifact 已產出並經獨立驗證：\n- storage/event_articles/errata_cpi_dates_20260717.json（已 merge 進 main，commit 7322c1330）\n- 驗證腳本 storage/event_articles/verify_errata_cpi_dates_20260717.py — hourly-slot-2 於 2026-07-17 12:20 親自重跑：198 checks PASS / 0 FAIL / exit 0。\n- 舊證據已封存於各文章目錄 archive_pre_errata_20260717/；圖已重繪。\n\n【⚠️ 父任務 assign_4470644e 的描述有一個已被推翻的數字 — 不要照抄】\n父描述寫「T-7 舊均值 +2.184% 會翻為約 -0.847%」。這是錯的。經驗證：\n- 維持原文資料窗（12 events）→ 正確均值 = **-1.90%**\n- -0.847% 是**延伸窗**（13 events，含 2026-06-10 那次 VIX +11.83%）的值，對應的是另一篇已發布 errata mile_9560b9cc（2026-07-12）。\n- 兩者都對，差別只在窗口。**絕對不要把 -1.90% 改成 -0.847% 來「對齊」父描述或 mile_9560b9cc。**\n  errata artifact 的 independent_check.reconciliation_with_published_errata 已載明此事並經算術驗證。\n\n【reader-facing 硬規則】開工前必讀 3 canonical paths：\n- .claude/skills/trending-repost/SKILL.md\n- .claude/skills/anti-ai-style/SKILL.md\n- .claude/rules/publishing.md\n發佈前必過 uv run python scripts/anti_ai_gate.py --file <draft>（exit 0 才可發）。\n主線程才可寫 feed.json / sync；不得在 worktree 內碰 feed。\n",
     "task_type": "event_article",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-17T04:13:02.028369+00:00",
     "created_by": "hourly-slot-2-f86ed3a5490b4cf783d502754ed1654a",
     "parent_task_id": "assign_4470644e",
     "timeout_parent_job_id": "agent-brief_assign_4470644e_cpi_dates-36c589",
-    "split_stage": "t7_retract_or_rewrite"
+    "split_stage": "t7_retract_or_rewrite",
+    "status_history": [
+      {
+        "ts": "2026-07-17T05:08:41.482483+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-f5a615b1a47940cf876f30010844227d"
+      },
+      {
+        "ts": "2026-07-17T05:08:49.605033+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-f5a615b1a47940cf876f30010844227d"
+      },
+      {
+        "ts": "2026-07-17T05:24:07.155686+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-f5a615b1a47940cf876f30010844227d"
+      }
+    ],
+    "started_at": "2026-07-17T05:08:49.605021+00:00",
+    "completed_at": "2026-07-17T05:24:07.155670+00:00",
+    "result": "撤稿 mile_ebb5d6f5（CPI 2026-06-13 T-7 預覽）。選撤稿而非重寫：發布日不存在（06-13 是週六，官方為 06-10），premise 無效且事件已過期，更正內容已由 mile_9560b9cc 覆蓋（重寫=arc dup）。feed.json status=retracted + retracted_reason/note/superseded_by/errata_ref。線上驗證 /v3/reports 與 /reports 皆 404，對照組 mile_9560b9cc 仍 200，sitemap/rss 無殘留。⚠️ 過程發現平台缺陷：supabase_sync 直寫 Supabase 繞過 /api/sync，從不 revalidateTag；加上 getArticleInternal 對撤稿文 throw 使 unstable_cache 拿不到新值而永續發舊值 → 撤稿在讀者端 15 分鐘以上未生效（遠超 revalidate=300）。改走 POST /api/sync/reports/<id>.json 即刻生效。治本 followup=assign_sync_cache_purge_20260717；stage 2 的 description 已補此 workaround。FB 舊貼文撤稿說明 followup=assign_fb_retract_note_ebb5d6f5_20260717。"
   },
   {
     "id": "assign_4470644e_s2_t2_rewrite",
     "title": "[errata stage 2/2] 重寫 mile_0fa9c7f5（CPI T-2）— recent-4 表 / 趨勢 / 離散度結論全反轉",
-    "description": "依已驗證的 errata artifact 正式重寫已發布文章 mile_0fa9c7f5（VIX 一根長腳之後：CPI 前夕的短端結構告訴我們什麼）。\n\nseverity = **rewrite**。artifact 判定：6/5 VIX 長腳那條主脊「與日期無關、完整存活」，可保留；但以下全部反轉，必須重寫：\n- recent-4 表整張（正確日期為 2026-02-13 / 03-11 / 04-10 / 05-12，非原文的 02-12 / 03-12 / 04-10 / 05-13）\n- reaction-trend 敘事：原文據以立論的「兩次大跳」（+18.0% / +12.6%）**根本不是 CPI 反應** — 正確反應是 -1.1% / -2.8%\n- recent-4 均值 +7.147% → **-1.83%**；earlier 均值 -0.022% → -1.94%\n- 離散度結論反轉：F=0.513 (p=0.7995, 不顯著) → **F=36.243, df=(7,3), 單尾 p=0.0067**（方向與原文相反且顯著）\n- pre-event run-up 段全部改寫（T-5 3.32→6.168、T-2 -1.33→+1.412 等）\n\n成功判準（single artifact）：mile_0fa9c7f5 已原地更正並 sync、live URL 可驗；anti_ai_gate exit 0；保留 errata audit trail。\n\n【上游已完成 — 不要重跑分析】errata artifact 已產出並經獨立驗證：\n- storage/event_articles/errata_cpi_dates_20260717.json（已 merge 進 main，commit 7322c1330）\n- 驗證腳本 storage/event_articles/verify_errata_cpi_dates_20260717.py — hourly-slot-2 於 2026-07-17 12:20 親自重跑：198 checks PASS / 0 FAIL / exit 0。\n- 舊證據已封存於各文章目錄 archive_pre_errata_20260717/；圖已重繪。\n\n【⚠️ 父任務 assign_4470644e 的描述有一個已被推翻的數字 — 不要照抄】\n父描述寫「T-7 舊均值 +2.184% 會翻為約 -0.847%」。這是錯的。經驗證：\n- 維持原文資料窗（12 events）→ 正確均值 = **-1.90%**\n- -0.847% 是**延伸窗**（13 events，含 2026-06-10 那次 VIX +11.83%）的值，對應的是另一篇已發布 errata mile_9560b9cc（2026-07-12）。\n- 兩者都對，差別只在窗口。**絕對不要把 -1.90% 改成 -0.847% 來「對齊」父描述或 mile_9560b9cc。**\n  errata artifact 的 independent_check.reconciliation_with_published_errata 已載明此事並經算術驗證。\n\n【reader-facing 硬規則】開工前必讀 3 canonical paths：\n- .claude/skills/trending-repost/SKILL.md\n- .claude/skills/anti-ai-style/SKILL.md\n- .claude/rules/publishing.md\n發佈前必過 uv run python scripts/anti_ai_gate.py --file <draft>（exit 0 才可發）。\n主線程才可寫 feed.json / sync；不得在 worktree 內碰 feed。\n",
+    "description": "【⚠️ 2026-07-17 stage 1 實測發現 — 發佈/更正後務必 purge cache，否則你會以為沒生效】\nscripts/supabase_sync.py 直寫 Supabase，**不會**呼叫 frontend 的 revalidateTag，所以改完 feed.json + sync_full() 之後，讀者端可能仍長時間供應舊內容（stage 1 實測 >15 分鐘，遠超 revalidate=300）。\nsync 後請額外走 canonical 路徑 purge：\n  POST https://volpred.zeabur.app/api/sync/reports/mile_0fa9c7f5.json\n  headers = {'Content-Type':'application/json', **volpred.mirror_auth.ops_admin_headers()}\n  body = storage/reports/feed.json 裡那筆 entry\n然後**實際 curl live URL 驗證新內容真的出現**，不要只看 sync 回 200 就當完成。\n治本追蹤：assign_sync_cache_purge_20260717。\n\n依已驗證的 errata artifact 正式重寫已發布文章 mile_0fa9c7f5（VIX 一根長腳之後：CPI 前夕的短端結構告訴我們什麼）。\n\nseverity = **rewrite**。artifact 判定：6/5 VIX 長腳那條主脊「與日期無關、完整存活」，可保留；但以下全部反轉，必須重寫：\n- recent-4 表整張（正確日期為 2026-02-13 / 03-11 / 04-10 / 05-12，非原文的 02-12 / 03-12 / 04-10 / 05-13）\n- reaction-trend 敘事：原文據以立論的「兩次大跳」（+18.0% / +12.6%）**根本不是 CPI 反應** — 正確反應是 -1.1% / -2.8%\n- recent-4 均值 +7.147% → **-1.83%**；earlier 均值 -0.022% → -1.94%\n- 離散度結論反轉：F=0.513 (p=0.7995, 不顯著) → **F=36.243, df=(7,3), 單尾 p=0.0067**（方向與原文相反且顯著）\n- pre-event run-up 段全部改寫（T-5 3.32→6.168、T-2 -1.33→+1.412 等）\n\n成功判準（single artifact）：mile_0fa9c7f5 已原地更正並 sync、live URL 可驗；anti_ai_gate exit 0；保留 errata audit trail。\n\n【上游已完成 — 不要重跑分析】errata artifact 已產出並經獨立驗證：\n- storage/event_articles/errata_cpi_dates_20260717.json（已 merge 進 main，commit 7322c1330）\n- 驗證腳本 storage/event_articles/verify_errata_cpi_dates_20260717.py — hourly-slot-2 於 2026-07-17 12:20 親自重跑：198 checks PASS / 0 FAIL / exit 0。\n- 舊證據已封存於各文章目錄 archive_pre_errata_20260717/；圖已重繪。\n\n【⚠️ 父任務 assign_4470644e 的描述有一個已被推翻的數字 — 不要照抄】\n父描述寫「T-7 舊均值 +2.184% 會翻為約 -0.847%」。這是錯的。經驗證：\n- 維持原文資料窗（12 events）→ 正確均值 = **-1.90%**\n- -0.847% 是**延伸窗**（13 events，含 2026-06-10 那次 VIX +11.83%）的值，對應的是另一篇已發布 errata mile_9560b9cc（2026-07-12）。\n- 兩者都對，差別只在窗口。**絕對不要把 -1.90% 改成 -0.847% 來「對齊」父描述或 mile_9560b9cc。**\n  errata artifact 的 independent_check.reconciliation_with_published_errata 已載明此事並經算術驗證。\n\n【reader-facing 硬規則】開工前必讀 3 canonical paths：\n- .claude/skills/trending-repost/SKILL.md\n- .claude/skills/anti-ai-style/SKILL.md\n- .claude/rules/publishing.md\n發佈前必過 uv run python scripts/anti_ai_gate.py --file <draft>（exit 0 才可發）。\n主線程才可寫 feed.json / sync；不得在 worktree 內碰 feed。\n",
     "task_type": "event_article",
     "priority": 1,
     "status": "pending",
@@ -41264,5 +41266,103 @@
     "source": "agent",
     "created_at": "2026-07-17T04:14:43.652866+00:00",
     "created_by": "hourly-slot-2-f86ed3a5490b4cf783d502754ed1654a"
+  },
+  {
+    "id": "email-12128-3027b2",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f",
+    "description": "Gmail UID: 12128\nMessage-ID: <A8DBEC78-E8A6-450E-B40A-26A3B2FBFE36@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 17 Jul 2026 12:48:48 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）— 已修復（根因：lock 檔名長度無上限）\n\n--- 用戶回信內容 ---\n立即從底層完成重構修復\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月17日 12:10 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）— 已修復（根因：lock 檔名長度無上限）\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> PHASE-Z 測試紅燈已修復（底層邏輯）\r\n> \r\n> 結論：紅燈修好了，但根因不在 00b07f07f 那個 commit 的邏輯，也不是壞測試。真正的錯是 lock 檔名長度沒有上限 —— 同一棵程式碼，checkout 放在哪決定它綠不綠。\r\n> 為什麼本機綠、gate 紅\r\n> \r\n> 先重現，不猜：\r\n> 環境\t結果\r\n> 本機 checkout（/Users/yhlai0911/volpred-research）\t8 passed\r\n> PHASE-Z 隔離 clone（/private/var/folders/.../head）\t8 failed\r\n> 拿到被截斷的尾段擋住的真正例外：\r\n> OSError: [Errno 63] File name too long:\r\n> /var/folders/.../volpred-sandboxed-locks/private__var__folders__...__head__storage__ops__locks__paper_snapshot_...spy_vix_2000-2026.csv.lock\r\n> 根因\r\n> \r\n> 兩層「把絕對路徑壓平成單一檔名」疊在一起，而且長度無上限：\r\n> _snapshot_lock_name() 把 CSV 的絕對路徑壓成 lock key\r\n> sandboxed_lock_path() 再把整個 lock 絕對路徑壓成 /tmp 下的一個檔名\r\n> 超過檔名上限（NAME_MAX = 255 bytes）就在 lock_file.exists() 的 os.stat 炸掉。本機路徑短，壓出來約 200 字元、剛好過關；PHASE-Z 的 clone 深了約 90 字元 → 270 字元、直接紅。\r\n> 這是地雷不是 bug：它不挑這個測試，對每一個走 sandboxed lock 的測試都成立，只是還沒有人把 checkout 放得夠深。\r\n> 修法\r\n> \r\n> src/volpred/ops/shared_lock.py 加 _bounded_filename(candidate, key=...)：\r\n> 只在超過 255 bytes 時作用 —— 既有 lock 檔名一字未改，向後相容\r\n> 保留可辨識的尾段（尾段才是區分兩個 lock 的部分），砍掉前面共用的目錄\r\n> 前面掛 sha256[:16]。只截斷會讓兩個不同的 lock 併成同一個檔 → 靜默放寬互斥，那比 crash 更糟；digest 保住一對一\r\n> sandbox 側與 canonical 側（storage/ops/locks/<name>.lock）共用同一個函式 —— 兩邊本來是同一顆地雷，不留半修狀態\r\n> 驗證（紅 → 綠雙向）\r\n> \r\n> 2 個新回歸測試放進未修的 clone → 重現同一個 Errno 63（證明測試真的抓得到）\r\n> 修好的 shared_lock.py 放進原本 8 failed 的深路徑 clone → 14 passed\r\n> 全部 lock 相關測試 → 76 passed / 2 skipped\r\n> 一個沒動的次要瑕疵\r\n> \r\n> 警報寫「HEAD^ 綠、HEAD 新增紅燈」，但實際 parent_returncode=5 —— 測試檔在 HEAD^ 還不存在，對照組根本沒跑任何測試，「綠」是誤述。這次的歸因結論仍然成立（那個 commit 確實引進了會紅的測試），所以我沒有擴大範圍去改 gate；先記在這裡，要不要單獨修請指示。\r\n> task: email-12125-0e04bd ／ 變更：src/volpred/ops/shared_lock.py、tests/test_shared_lock.py\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-17T05:00:07.596963+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12128,
+    "email_message_id": "<A8DBEC78-E8A6-450E-B40A-26A3B2FBFE36@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）— 已修復（根因：lock 檔名長度無上限）",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-17T05:01:29.689827+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-974d7182551e47adb7e4cfec88192836"
+      },
+      {
+        "ts": "2026-07-17T05:01:29.927855+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-974d7182551e47adb7e4cfec88192836"
+      },
+      {
+        "ts": "2026-07-17T05:08:27.144166+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-974d7182551e47adb7e4cfec88192836"
+      }
+    ],
+    "started_at": "2026-07-17T05:01:29.927839+00:00",
+    "completed_at": "2026-07-17T05:08:27.144147+00:00",
+    "result": "底層重構完成：新增 _classify_parent_baseline 成為 parent baseline 語意的單一判定點（green/red/no_coverage/unusable），取代 parent_rc not in (0,1,5) 成員測試；警報三段敘述改由 baseline 推導，不再寫死「HEAD^ 綠」。no_coverage 時明說對照組無證據、無法排除缺陷早於本 commit，建議不再預設 revert。紅→綠雙向驗證：3 新回歸測試在未修 clone 全紅 + probe 重現舊碼誤述；修後 gate 14 passed / phase_z 全域 50 passed。已寄 close email。"
+  },
+  {
+    "id": "ci-red-29553786006",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29553786006",
+    "ci_run_key": "29553786006:1",
+    "created_at": "2026-07-17T05:00:07.001569+00:00",
+    "title": "CI 紅燈修復（run 29553786006, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29553786006\nattempt: 1\nhead_sha: 00b07f07f\n偵測摘要（仍須讀完整 failed log）：2026-07-17T04:12:11.7377896Z scripts/tests/test_k1386_methodology_repair.py:63: AssertionError\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29553786006 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。"
+  },
+  {
+    "id": "assign_sync_cache_purge_20260717",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-17T05:30:00+00:00",
+    "source": "ops_manager",
+    "title": "supabase_sync 直寫 Supabase 不 purge Next cache tag → 撤稿/更正在讀者端可能永不生效",
+    "description": "【症狀｜2026-07-17 撤稿 mile_ebb5d6f5 時實測發現】\nsync_full() 跑完後：Supabase articles row 已 status=retracted、anon key + RLS 也已完全查不到該 row（與其他 12 篇線上 404 的撤稿文完全同態）。但 https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5 與 /reports/<id> 仍持續回 HTTP 200 並完整供應內文（含虛構事件段落）達 15 分鐘以上 —— 遠超 page 層 `export const revalidate = 300` 與 `unstable_cache(..., {revalidate: 60})`。cache-control 是 no-store，排除 CDN。\n\n【根因（兩個條件疊加，缺一不會壞）】\n1. scripts/supabase_sync.py 直接打 Supabase REST（_request_json / sync_article），繞過 frontend 的    frontend-v2-fix/src/app/api/sync/[...path]/route.ts —— 那條 route 在 upsert 後會呼叫    revalidateTag('article') + revalidateTag(`article-${slug}`)。走 supabase_sync 就永遠不會 purge tag。\n2. data-server.ts getArticleInternal 對已撤稿文章是 **throw**（.in('status',['published','draft','scheduled']) 過濾    + RLS 兩層都查無 → .single() error → throw）。unstable_cache 的 stale-while-revalidate 背景 revalidate 一 throw    就拿不到新值可寫，於是**續發舊的 good value**。過期不等於淘汰 —— 沒有新值就永遠不淘汰。\n\n→ 合起來：任何經由 feed.json + supabase_sync 做的**撤稿或狀態下架**，在讀者端可能永不生效，直到某次 redeploy 把 in-memory cache 清掉。其餘 12 篇撤稿文之所以現在 404，只是因為它們早已歷經多次 deploy —— 這是巧合，不是機制。\n這條路徑上「內容更正」本身也受影響（改內文 → 讀者仍看舊文），只是 content 更新不 throw、能被新值覆蓋，所以症狀較輕（僅延遲 60s），撤稿/下架才是無限期。\n\n【本班的 workaround（已驗證有效，非治本）】\nPOST /api/sync/reports/<id>.json，headers 用 volpred.mirror_auth.ops_admin_headers()（x-ops-key ← OPS_ADMIN_TOKEN），body = feed.json 那筆 entry。→ upsert + revalidateTag → 兩條路由即刻 404。scripts/record_and_publish.py L141-158 已是此模式。\n\n【治本方向（擇一，需先判斷 owner）】\na. supabase_sync.sync_article() 成功後呼叫 mirror revalidate（沿用 mirror_auth；auth 失敗要**大聲失敗**，   別重演 2026-06-11 那種 401 靜默數週）。單一 owner = sync 端。\nb. 或前端 getArticleInternal 改成回 null 而非 throw，讓 unstable_cache 能寫入「查無」這個新值，   由 page 層判 null → notFound()。單一 owner = 前端。注意此法只縮短到 60s，不是即時。\n   ⚠️ a 與 b 都做 = 雙 owner 反而更難維護；依 CLAUDE.md anti-stacking 選一個。\n須附 regression test：撤稿一篇 → sync → 立即打 live URL → 必 404。沒有這個 test，這個坑會再回來。\n\n【相關】parent=assign_4470644e_s1_t7_retract（本缺陷的發現現場）；同一坑會打到 assign_4470644e_s2_t2_rewrite。",
+    "parent_task_id": "assign_4470644e_s1_t7_retract"
+  },
+  {
+    "id": "assign_fb_retract_note_ebb5d6f5_20260717",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-17T05:30:00+00:00",
+    "source": "ops_manager",
+    "title": "mile_ebb5d6f5 已撤稿，但 Ivan Lai FB 那則貼文仍在、連結已 404 → 需補撤稿說明",
+    "description": "mile_ebb5d6f5（🌡️ 事件溫度計｜US CPI 2026-06-13 預覽 T-7）已於 2026-07-17 撤稿，線上兩條路由皆 404。\n但該文於 2026-06-03 16:53 發過 Ivan Lai 個人 FB（channel=ivan_lai_personal_chrome）：\n  貼文：https://www.facebook.com/yihao.lai/posts/pfbid02DvjuZrCrH4X8okFbPFEZFYxXy5tTMbQNP8Q9WHJPiMP9wVQDggp5mkLtZ1tELrwil\n  第一則留言連結：https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5 → 現在 404。\n\n問題不只是死連結：FB 文案本身改寫自原文，因此**同樣帶著錯誤前提**（把 2026-06-13 當 CPI 發布日 —— 那天是週六），而讀者在 FB 上看不到任何更正訊號。留著不管 = 錯誤敘事仍在對外流通。\n\n建議動作（依 .claude/skills/fb-publishing/SKILL.md 的 CDP-attach 持久 profile Chrome 路徑）：\n在該貼文補一則留言，說明：發布日期用了硬編 proxy 而非 BLS 官方行事曆、2026-06-13 是週六不可能發布、文中一次發布（2025-11-13）根本沒發生（政府停擺取消）、更正後 CPI 當日 VIX 均值 +2.18% → -1.90%，原文已撤稿，完整更正見 mile_9560b9cc（https://volpred.zeabur.app/v3/reports/mile_9560b9cc）。\n語氣照 .claude/skills/trending-repost/references/fb-ivanlai-tone.md（不講滿、不套路、直說錯在哪）。\n文字送出前必過 uv run python scripts/anti_ai_gate.py --file <draft>（exit 0 才發）。\n\n【為何本班沒做】FB 需 browser automation（CDP-attach Chrome），claude.ai Facebook MCP 在本 session 未認證，且 hourly fire 有 3000s cap；硬塞會重演「父等子燒完 cap」。故獨立成 task 而非默默略過。\nparent=assign_4470644e_s1_t7_retract。",
+    "parent_task_id": "assign_4470644e_s1_t7_retract"
+  },
+  {
+    "id": "telegram-907",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "claimed",
+    "created_at": "2026-07-17T05:25:47.225048+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 907）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我說過不要建議我行動是你自己立刻去處理\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\nℹ️ [INFO] Re: [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）— 底層重構完成：「HEAD^ 綠」誤述已修\n\n📌 PHASE-Z 誤述已從底層修好 — 「HEAD^ 綠」不再是寫死的字串\n\n收到「立即從底層完成重構修復」。修的是我上一封信自己標出、當時沒動的那個瑕疵。已完成並驗證。\n\n📎 根因不是文案，是資料流在中途把證據等級抹平了\n\n警報會說謊，是因為兩件事疊在一起：\n\n• 層: 舊行為 | 問題\n• 判定: parent_rc not in (0, 1, 5) → 可歸因 | rc=0（父版真的跑了、全綠）和 rc=5（父版一個測試都沒跑）被併成同一類\n• 敘述: body 寫死 \"HEAD^ 綠、HEAD 新增紅燈\" | 對照組沒證明過的事，被當成既成事實印出來\n\nrc=5 的意思是「測試檔在 HEAD^ 還不存在」——證據的缺席，不是綠的證據。這個區別在成員測試那一步就被抹掉，後面沒有任何地方救得回來。所以這不是改一句話的事，是判定點根本不存在。\n\n📌 修法：把「父版證明了什麼」變成單一判定點\n\nscripts/dispatch_supervisor/phase_z.py 新增：\n\n```python\n_classify_parent_baseline(parent_rc, parent_ran)\n-> green | red | no_coverage | unusable\n```\n\n• 這是唯一決定 baseline 語意的地方，取代散在兩處的 parent_rc == 比對\n• rc=0 但 ran=[] 也歸 no_coverage（防禦性：沒跑就是沒證據）\n• 警報三段敘述（觸發條件 / 影響 / 建議行動）全部改由 baseline 推導，不再寫死\n\n📌 歸因結論沒變\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram_responder",
+    "claimed_at": "2026-07-17T05:26:17.927661+00:00",
+    "claim_session_id": "463d54752ddf",
+    "status_history": [
+      {
+        "ts": "2026-07-17T05:26:17.927676+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      }
+    ]
   }
 ]

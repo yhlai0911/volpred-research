@@ -372,3 +372,85 @@ def test_gate_no_tests_collected_is_not_a_pass(tmp_path: Path) -> None:
 
     assert out["tests"]["passed"] is None
     assert out["tests"]["reason"] == "no_tests_collected"
+
+
+def test_parent_baseline_classes_keep_absence_of_evidence_apart_from_green() -> None:
+    # rc=0 with tests actually run is the ONLY green baseline. rc=5, and the
+    # defensive rc=0-but-ran-nothing, are absence of evidence.
+    assert phase_z._classify_parent_baseline(0, ["tests/test_foo.py"]) == phase_z._BASELINE_GREEN
+    assert phase_z._classify_parent_baseline(1, ["tests/test_foo.py"]) == phase_z._BASELINE_RED
+    assert phase_z._classify_parent_baseline(5, []) == phase_z._BASELINE_NO_COVERAGE
+    assert phase_z._classify_parent_baseline(0, []) == phase_z._BASELINE_NO_COVERAGE
+    assert phase_z._classify_parent_baseline(2, []) == phase_z._BASELINE_UNUSABLE
+    assert phase_z._classify_parent_baseline(None, []) == phase_z._BASELINE_UNUSABLE
+
+
+def test_alert_never_claims_parent_was_green_when_parent_ran_no_tests(tmp_path: Path) -> None:
+    """The 2026-07-17 misreport: the commit ADDED the test file, so HEAD^ ran
+    nothing (rc=5) — yet the alert asserted "HEAD^ 綠". A parent with no coverage
+    proves nothing about the parent, and the advice must not default to revert:
+    that red test may be exposing a latent defect that predates the commit
+    (shared_lock filename length did exactly that)."""
+    _init_repo(tmp_path, {"seed.txt": "seed\n"})
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_bar.py").write_text(
+        "def test_bar():\n    assert False\n", encoding="utf-8",
+    )
+    alert_fn, alerts = _recording_alert()
+    runner_cwds: list[Path] = []
+
+    def red_head_runner(argv, **kwargs):
+        # Only HEAD is ever executed: the parent has no such file, so the gate
+        # short-circuits it to rc=5 without spawning pytest at all.
+        runner_cwds.append(Path(kwargs["cwd"]))
+        return _FakeCompleted(
+            1, stdout="FAILED tests/test_bar.py::test_bar - assert False\n1 failed in 0.02s\n",
+        )
+
+    out = phase_z.run_phase_z(
+        pre_fire_dirty=set(), repo_root=tmp_path, now_hhmm="16:07",
+        test_runner=red_head_runner, alert_fn=alert_fn,
+    )
+
+    assert out["tests"]["reason"] == "new_failure"
+    assert out["tests"]["parent_returncode"] == 5
+    assert out["tests"]["parent_baseline"] == phase_z._BASELINE_NO_COVERAGE
+    assert out["tests"]["parent_ran"] == []
+    assert len(runner_cwds) == 1
+
+    gate = _gate_alerts(alerts)
+    assert len(gate) == 1
+    body = gate[0]["body"]
+    assert "HEAD^ 跑同一組測試為綠" not in body
+    assert "沒有跑到任何測試" in body
+    assert "揭露" in body, "no-coverage advice must not default to revert"
+    assert "baseline=no_coverage" in body
+    assert "無法排除缺陷本身早於本 commit" in body
+    assert "既有紅燈" not in body, "a no-coverage parent cannot rule out a pre-existing defect"
+
+
+def test_alert_states_green_baseline_only_when_parent_actually_ran_green(tmp_path: Path) -> None:
+    _init_repo(tmp_path, {"seed.txt": "seed\n", "tests/test_foo.py": "def test_foo():\n    assert True\n"})
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts" / "foo.py").write_text("VALUE = 2\n", encoding="utf-8")
+    alert_fn, alerts = _recording_alert()
+    calls = 0
+
+    def red_then_green(argv, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return _FakeCompleted(
+                1, stdout="FAILED tests/test_foo.py::test_foo - assert 1 == 2\n1 failed\n",
+            )
+        return _FakeCompleted(0, stdout="1 passed in 0.01s\n")
+
+    out = phase_z.run_phase_z(
+        pre_fire_dirty=set(), repo_root=tmp_path, now_hhmm="16:07",
+        test_runner=red_then_green, alert_fn=alert_fn,
+    )
+
+    assert out["tests"]["parent_baseline"] == phase_z._BASELINE_GREEN
+    body = _gate_alerts(alerts)[0]["body"]
+    assert "HEAD^ 跑同一組測試為綠" in body
+    assert "revert 該 commit" in body
