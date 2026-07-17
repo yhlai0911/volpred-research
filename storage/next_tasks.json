@@ -31792,42 +31792,15 @@
   },
   {
     "id": "K1684_article_general",
-    "title": "K1684: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1684 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: [提出: Fable 深度審查, 執行: Codex primary path] K1684 R3 是 forecast-tail-divergence E1 的誠實 null。以 TAIFEX 全 TX 合約重建 13:30(D-1)→13:30(D) active-contract 5-min RV，配對 0050 調整後收盤報酬；OOS 2023-03-01～2024-12-31，n=450，seed=20260712。aligned 0050 r² QLIKE 的 HAR-RV vs GJR DM t=+1.476651 (p=.140493,n",
-    "priority": 3,
     "status": "failed",
     "task_type": "daily_article",
+    "title": "K1684: write general-audience article (auto-discovered uncovered K)",
+    "priority": 3,
     "source": "auto_discovered",
-    "k_id": "K1684",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "topic_cluster": null,
     "created_at": "2026-07-12T21:08:09+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-14T00:09:52.598810+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-08"
-      },
-      {
-        "ts": "2026-07-14T00:09:52.872932+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-08"
-      },
-      {
-        "ts": "2026-07-14T00:18:15.301614+00:00",
-        "from": "in_progress",
-        "to": "failed",
-        "by": "hourly-08"
-      }
-    ],
-    "started_at": "2026-07-14T00:09:52.872917+00:00",
     "completed_at": "2026-07-14T00:18:15.301598+00:00",
-    "result": "不寫此文 — 根因已修。K1684 的 Codex review 明令『E2 required before publication/paper routing』、README 寫『不得據此寫 feed』，此任務是 refill auto-discovery 誤生（候選池從不讀 reviewer 的發佈條件）。已加 volpred.publication_gate 擋在 build_publication_candidates 的 belt 上（commit 9c2754caa），K1684 已從候選池移除，11 筆 regression test 釘住。K1684 要能發文須先完成 E2。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T01:07:34.471731+00:00"
   },
   {
     "id": "dreaming_missing_retry_strategy_research_rp_4855ddb7a9",
@@ -34605,13 +34578,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T00:07:24.691107+00:00",
+    "completed_at": "2026-07-17T01:01:06.232949+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T00:07:24.691107+00:00",
-      "last_clean_observed_at": "2026-07-17T00:07:24.691107+00:00"
+      "resolved_at": "2026-07-17T01:01:06.232949+00:00",
+      "last_clean_observed_at": "2026-07-17T01:01:06.232949+00:00"
     }
   },
   {
@@ -34623,13 +34596,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T00:24:08.122985+00:00",
+    "completed_at": "2026-07-17T01:39:05.150288+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T00:24:08.122985+00:00",
-      "last_clean_observed_at": "2026-07-17T00:24:08.122985+00:00"
+      "resolved_at": "2026-07-17T01:39:05.150288+00:00",
+      "last_clean_observed_at": "2026-07-17T01:39:05.150288+00:00"
     }
   },
   {
@@ -41142,5 +41115,147 @@
     "created_at": "2026-07-17T00:20:51.770447+00:00",
     "parent_task_id": "k1708_stage3_codex_review_merge_20260717",
     "dispatch_lane": "agent"
+  },
+  {
+    "id": "telegram-894",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-17T00:43:46.096832+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 894）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n徹底立刻解決\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] supervisor hang_killed\n\n📌 白話結論\n• pid: 22187\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n📌 Supervisor SIGKILL'd 一個 worker（hang > 50min cap）\n\n📌 Job\n• pid: 22187\n• pgid: 22187\n• started_at: 2026-07-16T22:07:35.961187+00:00\n• attempt: 1\n• model: claude-opus-4-8\n• log: /Users/yhlai0911/.volpred/logs/dispatch_supervisor_worker.slot-1.fb33cf37.log\n\n📌 影響\n• 本輪 hourly fire 沒派工成功；pool 沒消化\n• 該行程已確認消失；Supervisor 仍存活，下個整點會嘗試新 fire\n\n📌 Worker log tail\n\n```\n(empty)\n```\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-17T00:44:06.950746+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-17T00:46:07.235124+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-17T00:46:07.235110+00:00"
+  },
+  {
+    "id": "telegram-895",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-17T00:44:05.314828+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 895）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n徹底離開解決\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] PHASE-Z auto-commit 測試紅燈（53f601b7bd5b）\n\n📌 白話結論\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。\n• fire 時間: 06:57\n• commit: 53f601b7bd5b\n• 變更程式檔: src/volpred/publisher/arc_dedup.py, tests/test_arc_dedup.py, tests/test_check_arc_dedup_thin_signature.py\n• 跑的測試: tests/test_arc_dedup.py tests/test_arc_dedup_calibration.py tests/test_check_arc_dedup_thin_signature.py\n• pytest 退出碼: 1\n\n📌 影響\n隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。\n\n🛠️ 建議行動\n1. 本機重跑確認：\nuv run --extra dev python -m pytest tests/test_arc_dedup.py tests/test_arc_dedup_calibration.py tests/test_check_arc_dedup_thin_signature.py -q\n2. 修掉紅燈或 revert 該 commit（gate 不自動 rever\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-17T00:46:24.345553+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-17T00:47:21.367147+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-17T00:47:21.367133+00:00"
+  },
+  {
+    "id": "telegram-896",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-17T00:44:22.448538+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 896）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n徹底立刻解決\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] PHASE-Z auto-commit 測試紅燈（53f601b7bd5b）\n\n📌 白話結論\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。\n• fire 時間: 06:57\n• commit: 53f601b7bd5b\n• 變更程式檔: src/volpred/publisher/arc_dedup.py, tests/test_arc_dedup.py, tests/test_check_arc_dedup_thin_signature.py\n• 跑的測試: tests/test_arc_dedup.py tests/test_arc_dedup_calibration.py tests/test_check_arc_dedup_thin_signature.py\n• pytest 退出碼: 1\n\n📌 影響\n隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。\n\n🛠️ 建議行動\n1. 本機重跑確認：\nuv run --extra dev python -m pytest tests/test_arc_dedup.py tests/test_arc_dedup_calibration.py tests/test_check_arc_dedup_thin_signature.py -q\n2. 修掉紅燈或 revert 該 commit（gate 不自動 rever\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-17T00:46:24.579175+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-17T00:47:21.589898+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-17T00:47:21.589881+00:00"
+  },
+  {
+    "id": "assign_6cc19bfb",
+    "title": "supervisor hang 診斷不能：SIGKILL 的 worker log 必為 0 bytes（stdout block-buffered）",
+    "description": "根因（2026-07-17 responder 診斷，msg 894 老闆要求徹底解決）：\n\nworker 用 subprocess.Popen(stdout=log_fh) 把子行程 stdout 導向檔案（scripts/dispatch_supervisor/worker.py:245-248）。stdout 非 tty 時是 block-buffered，正常結束才 flush；hang 被 SIGKILL 時整段 buffer 隨行程消失。\n\n證據：137 個 worker log 中恰好 2 個是 0 bytes（fb33cf37 @07-17 06:07、b55db3be @07-15 00:00），兩個都是 hang_killed 的那次 fire。也就是「最需要 log 的 job 100% 沒有 log」，alert 的 'Worker log tail: (empty)' 是這個缺陷的直接後果，不是巧合。\n\n要做：\n1. 讓 child stdout line-buffered / unbuffered（child_env 加 PYTHONUNBUFFERED=1 只解 python 層；claude CLI 需 stdbuf -oL -eL 或 pty，擇一驗證有效者）。\n2. 驗收（機械 gate）：造一個必 hang 的假 worker，SIGKILL 後 log 必須非空且含被殺前輸出；加 test 鎖住。\n3. 順帶：hang 時 alert body 帶上 log tail 才有意義，修好後確認 alert 真的印得出東西。\n\n背景（不必修，供判斷）：06:07 那班 hang 是在做 arc-dedup 修復（大工程超 50min cap），同一工作已由 08:00 那班完成且 test-gate green（commit ce63a5616a0a），沒有成果遺失。supervisor 本身健康，07:07/08:00/08:07 三班皆 success。所以本任務只針對『診斷不能』這個缺陷。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-17T00:45:38.015707+00:00",
+    "created_by": "telegram_responder"
+  },
+  {
+    "id": "daily_digest_20260717",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-17T09:00:01.051135+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-17T01:07:50.053526+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ff8b66b6eb9c4d85af4fc3399ad5f992"
+      },
+      {
+        "ts": "2026-07-17T01:07:50.284114+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ff8b66b6eb9c4d85af4fc3399ad5f992"
+      },
+      {
+        "ts": "2026-07-17T01:37:46.697217+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ff8b66b6eb9c4d85af4fc3399ad5f992"
+      }
+    ],
+    "started_at": "2026-07-17T01:07:50.284099+00:00",
+    "completed_at": "2026-07-17T01:37:46.697200+00:00",
+    "result": "發佈 mile_28f844aa「財報不是成績單，是換錨日」5,272 字；9 篇來源跨 45 天、18 處 inline 標註、14 圖、anti_ai_gate exit 0；curl /v3/reports 200 驗證。順帶發現導讀讀者入口全 404 → 入池 P1 assign_digest_surface_404_20260717。"
+  },
+  {
+    "id": "assign_digest_surface_404_20260717",
+    "title": "[platform_ops] 精選導讀讀者入口全掛：/v3/digest/<id> 全 404、首頁導讀區塊空白",
+    "description": "**驗證過的事實（2026-07-17 09:4x，hourly slot-1 curl 實測）**：\n- `/v3/digest/mile_28f844aa` (今日新發) → **404**\n- `/v3/digest/mile_9f5151dc` (7/16) → **404**\n- `/v3/digest/mile_ee178213` (7/15) → **404**\n- `curl https://volpred.zeabur.app/v3 | grep -c 精選導讀` → **0**（首頁完全沒有導讀區塊）\n\n**對比：資料面是好的**，所以這是前端 route / 查詢的問題不是內容問題：\n`mile_28f844aa` 在 feed.json 與 Supabase 都是 status=published、details.content_type='daily_digest'、details.digest_articles 共 9 個 slug（全部對應真實已發佈文章、跨度 45 天），且 `/v3/reports/mile_28f844aa` 回 200、內文/圖/本期精選都正常。\n\n**影響**：我們每天花一整班 fire 產 5,000+ 字的策展長文，讀者卻只能靠 `/v3/reports/<id>` 撞到，導讀專欄這個產品面等於不存在。至少 7/14 起連續多期都是這樣（不是今天才壞）。\n\n**調查起點**：首頁 `getDigestColumn`（靠 details.content_type='daily_digest' 辨識）與 `/v3/digest/[id]` route 兩處。先確認 route 是否真的存在於 build、再確認查詢條件有沒有跟著 content_type / digest_articles 的欄位形狀漂移。\n\n**注意**：boss standing rule — 任何前端改動 `/paper` 原版 + `/v3/paper` 兩版都要改；此處同理，改完必 curl + Chrome 線上驗證，不可假宣告完成。\n\n發現者：hourly slot-1 fire ff8b66b6（daily_digest_20260717 發佈後驗證時撞到）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-17T09:37:13.860449+08:00",
+    "source": "discovered",
+    "tags": [
+      "platform_ops",
+      "frontend",
+      "reader_facing",
+      "daily_digest"
+    ]
   }
 ]

@@ -1,0 +1,133 @@
+{
+  "framework": {
+    "name": "換錨日四問",
+    "thesis": "財報不是成績單，是換錨日：市場替下一季換錨（指引、毛利率、capex），不是替上一季打分數"
+  },
+  "anchor_event": {
+    "date": "2026-07-16",
+    "company": "台積電 TSMC",
+    "source_article": "mile_f78be848",
+    "q2_revenue_usd_bn": 402,
+    "q2_revenue_yoy_pct": 33.7,
+    "q2_revenue_consensus_usd_bn": 396.3,
+    "q2_gross_margin_pct": 67.7,
+    "q2_gross_margin_guide_high_pct": 67.5,
+    "q2_adr_eps_usd": 4.31,
+    "q2_adr_eps_consensus_usd": 3.87,
+    "adr_premarket_move_pct": -3.9,
+    "capex_old_low_usd_bn": 520,
+    "capex_old_high_usd_bn": 560,
+    "capex_new_low_usd_bn": 600,
+    "capex_new_high_usd_bn": 640,
+    "capex_midpoint_hike_pct": 15,
+    "q3_gross_margin_guide_low_pct": 65,
+    "q3_gross_margin_guide_high_pct": 67,
+    "n2_margin_dilution_pp": "3-4",
+    "overseas_fab_dilution_pp": "2-3"
+  },
+  "q1_anchor_or_known": {
+    "question": "這場公布的是「已知數」還是「錨」？",
+    "source_article": "mile_e46449ca",
+    "spy_sample_days": 5075,
+    "spy_period": "2006-02-01 至 2026-04-06",
+    "ratio_abs_return": 0.981,
+    "ratio_squared_return": 0.934,
+    "ratio_rv5": 0.987,
+    "ratio_rv20": 0.981,
+    "ratio_vix": 0.975,
+    "earnings_season_share_of_days_pct": 41,
+    "verdict": "五個指標比值全部 < 1，財報季大盤反而稍安靜；統計上不算數"
+  },
+  "q2_premium_paid": {
+    "question": "市場有沒有先付保費？",
+    "source_article": "mile_aee1c78c",
+    "asof": "2026-07-08",
+    "iv_expiry_0710_pct": 59.9,
+    "iv_expiry_0717_pct": 63.5,
+    "earnings_bump_pp": 3.6,
+    "implied_single_day_move_pct": 4.0,
+    "realized_vol_20d_pct": 64,
+    "realized_vol_5d_pct": 70,
+    "hist_8_calls_mean_move_pct": 4.89,
+    "hist_8_calls_median_move_pct": 3.73,
+    "otm5_put_iv_pct": 64.05,
+    "otm5_call_iv_pct": 64.58,
+    "verdict": "隱含 63.5% 對已實現 64%，溢價幾乎歸零；肥保費是標的本身在震"
+  },
+  "q3_beat_size": {
+    "question": "beat 幅度別看（archive 證明無預測力）",
+    "same_day": {
+      "source_article": "mile_0ae5323e",
+      "binary_flag_t": 4.49,
+      "binary_flag_p": 0.0,
+      "binary_flag_aic": -513124,
+      "surprise_size_t": 1.11,
+      "surprise_size_p": 0.41,
+      "surprise_size_aic": -507645,
+      "aic_gap": 5479,
+      "n_obs": 90479,
+      "n_earnings_events": 1439,
+      "n_stocks": 30,
+      "period": "2014-2025"
+    },
+    "next_month": {
+      "source_article": "mile_9b9840e8",
+      "coef": 0.001,
+      "annualized_vol_impact_pp": 0.1,
+      "n_firm_months": 4739,
+      "n_firms": 50,
+      "n_months": 98,
+      "period": "2018-01 至 2026-03",
+      "verdict": "誤差範圍跨過零；2/3 個月同樣貼近零"
+    },
+    "visible_features": {
+      "source_article": "mile_85502a95",
+      "n_firms": 31,
+      "n_indicators": 6,
+      "n_hypotheses": 5,
+      "n_passed": 0,
+      "min_bh_adjusted_p": 0.854,
+      "in_sample_r2": 0.116,
+      "cv_r2": -0.661,
+      "tier_a_count": 0,
+      "tier_b_count": 31,
+      "tier_c_count": 0
+    }
+  },
+  "q4_t_plus_5": {
+    "question": "看 T+5，不是 T+0",
+    "us_event_study": {
+      "source_article": "mile_072c3972",
+      "n_earnings_per_firm": 10,
+      "n_tests_bonferroni": 6,
+      "msft_post5_diff_pct": 116.8,
+      "msft_post5_randomization_p": 0.00005,
+      "msft_post5_bonferroni_p": 0.0003,
+      "msft_baseline_vol": 0.188,
+      "nvda_pre5_diff_pct": -17.0,
+      "nvda_pre5_p": 0.352,
+      "nvda_pre5_bonferroni_p": 1.0,
+      "nvda_post5_diff_pct": 39.3,
+      "nvda_post5_bonferroni_p": 0.196,
+      "aapl_post5_diff_pct": 31.3,
+      "aapl_post5_bonferroni_p": 0.871,
+      "verdict": "六個檢定只剩 MSFT post window 撐得住"
+    },
+    "tsmc_event_profile": {
+      "source_article": "mile_5a20a332",
+      "n_calls": 30,
+      "period": "2019-01 至 2026-04",
+      "pre10d_abs_move_pct": 1.43,
+      "normal_day_abs_move_pct": 1.35,
+      "reaction_day_abs_move_pct": 2.43,
+      "reaction_day_multiple": 1.8,
+      "post5d_abs_move_pct": 1.41,
+      "t_stat": 3.01,
+      "p_value": 0.005,
+      "paired_t_stat": 2.40,
+      "paired_p_value": 0.023,
+      "hit_rate_pct": 66.7,
+      "verdict": "波動是一根釘子，不是一座山"
+    }
+  }
+}

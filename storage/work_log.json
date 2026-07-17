@@ -20531,5 +20531,15 @@
     "next_task_ids": [
       "k1708_fix_verdict_gate_20260717"
     ]
+  },
+  {
+    "timestamp": "2026-07-17T09:37:41+08:00",
+    "task_type": "daily_digest",
+    "task_id": "daily_digest_20260717",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-ff8b66b6eb9c4d85af4fc3399ad5f992",
+    "owner": "hourly-slot-1-ff8b66b6eb9c4d85af4fc3399ad5f992",
+    "commit": null,
+    "summary": "daily_digest_20260717 完成並發佈：`mile_28f844aa`「財報不是成績單，是換錨日：台積電每項都贏卻跌 4%，用四個問題重讀一場法說」。\n\n時事錨 = 台積電 2026-07-16 法說（營收/毛利率/EPS 全 beat、ADR 盤前跌近 4%）；議題 = 「成績單全贏卻跌，怎麼替一場法說定價」。具名框架「換錨日」+ 骨幹檢查表「換錨日四問」（已知數還是錨／市場有沒有先付保費／別看 beat 幅度／看 T+5 不是 T+0），四問各由 archive 證據撐起。\n\n主線程做選題 + 3-layer 查重（`check_arc_dedup.py --audience general` → verdict=clean，k_coverage/arc_duplicates 皆空；layer-2 grep feed 確認 7/11 那期「財報控制盤」問的是開跑前哪些訊號會亮，與本期「開完之後 beat 卻跌」不同題），writer subagent（opus/medium, per model_router）執行寫作 + 發佈。\n\n主線程獨立驗證（未採信 agent 自述）：feed.json status=published、details.content_type='daily_digest'、digest_articles 9 個 slug 全部對應真實已發佈文章、來源跨度 **45 天**（2026-06-01→07-16，遠超 `_audit_digest_archive_span` 的 14 天 gate）、內文 18 處 inline 來源標註（非只列文末）、14 張圖；`/v3/reports/mile_28f844aa` curl 回 200 且內文可見「換錨日」。anti_ai_gate exit 0（MUST=0，1 WARN 為 markdown 表格觸發的長段落誤判）。\n\n順帶發現並入池（P1 `assign_digest_surface_404_20260717`）：導讀讀者入口全掛 — `/v3/digest/<id>` 對今日新發與 7/16、7/15 三期**全部 404**，`/v3` 首頁 grep「精選導讀」= 0。資料面正常（Supabase/feed 記錄正確、reports 頁 200），所以是前端 route/查詢問題，調查起點 `getDigestColumn` 與 `/v3/digest/[id]`。影響：每天一整班 fire 產的 5,000+ 字策展文，讀者只能靠 reports 頁撞到，導讀專欄產品面等同不存在。本班不自行動手是因為前端改動需 build + 兩版同步 + 線上驗證，剩餘 ~15 分鐘無法完整收尾，依「禁止 partial 提交」入池而非硬做。"
   }
 ]
