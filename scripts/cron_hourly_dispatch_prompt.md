@@ -249,9 +249,9 @@ uv run python scripts/fire_receipt.py \
 ```
 
 - **這班有產出 → 一定要跑**。它會成為 commit 的 subject/body。
-- **漏跑不會掉工作**：PHASE-Z 照樣 commit，只是訊息變成系統生成的，並發一則 warn（「agent 沒交代原因」）——
-  那是 audit trail 的缺口，不是資料遺失。
-- **這班沒產出**（只有 state churn）→ 不用跑。
+- **這不是可選的**：Stop hook（`scripts/hooks/enforce_fire_receipt.py`）會在你結束 turn 前檢查 ——
+  有產出卻沒 receipt 就把 turn 擋回來要你補。想省這一步只會多花一輪。
+- **這班沒產出**（只有 state churn）→ 不用跑，hook 也不會擋（它只認得這班自己動的檔）。
 
 **禁止**:
 - ❌ `git add` / `git commit` / `git add -A` / `git commit -a` —— **一律不要碰 git**。你跑只會製造 race

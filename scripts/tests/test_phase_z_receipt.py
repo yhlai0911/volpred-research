@@ -89,7 +89,12 @@ def test_no_receipt_still_commits_and_warns(repo: Path):
     )
 
     assert out["committed"] is True, "work must land even with no receipt"
-    assert "沒留 receipt" in _subject(repo)
+    subject = _subject(repo)
+    assert "未留 receipt" in subject
+    # The 2026-07-17 fallback names WHAT moved (the diff knows that much) instead of
+    # the old content-free 「本班產出未附說明」. It still cannot know WHY — that gap is
+    # what the Stop gate exists to prevent, and what the warn below reports.
+    assert "out.txt" in subject
     assert [a for a in alerts if a["level"] == "warn" and "沒交代原因" in a["title"]]
 
 
@@ -146,7 +151,7 @@ def test_receipt_does_not_survive_its_fire(repo: Path):
     _fire(repo, baseline=set())
 
     assert "第一班的原因" not in _subject(repo), "a stale receipt captioned the next fire"
-    assert "沒留 receipt" in _subject(repo)
+    assert "未留 receipt" in _subject(repo)
 
 
 def test_cli_refuses_mangled_cjk_argv_with_an_actionable_message(repo: Path):

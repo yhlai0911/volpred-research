@@ -16,10 +16,22 @@ this is how it hands it over:
         --subject "K1702 收件：raw-MDD 改善是 scale artifact，降級 R3 措辭" \
         --body "全量掃 knowledge.json 命中 12 筆；K1265b 補跑 vol-normalized MDD。"
 
-Skipping this call does not lose work — PHASE-Z still commits, with a generated
-message, and raises a warn so the audit gap is visible. The failure mode is a
-worse commit message, never a dirty tree. That is the whole point of the 2026-07-13
-refactor (docs/refactor_plan_agent_output_ownership.md).
+This call is NOT optional. A Stop hook (`scripts/hooks/enforce_fire_receipt.py`)
+blocks a fire that produced output and left no receipt, and will hand the turn back
+until one exists.
+
+That gate is here because the 2026-07-13 refactor left this step to agent
+self-discipline on the theory that skipping it was merely cosmetic. The theory held;
+the discipline did not. Over the following 14 days, 186 of 266 dispatch commits
+(~70% of fires with output) carried a generated message, the accompanying warn became
+hourly noise, and the boss read it as the system misfiring (msg 886, 2026-07-16).
+A step everyone must remember, with nothing checking, is not a rare miss — it is the
+default path.
+
+What has not changed: skipping still cannot LOSE work. PHASE-Z commits either way,
+now captioning a receipt-less fire from the diff (what moved, never why). The failure
+mode remains a worse commit message, never a dirty tree
+(docs/refactor_plan_agent_output_ownership.md).
 """
 from __future__ import annotations
 

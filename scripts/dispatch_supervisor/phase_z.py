@@ -100,6 +100,14 @@ _TRUSTED_GATE_PATHS = {
 # a failure. Classified as no_tests (observable), never as red.
 _PYTEST_NO_TESTS_COLLECTED = 5
 
+# What the parent revision actually proved. rc=0 and rc=5 are NOT the same
+# baseline: only the first is evidence of green.  Keeping them apart is the whole
+# point — see _classify_parent_baseline.
+_BASELINE_GREEN = "green"
+_BASELINE_RED = "red"
+_BASELINE_NO_COVERAGE = "no_coverage"
+_BASELINE_UNUSABLE = "unusable"
+
 # Flat runtime-state files that .gitignore covers but which have drifted back
 # into tracking before (stash-pop, stray `git add`, pre-gitignore commit).
 # Scoped to the exact legacy list — NOT the storage/ops/{tasks,agents,...}/
@@ -645,6 +653,31 @@ def write_fire_receipt(
         return False
 
 
+def _parse_fire_receipt(raw: str, now: float) -> dict | None:
+    """Validate raw receipt bytes. Shared by the consuming read and the hook's peek,
+    so the gate and the commit can never disagree about what counts as a receipt."""
+    try:
+        payload = json.loads(raw)
+        subject = " ".join(str(payload["subject"]).split()).strip()
+        written_at = float(payload["written_at"])
+    except (ValueError, TypeError, KeyError) as exc:
+        LOG.warning("phase_z: fire receipt malformed (%s) — using a generated message", exc)
+        return None
+    if not subject:
+        LOG.warning("phase_z: fire receipt has an empty subject — using a generated message")
+        return None
+
+    age = now - written_at
+    if age > _RECEIPT_MAX_AGE_S or age < 0:
+        LOG.warning("phase_z: fire receipt is %.0fs old — refusing a stale message", age)
+        return None
+    return {
+        "subject": subject[:_RECEIPT_SUBJECT_MAX],
+        "body": str(payload.get("body") or "").strip(),
+        "task_id": str(payload.get("task_id") or "").strip(),
+    }
+
+
 def _read_and_consume_fire_receipt(repo_root: Path, runner, now: float | None = None) -> dict | None:
     """Read the receipt and delete it in the same breath — one fire, one receipt.
 
@@ -669,26 +702,93 @@ def _read_and_consume_fire_receipt(repo_root: Path, runner, now: float | None = 
         except OSError as exc:  # pragma: no cover — unlink of our own file
             LOG.warning("phase_z: cannot remove fire receipt (%s)", exc)
 
-    try:
-        payload = json.loads(raw)
-        subject = " ".join(str(payload["subject"]).split()).strip()
-        written_at = float(payload["written_at"])
-    except (ValueError, TypeError, KeyError) as exc:
-        LOG.warning("phase_z: fire receipt malformed (%s) — using a generated message", exc)
-        return None
-    if not subject:
-        LOG.warning("phase_z: fire receipt has an empty subject — using a generated message")
-        return None
+    return _parse_fire_receipt(raw, now if now is not None else datetime.now().timestamp())
 
-    age = (now if now is not None else datetime.now().timestamp()) - written_at
-    if age > _RECEIPT_MAX_AGE_S or age < 0:
-        LOG.warning("phase_z: fire receipt is %.0fs old — refusing a stale message", age)
-        return None
-    return {
-        "subject": subject[:_RECEIPT_SUBJECT_MAX],
-        "body": str(payload.get("body") or "").strip(),
-        "task_id": str(payload.get("task_id") or "").strip(),
-    }
+
+def fire_output_needs_receipt(
+    repo_root: Path, runner=subprocess.run, now: float | None = None,
+) -> dict:
+    """Would PHASE-Z have to caption this fire's commit itself?
+
+    The Stop-hook gate (`scripts/hooks/enforce_fire_receipt.py`) asks this the moment
+    the agent tries to end its turn — while it is still alive to write the receipt.
+    Asking at commit time was too late, which is why 70% of dispatch commits carried
+    a generated message (boss, 2026-07-16 Telegram msg 886) and the resulting warn
+    became hourly noise instead of a signal.
+
+    STRICTLY read-only: it must not consume the receipt or the snapshot. Both belong
+    to run_phase_z, which runs after the agent exits; eating either here would blind
+    the real commit. Callers get a verdict, never a side effect.
+    """
+    reply = {"needs_receipt": False, "owned": [], "reason": ""}
+    dest = _receipt_path(repo_root, runner)
+    if dest is None:
+        reply["reason"] = "not_a_git_repo"
+        return reply
+
+    snap = _snapshot_path(repo_root, runner)
+    if snap is None or not snap.exists():
+        # No fire-start baseline → not a dispatch fire (or the guard never ran).
+        # Ownership is unknowable, and PHASE-Z declines to commit without a
+        # baseline anyway, so there is nothing a receipt could caption.
+        reply["reason"] = "not_a_fire"
+        return reply
+
+    try:
+        if dest.exists() and _parse_fire_receipt(
+            dest.read_text(encoding="utf-8"),
+            now if now is not None else datetime.now().timestamp(),
+        ):
+            reply["reason"] = "receipt_present"
+            return reply
+    except OSError as exc:
+        LOG.warning("phase_z: receipt peek failed (%s) — letting the fire end", exc)
+        reply["reason"] = "receipt_unreadable"
+        return reply
+
+    dirty_now = _dirty_paths(repo_root, runner)
+    if dirty_now is None:
+        reply["reason"] = "status_error"  # fail open: never trap an agent on a probe error
+        return reply
+    if not dirty_now:
+        reply["reason"] = "clean"
+        return reply
+
+    baseline = _read_pre_fire_snapshot(repo_root, runner)
+    if baseline is None:
+        reply["reason"] = "no_baseline"
+        return reply
+
+    # Same arithmetic as run_phase_z's `owned` — one definition, two callers.
+    # Machine churn is excluded: a daemon-written path is this module's own
+    # bookkeeping, not an agent decision, and has no "why" to account for.
+    owned = sorted(p for p in (dirty_now - baseline) if not _is_machine_state(p))
+    if not owned:
+        reply["reason"] = "nothing_owned"
+        return reply
+    reply["needs_receipt"] = True
+    reply["owned"] = owned
+    reply["reason"] = "needs_receipt"
+    return reply
+
+
+def _generated_subject(owned: list[str]) -> str:
+    """A degraded WHAT, derived from the diff, for a fire that left no receipt.
+
+    Never as good as the agent's own account — the diff shows what moved, never why.
+    But 「本班產出未附說明」 told the reader nothing at all, which is what made the
+    audit gap feel like a system fault in `git log` (boss, msg 886).
+    """
+    groups: dict[str, int] = {}
+    for path in owned:
+        parts = path.split("/")
+        key = "/".join(parts[:2]) + "/" if len(parts) > 2 else (parts[0] if parts else path)
+        groups[key] = groups.get(key, 0) + 1
+    top = sorted(groups.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
+    shown = "、".join(f"{name}({count})" for name, count in top)
+    if len(groups) > len(top):
+        shown += f" 等 {len(groups)} 處"
+    return f"自動摘要（agent 未留 receipt）: 動到 {shown}"
 
 
 # ── foreign paths that never clear ───────────────────────────────────────────
@@ -1292,6 +1392,60 @@ def _run_clone_pytest(
     }
 
 
+def _classify_parent_baseline(parent_rc: int | None, parent_ran: list[str]) -> str:
+    """What the parent revision actually proved — the gate's evidence baseline.
+
+    Single owner for a distinction the gate used to lose: rc=0 means the parent
+    ran these tests and they passed; rc=5 means it ran *nothing* (the test file
+    or the -k case did not exist yet), which is the absence of evidence, not
+    evidence of green.  Both classes still attribute a red HEAD to the commit —
+    the commit did land the failure — but they license different prose and
+    different advice, so the call is made once, here, instead of being implied
+    by an `in (0, 1, 5)` membership test and then narrated as "HEAD^ 綠".
+    """
+    if parent_rc == _PYTEST_NO_TESTS_COLLECTED:
+        return _BASELINE_NO_COVERAGE
+    if parent_rc == 0:
+        return _BASELINE_GREEN if parent_ran else _BASELINE_NO_COVERAGE
+    if parent_rc == 1:
+        return _BASELINE_RED
+    return _BASELINE_UNUSABLE
+
+
+# Prose is derived from the baseline class, never hardcoded: the 2026-07-17
+# report claimed "HEAD^ 綠" on a parent that had run zero tests (parent rc=5).
+_BASELINE_PROSE = {
+    _BASELINE_GREEN: "HEAD^ 跑同一組測試為綠，HEAD 新增紅燈。",
+    _BASELINE_RED: "HEAD^ 已有紅燈，但 HEAD 新增了 HEAD^ 沒有的失敗 node。",
+    _BASELINE_NO_COVERAGE: (
+        "HEAD^ 沒有跑到任何測試（測試檔／case 在 HEAD^ 尚不存在）——"
+        "這**不是**「HEAD^ 綠」，對照組沒有提供任何證據；紅燈仍由本 commit 帶進 main。"
+    ),
+}
+
+# What the isolated comparison is entitled to claim. A no-coverage parent rules
+# out daemon race and collection error (both sides ran in disposable clones), but
+# it cannot rule out a defect older than the commit — only a green parent can.
+_BASELINE_IMPACT = {
+    _BASELINE_GREEN: "隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。",
+    _BASELINE_RED: "隔離對照已排除 live daemon race 與 collection error；新增的失敗 node 可歸因本 commit。",
+    _BASELINE_NO_COVERAGE: (
+        "隔離對照已排除 live daemon race 與 collection error，紅燈確實由本 commit 帶進 main；"
+        "但 HEAD^ 無覆蓋 → **無法排除缺陷本身早於本 commit**（測試新、缺陷不一定新）。"
+    ),
+}
+
+_BASELINE_ACTION = {
+    _BASELINE_GREEN: "修掉紅燈或 revert 該 commit（gate 不自動 revert — revert 風險高於紅燈本身）。",
+    _BASELINE_RED: "修掉新增的失敗 node；HEAD^ 既有的紅燈是另一件事，不要混在同一次修復裡。",
+    _BASELINE_NO_COVERAGE: (
+        "這是該測試第一次存在，先判斷方向再動手：是「本 commit 的程式壞了」，"
+        "還是「新測試揭露了既有的潛在缺陷」？後者 revert 只會把 bug 藏回去（2026-07-17 "
+        "shared_lock 檔名長度即為此類：地雷早就在，測試只是第一個踩到的）。"
+    ),
+}
+
+
 def _post_commit_test_gate(
     repo_root: Path,
     *,
@@ -1308,6 +1462,10 @@ def _post_commit_test_gate(
     evidence about this commit.  Only a failure newly introduced relative to the
     parent emits CRITICAL; collection errors and pre-existing failures remain
     observable but un-attributed.
+
+    The parent's own outcome is classified (_classify_parent_baseline) before any
+    of it is reported: a parent that ran zero tests is not a green parent, and
+    the alert must not say so.
     """
     try:
         shown = _git(
@@ -1394,18 +1552,22 @@ def _post_commit_test_gate(
         )
 
     parent_rc = previous["returncode"]
+    parent_ran = previous.get("ran", [])
     parent_ids = set(previous.get("failure_ids", []))
     current_ids = set(current.get("failure_ids", []))
+    baseline = _classify_parent_baseline(parent_rc, parent_ran)
     comparison = {
         "parent_returncode": parent_rc,
+        "parent_baseline": baseline,
+        "parent_ran": parent_ran,
         "failure_ids": sorted(current_ids),
         "parent_failure_ids": sorted(parent_ids),
     }
-    if parent_rc == 1 and (not current_ids or not (current_ids - parent_ids)):
+    if baseline == _BASELINE_RED and (not current_ids or not (current_ids - parent_ids)):
         LOG.warning("phase_z: isolated test-gate failure was already red at HEAD^")
         return {"passed": False, "reason": "pre_existing_failure", "failing_tail": out[-800:],
                 **comparison, **base}
-    if parent_rc not in (0, 1, _PYTEST_NO_TESTS_COLLECTED):
+    if baseline == _BASELINE_UNUSABLE:
         LOG.warning("phase_z: parent comparison rc=%s is not attributable", parent_rc)
         return {"passed": None, "reason": "attribution_error", "failing_tail": out[-800:],
                 **comparison, **base}
@@ -1416,7 +1578,8 @@ def _post_commit_test_gate(
     if rc == 0:
         raise AssertionError("unreachable")
     tail = out[-800:]
-    LOG.warning("phase_z: test-gate NEW failure rc=%d for %s", rc, targets)
+    LOG.warning("phase_z: test-gate NEW failure rc=%d for %s (parent baseline=%s)",
+                rc, targets, baseline)
     short_sha = commit_sha[:12]
 
     # title 不帶 hhmm：時間戳會讓每次 fire 的 dedup key 都不同，24h 去重形同虛設
@@ -1424,21 +1587,21 @@ def _post_commit_test_gate(
     title = f"PHASE-Z auto-commit 測試紅燈（{short_sha or 'HEAD'}）"
     body = "\n".join([
         "## 觸發條件",
-        "safety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。",
+        "safety-net 自動 commit 在隔離 clone 補跑受影響測試；" + _BASELINE_PROSE[baseline],
         f"- fire 時間: {hhmm}",
         f"- commit: {short_sha or 'HEAD'}",
         f"- 變更程式檔: {', '.join(code_files)}",
         f"- 跑的測試: {' '.join(targets)}" + (f" -k \"{k_expr}\"" if k_expr else ""),
-        f"- pytest 退出碼: {rc}",
+        f"- pytest 退出碼: {rc}（HEAD） / {parent_rc}（HEAD^，baseline={baseline}）",
         "",
         "## 影響",
-        "隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。",
+        _BASELINE_IMPACT[baseline],
         "",
         "## 建議行動",
         "1. 本機重跑確認：",
         f"   uv run --extra dev python -m pytest {' '.join(targets)} -q"
         + (f" -k \"{k_expr}\"" if k_expr else ""),
-        "2. 修掉紅燈或 revert 該 commit（gate 不自動 revert — revert 風險高於紅燈本身）。",
+        "2. " + _BASELINE_ACTION[baseline],
         "3. 失敗尾段：",
         "",
         "```",
@@ -1923,7 +2086,7 @@ def run_phase_z(
             if owned and receipt:
                 subject = f"dispatch({hhmm}): {receipt['subject']}"
             elif owned:
-                subject = f"dispatch({hhmm}): 本班產出未附說明（agent 沒留 receipt）"
+                subject = f"dispatch({hhmm}): {_generated_subject(owned)}"
             else:
                 subject = f"ops(dispatch-supervisor {hhmm}): PHASE-Z state churn (no agent output this fire)"
             body_lines = []
@@ -2030,8 +2193,18 @@ def run_phase_z(
         if owned and not receipt:
             # Not a rescue alert — the work IS committed. This flags a commit that
             # landed in main history with a generated message instead of an account
-            # of why, i.e. an audit-trail gap. Rare by design: the only way here is
-            # an agent that produced output and skipped one CLI call.
+            # of why, i.e. an audit-trail gap.
+            #
+            # This used to claim "rare by design: the only way here is an agent that
+            # produced output and skipped one CLI call". The skip WAS the only way in,
+            # but it was never rare: 186 of 266 dispatch commits over 14 days (~70% of
+            # fires with output) landed here, so the warn became hourly noise and the
+            # boss read it as the system misfiring (msg 886, 2026-07-16). A step that
+            # every agent must remember, with nothing checking, is not a rare failure —
+            # it is the default path. The Stop-hook gate
+            # (`scripts/hooks/enforce_fire_receipt.py`, via fire_output_needs_receipt)
+            # now asks for the receipt while the agent is still alive; reaching this
+            # warn means the gate was bypassed or failed open, which IS rare.
             alert_fn(
                 level="warn",
                 title="PHASE-Z 產出已 commit，但 agent 沒交代原因",
@@ -2040,12 +2213,14 @@ def run_phase_z(
                     "",
                     "## 發生什麼",
                     f"這班 fire 產出了 {len(owned)} 個檔案，PHASE-Z 已照常 commit（**工作沒有遺失**）。",
-                    "但 agent 沒有在收尾時留下 commit 說明（fire receipt），所以這筆 commit 的訊息是",
-                    "系統自動生成的 —— git log 上看不出這班到底做了什麼、為什麼做。",
+                    "但 agent 沒有在收尾時留下 commit 說明（fire receipt），所以 subject 是從 diff",
+                    "自動生成的 —— 看得出**動到哪些檔**，看不出**為什麼**。",
                     "",
                     "## 現在該做什麼",
                     "通常不用處理。若這筆 commit 之後要追溯，直接看 diff。",
-                    "同一個 agent 反覆漏 receipt → 檢查 dispatch prompt 的 PHASE Z 段是否被改壞。",
+                    "但這則 warn 現在應該很少見：Stop hook 會在 agent 結束前擋一次要 receipt。",
+                    "若又開始每小時出現 → 表示 gate 破了，查 `scripts/hooks/enforce_fire_receipt.py`",
+                    "是否 fail-open（它設計上任何錯誤都放行）、或 user-level Stop hook 是否被移除。",
                     "",
                     "## 正確做法（給 agent）",
                     "`uv run python scripts/fire_receipt.py --task-id <id> --subject '<一句話 what | why>'`",
