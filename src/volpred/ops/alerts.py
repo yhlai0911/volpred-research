@@ -56,6 +56,7 @@ INTERNAL_REMEDIABLE_ALERT_KEYS = frozenset(
     {
         "git_push_backup_hold",
         "phase_z_baseline_missing",
+        "phase_z_test_gate_red",
         "silent_fallback_new",
     }
 )

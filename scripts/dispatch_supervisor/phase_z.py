@@ -1510,7 +1510,7 @@ def _post_commit_test_gate(
     hhmm: str,
     runner,
     test_runner,
-    alert_fn,
+    internal_alert_fn,
 ) -> dict:
     """Test an exact commit in a disposable clone and compare its exact parent.
 
@@ -1642,6 +1642,12 @@ def _post_commit_test_gate(
     # title 不帶 hhmm：時間戳會讓每次 fire 的 dedup key 都不同，24h 去重形同虛設
     # （2026-07-13 老闆被同一 warn 每 64 秒轟炸的根因）。時間放 body。
     title = f"PHASE-Z auto-commit 測試紅燈（{short_sha or 'HEAD'}）"
+    # No owner to-do heading here. A red test on an auto-committed change is
+    # work the platform does, not a chore the owner runs (boss msg 907, 2026-07-17:
+    # 「不要建議我行動 是你自己立刻去處理」). This routes through the internal
+    # remediation bridge, which mints a P1 repair task and stays out of the owner's
+    # inbox on the first occurrence; the fix/revert steps below are context for the
+    # agent that picks that task up, not commands addressed to the owner.
     body = "\n".join([
         "## 觸發條件",
         "safety-net 自動 commit 在隔離 clone 補跑受影響測試；" + _BASELINE_PROSE[baseline],
@@ -1654,8 +1660,8 @@ def _post_commit_test_gate(
         "## 影響",
         _BASELINE_IMPACT[baseline],
         "",
-        "## 建議行動",
-        "1. 本機重跑確認：",
+        "## 修復線索（供接手任務）",
+        "1. 隔離重現：",
         f"   uv run --extra dev python -m pytest {' '.join(targets)} -q"
         + (f" -k \"{k_expr}\"" if k_expr else ""),
         "2. " + _BASELINE_ACTION[baseline],
@@ -1665,7 +1671,18 @@ def _post_commit_test_gate(
         tail or "(no output captured)",
         "```",
     ])
-    alert_result = alert_fn(level="critical", title=title, body=body)
+    # Fingerprint = the node ids newly failing at HEAD (vs HEAD^). Distinct
+    # failures stay distinct incidents in the bridge's escalation counter instead
+    # of conflating every unrelated red under one coarse alert_key.
+    new_failure_fp = sorted(current_ids - parent_ids) or list(code_files)
+    alert_result = internal_alert_fn(
+        alert_key="phase_z_test_gate_red",
+        level="critical",
+        title=title,
+        body=body,
+        observed_at=datetime.now(timezone.utc),
+        fingerprint=new_failure_fp,
+    )
     return {"passed": False, "reason": "new_failure", "failing_tail": tail,
             "alert": alert_result, **comparison, **base}
 
@@ -1714,9 +1731,10 @@ def run_phase_z(
             # Backward-compatible test seam: existing callers inject one three-
             # argument alert collector.  Production uses the dedicated router.
             def internal_alert_fn(
-                *, alert_key: str, level: str, title: str, body: str, observed_at=None
+                *, alert_key: str, level: str, title: str, body: str,
+                observed_at=None, fingerprint=None,
             ) -> dict:
-                del alert_key, observed_at
+                del alert_key, observed_at, fingerprint
                 return supplied_alert_fn(level=level, title=title, body=body)
     if internal_resolve_fn is None:
         internal_resolve_fn = (
@@ -2245,7 +2263,7 @@ def run_phase_z(
         tests = _post_commit_test_gate(
             repo_root, commit_sha=committed_sha, hhmm=hhmm, runner=runner,
             test_runner=test_runner or subprocess.run,
-            alert_fn=alert_fn or _default_alert,
+            internal_alert_fn=internal_alert_fn,
         )
         if owned and not receipt:
             # Not a rescue alert — the work IS committed. This flags a commit that

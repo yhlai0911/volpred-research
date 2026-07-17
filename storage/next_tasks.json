@@ -30890,43 +30890,15 @@
   },
   {
     "id": "K1685_article_general",
-    "title": "K1685: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1685 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1685 以 pinned yfinance SPY/VIX snapshot（2000-01-03～2026-07-10）延長 K988/K1393-faithful A4f vs GJR 的 OOS。完整 OOS 2019-01-02～2026-07-10、n=1,890：GJR QLIKE=1.515680，A4f=1.431558，A4f 相對改善 5.550%；canonical HAC-DM d=loss_GJR-loss_A4f，t=+3.9656、p=0.00007595、lag=13。K1393 legacy anchor t=3.6",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K1685: write general-audience article (auto-discovered uncovered K)",
+    "priority": 1,
     "source": "auto_discovered",
-    "k_id": "K1685",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "topic_cluster": "garch",
     "created_at": "2026-07-12T11:07:49+00:00",
-    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
-    "status_history": [
-      {
-        "ts": "2026-07-14T18:10:05.279669+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-02"
-      },
-      {
-        "ts": "2026-07-14T18:10:05.728599+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-02"
-      },
-      {
-        "ts": "2026-07-14T18:31:13.536327+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-02"
-      }
-    ],
-    "started_at": "2026-07-14T18:10:05.728583+00:00",
     "completed_at": "2026-07-14T18:31:13.536314+00:00",
-    "result": "已發佈進草稿池 mile_0f710450（status=draft，audience=general）。改寫一輪把學術術語移出正文（audience gate 原會覆寫成 research，而 research 版是 arc duplicate），數字/脆弱性揭露一句未刪。3 張真圖已上 Supabase，懶人包已 enqueue（lazypack-mile_0f710450），release_pool 會在懶人包落地後放行。anti_ai_gate exit 0，未用 force。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T19:08:10.992835+00:00"
   },
   {
     "id": "K1583_article_general_v2",
@@ -30981,43 +30953,15 @@
   },
   {
     "id": "K1695_article_general",
-    "title": "K1695: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1695 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: [提出: Fable deep review P0-1, 執行: Codex failover] K1695 以 pinned yfinance auto_adjust=False snapshot（paper cutoff 2026-03-31）、Close+distributions 明示 total return、前月末 12/VIX 月頻 lag、SHY cash sleeve、10bps turnover cost、prior-day IRX Sharpe 與跨 13 市場同步 stationary bootstrap 重建 vt-trend-",
-    "priority": 1,
     "status": "failed",
     "task_type": "daily_article",
+    "title": "K1695: write general-audience article (auto-discovered uncovered K)",
+    "priority": 1,
     "source": "auto_discovered",
-    "k_id": "K1695",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "topic_cluster": "vix",
     "created_at": "2026-07-12T11:07:51+00:00",
-    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
-    "status_history": [
-      {
-        "ts": "2026-07-14T18:10:05.505146+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-02"
-      },
-      {
-        "ts": "2026-07-14T18:10:05.956956+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-02"
-      },
-      {
-        "ts": "2026-07-14T18:26:31.024556+00:00",
-        "from": "in_progress",
-        "to": "failed",
-        "by": "hourly-02"
-      }
-    ],
-    "started_at": "2026-07-14T18:10:05.956932+00:00",
     "completed_at": "2026-07-14T18:26:31.024543+00:00",
-    "result": "草稿已寫成（誠實的 null 版本，在 worktree dispatch-slot-1-3217f0b2-k1695），但發佈 HELD：寫作過程發現 K1695 招牌結論是 exposure artifact，主線程獨立重算證實（raw +12.61pp → 同曝險 -0.87pp，13/13 市場 exposure_mismatch）。先發文等於用未認證分析推翻已認證實驗，順序反了。已建 P1 更正任務 k1695_exposure_matched_correction + paper_vt_trend_table5_exposure_hold + 根因 gate。證據：storage/ops/k1695_exposure_artifact_verification.md"
+    "tombstone": true,
+    "archived_at": "2026-07-17T19:08:10.992835+00:00"
   },
   {
     "id": "email-12143-2de65b",
@@ -33685,13 +33629,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T18:01:02.279231+00:00",
+    "completed_at": "2026-07-17T19:00:48.235808+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T18:01:02.279231+00:00",
-      "last_clean_observed_at": "2026-07-17T18:01:02.279231+00:00"
+      "resolved_at": "2026-07-17T19:00:48.235808+00:00",
+      "last_clean_observed_at": "2026-07-17T19:00:48.235808+00:00"
     }
   },
   {
@@ -33703,13 +33647,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T18:14:15.823571+00:00",
+    "completed_at": "2026-07-17T19:22:06.493988+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T18:14:15.823571+00:00",
-      "last_clean_observed_at": "2026-07-17T18:14:15.823571+00:00"
+      "resolved_at": "2026-07-17T19:22:06.493988+00:00",
+      "last_clean_observed_at": "2026-07-17T19:22:06.493988+00:00"
     }
   },
   {
@@ -34159,81 +34103,27 @@
   },
   {
     "id": "alert_internal_git_push_backup_hold_3f4834ce7a_20260714T180001000000Z_a1",
-    "title": "[internal alert] git-push-backup: push held — 3 new silent fallback(s)",
-    "description": "由內部可自癒 alert_key `git_push_backup_hold` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n本地領先 4 commit 但 HEAD 帶 3 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push 保護 CI（紅碼不上 origin、CI 不會紅）。路由器會建立固定 P1 任務，當班修每個 NEW 位置（先留下 warn，或對合法例外標 '# silent-ok: 理由'）並重跑本 wrapper 解封；首次與修復進行中不寄信。新發現：\nNEW scripts/audit_nested_dm_misuse.py:382 except OSError: return None\nNEW scripts/audit_nested_dm_misuse.py:999 except OverflowError|TypeError|ValueError: return False\nNEW scripts/audit_nested_dm_misuse.py:2091 except OSError: continue",
-    "task_type": "platform_ops",
-    "dispatch_lane": "agent",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-14T18:00:01+00:00",
+    "task_type": "platform_ops",
+    "title": "[internal alert] git-push-backup: push held — 3 new silent fallback(s)",
+    "priority": 1,
     "source": "internal_alert_remediation_router",
-    "tags": [
-      "alert",
-      "internal-remediable",
-      "git_push_backup_hold"
-    ],
-    "alert_key": "git_push_backup_hold",
-    "internal_remediable": true,
-    "internal_alert_state": {
-      "episode_id": "20260714T180001000000Z",
-      "episode_started_at": "2026-07-14T18:00:01+00:00",
-      "attempt_number": 1,
-      "last_seen_at": "2026-07-14T18:00:38+00:00",
-      "consecutive_remediation_failures": 0,
-      "attempt_history": [
-        {
-          "observed_at": "2026-07-14T19:00:01+00:00",
-          "completed_at": "2026-07-14T18:26:30.509599+00:00",
-          "status": "succeeded",
-          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因不是那 3 行 silent fallback，而是 gate 量錯樹：cron_git_push_backup.sh 掃工作區而非它要 gate 的 HEAD。共享 checkout 上 codex-vscode 未提交的編輯把 4 個乾淨 commit 擋了整晚，alert 卻寫「HEAD 帶 3 個」。實證：工作區 new=3、HEAD new=0。修法：audit_silent_fallbacks.py 加 --rev（抽該 rev 的子樹到 temp dir 當 --root），wrapper 傳 --rev HEAD。+2 hermetic-git regression test，21 passed。commit f5415afaf"
-        }
-      ],
-      "escalation_due": false,
-      "counted_as_failure_at": "2026-07-14T19:00:01+00:00",
-      "resolved_at": "2026-07-14T19:00:06+00:00",
-      "final_consecutive_remediation_failures": 1
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-14T18:26:30.289697+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-02"
-      },
-      {
-        "ts": "2026-07-14T18:26:30.509610+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "hourly-02"
-      }
-    ],
+    "created_at": "2026-07-14T18:00:01+00:00",
     "completed_at": "2026-07-14T18:26:30.509599+00:00",
-    "result": "根因不是那 3 行 silent fallback，而是 gate 量錯樹：cron_git_push_backup.sh 掃工作區而非它要 gate 的 HEAD。共享 checkout 上 codex-vscode 未提交的編輯把 4 個乾淨 commit 擋了整晚，alert 卻寫「HEAD 帶 3 個」。實證：工作區 new=3、HEAD new=0。修法：audit_silent_fallbacks.py 加 --rev（抽該 rev 的子樹到 temp dir 當 --root），wrapper 傳 --rev HEAD。+2 hermetic-git regression test，21 passed。commit f5415afaf"
+    "tombstone": true,
+    "archived_at": "2026-07-17T19:08:10.992835+00:00"
   },
   {
     "id": "telegram-768",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 768）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-14T18:08:27.349613+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 768）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n所以你這個到底是告訴我你解決了還是你又開始建議我而不是自己開始動？\n你跟我保證不會再出現錯誤，那這個到底算不算錯誤\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] git_conflict_guard 自動清理 0 衝突檔\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\n• git_conflict_guard 偵測到 orphaned AUTO_MERGE + 0 個 conflict-marker 檔，已自動清理\n• 受影響檔案：(僅 AUTO_MERGE，無 marker 檔)\n\n📌 影響\n• 這些是 live 站 + dispatcher 讀的 canonical 狀態檔；未清理會被下一次 commit 永久污染。已還原 HEAD canonical 版本，運作不中斷。\n\n🛠️ 建議行動\n• 結構根因 = 雙 dispatcher（Claude hourly + codex_loop）並發寫同分支。已用 .gitattributes merge=ours + 本 guard 止血；長期解見 docs/error_log.md 2026-06-28 entry（single-writer / commit-lock 決策）。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T18:10:36.272325+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-14T18:12:27.957111+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-14T18:12:27.957097+00:00"
+    "completed_at": "2026-07-14T18:12:27.957097+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T19:08:10.992835+00:00"
   },
   {
     "id": "ops-git-single-writer-2026-07-15",
@@ -34380,50 +34270,15 @@
   },
   {
     "id": "alert_internal_git_push_backup_hold_3f4834ce7a_20260714T180001000000Z_a2",
-    "title": "[internal alert] git-push-backup: push held — 3 new silent fallback(s)",
-    "description": "由內部可自癒 alert_key `git_push_backup_hold` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n本地領先 5 commit 但 HEAD 帶 3 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push 保護 CI（紅碼不上 origin、CI 不會紅）。路由器會建立固定 P1 任務，當班修每個 NEW 位置（先留下 warn，或對合法例外標 '# silent-ok: 理由'）並重跑本 wrapper 解封；首次與修復進行中不寄信。新發現：\nNEW scripts/audit_nested_dm_misuse.py:384 except OSError: return None\nNEW scripts/audit_nested_dm_misuse.py:1001 except OverflowError|TypeError|ValueError: return False\nNEW scripts/audit_nested_dm_misuse.py:2089 except OSError: continue",
-    "task_type": "platform_ops",
-    "dispatch_lane": "agent",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-14T19:00:01+00:00",
+    "task_type": "platform_ops",
+    "title": "[internal alert] git-push-backup: push held — 3 new silent fallback(s)",
+    "priority": 1,
     "source": "internal_alert_remediation_router",
-    "tags": [
-      "alert",
-      "internal-remediable",
-      "git_push_backup_hold"
-    ],
-    "alert_key": "git_push_backup_hold",
-    "internal_remediable": true,
-    "internal_alert_state": {
-      "episode_id": "20260714T180001000000Z",
-      "episode_started_at": "2026-07-14T18:00:01+00:00",
-      "attempt_number": 2,
-      "last_seen_at": "2026-07-14T19:00:01+00:00",
-      "consecutive_remediation_failures": 0,
-      "attempt_history": [
-        {
-          "observed_at": "2026-07-14T19:00:01+00:00",
-          "completed_at": "2026-07-14T18:26:30.509599+00:00",
-          "status": "succeeded",
-          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因不是那 3 行 silent fallback，而是 gate 量錯樹：cron_git_push_backup.sh 掃工作區而非它要 gate 的 HEAD。共享 checkout 上 codex-vscode 未提交的編輯把 4 個乾淨 commit 擋了整晚，alert 卻寫「HEAD 帶 3 個」。實證：工作區 new=3、HEAD new=0。修法：audit_silent_fallbacks.py 加 --rev（抽該 rev 的子樹到 temp dir 當 --root），wrapper 傳 --rev HEAD。+2 hermetic-git regression test，21 passed。commit f5415afaf"
-        }
-      ],
-      "escalation_due": false,
-      "resolved_at": "2026-07-14T19:00:06+00:00",
-      "final_consecutive_remediation_failures": 1
-    },
+    "created_at": "2026-07-14T19:00:01+00:00",
     "completed_at": "2026-07-14T19:00:06+00:00",
-    "result": "internal alert cleared before dispatch",
-    "status_history": [
-      {
-        "ts": "2026-07-14T19:00:06+00:00",
-        "from": "pending",
-        "to": "succeeded",
-        "by": "alert_remediation_router",
-        "note": "condition_cleared_automatically"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-17T19:08:10.992835+00:00"
   },
   {
     "id": "K1598_article_general",
@@ -39389,13 +39244,10 @@
     "description": "K1684 R3 primary Codex review 為 CONDITIONAL_PASS，但 E1 是 H2_UNSUPPORTED，不能選 paper route。執行 E2：選擇 forecast 與 realized target 為同一市場/標的的資料，OOS n>=2500；對 HAR-RV 與 GJR 使用相同資訊集、相同 lag、相同共同樣本，做 QLIKE + canonical DM/HAC/Harvey、1%/5% Kupiec+Christoffersen CC+Basel、Acerbi-Szekely Z1、FZ0。至少做跨 OOS/regime，scale/delta-c uncertainty 加 moving/block-bootstrap sensitivity。先讀 docs/error_log.md、knowledge K1684、experiment-preamble，檢索至少 3 篇文獻；固定 seed；不得用 cross-asset RV plug-in 冒充 own-market test。成功標準：三件套齊、lookahead mechanical audit、結果不論正負皆誠實報告、Codex review 後才決定 paper route。\n\n[migrated 2026-07-16 from task_18c9c0bd9722 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T14:48:11.761939+00:00]",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "source": "agent",
     "created_at": "2026-07-16T14:42:55.569435+00:00",
     "created_by": "single-gateway-migration",
-    "claimed_by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876",
-    "claimed_at": "2026-07-17T16:10:56.537568+00:00",
-    "claim_session_id": "ac4a4513cc2e",
     "status_history": [
       {
         "ts": "2026-07-17T16:10:56.537584+00:00",
@@ -39408,9 +39260,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876"
+      },
+      {
+        "ts": "2026-07-17T18:50:05.533451+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-17T16:10:56.781372+00:00"
+    "started_at": "2026-07-17T16:10:56.781372+00:00",
+    "last_released_at": "2026-07-17T18:50:05.533442+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "assign_a458fc01",
@@ -40950,7 +40811,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "boss_telegram_907",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-17T05:27:56.323174+00:00",
     "title": "PHASE-Z alert 繞過 alert_remediation bridge — body 還在叫老闆行動（老闆 msg 907 P1）",
     "description": "老闆 Telegram msg 907：「我說過不要建議我行動是你自己立刻去處理」——針對 PHASE-Z auto-commit 測試紅燈 CRITICAL 信。\n\n根因（已診斷，不必重查）：\n- scripts/dispatch_supervisor/phase_z.py:1600 的 alert body 仍寫死 \"## 建議行動\" + 兩行 CLI 指令給老闆跑。\n- 更根本：phase_z.py 直接呼叫 alert_fn(level=\"critical\", ...) 送信，**完全繞過 src/volpred/ops/alert_remediation.py bridge**。grep 證實 remediate_condition / remediate_internal_alert 只在 alerts.py 與 alert_remediation.py 內被呼叫，dispatch_supervisor 一個都沒接。\n- 所以 2026-07-13 的 class sweep（27 alert / 24 帶建議行動）只涵蓋 condition-based alert（check_alerts.py 路徑），dispatch_supervisor 自己直發的 alert 是漏網之魚。feedback_alert_is_a_task_not_a_chore 的「預設自動建任務」不變式在這條路徑上不成立。\n\n要做：\n1. phase_z test-gate CRITICAL 走 remediation bridge：註冊 ALERT_TASK_TYPE（或明確列入 SELF_REMEDIATING/OWNER_DECISION 並寫理由，禁止未分類後門）。\n2. body 行動段改為「## 已自動處理 + 任務 id」，刪掉 imperative 的「## 建議行動」。措辭誠實前提 = 任務必須真的被建出來（不可只改文案）。\n3. **class sweep 不可只修 phase_z**：全量掃 dispatch_supervisor/ 所有直呼 alert_fn 的點，逐一分類；留機械 gate（測試）擋未來新增的 alert 繞過 bridge。\n4. 測試：涵蓋「phase_z 紅燈 → 有 task 產出 + body 不含『建議行動』」。\n\n參考 memory：feedback_alert_is_a_task_not_a_chore、feedback_alerts_auto_act_not_suggest、feedback_declare_complete_requires_class_sweep。",
@@ -40973,11 +40834,31 @@
         "to": "pending",
         "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-17T19:09:28.725670+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-e4a21e656c2d4ff4814d55e57a5d2373"
+      },
+      {
+        "ts": "2026-07-17T19:09:35.976425+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-e4a21e656c2d4ff4814d55e57a5d2373"
+      },
+      {
+        "ts": "2026-07-17T19:18:46.221903+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-e4a21e656c2d4ff4814d55e57a5d2373"
       }
     ],
-    "started_at": "2026-07-17T14:14:15.658243+00:00",
+    "started_at": "2026-07-17T19:09:35.976410+00:00",
     "last_released_at": "2026-07-17T16:50:05.496585+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-17T19:18:46.221888+00:00",
+    "result": "phase_z test-gate 紅燈改走 internal remediation bridge（新增 alert_key phase_z_test_gate_red）：紅燈自動建 P1 修復任務、首次不進老闆信箱；刪除 body 的『## 建議行動』imperative，改為『## 修復線索（供接手任務）』；backward-compat seam 補 fingerprint kwarg。機械 gate 測試斷言 phase_z.py 永不再出現『## 建議行動』。class sweep：唯一 bypass 已修，send_auth_alert 的建議行動屬正當 OWNER_DECISION。tests 全綠（18 gate + 38 ownership + 88 alert）。"
   },
   {
     "id": "phase_z_orphan_receipt_feature_split_20260717",

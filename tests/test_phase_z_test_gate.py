@@ -454,3 +454,99 @@ def test_alert_states_green_baseline_only_when_parent_actually_ran_green(tmp_pat
     body = _gate_alerts(alerts)[0]["body"]
     assert "HEAD^ 跑同一組測試為綠" in body
     assert "revert 該 commit" in body
+
+
+# ── boss msg 907 (2026-07-17): a red test on an auto-committed change is work the
+# platform does, not a chore the owner runs. The gate must route through the
+# internal remediation bridge (which mints a P1 repair task and stays out of the
+# owner's inbox on first occurrence), never a direct owner-addressed CRITICAL with
+# a「## 建議行動」to-do list.
+
+
+def _recording_internal_alert():
+    calls: list[dict] = []
+
+    def internal_alert_fn(**kwargs):
+        calls.append(kwargs)
+        return {"created": True, "task_id": "internal_phase_z_test_gate_red_x"}
+
+    return internal_alert_fn, calls
+
+
+def test_gate_red_routes_through_bridge_not_owner_todo(tmp_path: Path) -> None:
+    _init_repo(tmp_path, {"seed.txt": "seed\n", "tests/test_foo.py": "def test_foo():\n    assert True\n"})
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts" / "foo.py").write_text("VALUE = 2\n", encoding="utf-8")
+
+    def red_runner(argv, **kwargs):
+        # HEAD red, HEAD^ green → new failure attributable to this commit.
+        if not getattr(red_runner, "_seen", False):
+            red_runner._seen = True
+            return _FakeCompleted(
+                1, stdout="FAILED tests/test_foo.py::test_foo - assert 1 == 2\n1 failed in 0.02s\n")
+        return _FakeCompleted(0, stdout="1 passed in 0.01s\n")
+
+    owner_alert, owner_calls = _recording_alert()
+    internal_alert, internal_calls = _recording_internal_alert()
+
+    out = phase_z.run_phase_z(
+        pre_fire_dirty=set(),
+        repo_root=tmp_path, now_hhmm="16:07",
+        test_runner=red_runner, alert_fn=owner_alert, internal_alert_fn=internal_alert,
+    )
+
+    assert out["tests"]["reason"] == "new_failure"
+    # The red went through the remediation bridge, tagged with its stable key.
+    bridged = [c for c in internal_calls if c.get("alert_key") == "phase_z_test_gate_red"]
+    assert len(bridged) == 1
+    assert bridged[0]["level"] == "critical"
+    # honest wording precondition: no owner to-do heading anywhere in the body.
+    assert "建議行動" not in bridged[0]["body"]
+    # fingerprint pins WHICH node newly failed → distinct incidents stay distinct.
+    assert bridged[0]["fingerprint"] == ["tests/test_foo.py::test_foo"]
+    # the owner inbox path was NOT used for this red (no direct CRITICAL send).
+    assert not [c for c in owner_calls if "紅燈" in c.get("title", "")]
+
+
+def test_phase_z_source_has_no_owner_action_heading() -> None:
+    # Mechanical gate: PHASE-Z's own alert path must never grow a「## 建議行動」
+    # owner to-do again. Every PHASE-Z alert is either auto-remediable (route it
+    # through the bridge) or a deliberate ownership-hazard notice; none should
+    # hand the owner an imperative command list. This trips the moment someone
+    # reintroduces the pattern, forcing them to the bridge instead.
+    source = (Path(phase_z.__file__)).read_text(encoding="utf-8")
+    assert "## 建議行動" not in source
+
+
+def test_phase_z_test_gate_red_is_a_registered_bridge_key() -> None:
+    # The honesty precondition of "已自動處理 + 任務 id": route_internal_remediable_alert
+    # rejects any unregistered key with ValueError, so a real task can only be minted
+    # if the key is registered. Prove the wiring exists end-to-end.
+    from volpred.ops import alerts as ops_alerts
+
+    assert "phase_z_test_gate_red" in ops_alerts.INTERNAL_REMEDIABLE_ALERT_KEYS
+
+
+def test_phase_z_test_gate_red_mints_a_real_task(tmp_path: Path) -> None:
+    from volpred.ops import alerts as ops_alerts
+
+    storage = tmp_path / "storage"
+    storage.mkdir()
+    (storage / "next_tasks.json").write_text("[]", encoding="utf-8")
+
+    result = ops_alerts.route_internal_remediable_alert(
+        alert_key="phase_z_test_gate_red",
+        level="critical",
+        title="PHASE-Z auto-commit 測試紅燈（deadbeef）",
+        body="## 觸發條件\n新測試在 HEAD 紅燈\n## 修復線索（供接手任務）\n重跑確認",
+        storage_dir=str(storage),
+        fingerprint=["tests/test_x.py::test_y"],
+    )
+    import json as _json
+
+    tasks = _json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
+    minted = [t for t in tasks if "phase_z_test_gate_red" in (t.get("tags") or [])]
+    assert minted, f"expected a bridge task, got result={result}"
+    assert minted[0]["priority"] == 1
+    assert minted[0]["task_type"] == "platform_ops"
+    assert "建議行動" not in minted[0]["description"]
