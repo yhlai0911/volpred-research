@@ -20876,5 +20876,15 @@
     "owner": "hourly-slot-1-065a3adc36174665b72683f3a4534377",
     "task_id": "alert_internal_silent_fallback_new_c67bec28dd_20260717T111834524387Z_a1",
     "summary": "解除 P1 self-healing alert：gen_codex_cli_reference.py 3 個 silent fallback 修正 → run_help/npm_latest 加 warn() 可觀測 trace，parse_subcommands StopIteration 標 # silent-ok（leaf 無 Commands: 區塊屬預期控制流）。audit findings 3→0，--check smoke 通過（drift 偵測正常），PHASE-Z candidate 現可過 pre-commit no-silent-fallback gate。"
+  },
+  {
+    "timestamp": "2026-07-18T00:13:48+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_168aeaf8+assign_43a2ee48",
+    "outcome": "enqueued",
+    "actor": "hourly-slot-1-79726798c811477a97b1a617bd3b4876",
+    "owner": "hourly-slot-1-79726798c811477a97b1a617bd3b4876",
+    "commit": null,
+    "summary": "STARVATION LOCKOUT 觸發（5 個 P2 aged>24h，diversity 暫停）。本 fire 清 2 個餓死研究實驗，走 compute_queue enqueue-agent 給 detached worker（experiment/xhigh 唯一合法路徑，fire 職責到 enqueue 為止）：(1) assign_168aeaf8 K1684 E2 own-market realized-target FTD cross-OOS gate → worktree dispatch-slot-1-79726798-k1684e2，brief 含 own-market 硬約束（禁 cross-asset RV plug-in，E1 已因此 H2_UNSUPPORTED）+ QLIKE/DM-HAC-Harvey/Kupiec-CC-Basel/AS-Z1/FZ0 + block-bootstrap + Codex review gate；(2) assign_43a2ee48 credit-stress firm-level → worktree dispatch-slot-1-79726798-credit-firm，brief 含控制 VIX 後增量為硬門檻 + 高槓桿組>低槓桿組分組差異 + 禁引用未查證文章數字（aggregate 版 K872/T14 已全 NULL）。兩 task 皆 claim+start=in_progress，followup 含 agent-result-verification/lookahead-audit/worktree-merge/knowledge/complete。收件由後續 fire PHASE A 接。"
   }
 ]
