@@ -60,10 +60,14 @@ def test_frozen_input_is_unique_hash_pinned_and_one_to_one(k1386) -> None:
     assert audit["merge_validation"] == "one_to_one"
     assert audit["analysis_window_merged_rows"] == 4119
     for source_audit in (audit["spy_qqq_source"], audit["gld_source"]):
-        assert source_audit["raw_rows"] == 4129
+        # The frozen window carried 10 byte-identical duplicate dates until the
+        # concurrent-append repair (00b07f07f) drained them. Pin the clean state
+        # so a re-polluted snapshot fails here instead of being silently deduped.
+        assert source_audit["raw_rows"] == 4119
         assert source_audit["unique_dates"] == 4119
-        assert source_audit["duplicate_date_count"] == 10
-        assert source_audit["duplicate_values_identical"] is True
+        assert source_audit["duplicate_date_count"] == 0
+        assert source_audit["duplicate_rows_removed"] == 0
+        assert source_audit["duplicate_dates"] == []
 
 
 def test_frozen_csv_reads_pin_round_trip_float_parser(k1386, monkeypatch) -> None:
@@ -79,6 +83,27 @@ def test_frozen_csv_reads_pin_round_trip_float_parser(k1386, monkeypatch) -> Non
 
     assert len(calls) == 2
     assert all(call.get("float_precision") == "round_trip" for call in calls)
+
+
+def test_identical_duplicate_dates_collapse_with_audit(k1386) -> None:
+    frame = pd.DataFrame(
+        {
+            "date": pd.to_datetime(["2020-01-03", "2020-01-02", "2020-01-02"]),
+            "value": [3.0, 1.0, 1.0],
+        }
+    )
+    deduplicated, audit = k1386._deduplicate_identical_dates(frame, "synthetic.csv")
+
+    assert deduplicated["date"].tolist() == pd.to_datetime(
+        ["2020-01-02", "2020-01-03"]
+    ).tolist()
+    assert deduplicated["value"].tolist() == [1.0, 3.0]
+    assert audit["raw_rows"] == 3
+    assert audit["unique_dates"] == 2
+    assert audit["duplicate_rows_removed"] == 1
+    assert audit["duplicate_date_count"] == 1
+    assert audit["duplicate_dates"] == ["2020-01-02"]
+    assert audit["duplicate_values_identical"] is True
 
 
 def test_conflicting_duplicate_dates_fail_closed(k1386) -> None:
