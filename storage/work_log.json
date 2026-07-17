@@ -20651,5 +20651,35 @@
     "owner": "hourly-slot-1-08caaf437317486887e371fc43f2b547",
     "commit": "52516623a, 9a2afe1dc",
     "summary": "老闆回信（email 12133）對『PHASE-Z receipt feature 半落地需拍板』回覆：『你自主運營…該怎麼做最好你應該知道…立刻處理』= 授權代行決定並選『落地』。\n(1) 52516623a：git_writer_lock 精確路徑原子提交 7 檔 — 非原 alert 點名的 6 檔，.claude/settings.json 的 hook 註冊漏算，少了它 enforce_fire_receipt.py 永不觸發、feature 等於沒落地。過程被 no-silent-fallback pre-commit gate 擋下 3 處，未用 --no-verify，依規則標 # silent-ok 並註明理由（fail-open 皆經 _emit_allow 印 stderr trace 非靜默；hook 由裸 python3 執行無法 import volpred.ops.diagnostics）。\n(2) 9a2afe1dc：跑 CI 等價全 suite 抓到自己造成的回歸 — tests/test_dispatch_supervisor.py 的 auto-commit subject 期望值 pin 到舊字串，該檔不在上一班的 dirty 集合內，故『工作區 34 passed』是局部驗證。新實作已在線上生效（daemon 從工作區跑 phase_z），stale 的是測試，與 K1386 同病同修法。已修並驗 89 passed。\n驗證：test_phase_z_test_gate 14 passed（原 AttributeError/KeyError 全消）、test_dispatch_supervisor 89 passed、receipt 20 + hook 13 passed；全 suite 3304 passed / 8 failed，其中 7 支為 test_scheduler_pregate 本地限定 CanonicalWriteBlocked 噪音（CI run 29553786006 該批全綠、run_phase_z 被 monkeypatch、writer 在未碰的 state.py/alerts.py），已入池 local_suite_pregate_canonical_write_noise_20260717 (P2)。\n未碰別人的髒檔（settings.local.json / drafts assets 原樣保留）。"
+  },
+  {
+    "timestamp": "2026-07-17T15:29:35+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_digest_surface_404_20260717",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366",
+    "owner": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366",
+    "commit": "fc3b9d2 (volpred-v2 repo)",
+    "summary": "P1 讀者端 digest 404：根因找到並修好，程式已 push 未上線（部署切給 P1 deploy_verify_v3_digest_route_20260717）。\n\n**診斷修正原單 — 兩個症狀只有一個是真的**：\n(1) /v3/digest/<id> 404 = 真。根因：frontend-v2-fix/src/app/v3/ 底下根本沒有 digest/ 目錄。2026-06-21 加導讀專欄只做了 v2（/digest/<id> 至今 200），沒照 boss standing rule「兩版都要改」同步 v3。\n(2)「首頁導讀區塊空白」= 誤判。/v3 是 client component（V3App 'use client'，SWR 取資料），SSR HTML 100KB 內零篇文章標題，`curl /v3 | grep -c 精選導讀 = 0` 是 curl 假陽性。v3 Editorial LEAD slot 一直會抓最新導讀（badge-resolver 已由 details.content_type='daily_digest' map 出 精選導讀；feed API 實測 mile_28f844aa content_type=daily_digest）。\n→ 原單「讀者入口全掛／導讀專欄等於不存在」過度描述：v3 讀者一直讀得到導讀，只是被導去 /v3/reports/<id> 拿到一般文章版型，失去報頭／第 N 期／本期來源文章 sidebar。真缺口 = route parity + 版型，不是內容不可達。也確認全 repo 無任何後端/腳本連到 /v3/digest/<id>，故 404 是無人引用的 parity 洞。\n\n**修復**（commit fc3b9d2 @ github.com/yhlai0911/volpred-v2 main）：\n- 新增 src/app/v3/digest/[id]/（page + DigestReader）：沿用 V3Shell + editorial primitives + CSS 變數，功能對齊 v2（getDigestById → notFound；報頭／期數／來源文章連 v3）\n- Editorial.tsx 加 hrefFor()：lead 與 secondaries 的導讀走 /v3/digest/\n- 抽 V3Prose 供 digest 與 reports 共用，避免複製 120 行 .v3-prose CSS\n\n**git ownership 注意**：frontend-v2-fix 是**獨立 repo 且在 canonical .gitignore:40**，PHASE-Z 收不到它 → 若不自行提交就會變成今天另一張 P1（phase_z 孤兒）的同型事故。故本班自行 commit 該 repo，只 stage 自己的 4 個路徑，未碰他人既有的 public/paper/*.pdf 髒檔。canonical repo 未跑任何 git mutation。\n\n**驗證**：npm run build 87/87（route 清單含 ƒ /v3/digest/[id]）、typecheck、check:row-cap 全過。V3Prose 抽離經 comm 逐行比對確認為逐字搬移，2026-05-07 貨幣/數學 gate 原樣保留。線上 curl 仍 404（Zeabur 非 push 自動部署，需跑 deploy-zeabur-safe.sh）——**未假宣告完成**。\n\n**為何不在本班部署**：發現時距 fire cap 僅約 10 分鐘，deploy-zeabur-safe.sh 要上傳＋輪詢到 RUNNING（數分鐘）。在 cap 邊緣啟動會改動線上服務的部署、中途被 SIGKILL，風險不可接受 → 依「scope 切小」原則切出 P1 follow-up，含 Chrome 視覺驗證與 /v3/reports 回歸檢查（V3Prose 動到了現行正常頁面，無視覺驗證）。"
+  },
+  {
+    "timestamp": "2026-07-17T15:29:48+08:00",
+    "task_type": "platform_ops",
+    "task_id": "phase_z_orphan_receipt_feature_split_20260717",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366",
+    "owner": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366",
+    "commit": "52516623a, 9a2afe1dc (前班)",
+    "summary": "驗證後結案（本班無程式改動）：上一班 15:01 已用 git_writer_lock 原子提交 6 檔孤兒（52516623a）並修隨附回歸（9a2afe1dc），混合狀態已消除。本班在 HEAD dde892bf1 重跑 tests/test_phase_z_test_gate.py + scripts/tests/test_phase_z_receipt.py + scripts/tests/test_enforce_fire_receipt.py = 34 passed，原 AttributeError/KeyError 全消 → 不需 revert tests/test_phase_z_test_gate.py。"
+  },
+  {
+    "timestamp": "2026-07-17T15:39:39+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_digest_surface_404_20260717",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366",
+    "owner": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366",
+    "commit": "fc3b9d2 (volpred-v2 repo) + Zeabur deploy 6a59da27b33bf4df98a4bd2d",
+    "summary": "【接續同班前一筆 work_log — 該筆寫『未上線』時我對剩餘 cap 估計過於悲觀（誤判剩 10 分鐘、實際剩 27），重估後在本班跑完部署，不留給下一班】\n\n**部署 + 線上驗證完成（15:38）**：cd frontend-v2-fix && ./scripts/deploy-zeabur-safe.sh（唯一安全入口，未用 npx zeabur deploy）→ Deployment 6a59da27b33bf4df98a4bd2d RUNNING，production API 驗證通過。\n\n**線上實測（非狀態碼空殼驗證）**：\n- 原單點名的三個全部 404 → **200**：/v3/digest/mile_28f844aa、mile_9f5151dc、mile_ee178213\n- 內容真的對：SSR HTML 含「每日精選導讀」報頭、「第 26 期」、發布時間、「本期來源文章」；9 篇來源文章全部連 /v3/reports/<slug>（數量與 details.digest_articles 的 9 篇吻合）\n- 回歸乾淨：/v3/reports/mile_28f844aa、/digest/mile_28f844aa（v2）、/v3、/ 全 200；/v3/reports/<id> 內文 57KB 正常渲染（V3Prose 抽離未打壞現行頁面）\n\n**順帶發現（已記在 follow-up，未擴大本班範圍）**：導讀內文有寫死的 v2 連結 /reports/mile_f78be848（200，非死連結，但跳出 v3 外殼）。**非本次改動造成** — 既有 /v3/reports/<id> 頁上同樣有，根因是文章 Markdown 內文寫死 v2 路徑。\n\n**剩餘**：deploy_verify_v3_digest_route_20260717 降為 P3，範圍收斂成純 Chrome 視覺審查（狀態碼與 HTML 內容已驗，只剩『好不好看』+ 用眼睛確認 /v3/reports 沒被改壞）。"
   }
 ]

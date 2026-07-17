@@ -33558,73 +33558,27 @@
   },
   {
     "id": "gate-fail-verdict-blocks-merge",
+    "status": "succeeded",
     "task_type": "ops",
+    "title": "Gate：Codex 判 FAIL 的實驗不得 merge 進 main（K1709 讓 CI 連紅 4 次的根因）",
     "priority": 1,
     "source": "agent-discovered",
-    "status": "succeeded",
     "created_at": "2026-07-14T05:42:35.257885+00:00",
-    "title": "Gate：Codex 判 FAIL 的實驗不得 merge 進 main（K1709 讓 CI 連紅 4 次的根因）",
-    "description": "K1709 被 Codex 判 FAIL，卻仍被 merge_worktree 併進 main，導致 nested-DM ratchet 對每一次 push 都紅燈（07-14 01:00/03:00/05:00 三班 CI 全紅 + 老闆兩度反映）。底層缺口：merge 路徑沒有讀 verdict。要做：merge_worktree.sh / dispatch 完成路徑在併入前檢查該 K 的 codex review verdict 與 experiments 完整性 gate，FAIL → 拒絕 merge 並自動建重做任務，不留在 main。regression test 要能重現 K1709 情境。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T06:20:19.877562+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-14"
-      },
-      {
-        "ts": "2026-07-14T06:20:20.172164+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-14"
-      },
-      {
-        "ts": "2026-07-14T06:20:20.449440+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-14"
-      }
-    ],
-    "started_at": "2026-07-14T06:20:20.172150+00:00",
     "completed_at": "2026-07-14T06:20:20.449425+00:00",
-    "result": "merge 路徑加審查認證 gate（commit 7f6adcbd2）。experiment_gates.py 新增 certify 子命令：實驗要進 main 需 review_verdict.json，verdict=PASS 且 reviewed_sha256 覆蓋 claim surface（*.py/README.md/*_results.json）並等於現行 bytes。沒裁決/FAIL/審完又改code(sha漂移) 三個入口全擋，abort 時保留 worktree。merge_worktree.sh 用 python3 stdlib 呼叫（不依賴 uv）。測試：test_experiment_certification.py 11 passed；test_merge_worktree.sh 16 cases/43 assertions（新增 case 14/15/16 重現 K1709 三情境）。已驗證 gate 在 main 上正確擋住未認證的 k1709。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T07:07:50.198397+00:00"
   },
   {
     "id": "ci-red-29307406826",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29307406826, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29307406826",
-    "ci_run_key": "29307406826:1",
     "created_at": "2026-07-14T06:00:06.762078+00:00",
-    "title": "CI 紅燈修復（run 29307406826, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29307406826\nattempt: 1\nhead_sha: 1c15d3c11\n偵測摘要（仍須讀完整 failed log）：2026-07-14T05:09:54.1105106Z E AssertionError: New nested-model site(s) use raw DM/HLN as primary inference:\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29307406826 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T06:32:13.319939+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T06:32:13.615376+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T06:42:39.357054+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-14T06:32:13.615365+00:00",
     "completed_at": "2026-07-14T06:42:39.357040+00:00",
-    "result": "root_cause=K1709 nested QLIKE comparisons fed raw DM/HLN into the primary verdict; repair_commit=562eaf958; hardening=merge review-certify now lazy-loads the audit stack so bare python3 works; verification=GitHub run 29309270493 success plus clean 39 pytest and 16/16 merge cases"
+    "tombstone": true,
+    "archived_at": "2026-07-17T07:07:50.198397+00:00"
   },
   {
     "id": "k1709-collect-codex-verdict",
@@ -34273,13 +34227,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T07:00:13+00:00",
+    "completed_at": "2026-07-17T07:01:16.220801+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T07:00:13+00:00",
-      "last_clean_observed_at": "2026-07-17T07:00:13+00:00"
+      "resolved_at": "2026-07-17T07:01:16.220801+00:00",
+      "last_clean_observed_at": "2026-07-17T07:01:16.220801+00:00"
     }
   },
   {
@@ -34291,13 +34245,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T07:01:24.914315+00:00",
+    "completed_at": "2026-07-17T07:40:54.234890+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T07:01:24.914315+00:00",
-      "last_clean_observed_at": "2026-07-17T07:01:24.914315+00:00"
+      "resolved_at": "2026-07-17T07:40:54.234890+00:00",
+      "last_clean_observed_at": "2026-07-17T07:40:54.234890+00:00"
     }
   },
   {
@@ -41085,7 +41039,7 @@
     "description": "**驗證過的事實（2026-07-17 09:4x，hourly slot-1 curl 實測）**：\n- `/v3/digest/mile_28f844aa` (今日新發) → **404**\n- `/v3/digest/mile_9f5151dc` (7/16) → **404**\n- `/v3/digest/mile_ee178213` (7/15) → **404**\n- `curl https://volpred.zeabur.app/v3 | grep -c 精選導讀` → **0**（首頁完全沒有導讀區塊）\n\n**對比：資料面是好的**，所以這是前端 route / 查詢的問題不是內容問題：\n`mile_28f844aa` 在 feed.json 與 Supabase 都是 status=published、details.content_type='daily_digest'、details.digest_articles 共 9 個 slug（全部對應真實已發佈文章、跨度 45 天），且 `/v3/reports/mile_28f844aa` 回 200、內文/圖/本期精選都正常。\n\n**影響**：我們每天花一整班 fire 產 5,000+ 字的策展長文，讀者卻只能靠 `/v3/reports/<id>` 撞到，導讀專欄這個產品面等於不存在。至少 7/14 起連續多期都是這樣（不是今天才壞）。\n\n**調查起點**：首頁 `getDigestColumn`（靠 details.content_type='daily_digest' 辨識）與 `/v3/digest/[id]` route 兩處。先確認 route 是否真的存在於 build、再確認查詢條件有沒有跟著 content_type / digest_articles 的欄位形狀漂移。\n\n**注意**：boss standing rule — 任何前端改動 `/paper` 原版 + `/v3/paper` 兩版都要改；此處同理，改完必 curl + Chrome 線上驗證，不可假宣告完成。\n\n發現者：hourly slot-1 fire ff8b66b6（daily_digest_20260717 發佈後驗證時撞到）。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "created_at": "2026-07-17T09:37:13.860449+08:00",
     "source": "discovered",
@@ -41094,7 +41048,30 @@
       "frontend",
       "reader_facing",
       "daily_digest"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-17T07:09:06.687292+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366"
+      },
+      {
+        "ts": "2026-07-17T07:09:14.103629+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366"
+      },
+      {
+        "ts": "2026-07-17T07:29:05.026777+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366"
+      }
+    ],
+    "started_at": "2026-07-17T07:09:14.103609+00:00",
+    "completed_at": "2026-07-17T07:29:05.026759+00:00",
+    "result": "根因找到並修好（程式已 push，未上線 — 部署切給 P1 deploy_verify_v3_digest_route_20260717）。\n\n**診斷修正原單**：兩個症狀只有一個是真的。\n(1) /v3/digest/<id> 404 = 真。根因：frontend-v2-fix/src/app/v3/ 底下根本沒有 digest/ 目錄 — 2026-06-21 加導讀專欄時只做 v2（/digest/<id> 至今 200），沒照 boss standing rule 同步 v3。\n(2) 「首頁導讀區塊空白」= 誤判。/v3 是 client component（V3App 'use client'，資料走 SWR），SSR HTML 100KB 內零篇文章標題，curl grep 精選導讀=0 是 curl 假陽性。v3 Editorial 的 LEAD slot 一直都會抓最新導讀（badge-resolver 已由 details.content_type='daily_digest' map 出 精選導讀）。\n故『讀者入口全掛／產品等於不存在』過度描述：v3 讀者一直能經 lead 讀到導讀，只是被導去 /v3/reports/<id> 拿到一般文章版型，失去報頭／第 N 期／本期來源文章 sidebar。真正的缺口是版型與 route parity，不是內容不可達。\n\n**修復**（commit fc3b9d2 @ volpred-v2 main；frontend-v2-fix 是獨立 repo 且在 canonical .gitignore 內，PHASE-Z 收不到，故由本班自行提交該 repo，只 stage 自己的 4 個路徑，未碰他人既有的 public/paper/*.pdf 髒檔）：\n- 新增 src/app/v3/digest/[id]/（page + DigestReader），沿用 V3Shell + editorial primitives + CSS 變數，功能對齊 v2\n- Editorial.tsx 加 hrefFor()：lead 與 secondaries 的導讀導向 /v3/digest/（secondaries 只按 published_at 取次新，舊一期導讀會落進來，故同規則）\n- 抽 V3Prose 供兩頁共用，避免複製 120 行 .v3-prose CSS\n\n**驗證**：npm run build 87/87（route 清單含 ƒ /v3/digest/[id]）、typecheck、check:row-cap 全過。抽離逐字比對確認 2026-05-07 貨幣/數學 gate 原樣保留。線上仍 404（未部署），未假宣告。"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260717T022124408654Z_a1",
@@ -41401,11 +41378,27 @@
     "id": "phase_z_orphan_receipt_feature_split_20260717",
     "priority": 1,
     "task_type": "platform_ops",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-17T06:19:58.630644+00:00",
     "source": "hourly-dispatch/ci-red-29553786006",
     "title": "PHASE-Z 孤兒：receipt/baseline feature 半落地 → main Test Suite 紅（需 owner 決定 adopt）",
-    "description": "main 紅燈第二根因（第一根因 K1386 已於本班修好）。\n\ntests/test_phase_z_test_gate.py 於 024538a18（13:26 safety-net auto-commit）落地，但它測的實作 phase_z._classify_parent_baseline 沒落地 → CI: AttributeError + KeyError x2。\n\n證據：工作區有完整實作，5 檔自 ~10:15 起持續 dirty 未提交（fire baseline 17 檔含這 5 檔）：\n  scripts/dispatch_supervisor/phase_z.py (+206/-31)\n  scripts/fire_receipt.py\n  scripts/hooks/enforce_fire_receipt.py (untracked)\n  scripts/tests/test_enforce_fire_receipt.py (untracked)\n  scripts/tests/test_phase_z_receipt.py\n  (+ scripts/cron_hourly_dispatch_prompt.md 也 dirty，描述此 feature)\n工作區驗證：34 passed（test_phase_z_test_gate 14 + receipt 20）。實作完整且綠，只差落地。\n\n為何沒有 fire 能自動修：phase_z.py:244 明文「另一 writer 的 dirt → 只發警報、never adopted，auto-adoption 正是三次事故成因」。它自 10:15 起就在每個 fire 的 pre-fire baseline 內 →每班都跳過 → 77b969488 所述「skip this run = skip every run」閂死。hourly agent 亦被禁止碰 git。\n\nACTION（需 owner 明示決定，勿自動化）：確認這 6 檔是同一份已完成工作後，一次原子提交落地；或若判定不該落地，則 revert tests/test_phase_z_test_gate.py 的 +82 行。兩者皆可讓 main 轉綠；混合狀態不行。"
+    "description": "main 紅燈第二根因（第一根因 K1386 已於本班修好）。\n\ntests/test_phase_z_test_gate.py 於 024538a18（13:26 safety-net auto-commit）落地，但它測的實作 phase_z._classify_parent_baseline 沒落地 → CI: AttributeError + KeyError x2。\n\n證據：工作區有完整實作，5 檔自 ~10:15 起持續 dirty 未提交（fire baseline 17 檔含這 5 檔）：\n  scripts/dispatch_supervisor/phase_z.py (+206/-31)\n  scripts/fire_receipt.py\n  scripts/hooks/enforce_fire_receipt.py (untracked)\n  scripts/tests/test_enforce_fire_receipt.py (untracked)\n  scripts/tests/test_phase_z_receipt.py\n  (+ scripts/cron_hourly_dispatch_prompt.md 也 dirty，描述此 feature)\n工作區驗證：34 passed（test_phase_z_test_gate 14 + receipt 20）。實作完整且綠，只差落地。\n\n為何沒有 fire 能自動修：phase_z.py:244 明文「另一 writer 的 dirt → 只發警報、never adopted，auto-adoption 正是三次事故成因」。它自 10:15 起就在每個 fire 的 pre-fire baseline 內 →每班都跳過 → 77b969488 所述「skip this run = skip every run」閂死。hourly agent 亦被禁止碰 git。\n\nACTION（需 owner 明示決定，勿自動化）：確認這 6 檔是同一份已完成工作後，一次原子提交落地；或若判定不該落地，則 revert tests/test_phase_z_test_gate.py 的 +82 行。兩者皆可讓 main 轉綠；混合狀態不行。",
+    "status_history": [
+      {
+        "ts": "2026-07-17T07:09:05.299972+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366"
+      },
+      {
+        "ts": "2026-07-17T07:09:42.750002+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366"
+      }
+    ],
+    "completed_at": "2026-07-17T07:09:42.749988+00:00",
+    "result": "已由 15:01 班落地：52516623a feat(phase-z) 提交 6 檔孤兒（phase_z.py 分類實作 + fire_receipt.py + enforce_fire_receipt hook + 3 測試），9a2afe1dc 修隨附回歸。本班驗證 HEAD dde892bf1 上 tests/test_phase_z_test_gate.py + scripts/tests/test_phase_z_receipt.py + test_enforce_fire_receipt.py 共 34 passed，混合狀態已消除，無需 revert。"
   },
   {
     "id": "email-12133-d09483",
@@ -41463,5 +41456,53 @@
     "created_at": "2026-07-17T06:58:06.630190+00:00",
     "source": "hourly_dispatch_observation",
     "parent_email_task_id": "email-12133-d09483"
+  },
+  {
+    "id": "telegram-914",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-17T07:13:38.916668+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 914）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n一直在失敗 你是怎樣了？\n不行就用高級一點的模型、或把問題拋給codex app gpt-5.6 sol看看\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] CI 自動修復未成功（ci-red-29553786006）\n\n📌 白話結論\n原因：ci_failed_more_than_two_cycles: 3\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🛠️ 自動修復需要支援\n原因：ci_failed_more_than_two_cycles: 3\n原始失敗：2026-07-17T04:12:11.7377896Z scripts/tests/test_k1386_methodology_repair.py:63: AssertionError\n已失敗 cycles：3\nrepair tasks：{'ci-red-29553786006': 'in_progress'}\n\n最新 failure run：29558810591\nhttps://github.com/yhlai0911/volpred-research/actions/runs/29558810591\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-17T07:14:01.733444+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-17T07:17:09.548829+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-17T07:17:09.548812+00:00"
+  },
+  {
+    "id": "assign_cb9c9fd1",
+    "title": "fix(ci-watchdog): 修復已 landed 但驗證 run 未跑完時，watcher 誤發 CRITICAL（時序誤報）",
+    "description": "根因（telegram-914 診斷）：ci-red-29553786006 的 CRITICAL 是**時序誤報**，不是修復失敗。\n\n時間線（UTC）：\n- 05:26 024538a18 進 main → 06:00 run 29558810591 Test Suite failure（K1386 測試）\n- 06:24 c586acc43 landed = K1386 測試修復\n- 07:00:08 check_alerts watcher 跑 → 最新「已完成」run 仍是 06:00 那個紅（修復前的 commit）→ failure_keys 累積 3 → 發 CRITICAL\n- 07:00:21 新 run 29561716600 開始（watcher 跑完 13 秒後）→ 07:11 完成，Test Suite / Data Baseline / Source Encoding / Silent Fallback **全 success**\n\n也就是修復其實第 3 輪就成功了，警報只是差 13 秒沒等到驗證 run。本地跑 scripts/tests/test_k1386_methodology_repair.py 亦 9 passed。\n\n要修的 class（scripts/check_alerts.py 附近 L1470-1512）：\n1. **主修**：failure_keys 累積 cycles 觸發 hard_failure 時，未檢查「修復 commit 是否已 landed 但尚未被任何 CI run 驗證過」。應在升級 CRITICAL 前判斷 latest_observed_run.head_sha 是否落後於 repair task 的修復 commit；若落後，該輪應維持 pending/等待驗證而非 escalate。\n2. **次要**：storage/ops/ci_watch_state.json 的 checked_at 卡在 2026-07-14T04:00:45（updated_at 已是 07-17T07:00:08）→ checked_at 有 stale/未更新的 bug，會誤導人判斷 watcher 死了。\n3. **順帶**：本機 HEAD dde892bf1（PHASE-Z receipt feature + 自身回歸修復）領先 origin/main 1 commit 未 push，該 commit 尚未經 CI 驗證。確認後推送。\n\n驗收：新增回歸測試覆蓋「修復已 landed、驗證 run 尚未完成」的時序，斷言該輪不發 CRITICAL。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-17T07:16:48.186222+00:00",
+    "parent_task_id": "telegram-914",
+    "created_by": "telegram-responder"
+  },
+  {
+    "id": "deploy_verify_v3_digest_route_20260717",
+    "title": "v3 導讀頁 Chrome 視覺審查（部署+狀態碼/內容驗證已完成）",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "hourly-dispatch",
+    "created_at": "2026-07-17T15:52:00+08:00",
+    "topology": "inline",
+    "description": "**部署與線上驗證已於 2026-07-17 15:38 完成（不必重做）**：fc3b9d2 已經 deploy-zeabur-safe.sh 上線並驗證：\n- /v3/digest/mile_28f844aa、mile_9f5151dc、mile_ee178213 全部 **404 → 200**（原單點名的三個）\n- 內容非空殼：SSR HTML 含報頭「每日精選導讀」、「第 26 期」、發布時間、「本期來源文章」，9 篇來源文章全部正確連 /v3/reports/<slug>\n- 回歸乾淨：/v3/reports/、/digest/（v2）、/v3、/ 全部維持 200；/v3/reports/<id> 內文 57KB 正常渲染\n\n**本單剩下的唯一工作 = Chrome 視覺審查**（headless fire 做不到，需互動 session 或有 Chrome MCP 的班；狀態碼與 HTML 內容已驗，這裡只審「好不好看」）：\n1. 開 https://volpred.zeabur.app/v3/digest/mile_28f844aa —— 依 web-ui-ux-review skill 審新頁是否真的符合 v3 Editorial 設計語言（報頭雙線、期數、sidebar sticky、桌機 3:1 grid、手機來源文章排在內文前）\n2. **必查 /v3/reports/<id> 沒被改壞** —— 本次抽出共用元件 V3Prose 動到了那個現行正常頁面。搬移經 comm 逐行比對確認逐字、build/typecheck/線上 HTML 長度都正常，但**沒有人用眼睛看過**\n3. 若需設計調整 → 改完再跑一次 deploy-zeabur-safe.sh\n\n**順帶發現（不在本單範圍，要處理請另開單）**：導讀內文有一個寫死的 v2 連結 `/reports/mile_f78be848`（200，非死連結，但點下去會跳出 v3 外殼）。**不是本次改動造成** —— 既有的 /v3/reports/<id> 頁面上同樣有它，根因是文章 Markdown 內文寫死了 v2 路徑。"
   }
 ]
