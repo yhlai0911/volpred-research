@@ -1,7 +1,7 @@
 {
-  "experiment_id": "K1719",
+  "experiment_id": "K1729",
   "title": "Self-owned TAIFEX tick (5-min RV) vs daily-only information for next-day TX day-session RV",
-  "timestamp_utc": "2026-07-17T11:34:08.207566+00:00",
+  "timestamp_utc": "2026-07-17T12:13:50.690339+00:00",
   "random_seed": 42,
   "verdict": "HAR_RV5_WINS_ROBUST_ACROSS_PROXIES",
   "hypothesis": {
@@ -198,5 +198,5 @@
     "SCOPE LIMIT ON THE COST CLAIM (Codex review): the HAR-DAILY baseline's day_return is itself computed from tick by the collector. The baseline's INFORMATION SET is daily-only (day-session open and close are published in TAIFEX's free daily settlement data), but this experiment did not source it end-to-end from an external daily feed. It therefore establishes whether 5-min RV beats daily-compressed information -- not that an external cheap daily feed could replace the tick pipeline byte-for-byte.",
     "Active-contract selection uses each day's TOTAL (day+night) volume, so the choice for day t-1 is only in the information set under the stated 08:45-on-t origin. A 13:45-on-t-1 origin would make it an economic-clock lookahead."
   ],
-  "code_sha256": "e427b925f20ec8939f5dde59b019b1eb7662ac5f168f784b9b0c8807011734e3"
+  "code_sha256": "d3e5691b23ae7168fbfaca875beaf7849702502768c1550e6db6e22745d624f0"
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""K1719: Does self-owned TAIFEX tick (5-min RV) beat daily-only information
+"""K1729: Does self-owned TAIFEX tick (5-min RV) beat daily-only information
 for next-day TX day-session volatility forecasting?
 
 Economic question (owner ruling 2026-07-14): the platform replaced a paid US
@@ -85,7 +85,7 @@ SEED = 42
 WINDOW = 1000           # rolling in-sample rows (not necessarily 1000 valid obs)
 HARVEY_T = 3.0          # Harvey (2016) significance bar
 DATA = REPO / "data" / "intraday" / "taifex_5min_rv.csv"
-OUT = Path(__file__).resolve().parent / "k1719_results.json"
+OUT = Path(__file__).resolve().parent / "k1729_results.json"
 
 np.random.seed(SEED)
 
@@ -265,7 +265,7 @@ def main() -> None:
         overall = "PROXY_DEPENDENT_INCONCLUSIVE"
 
     payload = {
-        "experiment_id": "K1719",
+        "experiment_id": "K1729",
         "title": "Self-owned TAIFEX tick (5-min RV) vs daily-only information for next-day TX day-session RV",
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "random_seed": SEED,

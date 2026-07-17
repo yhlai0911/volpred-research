@@ -1,0 +1,29 @@
+{
+  "kid": "k1729",
+  "verdict": "FAIL",
+  "reviewer": "Codex CLI gpt-5.6-sol (model_reasoning_effort=high) via scripts/codex_exec_bounded.sh; blocking premise independently re-verified by main thread (Claude Opus 4.8) against scripts/collect_taifex_tick.py",
+  "reviewed_at": "2026-07-17T20:40:38+08:00",
+  "reviewed_commit": "e5232b6e413de54c9c4dbe012132773deecdc51f",
+  "review_artifact": "codex_review.md",
+  "blocking_defects": [
+    "Ex-post target-contract selection lookahead: the target y_t (day t rv_5min) is measured on the contract chosen by pick_active_contract() from day t's TOTAL file volume (scripts/collect_taifex_tick.py:231-236, applied at :302-304 BEFORE day-session metrics are computed). That total includes day t's 08:45-13:45 day-session volume, which has not occurred at the stated 08:45-on-t forecast origin. The estimand is therefore not fixable ex ante. README.md:74-83 argues only that day t-1's selection is in the information set (which is correct, and makes X_t legal); it makes no argument for the target side, so the gap is undisclosed rather than scoped.",
+    "Operational claim exceeds evidence as a direct consequence: README.md:22 and :166-169 read the frozen result as an 08:45-implementable predictive gain that justifies maintaining the tick data line. That conclusion depends on the forecast estimand being fixable at the stated origin, which defect 1 shows it is not. The four scope caveats already present (README.md:171-180) do not cover this one."
+  ],
+  "reviewed_sha256": {
+    "README.md": "b79f45132bad62cb77ae913d2e70949c8c4a4246daed1374f7909abec6fbb2e1",
+    "k1729.py": "d3e5691b23ae7168fbfaca875beaf7849702502768c1550e6db6e22745d624f0",
+    "k1729_results.json": "e883953f10c2249217c1d269338fed4ced67f034b62ed7b0cd515fa0dac4240e"
+  },
+  "main_thread_verification_notes": {
+    "role": "Per CLAUDE.md, reviewer output is not canonical until the main thread verifies it. These checks were run independently of Codex and are recorded so the repair task does not redo them.",
+    "gates_that_held_up": [
+      "Numbers reproduce: results.json headline values are bit-identical on re-run (seed=42) and match the README tables exactly, including the diagnostic ranges (7-12 filter triggers / 972-1000 train obs are the union across the two targets, not a mis-transcription of one).",
+      "Self-certifying hashes: results.json code_sha256 == actual k1729.py bytes == the sha the gate pins; data.source_sha256 == actual taifex_5min_rv.csv. The results were produced by exactly this code on exactly this data.",
+      "DM correctness: canonical dm_test bandwidth is max(1, min(ceil(h^(1/3)*n^(1/3)), n//4)) = 14 at h=1, n=2548 -- it does NOT degenerate to lag=0, so the K1655 bug class does not apply here. Per-day loss arrays (not scalars) are passed; QLIKE pointwise direction is canonical actual/predicted.",
+      "Baseline symmetry: both models go through the same har_features() and the same rolling_oos(); feat_ok requires both feature sets finite; the ledger requires both forecasts finite. The 7-vs-0 / 12-vs-0 insanity-filter asymmetry is model behaviour through one shared rule, not an asymmetric code branch.",
+      "No-filter sensitivity claim (README.md:131-132,147) was flagged by Codex as unauditable from the frozen triple. The main thread verified it directly by re-running a filter-disabled copy in /tmp (claim surface untouched): both targets stay HAR_RV5_WINS and |t| RISES (3.681->3.867, 3.367->3.456). The claim is true, and the filter dampens rather than manufactures significance."
+    ],
+    "severity_assessment_of_the_blocking_defect": "The defect is target-side and shared by both models on a common ledger, so it is unlikely to manufacture the headline wins (+14.70% / +3.37%); the main thread's judgement is that the relative result will probably survive repair. But 'probably survives' is not the PASS bar. The bar is no-lookahead AND claims within evidence, and the operational conclusion is precisely the claim the defect undermines. Blocking a fixable disclosure defect costs one cycle; merging an undisclosed ex-post estimand into knowledge.json costs the credibility the platform is built on.",
+    "concrete_repair_path": "Cheap, and does NOT require reprocessing the 35.9GB raw tick: (a) disclose the ex-post contract selection as an explicit caveat; (b) quantify the ambiguity set from the canonical CSV (contract / is_roll columns; ~127 is_roll rows in the OOS window) and re-run the DM comparison with those days dropped from the ledger -- if the verdict survives, the claim is restored WITH evidence instead of by assertion; (c) re-scope README section 7 to whatever (b) actually supports. Then re-review; do not hand-edit this verdict."
+  }
+}

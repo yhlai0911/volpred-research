@@ -1,4 +1,4 @@
-# K1719：自有 TAIFEX tick（5 分鐘 RV）相對「純日頻資訊」的預測增益
+# K1729：自有 TAIFEX tick（5 分鐘 RV）相對「純日頻資訊」的預測增益
 
 - **Proposer / Executor**: Claude（dispatch task `research_taifex_intraday_rv_line`）
 - **Date**: 2026-07-17
@@ -194,6 +194,6 @@ K-C（選擇權 tick）就不是先驗上沒價值的方向 —— 但它的 blo
 
 ## 9. 檔案
 
-- `k1719.py` — 實驗腳本
-- `k1719_results.json` — 結果（含 SHA-256、診斷、排除審計）
+- `k1729.py` — 實驗腳本
+- `k1729_results.json` — 結果（含 SHA-256、診斷、排除審計）
 - `PLANNED_K_BRIEFS.md` — 後續 K 的 brief（含為何 (b)/(c) 原案須改）
