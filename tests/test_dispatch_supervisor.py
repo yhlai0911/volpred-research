@@ -434,8 +434,12 @@ def test_phase_z_dirty_tree_commits_with_correct_message(tmp_path: Path) -> None
     assert out["committed"] is True
     assert out["reason"] == "committed"
     assert _git_head_count(tmp_path) == before + 1
+    # A receipt-less fire still owes the reader a WHAT. The subject names the diff
+    # groups (_generated_subject) rather than only stating that the account is
+    # missing — 「本班產出未附說明」 told the reader nothing, which is what made the
+    # audit gap read as a system fault in `git log` (boss, msg 886).
     assert _git_head_subject(tmp_path) == (
-        "dispatch(16:07): 本班產出未附說明（agent 沒留 receipt）"
+        "dispatch(16:07): 自動摘要（agent 未留 receipt）: 動到 experiments(1)"
     )
     # the real work is now tracked
     tracked = subprocess.run(
