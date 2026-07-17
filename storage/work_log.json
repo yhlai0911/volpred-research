@@ -20641,5 +20641,15 @@
     "owner": "hourly-slot-1-af34ee72a6af40f4b5688d2fbaf9461a",
     "commit": null,
     "summary": "stale CI run（7/16 23:11 head）closeout。4 個失敗（test_check_arc_dedup_thin_signature::test_2026_07_13_incident_topic_is_never_clean / _now_names_its_twins、test_topic_dedup_at_generation::test_novel_topic_passes x2）皆已由後續 commit 於現行 HEAD 修復，驗證 51 passed，無殘留。當前 main 紅燈為另兩根因，見 ci-red-29553786006。"
+  },
+  {
+    "timestamp": "2026-07-17T14:46:05+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12133-d09483",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-08caaf437317486887e371fc43f2b547",
+    "owner": "hourly-slot-1-08caaf437317486887e371fc43f2b547",
+    "commit": "52516623a, 9a2afe1dc",
+    "summary": "老闆回信（email 12133）對『PHASE-Z receipt feature 半落地需拍板』回覆：『你自主運營…該怎麼做最好你應該知道…立刻處理』= 授權代行決定並選『落地』。\n(1) 52516623a：git_writer_lock 精確路徑原子提交 7 檔 — 非原 alert 點名的 6 檔，.claude/settings.json 的 hook 註冊漏算，少了它 enforce_fire_receipt.py 永不觸發、feature 等於沒落地。過程被 no-silent-fallback pre-commit gate 擋下 3 處，未用 --no-verify，依規則標 # silent-ok 並註明理由（fail-open 皆經 _emit_allow 印 stderr trace 非靜默；hook 由裸 python3 執行無法 import volpred.ops.diagnostics）。\n(2) 9a2afe1dc：跑 CI 等價全 suite 抓到自己造成的回歸 — tests/test_dispatch_supervisor.py 的 auto-commit subject 期望值 pin 到舊字串，該檔不在上一班的 dirty 集合內，故『工作區 34 passed』是局部驗證。新實作已在線上生效（daemon 從工作區跑 phase_z），stale 的是測試，與 K1386 同病同修法。已修並驗 89 passed。\n驗證：test_phase_z_test_gate 14 passed（原 AttributeError/KeyError 全消）、test_dispatch_supervisor 89 passed、receipt 20 + hook 13 passed；全 suite 3304 passed / 8 failed，其中 7 支為 test_scheduler_pregate 本地限定 CanonicalWriteBlocked 噪音（CI run 29553786006 該批全綠、run_phase_z 被 monkeypatch、writer 在未碰的 state.py/alerts.py），已入池 local_suite_pregate_canonical_write_noise_20260717 (P2)。\n未碰別人的髒檔（settings.local.json / drafts assets 原樣保留）。"
   }
 ]
