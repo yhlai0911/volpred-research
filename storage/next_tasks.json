@@ -33605,12 +33605,9 @@
     "description": "2026-07-14 kb-backfill 已把 136 個隱形實驗寫進 knowledge.json（KNOWLEDGE_UNRECORDED 136→0，ratchet gate: scripts/tests/test_knowledge_unrecorded_ratchet.py）。其中 29 筆標 needs_human，content 以 [NEEDS_HUMAN 待人工裁決] 開頭、gap 欄位寫明缺什麼。本任務逐筆裁決並更新該 entry：\n- K759 FSI lead-lag：artifact 自稱 dm_test_significant=true，依據 DM t=2.237（p=0.025），過不了 Harvey |t|>=3 → 依現行標準重新判定 NULL 或弱支持。\n- K833 CBOE IV short-straddle：Sharpe 3.4-3.7 無 baseline 檢定、無審查 → 依「Sharpe 遠高於 baseline 先懷疑 bug」複查代碼 lookahead / 成本。\n- K841：MDD 跨不同曝險直接比較（S1 年化波動 8.6% vs S0 19.7%）→ 依 mdd_scale_artifact 規則做 exposure-matched 對照。\n- 另 8 筆原 PASS 因無 reviewer 覆核紀錄，已依 K1259 provenance gate 以 UNVERIFIED 收錄（K1208/K1253/K1407/K1409/K1433/K1446/K1524/K847）→ 需要 Codex 覆核才能回復 PASS。\n來源與完整誠實清單：storage/ops/kb_backfill/README.md",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "source": "kb_backfill_followup (hourly-19, 2026-07-14)",
     "created_at": "2026-07-14T11:14:32.806386+00:00",
-    "claimed_by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c",
-    "claimed_at": "2026-07-17T14:13:05.373154+00:00",
-    "claim_session_id": "4b9d3cade150",
     "status_history": [
       {
         "ts": "2026-07-17T14:13:05.373169+00:00",
@@ -33623,9 +33620,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
+      },
+      {
+        "ts": "2026-07-17T16:50:05.496558+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-17T14:14:15.890200+00:00"
+    "started_at": "2026-07-17T14:14:15.890200+00:00",
+    "last_released_at": "2026-07-17T16:50:05.496549+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "alert_routing_internal_remediable",
@@ -33750,13 +33756,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T16:00:52.011380+00:00",
+    "completed_at": "2026-07-17T17:00:50.339798+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T16:00:52.011380+00:00",
-      "last_clean_observed_at": "2026-07-17T16:00:52.011380+00:00"
+      "resolved_at": "2026-07-17T17:00:50.339798+00:00",
+      "last_clean_observed_at": "2026-07-17T17:00:50.339798+00:00"
     }
   },
   {
@@ -33768,13 +33774,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T16:15:00.890949+00:00",
+    "completed_at": "2026-07-17T17:53:57.229046+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T16:15:00.890949+00:00",
-      "last_clean_observed_at": "2026-07-17T16:15:00.890949+00:00"
+      "resolved_at": "2026-07-17T17:53:57.229046+00:00",
+      "last_clean_observed_at": "2026-07-17T17:53:57.229046+00:00"
     }
   },
   {
@@ -41010,13 +41016,10 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "boss_telegram_907",
-    "status": "in_progress",
+    "status": "pending",
     "created_at": "2026-07-17T05:27:56.323174+00:00",
     "title": "PHASE-Z alert 繞過 alert_remediation bridge — body 還在叫老闆行動（老闆 msg 907 P1）",
     "description": "老闆 Telegram msg 907：「我說過不要建議我行動是你自己立刻去處理」——針對 PHASE-Z auto-commit 測試紅燈 CRITICAL 信。\n\n根因（已診斷，不必重查）：\n- scripts/dispatch_supervisor/phase_z.py:1600 的 alert body 仍寫死 \"## 建議行動\" + 兩行 CLI 指令給老闆跑。\n- 更根本：phase_z.py 直接呼叫 alert_fn(level=\"critical\", ...) 送信，**完全繞過 src/volpred/ops/alert_remediation.py bridge**。grep 證實 remediate_condition / remediate_internal_alert 只在 alerts.py 與 alert_remediation.py 內被呼叫，dispatch_supervisor 一個都沒接。\n- 所以 2026-07-13 的 class sweep（27 alert / 24 帶建議行動）只涵蓋 condition-based alert（check_alerts.py 路徑），dispatch_supervisor 自己直發的 alert 是漏網之魚。feedback_alert_is_a_task_not_a_chore 的「預設自動建任務」不變式在這條路徑上不成立。\n\n要做：\n1. phase_z test-gate CRITICAL 走 remediation bridge：註冊 ALERT_TASK_TYPE（或明確列入 SELF_REMEDIATING/OWNER_DECISION 並寫理由，禁止未分類後門）。\n2. body 行動段改為「## 已自動處理 + 任務 id」，刪掉 imperative 的「## 建議行動」。措辭誠實前提 = 任務必須真的被建出來（不可只改文案）。\n3. **class sweep 不可只修 phase_z**：全量掃 dispatch_supervisor/ 所有直呼 alert_fn 的點，逐一分類；留機械 gate（測試）擋未來新增的 alert 繞過 bridge。\n4. 測試：涵蓋「phase_z 紅燈 → 有 task 產出 + body 不含『建議行動』」。\n\n參考 memory：feedback_alert_is_a_task_not_a_chore、feedback_alerts_auto_act_not_suggest、feedback_declare_complete_requires_class_sweep。",
-    "claimed_by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c",
-    "claimed_at": "2026-07-17T14:13:04.890924+00:00",
-    "claim_session_id": "ec74da49eb2e",
     "status_history": [
       {
         "ts": "2026-07-17T14:13:04.890942+00:00",
@@ -41029,9 +41032,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
+      },
+      {
+        "ts": "2026-07-17T16:50:05.496588+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-17T14:14:15.658243+00:00"
+    "started_at": "2026-07-17T14:14:15.658243+00:00",
+    "last_released_at": "2026-07-17T16:50:05.496585+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "phase_z_orphan_receipt_feature_split_20260717",
@@ -41603,5 +41615,16 @@
     ],
     "description": "2026-07-17 查證（email-12129-04848d）的收尾驗證。\n\n## 不要手動升級 —— 這不是故障\n本機 npm codex 0.144.1 vs npm latest 0.144.5 的落差**不是 cron 壞了**：\ncron_codex_update.sh 每週一 09:00 跑，最後一次 2026-07-13 跑時 latest 就是 0.144.1（log 顯示 'no version change'）；0.144.5 是 2026-07-16 才發布。**下一次 cron = 07-20 會自動升。**\n（另：查證當下有 in-flight `codex exec resume --last` 在跑，手動升級會把 binary 從跑到一半的 job 腳下抽掉。）\n\n## 本班已把根因修掉\ncron_codex_update.sh 現在在版本變動時會自動：(a) 重生 cli-reference.md（升級後文件不再落後 binary — 這正是 K1729 的成因）(b) 跑 smoke，失敗則 email 升為 warn (c) email 附上 smoke 結果與 0.144.5 rm 偵測收緊的提醒。\n\n## 07-20 之後要驗什麼\n1. tail storage/logs/cron/codex_update.log → 應見 0.144.1 → 0.144.5、regen 那行、smoke rc=0\n2. uv run python scripts/gen_codex_cli_reference.py --check → 應 exit 0（無漂移）\n3. 確認老闆收到的 info email 有帶 smoke 結果\n4. 回歸：0.144.5 收緊 dangerous-command 偵測（更多 forced rm 被拒）→ 確認沒有自動化腳本因此被擋\n若 cron 沒跑或沒升 → 那才是真故障，再查 host cron。\n\nparent_email_task_id: email-12129-04848d",
     "blocked_until": "2026-07-20T09:30:00+08:00"
+  },
+  {
+    "id": "k1684_e2_cert_merge_knowledge",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "hourly-dispatch",
+    "created_at": "2026-07-18T01:51:58.507568+08:00",
+    "title": "K1684 E2 收尾：codex 認證 → merge worktree → 主線程寫 knowledge → complete assign_168aeaf8",
+    "description": "K1684 E2 (own-market realized-target forecast-tail-divergence cross-OOS gate) 實驗已於 2026-07-18 00:15-01:00 由 compute agent 跑完，worktree=dispatch-slot-1-79726798-k1684e2, 凍結 commit dd211a5e5。\n\n【已完成/已驗證，勿重跑】裁決 H2_UNSUPPORTED（誠實 null）。主線程已對 k1684_e2_results.json 逐項核對數字，與 agent stdout 一致：\n- 無偏 co² proxy 兩市場 HAR 未顯著贏 GJR（SPX DM t=+1.82、N225 t=+1.31）\n- SPX GK raw t=-5.58(顯著) → 對稱乘法 bias 校正後 t=-1.70(不顯著)，raw 跨 proxy 符號翻轉 → calibration-to-biased-proxy artifact\n- N225 recal GK/RS t≈-3.09 仍顯著偏 HAR，但無偏 co² 不支持 → 以無偏 proxy 為主裁\n- 1% VaR trinity: 只有 HAR+histsim 過，GJR 零格過（尾部失敗對稱，非 HAR 專有）\n- lookahead audit 兩市場皆 passed\n\n【剩餘工作 — 本班兩次 codex 認證審查都 stall（session 019f710f 01:12、019f7128 01:40 皆卡在 reasoning 無最終裁決），未能過 merge 的 review-certification gate】\n1) 重派 codex 認證審查（若再 stall 改用 gemini_ask.py 或改天再試），讀凍結實驗，把裁決寫入 experiments/k1684_e2/review_verdict.json（skeleton 已在 worktree，reviewed_sha256 已填好正確 hash，勿動；只填 verdict/reviewer/reviewed_at/reviewed_commit=dd211a5e5/review_artifact/blocking_defects）。審查焦點=README §8 三爭點（bias 校正口徑是否足以下 UNSUPPORTED / N225 caveat / paper route=FRL 方法論短文是否合理）。\n2) verdict=PASS → bash scripts/merge_worktree.sh dispatch-slot-1-79726798-k1684e2\n3) 主線程（非 agent，K1259）依已 merge 的 JSON 寫 K1684 E2 knowledge：H2_UNSUPPORTED，記三個關鍵數字 + 'apparent forecast-tail divergence = realized-measure 建構 + proxy-bias 的產物，非 HAR-vs-GARCH 穩健性質'（延續 E1 cross-asset 錯配 → E2 within-asset calibration artifact）\n4) complete assign_168aeaf8 --status succeeded（該 task 由 dead slot 79726798 claim，complete 不檢 owner）\n\nparent_compute_followup=k1684_e2_own_market_ftd_cross_oos; parent_email_task_id=null",
+    "escalation_attempts": 0
   }
 ]

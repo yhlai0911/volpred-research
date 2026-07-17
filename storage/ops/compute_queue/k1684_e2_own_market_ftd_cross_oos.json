@@ -20,11 +20,11 @@
     "5280"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queued_at": "2026-07-17T16:12:05Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-17T16:15:03Z",
+  "completed_at": "2026-07-17T17:01:22Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1684_e2_own_market_ftd_cross_oos.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1684_e2_own_market_ftd_cross_oos.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-79726798-k1684e2/experiments/k1684_e2/k1684_e2_results.json",
@@ -38,8 +38,14 @@
     "task_type": "experiment",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "timeout_seconds": 5400,
   "brief_source": "/tmp/brief_k1684_e2.md",
-  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/k1684_e2_own_market_ftd_cross_oos.md"
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/k1684_e2_own_market_ftd_cross_oos.md",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-79726798-k1684e2/experiments/k1684_e2"
+  },
+  "followup_dispatched_at": "2026-07-17T17:51:58Z",
+  "followup_next_task_id": "k1684_e2_cert_merge_knowledge"
 }

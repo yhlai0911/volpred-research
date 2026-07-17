@@ -20886,5 +20886,15 @@
     "owner": "hourly-slot-1-79726798c811477a97b1a617bd3b4876",
     "commit": null,
     "summary": "STARVATION LOCKOUT 觸發（5 個 P2 aged>24h，diversity 暫停）。本 fire 清 2 個餓死研究實驗，走 compute_queue enqueue-agent 給 detached worker（experiment/xhigh 唯一合法路徑，fire 職責到 enqueue 為止）：(1) assign_168aeaf8 K1684 E2 own-market realized-target FTD cross-OOS gate → worktree dispatch-slot-1-79726798-k1684e2，brief 含 own-market 硬約束（禁 cross-asset RV plug-in，E1 已因此 H2_UNSUPPORTED）+ QLIKE/DM-HAC-Harvey/Kupiec-CC-Basel/AS-Z1/FZ0 + block-bootstrap + Codex review gate；(2) assign_43a2ee48 credit-stress firm-level → worktree dispatch-slot-1-79726798-credit-firm，brief 含控制 VIX 後增量為硬門檻 + 高槓桿組>低槓桿組分組差異 + 禁引用未查證文章數字（aggregate 版 K872/T14 已全 NULL）。兩 task 皆 claim+start=in_progress，followup 含 agent-result-verification/lookahead-audit/worktree-merge/knowledge/complete。收件由後續 fire PHASE A 接。"
+  },
+  {
+    "timestamp": "2026-07-18T01:52:38.826297+08:00",
+    "task_type": "experiment",
+    "task_id": "k1684_e2_own_market_ftd_cross_oos (compute-followup collect) → assign_168aeaf8",
+    "outcome": "verified_null_cert_handoff",
+    "actor": "hourly-slot-1-4e4f56f719234e94a3f04ddc8e66f5e0",
+    "owner": "hourly-slot-1-4e4f56f719234e94a3f04ddc8e66f5e0",
+    "commit": null,
+    "summary": "PHASE A 收 K1684 E2 compute followup（agent 01:00 完成，exit0）。主線程逐項核對 k1684_e2_results.json 數字與 agent stdout 一致 → 裁決 H2_UNSUPPORTED 為誠實 null，無 overclaim：無偏 co² proxy 兩市場 HAR 未顯著贏 GJR(SPX t=+1.82/N225 t=+1.31)；SPX GK raw t=-5.58→對稱 bias 校正後 t=-1.70，raw 跨 proxy 符號翻轉=calibration-to-biased-proxy artifact；1% VaR 僅 HAR+histsim 過 trinity，GJR 零格；lookahead audit 兩市場 passed。merge_worktree.sh 被 review-certification gate 擋（需 review_verdict.json PASS + sha256 pin）→ 產 verdict-template（sha256 已填）。兩次派 codex 認證審查皆 stall（session 019f710f 卡 01:12、019f7128 卡 01:40，皆停在 reasoning 無最終 agent_message，非本 fire 能修的 codex 系統性不穩）→ 不 fabricate 裁決（K1709 教訓）。改用 PHASE A followup 機制乾淨交棒：append 新任務 k1684_e2_cert_merge_knowledge（含全部已驗證數字，標明剩餘=codex-cert→merge→主線程寫 knowledge→complete assign_168aeaf8），並 compute_queue mark-followup-dispatched 防重派。worktree 保留未合併等下一班認證。"
   }
 ]
