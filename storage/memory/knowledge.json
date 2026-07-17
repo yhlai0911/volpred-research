@@ -42189,5 +42189,19 @@
    "followup_job": "compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380",
    "residual_task": "assign_k1426_oos_residuals"
   }
+ },
+ {
+  "item_id": "82d0f876",
+  "category": "experiment_result",
+  "content": "K1701 (experiment_id=K1701, experiment_path=experiments/k1701/) — 已實現離散度（指數 vs 成分股）對指數波動率／尾部風險：CONDITIONAL PASS 的誠實 null，且核心價值是識別性教訓而非預測力。\n\nverdict=CONDITIONAL_PASS；codex_review=gpt-5.6-sol (reasoning=high, 2026-07-17, read-only)，理由：核心 OOS 推論與保守結論合格，但須降格 rho 的命名並收緊 PIT／尾部風險宣稱。\n\n發現：log(rdisp)=log(avg_vol)-log(idx_vol)，而 HAR 已含 index RV，故 HAR+l_rdisp 與 HAR+l_avg_vol 張成同一 span —— results.json 的 ladder.identity_check_rdisp_vs_avg_vol 以 max_abs_forecast_diff≈8.8e-17 數值證實兩模型預測完全重合。因此 primary proxy 的任何效果都不能命名為「離散度」，它是波動水準的重參數化。先控制波動水準後再加真離散度 proxies（rho、csvd_rel），12 格 MSE/Clark-West + BH-FDR 全滅。Primary QLIKE family 誠實停在 INCONCLUSIVE，未把 fail-to-reject 講成 exact null。\n\n關鍵數字：primary GW gate 0/6（OOS n=3,134-3,387，QLIKE 改善 -5.132%(TW50 h22) 至 +0.685%(TW50 h1)，六格 |GW z|<=1.069，BH q 全 0.9825）；1% material-gain exclusion Holm 後 0/6（最小 Holm p=0.0520，SPX h1 raw p=0.0087）；識別階梯 0/12（CW nominal p<0.05 僅 2 格，BH q=0.183 → 0 存活）；span identity max_abs_forecast_diff=8.8e-17；membership bias R2 SPX corr(PIT, naive)=0.9964 / TW50 corr=0.9163。\n\n已驗證（主線程 + agent 獨立重算，無 K1016 式方向反轉）：六格 qlike_improve_pct、GW z↔p、BH-FDR、Holm 全部從 raw 重算 0 mismatch；embargo origin gap 2/6/23 嚴格 > h=1/5/22，無 label look-ahead；Wikipedia 名單不構成 look-ahead（k1701_data.py 用歷史納入／剔除表倒推 PIT basket），殘留的是 yfinance 缺已下市股票的 availability bias，README 已誠實揭露。\n\n已知缺口（發文前必補）：R1（2020+ 高覆蓋率子樣本）與 R3（sector-ETF basket）中 rdisp 其實顯著變差（dm_p=0.0008 / 0.00013），方向對增廣模型不利、不構成 overclaim 但屬 under-report；fig6 event study 為全樣本 in-sample 描述，results.json 無對應數字、無法獨立驗證；rho 允許每股 15/22 最少觀測 + 逐日 nanmean，有效權重會漂移，故非精確的波動加權平均相關。\n\n可攜教訓：(1) 巢狀模型的增量 predictor 若與既有 regressor 張成同一 span，任何「效果」都是命名錯誤而非發現，須先做 identity check；(2) 巢狀模型不能用 raw DM 承載 null，需 GW/CW + 多重比較修正。",
+  "evidence": [
+   "experiments/k1701/k1701_results.json",
+   "experiments/k1701/README.md",
+   "experiments/k1701/k1701_data.py",
+   "codex_review=gpt-5.6-sol reasoning=high 2026-07-17 verdict=CONDITIONAL_PASS",
+   "task=dreaming_orphaned_experiment_k1701"
+  ],
+  "confidence": 0.7,
+  "created_at": "2026-07-17T18:23:04.329249"
  }
 ]
