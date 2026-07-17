@@ -1,24 +1,27 @@
 # Feed Index
 
-_Last built: 2026-07-16 14:40 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-17 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
 - Total articles: **1838**  (with thumbnail: 81)
-- Last 30 days: **288**
+- Last 30 days: **284**
 - Total chars (content): 5,646,902
 
-**Status**: published=1623, archived=124, unpublished=66, draft=12, retracted=12, wont_fix=1
+**Status**: published=1626, archived=124, unpublished=66, retracted=12, draft=9, wont_fix=1
 
 **Audience**: research=1142, general=449, daily=149, unknown=77, member_qa=14, event=7
 
 **Category**: milestone=906, general=812, unknown=73, member_qa=14, research=10, daily_article=8, event_article=5, qa=5, experiment=4, diary=1
 
-## 最近 30 天 (288)
+## 最近 30 天 (284)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
 | 2026-07-17 | `mile_aff342df` | 五檔股票扛起大盤 27.8% 權重：這種市場的保險，整張買太貴，用價差買省一半 | general | general | draft | 2904 |  | 一般讀者, 集中度, 避險, 選擇權, 資產配置 |
+| 2026-07-17 | `mile_8e086903` | 市場走得很毛躁，不代表複雜模型比較準：1,097 次隔日預測的教訓 | general | general | published | 2455 |  | 一般讀者, 波動率預測, SPY, HAR, 模型比較, 研究誠實 |
+| 2026-07-16 | `mile_e565b810` | 恐慌時拔掉華爾街溫度計，比特幣預測還是沒變準 | general | general | published | 3446 |  | 一般讀者, 比特幣, VIX, 波動率預測, 加密貨幣, 風險管理 |
+| 2026-07-16 | `mile_bb33fd72` | SPY 吃掉九成交易量，這個熱門度卻猜不到下週風險 | general | general | published | 2812 |  | 一般讀者, ETF, SPY, 成交量, 市場流動性, 波動率 |
 | 2026-07-16 | `mile_ff902b53` | 每日策略建議：VIX 15.92（正常）— 2026-07-16 | daily | general | published | 1518 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-16 | `mile_6f260b0d` | 2026-07-16 本日持倉比率建議（依據 2026-07-16 收盤數據） | daily | milestone | published | 941 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-16 | `mile_f78be848` | 台積電法說開完：成績單每項都贏，ADR 盤前卻跌近 4%，跌的是哪兩個數字？ | general | general | published | 3154 |  | 一般讀者, 台積電, 法說會, 選擇權, 半導體 |
@@ -36,9 +39,6 @@ _Last built: 2026-07-16 14:40 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-07-15 | `mile_009a85c8` | 稀土管制後，礦業 ETF 真的比較危險嗎？八場公告只留下兩次跳動 | general | general | draft | 2599 |  | 一般讀者, 稀土, 關鍵礦物, REMX, ETF, 風險管理 |
 | 2026-07-15 | `mile_9d7a5d1a` | 大盤跌 2.58% 那天，科技跌 6.66%、民生必需品反而漲 1.71% | general | general | draft | 2906 |  | 一般讀者, SPY, 板塊輪動, 防禦類股, 風險管理 |
 | 2026-07-15 | `mile_3c0ea15f` | 同樣跌 35%，退休第一年碰上比第 30 年更傷 | general | general | draft | 3406 |  | 一般讀者, 退休理財, 提領策略, 報酬順序, S&P 500, 台股 |
-| 2026-07-15 | `mile_8e086903` | 市場走得很毛躁，不代表複雜模型比較準：1,097 次隔日預測的教訓 | general | general | draft | 2455 |  | 一般讀者, 波動率預測, SPY, HAR, 模型比較, 研究誠實 |
-| 2026-07-15 | `mile_bb33fd72` | SPY 吃掉九成交易量，這個熱門度卻猜不到下週風險 | general | general | draft | 2812 |  | 一般讀者, ETF, SPY, 成交量, 市場流動性, 波動率 |
-| 2026-07-15 | `mile_e565b810` | 恐慌時拔掉華爾街溫度計，比特幣預測還是沒變準 | general | general | draft | 3446 |  | 一般讀者, 比特幣, VIX, 波動率預測, 加密貨幣, 風險管理 |
 | 2026-07-15 | `mile_a89bdd96` | 六檔 BDC 一起發抖，先別喊信用危機：扣掉大盤後只剩一週訊號 | general | general | draft | 3399 |  | 一般讀者, 私募信貸, BDC, BIZD, HYG, 高收益債 |
 | 2026-07-15 | `mile_7b02f9e2` | 冠軍換了十六次，統計上一個都沒贏 | general | general | published | 3801 |  | 一般讀者, 波動率, 模型選擇, 模型排行榜, 研究誠實 |
 | 2026-07-15 | `mile_cd543ce6` | 「回撤變淺」的真相：把風險拉到同一條線再比，六個因子只剩一個站得住 | general | general | published | 4892 |  | 一般讀者 |
@@ -302,15 +302,15 @@ _Last built: 2026-07-16 14:40 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-17 | `mile_19fa8ca1` | 空倉多到9年最高，上次這樣的時候 VIX 一週翻了兩倍 | general | general | published | 2482 |  | 一般讀者, trending, carry-trade, JPY, VIX, 跨資產波動率 |
 | 2026-06-17 | `mile_5301f92a` | FOMC 決議前夕：VIX9D/VIX 比值 0.961，term structure 已把 6/5 的震盪完全解除 | general | general | published | 3267 |  | 一般讀者, FOMC, VIX, VIX9D, vol-structure, 事件分析 |
 | 2026-06-17 | `mile_5acc24ee` | 跟單國會議員的股票交易能打敗市場嗎？實證告訴你不能 | general | general | published | 2978 |  | 一般讀者, 美股, 跟單策略, 投資策略, 市場效率, 行為金融 |
+
+<details><summary>## 2026-Q2 (882)</summary>
+
+| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
+|---|---|---|---|---|---|---|---|---|
 | 2026-06-16 | `mile_21b09f22` | MOVE 在說話，VIX 在沉默：Warsh 首秀前的跨資產波動率分裂 | general | general | published | 2476 |  | 一般讀者, FOMC, volatility, MOVE, VIX, rates |
 | 2026-06-16 | `mile_ec0e72ee` | 風險模型該回頭看 1 年還是 8 年？答案其實要先看市場現在安不安靜 | general | general | published | 2351 |  | 一般讀者, SPY, 風險模型, 訓練視窗, 市況, 波動率 |
 | 2026-06-16 | `mile_9c7f4c7f` | 一個波動率模型如果連 2008 金融海嘯都撐得住，才比較像真的有用 | general | general | published | 2786 |  | 一般讀者, 波動率預測, SPY, VIX, 金融海嘯, 風險模型 |
 | 2026-06-16 | `mile_328ced24` | 風險模型不是愈高級愈安全：最土的方法反而最少踩線 | research | milestone | published | 2494 |  | 研究, 風險管理, 極端風險, 歷史模擬, SPY, 分配假設 |
-
-<details><summary>## 2026-Q2 (878)</summary>
-
-| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
-|---|---|---|---|---|---|---|---|---|
 | 2026-06-16 | `mile_6f3e2b1a` | 抗通膨債券真的比較穩嗎？高通膨時，答案要看期限 | general | milestone | published | 2158 |  | 一般讀者, TIPS, 通膨, 債券, 美國公債, 波動率 |
 | 2026-06-16 | `mile_cbf8ba62` | 統計檢定通過了，監管機關還是會亮黃燈：換個分配假設，差距就出來了 | research | milestone | published | 2752 |  | 研究, VaR, 風險管理, GJR-GARCH, SPY, 尾端風險 |
 | 2026-06-16 | `mile_c725b44c` | 真正先變吵的，是除息前那 10 天 | general | general | published | 1805 |  | 一般讀者, 台股, 除息, 波動, 事件研究, 金融股 |
