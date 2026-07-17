@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "title": "半導體熊市 vs 平靜 VIX 懶人包",
+  "evidence": {
+    "ev": {
+      "path": "storage/reports/evidence/trending_sox_20260718.json",
+      "sha256": "bf29469e889c644d19d903cb5a8b8ec2199c9ca98352b094eca584abf92ab0ad",
+      "label": "SOX/VIX/S&P 行情 (yfinance, 2026-06-22~07-17)"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "同一場跌勢，兩種體感",
+      "alt": "半導體大跌但大盤平靜的概念框架",
+      "sources": ["ev"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "發生什麼事",
+          "body": [
+            "費半指數從六月高點跌進熊市，但衡量大盤恐慌的 VIX 幾乎沒動。",
+            "波動幾乎全待在半導體板塊，沒有外溢到整個市場。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "SOX 距高點回撤",
+          "value": {"source": "ev", "path": "sox.drawdown_frac", "format": {"kind": "percent", "digits": 1, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "同期 VIX",
+          "value": {"source": "ev", "path": "vix.latest", "format": {"kind": "number", "digits": 1}}
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "拿錯量尺會出事",
+      "alt": "半導體與大盤波動率的對比數字",
+      "sources": ["ev"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "SOX 七月報酬",
+          "value": {"source": "ev", "path": "sox.july_return_frac", "format": {"kind": "percent", "digits": 1, "show_plus": true}}
+        },
+        {
+          "kind": "metric",
+          "label": "SOX 實現波動(年化)",
+          "value": {"source": "ev", "path": "sox.rv10_annual_pct", "format": {"kind": "number", "digits": 0, "suffix": "%"}}
+        },
+        {
+          "kind": "metric",
+          "label": "S&P 實現波動(年化)",
+          "value": {"source": "ev", "path": "spx.rv10_annual_pct", "format": {"kind": "number", "digits": 0, "suffix": "%"}}
+        },
+        {
+          "kind": "metric",
+          "label": "SOX / S&P 波動倍數",
+          "value": {"source": "ev", "path": "compare.sox_spx_rv_ratio", "format": {"kind": "number", "digits": 1, "suffix": " 倍"}}
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "results",
+      "style": "editorial",
+      "title": "帶得走的兩件事",
+      "alt": "集中部位避險的兩個結論",
+      "sources": ["ev"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "保險要保對險種",
+          "body": [
+            "部位越集中，越不能用大盤 VIX 避險；它是被稀釋過的平均值。",
+            "用標的本身的選擇權，貴一點但真的會理賠。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "用自己的波動率當量尺",
+          "body": [
+            "大盤 VIX 低不等於你安全。",
+            "危不危險，看你手上籃子的實現波動，不是新聞頭條那個數字。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "七月單日重挫天數",
+          "value": {"source": "ev", "path": "sox.big_down_days_ge4pct", "format": {"kind": "integer", "suffix": " 天"}}
+        }
+      ]
+    }
+  ]
+}

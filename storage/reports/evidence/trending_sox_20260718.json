@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "topic": "SOX drawdown vs VIX divergence, mid-July 2026",
+    "sources": ["yfinance ^SOX", "yfinance ^VIX", "yfinance ^GSPC"],
+    "window": "2026-06-22 peak to 2026-07-17",
+    "computed_at": "2026-07-18"
+  },
+  "sox": {
+    "peak_value": 14634.7,
+    "peak_date": "2026-06-22",
+    "latest_value": 11673.9,
+    "latest_date": "2026-07-17",
+    "drawdown_frac": -0.202,
+    "july_return_frac": -0.181,
+    "big_down_days_ge4pct": 4,
+    "rv10_annual_pct": 50.7,
+    "rv10_annual_pct_june_peak": 79.9
+  },
+  "spx": {
+    "rv10_annual_pct": 10.4,
+    "latest_day_return_frac": -0.0101
+  },
+  "vix": {
+    "latest": 18.77,
+    "month_start": 16.59
+  },
+  "compare": {
+    "sox_spx_rv_ratio": 4.9
+  }
+}

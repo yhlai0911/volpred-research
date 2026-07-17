@@ -1,0 +1,369 @@
+{
+  "schema": "dreaming_review.v1",
+  "generated_at": "2026-07-17T21:25:01.224457+00:00",
+  "window_days": 14,
+  "dry_run": false,
+  "loop_health": {
+    "generated_at": "2026-07-17T21:25:01.224457+00:00",
+    "window_days": 14,
+    "overall": "ok",
+    "first_pass_success": {
+      "status": "ok",
+      "signal": "derived",
+      "window_days": 14,
+      "total_succeeded": 681,
+      "traced": 365,
+      "coverage": 0.536,
+      "first_pass": 361,
+      "retried": 4,
+      "first_pass_rate": 0.989,
+      "retry_rate": 0.011
+    },
+    "task_outcome": {
+      "status": "ok",
+      "signal": "supported",
+      "window_days": 14,
+      "success": 681,
+      "fail": 13,
+      "blocked": 11,
+      "other": 73,
+      "success_rate": 0.966
+    },
+    "error_recurrence": {
+      "status": "ok",
+      "signal": "supported",
+      "window_days": 14,
+      "distinct_signatures": 0,
+      "recurring": 0,
+      "recurrence_rate": 0.0,
+      "distinct_signatures_all": 22,
+      "recurring_all": 8,
+      "recurrence_rate_all": 0.364,
+      "top_recurring": [
+        {
+          "signature": "dispatch_supervisor:codex_failover_recovered:exit0",
+          "count": 20,
+          "first_seen": "2026-07-15T15:45:09.050947+00:00",
+          "last_seen": "2026-07-16T14:21:26.914435+00:00",
+          "source": "dispatch_state.completions",
+          "recovered": true,
+          "span_days": 0.94,
+          "known": false
+        },
+        {
+          "signature": "dispatch_supervisor:quota_blocked:exit1",
+          "count": 12,
+          "first_seen": "2026-07-15T13:52:05.526338+00:00",
+          "last_seen": "2026-07-16T09:11:19.901920+00:00",
+          "source": "dispatch_state.completions",
+          "recovered": true,
+          "span_days": 0.81,
+          "known": false
+        },
+        {
+          "signature": "codex_work_log_backfill.log:exit1",
+          "count": 4,
+          "first_seen": "2026-07-09T21:00:30.332468+00:00",
+          "last_seen": "2026-07-09T23:10:07.211324+00:00",
+          "source": "cron_log",
+          "recovered": true,
+          "span_days": 0.09,
+          "known": false
+        },
+        {
+          "signature": "git_push_backup.log:exit1:auth",
+          "count": 4,
+          "first_seen": "2026-07-14T09:00:07+00:00",
+          "last_seen": "2026-07-15T14:00:09+00:00",
+          "source": "cron_log",
+          "root_cause": "auth",
+          "recovered": true,
+          "span_days": 1.21,
+          "known": false
+        },
+        {
+          "signature": "dispatch_supervisor:kill_failed_orphan_drained:exit-1",
+          "count": 3,
+          "first_seen": "2026-07-15T20:31:03.621650+00:00",
+          "last_seen": "2026-07-16T14:16:33.348674+00:00",
+          "source": "dispatch_state.completions",
+          "recovered": true,
+          "span_days": 0.74,
+          "known": false
+        }
+      ]
+    },
+    "correction_trend": {
+      "status": "ok",
+      "signal": "supported",
+      "weeks": 4,
+      "weekly_counts_recent_first": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "slope_per_week": 0.0,
+      "trend": "flat",
+      "current_correction_report_high": null,
+      "current_correction_report_medium": null
+    }
+  },
+  "findings": [
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:paper9_c3_multiple_testing_subsection_k1380",
+      "severity": "warn",
+      "evidence": [
+        "task paper9_c3_multiple_testing_subsection_k1380 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_paper9_c3_multiple_testing_subsection",
+      "proposal": "Failed task paper9_c3_multiple_testing_subsection_k1380 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "paper9_c3_multiple_testing_subsection_k1380",
+      "governance_target": null,
+      "occurrences": 1,
+      "first_seen": "2026-07-17T21:25:01.224457+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:trending_repost_2026_07_17_ai變現",
+      "severity": "warn",
+      "evidence": [
+        "task trending_repost_2026_07_17_ai變現 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_trending_repost_2026_07_17_ai",
+      "proposal": "Failed task trending_repost_2026_07_17_ai變現 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "trending_repost_2026_07_17_ai變現",
+      "governance_target": null,
+      "occurrences": 1,
+      "first_seen": "2026-07-17T21:25:01.224457+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:trending_repost_2026_07_17_債市波動度",
+      "severity": "warn",
+      "evidence": [
+        "task trending_repost_2026_07_17_債市波動度 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_trending_repost_2026_07_17",
+      "proposal": "Failed task trending_repost_2026_07_17_債市波動度 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "trending_repost_2026_07_17_債市波動度",
+      "governance_target": null,
+      "occurrences": 1,
+      "first_seen": "2026-07-17T21:25:01.224457+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:trending_repost_2026_07_17_ai支出",
+      "severity": "warn",
+      "evidence": [
+        "task trending_repost_2026_07_17_ai支出 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task trending_repost_2026_07_17_ai支出 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "trending_repost_2026_07_17_ai支出",
+      "governance_target": null,
+      "occurrences": 1,
+      "first_seen": "2026-07-17T21:25:01.224457+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "memory_hygiene",
+      "signature": "memory_hygiene:consolidation_review",
+      "severity": "info",
+      "evidence": [
+        "99 條 feedback 記憶（>=45，疑有重疊）"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "feedback 記憶量大：月度做整併/去重/澄清，讓記憶更清楚易用（避免垃圾桶化）。",
+      "subject_task_id": null,
+      "governance_target": "memory/",
+      "occurrences": 23,
+      "first_seen": "2026-06-30T12:29:57.114601+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": null,
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:e28b5068534016a7",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=e28b5068534016a7 title='⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用' send_count=4 span=58.3d (first 2026-05-20T14:09:29.104141+00:00 → last 2026-07-17T20:12:32.631274+00:00) — no fire in 1.2h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用` fired 4× over 58.3d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-17T21:25:01.224457+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": "2026-07-17T20:12:32.631274+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:e46b1923cd3787a9",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=e46b1923cd3787a9 title='supervisor quota_blocked（額度恢復後自動復工）' send_count=9 span=10.1d (first 2026-07-06T11:08:02.667095+00:00 → last 2026-07-16T13:08:03.136126+00:00) — no fire in 32.3h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `supervisor quota_blocked（額度恢復後自動復工）` fired 9× over 10.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 2,
+      "first_seen": "2026-07-15T21:25:00.515638+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": "2026-07-16T13:08:03.136126+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:b74691d14763e77c",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=b74691d14763e77c title='Claude→Codex failover 接手失敗（Claude 端：quota）' send_count=21 span=5.5d (first 2026-07-10T14:25:34.143753+00:00 → last 2026-07-16T03:00:39.532591+00:00) — no fire in 42.4h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `Claude→Codex failover 接手失敗（Claude 端：quota）` fired 21× over 5.5d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 2,
+      "first_seen": "2026-07-15T21:25:00.515638+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": "2026-07-16T03:00:39.532591+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:800782d7aa16a35c",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=800782d7aa16a35c title='supervisor hang_killed' send_count=5 span=5.7d (first 2026-07-11T06:57:41.105045+00:00 → last 2026-07-16T22:57:38.804873+00:00) — no fire in 22.5h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `supervisor hang_killed` fired 5× over 5.7d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-17T21:25:01.224457+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": "2026-07-16T22:57:38.804873+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:0ddc7a520cfd9d1e",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=0ddc7a520cfd9d1e title='PHASE-Z 有檔案不是這班產出的，已略過' send_count=4 span=3.1d (first 2026-07-13T19:38:15.333090+00:00 → last 2026-07-16T21:24:27.070428+00:00) — no fire in 24.0h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `PHASE-Z 有檔案不是這班產出的，已略過` fired 4× over 3.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-16T21:25:01.228981+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": "2026-07-16T21:24:27.070428+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:e2f24397a43d4962",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=e2f24397a43d4962 title='PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積' send_count=4 span=3.1d (first 2026-07-14T07:20:33.562689+00:00 → last 2026-07-17T08:33:31.400398+00:00) — no fire in 12.9h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積` fired 4× over 3.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-17T21:25:01.224457+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": "2026-07-17T08:33:31.400398+00:00",
+      "task_type": "platform_ops"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:8e08e46929dc07ef",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=8e08e46929dc07ef title='PHASE-Z 產出已 commit，但 agent 沒交代原因' send_count=4 span=3.3d (first 2026-07-14T11:18:12.227684+00:00 → last 2026-07-17T19:23:24.364455+00:00) — no fire in 2.0h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `PHASE-Z 產出已 commit，但 agent 沒交代原因` fired 4× over 3.3d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-17T21:25:01.224457+00:00",
+      "last_seen": "2026-07-17T21:25:01.224457+00:00",
+      "activity_marker": "2026-07-17T19:23:24.364455+00:00",
+      "task_type": "platform_ops"
+    }
+  ],
+  "new_findings": [
+    "missing_retry_strategy:paper9_c3_multiple_testing_subsection_k1380",
+    "missing_retry_strategy:trending_repost_2026_07_17_ai變現",
+    "missing_retry_strategy:trending_repost_2026_07_17_債市波動度",
+    "missing_retry_strategy:trending_repost_2026_07_17_ai支出",
+    "persistent_alert:e28b5068534016a7",
+    "persistent_alert:800782d7aa16a35c",
+    "persistent_alert:e2f24397a43d4962",
+    "persistent_alert:8e08e46929dc07ef"
+  ],
+  "resolved_findings": [
+    "persistent_alert:52425890cc2f99a1"
+  ],
+  "escalations": [],
+  "auto_remediation": [
+    {
+      "signature": "missing_retry_strategy:paper9_c3_multiple_testing_subsection_k1380",
+      "action": "queued",
+      "task_id": "dreaming_missing_retry_strategy_paper9_c3_multiple_testing_subsection"
+    },
+    {
+      "signature": "missing_retry_strategy:trending_repost_2026_07_17_ai變現",
+      "action": "queued",
+      "task_id": "dreaming_missing_retry_strategy_trending_repost_2026_07_17_ai"
+    },
+    {
+      "signature": "missing_retry_strategy:trending_repost_2026_07_17_債市波動度",
+      "action": "queued",
+      "task_id": "dreaming_missing_retry_strategy_trending_repost_2026_07_17"
+    }
+  ],
+  "counts": {
+    "findings": 12,
+    "new": 8,
+    "resolved": 1,
+    "escalations": 0,
+    "propose_only": 8,
+    "auto_dispatch_eligible": 4
+  }
+}
