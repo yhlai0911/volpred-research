@@ -858,16 +858,15 @@ def is_arc_anchorless(sig: dict, refs: set[str] | list[str] | None = None) -> bo
     near-identical-title check, which catches a byte-recycle but cannot see a
     same-arc piece written fresh — that is a recycle detector, not an arc gate.
 
-      2026-07-17 — entities=[BIG_TECH, CAPEX_CYCLE, US_EQUITY], mechanisms=
-      [unspecified]. Registering the mega-cap vocabulary below gave 「AI變現挑戰:
-      從期權波動率解析科技巨頭的資本定價分歧」 two distinctive entities, so this
-      predicate said "anchored" and the CLI printed `clean` for the THIRD time --
-      against those same articles. But that piece is `descriptive`, and the
-      descriptive branch of `find_arc_duplicates` needs a specific shared
-      MECHANISM on top of the entity overlap; with mechanisms=[unspecified] it
-      can never hit. The predicate was reading only half of the matcher it claims
-      to mirror, and new vocabulary is exactly what makes that half-read
-      reachable: more entities, still no mechanism.
+      2026-07-17 — a descriptive piece with distinctive entities but no readable
+      mechanism was briefly reported as anchor-LESS here, because the descriptive
+      branch of `find_arc_duplicates` then demanded a shared SPECIFIC mechanism
+      and such a piece could never hit it. That was a mirror of a matcher BUG,
+      not of a matcher rule: the branch was reading "no mechanism extracted" as
+      "different mechanism". The fix belongs in the matcher (it now falls back to
+      the entity overlap when either side is mechanism-silent), so this predicate
+      goes back to asking the one question it can answer from a signature alone —
+      is there anything here to compare ON?
 
     Callers stay fail-OPEN (`.claude/rules/dedup-gate-audit.md`): anchor-less is
     not evidence of duplication. It just must never be reported as clean. Note
@@ -876,17 +875,7 @@ def is_arc_anchorless(sig: dict, refs: set[str] | list[str] | None = None) -> bo
     "go check by hand", while narrowing it costs a silent duplicate.
     """
     anchors = arc_match_anchors(sig, refs)
-    if anchors["experiment_refs"]:
-        return False  # the same-K short-circuit needs nothing else
-    if not anchors["distinctive_entities"]:
-        return True
-    # Entities alone are enough ONLY where the matcher treats them as enough.
-    # `descriptive` means "no readable conclusion", and there the matcher demands
-    # a specific mechanism as well (`_mechanisms_compatible`'s unspecified-passes
-    # rule does NOT apply on that branch).
-    if str(sig.get("conclusion_class") or "") == "descriptive":
-        return not anchors["specific_mechanisms"]
-    return False
+    return not anchors["distinctive_entities"] and not anchors["experiment_refs"]
 
 
 def _title_tokens(title: str) -> set[str]:
@@ -1252,15 +1241,29 @@ def find_arc_duplicates(
                     )
                 )
                 if not legacy_fuzzy_match:
-                    specific_shared = (
-                        (new_mechanisms & ex_mechanisms)
-                        - _GENERIC_MECHANISMS
-                        - {"unspecified"}
+                    new_specific = (
+                        new_mechanisms - _GENERIC_MECHANISMS - {"unspecified"}
                     )
+                    ex_specific = ex_mechanisms - _GENERIC_MECHANISMS - {"unspecified"}
+                    specific_shared = new_specific & ex_specific
+                    # An UNREADABLE mechanism is not a DIFFERENT one (2026-07-17).
+                    # Requiring `specific_shared` treated "I could not extract a
+                    # mechanism" as positive evidence of a different arc, which is
+                    # exactly backwards: the 2026-07-13 twins are all descriptive
+                    # AND mechanism-less, so demanding a shared specific mechanism
+                    # made the very family this branch exists to catch unmatchable.
+                    # Only when BOTH sides name a specific mechanism is a disjoint
+                    # pair real evidence of different arcs (that is the SpaceX
+                    # false-positive this branch was hardened against, and it keeps
+                    # its guard). Where either side is silent we fall back to the
+                    # entity overlap alone, and this branch is advisory-only
+                    # (`near_miss` -> warn, never a hard block), so the cost of a
+                    # loose hit is a "go check by hand", not a content black hole.
+                    mechanism_unreadable = not new_specific or not ex_specific
                     descriptive_fuzzy_match = bool(
                         include_fuzzy
                         and _is_significant_overlap(new_ents, ex_ents)
-                        and specific_shared
+                        and (specific_shared or mechanism_unreadable)
                     )
                     if not descriptive_fuzzy_match:
                         continue

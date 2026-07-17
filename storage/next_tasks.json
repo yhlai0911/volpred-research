@@ -32077,42 +32077,15 @@
   },
   {
     "id": "journal_discovery_20260713_0",
-    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
-    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
-    "priority": 2,
     "status": "succeeded",
     "task_type": "platform_ops",
-    "dispatch_lane": "agent",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "priority": 2,
     "source": "auto_journal_discovery_fallback",
-    "tags": [
-      "auto-journal-discovery",
-      "research-backlog-refresh",
-      "all-covered-fallback"
-    ],
     "created_at": "2026-07-13T00:00:00+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-13T23:38:28.488534+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T23:38:28.757519+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-13T23:53:05.781457+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-13T23:38:28.757498+00:00",
     "completed_at": "2026-07-13T23:53:05.781440+00:00",
-    "result": "三線掃描 2024–26 primary journals，語意去重後在 research_program.md 新增 10 個 PIT-safe 研究方向。實跑 generate_research_backlog materialize K1704–K1708 共 5 個 pending experiments；JSON、diff 與二次 dry-run 驗證通過。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T00:07:59.896015+00:00"
   },
   {
     "id": "daily_digest_20260713",
@@ -33113,41 +33086,15 @@
   },
   {
     "id": "trending_repost_2026_07_14_replacement",
-    "title": "[trending_repost] 今日 trending 補位（禁 AI-capex×波動率 arc — 該線已 5 篇飽和）",
-    "description": "本任務取代 `trending_repost_2026_07_14_ai資本`（該題已於 2026-07-14 06:30 由 hourly-06 判定 narrative-arc 重複並標 failed）。今天的 trending 檔期因此空著，daily cap 2 / 今日已發 0 —— 這是補位任務。\n\n**開工第一步：做 trending 掃描選題**（WebSearch；來源清單見 memory `reference_trending_blog_sources`）。不要沿用被拒的那題。\n\n**🚫 禁做的 arc（已飽和，寫了就是第 6 篇鬼打牆）**：\n「AI / 科技巨頭資本支出（CapEx）× 波動率定價」這條線的**任何變奏**都不准，包含但不限於：\n- 七巨頭 CapEx 宣告日前後的 IV/HV 溢價（← 就是被拒的那題）\n- 資本支出爆增但波動率沒反應 / 定價迷局\n- AI 變現進度 × 隱含波動率拐點\n- 指數波動率安靜 vs 個股波動率先動（AI 題材下）\n- 選擇權偏斜（skew）反映 AI 資本支出疑慮\n\n已覆蓋這條 arc 的 live general 文章（90 天內 5 篇）：\n`mile_f5f4cb43` / `mile_8a5e80b0` / `mile_49616ac2` / `mile_622a2b73` / `mile_ed9e4626`\n換標題、換角度、換 event window 都仍算同 arc（per memory `feedback_narrative_arc_dedup`）。\n\n**選題後、動筆前必跑**（不可跳過）：\n```\nuv run python scripts/check_arc_dedup.py --text-file <主題摘要> --audience general --title \"<planned title>\"\n```\n⚠️ 2026-07-14 起本 gate 會回 `unjudged_thin_signature`（不是 clean）當它錨不上你的題目 —— 那代表\n**它沒看**，不是「乾淨」。拿到 unjudged 時，**必須**自己做 layer-2 grep（`jq` 掃 feed 標題找同主題），\n不可把 unjudged 當綠燈。這正是今天這起事故的教訓（error_log 2026-07-14 06:20）。\n\n**其餘規格照 `.claude/skills/trending-repost/SKILL.md`**：VolPred 角度、無 source citation、無抄襲、\nevidence package 先於 prose（≥3 個可驗證數字 + ≥1 表 + ≥1 圖 + ≥1 層量化分析）、\nanti-ai-style gate（`scripts/anti_ai_gate.py` exit 0 才能發）、feed 直接 published（不進 draft 池）、\nFB / Ivan Lai 雙發佈（主貼文不放連結，連結放第一則留言）、文末附懶人包圖組。",
-    "task_type": "trending_repost",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-13T22:32:27+00:00",
+    "task_type": "trending_repost",
+    "title": "[trending_repost] 今日 trending 補位（禁 AI-capex×波動率 arc — 該線已 5 篇飽和）",
+    "priority": 1,
     "source": "hourly-06_arc_dup_replacement",
-    "tags": [
-      "trending_repost",
-      "reader_facing",
-      "replacement"
-    ],
-    "status_history": [
-      {
-        "ts": "2026-07-13T23:08:05.776121+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-07"
-      },
-      {
-        "ts": "2026-07-13T23:08:06.029970+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-07"
-      },
-      {
-        "ts": "2026-07-13T23:26:00.915528+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-07"
-      }
-    ],
-    "started_at": "2026-07-13T23:08:06.029952+00:00",
+    "created_at": "2026-07-13T22:32:27+00:00",
     "completed_at": "2026-07-13T23:26:00.915506+00:00",
-    "result": "K1703 + mile_2b424e20 已 published。今日兩大 trending（荷姆茲油價、銀行財報）皆落在飽和 arc（油x波動 5 篇、財報x波動 7 篇），改抓本週五 7/17 七月選擇權月結算，feed 一般讀者線 0 覆蓋。SPY 1993-2026 共 8418 交易日/1744 週：結算週年化 RV 14.37% vs 一般週 15.30%（p=0.183 不顯著）；結算後一週 14.57% 反而更低（p=0.266）→ 釋放句證偽；唯一顯著=結算日當天絕對報酬 0.683% vs 其他星期五 0.799%（p=0.009）。anti_ai_gate PASS、懶人包 4 panel data-bound 渲染、線上 HTTP 200。FB 待互動 session。附帶發現：check_arc_dedup 把摘要裡的否定式排除清單當實體抽取來源（寫「不涉及 Fed/VIX」→ 被標 FOMC/VIX 實體 → 誤判重複），已為 P2 task 補上重現路徑。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T00:07:59.896015+00:00"
   },
   {
     "id": "K1704",
@@ -34658,13 +34605,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-16T23:00:50.767195+00:00",
+    "completed_at": "2026-07-17T00:07:24.691107+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T23:00:50.767195+00:00",
-      "last_clean_observed_at": "2026-07-16T23:00:50.767195+00:00"
+      "resolved_at": "2026-07-17T00:07:24.691107+00:00",
+      "last_clean_observed_at": "2026-07-17T00:07:24.691107+00:00"
     }
   },
   {
@@ -34676,13 +34623,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-16T23:14:21.230744+00:00",
+    "completed_at": "2026-07-17T00:24:08.122985+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-16T23:14:21.230744+00:00",
-      "last_clean_observed_at": "2026-07-16T23:14:21.230744+00:00"
+      "resolved_at": "2026-07-17T00:24:08.122985+00:00",
+      "last_clean_observed_at": "2026-07-17T00:24:08.122985+00:00"
     }
   },
   {
@@ -40976,7 +40923,7 @@
     "description": "根因（2026-07-17 06:0x fire 實證）：昨晚 22:00 reader_facing_refill 產的 3 條 P1 trending topic 全部是 30 日內 general 已發文的 arc 重複（ai變現→mile_f5f4cb43 06-30；ai支出→mile_0fa841ed 07-05；債市→mile_d12825bb 07-06），每條都吃掉一個 fire 的主 slot 才被人工查出來。\n\narc gate 是 entity-anchored，但 src/volpred/publisher/arc_dedup.py 的 _ENTITY_SURFACE 完全沒有大型科技股/AI-CapEx cluster 詞彙：『微軟與 Google…科技股 IV skew』抽出 entities=[]（thin signature → gate 根本沒看）；『雲端四巨頭年燒六千億…科技股波動率偏斜』只抽到 USD（來自「六千億美元」的誤抽），撈回不相干的 SpaceX 文當 near-miss、漏掉真 dup。\n\narc_dedup.py line ~1439 註解自己已量到這件事（五篇同故事文章散成 {USD}/{NASDAQ,USD}/{SEMIS,VIX}/{US_EQUITY}/{USD}），當時的對策是 theme_saturation(門檻5)，但今天三題 saturation 只有 2/3/4 → 全部溜過。2026-07-13 事故三天後原樣重演。\n\n修法：比照 VOL_TARGETING(2026-06-14) / MERGER_ARB(2026-07-01) 前例，把 cluster 註冊成可見 entity，讓 arc gate 依設計運作，而非依賴 saturation 計數器。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-16T22:12:57+00:00",
     "source": "hourly_dispatch_root_cause",
     "tags": [
@@ -40985,9 +40932,6 @@
       "content_pipeline",
       "root_cause"
     ],
-    "claimed_by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117",
-    "claimed_at": "2026-07-16T22:13:03.494667+00:00",
-    "claim_session_id": "48489be1898e",
     "status_history": [
       {
         "ts": "2026-07-16T22:13:03.494687+00:00",
@@ -41000,8 +40944,203 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
+      },
+      {
+        "ts": "2026-07-17T00:21:24.411714+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
       }
     ],
-    "started_at": "2026-07-16T22:13:03.726716+00:00"
+    "started_at": "2026-07-16T22:13:03.726716+00:00",
+    "completed_at": "2026-07-17T00:21:24.411698+00:00",
+    "result": "詞表實作（BIG_TECH/CAPEX_CYCLE cluster）已隨 53f601b7b 進 main 並保留；但該 fire 的 agent 沒跑測試就結束，safety-net commit 送出未驗證成果 → main 紅燈 4 test。由 ci-red-29541122360（slot-1 08:0x）補完未竟的另一半：根因是 matcher 的 descriptive 分支把 mechanism unspecified 當 mismatch，使本 cluster 仍撈不到雙胞胎。修後兩個 incident topic 均由 matcher 指名 mile_f5f4cb43。全套測試綠。"
+  },
+  {
+    "id": "K1724",
+    "title": "K1724: 台股當沖佔比與波動：散戶 herding 在地量化 — TWSE 免費日頻當沖比率，對次日 RV 預測力 + 雙向 Granger（vol 吸引當沖 vs 當沖放大 vol）；台灣數據完整國際罕見（來源：JFQA/JEF 2024-25 r",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 580). Original: 台股當沖佔比與波動：散戶 herding 在地量化 — TWSE 免費日頻當沖比率，對次日 RV 預測力 + 雙向 Granger（vol 吸引當沖 vs 當沖放大 vol）；台灣數據完整國際罕見（來源：JFQA/JEF 2024-25 retail order-imbalance 辯論）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1724.py with signal.shift(1) + seed=42, (c) K1724_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 580,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-17T00:00:01Z"
+  },
+  {
+    "id": "K1725",
+    "title": "K1725: 現貨 BTC ETF 上市對加密 vol「時段結構」的改變 — BTC-USD 小時資料拆美股時段/非時段/週末 RV，斷點檢定 2024-01 IBIT 前後（ETF-ization 拉向傳統市場時鐘；與既有 vol-of-vol spi",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 581). Original: 現貨 BTC ETF 上市對加密 vol「時段結構」的改變 — BTC-USD 小時資料拆美股時段/非時段/週末 RV，斷點檢定 2024-01 IBIT 前後（ETF-ization 拉向傳統市場時鐘；與既有 vol-of-vol spillover 不同 — 時間分配結構非外溢）（來源：J.Futures Markets 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1725.py with signal.shift(1) + seed=42, (c) K1725_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 581,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-17T00:00:01Z"
+  },
+  {
+    "id": "K1726",
+    "title": "K1726: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 586). Original: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來源：JFE 2025 The volatility puzzle of the beta anomaly）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1726.py with signal.shift(1) + seed=42, (c) K1726_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 586,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-17T00:00:01Z"
+  },
+  {
+    "id": "K1727",
+    "title": "K1727: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JP",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 587). Original: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JPM The Impact of Volatility Targeting + Man Group 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1727.py with signal.shift(1) + seed=42, (c) K1727_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 587,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-17T00:00:01Z"
+  },
+  {
+    "id": "K1728",
+    "title": "K1728: 新聞情緒 / 總經注意力增益波動預測 — FRED EPU + 免費情緒/Google Trends 注意力加入 HAR/RV，檢定對美股 RV 的增量 OOS R²（來源：J.Forecasting/arXiv 2025 macro-at",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 594). Original: 新聞情緒 / 總經注意力增益波動預測 — FRED EPU + 免費情緒/Google Trends 注意力加入 HAR/RV，檢定對美股 RV 的增量 OOS R²（來源：J.Forecasting/arXiv 2025 macro-attention & sentiment vol）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1728.py with signal.shift(1) + seed=42, (c) K1728_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 594,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-17T00:00:01Z"
+  },
+  {
+    "id": "ci-red-29541122360",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29541122360",
+    "ci_run_key": "29541122360:1",
+    "created_at": "2026-07-17T00:00:06.940400+00:00",
+    "title": "CI 紅燈修復（run 29541122360, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29541122360\nattempt: 1\nhead_sha: 53f601b7b\n偵測摘要（仍須讀完整 failed log）：2026-07-16T23:11:50.6878886Z E AssertionError: assert 'clean' != 'clean'\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29541122360 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "claimed_by": "hourly-slot-1-627e9ed2cb1f4504b97d786973d1dd39",
+    "claimed_at": "2026-07-17T00:01:07.270827+00:00",
+    "claim_session_id": "1aeabc15b2a0",
+    "status_history": [
+      {
+        "ts": "2026-07-17T00:01:07.270841+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-627e9ed2cb1f4504b97d786973d1dd39"
+      },
+      {
+        "ts": "2026-07-17T00:01:07.495166+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-627e9ed2cb1f4504b97d786973d1dd39"
+      }
+    ],
+    "started_at": "2026-07-17T00:01:07.495151+00:00"
+  },
+  {
+    "id": "alert_host_cron_fail_20260717",
+    "title": "[alert] Host cron failure detected",
+    "description": "由 alert `host_cron_fail` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=warn（max_consecutive_failures=1；non_hang_failure=False）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\n- scheduler_last_status: ok\n- scheduler_age_minutes: 127876.1\n- failing_logs:\n  - storage/logs/cron/daily_update_intraday.log exit=142 at 2026-07-16T06:10:04+00:00 recency=fresh_or_unscheduled\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-17T00:01:27.390426+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "host_cron_fail"
+    ]
+  },
+  {
+    "id": "k1708_stage3_codex_review_merge_20260717",
+    "title": "[experiment] K1708 stage 3：Codex 審凍結程式碼+全樣本數字 → merge worktree → 寫 knowledge",
+    "description": "collect_completed followup for compute jobs k1708-split-verify-freeze (verdict=PASS) 與 k1708-split-gated-rerun (SKIPPED_GATE，其 stale 宣稱已被 verify report 的 brief_premise_superseded 推翻，勿沿用)。verify report 已確認：full_rerun_required=false、code_trace sha256/size/mtime_ns 三項均對上磁碟上的 K1708.py (43bffdd)、quick_mode=false、runtime 1571.6s、三市場齊全、18 tests pass、兩個 BLOCKER 皆修。本任務三步：(1) Codex 對凍結程式碼 + 全樣本數字 re-review（重點：兩 BLOCKER 是否真解、修正有無引入新 look-ahead、Clark-West 取代 DM-HLN 的 criterion_substitution 是否站得住）(2) 過了走正式 scripts/merge_worktree.sh dispatch-slot-2-8dda242d-k1708（禁 force-remove）(3) 依 verdict=NULL 據實寫 knowledge。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "succeeded",
+    "tags": [
+      "experiment",
+      "k1708",
+      "collection",
+      "followup",
+      "codex_review"
+    ],
+    "source": "compute_queue_followup",
+    "created_at": "2026-07-17T00:10:12.421820+00:00",
+    "parent_task_id": "k1708-split-verify-freeze",
+    "dispatch_lane": "main_thread",
+    "status_history": [
+      {
+        "ts": "2026-07-17T00:10:18.376825+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-2bf322e554cf427189253a069c30d154"
+      },
+      {
+        "ts": "2026-07-17T00:10:18.694832+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-2bf322e554cf427189253a069c30d154"
+      },
+      {
+        "ts": "2026-07-17T00:21:16.958574+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-2bf322e554cf427189253a069c30d154"
+      }
+    ],
+    "started_at": "2026-07-17T00:10:18.694816+00:00",
+    "completed_at": "2026-07-17T00:21:16.958558+00:00",
+    "result": "Codex primary review 跑完（bounded 900s, read-only）→ VERDICT: FAIL，依 brief 不 merge、不重跑。通過項：兩個原始 BLOCKER 真修好、CW 公式對算一致、NULL 為 derive_verdict 機械重算（非手填）、provenance 三項對上凍結 K1708.py 43bffdd。新 3 BLOCKER：CW 套用在非精確 nested 的比較 / 事前 DM-HLN |t|>=3 被換成較寬 CW gate 且無 multiple-testing correction / derive_verdict 第二市場只要 status==OK 即 qualified = 假陽性路徑（本 run 未受影響）。全文 storage/ops/k1708_codex_review_20260717.md。已開 k1708_fix_verdict_gate_20260717。worktree 保持未合併。"
+  },
+  {
+    "id": "k1708_fix_verdict_gate_20260717",
+    "title": "[experiment] K1708 修正 stage：verdict gate 假陽性 + CW nesting/gate 替換三個 BLOCKER",
+    "description": "Codex primary review 2026-07-17 判 FAIL（全文 storage/ops/k1708_codex_review_20260717.md）。已確認為真：兩個原始 BLOCKER 真修好、CW 公式正確、NULL 由現行數字機械重算得出、provenance 三項對上凍結程式碼。**不要重跑全樣本、不要 merge worktree、不要為了過 gate 動數字。**\n\n三個 BLOCKER，分兩類：\n(A) 機械 bug，可直接修 — K1708.py:1941-1968 derive_verdict 沒實作宣告的跨市場條件：只讀 TAIFEX 的 QLIKE/CW，第二個市場只要 status=='OK' 就算 qualified、不需任何改善；Codex 實測最小 payload（SPY=OK 無 metrics、只有 TAIFEX 過）回傳 SUPPORTED = 假陽性路徑。亦未檢查 README.md:246-251 宣告的 GW / MCS / regime consistency。修法：讓 qualified 條件真的要求該市場有 admissible metrics 且達成宣告的改善，並補上宣告卻未實作的檢查；加一個會對舊邏輯失敗的非空洞 regression test（用 Codex 那個最小 payload 當種子）。本 run 的 NULL 不受影響（SPY/QQQ 為 FAIL_NO_DATA），修完應仍為 NULL — 若 label 變了就是修錯。\n(B) 推論設計，需研究判斷後才動 code — K1708.py:1394-1405 CW 被套用在「被評分的 level forecast 上並非精確 nested」的比較（HAR_FIXED 每日重估 β/σ²，KF/HARSL 每 252 日 refit 且σ² 不同，差異經 exp(mu+var/2) 進入預測；README.md:280-306 自己承認 δ=1 ≠ HAR_FIXED）；以及 K1708.py:1952-1960 把事前 DM-HLN |t|>=3 換成「三模型任一 CW 單尾 5%」且無 multiple-testing correction，方向一致時明顯較寬 = verdict-shopping 風險（揭露誠實，但不使較寬 gate 等價）。這兩條要先決定「哪個比較才真的 nested」與「哪個 gate 治理 verdict」，再改 code + README，不可反向配合現有數字。\n\n完成條件：(A) 修好 + 非空洞 test + 全套 test 綠、(B) 有明確方法論決定並寫進 README；然後才回到 Codex re-review → merge → 寫 knowledge（NULL 據實記錄）。worktree: .claude/worktrees/dispatch-slot-2-8dda242d-k1708（禁 force-remove）。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "experiment",
+      "k1708",
+      "fix",
+      "codex_review_fail",
+      "followup"
+    ],
+    "source": "codex_review_followup",
+    "created_at": "2026-07-17T00:20:51.770447+00:00",
+    "parent_task_id": "k1708_stage3_codex_review_merge_20260717",
+    "dispatch_lane": "agent"
   }
 ]

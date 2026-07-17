@@ -196,20 +196,21 @@ def test_2026_07_13_incident_topic_now_names_its_twins():
     # here would pin the fixture's thinness, not the gate.
 
 
-def test_2026_07_14_descriptive_without_mechanism_is_anchorless():
-    """THE REGRESSION, in its 2026-07-17 form.
+def test_2026_07_14_mechanism_silent_topic_still_names_its_twin():
+    """THE REGRESSION, in its 2026-07-17 form — and where the fix belongs.
 
-    This topic now extracts distinctive entities (BIG_TECH/CAPEX_CYCLE), so the
-    old "core-only" reasoning no longer applies — but it is still unanchorable,
-    for the OTHER half of the matcher: it is `descriptive` and writes 「期權」/
-    「隱含波動率」, neither of which is a mechanism keyword, so mechanisms is
-    [unspecified] — and the descriptive branch requires a specific one.
+    This topic is `descriptive` and writes 「期權」/「隱含波動率」, neither of which
+    is a mechanism keyword, so mechanisms is [unspecified]. The descriptive branch
+    used to demand a shared SPECIFIC mechanism, which read "no mechanism could be
+    extracted" as "a different mechanism" — so the 2026-07-13 twins, every one of
+    them descriptive AND mechanism-silent, were unmatchable BY CONSTRUCTION. The
+    vocabulary fix alone could not reach this: it gives the topic more entities,
+    and the branch was not looking at entities.
 
-    This is why the vocabulary fix alone was not enough. Registering BIG_TECH
-    flipped this topic from "no anchor" to "anchored", and had the predicate kept
-    reading only the entity half, the CLI would have printed `clean` for the THIRD
-    time against the same twins. New vocabulary is precisely what makes a
-    half-read predicate reachable: more entities, still no mechanism.
+    Making `is_arc_anchorless` mirror that behaviour (descriptive + no mechanism
+    -> "unanchorable") would have pinned the bug as a rule. The matcher now falls
+    back to the entity overlap when either side is mechanism-silent, so the topic
+    is judged on its merits and NAMES the twin instead of shrugging at it.
     """
     sig = arc_signature(CAPEX_TITLE, CAPEX_TEXT)
     assert sig["conclusion_class"] == "descriptive"
@@ -217,7 +218,17 @@ def test_2026_07_14_descriptive_without_mechanism_is_anchorless():
     assert set(sig["entities"]) - {"US_EQUITY", "VIX", "TW_EQUITY"}, (
         "fixture premise: this topic DOES now carry distinctive entities"
     )
-    assert is_arc_anchorless(sig, None) is True
+    # It has something to compare on, so the gate must not excuse itself.
+    assert is_arc_anchorless(sig, None) is False
+    hit_ids = {
+        m["id"]
+        for m in find_arc_duplicates(
+            CAPEX_TITLE, CAPEX_TEXT, FEED, days=3650,
+            audience="general", include_fuzzy=True,
+        )
+    }
+    assert "mile_f5f4cb43" in hit_ids
+    assert "mile_unrelated" not in hit_ids
 
 
 def test_2026_07_14_incident_topic_is_never_clean():
@@ -234,14 +245,49 @@ def test_descriptive_with_specific_mechanism_is_anchorable():
     assert is_arc_anchorless(sig, None) is False
 
 
-def test_generic_mechanism_does_not_anchor_a_descriptive_piece():
-    """`model_forecast`/`cross_asset_spillover` are subtracted by the matcher too."""
-    sig = {
-        "entities": ["COPPER"],
-        "conclusion_class": "descriptive",
-        "mechanisms": ["model_forecast"],
-    }
-    assert is_arc_anchorless(sig, None) is True
+def test_mechanism_silence_is_not_evidence_of_a_different_arc():
+    """Two descriptive pieces on the same entity match even with no mechanism.
+
+    The inverse — both sides naming a specific and DISJOINT mechanism — is real
+    evidence of different arcs and still separates them; that is the SpaceX
+    false-positive guard, pinned in `test_disjoint_specific_mechanisms_separate`.
+    """
+    feed = [
+        {
+            "id": "mile_copper",
+            "audience": "general",
+            "status": "published",
+            "published_at": "2026-06-30T00:00:00+00:00",
+            "title": "銅的波動率結構",
+            "summary": "分析 HG=F 銅期貨的波動率結構。",
+        }
+    ]
+    hits = find_arc_duplicates(
+        "銅期貨的波動特徵", "檢視 HG=F 銅期貨的波動率行為。",
+        feed, days=3650, audience="general", include_fuzzy=True,
+    )
+    assert {m["id"] for m in hits} == {"mile_copper"}
+    # Advisory only: mechanism-silent evidence must never become a hard block.
+    assert all(is_arc_near_miss(m) for m in hits)
+
+
+def test_disjoint_specific_mechanisms_separate():
+    """Both sides named a mechanism and they disagree -> genuinely different arcs."""
+    feed = [
+        {
+            "id": "mile_copper_carry",
+            "audience": "general",
+            "status": "published",
+            "published_at": "2026-06-30T00:00:00+00:00",
+            "title": "銅礦股的散戶參與度",
+            "summary": "分析 HG=F 銅期貨的散戶參與與融資餘額變化。",
+        }
+    ]
+    hits = find_arc_duplicates(
+        "銅的選擇權偏斜", "檢視 HG=F 銅期貨選擇權偏斜（skew）與 vix9d 的期限結構。",
+        feed, days=3650, audience="general", include_fuzzy=True,
+    )
+    assert hits == []
 
 
 def test_non_descriptive_piece_anchors_on_entities_alone():

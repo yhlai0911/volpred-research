@@ -20507,5 +20507,29 @@
     "summary": "PHASE A split_required 處理：K1708 修正 agent job 逾時（5279s，exit 1），但 runner 報 artifact_ok=true 是假象 —— K1708_results.json 的 code_trace sha256=1b374a4(89369B) 與現行 K1708.py sha256=43bffdd(91752B) 不符，即 agent 先跑完全樣本(generated_at 22:11Z, runtime 1546s)、之後又改了 K1708.py(06:46)、只來得及跑 quick mode 就被砍。該份 full-run 數字相對最終程式碼已過期，provenance trace 自相矛盾，不可直接驗數字/Codex審/merge。依 split_contract 切 2 個 bounded child stages（均帶 parent_timeout_job_id + distinct split_stage + 單一 artifact + timeout<5400）：(1) k1708-split-verify-freeze [xhigh, 2400s] 獨立查核兩個 BLOCKER 修正、跑測試、查新 look-ahead、凍結 sha256、刪 quick-mode 殘留 → K1708_verify_report.json；(2) k1708-split-gated-rerun [high, 5100s] 以 verify report verdict=PASS + sha256 相符為 gate，通過才用凍結程式碼重跑全樣本並對帳 verdict 是否翻轉 → K1708_rerun_report.json。compute worker 單線程 FIFO 保證順序。Codex re-review + merge + knowledge 刻意留到數字為真之後（審過期數字正是上一輪失守處）。partial outputs 全數保留未重做。",
     "owner": "hourly-slot-1-173998aa607741c0b36cfa9c3c0d0539",
     "actor": "hourly-slot-1-173998aa607741c0b36cfa9c3c0d0539"
+  },
+  {
+    "timestamp": "2026-07-17T08:24:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29541122360",
+    "outcome": "succeeded",
+    "owner": "hourly-slot-1-627e9ed2cb1f4504b97d786973d1dd39",
+    "actor": "hourly-slot-1-627e9ed2cb1f4504b97d786973d1dd39",
+    "summary": "CI 紅燈修復（run 29541122360, main Test Suite, 4 failed）。root_cause=arc-dedup 的 descriptive 分支把「抽不出 mechanism」(unspecified) 當成「mechanism 不同」，要求 specific_shared 非空才配對；2026-07-13 那批雙胞胎每一篇都是 descriptive 且 mechanism-silent，於是這條分支對它本該攔的故事家族 by construction 永遠不命中。53f601b7b（safety-net auto-commit，agent 沒留 receipt）把 vocab 實作 + TDD 測試一起送進 main，但 agent 沒跑測試就結束，未竟的一半（matcher）留成紅燈：測試斷言 gate 該指名 mile_f5f4cb43，matcher 撈不到 → verdict 仍 clean。修法把根因放回 matcher（either side mechanism-silent → 退回 entity overlap，advisory near_miss 不 hard block；雙方都具名且互斥才視為不同 arc，SpaceX false-positive 護欄保留），並把 is_arc_anchorless 對 descriptive 的收緊回退 —— 該收緊是 predicate 去鏡像 matcher 的 bug，bug 修掉後鏡像即為誤報，且它讓 CARBON/STABLECOIN 等新題被誤判 unjudged_thin_signature（test_topic_dedup_at_generation 兩個 regression 即此）。驗證：兩個 incident topic 現由 matcher 指名 twin mile_f5f4cb43（比原方案的『我看不到，你自己查』更強），mile_unrelated(COPPER)/mile_dead0001(retracted) 未被誤掃；live-corpus calibration sentinel 22 passed（無 over-match）；dedup 群 134 passed；受影響面 688 passed；全套 3281 passed。agent 的 vocab 貢獻（BIG_TECH/CAPEX_CYCLE）完整保留。附帶把 assign_arcdedup_bigtech_vocab_20260717 從 in_progress 收口 —— 其實作已在 main，缺的只是這一半。",
+    "commit": "pending-phase-z"
+  },
+  {
+    "timestamp": "2026-07-17T08:21",
+    "task_type": "experiment",
+    "task_id": "k1708_stage3_codex_review_merge_20260717",
+    "actor": "hourly-slot-2-2bf322e554cf427189253a069c30d154",
+    "owner": "hourly-slot-2-2bf322e554cf427189253a069c30d154",
+    "summary": "K1708 stage 3：Codex primary review（read-only, bounded 900s）判 FAIL — 不 merge。通過：兩個原始 BLOCKER 真修好、CW 公式與 canonical helper 對算一致、NULL 由 derive_verdict 機械重算得出（非手填）、code_trace sha256/size/mtime_ns 三項對上凍結的 K1708.py 43bffdd。三個新 BLOCKER：(1) K1708.py:1394-1405 CW 套用在被評分 level forecast 上並非精確 nested 的比較；(2) K1708.py:1952-1960 事前 DM-HLN |t|>=3 被換成較寬的『三模型任一 CW 單尾 5%』且無 multiple-testing correction；(3) K1708.py:1941-1968 derive_verdict 假陽性 — 第二個市場只要 status=='OK' 即算 qualified，Codex 實測最小 payload 回傳 SUPPORTED（本 run 因 SPY/QQQ FAIL_NO_DATA 未受影響）。審查全文 storage/ops/k1708_codex_review_20260717.md；已開 bounded 修正 stage k1708_fix_verdict_gate_20260717。worktree dispatch-slot-2-8dda242d-k1708 保持未合併。",
+    "artifacts": [
+      "storage/ops/k1708_codex_review_20260717.md"
+    ],
+    "next_task_ids": [
+      "k1708_fix_verdict_gate_20260717"
+    ]
   }
 ]

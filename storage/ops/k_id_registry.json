@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1723,
+  "last_k_id": 1728,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -930,8 +930,58 @@
       "status": "reserved",
       "topic": "颱風登陸與台股波動：颱風假的 vol 機制 — CWB 警報/登陸資料 + TAIEX/台指期，停市後復市日 gap vol 系統性檢定、與一般連假區分；台灣特有制度國際空白（來源：physical-risk event-study 2025 方法移植）",
       "topic_hash": "bd146ad928c8f018"
+    },
+    {
+      "claimed_at": "2026-07-17T00:00:01.254597+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1724",
+      "number": 1724,
+      "source_max": 1723,
+      "status": "reserved",
+      "topic": "台股當沖佔比與波動：散戶 herding 在地量化 — TWSE 免費日頻當沖比率，對次日 RV 預測力 + 雙向 Granger（vol 吸引當沖 vs 當沖放大 vol）；台灣數據完整國際罕見（來源：JFQA/JEF 2024-25 retail order-imbalance 辯論）",
+      "topic_hash": "105f59633f7fb2d6"
+    },
+    {
+      "claimed_at": "2026-07-17T00:00:01.427564+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1725",
+      "number": 1725,
+      "source_max": 1724,
+      "status": "reserved",
+      "topic": "現貨 BTC ETF 上市對加密 vol「時段結構」的改變 — BTC-USD 小時資料拆美股時段/非時段/週末 RV，斷點檢定 2024-01 IBIT 前後（ETF-ization 拉向傳統市場時鐘；與既有 vol-of-vol spillover 不同 — 時間分配結構非外溢）（來源：J.Futures Markets 2025）",
+      "topic_hash": "cc7f554a85bb611b"
+    },
+    {
+      "claimed_at": "2026-07-17T00:00:01.593387+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1726",
+      "number": 1726,
+      "source_max": 1725,
+      "status": "reserved",
+      "topic": "BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來源：JFE 2025 The volatility puzzle of the beta anomaly）",
+      "topic_hash": "072e46db27ae9bcb"
+    },
+    {
+      "claimed_at": "2026-07-17T00:00:01.767876+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1727",
+      "number": 1727,
+      "source_max": 1726,
+      "status": "reserved",
+      "topic": "波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JPM The Impact of Volatility Targeting + Man Group 2025）",
+      "topic_hash": "9a3dab72d45f39be"
+    },
+    {
+      "claimed_at": "2026-07-17T00:00:01.944152+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1728",
+      "number": 1728,
+      "source_max": 1727,
+      "status": "reserved",
+      "topic": "新聞情緒 / 總經注意力增益波動預測 — FRED EPU + 免費情緒/Google Trends 注意力加入 HAR/RV，檢定對美股 RV 的增量 OOS R²（來源：J.Forecasting/arXiv 2025 macro-attention & sentiment vol）",
+      "topic_hash": "830222ab3ab4db03"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-16T00:00:02.780494+00:00"
+  "updated_at": "2026-07-17T00:00:01.944152+00:00"
 }
