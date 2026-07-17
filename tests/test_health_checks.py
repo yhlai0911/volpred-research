@@ -12,6 +12,7 @@ from volpred.ops import health
 from volpred.ops.alerts import build_alert_condition_report
 from volpred.ops.health import (
     check_disk_usage,
+    check_frontend_strategy_metrics_freshness,
     check_paper_trading_gaps,
     check_strategy_metrics_freshness,
     health_snapshot,
@@ -58,6 +59,80 @@ def test_strategy_metrics_stale_when_missing(tmp_path: Path):
     result = check_strategy_metrics_freshness(str(storage))
     assert result["status"] == "stale"
     assert result["exists"] is False
+
+
+# --------------------------------------------------------------------------- #
+# frontend_strategy_metrics_freshness (assign_90d7bdf9: frontend-copy blind spot)
+# --------------------------------------------------------------------------- #
+def _redirect_project_root(monkeypatch, root: Path) -> None:
+    """Point health.project_path at a tmp root so the repo-anchored frontend
+    freshness check reads a hermetic file instead of the real repo copy."""
+    monkeypatch.setattr(
+        health, "project_path", lambda *parts: root.joinpath(*parts)
+    )
+
+
+def test_frontend_strategy_metrics_fresh_is_ok(tmp_path: Path, monkeypatch):
+    _redirect_project_root(monkeypatch, tmp_path)
+    _write_json(tmp_path / "frontend-v2-fix" / "data" / "strategy_metrics.json", {"x": 1})
+    result = check_frontend_strategy_metrics_freshness()
+    assert result["status"] == "ok"
+    assert result["exists"] is True
+    assert result["path"] == "frontend-v2-fix/data/strategy_metrics.json"
+    assert result["age_hours"] is not None and result["age_hours"] < 26
+
+
+def test_frontend_strategy_metrics_stale_when_old(tmp_path: Path, monkeypatch):
+    _redirect_project_root(monkeypatch, tmp_path)
+    path = tmp_path / "frontend-v2-fix" / "data" / "strategy_metrics.json"
+    _write_json(path, {"x": 1})
+    # Schedule-aware like the storage copy: 8 days back is older than the most
+    # recent scheduled daily_update fire on any weekday, so it is unambiguously
+    # stale (30h would false-pass on a Sunday).
+    old = time.time() - 8 * 24 * 3600
+    os.utime(path, (old, old))
+    result = check_frontend_strategy_metrics_freshness()
+    assert result["status"] == "stale"
+    assert result["age_hours"] > 26
+
+
+def test_frontend_strategy_metrics_stale_when_missing(tmp_path: Path, monkeypatch):
+    _redirect_project_root(monkeypatch, tmp_path)
+    result = check_frontend_strategy_metrics_freshness()
+    assert result["status"] == "stale"
+    assert result["exists"] is False
+
+
+def test_frontend_strategy_metrics_alert_wrapper_breaches_when_stale(monkeypatch):
+    """The alert wrapper fires (warn) on stale and stays silent on ok — proves
+    'frontend copy stops updating → someone is alerted'."""
+    from volpred.ops import alerts as alerts_module
+
+    stale = {
+        "status": "stale",
+        "exists": True,
+        "age_hours": 50.0,
+        "path": "frontend-v2-fix/data/strategy_metrics.json",
+        "schedule": "daily_update cron 3 8 * * 1-6 (Asia/Taipei)",
+        "last_expected_refresh_utc": "2026-07-15T00:03:00+00:00",
+    }
+    monkeypatch.setattr(
+        alerts_module, "check_frontend_strategy_metrics_freshness", lambda: stale
+    )
+    cond = alerts_module._parse_frontend_strategy_metrics_freshness_state()
+    assert cond["id"] == "frontend_strategy_metrics_freshness"
+    assert cond["breached"] is True
+    assert cond["level"] == "warn"
+    assert cond["body"]  # non-empty body when breached
+
+    ok = dict(stale, status="ok")
+    monkeypatch.setattr(
+        alerts_module, "check_frontend_strategy_metrics_freshness", lambda: ok
+    )
+    cond_ok = alerts_module._parse_frontend_strategy_metrics_freshness_state()
+    assert cond_ok["breached"] is False
+    assert cond_ok["level"] == "info"
+    assert cond_ok["body"] == ""
 
 
 # --------------------------------------------------------------------------- #

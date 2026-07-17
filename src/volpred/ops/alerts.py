@@ -36,6 +36,7 @@ from .health import (
     DISK_USAGE_MIN_FREE_GB,
     PAPER_TRADING_GAP_NULL_THRESHOLD,
     check_disk_usage,
+    check_frontend_strategy_metrics_freshness,
     check_paper_trading_gaps,
     check_strategy_metrics_freshness,
 )
@@ -3790,6 +3791,58 @@ def _parse_strategy_metrics_freshness_state(storage_dir: str) -> dict[str, Any]:
     }
 
 
+def _parse_frontend_strategy_metrics_freshness_state() -> dict[str, Any]:
+    """frontend-v2-fix/data/strategy_metrics.json mtime falls behind the last
+    scheduled daily_update refresh (or missing) → stale (warn).
+
+    Blind-spot fix (2026-07-16, assign_90d7bdf9): the storage-copy check above
+    never watched the frontend copy, so an 11-day silent stall behind the
+    daily_update dirty-guard latch alerted no one (parent assign_56ddf72b).
+    """
+    check = check_frontend_strategy_metrics_freshness()
+    breached = check.get("status") == "stale"
+    age = check.get("age_hours")
+    rel = check.get("path") or "frontend-v2-fix/data/strategy_metrics.json"
+    schedule = check.get("schedule") or "daily_update (canonical config cron)"
+    last_expected = check.get("last_expected_refresh_utc") or "n/a"
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            "前端 v2 直接讀取的 strategy_metrics 副本 mtime 落後於最近一次「排定」的",
+            "daily_update 刷新（schedule-aware，非固定 26h；週日不誤報）。",
+            f"- 檔案: {rel}",
+            f"- exists: {check.get('exists')}",
+            f"- age_hours: {age if age is not None else '不可讀/不存在'}",
+            f"- 排程: {schedule}",
+            f"- 最近排定刷新(UTC): {last_expected}",
+            "",
+            "## 影響",
+            "此副本由 daily_update job 重寫並直供讀者向 v2 前端；mtime 落後代表前端策略卡",
+            "會用到過期數據，且 storage 副本的既有偵測器看不到這份（降噪不等於降盲）。",
+            "",
+            "## 建議行動",
+            "1. 查刷新 job log：tail -20 storage/logs/cron/daily_update.log。",
+            "2. 確認排程是否該跑：uv run volpred ops schedule-due daily_update。",
+            "3. 比對兩份副本 mtime：ls -l storage/strategy_metrics.json "
+            "frontend-v2-fix/data/strategy_metrics.json。",
+            "4. 若確為 miss，手動補：VOLPRED_ALLOW_OFFSCHEDULE_DAILY_UPDATE=1 "
+            "~/.volpred/bin/cron_daily_update.sh。",
+        ]
+    )
+    return {
+        "id": "frontend_strategy_metrics_freshness",
+        "breached": breached,
+        "level": "warn" if breached else "info",
+        "title": (
+            "前端策略 metrics 過期（frontend-v2-fix/data/strategy_metrics.json 停止更新）"
+            if breached
+            else "frontend_strategy_metrics_freshness ok"
+        ),
+        "body": body if breached else "",
+        "details": check,
+    }
+
+
 def _parse_paper_trading_gaps_state(storage_dir: str) -> dict[str, Any]:
     """Per strategy, >2 nulls in last 3 paper_trading entries → gap alert (warn).
 
@@ -4797,6 +4850,7 @@ def build_alert_condition_report(
         _parse_paper_website_drift_state(current),                # 2026-07-01 loop-eng: 網頁論文卡 status 是否 over-claim vs pipeline 決策
         _parse_paper_adjudication_gap_state(storage_dir, current), # 2026-07-14 K1686 incident: gating task 完成但裁決未發生（blocker stale → handoff 抄到已撤回裁定）
         _parse_strategy_metrics_freshness_state(storage_dir),     # 2026-06-24 migrated from cloud platform-ops-patrol
+        _parse_frontend_strategy_metrics_freshness_state(),       # 2026-07-16 assign_90d7bdf9: frontend copy blind-spot (assign_56ddf72b residual #1)
         _parse_paper_trading_gaps_state(storage_dir),             # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_disk_usage_state(storage_dir),                     # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_content_quality_state(storage_dir, current),       # 2026-06-24 meta-fix: content patrol layer

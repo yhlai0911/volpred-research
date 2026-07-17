@@ -33364,13 +33364,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T22:01:18.115699+00:00",
+    "completed_at": "2026-07-17T23:00:48.648144+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T22:01:18.115699+00:00",
-      "last_clean_observed_at": "2026-07-17T22:01:18.115699+00:00"
+      "resolved_at": "2026-07-17T23:00:48.648144+00:00",
+      "last_clean_observed_at": "2026-07-17T23:00:48.648144+00:00"
     }
   },
   {
@@ -33382,13 +33382,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T22:19:27.346245+00:00",
+    "completed_at": "2026-07-17T23:14:50.181958+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T22:19:27.346245+00:00",
-      "last_clean_observed_at": "2026-07-17T22:19:27.346245+00:00"
+      "resolved_at": "2026-07-17T23:14:50.181958+00:00",
+      "last_clean_observed_at": "2026-07-17T23:14:50.181958+00:00"
     }
   },
   {
@@ -33423,74 +33423,15 @@
   },
   {
     "id": "ci-red-29343425525",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29343425525, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29343425525",
-    "ci_run_key": "29343425525:1",
     "created_at": "2026-07-14T16:00:05.539127+00:00",
-    "title": "CI 紅燈修復（run 29343425525, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29343425525\nattempt: 1\nhead_sha: 0c0036be0\n偵測摘要（仍須讀完整 failed log）：2026-07-14T15:10:17.4840673Z E AssertionError: stale worktree blocked by Gate 0:\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29343425525 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T16:00:41.762538+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-00"
-      },
-      {
-        "ts": "2026-07-14T18:50:01.481700+00:00",
-        "from": "claimed",
-        "to": "pending",
-        "by": "hourly-00",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-14T19:00:45.887894+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-03"
-      },
-      {
-        "ts": "2026-07-14T19:00:46.161850+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-03"
-      },
-      {
-        "ts": "2026-07-14T21:50:05.194523+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-03",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-14T22:01:12.490310+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-06"
-      },
-      {
-        "ts": "2026-07-14T22:01:12.713153+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-06"
-      },
-      {
-        "ts": "2026-07-14T22:45:00.702726+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-06"
-      }
-    ],
-    "last_released_at": "2026-07-14T21:50:05.194514+00:00",
-    "last_release_reason": "auto_release_stale_2h",
-    "started_at": "2026-07-14T22:01:12.713139+00:00",
     "completed_at": "2026-07-14T22:45:00.702708+00:00",
-    "result": "root_cause=three test-env leaks (draft-pool refill wrote canonical NEXT_TASKS via new _promote_starved_article_tasks; force_kill_pgid test probed real pgid; cron manifest stale for cron_git_push_backup.sh); repair_commit=b92c44366 (+873cfb274); CI run 29373377712 SUCCESS"
+    "tombstone": true,
+    "archived_at": "2026-07-17T23:08:09.415601+00:00"
   },
   {
     "id": "alert_release_pool_gap_20260714",
@@ -34434,36 +34375,15 @@
   },
   {
     "id": "fix_reap_orphan_deliverables_gap",
+    "status": "succeeded",
     "task_type": "ops_fix",
+    "title": "reap_orphan_deliverables 漏收 storage/drafts/* — 追根因並修",
     "priority": 1,
     "source": "telegram-responder",
-    "status": "succeeded",
     "created_at": "2026-07-14T21:31:20.306197+00:00",
-    "title": "reap_orphan_deliverables 漏收 storage/drafts/* — 追根因並修",
-    "description": "K1572/K1681/K1685 的 draft/lazypack/圖檔在工作區連續多班未被收編，PHASE-Z 每班都發 alert 要老闆人工確認（老闆已明確不滿）。reap_orphan_deliverables.py 每小時由 check_alerts 跑，卻沒認出這些成品。查它的辨識規則為何漏掉 storage/drafts/*.md / *_lazypack_plan.json / assets/*.png，修到能自動入池，並補 regression test。已由 telegram-responder 手動 commit b361c967f 清空工作區，但根因未修 → 下批 agent 產出會重演。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T22:10:07.824646+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-06"
-      },
-      {
-        "ts": "2026-07-14T22:10:08.063613+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-06"
-      },
-      {
-        "ts": "2026-07-14T22:22:57.234252+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-06"
-      }
-    ],
-    "started_at": "2026-07-14T22:10:08.063596+00:00",
     "completed_at": "2026-07-14T22:22:57.234242+00:00",
-    "result": "根因：reaper 的草稿 recognizer 只問「這份草稿在不在 feed」（交付面），從不問「檔案有沒有進 git」（歸屬面）；已發佈的草稿因此被記為 skipped[registered] 而永遠裸躺，且 lazypack plan / assets PNG 連 glob 都沒掃到（只掃頂層 storage/drafts/*.md）。修：新增 scan_draft_artifacts + collect_draft_artifacts（沿用同檔 paper recognizer 形狀，但收 untracked——孤兒草稿正是以 untracked 形式出現）；保住不變式（永不刪除、不 checkout、不 commit 刪除、認不出就 held）。新增 tests/test_reap_draft_artifacts.py 5 cases 全綠；e2e 造同形狀孤兒檔驗證認得出；main 線上 dry-run 零誤抓。commit 3b2c10375"
+    "tombstone": true,
+    "archived_at": "2026-07-17T23:08:09.415601+00:00"
   },
   {
     "id": "trending_repost_2026_07_15_晶片雙雄",
@@ -34623,20 +34543,15 @@
   },
   {
     "id": "ci-red-29371532833",
+    "status": "closed_no_action",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29371532833, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "closed_no_action",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29343425525",
-    "ci_run_key": "29371532833:1",
     "created_at": "2026-07-14T23:00:06.815771+00:00",
-    "title": "CI 紅燈修復（run 29371532833, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29371532833\nattempt: 1\nhead_sha: b361c967f\n偵測摘要（仍須讀完整 failed log）：2026-07-14T15:10:17.4840673Z E AssertionError: stale worktree blocked by Gate 0:\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29371532833 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
     "completed_at": "2026-07-14T23:00:06.815771+00:00",
-    "result": "CI watcher verified recovery before this repair task started; green_run=29373377712; no action required",
-    "ci_closed_after_green": true
+    "tombstone": true,
+    "archived_at": "2026-07-17T23:08:09.415601+00:00"
   },
   {
     "id": "paper_body_vt_trend_withdraw_k1695_contribution",
@@ -39470,11 +39385,34 @@
     "description": "父任務 assign_56ddf72b 已移除 daily_update dirty-guard 的 latch，frontend-v2-fix/data/strategy_metrics.json 不再卡住（曾靜默 11 天未 commit、每輪 exit 0 無 alert）。但**盲點未補**：alerts.py 的 strategy_metrics_freshness 量的是 storage/strategy_metrics.json 的 mtime，**不是** frontend-v2-fix/data/strategy_metrics.json。若前端那份未來因別的原因再度停止更新，仍然沒有任何人會知道 —— 這正是「降噪不等於降盲」。\n\n**Scope（bounded，勿擴大）**：在 alerts.py 加一條量測 frontend-v2-fix/data/strategy_metrics.json 新鮮度的條件（比照既有 strategy_metrics_freshness 的 26h 門檻與 signature 風格），並補 hermetic regression test 證明「前端檔停更 → 會 alert」且「正常更新 → 不 alert」。\n\n**禁止**：不要順手重構 alerts.py、不要調整既有 signature 的門檻、不要碰 dirty-guard（已修完）。\n\n**證據來源**：docs/fix_56ddf72b_dirty_guard.md §2.C 與 §4 殘留風險 #1（agent 誠實自陳未做）。\n父任務 merge commit: 112af82a4。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "system",
     "created_at": "2026-07-16T18:12:31.947860+00:00",
     "parent_task_id": "assign_56ddf72b",
-    "created_by": "hourly-slot-1-a439b41013384a93ba3994b6c6e48e56"
+    "created_by": "hourly-slot-1-a439b41013384a93ba3994b6c6e48e56",
+    "status_history": [
+      {
+        "ts": "2026-07-17T23:09:24.030723+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-e5d3aed9d33e488a883e5fab9002d876"
+      },
+      {
+        "ts": "2026-07-17T23:09:31.372239+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-e5d3aed9d33e488a883e5fab9002d876"
+      },
+      {
+        "ts": "2026-07-17T23:13:52.078701+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-e5d3aed9d33e488a883e5fab9002d876"
+      }
+    ],
+    "started_at": "2026-07-17T23:09:31.372224+00:00",
+    "completed_at": "2026-07-17T23:13:52.078687+00:00",
+    "result": "frontend strategy_metrics 盲點偵測器：health.check_frontend_strategy_metrics_freshness + alerts wrapper/註冊 + 4 hermetic tests。pytest 15+62 passed，live report 新條件註冊且無誤報（age 17.2h→ok）。bounded scope，未動既有 signature/dirty-guard。"
   },
   {
     "id": "k1708_collect_fullrun_20260717",

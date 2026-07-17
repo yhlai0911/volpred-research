@@ -140,6 +140,67 @@ def check_strategy_metrics_freshness(storage_dir: str = "storage") -> dict:
     }
 
 
+# frontend-v2-fix/data/strategy_metrics.json is a SECOND copy of the strategy
+# metrics, read directly by the reader-facing v2 frontend. It is rewritten by the
+# same daily_update job as storage/strategy_metrics.json, but the pre-existing
+# freshness check only watches the storage copy. When the frontend copy silently
+# stopped updating for 11 days behind the daily_update dirty-guard latch
+# (父任務 assign_56ddf72b), nothing alerted — "降噪不等於降盲". This mirrors the
+# storage check (same schedule-aware threshold) against the frontend path.
+_FRONTEND_STRATEGY_METRICS_PARTS = ("frontend-v2-fix", "data", "strategy_metrics.json")
+_FRONTEND_STRATEGY_METRICS_REL = "frontend-v2-fix/data/strategy_metrics.json"
+
+
+def check_frontend_strategy_metrics_freshness() -> dict:
+    """frontend-v2-fix/data/strategy_metrics.json mtime older than the most
+    recent scheduled daily_update fire (or missing) → stale.
+
+    The v2 reader UI reads this copy directly; check_strategy_metrics_freshness
+    only watches storage/strategy_metrics.json, so a stall in the frontend copy
+    alone would go unnoticed (assign_56ddf72b residual risk #1). Schedule-aware,
+    mirroring the storage check — never false-fires on Sunday.
+    """
+    path = project_path(*_FRONTEND_STRATEGY_METRICS_PARTS)
+    if not path.exists():
+        return {
+            "status": "stale",
+            "exists": False,
+            "age_hours": None,
+            "threshold_hours": STRATEGY_METRICS_STALE_HOURS,
+            "path": _FRONTEND_STRATEGY_METRICS_REL,
+        }
+    try:
+        mtime = os.path.getmtime(path)
+        age_hours = round((datetime.now(timezone.utc).timestamp() - mtime) / 3600.0, 2)
+    except OSError as exc:
+        warn(
+            "health_frontend_strategy_metrics",
+            "getmtime failed; treating as stale",
+            path=str(path),
+            err=str(exc),
+        )
+        return {
+            "status": "stale",
+            "exists": True,
+            "age_hours": None,
+            "threshold_hours": STRATEGY_METRICS_STALE_HOURS,
+            "path": _FRONTEND_STRATEGY_METRICS_REL,
+        }
+    now_utc = datetime.now(timezone.utc)
+    mtime_dt = datetime.fromtimestamp(mtime, timezone.utc)
+    last_expected = _last_expected_metrics_refresh(now_utc)
+    status = "stale" if mtime_dt < last_expected else "ok"
+    cron = get_job_cron(_DAILY_UPDATE_JOB_ID) or _DAILY_UPDATE_CRON_FALLBACK
+    return {
+        "status": status,
+        "exists": True,
+        "age_hours": age_hours,
+        "last_expected_refresh_utc": last_expected.isoformat(),
+        "schedule": f"daily_update cron {cron} (Asia/Taipei)",
+        "path": _FRONTEND_STRATEGY_METRICS_REL,
+    }
+
+
 def check_paper_trading_gaps(storage_dir: str = "storage") -> dict:
     """Per strategy, inspect the last 3 paper_trading entries; if >2 of their
     portfolio_return values are null → gap alert.
