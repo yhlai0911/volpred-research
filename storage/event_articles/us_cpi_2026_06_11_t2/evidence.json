@@ -1,24 +1,127 @@
 {
-  "event": "US CPI 2026-06-11",
+  "event": "US CPI (T-2 preview article, mile_0fa9c7f5)",
   "article_slot": "T-2",
+  "errata_rerun": {
+    "date": "2026-07-17",
+    "reason": "original run hard-coded CPI release dates from a 13th-of-month proxy; 7 of 13 were wrong and the 2025-11-13 entry was a release that never happened (October-2025 reference month cancelled during the shutdown; CPIAUCSL has no 2025-10-01 observation)",
+    "event_date_source": "FRED/ALFRED release calendar (release_id=10) via volpred.data.event_dates.cpi_release_dates",
+    "data_window_unchanged": true,
+    "method_unchanged": false,
+    "method_deltas": [
+      "event-session alignment changed from bidirectional +/-5-day nearest-match to forward-only, bounded (MAX_SNAP_DAYS=4), fail-closed; behavioural change, inert on this data (all 12 mappings are identities)",
+      "enforces the complete requested XNYS session calendar before any analysis: drops extra non-session rows (yfinance returns a ^VIX quote for Memorial Day 2026-05-25 when the exchange was closed) and RAISES on missing, duplicate, or out-of-order sessions, with expected sessions derived from the requested window rather than the data's own bounds. Verified to change zero reported numbers, since ^VIX9D lacks that row and all 12 events precede it"
+    ],
+    "inference_limits": [
+      "reported std uses ddof=0 (descriptive, as in original); F-test uses ddof=1, so displayed sigmas do not reconcile to F algebraically",
+      "F-test assumes normality; n=4 in the recent group cannot support it and the classical F-test is highly sensitive to departures. p=0.0067 is suggestive of variance compression, not evidence for it"
+    ],
+    "previewed_event_date_was_wrong": {
+      "article_assumed": "2026-06-11",
+      "official": "2026-06-10",
+      "consequence": "the piece published 2026-06-09 was a T-1 preview, not T-2"
+    }
+  },
   "data_period": "2025-05-01 to 2026-06-08",
   "latest_closed_trading_day": "2026-06-08",
-  "cpi_dates_full_n": 13,
+  "official_release_dates": [
+    "2025-05-13",
+    "2025-06-11",
+    "2025-07-15",
+    "2025-08-12",
+    "2025-09-11",
+    "2025-10-24",
+    "2025-12-18",
+    "2026-01-13",
+    "2026-02-13",
+    "2026-03-11",
+    "2026-04-10",
+    "2026-05-12"
+  ],
+  "release_to_session_mapping": [
+    {
+      "release": "2025-05-13",
+      "session": "2025-05-13",
+      "snapped": false
+    },
+    {
+      "release": "2025-06-11",
+      "session": "2025-06-11",
+      "snapped": false
+    },
+    {
+      "release": "2025-07-15",
+      "session": "2025-07-15",
+      "snapped": false
+    },
+    {
+      "release": "2025-08-12",
+      "session": "2025-08-12",
+      "snapped": false
+    },
+    {
+      "release": "2025-09-11",
+      "session": "2025-09-11",
+      "snapped": false
+    },
+    {
+      "release": "2025-10-24",
+      "session": "2025-10-24",
+      "snapped": false
+    },
+    {
+      "release": "2025-12-18",
+      "session": "2025-12-18",
+      "snapped": false
+    },
+    {
+      "release": "2026-01-13",
+      "session": "2026-01-13",
+      "snapped": false
+    },
+    {
+      "release": "2026-02-13",
+      "session": "2026-02-13",
+      "snapped": false
+    },
+    {
+      "release": "2026-03-11",
+      "session": "2026-03-11",
+      "snapped": false
+    },
+    {
+      "release": "2026-04-10",
+      "session": "2026-04-10",
+      "snapped": false
+    },
+    {
+      "release": "2026-05-12",
+      "session": "2026-05-12",
+      "snapped": false
+    }
+  ],
+  "cpi_dates_full_n": 12,
   "cpi_dates_recent4_n": 4,
+  "date_convention": {
+    "event_date": "official BLS news-release date, published 08:30 ET",
+    "reaction_window": "t-1 close to t close; release at 08:30 precedes the 09:30 open, so same-day measurement is not lookahead",
+    "event_window_offsets": "trading days, not calendar days",
+    "pre_event_runup": "descriptive only — measured against the CPI-day VIX, which is unknown ex ante; not a tradeable signal",
+    "article_slot_naming": "T-2 is a calendar-day offset from the previewed release; unrelated to the trading-day offsets above"
+  },
   "primary_numbers": {
     "recent4_vix_day_pct": {
       "values": [
         {
-          "date": "2026-02-12",
-          "pct": 17.96,
-          "vix_prev": 17.65,
-          "vix_curr": 20.82
+          "date": "2026-02-13",
+          "pct": -1.057,
+          "vix_prev": 20.82,
+          "vix_curr": 20.6
         },
         {
-          "date": "2026-03-12",
-          "pct": 12.629,
-          "vix_prev": 24.23,
-          "vix_curr": 27.29
+          "date": "2026-03-11",
+          "pct": -2.808,
+          "vix_prev": 24.93,
+          "vix_curr": 24.23
         },
         {
           "date": "2026-04-10",
@@ -27,30 +130,31 @@
           "vix_curr": 19.23
         },
         {
-          "date": "2026-05-13",
-          "pct": -0.667,
-          "vix_prev": 17.99,
-          "vix_curr": 17.87
+          "date": "2026-05-12",
+          "pct": -2.122,
+          "vix_prev": 18.38,
+          "vix_curr": 17.99
         }
       ],
-      "mean": 7.147,
-      "std": 8.366,
-      "min": -1.334,
-      "max": 17.96
+      "mean": -1.83,
+      "std": 0.687,
+      "min": -2.808,
+      "max": -1.057
     },
-    "earlier9_vix_day_pct": {
-      "mean": -0.022,
-      "std": 6.525,
+    "earlier_vix_day_pct": {
+      "mean": -1.94,
+      "std": 4.464,
       "min": -9.354,
-      "max": 14.22,
-      "n": 9
+      "max": 5.688,
+      "n": 8
     },
     "variance_compression_ftest": {
-      "F_stat": 0.513,
-      "df_earlier": 8,
+      "F_stat": 36.243,
+      "df_earlier": 7,
       "df_recent": 3,
-      "one_sided_pval": 0.7995,
-      "interpretation": "p<0.05 表示近 4 次方差顯著低於前 9 次"
+      "one_sided_pval": 0.0067,
+      "interpretation": "小 p 值指向「近 4 次方差低於前 8 次」，但 n=4 撐不起 F 檢定的常態假設，且該檢定對偏離常態極敏感 —— 應讀為 suggestive，不可宣稱為顯著證據",
+      "normality_assumption_supported": false
     },
     "current_term_structure": {
       "as_of_date": "2026-06-08",
@@ -59,49 +163,49 @@
       "ratio_vix9d_vix": 1.0407,
       "latest5_ratio_mean": 0.9291,
       "latest10_ratio_mean": 0.8836,
-      "baseline_ratio_mean": 0.9,
-      "baseline_ratio_std": 0.0742,
-      "z_score_latest5_vs_baseline": 0.39
+      "baseline_ratio_mean": 0.901,
+      "baseline_ratio_std": 0.0744,
+      "z_score_latest5_vs_baseline": 0.38
     },
     "pre_cpi_runup": {
       "T-5": {
-        "mean_pct_vs_cpi_day": 3.318,
-        "n": 13
+        "mean_pct_vs_cpi_day": 6.168,
+        "n": 12
       },
       "T-4": {
-        "mean_pct_vs_cpi_day": 3.043,
-        "n": 13
+        "mean_pct_vs_cpi_day": 4.22,
+        "n": 12
       },
       "T-3": {
-        "mean_pct_vs_cpi_day": 0.83,
-        "n": 13
+        "mean_pct_vs_cpi_day": 5.606,
+        "n": 12
       },
       "T-2": {
-        "mean_pct_vs_cpi_day": -1.335,
-        "n": 13
+        "mean_pct_vs_cpi_day": 1.412,
+        "n": 12
       },
       "T-1": {
-        "mean_pct_vs_cpi_day": -1.578,
-        "n": 13
+        "mean_pct_vs_cpi_day": 2.083,
+        "n": 12
       }
     }
   },
   "table_rows_recent4": [
     {
-      "CPI 發布日": "2026-02-12",
-      "VIX（T-1）": 17.65,
-      "VIX（當日）": 20.82,
-      "VIX 當日漲跌": "+18.0%",
-      "VIX9D/VIX 比值": "0.951",
-      "VIX T+5 變化": "-8.3%"
+      "CPI 發布日": "2026-02-13",
+      "VIX（T-1）": 20.82,
+      "VIX（當日）": 20.6,
+      "VIX 當日漲跌": "-1.1%",
+      "VIX9D/VIX 比值": "0.911",
+      "VIX T+5 變化": "+2.0%"
     },
     {
-      "CPI 發布日": "2026-03-12",
-      "VIX（T-1）": 24.23,
-      "VIX（當日）": 27.29,
-      "VIX 當日漲跌": "+12.6%",
-      "VIX9D/VIX 比值": "1.062",
-      "VIX T+5 變化": "-11.8%"
+      "CPI 發布日": "2026-03-11",
+      "VIX（T-1）": 24.93,
+      "VIX（當日）": 24.23,
+      "VIX 當日漲跌": "-2.8%",
+      "VIX9D/VIX 比值": "1.009",
+      "VIX T+5 變化": "+3.5%"
     },
     {
       "CPI 發布日": "2026-04-10",
@@ -112,12 +216,12 @@
       "VIX T+5 變化": "-9.1%"
     },
     {
-      "CPI 發布日": "2026-05-13",
-      "VIX（T-1）": 17.99,
-      "VIX（當日）": 17.87,
-      "VIX 當日漲跌": "-0.7%",
-      "VIX9D/VIX 比值": "0.888",
-      "VIX T+5 變化": "-2.4%"
+      "CPI 發布日": "2026-05-12",
+      "VIX（T-1）": 18.38,
+      "VIX（當日）": 17.99,
+      "VIX 當日漲跌": "-2.1%",
+      "VIX9D/VIX 比值": "0.908",
+      "VIX T+5 變化": "+0.4%"
     }
   ],
   "latest_10_days": [
