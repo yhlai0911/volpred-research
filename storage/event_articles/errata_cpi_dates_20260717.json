@@ -1,0 +1,487 @@
+{
+  "errata_id": "errata_cpi_dates_20260717",
+  "created": "2026-07-17",
+  "source_audit": "K1442 related_event_date_audit",
+  "summary": "Two published CPI event-study articles were built on hard-coded release dates inferred from a 13th-of-month calendar proxy. Against the official FRED/ALFRED calendar, 7 of 13 dates were wrong and one was a release that never happened. Both articles' headline numbers reverse. Neither article can be repaired by editing numbers in place: the T-7 piece's central thesis is contradicted by its own corrected evidence, and it contains a fabricated event, an impossible release date, and a false provenance claim.",
+  "official_dates_used": {
+    "source": "FRED/ALFRED release calendar, release_id=10 (Consumer Price Index), via volpred.data.event_dates.cpi_release_dates",
+    "independent_confirmation": "FRED /series/vintagedates for CPIAUCSL — a different endpoint with no 'last release per month' dedup rule anywhere in it, which is what the release-calendar path cannot self-check. Per FRED's docs a vintage date is a date on which values were released OR revised, so this is a corroborating diagnostic, not a pure first-release oracle; its exact agreement here additionally assumes no extra revision vintages landed in the window. Returns an identical 12-date list.",
+    "window": "2025-05-01 .. 2026-05-26 (T-7) / 2025-05-01 .. 2026-06-08 (T-2)",
+    "dates": [
+      "2025-05-13",
+      "2025-06-11",
+      "2025-07-15",
+      "2025-08-12",
+      "2025-09-11",
+      "2025-10-24",
+      "2025-12-18",
+      "2026-01-13",
+      "2026-02-13",
+      "2026-03-11",
+      "2026-04-10",
+      "2026-05-12"
+    ],
+    "n": 12,
+    "proxy_dates_used_originally": [
+      "2025-05-13",
+      "2025-06-11",
+      "2025-07-15",
+      "2025-08-12",
+      "2025-09-11",
+      "2025-10-15",
+      "2025-11-13",
+      "2025-12-10",
+      "2026-01-14",
+      "2026-02-12",
+      "2026-03-12",
+      "2026-04-10",
+      "2026-05-13"
+    ],
+    "proxy_dates_wrong": 7,
+    "proxy_dates_correct": 6,
+    "phantom_release": {
+      "date": "2025-11-13",
+      "finding": "No CPI was published in November 2025 at all. The October-2025 reference month — which that November slot would have carried — was cancelled during the government shutdown.",
+      "verified_at_source": "FRED series CPIAUCSL has no observation for 2025-10-01 (value is '.')",
+      "note": "The release month (November) and the reference month (October) are distinct. Prior write-ups, including the docstring of src/volpred/data/event_dates.py, conflate them; see handoff notes."
+    },
+    "sample_size_change": "13 -> 12 (the phantom November release is gone). The T-2 'earlier 9' comparison group becomes 'earlier 8'."
+  },
+  "independent_check": {
+    "script": "storage/event_articles/verify_errata_cpi_dates_20260717.py",
+    "result": "PASS — 198 checks. Every number the articles quote, except the T-7 bootstrap (consistency-checked only), reproduced along a separate implementation path.",
+    "run_date": "2026-07-17",
+    "axes": [
+      "Event dates path A: raw ALFRED /release/dates with different params (desc sort, no include-with-no-data) and dict-based dedup instead of the module's groupby — catches an implementation bug in the module. Does NOT catch a shared conceptual error, since it applies the same last-per-month rule.",
+      "Event dates path B: /series/vintagedates for CPIAUCSL — different endpoint, no last-per-month rule. Covers the failure mode path A cannot: a shared conceptual error in that dedup rule. All three agree. (Caveat: vintage dates cover releases OR revisions, so this corroborates rather than independently defines the release list.)",
+      "Phantom-release premise asserted directly at source: CPIAUCSL 2025-10-01 == '.'.",
+      "Reactions and event windows: recomputed with different pandas idioms (pct_change / shift + reindex) instead of the scripts' index.get_loc()/iloc walk — catches implementation bugs such as the ratio-window wrong-bound defect. LIMIT: this is NOT a non-positional cross-check. Series.shift(n) moves by row count exactly as pos+offset does, so both sides share the premise that 'N trading days later' == 'N rows later'. That premise is covered separately by the XNYS session check below, not by date agreement.",
+      "VIX session integrity validated against the XNYS exchange calendar — this is what actually tests the 'N rows = N sessions' premise. It caught a second phantom: yfinance returns a ^VIX quote for Memorial Day 2026-05-25, when NYSE and CBOE were closed. Both analysis scripts now drop non-session rows. Verified to change zero reported numbers (primary_numbers byte-identical before/after): ^VIX9D lacks that row so the ratio series already excluded it via index intersection, and all 12 events precede it.",
+      "NOT independently reimplemented: the T-7 block bootstrap. It is seeded (20260717) and reproducible by rerunning the script; the verifier checks only its presence, well-formedness, and internal consistency (p<0.05 iff |observed| > the absolute 95% critical value, which share one tail definition by construction)."
+    ],
+    "reconciliation_with_published_errata": {
+      "issue": "The already-published errata article mile_9560b9cc (2026-07-12) reported the official-dates CPI-day VIX mean as -0.847%. This rerun reports -1.90% for the T-7 study. Both are correct; do not 'fix' one to match the other.",
+      "explanation": "Different windows. mile_9560b9cc runs through the 2026-06-10 release; the T-7 article (published 2026-05-26) could not have contained it. This rerun deliberately holds the original data window fixed so the before/after diff is attributable to the dates alone.",
+      "arithmetic": "12 events mean -1.90% + the 2026-06-10 release at VIX +11.83% = 13 events mean -0.847%. Verified: the extended-window recompute returns -0.847% exactly.",
+      "verified": true
+    }
+  },
+  "articles": [
+    {
+      "mile_id": "mile_ebb5d6f5",
+      "slot": "T-7",
+      "title": "🌡️ 事件溫度計｜US CPI 2026-06-13 預覽（T-7）：VIX 當日反應是抽籤，term structure 才是訊號",
+      "published_at": "2026-05-26T12:15:00Z",
+      "evidence_dir": "storage/event_articles/us_cpi_2026_06_13_t7",
+      "narrative_reversed": true,
+      "narrative_reversal_detail": "The article's top-level conclusion ('CPI-day VIX reaction is unpredictable / not significant') technically survives — the corrected mean is still not significantly different from zero (t p=0.113; sign test p=0.146). But every number supporting it reverses, and the corrected data leans the opposite way: 9 of 12 releases saw VIX fall, versus the 7-up/6-down 'coin flip' the article reported. This is a conclusion that was right for entirely wrong reasons.",
+      "severity": "retract-or-rewrite",
+      "severity_reason": "Beyond wrong numbers, the article contains three factual defects: it announces a release date that falls on a Saturday, it reports and narrates an event that never happened, and it twice claims a data provenance ('CPI 發布日期據 BLS 官方行事曆') that is false. Sentence-level number edits cannot fix these.",
+      "figures_regenerated": [
+        {
+          "file": "fig1_cpi_day_vix_dist.png",
+          "changed": true,
+          "sha256_old": "fca7c9f6",
+          "sha256_new": "4243ab6c"
+        },
+        {
+          "file": "fig2_vix_term_event_window.png",
+          "changed": true,
+          "sha256_old": "90ffb196",
+          "sha256_new": "1f3fe85f"
+        }
+      ],
+      "factual_errors": [
+        {
+          "location": "line 3",
+          "old": "2026-06-13，美東時間早上 8:30，美國勞工統計局發布五月 CPI 數據",
+          "new": "official June-2026 release was 2026-06-10 (Wednesday)",
+          "note": "2026-06-13 is a SATURDAY. BLS does not release on weekends. The article's premise was impossible on its face."
+        },
+        {
+          "location": "lines 31, 105",
+          "old": "CPI 發布日期據 BLS 官方行事曆",
+          "new": "must be removed or made true",
+          "note": "FALSE PROVENANCE CLAIM. The dates were a 13th-of-month guess, not the BLS calendar. This is the most serious honesty defect in the piece."
+        },
+        {
+          "location": "line 23 (table row), line 53 (narrative paragraph)",
+          "old": "2025-11-13 | 17.51 | 20.00 | +14.2% | 0.959 | +32.1%  ...  「2025-11 月那次就是如此，CPI 當天 VIX 漲了 14%，但後面五天再漲了 32%」",
+          "new": "DELETE — this release never happened",
+          "note": "A whole narrative paragraph is built on a cancelled release. The +14.2% and +32.1% are real market moves on a day that was not a CPI day."
+        },
+        {
+          "location": "line 101",
+          "old": "下一篇 T-2 預覽（預計 2026-06-11 發布）",
+          "new": "the T-2 piece actually published 2026-06-09",
+          "note": "minor, but wrong"
+        }
+      ],
+      "old_values": {
+        "n_events": 13,
+        "cpi_day_vix_mean_pct": 2.184,
+        "cpi_day_vix_median_pct": -0.667,
+        "cpi_day_vix_std_pct": 7.872,
+        "cpi_day_vix_p5_pct": -7.853,
+        "cpi_day_vix_p95_pct": 15.716,
+        "cpi_day_vix_min_pct": -9.354,
+        "cpi_day_vix_max_pct": 17.96,
+        "direction_split": "7 up / 6 down ('coin flip')",
+        "ratio_cpi_day_mean": 0.91,
+        "ratio_baseline_mean": 0.9006,
+        "ratio_difference": 0.0093,
+        "ratio_ttest_stat": 0.451,
+        "ratio_ttest_pval": 0.652,
+        "t_plus_5_mean_pct": 1.46,
+        "t_plus_5_median_pct": -2.41,
+        "ratio_t_plus_3": 0.924,
+        "ratio_t_plus_4": 0.937,
+        "max_ratio_event": "2026-03-12 @ 1.062"
+      },
+      "new_values": {
+        "n_events": 12,
+        "cpi_day_vix_mean_pct": -1.903,
+        "cpi_day_vix_median_pct": -1.728,
+        "cpi_day_vix_std_pct": 3.667,
+        "cpi_day_vix_p5_pct": -7.166,
+        "cpi_day_vix_p95_pct": 3.565,
+        "cpi_day_vix_min_pct": -9.354,
+        "cpi_day_vix_max_pct": 5.688,
+        "cpi_day_ttest_vs_zero_stat": -1.721,
+        "cpi_day_ttest_vs_zero_pval": 0.1132,
+        "direction_split": "3 up / 9 down (sign test two-sided p=0.146 — leans down, not significant at N=12)",
+        "ratio_cpi_day_mean": 0.8884,
+        "ratio_baseline_mean": 0.9017,
+        "ratio_difference": -0.0132,
+        "ratio_ttest_stat": -0.616,
+        "ratio_ttest_pval": 0.5382,
+        "ratio_ttest_caveat": "IID/equal-variance assumption against an autocorrelated daily baseline; understates SE. Retained only for comparability with the original run.",
+        "ratio_bootstrap_pval": 0.4823,
+        "ratio_bootstrap_spec": "null-imposed stationary block bootstrap (Politis & Romano 1994), 10000 reps, geometric mean block 5 trading days, seed 20260717. Each replicate resamples the FULL ratio series and reapplies the same fixed CPI mask, preserving both the serial dependence and the ~monthly event spacing. Cite THIS for any significance claim, not the t-test.",
+        "t_plus_5_mean_pct": 1.09,
+        "t_plus_5_median_pct": 2.77,
+        "ratio_t_plus_3": 0.8813,
+        "ratio_t_plus_4": 0.9155,
+        "max_ratio_event": "2026-03-11 @ 1.009 (barely above 1, not 1.062)",
+        "ratio_bootstrap_abs_95_critical": 0.0382
+      },
+      "diffs": [
+        {
+          "metric": "CPI-day VIX mean",
+          "old": "+2.18%",
+          "new": "-1.90%",
+          "delta": "-4.09pp",
+          "reversed": true,
+          "note": "SIGN FLIP. The article's headline number."
+        },
+        {
+          "metric": "CPI-day VIX median",
+          "old": "-0.67%",
+          "new": "-1.73%",
+          "delta": "-1.06pp",
+          "reversed": false
+        },
+        {
+          "metric": "CPI-day VIX std",
+          "old": "7.87%",
+          "new": "3.67%",
+          "delta": "-4.21pp",
+          "reversed": false,
+          "note": "The proxy dates were manufacturing more than half the apparent volatility."
+        },
+        {
+          "metric": "5th-95th range",
+          "old": "-7.9% ~ +15.7%",
+          "new": "-7.2% ~ +3.6%",
+          "delta": "upper bound collapses",
+          "reversed": false
+        },
+        {
+          "metric": "distribution shape",
+          "old": "right-skewed (mean > median), driven by +18% and +12.6% outliers",
+          "new": "mildly left-leaning (mean < median); both alleged outliers were not CPI days",
+          "reversed": true
+        },
+        {
+          "metric": "direction split",
+          "old": "7 up / 6 down",
+          "new": "3 up / 9 down",
+          "delta": "-4 up",
+          "reversed": true,
+          "note": "Kills the 'coin flip' framing. Leans systematically down, though not significantly at N=12."
+        },
+        {
+          "metric": "ratio CPI vs baseline difference",
+          "old": "+0.0093",
+          "new": "-0.0132",
+          "delta": "-0.0225",
+          "reversed": true,
+          "note": "SIGN FLIP: CPI days now sit BELOW baseline, not above. The 'no significant difference' conclusion survives: a null-imposed stationary block bootstrap respecting the baseline's autocorrelation gives p=0.4823, agreeing with the original IID t-test's 0.5382."
+        },
+        {
+          "metric": "T+5 median",
+          "old": "-2.41%",
+          "new": "+2.77%",
+          "delta": "+5.18pp",
+          "reversed": true,
+          "note": "SIGN FLIP."
+        },
+        {
+          "metric": "sample size",
+          "old": "13",
+          "new": "12",
+          "delta": "-1",
+          "reversed": false,
+          "note": "phantom November release removed"
+        }
+      ]
+    },
+    {
+      "mile_id": "mile_0fa9c7f5",
+      "slot": "T-2",
+      "title": "VIX 一根長腳之後：CPI 前夕的短端結構告訴我們什麼",
+      "published_at": "2026-06-09T00:16:45Z",
+      "evidence_dir": "storage/event_articles/us_cpi_2026_06_11_t2",
+      "narrative_reversed": true,
+      "narrative_reversal_detail": "The article argued reactions are NOT stably converging ('事件反應在「收斂、但偶爾炸一次」之間擺盪，不是穩定收斂'), citing recent-4 sigma 8.37% > earlier-9 sigma 6.53%. With official dates the opposite holds and significantly so: recent-4 sigma 0.69% vs earlier-8 sigma 4.46%, F=36.24, one-sided p=0.0067. Note the article's own reported F-test (p=0.7995) never supported its 'compression' framing either — the corrected data supports it.",
+      "severity": "rewrite",
+      "severity_reason": "The 6/5 VIX spike spine of the article is date-independent and survives intact. But the entire recent-4 table, the reaction-trend narrative, the dispersion conclusion, and the pre-event run-up section all reverse. The two 'big jumps' the trend narrative rests on were not CPI reactions at all.",
+      "figures_regenerated": [
+        {
+          "file": "fig1_recent4_vs_earlier9.png",
+          "changed": true,
+          "sha256_old": "b320bc3c",
+          "sha256_new": "8473b8c0",
+          "note": "Filename retains the legacy 'earlier9' token so the live article's image URL does not 404 mid-errata; the chart itself now says 前 8 次. Rename is optional cleanup for the next stage, and requires updating the article's image reference + re-upload."
+        },
+        {
+          "file": "fig2_current_vix_term.png",
+          "changed": false,
+          "sha256": "unchanged",
+          "note": "Byte-identical, and correctly so: this chart plots the VIX/VIX9D term structure and never touches event dates. Its being unchanged is a scope check — the fix landed exactly where it should and nowhere else."
+        }
+      ],
+      "factual_errors": [
+        {
+          "location": "lines 15, 85 (and title framing)",
+          "old": "週三早上的 CPI / 6/11 CPI 還沒發布 / T-2 preview",
+          "new": "official June-2026 release was 2026-06-10 (Wednesday)",
+          "note": "The article published 2026-06-09 was therefore a T-1 preview, not T-2. '週三早上的 CPI' happens to be right — 6/10 IS a Wednesday — but 6/11 is a Thursday, so the article's own date and its own weekday disagree."
+        },
+        {
+          "location": "line 75",
+          "old": "過去一年的 6/9、6/10 這兩天，VIX 通常會比 6/11 還低一點",
+          "new": "wrong on both counts: 6/10 WAS the CPI day, and the corrected run-up shows pre-event VIX sits ABOVE the CPI-day level, not below",
+          "note": "The actionable inference at line 77 ('週三開盤前的 VIX 可能還會壓到 18.5 上下') is derived from this reversed pattern."
+        }
+      ],
+      "old_values": {
+        "n_full": 13,
+        "n_earlier": 9,
+        "recent4_mean_pct": 7.147,
+        "recent4_std_pct": 8.366,
+        "earlier_mean_pct": -0.022,
+        "earlier_std_pct": 6.525,
+        "ftest_F": 0.513,
+        "ftest_df": "(8, 3)",
+        "ftest_pval_one_sided": 0.7995,
+        "recent4_table": [
+          {
+            "date": "2026-02-12",
+            "vix_prev": 17.65,
+            "vix_day": 20.82,
+            "pct": "+18.0%",
+            "ratio": 0.951,
+            "t_plus_5": "-8.3%"
+          },
+          {
+            "date": "2026-03-12",
+            "vix_prev": 24.23,
+            "vix_day": 27.29,
+            "pct": "+12.6%",
+            "ratio": 1.062,
+            "t_plus_5": "-11.8%"
+          },
+          {
+            "date": "2026-04-10",
+            "vix_prev": 19.49,
+            "vix_day": 19.23,
+            "pct": "-1.3%",
+            "ratio": 0.851,
+            "t_plus_5": "-9.1%"
+          },
+          {
+            "date": "2026-05-13",
+            "vix_prev": 17.99,
+            "vix_day": 17.87,
+            "pct": "-0.7%",
+            "ratio": 0.888,
+            "t_plus_5": "-2.4%"
+          }
+        ],
+        "pre_cpi_runup": {
+          "T-5": 3.32,
+          "T-4": 3.04,
+          "T-3": 0.83,
+          "T-2": -1.33,
+          "T-1": -1.58
+        },
+        "baseline_ratio_mean": 0.9,
+        "z_score_latest5": 0.39
+      },
+      "new_values": {
+        "n_full": 12,
+        "n_earlier": 8,
+        "recent4_mean_pct": -1.83,
+        "recent4_std_pct": 0.687,
+        "earlier_mean_pct": -1.94,
+        "earlier_std_pct": 4.464,
+        "ftest_F": 36.243,
+        "ftest_df": "(7, 3)",
+        "ftest_pval_one_sided": 0.0067,
+        "recent4_table": [
+          {
+            "date": "2026-02-13",
+            "vix_prev": 20.82,
+            "vix_day": 20.6,
+            "pct": "-1.1%",
+            "ratio": 0.911,
+            "t_plus_5": "+2.0%"
+          },
+          {
+            "date": "2026-03-11",
+            "vix_prev": 24.93,
+            "vix_day": 24.23,
+            "pct": "-2.8%",
+            "ratio": 1.009,
+            "t_plus_5": "+3.5%"
+          },
+          {
+            "date": "2026-04-10",
+            "vix_prev": 19.49,
+            "vix_day": 19.23,
+            "pct": "-1.3%",
+            "ratio": 0.851,
+            "t_plus_5": "-9.1%"
+          },
+          {
+            "date": "2026-05-12",
+            "vix_prev": 18.38,
+            "vix_day": 17.99,
+            "pct": "-2.1%",
+            "ratio": 0.908,
+            "t_plus_5": "+0.4%"
+          }
+        ],
+        "pre_cpi_runup": {
+          "T-5": 6.168,
+          "T-4": 4.22,
+          "T-3": 5.606,
+          "T-2": 1.412,
+          "T-1": 2.083
+        },
+        "baseline_ratio_mean": 0.901,
+        "z_score_latest5": 0.38
+      },
+      "diffs": [
+        {
+          "metric": "recent-4 mean",
+          "old": "+7.15%",
+          "new": "-1.83%",
+          "delta": "-8.98pp",
+          "reversed": true,
+          "note": "SIGN FLIP"
+        },
+        {
+          "metric": "recent-4 std",
+          "old": "8.37%",
+          "new": "0.69%",
+          "delta": "-7.68pp",
+          "reversed": false,
+          "note": "The dispersion was almost entirely an artifact of two misdated days."
+        },
+        {
+          "metric": "earlier group",
+          "old": "9 releases, mean -0.02%, sigma 6.53%",
+          "new": "8 releases, mean -1.94%, sigma 4.46%",
+          "reversed": false
+        },
+        {
+          "metric": "F-test (variance compression)",
+          "old": "F=0.513, p=0.7995 (no compression; recent variance LARGER)",
+          "new": "F=36.243, p=0.0067 (compression significant)",
+          "reversed": true,
+          "note": "CORE CLAIM REVERSAL. Ironically the article asserted compression while its own F-test refuted it; the corrected data supports the assertion."
+        },
+        {
+          "metric": "2026-02 reaction",
+          "old": "+18.0% (on 02-12)",
+          "new": "-1.1% (on 02-13)",
+          "reversed": true,
+          "note": "The proxy date was one day EARLY. The +18% move it captured was not a CPI reaction. Tell: the old row's VIX(T-1)=17.65 -> VIX(day)=20.82, and 20.82 is exactly the real event day's T-1 value."
+        },
+        {
+          "metric": "2026-03 reaction",
+          "old": "+12.6% (on 03-12)",
+          "new": "-2.8% (on 03-11)",
+          "reversed": true,
+          "note": "The proxy date was one day LATE — the +12.6% happened the day AFTER the CPI."
+        },
+        {
+          "metric": "2026-05 reaction",
+          "old": "-0.7% (on 05-13)",
+          "new": "-2.1% (on 05-12)",
+          "reversed": false
+        },
+        {
+          "metric": "reaction-trend narrative",
+          "old": "反應強度由大到小：+18% -> +12.6% -> -1.3% -> -0.7%",
+          "new": "all four are small declines: -1.1%, -2.8%, -1.3%, -2.1% — there is no descending trend, and there never was",
+          "reversed": true
+        },
+        {
+          "metric": "T+5 'all negative' claim",
+          "old": "T+5 一律往下，四次都是負的 (-2% ~ -12%)",
+          "new": "+2.0%, +3.5%, -9.1%, +0.4% — three of four are POSITIVE",
+          "reversed": true,
+          "note": "SIGN FLIP. The 'textbook IV crush' paragraph (line 36) and the T+5 playbook (line 89, '近 4 次 T+5 一律負，平均 -8%') both collapse."
+        },
+        {
+          "metric": "pre-event run-up",
+          "old": "T-2 -1.33%, T-1 -1.58% (pre-event VIX BELOW the CPI-day level)",
+          "new": "T-2 +1.41%, T-1 +2.08% (pre-event VIX ABOVE it)",
+          "reversed": true,
+          "note": "SIGN FLIP. The '越接近事件、IV 越壓低' reading needs restating: the corrected profile still drifts DOWN toward the event (+6.17 -> +1.41) but never crosses below zero."
+        },
+        {
+          "metric": "full-sample line (line 38)",
+          "old": "13 個月，均值 +2.2%、中位數 -0.7%、5-95% -7.9%~+15.7%",
+          "new": "12 次發布，均值 -1.9%、中位數 -1.7%、5-95% -7.2%~+3.6%",
+          "reversed": true
+        },
+        {
+          "metric": "z-score latest-5 vs baseline",
+          "old": "+0.39",
+          "new": "+0.38",
+          "delta": "-0.01",
+          "reversed": false,
+          "note": "The only headline number that essentially survives. The 6/5-spike section of the article is date-independent and stands."
+        }
+      ]
+    }
+  ],
+  "scope_note": {
+    "class_sweep": "grep across storage/event_articles/*/analysis.py found FOUR directories with hard-coded CPI date lists, not two. The other two: us_cpi_2026_06_11_t0 (also hard-codes a Desktop output path) and us_cpi_2026_07_14_t2 (already correct — it uses the official calendar and Path(__file__); it is the post-fix reference implementation and the evidence behind the published errata mile_9560b9cc).",
+    "out_of_scope_but_flagged": [
+      "us_cpi_2026_06_11_t0 hard-codes both the proxy dates and /Users/yhlai0911/Desktop/volpred-research/... — same defect class, not in this brief's scope. Its publication status was not determined. Recommend a follow-up task.",
+      "Three of the four scripts wrote to /Users/yhlai0911/Desktop/volpred-research/..., a repo path that no longer exists. Those scripts could not run at all today — the artifacts on disk predate the repo move. This is why the brief's 'output path drifts with cwd' framing understates it: the paths were not cwd-relative, they were absolute and dead."
+    ]
+  },
+  "reruns": {
+    "date": "2026-07-17",
+    "data_windows_held_fixed": true,
+    "why": "Extending the data would confound 'we fixed the dates' with 'we added fresh data'. Holding the original window makes the before/after diff attributable to the date source alone, which is what an errata must isolate.",
+    "codex_review": "see README.md in each evidence dir",
+    "method_deltas_disclosed": "Both packs disclose their method deltas in evidence.json errata_rerun. Neither claims 'method unchanged' — the event-session alignment was tightened (bidirectional +/-5-day nearest-match -> forward-only, bounded, fail-closed) and non-session rows are now dropped. Both are inert on this data and verified as such, but they are method changes and are listed as such."
+  }
+}
