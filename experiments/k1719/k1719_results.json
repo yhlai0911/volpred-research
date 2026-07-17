@@ -1,0 +1,202 @@
+{
+  "experiment_id": "K1719",
+  "title": "Self-owned TAIFEX tick (5-min RV) vs daily-only information for next-day TX day-session RV",
+  "timestamp_utc": "2026-07-17T11:34:08.207566+00:00",
+  "random_seed": 42,
+  "verdict": "HAR_RV5_WINS_ROBUST_ACROSS_PROXIES",
+  "hypothesis": {
+    "H0": "E[QLIKE(HAR-DAILY)] - E[QLIKE(HAR-RV5)] = 0 (intraday RV adds nothing over daily-only info)",
+    "H1": "HAR-RV5 attains strictly lower QLIKE on a common ledger",
+    "decision_rule": "Harvey (2016) |DM t| > 3.0 on BOTH proxy targets for a robust claim"
+  },
+  "data": {
+    "source_csv": "data/intraday/taifex_5min_rv.csv",
+    "source_sha256": "ce62b9c521a20fb23ccb8819addbee0341c2426de7edc167986b57f1d8dd86bb",
+    "contract": "TX active monthly (same_day_max_total_volume rule, per collector)",
+    "session": "day session 08:45-13:45 only (rv_5min == rv_day verified)",
+    "n_rows_total": 3550,
+    "date_min": "2012-01-02",
+    "date_max": "2026-07-16",
+    "night_session_note": "Night session exists only from 2017-05-16, but this design uses the day session exclusively, so the regime change does not enter the sample."
+  },
+  "models": {
+    "HAR_RV5": "HAR(d/w/m) on 5-min intraday RV regressors",
+    "HAR_DAILY": "HAR(d/w/m) on daily open-to-close squared-return regressors",
+    "symmetry": "Identical spec, rolling window, refit cadence, insanity filter and ledger. No hyperparameter was tuned for either model.",
+    "estimation": "level-space OLS, rolling window, refit every origin",
+    "window": 1000,
+    "insanity_filter": "forecast outside in-sample [min,max] or <=0 -> in-sample mean (BPQ 2016)",
+    "lag": "all regressors .shift(1); training pairs for origin t end at t-1"
+  },
+  "results": {
+    "rv_5min": {
+      "diagnostics": {
+        "HAR_RV5": {
+          "n_forecasts": 2550,
+          "n_insanity_filtered": 7,
+          "insanity_filter_rate_pct": 0.27450980392156865,
+          "train_obs_min": 978,
+          "train_obs_max": 1000
+        },
+        "HAR_DAILY": {
+          "n_forecasts": 2550,
+          "n_insanity_filtered": 0,
+          "insanity_filter_rate_pct": 0.0,
+          "train_obs_min": 978,
+          "train_obs_max": 1000
+        }
+      },
+      "full": {
+        "target": "rv_5min",
+        "n_test": 2548,
+        "ledger_start": "2016-01-20",
+        "ledger_end": "2026-07-16",
+        "qlike_har_rv5": 0.19086090240721354,
+        "qlike_har_daily": 0.2237478084493344,
+        "qlike_diff_rv5_minus_daily": -0.032886906042120856,
+        "qlike_pct_improvement_rv5_vs_daily": 14.698202529911164,
+        "dm_t": -3.6805195082126385,
+        "dm_p": 0.00023758940764562198,
+        "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+        "dm_hac_bandwidth": 14,
+        "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+        "loss_diff_acf1": 0.07154235008332327,
+        "harvey_significant": true,
+        "verdict": "HAR_RV5_WINS"
+      },
+      "sub_2017on": {
+        "target": "rv_5min@2017on",
+        "n_test": 2231,
+        "ledger_start": "2017-05-16",
+        "ledger_end": "2026-07-16",
+        "qlike_har_rv5": 0.18590291913149048,
+        "qlike_har_daily": 0.21570168849838203,
+        "qlike_diff_rv5_minus_daily": -0.029798769366891548,
+        "qlike_pct_improvement_rv5_vs_daily": 13.814805796995449,
+        "dm_t": -3.066900482041347,
+        "dm_p": 0.0021888811466170832,
+        "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+        "dm_hac_bandwidth": 14,
+        "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+        "loss_diff_acf1": 0.07955087842399229,
+        "harvey_significant": true,
+        "verdict": "HAR_RV5_WINS"
+      }
+    },
+    "daily_r2": {
+      "diagnostics": {
+        "HAR_RV5": {
+          "n_forecasts": 2550,
+          "n_insanity_filtered": 12,
+          "insanity_filter_rate_pct": 0.47058823529411764,
+          "train_obs_min": 972,
+          "train_obs_max": 997
+        },
+        "HAR_DAILY": {
+          "n_forecasts": 2550,
+          "n_insanity_filtered": 0,
+          "insanity_filter_rate_pct": 0.0,
+          "train_obs_min": 972,
+          "train_obs_max": 997
+        }
+      },
+      "full": {
+        "target": "daily_r2",
+        "n_test": 2536,
+        "ledger_start": "2016-01-20",
+        "ledger_end": "2026-07-16",
+        "qlike_har_rv5": 1.3949910321663586,
+        "qlike_har_daily": 1.443710291925937,
+        "qlike_diff_rv5_minus_daily": -0.04871925975957847,
+        "qlike_pct_improvement_rv5_vs_daily": 3.374586995191816,
+        "dm_t": -3.367082778615115,
+        "dm_p": 0.000771015697894839,
+        "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+        "dm_hac_bandwidth": 14,
+        "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+        "loss_diff_acf1": -0.05407902380629839,
+        "harvey_significant": true,
+        "verdict": "HAR_RV5_WINS"
+      },
+      "sub_2017on": {
+        "target": "daily_r2@2017on",
+        "n_test": 2222,
+        "ledger_start": "2017-05-16",
+        "ledger_end": "2026-07-16",
+        "qlike_har_rv5": 1.371681836111511,
+        "qlike_har_daily": 1.4195775631620873,
+        "qlike_diff_rv5_minus_daily": -0.04789572705057621,
+        "qlike_pct_improvement_rv5_vs_daily": 3.3739422412319064,
+        "dm_t": -2.920740591191706,
+        "dm_p": 0.003527212661807333,
+        "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+        "dm_hac_bandwidth": 14,
+        "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+        "loss_diff_acf1": -0.0549370934492154,
+        "harvey_significant": false,
+        "verdict": "NULL"
+      }
+    }
+  },
+  "exclusions": {
+    "zero_rv_days": {
+      "n": 2,
+      "dates": [
+        "2025-04-07",
+        "2025-04-10"
+      ],
+      "detail": [
+        {
+          "date": "2025-04-07",
+          "day_n_ticks": 481,
+          "day_open": 19167,
+          "day_close": 19167
+        },
+        {
+          "date": "2025-04-10",
+          "day_n_ticks": 292,
+          "day_open": 18902,
+          "day_close": 18902
+        }
+      ],
+      "reason": "Price frozen for the entire session (open == close, a few hundred ticks vs ~30k typical), i.e. limit-lock. RV=0 is a true market outcome, not a data hole, but QLIKE is undefined at actual=0, so these days are dropped from the ledger rather than clipped to a small positive value."
+    },
+    "zero_r2_days": {
+      "n": 21,
+      "dates": [
+        "2012-01-12",
+        "2012-08-03",
+        "2012-08-29",
+        "2012-09-06",
+        "2012-10-16",
+        "2013-02-01",
+        "2013-04-22",
+        "2016-03-07",
+        "2016-06-06",
+        "2016-08-02",
+        "2017-08-01",
+        "2017-08-15",
+        "2018-01-08",
+        "2018-04-27",
+        "2019-01-04",
+        "2019-09-20",
+        "2021-02-25",
+        "2022-08-10",
+        "2023-04-20",
+        "2025-04-07",
+        "2025-04-10"
+      ],
+      "reason": "day_return == 0 exactly -> r2 = 0 -> QLIKE undefined on the daily_r2 target."
+    },
+    "warmup": "first 22 rows lack HAR monthly features; first OOS origin at row 1000."
+  },
+  "forecast_origin": "08:45 on day t, immediately before the day session opens; predicts day t's 08:45-13:45 realized variance. All t-1 information (including the t-1 evening night session, which ends 05:00 on day t) is realized and observable by then.",
+  "caveats": [
+    "Neither target is the latent integrated variance; both are noisy proxies.",
+    "No neutral third proxy (e.g. Parkinson range) was used: the canonical 5-min RV layer stores no session high/low, and TWII spot OHLC is a different asset (basis).",
+    "Result speaks to the day session only; it does not test the night session or any options-tick signal.",
+    "SCOPE LIMIT ON THE COST CLAIM (Codex review): the HAR-DAILY baseline's day_return is itself computed from tick by the collector. The baseline's INFORMATION SET is daily-only (day-session open and close are published in TAIFEX's free daily settlement data), but this experiment did not source it end-to-end from an external daily feed. It therefore establishes whether 5-min RV beats daily-compressed information -- not that an external cheap daily feed could replace the tick pipeline byte-for-byte.",
+    "Active-contract selection uses each day's TOTAL (day+night) volume, so the choice for day t-1 is only in the information set under the stated 08:45-on-t origin. A 13:45-on-t-1 origin would make it an economic-clock lookahead."
+  ],
+  "code_sha256": "e427b925f20ec8939f5dde59b019b1eb7662ac5f168f784b9b0c8807011734e3"
+}
