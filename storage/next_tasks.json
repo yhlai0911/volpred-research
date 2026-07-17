@@ -30902,54 +30902,15 @@
   },
   {
     "id": "K1583_article_general_v2",
-    "title": "K1583: write general-audience article [retry-v2] (auto-discovered uncovered K)",
-    "description": "K K1583 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K1380_v4 17 個 SPY vol forecast spec（GARCH-X A1-A5/A2f/A4f/A3f/A2n/A4n + MIDAS B1-B3/C2-C3/B0；C1 因 0 valid 排除→16 specs）在 Model Confidence Set 三層分析全 retained：\n1. Unconditional MCS (B=1000, α=0.10)：16/16 全保留，p_set=0.438\n2. Conditional MCS (VIX high≥20 / mid / low<15)：每 regime 同樣 16/",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K1583: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "priority": 1,
     "source": "auto_discovered",
-    "k_id": "K1583",
-    "tags": [
-      "MCS",
-      "Model Confidence Set",
-      "meta-evaluation",
-      "QLIKE",
-      "GARCH-X",
-      "MIDAS",
-      "SPY",
-      "K1380_v4",
-      "NULL",
-      "methodology",
-      "auto-discovered",
-      "audience-general",
-      "retry-v2"
-    ],
-    "topic_cluster": "garch",
     "created_at": "2026-07-12T11:07:50+00:00",
-    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
-    "status_history": [
-      {
-        "ts": "2026-07-14T19:08:58.580075+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-03"
-      },
-      {
-        "ts": "2026-07-14T19:08:58.812583+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-03"
-      },
-      {
-        "ts": "2026-07-14T19:29:59.991490+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-03"
-      }
-    ],
-    "started_at": "2026-07-14T19:08:58.812570+00:00",
     "completed_at": "2026-07-14T19:29:59.991469+00:00",
-    "result": "已發佈 mile_7b02f9e2（audience=general, status=draft, 3118 chars, 2 真圖上 Supabase）。通過 AUDIENCE GATE（sanitize_applied=0，非 sanitizer 救回）+ anti_ai_gate exit 0 + content-vs-source audit PASS。懶人包 plan 已產出並 enqueue（lazypack-mile_7b02f9e2），*/15 worker 出圖後 release_pool 解鎖 flip。validate_feed_audience 確認本篇不在違規名單。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T20:07:54.756999+00:00"
   },
   {
     "id": "K1695_article_general",
@@ -33153,76 +33114,15 @@
   },
   {
     "id": "k1709-redo",
+    "status": "succeeded",
     "task_type": "experiment",
+    "title": "K1709 重做 — ETF flow → RV 增量預測（CW/general-loss primary，撤回版）",
     "priority": 1,
     "source": "agent-discovered",
-    "status": "succeeded",
     "created_at": "2026-07-14T05:42:35.257885+00:00",
-    "title": "K1709 重做 — ETF flow → RV 增量預測（CW/general-loss primary，撤回版）",
-    "description": "原 K1709 被 Codex (gpt-5.6-sol ultra) 判 FAIL 並已撤出 canonical experiments/（見 experiments/_rejected/k1709/）。重做硬性要求：(1) 巢狀比較不得用 raw DM 承載 verdict — MSPE 用 Clark-West，QLIKE/pinball 用適當 general-loss/encompassing/recursive-bootstrap，禁止把 MSPE-CW 貼標成 QLIKE inference；(2) 宣稱強度不得超過證據（可寫『未發現穩健增量證據』，不得寫『NULL 成立』或『可排除 ≥16% 效果』）；(3) provenance 測試要能證明每個 predictor 的真實來源日期（現行 assert 可被同列複製繞過）。開工前必跑 scripts/tests/test_nested_dm_misuse_ratchet.py。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T06:15:12.442339+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-14"
-      },
-      {
-        "ts": "2026-07-14T06:15:12.719842+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-14"
-      },
-      {
-        "ts": "2026-07-14T08:50:02.485390+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-14",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-14T16:00:14.889546+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T16:00:15.115963+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T18:50:01.481663+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "codex-vscode",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-14T18:50:16.441942+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T18:50:16.704436+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T19:44:37.889306+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-14T18:50:16.704420+00:00",
-    "last_released_at": "2026-07-14T18:50:01.481655+00:00",
-    "last_release_reason": "auto_release_stale_2h",
     "completed_at": "2026-07-14T19:44:37.889290+00:00",
-    "result": "K1709 rev6 已在 dba627028aec9924d4ee0e167a9d7b99b6c8de77 完成獨立 PASS，綁定 10 個 claim-surface 檔（含 5 圖）；74 tests、gate、certify 全 PASS，估計值未移動。認證 branch tip 0c1072d4c3feb12ae00416e35471d29fb1250f4f。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T20:07:54.756999+00:00"
   },
   {
     "id": "gate-fail-verdict-blocks-merge",
@@ -33568,57 +33468,15 @@
   },
   {
     "id": "nested_dm_auditor_cannot_express_fixed_window_gw",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "nested-DM auditor has no third role: the fixed-window bounded-memory GW unconditional special case",
+    "priority": 2,
     "source": "agent_discovered",
     "created_at": "2026-07-14T13:23:32.692943+00:00",
-    "title": "nested-DM auditor has no third role: the fixed-window bounded-memory GW unconditional special case",
-    "description": "K1709 rev3 撞出來的。scripts/audit_nested_dm_misuse.py 用字面規則判角色：PRIMARY_DM_DECL_RE 只要看到 PRIMARY 與 DM 在 80 字元內就判 primary_raw_dm（違規）。它只認得兩種安全角色：DM 是 diagnostic-only，或 Clark-West 覆蓋全部 primary。但存在合法的第三種：在 paired fixed rolling window（bounded-memory forecasting method）下，DM 形式的統計量正是 GW(2006) Sec 3.4 的無條件特例，巢狀比較下有效 —— 使它合法的是 estimation scheme，不是公式。K1709 rev2 用模糊的『GW gate』措辭時稽核器判它安全；rev3 依 Codex FAIL 誠實改成『primary family 由無條件 GW/DM 裁決』後反而被判違規。這是稽核器在訓練科學對它說謊 —— 修法方向不是把實驗改回含糊。讓 ratchet 能接受第三種角色，但必須要求證據（marker + 檔案內確有 fixed/rolling bounded-memory scheme 的實證），不可變成人人可蓋的免死金牌 —— ratchet 開後門就是 ratchet 死亡的方式。Codex 已在 K1709 rev3 重審 brief 裡被要求對這個設計問題給裁決（compute job agent-brief_k1709_rev3_review-580bae），先收他的意見再動手。注意：另一 slot 正在改 pre-commit Gate 0（branch fix/gate0-trusted-auditor-from-main），別撞同一批檔。現況：experiments/k1709/test_k1709.py::test_repo_nested_dm_auditor_marks_this_file_safe 與 scripts/tests/test_nested_dm_misuse_ratchet.py::test_no_new_nested_raw_dm_sites 都紅著，K1709 在 worktree 不進 main，故未污染 main CI。\n\n== Codex rev3 裁決（2026-07-14T15:25Z，已收）==\nauditor 的 two-role model 判定為【錯的】。GW(2006) Sec 3.4 明確定義 fixed-memory forecasting methods 的無條件檢定：HAC 標準化平均 loss differential + 標準常態參考分布，統計量與 DM 一致；只有 conditional test 才需要 instrument vector / Wald / chi-square。→ 不可為了取悅 lexical scanner 把科學文字改回模糊的『GW gate』；正解是加第三種角色（如 primary_unconditional_dm_fixed_memory）。但第三角色必須靠證據取得，不可自填 marker。Ratchet 接受第三角色前的 7 項門檻（逐字見 storage/ops/codex_reviews/k1709_rev3_verdict.json 的 ratchet_ruling_q4.required_evidence_before_ratchet_accepts_third_role）：(1) pair/cell-level 版本化 machine-readable manifest（非 file-level escape hatch）；(2) 每個 claim-bearing cell 的 runtime provenance 證明整條 forecasting method 為 bounded-memory（base/aug 同 fixed window、同 complete-case mask、同 training dates、同 embargo；上游 feature estimator 亦不得 expanding）；(3) statistic provenance（paired unadjusted loss differential、HAC estimator/bandwidth、有限正 LRV、normal reference、明確的 unconditional average-loss estimand）；(4) gate wiring 證明只有通過證據的 record 可 feeds_gate=true（bounded_memory=True 或註解不可自我認證）；(5) reader-facing claim 必須就地寫明 unconditional 並揭露 regime-offsetting 效果未被排除；(6) repo 外部的 adjudication receipt，綁 file SHA + cell-manifest hash + reviewer，bytes 一漂移即失效；(7) adversarial fixtures 必須繼續 FAIL（偽 marker、mixed fixed/expanding cells、fixed final regression 但 expanding preprocessing、conditional wording、file-level marker 洗白其他 cells）。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T16:17:14.041807+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T16:17:14.319396+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T18:50:01.481687+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "codex-vscode",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-14T18:50:16.966781+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T18:50:17.234329+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T19:44:38.114588+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-14T18:50:17.234312+00:00",
-    "last_released_at": "2026-07-14T18:50:01.481673+00:00",
-    "last_release_reason": "auto_release_stale_2h",
     "completed_at": "2026-07-14T19:44:38.114572+00:00",
-    "result": "新增 fail-closed primary_unconditional_gw_dm_fixed_memory 第三角色，要求 source/runtime/claim-surface/trusted receipt 全證據並涵蓋 reader-facing figures。129 tests PASS；全庫 1,830 檔掃描維持 231 affected、0 errors；獨立對抗複核 PASS。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T20:07:54.756999+00:00"
   },
   {
     "id": "alert_internal_git_push_backup_hold_3f4834ce7a_clean_watermark",
@@ -33629,13 +33487,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T19:00:48.235808+00:00",
+    "completed_at": "2026-07-17T20:00:52.069401+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T19:00:48.235808+00:00",
-      "last_clean_observed_at": "2026-07-17T19:00:48.235808+00:00"
+      "resolved_at": "2026-07-17T20:00:52.069401+00:00",
+      "last_clean_observed_at": "2026-07-17T20:00:52.069401+00:00"
     }
   },
   {
@@ -33647,13 +33505,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T19:22:06.493988+00:00",
+    "completed_at": "2026-07-17T20:16:32.668409+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T19:22:06.493988+00:00",
-      "last_clean_observed_at": "2026-07-17T19:22:06.493988+00:00"
+      "resolved_at": "2026-07-17T20:16:32.668409+00:00",
+      "last_clean_observed_at": "2026-07-17T20:16:32.668409+00:00"
     }
   },
   {
@@ -39244,7 +39102,7 @@
     "description": "K1684 R3 primary Codex review 為 CONDITIONAL_PASS，但 E1 是 H2_UNSUPPORTED，不能選 paper route。執行 E2：選擇 forecast 與 realized target 為同一市場/標的的資料，OOS n>=2500；對 HAR-RV 與 GJR 使用相同資訊集、相同 lag、相同共同樣本，做 QLIKE + canonical DM/HAC/Harvey、1%/5% Kupiec+Christoffersen CC+Basel、Acerbi-Szekely Z1、FZ0。至少做跨 OOS/regime，scale/delta-c uncertainty 加 moving/block-bootstrap sensitivity。先讀 docs/error_log.md、knowledge K1684、experiment-preamble，檢索至少 3 篇文獻；固定 seed；不得用 cross-asset RV plug-in 冒充 own-market test。成功標準：三件套齊、lookahead mechanical audit、結果不論正負皆誠實報告、Codex review 後才決定 paper route。\n\n[migrated 2026-07-16 from task_18c9c0bd9722 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T14:48:11.761939+00:00]",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-16T14:42:55.569435+00:00",
     "created_by": "single-gateway-migration",
@@ -39267,11 +39125,19 @@
         "to": "pending",
         "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-17T20:14:57.241467+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
     "started_at": "2026-07-17T16:10:56.781372+00:00",
     "last_released_at": "2026-07-17T18:50:05.533442+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-17T20:14:57.241452+00:00",
+    "result": "K1684 E2 own-market FTD cross-OOS gate 完成：H2_UNSUPPORTED（誠實 null）。compute agent 已跑（commit dd211a5e5），本班收尾=Gemini cert PASS + merge + knowledge 85df8797。詳見 experiments/k1684_e2/"
   },
   {
     "id": "assign_a458fc01",
@@ -41435,11 +41301,34 @@
     "id": "k1684_e2_cert_merge_knowledge",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-dispatch",
     "created_at": "2026-07-18T01:51:58.507568+08:00",
     "title": "K1684 E2 收尾：codex 認證 → merge worktree → 主線程寫 knowledge → complete assign_168aeaf8",
     "description": "K1684 E2 (own-market realized-target forecast-tail-divergence cross-OOS gate) 實驗已於 2026-07-18 00:15-01:00 由 compute agent 跑完，worktree=dispatch-slot-1-79726798-k1684e2, 凍結 commit dd211a5e5。\n\n【已完成/已驗證，勿重跑】裁決 H2_UNSUPPORTED（誠實 null）。主線程已對 k1684_e2_results.json 逐項核對數字，與 agent stdout 一致：\n- 無偏 co² proxy 兩市場 HAR 未顯著贏 GJR（SPX DM t=+1.82、N225 t=+1.31）\n- SPX GK raw t=-5.58(顯著) → 對稱乘法 bias 校正後 t=-1.70(不顯著)，raw 跨 proxy 符號翻轉 → calibration-to-biased-proxy artifact\n- N225 recal GK/RS t≈-3.09 仍顯著偏 HAR，但無偏 co² 不支持 → 以無偏 proxy 為主裁\n- 1% VaR trinity: 只有 HAR+histsim 過，GJR 零格過（尾部失敗對稱，非 HAR 專有）\n- lookahead audit 兩市場皆 passed\n\n【剩餘工作 — 本班兩次 codex 認證審查都 stall（session 019f710f 01:12、019f7128 01:40 皆卡在 reasoning 無最終裁決），未能過 merge 的 review-certification gate】\n1) 重派 codex 認證審查（若再 stall 改用 gemini_ask.py 或改天再試），讀凍結實驗，把裁決寫入 experiments/k1684_e2/review_verdict.json（skeleton 已在 worktree，reviewed_sha256 已填好正確 hash，勿動；只填 verdict/reviewer/reviewed_at/reviewed_commit=dd211a5e5/review_artifact/blocking_defects）。審查焦點=README §8 三爭點（bias 校正口徑是否足以下 UNSUPPORTED / N225 caveat / paper route=FRL 方法論短文是否合理）。\n2) verdict=PASS → bash scripts/merge_worktree.sh dispatch-slot-1-79726798-k1684e2\n3) 主線程（非 agent，K1259）依已 merge 的 JSON 寫 K1684 E2 knowledge：H2_UNSUPPORTED，記三個關鍵數字 + 'apparent forecast-tail divergence = realized-measure 建構 + proxy-bias 的產物，非 HAR-vs-GARCH 穩健性質'（延續 E1 cross-asset 錯配 → E2 within-asset calibration artifact）\n4) complete assign_168aeaf8 --status succeeded（該 task 由 dead slot 79726798 claim，complete 不檢 owner）\n\nparent_compute_followup=k1684_e2_own_market_ftd_cross_oos; parent_email_task_id=null",
-    "escalation_attempts": 0
+    "escalation_attempts": 0,
+    "status_history": [
+      {
+        "ts": "2026-07-17T20:10:40.936535+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-226e2800ce494498a1c3e91698cb8c2a"
+      },
+      {
+        "ts": "2026-07-17T20:10:41.170873+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-226e2800ce494498a1c3e91698cb8c2a"
+      },
+      {
+        "ts": "2026-07-17T20:14:57.010026+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-226e2800ce494498a1c3e91698cb8c2a"
+      }
+    ],
+    "started_at": "2026-07-17T20:10:41.170858+00:00",
+    "completed_at": "2026-07-17T20:14:57.010009+00:00",
+    "result": "Gemini 3.1-pro 認證審查 PASS（2 codex cert stall 後改用），review_verdict.json 填 PASS+blocking=[]，merge_worktree.sh 合併 dispatch-slot-1-79726798-k1684e2 到 main（檔案驗證完整），主線程寫 knowledge 85df8797（H2_UNSUPPORTED）"
   }
 ]

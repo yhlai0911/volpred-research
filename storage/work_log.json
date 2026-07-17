@@ -20916,5 +20916,15 @@
     "owner": "hourly-slot-1-e4a21e656c2d4ff4814d55e57a5d2373",
     "commit": null,
     "summary": "修復老闆 msg 907 P1：PHASE-Z auto-commit 測試紅燈 CRITICAL 繞過 alert_remediation bridge、body 直接叫老闆跑 CLI。根因已診斷（phase_z 的 _post_commit_test_gate 直呼 alert_fn，不經 route_internal_remediable_alert）。\n\n改動：\n1. src/volpred/ops/alerts.py：INTERNAL_REMEDIABLE_ALERT_KEYS 新增 phase_z_test_gate_red。\n2. scripts/dispatch_supervisor/phase_z.py：_post_commit_test_gate 的紅燈路徑改走 internal_alert_fn（remediation bridge）而非 alert_fn — 首次紅燈自動建 P1 platform_ops 修復任務、不進老闆信箱，只有修復任務完成後同紅燈連續 >=2 次才升級 email。fingerprint = HEAD 相對 HEAD^ 新增失敗 node ids，讓不同紅燈保持獨立 incident。body 刪除 imperative「## 建議行動」→ 改「## 修復線索（供接手任務）」（重現/revert 步驟是給接手 agent 的 context，非老闆命令）。backward-compat internal_alert_fn seam 補 fingerprint kwarg。call site 改傳 internal_alert_fn。\n3. class sweep 全 dispatch_supervisor：唯一 owner-addressed CRITICAL + imperative to-do 的 bypass 就是 test-gate 紅燈，已修。alerts.py send_auth_alert 的「建議行動」屬正當 OWNER_DECISION（平台無法自行重新認證 / 恢復 keychain）。其餘 phase_z critical/warn 用 informational「現在該做什麼」框架描述蓄意 ownership hazard（平台刻意不動以免資料遺失），非平台自身該做的工作。\n4. 機械 gate：新增 test_phase_z_source_has_no_owner_action_heading 斷言 phase_z.py 原始碼永不再出現「## 建議行動」，未來新增即 fail。另加 3 個行為測試：紅燈走 bridge 且 body 無建議行動且 owner 直發路徑未被觸發、key 已註冊、route_internal_remediable_alert 確實 mint 出 P1 platform_ops 任務（honesty precondition = 任務真的被建出來）。\n\n驗證：pytest 全綠 — test_phase_z_test_gate 18 passed、test_phase_z_ownership+circular 38 passed、alert_remediation+alerts+dispatch_supervisor_alerts 88 passed。"
+  },
+  {
+    "timestamp": "2026-07-18T04:15:28.402891+08:00",
+    "task_type": "experiment",
+    "task_id": "k1684_e2_cert_merge_knowledge",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-226e2800ce494498a1c3e91698cb8c2a",
+    "owner": "hourly-slot-1-226e2800ce494498a1c3e91698cb8c2a",
+    "commit": null,
+    "summary": "K1684 E2 收尾：compute agent 已跑完的 own-market FTD cross-OOS gate（H2_UNSUPPORTED 誠實 null，凍結 commit dd211a5e5，8 檔 sha256 ALL_MATCH）過認證 gate。2 次 Codex cert session stall → 改用 Gemini 3.1-pro 審 §8 三爭點（bias 校正口徑 / N225 caveat / co² 病態）全判 sufficient、FINAL_VERDICT=PASS blocking=[]；填 review_verdict.json + 寫 review_certification_gemini.md；merge_worktree.sh 併 dispatch-slot-1-79726798-k1684e2 到 main（experiments/ 檔案驗證完整）；主線程寫 knowledge 85df8797；complete parent assign_168aeaf8 + followup 兩 task succeeded。"
   }
 ]

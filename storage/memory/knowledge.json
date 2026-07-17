@@ -42216,5 +42216,19 @@
   ],
   "confidence": 0.85,
   "created_at": "2026-07-18T02:11:36.619542"
+ },
+ {
+  "item_id": "85df8797",
+  "category": "experiment_finding",
+  "content": "K1684 E2 — own-market realized-target forecast-tail-divergence cross-OOS gate：裁決 H2_UNSUPPORTED（誠實 null，非 REJECTED、非等價證明）。K850/K854 的 forecast-tail-divergence headline（HAR-RV 的 QLIKE 大勝 GJR、但尾部覆蓋大敗）在 own-market S&P500(^GSPC) 與 Nikkei225(^N225)、OOS n=5,412/5,238、跨 5 時段 + 高/低波 regime、calibration-neutral + Patton(2011) 無偏 proxy 的公平比較下無法建立。三個關鍵數字：(1) 無偏 co² proxy 上 HAR 沒贏 GJR（SPX DM t=+1.82、N225 t=+1.31，皆略偏 GJR、不顯著）；(2) SPX GK raw DM t=−5.58（HAR 顯著）→ 對稱乘法 bias 校正後 t=−1.70（不顯著），raw 跨 proxy 符號翻轉（GK 偏 HAR、co² 偏 GJR）；(3) 1% VaR trinity 只有 HAR+HistSim 過、GJR 零格過，Normal/CF/t 參數 overlay 在兩模型 Z1 全拒絕（尾部低估對稱、非 HAR 專有）。機制結論：apparent forecast-tail divergence = realized-measure 建構 + proxy-bias 的產物，不是 HAR-vs-GARCH 的穩健性質——延續 E1 cross-asset target 錯配（n=450、|t|=2.10 未過 Harvey）→ E2 within-asset calibration-to-biased-proxy artifact。N225 caveat：recal-GK/RS 仍 Harvey-顯著偏 HAR（t≈−3.1、bootstrap CI 排除 0），但無偏 co² 不支持（t=−0.39），以無偏 proxy 為主裁。限制：realized measure 為 range-based（GK/PK/RS）非真 5-min RV（Oxford-Man 停站、n≥2500 尺度不可得），故 UNSUPPORTED 不是 REJECTED；真 HF RV 下 HAR 資訊優勢可能更大（K849 TX 5-min RV t=−11）。lookahead mechanical audit 兩市場皆 passed；seed=20260718 固定。認證審查：Gemini 3.1-pro（2 次 Codex cert session stall 後改用）判 PASS、blocking_defects=[]（見 experiments/k1684_e2/review_certification_gemini.md）。",
+  "evidence": [
+   "experiments/k1684_e2/README.md",
+   "experiments/k1684_e2/k1684_e2_results.json (verdict=H2_UNSUPPORTED)",
+   "experiments/k1684_e2/review_verdict.json (PASS, reviewed_commit=dd211a5e5)",
+   "experiments/k1684_e2/review_certification_gemini.md",
+   "parent: experiments/k1684 (E1 R3, H2_UNSUPPORTED)"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-18T04:14:39.323418"
  }
 ]
