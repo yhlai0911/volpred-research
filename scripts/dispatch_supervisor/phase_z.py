@@ -520,6 +520,35 @@ def _clear_failed_closeout(repo_root: Path, runner) -> None:
         LOG.warning("phase_z: cannot clear failed-closeout receipt (%s)", exc)
 
 
+def _paths_carried_forward(repo_root: Path, since_iso: str | None, runner) -> set[str]:
+    """Paths some commit touched after the receipt was written.
+
+    Asks git rather than keeping a list of "hot" state files. A shared ledger
+    (`storage/work_log.json`, the task archive, token-usage reports) is appended
+    to by every fire and cron worker, so a day-old byte-pin can never match it
+    again — but that drift is the healthy path, not a hazard: the next writer
+    commits the whole file, carrying the failed fire's lines along with its own.
+    A hardcoded blocklist would have to name every such file and would rot the
+    day someone adds the next one; "a later commit already took this path" is the
+    same question answered from the history itself.
+
+    Fails closed (empty set) when git won't say — an unanswered question must not
+    read as "carried forward".
+    """
+    if not since_iso:
+        return set()
+    try:
+        proc = _git(repo_root, "log", f"--since={since_iso}", "--name-only", "-z",
+                    "--format=", timeout_s=_SHORT_TIMEOUT_S, runner=runner)
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        LOG.warning("phase_z: carried-forward probe failed (%s)", exc)
+        return set()
+    if proc.returncode != 0:
+        LOG.warning("phase_z: carried-forward probe failed (rc=%d)", proc.returncode)
+        return set()
+    return {path for path in (proc.stdout or "").split("\0") if path}
+
+
 def recover_failed_closeout(
     *,
     repo_root: Path,
@@ -531,8 +560,19 @@ def recover_failed_closeout(
 
     This is not orphan adoption. The durable receipt was written by PHASE-Z at
     the original candidate failure and pins every path to its bytes (or deletion
-    state). Any mismatch refuses recovery and leaves both bytes and receipt for
-    human review.
+    state). A mismatch on a path this recovery would still stage refuses recovery
+    and leaves both bytes and receipt for human review.
+
+    A pinned path that is no longer dirty is DONE, whatever it now holds: the
+    working tree agrees with HEAD, so recovery would stage nothing for it and can
+    misattribute nothing. Its bytes drifting means a later fire committed newer
+    work under its own baseline — normal progress, not a hazard. Checking the
+    hash before asking whether the path still needs committing is what pinned a
+    finished receipt into a permanent hourly CRITICAL: 34 of 40 paths had already
+    been committed by later fires and 6 hot state files (work_log.json, the task
+    archive, token-usage reports) had legitimately moved on, so every fire for 25
+    hours re-sent the same alert about work that was never at risk
+    (error_log 2026-07-17).
     """
     repo_root = Path(repo_root)
     payload = _read_failed_closeout(repo_root, runner)
@@ -542,31 +582,39 @@ def recover_failed_closeout(
     if dirty is None:
         return {"committed": False, "reason": "status_error"}
 
+    carried = _paths_carried_forward(repo_root, payload.get("created_at"), runner)
     unresolved: list[str] = []
     conflicts: list[str] = []
+    landed: list[str] = []
     for entry in payload["paths"]:
         rel = entry["path"]
-        current = _path_fingerprint(repo_root / rel)
-        if current != entry["fingerprint"]:
-            conflicts.append(rel)
-        elif rel in dirty:
+        if rel not in dirty:
+            landed.append(rel)
+            continue
+        if _path_fingerprint(repo_root / rel) != entry["fingerprint"]:
+            # Drifted and dirty. If a later commit already took this path, that
+            # shift carried the content forward and is now its owner; only an
+            # edit no commit ever picked up is an unstaged-output conflict.
+            (landed if rel in carried else conflicts).append(rel)
+        else:
             unresolved.append(rel)
 
+    if not unresolved and not conflicts:
+        # Every pinned path reached HEAD. Nothing to recover, nothing to warn.
+        _clear_failed_closeout(repo_root, runner)
+        return {"committed": False, "reason": "already_closed", "landed": landed}
     if conflicts:
         (alert_fn or _default_alert)(
             level="critical",
             title="PHASE-Z failed-closeout 內容已變更，拒絕跨班提交",
             body="\n".join([
-                "原 fire 的 ownership receipt 還在，但下列路徑已不再等於被 gate 擋下時的 bytes。",
+                "原 fire 的 ownership receipt 還在，但下列尚未提交的路徑已不再等於被 gate 擋下時的 bytes。",
                 "為避免把後來 session 的修改冒充原 fire 產出，系統沒有 commit 或覆蓋任何檔案。",
                 "",
                 *[f"- {path}" for path in conflicts],
             ]),
         )
         return {"committed": False, "reason": "hash_mismatch", "conflicts": conflicts}
-    if not unresolved:
-        _clear_failed_closeout(repo_root, runner)
-        return {"committed": False, "reason": "already_closed"}
 
     subjects = [
         str(item.get("subject") or "").strip()

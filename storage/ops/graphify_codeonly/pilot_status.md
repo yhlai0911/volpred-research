@@ -1,4 +1,15 @@
-# Graphify Code-only Pilot
+# Graphify Code-only Pilot — CLOSED / REMOVED (2026-07-17)
+
+> **STATUS: TERMINATED 2026-07-17.** Verdict: REMOVE. Graphify MCP tools were
+> invoked 0 times across 2,967 session logs in the 14-day window → 0% reduction
+> attributable (< 10% bar). The baseline was independently unusable (overlapping
+> windows, no defined comparison rule). MCP registration removed from
+> `~/.claude.json`. The `claude mcp add` command below is **obsolete — do not run**.
+> Full reasoning: `verdict_20260717.md`.
+>
+> Content below is preserved unchanged as the pilot's audit trail.
+
+---
 
 - Generated at: 2026-07-02T05:25:20.161863+00:00
 - Package: graphifyy[mcp]

@@ -132,6 +132,39 @@ def test_hash_pinned_closeout_refuses_later_edits(repo: Path):
     assert alerts and alerts[0]["level"] == "critical"
 
 
+def test_landed_closeout_clears_silently_despite_hot_state_drift(repo: Path):
+    """The 2026-07-17 alert loop: a receipt whose paths later fires already
+    committed must clear, not scream. The pinned set mixes the fire's own output
+    with a hot shared state file that every later fire rewrites — drift there is
+    normal progress once a later commit has carried the content forward."""
+    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
+    (repo / "out.txt").write_text("agent output\n")
+    (repo / "work_log.json").write_text('[{"fire": 1}]\n')
+    _install_blocking_hook(repo)
+    assert _run(repo, [])["reason"] == "commit_nonzero"
+
+    # A later fire commits both paths — carrying fire 1's log line along with its
+    # own — and a third is mid-append, so work_log.json is dirty again and no
+    # longer matches the bytes pinned at the failure.
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 0\n")
+    hook.chmod(0o755)
+    (repo / "work_log.json").write_text('[{"fire": 1}, {"fire": 2}]\n')
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "later fire committed the pinned work")
+    (repo / "work_log.json").write_text('[{"fire": 1}, {"fire": 2}, {"fire": 3}]\n')
+
+    alerts: list[dict] = []
+    recovered = phase_z.recover_failed_closeout(
+        repo_root=repo,
+        alert_fn=lambda **k: alerts.append(k) or {},
+    )
+
+    assert recovered["reason"] == "already_closed"
+    assert not alerts, f"finished receipt must not page anyone: {alerts}"
+    assert not _failed_closeout_file(repo).exists(), "a finished receipt must not survive to re-alert"
+
+
 def test_failed_closeout_accumulates_distinct_later_batches(repo: Path):
     assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
     (repo / "first.txt").write_text("first\n")

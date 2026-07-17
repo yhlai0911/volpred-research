@@ -1,0 +1,50 @@
+{
+  "id": "agent-brief_taifex_rv_line-835e05",
+  "title": "TAIFEX tick 5-min RV intraday 研究線重開（K 題組設計 + 首 K 完整執行）",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_taifex_rv_line-835e05.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-30aeb902-taifexrv",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-30aeb902-taifexrv/storage/ops/taifex_rv_line_handoff.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_taifex_rv_line-835e05.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-17T11:10:40Z",
+  "started_at": "2026-07-17T11:15:06Z",
+  "completed_at": "2026-07-17T11:42:50Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_taifex_rv_line-835e05.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_taifex_rv_line-835e05.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-30aeb902-taifexrv/storage/ops/taifex_rv_line_handoff.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_taifex_rv_line-835e05.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-30aeb902-taifexrv",
+  "claude_followup": {
+    "brief": "收 TAIFEX intraday RV 研究線首發 K：(1) 驗 results.json 數字與 agent 回報一致（走 agent-result-verification skill，K1016 教訓）；(2) 確認 OOS 無 lookahead、baseline 是誠實 daily HAR、樣本期間有誠實記載；(3) 走 worktree-merge-verification + merge_worktree.sh 正式合併 branch wt/dispatch-slot-1-30aeb902-taifexrv（禁留未合併 worktree）；(4) 主線程寫 knowledge.json（agent 禁寫）；(5) 把另外 2 個 K brief 建成 next_tasks pending task。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_taifex_rv_line.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_taifex_rv_line-835e05.md",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "followup_dispatched_at": "2026-07-17T12:29:14Z",
+  "followup_next_task_id": "assign_9d7292c1"
+}

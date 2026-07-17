@@ -20771,5 +20771,64 @@
     "owner": "hourly-slot-1-6dc08119c9334720b72b5034a498085e",
     "commit": null,
     "summary": "孤兒實驗 K1698 收尾（FTD E1 v2 — scale re-calibration gating，K1684 的 compliant rerun）。**判 FAIL → 依規則不寫 knowledge.json**。\n\n**topology_override: worktree→subagent** — 只讀 + codex 二審，不 mutate experiments/，無並行寫入衝突。\n\n**二審**：codex gpt-5.6-sol (reasoning=high, read-only) = **FAIL**：「數字可重現且比 K1684 完整，但 H2_REJECTED 與『divergence 是 construction artifact』超過證據；RV 資訊集與通道識別兩個 blocker 並未真正解決」。\n\n**先講公道話（這些是真修的，別重做）**：數字全部逐項對得上、無 K1016 式反向宣稱 —— leg1 t=+1.4694/p=0.1424/n=436、own-target bridge -5.2522 vs primary -2.0642(p=0.0396)、校正因子 1.20290/1.21091/1.07465、placebo GJRf-a OOS=1.11910/IS=0.99346、1% VaR trinity HAR+CF 14/450 (Kupiec p=0.000 FAIL) vs bridge 17/450、GJR+CF 2/450 PASS 但 c_emp=0.799[0.63,1.02] 屬過度保守型 PASS、K854 bridge 11/14。K1684 的 n=377 縮樣已修（declared drop 3 cells，n=450）、atomic write（tmp→json.load→os.replace）、GATE_RULES 寫死在 k1698.py:170 且 decide_gate_v2() 確實檢查 leg-2。\n\n**FAIL 打在結論與兩個號稱已解的 blocker**：\n1. **lookahead 未解（致命）**：active contract 依整份日檔成交量選出（k1698.py:328 `v[dl==d].sum()`），含 13:30-13:45 的 tick → 號稱「13:30 可得」的 RV predictor 用了視窗收盤後 15 分鐘的合約選擇資訊，直接推翻「資訊集建構上不相交」，並打在所有「新舊 RV 差 → artifact」結論的根上。\n2. **60 天邊界 audit 是空驗證**：rv_window_boundary_audit 取最早 60 個交易日（2017-01，夜盤上線前），12 筆 checks 的 night_pm_in_window / night_am_in_window 全是 None，而 None 不會令 ok=False；night_pm_stamped_before_file_date 更沒併進 all_ok。OOS(2023-24) 全在夜盤時代 → blocker 2 的機械證明並不存在。\n3. **accepting the null**：t=+1.469 (p=0.142) 只是「未證明 HAR 勝」，被寫成 H2_REJECTED +「divergence 是 artifact」。要立此論需 equivalence/noninferiority 檢定；-5.25→-2.06 是描述性比較，未對兩套 paired loss differential 之差做正式檢定。\n4. 「完全復現 K1684/K854 的世界」與 11/14 相矛盾（差的 3 格全是 GJR 家族）。\n5. 「差全部來自 RV 重建」無分項 ablation —— 新 RV 同時改了 active contract/gap/alignment/連續 path 四件事。\n6. JSON limitation #7「>=100-start GJR/RGL」與 top-level rgl_multistart=40 自相矛盾（README 本身寫對）。\n7. 目錄內無獨立 referee report/receipt，README §2 的「primary-path review PASS」無機械證據。\n\n**出口**：未寫 knowledge.json，改建 P2 重跑 task **assign_42306eaa**（修 contract-selection lookahead → 修 audit 抽樣涵蓋夜盤/OOS → 四層分項 ablation → equivalence 檢定 → 再審；heavy compute 走 compute_queue）。open task 即 consumer，孤兒已解且未把被拒結果洗白成知識。"
+  },
+  {
+    "timestamp": "2026-07-17T19:20:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_graphify_codeonly_14d_verdict_20260716",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-30aeb902a444412ebc77a4d4b9a51a6f",
+    "owner": "hourly-slot-1-30aeb902a444412ebc77a4d4b9a51a6f",
+    "commit": null,
+    "summary": "Graphify code-only pilot 14 天裁決（P4，餓死 365h）→ **REMOVE**。reduction = **0% attributable**，非估計而是建構上為零。\n\n**決定性證據（Ground 1）：這個 MCP 從頭到尾沒被叫過一次。** 掃 ~/.claude/projects 全部 2,967 個 jsonl，只計 message.content[] 裡 type=='tool_use' 且 name 含 graphify 的 block（刻意把真 invocation 與字串誤中分開）：**actual invocations = 0，invoked sessions = 0**。約 803 個 session log 的可用工具清單裡列了那 10 個 mcp__graphify-volpred-codeonly__* —— 但全是 attachment 的 tool list，不是呼叫。其餘 graphify 字串命中全部可解釋且都不是使用：ls 輸出列到 graphify-out/、dispatch 餓死橫幅寫到本 task id、本 task 自己的 prompt。註冊是好的（~/.claude.json project scope 確認在）、graph 產出是好的（4.9MB graph.json / 4,837 nodes / 12,129 edges）、binary 也在 —— 就是沒人用。0% < 10% → 撤除。淨效果其實**略負**（10 個 tool name 掛在 ~803 個 session 的工具清單裡、零抵銷使用）；該 overhead 無法被現有量測隔離，故**不編數字**，只記方向。\nrun_manifest 的『29.3x reduction』是**廠商在合成 corpus 上的自我 benchmark**，不是本倉 agent 的觀測值 —— 沒東西查過 graph，它本來就沒機會轉移。\n\n**獨立第二理由（Ground 2）：baseline 本來就撐不起 10% 檢定（pilot 設計缺陷）。** token_baseline.json 自己的 honesty_note 就寫了 platform_ops 無法隔離 hourly-dispatch。四個缺陷：(a) 三個候選列沒指定哪個是 baseline、沒指定哪個 metric 為準、沒定義比較算式；(b) 候選彼此差 3.3x（per-msg 10,075.20 / 8,484.77 / 3,549.92），選 weekly_06-26 得『~70-82% 減少』、選 weekly_06-28 現況值(3,080.78)得『~2%』—— 同資料同視窗，在 10% 線兩側翻面，結論由未載明的選擇決定；(c) 三個 baseline 視窗有兩個**跨進 install 後**（install 07-02，weekly_06-26 涵蓋 06-26→07-03、weekly_06-28 涵蓋 06-28→07-05），『前』含『後』；(d) **baseline 快照已無法從自己的來源檔重現** —— weekly_2026-06-28.json 現讀為 58 msgs/178,685 billable/3,080.78，對比 baseline 記的 145/1,230,291/8,484.77，該報表 Jul 6 被重生（mtime）蓋掉 Jul 2 釘的視窗（weekly_06-26 與 daily_06-30 仍可精確重現）。依 task 自訂規則『baseline 未定義清楚 → 記為設計缺陷 → 視同未達 10%』，Ground 2 單獨也判撤除。兩條路同向。\n\n**已執行**：(1) 移除 MCP 註冊 —— ~/.claude.json 的 projects['/Users/yhlai0911/volpred-research'].mcpServers 刪掉 graphify-volpred-codeonly，zeabur 保留，寫後 re-parse 驗證，備份 ~/.claude.json.bak_graphify_verdict_20260717；(2) pilot_status.md 加 CLOSED/REMOVED 橫幅並標註 mcp add 指令作廢（原文保留為 audit trail）；(3) 寫 storage/ops/graphify_codeonly/verdict_20260717.md。**未動**：graphify_codeonly/ 歷史（audit trail）、knowledge.json（K1259 禁止 agent 寫）、git（PHASE-Z 統一收）。\n**處置建議（未執行，留給 owner）**：graphify-out/ 4.9MB 已無引用可刪；uv tool uninstall graphifyy 可清 binary（去註冊後無害）。\n\n**教訓（未寫 knowledge.json，K1259）**：敗因不是 Graphify 有沒有效 —— 那仍未被測試。敗因是裝了工具，然後用 (a) baseline 檔自己都標記無法隔離的 proxy、(b) 與處理期重疊的 baseline 視窗、(c) **完全沒有採用率檢查** 來量它。一個能註冊能力卻從沒驗證過任何一次呼叫的 pilot，花了 14 天在量雜訊。日後任何工具 pilot 應先 gate 在使用次數上：invocations == 0 時效力問題根本不成立，當場即可裁決。"
+  },
+  {
+    "timestamp": "2026-07-17T19:17:03.917014+08:00",
+    "task_type": "paper_body",
+    "task_id": "paper9_c3_multiple_testing_subsection_k1380",
+    "actor": "hourly-slot-1-30aeb902a444412ebc77a4d4b9a51a6f",
+    "owner": "hourly-slot-1-30aeb902a444412ebc77a4d4b9a51a6f",
+    "status": "failed",
+    "summary": "拒寫 Paper 9 C3 Multiple Testing 子節：其證據 K1380 是 loss function bug 產物。k1380.py:649 qlike() 比值寫反 σ̂²/r²（應 r²/σ̂²）→ 非 proxy-robust，E[1/r²] 在 r²=σ²χ²₁ 下發散 → 單調獎勵低估波動率 → GJR 機械性勝出。400k-draw 驗證：robust 在真值最小(1.271)，反向隨 c 遞減(559,680→11,195)。佐證：mean QLIKE 620-740 vs K1379 同 proxy/OOS/n=1852 的 ~1.4（400x）；A4f t=-0.272 vs K1379 t=-4.37 → SPA p=1.000 是 power artifact；A5/C2/C3 的發散排除是反向 loss 懲罰高預測值所致需重判。已修 k1380.py:647、歸檔 *_INVALID_20260716.*、README 記根因+驗證表、建分階段重跑 task k1380_rerun_staged_correct_qlike。",
+    "artifacts": [
+      "experiments/k1380/k1380.py",
+      "experiments/k1380/README.md",
+      "experiments/k1380/k1380_results_INVALID_20260716.json"
+    ]
+  },
+  {
+    "timestamp": "2026-07-17T19:17:03.917014+08:00",
+    "task_type": "experiment",
+    "task_id": "research_taifex_intraday_rv_line",
+    "actor": "hourly-slot-1-30aeb902a444412ebc77a4d4b9a51a6f",
+    "owner": "hourly-slot-1-30aeb902a444412ebc77a4d4b9a51a6f",
+    "status": "succeeded",
+    "summary": "TAIFEX tick 5-min RV intraday 研究線重開派工：建 worktree wt/dispatch-slot-1-30aeb902-taifexrv，enqueue agent job agent-brief_taifex_rv_line-835e05 (opus/xhigh)。Brief 含 2017-05-16 夜盤斷點、2012-06-14 era 邊界、258 缺口=國定假日、OOS 禁 lookahead、NULL 可接受。實驗成果由 PHASE A followup 收+合併。",
+    "artifacts": [
+      "storage/ops/agent_briefs/agent-brief_taifex_rv_line-835e05.md"
+    ]
+  },
+  {
+    "timestamp": "2026-07-17T20:07:51.162730+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12130-a433ec",
+    "actor": "hourly-slot-1-fe2d5c687e484452a07278f2910303ec",
+    "owner": "hourly-slot-1-fe2d5c687e484452a07278f2910303ec",
+    "status": "succeeded",
+    "summary": "修好 PHASE-Z failed-closeout 的 25 小時 CRITICAL 迴圈（老闆回信「立刻檢查底層原因重構後修復」）。根因：recover_failed_closeout 先比 hash 才問「這條路徑還需要 commit 嗎」，且對 work_log.json / next_tasks_archive / token_usage 這類共用 append-only 帳本做 byte-pin —— 這些檔隔班必然被改寫，pin 永遠不可能再吻合。實測 7/16 18:25 的 receipt 40 條路徑中 34 條早被後續班次 commit、0 條還髒，工作成果從未有風險，卻連發 27 次同一封 CRITICAL。修法兩層：(1) 不髒的路徑不會被 stage，不可能被冒名頂替 → 直接視為完成；(2) 髒且 bytes 漂移者，問 git log --since=receipt 是否已有後續 commit 帶走 → 有=後續班次已承接（正常進度，靜默），無=未 staged 產出被人改過（維持 refuse+CRITICAL 不變）。用 git 歷史回答而非硬寫 hot-path 清單（會漂移）。真實 receipt 驗收：40/40 landed、0 alert、receipt 清除、HEAD 未動。47 phase_z/supervisor 測試綠，新 pin 經反向驗證（癱瘓探測即紅）。",
+    "artifacts": [
+      "scripts/dispatch_supervisor/phase_z.py",
+      "scripts/tests/test_phase_z_drain_retry.py"
+    ]
+  },
+  {
+    "timestamp": "2026-07-17T20:29:48+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_9d7292c1",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-4f0198b927234ee8bb9b5652ceaa9f08",
+    "owner": "hourly-slot-2-4f0198b927234ee8bb9b5652ceaa9f08",
+    "commit": null,
+    "summary": "收 TAIFEX intraday RV 線首發 K 的 collect_completed followup（compute job agent-brief_taifex_rv_line-835e05）。\n\n**驗證（通過）**：獨立重跑 `experiments/k1719/k1719.py`，除 timestamp 外 bit-identical 重現 results.json（seed=42）；handoff 宣稱的 4 個 headline 數字與 JSON 逐一對得上，無 K1016 式誇大。人工過代碼：`har_features()` 有明確 `.shift(1)`、`rolling_oos()` 訓練窗 `[t-WINDOW, t)`、兩模型同 spec/window/filter/common ledger、DM 用 canonical `dm_test`。agent 的 handoff 誠實度高（自報 dispatch brief 資料前提有誤、原案 (b)(c) 未執行的理由、2017+ 子樣本 |t|=2.92 不升格）。\n\n**發現並修正 K 號撞號**：K1719 被兩個不同實驗同時使用 —— ASIA-5 亞太時區階梯 spillover（7/16 00:00 由 research_backlog_auto 經 kid_reserve.py **正式預留**，worktree dispatch-slot-1-a56566ff-k1719，已有 sha-pin 的 review_verdict）vs 本 TAIFEX 實驗（7/17 執行）。違反 AGENTS.md「同一 K 編號不得同時被兩個 agent 執行」。處置：TAIFEX 讓號（後到 + 尚未過 Codex gate，改號成本最低；改 ASIA-5 會作廢其 sha-pin 裁決），經 `kid_reserve.py` 正式配得 **K1729**，目錄/檔名/內文/handoff artifact/work_log 全面改號後**重跑驗證數字不變**（只有 id/timestamp/code_sha256 變動）。ASIA-5 保留 K1719。\n\n**根因**：`kid_reserve.py`（2026-06-23 K-id race 事故的既有治本，fcntl 鎖 + registry）**只有 research_backlog_auto 在用**；ad-hoc experiment agent brief 完全沒提配號，agent 只好自己掃 `experiments/` 取 max+1（看到 1718 → 挑 1719），看不到 registry 的預留（registry last_k_id=1728）→ 必然撞號。配號器是寫入端 guard 卻沒接線強制。已建 `assign_762984a5` 治本單。\n\n**未 merge（刻意，非疏漏）**：`merge_worktree.sh` 的 review-certification gate 要求 `review_verdict.json` PASS 且 sha256 pin 住現行 bytes。Codex 審查跑逾 10 分鐘未收斂，fire 有 3000s 硬上限 → 依規定不硬等（避免 SIGKILL 毀成果）、不捏造裁決、不繞過 gate（K1709 教訓：Codex 判 FAIL 仍 merge，CI 連紅 4 次）。改以 `compute_queue enqueue-agent` 派 `agent-brief_k1729_certify-83eb58`（含完整 brief：Codex 審 → verdict-template → PASS 才 merge → 主線程寫 knowledge），由後續 fire 的 PHASE A 收。worktree/branch 完整保留。\n\n**建單**：`assign_680433de`（K-B 夜盤 RV 條件價值，含 hard kill criterion：子樣本 n<100 直接判 infeasible）、`assign_6b29e647`（選擇權 tick blocker 解除 → coverage manifest）、`assign_762984a5`（配號治本）。另修 PLANNED_K_BRIEFS.md 誤導的「建議 k1720」（該號已屬 LETF 題）→ 改為要求走配號器。\n\nknowledge.json 尚未寫入（依 gate 設計，須 merge 後才寫；已寫進 certify job 的 brief）。"
   }
 ]
