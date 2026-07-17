@@ -110,14 +110,84 @@ def test_draft_owned_by_a_live_task_is_left_alone(repo):
     assert scan["skipped"]["inflight"] == 1
 
 
-def test_unrecognised_file_is_held_not_committed(repo):
-    """Held + reported beats guessing. The reaper never commits what it can't name."""
+def test_novel_suffix_is_collected_by_default(repo):
+    """The default is COLLECT, and this test exists to keep it that way.
+
+    Do not read this as ".parquet is supported" — that reading is the bug. An
+    allowlist of draft suffixes was tried twice and leaked twice (2026-07-14
+    3b2c10375, then .csv/.py three days later) because a draft's asset suffixes
+    are an OPEN set: the next one is .txt or .ipynb or something unnamed today.
+    The assertion is that a suffix nobody anticipated lands in `collectable`
+    anyway, purely by living under storage/drafts/. If a future change makes an
+    unknown suffix held again, this test must fail — that is its whole job.
+    """
+    mod, root = repo
+    _write(root / "storage" / "drafts" / "assets" / "e1" / "series.parquet",
+           "PAR1", mtime=OLD)
+    _write(root / "storage" / "drafts" / "assets" / "e1" / "notebook.ipynb",
+           "{}", mtime=OLD)
+    _write(root / "storage" / "drafts" / "assets" / "e1" / "Makefile",
+           "all:\n", mtime=OLD)  # no suffix at all
+
+    scan = mod.scan_draft_artifacts()
+    assert {e["path"] for e in scan["collectable"]} == {
+        "storage/drafts/assets/e1/series.parquet",
+        "storage/drafts/assets/e1/notebook.ipynb",
+        "storage/drafts/assets/e1/Makefile",
+    }
+    assert scan["held"] == []
+
+
+def test_junk_file_is_held_not_committed(repo):
+    """Held + reported beats guessing — the denylist side of the same coin.
+
+    Renamed from test_unrecognised_file_is_held_not_committed: under the
+    inverted default nothing is held for being *unrecognised*; a file is held
+    only when it is positively identified as junk.
+    """
     mod, root = repo
     _write(root / "storage" / "drafts" / "scratch.tmp", "junk", mtime=OLD)
+    _write(root / "storage" / "drafts" / "assets" / "__pycache__" / "b.cpython-312.pyc",
+           "x", mtime=OLD)
+    _write(root / "storage" / "drafts" / ".DS_Store", "x", mtime=OLD)
+    _write(root / "storage" / "drafts" / "notes.md~", "x", mtime=OLD)
 
     scan = mod.scan_draft_artifacts()
     assert scan["collectable"] == []
-    assert scan["held"][0]["reason"] == "unrecognised_suffix:.tmp"
+    reasons = {e["path"]: e["reason"] for e in scan["held"]}
+    assert reasons["storage/drafts/scratch.tmp"] == "excluded_suffix:.tmp"
+    assert reasons["storage/drafts/.DS_Store"] == "excluded_dotfile"
+    assert reasons["storage/drafts/notes.md~"] == "excluded_editor_backup"
+    assert (reasons["storage/drafts/assets/__pycache__/b.cpython-312.pyc"]
+            == "excluded_suffix:.pyc")
+
+
+def test_oversize_file_is_held_not_committed(repo):
+    """Version control does not take data dumps; the reaper reports, never deletes."""
+    mod, root = repo
+    big = root / "storage" / "drafts" / "assets" / "e1" / "dump.csv"
+    big.parent.mkdir(parents=True, exist_ok=True)
+    big.write_bytes(b"0" * (mod.DRAFT_MAX_FILE_BYTES + 1))
+    os.utime(big, (OLD, OLD))
+
+    scan = mod.scan_draft_artifacts()
+    assert scan["collectable"] == []
+    assert scan["held"][0]["reason"].startswith("excluded_oversize:")
+    assert big.exists()  # invariant: held means held, not removed
+
+
+def test_symlink_is_held_not_committed(repo):
+    """Invariant 4: git ownership only recognises exact regular files."""
+    mod, root = repo
+    real = root / "outside.csv"
+    real.write_text("a,b\n", encoding="utf-8")
+    link = root / "storage" / "drafts" / "assets" / "e1" / "link.csv"
+    link.parent.mkdir(parents=True, exist_ok=True)
+    link.symlink_to(real)
+
+    scan = mod.scan_draft_artifacts()
+    assert scan["collectable"] == []
+    assert scan["held"][0]["reason"] == "excluded_symlink"
 
 
 def test_deletion_is_never_committed(repo):

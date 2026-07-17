@@ -56,6 +56,14 @@ frontend-v2/.env.local
 # .agents/skills/ is a legacy third copy — gitignore from 2026-04-17 to simplify canonical governance.
 .claude/scheduled_tasks.lock
 
+# Machine-local Claude Code permissions（Claude Code 官方慣例即為不進版控）。
+# 每個 session 允許一條新 Bash 指令就改寫它一次，於是每班 fire 都看到它 dirty、
+# 每班都沒有作者可歸屬 → 26 班的「沒人收」警報，把 orphan 警報的訊噪比長期壓低。
+# 共用設定（env / hooks / 團隊 permissions）在 .claude/settings.json，那份仍 tracked；
+# 這份只放本機權限，untrack 不會失去任何共用的東西。
+# 之前只靠使用者的全域 ~/.config/git/ignore 擋，換台機器 clone 就會再度被 track。
+.claude/settings.local.json
+
 # Local control-plane runtime state
 storage/ops/tasks/
 storage/ops/agents/

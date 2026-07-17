@@ -145,6 +145,15 @@ _LEAKED_STATE_PATHSPECS = (
     # (email-12038, boss: "一直爆警告"). Untracked, they stop being anybody's problem.
     "storage/logs/dedup_decisions.jsonl",
     "storage/ops/.last_email_immediate_dispatch",
+    # 2026-07-17 (boss msg 918). Claude Code's machine-local permission file: every
+    # session that allows one new Bash command rewrites it, so every fire found it
+    # dirty with no session to attribute it to — 26 consecutive fires of「沒人收」on
+    # a file nobody was ever going to commit, because committing one host's
+    # permission list is not a deliverable. Same shape as the two above, and the
+    # authorship test is what decides it, not the .claude/ prefix: the shared half
+    # (env / hooks / team permissions) lives in .claude/settings.json and stays
+    # tracked. Untracked, this half stops being anybody's problem.
+    ".claude/settings.local.json",
 )
 
 # Canonical control-plane state that background daemons (gmail poll, pool refill,

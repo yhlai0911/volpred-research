@@ -645,11 +645,69 @@ def collect_paper_artifacts(entries: list[dict]) -> list[dict]:
 # classify is held and reported, per the invariants at the top of this file.
 # ---------------------------------------------------------------------------
 
-DRAFT_ARTIFACT_SUFFIXES = {".md", ".json", ".png", ".jpg", ".jpeg", ".svg"}
+# Why a denylist and not an allowlist（2026-07-17，反轉預設）
+#
+# 這裡原本是一份 DRAFT_ARTIFACT_SUFFIXES 白名單。2026-07-14 才因為漏掉副檔名修過一次
+# （3b2c10375），那次的修法是「把這回漏掉的副檔名補進清單」；三天後 .csv 與 .py 出現，
+# 同一個洞立刻重演——同一批產出裡 evidence.json 與 fig2.png 被收走 commit，生成那些圖的
+# 原始資料與腳本卻留在工作區，圖進了版控、資料源沒有，可複現性就這樣斷在半路。
+#
+# 重演的不是清單內容，是清單這個形狀。一篇文章的資產副檔名是**開放集合**：下一次是
+# .txt、.ipynb、.parquet，還是某個還沒發明的格式，沒人猜得到。對開放集合列白名單，
+# 預設值就是「拒絕」，而拒絕在這支程式裡等於永遠卡著（PHASE-Z by design 不收養不是
+# 自己這班產的檔，兩邊都不收 = 檔案沒有出口）。再補一次清單只是把下次事故延後三天。
+#
+# 所以反轉預設。scan 已經 scoped 在 storage/drafts/ 底下，這個 namespace 裡的檔案
+# **就是**某篇文章的資產——這是目錄的定義，不是猜測。預設收編，只把真正不該進版控的
+# 擋掉：編輯器與執行期殘留、工具快取目錄、dotfile、symlink（top-of-file 不變量第 4 條：
+# git ownership 只認 exact 普通檔）、以及巨檔。
+#
+# 不變量沒有變：被擋的一律 held + 帶可讀 reason，永不刪除、永不 checkout。反轉的是
+# 「認不出來」的預設待遇，不是「保留而非丟棄」這條線。
+DRAFT_EXCLUDED_SUFFIXES = {
+    ".tmp", ".temp", ".part", ".partial",   # 寫到一半的檔，作者或 job 還沒交出來
+    ".swp", ".swo", ".bak",                 # 編輯器殘留
+    ".lock",                                # 執行期互斥檔，不是產出
+    ".pyc", ".pyo",                         # 編譯快取，由 .py 重生
+}
+
+# 工具快取目錄。裡面的東西是衍生物，收編它們等於把可重生的位元組塞進歷史。
+DRAFT_EXCLUDED_DIRS = {"__pycache__", ".ipynb_checkpoints"}
+
+# 版控不吃大二進位，而且到了這個尺寸幾乎必然是資料 dump 或中間產物，不是文章資產。
+# 真的有這麼大又非收不可的東西，held 的 reason 會指名它，由人決定（LFS？外部儲存？）。
+DRAFT_MAX_FILE_BYTES = 25 * 1024 * 1024
 
 # One article's family is ~10 files (draft + plan + 4-8 figures). This bounds a
 # runaway sweep without splitting a single article's output across two commits.
 DEFAULT_MAX_DRAFT_FILES = 40
+
+
+def _draft_exclusion(rel: str) -> str | None:
+    """Return a held-reason if this path is junk, else None（預設收編）。"""
+    path = Path(rel)
+    name = path.name
+
+    if name.startswith("."):
+        # .DS_Store、.env、編輯器 dotfile —— 沒有一個是讀者資產。
+        return "excluded_dotfile"
+    if name.endswith("~"):
+        return "excluded_editor_backup"
+    if path.suffix.lower() in DRAFT_EXCLUDED_SUFFIXES:
+        return f"excluded_suffix:{path.suffix.lower()}"
+    if DRAFT_EXCLUDED_DIRS.intersection(path.parts[:-1]):
+        return "excluded_junk_path"
+
+    full = ROOT / rel
+    if full.is_symlink():
+        return "excluded_symlink"
+    try:
+        size = full.stat().st_size
+    except OSError:
+        return None  # silent-ok: status→stat race；下游的 stat 會再處理一次
+    if size > DRAFT_MAX_FILE_BYTES:
+        return f"excluded_oversize:{size // (1024 * 1024)}MB"
+    return None
 
 
 def scan_draft_artifacts(*, now_ts: float | None = None) -> dict:
@@ -681,9 +739,9 @@ def scan_draft_artifacts(*, now_ts: float | None = None) -> dict:
             # would be this script's first destructive act; report it instead.
             held.append({"path": rel, "kind": "deletion", "reason": "deletion_not_owned"})
             continue
-        if Path(rel).suffix.lower() not in DRAFT_ARTIFACT_SUFFIXES:
-            held.append({"path": rel, "kind": "unknown",
-                         "reason": f"unrecognised_suffix:{Path(rel).suffix or 'none'}"})
+        excluded = _draft_exclusion(rel)
+        if excluded:
+            held.append({"path": rel, "kind": "excluded", "reason": excluded})
             continue
         try:
             if now_ts - (ROOT / rel).stat().st_mtime < GRACE_SECONDS:
