@@ -128,6 +128,39 @@ def test_hourly_alert_does_not_mint_twenty_four_tasks(pool) -> None:
     assert len(_tasks(pool)) == 1
 
 
+def test_cleared_ordinary_alert_closes_its_pending_task(pool) -> None:
+    """A self-cleared alert must not leave a pending task for starvation lockout.
+
+    2026-07-17: alert_telegram_reply_backlog sat pending for 24h after the
+    condition cleared, then the dispatcher's starvation lockout force-fed it to
+    a fire that burned a whole slot re-validating a no-op. remediate_report must
+    close the task the moment the condition is present-but-not-breached.
+    """
+    ar.remediate_condition(_condition("host_cron_fail"), storage_dir=str(pool), now=NOW)
+    assert _tasks(pool)[0]["status"] == "pending"
+
+    later = NOW.replace(hour=5)
+    report = {"conditions": [_condition("host_cron_fail", breached=False)]}
+    dispositions = ar.remediate_report(report, storage_dir=str(pool), now=later)
+
+    task = _tasks(pool)[0]
+    assert task["status"] == "succeeded"
+    assert task["result"] == "ordinary alert cleared before dispatch"
+    assert any(d.get("disposition") == "ordinary_resolution" for d in dispositions)
+
+
+def test_cleared_sweep_leaves_absent_alerts_untouched(pool) -> None:
+    """Only alerts present in the report are cleared; unknown-state alerts stay."""
+    ar.remediate_condition(_condition("host_cron_fail"), storage_dir=str(pool), now=NOW)
+
+    later = NOW.replace(hour=5)
+    # Report evaluates a *different* alert; host_cron_fail state is unknown here.
+    report = {"conditions": [_condition("some_other_alert", breached=False)]}
+    ar.remediate_report(report, storage_dir=str(pool), now=later)
+
+    assert _tasks(pool)[0]["status"] == "pending"
+
+
 def test_internal_alert_uses_stable_p1_task_and_suppresses_active_repeats(
     pool,
 ) -> None:

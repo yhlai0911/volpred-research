@@ -134,6 +134,9 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "src/volpred/ops/alert_remediation.py:_enqueue": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
     },
+    "src/volpred/ops/alert_remediation.py:_sweep_cleared_ordinary_tasks": {
+        "open-write": 1,
+    },
     "src/api/routers/mirror.py:append_memory_file": {
         "mkdir": 1, "replace": 1, "write_bytes": 1,
     },

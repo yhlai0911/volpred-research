@@ -934,15 +934,107 @@ def remediate_condition(
     return {"disposition": "task", "alert_id": alert_id, **outcome}
 
 
+def _sweep_cleared_ordinary_tasks(
+    cleared_alert_ids: set[str],
+    storage_dir: str,
+    now: datetime,
+) -> list[dict[str, Any]]:
+    """Close pending bridge tasks whose ordinary alert has cleared.
+
+    Symmetric to the breached→task path in `_enqueue`: when an ordinary alert
+    stops firing, the task it minted is no longer real work. Without this, that
+    task sits pending until the dispatcher's 24h starvation lockout force-feeds
+    it to a fire, which re-validates, finds the condition gone, and burns a
+    whole slot on a no-op — exactly what happened to
+    `alert_telegram_reply_backlog_20260716` on 2026-07-17. Internal alerts
+    already self-resolve via `_route_internal_task`, and `push_backlog` had a
+    one-off close in `alerts.py`; every *other* ordinary alert lacked one. Tags
+    (extensions/ids) are an open set, so close generically by alert-id tag
+    rather than enumerating alerts one at a time.
+    """
+    if not cleared_alert_ids:
+        return []
+    path = _tasks_path(storage_dir)
+    guard_canonical_write(path)
+    if not path.exists():
+        return []
+    resolutions: list[dict[str, Any]] = []
+    try:
+        with path.open("r+", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+            try:
+                payload = json.load(fh)
+                if not isinstance(payload, list):
+                    return []
+                changed = False
+                for task in payload:
+                    if not isinstance(task, dict):
+                        continue
+                    if task.get("source") != "alert_remediation_bridge":
+                        continue
+                    if task.get("internal_remediable") is True:
+                        continue  # internal alerts resolve via _route_internal_task
+                    status = str(task.get("status") or "").strip().lower()
+                    if status not in {"", "pending", "pending_main_thread"}:
+                        continue
+                    tags = [t for t in (task.get("tags") or []) if t != "alert"]
+                    alert_id = tags[0] if tags else None
+                    if alert_id not in cleared_alert_ids:
+                        continue
+                    task["status"] = "succeeded"
+                    task["completed_at"] = now.isoformat()
+                    task["result"] = "ordinary alert cleared before dispatch"
+                    _append_router_status_history(
+                        task,
+                        old_status=status,
+                        new_status="succeeded",
+                        now=now,
+                        note="condition_cleared_automatically",
+                    )
+                    changed = True
+                    resolutions.append(
+                        {
+                            "disposition": "ordinary_resolution",
+                            "alert_id": alert_id,
+                            "task_id": task.get("id"),
+                            "resolved": True,
+                        }
+                    )
+                if changed:
+                    write_tasks_to_handle(fh, payload)
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    except Exception as exc:  # noqa: BLE001 — sweep is best-effort; never block the email
+        warn("alert_remediation", "cleared-task sweep failed", err=str(exc))
+        return []
+    return resolutions
+
+
 def remediate_report(
     report: dict[str, Any],
     *,
     storage_dir: str = "storage",
     now: datetime | None = None,
 ) -> list[dict[str, Any]]:
-    """Run dispositions across every breached condition. Call before sending."""
-    return [
+    """Run dispositions across every condition. Call before sending.
+
+    Breached conditions mint/refresh a task; conditions that are present but no
+    longer breached close any task they previously minted, so a self-cleared
+    alert cannot leave a pending task to be force-dispatched later.
+    """
+    now = now or datetime.now(timezone.utc)
+    dispositions = [
         remediate_condition(c, storage_dir=storage_dir, now=now)
         for c in report.get("conditions", [])
         if c.get("breached")
     ]
+    cleared = {
+        str(c.get("id") or "")
+        for c in report.get("conditions", [])
+        if not c.get("breached")
+        and str(c.get("id") or "") not in SELF_REMEDIATING
+        and str(c.get("id") or "") not in OWNER_DECISION
+    }
+    cleared.discard("")
+    dispositions.extend(_sweep_cleared_ordinary_tasks(cleared, storage_dir, now))
+    return dispositions

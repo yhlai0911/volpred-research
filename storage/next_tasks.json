@@ -33530,82 +33530,27 @@
   },
   {
     "id": "k1709-rev3-gw-label",
-    "title": "K1709 rev3 — 把 GW 標籤改回它真正做的檢定（Codex FAIL 的唯一 blocking）",
-    "description": "Codex (gpt-5.6-sol/ultra) 對凍結 SHA c97d690c 的裁決 = FAIL，但只有一條 blocking，且是宣稱範圍問題不是算術錯。\n\n【blocking】k1709.py:1039-1091 的「Giacomini-White gate」實作的其實是 h_t≡1 的無條件 DM 特例（scalar loss differential + Bartlett HAC + normal z），從未建構 instrument h_t、q×q 共變異、Wald 統計量或 chi-square_q 參考分布。README.md:30-38 / 69-82 的「GW gate / GW z / Giacomini-White on QLIKE」因此超出證據：撐不起 conditional / state-dependent predictive ability 的宣稱，也可能抵銷掉跨 regime 的正負效果。Codex 明確指出數字本身站得住，只是站得住的是 GW(2006) Sec 3.4 真正授權的較弱宣稱 —— bounded-memory forecasting method 下的 equal *unconditional* predictive ability（此時 GW 統計量與 DM 重合）。\n\n修法（優先 a）：\n(a) 把用詞改成它實際做的事：README + code 標籤改為「unconditional DM / GW(2006) Sec 3.4 unconditional special case」，結論範圍收斂為「未發現無條件增量預測能力」。數字不動 → 不必重跑，但 render_readme.py 要重跑（Codex 已驗證 renderer 對凍結 JSON 可 byte-for-bit 重現 README）。\n(b) 真做 conditional GW（建 h_t、vector moment、Wald、chi2_q）→ 要重跑 + 重審。\n\n其餘 9 條舊缺陷（C6 cell-key collision / R1-R6 / README 撤回宣稱 / end-to-end runnability）Codex 全判 FIXED。4 條 non-blocking（bound 單調性假設、Fig2 event-day 位移一天、README:209 的 live-rerun 不變承諾、vendor vintage 未存檔）一併處理或明寫為 limitation。\n\n【重審 SOP — 不要再手抄 schema】凍結後跑：\n  uv run python scripts/experiment_gates.py verdict-template --path experiments/k1709 --out experiments/k1709/review_verdict.json\n再叫 Codex 只填欄位。rev2 就是 brief 手寫 schema 寫成 final_verdict/claim_surface_sha256、只 pin 2 個檔而 gate 要 5 個。\n\n實驗仍在 .claude/worktrees/dispatch-slot-2-c873d04d-k1709（FAIL 不得進 main）；rev2 裁決已 commit 6951526cc 保存。\n",
-    "task_type": "experiment",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "K1709 rev3 — 把 GW 標籤改回它真正做的檢定（Codex FAIL 的唯一 blocking）",
+    "priority": 1,
     "source": "hourly-16",
     "created_at": "2026-07-14T08:23:20.356430+00:00",
-    "started_at": "2026-07-14T13:08:34.481741+00:00",
     "completed_at": "2026-07-14T13:22:55.467697+00:00",
-    "result": "rev3 relabel done + committed (worktree exp/k1709-btc-etf-flow-vol, frozen f3f9d303). Codex FAIL 的唯一 blocking（無條件 DM 貼成 GW conditional gate）已修：函式改名 gw_unconditional_dm、docstring 明列未做 conditional GW machinery、verdict_basis claim 句子抽成 pure function + --relabel 路徑（斷言每個非字串欄位 byte-identical）、新增 conditional_predictive_ability_not_tested 欄位、headline claim 收斂為 no incremental UNCONDITIONAL predictive content、README 由 renderer 重生。數字零變動（獨立驗證：所有非字串值 identical）。61/62 experiment tests pass；第 62 個是真發現非回歸 — repo 的 nested-DM 稽核器用字面規則，誠實標籤反而觸發它 → 另立 task nested_dm_auditor_cannot_express_fixed_window_gw。Codex 重審已 enqueue（agent-brief_k1709_rev3_review-580bae），certify gate 正確擋著等裁決。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T13:08:34.234455+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-21"
-      },
-      {
-        "ts": "2026-07-14T13:08:34.481761+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-21"
-      },
-      {
-        "ts": "2026-07-14T13:22:55.467715+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-21"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-17T14:09:50.649952+00:00"
   },
   {
     "id": "telegram-749",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 749）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-14T08:27:23.339693+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 749）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你他媽的你不是說已經改好了嗎？\n立即給我從底層邏輯架構流程，整個重構\n不是給我修補而已\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] PHASE-Z auto-commit 測試紅燈（273b2b110）\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\nsafety-net 自動 commit 直接進 main，補跑受影響測試後亮紅燈。\n• fire 時間: 16:26\n• commit: 273b2b110\n• 變更程式檔: scripts/daily_checkup.py, scripts/experiment_gates.py, scripts/tests/test_experiment_certification.py, tests/test_daily_checkup_reproducibility.py, tests/test_reproduce_check.py\n• 跑的測試: tests -k \"daily_checkup or test_daily_checkup_reproducibility or test_reproduce_check\"\n• pytest 退出碼: 2\n\n📌 影響\nPHASE-Z 不經正常測試閘門就把 agent 未提交的變更送進 main（error_log dab3baa12：\n一次紅燈在 main 上紅了 5 天沒人發現）。紅燈代表 main 現在有壞掉的 runtime。\n\n🛠️ 建議行動\n1. 本機重跑確認：\nuv run --extra dev python -m pytest tests -q -k \"daily_checkup or test_daily_checkup_reproducibility or test_reproduce_check\"\n2. 修掉紅燈或 revert 該 co\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T08:31:45.489384+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-14T10:50:05.543020+00:00",
-        "from": "claimed",
-        "to": "pending",
-        "by": "telegram-responder",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-14T12:13:27.009425+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-14T12:25:47.976344+00:00",
-        "from": "claimed",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-14T12:25:48.211487+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "last_released_at": "2026-07-14T10:50:05.543010+00:00",
-    "last_release_reason": "auto_release_stale_2h",
-    "completed_at": "2026-07-14T12:25:48.211474+00:00"
+    "completed_at": "2026-07-14T12:25:48.211474+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T13:08:05.636272+00:00"
   },
   {
     "id": "email-12100-5615f8",
@@ -33681,42 +33626,39 @@
     "description": "2026-07-14 kb-backfill 已把 136 個隱形實驗寫進 knowledge.json（KNOWLEDGE_UNRECORDED 136→0，ratchet gate: scripts/tests/test_knowledge_unrecorded_ratchet.py）。其中 29 筆標 needs_human，content 以 [NEEDS_HUMAN 待人工裁決] 開頭、gap 欄位寫明缺什麼。本任務逐筆裁決並更新該 entry：\n- K759 FSI lead-lag：artifact 自稱 dm_test_significant=true，依據 DM t=2.237（p=0.025），過不了 Harvey |t|>=3 → 依現行標準重新判定 NULL 或弱支持。\n- K833 CBOE IV short-straddle：Sharpe 3.4-3.7 無 baseline 檢定、無審查 → 依「Sharpe 遠高於 baseline 先懷疑 bug」複查代碼 lookahead / 成本。\n- K841：MDD 跨不同曝險直接比較（S1 年化波動 8.6% vs S0 19.7%）→ 依 mdd_scale_artifact 規則做 exposure-matched 對照。\n- 另 8 筆原 PASS 因無 reviewer 覆核紀錄，已依 K1259 provenance gate 以 UNVERIFIED 收錄（K1208/K1253/K1407/K1409/K1433/K1446/K1524/K847）→ 需要 Codex 覆核才能回復 PASS。\n來源與完整誠實清單：storage/ops/kb_backfill/README.md",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "source": "kb_backfill_followup (hourly-19, 2026-07-14)",
-    "created_at": "2026-07-14T11:14:32.806386+00:00"
+    "created_at": "2026-07-14T11:14:32.806386+00:00",
+    "claimed_by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c",
+    "claimed_at": "2026-07-17T14:13:05.373154+00:00",
+    "claim_session_id": "4b9d3cade150",
+    "status_history": [
+      {
+        "ts": "2026-07-17T14:13:05.373169+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
+      },
+      {
+        "ts": "2026-07-17T14:14:15.890216+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
+      }
+    ],
+    "started_at": "2026-07-17T14:14:15.890200+00:00"
   },
   {
     "id": "alert_routing_internal_remediable",
-    "title": "Alert 分層：內部可自癒的 warn 改 auto-task 不寄老闆信（連續失敗才升級）",
-    "description": "refactor_plan_write_boundary_quality.md WS#4+#5。範圍：(a) git_push_backup hold、phase_z baseline missing、silent-fallback NEW 三類 alert 改為：只建 P1 task（idempotent by alert_key）+ 不寄 email；同一 alert_key 連續 ≥2 班自動修復失敗才升級寄信（body 用『已自動嘗試 X 次，失敗原因』框架）。(b) audit_silent_fallbacks 偵測器認得 bad.append/findings-collector 類 observable 出口（2026-07-14 兩個誤報 class），加回歸測試。Enforcement owner 不變（alerts.py 路由層 + no-silent-fallback 機械層）；anti-stacking：不建新通知機制，改路由。完成 Check：連續 7 天老闆信箱零內部乒乓。",
-    "task_type": "platform_ops",
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "Alert 分層：內部可自癒的 warn 改 auto-task 不寄老闆信（連續失敗才升級）",
     "priority": 1,
     "source": "owner_correction_20260714_evening",
     "created_at": "2026-07-14T11:16:52.864957+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-14T12:41:24.946884+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T12:41:25.197157+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T13:43:00.244937+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-14T12:41:25.197143+00:00",
     "completed_at": "2026-07-14T13:43:00.244923+00:00",
-    "result": "完成三類 internal-remediable alert stable-key P1 路由：首次/active 靜音，兩次 completed-but-still-breached 才以失敗原因升級；加入 explicit causal resolver、episode/delivery retry 與 CI child-transport suppression。silent-fallback auditor 支援保守 returned-collector proof，並 fail-closed 防 alias/escape 與 PHASE-Z gate 自我竄改；focused 145+新增 suppression 測試、wrappers/canonical/pre-commit suites 全綠，獨立終驗 APPROVE。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T14:09:50.649952+00:00"
   },
   {
     "id": "dispatch_writer_isolation_design",
@@ -33753,96 +33695,39 @@
   },
   {
     "id": "ci-red-29328352646",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29328352646, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29320130569",
-    "ci_run_key": "29328352646:1",
     "created_at": "2026-07-14T12:00:06.904455+00:00",
-    "title": "CI 紅燈修復（run 29328352646, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29328352646\nattempt: 1\nhead_sha: 647a04061\n偵測摘要（仍須讀完整 failed log）：failed log 無法取得：TimeoutExpired\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29328352646 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T12:00:42.060851+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-14T12:00:47.598303+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-14T12:10:07.982100+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-20"
-      }
-    ],
-    "started_at": "2026-07-14T12:00:47.598290+00:00",
     "completed_at": "2026-07-14T12:10:07.982079+00:00",
-    "result": "root_cause=Gate -1 (hook deploy/source atomicity) 與 canonical-write guard 落地時,兩個 phase_z temp-repo 測試仍在 .git/hooks 裝 stub hook(exit 0),與從真 repo 複製的 scripts/git_hooks/pre-commit 不一致->Gate -1 BLOCKED,commit_tail 拿不到 reproduce_check;test_notification_writer_refuses_canonical_path 在 clean clone 走 EmailNotifier.__init__ 建目錄就被 guard 擋(live checkout 目錄已存在故本地綠); repair_commit=1a74d562f (測試 harness 安裝真 hook + notifier probe 改 object.__new__ 繞建構,不放寬斷言); verify=GitHub Actions Test Suite run 29330892657 @1a74d562f completed/success 2026-07-14 20:09 台北; class_sweep=其餘碰 git hooks 的測試(scripts/tests/test_pre_commit_staged_scope.sh 等)不同時具備 hook 源+部署副本,Gate -1 不觸發,CI 亦綠"
+    "tombstone": true,
+    "archived_at": "2026-07-17T13:08:05.636272+00:00"
   },
   {
     "id": "telegram-758",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 758）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-14T12:12:51.963318+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 758）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n幹 為什麼修不好\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T12:13:27.249827+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-14T12:25:48.439521+00:00",
-        "from": "claimed",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-14T12:25:48.670228+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-14T12:25:48.670212+00:00"
+    "completed_at": "2026-07-14T12:25:48.670212+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T13:08:05.636272+00:00"
   },
   {
     "id": "telegram-759",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 759）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-14T12:13:37.289427+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 759）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n幹 為什麼修不好\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] CI 自動修復未成功（ci-red-29320130569）\n\n📌 白話結論\n系統偵測到需要處理的營運風險。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🛠️ 自動修復需要支援\n原因：remediation_stalled_more_than_two_checks: 3\n原始失敗：failed log 無法取得：TimeoutExpired\n已失敗 cycles：2\nrepair tasks：{'ci-red-29320130569': 'succeeded', 'ci-red-29328352646': 'pending'}\n\n最新 failure run：29328352646\nhttps://github.com/yhlai0911/volpred-research/actions/runs/29328352646\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T12:25:48.903305+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-14T12:25:49.136810+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-14T12:25:49.136794+00:00"
+    "completed_at": "2026-07-14T12:25:49.136794+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T13:08:05.636272+00:00"
   },
   {
     "id": "nested_dm_auditor_cannot_express_fixed_window_gw",
@@ -33907,13 +33792,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T12:00:44.353551+00:00",
+    "completed_at": "2026-07-17T15:00:42.775711+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T12:00:44.353551+00:00",
-      "last_clean_observed_at": "2026-07-17T12:00:44.353551+00:00"
+      "resolved_at": "2026-07-17T15:00:42.775711+00:00",
+      "last_clean_observed_at": "2026-07-17T15:00:42.775711+00:00"
     }
   },
   {
@@ -33925,13 +33810,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T12:32:29.453684+00:00",
+    "completed_at": "2026-07-17T15:05:41.337529+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T12:32:29.453684+00:00",
-      "last_clean_observed_at": "2026-07-17T12:32:29.453684+00:00"
+      "resolved_at": "2026-07-17T15:05:41.337529+00:00",
+      "last_clean_observed_at": "2026-07-17T15:05:41.337529+00:00"
     }
   },
   {
@@ -39588,13 +39473,36 @@
     "description": "由 alert `telegram_reply_backlog` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n老闆經 Telegram 傳來的訊息有 1 則沒被回，最久一則已等 39.3 分鐘（狀態 pending）。\n- telegram-877: pending, 已等 39.3 分鐘\n- 門檻: warn>30.0分 / critical>120.0分\n\n## 影響\n老闆以為訊息送出就會被處理，但實際上沒有任何回覆 —— 這個故障面從外部完全看不出來（訊息照收、任務照排），只有老闆本人會發現。\n\n## 診斷指引（此條無自動修復：根因分歧，盲目重啟不對症）\n1. tail -20 /Users/yhlai0911/.volpred/logs/telegram_responder.log\n   — 看是 FATAL（缺依賴 / 環境漂移）還是 exit=1（Claude 額度用盡）。\n2. 額度爆 → 等 reset 或改 TELEGRAM_RESPONDER_MODEL；缺依賴 → 修 scripts/telegram_responder.sh 的啟動關卡。\n3. hourly dispatch 是兜底（~1h）；critical 代表連兜底都沒接到。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-16T14:25:49.726166+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "telegram_reply_backlog"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-17T14:32:08.368736+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
+      },
+      {
+        "ts": "2026-07-17T14:36:51.254522+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
+      },
+      {
+        "ts": "2026-07-17T14:51:12.142147+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
+      }
+    ],
+    "started_at": "2026-07-17T14:36:51.254507+00:00",
+    "completed_at": "2026-07-17T14:51:12.142134+00:00",
+    "result": "Fresh re-validation no-op：依 _REVALIDATION_INSTRUCTION 重跑原 detector _parse_telegram_reply_backlog_state → breached=false, stuck_count=0。確認非假安靜：responder 今日 16:48 CST 跑完 exit=0 並將佇列排空，185 筆 telegram_reply 全 succeeded。警報已自然解除，未執行任何修復動作。"
   },
   {
     "id": "assign_168aeaf8",
@@ -40542,12 +40450,23 @@
     "description": "由 alert `host_cron_fail` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=warn（max_consecutive_failures=1；non_hang_failure=False）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\n- scheduler_last_status: ok\n- scheduler_age_minutes: 127876.1\n- failing_logs:\n  - storage/logs/cron/daily_update_intraday.log exit=142 at 2026-07-16T06:10:04+00:00 recency=fresh_or_unscheduled\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-17T00:01:27.390426+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "host_cron_fail"
+    ],
+    "completed_at": "2026-07-17T14:58:53.995371+00:00",
+    "result": "ordinary alert cleared before dispatch",
+    "status_history": [
+      {
+        "ts": "2026-07-17T14:58:53.995371+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "alert_remediation_router",
+        "note": "condition_cleared_automatically"
+      }
     ]
   },
   {
@@ -41111,10 +41030,28 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "boss_telegram_907",
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-17T05:27:56.323174+00:00",
     "title": "PHASE-Z alert 繞過 alert_remediation bridge — body 還在叫老闆行動（老闆 msg 907 P1）",
-    "description": "老闆 Telegram msg 907：「我說過不要建議我行動是你自己立刻去處理」——針對 PHASE-Z auto-commit 測試紅燈 CRITICAL 信。\n\n根因（已診斷，不必重查）：\n- scripts/dispatch_supervisor/phase_z.py:1600 的 alert body 仍寫死 \"## 建議行動\" + 兩行 CLI 指令給老闆跑。\n- 更根本：phase_z.py 直接呼叫 alert_fn(level=\"critical\", ...) 送信，**完全繞過 src/volpred/ops/alert_remediation.py bridge**。grep 證實 remediate_condition / remediate_internal_alert 只在 alerts.py 與 alert_remediation.py 內被呼叫，dispatch_supervisor 一個都沒接。\n- 所以 2026-07-13 的 class sweep（27 alert / 24 帶建議行動）只涵蓋 condition-based alert（check_alerts.py 路徑），dispatch_supervisor 自己直發的 alert 是漏網之魚。feedback_alert_is_a_task_not_a_chore 的「預設自動建任務」不變式在這條路徑上不成立。\n\n要做：\n1. phase_z test-gate CRITICAL 走 remediation bridge：註冊 ALERT_TASK_TYPE（或明確列入 SELF_REMEDIATING/OWNER_DECISION 並寫理由，禁止未分類後門）。\n2. body 行動段改為「## 已自動處理 + 任務 id」，刪掉 imperative 的「## 建議行動」。措辭誠實前提 = 任務必須真的被建出來（不可只改文案）。\n3. **class sweep 不可只修 phase_z**：全量掃 dispatch_supervisor/ 所有直呼 alert_fn 的點，逐一分類；留機械 gate（測試）擋未來新增的 alert 繞過 bridge。\n4. 測試：涵蓋「phase_z 紅燈 → 有 task 產出 + body 不含『建議行動』」。\n\n參考 memory：feedback_alert_is_a_task_not_a_chore、feedback_alerts_auto_act_not_suggest、feedback_declare_complete_requires_class_sweep。"
+    "description": "老闆 Telegram msg 907：「我說過不要建議我行動是你自己立刻去處理」——針對 PHASE-Z auto-commit 測試紅燈 CRITICAL 信。\n\n根因（已診斷，不必重查）：\n- scripts/dispatch_supervisor/phase_z.py:1600 的 alert body 仍寫死 \"## 建議行動\" + 兩行 CLI 指令給老闆跑。\n- 更根本：phase_z.py 直接呼叫 alert_fn(level=\"critical\", ...) 送信，**完全繞過 src/volpred/ops/alert_remediation.py bridge**。grep 證實 remediate_condition / remediate_internal_alert 只在 alerts.py 與 alert_remediation.py 內被呼叫，dispatch_supervisor 一個都沒接。\n- 所以 2026-07-13 的 class sweep（27 alert / 24 帶建議行動）只涵蓋 condition-based alert（check_alerts.py 路徑），dispatch_supervisor 自己直發的 alert 是漏網之魚。feedback_alert_is_a_task_not_a_chore 的「預設自動建任務」不變式在這條路徑上不成立。\n\n要做：\n1. phase_z test-gate CRITICAL 走 remediation bridge：註冊 ALERT_TASK_TYPE（或明確列入 SELF_REMEDIATING/OWNER_DECISION 並寫理由，禁止未分類後門）。\n2. body 行動段改為「## 已自動處理 + 任務 id」，刪掉 imperative 的「## 建議行動」。措辭誠實前提 = 任務必須真的被建出來（不可只改文案）。\n3. **class sweep 不可只修 phase_z**：全量掃 dispatch_supervisor/ 所有直呼 alert_fn 的點，逐一分類；留機械 gate（測試）擋未來新增的 alert 繞過 bridge。\n4. 測試：涵蓋「phase_z 紅燈 → 有 task 產出 + body 不含『建議行動』」。\n\n參考 memory：feedback_alert_is_a_task_not_a_chore、feedback_alerts_auto_act_not_suggest、feedback_declare_complete_requires_class_sweep。",
+    "claimed_by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c",
+    "claimed_at": "2026-07-17T14:13:04.890924+00:00",
+    "claim_session_id": "ec74da49eb2e",
+    "status_history": [
+      {
+        "ts": "2026-07-17T14:13:04.890942+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
+      },
+      {
+        "ts": "2026-07-17T14:14:15.658259+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
+      }
+    ],
+    "started_at": "2026-07-17T14:14:15.658243+00:00"
   },
   {
     "id": "phase_z_orphan_receipt_feature_split_20260717",
@@ -41396,8 +41333,8 @@
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260717T111834524387Z_a1",
-    "title": "[internal alert] PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
-    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 發生什麼\nPHASE-Z 連續 3 次無法完成這班的自動 commit（原因：commit_nonzero）。已停止重試 —— 同一班不再重跑。\n檔案仍在工作區、沒有遺失。\n\n## 現在該做什麼\n確認未提交檔案的作者後由該作者 commit。若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。\n\n## git commit 輸出（尾段）\ne-commit]   NEW experiments/k1380/k1380.py:219 except Exception: pass\n[pre-commit]   NEW experiments/k1380/k1380.py:292 except Exception: pass\n[pre-commit]   NEW experiments/k1380/k1380.py:362 except Exception: pass\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=3 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.VacPX1 baseline_findings=64 new=3 resolved=64\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:53 except TimeoutExpired|FileNotFoundError: return None\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:64 except StopIteration: return []\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:102 except URLError|TimeoutError|JSONDecodeError|OSError: return None\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
@@ -41415,7 +41352,7 @@
       "episode_id": "20260717T111834524387Z",
       "episode_started_at": "2026-07-17T11:18:34.524387+00:00",
       "attempt_number": 1,
-      "last_seen_at": "2026-07-17T11:20:51.145110+00:00",
+      "last_seen_at": "2026-07-17T14:07:55.225786+00:00",
       "consecutive_remediation_failures": 0,
       "attempt_history": [],
       "escalation_due": false,
@@ -41534,5 +41471,134 @@
     "source": "agent",
     "created_at": "2026-07-17T12:26:41.216622+00:00",
     "created_by": "hourly-slot-2-4f0198b927234ee8bb9b5652ceaa9f08"
+  },
+  {
+    "id": "assign_c441604e",
+    "title": "K1729 修復：target 端 ex-post 選約 lookahead（揭露＋剔除 roll 日重跑 DM＋重新 scope §7）→ 重審後才 merge",
+    "description": "K1729 被 Codex 二審判 FAIL（裁決：.claude/worktrees/dispatch-slot-1-30aeb902-taifexrv/experiments/k1729/review_verdict.json，全文 codex_review.md）。\nWorktree 與 branch wt/dispatch-slot-1-30aeb902-taifexrv 已保留，凍結狀態已 commit 於 6eeaafe71。**不要重跑整個實驗** —— 主線程已獨立驗證數字 bit-identical 重現、DM 正確（bandwidth=14，非 K1655 退化）、baseline 對稱、no-filter 敏感度宣稱為真（|t| 反而升到 3.867/3.456）。只修下面這一個缺陷。\n\nBLOCKING DEFECT（target 端 ex-post 選約 lookahead）：\ncollector 的 pick_active_contract() 對 day t 的整檔（日盤＋夜盤）volume 加總取 idxmax，才用選中的合約算 day-session metrics（scripts/collect_taifex_tick.py:231-236 → :302-304）。該總量包含 day t 08:45-13:45 的日盤量 —— 在 README 宣稱的「08:45-on-t」forecast origin 尚未發生。故 target y_t 的 estimand 無法事前固定。README:74-83 只論證了 t-1 列選約合法（那使 X_t 合法，論證正確且成立），對 target 側完全沒有論證 → 屬未揭露，非已 scope 的限制。連帶 README:22 與 :166-169 的營運結論（「08:45 可實作的增益 → 這條資料線值得維護」）超出證據。\n\n嚴重度（誠實記載）：缺陷在 target 側、兩模型共用同一 common ledger，幾乎確定不會翻轉 headline（+14.70% / +3.37%）。但 PASS 門檻是「無 lookahead ＋ 射程不超過證據」，不是「大概不會翻轉」。\n\nREPAIR PATH（便宜；**不需要**重跑 35.9GB raw tick）：\n(a) 把 ex-post 選約寫成明確 caveat（README + results.json 的 caveats）。\n(b) 用 canonical CSV（data/intraday/taifex_5min_rv.csv 已有 contract / is_roll 欄）量化模糊集：OOS 期間約 127 個 is_roll 列。把這些日子從 ledger 剔除後重跑 DM —— 若判定存活，宣稱就是用**證據**恢復而非斷言；若不存活，結論必須降級。\n(c) 依 (b) 的實測結果重新 scope README §7 的營運結論。\n(d) 改完 code → sha 漂移 → gate 會自動再擋一次 → **重新派 Codex 審查、重產 review_verdict.json**（禁止手改裁決檔）。\n(e) PASS 後才 merge（bash scripts/merge_worktree.sh dispatch-slot-1-30aeb902-taifexrv，主線程須先 cd 回主 repo），merge 成功後才由主線程寫 knowledge.json（agent 禁寫）。\n\nNON-BLOCKING（順手修，不單獨構成 FAIL）：\n- README:163 把 21 個 day_return==0 日寫成 target-B 的 ledger 排除，但 21 是全檔期間總數；OOS 實際只排除 14 日（2550-2536），其餘 7 日在 OOS 起點前。樣本敘述應區分 full-file 與 OOS exclusions。\n- README:131-132,147 的 no-filter 敏感度宣稱無法從三件套稽核（主線程已另行驗證為真）。建議把該敏感度路徑收進 k1729.py 並把數字寫進 results.json，讓宣稱可從三件套自證。\n- README:8,147 所稱「Codex pre-run review」不是凍結後的 final audit，不可用來取代裁決。\n\nTHIRD WALL（主線程實跑 methodology gate 發現，Codex 與主線程人工審查都沒提，機械 gate 抓到）：\n`uv run python scripts/experiment_gates.py run --path experiments/k1729` 目前 FAIL 於 [nested-dm-misuse]（site: experiments/k1729/k1729.py, role=primary_raw_dm）。這是**修好 lookahead 之後仍會擋住 merge 的第二道牆**，先知道免得白撞。\n\n主線程的判讀（供修復者參考，不是結論）：K1729 比的是 HAR-RV5（regressor = 5-min RV）vs HAR-DAILY（regressor = 日開收報酬平方）。兩者 HAR(d/w/m) 結構相同但 regressor 來源不同，**誰都不是誰的零約束/線性限制 → 非巢套**。DM 正是為非巢套比較設計；Clark-West 才是巢套用的。故這很可能是 ratchet 的 pattern-match false positive，而非真缺陷。\n\n官方豁免路徑（存在且有先例，勿自造後門）：storage/ops/nested_dm_misuse_baseline.json 的 `reviewed_nonnested` 名單。先例（2026-07-13 審裁，audit: docs/governance/2026-07/nested_dm_fp_narrowing_audit.md）：\n- experiments/K1049/K1049.py — 「三個模型 HAR-RV / GJR-GARCH / A4f-VIX² 互為不同族，無零約束關係」\n- experiments/k1100b/k1100b.py — 「邊際同為 A4f-ASYM，差異只在 DCC vs t-copula vs Clayton 的相依結構（非巢狀族）」\n條目 schema：{site, reason, dm_pairs, adjudicated_at, audit}。\n\n修復者要做的：以與上述先例同等的嚴謹度審裁 K1729 是否真非巢套（寫清 reason / dm_pairs），若是則登錄 reviewed_nonnested；若判定其實有巢套關係，則依 gate 指示改用 Clark-West 或 recursive-bootstrap 並把**那個**檢定接進 verdict sink。主線程刻意不代為登錄：實驗此刻是 FAIL 狀態、code 還要改，先豁免等於搶跑。\n\n---\nEXPERIMENT-GATE FINDING（2026-07-17 triage 補記；由 compute queue 的 repo gates 發現，非 Codex 二審的 defect）：\nscripts/experiment_gates.py 對 experiments/k1729 跑出 1 violation —\n\n  [nested-dm-misuse] experiments/k1729/k1729.py (primary_raw_dm)\n  → nested-model null 下的 raw DM/HLN 不是有效推論。squared-error 用 Clark-West (2007)；\n    QLIKE/pinball 用 general-loss / recursive-bootstrap，並把 THAT 接進 verdict。\n    若 DM 只是診斷用，寫明 `nested-dm: diagnostic-only` 並移出 claim sink。\n    Owner: scripts/tests/test_nested_dm_misuse_ratchet.py\n\n這與二審的 target 端 lookahead 是**兩個獨立的 blocking defect**：HAR_RV5 相對 HAR-DAILY 的\nnesting 關係使 primary DM 的推論本身有問題，即便 lookahead 修好也仍會被 merge-time gate 擋下。\n修復時兩者一起處理，重審前先讓 `python scripts/experiment_gates.py run --path experiments/k1729` 過。\n注意：二審已驗證 DM bandwidth=14（非 K1655 退化 bug）—— 這裡的問題不是 bandwidth，是 nested 情境下的檢定選擇。\n",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent_discovered",
+    "created_at": "2026-07-17T12:45:13.831089+00:00",
+    "payload": {
+      "kid": "k1729",
+      "worktree": "dispatch-slot-1-30aeb902-taifexrv",
+      "branch": "wt/dispatch-slot-1-30aeb902-taifexrv",
+      "frozen_commit": "6eeaafe71",
+      "verdict": "FAIL",
+      "verdict_file": "experiments/k1729/review_verdict.json",
+      "review_artifact": "experiments/k1729/codex_review.md",
+      "reviewer": "Codex CLI gpt-5.6-sol (effort=high)",
+      "do_not_rerun_whole_experiment": true,
+      "blocking_defect_count": 2,
+      "methodology_gate_status": "FAIL [nested-dm-misuse] — likely false positive (non-nested); exemption path = reviewed_nonnested baseline"
+    },
+    "created_by": "main-thread (queue task: K1729 Codex 認證)",
+    "status_history": [
+      {
+        "ts": "2026-07-17T13:11:16.954922+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-d6a7c2e22aa44cc8b9c98511382f3c28"
+      },
+      {
+        "ts": "2026-07-17T13:11:35.838588+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "hourly-slot-1-d6a7c2e22aa44cc8b9c98511382f3c28",
+        "note": "manual_release"
+      }
+    ],
+    "last_released_at": "2026-07-17T13:11:35.838573+00:00"
+  },
+  {
+    "id": "assign_review_job_gate_charge",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "succeeded",
+    "created_at": "2026-07-17T21:15:00+08:00",
+    "source": "triage",
+    "title": "compute_queue 把審查工作的 job 判 failed — experiment gate 向 reviewer 收 experiment 的違規",
+    "description": "Triage of pending followup agent-brief_k1729_certify-83eb58 (exit_code=4, failure_reason=experiment_gate_failed).\nrunner exit=0、artifact 存在且 validation_ok=true：agent 真的產出了合格的 review_verdict.json（verdict=FAIL）。\njob 之所以 failed，是 _experiment_gate_failure() 用 artifact 的 experiments/<kid> 祖先當 scope，對 K1729 跑了 repo gates 並把違規（nested-dm-misuse in k1729.py）記在 reviewer 的 job 上。\n→ 誠實找出缺陷的 review 反而被判 failed 並路由到 triage_failed，每一班 fire 重新 triage 一次已經做完的事。\n修法：reviewer job（declared artifact == experiment_gates.CERT_FILENAME）仍跑 gate（發現不能丟），但違規 charge 給 experiment 而非 job；job 照常 completed 走 collect_completed，gate report 併進 followup brief 交給該 experiment 的修復單。",
+    "status_history": [
+      {
+        "ts": "2026-07-17T13:12:09.489655+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-d6a7c2e22aa44cc8b9c98511382f3c28"
+      },
+      {
+        "ts": "2026-07-17T13:12:09.718974+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-d6a7c2e22aa44cc8b9c98511382f3c28"
+      },
+      {
+        "ts": "2026-07-17T13:15:11.679446+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-d6a7c2e22aa44cc8b9c98511382f3c28"
+      }
+    ],
+    "started_at": "2026-07-17T13:12:09.718960+00:00",
+    "completed_at": "2026-07-17T13:15:11.679414+00:00",
+    "result": "修掉 compute_queue 對 reviewer job 收 experiment 違規的誤判：k1729-certify 實為成功（verdict FAIL + 修復單），queue 判 failed 造成每班重 triage。reviewer job 仍跑 gate 但 charged_to=experiment、照常 completed，gate report 併進 collect_completed brief。+3 ratchet tests；59 tests pass。gate 發現的 nested-dm-misuse 已轉入 assign_c441604e。"
+  },
+  {
+    "id": "email-12129-04848d",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] Skill 修改通知: codex-cli（文件教的指令會靜默失敗，已修+實測）",
+    "description": "Gmail UID: 12129\nMessage-ID: <4790DFE2-D53A-4B13-BA0A-2ACA218EE3A7@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 17 Jul 2026 21:05:51 +0800\nSubject: Re: [VolPred Alert][WARN] Skill 修改通知: codex-cli（文件教的指令會靜默失敗，已修+實測）\n\n--- 用戶回信內容 ---\ncodex-cli, codex app所有操作與參數 立刻上網確認最新版 並建立skills或指示文件\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月17日 20:52 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Skill 修改通知: codex-cli（文件教的指令會靜默失敗，已修+實測）\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> codex-cli skill 的操作說明跟實際的 codex CLI 對不上，照著抄會靜默失敗（沒有錯誤、沒有產出、exit 2）。\r\n> 影響\r\n> \r\n> 影響研究結論累積與論文推進。\r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> 一句話\r\n> \r\n> codex-cli skill 的操作說明跟實際的 codex CLI 對不上，照著抄會靜默失敗（沒有錯誤、沒有產出、exit 2）。我在 K1729 審查時撞到，已修好並實測通過。\r\n> 觸發 incident\r\n> \r\n> K1729 實驗要做 Codex 二審。我照 skill 文件寫的指令派工，Codex 回傳 exit 0、stdout 全空、審查檔沒產出。查 stderr 才發現：\r\n> error: unexpected argument '-a' found\r\n> 文件教的 -a never 這個參數，實際的 codex CLI 根本不吃。上一班 fire 回報「Codex 超過 10 分鐘未收斂」而被迫改走 queue —— 很可能就是同一個坑（失敗得太安靜，看起來像卡住）。\r\n> 三處對不上的地方\r\n> \r\n> #\t文件寫的\t實際\t後果\r\n> 1\tflag 表列有 -a, --ask-for-approval\tcodex 0.144.1 的 exec沒有這個參數\texit 2、無產出的靜默失敗\r\n> 2\treasoning effort = ultra\tconfig 實際是 high\t對外誤述 reviewer 規格（研究誠實：reviewer 欄位要誠實填）\r\n> 3\t通篇示範裸跑 codex exec ...\t裸跑早已被 hook 機械 deny（2026-07-11 事故防護）\t照抄必被擋；文件與 enforcement 打架\r\n> 第 3 點最嚴重：deny hook 是 2026-07-11 加的（agent 裸跑卡 30 分鐘 → 撞 supervisor 3000s 上限 → 被 SIGKILL）。hook 加了，但這份文件沒跟著改，於是文件一直在教一個會被自己系統擋下來的用法。\r\n> 改了什麼\r\n> \r\n> 所有示範改走 scripts/codex_exec_bounded.sh --timeout <秒>（既有的官方有界包裝，不是我新造的東西）\r\n> -a 那列改成反面教材保留（標明不存在 + 會 exit 2），避免以後有人「好心」加回去\r\n> effort 改成「以 ~/.codex/config.toml 實測為準」，並註明 2026-07-17 實測值 = high，要引用前先 grep，不要照抄\r\n> heredoc 段補上實測陷阱：heredoc 直接接包裝腳本會被它內部的 exec python3 吃掉 → 改成寫檔再 pipe\r\n> timeout 單位標清楚（包裝腳本吃秒，Bash tool 吃毫秒，別搞混）；長 review 一律背景跑\r\n> 驗證（不是宣稱，是實測）\r\n> \r\n> 依新文件寫的 smoke 指令實跑：\r\n> bash scripts/codex_exec_bounded.sh --timeout 60 --skip-git-repo-check \"echo TEST\"\r\n> → TEST\r\n> → exit 0\r\n> 文件內可執行的裸跑示範殘留數：0。\r\n> 影響範圍\r\n> \r\n> 任何走 Codex 的流程：實驗 review gate、論文 review、citation verification、lazypack 渲染。這些流程過去照文件寫指令都會撞 deny hook 或 exit 2 —— 而 exit 2 那種看起來像超時、其實是參數錯，最容易被誤診成「Codex 又壞了」而白花時間查認證跟模型。\r\n> 檔案\r\n> \r\n> ~/.claude/skills/codex-cli/SKILL.md（user-level skill）\r\n> 本信依 CLAUDE.md「修改既有 skill 必寄 email」規定發出。K1729 本身的裁決是 FAIL（target 端 ex-post 選約 lookahead），已轉修復單 assign_c441604e，未 merge、未寫 knowledge。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-17T13:15:06.961669+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12129,
+    "email_message_id": "<4790DFE2-D53A-4B13-BA0A-2ACA218EE3A7@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] Skill 修改通知: codex-cli（文件教的指令會靜默失敗，已修+實測）",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-17T13:16:09.748898+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-ff7f55c18c91468890ca780fcde0cd95"
+      },
+      {
+        "ts": "2026-07-17T13:16:23.788218+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-ff7f55c18c91468890ca780fcde0cd95"
+      },
+      {
+        "ts": "2026-07-17T13:30:35.573259+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-ff7f55c18c91468890ca780fcde0cd95"
+      }
+    ],
+    "started_at": "2026-07-17T13:16:23.788204+00:00",
+    "completed_at": "2026-07-17T13:30:35.573246+00:00",
+    "result": "上網查證 codex CLI/App 全參數（官方 learn.chatgpt.com + GitHub releases + upstream 原始碼 + 本機實測四路交叉）→ 重建 codex-cli skill 三層架構：cli-reference.md（機器產生、56 指令節點/2587 行）+ codex-app-and-binaries.md + SKILL.md（217 行，只留判斷）。新增 gen_codex_cli_reference.py（--check 驗漂移）並接進 cron_codex_update.sh（升級後自動重生文件+smoke）= 根治文件漂移。**推翻自己前一班兩條錯誤斷言**：ultra 實為合法值、--full-auto 是隱藏但可用的 flag（錯因同為「grep --help 找不到⇒不存在」的無效推論）。查明 -a 屬互動非 exec（K1729 完整解釋）、effort 打錯 CLI 不擋（Custom fallback→API 400）、機器上三個 codex 三版本。誠實修正：版本落後非故障（cron 週一跑，0.144.5 為 07-16 才發布）→ 升級單改為 07-20 驗證單。smoke 逐字實跑通過。已寄 close email。"
+  },
+  {
+    "id": "platform_ops_codex_cli_upgrade_0144_5",
+    "title": "驗證 07-20 週度 codex cron 有升到 0.144.5 且自動重生參考文件",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "blocked",
+    "source": "hourly-slot-2",
+    "created_at": "2026-07-17T13:23:17.477859+00:00",
+    "tags": [
+      "codex",
+      "toolchain"
+    ],
+    "description": "2026-07-17 查證（email-12129-04848d）的收尾驗證。\n\n## 不要手動升級 —— 這不是故障\n本機 npm codex 0.144.1 vs npm latest 0.144.5 的落差**不是 cron 壞了**：\ncron_codex_update.sh 每週一 09:00 跑，最後一次 2026-07-13 跑時 latest 就是 0.144.1（log 顯示 'no version change'）；0.144.5 是 2026-07-16 才發布。**下一次 cron = 07-20 會自動升。**\n（另：查證當下有 in-flight `codex exec resume --last` 在跑，手動升級會把 binary 從跑到一半的 job 腳下抽掉。）\n\n## 本班已把根因修掉\ncron_codex_update.sh 現在在版本變動時會自動：(a) 重生 cli-reference.md（升級後文件不再落後 binary — 這正是 K1729 的成因）(b) 跑 smoke，失敗則 email 升為 warn (c) email 附上 smoke 結果與 0.144.5 rm 偵測收緊的提醒。\n\n## 07-20 之後要驗什麼\n1. tail storage/logs/cron/codex_update.log → 應見 0.144.1 → 0.144.5、regen 那行、smoke rc=0\n2. uv run python scripts/gen_codex_cli_reference.py --check → 應 exit 0（無漂移）\n3. 確認老闆收到的 info email 有帶 smoke 結果\n4. 回歸：0.144.5 收緊 dangerous-command 偵測（更多 forced rm 被拒）→ 確認沒有自動化腳本因此被擋\n若 cron 沒跑或沒升 → 那才是真故障，再查 host cron。\n\nparent_email_task_id: email-12129-04848d",
+    "blocked_until": "2026-07-20T09:30:00+08:00"
   }
 ]
