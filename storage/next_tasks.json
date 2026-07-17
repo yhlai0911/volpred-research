@@ -145,26 +145,14 @@
   },
   {
     "id": "fb_followup_cpi_20260611_mile_71dd116b",
+    "status": "expired",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "expired",
-    "blocked_reason": "awaiting_interactive_session",
-    "blocked_note": "FB 個人帳號（Ivan Lai）只能走 Claude in Chrome；hourly cron 無自主能力；待互動 session 接手（per memory feedback_fb_personal_account_chrome_only）",
-    "description": "FB 雙發佈 followup: event_cpi_20260611 mile_71dd116b",
-    "created_at": "2026-06-05T08:16:00+08:00",
     "source": "event_cpi_20260611",
-    "article_mile_id": "mile_71dd116b",
-    "article_url": "https://volpred.zeabur.app/v3/reports/mile_71dd116b",
-    "blocked_at": "2026-06-09T05:11:39+00:00",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "expired",
-        "reason": "FB followup 對 6/11 CPI 文，5 週後補發已無時效價值且違 FB 發文慣例（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ],
-    "completed_at": "2026-07-14T07:28:32.517134+00:00"
+    "created_at": "2026-06-05T08:16:00+08:00",
+    "completed_at": "2026-07-14T07:28:32.517134+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "K1401_gdp_q1_second_estimate_event_study",
@@ -1948,36 +1936,15 @@
   },
   {
     "id": "K628_article_general",
-    "title": "K628: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K628 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: 跳躍探索/網絡模型, 執行: Claude] Diebold-Yilmaz spillover index + Granger causality + Forbes-Rigobon contagion test，5 資產（SPY/GLD/TLT/0050.TW/USO），2010-2026。SPY 是主要傳播者（net +43.7%），0050.TW 是純接收者（OUT=0, IN=2）。高波動 regime 網絡密度翻倍（11 vs 4 Granger links）。Forbes-Rigobon：無傳染（p>0.20），只是相互依存——危機時",
-    "priority": 4,
     "status": "closed_no_action",
     "task_type": "daily_article",
+    "title": "K628: write general-audience article (auto-discovered uncovered K)",
+    "priority": 4,
     "source": "auto_discovered",
-    "k_id": "K628",
-    "tags": [
-      "spillover",
-      "network",
-      "Granger-causality",
-      "contagion",
-      "cross-asset",
-      "SPY",
-      "0050.TW",
-      "Forbes-Rigobon",
-      "auto-discovered",
-      "audience-general"
-    ],
     "created_at": "2026-05-07T23:08:11+00:00",
-    "blocked_reason": "No results.json — K628 only has trim_plan.json. Article generation requires real metrics. Re-evaluate when K628 produces full experiment results.",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "closed_no_action",
-        "reason": "K628 無 results.json（僅 trim_plan），無真數據可寫文；若 K628 重跑再手動開新任務（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ],
-    "completed_at": "2026-07-14T07:28:32.517134+00:00"
+    "completed_at": "2026-07-14T07:28:32.517134+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "K629_article_general",
@@ -4150,30 +4117,15 @@
   },
   {
     "id": "experiment_scaffold_k136",
-    "title": "Experiment scaffold: K136 (research_program backlog)",
-    "description": "K136 mentioned in research_program.md but no experiments/k136/ directory yet. Create three-part scaffold per CLAUDE.md `.claude/rules/experiments.md`: (a) README.md (motivation + method + expected output + lookahead policy), (b) k136.py initial implementation (with signal.shift(1) + seed), (c) plan placeholder k136_results.json schema. Do NOT run the experiment — just scaffold + stage for main thread to review.",
-    "priority": 4,
     "status": "closed_no_action",
     "task_type": "experiment",
+    "title": "Experiment scaffold: K136 (research_program backlog)",
+    "priority": 4,
     "source": "diverse_gen",
-    "tags": [
-      "experiment",
-      "scaffold",
-      "research-program-backlog"
-    ],
     "created_at": "2026-05-08T05:35:50+00:00",
-    "started_at": "2026-05-08T07:35:00+00:00",
-    "agent_id": "a60c1314269ed6d09",
-    "blocked_reason": "K136 is completed historical experiment (knowledge.json + completed_phases_2026-03.md), missing experiments/ dir is archive artifact not backlog. Source filter improved 2026-05-08 to skip completed K-IDs.",
     "completed_at": "2026-07-14T07:28:32.517134+00:00",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "closed_no_action",
-        "reason": "blocked_reason 自述：K136 為已完成歷史實驗，missing dir 是 archive artifact；source filter 已修（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "experiment_scaffold_k400",
@@ -7660,31 +7612,14 @@
   },
   {
     "id": "fb_post_trending_silicon_layoffs_2026_05_27",
-    "task_type": "platform_ops",
-    "priority": 2,
-    "title": "FB Ivan Lai dual-publish: 矽谷大裁員 × Mag7 CapEx (mile_89889d46)",
-    "description": "FB Ivan Lai dual-publish: 裁員八千人，同一季燒掉 $680 億 (mile_89889d46). Draft at storage/ops/fb_draft_mile_89889d46.md (272 字, anti_ai_gate PASS warn=0/3). URL in 1st comment: https://volpred.zeabur.app/v3/reports/mile_89889d46. Do NOT put link in main post body. Need /mcp claude-in-chrome auth session.",
     "status": "expired",
+    "task_type": "platform_ops",
+    "title": "FB Ivan Lai dual-publish: 矽谷大裁員 × Mag7 CapEx (mile_89889d46)",
+    "priority": 2,
     "created_at": "2026-05-26T16:20:26+08:00",
-    "blocked_reason": "awaiting_interactive_session",
-    "blocked_at": "2026-05-26T20:40:00+00:00",
-    "blocked_note": "Needs interactive Chrome MCP / logged-in FB session for manual post + comment writeback",
-    "last_released_at": "2026-05-26T18:14:00.178912+00:00",
-    "started_at": "2026-05-26T20:39:37.742262+00:00",
     "completed_at": "2026-07-14T07:28:32.517134+00:00",
-    "result": "Interactive-only FB post task: queue semantics fixed so blocked tasks now move to status=blocked; this item remains awaiting_interactive_session with feed/log handoff metadata already written.",
-    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
-    "stale_claim_previous_claimed_by": "codex-cli",
-    "stale_claim_previous_claimed_at": "2026-05-26T20:39:29.519220+00:00",
-    "stale_claim_previous_claim_session_id": "ea293b5d31d6",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "expired",
-        "reason": "trending FB 貼文，7 週 stale（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "platform_ops_daily_update_root_cause_fix",
@@ -7776,32 +7711,15 @@
   },
   {
     "id": "fb_post_event_nfp_2026_06_05_t7",
-    "title": "FB dual-publish: NFP 06/05 T-7 (mile_91692461)",
-    "description": "VolPred event_article NFP T-7 已 publish (mile_91692461). FB Ivan Lai 同步發佈待 MCP auth 恢復後執行；改寫版貼文須遵循 .claude/skills/trending-repost/references/fb-ivanlai-tone.md (200-400字短句、主貼不放連結、第一則留言放 VolPred 連結)。Anti-AI gate 必跑。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "expired",
-    "blocked_reason": "awaiting_interactive_session",
-    "blocked_at": "2026-06-09T05:11:39+00:00",
-    "blocked_note": "FB 個人帳號（Ivan Lai）只能走 Claude in Chrome；hourly cron 無自主能力；待互動 session 接手（per memory feedback_fb_personal_account_chrome_only）",
-    "created_at": "2026-05-26T19:18:28Z",
+    "task_type": "platform_ops",
+    "title": "FB dual-publish: NFP 06/05 T-7 (mile_91692461)",
+    "priority": 2,
     "source": "event_article_nfp_t7_followup",
-    "ref_milestone_id": "mile_91692461",
-    "tags": [
-      "platform_ops",
-      "fb_post",
-      "nfp_us",
-      "T-7"
-    ],
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "expired",
-        "reason": "NFP 6/5 事件文 FB 發佈，事件窗早過（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ],
-    "completed_at": "2026-07-14T07:28:32.517134+00:00"
+    "created_at": "2026-05-26T19:18:28Z",
+    "completed_at": "2026-07-14T07:28:32.517134+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "governance_blocked_reasons_single_source",
@@ -8134,33 +8052,15 @@
   },
   {
     "id": "platform_ops_install_reader_facing_crontab",
-    "title": "[platform_ops] 加 cron_reader_facing_refill 與 cron_question_ops_maintain 到 host crontab (TCC 授權後)",
-    "description": "Context: 2026-05-28 hourly tick 嘗試 install host crontab 補 reader-facing refill entry (0 6,12,18) + question_ops_maintain (0 */6)，被 macOS TCC App Management 攔截 (crontab: Interrupted system call)。\n\n當前狀態:\n- config/runtime_schedules.json 已含兩 entry (host_crontab_managed: true)\n- ~/.volpred/bin/cron_reader_facing_refill.sh + cron_question_ops_maintain.sh 都已存在且 executable\n- 已 manual fire reader_facing_refill 補今日 (event_added: 2; state.date=2026-05-28)\n\nDeliverable (interactive session 才能完成):\n1. macOS Settings → Privacy & Security → App Management → 加 Terminal / iTerm2 / Claude Code (任一你跑 install script 的 app)\n2. 跑 bash scripts/install_host_crontab.sh\n3. crontab -l 驗證兩 entry 已加入\n4. complete this task\n\n預估 5min (僅 GUI 授權 + install)。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
-    "blocked_reason": "awaiting_interactive_session",
-    "blocked_at": "2026-05-28T00:09:00+08:00",
-    "blocked_note": "macOS TCC App Management 攔截 crontab write; needs GUI privilege grant before install script can run",
-    "tags": [
-      "platform_ops",
-      "cron",
-      "macos_tcc",
-      "reader_facing",
-      "followup_from_hourly_dispatch_2026_05_28_0007"
-    ],
-    "created_at": "2026-05-28T00:09:00+08:00",
+    "task_type": "platform_ops",
+    "title": "[platform_ops] 加 cron_reader_facing_refill 與 cron_question_ops_maintain 到 host crontab (TCC 授權後)",
+    "priority": 3,
     "source": "hourly_dispatch_2026_05_28_0007",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "succeeded",
-        "reason": "2026-07-14 install_host_crontab.sh 重建（16→33 條）已含兩 entry；crontab -l 驗證通過（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ],
+    "created_at": "2026-05-28T00:09:00+08:00",
     "completed_at": "2026-07-14T07:28:32.517134+00:00",
-    "result_summary": "reader_facing_refill (0 6,12,18) + question_ops_maintain (0 */6) 已在 host crontab"
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "paper_review_mile_8ae0e7d8",
@@ -9645,30 +9545,15 @@
   },
   {
     "id": "fb_post_pending_mile_1b0477a8",
-    "task_type": "platform_ops",
-    "priority": 2,
-    "title": "FB Ivan Lai dual-publish: AI 集中度 vs VIX 個股波動率 (mile_1b0477a8)",
-    "description": "FB Ivan Lai 雙發布 trending 文 mile_1b0477a8: 「VIX 15，個股波動率卻是兩倍半：期權市場在定價什麼？」. 改寫 200-400 字 Ivan Lai 口吻 FB 版（不貼 VolPred 內文），主貼文不放連結，VolPred URL 放第一則留言 https://volpred.zeabur.app/v3/reports/mile_1b0477a8 . 走 .claude/skills/trending-repost/references/fb-ivanlai-tone.md SOP + anti_ai_gate.py。",
     "status": "expired",
-    "blocked_reason": "awaiting_interactive_session",
-    "blocked_note": "FB requires Chrome MCP per memory feedback_fb_personal_account_chrome_only; cannot be done by hourly cron",
+    "task_type": "platform_ops",
+    "title": "FB Ivan Lai dual-publish: AI 集中度 vs VIX 個股波動率 (mile_1b0477a8)",
+    "priority": 2,
     "source": "auto_followup_from_trending_repost_2026_05_31_ai擁擠度",
-    "tags": [
-      "platform_ops",
-      "fb_post",
-      "trending_followup"
-    ],
     "created_at": "2026-05-30T22:30:00+08:00",
-    "blocked_at": "2026-05-31T08:11:12+00:00",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "expired",
-        "reason": "FB dual-publish 積壓 >1 個月，時效歸零（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ],
-    "completed_at": "2026-07-14T07:28:32.517134+00:00"
+    "completed_at": "2026-07-14T07:28:32.517134+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "K1407_article_general",
@@ -12961,31 +12846,15 @@
   },
   {
     "id": "fb_followup_K1418_concentration",
-    "title": "[FB followup] K1418 集中度文 Ivan Lai FB 補發 + 留言貼 mile_123a3855 連結",
-    "description": "K1418 trending_repost mile_123a3855 已 VolPred publish + commit acbc7c34；FB Ivan Lai pending_chrome_followup（hourly agent 無 chrome 工具）。下次 chrome session 接：(1) 用 /tmp/fb_post_K1418.txt 草稿貼到 facebook.com/yihao.lai（claude-in-chrome MACBOOK 398dcdba）(2) 主貼文純文字、不放連結 (3) 發送後到第一則留言貼 https://volpred.zeabur.app/v3/reports/mile_123a3855 (4) screenshot 確認 (5) 寫回 feed.json fb_post_status=success + fb_post_url + work_log entry。失敗 max retry 3 後標 wont_fix。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "expired",
-    "created_at": "2026-06-04T23:23:00+00:00",
+    "task_type": "platform_ops",
+    "title": "[FB followup] K1418 集中度文 Ivan Lai FB 補發 + 留言貼 mile_123a3855 連結",
+    "priority": 2,
     "source": "trending_repost_fb_split",
-    "tags": [
-      "fb_post",
-      "trending_repost_followup",
-      "manual_chrome",
-      "K1418"
-    ],
-    "blocked_reason": "awaiting_interactive_session",
-    "blocked_at": "2026-06-09T05:11:37+00:00",
-    "blocked_note": "FB 個人帳號（Ivan Lai）只能走 Claude in Chrome；hourly cron 無自主能力；待互動 session 接手（per memory feedback_fb_personal_account_chrome_only）",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "expired",
-        "reason": "K1418 FB 補發積壓過久，時效歸零（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ],
-    "completed_at": "2026-07-14T07:28:32.517134+00:00"
+    "created_at": "2026-06-04T23:23:00+00:00",
+    "completed_at": "2026-07-14T07:28:32.517134+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "email-11706-7ef167",
@@ -14691,31 +14560,15 @@
   },
   {
     "id": "fb_dispatch_20260607_222204_semicon_vol",
-    "title": "[FB dispatch] 半導體 vol 文 Ivan Lai 同步發佈 + 留言貼連結",
-    "description": "走 Claude in Chrome MACBOOK 帳號發到 Ivan Lai FB 個人帳號。fb_post_draft 已存在 storage/reports/feed.json 的文章 mile_22d52561；FB 文案請讀 fb_post_draft 欄位（若無，依 trending-repost skill fb-ivanlai-tone.md 重寫 200-400 字版本）；發出後第一則留言貼 https://volpred.zeabur.app/v3/reports/mile_22d52561；完成後跑 uv run python scripts/mark_fb_post_status.py --mile-id mile_22d52561 --status success，並記錄 fb_post_url。Report id: mile_22d52561",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "expired",
-    "created_at": "2026-06-08T06:22:00+00:00",
+    "task_type": "platform_ops",
+    "title": "[FB dispatch] 半導體 vol 文 Ivan Lai 同步發佈 + 留言貼連結",
+    "priority": 2,
     "source": "trending_repost_2026_06_08_ai風險_followup",
-    "tags": [
-      "fb_dispatch",
-      "reader_facing",
-      "followup",
-      "half_conductor_vol"
-    ],
-    "blocked_reason": "awaiting_interactive_session",
-    "blocked_at": "2026-06-09T05:11:37+00:00",
-    "blocked_note": "FB 個人帳號（Ivan Lai）只能走 Claude in Chrome；hourly cron 無自主能力；待互動 session 接手（per memory feedback_fb_personal_account_chrome_only）",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "expired",
-        "reason": "6/7 半導體文 FB 發佈，5 週 stale（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ],
-    "completed_at": "2026-07-14T07:28:32.517134+00:00"
+    "created_at": "2026-06-08T06:22:00+00:00",
+    "completed_at": "2026-07-14T07:28:32.517134+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "platform_ops_publication_candidates_audit_20260608",
@@ -22029,63 +21882,27 @@
   },
   {
     "id": "trending_repost_2026_06_25_ai_roi",
-    "title": "[trending_repost] 科技股半導體急跌，AI資本支出ROI質疑下的波動率定價",
-    "description": "從6月下旬半導體大跌與科技股隱含波動率急升切入，探討市場對AI巨額投資變現能力的疑慮。可量化：科技巨頭CapEx營收比率與費半指數隱含波動率(IV)偏斜度的歷史相關性。",
-    "task_type": "trending_repost",
-    "priority": 1,
     "status": "expired",
-    "created_at": "2026-06-24T22:00:21+00:00",
+    "task_type": "trending_repost",
+    "title": "[trending_repost] 科技股半導體急跌，AI資本支出ROI質疑下的波動率定價",
+    "priority": 1,
     "source": "reader_facing_refill",
-    "tags": [
-      "trending_repost",
-      "reader_facing",
-      "auto_refill"
-    ],
-    "started_at": "2026-06-25T02:39:47.496936+00:00",
+    "created_at": "2026-06-24T22:00:21+00:00",
     "completed_at": "2026-07-14T07:28:32.517134+00:00",
-    "result": "Blocked by trending_repost dedup gate: topic overlaps recent AI CapEx/options/skew posts (6/2 mile_49616ac2, 6/23 mile_057f178b, 6/24 mile_b221e550). Fresh yfinance check also did not support a new downside-skew thesis for SMH/SOXX, so publishing would be low-incremental repackage.",
-    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
-    "stale_claim_previous_claimed_by": "claude-standin",
-    "stale_claim_previous_claimed_at": "2026-06-25T02:39:35.745320+00:00",
-    "stale_claim_previous_claim_session_id": "7164b3f5c47e",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "expired",
-        "reason": "6/25 trending 主題，3 週 stale（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "trending_repost_2026_06_25_套利交易",
-    "title": "[trending_repost] 日圓空倉創九年新高，VIX 定價是否低估尾部風險？",
-    "description": "對比 2026 年 6 月 CFTC 日圓淨空倉高點與 2024 年 8 月大解倉歷史。量化分析在高擁擠度下，USD/JPY 匯率變動對 VIX 的不對稱敏感度，評估當前 VIX 是否低估平倉風險。",
-    "task_type": "trending_repost",
-    "priority": 1,
     "status": "expired",
-    "created_at": "2026-06-24T22:00:29+00:00",
+    "task_type": "trending_repost",
+    "title": "[trending_repost] 日圓空倉創九年新高，VIX 定價是否低估尾部風險？",
+    "priority": 1,
     "source": "reader_facing_refill",
-    "tags": [
-      "trending_repost",
-      "reader_facing",
-      "auto_refill"
-    ],
-    "started_at": "2026-06-25T02:43:40.802027+00:00",
+    "created_at": "2026-06-24T22:00:29+00:00",
     "completed_at": "2026-07-14T07:28:32.517134+00:00",
-    "result": "Blocked by ARC/topic dedup: 2026-06-17 mile_19fa8ca1 already covers JPY carry-trade crowding, 9-year-high yen shorts, and VIX tail-risk underpricing; check_arc_dedup also exited 1 for JPY/VIX systemic-crowding arc. No genuinely new angle in task brief.",
-    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
-    "stale_claim_previous_claimed_by": "claude-standin",
-    "stale_claim_previous_claimed_at": "2026-06-25T02:43:40.604882+00:00",
-    "stale_claim_previous_claim_session_id": "4d1e4eeda1ab",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "expired",
-        "reason": "6/25 trending 主題，3 週 stale（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "journal_discovery_20260625_0",
@@ -23739,28 +23556,14 @@
   },
   {
     "id": "trending_repost_fb_post_2026_06_30_ai資本支出",
+    "status": "expired",
     "task_type": "trending_repost",
     "title": "FB 發文：科技巨頭 AI CapEx 變現缺口 + IV skew 拐點",
-    "description": "發佈 FB Ivan Lai 貼文（草稿在 /tmp/fb_post_trending_ai_capex.md）。需要 Chrome MCP。mile_id: mile_f5f4cb43。主貼文不放連結，VolPred 連結放第一則留言：https://volpred.zeabur.app/v3/reports/mile_f5f4cb43",
     "priority": 2,
-    "status": "expired",
-    "requires_interactive": true,
-    "requires_chrome_mcp": true,
     "created_at": "2026-06-30T10:56:00+08:00",
-    "fb_draft_path": "/tmp/fb_post_trending_ai_capex.md",
-    "feed_mile_id": "mile_f5f4cb43",
-    "blocked_reason": "awaiting_interactive_session",
-    "blocked_at": "2026-06-30T03:48:51+00:00",
-    "blocked_note": "requires_interactive=true + requires_chrome_mcp=true; hourly headless 無法處理 FB 個人帳號發文（per memory feedback_fb_personal_account_chrome_only）。需互動 session + Chrome MCP 選 MAX STUDIO browser 發佈 /tmp/fb_post_trending_ai_capex.md。draft 已備妥，互動 session 拉起即可貼。",
-    "status_history": [
-      {
-        "at": "2026-07-14T07:28:32.517134+00:00",
-        "from": "blocked",
-        "to": "expired",
-        "reason": "6/30 trending FB 文，2 週後已非 trending（docs/refactor_plan_token_ops_waste.md WS2c）"
-      }
-    ],
-    "completed_at": "2026-07-14T07:28:32.517134+00:00"
+    "completed_at": "2026-07-14T07:28:32.517134+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-17T08:07:54.713740+00:00"
   },
   {
     "id": "email-12256-0251f2",
@@ -31806,7 +31609,7 @@
     "description": "收尾 experiments/k1699/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：experiments/k1699/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1699'); finished 0.5 days ago; orphan backlog this run: 63 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-12T22:00:14.861047+00:00",
     "dreaming": {
@@ -31814,7 +31617,30 @@
       "pattern_type": "orphaned_experiment",
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-17T08:09:10.905578+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      },
+      {
+        "ts": "2026-07-17T08:09:36.287869+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      },
+      {
+        "ts": "2026-07-17T08:29:19.273626+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      }
+    ],
+    "started_at": "2026-07-17T08:09:36.287853+00:00",
+    "completed_at": "2026-07-17T08:29:19.273611+00:00",
+    "result": "非孤兒（item 04ca3bea 已存在）。修訂而非新增：既有 codex_review.md 早於修復與重現報告，故補跑 follow-up codex exec gpt-5.4/high = PASS_WITH_CAVEAT。README/per_market_table 全部 QLIKE 與 30 個 DM t 對回 JSON 全中；reproduce_report 537/537 scalar match。修訂記入 refit cadence 不對稱（GJR/HAR 63d vs PRG 126/252d，handicap PRG 可能放大 null）與 nominal 4/6 QLIKE 不可引用。conf 0.9→0.78。已排發文 task。"
   },
   {
     "id": "dreaming_orphaned_experiment_k1697",
@@ -31822,7 +31648,7 @@
     "description": "收尾 experiments/k1697/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：experiments/k1697/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1697'); finished 0.5 days ago; orphan backlog this run: 63 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-12T22:00:14.861047+00:00",
     "dreaming": {
@@ -31830,7 +31656,30 @@
       "pattern_type": "orphaned_experiment",
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-17T08:09:10.661219+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      },
+      {
+        "ts": "2026-07-17T08:09:36.060731+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      },
+      {
+        "ts": "2026-07-17T08:29:19.041803+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      }
+    ],
+    "started_at": "2026-07-17T08:09:36.060716+00:00",
+    "completed_at": "2026-07-17T08:29:19.041786+00:00",
+    "result": "非孤兒（7/14 backfill 已建 item ad2825d0）。收尾動作=修訂而非新增：Codex gpt-5.4/high CONDITIONAL PASS 解除該條目的 NEEDS_HUMAN hold；數字獨立對回 k1697_results.json 與 k892 JSON 全中。修訂含 4 caveat（0056>TWII 排序無差異檢定故降級；'差異純為端點'限縮到已查案例；Table 2 註 Newey-West HAC 與實算 BW-robust QMLE t 不符；Adj Close data-vintage）。conf 0.6→0.85。已排 daily_article 發文 task。"
   },
   {
     "id": "dreaming_orphaned_experiment_k1649",
@@ -32921,7 +32770,7 @@
     "description": "收尾 experiments/K1609/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-13T22:00:02.811164+00:00）。\n證據：experiments/K1609/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1609'); finished 10.9 days ago; orphan backlog this run: 60 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-13T22:00:02.811164+00:00",
     "dreaming": {
@@ -32929,7 +32778,30 @@
       "pattern_type": "orphaned_experiment",
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-17T08:09:11.373380+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      },
+      {
+        "ts": "2026-07-17T08:09:36.749152+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      },
+      {
+        "ts": "2026-07-17T08:29:19.728221+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      }
+    ],
+    "started_at": "2026-07-17T08:09:36.749134+00:00",
+    "completed_at": "2026-07-17T08:29:19.728205+00:00",
+    "result": "非孤兒（item 190a42a0 已存在）。修訂而非新增：Codex gpt-5.6-sol/ultra CONDITIONAL PASS。修訂記入 yfinance×FRED ffill 污染（實測 8 origin / 14 個 5 日窗 / 56 個 21 日窗落在非交易日）與 real-yield corr target 用 real_yield_lag1.diff() 之 lead-lag 錯位（削弱唯一 nominal 顯著 cell t=-2.05），補上 README 略去的 silver downside-semivariance cell（bootstrap p=0.0956）。所有缺陷方向一致：修正後只會更 null。conf 維持 0.6。不發文（null+抓不到資料+target 建構缺陷，對讀者無可靠角度）。"
   },
   {
     "id": "dreaming_orphaned_experiment_k1608",
@@ -32937,7 +32809,7 @@
     "description": "收尾 experiments/k1608/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-13T22:00:02.811164+00:00）。\n證據：experiments/k1608/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1608'); finished 10.9 days ago; orphan backlog this run: 60 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-13T22:00:02.811164+00:00",
     "dreaming": {
@@ -32945,7 +32817,30 @@
       "pattern_type": "orphaned_experiment",
       "occurrences": 1,
       "governance_target": "storage/memory/knowledge.json"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-17T08:09:11.135581+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      },
+      {
+        "ts": "2026-07-17T08:09:36.514858+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      },
+      {
+        "ts": "2026-07-17T08:29:19.505648+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884"
+      }
+    ],
+    "started_at": "2026-07-17T08:09:36.514840+00:00",
+    "completed_at": "2026-07-17T08:29:19.505633+00:00",
+    "result": "非孤兒（item 2e68e715 已存在）。修訂而非新增：Codex gpt-5.6-sol CONDITIONAL PASS。數字零落差（另從 asset_event_panel.csv 獨立重跑 HAC 回歸，係數 t 值重現至小數 4 位）。修訂改寫為 failure-to-detect（SPY 95% CI [-0.64%,+0.24%] 仍涵蓋經濟顯著效果，|t|>=3 gate 需 5 日 0.67% 效果，power 低）+ 記入 Monday-publication lookahead + p_sign_two_sided 非正式 p 值。conf 0.8→0.75。已排發文 task。"
   },
   {
     "id": "trending_repost_2026_07_14_ai資本",
@@ -34227,13 +34122,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T07:01:16.220801+00:00",
+    "completed_at": "2026-07-17T08:00:57.455579+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T07:01:16.220801+00:00",
-      "last_clean_observed_at": "2026-07-17T07:01:16.220801+00:00"
+      "resolved_at": "2026-07-17T08:00:57.455579+00:00",
+      "last_clean_observed_at": "2026-07-17T08:00:57.455579+00:00"
     }
   },
   {
@@ -34245,13 +34140,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T07:40:54.234890+00:00",
+    "completed_at": "2026-07-17T08:33:31.337445+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T07:40:54.234890+00:00",
-      "last_clean_observed_at": "2026-07-17T07:40:54.234890+00:00"
+      "resolved_at": "2026-07-17T08:33:31.337445+00:00",
+      "last_clean_observed_at": "2026-07-17T08:33:31.337445+00:00"
     }
   },
   {
@@ -41504,5 +41399,45 @@
     "created_at": "2026-07-17T15:52:00+08:00",
     "topology": "inline",
     "description": "**部署與線上驗證已於 2026-07-17 15:38 完成（不必重做）**：fc3b9d2 已經 deploy-zeabur-safe.sh 上線並驗證：\n- /v3/digest/mile_28f844aa、mile_9f5151dc、mile_ee178213 全部 **404 → 200**（原單點名的三個）\n- 內容非空殼：SSR HTML 含報頭「每日精選導讀」、「第 26 期」、發布時間、「本期來源文章」，9 篇來源文章全部正確連 /v3/reports/<slug>\n- 回歸乾淨：/v3/reports/、/digest/（v2）、/v3、/ 全部維持 200；/v3/reports/<id> 內文 57KB 正常渲染\n\n**本單剩下的唯一工作 = Chrome 視覺審查**（headless fire 做不到，需互動 session 或有 Chrome MCP 的班；狀態碼與 HTML 內容已驗，這裡只審「好不好看」）：\n1. 開 https://volpred.zeabur.app/v3/digest/mile_28f844aa —— 依 web-ui-ux-review skill 審新頁是否真的符合 v3 Editorial 設計語言（報頭雙線、期數、sidebar sticky、桌機 3:1 grid、手機來源文章排在內文前）\n2. **必查 /v3/reports/<id> 沒被改壞** —— 本次抽出共用元件 V3Prose 動到了那個現行正常頁面。搬移經 comm 逐行比對確認逐字、build/typecheck/線上 HTML 長度都正常，但**沒有人用眼睛看過**\n3. 若需設計調整 → 改完再跑一次 deploy-zeabur-safe.sh\n\n**順帶發現（不在本單範圍，要處理請另開單）**：導讀內文有一個寫死的 v2 連結 `/reports/mile_f78be848`（200，非死連結，但點下去會跳出 v3 外殼）。**不是本次改動造成** —— 既有的 /v3/reports/<id> 頁面上同樣有它，根因是文章 Markdown 內文寫死了 v2 路徑。"
+  },
+  {
+    "id": "article_k1697_rolling_gamma_moving_target",
+    "title": "[發文] K1697：沿用多時的台股 Table 2 數字重跑後復現不出來，rolling last-window γ 是移動標靶",
+    "task_type": "daily_article",
+    "priority": 3,
+    "status": "pending",
+    "source": "orphan_closeout",
+    "created_at": "2026-07-17T08:55:00+00:00",
+    "description": "K1697 收尾（knowledge item ad2825d0，Codex gpt-5.4/high CONDITIONAL PASS，conf 0.85）判定可發佈。\n\n角度：legacy TWII rolling γ=0.272/t=3.18 無存活 JSON、不可復現；calendar-aligned fresh snapshot（common_end 2026-07-09）重建為 γ=0.198/t=1.86，掉出 5% 顯著。更有價值的是端點敏感度：同 spec 的 TWII γ 為 0.157(2025-01) → 0.269(2026-04) → 0.198(2026-07)，三個月移動 0.07 —— rolling last-window 這種『最新一段窗口』的統計數字本質上是移動標靶，不該當結論引用。\n\n**禁止的角度**（Codex 明確降級）：『台股指數槓桿效應是個股的 6.2 倍』（分母是 9 個全不顯著 γ 的平均、與 0 無異、無 CI，rawclose 變體就跳到 9.0×）、『0056 確定比 TWII 強』（無差異檢定）。\n\n證據：experiments/k1697/k1697_results.json；knowledge item ad2825d0。\nparent_task_id: dreaming_orphaned_experiment_k1697"
+  },
+  {
+    "id": "article_k1699_forecast_timing_convention",
+    "title": "[發文] K1699：同一模型同一資料，只因改變『你幾點做預測』，DM 從 +5.06 崩到 0/6 顯著",
+    "task_type": "daily_article",
+    "priority": 3,
+    "status": "pending",
+    "source": "orphan_closeout",
+    "created_at": "2026-07-17T08:55:00+00:00",
+    "description": "K1699 收尾（knowledge item 04ca3bea，codex follow-up PASS_WITH_CAVEAT，conf 0.78）判定可發佈。\n\n角度：嚴格 close-time（t−1 收盤）口徑下，PRG Extended 對 GJR(1,1) 在 SPY/QQQ/GLD/EEM/0050.TW/TAIFEX 六市場 0/6 達 Harvey 顯著（DM t ∈ [−0.54,+2.28]）。canonical（混合時點）headline 的 DM +5.06 是時點混合 artifact。高 overnight-share 市場無例外（TAIFEX ON 佔比 60.99% → t=−0.49；GLD 53.09% → −0.44）。誠實的 null 才是這條研究線的正確結局。\n\n**注意**：不可引用 nominal QLIKE 勝負 4/6（1-ulp 擾動即可翻轉）；唯一穩健陳述是 DM 全表的不顯著性。可提 refit cadence 不對稱（GJR/HAR 63d vs PRG 126/252d）為限制。\n\n證據：experiments/k1699/k1699_results.json、reproduce_report.json（537/537 scalar match）；knowledge item 04ca3bea。\nparent_task_id: dreaming_orphaned_experiment_k1699"
+  },
+  {
+    "id": "article_k1608_boxoffice_null",
+    "title": "[發文] K1608：大片週末後股市會動嗎？1,098 個週末的誠實檢定說：測不到",
+    "task_type": "daily_article",
+    "priority": 4,
+    "status": "pending",
+    "source": "orphan_closeout",
+    "created_at": "2026-07-17T08:55:00+00:00",
+    "description": "K1608 收尾（knowledge item 2e68e715，Codex gpt-5.6-sol CONDITIONAL PASS，conf 0.75）判定可發佈。\n\n角度：用 2005-2026 共 1,098 個週末的 Wikipedia 公開票房資料檢定 blockbuster attention shock 對次週 SPY 報酬與 RV 的影響 —— 24 組資產×outcome 檢定無一達名目 5% 顯著（SPY 報酬 t=−0.90、RV t=+0.03，最大 |t| 僅 1.78）。重點是免費公開代理變數的精度天花板，以及 null 本身就是結果。\n\n**禁止的角度**：『電影不影響市場』。正確框架是 failure-to-detect —— SPY 報酬 95% CI [−0.64%,+0.24%] 仍涵蓋經濟顯著效果，|t|≥3 gate 需要 5 日 0.67% 的效果才過關，power 低。另需誠實揭露：Wikipedia 記的多是週一公布的 actual gross，outcome 卻自週一起算，故這不是『週日可交易訊號』的檢定。\n\n證據：experiments/k1608/k1608_results.json；knowledge item 2e68e715。\nparent_task_id: dreaming_orphaned_experiment_k1608"
+  },
+  {
+    "id": "dreaming_orphan_detector_stale_at_claim",
+    "title": "dreaming orphan 任務不在 claim 時重驗 —— 本班 4/4 已被 backfill 收編仍當孤兒派工",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "orphan_closeout",
+    "created_at": "2026-07-17T08:55:00+00:00",
+    "description": "## 觀察（2026-07-17 16:07 班，實測 4/4）\n\n本班處理 4 個餓死的 dreaming orphan 任務（k1697/k1699/k1608/k1609），**4 個全部已經不是孤兒** —— knowledge.json 早有對應條目（ad2825d0 / 04ca3bea / 2e68e715 / 190a42a0），由 `kb_backfill_unrecorded_experiments` 於 2026-07-14 寫入。任務建於 07-12 / 07-13，偵測當下屬實；但 backfill 在其後解除了孤兒狀態，任務卻繼續以『收尾孤兒 → 寫 knowledge.json』的過期快照描述被派工。\n\n**後果不是空轉而是誤導**：任務描述明寫『寫 knowledge.json』，agent 照做就會產生重複條目。本班是靠主線程 claim 後自行查證才改走 revise 路徑（結果反而有價值 —— 那些 backfill 條目未經 review、缺 caveat）。但這靠的是紀律，不是機制。\n\n## 為什麼是 class 問題\n\n同型 pending 還有 k1698 / k1623 等（next_tasks.json `source=dreaming`, `pattern_type=orphaned_experiment`）。這與 alert 的『執行修復前必須用原 detector 重新驗證仍在 breached，若已自然解除只記錄 fresh no-op』是同一個不變式 —— dreaming 任務沒有這條。\n\n## 要做\n\n1. dreaming orphan 任務在 claim / dispatch 時用原 detector 重驗孤兒條件（grep knowledge.json / feed.json / paper / open task）。已解除 → 自動 complete `succeeded` 並註明 no-op，不占 slot、不進 starvation lockout。\n2. 條件仍成立但 knowledge 條目存在且未經 review → 描述應導向 `scripts/revise_knowledge_entry.py`（本班已驗證可用、provenance gate 過）而非 add_knowledge。\n3. class sweep：檢查其他 dreaming pattern_type 是否有同樣 stale-snapshot 問題（不要只修 orphaned_experiment）。\n4. 測試涵蓋『孤兒條件已解除 → 自動 no-op complete，不派 agent』。\n\nparent: dreaming_orphaned_experiment_k1697/k1699/k1608/k1609（本班 4/4 實例）"
   }
 ]

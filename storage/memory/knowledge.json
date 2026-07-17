@@ -40767,12 +40767,12 @@
  {
   "item_id": "2e68e715",
   "category": "market_context",
-  "content": "K1608 [NULL]：以 Wikipedia 年度周末票房冠軍作 blockbuster attention shock 代理（gross_z≥1.5, shift(1)判定），測試對 SPY/QQQ/IWM/XLY 及娛樂類股（DIS/NFLX/AMC等）未來5日報酬與RV是否有影響。樣本2005-01-09至2026-06-21共1,098週末觀測（1,072有訊號歷史，96為衝擊事件）。SPY次週報酬：shock係數=-0.0020，HAC t=-0.898；SPY次週RV ratio：係數=+0.0018，HAC t=0.034。皆遠低於primary gate（|t|≥3）。娛樂股籃子報酬t=0.54、RV t=0.70，同樣不顯著。年度cluster bootstrap（5,000次,seed=42）CI皆跨零。結論：免費Wikipedia週末票房代理未能在此樣本偵測到穩健的次週SPY報酬或波動訊號，屬public-proxy null，不否定文獻中真正release-level blockbuster效應的存在。",
+  "content": "[NULL_RESULT—PROXY / FAILURE TO DETECT] 設計：以 Wikipedia『List of YYYY box office number-one films in the United States』(2005-2026) 的週末冠軍片 gross 建構 attention shock，gross_z = (log(gross) − trailing-52-weekend mean.shift(1)) / trailing-52 sd.shift(1)，z ≥ 1.5 判定為 shock（min 26 期前置觀測）。樣本 1,098 個週末觀測，2005-01-09 至 2026-06-21，週頻；1,072 具訊號歷史，回歸樣本 n=1,070，其中 96 筆為 shock（9.0%）。資產 8 檔：SPY / QQQ / IWM / XLY / DIS / NFLX / AMC 加一個等權娛樂籃（DIS/NFLX/AMC/CMCSA/EA/TTWO/RBLX，availability-weighted）。價格為 yfinance daily adj close。無 refit（單期 full-sample event-window 回歸，非 OOS）。seed=42。\n\n時序控制：訊號時戳為週末結束日（週日），outcome 視窗取嚴格晚於該日的前五個交易日（實測 gap 最小 1 日：968 筆 gap=1、101 筆 gap=2、2 筆 gap=3）。控制項全部落後於 outcome 視窗：SPY 前 5 日報酬、SPY 前 20 日 RV、lagged VIX close、holiday/closure week、NFP/CPI/FOMC 日曆 proxy flags、月份固定效果。\n\n主要數字（metric 名稱與方向）：三個 outcome 為 fwd5_return（次 5 交易日對數報酬和，越大越看多）、log_fwd5_rv_ratio（log(次 5 日年化 RV / 前 20 日年化 RV)，越大代表波動放大）、downside_semivar_5d_ann（次 5 日年化下方半變異數）。SPY fwd5_return shock 係數 = −0.00201（se 0.00224，HAC lag4 t = −0.90，p = 0.37）；SPY log_fwd5_rv_ratio 係數 = +0.00176（se 0.05131，t = +0.03，p = 0.97）；SPY downside_semivar 係數 = +0.00038（t = +0.16）。XLY fwd5_return t = −0.80、log RV ratio t = +0.68；娛樂籃 fwd5_return t = +0.54、log RV ratio t = +0.70。24 組資產×outcome 檢定中最大 |t| 為 AMC log_fwd5_rv_ratio t = +1.78（p = 0.074, n=626），其餘除 DIS fwd5_return t = −1.40 外皆 |t| < 1.2。無一組達名目 5% 顯著，全部遠離事前設定的 primary gate（SPY shock 係數需具預測符號且 HAC |t| ≥ 3）。\n\n統計檢定：OLS + Newey-West HAC lag 4；另跑 year-cluster bootstrap 差異均值（5,000 reps, seed=42），SPY 兩個主 outcome 的 CI 皆跨零（fwd5_return bootstrap p = 0.68、log RV ratio p = 0.95）。注意 bootstrap 的 p_sign_two_sided 是在未經 H0 置中的 year-pairs 分布上算 sign probability，並非正式 bootstrap p 值，且對應的是 raw diff-in-means 而非受控回歸——僅可作描述性輔助，不應引用為推論 p 值。\n\n驗證狀態：README 宣稱的每一個數字均回到 k1608_results.json 對上（SPY 報酬 −0.0020/t=−0.90、SPY RV +0.0017/t=0.03、娛樂籃 t=0.54/0.70、樣本 1,098/1,072/96 全部一致）；並自 data/asset_event_panel.csv 獨立重跑 SPY/XLY/娛樂籃 的 HAC 回歸，係數與 t 值重現至小數點後 4 位（SPY: −0.002009 / t=−0.8980；log RV: +0.001758 / t=+0.0343）。無數字落差。\n\n限制（Codex review 指出，必須隨結論一起記）：(1) 未拒絕不等於證明為零——SPY 報酬 95% CI 約 [−0.64%, +0.24%]、RV log-ratio CI 約 [−0.099, +0.102]，仍涵蓋有經濟意義的效果；在現有 SE 下 |t|≥3 gate 約需 5 日 0.67% 的效果才過關，power 低。應寫 failure-to-detect，除非補 SESOI 或等效性檢定。(2) Monday lookahead 為真：Wikipedia 記載的多為週一公布的 actual gross，而 outcome 視窗自週一起算，故此結果不是「週日可交易訊號」的檢定；方向不必然只灌水，錯置反應窗口也可能稀釋效果，NULL 不能因此豁免。補強需改用 actuals→週二起算，或 archived 週日估計值→週一起算。(3) construct 太窄：週末冠軍片 gross 不是總票房、不是觀影人次、也不是 surprise，它混合季節性、票價、上映規模與可預期的大片檔期；月份 FE 不修復 treatment measurement error。因此本設計只能回答「異常高的冠軍片 gross」，不能回答 aggregate movie-going attention。(4) 娛樂籃為現存上市成分，具生存者偏誤，非 point-in-time 產業組合。(5) 總體控制為確定性日曆 proxy，非實際公布時戳。(6) 未做 continuous-z / 門檻敏感度、未排除 COVID、HAC lag 4 未做 bandwidth sensitivity。(7) 此為 event-window 診斷，非 OOS 策略或因果宣稱。\n\n結論定位：本結果不否定既有電影情緒文獻（Hong & Wei 2025 Review of Finance；Liu et al. 2024 JBEF），也不檢驗 aggregate movie-going attention——它只說明這個免費公開 proxy 在保守落後設定下未檢出次週 SPY 報酬或 RV 關聯，且估計精度不足以排除較小的效果。",
   "evidence": [
    "experiments/k1608/README.md",
    "experiments/k1608/k1608_results.json"
   ],
-  "confidence": 0.8,
+  "confidence": 0.75,
   "created_at": "2026-07-02T00:00:00",
   "created_at_source": "artifact:k1608_results.json",
   "k_id": "K1608",
@@ -40781,26 +40781,64 @@
   "verdict": "NULL",
   "needs_human": false,
   "gap": "",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "reviewer": "codex exec gpt-5.6-sol (read-only) verdict=CONDITIONAL PASS, 2026-07-17, via dreaming_orphaned_experiment_k1608",
+  "revisions": [
+   {
+    "revised_at": "2026-07-17T16:28:34.149595+08:00",
+    "actor": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "reason": "orphan closeout (dreaming_orphaned_experiment_k1608): Codex CONDITIONAL PASS review of the 2026-07-14 backfill entry — reframe as failure-to-detect (95% CI still covers an economically significant effect), record the Monday-publication lookahead in the Wikipedia gross proxy, note p_sign_two_sided is not a formal p-value",
+    "fields": [
+     "confidence",
+     "content",
+     "reviewer"
+    ],
+    "before": {
+     "confidence": 0.8,
+     "reviewer": null,
+     "content": "K1608 [NULL]：以 Wikipedia 年度周末票房冠軍作 blockbuster attention shock 代理（gross_z≥1.5, shift(1)判定），測試對 SPY/QQQ/IWM/XLY 及娛樂類股（DIS/NFLX/AMC等）未來5日報酬與RV是否有影響。樣本2005-01-09至2026-06-21共1,098週末觀測（1,072有訊號歷史，96為衝擊事件）。SPY次週報酬：shock係數=-0.0020，HAC t=-0.898；SPY次週RV ratio：係數=+0.0018，HAC t=0.034。皆遠低於primary gate（|t|≥3）。娛樂股籃子報酬t=0.54、RV t=0.70，同樣不顯著。年度cluster bootstrap（5,000次,seed=42）CI皆跨零。結論：免費Wikipedia週末票房代理未能在此樣本偵測到穩健的次週SPY報酬或波動訊號，屬public-proxy null，不否定文獻中真正release-level blockbuster效應的存在。"
+    }
+   }
+  ]
  },
  {
   "item_id": "190a42a0",
   "category": "vol_prediction",
-  "content": "K1609 [DATA_LIMITATION_PROXY_NULL]：COMEX 倉庫稀缺性（registered/eligible 庫存）proxy 是否可預測貴金屬波動、下方半變異數與金銀/實質殖利率關係。原設計用 CME `Gold_Stocks.xls`/`Silver_stocks.xls`，但本次 runtime 兩 endpoint 皆 ReadTimeout、回傳 0 bytes，無法取得真實 COMEX 庫存序列（此為決定性限制）。改用 yfinance（GLD/SLV/GC=F/SI=F/^VIX）+ FRED DFII10 建構弱 proxy（futures/ETF basis z-score + dollar-volume z-score，皆 shift(1)），樣本 2061 個週五 origin（黃金 1038 個、白銀 1023 個），2006-01-06 至 2026-05-29。Fallback 結果：黃金 next-week log RV 係數 0.0165, HAC t=1.40（bootstrap CI 跨零）；白銀係數 0.0147, t=1.10（CI 跨零）；黃金 21 日 return-real yield 相關係數 -0.0157, t=-2.05（CI 仍跨零）；白銀 t=-1.63（CI 跨零）。結論：無 COMEX 真實庫存數據可用，fallback 市場緊張度 proxy 不支持能預測次週貴金屬 RV 的假說，且不可將此結果延伸為對真實 COMEX registered/eligible 庫存的任何宣稱。",
+  "content": "[NULL_RESULT] 設計：原始目標為以 CME COMEX 每日 registered/eligible 黃金與白銀倉儲庫存報表，預測 GLD/SLV/GC=F/SI=F 的已實現波動率。實際執行時兩個 CME XLS endpoint (Gold_Stocks.xls / Silver_stocks.xls) 皆 ReadTimeout（8 秒 timeout，回傳 0 bytes），因此本實驗對「真實 COMEX 註冊/合格庫存」零證據，不得做任何相關宣稱。此為 binding limitation，且僅證明本 runtime 抓不到，不代表資料不存在或他處不可得。\n\n替代 proxy（非庫存、非租賃利率，僅市場價量緊俏度）：scarcity_proxy = rolling_z(log(future/(etf*scale)), 252) + 0.5 * rolling_z(log1p(etf 成交額), 252)，再 .shift(1)。樣本 2006-01-06 至 2026-05-29，週五 origins，2,061 列（gold 1,038 / silver 1,023），dropna 後迴歸 n = 1,021 (gold) / 1,004 (silver)。控制變數：prior5_return、prior21_rv_ann、vix_lag1、real_yield_lag1、real_yield_change5_lag1（皆已 lag）。推論：OLS + HAC (Newey-West) lag 4，另加 year-cluster bootstrap 5,000 reps、seed 42。事前訂定嚴格 gate |t| >= 3。\n\n主要數字（metric = scarcity_proxy_lag1 對各 target 的 OLS 係數，正號＝proxy 升高預示該 target 升高）：gold log_fwd5_rv_ratio coef=+0.0165, HAC t=1.40, p=0.161；silver 同 target coef=+0.0147, t=1.10, p=0.271；gold downside_semivar_5d_ann coef=+0.00039, t=0.36, p=0.720；silver downside_semivar_5d_ann coef=+0.0074, t=1.42, p=0.156（其 year-bootstrap p_sign=0.0956，是全表最接近訊號者，README 未列此 cell）；gold fwd21_return_real_yield_corr coef=-0.0157, t=-2.05, p=0.040（HAC 95% CI [-0.0307, -0.0007] 不含 0，單一檢定下 nominally significant，但 year-bootstrap CI [-0.0565, +0.0204] 跨越 0）；silver 同 target coef=-0.0122, t=-1.63, p=0.102。6 個 primary cell 無一達 |t| >= 3，strong_cells = []。腳本自判 verdict = DATA_LIMITATION_PROXY_NULL。\n\n統計檢定：HAC lag 4 覆蓋週度 origins 的重疊；year-cluster bootstrap（5,000 reps, seed 42）比較 proxy 前 20% 與其餘的 target 均值差，所有 cell 的 95% CI 皆跨越 0。共 6 個 primary OLS 檢定加 6 個 secondary bootstrap contrast，除 |t|>=3 的保守 gate 外未做正式 FWER/FDR 校正。誠實表述：黃金 real-yield cell 存在 nominal association，但未過事前 gate、未經多重檢定校正，不構成 confirmatory evidence。\n\n數字驗證：README 所引每個數字均與 K1609_results.json 相符（0.0165/1.40、0.0147/1.10、-0.0157/-2.05、-1.63、2061/1038/1023、日期範圍、seed 42、5000 reps）。落差僅在完整性：README 完全略去兩個 downside-semivariance cell，其中 silver 的 bootstrap p=0.0956 是全表最接近訊號的一格，應補列。\n\n方法論缺陷（Codex 提出、本 agent 已獨立重現確認）：(1) build_daily_proxy 以 yfinance 與 FRED 日期取聯集後 ffill ETF 價格，導致債市開盤但股市休市之日（Good Friday、7/4）產生人造零報酬。實測：每個 metal 有 8 個 origin 當日 ETF 根本未交易（2007-04-06、2010-04-02、2012-04-06、2015-04-03、2021-04-02、2023-04-07、2025-07-04、2026-04-03）、14/1038 (1.3%) 的 5 日窗口只有 4 個真實交易日、56/1038 (5.4%) 的 21 日窗口只有 20 個真實交易日。此污染會使該些窗口 RV 略微下偏、整體加入雜訊（attenuation），方向上不會把訊號變成 null。(2) fwd21_return_real_yield_corr 的 target 用 ry = real_yield_lag1.diff()，即 t 日報酬配對 t-2→t-1 的殖利率變動，是錯位的 lead-lag 相關，並非 README 宣稱的「future return 與 real-yield changes 的相關」；這直接削弱唯一 nominally significant 的 gold t=-2.05 一格。(3) bootstrap 估計的是「無控制變數的 high-minus-low 均值差」，與 OLS「有控制變數的連續 proxy 斜率」不是同一 estimand，因此只能算 exploratory contrast，不能當作 OLS 係數的 robustness check。(4) bootstrap 的 high/low 切點用全樣本 80th percentile（deployment lookahead，但切點未看 outcome，方向不確定）。(5) latent code flaw：verdict() 的 cme_ok 只檢查 response.ok 且 bytes>0，未驗證是否真的解析出庫存時間序列。\n\n無 lookahead 洩漏：signal 與所有控制變數均 .shift(1)，target 一律自 pos+1 起算（future_window 且明確要求長度 >= horizon，故不存在「用少於 5 個觀測值算 target」的問題）。\n\n限制：(a) 未取得任何 COMEX 倉儲時間序列，此為決定性限制；(b) proxy 是市場價量代理，不是實體庫存或租賃利率；(c) GLD/SLV 有 ETF 費用、追蹤誤差、申購贖回機制，期現價差不是乾淨的 convenience yield；(d) FRED DFII10 使用最新下載版本而非 point-in-time vintage，單純 .shift(1) 無法排除歷史修訂；(e) 週度 origins 降低重疊但不建立因果識別。\n\n可記錄理由：結論是 null + 資料限制，而上述所有缺陷的方向若修正後只會讓結論更 null（污染是加雜訊、real-yield 錯位使唯一 nominal cell 更不可信、全樣本切點若有偏誤是偏向顯著），故 null 對每一項批評都穩健。若日後要把此 proxy 升級為正式主張，必須先以 ETF 真實交易日重建 5/21 日 target、排除非交易 origin、修正 real-yield target 對齊、並改用與 OLS 同 estimand 的 null-centered cluster bootstrap 後重跑。",
   "evidence": [
    "experiments/K1609/README.md",
    "experiments/K1609/K1609_results.json"
   ],
-  "confidence": 0.8,
+  "confidence": 0.6,
   "created_at": "2026-07-03T00:00:00",
   "created_at_source": "artifact:K1609_results.json",
   "k_id": "K1609",
-  "experiment_id": "K1609",
+  "experiment_id": "k1609",
   "experiment_path": "experiments/K1609/",
   "verdict": "NULL",
   "needs_human": false,
   "gap": "",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "reviewer": "codex exec gpt-5.6-sol (reasoning=ultra, read-only) verdict=CONDITIONAL PASS, 2026-07-17, via dreaming_orphaned_experiment_k1609",
+  "revisions": [
+   {
+    "revised_at": "2026-07-17T16:28:34.397928+08:00",
+    "actor": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "reason": "orphan closeout (dreaming_orphaned_experiment_k1609): Codex CONDITIONAL PASS review of the 2026-07-14 backfill entry — record the yfinance x FRED ffill contamination (8 origins / 14 5d / 56 21d windows on non-trading days) and that the real-yield corr target uses real_yield_lag1.diff(), a lead-lag misalignment that weakens the only nominally significant cell; add the omitted silver downside-semivariance cell (bootstrap p=0.0956)",
+    "fields": [
+     "confidence",
+     "content",
+     "experiment_id",
+     "reviewer"
+    ],
+    "before": {
+     "experiment_id": "K1609",
+     "confidence": 0.8,
+     "reviewer": null,
+     "content": "K1609 [DATA_LIMITATION_PROXY_NULL]：COMEX 倉庫稀缺性（registered/eligible 庫存）proxy 是否可預測貴金屬波動、下方半變異數與金銀/實質殖利率關係。原設計用 CME `Gold_Stocks.xls`/`Silver_stocks.xls`，但本次 runtime 兩 endpoint 皆 ReadTimeout、回傳 0 bytes，無法取得真實 COMEX 庫存序列（此為決定性限制）。改用 yfinance（GLD/SLV/GC=F/SI=F/^VIX）+ FRED DFII10 建構弱 proxy（futures/ETF basis z-score + dollar-volume z-score，皆 shift(1)），樣本 2061 個週五 origin（黃金 1038 個、白銀 1023 個），2006-01-06 至 2026-05-29。Fallback 結果：黃金 next-week log RV 係數 0.0165, HAC t=1.40（bootstrap CI 跨零）；白銀係數 0.0147, t=1.10（CI 跨零）；黃金 21 日 return-real yield 相關係數 -0.0157, t=-2.05（CI 仍跨零）；白銀 t=-1.63（CI 跨零）。結論：無 COMEX 真實庫存數據可用，fallback 市場緊張度 proxy 不支持能預測次週貴金屬 RV 的假說，且不可將此結果延伸為對真實 COMEX registered/eligible 庫存的任何宣稱。"
+    }
+   }
+  ]
  },
  {
   "item_id": "dc420984",
@@ -41082,12 +41120,12 @@
  {
   "item_id": "ad2825d0",
   "category": "research_methodology",
-  "content": "[NEEDS_HUMAN 待人工裁決] K1697 [DOCUMENTED_NEGATIVE，論文Table 2 rebind reconciliation實驗，非PASS/NULL假說檢定]：為paper taiwan-vt body_v3.tex Table 2 rolling-window(w=2000)列做calendar-aligned fresh-snapshot重跑，解除前作(paper2_taiwan_indiv_rolling_gamma)三個caveat(stale common_end/混用價格欄/single-start MLE)。14檔台股+SPY pinned yfinance snapshot，common_end=2026-07-09，每次估計101個seeded隨機起點(K1213 multistart規則，101/101起點收斂單一basin)。Reconciliation：把新snapshot截斷到前人端點、換回前人convention重估，四項檢查全部精確命中(如TWII simple returns端點2026-04-05：γ=0.2614/t=3.32對照值0.2614/3.32)。Headline結果：legacy渲染值TWII rolling γ=0.272,t=3.18無存活JSON、不可復現；K1697 canonical(adjclose,端點2026-07-09)重估為γ=0.198,t=1.86，跌出5%顯著門檻。0056.TW rolling γ=0.222為全場最高(高於TWII)，t=2.95顯著；個股rolling γ全數不顯著。 〔gap：README與results.json皆無明文『verdict』欄位；本實驗性質為論文Table rebind reconciliation，數字(canonical γ/t值、reconciliation checks)皆有徵且可復現，但README明寫『rebind走向(a)/(b)由主線程裁決』，即是否/如何把此發現寫回paper body與knowledge.json的最終措辭尚待人工/主線程確認，故標記needs_human。〕",
+  "content": "[REBUILD + PARTIAL_NULL] 設計：paper/taiwan-vt body_v3.tex Table tab:gamma 的 rolling-window 區塊只溯源到已刪除 run 的 knowledge entry N121/N120（無存活 JSON），fable deep review F2 判為致命傷。K1697 以全新 pinned yfinance snapshot（auto_adjust=False，2008-01-01 起，下載於 2026-07-12，14 檔 CSV + snapshot_manifest.json）重建。Spec 沿用 K892 rolling_w2000.last_window 慣例：GJR-GARCH(1,1)、Constant mean、Normal innovations、arch MLE on log-returns×100、rolling w=2000 取最後一個 2000-obs 窗口、robust（Bollerslev–Wooldridge）t、persistence=α+0.5γ+β。全部 13 檔台股序列 calendar-align 到 common_end=2026-07-09（最新共同交易日；Volume==0 且 O==H==L==C 的 TWSE 休市 placeholder 列已剔除，逐檔數在 data.per_ticker_cleaning；0056 剔除 265 列，其中 249 列集中在 2008，落在最終窗口內僅 1 列 2024-01-15）。每次估計 101 起點（arch 預設 + 100 個 seeded 隨機起點，BASE_SEED=1697，seed 由 (ticker, variant) 決定性導出），取最高收斂 log-likelihood。無 forecast / 無 OOS split / 無 signal — γ 為窗口內 in-sample 描述性估計，不存在 signal-return lookahead；但存在 data-vintage caveat：Adj Close 為事後調整序列，故這是 2026-07-12 snapshot 下的回溯重建，非當時可即時計得的歷史 rolling 值。\n\n主要數字（canonical = adjclose 變體、端點 2026-07-09；γ / robust-BW t，全部對得上 k1697_results.json）：(1) TWII rolling γ=0.1975 / t=1.858 — legacy 0.272/3.18 不可復現，且新值 t=1.86 僅 10% 邊際、掉出 5% 顯著。(2) 9-stock 平均 γ = 0.0321（legacy 0.054；前作 aligned 端點 2025-01-22 為 0.0241）；10-security 平均（含 0056）= 0.0511（legacy 0.060；前作 0.0419）。(3) 逐檔 canonical：0056 0.2220/2.948、TWII 0.1975/1.858、2886 0.1711/1.575、0050 0.1050/2.008、2330 0.0402/1.280、2891 0.0309/0.666、2383 0.0257/1.028、2882 0.0245/0.572、2885 0.0248/0.506、2454 0.0167/0.805、2317 0.0164/0.420、2881 0.0083/0.264、2412 −0.0297/−0.551；SPY（參考，非台股區塊）0.2004/4.094。5% 顯著者僅 0056、0050、SPY；9 檔個股 rolling γ 全部不顯著（|t| ≤ 1.03）。(4) 端點敏感度（本實驗最強的方法論發現，但僅在 TWII 與 2886 兩檔上直接觀察到，不宜升格為普遍法則）：同 spec、同資料源的 TWII rolling γ 為 0.1575（端點 2025-01-22）→ 0.2685（2026-04-05，log 慣例）→ 0.1975（2026-07-09），三個月內移動 0.071；2886 則 0.0539（2025-01-22）↔ 0.1711（2026-07-09）。legacy 0.272 落在某些端點的可達範圍內（2026-04 端點 log-ret 給 0.2685），但 vintage 不明、無 JSON，untraceable 判定不變。\n\n統計檢定 / reconciliation：本實驗未做任何形式檢定（無 DM、無 bootstrap CI、無係數差異檢定）。驗證靠 reconciliation — 把新 snapshot 截到前人端點、換回前人 convention 重估，三個對照全部命中：TWII simple returns / 端點 2026-04-05 得 γ=0.26144 / t=3.3245（K892 存檔 assets.^TWII.rolling_w2000.last_window = 0.261446 / 3.324542，已獨立開 K892 JSON 核對）；TWII log / 2025-01-22 得 0.15746 / 2.5687（前作 0.15747 / 2.5687）；2886 log / 2025-01-22 得 0.05391 / 1.4217（前作 0.05416 / 1.4125）。→ 就已檢查的案例而言，新資料源與 pipeline 與 K892 / 前作一致，主要差異由窗口端點與價格欄 convention 驅動（此結論限於已檢查案例，不等於 panel 上每一格的差異都純由端點造成）。Multistart 診斷：canonical adjclose 14/14 估計皆 101/101 收斂且單一 basin（n_at_best_basin=101，default_minus_best=0）；rawclose 變體唯一例外為 2891（n_at_best_basin=100/101，gamma_range_converged [0.0155, 0.0401]）— 非 canonical 變體。無 K1213 型 multistart fragility。\n\n限制（多項由 codex review 加嚴）：(1) amplification ratio（TWII γ / 9-stock 平均 γ = 6.16×；10-security = 3.87×）僅為描述性點估計，不得當統計事實引用 — 分母 0.032 由 9 個全部不顯著的 γ 平均而來、統計上與 0 無異，ratio 無 CI / 無 bootstrap / 無 delta method，且 rawclose 變體即跳到 9.05×（46% 擺動）。(2) 「0056（0.222）高於 TWII（0.198）」僅為同端點下的點估計排序，未做差異檢定；方向在兩個 aligned 端點（2025-01 前作 0.202 vs 0.157；2026-07 本實驗 0.222 vs 0.198）皆成立，但不足以宣稱 robust ordering — 原 README 「此排序 robust」措辭過強。(3) 報告的 t 為 arch robust（BW）QMLE t，paper Table 2 註目前寫「Newey–West HAC」— 這是實質不符而非措辭小疵，rebind 時必須修正（前作已標記同一問題）。(4) canonical 值綁定端點 2026-07-09，引用必須帶 as-of 日期；rolling last-window 在 TWII/2886 上顯示的漂移程度使其不宜作 headline（此為編輯判斷，非形式檢定結論）。(5) cross-section 平均為「同終點、起點略異」的平均（各檔 2000-obs 窗口起點 2018-04-03 ~ 2018-04-19，SPY 因美股日曆為 2018-07-24），非完全同 calendar span 的 panel 均值。(6) rawclose 敏感度顯示高股息金融股對價格欄選擇極敏感（2881/2885 變號、2886 t 1.58↔3.32、0056 0.222↔0.146）；canonical 取調整後價格與 K892/前作慣例一致。(7) K1697 只重建 rolling 顯示層，未驗證亦不能背書 paper 主線 full-sample 敘事（0.105/5.31、γ̄=0.027、TAIEX 0.114、ratio 4.2–4.7×、K1370 bootstrap CI [2.28, 6.58]）— 這些數字不在 k1697_results.json 內。(8) Adj Close 的除息調整因子會隨未來配息回溯改變 — 復現一律讀 experiments/k1697/data/ 內 pinned CSV。",
   "evidence": [
    "experiments/k1697/k1697_results.json",
    "experiments/k1697/README.md"
   ],
-  "confidence": 0.6,
+  "confidence": 0.85,
   "created_at": "2026-07-12T00:00:00",
   "created_at_source": "artifact:k1697_results.json",
   "k_id": "K1697",
@@ -41096,7 +41134,25 @@
   "verdict": "DOCUMENTED_NEGATIVE",
   "needs_human": true,
   "gap": "README與results.json皆無明文『verdict』欄位；本實驗性質為論文Table rebind reconciliation，數字(canonical γ/t值、reconciliation checks)皆有徵且可復現，但README明寫『rebind走向(a)/(b)由主線程裁決』，即是否/如何把此發現寫回paper body與knowledge.json的最終措辭尚待人工/主線程確認，故標記needs_human。",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "reviewer": "codex exec gpt-5.4 (reasoning=high) verdict=CONDITIONAL PASS, 2026-07-17, via dreaming_orphaned_experiment_k1697",
+  "revisions": [
+   {
+    "revised_at": "2026-07-17T16:28:34.643367+08:00",
+    "actor": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "reason": "orphan closeout (dreaming_orphaned_experiment_k1697): Codex CONDITIONAL PASS review resolves the NEEDS_HUMAN hold — numbers independently reconciled against k892 JSON; downgrade the '0056 > TWII ordering robust' claim (no difference test), qualify 'differences are purely endpoint' to the checked cases only, flag the Table 2 Newey-West HAC note as inconsistent with the BW-robust QMLE t actually computed, add the Adj Close data-vintage caveat",
+    "fields": [
+     "confidence",
+     "content",
+     "reviewer"
+    ],
+    "before": {
+     "confidence": 0.6,
+     "reviewer": null,
+     "content": "[NEEDS_HUMAN 待人工裁決] K1697 [DOCUMENTED_NEGATIVE，論文Table 2 rebind reconciliation實驗，非PASS/NULL假說檢定]：為paper taiwan-vt body_v3.tex Table 2 rolling-window(w=2000)列做calendar-aligned fresh-snapshot重跑，解除前作(paper2_taiwan_indiv_rolling_gamma)三個caveat(stale common_end/混用價格欄/single-start MLE)。14檔台股+SPY pinned yfinance snapshot，common_end=2026-07-09，每次估計101個seeded隨機起點(K1213 multistart規則，101/101起點收斂單一basin)。Reconciliation：把新snapshot截斷到前人端點、換回前人convention重估，四項檢查全部精確命中(如TWII simple returns端點2026-04-05：γ=0.2614/t=3.32對照值0.2614/3.32)。Headline結果：legacy渲染值TWII rolling γ=0.272,t=3.18無存活JSON、不可復現；K1697 canonical(adjclose,端點2026-07-09)重估為γ=0.198,t=1.86，跌出5%顯著門檻。0056.TW rolling γ=0.222為全場最高(高於TWII)，t=2.95顯著；個股rolling γ全數不顯著。 〔gap：README與results.json皆無明文『verdict』欄位；本實驗性質為論文Table rebind reconciliation，數字(canonical γ/t值、reconciliation checks)皆有徵且可復現，但README明寫『rebind走向(a)/(b)由主線程裁決』，即是否/如何把此發現寫回paper body與knowledge.json的最終措辭尚待人工/主線程確認，故標記needs_human。〕"
+    }
+   }
+  ]
  },
  {
   "item_id": "d11978f7",
@@ -41120,14 +41176,14 @@
  {
   "item_id": "04ca3bea",
   "category": "vol_prediction",
-  "content": "K1699 [CONDITIONAL_PASS/CONFIRMED_NULL]：prg-periodic-garch 論文「雙時點 convention」敘事的六市場補證（SPY/QQQ/GLD/EEM/0050.TW/TAIFEX），回答嚴格 close-time（t-1）convention 下 PRG 對 GJR 是否仍有優勢，並檢查高 overnight-share 市場（TAIFEX ON share 61%、GLD 53%）是否為例外。方法：PRG_tminus1 兩變體（exp=model-consistent 期望代入、lag=lagged realized plug-in，複製 K880 重跑）vs GJR(1,1)/HAR，皆 one-step-ahead、canonical dm_test（Newey-West HAC, bandwidth=ceil(n^(1/3))），seed=1699，pinned snapshot（SHA256 記錄）。樣本：SPY N=1823(2019-2026)、QQQ N=1981、GLD N=1613、EEM N=1734、0050.TW N=1251、TAIFEX N=843(sessions)。結果：PRG_tminus1 vs GJR 六市場全數 Harvey 不顯著（|t|>3.0 門檻）：SPY exp t=+0.74(p=.46)、QQQ t=+2.28(p=.023，未過Bonferroni)、GLD t=-0.44(p=.66)、EEM t=-0.54(p=.59)、0050.TW t=-0.32(p=.75)、TAIFEX t=-0.49(p=.62)；lag 變體結論完全一致。高 overnight-share 市場（TAIFEX、GLD）同樣無例外。QQQ 是唯一方向上偏向 GJR 較佳的市場（未達顯著）。PRG_tminus1 對 HAR 則 5/6 市場 Harvey 顯著勝出（TAIFEX 除外），但 GJR vs HAR 同樣 5/6 顯著，主因是 HAR 在 r² proxy target 上普遍弱於 GARCH 族，非 PRG 結構功勞。Codex review（codex_review.md）verdict=PASS_WITH_CAVEAT，reproduce_report.json 事後重跑 outcome.status=pass_tolerated（在預宣告容忍度內完全可復現）。裁定意義：完成雙時點框架六市場證據鏈——open convention 下 PRG 全勝（K1544, 4/6 過3.0），close convention 下與 GJR 無異（本實驗 0/6），混合時點（K880 canonical +5.06）確認為 ill-posed timing artifact，須從論文 headline 移除。",
+  "content": "設計：六市場（SPY / QQQ / GLD / EEM / 0050.TW / TAIFEX）日頻波動率預測 horserace，seed=1699（各模組 MLE multistart 內建 RandomState(42)，估計 deterministic）。expanding window、OOS 樣本：SPY 2019-01-02~2026-04-02 (N=1823)、QQQ 2018-05-16~2026-04-02 (N=1981)、GLD 2019-10-31~2026-04-02 (N=1613)、EEM 2019-05-10~2026-04-02 (N=1734)、0050.TW 2021-01-08~2026-04-02 (N=1251，共同樣本；n_oos=1266)、TAIFEX 2022-07-14~2025-12-31 (N=843，tick-derived sessions)。資料 pinned snapshot（SHA256 記錄於 results JSON，yfinance 2026-07-12 vintage）。close-convention 定義：全日預測 = ĥ_ov + ĥ_in 於 d−1 收盤發出，所有輸入 ∈ F^c_{d−1}；主變體 PRG_tminus1_exp 用 model-consistent 期望代入未觀測 overnight shock（leverage indicator 期望 = 1/2），robustness 變體 PRG_tminus1_lag 用 lagged realized plug-in。基準 GJR(1,1)（close-to-close returns）與 HAR（log σ²_fullday 的 1/5/22 lag）同為嚴格 one-step-ahead、每 63 日 refit。\n\n主要數字（metric = QLIKE，越低越好；canonical volpred qlike_pointwise，actual/predicted orientation）— PRG_tminus1_exp / GJR：SPY 0.8663 / 0.8534、QQQ 0.8626 / 0.8305、GLD 0.8978 / 0.9021、EEM 0.7850 / 0.7905、0050.TW 0.9692 / 0.9753、TAIFEX 0.2441 / 0.2550。PRG nominal 勝 4/6，但見下方限制第 2 點：此計數不可引用。\n\n統計檢定（canonical dm_test，h=1，Newey-West HAC bandwidth = ceil(n^{1/3}) = 10–13；負 t = 前者較佳；論文自訂 Harvey 門檻 |t| > 3.0）— PRG_tminus1_exp vs GJR：SPY +0.74 (p=.459)、QQQ +2.28 (p=.023)、GLD −0.44 (p=.663)、EEM −0.54 (p=.589)、0050.TW −0.32 (p=.751)、TAIFEX −0.49 (p=.623)。**0/6 達 Harvey 顯著**；lag 變體每格同號同不顯著（−0.00 ~ +2.95）。誠實表述為「零市場顯著，其中 QQQ 方向上偏 GJR（exp +2.28 / lag +2.95，未過 3.0）」，不可寫成 PRG 平手以上。高 overnight-share 市場無例外：TAIFEX（ON 變異數佔比 60.99%）−0.49、GLD（53.09%）−0.44、EEM（52.61%）−0.54，方向偏 PRG 但離顯著極遠。PRG_tminus1 對 HAR 5/6 Harvey 顯著勝（TAIFEX −1.82 除外），但 GJR vs HAR 同為 5/6 顯著 —— 此為 GARCH 族在 r² proxy 上全面勝 HAR，非 PRG 結構之功，僅能作次要佐證。診斷欄 PRG_canonical_diag（混合時點，用當日已實現 r²_ov[t]）QLIKE 全面最低（SPY 0.7469 vs GJR 0.8534），量化了時點混合的灌水幅度；K880 canonical headline DM +5.06 屬 ill-posed 物件。與先驗一致：K880v2 SPY −0.57、K880 重跑 SPY lag 式 −1.476，均落在「不顯著」判定內。\n\n重現狀態：scripts/reproduce_check.py（volpred.reproduce_report.v1，2026-07-14，repo_head 02912ce）在 macos_sandbox_exec、network=deny 下重跑，exit 0，duration 50.3s。**537/537 scalar 全部 match，mismatch_count = 0**（rtol 1e-9 / atol 1e-12，僅 ignore /created_at 與 /runtime_seconds）；outcome = pass_tolerated (WITHIN_PREDECLARED_TOLERANCE)、reproducible = true。canonical_unchanged = true。註：canonical_results.bit_identical = false 僅因 created_at 時戳欄位，所有科學數值 bit-level 一致。本 agent 已逐格覆核 README / per_market_table 宣稱的全部 QLIKE（6 市場 × 5 模型）與 30 個 DM t 值，與 k1699_results.json 完全相符；overnight share、K880 anchor 亦相符。\n\n限制：(1) **refit cadence 不對稱（本次 Codex 補審的核心 caveat）**：GJR/HAR 每 63 日 refit，PRG 沿用來源模組 cadence（SPY 126 日、QQQ/GLD/EEM/0050.TW 252 日、TAIFEX 126 sessions ≈ 63 交易日）。此設定 handicap PRG，故「0/6 顯著」應讀為「在保守、不利於 PRG 的 horserace 下 PRG 仍未過線」，非完全 cadence-matched 的 apples-to-apples。緩解證據：TAIFEX 實質為 matched cadence 且仍為 −0.49 不顯著；K1544/K881/K886 的 PRG 正結果本來也用同樣較慢的 PRG refit。但 TAIFEX 樣本最小（N=843、檢定力最低），緩解僅部分成立 → 未決追蹤項：以 63 日 cadence 重跑 PRG 確認 null 對 cadence robust。(2) **點估計脆弱**：非凸 PRG/GJR MLE 會把 1e-16 級輸入擾動放大成不同 optimization basin（CSV roundtrip 1-ulp 事故曾使 TAIFEX QLIKE 漂移 ~1%、DM t −0.49 → 0.00，判定不變；修復 = 所有 snapshot 讀取加 float_precision=\"round_trip\"，三處 read_csv 全覆蓋，Codex 已驗）。故 nominal QLIKE 勝負計數（4/6）不可引用為結論；穩健陳述只有 DM 全表的不顯著性。(3) leverage 期望 1/2（對稱 innovation）假設僅用於 exp 變體；lag 變體不依賴此假設且結論一致，故非結果驅動。(4) 每 DM cell 附 loss differential acf(1)（全表 |acf1| ≤ 0.263，最大為 TAIFEX exp-vs-HAR 0.2622）與 2× bandwidth 敏感度 t，對任何結論零影響。(5) 資料 vintage 差異：yfinance auto_adjust 回溯調整使本實驗與 K1544（06-24 未 pin）有 ulp~0.1% 級差異，K880/K1544 數字為方向性 anchor 而非 bit-identical 目標；TAIFEX 用本地 tick 無此漂移。(6) README metadata 小瑕疵（不影響科學結論）：README 記 Runtime ~77 秒，JSON runtime_seconds = 10.97、重現跑 50.3s；README EEM lag-vs-GJR 記 p=1.0，JSON 為 0.9972。\n\n裁定含義：本結果閉合雙時點框架 —— open convention（K1544）下 PRG session bridge 六市場全勝 fair GJR-X；close convention（本實驗）下與 GJR 無異；混合時點的 +5.06 為 artifact。NULL 是此處正確且必要的結果：若 close-time 下 PRG 仍勝，雙時點敘事反而崩潰。",
   "evidence": [
    "experiments/k1699/k1699_results.json",
    "experiments/k1699/README.md",
    "experiments/k1699/codex_review.md",
    "experiments/k1699/reproduce_report.json"
   ],
-  "confidence": 0.9,
+  "confidence": 0.78,
   "created_at": "2026-07-12T00:00:00",
   "created_at_source": "artifact:k1699_results.json",
   "k_id": "K1699",
@@ -41137,7 +41193,24 @@
   "needs_human": false,
   "gap": "",
   "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
-  "reviewer": "experiments/k1699/codex_review.md"
+  "reviewer": "codex exec gpt-5.4/high verdict=PASS_WITH_CAVEAT (archived codex_review.md 2026-07-12) + follow-up codex exec gpt-5.4/high verdict=PASS_WITH_CAVEAT 2026-07-17, via dreaming_orphaned_experiment_k1699",
+  "revisions": [
+   {
+    "revised_at": "2026-07-17T16:28:34.888848+08:00",
+    "actor": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "reason": "orphan closeout (dreaming_orphaned_experiment_k1699): follow-up Codex review (the archived codex_review.md predates both the fixes and the reproduce report) — record the refit-cadence asymmetry (GJR/HAR every 63d vs PRG 126/252d) that handicaps PRG and may amplify the null, mark the nominal 4/6 QLIKE win count as non-citable (1-ulp flippable), attach the 537/537 scalar reproduce receipt",
+    "fields": [
+     "confidence",
+     "content",
+     "reviewer"
+    ],
+    "before": {
+     "confidence": 0.9,
+     "reviewer": "experiments/k1699/codex_review.md",
+     "content": "K1699 [CONDITIONAL_PASS/CONFIRMED_NULL]：prg-periodic-garch 論文「雙時點 convention」敘事的六市場補證（SPY/QQQ/GLD/EEM/0050.TW/TAIFEX），回答嚴格 close-time（t-1）convention 下 PRG 對 GJR 是否仍有優勢，並檢查高 overnight-share 市場（TAIFEX ON share 61%、GLD 53%）是否為例外。方法：PRG_tminus1 兩變體（exp=model-consistent 期望代入、lag=lagged realized plug-in，複製 K880 重跑）vs GJR(1,1)/HAR，皆 one-step-ahead、canonical dm_test（Newey-West HAC, bandwidth=ceil(n^(1/3))），seed=1699，pinned snapshot（SHA256 記錄）。樣本：SPY N=1823(2019-2026)、QQQ N=1981、GLD N=1613、EEM N=1734、0050.TW N=1251、TAIFEX N=843(sessions)。結果：PRG_tminus1 vs GJR 六市場全數 Harvey 不顯著（|t|>3.0 門檻）：SPY exp t=+0.74(p=.46)、QQQ t=+2.28(p=.023，未過Bonferroni)、GLD t=-0.44(p=.66)、EEM t=-0.54(p=.59)、0050.TW t=-0.32(p=.75)、TAIFEX t=-0.49(p=.62)；lag 變體結論完全一致。高 overnight-share 市場（TAIFEX、GLD）同樣無例外。QQQ 是唯一方向上偏向 GJR 較佳的市場（未達顯著）。PRG_tminus1 對 HAR 則 5/6 市場 Harvey 顯著勝出（TAIFEX 除外），但 GJR vs HAR 同樣 5/6 顯著，主因是 HAR 在 r² proxy target 上普遍弱於 GARCH 族，非 PRG 結構功勞。Codex review（codex_review.md）verdict=PASS_WITH_CAVEAT，reproduce_report.json 事後重跑 outcome.status=pass_tolerated（在預宣告容忍度內完全可復現）。裁定意義：完成雙時點框架六市場證據鏈——open convention 下 PRG 全勝（K1544, 4/6 過3.0），close convention 下與 GJR 無異（本實驗 0/6），混合時點（K880 canonical +5.06）確認為 ill-posed timing artifact，須從論文 headline 移除。"
+    }
+   }
+  ]
  },
  {
   "item_id": "63b49ae2",

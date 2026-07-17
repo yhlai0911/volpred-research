@@ -20681,5 +20681,45 @@
     "owner": "hourly-slot-1-4478d52527c94a3b8fb0f951c958e366",
     "commit": "fc3b9d2 (volpred-v2 repo) + Zeabur deploy 6a59da27b33bf4df98a4bd2d",
     "summary": "【接續同班前一筆 work_log — 該筆寫『未上線』時我對剩餘 cap 估計過於悲觀（誤判剩 10 分鐘、實際剩 27），重估後在本班跑完部署，不留給下一班】\n\n**部署 + 線上驗證完成（15:38）**：cd frontend-v2-fix && ./scripts/deploy-zeabur-safe.sh（唯一安全入口，未用 npx zeabur deploy）→ Deployment 6a59da27b33bf4df98a4bd2d RUNNING，production API 驗證通過。\n\n**線上實測（非狀態碼空殼驗證）**：\n- 原單點名的三個全部 404 → **200**：/v3/digest/mile_28f844aa、mile_9f5151dc、mile_ee178213\n- 內容真的對：SSR HTML 含「每日精選導讀」報頭、「第 26 期」、發布時間、「本期來源文章」；9 篇來源文章全部連 /v3/reports/<slug>（數量與 details.digest_articles 的 9 篇吻合）\n- 回歸乾淨：/v3/reports/mile_28f844aa、/digest/mile_28f844aa（v2）、/v3、/ 全 200；/v3/reports/<id> 內文 57KB 正常渲染（V3Prose 抽離未打壞現行頁面）\n\n**順帶發現（已記在 follow-up，未擴大本班範圍）**：導讀內文有寫死的 v2 連結 /reports/mile_f78be848（200，非死連結，但跳出 v3 外殼）。**非本次改動造成** — 既有 /v3/reports/<id> 頁上同樣有，根因是文章 Markdown 內文寫死 v2 路徑。\n\n**剩餘**：deploy_verify_v3_digest_route_20260717 降為 P3，範圍收斂成純 Chrome 視覺審查（狀態碼與 HTML 內容已驗，只剩『好不好看』+ 用眼睛確認 /v3/reports 沒被改壞）。"
+  },
+  {
+    "timestamp": "2026-07-17T16:31:57+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1697",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "owner": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "commit": null,
+    "summary": "收尾「孤兒」實驗 k1697 —— 實測發現它已不是孤兒：knowledge item ad2825d0 早於 2026-07-14 由 kb_backfill_unrecorded_experiments 寫入。故收尾動作改為 revise 而非 add（避免重複條目），走 scripts/revise_knowledge_entry.py 正式 writer（provenance gate 修訂後 0/2664 violations）。\n\ntopology_override: worktree→subagent —— 實驗 2026-07-12 已跑完且結果完整，本任務是解讀收尾（讀 results.json + 驗數字 + Codex 審），非新運算，不需要 worktree 隔離。\n\nAgent（opus/high）驗證：README 每一格都回得到 k1697_results.json；另從 JSON 原始 per_security 獨立重算 aggregates 全部吻合；K892 對照值獨立開 k892_verify_tw_gamma_results.json 確認（γ=0.261446/t=3.324542 命中 reconciliation）。無 K1016 型落差。\n\nCodex gpt-5.4/high = CONDITIONAL PASS，解除既有條目的 [NEEDS_HUMAN 待人工裁決] hold。修訂寫入 4 個 caveat：(a) ratio 6.2× 分母是 9 個全不顯著 γ 的平均、與 0 無異、無 CI，rawclose 變體跳到 9.0×（46% 擺動）→ 只能當描述性點估計；(b)「0056 > TWII 排序 robust」無差異檢定 → 降級；(c) Table 2 註「Newey–West HAC」與實算 BW-robust QMLE t 不符（實質問題）；(d) Adj Close data-vintage（回溯重建 ≠ 當時可即時計得）。conf 0.6→0.85。\n\n科學內容：legacy TWII rolling γ=0.272/t=3.18 無存活 JSON、不可復現；calendar-aligned fresh snapshot 重建為 γ=0.198/t=1.86，掉出 5% 顯著。端點敏感度為最有價值發現（0.157→0.269→0.198，三個月移動 0.07）。已排 article_k1697_rolling_gamma_moving_target（含禁止角度清單）。"
+  },
+  {
+    "timestamp": "2026-07-17T16:31:57+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1699",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "owner": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "commit": null,
+    "summary": "收尾「孤兒」實驗 k1699 —— 同樣已非孤兒（knowledge item 04ca3bea 已存在）。改走 revise 路徑。\n\ntopology_override: worktree→subagent（實驗已跑完，解讀收尾非新運算）。\n\nAgent（opus/high）驗證：逐格覆核 README / per_market_table 宣稱的全部 QLIKE（6 市場 × 5 模型）與 30 個 DM t 值，與 k1699_results.json 完全相符。reproduce_report.json（2026-07-14，sandbox + network deny）537/537 scalar match、mismatch_count=0。3 處無關科學結論的 metadata 瑕疵已記入限制（README 記 runtime ~77s 但 JSON 為 10.97s；EEM lag-vs-GJR 記 p=1.0 但 JSON 0.9972；|acf1| ≤ 0.26 實際最大 0.2622）。\n\n既有 codex_review.md 審的是修復前程式碼且早於重現報告，故補跑 follow-up codex exec gpt-5.4/high = PASS_WITH_CAVEAT。唯一實質 caveat = refit cadence 不對稱（GJR/HAR 每 63 日 vs PRG 126/252 日）系統性 handicap PRG，可能部分放大 null → 這是把 verdict 壓在 CONDITIONAL_PASS（conf 0.9→0.78）的原因，並留未決追蹤項（以 63 日 cadence 重跑 PRG 確認 null 對 cadence robust）。另記 nominal 4/6 QLIKE 勝負不可引用（1-ulp 擾動即翻轉）。\n\n科學內容：close-time 口徑下 PRG Extended 對 GJR 六市場 0/6 達 Harvey 顯著；canonical headline DM +5.06 為時點混合 artifact。已排 article_k1699_forecast_timing_convention。"
+  },
+  {
+    "timestamp": "2026-07-17T16:31:57+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1608",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "owner": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "commit": null,
+    "summary": "收尾「孤兒」實驗 k1608 —— 已非孤兒（knowledge item 2e68e715，2026-07-14 backfill）。改走 revise 路徑。\n\ntopology_override: worktree→subagent（實驗 2026-07-03 已跑完，解讀收尾）。\n\nAgent（opus/high）驗證：零落差 —— README 宣稱的每個數字都對得上 JSON（SPY 報酬 -0.0020/t=-0.90、SPY RV +0.0017/t=0.03、娛樂籃 t=0.54/0.70、樣本 1,098/1,072/96）；另從 data/asset_event_panel.csv 獨立重跑 HAC 回歸，係數與 t 值重現至小數點後 4 位。方法論 sanity check 過：.shift(1) 確實用在 trailing 分布、outcome 視窗實測嚴格晚於訊號日（gap 最小 1 天）、控制項全部落後。\n\nCodex gpt-5.6-sol = CONDITIONAL PASS，三點必記修正已寫入（此為 verdict 未給 PASS 的原因）：(1) 要寫 failure-to-detect 不能寫「無效果」—— SPY 報酬 95% CI [-0.64%, +0.24%] 仍涵蓋經濟顯著效果，|t|>=3 gate 需 5 日 0.67% 效果，power 低；(2) Monday lookahead 是真的 —— Wikipedia 記的多是週一公布的 actual gross 但 outcome 自週一起算，故非「週日可交易訊號」的檢定，方向不確定故 null 不豁免；(3) bootstrap 的 p_sign_two_sided 非正式 p 值（未經 H0 置中、對應 raw diff-means 而非受控回歸）。既有 backfill 條目三點皆無。conf 0.8→0.75。\n\n已排 article_k1608_boxoffice_null（P4，含禁止角度「電影不影響市場」）。"
+  },
+  {
+    "timestamp": "2026-07-17T16:31:57+08:00",
+    "task_type": "experiment",
+    "task_id": "dreaming_orphaned_experiment_k1609",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "owner": "hourly-slot-1-9e31218404a944ffa2fcecbcc2ce7884",
+    "commit": null,
+    "summary": "收尾「孤兒」實驗 K1609 —— 已非孤兒（knowledge item 190a42a0）。改走 revise 路徑。\n\ntopology_override: worktree→subagent（實驗 2026-07-03 已跑完，解讀收尾）。\n\nAgent（opus/high）驗證：README 引用的 6 個 primary cell 數字全部對回 K1609_results.json。README 落差：完全略去兩個 downside-semivariance cell，其中 silver 的 bootstrap p=0.0956 是全表最接近訊號者 —— 已補入修訂條目。\n\nCodex gpt-5.6-sol/ultra = CONDITIONAL PASS。確認無 lookahead 洩漏（signal 與 control 皆 .shift(1)、target 自 pos+1 起）。抓到兩個 agent 原本漏掉的實質缺陷，agent 獨立重現確認後寫入：(1) yfinance×FRED 日期聯集後 ffill 造成 Good Friday / 7-4 人造零報酬 —— 實測 8 個 origin 當日 ETF 未交易、14 個 5 日窗、56 個 21 日窗受污染；(2) real-yield corr 的 target 用 real_yield_lag1.diff()，是錯位 lead-lag 而非 README 宣稱的相關，直接削弱唯一 nominal 顯著的 t=-2.05。Codex 另刪掉 agent 草稿一個假 caveat（「可能用 <5 obs 算 target」—— K1609.py:242 有 len >= horizon 檢查）並糾正過度宣稱（不可寫「毫無 evidence」，正確是「未過事前 gate、未經多重檢定校正，不構成 confirmatory evidence」）。\n\n所有缺陷方向一致：修正後只會讓結論更 null，故 null 對每項批評穩健。conf 維持 0.6。不發文（null + CME endpoint ReadTimeout 抓不到真實 COMEX 庫存 + 已知 target 建構缺陷，對讀者無可靠角度）。"
   }
 ]
