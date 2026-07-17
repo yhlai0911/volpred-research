@@ -30,6 +30,7 @@ the live dispatch supervisor.
 from __future__ import annotations
 
 import fcntl
+import hashlib
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
@@ -42,6 +43,43 @@ from .common import project_path
 # two test processes still holds — they just serialize against each other rather
 # than against production.
 _SANDBOX_LOCK_DIR = Path(tempfile.gettempdir()) / "volpred-sandboxed-locks"
+
+# NAME_MAX on macOS/APFS and Linux/ext4 alike. Exceeding it is ENAMETOOLONG at
+# stat() time, i.e. a crash inside the lock helper, not a lock that misbehaves.
+_NAME_MAX_BYTES = 255
+
+
+def _bounded_filename(candidate: str, *, key: str) -> str:
+    """Keep a derived lock filename inside NAME_MAX, injectively.
+
+    A lock filename is derived from something unbounded — a caller-chosen name,
+    or a whole path flattened into one component — while the filename itself is
+    bounded. Whether that overflowed used to depend on where the checkout
+    happened to live, which made it a landmine rather than a bug:
+    `paper_snapshot_<flattened csv path>` fits under a short checkout root and
+    blows past 255 bytes under a long one. PHASE-Z tests each commit in a
+    disposable clone at `/private/var/folders/.../<tmp>/head`, ~90 chars deeper
+    than the live checkout, so an identical tree came out green in one place and
+    red in the other (2026-07-17).
+
+    The tail carries what distinguishes two locks, so truncation keeps the tail
+    and drops the leading directories. Truncation alone would let two names
+    collapse onto one lock file — silently *widening* mutual exclusion, which is
+    worse than the crash it replaces — so a digest of the full key goes in front
+    to keep the mapping injective.
+    """
+    if len(candidate.encode("utf-8")) <= _NAME_MAX_BYTES:
+        return candidate
+    digest = hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
+    budget = _NAME_MAX_BYTES - len(digest) - 1
+    tail = candidate.encode("utf-8")[-budget:].decode("utf-8", "ignore")
+    return f"{digest}_{tail}"
+
+
+def _flatten_to_filename(path: Path) -> str:
+    """One absolute path -> one filename, injectively and within NAME_MAX."""
+    flat = str(path).lstrip("/").replace("/", "__")
+    return _bounded_filename(flat, key=str(path))
 
 
 def sandboxed_lock_path(path: Path) -> Path:
@@ -64,8 +102,7 @@ def sandboxed_lock_path(path: Path) -> Path:
     if not (canonical_writes_disabled() and is_canonical_path(path)):
         return path
     _SANDBOX_LOCK_DIR.mkdir(parents=True, exist_ok=True)
-    flat = str(path.resolve()).lstrip("/").replace("/", "__")
-    return _SANDBOX_LOCK_DIR / flat
+    return _SANDBOX_LOCK_DIR / _flatten_to_filename(path.resolve())
 
 
 @contextmanager
@@ -75,7 +112,8 @@ def shared_state_lock(name: str, storage_dir: str = "storage", *, blocking: bool
     Blocks until the lock is acquired. Cooperative across processes on the same
     host; opt-in (readers/writers that ignore the lock still race).
     """
-    lock_file = sandboxed_lock_path(project_path(storage_dir, "ops", "locks") / f"{name}.lock")
+    filename = _bounded_filename(f"{name}.lock", key=name)
+    lock_file = sandboxed_lock_path(project_path(storage_dir, "ops", "locks") / filename)
     # mkdir the resolved parent, never the canonical one: creating
     # storage/ops/locks/ is itself a write into the checkout.
     lock_file.parent.mkdir(parents=True, exist_ok=True)

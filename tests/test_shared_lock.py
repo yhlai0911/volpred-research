@@ -84,6 +84,49 @@ def test_different_names_do_not_block(tmp_path: Path):
     assert elapsed < 0.3, f"different-name locks should not block, elapsed={elapsed:.3f}s"
 
 
+def test_long_lock_name_does_not_overflow_name_max(tmp_path: Path):
+    """A lock name longer than NAME_MAX must lock, not raise ENAMETOOLONG.
+
+    The name here is what `_snapshot_lock_name` produces for a CSV outside the
+    checkout: a whole absolute path flattened into one lock key. It fit under a
+    short checkout root and crashed under PHASE-Z's deep clone (2026-07-17).
+    """
+    from volpred.ops.shared_lock import shared_state_lock
+
+    storage_dir = str(tmp_path / "storage")
+    name = "paper_snapshot_" + "_".join(f"segment{i:03d}" for i in range(40))
+    assert len(name) > 255, "test must actually exercise the overflow"
+
+    with shared_state_lock(name, storage_dir=storage_dir):
+        locks = list((tmp_path / "storage" / "ops" / "locks").iterdir())
+
+    assert len(locks) == 1
+    assert len(locks[0].name.encode("utf-8")) <= 255
+    # Still reentrant after release, and still resolves to the same file.
+    with shared_state_lock(name, storage_dir=storage_dir):
+        pass
+    assert [p.name for p in (tmp_path / "storage" / "ops" / "locks").iterdir()] == [locks[0].name]
+
+
+def test_long_lock_names_sharing_a_tail_do_not_collide(tmp_path: Path):
+    """Truncation must not merge two locks into one — that widens exclusion.
+
+    Both names overflow and share their entire tail, so tail-truncation alone
+    would map them onto one lock file and make two unrelated writers serialize.
+    """
+    from volpred.ops.shared_lock import shared_state_lock
+
+    storage_dir = str(tmp_path / "storage")
+    shared_tail = "_".join(f"segment{i:03d}" for i in range(40))
+    name_a, name_b = f"paper_a_{shared_tail}", f"paper_b_{shared_tail}"
+
+    with shared_state_lock(name_a, storage_dir=storage_dir):
+        with shared_state_lock(name_b, storage_dir=storage_dir, blocking=False) as acquired:
+            assert acquired is True, "distinct names collapsed onto one lock file"
+
+    assert len(list((tmp_path / "storage" / "ops" / "locks").iterdir())) == 2
+
+
 def test_nonblocking_shared_state_lock_reports_busy(tmp_path: Path):
     storage_dir = str(tmp_path / "storage")
     from volpred.ops.shared_lock import shared_state_lock

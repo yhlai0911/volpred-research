@@ -3,14 +3,14 @@
   "source": "claude_code_jsonl",
   "week_range": "2026-07-12 → 2026-07-19",
   "totals": {
-    "input_tokens": 5940042,
-    "output_tokens": 6804216,
-    "cache_read_tokens": 1626988840,
-    "cache_create_tokens": 56198396,
-    "billable_total": 68942654,
-    "assistant_messages": 10234,
-    "unique_sessions": 380,
-    "estimated_cost_usd": 3944.467
+    "input_tokens": 5940044,
+    "output_tokens": 6805343,
+    "cache_read_tokens": 1627004726,
+    "cache_create_tokens": 56235205,
+    "billable_total": 68980592,
+    "assistant_messages": 10235,
+    "unique_sessions": 381,
+    "estimated_cost_usd": 3945.2655
   },
   "by_model": {
     "claude-opus-4-7": {
@@ -22,12 +22,12 @@
       "estimated_cost_usd": 188.264
     },
     "claude-opus-4-8": {
-      "input_tokens": 4754135,
-      "output_tokens": 4614364,
-      "cache_read_tokens": 946107587,
-      "cache_create_tokens": 30638516,
-      "messages": 7084,
-      "estimated_cost_usd": 2411.0229
+      "input_tokens": 4754137,
+      "output_tokens": 4615491,
+      "cache_read_tokens": 946123473,
+      "cache_create_tokens": 30675325,
+      "messages": 7085,
+      "estimated_cost_usd": 2411.8214
     },
     "claude-fable-5": {
       "input_tokens": 653454,
@@ -86,13 +86,13 @@
       "description": "閱讀 / 搜尋檔案"
     },
     "text_only": {
-      "input_tokens": 137117,
-      "output_tokens": 778707,
-      "cache_read_tokens": 142336493,
-      "cache_create_tokens": 4992451,
-      "messages": 736,
-      "billable_total": 5908275,
-      "estimated_cost_usd": 367.573,
+      "input_tokens": 137119,
+      "output_tokens": 779834,
+      "cache_read_tokens": 142352379,
+      "cache_create_tokens": 5029260,
+      "messages": 737,
+      "billable_total": 5946213,
+      "estimated_cost_usd": 368.3715,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
@@ -336,7 +336,7 @@
       "cache_create_tokens": 13679523,
       "messages": 2080,
       "billable_total": 16229879,
-      "estimated_cost_usd": 928.572
+      "estimated_cost_usd": 928.2492
     },
     "2026-07-13": {
       "input_tokens": 1943733,
@@ -345,7 +345,7 @@
       "cache_create_tokens": 11818040,
       "messages": 2481,
       "billable_total": 15305358,
-      "estimated_cost_usd": 875.6767
+      "estimated_cost_usd": 875.3723
     },
     "2026-07-14": {
       "input_tokens": 2787100,
@@ -354,7 +354,7 @@
       "cache_create_tokens": 21762711,
       "messages": 4449,
       "billable_total": 27367528,
-      "estimated_cost_usd": 1565.7986
+      "estimated_cost_usd": 1565.2542
     },
     "2026-07-15": {
       "input_tokens": 120092,
@@ -363,7 +363,7 @@
       "cache_create_tokens": 2989881,
       "messages": 532,
       "billable_total": 3589259,
-      "estimated_cost_usd": 205.3549
+      "estimated_cost_usd": 205.2835
     },
     "2026-07-16": {
       "input_tokens": 8848,
@@ -372,27 +372,27 @@
       "cache_create_tokens": 5804960,
       "messages": 687,
       "billable_total": 6302880,
-      "estimated_cost_usd": 360.6113
+      "estimated_cost_usd": 360.486
     },
     "2026-07-17": {
-      "input_tokens": 10,
-      "output_tokens": 4459,
-      "cache_read_tokens": 120692,
-      "cache_create_tokens": 143281,
-      "messages": 5,
-      "billable_total": 147750,
-      "estimated_cost_usd": 8.4533
+      "input_tokens": 12,
+      "output_tokens": 5586,
+      "cache_read_tokens": 136578,
+      "cache_create_tokens": 180090,
+      "messages": 6,
+      "billable_total": 185688,
+      "estimated_cost_usd": 10.6202
     }
   },
   "drilldown": {
     "text_only": {
-      "messages": 9816,
-      "billable_total": 82313234,
+      "messages": 9818,
+      "billable_total": 82389110,
       "length_buckets": [
         {
           "name": "<200 chars",
-          "messages": 9083,
-          "billable_total": 76707557
+          "messages": 9085,
+          "billable_total": 76783433
         },
         {
           "name": "200-800 chars",
@@ -413,13 +413,13 @@
       "reason_groups": [
         {
           "name": "non-text assistant message",
-          "messages": 6196,
-          "billable_total": 50494225
+          "messages": 6197,
+          "billable_total": 50532163
         },
         {
           "name": "other",
-          "messages": 2423,
-          "billable_total": 20440934
+          "messages": 2424,
+          "billable_total": 20478872
         },
         {
           "name": "status/summary",
@@ -470,8 +470,8 @@
         },
         {
           "name": "(content types: tool_use)",
-          "messages": 304,
-          "billable_total": 2998587
+          "messages": 305,
+          "billable_total": 3036525
         },
         {
           "name": "(content types: server_tool_use)",
@@ -701,9 +701,9 @@
       ]
     },
     "cache_diagnostics": {
-      "sessions_in_window": 380,
-      "cache_create_tokens": 148644290,
-      "billable_total": 186714712,
+      "sessions_in_window": 381,
+      "cache_create_tokens": 148717908,
+      "billable_total": 186790588,
       "cache_create_share_pct": 79.6,
       "top_sessions_by_cache_create": [
         {
