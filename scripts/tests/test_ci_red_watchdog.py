@@ -78,13 +78,21 @@ def _ahead(n=0, head="localsha123", run_sha="deadbeefcafe"):
     }
 
 
-def _harness(tmp_path, *, send_results=None, probe=None, pusher=None):
+def _harness(tmp_path, *, send_results=None, probe=None, pusher=None, summarizer=None):
     sent = []
+    detections = []
     dispatches = []
     send_results = list(send_results or [])
 
     def sender(level, title, body, **kwargs):
-        sent.append({"level": level, "title": title, "body": body})
+        record = {"level": level, "title": title, "body": body}
+        # The msg-822 detection heads-up is warn-level and its own stream; it must
+        # not consume the terminal (recovery/escalation) ``send_results`` queue nor
+        # pollute the ``sent`` list existing assertions read.
+        if level == "warn":
+            detections.append(record)
+            return {"sent": True, "notification_id": f"d-{len(detections)}"}
+        sent.append(record)
         if send_results:
             result = send_results.pop(0)
             if isinstance(result, BaseException):
@@ -104,7 +112,7 @@ def _harness(tmp_path, *, send_results=None, probe=None, pusher=None):
             "sender": sender,
             "ahead_probe": probe or _ahead(),
             "pusher": pusher or (lambda: {"pushed": True, "rc": 0, "outcome": "pushed"}),
-            "failure_summarizer": lambda _run: CAUSE,
+            "failure_summarizer": summarizer or (lambda _run: CAUSE),
             "dispatcher": dispatcher,
             # A normal repair is covered by GREEN but was not already covered by
             # the failed head. Tests that need a rejection override this probe.
@@ -114,6 +122,7 @@ def _harness(tmp_path, *, send_results=None, probe=None, pusher=None):
             return check_alerts._handle_ci_runs(runs, **kwargs)
         return check_alerts._handle_ci_run(run, **kwargs)
 
+    run.detections = detections
     return run, sent, dispatches
 
 
@@ -167,6 +176,8 @@ def test_repair_task_and_fire_request_exist_before_slow_push_path(tmp_path):
     sent = []
 
     def sender(level, title, body, **kwargs):
+        if level == "warn":  # detection heads-up — not a terminal notice
+            return {"sent": True}
         sent.append(body)
         return {"sent": True}
 
@@ -362,6 +373,8 @@ def test_late_task_commit_promotes_stored_green_even_after_neutral_run(tmp_path)
     sent = []
 
     def sender(level, title, body, **kwargs):
+        if level == "warn":  # detection heads-up — not a terminal notice
+            return {"sent": True, "notification_id": "d-inline"}
         sent.append({"level": level, "title": title, "body": body})
         return {"sent": True, "notification_id": f"n-{len(sent)}"}
 
@@ -1040,3 +1053,67 @@ job\tstep\t2026-07-13T09:00:00Z\tFAILED tests/test_ci.py::test_green
     assert check_alerts._ci_pick_failure_cause(log) == (
         "E AssertionError: expected green, got red"
     )
+
+
+# ---------------------------------------------------------------------------
+# Detection notice (boss msg 822, 2026-07-18): CI going red must push one
+# plain-language, boss-facing heads-up the moment it is detected — not stay
+# silent until verified recovery / exhaustion. First line = plain cause; the
+# original run link/id/attempt/head_sha follow; one notice per incident.
+# ---------------------------------------------------------------------------
+DETECTION_FIXTURE_LOG = """
+job\tstep\t2026-07-13T09:00:00Z\tError: Process completed with exit code 1.
+job\tstep\t2026-07-13T09:00:00Z\tE   AssertionError: QLIKE regression exceeded tolerance
+job\tstep\t2026-07-13T09:00:00Z\tFAILED tests/test_metrics.py::test_qlike
+"""
+
+
+def test_red_detection_notice_leads_with_plain_cause(tmp_path):
+    cause = check_alerts._ci_pick_failure_cause(DETECTION_FIXTURE_LOG)
+    run, sent, _dispatches = _harness(tmp_path, summarizer=lambda _run: cause)
+
+    summary = run(RED1)
+
+    # Fix-first: no terminal recovery/escalation notice yet, but a detection
+    # heads-up must fire immediately.
+    assert sent == []
+    assert len(run.detections) == 1
+    notice = run.detections[0]
+    assert notice["level"] == "warn"  # heads-up, not a critical call for help
+    assert "紅燈偵測" in notice["title"]
+    first_line = notice["body"].splitlines()[0]
+    assert first_line == f"白話原因：{cause}"
+    assert "AssertionError" in first_line  # the plain cause leads the body
+    # Original run link/id/attempt/head_sha preserved for anyone wanting detail.
+    assert RED1["url"] in notice["body"]
+    assert str(RED1["databaseId"]) in notice["body"]
+    assert RED1["headSha"][:12] in notice["body"]
+    assert summary["detection"]["reason"] == "detection_notified"
+    notices = _state(tmp_path)["active_incident"]["notifications"]["detection"]
+    assert notices["status"] == "sent"
+
+
+def test_detection_notice_is_sent_once_per_incident(tmp_path):
+    run, sent, _dispatches = _harness(tmp_path)
+
+    run(RED1)
+    summary = run(RED1)
+
+    assert len(run.detections) == 1  # idempotent: second tick does not resend
+    assert summary["detection"]["reason"] == "detection_already_notified"
+    assert sent == []
+
+
+def test_detection_notice_marks_unknown_cause_but_still_fires(tmp_path):
+    unresolved = check_alerts._ci_pick_failure_cause("no parseable signal here\n")
+    assert unresolved.startswith("failed log")  # extractor found no root cause
+    run, sent, _dispatches = _harness(tmp_path, summarizer=lambda _run: unresolved)
+
+    run(RED1)
+
+    # Extraction failed, but msg 822 forbids silence: still notify, mark unknown.
+    assert len(run.detections) == 1
+    first_line = run.detections[0]["body"].splitlines()[0]
+    assert first_line == "白話原因：原因待查"
+    assert RED1["url"] in run.detections[0]["body"]
+    assert sent == []

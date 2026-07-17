@@ -29786,55 +29786,15 @@
   },
   {
     "id": "K1572_article_general",
-    "title": "K1572: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1572 has verdict signal (score=0, reasons=[]) but no general article in feed.json.  Verdict preview: K1572 — DNN Quantile VaR vs K1571 fair baseline plateau\n\nverdict: NULL\nreviewer: Codex (codex-cli, 2026-06-29 hourly tick)\nexperiment_id: k1572\nexperiment_path: experiments/k1572/\nk_id: K1572\nparent_k_id: K1571\n\nDesign: TLT/HYG daily returns, yfinance adjusted close cache from K1",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K1572: write general-audience article (auto-discovered uncovered K)",
+    "priority": 1,
     "source": "auto_discovered",
-    "k_id": "K1572",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "topic_cluster": null,
     "created_at": "2026-07-11T13:52:00+00:00",
-    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
-    "status_history": [
-      {
-        "ts": "2026-07-14T17:31:47.091592+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T17:31:47.320182+00:00",
-        "from": "claimed",
-        "to": "blocked",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T20:29:04.113652+00:00",
-        "from": "blocked",
-        "to": "claimed",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-14T20:29:04.351230+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-14T20:29:19.355359+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-04"
-      }
-    ],
     "completed_at": "2026-07-14T20:29:19.355341+00:00",
-    "result": "已交 agent queue（writer 20-40min > fire cap，依規則走 detached worker）。主線程已跑查重：check_arc_dedup verdict=clean + feed 層 grep 0 命中。草稿產出後 PHASE A followup 驗數字 + 串行發佈。\n\n一般讀者稿發佈進池 mile_f5813dec（draft/general，含 6 圖 + 懶人包 4 張）。驗證：71 個數字宣稱對 k1572_results.json，修正 3 處（基準定義=損失中位數、Kupiec 拒絕範圍、圖說誇大）；改寫過 audience gate（移除 VaR 縮寫）與 content-vs-source gate（250 日視窗改述為一年）。",
-    "started_at": "2026-07-14T20:29:04.351216+00:00"
+    "tombstone": true,
+    "archived_at": "2026-07-17T21:07:55.363817+00:00"
   },
   {
     "id": "telegram-492",
@@ -30089,55 +30049,15 @@
   },
   {
     "id": "K1681_article_general",
-    "title": "K1681: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1681 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1681：SMAD = (P - MA10)/MA10 對次日 RV / 未來 5 日下行半變異數 / 左尾命中率的增量預測力。20 檔美股 ETF 與大型股，2010-01 至 2026-07，79,140 asset-days，seed 1681。\n\n【核心設計 — span baseline】SMAD 的一階近似是過去 10 日報酬的遞減加權和，其表面預測力與槓桿效應糾纏。把 10 個 individual lagged returns 全放進基準（張成所有線性重新加權）後，天真 HAR-only 基準記給 SMAD 的 1.90pp 增量 R²",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K1681: write general-audience article (auto-discovered uncovered K)",
+    "priority": 1,
     "source": "auto_discovered",
-    "k_id": "K1681",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "topic_cluster": null,
     "created_at": "2026-07-11T17:07:37+00:00",
-    "priority_note": "2026-07-15 01:15 主線程批次升 P1（owner 指令「補滿到最低門檻，不是一篇一篇補」）：releasable drafts=0、pending 文章任務被 ops P1/P2 餓死整夜",
-    "status_history": [
-      {
-        "ts": "2026-07-14T17:31:47.757351+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T17:31:48.002112+00:00",
-        "from": "claimed",
-        "to": "blocked",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T20:29:04.585987+00:00",
-        "from": "blocked",
-        "to": "claimed",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-14T20:29:04.821170+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-14T20:29:19.588979+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-04"
-      }
-    ],
     "completed_at": "2026-07-14T20:29:19.588962+00:00",
-    "result": "已交 agent queue（writer 20-40min > fire cap，依規則走 detached worker）。主線程已跑查重：check_arc_dedup verdict=clean + feed 層 grep 0 命中。草稿產出後 PHASE A followup 驗數字 + 串行發佈。\n\n一般讀者稿發佈進池 mile_ff4069d3（draft/general，含 3 圖 + 懶人包 4 張）。驗證：34 個宣稱對 k1681_results.json，修正 1 處重大方向錯誤（不對稱表把兩側都寫成『波動上升』，canonical 係數為負 → 高於均線波動反而降）；改寫過 content-vs-source gate（85% 衍生比例改述）。null result 未被寫成正面結論。",
-    "started_at": "2026-07-14T20:29:04.821156+00:00"
+    "tombstone": true,
+    "archived_at": "2026-07-17T21:07:55.363817+00:00"
   },
   {
     "id": "email-12084-9b55bc",
@@ -31669,58 +31589,15 @@
   },
   {
     "id": "publish_milestone_k1702_phase_null",
-    "title": "K1702 milestone article: vol-managed factor zoo OOS null and corrected drawdown phase-null lesson",
-    "description": "K1702 has completed primary-path Codex review with two independent full-population audits. Write a general-audience milestone article from experiments/k1702 only. The empirical verdict is NULL_OR_MIXED_INDIVIDUAL_FACTOR_OOS: primary positive Sharpe delta 1/6, paired bootstrap BH-FDR 0/6, spanning-alpha t gate BH-FDR 0/6. The corrected drawdown lesson is that MDD/vol is descriptive, not scale invariant; exposure-matched 316-shift phase-null leaves only MOM with a positive production gap, p=0.1582 and Holm p=0.9494, so 0/6 survive. Say no detected timing evidence, never proof timing is absent. Follow feed-publisher, anti-ai-style, publishing dedup, and lazypack requirements; all numbers must be read from K1702 evidence artifacts.",
-    "task_type": "daily_article",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "publish_milestone_article",
-      "audience-general",
-      "K1702",
-      "phase-null"
-    ],
-    "created_at": "2026-07-13T01:31:24.833292+00:00",
+    "task_type": "daily_article",
+    "title": "K1702 milestone article: vol-managed factor zoo OOS null and corrected drawdown phase-null lesson",
+    "priority": 1,
     "source": "agent_result_verification_publishable_gate",
-    "k_id": "K1702",
-    "experiment_path": "experiments/k1702",
-    "dispatch_lane": "agent",
-    "priority_note": "2026-07-15 01:15 主線程升 P1：draft 池可發=0、16:00 後脫班（owner 直接點名），內容產線斷糧優先於非時效 ops",
-    "status_history": [
-      {
-        "ts": "2026-07-14T17:29:54.066809+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T17:29:54.291305+00:00",
-        "from": "claimed",
-        "to": "blocked",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T20:29:05.063205+00:00",
-        "from": "blocked",
-        "to": "claimed",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-14T20:29:05.303394+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-14T20:29:19.828034+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-04"
-      }
-    ],
+    "created_at": "2026-07-13T01:31:24.833292+00:00",
     "completed_at": "2026-07-14T20:29:19.828015+00:00",
-    "result": "已交 agent queue（writer 需 20-40min，超出 fire 50min cap → 依規則走 detached worker，不在 fire 內 spawn）。主線程已先跑 check_arc_dedup（k1702/general → verdict=clean）。草稿產出後由 PHASE A followup 驗數字 + 串行發佈。\n\n一般讀者稿發佈進池 mile_cd543ce6（draft/general，含 3 圖 + 懶人包 4 張）。驗證：84 個宣稱對 k1702_results.json，修正 1 處誇大（vol_ratio=0.2508 不是『不到四分之一』）；改寫過 content-vs-source gate（12.4pp 衍生差改成 −56.0%→−43.5% 元件值、移除文獻 t=3.1）。phase-null 框架正確、未把 null 說成正結果。",
-    "started_at": "2026-07-14T20:29:05.303380+00:00"
+    "tombstone": true,
+    "archived_at": "2026-07-17T21:07:55.363817+00:00"
   },
   {
     "id": "telegram-623",
@@ -33487,13 +33364,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T20:00:52.069401+00:00",
+    "completed_at": "2026-07-17T21:00:51.226950+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T20:00:52.069401+00:00",
-      "last_clean_observed_at": "2026-07-17T20:00:52.069401+00:00"
+      "resolved_at": "2026-07-17T21:00:51.226950+00:00",
+      "last_clean_observed_at": "2026-07-17T21:00:51.226950+00:00"
     }
   },
   {
@@ -33505,13 +33382,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T20:16:32.668409+00:00",
+    "completed_at": "2026-07-17T21:20:37.575403+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T20:16:32.668409+00:00",
-      "last_clean_observed_at": "2026-07-17T20:16:32.668409+00:00"
+      "resolved_at": "2026-07-17T21:20:37.575403+00:00",
+      "last_clean_observed_at": "2026-07-17T21:20:37.575403+00:00"
     }
   },
   {
@@ -33617,40 +33494,15 @@
   },
   {
     "id": "alert_release_pool_gap_20260714",
-    "title": "[alert] Release pool starved > 8.0h (cron healthy)",
-    "description": "由 alert `release_pool_gap` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n## 觸發條件\n釋出機器 cron 正常 fire（machinery_gap=0.0h），但已超過 8.0h 沒有任何文章成功釋出。\n- last_released_at: 2026-07-14T08:00:56.867821+00:00\n- release_gap_hours: 8.0\n- machinery_last_at: 2026-07-14T16:00:56+00:00\n\n## release preview\n- draft: 2\n- scheduled: 0\n- eligible_before_dedup: 2\n- dedup_flagged: 1\n- eligible_after_dedup: 1\n\n## 影響\n通常是 due 草稿全落在已飽和主題、dedup 正確 skip 但釋出算法未 fall-through 到 fresh-theme 草稿；\n讀者端看不到新內容（Mission 第 1/5 條），但這不是 cron 停擺，是內容釋出層問題。\n\n## 建議行動\n1. 若 eligible_after_dedup=0：不要強行釋出已被 dedup TTL 排除的草稿，先補 fresh-theme draft 或等 TTL 到期。\n2. 若還有 eligible_after_dedup>0：定向釋出一篇 fresh-theme 草稿（避開 model_complexity / vt_strategy / spy / vix / garch）：\n   jq '[.[]|select(.status==\"draft\")]|.[].title' storage/reports/feed.json 挑非飽和主題\n   VOLPRED_ACTOR=claude uv run volpred ops release-pool --pub-id <id> --include-drafts\n3. 若 draft 池主題全飽和：派 daily_article 補 fresh-theme 草稿（publication-candidates skill）。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
-    "created_at": "2026-07-14T16:01:10.804145+00:00",
+    "task_type": "platform_ops",
+    "title": "[alert] Release pool starved > 8.0h (cron healthy)",
+    "priority": 2,
     "source": "alert_remediation_bridge",
-    "tags": [
-      "alert",
-      "release_pool_gap"
-    ],
-    "status_history": [
-      {
-        "ts": "2026-07-14T20:30:52.115147+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-14T20:30:52.349031+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-04"
-      },
-      {
-        "ts": "2026-07-14T20:30:52.582545+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-04"
-      }
-    ],
-    "started_at": "2026-07-14T20:30:52.349014+00:00",
+    "created_at": "2026-07-14T16:01:10.804145+00:00",
     "completed_at": "2026-07-14T20:30:52.582533+00:00",
-    "result": "補池 3 篇（2→5）+ 定向釋出 mile_ff4069d3（迷思實驗室｜跌破均線），supabase synced、線上 200。斷檔 20h 已解除。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T21:07:55.363817+00:00"
   },
   {
     "id": "k1709_rev4_nameerror",
@@ -39373,10 +39225,33 @@
     "description": "老闆回饋（Telegram msg 822）：GitHub「Test Suite: All jobs have failed」原始通知只有失敗狀態＋技術術語，沒說錯在哪。要改 CI-failure 通知轉發流程：偵測到 Test Suite / workflow 失敗時，自動抓 gh run view --log-failed，抽出實際 FAIL/AssertionError 那一行，在推 Telegram/通知前面加一句白話根因（例：『feed audience 一致性測試掛：某篇文章 audience 標錯』）。要求：(1) 一句白話原因擺最前面；(2) 保留原始連結給要看細節的人；(3) 抽不到就標『原因待查』不要靜默。實測樣本：run 29406571212=feed audience mismatch、29402856478=DM test 缺 HAC、29399240558=cron wrapper manifest 過期——三次各不同因，正好證明需要逐次抽因。改的是通知轉發程式，走正式流程勿在 responder 動。\n\n[migrated 2026-07-16 from task_978eaaac9793 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T10:22:12.234306+00:00]",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-16T14:42:55.841240+00:00",
-    "created_by": "single-gateway-migration"
+    "created_by": "single-gateway-migration",
+    "status_history": [
+      {
+        "ts": "2026-07-17T21:09:04.651592+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-b877f6453ef5406681b2054b035e61bb"
+      },
+      {
+        "ts": "2026-07-17T21:09:04.880289+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-b877f6453ef5406681b2054b035e61bb"
+      },
+      {
+        "ts": "2026-07-17T21:19:09.965420+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-b877f6453ef5406681b2054b035e61bb"
+      }
+    ],
+    "started_at": "2026-07-17T21:09:04.880270+00:00",
+    "completed_at": "2026-07-17T21:19:09.965401+00:00",
+    "result": "CI 紅燈 detection 通知加白話根因：check_alerts.py 新增 _notify_ci_detection（每 incident 一則 warn 通知，白話根因擺第一行、保留 run 連結、抽不到標原因待查非靜默、ledger 冪等），+3 tests，pytest 49 passed"
   },
   {
     "id": "assign_a31a311d",

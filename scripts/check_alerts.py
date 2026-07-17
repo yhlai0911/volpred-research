@@ -1696,6 +1696,104 @@ def _ci_advance_remediation_watchdog(state: dict, *, now_iso: str) -> None:
         )
 
 
+def _ci_detection_cause(incident: dict) -> str:
+    """Plain-language cause for the detection notice, or '原因待查'.
+
+    The placeholder ('failed log 摘要擷取中') and every extraction-failure string
+    from ``_ci_failure_summary`` / ``_ci_pick_failure_cause`` begin with 'failed
+    log '. When that is all we have, msg 822 demands we still notify but label the
+    cause unknown — never silently drop the detection notice.
+    """
+    cause = str(
+        incident.get("confirmed_root_cause")
+        or incident.get("root_cause")
+        or ""
+    ).strip()
+    if not cause or cause.startswith("failed log"):
+        return "原因待查"
+    return cause
+
+
+def _notify_ci_detection(state: dict, *, now_iso: str, sender=None) -> dict:
+    """One boss-facing 'CI is red' notice per incident, plain cause first.
+
+    msg 822: the boss's only detection-time signal was GitHub's cause-less
+    failure mail; from detection this owner stayed silent until verified recovery
+    or exhaustion. Emit exactly one ``warn``-level notice the moment a red
+    incident exists — the first line is the plain-language root cause, then the
+    original run link / id / attempt / head_sha for anyone who wants the detail.
+    Idempotent via the incident's ``notifications['detection']`` ledger (one per
+    incident, not per run/attempt). This is a heads-up, not a call for help, so
+    the level stays ``warn`` — escalation keeps ``critical``.
+    """
+    summary = {
+        "detection_alert_sent": False,
+        "detection_notification_delivered": False,
+    }
+    incident = state.get("active_incident")
+    if not isinstance(incident, dict):
+        return summary
+    notices = incident.setdefault("notifications", {})
+    notice = notices.setdefault("detection", {})
+    if notice.get("status") == "sent":
+        summary["reason"] = "detection_already_notified"
+        return summary
+
+    incident_id = incident.get("incident_id") or "ci-red-unknown"
+    cause = _ci_detection_cause(incident)
+    failure = incident.get("latest_failure") or incident.get("first_failure") or {}
+    run_url = failure.get("url") or "（run URL 待補；請見 GitHub Actions）"
+    head_sha = str(failure.get("head_sha") or "")
+    level = "warn"
+    title = f"CI 紅燈偵測（{incident_id}）"
+    body = (
+        f"白話原因：{cause}\n\n"
+        "## CI Test Suite 於 main 失敗，已啟動自動修復\n"
+        f"原始 run：{run_url}\n"
+        f"run id：{failure.get('run_id')}（attempt {int(failure.get('attempt') or 1)}）\n"
+        f"head_sha：{head_sha[:12]}\n\n"
+        "細節見上方 GitHub run；修好或需要支援時會再通知。"
+    )
+
+    if sender is None:
+        from volpred.ops.alerts import send_alert as sender  # noqa: WPS433
+    notice["attempts"] = int(notice.get("attempts") or 0) + 1
+    notice["last_attempt_at"] = now_iso
+    try:
+        result = sender(
+            level,
+            title,
+            body,
+            storage_dir=str(PROJECT_ROOT / "storage"),
+        )
+        accepted = _ci_delivery_accepted(result)
+        notice["last_delivery"] = {
+            key: result.get(key)
+            for key in ("sent", "skipped", "skip_reason", "notification_id", "send_error")
+            if isinstance(result, dict) and key in result
+        }
+        summary["detection_alert_sent"] = (
+            bool(result.get("sent")) if isinstance(result, dict) else accepted
+        )
+    except Exception as exc:  # noqa: BLE001
+        warn("ci_watch", "detection notification send failed", err=str(exc))
+        notice["status"] = "pending"
+        notice["last_error"] = f"{type(exc).__name__}: {exc}"
+        summary["reason"] = "detection_notification_pending"
+        return summary
+
+    summary["detection_notification_delivered"] = accepted
+    if not accepted:
+        notice["status"] = "pending"
+        summary["reason"] = "detection_notification_pending"
+        return summary
+    notice["status"] = "sent"
+    notice["sent_at"] = now_iso
+    notice["reported_cause"] = cause
+    summary["reason"] = "detection_notified"
+    return summary
+
+
 def _notify_ci_incident(
     state: dict,
     run: dict,
@@ -1960,6 +2058,9 @@ def _handle_ci_runs(
         # a same-poll escalation; a newer in-progress run still defers recovery.
         if isinstance(state.get("active_incident"), dict):
             checkpoint()
+        # Detection notice fires the moment a red incident exists — before the
+        # terminal recovery/escalation notifier, which may still no-op this tick.
+        detection = _notify_ci_detection(state, now_iso=now_iso, sender=sender)
         notification = _notify_ci_incident(
             state,
             observed,
@@ -1970,7 +2071,9 @@ def _handle_ci_runs(
         )
         state["updated_at"] = now_iso if state != original else state.get("updated_at")
         _write_ci_state_if_changed(state_path, state, original)
-        return _ci_result_summary(state, transitions, notification, observed)
+        result = _ci_result_summary(state, transitions, notification, observed)
+        result["detection"] = detection
+        return result
 
 
 def _handle_ci_run(
@@ -2061,6 +2164,9 @@ def _handle_ci_unavailable(
             or {}
         )
         observed = _ci_record_as_run(observed_record)
+        # A provider outage must not strand a detection notice whose first
+        # delivery failed either; this no-ops once already sent.
+        detection = _notify_ci_detection(state, now_iso=now_iso, sender=sender)
         # A provider outage must not strand a terminal outbox created by the
         # previous available poll. In particular, retry a verified recovery
         # notification whose first delivery failed; the notifier itself safely
@@ -2075,6 +2181,7 @@ def _handle_ci_unavailable(
         )
         _write_ci_state_if_changed(state_path, state, original)
         result = _ci_result_summary(state, [], notification, observed)
+        result["detection"] = detection
         result["ci_provider_available"] = False
         if dispatch_result is not None:
             result["dispatch"] = dispatch_result
