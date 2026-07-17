@@ -29714,36 +29714,15 @@
   },
   {
     "id": "k1655_dm_sweep_triage_unknown_bucket",
-    "title": "DM HAC class sweep P3：人工 triage 195 個 unknown bandwidth 站點（盲區）",
-    "description": "來源：docs/governance/2026-07/dm_hac_lag_class_sweep.md §盲區分析。稽核器有 195 個 local DM 的 bandwidth 無法靜態解析。已知混雜三類：(a) 正確的雙變體實作（如 K1611 dm_hln 同時算 t_hln 與 t_hac 且主檢定用 t_hac — 這是模範）；(b) 純名字撞到的 helper（plot_dm_heatmap / classify_dm_status）；(c) 真的無法解析。逐一過眼分類，把 (a)(b) 排除、(c) 判定是否退化。額外檢查（稽核器抓不到、但正是 K1655 的真實失效點）：檔案就算 bandwidth 正確，也要確認**README/knowledge/文章引用的是哪個變體** — canonical helper 存在但主檢定用錯變體，靜態掃描看不出來。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "DM HAC class sweep P3：人工 triage 195 個 unknown bandwidth 站點（盲區）",
+    "priority": 3,
     "source": "agent_discovered",
     "created_at": "2026-07-11T18:16:10.820886+08:00",
-    "status_history": [
-      {
-        "ts": "2026-07-14T17:28:19.392667+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T17:28:19.615927+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T17:28:19.841724+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-01"
-      }
-    ],
-    "started_at": "2026-07-14T17:28:19.615912+00:00",
     "completed_at": "2026-07-14T17:28:19.841706+00:00",
-    "result": "78/78 unknown 站點逐一開檔分類（無抽樣）：a=11（正確雙變體）/ b=1（名字撞到的 helper）/ c=66。真正需修 5 個，全是 K1655 bug class；其中 3 個可能改變已發表結論（k1386 |t|=3.26 僅超門檻 8%、k841 策略報酬 DM、k1379 餵 Paper 9 horse race）。主線程抽驗 k1386 / k1379 / k841 三處原始碼確認判定屬實。副產物：稽核器 PLAIN_VARIANCE_RE 有 false negative（認不出手算變異數 idiom）。產出 docs/governance/2026-07/dm_hac_unknown_bucket_triage.md + storage/ops/dm_hac_unknown_triage.json（commit 2448bc505），已開 5 筆修復任務。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T18:07:55.297944+00:00"
   },
   {
     "id": "telegram-481",
@@ -32008,77 +31987,27 @@
   },
   {
     "id": "abm_p0_3_k1471_honesty",
-    "title": "paper_body P0-3: K1471 TF/MR 誠實補報（B3、B4）",
-    "description": "補 gate 失效全表（TF 4/5、MR 5/5 + baseline Sharpe）、RR_TF 5/5 惡化 + footprint-scale caveat（『not crowded flow per se』改為『not crowded flow at VT's footprint scale』）、修正 L243 錯誤 gate 敘述。 主線程執行（平台規則：論文 .tex 不派 background agent）。Brief=paper/vt-crowding-abm/review_history/fable_deep_review_20260711/README.md §5。父任務 fable0711_abm_honesty_pass 的第 N 段；完成後 xelatex 編譯 + uv run volpred ops paper-update --paper-id vt-crowding-abm。",
-    "priority": 2,
     "status": "succeeded",
     "task_type": "paper_body",
-    "topology": "inline",
+    "title": "paper_body P0-3: K1471 TF/MR 誠實補報（B3、B4）",
+    "priority": 2,
     "source": "decompose:fable0711_abm_honesty_pass",
-    "parent_task_id": "fable0711_abm_honesty_pass",
-    "series_order": 2,
-    "paper_id": "vt-crowding-abm",
     "created_at": "2026-07-13T07:10:29+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-14T17:15:06.789253+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T17:15:07.017208+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T17:15:07.249263+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-01"
-      }
-    ],
-    "started_at": "2026-07-14T17:15:07.017196+00:00",
     "completed_at": "2026-07-14T17:15:07.249253+00:00",
-    "result": "驗證後結案（工作早已落地、任務未同步）：main.tex 已含 Table tab:tfmr_gate 全表（TF treatment 5 cell 中 4 個未過 baseline-Sharpe floor、MR 5/5 未過），abstract/intro 已改 footprint-scale 口徑（'at VT's footprint scale' + TF 尺度下 RR 控制組同樣惡化），L247 gate 敘述已正確。家族層宣稱已撤回、機制證據收斂 VT-only。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T18:07:55.297944+00:00"
   },
   {
     "id": "abm_p0_4_reproduce_binding",
-    "title": "paper_body P0-4: reproduce.py 擴充 K1471 section + caption binding（B5、B6）",
-    "description": "reproduce.py 加 K1471 section（兩張新表逐欄 binding + match_rate gate）；修 caption binding 路徑；'\\% source' 全部改行首 '%' comment。完成後 reproduce_report.json 必須 PASS。 主線程執行（平台規則：論文 .tex 不派 background agent）。Brief=paper/vt-crowding-abm/review_history/fable_deep_review_20260711/README.md §5。父任務 fable0711_abm_honesty_pass 的第 N 段；完成後 xelatex 編譯 + uv run volpred ops paper-update --paper-id vt-crowding-abm。",
-    "priority": 2,
     "status": "succeeded",
     "task_type": "paper_body",
-    "topology": "inline",
+    "title": "paper_body P0-4: reproduce.py 擴充 K1471 section + caption binding（B5、B6）",
+    "priority": 2,
     "source": "decompose:fable0711_abm_honesty_pass",
-    "parent_task_id": "fable0711_abm_honesty_pass",
-    "series_order": 3,
-    "paper_id": "vt-crowding-abm",
     "created_at": "2026-07-13T07:10:29+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-14T17:15:07.474156+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T17:15:07.709432+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-01"
-      },
-      {
-        "ts": "2026-07-14T17:15:07.998939+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-01"
-      }
-    ],
-    "started_at": "2026-07-14T17:15:07.709419+00:00",
     "completed_at": "2026-07-14T17:15:07.998924+00:00",
-    "result": "本班在 HEAD tex 上重跑 reproduce gate 實測驗證：173/173 checks matched = 100.0%，alert_level=green，tables 含 table5_vt_monotone_curve / table6_matched_control_vt / table7_tfmr_gate（K1471 兩張新表已逐欄綁定）。B6 洩漏已修：'\\\\% source' 出現 0 次、行首 '% source' comment 8 處（投稿 PDF 不再印出內部 repo 路徑）。"
+    "tombstone": true,
+    "archived_at": "2026-07-17T18:07:55.297944+00:00"
   },
   {
     "id": "abm_p0_5_mechanical_batch",
@@ -33756,13 +33685,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T17:00:50.339798+00:00",
+    "completed_at": "2026-07-17T18:01:02.279231+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T17:00:50.339798+00:00",
-      "last_clean_observed_at": "2026-07-17T17:00:50.339798+00:00"
+      "resolved_at": "2026-07-17T18:01:02.279231+00:00",
+      "last_clean_observed_at": "2026-07-17T18:01:02.279231+00:00"
     }
   },
   {
@@ -33774,13 +33703,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T17:53:57.229046+00:00",
+    "completed_at": "2026-07-17T18:14:15.823571+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T17:53:57.229046+00:00",
-      "last_clean_observed_at": "2026-07-17T17:53:57.229046+00:00"
+      "resolved_at": "2026-07-17T18:14:15.823571+00:00",
+      "last_clean_observed_at": "2026-07-17T18:14:15.823571+00:00"
     }
   },
   {
@@ -39523,13 +39452,10 @@
     "description": "來源：老闆 2026-07-16 Telegram msg877（財經捕手 SpaceX 破發文）。本 brief 是兩個並行 session 的判斷合併版（原 storage/ops/tasks/task_31d75ca61913 + research_program.md msg877 拆解段），取代雙方各自的版本。\n\n【必讀先前 NULL 教訓 — aggregate 版已做過且全 NULL，不得重做】K872：FRED HY OAS 對 fwd vol raw r=0.55，但與 VIX corr=0.77，控制 VIX 後 delta-R²=0。T14：credit+yield 僅 +1.6% incremental R²（econ trivial）。K1621：EM sovereign credit vol proxies 不 lead EM equity vol。另 K1529/K1515/K1538 同軸皆弱。\n\n【本題唯一差異化空間 = firm-level 分組對比】文章真正的主張是 issuer-specific：高槓桿公司（ORCL、CRWV 等）自己的信用壓力 → 自己的 equity vol。設計：高槓桿 AI 標的 vs 低槓桿 hyperscaler（MSFT/GOOGL）對照組，HAR-RV baseline vs HAR-RV-X（lagged credit spread Δ），樣本 2015-2026 含兩次空頭；嚴格 signal shift(1)；QLIKE + DM-HLN + Harvey |t|>3 + canonical HAC bandwidth。\n\n【硬性成功門檻（比一般更嚴）】主檢定必須是「控制 VIX 之後」的增量（加 VIX 當第二 exogenous 或先對 VIX 正交化），且高槓桿組的增量必須顯著大於低槓桿對照組（分組差異才是文章的可檢定含義）。單純 raw 相關顯著 = 直接 NULL 結論（K872 已證那是 VIX 的影子）。個股 CDS 需 Markit（付費）不可得 → 用 HY/IG OAS + 個別公司債 ETF proxy，限制如實揭露。SPCX n=22 天樣本不足，只能當 case illustration 不得入檢定。文章的具體數字（-40%、6/22 -16.5%、250 億美元、7.5% 殖利率）未經查證，不得引用為事實。null 如實報告。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-16T14:42:55.644818+00:00",
     "created_by": "single-gateway-migration",
-    "claimed_by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876",
-    "claimed_at": "2026-07-17T16:12:26.802788+00:00",
-    "claim_session_id": "b9dacbdb8d5c",
     "status_history": [
       {
         "ts": "2026-07-17T16:12:26.802802+00:00",
@@ -39542,9 +39468,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876"
+      },
+      {
+        "ts": "2026-07-17T18:12:01.809641+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876"
       }
     ],
-    "started_at": "2026-07-17T16:12:27.030204+00:00"
+    "started_at": "2026-07-17T16:12:27.030204+00:00",
+    "completed_at": "2026-07-17T18:12:01.809624+00:00",
+    "result": "firm-level 信用壓力→高槓桿AI股波動率：純NULL。panel credit×HighLev t=-0.95(p=0.34方向相反)；HIGH-LEV組Clark-West t=-0.97 Harvey FAIL；raw corr=0.031 partial|VIX=0.014。延續K872 VIX-sufficiency家族。knowledge=ad85cb2d。產物→experiments/credit_stress_firm_level/。NULL不發文章。原compute job誤判failed實為artifact檔名不符(結果完整)。"
   },
   {
     "id": "assign_4470644e",

@@ -42203,5 +42203,18 @@
   ],
   "confidence": 0.7,
   "created_at": "2026-07-17T18:23:04.329249"
+ },
+ {
+  "item_id": "ad85cb2d",
+  "category": "null_result",
+  "content": "NULL_NEGATIVE — 信用壓力對高槓桿 AI 股波動率的 firm-level 增量預測價值不存在（控制 VIX 後）。設計：5 高槓桿 (ORCL/IBM/EQIX/DLR/CRM) vs 5 低槓桿 (MSFT/GOOGL/AAPL/NVDA/META) AI/雲端股，credit 信號用 HYG-LQD ETF 利差 proxy（full 2015-2026，含 2020/2022 兩次空頭；FRED HY/IG OAS 因 2024 ICE 授權只剩 2023-07+ 短樣本降為 secondary）。M0=log-HAR, M1=+log(VIX var 硬門檻), M2=+credit；nested 增量用 Clark-West (2007) 非 raw DM；QLIKE actual/pred (K783c)；lookahead 三重防護 (forward window [t+1,t+5] + j+H<i + shift(1))；date-aggregated cluster-robust (K1355)。關鍵數字：(1) panel 交互項 credit×HighLev t=-0.95 (p=0.34, 方向相反) → 高槓桿組並非更敏感；(2) HIGH-LEV 組 Clark-West t=-0.97 (p=0.83, Harvey FAIL)、LOW-LEV t=-0.75 → 兩組皆無 credit 增量；(3) raw corr(credit,RV)=0.031, partial|VIX=0.014 → 連 raw 都近零，比 K872 更弱。VIX-regime 分層 (calm<20 / stress≥20) 兩組所有 QLIKE gain 皆為負。結論：延續 K872 (VIX sufficiency) / T14 / K1621 / K1529 / K1538 的信用→波動率 NULL 家族，firm-level 分組（原以為能救 aggregate NULL）亦無 VIX-controlled 增量。純 NULL、無新反直覺角度 → 不發 feed 文章。",
+  "evidence": [
+   "experiments/credit_stress_firm_level/credit_stress_firm_level_results.json",
+   "experiments/credit_stress_firm_level/README.md",
+   "experiments/credit_stress_firm_level/plots/group_incremental.png",
+   "assign_43a2ee48 (task pool)"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-18T02:11:36.619542"
  }
 ]

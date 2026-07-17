@@ -1,0 +1,348 @@
+{
+  "experiment_id": "credit_stress_firm_level",
+  "generated_at": "2026-07-17T17:26:44.390105+00:00",
+  "seed": 42,
+  "verdict": "NULL",
+  "config": {
+    "start": "2015-01-01",
+    "end": "2026-07-17",
+    "horizon_days": 5,
+    "high_lev_firms": [
+      "ORCL",
+      "IBM",
+      "EQIX",
+      "DLR",
+      "CRM"
+    ],
+    "low_lev_firms": [
+      "MSFT",
+      "GOOGL",
+      "AAPL",
+      "NVDA",
+      "META"
+    ],
+    "case_only": [
+      "CRWV"
+    ],
+    "credit_signal_primary": "trailing-5d HYG-LQD credit-stress proxy (ETF)",
+    "credit_signal_secondary": "FRED HY/IG OAS change (short-sample 2023-07+)",
+    "vix_control": "log(VIX daily variance) as M1 regressor (hard gate)",
+    "incremental_test": "Clark-West (2007) nested MSPE-adjusted (NOT raw DM)",
+    "pooling": "date-aggregated cross-firm loss (K1355 cluster-robust)",
+    "har_spec": "log-HAR (Corsi 2009) + lognormal bias correction",
+    "loss": "QLIKE actual/predicted (Patton 2011, K783c)",
+    "leverage_metric": "current total-debt/market-cap (yfinance snapshot, static)",
+    "proxy_disclaimer": "HYG-LQD and OAS are DIAGNOSTIC proxies for credit stress; NOT raw single-name CDS (Markit, paid).",
+    "oas_history_note": "FRED HY/IG OAS retain only ~3yr rolling window since 2024 ICE license change (both start 2023-07-17, no bear market) -> secondary/underpowered only."
+  },
+  "leverage_snapshot": {
+    "ORCL": {
+      "debt_to_equity": 388.87,
+      "total_debt_over_mktcap": 0.4542
+    },
+    "IBM": {
+      "debt_to_equity": 211.169,
+      "total_debt_over_mktcap": 0.3474
+    },
+    "EQIX": {
+      "debt_to_equity": 162.961,
+      "total_debt_over_mktcap": 0.232
+    },
+    "DLR": {
+      "debt_to_equity": 76.592,
+      "total_debt_over_mktcap": 0.2973
+    },
+    "CRM": {
+      "debt_to_equity": 124.282,
+      "total_debt_over_mktcap": 0.303
+    },
+    "MSFT": {
+      "debt_to_equity": 30.271,
+      "total_debt_over_mktcap": 0.0428
+    },
+    "GOOGL": {
+      "debt_to_equity": 20.026,
+      "total_debt_over_mktcap": 0.0227
+    },
+    "AAPL": {
+      "debt_to_equity": 79.548,
+      "total_debt_over_mktcap": 0.0174
+    },
+    "NVDA": {
+      "debt_to_equity": 6.555,
+      "total_debt_over_mktcap": 0.0026
+    },
+    "META": {
+      "debt_to_equity": 35.608,
+      "total_debt_over_mktcap": 0.0527
+    },
+    "CRWV": {
+      "debt_to_equity": 738.538,
+      "total_debt_over_mktcap": 0.8723
+    }
+  },
+  "per_firm": {
+    "ORCL": {
+      "group": "high_lev",
+      "leverage": {
+        "debt_to_equity": 388.87,
+        "total_debt_over_mktcap": 0.4542
+      },
+      "n_oos": 2341,
+      "qlike_m0_har": 0.873061,
+      "qlike_m1_har_vix": 0.939533,
+      "qlike_m2_har_vix_credit": 0.934599,
+      "qlike_gain_m1_to_m2_pct": 0.5252,
+      "vix_gain_m0_to_m1_pct": -7.6137,
+      "cw_t_credit_beyond_vix": 0.382,
+      "cw_p_one_sided": 0.3512,
+      "harvey_pass": false
+    },
+    "IBM": {
+      "group": "high_lev",
+      "leverage": {
+        "debt_to_equity": 211.169,
+        "total_debt_over_mktcap": 0.3474
+      },
+      "n_oos": 2341,
+      "qlike_m0_har": 0.778614,
+      "qlike_m1_har_vix": 0.778824,
+      "qlike_m2_har_vix_credit": 0.784839,
+      "qlike_gain_m1_to_m2_pct": -0.7723,
+      "vix_gain_m0_to_m1_pct": -0.0269,
+      "cw_t_credit_beyond_vix": 0.6066,
+      "cw_p_one_sided": 0.272,
+      "harvey_pass": false
+    },
+    "EQIX": {
+      "group": "high_lev",
+      "leverage": {
+        "debt_to_equity": 162.961,
+        "total_debt_over_mktcap": 0.232
+      },
+      "n_oos": 2341,
+      "qlike_m0_har": 0.524767,
+      "qlike_m1_har_vix": 0.429818,
+      "qlike_m2_har_vix_credit": 0.433812,
+      "qlike_gain_m1_to_m2_pct": -0.9292,
+      "vix_gain_m0_to_m1_pct": 18.0935,
+      "cw_t_credit_beyond_vix": 0.5273,
+      "cw_p_one_sided": 0.299,
+      "harvey_pass": false
+    },
+    "DLR": {
+      "group": "high_lev",
+      "leverage": {
+        "debt_to_equity": 76.592,
+        "total_debt_over_mktcap": 0.2973
+      },
+      "n_oos": 2341,
+      "qlike_m0_har": 0.497535,
+      "qlike_m1_har_vix": 0.443346,
+      "qlike_m2_har_vix_credit": 0.444855,
+      "qlike_gain_m1_to_m2_pct": -0.3404,
+      "vix_gain_m0_to_m1_pct": 10.8915,
+      "cw_t_credit_beyond_vix": 0.5843,
+      "cw_p_one_sided": 0.2795,
+      "harvey_pass": false
+    },
+    "CRM": {
+      "group": "high_lev",
+      "leverage": {
+        "debt_to_equity": 124.282,
+        "total_debt_over_mktcap": 0.303
+      },
+      "n_oos": 2341,
+      "qlike_m0_har": 0.588926,
+      "qlike_m1_har_vix": 0.551664,
+      "qlike_m2_har_vix_credit": 0.553261,
+      "qlike_gain_m1_to_m2_pct": -0.2894,
+      "vix_gain_m0_to_m1_pct": 6.3271,
+      "cw_t_credit_beyond_vix": -1.0702,
+      "cw_p_one_sided": 0.8577,
+      "harvey_pass": false
+    },
+    "MSFT": {
+      "group": "low_lev",
+      "leverage": {
+        "debt_to_equity": 30.271,
+        "total_debt_over_mktcap": 0.0428
+      },
+      "n_oos": 2341,
+      "qlike_m0_har": 0.481696,
+      "qlike_m1_har_vix": 0.428004,
+      "qlike_m2_har_vix_credit": 0.429112,
+      "qlike_gain_m1_to_m2_pct": -0.259,
+      "vix_gain_m0_to_m1_pct": 11.1465,
+      "cw_t_credit_beyond_vix": -1.0647,
+      "cw_p_one_sided": 0.8565,
+      "harvey_pass": false
+    },
+    "GOOGL": {
+      "group": "low_lev",
+      "leverage": {
+        "debt_to_equity": 20.026,
+        "total_debt_over_mktcap": 0.0227
+      },
+      "n_oos": 2341,
+      "qlike_m0_har": 0.494824,
+      "qlike_m1_har_vix": 0.447824,
+      "qlike_m2_har_vix_credit": 0.449473,
+      "qlike_gain_m1_to_m2_pct": -0.3683,
+      "vix_gain_m0_to_m1_pct": 9.4984,
+      "cw_t_credit_beyond_vix": 0.5069,
+      "cw_p_one_sided": 0.3061,
+      "harvey_pass": false
+    },
+    "AAPL": {
+      "group": "low_lev",
+      "leverage": {
+        "debt_to_equity": 79.548,
+        "total_debt_over_mktcap": 0.0174
+      },
+      "n_oos": 2341,
+      "qlike_m0_har": 0.472475,
+      "qlike_m1_har_vix": 0.422701,
+      "qlike_m2_har_vix_credit": 0.422483,
+      "qlike_gain_m1_to_m2_pct": 0.0517,
+      "vix_gain_m0_to_m1_pct": 10.5347,
+      "cw_t_credit_beyond_vix": 0.6039,
+      "cw_p_one_sided": 0.273,
+      "harvey_pass": false
+    },
+    "NVDA": {
+      "group": "low_lev",
+      "leverage": {
+        "debt_to_equity": 6.555,
+        "total_debt_over_mktcap": 0.0026
+      },
+      "n_oos": 2341,
+      "qlike_m0_har": 0.493248,
+      "qlike_m1_har_vix": 0.471934,
+      "qlike_m2_har_vix_credit": 0.474959,
+      "qlike_gain_m1_to_m2_pct": -0.641,
+      "vix_gain_m0_to_m1_pct": 4.3211,
+      "cw_t_credit_beyond_vix": -1.0427,
+      "cw_p_one_sided": 0.8515,
+      "harvey_pass": false
+    },
+    "META": {
+      "group": "low_lev",
+      "leverage": {
+        "debt_to_equity": 35.608,
+        "total_debt_over_mktcap": 0.0527
+      },
+      "n_oos": 2341,
+      "qlike_m0_har": 0.771155,
+      "qlike_m1_har_vix": 0.692421,
+      "qlike_m2_har_vix_credit": 0.69317,
+      "qlike_gain_m1_to_m2_pct": -0.1082,
+      "vix_gain_m0_to_m1_pct": 10.2099,
+      "cw_t_credit_beyond_vix": 0.6647,
+      "cw_p_one_sided": 0.2531,
+      "harvey_pass": false
+    }
+  },
+  "group_clark_west": {
+    "high_lev": {
+      "n_dates": 2341,
+      "cw_t": -0.9735011029671794,
+      "cw_p_one_sided": 0.8348478438506548,
+      "cw_mean_adj_loss_diff": -1.0924563084771914e-09,
+      "hac_lag": 23,
+      "harvey_pass": false
+    },
+    "low_lev": {
+      "n_dates": 2341,
+      "cw_t": -0.7509901231809957,
+      "cw_p_one_sided": 0.7736707000472388,
+      "cw_mean_adj_loss_diff": -4.823958110243919e-09,
+      "hac_lag": 23,
+      "harvey_pass": false
+    }
+  },
+  "panel_interaction": {
+    "n_obs": 28460,
+    "n_dates": 2846,
+    "beta_credit": 2.4748090804698033,
+    "t_credit": 1.7033573146392516,
+    "beta_credit_x_high": -1.0944077040286702,
+    "t_credit_x_high": -0.9464134056900273,
+    "p_credit_x_high": 0.34393777048424357,
+    "beta_logvix": 0.4683807843670131,
+    "t_logvix": 24.57016302862505,
+    "interaction_harvey_pass": false,
+    "note": "credit_x_high>0 & Harvey-sig => levered issuers' vol responds MORE to credit beyond VIX (in-sample diagnostic, date-clustered)."
+  },
+  "raw_vs_controlled": {
+    "high_lev": {
+      "n": 14440,
+      "raw_corr_credit_rv": 0.0314,
+      "partial_corr_given_vix": 0.0143,
+      "raw_minus_partial": 0.0172
+    },
+    "low_lev": {
+      "n": 14440,
+      "raw_corr_credit_rv": 0.0251,
+      "partial_corr_given_vix": 0.0054,
+      "raw_minus_partial": 0.0197
+    }
+  },
+  "vix_regime": {
+    "high_lev": {
+      "calm_vix_lt20": {
+        "n": 7820,
+        "qlike_m1": 0.696466,
+        "qlike_m2": 0.697655,
+        "qlike_gain_pct": -0.171
+      },
+      "stress_vix_ge20": {
+        "n": 3885,
+        "qlike_m1": 0.492106,
+        "qlike_m2": 0.494642,
+        "qlike_gain_pct": -0.515
+      }
+    },
+    "low_lev": {
+      "calm_vix_lt20": {
+        "n": 7820,
+        "qlike_m1": 0.520262,
+        "qlike_m2": 0.521422,
+        "qlike_gain_pct": -0.223
+      },
+      "stress_vix_ge20": {
+        "n": 3885,
+        "qlike_m1": 0.43685,
+        "qlike_m2": 0.43832,
+        "qlike_gain_pct": -0.337
+      }
+    }
+  },
+  "crwv_case_illustration": {
+    "available": true,
+    "n_days": 326,
+    "first_date": "2025-03-28",
+    "sample_note": "post-IPO 2025+ only, NO bear market, single regime \u2014 CASE ILLUSTRATION, excluded from all formal tests",
+    "contemporaneous_corr_credit_vs_rv20": 0.1708,
+    "mean_ann_vol_pct": 102.23
+  },
+  "fred_oas_secondary": {
+    "available": true,
+    "note": "FRED HY OAS window 2023-07-17..2026-07-15 (n=787); no 2020/2022 bear market -> UNDERPOWERED secondary robustness only.",
+    "n": 3730,
+    "highlev_raw_corr_hyoas_rv": 0.031,
+    "highlev_partial_corr_given_vix": 0.0222
+  },
+  "prior_null_context": {
+    "K872": "HY OAS raw r=0.55 but delta-R2 after VIX = 0.0003 (VIX sufficiency)",
+    "T14": "credit+yield only +1.6% incremental R2 (econ trivial)",
+    "K1621": "EM sov-credit vol does not lead EM equity vol daily (contemp factor)",
+    "K1529": "FOMC credit NULL with free ETF proxies; firm/intraday needed to reopen",
+    "K1538": "bond-fund run-pressure proxy weak, below gates"
+  },
+  "charts": [
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-79726798-credit-firm/experiments/credit_stress_firm_level/plots/group_incremental.png",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-79726798-credit-firm/experiments/credit_stress_firm_level/plots/raw_vs_controlled.png",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-79726798-credit-firm/experiments/credit_stress_firm_level/plots/vix_regime.png"
+  ]
+}
