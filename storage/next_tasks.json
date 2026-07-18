@@ -33382,13 +33382,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T01:04:40.554095+00:00",
+    "completed_at": "2026-07-18T01:28:30.827143+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T01:04:40.554095+00:00",
-      "last_clean_observed_at": "2026-07-18T01:04:40.554095+00:00"
+      "resolved_at": "2026-07-18T01:28:30.827143+00:00",
+      "last_clean_observed_at": "2026-07-18T01:28:30.827143+00:00"
     }
   },
   {
@@ -41223,7 +41223,7 @@
     "description": "探討科技巨頭 AI 資本支出逼近新高，但費半指數在 7 月中旬拉回，反映市場對回報率轉趨謹慎。可量化角度：計算 Big Tech 資本支出指引變動與費半成分股歷史波動率的相關性，並利用 VIX 進行風險對沖。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-17T22:00:29+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -41287,11 +41287,31 @@
         "to": "pending",
         "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-18T01:09:02.041094+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2ce639b69cd6427895148ca8e0a4b7b7"
+      },
+      {
+        "ts": "2026-07-18T01:09:02.276788+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-2ce639b69cd6427895148ca8e0a4b7b7"
+      },
+      {
+        "ts": "2026-07-18T01:27:02.111624+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-2ce639b69cd6427895148ca8e0a4b7b7"
       }
     ],
-    "started_at": "2026-07-17T22:11:10.848796+00:00",
+    "started_at": "2026-07-18T01:09:02.276772+00:00",
     "last_released_at": "2026-07-18T00:50:04.157373+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-18T01:27:02.111608+00:00",
+    "result": "發佈 mile_78899a5c (feed live, SSR 驗證 title+5圖+內文 200)；evidence-package 完整、18 數字對 evidence.json 核對、anti_ai_gate PASS、Gemini 潤飾；FB 雙發佈標 pending 並建 followup fb_repost_mile_78899a5c"
   },
   {
     "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260717T231545117444Z_a1",
@@ -41473,5 +41493,18 @@
       }
     ],
     "started_at": "2026-07-18T01:01:44.681180+00:00"
+  },
+  {
+    "id": "fb_repost_mile_78899a5c",
+    "status": "pending",
+    "task_type": "platform_ops",
+    "title": "FB 補發 mile_78899a5c『費半跌了一成六，VIX 卻在睡覺』(trending 雙發佈；feed 已發, FB 待 Chrome)",
+    "description": "trending_repost mile_78899a5c 已發 VolPred feed，但 hourly fire 無 Chrome/Facebook MCP 無法雙發佈。請在 interactive session 依 .claude/skills/fb-publishing + trending-repost/references/fb-ivanlai-tone.md：查重(先 get_page_text 確認 Ivan Lai 牆沒發過)→主貼文改寫 200-400 字(無連結,附 vol_thermometers 或 concentrated_pain 圖)→第一則留言貼 https://volpred.zeabur.app/v3/reports/mile_78899a5c → mark_fb_post_status.py --mile-id mile_78899a5c --status success。parent_trending_task=trending_repost_2026_07_18_ai支出",
+    "priority": 2,
+    "source": "hourly-slot-1",
+    "created_at": "2026-07-18T09:20:00+08:00",
+    "completed_at": null,
+    "tombstone": false,
+    "archived_at": null
   }
 ]

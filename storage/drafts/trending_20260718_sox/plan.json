@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "title": "費半在修正，VIX 卻沒醒：三支溫度計，三個世界",
+  "subtitle": "科技巨頭猛砸 AI capex，晶片股卻先回檔，避險工具別拿錯",
+  "evidence": {
+    "ev": {
+      "path": "experiments/trending_20260718_sox_capex/evidence.json",
+      "sha256": "67cf0b569cb19d3eab0b8daaece818c45cdab183df904b193d3489ab57b16d1d",
+      "label": "yfinance 收盤價與 SMH 選擇權隱含波動，截至 2026-07-17"
+    }
+  },
+  "panels": [
+    {
+      "name": "01_thermometers",
+      "info": "results",
+      "style": "professional",
+      "title": "同一場費半修正，三支波動率溫度計讀數差近三倍",
+      "alt": "VIX、費半已實現波動、費半隱含波動三個讀數天差地遠",
+      "sources": [
+        "ev"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "VIX（S&P 指數恐慌）",
+          "value": {
+            "source": "ev",
+            "path": "vix.last",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "show_plus": false
+            }
+          },
+          "note": "還在平靜區間"
+        },
+        {
+          "kind": "metric",
+          "label": "費半已實現波動（SMH 近月，年化）",
+          "value": {
+            "source": "ev",
+            "path": "realized_vol_20d.SMH.rv20_now_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "show_plus": false,
+              "absolute": false
+            }
+          },
+          "note": "近月單日一度近一成振幅"
+        },
+        {
+          "kind": "metric",
+          "label": "費半隱含波動（SMH 近月選擇權）",
+          "value": {
+            "source": "ev",
+            "path": "smh_atm_iv_pct.value",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "show_plus": false,
+              "absolute": false
+            }
+          },
+          "note": "市場已在幫這個 sector 定價"
+        }
+      ]
+    },
+    {
+      "name": "02_concentrated",
+      "info": "concept",
+      "style": "editorial",
+      "title": "痛點集中在費半，指數層級幾乎沒事",
+      "alt": "SMH 自高點重挫，大盤只小跌，VIX 只微升",
+      "sources": [
+        "ev"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "費半 SMH 自六月下旬高點回撤",
+          "value": {
+            "source": "ev",
+            "path": "pullback.SMH.drawdown_from_peak_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "show_plus": false,
+              "absolute": false
+            }
+          },
+          "note": "同期 MTD 也接近雙位數"
+        },
+        {
+          "kind": "metric",
+          "label": "美股大盤 S&P 同期回撤",
+          "value": {
+            "source": "ev",
+            "path": "pullback.^GSPC.drawdown_from_peak_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "show_plus": false,
+              "absolute": false
+            }
+          },
+          "note": "大盤基本沒被波及"
+        },
+        {
+          "kind": "metric",
+          "label": "VIX 六月中的起點水位",
+          "value": {
+            "source": "ev",
+            "path": "vix.mid_june",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "show_plus": false
+            }
+          },
+          "note": "只多約兩點多，遠追不上費半跌幅"
+        }
+      ]
+    },
+    {
+      "name": "03_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "避險工具要對準 sector，不是對準大盤",
+      "alt": "VIX 對半導體曝險敏感度低，capex 與晶片股已脫鉤",
+      "sources": [
+        "ev"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "SMH 與 VIX 近兩個月相關性",
+          "value": {
+            "source": "ev",
+            "path": "correlation.smh_vs_vix_60d",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": false
+            }
+          },
+          "note": "方向相反，但 VIX 幅度太小賠不夠"
+        },
+        {
+          "kind": "metric",
+          "label": "四大雲端巨頭與費半近兩個月相關性",
+          "value": {
+            "source": "ev",
+            "path": "correlation.hyper_vs_sox_60d",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": false
+            }
+          },
+          "note": "capex 敘事與晶片股已脫鉤"
+        },
+        {
+          "kind": "text",
+          "heading": "一句話帶走",
+          "body": [
+            "曝險集中在半導體，就用半導體自己的選擇權避險，別用只反映大盤情緒的 VIX。"
+          ]
+        }
+      ]
+    }
+  ]
+}

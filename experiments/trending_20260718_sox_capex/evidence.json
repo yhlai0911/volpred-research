@@ -1,0 +1,103 @@
+{
+  "as_of": "2026-07-18",
+  "data_last_date": "2026-07-17",
+  "n_obs": 386,
+  "pullback": {
+    "^SOX": {
+      "sym": "^SOX",
+      "recent_peak": 14634.72,
+      "peak_date": "2026-06-22",
+      "last": 11673.89,
+      "last_date": "2026-07-17",
+      "drawdown_from_peak_pct": -20.23,
+      "mtd_pct": -12.58
+    },
+    "SMH": {
+      "sym": "SMH",
+      "recent_peak": 668.91,
+      "peak_date": "2026-06-22",
+      "last": 556.53,
+      "last_date": "2026-07-17",
+      "drawdown_from_peak_pct": -16.8,
+      "mtd_pct": -10.3
+    },
+    "^GSPC": {
+      "sym": "^GSPC",
+      "recent_peak": 7575.39,
+      "peak_date": "2026-07-10",
+      "last": 7457.69,
+      "last_date": "2026-07-17",
+      "drawdown_from_peak_pct": -1.55,
+      "mtd_pct": -0.34
+    }
+  },
+  "realized_vol_20d": {
+    "^SOX": {
+      "rv20_now_pct": 67.3,
+      "rv20_mid_june_pct": 70.1,
+      "delta_pct_pts": -2.8,
+      "ratio": 0.96
+    },
+    "SMH": {
+      "rv20_now_pct": 58.3,
+      "rv20_mid_june_pct": 59.8,
+      "delta_pct_pts": -1.5,
+      "ratio": 0.97
+    },
+    "NVDA": {
+      "rv20_now_pct": 38.9,
+      "rv20_mid_june_pct": 44.1,
+      "delta_pct_pts": -5.2,
+      "ratio": 0.88
+    },
+    "AVGO": {
+      "rv20_now_pct": 48.4,
+      "rv20_mid_june_pct": 71.3,
+      "delta_pct_pts": -23.0,
+      "ratio": 0.68
+    },
+    "AMD": {
+      "rv20_now_pct": 72.8,
+      "rv20_mid_june_pct": 84.9,
+      "delta_pct_pts": -12.1,
+      "ratio": 0.86
+    },
+    "TSM": {
+      "rv20_now_pct": 58.7,
+      "rv20_mid_june_pct": 46.6,
+      "delta_pct_pts": 12.0,
+      "ratio": 1.26
+    },
+    "MU": {
+      "rv20_now_pct": 109.6,
+      "rv20_mid_june_pct": 116.3,
+      "delta_pct_pts": -6.7,
+      "ratio": 0.94
+    }
+  },
+  "vix": {
+    "last": 18.77,
+    "mid_june": 16.41,
+    "ytd_mean": 19.13,
+    "ytd_pctile_of_last": 60.3
+  },
+  "correlation": {
+    "hyper_vs_sox_60d": 0.06,
+    "hyper_vs_sox_120d": 0.26,
+    "sox_vs_vix_60d": -0.57,
+    "smh_vs_vix_60d": -0.6,
+    "hyper_vs_vix_60d": -0.5
+  },
+  "vix_hedge": {
+    "smh_ret_on_dvix_beta": -0.0105,
+    "interpretation": "SMH 單日報酬對 VIX 單日變動(點)的敏感度",
+    "n": 120,
+    "avg_dvix_on_smh_down_days": 1.131
+  },
+  "smh_atm_iv_pct": {
+    "value": 50.3,
+    "expiry": "2026-07-22",
+    "spot": 556.53,
+    "source": "yfinance SMH option chain near-month ATM call"
+  }
+}
