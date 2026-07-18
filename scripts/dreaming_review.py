@@ -1133,9 +1133,24 @@ def send_dreaming_email(report: dict[str, Any], now: datetime, storage_dir: str)
             f"1. 看完整報告：`storage/ops/dreaming/{date_str}.json`。",
             "2. 治理類 findings（error_log / rules / knowledge.json）為 **propose-only** — 主線程審 "
             "proposal 後手動決定是否套用，dreaming 不自動改。",
-            "3. escalations(critical) → 開 `docs/refactor_plan_<topic>.md` 走 Three-Strike 根治。",
-            "4. auto_dispatch 類（orphaned failure）→ `--apply-auto` 才會派修復 task（預設關，先人工審）。",
         ]
+    )
+    # 建議行動要與嚴重度成比例（boss email-12149 2026-07-18）：escalations=0 時 findings
+    # 都是小型/漸進處理（補 retry 策略、memory 整併），反射式推「從底層重構」是過度反應。
+    # 只有真的有 escalation 才提 Three-Strike / refactor_plan。
+    if c["escalations"]:
+        lines.append(
+            f"3. **escalations={c['escalations']}（critical）** → 開 `docs/refactor_plan_<topic>.md` "
+            "走 Three-Strike 根治；這是連 3 次 dreaming run 仍未解的結構性問題，才值得動根。"
+        )
+    else:
+        lines.append(
+            "3. **escalations=0 → 不需要重構**。本輪 findings 為小型/漸進處理（補 retry 策略、"
+            "memory 整併等），依 finding 個別 propose 即可，**不啟動 Three-Strike / refactor_plan**。"
+            "找到問題 ≠ 從底層重構。"
+        )
+    lines.append(
+        "4. auto_dispatch 類（orphaned failure）→ `--apply-auto` 才會派修復 task（預設關，先人工審）。"
     )
     return send_alert(level, title, "\n".join(lines), storage_dir=storage_dir)
 

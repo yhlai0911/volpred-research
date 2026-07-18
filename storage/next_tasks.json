@@ -33310,13 +33310,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T02:01:00.734028+00:00",
+    "completed_at": "2026-07-18T03:00:55.921350+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T02:01:00.734028+00:00",
-      "last_clean_observed_at": "2026-07-18T02:01:00.734028+00:00"
+      "resolved_at": "2026-07-18T03:00:55.921350+00:00",
+      "last_clean_observed_at": "2026-07-18T03:00:55.921350+00:00"
     }
   },
   {
@@ -33328,13 +33328,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T02:35:33.955278+00:00",
+    "completed_at": "2026-07-18T03:06:06.404828+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T02:35:33.955278+00:00",
-      "last_clean_observed_at": "2026-07-18T02:35:33.955278+00:00"
+      "resolved_at": "2026-07-18T03:06:06.404828+00:00",
+      "last_clean_observed_at": "2026-07-18T03:06:06.404828+00:00"
     }
   },
   {
@@ -34370,37 +34370,15 @@
   },
   {
     "id": "fix_draft_pool_refill_tests_red_in_worktree",
-    "priority": 2,
-    "task_type": "ops_fix",
     "status": "succeeded",
+    "task_type": "ops_fix",
     "title": "tests/test_draft_pool_refill.py 在任何 worktree 都紅（CanonicalWriteBlocked），只有 main 綠",
-    "description": "發現於 2026-07-15 hourly-06（執行 fix_reap_orphan_deliverables_gap 時順帶查出）。\n\n症狀：在 .claude/worktrees/* 內跑 `uv run --extra dev python -m pytest tests/test_draft_pool_refill.py` → 4 failed（test_maybe_refill_fires_when_pool_all_unreleasable / _reports_accurate_by_type_on_fallback / _handles_refill_failure / _handles_timeout），全數 CanonicalWriteBlocked，錯誤路徑指向 <worktree>/storage/next_tasks.json。同一組測試在 main checkout 20 passed。\n\n已證明為 pre-existing：用 git stash 把當時的改動全部排除後重跑，照樣 4 red → 與該改動無關。\n\n影響：CI 只跑 main 所以永遠綠，但每個 worktree agent 跑測試都會看到紅燈。真正的成本不是這 4 個 test，而是 agent 會學會忽略紅燈 —— 紅燈一旦變成雜訊，測試就不再是 gate。\n\n根因方向：某個 writer path 在 worktree 內沒被 monkeypatch 導向 tmp_path，很可能是用 Path(__file__).parents[N] 或 git-common-dir 解析 ROOT，worktree 下解析結果與 main 不同。\n\n修法：把該 writer 的路徑解析收斂到單一可注入來源，讓測試在 worktree 與 main 行為一致；並補一條「在 worktree 內跑」的 regression gate，否則同類問題只會再犯。",
-    "created_at": "2026-07-14T22:24:03.682471+00:00",
+    "priority": 2,
     "source": "agent-discovered",
-    "created_by": "hourly-06",
-    "status_history": [
-      {
-        "ts": "2026-07-15T02:12:09.808125+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-10"
-      },
-      {
-        "ts": "2026-07-15T02:12:21.167955+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-10"
-      },
-      {
-        "ts": "2026-07-15T02:23:26.039768+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-10"
-      }
-    ],
-    "started_at": "2026-07-15T02:12:21.167939+00:00",
+    "created_at": "2026-07-14T22:24:03.682471+00:00",
     "completed_at": "2026-07-15T02:23:26.039751+00:00",
-    "result": "根因已由先前 commit 修好（c2c088fca 03:06 補 canonical guard + 873cfb274 06:10 加 module-wide autouse 隔離 fixture）；hourly-06 06:24 是在未拉到 06:10 fix 的舊 worktree 觀察到瞬時紅燈才建 task。驗證：main + 全新 HEAD worktree 皆 20 passed。補上真正缺的 worktree regression gate：test_promote_starved_articles_blocks_canonical_write_target（負向測試，把 tmp 偽裝成 canonical root 重現 worktree 條件，斷言 promote 寫入被 guard 擋下 CanonicalWriteBlocked 且檔案未被污染）。mutation 檢查證明 guard 為 load-bearing（拿掉 guard 則 canonical 被寫）。現 21 passed，main/worktree parity 確立。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T03:01:22.618230+00:00"
   },
   {
     "id": "ci-red-29371532833",
@@ -34663,42 +34641,15 @@
   },
   {
     "id": "daily_digest_20260715",
-    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
-    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
-    "task_type": "daily_digest",
-    "priority": 1,
     "status": "succeeded",
-    "dispatch_lane": "agent",
-    "created_at": "2026-07-15T09:00:01.139174+08:00",
+    "task_type": "daily_digest",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "priority": 1,
     "source": "scheduled",
-    "tags": [
-      "daily_digest",
-      "reader_facing",
-      "精選導讀"
-    ],
-    "status_history": [
-      {
-        "ts": "2026-07-15T02:15:55.260468+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-15T02:15:55.494146+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-15T02:36:41.316946+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-15T02:15:55.494132+00:00",
+    "created_at": "2026-07-15T09:00:01.139174+08:00",
     "completed_at": "2026-07-15T02:36:41.316932+00:00",
-    "result": "Published mile_ee178213: current-event AI power-grid digest with 5 archive sources spanning 65 days and 6 verified images. Anti-AI/publisher checks and 60 targeted tests passed; feed sync, live SSR, links, and content-quality verified."
+    "tombstone": true,
+    "archived_at": "2026-07-18T03:01:22.618230+00:00"
   },
   {
     "id": "alert_content_quality_20260715",
@@ -34739,111 +34690,39 @@
   },
   {
     "id": "email-12104-01db21",
-    "title": "[email_reply] Re: [VolPred Alert][WARN] 內容品質巡檢：發文太密集",
-    "description": "Gmail UID: 12104\nMessage-ID: <6123B504-AA7D-424E-8A93-D950A4BD0E05@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 15 Jul 2026 10:02:01 +0800\nSubject: Re: [VolPred Alert][WARN] 內容品質巡檢：發文太密集\n\n--- 用戶回信內容 ---\n懶人包圖應該是用Codex app的codex exec生成 notebooklm只是備援 立刻處理\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月15日 09:01 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 內容品質巡檢：發文太密集\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> 系統偵測到讀者端內容更新可能中斷，需要先恢復發文節奏。\r\n> \r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> \r\n> 行動\r\n> \r\n> 先補一篇可發佈文章或觸發釋出流程，再追查為什麼排程沒接上。\r\n> \r\n> 已自動處理\r\n> \r\n> 已建立任務 alert_content_quality_20260715（流程治理, P2），下一班 dispatch 會認領執行。任務逾時未被認領時，dispatcher 的 starvation lockout 會強制把它推上候選清單。老闆無需動作。\r\n> \r\n> 觸發條件\r\n> \r\n> 發文節奏: 發文太密集 — 1 對 間距 < 30min（最新間距列表：[57.71, 0.16, 213.19]）\r\n> 影響\r\n> \r\n> 內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\r\n> \r\n> 處理步驟（任務已自動建立，以下供執行者稽核）（主線程 auto-remediation）\r\n> \r\n> 同一天出現超過一篇每日精選導讀 → 檢視 storage/ops/content_quality_report.json items，挑 1 篇 retract：uv run volpred ops unpublish --mile-id <id>；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\r\n> 發文太密集 → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\r\n> 發文間隔過久 → 立即 release-pool-by-settings 或派 fresh-arc 日常文章 補位；同時查 release deadlock (docs/refactor_plan_release_layer_deadlock.md)。\r\n> 標題前綴重複 → 前端 header 與 title 擇一移除前綴；前端在 frontend-v2-fix/src/app/page.tsx + digest/[id]/page.tsx。\r\n> 懶人包覆蓋不足 → 針對 missing_examples 走 lazypack-infographic/NotebookLM 生圖，append ## 懶人包圖組 後 用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-15T02:15:07.768016+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] 內容品質巡檢：發文太密集",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12104,
-    "email_message_id": "<6123B504-AA7D-424E-8A93-D950A4BD0E05@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][WARN] 內容品質巡檢：發文太密集",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-15T02:16:47.790277+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-15T02:16:48.065075+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-15T02:21:35.048575+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "interactive-claude"
-      }
-    ],
-    "started_at": "2026-07-15T02:16:48.065060+00:00",
+    "created_at": "2026-07-15T02:15:07.768016+00:00",
     "completed_at": "2026-07-15T02:21:35.048561+00:00",
-    "result": "修正 lazypack 生成工具排序：alerts.py remediation 文字 + lazypack-infographic SKILL.md legacy 段，codex exec 首選、NotebookLM 降 fallback（依 boss 2026-06-30 directive）。close email 已寄（needs-reply，附確定性 renderer vs codex bespoke 一問）。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T03:01:22.618230+00:00"
   },
   {
     "id": "telegram-784",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 784）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-15T02:25:54.059249+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 784）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你是運營經理，你決定 \n但notebooklM已經被我放到後面 這是確定的\n畢竟Codex畫的圖好太多了\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T02:27:25.285884+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram_responder"
-      },
-      {
-        "ts": "2026-07-15T02:28:22.605847+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram_responder"
-      }
-    ],
     "completed_at": "2026-07-15T02:28:22.605832+00:00",
-    "result": "已回覆老闆（Telegram msg 785）。老闆定調：NotebookLM 放後面、圖走 Codex primary path，此 standing directive 已寫入 auto-memory（feedback_notebooklm_deprioritized_codex_figures.md + MEMORY.md pointer）。queued 的 platform_ops_enforce_lazypack_in_publish_pipeline 後續由 hourly dispatch 執行時改走 Codex 圖路徑。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T03:01:22.618230+00:00"
   },
   {
     "id": "email-12109-9109fb",
-    "title": "[email_reply] Re: [VolPred Alert][INFO] 🔴【需老闆回信】Re: [VolPred 警報][WARN] 內容品質巡檢：發文太密集 — 懶人包生成改用 ",
-    "description": "Gmail UID: 12109\nMessage-ID: <DFC2884C-38D9-4E52-8D20-D88E7CA9C5B4@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 15 Jul 2026 10:26:30 +0800\nSubject: Re: [VolPred Alert][INFO] 🔴【需老闆回信】Re: [VolPred 警報][WARN] 內容品質巡檢：發文太密集 — 懶人包生成改用 codex exec、NotebookLM 降 fallback（已修，附一問）\n\n--- 用戶回信內容 ---\n你是運營經理，你決定 \r\n但notebooklM已經被我放到後面 這是確定的\r\n畢竟Codex畫的圖好太多了\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月15日 10:21 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 🔴【需老闆回信】Re: [VolPred 警報][WARN] 內容品質巡檢：發文太密集 — 懶人包生成改用 codex exec、NotebookLM 降 fallback（已修，附一問）\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 🔴 此 email 需老闆做出決定才能繼續推進。\r\n> 請看下方「需要的決定」段，回信告知選項即可。\r\n> \r\n> 懶人包生成工具排序已修正：codex exec 首選、NotebookLM 降為 fallback\r\n> \r\n> 老闆您好，關於「懶人包圖應該用 Codex app 的 codex exec 生成，notebooklm 只是備援」這點，已立即處理完成。\r\n> \r\n> 問題根因\r\n> \r\n> 您在 09:01 收到的內容品質 警報，其「建議行動」第 5 條把生成工具寫成 lazypack-infographic/NotebookLM 生圖，等於把 NotebookLM 當首選 —— 這與您 2026-06-30 的既有 directive（codex exec 為首選、NotebookLM 為 fallback，gen_lazypack_codex.py 檔頭已明載）矛盾。警報 文字沒同步到那條政策，才會誤導。\r\n> \r\n> 已修正（2 處）\r\n> \r\n> 檔案\t改動\r\n> src/volpred/ops/alerts.py（警報 email 模板）\t第 5 條 remediation 改為：primary=確定性 renderer；需 LLM codegen 時用 codex exec，NotebookLM 僅 fallback、不得當首選\r\n> .claude/skills/lazypack-infographic/SKILL.md\tlegacy 段原本把 codex 工具與 NotebookLM AI-poster 當「兩者同級」→ 改為明確排序：codex exec 首選、NotebookLM fallback\r\n> 驗證：alerts.py import OK、無測試斷言那段文字（改動安全）。\r\n> \r\n> 一個需要您拍板的架構點（非阻塞）\r\n> \r\n> 補圖現在其實有兩條非-NotebookLM 路徑，想跟您確認預設要走哪條：\r\n> \r\n> 確定性 renderer（lazypack_render.py，2026-07-13 起的現行 primary）：plan.json 把每個數字用 hash 綁到 evidence JSON，固定模板出圖、零 LLM 呼叫，完全可重跑、無幻覺。缺點是版面是固定模板（concept/method/results）。\r\n> codex exec bespoke poster（您指的這條）：codex 寫一支 data-bound 的 Pillow/matplotlib 腳本，版面可客製（bento-grid、大數字），數字一樣從 evidence 讀出。\r\n> 兩條都符合「不用 NotebookLM、不花錢、不幻覺」。目前現行 primary 是第 1 條（比 codex exec 更省、更可重現）。\r\n> \r\n> 請問：填補懶人包缺口時，預設要走 (1) 確定性模板 renderer，還是 (2) codex exec 客製海報？若您要的是更客製的視覺，我就把 codex exec 提為 primary；若可重現/零 LLM 優先，維持現狀即可。無論哪個，NotebookLM 都已降為最後備援。\r\n> \r\n> 對應任務：email-12104-01db21（老闆回信, P1）\n",
-    "task_type": "email_reply",
-    "priority": 3,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-15T02:30:03.752705+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 🔴【需老闆回信】Re: [VolPred 警報][WARN] 內容品質巡檢：發文太密集 — 懶人包生成改用 ",
+    "priority": 3,
     "source": "gmail_inbox_poll",
-    "email_uid": 12109,
-    "email_message_id": "<DFC2884C-38D9-4E52-8D20-D88E7CA9C5B4@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][INFO] 🔴【需老闆回信】Re: [VolPred 警報][WARN] 內容品質巡檢：發文太密集 — 懶人包生成改用 codex exec、NotebookLM 降 fallback（已修，附一問）",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-15T02:31:40.762061+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-15T02:31:41.031794+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "interactive-claude"
-      },
-      {
-        "ts": "2026-07-15T02:36:15.383423+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "interactive-claude"
-      }
-    ],
-    "started_at": "2026-07-15T02:31:41.031780+00:00",
+    "created_at": "2026-07-15T02:30:03.752705+00:00",
     "completed_at": "2026-07-15T02:36:15.383408+00:00",
-    "result": "ops 決策拍板：懶人包視覺三層排序(routine=確定性renderer預設 / 旗艦=codex exec升sanctioned primary / NotebookLM=最後備援)。codify進SKILL.md。寄close email(sent=true, notif ce6c3679)。async全面換codex留未來platform_ops。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T03:01:22.618230+00:00"
   },
   {
     "id": "ci-red-29383038432",
@@ -41416,9 +41295,115 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-18T02:35:02.766379+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 936）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我不要用API 我不要付錢 要用agy\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] ⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用\n\n📌 白話結論\nscripts/gemini_ask.py 於 2026-07-17T20:11:18.782353+00:00 被呼叫並成功打 Gemini API。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\nscripts/gemini_ask.py 於 2026-07-17T20:11:18.782353+00:00 被呼叫並成功打 Gemini API。\n• caller: uv (ppid=90334)\n• model: gemini-3.1-pro-preview\n• prompt 6 字 / 回應 1671 字\n\n📌 影響\n此呼叫直接打 PAID Gemini API → 產生實際 API 費用。gemini_ask.py 是 agy 的 fallback，正常情況不應頻繁觸發；短時間多次出現代表 agy 或主路徑可能異常。\n\n🛠️ 建議行動\n查 storage/logs/gemini_ask_usage.jsonl 看呼叫頻率與 caller。若非預期：查為何沒走 agy；若為單次 fallback：忽略即可。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我不要用API 我不要付錢 要用agy\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] ⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用\n\n📌 白話結論\nscripts/gemini_ask.py 於 2026-07-17T20:11:18.782353+00:00 被呼叫並成功打 Gemini API。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\nscripts/gemini_ask.py 於 2026-07-17T20:11:18.782353+00:00 被呼叫並成功打 Gemini API。\n• caller: uv (ppid=90334)\n• model: gemini-3.1-pro-preview\n• prompt 6 字 / 回應 1671 字\n\n📌 影響\n此呼叫直接打 PAID Gemini API → 產生實際 API 費用。gemini_ask.py 是 agy 的 fallback，正常情況不應頻繁觸發；短時間多次出現代表 agy 或主路徑可能異常。\n\n🛠️ 建議行動\n查 storage/logs/gemini_ask_usage.jsonl 看呼叫頻率與 caller。若非預期：查為何沒走 agy；若為單次 fallback：忽略即可。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T02:35:41.791301+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-18T02:37:30.894107+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-18T02:37:30.894093+00:00",
+    "result": "已 Telegram 回覆(msg938)+記憶寫入 feedback-no-paid-gemini-use-agy+repo改動任務 assign_f8da7545 入池"
+  },
+  {
+    "id": "telegram-937",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-18T02:35:41.903399+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 937）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n徹底解決，並立刻用底層架構完成重構\n不准再出現這種遺留的狀況\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] 每日大體檢 07-18: 0 critical / 6 warn\n\n📌 白話結論\n• [warn][mission_progress] 14 筆 blocked 任務滯留 >30 天且無 blocked_until 出口（前 5：['K1169', 'Paper3_expansion_synthesis_decision_meta', 'email-1183…\n\n📌 影響\n影響研究結論累積與論文推進。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n📌 每日大體檢 — overall=warn\n\n• [warn][mission_progress] 14 筆 blocked 任務滯留 >30 天且無 blocked_until 出口（前 5：['K1169', 'Paper3_expansion_synthesis_decision_meta', 'email-11836-9833be', 'K492_article_general_v2', 'fb_page_graph_api_integration']）—— escalate-or-close，不可無限停放\n• recovery: 逐筆裁決：可自主解的解、需 owner 的併決策 email、死的 closed_no_action/expired\n• [info][reader_metrics] top-3 讀者互動: 買的時候時點沒那麼重要，賣的時候順序可能決定你幾(score=380); VIX 在 2026 衝到 31，標普同期漲 8(score=343); K1006: 台指期隔夜跳空累計 83.6% 卻(score=170)\n• [warn][dedup_calibration] arc/theme 校準漂移：legitimate recurring FOM\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T02:40:07.251796+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-18T02:40:52.981590+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-18T02:40:52.981577+00:00",
+    "result": "diagnosed root cause; enqueued P1 arch task assign_79c90a36; replied via telegram"
+  },
+  {
+    "id": "assign_f8da7545",
+    "title": "把所有 Gemini headless 呼叫改走 agy，禁用付費 gemini_ask.py API（老闆硬指令 msg936）",
+    "description": "老闆 2026-07-18 Telegram 硬指令：不要用 Gemini API、不要付錢，headless Gemini 一律走 agy（免費 OAuth CLI）。背景：storage/logs/gemini_ask_usage.jsonl 顯示 gemini_ask.py（直打 PAID Gemini API）近期仍被觸發（2026-07-17~18 共 4 次，caller=uv/zsh）。要做的事：(1) 盤點所有仍呼叫 scripts/gemini_ask.py 的路徑（gen_image.py、skills、docs、test_gemini_ask_notify.py 等）；(2) 把預設 headless 路徑改成 agy -p（見 memory reference-antigravity-cli 的用法/陷阱：-p 吃參數不吃 stdin、多行用 heredoc、換模型用 ANTIGRAVITY_MODEL）；(3) 讓 gemini_ask.py 變成需明確 opt-in 的最後手段或直接加 hard guard（預設 refuse + 提示改用 agy），避免任何自動流程再打付費 API；(4) 更新 gemini-cli skill / reference_dual_cli_availability / CLAUDE.md 敘述使其一致；(5) 跑一次 agy -p smoke 確認可用。驗證：改完後主要自動流程（review/lazypack/圖）不再出現在 gemini_ask_usage.jsonl。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-18T02:36:48.485439+00:00",
+    "created_by": "telegram_responder"
+  },
+  {
+    "id": "assign_79c90a36",
+    "title": "[P1][arch] 徹底重構 blocked 任務生命週期：writer 強制 blocked_until invariant + 清償 14 筆遺留停放",
+    "description": "【老闆 Telegram msg 937 P1 指令：徹底解決 + 底層架構重構，不准再出現遺留 blocked 停放】\n\n根因（已診斷）：canonical queue 允許 task 進入 status=blocked 卻不帶 blocked_until。現有 sweeper scripts/unblock_expired_blocked_tasks.py 只會 re-pend「blocked_until 已過期」的任務；對「根本沒有 blocked_until」的 blocked 任務完全掃不到 → 無限停放。目前有 14 筆滯留 >30 天。\n\n底層架構重構（必做，寫在 writer 層讓其不可能再發生）：\n1. 在 canonical queue writer（src/volpred/ops/next_tasks.py，含 append/write_tasks_locked/任何把 status 設成 blocked 的路徑）強制 invariant：status=='blocked' 必須帶非空 blocked_until；缺者一律拒寫或自動補 _default_blocked_until()（同 scripts/mark_task_blocked.py）。讓「blocked 而無出口」在架構上不可能存在。\n2. 擴充 sweeper（unblock_expired_blocked_tasks.py 或新 escalation pass）：對「無 blocked_until」的 legacy blocked 一律視為需裁決 → escalate-or-close，禁止靜默停放。\n3. 加機械 gate（如 scripts/tests/ 或 daily_checkup 維度）：任何 blocked 無 blocked_until 立即 fail，防回歸。\n\n立即清償這 14 筆滯留（逐筆裁決，不可再無限停放）：\n  - K1169\n  - Paper3_expansion_synthesis_decision_meta\n  - email-11836-9833be\n  - K492_article_general_v2\n  - fb_page_graph_api_integration\n  - K652_article_research\n  - K1414_paper3_hln_retrofit\n  - K672_article_general_v4\n  - BTC_GAS_tex_conversion\n  - K709_article_general_v2\n  - K1436_btc_funding_rate_vol_covariate\n  - K1438_vix1d_spy_intraday_vol_covariate\n  - k1095_v2_known_in_advance_schedule\n  - K1327_article_general\n裁決規則（依大體檢 recovery）：可自主解的直接解/re-pend；需 owner 決策的補 blocked_until 並發併決策 email；已死的 closed_no_action/expired。\n\n完成後：daily_checkup mission_progress 該 warn 應自動消失；並回報處置明細。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "telegram",
+    "created_at": "2026-07-18T02:40:36.294224+00:00",
+    "parent_task_id": "telegram-937",
+    "created_by": "telegram-responder(msg937)"
+  },
+  {
+    "id": "email-12149-c9e632",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] Dreaming review 2026-07-17 — 8 new / 0 escalations",
+    "description": "Gmail UID: 12149\nMessage-ID: <C762E532-9CEE-452F-99DC-89B07C892C49@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sat, 18 Jul 2026 10:58:13 +0800\nSubject: Re: [VolPred Alert][WARN] Dreaming review 2026-07-17 — 8 new / 0 escalations\n\n--- 用戶回信內容 ---\n又建議行動？ 我不是說找到問題就立刻從底層重構\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月18日 05:25 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Dreaming review 2026-07-17 — 8 new / 0 escalations\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> findings=12（new=8, resolved=1, escalations=0）；loop-health overall=ok\r\n> 影響\r\n> \r\n> 影響研究結論累積與論文推進。\r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> 觸發條件\r\n> \r\n> findings=12（new=8, resolved=1, escalations=0）；loop-health overall=ok\r\n> [warn] missing_retry_strategy: missing_retry_strategy:paper9_c3_multiple_testing_subsection_k1380 (×1)\r\n> [warn] missing_retry_strategy: missing_retry_strategy:trending_repost_2026_07_17_ai變現 (×1)\r\n> [warn] missing_retry_strategy: missing_retry_strategy:trending_repost_2026_07_17_債市波動度 (×1)\r\n> [warn] missing_retry_strategy: missing_retry_strategy:trending_repost_2026_07_17_ai支出 (×1)\r\n> [info] memory_hygiene: memory_hygiene:consolidation_review (×23) → propose memory/\r\n> [warn] persistent_alert: persistent_alert:e28b5068534016a7 (×1) → propose docs/error_log.md\r\n> [warn] persistent_alert: persistent_alert:e46b1923cd3787a9 (×2) → propose docs/error_log.md\r\n> [warn] persistent_alert: persistent_alert:b74691d14763e77c (×2) → propose docs/error_log.md\r\n> 影響\r\n> \r\n> Dreaming 是 loop-engineering 的慢 loop：跨 session 找重複失敗模式，避免「該被系統先抓到、卻靠老闆人工抓到」的結構性問題。escalations = 連 3 次 dreaming run 仍未解 → Three-Strike 根治候選。直接服務 Mission #2/#4（研究品質 + 運營穩定）。\r\n> 建議行動\r\n> \r\n> 看完整報告：storage/ops/dreaming/2026-07-17.json。\r\n> 治理類 findings（error_log / rules / knowledge.json）為 propose-only — 主線程審 proposal 後手動決定是否套用，dreaming 不自動改。\r\n> escalations(critical) → 開 docs/refactor_plan_<topic>.md 走 Three-Strike 根治。\r\n> auto_dispatch 類（orphaned failure）→ --apply-auto 才會派修復 task（預設關，先人工審）。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-18T03:00:07.909113+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12149,
+    "email_message_id": "<C762E532-9CEE-452F-99DC-89B07C892C49@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] Dreaming review 2026-07-17 — 8 new / 0 escalations",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-18T03:01:35.102586+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-b56bb220dffd47dd960853587de988f4"
+      },
+      {
+        "ts": "2026-07-18T03:01:42.142765+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-b56bb220dffd47dd960853587de988f4"
+      },
+      {
+        "ts": "2026-07-18T03:05:16.845579+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-b56bb220dffd47dd960853587de988f4"
+      }
+    ],
+    "started_at": "2026-07-18T03:01:42.142751+00:00",
+    "completed_at": "2026-07-18T03:05:16.845563+00:00",
+    "result": "回信糾正『escalations=0 卻推重構』。治本改 dreaming_review.py send_dreaming_email：建議行動第3條隨嚴重度分級，escalations=0 明講不需重構。兩分支端到端驗證+ast通過。存 feedback memory。已寄 close email efaf2ee3。"
   }
 ]
