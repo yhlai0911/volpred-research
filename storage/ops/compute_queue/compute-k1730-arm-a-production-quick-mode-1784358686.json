@@ -1,0 +1,32 @@
+{
+  "id": "compute-k1730-arm-a-production-quick-mode-1784358686",
+  "title": "K1730 arm A: 全量 production 重跑（非 quick mode）",
+  "script_path": ".claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730/k1730_gevreg_midas_ssvs.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-18T07:11:26Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1730-arm-a-production-quick-mode-1784358686.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1730-arm-a-production-quick-mode-1784358686.stderr",
+  "result_artifact": ".claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
+  "output_paths": [
+    ".claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730/k1730_gevreg_midas_ssvs_results.json"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "收 K1730 arm A 全量 production 結果：(1) 確認 results.json 的 quick_mode=false（若仍 true 代表沒跑到全量，要查）；(2) 與 quick-mode 版（k1730_quickmode_results.json）逐項對照覆蓋率/Kupiec/Christoffersen/ES — 若結論翻轉要說明為什麼；(3) lookahead 三項仍須 0 violations；(4) Codex 代碼審 k1730_models.py 的 GEV MLE 與 SSVS；(5) merge_worktree.sh 合併 wt/dispatch-slot-1-558d7893-k1730；(6) 主線程寫 knowledge.json。注意 quick-mode 結論是「90% 區間實際覆蓋 85.3%、Kupiec 拒絕」= 區間偏窄，全量若仍如此要如實報告 null/partial-null。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 10800,
+  "brief_source": null,
+  "brief_snapshot": null
+}

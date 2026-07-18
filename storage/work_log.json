@@ -21007,5 +21007,25 @@
     "owner": "hourly-slot-1-558d7893c7e04c7992525da8489f5095",
     "commit": null,
     "summary": "PHASE A0 時效 P1（老闆指派 source=user）：GEVReg-MIDAS-SSVS arm A 波動率區間預測派工。router 回 opus/xhigh/worktree → 依規不在 50min fire 內父等子，走 compute_queue enqueue-agent。建 registered worktree .claude/worktrees/dispatch-slot-1-558d7893-k1730（branch wt/dispatch-slot-1-558d7893-k1730，經 git_writer_lock run 建立）；K id 選 k1730（掃 main + 所有 worktree + next_tasks 確認 k1729 以下已占用）。Brief 規格：MIDAS 重用 k526、SSVS 重用 k818、GEV regression likelihood（scipy genextreme + 自寫 MLE, multistart>=20, 固定 seed）為唯一新做部分；in-sample 估計與 rolling OOS 分離、月頻總經一律 shift(1) 以上 lag 禁 same-day、OOS>=500 點且跨>=3 期間含空頭；baseline = GARCH-MIDAS 分位數版 / quantile HAR-RV / 歷史分位數（同 lag 同窗）；評分 Kupiec UC + Christoffersen CC + pinball + ES + DM test 分期間報。硬規已寫進 brief：禁碰 feed.json / knowledge.json / thinking_journal / experiment_experiences（knowledge 由主線程 Codex review 後寫，K1259）、禁假數字、worktree 內 commit 不 push 不 merge、禁 worktree remove --force。job id agent-brief_k1730_gevreg_midas_ssvs-cdcac4（timeout 5400s，artifact experiments/k1730/k1730_gevreg_midas_ssvs_results.json），followup task_type=experiment P1 已綁定收件契約（驗數字/查 lookahead/Codex review/merge_worktree/寫 knowledge/解鎖 arm B assign_c55b0d66）。arm B assign_c55b0d66 依 parent 依賴留 pending 不動。"
+  },
+  {
+    "timestamp": "2026-07-18T15:12:44+08:00",
+    "task_type": "experiment",
+    "task_id": "collect_k1730_armA_20260718",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-bd00f90a70504e369172895193de418d",
+    "owner": "hourly-slot-1-bd00f90a70504e369172895193de418d",
+    "commit": "9060414f9",
+    "summary": "接手上一班（slot dc5897b0）未收班的 K1730 arm A 收件任務並收尾。\n\n**上一班留下的狀態**：fire 於 14:16 結束時 task 仍 in_progress。agent job 已 completed（exit 0）產出 quick-mode 結果；13:44 啟動的全量 production 重跑被 job 結束截斷，`run_production.log` 只跑到 2019 refit（19 個 annual refit 中的第 12 個）。\n\n**本班驗證（誠實性 gate）**：\n- GEV likelihood 數值驗證：max_abs_logpdf_err = 4.5e-13；Gumbel 極限收斂（tiny_xi exact vs gumbel 差 3.2e-07）；passed=true\n- Lookahead 三項全 0 violations：macro_released_before_origin（118,080 cells）、origin_before_block_start（1,640 blocks）、blocks_non_overlapping（1,639）\n- 總經用 ALFRED first-release vintages（output_type=4），availability lag median 34-45 天，非修正後數列\n- OOS 967 週（2008-01-07 ~ 2026-07-13）\n- 結果方向：90% 區間實際覆蓋 **85.3%**，Kupiec p=4.8e-6 **拒絕**；95% 區間覆蓋 90.8%，Kupiec p=6.7e-8 拒絕 → **區間系統性偏窄**。VaR95 反而校準良好（實際 4.86%，Kupiec p=0.84 不拒絕），但 Christoffersen 獨立性被拒（p=2.5e-4）= 違反有叢聚。\n- 判定：**partial-null，未見灌水**。結果不好看但如實，符合「結果好得不像真的 = 90% 有 bug」的反向檢查 — 這份不是好得不像真的。\n\n**本班動作**：\n1. `experiments/k1730/` 原為 untracked，先 commit 保全（9060414f9，經 git_writer_lock run）\n2. quick-mode 結果已另存 `k1730_quickmode_results.json` 作對照基準\n3. 全量 production 重跑改走 compute queue：job `compute-k1730-arm-a-production-quick-mode-1784358686`（timeout 10800s，script 用 `__file__`-relative 路徑輸出故 cwd 無關）\n4. 剩餘工作（quick vs production 逐項對照、Codex 審 GEV MLE 與 SSVS、merge_worktree、knowledge.json）全部折入該 job 的 followup brief，不再重複掛回本 task\n\n**尚未做的事（誠實記錄）**：Codex 代碼審尚未執行 — 已排進 followup，knowledge.json 在 Codex 過審前不寫。"
+  },
+  {
+    "timestamp": "2026-07-18T15:12:44+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_c55b0d66",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-bd00f90a70504e369172895193de418d",
+    "owner": "hourly-slot-1-bd00f90a70504e369172895193de418d",
+    "commit": null,
+    "summary": "PHASE A0 時效 P1（老闆指派 source=user）：GEVReg-MIDAS-SSVS arm B 報酬尾部區間預測派工。\n\n依賴解除：arm B 原本卡在「等 arm A 框架完成」。本班確認 arm A 引擎已可用（quick-mode 端到端跑通、GEV logpdf 誤差 4.5e-13、Gumbel 極限收斂驗證通過、lookahead 三項 0 violations），故 arm B 解鎖。\n\n**先補一個資料遺失風險**：arm A 的 `experiments/k1730/` 在其 worktree 裡是 untracked（`git status` 只有 `?? experiments/k1730/`），上一班 fire 未收班就結束。本班先 commit（9060414f9，經 git_writer_lock run）才動後續，避免整份引擎躺在工作區被誤收或誤刪。\n\n**worktree 繼承而非重寫**：經 git_writer_lock run 從 `wt/dispatch-slot-1-558d7893-k1730` 分出 `wt/dispatch-slot-1-bd00f90a-k1731` / `.claude/worktrees/dispatch-slot-1-bd00f90a-k1731`。arm B 直接 import 重用 k1730_data.py（ALFRED first-release PIT vintages + lookahead 檢查）、k1730_models.py（GEV MLE + MIDAS + SSVS）、k1730_scoring.py（Kupiec/Christoffersen/DQ/ES），brief 明令 `experiments/k1730/` 唯讀（arm A 全量重跑同時在跑），發現 bug 只回報不就地改。\n\n**設計依老闆 msg 946/947**：報酬做**尾部區間預測**（週報酬 block minima → 取負轉 GEV maxima，直接餵既有 likelihood），**不做點預測**（報酬點預測 OOS R² 天生近 0，做出來是無資訊的 null）。Baseline = 歷史分位數 / GARCH-t VaR / quantile HAR，全部同 lag 同 OOS 切法。評分 = Kupiec UC + Christoffersen ind/cc + DQ + pinball + ES bootstrap + DM(HAC)；經濟意義走避險/部位規模口徑（HE / VaR sizing / utility），**不比 Sharpe**（feedback_hedging_vs_trading）。OOS 起點與 arm A 對齊 2008-01，窗內含 2008 與 2020 空頭。\n\n**載具**：router 回 opus/xhigh/worktree → 依規不在 50min fire 內父等子，走 `compute_queue enqueue-agent`：job `agent-brief_k1731_armB-f3e688`（opus/xhigh, timeout 7200s, artifact `experiments/k1731/k1731_gevreg_midas_ssvs_returns_results.json`）。Followup brief 已寫明收件時要做的事：驗誠實性、查 lookahead 與 baseline 同 lag、Codex 審（block minima 符號 / DQ 實作 / DM 的 HAC）、確認 k1730 未被改動、merge worktree、主線程寫 knowledge.json、兩 arm 齊備後依老闆指示判斷寫文章或論文。"
   }
 ]
