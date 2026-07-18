@@ -268,7 +268,14 @@ def test_alert_chain_surfaces_new_breaches(tmp_path: Path, monkeypatch: pytest.M
         health.shutil, "disk_usage", lambda _p: _DiskUsage(total=100, used=95, free=5)
     )
 
-    report = build_alert_condition_report(storage_dir=str(storage))
+    # paper_root injected: with the default (None), _parse_paper_stale_state rglob's
+    # the LIVE paper/ tree, making this test read untracked files (CI-parity guard)
+    # and depend on real repo state it does not assert on.
+    paper_root = tmp_path / "paper"
+    (paper_root / "demo").mkdir(parents=True, exist_ok=True)
+    (paper_root / "demo" / "body.tex").write_text("\\documentclass{article}", encoding="utf-8")
+
+    report = build_alert_condition_report(storage_dir=str(storage), paper_root=paper_root)
     by_id = {c["id"]: c for c in report["conditions"]}
 
     assert by_id["strategy_metrics_freshness"]["breached"] is True
@@ -292,7 +299,12 @@ def test_alert_chain_healthy_no_breach(tmp_path: Path, monkeypatch: pytest.Monke
     monkeypatch.setattr(
         health.shutil, "disk_usage", lambda _p: _DiskUsage(total=100, used=40, free=60)
     )
-    report = build_alert_condition_report(storage_dir=str(storage))
+    # paper_root injected — same live-tree isolation as the test above.
+    paper_root = tmp_path / "paper"
+    (paper_root / "demo").mkdir(parents=True, exist_ok=True)
+    (paper_root / "demo" / "body.tex").write_text("\\documentclass{article}", encoding="utf-8")
+
+    report = build_alert_condition_report(storage_dir=str(storage), paper_root=paper_root)
     by_id = {c["id"]: c for c in report["conditions"]}
     assert by_id["strategy_metrics_freshness"]["breached"] is False
     assert by_id["paper_trading_gaps"]["breached"] is False

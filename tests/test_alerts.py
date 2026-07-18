@@ -752,7 +752,16 @@ def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):
         },
     )
 
-    report = build_alert_condition_report(storage_dir=str(storage_dir), now=now)
+    # Inject a fixture paper_root: with paper_root=None, _parse_paper_stale_state
+    # rglob's the LIVE paper/ tree, so this test reads untracked files (flagged by
+    # the CI-parity guard) and behaves differently on a clean `actions/checkout`.
+    # Same isolation class as the stubs in the fan-out test below.
+    paper_root = tmp_path / "paper"
+    _write_text(paper_root / "demo" / "body.tex", "\\documentclass{article}")
+
+    report = build_alert_condition_report(
+        storage_dir=str(storage_dir), now=now, paper_root=paper_root
+    )
     conditions = {item["id"]: item for item in report["conditions"]}
 
     assert conditions["release_pool_gap"]["breached"] is True
@@ -985,14 +994,47 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
 
     monkeypatch.setattr("volpred.ops.alerts.send_alert", fake_send_alert)
 
+    # STRUCTURAL ISOLATION (2026-07-18, ci-red-29622117580). Every stub above was
+    # added *after* a CI red, one condition at a time: dispatch_binary_health,
+    # then codex_failover_ready, then frontend_strategy_metrics_freshness — three
+    # repeats of a single class. Root cause is not any one condition: it is that
+    # this fan-out test asserts over the WHOLE registry, which makes it hostage to
+    # (a) every condition that reads real host/repo state instead of `storage_dir`
+    # and (b) every condition added later, which nobody can stub in advance.
+    # Scope the report to the ids this fixture actually owns, so a new or
+    # environment-sensitive condition can never redden the fan-out assertions
+    # again. The per-condition stubs stay on purpose: they also keep those parsers
+    # from shelling out (`codex --version`, host config probes) during the test.
+    fixture_owned_ids = {"release_pool_gap", "draft_pool_low", "host_cron_fail"}
+    real_build_alert_condition_report = alerts_module.build_alert_condition_report
+
+    def build_report_scoped_to_fixture(**kwargs):
+        report = real_build_alert_condition_report(**kwargs)
+        scoped = [c for c in report["conditions"] if c.get("id") in fixture_owned_ids]
+        # Guard against silent scope rot: if a fixture-owned condition is renamed
+        # or dropped, fail loudly here instead of vacuously passing below.
+        assert {c["id"] for c in scoped} == fixture_owned_ids, (
+            f"fixture-owned conditions missing from registry: "
+            f"{fixture_owned_ids - {c['id'] for c in scoped}}"
+        )
+        return {
+            **report,
+            "conditions": scoped,
+            "breach_count": sum(1 for c in scoped if c.get("breached")),
+        }
+
+    monkeypatch.setattr(
+        "volpred.ops.alerts.build_alert_condition_report",
+        build_report_scoped_to_fixture,
+    )
+
     result = check_alert_conditions(
         storage_dir=str(storage_dir), now=now, paper_root=paper_root
     )
 
     # Assert WHICH conditions breached, not just how many. A bare count reported
     # "4 != 3" on the first Linux CI run and said nothing about the intruder.
-    # Several conditions still read production state instead of `storage_dir`, so
-    # an extra breach here is environment-dependent by construction — name it.
+    # The scoping above makes this list depend only on fixture state.
     breached_ids = [c["id"] for c in result["conditions"] if c.get("breached")]
     assert breached_ids == ["release_pool_gap", "draft_pool_low", "host_cron_fail"]
     assert result["breach_count"] == 3

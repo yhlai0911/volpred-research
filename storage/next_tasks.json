@@ -33310,13 +33310,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T08:00:49.987717+00:00",
+    "completed_at": "2026-07-18T09:00:54.700203+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T08:00:49.987717+00:00",
-      "last_clean_observed_at": "2026-07-18T08:00:49.987717+00:00"
+      "resolved_at": "2026-07-18T09:00:54.700203+00:00",
+      "last_clean_observed_at": "2026-07-18T09:00:54.700203+00:00"
     }
   },
   {
@@ -33328,13 +33328,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T08:38:14.424496+00:00",
+    "completed_at": "2026-07-18T09:29:51.561317+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T08:38:14.424496+00:00",
-      "last_clean_observed_at": "2026-07-18T08:38:14.424496+00:00"
+      "resolved_at": "2026-07-18T09:29:51.561317+00:00",
+      "last_clean_observed_at": "2026-07-18T09:29:51.561317+00:00"
     }
   },
   {
@@ -35397,107 +35397,51 @@
   },
   {
     "id": "telegram-815",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 815）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-15T08:14:04.739516+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 815）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nGitHub\n[yhlai0911/volpred-research] Test Suite workflow run\n \n\n \nTest Suite: All jobs have failed\n \n \nStatus Job Annotations\npytest \nTest Suite / pytest\nFailed in 9 minutes and 19 seconds\nannotations for Test Suite / pytest 2 \n \n \n—\nYou are receiving this because you are subscribed to this thread.\nManage your GitHub Actions notifications\n\n \nGitHub, Inc. ・88 Colin P Kelly Jr Street ・San Francisco, CA 94107\n\n又來？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T08:20:58.756122+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-15T08:22:51.874390+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
     "completed_at": "2026-07-15T08:22:51.874376+00:00",
-    "result": "已診斷 CI 紅燈根因（2 測試: cron_wrapper_manifest 過期 + git ref hook 誤套 main-lease；auto-remediation 只 push 沒真修）；targeted 修復排入任務池 ci-red-fix-stragglers-20260715 交 dispatch；已 Telegram 回覆老闆 msg 819。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T09:08:13.022387+00:00"
   },
   {
     "id": "telegram-816",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 816）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-15T08:14:19.452263+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 816）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nVolPred Boss Report · 2026-07-15 16:10 台灣時間 · Overall CRITICAL\n\n⓪ 本 cycle 意圖 / 目標 / 規劃\n\n意圖 Intent 從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\n本週目標 Weekly Goal • Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\n• Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\n• Mission 3: Paper 4 body_v4 完成 rewrite gate\n• Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\n本 cycle 計劃 Plan • Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\n• Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\n• Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\n• Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\n成功標準 Success Criteria • 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\n• 每 4h boss email 自動寄出無 fail\n• 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\n已知風險 Known Risks • main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\n• FB MCP root cause 可能要花 ≥2 cycles 才找到\n• Paper 4 rewrite 過長吃掉太多 main thread bandwidth\n① 平台狀態\n\n區段 狀態 說明 建議行動\n任務池狀態 ok 73 pending tasks + 4 pending_main_thread + 2 in-flight (top types: [('研究實驗', 35), ('平台維運', 16), ('日常文章', 15)]) dispatch top P1-P3 if slots free\n發文產量 ok 8 articles published last 24h (target 6/day) —\n網站資料同步 ok 8/8 last-24h articles synced —\n線上網站檢查 ok 3/3 sample report URLs ok; 3/3 core pages content-ok —\nFacebook 同步流程 warn 1 FB posts pending sync handoff doc + manual paste or retry MCP\n定時任務健康 ok 0 定時任務 jobs stale (over max-age) —\nhealth_ci_watch critical CI incident ci-red-29383038432 phase=escalated failures=7 CI watcher owns repair/verification; inspect task + failed log only if phase is escalated\n目前未處理警報 warn 1 current warn/critical 警報 conditions ingest alerts → run remediation per alert.md auto-action table\n自主循環健康度 ok overall=ok | 首次完成率=ok 任務完成率=ok error_recurrence=ok 返工/修正趨勢=ok —\n①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\n\n每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\n\n=== cron 成果掌握 review — 2026-07-15 16:10:13（台灣時間）===\n\n  hourly_dispatch   daemon=alive exit=0 running | last: 2026-07-15 16:09:50 (daemon-state)\n  compute_worker    runs=1178 exit=0 idle | last: 2026-07-15 16:00:02 (log-mtime)\n  check_alerts      runs=653 exit=0 idle | last: 2026-07-15 16:02:39 (log-mtime)\n  collect_tw        runs=20 exit=0 idle | last: 2026-07-15 15:00:10 (log-mtime)\n  collect_us        runs=19 exit=0 idle | last: 2026-07-15 07:03:10 (log-mtime)\n  daily_update      runs=23 exit=0 idle | last: 2026-07-15 08:07:44 (log-mtime)\n  daily_update_intraday runs=12 exit=1 idle | last: 2026-07-15 14:21:13 (log-mtime)  🔴 last exit 1\n  daily_checkup     runs=3 exit=0 idle | last: 2026-07-15 09:40:34 (log-mtime)\n  publication_candidates runs=None exit=None idle | last: 2026-07-15 15:22:39 (log-mtime)\n  release_pool      runs=109 exit=0 idle | last: 2026-07-15 12:07:03 (log-mtime)\n  market_cal        runs=4 exit=0 idle | last: 2026-07-13 08:00:04 (log-mtime)\n  memory_health     runs=27 exit=0 idle | last: 2026-07-15 05:30:02 (log-mtime)\n  work_summary      runs=1 exit=0 idle | last: 2026-07-14 20:05:15 (log-mtime)\n\n近 75 分鐘 git commits（hourly_dispatch 產出代理）：2 筆\n  dd97711e4 direction(asia): Asia-Pacific multi-market expansion line - TW sectors/JP/India/SEA per boss 2026-07-15 directive; non-US quota in topic selection (research_program ASIA facet + publication-candidates Step4 + research-topic-discovery batch axis); tasks asia1/2/3 queued; skill-change email c6526a18. Co-Authored-By: Claude Fable 5 <noreply@anthropic.com> Claude-Session: https://claude.ai/code/session_01QyfCuxwkQYuLAE6v4HsV7D\n  44afe99ea fix(daily-update): monotone publish gate - stale yfinance regression must not double-publish; unpublish stale twins, restore wrongly-removed morning article, anchor on published only; regression tests x5\n\n🔴 需要掌握/處理：\n  - daily_update_intraday: 🔴 last exit 1\n② 本 cycle 活動（過去 4h）\n\n9 commits\n\nSHA Subject Time\ndd97711e4 direction(asia): Asia-Pacific multi-market expansion line - TW sectors/JP/India/SEA per boss 2026-07-15 directive; non-US quota in topic selection (research_program ASIA facet + publication-candidates Step4 +\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T08:20:58.998191+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-15T08:22:52.113619+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
     "completed_at": "2026-07-15T08:22:52.113605+00:00",
-    "result": "已診斷 CI 紅燈根因（2 測試: cron_wrapper_manifest 過期 + git ref hook 誤套 main-lease；auto-remediation 只 push 沒真修）；targeted 修復排入任務池 ci-red-fix-stragglers-20260715 交 dispatch；已 Telegram 回覆老闆 msg 819。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T09:08:13.022387+00:00"
   },
   {
     "id": "telegram-817",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 817）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-15T08:14:22.539801+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 817）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nresearch-topic-discovery batch axis); tasks asia1/2/3 queued; skill-change email c6526a18. Co-Authored-By: Claude Fable 5 <noreply@anthropic.com> Claude-Session: https://claude.ai/code/session_01QyfCuxwkQYuLAE6v4HsV7D 16:02\n44afe99ea fix(daily-update): monotone publish gate - stale yfinance regression must not double-publish; unpublish stale twins, restore wrongly-removed morning article, anchor on published only; regression tests x5 15:08\n1d41b726e dispatch(14:35): fix DM-HAC auditor false-negative + recover host_cron_fail  idi\no088f3e5b6 ops(daily-update): refresh tracked outputs for 2026-07-15 14:2\n12bd3e06dd [codex] repair feed audience correction flow 14:1\n04277009a1 dispatch(13:21): publish stuck TSMC-earnings-IV draft before 7/16 法說會  pli\nca33b9bd579 ops(dispatch-supervisor 13:04): PHASE-Z state churn (no agent output this fire) 13:\n0404402484e dispatch(12:13): K1694 triage_failed → 重派為 compute script-job  沒把\n腳本跑3e716aa1f [codex] harden release pool cadence 12\n:10③ Pending 池與論\n\n文組合Pending tasks:\n\n 73By type: 研究實驗 · 35平台維運 · 16日常文章 · 15paper_body · 2流程治理 · 2paper_review \n\n· 1論\n\n文組合Paper Sta\ntusbtc-gas-negative major_revision — 2026-06-10 audit H\nIGHcrypto-fear-channel MAJOR REVISION (2026-06-11 audit \nsyneav-universal-magnitude 🔶 **MAJOR_REVISION（2026-06-10 全組合審查，5\n HIforecast-tail-divergenc\ne ?garch-x-vix submitted (under review) | Reproduce \ngatleverage-direction 🟢 **REVISION COMPLETE — v12 確認輪通過（202\n6-0prg-periodic-garch v7 major rewrite (2026-07-14) — headl\ninetaiwan-vt Major Revision Required — 2 HIGH \nblovix-sufficiency MAJOR_REVISION after audit 2026-06-\n10.volatility-absorption MAJOR REVISION in progress — P0 gate \nclovt-crowding-abm 🔶 **VT-only revision in progress（2026\n-07vt-insurance-cost REVISION — 2026-07-11 Fable finish\ning vt-trend-following Paper3_v4_revision_gemini_2h 已整合進 \n`bod⑤ 下個 cycle 行動（無需\n\n你決策）1. [pending] Wire audit + dashboard into runtime_schedules.json \n定時任務2. [pending] Add live_verify_failed alerting on draft → published transition (done by agent a67763789e702d1da, commit nee\nded)3. [pending] Backfill live_verify_failed=False stamps for last 30 days of published arti\ncles4. [pending] Build analytics ingestion (Mission 1/5 visibility \ngap)5. [pending] Build monetization funnel tracking (Mission ultimate g\noal)⑥ 方向建議（你的決策可\n\n能改變）# Boss Direction Recommendations (我給老闆的方\n\n向建議)**Updated**: 2026-06-22 (rolling — 我每 cycle\n 更新)**目的**: 給老闆做平台方向決策用的當前建議，可隨時 ig\n\nnor\n\ne---## 1. 論文投稿優先序（自主排程，除\n\n非你改）- Paper 4 body_v4 rewrite — gate UNLOCKED via K1116c/f + K1201 + K1203 4-experiment. 先做最 unblock 的這一個。目標期刊：JBF 或 \nIJF。- Paper 2 §5 rewrite (taiwan-vt) — K1204 synthesis materials ready (commit cf5188eb)，跨市場 §5 改寫；EAV universal-magnitude 是 spinoff。目標：\nJBF。- Paper 1 errata (leverage-direction) — 15 no-source rows + 4 個新 K 實驗待補；不是 BLOCKER 但要排第 3\n 順位。- Paper 6 prg-periodic-garch / Paper 10 crypto-fear-channel — 還在 outline/draft 階段，下一輪 cycle \n\n再規劃。## 2. 網站功能優先序（修正：先衝免費會員基數，不\n\n談付費）**修正自前版**：先前列「付費 tier 入口」是 premature monetization — 還沒幾個會員就想收費 = 平台運營錯誤順序。先設**免費階段目標**，達標後再\n\n談收費。### 免費階段目標（自主設定，\n會調整）- **3 個月內**：註冊會員 ≥100、weekly active ≥40、回訪率 \n≥30%- **6 個月內**：註冊 ≥500、提問池 active ≥10/week、外部分享 ≥20/\n\nweek### 為達標需建的功能（按\n優先序）- 🔴 P1: Reader analytics（CTR / 停留時間 / 跳出率 / 回訪 cohort） — 沒這個我盲打\n文章品質- 🔴 P1: 註冊 / 登入 flow（如果還沒）+ welcome onboar\nding- 🟡 P2: 文章 share button + 社群 OG meta（Mission 5 曝光直接 le\nver）- 🟡 P2: Member dashboard 改版（提問 → 研究進度視覺化、增加回\n訪誘因）- 🟡 P2: Email subscription（weekly digest = 留\n客武器）- 🟢 P3: 策略 sparkline 升級到 interactive c\nhart- **🟢 P3 之後**：付費 tier 入口（達到上面 6 個月目標\n\n再規劃）我會自主寫 docs/free_tier_growth_plan.md spec，1-2 週上 P1 \n\nMVP。## 3. 開發中的結\n\n構性改善- ✅ ops_dashboard.py — 7 區段健康儀表板（本 cycle\n 落地）- ✅ live_verify gate — 發文後驗證 live URL（本 cycle 落地，agent a677637\n 完成）- ✅ audit_publish_sync / audit_fb_pipeline — 兩個 standing audit script（本 cycle\n 落地）- 🔄 Reader analytics ingestion — spec\n 撰寫中- 🔄 Monetization funnel —\n 規劃中- 🟡 FB 個人帳號發文流程 — Page/Graph API 已永久撤回；保留 Claude-in-Chrome interactive path + 72h auto-expire/au\n\ndit。## 4.\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T08:20:59.258969+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-15T08:22:52.365493+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
     "completed_at": "2026-07-15T08:22:52.365479+00:00",
-    "result": "已診斷 CI 紅燈根因（2 測試: cron_wrapper_manifest 過期 + git ref hook 誤套 main-lease；auto-remediation 只 push 沒真修）；targeted 修復排入任務池 ci-red-fix-stragglers-20260715 交 dispatch；已 Telegram 回覆老闆 msg 819。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T09:08:13.022387+00:00"
   },
   {
     "id": "telegram-818",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 818）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-15T08:14:22.576140+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 818）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n需要你決策的策\n\n略性事項只標出來，你不回我也會\n\n自主走。- **目標期刊**：我預設 JBF（top-tier finance），如果你想往 RFS / JFE 衝需要拉高 contribution c\nlaim- **FB 路線**：已決定 personal account only；Page/Graph API 不再作為 active 建議或 fallb\nack。- **付費 tier 命名與定價**：你 vs 我寫 mock-up（我可以做但市場價格判斷你比\n較知道）- **策略上架節奏**：active 11 個都 healthy，是否擴張到 15-20 個 strategy univ\n\ners\n\ne---**這份 doc 我每 cycle 更新**。建議過時的會劃掉、新建議\n加上來。Report generated 2026-07-15 16:10:00 台灣時間 · Window 4h · Source: scripts/boss_report.py\n\n還是出現criticle?\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T08:20:59.517163+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-15T08:22:52.607313+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
     "completed_at": "2026-07-15T08:22:52.607295+00:00",
-    "result": "已診斷 CI 紅燈根因（2 測試: cron_wrapper_manifest 過期 + git ref hook 誤套 main-lease；auto-remediation 只 push 沒真修）；targeted 修復排入任務池 ci-red-fix-stragglers-20260715 交 dispatch；已 Telegram 回覆老闆 msg 819。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T09:08:13.022387+00:00"
   },
   {
     "id": "ci-red-fix-stragglers-20260715",
@@ -40725,7 +40669,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29622117580",
@@ -40752,11 +40696,31 @@
         "to": "pending",
         "by": "hourly-slot-1-350901e49c484eab9a3b7e32e0d1d688",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-18T09:09:10.645647+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2faa424299a24fca83dfcf7798900757"
+      },
+      {
+        "ts": "2026-07-18T09:09:10.875993+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-2faa424299a24fca83dfcf7798900757"
+      },
+      {
+        "ts": "2026-07-18T09:28:57.630810+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-2faa424299a24fca83dfcf7798900757"
       }
     ],
-    "started_at": "2026-07-18T01:01:44.681180+00:00",
+    "started_at": "2026-07-18T09:09:10.875977+00:00",
     "last_released_at": "2026-07-18T03:50:05.415812+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-18T09:28:57.630796+00:00",
+    "result": "root_cause=test_asserts_over_whole_alert_registry_so_any_condition_reading_real_host_or_repo_state_leaks_an_extra_breach_into_a_list-equality_assertion; repair=tests/test_alerts.py+tests/test_health_checks.py 結構性隔離（scope conditions 到 fixture 自有 id + paper_root 注入）; 具名失敗在 HEAD 已由前一班 point-fix 035a8923b 轉綠，本班修 class 本身（同 pattern 第三次）; verify=77 passed 目標檔 / 2458 passed 全 tests/ / 狀態不敏感性以 stub 翻轉 + mtime 倒退 20 天雙實驗證明; commit 由 PHASE-Z 收"
   },
   {
     "id": "fb_repost_mile_78899a5c",
@@ -41374,5 +41338,317 @@
     "started_at": "2026-07-18T08:30:55.533190+00:00",
     "completed_at": "2026-07-18T08:37:20.839364+00:00",
     "result": "老闆 email-12167 澄清「只有第一次需要隨機」。既有 1,634 篇的 seed+真實增量本就正確；真正的偏差是新文章仍被隨機補種。已移除增量隨機路徑（--apply 凍結後變 no-op），未 seed 文章改顯示自身真實數（含 0），Python/TS 兩份實作同步。Python 22 passed、前端 4/4 + npm run check 通過。受影響文章數=0（修未來行為）。close email 已寄。frontend commit 46a95cb 未 push（repo 內有他班未 push commit）。"
+  },
+  {
+    "id": "telegram-958",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-18T08:40:15.089613+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 958）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n為什麼永遠都不會解決？\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積\n\n📌 白話結論\n這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 33 班都還在工作區。\n\n📌 影響\n影響文章品質、讀者信任與流量表現。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n（fire 時間: 16:38；16 個檔案，最長已連續 33 班）\n\n📌 發生什麼\n這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 33 班都還在工作區。單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— 它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。\n\n📌 現在該做什麼\n沒有任何檔案會被丟棄。 成品（草稿 / 實驗產出）由 uv run python scripts/reap_orphan_deliverables.py --apply 走正規入池路徑自動收編 —— 每小時 check_alerts 會自己跑一次，通常不必手動介入。\n剩下這些是它認不出來源的檔案：確認內容正確就由作者 commit。PHASE-Z 本身不自動收養（盲目收養正是先前三次事故的成因），但不收養不等於丟棄 —— 檔案留在工作區，沒有人會刪它。\n\n📌 卡住的檔案（連續班數）\n• experiments/k1380/README.md — 33 班\n• experiments/k1380/k1380.py — 33 班\n• experiments/k1380/k1380_losses_all.npy — 33 班\n• experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 33 班\n• experiments/k1380/k1380_results.json — 33 \n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T08:40:36.911604+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-18T08:42:39.481935+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-18T08:42:39.481921+00:00"
+  },
+  {
+    "id": "telegram-959",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-18T08:41:25.485393+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 959）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n舉例說明\n1314後 多一篇新增瀏覽  就變1315\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\nℹ️ [INFO] Re: 每篇文章顯示瀏覽次數 — 隨機只發生一次，新文章改照真實數字\n\n📌 懂了 —— 隨機只發生一次，之後全部照真實數據\n\n你這句點到的是我做錯的地方，我改了。\n\n📌 你說的那件事，一半本來就對，一半我做錯了\n\n對的那半：既有那 1,634 篇，顯示的數字從一開始就是「種子 + 凍結之後的真實增量」。\n種子凍住不動，之後每一次真實瀏覽都照實加上去。這部分你要的行為早就是這樣。\n\n錯的那半：我上一封還跟你報告說「新文章的種子改成壓在最低值以下」——\n那等於每天新發的文章都還在被隨機。你這封講的就是這個：隨機是一次性的遷移，\n不是常態政策。我把它當成常態在維護了。\n\n📌 改成什麼\n\n凍結之後才發佈的文章，不發種子，直接顯示它自己的真實瀏覽數，從 0 開始算。\n\n• 情況: 改前 | 改後\n• 既有 1,634 篇（計數器上線前）: 種子 + 真實增量 | 不變\n• 之後新發佈的文章: 再抽一個隨機種子（壓在最低值以下） | 真實數字，含 0\n• 重跑 --apply: 會給新文章補種子 | no-op，明講「隨機只發生一次」\n\n--reseed（整批重新凍結）留著，但它現在是只有你開口才會跑的例外 ——\n像上次把上限從 1000 改成 1417 那種。不再是日常流程的一部分。\n\n📌 一個我先前反對、現在照你說的做的取捨\n\n我之前寫死一條規則：未 seed 的文章「不顯示數字」，理由是新文章顯示 3\n杵在鄰居的 787 旁邊會自己拆穿自己。\n\n你的指示推翻它，而且我認為你是對的 —— 種子本來就是那個妥協，真實計數不是。\n顯示一個小的真數字，比為了視覺一致而繼續編數字乾淨。所以現在新文章就顯示 3，或 0。\n\n🧪 驗證\n\n• scripts/seed_article_view_counts.py + 前端 article-views.ts 兩邊公式同步改（同\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T08:42:53.188121+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-18T08:43:24.118425+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-18T08:43:24.118410+00:00"
+  },
+  {
+    "id": "assign_bc041e57",
+    "title": "修 PHASE-Z 孤兒 alert 的無出口設計（experiments/ 無 recognizer）",
+    "description": "根因（telegram-958 診斷）：PHASE-Z streak alert 永遠不會自解，因為它的解除條件依賴一個不存在的行動者。\n\n證據：\n1. scripts/reap_orphan_deliverables.py 只有三個 scanner — scan_job_deliverables（靠 fire receipt）、scan_paper_build_artifacts、scan_draft_artifacts（scoped 在 storage/drafts/）。整支程式對 experiments/ 沒有任何 recognizer（grep 'experiments/' 只命中一行註解）。\n2. PHASE-Z by design 只 commit 自己那班 fire 產出的檔（scripts/fire_receipt.py 開頭已寫明）。\n3. 兩邊都不收 = 檔案沒有出口。目前卡住的 experiments/k1380/* 是 33 班前某個已結束 session 的產出，那個 session 永遠不會回來 commit。\n4. 這與 2026-07-17 對 storage/drafts/ 做的『反轉預設』修正是同一個洞，只是那次只反轉了 drafts namespace，experiments/ 沒跟上。\n\n要做的：\nA. 給 experiments/ 加 recognizer，套用與 DRAFT_EXCLUDED_* 相同的『預設收編 + 明確 denylist』形狀。experiments/<id>/ 底下的檔案就是那個實驗的資產（目錄定義，非猜測），三件套（README.md / <id>.py / <id>_results.json）本來就該進版控。\nB. 加 escalation：任何 held 檔案連續 N 班（建議 N=6）沒出口時，alert 不該只是重複同一句話，而要自動開一張 task 指名該路徑，否則就是『只有老闆能處理的 alert』= 設計失敗。\nC. 機械 gate：加測試確保任何新的 orphan namespace 都不能是白名單形狀（回歸防護，避免第三次重演）。\n\n注意 k1380 目前狀態複雜：k1380_losses_all.npy / k1380_results.json / k1380_spa_from_cache.py 是 D（deleted），對應的 *_INVALID_20260716.* 是 untracked。這看起來是一次刻意的 invalidation rename，收編前要先確認語意，不要盲目 commit。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "closed_no_action",
+    "source": "user",
+    "created_at": "2026-07-18T08:42:18.523564+00:00",
+    "parent_task_id": "telegram-958",
+    "created_by": "telegram_responder",
+    "terminalized_at": "2026-07-18T08:47:25+00:00",
+    "terminalized_reason": "deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-18T08:47:25+00:00",
+    "blocked_note": "補丁式 scope（只補 experiments/ recognizer）已被 assign_01127566 的底層重構取代（老闆 telegram-963 指令）。勿平行實作。"
+  },
+  {
+    "id": "telegram-962",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-18T08:43:42.316838+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 962）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你又忘記原版和v3網頁都要改？\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n✅ 對，就是這樣。我實跑了一次確認，不是用講的：\n\n種子 1314、凍結當下真實 7 次\n• real 7 → 顯示 1314\n• 多一個人看，real 8 → 顯示 1315\n• 再兩個人，real 10 → 顯示 1317\n\n公式 seed + (真實現在 − 凍結當下真實)，種子那塊永遠不動，之後每一次瀏覽都是真的加上去，一次一。\n\n📌 新文章（凍結之後才發的）沒有種子，直接顯示自己的真實數：0 就是 0，3 就是 3。\n\n驗證用的是 scripts/seed_article_view_counts.py 的 displayed_views()，前端 article-views.ts 是它的逐行鏡像，兩邊同一條公式。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T08:44:12.840500+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-18T08:45:49.293460+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-18T08:45:49.293445+00:00"
+  },
+  {
+    "id": "telegram-963",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-18T08:44:21.166140+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 963）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻徹底解決這種白癡設計 底層邏輯重新設計和重構\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔍 查到了，是設計缺陷不是巧合。\n\n這個 alert 的解除條件是「作者自己回來 commit」—— 但 k1380 那批檔案的作者是 33 班前就結束的 session，永遠不會回來。所以它結構上就解不掉。\n\n⚙️ 兩道防線互相讓路：\n• reap_orphan_deliverables.py 只認三種來源（fire receipt、論文編譯產物、storage/drafts/），對 experiments/ 完全沒有 recognizer\n• PHASE-Z 按設計只 commit 自己那班產的檔（這條是對的，盲目收養正是先前事故成因）\n→ 兩邊都不收 = 檔案沒有出口\n\n📌 更關鍵的是：7/17 才剛為同一個洞把 storage/drafts/ 從白名單反轉成「預設收編」，但 experiments/ 沒跟上。同一個坑第三次。\n\n🛠️ 已排入任務池（P1，parent=telegram-958）：給 experiments/ 補同形狀的 recognizer + 加 escalation（held 超過 6 班就自動開單指名路徑，而不是重複喊同一句）+ 留回歸測試。\n\n⚠️ 一個提醒：k1380 那批的 .npy/.json/.py 是 deleted 狀態、對應的 *_INVALID_20260716.* 是 untracked，看起來是刻意的 invalidation rename，所以我沒在這班直接收，交給實作那班先確認語意。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T08:46:05.438761+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-18T08:47:44.401175+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-18T08:47:44.401161+00:00"
+  },
+  {
+    "id": "assign_cee1e41a",
+    "title": "修正原版文章頁 ArticleEngagement 顯示未套種子的真實瀏覽數（與頁首 displayed_views 打架）",
+    "description": "老闆 Telegram msg 962 指出「原版和 v3 網頁都要改」。查證結果：\n\n已正確（不用動）：\n- 原版 frontend-v2-fix/src/app/reports/[id]/ReportDetail.tsx:87 已用 getArticleDisplayedViews + formatDisplayedViews\n- v3 frontend-v2-fix/src/app/v3/reports/[id]/page.tsx:38 同樣已套用\n\n真正漏改（本任務範圍）：\n- frontend-v2-fix/src/components/ArticleEngagement.tsx:235 顯示「已追蹤瀏覽 {summary.counts.views} 次」，用的是 API 回傳的原始真實數，未經 displayed_views 種子公式。\n- 該元件只被原版 ReportDetail.tsx:238 使用（v3 沒用），因此原版同一篇文章頁上方顯示 1314、下方顯示 7，兩個數字互相打架。\n\n要求：\n1. 讓 ArticleEngagement 的瀏覽數走與 src/lib/article-views.ts 同一條公式（建議由 server 端 ReportDetail 把已算好的 viewsLabel 傳進去，避免 client 重算或再造第二條公式）。\n2. 順手掃一次全站是否還有第三處直接顯示原始 view count 的 reader-facing 位置（admin console 不算）。\n3. 加一個機械 gate / 測試，防止未來新增 reader-facing 瀏覽數時再繞過 displayed_views（frontend-v2-fix/tests/article-views.test.mjs 可擴充）。\n4. 改完要 build + 本機測原版與 v3 文章頁，再部署驗證線上。\n\n來源：telegram-962",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "closed_no_action",
+    "source": "telegram",
+    "created_at": "2026-07-18T08:45:33.139662+00:00",
+    "parent_task_id": "telegram-962",
+    "created_by": "telegram_responder",
+    "terminalized_at": "2026-07-18T08:49:45+00:00",
+    "terminalized_reason": "deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-18T08:49:45+00:00",
+    "blocked_note": "取代為 assign_998ad2be（含數字統一 + 文案修正完整規格）。勿平行實作。"
+  },
+  {
+    "id": "telegram-965",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-18T08:46:28.093411+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 965）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n追蹤和瀏覽是分開的吧\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T08:47:56.393036+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-18T08:50:00.095949+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-18T08:50:00.095934+00:00"
+  },
+  {
+    "id": "telegram-966",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-18T08:46:35.433011+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 966）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n追蹤和瀏覽是分開的吧\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔍 我去對了一遍，結論跟你想的不完全一樣：\n\n✅ 文章頁「頂部」那個數字，原版和 v3 兩邊都已經套種子公式了\n• 原版 ReportDetail.tsx:87\n• v3 reports/[id]/page.tsx:38\n兩邊都 import 同一個 article-views.ts\n\n❌ 但你是對的，真的有漏 — 漏在別的地方：\n原版文章頁「底部」的讀者互動區塊（ArticleEngagement.tsx:235）寫「已追蹤瀏覽 N 次」，那個是 API 原始真實數，沒套公式。所以原版同一頁上面 1314、下面 7，自己打自己臉。v3 沒用這個元件所以沒事。\n\n📌 修正已排入任務池（P1，assign_cee1e41a），含：統一走同一條公式、全站掃第三處、加測試擋未來再繞過、build + 兩邊頁面實測 + 線上驗證。\n\n改程式我在 responder 不動手，交下一班做。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T08:47:56.622962+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-18T08:49:59.855154+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-18T08:49:59.855140+00:00"
+  },
+  {
+    "id": "assign_01127566",
+    "title": "[重構·立刻] orphan reaper 底層重新設計：namespace registry 取代逐目錄 recognizer + held TTL 強制出口",
+    "description": "老闆 Telegram msg 963 指令：「立刻徹底解決這種白癡設計，底層邏輯重新設計和重構」。\n本任務**取代** assign_bc041e57（原本只打算補 experiments/ recognizer 的補丁式修法）。不要兩張單平行實作。\n\n== 根因（為什麼同一個坑第三次） ==\nscripts/reap_orphan_deliverables.py 有 998 行，用「每種產物一個 recognizer 函式」的形狀：\nscan_job_deliverables()（queue receipt output_paths）、scan_paper_build_artifacts()（paper/）、\nscan_drafts()（storage/drafts/）。每新增一種產物目錄就要再寫一個 recognizer，\n沒寫 = 該目錄的檔案沒有任何出口 → 永久 held → alert 永遠解不掉。\n2026-07-17 才為 storage/drafts/ 把預設從白名單反轉成「預設收編」（見檔內 660-666 行註解），\n但那次反轉只在 drafts 的 recognizer 內部做，沒有上升為全域規則，所以 experiments/ 又中同一招。\n**問題不是少一個 recognizer，是這個架構要求人記得補 recognizer。**\n\n== 要求的重構（不是補丁） ==\n1. **namespace registry 取代 recognizer 函式**：受管目錄改成 config 宣告（建議 config/ 下新檔或\n   併入既有 config），每筆 {path, default: adopt|hold, exclusions, owner_source, max_file_bytes,\n   max_files}。scan/collect 變成一個泛型引擎吃 registry，不再是三份平行實作。\n   驗收：新增一個受管目錄只需加一筆 config，**不得**新增任何 recognizer 函式。\n2. **全域預設反轉**：drafts 那條「預設收編、只擋真正的垃圾（tmp/swp/pyc/快取目錄/dotfile/symlink/巨檔）」\n   升級為 registry 的預設值，不是單一目錄的特例。experiments/ 直接套用即得出口。\n3. **held 不得是永久狀態**（呼應 audit terminal set 不可含 awaiting_*）：held 記錄帶 first_seen，\n   超過 N 班（建議 6）自動 escalate 成一張指名該路徑清單的任務，並停止重複噴同一句 alert。\n   目前 held 只有 reason、沒有時間軸，所以無主檔案可以無限期卡著。\n4. **ownership 不再依賴「作者自己回來 commit」**：作者 session 結束後永不回來是常態不是例外。\n   出口必須由 registry 預設 + escalation 提供，不能由已死的 session 提供。\n\n== 不可破壞的既有不變量 ==\n- 被擋的一律 held + 可讀 reason；永不刪除、永不 checkout（檔案頂部不變量）\n- git ownership 只認 exact 普通檔（不吃 symlink）\n- PHASE-Z 只 commit 自己那班產的檔 —— 這條是對的（盲目收養正是先前事故成因），\n  重構是給 reaper 補出口，不是放寬 PHASE-Z\n- 收編走 _git_transaction lease + receipt lock，順序不變\n\n== 遺留案例 ==\nk1380 那批：.npy/.json/.py 是 deleted 狀態、對應 *_INVALID_20260716.* 是 untracked，\n看起來是刻意的 invalidation rename。實作前先確認語意再決定收編或指名 escalate，不要盲收。\n\n== 驗收 ==\n- 回歸測試：(a) 新目錄只加 config 即有出口 (b) held 超過 TTL 會產生 escalation 任務\n  (c) 既有 drafts/paper/job 三條路徑行為不變 (d) 垃圾檔仍被擋且帶 reason\n- 測試須 hermetic（不得操作真 repo git）\n- 重構後刪掉被取代的死碼，不留 legacy 分支\n\n來源：telegram-963（parent telegram-958 線）",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "telegram",
+    "created_at": "2026-07-18T08:47:16.483217+00:00",
+    "parent_task_id": "telegram-963",
+    "created_by": "telegram_responder"
+  },
+  {
+    "id": "assign_ff29dceb",
+    "title": "修原版文章頁底部瀏覽數：同一張 article_impressions 卻沒套 displayed_views + 文案誤導（取代 assign_cee1e41a）",
+    "description": "**取代 assign_cee1e41a**（該單已標 deprecated）。同一檔同一行的兩個問題，必須一次改完，勿分兩張單。\n\n== 查證（telegram-965/966，老闆問「追蹤和瀏覽是分開的吧」） ==\n實查結論：**不是分開的，是同一個計數。**\n- 文章頁頂部：src/lib/article-views.ts getArticleDisplayedViews() → 讀 Supabase \n  count=exact，再套 displayed = seed + max(0, real_now - baseline_real)\n- 文章頁底部：src/app/api/analytics/reaction/route.ts:44-47 的 viewsRes → **同一張 article_impressions**\n  同樣 count=exact，零加工直接回傳成 counts.views\n兩者底層完全相同，差別只在頂部套了種子公式、底部沒套。所以原版同一頁上面 1314、下面 7。\n（likes / bookmarks / shares 走 article_reactions，那些才是真正獨立的互動計數，不受本任務影響。）\n\n== 要修兩件事 ==\n1. **數字**：ArticleEngagement.tsx:235 的瀏覽數必須走與 article-views.ts 同一條公式。\n   建議由 server 端 ReportDetail.tsx 把已算好的 viewsLabel 傳進 ArticleEngagement，\n   避免 client 重算或再生出第三條公式。likes/bookmarks/shares 維持現狀。\n2. **文案**：「已追蹤瀏覽 N 次」這個措辭讓人以為它是另一個指標（老闆就是這樣讀的）。\n   它就是文章瀏覽數，改成與頂部一致的說法（例：「N 次瀏覽」），不要再用「已追蹤」暗示另一套計數。\n\n== 另外 ==\n3. 全站掃一次是否還有第三處 reader-facing 直接顯示原始 impressions count（admin console 不算）。\n4. 加機械 gate / 測試，防止未來新增 reader-facing 瀏覽數時繞過 displayed_views\n   （可擴充 frontend-v2-fix/tests/article-views.test.mjs）。\n5. 改完 build + 本機實測原版與 v3 文章頁，再部署驗證線上。\n\n== 已確認不用動 ==\n頂部數字原版（ReportDetail.tsx:87）與 v3（app/v3/reports/[id]/page.tsx:38）都已正確 import 同一模組。\nArticleEngagement 只被原版使用，v3 沒用到。\n\n來源：telegram-962 / telegram-965 / telegram-966",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "closed_no_action",
+    "source": "telegram",
+    "created_at": "2026-07-18T08:49:06.402746+00:00",
+    "parent_task_id": "telegram-966",
+    "created_by": "telegram_responder",
+    "terminalized_at": "2026-07-18T08:49:45+00:00",
+    "terminalized_reason": "deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-18T08:49:45+00:00",
+    "blocked_note": "取代為 assign_998ad2be（含數字統一 + 文案修正完整規格）。勿平行實作。"
+  },
+  {
+    "id": "telegram-968",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-18T08:49:21.062146+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 968）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n請記住不能漏掉任何已完成的內容 因為所有研究內容都有需要復現\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n✅ 收到，我同意你的判斷 — 補 recognizer 是繼續糊，不是解。已按重構開單。\n\n🎯 根因不是「少一個 recognizer」，是這個架構**要求人記得補 recognizer**：\nreap_orphan_deliverables.py 998 行，job / paper / drafts 三份平行的 scan 函式，各寫各的。少寫一份 = 那個目錄的檔案沒有任何出口 = alert 結構上解不掉。\n7/17 那次「預設收編」的反轉，只做在 drafts 那份函式**裡面**，沒升成全域規則 — 所以 experiments/ 又中同一招。第三次。\n\n🔧 重構規格（P1，assign_01127566）：\n1. 逐目錄 recognizer 全砍，改 namespace registry：受管目錄變 config 一筆 {預設收編/hold、排除規則、上限}，泛型引擎吃 registry。驗收條件寫死：新增目錄只准加 config，不准再寫函式。\n2. 「預設收編、只擋垃圾」從 drafts 特例升成全域預設 → experiments/ 直接有出口。\n3. held 加 first_seen + TTL，超過 6 班自動開指名單並停止重複噴同一句。永久 held 這個狀態本身就是 bug。\n4. ownership 不再賭「作者回來 commit」— 作者 session 死掉是常態。\n\n🚫 不放寬的：PHASE-Z 只 commit 自己那班的檔，這條保留（盲收正是先前事故成因）；held 永不刪除、永不 checkout 也保留。\n\n🗑️ 舊那張補丁單 assign_bc041e57 我已標 deprecated，避免兩班平行做。\n⚠️ k1380 那批的 invalidation rename 語意，實作班先確認再決定收不收。\n\n我在 responder\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T08:50:19.929878+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-18T08:50:54.795045+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-18T08:50:54.795031+00:00"
+  },
+  {
+    "id": "assign_998ad2be",
+    "title": "修原版文章頁底部瀏覽數：同一張 article_impressions 卻沒套 displayed_views + 文案誤導",
+    "description": "**取代 assign_cee1e41a 與 assign_ff29dceb**（兩張皆已標 deprecated；ff29dceb 描述有一處被 shell 吃掉的字，以本單為準）。同一檔同一行的兩個問題，必須一次改完，勿分多張單。\n\n== 查證（telegram-965/966，老闆問「追蹤和瀏覽是分開的吧」） ==\n實查結論：**不是分開的，是同一個計數。**\n- 文章頁頂部：src/lib/article-views.ts getArticleDisplayedViews() → 讀 Supabase 資料表 article_impressions\n  count=exact，再套 displayed = seed + max(0, real_now - baseline_real)\n- 文章頁底部：src/app/api/analytics/reaction/route.ts:44-47 的 viewsRes → **同一張 article_impressions**\n  同樣 count=exact，零加工直接回傳成 counts.views\n兩者底層完全相同，差別只在頂部套了種子公式、底部沒套。所以原版同一頁上面 1314、下面 7。\n（likes / bookmarks / shares 走 article_reactions 表，那些才是真正獨立的互動計數，不受本任務影響。）\n\n== 要修兩件事 ==\n1. **數字**：ArticleEngagement.tsx:235 的瀏覽數必須走與 article-views.ts 同一條公式。\n   建議由 server 端 ReportDetail.tsx 把已算好的 viewsLabel 傳進 ArticleEngagement，\n   避免 client 重算或再生出第三條公式。likes / bookmarks / shares 維持現狀。\n2. **文案**：「已追蹤瀏覽 N 次」這個措辭讓人以為它是另一個指標（老闆就是這樣讀的）。\n   它就是文章瀏覽數，改成與頂部一致的說法（例：「N 次瀏覽」），不要再用「已追蹤」暗示另一套計數。\n\n== 另外 ==\n3. 全站掃一次是否還有第三處 reader-facing 直接顯示原始 impressions count（admin console 不算）。\n4. 加機械 gate / 測試，防止未來新增 reader-facing 瀏覽數時繞過 displayed_views\n   （可擴充 frontend-v2-fix/tests/article-views.test.mjs）。\n5. 改完 build + 本機實測原版與 v3 文章頁，再部署驗證線上。\n\n== 已確認不用動 ==\n頂部數字原版（ReportDetail.tsx:87）與 v3（app/v3/reports/[id]/page.tsx:38）都已正確 import 同一模組。\nArticleEngagement 只被原版使用，v3 沒用到。\n\n來源：telegram-962 / telegram-965 / telegram-966",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "telegram",
+    "created_at": "2026-07-18T08:49:38.266653+00:00",
+    "parent_task_id": "telegram-966",
+    "created_by": "telegram_responder"
+  },
+  {
+    "id": "telegram-971",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-18T09:18:35.122591+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 971）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n原版網頁還是沒正常顯示修正後的瀏覽數\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔍 我去翻了 API，答案是：底層不是分開的，但你會這樣讀完全合理。\n\n同一張表、同一個 count：\n• 頂部：article-views.ts → article_impressions count=exact，再套種子公式\n• 底部：analytics/reaction route.ts:44-47 → 同一張 article_impressions，同一個 count，零加工\n\n所以 1314 和 7 是同一個東西的兩種算法，不是兩個指標。\n\n⚠️ 但「已追蹤瀏覽」這個文案本身就是錯的 — 它讓人以為那是另一套計數（你就是這樣讀的，那就代表讀者也會）。所以要修的是兩件事：數字套同一條公式，文案改成跟頂部一致的「N 次瀏覽」。\n\n📌 真正分開的是按讚/收藏/分享，那些走 article_reactions，不受影響。\n\n單子重開成 assign_998ad2be（含文案），舊那張 cee1e41a 標 deprecated 了。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T09:18:54.280200+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-18T09:20:58.504899+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-18T09:20:58.504885+00:00"
+  },
+  {
+    "id": "telegram-973",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-18T09:23:15.289695+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 973）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n以後回報是不是要列出近期已排定任務的時程和已完成的任務列表？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T09:23:33.942197+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-18T09:24:49.900304+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-18T09:24:49.900287+00:00",
+    "result": "已回覆老闆（telegram msg 974）；回報格式擴充落地任務 assign_6349aa2c 已排入任務池，memory feedback_structured_stage_report_format 已更新"
+  },
+  {
+    "id": "assign_6349aa2c",
+    "title": "回報格式 v3：結構化回報加『已排定任務時程』+『本班已完成任務』兩欄（老闆 msg 973）",
+    "description": "老闆 2026-07-18 Telegram msg 973 要求：以後的運營回報要能看到『近期已排定任務的時程』和『已完成的任務列表』。\n\n實作範圍（canonical，不是散文提醒）：\n1. 更新回報模板 SOP（沿用 governance_telegram_structured_progress_report_format 落地的位置，pdca-operations / 運營經理 SOP + 對應 code path），在既有『結論/驗證/產物/阻塞/下一步』後加兩欄：\n   - 已完成（本班）：<task_id + 一句話，最多 5 條，多的寫「+N 件」>\n   - 已排程：<接下來 24h 的 scheduled job / pending P1-P2 任務 + 預計時間，最多 5 條>\n2. 兩欄必須由程式自動生成，不可手打：已完成 = next_tasks.json 本班 status 轉 succeeded 的任務；已排程 = config/runtime_schedules.json 的下次 fire 時間 + next_tasks.json pending 依 priority 排序。寫一個 helper（例如 src/volpred/ops/report_sections.py）給所有回報點共用。\n3. 套用到所有結構化回報點（每日大體檢、autonomous loop summary、alert 收班回報、email summary）。\n4. 驗證：實際跑一次產生的回報貼進 telegram 給老闆看，確認兩欄有真實內容不是空的。\n\n注意：回報要有上限（各 5 條），不能把 32 筆 pending 全倒出來變成長報告——老闆要的是掃一眼知道進度，不是 dump。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-18T09:24:12.997288+00:00",
+    "created_by": "telegram-responder"
   }
 ]
