@@ -143,7 +143,21 @@ yfinance 事後回補了 06-29 ~ 07-01，所以現在是真正的同日 T-1 比�
 **未發第二篇更正文**（依任務要求）。`published_at` 未動，feed 排序不受影響；改動記在
 `errata.update_history`。
 
-### 4.4 Live verify 實證
+### 4.4 metadata 層 class sweep（同類問題還有沒有別的？）
+
+掃過整個 `feed.json`，帶結構化 NFP/CPI 事件 metadata 的文章**只有 `mile_35eef830` 一篇**：
+
+```
+$ jq -r '.[] | select(.details.event != null)
+         | select(.details.event | test("NFP|CPI|nfp|cpi"))
+         | "\(.id)\t\(.status)\t\(.details.event)"' storage/reports/feed.json
+mile_35eef830   published   NFP_US_2026_07_02      ← 已修正
+```
+
+即**線上 metadata 層這一類問題已清空**。注意這只涵蓋 `details.event` 這個欄位；
+正文內容層的污染（§7 的 k528）不在這個 sweep 的範圍內。
+
+### 4.5 Live verify 實證
 
 ```
 $ curl -s -o /dev/null -w "HTTP %{http_code}" https://volpred.zeabur.app/v3/reports/mile_35eef830
