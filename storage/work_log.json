@@ -21144,5 +21144,25 @@
     "owner": "hourly-slot-1-22a06d16729b49caaf877cd2bbde5cfc",
     "commit": null,
     "summary": "P1 (老闆 Telegram msg 937)：blocked 任務生命週期底層重構 + 清償全部滯留停放。**架構層 + 資料層同班收尾，零筆留給下一輪，零筆需老闆決策**。\n\n**根因**：canonical queue 允許 task 進 `status=blocked` 卻不帶 `blocked_until`；sweeper `unblock_expired_blocked_tasks.py` 只 re-pend「已過期」者，對「根本沒有 blocked_until」者結構上永遠掃不到 → 無限停放。實查 30 筆 blocked 中 19 筆無出口（task 描述說 14 筆，實際已漂移到 19），最舊停放 >45 天。\n\n**層 1 — writer invariant**（`src/volpred/ops/next_tasks.py`）：新增 `InvalidBlockedUntil` / `DEFAULT_BLOCKED_UNTIL_DAYS=14` / `default_blocked_until()` / `enforce_blocked_until()` / `_audit_blocked_until()`。沿用該模組既有的兩段式嚴格度哲學（同 `validate_task_status` vs `_audit_task_statuses`）：caller 自建的 blocked row 走 strict path 自動補預設窗；whole-file 路徑只 warn 不 raise（raise 會 brick 每個 materializer）。14 天窗語意由此模組單一擁有並 re-export 給 `mark_task_blocked.py`，避免同一數字漂成兩份。\n\n**層 2 — sweeper escalation**（`scripts/unblock_expired_blocked_tasks.py`）：新增 escalate pass，「blocked 無 blocked_until」不得靜默略過，逐筆列出並補窗 + 標 `needs_adjudication`；刻意**不**自動 re-pend / 自動 close（裁決權不下放給腳本）。\n\n**層 3 — 防回歸 gate**（`tests/test_task_status_vocab.py`）：baseline 鏡像 + 超標即 fail。單一 enforcement owner（未同時加 daily_checkup 維度，避免 anti-stacking）。\n\n**baseline 收到 0**：agent 原本凍在 19（等於把病灶合法化）。19 筆既已當班清償，無 legacy 族群可 grandfather → `LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE = 0`，任何新出現的無出口 blocked 立即 fail。註解寫明「要調高就是重新打開這個洞，請改去裁決」。\n\n**19 筆逐筆裁決**（每筆證據落在 row 的 `adjudication_reason`）：\n- **12 筆 re-pend** — blocker 已消失或本就不是 blocker。K1169（prereq 目錄 `paper/eav-universal-magnitude/` 實查已存在）；Paper3_expansion_synthesis（等 E1+E2+E3 全完成，但 **E3 已 failed → 條件永遠不可能滿足**，改以 E1+E2 + E3 記為 failed arm 收斂）；K1438（**實測 yfinance `^VIX1D` 可取，21 rows/2024-01 → 「awaiting_external_data」前提是假的**）；K1436 / k1095_v2 / vix_sufficiency F3/F9/F10（funding rate、公開行事曆、CBOE put-call + pytrends + VIX open 皆公開可取，取數是任務本體不是 blocker）；K1708（**有 active worktree `dispatch-slot-2-8dda242d-k1708` 在跑 → 純屬錯標**）；K492 / K709（dedup gate exit 0，仍未覆蓋）；K1414（kid_collision 只是記帳問題，本體是 Paper 3 submission blocker → `pending_main_thread`）；BTC_GAS_tex_conversion（prior_attempts_failed 是重試訊號不是 blocker，走 escalation ladder）；research_har_mcs（完全沒有 blocker reason）。\n- **6 筆關閉** — K652（`check_arc_dedup` → K-COVERAGE 已有文章）；K672 / K1327（ARC DUPLICATE）；email-11836（49 天前 INFO alert 回信，時效歸零 → expired）；email-11980（FB App Review，路線已撤 → superseded）；**fb_page_graph_api_integration（關鍵發現：不是在等老闆給 FB 憑證，而是老闆 2026-06-03 已「永久撤回」Page/Graph API 路線，見 `docs/fb_pipeline_permanent_fix.md:46`。它卡 45 天純粹因為 blocked 沒有出口機制 —— 正是這張 P1 要根治的病徵本身）→ cancelled**。\n- **1 筆補記已交付** — platform-ops-fb-realchrome-autopost：`scripts/fb_realchrome_post.py`（927 行、CDP-attach）已在 production 使用，work_log `fb_dual_publish_20260716` 是實際雙發佈紀錄 → succeeded。\n\n**驗收（全部主線程實跑，未採信 agent 宣稱）**：`pytest tests/test_task_status_vocab.py` 29 passed；sweeper dry-run 由「escalate 19」轉為「escalate 0」；`enforce_blocked_until` 實測三態（缺值自動補 2026-08-01T15:15:00+00:00 / 既有值不動 / 非 blocked no-op）；queue 完整性 2870 筆無損（無截斷）；`daily_checkup.py` 重跑 **critical=0 且 blocked 相關 warn 已消失**（task 指定的驗收條件）。\n\n**留給後續**（上一班 assign_67f56b79 提出、本班確認仍缺）：`mark_task_blocked.py` 的 reason enum 沒有「等上游 compute job 產出」這個實際最常見的停放理由，目前只能借用 `awaiting_external_data` + note 補述；建議補 `awaiting_upstream_job`。本班未動，因超出本 task 契約範圍。"
+  },
+  {
+    "timestamp": "2026-07-19T00:27:31.582252+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_01127566",
+    "actor": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b",
+    "owner": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b",
+    "title": "orphan reaper 底層重構：namespace registry 取代逐目錄 recognizer + held TTL escalation",
+    "summary": "config/orphan_namespaces.json 宣告受管目錄（drafts=adopt / paper=hold / experiments=adopt）；泛型引擎 scan_namespace + collect_namespace 取代 scan_draft_artifacts / scan_paper_build_artifacts 等三份平行 recognizer（刪 ~310 行死碼，source-level ratchet 擋 recognizer 復活）；全域預設反轉為「預設收編、只擋 tmp/swp/pyc/dotfile/symlink/巨檔」→ experiments/ 自動有出口；held 帶 first_seen + shifts，連續 6 班無主自動 escalate 成指名路徑任務並停止重複 alert；k1380 判為刻意 invalidation rename → 以泛型 paired_deletion_pending 規則 hold 而非盲收。queue-receipt 路徑刻意保留獨立 owner（receipt-lock 排序不變量）。",
+    "verification": "uv run pytest 56 passed + audit_canonical_writers PASS + reaper dry-run exit 0"
+  },
+  {
+    "timestamp": "2026-07-19T00:29:38.495922+08:00",
+    "task_type": "platform_ops",
+    "task_id": "agent-k1731-armB-esfix-7009a4",
+    "actor": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b",
+    "owner": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b",
+    "title": "PHASE A triage：K1731 arm B ES 修正 agent job failed",
+    "summary": "根因＝agent 把 19-refit production 重跑丟背景後結束回合，自述「會被自動喚回」但 runner 無此機制，process group 隨回合收掉；run_corrected_rev5.log 停在 3/19 refit，k1731_armB_esfix.json 從未產出。非程式錯誤。可保留成果確認存在：k1731_models.py(rev5)、finalize_report、regression_check、es_mixture_check_results（已確立舊 ES 估計量向下偏誤 3.9%-22.8%）。regression baseline 原僅存於 /tmp，本班保全至 worktree experiments/k1731/regression_baseline/。建續跑任務 assign_1394a67a（段1 heavy compute 走 compute_queue、段2 回歸檢查+finalize），已 mark-followup-dispatched。未 force-remove worktree、未把中斷結果當完整結果。",
+    "verification": "worktree ls + stderr/stdout log 逐條核對；mark-followup-dispatched 回 true"
   }
 ]

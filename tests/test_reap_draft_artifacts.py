@@ -71,7 +71,7 @@ def test_published_draft_and_its_assets_are_collected(repo):
     _write(drafts / "K1685_lazypack_plan.json", "{}", mtime=OLD)
     _write(drafts / "assets" / "k1685_lazypack" / "1_concept.png", "png", mtime=OLD)
 
-    scan = mod.scan_draft_artifacts()
+    scan = mod.scan_namespace("drafts")
     paths = {e["path"] for e in scan["collectable"]}
     assert paths == {
         "storage/drafts/K1685_general_draft.md",
@@ -80,7 +80,7 @@ def test_published_draft_and_its_assets_are_collected(repo):
     }
     assert scan["held"] == []
 
-    out = mod.collect_draft_artifacts(scan["collectable"])
+    out = mod.collect_namespace("drafts", scan["collectable"])
     assert out[0]["committed"] is True
     # The whole point: nothing left for PHASE-Z to re-alert about.
     assert _git(root, "status", "--porcelain", "--", "storage/drafts/").stdout.strip() == ""
@@ -91,7 +91,7 @@ def test_draft_still_being_written_is_left_alone(repo):
     mod, root = repo
     _write(root / "storage" / "drafts" / "K9_general_draft.md", "fresh")  # mtime = now
 
-    scan = mod.scan_draft_artifacts()
+    scan = mod.scan_namespace("drafts")
     assert scan["collectable"] == []
     assert scan["skipped"]["grace"] == 1
 
@@ -105,7 +105,7 @@ def test_draft_owned_by_a_live_task_is_left_alone(repo):
          "description": "writing storage/drafts/K9_general_draft.md"},
     ]), encoding="utf-8")
 
-    scan = mod.scan_draft_artifacts()
+    scan = mod.scan_namespace("drafts")
     assert scan["collectable"] == []
     assert scan["skipped"]["inflight"] == 1
 
@@ -129,7 +129,7 @@ def test_novel_suffix_is_collected_by_default(repo):
     _write(root / "storage" / "drafts" / "assets" / "e1" / "Makefile",
            "all:\n", mtime=OLD)  # no suffix at all
 
-    scan = mod.scan_draft_artifacts()
+    scan = mod.scan_namespace("drafts")
     assert {e["path"] for e in scan["collectable"]} == {
         "storage/drafts/assets/e1/series.parquet",
         "storage/drafts/assets/e1/notebook.ipynb",
@@ -152,7 +152,7 @@ def test_junk_file_is_held_not_committed(repo):
     _write(root / "storage" / "drafts" / ".DS_Store", "x", mtime=OLD)
     _write(root / "storage" / "drafts" / "notes.md~", "x", mtime=OLD)
 
-    scan = mod.scan_draft_artifacts()
+    scan = mod.scan_namespace("drafts")
     assert scan["collectable"] == []
     reasons = {e["path"]: e["reason"] for e in scan["held"]}
     assert reasons["storage/drafts/scratch.tmp"] == "excluded_suffix:.tmp"
@@ -167,10 +167,10 @@ def test_oversize_file_is_held_not_committed(repo):
     mod, root = repo
     big = root / "storage" / "drafts" / "assets" / "e1" / "dump.csv"
     big.parent.mkdir(parents=True, exist_ok=True)
-    big.write_bytes(b"0" * (mod.DRAFT_MAX_FILE_BYTES + 1))
+    big.write_bytes(b"0" * (mod.get_namespace("drafts")["max_file_bytes"] + 1))
     os.utime(big, (OLD, OLD))
 
-    scan = mod.scan_draft_artifacts()
+    scan = mod.scan_namespace("drafts")
     assert scan["collectable"] == []
     assert scan["held"][0]["reason"].startswith("excluded_oversize:")
     assert big.exists()  # invariant: held means held, not removed
@@ -185,7 +185,7 @@ def test_symlink_is_held_not_committed(repo):
     link.parent.mkdir(parents=True, exist_ok=True)
     link.symlink_to(real)
 
-    scan = mod.scan_draft_artifacts()
+    scan = mod.scan_namespace("drafts")
     assert scan["collectable"] == []
     assert scan["held"][0]["reason"] == "excluded_symlink"
 
@@ -200,7 +200,7 @@ def test_deletion_is_never_committed(repo):
     _git(root, "commit", "-q", "-m", "add draft")
     tracked.unlink()
 
-    scan = mod.scan_draft_artifacts()
+    scan = mod.scan_namespace("drafts")
     assert scan["collectable"] == []
     assert scan["held"][0]["reason"] == "deletion_not_owned"
     # Still in HEAD: the reaper reported the deletion, it did not ratify it.
@@ -211,13 +211,13 @@ def test_draft_collector_refuses_late_prestaged_collision(repo):
     mod, root = repo
     target = root / "storage" / "drafts" / "K10_general_draft.md"
     _write(target, "first complete draft", mtime=OLD)
-    entries = mod.scan_draft_artifacts()["collectable"]
+    entries = mod.scan_namespace("drafts")["collectable"]
     assert entries
 
     _git(root, "add", "storage/drafts/K10_general_draft.md")
     staged = _git(root, "show", ":storage/drafts/K10_general_draft.md").stdout
     _write(target, "later working bytes", mtime=OLD)
-    out = mod.collect_draft_artifacts(entries)
+    out = mod.collect_namespace("drafts", entries)
     assert out[0]["committed"] is False
     assert out[0]["err"] == "pre_staged_collision"
     assert _git(root, "show", ":storage/drafts/K10_general_draft.md").stdout == staged

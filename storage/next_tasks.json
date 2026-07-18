@@ -9294,32 +9294,15 @@
   },
   {
     "id": "email-11836-9833be",
-    "title": "[email_reply] Re: [VolPred Alert][INFO] 自主 loop fire 17:07 — Paper3 D2 errata verify-and-close",
-    "description": "Gmail UID: 11836\nMessage-ID: <92EE6045-BEC9-40A1-820D-6C8B14F796FC@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sat, 30 May 2026 17:50:32 +0800\nSubject: Re: [VolPred Alert][INFO] 自主 loop fire 17:07 — Paper3 D2 errata verify-and-close\n\n--- 用戶回信內容 ---\n看看這段對話chatgpt.com \n做模擬然後寫成一篇trending文章−−\n\nVolPred <yihao.lai@gmail.com> 於 2026年5月30日 17:14 寫道：\n\n﻿\r\n\r\n  \r\n    \r\n    \r\n    自主 loop fire 17:07 — Paper3 D2 errata verify-and-close\r\n  \r\n  \r\n    \r\n      \r\n        \r\n          VolPred 管理通知\r\n          自主 loop fire 17:07 — Paper3 D2 errata verify-and-close\r\n          Alert level: info\n\n\r\n        \r\n        \r\n          \r\n          INFO自主 loop fire 17:07 — Paper 3 D2 errata verify-and-close\r\n本班動作摘要\r\nPhase 0 (email_reply): 無 in_progress / pending 待處理。\n\r\nPhase 0.5 (reader-facing refill): state OK (scanned=true, errors=[])。\n\r\nPhase A (compute queue): 無 completed-pending-followup。\n\r\nPhase B (派工):\n\n\r\n\r\n挑 Paper3_D2_errata_Table5_and_remove_rho_0.830 (paper_review, P4, pending_main_thread 18 天)\r\ndiversity 通過 (last-3: paper_body/trending_repost/platform_ops/daily_article ×2; paper_review 不在 last-3)\r\nmission §3 (top-tier journal paper) 對齊\r\nclaim → start → 主線程審 → complete\r\n\r\n發現\r\nTask 實際已在 v2→v3 升級時完成 — body_v3.tex 已實現所有 4 項 scope：\n\n\r\n\r\n\r\n\r\nScope\r\nBody location\r\n狀態\r\n\r\n\r\n\r\n\r\nTable 5 數字 → K1178 canonical\r\nline 444-445 (avg ΔMDD 24.9, t=10.25), line 449 (r=-0.806, ρ=-0.835)\r\n✅ done\r\n\r\n\r\nRemove ρ=0.830 GJR γ vs ΔSharpe\r\nline 450 \"Removed in v3\" note + line 483 forensic discussion\r\n✅ done\r\n\r\n\r\ndata_sources.md 標 K1178 source\r\nline 34, 92 (含 auto_adjust 註記)\r\n✅ done\r\n\r\n\r\nexperiments.md 標 K1178 source\r\nline 19, 67, 70 (Table 5 + Figure 2)\r\n✅ done\r\n\r\n\r\n\r\nVerify K1178 results.json 對齊：\n\n\r\n\r\ncross_sectional.vix_sens_vs_delta_mdd_pearson_r = -0.8063 (p=0.00087) → body 用 -0.806 ✓\r\ncross_sectional.vix_sens_vs_delta_mdd_spearman_rho = -0.8351 (p=0.00038) → body 用 -0.835 ✓\r\n\r\nGrep clean: body_v3 已無 stale K901 數字 (28.7 / 15.70 / -0.770 / -0.720)。\n\n\r\n後續 backlog\r\nPaper 3 pending_main_thread 7→6。剩餘:\n\n\r\n\r\nBTC_GAS_negative_paper P4 paper_body\r\nPaper2_errata_Table3_full_rewrite P4 paper_review\r\nPaper4_DIV4_Table6_era_Harvey_passes P4 paper_review\r\nPaper4_body_integration_9_new_experiments P3 paper_decision (next-up)\r\nPaper6_major_errata_K880v2_canonical P4 paper_review\r\nVolAbsorption_errata_decision P4 paper_body\r\n\r\n下班 fire 應先驗證其他 P4 errata 是否同樣 stale (v2→v3 已 done)。Paper 4 (P3) 是最高 priority，需 narrative decision + 9 實驗 body integration，建議獨立 fire 處理。\n\n\r\n紀律 check\r\n\r\n✅ Claim → start → complete 完整 (cross-session lock 保護)\r\n✅ PHASE Z commit 1d32f52e\r\n✅ work_log entry added (973→974)\r\n✅ 研究誠實: 數字 cell-level verify (Pearson/Spearman 對齊 results.json)\r\n✅ \"先修流程，不修資料\": 確認 v3 已實現，標 succeeded，不額外 patch\r\n✅ Mission §3 alignment: Paper 3 投稿前 errata 護城河\r\n\r\n時間\r\n\r\n⏱ 開始 2026-05-30 17:07:46 (台灣時間)\r\n⏱ 停止 2026-05-30 17:13:30 (台灣時間)\r\n總耗時 ~6 分鐘\r\n⏭ 下次 autonomous fire: 2026-05-30 17:43 (台灣時間, 30min wakeup)\r\n⏭ 下次 hourly cron: 2026-05-30 18:07 (台灣時間)\n\n--- 原始助理寄出內容（引用部分） ---\n(no quote)\n",
-    "task_type": "email_reply",
-    "priority": 3,
     "status": "expired",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-05-30T10:00:10.824897+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 自主 loop fire 17:07 — Paper3 D2 errata verify-and-close",
+    "priority": 3,
     "source": "gmail_inbox_poll",
-    "email_uid": 11836,
-    "email_message_id": "<92EE6045-BEC9-40A1-820D-6C8B14F796FC@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][INFO] 自主 loop fire 17:07 — Paper3 D2 errata verify-and-close",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "blocked_at": "2026-05-30T10:14:34+00:00",
-    "blocked_note": "等老闆補 ChatGPT 對話分享連結才能做模擬+寫文章；已回信請求",
+    "created_at": "2026-05-30T10:00:10.824897+00:00",
     "completed_at": "2026-05-30T10:14:42.005753+00:00",
-    "result": "請求補 ChatGPT 對話連結（信中只有 chatgpt.com 字樣無實際分享連結）；已回信(d1f9e60e)。拿到連結後做 VolPred 模擬+寫 trending 文章。",
-    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
-    "stale_claim_previous_claimed_by": "interactive-claude",
-    "stale_claim_previous_claimed_at": "2026-05-30T10:11:07.863693+00:00",
-    "stale_claim_previous_claim_session_id": "61c1ba18db8b",
-    "adjudicated_at": "2026-07-18T15:14:21.054308+00:00",
-    "adjudicated_by": "hourly-slot-1-22a06d16729b49caaf877cd2bbde5cfc",
-    "adjudication_reason": "reply to an INFO-level loop-fire alert from 2026-05-30 parked on external data; 49 days stale, no remaining time value"
+    "tombstone": true,
+    "archived_at": "2026-07-18T16:08:12.289695+00:00"
   },
   {
     "id": "K492_article_general",
@@ -21783,33 +21766,15 @@
   },
   {
     "id": "email-11980-d951a2",
-    "title": "[email_reply] Re: [VolPred Alert][INFO] 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiti",
-    "description": "Gmail UID: 11980\nMessage-ID: <9E561D3F-D2FF-4D47-A053-DF2C9021A203@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 24 Jun 2026 13:35:21 +0800\nSubject: Re: [VolPred Alert][INFO] 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting\n\n--- 用戶回信內容 ---\n我都開好了 你自己去看\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月24日 13:18 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting\r\n> Alert level: info\r\n> INFO\r\n> Re: 關於 FB 貼文 — 老闆糾正回覆\r\n> \r\n> 回覆兩個問題：\r\n> 1. FB App Review 狀況\r\n> \r\n> 老實說：我不知道當前 App Review 確切狀態。\r\n> 之前 session（2026-05-29）標 wont_fix 時的依據是「卡 App Review」，但那是 prior session 判斷，未實際登入 Meta Developer Portal 查證。\r\n> 可行的查證路徑：\r\n> Meta Developer Portal (developers.facebook.com/apps <http://developers.facebook.com/apps>) 需 Chrome 登入 — 不是 headless 能完成\r\n> 需要互動 session（你開著 Chrome + 我用 Claude in Chrome 操作）才能查 App 狀態 / 重新申請\r\n> 建議下一次互動 session 我做這 3 步：\r\n> 開 developers.facebook.com/apps <http://developers.facebook.com/apps> 查 App ID（你的個人 / VolPred 粉專 app）狀態\r\n> 看 pages_manage_posts / publish_actions 等 permission 是否被 reject 或 stale pending\r\n> 如有 reject reason 對症補 review note 重送；如未送過就跑首次 review\r\n> 2. Ivan Lai 個人 FB Chrome 操作\r\n> \r\n> 已糾正：你說對了 — Ivan FB 本來就是 Chrome 路徑，不該標 wont_fix。\r\n> 剛才做的：把 5 個誤標 wont_fix 的 FB 文章改回 awaiting_interactive_session：\r\n> Mile ID\t標題\r\n> mile_b221e550\t法說季開打前，Mag 7 的期權市場悄悄在說一件事\r\n> mile_057f178b\t為什麼 NVDA 每天都讓人心跳加速\r\n> mile_671d4c75\t債市和股市同時在怕，但怕的不是同一件事\r\n> mile_89889d46\t裁員八千人，同一季燒掉 $680 億\r\n> mile_5b3569c3\t配息數字背後的風險帳\r\n> 加上 handoff 已有的 9+ 篇 awaiting，FB backlog 約 14 篇待你下次開 Chrome 時批次處理（或我 Claude in Chrome）。\r\n> 自我檢討\r\n> \r\n> 「卡 App Review」這個結論我沒實證就標 wont_fix，違反研究誠實原則（時間/狀態也是數據）。下次遇到「不能完成」的判斷會先查證實際狀態。\r\n> 下一步\r\n> \r\n> 本 tick 完成：5 篇 wont_fix → awaiting flip + email 回覆\r\n> 待你下次開 Chrome 互動 session：(a) Meta Dev Portal 查 App Review (b) Ivan FB 14 篇 backlog 批次貼\n",
-    "task_type": "email_reply",
-    "priority": 3,
     "status": "superseded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-06-24T05:45:06.659091+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiti",
+    "priority": 3,
     "source": "gmail_inbox_poll",
-    "email_uid": 11980,
-    "email_message_id": "<9E561D3F-D2FF-4D47-A053-DF2C9021A203@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][INFO] 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "last_released_at": "2026-06-24T10:50:05.505769+00:00",
-    "last_release_reason": "auto_release_stale_2h",
-    "started_at": "2026-06-25T02:44:41.942322+00:00",
+    "created_at": "2026-06-24T05:45:06.659091+00:00",
     "completed_at": "2026-06-25T02:48:06.639017+00:00",
-    "result": "Close email sent (notification f70cd41e). Chrome tabs confirmed open for Meta Developers and Ivan FB. Meta tab claim timed out; Facebook content read blocked by browser-use enterprise policy. No Meta form/FB post side effects performed; task blocked until user provides screenshot/status or an allowed interactive environment.",
-    "stale_claim_cleared_at": "2026-07-05T14:44:25+00:00",
-    "stale_claim_previous_claimed_by": "claude-standin",
-    "stale_claim_previous_claimed_at": "2026-06-25T02:44:41.741566+00:00",
-    "stale_claim_previous_claim_session_id": "f8e6825f382c",
-    "adjudicated_at": "2026-07-18T15:14:21.054308+00:00",
-    "adjudicated_by": "hourly-slot-1-22a06d16729b49caaf877cd2bbde5cfc",
-    "adjudication_reason": "concerned FB App Review; the Graph API / Page track was permanently retracted by the owner on 2026-06-03 (docs/fb_pipeline_permanent_fix.md)"
+    "tombstone": true,
+    "archived_at": "2026-07-18T16:08:12.289695+00:00"
   },
   {
     "id": "research_short_interest_borrow_rate_proxy_squeeze_risk_sm",
@@ -27730,42 +27695,15 @@
   },
   {
     "id": "platform-ops-fb-realchrome-autopost",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "FB 個人帳號自動發文：real-Chrome CDP-attach worker（底層修復）",
     "priority": 1,
     "source": "telegram-237-boss-directive",
-    "status": "succeeded",
     "created_at": "2026-07-07T02:17:33.259825+00:00",
-    "title": "FB 個人帳號自動發文：real-Chrome CDP-attach worker（底層修復）",
-    "description": "老闆 Telegram msg 237 硬性指令：'我就要你自動發，那能怎麼立刻從底層修復處理？'。\n背景：現況 FB 個人帳號發文只能靠 interactive Claude-in-Chrome session；hourly headless 巡檢連不到 Chrome → 每次卡 pending/awaiting。老闆已釘死不用 Graph API / 不用粉專 / 不用 headless Playwright（見 docs/fb_pipeline_permanent_fix.md + memory feedback_fb_personal_account_chrome_only）。\n\n唯一未試過且尊重上述約束的底層 path = attach 到老闆『已開著、已登入 facebook.com/yihao.lai 的真實 Chrome』（真 profile、真 session，非 headless Playwright），用 CDP remote-debugging-port 由排程 worker 驅動貼文，不再等 interactive session。要件：(1) MAC STUDIO Chrome 以 --remote-debugging-port 啟動或改用既有已登入 profile (deviceId bc09353b… per memory reference_fb_chrome_browser_autoselect)；(2) 寫 fb_realchrome_post.py：讀已備妥 FB draft → CDP 連線 → 貼主文（不放連結）→ 第一則留言補網址；(3) hourly dispatch 在有 draft 時呼叫；(4) 風控驗證：先手動小樣本測 1 篇確認不觸發 FB 自動化鎖帳，PASS 才 wire 進排程。\n\n先做 spike/POC 驗證 CDP-attach 可行性 + 不鎖帳，再決定是否全自動化。若 CDP 仍觸風控 → 誠實回報物理上限、不硬繞。主線程 / 下個 Chrome-capable interactive tick 執行，不在 headless responder 做。\n\n待處理已備妥 2 篇：mile_08fefa59（AI 基建波動率）、mile_d12825bb（MOVE 債市方向感）。",
-    "claimed_by": "hourly-11",
-    "claimed_at": "2026-07-07T03:09:10.074441+00:00",
-    "claim_session_id": "b61384759e3d",
-    "status_history": [
-      {
-        "ts": "2026-07-07T03:09:10.074717+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-11"
-      },
-      {
-        "ts": "2026-07-07T03:09:45.138670+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-11"
-      },
-      {
-        "ts": "2026-07-07T03:14:38.689141+00:00",
-        "from": "in_progress",
-        "to": "blocked",
-        "by": "hourly-11"
-      }
-    ],
-    "started_at": "2026-07-07T03:09:45.138286+00:00",
     "completed_at": "2026-07-07T03:14:38.688761+00:00",
-    "result": "底層 CDP-attach worker 已建好+POC 通過（scripts/fb_realchrome_post.py --check 實測：connect_over_cdp attach 真 Chrome 成功、能開 FB 頁+截圖+讀 DOM）。唯一卡點=開著 debug-port 9222 的 Chrome profile 未登入 FB(login wall 截圖驗證)，AI 不能替老闆輸密碼。已 Telegram msg 252 回報+請老闆在該 Chrome 登入一次即永久自動。setup=docs/fb_realchrome_setup.md",
-    "adjudicated_at": "2026-07-18T15:14:21.054308+00:00",
-    "adjudicated_by": "hourly-slot-1-22a06d16729b49caaf877cd2bbde5cfc",
-    "adjudication_reason": "delivered: scripts/fb_realchrome_post.py (927 lines, CDP-attach) is in production use -- work_log fb_dual_publish_20260716 records a real dual publish"
+    "tombstone": true,
+    "archived_at": "2026-07-18T16:08:12.289695+00:00"
   },
   {
     "id": "fb_writer_persist_canonical_draft",
@@ -33168,13 +33106,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T15:00:52.082290+00:00",
+    "completed_at": "2026-07-18T16:01:02.537802+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T15:00:52.082290+00:00",
-      "last_clean_observed_at": "2026-07-18T15:00:52.082290+00:00"
+      "resolved_at": "2026-07-18T16:01:02.537802+00:00",
+      "last_clean_observed_at": "2026-07-18T16:01:02.537802+00:00"
     }
   },
   {
@@ -33186,13 +33124,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T15:20:17.881662+00:00",
+    "completed_at": "2026-07-18T16:30:48.299183+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T15:20:17.881662+00:00",
-      "last_clean_observed_at": "2026-07-18T15:20:17.881662+00:00"
+      "resolved_at": "2026-07-18T16:30:48.299183+00:00",
+      "last_clean_observed_at": "2026-07-18T16:30:48.299183+00:00"
     }
   },
   {
@@ -33423,34 +33361,13 @@
   },
   {
     "id": "dm_hac_fix_k841_strategy_dm",
+    "status": "succeeded",
     "task_type": "experiment",
     "priority": 2,
-    "status": "succeeded",
     "created_at": "2026-07-15T01:28:07+08:00",
-    "description": "K1655 bug class 必修 #3：experiments/k841/k841_futures_realtime_vt.py:436 用 `for k in range(h)`（正確應為 range(1,h+1)）→ h=1 時只取 gamma[0]，無 HAC。這是**策略報酬差的 DM**，自相關是常態不是例外。results.json 目前標 harvey_significant=True（t=10.82/−7.13/−1.97），曝險 feed×5。做法同上。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md",
-    "status_history": [
-      {
-        "ts": "2026-07-15T13:15:09.902611+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-15T13:15:21.983720+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-15T15:44:34.571890+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover"
-      }
-    ],
-    "started_at": "2026-07-15T13:15:21.983705+00:00",
     "completed_at": "2026-07-15T15:44:34.571874+00:00",
-    "result": "K841 repaired: canonical variance-risk HAC-DM lag 13 over n=2157; all 7 legacy t-statistics changed with 0 |t|>3 classification flips. Timing, cost, and session defects were rerun with byte-bound independent PASS review; 31 focused tests plus experiment gates and certify PASS. Two public articles were corrected and synced, and knowledge item a0f5af26 was superseded. Commits 9f868e41f cb3247d7e b2188a70c."
+    "tombstone": true,
+    "archived_at": "2026-07-18T16:08:12.289695+00:00"
   },
   {
     "id": "dm_hac_fix_k1525_k1526_pair",
@@ -35104,36 +35021,15 @@
   },
   {
     "id": "asia1_india_vt_indiavix",
-    "title": "[ASIA-1] 印度 VT + India VIX 資訊含量（^NSEI + ^INDIAVIX，複製 R12 設計）",
-    "description": "面向 ASIA（research_program.md 2026-07-15 用戶指示成立）第一棒。^NSEI + ^INDIAVIX（yfinance 2026-07-15 smoke test 驗證可用）：(1) India VIX vs 美 VIX 對 NIFTY 次日波動的資訊含量 — Granger + GARCH-X/HAR-X OOS QLIKE + Harvey/DM，完全對照台股 R12（VIX 優於 VXEEM）設計；(2) 若 India VIX 勝出，續做 c/IndiaVIX ratio VT 策略 sweep（對照台股 8.63/VIX，Q1/R15 慣例）。資料期間：^NSEI 2007 起（含 2008 空頭）、^INDIAVIX 起始日開工時診斷。硬規則：開工先讀 docs/error_log.md + 搜 knowledge.json 相似 K + 至少 3 篇文獻；先做資料期間診斷（smoke test 只驗 2y，實驗要拉最長可得樣本，OOS 必含至少一次空頭）；跨市場假日 alignment 依 methodology.md；signal.shift(1) 明確 lag；DM 用 canonical volpred.stats.model_evaluation.dm_test（HAC bandwidth 規則）；收工跑 experiment_gates.py。",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "[ASIA-1] 印度 VT + India VIX 資訊含量（^NSEI + ^INDIAVIX，複製 R12 設計）",
+    "priority": 2,
     "source": "user_directive_20260715_market_diversification",
     "created_at": "2026-07-15T07:59:24.440660+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-15T14:38:20.913116+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-15T14:38:21.198329+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-15T15:58:58.017548+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-15T14:38:21.198315+00:00",
     "completed_at": "2026-07-15T15:58:58.017530+00:00",
-    "result": "K1717 完成並通過 frozen-byte Codex certification。OOS 2020-2026：India VIX 在 GARCH-X/HAR-X 平均 QLIKE 較低，但 GARCH canonical DM t=-2.868 未達預註冊 t<-3，資訊 gate FAIL；VT 依規則跳過。結果、snapshot、兩張圖、knowledge 與 E080 已同步。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T16:08:12.289695+00:00"
   },
   {
     "id": "asia2_japan_vt_baseline",
@@ -41007,11 +40903,34 @@
     "description": "老闆 Telegram msg 963 指令：「立刻徹底解決這種白癡設計，底層邏輯重新設計和重構」。\n本任務**取代** assign_bc041e57（原本只打算補 experiments/ recognizer 的補丁式修法）。不要兩張單平行實作。\n\n== 根因（為什麼同一個坑第三次） ==\nscripts/reap_orphan_deliverables.py 有 998 行，用「每種產物一個 recognizer 函式」的形狀：\nscan_job_deliverables()（queue receipt output_paths）、scan_paper_build_artifacts()（paper/）、\nscan_drafts()（storage/drafts/）。每新增一種產物目錄就要再寫一個 recognizer，\n沒寫 = 該目錄的檔案沒有任何出口 → 永久 held → alert 永遠解不掉。\n2026-07-17 才為 storage/drafts/ 把預設從白名單反轉成「預設收編」（見檔內 660-666 行註解），\n但那次反轉只在 drafts 的 recognizer 內部做，沒有上升為全域規則，所以 experiments/ 又中同一招。\n**問題不是少一個 recognizer，是這個架構要求人記得補 recognizer。**\n\n== 要求的重構（不是補丁） ==\n1. **namespace registry 取代 recognizer 函式**：受管目錄改成 config 宣告（建議 config/ 下新檔或\n   併入既有 config），每筆 {path, default: adopt|hold, exclusions, owner_source, max_file_bytes,\n   max_files}。scan/collect 變成一個泛型引擎吃 registry，不再是三份平行實作。\n   驗收：新增一個受管目錄只需加一筆 config，**不得**新增任何 recognizer 函式。\n2. **全域預設反轉**：drafts 那條「預設收編、只擋真正的垃圾（tmp/swp/pyc/快取目錄/dotfile/symlink/巨檔）」\n   升級為 registry 的預設值，不是單一目錄的特例。experiments/ 直接套用即得出口。\n3. **held 不得是永久狀態**（呼應 audit terminal set 不可含 awaiting_*）：held 記錄帶 first_seen，\n   超過 N 班（建議 6）自動 escalate 成一張指名該路徑清單的任務，並停止重複噴同一句 alert。\n   目前 held 只有 reason、沒有時間軸，所以無主檔案可以無限期卡著。\n4. **ownership 不再依賴「作者自己回來 commit」**：作者 session 結束後永不回來是常態不是例外。\n   出口必須由 registry 預設 + escalation 提供，不能由已死的 session 提供。\n\n== 不可破壞的既有不變量 ==\n- 被擋的一律 held + 可讀 reason；永不刪除、永不 checkout（檔案頂部不變量）\n- git ownership 只認 exact 普通檔（不吃 symlink）\n- PHASE-Z 只 commit 自己那班產的檔 —— 這條是對的（盲目收養正是先前事故成因），\n  重構是給 reaper 補出口，不是放寬 PHASE-Z\n- 收編走 _git_transaction lease + receipt lock，順序不變\n\n== 遺留案例 ==\nk1380 那批：.npy/.json/.py 是 deleted 狀態、對應 *_INVALID_20260716.* 是 untracked，\n看起來是刻意的 invalidation rename。實作前先確認語意再決定收編或指名 escalate，不要盲收。\n\n== 驗收 ==\n- 回歸測試：(a) 新目錄只加 config 即有出口 (b) held 超過 TTL 會產生 escalation 任務\n  (c) 既有 drafts/paper/job 三條路徑行為不變 (d) 垃圾檔仍被擋且帶 reason\n- 測試須 hermetic（不得操作真 repo git）\n- 重構後刪掉被取代的死碼，不留 legacy 分支\n\n來源：telegram-963（parent telegram-958 線）",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "telegram",
     "created_at": "2026-07-18T08:47:16.483217+00:00",
     "parent_task_id": "telegram-963",
-    "created_by": "telegram_responder"
+    "created_by": "telegram_responder",
+    "status_history": [
+      {
+        "ts": "2026-07-18T16:08:23.000085+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b"
+      },
+      {
+        "ts": "2026-07-18T16:09:14.700140+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b"
+      },
+      {
+        "ts": "2026-07-18T16:27:37.203082+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b"
+      }
+    ],
+    "started_at": "2026-07-18T16:09:14.700124+00:00",
+    "completed_at": "2026-07-18T16:27:37.203068+00:00",
+    "result": "namespace registry 重構落地：config/orphan_namespaces.json + 泛型 scan/collect 引擎取代 3 份 recognizer（刪 ~310 行死碼，ratchet 擋復活）；全域預設反轉 → experiments/ 自動有出口；held 帶 first_seen/shifts，6 班後 escalate 成指名路徑任務並停止重複 alert；k1380 依泛型 paired_deletion_pending 規則 hold（刻意 invalidation rename，不盲收）。56 tests pass，audit_canonical_writers PASS，dry-run exit 0。PHASE-Z commit 範圍未動。"
   },
   {
     "id": "assign_ff29dceb",
@@ -41540,5 +41459,60 @@
     "created_at": "2026-07-18T12:12:05.505193+00:00",
     "parent_task_id": "assign_8a80c2fb",
     "created_by": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f"
+  },
+  {
+    "id": "member_qa_3e258ba2_evaluate",
+    "title": "[member_qa] yaoxk1431 提問：如果我要接下來30年我的資金穩定每年成長7%, 我該問什麼問題, 我必須掌握投資的15個問題",
+    "description": "Member question id: 3e258ba2-6a9d-4807-953d-a1671cce3b82\nProposer: yaoxk1431\nCreated: 2026-07-18T06:19:41.880497+00:00\n\n原題：\n如果我要接下來30年我的資金穩定每年成長7%, 我該問什麼問題, 我必須掌握投資的15個問題\n\n執行流程：\n1. uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json\n2. 主線程逐題做 4 維度評分（研究可行性 / 讀者價值 / 研究相關性 / 預期影響力）\n3. uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json\n4. rerank 後如本題入榜，再 uv run volpred ops question-claim --question-id 3e258ba2-6a9d-4807-953d-a1671cce3b82 --actor claude\n5. 完成 research / write / question-answer / question-finish\n\n注意：member_qa 為 reader-facing published flow，不可只 review report 就停。",
+    "task_type": "member_qa",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "tags": [
+      "member_qa",
+      "user"
+    ],
+    "created_at": "2026-07-18T16:00:03.004535+00:00",
+    "source": "question_ops_maintain",
+    "question_id": "3e258ba2-6a9d-4807-953d-a1671cce3b82",
+    "question_status": "evaluating",
+    "proposer": "yaoxk1431",
+    "question_score": null,
+    "task_mode": "evaluate"
+  },
+  {
+    "id": "platform_ops_release_audit_fix_mile_aff342df",
+    "title": "Fix release-pool audit blockers: 五檔股票扛起大盤 27.8% 權重：這種市場的保險，整張買太貴，用價差買省一半",
+    "description": "release_pool skipped draft `mile_aff342df` 3 times because the general-audience audit failed.\n\nTitle: 五檔股票扛起大盤 27.8% 權重：這種市場的保險，整張買太貴，用價差買省一半\n\nIssues:\n- anti_ai_style publish gate failed: [MUST] 1.1 不是...而是 套路對比: hit 1 次 — 範例 '不是「會不會跌」而是'. Rewrite per .claude/skills/anti-ai-style/references/editor-sop.md\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 3,
+    "status": "pending",
+    "source": "release_pool_audit_skip_materializer",
+    "tags": [
+      "release_pool",
+      "audit_skip",
+      "platform_ops"
+    ],
+    "created_at": "2026-07-18T16:00:47.656648+00:00",
+    "article_id": "mile_aff342df",
+    "release_audit_skipped_count": 3,
+    "release_audit_issues": [
+      "anti_ai_style publish gate failed: [MUST] 1.1 不是...而是 套路對比: hit 1 次 — 範例 '不是「會不會跌」而是'. Rewrite per .claude/skills/anti-ai-style/references/editor-sop.md"
+    ]
+  },
+  {
+    "id": "assign_1394a67a",
+    "title": "K1731 arm B ES 修正續跑：corrected production 進 compute_queue + 回歸檢查/finalize",
+    "description": "TRIAGE 結論（來自 compute job agent-k1731-armB-esfix-7009a4，exit_code=1、artifact_ok=False）。\n\n== 為什麼 failed ==\nAgent 把 corrected-spec production 重跑丟到背景（19 refits × ~53s），然後**結束回合**，\n自述「完成後我會被自動喚回」—— 但 agent job runner 沒有這種喚回機制，回合一結束整個\nprocess group 就收掉。`run_corrected_rev5.log` 停在 21:27:34 的 2010 refit（19 個只跑完 3 個），\n所以 `experiments/k1731/k1731_armB_esfix.json` 從來沒被產出 → runner 判 artifact missing。\n\n**不是程式錯誤，是把長時間背景計算留在會結束的 agent 回合裡。**\n\n== 可保留的成果（已確認存在，不要重做） ==\n- `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_models.py`（rev5，含新 ES 估計量）\n- `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_finalize_report.py`（provenance 蓋章 pipeline，無 provenance 直接 SystemExit）\n- `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_regression_check.py`（allow-list 外漂移一律 FAIL）\n- `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_es_mixture_check_results.json`（ES 估計量收斂驗證：\n  MC 標準誤每 4 倍樣本乾淨減半，|old-mc| 固定 2.12 不動 → 舊算法低估 ES 3.9%-22.8%，\n  方向已確立為偏誤而非雜訊）\n- **regression baseline 已由本班從 /tmp 保全到** `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/regression_baseline/`\n  （原本只存在 /tmp/k1731_regression_baseline/，隨時可能被清掉）\n\n== 要做什麼（兩段，不要合併成一個 agent 回合） ==\n段 1 — **heavy compute 走 compute_queue，不要放 agent 背景**：\n  corrected-spec production 重跑（19 annual refits，~17-20 min）。\n  進入點 `experiments/k1731/k1731_gevreg_midas_ssvs_returns.py`（argparse: --quick / --exclude-ip /\n  --garch-origin-lag / --tag）。**確切旗標從 `run_corrected_rev5.log` 開頭與 `k1731_models.py` 反推**，\n  不要憑印象猜。用 `scripts/compute_queue.py enqueue --script ... --result-artifact <corrected results json>\n  --output-path <同上> --timeout 3600`，cwd 指向上面 worktree。\n\n段 2 — 段 1 產出後（agent，bounded）：\n  回歸檢查（比對 `experiments/k1731/regression_baseline/`，驗證**只有 SSVS ES 欄位變動**）\n  → finalize → README §3.1/§3.5/§8/§9/§10 同步 → 產出 `k1731_armB_esfix.json`。\n  注意 §3.1 那個 p=0.0145 的拒絕**部分是舊 ES 估計量的假象**，修正後 §3.5 結論有實質翻轉可能 —— 翻轉就照實寫。\n\n== 之後才輪到 assign_67f56b79（拆段 2）==\n凍 bytes → Codex 重審 → merge_worktree.sh → 寫 knowledge.json（**只引 is_primary 那份，禁引 do_not_cite**）。\n\n== 禁止 ==\n- 不得把已中斷的 rev5 重跑結果當完整結果\n- 不得 force-remove worktree `dispatch-slot-1-bd00f90a-k1731`\n- 不得整份重跑拆段 1 已完成的部分\n",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "compute_queue_followup",
+    "created_at": "2026-07-18T16:29:22.049442+00:00",
+    "payload": {
+      "parent_job_id": "agent-k1731-armB-esfix-7009a4"
+    },
+    "created_by": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b"
   }
 ]

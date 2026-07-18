@@ -55,12 +55,12 @@ def test_volatile_only_results_and_clean_pdf_collectable(fake_repo: Path) -> Non
     (d / "experiments" / "k1_results.json").write_text(json.dumps(
         {"timestamp": "new", "runtime_seconds": 2.0, "sharpe": 0.51}))
     (d / "main.pdf").write_bytes(b"%PDF-rebuilt")
-    scan = reap.scan_paper_build_artifacts()
+    scan = reap.scan_namespace("paper")
     kinds = {e["path"]: e for e in scan["collectable"]}
     assert "paper/demo/experiments/k1_results.json" in kinds
     assert "paper/demo/main.pdf" in kinds
     assert scan["held"] == []
-    out = reap.collect_paper_artifacts(scan["collectable"])
+    out = reap.collect_namespace("paper", scan["collectable"])
     assert out and out[0]["committed"] is True
     status = subprocess.run(["git", "status", "--porcelain"], cwd=fake_repo,
                             capture_output=True, text=True)
@@ -71,7 +71,7 @@ def test_real_result_change_is_held(fake_repo: Path) -> None:
     d = fake_repo / "paper" / "demo"
     (d / "experiments" / "k1_results.json").write_text(json.dumps(
         {"timestamp": "new", "runtime_seconds": 2.0, "sharpe": 0.99}))  # 數字變了
-    scan = reap.scan_paper_build_artifacts()
+    scan = reap.scan_namespace("paper")
     held = {e["path"]: e["reason"] for e in scan["held"]}
     assert held.get("paper/demo/experiments/k1_results.json") == "content_changed"
     assert not any(e["path"].endswith("k1_results.json") for e in scan["collectable"])
@@ -81,7 +81,7 @@ def test_pdf_with_dirty_tex_is_held(fake_repo: Path) -> None:
     d = fake_repo / "paper" / "demo"
     (d / "main.tex").write_text("\\documentclass{article} % edited")
     (d / "main.pdf").write_bytes(b"%PDF-rebuilt")
-    scan = reap.scan_paper_build_artifacts()
+    scan = reap.scan_namespace("paper")
     held = [e for e in scan["held"] if e["path"] == "paper/demo/main.pdf"]
     assert held and held[0]["reason"].startswith("sources_dirty")
     assert not any(e["path"].endswith(".pdf") for e in scan["collectable"])
@@ -90,7 +90,7 @@ def test_pdf_with_dirty_tex_is_held(fake_repo: Path) -> None:
 def test_paper_collector_refuses_late_prestaged_collision(fake_repo: Path) -> None:
     target = fake_repo / "paper" / "demo" / "main.pdf"
     target.write_bytes(b"%PDF-rebuilt")
-    scan = reap.scan_paper_build_artifacts()
+    scan = reap.scan_namespace("paper")
     entries = [e for e in scan["collectable"] if e["path"].endswith("main.pdf")]
     assert entries
 
@@ -99,7 +99,7 @@ def test_paper_collector_refuses_late_prestaged_collision(fake_repo: Path) -> No
         ["git", "show", ":paper/demo/main.pdf"], cwd=fake_repo, capture_output=True
     ).stdout
     target.write_bytes(b"%PDF-later-working")
-    out = reap.collect_paper_artifacts(entries)
+    out = reap.collect_namespace("paper", entries)
     assert out[0]["committed"] is False
     assert out[0]["err"] == "pre_staged_collision"
     assert subprocess.run(

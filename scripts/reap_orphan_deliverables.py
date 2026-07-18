@@ -34,6 +34,18 @@ dashboard 看不到。它唯一的痕跡是 `git status` 裡一行未追蹤檔�
 4. **Git ownership 只認 exact files**。不遞迴 result directory、不接受 repo 外路徑、目錄、
    symlink 或 ignored junk；commit 使用相同的 literal pathspec，永遠不掃整棵工作區。
 
+## 受管目錄是資料，不是程式（2026-07-19，老闆 msg 963）
+
+這支程式曾經是「每種產物一個 recognizer 函式」。那個形狀本身就是 bug：新增一種產物
+目錄就要有人記得再寫一支函式，沒寫 = 該目錄的檔案沒有任何出口 → 永久 held → alert
+永遠解不掉。同一個坑踩了三次（paper/、storage/drafts/、experiments/）。
+
+現在受管目錄宣告在 `config/orphan_namespaces.json`，掃描與收編是一個吃 registry 的
+泛型引擎（`scan_namespace` / `collect_namespace`）。**新增一個受管目錄 = 加一筆 config。**
+預設是 `adopt`：namespace 裡的檔案就是那個 namespace 的產物（目錄的定義），只擋真正的
+垃圾。並且 held 帶 `first_seen`，連續數班無主會升級成一張指名路徑的任務 —— 因為「作者
+自己回來 commit」從來不是可靠的出口，作者 session 結束後不回來是常態。
+
 ## 交付憑證
 
 `publish_draft.py` 現在會把 `details.source_draft` 寫進 feed entry —— 草稿檔與文章之間
@@ -57,7 +69,7 @@ import sys
 import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
@@ -495,23 +507,103 @@ def _inflight_stems(tasks: list[dict]) -> set[str]:
 
 
 # ---------------------------------------------------------------------------
-# Paper build artifacts（2026-07-14，PHASE-Z streak alert 根因修正）。
-# 論文 session 跑 reproduce.py 驗證會就地重寫 experiments/*_results.json 的
-# volatile 欄位（timestamp/runtime）並 xelatex 重編譯 main.pdf；session 用
-# explicit-path commit（正確紀律）收自己的 .tex 修正時，這些驗證副產物必然被
-# 漏掉 → 連續多班無主 → PHASE-Z streak alert。此 recognizer 讓 reaper（孤兒
-# 成品的唯一 owner）認得這一類並在安全條件下自動收編：
-#   *_results.json — 與 HEAD 的差異僅限 volatile keys（實驗數字零變動）才收
-#   *.pdf         — 同 paper dir 無任何未提交的 .tex/.bib/圖源（= HEAD 源的
-#                    rebuild）才收
-# 任一條件不成立 → held 回報，絕不收（真的內容變動必須由作者驗證後 commit）。
+# Namespace registry（2026-07-19，老闆 msg 963 — 底層邏輯重新設計）
+#
+# 這裡原本是三份平行的 recognizer：scan_paper_build_artifacts、scan_draft_artifacts，
+# 各自帶一份 collect_*。形狀本身就是 bug：每新增一種產物目錄，就要有人記得再寫一個
+# recognizer 函式；沒寫 = 那個目錄的檔案**沒有任何出口**（PHASE-Z by design 只 commit
+# 自己那班產的檔），於是永久 held、alert 永遠解不掉。
+#
+# 這個坑踩了三次 —— paper/(07-14)、storage/drafts/(07-15，07-17 才把預設從白名單反轉
+# 成收編)、experiments/(07-19)。07-17 那次反轉只做在 drafts recognizer 內部，沒有升級成
+# 全域規則，所以下一個目錄照樣中招。問題不是少一個 recognizer，是這個架構要求人記得補
+# recognizer。
+#
+# 所以：受管目錄變成 config（config/orphan_namespaces.json）裡的一筆資料，掃描與收編
+# 變成一個吃 registry 的泛型引擎。新增一個受管目錄 = 加一筆 config，不寫任何程式。
+# 預設值是 adopt：一個 namespace 裡的檔案**就是**那個 namespace 的產物（目錄的定義，
+# 不是猜測），只擋真正的垃圾（編輯器殘留、快取目錄、dotfile、symlink、巨檔）。
+#
+# 檔案頂部的不變量一條都沒有放寬：被擋的一律 held + 可讀 reason，永不刪除、永不
+# checkout；git ownership 只認 exact 普通檔；收編一律走 _git_transaction lease。
 # ---------------------------------------------------------------------------
 
-PAPER_DIR = ROOT / "paper"
+REGISTRY_PATH = ROOT / "config" / "orphan_namespaces.json"
+HELD_STATE_PATH = ROOT / "storage" / "ops" / "orphan_held_state.json"
+
+# 內建 fallback：config 讀不到時仍有一份安全的預設，而不是「沒有 namespace = 什麼都
+# 不收」（那正是本次要修掉的失效模式）。
+_BUILTIN_DEFAULTS = {
+    "default": "adopt",
+    "status_filter": "all",
+    "respect_inflight": True,
+    "content_gates": [],
+    "max_file_bytes": 25 * 1024 * 1024,
+    "max_files": 40,
+    "exclusions": {
+        "dotfiles": True,
+        "editor_backups": True,
+        "symlinks": True,
+        "suffixes": [".tmp", ".temp", ".part", ".partial", ".swp", ".swo",
+                     ".bak", ".lock", ".pyc", ".pyo"],
+        "dirs": ["__pycache__", ".ipynb_checkpoints"],
+    },
+}
+
+# held 不得是永久狀態。連續這麼多班仍無主 → 升級成一張指名該路徑清單的任務，並停止
+# 重複噴同一句 alert。作者 session 結束後永不回來是常態，出口必須由系統提供。
+DEFAULT_HELD_ESCALATION_SHIFTS = 6
+
+_REGISTRY_CACHE: dict[str, dict] = {}
+
+
+def load_registry(*, refresh: bool = False) -> dict:
+    """Read the namespace registry, merging each entry over the declared defaults."""
+    key = str(REGISTRY_PATH)
+    if not refresh and key in _REGISTRY_CACHE:
+        return _REGISTRY_CACHE[key]
+    raw = _load_json(REGISTRY_PATH, {})
+    if not isinstance(raw, dict):
+        warn("reap_orphan", "namespace registry malformed — using builtin defaults",
+             path=key)
+        raw = {}
+    defaults = {**_BUILTIN_DEFAULTS, **(raw.get("defaults") or {})}
+    namespaces: dict[str, dict] = {}
+    for entry in raw.get("namespaces") or []:
+        if not isinstance(entry, dict) or not entry.get("path"):
+            warn("reap_orphan", "namespace entry skipped — needs a path",
+                 entry=json.dumps(entry, ensure_ascii=False)[:120])
+            continue
+        merged = {**defaults, **entry}
+        merged["id"] = str(entry.get("id") or entry["path"]).strip()
+        merged["path"] = str(entry["path"]).strip().strip("/")
+        merged["exclusions"] = {**(defaults.get("exclusions") or {}),
+                                **(entry.get("exclusions") or {})}
+        namespaces[merged["id"]] = merged
+    registry = {
+        "namespaces": namespaces,
+        "held_escalation_shifts": int(
+            raw.get("held_escalation_shifts") or DEFAULT_HELD_ESCALATION_SHIFTS),
+    }
+    _REGISTRY_CACHE[key] = registry
+    return registry
+
+
+def get_namespace(ns_id: str) -> dict:
+    ns = load_registry()["namespaces"].get(ns_id)
+    if ns is None:
+        raise KeyError(f"unknown orphan namespace: {ns_id!r}")
+    return ns
+
+
+# ── content gates ────────────────────────────────────────────────────────────
+# Gates 是**可重用的規則**，不是每個目錄一支函式：一筆 config 用名字引用它們，多數
+# namespace 一個都不用（default: adopt 就是出口）。paper/ 需要它們是因為那裡的 dirty
+# 檔可能是真的內容變動 —— 那必須由作者驗證後自己 commit，reaper 只認「重建副產物」。
+
 _VOLATILE_RESULT_KEYS = {"timestamp", "runtime_seconds", "generated_at",
                          "audit_date", "run_at", "elapsed_seconds"}
-_PAPER_SOURCE_SUFFIXES = {".tex", ".bib", ".sty", ".cls", ".png", ".pdf_tex", ".eps"}
-DEFAULT_MAX_PAPER_COMMITS = 2
+_BUILD_SOURCE_SUFFIXES = {".tex", ".bib", ".sty", ".cls", ".png", ".pdf_tex", ".eps"}
 
 
 def _strip_volatile(obj):
@@ -538,197 +630,114 @@ def _results_volatile_only(rel: str) -> tuple[bool, str]:
     return False, "content_changed"
 
 
-def scan_paper_build_artifacts(*, now_ts: float | None = None) -> dict:
-    """Classify dirty tracked files under paper/ into collectable / held."""
-    now_ts = now_ts if now_ts is not None else time.time()
-    status = _git("status", "--porcelain", "--", "paper/")
-    collectable: list[dict] = []
-    held: list[dict] = []
-    if status.returncode != 0:
-        warn("reap_orphan", "paper artifact scan: git status failed",
-             err=status.stderr[:120])
-        return {"collectable": [], "held": []}
-    dirty = [ln[3:].strip() for ln in status.stdout.splitlines()
-             if ln[:2].strip() == "M"]  # tracked modifications only；untracked 另有 owner
-    dirty_set = set(dirty)
-    for rel in dirty:
-        p = ROOT / rel
-        try:
-            if now_ts - p.stat().st_mtime < GRACE_SECONDS:
-                continue  # 可能有 session 正在寫 — 給滿 grace 再說
-        except OSError:
-            continue  # silent-ok: status→stat 之間檔案消失 = 無物可收，race-safe
-        parts = Path(rel).parts
-        if len(parts) < 2 or parts[0] != "paper":
-            continue
-        paper_dir = f"paper/{parts[1]}"
-        if rel.endswith("_results.json"):
-            ok, why = _results_volatile_only(rel)
-            (collectable if ok else held).append(
-                {"path": rel, "kind": "results_json", "reason": why})
-        elif rel.endswith(".pdf"):
-            dirty_sources = [d for d in dirty_set
-                             if d.startswith(paper_dir + "/") and d != rel
-                             and Path(d).suffix in _PAPER_SOURCE_SUFFIXES]
-            if dirty_sources:
-                held.append({"path": rel, "kind": "pdf",
-                             "reason": f"sources_dirty:{dirty_sources[:3]}"})
-            else:
-                collectable.append({"path": rel, "kind": "pdf",
-                                    "reason": "rebuild_of_head_sources"})
-    return {"collectable": collectable, "held": held}
+def _gate_volatile_json_only(rel: str, ctx: dict):
+    """Claim *_results.json; collectable only if the diff is timestamps/runtime."""
+    if not rel.endswith("_results.json"):
+        return None
+    ok, why = _results_volatile_only(rel)
+    return ("results_json", ok, why)
 
 
-def collect_paper_artifacts(entries: list[dict]) -> list[dict]:
-    """Commit collectable paper build artifacts through git（ASCII message）."""
-    out: list[dict] = []
-    if not entries:
-        return out
-    paths = [e["path"] for e in entries]
-    with _git_transaction("orphan-reaper:paper") as locked:
-        if not locked:
-            return [{"paths": paths, "committed": False,
-                     "err": "git_writer_lock_busy"}]
-        pre_staged = _git("diff", "--cached", "--name-only", "--", *paths)
-        collisions = [line for line in pre_staged.stdout.splitlines() if line]
-        if pre_staged.returncode != 0 or collisions:
-            err = "pre_staged_collision" if collisions else "git_preflight_failed"
-            return [{"paths": paths, "committed": False, "err": err,
-                     "collisions": collisions}]
-        index_owned = True
-        try:
-            add = _git("add", "--", *paths)
-            if add.returncode != 0:
-                warn("reap_orphan", "paper artifact add failed", err=add.stderr[:150])
-                return [{"paths": paths, "committed": False, "err": add.stderr[:150]}]
-            msg = ("chore(paper-reap): collect verification byproducts "
-                   f"({', '.join(sorted({Path(p).parts[1] for p in paths}))})\n\n"
-                   "Auto-collected by reap_orphan_deliverables: results diffs are "
-                   "volatile-only (timestamp/runtime) and PDFs rebuild HEAD sources. "
-                   "Root-cause: reproduce.py verification dirties tracked artifacts "
-                   "that explicit-path session commits necessarily miss.\n\n"
-                   "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>")
-            commit = _git("commit", "--only", "-m", msg, "--", *paths)
-            if commit.returncode == 0:
-                index_owned = False
-        finally:
-            if index_owned:
-                _git("reset", "-q", "HEAD", "--", *paths)
-    ok = commit.returncode == 0
-    if not ok:
-        warn("reap_orphan", "paper artifact commit failed", err=commit.stderr[:150])
-    out.append({"paths": paths, "committed": ok,
-                "detail": (commit.stdout or commit.stderr)[:150]})
-    return out
+def _gate_pdf_requires_clean_sources(rel: str, ctx: dict):
+    """Claim *.pdf; collectable only as a rebuild of sources already in HEAD."""
+    if not rel.endswith(".pdf"):
+        return None
+    parts = PurePosixPath(rel).parts
+    depth = ctx["ns_depth"]
+    if len(parts) < depth + 1:
+        return None
+    scope = "/".join(parts[:depth + 1])
+    dirty_sources = [d for d in ctx["dirty_set"]
+                     if d.startswith(scope + "/") and d != rel
+                     and PurePosixPath(d).suffix in _BUILD_SOURCE_SUFFIXES]
+    if dirty_sources:
+        return ("pdf", False, f"sources_dirty:{dirty_sources[:3]}")
+    return ("pdf", True, "rebuild_of_head_sources")
 
 
-# ---------------------------------------------------------------------------
-# Draft-family artifacts（2026-07-15，fix_reap_orphan_deliverables_gap）
-#
-# `scan()` below answers a PRODUCT question: is this draft in the feed? A draft
-# that is already published answers "yes" and is skipped — correctly, as far as
-# publishing goes. But the file itself, its lazypack plan and its figures are
-# still sitting untracked in the working tree, because `publish_draft.py` writes
-# feed.json and never touches git. Nobody else claims them either: PHASE-Z only
-# commits what its own fire produced, so a draft written by a fire that crashed
-# (or by a producer outside the fire lane) belongs to no one. Every fire then
-# re-reports the same untracked files as orphans — the alert the owner has been
-# getting for days, on work that was in fact finished.
-#
-# So this is the second, missing recognizer: not "is it delivered to readers?"
-# but "is it delivered to git?". Same shape as the paper recognizer above, one
-# deliberate difference — here UNTRACKED files are the point. A new draft, a new
-# lazypack plan and new PNGs enter the world untracked; that is exactly what
-# being orphaned looks like in this directory, so the reaper owns them.
-#
-# Never deletes, never checks out, never commits a deletion — an orphan it can't
-# classify is held and reported, per the invariants at the top of this file.
-# ---------------------------------------------------------------------------
-
-# Why a denylist and not an allowlist（2026-07-17，反轉預設）
-#
-# 這裡原本是一份 DRAFT_ARTIFACT_SUFFIXES 白名單。2026-07-14 才因為漏掉副檔名修過一次
-# （3b2c10375），那次的修法是「把這回漏掉的副檔名補進清單」；三天後 .csv 與 .py 出現，
-# 同一個洞立刻重演——同一批產出裡 evidence.json 與 fig2.png 被收走 commit，生成那些圖的
-# 原始資料與腳本卻留在工作區，圖進了版控、資料源沒有，可複現性就這樣斷在半路。
-#
-# 重演的不是清單內容，是清單這個形狀。一篇文章的資產副檔名是**開放集合**：下一次是
-# .txt、.ipynb、.parquet，還是某個還沒發明的格式，沒人猜得到。對開放集合列白名單，
-# 預設值就是「拒絕」，而拒絕在這支程式裡等於永遠卡著（PHASE-Z by design 不收養不是
-# 自己這班產的檔，兩邊都不收 = 檔案沒有出口）。再補一次清單只是把下次事故延後三天。
-#
-# 所以反轉預設。scan 已經 scoped 在 storage/drafts/ 底下，這個 namespace 裡的檔案
-# **就是**某篇文章的資產——這是目錄的定義，不是猜測。預設收編，只把真正不該進版控的
-# 擋掉：編輯器與執行期殘留、工具快取目錄、dotfile、symlink（top-of-file 不變量第 4 條：
-# git ownership 只認 exact 普通檔）、以及巨檔。
-#
-# 不變量沒有變：被擋的一律 held + 帶可讀 reason，永不刪除、永不 checkout。反轉的是
-# 「認不出來」的預設待遇，不是「保留而非丟棄」這條線。
-DRAFT_EXCLUDED_SUFFIXES = {
-    ".tmp", ".temp", ".part", ".partial",   # 寫到一半的檔，作者或 job 還沒交出來
-    ".swp", ".swo", ".bak",                 # 編輯器殘留
-    ".lock",                                # 執行期互斥檔，不是產出
-    ".pyc", ".pyo",                         # 編譯快取，由 .py 重生
+_CONTENT_GATES = {
+    "volatile_json_only": _gate_volatile_json_only,
+    "pdf_requires_clean_sources": _gate_pdf_requires_clean_sources,
 }
 
-# 工具快取目錄。裡面的東西是衍生物，收編它們等於把可重生的位元組塞進歷史。
-DRAFT_EXCLUDED_DIRS = {"__pycache__", ".ipynb_checkpoints"}
 
-# 版控不吃大二進位，而且到了這個尺寸幾乎必然是資料 dump 或中間產物，不是文章資產。
-# 真的有這麼大又非收不可的東西，held 的 reason 會指名它，由人決定（LFS？外部儲存？）。
-DRAFT_MAX_FILE_BYTES = 25 * 1024 * 1024
-
-# One article's family is ~10 files (draft + plan + 4-8 figures). This bounds a
-# runaway sweep without splitting a single article's output across two commits.
-DEFAULT_MAX_DRAFT_FILES = 40
+# ── the generic engine ───────────────────────────────────────────────────────
 
 
-def _draft_exclusion(rel: str) -> str | None:
-    """Return a held-reason if this path is junk, else None（預設收編）。"""
-    path = Path(rel)
+def _exclusion_reason(rel: str, ns: dict) -> str | None:
+    """Return a held-reason if this path is junk, else None（預設收編）。
+
+    這是 07-17 為 storage/drafts/ 做的反轉，現在是**全域預設**而不是單一目錄特例。
+    白名單對開放集合（一次產出的副檔名沒人猜得到下一個是什麼）等於預設拒絕，而拒絕
+    在這支程式裡等於永遠卡著。所以只擋真正不該進版控的東西。
+    """
+    exc = ns.get("exclusions") or {}
+    path = PurePosixPath(rel)
     name = path.name
 
-    if name.startswith("."):
-        # .DS_Store、.env、編輯器 dotfile —— 沒有一個是讀者資產。
+    if exc.get("dotfiles", True) and name.startswith("."):
+        # .DS_Store、.env、編輯器 dotfile —— 沒有一個是產物。
         return "excluded_dotfile"
-    if name.endswith("~"):
+    if exc.get("editor_backups", True) and name.endswith("~"):
         return "excluded_editor_backup"
-    if path.suffix.lower() in DRAFT_EXCLUDED_SUFFIXES:
-        return f"excluded_suffix:{path.suffix.lower()}"
-    if DRAFT_EXCLUDED_DIRS.intersection(path.parts[:-1]):
+    suffix = path.suffix.lower()
+    if suffix in {str(s).lower() for s in exc.get("suffixes") or ()}:
+        return f"excluded_suffix:{suffix}"
+    if set(exc.get("dirs") or ()).intersection(path.parts[:-1]):
         return "excluded_junk_path"
 
     full = ROOT / rel
-    if full.is_symlink():
+    if exc.get("symlinks", True) and full.is_symlink():
+        # 檔案頂部不變量第 4 條：git ownership 只認 exact 普通檔。
         return "excluded_symlink"
     try:
         size = full.stat().st_size
     except OSError:
         return None  # silent-ok: status→stat race；下游的 stat 會再處理一次
-    if size > DRAFT_MAX_FILE_BYTES:
+    limit = int(ns.get("max_file_bytes") or 0)
+    if limit and size > limit:
         return f"excluded_oversize:{size // (1024 * 1024)}MB"
     return None
 
 
-def scan_draft_artifacts(*, now_ts: float | None = None) -> dict:
-    """Classify dirty/untracked files under storage/drafts/ into collectable / held."""
-    now_ts = now_ts if now_ts is not None else time.time()
-    tasks = _load_json(TASKS_PATH, [])
-    tasks = tasks if isinstance(tasks, list) else tasks.get("tasks", []) if isinstance(tasks, dict) else []
-    inflight = _inflight_stems(tasks)
+def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
+    """Classify one registered namespace's dirty/untracked files. Pure read.
 
-    # quotePath=false: figure filenames may carry non-ASCII; git would otherwise
-    # hand back an escaped name that no longer resolves as a real path.
+    One engine, every namespace. Behaviour is entirely a function of the config
+    entry — which is the point: a new managed directory is a new config row, not
+    a new recognizer nobody remembers to write.
+    """
+    ns = get_namespace(ns_id)
+    now_ts = now_ts if now_ts is not None else time.time()
+    adopt_default = ns.get("default", "adopt") == "adopt"
+    all_files = ns.get("status_filter", "all") != "modified"
+
+    inflight: set[str] = set()
+    if ns.get("respect_inflight", True):
+        tasks = _load_json(TASKS_PATH, [])
+        tasks = tasks if isinstance(tasks, list) else (
+            tasks.get("tasks", []) if isinstance(tasks, dict) else [])
+        inflight = _inflight_stems(tasks)
+
+    empty = {"namespace": ns_id, "collectable": [], "held": [],
+             "skipped": {"grace": 0, "inflight": 0, "unclaimed": 0}}
+
+    # quotePath=false: figure/result filenames may carry non-ASCII; git would
+    # otherwise hand back an escaped name that no longer resolves as a real path.
     status = _git("-c", "core.quotePath=false", "status", "--porcelain=v1",
-                  "--untracked-files=all", "--", "storage/drafts/")
+                  "--untracked-files=all" if all_files else "--untracked-files=no",
+                  "--", ns["path"] + "/")
     if status.returncode != 0:
-        warn("reap_orphan", "draft artifact scan: git status failed",
-             err=status.stderr[:120])
-        return {"collectable": [], "held": [], "skipped": {}}
+        warn("reap_orphan", "namespace scan: git status failed",
+             namespace=ns_id, err=status.stderr[:120])
+        return empty
 
     collectable: list[dict] = []
     held: list[dict] = []
-    skipped = {"grace": 0, "inflight": 0}
+    skipped = {"grace": 0, "inflight": 0, "unclaimed": 0}
+    records: list[tuple[str, str]] = []
+    dirty_set: set[str] = set()
+    deletion_dirs: set[str] = set()
 
     for line in status.stdout.splitlines():
         code, rel = line[:2], line[3:].strip()
@@ -737,73 +746,248 @@ def scan_draft_artifacts(*, now_ts: float | None = None) -> dict:
         if "D" in code:
             # A disappearing file is not a deliverable. Committing the deletion
             # would be this script's first destructive act; report it instead.
-            held.append({"path": rel, "kind": "deletion", "reason": "deletion_not_owned"})
+            if all_files:
+                held.append({"path": rel, "kind": "deletion",
+                             "reason": "deletion_not_owned"})
+                deletion_dirs.add(str(PurePosixPath(rel).parent))
             continue
-        excluded = _draft_exclusion(rel)
-        if excluded:
-            held.append({"path": rel, "kind": "excluded", "reason": excluded})
+        dirty_set.add(rel)
+        if not all_files and code.strip() != "M":
             continue
+        records.append((code, rel))
+
+    ns_depth = len(PurePosixPath(ns["path"]).parts)
+    gates = [(name, _CONTENT_GATES[name]) for name in ns.get("content_gates") or ()
+             if name in _CONTENT_GATES]
+    ctx = {"dirty_set": dirty_set, "ns_depth": ns_depth, "ns": ns}
+
+    for code, rel in records:
+        if adopt_default:
+            reason = _exclusion_reason(rel, ns)
+            if reason:
+                held.append({"path": rel, "kind": "excluded", "reason": reason})
+                continue
         try:
             if now_ts - (ROOT / rel).stat().st_mtime < GRACE_SECONDS:
                 skipped["grace"] += 1
-                continue  # someone may still be writing it
+                continue  # 可能有 session 正在寫 — 給滿 grace 再說
         except OSError:
             continue  # silent-ok: status→stat race, file already gone
 
-        stem = Path(rel).stem
-        if stem in inflight or stem.replace("_draft", "") in inflight:
-            skipped["inflight"] += 1
+        if inflight:
+            stem = PurePosixPath(rel).stem
+            if stem in inflight or stem.replace("_draft", "") in inflight:
+                skipped["inflight"] += 1
+                continue
+
+        claimed = None
+        for _name, gate in gates:
+            claimed = gate(rel, ctx)
+            if claimed is not None:
+                break
+        if claimed is not None:
+            kind, ok, why = claimed
+            (collectable if ok else held).append(
+                {"path": rel, "kind": kind, "reason": why})
+            continue
+        if not adopt_default:
+            # hold-by-default namespace, no gate claimed it: someone else owns it.
+            skipped["unclaimed"] += 1
             continue
 
-        collectable.append({"path": rel, "kind": Path(rel).suffix.lstrip("."),
+        parent = str(PurePosixPath(rel).parent)
+        if parent in deletion_dirs:
+            # A pending deletion beside it means this is half of a rename (the
+            # k1380 `*_INVALID_20260716.*` shape: deliberate invalidation, the
+            # additive half untracked). The reaper never commits deletions, so
+            # adopting only the other half would land a half-applied rename and
+            # silently duplicate invalidated data. Held → escalated by name.
+            held.append({"path": rel, "kind": "paired_deletion",
+                         "reason": f"paired_deletion_pending:{parent}"})
+            continue
+
+        collectable.append({"path": rel, "kind": PurePosixPath(rel).suffix.lstrip("."),
                             "reason": "untracked" if code == "??" else "modified"})
 
-    return {"collectable": collectable, "held": held, "skipped": skipped}
+    return {"namespace": ns_id, "collectable": collectable, "held": held,
+            "skipped": skipped}
 
 
-def collect_draft_artifacts(entries: list[dict]) -> list[dict]:
-    """Commit collectable draft-family artifacts through git（ASCII message）."""
+def scan_all_namespaces(*, now_ts: float | None = None) -> dict[str, dict]:
+    """Scan every registered namespace. Adding one here means editing config only."""
+    return {ns_id: scan_namespace(ns_id, now_ts=now_ts)
+            for ns_id in load_registry()["namespaces"]}
+
+
+def _commit_message(ns: dict, paths: list[str]) -> str:
+    depth = len(PurePosixPath(ns["path"]).parts)
+    scopes = sorted({PurePosixPath(p).parts[depth] for p in paths
+                     if len(PurePosixPath(p).parts) > depth})
+    subject = str(ns.get("commit_subject")
+                  or "chore(orphan-reap): collect {count} orphaned files in " + ns["path"])
+    subject = subject.format(count=len(paths), scopes=", ".join(scopes) or ns["id"])
+    body = str(ns.get("commit_body") or
+               "Auto-collected by reap_orphan_deliverables: files in a managed "
+               "namespace that no live producer owns.")
+    return (f"{subject}\n\n{body}\n\n"
+            "Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>")
+
+
+def collect_namespace(ns_id: str, entries: list[dict]) -> list[dict]:
+    """Commit one namespace's collectable files through the git writer lease."""
     out: list[dict] = []
     if not entries:
         return out
+    ns = get_namespace(ns_id)
     paths = [e["path"] for e in entries]
-    with _git_transaction("orphan-reaper:drafts") as locked:
+    with _git_transaction(f"orphan-reaper:{ns_id}") as locked:
         if not locked:
-            return [{"paths": paths, "committed": False,
+            return [{"namespace": ns_id, "paths": paths, "committed": False,
                      "err": "git_writer_lock_busy"}]
         pre_staged = _git("diff", "--cached", "--name-only", "--", *paths)
         collisions = [line for line in pre_staged.stdout.splitlines() if line]
         if pre_staged.returncode != 0 or collisions:
             err = "pre_staged_collision" if collisions else "git_preflight_failed"
-            return [{"paths": paths, "committed": False, "err": err,
-                     "collisions": collisions}]
+            return [{"namespace": ns_id, "paths": paths, "committed": False,
+                     "err": err, "collisions": collisions}]
         index_owned = True
         try:
             add = _git("add", "--", *paths)
             if add.returncode != 0:
-                warn("reap_orphan", "draft artifact add failed", err=add.stderr[:150])
-                return [{"paths": paths, "committed": False, "err": add.stderr[:150]}]
-            msg = ("chore(draft-reap): collect orphaned draft artifacts "
-                   f"({len(paths)} files)\n\n"
-                   "Auto-collected by reap_orphan_deliverables: drafts, lazypack plans "
-                   "and figures left untracked in storage/drafts/. Root-cause: "
-                   "publish_draft.py registers a draft in feed.json but never commits "
-                   "the files, and PHASE-Z only commits what its own fire produced — so "
-                   "output from a crashed or out-of-lane producer was owned by no one "
-                   "and re-alerted every fire.\n\n"
-                   "Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>")
-            commit = _git("commit", "--only", "-m", msg, "--", *paths)
+                warn("reap_orphan", "namespace add failed",
+                     namespace=ns_id, err=add.stderr[:150])
+                return [{"namespace": ns_id, "paths": paths, "committed": False,
+                         "err": add.stderr[:150]}]
+            commit = _git("commit", "--only", "-m", _commit_message(ns, paths),
+                          "--", *paths)
             if commit.returncode == 0:
                 index_owned = False
         finally:
             if index_owned:
+                # Preflight proved no one else owned these scoped index entries,
+                # so cleanup cannot erase a foreign staged change. Working files
+                # remain intact for the next sweep.
                 _git("reset", "-q", "HEAD", "--", *paths)
     ok = commit.returncode == 0
     if not ok:
-        warn("reap_orphan", "draft artifact commit failed", err=commit.stderr[:150])
-    out.append({"paths": paths, "committed": ok,
+        warn("reap_orphan", "namespace commit failed",
+             namespace=ns_id, err=commit.stderr[:150])
+    out.append({"namespace": ns_id, "paths": paths, "committed": ok,
                 "detail": (commit.stdout or commit.stderr)[:150]})
     return out
+
+
+# ── held TTL → escalation ────────────────────────────────────────────────────
+# held 原本只有 reason、沒有時間軸，所以一份無主檔案可以無限期卡著，每班噴一次同樣的
+# alert，永遠沒有人被指派去解。這裡給每筆 held 一個 first_seen 與班次計數：連續 N 班
+# 仍無主 → 產生一張**指名該路徑清單**的任務，之後這些路徑不再重複出現在 alert 面。
+# 這條與「作者自己回來 commit」無關 —— 那個假設本來就是錯的。
+
+
+def _held_key(entry: dict) -> str:
+    path = entry.get("path")
+    if path:
+        return str(path)
+    return f"job:{entry.get('job_id')}"
+
+
+def _write_json_atomic(path: Path, payload) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.{time.time_ns()}.tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+                   encoding="utf-8")
+    tmp.replace(path)
+
+
+def _escalate_held(records: dict[str, dict]) -> dict:
+    """Queue one task that names every path held past the TTL.
+
+    Goes through `volpred.ops.next_tasks.append_next_task` — the single canonical
+    gateway for the pending queue (flock + guard + priority normalisation). This
+    script does not get its own queue writer; a second writer is how shared state
+    gets corrupted.
+    """
+    from volpred.ops.next_tasks import append_next_task
+
+    paths = sorted(records)
+    lines = [f"- `{key}` — {records[key].get('reason')} "
+             f"(namespace={records[key].get('namespace')}, "
+             f"first_seen={records[key].get('first_seen')}, "
+             f"shifts={records[key].get('shifts')})"
+             for key in paths]
+    return append_next_task(
+        title=f"解決 {len(paths)} 份長期無主的產物（reaper held 超過 TTL）",
+        description=(
+            "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是"
+            "永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須"
+            "由系統指派，不能等作者自己回來 commit。\n\n"
+            + "\n".join(lines)
+            + "\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定"
+              "（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何"
+              "這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與"
+              "其下游丟棄產物。判定完成後這張任務關閉，held 記錄會自然消失。"
+        ),
+        source="reap_orphan_deliverables_held_ttl",
+        task_family="ops",
+        legacy_priority=30,
+        payload={"held_paths": paths,
+                 "held_reasons": {key: records[key].get("reason") for key in paths},
+                 "tags": ["orphan_reap", "held_escalation"]},
+        created_by="reap_orphan_deliverables",
+        path=TASKS_PATH,
+    )
+
+
+def track_held(held_entries: list[dict], *, shifts_to_escalate: int | None = None,
+               persist: bool = True) -> dict:
+    """Age every held entry one shift; escalate the ones past the TTL.
+
+    Returns the per-key state plus the suppression set — keys already escalated
+    are owned by a task now, so re-alerting on them every shift is noise.
+    """
+    if shifts_to_escalate is None:
+        shifts_to_escalate = load_registry()["held_escalation_shifts"]
+    # No state file yet is the normal first run, not a fault — reading it through
+    # _load_json would warn on every sweep about an absence that means "nothing
+    # has been held long enough to have a clock yet".
+    previous: dict = {}
+    if HELD_STATE_PATH.exists():
+        loaded = _load_json(HELD_STATE_PATH, {})
+        if isinstance(loaded, dict) and isinstance(loaded.get("entries"), dict):
+            previous = loaded["entries"]
+    now_iso = _now().isoformat()
+
+    state: dict[str, dict] = {}
+    for entry in held_entries:
+        key = _held_key(entry)
+        prior = previous.get(key) if isinstance(previous.get(key), dict) else None
+        record = dict(prior) if prior else {"first_seen": now_iso, "shifts": 0}
+        record["shifts"] = int(record.get("shifts") or 0) + 1
+        record["last_seen"] = now_iso
+        record["reason"] = entry.get("reason")
+        record["namespace"] = entry.get("namespace")
+        state[key] = record
+
+    pending = {key: rec for key, rec in state.items()
+               if rec["shifts"] >= shifts_to_escalate and not rec.get("task_id")}
+    escalations: list[dict] = []
+    if pending and persist:
+        task = _escalate_held(pending)
+        for rec in pending.values():
+            rec["task_id"] = task["id"]
+            rec["escalated_at"] = now_iso
+        escalations.append({"task_id": task["id"], "paths": sorted(pending)})
+
+    suppressed = sorted(key for key, rec in state.items() if rec.get("task_id"))
+    if persist:
+        _write_json_atomic(HELD_STATE_PATH, {
+            "note": "held 的時間軸。超過 held_escalation_shifts 班仍無主 → 指名任務。"
+                    "一筆記錄消失 = 那個路徑已經有出口了。",
+            "updated_at": now_iso,
+            "shifts_to_escalate": shifts_to_escalate,
+            "entries": state,
+        })
+    return {"state": state, "escalations": escalations, "suppressed": suppressed}
 
 
 def scan(*, now_ts: float | None = None) -> dict:
@@ -913,8 +1097,9 @@ def main() -> int:
                     help=f"單次最多收編幾份（預設 {DEFAULT_MAX_ADOPT}）")
     ap.add_argument("--max-jobs", type=int, default=DEFAULT_MAX_JOB_COMMITS,
                     help=f"單次最多提交幾個 queue job 的產物（預設 {DEFAULT_MAX_JOB_COMMITS}）")
-    ap.add_argument("--max-draft-files", type=int, default=DEFAULT_MAX_DRAFT_FILES,
-                    help=f"單次最多提交幾個草稿成品檔（預設 {DEFAULT_MAX_DRAFT_FILES}）")
+    ap.add_argument("--max-draft-files", type=int, default=None,
+                    help="覆寫 drafts namespace 的 max_files（預設讀 "
+                         "config/orphan_namespaces.json）")
     ap.add_argument("--init-baseline", action="store_true",
                     help="一次性 cutover：把現存草稿全數凍結為 baseline（豁免）")
     ap.add_argument("--json", action="store_true", help="只輸出 JSON")
@@ -934,20 +1119,23 @@ def main() -> int:
 
     result = scan()
     job_scan = scan_job_deliverables()
-    paper_scan = scan_paper_build_artifacts()
-    draft_scan = scan_draft_artifacts()
+    namespace_scans = scan_all_namespaces()
+    registry = load_registry()
     job_deliveries: list[dict] = []
-    paper_collections: list[dict] = []
-    draft_collections: list[dict] = []
+    namespace_collections: dict[str, list[dict]] = {}
     adopted: list[dict] = []
     if args.apply:
         # Before adopt(): commit the stable on-disk state. publish_draft.py may
         # rewrite frontmatter, and that delta is collected on a later run once it
         # ages past the grace window — never mid-write.
-        draft_collections = collect_draft_artifacts(
-            draft_scan["collectable"][: args.max_draft_files])
-        paper_collections = collect_paper_artifacts(
-            paper_scan["collectable"][:DEFAULT_MAX_PAPER_COMMITS])
+        for ns_id, ns_scan in namespace_scans.items():
+            limit = registry["namespaces"][ns_id].get("max_files") or 0
+            if ns_id == "drafts" and args.max_draft_files is not None:
+                limit = args.max_draft_files
+            batch = ns_scan["collectable"][:limit] if limit else ns_scan["collectable"]
+            collected = collect_namespace(ns_id, batch)
+            if collected:
+                namespace_collections[ns_id] = collected
         for candidate in job_scan["candidates"][: args.max_jobs]:
             job_deliveries.append(deliver_job_outputs(candidate))
         for entry in result["adoptable"][: args.max]:
@@ -958,18 +1146,37 @@ def main() -> int:
         if len(result["adoptable"]) > args.max:
             print(f"[reap] 本次上限 {args.max}，還有 "
                   f"{len(result['adoptable']) - args.max} 份待下次收編（沒有丟棄）")
+    # Every held entry, from every source, ages on the same clock. held is not a
+    # terminal state any more: past the TTL it becomes a task that names the paths.
+    all_held: list[dict] = [{**h, "namespace": "drafts_intake"} for h in result["held"]]
+    all_held += [{**h, "namespace": "compute_queue"} for h in job_scan["held"]]
+    for ns_id, ns_scan in namespace_scans.items():
+        all_held += [{**h, "namespace": ns_id} for h in ns_scan["held"]]
+    tracking = track_held(all_held, persist=args.apply)
+    suppressed = set(tracking["suppressed"])
+
+    def _open_held(entries: list[dict]) -> list[dict]:
+        """Held entries still worth alerting on — escalated ones have an owner."""
+        return [h for h in entries if _held_key(h) not in suppressed]
+
     result["adopted"] = adopted
     result["applied"] = args.apply
     result["job_deliverable_candidates"] = job_scan["candidates"]
-    result["job_deliverable_held"] = job_scan["held"]
+    result["job_deliverable_held"] = _open_held(job_scan["held"])
     result["job_deliveries"] = job_deliveries
-    result["paper_artifact_collectable"] = paper_scan["collectable"]
-    result["paper_artifact_held"] = paper_scan["held"]
-    result["paper_collections"] = paper_collections
-    result["draft_artifact_collectable"] = draft_scan["collectable"]
-    result["draft_artifact_held"] = draft_scan["held"]
-    result["draft_artifact_skipped"] = draft_scan["skipped"]
-    result["draft_collections"] = draft_collections
+    result["namespaces"] = {
+        ns_id: {
+            "collectable": ns_scan["collectable"],
+            "held": _open_held(ns_scan["held"]),
+            "skipped": ns_scan["skipped"],
+            "collections": namespace_collections.get(ns_id, []),
+        }
+        for ns_id, ns_scan in namespace_scans.items()
+    }
+    result["held"] = _open_held(result["held"])
+    result["orphan_count"] = len(result["adoptable"]) + len(result["held"])
+    result["held_escalations"] = tracking["escalations"]
+    result["held_escalated_paths"] = tracking["suppressed"]
 
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n",
@@ -983,14 +1190,21 @@ def main() -> int:
           f"可收編 {len(result['adoptable'])}、保留待確認 {len(result['held'])}")
     delivered_jobs = [item for item in job_deliveries if item.get("delivered")]
     print(f"[reap] queue 產物：候選 {len(job_scan['candidates'])}、"
-          f"已交付 {len(delivered_jobs)}、保留 {len(job_scan['held'])}")
-    committed_drafts = sum(len(c["paths"]) for c in draft_collections if c.get("committed"))
-    print(f"[reap] 草稿成品（git 歸屬）：可收 {len(draft_scan['collectable'])}、"
-          f"已提交 {committed_drafts}、保留 {len(draft_scan['held'])}、"
-          f"略過 {draft_scan['skipped']}")
+          f"已交付 {len(delivered_jobs)}、保留 {len(result['job_deliverable_held'])}")
+    for ns_id, view in result["namespaces"].items():
+        committed = sum(len(c["paths"]) for c in view["collections"] if c.get("committed"))
+        print(f"[reap] namespace {ns_id}：可收 {len(view['collectable'])}、"
+              f"已提交 {committed}、保留 {len(view['held'])}、略過 {view['skipped']}")
+        for h in view["held"][:5]:
+            print(f"  - 保留 {h['path']} — {h['reason']}")
+    for esc in result["held_escalations"]:
+        print(f"[reap] held 超過 TTL → 已開任務 {esc['task_id']}："
+              f"{len(esc['paths'])} 條路徑（此後不再重複噴同一句 alert）")
+    if result["held_escalated_paths"]:
+        print(f"[reap] 已升級為任務、alert 靜音中：{len(result['held_escalated_paths'])} 條")
     print(f"[reap] 略過：{result['skipped']}")
     for h in result["held"][:10]:
-        print(f"  - 保留 {h['path']} — {h['detail']}")
+        print(f"  - 保留 {h['path']} — {h.get('detail') or h.get('reason')}")
     return 0
 
 

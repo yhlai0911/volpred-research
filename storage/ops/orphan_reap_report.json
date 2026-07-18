@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-18T15:00:47.687612+00:00",
+  "generated_at": "2026-07-18T16:25:00.757047+00:00",
   "adoptable": [],
   "held": [
     {
@@ -41,7 +41,7 @@
   },
   "orphan_count": 6,
   "adopted": [],
-  "applied": true,
+  "applied": false,
   "job_deliverable_candidates": [],
   "job_deliverable_held": [
     {
@@ -146,14 +146,79 @@
     }
   ],
   "job_deliveries": [],
-  "paper_artifact_collectable": [],
-  "paper_artifact_held": [],
-  "paper_collections": [],
-  "draft_artifact_collectable": [],
-  "draft_artifact_held": [],
-  "draft_artifact_skipped": {
-    "grace": 0,
-    "inflight": 0
+  "namespaces": {
+    "drafts": {
+      "collectable": [],
+      "held": [],
+      "skipped": {
+        "grace": 0,
+        "inflight": 0,
+        "unclaimed": 0
+      },
+      "collections": []
+    },
+    "paper": {
+      "collectable": [],
+      "held": [],
+      "skipped": {
+        "grace": 0,
+        "inflight": 0,
+        "unclaimed": 0
+      },
+      "collections": []
+    },
+    "experiments": {
+      "collectable": [],
+      "held": [
+        {
+          "path": "experiments/k1380/k1380_losses_all.npy",
+          "kind": "deletion",
+          "reason": "deletion_not_owned"
+        },
+        {
+          "path": "experiments/k1380/k1380_results.json",
+          "kind": "deletion",
+          "reason": "deletion_not_owned"
+        },
+        {
+          "path": "experiments/k1380/k1380_spa_from_cache.py",
+          "kind": "deletion",
+          "reason": "deletion_not_owned"
+        },
+        {
+          "path": "experiments/k1380/README.md",
+          "kind": "paired_deletion",
+          "reason": "paired_deletion_pending:experiments/k1380"
+        },
+        {
+          "path": "experiments/k1380/k1380.py",
+          "kind": "paired_deletion",
+          "reason": "paired_deletion_pending:experiments/k1380"
+        },
+        {
+          "path": "experiments/k1380/k1380_losses_all_INVALID_20260716.npy",
+          "kind": "paired_deletion",
+          "reason": "paired_deletion_pending:experiments/k1380"
+        },
+        {
+          "path": "experiments/k1380/k1380_results_INVALID_20260716.json",
+          "kind": "paired_deletion",
+          "reason": "paired_deletion_pending:experiments/k1380"
+        },
+        {
+          "path": "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py",
+          "kind": "paired_deletion",
+          "reason": "paired_deletion_pending:experiments/k1380"
+        }
+      ],
+      "skipped": {
+        "grace": 0,
+        "inflight": 0,
+        "unclaimed": 0
+      },
+      "collections": []
+    }
   },
-  "draft_collections": []
+  "held_escalations": [],
+  "held_escalated_paths": []
 }

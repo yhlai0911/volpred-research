@@ -1,0 +1,65 @@
+{
+  "note": "受管產物目錄的宣告式清單 —— 新增一個目錄只加一筆，不寫任何 recognizer 函式。",
+  "why": [
+    "2026-07-19（老闆 msg 963）：reaper 原本是『每種產物一個 recognizer 函式』。",
+    "每新增一種產物目錄就要有人記得再寫一個函式；沒寫 = 該目錄的檔案沒有任何出口",
+    "（PHASE-Z by design 只收自己那班產的檔），於是永久 held、alert 永遠解不掉。",
+    "同一個坑踩了三次：paper/(07-14)、storage/drafts/(07-15、07-17 反轉預設)、",
+    "experiments/(07-19)。問題不是少一個 recognizer，是這個架構要求人記得補 recognizer。",
+    "所以受管目錄改成資料，掃描/收編改成一個泛型引擎。預設值是 adopt：一個 namespace",
+    "裡的檔案**就是**那個 namespace 的產物（這是目錄的定義，不是猜測），只擋真正的垃圾。"
+  ],
+  "held_escalation_shifts": 6,
+  "defaults": {
+    "default": "adopt",
+    "status_filter": "all",
+    "respect_inflight": true,
+    "content_gates": [],
+    "max_file_bytes": 26214400,
+    "max_files": 40,
+    "exclusions": {
+      "dotfiles": true,
+      "editor_backups": true,
+      "symlinks": true,
+      "suffixes": [
+        ".tmp", ".temp", ".part", ".partial",
+        ".swp", ".swo", ".bak",
+        ".lock",
+        ".pyc", ".pyo"
+      ],
+      "dirs": ["__pycache__", ".ipynb_checkpoints", ".pytest_cache", ".mypy_cache"]
+    }
+  },
+  "namespaces": [
+    {
+      "id": "drafts",
+      "path": "storage/drafts",
+      "owner_source": "draft_family",
+      "default": "adopt",
+      "max_files": 40,
+      "commit_subject": "chore(draft-reap): collect orphaned draft artifacts ({count} files)",
+      "commit_body": "Auto-collected by reap_orphan_deliverables: drafts, lazypack plans and figures left untracked in storage/drafts/. Root-cause: publish_draft.py registers a draft in feed.json but never commits the files, and PHASE-Z only commits what its own fire produced - so output from a crashed or out-of-lane producer was owned by no one and re-alerted every fire."
+    },
+    {
+      "id": "paper",
+      "path": "paper",
+      "owner_source": "paper_build",
+      "default": "hold",
+      "status_filter": "modified",
+      "respect_inflight": false,
+      "content_gates": ["volatile_json_only", "pdf_requires_clean_sources"],
+      "max_files": 2,
+      "commit_subject": "chore(paper-reap): collect verification byproducts ({scopes})",
+      "commit_body": "Auto-collected by reap_orphan_deliverables: results diffs are volatile-only (timestamp/runtime) and PDFs rebuild HEAD sources. Root-cause: reproduce.py verification dirties tracked artifacts that explicit-path session commits necessarily miss."
+    },
+    {
+      "id": "experiments",
+      "path": "experiments",
+      "owner_source": "experiment_run",
+      "default": "adopt",
+      "max_files": 40,
+      "commit_subject": "chore(experiment-reap): collect orphaned experiment artifacts ({count} files)",
+      "commit_body": "Auto-collected by reap_orphan_deliverables: experiment scripts, result JSON and caches left uncommitted after the producing session ended. Root-cause: the author session that wrote them never came back, and PHASE-Z only commits what its own fire produced - so the files had no owner and re-alerted every fire."
+    }
+  ]
+}
