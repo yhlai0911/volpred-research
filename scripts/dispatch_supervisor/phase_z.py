@@ -422,6 +422,17 @@ def _path_fingerprint(path: Path) -> dict[str, object] | None:
 
 
 def _read_failed_closeout(repo_root: Path, runner) -> dict | None:
+    """The live ownership receipt, or None.
+
+    A receipt that will not parse is QUARANTINED, not left in place. Leaving it
+    made the module permanently unable to record ownership: every later failure's
+    `_ensure_failed_closeout` saw a file it could not read and returned False, so
+    no fire could ever persist a receipt again and nothing said so out loud. That
+    is the same "no exit" shape as the untracked conflict below — a state only a
+    human deleting a hidden `.git/` file could leave. Renaming it aside restores
+    the module to a working state on the next call and keeps the bytes for
+    forensics.
+    """
     path = _failed_closeout_path(repo_root, runner)
     if path is None or not path.exists():
         return None
@@ -440,7 +451,16 @@ def _read_failed_closeout(repo_root: Path, runner) -> dict | None:
                 raise TypeError("invalid fingerprint entry")
         return payload
     except (OSError, ValueError, TypeError, KeyError) as exc:
-        LOG.warning("phase_z: failed-closeout receipt unreadable (%s) — fail closed", exc)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        quarantine = path.with_name(f"{path.name}.corrupt-{stamp}")
+        try:
+            path.replace(quarantine)
+            LOG.error("phase_z: failed-closeout receipt unreadable (%s) — quarantined to %s",
+                      exc, quarantine.name)
+        except OSError as move_exc:  # pragma: no cover — rename of our own file
+            LOG.error("phase_z: failed-closeout receipt unreadable (%s) and cannot be "
+                      "quarantined (%s) — ownership recording is wedged until removed",
+                      exc, move_exc)
         return None
 
 
@@ -467,20 +487,35 @@ def _ensure_failed_closeout(
         for entry in (existing_payload or {}).get("paths", [])
     }
     entries: list[dict[str, object]] = []
+    stale: set[str] = set()
     for rel in owned:
         fingerprint = _path_fingerprint(repo_root / rel)
         if fingerprint is None:
-            return False
+            # One unreadable path must not cost the other nine their receipt.
+            # Aborting the whole write was the old behaviour and it silently
+            # dropped ownership of every path in the batch.
+            LOG.error("phase_z: cannot fingerprint owned path %s — excluded from receipt", rel)
+            continue
         if rel in existing_entries:
             # The first rejected candidate is the authority. Re-pinning an
-            # overlapping path would bless bytes edited after that failure.
+            # overlapping path would bless bytes edited after that failure — so
+            # a drifted pin is RELEASED (the claim is dropped, the bytes are left
+            # alone) rather than re-pinned or left to wedge the whole receipt.
             if fingerprint != existing_entries[rel]:
-                LOG.error("phase_z: failed-closeout path changed before a later failure: %s", rel)
-                return False
+                LOG.warning("phase_z: failed-closeout path changed before a later failure — "
+                            "releasing stale claim: %s", rel)
+                stale.add(rel)
             continue
         entries.append({"path": rel, "fingerprint": fingerprint})
     if existing_payload is not None:
         payload = existing_payload
+        if stale:
+            payload["paths"] = [e for e in payload["paths"] if e["path"] not in stale]
+            payload.setdefault("released", []).extend(
+                {"path": rel, "reason": "repin_refused",
+                 "released_at": datetime.now(timezone.utc).isoformat()}
+                for rel in sorted(stale)
+            )
         payload["paths"].extend(entries)
         payload.setdefault("receipts", []).append(receipt)
         payload["last_failure_at"] = datetime.now(timezone.utc).isoformat()
@@ -496,6 +531,12 @@ def _ensure_failed_closeout(
             "receipts": [receipt],
             "paths": entries,
         }
+    if not payload["paths"]:
+        # Nothing left to claim. An empty receipt is unreadable by
+        # _read_failed_closeout and would quarantine itself next call; delete it
+        # so the module returns to the clean "no receipt" state.
+        _clear_failed_closeout(repo_root, runner)
+        return False
     try:
         tmp = dest.with_suffix(".tmp")
         tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -523,6 +564,15 @@ def _clear_failed_closeout(repo_root: Path, runner) -> None:
 def _paths_carried_forward(repo_root: Path, since_iso: str | None, runner) -> set[str]:
     """Paths some commit touched after the receipt was written.
 
+    ADVISORY ONLY — never a gate. `git log` cannot, by definition, name a path
+    that no commit contains, so this question is FALSE for every untracked file
+    forever, not merely "not yet". Using it as the sole discriminator between
+    "resolved" and "conflict" is what produced a CRITICAL with no exit
+    (error_log 2026-07-18): an untracked file that a later session edited was
+    dirty (so not landed), drifted (so not unresolved) and invisible to git log
+    (so never carried) — permanently. It now only decides how loudly a drifted
+    pin is released, not whether the claim can be dropped.
+
     Asks git rather than keeping a list of "hot" state files. A shared ledger
     (`storage/work_log.json`, the task archive, token-usage reports) is appended
     to by every fire and cron worker, so a day-old byte-pin can never match it
@@ -549,6 +599,55 @@ def _paths_carried_forward(repo_root: Path, since_iso: str | None, runner) -> se
     return {path for path in (proc.stdout or "").split("\0") if path}
 
 
+def _release_closeout_claims(
+    repo_root: Path, released: list[str], runner, *, reason: str
+) -> bool:
+    """Drop stale ownership claims from the receipt. THIS IS THE ALERT'S EXIT.
+
+    A released path is one whose pinned bytes no longer exist in the working
+    tree. The rejected fire's output is gone — overwritten by whoever edited the
+    file afterwards — so there is nothing left for this receipt to recover and
+    the claim is moot. Releasing commits nothing, deletes nothing and touches no
+    working bytes; it only stops this module from asserting ownership over
+    content it did not produce.
+
+    Returns True when the receipt was successfully rewritten (or removed because
+    it became empty). The caller alerts ONCE on the release; the next pass finds
+    no claim and is silent. That one-shot shape is the hard requirement: before
+    this, a drifted claim re-raised the same CRITICAL every fire and the only way
+    to stop it was a human deleting `.git/volpred_phase_z_failed_closeout.json`.
+    """
+    if not released:
+        return True
+    dest = _failed_closeout_path(repo_root, runner)
+    payload = _read_failed_closeout(repo_root, runner)
+    if dest is None or payload is None:
+        return False
+    dropped = set(released)
+    payload["paths"] = [e for e in payload["paths"] if e["path"] not in dropped]
+    payload.setdefault("released", []).extend(
+        {"path": rel, "reason": reason,
+         "released_at": datetime.now(timezone.utc).isoformat()}
+        for rel in sorted(dropped)
+    )
+    if not payload["paths"]:
+        _clear_failed_closeout(repo_root, runner)
+        LOG.warning("phase_z: released %d stale closeout claim(s); receipt is now empty and removed",
+                    len(dropped))
+        return True
+    try:
+        tmp = dest.with_suffix(".tmp")
+        tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp.replace(dest)
+        LOG.warning("phase_z: released %d stale closeout claim(s); %d still pinned",
+                    len(dropped), len(payload["paths"]))
+        return True
+    except OSError as exc:
+        LOG.error("phase_z: cannot persist closeout release (%s) — claim will be re-evaluated "
+                  "next pass", exc)
+        return False
+
+
 def recover_failed_closeout(
     *,
     repo_root: Path,
@@ -573,6 +672,34 @@ def recover_failed_closeout(
     archive, token-usage reports) had legitimately moved on, so every fire for 25
     hours re-sent the same alert about work that was never at risk
     (error_log 2026-07-17).
+
+    Every pinned path lands in exactly one of three buckets, and all three
+    terminate:
+
+      landed      — no longer dirty, or drifted-and-carried-forward by a later
+                    commit. Silent; the claim is satisfied.
+      unresolved  — still dirty and still byte-identical to the pin. THIS is the
+                    only bucket recovery acts on: the rejected fire's output is
+                    verifiably still there, so it can be re-staged and committed
+                    under the original attribution.
+      released    — still dirty but the pinned bytes are gone (someone edited the
+                    file after the failure). Nothing recoverable remains, so the
+                    claim is dropped from the receipt, alerted ONCE at warn, and
+                    never re-raised.
+
+    HOW THIS ALERT STOPS (the property 2026-07-17's fix did not give it): the
+    release rewrites the receipt in the same pass that alerts, so the condition
+    is gone before the next fire evaluates it. No human action, no file deletion,
+    no gate repair is required for the paging to end — the loudest this can ever
+    be is one warn per drifted path per lifetime of the claim. Nothing is
+    discarded by a release: the working-tree bytes are untouched and a later
+    fire's own pre-fire baseline will own and commit them normally.
+
+    The predecessor design had no such exit for untracked paths. "Did a later
+    commit carry this forward?" is answered by `git log`, which never lists an
+    untracked file, so an untracked + edited path was structurally incapable of
+    leaving the conflict bucket — a CRITICAL every hour whose only off switch was
+    deleting a file inside `.git/` by hand (error_log 2026-07-18).
     """
     repo_root = Path(repo_root)
     payload = _read_failed_closeout(repo_root, runner)
@@ -584,7 +711,7 @@ def recover_failed_closeout(
 
     carried = _paths_carried_forward(repo_root, payload.get("created_at"), runner)
     unresolved: list[str] = []
-    conflicts: list[str] = []
+    released: list[str] = []
     landed: list[str] = []
     for entry in payload["paths"]:
         rel = entry["path"]
@@ -592,29 +719,47 @@ def recover_failed_closeout(
             landed.append(rel)
             continue
         if _path_fingerprint(repo_root / rel) != entry["fingerprint"]:
-            # Drifted and dirty. If a later commit already took this path, that
-            # shift carried the content forward and is now its owner; only an
-            # edit no commit ever picked up is an unstaged-output conflict.
-            (landed if rel in carried else conflicts).append(rel)
+            # Drifted and dirty: the pinned bytes are gone either way. A later
+            # commit having taken the path is merely evidence that the drift was
+            # ordinary progress (silent); otherwise the claim is released with one
+            # warn. Neither outcome can persist into the next pass.
+            (landed if rel in carried else released).append(rel)
         else:
             unresolved.append(rel)
 
-    if not unresolved and not conflicts:
-        # Every pinned path reached HEAD. Nothing to recover, nothing to warn.
-        _clear_failed_closeout(repo_root, runner)
-        return {"committed": False, "reason": "already_closed", "landed": landed}
-    if conflicts:
+    if released:
+        persisted = _release_closeout_claims(
+            repo_root, released, runner, reason="drifted_uncarried")
         (alert_fn or _default_alert)(
-            level="critical",
-            title="PHASE-Z failed-closeout 內容已變更，拒絕跨班提交",
+            level="warn",
+            title="PHASE-Z 放棄了已被覆寫的 failed-closeout 認領",
             body="\n".join([
-                "原 fire 的 ownership receipt 還在，但下列尚未提交的路徑已不再等於被 gate 擋下時的 bytes。",
-                "為避免把後來 session 的修改冒充原 fire 產出，系統沒有 commit 或覆蓋任何檔案。",
+                "## 發生什麼",
+                "某班 fire 的產出曾被 commit gate 擋下，PHASE-Z 保留了 ownership receipt 準備下次補交。",
+                "但下列路徑現在的內容已經不等於當時被擋下的 bytes —— 後來有人改過它。",
+                "原本那份產出已不存在於工作區，**沒有任何東西可以補交**，所以系統放棄這幾條認領。",
                 "",
-                *[f"- {path}" for path in conflicts],
+                "## 有沒有東西不見",
+                "沒有。PHASE-Z 沒有 commit、沒有覆蓋、沒有刪除任何檔案；現在的內容原封不動留在工作區，",
+                "會由後續 fire 依它自己的 pre-fire baseline 正常收編。",
+                "",
+                "## 這則警報會再出現嗎",
+                ("不會。認領已從 receipt 移除，下一班不會再評估到它。"
+                 if persisted else
+                 "**會** —— receipt 寫入失敗（磁碟問題），下一班會重新評估並再送一次。請檢查 "
+                 "`.git/volpred_phase_z_failed_closeout.json` 是否可寫。"),
+                "",
+                "## 放棄認領的路徑",
+                *[f"- {path}" for path in released],
             ]),
         )
-        return {"committed": False, "reason": "hash_mismatch", "conflicts": conflicts}
+
+    if not unresolved:
+        # Nothing byte-identical is left to re-stage. Whatever remained was
+        # landed or released, so the receipt has no further work to describe.
+        _clear_failed_closeout(repo_root, runner)
+        return {"committed": False, "reason": "released" if released else "already_closed",
+                "landed": landed, "released": released}
 
     subjects = [
         str(item.get("subject") or "").strip()
@@ -640,6 +785,8 @@ def recover_failed_closeout(
     )
     if result.get("committed"):
         _clear_failed_closeout(repo_root, runner)
+    if released:
+        result = {**result, "released": released}
     return result
 
 
@@ -857,6 +1004,22 @@ def _generated_subject(owned: list[str]) -> str:
 # never committable).
 _FOREIGN_STREAK_BASENAME = "volpred_phase_z_foreign_streak.json"
 _FOREIGN_STREAK_CRITICAL = 3  # consecutive fires before warn → critical
+
+
+def _streak_is_notifiable(streak: int) -> bool:
+    """Re-page on a stuck foreign path at 3, 6, 12, 24, … fires — not every fire.
+
+    This alert's exit is human (commit the file, or let reap_orphan_deliverables
+    adopt it), and a path nobody ever collects would otherwise emit a CRITICAL
+    once an hour forever. Same alert-fatigue class as the failed-closeout loop:
+    an unbounded repeat rate trains the reader to ignore it, and the 25-hour
+    incident (error_log 2026-07-17) is what that costs. Doubling backoff keeps
+    the condition observable and escalating without being a metronome.
+    """
+    if streak < _FOREIGN_STREAK_CRITICAL:
+        return False
+    multiple, remainder = divmod(streak, _FOREIGN_STREAK_CRITICAL)
+    return remainder == 0 and multiple & (multiple - 1) == 0  # 1, 2, 4, 8, …
 
 
 def _bump_foreign_streaks(repo_root: Path, runner, foreign: list[str]) -> dict[str, int]:
@@ -1855,6 +2018,9 @@ def run_phase_z(
     if stuck:
         LOG.warning("phase_z: %d foreign path(s) stuck for >=%d fires: %s",
                     len(stuck), _FOREIGN_STREAK_CRITICAL, stuck[:10])
+    # Observability is the log line above (every fire). Paging is backed off — see
+    # _streak_is_notifiable.
+    if stuck and any(_streak_is_notifiable(streaks[p]) for p in stuck):
         alert_fn(
             level="critical",
             # streak 每班 +1、count 會浮動 — 進 title 就等於每班一個新 dedup key，
