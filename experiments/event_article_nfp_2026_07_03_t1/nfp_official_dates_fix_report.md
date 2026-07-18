@@ -307,6 +307,40 @@ Round 2 確認 #1/#2/#3/#4/#7 修得完整（含逐項驗證 `_splice` 對相鄰
 
 ---
 
+## 6e. Codex 複審（round 4）→ **PASS**，已產出合併裁決
+
+複審逐行確認 tripwire 修正正確：`main()` 連續完成三次 `yf.download` 賦值期間**沒有讀取任何
+回傳 frame**，第一個屬性存取確實是 `df.columns`（MultiIndex 攤平那一步），所以中止點確實
+落在整個下載區塊之後；捕捉範圍只吞 `_StopEarly`，不會吞掉 `AttributeError` 之類的意外例外
+而假裝成功。並確認 HEAD 與父 commit 的實驗程式與 results JSON **無 diff、git blob ID 相同**。
+
+**FINAL VERDICT: PASS**，blocking defects = 0。
+
+裁決檔：`review_verdict.json`（由 `experiment_gates.py verdict-template` 產生，**不是手抄**），
+pin 住 9 個 claim-surface 檔的 sha256。`experiment_gates.py certify` → **PASS**，合併關卡已備妥。
+
+### 四輪總結
+
+| 輪次 | 判定 | 發現 |
+|---|---|---|
+| R1 | FIX-BEFORE-MERGE | 3 HIGH（sync 靜默失敗、非原子寫、replacement 交互污染）+ 4 MEDIUM |
+| R2 | FAIL | 2 blocking（next-day 分母無聲縮水、lookahead 只驗 SPY）|
+| R3 | FAIL | blocking 1 CLOSED；blocking 2 剩「第 4 個下載不可觀測」 |
+| R4 | **PASS** | 盲點確實關上，無新缺陷 |
+
+**R1 之後沒有任何一個修正改動過數字** —— 13 列表格與 8 個統計量在 R2/R3/R4 全部 byte-identical。
+唯一改變對外數字的是**最初的日期修正本身**。
+
+### 裁決的誠實 caveat（已寫進 `review_verdict.json`）
+
+- R2/R3/R4 的審查環境是唯讀沙箱、**沒有可寫暫存目錄，跑不了 pytest**。裁決是基於逐行控制流
+  分析、commit diff 與 git blob equality。**所有 55 passed 與四次 mutation test 都是我本機
+  實跑的，不是審查者跑的** —— 這點必須寫明，否則會讓人誤以為 PASS 附帶了獨立的測試執行證據。
+- **k528 完全不在審查範圍內**（§7）。這份 PASS 只認證本實驗的程式與產物，**不認證線上文章
+  核心統計量的正確性**。
+
+---
+
 ## 7. 尚未解決 / 需要另開任務的事
 
 ### 🔴 最重要：線上文章的核心統計量建立在**同一類污染**上（未修）
