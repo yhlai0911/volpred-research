@@ -33037,13 +33037,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T21:00:58.045626+00:00",
+    "completed_at": "2026-07-18T22:01:24.337123+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T21:00:58.045626+00:00",
-      "last_clean_observed_at": "2026-07-18T21:00:58.045626+00:00"
+      "resolved_at": "2026-07-18T22:01:24.337123+00:00",
+      "last_clean_observed_at": "2026-07-18T22:01:24.337123+00:00"
     }
   },
   {
@@ -33055,13 +33055,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T21:23:40.320334+00:00",
+    "completed_at": "2026-07-18T22:25:19.253847+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T21:23:40.320334+00:00",
-      "last_clean_observed_at": "2026-07-18T21:23:40.320334+00:00"
+      "resolved_at": "2026-07-18T22:25:19.253847+00:00",
+      "last_clean_observed_at": "2026-07-18T22:25:19.253847+00:00"
     }
   },
   {
@@ -33853,42 +33853,15 @@
   },
   {
     "id": "K1712",
-    "title": "K1712: Wild Bootstrap OHR — JRFM 2024",
-    "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 443). Original: Wild Bootstrap OHR — JRFM 2024\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1712.py with signal.shift(1) + seed=42, (c) K1712_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "succeeded",
     "task_type": "experiment",
-    "dispatch_lane": "agent",
+    "title": "K1712: Wild Bootstrap OHR — JRFM 2024",
+    "priority": 3,
     "source": "research_backlog_auto",
-    "source_line": 443,
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
     "created_at": "2026-07-15T00:00:01Z",
-    "status_history": [
-      {
-        "ts": "2026-07-15T21:09:25.100607+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-1-f6220ef247e74d1ebd065eec134c33b1"
-      },
-      {
-        "ts": "2026-07-15T21:09:32.763538+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-1-f6220ef247e74d1ebd065eec134c33b1"
-      },
-      {
-        "ts": "2026-07-15T21:11:03.449293+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-1-f6220ef247e74d1ebd065eec134c33b1"
-      }
-    ],
-    "started_at": "2026-07-15T21:09:32.763523+00:00",
     "completed_at": "2026-07-15T21:11:03.449279+00:00",
-    "result": "duplicate_already_covered; root_cause=canonical research_program checkbox remained open after prior resolution; evidence=K965 tracked triplet + knowledge entry + JRFM/Mammen/Ederington literature chain; fix=closed source checkbox and documented K1712 recurrence; validation=experiment_gates PASS, backlog scanner excludes Wild Bootstrap OHR, generator tests 8 passed"
+    "tombstone": true,
+    "archived_at": "2026-07-18T22:01:28.696031+00:00"
   },
   {
     "id": "K1713",
@@ -34230,48 +34203,15 @@
   },
   {
     "id": "K1365_article_general_audience_rewrite_c16d94b7",
-    "title": "Audience correction: rewrite a true general companion for 同一個指數好幾檔 ETF，短線交易全擠在最老那一檔——拿來當風險訊號靈不靈？",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_c16d94b7. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1365']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 同一個指數好幾檔 ETF，短線交易全擠在最老那一檔——拿來當風險訊號靈不靈？",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_c16d94b7",
-    "experiment_refs": [
-      "K1365"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1365",
-    "status_history": [
-      {
-        "ts": "2026-07-15T20:51:47.757832+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-k1365-audience"
-      },
-      {
-        "ts": "2026-07-15T20:51:47.985411+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-k1365-audience"
-      },
-      {
-        "ts": "2026-07-15T21:13:12.877082+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-k1365-audience"
-      }
-    ],
-    "started_at": "2026-07-15T20:51:47.985396+00:00",
     "completed_at": "2026-07-15T21:13:12.877063+00:00",
-    "result": "Published new general-audience draft mile_bb33fd72 with exact K1365 refs, two corrected data-bound charts, and explicit -5.34 to -2.65 lookahead erratum. Independent cross-model FACT/STYLE review passed; audience marker, async lazypack queue, and Supabase feed sync completed."
+    "tombstone": true,
+    "archived_at": "2026-07-18T22:01:28.696031+00:00"
   },
   {
     "id": "K1575_article_general_audience_rewrite_9839822d",
@@ -34354,50 +34294,15 @@
   },
   {
     "id": "K1332_article_general_audience_rewrite_1b511caa",
-    "title": "Audience correction: rewrite a true general companion for 私募信貸看不到帳本，市場還是會先動：一個只對高收益債有用的影子訊號",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_1b511caa. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1332', 'K1499']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 私募信貸看不到帳本，市場還是會先動：一個只對高收益債有用的影子訊號",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_1b511caa",
-    "experiment_refs": [
-      "K1332",
-      "K1499"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1332",
-    "experiment_id": "K1499",
-    "status_history": [
-      {
-        "ts": "2026-07-15T20:35:21.098923+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-k1332-audience"
-      },
-      {
-        "ts": "2026-07-15T20:35:21.347987+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-k1332-audience"
-      },
-      {
-        "ts": "2026-07-15T21:07:33.632985+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-k1332-audience"
-      }
-    ],
-    "started_at": "2026-07-15T20:35:21.347971+00:00",
     "completed_at": "2026-07-15T21:07:33.632971+00:00",
-    "result": "Published draft/general companion mile_a89bdd96 with exact refs K1332/K1499 and sanitize_applied=0; cross-model review PASS, 109 tests PASS, images/readback HTTP 200. Corrected source caveats (BKLN 12.5x vs HYG 4.6x; horizons 5/10/21) without relabeling research source; bespoke 3-panel lazypack completed and synced."
+    "tombstone": true,
+    "archived_at": "2026-07-18T22:01:28.696031+00:00"
   },
   {
     "id": "K740_article_general_audience_rewrite_2fb1dfb3",
@@ -34435,48 +34340,15 @@
   },
   {
     "id": "K1427_article_general_audience_rewrite_c07025d2",
-    "title": "Audience correction: rewrite a true general companion for 「股債金油齊跌、資金在輪動」這個說法，數據站哪邊？——拆開大跌底下的板塊離散度",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_c07025d2. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1427']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 「股債金油齊跌、資金在輪動」這個說法，數據站哪邊？——拆開大跌底下的板塊離散度",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_c07025d2",
-    "experiment_refs": [
-      "K1427"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1427",
-    "status_history": [
-      {
-        "ts": "2026-07-15T21:42:07.942095+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-k1427-audience"
-      },
-      {
-        "ts": "2026-07-15T21:42:08.198468+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-k1427-audience"
-      },
-      {
-        "ts": "2026-07-15T21:57:36.480210+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-k1427-audience"
-      }
-    ],
-    "started_at": "2026-07-15T21:42:08.198456+00:00",
     "completed_at": "2026-07-15T21:57:36.480192+00:00",
-    "result": "Created draft general companion mile_9d7a5d1a with exact K1427 provenance, plain-language clustered-episode caveat and source limitations. Installed and visually verified 3 data-bound lazypack panels; local/Supabase content matched, all URLs 200, audience and anti-AI gates passed."
+    "tombstone": true,
+    "archived_at": "2026-07-18T22:01:28.696031+00:00"
   },
   {
     "id": "K1157_article_general_audience_rewrite_858690fd",
@@ -35314,48 +35186,15 @@
   },
   {
     "id": "K1386_article_general_audience_rewrite_f3ade114",
-    "title": "Audience correction: rewrite a true general companion for 市場真的很「粗糙」，但更複雜的模型還是沒贏",
-    "description": "parent_task_id=ci-red-29421677446; source_article=mile_f3ade114. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1386']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 市場真的很「粗糙」，但更複雜的模型還是沒贏",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_f3ade114",
-    "experiment_refs": [
-      "K1386"
-    ],
-    "parent_task_id": "ci-red-29421677446",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T16:16:33.771681+00:00",
-    "k_id": "K1386",
-    "status_history": [
-      {
-        "ts": "2026-07-15T21:08:05.704153+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-k1386-audience"
-      },
-      {
-        "ts": "2026-07-15T21:08:05.962947+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-k1386-audience"
-      },
-      {
-        "ts": "2026-07-15T21:29:34.526434+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-k1386-audience"
-      }
-    ],
-    "started_at": "2026-07-15T21:08:05.962930+00:00",
     "completed_at": "2026-07-15T21:29:34.526418+00:00",
-    "result": "Created draft/general companion mile_8e086903 with exact ref K1386, sanitize_applied=0, two evidence charts, corrected 1097-row results and all methodology caveats. 109 tests PASS; Supabase/three lazypack URLs verified; r2 removed QLIKE alt regression and audience validator PASS (0 mismatches)."
+    "tombstone": true,
+    "archived_at": "2026-07-18T22:01:28.696031+00:00"
   },
   {
     "id": "ci-red-29430567843",
@@ -35554,42 +35393,15 @@
   },
   {
     "id": "dreaming_persistent_alert_52425890cc2f99a1",
-    "title": "[dreaming] persistent_alert:52425890cc2f99a1",
-    "description": "Alert `git-push-backup: push 失敗` fired 6× over 17.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 3 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：alert_key=52425890cc2f99a1 title='git-push-backup: push 失敗' send_count=6 span=17.1d (first 2026-06-28T10:28:38.987914+00:00 → last 2026-07-15T14:00:04.899579+00:00) — no fire in 7.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] persistent_alert:52425890cc2f99a1",
+    "priority": 2,
     "source": "dreaming",
     "created_at": "2026-07-15T21:25:00.515638+00:00",
-    "dreaming": {
-      "signature": "persistent_alert:52425890cc2f99a1",
-      "pattern_type": "persistent_alert",
-      "occurrences": 3,
-      "governance_target": "docs/error_log.md"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-15T21:31:04.409767+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-git-push-alert"
-      },
-      {
-        "ts": "2026-07-15T21:31:04.646170+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-git-push-alert"
-      },
-      {
-        "ts": "2026-07-15T21:39:52.222530+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-git-push-alert"
-      }
-    ],
-    "started_at": "2026-07-15T21:31:04.646156+00:00",
     "completed_at": "2026-07-15T21:39:52.222499+00:00",
-    "result": "逐 fire 稽核：六個 window 中五次為 host-cron Keychain 失敗、一次為 encoding gate 正確阻擋。已解耦 host_crontab_managed=false 與 piggy_back_enabled=true、移除 live host leg、加 Three-Strike plan 與回歸測試；21 tests PASS。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T22:01:28.696031+00:00"
   },
   {
     "id": "ci-red-29450374699",
@@ -41252,5 +41064,324 @@
     "description": "scripts/tests/test_audit_canonical_writers.py::test_real_active_tree_matches_frozen_owner_inventory 在當前 HEAD 失敗（本地實測；publisher.py 工作區乾淨 = 真實存在於 HEAD，非未提交改動）。\n\nFAIL 明細：\n- src/volpred/publisher/publisher.py:2611 Publisher._append_to_feed -> open-write\n- src/volpred/publisher/publisher.py:2616 Publisher._append_to_feed -> replace\n- src/volpred/publisher/publisher.py:2665 Publisher._rewrite_feed_entry -> open-write\n- src/volpred/publisher/publisher.py:2669 Publisher._rewrite_feed_entry -> replace\n[canonical-writers] FAIL: 1 unguarded, 0 owner-count mismatch, 0 parse error\n\n待查重點：此 gate 在 CI run 29658868526 未被報出（該 run 只報 phase_z 一條），需先確認 CI 是否根本沒跑這個 test 檔 — 若是，除了補 guard 還要修 CI 覆蓋缺口，否則 canonical-writer 防護形同虛設。\n\n發現脈絡：2026-07-19 05:xx slot-1 fire 修 CI watchdog 時序誤報時由 subagent 順帶掃出，非本班範圍故另立單。",
     "completed_at": "2026-07-19T05:20:00+08:00",
     "result": "本班同 fire 內修復完成。開單時的描述前提是錯的 —— 我把 auditor 輸出裡的 guarded-owner（PASS 分類的 inventory 列印）誤讀為違規，因此誤指 publisher.py 的 _append_to_feed / _rewrite_feed_entry 未 guard；那四行其實是通過的。真因在別的檔：src/volpred/publisher/article_correction.py:194 apply_article_correction -> os.replace 為 direct-guarded-bypass (guarded=True, declared_owner=False) —— guard 一直都在，缺的是 LOW_LEVEL_OWNERS 註冊；依 auditor 契約「guarded mutation outside an owner is still rejected because it creates a second write path」。由 9716b0af0（建立該檔的 commit）引入，非後來的 fa3dfad20；fa3dfad20 只是把 write_text 換成 mkstemp+os.replace，改變了被標記的行號與 operation。修法：scripts/audit_canonical_writers.py 註冊該 owner {\"os.replace\": 1}（+9 行），非白名單豁免 —— guard 仍被 dominance-check 強制，op count 仍是雙向 ratchet。negative check 已做（移除註冊即紅，逐字重現原失敗）。auditor CLI PASS exit 0；test_audit_canonical_writers.py 15 passed。另：開單時猜「CI 可能沒跑這個 test 檔」亦為誤 —— CI run 29660781857 確實有跑並報紅。"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_trending_repost_2026_07_18_fed",
+    "title": "[dreaming] missing_retry_strategy:trending_repost_2026_07_18_fed政策",
+    "description": "Failed task trending_repost_2026_07_18_fed政策 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-18T21:25:00.535671+00:00）。\n證據：task trending_repost_2026_07_18_fed政策 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-18T21:25:00.535671+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:trending_repost_2026_07_18_fed政策",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "trending_repost_2026_07_18_fed政策"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_trending_repost_2026_07_18",
+    "title": "[dreaming] missing_retry_strategy:trending_repost_2026_07_18_台股崩跌",
+    "description": "Failed task trending_repost_2026_07_18_台股崩跌 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-18T21:25:00.535671+00:00）。\n證據：task trending_repost_2026_07_18_台股崩跌 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-18T21:25:00.535671+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:trending_repost_2026_07_18_台股崩跌",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "trending_repost_2026_07_18_台股崩跌"
+  },
+  {
+    "id": "ci-red-29660781857",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29651115228",
+    "ci_run_key": "29660781857:1",
+    "created_at": "2026-07-18T22:00:09.323624+00:00",
+    "title": "CI 紅燈修復（run 29660781857, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29660781857\nattempt: 1\nhead_sha: 869753414\n偵測摘要（仍須讀完整 failed log）：2026-07-18T16:04:20.9274559Z ImportError while importing test module '/home/runner/work/volpred-research/volpred-research/tests/test_covered_article_dedup.py'.\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29660781857 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T22:01:38.809691+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a6e99d58145e4a83ab674437de17d09f"
+      },
+      {
+        "ts": "2026-07-18T22:01:39.037873+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a6e99d58145e4a83ab674437de17d09f"
+      },
+      {
+        "ts": "2026-07-18T22:08:13.784421+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-a6e99d58145e4a83ab674437de17d09f"
+      }
+    ],
+    "started_at": "2026-07-18T22:01:39.037857+00:00",
+    "completed_at": "2026-07-18T22:08:13.784407+00:00",
+    "result": "root_cause=canonical-writers audit FAIL (1 unguarded writer) in scripts/tests/test_audit_canonical_writers.py; repair_commit=6620d2f80 (landed by prior shift, verified locally: 15 passed). 本班另修 CI watcher 缺陷：check_alerts.py root_cause 只算一次/incident，跨 7 個 red run 沿用 run 1 的 stale ImportError，3 張 repair task 全被導向已修掉的失敗；改為綁 root_cause_run_key 逐 run 重算 + regression test（mutation-checked）。Test Suite run 29662644131 綠燈由 CI watcher 獨立驗證。"
+  },
+  {
+    "id": "trending_repost_2026_07_19_美債波動",
+    "title": "[trending_repost] Fed降息循環終點？美債隱含波動率與利差交易風險",
+    "description": "分析聯準會降息尾聲下，MOVE指數與長短天期美債利差的連動關係。可量化：以美債隱含波動率歷史分位數，評估日圓套利交易平倉對新興市場的二次衝擊。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-07-18T22:00:20+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "warn_arc_near_miss",
+      "blocked": false,
+      "reason": "fuzzy descriptive arc near-miss of mile_d12825bb, mile_35875d6f, mile_4901f7bc; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
+      "saturation": 3,
+      "theme_terms": [
+        "指數",
+        "交易",
+        "move",
+        "fed",
+        "分位",
+        "場的"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_d12825bb",
+          "title": "同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感"
+        },
+        {
+          "id": "mile_35875d6f",
+          "title": "Fed 放鷹、VIX 卻破 16：這種平靜，先問它三個問題再決定信不信"
+        },
+        {
+          "id": "mile_4901f7bc",
+          "title": "AI 一季燒五百億，該擔心嗎？別看 VIX，看波動率市場真正在怕的三件事"
+        },
+        {
+          "id": "mile_68285aa0",
+          "title": "國防預算翻倍喊得這麼大聲，國防 ETF 卻沒按劇本震盪"
+        },
+        {
+          "id": "mile_44ab1acc",
+          "title": "指數安靜，不代表風險沒聲音"
+        }
+      ],
+      "screened_at": "2026-07-18T22:00:22+00:00"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-18T22:07:50.710016+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
+      },
+      {
+        "ts": "2026-07-18T22:07:50.943660+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
+      },
+      {
+        "ts": "2026-07-18T22:23:53.968471+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
+      }
+    ],
+    "started_at": "2026-07-18T22:07:50.943645+00:00",
+    "completed_at": "2026-07-18T22:23:53.968456+00:00",
+    "result": "已寫成並發佈為 draft（lazypack async render 後由 release cron 上架）。美債題=mile_21e45133 日圓carry傳導鏈NULL；台股題=mile_47c4bc3e 融資領先性混合偏NULL。兩篇 anti_ai_gate exit 0。"
+  },
+  {
+    "id": "trending_repost_2026_07_19_台股槓桿",
+    "title": "[trending_repost] 槓桿踩踏引發暴跌？台股歷史性回檔下的波動率避險策略",
+    "description": "分析 2026 年 7 月台股因 AI 概念股獲利了結與散戶融資斷頭導致的歷史性大跌。可量化角度：計算融資餘額變動率與台股波動率指數（TAIMEX VIX）的領先滯後關係，並評估在融資維持率跌破特定門檻時，買入價外 Put 的避險績效。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-07-18T22:00:33+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "unjudged_thin_signature",
+      "blocked": false,
+      "reason": "arc gate had no anchor (no distinctive entity, no experiment ref) — it did not look; theme saturation 3 < 5 is the only signal that ran. Caller must do the 3-layer dedup check.",
+      "saturation": 3,
+      "theme_terms": [
+        "台股",
+        "指數",
+        "的波",
+        "避險",
+        "股波",
+        "槓桿"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_e13e5485",
+          "title": "台股恐慌 37、美股只剩 16：一道 20 點的「恐慌溫差」，用三個問題就能讀懂"
+        },
+        {
+          "id": "mile_3e11060d",
+          "title": "台股恐慌居高不下，美股早就退燒了：台版 VIX 站上 37 在說什麼"
+        },
+        {
+          "id": "mile_c43717b0",
+          "title": "台股波動有辦法「預測尾巴」嗎？一個對退休族有用的風險量化方法"
+        }
+      ],
+      "screened_at": "2026-07-18T22:00:35+00:00"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-18T22:07:51.213934+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
+      },
+      {
+        "ts": "2026-07-18T22:07:51.447197+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
+      },
+      {
+        "ts": "2026-07-18T22:23:54.204968+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
+      }
+    ],
+    "started_at": "2026-07-18T22:07:51.447184+00:00",
+    "completed_at": "2026-07-18T22:23:54.204948+00:00",
+    "result": "已寫成並發佈為 draft（lazypack async render 後由 release cron 上架）。美債題=mile_21e45133 日圓carry傳導鏈NULL；台股題=mile_47c4bc3e 融資領先性混合偏NULL。兩篇 anti_ai_gate exit 0。"
+  },
+  {
+    "id": "trending_repost_2026_07_19_地緣避險",
+    "title": "[trending_repost] 中東變局與運價震盪，原油期權偏斜度洩露的尾部風險",
+    "description": "針對地緣衝突反覆導致的航運與能源成本飆升，評估商品選擇權市場對極端風險的溢價。可量化：觀測原油期權 OTM Call 隱含波動率溢價與地緣政治風險指數（GPR）的動態關聯。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-18T22:00:39+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "clean",
+      "blocked": false,
+      "reason": "no K coverage, no arc dup, theme saturation 1 < 5",
+      "saturation": 1,
+      "theme_terms": [
+        "指數",
+        "尾部",
+        "成本",
+        "動態",
+        "商品",
+        "部風"
+      ],
+      "near_misses": [],
+      "screened_at": "2026-07-18T22:00:41+00:00"
+    }
+  },
+  {
+    "id": "assign_d8b55d37",
+    "title": "解決 22 份長期無主的產物（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `experiments/k1380/README.md` — paired_deletion_pending:experiments/k1380 (namespace=experiments, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `experiments/k1380/k1380.py` — paired_deletion_pending:experiments/k1380 (namespace=experiments, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `experiments/k1380/k1380_losses_all.npy` — deletion_not_owned (namespace=experiments, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `experiments/k1380/k1380_losses_all_INVALID_20260716.npy` — paired_deletion_pending:experiments/k1380 (namespace=experiments, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `experiments/k1380/k1380_results.json` — deletion_not_owned (namespace=experiments, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `experiments/k1380/k1380_results_INVALID_20260716.json` — paired_deletion_pending:experiments/k1380 (namespace=experiments, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `experiments/k1380/k1380_spa_from_cache.py` — deletion_not_owned (namespace=experiments, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py` — paired_deletion_pending:experiments/k1380 (namespace=experiments, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `job:K1694-script-rerun-1211` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `job:compute-k1730-arm-a-production-quick-mode-1784358686` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `job:k1704-formal-cache-rerun-20260716` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `job:k1704-formal-rerun-20260716` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `job:k1704-input-ledger-delta-review-20260716` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `job:k1704-origin-ledger-delta-review-20260716` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `job:k1704-post-run-review-20260716` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `job:lazypack-mile_a8d79d6a-r2` — declared_outputs_not_yet_deliverable (namespace=compute_queue, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `storage/drafts/digest_20260714.md` — no_title (namespace=drafts_intake, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `storage/drafts/fb_mile_5a20a332.md` — no_title (namespace=drafts_intake, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `storage/drafts/fb_mile_f78be848.md` — no_title (namespace=drafts_intake, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `storage/drafts/k1410_source_provenance_update.md` — no_title (namespace=drafts_intake, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `storage/drafts/k841_mile_179df5f5_correction.md` — no_title (namespace=drafts_intake, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n- `storage/drafts/k841_mile_b4304948_correction.md` — no_title (namespace=drafts_intake, first_seen=2026-07-18T17:01:05.109670+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。判定完成後這張任務關閉，held 記錄會自然消失。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-18T22:01:24.271765+00:00",
+    "payload": {
+      "held_paths": [
+        "experiments/k1380/README.md",
+        "experiments/k1380/k1380.py",
+        "experiments/k1380/k1380_losses_all.npy",
+        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy",
+        "experiments/k1380/k1380_results.json",
+        "experiments/k1380/k1380_results_INVALID_20260716.json",
+        "experiments/k1380/k1380_spa_from_cache.py",
+        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py",
+        "job:K1694-script-rerun-1211",
+        "job:compute-k1730-arm-a-production-quick-mode-1784358686",
+        "job:k1704-formal-cache-rerun-20260716",
+        "job:k1704-formal-rerun-20260716",
+        "job:k1704-input-ledger-delta-review-20260716",
+        "job:k1704-origin-ledger-delta-review-20260716",
+        "job:k1704-post-run-review-20260716",
+        "job:lazypack-mile_a8d79d6a-r2",
+        "storage/drafts/digest_20260714.md",
+        "storage/drafts/fb_mile_5a20a332.md",
+        "storage/drafts/fb_mile_f78be848.md",
+        "storage/drafts/k1410_source_provenance_update.md",
+        "storage/drafts/k841_mile_179df5f5_correction.md",
+        "storage/drafts/k841_mile_b4304948_correction.md"
+      ],
+      "held_reasons": {
+        "experiments/k1380/README.md": "paired_deletion_pending:experiments/k1380",
+        "experiments/k1380/k1380.py": "paired_deletion_pending:experiments/k1380",
+        "experiments/k1380/k1380_losses_all.npy": "deletion_not_owned",
+        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": "paired_deletion_pending:experiments/k1380",
+        "experiments/k1380/k1380_results.json": "deletion_not_owned",
+        "experiments/k1380/k1380_results_INVALID_20260716.json": "paired_deletion_pending:experiments/k1380",
+        "experiments/k1380/k1380_spa_from_cache.py": "deletion_not_owned",
+        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": "paired_deletion_pending:experiments/k1380",
+        "job:K1694-script-rerun-1211": "no_existing_declared_files",
+        "job:compute-k1730-arm-a-production-quick-mode-1784358686": "no_existing_declared_files",
+        "job:k1704-formal-cache-rerun-20260716": "no_existing_declared_files",
+        "job:k1704-formal-rerun-20260716": "no_existing_declared_files",
+        "job:k1704-input-ledger-delta-review-20260716": "no_existing_declared_files",
+        "job:k1704-origin-ledger-delta-review-20260716": "no_existing_declared_files",
+        "job:k1704-post-run-review-20260716": "no_existing_declared_files",
+        "job:lazypack-mile_a8d79d6a-r2": "declared_outputs_not_yet_deliverable",
+        "storage/drafts/digest_20260714.md": "no_title",
+        "storage/drafts/fb_mile_5a20a332.md": "no_title",
+        "storage/drafts/fb_mile_f78be848.md": "no_title",
+        "storage/drafts/k1410_source_provenance_update.md": "no_title",
+        "storage/drafts/k841_mile_179df5f5_correction.md": "no_title",
+        "storage/drafts/k841_mile_b4304948_correction.md": "no_title"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
+    "created_by": "reap_orphan_deliverables"
+  },
+  {
+    "id": "assign_price_cache_0050_split_break",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "hourly_dispatch_finding",
+    "created_at": "2026-07-19T06:45:00+08:00",
+    "title": "price_cache 0050.TW 2014-01-02 未回溯調整的 4.01x 斷點修復 + 全 repo 影響盤點",
+    "description": "本班 slot-2 寫 trending_repost 台股融資題時，writer agent 發現並經主線程獨立覆核：data/cache/price_cache.db 的 0050.TW 在 2014-01-02 有未回溯調整的 4.01 倍價格斷點（2013-12-31 close 58.70 → 2014-01-02 close 14.6375；adj_close 亦同：37.41 → 9.33，亦即 adj_close 並未修正此斷點）。影響：任何跨 2014-01-02 的 0050 長樣本 rolling / realized-vol / 報酬序列都被污染。實測 writer 第一版分析中 RV persistence 相關係數被壓到 0.017，改由 2014-01-02 起算後才正常。待辦：(1) 確認 0050 該日是否真有分割或為資料源錯誤；(2) 修復 cache 或加 as-of 調整層；(3) 全 repo 盤點哪些既有 experiments / paper 用了跨此日期的 0050 長樣本並評估是否需重跑；(4) 檢查 price_cache 其他 ticker 是否有同類斷點（建議寫成通用 split-break 偵測器）。證據：storage/article_assets/tw-margin-vol-leadlag/evidence.json 的 known_defect 欄位。"
   }
 ]

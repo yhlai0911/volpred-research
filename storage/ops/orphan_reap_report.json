@@ -1,135 +1,32 @@
 {
-  "generated_at": "2026-07-18T21:00:53.292945+00:00",
+  "generated_at": "2026-07-18T22:01:18.660262+00:00",
   "adoptable": [],
-  "held": [
-    {
-      "path": "storage/drafts/digest_20260714.md",
-      "reason": "no_title",
-      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
-    },
-    {
-      "path": "storage/drafts/fb_mile_5a20a332.md",
-      "reason": "no_title",
-      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
-    },
-    {
-      "path": "storage/drafts/fb_mile_f78be848.md",
-      "reason": "no_title",
-      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
-    },
-    {
-      "path": "storage/drafts/k1410_source_provenance_update.md",
-      "reason": "no_title",
-      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
-    },
-    {
-      "path": "storage/drafts/k841_mile_179df5f5_correction.md",
-      "reason": "no_title",
-      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
-    },
-    {
-      "path": "storage/drafts/k841_mile_b4304948_correction.md",
-      "reason": "no_title",
-      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
-    }
-  ],
+  "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 25,
     "grace": 0,
     "inflight": 0
   },
-  "orphan_count": 6,
+  "orphan_count": 0,
   "adopted": [],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/ops/codex_reviews/k1731_armB_rev5_verdict.md"
+      ],
+      "existing_paths": [
+        "storage/ops/codex_reviews/k1731_armB_rev5_verdict.md"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [
-    {
-      "job_id": "K1694-script-rerun-1211",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/K1694_results.json",
-          "reason": "missing_or_not_regular_file"
-        },
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/figures/fig1_fcm_hhi_timeseries.png",
-          "reason": "missing_or_not_regular_file"
-        },
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/figures/fig2_regime_2x2.png",
-          "reason": "missing_or_not_regular_file"
-        },
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-f53bca44-k1694/experiments/K1694/figures/fig3_interaction_coef.png",
-          "reason": "missing_or_not_regular_file"
-        }
-      ]
-    },
-    {
-      "job_id": "compute-k1730-arm-a-production-quick-mode-1784358686",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
-          "reason": "git_ignored"
-        }
-      ]
-    },
-    {
-      "job_id": "k1704-formal-cache-rerun-20260716",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704_results.json",
-          "reason": "missing_or_not_regular_file"
-        }
-      ]
-    },
-    {
-      "job_id": "k1704-formal-rerun-20260716",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704_daily_proxies.csv",
-          "reason": "missing_or_not_regular_file"
-        },
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704_results.json",
-          "reason": "missing_or_not_regular_file"
-        }
-      ]
-    },
-    {
-      "job_id": "k1704-input-ledger-delta-review-20260716",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/pre_run_input_delta_review.md",
-          "reason": "missing_or_not_regular_file"
-        }
-      ]
-    },
-    {
-      "job_id": "k1704-origin-ledger-delta-review-20260716",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/pre_run_origin_delta_review.md",
-          "reason": "missing_or_not_regular_file"
-        }
-      ]
-    },
-    {
-      "job_id": "k1704-post-run-review-20260716",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/post_run_review.md",
-          "reason": "missing_or_not_regular_file"
-        }
-      ]
-    },
     {
       "job_id": "k1731-armB-corrected-rev5",
       "reason": "no_existing_declared_files",
@@ -139,23 +36,20 @@
           "reason": "git_ignored"
         }
       ]
-    },
-    {
-      "job_id": "lazypack-mile_a8d79d6a-r2",
-      "reason": "declared_outputs_not_yet_deliverable",
-      "rejected": [
-        {
-          "path": "storage/lazypack_jobs/mile_a8d79d6a/panels/__pycache__/render_lazypack.cpython-312.pyc",
-          "reason": "git_ignored"
-        },
-        {
-          "path": "storage/lazypack_jobs/mile_a8d79d6a/panels/mile_a8d79d6a_article.md",
-          "reason": "git_ignored"
-        }
-      ]
     }
   ],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008",
+      "paths": [
+        "storage/ops/codex_reviews/k1731_armB_rev5_verdict.md"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "3e0c9408480698bd076e2070840792fc16f4dd32",
+      "reason": "committed"
+    }
+  ],
   "namespaces": {
     "drafts": {
       "collectable": [],
@@ -179,48 +73,7 @@
     },
     "experiments": {
       "collectable": [],
-      "held": [
-        {
-          "path": "experiments/k1380/k1380_losses_all.npy",
-          "kind": "deletion",
-          "reason": "deletion_not_owned"
-        },
-        {
-          "path": "experiments/k1380/k1380_results.json",
-          "kind": "deletion",
-          "reason": "deletion_not_owned"
-        },
-        {
-          "path": "experiments/k1380/k1380_spa_from_cache.py",
-          "kind": "deletion",
-          "reason": "deletion_not_owned"
-        },
-        {
-          "path": "experiments/k1380/README.md",
-          "kind": "paired_deletion",
-          "reason": "paired_deletion_pending:experiments/k1380"
-        },
-        {
-          "path": "experiments/k1380/k1380.py",
-          "kind": "paired_deletion",
-          "reason": "paired_deletion_pending:experiments/k1380"
-        },
-        {
-          "path": "experiments/k1380/k1380_losses_all_INVALID_20260716.npy",
-          "kind": "paired_deletion",
-          "reason": "paired_deletion_pending:experiments/k1380"
-        },
-        {
-          "path": "experiments/k1380/k1380_results_INVALID_20260716.json",
-          "kind": "paired_deletion",
-          "reason": "paired_deletion_pending:experiments/k1380"
-        },
-        {
-          "path": "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py",
-          "kind": "paired_deletion",
-          "reason": "paired_deletion_pending:experiments/k1380"
-        }
-      ],
+      "held": [],
       "skipped": {
         "grace": 0,
         "inflight": 0,
@@ -229,6 +82,57 @@
       "collections": []
     }
   },
-  "held_escalations": [],
-  "held_escalated_paths": []
+  "held_escalations": [
+    {
+      "task_id": "assign_d8b55d37",
+      "paths": [
+        "experiments/k1380/README.md",
+        "experiments/k1380/k1380.py",
+        "experiments/k1380/k1380_losses_all.npy",
+        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy",
+        "experiments/k1380/k1380_results.json",
+        "experiments/k1380/k1380_results_INVALID_20260716.json",
+        "experiments/k1380/k1380_spa_from_cache.py",
+        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py",
+        "job:K1694-script-rerun-1211",
+        "job:compute-k1730-arm-a-production-quick-mode-1784358686",
+        "job:k1704-formal-cache-rerun-20260716",
+        "job:k1704-formal-rerun-20260716",
+        "job:k1704-input-ledger-delta-review-20260716",
+        "job:k1704-origin-ledger-delta-review-20260716",
+        "job:k1704-post-run-review-20260716",
+        "job:lazypack-mile_a8d79d6a-r2",
+        "storage/drafts/digest_20260714.md",
+        "storage/drafts/fb_mile_5a20a332.md",
+        "storage/drafts/fb_mile_f78be848.md",
+        "storage/drafts/k1410_source_provenance_update.md",
+        "storage/drafts/k841_mile_179df5f5_correction.md",
+        "storage/drafts/k841_mile_b4304948_correction.md"
+      ]
+    }
+  ],
+  "held_escalated_paths": [
+    "experiments/k1380/README.md",
+    "experiments/k1380/k1380.py",
+    "experiments/k1380/k1380_losses_all.npy",
+    "experiments/k1380/k1380_losses_all_INVALID_20260716.npy",
+    "experiments/k1380/k1380_results.json",
+    "experiments/k1380/k1380_results_INVALID_20260716.json",
+    "experiments/k1380/k1380_spa_from_cache.py",
+    "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py",
+    "job:K1694-script-rerun-1211",
+    "job:compute-k1730-arm-a-production-quick-mode-1784358686",
+    "job:k1704-formal-cache-rerun-20260716",
+    "job:k1704-formal-rerun-20260716",
+    "job:k1704-input-ledger-delta-review-20260716",
+    "job:k1704-origin-ledger-delta-review-20260716",
+    "job:k1704-post-run-review-20260716",
+    "job:lazypack-mile_a8d79d6a-r2",
+    "storage/drafts/digest_20260714.md",
+    "storage/drafts/fb_mile_5a20a332.md",
+    "storage/drafts/fb_mile_f78be848.md",
+    "storage/drafts/k1410_source_provenance_update.md",
+    "storage/drafts/k841_mile_179df5f5_correction.md",
+    "storage/drafts/k841_mile_b4304948_correction.md"
+  ]
 }

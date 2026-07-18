@@ -1,0 +1,1389 @@
+{
+  "meta": {
+    "sample_start": "2016-01-04",
+    "sample_end": "2026-07-10",
+    "n_trading_days_with_valid_threshold": 2478,
+    "n_move_jump_events": 266,
+    "n_declustered_events": 136,
+    "event_rule": "dlnMOVE_t >= trailing-252d 90th percentile of dlnMOVE, threshold uses data up to t-1 only",
+    "data_source": "yfinance daily close, auto_adjust=True; tickers ^MOVE, JPY=X, FXY, EEM, EWZ, EWY, ^VIX, TLT",
+    "raw_csv": "raw_prices.csv",
+    "move_as_of_note": "^MOVE last valid close 2026-07-10; later sessions unavailable on yfinance at time of writing",
+    "test": "OLS on event dummy with Newey-West HAC SE (maxlags = h+5); overlapping windows acknowledged"
+  },
+  "event_study_all_events": {
+    "USDJPY": {
+      "note": "negative = yen appreciates (carry unwind direction)",
+      "horizons": {
+        "h1": {
+          "n_event": 264,
+          "n_other": 2327,
+          "mean_event_pct": -0.01233843724049797,
+          "mean_other_pct": 0.014648884224528473,
+          "diff_pct": -0.026987321465026633,
+          "tstat": -0.6059823561488198,
+          "pval": 0.5445264695418329
+        },
+        "h5": {
+          "n_event": 261,
+          "n_other": 2322,
+          "mean_event_pct": 0.10089635579431926,
+          "mean_other_pct": 0.056541123437709055,
+          "diff_pct": 0.04435523235661005,
+          "tstat": 0.4902467145543119,
+          "pval": 0.6239593280661115
+        },
+        "h10": {
+          "n_event": 259,
+          "n_other": 2319,
+          "mean_event_pct": 0.30327595203843066,
+          "mean_other_pct": 0.1023575577938828,
+          "diff_pct": 0.20091839424454627,
+          "tstat": 1.5340728494735338,
+          "pval": 0.12501173183801184
+        }
+      }
+    },
+    "FXY": {
+      "note": "positive = yen appreciates",
+      "horizons": {
+        "h1": {
+          "n_event": 234,
+          "n_other": 2179,
+          "mean_event_pct": -0.0490102147016341,
+          "mean_other_pct": -0.004278688742610927,
+          "diff_pct": -0.04473152595902354,
+          "tstat": -1.0538304207187894,
+          "pval": 0.2919605631750223
+        },
+        "h5": {
+          "n_event": 226,
+          "n_other": 2184,
+          "mean_event_pct": -0.2079811894281617,
+          "mean_other_pct": -0.04658727538032681,
+          "diff_pct": -0.1613939140478367,
+          "tstat": -1.4849042746070813,
+          "pval": 0.13756918354107556
+        },
+        "h10": {
+          "n_event": 221,
+          "n_other": 2189,
+          "mean_event_pct": -0.36074834745269263,
+          "mean_other_pct": -0.08214893991608777,
+          "diff_pct": -0.27859940753660467,
+          "tstat": -1.7491573498326136,
+          "pval": 0.08026382416594936
+        }
+      }
+    },
+    "EEM": {
+      "note": "negative = EM equity under pressure",
+      "horizons": {
+        "h1": {
+          "n_event": 234,
+          "n_other": 2179,
+          "mean_event_pct": -0.07290791283338194,
+          "mean_other_pct": 0.05318013406149513,
+          "diff_pct": -0.1260880468948781,
+          "tstat": -1.289427082233734,
+          "pval": 0.19724965123703508
+        },
+        "h5": {
+          "n_event": 226,
+          "n_other": 2184,
+          "mean_event_pct": -0.13534721693889432,
+          "mean_other_pct": 0.1779950157636945,
+          "diff_pct": -0.3133422327025921,
+          "tstat": -1.1344341363780008,
+          "pval": 0.2566124867536952
+        },
+        "h10": {
+          "n_event": 221,
+          "n_other": 2189,
+          "mean_event_pct": -0.007826221460402422,
+          "mean_other_pct": 0.3986474239796281,
+          "diff_pct": -0.4064736454400302,
+          "tstat": -1.01885452627105,
+          "pval": 0.30827203495895206
+        }
+      }
+    },
+    "EWZ": {
+      "note": "negative = Brazil under pressure",
+      "horizons": {
+        "h1": {
+          "n_event": 234,
+          "n_other": 2179,
+          "mean_event_pct": -0.18738734041713478,
+          "mean_other_pct": 0.04448190223186085,
+          "diff_pct": -0.2318692426489975,
+          "tstat": -1.26445195943733,
+          "pval": 0.206067853342234
+        },
+        "h5": {
+          "n_event": 226,
+          "n_other": 2184,
+          "mean_event_pct": -0.2519865433238737,
+          "mean_other_pct": 0.13797903338378287,
+          "diff_pct": -0.38996557670766097,
+          "tstat": -0.8518610429607401,
+          "pval": 0.3942912211555788
+        },
+        "h10": {
+          "n_event": 221,
+          "n_other": 2189,
+          "mean_event_pct": -0.7088672832450291,
+          "mean_other_pct": 0.40166071551147825,
+          "diff_pct": -1.110527998756506,
+          "tstat": -1.506836045715492,
+          "pval": 0.13185268769306924
+        }
+      }
+    },
+    "EWY": {
+      "note": "negative = Korea under pressure",
+      "horizons": {
+        "h1": {
+          "n_event": 234,
+          "n_other": 2179,
+          "mean_event_pct": 0.004616840321009854,
+          "mean_other_pct": 0.07871285876419906,
+          "diff_pct": -0.07409601844318985,
+          "tstat": -0.5748873232272483,
+          "pval": 0.5653675038815973
+        },
+        "h5": {
+          "n_event": 226,
+          "n_other": 2184,
+          "mean_event_pct": -0.029599777334459055,
+          "mean_other_pct": 0.28908581145901957,
+          "diff_pct": -0.3186855887934821,
+          "tstat": -0.8831859562633981,
+          "pval": 0.3771358081052436
+        },
+        "h10": {
+          "n_event": 221,
+          "n_other": 2189,
+          "mean_event_pct": 0.38810827799783754,
+          "mean_other_pct": 0.6199563363239001,
+          "diff_pct": -0.23184805832606276,
+          "tstat": -0.44728172587808956,
+          "pval": 0.6546716596458951
+        }
+      }
+    }
+  },
+  "event_study_declustered": {
+    "USDJPY": {
+      "h1": {
+        "n_event": 135,
+        "n_other": 2456,
+        "mean_event_pct": 0.05361605895729464,
+        "mean_other_pct": 0.009606041612276678,
+        "diff_pct": 0.04401001734501743,
+        "tstat": 0.8693800487871098,
+        "pval": 0.38463929200098723
+      },
+      "h5": {
+        "n_event": 132,
+        "n_other": 2451,
+        "mean_event_pct": 0.06402046882728574,
+        "mean_other_pct": 0.060861581231936364,
+        "diff_pct": 0.0031588875953493527,
+        "tstat": 0.03001840857030104,
+        "pval": 0.9760523718698741
+      },
+      "h10": {
+        "n_event": 133,
+        "n_other": 2445,
+        "mean_event_pct": 0.26496688216032743,
+        "mean_other_pct": 0.11479552260721644,
+        "diff_pct": 0.15017135955311237,
+        "tstat": 1.172274980625178,
+        "pval": 0.24108667315144483
+      }
+    },
+    "EEM": {
+      "h1": {
+        "n_event": 112,
+        "n_other": 2301,
+        "mean_event_pct": 0.08401083434842868,
+        "mean_other_pct": 0.03885695222510322,
+        "diff_pct": 0.04515388212332514,
+        "tstat": 0.36439884136344886,
+        "pval": 0.7155602005465151
+      },
+      "h5": {
+        "n_event": 109,
+        "n_other": 2301,
+        "mean_event_pct": 0.05905688227619028,
+        "mean_other_pct": 0.15285329997027983,
+        "diff_pct": -0.09379641769409085,
+        "tstat": -0.3630334456242732,
+        "pval": 0.7165799002431276
+      },
+      "h10": {
+        "n_event": 104,
+        "n_other": 2306,
+        "mean_event_pct": 0.17483734660001055,
+        "mean_other_pct": 0.36978600698276487,
+        "diff_pct": -0.19494866038275294,
+        "tstat": -0.5705845552316526,
+        "pval": 0.5682812903767933
+      }
+    },
+    "FXY": {
+      "h1": {
+        "n_event": 112,
+        "n_other": 2301,
+        "mean_event_pct": -0.023770891029826054,
+        "mean_other_pct": -0.007878884491521543,
+        "diff_pct": -0.015892006538304398,
+        "tstat": -0.2542466261944997,
+        "pval": 0.7993050312506171
+      },
+      "h5": {
+        "n_event": 109,
+        "n_other": 2301,
+        "mean_event_pct": -0.041216041155791604,
+        "mean_other_pct": -0.06269352879418384,
+        "diff_pct": 0.021477487638392488,
+        "tstat": 0.17832131908620166,
+        "pval": 0.8584706369222418
+      },
+      "h10": {
+        "n_event": 104,
+        "n_other": 2306,
+        "mean_event_pct": -0.18218625808703676,
+        "mean_other_pct": -0.10433739957602314,
+        "diff_pct": -0.07784885851101325,
+        "tstat": -0.5099466270080579,
+        "pval": 0.610088854555165
+      }
+    }
+  },
+  "link_b_yen_surge_to_EEM": {
+    "n_days_yen_surge": 143,
+    "definition": "trailing 5d USDJPY <= -2%",
+    "results": {
+      "h1": {
+        "n_event": 129,
+        "n_other": 2284,
+        "mean_event_pct": -0.01021821604932993,
+        "mean_other_pct": 0.04384291172826186,
+        "diff_pct": -0.054061127777591755,
+        "tstat": -0.4159056142792105,
+        "pval": 0.6774790711155798
+      },
+      "h5": {
+        "n_event": 129,
+        "n_other": 2281,
+        "mean_event_pct": 0.2665295064579395,
+        "mean_other_pct": 0.14194227841588972,
+        "diff_pct": 0.1245872280420504,
+        "tstat": 0.16868144359809634,
+        "pval": 0.8660472154762595
+      },
+      "h10": {
+        "n_event": 134,
+        "n_other": 2276,
+        "mean_event_pct": 0.7833457999922327,
+        "mean_other_pct": 0.3365295601712205,
+        "diff_pct": 0.4468162398210079,
+        "tstat": 0.3427230379589643,
+        "pval": 0.7318068294778762
+      }
+    }
+  },
+  "conditional_split": {
+    "move_jump_with_yen_up": {
+      "n": 128,
+      "EEM_h5": {
+        "n_event": 108,
+        "n_other": 2302,
+        "mean_event_pct": -0.5265860944875006,
+        "mean_other_pct": 0.1802884194632358,
+        "diff_pct": -0.7068745139507472,
+        "tstat": -1.7788476350884515,
+        "pval": 0.07526474512297532
+      },
+      "EEM_h10": {
+        "n_event": 106,
+        "n_other": 2304,
+        "mean_event_pct": -0.1722994679142215,
+        "mean_other_pct": 0.38592593739043596,
+        "diff_pct": -0.5582254053046526,
+        "tstat": -0.9824538466597809,
+        "pval": 0.3258763098210191
+      },
+      "USDJPY_h5": {
+        "n_event": 126,
+        "n_other": 2457,
+        "mean_event_pct": 0.021321608663397357,
+        "mean_other_pct": 0.06305898037976788,
+        "diff_pct": -0.04173737171637064,
+        "tstat": -0.3761507120667358,
+        "pval": 0.7068048551749481
+      },
+      "USDJPY_h10": {
+        "n_event": 125,
+        "n_other": 2453,
+        "mean_event_pct": 0.30139466570670026,
+        "mean_other_pct": 0.11342899098598867,
+        "diff_pct": 0.18796567472071044,
+        "tstat": 0.9949687651640082,
+        "pval": 0.3197514559973711
+      }
+    },
+    "move_jump_with_yen_down": {
+      "n": 138,
+      "EEM_h5": {
+        "n_event": 118,
+        "n_other": 2292,
+        "mean_event_pct": 0.22273582352932164,
+        "mean_other_pct": 0.14479485873615125,
+        "diff_pct": 0.07794096479316996,
+        "tstat": 0.2447134819299243,
+        "pval": 0.8066782883163872
+      },
+      "EEM_h10": {
+        "n_event": 115,
+        "n_other": 2295,
+        "mean_event_pct": 0.14377520570572647,
+        "mean_other_pct": 0.37227689215359405,
+        "diff_pct": -0.22850168644787033,
+        "tstat": -0.6196065768426448,
+        "pval": 0.5355168357102873
+      },
+      "USDJPY_h5": {
+        "n_event": 135,
+        "n_other": 2448,
+        "mean_event_pct": 0.17516611978317967,
+        "mean_other_pct": 0.0547283542949136,
+        "diff_pct": 0.12043776548826639,
+        "tstat": 0.9945953198382567,
+        "pval": 0.3199331246797471
+      },
+      "USDJPY_h10": {
+        "n_event": 134,
+        "n_other": 2444,
+        "mean_event_pct": 0.30503088331802997,
+        "mean_other_pct": 0.11253744260939105,
+        "diff_pct": 0.1924934407086383,
+        "tstat": 1.1519794407898063,
+        "pval": 0.24932952173234157
+      }
+    }
+  },
+  "correlation": {
+    "dMOVE_vs_dUSDJPY_full_sample": -0.028800509317746525,
+    "dMOVE_vs_dUSDJPY_2024": -0.04406528984022205,
+    "rolling252_min": -0.19127152440220682,
+    "rolling252_max": 0.16641884935229195,
+    "rolling252_min_date": "2020-03-09",
+    "rolling252_max_date": "2021-05-11"
+  },
+  "case_2024_08": {
+    "window": "2024-07-31 (BoJ hike) .. 2024-08-05",
+    "MOVE_2024_07_31": 99.41000366210938,
+    "MOVE_2024_08_05": 121.22000122070312,
+    "MOVE_pct": 21.93943944789003,
+    "USDJPY_2024_07_31": 152.6699981689453,
+    "USDJPY_2024_08_05": 145.58399963378906,
+    "USDJPY_pct": -4.64138247209177,
+    "EEM_pct": -5.8905601047296585,
+    "EWY_pct": -9.676936180263752,
+    "EWZ_pct": -3.2409024605544623,
+    "VIX_2024_08_05": 38.56999969482422,
+    "EEM_recovery_days_to_prior_level": 9,
+    "EEM_recovery_date": "2024-08-16"
+  },
+  "case_2024_08_daily": [
+    {
+      "date": "2024-07-29",
+      "MOVE": 98.6500015258789,
+      "MOVE_chg_pct": 0.9103921544602045,
+      "USDJPY": 154.13900756835938,
+      "USDJPY_chg_pct": 0.287579669655158,
+      "EEM_chg_pct": -0.3304999469246783
+    },
+    {
+      "date": "2024-07-30",
+      "MOVE": 100.41999816894533,
+      "MOVE_chg_pct": 1.7942185663343269,
+      "USDJPY": 153.83299255371094,
+      "USDJPY_chg_pct": -0.19853184438902716,
+      "EEM_chg_pct": -0.45002567035180574
+    },
+    {
+      "date": "2024-07-31",
+      "MOVE": 99.41000366210938,
+      "MOVE_chg_pct": -1.0057702900339693,
+      "USDJPY": 152.6699981689453,
+      "USDJPY_chg_pct": -0.7560110256318975,
+      "EEM_chg_pct": 2.1889078776683446
+    },
+    {
+      "date": "2024-08-01",
+      "MOVE": 101.81999969482422,
+      "MOVE_chg_pct": 2.424299309862543,
+      "USDJPY": 149.74400329589844,
+      "USDJPY_chg_pct": -1.916548705141785,
+      "EEM_chg_pct": -1.7462072222929947
+    },
+    {
+      "date": "2024-08-02",
+      "MOVE": 112.26000213623048,
+      "MOVE_chg_pct": 10.253390760849634,
+      "USDJPY": 149.2010040283203,
+      "USDJPY_chg_pct": -0.36261837244006,
+      "EEM_chg_pct": -1.421812159924285
+    },
+    {
+      "date": "2024-08-05",
+      "MOVE": 121.22000122070312,
+      "MOVE_chg_pct": 7.981470616399422,
+      "USDJPY": 145.58399963378906,
+      "USDJPY_chg_pct": -2.4242493662071096,
+      "EEM_chg_pct": -2.8365259545465427
+    },
+    {
+      "date": "2024-08-06",
+      "MOVE": 119.23999786376952,
+      "MOVE_chg_pct": -1.6333965822427077,
+      "USDJPY": 145.7899932861328,
+      "USDJPY_chg_pct": 0.14149470605411274,
+      "EEM_chg_pct": 0.5690214806473248
+    },
+    {
+      "date": "2024-08-07",
+      "MOVE": 112.69000244140624,
+      "MOVE_chg_pct": -5.493119372449717,
+      "USDJPY": 144.73199462890625,
+      "USDJPY_chg_pct": -0.7257004636456621,
+      "EEM_chg_pct": 0.6150093763290121
+    }
+  ],
+  "lead_lag_corr_dMOVE_vs_dUSDJPY": {
+    "k=-3": 0.012023447564555796,
+    "k=-2": 0.01767680580032918,
+    "k=-1": -0.009654296391336003,
+    "k=+0": -0.028800509317746525,
+    "k=+1": -0.01951729385597929,
+    "k=+2": 0.039933801008474774,
+    "k=+3": -0.023398850675839064
+  },
+  "move_event_dates_around_2024_08": [
+    "2024-08-02",
+    "2024-08-05"
+  ],
+  "top10_move_jumps": [
+    {
+      "date": "2020-10-06",
+      "dMOVE_pct": 45.064049253575675,
+      "MOVE_level": 57.75,
+      "USDJPY_fwd5_pct": 0.1403903856795452,
+      "EEM_fwd5_pct": 1.5099221039895028
+    },
+    {
+      "date": "2020-03-09",
+      "dMOVE_pct": 30.740354720234752,
+      "MOVE_level": 163.6999969482422,
+      "USDJPY_fwd5_pct": 2.6458079877786034,
+      "EEM_fwd5_pct": -15.405194559396818
+    },
+    {
+      "date": "2020-03-06",
+      "dMOVE_pct": 29.13572634771611,
+      "MOVE_level": 125.20999908447266,
+      "USDJPY_fwd5_pct": -1.5416765222346918,
+      "EEM_fwd5_pct": -9.942695448361704
+    },
+    {
+      "date": "2026-03-20",
+      "dMOVE_pct": 28.22808654545259,
+      "MOVE_level": 108.83999633789062,
+      "USDJPY_fwd5_pct": 1.1271236953857455,
+      "EEM_fwd5_pct": -0.7907915710188784
+    },
+    {
+      "date": "2024-10-07",
+      "dMOVE_pct": 24.043935560832153,
+      "MOVE_level": 124.2300033569336,
+      "USDJPY_fwd5_pct": 0.1468676607145225,
+      "EEM_fwd5_pct": -4.189250175905334
+    },
+    {
+      "date": "2023-03-13",
+      "dMOVE_pct": 23.93973965712064,
+      "MOVE_level": 173.58999633789062,
+      "USDJPY_fwd5_pct": -1.9973323683826871,
+      "EEM_fwd5_pct": -0.3957715944571838
+    },
+    {
+      "date": "2022-06-13",
+      "dMOVE_pct": 21.86816302445409,
+      "MOVE_level": 139.2100067138672,
+      "USDJPY_fwd5_pct": -1.9122619469828628,
+      "EEM_fwd5_pct": null
+    },
+    {
+      "date": "2023-07-06",
+      "dMOVE_pct": 21.804040866441852,
+      "MOVE_level": 134.6300048828125,
+      "USDJPY_fwd5_pct": -4.272986898302566,
+      "EEM_fwd5_pct": 5.8793371980755404
+    },
+    {
+      "date": "2026-03-12",
+      "dMOVE_pct": 21.26225663890351,
+      "MOVE_level": 95.3000030517578,
+      "USDJPY_fwd5_pct": 0.452617466299543,
+      "EEM_fwd5_pct": 1.1764686871124086
+    },
+    {
+      "date": "2021-02-16",
+      "dMOVE_pct": 20.782813883421227,
+      "MOVE_level": 56.779998779296875,
+      "USDJPY_fwd5_pct": -0.3823999866795602,
+      "EEM_fwd5_pct": null
+    }
+  ],
+  "hit_rates_event": {
+    "USDJPY_h5_down_pct": [
+      45.593869731800766,
+      261
+    ],
+    "EEM_h5_down_pct": [
+      47.78761061946903,
+      226
+    ],
+    "EEM_h10_down_pct": [
+      42.081447963800905,
+      221
+    ]
+  },
+  "hit_rates_unconditional": {
+    "USDJPY_h5_down_pct_all": 43.86372435152923,
+    "EEM_h5_down_pct_all": 44.398340248962654,
+    "EEM_h10_down_pct_all": 41.86721991701245
+  },
+  "eem_realized_vol_change_10d": {
+    "n_event": 107,
+    "n_other": 898,
+    "mean_event_pct": 68.8758217888106,
+    "mean_other_pct": 21.186593919680604,
+    "diff_pct": 47.68922786913028,
+    "tstat": 0.22420686426450379,
+    "pval": 0.822596342519947
+  },
+  "article_claims": {
+    "說明": "文中每個數字 -> evidence.json 內的 json_path 與值。全部由 analysis.py 從 raw_prices.csv 計算，無手填。",
+    "draft": "/tmp/tr_move_draft.md",
+    "charts": [
+      "chart1_event_paths.png",
+      "chart2_2024_08_episode.png",
+      "chart3_rolling_corr.png"
+    ],
+    "reproduce": "uv run python storage/article_assets/jpy_carry_move_transmission/analysis.py",
+    "claims": [
+      {
+        "文中敘述": "樣本可判定交易日 2,478 天",
+        "json_path": "meta/n_trading_days_with_valid_threshold",
+        "值": 2478,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "MOVE 跳升事件 266 次",
+        "json_path": "meta/n_move_jump_events",
+        "值": 266,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "去叢集後 136 次",
+        "json_path": "meta/n_declustered_events",
+        "值": 136,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h1 事件後平均",
+        "json_path": "event_study_all_events/USDJPY/horizons/h1/mean_event_pct",
+        "值": -0.01233843724049797,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h1 全樣本平均",
+        "json_path": "event_study_all_events/USDJPY/horizons/h1/mean_other_pct",
+        "值": 0.014648884224528473,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h1 差異(pp)",
+        "json_path": "event_study_all_events/USDJPY/horizons/h1/diff_pct",
+        "值": -0.026987321465026633,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h1 t 值",
+        "json_path": "event_study_all_events/USDJPY/horizons/h1/tstat",
+        "值": -0.6059823561488198,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h1 p 值",
+        "json_path": "event_study_all_events/USDJPY/horizons/h1/pval",
+        "值": 0.5445264695418329,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h5 事件後平均",
+        "json_path": "event_study_all_events/USDJPY/horizons/h5/mean_event_pct",
+        "值": 0.10089635579431926,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h5 全樣本平均",
+        "json_path": "event_study_all_events/USDJPY/horizons/h5/mean_other_pct",
+        "值": 0.056541123437709055,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h5 差異(pp)",
+        "json_path": "event_study_all_events/USDJPY/horizons/h5/diff_pct",
+        "值": 0.04435523235661005,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h5 t 值",
+        "json_path": "event_study_all_events/USDJPY/horizons/h5/tstat",
+        "值": 0.4902467145543119,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h5 p 值",
+        "json_path": "event_study_all_events/USDJPY/horizons/h5/pval",
+        "值": 0.6239593280661115,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h10 事件後平均",
+        "json_path": "event_study_all_events/USDJPY/horizons/h10/mean_event_pct",
+        "值": 0.30327595203843066,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h10 全樣本平均",
+        "json_path": "event_study_all_events/USDJPY/horizons/h10/mean_other_pct",
+        "值": 0.1023575577938828,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h10 差異(pp)",
+        "json_path": "event_study_all_events/USDJPY/horizons/h10/diff_pct",
+        "值": 0.20091839424454627,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h10 t 值",
+        "json_path": "event_study_all_events/USDJPY/horizons/h10/tstat",
+        "值": 1.5340728494735338,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 USDJPY h10 p 值",
+        "json_path": "event_study_all_events/USDJPY/horizons/h10/pval",
+        "值": 0.12501173183801184,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 FXY h5 事件後平均",
+        "json_path": "event_study_all_events/FXY/horizons/h5/mean_event_pct",
+        "值": -0.2079811894281617,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 FXY h5 全樣本平均",
+        "json_path": "event_study_all_events/FXY/horizons/h5/mean_other_pct",
+        "值": -0.04658727538032681,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 FXY h5 差異(pp)",
+        "json_path": "event_study_all_events/FXY/horizons/h5/diff_pct",
+        "值": -0.1613939140478367,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 FXY h5 t 值",
+        "json_path": "event_study_all_events/FXY/horizons/h5/tstat",
+        "值": -1.4849042746070813,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 FXY h5 p 值",
+        "json_path": "event_study_all_events/FXY/horizons/h5/pval",
+        "值": 0.13756918354107556,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 FXY h10 事件後平均",
+        "json_path": "event_study_all_events/FXY/horizons/h10/mean_event_pct",
+        "值": -0.36074834745269263,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 FXY h10 全樣本平均",
+        "json_path": "event_study_all_events/FXY/horizons/h10/mean_other_pct",
+        "值": -0.08214893991608777,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 FXY h10 差異(pp)",
+        "json_path": "event_study_all_events/FXY/horizons/h10/diff_pct",
+        "值": -0.27859940753660467,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 FXY h10 t 值",
+        "json_path": "event_study_all_events/FXY/horizons/h10/tstat",
+        "值": -1.7491573498326136,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 FXY h10 p 值",
+        "json_path": "event_study_all_events/FXY/horizons/h10/pval",
+        "值": 0.08026382416594936,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EEM h5 事件後平均",
+        "json_path": "event_study_all_events/EEM/horizons/h5/mean_event_pct",
+        "值": -0.13534721693889432,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EEM h5 全樣本平均",
+        "json_path": "event_study_all_events/EEM/horizons/h5/mean_other_pct",
+        "值": 0.1779950157636945,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EEM h5 差異(pp)",
+        "json_path": "event_study_all_events/EEM/horizons/h5/diff_pct",
+        "值": -0.3133422327025921,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EEM h5 t 值",
+        "json_path": "event_study_all_events/EEM/horizons/h5/tstat",
+        "值": -1.1344341363780008,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EEM h5 p 值",
+        "json_path": "event_study_all_events/EEM/horizons/h5/pval",
+        "值": 0.2566124867536952,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EEM h10 事件後平均",
+        "json_path": "event_study_all_events/EEM/horizons/h10/mean_event_pct",
+        "值": -0.007826221460402422,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EEM h10 全樣本平均",
+        "json_path": "event_study_all_events/EEM/horizons/h10/mean_other_pct",
+        "值": 0.3986474239796281,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EEM h10 差異(pp)",
+        "json_path": "event_study_all_events/EEM/horizons/h10/diff_pct",
+        "值": -0.4064736454400302,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EEM h10 t 值",
+        "json_path": "event_study_all_events/EEM/horizons/h10/tstat",
+        "值": -1.01885452627105,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EEM h10 p 值",
+        "json_path": "event_study_all_events/EEM/horizons/h10/pval",
+        "值": 0.30827203495895206,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EWY h10 事件後平均",
+        "json_path": "event_study_all_events/EWY/horizons/h10/mean_event_pct",
+        "值": 0.38810827799783754,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EWY h10 全樣本平均",
+        "json_path": "event_study_all_events/EWY/horizons/h10/mean_other_pct",
+        "值": 0.6199563363239001,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EWY h10 差異(pp)",
+        "json_path": "event_study_all_events/EWY/horizons/h10/diff_pct",
+        "值": -0.23184805832606276,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EWY h10 t 值",
+        "json_path": "event_study_all_events/EWY/horizons/h10/tstat",
+        "值": -0.44728172587808956,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EWY h10 p 值",
+        "json_path": "event_study_all_events/EWY/horizons/h10/pval",
+        "值": 0.6546716596458951,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EWZ h10 事件後平均",
+        "json_path": "event_study_all_events/EWZ/horizons/h10/mean_event_pct",
+        "值": -0.7088672832450291,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EWZ h10 全樣本平均",
+        "json_path": "event_study_all_events/EWZ/horizons/h10/mean_other_pct",
+        "值": 0.40166071551147825,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EWZ h10 差異(pp)",
+        "json_path": "event_study_all_events/EWZ/horizons/h10/diff_pct",
+        "值": -1.110527998756506,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EWZ h10 t 值",
+        "json_path": "event_study_all_events/EWZ/horizons/h10/tstat",
+        "值": -1.506836045715492,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表1 EWZ h10 p 值",
+        "json_path": "event_study_all_events/EWZ/horizons/h10/pval",
+        "值": 0.13185268769306924,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "事件後 5 日 USDJPY 收黑比例 45.6%",
+        "json_path": "hit_rates_event/USDJPY_h5_down_pct/0",
+        "值": 45.593869731800766,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "全樣本 5 日 USDJPY 收黑比例 43.9%",
+        "json_path": "hit_rates_unconditional/USDJPY_h5_down_pct_all",
+        "值": 43.86372435152923,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "事件後 5 日 EEM 收黑比例 47.8%",
+        "json_path": "hit_rates_event/EEM_h5_down_pct/0",
+        "值": 47.78761061946903,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "全樣本 5 日 EEM 收黑比例 44.4%",
+        "json_path": "hit_rates_unconditional/EEM_h5_down_pct_all",
+        "值": 44.398340248962654,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "去叢集後 EEM 5 日差異 -0.09pp",
+        "json_path": "event_study_declustered/EEM/h5/diff_pct",
+        "值": -0.09379641769409085,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "去叢集後 EEM 5 日 t 值 -0.36",
+        "json_path": "event_study_declustered/EEM/h5/tstat",
+        "值": -0.3630334456242732,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "日圓 5 日走強 >2% 的天數 143",
+        "json_path": "link_b_yen_surge_to_EEM/n_days_yen_surge",
+        "值": 143,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h1 EEM 平均",
+        "json_path": "link_b_yen_surge_to_EEM/results/h1/mean_event_pct",
+        "值": -0.01021821604932993,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h1 全樣本平均",
+        "json_path": "link_b_yen_surge_to_EEM/results/h1/mean_other_pct",
+        "值": 0.04384291172826186,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h1 差異",
+        "json_path": "link_b_yen_surge_to_EEM/results/h1/diff_pct",
+        "值": -0.054061127777591755,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h1 t 值",
+        "json_path": "link_b_yen_surge_to_EEM/results/h1/tstat",
+        "值": -0.4159056142792105,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h1 p 值",
+        "json_path": "link_b_yen_surge_to_EEM/results/h1/pval",
+        "值": 0.6774790711155798,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h5 EEM 平均",
+        "json_path": "link_b_yen_surge_to_EEM/results/h5/mean_event_pct",
+        "值": 0.2665295064579395,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h5 全樣本平均",
+        "json_path": "link_b_yen_surge_to_EEM/results/h5/mean_other_pct",
+        "值": 0.14194227841588972,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h5 差異",
+        "json_path": "link_b_yen_surge_to_EEM/results/h5/diff_pct",
+        "值": 0.1245872280420504,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h5 t 值",
+        "json_path": "link_b_yen_surge_to_EEM/results/h5/tstat",
+        "值": 0.16868144359809634,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h5 p 值",
+        "json_path": "link_b_yen_surge_to_EEM/results/h5/pval",
+        "值": 0.8660472154762595,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h10 EEM 平均",
+        "json_path": "link_b_yen_surge_to_EEM/results/h10/mean_event_pct",
+        "值": 0.7833457999922327,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h10 全樣本平均",
+        "json_path": "link_b_yen_surge_to_EEM/results/h10/mean_other_pct",
+        "值": 0.3365295601712205,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h10 差異",
+        "json_path": "link_b_yen_surge_to_EEM/results/h10/diff_pct",
+        "值": 0.4468162398210079,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h10 t 值",
+        "json_path": "link_b_yen_surge_to_EEM/results/h10/tstat",
+        "值": 0.3427230379589643,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表2 h10 p 值",
+        "json_path": "link_b_yen_surge_to_EEM/results/h10/pval",
+        "值": 0.7318068294778762,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "MOVE 7/31 = 99.41",
+        "json_path": "case_2024_08/MOVE_2024_07_31",
+        "值": 99.41000366210938,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "MOVE 8/5 = 121.22",
+        "json_path": "case_2024_08/MOVE_2024_08_05",
+        "值": 121.22000122070312,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "MOVE +21.9%",
+        "json_path": "case_2024_08/MOVE_pct",
+        "值": 21.93943944789003,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "USDJPY 7/31 = 152.67",
+        "json_path": "case_2024_08/USDJPY_2024_07_31",
+        "值": 152.6699981689453,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "USDJPY 8/5 = 145.58",
+        "json_path": "case_2024_08/USDJPY_2024_08_05",
+        "值": 145.58399963378906,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "日圓走強 4.6%",
+        "json_path": "case_2024_08/USDJPY_pct",
+        "值": -4.64138247209177,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "EEM -5.9%",
+        "json_path": "case_2024_08/EEM_pct",
+        "值": -5.8905601047296585,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "EWY -9.7%",
+        "json_path": "case_2024_08/EWY_pct",
+        "值": -9.676936180263752,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "EWZ -3.2%",
+        "json_path": "case_2024_08/EWZ_pct",
+        "值": -3.2409024605544623,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "VIX 8/5 收 38.57",
+        "json_path": "case_2024_08/VIX_2024_08_05",
+        "值": 38.56999969482422,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "EEM 9 個交易日收復",
+        "json_path": "case_2024_08/EEM_recovery_days_to_prior_level",
+        "值": 9,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "EEM 於 2024-08-16 回到 7/31 價位",
+        "json_path": "case_2024_08/EEM_recovery_date",
+        "值": "2024-08-16",
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表3 2024-07-29 至 08-07 逐日 MOVE / USDJPY / EEM",
+        "json_path": "case_2024_08_daily",
+        "值": [
+          {
+            "date": "2024-07-29",
+            "MOVE": 98.6500015258789,
+            "MOVE_chg_pct": 0.9103921544602045,
+            "USDJPY": 154.13900756835938,
+            "USDJPY_chg_pct": 0.287579669655158,
+            "EEM_chg_pct": -0.3304999469246783
+          },
+          {
+            "date": "2024-07-30",
+            "MOVE": 100.41999816894533,
+            "MOVE_chg_pct": 1.7942185663343269,
+            "USDJPY": 153.83299255371094,
+            "USDJPY_chg_pct": -0.19853184438902716,
+            "EEM_chg_pct": -0.45002567035180574
+          },
+          {
+            "date": "2024-07-31",
+            "MOVE": 99.41000366210938,
+            "MOVE_chg_pct": -1.0057702900339693,
+            "USDJPY": 152.6699981689453,
+            "USDJPY_chg_pct": -0.7560110256318975,
+            "EEM_chg_pct": 2.1889078776683446
+          },
+          {
+            "date": "2024-08-01",
+            "MOVE": 101.81999969482422,
+            "MOVE_chg_pct": 2.424299309862543,
+            "USDJPY": 149.74400329589844,
+            "USDJPY_chg_pct": -1.916548705141785,
+            "EEM_chg_pct": -1.7462072222929947
+          },
+          {
+            "date": "2024-08-02",
+            "MOVE": 112.26000213623048,
+            "MOVE_chg_pct": 10.253390760849634,
+            "USDJPY": 149.2010040283203,
+            "USDJPY_chg_pct": -0.36261837244006,
+            "EEM_chg_pct": -1.421812159924285
+          },
+          {
+            "date": "2024-08-05",
+            "MOVE": 121.22000122070312,
+            "MOVE_chg_pct": 7.981470616399422,
+            "USDJPY": 145.58399963378906,
+            "USDJPY_chg_pct": -2.4242493662071096,
+            "EEM_chg_pct": -2.8365259545465427
+          },
+          {
+            "date": "2024-08-06",
+            "MOVE": 119.23999786376952,
+            "MOVE_chg_pct": -1.6333965822427077,
+            "USDJPY": 145.7899932861328,
+            "USDJPY_chg_pct": 0.14149470605411274,
+            "EEM_chg_pct": 0.5690214806473248
+          },
+          {
+            "date": "2024-08-07",
+            "MOVE": 112.69000244140624,
+            "MOVE_chg_pct": -5.493119372449717,
+            "USDJPY": 144.73199462890625,
+            "USDJPY_chg_pct": -0.7257004636456621,
+            "EEM_chg_pct": 0.6150093763290121
+          }
+        ],
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "被事件規則抓到的日期為 8/2 與 8/5",
+        "json_path": "move_event_dates_around_2024_08",
+        "值": [
+          "2024-08-02",
+          "2024-08-05"
+        ],
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "MOVE 與 USDJPY 日變動全樣本相關 -0.029",
+        "json_path": "correlation/dMOVE_vs_dUSDJPY_full_sample",
+        "值": -0.028800509317746525,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "2024 年相關 -0.044",
+        "json_path": "correlation/dMOVE_vs_dUSDJPY_2024",
+        "值": -0.04406528984022205,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "滾動 252 日相關最低 -0.191",
+        "json_path": "correlation/rolling252_min",
+        "值": -0.19127152440220682,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "最低點日期 2020-03-09",
+        "json_path": "correlation/rolling252_min_date",
+        "值": "2020-03-09",
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "滾動 252 日相關最高 +0.166",
+        "json_path": "correlation/rolling252_max",
+        "值": 0.16641884935229195,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "最高點日期 2021-05-11",
+        "json_path": "correlation/rolling252_max_date",
+        "值": "2021-05-11",
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "領先落後 7 個係數落在 -0.029 ~ +0.040",
+        "json_path": "lead_lag_corr_dMOVE_vs_dUSDJPY",
+        "值": {
+          "k=-3": 0.012023447564555796,
+          "k=-2": 0.01767680580032918,
+          "k=-1": -0.009654296391336003,
+          "k=+0": -0.028800509317746525,
+          "k=+1": -0.01951729385597929,
+          "k=+2": 0.039933801008474774,
+          "k=+3": -0.023398850675839064
+        },
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "MOVE 跳升 + 日圓走強 128 次",
+        "json_path": "conditional_split/move_jump_with_yen_up/n",
+        "值": 128,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "MOVE 跳升 + 日圓走弱 138 次",
+        "json_path": "conditional_split/move_jump_with_yen_down/n",
+        "值": 138,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表4 走強組 EEM 5 日平均",
+        "json_path": "conditional_split/move_jump_with_yen_up/EEM_h5/mean_event_pct",
+        "值": -0.5265860944875006,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表4 走強組 全樣本平均",
+        "json_path": "conditional_split/move_jump_with_yen_up/EEM_h5/mean_other_pct",
+        "值": 0.1802884194632358,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表4 走強組 差異",
+        "json_path": "conditional_split/move_jump_with_yen_up/EEM_h5/diff_pct",
+        "值": -0.7068745139507472,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表4 走強組 t 值",
+        "json_path": "conditional_split/move_jump_with_yen_up/EEM_h5/tstat",
+        "值": -1.7788476350884515,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表4 走強組 p 值",
+        "json_path": "conditional_split/move_jump_with_yen_up/EEM_h5/pval",
+        "值": 0.07526474512297532,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表4 走弱組 EEM 5 日平均",
+        "json_path": "conditional_split/move_jump_with_yen_down/EEM_h5/mean_event_pct",
+        "值": 0.22273582352932164,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表4 走弱組 全樣本平均",
+        "json_path": "conditional_split/move_jump_with_yen_down/EEM_h5/mean_other_pct",
+        "值": 0.14479485873615125,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表4 走弱組 差異",
+        "json_path": "conditional_split/move_jump_with_yen_down/EEM_h5/diff_pct",
+        "值": 0.07794096479316996,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表4 走弱組 t 值",
+        "json_path": "conditional_split/move_jump_with_yen_down/EEM_h5/tstat",
+        "值": 0.2447134819299243,
+        "格式": "raw",
+        "備註": ""
+      },
+      {
+        "文中敘述": "表4 走弱組 p 值",
+        "json_path": "conditional_split/move_jump_with_yen_down/EEM_h5/pval",
+        "值": 0.8066782883163872,
+        "格式": "raw",
+        "備註": ""
+      }
+    ]
+  }
+}

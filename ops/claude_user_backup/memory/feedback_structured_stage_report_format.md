@@ -33,4 +33,11 @@ metadata:
 阻塞：<無 / 具體+要決策點>
 下一步：<下一程序@時間>
 ```
-關鍵：**「驗證」欄強制——沒實測結果不准說完成**。制度化任務 = canonical `governance_telegram_structured_progress_report_format`（next_tasks.json，pending，含驗證欄；早前記錄的 priority=5 code 任務即此）。responder 角色不能改 governance/commit，只能確認任務已排、用新格式回覆示範，land 交 hourly dispatch。復發類警報（如 PHASE-Z 對 work_log.json / next_tasks_archive / paper_pipeline_status.json 這種 runtime-state 檔每班重報）本身是 alert-noise 根因，另建修復任務（ops assign, task_ca7b979da7db）。
+關鍵：**「驗證」欄強制——沒實測結果不准說完成**。
+
+**⚠️ 2026-07-18 msg 973 更新（老闆要求加進度可視性）**：老闆問「以後回報是不是要列出近期已排定任務的時程和已完成的任務列表？」= 要。模板再加兩欄，放在「下一步」之後：
+```
+已完成（本班）：<task_id + 一句話，≤5 條，超過寫「+N 件」>
+已排程：<未來 24h 的 scheduled job + pending P1-P2 任務與預計時間，≤5 條>
+```
+兩欄**必須程式自動生成**（已完成 = next_tasks.json 本班轉 succeeded；已排程 = runtime_schedules.json 下次 fire + pending 依 priority），不可手打，共用 helper。各欄硬上限 5 條——老闆要掃一眼看進度，不是把 30+ 筆 pending dump 成長報告。落地任務 `assign_6349aa2c`（P1，交 hourly dispatch）**已於 2026-07-18 18:12 完成**：兩欄由 `src/volpred/ops/report_sections.py` 產生、`scripts/progress_report.py` 自動附上，**刻意不開 CLI 旗標**（可手打就會被手打）；已完成欄按 `--actor` 的 fire owner token 歸屬（多 slot 併行時時間窗會誤算別班的工）——所以呼叫時務必傳 `$VOLPRED_TASK_CLAIM_OWNER`。已實發 Telegram msg 984 驗收，兩欄有真實內容。制度化任務 = canonical `governance_telegram_structured_progress_report_format`（next_tasks.json，pending，含驗證欄；早前記錄的 priority=5 code 任務即此）。responder 角色不能改 governance/commit，只能確認任務已排、用新格式回覆示範，land 交 hourly dispatch。復發類警報（如 PHASE-Z 對 work_log.json / next_tasks_archive / paper_pipeline_status.json 這種 runtime-state 檔每班重報）本身是 alert-noise 根因，另建修復任務（ops assign, task_ca7b979da7db）。

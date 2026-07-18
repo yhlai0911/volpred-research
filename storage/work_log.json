@@ -21314,5 +21314,60 @@
     "owner": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2",
     "commit": null,
     "summary": "canonical-writers gate 紅燈修復 — main CI 當前唯一失敗。\n\nroot_cause：src/volpred/publisher/article_correction.py:194 apply_article_correction -> os.replace 被判 direct-guarded-bypass，屬性是 guarded=True, declared_owner=False —— guard 一直都在，缺的是 LOW_LEVEL_OWNERS 註冊。依 auditor 自己的契約：「a guarded mutation outside an owner is still rejected because it creates a second write path」。\n\n引入點由實測確認而非推測：把 pre-fa3dfad20 的檔案內容放進 scratch tree 跑 auditor，仍然 ok=False（VIOL 135 write_text）。所以紅燈從 9716b0af0 建立該檔起就存在；fa3dfad20（write_text → mkstemp+fsync+os.replace，修 15MB 非原子覆寫）只是把被標記的行號與 operation 從 135/write_text 移到 194/os.replace，不是引入者。\n\n修法：註冊該 owner {\"os.replace\": 1}（audit_canonical_writers.py +9 行）。這是契約規定的「新增合法 canonical writer」機制，不是白名單豁免 — test_guarded_registered_storage_writer_passes 就是把註冊定義為 pass path，test_registered_owner_operation_count_is_a_fixed_ratchet 保證註冊後 op count 仍是雙向 ratchet。guard 仍被 dominance-check 強制，該 scope 未來多加任何一個 mutation 都會因 count mismatch 而紅。同 scope 的 mkstemp/fdopen/unlink 指向 tmp 檔不是 storage，正確地不在 inventory 內。\n\n刻意未做的事：沒有把 article_correction 改走 Publisher._rewrite_feed_entry —— 它必須跨 Supabase sync 持有 publisher_feed lock 才滿足自己的 CorrectionNotSynced 契約，而 _rewrite_feed_entry 不提供。理由已寫進 code comment。\n\nnegative check：移除註冊即紅，逐字重現原失敗輸出。auditor CLI PASS exit 0；獨立驗證 83 passed（含 watchdog 與 phase_z 不回歸）。"
+  },
+  {
+    "timestamp": "2026-07-19T06:07:51+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29660781857",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-a6e99d58145e4a83ab674437de17d09f",
+    "owner": "hourly-slot-1-a6e99d58145e4a83ab674437de17d09f",
+    "commit": "6620d2f80",
+    "summary": "CI 紅燈 run 29660781857（main Test Suite）處理完成。\n\n**紅燈根因**：`scripts/tests/test_audit_canonical_writers.py::test_real_active_tree_matches_frozen_owner_inventory` FAIL — `[canonical-writers] FAIL: 1 unguarded`（3493 passed / 1 failed）。該根因已由前一班的 6620d2f80「fix(ci): land canonical-writers owner registration + supersession guard」修掉；本地在當前 HEAD 重跑 `test_audit_canonical_writers.py` 15 passed。\n\n**本班實際修的是另一個缺陷（讀 log 時撞到）**：CI watcher 建出來的 repair task 描述引用的根因是錯的。task description 寫「ImportError while importing test module tests/test_covered_article_dedup.py」，時間戳 16:04:20Z，但該 run 21:00 才建立 —— 抓全 log `grep ImportError` 零筆命中。\n\n追到 `scripts/check_alerts.py:1579`：`root_cause` 只在 `root_cause_status != \"complete\"` 時計算一次，而 incident 是橫跨多個 red run 的（`failure_run_keys`）。實際 state：incident `ci-red-29651115228` 從 16:00 開，連紅 **7 個 run**、開了 **3 張 repair task**，全部沿用 run 1 的 ImportError。到 run 7 時那個 ImportError 早已修掉，真正的 canonical-writers 失敗**從未出現在任何一張 task description 裡** —— 每個接手的 fixer 都被導向一個不存在的失敗。\n\n**修法**：`root_cause` 綁定產生它的 run（新增 `root_cause_run_key`），換 run 就重算；同一個 run 反覆 poll 時 key 不變，不會重複打 `gh`（原本一 incident 一次 → 現在一 red run 一次，7 個 run / 6 小時，有界）。\n\n**驗證**：新增 regression test `test_retry_task_carries_the_new_runs_cause_not_the_first_failures`（RED1 → 完成修復 → RED2，斷言第二張 task 帶 RED2 的 cause 且不含 RED1 的、summarizer 呼叫次數為 2 而非 3）。做過 mutation check：把修復還原則該測試 FAIL（`assert [29233920234] == [29233920234, 29233920235]`），還原修復則 PASS。全套 `test_audit_canonical_writers + test_check_alerts_script + test_ops_dashboard_ci_watch + test_ci_red_watchdog` 85 passed。\n\n**過程中的假綠燈（記錄下來）**：一開始用了錯誤路徑 `scripts/tests/test_check_alerts_script.py`（實際在 `tests/`），pytest 回 `no tests ran` 但 hook 摘要仍報 \"Tests passed\" —— 已用正確路徑重跑確認。\n\n**未收口項**：run 29662644131（Test Suite on 6620d2f80）在本班結束時仍 in_progress，最終綠燈由 CI watcher 獨立驗證（per task 成功標準第 5 條，fixer 不自行通知 owner）。\n\nroot_cause=canonical-writers audit 1 unguarded writer（已由 6620d2f80 修復）；本班另修 ci watcher 跨 run 沿用 stale root_cause; repair_commit=6620d2f80"
+  },
+  {
+    "timestamp": "2026-07-19T06:48:00+08:00",
+    "task_type": "trending_repost",
+    "actor": "hourly-slot-2-1da62ba635874b0fa8f863a385292179",
+    "owner": "hourly-slot-2-1da62ba635874b0fa8f863a385292179",
+    "task_id": "trending_repost_2026_07_19_美債波動",
+    "summary": "日圓 carry trade 平倉傳導鏈事件研究 — NULL 結果。266 次 MOVE 跳升（2016-01~2026-07，滾動252日P90門檻）後 USDJPY 10日 +0.30% vs 全樣本 +0.10%（t=1.53），方向與平倉劇本相反；日圓走強>2% 的143天後 EEM 5日 +0.27% vs +0.14%（t=0.17）。兩段鏈子皆斷。2024/08 案例順序為反：USDJPY 7/31-8/1 先動，MOVE 8/2 才跳。發佈 mile_21e45133 (draft, 待 lazypack async render)。",
+    "artifacts": [
+      "storage/article_assets/jpy_carry_move_transmission/",
+      "storage/drafts/tr_move_general_draft.md"
+    ],
+    "gates": {
+      "anti_ai_gate": "exit 0 (warn 1/3)",
+      "arc_dedup": "exit 0 near-miss, 角度由主線程改鎖 carry-trade 軸"
+    },
+    "topology_override": "inline→subagent 原因：A0 lane 兩篇時效稿並行，寫入僅限 draft 檔，發佈由主線程串行避免 feed race"
+  },
+  {
+    "timestamp": "2026-07-19T06:48:00+08:00",
+    "task_type": "trending_repost",
+    "actor": "hourly-slot-2-1da62ba635874b0fa8f863a385292179",
+    "owner": "hourly-slot-2-1da62ba635874b0fa8f863a385292179",
+    "task_id": "trending_repost_2026_07_19_台股槓桿",
+    "summary": "0050 融資餘額變動對未來波動的領先性檢驗 — 混合偏 NULL。控制波動自身後融資增量解釋力 +1.10/+0.45/+0.32pp（5/10/20日），HAC t=1.65/1.05/0.77 全不顯著；唯一站得住訊號在中波動層：融資增速前20%其後20日波動 21.3% vs 後20% 15.4%（起跑點 15.1% vs 14.8%），block bootstrap 90% 區間 [1.8,10.7] 不含0。原 task 要求的 Put 避險回測因無台指選擇權報價資料而未做，誠實寫為 open question 未編造數字。原 task「歷史性大跌」措辭經覆核為誇飾，改用實測 7/17 -5.87%、自高點 -9.9%。",
+    "artifacts": [
+      "storage/article_assets/tw-margin-vol-leadlag/",
+      "storage/drafts/tr_tw_general_draft.md"
+    ],
+    "gates": {
+      "anti_ai_gate": "exit 0 (warn 1/3)",
+      "arc_dedup": "exit 0 但 signature thin — 主線程補做 layer-2 grep 查重，避開 07-05 融資見頂篇"
+    },
+    "topology_override": "inline→subagent 原因同上"
+  },
+  {
+    "timestamp": "2026-07-19T06:48:00+08:00",
+    "task_type": "platform_ops",
+    "actor": "hourly-slot-2-1da62ba635874b0fa8f863a385292179",
+    "owner": "hourly-slot-2-1da62ba635874b0fa8f863a385292179",
+    "task_id": "assign_price_cache_0050_split_break",
+    "summary": "意外發現並經主線程獨立覆核：data/cache/price_cache.db 的 0050.TW 在 2014-01-02 有未回溯調整的 4.01x 斷點（close 58.70→14.6375；adj_close 37.41→9.33 亦未修正）。污染任何跨該日的 0050 長樣本 rolling/RV 計算。已建 P2 followup task 做修復與全 repo 影響盤點。",
+    "artifacts": [
+      "storage/next_tasks.json"
+    ]
   }
 ]

@@ -1,0 +1,167 @@
+{
+  "slug": "tw-margin-vol-leadlag",
+  "task_id": "trending_repost_2026_07_19_台股槓桿",
+  "generated_at": "2026-07-19",
+  "reproduce": "uv run python storage/article_assets/tw-margin-vol-leadlag/analysis.py",
+  "raw_output": "storage/article_assets/tw-margin-vol-leadlag/stats_raw.json",
+  "figures": [
+    {
+      "path": "storage/article_assets/tw-margin-vol-leadlag/fig1_margin_vs_vol.png",
+      "caption": "上：0050 融資餘額（千張）與 20 日已實現波動（年化 %）疊圖，2014-01 ~ 2026-03。下：融資餘額 20 日變動 vs 其後 20 日已實現波動散佈圖，n=2943"
+    },
+    {
+      "path": "storage/article_assets/tw-margin-vol-leadlag/fig2_conditional.png",
+      "caption": "左：全樣本 / 融資增速前 10% / 當前波動前 10% 三組的其後 20 日波動分布。右：先按當前波動分三層，再比融資增速前 20% 與後 20% 的其後 20 日波動"
+    }
+  ],
+  "data_sources": [
+    {
+      "id": "margin",
+      "file": "storage/sentiment/tw_margin_0050.csv",
+      "field": "MarginPurchaseTodayBalance",
+      "coverage": "2003-06-27 ~ 2026-03-16, 5593 列",
+      "origin": "TWSE 個股融資融券餘額（FinMind 落地）",
+      "unit": "張"
+    },
+    {
+      "id": "price",
+      "file": "data/cache/price_cache.db :: price_data (ticker='0050.TW')",
+      "coverage": "2009-01-02 ~ 2026-07-17, 4292 列",
+      "origin": "yfinance 落地 cache",
+      "known_defect": "2013-12-31 收 58.70 → 2014-01-02 收 14.64（比例約 4.01）為未回溯調整的 1:4 分割斷點；close 與 adj_close 皆有此斷點。故所有統計樣本自 2014-01-02 起算，未使用 2009-2013 段。"
+    },
+    {
+      "id": "vixtwn",
+      "file": "data/vixtwn/vixtwn_daily.csv",
+      "field": "vixtwn_close",
+      "coverage": "2025-12-01 ~ 2026-07-16, 149 列",
+      "usage": "樣本僅 149 個交易日，文中只作敘事佐證，不進任何統計檢定"
+    }
+  ],
+  "definitions": {
+    "已實現波動": "日對數報酬的滾動標準差 × sqrt(252) × 100，單位為年化百分比",
+    "rv20": "過去 20 個交易日（含當日）的已實現波動",
+    "fwd_rv_h": "當日之後第 1 到第 h 個交易日的已實現波動，完全不含當日與之前資訊",
+    "mchg20": "融資餘額相對 20 個交易日前的百分比變動",
+    "統計樣本": "2014-01-02 ~ 2026-03-16 融資與收盤交集 2963 個交易日；迴歸/分組因需 fwd_rv20 而為 n=2943"
+  },
+  "claims": [
+    {
+      "claim": "0050 在 2026-07-17 單日下跌 5.87%，是 2026 年至今最大單日跌幅，次大為 03-09 的 4.23%",
+      "value": -5.87,
+      "source": "price",
+      "calc": "close(2026-07-17)/close(2026-07-16)-1 = 100.150002/106.400002-1；2026 年全部日報酬取最小三名",
+      "raw_key": "event.ret_2026_07_17_pct / event.worst3_2026_daily_pct"
+    },
+    {
+      "claim": "自 2026 年高點（06-22 收 111.15）回檔 9.9%",
+      "value": -9.9,
+      "source": "price",
+      "calc": "close(2026-07-17)/max(close, 2026 年至今)-1",
+      "raw_key": "event.peak_2026 / event.drawdown_from_2026_peak_pct"
+    },
+    {
+      "claim": "20 日已實現波動在 7/16 為 28.4%（年化），7/17 當天跳到 35.2%",
+      "value": [
+        28.4,
+        35.2
+      ],
+      "source": "price",
+      "raw_key": "event.rv20_before_2026_07_17 / event.rv20_on_2026_07_17"
+    },
+    {
+      "claim": "台指 VIX 在 2026-07-16 收 34.74，位於自身 149 日樣本的第 54.4 百分位，樣本中位數 33.94",
+      "value": 34.74,
+      "source": "vixtwn",
+      "caveat": "樣本僅 2025-12-01 起 149 個交易日，百分位不可外推到更長歷史",
+      "raw_key": "vixtwn"
+    },
+    {
+      "claim": "融資餘額 20 日變動與其後 20 日已實現波動的相關係數為 0.136；波動自身（過去 20 日）與其後 20 日的相關係數為 0.346",
+      "value": [
+        0.136,
+        0.346
+      ],
+      "source": "margin+price",
+      "raw_key": "correlations.corr_mchg20_fwdrv20 / correlations.corr_rv20_fwdrv20"
+    },
+    {
+      "claim": "控制過去 20 日波動後，融資變動對未來波動的增量解釋力為 5 日 +1.10、10 日 +0.45、20 日 +0.32 個百分點，HAC t 值分別 1.65 / 1.05 / 0.77，皆未達 5% 顯著",
+      "source": "margin+price",
+      "calc": "OLS fwd_rv_h ~ rv20 (+ mchg20)，Newey-West HAC 標準誤，lag = 2h，n=2943",
+      "raw_key": "regression"
+    },
+    {
+      "claim": "融資 20 日增幅最快 10%（n=295，門檻 +94.6%）其後 20 日波動平均 19.7%，全樣本 16.9%；但該組當下波動平均已是 19.6%，全樣本 16.8%",
+      "source": "margin+price",
+      "raw_key": "deciles"
+    },
+    {
+      "claim": "先按當下波動分三層，中波動層內融資增速前 20% 其後 20 日波動 21.3%，後 20% 為 15.4%，差 5.9 個百分點；兩組當下波動為 15.1% 與 14.8%（差 0.3）；block bootstrap 90% 區間 [1.8, 10.7] 不含 0",
+      "source": "margin+price",
+      "calc": "rv20 三等分 → 各層內 mchg20 取前後 20% → fwd_rv20 均值差；block bootstrap block=40 交易日、2000 次、seed=20260719",
+      "raw_key": "double_sort.中波動"
+    },
+    {
+      "claim": "低波動層差 0.8 個百分點，90% 區間 [-2.9, 4.0] 含 0；高波動層差 5.5 個百分點但兩組當下波動已相差 7.0（30.1 vs 23.1）",
+      "source": "margin+price",
+      "raw_key": "double_sort.低波動 / double_sort.高波動"
+    },
+    {
+      "claim": "0050 融資資料最後一筆為 2026-03-16，距 7/17 相隔 123 天；該日融資餘額 14592 張、20 日變動 +91.2%，位於樣本第 89.5 百分位",
+      "source": "margin",
+      "raw_key": "last_margin_obs"
+    },
+    {
+      "claim": "2026-03-17 至 2026-07-17 期間 0050 已實現波動 32.9%（年化），2014-2026 的 20 日已實現波動中位數為 15.3%",
+      "source": "price",
+      "caveat": "n=1 的單次後續紀錄，不構成統計證據",
+      "raw_key": "after_last_obs"
+    },
+    {
+      "claim": "0050 在 2020 年上半年最大回檔 30.5%，2022 全年最大回檔 36.4%，均遠大於 2026 年的 9.9%",
+      "value": [
+        -30.5,
+        -36.4
+      ],
+      "source": "price",
+      "calc": "該期間 close / 期間內 cummax - 1 之最小值"
+    },
+    {
+      "claim": "波動三等分的分界為年化 12.8% 與 17.8%，中波動層即介於兩者之間",
+      "value": [
+        12.8,
+        17.8
+      ],
+      "source": "price",
+      "calc": "rv20 的 1/3 與 2/3 分位數，樣本 n=2943"
+    },
+    {
+      "claim": "融資 20 日變動與當日過去 20 日已實現波動的同期相關係數為 0.235",
+      "value": 0.235,
+      "source": "margin+price",
+      "raw_key": "correlations.corr_mchg20_rv20_same_day"
+    }
+  ],
+  "not_done": [
+    {
+      "item": "融資維持率跌破門檻後買價外 Put 的避險績效回測",
+      "reason": "repo 內沒有台指選擇權逐日報價（權利金、隱含波動率、各履約價買賣報價），無法計算真實成本",
+      "needed_data": "台指選擇權逐日各履約價收盤價/結算價與隱含波動率序列，以及個股或全市場融資維持率日資料"
+    },
+    {
+      "item": "全市場融資餘額與融資維持率分析",
+      "reason": "repo 只有 0050 個股融資融券，沒有全市場口徑",
+      "needed_data": "TWSE 全市場信用交易統計日資料"
+    },
+    {
+      "item": "2026 年 3 月 17 日之後的融資訊號驗證",
+      "reason": "0050 融資資料停在 2026-03-16",
+      "needed_data": "融資資料更新至 2026-07"
+    },
+    {
+      "item": "台指 VIX 的統計檢定",
+      "reason": "樣本僅 149 個交易日，跨越不到一個完整波動循環"
+    }
+  ]
+}

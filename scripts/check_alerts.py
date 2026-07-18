@@ -1576,9 +1576,22 @@ def _reduce_ci_run(
             # know a red incident existed.
             checkpoint()
 
-        if incident.get("root_cause_status") != "complete":
+        # root_cause 綁定「產生它的那個 run」，不是綁 incident。一個 incident 會橫跨
+        # 多個失敗 run（見 failure_run_keys），而每個 run 的失敗原因可能完全不同：
+        # 2026-07-19 的 incident ci-red-29651115228 連紅 7 個 run，第一個是
+        # test_covered_article_dedup 的 ImportError、最後一個已經換成 canonical-writers
+        # unguarded writer，但三張 repair task 全被塞進第一個 root_cause —— fixer 拿到的
+        # 是 6 小時前早已修掉的線索，真正的根因從沒出現在任何 task description 裡。
+        # 所以「換了 run 就重算」，不是算過一次就永久沿用；同一個 run 反覆 poll 時
+        # run_key 不變，不會重複打 gh。
+        run_key = _ci_run_key(run)
+        if (
+            incident.get("root_cause_status") != "complete"
+            or incident.get("root_cause_run_key") != run_key
+        ):
             incident["root_cause"] = failure_summarizer(run)
             incident["root_cause_status"] = "complete"
+            incident["root_cause_run_key"] = run_key
             checkpoint()
 
         is_new_failure = _ci_record_failure(incident, run)

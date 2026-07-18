@@ -59,6 +59,8 @@ CANCELLED = {
 }
 NOW = "2026-07-13T10:00:00+00:00"
 CAUSE = "ImportError: cannot import name 'ARC_SIGNATURE_SCHEMA_VERSION'"
+# A *different* failure surfacing later in the same incident (see the retry-cause test).
+LATER_CAUSE = "AssertionError: [canonical-writers] FAIL: 1 unguarded"
 
 
 def _commit_covered(repair: str, head: str) -> bool:
@@ -248,6 +250,39 @@ def test_red_then_green_sends_exactly_one_verified_notice(tmp_path):
     assert "active_incident" not in state
     assert state["last_closed_incident"]["phase"] == "recovered"
     assert _tasks(tmp_path)[0]["status"] == "succeeded"
+
+
+def test_retry_task_carries_the_new_runs_cause_not_the_first_failures(tmp_path):
+    """One incident spans many red runs, and each can fail for a different reason.
+
+    2026-07-19: incident ``ci-red-29651115228`` stayed red across 7 runs. Run 1 failed
+    on an ImportError; by run 7 that was long fixed and the tree was failing the
+    canonical-writers audit instead. Because ``root_cause`` was computed once per
+    *incident*, all three repair tasks quoted run 1's ImportError — the live root cause
+    never appeared in any task description, and the fixer was sent chasing a ghost.
+    """
+    causes = {RED1["databaseId"]: CAUSE, RED2["databaseId"]: LATER_CAUSE}
+    calls = []
+
+    def summarizer(run_payload):
+        calls.append(run_payload["databaseId"])
+        return causes[run_payload["databaseId"]]
+
+    run, _sent, _dispatches = _harness(tmp_path, summarizer=summarizer)
+    run(RED1)
+    run(RED1)  # same run re-polled: must not re-fetch the log
+    _complete_repair_task(tmp_path)
+    run(RED2)
+
+    assert calls == [RED1["databaseId"], RED2["databaseId"]]
+    incident = _state(tmp_path)["active_incident"]
+    assert incident["root_cause"] == LATER_CAUSE
+    assert incident["root_cause_run_key"] == check_alerts._ci_run_key(RED2)
+    retry_task = {task["id"]: task for task in _tasks(tmp_path)}[
+        check_alerts._ci_task_id(RED2)
+    ]
+    assert LATER_CAUSE in retry_task["description"]
+    assert CAUSE not in retry_task["description"]
 
 
 def test_verified_watcher_push_head_is_not_automatically_called_repair_commit(tmp_path):

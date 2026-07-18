@@ -1,0 +1,151 @@
+{
+  "sample": {
+    "start": "2014-01-02",
+    "end": "2026-03-16",
+    "n_days": 2963,
+    "note": "0050 融資資料與 0050 收盤的交集。融資 csv 起於 2003-06-27、價格 cache 起於 2009-01-02，但 cache 在 2014-01-02 有未回溯調整的 1:4 分割斷點，故統計樣本自 2014-01-02 起"
+  },
+  "event": {
+    "ret_2026_07_17_pct": -5.87,
+    "peak_2026": {
+      "date": "2026-06-22",
+      "close": 111.15
+    },
+    "drawdown_from_2026_peak_pct": -9.9,
+    "worst3_2026_daily_pct": {
+      "2026-07-17": -5.87,
+      "2026-03-09": -4.23,
+      "2026-03-04": -4.0
+    },
+    "rv20_before_2026_07_17": 28.4,
+    "rv20_on_2026_07_17": 35.2
+  },
+  "vixtwn": {
+    "start": "2025-12-01",
+    "end": "2026-07-16",
+    "close_2026_07_16": 34.74,
+    "median_full": 33.94,
+    "pctile_of_0716": 54.4,
+    "n_days": 149
+  },
+  "correlations": {
+    "corr_mchg20_fwdrv5": 0.178,
+    "corr_rv20_fwdrv5": 0.324,
+    "corr_mchg20_fwdrv10": 0.146,
+    "corr_rv20_fwdrv10": 0.342,
+    "corr_mchg20_fwdrv20": 0.136,
+    "corr_rv20_fwdrv20": 0.346,
+    "corr_mchg20_rv20_same_day": 0.235
+  },
+  "regression": {
+    "h5": {
+      "n": 2943,
+      "baseline_rv20_only_R2": 0.1051,
+      "with_margin_R2": 0.1161,
+      "delta_R2_pp": 1.1,
+      "beta_margin": 0.0131,
+      "t_margin_HAC": 1.65,
+      "beta_rv20": 0.389,
+      "t_rv20_HAC": 5.64
+    },
+    "h10": {
+      "n": 2943,
+      "baseline_rv20_only_R2": 0.1169,
+      "with_margin_R2": 0.1214,
+      "delta_R2_pp": 0.45,
+      "beta_margin": 0.0073,
+      "t_margin_HAC": 1.05,
+      "beta_rv20": 0.37,
+      "t_rv20_HAC": 5.94
+    },
+    "h20": {
+      "n": 2943,
+      "baseline_rv20_only_R2": 0.1197,
+      "with_margin_R2": 0.1229,
+      "delta_R2_pp": 0.32,
+      "beta_margin": 0.0055,
+      "t_margin_HAC": 0.77,
+      "beta_rv20": 0.339,
+      "t_rv20_HAC": 5.06
+    }
+  },
+  "deciles": {
+    "cut_top10_mchg20_pct": 94.64,
+    "cut_bot10_mchg20_pct": -44.92,
+    "stats": {
+      "融資 20 日增幅最快 10%": {
+        "n": 295,
+        "mean_fwd_rv20": 19.7,
+        "median_fwd_rv20": 14.9,
+        "p90_fwd_rv20": 33.2,
+        "mean_past_rv20": 19.6
+      },
+      "融資 20 日減幅最快 10%": {
+        "n": 295,
+        "mean_fwd_rv20": 14.3,
+        "median_fwd_rv20": 12.4,
+        "p90_fwd_rv20": 21.6,
+        "mean_past_rv20": 13.4
+      },
+      "全樣本": {
+        "n": 2943,
+        "mean_fwd_rv20": 16.9,
+        "median_fwd_rv20": 15.1,
+        "p90_fwd_rv20": 25.9,
+        "mean_past_rv20": 16.8
+      }
+    }
+  },
+  "rv_own_decile": {
+    "cut_top10_rv20": 25.4,
+    "mean_fwd_rv20_when_rv20_top10": 22.5
+  },
+  "double_sort": {
+    "低波動": {
+      "n_bin": 981,
+      "fwd_rv20_margin_top20pct": 14.3,
+      "fwd_rv20_margin_bot20pct": 13.5,
+      "diff": 0.8,
+      "past_rv20_margin_top20pct": 11.1,
+      "past_rv20_margin_bot20pct": 10.1,
+      "boot_diff_p05": -2.9,
+      "boot_diff_p95": 4.0,
+      "boot_note": "block bootstrap, block=40 交易日, 2000 次, 90% 區間"
+    },
+    "中波動": {
+      "n_bin": 981,
+      "fwd_rv20_margin_top20pct": 21.3,
+      "fwd_rv20_margin_bot20pct": 15.4,
+      "diff": 5.9,
+      "past_rv20_margin_top20pct": 15.1,
+      "past_rv20_margin_bot20pct": 14.8,
+      "boot_diff_p05": 1.8,
+      "boot_diff_p95": 10.7,
+      "boot_note": "block bootstrap, block=40 交易日, 2000 次, 90% 區間"
+    },
+    "高波動": {
+      "n_bin": 981,
+      "fwd_rv20_margin_top20pct": 22.8,
+      "fwd_rv20_margin_bot20pct": 17.3,
+      "diff": 5.5,
+      "past_rv20_margin_top20pct": 30.1,
+      "past_rv20_margin_bot20pct": 23.1,
+      "boot_diff_p05": 1.0,
+      "boot_diff_p95": 8.9,
+      "boot_note": "block bootstrap, block=40 交易日, 2000 次, 90% 區間"
+    }
+  },
+  "last_margin_obs": {
+    "date": "2026-03-16",
+    "margin_lots": 14592,
+    "mchg20_pct": 91.2,
+    "pctile_in_sample": 89.5,
+    "gap_days_to_event": 123
+  },
+  "after_last_obs": {
+    "rv_2026_03_17_to_04_15_ann_pct": 34.1,
+    "rv_2026_03_17_to_07_17_ann_pct": 32.9,
+    "rv20_median_2014_2026": 15.3,
+    "caveat": "n=1，只是後續事實紀錄，不能當統計證據"
+  }
+}
