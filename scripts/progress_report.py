@@ -37,6 +37,18 @@ Emitted block (fixed — never hand-type it, this script is the only owner):
   ⏭ 下一步
   　<下一程序@時間>
 
+  📗 已完成（本班）
+  　<task_id — 一句話，≤5 條，多的收成「+N 件」>
+
+  🗓 已排程
+  　<未來 24h 的 cron job + pending P1-P2 及預計時間，≤5 條>
+
+The last two fields (msg 973, 2026-07-18) have no CLI flags on purpose: they are
+derived from storage/next_tasks.json + config/runtime_schedules.json by
+volpred.ops.report_sections. A hand-typed「已完成」list is precisely the claim the
+驗證 field exists to stop. 已完成 is attributed by --actor (the fire owner token),
+so a sibling slot's work never gets credited to this shift.
+
 Strict rules (exit 1 on violation — this is the checker, not a reminder):
   - --status done  REQUIRES --verified (cannot claim done without a measurement)
   - --status done  REQUIRES --verified-cmd (the plain reading needs real evidence)
@@ -149,6 +161,10 @@ def build(args) -> tuple[str, dict]:
         "⏭ 下一步",
         f"{IND}{args.next}",
     ]
+    # msg 973：進度可視性兩欄，程式生成不可手打（沒有對應的 CLI 旗標就是刻意的）
+    from volpred.ops.report_sections import render_sections
+
+    lines += render_sections(args.actor, indent=IND)
     record = {
         "ts_taipei": now.isoformat(),
         "procedure": args.procedure,
@@ -176,7 +192,12 @@ def main() -> int:
     ap.add_argument("--artifacts", help="檔案/commit/msg id")
     ap.add_argument("--blockers", help="具體阻塞 + 需老闆決策的點")
     ap.add_argument("--next", required=True, help="下一程序@時間")
-    ap.add_argument("--actor", default="ops-manager", help="回報者（fire owner token）")
+    ap.add_argument(
+        "--actor",
+        default="ops-manager",
+        help="回報者；務必傳 $VOLPRED_TASK_CLAIM_OWNER —「已完成（本班）」是按此 token 歸屬，"
+        "傳錯這欄會是空的（別班的工也不會被誤算進來）",
+    )
     ap.add_argument("--send", action="store_true", help="送到老闆 Telegram 並記 message id")
     args = ap.parse_args()
 
