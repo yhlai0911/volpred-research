@@ -30410,42 +30410,15 @@
   },
   {
     "id": "dreaming_memory_hygiene_consolidation_review",
-    "title": "[dreaming] memory_hygiene:consolidation_review",
-    "description": "feedback 記憶量大：月度做整併/去重/澄清，讓記憶更清楚易用（避免垃圾桶化）。\n\n— dreaming 連續 16 晚偵測到此模式（首見 2026-06-30T12:29:57.114601+00:00）。\n證據：83 條 feedback 記憶（>=45，疑有重疊）\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] memory_hygiene:consolidation_review",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-12T08:28:40.700993+00:00",
-    "dreaming": {
-      "signature": "memory_hygiene:consolidation_review",
-      "pattern_type": "memory_hygiene",
-      "occurrences": 16,
-      "governance_target": "memory/"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-15T11:14:32.310449+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-19-slot2"
-      },
-      {
-        "ts": "2026-07-15T11:14:57.878019+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-19-slot2"
-      },
-      {
-        "ts": "2026-07-15T11:21:39.611729+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-19-slot2"
-      }
-    ],
-    "started_at": "2026-07-15T11:14:57.878003+00:00",
     "completed_at": "2026-07-15T11:21:39.611712+00:00",
-    "result": "月度整併審查完成 → storage/ops/memory_consolidation_review_20260715.md。98條→10群；核心發現：raw-count≥45 是錯度量、finish/act群重疊為刻意防禦縱深不併；真整併候選=FB群6→1(已被fb-publishing skill承載)。根因建議：dreaming偵測加30天cooldown。propose-only 未單方改記憶，執行建議另開followup。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T12:08:01.178943+00:00"
   },
   {
     "id": "dreaming_persistent_alert_e1aa596aac4a2172",
@@ -33289,13 +33262,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T11:00:46.502495+00:00",
+    "completed_at": "2026-07-18T12:01:02.344738+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T11:00:46.502495+00:00",
-      "last_clean_observed_at": "2026-07-18T11:00:46.502495+00:00"
+      "resolved_at": "2026-07-18T12:01:02.344738+00:00",
+      "last_clean_observed_at": "2026-07-18T12:01:02.344738+00:00"
     }
   },
   {
@@ -33307,13 +33280,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T11:26:09.424711+00:00",
+    "completed_at": "2026-07-18T12:13:24.459767+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T11:26:09.424711+00:00",
-      "last_clean_observed_at": "2026-07-18T11:26:09.424711+00:00"
+      "resolved_at": "2026-07-18T12:13:24.459767+00:00",
+      "last_clean_observed_at": "2026-07-18T12:13:24.459767+00:00"
     }
   },
   {
@@ -35415,35 +35388,14 @@
   },
   {
     "id": "dm_hac_fix_k1378_covid_split",
+    "status": "succeeded",
     "task_type": "experiment",
     "priority": 1,
-    "status": "succeeded",
-    "created_at": "2026-07-15T08:34:29.171934+00:00",
     "source": "dm_hac_fix_k1379_paper9_exposure_audit",
-    "description": "Rerun K1378 leave-COVID-out and subperiod comparisons with actual-first QLIKE, canonical Bartlett-HAC DM, aligned A4f recursion, and pinned unique-date input. Correct knowledge/feed mile_54f79768 only from its own rerun; do not transplant K1379 values.",
-    "status_history": [
-      {
-        "ts": "2026-07-15T10:17:32.809427+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-15T10:17:33.072809+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-15T11:27:23.341044+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-15T10:17:33.072794+00:00",
+    "created_at": "2026-07-15T08:34:29.171934+00:00",
     "completed_at": "2026-07-15T11:27:23.341030+00:00",
-    "result": "K1378 fresh rerun repaired actual-first QLIKE, canonical Bartlett-HAC DM, aligned A4f tau timing, fail-closed optimization, and pinned unique-date input. Full/no-COVID DM t=-4.37/-5.60 favor A4f; COVID-only t=-1.34 is inconclusive. Independent review and experiment gates PASS; corrected mile_54f79768, knowledge, charts, Supabase readback, DM-HAC ratchet, and publication selector."
+    "tombstone": true,
+    "archived_at": "2026-07-18T12:08:01.178943+00:00"
   },
   {
     "id": "k1396_scope_repair_daily_r2",
@@ -35666,40 +35618,15 @@
   },
   {
     "id": "ci-red-29406571212",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29406571212, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29383038432",
-    "ci_run_key": "29406571212:1",
     "created_at": "2026-07-15T11:00:07.385365+00:00",
-    "title": "CI 紅燈修復（run 29406571212, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29406571212\nattempt: 1\nhead_sha: cef1eb1ed\n偵測摘要（仍須讀完整 failed log）：2026-07-15T02:10:18.2460417Z E AssertionError: assert 2 == 0\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29406571212 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T11:01:23.892421+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-19"
-      },
-      {
-        "ts": "2026-07-15T11:01:24.171186+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-19"
-      },
-      {
-        "ts": "2026-07-15T11:25:15.191624+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-19"
-      }
-    ],
-    "started_at": "2026-07-15T11:01:24.171171+00:00",
     "completed_at": "2026-07-15T11:25:15.191606+00:00",
-    "result": "CI red root-cause: (1) feed audience mismatch mile_8a9ae3c8 general->research already landed in HEAD via codex commit 024b31c74 (原 failed run 29406571212 是 stale commit cef1eb1e); (2) audience 綠後暴露被 fail-fast 遮蔽的 test_non_main_branch_ref_is_not_subject_to_main_lease 失敗 — committed reference-transaction hook 對 HEAD 無條件 touches_head=1, git worktree add -b side (git>=2.50) 的 linked-HEAD symref creation (old=0000) 被誤判為 main 移動而 BLOCK. Fix commit 69498a865: HEAD 僅在 old!=null 才 arm main-lease. Pushed, CI run 29410950263 全綠 (3117 pass)."
+    "tombstone": true,
+    "archived_at": "2026-07-18T12:08:01.178943+00:00"
   },
   {
     "id": "lazypack_async_codex_primary",
@@ -35736,218 +35663,63 @@
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a3",
-    "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=1 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.b4kgwE baseline_findings=64 new=1 resolved=64\n[pre-commit]   NEW scripts/build_publication_candidates.py:165 except ValueError: continue\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
-    "task_type": "platform_ops",
-    "dispatch_lane": "agent",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-15T11:27:43.808050+00:00",
+    "task_type": "platform_ops",
+    "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
+    "priority": 1,
     "source": "internal_alert_remediation_router",
-    "tags": [
-      "alert",
-      "internal-remediable",
-      "silent_fallback_new"
-    ],
-    "alert_key": "silent_fallback_new",
-    "internal_remediable": true,
-    "internal_alert_state": {
-      "episode_id": "20260715T072600838284Z",
-      "episode_started_at": "2026-07-15T07:26:00.838284+00:00",
-      "attempt_number": 3,
-      "last_seen_at": "2026-07-15T11:28:18.661638+00:00",
-      "consecutive_remediation_failures": 0,
-      "attempt_history": [
-        {
-          "observed_at": "2026-07-15T09:25:28.550316+00:00",
-          "completed_at": "2026-07-15T08:15:14.858470+00:00",
-          "status": "succeeded",
-          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因=PHASE-Z ownership race：某 07:xx fire 在 codex 07:13 dirty k1379.py 前起跑→誤判 owned→試 commit codex 在途未完成檔(3 bare silent-fallback)→gate 正確拒→3 retry→alert。現場確認 codex-vscode 活躍 review/repair k1379(live codex exec 3:48PM)，非孤兒。處置:為 3 處合法 best-effort fallback(k1379.py:148/201/248, caller 皆 check None) 補 silent-ok 註解→audit 0 findings，作者 codex commit 時 gate 會過；本 fire 不 commit(禁 steal 活躍作者檔)。自限:k1379.py 對後續 fire 皆 pre-fire-dirty→race 不重演。"
-        },
-        {
-          "observed_at": "2026-07-15T11:27:43.808050+00:00",
-          "completed_at": "2026-07-15T10:14:28.946406+00:00",
-          "status": "succeeded",
-          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：root_cause=pre-commit silent-fallback gate 擋下 scripts/taifex_tick_inventory.py:86(except OSError→continue, inventory rglob/stat race) 與 :277(except decode→continue, 多編碼嘗試迴圈; 全失敗回 error dict) 兩個未標記合法 silent path，導致 17:24 taifexdata_dropbox_organize fire 的 PHASE-Z commit_nonzero×3。 repair=兩處加 '# silent-ok: <reason>' 標記；audit_silent_fallbacks.py 對 taifex_tick_inventory.py/collect_taifex_tick.py/taifex_tick_to_canonical.py 全 findings=0 exit0，self-healing alert 條件(gate 阻擋)已於 working tree 清除。 note: 這些"
-        },
-        {
-          "observed_at": "2026-07-15T15:45:15.152580+00:00",
-          "completed_at": "2026-07-15T11:34:21.246406+00:00",
-          "status": "succeeded",
-          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：Alert was generated from the first blocked K1378 commit attempt. Root cause scripts/build_publication_candidates.py:165 malformed-timestamp fallback lacked an auditable rationale. Added precise silent-ok annotation; strict audit findings=0, 10 selector tests pass, and pre-commit accepted [codex] commit 70877b0c0. No additional mutation required; warning was stale by claim time."
-        }
-      ],
-      "escalation_due": true,
-      "escalation_sent_at": "2026-07-15T11:27:43.808050+00:00",
-      "escalation_notification_id": "e8bb2005",
-      "counted_as_failure_at": "2026-07-15T15:45:15.152580+00:00",
-      "resolved_at": "2026-07-15T23:31:39.962574+00:00",
-      "final_consecutive_remediation_failures": 3,
-      "superseded_by_distinct_incident_at": "2026-07-15T23:31:39.962574+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-15T11:30:33.672188+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-15T11:30:37.315257+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-15T11:34:21.246422+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-15T11:30:37.315244+00:00",
+    "created_at": "2026-07-15T11:27:43.808050+00:00",
     "completed_at": "2026-07-15T11:34:21.246406+00:00",
-    "result": "Alert was generated from the first blocked K1378 commit attempt. Root cause scripts/build_publication_candidates.py:165 malformed-timestamp fallback lacked an auditable rationale. Added precise silent-ok annotation; strict audit findings=0, 10 selector tests pass, and pre-commit accepted [codex] commit 70877b0c0. No additional mutation required; warning was stale by claim time."
+    "tombstone": true,
+    "archived_at": "2026-07-18T12:08:01.178943+00:00"
   },
   {
     "id": "email-12122-257979",
-    "title": "[email_reply] Re: [VolPred Alert][WARN] PHASE-Z 產出已 commit，但 agent 沒交代原因",
-    "description": "Gmail UID: 12122\nMessage-ID: <70520969-C213-414E-80D3-A54CEBA5F355@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 15 Jul 2026 19:31:20 +0800\nSubject: Re: [VolPred Alert][WARN] PHASE-Z 產出已 commit，但 agent 沒交代原因\n\n--- 用戶回信內容 ---\n你要通報給我知道的話，你就得告訴我確切的原因，你不要給我一個模擬兩可要我猜的原因立刻處理\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月15日 19:30 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> PHASE-Z 產出已 commit，但 agent 沒交代原因\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> （fire 時間: 19:29；12 個檔案）\r\n> \r\n> 發生什麼\r\n> \r\n> 這班 fire 產出了 12 個檔案，PHASE-Z 已照常 commit（工作沒有遺失）。\r\n> 但 agent 沒有在收尾時留下 commit 說明（fire receipt），所以這筆 commit 的訊息是\r\n> 系統自動生成的 —— git log 上看不出這班到底做了什麼、為什麼做。\r\n> \r\n> 現在該做什麼\r\n> \r\n> 通常不用處理。若這筆 commit 之後要追溯，直接看 diff。\r\n> 同一個 agent 反覆漏 receipt → 檢查 dispatch prompt 的 PHASE Z 段是否被改壞。\r\n> \r\n> 正確做法（給 agent）\r\n> \r\n> uv run python scripts/fire_receipt.py --task-id <id> --subject '<一句話 what | why>'\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-15T11:45:06.860868+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] PHASE-Z 產出已 commit，但 agent 沒交代原因",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12122,
-    "email_message_id": "<70520969-C213-414E-80D3-A54CEBA5F355@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][WARN] PHASE-Z 產出已 commit，但 agent 沒交代原因",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-15T11:48:04.103984+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-19"
-      },
-      {
-        "ts": "2026-07-15T11:48:04.355742+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-19"
-      },
-      {
-        "ts": "2026-07-15T12:05:28.513135+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-19"
-      }
-    ],
-    "started_at": "2026-07-15T11:48:04.355728+00:00",
+    "created_at": "2026-07-15T11:45:06.860868+00:00",
     "completed_at": "2026-07-15T12:05:28.513120+00:00",
-    "result": "根因 boss_facing 通用樣板退路；修為未命中關鍵字時從『發生什麼』抓第一句具體原因當白話結論。改 boss_facing + 測試；alerts 62 passed。已寄 close email。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T12:08:01.178943+00:00"
   },
   {
     "id": "email-12121-d98299",
-    "title": "[email_reply] Re: [VolPred Alert][WARN] 內部自動修復連續失敗（silent_fallback_new；episode 20260715T072600",
-    "description": "Gmail UID: 12121\nMessage-ID: <81211E78-CDD2-49DE-931F-829B160A0B9B@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 15 Jul 2026 19:30:13 +0800\nSubject: Re: [VolPred Alert][WARN] 內部自動修復連續失敗（silent_fallback_new；episode 20260715T072600838284Z）\n\n--- 用戶回信內容 ---\n你不是跟我保證不會出錯了嗎？立刻解決從底層解決不要再用修補的方式。\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月15日 19:28 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 內部自動修復連續失敗（silent_fallback_new；episode 20260715T072600838284Z）\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> 系統偵測到需要處理的營運風險。\r\n> \r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> 自動修復失敗\r\n> \r\n> 同一 alert_key silent_fallback_new 已自動嘗試 2 次，仍未解除。\r\n> 失敗原因：任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：root_cause=pre-commit silent-fallback gate 擋下 scripts/taifex_tick_inventory.py:86(except OSError→continue, inventory rglob/stat race) 與 :277(except decode→continue, 多編碼嘗試迴圈; 全失敗回 error dict) 兩個未標記合法 silent path，導致 17:24 taifexdata_dropbox_organize fire 的 PHASE-Z commit_nonzero×3。 repair=兩處加 '# silent-ok: <reason>' 標記；audit_silent_fallbacks.py 對 taifex_tick_inventory.py/collect_taifex_tick.py/taifex_tick_to_canonical.py 全 findings=0 exit0，self-healing 警報 條件(gate 阻擋)已於 working tree 清除。 note: 這些\r\n> P1 任務：alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a3（已再次排入任務池）\r\n> \r\n> 原始警報\r\n> \r\n> 候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\r\n> \r\n> [pre-commit] BLOCKED — this commit introduces new silent fallback(s):\r\n> [pre-commit] warning: VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv does not match the project environment path .venv and will be ignored; use --active to target the active environment instead\r\n> [pre-commit] [silent-fallback-audit] findings=1 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.VWDhv5 baseline_findings=64 new=1 resolved=64\r\n> [pre-commit] NEW scripts/build_publication_candidates.py:165 except ValueError: continue\r\n> [pre-commit] [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\r\n> [pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\r\n> [pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\r\n> [pre-commit] Rule: .claude/rules/no-silent-fallback.md\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-15T11:45:12.423590+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] 內部自動修復連續失敗（silent_fallback_new；episode 20260715T072600",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12121,
-    "email_message_id": "<81211E78-CDD2-49DE-931F-829B160A0B9B@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][WARN] 內部自動修復連續失敗（silent_fallback_new；episode 20260715T072600838284Z）",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-15T11:48:03.595354+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-19"
-      },
-      {
-        "ts": "2026-07-15T11:48:03.846121+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-19"
-      },
-      {
-        "ts": "2026-07-15T12:05:28.261651+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-19"
-      }
-    ],
-    "started_at": "2026-07-15T11:48:03.846107+00:00",
+    "created_at": "2026-07-15T11:45:12.423590+00:00",
     "completed_at": "2026-07-15T12:05:28.261636+00:00",
-    "result": "底層修法：silent_fallback_new 改 fingerprint-aware escalation（不同 file:line=新事件不誤升級，同一處反覆才升級）。改 alert_remediation/alerts/phase_z + 2 測試；回歸 190 passed。已寄 close email。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T12:08:01.178943+00:00"
   },
   {
     "id": "ci-red-29410098604",
+    "status": "closed_no_action",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29410098604, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "closed_no_action",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29383038432",
-    "ci_run_key": "29410098604:1",
     "created_at": "2026-07-15T12:00:06.534997+00:00",
-    "title": "CI 紅燈修復（run 29410098604, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29410098604\nattempt: 1\nhead_sha: 811a6283c\n偵測摘要（仍須讀完整 failed log）：2026-07-15T02:10:18.2460417Z E AssertionError: assert 2 == 0\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29410098604 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
     "completed_at": "2026-07-15T12:00:06.534997+00:00",
-    "result": "CI watcher verified recovery before this repair task started; green_run=29410950263; no action required",
-    "ci_closed_after_green": true
+    "tombstone": true,
+    "archived_at": "2026-07-18T12:08:01.178943+00:00"
   },
   {
     "id": "email-12126-702c4b",
-    "title": "[email_reply] Re: [VolPred Alert][INFO] claude CLI 更新偵測 2.1.206→2.1.210 — 已暖授權 Desktop TCC 19:",
-    "description": "Gmail UID: 12126\nMessage-ID: <01BC4132-B793-428F-BAF7-871B9426DDE1@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 15 Jul 2026 19:48:11 +0800\nSubject: Re: [VolPred Alert][INFO] claude CLI 更新偵測 2.1.206→2.1.210 — 已暖授權 Desktop TCC 19:46\n\n--- 用戶回信內容 ---\n你他媽的 專案不是已經搬到 ~/volpred-research了嗎？ 為什麼跟desktop還有關係？你有在運作嗎？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月15日 19:46 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> claude CLI 更新偵測 2.1.206→2.1.210 — 已暖授權 Desktop TCC 19:46\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> claude CLI 版本變更偵測\r\n> \r\n> 2.1.206 → 2.1.210（symlink 目標已切換）。\r\n> 為什麼重要\r\n> \r\n> macOS TCC 的 Desktop 授權綁定 binary 路徑+雜湊，新版 claude 對 ~/Desktop 預設無授權。在此互動 session 開始前的空窗期，所有 cwd 在 Desktop 的 launchd 排程（hourly-dispatch / gmail-poll 等）很可能因 TCC 懸置而逾時或 EINTR 全滅。\r\n> 已自動處理\r\n> \r\n> 本 SessionStart hook 已在授權 context 下觸碰 Desktop，將新版 binary 的 TCC 授權在 session 開始當下重新觸發（把空窗從『數小時』壓到『本 session 開始』）。\r\n> 根治仍待決策\r\n> \r\n> 每 1-2 天一次的 CLI 自動更新會週期性重演此空窗。根治選項（搬 repo 出 Desktop / 停用 CLI 自動更新）見 docs/error_log.md 2026-07-02 條目。\n",
-    "task_type": "email_reply",
-    "priority": 3,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-15T12:00:07.565034+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] claude CLI 更新偵測 2.1.206→2.1.210 — 已暖授權 Desktop TCC 19:",
+    "priority": 3,
     "source": "gmail_inbox_poll",
-    "email_uid": 12126,
-    "email_message_id": "<01BC4132-B793-428F-BAF7-871B9426DDE1@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][INFO] claude CLI 更新偵測 2.1.206→2.1.210 — 已暖授權 Desktop TCC 19:46",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-15T12:01:02.183774+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-15T12:01:02.443830+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-15T12:04:59.985936+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-20"
-      }
-    ],
-    "started_at": "2026-07-15T12:01:02.443813+00:00",
+    "created_at": "2026-07-15T12:00:07.565034+00:00",
     "completed_at": "2026-07-15T12:04:59.985921+00:00",
-    "result": "老闆質疑『專案已搬 ~/volpred-research 為何 alert 還講 Desktop』。查證：repo 確已完整搬離 Desktop（20 plists WorkingDirectory=~/volpred-research，Desktop symlink 已無），系統正常運作（heartbeat 0.2min/今日45 entries/8 發文）。根因=warm_tcc_authorization.sh SessionStart hook 是 07-02 Desktop 時代殘留，搬家後 alert 文案沒退役，仍宣稱 Desktop TCC 全滅（實際 stat ~/volpred-research，未碰 Desktop）→ 每次 CLI 更新散播假警報。修法：移除誤導 INFO email 改 log-only，保留版本追蹤。已 bash -n + dry-run 過。close email 已寄。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T12:08:01.178943+00:00"
   },
   {
     "id": "telegram-836",
@@ -41773,5 +41545,51 @@
     ],
     "completed_at": "2026-07-18T11:24:24.081300+00:00",
     "result": "回覆 msg 990（msg 991 已送出）。老闆第 3 次轉發同一則 PHASE-Z failed-closeout CRITICAL。查證：根因單 assign_5f16a7c5 已由上一班 responder 開好且 pending；receipt .git/volpred_phase_z_failed_closeout.json 仍在（19:22 才更新，警報持續中）。誠實回報排隊位置：pending P1 共 7 張，5f16a7c5 排第 7、修插隊規則的 a64e9f61 排第 6，警報今晚會續噴。未刪 receipt（修資料非修流程，且內含 8 條合法 tracked ownership）。responder 未做任何 repo/git 變更。"
+  },
+  {
+    "id": "assign_8a80c2fb",
+    "title": "K1730 arm A 全量 production 結果收件與驗證（GEVReg-MIDAS-SSVS）",
+    "description": "收 compute job compute-k1730-arm-a-production-quick-mode-1784358686 的全量結果：驗 quick_mode=false、與 quick-mode 逐項對照、lookahead 三項 0 violations、跨模型校準表、permutation test 解讀、SSVS MCMC 收斂診斷；寫 knowledge.json、合併 worktree dispatch-slot-1-558d7893-k1730。Codex 代碼審 k1730_models.py 另立 followup。",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "system",
+    "created_at": "2026-07-18T12:09:59.574980+00:00",
+    "created_by": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f",
+    "status_history": [
+      {
+        "ts": "2026-07-18T12:10:03.692714+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f"
+      },
+      {
+        "ts": "2026-07-18T12:10:03.942068+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f"
+      },
+      {
+        "ts": "2026-07-18T12:12:25.929641+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f"
+      }
+    ],
+    "started_at": "2026-07-18T12:10:03.942053+00:00",
+    "completed_at": "2026-07-18T12:12:25.929627+00:00",
+    "result": "K1730 arm A 全量結果收件驗證完成：quick_mode=false、lookahead 0 violations、與 quick-mode 結論一致。裁決 NULL（DM favours benchmark p=0.046；permutation 打亂 macro 反而更好）。knowledge item f932cb04。merge 待 Codex 裁決 → assign_a72fa4f6"
+  },
+  {
+    "id": "assign_a72fa4f6",
+    "title": "K1730 Codex 代碼審 + merge gate：k1730_models.py 的 GEV MLE 與 SSVS",
+    "description": "K1730 arm A 全量結果已收件驗證（knowledge item f932cb04），結論 NULL。剩下 merge gate：merge_worktree.sh 要求 experiments/k1730/review_verdict.json — 需 Codex 審凍結後的 claim surface（k1730_models.py / k1730_gevreg_midas_ssvs.py / k1730_scoring.py / *_results.json / README.md）並 pin sha256。審查重點：(1) GEV log-likelihood 與 MLE multistart（收斂率僅 0.47–0.51，Hessian 全正定，確認是似然面多峰而非實作 bug）；(2) SSVS Gibbs 實作 — MCMC 未收斂（worst R-hat 1.61、min ESS 6.25、Geweke |z| 49.3），確認是 sampler 設定/參數化問題還是實作錯誤；(3) permutation test 的 shuffle 是否真的只打亂 macro 張量而不動其他輸入。審完寫 review_verdict.json 再跑 bash scripts/merge_worktree.sh dispatch-slot-1-558d7893-k1730。禁止手改裁決檔。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-18T12:12:05.505193+00:00",
+    "parent_task_id": "assign_8a80c2fb",
+    "created_by": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f"
   }
 ]

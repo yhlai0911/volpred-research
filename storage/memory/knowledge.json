@@ -42230,5 +42230,18 @@
   ],
   "confidence": 0.85,
   "created_at": "2026-07-18T04:14:39.323418"
+ },
+ {
+  "item_id": "f932cb04",
+  "category": "experiment_finding",
+  "content": "K1730 arm A（GEVReg-MIDAS-SSVS，全量 production，quick_mode=false）— 裁決 NULL：point-in-time 月頻總經資料對 SPY 週最大 Parkinson RV 的區間預測沒有可偵測的增量價值。OOS 967 週（2008-01-07→2026-07-13）、19 次 refit、1,640 個非重疊週區塊。三個關鍵數字：(1) DM vs GEV-HAR t=+1.998、p=0.046 且 favours=benchmark（Harvey 校正後不顯著），vs HAR-QR t=+1.778、p=0.076 也偏 benchmark — 本模型只贏 Empirical（p<1e-8）；(2) permutation test 決定性：把 macro MIDAS 張量跨週打亂後 mean pinball 從 0.11407 **降到** 0.11208，與完全不用 macro 的 GEV-HAR（0.11224）幾乎相同，shuffled_worse_than_real=false → 真實 macro 排序不帶任何優勢；(3) SSVS 在樣本內確實選了 macro（real PIP：VIX 0.865 / CPI 0.653 / UNRATE 0.427，打亂後全數掉到 0.05–0.09），所以選擇機制有運作，但樣本內選擇完全沒轉換成 OOS 增益。校準面：全部五個模型的 Kupiec UC 都被拒絕（GEVReg 90% 實際覆蓋 0.8501、p=1.2e-06；GEV-HAR 0.8625；HAR-QR 0.8542；Gaussian-MIDAS 0.8480；Empirical 0.8366）→ 區間偏窄是這個 target 的共同性質、不是本模型特有缺陷；本模型 Christoffersen independence 不拒絕（p=0.73），問題在無條件寬度而非違反叢聚。全量 vs quick-mode 結論未翻轉（pinball 0.114193→0.114066，DM p 0.033→0.046，同號同結論）。Lookahead 三項 0 violations（macro_released_before_origin 0/118,080、origin_before_block_start 0/1,640、blocks_non_overlapping 0/1,639），GEV 數值驗證 max|logpdf err|=4.5e-13。限制（如實記錄，不可略）：SSVS MCMC 未收斂（worst R-hat=1.61、min ESS=6.25、worst |Geweke z|=49.3）→ PIP 只能當粗略指標；GEV MLE multistart 收斂率僅 0.47–0.51，但 Hessian 全正定、條件數≤1.8e4、Nelder-Mead 追加改善 ~3e-9 → 最佳解本身穩定，低收斂率反映似然面多峰。xi∈[-0.140,-0.095]（Weibull 域、上尾有界）。合併狀態：worktree dispatch-slot-1-558d7893-k1730 尚未合併 — merge gate 要求 experiments/k1730/review_verdict.json（Codex 審凍結後 claim surface 的 sha256 pin），已另立 followup。",
+  "evidence": [
+   ".claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
+   ".claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730/k1730_quickmode_results.json",
+   ".claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md",
+   "compute job compute-k1730-arm-a-production-quick-mode-1784358686 (exit 0, 2026-07-18T09:15:05Z→10:02:46Z)"
+  ],
+  "confidence": 0.8,
+  "created_at": "2026-07-18T20:11:49.668432"
  }
 ]

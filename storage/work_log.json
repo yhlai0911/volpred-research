@@ -21114,5 +21114,15 @@
     "verification": "typecheck/build 過；article-views 7 tests 全過（含新增 3 個 guard test）；repo-wide guard OK；線上 volpred.zeabur.app mile_30367280（seed=22/baseline=1/raw=1）上下皆 22，另抽驗 3 篇一致，『已追蹤瀏覽』字樣歸零",
     "commit": "volpred-v2@8ced8c7 (frontend-v2-fix 獨立 repo，已 push origin/main)",
     "deployed": true
+  },
+  {
+    "timestamp": "2026-07-18T20:12:21+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_8a80c2fb",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f",
+    "owner": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f",
+    "commit": null,
+    "summary": "收件並驗證 K1730 arm A 全量 production 結果（compute job compute-k1730-arm-a-production-quick-mode-1784358686，exit 0）。\n\n驗證四項全過：quick_mode=false（n_starts=30 / n_draws=40000 / 2 chains）；lookahead 三項 0 violations（118,080 + 1,640 + 1,639 checks）；GEV 數值驗證 max|logpdf err|=4.5e-13；全量 vs quick-mode 結論未翻轉（pinball 0.114193→0.114066、DM p 0.033→0.046，同號）。\n\n裁決 NULL：DM vs GEV-HAR t=+1.998 p=0.046 favours=benchmark；permutation test 打亂 macro 後 pinball 反而更好（0.11407→0.11208，≈GEV-HAR 的 0.11224）→ macro 無增量資訊。SSVS 樣本內確實選了 macro（VIX PIP 0.865 / CPI 0.653，打亂後掉到 0.05–0.09），但沒轉成 OOS 增益。跨模型校準表顯示五個模型 Kupiec UC 全被拒絕 → 區間偏窄是 target 共同性質，非本模型缺陷。\n\n如實記錄限制：SSVS MCMC 未收斂（R-hat 1.61 / ESS 6.25 / Geweke |z| 49.3）；GEV MLE multistart 收斂率 0.47–0.51（但 Hessian 全正定、Nelder-Mead 追加改善 3e-9 → 最佳解穩定）。\n\n產出：worktree 內 K1730_ARM_A_FULL_RUN_COLLECTION.md；canonical knowledge.json item f932cb04（主線程寫，非 agent）。\n\n未完成（已另立 assign_a72fa4f6）：worktree dispatch-slot-1-558d7893-k1730 未合併 — merge_worktree.sh 的 gate 要求 Codex 審凍結後 claim surface 的 review_verdict.json，本班 fire 禁止 spawn codex exec，故 merge 留給該 followup。"
   }
 ]
