@@ -33364,13 +33364,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T00:07:22.578557+00:00",
+    "completed_at": "2026-07-18T01:01:14.814080+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T00:07:22.578557+00:00",
-      "last_clean_observed_at": "2026-07-18T00:07:22.578557+00:00"
+      "resolved_at": "2026-07-18T01:01:14.814080+00:00",
+      "last_clean_observed_at": "2026-07-18T01:01:14.814080+00:00"
     }
   },
   {
@@ -33382,13 +33382,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T00:18:00.701155+00:00",
+    "completed_at": "2026-07-18T01:04:40.554095+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T00:18:00.701155+00:00",
-      "last_clean_observed_at": "2026-07-18T00:18:00.701155+00:00"
+      "resolved_at": "2026-07-18T01:04:40.554095+00:00",
+      "last_clean_observed_at": "2026-07-18T01:04:40.554095+00:00"
     }
   },
   {
@@ -33778,36 +33778,15 @@
   },
   {
     "id": "ops-git-single-writer-2026-07-15",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "根因：雙 dispatcher 並發寫同分支 → 落實 single-writer / commit-lock",
     "priority": 1,
     "source": "telegram-responder",
-    "status": "succeeded",
     "created_at": "2026-07-14T18:10:49.204313+00:00",
-    "title": "根因：雙 dispatcher 並發寫同分支 → 落實 single-writer / commit-lock",
-    "description": "git_conflict_guard 是止血層，不是解。根因 = Claude hourly dispatcher 與 codex_loop 並發 commit 同一分支，產生 orphaned AUTO_MERGE / conflict markers 在 canonical 狀態檔。\n要做：(1) 盤點所有會 commit 主分支的 writer（hourly dispatch、codex_loop、compute-worker、merge_worktree.sh、各 cron）；(2) 落實 single-writer 或跨 process commit-lock（flock on .git 寫入路徑）；(3) 廢棄 .gitattributes merge=ours 的掩蓋式 workaround，不留兩套；(4) regression test 覆蓋「兩個 writer 同時 commit」情境；(5) 寫 docs/error_log.md entry（先前 alert body 引用的 2026-06-28 entry 其實不存在）。\nCommit 開頭：refactor(3-strike): git single-writer。",
-    "status_history": [
-      {
-        "ts": "2026-07-14T22:15:57.417992+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-14T22:16:03.061860+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode"
-      },
-      {
-        "ts": "2026-07-15T00:16:04.959605+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode"
-      }
-    ],
-    "started_at": "2026-07-14T22:16:03.061843+00:00",
     "completed_at": "2026-07-15T00:16:04.959592+00:00",
-    "result": "導入 common-dir Git writer lease、installed main/HEAD reference gate、canonical-main checks 與 exact-path rollback，並移除 merge=ours。遷移 repo-owned writers；並行/crash/alias/scratch 回歸 205 pytest、194 pretool、16/16 merge cases 全綠。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T01:01:38.551899+00:00"
   },
   {
     "id": "k1695_exposure_matched_correction",
@@ -41244,7 +41223,7 @@
     "description": "探討科技巨頭 AI 資本支出逼近新高，但費半指數在 7 月中旬拉回，反映市場對回報率轉趨謹慎。可量化角度：計算 Big Tech 資本支出指引變動與費半成分股歷史波動率的相關性，並利用 VIX 進行風險對沖。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "created_at": "2026-07-17T22:00:29+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -41289,9 +41268,6 @@
       ],
       "screened_at": "2026-07-17T22:00:32+00:00"
     },
-    "claimed_by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726",
-    "claimed_at": "2026-07-17T22:11:10.605751+00:00",
-    "claim_session_id": "967e9284f764",
     "status_history": [
       {
         "ts": "2026-07-17T22:11:10.605766+00:00",
@@ -41304,9 +41280,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726"
+      },
+      {
+        "ts": "2026-07-18T00:50:04.157380+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-17T22:11:10.848796+00:00"
+    "started_at": "2026-07-17T22:11:10.848796+00:00",
+    "last_released_at": "2026-07-18T00:50:04.157373+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260717T231545117444Z_a1",
@@ -41440,5 +41425,53 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-18T00:00:02Z"
+  },
+  {
+    "id": "daily_digest_20260718",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-18T09:00:00.589503+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ]
+  },
+  {
+    "id": "ci-red-29622117580",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29622117580",
+    "ci_run_key": "29622117580:1",
+    "created_at": "2026-07-18T01:00:05.072728+00:00",
+    "title": "CI 紅燈修復（run 29622117580, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29622117580\nattempt: 1\nhead_sha: d9d07c549\n偵測摘要（仍須讀完整 failed log）：2026-07-18T00:11:42.8841683Z E AssertionError: assert ['release_poo...cs_freshness'] == ['release_poo...st_cron_fail']\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29622117580 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "claimed_by": "hourly-slot-1-350901e49c484eab9a3b7e32e0d1d688",
+    "claimed_at": "2026-07-18T01:01:44.429032+00:00",
+    "claim_session_id": "0d06ffcc3581",
+    "status_history": [
+      {
+        "ts": "2026-07-18T01:01:44.429047+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-350901e49c484eab9a3b7e32e0d1d688"
+      },
+      {
+        "ts": "2026-07-18T01:01:44.681198+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-350901e49c484eab9a3b7e32e0d1d688"
+      }
+    ],
+    "started_at": "2026-07-18T01:01:44.681180+00:00"
   }
 ]
