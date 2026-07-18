@@ -254,6 +254,35 @@ Codex 判定事件日期與下載邊界正確，但在**新寫的 canonical writ
 
 ---
 
+## 6c. Codex 複審（round 2）→ 判 FAIL → 兩個 blocking 已修
+
+Round 2 確認 #1/#2/#3/#4/#7 修得完整（含逐項驗證 `_splice` 對相鄰 span 與
+「`new` 內含自己的 `old`」都正確），但判定 **#5 與 #6 只做了一半**。兩個都屬實：
+
+| # | blocking 缺陷 | 為什麼是真的 | 修正 |
+|---|---|---|---|
+| 5b | `after_idx` 為空時仍寫入該列、只把 next-day 存成 `None`，**沒進 `skipped`**。pandas `.mean()` 會靜默跳過 NaN → `spy_ret_next_day_mean_pct` 的分母比旁邊標的 n 小，而 fail-loud 不變式抓不到。 | 我上一輪宣稱「拒絕讓樣本無聲縮水」，但這條路徑正好繞過它 —— **同一個 bug class 在我自己的修正裡復發**。 | 無下一個 session → 整筆列入 `skipped` 並 raise，不再存 `None`。 |
+| 6b | lookahead recorder **第一次呼叫就 raise**，所以只驗到 SPY；`^VIX` / `^VIX9D` 的 `end` 被改動仍會全綠。 | 三個序列共用同一個 cutoff，只驗一個等於沒驗。 | recorder 改成撐到第三次呼叫，斷言 ticker 序列 `[SPY, ^VIX, ^VIX9D]` 與三個 `end` 值；並補 call 數斷言，堵掉 `all([])` 的 vacuous 通過。 |
+
+**mutation test 驗證新覆蓋確實有效**：單獨把 `^VIX` 的 `end` 改成 `2026-07-03`
+（round 2 明確指出這個變異原本會存活）→ **測試轉紅**。已還原。
+
+**兩個修正都沒有改變任何數字**：13 列與 8 個統計量重跑後 byte-identical
+（`historical_nfp_table` 與 `historical_nfp_day_stats` 皆逐欄比對相同）。
+
+### Round 2 提出但未修（非 blocking，已評估）
+
+- **持鎖跨網路呼叫**：`shared_state_lock` 是無 timeout 的 blocking `flock`，而 sync 有 15 秒
+  網路重試 —— 期間所有 feed writer 會被擋住。這是我為了修「lock 外用舊 snapshot」刻意換來的
+  取捨。文章更正是**低頻手動操作**，正確性優先於可用性；但若未來要做批次更正，這個取捨要重審。
+- **原子寫的成功路徑測試對 atomicity 而言是 vacuous**（拿掉 `fsync` 或改回 `write_text` 仍會過）。
+  失敗路徑測試有抓到 `os.replace` 被移除。未補更深的 fault injection。
+- **guard patch 目標改回舊值仍會綠**，因為測試的 feed 在 `tmp_path`，而 guard 本來就放行。
+  patch 目標已是正確的那個，但這條測試不構成 guard 的迴歸防線。
+- Round 2 環境唯讀、**沒有實跑測試**（`tmp_path` 無法寫入），所有 pass/fail 數字以本機實跑為準。
+
+---
+
 ## 7. 尚未解決 / 需要另開任務的事
 
 ### 🔴 最重要：線上文章的核心統計量建立在**同一類污染**上（未修）

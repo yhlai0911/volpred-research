@@ -225,12 +225,19 @@ class TestNoLookahead:
     call still passes a later `end`. These observe the actual yfinance calls.
     """
 
+    # SPY, ^VIX, ^VIX9D -- every series must respect the cutoff, so the
+    # recorder has to survive past the first call. Stopping on call 1 would
+    # leave a mutated ^VIX or ^VIX9D `end` completely untested.
+    EXPECTED_TICKERS = ["SPY", "^VIX", "^VIX9D"]
+
     def _capture_downloads(self, experiment, monkeypatch):
         calls = []
 
         def recorder(ticker, **kw):
             calls.append({"ticker": ticker, **kw})
-            raise _StopEarly()
+            if len(calls) >= len(self.EXPECTED_TICKERS):
+                raise _StopEarly()
+            return pd.DataFrame({"Close": []})
 
         monkeypatch.setattr(
             event_dates, "_fetch", lambda *_a, **_kw: list(OFFICIAL_2024_2026)
@@ -249,9 +256,14 @@ class TestNoLookahead:
             pass  # silent-ok: sentinel to stop main() once args are captured
         return calls
 
+    def test_every_series_is_downloaded(self, experiment, monkeypatch):
+        """Pin the call count so the assertions below cannot pass vacuously."""
+        calls = self._capture_downloads(experiment, monkeypatch)
+        assert [c["ticker"] for c in calls] == self.EXPECTED_TICKERS
+
     def test_download_window_ends_before_the_release(self, experiment, monkeypatch):
         calls = self._capture_downloads(experiment, monkeypatch)
-        assert calls, "expected at least one yfinance download"
+        assert len(calls) == len(self.EXPECTED_TICKERS)
         for call in calls:
             # yfinance `end` is exclusive, so end == release date means the
             # last obtainable session is 2026-07-01.
@@ -264,6 +276,8 @@ class TestNoLookahead:
         self, experiment, monkeypatch
     ):
         calls = self._capture_downloads(experiment, monkeypatch)
+        # Guard against all([]) passing vacuously if nothing was captured.
+        assert len(calls) == len(self.EXPECTED_TICKERS)
         # Needs a prior close to difference against 2025-05-02.
         assert all(call["start"] < "2025-05-02" for call in calls)
 

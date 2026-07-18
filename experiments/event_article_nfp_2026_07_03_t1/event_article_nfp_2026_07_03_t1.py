@@ -161,9 +161,15 @@ def main():
         vix_on = float(vix_close.loc[day0])
         vix_chg = vix_on - vix_prior
 
-        # next trading day SPY return (post-digestion day t+1)
+        # next trading day SPY return (post-digestion day t+1). A missing next
+        # session must skip the whole event, not store None: pandas .mean()
+        # drops NaN silently, so spy_ret_next_day_mean_pct would quietly be
+        # computed over a smaller denominator than the n reported beside it.
         after_idx = spy_ret.index[spy_ret.index > day0]
-        ret_next = float(spy_ret.loc[after_idx[0]]) * 100.0 if len(after_idx) else np.nan
+        if len(after_idx) == 0:
+            skipped.append((nfp_ts, f"no SPY session after {day0.date()}"))
+            continue
+        ret_next = float(spy_ret.loc[after_idx[0]]) * 100.0
 
         rows.append(
             {
@@ -171,7 +177,7 @@ def main():
                 "trading_day": str(day0.date()),
                 "spy_ret_day0_pct": round(ret_day0, 3),
                 "vix_chg_day0_pts": round(vix_chg, 3),
-                "spy_ret_next_day_pct": round(ret_next, 3) if not np.isnan(ret_next) else None,
+                "spy_ret_next_day_pct": round(ret_next, 3),
             }
         )
 
