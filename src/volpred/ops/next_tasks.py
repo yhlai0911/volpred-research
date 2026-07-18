@@ -26,6 +26,14 @@ Single enforcement owner for two invariants on the canonical queue:
    the full payload FIRST and only truncates once serialization has succeeded --
    the same hardening ``scripts/task_pool_claim.py`` grew inline in 2026-07-05,
    now shared here so every writer inherits it.
+
+3. **Blocked rows always have an exit** (``enforce_blocked_until`` /
+   ``_audit_blocked_until``). ``scripts/unblock_expired_blocked_tasks.py`` only
+   re-pends a block whose ``blocked_until`` has PASSED, so a row that reached
+   ``status=blocked`` with no ``blocked_until`` at all was invisible to the
+   sweeper and parked forever -- 19 such rows by 2026-07-18. Strict writers call
+   ``enforce_blocked_until`` (auto-fill the default window, or raise); the
+   whole-file path only audits against the frozen legacy baseline.
 """
 from __future__ import annotations
 
@@ -198,6 +206,101 @@ def validate_task_status(status: str | None) -> str:
             "src/volpred/ops/next_tasks.py if it is a real new state"
         )
     return str(status).strip().lower()
+
+
+class InvalidBlockedUntil(ValueError):
+    """Raised when a ``status=blocked`` row cannot be given a valid ``blocked_until``."""
+
+
+# Default auto-recheck window for a block with no explicit expiry. Semantics are
+# owned here and re-exported to scripts/mark_task_blocked.py (which defined the
+# 14-day window first) so one number cannot drift into two.
+DEFAULT_BLOCKED_UNTIL_DAYS = 14
+
+# Allowed count of status=blocked rows carrying NO blocked_until. Zero, and it
+# must stay zero: such a row has no exit at all, because
+# scripts/unblock_expired_blocked_tasks.py only ever re-pends an EXPIRED block.
+#
+# History: 19 such rows had accumulated by 2026-07-18 (30 blocked rows, 19 with
+# no expiry), the oldest parked >45 days -- the hole boss Telegram msg 937 P1
+# ordered closed. All 19 were adjudicated that day (see the sweeper's escalate
+# pass), so there is no legacy population left to grandfather and the baseline
+# drops to 0. Raising this number again would re-open the hole; adjudicate the
+# rows instead. Per 永遠修流程，不修資料 a writer never silently rewrites an
+# existing blocked row -- the strict path only fills an expiry on rows it owns.
+# MIRRORED in tests/test_task_status_vocab.py::BLOCKED_NO_UNTIL_BASELINE.
+LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE = 0
+
+
+def default_blocked_until(now: "datetime | None" = None) -> str:
+    """ISO timestamp ``DEFAULT_BLOCKED_UNTIL_DAYS`` from now (seconds precision)."""
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+
+    base = now or _dt.now(_tz.utc)
+    return (base + _td(days=DEFAULT_BLOCKED_UNTIL_DAYS)).isoformat(timespec="seconds")
+
+
+def enforce_blocked_until(task: dict[str, Any], *, now: "datetime | None" = None) -> bool:
+    """Strict path: a row a caller just set to ``blocked`` MUST carry an expiry.
+
+    Mirrors ``validate_task_status``'s split of strictness. Use this wherever a
+    writer sets ``status="blocked"`` on a row it owns; returns ``True`` when a
+    default expiry was filled in.
+
+    Why this is an invariant and not a lint: the dispatcher only ever re-pends a
+    block whose ``blocked_until`` has passed, so a blocked row without one has no
+    exit at all -- it parks forever with nobody notified (19 rows accumulated
+    before 2026-07-18). Auto-filling the default window gives every new block an
+    exit; a present-but-unusable value cannot be second-guessed by a writer, so
+    it raises instead.
+
+    NOT called from the whole-file write path -- see ``_audit_blocked_until``.
+    """
+    if str(task.get("status") or "").strip().lower() != "blocked":
+        return False
+    until = task.get("blocked_until")
+    if until is None or (isinstance(until, str) and not until.strip()):
+        task["blocked_until"] = default_blocked_until(now)
+        return True
+    if not isinstance(until, str):
+        raise InvalidBlockedUntil(
+            f"task {task.get('id')!r} blocked_until must be an ISO string, got "
+            f"{type(until).__name__} {until!r}"
+        )
+    return False
+
+
+def _audit_blocked_until(tasks: list[Any]) -> int:
+    """Surface ``blocked`` rows with no ``blocked_until`` (observable, non-fatal).
+
+    Same non-fatal contract as ``_audit_task_statuses`` and for the same reason:
+    the canonical queue still carries the frozen legacy rows, and raising on a
+    whole-file rewrite would brick every task materializer. Warns only ABOVE the
+    baseline, so a frozen known fact never becomes hot-path noise; the mechanical
+    stop is the baseline gate in tests/test_task_status_vocab.py.
+
+    Deliberately does NOT auto-fill: rewriting legacy rows here would erase the
+    very evidence the human adjudication queue works from (永遠修流程，不修資料).
+    """
+    bad: list[str] = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        if str(task.get("status") or "").strip().lower() != "blocked":
+            continue
+        until = task.get("blocked_until")
+        if until is None or (isinstance(until, str) and not until.strip()):
+            bad.append(str(task.get("id") or "<no-id>"))
+    if len(bad) > LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE:
+        warn(
+            "next_tasks_blocked_until",
+            "blocked task(s) with no blocked_until ABOVE frozen baseline -- "
+            "these can never be re-pended and will park forever",
+            count=len(bad),
+            baseline=LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE,
+            examples=bad[:5],
+        )
+    return len(bad)
 
 
 def _audit_task_statuses(tasks: list[Any]) -> int:
@@ -392,6 +495,7 @@ def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
 
     _normalize_priorities_tolerant(tasks)
     _audit_task_statuses(tasks)
+    _audit_blocked_until(tasks)
     payload = json.dumps(tasks, indent=2, ensure_ascii=False)
     try:
         payload.encode("utf-8")
@@ -452,6 +556,59 @@ def _legacy_priority_to_p(legacy: int) -> int:
     return 4
 
 
+#: 只有寫進**正牌**佇列才准叫醒 supervisor（測試/暫存佇列不得觸發真實派工）。
+CANONICAL_NEXT_TASKS = Path(__file__).resolve().parents[3] / "storage" / "next_tasks.json"
+
+
+def _request_urgent_fire(record: dict[str, Any], path: Path) -> bool:
+    """急件入池 → 立刻要求 supervisor out-of-band 派工，不等下一班 hourly cron。
+
+    2026-07-18 boss Telegram msg 981「急件和一般排程應該要分開。急件就不進入排班
+    直接派工」。這條路徑本來只有 email (`gmail_inbox_poll.py:754`) 和 CI red
+    (`check_alerts.py:1168`) 接上；Telegram 進來的 P1 只 append 就結束，等下一班
+    hourly（實例：assign_998ad2be / assign_33a9151f 建單 16:49/17:42，18:06 仍
+    pending）。這裡是 **single gateway**（`volpred ops assign` 唯一的 append 路
+    徑），所以接在這裡就同時涵蓋 telegram / user / owner / boss 所有人為 ingress。
+
+    `request_fire()` 只是在 supervisor state 寫一個 flag（同一把 fcntl 鎖），由
+    scheduler 下一個 ≤60s tick 消費並走正常 `reserve_fire()` slot —— 不 spawn 任何
+    平行 agent，slot 滿就留著等，不是 double dispatch。
+
+    失敗不 raise：任務已經入池，最壞情況就是退回原本的 hourly 行為；但必須留
+    warn（no-silent-fallback）。回傳是否真的送出 fire request。
+    """
+    from volpred.ops.task_urgency import is_urgent
+
+    if not is_urgent(record):
+        return False
+    try:
+        if path.resolve() != CANONICAL_NEXT_TASKS.resolve():
+            return False  # scratch / test queue：不得叫醒真的 supervisor
+    except OSError:  # silent-ok: 同 585 —— 無法確認是 canonical queue 就不叫醒 supervisor，非失敗兜底
+        return False
+    try:
+        import sys
+
+        root = str(CANONICAL_NEXT_TASKS.parent.parent)
+        if root not in sys.path:
+            sys.path.insert(0, root)
+        from scripts.dispatch_supervisor import state as dispatch_state
+
+        dispatch_state.request_fire(f"{record.get('source')}:{record['id']}")
+        return True
+    except Exception as exc:  # noqa: BLE001 — 任務已入池，hourly 兜底
+        from volpred.ops.diagnostics import warn
+
+        warn(
+            "urgent_fire_request",
+            "request_fire failed; urgent task falls back to hourly cadence",
+            task_id=str(record.get("id")),
+            source=str(record.get("source")),
+            err=f"{type(exc).__name__}: {exc}",
+        )
+        return False
+
+
 def append_next_task(
     *,
     title: str,
@@ -508,4 +665,8 @@ def append_next_task(
             write_tasks_to_handle(fh, tasks)
         finally:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    # 急件不進排班：入池成功後（鎖已釋放）立刻請 supervisor 派工。
+    # `fire_requested` 是 **return-only receipt**（給 CLI 印 / 給測試斷言），
+    # 刻意不寫回佇列 —— 它是這次 append 的動作結果，不是 task 的狀態欄位。
+    record["fire_requested"] = _request_urgent_fire(record, p)
     return record
