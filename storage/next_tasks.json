@@ -33106,13 +33106,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T16:01:02.537802+00:00",
+    "completed_at": "2026-07-18T17:01:05.136265+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T16:01:02.537802+00:00",
-      "last_clean_observed_at": "2026-07-18T16:01:02.537802+00:00"
+      "resolved_at": "2026-07-18T17:01:05.136265+00:00",
+      "last_clean_observed_at": "2026-07-18T17:01:05.136265+00:00"
     }
   },
   {
@@ -33124,13 +33124,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T16:30:48.299183+00:00",
+    "completed_at": "2026-07-18T17:23:55.136548+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T16:30:48.299183+00:00",
-      "last_clean_observed_at": "2026-07-18T16:30:48.299183+00:00"
+      "resolved_at": "2026-07-18T17:23:55.136548+00:00",
+      "last_clean_observed_at": "2026-07-18T17:23:55.136548+00:00"
     }
   },
   {
@@ -35741,118 +35741,27 @@
   },
   {
     "id": "ci-red-29421677446",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29421677446, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29421677446",
-    "ci_run_key": "29421677446:1",
     "created_at": "2026-07-15T15:00:06.868630+00:00",
-    "title": "CI 紅燈修復（run 29421677446, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29421677446\nattempt: 1\nhead_sha: 78115830d\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29421677446 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T16:08:45.237471+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-15T16:08:58.524339+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-15T16:19:13.308737+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover"
-      }
-    ],
-    "started_at": "2026-07-15T16:08:58.524326+00:00",
     "completed_at": "2026-07-15T16:19:13.308724+00:00",
-    "result": "root_cause=publish_draft update mode skipped canonical audience inference, so the K1386 methodology rewrite retained audience=general; repair_commit=48bdf37b8; guard_commit=c53cd4470; class_sweep=1816 entries and 0 mismatches; tests=139 passed; push=deferred per supervisor"
+    "tombstone": true,
+    "archived_at": "2026-07-18T17:01:00.245054+00:00"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a4",
-    "title": "[internal alert] PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
-    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 發生什麼\nPHASE-Z 連續 3 次無法完成這班的自動 commit（原因：commit_nonzero）。已停止重試 —— 同一班不再重跑。\n檔案仍在工作區、沒有遺失。\n\n## 現在該做什麼\n確認未提交檔案的作者後由該作者 commit。若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。\n\n## git commit 輸出（尾段）\niv8Cd baseline_findings=64 new=2 resolved=64\n[pre-commit]   NEW experiments/k1259/build_dm_ledger.py:136 except Exception: pass\n[pre-commit]   NEW experiments/k1259/build_dm_ledger.py:368 except Exception: return []\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
-    "task_type": "platform_ops",
-    "dispatch_lane": "agent",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-15T15:45:15.152580+00:00",
+    "task_type": "platform_ops",
+    "title": "[internal alert] PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
+    "priority": 1,
     "source": "internal_alert_remediation_router",
-    "tags": [
-      "alert",
-      "internal-remediable",
-      "silent_fallback_new"
-    ],
-    "alert_key": "silent_fallback_new",
-    "internal_remediable": true,
-    "internal_alert_state": {
-      "episode_id": "20260715T072600838284Z",
-      "episode_started_at": "2026-07-15T07:26:00.838284+00:00",
-      "attempt_number": 4,
-      "last_seen_at": "2026-07-15T15:47:32.178225+00:00",
-      "consecutive_remediation_failures": 0,
-      "attempt_history": [
-        {
-          "observed_at": "2026-07-15T09:25:28.550316+00:00",
-          "completed_at": "2026-07-15T08:15:14.858470+00:00",
-          "status": "succeeded",
-          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：根因=PHASE-Z ownership race：某 07:xx fire 在 codex 07:13 dirty k1379.py 前起跑→誤判 owned→試 commit codex 在途未完成檔(3 bare silent-fallback)→gate 正確拒→3 retry→alert。現場確認 codex-vscode 活躍 review/repair k1379(live codex exec 3:48PM)，非孤兒。處置:為 3 處合法 best-effort fallback(k1379.py:148/201/248, caller 皆 check None) 補 silent-ok 註解→audit 0 findings，作者 codex commit 時 gate 會過；本 fire 不 commit(禁 steal 活躍作者檔)。自限:k1379.py 對後續 fire 皆 pre-fire-dirty→race 不重演。"
-        },
-        {
-          "observed_at": "2026-07-15T11:27:43.808050+00:00",
-          "completed_at": "2026-07-15T10:14:28.946406+00:00",
-          "status": "succeeded",
-          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：root_cause=pre-commit silent-fallback gate 擋下 scripts/taifex_tick_inventory.py:86(except OSError→continue, inventory rglob/stat race) 與 :277(except decode→continue, 多編碼嘗試迴圈; 全失敗回 error dict) 兩個未標記合法 silent path，導致 17:24 taifexdata_dropbox_organize fire 的 PHASE-Z commit_nonzero×3。 repair=兩處加 '# silent-ok: <reason>' 標記；audit_silent_fallbacks.py 對 taifex_tick_inventory.py/collect_taifex_tick.py/taifex_tick_to_canonical.py 全 findings=0 exit0，self-healing alert 條件(gate 阻擋)已於 working tree 清除。 note: 這些"
-        },
-        {
-          "observed_at": "2026-07-15T15:45:15.152580+00:00",
-          "completed_at": "2026-07-15T11:34:21.246406+00:00",
-          "status": "succeeded",
-          "failure_reason": "任務回報 succeeded，但同一 alert_key 仍觸發；上次結果：Alert was generated from the first blocked K1378 commit attempt. Root cause scripts/build_publication_candidates.py:165 malformed-timestamp fallback lacked an auditable rationale. Added precise silent-ok annotation; strict audit findings=0, 10 selector tests pass, and pre-commit accepted [codex] commit 70877b0c0. No additional mutation required; warning was stale by claim time."
-        }
-      ],
-      "escalation_due": true,
-      "fingerprint": [
-        "experiments/k1259/build_dm_ledger.py:136",
-        "experiments/k1259/build_dm_ledger.py:368"
-      ],
-      "escalation_sent_at": "2026-07-15T15:45:15.152580+00:00",
-      "escalation_notification_id": "e8bb2005",
-      "resolved_at": "2026-07-15T23:31:39.962574+00:00",
-      "final_consecutive_remediation_failures": 3,
-      "superseded_by_distinct_incident_at": "2026-07-15T23:31:39.962574+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-15T16:02:08.422916+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-15T16:02:15.220927+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-15T16:12:29.639933+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover"
-      }
-    ],
-    "started_at": "2026-07-15T16:02:15.220911+00:00",
+    "created_at": "2026-07-15T15:45:15.152580+00:00",
     "completed_at": "2026-07-15T16:12:29.639920+00:00",
-    "result": "Fresh detector recheck found 2 K1259 silent fallbacks. Added structured warnings and narrow exceptions, removed a missed catch-all, preserved ledger_exclude, and regenerated Phase 1 plus Phase 1.5 artifacts idempotently; strict audit new=0. Regression: 3 K1259, 4 retry/fingerprint, and 9 K841 tests passed; distinct-fingerprint root fix already landed in a9d1df03e."
+    "tombstone": true,
+    "archived_at": "2026-07-18T17:01:00.245054+00:00"
   },
   {
     "id": "K1386_article_general_audience_rewrite_f3ade114",
@@ -40232,7 +40141,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-18T03:21:50.838252+00:00",
     "source": "internal_alert_remediation_router",
     "tags": [
@@ -40253,7 +40162,30 @@
       "fingerprint": [
         "tests/test_worker_hang_log_capture.py:61"
       ]
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-18T17:20:24.692724+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
+      },
+      {
+        "ts": "2026-07-18T17:20:31.111239+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
+      },
+      {
+        "ts": "2026-07-18T17:22:25.304942+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
+      }
+    ],
+    "started_at": "2026-07-18T17:20:31.111225+00:00",
+    "completed_at": "2026-07-18T17:22:25.304924+00:00",
+    "result": "已重驗警報仍 breached 後修復並落地 commit 7f3e78ab0。gate 擋得對：兩處 silent fallback 都會讓 boss-facing 報告靜默降級（讀不到 canonical 檔→『已完成』空白，與『本班沒做事』無法區分；壞掉的 cron row→永不 fire 的 job 在『已排程』看起來只是還沒輪到），改為 warn 留 trace。audit 本檔 0 findings、tests 12 passed。同時解除一併擱置的 progress_report.py msg 973 兩欄功能。"
   },
   {
     "id": "telegram-942",
@@ -41234,13 +41166,10 @@
     "description": "老闆架構硬指令（Telegram msg 981）：「急件和一般排程應該要分開。急件就不進入排班直接派工，一般排程才進入排班。」\n\n== 現況實查（telegram-981，2026-07-18 18:1x）==\n底層機制已存在且正確，缺的只是接線：\n- scripts/dispatch_supervisor/state.py:684 request_fire(reason) = out-of-band 立即派工\n- scripts/dispatch_supervisor/scheduler.py:723 明確保證 requested fire 繞過所有 gate（'Gates ONLY plain cron fires — requested fires always run'）\n- 已接上：scripts/gmail_inbox_poll.py:754 (email_reply:*)、scripts/check_alerts.py:1168 (ci_red:*)\n- **未接上：Telegram**。Telegram P1 只 append 進 storage/next_tasks.json 等 hourly cron → 這就是 email 急件立刻做、Telegram 急件等下一班的全部原因。\n\n== 要修兩處（缺一不可）==\n1. **ingest 端**：Telegram 訊息建出 P1 任務時呼叫 dispatch_state.request_fire(f'telegram:{task_id}')，比照 gmail_inbox_poll.py:754。找 telegram ingest 實作位置（src/volpred/ops/telegram.py 或對應 poller）。\n2. **派工端**：request_fire 只是 generic wake-up 不是 targeted claim（continue_task_dispatch.py:970 註解自陳）。scripts/cron_hourly_dispatch_prompt.md PHASE A0 的時效 P1 過濾條件目前是\n   task_type in (event_article, trending_repost, daily_digest) or source == 'user'\n   → 漏掉 source='telegram'，且『本班主產出 = 最舊那個時效 P1』每班只做一張。\n   改為以 **source + priority** 判定急件（列舉 task_type 正是這次漏掉的根因），並讓一班可連續清完所有急件才進一般排程。\n\n== 實例（老闆親眼看到的後果）==\n瀏覽數不一致拆成 assign_998ad2be（source=telegram，A0 抓不到）與 assign_33a9151f（source=user，抓得到但排在 assign_6349aa2c 後），16:49/17:42 建單，18:06 老闆再問時兩張都還 pending；17:08 那班跑的是 K1730（P3 研究）。\n\n== 驗收 ==\n- 新增測試：source=telegram 的 P1 建立後 request_fire 被呼叫、且 A0 判定為急件。\n- 改 A0 白名單前先跑 stage×paths 矩陣（見 feedback_path_narrowing_audit 紀律）。\n- 改完把 assign_998ad2be / assign_33a9151f（瀏覽數）當第一個實測案例跑通。\n\n來源：telegram-980 / telegram-981",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-18T10:10:30.615399+00:00",
     "created_by": "telegram_responder",
-    "claimed_by": "hourly-slot-1-c3749124d2e847069214731df570cd5d",
-    "claimed_at": "2026-07-18T14:08:53.347961+00:00",
-    "claim_session_id": "f3105977a41d",
     "status_history": [
       {
         "ts": "2026-07-18T14:08:53.347980+00:00",
@@ -41253,9 +41182,38 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d"
+      },
+      {
+        "ts": "2026-07-18T16:50:03.140866+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-18T17:08:12.027814+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
+      },
+      {
+        "ts": "2026-07-18T17:10:22.947153+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
+      },
+      {
+        "ts": "2026-07-18T17:15:41.828077+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
       }
     ],
-    "started_at": "2026-07-18T14:08:53.574512+00:00"
+    "started_at": "2026-07-18T17:10:22.947138+00:00",
+    "last_released_at": "2026-07-18T16:50:03.140857+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-18T17:15:41.828062+00:00",
+    "result": "驗收關單：ingest 端(append_next_task->_request_urgent_fire)與派工端(A0 改用 volpred.ops.task_urgency source+priority 判定、連續清 lane)兩處接線已於 4684b5e02 落地，測試 33 passed，實測案例 assign_998ad2be/assign_33a9151f 皆 succeeded。本班補釘 dedicated-owner 邊界 regression test（telegram_reply 非漏網，屬 _spawn_responder+120s retry 專屬 owner）+ 修正 fail-open 訊息誤導。"
   },
   {
     "id": "assign_67f56b79",
@@ -41365,13 +41323,10 @@
     "description": "老闆 Telegram msg 988 第 2 次點名同一警報（「還是沒解決…立刻重構」）。2026-07-17 的修法只治了 tracked 檔，untracked 檔仍是死結。\n\n## 根因（已於 responder 端查證，勿重覆診斷）\nscripts/dispatch_supervisor/phase_z.py:523 _paths_carried_forward() 用\n  git log --since=<receipt.created_at> --name-only\n判斷「後續 commit 是否已接手這條路徑」。**git log 在定義上永遠不會列出 untracked 檔**，\n所以任何被 pin 過、之後又被編輯的 untracked 檔：\n  - 不在 dirty→landed（它 dirty）\n  - fingerprint 已漂移（不進 unresolved）\n  - 永遠不在 carried（git log 看不到）\n→ 必然落入 recover_failed_closeout() 的 conflicts → 每小時發一次 CRITICAL，\n   且**沒有任何自癒路徑**（除非人工刪 receipt）。\n\n## 現場證據（2026-07-18 19:16 查）\nreceipt: .git/volpred_phase_z_failed_closeout.json（created_at 2026-07-17T13:32:35Z，10 條 path）\n- scripts/gen_codex_cli_reference.py：git status = '??'（untracked）\n  pin sha256=905372360a47…  現值 81a47ad4cb07…（已漂移）\n  git log --since=receipt -- <該檔> = 空 → 永遠 carried=false → 永久 conflict。這就是老闆收到的那則。\n- tests/test_worker_hang_log_capture.py：同為 untracked，目前 bytes 仍等於 pin（落在 unresolved），\n  **是同 class 的下一顆地雷** —— 任何人一編輯它就變成第二個永久 CRITICAL。\n- 其餘 8 條為 tracked ' M'，走既有路徑，不是本 bug。\n\n## 要求（重構，非補丁 — 老闆原話「立刻重構」）\n1. 治本：conflict 判定必須對 untracked 檔有定義良好的語意。carried-forward 這個問句\n   （「後來的 commit 接手了嗎」）對 untracked 檔恆為 false，用它當唯一判準即為設計缺陷。\n2. **硬性驗收：任何 conflict 都必須存在自癒或人工結案路徑，不得產生「只能靠人刪檔才會停」的\n   永久 CRITICAL**。這是本 bug 的 class 本質（參 error_log 2026-07-17 同型事故：\n   34/40 path 已 commit 卻照噴 25 小時）。設計時請把「這個 alert 要怎麼停」寫進 docstring。\n3. 依 feedback_declare_complete_requires_class_sweep：對 phase_z.py 全檔掃同 class\n   —— 還有哪些判準會對 untracked / 已刪除 / symlink 路徑給出無法結案的結果。\n4. 補迴歸測試（scripts/tests/test_phase_z_*.py 已有同族檔案）：至少涵蓋\n   (a) untracked + drifted → 不得產生無法結案的 conflict\n   (b) untracked + 未漂移 → 行為不變\n   (c) tracked + carried → 行為不變（勿回歸 2026-07-17 修正）\n5. 完成後寫 docs/error_log.md（含「為何 2026-07-17 的修法沒蓋到這個 class」），\n   並確認下一輪巡檢 CRITICAL 自動消失才算完成（feedback_fix_verify_then_report）。\n\n## 注意\n現存那份 receipt 內含 8 條 tracked 路徑的合法 ownership，**不要直接刪檔了事**；\n要讓新邏輯能正確把它收斂掉。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-18T11:19:16.618346+00:00",
     "created_by": "telegram-responder",
-    "claimed_by": "hourly-slot-1-c3749124d2e847069214731df570cd5d",
-    "claimed_at": "2026-07-18T14:08:53.803482+00:00",
-    "claim_session_id": "09cbec389373",
     "status_history": [
       {
         "ts": "2026-07-18T14:08:53.803496+00:00",
@@ -41384,9 +41339,32 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d"
+      },
+      {
+        "ts": "2026-07-18T16:50:03.140876+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-18T17:15:50.604780+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
+      },
+      {
+        "ts": "2026-07-18T17:19:43.208685+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
       }
     ],
-    "started_at": "2026-07-18T14:08:54.035829+00:00"
+    "started_at": "2026-07-18T14:08:54.035829+00:00",
+    "last_released_at": "2026-07-18T16:50:03.140874+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-18T17:19:43.208670+00:00",
+    "result": "重構已落地 commit fb1e4cc68。修正本身（三 bucket 全可終止 + released 自癒 + carried-forward 降為 advisory + 同 class sweep 兩處）與 6 條迴歸測試早於 07-18 22:14 完成但從未進 git（unstaged + untracked），本班驗收後落地並補 docs/error_log.md Class J 條目與可終止性規則。驗證：phase_z 全族 32 passed；live 無 receipt、recover_failed_closeout 回 no_failed_closeout、CRITICAL 已消失。"
   },
   {
     "id": "telegram-990",
@@ -41514,5 +41492,37 @@
       "parent_job_id": "agent-k1731-armB-esfix-7009a4"
     },
     "created_by": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b"
+  },
+  {
+    "id": "ci-red-29651115228",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29651115228",
+    "ci_run_key": "29651115228:1",
+    "created_at": "2026-07-18T17:00:07.857447+00:00",
+    "title": "CI 紅燈修復（run 29651115228, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29651115228\nattempt: 1\nhead_sha: 98950fff3\n偵測摘要（仍須讀完整 failed log）：2026-07-18T16:04:20.9274559Z ImportError while importing test module '/home/runner/work/volpred-research/volpred-research/tests/test_covered_article_dedup.py'.\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29651115228 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "claimed_by": "hourly-slot-1-8a6f37741efc4f538d13e2fd260d661c",
+    "claimed_at": "2026-07-18T17:01:11.374009+00:00",
+    "claim_session_id": "661e2d3ac5ee",
+    "status_history": [
+      {
+        "ts": "2026-07-18T17:01:11.374025+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-8a6f37741efc4f538d13e2fd260d661c"
+      },
+      {
+        "ts": "2026-07-18T17:01:11.615429+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-8a6f37741efc4f538d13e2fd260d661c"
+      }
+    ],
+    "started_at": "2026-07-18T17:01:11.615415+00:00"
   }
 ]

@@ -21164,5 +21164,45 @@
     "title": "PHASE A triage：K1731 arm B ES 修正 agent job failed",
     "summary": "根因＝agent 把 19-refit production 重跑丟背景後結束回合，自述「會被自動喚回」但 runner 無此機制，process group 隨回合收掉；run_corrected_rev5.log 停在 3/19 refit，k1731_armB_esfix.json 從未產出。非程式錯誤。可保留成果確認存在：k1731_models.py(rev5)、finalize_report、regression_check、es_mixture_check_results（已確立舊 ES 估計量向下偏誤 3.9%-22.8%）。regression baseline 原僅存於 /tmp，本班保全至 worktree experiments/k1731/regression_baseline/。建續跑任務 assign_1394a67a（段1 heavy compute 走 compute_queue、段2 回歸檢查+finalize），已 mark-followup-dispatched。未 force-remove worktree、未把中斷結果當完整結果。",
     "verification": "worktree ls + stderr/stdout log 逐條核對；mark-followup-dispatched 回 true"
+  },
+  {
+    "timestamp": "2026-07-19T01:09:34+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29651115228",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-8a6f37741efc4f538d13e2fd260d661c",
+    "owner": "hourly-slot-1-8a6f37741efc4f538d13e2fd260d661c",
+    "commit": "4684b5e02",
+    "summary": "CI 紅燈修復（run 29651115228）：4 個 test module collection ImportError。\n\n**根因**：split landing。`assign_79c90a36`（blocked 生命週期重構）把 consumer 端\n（`mark_task_blocked.py` / `sync_next_tasks_status.py` / `unblock_expired_blocked_tasks.py` /\n`tests/test_task_status_vocab.py`）commit 進了 main，但 producer —— `src/volpred/ops/next_tasks.py`\n裡定義 `default_blocked_until` / `enforce_blocked_until` / `InvalidBlockedUntil` /\n`LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE` 的那 161 行 —— 留在工作區沒進 repo。\n本地因為有那些行而全綠，clean CI checkout 卻連 import 都做不到。\n\n**為什麼不會自己好**：`phase_z` 只 commit「fire 開始後才變 dirty」的路徑。這個檔在每一班的\nbaseline 時就已經 dirty → 每班都判為別人的工作而跳過 → main 會一直紅。這正是 `assign_5f16a7c5`\n那張 P1 描述的洞的一個實例。\n\n**Class sweep**（per feedback_declare_complete_requires_class_sweep）：用 `git grep` 掃 HEAD\n（不是工作區）找所有「consumer 已 commit、producer 未 commit」的配對。結果確認這 4 個 symbol 是\n唯一缺口；另一個 untracked module `report_sections.py` 在 HEAD 零 consumer，不會影響 CI。\n\n**過程中避開的第二次紅燈**：同一批未 commit 的行還含 `_request_urgent_fire`\n（`assign_a64e9f61` / boss Telegram msg 981 的產物），它 import `volpred.ops.task_urgency` —— 而\n那個 module 也是 untracked。只 commit `next_tasks.py` 會把 ImportError 從一個 symbol 換成另一個\nmodule。因此 `task_urgency.py` 與其測試一起 land，不再製造第二次 split。\n\n**兩處 silent-fallback gate 標註**（皆非失敗兜底）：`_request_urgent_fire` 的 OSError 分支與它上一行\n不 warn 的 return 同義（無法確認是 canonical queue 就不叫醒 supervisor）；`_priority` 對無法解析的值\n回 None 交呼叫端判斷。\n\n**驗證**：4 個原失敗 module + `test_task_status_vocab` + `test_urgent_task_lane` +\n`test_next_tasks_writer` 全綠（55 passed）；3439 tests collect 無 error。\nGitHub 端 Source Encoding Gate / Silent Fallback Gate 已 success，Test Suite 由 CI watcher 收口。\n\nroot_cause=assign_79c90a36 committed blocked_until consumers but left the producing lines in volpred.ops.next_tasks uncommitted, so a clean CI checkout could not import them; repair_commit=4684b5e02"
+  },
+  {
+    "timestamp": "2026-07-19T01:15:35+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_a64e9f61",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db",
+    "owner": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db",
+    "commit": null,
+    "summary": "急件/一般排程分流驗收關單。兩處接線已於 4684b5e02 落地：ingest 端 append_next_task->_request_urgent_fire（涵蓋 volpred ops assign 全部人為 ingress），派工端 PHASE A0 改由 volpred.ops.task_urgency 以 source+priority 判定並連續清 lane；驗收案例 assign_998ad2be / assign_33a9151f 皆 succeeded。本班新發現並修正兩點：(1) telegram_poll._append_task 直寫 canonical queue 看似漏接線，實為 telegram_reply 屬 DEDICATED_OWNER_TASK_TYPES、由 _spawn_responder + 120s retry 迴圈負責，硬接 fire 是 no-op —— 本班一度真的照補下去，被既有測試擋回，故新增 2 條 regression test 與 docstring 把邊界釘死；(2) _spawn_responder fail-open 回覆誤稱『稍後由排程接手』（實際 120s 內重派），已改為正確描述。測試 33 passed；相關 106 passed；canonical-writers audit PASS。"
+  },
+  {
+    "timestamp": "2026-07-19T01:19:36+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_5f16a7c5",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db",
+    "owner": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db",
+    "commit": "fb1e4cc68",
+    "summary": "PHASE-Z failed-closeout untracked 永久 CRITICAL 重構關單。查證發現程式修正與 6 條迴歸測試早在 2026-07-18 22:14 就已完成，但從未進 git（phase_z.py 為 unstaged、測試檔為 untracked），跨數班 fire 一直擱在工作區 —— PHASE-Z 的 owned = dirty_now - baseline 定義上不會收編開班前就髒的檔，正是同一個 class 往上一層的複製。本班驗收後以 git_writer_lock commit fb1e4cc68 落地（檔案 mtime 已穩定 3 小時、確認無他 session 在途）。修正內容：conflicts bucket 改為 released，drift 的 pin 在發警報同一趟即從 receipt 移除，一個 path 一輩子最多 warn 一次；_paths_carried_forward 降為 advisory。同 class sweep 另修 unreadable receipt（原 fail-closed 會讓模組永遠再也記不了 ownership 且不出聲，改 quarantine 自癒）與單一 path 無法 fingerprint 連坐整批。補 docs/error_log.md Class J 條目含『為何 2026-07-17 的修法沒蓋到這個 class』+ 新增可終止性規則。驗證：phase_z 全族 32 passed；live recover_failed_closeout 回 no_failed_closeout、無 receipt、CRITICAL 條件已消失。"
+  },
+  {
+    "timestamp": "2026-07-19T01:22:18+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_internal_silent_fallback_new_c67bec28dd_20260718T032150838252Z_a1",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db",
+    "owner": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db",
+    "commit": "7f3e78ab0",
+    "summary": "PHASE-Z commit_nonzero 三次重試失敗關單。依任務規定先用原 detector 重驗警報仍 breached（audit_silent_fallbacks 仍報 report_sections.py:52 與 :137 兩條），非快照過期。根因不是 gate 誤擋 —— gate 擋得對：(1) _load_json 讀不到 canonical 檔回 None 會讓報告的『已完成/已排程』降級成空白，對老闆而言與『本班什麼都沒做』無法區分；(2) 無法解析的 cron row 被靜默跳過，會讓一個永遠不會 fire 的 job 在『已排程』看起來只是還沒輪到。兩處都改為 warn 留 trace 而非消音，非加 silent-ok 敷衍。audit 對本檔 0 findings，tests 12 passed，以 git_writer_lock commit 7f3e78ab0 落地，連同一併擱置的 progress_report.py（msg 973 已完成/已排程兩欄，derived 不可手打）與 tests/test_report_sections.py。"
   }
 ]
