@@ -20,6 +20,9 @@ audit found its NFP metadata pinned to a release date that never happened
 from __future__ import annotations
 
 import json
+import os
+import re
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -28,6 +31,45 @@ from volpred.canonical_write import guard_canonical_write
 
 class CorrectionNotApplied(RuntimeError):
     """A requested replacement did not match its target exactly once."""
+
+
+class CorrectionNotSynced(RuntimeError):
+    """feed.json was corrected but the Supabase projection was not updated."""
+
+
+def _splice(content: str, replacements: list[tuple[str, str]]) -> list[dict]:
+    """Locate every replacement in `content` and return non-overlapping spans.
+
+    Matches are located in the ORIGINAL content only, so replacements cannot
+    chain: given [("A","B"), ("B","C")] on "A B", a naive sequential
+    `str.replace` yields "C B" because the second pattern eats the first
+    pattern's output. Here both spans are resolved against the original and
+    applied simultaneously, so the result is "B C".
+
+    Raises CorrectionNotApplied unless every `old` matches exactly once and no
+    two matches overlap.
+    """
+    spans: list[dict] = []
+    for old, new in replacements:
+        if not old:
+            raise CorrectionNotApplied("empty search string")
+        hits = [m.start() for m in re.finditer(re.escape(old), content)]
+        if len(hits) != 1:
+            raise CorrectionNotApplied(
+                f"{old!r} matched {len(hits)} times, expected exactly 1. "
+                "Nothing was written. Widen the substring until it is unique."
+            )
+        spans.append({"start": hits[0], "end": hits[0] + len(old),
+                      "from": old, "to": new})
+
+    spans.sort(key=lambda s: s["start"])
+    for a, b in zip(spans, spans[1:]):
+        if b["start"] < a["end"]:
+            raise CorrectionNotApplied(
+                f"replacements overlap in the source text: {a['from']!r} and "
+                f"{b['from']!r}. Nothing was written."
+            )
+    return spans
 
 
 def apply_article_correction(
@@ -69,20 +111,25 @@ def apply_article_correction(
             raise KeyError(f"{article_id} not found in {feed_path}")
 
         content = art.get("content") or ""
-        applied: list[dict] = []
 
-        # Validate every replacement BEFORE mutating anything, so a bad batch
+        # Resolve all spans against the ORIGINAL content, then apply them in a
+        # single pass. Validation happens before any mutation, so a bad batch
         # cannot leave the article half-corrected.
-        for old, new in replacements:
-            hits = content.count(old)
-            if hits != 1:
-                raise CorrectionNotApplied(
-                    f"{article_id}: {old!r} matched {hits} times, expected exactly 1. "
-                    "Nothing was written. Widen the substring until it is unique."
-                )
-        for old, new in replacements:
-            content = content.replace(old, new, 1)
-            applied.append({"from": old, "to": new})
+        try:
+            spans = _splice(content, replacements)
+        except CorrectionNotApplied as exc:
+            raise CorrectionNotApplied(f"{article_id}: {exc}") from None
+
+        applied = [{"from": s["from"], "to": s["to"]} for s in spans]
+        if spans:
+            out: list[str] = []
+            pos = 0
+            for s in spans:
+                out.append(content[pos:s["start"]])
+                out.append(s["to"])
+                pos = s["end"]
+            out.append(content[pos:])
+            content = "".join(out)
 
         details_changes: dict = {}
         if details_patch:
@@ -132,18 +179,44 @@ def apply_article_correction(
         art["errata"] = errata
 
         guard_canonical_write(feed_path)
-        feed_path.write_text(
-            json.dumps(feed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        # Atomic: feed.json is ~15MB of canonical state. A truncated in-place
+        # write (disk full, I/O error, kill) would destroy every article, and
+        # the lock does not protect against that -- it only serialises writers.
+        payload = json.dumps(feed, ensure_ascii=False, indent=2) + "\n"
+        fd, tmp_name = tempfile.mkstemp(
+            dir=str(feed_path.parent), prefix=".feed_correction_", suffix=".json"
         )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                fh.write(payload)
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(tmp_name, feed_path)
+        except BaseException:
+            Path(tmp_name).unlink(missing_ok=True)
+            raise
 
-    synced: bool | None = None
-    if sync:
-        from scripts.supabase_sync import sync_article
+        # Sync inside the lock. Outside it, a concurrent writer could land
+        # between the write and the sync, and we would upsert this stale
+        # snapshot over their change. sync_article does not take this lock,
+        # so this cannot deadlock.
+        if sync:
+            from scripts.supabase_sync import sync_article
 
-        # Deliberately not wrapped in try/except: an unsynced correction means
-        # the live page still serves the wrong number, which is precisely the
-        # state this module exists to end. Callers must see the failure.
-        synced = bool(sync_article(art, storage_dir=str(storage)))
+            # sync_article signals failure by RETURNING FALSE, not by raising
+            # (HTTP error, missing Supabase key). Returning that quietly would
+            # leave feed.json corrected and the live page still serving the
+            # wrong number -- exactly the silent-failure class this module
+            # exists to end. Convert it into a loud error.
+            synced = bool(sync_article(art, storage_dir=str(storage)))
+            if not synced:
+                raise CorrectionNotSynced(
+                    f"{article_id}: feed.json was corrected but sync_article "
+                    "returned False, so the live page still serves the old "
+                    "content. Re-run the sync; do not treat this as success."
+                )
+        else:
+            synced = None
 
     return {
         "article_id": article_id,

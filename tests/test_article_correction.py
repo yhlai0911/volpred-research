@@ -12,6 +12,7 @@ import pytest
 
 from volpred.publisher.article_correction import (
     CorrectionNotApplied,
+    CorrectionNotSynced,
     apply_article_correction,
 )
 
@@ -33,8 +34,13 @@ def storage(tmp_path, monkeypatch):
     (reports / "feed.json").write_text(
         json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    # Patch the name the module actually calls. `article_correction` did
+    # `from volpred.canonical_write import guard_canonical_write` at import
+    # time, so it holds its own alias -- patching the source module would be a
+    # silent no-op that looks like it is protecting the test.
     monkeypatch.setattr(
-        "volpred.canonical_write.guard_canonical_write", lambda *_a, **_kw: None
+        "volpred.publisher.article_correction.guard_canonical_write",
+        lambda *_a, **_kw: None,
     )
     return tmp_path
 
@@ -161,18 +167,22 @@ def test_repeated_corrections_append_to_history(storage):
     assert [h["summary"] for h in hist] == ["fix A", "fix B"]
 
 
-def test_sync_failure_propagates(storage, monkeypatch):
-    """An unsynced correction leaves the live page wrong; it must not be silent."""
+def _fake_sync(monkeypatch, impl):
     import sys
     import types
 
     fake = types.ModuleType("scripts.supabase_sync")
+    fake.sync_article = impl
+    monkeypatch.setitem(sys.modules, "scripts.supabase_sync", fake)
+
+
+def test_sync_exception_propagates(storage, monkeypatch):
+    """An unsynced correction leaves the live page wrong; it must not be silent."""
 
     def boom(*_a, **_kw):
         raise RuntimeError("supabase unreachable")
 
-    fake.sync_article = boom
-    monkeypatch.setitem(sys.modules, "scripts.supabase_sync", fake)
+    _fake_sync(monkeypatch, boom)
 
     with pytest.raises(RuntimeError, match="supabase unreachable"):
         apply_article_correction(
@@ -186,3 +196,97 @@ def test_sync_failure_propagates(storage, monkeypatch):
     # The feed edit itself is already committed; only the projection failed.
     # Surfacing that is the point -- the caller must retry the sync.
     assert _article(storage)["details"]["event"] == "NFP_US_2026_07_02"
+
+
+def test_sync_returning_false_is_an_error_not_a_quiet_flag(storage, monkeypatch):
+    """sync_article signals failure by RETURNING FALSE, not by raising.
+
+    Reporting that as {"synced": False} and returning normally would leave
+    feed.json corrected while the live page still served the old number --
+    the exact silent-failure class this module exists to end.
+    """
+    _fake_sync(monkeypatch, lambda *_a, **_kw: False)
+
+    with pytest.raises(CorrectionNotSynced, match="still serves the old"):
+        apply_article_correction(
+            "mile_test",
+            details_patch={"event": "NFP_US_2026_07_02"},
+            summary="s",
+            storage_dir=storage,
+            sync=True,
+        )
+
+
+def test_sync_success_is_reported(storage, monkeypatch):
+    _fake_sync(monkeypatch, lambda *_a, **_kw: True)
+    report = apply_article_correction(
+        "mile_test", details_patch={"event": "X"}, summary="s",
+        storage_dir=storage, sync=True,
+    )
+    assert report["synced"] is True
+
+
+def test_replacements_cannot_chain_into_each_other(storage):
+    """[(A->B), (B->C)] on "A B" must give "B C", never "C B".
+
+    Sequential str.replace would let the second pattern eat the first
+    pattern's output. Spans are resolved against the original text.
+    """
+    art = _article(storage)
+    art["content"] = "A B"
+    feed = _feed(storage)
+    feed[0] = art
+    (storage / "reports" / "feed.json").write_text(
+        json.dumps(feed, ensure_ascii=False), encoding="utf-8"
+    )
+
+    apply_article_correction(
+        "mile_test",
+        content_replacements=[("A", "B"), ("B", "C")],
+        summary="s",
+        storage_dir=storage,
+        sync=False,
+    )
+    assert _article(storage)["content"] == "B C"
+
+
+def test_overlapping_replacements_are_rejected(storage):
+    with pytest.raises(CorrectionNotApplied, match="overlap"):
+        apply_article_correction(
+            "mile_test",
+            content_replacements=[("18.1%", "x"), ("18.1", "y")],
+            summary="s",
+            storage_dir=storage,
+            sync=False,
+        )
+    assert "18.1%" in _article(storage)["content"]
+
+
+def test_write_is_atomic_and_leaves_no_temp_files(storage):
+    apply_article_correction(
+        "mile_test", details_patch={"event": "X"}, summary="s",
+        storage_dir=storage, sync=False,
+    )
+    leftovers = list((storage / "reports").glob(".feed_correction_*"))
+    assert leftovers == []
+    # File is complete and parseable, not truncated.
+    assert len(_feed(storage)) == 2
+
+
+def test_failed_write_does_not_leave_a_partial_feed(storage, monkeypatch):
+    """If the atomic write blows up, the original feed must survive intact."""
+    original = _feed(storage)
+
+    def boom(*_a, **_kw):
+        raise OSError("disk full")
+
+    monkeypatch.setattr("os.replace", boom)
+
+    with pytest.raises(OSError, match="disk full"):
+        apply_article_correction(
+            "mile_test", details_patch={"event": "X"}, summary="s",
+            storage_dir=storage, sync=False,
+        )
+
+    assert _feed(storage) == original
+    assert list((storage / "reports").glob(".feed_correction_*")) == []

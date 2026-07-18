@@ -212,7 +212,31 @@ no-op 拒絕蓋 errata / `published_at` 不被動 / sync 失敗必須往上拋�
 之後已還原（`diff -q` 驗證與修正版一致）。
 
 其他：`experiment_gates.py run` → **PASS**（4 gates）。
-`test_event_dates.py` + `test_prepublish_audit_dates.py` 未受影響，46 tests 全綠。
+`test_event_dates.py` + `test_prepublish_audit_dates.py` 未受影響。
+
+---
+
+## 6b. Codex 獨立審查（round 1）→ 判 FIX-BEFORE-MERGE → 已全數修正
+
+Codex 判定事件日期與下載邊界正確，但在**新寫的 canonical writer**
+`article_correction.py` 上抓到三個高風險缺陷。**全部屬實，已修**：
+
+| # | 嚴重度 | 缺陷 | 修正 |
+|---|---|---|---|
+| 1 | HIGH | **靜默同步失敗**。`sync_article()` 失敗時是 **return False**，不是丟例外。我的模組只處理了例外路徑，於是會正常返回 `{"synced": False}` —— feed.json 已改、Supabase 沒改、呼叫端以為成功。**這正好是本模組宣稱要杜絕的失效模式，卻自己犯了。** | 已驗證 `supabase_sync.py` 確有 6 條 `return False` 路徑。falsy 回傳改為 raise `CorrectionNotSynced`。新增測試。 |
+| 2 | HIGH | **非原子覆寫**。`write_text()` 直接 truncate 15MB 的 canonical feed.json；磁碟滿／中斷會留下截斷 JSON，lock 擋不住。 | 改 `mkstemp` + `fsync` + `os.replace()`；失敗清掉暫存檔。新增「寫入失敗後原檔完好」測試。 |
+| 3 | HIGH | **replacement 交互污染**。驗證在原文做、替換卻依序作用於已改內容：`[("A","B"),("B","C")]` 對 `"A B"` 會得到 `"C B"`（第二筆吃掉第一筆的產物）。所以我宣稱的 all-or-nothing **並不成立**。 | 改成在**原文**上解析所有 span、檢查不重疊、單次 splice 組回去。新增交互測試（斷言得 `"B C"`）與重疊拒絕測試。 |
+| 4 | MEDIUM | sync 在 lock 外用舊 snapshot，並行 writer 會被舊內容蓋回。 | 已驗證 `sync_article` 不取同一把 lock（不會 deadlock）→ 移進 lock 內。 |
+| 5 | MEDIUM | **SPY/VIX 各自獨立**取「事件日後第一筆」，未要求同一天；vendor gap 會把不同日期的兩個數字拼成一列。且事件被 `continue` 跳過後仍用較小的 n 產出看似合理的結果。 | VIX 改為**必須**落在與 SPY 相同的 session；任何事件無法測量 → 收集後 **raise**，不再讓樣本無聲縮水。 |
+| 6 | MEDIUM | lookahead 只有實作、**沒有測試防線**——把 `end` 改回 `2026-07-03` 仍全綠。 | 新增 `TestNoLookahead`：攔截實際 `yf.download` 呼叫並斷言 `end == "2026-07-02"`。 |
+| 7 | 測試品質 | `monkeypatch` 打在 `volpred.canonical_write.guard_canonical_write`，但模組已 `from ... import` 綁了自己的別名 → **這個 patch 根本沒生效**，只是看起來有保護。 | 改 patch `volpred.publisher.article_correction.guard_canonical_write`。 |
+
+**#5 修正後統計量完全沒變**（13 列全數保留，8 個統計量 byte-identical）——證明這份資料本來就對齊，
+該修正是防線而非數字變更。**沒有任何一個對外數字因為這輪 review 而改變。**
+
+**兩次 mutation test 都確認測試會紅**：還原 proxy → 5 紅；把 `end` 改回 `2026-07-03` → lookahead 測試轉紅。
+
+修正後 tests：`test_article_correction.py` **16 passed**、`test_nfp_official_release_dates.py` **32 passed**。
 
 ---
 

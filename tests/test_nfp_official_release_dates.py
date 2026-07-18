@@ -218,6 +218,60 @@ class TestExperimentUsesOfficialCalendar:
             experiment.build_nfp_dates(13)
 
 
+class TestNoLookahead:
+    """The download window itself must exclude the release day.
+
+    Asserting on constants is not enough: the constant can be right while the
+    call still passes a later `end`. These observe the actual yfinance calls.
+    """
+
+    def _capture_downloads(self, experiment, monkeypatch):
+        calls = []
+
+        def recorder(ticker, **kw):
+            calls.append({"ticker": ticker, **kw})
+            raise _StopEarly()
+
+        monkeypatch.setattr(
+            event_dates, "_fetch", lambda *_a, **_kw: list(OFFICIAL_2024_2026)
+        )
+        monkeypatch.setattr(
+            experiment,
+            "nfp_release_dates",
+            lambda start, end, **kw: event_dates.nfp_release_dates(
+                start, end, use_cache=False
+            ),
+        )
+        monkeypatch.setattr(experiment.yf, "download", recorder)
+        try:
+            experiment.main()
+        except _StopEarly:
+            pass  # silent-ok: sentinel to stop main() once args are captured
+        return calls
+
+    def test_download_window_ends_before_the_release(self, experiment, monkeypatch):
+        calls = self._capture_downloads(experiment, monkeypatch)
+        assert calls, "expected at least one yfinance download"
+        for call in calls:
+            # yfinance `end` is exclusive, so end == release date means the
+            # last obtainable session is 2026-07-01.
+            assert call["end"] == "2026-07-02", (
+                f"{call['ticker']} download window ends at {call['end']!r}; "
+                "the 2026-07-02 release day must not be downloadable"
+            )
+
+    def test_download_window_starts_before_the_earliest_event(
+        self, experiment, monkeypatch
+    ):
+        calls = self._capture_downloads(experiment, monkeypatch)
+        # Needs a prior close to difference against 2025-05-02.
+        assert all(call["start"] < "2025-05-02" for call in calls)
+
+
+class _StopEarly(Exception):
+    """Abort main() once the download arguments have been observed."""
+
+
 class TestNoProxyResidue:
     """Source-level guard. The behavioural tests above can all pass while a
     dormant proxy helper sits in the file waiting to be called again."""

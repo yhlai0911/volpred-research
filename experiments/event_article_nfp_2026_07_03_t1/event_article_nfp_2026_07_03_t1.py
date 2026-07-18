@@ -130,26 +130,35 @@ def main():
 
     # ---- historical NFP-day event window ----
     rows = []
+    skipped = []
     for nfp_ts in nfp_dates:
-        # SPY return ON the NFP release day (close-to-close, day t vs t-1)
+        # SPY return ON the NFP release day (close-to-close, day t vs t-1).
+        # 2026-04-03 is Good Friday: BLS published, equities were shut, so the
+        # first tradable session is the following Monday. That row's "day 0"
+        # therefore spans a weekend -- disclosed in the README.
         idx = spy_ret.index[spy_ret.index >= nfp_ts]
         if len(idx) == 0:
+            skipped.append((nfp_ts, "no SPY session at or after release"))
             continue
         day0 = idx[0]
         if day0 - nfp_ts > pd.Timedelta(days=4):
-            continue  # release date not a trading day within reasonable window, skip
+            skipped.append((nfp_ts, f"nearest SPY session {day0.date()} too far"))
+            continue
         ret_day0 = float(spy_ret.loc[day0]) * 100.0
 
-        # VIX change from day before release to day of release (VIX close t vs t-1)
-        vix_idx = vix_close.index[vix_close.index >= nfp_ts]
-        if len(vix_idx) == 0:
+        # VIX must be measured on the SAME session as SPY. Letting each series
+        # pick its own "first date at or after the release" would silently pair
+        # a SPY return from one day with a VIX change from another whenever the
+        # two calendars disagree, producing a plausible but incoherent row.
+        if day0 not in vix_close.index:
+            skipped.append((nfp_ts, f"no VIX close on SPY session {day0.date()}"))
             continue
-        vix_day0 = vix_idx[0]
-        prior_vix_idx = vix_close.index[vix_close.index < vix_day0]
+        prior_vix_idx = vix_close.index[vix_close.index < day0]
         if len(prior_vix_idx) == 0:
+            skipped.append((nfp_ts, "no VIX close before release"))
             continue
         vix_prior = float(vix_close.loc[prior_vix_idx[-1]])
-        vix_on = float(vix_close.loc[vix_day0])
+        vix_on = float(vix_close.loc[day0])
         vix_chg = vix_on - vix_prior
 
         # next trading day SPY return (post-digestion day t+1)
@@ -168,6 +177,16 @@ def main():
 
     hist_df = pd.DataFrame(rows)
     print(hist_df)
+
+    # A dropped event silently shrinks n and every statistic computed from it,
+    # while the run still succeeds and the figures still render. Refuse to
+    # produce a quietly smaller sample.
+    if skipped:
+        detail = "; ".join(f"{ts.date()}: {why}" for ts, why in skipped)
+        raise RuntimeError(
+            f"{len(skipped)} of {len(nfp_dates)} official NFP events could not "
+            f"be measured, so the sample would silently shrink: {detail}"
+        )
 
     n = len(hist_df)
     win_rate_up = float((hist_df["spy_ret_day0_pct"] > 0).mean()) * 100.0
