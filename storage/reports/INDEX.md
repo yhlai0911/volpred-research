@@ -1,23 +1,25 @@
 # Feed Index
 
-_Last built: 2026-07-18 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-18 06:01 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1839**  (with thumbnail: 81)
-- Last 30 days: **275**
-- Total chars (content): 5,660,987
+- Total articles: **1841**  (with thumbnail: 81)
+- Last 30 days: **274**
+- Total chars (content): 5,671,149
 
-**Status**: published=1631, archived=124, unpublished=66, retracted=13, draft=4, wont_fix=1
+**Status**: published=1633, archived=124, unpublished=66, retracted=13, draft=4, wont_fix=1
 
-**Audience**: research=1142, general=450, daily=149, unknown=77, member_qa=14, event=7
+**Audience**: research=1142, general=452, daily=149, unknown=77, member_qa=14, event=7
 
-**Category**: milestone=906, general=813, unknown=73, member_qa=14, research=10, daily_article=8, event_article=5, qa=5, experiment=4, diary=1
+**Category**: milestone=906, general=815, unknown=73, member_qa=14, research=10, daily_article=8, event_article=5, qa=5, experiment=4, diary=1
 
-## 最近 30 天 (275)
+## 最近 30 天 (274)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-18 | `mile_d54f3c96` | 減碼還是加碼？把波動率當油門，用四段檢查決定這一腳踩多深 | general | general | published | 7483 |  | 一般讀者, 精選導讀, daily_digest, VIX, 波動率目標, VT策略 |
+| 2026-07-18 | `mile_78899a5c` | 費半跌了一成六，VIX 卻在睡覺：你的避險工具可能對錯了目標 | general | general | published | 2679 |  | 一般讀者, 波動率, 半導體, VIX, 避險, 相關性 |
 | 2026-07-17 | `mile_d288539b` | 同樣叫短債，USDC 出事時一檔波動放大 2.8 倍，另一檔幾乎沒變 | general | general | published | 2977 |  | 一般讀者, 穩定幣, USDC, 短期公債, SHY, BIL |
 | 2026-07-17 | `mile_badbc47b` | 我們把自家的抗跌策略重做了一遍：漂亮的 12.61 個百分點，主要是減碼買來的 | general | general | published | 4457 |  | 一般讀者, 研究誠實, 回撤, 波動率目標, 風險管理, VIX |
 | 2026-07-17 | `mile_382127b9` | 風險區間天天調會更準嗎？12 檔 ETF 只贏了一格 | general | general | published | 2666 |  | 一般讀者, 風險區間, Conformal, ETF, 模型校準 |
@@ -290,14 +292,14 @@ _Last built: 2026-07-18 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-18 | `mile_7d5d0e1f` | VIX 報的是恐慌，不是真實波動——有辦法同時吸收兩者的優點嗎？ | research | milestone | published | 3174 |  | 研究, leverage-effect, vix, volatility-targeting, SPY, 波動率 |
 | 2026-06-18 | `mile_c9dc52b5` | K1416：HLN(1997) 小樣本修正的正式套用 — Paper 3 TW0050-N225 主張的穩健性確認 | research | milestone | published | 3858 |  | 研究, HLN, DM-test, small-sample, copula, Paper3 |
 | 2026-06-18 | `mile_6000a480` | 五個不同起點都過關，這個跨市場模型不是剛好猜中一次 | general | general | published | 1472 |  | 一般讀者, 台股, 日本股市, 跨市場, 波動率, 風險管理 |
-| 2026-06-18 | `mile_9def57ab` | SpaceX 還沒上市，被動資金的買單已經在排隊：指數納入正在變成一場可以倒數的波動率事件 | general | general | published | 3899 |  | 一般讀者, trending, 指數納入, 波動率, 被動投資, SpaceX |
-| 2026-06-18 | `mile_50616ca2` | 把同一個模型算慢一點，答案真的會變嗎？ | general | general | published | 1563 |  | 一般讀者, 模型穩健性, 波動率, 方法論, 研究流程 |
-| 2026-06-18 | `mile_7f189c12` | 新主席首秀即放鷹：MOVE 指數說的話，VIX 還沒聽懂 | general | general | published | 2790 |  | 一般讀者, FOMC, Fed, 通膨, 利率, MOVE |
 
-<details><summary>## 2026-Q2 (892)</summary>
+<details><summary>## 2026-Q2 (895)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-18 | `mile_9def57ab` | SpaceX 還沒上市，被動資金的買單已經在排隊：指數納入正在變成一場可以倒數的波動率事件 | general | general | published | 3899 |  | 一般讀者, trending, 指數納入, 波動率, 被動投資, SpaceX |
+| 2026-06-18 | `mile_50616ca2` | 把同一個模型算慢一點，答案真的會變嗎？ | general | general | published | 1563 |  | 一般讀者, 模型穩健性, 波動率, 方法論, 研究流程 |
+| 2026-06-18 | `mile_7f189c12` | 新主席首秀即放鷹：MOVE 指數說的話，VIX 還沒聽懂 | general | general | published | 2790 |  | 一般讀者, FOMC, Fed, 通膨, 利率, MOVE |
 | 2026-06-17 | `mile_0daa4bb2` | NVDA 選擇權把話說得很清楚：先怕，再買 | general | general | published | 2060 |  | 一般讀者, trending_repost, nvda, iv, skew, options |
 | 2026-06-17 | `mile_5c8ef549` | K1390：VIX 體制拆分的 Conformal VaR — 唯一同時通過 Kupiec 與 Christoffersen 的方法 | research | milestone | published | 4950 |  | 研究, VaR, conformal, VIX, SPY, regime |
 | 2026-06-17 | `mile_eabd7e46` | 地緣政治風險指數能預測美股波動嗎？六千個交易日的答案 | research | milestone | unpublished | 6515 |  | 研究, 地緣政治, 波動率, VIX, GPR, 美股 |
