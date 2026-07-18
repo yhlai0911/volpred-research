@@ -939,3 +939,65 @@ def test_orphan_finding_queues_as_experiment_task_type(tmp_path):
     types = {t["title"]: t["task_type"] for t in queued.values()}
     assert types["[dreaming] orphaned_experiment:k1630"] == "experiment"
     assert types["[dreaming] missing_retry_strategy:k9"] == "platform_ops"
+
+
+# ---------------------------------------------------------------------------
+# Email 建議行動：嚴重度 → level + 行動，由 DREAMING_SEVERITY_TIERS 這張表決定。
+# 2026-07-18 重構後的迴歸鎖：level 與文案必須來自同一筆 tier，不再兩處各自 if。
+# ---------------------------------------------------------------------------
+def _email_report(new: int, escalations: int) -> dict:
+    return {
+        "counts": {"findings": new, "new": new, "resolved": 0, "escalations": escalations},
+        "findings": [
+            {
+                "severity": "critical" if escalations else "warn",
+                "pattern_type": "repeated_tool_failure",
+                "signature": "host_cron_fail:myjob",
+                "occurrences": 3 if escalations else 1,
+                "governance_target": None,
+            }
+        ][:new],
+        "loop_health": {"overall": "degrading" if escalations else "ok"},
+    }
+
+
+def _capture_email(monkeypatch, report):
+    sent = {}
+
+    def _fake(level, title, body, **kw):
+        sent.update(level=level, title=title, body=body)
+        return {"sent": True}
+
+    monkeypatch.setattr("volpred.ops.alerts.send_alert", _fake)
+    dr.send_dreaming_email(report, NOW, storage_dir="/tmp")
+    return sent
+
+
+def test_email_with_escalation_routes_to_three_strike(monkeypatch):
+    sent = _capture_email(monkeypatch, _email_report(new=1, escalations=1))
+    assert sent["level"] == "critical"
+    assert "refactor_plan" in sent["body"]
+    assert "Three-Strike" in sent["body"]
+    assert "不需要重構" not in sent["body"]
+
+
+def test_email_without_escalation_explicitly_declines_refactor(monkeypatch):
+    sent = _capture_email(monkeypatch, _email_report(new=1, escalations=0))
+    assert sent["level"] == "warn"
+    assert "不需要重構" in sent["body"]
+    # 只有「不啟動 refactor_plan」的否定句，不得出現「開 refactor_plan」的指示。
+    assert "docs/refactor_plan_" not in sent["body"]
+    assert "不啟動 Three-Strike / refactor_plan" in sent["body"]
+
+
+def test_email_quiet_run_is_info_and_still_declines_refactor(monkeypatch):
+    sent = _capture_email(monkeypatch, _email_report(new=0, escalations=0))
+    assert sent["level"] == "info"
+    assert "不需要重構" in sent["body"]
+
+
+def test_action_numbering_is_positional_not_hardcoded():
+    """加一條 tier 行動時編號自動遞延 —— 這是「加資料不改邏輯」的實證。"""
+    tier = dr.select_dreaming_tier({"escalations": 1, "new": 1})
+    lines = dr.render_dreaming_actions(tier, {"escalations": 1, "new": 1, "date_str": "2026-07-18"})
+    assert [line.split(".")[0] for line in lines] == ["1", "2", "3", "4"]

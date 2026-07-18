@@ -168,6 +168,7 @@
 **規則（false-negative 面，2026-07-16 補）**：**探針與復原都要架在 outcome 上，不是架在便宜的中間節點**。凡是**收 → 處理 → 回**的管線（Telegram / Gmail / 發文 / 派工），量「收得到」不等於量「做到了」；處理端死掉時，ingress 心跳會誠實地全綠 —— 「它死了」與「它沒事做」在 proxy 儀器上同形。量末端 outcome 的附帶好處：多個根因（依賴消失 / 額度耗盡 / claim 後卡死）由**同一支探針**覆蓋，不必各立一支。**推論（同日 strike 2）**：event-driven 處理器失敗後若無獨立 driver 重試，復原條件就是「同一個外部事件再來一次」= 把復原責任外包給老闆；retry 也要由**佇列殘留**驅動，不是由事件到達驅動。**且註解裡的安全網要當宣稱查證**（「hourly 兜底」寫在三處、跨多次修改沒人質疑，routing rule 從頭就排除它）。此條與 §D「靜默 fail-open」、control-plane.md「靜默的守門員最危險」同源。
 **機械 owner**：`src/volpred/ops/alerts.py`（check_alerts 每小時，condition-based）+ dreaming detector（dedup key = root-cause identity）。
 **代表 incident**：
+- 2026-07-18 dreaming email「建議行動」用 if/else 文案分支修補 —— 老闆糾正一次語氣就多插一個 branch，`level` 判定與文案兩處各自 if，形同遺留產線。改為 `DREAMING_SEVERITY_TIERS` 資料表（severity → level + actions 同源）。**教訓：alert body 的文案分支是遺留來源；「加一級嚴重度」必須等於加一筆資料，不是加一個 if。** — Q3
 - 2026-07-16 22:2x host_cron_fail 連續 critical，兩個來源**都不是失敗**：(a) `paper_sync_all` 一次 socket timeout 就 exit 1（同一 flake 也讓當天 digest 的 publish read-back 誤報，實際已同步）→ 修在 `supabase_sync._urlopen` 單一出口加 bounded retry，且**只重放 replay-safe 請求**（GET/PATCH/DELETE + 帶 on_conflict 的 POST；裸 POST 不重放否則複製 row），gate `tests/test_supabase_transient_retry.py`；(b) `daily_update` 偵測到 feed.json 已 dirty、正確拒絕覆寫他人在途編輯，卻用 exit 1 回報 → 與真 infra failure 撞號，alert 建議「chmod +x / 檢查 FDA」完全不相干。**這是 `.claude/rules/alert.md` §Severity taxonomy「Guard-held success 要用 distinct exit code」已寫明、但未落實的第 3 個位置**（前兩個：2026-06-20 exit-as-findings、2026-07-03 push-held）→ 收編既有 sentinel 120（不新建機制），gate `tests/test_daily_update_guard_held_exit.py` 釘住它與 `alerts._PUSH_HELD_EXIT_CODE` 不漂移。**教訓：規則寫進 rules 檔不等於落地——同一 taxonomy 條目已被違反三次，每次都是新 caller 沿用 exit 1。新增任何會 hold/abort 的 guard 時，exit code 的語義分類要與程式同時寫。** 驗證：wrapper 端到端 exit 0；資料實際新鮮（策略全到 7/15 最新收盤），故無 outcome damage — Q3
 - 2026-07-16 22:27 **同日 strike 2**：宣告「已修好並驗證」後 41 分鐘，同一通道再次靜默 — responder 純 event-driven（只在新訊息到達時 spawn）、失敗後無重試，額度恢復也不會自己回來；且它三處註解自稱的「hourly dispatch 兜底」**根本不存在**（task-routing.md:40 明排除 telegram_reply）。改由 poll daemon 的 while-loop 兼任 retry driver（佇列殘留 >2min 重 spawn，5min backoff）— Q3
 - 2026-07-16 20:33 Telegram poll 全綠但 responder 死透（brew `jq` 消失 FATAL + 前一段 Claude 週額度 exit=1），老闆訊息無人回、只有老闆本人發現；補 `telegram_reply_backlog` outcome 探針（量「有沒有被回」非「process 活著沒」）+ responder 移除 brew `jq` 硬編碼依賴 — Q3
@@ -349,3 +350,26 @@ error/subagent/background/cron，使用 `session_id + assistant.uuid` one-shot �
 
 **教訓**：Stop 是 turn-end，不是 task-completed；任何非空文字都算完成會把 no-op、拒絕、timeout
 誤播。語意層必須提供明確 receipt，機械層才 consume；外部文字不可拼 shell command。
+
+## 2026-07-18 反射式文案 if/else 是遺留來源：dreaming email「建議行動」重構 — FIXED
+
+**根因**：`send_dreaming_email` 的建議行動是一疊寫死的模板字串。老闆指出 escalations=0 時仍反射式
+建議「從底層重構」是過度反應（email-12149），上一輪的修法是在字串堆疊中間插一個
+`if c["escalations"]: ... else: ...` 文案分支。老闆隨即指出**這個修法本身就是要停止的行為**
+（telegram-942：「不可以只用修補的方式，以後不可以再出現這種遺留的狀況」）。結構上的問題有兩層：
+(1) 每收到一次語氣糾正就多一個 branch，函式無界成長；(2) `level = "critical" if escalations else
+(...)` 與文案分支是**兩處各自 if 同一個條件**，任何一邊改動都會讓 level 與內文語意漂移，而且沒有
+任何測試會發現。
+
+**修復**：抽成 module-level 資料表 `DREAMING_SEVERITY_TIERS`（frozen dataclass
+`DreamingSeverityTier`：`matches` 條件 + `alert_level` + 該級專屬 `actions`），通用行動放
+`_DREAMING_COMMON_ACTIONS_HEAD/TAIL`，由 `select_dreaming_tier` 選、`render_dreaming_actions`
+渲染（編號用 enumerate 產生，不寫死在字串裡）。level 與文案自此同源於一筆 tier。舊 if/else 分支
+整段移除，無 legacy fallback。新增 4 個測試釘住三級 level 與各自文案、以及編號的位置性；
+`tests/test_dreaming_review.py` 50 passed，連同 alerts / check_alerts 共 119 passed。
+
+**教訓**：**boss-facing 文案的 if/else 分支是遺留的孵化器** —— 文案糾正頻率高、每次糾正的最小
+修補都是「再加一個 branch」，於是修補本身變成復發機制。凡「條件 → 文案」的對應，第二個分支出現時
+就該轉成資料表；且同一條件不得在兩個地方各自 if（level 與內文必須由同一筆資料決定），否則漂移
+無人察覺。此條與 §H「alert body 是寫給人看的待辦」同源：alert 內文是產品介面，要有結構與測試，
+不是可以隨手貼字串的地方。

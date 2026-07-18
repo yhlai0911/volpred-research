@@ -44,7 +44,7 @@ import sys
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "src"))
@@ -1101,12 +1101,93 @@ def append_decision(storage_dir: str, now: datetime, report: dict[str, Any]) -> 
         fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
+@dataclass(frozen=True)
+class DreamingSeverityTier:
+    """一級嚴重度 → 郵件 level + 該級專屬的建議行動。
+
+    2026-07-18（boss telegram-942）：這段原本是 `level = ... if ... else ...` 加上一組
+    寫死的模板字串、再加一個 if/else 文案分支。每次老闆糾正一次文案，就多插一個分支 ——
+    這正是「反射式修補」的遺留來源。改成資料表後，新增一級嚴重度或一條行動 = 加一筆資料，
+    而且 level 與文案由同一筆資料決定，不會再出現「兩處各自 if、語意漂移」。
+    """
+
+    name: str
+    # 命中條件只看 report["counts"]，順序由上而下第一個命中者勝（最後一筆必須是 catch-all）。
+    matches: Callable[[dict[str, int]], bool]
+    alert_level: str  # critical | warn | info（送進 send_alert 的 level）
+    # 該級專屬行動；以 str.format(**ctx) 展開，ctx = report["counts"] + date_str
+    # （由 send_dreaming_email 組好後傳給 render_dreaming_actions）。
+    actions: tuple[str, ...]
+
+
+# 不論嚴重度都要講的行動（報告位置、propose-only 邊界）。放在專屬行動之前。
+_DREAMING_COMMON_ACTIONS_HEAD: tuple[str, ...] = (
+    "看完整報告：`storage/ops/dreaming/{date_str}.json`。",
+    "治理類 findings（error_log / rules / knowledge.json）為 **propose-only** — 主線程審 "
+    "proposal 後手動決定是否套用，dreaming 不自動改。",
+)
+
+# 放在專屬行動之後的通用行動。
+_DREAMING_COMMON_ACTIONS_TAIL: tuple[str, ...] = (
+    "auto_dispatch 類（orphaned failure）→ `--apply-auto` 才會派修復 task（預設關，先人工審）。",
+)
+
+# escalations=0 時 findings 都是小型/漸進處理（補 retry 策略、memory 整併），反射式推
+# 「從底層重構」是過度反應（boss email-12149 2026-07-18）。warn 與 info 兩級共用這條，
+# 所以抽成常數而非在兩筆資料裡各貼一份字串。
+_NO_REFACTOR_ACTION = (
+    "**escalations=0 → 不需要重構**。本輪 findings 為小型/漸進處理（補 retry 策略、"
+    "memory 整併等），依 finding 個別 propose 即可，**不啟動 Three-Strike / refactor_plan**。"
+    "找到問題 ≠ 從底層重構。"
+)
+
+# 建議行動要與嚴重度成比例。由上而下第一個 matches 命中者決定 level 與專屬行動。
+DREAMING_SEVERITY_TIERS: tuple[DreamingSeverityTier, ...] = (
+    DreamingSeverityTier(
+        name="escalated",
+        matches=lambda c: bool(c.get("escalations")),
+        alert_level="critical",
+        actions=(
+            "**escalations={escalations}（critical）** → 開 `docs/refactor_plan_<topic>.md` "
+            "走 Three-Strike 根治；這是連 3 次 dreaming run 仍未解的結構性問題，才值得動根。",
+        ),
+    ),
+    DreamingSeverityTier(
+        name="new_findings",
+        matches=lambda c: bool(c.get("new")),
+        alert_level="warn",
+        actions=(_NO_REFACTOR_ACTION,),
+    ),
+    DreamingSeverityTier(
+        name="steady",
+        matches=lambda c: True,  # catch-all：沒有 new、沒有 escalation 的例行回報
+        alert_level="info",
+        actions=(_NO_REFACTOR_ACTION,),
+    ),
+)
+
+
+def select_dreaming_tier(counts: dict[str, Any]) -> DreamingSeverityTier:
+    """回傳第一個命中的 tier；表尾的 catch-all 保證一定有結果。"""
+    for tier in DREAMING_SEVERITY_TIERS:
+        if tier.matches(counts):
+            return tier
+    return DREAMING_SEVERITY_TIERS[-1]
+
+
+def render_dreaming_actions(tier: DreamingSeverityTier, ctx: dict[str, Any]) -> list[str]:
+    """把 tier 的行動展開成編號行。編號由順序決定，不寫死在字串裡。"""
+    actions = (*_DREAMING_COMMON_ACTIONS_HEAD, *tier.actions, *_DREAMING_COMMON_ACTIONS_TAIL)
+    return [f"{i}. {a.format(**ctx)}" for i, a in enumerate(actions, start=1)]
+
+
 def send_dreaming_email(report: dict[str, Any], now: datetime, storage_dir: str) -> dict[str, Any]:
     from volpred.ops.alerts import send_alert
 
     c = report["counts"]
-    level = "critical" if c["escalations"] else ("warn" if c["new"] else "info")
     date_str = now.astimezone(timezone.utc).strftime("%Y-%m-%d")
+    tier = select_dreaming_tier(c)
+    level = tier.alert_level
     title = f"Dreaming review {date_str} — {c['new']} new / {c['escalations']} escalations"
 
     lines = ["## 觸發條件"]
@@ -1130,28 +1211,9 @@ def send_dreaming_email(report: dict[str, Any], now: datetime, storage_dir: str)
             "根治候選。直接服務 Mission #2/#4（研究品質 + 運營穩定）。",
             "",
             "## 建議行動",
-            f"1. 看完整報告：`storage/ops/dreaming/{date_str}.json`。",
-            "2. 治理類 findings（error_log / rules / knowledge.json）為 **propose-only** — 主線程審 "
-            "proposal 後手動決定是否套用，dreaming 不自動改。",
         ]
     )
-    # 建議行動要與嚴重度成比例（boss email-12149 2026-07-18）：escalations=0 時 findings
-    # 都是小型/漸進處理（補 retry 策略、memory 整併），反射式推「從底層重構」是過度反應。
-    # 只有真的有 escalation 才提 Three-Strike / refactor_plan。
-    if c["escalations"]:
-        lines.append(
-            f"3. **escalations={c['escalations']}（critical）** → 開 `docs/refactor_plan_<topic>.md` "
-            "走 Three-Strike 根治；這是連 3 次 dreaming run 仍未解的結構性問題，才值得動根。"
-        )
-    else:
-        lines.append(
-            "3. **escalations=0 → 不需要重構**。本輪 findings 為小型/漸進處理（補 retry 策略、"
-            "memory 整併等），依 finding 個別 propose 即可，**不啟動 Three-Strike / refactor_plan**。"
-            "找到問題 ≠ 從底層重構。"
-        )
-    lines.append(
-        "4. auto_dispatch 類（orphaned failure）→ `--apply-auto` 才會派修復 task（預設關，先人工審）。"
-    )
+    lines.extend(render_dreaming_actions(tier, {**c, "date_str": date_str}))
     return send_alert(level, title, "\n".join(lines), storage_dir=storage_dir)
 
 
