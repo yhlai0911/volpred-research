@@ -21264,5 +21264,15 @@
     "owner": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38",
     "commit": "999859933",
     "summary": "手動 land scripts/tests/test_phase_z_drain_retry.py 等 3 支擱淺測試檔（詳見 ci-red-29651115228 同班 entry）。人工判定要點：測試對 fb1e4cc68 的行為變更是逐條 track 且額外收緊，非放寬斷言；以 HEAD 版對現行 source 實跑 FAILED 作為『真溫度計』證據。"
+  },
+  {
+    "timestamp": "2026-07-19T04:15:05+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_358decfa",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-9821e0723e124a95af0ae537ebd2dde0",
+    "owner": "hourly-slot-1-9821e0723e124a95af0ae537ebd2dde0",
+    "commit": "8dfb83806",
+    "summary": "收 agent job `agent-brief_nfp_official_dates-d68f3f`（PHASE A followup / collect_completed）。\n\n**驗證（brief 四項全過）**：\n1. 7 筆錯誤樣本前後對照表逐筆有官方日期對應；live verify 是實際 curl + Supabase projection 查詢（HTTP 200 + 新值 18.28%/14.41% present、舊值 18.1%/14.0% absent），非推理。\n2. first-Friday proxy 已無殘留（該腳本內僅剩敘事性提及與原始碼層防呆）；本機重跑 `tests/test_nfp_official_release_dates.py` + `tests/test_article_correction.py` = **49 passed**。報告載明 mutation test：還原 proxy → 5 測試轉紅、`end` 改回 07-03 → lookahead 轉紅、加第 4 個下載 → 3 個 lookahead 全紅。\n3. 未發第二篇更正文；metadata 走新增的唯一正式入口 `src/volpred/publisher/article_correction.py`（all-or-nothing、每個替換恰好命中一次、atomic mkstemp+fsync+os.replace）。feed sweep 確認 `details.event` 類問題已清空。\n4. Codex 4 輪審查判 PASS（`review_verdict.json`，gpt-5.6-sol/high，blocking_defects=[]）。\n\n**合併**：`scripts/merge_worktree.sh dispatch-slot-1-0bd07fce-nfpdates` → experiments 完整性檢查通過、branch `task/nfp-official-dates`（8dfb83806）已刪、worktree 已移除。\n\n**knowledge**：主線程寫入 `390d9784`（category=methodology_lesson）。核心教訓 —— proxy 不噴錯、不產生 NaN、圖照畫，安靜產出方向相反的數字；SPY 上漲機率 53.8%→46.2%、VIX 下降比例 46.2%→53.8% 兩個方向翻轉，但**當日報酬平均值幾乎不動**（-0.185%→-0.183%），只看平均完全看不出污染。\n\n**衍生任務（報告 §7，未修範圍）**：\n- `assign_ae004ae2` P1 — k528 用同一 proxy，254 筆中 53 筆（20.9%）錯、52 個真實發布日被漏，偏誤系統性偏早（28 筆剛好早 7 天）。線上文章 `mile_35eef830` 正文核心數字（2.17 倍體制差、相關 0.45、分界 16.71）全出自 k528，尚未修。\n- `assign_23b2a961` P2 — 全 repo 另 6 支腳本仍用該 proxy，**k904 在 `paper/` 底下可能影響論文**（列為該任務第一優先）；併含 `event_dates.release_dates()` 的 `.max()` 對 NFP 取錯（需 per-event 語意，不可順手改動與 CPI 共用的行為）。"
   }
 ]

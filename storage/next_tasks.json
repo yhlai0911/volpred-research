@@ -32900,36 +32900,15 @@
   },
   {
     "id": "paper_stage_tracker_unification_analysis",
-    "title": "Paper stage tracker 雙 SoT 統一分析（5-stage vs 11-stage）",
-    "description": "WS5-5b S1 發現：paper-stage-classifier 的 5-stage 與 paper-submission-pipeline 的 11-stage 是兩套並行生命週期 tracker（dual source of truth），statuses 會漂移。本任務：分析-only — 盤點兩套的實際讀寫者（Supabase schema、前端、storage/paper_pipeline_status.json、各 skill），提出統一方案（保哪套、migration 步驟、影響面），落檔 docs/governance/。實施需 owner 裁決後另開任務。參考 docs/governance/2026-07/paper_skills_merge_eval.md §S1。",
-    "task_type": "governance",
     "status": "succeeded",
+    "task_type": "governance",
+    "title": "Paper stage tracker 雙 SoT 統一分析（5-stage vs 11-stage）",
     "priority": 3,
     "source": "ws5_governance_layer_consolidation",
     "created_at": "2026-07-14T09:04:42.802403+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-15T19:49:06.448376+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop"
-      },
-      {
-        "ts": "2026-07-15T19:49:06.690274+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop"
-      },
-      {
-        "ts": "2026-07-15T20:03:17.727025+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop"
-      }
-    ],
-    "started_at": "2026-07-15T19:49:06.690259+00:00",
     "completed_at": "2026-07-15T20:03:17.727010+00:00",
-    "result": "Analysis-only audit complete: 5-stage classifier is an unimplemented legacy spec, while the 11-stage tracker is the actual decision SoT and Supabase status is a display projection. Proposed single config owner, inode-safe sidecar-locked transition writer, explicit remote-sync receipts/outbox, phased migration, rollback and acceptance gates; implementation remains owner-gated. Commit b1ed9bf8b."
+    "tombstone": true,
+    "archived_at": "2026-07-18T20:11:07.703259+00:00"
   },
   {
     "id": "ci-red-29320130569",
@@ -33076,13 +33055,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T20:06:21.904857+00:00",
+    "completed_at": "2026-07-18T20:16:37.557010+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T20:06:21.904857+00:00",
-      "last_clean_observed_at": "2026-07-18T20:06:21.904857+00:00"
+      "resolved_at": "2026-07-18T20:16:37.557010+00:00",
+      "last_clean_observed_at": "2026-07-18T20:16:37.557010+00:00"
     }
   },
   {
@@ -34893,57 +34872,15 @@
   },
   {
     "id": "asia2_japan_vt_baseline",
-    "title": "[ASIA-2] 日股 VT 基礎（^N225/1306.T baseline sweep + 美 VIX exogenous）",
-    "description": "面向 ASIA 第二棒。^N225 + 1306.T（TOPIX ETF）baseline sweep（GARCH/GJR/HAR）+ 美 VIX exogenous 增量檢定 — 台股 R12 結論（美 VIX 優於本地 vol proxy）的日本複製。^NKVI（日經VI）yfinance 不可得（2026-07-15 smoke test x3 empty），本 K 用美 VIX spillover 角度，不做日本本地 IV。時區注意：日股收盤先於美股開盤，overnight VIX 訊號用前一美股交易日收盤（timing 合法）。資料期間：^N225 可回溯數十年，開工先診斷並依 COMMON_START 慣例。硬規則：開工先讀 docs/error_log.md + 搜 knowledge.json 相似 K + 至少 3 篇文獻；先做資料期間診斷（smoke test 只驗 2y，實驗要拉最長可得樣本，OOS 必含至少一次空頭）；跨市場假日 alignment 依 methodology.md；signal.shift(1) 明確 lag；DM 用 canonical volpred.stats.model_evaluation.dm_test（HAC bandwidth 規則）；收工跑 experiment_gates.py。",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "[ASIA-2] 日股 VT 基礎（^N225/1306.T baseline sweep + 美 VIX exogenous）",
+    "priority": 2,
     "source": "user_directive_20260715_market_diversification",
     "created_at": "2026-07-15T07:59:24.440660+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-15T17:09:11.082616+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-15T17:09:17.832078+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover"
-      },
-      {
-        "ts": "2026-07-15T19:50:06.266234+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "codex-failover",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-15T20:01:37.581127+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-1-3c9f512dc6414e2b84f77ff214fadf88"
-      },
-      {
-        "ts": "2026-07-15T20:01:37.859849+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-1-3c9f512dc6414e2b84f77ff214fadf88"
-      },
-      {
-        "ts": "2026-07-15T20:08:44.557947+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-1-3c9f512dc6414e2b84f77ff214fadf88"
-      }
-    ],
-    "started_at": "2026-07-15T20:01:37.859834+00:00",
-    "last_released_at": "2026-07-15T19:50:06.266227+00:00",
-    "last_release_reason": "auto_release_stale_2h",
     "completed_at": "2026-07-15T20:08:44.557932+00:00",
-    "result": "K1718 completed and merged: repaired audited 1306.T vendor scale discontinuities, reran 2015-2026 Japan OOS baselines, and found lagged US VIX passes 0/6 Holm-adjusted cells (NULL). Codex review/certification PASS; pytest 3/3 and experiment integrity gates PASS; merge_commit=21c155fb9."
+    "tombstone": true,
+    "archived_at": "2026-07-18T20:11:07.703259+00:00"
   },
   {
     "id": "asia3_tw_sector_spillover",
@@ -37070,13 +37007,10 @@
     "description": "K1442 同類污染掃描發現 experiments/event_article_nfp_2026_07_03_t1 用 first-Friday proxy；13 個歷史樣本至少 7 筆錯，2026-07 目標發布日是 07-02 而非 07-03。改用 volpred.data.event_dates.nfp_release_dates，保留 AS_OF=2026-07-01 的正確 T-1 快照，重跑 README/results/歷史 CSV、受影響的 fig2 與 lazypack 2/3，並做官方日曆 regression tests。live mile_35eef830 正文已在 07-03 改為正確 07-02 且主要引用 K528/K513；勿發第二篇更正文，只透過正式 publisher 修正 details.event 與 phase metadata，核對正文是否仍有受污染數字，最後 sync 與 live verify。稽核來源：K1442 related_event_date_audit。\n\n[migrated 2026-07-16 from task_7ef956506564 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T13:14:00.066923+00:00]",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-16T14:42:55.800884+00:00",
     "created_by": "single-gateway-migration",
-    "claimed_by": "hourly-slot-1-0bd07fce62c74c6dbebcb892c4421508",
-    "claimed_at": "2026-07-18T18:12:39.244926+00:00",
-    "claim_session_id": "42b160ec362f",
     "status_history": [
       {
         "ts": "2026-07-18T18:12:39.244944+00:00",
@@ -37089,11 +37023,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-0bd07fce62c74c6dbebcb892c4421508"
+      },
+      {
+        "ts": "2026-07-18T20:15:10.749212+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-0bd07fce62c74c6dbebcb892c4421508"
       }
     ],
     "started_at": "2026-07-18T18:12:39.475502+00:00",
-    "result": "[2026-07-19 hourly-slot-1] 已派 agent job `agent-brief_nfp_official_dates-d68f3f`（opus/xhigh，worktree `.claude/worktrees/dispatch-slot-1-0bd07fce-nfpdates`, branch `task/nfp-official-dates`）。產出 = experiments/event_article_nfp_2026_07_03_t1/nfp_official_dates_fix_report.md。該 job 的 followup 負責驗證 + merge_worktree.sh 合併 + 標本任務終態。本任務保持 in_progress 直到 followup 收件。",
-    "agent_job_id": "agent-brief_nfp_official_dates-d68f3f"
+    "result": "[2026-07-19 hourly-slot-1] 已派 agent job `agent-brief_nfp_official_dates-d68f3f`（opus/xhigh，worktree `.claude/worktrees/dispatch-slot-1-0bd07fce-nfpdates`, branch `task/nfp-official-dates`）。產出 = experiments/event_article_nfp_2026_07_03_t1/nfp_official_dates_fix_report.md。該 job 的 followup 負責驗證 + merge_worktree.sh 合併 + 標本任務終態。本任務保持 in_progress 直到 followup 收件。\n\n驗證通過（49 tests pass / Codex 4 輪 PASS / live verify 有實證）→ merge_worktree.sh 正式合併 8dfb83806。knowledge 390d9784 已寫。§7 未修範圍開 assign_ae004ae2(P1, k528 254筆中53筆錯、線上 mile_35eef830 核心數字受污染) + assign_23b2a961(P2, 其餘6支腳本 sweep, k904 在 paper/ 下優先)。",
+    "agent_job_id": "agent-brief_nfp_official_dates-d68f3f",
+    "completed_at": "2026-07-18T20:15:10.749199+00:00"
   },
   {
     "id": "assign_1fa7f2f4",
@@ -41338,5 +41279,27 @@
     "started_at": "2026-07-18T20:01:48.105871+00:00",
     "completed_at": "2026-07-18T20:04:01.875415+00:00",
     "result": "root_cause=phase_z _is_test_path fail-closed leaves honest test halves stranded forever; repair_commit=999859933. Hand-verified test_phase_z_drain_retry.py is fb1e4cc68's matching half (source moved hash_mismatch/critical -> released/warn by design); test tracks it and ADDS two assertions (HEAD unmoved, pinned bytes identical) = strictly tighter, not relaxed. Both directions checked: HEAD version FAILS vs current source, working-tree version passes. Also landed test_urgent_task_lane.py (+34/-0) and new test_phase_z_orphan_half.py. 46 passed."
+  },
+  {
+    "id": "assign_ae004ae2",
+    "title": "k528 NFP 事件日污染修復：254 筆中 53 筆（20.9%）不是 NFP 日，線上文章 mile_35eef830 核心數字全建立其上",
+    "description": "來源：event_article_nfp_2026_07_03_t1 修正報告 §7（已合併，commit 8dfb83806）。\n\nexperiments/k528/k528_nfp_event_study.py 用 get_first_friday() proxy。實測全樣本（2005-02~2026-03，254 筆，FRED 官方涵蓋完整、無外插）：與官方日期相符 201、proxy 錯誤（該日無發布）53（20.9%）、官方發布被完全漏掉 52、幻影月份 1（2025-10）。偏誤系統性偏早（35 早 / 13 晚），其中 28 筆剛好早 7 天（BLS 因參考週改在第二個週五）、12 筆晚 3-4 天（假日提前）。\n\n衝擊面：線上文章 mile_35eef830 正文的所有主要數字 —— 1.10 倍、1.17 倍、2.17 倍體制差、相關係數 0.45、分界值 16.71、254 次樣本 —— 全部出自 k528。\n\n要做：(1) k528 改用 volpred.data.event_dates.nfp_release_dates（fail closed），全樣本重跑；(2) 逐項對照 2.17 倍體制差 / 0.45 / 16.71 是否翻轉或失去顯著性（教訓：平均值可能幾乎不動而中位數與勝率翻轉，不可只看平均）；(3) 若核心論點變動，用既有的 src/volpred/publisher/article_correction.py 做 in-place 更正 （唯一入口，all-or-nothing、每個替換必須恰好命中一次），**禁發第二篇更正文**；(4) 補官方日曆 regression tests + mutation test（還原 proxy 必須轉紅）；(5) Codex 審後才合併。\n\nparent: assign_358decfa",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-18T20:14:17.175688+00:00",
+    "created_by": "hourly-slot-1-9821e0723e124a95af0ae537ebd2dde0"
+  },
+  {
+    "id": "assign_23b2a961",
+    "title": "全 repo first-Friday proxy sweep：6 支腳本仍在用，k904 在 paper/ 底下可能影響論文",
+    "description": "來源：event_article_nfp_2026_07_03_t1 修正報告 §7（已合併）。k528 另開任務，本任務處理其餘。\n\n仍用 first-Friday proxy：experiments/{k741,k661,k259,k904,k1608}、paper/volatility-absorption/experiments/{k741,k904}。k1608 用它當 calendar control。\n**k904 在 paper/ 底下 —— 先評估是否影響已投稿/待投稿論文的數字，這是本任務的第一優先。**\n\n要做：逐支評估影響幅度（不必全部重跑；先算該腳本樣本期內 proxy 錯誤率與偏誤方向），產出 impact matrix（腳本 × 錯誤率 × 對外數字是否引用 × 是否需重跑），再決定重跑順序。有引用到論文或線上文章的優先。\n\n另含：src/volpred/data/event_dates.py 的 release_dates() 用 .max() 取月份最後一筆，對 NFP 是錯的 —— 6 個月份（2006-05, 2012-12, 2013-05, 2020-05, 2024-01, 2024-08）在 ALFRED 有兩筆而就業報告都是第一筆。該函式與 CPI 共用，且既有測試 test_release_dates_uses_last_entry_when_release_has_same_month_revisions 明確要求 CPI 取最後一筆 → 正解是 per-event 語意，不可順手把 CPI 一起改掉（會動到 K1442 剛修好的 CPI 結果）。\n\nparent: assign_358decfa",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-18T20:14:17.175688+00:00",
+    "created_by": "hourly-slot-1-9821e0723e124a95af0ae537ebd2dde0"
   }
 ]
