@@ -240,9 +240,35 @@ def _spawn(
     pre-2026-07-10 behaviour. Callers that need to stamp VOLPRED_ACTOR pass an
     os.environ EXTENSION (`{**os.environ, ...}`), never a replacement, so PATH /
     auth / HOME survive.
+
+    Hang-log capture (2026-07-18): a child's stdout to a plain file fd is
+    block-buffered by default, so when a hung worker is SIGKILL'd the whole
+    in-process buffer dies with it — the log lands 0 bytes and the hang alert's
+    `Worker log tail` (see alerts.read_log_tail) is useless exactly for the
+    fires that most need diagnosing (evidence: the only two 0-byte worker logs
+    were both hang_killed). We force `PYTHONUNBUFFERED=1` into the child env so
+    every python child (the worker's helpers and any python the agent spawns)
+    flushes each line to the OS page cache, which persists across SIGKILL.
+
+    We must extend the resolved env, never replace it: `{**(env or os.environ),
+    ...}`. A bare `{"PYTHONUNBUFFERED": "1"}` would wipe PATH/HOME/auth and the
+    child could not exec or authenticate.
+
+    Scope honesty: this helps python children only. The real hourly child is the
+    `claude` CLI (Node), whose stdout to a regular-file fd is written
+    synchronously (libuv SyncWriteStream) and already survives SIGKILL — it does
+    not read PYTHONUNBUFFERED and gains nothing here. We deliberately do NOT
+    prefix argv with `stdbuf -oL`: verified locally that stdbuf does not unbuffer
+    python (python buffers in its own io layer, not libc FILE*) and is inert for
+    Node, while its DYLD_INSERT_LIBRARIES/libstdbuf shim is inherited by every
+    descendant and can emit dyld warnings that would pollute the 2KB
+    classification tail (`_read_since`) — a net negative. A PTY is likewise
+    rejected: making isatty() true risks `claude -p` emitting ANSI/TUI output
+    that corrupts outcome classification.
     """
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_fh = log_path.open("ab")
+    child_env = {**(env or os.environ), "PYTHONUNBUFFERED": "1"}
     return subprocess.Popen(
         list(argv),
         stdout=log_fh,
@@ -250,7 +276,7 @@ def _spawn(
         stdin=subprocess.DEVNULL,
         start_new_session=True,  # new PGID — clean SIGKILL group
         close_fds=True,
-        env=env,
+        env=child_env,
         cwd=str(cwd) if cwd is not None else None,
     )
 

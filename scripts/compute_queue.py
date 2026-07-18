@@ -241,6 +241,18 @@ def _declared_result_artifact(job: dict[str, Any]) -> Path | None:
     return path if path.is_absolute() else ROOT / path
 
 
+# The canonical certificate filename, fixed by experiment_gates.CERT_FILENAME. A job
+# whose declared deliverable IS that certificate adjudicated an experiment; it did not
+# write one. Kept as a literal rather than an import: the gate that matters runs inside
+# the worktree, and this side must not start depending on the canonical module's shape.
+_REVIEW_ARTIFACT_NAME = "review_verdict.json"
+
+
+def _is_review_job(artifact_path: Path | None) -> bool:
+    """Did this job judge someone else's experiment rather than author one?"""
+    return artifact_path is not None and artifact_path.name == _REVIEW_ARTIFACT_NAME
+
+
 def _experiment_scope(job: dict[str, Any], artifact_path: Path | None) -> Path | None:
     """The `experiments/<kid>` directory this job produced, if any.
 
@@ -332,12 +344,26 @@ def _experiment_gate_failure(
         job["experiment_gate"] = {"status": "passed", "scope": str(scope)}
         return None
 
-    return {
+    report = {
         "status": "failed",
         "scope": str(scope),
         "exit_code": proc.returncode,
         "report": (proc.stderr or proc.stdout).strip(),
     }
+
+    if _is_review_job(artifact_path):
+        # A reviewer writes its verdict INTO the experiment it judges, so the scope
+        # above resolves to someone else's tree. Charging the reviewer for what it
+        # found inverts the incentive the gates exist to protect: on 2026-07-17
+        # k1729-certify returned a valid FAIL verdict, opened the repair task, and
+        # was filed `failed` for the very defect it was sent to find -- so every
+        # later fire re-triaged finished work, and the only way for a review to be
+        # "completed" would have been to find nothing. The finding is real and is
+        # kept; it belongs to the experiment's own disposition, not to this job.
+        job["experiment_gate"] = {**report, "charged_to": "experiment"}
+        return None
+
+    return report
 
 
 def slug(s: str) -> str:
@@ -818,6 +844,26 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
     if job.get("status") == "completed" and job.get("claude_followup"):
         row = dict(job)
         row["followup_mode"] = "collect_completed"
+        gate = job.get("experiment_gate")
+        if isinstance(gate, dict) and gate.get("charged_to") == "experiment":
+            # The gate failed over the tree this job reviewed. The job is still
+            # completed (see _experiment_gate_failure), but the finding must land
+            # somewhere a human acts on, or "charged to the experiment" is just a
+            # word for dropped.
+            followup = dict(row.get("claude_followup") or {})
+            followup["brief"] = "\n".join(
+                [
+                    str(followup.get("brief") or "").strip(),
+                    "",
+                    "EXPERIMENT-GATE FINDING — charged to the experiment, NOT to this review job:",
+                    f"The repo gates were run over {gate.get('scope')} and FAILED. This job reviewed "
+                    "that experiment, so the violation belongs to the experiment's disposition: fold "
+                    "it into the experiment's repair task (open one if none exists) and make sure the "
+                    "re-review covers it. Do not re-run or re-triage this review job over it.",
+                    str(gate.get("report") or "").strip(),
+                ]
+            )
+            row["claude_followup"] = followup
         if certified:
             row["possibly_superseded"] = certified
         return row

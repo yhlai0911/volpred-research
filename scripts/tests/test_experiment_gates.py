@@ -30,6 +30,7 @@ GATE = REPO_ROOT / "scripts" / "experiment_gates.py"
 
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
+import compute_queue as cq  # noqa: E402
 import experiment_gates as eg  # noqa: E402
 
 
@@ -283,3 +284,73 @@ def test_the_runner_actually_calls_the_gate() -> None:
         "There must be exactly one place run_next() calls a job completed, so "
         "the gate cannot be bypassed by a second path."
     )
+
+
+def _agent_job(root: Path, artifact: Path, job_id: str = "job-1") -> dict:
+    return {
+        "id": job_id,
+        "title": f"agent: {job_id}",
+        "kind": "agent",
+        "cwd": str(root),
+        "result_artifact": str(artifact),
+        "claude_followup": {"brief": "collect the verdict", "task_type": "experiment"},
+    }
+
+
+def test_a_reviewer_is_not_charged_for_the_experiment_it_reviewed(tmp_path: Path) -> None:
+    """A review that finds a defect must not be filed as a failed job.
+
+    2026-07-17: k1729-certify ran to exit 0 and wrote a valid FAIL verdict with a
+    repair task behind it. Its artifact lives at `experiments/k1729/review_verdict.json`,
+    so the scope resolver handed the gate K1729's own tree, the nested-DM ratchet
+    fired, and the reviewer was marked `failed` for the defect it was sent to find --
+    routing finished work to triage_failed on every later fire. The only way for a
+    review to be "completed" would have been to find nothing.
+    """
+    root = _portable_checkout(tmp_path)
+    _plant(root, "k1729", K1709_V1)
+    artifact = root / "experiments" / "k1729" / eg.CERT_FILENAME
+    artifact.write_text(json.dumps({"kid": "k1729", "verdict": "FAIL"}), encoding="utf-8")
+    job = _agent_job(root, artifact)
+
+    assert cq._experiment_gate_failure(job, artifact) is None, (
+        "the reviewer's job must survive its own correct finding"
+    )
+    gate = job["experiment_gate"]
+    assert gate["status"] == "failed", "the finding itself must not be swallowed"
+    assert gate["charged_to"] == "experiment"
+
+
+def test_the_experiment_gate_finding_reaches_the_collector(tmp_path: Path) -> None:
+    """`charged_to: experiment` is only honest if someone is told. Otherwise it is dropped."""
+    root = _portable_checkout(tmp_path)
+    artifact = root / "experiments" / "k1729" / eg.CERT_FILENAME
+    job = _agent_job(root, artifact)
+    job["status"] = "completed"
+    job["experiment_gate"] = {
+        "status": "failed",
+        "charged_to": "experiment",
+        "scope": str(root / "experiments" / "k1729"),
+        "report": "[nested-dm-misuse] experiments/k1729/k1729.py (primary_raw_dm)",
+    }
+
+    row = cq._pending_followup_view(job)
+
+    assert row["followup_mode"] == "collect_completed"
+    brief = row["claude_followup"]["brief"]
+    assert "collect the verdict" in brief, "the original followup must survive"
+    assert "nested-dm-misuse" in brief
+    assert "charged to the experiment" in brief
+
+
+def test_an_authoring_job_is_still_charged_for_its_own_experiment(tmp_path: Path) -> None:
+    """The K1709 hole stays shut: a job that WROTE the experiment still fails on a violation."""
+    root = _portable_checkout(tmp_path)
+    _plant(root, "k1709", K1709_V1)
+    artifact = root / "experiments" / "k1709" / "k1709_results.json"
+    artifact.write_text(json.dumps({"verdict": "PASS"}), encoding="utf-8")
+
+    gate = cq._experiment_gate_failure(_agent_job(root, artifact), artifact)
+
+    assert gate is not None and gate["status"] == "failed"
+    assert "charged_to" not in gate

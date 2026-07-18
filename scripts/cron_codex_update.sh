@@ -29,8 +29,28 @@ AFTER=$(codex --version 2>/dev/null | awk '{print $NF}')
 echo "after: ${AFTER:-unknown} (npm rc=$RC)"
 
 if [ "$RC" -eq 0 ] && [ -n "$AFTER" ] && [ "$BEFORE" != "$AFTER" ]; then
-  echo "version changed ${BEFORE} -> ${AFTER}; emailing boss"
-  /opt/homebrew/bin/uv run volpred ops send-alert --level info \
+  echo "version changed ${BEFORE} -> ${AFTER}; regenerating CLI reference"
+
+  # 升級後必須重生參考文件，否則 codex-cli skill 的參數表會停在舊版 —— 那正是
+  # 2026-07-17 K1729 的成因（文件教了 exec 上不存在的 -a，照抄得到 exit 2 靜默失敗）。
+  # 這一步跟升級綁在一起，文件才不會再落後 binary。
+  REGEN=$(/opt/homebrew/bin/uv run python scripts/gen_codex_cli_reference.py 2>&1 | tail -1)
+  echo "regen: ${REGEN}"
+
+  # smoke：config 的 model 若不被新 CLI 支援會 API 400 靜默失敗（2026-07-10 事故卡死全平台）。
+  SMOKE_OUT=$(bash scripts/codex_exec_bounded.sh --timeout 60 --skip-git-repo-check "echo TEST" 2>/dev/null)
+  SMOKE_RC=$?
+  echo "smoke: rc=${SMOKE_RC} out=${SMOKE_OUT}"
+  if [ "$SMOKE_RC" -eq 0 ]; then
+    SMOKE_LINE="✅ smoke 通過（\`echo TEST\` → exit 0）"
+    LEVEL="info"
+  else
+    SMOKE_LINE="🚨 **smoke 失敗（rc=${SMOKE_RC}）— 升級後 codex 可能整條掛掉，請優先查**"
+    LEVEL="warn"
+  fi
+
+  echo "emailing boss (level=${LEVEL})"
+  /opt/homebrew/bin/uv run volpred ops send-alert --level "${LEVEL}" \
     --title "codex-cli 自動更新 ${BEFORE} → ${AFTER}" \
     --body "## 觸發條件
 週度 codex-cli 自動更新 job (cron_codex_update.sh) 偵測到新版本。
@@ -39,8 +59,13 @@ before=${BEFORE} after=${AFTER}
 ## 影響
 codex-cli 是降低 Claude Code token 消耗的輔助 agent（code review / 第二意見 / 針對性修正）。保持最新確保 model whitelist 與 bug fix 同步。
 
+## 升級後自動驗證
+- ${SMOKE_LINE}
+- 參考文件已重生：\`${REGEN}\`（\`~/.claude/skills/codex-cli/references/cli-reference.md\`）
+
 ## 建議行動
-無需動作。若 codex_loop / codex review 出現異常，依 .claude/rules/experiments.md 的 Codex diagnostic 5 步排查。" 2>&1 | tail -2
+smoke 通過則無需動作。若 codex_loop / codex review 出現異常，依 .claude/rules/experiments.md 的 Codex diagnostic 5 步排查。
+⚠️ 0.144.5 起 dangerous-command 偵測收緊（更多 forced \`rm\` 形式被拒）—— 若自動化腳本原本會跑 \`rm\`，升級後可能開始被擋。" 2>&1 | tail -2
 elif [ "$RC" -ne 0 ]; then
   echo "WARN: npm update failed (rc=$RC)"
 else
