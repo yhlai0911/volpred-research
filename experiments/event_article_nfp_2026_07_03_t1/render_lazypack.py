@@ -136,7 +136,11 @@ def render_framework(results: dict):
         if i == 0:
             note = f"最新收盤 {snap['vix_close_latest']}（{snap['vix_close_latest_date']}）"
         elif i == 1:
-            note = f"最後一筆 {snap['vix9d_close_latest_print']}（{snap['vix9d_close_latest_print_date']}，落後 {snap['vix9d_data_lag_days_vs_vix']} 天）"
+            # The vendor gap that forced a "lags N days" caption has since been
+            # backfilled, so don't render "落後 0 天".
+            _lag = snap["vix9d_data_lag_days_vs_vix"]
+            _lag_txt = f"，落後 {_lag} 天" if _lag else "，與 VIX 同日"
+            note = f"最後一筆 {snap['vix9d_close_latest_print']}（{snap['vix9d_close_latest_print_date']}{_lag_txt}）"
         else:
             note = f"同日比值 {snap['vix9d_over_vix_ratio_same_date']}（{snap['vix9d_over_vix_ratio_same_date_basis']}）"
         multiline(draw, (x + 30, y0 + 306), note, cw - 60, fnt=F_SMALL, fill=MUTED)
@@ -146,7 +150,7 @@ def render_framework(results: dict):
     multiline(
         draw,
         (210, 770),
-        "VIX9D 資料本身落後幾個交易日，這篇不假裝有最新數字；用同一天的配對比值才乾淨。",
+        "VIX9D 與 VIX 只取同一天的配對算比值，不把不同日期的數字硬湊在一起。",
         1180,
         fnt=F_BODY,
         fill=SLATE,
@@ -164,7 +168,12 @@ def render_results(results: dict):
 
     stat_boxes = [
         ("上漲機率", f"{hist['spy_up_day_win_rate_pct']}%", GREEN, "當日 SPY 收紅的比例"),
-        ("平均報酬", f"{hist['spy_ret_day0_mean_pct']:+.2f}%", ORANGE, "13 次算術平均，中位數 +0.10%"),
+        # Bind the median to the data too. It used to be hard-coded "+0.10%",
+        # which silently went stale the moment the event dates were corrected.
+        # Keep this caption short: the negative median added a character and
+        # pushed the number onto a second line mid-digit.
+        ("平均報酬", f"{hist['spy_ret_day0_mean_pct']:+.2f}%", ORANGE,
+         f"中位數 {hist['spy_ret_day0_median_pct']:+.2f}%"),
         ("VIX 平均變化", f"{hist['vix_chg_day0_mean_pts']:+.2f} 點", BLUE, "多數次數變化很小，但有極端值"),
         ("VIX 下降比例", f"{hist['pct_events_vix_fell_pct']}%", TEAL, "接近一半，恐慌指數不必然衝高"),
     ]
@@ -234,9 +243,9 @@ def render_takeaway(results: dict):
     card(draw, (820, 240, 1520, 620), fill="#ffffff")
     text(draw, (860, 276), "誠實的不確定性", fill=INK, fnt=F_H2)
     points = [
-        "13 次樣本不足以做統計檢定，只能看描述性型態。",
-        "NFP 日期用「當月第一個週五」規則近似，未逐月對照 BLS 公告。",
-        "VIX9D 資料有落後，比值只能用同一天配對，不是即時。",
+        f"{results['n_historical_nfp_events']} 次樣本不足以做統計檢定，只能看描述性型態。",
+        "NFP 日期取自 BLS 官方發布行事曆，不用「第一個週五」近似。",
+        "平均數被單一離群事件拉動，要和中位數一起看。",
     ]
     y = 340
     for p in points:

@@ -4,11 +4,21 @@ event_article_nfp_2026_07_03_t1 — evidence package for NFP T-1 event article.
 Pulls (as of most recent close available, target 2026-07-01):
   - VIX, VIX9D level + VIX9D/VIX ratio (term-structure inversion signal)
   - SPY 5d / 20d realized vol (annualized, close-to-close)
-  - Historical NFP-day (first-Friday-of-month release) SPY return + next-day
-    VIX change, for the trailing ~12 NFP dates prior to 2026-07-03.
+  - Historical NFP-day SPY return + next-day VIX change, for the trailing 13
+    OFFICIAL Employment Situation releases prior to 2026-07-02.
 
-All data pulled from yfinance. No lookahead: all "current" stats are as of
-close 2026-07-01 (the last trading day before NFP release 2026-07-03).
+Event dates come from the official BLS/ALFRED release calendar via
+`volpred.data.event_dates.nfp_release_dates`, which fails closed if the
+calendar is unreachable. This script previously derived them from a
+first-Friday-of-month proxy; against the official calendar 7 of the 13 dates
+were wrong, including one phantom event (no Employment Situation was published
+in October 2025 — the shutdown pushed the September report to 2025-11-20).
+The release under study is 2026-07-02, not 2026-07-03: the July 4 holiday was
+observed on Friday 2026-07-03, so BLS moved the release forward a day.
+See experiments/k1442/related_event_date_audit.md.
+
+All data pulled from yfinance. No lookahead: the download window itself ends
+before the release, so "current" stats cannot see 2026-07-02 even by accident.
 Event-window stats use realized (already-occurred) history only.
 
 Seed: N/A (no stochastic procedure in this script; pure descriptive stats).
@@ -17,46 +27,40 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import date, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import yfinance as yf
 
+from volpred.data.event_dates import nfp_release_dates
+
 OUT_DIR = Path(__file__).resolve().parent
 FIG_DIR = OUT_DIR / "figures"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
-AS_OF = "2026-07-01"  # last close before 2026-07-03 NFP release
+RELEASE_DATE = "2026-07-02"  # official BLS Employment Situation release
+AS_OF = "2026-07-01"  # last close before the release
 
 
-def first_friday(year: int, month: int) -> date:
-    d = date(year, month, 1)
-    offset = (4 - d.weekday()) % 7  # Friday = weekday 4
-    return d + timedelta(days=offset)
+def build_nfp_dates(n: int = 13) -> list[pd.Timestamp]:
+    """Trailing N official Employment Situation releases strictly before RELEASE_DATE.
 
-
-def build_nfp_dates(n: int = 13) -> list[date]:
-    """Trailing N first-Fridays-of-month strictly before 2026-07-03.
-
-    Note: US NFP release date is normally first Friday of month, but a small
-    number of months are shifted (e.g. holiday adjustment). We use the
-    first-Friday rule as a standard proxy consistent with BLS historical
-    schedule for the vast majority of months; this is disclosed in the
-    article as the identification rule.
+    No proxy and no fallback: `nfp_release_dates` raises if the official
+    calendar cannot be retrieved. A wrong event date is worse than a failed
+    run because it still produces plausible-looking numbers.
     """
-    dates = []
-    y, m = 2026, 6
-    while len(dates) < n:
-        ff = first_friday(y, m)
-        if ff < date(2026, 7, 3):
-            dates.append(ff)
-        m -= 1
-        if m == 0:
-            m = 12
-            y -= 1
-    return list(reversed(dates))
+    release_ts = pd.Timestamp(RELEASE_DATE)
+    # Reach back far enough that N releases exist even with cancelled months.
+    official = nfp_release_dates("2024-01-01", RELEASE_DATE)
+    prior = [d for d in official if d < release_ts]
+    if len(prior) < n:
+        raise RuntimeError(
+            f"official calendar returned only {len(prior)} releases before "
+            f"{RELEASE_DATE}; need {n}"
+        )
+    return prior[-n:]
 
 
 def pct(x):
@@ -65,11 +69,13 @@ def pct(x):
 
 def main():
     nfp_dates = build_nfp_dates(13)
-    print("NFP proxy dates used:", nfp_dates)
+    print("Official NFP release dates used:", [str(d.date()) for d in nfp_dates])
 
     # ---- Pull SPY + VIX long history to cover event windows + current RV ----
-    start = (nfp_dates[0] - timedelta(days=10)).isoformat()
-    end = "2026-07-03"
+    start = (nfp_dates[0] - timedelta(days=10)).date().isoformat()
+    # yfinance `end` is exclusive: stop the window at AS_OF so the release day
+    # itself is never downloaded. No-lookahead is then structural, not a slice.
+    end = RELEASE_DATE
 
     spy = yf.download("SPY", start=start, end=end, auto_adjust=True, progress=False)
     vix = yf.download("^VIX", start=start, end=end, auto_adjust=False, progress=False)
@@ -124,8 +130,7 @@ def main():
 
     # ---- historical NFP-day event window ----
     rows = []
-    for nfp in nfp_dates:
-        nfp_ts = pd.Timestamp(nfp)
+    for nfp_ts in nfp_dates:
         # SPY return ON the NFP release day (close-to-close, day t vs t-1)
         idx = spy_ret.index[spy_ret.index >= nfp_ts]
         if len(idx) == 0:
@@ -153,7 +158,7 @@ def main():
 
         rows.append(
             {
-                "nfp_date_proxy": str(nfp),
+                "nfp_release_date": str(nfp_ts.date()),
                 "trading_day": str(day0.date()),
                 "spy_ret_day0_pct": round(ret_day0, 3),
                 "vix_chg_day0_pts": round(vix_chg, 3),
@@ -176,7 +181,11 @@ def main():
 
     summary = {
         "as_of_date": AS_OF,
-        "nfp_release_date": "2026-07-03",
+        "nfp_release_date": RELEASE_DATE,
+        "event_date_source": (
+            "official BLS Employment Situation release calendar via "
+            "volpred.data.event_dates.nfp_release_dates (FRED/ALFRED release id 50)"
+        ),
         "data_source": "yfinance (SPY, ^VIX, ^VIX9D daily close)",
         "n_historical_nfp_events": n,
         "current_snapshot": {
@@ -190,6 +199,23 @@ def main():
             "spy_5d_realized_vol_annualized_pct": round(rv5_ann, 2),
             "spy_20d_realized_vol_annualized_pct": round(rv20_ann, 2),
         },
+        # The original 2026-07-01 run hit a yfinance ^VIX9D gap: the series
+        # stopped at 2026-06-26, so the ratio was computed on that basis and
+        # the gap was disclosed in the article. yfinance has since backfilled
+        # 2026-06-29..2026-07-01, so the ratio is now a true same-date T-1
+        # figure. This is a VENDOR VINTAGE change, not a consequence of the
+        # event-date correction, and not lookahead: 13.14 is the actual
+        # 2026-07-01 close, still strictly before the 2026-07-02 release. The
+        # 2026-06-26 print is unchanged at 16.80, which is what pins the cause.
+        # Recorded rather than overwritten so the as-published claim stays auditable.
+        "vix9d_vintage_note": {
+            "as_published_vix9d_last_print_date": "2026-06-26",
+            "as_published_vix9d_last_print": 16.8,
+            "as_published_ratio_same_date": 0.9125,
+            "as_published_data_lag_days": 5,
+            "reason_for_change": "yfinance backfilled the ^VIX9D gap after publication",
+            "affects_live_article": False,
+        },
         "historical_nfp_day_stats": {
             "spy_ret_day0_mean_pct": round(mean_ret, 3),
             "spy_ret_day0_median_pct": round(median_ret, 3),
@@ -202,23 +228,31 @@ def main():
         },
         "historical_nfp_table": rows,
         "notes": (
-            "NFP release dates approximated via first-Friday-of-month rule "
-            "(standard BLS schedule pattern); a small number of months may "
-            "shift by BLS holiday adjustment, not individually re-verified "
-            "against BLS calendar for each of the 13 dates. spy_ret_day0 = "
+            "NFP release dates are the official BLS Employment Situation "
+            "release dates from the FRED/ALFRED release calendar (release id "
+            "50), retrieved via volpred.data.event_dates.nfp_release_dates, "
+            "which fails closed rather than falling back to a proxy. This "
+            "replaces the first-Friday-of-month proxy used in the original "
+            "run, which put 7 of these 13 events on the wrong date, including "
+            "a phantom 2025-10-03 event (no Employment Situation was published "
+            "in October 2025; the shutdown moved the September report to "
+            "2025-11-20). spy_ret_day0 = "
             "close-to-close return on the trading day matching/following the "
             "release date. vix_chg_day0 = VIX close on release day minus VIX "
-            "close on prior trading day. No lookahead: all stats use only "
-            "data at/after each historical date; current_snapshot uses only "
-            "data through as_of_date (2026-07-01), strictly before the "
-            "2026-07-03 release. KNOWN DATA GAP: yfinance ^VIX9D series stops "
-            "printing 2026-06-26 (verified via yf.Ticker.history), i.e. it "
-            "lags the ^VIX series by several trading sessions as of the "
-            "as_of_date. To avoid mixing two different calendar dates into "
-            "one ratio, vix9d_over_vix_ratio_same_date is computed on the "
-            "last date BOTH series have a print (2026-06-26), not on the "
-            "as_of_date. This is disclosed verbatim in the article; no "
-            "value was invented to fill the gap."
+            "close on prior trading day. No lookahead: the yfinance download "
+            "window ends exclusive at the release date, so no series in this "
+            "script contains a 2026-07-02 print at all; current_snapshot is "
+            "as of the 2026-07-01 close, the last session before the release. "
+            "RESOLVED DATA GAP: at publication the yfinance ^VIX9D series "
+            "stopped printing at 2026-06-26, so the ratio was computed on that "
+            "basis (0.9125) and the 5-session lag was disclosed verbatim in the "
+            "article rather than filled with an invented value. yfinance has "
+            "since backfilled 2026-06-29..2026-07-01, so the ratio is now a "
+            "true same-date T-1 figure (13.14 / 16.59 = 0.7920). The 2026-06-26 "
+            "print is unchanged at 16.80, which confirms the cause is vendor "
+            "backfill rather than the event-date correction. Both vintages are "
+            "kept: see vix9d_vintage_note. The live article never cited the "
+            "VIX9D ratio, so no published number is affected."
         ),
     }
 
