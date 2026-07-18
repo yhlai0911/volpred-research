@@ -235,9 +235,12 @@ class TestNoLookahead:
 
         def recorder(ticker, **kw):
             calls.append({"ticker": ticker, **kw})
-            if len(calls) >= len(self.EXPECTED_TICKERS):
-                raise _StopEarly()
-            return pd.DataFrame({"Close": []})
+            # Never abort inside the recorder itself. Stopping on call N would
+            # make a download added AFTER the ones we know about unreachable,
+            # so a 4th series could ship with an unchecked `end`. The tripwire
+            # defers the abort until main() first touches a frame, which is
+            # past the whole download block.
+            return _Tripwire()
 
         monkeypatch.setattr(
             event_dates, "_fetch", lambda *_a, **_kw: list(OFFICIAL_2024_2026)
@@ -284,6 +287,20 @@ class TestNoLookahead:
 
 class _StopEarly(Exception):
     """Abort main() once the download arguments have been observed."""
+
+
+class _Tripwire:
+    """Stand-in for a downloaded frame that raises when first consumed.
+
+    Lets every `yf.download` call run and be recorded before main() is
+    aborted, so the ticker-sequence assertion can see a download that does
+    not exist yet. main() touches `.columns` first when it flattens the
+    MultiIndex.
+    """
+
+    @property
+    def columns(self):
+        raise _StopEarly()
 
 
 class TestNoProxyResidue:

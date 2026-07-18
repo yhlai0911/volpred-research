@@ -283,6 +283,30 @@ Round 2 確認 #1/#2/#3/#4/#7 修得完整（含逐項驗證 `_splice` 對相鄰
 
 ---
 
+## 6d. Codex 複審（round 3）→ blocking 1 CLOSED、blocking 2 剩一個盲點 → 已補
+
+- **Blocking 1（樣本無聲縮水）判定 CLOSED**。複審逐條確認：所有無法完整計算的路徑都在唯一的
+  `rows.append` 之前 `skipped` + `continue`；成功列無條件寫滿五個欄位、不再有 `None` 分支；
+  任何 skip 都在統計與 JSON 寫入前拋錯；8 個統計量全部用同一張完整表。
+  （`std(ddof=1)` 的除數是 n-1 屬正確的樣本標準差定義，不是缺值造成的縮減。）
+  **我自己另外驗過**：3 個數值欄位 usable 全部 = 13 = n，全表無 null/NaN。
+
+- **Blocking 2 的四種變異，三種已被抓到**：`^VIX` end、`^VIX9D` end、ticker 順序皆 CAUGHT。
+  剩一個盲點：recorder 在**第三次呼叫就中止 `main()`**，所以「日後新增的第 4 個下載」永遠不會
+  執行，也就永遠不會被檢查 —— 那個 series 可以帶著沒人看過的 `end` 上線。
+
+  **已補**：recorder 不再自己中止，改回傳一個 `_Tripwire`（`.columns` 被存取時才拋
+  `_StopEarly`）。中止點因此移到整個下載區塊**之後**，第 4 個下載會照跑並被記錄，既有的
+  ticker 序列與數量斷言就抓得到。
+
+  **mutation test 實證**：臨時加入第 4 個下載 `^TNX`（`end="2026-07-31"`，明顯 lookahead）
+  → **三個 lookahead 測試全紅**（修正前這個變異完全隱形）。已還原。
+
+- 此輪為**測試層修正，未動實驗邏輯**：重跑後 `_results.json` 與前一版 byte-identical
+  （整份 JSON `==` 比對相同），`experiment_gates.py` PASS，55 tests 全綠。
+
+---
+
 ## 7. 尚未解決 / 需要另開任務的事
 
 ### 🔴 最重要：線上文章的核心統計量建立在**同一類污染**上（未修）
