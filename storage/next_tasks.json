@@ -30987,37 +30987,15 @@
   },
   {
     "id": "platform_ops_compute_queue_cancel_command",
-    "title": "compute_queue 缺 cancel 命令（只能手刪 job JSON = 修資料不修流程）",
-    "task_type": "platform_ops",
-    "priority": 3,
-    "description": "2026-07-13 hourly-04：queue 了一個 Codex review job，隨後因 revert 讓它的審查對象消失，job 變成必然撲空。compute_queue.py 的子命令只有 {enqueue, enqueue-agent, list, show, run-next, mark-followup-dispatched} —— 沒有 cancel。唯一能做的是直接 rm 掉 storage/ops/compute_queue/<id>.json，這正是「修資料不修流程」的反模式，而且不留任何 audit trail（沒人知道有 job 被撤、為何撤）。\n\n要做：加 `cancel --id <job_id> --reason <why>` 子命令，把 status 改成 cancelled 並記 cancelled_at / cancel_reason，pending-followup 與 run-next 都要跳過 cancelled。已 running 的 job 是否可 cancel 一併想清楚（至少要能標記，不必真的殺 process）。",
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "compute_queue 缺 cancel 命令（只能手刪 job JSON = 修資料不修流程）",
+    "priority": 3,
     "source": "agent_discovered",
     "created_at": "2026-07-12T20:36:58.646978+00:00",
-    "created_by": "hourly-04",
-    "status_history": [
-      {
-        "ts": "2026-07-15T19:08:40.110389+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-2-32dd5c53698b406e991d669c0a162efc"
-      },
-      {
-        "ts": "2026-07-15T19:08:40.401389+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-2-32dd5c53698b406e991d669c0a162efc"
-      },
-      {
-        "ts": "2026-07-15T19:10:35.735867+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-2-32dd5c53698b406e991d669c0a162efc"
-      }
-    ],
-    "started_at": "2026-07-15T19:08:40.401374+00:00",
     "completed_at": "2026-07-15T19:10:35.735855+00:00",
-    "result": "Closed stale implementation gap: cancel now records cancelled_at plus completed_at, requires a non-empty audit reason, skips cancelled receipts in followup and run-next, and refuses running jobs. Validation: 35 targeted tests passed; silent-fallback audit returned []."
+    "tombstone": true,
+    "archived_at": "2026-07-18T20:00:26.534825+00:00"
   },
   {
     "id": "K1684_article_general",
@@ -33080,13 +33058,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T19:00:53.215066+00:00",
+    "completed_at": "2026-07-18T20:00:59.527214+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T19:00:53.215066+00:00",
-      "last_clean_observed_at": "2026-07-18T19:00:53.215066+00:00"
+      "resolved_at": "2026-07-18T20:00:59.527214+00:00",
+      "last_clean_observed_at": "2026-07-18T20:00:59.527214+00:00"
     }
   },
   {
@@ -33098,13 +33076,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T19:11:41.047359+00:00",
+    "completed_at": "2026-07-18T20:06:21.904857+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T19:11:41.047359+00:00",
-      "last_clean_observed_at": "2026-07-18T19:11:41.047359+00:00"
+      "resolved_at": "2026-07-18T20:06:21.904857+00:00",
+      "last_clean_observed_at": "2026-07-18T20:06:21.904857+00:00"
     }
   },
   {
@@ -35126,48 +35104,15 @@
   },
   {
     "id": "K1379_article_general_audience_rewrite_8a9ae3c8",
-    "title": "Audience correction: rewrite a true general companion for 波動率預測不是把指標愈疊愈多就會愈準",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_8a9ae3c8. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1379']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 波動率預測不是把指標愈疊愈多就會愈準",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_8a9ae3c8",
-    "experiment_refs": [
-      "K1379"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T10:06:41.746915+00:00",
-    "k_id": "K1379",
-    "status_history": [
-      {
-        "ts": "2026-07-15T19:40:32.013056+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-k1379-audience"
-      },
-      {
-        "ts": "2026-07-15T19:40:32.254247+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-k1379-audience"
-      },
-      {
-        "ts": "2026-07-15T19:59:53.034574+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-k1379-audience"
-      }
-    ],
-    "started_at": "2026-07-15T19:40:32.254231+00:00",
     "completed_at": "2026-07-15T19:59:53.034554+00:00",
-    "result": "Created true general companion mile_6e81bb0a as draft while preserving mile_8a9ae3c8 as research/published. Anti-AI PASS, publisher inference PASS, sanitize_applied=0, provenance/image/font/audience gates PASS; audience_correction_gap=false. Strict 3-panel lazypack plan validated and queued as lazypack-mile_6e81bb0a. Commit 43cdeb9a2."
+    "tombstone": true,
+    "archived_at": "2026-07-18T20:00:26.534825+00:00"
   },
   {
     "id": "telegram-820",
@@ -35315,36 +35260,15 @@
   },
   {
     "id": "platform_ops-hourly-dispatch-tcc-desktop-copy-retire-20260715",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "退役 cron_hourly_dispatch.sh TCC/Desktop 過時警報文案",
     "priority": 3,
     "source": "telegram_responder_audit",
-    "status": "succeeded",
     "created_at": "2026-07-15T12:10:24.273595+00:00",
-    "title": "退役 cron_hourly_dispatch.sh TCC/Desktop 過時警報文案",
-    "description": "排查來源：老闆 Telegram msg 836「徹底排查是否還有這種路徑問題」（承接 warm_tcc_authorization.sh 過時 Desktop 文案議題）。\n\n排查結論（telegram_responder 2026-07-15 20:06 完成）：\n路徑層全乾淨 — 20 個 launchd plist WorkingDirectory 全指向 ~/volpred-research；~/Desktop/volpred-research 目錄與 symlink 已不存在；src/volpred/publisher/prepublish_audit.py 的 Desktop 引用是防禦性 stale-path 偵測（保留）；cron_*.sh header 提到 Desktop 只是歷史註解與 log 目錄說明，不影響行為。\n\n唯一同類殘留（需修）：scripts/cron_hourly_dispatch.sh 的 TCC-shaped failure alert 分支（約 line 291, 303-325, 379-381）。repo 已於 2026-07-02 搬離 ~/Desktop、TCC 對 repo 不再適用，但此分支的標題、內文根因與處置步驟仍寫死「新版 binary 尚未取得 Desktop TCC 授權 / 請在 Desktop 下開互動 session 修復」的過時敘事。若因系統負載等其他原因出現 EINTR / operation not permitted / getcwd 特徵而誤觸發，會發一封 CRITICAL 假警報並給出誤導處置。\n\n建議：比照 warm_tcc_authorization.sh 已退役 email alert 的做法，退役或改寫此分支 —— 移除 Desktop-TCC 專屬敘事與「在 Desktop 下開 session」步驟，改為中性描述（EINTR/資源競爭類暫時失敗），或降級不發 CRITICAL。修前先讀 docs/error_log.md 2026-07-02 條目確認語意。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T19:39:43.255632+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop"
-      },
-      {
-        "ts": "2026-07-15T19:39:43.494271+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop"
-      },
-      {
-        "ts": "2026-07-15T19:47:16.225411+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop"
-      }
-    ],
-    "started_at": "2026-07-15T19:39:43.494258+00:00",
     "completed_at": "2026-07-15T19:47:16.225395+00:00",
-    "result": "Retired stale Desktop-TCC diagnosis from rollback hourly wrapper. EPERM/getcwd/EINTR now produce neutral WARN with Codex failover and bounded runtime/filesystem diagnostics; removed symlink-age heuristic and stale remediation. Added regression/governance record; bash -n PASS, 172 targeted tests PASS, independent review PASS. Commit c45d82c0d."
+    "tombstone": true,
+    "archived_at": "2026-07-18T20:00:26.534825+00:00"
   },
   {
     "id": "telegram-838",
@@ -35744,40 +35668,15 @@
   },
   {
     "id": "ci-red-29438793681",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29438793681, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29421677446",
-    "ci_run_key": "29438793681:1",
     "created_at": "2026-07-15T19:00:04.398094+00:00",
-    "title": "CI 紅燈修復（run 29438793681, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29438793681\nattempt: 1\nhead_sha: ea38aa75a\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29438793681 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T19:01:17.196839+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-1-aa29315782164df2a646c895b48b86d4"
-      },
-      {
-        "ts": "2026-07-15T19:01:17.418928+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-1-aa29315782164df2a646c895b48b86d4"
-      },
-      {
-        "ts": "2026-07-15T19:08:46.642096+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-1-aa29315782164df2a646c895b48b86d4"
-      }
-    ],
-    "started_at": "2026-07-15T19:01:17.418915+00:00",
     "completed_at": "2026-07-15T19:08:46.642085+00:00",
-    "result": "root_cause=K1709 finished artifacts landed without a knowledge registry entry, while run 29438793681 tested a pre-fixed-memory-adjudication head; class sweep also found newly merged K1711 missing from knowledge; repair_commit=a06d64daf; verification=knowledge inventory zero, K1259 provenance 0 violations, nested-DM ratchet passes on current main; no push per supervisor policy"
+    "tombstone": true,
+    "archived_at": "2026-07-18T20:00:26.534825+00:00"
   },
   {
     "id": "ci-red-29442836650",
@@ -41312,7 +41211,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29651115228",
@@ -41320,9 +41219,6 @@
     "created_at": "2026-07-18T17:00:07.857447+00:00",
     "title": "CI 紅燈修復（run 29651115228, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29651115228\nattempt: 1\nhead_sha: 98950fff3\n偵測摘要（仍須讀完整 failed log）：2026-07-18T16:04:20.9274559Z ImportError while importing test module '/home/runner/work/volpred-research/volpred-research/tests/test_covered_article_dedup.py'.\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29651115228 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "claimed_by": "hourly-slot-1-8a6f37741efc4f538d13e2fd260d661c",
-    "claimed_at": "2026-07-18T17:01:11.374009+00:00",
-    "claim_session_id": "661e2d3ac5ee",
     "status_history": [
       {
         "ts": "2026-07-18T17:01:11.374025+00:00",
@@ -41335,9 +41231,38 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-8a6f37741efc4f538d13e2fd260d661c"
+      },
+      {
+        "ts": "2026-07-18T19:50:05.787567+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-8a6f37741efc4f538d13e2fd260d661c",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-18T20:00:45.940567+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38"
+      },
+      {
+        "ts": "2026-07-18T20:00:46.174996+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38"
+      },
+      {
+        "ts": "2026-07-18T20:04:01.420704+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38"
       }
     ],
-    "started_at": "2026-07-18T17:01:11.615415+00:00"
+    "started_at": "2026-07-18T20:00:46.174982+00:00",
+    "last_released_at": "2026-07-18T19:50:05.787558+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-18T20:04:01.420689+00:00",
+    "result": "root_cause=tests imported default_blocked_until/enforce_blocked_until that were absent from src/volpred/ops/next_tasks.py at 98950fff3 (partial commit: test half landed, module half did not); repair_commit=4684b5e02 (already in HEAD, run 29656955513 green). Class sweep found the same partial-commit class in 3 stranded test files; landed as 999859933."
   },
   {
     "id": "email-12137-d49553",
@@ -41386,9 +41311,32 @@
     "description": "背景：CI run 29653262702 紅燈根因為 partial commit。本班（job 6b245c8f）已修 asset 側孤兒出口，PHASE-Z 會自動 land scripts/cron_hourly_dispatch_prompt.md，紅燈節點 2→1。\n\n剩餘 1 節點：scripts/tests/test_phase_z_drain_retry.py::test_hash_pinned_closeout_refuses_later_edits 在 HEAD 為紅；工作區版本可轉綠（fb1e4cc68 只 land 了 phase_z.py 側，測試檔留在工作區）。此為 subagent 實測，主線程未獨立複驗（shallow clone 缺 venv，collection error）—— 接手時請先自行複驗。\n\n為何不自動收：新規則 _is_test_path 刻意把測試檔排除在採用候選外 —— 「補上工作區內容讓紅測試轉綠」這個判準對測試檔可被『放寬斷言』瑣碎滿足，與殺掉溫度計無法機械區分。fail-closed 是刻意選擇。\n\n要做的：人工確認工作區版 test_phase_z_drain_retry.py 是 fb1e4cc68 的正確另一半（非放寬斷言），附 diff 佐證後 land。\n\nparent_email_task_id: email-12137-d49553",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-18T18:56:32.549244+00:00",
-    "created_by": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f"
+    "created_by": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f",
+    "status_history": [
+      {
+        "ts": "2026-07-18T20:01:47.874357+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38"
+      },
+      {
+        "ts": "2026-07-18T20:01:48.105887+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38"
+      },
+      {
+        "ts": "2026-07-18T20:04:01.875429+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38"
+      }
+    ],
+    "started_at": "2026-07-18T20:01:48.105871+00:00",
+    "completed_at": "2026-07-18T20:04:01.875415+00:00",
+    "result": "root_cause=phase_z _is_test_path fail-closed leaves honest test halves stranded forever; repair_commit=999859933. Hand-verified test_phase_z_drain_retry.py is fb1e4cc68's matching half (source moved hash_mismatch/critical -> released/warn by design); test tracks it and ADDS two assertions (HEAD unmoved, pinned bytes identical) = strictly tighter, not relaxed. Both directions checked: HEAD version FAILS vs current source, working-tree version passes. Also landed test_urgent_task_lane.py (+34/-0) and new test_phase_z_orphan_half.py. 46 passed."
   }
 ]

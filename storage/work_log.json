@@ -21244,5 +21244,25 @@
     "owner": "hourly-slot-1-79fea1ed6e8645819a3751ccdb37ce9d",
     "commit": null,
     "summary": "PHASE A 收件：compute job `k1731-armB-corrected-rev5`（exit 0, followup_mode=collect_completed）。\n\n段 1（heavy compute）已成功：corrected-spec production 19 annual refits 完整跑完，產出\n`k1731_gevreg_midas_ssvs_returns_results_corrected_rev5.json`（179,830 bytes, 2026-07-19 02:35），\nrun log 顯示 GEV logpdf 對 scipy max 誤差 4.55e-13、lookahead check PASSED（118,080 macro cells / 1640 blocks）。\n這正是 assign_1394a67a triage 要求的修法 —— 前一次 failed 的根因是 agent 把 19×53s 的重跑丟到自己會結束的\n回合背景裡（`run_corrected_rev5.log` 停在 2010 refit，19 個只跑完 3 個），改走 compute_queue 後一次過。\n\n段 2（bounded agent）本班 enqueue，未在 fire 內等：`agent-brief_k1731_armB_seg2-9be956`\n（opus/xhigh per model_router；cwd=worktree dispatch-slot-1-bd00f90a-k1731；\nresult-artifact=experiments/k1731/k1731_armB_esfix.json）。工作內容：regression check（allow-list 外漂移\n一律 FAIL 就停）→ finalize provenance 蓋章（rev5 = 唯一 is_primary，舊兩份 do_not_cite，禁手改 JSON）\n→ README §3.1/§3.5/§8/§9/§10 數字同步 → 產 esfix.json。\n\nbrief 明寫的誠實要求：README §3.1 的 ES p=0.0145 拒絕**部分是舊 ES 估計量的假象**\n（`k1731_es_mixture_check_results.json` 已確立舊算法低估 ES 3.9%–22.8%，且 MC 標準誤每 4 倍樣本乾淨減半、\n|old−mc| 固定 2.12 不動 → 是系統性偏誤不是雜訊），修正後 §3.5 結論若翻轉必須照實寫，\n不得軟化成「證據較弱但方向一致」。\n\n未走 Agent tool 而走 enqueue-agent 的理由：task_type=experiment → router effort=xhigh，屬長研究 agent；\nfire 有 3000s hard cap，父等子會被 SIGKILL、父先走則子成孤兒（2026-07-12 3-STRIKE / K1681 教訓）。\n成果由後續某班 fire 的 PHASE A 收，followup 已接上 assign_67f56b79（凍 bytes → Codex 重審 → merge_worktree.sh\n→ 寫 knowledge，只引 is_primary 那份）。\n\n`mark-followup-dispatched` 已設，防重派。assign_1394a67a 標 succeeded（段 1 已驗證、段 2 已正確交棒），\n不留 in_progress 殘留給 2h stale-release 重複派工。\n\n附帶觀察（未處理，非本班職責）：PHASE 0.5 的 daily_reader_facing_scan_state.json 日期為 2026-07-18，\n但該 cron 約 06:00 CST 才跑、現在 03:07，尚未到期，故不建 followup 以免每晚產生假警報。"
+  },
+  {
+    "timestamp": "2026-07-19T04:05:15+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29651115228",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38",
+    "owner": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38",
+    "commit": "999859933",
+    "summary": "CI red 29651115228 收口。根因=partial commit：tests 引用的 default_blocked_until/enforce_blocked_until 在 98950fff3 的 src/volpred/ops/next_tasks.py 不存在（測試半邊 land、模組半邊沒 land）；已由 4684b5e02 修復並在 HEAD，run 29656955513 green。Class sweep 發現同類擱淺：PHASE-Z _is_test_path fail-closed 讓 3 個誠實的測試半邊永遠留在工作區。逐檔人工判定後 land 為 999859933：test_phase_z_drain_retry.py 確認是 fb1e4cc68 的另一半（source 刻意 hash_mismatch/critical→released/warn），且新增 2 條更嚴斷言（HEAD 未移動、pinned bytes 逐字不變）= 收緊非放寬；雙向驗證 HEAD 版對現行 source FAILED、工作區版 46 passed。另 land test_urgent_task_lane.py(+34/-0) 與新檔 test_phase_z_orphan_half.py。"
+  },
+  {
+    "timestamp": "2026-07-19T04:05:15+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_ee93acd2",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38",
+    "owner": "hourly-slot-1-0a9f250963894bbc9461ea331e935c38",
+    "commit": "999859933",
+    "summary": "手動 land scripts/tests/test_phase_z_drain_retry.py 等 3 支擱淺測試檔（詳見 ci-red-29651115228 同班 entry）。人工判定要點：測試對 fb1e4cc68 的行為變更是逐條 track 且額外收緊，非放寬斷言；以 HEAD 版對現行 source 實跑 FAILED 作為『真溫度計』證據。"
   }
 ]

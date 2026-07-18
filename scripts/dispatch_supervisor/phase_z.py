@@ -61,6 +61,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
@@ -1562,8 +1563,14 @@ def _run_clone_pytest(
     targets: list[str],
     k_expr: str | None,
     test_runner,
+    timeout_s: float = _TEST_GATE_TIMEOUT_S,
 ) -> dict:
-    """Run one side of the attribution comparison inside its disposable clone."""
+    """Run one side of the attribution comparison inside its disposable clone.
+
+    ``timeout_s`` defaults to the post-commit gate's budget.  The orphan-half
+    probe below runs the same machinery many times in one tick and passes a
+    tighter budget so a slow suite cannot stall the supervisor.
+    """
     existing_targets = [target for target in targets if (clone_root / target).exists()]
     if not existing_targets:
         return {"returncode": _PYTEST_NO_TESTS_COLLECTED, "output": "", "ran": []}
@@ -1588,7 +1595,7 @@ def _run_clone_pytest(
             argv,
             capture_output=True,
             text=True,
-            timeout=_TEST_GATE_TIMEOUT_S,
+            timeout=timeout_s,
             cwd=str(clone_root),
             env=env,
             check=False,
@@ -1664,6 +1671,242 @@ _BASELINE_ACTION = {
         "shared_lock 檔名長度即為此類：地雷早就在，測試只是第一個踩到的）。"
     ),
 }
+
+
+# ---------------------------------------------------------------------------
+# Orphan halves: an exit for dirty-at-fire-start paths that are provably the
+# missing half of a commit that already landed.
+#
+# The ownership model knows two kinds of dirt: produced by this fire (commit)
+# and dirty before this fire (never touch, only warn).  A path that is the
+# *other half* of an already-landed commit falls in the second bucket and stays
+# there forever — every fire re-reports it and CI stays red for good.  That is
+# the same shape as the 2026-07-18 untracked-closeout incident: a class of path
+# with no exit from the state machine.
+#
+# "Dirty before the fire" ⇒ "someone else is still typing it" is an INFERENCE.
+# It has exactly one mechanically falsifiable exception, and the direction of
+# the evidence is the whole safety argument:
+#
+#     A test that is ALREADY COMMITTED at HEAD is RED, and materialising this
+#     path's working-tree bytes on top of a pristine HEAD turns that same test
+#     GREEN.
+#
+# Third-party work in progress does not do that.  A half-written edit either
+# changes nothing about an already-landed test or breaks more of it; only the
+# missing half of a split commit repairs a test that HEAD already ships.
+#
+# Everything else about this path is fail-closed, matching every other rule in
+# this file: no red test at HEAD, a clone failure, a pytest timeout, an
+# unattributable outcome, or more candidates than the cap ⇒ adopt nothing and
+# leave the existing warning exactly as it was.
+# ---------------------------------------------------------------------------
+
+# Cost ceiling for one tick. Each candidate costs one shared clone plus one
+# pytest run of the tests that map to it, on top of the single HEAD probe.
+_ORPHAN_HALF_MAX_CANDIDATES = 8
+_ORPHAN_HALF_PROBE_TIMEOUT_S = 240
+_ORPHAN_HALF_BUDGET_S = 900
+
+
+def _is_test_path(rel: str) -> bool:
+    """Paths whose bytes are the *thermometer*, never the patient.
+
+    The evidence direction requires the failing test to come from HEAD.  If a
+    working-tree test file were allowed to be materialised as a candidate, an
+    in-progress edit that weakens an assertion would flip red→green and get
+    itself adopted — the probe would be measuring the candidate's own relaxed
+    thermometer.  Test files are therefore never candidates, only evidence.
+    """
+    return (
+        rel.startswith(("tests/", "scripts/tests/"))
+        or Path(rel).name.startswith("test_")
+    )
+
+
+def _orphan_half_candidates(repo_root: Path, foreign: list[str]) -> list[str]:
+    """Foreign dirty paths eligible to be *proved* a missing half.
+
+    Narrow on purpose (the adopted set must be a proved minimum, never "the
+    whole baseline"):
+      - inside the gated trees only — the same scope the post-commit gate uses;
+      - never a test file (see _is_test_path);
+      - must exist as a readable file now: a deletion has no bytes to
+        materialise, so it can never be shown to repair anything.
+    """
+    candidates: list[str] = []
+    for rel in sorted(foreign):
+        if not rel.startswith(_GATED_CODE_PREFIXES):
+            continue
+        if _is_test_path(rel):
+            continue
+        if not (repo_root / rel).is_file():
+            continue
+        candidates.append(rel)
+    return candidates
+
+
+def _failure_ids_for(failure_ids: set[str], targets: list[str]) -> set[str]:
+    """Failing node ids that live in ``targets``.
+
+    Both id sources (junit ``file::class::name`` and pytest's short summary)
+    start with the test file path, so the file is the leading segment.
+    """
+    wanted = set(targets)
+    return {fid for fid in failure_ids if fid.split("::", 1)[0] in wanted}
+
+
+def _materialise_candidate(repo_root: Path, clone_root: Path, rel: str) -> bool:
+    """Copy one working-tree path's bytes into a disposable clone."""
+    source = repo_root / rel
+    destination = clone_root / rel
+    try:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+    except OSError as exc:
+        LOG.warning("phase_z: orphan-half probe cannot materialise %s (%s)", rel, exc)
+        return False
+    return True
+
+
+def _adopt_orphan_halves(
+    repo_root: Path,
+    foreign: list[str],
+    *,
+    runner,
+    test_runner,
+    monotonic=time.monotonic,
+) -> dict:
+    """Prove (or fail to prove) which foreign dirty paths are missing halves.
+
+    Returns an observability dict — never raises, never touches the live
+    checkout, and never runs pytest anywhere but a disposable clone (the live
+    tree's canonical state is rewritten by 24/7 daemons, so nothing observed
+    there could be evidence; see _post_commit_test_gate).
+
+    Keys: ``adopted`` (list[str], the proved minimum — may be empty),
+    ``reason`` (why the pass stopped or what it concluded), ``considered``
+    (candidates actually probed) and ``evidence`` (per adopted path: the node
+    ids it turned green, and the test files that ran).
+    """
+    result: dict = {"adopted": [], "reason": "no_candidates", "considered": [], "evidence": {}}
+    candidates = _orphan_half_candidates(repo_root, foreign)
+    if not candidates:
+        return result
+    if len(candidates) > _ORPHAN_HALF_MAX_CANDIDATES:
+        # Fail-closed rather than probing an arbitrary subset: a truncated scan
+        # would silently decide "not a missing half" for paths it never tested.
+        LOG.info("phase_z: orphan-half probe skipped — %d candidates exceeds cap %d",
+                 len(candidates), _ORPHAN_HALF_MAX_CANDIDATES)
+        return {**result, "reason": "too_many_candidates", "considered": candidates}
+
+    deadline = monotonic() + _ORPHAN_HALF_BUDGET_S
+    try:
+        # Pin the revision once. Every clone below materialises the SAME sha, so
+        # a concurrent writer advancing HEAD mid-probe cannot make the "red" run
+        # and the "green" run disagree about what they were comparing.
+        head_probe = _git(repo_root, "rev-parse", "--verify", "HEAD",
+                          timeout_s=_SHORT_TIMEOUT_S, runner=runner)
+        if head_probe.returncode != 0:
+            return {**result, "reason": "head_resolve_error", "considered": candidates}
+        head_sha = (head_probe.stdout or "").strip()
+
+        with tempfile.TemporaryDirectory(prefix="volpred-phase-z-orphan-") as tmp:
+            temp_root = Path(tmp)
+            head_root = temp_root / "head"
+            cloned = _clone_revision(repo_root, head_root, head_sha, runner=runner)
+            if not cloned["ok"]:
+                LOG.warning("phase_z: orphan-half probe could not clone HEAD (%s)", cloned["reason"])
+                return {**result, "reason": cloned["reason"], "considered": candidates}
+
+            # Test targets are resolved against the CLONE, so every test that
+            # can serve as evidence is HEAD's committed version by construction.
+            plan = _resolve_test_targets(head_root, candidates)
+            targets = plan["targets"]
+            if not targets:
+                return {**result, "reason": "no_mapped_tests", "considered": candidates}
+
+            head = _run_clone_pytest(
+                head_root, targets=targets, k_expr=plan["k_expr"],
+                test_runner=test_runner, timeout_s=_ORPHAN_HALF_PROBE_TIMEOUT_S,
+            )
+            head_rc = head["returncode"]
+            if head_rc is None:
+                LOG.warning("phase_z: orphan-half probe HEAD run did not finish (%s)",
+                            head.get("reason"))
+                return {**result, "reason": f"head_{head.get('reason', 'error')}",
+                        "considered": candidates}
+            if head_rc != 1:
+                # rc 0 (green), 5 (collected nothing) and 2 (collection error)
+                # all mean the same thing here: no red test at HEAD to repair.
+                # Constraint: this path only ever starts from a red HEAD.
+                return {**result, "reason": "head_not_red", "head_returncode": head_rc,
+                        "considered": candidates}
+            head_ids = set(head.get("failure_ids", []))
+            if not head_ids:
+                # rc=1 with no attributable node id: cannot prove anything about
+                # *which* test flipped, so prove nothing.
+                return {**result, "reason": "head_failures_unattributable",
+                        "considered": candidates}
+
+            adopted: list[str] = []
+            evidence: dict[str, dict] = {}
+            considered: list[str] = []
+            for index, rel in enumerate(candidates):
+                if monotonic() >= deadline:
+                    LOG.warning("phase_z: orphan-half probe out of budget after %d candidate(s)",
+                                index)
+                    result_reason = "budget_exhausted"
+                    return {"adopted": adopted, "reason": result_reason,
+                            "considered": considered, "evidence": evidence,
+                            "unprobed": candidates[index:]}
+                own = _resolve_test_targets(head_root, [rel])["targets"]
+                own_red = _failure_ids_for(head_ids, own)
+                if not own_red:
+                    # No test that HEAD ships and that maps to this path is red.
+                    # Nothing this path's bytes could repair ⇒ not a missing half.
+                    continue
+                considered.append(rel)
+                probe_root = temp_root / f"probe-{index}"
+                probe = _clone_revision(repo_root, probe_root, head_sha, runner=runner)
+                if not probe["ok"]:
+                    LOG.warning("phase_z: orphan-half probe clone failed for %s (%s)",
+                                rel, probe["reason"])
+                    continue
+                if not _materialise_candidate(repo_root, probe_root, rel):
+                    continue
+                after = _run_clone_pytest(
+                    probe_root, targets=own, k_expr=None,
+                    test_runner=test_runner, timeout_s=_ORPHAN_HALF_PROBE_TIMEOUT_S,
+                )
+                if after["returncode"] is None:
+                    LOG.warning("phase_z: orphan-half probe for %s did not finish (%s)",
+                                rel, after.get("reason"))
+                    continue
+                after_ids = set(after.get("failure_ids", []))
+                repaired = sorted(own_red - after_ids)
+                regressed = sorted(after_ids - head_ids)
+                if not repaired or regressed:
+                    # Either it fixed nothing (ordinary work in progress) or it
+                    # broke something HEAD did not have (definitely not the
+                    # missing half of a green commit). Leave it alone.
+                    continue
+                adopted.append(rel)
+                evidence[rel] = {
+                    "turned_green": repaired,
+                    "ran": after.get("ran", own),
+                    "returncode": after["returncode"],
+                }
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        LOG.warning("phase_z: orphan-half probe aborted (%s) — adopting nothing", exc)
+        return {**result, "reason": "probe_error", "detail": str(exc)[:300]}
+
+    return {
+        "adopted": adopted,
+        "reason": "adopted" if adopted else "no_proof",
+        "considered": considered,
+        "evidence": evidence,
+    }
 
 
 def _post_commit_test_gate(
@@ -2008,6 +2251,34 @@ def run_phase_z(
             ]),
         )
 
+    # Foreign dirt splits once more. Most of it really is another session's work
+    # in progress. A subset can be MECHANICALLY PROVED to be the missing half of
+    # a commit that already landed — a red test at HEAD that this path's bytes
+    # turn green. Without this exit such a path is foreign forever and CI stays
+    # red forever (see _adopt_orphan_halves for the full evidence argument).
+    # Skipped during recovery for the same reason streaks are: a recovery pass
+    # runs immediately before the real pre-fire snapshot, so probing here would
+    # pay for the whole clone+pytest sweep twice in one tick for one answer.
+    orphan_halves = (
+        {"adopted": [], "reason": "recovery_mode", "considered": [], "evidence": {}}
+        if recovery_mode
+        else _adopt_orphan_halves(
+            repo_root, foreign, runner=runner, test_runner=test_runner or subprocess.run,
+        )
+    )
+    adopted_halves = list(orphan_halves["adopted"])
+    if adopted_halves:
+        # Never silent: adoption reverses this file's default answer, so it says
+        # which path it took and on whose evidence, every time.
+        for rel in adopted_halves:
+            LOG.warning(
+                "phase_z: adopting orphan half %s — it turns committed test(s) %s green at HEAD",
+                rel, ", ".join(orphan_halves["evidence"][rel]["turned_green"]),
+            )
+        foreign = [p for p in foreign if p not in set(adopted_halves)]
+    elif orphan_halves["reason"] not in {"no_candidates", "no_proof"}:
+        LOG.info("phase_z: orphan-half probe adopted nothing (%s)", orphan_halves["reason"])
+
     # A recovery pass runs immediately before the real pre-fire snapshot. It
     # must not count the same unrelated dirty paths as another hourly shift.
     streaks = {} if recovery_mode else _bump_foreign_streaks(repo_root, runner, foreign)
@@ -2058,15 +2329,16 @@ def run_phase_z(
         LOG.info("phase_z: %d machine-churn path(s) busy/unreadable — next fire takes them: %s",
                  len(churn_deferred), churn_deferred)
 
-    if not owned and not churn:
+    if not owned and not churn and not adopted_halves:
         _consume_pre_fire_snapshot(repo_root, runner)  # settled: nothing of ours to commit
         LOG.info("phase_z: nothing this fire produced — %d foreign path(s) left alone", len(foreign))
         if not foreign:
-            return {"committed": False, "reason": "nothing_owned", "foreign": []}
+            return {"committed": False, "reason": "nothing_owned", "foreign": [],
+                    "orphan_halves": orphan_halves}
         if stuck:
             # the critical alert above already said everything this one would, louder.
             return {"committed": False, "reason": "nothing_owned",
-                    "foreign": foreign, "stuck": stuck}
+                    "foreign": foreign, "stuck": stuck, "orphan_halves": orphan_halves}
         alert_fn(
             level="warn",
             title="PHASE-Z 有檔案未提交，但不是這班產出的",
@@ -2087,10 +2359,12 @@ def run_phase_z(
                 *(["- …"] if len(foreign) > 30 else []),
             ]),
         )
-        return {"committed": False, "reason": "nothing_owned", "foreign": foreign}
+        return {"committed": False, "reason": "nothing_owned", "foreign": foreign,
+                "orphan_halves": orphan_halves}
 
-    LOG.info("phase_z: auto-committing %d path(s) from this fire + %d machine-churn path(s)",
-             len(owned), len(churn))
+    LOG.info("phase_z: auto-committing %d path(s) from this fire + %d machine-churn path(s)"
+             " + %d proved orphan half/halves",
+             len(owned), len(churn), len(adopted_halves))
     # Build the commit in an alternate index.  The real index may contain another
     # session's carefully staged work; mutating it and attempting to reset after a
     # hook failure is not a transaction.  A temporary GIT_INDEX_FILE gives PHASE-Z
@@ -2140,7 +2414,7 @@ def run_phase_z(
                     return {"committed": False, "reason": "candidate_index_error", "rolled_back": True}
                 untracked.append(path)
 
-            to_stage = [p for p in (owned + churn) if p not in set(untracked)]
+            to_stage = [p for p in (owned + churn + adopted_halves) if p not in set(untracked)]
             pathspec_file = tx_root / "paths.nul"
             try:
                 pathspec_file.write_bytes(b"\0".join(os.fsencode(path) for path in to_stage))
@@ -2328,6 +2602,11 @@ def run_phase_z(
                 subject = f"dispatch({hhmm}): {receipt['subject']}"
             elif owned:
                 subject = f"dispatch({hhmm}): {_generated_subject(owned)}"
+            elif adopted_halves and not churn:
+                subject = (
+                    f"fix(ci {hhmm}): land proved missing half of an "
+                    f"already-committed change"
+                )
             else:
                 subject = f"ops(dispatch-supervisor {hhmm}): PHASE-Z state churn (no agent output this fire)"
             body_lines = []
@@ -2343,6 +2622,18 @@ def run_phase_z(
                 f"{len(churn)} daemon-written machine-churn path(s) this module owns.\n"
                 f"Left alone (dirty before the fire, another writer's): {len(foreign)} path(s)."
             )
+            if adopted_halves:
+                # The audit trail for reversing this file's default answer lives
+                # in the commit itself, not only in a log line that rotates away.
+                body_lines.append("")
+                body_lines.append(
+                    "Adopted orphan half/halves — dirty before this fire, but proved to be the "
+                    "missing half of an already-landed commit (a test committed at HEAD was RED "
+                    "and these bytes turn it GREEN in an isolated clone):"
+                )
+                for rel in adopted_halves:
+                    turned = ", ".join(orphan_halves["evidence"][rel]["turned_green"])
+                    body_lines.append(f"- {rel} — turns green: {turned}")
             commit_object = _git(
                 repo_root, "commit-tree", tree_after.stdout.strip(), "-p", base_sha,
                 "-m", subject, "-m", "\n".join(body_lines),
@@ -2488,7 +2779,8 @@ def run_phase_z(
             )
         return {"committed": True, "reason": "committed", "untracked": untracked,
                 "owned": owned, "foreign": foreign, "churn": churn,
-                "commit_head": out[-500:], "tests": tests, "index_refresh": refresh}
+                "commit_head": out[-500:], "tests": tests, "index_refresh": refresh,
+                "orphan_halves": orphan_halves}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything
     # dirty was a leaked-ignored file already rm --cached'd, or a race cleaned
     # it) from a genuine commit failure.
