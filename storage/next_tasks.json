@@ -33098,13 +33098,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T18:15:19.089233+00:00",
+    "completed_at": "2026-07-18T18:59:17.646931+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T18:15:19.089233+00:00",
-      "last_clean_observed_at": "2026-07-18T18:15:19.089233+00:00"
+      "resolved_at": "2026-07-18T18:59:17.646931+00:00",
+      "last_clean_observed_at": "2026-07-18T18:59:17.646931+00:00"
     }
   },
   {
@@ -41365,7 +41365,7 @@
     "description": "Gmail UID: 12137\nMessage-ID: <E10FA350-4D02-42E9-A61E-20CFAADA2B68@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 19 Jul 2026 02:01:59 +0800\nSubject: Re: [VolPred Alert][CRITICAL] CI 自動修復未成功（ci-red-29651115228）\n\n--- 用戶回信內容 ---\n立刻解決 從底層重構來徹底解決\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月19日 02:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> CI 自動修復未成功（ci-red-29651115228）\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 原因：ci_failed_more_than_two_cycles: 3\r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> 自動修復需要支援\r\n> \r\n> 原因：ci_failed_more_than_two_cycles: 3\r\n> 原始失敗：2026-07-18T16:04:20.9274559Z ImportError while importing test module '/home/runner/work/volpred-research/volpred-research/tests/test_covered_article_dedup.py'.\r\n> 已失敗 cycles：3\r\n> repair tasks：{'ci-red-29651115228': 'in_progress'}\r\n> 最新 failure run：29653262702\r\n> https://github.com/yhlai0911/volpred-research/actions/runs/29653262702\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -41375,6 +41375,40 @@
     "email_uid": 12137,
     "email_message_id": "<E10FA350-4D02-42E9-A61E-20CFAADA2B68@gmail.com>",
     "email_subject": "Re: [VolPred Alert][CRITICAL] CI 自動修復未成功（ci-red-29651115228）",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-18T18:16:12.713133+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f"
+      },
+      {
+        "ts": "2026-07-18T18:19:02.045047+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f"
+      },
+      {
+        "ts": "2026-07-18T18:57:56.122914+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f"
+      }
+    ],
+    "started_at": "2026-07-18T18:19:02.045031+00:00",
+    "completed_at": "2026-07-18T18:57:56.122885+00:00",
+    "result": "根因=partial commit（4684b5e02 land 測試但 asset 留工作區）。底層修法：phase_z.py 加證據門檻的孤兒採用規則（HEAD 紅測試補該路徑內容後轉綠才收，disposable clone 跑 pytest，fail-closed）+ 13 tests。實測 19 dirty 只採用 cron_hourly_dispatch_prompt.md。CI 紅燈 2→1，未全綠：剩 test_phase_z_drain_retry.py 為測試檔，規則刻意不自動收（防放寬斷言）→ P1 assign_ee93acd2。close email 已寄。"
+  },
+  {
+    "id": "assign_ee93acd2",
+    "title": "CI 剩餘紅燈：手動 land scripts/tests/test_phase_z_drain_retry.py（PHASE-Z 規則刻意不自動收測試檔）",
+    "description": "背景：CI run 29653262702 紅燈根因為 partial commit。本班（job 6b245c8f）已修 asset 側孤兒出口，PHASE-Z 會自動 land scripts/cron_hourly_dispatch_prompt.md，紅燈節點 2→1。\n\n剩餘 1 節點：scripts/tests/test_phase_z_drain_retry.py::test_hash_pinned_closeout_refuses_later_edits 在 HEAD 為紅；工作區版本可轉綠（fb1e4cc68 只 land 了 phase_z.py 側，測試檔留在工作區）。此為 subagent 實測，主線程未獨立複驗（shallow clone 缺 venv，collection error）—— 接手時請先自行複驗。\n\n為何不自動收：新規則 _is_test_path 刻意把測試檔排除在採用候選外 —— 「補上工作區內容讓紅測試轉綠」這個判準對測試檔可被『放寬斷言』瑣碎滿足，與殺掉溫度計無法機械區分。fail-closed 是刻意選擇。\n\n要做的：人工確認工作區版 test_phase_z_drain_retry.py 是 fb1e4cc68 的正確另一半（非放寬斷言），附 diff 佐證後 land。\n\nparent_email_task_id: email-12137-d49553",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-18T18:56:32.549244+00:00",
+    "created_by": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f"
   }
 ]

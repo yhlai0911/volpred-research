@@ -21224,5 +21224,15 @@
     "owner": "hourly-slot-1-0bd07fce62c74c6dbebcb892c4421508",
     "commit": null,
     "summary": "assign_358decfa（改用官方 NFP 發布日並修正線上事件 metadata）— 本班派工，未收件。\n\nSTARVATION LOCKOUT 下的第二張（aged 51.4h，threshold 24h）。因 router topology=worktree、effort=xhigh，\n且工作量（重跑產物 + regression tests + publisher 修正 + live verify）明顯超過 50min fire cap，\n走 `enqueue-agent` 而非 fire 內同步跑 —— 這正是 2026-07-12 3-STRIKE 的教訓：把 60 分鐘的工作\n塞進 50 分鐘的容器只會被 SIGKILL 或留下 ppid=1 孤兒。\n\n- 已建 registered worktree `.claude/worktrees/dispatch-slot-1-0bd07fce-nfpdates`\n  （branch `task/nfp-official-dates`，走 `git_writer_lock.py run --actor <owner>`）\n- agent job: `agent-brief_nfp_official_dates-d68f3f`（opus / xhigh）\n- result artifact: `experiments/event_article_nfp_2026_07_03_t1/nfp_official_dates_fix_report.md`\n- brief 明列的邊界：不發第二篇更正文、metadata 只走正式 publisher、保留 AS_OF=2026-07-01 的 T-1 快照\n  （改日期不重抓，重抓會引入 lookahead）、不寫 knowledge.json、不自行 merge 回 main\n- followup brief 綁的驗收：7 筆歷史樣本前後對照要有實際執行證據（非推理）、regression test 必須真的\n  fail 在 proxy 上、live verify 要有 curl 證據；通過才由 `merge_worktree.sh` 正式合併\n\n任務保持 in_progress（agent job 執行中），終態由該 job 的 followup 標。"
+  },
+  {
+    "timestamp": "2026-07-19T03:02:00+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12137-d49553",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f",
+    "owner": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f",
+    "commit": null,
+    "summary": "老闆回信「立刻解決 從底層重構來徹底解決」（CI 連紅 3 cycles, run 29653262702）。\n\n根因（非 alert 說的 ImportError，那是舊 cycle）：partial commit。\ncommit 4684b5e02 land 了 scripts/tests/test_urgent_task_lane.py + 兩個模組，但該測試斷言的\nscripts/cron_hourly_dispatch_prompt.md 改動留在工作區。工作區綠、CI 紅。\n\n底層缺口：phase_z.py 的所有權模型只有兩類 dirty —— 本班產生的（收）/ fire 開始前就 dirty 的\n（一律不碰，視為別人在製品）。孤兒改動落在第二類就永遠沒有出口，每班跳過、CI 永遠紅。\n與 error_log 2026-07-18 的 untracked-closeout 事故（fb1e4cc68 修的）是同一 class 的上一層。\n\n修法：加一條以證據為準的窄採用規則 —— 若 HEAD 上某個已 land 的測試現在為紅，而補上該 dirty\n路徑的工作區內容後轉綠，則它是缺半而非在製品（真正在製中的第三方編輯不會讓已 land 的測試由紅轉綠）。\n一律在 disposable clone 跑 pytest，live checkout 絕不當 cwd；預設不採用，fail-closed。\n\n實測（subagent）：19 個 dirty 路徑中只採用 scripts/cron_hourly_dispatch_prompt.md，\n證據節點正是 CI 紅的 test_dispatch_prompt_delegates_a0_decision_to_the_script。\n其餘 18 個全部排除且各有量測理由（5 個進 probe、3 個因無紅測試對應而零成本略過）。\n\n新增 scripts/tests/test_phase_z_orphan_half.py（13 tests，mutation check：stub adopted=[] 殺 3 個）。\n全套 3447 passed / 1 failed，唯一 fail 是工作區未追蹤檔 scripts/gen_codex_cli_reference.py 造成，\nHEAD 無此檔（clean clone 下 4 passed），與本次改動無關。\n\n誠實邊界：CI 紅燈節點 2→1，非全綠。第二個孤兒半是 scripts/tests/test_phase_z_drain_retry.py\n本身，新規則刻意不收測試檔 —— 「補內容讓紅測試轉綠」對測試檔可被放寬斷言瑣碎滿足，與殺溫度計\n無法機械區分。已建 P1 followup assign_ee93acd2 人工複核後 land。\n此第二節點為 subagent 實測，主線程未獨立複驗（shallow clone 缺 venv）。"
   }
 ]
