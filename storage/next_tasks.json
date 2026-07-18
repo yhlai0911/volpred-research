@@ -33080,13 +33080,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T18:00:56.089687+00:00",
+    "completed_at": "2026-07-18T19:00:53.215066+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T18:00:56.089687+00:00",
-      "last_clean_observed_at": "2026-07-18T18:00:56.089687+00:00"
+      "resolved_at": "2026-07-18T19:00:53.215066+00:00",
+      "last_clean_observed_at": "2026-07-18T19:00:53.215066+00:00"
     }
   },
   {
@@ -33098,13 +33098,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T18:59:17.646931+00:00",
+    "completed_at": "2026-07-18T19:11:41.047359+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T18:59:17.646931+00:00",
-      "last_clean_observed_at": "2026-07-18T18:59:17.646931+00:00"
+      "resolved_at": "2026-07-18T19:11:41.047359+00:00",
+      "last_clean_observed_at": "2026-07-18T19:11:41.047359+00:00"
     }
   },
   {
@@ -35207,36 +35207,15 @@
   },
   {
     "id": "refactor_3strike_supabase_row_cap_helper",
-    "title": "refactor(3-strike): PostgREST 1000-row cap class — 統一 fetchAllRows helper + 機械 gate（第 4 次再現）",
-    "description": "3-STRIKE TRIGGER（第 4 次同 class）：2026-03-18 paper_trades、2026-04-17 knowledge summary、2026-06-23 article_tags、2026-07-15 fetchArticleSummaries+fetchMarketDaily（boss 抓到 v3 報頭「1000 篇研究」，真值 1612）。root cause = 每個新 supabase query 都要記得分頁，無結構性防護。任務（frontend-v2-fix repo）：(1) 建統一 fetchAllRows(queryBuilder) helper（range 分頁 loop），現有 5 處手寫 loop 收編；(2) 逐點評估剩餘 10 個無分頁站點（audit 清單見主 repo docs/error_log.md 2026-07-15 Class M entry：L714 article_relations / L759 member_qa articles / L1645 article_reactions / L1687+L1919 questions / L1801 digest slugs / L2047+L2169 paper_trades / L2184+L2198 question_articles）— 會增長的表全部接 helper，≤11 列小表（strategy_signals/strategy_metrics_cache）加註解豁免；(3) 機械 gate：test 或 lint script 掃 data-server.ts `.from().select` chain 無 .range/.limit/.single/.in 者 fail（豁免需 `// row-cap-exempt: <reason>` 註記）；(4) build + deploy + 線上驗證 total/tags/市場數據。注意 frontend-v2-fix 是巢狀 git repo。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "refactor(3-strike): PostgREST 1000-row cap class — 統一 fetchAllRows helper + 機械 gate（第 4 次再現）",
+    "priority": 2,
     "source": "3strike_20260715_row_cap",
     "created_at": "2026-07-15T10:46:29.744853+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-15T18:08:50.041765+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-2-10a58dcb81fe495195f8dc60f4f8fe64"
-      },
-      {
-        "ts": "2026-07-15T18:08:50.258608+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-2-10a58dcb81fe495195f8dc60f4f8fe64"
-      },
-      {
-        "ts": "2026-07-15T18:19:22.455556+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-2-10a58dcb81fe495195f8dc60f4f8fe64"
-      }
-    ],
-    "started_at": "2026-07-15T18:17:07.032741+00:00",
     "completed_at": "2026-07-15T18:19:22.455542+00:00",
-    "result": "Unified growing Supabase reads behind fetchAllRows and added a mechanical row-cap gate with negative tests. Node 22 typecheck/build passed; deployed 6a57ce173d3d099ed2f12794 and verified cluster total=1614, tagCounts=2082, latest market=2026-07-15. Existing unrelated verify:regressions paper.updated_at guard remains baseline-failing."
+    "tombstone": true,
+    "archived_at": "2026-07-18T19:07:43.077821+00:00"
   },
   {
     "id": "ci-red-29406571212",
@@ -35252,36 +35231,15 @@
   },
   {
     "id": "lazypack_async_codex_primary",
-    "title": "lazypack async 管線改接 codex bespoke poster 為 PRIMARY（boss 2026-07-15 指令：模板圖太醜）",
-    "description": "boss 2026-07-15 晚間指令：懶人包圖走 codex 生成，deterministic renderer 模板『render 得很醜』降為 fallback。skill 政策已改（.claude/skills/lazypack-infographic/SKILL.md 視覺分層段）。本 task 改管線：(1) `scripts/lazypack_async_render.py` 改為先走 `scripts/gen_lazypack_codex.py`（codex 寫 data-bound 腳本→ 本地執行 → PNG 驗證 → bounded repair），codex 失敗才 fallback deterministic `lazypack_render.py` 並在 work_log 註記 fallback（不得 silent — 依 no-silent-fallback rule）；(2) 保留 hash-receipt / evidence 驗證等研究誠實 gate（codex 腳本的數字也必須 data-bound 自 evidence JSON）；(3) 更新對應 tests；(4) 用一篇 pending queue 文章端到端驗證（enqueue → compute worker → PNG 品質 + upload + append）。注意 gen_lazypack_codex.py 頭部 docstring 的 LEGACY 標示要同步改掉（它現在是 primary）。參考 incident：2026-07-15 trending_ai_power_vol 懶人包（deterministic 模板）被 boss 嫌醜，已用 codex 重生。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "lazypack async 管線改接 codex bespoke poster 為 PRIMARY（boss 2026-07-15 指令：模板圖太醜）",
+    "priority": 2,
     "source": "boss_directive_20260715_lazypack_codex",
     "created_at": "2026-07-15T11:14:45.382258+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-15T18:01:43.246234+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-1-a9c7dc5ce95e4ed5896a6d516af9aa5b"
-      },
-      {
-        "ts": "2026-07-15T18:01:43.467874+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-1-a9c7dc5ce95e4ed5896a6d516af9aa5b"
-      },
-      {
-        "ts": "2026-07-15T18:22:25.129842+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-1-a9c7dc5ce95e4ed5896a6d516af9aa5b"
-      }
-    ],
-    "started_at": "2026-07-15T18:01:43.467859+00:00",
     "completed_at": "2026-07-15T18:22:25.129828+00:00",
-    "result": "Codex bespoke renderer is now async PRIMARY; strict plan/evidence and hash receipt gates retained; deterministic fallback writes work_log. 93 tests passed. E2E lazypack-mile_7b02f9e2-r2 completed exit=0, 4 PNGs uploaded/appended/synced and visually verified."
+    "tombstone": true,
+    "archived_at": "2026-07-18T19:07:43.077821+00:00"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260715T072600838284Z_a3",
@@ -41318,14 +41276,36 @@
     "description": "TRIAGE 結論（來自 compute job agent-k1731-armB-esfix-7009a4，exit_code=1、artifact_ok=False）。\n\n== 為什麼 failed ==\nAgent 把 corrected-spec production 重跑丟到背景（19 refits × ~53s），然後**結束回合**，\n自述「完成後我會被自動喚回」—— 但 agent job runner 沒有這種喚回機制，回合一結束整個\nprocess group 就收掉。`run_corrected_rev5.log` 停在 21:27:34 的 2010 refit（19 個只跑完 3 個），\n所以 `experiments/k1731/k1731_armB_esfix.json` 從來沒被產出 → runner 判 artifact missing。\n\n**不是程式錯誤，是把長時間背景計算留在會結束的 agent 回合裡。**\n\n== 可保留的成果（已確認存在，不要重做） ==\n- `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_models.py`（rev5，含新 ES 估計量）\n- `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_finalize_report.py`（provenance 蓋章 pipeline，無 provenance 直接 SystemExit）\n- `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_regression_check.py`（allow-list 外漂移一律 FAIL）\n- `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_es_mixture_check_results.json`（ES 估計量收斂驗證：\n  MC 標準誤每 4 倍樣本乾淨減半，|old-mc| 固定 2.12 不動 → 舊算法低估 ES 3.9%-22.8%，\n  方向已確立為偏誤而非雜訊）\n- **regression baseline 已由本班從 /tmp 保全到** `/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/regression_baseline/`\n  （原本只存在 /tmp/k1731_regression_baseline/，隨時可能被清掉）\n\n== 要做什麼（兩段，不要合併成一個 agent 回合） ==\n段 1 — **heavy compute 走 compute_queue，不要放 agent 背景**：\n  corrected-spec production 重跑（19 annual refits，~17-20 min）。\n  進入點 `experiments/k1731/k1731_gevreg_midas_ssvs_returns.py`（argparse: --quick / --exclude-ip /\n  --garch-origin-lag / --tag）。**確切旗標從 `run_corrected_rev5.log` 開頭與 `k1731_models.py` 反推**，\n  不要憑印象猜。用 `scripts/compute_queue.py enqueue --script ... --result-artifact <corrected results json>\n  --output-path <同上> --timeout 3600`，cwd 指向上面 worktree。\n\n段 2 — 段 1 產出後（agent，bounded）：\n  回歸檢查（比對 `experiments/k1731/regression_baseline/`，驗證**只有 SSVS ES 欄位變動**）\n  → finalize → README §3.1/§3.5/§8/§9/§10 同步 → 產出 `k1731_armB_esfix.json`。\n  注意 §3.1 那個 p=0.0145 的拒絕**部分是舊 ES 估計量的假象**，修正後 §3.5 結論有實質翻轉可能 —— 翻轉就照實寫。\n\n== 之後才輪到 assign_67f56b79（拆段 2）==\n凍 bytes → Codex 重審 → merge_worktree.sh → 寫 knowledge.json（**只引 is_primary 那份，禁引 do_not_cite**）。\n\n== 禁止 ==\n- 不得把已中斷的 rev5 重跑結果當完整結果\n- 不得 force-remove worktree `dispatch-slot-1-bd00f90a-k1731`\n- 不得整份重跑拆段 1 已完成的部分\n",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "compute_queue_followup",
     "created_at": "2026-07-18T16:29:22.049442+00:00",
     "payload": {
       "parent_job_id": "agent-k1731-armB-esfix-7009a4"
     },
     "created_by": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b",
-    "result": "\n[2026-07-19 hourly-slot-1] 段 1 已 enqueue compute job k1731-armB-corrected-rev5；段 2 由該 job 的 followup 接手。"
+    "result": "[2026-07-19 hourly-slot-1] 段 1 已 enqueue compute job k1731-armB-corrected-rev5；段 2 由該 job 的 followup 接手。\n\n段 1（heavy compute）+ 段 2（bounded agent）皆已依 topology 正確落地。段 1 compute job k1731-armB-corrected-rev5 exit 0，產出 k1731_gevreg_midas_ssvs_returns_results_corrected_rev5.json（179,830 bytes，19 annual refits 完整，lookahead check PASSED）。段 2 已 enqueue-agent 為 agent-brief_k1731_armB_seg2-9be956（opus/xhigh，cwd=worktree dispatch-slot-1-bd00f90a-k1731，result-artifact=experiments/k1731/k1731_armB_esfix.json）。followup 已接到 assign_67f56b79 拆段 2（Codex 重審→merge→knowledge）。PHASE A followup 已 mark-followup-dispatched。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T19:08:28.411670+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-79fea1ed6e8645819a3751ccdb37ce9d"
+      },
+      {
+        "ts": "2026-07-18T19:08:32.503654+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-79fea1ed6e8645819a3751ccdb37ce9d"
+      },
+      {
+        "ts": "2026-07-18T19:10:02.053861+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-79fea1ed6e8645819a3751ccdb37ce9d"
+      }
+    ],
+    "started_at": "2026-07-18T19:08:32.503640+00:00",
+    "completed_at": "2026-07-18T19:10:02.053846+00:00"
   },
   {
     "id": "ci-red-29651115228",

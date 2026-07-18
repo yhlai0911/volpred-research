@@ -85,23 +85,24 @@ PHASE 0.5 — **verify-only：reader-facing badge pool refill 狀態檢查**（2
 
 這樣做的目的：把 reader-facing pool top-up 從 prompt-level 紀律改成 repo-level script + host cron，可測試、可重跑、可觀測。
 
-PHASE A0 — **時效 P1 優先檢查**（2026-07-16 加，治本 daily_digest 脫班案例）:
+PHASE A0 — **急件 / 時效 lane**（2026-07-16 daily_digest 脫班案；2026-07-18 boss msg 981 擴為急件 lane）:
 
-**Why**：CLAUDE.md 上位規則「時效性 P1（event_article / trending_repost / daily_digest / user-assigned P1）插隊所有 scheduled」。舊流程 PHASE A 命中 followup 就「本小時派工結束」，followup backlog 連續存在時 P1 被永久餓死（2026-07-16 實例：上午 5 班 quota_blocked，下午恢復的 3 班全被 compute followup 吃掉，daily_digest_20260716 從 09:00 積壓到 14:38 才被 boss 點名）。
+**Why**：CLAUDE.md 上位規則「時效性 P1 插隊所有 scheduled」。舊流程 PHASE A 命中 followup 就「本小時派工結束」，followup backlog 連續存在時 P1 被永久餓死。2026-07-18 又發現第二層：舊 A0 的判定是**列舉 task_type** + `source=='user'`，Telegram 建出的 P1（`task_type=platform_ops` / `source=telegram`）兩條都不中，A0 根本看不到（實例 `assign_998ad2be` / `assign_33a9151f` 建單 16:49/17:42，18:06 仍 pending）。
 
-1. 查 pending 時效 P1：
-   ```bash
-   python3 -c "
-   import json
-   d=json.load(open('storage/next_tasks.json'))
-   ts=d if isinstance(d,list) else d.get('tasks',d)
-   hot=[t for t in ts if isinstance(t,dict) and t.get('status')=='pending' and t.get('priority')==1
-        and (t.get('task_type') in ('event_article','trending_repost','daily_digest') or t.get('source')=='user')]
-   print(json.dumps([{k:t.get(k) for k in ('id','task_type','created_at')} for t in sorted(hot,key=lambda x:x.get('created_at',''))],ensure_ascii=False))
-   "
-   ```
-2. 若有 → **本班主產出 = 最舊那個時效 P1**（依 task-routing capability：這些 type 都是 Claude-only 主線程紀律，本 fire 就是主線程，直接執行；daily_digest/trending_repost 遵守各自 skill 與 daily cap）。PHASE A 的 followup 本班只在執行完 P1 後仍有時間預算時才處理最舊一條，否則留給下一班 — followup 是研究收尾，無時效，可等；P1 時效過了價值歸零。
-3. 若無時效 P1 → 進 PHASE A。
+**判定不由你決定 —— 唯一 owner 是腳本**（同 `dispatch_slot_budget.py` 的作法；列舉 task_type 正是上面那次漏掉的根因）：
+
+```bash
+uv run python -m volpred.ops.task_urgency
+```
+
+回傳 `{count, urgent, time_critical, tasks:[{id, lane, task_type, source, priority, created_at, title}]}`，已排好序：**urgent（人為 ingress P1，用 source+priority 判）全部在前，time_critical（event_article / trending_repost / daily_digest）在後，各自舊→新**。判定細節與 lane 定義見 `src/volpred/ops/task_urgency.py` docstring，不要在本 prompt 重寫條件。
+
+1. 跑上面那行。`count == 0` → 直接進 PHASE A。
+2. `count > 0` → **本班主產出 = 這條 lane，且要連續清完**：照回傳順序逐一 claim → 執行 → complete，做完一張立刻接下一張，**不是每班只做最舊一張**（boss msg 981「急件就不進入排班直接派工」：急件本來就靠 ingest 端 `request_fire` 立刻起一班，那一班若只清一張，堆積的急件仍要等下一班）。
+3. 停止條件只有兩個：lane 清空，或 50min cap 內已無時間預算再收尾一張完整任務（寧可留給下一班，禁止做一半）。
+4. lane 還有殘留 → **本班不進 PHASE A followup**（followup 是研究收尾，無時效，可等；P1 時效過了價值歸零）。lane 清空且仍有預算 → 進 PHASE A。
+
+**注意**：`email_reply` / `telegram_reply` 不在這條 lane（各有專屬 owner：PHASE 0 / `telegram_responder.sh`），別重複 claim。
 
 PHASE A — 檢查 compute queue 有無 completed collection / failed-agent triage followup:
 1. 跑 `uv run python scripts/compute_queue.py list --pending-followup --json`
