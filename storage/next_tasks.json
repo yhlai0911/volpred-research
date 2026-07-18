@@ -33328,13 +33328,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T07:14:04.978015+00:00",
+    "completed_at": "2026-07-18T07:25:07.773138+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T07:14:04.978015+00:00",
-      "last_clean_observed_at": "2026-07-18T07:14:04.978015+00:00"
+      "resolved_at": "2026-07-18T07:25:07.773138+00:00",
+      "last_clean_observed_at": "2026-07-18T07:25:07.773138+00:00"
     }
   },
   {
@@ -41363,5 +41363,66 @@
     "started_at": "2026-07-18T06:10:25.827824+00:00",
     "completed_at": "2026-07-18T07:11:48.142462+00:00",
     "result": "上一班（slot dc5897b0）fire 於 14:16 結束時未收班，留 in_progress。本班接手收尾：已驗證 quick-mode 結果誠實（GEV logpdf 誤差 4.5e-13、Gumbel 極限收斂；lookahead 三項 0 violations / 118,080 macro cells / 1,640 blocks；OOS 967 週 2008-01~2026-07；90% 區間實際覆蓋 85.3%、Kupiec p=4.8e-6 拒絕 = 區間偏窄的 partial-null，未見灌水）。arm A 引擎已 commit（9060414f9）。剩餘工作（全量 production 重跑 / Codex 代碼審 / merge_worktree / knowledge.json）已折入 compute job compute-k1730-arm-a-production-quick-mode-1784358686 的 followup brief，不再重複掛在本 task。arm B 已解鎖並派出（assign_c55b0d66）。"
+  },
+  {
+    "id": "email-12157-29eb65",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-07-18 15:00 台灣時間 平台運營報告",
+    "description": "Gmail UID: 12157\nMessage-ID: <7BF7F145-EB1A-46AE-AE41-26C8374C1E23@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sat, 18 Jul 2026 15:09:03 +0800\nSubject: Re: [VolPred Boss Report] 2026-07-18 15:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n## 2. 網站功能優先序（修正：先衝免費會員基數，不談付費）\r\n\r\n**修正自前版**：先前列「付費 tier 入口」是 premature monetization — 還沒幾個會員就想收費 = 平台運營錯誤順序。先設**免費階段目標**，達標後再談收費。\r\n\r\n### 免費階段目標（自主設定，會調整）\r\n- **3 個月內**：註冊會員 ≥100、weekly active ≥40、回訪率 ≥30%\r\n- **6 個月內**：註冊 ≥500、提問池 active ≥10/week、外部分享 ≥20/week\r\n\r\n### 為達標需建的功能（按優先序）\r\n- **🔴 P1**: Reader analytics（CTR / 停留時間 / 跳出率 / 回訪 cohort） — 沒這個我盲打文章品質\r\n- **🔴 P1**: 註冊 / 登入 flow（如果還沒）+ welcome onboarding\r\n- **🟡 P2**: 文章 share button + 社群 OG meta（Mission 5 曝光直接 lever）\r\n- **🟡 P2**: Member dashboard 改版（提問 → 研究進度視覺化、增加回訪誘因）\r\n- **🟡 P2**: Email subscription（weekly digest = 留客武器）\r\n- **🟢 P3**: 策略 sparkline 升級到 interactive chart\r\n- **🟢 P3 之後**：付費 tier 入口（達到上面 6 個月目標再規劃）\r\n\r\n我會自主寫 `docs/free_tier_growth_plan.md` spec，1-2 週上 P1 MVP。\r\n\r\n## 3. 開發中的結構性改善\r\n\r\n- ✅ ops_dashboard.py — 7 區段健康儀表板（本 cycle 落地）\r\n- ✅ live_verify gate — 發文後驗證 live URL（本 cycle 落地，agent a677637 完成）\r\n- ✅ audit_publish_sync / audit_fb_pipeline — 兩個 standing audit script（本 cycle 落地）\r\n- 🔄 Reader analytics ingestion — spec 撰寫中\r\n- 🔄 Monetization funnel — 規劃中\r\n- 🟡 FB 個人帳號發文流程 — Page/Graph API 已永久撤回；保留 Claude-in-Chrome interactive path + 72h auto-expire/audit。\r\n\r\n## 4. 需要你決策的策略性事項\r\n\r\n只標出來，你不回我也會自主走。\r\n\r\n- **目標期刊**：我預設 JBF（top-tier finance），如果你想往 RFS / JFE 衝需要拉高 contribution claim\r\n- **FB 路線**：已決定 personal account only；Page/Graph API 不再作為 active 建議或 fallback。\r\n- **付費 tier 命名與定價**：你 vs 我寫 mock-up（我可以做但市場價格判斷你比較知道）\r\n- **策略上架節奏**：active 11 個都 healthy，是否擴張到 15-20 個 strategy universe\r\n\r\n---\r\n\r\n**這份 doc 我每 cycle 更新**。建議過時的會劃掉、新建議加上來。\r\nReport generated 2026-07-18 15:00:38 台灣時間 · Window 4h · Source: scripts/boss_report.py\r\n\r\n\r\n\r\n這些任務有盤點與檢討嗎？pdca/loop enginering\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月18日 15:00 寫道：\r\n> \r\n> ## 2. 網站功能優先序（修正：先衝免費會員基數，不談付費）\r\n> \r\n> **修正自前版**：先前列「付費 tier 入口」是 premature monetization — 還沒幾個會員就想收費 = 平台運營錯誤順序。先設**免費階段目標**，達標後再談收費。\r\n> \r\n> ### 免費階段目標（自主設定，會調整）\r\n> - **3 個月內**：註冊會員 ≥100、weekly active ≥40、回訪率 ≥30%\r\n> - **6 個月內**：註冊 ≥500、提問池 active ≥10/week、外部分享 ≥20/week\r\n> \r\n> ### 為達標需建的功能（按優先序）\r\n> - **🔴 P1**: Reader analytics（CTR / 停留時間 / 跳出率 / 回訪 cohort） — 沒這個我盲打文章品質\r\n> - **🔴 P1**: 註冊 / 登入 flow（如果還沒）+ welcome onboarding\r\n> - **🟡 P2**: 文章 share button + 社群 OG meta（Mission 5 曝光直接 lever）\r\n> - **🟡 P2**: Member dashboard 改版（提問 → 研究進度視覺化、增加回訪誘因）\r\n> - **🟡 P2**: Email subscription（weekly digest = 留客武器）\r\n> - **🟢 P3**: 策略 sparkline 升級到 interactive chart\r\n> - **🟢 P3 之後**：付費 tier 入口（達到上面 6 個月目標再規劃）\r\n> \r\n> 我會自主寫 `docs/free_tier_growth_plan.md` spec，1-2 週上 P1 MVP。\r\n> \r\n> ## 3. 開發中的結構性改善\r\n> \r\n> - ✅ ops_dashboard.py — 7 區段健康儀表板（本 cycle 落地）\r\n> - ✅ live_verify gate — 發文後驗證 live URL（本 cycle 落地，agent a677637 完成）\r\n> - ✅ audit_publish_sync / audit_fb_pipeline — 兩個 standing audit script（本 cycle 落地）\r\n> - 🔄 Reader analytics ingestion — spec 撰寫中\r\n> - 🔄 Monetization funnel — 規劃中\r\n> - 🟡 FB 個人帳號發文流程 — Page/Graph API 已永久撤回；保留 Claude-in-Chrome interactive path + 72h auto-expire/audit。\r\n> \r\n> ## 4. 需要你決策的策略性事項\r\n> \r\n> 只標出來，你不回我也會自主走。\r\n> \r\n> - **目標期刊**：我預設 JBF（top-tier finance），如果你想往 RFS / JFE 衝需要拉高 contribution claim\r\n> - **FB 路線**：已決定 personal account only；Page/Graph API 不再作為 active 建議或 fallback。\r\n> - **付費 tier 命名與定價**：你 vs 我寫 mock-up（我可以做但市場價格判斷你比較知道）\r\n> - **策略上架節奏**：active 11 個都 healthy，是否擴張到 15-20 個 strategy universe\r\n> \r\n> ---\r\n> \r\n> **這份 doc 我每 cycle 更新**。建議過時的會劃掉、新建議加上來。\r\n> Report generated 2026-07-18 15:00:38 台灣時間 · Window 4h · Source: scripts/boss_report.py\r\n>\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-18T07:15:07.483649+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12157,
+    "email_message_id": "<7BF7F145-EB1A-46AE-AE41-26C8374C1E23@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-07-18 15:00 台灣時間 平台運營報告",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-18T07:15:44.775123+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-8470cfcda97f4656b2b49a9f5a1e7adf"
+      },
+      {
+        "ts": "2026-07-18T07:15:45.019099+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-8470cfcda97f4656b2b49a9f5a1e7adf"
+      },
+      {
+        "ts": "2026-07-18T07:24:10.050471+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-8470cfcda97f4656b2b49a9f5a1e7adf"
+      }
+    ],
+    "started_at": "2026-07-18T07:15:45.019083+00:00",
+    "completed_at": "2026-07-18T07:24:10.050451+00:00",
+    "result": "盤點答案=沒有：boss_direction_recommendations.md 停在 2026-06-22（26天），7 個 roadmap 項目 pool 覆蓋 0，§3 兩項『進行中』實為未開工。治本：audit_roadmap_coverage.py（marker 綁 task id + 對 pool 查真實 status + stale gate）、boss_report 第6節改先渲染對帳表、兩個 P1 建 backing task、tests 6 passed / 既有 73 passed。close email 已寄。"
+  },
+  {
+    "id": "growth_p1_reader_analytics",
+    "title": "[growth P1] Reader analytics ingestion — CTR / 停留時間 / 跳出率 / 回訪 cohort",
+    "description": "來源：docs/boss_direction_recommendations.md §2 免費階段 roadmap（rid:reader-analytics）。老闆 2026-07-18 email-12157 問「這些任務有盤點與檢討嗎」時發現：此項自 2026-06-22 列為 P1 但 pool 內 0 覆蓋、26 天無進展。\n\n目標（不是把功能做完，是先讓它可被追蹤地推進）：\n1. 盤點現況 — repo 內無任何 analytics/telemetry 實作（已確認 git ls-files 無命中）。確認 v3 前端是否在 git 追蹤範圍（frontend-v2-fix 目前只在 archive/ 下），沒有的話先解決 code ownership。\n2. 選型 — 自建 ingestion（Supabase table + 前端 beacon）vs 第三方（Plausible/Umami）。判準：讀者隱私、成本、能否算回訪 cohort。\n3. 寫 spec 到 docs/free_tier_growth_plan.md（該檔至今不存在，doc 承諾「1-2 週上 P1 MVP」已逾期 26 天）。\n\n完成定義：spec 落地 + 選型有結論 + 本 task 在 audit_roadmap_coverage.py 顯示 live。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "email-12157-29eb65 roadmap reconcile (hourly-slot-1, 2026-07-18)",
+    "created_at": "2026-07-18T07:19:31.041187+00:00"
+  },
+  {
+    "id": "growth_p1_auth_onboarding",
+    "title": "[growth P1] 註冊/登入 flow 現況盤點 + welcome onboarding",
+    "description": "來源：docs/boss_direction_recommendations.md §2 免費階段 roadmap（rid:auth-onboarding）。同 email-12157 盤點發現：列 P1 但 pool 0 覆蓋。\n\n注意 doc 原文寫「註冊/登入 flow（如果還沒）」— 這個「如果」26 天沒人去確認，正是問題本身。\n\n第一步必須是盤點而非開發：\n1. 確認現況 — repo 有 src/volpred/mirror_auth.py、docs/migration/003_auth_trigger.sql、docs/zeabur-oauth-gotcha.md，顯示 Supabase auth 已有基礎；但前端登入頁是否存在無法從 git 確認（前端未追蹤）。先給出「已有什麼 / 缺什麼」的明確答案。\n2. 若 flow 已可用 → 本 task 縮到只做 welcome onboarding，並更新 doc 移除「如果還沒」。\n3. 若不可用 → 拆出 MVP task。\n\n完成定義：現況有明確結論寫回 doc（不再是「如果還沒」）+ 後續 scope 已定。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "email-12157-29eb65 roadmap reconcile (hourly-slot-1, 2026-07-18)",
+    "created_at": "2026-07-18T07:19:31.041187+00:00"
   }
 ]

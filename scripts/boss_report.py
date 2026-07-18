@@ -215,6 +215,49 @@ def _esc(s):
     return html.escape(str(s) if s is not None else "")
 
 
+def _render_roadmap_coverage():
+    """Machine reconcile of the direction doc's roadmap against the real task pool."""
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+        from audit_roadmap_coverage import audit
+
+        rep = audit()
+    except Exception as exc:
+        _warn_report("roadmap_coverage", exc)
+        return ""
+    if rep.get("error") or not rep.get("items"):
+        return ""
+
+    counts = rep["coverage_counts"]
+    live, missing = counts.get("live", 0), counts.get("no_task", 0) + counts.get("dangling", 0)
+    age = rep.get("doc_age_days")
+    tone = "#b91c1c" if (missing or (age is not None and age > 14)) else "#0a8a3a"
+
+    rows = []
+    for item in rep["items"]:
+        label = {
+            "live": ("進行中", "#0a8a3a"),
+            "parked": ("已擱置", "#6b7280"),
+            "closed": ("已結案（doc 待更新）", "#6b7280"),
+            "no_task": ("未開工", "#b91c1c"),
+            "dangling": ("task 已消失", "#b91c1c"),
+        }.get(item["coverage"], ("?", "#6b7280"))
+        rows.append(
+            f"<tr><td class='small'>{_esc(item['priority'])}</td>"
+            f"<td class='small'>{_esc(item['text'][:52])}</td>"
+            f"<td class='small' style='color:{label[1]};white-space:nowrap'>{label[0]}</td>"
+            f"<td class='small' style='color:#6b7280'>{_esc(item['task_id'] or '—')}</td></tr>"
+        )
+
+    return (
+        f"<div style='border-left:4px solid {tone};padding:8px 12px;margin:8px 0;background:#fafbfc'>"
+        f"<div class='small'><strong>Roadmap 對帳</strong>（doc 更新於 {_esc(rep['doc_updated'])}，"
+        f"{_esc(age)} 天前）：{live} 項有 backing task，{missing} 項未開工。"
+        f"來源 <code>scripts/audit_roadmap_coverage.py</code> — 文字宣稱無法蓋過 pool 真實狀態。</div>"
+        f"<table style='width:100%;margin-top:6px'>{''.join(rows)}</table></div>"
+    )
+
+
 def _iso_to_tw(iso_str):
     """UTC ISO 字串 → 台灣時間顯示 'MM-DD HH:MM'。失敗回原字串。"""
     if not iso_str:
@@ -357,6 +400,12 @@ def build_html():
     if rec_file.exists():
         rec_txt = rec_file.read_text()[:3000]
         parts.append("<h2>⑥ 方向建議（你的決策可能改變）</h2>")
+
+        # The doc is prose I write, so it can claim progress that never happened -- it did,
+        # for 26 days, until the boss asked (email-12157, 2026-07-18). Lead with the machine
+        # reconcile so every roadmap item shows its real pool status before the prose speaks.
+        parts.append(_render_roadmap_coverage())
+
         rendered = _esc(rec_txt).replace("\n", "<br>")
         parts.append(f"<div class='small' style='background:#fafbfc;padding:10px;border-radius:6px'>{rendered}</div>")
 
