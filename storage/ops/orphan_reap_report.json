@@ -1,31 +1,17 @@
 {
-  "generated_at": "2026-07-18T22:01:18.660262+00:00",
+  "generated_at": "2026-07-18T23:00:56.414851+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 25,
-    "grace": 0,
+    "grace": 2,
     "inflight": 0
   },
   "orphan_count": 0,
   "adopted": [],
   "applied": true,
-  "job_deliverable_candidates": [
-    {
-      "job_id": "compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008.json",
-      "execution_status": "completed",
-      "paths": [
-        "storage/ops/codex_reviews/k1731_armB_rev5_verdict.md"
-      ],
-      "existing_paths": [
-        "storage/ops/codex_reviews/k1731_armB_rev5_verdict.md"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    }
-  ],
+  "job_deliverable_candidates": [],
   "job_deliverable_held": [
     {
       "job_id": "k1731-armB-corrected-rev5",
@@ -38,18 +24,7 @@
       ]
     }
   ],
-  "job_deliveries": [
-    {
-      "job_id": "compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008",
-      "paths": [
-        "storage/ops/codex_reviews/k1731_armB_rev5_verdict.md"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "3e0c9408480698bd076e2070840792fc16f4dd32",
-      "reason": "committed"
-    }
-  ],
+  "job_deliveries": [],
   "namespaces": {
     "drafts": {
       "collectable": [],
@@ -82,35 +57,7 @@
       "collections": []
     }
   },
-  "held_escalations": [
-    {
-      "task_id": "assign_d8b55d37",
-      "paths": [
-        "experiments/k1380/README.md",
-        "experiments/k1380/k1380.py",
-        "experiments/k1380/k1380_losses_all.npy",
-        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy",
-        "experiments/k1380/k1380_results.json",
-        "experiments/k1380/k1380_results_INVALID_20260716.json",
-        "experiments/k1380/k1380_spa_from_cache.py",
-        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py",
-        "job:K1694-script-rerun-1211",
-        "job:compute-k1730-arm-a-production-quick-mode-1784358686",
-        "job:k1704-formal-cache-rerun-20260716",
-        "job:k1704-formal-rerun-20260716",
-        "job:k1704-input-ledger-delta-review-20260716",
-        "job:k1704-origin-ledger-delta-review-20260716",
-        "job:k1704-post-run-review-20260716",
-        "job:lazypack-mile_a8d79d6a-r2",
-        "storage/drafts/digest_20260714.md",
-        "storage/drafts/fb_mile_5a20a332.md",
-        "storage/drafts/fb_mile_f78be848.md",
-        "storage/drafts/k1410_source_provenance_update.md",
-        "storage/drafts/k841_mile_179df5f5_correction.md",
-        "storage/drafts/k841_mile_b4304948_correction.md"
-      ]
-    }
-  ],
+  "held_escalations": [],
   "held_escalated_paths": [
     "experiments/k1380/README.md",
     "experiments/k1380/k1380.py",

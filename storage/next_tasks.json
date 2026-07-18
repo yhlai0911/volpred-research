@@ -32358,42 +32358,15 @@
   },
   {
     "id": "K1705",
-    "title": "K1705: 相依結構預測評分的誠實度回溯稽核** — 對既有 Joe、DCC 結果重建單邊滾動 marginal PIT，先驗證邊際，再用 lexicographic 邊際＋相依分數與 two-step predictive-ability 檢定，並做",
-    "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 1604). Original: 相依結構預測評分的誠實度回溯稽核** — 對既有 Joe、DCC 結果重建單邊滾動 marginal PIT，先驗證邊際，再用 lexicographic 邊際＋相依分數與 two-step predictive-ability 檢定，並做非同步收盤敏感度。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1705.py with signal.shift(1) + seed=42, (c) K1705_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "succeeded",
     "task_type": "experiment",
-    "dispatch_lane": "agent",
+    "title": "K1705: 相依結構預測評分的誠實度回溯稽核** — 對既有 Joe、DCC 結果重建單邊滾動 marginal PIT，先驗證邊際，再用 lexicographic 邊際＋相依分數與 two-step predictive-ability 檢定，並做",
+    "priority": 3,
     "source": "research_backlog_auto",
-    "source_line": 1604,
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
     "created_at": "2026-07-13T23:52:31Z",
-    "status_history": [
-      {
-        "ts": "2026-07-15T22:08:18.996101+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-2-8de6e96e924b4634ab107b311a353e3d"
-      },
-      {
-        "ts": "2026-07-15T22:08:51.223024+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-2-8de6e96e924b4634ab107b311a353e3d"
-      },
-      {
-        "ts": "2026-07-15T22:44:33.971447+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-2-8de6e96e924b4634ab107b311a353e3d"
-      }
-    ],
-    "started_at": "2026-07-15T22:08:51.223008+00:00",
     "completed_at": "2026-07-15T22:44:33.971434+00:00",
-    "result": "K1705 completed and independently reviewed PASS. Parent K1100c Joe-superiority claim is sign-reversed and its Joe density fails theta=1 independence; common one-sided PIT margins fail calibration, so no dependence attribution is established. Tests 3/3, experiment gates and certification PASS; merged as 85304eae6."
+    "tombstone": true,
+    "archived_at": "2026-07-18T23:07:44.358647+00:00"
   },
   {
     "id": "K1706",
@@ -33037,13 +33010,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T22:01:24.337123+00:00",
+    "completed_at": "2026-07-18T23:01:01.139840+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T22:01:24.337123+00:00",
-      "last_clean_observed_at": "2026-07-18T22:01:24.337123+00:00"
+      "resolved_at": "2026-07-18T23:01:01.139840+00:00",
+      "last_clean_observed_at": "2026-07-18T23:01:01.139840+00:00"
     }
   },
   {
@@ -33055,13 +33028,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T22:25:19.253847+00:00",
+    "completed_at": "2026-07-18T23:19:01.219300+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T22:25:19.253847+00:00",
-      "last_clean_observed_at": "2026-07-18T22:25:19.253847+00:00"
+      "resolved_at": "2026-07-18T23:19:01.219300+00:00",
+      "last_clean_observed_at": "2026-07-18T23:19:01.219300+00:00"
     }
   },
   {
@@ -33343,42 +33316,15 @@
   },
   {
     "id": "K1598_article_general",
-    "title": "K1598: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1598 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'cross-market/universal']) but no general article in feed.json.  Verdict preview: K1598 [CONDITIONAL_PASS/COVERAGE_COMPETITIVE_NO_PANEL_EDGE]：測試 Liu, Dobriban & Orabona (2026, arXiv:2602.03168) universal-portfolio 風格的線上 conformal 校準（UP_AggACI_lite，Cover-style 對 ACI 專家做指數混合）能否改善波動率縮放報酬區間，優於 rolling conformal 與 ACI baseline。資料：experiments/k1552 frozen prices.par",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K1598: write general-audience article (auto-discovered uncovered K)",
+    "priority": 3,
     "source": "auto_discovered",
-    "k_id": "K1598",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
-    "topic_cluster": null,
     "created_at": "2026-07-14T19:07:58+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-15T22:37:26.820302+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-k1598-article"
-      },
-      {
-        "ts": "2026-07-15T22:37:27.380420+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-k1598-article"
-      },
-      {
-        "ts": "2026-07-15T22:52:27.451528+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-k1598-article"
-      }
-    ],
-    "started_at": "2026-07-15T22:37:27.380404+00:00",
     "completed_at": "2026-07-15T22:52:27.451515+00:00",
-    "result": "Created general draft mile_382127b9 for K1598 with structured ref, sanitize_applied=0, four verified HTTP-200 images, and three data-bound Codex bespoke panels. Audience/anti-AI/provenance gates passed, local and Supabase content SHA-256 match exactly, and 120 focused tests passed; conclusion remains coverage improvement versus Rolling252 with no panel-level edge."
+    "tombstone": true,
+    "archived_at": "2026-07-18T23:07:44.358647+00:00"
   },
   {
     "id": "K1678_article_general",
@@ -34158,48 +34104,15 @@
   },
   {
     "id": "K1586_article_general_audience_rewrite_c1ce6550",
-    "title": "Audience correction: rewrite a true general companion for USDC 脫鉤那幾天：1-3 年短券日波動飆 2.8 倍，1-3 個月卻沒事",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_c1ce6550. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1586']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for USDC 脫鉤那幾天：1-3 年短券日波動飆 2.8 倍，1-3 個月卻沒事",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_c1ce6550",
-    "experiment_refs": [
-      "K1586"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1586",
-    "status_history": [
-      {
-        "ts": "2026-07-15T22:19:58.979138+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-k1586-audience"
-      },
-      {
-        "ts": "2026-07-15T22:19:59.240686+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-k1586-audience"
-      },
-      {
-        "ts": "2026-07-15T22:51:24.403066+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-k1586-audience"
-      }
-    ],
-    "started_at": "2026-07-15T22:19:59.240669+00:00",
     "completed_at": "2026-07-15T22:51:24.403048+00:00",
-    "result": "Published draft general companion mile_d288539b with exact K1586 refs, five verified PNGs, anti-AI PASS, audience coverage closed, 144 functional tests passed (141 clean + 3 local-env parity-only), feed sync failed=0."
+    "tombstone": true,
+    "archived_at": "2026-07-18T23:07:44.358647+00:00"
   },
   {
     "id": "K1365_article_general_audience_rewrite_c16d94b7",
@@ -34215,48 +34128,15 @@
   },
   {
     "id": "K1575_article_general_audience_rewrite_9839822d",
-    "title": "Audience correction: rewrite a true general companion for 政策標題嚇人，數據沒這麼怕：八次稀土管制公告之後，礦業 ETF 都怎麼走？",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_9839822d. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1575']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 政策標題嚇人，數據沒這麼怕：八次稀土管制公告之後，礦業 ETF 都怎麼走？",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_9839822d",
-    "experiment_refs": [
-      "K1575"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1575",
-    "status_history": [
-      {
-        "ts": "2026-07-15T22:17:30.364199+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-k1575-audience"
-      },
-      {
-        "ts": "2026-07-15T22:17:30.596701+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-k1575-audience"
-      },
-      {
-        "ts": "2026-07-15T22:29:48.773734+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-k1575-audience"
-      }
-    ],
-    "started_at": "2026-07-15T22:17:30.596686+00:00",
     "completed_at": "2026-07-15T22:29:48.773717+00:00",
-    "result": "Created general-reader companion mile_009a85c8 as draft with exact K1575 refs, sanitize_applied=0, and three data-bound Codex bespoke panels; source mile_9839822d remains research. Verified anti-AI/audience/provenance gates, 3/3 image HTTP 200, Supabase content SHA exact match, and 124 focused tests passed (local parity wrapper separately flags pre-existing .env reads). Duplicate retry mile_e2e39e6c was formally unpublished."
+    "tombstone": true,
+    "archived_at": "2026-07-18T23:07:44.358647+00:00"
   },
   {
     "id": "K824_article_general_audience_rewrite_328ced24",
@@ -34364,48 +34244,15 @@
   },
   {
     "id": "K1410_article_general_audience_rewrite_c2020d8c",
-    "title": "Audience correction: rewrite a true general companion for 買的時候時點沒那麼重要，賣的時候順序可能決定你幾歲把錢花光",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_c2020d8c. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1410']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 買的時候時點沒那麼重要，賣的時候順序可能決定你幾歲把錢花光",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_c2020d8c",
-    "experiment_refs": [
-      "K1410"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1410",
-    "status_history": [
-      {
-        "ts": "2026-07-15T21:13:46.324982+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-k1410-audience"
-      },
-      {
-        "ts": "2026-07-15T21:13:46.559933+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-k1410-audience"
-      },
-      {
-        "ts": "2026-07-15T22:18:36.566580+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-k1410-audience"
-      }
-    ],
-    "started_at": "2026-07-15T21:13:46.559919+00:00",
     "completed_at": "2026-07-15T22:18:36.566568+00:00",
-    "result": "完成 K1410 報酬來源與尾月完整性更正；重跑數值與三張研究圖不變。新增一般讀者 draft mile_3c0ea15f、兩張讀者圖與 Codex-bespoke r3 懶人包，圖卡無內部 K 編號；audience/anti-AI/layout/feed sync 均通過。Commits: 501f68d94, 7df25236b, c20115c5a."
+    "tombstone": true,
+    "archived_at": "2026-07-18T23:07:44.358647+00:00"
   },
   {
     "id": "K1010_article_general_audience_rewrite_94a0a999",
@@ -35405,40 +35252,15 @@
   },
   {
     "id": "ci-red-29450374699",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29450374699, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29421677446",
-    "ci_run_key": "29450374699:1",
     "created_at": "2026-07-15T22:00:06.114050+00:00",
-    "title": "CI 紅燈修復（run 29450374699, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29450374699\nattempt: 1\nhead_sha: d4e004f03\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29450374699 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T22:04:50.720373+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-ci-29450374699"
-      },
-      {
-        "ts": "2026-07-15T22:04:50.964764+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-ci-29450374699"
-      },
-      {
-        "ts": "2026-07-15T22:14:52.820670+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-ci-29450374699"
-      }
-    ],
-    "started_at": "2026-07-15T22:04:50.964750+00:00",
     "completed_at": "2026-07-15T22:14:52.820659+00:00",
-    "result": "root_cause=refill cluster planner read production storage despite a redirected task pool, while reviewed K1718 was closed before its required knowledge append; repair_commit=8ab81cb28; verification=61 focused tests passed, knowledge provenance 0/2657, wrapper manifest clean, Mirror+Supabase synced; latest run 29453904758 confirms exactly these two residual failures; push=deferred per repository policy"
+    "tombstone": true,
+    "archived_at": "2026-07-18T23:07:44.358647+00:00"
   },
   {
     "id": "trending_repost_2026_07_16_ai資本支出",
@@ -40605,12 +40427,14 @@
     ],
     "started_at": "2026-07-18T21:08:16.571378+00:00",
     "last_released_at": "2026-07-18T18:10:41.402602+00:00",
-    "blocked_until": "2026-07-19T08:00:00+08:00",
-    "blocked_reason": "2026-07-19T02:2x hourly-slot-1: verification verdict=needs_fix（B1 SSVS ES 用 component-wise 平均而非 mixture ES；B2 兩份 production artifact 無 supersession 標記；B3 review_verdict.json 缺、現況不能誠實寫 PASS）→ 不得合併。段 1 corrected-spec 重跑已 enqueue compute job k1731-armB-corrected-rev5（wrapper run_corrected_rev5_production.py，--exclude-ip --garch-origin-lag 1 --tag corrected_rev5，timeout 3600）；其 followup 做回歸檢查 + provenance 蓋章 + README 同步。該 followup succeeded 後本任務才可解 block。",
+    "blocked_until": "2026-07-19T18:00:00+08:00",
+    "blocked_reason": "prior_attempts_failed",
     "claimed_by": "hourly-slot-2-f59ba8cd2d384523bb27f862c0f58168",
     "claimed_at": "2026-07-18T21:08:16.333485+00:00",
     "claim_session_id": "946dca0cc176",
-    "result": "拆段 2a 完成（hourly-slot-2-f59ba8cd）：讀 k1731_armB_esfix.json → verdict=ready_for_codex_review、blocking_issues=[]、regression PASS(3834 leaves / 0 out-of-allowlist)、README traceability 50/50。依 scripts/codex_review_job.sh 規範（整份 experiment 一審 10-40min，禁 in-fire spawn）已 enqueue Codex 一審 job compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008，prompt=storage/ops/codex_reviews/k1731_armB_rev5_prompt.md，verdict 出口=storage/ops/codex_reviews/k1731_armB_rev5_verdict.md。受審 bytes 已凍結於 storage/ops/codex_reviews/k1731_armB_rev5_freeze.sha256（20 檔 sha256）—— 合併前須比對一致。拆段 2b（verdict-template → merge_worktree.sh → knowledge.json 只引 rev5 → 文章/論文判斷 → progress_report）由該 job 的 compute-queue followup 接手。"
+    "result": "拆段 2a 完成（hourly-slot-2-f59ba8cd）：讀 k1731_armB_esfix.json → verdict=ready_for_codex_review、blocking_issues=[]、regression PASS(3834 leaves / 0 out-of-allowlist)、README traceability 50/50。依 scripts/codex_review_job.sh 規範（整份 experiment 一審 10-40min，禁 in-fire spawn）已 enqueue Codex 一審 job compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008，prompt=storage/ops/codex_reviews/k1731_armB_rev5_prompt.md，verdict 出口=storage/ops/codex_reviews/k1731_armB_rev5_verdict.md。受審 bytes 已凍結於 storage/ops/codex_reviews/k1731_armB_rev5_freeze.sha256（20 檔 sha256）—— 合併前須比對一致。拆段 2b（verdict-template → merge_worktree.sh → knowledge.json 只引 rev5 → 文章/論文判斷 → progress_report）由該 job 的 compute-queue followup 接手。",
+    "blocked_at": "2026-07-18T23:11:38+00:00",
+    "blocked_note": "2026-07-19T07:2x hourly-slot-1: Codex 一審 rev5 VERDICT=FAIL（storage/ops/codex_reviews/k1731_armB_rev5_verdict.md）→ 不得合併。PASS 的是 ES estimator 推導/實作、conclusion_flipped、99% 措辭、regression allow-list、false-fail 解釋、provenance；FAIL 落在 §7 stale prose 與 §8 claim-evidence，共 7 條 blocking issues，其中 B1 為實質問題（SSVS vs GEV-HAR 是嵌套比較卻用未校正 DM/HAC，[-0.74%,4.41%] 撐不起 bounded null 宣稱）。主線程已獨立複驗兩條（README 3776 vs gate 3834；k1731_es_mixture_check.py:200 abs(hash(name)) 受 PYTHONHASHSEED 影響、宣稱的固定種子不成立）。bounded 修正 agent job 已 enqueue：agent-brief_k1731_armB_rev6-526c33（timeout 3000，result artifact experiments/k1731/k1731_armB_rev6.json），其 followup 會重新送 Codex 審。本任務須待新一輪 Codex PASS 才可解 block。"
   },
   {
     "id": "telegram-985",
@@ -40790,7 +40614,7 @@
     "task_type": "member_qa",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "member_qa",
       "user"
@@ -40801,7 +40625,30 @@
     "question_status": "evaluating",
     "proposer": "yaoxk1431",
     "question_score": null,
-    "task_mode": "evaluate"
+    "task_mode": "evaluate",
+    "status_history": [
+      {
+        "ts": "2026-07-18T23:12:33.296832+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-b74d6db239604d20a1027972a413822c"
+      },
+      {
+        "ts": "2026-07-18T23:12:33.530447+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-b74d6db239604d20a1027972a413822c"
+      },
+      {
+        "ts": "2026-07-18T23:15:12.366518+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-b74d6db239604d20a1027972a413822c"
+      }
+    ],
+    "started_at": "2026-07-18T23:12:33.530430+00:00",
+    "completed_at": "2026-07-18T23:15:12.366502+00:00",
+    "result": "評分/rerank/承接完成。依 evaluation-guide 四維度給分：研究可行性 20 / 讀者價值 24 / 研究相關性 18 / 預期影響力 20 = 82。question-rerank 套用 stable insertion → rank 1（previous_active_count=0，無舊榜單順序受影響）。question-claim 成功，status ranked→researching（cross-session lock 取得）。後半段 research+write+publish 因是完整的另一個 40min 單位、本班剩餘預算塞不下，依「scope 切小到能收尾的單位」建 member_qa_3e258ba2_research_write（P1, task_type=member_qa, parent=本任務），description 已載明研究角度骨架（volatility drag CAGR≈μ−σ²/2、30年 rolling/bootstrap 達標比例、sequence-of-returns risk、VT 能否收窄分佈）與 reader-facing 硬性流程（3 canonical paths / evidence package / dedup gate 帶 --audience / anti_ai_gate 禁 --force / question-answer+question-finish 回綁）。"
   },
   {
     "id": "platform_ops_release_audit_fix_mile_aff342df",
@@ -41284,7 +41131,7 @@
     "description": "針對地緣衝突反覆導致的航運與能源成本飆升，評估商品選擇權市場對極端風險的溢價。可量化：觀測原油期權 OTM Call 隱含波動率溢價與地緣政治風險指數（GPR）的動態關聯。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-07-18T22:00:39+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -41307,7 +41154,11 @@
       ],
       "near_misses": [],
       "screened_at": "2026-07-18T22:00:41+00:00"
-    }
+    },
+    "blocked_until": "2026-07-20T00:05:00+08:00",
+    "blocked_reason": "daily_cap_reached",
+    "blocked_at": "2026-07-18T23:11:25+00:00",
+    "blocked_note": "trending_repost daily cap 2/2 已達（.claude/skills/trending-repost/SKILL.md hard rule）：2026-07-19 已發 trending_repost_2026_07_19_台股槓桿 + trending_repost_2026_07_19_美債波動。本張為 P1 time_critical lane，非品質問題，純粹撞 cap → defer 到 07-20 首個 fire。解 block 後仍需先做時效性複查（中東變局/運價/原油期權偏斜），若題材已過期則改角度或 close。"
   },
   {
     "id": "assign_d8b55d37",
@@ -41383,5 +41234,31 @@
     "created_at": "2026-07-19T06:45:00+08:00",
     "title": "price_cache 0050.TW 2014-01-02 未回溯調整的 4.01x 斷點修復 + 全 repo 影響盤點",
     "description": "本班 slot-2 寫 trending_repost 台股融資題時，writer agent 發現並經主線程獨立覆核：data/cache/price_cache.db 的 0050.TW 在 2014-01-02 有未回溯調整的 4.01 倍價格斷點（2013-12-31 close 58.70 → 2014-01-02 close 14.6375；adj_close 亦同：37.41 → 9.33，亦即 adj_close 並未修正此斷點）。影響：任何跨 2014-01-02 的 0050 長樣本 rolling / realized-vol / 報酬序列都被污染。實測 writer 第一版分析中 RV persistence 相關係數被壓到 0.017，改由 2014-01-02 起算後才正常。待辦：(1) 確認 0050 該日是否真有分割或為資料源錯誤；(2) 修復 cache 或加 as-of 調整層；(3) 全 repo 盤點哪些既有 experiments / paper 用了跨此日期的 0050 長樣本並評估是否需重跑；(4) 檢查 price_cache 其他 ticker 是否有同類斷點（建議寫成通用 split-break 偵測器）。證據：storage/article_assets/tw-margin-vol-leadlag/evidence.json 的 known_defect 欄位。"
+  },
+  {
+    "id": "member_qa_3e258ba2_research_write",
+    "title": "[member_qa] yaoxk1431 30年7%穩定成長提問 —— research + write + publish 後半段",
+    "task_type": "member_qa",
+    "priority": 1,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-18T23:14:48.780256+00:00",
+    "created_by": "hourly-slot-1-b74d6db239604d20a1027972a413822c",
+    "parent_task_id": "member_qa_3e258ba2_evaluate",
+    "description": "會員問題已完成評分/排名/承接（rank 1, score 82, status=researching），\n本 task 承接後半段：research → write → publish → question-answer → question-finish。\n\nQuestion id: 3e258ba2-6a9d-4807-953d-a1671cce3b82\nProposer: yaoxk1431\n原題：如果我要接下來30年我的資金穩定每年成長7%, 我該問什麼問題, 我必須掌握投資的15個問題\n\n評分（hourly-slot-1 2026-07-19T07:1x，依 .claude/skills/member-questions/references/evaluation-guide.md）：\n研究可行性 20 / 讀者價值 24 / 研究相關性 18 / 預期影響力 20 = 82。\n評分理由：字面訴求（給我 15 個問題）是框架型清單、本身不是實驗；但其核心可檢定的子問題\n——「30 年穩定每年 7% 在歷史數據上可達成嗎、變異有多大」——完全可用現有資料做\n（長期報酬 bootstrap、sequence-of-returns risk、volatility drag）。研究相關性給 18 而非滿分，\n因為它不是核心 vol forecasting，但 VT / vol drag 確在研究主軸內。\n\n## 研究角度（建議，非強制）\n不要寫成泛用理財清單 —— 那是 AI 味與空泛評論的高風險區，且無 VolPred 差異化。\n建議的可驗證骨架：\n1. 「穩定每年 7%」這個框架本身有問題：算術平均 vs 幾何平均的落差 = volatility drag\n   （CAGR ≈ μ − σ²/2）。用實際資料算出「要拿到 7% 幾何報酬，需要多高的算術報酬 / 承受多大 σ」。\n2. 30 年期 rolling / bootstrap：歷史上滾動 30 年期實際落在 7% 以上的比例是多少？分佈多寬？\n   「穩定」在數據上根本不存在——這是本文的 VolPred angle。\n3. sequence-of-returns risk：同樣的 30 年報酬序列，順序不同對期末資產的影響（有提領時尤甚）。\n4. 波動率管理（VT）能否收窄這個分佈 —— 接回 VolPred 既有研究鏈。\n最後才把「該問哪些問題」收斂成由上述證據推導出來的少數幾個真正該問的問題，\n不要硬湊成 15 條（湊數清單 = 模板腔，會被 anti_ai_gate 擋）。\n\n## 硬性流程（reader-facing published flow，不可只出 report 就停）\n- 開工前讀 3 canonical paths：.claude/skills/trending-repost/SKILL.md、\n  .claude/skills/anti-ai-style/SKILL.md、.claude/rules/publishing.md\n- Evidence package 先於 prose：>=3 個可驗證數字（primary source）+ >=1 表 + >=1 圖 + >=1 層量化分析\n- DEDUP GATE（寫前必跑，唯一防線）：\n  uv run python scripts/check_arc_dedup.py --audience general --text-file <主題摘要> --title \"<planned title>\"\n  （--audience 不可省）\n- 寫後跑 anti-ai-style/references/editor-sop.md 3 階段 9-checklist\n- PROGRAMMATIC GATE（publish 前必跑，exit 0 才能發）：\n  uv run python scripts/anti_ai_gate.py --file /tmp/<draft>.md  禁用 --force 繞過\n- 發佈後回綁：uv run volpred ops question-answer ... 再 question-finish，proposer=yaoxk1431\n- 文章仍是 draft 時問題保持 researching；只有已發佈才可進 answered\n\nParent: member_qa_3e258ba2_evaluate",
+    "payload": {
+      "question_id": "3e258ba2-6a9d-4807-953d-a1671cce3b82",
+      "proposer": "yaoxk1431",
+      "score": 82,
+      "score_breakdown": {
+        "研究可行性": 20,
+        "讀者價值": 24,
+        "研究相關性": 18,
+        "預期影響力": 20
+      },
+      "rank": 1,
+      "question_status_at_creation": "researching",
+      "stage": "research_write_publish"
+    }
   }
 ]

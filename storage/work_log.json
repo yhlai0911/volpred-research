@@ -21369,5 +21369,35 @@
     "artifacts": [
       "storage/next_tasks.json"
     ]
+  },
+  {
+    "timestamp": "2026-07-19T07:15:34+08:00",
+    "task_type": "member_qa",
+    "task_id": "member_qa_3e258ba2_evaluate",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-b74d6db239604d20a1027972a413822c",
+    "owner": "hourly-slot-1-b74d6db239604d20a1027972a413822c",
+    "commit": null,
+    "summary": "會員問題 3e258ba2（yaoxk1431：「30 年資金穩定每年成長 7%，我該問什麼問題」）完成評分 → 排名 → 承接。\n\n依 `.claude/skills/member-questions/references/evaluation-guide.md` 四維度（各 0-25）評分：\n研究可行性 20 / 讀者價值 24 / 研究相關性 18 / 預期影響力 20 = **82**。\n\n給分理由（留審計軌跡）：字面訴求「給我 15 個問題」是框架型清單、本身不構成實驗，故可行性不給滿分；\n但其核心可檢定的子問題「30 年穩定每年 7% 在歷史數據上可達成嗎、分佈多寬」完全能用現有資料做\n（長期報酬 bootstrap、sequence-of-returns risk、volatility drag），故仍給 20。研究相關性 18 而非滿分：\n不是核心 vol forecasting，但 VT / vol drag 確實在既有研究主軸內。\n\n`question-rerank` 套 stable insertion → rank 1（previous_active_count=0，無舊榜單相對順序受影響）。\n`question-claim` 取得 cross-session lock，status ranked → researching。\n\n後半段（research → write → publish → question-answer → question-finish）是完整的另一個約 40 分鐘單位，\n本班剩餘預算塞不下。依 hourly-dispatch「scope 切小到能在 50min 內收尾的單位、不要 partial 提交」，\n建 `member_qa_3e258ba2_research_write`（P1, task_type=member_qa, parent=本任務）承接，\ndescription 已寫死研究骨架與 reader-facing 硬性流程，避免下一班從零重建 context：\n\n- 研究骨架：volatility drag（CAGR ≈ μ − σ²/2）→ 要拿 7% 幾何報酬需多高算術報酬與多大 σ；\n  30 年 rolling/bootstrap 實際達標比例與分佈寬度（「穩定」在數據上不存在 = 本文 VolPred angle）；\n  sequence-of-returns risk；VT 能否收窄該分佈（接回既有研究鏈）。\n  明確禁止硬湊成 15 條清單 —— 湊數清單是模板腔，會被 anti_ai_gate 擋。\n- 流程：3 canonical paths → evidence package 先於 prose → dedup gate（`--audience` 不可省）\n  → 9-checklist → `anti_ai_gate.py` exit 0 才發（禁 `--force`）→ 發佈後回綁問答頁。"
+  },
+  {
+    "timestamp": "2026-07-19T07:16:02+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_67f56b79",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-b74d6db239604d20a1027972a413822c",
+    "owner": "hourly-slot-1-b74d6db239604d20a1027972a413822c",
+    "commit": null,
+    "summary": "K1731 arm B rev5 的 Codex 一審回來了：**VERDICT: FAIL** → 不合併，開 bounded 修正 job。\n\n報告 `storage/ops/codex_reviews/k1731_armB_rev5_verdict.md`。**PASS 的部分**（記下來避免下一班重工）：\nES estimator 的 posterior-mixture 閉式推導與兩支實作正確（1,120-case identity error 1.07e-14）、\n`conclusion_flipped: false` 的 ES-specific 宣稱誠實、99% 案例措辭無 absence-of-evidence 誤用、\nregression gate allow-list 本輪可接受、disclosed false-fail 解釋成立（57 leaves = 34+17+5+1）、\nprovenance invariant 正確（rev5 is_primary / rev4+original do_not_cite）。\n\n**FAIL 落在 §7 stale prose 與 §8 claim–evidence 不匹配，共 7 條 blocking issues。**\n主線程未照單全收，抽驗兩條 bytes 後確認屬實：\n- README:169 / README:665 寫 `3,776`，但 `k1731_regression_check_results.json` 的\n  `n_leaf_values_compared` = **3834**。連帶使「zero mismatches」的 traceability 宣稱為假 ——\n  真正的問題是 checker 覆蓋缺口（沒掃 gate/meta 數字），不只是改兩個數字。\n- `k1731_es_mixture_check.py:200` 為 `SEED + abs(hash(name)) % 10_000`。Python 對 str 的 `hash()`\n  受 `PYTHONHASHSEED` 隨機化 → 宣稱的「固定種子」不成立，3.85–22.77% 區間不可重現。\n\n最實質的是 **B1**：GEV-HAR 是「關掉 macro block」建構的（`k1731_gevreg_midas_ssvs_returns.py:163`），\nSSVS vs GEV-HAR 因此是**嵌套比較**，但 `:382` 用一般 `dm_with_diagnostics` 跑未調整的 pinball-loss 差。\nHAC 只治序列相關，不移除 nested-model estimation bias → [-0.74%, 4.41%] 撐不起 \"bounded null\" 宣稱。\n本輪指定走**撤回路徑**：raw DM 降級為 diagnostic-only、撤下 bounded null 措辭；\nrecursive-bootstrap 校正是 heavy compute，明確禁止塞進本輪（硬做只會做半套），\n要求 agent 在 artifact 的 `followup_needed` 記下，供後續另立 task。\n\nbounded 修正 agent job 已 enqueue：`agent-brief_k1731_armB_rev6-526c33`\n（opus/xhigh per model_router，timeout 3000 < parent 3600，cwd=worktree，\nresult artifact `experiments/k1731/k1731_armB_rev6.json`）。brief 要求 agent 自行核對 bytes、\n可在 `codex_claims_rejected` 反駁 Codex，並在任何需要重跑 production MCMC 才能修的情況下\n標 `needs_main_thread` 停手而非硬跑。其 followup 會重新 freeze sha256 + 送新一輪 Codex 審。\n\n`assign_67f56b79`（合併+寫 knowledge+文章/論文判斷）原本 blocked_until 07-19T08:00 即將到期，\n若不處理會在 Codex FAIL 未修的狀態下被下一班認領去合併 —— 已 re-block 到 07-19T18:00\n並把上述 verdict 摘要寫進 blocked_reason。"
+  },
+  {
+    "timestamp": "2026-07-19T07:17:28+08:00",
+    "task_type": "platform_ops",
+    "task_id": "trending_repost_2026_07_19_地緣避險",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-b74d6db239604d20a1027972a413822c",
+    "owner": "hourly-slot-1-b74d6db239604d20a1027972a413822c",
+    "commit": null,
+    "summary": "`volpred.ops.blocked_reasons` 補一個 enum 值 `daily_cap_reached`。\n\n觸發：PHASE A0 的 time_critical lane 有一張 P1 `trending_repost_2026_07_19_地緣避險`\n（中東變局／運價／原油期權偏斜度），但今日 trending_repost 已發 2 篇（台股槓桿、美債波動），\n撞上 `.claude/skills/trending-repost/SKILL.md` 的 daily cap = 2/day hard rule。\n\n不能就這樣放著：A0 的規則是「lane 還有殘留 → 本班不進 PHASE A followup」，\n而這張要到 07-20 才解得開。若留在 pending，接下來到午夜為止的每一班 fire 都會在 A0 卡住、\n連帶 PHASE A 的 compute followup 被餓死約 17 小時。必須 defer 掉。\n\n但 `mark_task_blocked.py --reason` 是必填 enum，11 個既有值沒有一個對應「撞每日產出上限」。\n最接近的 `deprecated`（會被 TERMINAL_INTENT_REASONS 當終止意圖）、`self_tagged_optional`\n都會把這張 P1 時效稿誤述成「不該做」——它沒有品質問題，只是今天額度用完了。\n與其貼錯標籤，補一個誠實的值：`daily_cap_reached`，語意上與 `blocked_until`=次日當地午夜配對。\n\n該模組的 docstring 本來就寫明「Adding new reasons here is the only sanctioned way to extend the vocab」\n（2026-05-27 曾因 mark_task_blocked 7 個值、dispatcher 9 個值而 drift），\n單一來源同時餵 CLI 與 `continue_task_dispatch.py`，故一處新增即全域生效、不會再分岔。\n\n用新值 block 該 task 至 2026-07-20T00:05+08:00，note 記明是撞 cap 而非品質問題，\n並要求解 block 後先做時效性複查（題材可能已過期，屆時改角度或 close）。\n驗證：`task_urgency` lane 由 count=1 → count=0；`continue_task_dispatch.py --report` 正常；\n`pytest -k \"next_tasks or dispatch or urgency or questions\"` 253 passed。"
   }
 ]
