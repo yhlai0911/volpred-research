@@ -36,7 +36,11 @@ NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 EXPERIMENTS = ROOT / "experiments"
 
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
-from volpred.ops.next_tasks import normalize_priority, normalize_task_priorities  # noqa: E402
+from volpred.ops.next_tasks import (  # noqa: E402
+    enforce_blocked_until,
+    normalize_priority,
+    normalize_task_priorities,
+)
 
 K_ID_RE = re.compile(r"^K\d+[a-z_]*$")
 REVIEW_GATE_K_ID_RE = re.compile(r"^K\d{2,5}[A-Z]?$", re.IGNORECASE)
@@ -302,6 +306,9 @@ def main() -> int:
             tasks[idx]["review_gate_detected_at"] = now_iso
             tasks[idx]["review_gate_previous_status"] = previous_status
             tasks[idx]["review_gate_experiment_dir"] = _display_path(exp_dir)
+            # Every new block needs an exit: the sweeper only re-pends EXPIRED
+            # blocks, so a review gate with no blocked_until parks forever.
+            enforce_blocked_until(tasks[idx])
             if _has_task_id(tasks, followup_id):
                 tasks[idx]["review_gate_followup_task_id"] = followup_id
                 continue

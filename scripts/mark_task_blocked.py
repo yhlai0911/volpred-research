@@ -36,7 +36,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +47,10 @@ from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS  # noqa: E402
 from volpred.ops.blocked_reasons import is_valid as _valid_blocked_reason  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+# 2026-07-18: the 14-day default window used to be this module's own constant.
+# It is now owned by volpred.ops.next_tasks (which enforces the same invariant on
+# every writer, not just this CLI) so the number cannot drift into two.
+from volpred.ops.next_tasks import default_blocked_until as _default_blocked_until  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 # 2026-07-10: this module used to define its OWN `shared_state_lock` — same name, same
 # semantics, its own hardcoded LOCK_DIR — shadowing the real one. It therefore never
@@ -56,7 +60,6 @@ from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 from volpred.ops.shared_lock import shared_state_lock  # noqa: E402
 
 
-DEFAULT_BLOCKED_UNTIL_DAYS = 14
 TERMINAL_INTENT_REASONS = {"deprecated"}
 CANONICAL_STATUSES = {
     "pending",
@@ -119,10 +122,6 @@ def _save(payload: dict | list, tasks: list) -> None:
     tmp.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     json.loads(tmp.read_text(encoding="utf-8"))
     tmp.replace(NEXT_TASKS)
-
-
-def _default_blocked_until() -> str:
-    return (datetime.now(timezone.utc) + timedelta(days=DEFAULT_BLOCKED_UNTIL_DAYS)).isoformat(timespec="seconds")
 
 
 def _validate_task_schema(task: dict) -> None:

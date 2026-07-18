@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-07-18T09:40:03.832423",
+  "generated_at": "2026-07-18T23:15:08.197627",
   "overall": "warn",
   "critical_count": 0,
   "warn_count": 6,
   "findings": [
     {
-      "dimension": "mission_progress",
+      "dimension": "content_pipeline",
       "severity": "warn",
-      "message": "14 筆 blocked 任務滯留 >30 天且無 blocked_until 出口（前 5：['K1169', 'Paper3_expansion_synthesis_decision_meta', 'email-11836-9833be', 'K492_article_general_v2', 'fb_page_graph_api_integration']）—— escalate-or-close，不可無限停放",
-      "recovery": "逐筆裁決：可自主解的解、需 owner 的併決策 email、死的 closed_no_action/expired"
+      "message": "草稿池僅 2 篇（門檻 4）—— Mission 1 缺產出",
+      "recovery": "主動派寫作 agent 補池（feed-publisher，新鮮非 spy 主題）"
     },
     {
       "dimension": "reader_metrics",
@@ -19,7 +19,7 @@
     {
       "dimension": "dedup_calibration",
       "severity": "warn",
-      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=838, AI saturation=11 (threshold=5, margin=6), NFP control=3, FOMC theme=0 / hard=0",
+      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=832, AI saturation=11 (threshold=5, margin=6), NFP control=3, FOMC theme=0 / hard=0",
       "recovery": "uv run python scripts/daily_checkup.py --json  # 檢查 dedup_calibration"
     },
     {
@@ -31,7 +31,7 @@
     {
       "dimension": "reproducibility",
       "severity": "warn",
-      "message": "PRIORITY_UNVERIFIED: 228 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1010, k1023, k1025）",
+      "message": "PRIORITY_UNVERIFIED: 231 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1010, k1023, k1025）",
       "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
     },
     {

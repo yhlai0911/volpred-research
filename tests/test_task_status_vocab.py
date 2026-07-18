@@ -20,6 +20,9 @@ ROOT = Path(__file__).resolve().parents[1]
 REAL_NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 VALIDATOR = ROOT / "scripts" / "validate_next_tasks_status.py"
 BASELINE = 27
+# Frozen 2026-07-18: blocked rows carrying no blocked_until. See
+# next_tasks.LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE for provenance.
+BLOCKED_NO_UNTIL_BASELINE = 0
 
 
 # ---------------------------------------------------------------- vocabulary --
@@ -340,6 +343,118 @@ def test_status_audit_is_quiet_at_or_below_baseline(tmp_path, capsys):
         fcntl.flock(fh, fcntl.LOCK_EX)
         nt.write_tasks_to_handle(fh, tasks)
     assert "out-of-vocab" not in capsys.readouterr().err
+
+
+# ------------------------------------------------- blocked_until invariant --
+# Mechanical regression stop for the infinite-parking hole (boss Telegram msg
+# 937, 2026-07-18): a blocked row with no blocked_until is unreachable by
+# scripts/unblock_expired_blocked_tasks.py's expiry sweep, so it parks forever.
+# This file is the single enforcement owner for the gate; scripts/daily_checkup.py
+# already reports the >30d blocked-rot dimension and is deliberately NOT extended
+# with a second check of the same concern.
+
+
+def _count_blocked_without_until(tasks) -> int:
+    n = 0
+    for t in tasks:
+        if not isinstance(t, dict):
+            continue
+        if str(t.get("status") or "").strip().lower() != "blocked":
+            continue
+        until = t.get("blocked_until")
+        if until is None or (isinstance(until, str) and not until.strip()):
+            n += 1
+    return n
+
+
+def test_blocked_without_until_baseline_constant_mirrors_module():
+    assert nt.LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE == BLOCKED_NO_UNTIL_BASELINE
+
+
+def test_real_queue_blocked_without_until_at_or_below_baseline():
+    """THE gate: any NEW blocked row lacking an exit fails CI."""
+    tasks = json.loads(REAL_NEXT_TASKS.read_text(encoding="utf-8"))
+    count = _count_blocked_without_until(tasks)
+    assert count <= BLOCKED_NO_UNTIL_BASELINE, (
+        f"{count} blocked rows have no blocked_until (baseline "
+        f"{BLOCKED_NO_UNTIL_BASELINE}). A blocked row with no expiry can never be "
+        "re-pended by scripts/unblock_expired_blocked_tasks.py -- it parks forever. "
+        "Set blocked_until via scripts/mark_task_blocked.py, or call "
+        "volpred.ops.next_tasks.enforce_blocked_until in the writer."
+    )
+
+
+def test_enforce_blocked_until_autofills_on_strict_path():
+    task = {"id": "k1", "status": "blocked", "blocked_reason": "prior_attempts_failed"}
+    assert nt.enforce_blocked_until(task) is True
+    # Filled value must be a parseable future ISO timestamp.
+    from datetime import datetime, timezone
+
+    assert datetime.fromisoformat(task["blocked_until"]) > datetime.now(timezone.utc)
+
+
+def test_enforce_blocked_until_is_a_noop_for_non_blocked_and_for_valid_rows():
+    pending = {"id": "k2", "status": "pending"}
+    assert nt.enforce_blocked_until(pending) is False
+    assert "blocked_until" not in pending
+
+    ok = {"id": "k3", "status": "blocked", "blocked_until": "2026-08-01T00:00:00+00:00"}
+    assert nt.enforce_blocked_until(ok) is False
+    assert ok["blocked_until"] == "2026-08-01T00:00:00+00:00"
+
+
+def test_enforce_blocked_until_raises_on_unusable_value():
+    with pytest.raises(nt.InvalidBlockedUntil):
+        nt.enforce_blocked_until({"id": "k4", "status": "blocked", "blocked_until": 1234})
+
+
+def test_blocked_until_audit_is_quiet_on_well_formed_blocked_rows(tmp_path, capsys):
+    """A properly-expiring block is the normal case and must stay silent."""
+    tasks = [
+        {"id": "b1", "status": "blocked", "priority": 3, "blocked_until": "2099-01-01T00:00:00+00:00"},
+        {"id": "p1", "status": "pending", "priority": 3},
+    ]
+    p = tmp_path / "next_tasks.json"
+    p.write_text("[]", encoding="utf-8")
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        nt.write_tasks_to_handle(fh, tasks)
+    assert "blocked_until" not in capsys.readouterr().err
+
+
+def test_blocked_until_audit_never_raises_and_never_rewrites(tmp_path, capsys):
+    """Whole-file contract: report, but do not brick the write and do not 修資料.
+
+    Raising here would fail EVERY materializer (content, questions, claim,
+    complete) the moment one bad row existed -- the same bricking
+    ``_audit_task_statuses`` refuses to cause. Auto-filling would instead erase
+    the evidence the adjudication queue works from.
+    """
+    tasks = [{"id": "no-exit", "status": "blocked", "priority": 3}]
+    p = tmp_path / "next_tasks.json"
+    p.write_text("[]", encoding="utf-8")
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        nt.write_tasks_to_handle(fh, tasks)  # must not raise
+    written = json.loads(p.read_text(encoding="utf-8"))
+    assert written[0]["id"] == "no-exit"
+    assert "blocked_until" not in written[0], "audit must report, not rewrite"
+    assert nt._audit_blocked_until(tasks) == 1
+
+
+def test_blocked_until_audit_warns_above_baseline(tmp_path, capsys):
+    tasks = [
+        {"id": f"legacy-{i}", "status": "blocked", "priority": 3}
+        for i in range(nt.LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE + 1)
+    ]
+    p = tmp_path / "next_tasks.json"
+    p.write_text("[]", encoding="utf-8")
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        nt.write_tasks_to_handle(fh, tasks)
+    err = capsys.readouterr().err
+    assert "ABOVE frozen baseline" in err
+    assert "park forever" in err
 
 
 def test_status_audit_warns_above_baseline(tmp_path, capsys):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Queue maintenance sweep for storage/next_tasks.json（每班 dispatch PRE-PHASE-0）.
 
-兩項職責（同一 owner、同一把鎖 — anti-stacking）：
+三項職責（同一 owner、同一把鎖 — anti-stacking）：
 
 1. **Unblock expired**：blocked 且 blocked_until 已過期 → status="pending"，
    清 blocked_* 欄位並寫 status_history audit。
@@ -9,7 +9,14 @@
    candidates；categorize() 的 blocked_until check 只 gate runtime dispatch，
    永遠不會把 status 翻回來 → 過期 blocked task 永遠進不了 agentable pool。
 
-2. **Compact terminal**（2026-07-14 refactor_plan_token_ops_waste WS2a）：
+2. **Escalate missing blocked_until**（2026-07-18 boss Telegram msg 937 P1）：
+   status=blocked 但**沒有** blocked_until 的 row，第 1 項掃不到（它只處理
+   已過期者）、dispatcher 也不看（只收 pending）→ 無限停放，2026-07-18 共 19 筆。
+   一律列入 escalate 清單（stdout + diagnostics warn），`--apply` 保守處置：
+   補預設窗口 + `needs_adjudication=true`，**不** auto re-pend、**不** auto close
+   （裁決權在人）。上游 invariant 在 volpred.ops.next_tasks.enforce_blocked_until。
+
+3. **Compact terminal**（2026-07-14 refactor_plan_token_ops_waste WS2a）：
    終態超過 30 天的任務壓成 tombstone（id/status/type/title 留池 → 所有
    reader 的 id 查重零改動），全文 append 到
    storage/next_tasks_archive/YYYY-MM.jsonl。歸檔先落地、queue 後改寫
@@ -34,9 +41,11 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
+from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 from volpred.ops.next_tasks import (  # noqa: E402
     compact_terminal_tasks,
+    default_blocked_until,
     write_tasks_to_handle,
 )
 
@@ -97,6 +106,65 @@ def _sweep_unblock(tasks: list, *, apply: bool) -> list[dict]:
     return swept
 
 
+def _sweep_missing_until(tasks: list, *, apply: bool) -> list[dict]:
+    """Pass 3: blocked rows with NO blocked_until — escalate, never silently skip.
+
+    `_sweep_unblock` above `continue`s on a falsy blocked_until, which was correct
+    for its own job (never unblock what has no expiry) but meant the row was
+    invisible to every pass: the dispatcher ignores non-pending, the sweeper
+    ignores no-expiry, so 19 rows sat parked indefinitely (boss Telegram msg 937,
+    2026-07-18). Silence is the bug; these are now always listed.
+
+    `--apply` is deliberately CONSERVATIVE: give the row an exit window and flag
+    it for adjudication. It does NOT re-pend (the block may still be real) and
+    does NOT close (only a human retires work). The next expiry sweep then picks
+    it up through the normal path if nobody has adjudicated it by then.
+    """
+    escalated: list[dict] = []
+    for t in tasks:
+        if not isinstance(t, dict):
+            continue
+        if (t.get("status") or "").lower() != "blocked":
+            continue
+        until = t.get("blocked_until")
+        if isinstance(until, str) and until.strip():
+            continue
+        if until is not None and not isinstance(until, str):
+            # Present but unusable; enforce_blocked_until refuses to guess.
+            escalated.append(
+                {
+                    "id": t.get("id"),
+                    "task_type": t.get("task_type"),
+                    "blocked_reason": t.get("blocked_reason"),
+                    "detail": f"blocked_until is {type(until).__name__}, not an ISO string",
+                    "assigned_until": None,
+                }
+            )
+            continue
+        new_until = default_blocked_until()
+        escalated.append(
+            {
+                "id": t.get("id"),
+                "task_type": t.get("task_type"),
+                "blocked_reason": t.get("blocked_reason"),
+                "detail": "no blocked_until — unreachable by the expiry sweep",
+                "assigned_until": new_until,
+            }
+        )
+        if apply:
+            t["blocked_until"] = new_until
+            t["needs_adjudication"] = True
+            t.setdefault("status_history", []).append(
+                {
+                    "at": datetime.now(timezone.utc).isoformat(),
+                    "from": "blocked",
+                    "to": "blocked",
+                    "reason": f"missing_blocked_until_backfilled ({new_until}); needs_adjudication",
+                }
+            )
+    return escalated
+
+
 def _persist_archive(archived: list[dict]) -> Path:
     dest = ARCHIVE_DIR / f"{datetime.now(timezone.utc).strftime('%Y-%m')}.jsonl"
     guard_canonical_write(dest)
@@ -124,6 +192,7 @@ def main(apply: bool) -> int:
             if isinstance(tasks, dict):
                 tasks = tasks.get("tasks", [])
             swept = _sweep_unblock(tasks, apply=apply)
+            escalated = _sweep_missing_until(tasks, apply=apply)
             n_compact, archived = compact_terminal_tasks(tasks, age_days=COMPACT_AGE_DAYS)
             if apply:
                 if archived:
@@ -132,11 +201,13 @@ def main(apply: bool) -> int:
                 write_tasks_to_handle(fh, tasks)
                 print(
                     f"[queue-maint] applied: {len(swept)} unblocked, "
-                    f"{n_compact} compacted to tombstones"
+                    f"{len(escalated)} escalated (blocked_until backfilled + "
+                    f"needs_adjudication), {n_compact} compacted to tombstones"
                 )
             else:
                 print(
                     f"[queue-maint] dry-run: would unblock {len(swept)}, "
+                    f"would escalate {len(escalated)} (blocked w/o usable blocked_until), "
                     f"would compact {n_compact} (>{COMPACT_AGE_DAYS}d terminal)"
                 )
         finally:
@@ -145,6 +216,24 @@ def main(apply: bool) -> int:
         print(
             f"  - {s['id']} ({s['task_type']}) "
             f"reason={s['blocked_reason']} until={s['blocked_until']}"
+        )
+    if escalated:
+        print(
+            f"[queue-maint] ESCALATE — {len(escalated)} blocked task(s) with no "
+            "blocked_until. These can never be re-pended by the expiry sweep; "
+            "each needs a human verdict (unblock / re-scope / close):"
+        )
+        for e in escalated:
+            print(
+                f"  ! {e['id']} ({e['task_type']}) "
+                f"reason={e['blocked_reason']} — {e['detail']}"
+                + (f" → until={e['assigned_until']}" if e["assigned_until"] else "")
+            )
+        warn(
+            "queue_maint_blocked_until",
+            "blocked task(s) with no blocked_until require adjudication",
+            count=len(escalated),
+            examples=[str(e["id"]) for e in escalated[:5]],
         )
     return 0
 
