@@ -30331,43 +30331,15 @@
   },
   {
     "id": "dreaming_missing_retry_strategy_fable0711_ftd_e1_scale_gating",
-    "title": "[dreaming] missing_retry_strategy:fable0711_ftd_e1_scale_gating",
-    "description": "Failed task fable0711_ftd_e1_scale_gating has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-11T22:00:05.649440+00:00）。\n證據：task fable0711_ftd_e1_scale_gating (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] missing_retry_strategy:fable0711_ftd_e1_scale_gating",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-12T08:28:40.700993+00:00",
-    "dreaming": {
-      "signature": "missing_retry_strategy:fable0711_ftd_e1_scale_gating",
-      "pattern_type": "missing_retry_strategy",
-      "occurrences": 2,
-      "governance_target": null
-    },
-    "follows_up_on": "fable0711_ftd_e1_scale_gating",
-    "status_history": [
-      {
-        "ts": "2026-07-15T12:12:57.891465+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-15T12:13:06.448911+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-15T12:14:58.466408+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-20"
-      }
-    ],
-    "started_at": "2026-07-15T12:13:06.448892+00:00",
     "completed_at": "2026-07-15T12:14:58.466394+00:00",
-    "result": "失敗任務 fable0711_ftd_e1_scale_gating（E1 尺度再校準 gating）實已被完整 rescue 承接為實驗 K1684：2026-07-12 hourly-21 從孤兒 worktree 收回 agent 未 commit 的修正（第4個 Codex-found defect: asymmetric HAR/GJR theta pool），commit 3976e1fd4，重跑腳本(84s, seed 20260712)、resync README(ad208d984)，經 k1684_r3_codex_primary_review 二審通過，並已寫入 knowledge.json（experiment_id=K1684, 'K1684 R3：共同目標下 forecast-tail divergence 的 leg 1 無法建立'）。原 fable0711_* task 已 tombstone+archived(2026-07-14)。dreaming detector 因 follow-up 落在 k1684_* 命名空間而未跨域辨識，無實質缺口，無需 retry。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T13:08:02.888450+00:00"
   },
   {
     "id": "dreaming_memory_skill_gap_uncodified_process",
@@ -30422,42 +30394,15 @@
   },
   {
     "id": "dreaming_persistent_alert_e1aa596aac4a2172",
-    "title": "[dreaming] persistent_alert:e1aa596aac4a2172",
-    "description": "Alert `發文脫班補救失敗：force-release/refill 皆為 0` fired 9× over 5.8d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 3 晚偵測到此模式（首見 2026-07-08T22:00:03.711969+00:00）。\n證據：alert_key=e1aa596aac4a2172 title='發文脫班補救失敗：force-release/refill 皆為 0' send_count=9 span=5.8d (first 2026-07-04T13:00:41.508373+00:00 → last 2026-07-10T09:23:12.869354+00:00) — no fire in 47.1h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] persistent_alert:e1aa596aac4a2172",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-12T08:28:40.700993+00:00",
-    "dreaming": {
-      "signature": "persistent_alert:e1aa596aac4a2172",
-      "pattern_type": "persistent_alert",
-      "occurrences": 3,
-      "governance_target": "docs/error_log.md"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-15T12:12:58.141967+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-15T12:13:06.705614+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-15T12:16:56.506005+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-20"
-      }
-    ],
-    "started_at": "2026-07-15T12:13:06.705596+00:00",
     "completed_at": "2026-07-15T12:16:56.505988+00:00",
-    "result": "根因已識別並治本修復（fix source not symptom）。Alert『發文脫班補救失敗：force-release/refill 皆為 0』連 9 次(2026-07-04→07-10, 5.8d)的真因不是補救機制失效，而是 refill 把一整個連載(series) cluster 塞爆 → 池裡有稿但受同 cluster release 節奏鎖全不可釋出 → force_release 見 releasable=0、refill added>0 但淨釋出=0 → dead-man switch 判雙 0 升 critical。治本 commit e96554041(2026-07-13 21:17) 在 refill_task_pool.py 加 per-cluster budget + src/volpred/ops/content.py 讓補池看得見釋出閘門，附回歸測試 test_refill_cluster_budget.py，不再自製單一 cluster 死鎖。Alert 07-10 已停火、達 48h 自清；當前 remediate_publish_drought.py --dry-run = 'no drought (gap=0.74h)'，發文健康(今日8篇/草稿2)。已於 docs/error_log.md Class K 補代表 incident(3-STRIKE RESOLVED) 補齊 audit trail。無需另開 refactor_plan。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T13:08:02.888450+00:00"
   },
   {
     "id": "nested_dm_fp_narrowing_baseline_audit",
@@ -30654,42 +30599,15 @@
   },
   {
     "id": "dreaming_orphaned_experiment_k1677",
-    "title": "[dreaming] orphaned_experiment:k1677",
-    "description": "收尾 experiments/K1677-rev/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T09:16:48.626840+00:00）。\n證據：experiments/K1677-rev/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1677'); finished 1.5 days ago; orphan backlog this run: 67 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "experiment",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "[dreaming] orphaned_experiment:k1677",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-12T09:16:48.626840+00:00",
-    "dreaming": {
-      "signature": "orphaned_experiment:k1677",
-      "pattern_type": "orphaned_experiment",
-      "occurrences": 1,
-      "governance_target": "storage/memory/knowledge.json"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-15T12:12:57.394867+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-15T12:13:05.947160+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-20"
-      },
-      {
-        "ts": "2026-07-15T12:22:47.501896+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-20"
-      }
-    ],
-    "started_at": "2026-07-15T12:13:05.947140+00:00",
     "completed_at": "2026-07-15T12:22:47.501878+00:00",
-    "result": "孤兒實驗 K1677-rev 收尾完成。詐欺/執法揭露後同業 peer contagion 事件研究（28 手工事件，fail-closed peer，primary complete-case n=20/13 clusters）。Codex gpt-5-codex 二審 CONDITIONAL PASS + NUMBERS_CONSISTENT=yes。結論：controlled peer RV contagion 未偵測到(cluster BH 0.7047)；Corwin-Schultz spread primary exact sign-flip BH=0.0752 未過 gate 不升格，僅 available-peer sensitivity(cluster t 4.206, BH 0.0031)為 robustness association(受 survivor bias)。已寫 knowledge.json(item_id=ebd78e8c, experiment_id=K1677, verdict=CONDITIONAL_PASS/CONTROLLED_RV_NULL_...UNDERPOWERED, reviewer provenance 含 codex)。Null 照實記，不寫成 confirmed contagion，無 feed/paper route，後續需 CRSP/WRDS entity universe 再驗。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T13:08:02.888450+00:00"
   },
   {
     "id": "telegram-556",
@@ -33262,13 +33180,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T12:01:02.344738+00:00",
+    "completed_at": "2026-07-18T13:01:10.546886+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T12:01:02.344738+00:00",
-      "last_clean_observed_at": "2026-07-18T12:01:02.344738+00:00"
+      "resolved_at": "2026-07-18T13:01:10.546886+00:00",
+      "last_clean_observed_at": "2026-07-18T13:01:10.546886+00:00"
     }
   },
   {
@@ -33280,13 +33198,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T12:13:24.459767+00:00",
+    "completed_at": "2026-07-18T13:13:07.500811+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T12:13:24.459767+00:00",
-      "last_clean_observed_at": "2026-07-18T12:13:24.459767+00:00"
+      "resolved_at": "2026-07-18T13:13:07.500811+00:00",
+      "last_clean_observed_at": "2026-07-18T13:13:07.500811+00:00"
     }
   },
   {
@@ -35723,29 +35641,15 @@
   },
   {
     "id": "telegram-836",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 836）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-15T12:06:01.598344+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 836）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n徹底排查是否還有這種路徑問題\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\nℹ️ [INFO] Re: [VolPred 警報][INFO] claude CLI 更新偵測 2.1.206→2.1.210 — 你是對的，Desktop 警報 已退役\n\n📌 你是對的：專案早已脫離 Desktop，那封 警報 是過時殘留\n\n先直接回答你的三個問題：\n\n📌 1. 專案搬到 ~/volpred-research 了嗎？— 是，且徹底搬完\n\n• 項目: 現況\n• 全部 20 個 launchd 排程: WorkingDirectory 都指向 /Users/yhlai0911/volpred-research\n• ~/Desktop/volpred-research symlink: 已不存在（連殘留都清乾淨）\n• repo 是否還在 TCC 保護區: 否，~/volpred-research 不受 macOS TCC 管轄\n\n📌 2. 那為什麼 警報 還在講 Desktop？— 文案沒跟著搬家更新\n\n那封信來自 scripts/warm_tcc_authorization.sh（SessionStart hook），是 2026-07-02 Desktop 時代的防線。當時 repo 在 ~/Desktop，每次 claude CLI 自動更新會讓新版 binary 對 Desktop 暫時無 TCC 授權 → launchd 排程全滅（那次停擺 05:00–10:48）。\n\n根治其實早就做了 —— 就是把 repo 搬出 Desktop（也就是你現在看到的 ~/volpred-research）。但這個 hook 的警報文字沒被一起退役：\n\n• 它實際 stat 的是 ~/volpred-research/CLAUDE.md，根本沒碰 Desktop；\n• 內文卻還寫「cwd 在 Desktop 的排程很可能全滅」、標題寫「已暖授權 Desktop TC\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T12:06:45.343060+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram_responder"
-      },
-      {
-        "ts": "2026-07-15T12:10:45.452610+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram_responder"
-      }
-    ],
     "completed_at": "2026-07-15T12:10:45.452595+00:00",
-    "result": "排查完成：路徑層乾淨；唯一同類殘留(cron_hourly_dispatch.sh TCC alert 文案)已排 platform_ops 任務。已 Telegram 回覆老闆。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T13:08:02.888450+00:00"
   },
   {
     "id": "platform_ops-hourly-dispatch-tcc-desktop-copy-retire-20260715",
@@ -35782,29 +35686,15 @@
   },
   {
     "id": "telegram-838",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 838）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-15T12:59:43.503194+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 838）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n最近的重要經濟指標宣告你都沒做嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T13:00:35.553247+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-15T13:05:18.053431+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
     "completed_at": "2026-07-15T13:05:18.053412+00:00",
-    "result": "診斷完成：近期經濟指標多已覆蓋(NFP 7/3 三篇、CPI 7/14 T-2、TSMC 7/10)，但 CPI 7/14 T+0 反應文被 event dedup false-positive(fuzzy 配到無關黃金文 mile_5dd7c135)誤判覆蓋而漏發。已建 2 任務進池：補發 CPI T+0 反應文 + 修 dedup 誤判。已 Telegram 回覆。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T13:08:02.888450+00:00"
   },
   {
     "id": "platform_ops_event_dedup_false_positive_cpi_20260714",
@@ -41456,8 +41346,39 @@
       "worktree": ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731"
     },
     "created_by": "hourly-slot-1-d1a349e0f02e456ea5c10f3437e29730",
-    "blocked_until": "2026-07-18T20:15:19+08:00",
-    "blocked_reason": "等 compute job k1731-armB-split-verification 產出驗收 artifact"
+    "status_history": [
+      {
+        "at": "2026-07-18T13:08:02.888425+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-18T20:15:19+08:00)"
+      },
+      {
+        "ts": "2026-07-18T13:08:24.908958+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-5701a21d69f5497b8ee23fefe9c7aae1"
+      },
+      {
+        "ts": "2026-07-18T13:08:25.136483+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-5701a21d69f5497b8ee23fefe9c7aae1"
+      },
+      {
+        "ts": "2026-07-18T13:11:15.893471+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-5701a21d69f5497b8ee23fefe9c7aae1",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-18T13:08:25.136468+00:00",
+    "last_released_at": "2026-07-18T13:11:15.893458+00:00",
+    "blocked_until": "2026-07-18T22:30:00+08:00",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-07-18T13:11:16+00:00",
+    "blocked_note": "拆段1驗收 verdict=needs_fix（SSVS ES 算成 component-wise 平均、與所報 VaR 不同物件；原始 artifact 無 superseded 標記）。已派拆段3 compute job agent-k1731-armB-esfix-7009a4（ES 修正+重跑+回歸檢查+supersession 標記，timeout 3480s）。等 experiments/k1731/k1731_armB_esfix.json 產出且 verdict=ready_for_verdict_gate 才可進 verdict 凍結→Codex 重審→merge。"
   },
   {
     "id": "telegram-985",
