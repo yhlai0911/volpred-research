@@ -33364,13 +33364,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-17T23:00:48.648144+00:00",
+    "completed_at": "2026-07-18T00:07:22.578557+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T23:00:48.648144+00:00",
-      "last_clean_observed_at": "2026-07-17T23:00:48.648144+00:00"
+      "resolved_at": "2026-07-18T00:07:22.578557+00:00",
+      "last_clean_observed_at": "2026-07-18T00:07:22.578557+00:00"
     }
   },
   {
@@ -33382,13 +33382,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-17T23:14:50.181958+00:00",
+    "completed_at": "2026-07-18T00:18:00.701155+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-17T23:14:50.181958+00:00",
-      "last_clean_observed_at": "2026-07-17T23:14:50.181958+00:00"
+      "resolved_at": "2026-07-18T00:18:00.701155+00:00",
+      "last_clean_observed_at": "2026-07-18T00:18:00.701155+00:00"
     }
   },
   {
@@ -33811,54 +33811,15 @@
   },
   {
     "id": "k1695_exposure_matched_correction",
-    "title": "K1695 更正：招牌 drawdown protection 是 exposure artifact（同曝險下 +12.61pp → -0.87pp）",
-    "description": "主線程 hourly-02 已用 canonical volpred.stats.drawdown.compare_max_drawdown + pinned experiments/k1695/data/paired_common_returns.csv.gz 獨立驗證：raw ΔMDD +12.61pp (13/13 為正) 但 exposure-matched -0.87pp (只剩 7/13)；compare_max_drawdown 對 13/13 市場亮 exposure_mismatch (vol ratio 0.61-0.68，遠超 .claude/rules/experiments.md:140 的 20% 門檻)；k1695_results.json 無任何 exposure 欄位。完整證據：storage/ops/k1695_exposure_artifact_verification.md。\n要做：(1) 重跑 K1695 並用 compare_max_drawdown，results.json 補 exposure-matched 欄位；(2) 補 circular-shift / phase-randomized null（本班未做，故目前只能說『約等於零』不能說『顯著為負』）；(3) .inference.primary 的 90% CI 與 decision.kill_triggered 需以同曝險口徑重算；(4) Codex 審；(5) 更正 knowledge.json 的 K1695 條目 + 寫 docs/error_log.md。文章草稿（已誠實寫成 null）在 worktree dispatch-slot-1-3217f0b2-k1695，等認證後才可發。",
-    "task_type": "experiment",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-15T02:38:00+08:00",
+    "task_type": "experiment",
+    "title": "K1695 更正：招牌 drawdown protection 是 exposure artifact（同曝險下 +12.61pp → -0.87pp）",
+    "priority": 1,
     "source": "agent",
-    "status_history": [
-      {
-        "ts": "2026-07-14T21:16:42.128698+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-05"
-      },
-      {
-        "ts": "2026-07-14T21:16:52.565723+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-05"
-      },
-      {
-        "ts": "2026-07-14T21:20:03.000572+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-05"
-      },
-      {
-        "ts": "2026-07-14T21:20:30.706541+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-05"
-      },
-      {
-        "ts": "2026-07-14T21:20:30.938243+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-05"
-      },
-      {
-        "ts": "2026-07-14T23:19:59.440265+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-05"
-      }
-    ],
-    "started_at": "2026-07-14T21:20:30.938228+00:00",
+    "created_at": "2026-07-15T02:38:00+08:00",
     "completed_at": "2026-07-14T23:19:59.440249+00:00",
-    "result": "K1695 exposure-correction rerun+retract committed (bdf6b451f); main-thread independent recompute confirmed (common -0.87pp/7-13, inception +4.96pp/12-13, circular-shift null p=0.559/0.212 NOT rejected, Holm 0/13); certified review_verdict.json PASS + certify PASS; knowledge correction 8f80b2ee written; paper 3rd-contribution WITHDRAW decision recorded; feed_correction unblocked; Codex re-verify enqueued"
+    "tombstone": true,
+    "archived_at": "2026-07-18T00:08:12.081222+00:00"
   },
   {
     "id": "paper_vt_trend_table5_exposure_hold",
@@ -41346,5 +41307,138 @@
       }
     ],
     "started_at": "2026-07-17T22:11:10.848796+00:00"
+  },
+  {
+    "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260717T231545117444Z_a1",
+    "title": "[internal alert] PHASE-Z auto-commit 測試紅燈（d9d07c54939b）",
+    "description": "由內部可自癒 alert_key `phase_z_test_gate_red` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 跑同一組測試為綠，HEAD 新增紅燈。\n- fire 時間: 07:14\n- commit: d9d07c54939b\n- 變更程式檔: src/volpred/ops/alerts.py, src/volpred/ops/health.py, tests/test_health_checks.py\n- 跑的測試: tests/test_alerts.py tests/test_health.py tests/test_health_checks.py\n- pytest 退出碼: 1（HEAD） / 0（HEAD^，baseline=green）\n\n## 影響\n隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。\n\n## 修復線索（供接手任務）\n1. 隔離重現：\n   uv run --extra dev python -m pytest tests/test_alerts.py tests/test_health.py tests/test_health_checks.py -q\n2. 修掉紅燈或 revert 該 commit（gate 不自動 revert — revert 風險高於紅燈本身）。\n3. 失敗尾段：\n\n```\ndication_gap read failed | err=pipeline or next_tasks missing/malformed\n=========================== short test summary info ============================\nFAILED tests/test_alerts.py::test_check_alert_conditions_sends_each_breached_condition_once\n1 failed, 77 passed in 1.92s\nwarning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nUsing CPython 3.12.10\nCreating virtual environment at: .venv\n   Building volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-8fe0t6be/head\n      Built volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-8fe0t6be/head\nInstalled 125 packages in 608ms\n```",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-07-17T23:15:45.117444+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "phase_z_test_gate_red"
+    ],
+    "alert_key": "phase_z_test_gate_red",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260717T231545117444Z",
+      "episode_started_at": "2026-07-17T23:15:45.117444+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-17T23:15:45.117444+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false,
+      "fingerprint": [
+        "tests/test_alerts.py::tests.test_alerts::test_check_alert_conditions_sends_each_breached_condition_once"
+      ]
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-18T00:08:51.906733+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-232ed7eb51f842dd8ecb4aa6b2fb790c"
+      },
+      {
+        "ts": "2026-07-18T00:09:01.114574+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-232ed7eb51f842dd8ecb4aa6b2fb790c"
+      },
+      {
+        "ts": "2026-07-18T00:16:48.497956+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-232ed7eb51f842dd8ecb4aa6b2fb790c"
+      }
+    ],
+    "started_at": "2026-07-18T00:09:01.114560+00:00",
+    "completed_at": "2026-07-18T00:16:48.497943+00:00",
+    "result": "修復 fan-out 測試回歸：新 frontend_strategy_metrics_freshness 條件讀 gitignored 前端檔，在 PHASE-Z 隔離 clone 中缺失→breach→intruder 使 breached_ids 斷言紅。比照 4 個既有 host-dependent sibling 補 monkeypatch stub 隔離。78 passed 零回歸 + counterfactual 雙向驗證（無 stub FAIL / 含 stub PASS），前端檔 mtime 已還原。純測試檔改動。"
+  },
+  {
+    "id": "K1730",
+    "title": "K1730: 隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-2",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 596). Original: 隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-26 VRP calendar effect）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1730.py with signal.shift(1) + seed=42, (c) K1730_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 596,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-18T00:00:01Z"
+  },
+  {
+    "id": "K1731",
+    "title": "K1731: 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE +",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 598). Original: 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1731.py with signal.shift(1) + seed=42, (c) K1731_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 598,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-18T00:00:01Z"
+  },
+  {
+    "id": "K1732",
+    "title": "K1732: ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（EFA/EEM/EWJ/EWG/EWZ/INDA/XLK/XLF）事件窗，檢定 ETF-heavy 標的是否在宏觀 ",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 603). Original: ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（EFA/EEM/EWJ/EWG/EWZ/INDA/XLK/XLF）事件窗，檢定 ETF-heavy 標的是否在宏觀 shock 日更快反映資訊但後續 co-volatility / reversal 更強（來源：JPM 2025 ETF macroefficiency + JFM 2025 ETF-based fragility）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1732.py with signal.shift(1) + seed=42, (c) K1732_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 603,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-18T00:00:01Z"
+  },
+  {
+    "id": "K1733",
+    "title": "K1733: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 606). Original: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否先在電力/基建/credit vol 出現，再傳到 Nasdaq RV（來源：J.P. Morgan 2026 alternatives outlook；AI data-center financing / public-private market shift）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1733.py with signal.shift(1) + seed=42, (c) K1733_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 606,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-18T00:00:02Z"
+  },
+  {
+    "id": "K1734",
+    "title": "K1734: EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carr",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 625). Original: EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carry 報酬分佈左尾是否在 risk-off 急速放大、unwind 是否領先 EM 股 vol；明確標示 leveraged/crowded position 數據 blocked 用 proxy（來源：BIS/IMF GFSR 2025；EM drawdown 為 EUR 的 3-5 倍）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1734.py with signal.shift(1) + seed=42, (c) K1734_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 625,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-18T00:00:02Z"
   }
 ]

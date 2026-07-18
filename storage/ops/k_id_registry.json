@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1729,
+  "last_k_id": 1734,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -990,8 +990,58 @@
       "status": "reserved",
       "topic": "自有 TAIFEX tick 5-min RV vs 純日頻資訊對次日 TX 日盤 RV 的預測增益（HAR-RV5 vs HAR-DAILY，雙 proxy 穩健）— 原誤標 K1719，與 7/16 已預留之 ASIA-5 spillover 撞號，改配本號",
       "topic_hash": "e015a88689eb2483"
+    },
+    {
+      "claimed_at": "2026-07-18T00:00:01.459169+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1730",
+      "number": 1730,
+      "source_max": 1729,
+      "status": "reserved",
+      "topic": "隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-26 VRP calendar effect）",
+      "topic_hash": "3c7139386715f5a1"
+    },
+    {
+      "claimed_at": "2026-07-18T00:00:01.649089+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1731",
+      "number": 1731,
+      "source_max": 1730,
+      "status": "reserved",
+      "topic": "深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR）",
+      "topic_hash": "4346c2ef0c936853"
+    },
+    {
+      "claimed_at": "2026-07-18T00:00:01.917841+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1732",
+      "number": 1732,
+      "source_max": 1731,
+      "status": "reserved",
+      "topic": "ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（EFA/EEM/EWJ/EWG/EWZ/INDA/XLK/XLF）事件窗，檢定 ETF-heavy 標的是否在宏觀 shock 日更快反映資訊但後續 co-volatility / reversal 更強（來源：JPM 2025 ETF macroefficiency + JFM 2025 ETF-based fragility）",
+      "topic_hash": "020c9ea3475f9aef"
+    },
+    {
+      "claimed_at": "2026-07-18T00:00:02.604180+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1733",
+      "number": 1733,
+      "source_max": 1732,
+      "status": "reserved",
+      "topic": "AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否先在電力/基建/credit vol 出現，再傳到 Nasdaq RV（來源：J.P. Morgan 2026 alternatives outlook；AI data-center financing / public-private market shift）",
+      "topic_hash": "c84b80d78add1a5d"
+    },
+    {
+      "claimed_at": "2026-07-18T00:00:02.796964+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1734",
+      "number": 1734,
+      "source_max": 1733,
+      "status": "reserved",
+      "topic": "EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carry 報酬分佈左尾是否在 risk-off 急速放大、unwind 是否領先 EM 股 vol；明確標示 leveraged/crowded position 數據 blocked 用 proxy（來源：BIS/IMF GFSR 2025；EM drawdown 為 EUR 的 3-5 倍）",
+      "topic_hash": "81138f643ba37ae7"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-17T12:12:33.134244+00:00"
+  "updated_at": "2026-07-18T00:00:02.796964+00:00"
 }

@@ -892,6 +892,27 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
             "details": {},
         },
     )
+    # frontend_strategy_metrics_freshness (2026-07-16) reads the REAL
+    # frontend-v2-fix/data/strategy_metrics.json via project_path — it takes no
+    # storage_dir and cannot be isolated by the fixture. That file is gitignored,
+    # so in the PHASE-Z isolated clone (git clone HEAD → temp) it is absent,
+    # check_frontend_strategy_metrics_freshness() returns "stale", and this
+    # condition breached as the index intruder that reddened the fan-out on the
+    # Linux/clone run while a macOS dev box (file present + fresh) stayed green.
+    # Same host-dependent shape as dispatch_binary_health / codex_failover_ready
+    # above; its own probe is covered by hermetic tests in test_health_checks.py,
+    # so keep it out of this cron/pool set.
+    monkeypatch.setattr(
+        "volpred.ops.alerts._parse_frontend_strategy_metrics_freshness_state",
+        lambda: {
+            "id": "frontend_strategy_metrics_freshness",
+            "breached": False,
+            "level": "info",
+            "title": "frontend_strategy_metrics_freshness ok",
+            "body": "",
+            "details": {},
+        },
+    )
     duplicate_slot_calls: list[str] = []
 
     def duplicate_slot_ok(_storage_dir, _now):
