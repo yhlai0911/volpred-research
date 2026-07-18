@@ -113,6 +113,14 @@ def test_hash_pinned_closeout_recovers_after_gate_is_fixed(repo: Path):
 
 
 def test_hash_pinned_closeout_refuses_later_edits(repo: Path):
+    """A later session's edits are never committed under the failed fire's name.
+
+    The safety property is unchanged from the original pin: HEAD does not move
+    and the edited bytes are left exactly as the later session wrote them. What
+    changed (2026-07-18) is the AFTERMATH — the stale claim is released instead
+    of re-raising a CRITICAL every fire with no way to stop. See
+    test_phase_z_untracked_closeout.py for the self-heal pins.
+    """
     assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
     (repo / "out.txt").write_text("agent output\n")
     _install_blocking_hook(repo)
@@ -126,10 +134,11 @@ def test_hash_pinned_closeout_refuses_later_edits(repo: Path):
         alert_fn=lambda **k: alerts.append(k) or {},
     )
 
-    assert recovered["reason"] == "hash_mismatch"
+    assert recovered["reason"] == "released"
+    assert recovered["released"] == ["out.txt"]
     assert _git(repo, "rev-parse", "HEAD").strip() == before_head
-    assert _failed_closeout_file(repo).exists()
-    assert alerts and alerts[0]["level"] == "critical"
+    assert (repo / "out.txt").read_text() == "edited by a later session\n"
+    assert alerts and alerts[0]["level"] == "warn"
 
 
 def test_landed_closeout_clears_silently_despite_hot_state_drift(repo: Path):

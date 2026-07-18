@@ -237,3 +237,37 @@ def test_dispatch_prompt_delegates_a0_decision_to_the_script() -> None:
     assert "volpred.ops.task_urgency" in prompt, "A0 必須指向唯一判定 owner"
     a0 = prompt.split("PHASE A0")[1].split("PHASE A —")[0]
     assert "t.get('task_type') in ('event_article'" not in a0, "判定邏輯不得留在 prompt"
+
+
+# --- 5. dedicated-owner 邊界：telegram_reply 不是漏網之魚 ---------------------
+#
+# 2026-07-19 記：`scripts/telegram_poll.py` 自己組 record 直寫 canonical queue、
+# 不經 `append_next_task()`，看起來就是第 1 節罵的那種「ingest 端沒接線」——
+# source=telegram + priority=1 全中。實際查證後不是：它建的是 `telegram_reply`，
+# 有專屬 owner（`_spawn_responder()` 即時處理，spawn 失敗則由 poll 迴圈在
+# `RETRY_AGE_THRESHOLD_SEC`=120s 內重派），本來就不歸 hourly dispatcher 管。
+#
+# 這一節存在的唯一理由：本次維護時真的照著「補接線」改下去了，是既有測試把它擋
+# 回來的。下一個人會踩同一個坑，所以把邊界連同理由一起釘死，而不是只留註解。
+
+def test_dedicated_owner_reply_types_are_not_urgent(monkeypatch, tmp_path) -> None:
+    """telegram_reply / email_reply 即使 source+priority 全中也不得進 urgent lane。"""
+    for task_type in ("telegram_reply", "email_reply"):
+        record = _task("t", task_type=task_type, source="telegram", priority=1)
+        assert is_urgent(record) is False, (
+            f"{task_type} 有專屬 owner，進 urgent lane 會和 owner 重複 claim"
+        )
+        assert dispatch_lane([record]) == [], f"{task_type} 不得出現在 A0 lane"
+
+
+def test_telegram_poll_does_not_wire_an_urgent_fire() -> None:
+    """釘住上面那個結論的實作面：telegram_poll 不該呼叫 fire helper。
+
+    呼叫了會是 no-op（`is_urgent` 對 telegram_reply 一律 False），而 no-op 的接線
+    比沒接線更糟 —— 它讀起來像已經處理好了。
+    """
+    src = (ROOT / "scripts" / "telegram_poll.py").read_text(encoding="utf-8")
+    assert "request_urgent_fire" not in src.replace("_request_urgent_fire", ""), (
+        "telegram_reply 有專屬 owner，不該請 hourly out-of-band fire"
+    )
+    assert "_spawn_responder" in src, "專屬 owner 消失的話，上面的豁免就不再成立"
