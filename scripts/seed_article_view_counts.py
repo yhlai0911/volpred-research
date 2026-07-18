@@ -10,6 +10,10 @@ So the displayed number is:
 
     displayed(article) = seed + max(0, real_views_now - real_views_at_seed_time)
 
+Ceiling history: v1 used 1000 (the boss's literal wording). He then asked for 1417
+(email-12163) — a round 1000 as the visible maximum is itself a tell that the number
+was picked by a human, so an odd ceiling reads as measured rather than chosen.
+
 `seed` is frozen once per article; every view AFTER seeding is counted for real.
 The seeds are drawn at random in [1, MAX_SEED] and then assigned in rank order, so
 the displayed ranking is identical to the true-impression ranking — the boss's
@@ -62,10 +66,10 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from supabase_sync import SUPABASE_URL, SUPABASE_KEY, HEADERS  # noqa: E402
 
-MAX_SEED = 1000  # boss: "隨機顯示一個不超過1000的數字"
+MAX_SEED = 1417  # boss email-12163: "上限不要1000 改1417 看起來比較不假"
 MIN_SEED = 1
 TAIL_TARGET = 12  # roughly where the lowest-ranked article should land (see assign_seeds)
-ALGO_VERSION = 1
+ALGO_VERSION = 2  # v1 = ceiling 1000; v2 = ceiling 1417 (round numbers read as fabricated)
 PAGE_SIZE = 1000  # PostgREST implicit row cap — must page past it
 REQUEST_TIMEOUT = 20
 
@@ -216,11 +220,26 @@ def main() -> int:
         print("\nnothing to seed (all published articles already have a frozen baseline)")
         return 0
 
-    # Seeds are drawn against the FULL ranking so the ceiling is spread across the
-    # whole corpus; when only some articles need seeding we still assign in global
-    # rank order, which keeps new articles consistent with already-frozen neighbours.
     rng = random.Random(args.random_seed)
-    seeds = assign_seeds(len(targets), rng)
+    if args.reseed:
+        # Full re-freeze: the ceiling is spread across the whole corpus.
+        seeds = assign_seeds(len(targets), rng)
+    else:
+        # Incremental: a newly published article has ~0 real views, so it belongs at
+        # the BOTTOM of the ranking. Drawing from the full curve would hand it the
+        # ceiling and park a brand-new post at rank 1 — exactly the "obviously fake"
+        # failure the boss is trying to avoid. Cap it below every frozen neighbour.
+        floor = min(
+            ((a.get("details") or {}).get("view_display", {}).get("seed", MAX_SEED) for a in seeded),
+            default=MAX_SEED,
+        )
+        cap = max(MIN_SEED, min(MAX_SEED, floor))
+        print(f"\nincremental seeding: capping new seeds at {cap} (lowest frozen seed)")
+        hot = [a for a in targets if real.get(a["id"], 0) > 0]
+        if hot:
+            print(f"  note: {len(hot)} unseeded article(s) already have real views — "
+                  f"run --reseed to re-freeze the whole corpus if their true rank is not last")
+        seeds = assign_seeds(len(targets), rng, max_seed=cap, tail_target=min(TAIL_TARGET, cap))
     now = datetime.now(timezone.utc).isoformat()
 
     plan = []

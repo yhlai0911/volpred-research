@@ -1,7 +1,8 @@
 """Tests for the article view-count display seeding (boss email-12160, 2026-07-18).
 
-The boss's constraint was explicit: seeds are random and capped at 1000, but
-"排序不能變" — the displayed ranking must equal the true-impression ranking.
+The boss's constraint was explicit: seeds are random and capped (1000 in v1, 1417
+after email-12163), but "排序不能變" — the displayed ranking must equal the
+true-impression ranking.
 That is the invariant these tests pin down, because it is the one that silently
 breaks if someone later "improves" the seed distribution.
 """
@@ -38,9 +39,27 @@ def test_seeds_are_non_increasing_so_ranking_is_preserved(n):
 
 
 @pytest.mark.parametrize("n", [1, 50, 1634, 3000])
-def test_seeds_respect_the_1000_ceiling_and_stay_positive(n):
+def test_seeds_respect_the_ceiling_and_stay_positive(n):
     seeds = assign_seeds(n, random.Random(7))
     assert all(MIN_SEED <= s <= MAX_SEED for s in seeds)
+
+
+def test_ceiling_is_not_a_round_number():
+    """Boss email-12163: a visible maximum of exactly 1000 reads as hand-picked."""
+    assert MAX_SEED == 1417
+    assert MAX_SEED % 100 != 0
+
+
+@pytest.mark.parametrize("cap", [40, 240, 1417])
+def test_incremental_seeding_stays_under_the_lowest_frozen_seed(cap):
+    """New articles have ~0 real views: they must land at the bottom, not the ceiling.
+
+    The incremental path passes the lowest already-frozen seed as `max_seed`, so a
+    freshly published post can never outrank the existing corpus on display.
+    """
+    seeds = assign_seeds(30, random.Random(11), max_seed=cap, tail_target=min(12, cap))
+    assert all(MIN_SEED <= s <= cap for s in seeds)
+    assert all(a >= b for a, b in zip(seeds, seeds[1:]))
 
 
 def test_end_to_end_display_ranking_matches_true_ranking():
