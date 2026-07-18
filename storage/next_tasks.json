@@ -33310,13 +33310,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T05:00:52.841930+00:00",
+    "completed_at": "2026-07-18T06:04:24.993418+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T05:00:52.841930+00:00",
-      "last_clean_observed_at": "2026-07-18T05:00:52.841930+00:00"
+      "resolved_at": "2026-07-18T06:04:24.993418+00:00",
+      "last_clean_observed_at": "2026-07-18T06:04:24.993418+00:00"
     }
   },
   {
@@ -33328,13 +33328,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T05:11:03.902433+00:00",
+    "completed_at": "2026-07-18T06:16:35.929776+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T05:11:03.902433+00:00",
-      "last_clean_observed_at": "2026-07-18T05:11:03.902433+00:00"
+      "resolved_at": "2026-07-18T06:16:35.929776+00:00",
+      "last_clean_observed_at": "2026-07-18T06:16:35.929776+00:00"
     }
   },
   {
@@ -34248,66 +34248,15 @@
   },
   {
     "id": "trending_repost_2026_07_15_晶片雙雄",
-    "title": "[trending_repost] TSMC與ASML財報前夕，晶片股隱含波動率的跨式策略",
-    "description": "聚焦Q2財報季半導體龍頭的業績指引，探討高估值背景下隱含波動率（IV）在財報公布前的攀升與公布後的快速崩塌（IV Crush）。可量化：歷史財報公布前後隱含波動率 vs 實際波動率（RV）的溢價分布，設計跨式或寬跨式選擇權賣方策略。",
-    "task_type": "trending_repost",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-14T22:00:21+00:00",
+    "task_type": "trending_repost",
+    "title": "[trending_repost] TSMC與ASML財報前夕，晶片股隱含波動率的跨式策略",
+    "priority": 1,
     "source": "reader_facing_refill",
-    "tags": [
-      "trending_repost",
-      "reader_facing",
-      "auto_refill"
-    ],
-    "dedup_screen": {
-      "verdict": "warn_arc_near_miss",
-      "blocked": false,
-      "reason": "fuzzy descriptive arc near-miss of mile_7bd0f673, mile_02518109; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
-      "saturation": 4,
-      "theme_terms": [
-        "財報",
-        "後的",
-        "半導",
-        "導體",
-        "設計",
-        "tsmc"
-      ],
-      "near_misses": [
-        {
-          "id": "mile_7bd0f673",
-          "title": "🛩️ 無人載具｜EP1：上游 87% 的營收集中在三家晶片廠，而市場的無人機錢一塊也沒買它們"
-        },
-        {
-          "id": "mile_02518109",
-          "title": "特習會過後，誰在賣單，誰在假裝沒事"
-        }
-      ],
-      "screened_at": "2026-07-14T22:00:23+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-15T05:09:29.331641+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-13"
-      },
-      {
-        "ts": "2026-07-15T05:09:36.694710+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-13"
-      },
-      {
-        "ts": "2026-07-15T05:20:06.315882+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-13"
-      }
-    ],
-    "started_at": "2026-07-15T05:09:36.694693+00:00",
+    "created_at": "2026-07-14T22:00:21+00:00",
     "completed_at": "2026-07-15T05:20:06.315867+00:00",
-    "result": "驗證 7/8 卡池的 tsmc_earnings_iv 稿（30場法說會事件研究，數字全對 event_study_results.json）→ 建 4-panel deterministic 懶人包（lazypack_render，0 LLM，layout guard pass）→ anti_ai_gate PASS → 同步發佈 published mile_5a20a332（general，6張圖上架）。FB 文案已寫+過 gate，排 followup fb_post_tsmc_earnings_iv_20260715（需互動 Chrome）。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T06:07:31.347087+00:00"
   },
   {
     "id": "trending_repost_2026_07_15_ai基建",
@@ -34963,35 +34912,15 @@
   },
   {
     "id": "K824_article_general_audience_rewrite_328ced24",
-    "title": "Audience correction: rewrite a true general companion for 風險模型不是愈高級愈安全：最土的方法反而最少踩線",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_328ced24. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K824']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "superseded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 風險模型不是愈高級愈安全：最土的方法反而最少踩線",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_328ced24",
-    "experiment_refs": [
-      "K824"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K824",
     "completed_at": "2026-07-15T05:36:44.177941+00:00",
-    "result": "Superseded: canonical feed already has other valid general-audience coverage for every reviewed experiment ref.",
-    "status_history": [
-      {
-        "ts": "2026-07-15T05:36:44.177941+00:00",
-        "from": "pending",
-        "to": "superseded",
-        "by": "backfill_feed_audience"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-18T06:07:31.347087+00:00"
   },
   {
     "id": "K698_article_general_audience_rewrite_67b3714d",
@@ -35176,35 +35105,15 @@
   },
   {
     "id": "K1157_article_general_audience_rewrite_858690fd",
-    "title": "Audience correction: rewrite a true general companion for 13,261% 的財報驚喜，為什麼反而是壞訊號？",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_858690fd. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1157']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "superseded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 13,261% 的財報驚喜，為什麼反而是壞訊號？",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_858690fd",
-    "experiment_refs": [
-      "K1157"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1157",
     "completed_at": "2026-07-15T05:36:44.177941+00:00",
-    "result": "Superseded: canonical feed already has other valid general-audience coverage for every reviewed experiment ref.",
-    "status_history": [
-      {
-        "ts": "2026-07-15T05:36:44.177941+00:00",
-        "from": "pending",
-        "to": "superseded",
-        "by": "backfill_feed_audience"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-18T06:07:31.347087+00:00"
   },
   {
     "id": "K1410_article_general_audience_rewrite_c2020d8c",
@@ -41548,5 +41457,35 @@
     "created_at": "2026-07-18T04:30:31.290687+00:00",
     "parent_task_id": "assign_8082bc79",
     "created_by": "telegram_responder"
+  },
+  {
+    "id": "collect_k1730_armA_20260718",
+    "title": "收 K1730 arm A（GEVReg-MIDAS-SSVS 波動率區間預測）：驗結果 + Codex 審 + 產出後續",
+    "description": "compute job agent-brief_k1730_gevreg_midas_ssvs-cdcac4 已 completed（exit 0）。artifact = quick-mode results.json；production 全量重跑在 13:44 啟動但被 job 結束截斷（run_production.log 只到 2019 refit）。本 task：驗證誠實性/lookahead/統計方法 + Codex 代碼審 + 決定 production 重跑與 arm B 解鎖。parent compute job id=agent-brief_k1730_gevreg_midas_ssvs-cdcac4；unblocks assign_c55b0d66 (arm B)。",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "compute_queue_followup",
+    "created_at": "2026-07-18T06:10:25.324036+00:00",
+    "parent_task_id": "assign_8082bc79",
+    "created_by": "hourly-dispatch",
+    "claimed_by": "hourly-slot-1-dc5897b0352140ae9a46d4ec0e03dc59",
+    "claimed_at": "2026-07-18T06:10:25.586830+00:00",
+    "claim_session_id": "1cdc9406dbf7",
+    "status_history": [
+      {
+        "ts": "2026-07-18T06:10:25.586848+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-dc5897b0352140ae9a46d4ec0e03dc59"
+      },
+      {
+        "ts": "2026-07-18T06:10:25.827839+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-dc5897b0352140ae9a46d4ec0e03dc59"
+      }
+    ],
+    "started_at": "2026-07-18T06:10:25.827824+00:00"
   }
 ]
