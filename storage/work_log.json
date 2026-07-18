@@ -21204,5 +21204,25 @@
     "owner": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db",
     "commit": "7f3e78ab0",
     "summary": "PHASE-Z commit_nonzero 三次重試失敗關單。依任務規定先用原 detector 重驗警報仍 breached（audit_silent_fallbacks 仍報 report_sections.py:52 與 :137 兩條），非快照過期。根因不是 gate 誤擋 —— gate 擋得對：(1) _load_json 讀不到 canonical 檔回 None 會讓報告的『已完成/已排程』降級成空白，對老闆而言與『本班什麼都沒做』無法區分；(2) 無法解析的 cron row 被靜默跳過，會讓一個永遠不會 fire 的 job 在『已排程』看起來只是還沒輪到。兩處都改為 warn 留 trace 而非消音，非加 silent-ok 敷衍。audit 對本檔 0 findings，tests 12 passed，以 git_writer_lock commit 7f3e78ab0 落地，連同一併擱置的 progress_report.py（msg 973 已完成/已排程兩欄，derived 不可手打）與 tests/test_report_sections.py。"
+  },
+  {
+    "timestamp": "2026-07-19T02:11:57+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_67f56b79",
+    "outcome": "blocked",
+    "actor": "hourly-slot-1-0bd07fce62c74c6dbebcb892c4421508",
+    "owner": "hourly-slot-1-0bd07fce62c74c6dbebcb892c4421508",
+    "commit": null,
+    "summary": "K1731 arm B 拆段 2/2（assign_67f56b79）開工前 gate 擋下：拆段 1 的 verification artifact\n`k1731_armB_verification.json` verdict = **needs_fix**，不是 ready_to_merge，因此**沒有合併 worktree**。\n\n三個 blocking issues（照 artifact 原文）：\n- **B1 (high)**：SSVS 的 expected shortfall 是把各 component 的 ES 平均，而不是對後驗混合分佈算 ES\n  （`k1731_gevreg_midas_ssvs_returns.py:227-237`）。§3.1 報的 ES backtest p=0.0145、以及 §3.5 依賴它的\n  結論，算的是與所報 VaR 不同的物件。只影響主模型，其餘四個帶 ES 的模型正確。\n- **B2 (high)**：`_results.json` 與 `_results_corrected.json` 兩份 production artifact 並存，有缺陷的那份\n  占用預設檔名且無 supersession 標記 → 任何下游（文章／論文／knowledge.json）照直覺路徑解析就會引到\n  IP transform 已損毀 + GARCH information-set 不對稱的那份。\n- **B3 (blocking-for-merge)**：`review_verdict.json` 不存在，且 Codex 回 OVERALL: issues，現況寫 PASS\n  不誠實；`merge_worktree.sh` 的 experiment_gates certify 本來就會擋。\n\n**本班處置**（依 task description 指定的 needs_fix 分支）：\n1. 段 1 heavy compute 進 compute_queue：job `k1731-armB-corrected-rev5`，timeout 3600。\n   入口用新寫的 pinned wrapper `run_corrected_rev5_production.py`（`--exclude-ip --garch-origin-lag 1\n   --tag corrected_rev5`；旗標從 corrected artifact 的 `specification` block 反推，非憑印象）。\n   之所以要 wrapper：`compute_queue.py --script-args` 的 nargs='*' 吃不下以 `-` 開頭的值。\n   tag 用 `corrected_rev5` 而非覆寫 `_corrected.json`，是為了讓段 2 的回歸檢查能兩份對比\n   （驗證只有 SSVS ES 欄位變動）。\n2. followup brief 已綁該 job：回歸檢查 → `k1731_finalize_report.py` 蓋 provenance（B2；禁手改 JSON）\n   → README §3.1/§3.5/§8/§9/§10 同步（明寫「§3.5 結論若翻轉就照實寫」）→ 產 `k1731_armB_esfix.json`。\n3. `assign_67f56b79` 標回 blocked（`blocked_until=2026-07-19T05:30:00+08:00`）並寫入 blocked_reason；\n   `assign_1394a67a` 的 result 補註段 1 已入列。\n\n前一輪 failed 的根因（triage 已載於 assign_1394a67a）不是程式錯誤，是把 19 refits × ~53s 的長計算留在\n會結束的 agent 回合裡（`run_corrected_rev5.log` 停在第 3 個 refit）。本班改走 compute_queue 正是治這一點。\n\n**未做且刻意未做**：worktree `dispatch-slot-1-bd00f90a-k1731` 未合併、knowledge.json 未寫、文章/論文\n判斷未做 —— 三者都以 verdict=ready_to_merge 為前提。"
+  },
+  {
+    "timestamp": "2026-07-19T02:13:51+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_358decfa",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-0bd07fce62c74c6dbebcb892c4421508",
+    "owner": "hourly-slot-1-0bd07fce62c74c6dbebcb892c4421508",
+    "commit": null,
+    "summary": "assign_358decfa（改用官方 NFP 發布日並修正線上事件 metadata）— 本班派工，未收件。\n\nSTARVATION LOCKOUT 下的第二張（aged 51.4h，threshold 24h）。因 router topology=worktree、effort=xhigh，\n且工作量（重跑產物 + regression tests + publisher 修正 + live verify）明顯超過 50min fire cap，\n走 `enqueue-agent` 而非 fire 內同步跑 —— 這正是 2026-07-12 3-STRIKE 的教訓：把 60 分鐘的工作\n塞進 50 分鐘的容器只會被 SIGKILL 或留下 ppid=1 孤兒。\n\n- 已建 registered worktree `.claude/worktrees/dispatch-slot-1-0bd07fce-nfpdates`\n  （branch `task/nfp-official-dates`，走 `git_writer_lock.py run --actor <owner>`）\n- agent job: `agent-brief_nfp_official_dates-d68f3f`（opus / xhigh）\n- result artifact: `experiments/event_article_nfp_2026_07_03_t1/nfp_official_dates_fix_report.md`\n- brief 明列的邊界：不發第二篇更正文、metadata 只走正式 publisher、保留 AS_OF=2026-07-01 的 T-1 快照\n  （改日期不重抓，重抓會引入 lookahead）、不寫 knowledge.json、不自行 merge 回 main\n- followup brief 綁的驗收：7 筆歷史樣本前後對照要有實際執行證據（非推理）、regression test 必須真的\n  fail 在 proxy 上、live verify 要有 curl 證據；通過才由 `merge_worktree.sh` 正式合併\n\n任務保持 in_progress（agent job 執行中），終態由該 job 的 followup 標。"
   }
 ]
