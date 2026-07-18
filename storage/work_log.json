@@ -21083,5 +21083,36 @@
     "actor": "hourly-slot-1-2faa424299a24fca83dfcf7798900757",
     "owner": "hourly-slot-1-2faa424299a24fca83dfcf7798900757",
     "summary": "CI 紅燈修復（run 29622117580, main Test Suite）。\n\n**失敗**：tests/test_alerts.py::test_check_alert_conditions_sends_each_breached_condition_once — 期望 3 條 breach，實得 4 條（多出 frontend_strategy_metrics_freshness）。\n\n**根因（非斷言寫錯）**：該測試對「整個 alert registry」做 list 全等斷言，而 registry 裡有多條 condition 忽略 storage_dir、直接讀真實 host/repo 狀態。frontend_strategy_metrics_freshness 的 parser（src/volpred/ops/alerts.py:3794）不收 storage_dir，底層 health.py:154 去 stat 一個 gitignored 檔 frontend-v2-fix/data/strategy_metrics.json —— clean checkout 上該檔不存在 → status=stale → 多一條 breach。root_cause=test_asserts_over_whole_alert_registry_so_any_condition_reading_real_host_or_repo_state_leaks_an_extra_breach_into_a_list-equality_assertion\n\n**這是第三次同一個 pattern**：dispatch_binary_health → codex_failover_ready → frontend_strategy_metrics_freshness，前兩次都只補單條 stub（最近一次 035a8923b，已在 d9d07c549 之後落地，故 CI 具名失敗在 HEAD 已綠）。本班修的是 class 本身，不是第三個實例。\n\n**改動（僅測試層，未動 src/）**：\n- tests/test_alerts.py 該測試改為 monkeypatch build_alert_condition_report 包一層：呼叫真實 builder 後，把 conditions 限縮到 fixture 自有的 3 個 id 並重算 breach_count；wrapper 內另斷言這 3 個 id 仍存在，避免 rename/drop 時測試空過。=> 任何 registry 外的 condition（現有或未來新增）結構上不可能再讓此測試變紅。\n- tests/test_alerts.py / test_health_checks.py 三處 paper_root=None 改注入 tmp_path，原本會 rglob 線上 paper/ 樹（正被 repo 自身 CI-parity guard 判定發散）。\n\n**Class sweep**：掃過 tests/ 與 scripts/tests/ 全部呼叫 check_alert_conditions / build_alert_condition_report / 個別 parser 的站點。會讀真實狀態的 condition：frontend_strategy_metrics_freshness、dispatch_binary_health、codex_failover_ready、cluster_cap_drift、series_registry、paper_stale、paper_website_drift、push_backlog、orphan_branch、lazypack_render、dispatch_duplicate_slot。其中唯一做全 registry 全等斷言的就是這條（已結構性免疫）；by_id 查表型測試不會被多餘 breach 弄紅，僅補 paper_root；其餘測試整個 stub 掉 builder，無曝險。\n\n**驗證（實跑非推理）**：tests/test_alerts.py + test_health_checks.py 77 passed（主線程複驗亦 77 passed）；全 tests/ 2458 passed, 5 skipped。狀態不敏感性用兩組實驗證明：把 stub 翻成 breached=True → pass；整個刪掉 stub 並把真實 strategy_metrics.json mtime 倒退 20 天（實測 age_h 483.18、condition breached=True）→ 仍 pass，且證明非空過。\n\n**未處理（已記錄，本班未動）**：(1) scripts/tests/test_scheduler_pregate.py 8 筆既有失敗，源於本機工作區髒狀態觸發 CanonicalWriteBlocked，非本次改動所致、在 d9d07c549 是綠的；(2) 治本解是讓 _parse_cluster_cap_drift_state / _parse_frontend_strategy_metrics_freshness_state 真的尊重 storage_dir（src/ 改動），本班刻意不擴大範圍。\n\n**未自行 git**：依 supervisor 規則，commit 由 PHASE-Z 收。"
+  },
+  {
+    "timestamp": "2026-07-18T18:12:23+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_6349aa2c",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-d1a349e0f02e456ea5c10f3437e29730",
+    "owner": "hourly-slot-1-d1a349e0f02e456ea5c10f3437e29730",
+    "commit": null,
+    "summary": "回報格式 v3：結構化回報加「已完成（本班）」+「已排程」兩欄（老闆 Telegram msg 973）。\n\n**做了什麼**\n- 新增 `src/volpred/ops/report_sections.py`：兩欄的唯一產生者。\n  - 已完成（本班）= `storage/next_tasks.json` 中 `status_history` 有「轉 succeeded 且 by == 本班 owner token」的任務。**按 owner token 歸屬而非時間窗**——多 slot 併行時「最近一小時完成」會把別班的工算到自己頭上。\n  - 已排程 = `config/runtime_schedules.json` 各段 cron 的未來 24h 下次 fire（croniter，已在 alerts.py 用過）+ pending P1/P2 任務（ETA = 下次 hourly dispatch HH:07）。\n  - 上限：兩欄各 ≤5 條，超出收成「+N 件」；已排程再分配 cron ≤2 / pending ≤3，避免一堆 cron 把老闆真正在意的 pending 擠光。長 alert id 保留全長（要能複製查詢），改壓標題不撐爆行。\n- `scripts/progress_report.py`（結構化回報的 single owner）在「下一步」後自動附這兩欄。**刻意不開 CLI 旗標**——可手打的欄位就會被手打，而手打的「已完成」正是「驗證」欄當初要擋的那種宣稱。docstring 模板同步更新；`--actor` help 寫明要傳 `$VOLPRED_TASK_CLAIM_OWNER`。\n- `tests/test_report_sections.py` 13 tests：owner 歸屬、兩欄上限與 +N、cron 超出 horizon / 格式壞掉要跳過而非炸掉整份回報、pending ETA、P3 不入列、render 永不 raise（壞檔降級成「讀取失敗」）、以及「兩欄沒有 CLI 旗標」這條契約本身。\n\n**為什麼不改其他回報點**\nrequirement 提到「套用到所有結構化回報點」，但 grep 全 repo 只有 `progress_report.py` 產生這個 block（daily checkup / loop summary / alert 收班 / email summary 依 pdca-operations SKILL 都是呼叫它）。single enforcement owner 已成立，照 anti-stacking 不再加第二處欄位定義，SKILL.md 也不複製（它已寫「跑 --help 看契約」）。\n\n**驗證**\n`uv run pytest tests/test_report_sections.py tests/test_boss_report.py` → 15 passed。真實資料 dry-run 兩欄都有內容（已排程列出 audit_publish_sync 18:15、gmail_poll 18:15、3 筆 P1 pending @19:07 + 「+24 件」）。最後以本任務為素材實際發一則 Telegram 給老闆驗收。"
+  },
+  {
+    "timestamp": "2026-07-18T18:16:08+08:00",
+    "task_type": "experiment",
+    "task_id": "agent-brief_k1731_armB-f3e688",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-d1a349e0f02e456ea5c10f3437e29730",
+    "owner": "hourly-slot-1-d1a349e0f02e456ea5c10f3437e29730",
+    "commit": null,
+    "summary": "PHASE A followup：`agent-brief_k1731_armB-f3e688`（K1731 arm B，7200s 額度用盡被砍，followup_mode=split_required）拆段處理。\n\n**盤點既有產出（禁原樣重派前的必要步驟）**：worktree `dispatch-slot-1-bd00f90a-k1731` 裡上一段 agent 其實已經做到很後面——四張圖、MCMC diagnostic 結果、30KB README（內含三輪自審與逐條 disposition），以及**兩份** results JSON（`_results.json` 與 `_results_corrected.json`）。timeout 砍在收尾階段而非計算階段，`artifact_ok=True`。\n\n**判斷**：這批不需要重算，需要的是驗收。而那兩份並存的 results JSON 是最大風險——下游寫 knowledge 或文章時引錯，就是把已知有錯的數字寫進長期記憶。\n\n**materialize 的兩段（符合 split_contract：≥2 bounded stages、各有單一 artifact 與成功判準、timeout < parent）**：\n1. compute job `k1731-armB-split-verification`（agent, opus/xhigh, timeout 3600s, `--timeout-parent-job-id agent-brief_k1731_armB-f3e688 --split-stage verification`）：判定 canonical artifact、獨立複驗 README 宣稱的 traceability（抽驗 ≥15 個關鍵數字，**不接受它自己的自審結論**）、lookahead 三項與 baseline 對齊、Codex 代碼審（block minima 轉 maxima 符號 / DQ test / DM test HAC）、確認 k1730 未被污染。單一 artifact `experiments/k1731/k1731_armB_verification.json`。brief 明文禁止重跑 MLE/MCMC/全期 backtest，也明文寫「發現問題 = 成功的驗收」以免為了 verdict 好看而放水。\n2. next_tasks `assign_67f56b79`（experiment P1，status=blocked，blocked_until 2026-07-18T20:15+08:00）：驗收通過才合併 worktree + 寫 knowledge（只引 canonical artifact）+ 依老闆 msg 946/947 判斷文章或論文。刻意用 blocked 而非 pending——stage 1 還在跑時被派工就會做出錯誤合併。\n\n已跑 `mark-followup-dispatched --id agent-brief_k1731_armB-f3e688 --next-task-id assign_67f56b79` 防重派；覆查 `list --pending-followup` 只剩 k1730 那筆（留給下一班）。stage 1 已 running。"
+  },
+  {
+    "timestamp": "2026-07-18T19:24:46+0800",
+    "task_type": "platform_ops",
+    "task_id": "assign_998ad2be+assign_33a9151f",
+    "actor": "hourly-slot-1-0f0d2614e6074e2d9e6fb4ad26c8de18",
+    "owner": "hourly-slot-1-0f0d2614e6074e2d9e6fb4ad26c8de18",
+    "summary": "文章頁上下兩個瀏覽數打架：reaction API 繞過 article-views.ts 自己 count article_impressions。改回 getArticleDisplayedViews 單一來源 + 文案「已追蹤瀏覽 N 次」→「N 次瀏覽」+ ReportDetail 以 initialViews 讓 SSR 當下就一致 + 新增 check-article-view-sources.mjs 機械 gate（接進 npm run check）。",
+    "verification": "typecheck/build 過；article-views 7 tests 全過（含新增 3 個 guard test）；repo-wide guard OK；線上 volpred.zeabur.app mile_30367280（seed=22/baseline=1/raw=1）上下皆 22，另抽驗 3 篇一致，『已追蹤瀏覽』字樣歸零",
+    "commit": "volpred-v2@8ced8c7 (frontend-v2-fix 獨立 repo，已 push origin/main)",
+    "deployed": true
   }
 ]

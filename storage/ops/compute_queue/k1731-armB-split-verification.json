@@ -1,0 +1,51 @@
+{
+  "id": "k1731-armB-split-verification",
+  "title": "K1731 arm B 拆段1/2：成果驗收（canonical artifact + 誠實性 + lookahead + Codex 代碼審）",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/k1731-armB-split-verification.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_armB_verification.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/k1731-armB-split-verification.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-18T10:14:40Z",
+  "started_at": "2026-07-18T10:15:05Z",
+  "completed_at": "2026-07-18T10:27:28Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1731-armB-split-verification.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1731-armB-split-verification.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_armB_verification.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/k1731-armB-split-verification.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+  "claude_followup": {
+    "brief": "收 K1731 arm B 驗收結果：讀 k1731_armB_verification.json。verdict=ready_to_merge → 走拆段2（task k1731_armB_merge_decide）：merge_worktree.sh 合併 dispatch-slot-1-bd00f90a-k1731、主線程寫 knowledge.json（引 canonical_artifact 指定的那份，不可引另一份）、依老闆 msg 946/947 判斷 arm A+B 合起來寫文章還是論文並回報。verdict=needs_fix → 依 blocking_issues 開第三段修正 job（bounded、timeout<3600），禁整份重跑。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1731_split_verify.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/k1731-armB-split-verification.md",
+  "parent_timeout_job_id": "agent-brief_k1731_armB-f3e688",
+  "split_stage": "verification",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731"
+  }
+}
