@@ -1,0 +1,25 @@
+{
+  "kid": "event_article_nfp_2026_07_03_t1",
+  "verdict": "PASS",
+  "reviewer": "Codex CLI 0.144.1 / gpt-5.6-sol / reasoning=high (4 rounds)",
+  "reviewed_at": "2026-07-18T19:39:47Z",
+  "reviewed_commit": "c86409f6be0735cdb2a987c700d618b711b1280d",
+  "review_artifact": "experiments/event_article_nfp_2026_07_03_t1/nfp_official_dates_fix_report.md",
+  "blocking_defects": [],
+  "reviewed_sha256": {
+    "README.md": "817c3c1fc74e8639b509366e9894e9dece342b1e9fca0d41fd0f4e65468c0001",
+    "event_article_nfp_2026_07_03_t1.py": "731e4a7c2f9448c0c4fed46caa82f47e87c5125e2d0091143a41cecaf210e33a",
+    "event_article_nfp_2026_07_03_t1_results.json": "89e17e4ce36888d1866441a252ef6dcb52e8e138df5dea8ffd57787454a65b8e",
+    "figures/fig1_vix_vix9d_term_structure.png": "7450cb41784d65e3ddb6c565e2411e12af5ea8acfc9b0a01decd0f280d25e820",
+    "figures/fig2_nfp_day_spy_return.png": "2c394e326598a056667fb503fb15c3ac4f2ecf1c2ae28302b5e4c2c3e3b4aec4",
+    "figures/nfp_lazypack_1_framework.png": "b53473f52c818544850ff07395f8de7f03ea069a1b2167e6bb306fd95ba9acd3",
+    "figures/nfp_lazypack_2_results.png": "80baf984faa74ecc652aa306fca92b15b9a97e5ef0beebda4e3270d573a9256f",
+    "figures/nfp_lazypack_3_takeaway.png": "e3f4155ca076aca292de3c97da79ccb4324792f5219cdcaf3b627f0cd58c4631",
+    "render_lazypack.py": "4ead73dcd205e679c7cf86ad022df407d241ac1e34c6c85a1dd51979a2a887cf"
+  },
+  "review_notes": "4 rounds. R1 FIX-BEFORE-MERGE: 3 HIGH in the new canonical writer (sync_article returns False rather than raising, so failures were swallowed; non-atomic write of 15MB feed.json; replacements applied sequentially so one could consume another's output) + 4 MEDIUM. R2 FAIL: 2 blocking (a missing next SPY session stored None and let mean() shrink the denominator behind the fail-loud invariant; the lookahead test only observed the SPY download). R3: blocking 1 CLOSED, blocking 2 left one gap (recorder aborted on call 3, so a future 4th download was unobservable). R4 PASS: gap closed via a deferred tripwire; verified .columns is the first attribute main() touches and only _StopEarly is caught. Every fix was mutation-tested locally: restoring the proxy turns 5 tests red, reverting the exclusive `end` turns the lookahead test red, mutating only ^VIX's end is caught, and adding a 4th download (^TNX, end=2026-07-31) turns all 3 lookahead tests red. No fix after R1 changed any number: the 13-row table and all 8 summary statistics are byte-identical across R2/R3/R4.",
+  "review_caveats": [
+    "R2/R3/R4 ran in a read-only sandbox with no writable tmpdir, so the reviewer could not execute pytest. Verdicts are based on line-by-line control-flow analysis, commit diffs and git blob equality. All pass/fail counts (55 passed) and every mutation test were run locally by the author, not by the reviewer.",
+    "Out of scope and NOT reviewed: k528 uses the same first-Friday proxy (20.9% of its 254 dates are wrong) and the live article's headline statistics derive from it. See report section 7."
+  ]
+}

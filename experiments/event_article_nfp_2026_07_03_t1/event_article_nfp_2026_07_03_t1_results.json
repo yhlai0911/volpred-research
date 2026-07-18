@@ -1,121 +1,130 @@
 {
   "as_of_date": "2026-07-01",
-  "nfp_release_date": "2026-07-03",
+  "nfp_release_date": "2026-07-02",
+  "event_date_source": "official BLS Employment Situation release calendar via volpred.data.event_dates.nfp_release_dates (FRED/ALFRED release id 50)",
   "data_source": "yfinance (SPY, ^VIX, ^VIX9D daily close)",
   "n_historical_nfp_events": 13,
   "current_snapshot": {
     "vix_close_latest": 16.59,
     "vix_close_latest_date": "2026-07-01",
-    "vix9d_close_latest_print": 16.8,
-    "vix9d_close_latest_print_date": "2026-06-26",
-    "vix9d_data_lag_days_vs_vix": 5,
-    "vix9d_over_vix_ratio_same_date": 0.9125,
-    "vix9d_over_vix_ratio_same_date_basis": "2026-06-26",
+    "vix9d_close_latest_print": 13.14,
+    "vix9d_close_latest_print_date": "2026-07-01",
+    "vix9d_data_lag_days_vs_vix": 0,
+    "vix9d_over_vix_ratio_same_date": 0.792,
+    "vix9d_over_vix_ratio_same_date_basis": "2026-07-01",
     "spy_5d_realized_vol_annualized_pct": 14.41,
     "spy_20d_realized_vol_annualized_pct": 18.28
   },
+  "vix9d_vintage_note": {
+    "as_published_vix9d_last_print_date": "2026-06-26",
+    "as_published_vix9d_last_print": 16.8,
+    "as_published_ratio_same_date": 0.9125,
+    "as_published_data_lag_days": 5,
+    "reason_for_change": "yfinance backfilled the ^VIX9D gap after publication",
+    "affects_live_article": false
+  },
   "historical_nfp_day_stats": {
-    "spy_ret_day0_mean_pct": -0.185,
-    "spy_ret_day0_median_pct": 0.098,
-    "spy_ret_day0_std_pct": 1.168,
-    "spy_up_day_win_rate_pct": 53.8,
-    "vix_chg_day0_mean_pts": 0.991,
-    "vix_chg_day0_median_pts": 0.02,
-    "pct_events_vix_fell_pct": 46.2,
-    "spy_ret_next_day_mean_pct": 0.411
+    "spy_ret_day0_mean_pct": -0.183,
+    "spy_ret_day0_median_pct": -0.023,
+    "spy_ret_day0_std_pct": 1.236,
+    "spy_up_day_win_rate_pct": 46.2,
+    "vix_chg_day0_mean_pts": 1.042,
+    "vix_chg_day0_median_pts": -0.02,
+    "pct_events_vix_fell_pct": 53.8,
+    "spy_ret_next_day_mean_pct": 0.032
   },
   "historical_nfp_table": [
     {
-      "nfp_date_proxy": "2025-06-06",
+      "nfp_release_date": "2025-05-02",
+      "trading_day": "2025-05-02",
+      "spy_ret_day0_pct": 1.484,
+      "vix_chg_day0_pts": -1.92,
+      "spy_ret_next_day_pct": -0.573
+    },
+    {
+      "nfp_release_date": "2025-06-06",
       "trading_day": "2025-06-06",
       "spy_ret_day0_pct": 1.027,
       "vix_chg_day0_pts": -1.71,
       "spy_ret_next_day_pct": 0.09
     },
     {
-      "nfp_date_proxy": "2025-07-04",
-      "trading_day": "2025-07-07",
-      "spy_ret_day0_pct": -0.745,
-      "vix_chg_day0_pts": 1.41,
-      "spy_ret_next_day_pct": -0.055
+      "nfp_release_date": "2025-07-03",
+      "trading_day": "2025-07-03",
+      "spy_ret_day0_pct": 0.788,
+      "vix_chg_day0_pts": -0.26,
+      "spy_ret_next_day_pct": -0.745
     },
     {
-      "nfp_date_proxy": "2025-08-01",
+      "nfp_release_date": "2025-08-01",
       "trading_day": "2025-08-01",
       "spy_ret_day0_pct": -1.639,
       "vix_chg_day0_pts": 3.66,
       "spy_ret_next_day_pct": 1.52
     },
     {
-      "nfp_date_proxy": "2025-09-05",
+      "nfp_release_date": "2025-09-05",
       "trading_day": "2025-09-05",
       "spy_ret_day0_pct": -0.29,
       "vix_chg_day0_pts": -0.12,
       "spy_ret_next_day_pct": 0.246
     },
     {
-      "nfp_date_proxy": "2025-10-03",
-      "trading_day": "2025-10-03",
-      "spy_ret_day0_pct": -0.001,
-      "vix_chg_day0_pts": 0.02,
-      "spy_ret_next_day_pct": 0.359
+      "nfp_release_date": "2025-11-20",
+      "trading_day": "2025-11-20",
+      "spy_ret_day0_pct": -1.524,
+      "vix_chg_day0_pts": 2.76,
+      "spy_ret_next_day_pct": 0.996
     },
     {
-      "nfp_date_proxy": "2025-11-07",
-      "trading_day": "2025-11-07",
-      "spy_ret_day0_pct": 0.098,
-      "vix_chg_day0_pts": -0.42,
-      "spy_ret_next_day_pct": 1.56
+      "nfp_release_date": "2025-12-16",
+      "trading_day": "2025-12-16",
+      "spy_ret_day0_pct": -0.273,
+      "vix_chg_day0_pts": -0.02,
+      "spy_ret_next_day_pct": -1.1
     },
     {
-      "nfp_date_proxy": "2025-12-05",
-      "trading_day": "2025-12-05",
-      "spy_ret_day0_pct": 0.19,
-      "vix_chg_day0_pts": -0.37,
-      "spy_ret_next_day_pct": -0.3
+      "nfp_release_date": "2026-01-09",
+      "trading_day": "2026-01-09",
+      "spy_ret_day0_pct": 0.661,
+      "vix_chg_day0_pts": -0.96,
+      "spy_ret_next_day_pct": 0.157
     },
     {
-      "nfp_date_proxy": "2026-01-02",
-      "trading_day": "2026-01-02",
-      "spy_ret_day0_pct": 0.183,
-      "vix_chg_day0_pts": -0.44,
-      "spy_ret_next_day_pct": 0.666
+      "nfp_release_date": "2026-02-11",
+      "trading_day": "2026-02-11",
+      "spy_ret_day0_pct": -0.023,
+      "vix_chg_day0_pts": -0.14,
+      "spy_ret_next_day_pct": -1.545
     },
     {
-      "nfp_date_proxy": "2026-02-06",
-      "trading_day": "2026-02-06",
-      "spy_ret_day0_pct": 1.918,
-      "vix_chg_day0_pts": -1.4,
-      "spy_ret_next_day_pct": 0.482
-    },
-    {
-      "nfp_date_proxy": "2026-03-06",
+      "nfp_release_date": "2026-03-06",
       "trading_day": "2026-03-06",
       "spy_ret_day0_pct": -1.311,
       "vix_chg_day0_pts": 5.74,
       "spy_ret_next_day_pct": 0.876
     },
     {
-      "nfp_date_proxy": "2026-04-03",
+      "nfp_release_date": "2026-04-03",
       "trading_day": "2026-04-06",
       "spy_ret_day0_pct": 0.473,
       "vix_chg_day0_pts": 0.3,
       "spy_ret_next_day_pct": 0.044
     },
     {
-      "nfp_date_proxy": "2026-05-01",
-      "trading_day": "2026-05-01",
-      "spy_ret_day0_pct": 0.277,
-      "vix_chg_day0_pts": 0.1,
-      "spy_ret_next_day_pct": -0.366
+      "nfp_release_date": "2026-05-08",
+      "trading_day": "2026-05-08",
+      "spy_ret_day0_pct": 0.826,
+      "vix_chg_day0_pts": 0.11,
+      "spy_ret_next_day_pct": 0.228
     },
     {
-      "nfp_date_proxy": "2026-06-05",
+      "nfp_release_date": "2026-06-05",
       "trading_day": "2026-06-05",
       "spy_ret_day0_pct": -2.581,
       "vix_chg_day0_pts": 6.11,
       "spy_ret_next_day_pct": 0.226
     }
   ],
-  "notes": "NFP release dates approximated via first-Friday-of-month rule (standard BLS schedule pattern); a small number of months may shift by BLS holiday adjustment, not individually re-verified against BLS calendar for each of the 13 dates. spy_ret_day0 = close-to-close return on the trading day matching/following the release date. vix_chg_day0 = VIX close on release day minus VIX close on prior trading day. No lookahead: all stats use only data at/after each historical date; current_snapshot uses only data through as_of_date (2026-07-01), strictly before the 2026-07-03 release. KNOWN DATA GAP: yfinance ^VIX9D series stops printing 2026-06-26 (verified via yf.Ticker.history), i.e. it lags the ^VIX series by several trading sessions as of the as_of_date. To avoid mixing two different calendar dates into one ratio, vix9d_over_vix_ratio_same_date is computed on the last date BOTH series have a print (2026-06-26), not on the as_of_date. This is disclosed verbatim in the article; no value was invented to fill the gap."
+  "notes": "NFP release dates are the official BLS Employment Situation release dates from the FRED/ALFRED release calendar (release id 50), retrieved via volpred.data.event_dates.nfp_release_dates, which fails closed rather than falling back to a proxy. This replaces the first-Friday-of-month proxy used in the original run, which put 7 of these 13 events on the wrong date, including a phantom 2025-10-03 event (no Employment Situation was published in October 2025; the shutdown moved the September report to 2025-11-20). spy_ret_day0 = close-to-close return on the trading day matching/following the release date. vix_chg_day0 = VIX close on release day minus VIX close on prior trading day. No lookahead: the yfinance download window ends exclusive at the release date, so no series in this script contains a 2026-07-02 print at all; current_snapshot is as of the 2026-07-01 close, the last session before the release. RESOLVED DATA GAP: at publication the yfinance ^VIX9D series stopped printing at 2026-06-26, so the ratio was computed on that basis (0.9125) and the 5-session lag was disclosed verbatim in the article rather than filled with an invented value. yfinance has since backfilled 2026-06-29..2026-07-01, so the ratio is now a true same-date T-1 figure (13.14 / 16.59 = 0.7920). The 2026-06-26 print is unchanged at 16.80, which confirms the cause is vendor backfill rather than the event-date correction. Both vintages are kept: see vix9d_vintage_note. The live article never cited the VIX9D ratio, so no published number is affected."
 }
