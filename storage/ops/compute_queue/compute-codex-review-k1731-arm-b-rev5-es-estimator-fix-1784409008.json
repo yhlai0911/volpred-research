@@ -1,0 +1,36 @@
+{
+  "id": "compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008",
+  "title": "codex review: K1731 arm B rev5 (ES estimator fix)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1731_armB_rev5_prompt.md",
+    "storage/ops/codex_reviews/k1731_armB_rev5_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-07-18T21:10:08Z",
+  "started_at": "2026-07-18T21:15:05Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1731_armB_rev5_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1731_armB_rev5_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1731 arm B rev5 的 Codex 一審已完成，報告在 storage/ops/codex_reviews/k1731_armB_rev5_verdict.md。先讀第一行 VERDICT：(a) FAIL → 不要合併，依 Blocking issues 開 bounded 修正 job（timeout<3600，禁整份重跑），並把 assign_67f56b79 再 block 一輪；(b) PASS → 解 block assign_67f56b79 並完成拆段 2b：① uv run python scripts/experiment_gates.py verdict-template --path experiments/k1731 產生 review_verdict.json（禁手寫），把 Codex 報告結論填入 ② scripts/merge_worktree.sh 正式合併 dispatch-slot-1-bd00f90a-k1731（禁裸 git merge / 禁 force-remove）③ 主線程寫 knowledge.json —— 只引 finalize 標為 is_primary 的 k1731_gevreg_midas_ssvs_returns_results_corrected_rev5.json，禁引兩份 do_not_cite；entry 必須寫出 ES estimator 由 per-draw 平均改為 posterior-mixture 閉式，且 95% 拒絕的一部分原本是估計量假象（p 0.0145->0.0181）、conclusion_flipped=false ④ 依老闆 msg 946/947 判斷 arm A(K1730)+arm B(K1731) 齊備後寫文章還是論文 ⑤ scripts/progress_report.py 回報（--actor 傳 $VOLPRED_TASK_CLAIM_OWNER）。合併前先比對 /tmp 之外的 freeze 紀錄：本班已把 21 個檔的 sha256 記在 assign_67f56b79 的 result 欄位，Codex 審的必須是同一批 bytes，不一致就重審不合併。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null
+}

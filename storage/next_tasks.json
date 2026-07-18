@@ -33037,13 +33037,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T20:00:59.527214+00:00",
+    "completed_at": "2026-07-18T21:00:58.045626+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T20:00:59.527214+00:00",
-      "last_clean_observed_at": "2026-07-18T20:00:59.527214+00:00"
+      "resolved_at": "2026-07-18T21:00:58.045626+00:00",
+      "last_clean_observed_at": "2026-07-18T21:00:58.045626+00:00"
     }
   },
   {
@@ -33055,13 +33055,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T20:16:37.557010+00:00",
+    "completed_at": "2026-07-18T21:23:40.320334+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T20:16:37.557010+00:00",
-      "last_clean_observed_at": "2026-07-18T20:16:37.557010+00:00"
+      "resolved_at": "2026-07-18T21:23:40.320334+00:00",
+      "last_clean_observed_at": "2026-07-18T21:23:40.320334+00:00"
     }
   },
   {
@@ -33239,34 +33239,13 @@
   },
   {
     "id": "dm_hac_fix_k1525_k1526_pair",
+    "status": "succeeded",
     "task_type": "experiment",
     "priority": 3,
-    "status": "succeeded",
     "created_at": "2026-07-15T01:28:07+08:00",
-    "description": "K1655 bug class 必修 #4/#5（必須同輪修，否則兩份 README 數字分岔）：k1525.py:265 與 k1526.py:265（逐字複製）雙重退化 — 空迴圈 + Newey-West 權重 `1-k/h` 在 h=1,k=1 時歸零。k1525 README 的 headline null（t=-0.85, p=0.397）就建在這上面。注意：null 不代表安全 —— k621 前例是負自協方差讓 |t| 由 2.26 升到 3.64、p 由 0.0237 掉到 0.0003，補 HAC 後 null 可能翻成顯著。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md",
-    "status_history": [
-      {
-        "ts": "2026-07-15T20:08:34.791551+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-2-6248c6031dd8485aa71ab6a0f6f51f7a"
-      },
-      {
-        "ts": "2026-07-15T20:08:35.023307+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-2-6248c6031dd8485aa71ab6a0f6f51f7a"
-      },
-      {
-        "ts": "2026-07-15T20:28:25.049025+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-2-6248c6031dd8485aa71ab6a0f6f51f7a"
-      }
-    ],
-    "started_at": "2026-07-15T20:08:35.023294+00:00",
     "completed_at": "2026-07-15T20:28:25.049010+00:00",
-    "result": "Removed both h=1-degenerate local DM helpers and reran the nested historical-mean vs ES+VIX comparison with canonical Clark-West HAC (lag 6). K1525/K1526 match: n=138, t=-0.213, one-sided p=0.584, R2_OOS=-4.57%; OOS NULL unchanged. Added frozen ledgers, SHA-pinned PASS verdicts; 123 ratchet tests passed."
+    "tombstone": true,
+    "archived_at": "2026-07-18T21:00:26.359732+00:00"
   },
   {
     "id": "dm_hac_auditor_false_negative_regex",
@@ -34444,48 +34423,15 @@
   },
   {
     "id": "K1096_article_general_audience_rewrite_4e5a221e",
-    "title": "Audience correction: rewrite a true general companion for 明知道 VIX 在比特幣恐慌時會失靈，為什麼把它關掉還是沒救？",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_4e5a221e. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1096']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 明知道 VIX 在比特幣恐慌時會失靈，為什麼把它關掉還是沒救？",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_4e5a221e",
-    "experiment_refs": [
-      "K1096"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1096",
-    "status_history": [
-      {
-        "ts": "2026-07-15T20:31:15.459916+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-k1096-audience"
-      },
-      {
-        "ts": "2026-07-15T20:31:15.687606+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-k1096-audience"
-      },
-      {
-        "ts": "2026-07-15T20:50:42.232861+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-k1096-audience"
-      }
-    ],
-    "started_at": "2026-07-15T20:31:15.687592+00:00",
     "completed_at": "2026-07-15T20:50:42.232844+00:00",
-    "result": "Created true general companion mile_e565b810 (draft/general) from K1096 with 2 verified evidence charts, all source numbers/null result/limits/t-1 no-lookahead/date clarification preserved. publish_draft dry-run and publish both sanitize_applied=0; cross-model FACT/STYLE PASS; audience validator 1820 entries/0 mismatches; 187 targeted tests passed. Source mile_4e5a221e now records K1096 general coverage; bespoke Codex lazypack queued as lazypack-mile_e565b810. Content commit fabbf76c0."
+    "tombstone": true,
+    "archived_at": "2026-07-18T21:00:26.359732+00:00"
   },
   {
     "id": "K1427_article_general_audience_rewrite_c07025d2",
@@ -34591,48 +34537,15 @@
   },
   {
     "id": "K1010_article_general_audience_rewrite_94a0a999",
-    "title": "Audience correction: rewrite a true general companion for 預測波動率有多準？用天氣預報的標準驗證——簡單方法竟然最精確",
-    "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_94a0a999. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K1010']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
-    "dispatch_lane": "agent",
+    "title": "Audience correction: rewrite a true general companion for 預測波動率有多準？用天氣預報的標準驗證——簡單方法竟然最精確",
+    "priority": 3,
     "source": "audience_correction_backfill",
-    "article_id": "mile_94a0a999",
-    "experiment_refs": [
-      "K1010"
-    ],
-    "parent_task_id": "content_audience_mislabel_backlog_45",
-    "tags": [
-      "audience-correction",
-      "rewrite-general",
-      "content-quality"
-    ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
-    "k_id": "K1010",
-    "status_history": [
-      {
-        "ts": "2026-07-15T20:06:39.377926+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop"
-      },
-      {
-        "ts": "2026-07-15T20:06:39.653853+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop"
-      },
-      {
-        "ts": "2026-07-15T20:29:23.873040+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop"
-      }
-    ],
-    "started_at": "2026-07-15T20:06:39.653835+00:00",
     "completed_at": "2026-07-15T20:29:23.873026+00:00",
-    "result": "Created true general-audience K1010 companion as draft mile_e58dc338. Source figures and correction were verified; sanitize_applied=0; cross-model review PASS; Supabase read-back and image HTTP 200 verified; lazypack job queued. Content commit 4a9495f8c."
+    "tombstone": true,
+    "archived_at": "2026-07-18T21:00:26.359732+00:00"
   },
   {
     "id": "K942_article_general_audience_rewrite_2cfa32a4",
@@ -35617,77 +35530,27 @@
   },
   {
     "id": "ci-red-29442836650",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29442836650, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29421677446",
-    "ci_run_key": "29442836650:1",
     "created_at": "2026-07-15T20:00:07.985734+00:00",
-    "title": "CI 紅燈修復（run 29442836650, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29442836650\nattempt: 1\nhead_sha: 22422d2ee\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29442836650 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T20:00:59.309218+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-ci-29442836650"
-      },
-      {
-        "ts": "2026-07-15T20:00:59.534327+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-ci-29442836650"
-      },
-      {
-        "ts": "2026-07-15T20:12:56.321030+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-ci-29442836650"
-      }
-    ],
-    "started_at": "2026-07-15T20:00:59.534312+00:00",
     "completed_at": "2026-07-15T20:12:56.321015+00:00",
-    "result": "root_cause=merge 22422d2ee brought k1709 and k1711 archived results onto main before canonical reviewed findings were recorded, so the zero-baseline knowledge ratchet correctly rejected both; repair_commit=a06d64daf4c343e9d84dc7724b273c0b92659d33; verification=knowledge class sweep 32 passed and provenance 0/2656 violations; subsequent run 29446641414 passes original ratchet but exposes two unrelated CI debts"
+    "tombstone": true,
+    "archived_at": "2026-07-18T21:00:26.359732+00:00"
   },
   {
     "id": "ci-red-29446641414",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29446641414, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29421677446",
-    "ci_run_key": "29446641414:1",
     "created_at": "2026-07-15T21:00:04.311497+00:00",
-    "title": "CI 紅燈修復（run 29446641414, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29446641414\nattempt: 1\nhead_sha: 1e2c5a534\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29446641414 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-15T21:00:50.886802+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-1-381bd58c79e34d6dbd40c9634f484ad0"
-      },
-      {
-        "ts": "2026-07-15T21:00:56.209078+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-1-381bd58c79e34d6dbd40c9634f484ad0"
-      },
-      {
-        "ts": "2026-07-15T21:05:55.310256+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-1-381bd58c79e34d6dbd40c9634f484ad0"
-      }
-    ],
-    "started_at": "2026-07-15T21:00:56.209066+00:00",
     "completed_at": "2026-07-15T21:05:55.310244+00:00",
-    "result": "root_cause=cron_hourly_dispatch.sh changed in c45d82c0d without regenerating config/cron_wrapper_manifest.json or the launchd copy; repair_commit=3e36eac3f; validation=117 targeted tests passed and canonical/manifest/runtime SHA-256 all match; note=K1396 ratchet failure was already repaired by later HEAD; push=deferred to git_push_backup per supervisor policy"
+    "tombstone": true,
+    "archived_at": "2026-07-18T21:07:20.371516+00:00"
   },
   {
     "id": "dreaming_persistent_alert_52425890cc2f99a1",
@@ -38578,11 +38441,34 @@
     "description": "根因（telegram-914 診斷）：ci-red-29553786006 的 CRITICAL 是**時序誤報**，不是修復失敗。\n\n時間線（UTC）：\n- 05:26 024538a18 進 main → 06:00 run 29558810591 Test Suite failure（K1386 測試）\n- 06:24 c586acc43 landed = K1386 測試修復\n- 07:00:08 check_alerts watcher 跑 → 最新「已完成」run 仍是 06:00 那個紅（修復前的 commit）→ failure_keys 累積 3 → 發 CRITICAL\n- 07:00:21 新 run 29561716600 開始（watcher 跑完 13 秒後）→ 07:11 完成，Test Suite / Data Baseline / Source Encoding / Silent Fallback **全 success**\n\n也就是修復其實第 3 輪就成功了，警報只是差 13 秒沒等到驗證 run。本地跑 scripts/tests/test_k1386_methodology_repair.py 亦 9 passed。\n\n要修的 class（scripts/check_alerts.py 附近 L1470-1512）：\n1. **主修**：failure_keys 累積 cycles 觸發 hard_failure 時，未檢查「修復 commit 是否已 landed 但尚未被任何 CI run 驗證過」。應在升級 CRITICAL 前判斷 latest_observed_run.head_sha 是否落後於 repair task 的修復 commit；若落後，該輪應維持 pending/等待驗證而非 escalate。\n2. **次要**：storage/ops/ci_watch_state.json 的 checked_at 卡在 2026-07-14T04:00:45（updated_at 已是 07-17T07:00:08）→ checked_at 有 stale/未更新的 bug，會誤導人判斷 watcher 死了。\n3. **順帶**：本機 HEAD dde892bf1（PHASE-Z receipt feature + 自身回歸修復）領先 origin/main 1 commit 未 push，該 commit 尚未經 CI 驗證。確認後推送。\n\n驗收：新增回歸測試覆蓋「修復已 landed、驗證 run 尚未完成」的時序，斷言該輪不發 CRITICAL。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-17T07:16:48.186222+00:00",
     "parent_task_id": "telegram-914",
-    "created_by": "telegram-responder"
+    "created_by": "telegram-responder",
+    "status_history": [
+      {
+        "ts": "2026-07-18T21:02:40.239935+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2"
+      },
+      {
+        "ts": "2026-07-18T21:02:40.571478+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2"
+      },
+      {
+        "ts": "2026-07-18T21:21:30.234871+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2"
+      }
+    ],
+    "started_at": "2026-07-18T21:02:40.571464+00:00",
+    "completed_at": "2026-07-18T21:21:30.234855+00:00",
+    "result": "CI watchdog 時序誤報修復。root_cause=newer-in-progress-run guard 只存在於 _notify_ci_incident 且需已存 recovery_candidate（綠）才觸發，新開的 red incident 走 _reduce_ci_run 從不查詢它，也從未對紅 run 自己的 head_sha 做 ancestry 比對；_ci_commit_covered 僅用於綠側驗證。本班實例：紅 run head 768bfd059 已是 main 新 HEAD 869753414 的祖先（修復 999859933 在中間 landed），且 29660781857 正在新 HEAD 上跑，watcher 仍開 P1 + request_fire。修法=新增 _ci_newer_run_covering_head / _ci_superseding_in_progress_run / _ci_superseding_green_run 三個 helper + sibling_runs 參數，僅在 is_new_incident 路徑 defer（不 mark processed，下輪重判；deferral 寫入 state 並 warn，非沉默 fallback）。6 個新測試含 4 個反向案例；negative check 已做（sibling_runs=() 時恰好兩個新測試紅）。獨立驗證 76 passed。"
   },
   {
     "id": "deploy_verify_v3_digest_route_20260717",
@@ -40891,12 +40777,28 @@
         "to": "pending",
         "by": "hourly-slot-1-0bd07fce62c74c6dbebcb892c4421508",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-18T21:08:16.333504+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-f59ba8cd2d384523bb27f862c0f58168"
+      },
+      {
+        "ts": "2026-07-18T21:08:16.571393+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-f59ba8cd2d384523bb27f862c0f58168"
       }
     ],
-    "started_at": "2026-07-18T18:08:50.244321+00:00",
+    "started_at": "2026-07-18T21:08:16.571378+00:00",
     "last_released_at": "2026-07-18T18:10:41.402602+00:00",
-    "blocked_until": "2026-07-19T05:30:00+08:00",
-    "blocked_reason": "2026-07-19T02:2x hourly-slot-1: verification verdict=needs_fix（B1 SSVS ES 用 component-wise 平均而非 mixture ES；B2 兩份 production artifact 無 supersession 標記；B3 review_verdict.json 缺、現況不能誠實寫 PASS）→ 不得合併。段 1 corrected-spec 重跑已 enqueue compute job k1731-armB-corrected-rev5（wrapper run_corrected_rev5_production.py，--exclude-ip --garch-origin-lag 1 --tag corrected_rev5，timeout 3600）；其 followup 做回歸檢查 + provenance 蓋章 + README 同步。該 followup succeeded 後本任務才可解 block。"
+    "blocked_until": "2026-07-19T08:00:00+08:00",
+    "blocked_reason": "2026-07-19T02:2x hourly-slot-1: verification verdict=needs_fix（B1 SSVS ES 用 component-wise 平均而非 mixture ES；B2 兩份 production artifact 無 supersession 標記；B3 review_verdict.json 缺、現況不能誠實寫 PASS）→ 不得合併。段 1 corrected-spec 重跑已 enqueue compute job k1731-armB-corrected-rev5（wrapper run_corrected_rev5_production.py，--exclude-ip --garch-origin-lag 1 --tag corrected_rev5，timeout 3600）；其 followup 做回歸檢查 + provenance 蓋章 + README 同步。該 followup succeeded 後本任務才可解 block。",
+    "claimed_by": "hourly-slot-2-f59ba8cd2d384523bb27f862c0f58168",
+    "claimed_at": "2026-07-18T21:08:16.333485+00:00",
+    "claim_session_id": "946dca0cc176",
+    "result": "拆段 2a 完成（hourly-slot-2-f59ba8cd）：讀 k1731_armB_esfix.json → verdict=ready_for_codex_review、blocking_issues=[]、regression PASS(3834 leaves / 0 out-of-allowlist)、README traceability 50/50。依 scripts/codex_review_job.sh 規範（整份 experiment 一審 10-40min，禁 in-fire spawn）已 enqueue Codex 一審 job compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008，prompt=storage/ops/codex_reviews/k1731_armB_rev5_prompt.md，verdict 出口=storage/ops/codex_reviews/k1731_armB_rev5_verdict.md。受審 bytes 已凍結於 storage/ops/codex_reviews/k1731_armB_rev5_freeze.sha256（20 檔 sha256）—— 合併前須比對一致。拆段 2b（verdict-template → merge_worktree.sh → knowledge.json 只引 rev5 → 文章/論文判斷 → progress_report）由該 job 的 compute-queue followup 接手。"
   },
   {
     "id": "telegram-985",
@@ -41301,5 +41203,54 @@
     "source": "agent",
     "created_at": "2026-07-18T20:14:17.175688+00:00",
     "created_by": "hourly-slot-1-9821e0723e124a95af0ae537ebd2dde0"
+  },
+  {
+    "id": "ci-red-29658868526",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29651115228",
+    "ci_run_key": "29658868526:1",
+    "created_at": "2026-07-18T21:00:04.107214+00:00",
+    "title": "CI 紅燈修復（run 29658868526, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29658868526\nattempt: 1\nhead_sha: 768bfd059\n偵測摘要（仍須讀完整 failed log）：2026-07-18T16:04:20.9274559Z ImportError while importing test module '/home/runner/work/volpred-research/volpred-research/tests/test_covered_article_dedup.py'.\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29658868526 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-18T21:00:56.027489+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2"
+      },
+      {
+        "ts": "2026-07-18T21:00:56.271943+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2"
+      },
+      {
+        "ts": "2026-07-18T21:21:20.194776+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2"
+      }
+    ],
+    "started_at": "2026-07-18T21:00:56.271925+00:00",
+    "completed_at": "2026-07-18T21:21:20.194760+00:00",
+    "result": "CI red 修復完成。root_cause=紅 run 29658868526 (commit 768bfd059) 的唯一失敗 test_phase_z_drain_retry.py::test_hash_pinned_closeout_refuses_later_edits 早已被 repair_commit=999859933 修好（該 commit 不在紅 run 的樹裡），本地 13 passed。但本班驗證新 run 29660781857 (869753414) 仍紅，真因是另一條、更早就存在的 gate 失敗 test_audit_canonical_writers.py — article_correction.py:194 direct-guarded-bypass 未註冊 owner，由 9716b0af0 引入。已修（audit_canonical_writers.py 註冊 owner），auditor CLI PASS exit 0，83 passed 獨立驗證。同時修掉導致本班被誤 fire 的 watchdog 時序 bug（見 assign_cb9c9fd1）。"
+  },
+  {
+    "id": "canonical_writers_publisher_feed_unguarded_20260719",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "system",
+    "status": "succeeded",
+    "created_at": "2026-07-18T21:11:36.264024+00:00",
+    "title": "[platform_ops] canonical-writers gate 紅：article_correction 未註冊 owner（已修）",
+    "description": "scripts/tests/test_audit_canonical_writers.py::test_real_active_tree_matches_frozen_owner_inventory 在當前 HEAD 失敗（本地實測；publisher.py 工作區乾淨 = 真實存在於 HEAD，非未提交改動）。\n\nFAIL 明細：\n- src/volpred/publisher/publisher.py:2611 Publisher._append_to_feed -> open-write\n- src/volpred/publisher/publisher.py:2616 Publisher._append_to_feed -> replace\n- src/volpred/publisher/publisher.py:2665 Publisher._rewrite_feed_entry -> open-write\n- src/volpred/publisher/publisher.py:2669 Publisher._rewrite_feed_entry -> replace\n[canonical-writers] FAIL: 1 unguarded, 0 owner-count mismatch, 0 parse error\n\n待查重點：此 gate 在 CI run 29658868526 未被報出（該 run 只報 phase_z 一條），需先確認 CI 是否根本沒跑這個 test 檔 — 若是，除了補 guard 還要修 CI 覆蓋缺口，否則 canonical-writer 防護形同虛設。\n\n發現脈絡：2026-07-19 05:xx slot-1 fire 修 CI watchdog 時序誤報時由 subagent 順帶掃出，非本班範圍故另立單。",
+    "completed_at": "2026-07-19T05:20:00+08:00",
+    "result": "本班同 fire 內修復完成。開單時的描述前提是錯的 —— 我把 auditor 輸出裡的 guarded-owner（PASS 分類的 inventory 列印）誤讀為違規，因此誤指 publisher.py 的 _append_to_feed / _rewrite_feed_entry 未 guard；那四行其實是通過的。真因在別的檔：src/volpred/publisher/article_correction.py:194 apply_article_correction -> os.replace 為 direct-guarded-bypass (guarded=True, declared_owner=False) —— guard 一直都在，缺的是 LOW_LEVEL_OWNERS 註冊；依 auditor 契約「guarded mutation outside an owner is still rejected because it creates a second write path」。由 9716b0af0（建立該檔的 commit）引入，非後來的 fa3dfad20；fa3dfad20 只是把 write_text 換成 mkstemp+os.replace，改變了被標記的行號與 operation。修法：scripts/audit_canonical_writers.py 註冊該 owner {\"os.replace\": 1}（+9 行），非白名單豁免 —— guard 仍被 dominance-check 強制，op count 仍是雙向 ratchet。negative check 已做（移除註冊即紅，逐字重現原失敗）。auditor CLI PASS exit 0；test_audit_canonical_writers.py 15 passed。另：開單時猜「CI 可能沒跑這個 test 檔」亦為誤 —— CI run 29660781857 確實有跑並報紅。"
   }
 ]

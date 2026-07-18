@@ -827,6 +827,65 @@ def _ci_run_sort_key(run: dict) -> tuple[str, int, int]:
     )
 
 
+def _ci_newer_run_covering_head(
+    run: dict,
+    sibling_runs,
+    *,
+    commit_covered_probe,
+    predicate,
+) -> dict | None:
+    """Newest sibling run that verifies a strictly newer main commit.
+
+    "Newer commit" is ancestry, not wall clock: the failing run's head must be an
+    ancestor of the sibling's head, so main has moved past the failing code and
+    the sibling is testing something the failing run never saw. A rerun of the
+    same head (head equal) is deliberately not a supersession.
+
+    Fails closed: an unknown/ungraftable head makes the ancestry probe return
+    False, so an unverifiable sibling can never suppress a red incident.
+    """
+    head = str(run.get("headSha") or "")
+    if not head:
+        return None
+    run_sort = _ci_run_sort_key(run)
+    candidates = [
+        other
+        for other in sibling_runs or ()
+        if predicate(other)
+        and _ci_run_sort_key(other) > run_sort
+        and str(other.get("headSha") or "") not in ("", head)
+        and commit_covered_probe(head, str(other.get("headSha") or ""))
+    ]
+    if not candidates:
+        return None
+    return max(candidates, key=_ci_run_sort_key)
+
+
+def _ci_superseding_in_progress_run(
+    run: dict, sibling_runs, *, commit_covered_probe
+) -> dict | None:
+    return _ci_newer_run_covering_head(
+        run,
+        sibling_runs,
+        commit_covered_probe=commit_covered_probe,
+        predicate=lambda other: str(other.get("status") or "completed").lower()
+        != "completed",
+    )
+
+
+def _ci_superseding_green_run(
+    run: dict, sibling_runs, *, commit_covered_probe
+) -> dict | None:
+    return _ci_newer_run_covering_head(
+        run,
+        sibling_runs,
+        commit_covered_probe=commit_covered_probe,
+        predicate=lambda other: str(other.get("status") or "completed").lower()
+        == "completed"
+        and str(other.get("conclusion") or "").lower() == "success",
+    )
+
+
 def _ci_record_sort_key(record: dict) -> tuple[str, int, int]:
     return (
         str(record.get("started_at") or record.get("created_at") or ""),
@@ -1366,6 +1425,7 @@ def _reduce_ci_run(
     dispatcher,
     commit_covered_probe,
     checkpoint,
+    sibling_runs=(),
 ) -> dict:
     """Mutate incident state and trigger repair effects; never notify the boss."""
     run_id = run.get("databaseId")
@@ -1426,6 +1486,75 @@ def _reduce_ci_run(
                 summary["failure_cycles"] = len(incident.get("failure_run_keys") or [])
                 summary["phase"] = incident.get("phase")
                 return summary
+
+        if is_new_incident:
+            # Fix-first, not alarm-first. A red run whose head main has already
+            # moved past is not evidence that main is red *now*: the fix can have
+            # landed between that run and this poll. Opening an incident here
+            # dispatches a whole P1 repair fire at code that may already be fixed
+            # (2026-07-17 ci-red-29553786006, 2026-07-19 ci-red-29658868526).
+            # While a newer run is still verifying the newer HEAD, defer instead —
+            # loudly, in state, and without marking the run processed, so the next
+            # poll re-judges it once that run lands. If the newer run also fails,
+            # its own completed failure opens the incident normally.
+            deferred_ledger = state.get("deferred_superseded_failures") or {}
+            superseding = _ci_superseding_in_progress_run(
+                run, sibling_runs, commit_covered_probe=commit_covered_probe
+            )
+            if superseding is not None:
+                record = {
+                    "failure_run_key": run_key,
+                    "failure_head_sha": str(run.get("headSha") or ""),
+                    "superseding_run": _ci_run_record(superseding),
+                    "deferred_at": now_iso,
+                    "reason": "failure_head_superseded_by_newer_in_progress_run",
+                }
+                deferred_ledger[run_key] = record
+                for stale_key in list(deferred_ledger)[:-50]:
+                    deferred_ledger.pop(stale_key, None)
+                state["deferred_superseded_failures"] = deferred_ledger
+                warn(
+                    "ci_watch",
+                    "red run deferred: head superseded by newer in-progress run",
+                    run_id=run_id,
+                    head_sha=str(run.get("headSha") or "")[:12],
+                    newer_run_id=superseding.get("databaseId"),
+                    newer_head_sha=str(superseding.get("headSha") or "")[:12],
+                )
+                summary["reason"] = "failure_head_superseded_by_newer_in_progress_run"
+                summary["deferred"] = record
+                summary["failure_cycles"] = 0
+                summary["phase"] = "idle"
+                return summary
+            if run_key in deferred_ledger:
+                # The run this red was deferred behind has landed. A green on a
+                # descendant head means main carries the failing commit and passes,
+                # so there is nothing left to repair — retire the deferral instead
+                # of opening an incident we would immediately close.
+                resolving_green = _ci_superseding_green_run(
+                    run, sibling_runs, commit_covered_probe=commit_covered_probe
+                )
+                if resolving_green is not None:
+                    resolved = deferred_ledger.pop(run_key)
+                    resolved["resolved_at"] = now_iso
+                    resolved["resolved_by_green_run"] = _ci_run_record(resolving_green)
+                    state["deferred_superseded_failures"] = deferred_ledger
+                    resolved_log = state.setdefault(
+                        "resolved_superseded_failures", []
+                    )
+                    resolved_log.append(resolved)
+                    del resolved_log[:-50]
+                    warn(
+                        "ci_watch",
+                        "deferred red retired: newer green head covers the failing commit",
+                        run_id=run_id,
+                        green_run_id=resolving_green.get("databaseId"),
+                    )
+                    _ci_mark_processed(state, run)
+                    summary["reason"] = "superseded_failure_resolved_by_newer_green"
+                    summary["failure_cycles"] = 0
+                    summary["phase"] = "idle"
+                    return summary
 
         if is_new_incident:
             incident_id = _ci_task_id(run)
@@ -2045,6 +2174,7 @@ def _handle_ci_runs(
                     dispatcher=dispatcher,
                     commit_covered_probe=commit_covered_probe,
                     checkpoint=checkpoint,
+                    sibling_runs=runs,
                 )
             )
         _ci_refresh_attempt_completeness(state, runs)

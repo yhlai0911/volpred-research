@@ -78,7 +78,15 @@ def _ahead(n=0, head="localsha123", run_sha="deadbeefcafe"):
     }
 
 
-def _harness(tmp_path, *, send_results=None, probe=None, pusher=None, summarizer=None):
+def _harness(
+    tmp_path,
+    *,
+    send_results=None,
+    probe=None,
+    pusher=None,
+    summarizer=None,
+    covered=None,
+):
     sent = []
     detections = []
     dispatches = []
@@ -116,7 +124,7 @@ def _harness(tmp_path, *, send_results=None, probe=None, pusher=None, summarizer
             "dispatcher": dispatcher,
             # A normal repair is covered by GREEN but was not already covered by
             # the failed head. Tests that need a rejection override this probe.
-            "commit_covered_probe": _commit_covered,
+            "commit_covered_probe": covered or _commit_covered,
         }
         if runs is not None:
             return check_alerts._handle_ci_runs(runs, **kwargs)
@@ -1102,6 +1110,134 @@ def test_detection_notice_is_sent_once_per_incident(tmp_path):
     assert len(run.detections) == 1  # idempotent: second tick does not resend
     assert summary["detection"]["reason"] == "detection_already_notified"
     assert sent == []
+
+
+# --- stale-red supersession (assign_cb9c9fd1, second recurrence 2026-07-19) ----
+# A red run against a commit main has already moved past is not proof main is red
+# now. Twice the watchdog opened a P1 incident and fired a whole dispatch shift at
+# a failure whose fix had already landed, while the run verifying the new HEAD was
+# still running.
+
+NEWER_HEAD = "999859933aaaa0000000000000000000000000aa"
+VERIFYING = {
+    **RED1,
+    "databaseId": 29234963400,
+    "url": f"{BASE_URL}/29234963400",
+    "status": "in_progress",
+    "conclusion": "",
+    "headSha": NEWER_HEAD,
+    "createdAt": "2026-07-13T09:50:00Z",
+    "startedAt": "2026-07-13T09:50:00Z",
+}
+VERIFIED_GREEN = {
+    **VERIFYING,
+    "databaseId": 29234963401,
+    "url": f"{BASE_URL}/29234963401",
+    "status": "completed",
+    "conclusion": "success",
+    "createdAt": "2026-07-13T09:55:00Z",
+    "startedAt": "2026-07-13T09:55:00Z",
+}
+VERIFIED_RED = {
+    **VERIFIED_GREEN,
+    "databaseId": 29234963402,
+    "url": f"{BASE_URL}/29234963402",
+    "conclusion": "failure",
+}
+PRIOR_GREEN = {
+    **GREEN,
+    "databaseId": 29230000000,
+    "url": f"{BASE_URL}/29230000000",
+    "headSha": "aaa0000000000000000000000000000000000001",
+    "createdAt": "2026-07-13T08:00:00Z",
+    "startedAt": "2026-07-13T08:00:00Z",
+}
+
+
+def test_stale_red_with_newer_run_in_flight_does_not_dispatch_or_escalate(tmp_path):
+    run, sent, dispatches = _harness(tmp_path)
+
+    summary = run(None, runs=[VERIFYING, RED1])
+
+    assert summary["reason"] == "failure_head_superseded_by_newer_in_progress_run"
+    assert summary["task_added"] is False
+    assert dispatches == []  # no repair fire at already-fixed code
+    assert not (tmp_path / "next_tasks.json").exists()
+    assert sent == []  # neither CRITICAL escalation ...
+    assert run.detections == []  # ... nor a red-detection heads-up
+    state = _state(tmp_path)
+    assert "active_incident" not in state
+    # The defer is recorded, not silently swallowed, and the run stays unprocessed
+    # so the next poll re-judges it once the verifying run lands.
+    deferred = state["deferred_superseded_failures"][check_alerts._ci_run_key(RED1)]
+    assert deferred["superseding_run"]["run_id"] == VERIFYING["databaseId"]
+    assert state.get("processed_run_keys", []) == []
+
+
+def test_rerun_of_the_same_failing_head_still_dispatches(tmp_path):
+    """Fix not landed: the in-flight run tests the very commit that failed."""
+    run, sent, dispatches = _harness(tmp_path)
+    same_head_rerun = {**VERIFYING, "headSha": RED1["headSha"], "attempt": 2}
+
+    summary = run(None, runs=[same_head_rerun, RED1])
+
+    assert summary["task_added"] is True
+    assert dispatches == ["ci-red-29233920234"]
+    assert len(run.detections) == 1
+    assert _state(tmp_path)["active_incident"]["phase"] in {"remediating", "verifying"}
+
+
+def test_newer_run_that_does_not_carry_the_failing_commit_still_dispatches(tmp_path):
+    """Ungraftable/unrelated head: ancestry fails closed, so the red still fires."""
+    run, sent, dispatches = _harness(tmp_path, covered=lambda _a, _b: False)
+
+    summary = run(None, runs=[VERIFYING, RED1])
+
+    assert summary["task_added"] is True
+    assert dispatches == ["ci-red-29233920234"]
+    assert _state(tmp_path)["active_incident"]["failure_cycles"] == 1
+
+
+def test_no_newer_run_at_all_still_dispatches(tmp_path):
+    run, _sent, dispatches = _harness(tmp_path)
+
+    summary = run(None, runs=[RED1])
+
+    assert summary["task_added"] is True
+    assert dispatches == ["ci-red-29233920234"]
+
+
+def test_deferred_stale_red_is_retired_when_the_newer_head_goes_green(tmp_path):
+    run, sent, dispatches = _harness(tmp_path)
+    run(PRIOR_GREEN)  # seed history so the poll cursor is past first boot
+
+    run(None, runs=[VERIFYING, RED1, PRIOR_GREEN])
+    summary = run(None, runs=[VERIFIED_GREEN, RED1, PRIOR_GREEN])
+
+    assert dispatches == []
+    assert not (tmp_path / "next_tasks.json").exists()
+    assert sent == []
+    assert run.detections == []
+    state = _state(tmp_path)
+    assert "active_incident" not in state
+    assert state["deferred_superseded_failures"] == {}
+    resolved = state["resolved_superseded_failures"][-1]
+    assert resolved["resolved_by_green_run"]["run_id"] == VERIFIED_GREEN["databaseId"]
+    assert summary["reason"] == "healthy_no_incident"
+
+
+def test_deferred_stale_red_still_opens_an_incident_if_the_newer_head_is_red(tmp_path):
+    """Deferral is a wait, never an amnesty: a genuinely red main still fires."""
+    run, _sent, dispatches = _harness(tmp_path)
+    run(PRIOR_GREEN)
+
+    run(None, runs=[VERIFYING, RED1, PRIOR_GREEN])
+    run(None, runs=[VERIFIED_RED, RED1, PRIOR_GREEN])
+
+    assert dispatches  # repair work was requested once main was provably red
+    assert len(run.detections) == 1
+    incident = _state(tmp_path)["active_incident"]
+    assert incident["failure_cycles"] == 2
 
 
 def test_detection_notice_marks_unknown_cause_but_still_fires(tmp_path):

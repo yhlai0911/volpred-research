@@ -21274,5 +21274,45 @@
     "owner": "hourly-slot-1-9821e0723e124a95af0ae537ebd2dde0",
     "commit": "8dfb83806",
     "summary": "收 agent job `agent-brief_nfp_official_dates-d68f3f`（PHASE A followup / collect_completed）。\n\n**驗證（brief 四項全過）**：\n1. 7 筆錯誤樣本前後對照表逐筆有官方日期對應；live verify 是實際 curl + Supabase projection 查詢（HTTP 200 + 新值 18.28%/14.41% present、舊值 18.1%/14.0% absent），非推理。\n2. first-Friday proxy 已無殘留（該腳本內僅剩敘事性提及與原始碼層防呆）；本機重跑 `tests/test_nfp_official_release_dates.py` + `tests/test_article_correction.py` = **49 passed**。報告載明 mutation test：還原 proxy → 5 測試轉紅、`end` 改回 07-03 → lookahead 轉紅、加第 4 個下載 → 3 個 lookahead 全紅。\n3. 未發第二篇更正文；metadata 走新增的唯一正式入口 `src/volpred/publisher/article_correction.py`（all-or-nothing、每個替換恰好命中一次、atomic mkstemp+fsync+os.replace）。feed sweep 確認 `details.event` 類問題已清空。\n4. Codex 4 輪審查判 PASS（`review_verdict.json`，gpt-5.6-sol/high，blocking_defects=[]）。\n\n**合併**：`scripts/merge_worktree.sh dispatch-slot-1-0bd07fce-nfpdates` → experiments 完整性檢查通過、branch `task/nfp-official-dates`（8dfb83806）已刪、worktree 已移除。\n\n**knowledge**：主線程寫入 `390d9784`（category=methodology_lesson）。核心教訓 —— proxy 不噴錯、不產生 NaN、圖照畫，安靜產出方向相反的數字；SPY 上漲機率 53.8%→46.2%、VIX 下降比例 46.2%→53.8% 兩個方向翻轉，但**當日報酬平均值幾乎不動**（-0.185%→-0.183%），只看平均完全看不出污染。\n\n**衍生任務（報告 §7，未修範圍）**：\n- `assign_ae004ae2` P1 — k528 用同一 proxy，254 筆中 53 筆（20.9%）錯、52 個真實發布日被漏，偏誤系統性偏早（28 筆剛好早 7 天）。線上文章 `mile_35eef830` 正文核心數字（2.17 倍體制差、相關 0.45、分界 16.71）全出自 k528，尚未修。\n- `assign_23b2a961` P2 — 全 repo 另 6 支腳本仍用該 proxy，**k904 在 `paper/` 底下可能影響論文**（列為該任務第一優先）；併含 `event_dates.release_dates()` 的 `.max()` 對 NFP 取錯（需 per-event 語意，不可順手改動與 CPI 共用的行為）。"
+  },
+  {
+    "timestamp": "2026-07-19T05:25:00+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_67f56b79",
+    "outcome": "in_progress",
+    "actor": "hourly-slot-2-f59ba8cd2d384523bb27f862c0f58168",
+    "owner": "hourly-slot-2-f59ba8cd2d384523bb27f862c0f58168",
+    "commit": null,
+    "summary": "PHASE A followup `agent-brief_k1731_armB_seg2-9be956`（collect_completed）收件 + K1731 arm B 拆段 2a。\n\n**讀 artifact 判分流**：`k1731_armB_esfix.json` verdict=`ready_for_codex_review`、`blocking_issues=[]` → 走 (b) 路徑，非 regression_failed。\n佐證：regression gate PASS（3834 leaf 值比對、22 by-design、19 non-deterministic、**0 out-of-allowlist**；`refits_ssvs_leaves_differing=0`）；README traceability 50 個數字程式化重讀 rev5、0 mismatch；provenance invariant 恰好一份 `is_primary`（`..._corrected_rev5.json`），另兩份標 `do_not_cite`。\n\n**ES estimator 修正的實質**：由「對每個 posterior draw 取其自身分位以外的尾部期望再平均」改為「posterior 混合分布在其混合 VaR 以外的尾部期望（給定門檻為閉式）」。閉式恆等式在 1120 個案例上 max relative error 1.07e-14。`conclusion_flipped=false`：95% ES 拒絕仍成立（p 0.0145→0.0181）、99% 不拒絕仍成立（p 0.0637→0.0876），兩個 p 值都上升，方向與偏誤預測一致。**但 esfix 自陳「原本 95% 拒絕有一部分是估計量假象」** —— 這句必須進 knowledge，不可沿用舊框架。\n另註：合成壓力測試的 3.85–22.77% 區間是刻意對抗性的，**不得**當成本實驗誤差；實際影響僅 +0.36%/+0.72%。\n\n**本班為何不直接合併**：整份 experiment 的 Codex 一審跑 10–40 min，fire 有 3000s hard cap。`scripts/codex_review_job.sh` 檔頭已把這條寫成 canonical（2026-07-12 3-STRIKE：父等子 → SIGKILL）。故改 enqueue：job `compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008`（timeout 2700 / codex 2400、read-only sandbox）。\n審查 prompt 為手寫非樣板，指定 8 項須裁決事項，其中兩項是這輪新增的結構性風險：① regression gate 的 allow-list 現由**被審腳本自己**（finalizer 的 `FINALIZE_OWNED_KEYS`）定義 —— 單一真相來源同時是利益衝突，要求 Codex 檢驗 `blind_spot_analysis` 的論證而非接受它；② 首次 gate 紅燈（57 筆 drift、全為 status=removed）自陳為 baseline stage mismatch，要求從 `regression_baseline/` bytes 確認修的是 baseline 選取、never 資料。\n\n**受審 bytes 已凍結**：`storage/ops/codex_reviews/k1731_armB_rev5_freeze.sha256`（20 檔 sha256）。拆段 2b 合併前必須比對一致，不一致就重審不合併 —— 三輪前的 `review_verdict.json` 已因本段改動 （regression_check / finalize / 三份 JSON / README）sha-invalidated，同樣的失效不能再發生一次。\n\n**狀態交接**：`assign_67f56b79` 由 blocked→claim→start→回 blocked（`blocked_until` 2026-07-19T08:00+08:00），result 欄位記完整交接；拆段 2b（verdict-template → merge_worktree.sh → knowledge 只引 rev5 → 文章/論文判斷 → progress_report）由該 job 的 compute-queue followup 接手。無 in_progress 殘留。"
+  },
+  {
+    "timestamp": "2026-07-19T05:21:52+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29658868526",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2",
+    "owner": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2",
+    "commit": null,
+    "summary": "CI red 修復（fire_reason=requested:ci_red:ci-red-29658868526）。\n\n紅 run 29658868526 的唯一失敗（test_phase_z_drain_retry.py::test_hash_pinned_closeout_refuses_later_edits，assert 'released' == 'hash_mismatch'）早已被 repair_commit 999859933 修好 — 該 commit 不在紅 run 的 commit 768bfd059 樹裡（merge-base --is-ancestor 回 non-zero），本地在當前 HEAD 跑該檔 13 passed。\n\n但**沒有就此收工**：驗證下一個 run 29660781857（HEAD 869753414）發現 main 仍紅，且是另一條、更早就存在的失敗 — test_audit_canonical_writers.py::test_real_active_tree_matches_frozen_owner_inventory。真因見 canonical_writers_publisher_feed_unguarded_20260719。若只憑「我這條測試本地過了」結案，main 會帶著紅燈繼續跑。\n\n一併記錄一個我自己的誤判：開 followup 單時把 auditor 輸出裡的 `guarded-owner`（PASS 分類的 inventory 列印）讀成違規標籤，因此誤指 publisher.py 的 _append_to_feed / _rewrite_feed_entry 未 guard，並據此寫了 brief。subagent 沒有照著錯誤前提硬改，而是回報「brief 的前提是錯的」並指出真正的違規行在 article_correction.py:194。brief 裡「若診斷後判定不需改碼就如實回報，不要為了交差硬改」那條指示是這次沒有把 gate 改壞的直接原因 — 值得保留在後續 brief 樣板裡。"
+  },
+  {
+    "timestamp": "2026-07-19T05:22:09+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_cb9c9fd1",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2",
+    "owner": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2",
+    "commit": null,
+    "summary": "CI watchdog 時序誤報修復 — 同一個 bug 的第二次實例，這次修根因。\n\n第一次 2026-07-17（ci-red-29553786006），當時開單記錄未修。本班自己就是受害者：watcher 在 21:00 對一個 20:00 的紅 run 開 P1 + request_fire，起了一整班 dispatch 去修一個 39 分鐘前就已 landed 修復的東西。\n\nroot_cause：newer-in-progress-run 的 guard 只存在於 _notify_ci_incident，且只在已存有 recovery_candidate（綠）時才觸發。新開的 red incident 走 _reduce_ci_run，那條路徑從不查詢它，也從未對紅 run 自己的 head_sha 做 ancestry 比對 — _ci_commit_covered 這個現成的 probe 一直只用在綠側驗證，從沒對著失敗的 head 用過。\n\n修法：新增 _ci_newer_run_covering_head / _ci_superseding_in_progress_run / _ci_superseding_green_run，sibling_runs 從 _handle_ci_runs 串進 _reduce_ci_run。**僅在 is_new_incident 路徑** defer（已在 remediating 的 incident 維持原本重複 dispatch 行為不變）。defer 時刻意不 mark processed，下輪重新判斷；deferral 寫入 state[\"deferred_superseded_failures\"] 並 warn — 依 no-silent-fallback.md，不是無聲吞掉。\n\n防「修成永遠不告警」：6 個新測試裡 4 個是反向案例（同 head 重跑、head 不覆蓋、根本沒有 newer run、deferred 後新 head 也紅 → 斷言 incident 仍會開）。deferral 是等待，不是特赦。negative check：把 sibling_runs=() 後恰好只有兩個新測試紅。獨立驗證 76 passed。"
+  },
+  {
+    "timestamp": "2026-07-19T05:22:26+08:00",
+    "task_type": "platform_ops",
+    "task_id": "canonical_writers_publisher_feed_unguarded_20260719",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2",
+    "owner": "hourly-slot-1-4cde126f35b8400cb39535e40165a0c2",
+    "commit": null,
+    "summary": "canonical-writers gate 紅燈修復 — main CI 當前唯一失敗。\n\nroot_cause：src/volpred/publisher/article_correction.py:194 apply_article_correction -> os.replace 被判 direct-guarded-bypass，屬性是 guarded=True, declared_owner=False —— guard 一直都在，缺的是 LOW_LEVEL_OWNERS 註冊。依 auditor 自己的契約：「a guarded mutation outside an owner is still rejected because it creates a second write path」。\n\n引入點由實測確認而非推測：把 pre-fa3dfad20 的檔案內容放進 scratch tree 跑 auditor，仍然 ok=False（VIOL 135 write_text）。所以紅燈從 9716b0af0 建立該檔起就存在；fa3dfad20（write_text → mkstemp+fsync+os.replace，修 15MB 非原子覆寫）只是把被標記的行號與 operation 從 135/write_text 移到 194/os.replace，不是引入者。\n\n修法：註冊該 owner {\"os.replace\": 1}（audit_canonical_writers.py +9 行）。這是契約規定的「新增合法 canonical writer」機制，不是白名單豁免 — test_guarded_registered_storage_writer_passes 就是把註冊定義為 pass path，test_registered_owner_operation_count_is_a_fixed_ratchet 保證註冊後 op count 仍是雙向 ratchet。guard 仍被 dominance-check 強制，該 scope 未來多加任何一個 mutation 都會因 count mismatch 而紅。同 scope 的 mkstemp/fdopen/unlink 指向 tmp 檔不是 storage，正確地不在 inventory 內。\n\n刻意未做的事：沒有把 article_correction 改走 Publisher._rewrite_feed_entry —— 它必須跨 Supabase sync 持有 publisher_feed lock 才滿足自己的 CorrectionNotSynced 契約，而 _rewrite_feed_entry 不提供。理由已寫進 code comment。\n\nnegative check：移除註冊即紅，逐字重現原失敗輸出。auditor CLI PASS exit 0；獨立驗證 83 passed（含 watchdog 與 phase_z 不回歸）。"
   }
 ]
