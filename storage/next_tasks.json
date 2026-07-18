@@ -30430,42 +30430,15 @@
   },
   {
     "id": "dreaming_orphaned_experiment_k1686",
-    "title": "[dreaming] orphaned_experiment:k1686",
-    "description": "收尾 experiments/k1686/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T09:16:48.626840+00:00）。\n證據：experiments/k1686/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1686'); finished 0.5 days ago; orphan backlog this run: 67 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "experiment",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "[dreaming] orphaned_experiment:k1686",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-12T09:16:48.626840+00:00",
-    "dreaming": {
-      "signature": "orphaned_experiment:k1686",
-      "pattern_type": "orphaned_experiment",
-      "occurrences": 1,
-      "governance_target": "storage/memory/knowledge.json"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-15T13:09:21.529512+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-21"
-      },
-      {
-        "ts": "2026-07-15T13:10:37.535478+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-21"
-      },
-      {
-        "ts": "2026-07-15T13:11:31.945004+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-21"
-      }
-    ],
-    "started_at": "2026-07-15T13:10:37.535459+00:00",
     "completed_at": "2026-07-15T13:11:31.944988+00:00",
-    "result": "K1686 孤兒收尾：主線程寫 knowledge entry 0105308b(PASS,ambient-fear-shock gate 通過關閉 Paper8 P0-1)，provenance 0 violations"
+    "tombstone": true,
+    "archived_at": "2026-07-18T14:08:13.312240+00:00"
   },
   {
     "id": "dreaming_orphaned_experiment_k1684",
@@ -30481,42 +30454,15 @@
   },
   {
     "id": "dreaming_orphaned_experiment_k1680",
-    "title": "[dreaming] orphaned_experiment:k1680",
-    "description": "收尾 experiments/k1680/：讀 results.json → Codex review （CONDITIONAL PASS 以上才可寫）→ 寫 knowledge.json（含 experiment_id + reviewer provenance）。Null result 照實寫，null 也是結果。若結論可發佈，另排文章 task。收尾後此 K 就不再是孤兒。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T09:16:48.626840+00:00）。\n證據：experiments/k1680/ has results but no consumer (knowledge.json / feed.json / paper / open task all miss 'k1680'); finished 1.2 days ago; orphan backlog this run: 67 within 30d (queueing 5), plus 26 older than 30d not queued\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "experiment",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "[dreaming] orphaned_experiment:k1680",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-12T09:16:48.626840+00:00",
-    "dreaming": {
-      "signature": "orphaned_experiment:k1680",
-      "pattern_type": "orphaned_experiment",
-      "occurrences": 1,
-      "governance_target": "storage/memory/knowledge.json"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-15T13:09:21.289773+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-21"
-      },
-      {
-        "ts": "2026-07-15T13:10:37.282525+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-21"
-      },
-      {
-        "ts": "2026-07-15T13:11:31.679574+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-21"
-      }
-    ],
-    "started_at": "2026-07-15T13:10:37.282507+00:00",
     "completed_at": "2026-07-15T13:11:31.679559+00:00",
-    "result": "K1680 孤兒收尾：knowledge entry 已於 7/14 backfill 補齊(NULL/RETROSPECTIVE_NULL,Codex PASS)，孤兒已解，null 不發文"
+    "tombstone": true,
+    "archived_at": "2026-07-18T14:08:13.312240+00:00"
   },
   {
     "id": "dreaming_orphaned_experiment_k1678",
@@ -33180,13 +33126,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-18T13:01:10.546886+00:00",
+    "completed_at": "2026-07-18T14:00:54.493660+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T13:01:10.546886+00:00",
-      "last_clean_observed_at": "2026-07-18T13:01:10.546886+00:00"
+      "resolved_at": "2026-07-18T14:00:54.493660+00:00",
+      "last_clean_observed_at": "2026-07-18T14:00:54.493660+00:00"
     }
   },
   {
@@ -33198,13 +33144,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T13:13:07.500811+00:00",
+    "completed_at": "2026-07-18T14:20:29.004140+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T13:13:07.500811+00:00",
-      "last_clean_observed_at": "2026-07-18T13:13:07.500811+00:00"
+      "resolved_at": "2026-07-18T14:20:29.004140+00:00",
+      "last_clean_observed_at": "2026-07-18T14:20:29.004140+00:00"
     }
   },
   {
@@ -33425,34 +33371,13 @@
   },
   {
     "id": "dm_hac_fix_k1386_borderline",
+    "status": "succeeded",
     "task_type": "experiment",
     "priority": 2,
-    "status": "succeeded",
     "created_at": "2026-07-15T01:28:07+08:00",
-    "description": "K1655 bug class 必修 #2（門檻邊緣，最可能翻盤）：experiments/k1386/k1386.py:367 `for k in range(1, max(1, h))` 在 h=1 是空迴圈 → gamma_sum=0 → 零 HAC（已抽驗確認）。README 報 |t|=3.26，只超 Harvey 門檻 3.0 八個百分點 —— 補 HAC 後極可能跌破。曝險：feed×6。做法同上：改 canonical dm_test、先量 acf、重跑、若翻轉則回溯更正 README 與 6 篇文章。來源：docs/governance/2026-07/dm_hac_unknown_bucket_triage.md",
-    "status_history": [
-      {
-        "ts": "2026-07-15T12:36:00.443746+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-vscode-k1386"
-      },
-      {
-        "ts": "2026-07-15T12:36:03.759307+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-vscode-k1386"
-      },
-      {
-        "ts": "2026-07-15T13:34:09.166219+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-vscode-k1386"
-      }
-    ],
-    "started_at": "2026-07-15T12:36:03.759293+00:00",
     "completed_at": "2026-07-15T13:34:09.166203+00:00",
-    "result": "K1386 已改用 canonical HAC-DM，並修復 duplicate-date many-to-many merge 與 HAR IS/OOS target leakage；固定樣本重跑 n_eval=1097，DM t=3.437/3.452，NULL_NO_FGN_IMPROVEMENT 質性結論不變。獨立 PASS review、knowledge supersede、單篇 feed 更正與 live sync、auditor regression/retirement 均完成。"
+    "tombstone": true,
+    "archived_at": "2026-07-18T14:08:13.312240+00:00"
   },
   {
     "id": "dm_hac_fix_k841_strategy_dm",
@@ -41325,10 +41250,28 @@
     "description": "老闆架構硬指令（Telegram msg 981）：「急件和一般排程應該要分開。急件就不進入排班直接派工，一般排程才進入排班。」\n\n== 現況實查（telegram-981，2026-07-18 18:1x）==\n底層機制已存在且正確，缺的只是接線：\n- scripts/dispatch_supervisor/state.py:684 request_fire(reason) = out-of-band 立即派工\n- scripts/dispatch_supervisor/scheduler.py:723 明確保證 requested fire 繞過所有 gate（'Gates ONLY plain cron fires — requested fires always run'）\n- 已接上：scripts/gmail_inbox_poll.py:754 (email_reply:*)、scripts/check_alerts.py:1168 (ci_red:*)\n- **未接上：Telegram**。Telegram P1 只 append 進 storage/next_tasks.json 等 hourly cron → 這就是 email 急件立刻做、Telegram 急件等下一班的全部原因。\n\n== 要修兩處（缺一不可）==\n1. **ingest 端**：Telegram 訊息建出 P1 任務時呼叫 dispatch_state.request_fire(f'telegram:{task_id}')，比照 gmail_inbox_poll.py:754。找 telegram ingest 實作位置（src/volpred/ops/telegram.py 或對應 poller）。\n2. **派工端**：request_fire 只是 generic wake-up 不是 targeted claim（continue_task_dispatch.py:970 註解自陳）。scripts/cron_hourly_dispatch_prompt.md PHASE A0 的時效 P1 過濾條件目前是\n   task_type in (event_article, trending_repost, daily_digest) or source == 'user'\n   → 漏掉 source='telegram'，且『本班主產出 = 最舊那個時效 P1』每班只做一張。\n   改為以 **source + priority** 判定急件（列舉 task_type 正是這次漏掉的根因），並讓一班可連續清完所有急件才進一般排程。\n\n== 實例（老闆親眼看到的後果）==\n瀏覽數不一致拆成 assign_998ad2be（source=telegram，A0 抓不到）與 assign_33a9151f（source=user，抓得到但排在 assign_6349aa2c 後），16:49/17:42 建單，18:06 老闆再問時兩張都還 pending；17:08 那班跑的是 K1730（P3 研究）。\n\n== 驗收 ==\n- 新增測試：source=telegram 的 P1 建立後 request_fire 被呼叫、且 A0 判定為急件。\n- 改 A0 白名單前先跑 stage×paths 矩陣（見 feedback_path_narrowing_audit 紀律）。\n- 改完把 assign_998ad2be / assign_33a9151f（瀏覽數）當第一個實測案例跑通。\n\n來源：telegram-980 / telegram-981",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-18T10:10:30.615399+00:00",
-    "created_by": "telegram_responder"
+    "created_by": "telegram_responder",
+    "claimed_by": "hourly-slot-1-c3749124d2e847069214731df570cd5d",
+    "claimed_at": "2026-07-18T14:08:53.347961+00:00",
+    "claim_session_id": "f3105977a41d",
+    "status_history": [
+      {
+        "ts": "2026-07-18T14:08:53.347980+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d"
+      },
+      {
+        "ts": "2026-07-18T14:08:53.574529+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d"
+      }
+    ],
+    "started_at": "2026-07-18T14:08:53.574512+00:00"
   },
   {
     "id": "assign_67f56b79",
@@ -41436,10 +41379,28 @@
     "description": "老闆 Telegram msg 988 第 2 次點名同一警報（「還是沒解決…立刻重構」）。2026-07-17 的修法只治了 tracked 檔，untracked 檔仍是死結。\n\n## 根因（已於 responder 端查證，勿重覆診斷）\nscripts/dispatch_supervisor/phase_z.py:523 _paths_carried_forward() 用\n  git log --since=<receipt.created_at> --name-only\n判斷「後續 commit 是否已接手這條路徑」。**git log 在定義上永遠不會列出 untracked 檔**，\n所以任何被 pin 過、之後又被編輯的 untracked 檔：\n  - 不在 dirty→landed（它 dirty）\n  - fingerprint 已漂移（不進 unresolved）\n  - 永遠不在 carried（git log 看不到）\n→ 必然落入 recover_failed_closeout() 的 conflicts → 每小時發一次 CRITICAL，\n   且**沒有任何自癒路徑**（除非人工刪 receipt）。\n\n## 現場證據（2026-07-18 19:16 查）\nreceipt: .git/volpred_phase_z_failed_closeout.json（created_at 2026-07-17T13:32:35Z，10 條 path）\n- scripts/gen_codex_cli_reference.py：git status = '??'（untracked）\n  pin sha256=905372360a47…  現值 81a47ad4cb07…（已漂移）\n  git log --since=receipt -- <該檔> = 空 → 永遠 carried=false → 永久 conflict。這就是老闆收到的那則。\n- tests/test_worker_hang_log_capture.py：同為 untracked，目前 bytes 仍等於 pin（落在 unresolved），\n  **是同 class 的下一顆地雷** —— 任何人一編輯它就變成第二個永久 CRITICAL。\n- 其餘 8 條為 tracked ' M'，走既有路徑，不是本 bug。\n\n## 要求（重構，非補丁 — 老闆原話「立刻重構」）\n1. 治本：conflict 判定必須對 untracked 檔有定義良好的語意。carried-forward 這個問句\n   （「後來的 commit 接手了嗎」）對 untracked 檔恆為 false，用它當唯一判準即為設計缺陷。\n2. **硬性驗收：任何 conflict 都必須存在自癒或人工結案路徑，不得產生「只能靠人刪檔才會停」的\n   永久 CRITICAL**。這是本 bug 的 class 本質（參 error_log 2026-07-17 同型事故：\n   34/40 path 已 commit 卻照噴 25 小時）。設計時請把「這個 alert 要怎麼停」寫進 docstring。\n3. 依 feedback_declare_complete_requires_class_sweep：對 phase_z.py 全檔掃同 class\n   —— 還有哪些判準會對 untracked / 已刪除 / symlink 路徑給出無法結案的結果。\n4. 補迴歸測試（scripts/tests/test_phase_z_*.py 已有同族檔案）：至少涵蓋\n   (a) untracked + drifted → 不得產生無法結案的 conflict\n   (b) untracked + 未漂移 → 行為不變\n   (c) tracked + carried → 行為不變（勿回歸 2026-07-17 修正）\n5. 完成後寫 docs/error_log.md（含「為何 2026-07-17 的修法沒蓋到這個 class」），\n   並確認下一輪巡檢 CRITICAL 自動消失才算完成（feedback_fix_verify_then_report）。\n\n## 注意\n現存那份 receipt 內含 8 條 tracked 路徑的合法 ownership，**不要直接刪檔了事**；\n要讓新邏輯能正確把它收斂掉。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-18T11:19:16.618346+00:00",
-    "created_by": "telegram-responder"
+    "created_by": "telegram-responder",
+    "claimed_by": "hourly-slot-1-c3749124d2e847069214731df570cd5d",
+    "claimed_at": "2026-07-18T14:08:53.803482+00:00",
+    "claim_session_id": "09cbec389373",
+    "status_history": [
+      {
+        "ts": "2026-07-18T14:08:53.803496+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d"
+      },
+      {
+        "ts": "2026-07-18T14:08:54.035844+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d"
+      }
+    ],
+    "started_at": "2026-07-18T14:08:54.035829+00:00"
   },
   {
     "id": "telegram-990",
