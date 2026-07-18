@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "title": "波動率油門 — 減碼還是加碼的四段檢查",
+  "evidence": {
+    "fw": {
+      "path": "storage/lazypack_jobs/mile_digest_20260718/framework_evidence.json",
+      "sha256": "c0846008317cceba277ae6604830902f6286bb9254faa1febf3e362f99bc3abd",
+      "label": "波動率油門框架數字彙整"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "波動率油門：把「進或出」換成「踩多深」",
+      "alt": "波動率油門心智模型：反應式調倉勝過預測式擇時的核心數字",
+      "sources": ["fw"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話規則",
+          "body": ["波動升高就鬆油門、降曝險；波動降低就補油門、加回曝險。倉位隨波動反向縮放，連續微調，不做紅燈急煞、綠燈暴衝。"]
+        },
+        {
+          "kind": "text",
+          "heading": "為什麼反應贏過預測",
+          "body": ["轉折點幾乎測不準，笨方法『明天跟今天一樣』的命中率就贏過所有 AI 模型；改用平滑反應調倉，長期最大回撤只有買進持有的一半不到。"]
+        },
+        {
+          "kind": "metric",
+          "label": "笨方法命中率（明天跟今天一樣）",
+          "value": {"source": "fw", "path": "naive_f1", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "最強 AI 模型命中率",
+          "value": {"source": "fw", "path": "ai_f1_best", "format": {"kind": "number", "digits": 3}}
+        },
+        {
+          "kind": "metric",
+          "label": "每日狀態轉換機率",
+          "value": {"source": "fw", "path": "transition_prob_daily", "format": {"kind": "percent", "digits": 1}}
+        },
+        {
+          "kind": "metric",
+          "label": "平滑油門長期最大回撤",
+          "value": {"source": "fw", "path": "mdd_smooth", "format": {"kind": "percent", "digits": 1}}
+        },
+        {
+          "kind": "metric",
+          "label": "買進持有最大回撤",
+          "value": {"source": "fw", "path": "mdd_buyhold", "format": {"kind": "percent", "digits": 1}}
+        }
+      ]
+    },
+    {
+      "name": "2_four_gears",
+      "info": "method",
+      "style": "editorial",
+      "title": "油門四段檢查：當天可套用的調倉 routine",
+      "alt": "油門四段檢查：讀儀表、對號、踩深、換段四步驟",
+      "sources": ["fw"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "① 讀哪個儀表",
+          "body": ["看 VIX 的水準，不要盯它的當日變化率；再疊一個滾動分位判斷貴不貴。"]
+        },
+        {
+          "kind": "text",
+          "heading": "② 你落在哪一段",
+          "body": ["五級對號：平靜、正常、偏高、高、危機，由低波到爆表依序排列。"]
+        },
+        {
+          "kind": "text",
+          "heading": "③ 這段該踩多深",
+          "body": ["用一條耐用公式估曝險倍數，再配自己的風險預算微調。"]
+        },
+        {
+          "kind": "text",
+          "heading": "④ 什麼訊號換段",
+          "body": ["偏高區要開始收；逆價差與高檔彎點是加速訊號；急殺當下的單日 spike 別追著砍。"]
+        },
+        {
+          "kind": "metric",
+          "label": "曝險公式",
+          "value": {"source": "fw", "path": "exposure_formula", "format": {"kind": "text"}}
+        },
+        {
+          "kind": "metric",
+          "label": "VIX 水準預測大跌能力 (AUC)",
+          "value": {"source": "fw", "path": "gauge_auc_level", "format": {"kind": "number", "digits": 2}}
+        },
+        {
+          "kind": "metric",
+          "label": "VIX 變化率預測能力 (AUC)",
+          "value": {"source": "fw", "path": "gauge_auc_change", "format": {"kind": "number", "digits": 2}}
+        }
+      ]
+    },
+    {
+      "name": "3_evidence",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "五段對號 + 關鍵實證數字",
+      "alt": "五級波動率分區出現比例與波動率擇時的保護實證",
+      "sources": ["fw"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "平靜段出現比例",
+          "value": {"source": "fw", "path": "gear_calm_freq", "format": {"kind": "percent", "digits": 1}}
+        },
+        {
+          "kind": "metric",
+          "label": "正常段出現比例",
+          "value": {"source": "fw", "path": "gear_normal_freq", "format": {"kind": "percent", "digits": 1}}
+        },
+        {
+          "kind": "metric",
+          "label": "危機段出現比例",
+          "value": {"source": "fw", "path": "gear_crisis_freq", "format": {"kind": "percent", "digits": 1}}
+        },
+        {
+          "kind": "metric",
+          "label": "金融海嘯純持股回撤",
+          "value": {"source": "fw", "path": "vt_2008_spy", "format": {"kind": "percent", "digits": 1}}
+        },
+        {
+          "kind": "metric",
+          "label": "金融海嘯半股半金加油門回撤",
+          "value": {"source": "fw", "path": "vt_2008_vt", "format": {"kind": "percent", "digits": 1}}
+        },
+        {
+          "kind": "metric",
+          "label": "油門年均保費",
+          "value": {"source": "fw", "path": "vt_premium_annual", "format": {"kind": "percent", "digits": 2}}
+        },
+        {
+          "kind": "metric",
+          "label": "危機狀態平均壽命",
+          "value": {"source": "fw", "path": "crisis_halflife_days", "format": {"kind": "number", "digits": 1, "suffix": " 天"}}
+        },
+        {
+          "kind": "metric",
+          "label": "VIX 過中位數後風險加速倍數",
+          "value": {"source": "fw", "path": "nonlinear_slope", "format": {"kind": "number", "digits": 2, "suffix": " 倍"}}
+        }
+      ]
+    }
+  ]
+}
