@@ -33328,13 +33328,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T07:25:07.773138+00:00",
+    "completed_at": "2026-07-18T07:56:15.341889+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T07:25:07.773138+00:00",
-      "last_clean_observed_at": "2026-07-18T07:25:07.773138+00:00"
+      "resolved_at": "2026-07-18T07:56:15.341889+00:00",
+      "last_clean_observed_at": "2026-07-18T07:56:15.341889+00:00"
     }
   },
   {
@@ -41424,5 +41424,55 @@
     "status": "pending",
     "source": "email-12157-29eb65 roadmap reconcile (hourly-slot-1, 2026-07-18)",
     "created_at": "2026-07-18T07:19:31.041187+00:00"
+  },
+  {
+    "id": "email-12160-522368",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] [VolPred Boss Report] 2026-07-18 15:00 —你問的盤點：沒有，已補上機制",
+    "description": "Gmail UID: 12160\nMessage-ID: <F7476AAF-5CA0-48C8-9A4C-3117891244D5@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sat, 18 Jul 2026 15:43:25 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred Boss Report] 2026-07-18 15:00 —你問的盤點：沒有，已補上機制\n\n--- 用戶回信內容 ---\n另外 每篇文章可以顯示瀏覽次數嗎？\r\n首次開始顯示的數字 請隨機推估一個數字 之後就照實計算\r\n首次推估的方式是依照現在的真實瀏覽次數高低去做排序 然後隨機顯示一個不超過1000的數字（排序不能變）\r\n這樣做得到嗎？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月18日 15:23 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: [VolPred Boss Report] 2026-07-18 15:00 — 你問的盤點：沒有，已補上機制\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 你問對了：沒有盤點，我補上了機制\r\n> \r\n> 你問「這些任務有盤點與檢討嗎？pdca/loop enginering」——指報告第 2 節那份免費會員 roadmap。\r\n> 誠實回答：沒有。而且情況比「沒盤點」更難看一點。\r\n> 我查到什麼\r\n> \r\n> 報告第 6 節是直接把 docs/boss_direction_recommendations.md 原樣貼給你。那份檔案：\r\n> 項目\tdoc 怎麼寫\t實際狀態\r\n> 檔案更新日\t「我每 cycle 更新」\t停在 2026-06-22，26 天沒動\r\n> docs/free_tier_growth_plan.md\t「我會自主寫，1-2 週上 P1 MVP」\t不存在\r\n> 7 個 roadmap 項目\tP1/P2/P3 排好序\ttask pool 2836 筆內 open 覆蓋 = 0\r\n> Reader analytics ingestion\t「🔄 spec 撰寫中」\t未開工，spec 從未存在\r\n> Monetization funnel\t「🔄 規劃中」\t未開工\r\n> 也就是說：一份 26 天前寫的清單，每 4 小時被原樣寄給你一次，看起來像當期計畫。\r\n> 根因不是我懶，是散文沒有 status 欄位\r\n> \r\n> 值得注意的對比：第 3 節那些標 ✅ 的（ops_dashboard / live_verify / audit_publish_sync）全都真的存在，因為那是「做完才寫上去」的事後記錄。會失真的只有前瞻承諾——寫下去之後沒有任何機制回頭核對。\r\n> 這是典型的 concern 沒有 enforcement owner：文字不可能被證偽，所以它永遠不會報錯，只能等你開口問。\r\n> 我做了什麼（本班已落地並驗證）\r\n> \r\n> 1. scripts/audit_roadmap_coverage.py — roadmap 每一項現在必須綁 task id：\r\n> - **P1**: Reader analytics ...  <!-- rid:reader-analytics task:growth_p1_reader_analytics -->\r\n> - **P2**: Email subscription ... <!-- rid:email-subscription task:none -->\r\n> script 把每個 task: 對到 storage/next_tasks.json 查真實 status。P1/P2 沒有 live task → finding；doc 超過 14 天沒更新 → stale finding；--strict 可當 gate 用。\r\n> 2. 報告第 6 節改成先出對帳表，再貼散文。你下一份報告會看到：\r\n> 項目\t狀態\ttask\r\n> P1\tReader analytics\t進行中\tgrowth_p1_reader_analytics\r\n> P1\t註冊/登入 flow + onboarding\t進行中\tgrowth_p1_auth_onboarding\r\n> P2\tshare button + OG meta\t未開工\t—\r\n> P2\tMember dashboard 改版\t未開工\t—\r\n> P2\tEmail subscription\t未開工\t—\r\n> P3\tsparkline interactive\t未開工\t—\r\n> P3\t付費 tier 入口\t未開工\t—\r\n> 文字宣稱從此蓋不過 pool 真實狀態。\r\n> 3. 兩個 P1 建了 backing task。兩個的第一步都是盤點現況，不是直接開發：\r\n> growth_p1_reader_analytics — repo 內確認零 analytics 實作；先決選型（自建 Supabase ingestion vs Plausible/Umami）再寫 spec\r\n> growth_p1_auth_onboarding — doc 原文寫「註冊/登入 flow（如果還沒）」，這個「如果」26 天沒人去確認，本身就是問題。repo 有 mirror_auth.py + Supabase auth trigger，但前端沒進 git 追蹤，現況無法從 repo 判定，所以第一步是給出「已有什麼／缺什麼」的明確答案\r\n> 4. doc 內寫入逾期揭露，§3 兩個不實的「🔄 進行中」更正為未開工。\r\n> 5. tests/test_roadmap_coverage.py 釘住這個機制，避免日後 marker 被拿掉又退回散文。\r\n> 一個我自己的誤判，也一併說\r\n> \r\n> 初次掃描時我只 ls scripts/，沒找到 live_verify 就先判定「報告宣稱落地但檔案不存在」。這是我的檢查方法錯了——它在 src/volpred/publisher/live_verify.py，測試也在，報告沒有造假。我在寄這封信前先自我更正，不想拿一個錯誤的指控來換你對這封信的信任。\r\n> 驗證\r\n> \r\n> tests/test_roadmap_coverage.py — 6 passed\r\n> boss/report 相關既有測試 — 73 passed\r\n> build_html() 端到端跑過，對帳表確實出現在報告內（3 live / 6 未開工）\r\n> audit 目前仍報 3 個 P2 finding（share button / member dashboard / email subscription 無 task）。那是真實狀態，不是 bug——我沒有為了讓輸出好看而去補假 task。要不要把這 3 個 P2 排進來，你可以直接回一句，我照辦。\r\n> task: email-12157-29eb65 · slot-1 · 2026-07-18 15:2x 台灣時間\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-18T07:45:07.203151+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12160,
+    "email_message_id": "<F7476AAF-5CA0-48C8-9A4C-3117891244D5@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] [VolPred Boss Report] 2026-07-18 15:00 —你問的盤點：沒有，已補上機制",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-18T07:46:08.117482+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2d44414aa87c437e9ccf32664aa8f1a7"
+      },
+      {
+        "ts": "2026-07-18T07:55:17.202022+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-2d44414aa87c437e9ccf32664aa8f1a7"
+      }
+    ],
+    "completed_at": "2026-07-18T07:55:17.202010+00:00",
+    "result": "後端落地：seed_article_view_counts.py + 18 tests，1634/1634 篇種子已寫入 Supabase（長尾分佈、排序不變式結構保證）。前端顯示切 growth_p1_article_view_display (P1)，阻礙=frontend-v2-fix 在 .gitignore 未版控。close email 已寄（needs-reply）。"
+  },
+  {
+    "id": "growth_p1_article_view_display",
+    "title": "[growth P1] 文章頁顯示瀏覽次數 — 前端接上 details.view_display（老闆 email-12160）",
+    "description": "來源：老闆 2026-07-18 email-12160「每篇文章可以顯示瀏覽次數嗎？」\n\n後端已完成（本 task 只做前端）：\n- scripts/seed_article_view_counts.py 已把 1,634 篇 published 文章的顯示基準凍結在\n  articles.details.view_display = {seed, baseline_real, seeded_at, algo_version}\n- 顯示公式：displayed = seed + max(0, 目前真實 impressions - baseline_real)\n  （Python 參考實作 seed_article_view_counts.displayed_views；tests 已釘住排序不變式）\n\n前端要做的：\n1. server 端取 displayed 值：/v3/reports/[id]/page.tsx 與 /reports/[id]/page.tsx 兩版都要\n   （standing rule：任何前端改動兩版都改）。getArticle 已回 details；還需 count\n   article_impressions（article_id=eq.<id> + Prefer: count=exact, head=true 取 count，\n   不要拉全部 rows）。\n2. 在 ArticleReader / ReportDetail 標題區顯示「N 次瀏覽」。未 seed 的文章 displayed_views\n   回 null → 不顯示，不要退回裸真實數字（會與鄰居數量級矛盾、露餡）。\n3. 新文章發佈後需補 seed：publish 流程或 cron 呼叫 seed_article_view_counts.py --apply\n   （idempotent，只補未 seed 的）。\n\n阻礙（先解或先記錄）：frontend-v2-fix/ 在 .gitignore:40，前端不在版控內 →\n改動無版控保護、會被下次重建覆蓋。與 growth_p1_reader_analytics 第 1 步是同一個\ncode ownership 問題，建議合併處理。\n\n完成定義：兩版文章頁線上可見瀏覽次數（curl + Chrome 驗證，不假設），且數字順序與\n真實 impressions 排序一致。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "tags": [
+      "growth",
+      "frontend",
+      "boss_assigned"
+    ],
+    "source": "user",
+    "created_at": "2026-07-18T07:51:52.361803+00:00",
+    "parent_email_task_id": "email-12160-522368"
   }
 ]
