@@ -51,12 +51,8 @@ def test_ceiling_is_not_a_round_number():
 
 
 @pytest.mark.parametrize("cap", [40, 240, 1417])
-def test_incremental_seeding_stays_under_the_lowest_frozen_seed(cap):
-    """New articles have ~0 real views: they must land at the bottom, not the ceiling.
-
-    The incremental path passes the lowest already-frozen seed as `max_seed`, so a
-    freshly published post can never outrank the existing corpus on display.
-    """
+def test_assign_seeds_honours_a_lower_ceiling(cap):
+    """A caller-supplied ceiling is respected and the ordering guarantee survives it."""
     seeds = assign_seeds(30, random.Random(11), max_seed=cap, tail_target=min(12, cap))
     assert all(MIN_SEED <= s <= cap for s in seeds)
     assert all(a >= b for a, b in zip(seeds, seeds[1:]))
@@ -98,9 +94,15 @@ def test_displayed_is_seed_plus_real_growth_since_seeding():
     assert displayed_views(vd, 30) == 742          # impressions deleted -> never goes backwards
 
 
-def test_unseeded_article_returns_none_rather_than_a_bare_real_count():
-    assert displayed_views(None, 12) is None
-    assert displayed_views({}, 12) is None
+def test_article_published_after_the_freeze_shows_its_real_count():
+    """Boss email-12167: 「只有第一次需要隨機 之後就是按照正常的瀏覽數據去累積」.
+
+    No second randomisation. An article with no frozen seed was counted honestly
+    from its first impression, so it displays that count — 0 included.
+    """
+    assert displayed_views(None, 12) == 12
+    assert displayed_views({}, 12) == 12
+    assert displayed_views(None, 0) == 0
 
 
 def test_rank_tiebreak_is_deterministic():

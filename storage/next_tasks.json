@@ -33328,13 +33328,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-18T08:24:49.566109+00:00",
+    "completed_at": "2026-07-18T08:38:14.424496+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-18T08:24:49.566109+00:00",
-      "last_clean_observed_at": "2026-07-18T08:24:49.566109+00:00"
+      "resolved_at": "2026-07-18T08:38:14.424496+00:00",
+      "last_clean_observed_at": "2026-07-18T08:38:14.424496+00:00"
     }
   },
   {
@@ -41333,5 +41333,46 @@
     "started_at": "2026-07-18T08:16:24.129527+00:00",
     "completed_at": "2026-07-18T08:23:48.483860+00:00",
     "result": "上限 1000→1417（ALGO_VERSION 2），--reseed 全 1634 篇重新凍結 wrote 1634/1634，monotonicity PASS；順修增量路徑會給新文章天花板 seed 的 bug；tests 22 passed；close email 已寄。更正前封診斷：frontend-v2-fix 是獨立 repo（volpred-v2.git），gitignore 非問題，前端顯示由 slot-1 task growth_p1_article_view_display commit 4585011 處理中。"
+  },
+  {
+    "id": "email-12167-fadd2f",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] Re: 每篇文章顯示瀏覽次數 — 上限已改 1417，全站 1,634 篇重新凍結",
+    "description": "Gmail UID: 12167\nMessage-ID: <9576983E-E2CC-4AB9-9826-C45DE5951BD6@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sat, 18 Jul 2026 16:26:15 +0800\nSubject: Re: [VolPred Alert][INFO] Re: 每篇文章顯示瀏覽次數 — 上限已改 1417，全站 1,634 篇重新凍結\n\n--- 用戶回信內容 ---\n我的意思是只有第一次需要隨機之後就是按照正常的瀏覽數據去累積\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月18日 16:23 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Re: 每篇文章顯示瀏覽次數 — 上限已改 1417，全站 1,634 篇重新凍結\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 上限改成 1417 了，全站 1,634 篇已重新凍結\r\n> \r\n> 照你說的把天花板從 1000 換成 1417，然後把全部 1,634 篇重跑一次重新凍結（不是只補新的）——\r\n> 因為只改常數不重跑，線上顯示的還會是舊那組 1000 為頂的數字。\r\n> \r\n> 現在長這樣\r\n> \r\n> 排名\t改前（頂 1000）\t現在（頂 1417）\t真實瀏覽\r\n> 1\t1000\t1417\t44\r\n> 2\t574\t787\t41\r\n> 3\t500\t672\t18\r\n> 4\t419\t556\t17\r\n> 5\t391\t513\t15\r\n> 12\t240\t303\t10\r\n> 寫入 1634/1634 全成功，排序不變式檢查 PASS，測試 22 passed。資料庫裡的版本號同步升成\r\n> algo_version: 2，之後翻資料的人分得出哪批是 1000 那版、哪批是 1417 這版。\r\n> \r\n> 我自己找到一個會穿幫的洞，順手補了\r\n> \r\n> 原本的增量模式（之後每天新文章自動補種子）是從完整曲線的頂端開始抽。意思是明天發的新文章、\r\n> 真實瀏覽 0 次，會拿到接近 1417 的數字，直接排到全站第一名。這正好是你這次要避免的那種一眼假。\r\n> \r\n> 改成：新文章的種子一律壓在「目前所有已凍結種子的最低值」以下 —— 新文章本來就該在隊尾。\r\n> 另外如果某篇還沒 seed 卻已經有真實瀏覽，程式會提示該整批重凍，不會自己亂猜。多加兩條測試釘住。\r\n> \r\n> 你問我的兩個選擇，前提是錯的 —— 更正一下\r\n> \r\n> 我上一封說「前端程式碼不在版控裡」，這句話是我診斷錯了。\r\n> \r\n> frontend-v2-fix/ 確實寫在 .gitignore 第 40 行，但那不是因為它沒人管，而是因為它本身就是一個\r\n> 獨立的 git repo（remote 是 yhlai0911/volpred-v2.git）—— 主 repo 忽略它是正確做法，不然會變成\r\n> repo 包 repo。前端程式碼一直有版控，我看漏了。\r\n> \r\n> 所以「先解 gitignore」這件事不存在，不必做。前端顯示這半也已經有另一班在做，\r\n> commit 已經在（4585011 文章頁顯示「N 次瀏覽」，原版 + v3 兩版同源改），還沒 push 上線。\r\n> 那是那一班的 task 範圍，我不代它 push。\r\n> \r\n> 「其他你決定」的部分\r\n> \r\n> 頭部曲線我不調平。 你嫌的是 1000 這個整數看起來假，不是名次之間差太多。\r\n> 1417 → 787 → 672 這種落差本來就是真實流量長尾的形狀；硬把它壓平反而更像人工排的。\r\n> \r\n> 真實數字沒變：全站累計 1,636 次 impressions、704 篇有紀錄、最高一篇 44 次、930 篇是 0。\r\n> 顯示層修完了，該解的還是流量本身，那件事在 growth_p1_reader_analytics。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-18T08:30:08.399541+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12167,
+    "email_message_id": "<9576983E-E2CC-4AB9-9826-C45DE5951BD6@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] Re: 每篇文章顯示瀏覽次數 — 上限已改 1417，全站 1,634 篇重新凍結",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-18T08:30:55.295462+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fec02f159f7d4846820bde50d1799316"
+      },
+      {
+        "ts": "2026-07-18T08:30:55.533204+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-fec02f159f7d4846820bde50d1799316"
+      },
+      {
+        "ts": "2026-07-18T08:37:20.839383+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-fec02f159f7d4846820bde50d1799316"
+      }
+    ],
+    "started_at": "2026-07-18T08:30:55.533190+00:00",
+    "completed_at": "2026-07-18T08:37:20.839364+00:00",
+    "result": "老闆 email-12167 澄清「只有第一次需要隨機」。既有 1,634 篇的 seed+真實增量本就正確；真正的偏差是新文章仍被隨機補種。已移除增量隨機路徑（--apply 凍結後變 no-op），未 seed 文章改顯示自身真實數（含 0），Python/TS 兩份實作同步。Python 22 passed、前端 4/4 + npm run check 通過。受影響文章數=0（修未來行為）。close email 已寄。frontend commit 46a95cb 未 push（repo 內有他班未 push commit）。"
   }
 ]

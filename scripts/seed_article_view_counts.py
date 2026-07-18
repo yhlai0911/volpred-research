@@ -15,6 +15,12 @@ Ceiling history: v1 used 1000 (the boss's literal wording). He then asked for 14
 was picked by a human, so an odd ceiling reads as measured rather than chosen.
 
 `seed` is frozen once per article; every view AFTER seeding is counted for real.
+
+The randomisation is a ONE-TIME migration, not an ongoing policy (boss email-12167:
+「只有第一次需要隨機 之後就是按照正常的瀏覽數據去累積」). Articles published after
+the freeze get no seed at all — they display their own real count from impression
+one. Re-running --apply is therefore a no-op once the corpus is frozen; only an
+explicit --reseed (boss-directed, e.g. the 1000 → 1417 ceiling change) re-randomises.
 The seeds are drawn at random in [1, MAX_SEED] and then assigned in rank order, so
 the displayed ranking is identical to the true-impression ranking — the boss's
 "排序不能變" constraint is satisfied by construction, not by hope. See
@@ -124,14 +130,25 @@ def assign_seeds(
     return sorted(vals, reverse=True)
 
 
-def displayed_views(view_display: dict | None, real_now: int) -> int | None:
-    """The number a reader should see: frozen seed + real growth since seeding.
+def displayed_views(view_display: dict | None, real_now: int) -> int:
+    """The number a reader should see.
 
-    Returns None for an un-seeded article so callers can decide (hide vs seed-on-read)
-    instead of silently showing a bare real count that would contradict its neighbours.
+    Seeded article (part of the one-time freeze):  seed + real growth since seeding.
+    Un-seeded article (published after the freeze): its real count, nothing added.
+
+    Boss email-12167, verbatim: 「只有第一次需要隨機 之後就是按照正常的瀏覽數據去累積」.
+    The randomisation was a one-time migration for the corpus that predated the
+    counter; an article published afterwards has been counted honestly from its
+    first impression, so it just shows that count — including 0.
+
+    This overrides the earlier design note that an un-seeded article should render
+    nothing rather than a bare count. That note was protecting against a new post
+    showing "3" beside a seeded neighbour showing "787"; the boss has weighed that
+    and chosen real accumulation. Displaying a small true number is the honest
+    branch anyway — the seed is the concession, not the count.
     """
     if not view_display:
-        return None
+        return max(0, real_now)
     seed = int(view_display.get("seed", 0))
     baseline = int(view_display.get("baseline_real", 0))
     return seed + max(0, real_now - baseline)
@@ -215,31 +232,27 @@ def main() -> int:
             print(f"{i:>4}  {str(d) if d is not None else '—':>9}  {real.get(a['id'], 0):>4}  {a['slug']}")
         return 0
 
+    if not args.reseed and seeded:
+        # Boss email-12167: 「只有第一次需要隨機 之後就是按照正常的瀏覽數據去累積」.
+        # The one-time freeze already happened, so there is no second randomisation.
+        # An article published afterwards displays its own true count (see
+        # displayed_views) — no seed row is written for it at all.
+        print(f"\ninitial freeze already done ({len(seeded)} articles).")
+        print(f"{len(unseeded)} newer article(s) display their real count and accumulate normally.")
+        print("Nothing to seed — randomisation happens once, not per new article.")
+        print("(--reseed still re-freezes the whole corpus; that is a boss-directed exception,")
+        print(" e.g. email-12163 changing the ceiling from 1000 to 1417.)")
+        return 0
+
     targets = ranked if args.reseed else unseeded
     if not targets:
         print("\nnothing to seed (all published articles already have a frozen baseline)")
         return 0
 
+    # Either the very first freeze, or an explicit boss-directed re-freeze: in both
+    # cases the ceiling is spread across the whole set being written.
     rng = random.Random(args.random_seed)
-    if args.reseed:
-        # Full re-freeze: the ceiling is spread across the whole corpus.
-        seeds = assign_seeds(len(targets), rng)
-    else:
-        # Incremental: a newly published article has ~0 real views, so it belongs at
-        # the BOTTOM of the ranking. Drawing from the full curve would hand it the
-        # ceiling and park a brand-new post at rank 1 — exactly the "obviously fake"
-        # failure the boss is trying to avoid. Cap it below every frozen neighbour.
-        floor = min(
-            ((a.get("details") or {}).get("view_display", {}).get("seed", MAX_SEED) for a in seeded),
-            default=MAX_SEED,
-        )
-        cap = max(MIN_SEED, min(MAX_SEED, floor))
-        print(f"\nincremental seeding: capping new seeds at {cap} (lowest frozen seed)")
-        hot = [a for a in targets if real.get(a["id"], 0) > 0]
-        if hot:
-            print(f"  note: {len(hot)} unseeded article(s) already have real views — "
-                  f"run --reseed to re-freeze the whole corpus if their true rank is not last")
-        seeds = assign_seeds(len(targets), rng, max_seed=cap, tail_target=min(TAIL_TARGET, cap))
+    seeds = assign_seeds(len(targets), rng)
     now = datetime.now(timezone.utc).isoformat()
 
     plan = []

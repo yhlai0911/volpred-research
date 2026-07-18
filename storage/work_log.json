@@ -21067,5 +21067,13 @@
     "owner": "hourly-slot-2-5300c2f3512a4bdfbe54616c715c2cb6",
     "commit": null,
     "summary": "老闆 email-12163 回信處理：瀏覽次數顯示上限 1000 → 1417。\n\n做了三件事：\n1. `scripts/seed_article_view_counts.py`：MAX_SEED 1000→1417，ALGO_VERSION 1→2。\n   `--apply --reseed --random-seed 20260718` 重新凍結全部 1,634 篇 published 文章，\n   wrote 1634/1634，monotonicity check PASS。--report 抽驗：1417/787/672/556/513（真實 44/41/18/17/15）。\n2. 順手修增量路徑的真 bug：`--apply`（非 reseed）對新文章是從完整曲線抽，新文章真實瀏覽 ~0\n   卻會拿到天花板 1417、在顯示上排到第 1 名 —— 正是老闆要避免的「一眼假」。改成把新 seed\n   壓在「現有已凍結 seed 的最小值」以下，並在有真實瀏覽的未 seed 文章出現時提示改跑 --reseed。\n3. 測試：改 ceiling 測試為常數驅動 + 新增「上限不得是整百」與「增量 seed 不得超過既有最低」\n   兩條回歸測試。22 passed。\n\n同時更正上一封信給老闆的錯誤診斷：前端不是「沒有版控」。frontend-v2-fix 是獨立 git repo\n（remote yhlai0911/volpred-v2.git），.gitignore:40 排除它只是因為 nested repo，不是程式碼沒人管。\n前端顯示已由平行班次 slot-1 commit（4585011「文章頁顯示 N 次瀏覽」，原版 + v3 同源），\n本班檢查時 local main 尚未 push（origin 停在 fc3b9d2）—— 屬 slot-1 的 task\ngrowth_p1_article_view_display 範圍，本班不越權代 push。\n\n決定（老闆說「其他你決定」）：頭部曲線不調平。老闆嫌的是「1000 這個整數看起來假」，\n不是名次落差；1417/787 的落差本來就是長尾流量的正常形狀，調平反而更假。"
+  },
+  {
+    "timestamp": "2026-07-18T16:37:00+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12167-fadd2f",
+    "actor": "hourly-slot-1-fec02f159f7d4846820bde50d1799316",
+    "owner": "hourly-slot-1-fec02f159f7d4846820bde50d1799316",
+    "summary": "老闆 email-12167:「只有第一次需要隨機 之後就是按照正常的瀏覽數據去累積」。\n\n**診斷**：既有 1,634 篇的「種子 + 凍結後真實增量」本來就符合老闆要求（displayed = seed + max(0, real_now - baseline_real)，Python/TS 兩份實作皆是）。真正被打臉的是上一班我自己加的增量路徑 —— 新文章仍會被抽一個隨機種子（壓在最低 frozen seed 以下），等於把一次性遷移做成了常態政策。\n\n**改動**：\n- scripts/seed_article_view_counts.py：displayed_views(None, real) 由 None 改回傳 real（凍結後文章顯示自身真實數，含 0）；移除 --apply 的增量隨機補種分支 —— 已凍結後 --apply 變 no-op 並印出理由；--reseed 保留但降級為「老闆指示才跑」的例外（如 1000→1417）。\n- frontend-v2-fix/src/lib/article-views.ts（巢狀獨立 repo，commit 46a95cb）：displayedViews 未 seed 回傳 real、getArticleDisplayedViews 移除未 seed 提前 return。渲染端兩版無需改（formatDisplayedViews(0)===\"0\" 為 truthy）。\n- 測試：兩條釘住舊語意的測試（incremental 上限、unseeded→null）換成釘住新規則。Python 22 passed、前端 4/4、npm run check（typecheck+build）通過。\n\n**刻意推翻自己先前的設計註記**：原本 hard rule「未 seed 不顯示數字」是防「新文章顯示 3 杵在鄰居 787 旁」；老闆已權衡並選擇真實累積，且顯示小的真數字本來就是誠實的那一支。已在信中明說是推翻而非漏做。\n\n**驗證**：實跑 --apply 確認 no-op（already seeded 1634 / needs seeding 0）。目前受影響文章數 = 0（凍結後尚無新文章），故線上數字無變化，此為修未來行為。\n\n**未 push**：frontend-v2-fix 內尚有另一班未 push 的 commit 4585011，不代他人 push；今日無文章受影響，下次前端部署一併上線。已在 close email 交代。"
   }
 ]
