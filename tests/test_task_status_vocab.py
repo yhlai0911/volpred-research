@@ -206,6 +206,7 @@ def test_questions_materializer_routes_through_hardened_writer(tmp_path, monkeyp
                 }
             ],
             "pending_questions": [],
+            "answered_history": [],
         },
     )
 
