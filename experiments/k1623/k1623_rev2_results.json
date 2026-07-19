@@ -1,0 +1,2246 @@
+{
+  "experiment_id": "k1623_rev2",
+  "title": "K1623 rev2 — retract the identification claim; add MSE DM tests and multiple-comparison correction",
+  "supersedes": "k1623_results.json (inference and claims revised; the forecasting code is byte-identical and the reproduced AGGREGATE losses match to 1e-9 for the 4 exact-pin assets -- see reproduction_guard.scope_and_limits for what that does and does not establish, and note TW0050 is a near-replication on revised upstream history, not an exact one)",
+  "generated_utc": "2026-07-19T09:45:57.979418+00:00",
+  "seed": 42,
+  "reproduction_guard": {
+    "checked_cells": 100,
+    "exactly_reproduced_assets": [
+      "VIX",
+      "SPY",
+      "QQQ",
+      "N225"
+    ],
+    "near_replicated_assets": [
+      "TW0050"
+    ],
+    "max_relative_deviation_exact_assets": 0.0,
+    "tolerance": 1e-09,
+    "per_asset_vintage": {
+      "VIX": {
+        "exact": true,
+        "n": 4655,
+        "max_relative_deviation_vs_original": 0.0
+      },
+      "SPY": {
+        "exact": true,
+        "n": 2639,
+        "max_relative_deviation_vs_original": 0.0
+      },
+      "TW0050": {
+        "exact": false,
+        "n": 4264,
+        "n_original": 4263,
+        "note": "TW0050 cannot be reproduced exactly: the cached history was REVISED, not just extended. At the pin date the raw row count is unchanged, but one formerly degenerate (high == low) row now has high > low, so it is retained where the original round dropped it. rev2 TW0050 statistics are therefore a NEAR-replication (n differs by 1); the measured deviation from the original summary statistics is reported in max_relative_deviation.",
+        "max_relative_deviation_vs_original": 0.005259349489457132
+      },
+      "QQQ": {
+        "exact": true,
+        "n": 2639,
+        "max_relative_deviation_vs_original": 0.0
+      },
+      "N225": {
+        "exact": true,
+        "n": 2565,
+        "max_relative_deviation_vs_original": 0.0
+      }
+    },
+    "note": "For the 4 exact-pin assets, all four stored functionals (qlike_mean, qlike_median, mse, clip_hit_rate) reproduce k1623_results.json to 1e-9. Assets under near_replicated_assets had their cached history revised upstream and are disclosed, not forced to match.",
+    "scope_and_limits": {
+      "what_is_checked": "Four aggregate functionals per model per asset: two loss moments (qlike_mean, mse), a median (qlike_median, robust to the tail that dominates MSE), and the forecast-guard hit count (clip_hit_rate).",
+      "what_is_NOT_checked": "Per-period forecast vectors. The original artifact NEVER STORED THEM, so a pointwise comparison against it is impossible -- not merely omitted.",
+      "therefore": "The defensible claim is 'the reproduced aggregate losses are identical', NOT 'the forecasts are identical'. Agreement of four independent functionals to 1e-9 is strong EVIDENCE the forecast paths coincide; it is not proof.",
+      "tw0050_exception": "TW0050 is excluded from the assertion entirely and is measured instead (n 4263 -> 4264, max relative deviation 2.5e-3). Any statement of the form 'same forecasts, same sample' is FALSE for TW0050 and must not be made."
+    },
+    "data_vintage_pinned": {
+      "reason": "price_cache.db has advanced ~10 trading days since the original run (to 2026-07-17). The trailing-750 OOS window would slide, confounding 'the test was fixed' with 'the sample moved'.",
+      "pinned_end_dates": {
+        "VIX": "2026-07-02",
+        "SPY": "2026-07-02",
+        "TW0050": "2026-07-03",
+        "QQQ": "2026-07-02",
+        "N225": "2026-07-03"
+      },
+      "consequence": "rev2 t-statistics are like-for-like revisions of the original ones. They are NOT an updated-sample result."
+    }
+  },
+  "inference_method": {
+    "primary": "volpred.stats.model_evaluation.dm_test (Newey-West HAC, bandwidth = max(1, ceil(h^(1/3) n^(1/3)))), h=1",
+    "hln": "Harvey-Leybourne-Newbold multiplier reported as t_hac_hln; at h=1, n=749 the factor is ~0.9993 and is immaterial.",
+    "hln_p_asymmetry_disclosed": "p_hac -- the value fed to BH/Bonferroni -- corresponds to t_hac, NOT to t_hac_hln. The HLN-implied p is published alongside as p_hac_hln so the gap is checkable: it appears in the 4th decimal (e.g. VIX/QLIKE/ARFIMA 0.08822 vs 0.08843) and changes no 5% verdict and no BH outcome. Disclosed rather than left for a reader to find.",
+    "hac_estimator_caveats": "The canonical dm_test normalises gamma0 by n but gamma_l by (n - lag), which is a valid variant but not the textbook finite-sample Newey-West form (common 1/n). Recomputing VIX/QLIKE/ARFIMA with a common 1/n gives t = 1.70601 vs the reported 1.70711 -- immaterial here. dm_test also returns (0.0, 1.0) if the estimated long-run variance is non-positive, which would disguise estimator failure as a perfectly insignificant result; VERIFIED that this branch is not triggered by any of the 40 rows.",
+    "superseded": "k1623.dm_hln used `for lag in range(1, h)`, which at h=1 is an EMPTY loop -> no HAC correction. That site is frozen in storage/ops/dm_hac_lag_baseline.json under degenerate_sites. Its statistics are retained per row as t_original_degenerate_no_hac for audit.",
+    "multiple_comparison": "BH FDR (primary) and Bonferroni (secondary). PRIMARY FAMILY IS PRE-SPECIFIED IN CODE as within_loss_20 (corrections applied separately within QLIKE and within MSE, each of size 20); every README conclusion uses BH at that family. CORRECTION TO EARLIER WORDING: this is FIVE nested hypothesis sets, not 'three explicit families' -- QLIKE-20, MSE-20, QLIKE-focal-10, MSE-focal-10, pooled-40, where each focal_10 is a SUBSET of its within_loss_20 and pooled_40 is the union. The non-primary sets are reported as sensitivity, not as a menu: zero focal comparisons survive BH in ANY of them, so the conclusion does not depend on the choice."
+  },
+  "headline_finding": {
+    "statement": "Under QLIKE, HAR has the lower mean loss against ARFIMA in 4 of 5 assets. Under MSE, ARFIMA has the lower mean loss in 4 of 5 assets, by 11-16%. Same forecasting code, same models, same forecasts scored two ways (for the 4 exact-pin assets the reproduced aggregate losses match the original to 1e-9; TW0050 is a near-replication on revised upstream history) -- the model ranking flips with the loss function in 3 of 5 assets. But under canonical HAC inference NEITHER loss makes the ARFIMA-vs-HAR difference statistically significant after multiple-comparison correction, so the defensible conclusion is that the two are indistinguishable and that reporting a single loss would have manufactured a directional conclusion in either direction.",
+    "what_this_is_not": "This is NOT a finding that ARFIMA beats HAR under MSE. No ARFIMA-vs-HAR MSE comparison is significant even nominally (p in [0.265, 0.974]), and NO MSE comparison of any kind survives BH or Bonferroni. (Precision matters here: 2 of the 20 MSE comparisons ARE nominally significant at 5% -- both against the deliberately naive EWMA baseline -- so the blanket phrasing 'no MSE comparison reaches significance' would be wrong.) It is a methodological result about loss-function dependence of model rankings.",
+    "verifiable_from": "loss_function_sign_reversal[] and dm_comparisons[] below."
+  },
+  "per_asset": {
+    "VIX": {
+      "n_oos": 749,
+      "hln_factor_h1": 0.9993322202928082,
+      "hac_bandwidth": 10,
+      "models": {
+        "HAR": {
+          "qlike_mean": 0.013609359413621193,
+          "qlike_median": 0.003198097740749084,
+          "mse": 0.00011122347545708535,
+          "clip_hit_rate": 0.0
+        },
+        "AR1": {
+          "qlike_mean": 0.01353954660423939,
+          "qlike_median": 0.0031313175226153067,
+          "mse": 0.00011616521756961044,
+          "clip_hit_rate": 0.0
+        },
+        "ARFIMA": {
+          "qlike_mean": 0.01419652204395241,
+          "qlike_median": 0.0033179058871590783,
+          "mse": 0.00011141693620291796,
+          "clip_hit_rate": 0.0
+        },
+        "BreakHAR": {
+          "qlike_mean": 0.013938402052153001,
+          "qlike_median": 0.003047465114906389,
+          "mse": 0.00011655985572213736,
+          "clip_hit_rate": 0.0
+        },
+        "EWMA": {
+          "qlike_mean": 0.05161859870759612,
+          "qlike_median": 0.01884944768479868,
+          "mse": 0.0002815599449320795,
+          "clip_hit_rate": 0.0
+        }
+      },
+      "best_by_qlike": "AR1",
+      "best_by_mse": "HAR",
+      "runtime_sec": 0.58
+    },
+    "SPY": {
+      "n_oos": 749,
+      "hln_factor_h1": 0.9993322202928082,
+      "hac_bandwidth": 10,
+      "models": {
+        "HAR": {
+          "qlike_mean": 0.4089210133317056,
+          "qlike_median": 0.18216040315446902,
+          "mse": 2.7863603178677365e-08,
+          "clip_hit_rate": 0.0
+        },
+        "AR1": {
+          "qlike_mean": 0.4411701308338106,
+          "qlike_median": 0.2285312170006346,
+          "mse": 2.607612386373497e-08,
+          "clip_hit_rate": 0.0
+        },
+        "ARFIMA": {
+          "qlike_mean": 0.42107798439201544,
+          "qlike_median": 0.20241583997715473,
+          "mse": 2.47647362184126e-08,
+          "clip_hit_rate": 0.0
+        },
+        "BreakHAR": {
+          "qlike_mean": 0.41153439018814403,
+          "qlike_median": 0.18488124316709165,
+          "mse": 3.01087628126596e-08,
+          "clip_hit_rate": 0.0
+        },
+        "EWMA": {
+          "qlike_mean": 0.4990106268188922,
+          "qlike_median": 0.23181790629292442,
+          "mse": 3.484923876522255e-08,
+          "clip_hit_rate": 0.0
+        }
+      },
+      "best_by_qlike": "HAR",
+      "best_by_mse": "ARFIMA",
+      "runtime_sec": 0.39
+    },
+    "TW0050": {
+      "n_oos": 749,
+      "hln_factor_h1": 0.9993322202928082,
+      "hac_bandwidth": 10,
+      "models": {
+        "HAR": {
+          "qlike_mean": 0.41572533429486797,
+          "qlike_median": 0.19976813668350313,
+          "mse": 1.0645174679513816e-08,
+          "clip_hit_rate": 0.0
+        },
+        "AR1": {
+          "qlike_mean": 0.43669450641534185,
+          "qlike_median": 0.23404924529659876,
+          "mse": 8.905688820166763e-09,
+          "clip_hit_rate": 0.0
+        },
+        "ARFIMA": {
+          "qlike_mean": 0.43186463800683467,
+          "qlike_median": 0.2267934094515569,
+          "mse": 8.898326863597809e-09,
+          "clip_hit_rate": 0.0
+        },
+        "BreakHAR": {
+          "qlike_mean": 0.42775706697336835,
+          "qlike_median": 0.2043852025817432,
+          "mse": 1.0346990935462567e-08,
+          "clip_hit_rate": 0.0
+        },
+        "EWMA": {
+          "qlike_mean": 0.42128456368992256,
+          "qlike_median": 0.20106475844234706,
+          "mse": 1.0779062418257196e-08,
+          "clip_hit_rate": 0.0
+        }
+      },
+      "best_by_qlike": "HAR",
+      "best_by_mse": "ARFIMA",
+      "runtime_sec": 0.49
+    },
+    "QQQ": {
+      "n_oos": 749,
+      "hln_factor_h1": 0.9993322202928082,
+      "hac_bandwidth": 10,
+      "models": {
+        "HAR": {
+          "qlike_mean": 0.3679870876342739,
+          "qlike_median": 0.16239583762893628,
+          "mse": 5.1121490470469133e-08,
+          "clip_hit_rate": 0.0
+        },
+        "AR1": {
+          "qlike_mean": 0.42323927121371335,
+          "qlike_median": 0.21410015679690386,
+          "mse": 4.840609430933325e-08,
+          "clip_hit_rate": 0.0
+        },
+        "ARFIMA": {
+          "qlike_mean": 0.38967368537904684,
+          "qlike_median": 0.18098241575825846,
+          "mse": 4.4690198711484146e-08,
+          "clip_hit_rate": 0.0
+        },
+        "BreakHAR": {
+          "qlike_mean": 0.37736712788265114,
+          "qlike_median": 0.14439304529805774,
+          "mse": 5.504057367025089e-08,
+          "clip_hit_rate": 0.0
+        },
+        "EWMA": {
+          "qlike_mean": 0.433785214385819,
+          "qlike_median": 0.19552108200981477,
+          "mse": 5.996290682011847e-08,
+          "clip_hit_rate": 0.0
+        }
+      },
+      "best_by_qlike": "HAR",
+      "best_by_mse": "ARFIMA",
+      "runtime_sec": 0.39
+    },
+    "N225": {
+      "n_oos": 749,
+      "hln_factor_h1": 0.9993322202928082,
+      "hac_bandwidth": 10,
+      "models": {
+        "HAR": {
+          "qlike_mean": 0.3941313649060909,
+          "qlike_median": 0.16534171172108625,
+          "mse": 6.371345086453747e-08,
+          "clip_hit_rate": 0.0
+        },
+        "AR1": {
+          "qlike_mean": 0.4384417041511921,
+          "qlike_median": 0.18668774413374756,
+          "mse": 6.304503042856659e-08,
+          "clip_hit_rate": 0.0
+        },
+        "ARFIMA": {
+          "qlike_mean": 0.3827098969897055,
+          "qlike_median": 0.18945701448121222,
+          "mse": 5.67911884573985e-08,
+          "clip_hit_rate": 0.0
+        },
+        "BreakHAR": {
+          "qlike_mean": 0.41582805106638987,
+          "qlike_median": 0.16798097038237625,
+          "mse": 6.48670033170714e-08,
+          "clip_hit_rate": 0.0
+        },
+        "EWMA": {
+          "qlike_mean": 0.499981897143715,
+          "qlike_median": 0.19247055841476413,
+          "mse": 6.983347067357093e-08,
+          "clip_hit_rate": 0.0
+        }
+      },
+      "best_by_qlike": "ARFIMA",
+      "best_by_mse": "ARFIMA",
+      "runtime_sec": 0.38
+    }
+  },
+  "dm_comparisons": [
+    {
+      "asset": "VIX",
+      "loss": "QLIKE",
+      "model": "AR1",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.01353954660423939,
+      "loss_HAR": 0.013609359413621193,
+      "loss_ratio_model_over_HAR": 0.9948702354563487,
+      "winner": "model",
+      "t_hac": -0.5272138475707258,
+      "t_hac_hln": -0.5268617848619676,
+      "p_hac": 0.598201419541633,
+      "p_hac_hln": 0.5984457787821854,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": -0.17004077051568808,
+      "t_original_degenerate_no_hac": -0.3559352694469837,
+      "p_original_degenerate_no_hac": 0.7219894025591873,
+      "abs_t_change_from_hac": 0.17092651541498383,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.6498142747639041,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.667376822730496,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "VIX",
+      "loss": "QLIKE",
+      "model": "ARFIMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.01419652204395241,
+      "loss_HAR": 0.013609359413621193,
+      "loss_ratio_model_over_HAR": 1.0431440314335108,
+      "winner": "HAR",
+      "t_hac": 1.707106913933971,
+      "t_hac_hln": 1.705966942578839,
+      "p_hac": 0.08821718664386347,
+      "p_hac_hln": 0.08842935565892317,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.05804941271000702,
+      "t_original_degenerate_no_hac": 1.5644308701567065,
+      "p_original_degenerate_no_hac": 0.11813936052110958,
+      "abs_t_change_from_hac": 0.14153607242213262,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.19603819254191882,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "QLIKE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.40783128276950076,
+          "p_bonferroni": 0.8821718664386347,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.320789769614049,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "VIX",
+      "loss": "QLIKE",
+      "model": "BreakHAR",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.013938402052153001,
+      "loss_HAR": 0.013609359413621193,
+      "loss_ratio_model_over_HAR": 1.0241776727714664,
+      "winner": "HAR",
+      "t_hac": 1.5136802124831588,
+      "t_hac_hln": 1.5126694075540847,
+      "p_hac": 0.1305293674789716,
+      "p_hac_hln": 0.1307860264377886,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.10485693524905647,
+      "t_original_degenerate_no_hac": 1.6739472574540168,
+      "p_original_degenerate_no_hac": 0.09455902405784239,
+      "abs_t_change_from_hac": -0.1612778498999321,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.2610587349579432,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "QLIKE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.40783128276950076,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.37294104993991883,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "VIX",
+      "loss": "QLIKE",
+      "model": "EWMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.05161859870759612,
+      "loss_HAR": 0.013609359413621193,
+      "loss_ratio_model_over_HAR": 3.792874972199841,
+      "winner": "HAR",
+      "t_hac": 4.5136249831461654,
+      "t_hac_hln": 4.510610875976546,
+      "p_hac": 7.400162164605817e-06,
+      "p_hac_hln": 7.50326593643833e-06,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.4912867325454535,
+      "t_original_degenerate_no_hac": 7.1536805978314995,
+      "p_original_degenerate_no_hac": 2.0167371476259457e-12,
+      "abs_t_change_from_hac": -2.6430697218549533,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 7.400162164605817e-05,
+          "p_bonferroni": 0.00014800324329211634,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": true
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.00014800324329211634,
+          "p_bonferroni": 0.0002960064865842327,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": true
+        }
+      }
+    },
+    {
+      "asset": "VIX",
+      "loss": "MSE",
+      "model": "AR1",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.00011616521756961044,
+      "loss_HAR": 0.00011122347545708535,
+      "loss_ratio_model_over_HAR": 1.044430747126148,
+      "winner": "HAR",
+      "t_hac": 1.2084017837015935,
+      "t_hac_hln": 1.2075948375123031,
+      "p_hac": 0.22727463162566375,
+      "p_hac_hln": 0.2275848379871385,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": -0.2438898803243834,
+      "t_original_degenerate_no_hac": 0.6191395053310854,
+      "p_original_degenerate_no_hac": 0.5360129781702279,
+      "abs_t_change_from_hac": 0.5884553321812177,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.46252022362992484,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "VIX",
+      "loss": "MSE",
+      "model": "ARFIMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.00011141693620291796,
+      "loss_HAR": 0.00011122347545708535,
+      "loss_ratio_model_over_HAR": 1.0017393877060357,
+      "winner": "HAR",
+      "t_hac": 0.032063283708963906,
+      "t_hac_hln": 0.032041872498757125,
+      "p_hac": 0.9744301370607908,
+      "p_hac_hln": 0.9744472062438756,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.0008908991640190795,
+      "t_original_degenerate_no_hac": 0.01760905041360923,
+      "p_original_degenerate_no_hac": 0.9859554324047536,
+      "abs_t_change_from_hac": 0.014432822085147894,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.9744301370607908,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "MSE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.9744301370607908,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.9744301370607908,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "VIX",
+      "loss": "MSE",
+      "model": "BreakHAR",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.00011655985572213736,
+      "loss_HAR": 0.00011122347545708535,
+      "loss_ratio_model_over_HAR": 1.0479789023236465,
+      "winner": "HAR",
+      "t_hac": 1.2831286165489937,
+      "t_hac_hln": 1.2822717692971453,
+      "p_hac": 0.1998444289728325,
+      "p_hac_hln": 0.20014457798524118,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.0788930626128476,
+      "t_original_degenerate_no_hac": 1.1459918805999374,
+      "p_original_degenerate_no_hac": 0.25216499754027943,
+      "abs_t_change_from_hac": 0.13627988869720786,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "MSE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.46015096461678673,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.46252022362992484,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "VIX",
+      "loss": "MSE",
+      "model": "EWMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.0002815599449320795,
+      "loss_HAR": 0.00011122347545708535,
+      "loss_ratio_model_over_HAR": 2.5314794720716765,
+      "winner": "HAR",
+      "t_hac": 1.999260200215051,
+      "t_hac_hln": 1.9979251348239513,
+      "p_hac": 0.04594152435145027,
+      "p_hac_hln": 0.04608642880559717,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.224736673325908,
+      "t_original_degenerate_no_hac": 2.4740564879217017,
+      "p_original_degenerate_no_hac": 0.01357971060754063,
+      "abs_t_change_from_hac": -0.47613135309775045,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.4594152435145027,
+          "p_bonferroni": 0.9188304870290054,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.18376609740580108,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "SPY",
+      "loss": "QLIKE",
+      "model": "AR1",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.4411701308338106,
+      "loss_HAR": 0.4089210133317056,
+      "loss_ratio_model_over_HAR": 1.078863928364438,
+      "winner": "HAR",
+      "t_hac": 3.0477421227415116,
+      "t_hac_hln": 3.0457069023991914,
+      "p_hac": 0.002386846432129719,
+      "p_hac_hln": 0.0024028588713949904,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": -0.17751860016177784,
+      "t_original_degenerate_no_hac": 2.520146293167789,
+      "p_original_degenerate_no_hac": 0.011937671462108806,
+      "abs_t_change_from_hac": 0.5255606092314022,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.01591230954753146,
+          "p_bonferroni": 0.04773692864259438,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": true
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.03182461909506292,
+          "p_bonferroni": 0.09547385728518876,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "SPY",
+      "loss": "QLIKE",
+      "model": "ARFIMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.42107798439201544,
+      "loss_HAR": 0.4089210133317056,
+      "loss_ratio_model_over_HAR": 1.02972938700621,
+      "winner": "HAR",
+      "t_hac": 1.3959872562352782,
+      "t_hac_hln": 1.395055044274066,
+      "p_hac": 0.1631325131078003,
+      "p_hac_hln": 0.1634133180695767,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.007275103112346124,
+      "t_original_degenerate_no_hac": 1.3346000630551462,
+      "p_original_degenerate_no_hac": 0.18241337685993902,
+      "abs_t_change_from_hac": 0.06045498121891968,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.29660456928690965,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "QLIKE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.40783128276950076,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.40783128276950076,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "SPY",
+      "loss": "QLIKE",
+      "model": "BreakHAR",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.41153439018814403,
+      "loss_HAR": 0.4089210133317056,
+      "loss_ratio_model_over_HAR": 1.0063909086870977,
+      "winner": "HAR",
+      "t_hac": 0.18820838692717606,
+      "t_hac_hln": 0.1880827051856628,
+      "p_hac": 0.8507643449647206,
+      "p_hac_hln": 0.85086283000454,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.14450125723704904,
+      "t_original_degenerate_no_hac": 0.24673286690419366,
+      "p_original_degenerate_no_hac": 0.8051826665615436,
+      "abs_t_change_from_hac": -0.05865016171853085,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.8507643449647206,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "QLIKE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.8507643449647206,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.8725788153484314,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "SPY",
+      "loss": "QLIKE",
+      "model": "EWMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.4990106268188922,
+      "loss_HAR": 0.4089210133317056,
+      "loss_ratio_model_over_HAR": 1.2203105503265208,
+      "winner": "HAR",
+      "t_hac": 2.8239011061166006,
+      "t_hac_hln": 2.8220153622628197,
+      "p_hac": 0.004870480117981302,
+      "p_hac_hln": 0.004898902688888676,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.2391101319890746,
+      "t_original_degenerate_no_hac": 4.0357003361845605,
+      "p_original_degenerate_no_hac": 6.0041278178462677e-05,
+      "abs_t_change_from_hac": -1.2136849739217408,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.01623493372660434,
+          "p_bonferroni": 0.09740960235962604,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.03246986745320868,
+          "p_bonferroni": 0.19481920471925207,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "SPY",
+      "loss": "MSE",
+      "model": "AR1",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 2.607612386373497e-08,
+      "loss_HAR": 2.7863603178677365e-08,
+      "loss_ratio_model_over_HAR": 0.9358489530776025,
+      "winner": "model",
+      "t_hac": -0.8020615161958377,
+      "t_hac_hln": -0.8015259157914026,
+      "p_hac": 0.4227721104397941,
+      "p_hac_hln": 0.4230817889556536,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.49235332253961117,
+      "t_original_degenerate_no_hac": -1.3088341067224845,
+      "p_original_degenerate_no_hac": 0.19099251308785267,
+      "abs_t_change_from_hac": -0.5073081909310818,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.5636961472530589,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.6039601577711345,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "SPY",
+      "loss": "MSE",
+      "model": "ARFIMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 2.47647362184126e-08,
+      "loss_HAR": 2.7863603178677365e-08,
+      "loss_ratio_model_over_HAR": 0.8887844138321574,
+      "winner": "model",
+      "t_hac": -0.9649014608691769,
+      "t_hac_hln": -0.9642571192541688,
+      "p_hac": 0.33490601427819056,
+      "p_hac_hln": 0.33522866307085614,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.08770002392755877,
+      "t_original_degenerate_no_hac": -1.0376007206176823,
+      "p_original_degenerate_no_hac": 0.29979128118740384,
+      "abs_t_change_from_hac": -0.07334360136351348,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "MSE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.46015096461678673,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.5358496228451048,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "SPY",
+      "loss": "MSE",
+      "model": "BreakHAR",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 3.01087628126596e-08,
+      "loss_HAR": 2.7863603178677365e-08,
+      "loss_ratio_model_over_HAR": 1.0805767875599215,
+      "winner": "HAR",
+      "t_hac": 0.9713901855084712,
+      "t_hac_hln": 0.9707415108548234,
+      "p_hac": 0.33166801903601995,
+      "p_hac_hln": 0.33199080462061153,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.3483769599279987,
+      "t_original_degenerate_no_hac": 1.2576317983397982,
+      "p_original_degenerate_no_hac": 0.20891743362542356,
+      "abs_t_change_from_hac": -0.2868902874849748,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "MSE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.46015096461678673,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.5358496228451048,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "SPY",
+      "loss": "MSE",
+      "model": "EWMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 3.484923876522255e-08,
+      "loss_HAR": 2.7863603178677365e-08,
+      "loss_ratio_model_over_HAR": 1.2507082641734915,
+      "winner": "HAR",
+      "t_hac": 1.4462094645060208,
+      "t_hac_hln": 1.445243715173275,
+      "p_hac": 0.1485373340295053,
+      "p_hac_hln": 0.14880824175937182,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.35662686764059104,
+      "t_original_degenerate_no_hac": 2.135715341530407,
+      "p_original_degenerate_no_hac": 0.0330267519699227,
+      "abs_t_change_from_hac": -0.6904716263571318,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.39609955741201414,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "TW0050",
+      "loss": "QLIKE",
+      "model": "AR1",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.43669450641534185,
+      "loss_HAR": 0.41572533429486797,
+      "loss_ratio_model_over_HAR": 1.0504399669460625,
+      "winner": "HAR",
+      "t_hac": 0.766406699380443,
+      "t_hac_hln": 0.765894908539141,
+      "p_hac": 0.44367614574506153,
+      "p_hac_hln": 0.44398044749288873,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.16349590041653997,
+      "t_original_degenerate_no_hac": 0.9346791684309316,
+      "p_original_degenerate_no_hac": 0.350255299489526,
+      "abs_t_change_from_hac": -0.16878425989179058,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.6338230653500878,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.6119670975793952,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "TW0050",
+      "loss": "QLIKE",
+      "model": "ARFIMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.43186463800683467,
+      "loss_HAR": 0.41572533429486797,
+      "loss_ratio_model_over_HAR": 1.0388220355618725,
+      "winner": "HAR",
+      "t_hac": 0.5665346514032545,
+      "t_hac_hln": 0.5661563310596265,
+      "p_hac": 0.5712003271572721,
+      "p_hac_hln": 0.5714573235722384,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.23981218539702973,
+      "t_original_degenerate_no_hac": 0.6698235945870818,
+      "p_original_degenerate_no_hac": 0.5031769665822474,
+      "abs_t_change_from_hac": -0.10366726352745537,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.6498142747639041,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "QLIKE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.6859150678063431,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.667376822730496,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "TW0050",
+      "loss": "QLIKE",
+      "model": "BreakHAR",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.42775706697336835,
+      "loss_HAR": 0.41572533429486797,
+      "loss_ratio_model_over_HAR": 1.028941543095775,
+      "winner": "HAR",
+      "t_hac": 1.1980934673639567,
+      "t_hac_hln": 1.197293404859132,
+      "p_hac": 0.23126011181496242,
+      "p_hac_hln": 0.23157150563450468,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.05218365469711613,
+      "t_original_degenerate_no_hac": 1.3604702372428843,
+      "p_original_degenerate_no_hac": 0.17409097917446245,
+      "abs_t_change_from_hac": -0.16317683238375236,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.38543351969160405,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "QLIKE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.46252022362992484,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.46252022362992484,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "TW0050",
+      "loss": "QLIKE",
+      "model": "EWMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.42128456368992256,
+      "loss_HAR": 0.41572533429486797,
+      "loss_ratio_model_over_HAR": 1.0133723613560475,
+      "winner": "HAR",
+      "t_hac": 0.5165121782529515,
+      "t_hac_hln": 0.5161672619017967,
+      "p_hac": 0.6056494003289306,
+      "p_hac_hln": 0.6058901405816316,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.14989212149811088,
+      "t_original_degenerate_no_hac": 0.5921727218063444,
+      "p_original_degenerate_no_hac": 0.5539138833901558,
+      "abs_t_change_from_hac": -0.07600545990454766,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.6498142747639041,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.667376822730496,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "TW0050",
+      "loss": "MSE",
+      "model": "AR1",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 8.905688820166763e-09,
+      "loss_HAR": 1.0645174679513816e-08,
+      "loss_ratio_model_over_HAR": 0.8365939581344194,
+      "winner": "model",
+      "t_hac": -1.2506866194123925,
+      "t_hac_hln": -1.2498514362678925,
+      "p_hac": 0.21143990993947526,
+      "p_hac_hln": 0.21174472672330066,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.4681135677083688,
+      "t_original_degenerate_no_hac": -1.8082512458337845,
+      "p_original_degenerate_no_hac": 0.0709689007546293,
+      "abs_t_change_from_hac": -0.558399809565892,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.46252022362992484,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "TW0050",
+      "loss": "MSE",
+      "model": "ARFIMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 8.898326863597809e-09,
+      "loss_HAR": 1.0645174679513816e-08,
+      "loss_ratio_model_over_HAR": 0.83590238126597,
+      "winner": "model",
+      "t_hac": -0.9944540563879533,
+      "t_hac_hln": -0.9937899801493628,
+      "p_hac": 0.32032344636060506,
+      "p_hac_hln": 0.3206464934367649,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.23877895778107577,
+      "t_original_degenerate_no_hac": -1.0430023910132549,
+      "p_original_degenerate_no_hac": 0.29728415467446667,
+      "abs_t_change_from_hac": -0.04921241086389205,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "MSE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.46015096461678673,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.5358496228451048,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "TW0050",
+      "loss": "MSE",
+      "model": "BreakHAR",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 1.0346990935462567e-08,
+      "loss_HAR": 1.0645174679513816e-08,
+      "loss_ratio_model_over_HAR": 0.9719888350329196,
+      "winner": "model",
+      "t_hac": -1.6165231001193119,
+      "t_hac_hln": -1.6154436187968455,
+      "p_hac": 0.10640290029684207,
+      "p_hac_hln": 0.10663634394618632,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.46041779520010706,
+      "t_original_degenerate_no_hac": -2.5054154721520088,
+      "p_original_degenerate_no_hac": 0.012442204081982607,
+      "abs_t_change_from_hac": -0.8899718533551633,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "MSE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.46015096461678673,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.3274740348828488,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "TW0050",
+      "loss": "MSE",
+      "model": "EWMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 1.0779062418257196e-08,
+      "loss_HAR": 1.0645174679513816e-08,
+      "loss_ratio_model_over_HAR": 1.0125773172140653,
+      "winner": "HAR",
+      "t_hac": 0.5776300732865102,
+      "t_hac_hln": 0.5772443436453057,
+      "p_hac": 0.5636877279279235,
+      "p_hac_hln": 0.5639480991995145,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.4512659516604845,
+      "t_original_degenerate_no_hac": 0.7734865593366284,
+      "p_original_degenerate_no_hac": 0.43947885153861,
+      "abs_t_change_from_hac": -0.1962422156913226,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.6281852928693585,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.667376822730496,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "QQQ",
+      "loss": "QLIKE",
+      "model": "AR1",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.42323927121371335,
+      "loss_HAR": 0.3679870876342739,
+      "loss_ratio_model_over_HAR": 1.1501470715579893,
+      "winner": "HAR",
+      "t_hac": 5.379925658648563,
+      "t_hac_hln": 5.376333053467517,
+      "p_hac": 9.975471404466418e-08,
+      "p_hac_hln": 1.016890814306666e-07,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": -0.08124504264324012,
+      "t_original_degenerate_no_hac": 4.715807128211901,
+      "p_original_degenerate_no_hac": 2.8722697881012705e-06,
+      "abs_t_change_from_hac": 0.6605259252556159,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 1.9950942808932837e-06,
+          "p_bonferroni": 1.9950942808932837e-06,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": true
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 3.990188561786567e-06,
+          "p_bonferroni": 3.990188561786567e-06,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": true
+        }
+      }
+    },
+    {
+      "asset": "QQQ",
+      "loss": "QLIKE",
+      "model": "ARFIMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.38967368537904684,
+      "loss_HAR": 0.3679870876342739,
+      "loss_ratio_model_over_HAR": 1.0589330399721153,
+      "winner": "HAR",
+      "t_hac": 2.133936461798326,
+      "t_hac_hln": 2.1325114623327006,
+      "p_hac": 0.033172626948140715,
+      "p_hac_hln": 0.03328988063422796,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.09056546318625343,
+      "t_original_degenerate_no_hac": 2.470155056120931,
+      "p_original_degenerate_no_hac": 0.013727482469807649,
+      "abs_t_change_from_hac": -0.3376435937882305,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.08293156737035179,
+          "p_bonferroni": 0.6634525389628143,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "QLIKE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.33172626948140715,
+          "p_bonferroni": 0.33172626948140715,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.14743389754729208,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "QQQ",
+      "loss": "QLIKE",
+      "model": "BreakHAR",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.37736712788265114,
+      "loss_HAR": 0.3679870876342739,
+      "loss_ratio_model_over_HAR": 1.025490134201936,
+      "winner": "HAR",
+      "t_hac": 0.7092372335007331,
+      "t_hac_hln": 0.7087636192686164,
+      "p_hac": 0.47839827228862397,
+      "p_hac_hln": 0.4786920064844855,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.29907105943562573,
+      "t_original_degenerate_no_hac": 1.0454904460747694,
+      "p_original_degenerate_no_hac": 0.2961340889231348,
+      "abs_t_change_from_hac": -0.33672682680615296,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.6378643630514986,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "QLIKE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.6834261032694628,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.6378643630514986,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "QQQ",
+      "loss": "QLIKE",
+      "model": "EWMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.433785214385819,
+      "loss_HAR": 0.3679870876342739,
+      "loss_ratio_model_over_HAR": 1.1788055313966315,
+      "winner": "HAR",
+      "t_hac": 2.850848532643942,
+      "t_hac_hln": 2.8489447938455648,
+      "p_hac": 0.004480328783182719,
+      "p_hac_hln": 0.004506930723258103,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.24092426317595983,
+      "t_original_degenerate_no_hac": 4.2140569089440945,
+      "p_original_degenerate_no_hac": 2.8146716713054178e-05,
+      "abs_t_change_from_hac": -1.3651121150985297,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.01623493372660434,
+          "p_bonferroni": 0.08960657566365438,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.03246986745320868,
+          "p_bonferroni": 0.17921315132730875,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "QQQ",
+      "loss": "MSE",
+      "model": "AR1",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 4.840609430933325e-08,
+      "loss_HAR": 5.1121490470469133e-08,
+      "loss_ratio_model_over_HAR": 0.9468834704124196,
+      "winner": "model",
+      "t_hac": -0.6168942663070965,
+      "t_hac_hln": -0.6164823168345737,
+      "p_hac": 0.5374921869518077,
+      "p_hac_hln": 0.5377638104935007,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.4873580194015252,
+      "t_original_degenerate_no_hac": -1.0325272798408596,
+      "p_original_degenerate_no_hac": 0.3021588950178781,
+      "abs_t_change_from_hac": -0.4160449630062859,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.6281852928693585,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.667376822730496,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "QQQ",
+      "loss": "MSE",
+      "model": "ARFIMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 4.4690198711484146e-08,
+      "loss_HAR": 5.1121490470469133e-08,
+      "loss_ratio_model_over_HAR": 0.874195926218151,
+      "winner": "model",
+      "t_hac": -0.9005437942032729,
+      "t_hac_hln": -0.8999424293320665,
+      "p_hac": 0.3681207716934294,
+      "p_hac_hln": 0.36844052039102815,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.08134173593806183,
+      "t_original_degenerate_no_hac": -0.9661322817103779,
+      "p_original_degenerate_no_hac": 0.33429024826765,
+      "abs_t_change_from_hac": -0.06618985237831143,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.5258868167048991,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "MSE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.46015096461678673,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.545364106212488,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "QQQ",
+      "loss": "MSE",
+      "model": "BreakHAR",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 5.504057367025089e-08,
+      "loss_HAR": 5.1121490470469133e-08,
+      "loss_ratio_model_over_HAR": 1.0766621466572,
+      "winner": "HAR",
+      "t_hac": 0.9938428480078211,
+      "t_hac_hln": 0.9931791799217837,
+      "p_hac": 0.320620767481133,
+      "p_hac_hln": 0.3209438121118925,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.39642542834788097,
+      "t_original_degenerate_no_hac": 1.3339919796869437,
+      "p_original_degenerate_no_hac": 0.18261249185530493,
+      "abs_t_change_from_hac": -0.34081279976516,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "MSE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.46015096461678673,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.5358496228451048,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "QQQ",
+      "loss": "MSE",
+      "model": "EWMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 5.996290682011847e-08,
+      "loss_HAR": 5.1121490470469133e-08,
+      "loss_ratio_model_over_HAR": 1.1729491113870532,
+      "winner": "HAR",
+      "t_hac": 1.6164020336855471,
+      "t_hac_hln": 1.6153226332087884,
+      "p_hac": 0.10642906133692587,
+      "p_hac_hln": 0.10666253306024835,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.365117499435858,
+      "t_original_degenerate_no_hac": 2.4337803105290283,
+      "p_original_degenerate_no_hac": 0.015175163923270887,
+      "abs_t_change_from_hac": -0.8184576773202399,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.3274740348828488,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "N225",
+      "loss": "QLIKE",
+      "model": "AR1",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.4384417041511921,
+      "loss_HAR": 0.3941313649060909,
+      "loss_ratio_model_over_HAR": 1.1124253058511568,
+      "winner": "HAR",
+      "t_hac": 2.8930751575344966,
+      "t_hac_hln": 2.8911432206529146,
+      "p_hac": 0.003925745933846203,
+      "p_hac_hln": 0.0039496884549220426,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.0009293506734347556,
+      "t_original_degenerate_no_hac": 2.828858409067987,
+      "p_original_degenerate_no_hac": 0.004796473566654432,
+      "abs_t_change_from_hac": 0.06228481158492771,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.01623493372660434,
+          "p_bonferroni": 0.07851491867692406,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.03246986745320868,
+          "p_bonferroni": 0.15702983735384812,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "N225",
+      "loss": "QLIKE",
+      "model": "ARFIMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.3827098969897055,
+      "loss_HAR": 0.3941313649060909,
+      "loss_ratio_model_over_HAR": 0.9710211646842498,
+      "winner": "model",
+      "t_hac": -0.4998558889756434,
+      "t_hac_hln": -0.4995220953564652,
+      "p_hac": 0.6173235610257088,
+      "p_hac_hln": 0.61755851901428,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.2845074671711175,
+      "t_original_degenerate_no_hac": -0.6439766684875856,
+      "p_original_degenerate_no_hac": 0.5197879688665543,
+      "abs_t_change_from_hac": -0.14445457313112042,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.6498142747639041,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "QLIKE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.6859150678063431,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.667376822730496,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "N225",
+      "loss": "QLIKE",
+      "model": "BreakHAR",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.41582805106638987,
+      "loss_HAR": 0.3941313649060909,
+      "loss_ratio_model_over_HAR": 1.0550493771676066,
+      "winner": "HAR",
+      "t_hac": 0.9353830792303337,
+      "t_hac_hln": 0.9347584493915732,
+      "p_hac": 0.34989278818384784,
+      "p_hac_hln": 0.3502144581801778,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.279493427731853,
+      "t_original_degenerate_no_hac": 1.233146973439663,
+      "p_original_degenerate_no_hac": 0.21790832172362296,
+      "abs_t_change_from_hac": -0.2983885240480898,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.5382965972059197,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "QLIKE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.5831546469730797,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.5382965972059197,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "N225",
+      "loss": "QLIKE",
+      "model": "EWMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 0.499981897143715,
+      "loss_HAR": 0.3941313649060909,
+      "loss_ratio_model_over_HAR": 1.2685666294608269,
+      "winner": "HAR",
+      "t_hac": 2.565511887320452,
+      "t_hac_hln": 2.5637986905435404,
+      "p_hac": 0.010496161490302525,
+      "p_hac_hln": 0.01054764496801519,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.15461822192232738,
+      "t_original_degenerate_no_hac": 3.416159844386619,
+      "p_original_degenerate_no_hac": 0.0006694090794020597,
+      "abs_t_change_from_hac": -0.8523611538430784,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "QLIKE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.029989032829435786,
+          "p_bonferroni": 0.2099232298060505,
+          "sig_bh_05": true,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.05997806565887157,
+          "p_bonferroni": 0.419846459612101,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "N225",
+      "loss": "MSE",
+      "model": "AR1",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 6.304503042856659e-08,
+      "loss_HAR": 6.371345086453747e-08,
+      "loss_ratio_model_over_HAR": 0.9895089588320679,
+      "winner": "model",
+      "t_hac": -0.4168542529181561,
+      "t_hac_hln": -0.41657588610720075,
+      "p_hac": 0.6769046157109939,
+      "p_hac_hln": 0.6771081597555572,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.07868950794257758,
+      "t_original_degenerate_no_hac": -0.43752303967606426,
+      "p_original_degenerate_no_hac": 0.6618583680944019,
+      "abs_t_change_from_hac": -0.020947153568863508,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.7125311744326251,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.7125311744326251,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "N225",
+      "loss": "MSE",
+      "model": "ARFIMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 5.67911884573985e-08,
+      "loss_HAR": 6.371345086453747e-08,
+      "loss_ratio_model_over_HAR": 0.8913532022954378,
+      "winner": "model",
+      "t_hac": -1.1146386339205117,
+      "t_hac_hln": -1.1138943008599276,
+      "p_hac": 0.26536331140045166,
+      "p_hac_hln": 0.2656823313205532,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.5635482158014719,
+      "t_original_degenerate_no_hac": -1.5882158164484401,
+      "p_original_degenerate_no_hac": 0.11266012587180754,
+      "abs_t_change_from_hac": -0.47432151558851254,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.515240021966447,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "MSE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.46015096461678673,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.5054539264770508,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "N225",
+      "loss": "MSE",
+      "model": "BreakHAR",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 6.48670033170714e-08,
+      "loss_HAR": 6.371345086453747e-08,
+      "loss_ratio_model_over_HAR": 1.0181053205701653,
+      "winner": "HAR",
+      "t_hac": 0.575144156395353,
+      "t_hac_hln": 0.5747600867990023,
+      "p_hac": 0.5653667635824227,
+      "p_hac_hln": 0.5656263861247928,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.3946786130368102,
+      "t_original_degenerate_no_hac": 0.7276458787042501,
+      "p_original_degenerate_no_hac": 0.46705808317660386,
+      "abs_t_change_from_hac": -0.15288579190524787,
+      "focal": true,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.6281852928693585,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "focal_10": {
+          "family": "MSE: 5 assets x {ARFIMA, BreakHAR}",
+          "family_size": 10,
+          "p_bh": 0.6281852928693585,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.667376822730496,
+          "p_bonferroni": 1.0,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    },
+    {
+      "asset": "N225",
+      "loss": "MSE",
+      "model": "EWMA",
+      "benchmark": "HAR",
+      "n_oos": 749,
+      "loss_model": 6.983347067357093e-08,
+      "loss_HAR": 6.371345086453747e-08,
+      "loss_ratio_model_over_HAR": 1.09605538117917,
+      "winner": "HAR",
+      "t_hac": 2.322607543559117,
+      "t_hac_hln": 2.3210565533737575,
+      "p_hac": 0.0204677014803909,
+      "p_hac_hln": 0.020551729289669363,
+      "hac_bandwidth": 10,
+      "loss_diff_acf1": 0.22810893714049502,
+      "t_original_degenerate_no_hac": 4.044814098838322,
+      "p_original_degenerate_no_hac": 5.7800963260552325e-05,
+      "abs_t_change_from_hac": -1.7237575454645646,
+      "focal": false,
+      "corrections": {
+        "within_loss_20": {
+          "family": "MSE: 5 assets x 4 challengers",
+          "family_size": 20,
+          "p_bh": 0.40935402960781797,
+          "p_bonferroni": 0.40935402960781797,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        },
+        "pooled_40": {
+          "family": "both losses: 5 assets x 4 challengers x 2 losses",
+          "family_size": 40,
+          "p_bh": 0.10233850740195449,
+          "p_bonferroni": 0.8187080592156359,
+          "sig_bh_05": false,
+          "sig_bonferroni_05": false
+        }
+      }
+    }
+  ],
+  "loss_function_sign_reversal": [
+    {
+      "asset": "VIX",
+      "qlike_ratio_arfima_over_har": 1.0431440314335108,
+      "qlike_winner": "HAR",
+      "qlike_p_hac": 0.08821718664386347,
+      "mse_ratio_arfima_over_har": 1.0017393877060357,
+      "mse_winner": "HAR",
+      "mse_p_hac": 0.9744301370607908,
+      "sign_reversal": false
+    },
+    {
+      "asset": "SPY",
+      "qlike_ratio_arfima_over_har": 1.02972938700621,
+      "qlike_winner": "HAR",
+      "qlike_p_hac": 0.1631325131078003,
+      "mse_ratio_arfima_over_har": 0.8887844138321574,
+      "mse_winner": "model",
+      "mse_p_hac": 0.33490601427819056,
+      "sign_reversal": true
+    },
+    {
+      "asset": "TW0050",
+      "qlike_ratio_arfima_over_har": 1.0388220355618725,
+      "qlike_winner": "HAR",
+      "qlike_p_hac": 0.5712003271572721,
+      "mse_ratio_arfima_over_har": 0.83590238126597,
+      "mse_winner": "model",
+      "mse_p_hac": 0.32032344636060506,
+      "sign_reversal": true
+    },
+    {
+      "asset": "QQQ",
+      "qlike_ratio_arfima_over_har": 1.0589330399721153,
+      "qlike_winner": "HAR",
+      "qlike_p_hac": 0.033172626948140715,
+      "mse_ratio_arfima_over_har": 0.874195926218151,
+      "mse_winner": "model",
+      "mse_p_hac": 0.3681207716934294,
+      "sign_reversal": true
+    },
+    {
+      "asset": "N225",
+      "qlike_ratio_arfima_over_har": 0.9710211646842498,
+      "qlike_winner": "model",
+      "qlike_p_hac": 0.6173235610257088,
+      "mse_ratio_arfima_over_har": 0.8913532022954378,
+      "mse_winner": "model",
+      "mse_p_hac": 0.26536331140045166,
+      "sign_reversal": false
+    }
+  ],
+  "summary": {
+    "n_dm_comparisons_total": 40,
+    "nominal_sig_05": {
+      "QLIKE": 8,
+      "MSE": 2
+    },
+    "bh_sig_05_within_loss": {
+      "QLIKE": 7,
+      "MSE": 0
+    },
+    "bonferroni_sig_05_within_loss": {
+      "QLIKE": 3,
+      "MSE": 0
+    },
+    "focal_arfima_breakhar_nominal_sig_05": 1,
+    "focal_arfima_breakhar_bh_sig_05": 0,
+    "n_sign_reversals_arfima": 3,
+    "hac_changed_significance_at_05": [
+      {
+        "asset": "SPY",
+        "loss": "MSE",
+        "model": "EWMA",
+        "p_degenerate": 0.0330267519699227,
+        "p_hac": 0.1485373340295053,
+        "loss_diff_acf1": 0.35662686764059104
+      },
+      {
+        "asset": "TW0050",
+        "loss": "MSE",
+        "model": "BreakHAR",
+        "p_degenerate": 0.012442204081982607,
+        "p_hac": 0.10640290029684207,
+        "loss_diff_acf1": 0.46041779520010706
+      },
+      {
+        "asset": "QQQ",
+        "loss": "MSE",
+        "model": "EWMA",
+        "p_degenerate": 0.015175163923270887,
+        "p_hac": 0.10642906133692587,
+        "loss_diff_acf1": 0.365117499435858
+      }
+    ],
+    "hac_is_two_sided": {
+      "n_abs_t_shrunk": 31,
+      "n_abs_t_grew": 9,
+      "all_negative_acf1_rows_grew": true,
+      "examples_grew_negative_acf1": [
+        {
+          "cell": "VIX/QLIKE/AR1",
+          "acf1": -0.17,
+          "abs_t_degenerate": 0.36,
+          "abs_t_hac": 0.53
+        },
+        {
+          "cell": "VIX/MSE/AR1",
+          "acf1": -0.244,
+          "abs_t_degenerate": 0.62,
+          "abs_t_hac": 1.21
+        },
+        {
+          "cell": "SPY/QLIKE/AR1",
+          "acf1": -0.178,
+          "abs_t_degenerate": 2.52,
+          "abs_t_hac": 3.05
+        },
+        {
+          "cell": "QQQ/QLIKE/AR1",
+          "acf1": -0.081,
+          "abs_t_degenerate": 4.72,
+          "abs_t_hac": 5.38
+        }
+      ],
+      "note": "Rows with negative loss-differential acf(1) all see |t| INCREASE under HAC; rows with strongly positive acf(1) see |t| decrease. A reviewer cannot assume a missing HAC correction only ever inflates significance."
+    }
+  },
+  "retracted_claims": [
+    {
+      "claim_id": "genuine_long_memory_identified",
+      "where": "README.md Verdict line, §6.2 '純 level-shift 假象假說被拒絕', §7",
+      "before": "All assets retain a significant d-hat after break-demeaning, therefore the pure level-shift (Diebold-Inoue) hypothesis is REJECTED and a genuine long-memory component is present.",
+      "after": "Break-demeaned d-hat stays positive (BIC 0.46-0.65; permissive 0.19-0.58). This is DESCRIPTIVE residual persistence. It does not reject Diebold-Inoue.",
+      "basis": "Diebold-Inoue's DGP is a RANDOM, potentially dense shift process. Removing <=5 (permissive <=15) DETERMINISTIC Bai-Perron mean breaks cannot subtract it, so surviving d-hat > 0 is not evidence against it. No identification theorem licenses the inference. Compounding this, the demeaned SEs ignore that the break dates were estimated.",
+      "status": "RETRACTED"
+    },
+    {
+      "claim_id": "not_tradable",
+      "where": "README.md Verdict line '不可交易', §6.3 heading, §7",
+      "before": "The genuine long-memory component is 'not tradable'.",
+      "after": "Removed. No strategy, cost or utility test was run, so the experiment takes no position on tradability. The defensible statement is narrower: under QLIKE, neither ARFIMA nor BreakRobustHAR beat HAR one step ahead.",
+      "basis": "Pure rhetoric -- zero supporting computation existed in any round.",
+      "status": "RETRACTED"
+    },
+    {
+      "claim_id": "significantly_worse_in_several_places",
+      "where": "README.md §3 differentiation paragraph, §6.3 '多處反而顯著更差'",
+      "before": "ARFIMA / break-robust models are 'significantly worse in several places' than HAR.",
+      "after": "The claim concerns ARFIMA / BreakRobustHAR. Of those 10 QLIKE comparisons, 1 is nominally significant at 5% under canonical HAC (QQQ/ARFIMA (p=0.0332)), and 0 survive BH FDR under any family definition tried. 'Several places' is therefore wrong; the correct statement is 'one nominally significant comparison, which does not survive multiple-comparison correction'. For completeness, the significant QLIKE comparisons in the wider 20-comparison family are all against the deliberately naive baselines (VIX/EWMA, SPY/AR1, SPY/EWMA, QQQ/AR1, QQQ/EWMA, N225/AR1, N225/EWMA) -- HAR beating AR(1) and EWMA is not the contested claim.",
+      "basis": "Recount against the current results table with HAC-corrected inference and an explicit multiple-comparison family (repo rule: uniqueness / count claims must be re-verified after any inference retrofit).",
+      "status": "RETRACTED"
+    },
+    {
+      "claim_id": "both_losses_tested",
+      "where": "README.md §4.5 'Loss：QLIKE + MSE，報 mean 與 median。DM + HLN'",
+      "before": "Implies DM tests were run on both QLIKE and MSE.",
+      "after": "DM was run on QLIKE ONLY. Under MSE, ARFIMA's point estimate beats HAR in 4 of 5 assets (SPY, TW0050, QQQ, N225), MSE ratios {'VIX': 1.0017, 'SPY': 0.8888, 'TW0050': 0.8359, 'QQQ': 0.8742, 'N225': 0.8914} -- i.e. 11-16% lower. The omitted loss reverses the model RANKING in 3 of 5 assets. IMPORTANT and stated plainly: not one ARFIMA-vs-HAR MSE comparison is statistically significant (p in [0.2654, 0.9744]), so this is a reversal of the point-estimate ordering, NOT evidence that ARFIMA beats HAR under MSE. The honest reading is that the two models are statistically indistinguishable under both losses, while a reader who saw only one loss table would draw opposite conclusions about which model is better. MSE on variance-level data is dominated by a few extreme observations, which is why an 11-16% mean gap still carries a large standard error.",
+      "basis": "Direct inspection of k1623.run_oos: dm_vs_HAR is built from the QLIKE loss vector only. MSE was stored as a summary mean and never tested.",
+      "status": "CORRECTED (omission repaired in this round)"
+    },
+    {
+      "claim_id": "elw_is_shimotsu_phillips",
+      "where": "README.md §4.2, §9 headline",
+      "before": "ELW described as 'Shimotsu-Phillips, estimates non-stationary d'.",
+      "after": "The implementation demeans by the SAMPLE MEAN; it does not use the Shimotsu-Phillips unknown-mean mu-hat(d) weighted estimator. It is 'ELW with sample-mean demeaning'. For VIX (d-hat > 0.5) the sample mean is not a valid level estimator.",
+      "basis": "k1623.local_whittle(exact=True) computes xd = x - mean(x) once, then optimises only over d.",
+      "status": "CORRECTED (method description)"
+    },
+    {
+      "claim_id": "shift_share_upper_bound",
+      "where": "README.md §6.2 bracket column, §7 caveat 3",
+      "before": "VIX level-shift contribution bracketed at [11%, 20%], the upper end described as an upper bound.",
+      "after": "VIX selected 15 of a maximum 15 permissive breaks -- the cap BINDS, so 20.3% is not an upper bound. The VIX bracket is open-ended above. The other four assets selected 10-13 of 15 and are unaffected.",
+      "basis": "k1623_results.json: VIX n_breaks_selected = 15 = max_breaks_cap.",
+      "status": "CORRECTED (bound downgraded)"
+    },
+    {
+      "claim_id": "breakrobust_har_window",
+      "where": "README.md §4.5 'BreakRobustHAR（只用最近 latest-break 之後樣本 refit）'",
+      "before": "BreakRobustHAR refits HAR on the post-latest-break sample only.",
+      "after": "k1623.py:475 sets wstart = max(0, min(brk_start, i-22-60)), which deliberately pushes the window START BACK BEFORE the break when the break is too recent (to keep >=60 usable rows); with no detected break it falls back to a trailing 750 window. The description is corrected to match the code; the code is unchanged, so all numbers stand.",
+      "basis": "Direct code read. Option (i) of the brief: fix the description, not the code, because this round is about claims vs evidence.",
+      "status": "CORRECTED (description aligned to code)"
+    },
+    {
+      "claim_id": "dm_inference_no_hac",
+      "where": "k1623.py dm_hln, all t-statistics in README §6.3",
+      "before": "DM t-statistics computed with `for lag in range(1, h)`, which at h=1 applies NO HAC correction.",
+      "after": "All rev2 inference uses canonical dm_test (Newey-West, bandwidth ceil(n^(1/3))). Per-row t_original_degenerate_no_hac retains the old statistic. Comparisons whose 5% verdict changed: 3.",
+      "basis": ".claude/rules/experiments.md 'DM 的 HAC 落後期不可只用 h-1'; the site is already frozen in storage/ops/dm_hac_lag_baseline.json degenerate_sites. Omitting HAC is two-sided: it can inflate OR deflate |t| depending on the sign of the loss-differential autocovariance (see loss_diff_acf1).",
+      "status": "CORRECTED (inference upgraded)"
+    }
+  ],
+  "residual_limitations": [
+    {
+      "id": "identification_not_restored",
+      "text": "This round RETRACTS the identification claim; it does not replace it. Testing genuine vs spurious long memory needs a test built for a random / dense shift process -- Qu (2011) score test, Shimotsu (2006) splitting, or Perron-Qu (2010). None is implemented here. The surviving demeaned d-hat is descriptive only."
+    },
+    {
+      "id": "generated_regressor_se",
+      "text": "Demeaned d-hat SEs are the raw ELW asymptotic 1/(2 sqrt(m)). They do NOT account for the break dates being ESTIMATED, so they are a LOWER BOUND on the true sampling uncertainty. The Monte Carlo in k1623_rev2_mc.py quantifies the gap but is not a substitute for a correct analytic SE."
+    },
+    {
+      "id": "elw_is_sample_mean_demeaned",
+      "text": "The ELW implementation demeans by the SAMPLE MEAN, not the Shimotsu-Phillips mu-hat(d) weighted mean. For VIX (d-hat = 0.723 > 0.5, non-stationary region) the sample mean is not a valid level estimator, so VIX d-hat is the least trustworthy of the five."
+    },
+    {
+      "id": "fd_maxk_binding",
+      "text": "FD_MAXK = 2000 truncates the fractional-difference filter. With n = 2,565-4,655 the truncation BINDS for every asset, and it bites hardest where d is largest (VIX), because the neglected weight tail decays as k^(-d-1)."
+    },
+    {
+      "id": "vix_permissive_cap_binding",
+      "text": "VIX selected 15 of a maximum 15 permissive breaks. The cap binds, so the 20.3% permissive level-shift share is NOT an upper bound for VIX -- allowing more breaks could push it higher. The bracket is open-ended on that side."
+    },
+    {
+      "id": "no_tradability_test",
+      "text": "No strategy, transaction-cost or utility evaluation was run in any round. This experiment takes no position on tradability."
+    },
+    {
+      "id": "range_proxy",
+      "text": "RV proxy is a daily Parkinson high-low range (intraday history is ~115 days, too short). Measurement error affects the LEVEL of d-hat."
+    },
+    {
+      "id": "one_step_only",
+      "text": "OOS is one-step. h=5/22 with overlapping-forecast HAC is untested."
+    },
+    {
+      "id": "tw0050_near_replication",
+      "text": "TW0050 is a NEAR-replication, not an exact one. Its cached history was REVISED upstream (not merely extended): at the pinned end date one formerly degenerate high==low row now has high > low and is retained, so n is 4264 vs the original 4263. Max relative deviation from the original summary statistics is 2.5e-3. Statements of the form 'same forecasts, same sample' are FALSE for TW0050."
+    },
+    {
+      "id": "temporary_spikes_not_removed",
+      "text": "Piecewise-mean demeaning removes permanent LEVEL shifts only. It cannot remove TEMPORARY spikes such as VIX during the GFC and COVID, so part of VIX's high d-hat may reflect a few extreme episodes rather than smooth long memory."
+    },
+    {
+      "id": "cross_asset_diagnostic_only",
+      "text": "Cross-asset figures are diagnostic. Asset-days are never pooled, because same-date cross-asset loss differentials share market-wide shocks and stacking them would understate standard errors (repo rule: no asset-day iid pooling)."
+    }
+  ],
+  "total_runtime_sec": 2.23
+}

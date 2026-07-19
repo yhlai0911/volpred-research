@@ -1,0 +1,191 @@
+{
+  "experiment_id": "k1623_rev2_mc",
+  "title": "Generated-regressor Monte Carlo for the break-demeaned ELW d-hat",
+  "generated_utc": "2026-07-19T06:53:14.104716+00:00",
+  "seed": 42,
+  "n_reps": 500,
+  "burn_in": 2000,
+  "design": {
+    "arm_a": "simulate -> Bai-Perron re-estimates breaks -> demean -> ELW (realistic)",
+    "arm_b": "simulate -> demean at TRUE simulated breaks -> ELW (oracle)",
+    "dgp": "ARFIMA(0, d_hat, 0) Gaussian innovations + the fitted piecewise-constant level implanted at the estimated break dates"
+  },
+  "per_asset": {
+    "VIX": {
+      "n": 4655,
+      "bandwidth_m": 158,
+      "d_demeaned_fitted": 0.6452016182738278,
+      "se_asymptotic_published": 0.0397778642087865,
+      "n_breaks_true": 4,
+      "innovation_sigma": 0.15951525287941057,
+      "arm_a_breaks_reestimated": {
+        "mean": 0.6178626183444433,
+        "sd": 0.051776804285963506,
+        "bias_vs_fitted": -0.02733899992938449,
+        "pct_2_5": 0.5136419399419404,
+        "pct_97_5": 0.7209090572628537
+      },
+      "arm_b_breaks_known": {
+        "mean": 0.6378246199636172,
+        "sd": 0.05096568141549462,
+        "bias_vs_fitted": -0.0073769983102106584
+      },
+      "generated_regressor_inflation_sd_a_over_sd_b": 1.0159150794797829,
+      "understatement_sd_a_over_published_se": 1.301648676112846,
+      "break_count_recovery": {
+        "true": 4,
+        "mean_selected": 4.196,
+        "pct_recovered_exactly": 0.784
+      }
+    },
+    "SPY": {
+      "n": 2639,
+      "bandwidth_m": 112,
+      "d_demeaned_fitted": 0.4750335000036255,
+      "se_asymptotic_published": 0.0472455591261534,
+      "n_breaks_true": 4,
+      "innovation_sigma": 0.8723414808015181,
+      "arm_a_breaks_reestimated": {
+        "mean": 0.3903992964877732,
+        "sd": 0.0629120089576339,
+        "bias_vs_fitted": -0.08463420351585227,
+        "pct_2_5": 0.2640474954822642,
+        "pct_97_5": 0.4992691506871067
+      },
+      "arm_b_breaks_known": {
+        "mean": 0.43555877897490963,
+        "sd": 0.05975524367701467,
+        "bias_vs_fitted": -0.03947472102871585
+      },
+      "generated_regressor_inflation_sd_a_over_sd_b": 1.052828255503098,
+      "understatement_sd_a_over_published_se": 1.3315962414509372,
+      "break_count_recovery": {
+        "true": 4,
+        "mean_selected": 4.028,
+        "pct_recovered_exactly": 0.564
+      }
+    },
+    "TW0050": {
+      "n": 4264,
+      "bandwidth_m": 150,
+      "d_demeaned_fitted": 0.5630956484286742,
+      "se_asymptotic_published": 0.040824829046386304,
+      "n_breaks_true": 3,
+      "innovation_sigma": 0.9097591601101053,
+      "arm_a_breaks_reestimated": {
+        "mean": 0.4984094560470068,
+        "sd": 0.049552929412157457,
+        "bias_vs_fitted": -0.0646861923816674,
+        "pct_2_5": 0.402988598197367,
+        "pct_97_5": 0.6005129212577169
+      },
+      "arm_b_breaks_known": {
+        "mean": 0.5540295977499768,
+        "sd": 0.04502337769105379,
+        "bias_vs_fitted": -0.009066050678697368
+      },
+      "generated_regressor_inflation_sd_a_over_sd_b": 1.1006044404794555,
+      "understatement_sd_a_over_published_se": 1.2137939231993855,
+      "break_count_recovery": {
+        "true": 3,
+        "mean_selected": 4.246,
+        "pct_recovered_exactly": 0.07
+      }
+    },
+    "QQQ": {
+      "n": 2639,
+      "bandwidth_m": 112,
+      "d_demeaned_fitted": 0.4573093739711618,
+      "se_asymptotic_published": 0.0472455591261534,
+      "n_breaks_true": 4,
+      "innovation_sigma": 0.830685077485762,
+      "arm_a_breaks_reestimated": {
+        "mean": 0.3801196675368566,
+        "sd": 0.06190586520605872,
+        "bias_vs_fitted": -0.07718970643430517,
+        "pct_2_5": 0.261887374117689,
+        "pct_97_5": 0.500782031832845
+      },
+      "arm_b_breaks_known": {
+        "mean": 0.4212227111808416,
+        "sd": 0.0598976321951364,
+        "bias_vs_fitted": -0.03608666279032019
+      },
+      "generated_regressor_inflation_sd_a_over_sd_b": 1.0335277528897944,
+      "understatement_sd_a_over_published_se": 1.3103001922521416,
+      "break_count_recovery": {
+        "true": 4,
+        "mean_selected": 3.942,
+        "pct_recovered_exactly": 0.56
+      }
+    },
+    "N225": {
+      "n": 2565,
+      "bandwidth_m": 111,
+      "d_demeaned_fitted": 0.46032378718005595,
+      "se_asymptotic_published": 0.04745789978762495,
+      "n_breaks_true": 4,
+      "innovation_sigma": 0.8536423835313695,
+      "arm_a_breaks_reestimated": {
+        "mean": 0.3760586806922651,
+        "sd": 0.06021076681209827,
+        "bias_vs_fitted": -0.08426510648779084,
+        "pct_2_5": 0.2588928255534172,
+        "pct_97_5": 0.4980586250160757
+      },
+      "arm_b_breaks_known": {
+        "mean": 0.4216054744262296,
+        "sd": 0.059585690412935696,
+        "bias_vs_fitted": -0.03871831275382637
+      },
+      "generated_regressor_inflation_sd_a_over_sd_b": 1.010490377720401,
+      "understatement_sd_a_over_published_se": 1.2687195826520485,
+      "break_count_recovery": {
+        "true": 4,
+        "mean_selected": 3.968,
+        "pct_recovered_exactly": 0.634
+      }
+    }
+  },
+  "summary": {
+    "generated_regressor_inflation_range": [
+      1.010490377720401,
+      1.1006044404794555
+    ],
+    "published_se_understatement_range": [
+      1.2137939231993855,
+      1.3315962414509372
+    ],
+    "attenuation_bias_range": [
+      -0.08463420351585227,
+      -0.02733899992938449
+    ],
+    "d_over_mc_sd": {
+      "VIX": 12.46120974771592,
+      "SPY": 7.550760305930173,
+      "TW0050": 11.363518869795067,
+      "QQQ": 7.387173613501244,
+      "N225": 7.645207187222903
+    },
+    "break_count_exact_recovery_rate": {
+      "VIX": 0.784,
+      "SPY": 0.564,
+      "TW0050": 0.07,
+      "QQQ": 0.56,
+      "N225": 0.634
+    },
+    "finding_1_se_is_understated": "The published asymptotic SE understates the Monte Carlo sampling sd by a factor of 1.21-1.33. The original confidence intervals are too narrow.",
+    "finding_2_but_not_mainly_because_of_the_breaks": "Contrary to what the reviewer critique might suggest, break ESTIMATION contributes only 1.01-1.10x on top of the oracle-break sd -- i.e. the generated-regressor effect on the SE is SMALL. Most of the understatement comes from the asymptotic 1/(2 sqrt(m)) formula itself being optimistic at this sample size and bandwidth. Reported this way round because it is what the simulation shows, not what would best support the critique.",
+    "finding_3_downward_attenuation": "Re-estimating breaks and demeaning attenuates d-hat downward by -0.085 to -0.027 even when the simulated DGP contains EXACTLY the level shifts being removed and no others. So part of the raw -> demeaned d-hat drop reported in the original round is a mechanical artefact of fitting breaks, not evidence of additional level shifts. This weakens the original round's reading of that drop in BOTH directions and is a further reason the identification claim does not stand.",
+    "finding_4_break_recovery_is_noisy": "Bai-Perron recovers the exact number of breaks in 7%-78% of replications (TW0050 worst at 7%). Break DATES are estimated with substantial uncertainty even where the resulting d-hat sd is not much inflated.",
+    "what_survives": "The descriptive statement survives comfortably: with MC sd of 0.045-0.063 and d-hat of 0.457-0.645, the ratio d/sd is 7.4-12.5, so the break-demeaned d-hat is still clearly positive under this model. That is a statement about RESIDUAL PERSISTENCE, not an identification result -- the retracted claim stays retracted, because no amount of SE correction can make a deterministic 5-break model speak to a random dense-shift alternative."
+  },
+  "scope_limits": [
+    "MODEL-CONDITIONAL: assumes the DGP really is ARFIMA + deterministic breaks at the estimated dates. It quantifies sampling uncertainty under that model.",
+    "It is NOT a test of that model and NOT evidence for it.",
+    "It cannot address Diebold-Inoue (random / dense shift DGP), which is the identification question this experiment RETRACTS rather than answers.",
+    "Gaussian innovations; log-RV is closer to Gaussian than RV but not exactly so.",
+    "The same FD_MAXK = 2000 truncation binds here as in the main round."
+  ],
+  "total_runtime_sec": 306.45
+}
