@@ -41402,7 +41402,7 @@
     "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:k1731-armB-corrected-rev5` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-18T19:00:53.185575+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。判定完成後這張任務關閉，held 記錄會自然消失。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "reap_orphan_deliverables_held_ttl",
     "created_at": "2026-07-19T00:01:09.730137+00:00",
     "payload": {
@@ -41418,9 +41418,6 @@
       ]
     },
     "created_by": "reap_orphan_deliverables",
-    "claimed_by": "codex-failover-slot-3-fdddacd4ae174025bdb171ff5b995fb3",
-    "claimed_at": "2026-07-19T06:53:31.834737+00:00",
-    "claim_session_id": "4a49838b4da8",
     "status_history": [
       {
         "ts": "2026-07-19T06:53:31.834750+00:00",
@@ -41433,9 +41430,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-3-fdddacd4ae174025bdb171ff5b995fb3"
+      },
+      {
+        "ts": "2026-07-19T06:57:48.235439+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-3-fdddacd4ae174025bdb171ff5b995fb3"
       }
     ],
-    "started_at": "2026-07-19T06:53:37.313094+00:00"
+    "started_at": "2026-07-19T06:53:37.313094+00:00",
+    "completed_at": "2026-07-19T06:57:48.235422+00:00",
+    "result": "root_cause=canonical reaper treated a clean Git-tracked compute output inside an active ignored worktree as git_ignored/no_existing_declared_files; repair=recognize exact clean tracked worktree outputs as owned by the formal review+merge path, add dirty-output fail-closed regression, and refresh held state; verification=11 targeted tests passed and live k1731 held entry removed",
+    "burst_reported_at": "2026-07-19T06:57:48.241822+00:00"
   },
   {
     "id": "alert_release_pool_gap_20260719",
@@ -42954,13 +42960,10 @@
     "description": "2026-07-19 觀察到的協調危害：agent-brief_snapaudit-3cae76 已 completed_at 05:58Z status=failed(experiment_gate_failed)，PHASE A 依規則派 triage followup（assign_6c43a4d4）；但同時有 compute worker（PID 40900，14:00 起）在把同一 brief 重試進同一 worktree .claude/worktrees/dispatch-slot-1-858545f9-snapaudit。triage subagent 的 Write 被 file-modified 保護擋下才沒互相覆寫，且它觀察到腳本在它兩次驗證之間又被改（5031→5536 bytes）。要查：(1) failed job 的 retry 條件是什麼、為何在 followup_dispatched 之後仍重試；(2) retry 與 followup 是否應互斥（例如 mark-followup-dispatched 即禁止 retry，或 retry 前先確認無 in_progress 的 triage task）；(3) 同一 worktree 是否該有 writer lock。不修表面，找 owner 收斂成單一 enforcement point。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "system",
     "created_at": "2026-07-19T06:28:31.488714+00:00",
     "created_by": "hourly-slot-1-22b2d7cd63ae49c6993bc3ea246ac142",
-    "claimed_by": "codex-failover-slot-1-5741c175270c4935a70126f41109eb54",
-    "claimed_at": "2026-07-19T06:54:06.977491+00:00",
-    "claim_session_id": "0242d718877f",
     "status_history": [
       {
         "ts": "2026-07-19T06:54:06.977507+00:00",
@@ -42973,9 +42976,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-1-5741c175270c4935a70126f41109eb54"
+      },
+      {
+        "ts": "2026-07-19T06:57:53.450322+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-5741c175270c4935a70126f41109eb54"
       }
     ],
-    "started_at": "2026-07-19T06:54:07.214910+00:00"
+    "started_at": "2026-07-19T06:54:07.214910+00:00",
+    "completed_at": "2026-07-19T06:57:53.450309+00:00",
+    "result": "root_cause=mark-followup-dispatched accepted nonterminal receipts while requeue ignored delegated followups; repair=atomic receipt-lock mutual exclusion plus regression coverage, 48 compute-queue tests passed; incident_audit=14:00 worker log shows k1708 ran in a different worktree, so same-brief automatic retry was a false attribution",
+    "burst_reported_at": "2026-07-19T06:57:53.456434+00:00"
   },
   {
     "id": "telegram-1090",
@@ -43176,7 +43188,7 @@
         "by": "hourly-slot-3-fdddacd4ae174025bdb171ff5b995fb3"
       }
     ],
-    "started_at": "2026-07-19T06:52:17.639673+00:00"
+    "started_at": "2026-07-19T06:58:08.588870+00:00"
   },
   {
     "id": "assign_26fb158e",

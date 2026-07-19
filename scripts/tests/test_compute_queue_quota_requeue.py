@@ -200,3 +200,48 @@ def test_requeue_cli_refuses_a_job_that_is_not_failed(queue, tmp_path, capsys):
     _agent_job(queue, tmp_path, "k1708", "quota", status="running")
     assert compute_queue.requeue(argparse.Namespace(id="k1708")) == 2
     assert "not failed" in capsys.readouterr().err
+
+
+def test_followup_then_requeue_is_mutually_exclusive(queue, tmp_path, capsys):
+    """A triage owner prevents a blind retry from writing the same worktree."""
+    path = _agent_job(queue, tmp_path, "k1710", "quota")
+
+    assert compute_queue.mark_followup_dispatched(
+        argparse.Namespace(id="k1710", next_task_id="triage-k1710")
+    ) == 0
+    assert compute_queue.requeue(argparse.Namespace(id="k1710")) == 2
+
+    job = json.loads(path.read_text())
+    assert job["status"] == "failed"
+    assert job["followup_dispatched"] is True
+    assert job["followup_next_task_id"] == "triage-k1710"
+    assert "disposition is owned by followup triage-k1710" in capsys.readouterr().err
+
+
+def test_requeue_then_followup_is_mutually_exclusive(queue, tmp_path, capsys):
+    """The reciprocal lock order refuses to attach triage to a queued retry."""
+    path = _agent_job(queue, tmp_path, "k1711", "auth")
+
+    assert compute_queue.requeue(argparse.Namespace(id="k1711")) == 0
+    assert compute_queue.mark_followup_dispatched(
+        argparse.Namespace(id="k1711", next_task_id="triage-k1711")
+    ) == 2
+
+    job = json.loads(path.read_text())
+    assert job["status"] == "queued"
+    assert job["followup_dispatched"] is False
+    assert "status=queued, not terminal" in capsys.readouterr().err
+
+
+def test_automatic_quota_requeue_refuses_followup_owned_receipt(queue, tmp_path):
+    job = json.loads(_agent_job(
+        queue,
+        tmp_path,
+        "k1712",
+        "quota",
+        followup_dispatched=True,
+        followup_next_task_id="triage-k1712",
+    ).read_text())
+
+    assert compute_queue._requeue_quota_blocked(job) is False
+    assert job["status"] == "failed"

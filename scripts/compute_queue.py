@@ -758,6 +758,12 @@ def _requeue_quota_blocked(job: dict[str, Any]) -> bool:
     if it should fail normally — either because the wall was not quota, or because
     the job has already spent its patience.
     """
+    # Once a followup owns the disposition, the queue must not create a second
+    # writer.  This is normally impossible for the automatic path (the worker
+    # has not published a terminal receipt yet), but pin the invariant here as
+    # well as in the manual CLI so legacy/corrupt receipts fail closed.
+    if job.get("followup_dispatched"):
+        return False
     if _runner_failure_class(job) != "quota":
         return False
     bounces = job.get("quota_requeues") or 0
@@ -1203,7 +1209,21 @@ def mark_followup_dispatched(args) -> int:
         print(f"error: not found {args.id}", file=sys.stderr)
         return 2
     with _receipt_lock():
-        j = json.loads(p.read_text())
+        j = _read_job_file(p, context="mark-followup-dispatched")
+        if j is None:
+            return 2
+        # This check and requeue()'s followup check use the same receipt lock.
+        # Whichever transition wins makes the other refuse: a queued/running
+        # worker and a triage followup can therefore never own the same job at
+        # once.  Before this gate, requeue-first followed by mark-followup could
+        # leave a queued job carrying an active triage task.
+        if j.get("status") not in {"completed", "failed"}:
+            print(
+                f"error: cannot dispatch followup for {args.id} — "
+                f"status={j.get('status')}, not terminal.",
+                file=sys.stderr,
+            )
+            return 2
         j["followup_dispatched"] = True
         j["followup_dispatched_at"] = utc_now()
         if args.next_task_id:
@@ -1360,6 +1380,14 @@ def requeue(args) -> int:
         if job.get("status") != "failed":
             print(f"error: cannot requeue {args.id} — status={job.get('status')}, not failed.",
                   file=sys.stderr)
+            return 2
+        if job.get("followup_dispatched"):
+            followup_id = job.get("followup_next_task_id") or "(unknown followup task)"
+            print(
+                f"error: cannot requeue {args.id} — disposition is owned by "
+                f"followup {followup_id}. Do not retry the delegated original receipt.",
+                file=sys.stderr,
+            )
             return 2
         failure = _runner_failure_class(job)
         if failure not in ("auth", "quota"):
