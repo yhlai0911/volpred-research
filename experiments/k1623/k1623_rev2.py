@@ -530,8 +530,12 @@ def main() -> None:
                              "paths coincide; it is not proof.",
                 "tw0050_exception": "TW0050 is excluded from the assertion entirely and is "
                                     "measured instead (n 4263 -> 4264, max relative deviation "
-                                    "2.5e-3). Any statement of the form 'same forecasts, same "
-                                    "sample' is FALSE for TW0050 and must not be made.",
+                                    "5.26e-3 -- see per_asset_vintage.TW0050."
+                                    "max_relative_deviation_vs_original for the full-precision "
+                                    "value; earlier drafts wrote 2.5e-3 here, about half the "
+                                    "true figure, corrected in rev3). Any statement of the form "
+                                    "'same forecasts, same sample' is FALSE for TW0050 and must "
+                                    "not be made.",
             },
             "data_vintage_pinned": {
                 "reason": "price_cache.db has advanced ~10 trading days since the original "
@@ -572,21 +576,27 @@ def main() -> None:
                                    "IS PRE-SPECIFIED IN CODE as within_loss_20 (corrections "
                                    "applied separately within QLIKE and within MSE, each of size "
                                    "20); every README conclusion uses BH at that family. "
-                                   "CORRECTION TO EARLIER WORDING: this is FIVE nested "
-                                   "hypothesis sets, not 'three explicit families' -- QLIKE-20, "
-                                   "MSE-20, QLIKE-focal-10, MSE-focal-10, pooled-40, where each "
-                                   "focal_10 is a SUBSET of its within_loss_20 and pooled_40 is "
-                                   "the union. The non-primary sets are reported as sensitivity, "
+                                   "CORRECTION TO EARLIER WORDING: this is FIVE hypothesis "
+                                   "sets, not 'three explicit families' -- QLIKE-20, MSE-20, "
+                                   "QLIKE-focal-10, MSE-focal-10, pooled-40. FURTHER CORRECTION "
+                                   "(rev3): calling all five 'nested' was imprecise. QLIKE-20 "
+                                   "and MSE-20 are DISJOINT, not nested. The actual structure "
+                                   "is: each focal_10 is a SUBSET of its own within_loss_20, "
+                                   "and pooled_40 is the UNION of QLIKE-20 and MSE-20. Only the "
+                                   "focal-within-loss relation is genuinely nested. "
+                                   "The non-primary sets are reported as sensitivity, "
                                    "not as a menu: zero focal comparisons survive BH in ANY of "
                                    "them, so the conclusion does not depend on the choice.",
         },
         "headline_finding": {
             "statement": "Under QLIKE, HAR has the lower mean loss against ARFIMA in 4 of 5 "
                          "assets. Under MSE, ARFIMA has the lower mean loss in 4 of 5 assets, "
-                         "by 11-16%. Same forecasting code, same models, same forecasts scored "
-                         "two ways (for the 4 exact-pin assets the reproduced aggregate losses "
-                         "match the original to 1e-9; TW0050 is a near-replication on revised "
-                         "upstream history) -- the model "
+                         "by 11-16%. Same forecasting code, same models, same scoring window, "
+                         "scored two ways (for the 4 exact-pin assets the reproduced AGGREGATE "
+                         "losses match the original to 1e-9 -- strong evidence, not proof, that "
+                         "the forecast paths coincide; TW0050 is a NEAR-replication on revised "
+                         "upstream history, so 'same forecasts, same sample' is FALSE for it) "
+                         "-- the model "
                          "ranking flips with the loss function in 3 of 5 assets. But under "
                          "canonical HAC inference NEITHER loss makes the ARFIMA-vs-HAR "
                          "difference statistically significant after multiple-comparison "
@@ -674,8 +684,12 @@ RESIDUAL_LIMITATIONS = [
         "text": "TW0050 is a NEAR-replication, not an exact one. Its cached history was REVISED "
                 "upstream (not merely extended): at the pinned end date one formerly degenerate "
                 "high==low row now has high > low and is retained, so n is 4264 vs the original "
-                "4263. Max relative deviation from the original summary statistics is 2.5e-3. "
-                "Statements of the form 'same forecasts, same sample' are FALSE for TW0050.",
+                "4263. Max relative deviation from the original summary statistics is 5.26e-3 "
+                "(authoritative field: reproduction_guard.per_asset_vintage.TW0050."
+                "max_relative_deviation_vs_original = 0.005259349489457132; earlier drafts of "
+                "this prose said 2.5e-3, roughly half the true value -- a hand-written typo, "
+                "corrected in rev3). Statements of the form 'same forecasts, same sample' are "
+                "FALSE for TW0050.",
     },
     {
         "id": "temporary_spikes_not_removed",

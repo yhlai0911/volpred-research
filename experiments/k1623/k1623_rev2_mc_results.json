@@ -8,7 +8,8 @@
   "design": {
     "arm_a": "simulate -> Bai-Perron re-estimates breaks -> demean -> ELW (realistic)",
     "arm_b": "simulate -> demean at TRUE simulated breaks -> ELW (oracle)",
-    "dgp": "ARFIMA(0, d_hat, 0) Gaussian innovations + the fitted piecewise-constant level implanted at the estimated break dates"
+    "dgp": "ARFIMA(0, d_hat, 0) Gaussian innovations + the fitted piecewise-constant level implanted at the estimated break dates",
+    "arm_b_scope_correction_rev3": "Arm B oracle-ises the break LOCATIONS only. It still calls piecewise_demean on the simulated series, i.e. it re-estimates each segment mean, so it is NOT an 'ELW alone' baseline. See claim_corrections_rev3.arm_b_is_not_pure_elw_only."
   },
   "per_asset": {
     "VIX": {
@@ -178,14 +179,99 @@
     "finding_2_but_not_mainly_because_of_the_breaks": "Contrary to what the reviewer critique might suggest, break ESTIMATION contributes only 1.01-1.10x on top of the oracle-break sd -- i.e. the generated-regressor effect on the SE is SMALL. Most of the understatement comes from the asymptotic 1/(2 sqrt(m)) formula itself being optimistic at this sample size and bandwidth. Reported this way round because it is what the simulation shows, not what would best support the critique.",
     "finding_3_downward_attenuation": "Re-estimating breaks and demeaning attenuates d-hat downward by -0.085 to -0.027 even when the simulated DGP contains EXACTLY the level shifts being removed and no others. So part of the raw -> demeaned d-hat drop reported in the original round is a mechanical artefact of fitting breaks, not evidence of additional level shifts. This weakens the original round's reading of that drop in BOTH directions and is a further reason the identification claim does not stand.",
     "finding_4_break_recovery_is_noisy": "Bai-Perron recovers the exact number of breaks in 7%-78% of replications (TW0050 worst at 7%). Break DATES are estimated with substantial uncertainty even where the resulting d-hat sd is not much inflated.",
-    "what_survives": "The descriptive statement survives comfortably: with MC sd of 0.045-0.063 and d-hat of 0.457-0.645, the ratio d/sd is 7.4-12.5, so the break-demeaned d-hat is still clearly positive under this model. That is a statement about RESIDUAL PERSISTENCE, not an identification result -- the retracted claim stays retracted, because no amount of SE correction can make a deterministic 5-break model speak to a random dense-shift alternative."
+    "what_survives": "The descriptive statement survives comfortably: with MC sd of 0.045-0.063 and d-hat of 0.457-0.645, the ratio d/sd is 7.4-12.5, so the break-demeaned d-hat is still clearly positive under this model. That is a statement about RESIDUAL PERSISTENCE, not an identification result -- the retracted claim stays retracted, because no amount of SE correction can make a deterministic 5-break model speak to a random dense-shift alternative.",
+    "READ_THIS_FIRST_rev3_supersessions": "TWO ENTRIES IN THIS `summary` BLOCK ARE SUPERSEDED -- see claim_corrections_rev3 for the full record. (1) finding_3_downward_attenuation attributes the whole -0.085..-0.027 arm-A bias to break estimation. It does not: the correct, paired A-minus-B figure is -0.056 to -0.020, roughly half. (2) finding_4_break_recovery_is_noisy ends with a claim about break DATE uncertainty. RETRACTED: this simulation stores only break COUNTS and never compares dates. The original strings are retained verbatim, not rewritten, so that the record of what was claimed survives alongside the correction."
   },
   "scope_limits": [
     "MODEL-CONDITIONAL: assumes the DGP really is ARFIMA + deterministic breaks at the estimated dates. It quantifies sampling uncertainty under that model.",
     "It is NOT a test of that model and NOT evidence for it.",
     "It cannot address Diebold-Inoue (random / dense shift DGP), which is the identification question this experiment RETRACTS rather than answers.",
     "Gaussian innovations; log-RV is closer to Gaussian than RV but not exactly so.",
-    "The same FD_MAXK = 2000 truncation binds here as in the main round."
+    "The same FD_MAXK = 2000 truncation binds here as in the main round.",
+    "ARM B IS NOT ELW-ONLY (added rev3): the oracle arm knows the break DATES but still estimates the segment MEANS from simulated data. The A-minus-B contrast therefore isolates the cost of locating breaks and differences out the mean-estimation generated-regressor uncertainty, which this design does not measure."
   ],
-  "total_runtime_sec": 306.45
+  "total_runtime_sec": 306.45,
+  "claim_corrections_rev3": {
+    "status": "This frozen artifact predates the corrections listed here. Its original fields are retained verbatim for audit; the entries below say which of its CLAIMS no longer hold and what replaces them. Where a corrected number is given it was computed from fields already present in this same file (arm means and d_demeaned_fitted), not from a re-run.",
+    "raised_by": "Codex gpt-5.6-sol round 2 review of K1623 rev2, section 7 (BLOCKER)",
+    "applied_at_round": "rev3 (claim-alignment only; no estimation was re-run)",
+    "source_of_truth": "k1623_rev2_mc.py as it now stands already emits the corrected fields (break_estimation_attenuation_a_minus_b, arm_b_oracle_location_bias). This artifact was generated by the earlier draft and is NOT regenerated in rev3, which is exactly why the discrepancy has to be annotated here rather than hidden.",
+    "superseded_claims": [
+      {
+        "json_path": "summary.finding_3_downward_attenuation",
+        "superseded_text": "Re-estimating breaks and demeaning attenuates d-hat downward by -0.085 to -0.027 ...",
+        "why_it_is_wrong": "That range is arm A's TOTAL bias against the fitted d-hat. It is the sum of (i) the bias the oracle-break arm B already shows and (ii) the extra attenuation from having to LOCATE the breaks. Attributing the total to break estimation overstates that effect roughly two-fold.",
+        "corrected_claim": "The part attributable to ESTIMATING the break locations is the paired A-minus-B contrast: -0.056 to -0.020. Arm B is itself biased by -0.039 to -0.007 (ELW finite-sample behaviour PLUS estimating the segment means at known locations -- see arm_b_is_not_pure_elw_only). The qualitative point is unchanged: part of the original round's raw -> demeaned d-hat drop is a mechanical artefact of fitting breaks."
+      },
+      {
+        "json_path": "summary.attenuation_bias_range",
+        "superseded_text": [
+          -0.08463420351585227,
+          -0.02733899992938449
+        ],
+        "why_it_is_wrong": "Retained unchanged and still numerically correct AS arm A's total bias, but its NAME invites reading it as the attenuation caused by break estimation, which it is not.",
+        "corrected_claim": "Use break_location_estimation_effect_range_a_minus_b below for the break-estimation effect. Read this field only as 'total arm-A bias vs the fitted d-hat'."
+      },
+      {
+        "json_path": "summary.finding_4_break_recovery_is_noisy",
+        "superseded_text": "Break DATES are estimated with substantial uncertainty even where the resulting d-hat sd is not much inflated.",
+        "why_it_is_wrong": "RETRACTED as unsupported by this artifact. The simulation stores only the selected break COUNT; it never stores or compares estimated break DATES, so it cannot quantify date-location error in either direction. k1623_rev2_mc.py already concedes this in its own finding_4 text.",
+        "corrected_claim": "Only the COUNT recovery rate is supported: Bai-Perron recovers the exact number of breaks in 7%-78% of replications (TW0050 worst at 7%). No statement about break-date uncertainty is made."
+      },
+      {
+        "json_path": "design.arm_b / summary.finding_2_but_not_mainly_because_of_the_breaks",
+        "superseded_text": "arm B = oracle; 'Arm B isolates the sampling noise of ELW alone'.",
+        "why_it_is_wrong": "Arm B calls piecewise_demean on the SIMULATED data, so it estimates each segment's mean from that data. It oracle-ises the break LOCATIONS only; it does not use the known implanted levels. So it is not an ELW-only baseline, and the mean-structure generated-regressor uncertainty it still carries is DIFFERENCED OUT of the A-minus-B contrast.",
+        "corrected_claim": "sd(A)/sd(B) = 1.01-1.10x and the A-minus-B bias contrast both measure the cost of LOCATING the breaks, conditional on the segment means being re-estimated in both arms. The total generated-regressor burden of the estimated mean structure is therefore NOT bounded by these figures -- it is not measured by this design at all."
+      }
+    ],
+    "corrected_attribution": {
+      "definition": "total_arm_a_bias = arm_a.mean - d_demeaned_fitted; arm_b_oracle_location_bias = arm_b.mean - d_demeaned_fitted; break_location_estimation_effect = arm_a.mean - arm_b.mean.",
+      "per_asset": {
+        "VIX": {
+          "total_arm_a_bias_vs_fitted": -0.02733899992938449,
+          "arm_b_oracle_location_bias_vs_fitted": -0.0073769983102106584,
+          "break_location_estimation_effect_a_minus_b": -0.01996200161917383
+        },
+        "SPY": {
+          "total_arm_a_bias_vs_fitted": -0.08463420351585227,
+          "arm_b_oracle_location_bias_vs_fitted": -0.03947472102871585,
+          "break_location_estimation_effect_a_minus_b": -0.045159482487136415
+        },
+        "TW0050": {
+          "total_arm_a_bias_vs_fitted": -0.0646861923816674,
+          "arm_b_oracle_location_bias_vs_fitted": -0.009066050678697368,
+          "break_location_estimation_effect_a_minus_b": -0.05562014170297003
+        },
+        "QQQ": {
+          "total_arm_a_bias_vs_fitted": -0.07718970643430517,
+          "arm_b_oracle_location_bias_vs_fitted": -0.03608666279032019,
+          "break_location_estimation_effect_a_minus_b": -0.04110304364398498
+        },
+        "N225": {
+          "total_arm_a_bias_vs_fitted": -0.08426510648779084,
+          "arm_b_oracle_location_bias_vs_fitted": -0.03871831275382637,
+          "break_location_estimation_effect_a_minus_b": -0.045546793733964475
+        }
+      },
+      "break_location_estimation_effect_range_a_minus_b": [
+        -0.05562014170297003,
+        -0.01996200161917383
+      ],
+      "arm_b_oracle_location_bias_range": [
+        -0.03947472102871585,
+        -0.0073769983102106584
+      ],
+      "total_arm_a_bias_range": [
+        -0.08463420351585227,
+        -0.02733899992938449
+      ],
+      "quote_this_one": "break_location_estimation_effect_range_a_minus_b"
+    },
+    "arm_b_is_not_pure_elw_only": {
+      "what_arm_b_actually_does": "k1623_rev2_mc.py:118-120 -- K.piecewise_demean(x, breaks_true): the break LOCATIONS are the true simulated ones, but each segment's mean is estimated from the simulated series.",
+      "consequence": "Arm B is an oracle in break LOCATION only. It is NOT 'ELW alone' and NOT free of generated-regressor uncertainty: it still estimates k+1 segment means. Any contrast against arm B therefore isolates the location-search cost and is SILENT about the mean-estimation cost.",
+      "what_would_measure_the_rest": "A third arm that demeans with the KNOWN implanted level vector instead of re-estimating segment means. That arm does not exist in this design and rev3 does not add it (no-recompute scope)."
+    }
+  }
 }

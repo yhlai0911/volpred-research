@@ -1,0 +1,364 @@
+{
+  "experiment_id": "k1623_rev3",
+  "title": "K1623 rev3 — bounded claim-alignment remediation of the Codex round-2 FAIL",
+  "round": "rev3",
+  "generated_for": "Codex gpt-5.6-sol round 2 verdict (FAIL), storage/ops/codex_reviews/k1623_rev2_verdict.md",
+  "scope": {
+    "what_this_round_did": "Aligned CLAIMS with the frozen evidence. Text and prose JSON fields only.",
+    "what_this_round_did_not_do": [
+      "No estimation was re-run.",
+      "No forecast value changed.",
+      "No method was redesigned.",
+      "No original numeric field was rewritten.",
+      "knowledge.json was NOT written (K1259: the main thread owns that).",
+      "The worktree was NOT merged (verdict is still FAIL pending round 3)."
+    ],
+    "every_new_number_is_derived_not_recomputed": "The A-minus-B attribution added in rev3 is computed from arm means already present in the frozen k1623_rev2_mc_results.json (arm_a.mean, arm_b.mean, d_demeaned_fitted) by k1623_rev3_patch_mc_artifact.py, which refuses to write if any frozen numeric field moves."
+  },
+  "blockers_fixed": [
+    {
+      "blocker": "B1",
+      "codex_section": "§2",
+      "defect": "TW0050 max relative deviation written as 2.51e-3 / 2.5e-3 — about half the authoritative value.",
+      "before": "2.51e-3 (README x3), 2.5e-3 (2 JSON prose fields, 2 source string literals)",
+      "after": "5.26e-3 everywhere, with the authoritative field 0.005259349489457132 quoted inline",
+      "files_changed": [
+        "experiments/k1623/README.md",
+        "experiments/k1623/k1623_rev2.py",
+        "experiments/k1623/k1623_rev2_results.json"
+      ],
+      "sites": [
+        "README.md §3 table",
+        "README.md §3 prose",
+        "README.md §7 limitation 9",
+        "k1623_rev2_results.json reproduction_guard.scope_and_limits.tw0050_exception",
+        "k1623_rev2_results.json residual_limitations[tw0050_near_replication]",
+        "k1623_rev2.py two matching string literals"
+      ],
+      "note": "The wrong figure was a hand-written prose typo, never a computed output; the authoritative field was correct all along. Source and artifact were edited together and verified byte-identical (see self_check.source_artifact_prose)."
+    },
+    {
+      "blocker": "B1-b",
+      "codex_section": "§2",
+      "defect": "README claimed 'every README number can be checked against the rev2 JSON' — false.",
+      "before": "每一個 README 數字都可在 JSON 逐項對上",
+      "after": "A per-section provenance table naming which of the THREE artifacts each figure comes from (k1623_results.json for §6.1/§6.2, rev2 JSON for §3/§6.3, MC JSON for §6.4).",
+      "files_changed": [
+        "experiments/k1623/README.md"
+      ]
+    },
+    {
+      "blocker": "B2",
+      "codex_section": "§2",
+      "defect": "Claimed HAR is the QLIKE winner or tied-best in all 5 assets. All-model winners are VIX=AR1 and N225=ARFIMA; only 3 assets have HAR as overall winner.",
+      "before": "QLIKE 下 HAR 是 5 資產的冠軍或並列最佳",
+      "after": "QLIKE 下 HAR 對 ARFIMA 在 4/5 資產有較低的平均損失 (pairwise, verified against per_asset.*.best_by_qlike)",
+      "files_changed": [
+        "experiments/k1623/README.md"
+      ],
+      "sites": [
+        "README.md §0 'not retracted' list (the false claim)",
+        "README.md §6.3 conclusion 1 (added pairwise qualifier)",
+        "README.md §10 publishable angle (added the two qualifiers a writer must not drop)"
+      ],
+      "note": "§10 mattered most: it is the block a future article agent copies from."
+    },
+    {
+      "blocker": "B3",
+      "codex_section": "§5",
+      "defect": "Unqualified 'all numbers unchanged' / 'all forecasts unchanged' / 'same sample'. Same code does not imply same input: TW0050 went n=4263 -> 4264.",
+      "before": "故所有數字不變 / 故所有預測值不變 / 同一組預測、同一批模型、同一個樣本",
+      "after": "Qualified everywhere: 4 exact-pin assets reproduce AGGREGATE losses to 1e-9; TW0050 changed due to upstream vintage revision. Pointers to scope_and_limits.",
+      "files_changed": [
+        "experiments/k1623/README.md",
+        "experiments/k1623/k1623_rev2.py",
+        "experiments/k1623/k1623_rev2_results.json"
+      ],
+      "sites": [
+        "README.md §4 BreakRobustHAR note",
+        "README.md §6.3 heading line",
+        "README.md §8 output table",
+        "README.md §10 publishable angle",
+        "k1623_rev2_results.json headline_finding.statement + matching source literal"
+      ]
+    },
+    {
+      "blocker": "B4a",
+      "codex_section": "§7",
+      "defect": "Frozen MC JSON attributed the whole -0.085..-0.027 arm-A bias to re-estimating breaks, while the source had already been corrected to the paired A-minus-B contrast.",
+      "before": "summary.finding_3 / summary.attenuation_bias_range presented as the break-estimation effect",
+      "after": "claim_corrections_rev3 block naming each superseded claim and giving the correct A-minus-B range [-0.056, -0.020], plus summary.READ_THIS_FIRST_rev3_supersessions so a reader who stops at the findings still sees the warning. ORIGINAL NUMERIC FIELDS LEFT BYTE-IDENTICAL.",
+      "files_changed": [
+        "experiments/k1623/k1623_rev2_mc_results.json",
+        "experiments/k1623/k1623_rev3_patch_mc_artifact.py"
+      ],
+      "verification": "k1623_rev3_patch_mc_artifact.py guards 10 frozen numeric paths and refuses to write on any change; an independent deep-diff against the pre-rev3 snapshot reported 0 pre-existing fields changed or removed."
+    },
+    {
+      "blocker": "B4b",
+      "codex_section": "§7",
+      "defect": "README §6.4 repeated the old attribution while §9 already used A-minus-B — self-contradiction.",
+      "before": "擬合斷點會機械性地把 d̂ 往下拉 −0.085 到 −0.027",
+      "after": "正確歸因是配對 A−B contrast = −0.056 至 −0.020; the §6.4 table now carries three separate columns (total arm-A / arm-B own / A-minus-B) so the decomposition is visible.",
+      "files_changed": [
+        "experiments/k1623/README.md"
+      ]
+    },
+    {
+      "blocker": "B4c",
+      "codex_section": "§7",
+      "defect": "MC JSON claimed break DATES carry substantial uncertainty, but only break COUNTS are ever stored; the source itself already conceded this.",
+      "before": "Break DATES are estimated with substantial uncertainty even where the resulting d-hat sd is not much inflated.",
+      "after": "RETRACTED in claim_corrections_rev3.superseded_claims and in summary.READ_THIS_FIRST_rev3_supersessions; README §6.4 finding 4 restated as COUNT-only and explicitly makes no break-date claim.",
+      "files_changed": [
+        "experiments/k1623/README.md",
+        "experiments/k1623/k1623_rev2_mc_results.json",
+        "experiments/k1623/k1623_rev2_mc.py"
+      ]
+    },
+    {
+      "blocker": "B4d",
+      "codex_section": "§7",
+      "defect": "Arm B uses piecewise_demean on simulated data, so it oracle-ises break LOCATIONS only and is not an 'ELW alone' baseline.",
+      "before": "Arm B isolates the sampling noise of ELW alone / arm_b: '... -> ELW (oracle)' / field named elw_own_finite_sample_bias_arm_b",
+      "after": "Described as a LOCATION-oracle throughout; field renamed to arm_b_oracle_location_bias; README §6.4 carries a correction box stating that the mean-estimation share of the generated-regressor problem is DIFFERENCED OUT of A-minus-B and is not measured or bounded by this design.",
+      "files_changed": [
+        "experiments/k1623/README.md",
+        "experiments/k1623/k1623_rev2_mc.py",
+        "experiments/k1623/k1623_rev2_mc_results.json"
+      ],
+      "note": "Renaming the field changes no computation (still b.mean() - d_hat) and aligns the source with the corrected_attribution written into the frozen artifact."
+    },
+    {
+      "blocker": "B5",
+      "codex_section": "§8",
+      "defect": "Claimed four 'still unique contributions' while the same README called §6.3 another instance of the existing K1016 lesson, contradicting (d).",
+      "before": "本實驗 rev2 後仍然獨有的貢獻：(a)...(b)...(c)...(d)...",
+      "after": "A four-row status table: (a) computationally supported, (b) descriptively supported, (c) DOWNGRADED to model-conditional and location-only, (d) rewritten as 'a new instance of the existing K1016 lesson', not a unique contribution. Plus an explicit evidence-boundary paragraph: knowledge.json + README grep can only support 'no duplicate within this repo', never general academic uniqueness.",
+      "files_changed": [
+        "experiments/k1623/README.md"
+      ]
+    },
+    {
+      "blocker": "MINOR",
+      "codex_section": "§3",
+      "defect": "'Five nested sets' is imprecise — QLIKE-20 and MSE-20 are disjoint.",
+      "before": "五個巢狀集合 / FIVE nested hypothesis sets",
+      "after": "五個假設集合; only focal-10 ⊂ within-loss-20 is genuinely nested, pooled-40 is the UNION, and QLIKE-20 / MSE-20 are DISJOINT.",
+      "files_changed": [
+        "experiments/k1623/README.md",
+        "experiments/k1623/k1623_rev2.py",
+        "experiments/k1623/k1623_rev2_results.json"
+      ]
+    }
+  ],
+  "blocked_items": [
+    {
+      "id": "mean_structure_generated_regressor_share_unmeasured",
+      "raised_by": "Codex round 2 §7, consequence of the Arm-B correction (B4d)",
+      "what_is_blocked": "Quantifying how much of the generated-regressor uncertainty comes from ESTIMATING THE SEGMENT MEANS (as opposed to locating the breaks).",
+      "why_it_is_blocked": "Both arms re-estimate segment means, so that component cancels in the A-minus-B contrast. Measuring it needs a THIRD arm that demeans with the known implanted level vector — i.e. a new Monte Carlo run. rev3 is explicitly a no-recompute round, and the brief instructs me to stop and report rather than enqueue compute or touch estimation code.",
+      "status": "DISCLOSED, NOT FIXED",
+      "where_disclosed": [
+        "README.md §6.4 Arm-B correction box",
+        "README.md §6.4 MC scope limit 2",
+        "k1623_rev2_mc_results.json claim_corrections_rev3.arm_b_is_not_pure_elw_only.what_would_measure_the_rest",
+        "k1623_rev2_mc.py module docstring"
+      ],
+      "effect_on_claims": "No current claim depends on it. The reported 1.01-1.10x inflation and the A-minus-B bias range are now both stated as LOCATION-only, so nothing in the README asserts a complete generated-regressor accounting."
+    },
+    {
+      "id": "frozen_finding_3_and_4_text_retained",
+      "what_is_blocked": "Making summary.finding_3 / summary.finding_4 read correctly in place.",
+      "why_it_is_blocked": "The brief forbids editing the original fields to look as if they had always been right, and regenerating them requires re-running the MC.",
+      "status": "MITIGATED, BY DESIGN",
+      "mitigation": "summary.READ_THIS_FIRST_rev3_supersessions sits in the same block and names both, and claim_corrections_rev3 carries the full record. The self-check allowlists exactly these two sites with a written reason rather than letting a loose pattern rescue them."
+    }
+  ],
+  "files_changed": [
+    {
+      "path": "experiments/k1623/README.md",
+      "kind": "modified",
+      "why": "B1, B1-b, B2, B3, B4b, B4c, B4d, B5, MINOR"
+    },
+    {
+      "path": "experiments/k1623/k1623_rev2.py",
+      "kind": "modified",
+      "why": "B1, B3, MINOR — prose string literals only; no computation touched"
+    },
+    {
+      "path": "experiments/k1623/k1623_rev2_mc.py",
+      "kind": "modified",
+      "why": "B4c, B4d — docstring, comments, and one field rename; no computation touched"
+    },
+    {
+      "path": "experiments/k1623/k1623_rev2_results.json",
+      "kind": "modified",
+      "why": "B1, B3, MINOR — prose fields only, matched to the source literals"
+    },
+    {
+      "path": "experiments/k1623/k1623_rev2_mc_results.json",
+      "kind": "modified",
+      "why": "B4a, B4c, B4d — additive annotation only; 0 pre-existing fields changed"
+    },
+    {
+      "path": "experiments/k1623/k1623_rev3_patch_mc_artifact.py",
+      "kind": "added",
+      "why": "Applies the MC annotation; guards frozen numeric fields; idempotent"
+    },
+    {
+      "path": "experiments/k1623/k1623_rev3_selfcheck.py",
+      "kind": "added",
+      "why": "Mechanical full-text consistency check over the claim surface"
+    },
+    {
+      "path": "experiments/k1623/k1623_rev3_selfcheck_report.json",
+      "kind": "added",
+      "why": "Machine-readable hit list for every rule"
+    },
+    {
+      "path": "experiments/k1623/k1623_rev3_remediation.json",
+      "kind": "added",
+      "why": "This file — the rev3 job result artifact"
+    },
+    {
+      "path": "experiments/k1623/review_verdict.json",
+      "kind": "regenerated",
+      "why": "Claim surface changed, so the pinned sha256 set was stale"
+    }
+  ],
+  "self_check": {
+    "method": "k1623_rev3_selfcheck.py — regex rules over all claim-surface files, in Python.",
+    "why_not_grep": "grep on this machine resolves to ugrep, where `-r` plus an explicit multi-file list degrades to 'No such file or directory' and then reports ZERO hits. An initial grep-based sweep produced 11 false 'no residual' results before this was caught. A checker that cannot fail is worse than no checker.",
+    "rules_total": 11,
+    "rules_failed": 0,
+    "all_pass": true,
+    "positive_control_hits": 110,
+    "negative_control": "Injecting three retracted claims into README.md (2.51e-3 / HAR 冠軍 / 所有數字不變) made three rules FAIL and the exit code flip to 1; reverting returned it to 0. The check demonstrably catches regressions.",
+    "per_rule": [
+      {
+        "rule_id": "B1-stale-deviation",
+        "blocker": "B1",
+        "status": "PASS",
+        "hits": 5,
+        "unqualified": 0,
+        "allowlisted": []
+      },
+      {
+        "rule_id": "B1-authoritative-present",
+        "blocker": "B1",
+        "status": "PASS",
+        "hits": 10,
+        "unqualified": 0,
+        "allowlisted": []
+      },
+      {
+        "rule_id": "B2-har-champion",
+        "blocker": "B2",
+        "status": "PASS",
+        "hits": 5,
+        "unqualified": 0,
+        "allowlisted": []
+      },
+      {
+        "rule_id": "B3-unchanged-numbers",
+        "blocker": "B3",
+        "status": "PASS",
+        "hits": 2,
+        "unqualified": 0,
+        "allowlisted": []
+      },
+      {
+        "rule_id": "B3-same-forecasts",
+        "blocker": "B3",
+        "status": "PASS",
+        "hits": 10,
+        "unqualified": 0,
+        "allowlisted": []
+      },
+      {
+        "rule_id": "B4-total-as-break-effect",
+        "blocker": "B4",
+        "status": "PASS",
+        "hits": 5,
+        "unqualified": 0,
+        "allowlisted": [
+          "k1623_rev2_mc_results.json:180"
+        ]
+      },
+      {
+        "rule_id": "B4-break-dates-claim",
+        "blocker": "B4",
+        "status": "PASS",
+        "hits": 21,
+        "unqualified": 0,
+        "allowlisted": [
+          "k1623_rev2_mc_results.json:181"
+        ]
+      },
+      {
+        "rule_id": "B4-arm-b-elw-only",
+        "blocker": "B4",
+        "status": "PASS",
+        "hits": 15,
+        "unqualified": 0,
+        "allowlisted": []
+      },
+      {
+        "rule_id": "B5-uniqueness",
+        "blocker": "B5",
+        "status": "PASS",
+        "hits": 1,
+        "unqualified": 0,
+        "allowlisted": []
+      },
+      {
+        "rule_id": "MINOR-nested-sets",
+        "blocker": "MINOR",
+        "status": "PASS",
+        "hits": 1,
+        "unqualified": 0,
+        "allowlisted": []
+      },
+      {
+        "rule_id": "B1-every-number-in-json",
+        "blocker": "B1",
+        "status": "PASS",
+        "hits": 1,
+        "unqualified": 0,
+        "allowlisted": []
+      }
+    ],
+    "checker_defects_found_and_fixed_during_this_round": [
+      "grep/ugrep silent zero-hit — replaced with Python scanning of read bytes.",
+      "Marker `NOT ` was so loose that the frozen finding_3 passed on the strength of an unrelated 'not evidence of additional level shifts'. Marker list narrowed to phrases only used when retracting; that site now goes through the written allowlist instead.",
+      "JSON was allowed to borrow a retraction marker from the neighbouring line, which is how finding_3 was rescued by finding_4's 'IS NOT much inflated'. JSON is now judged one line at a time; only .py/.md use a window, where statements genuinely wrap.",
+      "The pattern was compiled without re.I, so 'Break DATES are estimated with substantial uncertainty' (capital B) — the exact sentence B4c retracts — was never scanned at all, and the rule reported PASS having never looked at it."
+    ]
+  },
+  "source_artifact_consistency": {
+    "checked": "Every prose field edited in k1623_rev2_results.json was compared against the string literals of k1623_rev2.py by AST extraction.",
+    "result": "4/4 fields appear verbatim in the source — re-running k1623_rev2.py would emit identical text.",
+    "mc_caveat": "k1623_rev2_mc.py now emits fields (break_estimation_attenuation_a_minus_b, arm_b_oracle_location_bias) that the frozen MC artifact does not contain, because the artifact predates them and rev3 does not re-run it. This is disclosed in claim_corrections_rev3.source_of_truth rather than papered over."
+  },
+  "gates": {
+    "experiment_gates_run": "PASS — 5 files under experiments/k1623 cleared 4 experiment-integrity gates",
+    "py_compile": "PASS for k1623_rev2.py, k1623_rev2_mc.py, k1623_rev3_patch_mc_artifact.py",
+    "json_parse": "PASS for both results JSONs"
+  },
+  "verdict_template_regenerated": true,
+  "not_done_by_design": [
+    "Worktree not merged (verdict remains FAIL until round 3 clears it).",
+    "knowledge.json not written (K1259).",
+    "No round-3 Codex review enqueued — the main thread decides that on intake.",
+    "review_verdict.json verdict/reviewer fields left as FILL placeholders for the round-3 reviewer."
+  ],
+  "verdict_template_detail": {
+    "command": "uv run python scripts/experiment_gates.py verdict-template --path experiments/k1623 --out experiments/k1623/review_verdict.json",
+    "pinned_files": 29,
+    "sha256_hand_edited": false,
+    "sha256_independently_verified": "29/29 pins recomputed from disk match; 0 mismatches",
+    "verdict_field": "FAIL (held fail-closed; round-2 verdict, these bytes not yet re-reviewed)",
+    "certify_result": "BLOCKED as intended — merge is refused while verdict != PASS"
+  }
+}

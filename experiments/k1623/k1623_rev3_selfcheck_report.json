@@ -1,0 +1,235 @@
+{
+  "claim_surface_files": [
+    "README.md",
+    "k1623_rev2.py",
+    "k1623_rev2_mc.py",
+    "k1623_rev2_results.json",
+    "k1623_rev2_mc_results.json",
+    "k1623_rev3_patch_mc_artifact.py",
+    "k1623_rev3_selfcheck.py"
+  ],
+  "positive_control_hits": 110,
+  "rules_total": 11,
+  "rules_failed": 0,
+  "all_pass": true,
+  "rules": [
+    {
+      "rule_id": "B1-stale-deviation",
+      "blocker": "B1",
+      "kind": "qualified",
+      "pattern": "2\\.51e-3|0\\.00251|2\\.5e-3",
+      "hits": [
+        "README.md:133",
+        "k1623_rev2.py:535",
+        "k1623_rev2.py:690",
+        "k1623_rev2_results.json:54",
+        "k1623_rev2_results.json:2234"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "TW0050 max relative deviation was written as 2.51e-3 / 2.5e-3; authoritative is 5.26e-3."
+    },
+    {
+      "rule_id": "B1-authoritative-present",
+      "blocker": "B1",
+      "kind": "required",
+      "pattern": "5\\.26e-3",
+      "hits": [
+        "README.md:117",
+        "README.md:128",
+        "README.md:135",
+        "README.md:171",
+        "README.md:392",
+        "README.md:479",
+        "k1623_rev2.py:533",
+        "k1623_rev2.py:687",
+        "k1623_rev2_results.json:54",
+        "k1623_rev2_results.json:2234"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "The corrected value must actually appear."
+    },
+    {
+      "rule_id": "B2-har-champion",
+      "blocker": "B2",
+      "kind": "qualified",
+      "pattern": "冠軍|並列最佳|tied-best|champion in all",
+      "hits": [
+        "README.md:39",
+        "README.md:41",
+        "README.md:42",
+        "README.md:275",
+        "README.md:476"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "HAR was claimed the 5-asset QLIKE winner; all-model winners include AR1 and ARFIMA."
+    },
+    {
+      "rule_id": "B3-unchanged-numbers",
+      "blocker": "B3",
+      "kind": "qualified",
+      "pattern": "所有數字不變|所有預測值不變|forecasts unchanged",
+      "hits": [
+        "README.md:167",
+        "README.md:442"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "Unqualified 'nothing changed' is FALSE for TW0050 (n 4263 -> 4264)."
+    },
+    {
+      "rule_id": "B3-same-forecasts",
+      "blocker": "B3",
+      "kind": "qualified",
+      "pattern": "same forecasts|同一個樣本",
+      "hits": [
+        "README.md:225",
+        "README.md:259",
+        "README.md:442",
+        "README.md:478",
+        "k1623_rev2.py:537",
+        "k1623_rev2.py:598",
+        "k1623_rev2.py:691",
+        "k1623_rev2_results.json:54",
+        "k1623_rev2_results.json:77",
+        "k1623_rev2_results.json:2234"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "'same forecasts / same sample' may appear only where marked false for TW0050."
+    },
+    {
+      "rule_id": "B4-total-as-break-effect",
+      "blocker": "B4",
+      "kind": "qualified",
+      "pattern": "-0\\.085 to -0\\.027|−0\\.085 到 −0\\.027|0\\.085 至 .?0\\.027",
+      "hits": [
+        "README.md:347",
+        "README.md:444",
+        "k1623_rev2_mc_results.json:180",
+        "k1623_rev2_mc_results.json:202",
+        "k1623_rev3_patch_mc_artifact.py:103"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [
+        {
+          "site": "k1623_rev2_mc_results.json:180",
+          "reason": "Frozen-by-design. rev3 must not rewrite the original artifact text (that would be the 'pretend it was always right' failure). It is superseded in-block by summary.READ_THIS_FIRST_rev3_supersessions and claim_corrections_rev3."
+        }
+      ],
+      "status": "PASS",
+      "note": "The arm-A total may be quoted only when labelled the total, never as the break effect."
+    },
+    {
+      "rule_id": "B4-break-dates-claim",
+      "blocker": "B4",
+      "kind": "qualified",
+      "pattern": "break DATES|斷點.{0,4}日期",
+      "hits": [
+        "README.md:311",
+        "README.md:356",
+        "README.md:358",
+        "README.md:370",
+        "k1623_rev2.py:645",
+        "k1623_rev2.py:736",
+        "k1623_rev2_mc.py:132",
+        "k1623_rev2_mc.py:221",
+        "k1623_rev2_mc.py:270",
+        "k1623_rev2_mc.py:292",
+        "k1623_rev2_mc.py:296",
+        "k1623_rev2_results.json:2139",
+        "k1623_rev2_results.json:2206",
+        "k1623_rev2_mc_results.json:11",
+        "k1623_rev2_mc_results.json:181",
+        "k1623_rev2_mc_results.json:191",
+        "k1623_rev2_mc_results.json:217",
+        "k1623_rev2_mc_results.json:218",
+        "k1623_rev3_patch_mc_artifact.py:130",
+        "k1623_rev3_patch_mc_artifact.py:134",
+        "k1623_rev3_patch_mc_artifact.py:203"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [
+        {
+          "site": "k1623_rev2_mc_results.json:181",
+          "reason": "Frozen-by-design, same reason; the break-DATE sentence inside it is retracted by summary.READ_THIS_FIRST_rev3_supersessions and claim_corrections_rev3."
+        }
+      ],
+      "status": "PASS",
+      "note": "Break-date UNCERTAINTY claims are retracted; describing where breaks were implanted, or stating that only counts are stored, is legitimate."
+    },
+    {
+      "rule_id": "B4-arm-b-elw-only",
+      "blocker": "B4",
+      "kind": "qualified",
+      "pattern": "ELW alone|elw_own|ELW-only|ELW 而已",
+      "hits": [
+        "k1623_rev2_mc.py:31",
+        "k1623_rev2_mc.py:134",
+        "k1623_rev2_mc.py:167",
+        "k1623_rev2_mc.py:219",
+        "k1623_rev2_mc.py:292",
+        "k1623_rev2_mc_results.json:12",
+        "k1623_rev2_mc_results.json:191",
+        "k1623_rev2_mc_results.json:223",
+        "k1623_rev2_mc_results.json:224",
+        "k1623_rev2_mc_results.json:273",
+        "k1623_rev3_patch_mc_artifact.py:149",
+        "k1623_rev3_patch_mc_artifact.py:175",
+        "k1623_rev3_patch_mc_artifact.py:199",
+        "k1623_rev3_patch_mc_artifact.py:203",
+        "k1623_rev3_patch_mc_artifact.py:208"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "Arm B must never be described as an ELW-only baseline except to deny it."
+    },
+    {
+      "rule_id": "B5-uniqueness",
+      "blocker": "B5",
+      "kind": "qualified",
+      "pattern": "獨有的貢獻|unique contribution|仍然獨有",
+      "hits": [
+        "README.md:72"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "General academic uniqueness is unsupported; only the retraction may use the phrase."
+    },
+    {
+      "rule_id": "MINOR-nested-sets",
+      "blocker": "MINOR",
+      "kind": "qualified",
+      "pattern": "五個巢狀集合|FIVE nested",
+      "hits": [
+        "README.md:188"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "QLIKE-20 and MSE-20 are disjoint, so 'five nested sets' is imprecise."
+    },
+    {
+      "rule_id": "B1-every-number-in-json",
+      "blocker": "B1",
+      "kind": "qualified",
+      "pattern": "每一個 README 數字都可在 JSON 逐項對上|每一個 README 數字都可在 rev2 JSON",
+      "hits": [
+        "README.md:412"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "README numbers live across three artifacts, not one."
+    }
+  ]
+}

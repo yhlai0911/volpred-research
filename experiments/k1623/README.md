@@ -32,8 +32,15 @@ BreakRobustHAR **在 QLIKE 與 MSE 兩個 loss 下、經多重比較修正後，
 | 7 | BreakRobustHAR「只用最近 latest-break 之後樣本 refit」 | **CORRECTED（描述對齊 code）** | `k1623.py:475` 在斷點太近時**刻意把窗口推回斷點之前**；無斷點時 fallback trailing 750 |
 | 8 | DM t 統計量（第一輪全部） | **CORRECTED（推論升級）** | 第一輪 `dm_hln` 用 `for lag in range(1, h)`，**h=1 時是空迴圈 → 完全沒做 HAC**。rev2 全面改用 canonical Newey-West |
 
-**沒有被撤回的**（rev2 逐項重驗，仍然成立）：OOS n=749/資產；QLIKE 下 HAR 是 5 資產的冠軍或並列最佳；
+**沒有被撤回的**（rev2 逐項重驗，仍然成立）：OOS n=749/資產；
+**QLIKE 下 HAR 對 ARFIMA 在 4/5 資產有較低的平均損失**；
 BreakHAR vs HAR 10 個比較全部不顯著；扣斷點後 d̂ 仍為正（作為**描述**）。
+
+> **rev3 更正（2026-07-20，Codex round 2 §2）**：上一行原本寫「QLIKE 下 HAR 是 5 資產的**冠軍或並列
+> 最佳**」——**這是假的**。`k1623_rev2_results.json` 的 `best_by_qlike`（**全 5 模型**比較）是
+> VIX=`AR1`（:118）、N225=`ARFIMA`（:278），只有 SPY / TW0050 / QQQ 三個資產的全模型冠軍是 HAR。
+> 「5 資產冠軍」把一個 **HAR-vs-ARFIMA 的兩兩比較**擴張成了**全模型排名**宣稱。
+> 現行說法收窄為兩兩比較，與 §6.3 表格逐格對得上。
 
 ---
 
@@ -53,12 +60,27 @@ shift 過程；扣掉 ≤5 個（permissive ≤15 個）**決定性**的 Bai-Per
 沒有任何識別定理授權從前者推到後者。雪上加霜的是，demeaned d̂ 的 SE 直接沿用 raw ELW 的漸近 SE，
 **未計入斷點是估計出來的**（generated-regressor 問題，見 §6.4 的 Monte Carlo）。
 
-**本實驗 rev2 後仍然獨有的貢獻**：**(a)** 對同一組預測同時報 QLIKE 與 MSE 的 DM，並揭露
-**模型排序隨 loss 反轉**；**(b)** Bai-Perron break-demean 的**描述性**顆粒度敏感度；
-**(c)** 一個量化 generated-regressor 不確定性的 Monte Carlo；**(d)** 一個關於「單一 loss 會製造
-方向性結論」的方法論教訓。**識別問題本身，本實驗現在明確表態：未解決。**
+**本實驗 rev2 後留下什麼**（**rev3 依 Codex round 2 §8 逐點重評，不再宣稱「獨有」**）：
 
-**與既有 K 的差異**（已查 knowledge.json + README grep）：
+| # | 內容 | 支撐狀態 | 可以怎麼說 |
+|---|---|---|---|
+| **(a)** | 對同一組預測**同時**報 QLIKE 與 MSE 的 DM，並揭露**模型排序隨 loss 反轉** | **有計算支撐**（`dm_comparisons[40]`、`loss_function_sign_reversal[5]`，3/5 資產反轉） | 本實驗的**主要產出**。可陳述為結果，但必須連同「兩個 loss 都不顯著」一起講 |
+| **(b)** | Bai-Perron break-demean 的**顆粒度敏感度**（BIC ≤5 vs permissive ≤15） | **有描述性計算支撐**（§6.2 表） | 可陳述為**描述性**敏感度，**不是**識別證據 |
+| **(c)** | 量化 generated-regressor 不確定性的 Monte Carlo | **降級：只有 model-conditional 支撐**，且**只涵蓋斷點定位**、不涵蓋段均值估計（§6.4 Arm B 更正框） | 只能說「**在 ARFIMA + 決定性斷點這個模型假設下**，抽樣 sd 是漸近 SE 的 1.21–1.33 倍」。**不可**說成對該模型的檢定，**不可**說成對 generated-regressor 問題的完整量化 |
+| **(d)** | 「單一 loss 會製造方向性結論」的方法論教訓 | **不是本實驗獨有** | 改寫為：**本資料提供了 K1016 既有教訓的一個新實例**（新的資產集、新的模型集、且附帶 HAC + BH 的完整推論）。**不是**新教訓 |
+
+**為什麼 rev3 要改這段**：原文宣稱這四點是「**仍然獨有的貢獻**」，但同一份 README 的下一段
+自己就寫「K1016：…**rev2 的 §6.3 是這條教訓的又一個實例**」——**這句直接否定了 (d) 的 uniqueness**。
+(c) 也在 §6.4 自陳 model-conditional，撐不起無限定的「貢獻」措辭。
+
+**關於「獨有 / novelty」的證據邊界（rev3 明確劃線）**：本實驗查核的是
+**knowledge.json + 本 repo README grep**，那只能支撐一句話 ——「**在本 repo 既有的 K 之中沒有重複**」。
+**它不能支撐任何一般性的學術 uniqueness 宣稱**（那需要系統性的 prior-art / 文獻檢索，本輪未做）。
+下表因此只講 repo 內部差異，不講學術首創。
+
+**識別問題本身，本實驗現在明確表態：未解決。**
+
+**與既有 K 的差異**（範圍限於本 repo：knowledge.json + README grep；**不構成學術 novelty 宣稱**）：
 - **K442（FIGARCH）/ K435（Structural Break + Adaptive GARCH）**：都碰過 Hillebrand 效應，但那是對
   **GARCH persistence**（近單根 0.975）談「近似長記憶假象」，沒有對 d̂ 做 raw-vs-break-demeaned 對照。
 - **K138 / K625 / K529（Hurst / rough vol / DFA）**：談 roughness 與 time-varying Hurst，不是 level-shift 對照。
@@ -92,7 +114,7 @@ shift 過程；扣掉 ≤5 個（permissive ≤15 個）**決定性**的 Bai-Per
 |---|---|---|---|---|
 | VIX | ^VIX | 4,655 | 2008-01 – 2026-07 | **exact**（1e-9） |
 | SPY | SPY | 2,639 | 2016-01 – 2026-07 | **exact**（1e-9） |
-| TW0050 | 0050.TW | 4,263 → **4,264** | 2009-01 – 2026-07 | **near**（最大相對偏差 2.51e-3，見下） |
+| TW0050 | 0050.TW | 4,263 → **4,264** | 2009-01 – 2026-07 | **near**（最大相對偏差 5.26e-3，見下） |
 | QQQ | QQQ | 2,639 | 2016-01 – 2026-07 | **exact**（1e-9） |
 | N225 | ^N225 | 2,565 | 2016-01 – 2026-07 | **exact**（1e-9） |
 
@@ -103,8 +125,14 @@ end date **pin 回第一輪**（VIX/SPY/QQQ 2026-07-02，TW0050/N225 2026-07-03�
 
 **TW0050 無法精確重現，如實揭露**：其快取歷史被**修訂**（非僅延長）——pin 日的原始列數不變，
 但一列原本 high==low 的 degenerate 列現在 high > low，故被保留而非剔除（n 由 4,263 → 4,264）。
-TW0050 的 rev2 統計量因此是**近似重現**，實測與第一輪摘要統計的最大相對偏差 **2.51e-3**，
-已逐格記錄於 `reproduction_guard.per_asset_vintage`。**不強行對齊、不隱藏。**
+TW0050 的 rev2 統計量因此是**近似重現**，實測與第一輪摘要統計的最大相對偏差 **5.26e-3**
+（權威欄位 `reproduction_guard.per_asset_vintage.TW0050.max_relative_deviation_vs_original`
+= `0.005259349489457132`），已逐格記錄於 `reproduction_guard.per_asset_vintage`。**不強行對齊、不隱藏。**
+
+> **rev3 更正（2026-07-20，Codex round 2 §2）**：本 README 原本三處（§3 表格、本段、§7 limitation 9）
+> 與兩份 JSON 的 prose 欄位，都把這個數字寫成 **2.5e-3 / 2.51e-3 — 約為權威值的一半**。
+> 那是人手寫進 prose 字串的筆誤，不是任何計算輸出；權威欄位自始至終是 `0.00525935`。
+> 全部已改為 **5.26e-3**。
 
 ## 4. 方法
 
@@ -135,7 +163,13 @@ TW0050 的 rev2 統計量因此是**近似重現**，實測與第一輪摘要統
      **與程式不符**。`k1623.py:475` 實際是 `wstart = max(0, min(brk_start, i-22-60))`，
      即**斷點太近時刻意把窗口起點推回斷點之前**（以保留 ≥60 個可用列）；**無偵測到斷點時 fallback
      到 trailing 750 窗**。rev2 依 brief 選項 (i)：**修描述、不修 code**——因為本輪的目的是修
-     「宣稱 vs 證據」，改 code 會讓所有數字失效並超出 scope。**故所有數字不變。**
+     「宣稱 vs 證據」，改 code 會讓所有數字失效並超出 scope。
+     **⚠️ rev3 更正（Codex round 2 §5）**：此處原本寫「**故所有數字不變**」——**這句無限定，
+     對 TW0050 為假**。程式沒改**不等於**輸入沒改：TW0050 的上游快取歷史被修訂（n 4,263→4,264），
+     同一份 code 餵不同輸入就會產生不同 forecasts。正確說法是
+     **「4 個 exact-pin 資產（VIX/SPY/QQQ/N225）的聚合損失重現到 1e-9；TW0050 的數字有變動，
+     最大相對偏差 5.26e-3」**，詳見 `k1623_rev2_results.json` →
+     `reproduction_guard.scope_and_limits`（含 `tw0050_exception`）。
    - **EWMA(0.94)**（variance space, RiskMetrics）
    - **Loss 與推論** — **⚠️ rev2 更正（撤回表 #4、#8）**：
      - 第一輪 §4.5 寫「QLIKE + MSE ... DM + HLN」，**實際只對 QLIKE 跑了 DM**；MSE 只存了 summary mean
@@ -149,9 +183,12 @@ TW0050 的 rev2 統計量因此是**近似重現**，實測與第一輪摘要統
        **primary family 在程式碼中事前指定**為 `within_loss_20`（QLIKE 與 MSE 各自獨立修正，各 20 個），
        **README 全部結論一律取 BH @ `within_loss_20`** —— 事前寫死在 code 裡，正是為了讓
        「選哪個 family」無法在看到結果後才決定。
-       **⚠️ 措辭更正（rev2 二審）**：這實際是**五個巢狀集合，不是「三個 family」** ——
-       QLIKE-20、MSE-20、QLIKE-focal-10、MSE-focal-10、pooled-40，其中每個 focal-10 是其
-       within_loss_20 的**子集**，pooled-40 是兩者的**聯集**。非 primary 的集合作為
+       **⚠️ 措辭更正（rev2 二審；rev3 再修）**：這實際是**五個假設集合，不是「三個 family」**——
+       QLIKE-20、MSE-20、QLIKE-focal-10、MSE-focal-10、pooled-40。
+       **rev3 更正（Codex round 2 §3）**：rev2 把它們統稱為「**五個巢狀集合**」**並不精確** ——
+       **QLIKE-20 與 MSE-20 彼此互斥（disjoint），談不上巢狀**；正確的關係是
+       **每個 focal-10 是其對應 within-loss-20 的子集**、**pooled-40 是 QLIKE-20 與 MSE-20 的聯集**。
+       換言之只有「focal ⊂ within-loss」這一組是真的巢狀。非 primary 的集合作為
        **sensitivity 報告，不是可挑選的菜單**：**focal 比較在五個集合中沒有任何一個存活 BH**，
        故結論不依賴 family 的選擇。
      - **HLN 的一個不對稱，如實揭露**：`t_hac_hln = t_hac × 0.9993`，但**送進 BH/Bonferroni 的
@@ -217,7 +254,9 @@ raw ELW d̂ (m060) 全部顯著 >0，落在 **0.50-0.72**。**（此節未受 re
 
 ### 6.3 預測含意（OOS one-step, n=749/資產）— **rev2 核心產出：loss 反轉**
 
-**同一組預測、同一批模型、同一個樣本，換一個 loss function，模型排序就反轉。**
+**同一份預測程式、同一批模型、同一個評分窗，換一個 loss function，模型排序就反轉。**
+（**限定**：4 個 exact-pin 資產的**聚合損失**重現到 1e-9；**TW0050 是近似重現**，
+其樣本因上游歷史修訂由 n=4,263 變 4,264，故對 TW0050 不能說「同一個樣本」。見 §3、§5。）
 
 | 資產 | QLIKE ratio (ARFIMA/HAR) | QLIKE 贏家 | QLIKE t_HAC (p) | MSE ratio (ARFIMA/HAR) | MSE 贏家 | MSE t_HAC (p) | 排序反轉？ |
 |---|---|---|---|---|---|---|---|
@@ -231,7 +270,10 @@ raw ELW d̂ (m060) 全部顯著 >0，落在 **0.50-0.72**。**（此節未受 re
 
 **結論（必須完整讀，缺一句就會誤導）**：
 
-1. **QLIKE 說 HAR 贏 4/5 資產；MSE 說 ARFIMA 贏 4/5 資產，且低 11–16%。5 個資產有 3 個排序反轉。**
+1. **在 HAR-vs-ARFIMA 這一對上**：QLIKE 說 HAR 在 4/5 資產較低；MSE 說 ARFIMA 在 4/5 資產較低，
+   且低 11–16%。**5 個資產有 3 個排序反轉。**
+   （**限定**：這是**兩兩比較**，不是全模型排名。全 5 模型的 QLIKE 冠軍只有 3 個是 HAR
+   ——VIX 是 AR1、N225 是 ARFIMA，見 `per_asset.*.best_by_qlike`。）
 2. **但兩個 loss 都沒有任何一個 ARFIMA-vs-HAR 比較達到統計顯著**（MSE 的 p ∈ [0.265, 0.974]）。
    所以**這不是「ARFIMA 在 MSE 下打敗 HAR」的發現**——`headline_finding.what_this_is_not` 明文標註。
 3. **可辯護的結論是：兩者統計上無法區分。** 而一個只看到單邊 loss 表的讀者，
@@ -267,35 +309,66 @@ QQQ/AR1、QQQ/EWMA、N225/AR1、N225/EWMA。HAR 打敗 AR(1) 與 EWMA 不是本�
 brief 要求至少在 limitation 揭露「demeaned d̂ 的 SE 未計入斷點是估計出來的」。rev2 進一步**量化**它。
 
 設計：500 次重複，seed=42，burn-in 2000。DGP = ARFIMA(0, d̂, 0) + 在**估計出的斷點日期**植入
-**已擬合的分段常數 level**。**Arm A**（真實）= 模擬 → Bai-Perron **重新估計**斷點 → demean → ELW；
-**Arm B**（oracle）= 模擬 → 在**真實**斷點 demean → ELW。
+**已擬合的分段常數 level**。
+- **Arm A**（真實）= 模擬 → Bai-Perron **重新估計**斷點 → demean → ELW
+- **Arm B**（**僅位置** oracle）= 模擬 → 在**真實斷點位置** demean → ELW
 
-| 資產 | d̂ (fitted) | 已發表漸近 SE | MC 抽樣 sd (Arm A) | SE 低估倍數 | generated-regressor 膨脹 (A/B) | d̂ 衰減偏誤 | 斷點數精確回收率 |
-|---|---|---|---|---|---|---|---|
-| VIX | 0.645 | 0.0398 | 0.0518 | **1.30×** | 1.016 | −0.027 | 78.4% |
-| SPY | 0.475 | 0.0472 | 0.0629 | **1.33×** | 1.053 | −0.085 | 56.4% |
-| TW0050 | 0.563 | 0.0408 | 0.0496 | **1.21×** | 1.101 | −0.065 | **7.0%** |
-| QQQ | 0.457 | 0.0472 | 0.0619 | **1.31×** | 1.034 | −0.077 | 56.0% |
-| N225 | 0.460 | 0.0475 | 0.0602 | **1.27×** | 1.010 | −0.084 | 63.4% |
+> **⚠️ rev3 更正（Codex round 2 §7）— Arm B 不是「純 ELW」基準**：
+> `k1623_rev2_mc.py:118-120` 的 Arm B 呼叫 `K.piecewise_demean(x, breaks_true)`，
+> **斷點「位置」用真值，但每段的「均值」仍是從模擬資料估出來的**（沒有用已知的植入 level 向量）。
+> 所以 Arm B **只 oracle 化了斷點位置，沒有消除 mean-structure 的 generated-regressor 不確定性**。
+> **後果（決定下表怎麼讀）**：A−B 對照隔離的是**「找斷點位置」的成本**；
+> **「估各段均值」的成本在兩臂都存在，被差分掉了 —— 本設計完全沒有量到它，也沒有為它設上界。**
+> 要量它需要第三臂（用已知植入 level 去 demean），本輪 scope 不重跑、故不新增。
+
+| 資產 | d̂ (fitted) | 已發表漸近 SE | MC 抽樣 sd (Arm A) | SE 低估倍數 | 位置估計 sd 膨脹 (A/B) | 總偏誤 (Arm A) | Arm B 自身偏誤 | **斷點定位效應 (A−B)** | 斷點**數**精確回收率 |
+|---|---|---|---|---|---|---|---|---|---|
+| VIX | 0.645 | 0.0398 | 0.0518 | **1.30×** | 1.016 | −0.027 | −0.007 | **−0.020** | 78.4% |
+| SPY | 0.475 | 0.0472 | 0.0629 | **1.33×** | 1.053 | −0.085 | −0.039 | **−0.045** | 56.4% |
+| TW0050 | 0.563 | 0.0408 | 0.0496 | **1.21×** | 1.101 | −0.065 | −0.009 | **−0.056** | **7.0%** |
+| QQQ | 0.457 | 0.0472 | 0.0619 | **1.31×** | 1.034 | −0.077 | −0.036 | **−0.041** | 56.0% |
+| N225 | 0.460 | 0.0475 | 0.0602 | **1.27×** | 1.010 | −0.084 | −0.039 | **−0.046** | 63.4% |
+
+（「總偏誤」= `arm_a.mean − d_demeaned_fitted`；「Arm B 自身偏誤」= `arm_b.mean − d_demeaned_fitted`
+＝ ELW 有限樣本行為 **＋ 在已知位置估段均值**；「A−B」= `arm_a.mean − arm_b.mean`。
+三欄全部可由 `k1623_rev2_mc_results.json` → `claim_corrections_rev3.corrected_attribution.per_asset`
+逐格對上，該欄位是由凍結的 arm means **計算**出來的，未重跑模擬。）
 
 **四個發現（含一個與批評方向相反、仍如實報告）**：
 
 1. **已發表的 SE 確實低估**：真實抽樣 sd 是漸近 SE 的 **1.21–1.33 倍**，原信賴區間過窄。
-2. **但主因不是斷點估計**——與批評所暗示的相反：斷點**估計**相對於 oracle 只貢獻 **1.01–1.10×**，
-   generated-regressor 效應**很小**；低估主要來自 **1/(2√m) 漸近公式本身**在此樣本數與頻寬下過度樂觀。
+2. **但主因不是「找斷點位置」**——與批評所暗示的相反：斷點**定位**相對於位置-oracle 只貢獻
+   **1.01–1.10×**；低估主要來自 **1/(2√m) 漸近公式本身**在此樣本數與頻寬下過度樂觀。
    **這樣報是因為模擬就是這樣顯示，不是因為這樣最能支持該批評。**
-3. **擬合斷點會機械性地把 d̂ 往下拉 −0.085 到 −0.027**，即使模擬的 DGP **恰好只含**被移除的那些 level shift。
-   所以第一輪報告的 raw → demeaned d̂ 下降，**有一部分是擬合斷點的機械假象，不是額外 level shift 的證據**。
-   這在**兩個方向**上都削弱了第一輪的解讀，也是識別宣稱站不住的又一個理由。
-4. **斷點回收很吵**：精確回收斷點數的比例只有 **7%–78%**（TW0050 最差 7%）。
+   **限定**：此倍數只涵蓋定位成本；估段均值的那一份在 A、B 兩臂互相抵消，**未被量測**（見上方 Arm B 更正框）。
+3. **擬合斷點會機械性地把 d̂ 往下拉**，即使模擬的 DGP **恰好只含**被移除的那些 level shift。
+   **正確歸因是配對 A−B contrast = −0.056 至 −0.020**（權威：
+   `claim_corrections_rev3.corrected_attribution.break_location_estimation_effect_range_a_minus_b`）。
+   **⚠️ rev3 更正**：本段原本寫「往下拉 **−0.085 到 −0.027**」——那是 **Arm A 的總偏誤**，
+   其中 −0.039 至 −0.007 是 Arm B 在真實斷點位置下就已經有的偏誤。
+   **把總量說成斷點估計的效應，約高估兩倍**。§9 表格的 MED 條目早已改用 A−B，本段之前沒跟上，
+   造成同一份 README 內部自相矛盾 —— 現已統一。
+   質性結論不變：第一輪報告的 raw → demeaned d̂ 下降，**有一部分是擬合斷點的機械假象，
+   不是額外 level shift 的證據**；這在**兩個方向**上都削弱了第一輪的解讀。
+4. **斷點「數量」回收很吵**：精確回收斷點**數**的比例只有 **7%–78%**（TW0050 最差 7%）。
+   **⚠️ rev3 撤回（Codex round 2 §7）**：凍結 JSON 的 `finding_4` 原本附帶一句
+   「break **dates** are estimated with substantial uncertainty」——**本 artifact 不支撐這句**：
+   模擬只記錄被選中的斷點**數量**，從未儲存或比對估計出的斷點**日期**，
+   因此無法量化定位誤差。該句已在 `claim_corrections_rev3.superseded_claims` 明列撤回。
+   **本 README 不作任何關於斷點日期不確定性的宣稱。**
 
 **存活的**：以 MC sd 0.045–0.063 對 d̂ 0.457–0.645，**d/sd = 7.4–12.5**，故 break-demeaned d̂
 在此模型下仍明確為正。**但這是「殘餘持續性」的陳述，不是識別結果**——
 再多的 SE 修正也不能讓一個 5 斷點的決定性模型去回答隨機密集 shift 的替代假說。
 
-**MC 的 scope 限制（必讀）**：此 MC 是 **model-conditional** 的——它假設 DGP **真的是**
-ARFIMA + 估計日期上的決定性斷點，量化的是**該模型下**的抽樣不確定性。
-**它不是對該模型的檢定，也不是支持該模型的證據，更無法處理 Diebold-Inoue 的隨機／密集 shift DGP。**
+**MC 的 scope 限制（必讀）**：
+1. 此 MC 是 **model-conditional** 的——它假設 DGP **真的是** ARFIMA + 估計日期上的決定性斷點，
+   量化的是**該模型下**的抽樣不確定性。
+   **它不是對該模型的檢定，也不是支持該模型的證據，更無法處理 Diebold-Inoue 的隨機／密集 shift DGP。**
+2. **Arm B 只 oracle 化斷點位置**，仍估各段均值 → A−B 只隔離定位成本，
+   **mean-structure 的 generated-regressor 不確定性未被量測、未被設上界**。
+3. **只有斷點數量、沒有斷點日期**：本 artifact 無法對日期定位誤差說任何話。
+4. 高斯 innovation；FD_MAXK = 2000 截斷在此同樣 binding。
 
 ## 7. Verdict 與 caveats（rev2）
 
@@ -316,7 +389,7 @@ ARFIMA + 估計日期上的決定性斷點，量化的是**該模型下**的抽�
 6. **零交易／成本／效用測試**（任何一輪都沒有）。
 7. **RV proxy 是 daily range（Parkinson）**，非 5-min RV；measurement error 影響 d̂ 的**水準**。
 8. **OOS 為 one-step**；h=5/22（需 overlapping-forecast HAC）未測試。
-9. **TW0050 為近似重現**（上游快取修訂，n 差 1，最大相對偏差 2.51e-3）。
+9. **TW0050 為近似重現**（上游快取修訂，n 差 1，最大相對偏差 5.26e-3）。
 10. cross-asset 僅 diagnostic，未 pool asset-day。
 11. **level shifts vs temporary spikes**：mean-break demean 無法移除 VIX 的 GFC/COVID 暫時性 spike。
 
@@ -324,16 +397,33 @@ ARFIMA + 估計日期上的決定性斷點，量化的是**該模型下**的抽�
 
 | 檔案 | 內容 | 狀態 |
 |---|---|---|
-| `k1623.py` | 第一輪主程式（~7s） | **未修改**（依 brief 選項 (i)；故所有預測值不變） |
+| `k1623.py` | 第一輪主程式（~7s） | **未修改**（依 brief 選項 (i)）；**4 個 exact-pin 資產的聚合損失重現到 1e-9，TW0050 的預測值因上游 vintage 修訂而變動** — 見 `scope_and_limits` |
 | `k1623_results.json` | 第一輪全部統計量 | **預測值有效；DM 推論已被 rev2 取代** |
 | `k1623_rev2.py` | rev2 主程式：vintage pinning、重現性 guard、40 個 HAC DM、BH/Bonferroni | 新增 |
 | `k1623_rev2_results.json` | **rev2 權威結果**：`dm_comparisons[40]`、`retracted_claims[8]`、`loss_function_sign_reversal[5]`、`residual_limitations[11]`、`reproduction_guard` | 新增 |
-| `k1623_rev2_mc.py` | generated-regressor Monte Carlo（500 reps, seed=42, ~306s） | 新增 |
-| `k1623_rev2_mc_results.json` | MC 結果 + scope 限制 | 新增 |
+| `k1623_rev2_mc.py` | generated-regressor Monte Carlo（500 reps, seed=42, ~306s） | 新增；**rev3 修正 Arm B 的描述與欄位命名（不改任何計算）** |
+| `k1623_rev2_mc_results.json` | MC 結果 + scope 限制 | 新增；**rev3 附加 `claim_corrections_rev3`（原數值欄位一格未動）** |
+| `k1623_rev3_patch_mc_artifact.py` | rev3 標註工具：把 MC artifact 的失效宣稱逐條標記，並由凍結的 arm means **計算** A−B 正確歸因 | 新增（含 guard：任一原數值欄位被改動就拒絕寫入） |
+| `k1623_rev3_remediation.json` | rev3 本輪的 remediation 紀錄（逐 blocker 的 before/after + 自檢結果） | 新增 |
 | `plots/` | 每資產 4 圖（共 20 張） | 未修改 |
 
-**每一個 README 數字都可在 JSON 逐項對上**；rev2 的 §6.3 表全部來自 `dm_comparisons[]`，
-§6.4 表全部來自 `k1623_rev2_mc_results.json.per_asset`。
+**README 數字的來源分佈（rev3 更正）**：
+
+> **⚠️ 這裡原本寫「每一個 README 數字都可在 JSON 逐項對上」——Codex round 2 §2 指出這句為假**：
+> 它讓人以為單看 `k1623_rev2_results.json` 就能核完全文，但 README 的數字實際散落在**三份** artifact。
+> 誠實的對應如下：
+
+| README 段落 | 數字來源 | 檔案 |
+|---|---|---|
+| §6.1 ACF sum、raw ELW d̂ | 第一輪 artifact | **`k1623_results.json`** |
+| §6.2 d_raw / d_demean / 斷點數 / 頻寬 pattern | 第一輪 artifact | **`k1623_results.json`** |
+| §3 重現性、n、pin dates、最大相對偏差 | rev2 | `k1623_rev2_results.json` → `reproduction_guard` |
+| §6.3 全部（ratio / t / p / BH / Bonferroni / 反轉） | rev2 | `k1623_rev2_results.json` → `dm_comparisons[]`、`loss_function_sign_reversal[]` |
+| §6.4 表格前 6 欄 + 回收率 | MC | `k1623_rev2_mc_results.json` → `per_asset` |
+| §6.4 表格「Arm B 自身偏誤」「A−B」兩欄 | MC（rev3 由凍結 arm means **計算**，非重跑） | `k1623_rev2_mc_results.json` → `claim_corrections_rev3.corrected_attribution` |
+| §0 撤回表、§7 limitations | rev2 | `k1623_rev2_results.json` → `retracted_claims[]`、`residual_limitations[]` |
+
+**所以正確的說法是：每個 README 數字都能在上表指定的那一份 artifact 裡對上 —— 但不是全部都在 rev2 JSON 裡。**
 
 ## 9. Reviewer 與 reviewer 可靠度教訓
 
@@ -376,10 +466,17 @@ code review 天然會去看「程式有沒有照它想的跑」，而第一輪�
 
 撤回識別宣稱後，仍有一個**純描述性、可從 JSON 直接驗證**的可發佈素材：
 
-> **「同一組預測、同一批模型、同一個樣本，換一個 loss function 結論就反轉」**
-> —— QLIKE 說樸素 HAR 在 5 個資產中贏 4 個；MSE 說 ARFIMA 在 5 個資產中贏 4 個、且低 11–16%。
+> **「同一份預測、同一批模型、同一個評分窗，換一個 loss function 結論就反轉」**
+> —— 在 **HAR 對 ARFIMA** 這一對上：QLIKE 說樸素 HAR 在 5 個資產中有 4 個較低；
+> MSE 說 ARFIMA 在 5 個資產中有 4 個較低、且低 11–16%。
 > 5 個資產有 3 個排序反轉。**而兩邊都不統計顯著**——所以真正的教訓不是「哪個模型好」，
 > 而是**「只報一個 loss，就等於製造了一個方向性結論」**。
+
+- **寫文章時不可省略的兩個限定**（省掉任一個，文章就變成第一輪錯誤的鏡像版本）：
+  1. 這是 **HAR-vs-ARFIMA 的兩兩比較**，**不是**「HAR 是 5 資產冠軍」。全 5 模型的 QLIKE 冠軍
+     只有 3 個是 HAR（VIX=AR1、N225=ARFIMA）。
+  2. 「同一個樣本」**對 TW0050 為假**（n 4,263→4,264，上游歷史修訂）。要寫成「同一份預測程式 +
+     同一個評分窗」，4 個資產的聚合損失重現到 1e-9、TW0050 為近似重現（最大相對偏差 5.26e-3）。
 
 - **呼應** K1016（loss function 選擇影響結論）與 Patton (2011)。
 - **誠實線**：文章**必須**同時寫出「兩個 loss 都不顯著」，否則就變成第一輪錯誤的鏡像版本。
