@@ -32976,13 +32976,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T04:06:07.109125+00:00",
+    "completed_at": "2026-07-19T04:33:09.804784+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T04:06:07.109125+00:00",
-      "last_clean_observed_at": "2026-07-19T04:06:07.109125+00:00"
+      "resolved_at": "2026-07-19T04:33:09.804784+00:00",
+      "last_clean_observed_at": "2026-07-19T04:33:09.804784+00:00"
     }
   },
   {
@@ -37614,15 +37614,12 @@
     "id": "assign_sync_cache_purge_20260717",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-17T05:30:00+00:00",
     "source": "ops_manager",
     "title": "supabase_sync 直寫 Supabase 不 purge Next cache tag → 撤稿/更正在讀者端可能永不生效",
     "description": "【症狀｜2026-07-17 撤稿 mile_ebb5d6f5 時實測發現】\nsync_full() 跑完後：Supabase articles row 已 status=retracted、anon key + RLS 也已完全查不到該 row（與其他 12 篇線上 404 的撤稿文完全同態）。但 https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5 與 /reports/<id> 仍持續回 HTTP 200 並完整供應內文（含虛構事件段落）達 15 分鐘以上 —— 遠超 page 層 `export const revalidate = 300` 與 `unstable_cache(..., {revalidate: 60})`。cache-control 是 no-store，排除 CDN。\n\n【根因（兩個條件疊加，缺一不會壞）】\n1. scripts/supabase_sync.py 直接打 Supabase REST（_request_json / sync_article），繞過 frontend 的    frontend-v2-fix/src/app/api/sync/[...path]/route.ts —— 那條 route 在 upsert 後會呼叫    revalidateTag('article') + revalidateTag(`article-${slug}`)。走 supabase_sync 就永遠不會 purge tag。\n2. data-server.ts getArticleInternal 對已撤稿文章是 **throw**（.in('status',['published','draft','scheduled']) 過濾    + RLS 兩層都查無 → .single() error → throw）。unstable_cache 的 stale-while-revalidate 背景 revalidate 一 throw    就拿不到新值可寫，於是**續發舊的 good value**。過期不等於淘汰 —— 沒有新值就永遠不淘汰。\n\n→ 合起來：任何經由 feed.json + supabase_sync 做的**撤稿或狀態下架**，在讀者端可能永不生效，直到某次 redeploy 把 in-memory cache 清掉。其餘 12 篇撤稿文之所以現在 404，只是因為它們早已歷經多次 deploy —— 這是巧合，不是機制。\n這條路徑上「內容更正」本身也受影響（改內文 → 讀者仍看舊文），只是 content 更新不 throw、能被新值覆蓋，所以症狀較輕（僅延遲 60s），撤稿/下架才是無限期。\n\n【本班的 workaround（已驗證有效，非治本）】\nPOST /api/sync/reports/<id>.json，headers 用 volpred.mirror_auth.ops_admin_headers()（x-ops-key ← OPS_ADMIN_TOKEN），body = feed.json 那筆 entry。→ upsert + revalidateTag → 兩條路由即刻 404。scripts/record_and_publish.py L141-158 已是此模式。\n\n【治本方向（擇一，需先判斷 owner）】\na. supabase_sync.sync_article() 成功後呼叫 mirror revalidate（沿用 mirror_auth；auth 失敗要**大聲失敗**，   別重演 2026-06-11 那種 401 靜默數週）。單一 owner = sync 端。\nb. 或前端 getArticleInternal 改成回 null 而非 throw，讓 unstable_cache 能寫入「查無」這個新值，   由 page 層判 null → notFound()。單一 owner = 前端。注意此法只縮短到 60s，不是即時。\n   ⚠️ a 與 b 都做 = 雙 owner 反而更難維護；依 CLAUDE.md anti-stacking 選一個。\n須附 regression test：撤稿一篇 → sync → 立即打 live URL → 必 404。沒有這個 test，這個坑會再回來。\n\n【相關】parent=assign_4470644e_s1_t7_retract（本缺陷的發現現場）；同一坑會打到 assign_4470644e_s2_t2_rewrite。",
     "parent_task_id": "assign_4470644e_s1_t7_retract",
-    "claimed_by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745",
-    "claimed_at": "2026-07-19T04:03:35.696372+00:00",
-    "claim_session_id": "e1b16b47990a",
     "status_history": [
       {
         "ts": "2026-07-19T04:03:35.696388+00:00",
@@ -37635,23 +37632,29 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745"
+      },
+      {
+        "ts": "2026-07-19T04:14:47.313276+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745"
       }
     ],
-    "started_at": "2026-07-19T04:03:35.928867+00:00"
+    "started_at": "2026-07-19T04:03:35.928867+00:00",
+    "completed_at": "2026-07-19T04:14:47.313268+00:00",
+    "result": "sync 端 owner (a)：supabase_sync.py 新增 revalidate_article_cache()，接進 sync_article/sync_article_status/delete_article 三條路徑；frontend route.ts 新增 POST /api/sync/revalidate/article/<slug>（authorizeOpsAdmin gate 後、readSyncJsonBody 前）。auth 缺失/401 大聲失敗並扣住 content hash 促下次重試。tests/test_supabase_sync_cache_purge.py 8 passed 1 skipped；相關 suite 367 passed；tsc exit 0；本機 next dev 實測 200/401/400 皆符預期。CAVEAT: frontend-v2-fix 為獨立 repo 且被 canonical .gitignore:40 排除，PHASE-Z 收不到 route.ts → 修復在部署前 inert（production 探測 HTTP 500=舊碼）。已查證不會弄壞排程（full 僅手動；drain 走 sync_article 且回傳不受 purge 失敗影響）。部署已開 P1 followup assign_frontend_deploy_revalidate_endpoint_20260719。原 bug 無法重現（mile_ebb5d6f5 於餓死期間已被 redeploy 清快取而 404）。",
+    "burst_reported_at": "2026-07-19T04:14:47.320287+00:00"
   },
   {
     "id": "assign_fb_retract_note_ebb5d6f5_20260717",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-17T05:30:00+00:00",
     "source": "ops_manager",
     "title": "mile_ebb5d6f5 已撤稿，但 Ivan Lai FB 那則貼文仍在、連結已 404 → 需補撤稿說明",
     "description": "mile_ebb5d6f5（🌡️ 事件溫度計｜US CPI 2026-06-13 預覽 T-7）已於 2026-07-17 撤稿，線上兩條路由皆 404。\n但該文於 2026-06-03 16:53 發過 Ivan Lai 個人 FB（channel=ivan_lai_personal_chrome）：\n  貼文：https://www.facebook.com/yihao.lai/posts/pfbid02DvjuZrCrH4X8okFbPFEZFYxXy5tTMbQNP8Q9WHJPiMP9wVQDggp5mkLtZ1tELrwil\n  第一則留言連結：https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5 → 現在 404。\n\n問題不只是死連結：FB 文案本身改寫自原文，因此**同樣帶著錯誤前提**（把 2026-06-13 當 CPI 發布日 —— 那天是週六），而讀者在 FB 上看不到任何更正訊號。留著不管 = 錯誤敘事仍在對外流通。\n\n建議動作（依 .claude/skills/fb-publishing/SKILL.md 的 CDP-attach 持久 profile Chrome 路徑）：\n在該貼文補一則留言，說明：發布日期用了硬編 proxy 而非 BLS 官方行事曆、2026-06-13 是週六不可能發布、文中一次發布（2025-11-13）根本沒發生（政府停擺取消）、更正後 CPI 當日 VIX 均值 +2.18% → -1.90%，原文已撤稿，完整更正見 mile_9560b9cc（https://volpred.zeabur.app/v3/reports/mile_9560b9cc）。\n語氣照 .claude/skills/trending-repost/references/fb-ivanlai-tone.md（不講滿、不套路、直說錯在哪）。\n文字送出前必過 uv run python scripts/anti_ai_gate.py --file <draft>（exit 0 才發）。\n\n【為何本班沒做】FB 需 browser automation（CDP-attach Chrome），claude.ai Facebook MCP 在本 session 未認證，且 hourly fire 有 3000s cap；硬塞會重演「父等子燒完 cap」。故獨立成 task 而非默默略過。\nparent=assign_4470644e_s1_t7_retract。",
     "parent_task_id": "assign_4470644e_s1_t7_retract",
-    "claimed_by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745",
-    "claimed_at": "2026-07-19T04:03:36.161294+00:00",
-    "claim_session_id": "c61c7834da8b",
     "status_history": [
       {
         "ts": "2026-07-19T04:03:36.161310+00:00",
@@ -37664,9 +37667,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745"
+      },
+      {
+        "ts": "2026-07-19T04:14:54.510937+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745"
       }
     ],
-    "started_at": "2026-07-19T04:03:36.393982+00:00"
+    "started_at": "2026-07-19T04:03:36.393982+00:00",
+    "completed_at": "2026-07-19T04:14:54.510923+00:00",
+    "result": "FB 更正留言已發佈於 Ivan Lai 6/3 貼文下，fresh-load 獨立複驗（留言數 1→2、關鍵字命中、發佈中已消失）。五項錯誤全數自行核對 CONFIRMED（來源 work_log L20613/L20593 + errata_cpi_dates_20260717.json 198 checks PASS）；避開 -0.847%(13-event 延伸窗) 陷阱，採 12-event 的 -1.90%。mile_9560b9cc 實測 200、mile_ebb5d6f5 實測 404。anti_ai_gate exit 0（warn 0/3，未用 --force）。新增能力：fb_realchrome_post.py --comment-on <post_url> --comment-file，重用 _add_first_comment 的定位邏輯（抽出 _locate_comment_box/_verify_comment_sent 共用，既有行為不變）。殘留：feed.json superseded_by=null 已開 followup assign_feed_superseded_by_null_audit_20260719。",
+    "burst_reported_at": "2026-07-19T04:14:54.517338+00:00"
   },
   {
     "id": "telegram-907",
@@ -38696,7 +38708,10 @@
       "escalation_due": false,
       "fingerprint": [
         "tests/test_alerts.py::tests.test_alerts::test_check_alert_conditions_sends_each_breached_condition_once"
-      ]
+      ],
+      "resolved_at": "2026-07-19T04:06:57.810739+00:00",
+      "final_consecutive_remediation_failures": 0,
+      "superseded_by_distinct_incident_at": "2026-07-19T04:06:57.810739+00:00"
     },
     "status_history": [
       {
@@ -41984,7 +41999,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29671078611",
@@ -41992,9 +42007,6 @@
     "created_at": "2026-07-19T04:00:07.628715+00:00",
     "title": "CI 紅燈修復（run 29671078611, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29671078611\nattempt: 1\nhead_sha: c212453ba\n偵測摘要（仍須讀完整 failed log）：2026-07-19T03:12:05.7620647Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['k1732']\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29671078611 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "claimed_by": "hourly-slot-2-883524a7ea2d48f484ba9819a0ac30c5",
-    "claimed_at": "2026-07-19T04:01:17.501872+00:00",
-    "claim_session_id": "c37241235e37",
     "status_history": [
       {
         "ts": "2026-07-19T04:01:17.501888+00:00",
@@ -42007,8 +42019,70 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-883524a7ea2d48f484ba9819a0ac30c5"
+      },
+      {
+        "ts": "2026-07-19T04:32:24.011165+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-883524a7ea2d48f484ba9819a0ac30c5"
       }
     ],
-    "started_at": "2026-07-19T04:01:24.911496+00:00"
+    "started_at": "2026-07-19T04:01:24.911496+00:00",
+    "completed_at": "2026-07-19T04:32:24.011150+00:00",
+    "result": "root_cause=pre-commit silent-fallback gate blocked the PHASE-Z closeout carrying k1732's knowledge entry, so a committed experiment had no knowledge row on a clean checkout; repair_commit=4b3875b053. 另修 conftest.py autouse burst 隔離（測試讀 live ops state 洩漏）。全套 3546 passed，殘留 2 fail 屬他人未提交檔。",
+    "burst_reported_at": "2026-07-19T04:32:24.016815+00:00"
+  },
+  {
+    "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260719T040657810739Z_a1",
+    "title": "[internal alert] PHASE-Z auto-commit 測試紅燈（4b3875b053bb）",
+    "description": "由內部可自癒 alert_key `phase_z_test_gate_red` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 跑同一組測試為綠，HEAD 新增紅燈。\n- fire 時間: 12:06\n- commit: 4b3875b053bb\n- 變更程式檔: scripts/dispatch_burst_cli.py, scripts/task_pool_claim.py, scripts/tests/test_dispatch_burst.py, src/volpred/ops/dispatch_burst.py\n- 跑的測試: scripts/tests/test_dispatch_burst.py tests/test_task_pool_claim.py\n- pytest 退出碼: 1（HEAD） / 0（HEAD^，baseline=green）\n\n## 影響\n隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。\n\n## 修復線索（供接手任務）\n1. 隔離重現：\n   uv run --extra dev python -m pytest scripts/tests/test_dispatch_burst.py tests/test_task_pool_claim.py -q\n2. 修掉紅燈或 revert 該 commit（gate 不自動 revert — revert 風險高於紅燈本身）。\n3. 失敗尾段：\n\n```\nary info ============================\nFAILED scripts/tests/test_dispatch_burst.py::test_quota_streak_suspends_but_does_not_end_the_window\nFAILED tests/test_task_pool_claim.py::test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task\n2 failed, 31 passed in 1.02s\nwarning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nUsing CPython 3.12.10\nCreating virtual environment at: .venv\n   Building volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-oypbot93/head\n      Built volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-oypbot93/head\nInstalled 125 packages in 541ms\n```",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-19T04:06:57.810739+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "phase_z_test_gate_red"
+    ],
+    "alert_key": "phase_z_test_gate_red",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260719T040657810739Z",
+      "episode_started_at": "2026-07-19T04:06:57.810739+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-19T04:06:57.810739+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false,
+      "fingerprint": [
+        "scripts/tests/test_dispatch_burst.py::scripts.tests.test_dispatch_burst::test_quota_streak_suspends_but_does_not_end_the_window",
+        "tests/test_task_pool_claim.py::tests.test_task_pool_claim::test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task"
+      ]
+    }
+  },
+  {
+    "id": "assign_frontend_deploy_revalidate_endpoint_20260719",
+    "title": "frontend-v2-fix 的 /api/sync/revalidate/article 新端點未進版控 → 撤稿快取修復尚未生效",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "internal",
+    "parent_task_id": "assign_sync_cache_purge_20260717",
+    "created_at": "2026-07-19T12:14:35+08:00",
+    "description": "【背景】assign_sync_cache_purge_20260717 已在 canonical repo 修好 sync 端（scripts/supabase_sync.py 新增 revalidate_article_cache()，撤稿/下架/狀態變更三條路徑都會呼叫），並附 tests/test_supabase_sync_cache_purge.py（8 passed, 1 skipped）。\n\n【但修復目前是 inert 的】它呼叫的對象是 frontend 新端點 POST /api/sync/revalidate/article/<slug>（revalidateTag('article') + revalidateTag('article-<slug>')），該端點的代碼寫在 frontend-v2-fix/src/app/api/sync/[...path]/route.ts —— 而 **frontend-v2-fix/ 是獨立 git repo 且被 canonical .gitignore:40 排除**，PHASE-Z 只 commit canonical 工作區，收不到這個檔。\n實測 production 探測回 HTTP 500 {\"error\":\"Unexpected end of JSON input\"} —— auth 有過，但舊代碼沒有這個分支，fall through 到 readSyncJsonBody。\n\n【風險評估（已查證，非推測）】不會弄壞既有排程：\n  - supabase_sync.py full / force-full 的 sys.exit(1) 只在手動 CLI 觸發（ops_dashboard / audit_publish_sync 只是把它當 remediation 提示字串印出），無 cron 直接跑 full。\n  - supabase_sync_drain (*/30) 走 drain_failed_supabase_syncs.py → sync_article()，而 purge 失敗**不會**翻轉 sync_article 的回傳（DB write 才是它的契約），故 drain 不受影響。\n→ 因此這是「修復未生效」而非「修復造成故障」，但下一次真實撤稿仍會在讀者端無限期可見。\n\n【要做的】\n1. 在 frontend-v2-fix repo 內 review 該 route.ts 改動（新分支置於 readSyncJsonBody 之前、無 request body、仍在既有 authorizeOpsAdmin gate 之後）→ commit → deploy。\n2. 部署後立即驗證端點：帶 valid OPS_ADMIN_TOKEN 應回 200 {\"status\":\"revalidated\",...}，無 token 應回 401。\n3. 跑 end-to-end 真實驗證（原任務因 mile_ebb5d6f5 在餓死的 46.6h 間已被某次 redeploy 清掉快取、當時已 404，無法重現 bug）：\n   VOLPRED_LIVE_INTEGRATION=1 pytest tests/test_supabase_sync_cache_purge.py -k live\n   或下次真實撤稿時：撤稿 → sync → 立刻打 live URL → 必 404。\n\n【定為 P1 的理由】canonical 端已 merge，兩端不同步的窗口期越長越容易被誤認為「已修好」；且撤稿在讀者端不生效是內容誠信問題（錯誤敘事持續對外流通）。"
+  },
+  {
+    "id": "assign_feed_superseded_by_null_audit_20260719",
+    "title": "feed.json 撤稿 entry 的 superseded_by 是 null 但 work_log 宣稱有寫 → 疑 writer 漏寫欄位",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "internal",
+    "parent_task_id": "assign_fb_retract_note_ebb5d6f5_20260717",
+    "created_at": "2026-07-19T12:14:35+08:00",
+    "description": "【發現】處理 assign_fb_retract_note_ebb5d6f5_20260717 時，agent 比對發現 storage/reports/feed.json 的 mile_ebb5d6f5 entry 其 superseded_by = null，但 work_log L20613 的撤稿 entry 敘述宣稱已寫入該指標。\n\nerrata_ref 與 retracted_reason 都在，撤稿機制本身有效（線上實測 mile_ebb5d6f5 = 404、取代它的 mile_9560b9cc = 200），所以這不是讀者端故障 —— 是 audit 端看不出這篇被誰取代。\n\n【為何值得查】若這是撤稿 writer 的漏寫 bug 而非單一個案，其他撤稿文會同樣中招，supersede 鏈就整片斷掉。\n\n【要做的】\n1. 掃 feed.json 全部 status=retracted 的 entry，統計有多少 superseded_by 為 null 但實際有對應更正文（可由 errata_ref 反查）。\n2. 若 >1 篇 → 定位撤稿 writer 補寫欄位（單一 owner，勿在多處補），加 regression test。\n3. 回填既有缺漏的 superseded_by。注意：動 canonical feed.json 後需另走 sync，且會受上述 assign_frontend_deploy_revalidate_endpoint_20260719 的快取問題影響 —— 建議排在該端點部署之後。\n\n【不要做的】原 FB 更正任務未動這個欄位是正確的（非其 scope）。"
   }
 ]
