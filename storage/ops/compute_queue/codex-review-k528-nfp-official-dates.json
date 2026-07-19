@@ -1,0 +1,51 @@
+{
+  "id": "codex-review-k528-nfp-official-dates",
+  "title": "k528 NFP 官方日曆修正 — Codex 二審 + review_verdict.json",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/codex-review-k528-nfp-official-dates.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528/review_verdict.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/codex-review-k528-nfp-official-dates.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-19T03:22:13Z",
+  "started_at": "2026-07-19T03:30:05Z",
+  "completed_at": "2026-07-19T03:36:20Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-review-k528-nfp-official-dates.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/codex-review-k528-nfp-official-dates.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528/review_verdict.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/codex-review-k528-nfp-official-dates.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp",
+  "claude_followup": {
+    "brief": "讀 experiments/k528/review_verdict.json 的 verdict。PASS → (1) bash scripts/merge_worktree.sh dispatch-slot-3-30adeed7-k528nfp 合併（cert gate 這時才會放行）(2) 在 repo root 跑 uv run python experiments/k528/build_article_correction.py 驗證後再 --apply 套用 mile_35eef830 的 18 條更正（all-or-nothing、每條恰好命中一次、不另發第二篇更正文）(3) 重製兩張內文圖 nfp_20260703_regime.png / nfp_20260703_baseline.png 與文末兩張懶人包圖（仍是 proxy 期數據，與更正後正文不一致，文中已明寫「正在重新產製」）+ 重新上傳 Supabase (4) 寫 knowledge.json (5) 標 assign_ae004ae2 succeeded。FAIL → 照 blocking issues 派 bounded remediation，不原樣重派、不放行未驗收的合併，且文章更正一律不套用。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k528_codex_review.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/codex-review-k528-nfp-official-dates.md",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528"
+  },
+  "followup_dispatched_at": "2026-07-19T03:41:27Z",
+  "followup_next_task_id": "assign_667a501a"
+}

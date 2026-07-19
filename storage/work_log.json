@@ -21487,5 +21487,35 @@
     "task_id": "assign_ae004ae2",
     "summary": "k528 NFP proxy 污染（254 筆中 53 筆 20.9% 非 NFP 日，系統性偏早）修復任務已 enqueue 給 compute worker：job agent-brief_k528_nfp-e245d0，worktree dispatch-slot-3-30adeed7-k528nfp（branch k528-nfp-official-dates），opus/xhigh timeout 5400s。brief 要求換 nfp_release_dates fail-closed 全樣本重跑、每項指標 mean+median+勝率並判翻轉、必要時走 article_correction.py in-place 更正 mile_35eef830（禁發第二篇）、補 mutation test。合併由後續 fire PHASE A 收。",
     "status": "dispatched_async"
+  },
+  {
+    "timestamp": "2026-07-19T11:22:45.062172+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_ae004ae2",
+    "actor": "hourly-slot-1-9bb2c71a34cc419894e680455a0236cf",
+    "owner": "hourly-slot-1-9bb2c71a34cc419894e680455a0236cf",
+    "title": "k528 NFP 官方日曆修正 — 獨立驗證通過，Codex 二審進 queue（cert gate 擋合併）",
+    "summary": "PHASE A 收 compute-queue followup agent-brief_k528_nfp-e245d0（collect_completed）。獨立驗證：pytest tests/test_nfp_official_release_dates.py 42 passed，含 9 個 guard/mutation test（first-Friday proxy 餵給 guard 確實被拒、幻影日 2025-10-03 被抓）；18 條 mile_35eef830 更正替換字串的每個數字逐條核對 k528_nfp_event_study_results.json，全部有來源（1.08/0.828%/0.764%/1.15/p=0.057/2.04/1.11%/0.54%/0.44/0.34/16.69/0.042/253/127/126）；文章未被更正過、無第二篇更正文、每條恰好命中一次。核心發現：254→253 筆看似沒動，實際只有 207 個日期共通、46 場換日；唯一結論翻轉為 NFP vs 非 NFP 週五 p=0.0335(顯著)→p=0.0571(不顯著)；方向性主結論不變（VIX 體制 2.04x, p≈8e-9 才是主因）。合併被 merge_worktree.sh 的 review-certification gate 機械擋下（缺 review_verdict.json）—— 判定 gate 正確，未繞過。Codex 二審在 codex-rescue subagent 內撞 600s 上限失敗，改依規則走 compute_queue enqueue-agent：job codex-review-k528-nfp-official-dates，timeout 3600s，result-artifact=experiments/k528/review_verdict.json，followup 接手 merge + 套用文章更正 + 重製 4 張 proxy 期圖表。assign_ae004ae2 標 blocked until 2026-07-19T14:00+08:00（blocked_reason=awaiting_codex_review_verdict），PRE-PHASE-0 sweep 會自動放回 pending。線上文章在 verdict PASS 前維持原狀，未套用任何更正。",
+    "outcome": "verified_pending_review"
+  },
+  {
+    "timestamp": "2026-07-19T11:38:56+08:00",
+    "task_type": "daily_article",
+    "task_id": "assign_3570f734",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-0b2ef81497394ce99934c4f1802f3689",
+    "owner": "hourly-slot-2-0b2ef81497394ce99934c4f1802f3689",
+    "commit": null,
+    "summary": "[P1][FB] 發佈 mile_29018fa1 到 Ivan Lai FB（老闆 Telegram msg 1023 批准「發」）\n\n**產出**：貼文已上線 https://www.facebook.com/yihao.lai/posts/pfbid03SaPjm1FqJVfsJauJ5X9bF3oRrKmiziF2Jp3jajkqunckFNHxKj4ALSad5fxvZfFl\n主文 287 字（無連結）+ 3 張圖（k1732_fig1_case2026 + 懶人包 2_results / 3_takeaway）+ 第一則留言貼 VolPred 連結（含預覽卡）。canonical fb_post_status=success、fb_post_url 已回寫。\n\n**過程中排除的三個阻礙**（都是 fb_realchrome_post.py 的環境/驗證缺陷，非稿件問題）：\n1. composer 開不了 —— FB 的「我們已移除你的限時動態」通知 modal（正是 msg 1022 在問的那則）蓋住觸發鈕。關掉 modal 後即可。\n2. composer 誤判 ABORT —— click 的 actionability 等待在 FB 重繪時 timeout，但點擊已送達、composer 正在開。已改成「以 dialog 是否真的出現為準」，不再只看 click 回傳。\n3. **第一則留言誤報成功** —— `_add_first_comment` 無條件印 [OK]，實際貼文 0 留言、引流連結整篇掉了。已補送出後回讀驗證（留言框清空 + 頁面出現連結），驗不過就 raise；同時把 profile 頁等待從 domcontentloaded+3.5s 改成 load+15s + 捲「其他貼文」進視窗（原設定下 feed 根本還沒 render，是這次定位失敗的根因）。\n\n**方法論教訓**：本次驗證一度連續三輪判定「貼文不在時間軸」，全是 FB 虛擬化 + 未 render 完造成的偽陰性 —— 貼文其實一直在。對 FB DOM 的「查無」結論，必須以截圖為準、且等頁面真的載完再掃，否則會把成功誤判成失敗（差點就據此回報發文失敗）。\n\n**draft 修正**：storage/drafts/fb_mile_29018fa1.md 的留言段原本是「完整版分析 + 29 年回測圖表在這裡 → <url>」，parser 只吃裸 URL 行 → 留言連結解析為空。已改回裸 URL（描述文字本來也不會被貼出）。"
+  },
+  {
+    "timestamp": "2026-07-19T11:41:45+08:00",
+    "task_type": "experiment",
+    "task_id": "codex-review-k528-nfp-official-dates",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-0b2ef81497394ce99934c4f1802f3689",
+    "owner": "hourly-slot-2-0b2ef81497394ce99934c4f1802f3689",
+    "commit": null,
+    "summary": "PHASE A 收件：compute job codex-review-k528-nfp-official-dates（collect_completed）\n\n**攔下一個假成功**。job 標 completed、`--result-artifact` 存在檢查也過，但 `review_verdict.json` 八個欄位全是未填的 `FILL:` 佔位樣板（verdict / reviewer / reviewed_at / reviewed_commit / review_artifact / blocking_defects），只有 kid 與 reviewed_sha256 是實值 —— 樣板 scaffold 是預先建好的，Codex 從未回寫裁決。**artifact 存在 ≠ 審查完成**。\n\n若照原 followup brief 的 PASS 分支走，會連鎖做出四件不可逆的錯事：合併未驗收的 worktree、對線上文章 mile_35eef830 套用 18 條未經審查的更正、重製上傳圖表、把 assign_ae004ae2 標 succeeded。全部擋下。\n\n**產出**：建 P1 followup `assign_667a501a`（重跑 Codex 二審 + 確保 verdict 真的回寫；明列四項禁止動作），並 mark-followup-dispatched 防重派。父任務 assign_ae004ae2 維持 in_progress 未動。\n\n**治本建議已寫進任務**：verdict artifact 的成功後置條件不能只驗檔案存在，應加佔位符/schema 檢查（任一欄位仍以 `FILL:` 開頭即視為未完成），否則同一個假成功會在每個走 verdict gate 的 job 重演。"
   }
 ]

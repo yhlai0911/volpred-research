@@ -408,10 +408,16 @@ def _add_first_comment(page, body: str, link: str) -> None:
     以 JS innerText 比對定位「該貼文」的留言 textbox（profile 頁 div[role='article']
     不穩，2026-07-07 改此法驗證可行），type URL（ASCII 不亂碼）+ Enter 送出。"""
     anchor = body.strip().splitlines()[0][:12]
-    page.goto(FB_PROFILE_URL, wait_until="domcontentloaded", timeout=60_000)
-    page.wait_for_timeout(3_500)
-    page.mouse.wheel(0, 1250)  # 捲過置頂貼文，露出最新貼文
-    page.wait_for_timeout(2_500)
+    # 2026-07-19：原本 domcontentloaded + 3.5s 就掃 DOM，profile feed 常還沒 render
+    # （實測 body innerText 僅 2170 字、滿頁佔位）→ 定位不到貼文。改等 load + 15s，
+    # 並把「其他貼文」捲進視窗讓最新貼文真正掛上 DOM。
+    page.goto(FB_PROFILE_URL, wait_until="load", timeout=90_000)
+    page.wait_for_timeout(15_000)
+    try:
+        page.get_by_text("其他貼文", exact=True).first.scroll_into_view_if_needed(timeout=15_000)
+    except Exception:
+        page.mouse.wheel(0, 1250)  # fallback: 捲過置頂貼文，露出最新貼文
+    page.wait_for_timeout(5_000)
     js = """
     (anchor) => {
       const boxes = Array.from(document.querySelectorAll('div'));
@@ -436,7 +442,16 @@ def _add_first_comment(page, body: str, link: str) -> None:
     page.wait_for_timeout(3_500)  # 等連結預覽
     page.keyboard.press("Enter")
     page.wait_for_timeout(4_500)
-    print(f"[OK] 第一則留言已送出：{link}")
+    # 2026-07-19：原本無條件印 [OK]。實測 mile_29018fa1 這樣誤報成功，貼文實際 0 留言，
+    # 引流連結整篇掉了。送出後必須回讀確認：留言框清空 + 頁面出現該連結。
+    for _ in range(6):
+        cleared = (el.inner_text() or "").strip() == ""
+        shown = link.rsplit("/", 1)[-1] in page.evaluate("() => document.body.innerText")
+        if cleared and shown:
+            print(f"[OK] 第一則留言已送出並驗證：{link}")
+            return
+        page.wait_for_timeout(2_500)
+    raise RuntimeError(f"留言送出後驗證失敗（留言框未清空或頁面查無連結）：{link}")
 
 
 def cmd_delete_matching(anchor: str, confirm: bool) -> int:
@@ -690,6 +705,19 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
                     break
             except Exception:
                 continue  # silent-ok: 逐一試 composer selector，全失敗由 opened=False→ABORT
+        if not opened:
+            # 2026-07-19 fix：click 的 actionability 等待可能在 FB 重繪時 timeout，
+            # 但點擊本身已送達、composer 正在開（skeleton）→ 只看例外會誤判 ABORT。
+            # 以「dialog 是否真的出現」為準，而非 click 的回傳。
+            page.wait_for_timeout(3_000)
+            try:
+                page.locator(
+                    "div[role='dialog'] div[role='textbox'][contenteditable='true']"
+                ).first.wait_for(state="visible", timeout=8_000)
+                opened = True
+                print("[INFO] click 回報失敗但 composer 已開 → 續行")
+            except Exception:
+                pass  # silent-ok: 確認 composer 真的沒開 → 落到下面 ABORT
         if not opened:
             shot = SHOT_DIR / f"post_no_composer_{int(time.time())}.png"
             page.screenshot(path=str(shot))

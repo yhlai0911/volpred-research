@@ -14,7 +14,7 @@
 
 只答得出第一題的訊號，市場上到處都是。
 ## 第一則留言（貼連結）
-完整版分析 + 29 年回測圖表在這裡 → https://volpred.zeabur.app/v3/reports/mile_29018fa1
+https://volpred.zeabur.app/v3/reports/mile_29018fa1
 ## 圖片（結果圖 + 懶人包，依序）
 https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1732/k1732_fig1_case2026.png
 https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1732_lazypack/2_results.png

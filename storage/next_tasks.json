@@ -32958,13 +32958,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T02:00:53.129499+00:00",
+    "completed_at": "2026-07-19T03:00:53.428979+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T02:00:53.129499+00:00",
-      "last_clean_observed_at": "2026-07-19T02:00:53.129499+00:00"
+      "resolved_at": "2026-07-19T03:00:53.428979+00:00",
+      "last_clean_observed_at": "2026-07-19T03:00:53.428979+00:00"
     }
   },
   {
@@ -32976,13 +32976,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T02:58:45.005031+00:00",
+    "completed_at": "2026-07-19T03:43:21.473380+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T02:58:45.005031+00:00",
-      "last_clean_observed_at": "2026-07-19T02:58:45.005031+00:00"
+      "resolved_at": "2026-07-19T03:43:21.473380+00:00",
+      "last_clean_observed_at": "2026-07-19T03:43:21.473380+00:00"
     }
   },
   {
@@ -35535,40 +35535,15 @@
   },
   {
     "id": "alert_host_cron_fail_20260716",
-    "title": "[alert] Host cron failure detected",
-    "description": "由 alert `host_cron_fail` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=critical（max_consecutive_failures=1；non_hang_failure=True）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\n- scheduler_last_status: ok\n- scheduler_age_minutes: 126496.0\n- failing_logs:\n  - storage/logs/cron/daily_update.log exit=1 at 2026-07-16T00:03:07+00:00 recency=fresh_or_unscheduled\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-16T01:01:19.550010+00:00",
+    "task_type": "platform_ops",
+    "title": "[alert] Host cron failure detected",
+    "priority": 1,
     "source": "alert_remediation_bridge",
-    "tags": [
-      "alert",
-      "host_cron_fail"
-    ],
-    "status_history": [
-      {
-        "ts": "2026-07-16T03:08:30.606077+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-20260716"
-      },
-      {
-        "ts": "2026-07-16T03:08:30.878900+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-20260716"
-      },
-      {
-        "ts": "2026-07-16T03:08:31.157575+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-20260716"
-      }
-    ],
-    "started_at": "2026-07-16T03:08:30.878879+00:00",
+    "created_at": "2026-07-16T01:01:19.550010+00:00",
     "completed_at": "2026-07-16T03:08:31.157550+00:00",
-    "result": "fresh no-op: original daily_update exit=1 was a fail-loud dirty feed guard; latest detector reports host_cron_fail ok and all ops alert checks clear; no schedule or data mutation required"
+    "tombstone": true,
+    "archived_at": "2026-07-19T03:21:03.304637+00:00"
   },
   {
     "id": "telegram-855",
@@ -40578,13 +40553,10 @@
     "description": "來源：event_article_nfp_2026_07_03_t1 修正報告 §7（已合併，commit 8dfb83806）。\n\nexperiments/k528/k528_nfp_event_study.py 用 get_first_friday() proxy。實測全樣本（2005-02~2026-03，254 筆，FRED 官方涵蓋完整、無外插）：與官方日期相符 201、proxy 錯誤（該日無發布）53（20.9%）、官方發布被完全漏掉 52、幻影月份 1（2025-10）。偏誤系統性偏早（35 早 / 13 晚），其中 28 筆剛好早 7 天（BLS 因參考週改在第二個週五）、12 筆晚 3-4 天（假日提前）。\n\n衝擊面：線上文章 mile_35eef830 正文的所有主要數字 —— 1.10 倍、1.17 倍、2.17 倍體制差、相關係數 0.45、分界值 16.71、254 次樣本 —— 全部出自 k528。\n\n要做：(1) k528 改用 volpred.data.event_dates.nfp_release_dates（fail closed），全樣本重跑；(2) 逐項對照 2.17 倍體制差 / 0.45 / 16.71 是否翻轉或失去顯著性（教訓：平均值可能幾乎不動而中位數與勝率翻轉，不可只看平均）；(3) 若核心論點變動，用既有的 src/volpred/publisher/article_correction.py 做 in-place 更正 （唯一入口，all-or-nothing、每個替換必須恰好命中一次），**禁發第二篇更正文**；(4) 補官方日曆 regression tests + mutation test（還原 proxy 必須轉紅）；(5) Codex 審後才合併。\n\nparent: assign_358decfa",
     "task_type": "experiment",
     "priority": 1,
-    "status": "in_progress",
+    "status": "blocked",
     "source": "agent",
     "created_at": "2026-07-18T20:14:17.175688+00:00",
     "created_by": "hourly-slot-1-9821e0723e124a95af0ae537ebd2dde0",
-    "claimed_by": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c",
-    "claimed_at": "2026-07-19T02:41:50.681102+00:00",
-    "claim_session_id": "1eb97cdc6dad",
     "status_history": [
       {
         "ts": "2026-07-19T02:41:50.681117+00:00",
@@ -40597,12 +40569,42 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c"
+      },
+      {
+        "ts": "2026-07-19T03:09:09.400424+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-19T03:09:09.687483+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-9bb2c71a34cc419894e680455a0236cf"
+      },
+      {
+        "ts": "2026-07-19T03:09:10.252747+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-9bb2c71a34cc419894e680455a0236cf"
+      },
+      {
+        "ts": "2026-07-19T03:22:26.294777+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-9bb2c71a34cc419894e680455a0236cf",
+        "note": "manual_release"
       }
     ],
-    "started_at": "2026-07-19T02:41:54.392039+00:00",
+    "started_at": "2026-07-19T03:09:10.252735+00:00",
     "dispatched_agent_job_id": "agent-brief_k528_nfp-e245d0",
     "dispatched_worktree": ".claude/worktrees/dispatch-slot-3-30adeed7-k528nfp",
-    "dispatch_note": "2026-07-19 10:47 交 compute worker（xhigh agent，timeout 5400s）。完成由 PHASE A collect_completed followup 收：驗數字→Codex 審→merge_worktree→標 succeeded。重複 claim 前先查此 job 狀態。"
+    "dispatch_note": "2026-07-19 10:47 交 compute worker（xhigh agent，timeout 5400s）。完成由 PHASE A collect_completed followup 收：驗數字→Codex 審→merge_worktree→標 succeeded。重複 claim 前先查此 job 狀態。",
+    "last_released_at": "2026-07-19T03:22:26.294756+00:00",
+    "blocked_until": "2026-07-19T14:00:00+08:00",
+    "blocked_reason": "awaiting_codex_review_verdict",
+    "notes": "修正本身已完成並驗證（42 tests passed 含 mutation test；18 條文章替換數字逐條核對過）。merge_worktree.sh 的 review-certification gate 要求 experiments/k528/review_verdict.json —— Codex 二審已進 compute queue: job codex-review-k528-nfp-official-dates（timeout 3600s）。該 job 的 followup 會接手 merge + 套用 mile_35eef830 文章更正 + 重製圖表 + 標本任務 succeeded。文章更正在 verdict PASS 前一律不套用。"
   },
   {
     "id": "assign_23b2a961",
@@ -41736,7 +41738,7 @@
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260719T024745114940Z_a1",
     "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=2 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.MjczH9 baseline_findings=64 new=2 resolved=64\n[pre-commit]   NEW scripts/task_pool_claim.py:563 except Exception: return None\n[pre-commit]   NEW src/volpred/ops/dispatch_burst.py:67 except OSError|JSONDecodeError: return None\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=2 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.XwY84G baseline_findings=64 new=2 resolved=64\n[pre-commit]   NEW scripts/task_pool_claim.py:563 except Exception: return None\n[pre-commit]   NEW src/volpred/ops/dispatch_burst.py:67 except OSError|JSONDecodeError: return None\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
@@ -41754,7 +41756,7 @@
       "episode_id": "20260719T024745114940Z",
       "episode_started_at": "2026-07-19T02:47:45.114940+00:00",
       "attempt_number": 1,
-      "last_seen_at": "2026-07-19T02:53:59.769617+00:00",
+      "last_seen_at": "2026-07-19T03:07:27.727877+00:00",
       "consecutive_remediation_failures": 0,
       "attempt_history": [],
       "escalation_due": false,
@@ -41820,5 +41822,77 @@
         "note": "spawned from K1731 rev7 detector newly_flagged_sites"
       }
     ]
+  },
+  {
+    "id": "telegram-1023",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T03:18:41.463678+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1023）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n發\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T03:19:45.729499+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-19T03:20:37.463176+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-19T03:20:37.463160+00:00",
+    "result": "老闆『發』=批准 msg 1022 的 FB 發文裁決。已開 P1 急件 assign_3570f734（fire_requested 已寫入 dispatch_state，非排班等待），已 telegram 回覆（msg 1024）。",
+    "burst_reported_at": "2026-07-19T03:20:37.469158+00:00"
+  },
+  {
+    "id": "assign_3570f734",
+    "title": "[P1][FB] 發佈 mile_29018fa1 FB 貼文（老闆 msg 1023 批准『發』）",
+    "description": "老闆 2026-07-19 11:18 CST Telegram msg 1023 回覆單字『發』，即批准 msg 1022 的 FB 發文裁決請求（原問句：時間軸顯示 7/16 限時動態被 FB 移除，要照發請回『FB照發』）。裁決＝照發。\n\n執行內容：\n1. 走 fb-publishing skill SOP：CDP-attach 持久 profile Chrome（個人帳號 Ivan Lai），非 headless。\n2. 稿件已備妥：storage/drafts/fb_mile_29018fa1.md（主貼文純文字不含連結 + 第一則留言貼連結 + 3 張圖 URL）。\n3. 主貼文必附圖（k1732_fig1_case2026 + 懶人包 2_results / 3_takeaway，依序）。\n4. 連結放第一則留言，不放正文。\n5. 發前冪等 guard：先查老闆是否已手動發過同一篇（mile_29018fa1），已發則跳過並回報。\n6. 發完用 telegram-send 回報老闆貼文網址。\n\n來源任務：telegram-1023。",
+    "task_type": "daily_article",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-19T03:20:02.060721+00:00",
+    "created_by": "telegram-responder",
+    "status_history": [
+      {
+        "ts": "2026-07-19T03:21:19.538028+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-0b2ef81497394ce99934c4f1802f3689"
+      },
+      {
+        "ts": "2026-07-19T03:21:22.697349+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-0b2ef81497394ce99934c4f1802f3689"
+      },
+      {
+        "ts": "2026-07-19T03:39:37.640741+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-0b2ef81497394ce99934c4f1802f3689"
+      }
+    ],
+    "started_at": "2026-07-19T03:21:22.697335+00:00",
+    "completed_at": "2026-07-19T03:39:37.640727+00:00",
+    "result": "FB 貼文已上線 https://www.facebook.com/yihao.lai/posts/pfbid03SaPjm1FqJVfsJauJ5X9bF3oRrKmiziF2Jp3jajkqunckFNHxKj4ALSad5fxvZfFl（主文+3圖+第一則留言連結，canonical fb_post_status=success/url 已回寫）。順修 fb_realchrome_post.py 兩個誤判：composer 開啟以 dialog 出現為準、第一則留言送出後強制回讀驗證（原本無條件印 OK，本次即誤報、留言其實沒送出）。已 Telegram 回報 msg 1026。",
+    "burst_reported_at": "2026-07-19T03:39:37.650642+00:00"
+  },
+  {
+    "id": "assign_667a501a",
+    "title": "k528 Codex 二審重跑：review_verdict.json 全是未填 FILL 佔位（禁合併/禁套18條更正）",
+    "description": "k528 NFP 官方日曆修正 —— Codex 二審實際上沒產出裁決，需重跑（不得合併、不得套更正）\n\n**發現**（2026-07-19 hourly-slot-2 PHASE A 收件時）：compute job `codex-review-k528-nfp-official-dates` 標 status=completed，`--result-artifact` 存在檢查也過了，但打開 `.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528/review_verdict.json`，**八個欄位全是未填的 `FILL:` 佔位樣板**：\n\n- verdict: \"FILL: PASS or FAIL — anything but PASS blocks the merge\"\n- reviewer / reviewed_at / reviewed_commit / review_artifact: 全是 \"FILL: ...\"\n- blocking_defects: [\"FILL: one entry per defect...\"]\n\n只有 `kid` 與 `reviewed_sha256`（凍結檔案雜湊）是實值 —— 也就是**樣板 scaffold 是預先建好的，Codex 從未回寫裁決**。artifact 存在 ≠ 審查完成。\n\n**因此下列動作一律禁止**（原 followup brief 的 PASS 分支不成立，因為根本沒有 PASS）：\n- ❌ `merge_worktree.sh dispatch-slot-3-30adeed7-k528nfp`\n- ❌ `build_article_correction.py --apply`（mile_35eef830 的 18 條更正）\n- ❌ 重製/上傳圖表、寫 knowledge.json、標 assign_ae004ae2 succeeded\n\n**要做的**：\n1. 重跑 Codex 二審（`.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp`，審 k528 NFP 官方日曆修正 + build_article_correction.py 的 18 條更正對應），並確保 review_verdict.json 真的被回寫成實值（verdict=PASS/FAIL、reviewer、reviewed_commit、blocking_defects）。\n2. 回寫後才依裁決走原 followup brief 的 PASS / FAIL 分支。\n3. **順手治本**：`review_verdict.json` 這類 verdict artifact 的成功後置條件不能只驗「檔案存在」—— 應加 schema/佔位符檢查（任一欄位仍以 `FILL:` 開頭即視為未完成），否則同一個假成功會在每個走 verdict gate 的 job 重演。實作位置建議在 compute_queue 的 result-artifact 驗收處或獨立 `verify_verdict_artifact.py`。\n\n**父任務**：assign_ae004ae2（k528 NFP 事件日污染修復，claimed_by=hourly-slot-3-30adeed7...），維持 in_progress，本任務完成前不得標 succeeded。\n**來源**：compute job codex-review-k528-nfp-official-dates 的 collect_completed followup。",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-19T03:41:07.556892+00:00"
   }
 ]
