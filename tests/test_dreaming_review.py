@@ -946,8 +946,18 @@ def test_orphan_finding_queues_as_experiment_task_type(tmp_path):
 # 2026-07-18 重構後的迴歸鎖：level 與文案必須來自同一筆 tier，不再兩處各自 if。
 # ---------------------------------------------------------------------------
 def _email_report(new: int, escalations: int) -> dict:
+    # 這個 finding 是 propose_only 且未 quiescent → actionable，所以 actionable_new == new。
     return {
-        "counts": {"findings": new, "new": new, "resolved": 0, "escalations": escalations},
+        "counts": {
+            "findings": new,
+            "new": new,
+            "resolved": 0,
+            "escalations": escalations,
+            "actionable": new,
+            "actionable_new": new,
+            "quiescent": 0,
+            "machine_handled": 0,
+        },
         "findings": [
             {
                 "severity": "critical" if escalations else "warn",
@@ -955,6 +965,8 @@ def _email_report(new: int, escalations: int) -> dict:
                 "signature": "host_cron_fail:myjob",
                 "occurrences": 3 if escalations else 1,
                 "governance_target": None,
+                "remediation": "propose_only",
+                "quiescent": False,
             }
         ][:new],
         "loop_health": {"overall": "degrading" if escalations else "ok"},
@@ -1001,3 +1013,148 @@ def test_action_numbering_is_positional_not_hardcoded():
     tier = dr.select_dreaming_tier({"escalations": 1, "new": 1})
     lines = dr.render_dreaming_actions(tier, {"escalations": 1, "new": 1, "date_str": "2026-07-18"})
     assert [line.split(".")[0] for line in lines] == ["1", "2", "3", "4"]
+
+
+# ---------------------------------------------------------------------------
+# 音量控制（2026-07-19 boss email-12141）：dreaming 對外的判準是「有人得動手嗎」，
+# 不是「有沒有新東西」。回歸標本 = 那天真正寄出的那封 WARN 的 finding 組合。
+# ---------------------------------------------------------------------------
+def _auto_dispatch_finding(sig="missing_retry_strategy:trending_repost_2026_07_18_fed"):
+    return dr.DreamFinding(
+        pattern_type="missing_retry_strategy",
+        signature=sig,
+        severity="warn",
+        remediation="auto_dispatch",
+    )
+
+
+def _quiescent_alert_finding(sig="persistent_alert:e28b5068534016a7"):
+    f = dr.DreamFinding(
+        pattern_type="persistent_alert",
+        signature=sig,
+        severity="warn",
+        remediation="propose_only",
+        governance_target="docs/error_log.md",
+    )
+    f.quiescent = True
+    return f
+
+
+def test_machine_owned_finding_does_not_need_a_human():
+    """auto_dispatch 是 actuator 的責任（預設開）。機器正在修的事不寄給老闆。"""
+    assert dr.needs_human_attention(_auto_dispatch_finding()) is False
+
+
+def test_quiescent_finding_does_not_need_a_human():
+    """已停火、48h 自清中的 alert 是過去式 —— 沒有行動可做。"""
+    assert dr.needs_human_attention(_quiescent_alert_finding()) is False
+
+
+def test_escalation_always_needs_a_human_even_if_machine_owned():
+    """Three-Strike 種子是這層存在的理由，任何分類都不得把它靜音。"""
+    f = _auto_dispatch_finding()
+    f.severity = "critical"
+    assert dr.needs_human_attention(f) is True
+
+
+def test_live_governance_proposal_needs_a_human():
+    """治理檔 propose-only 且仍在發生 → 只有主線程能判，必須寄。"""
+    f = _quiescent_alert_finding()
+    f.quiescent = False
+    assert dr.needs_human_attention(f) is True
+
+
+def test_reconcile_marks_the_decaying_finding_quiescent():
+    """quiescent 一直被算出來卻被丟掉；現在它留在 finding 上。"""
+    f = dr.DreamFinding(
+        pattern_type="persistent_alert",
+        signature="persistent_alert:abc",
+        severity="warn",
+        activity_marker="2026-07-16T22:57:38+00:00",
+    )
+    baseline = {
+        "persistent_alert:abc": {
+            "strike_count": 2,
+            "pattern_type": "persistent_alert",
+            "first_seen": "2026-06-27T00:00:00+00:00",
+            "last_seen": "2026-06-28T00:00:00+00:00",
+            "activity_marker": "2026-07-16T22:57:38+00:00",  # 未推進 → 停火中
+        }
+    }
+    dr.reconcile([f], baseline, NOW)
+    assert f.quiescent is True
+    assert f.severity == "warn", "停火的 finding 不得累加 strike 升 critical"
+
+
+def test_the_2026_07_18_email_would_not_be_sent_today():
+    """那封信的完整標本：4 個機器已接手 + 5 個自清中 + escalations=0 → 不寄。
+
+    信裡自己寫著「escalations=0 → 不需要重構」—— 一封告訴收件人「你不用做事」的
+    WARN 就是雜訊。報告仍要寫出來，靜默不等於黑洞。
+    """
+    findings = [_auto_dispatch_finding(f"missing_retry_strategy:t{i}") for i in range(4)]
+    findings += [_quiescent_alert_finding(f"persistent_alert:{i:016x}") for i in range(5)]
+    report = dr.build_report(
+        {"overall": "ok"}, findings, findings, [], [], NOW, dry_run=False, auto_actions=[],
+    )
+    assert report["counts"]["findings"] == 9
+    assert report["counts"]["new"] == 9, "仍然全部是新 finding —— 舊閘門會寄信"
+    assert report["counts"]["actionable_new"] == 0, "但沒有一項需要人"
+    assert report["counts"]["machine_handled"] == 4
+    assert report["counts"]["quiescent"] == 5
+
+
+def test_main_stays_silent_when_nothing_needs_a_human(tmp_path, monkeypatch):
+    """端到端：只有 auto_dispatch finding 的一夜 → 報告有、信沒有。"""
+    storage = _storage(tmp_path)
+    sent = []
+    monkeypatch.setattr(
+        "volpred.ops.alerts.send_alert", lambda *a, **k: sent.append(1) or {"sent": True}
+    )
+    monkeypatch.setattr(
+        dr, "DETECTORS",
+        [lambda s, snap, now: [_auto_dispatch_finding("missing_retry_strategy:solo")]],
+    )
+    rc = dr.main(storage_dir=str(storage), dry_run=False, apply_auto=False, now=NOW)
+    assert rc == 0
+    assert sent == [], "機器自理的 finding 不寄信"
+    report = json.loads((storage / "ops" / "dreaming" / "2026-06-29.json").read_text())
+    assert report["counts"]["findings"] == 1, "報告照寫 —— 靜默不是黑洞"
+    assert (storage / "ops" / "autonomous_decisions.jsonl").exists()
+
+
+def test_main_still_emails_when_a_governance_proposal_is_live(tmp_path, monkeypatch):
+    """反向鎖：真的需要人判斷時不得被新閘門吞掉。"""
+    storage = _storage(tmp_path)
+    sent = []
+    monkeypatch.setattr(
+        "volpred.ops.alerts.send_alert", lambda *a, **k: sent.append(1) or {"sent": True}
+    )
+    live = _quiescent_alert_finding()
+    live.quiescent = False
+    monkeypatch.setattr(dr, "DETECTORS", [lambda s, snap, now: [live]])
+    rc = dr.main(storage_dir=str(storage), dry_run=False, apply_auto=False, now=NOW)
+    assert rc == 0
+    assert len(sent) == 1
+
+
+def test_email_body_explains_why_a_finding_needs_no_action(monkeypatch):
+    """混在同一封信裡的兩種 finding 必須標明差別，否則分類工作退回給人。"""
+    findings = [_auto_dispatch_finding(), _quiescent_alert_finding()]
+    live = _quiescent_alert_finding("persistent_alert:live")
+    live.quiescent = False
+    report = dr.build_report(
+        {"overall": "ok"}, [live, *findings], [live], [], [], NOW, dry_run=False, auto_actions=[],
+    )
+    sent = _capture_email(monkeypatch, report)
+    assert "機器已派修復 task" in sent["body"]
+    assert "已停火、自清中" in sent["body"]
+    body_lines = [ln for ln in sent["body"].splitlines() if ln.startswith("  - [")]
+    assert "persistent_alert:live" in body_lines[0], "需要人的排最前面"
+
+
+def test_email_does_not_describe_the_actuator_as_off(monkeypatch):
+    """actuator 自 2026-07-12 預設開；信裡曾對老闆描述一個一週前就不存在的系統。"""
+    sent = _capture_email(monkeypatch, _email_report(new=1, escalations=0))
+    assert "預設關" not in sent["body"]
+    assert "預設開啟" in sent["body"]

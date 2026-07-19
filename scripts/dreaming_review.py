@@ -183,6 +183,13 @@ class DreamFinding:
     # git-push-backup fired a burst 06-30→07-05 then went quiet, yet three daily
     # dreaming runs still saw it inside the 48h window and escalated to CRITICAL).
     activity_marker: str | None = None
+    # Set by reconcile(): the underlying signal did not demonstrably advance since the
+    # previous run — the condition has stopped happening and is decaying toward its
+    # auto-clear window. reconcile() has always COMPUTED this (to hold the strike) and
+    # then thrown it away, so a decaying alert still surfaced as an active warn finding
+    # and still woke the boss. Keeping it on the finding is what lets the report say
+    # "resolving itself" instead of "9 warnings" (boss email-12141 2026-07-19).
+    quiescent: bool = False
     # Task type the queue writer stamps on an auto-dispatched follow-up. Defaults to
     # platform_ops (what every detector before 2026-07-12 wanted). An orphaned
     # experiment needs a RESEARCH closure — Codex review + a knowledge.json entry —
@@ -1014,6 +1021,7 @@ def reconcile(
             quiescent = f.activity_marker is not None and (
                 prev_marker == f.activity_marker or prev_marker is _MARKER_MISSING
             )
+            f.quiescent = bool(quiescent)
             if not quiescent:
                 prev["strike_count"] = int(prev.get("strike_count", 0)) + 1
             prev["last_seen"] = iso
@@ -1039,6 +1047,33 @@ def reconcile(
 # ---------------------------------------------------------------------------
 # Report + email + auto-remediation
 # ---------------------------------------------------------------------------
+def needs_human_attention(finding: DreamFinding) -> bool:
+    """這個 finding 是否需要「人」看？—— dreaming 對外音量的唯一判準。
+
+    設計目標（`loop-health-and-dreaming.md` §Auto vs Propose）把責任切得很清楚：
+    `auto_dispatch` 是機器的事（actuator 自 2026-07-12 預設開，finding 一出現就自己
+    進 next_tasks），`propose_only` 是人的事（治理檔只有主線程能改）。舊的寄信條件
+    `if new_findings or escalations` 判的卻是「有沒有新東西」，於是機器正在處理的、
+    以及已經自己停火的，全都照樣寄。
+
+    2026-07-19 boss email-12141 那封 WARN 就是這個 bug 的完整標本：9 個 finding =
+    4 個 auto_dispatch（機器已派 task）+ 5 個 quiescent persistent_alert（停火
+    12.8–46.5h，48h 自清），escalations=0。零項需要老闆，信照寄，而且信裡自己寫著
+    「escalations=0 → 不需要重構」。**一封告訴收件人「你不用做事」的 WARN，就是雜訊。**
+
+    三條規則，由強到弱：
+    1. escalated（severity=critical）→ 一律要人：這是連 3 次未解的 Three-Strike 種子，
+       正是這層存在的理由。
+    2. quiescent → 不要人：條件已經停止發生，正在自清。回報過去式沒有行動可做。
+    3. 其餘 → 只有 propose_only 要人（治理判斷）；auto_dispatch 歸機器。
+    """
+    if finding.severity == "critical":
+        return True
+    if finding.quiescent:
+        return False
+    return finding.remediation == "propose_only"
+
+
 def build_report(
     snapshot: dict[str, Any],
     findings: list[DreamFinding],
@@ -1068,6 +1103,14 @@ def build_report(
             "escalations": len(escalations),
             "propose_only": sum(1 for f in findings if f.remediation == "propose_only"),
             "auto_dispatch_eligible": sum(1 for f in findings if f.remediation == "auto_dispatch"),
+            # 音量控制的三個讀數（見 needs_human_attention）。`actionable_new` 是寄信閘門：
+            # 「新」不再等於「值得打擾」，只有新 **且** 需要人判斷的才算。
+            "actionable": sum(1 for f in findings if needs_human_attention(f)),
+            "actionable_new": sum(1 for f in new_findings if needs_human_attention(f)),
+            "quiescent": sum(1 for f in findings if f.quiescent),
+            "machine_handled": sum(
+                1 for f in findings if f.remediation == "auto_dispatch" and not needs_human_attention(f)
+            ),
         },
     }
 
@@ -1091,7 +1134,10 @@ def append_decision(storage_dir: str, now: datetime, report: dict[str, Any]) -> 
         "intent": "cross-session 失敗模式盤點 (loop-engineering slow loop)",
         "reasoning": (
             f"{report['counts']['findings']} findings "
-            f"({report['counts']['new']} new, {report['counts']['escalations']} escalations); "
+            f"({report['counts']['new']} new, {report['counts']['escalations']} escalations, "
+            f"{report['counts'].get('actionable', 0)} actionable / "
+            f"{report['counts'].get('machine_handled', 0)} machine-handled / "
+            f"{report['counts'].get('quiescent', 0)} quiescent); "
             f"governance findings propose-only."
         ),
         "outcome": f"report storage/ops/dreaming/{now.strftime('%Y-%m-%d')}.json",
@@ -1129,7 +1175,11 @@ _DREAMING_COMMON_ACTIONS_HEAD: tuple[str, ...] = (
 
 # 放在專屬行動之後的通用行動。
 _DREAMING_COMMON_ACTIONS_TAIL: tuple[str, ...] = (
-    "auto_dispatch 類（orphaned failure）→ `--apply-auto` 才會派修復 task（預設關，先人工審）。",
+    # 2026-07-19：這行原本寫「`--apply-auto` 才會派修復 task（預設關，先人工審）」，
+    # 但 actuator 自 2026-07-12 起 apply_auto 預設 ON。信裡對老闆描述了一個一週前就
+    # 不存在的系統。文案與行為分屬兩處、只有一處被改 —— 與 tier 表要修的是同一個病。
+    "auto_dispatch 類（orphaned failure / missing retry）→ actuator **預設開啟**，"
+    "已自動進 `storage/next_tasks.json`，不需要你動手；`--no-apply-auto` 才會關掉。",
 )
 
 # escalations=0 時 findings 都是小型/漸進處理（補 retry 策略、memory 整併），反射式推
@@ -1154,7 +1204,9 @@ DREAMING_SEVERITY_TIERS: tuple[DreamingSeverityTier, ...] = (
     ),
     DreamingSeverityTier(
         name="new_findings",
-        matches=lambda c: bool(c.get("new")),
+        # 判 `actionable_new` 而非 `new`：新的 auto_dispatch / quiescent finding 會寫進
+        # 報告，但不構成 warn —— 沒有人需要為它做任何事（見 needs_human_attention）。
+        matches=lambda c: bool(c.get("actionable_new")),
         alert_level="warn",
         actions=(_NO_REFACTOR_ACTION,),
     ),
@@ -1192,15 +1244,28 @@ def send_dreaming_email(report: dict[str, Any], now: datetime, storage_dir: str)
 
     lines = ["## 觸發條件"]
     lines.append(
-        f"- findings={c['findings']}（new={c['new']}, resolved={c['resolved']}, "
-        f"escalations={c['escalations']}）；loop-health overall="
-        f"{report['loop_health'].get('overall')}"
+        f"- findings={c['findings']}（**需要你看 {c.get('actionable', 0)}**、"
+        f"機器已接手 {c.get('machine_handled', 0)}、自清中 {c.get('quiescent', 0)}；"
+        f"new={c['new']}, resolved={c['resolved']}, escalations={c['escalations']}）；"
+        f"loop-health overall={report['loop_health'].get('overall')}"
     )
-    for f in report["findings"][:8]:
+    # 需要人的排前面，其餘標明「為什麼不需要你動手」—— 一封信裡混著兩種東西而不說明
+    # 差別，收件人就得自己一條一條判，等於把分類工作退回給人。
+    ranked = sorted(
+        report["findings"],
+        key=lambda f: (f.get("quiescent") or f.get("remediation") == "auto_dispatch"),
+    )
+    for f in ranked[:8]:
         gov = f" → propose {f['governance_target']}" if f.get("governance_target") else ""
+        if f.get("quiescent"):
+            note = " — 已停火、自清中"
+        elif f.get("remediation") == "auto_dispatch":
+            note = " — 機器已派修復 task"
+        else:
+            note = ""
         lines.append(
             f"  - [{f['severity']}] {f['pattern_type']}: {f['signature']} "
-            f"(×{f['occurrences']}){gov}"
+            f"(×{f['occurrences']}){gov}{note}"
         )
     lines.extend(
         [
@@ -1393,12 +1458,22 @@ def main(
             append_decision(storage_dir, current, report)
         except OSError as exc:
             warn("dreaming", "autonomous_decisions append failed", err=str(exc))
-        if new_findings or escalations:
+        # 寄信閘門 = 「有人得動手嗎」，不是「有新東西嗎」（見 needs_human_attention）。
+        # 靜默不等於黑洞：報告照寫、decision log 照記，dashboard / ops_snapshot 讀得到，
+        # 而且 skip 的理由會印在 cron log 上。
+        if escalations or report["counts"]["actionable_new"]:
             try:
                 send_dreaming_email(report, current, storage_dir)
                 print("[dreaming] email sent to boss")
             except Exception as exc:
                 warn("dreaming", "dreaming email failed; report still written", err=str(exc))
+        else:
+            print(
+                "[dreaming] email skipped — nothing needs a human "
+                f"(machine_handled={report['counts']['machine_handled']}, "
+                f"quiescent={report['counts']['quiescent']}, "
+                f"new={report['counts']['new']}); report still written"
+            )
 
     return 0  # always 0 — reporting surface, fail-open
 

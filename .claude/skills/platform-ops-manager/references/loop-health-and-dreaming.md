@@ -39,11 +39,31 @@ memory_governance / persistent_alert / orphaned_experiment。每個 fail-open（
 - **AUTO-DISPATCH（低風險衍生狀態，建修復 task）**：actuator 自 2026-07-12 **預設開啟**。`auto_dispatch` finding（如 missing retry / orphan）在 warn 即進 `storage/next_tasks.json`；`propose_only` finding 連續 3 晚仍存在才進 queue，且 task 只要求 agent 審核，不直接改治理檔。`--dry-run` 才不派工。
 - **PROPOSE-ONLY（治理檔，絕不自動改）**：`docs/error_log.md` / `.claude/rules/*` / `CLAUDE.md` / `storage/memory/knowledge.json` / `docs/refactor_plan_*`。dreaming 只把建議寫進 report 的 `proposal` 欄 + `governance_target` + email。**主線程審完才手動套用。**
 
+## 對外音量：寄信閘門 = 「有人得動手嗎」（2026-07-19）
+
+`needs_human_attention(finding)` 是 dreaming 唯一的對外音量判準，順序由強到弱：
+
+1. `severity=critical`（Three-Strike 種子）→ **一律寄**，這是本層存在的理由。
+2. `quiescent`（底層訊號自上次 run 起未再推進 = 已停火、正在自清）→ 不寄。
+3. 其餘只有 `propose_only` 要人（治理判斷）；`auto_dispatch` 歸 actuator。
+
+報告 `counts` 因此多三個讀數：`actionable` / `machine_handled` / `quiescent`，
+`main()` 的閘門是 `escalations or actionable_new`。**靜默 ≠ 黑洞** —— 報告照寫、
+`autonomous_decisions.jsonl` 照記、skip 理由印在 cron log。
+
+**已知邊界**：`quiescent` 由「兩次 run 之間 marker 有無推進」定義，所以**首次出現**的
+finding 一律不算 quiescent（那晚還沒有可比對的前值）。一個「初見即已停火」的 alert 仍會寄
+一次信，隔晚才靜音。alert 48h 自清 + persistent_alert 需累積 send_count，這個窗口很窄，
+故不為它加第二套判定（會與 reconcile 的 marker 邏輯形成雙 owner）。
+
 ## Three-strike 升級
 
 一個 signature 連 **3 次** dreaming run 都出現 → severity 升 `critical`、email level=critical。這是 `docs/refactor_plan_<topic>.md` Three-Strike 根治的種子。dreaming 不自動建 refactor_plan（屬 docs/，propose-only）—— 主線程開檔。
 
 ## 主線程收到 dreaming email 時做什麼
+
+收到信 = 至少有一項需要人（escalation 或 live 治理 proposal）；信裡標了「機器已派修復 task」
+/「已停火、自清中」的項目是背景資訊，不用動手。
 
 1. 看 `storage/ops/dreaming/<date>.json` 完整 findings。
 2. 治理類 proposal → 評估是否套用（改 error_log / rule / knowledge），**手動**做，不讓 dreaming 改。
