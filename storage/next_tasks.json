@@ -32958,13 +32958,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T03:00:53.428979+00:00",
+    "completed_at": "2026-07-19T04:01:07.875433+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T03:00:53.428979+00:00",
-      "last_clean_observed_at": "2026-07-19T03:00:53.428979+00:00"
+      "resolved_at": "2026-07-19T04:01:07.875433+00:00",
+      "last_clean_observed_at": "2026-07-19T04:01:07.875433+00:00"
     }
   },
   {
@@ -32976,13 +32976,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T03:43:21.473380+00:00",
+    "completed_at": "2026-07-19T04:06:07.109125+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T03:43:21.473380+00:00",
-      "last_clean_observed_at": "2026-07-19T03:43:21.473380+00:00"
+      "resolved_at": "2026-07-19T04:06:07.109125+00:00",
+      "last_clean_observed_at": "2026-07-19T04:06:07.109125+00:00"
     }
   },
   {
@@ -33088,45 +33088,15 @@
   },
   {
     "id": "k1711_mcs_eval_redispatch_fa2c62",
-    "title": "K1711 TSFM-HAR MCS 評估重派（兩次 timeout 後）",
-    "description": "K1711（TimesFM/TTM vs HAR 的 MCS 評估）研究線卡住：agent job agent-brief_tsfm_har_mcs-54e6f9 於 5280s cap 超時、salvage commit 750631d915a9 搶救部分產出；follow-up compute job k1711-mcs-eval 又於 3600s timeout（stderr=[TIMEOUT]，script 指向已清除的 worktree dispatch-slot-1-671aaa12-tsfm-har）。重派要求：(1) 先 git show 750631d915a9 定位 salvage 產出實際位置；(2) 評估 script 落到主 repo experiments/k1711/；(3) compute job timeout ≥7200s 或拆段跑；(4) 完成後三件套 + Codex 審。",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "K1711 TSFM-HAR MCS 評估重派（兩次 timeout 後）",
+    "priority": 2,
     "source": "main_thread",
     "created_at": "2026-07-14T17:13:16.384826+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-15T18:17:51.469226+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop"
-      },
-      {
-        "ts": "2026-07-15T18:17:51.697942+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop"
-      },
-      {
-        "ts": "2026-07-15T18:48:17.564786+00:00",
-        "from": "in_progress",
-        "to": "pending_main_thread",
-        "by": "codex-desktop",
-        "note": "K1711 experiment fully completed, independently reviewed, certified, and merged to main at 22422d2ee. Evidence: experiments/k1711/; 25 tests PASS; experiment_gates certify PASS; independent 5000-draw primary and pooled MCS recomputation matched. Codex is forbidden to write storage/memory/knowledge.json. Claude main thread must run the canonical K1259-gated knowledge writer using the narrow verdict TSFM_BEARING_MODELS_SURVIVE_MCS_NO_WINNER_OR_INCREMENTAL_CLAIM, preserving nested QLIKE as INCONCLUSIVE and retrospective pseudo-OOS limitations; then complete this task."
-      },
-      {
-        "ts": "2026-07-16T03:44:41.856222+00:00",
-        "from": "pending_main_thread",
-        "to": "succeeded",
-        "by": "complete"
-      }
-    ],
-    "started_at": "2026-07-15T18:17:51.697926+00:00",
-    "handoff_note": "K1711 experiment fully completed, independently reviewed, certified, and merged to main at 22422d2ee. Evidence: experiments/k1711/; 25 tests PASS; experiment_gates certify PASS; independent 5000-draw primary and pooled MCS recomputation matched. Codex is forbidden to write storage/memory/knowledge.json. Claude main thread must run the canonical K1259-gated knowledge writer using the narrow verdict TSFM_BEARING_MODELS_SURVIVE_MCS_NO_WINNER_OR_INCREMENTAL_CLAIM, preserving nested QLIKE as INCONCLUSIVE and retrospective pseudo-OOS limitations; then complete this task.",
-    "handoff_at": "2026-07-15T18:48:17.564768+00:00",
     "completed_at": "2026-07-16T03:44:41.856203+00:00",
-    "result": "Closure audit 2026-07-16: timeout recovery was already split into salvage, evaluation, nested-inference repair, independent review, and certification; merged experiment commits culminate at 1b4c14797. Canonical knowledge item k1711_reviewed_20260716 now exists via a06d64daf, so the stale pending_main_thread closure is complete. Do not redispatch the whole K1711 job."
+    "tombstone": true,
+    "archived_at": "2026-07-19T03:45:36.430596+00:00"
   },
   {
     "id": "dm_hac_fix_k1379_paper9",
@@ -36276,10 +36246,28 @@
     "description": "K1442 日期稽核追查發現 storage/event_articles/us_cpi_2026_06_11_t0 的當次 2026-06-10 窗口正確，但歷史比較硬編 7 個錯誤日期與 1 個 phantom event；文章未曾發布。改用 volpred.data.event_dates.cpi_release_dates，輸出路徑改為 Path(__file__).resolve().parent，封存舊證據後重跑 analysis/evidence/article/details。重算後 2026-06-10 VIX +11.827% 應是 13 場官方發布中的最大值，不是舊文第 4；確認兩張只含當次窗口的 PNG 是否可保留。補 regression tests 與 source-level review，不得發布重複文章。稽核來源：K1442 related_event_date_audit。\n\n[migrated 2026-07-16 from task_b3b91831f5a3 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T13:13:51.226709+00:00]",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "created_at": "2026-07-16T14:42:55.878259+00:00",
-    "created_by": "single-gateway-migration"
+    "created_by": "single-gateway-migration",
+    "claimed_by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615",
+    "claimed_at": "2026-07-19T03:46:17.575625+00:00",
+    "claim_session_id": "c95d5b0ea850",
+    "status_history": [
+      {
+        "ts": "2026-07-19T03:46:17.575640+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      },
+      {
+        "ts": "2026-07-19T03:49:01.638916+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      }
+    ],
+    "started_at": "2026-07-19T03:49:01.638903+00:00"
   },
   {
     "id": "assign_5e030431",
@@ -37079,7 +37067,7 @@
     "description": "Codex primary review 2026-07-17 判 FAIL（全文 storage/ops/k1708_codex_review_20260717.md）。已確認為真：兩個原始 BLOCKER 真修好、CW 公式正確、NULL 由現行數字機械重算得出、provenance 三項對上凍結程式碼。**不要重跑全樣本、不要 merge worktree、不要為了過 gate 動數字。**\n\n三個 BLOCKER，分兩類：\n(A) 機械 bug，可直接修 — K1708.py:1941-1968 derive_verdict 沒實作宣告的跨市場條件：只讀 TAIFEX 的 QLIKE/CW，第二個市場只要 status=='OK' 就算 qualified、不需任何改善；Codex 實測最小 payload（SPY=OK 無 metrics、只有 TAIFEX 過）回傳 SUPPORTED = 假陽性路徑。亦未檢查 README.md:246-251 宣告的 GW / MCS / regime consistency。修法：讓 qualified 條件真的要求該市場有 admissible metrics 且達成宣告的改善，並補上宣告卻未實作的檢查；加一個會對舊邏輯失敗的非空洞 regression test（用 Codex 那個最小 payload 當種子）。本 run 的 NULL 不受影響（SPY/QQQ 為 FAIL_NO_DATA），修完應仍為 NULL — 若 label 變了就是修錯。\n(B) 推論設計，需研究判斷後才動 code — K1708.py:1394-1405 CW 被套用在「被評分的 level forecast 上並非精確 nested」的比較（HAR_FIXED 每日重估 β/σ²，KF/HARSL 每 252 日 refit 且σ² 不同，差異經 exp(mu+var/2) 進入預測；README.md:280-306 自己承認 δ=1 ≠ HAR_FIXED）；以及 K1708.py:1952-1960 把事前 DM-HLN |t|>=3 換成「三模型任一 CW 單尾 5%」且無 multiple-testing correction，方向一致時明顯較寬 = verdict-shopping 風險（揭露誠實，但不使較寬 gate 等價）。這兩條要先決定「哪個比較才真的 nested」與「哪個 gate 治理 verdict」，再改 code + README，不可反向配合現有數字。\n\n完成條件：(A) 修好 + 非空洞 test + 全套 test 綠、(B) 有明確方法論決定並寫進 README；然後才回到 Codex re-review → merge → 寫 knowledge（NULL 據實記錄）。worktree: .claude/worktrees/dispatch-slot-2-8dda242d-k1708（禁 force-remove）。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "tags": [
       "experiment",
       "k1708",
@@ -37090,7 +37078,25 @@
     "source": "codex_review_followup",
     "created_at": "2026-07-17T00:20:51.770447+00:00",
     "parent_task_id": "k1708_stage3_codex_review_merge_20260717",
-    "dispatch_lane": "agent"
+    "dispatch_lane": "agent",
+    "claimed_by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615",
+    "claimed_at": "2026-07-19T03:46:17.812465+00:00",
+    "claim_session_id": "71d88edd9a8b",
+    "status_history": [
+      {
+        "ts": "2026-07-19T03:46:17.812481+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      },
+      {
+        "ts": "2026-07-19T03:49:01.899024+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      }
+    ],
+    "started_at": "2026-07-19T03:49:01.899010+00:00"
   },
   {
     "id": "telegram-894",
@@ -37331,11 +37337,29 @@
     "description": "背景：assign_09984c91 修好 refresh_paper_snapshots.py 的並行 double-append 後，發現污染範圍不只 K1685 指出的 1 檔 —— 6 篇 paper 共 9 個 live snapshot 全數在 2026-05-04..05-15 被重複 append 10 天（byte-identical，同一次事故）。\n\n污染窗：git history 顯示 3ea7dbb9d (2026-05-04) 乾淨、f1bdea2d1 (2026-05-20) 已有 dup，至今日修復為止約 2 個月。期間任何讀這些 CSV 的 consumer 都會拿到序列中間多 10 天重複列 —— 對 rolling estimation / OOS split 而言不只是多 10 筆，是 05-04 之後的整條時間軸位移。\n\n受影響檔（已修復，surviving rows byte-identical，見 fire receipt）：\n  paper/garch-x-vix/data/{spy_vix_qqq_eem_fez_2000-2026,gld_vix_gvz_2000-2026,uso_vix_ovx_2005-2026}.csv\n  paper/leverage-direction/data/{spy_vix_2004-2026,spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026,vix_daily}.csv\n  paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv\n  paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv\n  paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv\n\n要做的事：\n1. 盤點 2026-05-20 後跑過、且 OOS 期間涵蓋 2026-05-04 之後、且直接讀上列 CSV（非自帶 pinned snapshot）   的實驗 / paper results。已知讀檔者：paper/garch-x-vix/reproduce.py、paper/garch-x-vix/scripts/summary_stats.py、   experiments/{k1392,K1380_v4,k1393,K1394,k1489,k1662,k1585}。\n2. 對每一個判定「是否受影響」：多數 consumer 沒有 drop_duplicates，需逐一確認。   K1685 用自己的 pinned data/k1685_spy_vix_snapshot.csv，初判不受影響 —— 仍請覆核。\n3. 受影響者在修好的 snapshot 上重跑，比對數字是否改變；有變動且已發表 / 在審 → 回報並修正。\n4. 誠實記錄：沒受影響也要寫明判定依據，不要只列受影響的。\n\n禁止：假設『反正只有 10 天、影響很小』就跳過重跑 —— 那是猜測不是驗證。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-17T03:13:54.767921+00:00",
     "parent_task_id": "assign_09984c91",
-    "created_by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87"
+    "created_by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87",
+    "claimed_by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615",
+    "claimed_at": "2026-07-19T03:46:18.047968+00:00",
+    "claim_session_id": "869e4b07a711",
+    "status_history": [
+      {
+        "ts": "2026-07-19T03:46:18.047984+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      },
+      {
+        "ts": "2026-07-19T03:49:02.140518+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      }
+    ],
+    "started_at": "2026-07-19T03:49:02.140503+00:00"
   },
   {
     "id": "email-12125-0e04bd",
@@ -37458,10 +37482,34 @@
     "description": "【發現於 2026-07-17 12:2x，hourly-slot-2 合併 dispatch-slot-1-4036423d-cpidates 時】\n\nmerge_worktree.sh 為了防 K1032/K1114/K1262 的 rev-list false-negative（rev-list 報 0 commits 但檔案實在 worktree 裡 → 未合併就砍 worktree）建了兩層防線：\n- K1262-v4 PRIMARY：file-presence diff，不信 rev-list\n- K1143-v2：rev-list=0 時再查工作目錄\n\n問題：**這兩層都只掃 worktree 的 experiments/ 目錄**（見 script 內 exp_files / experiments/ 相關判斷，約 line 244-347）。本次 agent 成果全部在 storage/event_articles/，不在 experiments/ 底下 → 若 auto-commit（line 189 git add -A && git commit）因任何原因靜默失敗，rev-list=0 且 experiments/ 空 → 直接走 line 347 「[OK] 沒有新的 commits（雙重確認 rev-list=0）+ experiments/ 也空，可安全移除」→ **未合併就砍 worktree**。\n\n本次沒出事只是因為 auto-commit 正常運作、且 branch 還在。但防線的實際覆蓋範圍比它宣稱的窄 —— 現在 agent 產出早就不只放 experiments/（storage/event_articles/、storage/drafts/、docs/ 都有）。\n\n另注意：--dry-run 會輸出「會自動提交」與「[OK] 可安全移除」兩句自相矛盾的訊息（因為 dry-run 不真的 commit，rev-list 自然是 0），容易讓人誤判 worktree 是空的。這個訊息本身也該修。\n\n建議修法：把 file-presence diff 的掃描範圍從硬編 experiments/ 改成「worktree branch 相對 main 的全樹 diff」或至少涵蓋所有 agent 產出路徑；並讓 dry-run 模擬 auto-commit 後的狀態再下結論。\n\n成功判準：新增 regression test — 一個成果只在 storage/ 而非 experiments/ 的 worktree，在 auto-commit 被 mock 成失敗時，merge_worktree.sh 必須 ABORT 而非「可安全移除」。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-17T04:14:43.652866+00:00",
-    "created_by": "hourly-slot-2-f86ed3a5490b4cf783d502754ed1654a"
+    "created_by": "hourly-slot-2-f86ed3a5490b4cf783d502754ed1654a",
+    "status_history": [
+      {
+        "ts": "2026-07-19T03:46:18.275980+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      },
+      {
+        "ts": "2026-07-19T03:49:02.382711+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      },
+      {
+        "ts": "2026-07-19T04:01:31.691170+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      }
+    ],
+    "started_at": "2026-07-19T03:49:02.382694+00:00",
+    "completed_at": "2026-07-19T04:01:31.691152+00:00",
+    "result": "merge_worktree.sh �?�層 false-negative �?��?�?�硬編 experiments/ �?��?��?�樹�??�??�?worktree_only_paths helper + noise denylist�?�?ABORT �?��?� exit 1�?--dry-run �?�??�??�??�?��??�??�?��??�??交�??�??�??�?��?�?�移�?��??�??�?��? regression Case 20/21�?已�?��??�?? script 實測 7 assertion FAIL �??�??�??空�?�??主�?�?�??�? 21/21 cases�??65 assertions �?�綠 + pytest dedup regression 12 passed�??",
+    "burst_reported_at": "2026-07-19T04:01:31.753927+00:00"
   },
   {
     "id": "email-12128-3027b2",
@@ -37566,23 +37614,59 @@
     "id": "assign_sync_cache_purge_20260717",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-17T05:30:00+00:00",
     "source": "ops_manager",
     "title": "supabase_sync 直寫 Supabase 不 purge Next cache tag → 撤稿/更正在讀者端可能永不生效",
     "description": "【症狀｜2026-07-17 撤稿 mile_ebb5d6f5 時實測發現】\nsync_full() 跑完後：Supabase articles row 已 status=retracted、anon key + RLS 也已完全查不到該 row（與其他 12 篇線上 404 的撤稿文完全同態）。但 https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5 與 /reports/<id> 仍持續回 HTTP 200 並完整供應內文（含虛構事件段落）達 15 分鐘以上 —— 遠超 page 層 `export const revalidate = 300` 與 `unstable_cache(..., {revalidate: 60})`。cache-control 是 no-store，排除 CDN。\n\n【根因（兩個條件疊加，缺一不會壞）】\n1. scripts/supabase_sync.py 直接打 Supabase REST（_request_json / sync_article），繞過 frontend 的    frontend-v2-fix/src/app/api/sync/[...path]/route.ts —— 那條 route 在 upsert 後會呼叫    revalidateTag('article') + revalidateTag(`article-${slug}`)。走 supabase_sync 就永遠不會 purge tag。\n2. data-server.ts getArticleInternal 對已撤稿文章是 **throw**（.in('status',['published','draft','scheduled']) 過濾    + RLS 兩層都查無 → .single() error → throw）。unstable_cache 的 stale-while-revalidate 背景 revalidate 一 throw    就拿不到新值可寫，於是**續發舊的 good value**。過期不等於淘汰 —— 沒有新值就永遠不淘汰。\n\n→ 合起來：任何經由 feed.json + supabase_sync 做的**撤稿或狀態下架**，在讀者端可能永不生效，直到某次 redeploy 把 in-memory cache 清掉。其餘 12 篇撤稿文之所以現在 404，只是因為它們早已歷經多次 deploy —— 這是巧合，不是機制。\n這條路徑上「內容更正」本身也受影響（改內文 → 讀者仍看舊文），只是 content 更新不 throw、能被新值覆蓋，所以症狀較輕（僅延遲 60s），撤稿/下架才是無限期。\n\n【本班的 workaround（已驗證有效，非治本）】\nPOST /api/sync/reports/<id>.json，headers 用 volpred.mirror_auth.ops_admin_headers()（x-ops-key ← OPS_ADMIN_TOKEN），body = feed.json 那筆 entry。→ upsert + revalidateTag → 兩條路由即刻 404。scripts/record_and_publish.py L141-158 已是此模式。\n\n【治本方向（擇一，需先判斷 owner）】\na. supabase_sync.sync_article() 成功後呼叫 mirror revalidate（沿用 mirror_auth；auth 失敗要**大聲失敗**，   別重演 2026-06-11 那種 401 靜默數週）。單一 owner = sync 端。\nb. 或前端 getArticleInternal 改成回 null 而非 throw，讓 unstable_cache 能寫入「查無」這個新值，   由 page 層判 null → notFound()。單一 owner = 前端。注意此法只縮短到 60s，不是即時。\n   ⚠️ a 與 b 都做 = 雙 owner 反而更難維護；依 CLAUDE.md anti-stacking 選一個。\n須附 regression test：撤稿一篇 → sync → 立即打 live URL → 必 404。沒有這個 test，這個坑會再回來。\n\n【相關】parent=assign_4470644e_s1_t7_retract（本缺陷的發現現場）；同一坑會打到 assign_4470644e_s2_t2_rewrite。",
-    "parent_task_id": "assign_4470644e_s1_t7_retract"
+    "parent_task_id": "assign_4470644e_s1_t7_retract",
+    "claimed_by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745",
+    "claimed_at": "2026-07-19T04:03:35.696372+00:00",
+    "claim_session_id": "e1b16b47990a",
+    "status_history": [
+      {
+        "ts": "2026-07-19T04:03:35.696388+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745"
+      },
+      {
+        "ts": "2026-07-19T04:03:35.928881+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745"
+      }
+    ],
+    "started_at": "2026-07-19T04:03:35.928867+00:00"
   },
   {
     "id": "assign_fb_retract_note_ebb5d6f5_20260717",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-17T05:30:00+00:00",
     "source": "ops_manager",
     "title": "mile_ebb5d6f5 已撤稿，但 Ivan Lai FB 那則貼文仍在、連結已 404 → 需補撤稿說明",
     "description": "mile_ebb5d6f5（🌡️ 事件溫度計｜US CPI 2026-06-13 預覽 T-7）已於 2026-07-17 撤稿，線上兩條路由皆 404。\n但該文於 2026-06-03 16:53 發過 Ivan Lai 個人 FB（channel=ivan_lai_personal_chrome）：\n  貼文：https://www.facebook.com/yihao.lai/posts/pfbid02DvjuZrCrH4X8okFbPFEZFYxXy5tTMbQNP8Q9WHJPiMP9wVQDggp5mkLtZ1tELrwil\n  第一則留言連結：https://volpred.zeabur.app/v3/reports/mile_ebb5d6f5 → 現在 404。\n\n問題不只是死連結：FB 文案本身改寫自原文，因此**同樣帶著錯誤前提**（把 2026-06-13 當 CPI 發布日 —— 那天是週六），而讀者在 FB 上看不到任何更正訊號。留著不管 = 錯誤敘事仍在對外流通。\n\n建議動作（依 .claude/skills/fb-publishing/SKILL.md 的 CDP-attach 持久 profile Chrome 路徑）：\n在該貼文補一則留言，說明：發布日期用了硬編 proxy 而非 BLS 官方行事曆、2026-06-13 是週六不可能發布、文中一次發布（2025-11-13）根本沒發生（政府停擺取消）、更正後 CPI 當日 VIX 均值 +2.18% → -1.90%，原文已撤稿，完整更正見 mile_9560b9cc（https://volpred.zeabur.app/v3/reports/mile_9560b9cc）。\n語氣照 .claude/skills/trending-repost/references/fb-ivanlai-tone.md（不講滿、不套路、直說錯在哪）。\n文字送出前必過 uv run python scripts/anti_ai_gate.py --file <draft>（exit 0 才發）。\n\n【為何本班沒做】FB 需 browser automation（CDP-attach Chrome），claude.ai Facebook MCP 在本 session 未認證，且 hourly fire 有 3000s cap；硬塞會重演「父等子燒完 cap」。故獨立成 task 而非默默略過。\nparent=assign_4470644e_s1_t7_retract。",
-    "parent_task_id": "assign_4470644e_s1_t7_retract"
+    "parent_task_id": "assign_4470644e_s1_t7_retract",
+    "claimed_by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745",
+    "claimed_at": "2026-07-19T04:03:36.161294+00:00",
+    "claim_session_id": "c61c7834da8b",
+    "status_history": [
+      {
+        "ts": "2026-07-19T04:03:36.161310+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745"
+      },
+      {
+        "ts": "2026-07-19T04:03:36.393998+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-db7fe08da0214032af90e3df7a906745"
+      }
+    ],
+    "started_at": "2026-07-19T04:03:36.393982+00:00"
   },
   {
     "id": "telegram-907",
@@ -41738,7 +41822,7 @@
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260719T024745114940Z_a1",
     "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=2 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.XwY84G baseline_findings=64 new=2 resolved=64\n[pre-commit]   NEW scripts/task_pool_claim.py:563 except Exception: return None\n[pre-commit]   NEW src/volpred/ops/dispatch_burst.py:67 except OSError|JSONDecodeError: return None\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=2 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.Kh6HUf baseline_findings=64 new=2 resolved=64\n[pre-commit]   NEW scripts/task_pool_claim.py:563 except Exception: return None\n[pre-commit]   NEW src/volpred/ops/dispatch_burst.py:67 except OSError|JSONDecodeError: return None\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
@@ -41756,7 +41840,7 @@
       "episode_id": "20260719T024745114940Z",
       "episode_started_at": "2026-07-19T02:47:45.114940+00:00",
       "attempt_number": 1,
-      "last_seen_at": "2026-07-19T03:07:27.727877+00:00",
+      "last_seen_at": "2026-07-19T03:45:04.632663+00:00",
       "consecutive_remediation_failures": 0,
       "attempt_history": [],
       "escalation_due": false,
@@ -41894,5 +41978,37 @@
     "status": "pending",
     "source": "agent",
     "created_at": "2026-07-19T03:41:07.556892+00:00"
+  },
+  {
+    "id": "ci-red-29671078611",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29671078611",
+    "ci_run_key": "29671078611:1",
+    "created_at": "2026-07-19T04:00:07.628715+00:00",
+    "title": "CI 紅燈修復（run 29671078611, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29671078611\nattempt: 1\nhead_sha: c212453ba\n偵測摘要（仍須讀完整 failed log）：2026-07-19T03:12:05.7620647Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['k1732']\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29671078611 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "claimed_by": "hourly-slot-2-883524a7ea2d48f484ba9819a0ac30c5",
+    "claimed_at": "2026-07-19T04:01:17.501872+00:00",
+    "claim_session_id": "c37241235e37",
+    "status_history": [
+      {
+        "ts": "2026-07-19T04:01:17.501888+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-883524a7ea2d48f484ba9819a0ac30c5"
+      },
+      {
+        "ts": "2026-07-19T04:01:24.911512+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-883524a7ea2d48f484ba9819a0ac30c5"
+      }
+    ],
+    "started_at": "2026-07-19T04:01:24.911496+00:00"
   }
 ]

@@ -536,7 +536,80 @@ def cmd_handoff_main_thread(args: argparse.Namespace) -> dict[str, Any]:
         return {"ok": True, "task_id": args.id, "status": "pending_main_thread"}
 
 
+def _burst_actions(task: dict[str, Any], status_value: str,
+                   tasks: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """What a burst window wants doing for this completion, or None.
+
+    Returns None when no window is open (the normal state — completions are
+    silent and dispatch keeps its hourly cadence), or when the burst module is
+    unavailable: a notification problem must never fail the completion it is
+    only describing.
+
+    `text` is omitted if the row already carries `burst_reported_at`, so a
+    re-run of `complete` never double-notifies while still keeping the loop
+    going. Counting pending here, under the lock, avoids waking the supervisor
+    for an empty queue.
+    """
+    try:
+        from volpred.ops import dispatch_burst
+        if not dispatch_burst.active():
+            return None
+        pending = sum(1 for t in tasks
+                      if isinstance(t, dict) and (t.get("status") or "").lower() == "pending")
+        out: dict[str, Any] = {"pending_left": pending}
+        if not task.get("burst_reported_at"):
+            out["text"] = dispatch_burst.format_completion(task, status_value)
+        return out
+    except Exception as exc:
+        # Fail-open: the claim/complete write already landed under the lock, so a
+        # broken burst window must never fail the caller. Observable, not silent.
+        from volpred.ops.diagnostics import warn
+        warn("task_pool_claim", "burst report probe failed",
+             err=f"{type(exc).__name__}: {exc}", task_id=str(task.get("id") or ""))
+        return None
+
+
+def _send_burst_report(*, text: str) -> dict[str, Any]:
+    """Best-effort Telegram line. Never raises — the work is already done."""
+    try:
+        from volpred.ops.telegram import send_telegram
+        return send_telegram(text)
+    except Exception as exc:
+        return {"sent": False, "reason": f"{type(exc).__name__}: {exc}"}
+
+
+def _request_burst_fire(task_id: str, pending_left: int) -> dict[str, Any]:
+    """Pull the next fire forward instead of waiting for the cron slot.
+
+    This is the whole continuous-dispatch mechanism: a completion is exactly
+    the moment a slot may have freed, so it is the only moment worth checking.
+    `request_fire` just sets a flag under the supervisor's own lock — the
+    scheduler consumes it on its next ≤60s tick through the normal
+    `reserve_fire()` slot path, so a full pool queues rather than
+    double-dispatches.
+    """
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        from scripts.dispatch_supervisor import state as sup_state
+        sup_state.request_fire(f"burst:{task_id}")
+        return {"requested": True, "pending_left": pending_left}
+    except Exception as exc:
+        return {"requested": False, "reason": f"{type(exc).__name__}: {exc}"}
+
+
 def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
+    out, burst = _complete_locked(args)
+    if burst:
+        # Both run outside the queue lock: network IO and the supervisor's own
+        # lock have no business being held under the queue's LOCK_EX.
+        if burst.get("text"):
+            out["burst_report"] = _send_burst_report(text=burst["text"])
+        if burst.get("pending_left"):
+            out["burst_next_fire"] = _request_burst_fire(args.id, burst["pending_left"])
+    return out
+
+
+def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any] | None]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
         prev_status = (task.get("status") or "").lower() or "in_progress"
@@ -553,7 +626,7 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
                 "task_id": args.id,
                 "status": prev_status,
                 "already_completed": True,
-            }
+            }, None
         task["status"] = args.status
         task["completed_at"] = _now()
         _record_status_history(
@@ -576,7 +649,12 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
         out = {"ok": True, "task_id": args.id, "status": args.status}
         if effect:
             out["review_followup_effect"] = effect
-        return out
+        # Stamped inside the same LOCK_EX that wrote the terminal status, so the
+        # "already reported" claim can never disagree with the row it describes.
+        burst = _burst_actions(task, args.status, tasks)
+        if burst and burst.get("text"):
+            task["burst_reported_at"] = _now()
+        return out, burst
 
 
 def cmd_list(args: argparse.Namespace) -> dict[str, Any]:

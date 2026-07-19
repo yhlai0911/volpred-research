@@ -21517,5 +21517,15 @@
     "owner": "hourly-slot-2-0b2ef81497394ce99934c4f1802f3689",
     "commit": null,
     "summary": "PHASE A 收件：compute job codex-review-k528-nfp-official-dates（collect_completed）\n\n**攔下一個假成功**。job 標 completed、`--result-artifact` 存在檢查也過，但 `review_verdict.json` 八個欄位全是未填的 `FILL:` 佔位樣板（verdict / reviewer / reviewed_at / reviewed_commit / review_artifact / blocking_defects），只有 kid 與 reviewed_sha256 是實值 —— 樣板 scaffold 是預先建好的，Codex 從未回寫裁決。**artifact 存在 ≠ 審查完成**。\n\n若照原 followup brief 的 PASS 分支走，會連鎖做出四件不可逆的錯事：合併未驗收的 worktree、對線上文章 mile_35eef830 套用 18 條未經審查的更正、重製上傳圖表、把 assign_ae004ae2 標 succeeded。全部擋下。\n\n**產出**：建 P1 followup `assign_667a501a`（重跑 Codex 二審 + 確保 verdict 真的回寫；明列四項禁止動作），並 mark-followup-dispatched 防重派。父任務 assign_ae004ae2 維持 in_progress 未動。\n\n**治本建議已寫進任務**：verdict artifact 的成功後置條件不能只驗檔案存在，應加佔位符/schema 檢查（任一欄位仍以 `FILL:` 開頭即視為未完成），否則同一個假成功會在每個走 verdict gate 的 job 重演。"
+  },
+  {
+    "timestamp": "2026-07-19T12:01:31+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_merge_worktree_safety_net_scope_20260717",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615",
+    "owner": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615",
+    "commit": null,
+    "summary": "merge_worktree.sh 的 false-negative 防線只掃 experiments/ — 已擴到全樹。\n\n問題：K1262-v4 PRIMARY（file-presence diff）與 K1143-v2（rev-list=0 時查工作目錄）兩層防線都硬編 experiments/ 路徑。agent 成果早已不只放 experiments/（storage/event_articles/、storage/drafts/、docs/），一旦 auto-commit 靜默失敗且 experiments/ 空 → 直接走「可安全移除」→ 未合併就砍 worktree（silent data loss）。2026-07-17 合併 dispatch-slot-1-4036423d-cpidates 時發現，當次沒出事只因 auto-commit 正常。\n\n修法：\n- 新增 worktree_only_paths() helper，兩層防線共用；PRIMARY 的 diff-tree 拿掉 `-- experiments/` pathspec 改全樹；FS-DEFENSE 與 K1143-v2 pre-remove scan 都改走 helper 逐檔比對。\n- 邊界用結構性 noise denylist（.git/__pycache__/venv/node_modules/dist/build/.claude/storage/logs/*.pyc…）而非委給 .gitignore — 因為「被 gitignore 吃掉的 agent 產出」正是最需要攔的那一類。\n- 新增 ABORT_FOUND：單一 worktree ABORT 不再中斷其他 worktree（保留 K1143-v2 設計），但整體 exit 1（原本印 ABORT 卻 exit 0）。\n- 修 --dry-run 自相矛盾訊息：rev-list=0 且有未提交變更時，模擬 auto-commit 後狀態並說明 rev-list=0 是 dry-run 產物，不再宣告「可安全移除」。\n\nRegression test（成功判準）：scripts/tests/test_merge_worktree.sh Case 20（成果只在 storage/、auto-commit 用 .git/info/exclude mock 成失效 → 必須 ABORT + 非 0 exit + 檔案還在 + worktree 未移除）、Case 21（dry-run 訊息不自相矛盾）。非空洞已驗證：在 /tmp/oldrepo 用 `git show HEAD:scripts/merge_worktree.sh` 的舊版跑同一測試 → 7 個 assertion FAIL，舊版原樣印出「可安全移除」→「已移除 worktree」，成果真的被毀。\n\n驗證（主線程獨立重跑）：bash scripts/tests/test_merge_worktree.sh → 21/21 cases、65 assertions PASS/0 FAIL（含 19 個既有 case 全綠）。pytest tests/test_merge_worktree_dedup_regression.py → 12 passed。\n\n風險（誠實記錄）：\n- exit code 由 0 變 1 是刻意的行為改變。grep 全 repo，現有 merge_worktree 引用皆為文件/人工呼叫，無自動化 branch 在此 rc 上 — 但下班 fire 值得觀察。\n- false-ABORT 風險為真且刻意接受：denylist 外的 worktree-only 檔（例如 worktree 內新寫的 storage/ops/* runtime state）會擋住移除而非靜默刪除。已加 HINT 指示操作者確認可丟棄後刪檔重跑。\n- 未涵蓋：內容層 drift（兩邊都有但內容不同）仍不由這層偵測；dist/build 於任意深度被 prune，experiments/kXXXX/build/ 之類的真結果會漏。"
   }
 ]

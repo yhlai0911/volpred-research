@@ -44,17 +44,28 @@ memory_governance / persistent_alert / orphaned_experiment。每個 fail-open（
 `needs_human_attention(finding)` 是 dreaming 唯一的對外音量判準，順序由強到弱：
 
 1. `severity=critical`（Three-Strike 種子）→ **一律寄**，這是本層存在的理由。
-2. `quiescent`（底層訊號自上次 run 起未再推進 = 已停火、正在自清）→ 不寄。
+2. `quiescent`（底層訊號在最近一個 run interval 內未推進 = 已停火、正在自清）→ 不寄。
 3. 其餘只有 `propose_only` 要人（治理判斷）；`auto_dispatch` 歸 actuator。
 
 報告 `counts` 因此多三個讀數：`actionable` / `machine_handled` / `quiescent`，
 `main()` 的閘門是 `escalations or actionable_new`。**靜默 ≠ 黑洞** —— 報告照寫、
 `autonomous_decisions.jsonl` 照記、skip 理由印在 cron log。
 
-**已知邊界**：`quiescent` 由「兩次 run 之間 marker 有無推進」定義，所以**首次出現**的
-finding 一律不算 quiescent（那晚還沒有可比對的前值）。一個「初見即已停火」的 alert 仍會寄
-一次信，隔晚才靜音。alert 48h 自清 + persistent_alert 需累積 send_count，這個窗口很窄，
-故不為它加第二套判定（會與 reconcile 的 marker 邏輯形成雙 owner）。
+**quiescent 的定義與唯一 owner**（`_is_quiescent()`，2026-07-19 重構）：
+「底層訊號在最近一個 `DREAMING_RUN_INTERVAL_HOURS`(=24h，cron 05:25 日跑) 內有沒有推進？」
+同一個問題、三種證據來源，依可靠度排序：
+
+| 情境 | 證據 | 判定 |
+|---|---|---|
+| 有前一輪 marker | **相對**：marker 未推進 | quiescent |
+| legacy baseline（無 marker 欄） | advance 未知 | 保守 hold，下輪自我修正 |
+| **首見**（無前值） | **絕對**：marker 距今 ≥ 一個 run interval | quiescent |
+
+第三列補於 2026-07-19（boss email-12144）。舊版只有相對式，於是「初見即已停火」的 alert
+必吵一次、隔晚才靜音；當時記成「已知邊界」，理由是補它會形成雙 owner。**那個理由是錯的**
+—— 它把相對式誤當成 quiescence 的定義本身。定義是「一個 run interval 內沒推進」，相對式
+只是它在有前值時的特例；首見改問同一判準的絕對形式，仍是同一個 owner，不是第二套判定。
+`reconcile()` 兩條分支都委派給 `_is_quiescent()`，有 test 鎖住不得散回去。
 
 ## Three-strike 升級
 
