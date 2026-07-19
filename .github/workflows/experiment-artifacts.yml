@@ -1,0 +1,75 @@
+name: Experiment Artifacts Gate
+
+# An experiment that lands finished results must land its artifacts too.
+#
+# 2026-07-19 turned CI red three dispatch hours in a row: k1732 merged without a
+# knowledge.json entry, then k1719 without one, then a test wrote canonical state.
+# The first two were the same bug class and each was patched one experiment at a
+# time, by a human noticing a red build. Nothing stopped the next one.
+#
+# This gate freezes the class at the two doors an experiment can enter main
+# through. Both doors run the SAME script — scripts/check_experiment_artifacts.py:
+#
+#   * scripts/merge_worktree.sh                  — pre-merge (blocks the merge)
+#   * this workflow                              — push / PR (blocks the branch)
+#
+# Do not reimplement the rule in either caller: two copies of a rule drift, and the
+# drift is always found by the incident the rule was meant to stop.
+#
+# Scope is a FORWARD RATCHET — only experiments added or modified in this push/PR.
+# The 1,261-experiment reproduce_spec backlog is deliberately out of scope:
+# reproduce_spec.json only became a convention in 2026-07, and synthesising specs
+# for runs nobody can re-execute would mean inventing entrypoints, input hashes and
+# seeds. Inventing history is the failure this gate exists to prevent.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The gate diffs against a base commit, so the shallow default clone is
+          # not enough — `git diff base...HEAD` needs the merge-base present.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve the base commit to diff against
+        id: base
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          base=""
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            base="$PR_BASE_SHA"
+          elif [[ "$EVENT_NAME" == "push" ]]; then
+            base="$PUSH_BEFORE"
+          fi
+          # A branch's first push reports an all-zero "before"; a manual dispatch
+          # reports nothing at all. Fall back to the previous commit rather than
+          # abstaining — a gate that silently passes is worse than a narrow one.
+          if [[ -z "$base" || "$base" =~ ^0+$ ]] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"
+            echo "no usable event base; falling back to $base"
+          fi
+          echo "sha=$base" >> "$GITHUB_OUTPUT"
+
+      - name: Gate experiments added or modified in this change
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+        run: python scripts/check_experiment_artifacts.py check --changed-since "$BASE_SHA"

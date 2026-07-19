@@ -150,6 +150,20 @@
 - 主線程再用 `bash scripts/merge_worktree.sh` 合併。
 - **絕對禁止** `git worktree remove --force`。
 
+### 實驗 artifact gate（2026-07-19 起，merge 與 CI 兩處都擋）
+
+帶 archived `*_results.json` 的 `experiments/<id>/` 若少了 knowledge 條目或 `reproduce_spec.json`，
+`scripts/check_experiment_artifacts.py` 會擋下 merge（`merge_worktree.sh`）與 push
+（`.github/workflows/experiment-artifacts.yml`），並印出可直接貼上執行的補救指令。
+
+- 開工前自查：`python3 scripts/check_experiment_artifacts.py check --path experiments/<id>`
+- knowledge 條目**只能主線程寫**（K1259），數字一律從 `*_results.json` 程式化取得，不得從 README
+  或 agent 摘要轉抄。
+- 只審本次新增/修改的實驗；無 results 的目錄、無 K-id 的目錄（後者仍要交 spec）不在 knowledge
+  半邊的 scope 內。理由見 `docs/error_log.md` 2026-07-19 條。
+- 真的無法產生 artifact 才寫 `config/experiment_artifact_exclusions.json`，且必須說明**為什麼做不到**
+  ——「之後再補」是 bug，不是理由。
+
 ## 發佈、論文、策略
 
 ### 發佈

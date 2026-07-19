@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-19T08:00:59.532071+00:00",
+  "generated_at": "2026-07-19T09:00:53.569125+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
@@ -29,14 +29,35 @@
       "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 2,
+        "grace": 0,
         "inflight": 0,
-        "unclaimed": 0
+        "unclaimed": 2
       },
       "collections": []
     },
     "experiments": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/0050_tw.csv",
+          "kind": "csv",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/paper2_taiwan_indiv_rolling_gamma/paper2_taiwan_indiv_rolling_gamma_results.json",
+          "kind": "json",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1719/reproduce_spec.json",
+          "kind": "json",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/paper2_0050_split_repair_verification/verify_0050_gamma.py",
+          "kind": "py",
+          "reason": "untracked"
+        }
+      ],
       "held": [
         {
           "path": "experiments/k1380",
@@ -56,11 +77,23 @@
         }
       ],
       "skipped": {
-        "grace": 4,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "experiments",
+          "paths": [
+            "experiments/paper2_taiwan_indiv_rolling_gamma/data/0050_tw.csv",
+            "experiments/paper2_taiwan_indiv_rolling_gamma/paper2_taiwan_indiv_rolling_gamma_results.json",
+            "experiments/k1719/reproduce_spec.json",
+            "experiments/paper2_0050_split_repair_verification/verify_0050_gamma.py"
+          ],
+          "committed": true,
+          "detail": "[main a261539ce] chore(experiment-reap): collect orphaned experiment artifacts (4 files)\n 4 files changed, 1401 insertions(+), 1239 deletions(-)\n crea"
+        }
+      ]
     }
   },
   "held_escalations": [],

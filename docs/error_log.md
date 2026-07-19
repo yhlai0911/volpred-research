@@ -419,3 +419,36 @@ escalation 也會一起被忽略 —— 這是把 §J（alert 轟炸）的傷害
 就該轉成資料表；且同一條件不得在兩個地方各自 if（level 與內文必須由同一筆資料決定），否則漂移
 無人察覺。此條與 §H「alert body 是寫給人看的待辦」同源：alert 內文是產品介面，要有結構與測試，
 不是可以隨手貼字串的地方。
+
+## 2026-07-19 實驗進 main、artifact 沒進：CI 連三班紅 → 機械 gate — FIXED
+
+**根因**：experiment 目錄合併進 main 時，`storage/memory/knowledge.json` 條目與
+`reproduce_spec.json` 沒有任何東西強制它一起進來。2026-07-19 一天內 CI 連三班紅：k1732 缺
+knowledge 條目 → 補；k1719 缺條目 → 補；第三班測試寫 canonical → 補。**三次都是逐筆補、沒有人修
+流程**，所以第四次只是時間問題。這是典型的「清庫存當成修 bug」：庫存清完，產生庫存的那道門還開著。
+
+**修復**：`scripts/check_experiment_artifacts.py` 一支腳本、兩個門，規則只有一份 ——
+`scripts/merge_worktree.sh`（pre-merge，擋合併，接在既有 certify gate 之後）與
+`.github/workflows/experiment-artifacts.yml`（push / PR，擋分支）。帶 archived `*_results.json`
+的 experiment 目錄必須同時有 (a) knowledge.json 中提及其 K-id 的條目、(b) 可通過
+`reproduce_check.load_spec` 的 `reproduce_spec.json`。失敗訊息直接印出可貼上執行的補救指令。
+
+**三條刻意畫死的邊界**（每一條都是為了不製造假歷史）：
+1. **前進式 ratchet**：只審本次 push / merge 新增或修改的實驗，不追殺 1,261 筆歷史缺 spec。
+   `reproduce_spec.json` 是 2026-07 才成形的慣例，替沒人跑得動的舊 run 補 entrypoint / input hash /
+   seed 等於發明歷史 —— 那正是這道 gate 要防的事。
+2. **無 results 的目錄不入 scope**（sweep 掃到 232 個：論文撰寫 session、`.gitkeep`、廢棄 stub）。
+   沒有結果就沒有發現可記、沒有輸出可釘，硬要求只會逼人捏造條目。
+3. **無 K-id 的目錄不審 knowledge 半邊**（如 `paper2_taiwan_indiv_rolling_gamma`）：knowledge.json
+   以 K-id 為 key，對這種目錄 gate 根本無 key 可查，「請補一筆提及 paper2_… 的條目」是查不到也做不到
+   的指令。**做不到的 gate 只會被繞過，不會被遵守**。它們仍要交 `reproduce_spec.json`。
+
+**驗證**：`scripts/tests/test_check_experiment_artifacts.py` 12 passed（含刻意造缺條目 / 缺 spec
+目錄被擋、無 results 不被擋、無 K-id 只審 spec、knowledge.json 讀不到時 fail-closed）；
+`check --changed-since origin/main` 當場抓到真實漏網的
+`experiments/paper2_taiwan_indiv_rolling_gamma`（orphan reaper 於本日收進 main、無 spec），已依其
+腳本實際的 `SEED = 20260713` 與 `data/` 13 個檔的 sha256 補上 spec，非事後編造。
+
+**教訓**：**逐筆補同一個 bug class = 把偵測成本外包給下一班的紅燈**。同一種紅燈出現第二次時，該修的
+就不是那一筆而是那道門。另一條更通用：**gate 的要求必須可被執行**——當規則對某類目標無法滿足時，
+正解是把該類明確排除並說明理由，不是留一條沒人做得到的規則等著被 `--no-verify` 繞過。

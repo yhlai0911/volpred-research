@@ -575,6 +575,7 @@ def enqueue(args) -> int:
         "cwd": getattr(args, "job_cwd", None),
         "claude_followup": followup,
         "followup_dispatched": False,
+        "source_task_id": getattr(args, "source_task_id", None),
         "timeout_seconds": args.timeout or 3600,
         # Where the brief came from vs the frozen copy the runner will actually read.
         # Keeping both makes "the agent read something else than I wrote" auditable.
@@ -587,7 +588,51 @@ def enqueue(args) -> int:
         return 2
     _write_job_file(job_path, entry)
     print(f"enqueued: {job_id}")
+    _link_source_task(job_id, entry.get("source_task_id"))
     return 0
+
+
+def _link_source_task(job_id: str, task_id: str | None) -> None:
+    """Mark the pool task that spawned this job as in_progress.
+
+    Without this the task stays `pending` while its job sits in the queue, so
+    every later fire's urgency lane re-surfaces it as undispatched work and the
+    honest response — enqueue it — produces a duplicate job (observed
+    2026-07-19: assign_98a32740 / assign_1238781f both queued yet still
+    pending, three fires apart).  The link is written at the one moment both
+    ids are known; a reconciler after the fact would be a second owner for the
+    same invariant.
+
+    Never fails the enqueue: the job file is already durable, and a job with an
+    unlinked task is strictly better than a fire that aborts mid-dispatch.
+    """
+    if not task_id:
+        return
+    try:
+        # Import under the canonical `scripts.` name. Path-inserting scripts/ and
+        # importing bare `task_pool_claim` would create a second module object
+        # with its own NEXT_TASKS constant, so a caller holding
+        # `scripts.task_pool_claim` (tests, other scripts) would be editing a
+        # different file than this one writes.
+        repo_root = str(Path(__file__).resolve().parent.parent)
+        if repo_root not in sys.path:
+            sys.path.insert(0, repo_root)
+        from scripts import task_pool_claim as tpc
+
+        # _locked_load writes the mutated list back on context exit; mutating in
+        # place is the whole contract, there is no separate write call.
+        with tpc._locked_load() as (_fh, tasks):
+            task = tpc._find(tasks, task_id)
+            task["compute_job_id"] = job_id
+            if task.get("status") in ("pending", "claimed"):
+                task["status"] = "in_progress"
+            task["result"] = tpc._append_note(
+                task.get("result"),
+                f"dispatched to compute job {job_id}; awaiting PHASE A collection",
+            )
+        print(f"linked source task: {task_id} -> in_progress")
+    except Exception as exc:  # noqa: BLE001 — advisory link, never blocks enqueue
+        print(f"warning: could not link source task {task_id}: {exc}", file=sys.stderr)
 
 
 def enqueue_agent(args) -> int:
@@ -697,6 +742,7 @@ def enqueue_agent(args) -> int:
         brief_snapshot=str(frozen_brief),
         timeout_parent_job_id=getattr(args, "timeout_parent_job_id", None),
         split_stage=getattr(args, "split_stage", None),
+        source_task_id=getattr(args, "source_task_id", None),
     )
     return enqueue(inner)
 
@@ -1447,6 +1493,10 @@ def main():
     e.add_argument("--timeout", type=int)
     e.add_argument("--timeout-parent-job-id")
     e.add_argument("--split-stage")
+    e.add_argument(
+        "--source-task-id",
+        help="Pool task this job was dispatched for; marked in_progress so A0 stops re-surfacing it.",
+    )
     e.set_defaults(func=enqueue)
 
     ea = sub.add_parser(
@@ -1470,6 +1520,10 @@ def main():
     ea.add_argument("--timeout", type=int)
     ea.add_argument("--timeout-parent-job-id")
     ea.add_argument("--split-stage")
+    ea.add_argument(
+        "--source-task-id",
+        help="Pool task this job was dispatched for; marked in_progress so A0 stops re-surfacing it.",
+    )
     ea.set_defaults(func=enqueue_agent)
 
     am = sub.add_parser(

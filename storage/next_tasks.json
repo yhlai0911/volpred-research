@@ -30404,42 +30404,15 @@
   },
   {
     "id": "dreaming_memory_skill_gap_uncodified_process",
-    "title": "[dreaming] memory_skill_gap:uncodified_process",
-    "description": "這些記憶描述 recurring process/cadence 但無對應 skill；評估 promote 成 skill 或加排程/cadence（見 pdca-operations 技能治理 + operations-cadence）。\n\n— dreaming 連續 16 晚偵測到此模式（首見 2026-06-30T12:29:57.114601+00:00）。\n證據：- [reference_notebooklm_rag_workflow.md](reference_notebooklm_rag_workflow.md) — NotebookLM 作為論文 / 文件 RAG 資料庫；cross-pape; - [reference_unified_memory_one_brain.md](reference_unified_memory_one_brain.md) — Telegram 與本機 session 是同一個大腦（共用 auto-m; - [project_loop_engineering_layer.md](project_loop_engineering_layer.md) — 2026-06-29 上線 loop-engineering 閉環：loop-health; - [project_fb_page_operation.md](project_fb_page_operation.md) — VolPred 粉專(id 61590464616031)由 AI 全權經營+優化+固定巡檢；Chrome 發; - [project_strategy_lifecycle_standing_directive.md](project_strategy_lifecycle_standing_directive.md) — boss standing d; - [feedback_paper_autonomy_optimize_acceptance.md](feedback_paper_autonomy_optimize_acceptance.md) — 老闆 msg 309(7/9)授權：論\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] memory_skill_gap:uncodified_process",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-12T08:28:40.700993+00:00",
-    "dreaming": {
-      "signature": "memory_skill_gap:uncodified_process",
-      "pattern_type": "memory_skill_gap",
-      "occurrences": 16,
-      "governance_target": ".claude/skills/"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-16T08:35:25.566897+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-governance"
-      },
-      {
-        "ts": "2026-07-16T08:35:25.844113+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-governance"
-      },
-      {
-        "ts": "2026-07-16T08:51:26.367396+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-governance"
-      }
-    ],
-    "started_at": "2026-07-16T08:35:25.844095+00:00",
     "completed_at": "2026-07-16T08:51:26.367377+00:00",
-    "result": "Root-cause fixed in 867120c2b: memory process gaps now use per-memory signatures and verifiable process_owner paths, preventing aggregate queue-once suppression; live audit returns zero unowned processes. Reconciled true drift in Telegram canonical autoMemoryDirectory, paper submission autonomy, and dreaming actuator docs; 46+1 targeted tests passed."
+    "tombstone": true,
+    "archived_at": "2026-07-19T09:01:39.384035+00:00"
   },
   {
     "id": "dreaming_memory_hygiene_consolidation_review",
@@ -31095,43 +31068,15 @@
   },
   {
     "id": "dreaming_missing_retry_strategy_research_rp_4855ddb7a9",
-    "title": "[dreaming] missing_retry_strategy:research_rp_4855ddb7a9",
-    "description": "Failed task research_rp_4855ddb7a9 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-12T22:00:14.861047+00:00）。\n證據：task research_rp_4855ddb7a9 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] missing_retry_strategy:research_rp_4855ddb7a9",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-12T22:00:14.861047+00:00",
-    "dreaming": {
-      "signature": "missing_retry_strategy:research_rp_4855ddb7a9",
-      "pattern_type": "missing_retry_strategy",
-      "occurrences": 1,
-      "governance_target": null
-    },
-    "follows_up_on": "research_rp_4855ddb7a9",
-    "status_history": [
-      {
-        "ts": "2026-07-16T08:30:59.983559+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:31:00.332529+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:31:00.686679+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      }
-    ],
-    "started_at": "2026-07-16T08:31:00.332505+00:00",
     "completed_at": "2026-07-16T08:31:00.686661+00:00",
-    "result": "Resolved by K1701 revision sibling k1701_primary_inference_nested_general_loss: succeeded with formal INCONCLUSIVE_NO_EXACT_NULL_CLAIM verdict."
+    "tombstone": true,
+    "archived_at": "2026-07-19T09:01:39.384035+00:00"
   },
   {
     "id": "dreaming_persistent_alert_a4a7ca551f8626b2",
@@ -32047,35 +31992,14 @@
   },
   {
     "id": "k1025b_v2_codex_primary_path_verify",
-    "title": "K1025b v2 Codex primary-path 二次驗證（closure gate）",
-    "description": "K1025b v2（Cholesky FEVD 排序假象稽核 / KPPS 回溯更正）已由 code-reviewer subagent fallback 判 CONDITIONAL PASS，5 個條件全數已修（見 experiments/k1025b/ordering_audit.md §5）。但 per .claude/rules/experiments.md 的 K1259 教訓：subagent fallback PASS != primary-path Codex PASS，closure 未成立。本 task = Codex primary path 對 experiments/k1025b/k1025b_v2.py + k1025b_v2_results.json 做二次驗證。重點複查：(a) KPPS 實作與 k1025_v3 一致無分歧 (b) buggy 路徑是真重跑非 hardcode (c) 無 lookahead (d) circular-shift null 與雙尾 p 自洽 (e) net_formula_equivalence_check 的 assert 有效 (f) 結論無 overclaim。注意 Codex 前次逾時：走 scripts/codex_exec_bounded.sh 或 compute_queue，勿裸跑。knowledge entry = e3e4b1fa（category=self-correction）。",
-    "task_type": "paper_review",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "paper_review",
+    "title": "K1025b v2 Codex primary-path 二次驗證（closure gate）",
+    "priority": 3,
     "source": "agent_discovered",
-    "status_history": [
-      {
-        "ts": "2026-07-16T08:10:20.946071+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-1-288354348003490e955397e456cbb166"
-      },
-      {
-        "ts": "2026-07-16T08:10:21.215905+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-1-288354348003490e955397e456cbb166"
-      },
-      {
-        "ts": "2026-07-16T08:14:29.711446+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-1-288354348003490e955397e456cbb166"
-      }
-    ],
-    "started_at": "2026-07-16T08:10:21.215891+00:00",
     "completed_at": "2026-07-16T08:14:29.711426+00:00",
-    "result": "Codex primary-path PASS: verified canonical K1025v3 KPPS reuse, real buggy rerun, no lookahead, circular-shift/two-sided-p construction, executable NET equivalence assert, and restrained claims. Fresh full-sample values matched; experiment gates PASS; FEVD ratchet 2 passed. Receipt: storage/ops/codex_reviews/k1025b_v2_primary_verify.md."
+    "tombstone": true,
+    "archived_at": "2026-07-19T09:01:39.384035+00:00"
   },
   {
     "id": "platform_ops_arc_gate_macro_false_positive_trending_lane",
@@ -32973,13 +32897,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T08:01:05.018133+00:00",
+    "completed_at": "2026-07-19T09:01:16.811512+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T08:01:05.018133+00:00",
-      "last_clean_observed_at": "2026-07-19T08:01:05.018133+00:00"
+      "resolved_at": "2026-07-19T09:01:16.811512+00:00",
+      "last_clean_observed_at": "2026-07-19T09:01:16.811512+00:00"
     }
   },
   {
@@ -32991,13 +32915,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T08:17:51.458434+00:00",
+    "completed_at": "2026-07-19T09:22:57.143116+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T08:17:51.458434+00:00",
-      "last_clean_observed_at": "2026-07-19T08:17:51.458434+00:00"
+      "resolved_at": "2026-07-19T09:22:57.143116+00:00",
+      "last_clean_observed_at": "2026-07-19T09:22:57.143116+00:00"
     }
   },
   {
@@ -33342,243 +33266,75 @@
   },
   {
     "id": "dreaming_missing_retry_strategy_k267_article_general_v2",
-    "title": "[dreaming] missing_retry_strategy:K267_article_general_v2",
-    "description": "Failed task K267_article_general_v2 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task K267_article_general_v2 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] missing_retry_strategy:K267_article_general_v2",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
-    "dreaming": {
-      "signature": "missing_retry_strategy:K267_article_general_v2",
-      "pattern_type": "missing_retry_strategy",
-      "occurrences": 1,
-      "governance_target": null
-    },
-    "follows_up_on": "K267_article_general_v2",
-    "status_history": [
-      {
-        "ts": "2026-07-16T08:30:57.890117+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:30:58.257139+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:30:58.609605+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      }
-    ],
-    "started_at": "2026-07-16T08:30:58.257122+00:00",
     "completed_at": "2026-07-16T08:30:58.609589+00:00",
-    "result": "Resolved by retry K267_article_general_v3: succeeded; article mile_736c76d3 is published and live verified."
+    "tombstone": true,
+    "archived_at": "2026-07-19T09:01:39.384035+00:00"
   },
   {
     "id": "dreaming_missing_retry_strategy_research_spot_bitcoin_etf_flow_shock_",
-    "title": "[dreaming] missing_retry_strategy:research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
-    "description": "Failed task research_spot_bitcoin_etf_flow_shock_btc_eth_vol has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task research_spot_bitcoin_etf_flow_shock_btc_eth_vol (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] missing_retry_strategy:research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
-    "dreaming": {
-      "signature": "missing_retry_strategy:research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
-      "pattern_type": "missing_retry_strategy",
-      "occurrences": 1,
-      "governance_target": null
-    },
-    "follows_up_on": "research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
-    "status_history": [
-      {
-        "ts": "2026-07-16T08:31:01.023955+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:31:01.382495+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:31:01.722608+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      }
-    ],
-    "started_at": "2026-07-16T08:31:01.382477+00:00",
     "completed_at": "2026-07-16T08:31:01.722594+00:00",
-    "result": "Resolved by K1709 revision chain: k1709-redo and rev4 fixes succeeded; rev6 reached certified merge."
+    "tombstone": true,
+    "archived_at": "2026-07-19T09:01:39.384035+00:00"
   },
   {
     "id": "dreaming_missing_retry_strategy_research_private_market_rv_correlatio",
-    "title": "[dreaming] missing_retry_strategy:research_private_market_rv_correlation_regime",
-    "description": "Failed task research_private_market_rv_correlation_regime has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task research_private_market_rv_correlation_regime (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] missing_retry_strategy:research_private_market_rv_correlation_regime",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
-    "dreaming": {
-      "signature": "missing_retry_strategy:research_private_market_rv_correlation_regime",
-      "pattern_type": "missing_retry_strategy",
-      "occurrences": 1,
-      "governance_target": null
-    },
-    "follows_up_on": "research_private_market_rv_correlation_regime",
-    "status_history": [
-      {
-        "ts": "2026-07-16T08:30:58.933090+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:30:59.293005+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:30:59.652921+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      }
-    ],
-    "started_at": "2026-07-16T08:30:59.292985+00:00",
     "completed_at": "2026-07-16T08:30:59.652906+00:00",
-    "result": "Resolved as controlled no-retry: original task concluded INFEASIBLE AS SPECIFIED because annual or quarterly allocation data are insufficient; a daily-proxy design is a different research task."
+    "tombstone": true,
+    "archived_at": "2026-07-19T09:01:39.384035+00:00"
   },
   {
     "id": "dreaming_missing_retry_strategy_k1695",
-    "title": "[dreaming] missing_retry_strategy:K1695",
-    "description": "Failed task K1695_article_general has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task K1695_article_general (k_id=K1695) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] missing_retry_strategy:K1695",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
-    "dreaming": {
-      "signature": "missing_retry_strategy:K1695",
-      "pattern_type": "missing_retry_strategy",
-      "occurrences": 1,
-      "governance_target": null
-    },
-    "follows_up_on": "K1695_article_general",
-    "status_history": [
-      {
-        "ts": "2026-07-16T08:24:29.504928+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-k1695-retry-closure"
-      },
-      {
-        "ts": "2026-07-16T08:24:29.821647+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-k1695-retry-closure"
-      },
-      {
-        "ts": "2026-07-16T08:25:09.922489+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-k1695-retry-closure"
-      }
-    ],
-    "started_at": "2026-07-16T08:24:29.821633+00:00",
     "completed_at": "2026-07-16T08:25:09.922474+00:00",
-    "result": "Resolved by controlled retry K1695_article_general_retry1: succeeded with draft mile_badbc47b after certification, provenance, anti-AI, cross-model, and lazypack gates. Original failed task remains preserved as audit history; no blind rerun was used."
+    "tombstone": true,
+    "archived_at": "2026-07-19T09:01:39.384035+00:00"
   },
   {
     "id": "dreaming_missing_retry_strategy_k1684",
-    "title": "[dreaming] missing_retry_strategy:K1684",
-    "description": "Failed task K1684_article_general has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task K1684_article_general (k_id=K1684) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] missing_retry_strategy:K1684",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
-    "dreaming": {
-      "signature": "missing_retry_strategy:K1684",
-      "pattern_type": "missing_retry_strategy",
-      "occurrences": 1,
-      "governance_target": null
-    },
-    "follows_up_on": "K1684_article_general",
-    "status_history": [
-      {
-        "ts": "2026-07-16T08:30:56.817786+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:30:57.201207+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:30:57.556389+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      }
-    ],
-    "started_at": "2026-07-16T08:30:57.201190+00:00",
     "completed_at": "2026-07-16T08:30:57.556372+00:00",
-    "result": "Resolved as controlled no-retry: K1684_article_general explicitly forbids publication until E2 completes; publication gate fix and 11 tests preserve the hold."
+    "tombstone": true,
+    "archived_at": "2026-07-19T09:01:39.384035+00:00"
   },
   {
     "id": "dreaming_missing_retry_strategy_trending_repost_2026_07_14_ai",
-    "title": "[dreaming] missing_retry_strategy:trending_repost_2026_07_14_ai資本",
-    "description": "Failed task trending_repost_2026_07_14_ai資本 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-14T21:25:00.835031+00:00）。\n證據：task trending_repost_2026_07_14_ai資本 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
-    "task_type": "platform_ops",
-    "priority": 3,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[dreaming] missing_retry_strategy:trending_repost_2026_07_14_ai資本",
+    "priority": 3,
     "source": "dreaming",
     "created_at": "2026-07-14T21:25:00.835031+00:00",
-    "dreaming": {
-      "signature": "missing_retry_strategy:trending_repost_2026_07_14_ai資本",
-      "pattern_type": "missing_retry_strategy",
-      "occurrences": 1,
-      "governance_target": null
-    },
-    "follows_up_on": "trending_repost_2026_07_14_ai資本",
-    "status_history": [
-      {
-        "ts": "2026-07-16T08:31:02.110789+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:31:02.473972+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      },
-      {
-        "ts": "2026-07-16T08:31:02.811563+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-retry-ghosts"
-      }
-    ],
-    "started_at": "2026-07-16T08:31:02.473955+00:00",
     "completed_at": "2026-07-16T08:31:02.811547+00:00",
-    "result": "Resolved by replacement trending_repost_2026_07_14_replacement: succeeded and published as mile_2b424e20 after the original AI CapEx arc was correctly rejected as duplicate."
+    "tombstone": true,
+    "archived_at": "2026-07-19T09:01:39.384035+00:00"
   },
   {
     "id": "telegram-774",
@@ -35430,37 +35186,15 @@
   },
   {
     "id": "K1695_article_general_retry1",
-    "title": "K1695 誠信更正公開文章：抗跌策略重做後發現不抗跌（draft 已寫好，走發佈流程）",
-    "description": "K1695_article_general 原 HELD 原因（修正未認證）已於 2026-07-16 全部解除：k1695_exposure_matched_correction succeeded、認證 PASS（experiments/k1695/review_verdict.json，certify 驗證綁定現行 bytes）、feed 更正已發。draft 與資產已 merge 進 main：storage/drafts/K1695_general_draft.md（93 行誠實撤回敘事）+ k1695_fig1_exposure_matched.png + k1695_fig2_cost_and_mechanism.png + K1695_lazypack_plan.json + k1695_article_evidence.json。剩餘工作：(1) 對照 experiments/k1695/review_certification_20260715.md 核對 draft 數字（common matched -0.87pp、inception +4.96pp、raw 12.61/27.50、Holm 0/13）；(2) 3-layer 查重（與 feed_correction_k1695 更正文區隔：本篇是完整敘事長文非更正通知）；(3) lazypack 走 codex primary path（plan 已備）；(4) feed-publisher 發佈（audience=general，draft 進池即可非即時）。",
-    "task_type": "daily_article",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "daily_article",
+    "title": "K1695 誠信更正公開文章：抗跌策略重做後發現不抗跌（draft 已寫好，走發佈流程）",
+    "priority": 2,
     "source": "main_thread_triage",
-    "k_id": "K1695",
     "created_at": "2026-07-16T06:43:49.836447+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-16T07:53:44.441435+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-k1695-article"
-      },
-      {
-        "ts": "2026-07-16T07:53:44.835263+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-k1695-article"
-      },
-      {
-        "ts": "2026-07-16T08:23:40.997069+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-k1695-article"
-      }
-    ],
-    "started_at": "2026-07-16T07:53:44.835249+00:00",
     "completed_at": "2026-07-16T08:23:40.997053+00:00",
-    "result": "Created general-audience correction draft mile_badbc47b (status=draft): 4,457 chars, 2 evidence charts, 4 Codex data-bound lazypack panels. Provenance audit passed 21/21 claims, anti-AI and cross-model review passed; committed final draft/feed/assets in 96b4b3a05."
+    "tombstone": true,
+    "archived_at": "2026-07-19T09:01:39.384035+00:00"
   },
   {
     "id": "ci-red-29475505993",
@@ -37856,7 +37590,7 @@
     "description": "K1623（experiments/k1623/）於 2026-07-17 孤兒收尾時經 codex gpt-5.6-sol (reasoning=high) 獨立二審判 **FAIL**，依 K1259 規則不得寫入 knowledge.json，結論必須撤回而非收編。本 task 是它的 consumer 與修復出口。\n\n**FAIL 理由（二審 + 主線程驗證，算術全部一致，問題在「宣稱 vs 證據」）**：\n1. 識別宣稱不成立：至多 5（permissive 15）個 deterministic Bai-Perron mean break 扣不掉 Diebold-Inoue 所設想的隨機／密集 regime shift，故「純 level-shift 假象假說被拒絕、確有真 long-memory 成分」無識別定理支撐。且 demeaned d̂ 的 SE 直接沿用 raw ELW 漸近 SE，未計入斷點是估計出來的 generated-regressor 不確定性。\n2. 結論隨 loss function 反轉且未揭露：DM **只跑了 QLIKE**，而 ARFIMA 的 MSE 在 5 資產中有 4 個低於 HAR（SPY 0.889 / TW0050 0.836 / QQQ 0.874 / N225 0.891，低 11-16%）。README §4 宣稱報 QLIKE+MSE 兩個 loss，實際只對 QLIKE 做檢定，MSE 方向相反且完全未提。\n3. 「不可交易」無任何交易策略／成本／效用測試，純屬修辭。\n4. README §3 稱「多處反而顯著更差」→ 實際 10 個 ARFIMA/BreakHAR 比較中僅 1 個顯著（QQQ t=+2.47, p=0.0137），且對 5 個檢定做 Bonferroni 即不顯著；20 個 DM 比較全無多重比較修正。\n5. 描述與程式碼不符：§4 稱 BreakRobustHAR「只用最近 latest-break 之後樣本 refit」，但 k1623.py:471 `wstart = max(0, min(brk_start, i-22-60))` 在斷點太近時刻意把窗口推回斷點之前，無斷點時 fallback 到 trailing 750。\n6. §4/§9 headline 稱 ELW 為「Shimotsu-Phillips 可估非平穩 d」，但 code 只做 sample-mean demeaning（非 SP 的 unknown-mean μ̂(d) 加權）；fracdiff 截斷 FD_MAXK=2000 對 n=2,565-4,655 實際 binding，對 d̂=0.723 的 VIX（d>0.5，樣本平均在非平穩區不是有效 level 估計）影響最大。\n7. VIX 的 permissive 斷點選到 cap 上限 15/15（cap binding），故夾擠上界 20.3% 不構成上界。\n\n**可保留的描述性事實**（不依賴已崩的識別宣稱）：扣掉 BIC 斷點後 ELW d̂ 仍 0.46-0.65、扣掉 10-15 個 permissive 斷點後仍 0.19-0.58（殘餘低頻持續性未消失）；OOS n=749/資產，HAR 在 QLIKE 上是 5 資產冠軍或並列最佳；BreakHAR vs HAR 10 個比較全部不顯著（最小 p=0.0946）。\n\n**要做的**：\n1. 改寫 experiments/k1623/README.md：撤回 (a)「真 long memory 成分存在」identification 宣稱、(b)「不可交易」、(c)「多處顯著更差」；改為 loss-dependent 的誠實陳述。\n2. 補跑 MSE 的 DM 檢定 + 20 個比較的多重比較修正（BH 或 Bonferroni），把 loss 反轉寫進結果表。\n3. 修正 ELW 方法描述（sample-mean demeaning 非 SP）+ 揭露 FD_MAXK binding + VIX cap binding。\n4. 修正 BreakRobustHAR 描述使其與 k1623.py:471 實際行為一致（或改 code 對齊描述，二擇一並說明）。\n5. 完成後再送一次 codex 二審；CONDITIONAL PASS 以上才可寫 knowledge.json。\n6. 注意 §9 記載前一輪 codex（gpt-5.5）判「no CRITICAL/HIGH」與本輪 gpt-5.6-sol 直接衝突 —— 前輪 review 未捕捉上述問題，這本身是 reviewer 可靠度的教訓，值得記進 error_log。\n\n**可發佈 angle（撤回識別宣稱後仍成立）**：「同一組預測、同一批模型，換一個 loss function 結論就反轉：QLIKE 說樸素 HAR 贏遍 5 個資產，MSE 說 ARFIMA 在 4/5 資產低 11-16%」—— 純描述性、可從 JSON 直接驗證的方法論教訓（呼應 K1016）。此 angle 須待 (1)(2) 修完才可寫成文章。\n\nparent_task_id=dreaming_orphaned_experiment_k1623",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "auto_discovered",
     "created_at": "2026-07-17T10:24:51.136605+00:00",
     "parent_task_id": "dreaming_orphaned_experiment_k1623",
@@ -37883,10 +37617,11 @@
       }
     ],
     "started_at": "2026-07-19T04:41:58.617369+00:00",
-    "result": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
+    "result": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。\n\ndispatched to compute job agent-brief_k1623_rev2-e343cd; awaiting PHASE A collection",
     "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
     "last_released_at": "2026-07-19T06:50:06.179320+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "compute_job_id": "agent-brief_k1623_rev2-e343cd"
   },
   {
     "id": "assign_42306eaa",
@@ -37894,7 +37629,7 @@
     "description": "K1698（experiments/k1698/，FTD E1 v2 — scale re-calibration gating，K1684 的 compliant rerun）於 2026-07-17 孤兒收尾時經 codex gpt-5.6-sol (reasoning=high) 獨立二審判 **FAIL**，依 K1259 規則不得寫入 knowledge.json。本 task 是它的 consumer 與修復出口。\n\n**先講公道話（這些 blocker 是真修的，別重做）**：數字全部可從 JSON 逐項對上、無 K1016 式反向宣稱 —— leg1 t=+1.4694/p=0.1424/n=436、own-target bridge −5.2522 vs primary −2.0642(p=0.0396)、校正因子 std(z)=1.20290 / MZ=1.21091 / HL=1.07465、placebo GJRf-a OOS=1.11910 / IS=0.99346、1% VaR trinity HAR+CF 14/450 (Kupiec p=0.000 FAIL) vs bridge 17/450、GJR+CF 2/450 PASS 但 c_emp=0.799 [0.63,1.02] 屬過度保守型 PASS、K854 bridge 11/14 格相符。K1684 的 n=377 縮樣已修（改 declared drop 3 cells，n=450）、atomic write（tmp→json.load→os.replace）、GATE_RULES 寫在 k1698.py:170 且 decide_gate_v2() 確實檢查 leg-2 —— 全部確認到位。\n\n**FAIL 理由（問題全在「數字 → 結論」與兩個號稱已解的 blocker）**：\n1. **lookahead 未解（致命）**：active contract 依整份日檔成交量選出（k1698.py:328 `v[dl==d].sum()`），含 13:30-13:45 的 tick，因此號稱「13:30 可得」的 RV predictor 用了視窗收盤後 15 分鐘的合約選擇資訊 —— 直接推翻 README「資訊集建構上不相交」的宣稱，並打在所有「新舊 RV 差 → divergence 是 artifact」結論的根上。\n2. **60 天邊界 audit 是空驗證**：rv_window_boundary_audit 取的是最早 60 個交易日（2017-01，夜盤上線前），JSON 內 12 筆 checks 的 night_pm_in_window / night_am_in_window 全是 None，而 None 不會令 ok=False；night_pm_stamped_before_file_date 更根本沒併進 all_ok。而 OOS(2023-24) 全在夜盤時代 → blocker 2 的機械證明並不存在。\n3. **accepting the null**：t=+1.469 (p=0.142) 只是「未證明 HAR 勝」，被寫成 H2_REJECTED +「divergence 是 construction artifact」。要立此論需 equivalence / noninferiority 檢定；−5.25→−2.06 是描述性比較，未對兩套 paired loss differential 之差做正式檢定。\n4. 「完全復現 K1684/K854 的世界」與 JSON 的 11/14 相矛盾（只有 HAR/RGL cells 逐格復現，差的 3 格全是 GJR 家族 10→9、3→2、9→7）。\n5. 「差全部來自 RV 重建」無分項 ablation —— 新 RV 同時改了 active contract／gap／alignment／連續 path 四件事，故「RV 建構吃掉最多」「殘餘 1.075 = composition/basis」皆未識別。\n6. JSON limitation #7 寫「>=100-start GJR/RGL」與 top-level rgl_multistart=40 自相矛盾（README 本身寫對）。\n7. k1698/ 目錄內無獨立 referee report/receipt，README §2 的「primary-path review PASS」無機械證據。\n\n**要做的（順序有依賴，別跳）**：\n1. 修 contract-selection lookahead：合約選擇只能用 13:30 前可得資訊（前一日 volume 或 rolling 規則），重跑 RV predictor。這一步不做，後面全部無意義。\n2. 修 rv_window_boundary_audit：抽樣必須涵蓋夜盤時代與 OOS 期（2023-24），None 應令 ok=False，night_pm_stamped_before_file_date 併進 all_ok。\n3. 無 lookahead 重跑後，做四層分項 ablation（active contract / gap / alignment / 連續 path）才能講「哪一項吃掉多少」。\n4. H2 若仍要主張「divergence 是 artifact」，改用 equivalence / noninferiority 檢定，不可拿 p=0.142 當證據。\n5. 修 limitation #7 與 rgl_multistart 的矛盾；把 review receipt 落成檔案。\n6. 重跑後再送 codex 二審；CONDITIONAL PASS 以上才可寫 knowledge.json。\n7. heavy compute 走 scripts/compute_queue.py enqueue，不要塞進 hourly fire。\n\n**可保留素材（修完才談短文）**：common-target vs own-target ranking 分歧、RV 建構敏感性、校正機器對 GJR placebo 同樣有效的否定結果、c_emp 作 ex-post calibration 診斷。\n\nparent_task_id=dreaming_orphaned_experiment_k1698",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "auto_discovered",
     "created_at": "2026-07-17T10:24:51.180552+00:00",
     "parent_task_id": "dreaming_orphaned_experiment_k1698",
@@ -37921,10 +37656,11 @@
       }
     ],
     "started_at": "2026-07-19T04:41:58.856904+00:00",
-    "result": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
+    "result": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。\n\ndispatched to compute job agent-brief_k1698_rev2-713b65; awaiting PHASE A collection",
     "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
     "last_released_at": "2026-07-19T06:50:06.179335+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "compute_job_id": "agent-brief_k1698_rev2-713b65"
   },
   {
     "id": "k1380_rerun_staged_correct_qlike",
@@ -42629,9 +42365,6 @@
     "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-19T05:57:31.986493+00:00",
-    "claimed_by": "hourly-slot-1-22b2d7cd63ae49c6993bc3ea246ac142",
-    "claimed_at": "2026-07-19T06:17:15.301972+00:00",
-    "claim_session_id": "aa0d8c0b53c4",
     "status_history": [
       {
         "ts": "2026-07-19T06:17:15.301987+00:00",
@@ -42644,9 +42377,35 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-22b2d7cd63ae49c6993bc3ea246ac142"
+      },
+      {
+        "ts": "2026-07-19T08:50:03.171243+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-22b2d7cd63ae49c6993bc3ea246ac142",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-19T09:07:49.035837+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-9113b28a7ea040bcab9925e5c096b878"
+      },
+      {
+        "ts": "2026-07-19T09:07:53.553198+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-9113b28a7ea040bcab9925e5c096b878"
       }
     ],
-    "started_at": "2026-07-19T06:18:31.969886+00:00"
+    "started_at": "2026-07-19T09:07:53.553179+00:00",
+    "last_released_at": "2026-07-19T08:50:03.171235+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-slot-2-9113b28a7ea040bcab9925e5c096b878",
+    "claimed_at": "2026-07-19T09:07:49.035823+00:00",
+    "claim_session_id": "3031ce7d7585",
+    "compute_job_id": "agent-brief_k1730_remediation-832ffa",
+    "result": "dispatched to compute job agent-brief_k1730_remediation-832ffa; awaiting PHASE A collection"
   },
   {
     "id": "price_cache_stale_fill_0050_20250610",
@@ -42693,14 +42452,37 @@
   },
   {
     "id": "k1719_reproduce_spec_backfill",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 3,
     "task_type": "experiment",
     "title": "k1719 補 reproduce_spec.json（classification=unverified_missing_spec）",
     "description": "k1719（ASIA-5 daily volatility spillover ladder）的 knowledge 條目已於 2026-07-19 由 hourly fire 補上（item_id=651fe11c，verdict=MIXED / Codex PASS），unrecorded-ratchet 已轉綠。剩餘缺口：experiments/k1719/ 沒有 reproduce_spec.json，reproduce_check 將其歸為 unverified_missing_spec —— 該實驗目前不是 byte-reproducible on demand。\n\n注意這條沒有對應的 CI gate（scripts/tests/ 下只有 knowledge/dm_hac_lag/nested_dm_misuse/mdd_scale/fevd_ordering/cjk_font 六個 ratchet，沒有 spec ratchet），所以它不會自己變紅，要靠這張單推。\n\n動作：(1) 依 reproduce_check 期望的 spec schema 為 k1719 寫 reproduce_spec.json（entry point experiments/k1719/k1719.py、seed 42、window 756、min 504 obs、snapshot k1719_source_snapshot.csv sha256 e2b64d8fad02aa29c96b243abb74fab6f707fa24f3f5ddf95b1eb3622ddb8160）；(2) 實跑一次確認可重現 review_verdict.json 記錄的 results sha256 9744ef08b1ea74bf4360e5aa149110337f8e4b32877fb7cf1a389c5121d376ae —— 若重現不出來，如實記錄差異來源（yfinance 資料漂移是合理原因），不要調 spec 去硬湊；(3) 順便評估這類 missing-spec 是否該比照 unrecorded-ratchet 加一個機械 gate，但依 anti-stacking 先確認沒有既有 owner 再提。",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T05:58:00+00:00",
-    "parent_task_id": "ci-red-k1719-unrecorded-knowledge"
+    "parent_task_id": "ci-red-k1719-unrecorded-knowledge",
+    "status_history": [
+      {
+        "ts": "2026-07-19T09:12:03.452641+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-c3c69ca15cb846929316662377332779"
+      },
+      {
+        "ts": "2026-07-19T09:12:07.942945+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-c3c69ca15cb846929316662377332779"
+      },
+      {
+        "ts": "2026-07-19T09:12:08.170886+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-c3c69ca15cb846929316662377332779"
+      }
+    ],
+    "started_at": "2026-07-19T09:12:07.942930+00:00",
+    "completed_at": "2026-07-19T09:12:08.170871+00:00",
+    "result": "k1719 已有 reproduce_spec.json，且通過 check_experiment_artifacts strict 驗證（reproduce_check.load_spec，exit 0）。本任務的原始缺口已不存在，隨 assign_40696430 的 class gate 一併收單。"
   },
   {
     "id": "telegram-1073",
@@ -42733,15 +42515,12 @@
     "id": "paper_0050_snapshot_repoint_20260719",
     "priority": 1,
     "task_type": "paper_review",
-    "status": "in_progress",
+    "status": "pending",
     "source": "agent",
     "created_at": "2026-07-19T14:25:00+08:00",
     "parent_task_id": "assign_price_cache_0050_split_break",
     "title": "P0 論文層：taiwan-vt / garch-x-vix 的 0050 pinned snapshot 仍含 4x 斷點，且方法描述與事實不符",
     "description": "本班修好 price_cache.db 的 0050 2014-01-02 分割斷點後，用 scripts/detect_price_split_breaks.py --csv-scan 掃出真正的污染載體是已凍結的 pinned snapshot CSV（DB 修復碰不到），共 16 檔含 0050 斷點，其中兩個是論文主資料檔：\n(1) paper/taiwan-vt/data/0050_tw_twii_..._2008-2026.csv（0050_tw_adj_close/close/high/low/open 全部 x0.2494 @2014-01-02）\n(2) paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv（同上）\n\n**方法描述矛盾（必修）**：paper/taiwan-vt/body_v3.tex:33 宣稱 \"compute returns from Adj Close\" 來處理此分割 —— 這不成立，因為 adj_close 同步跳（37.41→9.33），並未修正斷點。真正救回結論的是後半句 \"exclude the split date\"。referee 照這段描述重做會得到不同數字。paper/garch-x-vix/main.tex:377 有同樣問題（宣稱依 lai2026vt 程序清理，但資料檔 ratio=4.010）。\n\n影響分層（獨立盤點結論）：報酬序列衍生量（GJR gamma / DM / VT Sharpe）因 exclude split date 而實質安全；**價格水準衍生量（rolling window 價格、drawdown 路徑、未剔除該日的 realized-vol）仍污染**。\n\n待辦：(a) 從已修好的 DB 重建兩個 snapshot CSV；(b) 重跑 experiments/paper2_taiwan_indiv_rolling_gamma（rolling gamma 對價格水準敏感，body_v3.tex:53 的 gamma=0.097 / t=3.60 需重驗）；(c) 改寫 body_v3.tex:33 與 main.tex:377 的方法描述使其與事實一致；(d) 驗證 main.tex:531 的 0050 列（DM t=1.44）是清理後算的。\n\n驗證指令：uv run python scripts/detect_price_split_breaks.py --csv-scan",
-    "claimed_by": "hourly-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98",
-    "claimed_at": "2026-07-19T06:47:25.039594+00:00",
-    "claim_session_id": "cdff442dbdbb",
     "status_history": [
       {
         "ts": "2026-07-19T06:47:25.039610+00:00",
@@ -42754,9 +42533,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98"
+      },
+      {
+        "ts": "2026-07-19T08:50:03.171254+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-19T06:47:30.578496+00:00"
+    "started_at": "2026-07-19T06:47:30.578496+00:00",
+    "last_released_at": "2026-07-19T08:50:03.171252+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "k_reruns_0050_snapshot_contaminated_20260719",
@@ -42995,13 +42783,10 @@
     "description": "根因：2026-07-19 一天內 CI 三班連環紅（k1732 缺 knowledge 條目 → k1719 缺條目 → 測試寫 canonical），全是逐筆補、沒修流程。\n\n目標：把「實驗 artifact 完整性」變成機械 gate，不再靠人事後補。\n\n要做：\n1. 全量掃描 experiments/ 下所有已併入 main 的 experiment_id，比對 storage/memory/knowledge.json 是否有對應 K 條目、是否有 reproduce_spec.json。輸出缺漏清單（這是 bug class sweep，不是只修 k1719/k1732）。\n2. 一次補齊所有缺漏（含既有的 k1719_reproduce_spec_backfill，補完後把那張任務收掉）。\n3. 加 pre-merge / CI gate：新增或修改 experiments/<id>/ 時，若 knowledge.json 缺該 id 的條目或缺 reproduce_spec.json 就 fail，並給出可直接執行的補救指令。gate 要跑在 merge_worktree.sh 與 CI 兩處，避免只擋一邊。\n4. 寫入 docs/error_log.md（根因 + 防錯規則），並更新 AGENTS.md 或對應 skill 讓下一班知道這道 gate 存在。\n\n驗收：sweep 輸出 0 缺漏；故意造一個缺條目的 experiment 目錄能被 gate 擋下；CI 連續兩班綠。\n\n來源：老闆 2026-07-19 Telegram 指示（telegram-1090）。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-19T06:31:04.575105+00:00",
     "created_by": "telegram_responder",
-    "claimed_by": "hourly-slot-1-5741c175270c4935a70126f41109eb54",
-    "claimed_at": "2026-07-19T06:46:13.901891+00:00",
-    "claim_session_id": "9ccb2fe32704",
     "status_history": [
       {
         "ts": "2026-07-19T06:46:13.901907+00:00",
@@ -43014,9 +42799,38 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54"
+      },
+      {
+        "ts": "2026-07-19T08:50:03.171261+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-19T09:04:39.032795+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-c3c69ca15cb846929316662377332779"
+      },
+      {
+        "ts": "2026-07-19T09:04:39.264766+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-c3c69ca15cb846929316662377332779"
+      },
+      {
+        "ts": "2026-07-19T09:12:21.857245+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-c3c69ca15cb846929316662377332779"
       }
     ],
-    "started_at": "2026-07-19T06:46:26.544259+00:00"
+    "started_at": "2026-07-19T09:04:39.264751+00:00",
+    "last_released_at": "2026-07-19T08:50:03.171259+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-19T09:12:21.857231+00:00",
+    "result": "class gate 上線：check_experiment_artifacts.py（前一班寫好但 untracked、無呼叫點）接上兩道門 —— merge_worktree.sh 的 pre-merge gate + 新增 .github/workflows/experiment-artifacts.yml 的 push/PR gate，規則單一來源。新增 12 個測試（缺條目/缺 spec 被擋、無 results 不擋、無 K-id 只審 spec、knowledge 讀不到 fail-closed、端到端印補救指令）。修掉一個不可執行的規則：無 K-id 目錄原被要求補一筆永遠 match 不到的 knowledge 條目，改為只審 spec。sweep：1265 個在 scope，knowledge 缺漏 0，spec 缺漏 1261（歷史，刻意不補 —— 補等於發明 entrypoint/hash/seed；gate 為前進式 ratchet）。gate 當場抓到真實漏網 paper2_taiwan_indiv_rolling_gamma，已依腳本實際 SEED=20260713 與 data/ 13 檔 sha256 程式化補 spec。docs/error_log.md + AGENTS.md 已記根因與三條 scope 邊界。未完成項（誠實記錄）：驗收條的『CI 連續兩班綠』需 workflow 進 main 後由後續兩班觀察，本班只能保證本地 30 passed + 既有 Test Suite run 29680801763 green。"
   },
   {
     "id": "assign_79faa0b0",
@@ -43096,9 +42910,6 @@
     "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-19T06:43:14.951396+00:00",
-    "claimed_by": "hourly-slot-1-5741c175270c4935a70126f41109eb54",
-    "claimed_at": "2026-07-19T06:46:14.388541+00:00",
-    "claim_session_id": "a6f4057647a8",
     "status_history": [
       {
         "ts": "2026-07-19T06:46:14.388554+00:00",
@@ -43111,9 +42922,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54"
+      },
+      {
+        "ts": "2026-07-19T08:50:03.171266+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-19T06:46:27.024376+00:00"
+    "started_at": "2026-07-19T06:46:27.024376+00:00",
+    "last_released_at": "2026-07-19T08:50:03.171264+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "compute_job_id": "agent-brief_k741_nfp_canonical-837c1f",
+    "result": "dispatched to compute job agent-brief_k741_nfp_canonical-837c1f; awaiting PHASE A collection"
   },
   {
     "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260719T064406492747Z_a1",
@@ -43299,5 +43121,157 @@
     "started_at": "2026-07-19T08:03:22.255560+00:00",
     "completed_at": "2026-07-19T08:17:10.211964+00:00",
     "result": "根因 f0350b912 的 status==failed 早退把『沒產出』與『產物存在但被政策擋下』壓成同一格，且只同步了 namespace 測試。修法收窄早退條件（_NOTHING_WAS_PRODUCED）而非回退，兩邊原意都保住；補一條邊界測試釘住原意。驗證：目標測試 28 passed；全庫 3630 passed，另 3 失敗來自其他 slot 未提交的在途檔案、不在 HEAD 上。同根因姊妹任務 ci-red-29674177829 / alert_internal_phase_z_test_gate_red_7af47e56b9 應可直接關閉。"
+  },
+  {
+    "id": "telegram-1107",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T08:21:42.061316+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1107）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nClaude額度已恢復 是吧\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T08:22:00.439969+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-19T08:22:45.773446+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-19T08:22:45.773431+00:00"
+  },
+  {
+    "id": "telegram-1110",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T08:38:22.103584+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1110）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n回覆可以使用sonnet?\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T08:39:18.763821+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-19T08:39:40.348643+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-19T08:39:40.348627+00:00",
+    "result": "已回覆老闆：sonnet 可用，responder 預設 opus，切換是改 TELEGRAM_RESPONDER_MODEL env，已詢問是否要排工單實際切換"
+  },
+  {
+    "id": "telegram-1112",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T08:40:26.276239+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1112）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n這個只負責回覆的文字 不負責分析和判斷 對嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T08:40:46.301807+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-19T08:41:02.890225+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-19T08:41:02.890211+00:00"
+  },
+  {
+    "id": "telegram-1114",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T08:41:24.516313+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1114）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n這個sh只負責回覆的文字 不負責分析和判斷 對嗎？\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n可以，sonnet 在可用名單上。目前這個回覆通道預設用 opus-4-8，改成 sonnet 只要動 scripts/telegram_responder.sh 裡一個 env（TELEGRAM_RESPONDER_MODEL）就好。要我排工單真的切過去嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T08:41:48.694686+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-19T08:42:11.040663+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-19T08:42:11.040650+00:00",
+    "result": "已 Telegram 回覆（msg 1115）：釐清 telegram_responder.sh 是啟動器但 model/effort env 決定推理腦"
+  },
+  {
+    "id": "ci-red-29679059828",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29677363216",
+    "ci_run_key": "29679059828:1",
+    "created_at": "2026-07-19T09:00:07.773690+00:00",
+    "title": "CI 紅燈修復（run 29679059828, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29679059828\nattempt: 1\nhead_sha: 50bb24870\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29679059828 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T09:01:58.012072+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-c3c69ca15cb846929316662377332779"
+      },
+      {
+        "ts": "2026-07-19T09:01:58.254401+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-c3c69ca15cb846929316662377332779"
+      },
+      {
+        "ts": "2026-07-19T09:12:00.378637+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-c3c69ca15cb846929316662377332779"
+      }
+    ],
+    "started_at": "2026-07-19T09:01:58.254386+00:00",
+    "completed_at": "2026-07-19T09:12:00.378622+00:00",
+    "result": "紅燈根因=f0350b912 把 reaper 的 failed-job 早退寫成無條件 continue，導致 held 為空、test_orphan_reaper StopIteration。該紅燈已由 e84ff3a74（16:17，已在 origin/main）修好；本班驗證：本地 test_orphan_reaper.py 18 passed，且 e84ff3a74 的 Test Suite run 29680801763 completed/success。屬已被後續 commit 修復的過期紅燈，無需再改碼。"
+  },
+  {
+    "id": "compute_queue_priority_inversion_20260719",
+    "title": "compute_queue 純 FIFO → P1 job 被較早入列的 P2 卡住（加 priority 排序）",
+    "description": "compute_queue 的 worker 選 job 是純 FIFO（scripts/compute_queue.py run_next: queued.append((queued_at, ...)) 後 queued.sort()），job schema 沒有 priority 欄位。後果：P1 user-sourced 的長 agent job 會排在較早入列的 P2 job 後面。2026-07-19 17:00 實測 —— assign_98a32740（P1，K1730 remediation，06:18Z 入列）排在 agent-brief_k1623_rev2 / agent-brief_k1698_rev2（皆 P2，04:44Z 入列）之後；worker 單槽序列執行、每 job timeout 90min，等於 P1 要多等約 3 小時。\n\n要做：(1) job schema 加 priority（enqueue/enqueue-agent 加 --priority，預設沿用 claude_followup.priority，缺值 3）；(2) run_next 改 sort by (priority, queued_at) —— 仍以 queued_at 為同優先序內的 tie-break，避免 P1 之間插隊；(3) 補 tests/test_compute_queue.py 案例：P1 晚入列仍先被撿走、同優先序維持 FIFO；(4) 既有 queued job 用 claude_followup.priority 回填。\n\n注意：不要用 not_before 去延後 P2 job 當作變通 —— 那是把排序問題偽裝成排程問題，且會讓 P2 無限期後退。\n\n發現脈絡：本班（slot-2 9113b28a）在 A0 lane 處理 assign_98a32740 時，查證『為何 P1 已 enqueue 3 小時仍未開跑』而發現。同班已修的是另一個問題（enqueue 後 pool task 仍是 pending → lane 重複浮出、幾乎重複派工），見 compute_queue.py 的 _link_source_task 與 --source-task-id。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_by": "hourly-slot-2-9113b28a7ea040bcab9925e5c096b878",
+    "created_at": "2026-07-19T09:15:17.030506+00:00",
+    "parent_task_id": "assign_98a32740",
+    "result": null
   }
 ]

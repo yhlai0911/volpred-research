@@ -134,6 +134,77 @@ def test_enqueue_normalizes_and_deduplicates_explicit_output_paths(
     assert job["output_paths"] == ["results/a.json", "results/b.png"]
 
 
+def test_enqueue_links_source_task_to_in_progress(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A queued job must not leave its pool task looking undispatched.
+
+    2026-07-19: assign_98a32740 / assign_1238781f each had a queued job yet
+    stayed `pending`, so the urgency lane re-surfaced them every fire and the
+    next dispatch nearly enqueued duplicate agents.
+    """
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(json.dumps([{"id": "assign_x", "status": "pending", "result": None}]))
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    monkeypatch.setattr(tpc, "guard_canonical_write", lambda *_a, **_k: None)
+
+    assert module.enqueue(_enqueue_args(source_task_id="assign_x")) == 0
+
+    job = json.loads((queue_dir / "owned-output-job.json").read_text())
+    assert job["source_task_id"] == "assign_x"
+
+    task = json.loads(pool.read_text())[0]
+    assert task["status"] == "in_progress"
+    assert task["compute_job_id"] == "owned-output-job"
+    assert "owned-output-job" in task["result"]
+
+
+def test_enqueue_agent_forwards_source_task_id(tmp_path: Path, monkeypatch) -> None:
+    """enqueue_agent rebuilds args into a fresh Namespace, dropping anything
+    it does not name explicitly.
+
+    A missing forward fails silently — the job still gets created, only the
+    link is lost, which is precisely the bug this field exists to prevent.
+    """
+    _patch_queue_paths(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(module, "AGENT_BRIEF_DIR", tmp_path / "briefs")
+    monkeypatch.setattr(module, "is_registered_linked_worktree", lambda *_a, **_k: True)
+
+    brief = tmp_path / "brief.md"
+    brief.write_text("do the thing")
+    workdir = tmp_path / "wt"
+    workdir.mkdir()
+
+    captured: dict = {}
+    monkeypatch.setattr(module, "enqueue", lambda inner: captured.update(vars(inner)) or 0)
+
+    args = SimpleNamespace(
+        id="agent-job",
+        title=None,
+        brief_file=str(brief),
+        model="claude-opus-4-8",
+        effort="xhigh",
+        cwd=str(workdir),
+        result_artifact=None,
+        followup_brief=None,
+        followup_task_type=None,
+        followup_priority=None,
+        timeout=None,
+        timeout_parent_job_id=None,
+        split_stage=None,
+        source_task_id="assign_y",
+    )
+    assert module.enqueue_agent(args) == 0
+    assert captured["source_task_id"] == "assign_y"
+
+
 def _queued_job(queue_dir: Path, log_dir: Path, *, artifact: Path | None) -> Path:
     path = queue_dir / "artifact-postcondition.json"
     path.write_text(

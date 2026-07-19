@@ -21782,5 +21782,35 @@
     "owner": "hourly-slot-1-24204889eaad491881707c58b7fff088",
     "commit": null,
     "summary": "CI 紅燈修復（run 29677363216, main Test Suite）：`test_orphan_reaper.py::test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths` StopIteration。\n\n**根因**：commit `f0350b912`（今日 14:42）在 `scripts/reap_orphan_deliverables.py` 的 `scan_job_deliverables()` 加了一條早退 —— `if job.get(\"status\") == \"failed\": continue`。它要治的是真實問題（worktree merge 後宣告路徑消失，產生 7 筆假的 `no_existing_declared_files` held），但那個問題其實已被同 commit 的 `_landed_in_main()` 解掉；多加的 status 判斷是粗筆刷，把「failed 且完全沒產出」和「failed 但檔案存在、只是被政策擋下」壓成同一格。該 commit 只同步了 `test_orphan_namespace_registry.py`，沒動 `test_orphan_reaper.py`，於是舊測試（decbc5108 立的）當場紅。\n\n**修法（收窄，不是回退）**：新增 `_NOTHING_WAS_PRODUCED = {missing_or_not_regular_file, not_a_nonempty_string}`，早退條件改為 failed **且所有 rejection 都屬於「producer 從未寫出這個檔」**。若宣告路徑真的存在、只是因 `outside_repo` / `symlink_not_owned` / `git_ignored` 被拒，仍然 held —— 這正是本檔案頂部的不變量：存在的產物一律 held + 可讀 reason，永不因為 producer 剛好非零退出就被靜默丟棄。兩邊原意都保住。\n\n**補護欄**：新增 `test_job_reaper_does_not_hold_a_failed_job_that_produced_nothing`，把 f0350b912 的原意釘住。這兩條測試現在互為邊界（同為 status=failed，差別只在宣告路徑是否存在），下一個想「簡化」這段的人會被擋下 —— 缺這條就是這次紅燈重演的路徑。\n\n**驗證（實跑）**：\n- 修前本地重現：`StopIteration` at test_orphan_reaper.py:341（與 CI 同一條）\n- `uv run pytest scripts/tests/test_orphan_reaper.py scripts/tests/test_orphan_namespace_registry.py -q` → 28 passed\n- 全庫 `uv run pytest -q` → 3630 passed, 3 failed（712s）\n\n**那 3 個失敗與本修復無關，且不在 HEAD 上**：`test_supabase_read_gate` / `test_audit_canonical_writers` / `test_agentic_cli_timeout_killpg`，分別指向其他 slot **未提交**的在途檔案（`scripts/supabase_sync.py` M、`src/volpred/ops/next_tasks.py` M、`scripts/gen_codex_cli_reference.py` 未追蹤）。CI 測的是 committed HEAD、只有 1 個失敗，與此一致。未代為修改他人在途工作。\n\n**同根因的姊妹任務（本班未動，因已由他人 claim）**：`ci-red-29674177829` 與 `alert_internal_phase_z_test_gate_red_7af47e56b9_...`（alert 標題直接點名 f0350b912）皆為同一條測試紅燈，claimed_by=hourly-slot-3 於 06:52Z 但至今工作區無對應改動。本修復落地後兩者應可直接關閉，不需重做。"
+  },
+  {
+    "timestamp": "2026-07-19T17:10:51+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29679059828",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-c3c69ca15cb846929316662377332779",
+    "owner": "hourly-slot-1-c3c69ca15cb846929316662377332779",
+    "commit": null,
+    "summary": "CI 紅燈 run 29679059828（main Test Suite, sha 50bb2487）診斷：唯一失敗\nscripts/tests/test_orphan_reaper.py::test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths\n（StopIteration）。\n\n根因：f0350b912 的 PHASE-Z auto-commit 把 scan_job_deliverables() 的 failed-job 早退寫成無條件\n`if job.get(\"status\") == \"failed\": continue`，於是「檔案存在但被政策擋下（outside_repo /\nsymlink_not_owned / git_ignored）」的 failed job 也被靜默丟掉，held 為空 → 測試的 next() 拋\nStopIteration。\n\n狀態：紅燈已於 e84ff3a74（16:17）被前一班修好（早退收窄到 _NOTHING_WAS_PRODUCED），該 commit 已在\norigin/main。本班驗證：本地 test_orphan_reaper.py 18 passed；e84ff3a74 的 Test Suite\nrun 29680801763 全程監看。此 task 屬「已被後續 commit 修復的過期紅燈」，不需再改碼。\n\n流程觀察（本班未修，僅記錄）：ci-red ingress 依 run id 建 task，不比對 HEAD 是否已含修復，因此同一個\nbug 會生出一張一開始就過期的 P1。若再發生一次，值得在建單時加一道 fix-commit 比對。"
+  },
+  {
+    "timestamp": "2026-07-19T17:10:56+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_40696430",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-c3c69ca15cb846929316662377332779",
+    "owner": "hourly-slot-1-c3c69ca15cb846929316662377332779",
+    "commit": null,
+    "summary": "根治「實驗併入 main 但 knowledge/reproduce_spec 未補」的 bug class：把它變成兩道機械 gate。\n\n發現：scripts/check_experiment_artifacts.py 已由前一班寫好但**從未 commit、也沒接上任何呼叫點**\n（untracked，docstring 宣稱的兩處 caller 都不存在）——本身就是「做一半」的實例。本班補完接線與驗證。\n\n本班產出：\n1. .github/workflows/experiment-artifacts.yml（push / PR gate，fetch-depth: 0，base sha 用 env 傳避免\n   workflow injection；event base 缺失時退回 HEAD~1 而非棄權）。\n2. scripts/merge_worktree.sh 接上 artifact gate，緊接既有 certify gate 之後，同樣用 stdlib-only 的\n   python3（起不來的 gate 等於棄權）。規則只有一份，兩個 caller 呼叫同一支腳本。\n3. scripts/tests/test_check_experiment_artifacts.py（12 passed）：刻意造缺 knowledge 條目 / 缺 spec 的\n   目錄會被擋、無 results 目錄不被擋、無 K-id 目錄只審 spec、knowledge.json 讀不到時 fail-closed、\n   cmd_check 端到端回 1 且印出可執行補救指令。\n4. 修一個會讓 gate 變成「做不到的指令」的缺陷：無 K-id 的目錄（如 paper2_taiwan_indiv_rolling_gamma）\n   原本會被要求「補一筆提及 paper2_… 的 knowledge 條目」，但 knowledge.json 以 K-id 為 key，這個查詢\n   永遠不會 match。改為該類目錄不審 knowledge 半邊、仍須交 reproduce_spec；PASS 訊息也據實標示哪半邊\n   沒審，避免超出 scope 的隱性宣稱。\n5. docs/error_log.md + AGENTS.md 記根因、三條 scope 邊界與自查指令。\n\nsweep 現況（scripts/check_experiment_artifacts.py sweep）：1497 個實驗目錄，1265 個在 gate scope 內，\n1261 個缺 reproduce_spec、**0 個缺 knowledge 條目**，232 個無 results 不入 scope。1261 筆歷史缺 spec\n刻意不補：reproduce_spec 是 2026-07 才成形的慣例，替沒人跑得動的舊 run 補 entrypoint / input hash /\nseed 等於發明歷史，正是這道 gate 要防的事。gate 因此是**前進式 ratchet**，只審本次新增/修改。\n\n驗證：check --changed-since origin/main 當場抓到真實漏網 experiments/paper2_taiwan_indiv_rolling_gamma\n（orphan reaper 本日收進 main、無 spec）→ 依其腳本實際的 SEED = 20260713 與 data/ 下 13 個檔的\nsha256 程式化產生 reproduce_spec.json（非事後編造）→ 再跑 exit 0。bash -n merge_worktree.sh 通過；\n新舊測試 30 passed。\n\n未做（誠實記錄）：任務原文的「一次補齊所有缺漏」在 reproduce_spec 這半邊刻意不執行，理由如上；\nknowledge 半邊本來就已是 0 缺漏。k1719_reproduce_spec_backfill（P3）現況已有 spec，可另行收單。"
+  },
+  {
+    "timestamp": "2026-07-19T17:15:54+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_98a32740",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-9113b28a7ea040bcab9925e5c096b878",
+    "owner": "hourly-slot-2-9113b28a7ea040bcab9925e5c096b878",
+    "commit": null,
+    "summary": "A0 urgent lane 處理 assign_98a32740（K1730 remediation）時，發現它三小時前就已 enqueue （agent-brief_k1730_remediation-832ffa，06:18Z），但 pool 狀態仍是 pending、result 為 null、與 job 無任何連結。差一步就再 enqueue 一份重複的 agent。\n\n根因：compute_queue 的 job 不知道自己由哪個 pool task 派生，pool task 也不知道 job 存在。enqueue-then-forget → 每班 A0 都把它當未派工重新浮出。系統性問題，不是單例：另有 assign_1238781f / assign_5aa9d5f5 / assign_42306eaa 三筆同樣是 pending 但有 live job。\n\n修法（單一 owner，在兩個 id 同時已知的那一刻寫入）：\n1. compute_queue.py 加 --source-task-id（enqueue + enqueue-agent），job 存 source_task_id；\n2. 新增 _link_source_task()：enqueue 成功後把 pool task 標 in_progress + 寫 compute_job_id + result 註記。link 失敗只警告不擋 enqueue（job 已落地，中止派工更糟）；\n3. 補兩個測試：enqueue 連結 pool task；enqueue_agent 轉交 source_task_id（它用顯式 Namespace 重建 args，漏傳會靜默失效——正是這個欄位要防的 bug 形狀）。\n\n過程中兩個真問題由測試抓出，非事後補：(a) 我原本用 sys.path hack import bare task_pool_claim，會產生與 scripts.task_pool_claim 不同的模組物件、各自持有 NEXT_TASKS，等於寫到不同檔案 → 改為正規 scripts. 名稱 import；(b) canonical-write guard 擋下測試寫入共享 next_tasks.json 與 agent_briefs → 測試改導向 tmp_path。\n\n回填：4 筆既有 queued job 用同一支 helper 補鏈（不另寫平行邏輯，避免 backfill 與 live path 漂移）。assign_667a501a 已 succeeded、assign_9f0a31a8 屬 main_thread lane，兩者不動。\n回填後 task_urgency lane 由 2 降為 0 —— 這不是壓抑告警，是兩個 P1 的真實狀態本來就是「已派工、在 queue 排隊中」。\n\n順帶發現並立案（未修，P2 compute_queue_priority_inversion_20260719）：worker 選 job 純 FIFO、job schema 無 priority 欄位，導致 P1 的 k1730 排在兩個 04:44Z 入列的 P2 之後；單槽序列 + 90min timeout ≈ 多等 3 小時。屬排序設計問題，需改 run_next 並補測試，非本任務範圍。\n\n驗證：tests/test_compute_queue.py 24 passed、tests/test_task_pool_claim.py 25 passed、validate_next_tasks_status.py OK（27 out-of-vocab = 既有 baseline）。\n\nassign_98a32740 維持 in_progress 且已連結 job —— 這是正確狀態，非殘留：K1730 remediation 的實體工作在 queue 中執行，由後續 PHASE A 收件並派 Codex 二審。"
   }
 ]
