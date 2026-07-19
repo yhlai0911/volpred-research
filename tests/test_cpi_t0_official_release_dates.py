@@ -195,7 +195,11 @@ class TestScriptUsesOfficialCalendar:
         monkeypatch.setattr(
             event_dates,
             "_fetch",
-            lambda *_a, **_kw: [*OFFICIAL_2025_2026, "2026-05-30"],  # a Saturday
+            # A Saturday that is also the month's EARLIEST entry: since the
+            # 2026-07-19 off-cycle fix, release_dates keeps each month's min()
+            # (a late injected date would simply lose to the regular release
+            # and never surface downstream).
+            lambda *_a, **_kw: [*OFFICIAL_2025_2026, "2026-05-02"],
         )
         with pytest.raises(RuntimeError, match="not XNYS sessions"):
             analysis.official_cpi_dates(sessions)
