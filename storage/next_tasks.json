@@ -32897,13 +32897,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T11:01:14.102085+00:00",
+    "completed_at": "2026-07-19T12:02:01.868833+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T11:01:14.102085+00:00",
-      "last_clean_observed_at": "2026-07-19T11:01:14.102085+00:00"
+      "resolved_at": "2026-07-19T12:02:01.868833+00:00",
+      "last_clean_observed_at": "2026-07-19T12:02:01.868833+00:00"
     }
   },
   {
@@ -32915,13 +32915,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T11:32:31.595737+00:00",
+    "completed_at": "2026-07-19T12:13:49.032340+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T11:32:31.595737+00:00",
-      "last_clean_observed_at": "2026-07-19T11:32:31.595737+00:00"
+      "resolved_at": "2026-07-19T12:13:49.032340+00:00",
+      "last_clean_observed_at": "2026-07-19T12:13:49.032340+00:00"
     }
   },
   {
@@ -33993,43 +33993,15 @@
   },
   {
     "id": "governance_telegram_structured_progress_report_format",
-    "title": "制度化『逐程序結構化 Telegram 進度回報格式（含強制驗證欄）』到運營經理 SOP",
-    "description": "來源：老闆 Ivan 經 Telegram（msg 796/798/800/802，2026-07-15）。\n\n老闆痛點（msg 796）：運營經理常「發現問題→告訴老闆有問題→設計任務→下輪解決」，老闆無法得知到底有沒有做完、驗證了沒。他貼了一個逐程序結構化回報範例（msg 798「葉小金重點觀察」格式：程序/狀態/結論/產物/阻塞/下一程序/message id），問能不能做出類似或更優化的版本（msg 800/802）。\n\n任務：把「逐程序結構化進度回報格式」制度化進運營經理 SOP（canonical：ops manager / telegram reporting 相關 skill + docs；例如 pdca-operations 或新建 telegram-progress-report reference）。改 governance 檔前先 commit snapshot（snapshot: prefix）。\n\n必須採用的優化格式（比範例多一個關鍵欄「驗證」——直接回應 msg 796 痛點：證明真的做完+實測，不是「已建任務下輪解決」）：\n\n【VolPred 運營回報｜<台北時間>｜<程序名>】\n結論：<一句話，做完/沒做完，先講>\n驗證：<實測指令 + 結果/exit code；沒驗證就寫「未驗證：原因」>\n產物：<檔案/commit/msg id，可點可查>\n阻塞：<無 / 具體阻塞 + 需老闆決策的點>\n下一步：<下一程序@時間>\n\n規則：\n1. 每個程序完成後個別回報並留下 Telegram message id（可稽核）。\n2. 「驗證」欄強制——沒有實測結果不得宣稱完成；區分「已修並驗證」vs「已建任務待下輪」。\n3. 短、結論先講、可追蹤；不是長報告。\n4. 漏報由 strict checker 阻擋（可參考老闆範例的 stage reporting contract 概念）。\n\n成功標準：ops manager 相關 skill/docs 更新完成並 commit（snapshot 先行）；下次運營回報即依此格式；回寫一句到 docs/error_log.md 或 research_program.md 註明格式來源。dispatch_lane=main_thread（涉及運營經理回報語義，主線程處理）。\n\n---\n[細化 2026-07-15 老闆經 Telegram msg 808/810] 老闆核准此結構化回報方向（msg 810「可以」），並追加兩點要求：(1) msg 808『排版要更有架構一點』——欄位要有清楚視覺層次/分隔（可用 emoji 或縮排分段），不要糊成一團；(2) msg 810『但要說明清楚』——結論與驗證欄的說明要讓非工程背景也一眼看懂，白話先於術語，不可只丟指令/exit code 而無解讀。落地時把這兩點併入前述格式規範。",
-    "task_type": "governance",
-    "priority": 2,
     "status": "succeeded",
-    "created_at": "2026-07-15T06:55:19.962441+00:00",
+    "task_type": "governance",
+    "title": "制度化『逐程序結構化 Telegram 進度回報格式（含強制驗證欄）』到運營經理 SOP",
+    "priority": 2,
     "source": "telegram_msg_802",
-    "dispatch_lane": "main_thread",
-    "tags": [
-      "telegram",
-      "governance",
-      "reporting",
-      "from_boss"
-    ],
-    "status_history": [
-      {
-        "ts": "2026-07-16T11:09:29.425805+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
-      },
-      {
-        "ts": "2026-07-16T11:11:40.777113+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
-      },
-      {
-        "ts": "2026-07-16T11:19:58.176326+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-215e3e27ac5b46b78a013cb996257633"
-      }
-    ],
-    "started_at": "2026-07-16T11:11:40.777098+00:00",
+    "created_at": "2026-07-15T06:55:19.962441+00:00",
     "completed_at": "2026-07-16T11:19:58.176312+00:00",
-    "result": "格式 owner = scripts/progress_report.py（done 無實測即 exit 1；done/queued 分流；emoji 分欄 + 白話先於術語，涵蓋 msg 796/808/810 三點）。tests/test_progress_report.py 8 passed。SOP 收 pointer：pdca-operations SKILL.md、CLAUDE.md 回報段、docs/error_log.md §H。首則新格式回報已送達 Telegram msg id 872。"
+    "tombstone": true,
+    "archived_at": "2026-07-19T12:09:20.556282+00:00"
   },
   {
     "id": "fb_post_ai_power_vol_20260715",
@@ -37480,7 +37452,7 @@
       }
     ],
     "started_at": "2026-07-19T04:41:58.856904+00:00",
-    "result": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。\n\ndispatched to compute job agent-brief_k1698_rev2-713b65; awaiting PHASE A collection",
+    "result": "rev2b 已完成並自審修掉 round-2 六項缺陷；主線程逐條驗過 contract-selection / boundary audit / TOST 三項；Codex round 3 已進 compute queue compute-k1698-rev2b-codex-round-3-primary-path-review-1784463137，裁決前不得 merge",
     "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
     "last_released_at": "2026-07-19T06:50:06.179335+00:00",
     "last_release_reason": "auto_release_stale_2h",
@@ -42220,16 +42192,35 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-9113b28a7ea040bcab9925e5c096b878"
+      },
+      {
+        "ts": "2026-07-19T11:50:02.255716+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-9113b28a7ea040bcab9925e5c096b878",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-19T12:09:32.986931+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-da0bc206e2e24831b43805b8e9c6e8c2"
+      },
+      {
+        "ts": "2026-07-19T12:09:59.816213+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-da0bc206e2e24831b43805b8e9c6e8c2"
       }
     ],
-    "started_at": "2026-07-19T09:07:53.553179+00:00",
-    "last_released_at": "2026-07-19T08:50:03.171235+00:00",
+    "started_at": "2026-07-19T12:09:59.816199+00:00",
+    "last_released_at": "2026-07-19T11:50:02.255706+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "hourly-slot-2-9113b28a7ea040bcab9925e5c096b878",
-    "claimed_at": "2026-07-19T09:07:49.035823+00:00",
-    "claim_session_id": "3031ce7d7585",
     "compute_job_id": "agent-brief_k1730_remediation-832ffa",
-    "result": "dispatched to compute job agent-brief_k1730_remediation-832ffa; awaiting PHASE A collection"
+    "result": "compute job agent-brief_k1730_remediation-832ffa RUNNING (started 2026-07-19T11:15Z); 本班確認 in-flight，未重派；待 PHASE A collect_completed",
+    "claimed_by": "hourly-slot-1-da0bc206e2e24831b43805b8e9c6e8c2",
+    "claimed_at": "2026-07-19T12:09:32.986917+00:00",
+    "claim_session_id": "3f68c7630c23"
   },
   {
     "id": "price_cache_stale_fill_0050_20250610",
@@ -43591,7 +43582,7 @@
   {
     "id": "assign_6bf4ae0a",
     "title": "PHASE-Z 卡住檔案 incident（7d9fa0b9401045e0）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n39 個未提交檔案不是任何一班 fire 產出的，最長已連續 84 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 9 班\n- config/runtime_schedules.json — 28 班\n- conftest.py — 23 班\n- experiments/k1380/README.md — 84 班\n- experiments/k1380/k1380.py — 84 班\n- experiments/k1380/k1380_losses_all.npy — 84 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 84 班\n- experiments/k1380/k1380_results.json — 84 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 84 班\n- experiments/k1380/k1380_spa_from_cache.py — 84 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 84 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 9 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 9 班\n- scripts/build_knowledge_index.py — 9 班\n- scripts/continue_task_dispatch.py — 14 班\n- scripts/daily_checkup.py — 28 班\n- scripts/detect_price_split_breaks.py — 14 班\n- scripts/dreaming_review.py — 28 班\n- scripts/fb_realchrome_post.py — 23 班\n- scripts/fix_0050_split_break.py — 14 班\n- scripts/gen_codex_cli_reference.py — 79 班\n- scripts/merge_worktree.sh — 23 班\n- scripts/reclaim_stale_worktrees.py — 28 班\n- scripts/repoint_snapshot_from_db.py — 9 班\n- scripts/supabase_sync.py — 23 班\n- scripts/task_pool_claim.py — 14 班\n- scripts/telegram_poll.py — 41 班\n- scripts/tests/test_merge_worktree.sh — 23 班\n- scripts/tests/test_paid_gemini_embedding_guard.py — 9 班\n- scripts/tests/test_scheduler_max_slots.py — 28 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T113233299524Z:<路徑>`",
+    "description": "## 發生什麼\n39 個未提交檔案不是任何一班 fire 產出的，最長已連續 85 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 10 班\n- config/runtime_schedules.json — 29 班\n- conftest.py — 24 班\n- experiments/k1380/README.md — 85 班\n- experiments/k1380/k1380.py — 85 班\n- experiments/k1380/k1380_losses_all.npy — 85 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 85 班\n- experiments/k1380/k1380_results.json — 85 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 85 班\n- experiments/k1380/k1380_spa_from_cache.py — 85 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 85 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 10 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 10 班\n- scripts/build_knowledge_index.py — 10 班\n- scripts/continue_task_dispatch.py — 15 班\n- scripts/daily_checkup.py — 29 班\n- scripts/detect_price_split_breaks.py — 15 班\n- scripts/dreaming_review.py — 29 班\n- scripts/fb_realchrome_post.py — 24 班\n- scripts/fix_0050_split_break.py — 15 班\n- scripts/gen_codex_cli_reference.py — 80 班\n- scripts/merge_worktree.sh — 24 班\n- scripts/reclaim_stale_worktrees.py — 29 班\n- scripts/repoint_snapshot_from_db.py — 10 班\n- scripts/supabase_sync.py — 24 班\n- scripts/task_pool_claim.py — 15 班\n- scripts/telegram_poll.py — 42 班\n- scripts/tests/test_merge_worktree.sh — 24 班\n- scripts/tests/test_paid_gemini_embedding_guard.py — 10 班\n- scripts/tests/test_scheduler_max_slots.py — 29 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T113233299524Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
     "status": "pending",
@@ -43642,52 +43633,72 @@
         "tests/test_task_pool_claim.py"
       ],
       "streaks": {
-        "config/experiment_artifact_exclusions.json": 9,
-        "config/runtime_schedules.json": 28,
-        "conftest.py": 23,
-        "experiments/k1380/README.md": 84,
-        "experiments/k1380/k1380.py": 84,
-        "experiments/k1380/k1380_losses_all.npy": 84,
-        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": 84,
-        "experiments/k1380/k1380_results.json": 84,
-        "experiments/k1380/k1380_results_INVALID_20260716.json": 84,
-        "experiments/k1380/k1380_spa_from_cache.py": 84,
-        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": 84,
-        "paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv": 9,
-        "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv": 9,
-        "scripts/build_knowledge_index.py": 9,
-        "scripts/continue_task_dispatch.py": 14,
-        "scripts/daily_checkup.py": 28,
-        "scripts/detect_price_split_breaks.py": 14,
-        "scripts/dreaming_review.py": 28,
-        "scripts/fb_realchrome_post.py": 23,
-        "scripts/fix_0050_split_break.py": 14,
-        "scripts/gen_codex_cli_reference.py": 79,
-        "scripts/merge_worktree.sh": 23,
-        "scripts/reclaim_stale_worktrees.py": 28,
-        "scripts/repoint_snapshot_from_db.py": 9,
-        "scripts/supabase_sync.py": 23,
-        "scripts/task_pool_claim.py": 14,
-        "scripts/telegram_poll.py": 41,
-        "scripts/tests/test_merge_worktree.sh": 23,
-        "scripts/tests/test_paid_gemini_embedding_guard.py": 9,
-        "scripts/tests/test_scheduler_max_slots.py": 28,
-        "src/volpred/ops/dreaming_revalidate.py": 14,
-        "src/volpred/ops/next_tasks.py": 44,
-        "storage/article_assets/tw-margin-vol-leadlag/evidence.json": 14,
-        "storage/work_log.json.bak_graphify_verdict_20260717": 84,
-        "tests/.!71268!test_task_pool_claim.py": 14,
-        "tests/test_dreaming_revalidate.py": 14,
-        "tests/test_dreaming_review.py": 28,
-        "tests/test_supabase_sync_cache_purge.py": 23,
-        "tests/test_task_pool_claim.py": 14
+        "config/experiment_artifact_exclusions.json": 10,
+        "config/runtime_schedules.json": 29,
+        "conftest.py": 24,
+        "experiments/k1380/README.md": 85,
+        "experiments/k1380/k1380.py": 85,
+        "experiments/k1380/k1380_losses_all.npy": 85,
+        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": 85,
+        "experiments/k1380/k1380_results.json": 85,
+        "experiments/k1380/k1380_results_INVALID_20260716.json": 85,
+        "experiments/k1380/k1380_spa_from_cache.py": 85,
+        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": 85,
+        "paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv": 10,
+        "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv": 10,
+        "scripts/build_knowledge_index.py": 10,
+        "scripts/continue_task_dispatch.py": 15,
+        "scripts/daily_checkup.py": 29,
+        "scripts/detect_price_split_breaks.py": 15,
+        "scripts/dreaming_review.py": 29,
+        "scripts/fb_realchrome_post.py": 24,
+        "scripts/fix_0050_split_break.py": 15,
+        "scripts/gen_codex_cli_reference.py": 80,
+        "scripts/merge_worktree.sh": 24,
+        "scripts/reclaim_stale_worktrees.py": 29,
+        "scripts/repoint_snapshot_from_db.py": 10,
+        "scripts/supabase_sync.py": 24,
+        "scripts/task_pool_claim.py": 15,
+        "scripts/telegram_poll.py": 42,
+        "scripts/tests/test_merge_worktree.sh": 24,
+        "scripts/tests/test_paid_gemini_embedding_guard.py": 10,
+        "scripts/tests/test_scheduler_max_slots.py": 29,
+        "src/volpred/ops/dreaming_revalidate.py": 15,
+        "src/volpred/ops/next_tasks.py": 45,
+        "storage/article_assets/tw-margin-vol-leadlag/evidence.json": 15,
+        "storage/work_log.json.bak_graphify_verdict_20260717": 85,
+        "tests/.!71268!test_task_pool_claim.py": 15,
+        "tests/test_dreaming_revalidate.py": 15,
+        "tests/test_dreaming_review.py": 29,
+        "tests/test_supabase_sync_cache_purge.py": 24,
+        "tests/test_task_pool_claim.py": 15
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260719T113233299524Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-19T11:32:33.371300+00:00",
-      "last_seen_at": "2026-07-19T11:32:33.371300+00:00"
-    }
+      "last_seen_at": "2026-07-19T12:13:56.775437+00:00"
+    },
+    "updated_at": "2026-07-19T12:13:56.775437+00:00"
+  },
+  {
+    "id": "K1718_article_general",
+    "title": "K1718: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1718 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1718 [NULL, reviewed]: In the 2015-2026 Japan sample with annual expanding OOS forecasts from 2020 onward, lagged US VIX passed none of six pre-registered Nikkei 225 / TOPIX ETF model-family cells. Each cell required both lower Patton QLIKE and a Holm-adjusted one-sided Clark-We",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_publish_drought_emergency",
+    "audience_correction_rewrite": false,
+    "k_id": "K1718",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "publish-drought-emergency",
+      "reader-facing"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-19T12:01:52+00:00"
   }
 ]
