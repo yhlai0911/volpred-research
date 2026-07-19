@@ -21557,5 +21557,45 @@
     "owner": "hourly-slot-2-883524a7ea2d48f484ba9819a0ac30c5",
     "commit": "4b3875b053",
     "summary": "CI run 29671078611 紅燈修復：`test_knowledge_unrecorded_ratchet` 抓到 k1732 有 archived results 卻無 knowledge.json 條目。\n\n**根因（三層，不是「忘了寫 knowledge」）**：條目其實早已寫在工作區 —— 卡在 PHASE-Z failed-closeout。\n`.git/volpred_phase_z_failed_closeout.json` last_reason=commit_nonzero：pre-commit Gate 2（silent-fallback）\n擋下 `scripts/task_pool_claim.py:563` 與 `src/volpred/ops/dispatch_burst.py:67` 兩個新 bare fallback，\n整批 13 條 closeout（含 knowledge.json）連帶無法落地 → CI 在乾淨 checkout 只看到 results 沒有 knowledge → red。\n\n**修法**：\n1. `task_pool_claim._burst_report_payload` 的 `except Exception: return None` → 補 `warn()`（fail-open 保留，silent 移除）。\n2. `dispatch_burst.read_window` 拆 `FileNotFoundError`（標 `# silent-ok:` — 無 burst window 是穩態非錯誤），\n   其餘 OSError/JSONDecodeError 走 `warn()`。\n3. 用 `phase_z.run_phase_z(pre_fire_dirty=...)`（repo 自身 lock-protected 路徑，非裸 git）補交\n   coherent bundle：11 條 pinned + 上述 2 個修好的檔。module 與其 test 必須同批，否則 audit-test-imports\n   會擋（實測擋過一次）。commit 4b3875b053。\n4. commit 後 test gate 抓到 `tests/test_task_pool_claim.py` 新 fail：dispatch_burst 一落地，`complete` 就真的\n   走 burst 分支 → `request_fire()` 寫 canonical `dispatch_state.json` → 被寫入保護擋下。\n   **這是測試讀 live ops state 的洩漏**：同一個測試在「有無 burst window 開著」下結果不同。\n   class fix 放 repo-root `conftest.py`（四個 side-effect flag 的同一個 owner）：autouse fixture 把\n   `dispatch_burst` 的 BURST_PATH 與三個函式 `__kwdefaults__['path']` 指到 tmp（預設值在 def 時綁定，\n   只改模組屬性無效）。顯式傳 `path=` 的 burst 自身測試不受影響。\n\n**驗證**：全套 3546 passed / 7 skipped；殘留 2 fail（test_supabase_read_gate、test_agentic_cli_timeout_killpg）\n經確認由他人未提交的 `scripts/gen_codex_cli_reference.py`（foreign streak 56）觸發，不在 main 樹上。\nknowledge ratchet + test_task_pool_claim + test_dispatch_burst 皆綠；`git show HEAD:storage/memory/knowledge.json`\n確認 k1732 條目已在 main。最終綠燈由 CI watcher 獨立驗證。\n\nroot_cause=pre-commit silent-fallback gate blocked the PHASE-Z closeout carrying k1732's knowledge entry, so a committed experiment had no knowledge row on a clean checkout; repair_commit=4b3875b053"
+  },
+  {
+    "timestamp": "2026-07-19T12:40:20+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_a31a311d",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-1951500713524e9680a7091d9fb83758",
+    "owner": "hourly-slot-1-1951500713524e9680a7091d9fb83758",
+    "commit": "c60ef77486",
+    "summary": "PHASE A collect_completed：收 compute-queue agent job `agent-brief_cpidates-f2f6c8`（CPI T+0 事件文章的官方發布日污染修正），驗證後合併 worktree `dispatch-slot-1-858545f9-cpidates` → main（merge c60ef7748，內容 commit 32ad8be33）。\n\n**我沒有採信 agent 的自述** —— 每個頭條數字由主線程獨立重算：\n- 從 `volpred.data.event_dates.cpi_release_dates` 重抓 canonical 日曆 → 13 個日期與 artifact 逐字相符；\n- 從 yfinance ^VIX 收盤重算 13 場 CPI 日反應 → 排名、+11.827%、第 2 名 +5.688%、\n  mean -0.847% / median -1.334% / 4 正，全部對得上，errata 表每一格 old→new 的 VIX 值也對得上。\n\n**結論**：硬編的 14 個 CPI 日有 7 個錯，其中 2025-11-13 是 phantom —— 2025 年 11 月 BLS 根本沒發 CPI\n（10 月參考月在政府關門期間取消、9 月報告已於 10/24 離線程發布），硬編日曆無法表達「取消」於是憑空造了一場，\n還把一個普通交易日的 VIX +14.22% 排到第 2 名、正好壓在受研究的那場之上。改用官方日曆後樣本 14→13，\n2026-06-10 從草稿的第 4 名更正為**第 1 名**；壓過它的 3 天全是非事件日（phantom + 兩個 off-by-one，\n後者跨相鄰交易日 VIX 正負號翻轉近 19pp）。文章**尚未發佈**，故不欠對外更正。\n\n**驗證**：`tests/test_cpi_t0_official_release_dates.py` 39 tests 全綠，且反向對照證明非空洞\n（還原舊日曆 → 9 條日曆測試 8 條 FAIL；唯一倖存者是 target 解析，因舊清單碰巧含正確的 2026-06-10 —— \nagent 據實寫成 8/9 而非灌水成「全部 FAIL」）。合併後於 main 複跑 40 passed。\nKnowledge 由主線程寫入（K1259）：item `39255940`，provenance validator 0/2671 violations。\n\n**順帶查明**：本班是 ci-red-29671078611 的 burst fire，但該紅燈的修復（k1732 knowledge 條目）\n已由 slot-2 於 12:06 commit `4b3875b05` 完成、本地 ratchet 測試已綠；只是 hourly push 窗口在 12:00，\n修復晚 6 分鐘落地，故 origin 仍紅到 13:00 那次 push。無需再修，不謊報為本班成果。"
+  },
+  {
+    "timestamp": "2026-07-19T12:58:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "local_suite_pregate_canonical_write_noise_20260717",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
+    "owner": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
+    "commit": "pending-PHASE-Z",
+    "summary": "修好 `scripts/tests/test_scheduler_pregate.py` 的 host-state 洩漏 —— 本地 7 支恆紅（CanonicalWriteBlocked 寫 storage/ops/alert_dedup.json）而 CI 全綠的成因。\n\n**根因不是路徑解析，是整組 pregate 測試在對真實 repo 跑**：`_tick()` helper 呼叫 `scheduler._tick_once()` 時沒傳 `repo_root`，而該參數預設 `ROOT`（scheduler.py:634）= 本機 checkout。每個過了 due 的 tick 都會對 live repo 跑兩個 phase_z pre-fire hook（測試 line 82 只 monkeypatch 了 `run_phase_z`，這兩個沒被擋）。爆炸鏈在 `recover_failed_closeout`：`.git/` 存在 failed-closeout receipt 且有 released 路徑時 → `_default_alert` → `send_alert(storage_dir='storage')` → 寫 canonical `alert_dedup.json` → CanonicalWriteBlocked。\n\n**fail-open 為何沒接住**：`CanonicalWriteBlocked` 繼承 `BaseException` 而非 `Exception`（agent 實測 `issubclass(..., Exception)=False`），故穿透 `_default_alert` 與 scheduler 兩層 `except Exception`。\n**CI 為何綠**：全新 checkout 的 `.git/` 無 receipt → early return，該分支在 CI 是死碼。\n\n**比恆紅更嚴重的副作用**：有 receipt 時，這組單元測試會對開發者的真實工作區跑 git add/commit；且每次跑都改寫 `.git/volpred_phase_z_pre_fire_dirty.json`（實測 mtime 被改）。\n\n**修法**：只改測試檔（+26/-1），`_tick()` 加 `repo_root = prompt_file.parent`（tmp_path）並傳進 `_tick_once`。用 production 已暴露的 seam，不動 production code、不加新 env var。兩個 hook 仍真的執行，只是在 tmp_path 找不到 git repo 而各自 fail-open（guard_missing / no_failed_closeout），受測的 scheduler 決策邏輯不變。**未用 skip / xfail / 放寬 assertion**。\n\n**驗證**：主線程獨立複跑 `pytest scripts/tests/test_scheduler_pregate.py -q` → 25 passed（可重複，連跑皆綠）；agent 端另跑 + `tests/test_dispatch_supervisor.py` → 114 passed；0 skipped / 0 xfail。副作用證據：runtime 20.99s → 1.45s，正是那 14 次對 live repo 的 git subprocess 消失。\n\n**誠實揭露**：7 紅未能現場複現 —— 觸發條件（`.git/` 內存在 failed-closeout receipt）當下不存在，裸跑本就 25 passed。未偽造 receipt 來複現，因為 `recover_failed_closeout` 的 unresolved 分支會對 live repo 跑 git add/commit。根因鏈每一環（repo_root 洩漏用 spy 量到 14 次、BaseException 穿透、CI 無 receipt）皆逐一實測，但「修掉了那 7 紅」是推論而非直接觀測。\n\n**殘留風險（未修，屬類別層級）**：`CanonicalWriteBlocked` 是 BaseException 為刻意設計（guard 不可被吞），代價是任何測試間接走到 alert/canonical writer 都會以「fail-open 卻沒 fail-open」炸出。掃過所有碰 phase_z hook 的測試檔，無第二個同類洩漏（其餘皆已傳 tmp repo_root）。建議後續加 CI 檢查：斷言測試跑完後 `.git/volpred_*.json` 與 `storage/ops/*` mtime 未變。"
+  },
+  {
+    "timestamp": "2026-07-19T12:58:00+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_5aa9d5f5",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
+    "owner": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
+    "commit": "pending-PHASE-Z",
+    "summary": "K1623 修復（codex gpt-5.6-sol 判 FAIL）—— enqueue 至 compute queue agent lane，job `agent-brief_k1623_rev2-e343cd`（opus/xhigh, timeout 5400s, worktree `.claude/worktrees/dispatch-slot-2-c5cafe39-k1623`, result artifact `experiments/k1623/k1623_rev2_results.json`）。\n\n走 queue 而非 fire 內 spawn：xhigh 研究任務需 20-60min，hourly fire 3000s cap 內等它 = 被 SIGKILL 或留孤兒 worktree。\n\nbrief 要點：問題不在算術（全部對得上），在宣稱超過證據。要撤回三條宣稱（真 long-memory 識別 / 不可交易 / 多處顯著更差），補跑 MSE 的 DM 檢定（ARFIMA 在 4/5 資產 MSE 低 11-16%，與 QLIKE 結論反向且原文未提）＋ 20 個比較的 BH/Bonferroni 修正，並修正 ELW（實為 sample-mean demeaning 非 Shimotsu-Phillips）、FD_MAXK=2000 binding、VIX permissive cap 15/15 binding 三處方法描述。K1259：不得寫 knowledge.json，須 codex 二審 CONDITIONAL PASS 以上。followup task_type=paper_review P2 已掛。"
+  },
+  {
+    "timestamp": "2026-07-19T12:58:00+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_42306eaa",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
+    "owner": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
+    "commit": "pending-PHASE-Z",
+    "summary": "K1698 重跑（codex gpt-5.6-sol 判 FAIL）—— enqueue 至 compute queue agent lane，job `agent-brief_k1698_rev2-713b65`（opus/xhigh, timeout 7200s, worktree `.claude/worktrees/dispatch-slot-2-c5cafe39-k1698`, result artifact `experiments/k1698/k1698_rev2_results.json`）。\n\nbrief 要點（順序有依賴）：(1) 致命 lookahead 未解 —— active contract 依整份日檔成交量選出（k1698.py:328），含 13:30-13:45 tick，推翻「資訊集不相交」宣稱，須改用 13:30 前可得資訊後重跑；(2) 60 天邊界 audit 是空驗證 —— 抽最早 60 個交易日（2017-01，夜盤上線前），12 筆 checks 的 night_*_in_window 全為 None 且 None 不令 ok=False，須改抽夜盤期＋OOS(2023-24)；(3) accepting the null —— p=0.142 被寫成 H2_REJECTED，須改 equivalence/noninferiority；(4) 四層 ablation（contract/gap/alignment/path）才能講「哪一項吃掉多少」。brief 明列已修好、不必重做的 blocker （n=450 縮樣、atomic write、GATE_RULES leg-2 檢查）避免浪費。K1259：須 codex 二審。followup paper_review P2 已掛。"
   }
 ]

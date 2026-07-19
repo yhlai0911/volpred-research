@@ -84,11 +84,36 @@ def worker_calls(monkeypatch: pytest.MonkeyPatch) -> list:
 
 
 def _tick(tmp_state: Path, prompt_file: Path, schedules_path: Path):
+    # 2026-07-19: `repo_root` defaulted to the live checkout, so every tick that
+    # got past `due` ran the two phase_z pre-fire hooks
+    # (`recover_failed_closeout`, `run_pre_fire_guard`) against the developer's
+    # REAL repo — 14 such calls per run. Two consequences, one loud and one much
+    # worse:
+    #
+    #   * `run_pre_fire_guard` rewrote `.git/volpred_phase_z_pre_fire_dirty.json`
+    #     on the live repo on every run, and `recover_failed_closeout` will
+    #     `git add`/`git commit` the working tree whenever a failed-closeout
+    #     receipt happens to exist — a unit test with commit rights on the
+    #     machine it runs on.
+    #   * When that receipt exists, the release branch calls `send_alert`, which
+    #     writes canonical `storage/ops/alert_dedup.json`. Under the suite's
+    #     `VOLPRED_NO_CANONICAL_WRITE=1` that raises `CanonicalWriteBlocked` —
+    #     and because that is a BaseException, not an Exception, it walks
+    #     straight through `_default_alert`'s and the scheduler's `except
+    #     Exception` fail-open handlers and fails the test. CI never saw it: a
+    #     fresh checkout has no receipt in `.git/`, so the branch is dead there.
+    #     Locally it made 7 tests fail whenever a real closeout had failed —
+    #     permanent red that trained everyone to ignore this file's FAILED lines.
+    #
+    # Pinning `repo_root` at `tmp_path` uses the seam production already exposes.
+    # The hooks still run for real; they just find no git repo and fail open, so
+    # the scheduler decisions under test are unchanged while host state is not.
+    repo_root = prompt_file.parent
     return asyncio.run(
         scheduler._tick_once(
             state_path=tmp_state, cron_expr=CRON,
             prompt_path=prompt_file, log_path=prompt_file.parent / "worker.log",
-            dry_run=False, schedules_path=schedules_path,
+            dry_run=False, repo_root=repo_root, schedules_path=schedules_path,
         )
     )
 

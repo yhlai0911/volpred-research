@@ -25,7 +25,7 @@
 
 ### 為達標需建的功能（按優先序）
 - **P1**: Reader analytics（CTR / 停留時間 / 跳出率 / 回訪 cohort） — 沒這個我盲打文章品質 <!-- rid:reader-analytics task:growth_p1_reader_analytics -->
-- **P1**: 註冊 / 登入 flow（現況待盤點）+ welcome onboarding <!-- rid:auth-onboarding task:growth_p1_auth_onboarding -->
+- **P1**: 登入/註冊 flow **已上線可用**（Google OAuth 走全站 header 的 AuthButton，`auth/callback` route + `handle_new_user` DB trigger 自動建 profile 都在；線上 `/auth/callback` 回 200、Supabase 公鑰已注入、`/me` 可用）→ 本項縮為 **welcome onboarding**（首登歡迎頁 / 引導 / welcome email，目前全缺）；完整盤點證據見 `docs/growth_auth_onboarding_status.md` <!-- rid:auth-onboarding task:growth_p1_auth_onboarding -->
 - **P2**: 文章 share button + 社群 OG meta（Mission 5 曝光直接 lever） <!-- rid:share-og-meta task:none -->
 - **P2**: Member dashboard 改版（提問 → 研究進度視覺化、增加回訪誘因） <!-- rid:member-dashboard task:none -->
 - **P2**: Email subscription（weekly digest = 留客武器） <!-- rid:email-subscription task:none -->
