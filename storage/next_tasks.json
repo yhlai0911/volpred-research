@@ -32818,13 +32818,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T15:01:15.231205+00:00",
+    "completed_at": "2026-07-19T16:00:56+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T15:01:15.231205+00:00",
-      "last_clean_observed_at": "2026-07-19T15:01:15.231205+00:00"
+      "resolved_at": "2026-07-19T16:00:56+00:00",
+      "last_clean_observed_at": "2026-07-19T16:00:56+00:00"
     }
   },
   {
@@ -32836,13 +32836,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T15:20:21.501167+00:00",
+    "completed_at": "2026-07-19T16:39:32.548995+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T15:20:21.501167+00:00",
-      "last_clean_observed_at": "2026-07-19T15:20:21.501167+00:00"
+      "resolved_at": "2026-07-19T16:39:32.548995+00:00",
+      "last_clean_observed_at": "2026-07-19T16:39:32.548995+00:00"
     }
   },
   {
@@ -35055,37 +35055,15 @@
   },
   {
     "id": "assign_a458fc01",
-    "title": "CI 卡死 5 個測試：本地綠、只在 CI 紅（single-writer 迴圈修不掉）",
-    "description": "根因：a16840bd0 single-writer 重構加的 git-writer-lock / mutation-guard / main-lease worktree invariant，這 5 個舊測試在 CI 的 git 狀態下觸發封鎖，但本地重現全過 → auto-repair 迴圈每次本地綠就標 succeeded、push、CI 同 5 個又紅，已連燒 3+ cycles（commits 6a7e64816、fa4cbfbc6 都沒解掉）。\n\n卡住的 5 個（run 29387887860 --log-failed 確認）：\n- tests/test_cron_auth_preflight.py::test_auth_preflight_passes_without_fallback（assert 2==0）\n- tests/test_cron_auth_preflight.py::test_auth_preflight_recovers_after_sourcing_zshrc\n- tests/test_cron_auth_preflight.py::test_auth_preflight_sends_actionable_alert_on_double_failure（[git-writer-lock] BLOCKED: legacy dispatch requires canonical symbolic main）\n- tests/test_cron_auth_preflight.py::test_auth_preflight_tcc_shaped_failure_diagnoses_claude_update（同上 git-writer-lock BLOCKED）\n- scripts/tests/test_git_reference_transaction_hook.py::test_non_main_branch_ref_is_not_subject_to_main_lease（git worktree add -b side exit 128）\n\n必做（否則會再進迴圈）：\n1. 不許只本地重現就宣稱修好 — 這 5 個本地就是綠的。必須在 CI-like 條件（detached HEAD / 非 canonical symbolic main / fresh checkout / 無 worktree 前置）重現封鎖，或直接讀 git-writer-lock 與 reference-transaction hook 在 CI git 狀態的分支邏輯。\n2. 判斷是『測試沒對齊新 invariant』還是『invariant 本身在 CI 環境誤判』，對症修 — 若是後者要修 guard 不是改測試。\n3. 修完本地綠 + 推 main 後，必須確認新 CI run 真的全綠才可標 succeeded（別再標假成功）。\n4. 順手看能否收斂 auto-repair 迴圈的『本地綠即標 succeeded』漏洞（根因防再犯）。\n\n[migrated 2026-07-16 from task_28650497a155 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T04:12:09.549976+00:00]",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "CI 卡死 5 個測試：本地綠、只在 CI 紅（single-writer 迴圈修不掉）",
+    "priority": 1,
     "source": "agent",
     "created_at": "2026-07-16T14:42:55.609061+00:00",
-    "created_by": "single-gateway-migration",
-    "status_history": [
-      {
-        "ts": "2026-07-16T15:12:00.191409+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b"
-      },
-      {
-        "ts": "2026-07-16T15:12:00.458325+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b"
-      },
-      {
-        "ts": "2026-07-16T15:12:00.730377+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b"
-      }
-    ],
-    "started_at": "2026-07-16T15:12:00.458309+00:00",
     "completed_at": "2026-07-16T15:12:00.730360+00:00",
-    "result": "已由先前 commit 解決，本班以 CI 證據驗證後 close（非本班修復）。task 明訂『不許只本地重現就宣稱修好』，故只採信 CI：(1) run 29507491552 (commit 14:38 fix(telegram) nvm node PATH) Test Suite success，3230 passed / 9 skipped / 0 failed；(2) run 29509162624 (commit dc402ad25 single-gateway refactor) Test Suite success，3243 passed / 0 failed — 新 commit 無回歸。描述的 5 個測試（test_cron_auth_preflight 4 個 + test_git_reference_transaction_hook::test_non_main_branch_ref_is_not_subject_to_main_lease）在 CI 全數通過，auto-repair 迴圈已終止。"
+    "tombstone": true,
+    "archived_at": "2026-07-19T15:32:10.008894+00:00"
   },
   {
     "id": "assign_43a2ee48",
@@ -35376,37 +35354,15 @@
   },
   {
     "id": "assign_5e030431",
-    "title": "PHASE-Z orphan 警報：對 runtime-state 檔停止重複報警（根因修復）",
-    "description": "來源：老闆 Ivan Telegram msg 806（2026-07-15）『為什麼又出現一樣的錯誤』。\n\n現象：PHASE-Z orphan-deliverable 警報每班重複點名同一批檔（15:25 fire：market_closure_detect 38 班、storage/next_tasks_archive/2026-07.jsonl 35 班、storage/work_log.json 35 班、experiments/k1695/review_*.{md,json} 11 班、storage/paper_pipeline_status.json）。\n\n根因：PHASE-Z 刻意不自動收養（盲收養是先前 3 次事故成因，正確設計）。但其中 work_log.json / next_tasks_archive/*.jsonl / paper_pipeline_status.json 是『系統自己持續寫、本就不該由某一班 commit』的 runtime-state 檔 —— 它們永遠不會被作者 commit，所以每班都會再報一次，變成永久 noise，稀釋警報可信度。\n\n任務：在 check_alerts / PHASE-Z orphan 偵測加一份 runtime-state allowlist（glob：storage/work_log.json、storage/next_tasks_archive/*.jsonl、storage/paper_pipeline_status.json 等系統寫入檔），這類檔不計入 orphan-deliverable 告警（或改由既有 flush 機制正規落盤），使警報只點『真的沒人收的成品』。k1695 review 檔則走正常『作者 commit』路徑。改 alert 邏輯前先 commit snapshot（snapshot: 前綴）。成功標準：下一班 check_alerts 對這批 runtime 檔不再 fire，且真 orphan 仍會被抓。\n\n[migrated 2026-07-16 from task_ca7b979da7db (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T07:37:04.467173+00:00]",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "PHASE-Z orphan 警報：對 runtime-state 檔停止重複報警（根因修復）",
+    "priority": 1,
     "source": "user",
     "created_at": "2026-07-16T14:42:55.915398+00:00",
-    "created_by": "single-gateway-migration",
-    "status_history": [
-      {
-        "ts": "2026-07-16T15:07:54.241933+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-2-181fb4df7656482db60b8930f241d37b"
-      },
-      {
-        "ts": "2026-07-16T15:07:58.565557+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-2-181fb4df7656482db60b8930f241d37b"
-      },
-      {
-        "ts": "2026-07-16T15:14:39.333393+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-2-181fb4df7656482db60b8930f241d37b"
-      }
-    ],
-    "started_at": "2026-07-16T15:07:58.565537+00:00",
     "completed_at": "2026-07-16T15:14:39.333376+00:00",
-    "result": "PHASE-Z orphan 重複告警根因修復：work_log.json + next_tasks_archive/ 納入 machine-state 收養名單（原機制已存在，是這兩個檔漏列）；.jsonl 補逐行 parse gate 防截斷入史。paper_pipeline_status.json 經查為 agent 手改的 decision-of-record（git log 佐證），非 runtime state → 維持 foreign，未收養。163 tests 綠 + 對當下工作區實跑驗證 archive foreign→committable。"
+    "tombstone": true,
+    "archived_at": "2026-07-19T15:32:10.008894+00:00"
   },
   {
     "id": "assign_8aa98ff0",
@@ -35422,37 +35378,15 @@
   },
   {
     "id": "assign_bfde715f",
-    "title": "運營回報排版加『架構感』：視覺分區塊+標題階層+條列（refine 格式治理任務）",
-    "description": "來源：老闆 Ivan 經 Telegram msg 808（2026-07-15），回覆 msg 806 的新格式運營回報後說『排版可不可以有架構一點？』。\n\n這是對既有任務 governance_telegram_structured_progress_report_format 的排版細化，不是新格式規格。痛點：現行『結論/驗證/產物/阻塞/下一步』雖有標籤，但整則仍是一長串貼在一起、視覺上偏平，老闆要更明顯的『架構感』。\n\n要制度化的排版規則（併入運營經理 telegram reporting SOP，改 governance 檔前先 snapshot commit）：\n1. 明確分區塊：標題列 + 分隔線 + 逐欄條列，欄與欄之間視覺分開，不要 run-on prose。\n2. 標題階層：頂部一行標題（【VolPred 運營回報｜台北時間｜程序名】），下方各欄用固定順序編號/emoji 前綴（結論→驗證→產物→阻塞→下一步）。\n3. 每欄一行到位、結論先講；仍維持短、可稽核、留 message id。不得因為加排版而變長報告。\n4. 在 Telegram 能正常 render（避免過度 box-drawing 造成手機端錯亂）。\n\n成功標準：SOP/skill 更新並 commit（snapshot 先行），下次運營回報即依此更有架構的排版；回寫格式來源一句到 docs。dispatch_lane=main_thread（運營回報語義，主線程處理）。\n\n[migrated 2026-07-16 from task_e1c2a1c65163 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T07:57:46.009547+00:00]",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "運營回報排版加『架構感』：視覺分區塊+標題階層+條列（refine 格式治理任務）",
+    "priority": 1,
     "source": "user",
     "created_at": "2026-07-16T14:42:55.994529+00:00",
-    "created_by": "single-gateway-migration",
-    "status_history": [
-      {
-        "ts": "2026-07-16T15:12:57.576298+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b"
-      },
-      {
-        "ts": "2026-07-16T15:12:57.854284+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b"
-      },
-      {
-        "ts": "2026-07-16T15:15:16.580131+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b"
-      }
-    ],
-    "started_at": "2026-07-16T15:12:57.854263+00:00",
     "completed_at": "2026-07-16T15:15:16.580112+00:00",
-    "result": "已由 commit 50c24cc57 實作，本班驗證後 close（非本班修復）。證據：scripts/progress_report.py 為格式 enforcement owner（pdca-operations SKILL.md L71-73 指明不得手打格式），其 docstring L13-16 明載 'Refined by msg 808/810 — msg 808「排版要更有架構一點」→ emoji-headed fields + indented values, not a wall of text'；git log -S 確認 msg808 refinement 即在 50c24cc57。實跑 render 驗證，task 4 條要求對照：(1) 分區塊 ✓ 空行+emoji 標頭逐欄；(2) 標題階層 ✓ 頂部標題列 + 固定順序 emoji 前綴 結論→驗證→產物→阻塞→下一步；(3) 結論先講 ✓ 且未變長；(4) Telegram render ✓ 用全形空格 IND 刻意避 box-drawing。未做的字面兩點及理由：『分隔線』與 task 自身第3條『不得因加排版而變長』衝突，現行以空行達同等分隔；『單行標題』現行拆為標題列+🕘副標，反而更符合『標題階層』意圖。核心訴求已滿足，不擅改已正確格式以免回歸；若老闆要字面規格可另開 task。"
+    "tombstone": true,
+    "archived_at": "2026-07-19T15:32:10.008894+00:00"
   },
   {
     "id": "assign_2398cbfe",
@@ -35503,29 +35437,15 @@
   },
   {
     "id": "telegram-886",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 886）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-16T15:24:26.987489+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 886）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n為什麼沒有理由？\n為什麼總是會有這樣的情形？\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] PHASE-Z 產出已 commit，但 agent 沒交代原因\n\n📌 白話結論\n這班 fire 產出了 13 個檔案，PHASE-Z 已照常 commit（工作沒有遺失）。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n（fire 時間: 23:19；13 個檔案）\n\n📌 發生什麼\n這班 fire 產出了 13 個檔案，PHASE-Z 已照常 commit（工作沒有遺失）。\n但 agent 沒有在收尾時留下 commit 說明（fire receipt），所以這筆 commit 的訊息是\n系統自動生成的 —— git log 上看不出這班到底做了什麼、為什麼做。\n\n📌 現在該做什麼\n通常不用處理。若這筆 commit 之後要追溯，直接看 diff。\n同一個 agent 反覆漏 receipt → 檢查 dispatch prompt 的 PHASE Z 段是否被改壞。\n\n📌 正確做法（給 agent）\nuv run python scripts/fire_receipt.py --task-id <id> --subject '<一句話 what | why>'\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-16T15:24:47.004888+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-16T15:27:14.368173+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
     "completed_at": "2026-07-16T15:27:14.368154+00:00",
-    "result": "已診斷並回覆（msg 887）：receipt 覆蓋率 80/266，漏 70%；根因=無機械 gate。後續修復排入 assign_bec6bcd1 (P1)。"
+    "tombstone": true,
+    "archived_at": "2026-07-19T15:32:10.008894+00:00"
   },
   {
     "id": "assign_bec6bcd1",
@@ -35564,28 +35484,15 @@
   },
   {
     "id": "telegram-888",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 888）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-16T15:31:37.901383+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 888）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n為什麼不是馬上修正？一定要排入任務池？\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n查了，你問對了 — 這不是偶發，是常態。\n\n📌 為什麼沒有理由\nPHASE-Z 只知道「改了哪些檔」，不知道「為什麼」。那句「為什麼」要 agent 自己收尾時跑一行 fire_receipt.py 交出來。那班 agent 沒跑，所以 commit 訊息只能系統自動生成。工作沒掉，只是 git log 看不出動機。\n\n📌 為什麼總是這樣\n近 14 天真實數字：有產出的 fire 共 266 班，186 班漏 receipt、只有 80 班有 → 漏了 70%。\n根因是這步沒有任何機械關卡，純靠 agent 自覺：\n1️⃣ dispatch prompt 269 行，PHASE Z 排在第 235 行最尾巴\n2️⃣ prompt 自己寫「漏跑不會掉工作」→ 等於告訴 agent 這步可選\n3️⃣ 程式註解還寫「Rare by design」，跟 70% 完全對不上 — 所以這個 warn 早就變成噪音，你看到的就是它\n\n📌 處理\n已排入任務池（assign_bec6bcd1，P1）：把 receipt 從「靠自覺」改成機械 gate（Stop hook 擋 / PHASE-Z 用 diff 自動生成一句 what），順手修掉那個假的 Rare by design 註解和 prompt 的可選措辭。驗收看連續 10 班覆蓋率 ≥90%。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-16T15:32:05.413430+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram_responder"
-      },
-      {
-        "ts": "2026-07-16T15:33:20.790433+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram_responder"
-      }
-    ],
-    "completed_at": "2026-07-16T15:33:20.790418+00:00"
+    "completed_at": "2026-07-16T15:33:20.790418+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-19T15:39:16.233428+00:00"
   },
   {
     "id": "assign_k1426_oos_residuals",
@@ -40423,7 +40330,7 @@
     "description": "針對地緣衝突反覆導致的航運與能源成本飆升，評估商品選擇權市場對極端風險的溢價。可量化：觀測原油期權 OTM Call 隱含波動率溢價與地緣政治風險指數（GPR）的動態關聯。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "succeeded",
     "created_at": "2026-07-18T22:00:39+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -40447,10 +40354,35 @@
       "near_misses": [],
       "screened_at": "2026-07-18T22:00:41+00:00"
     },
-    "blocked_until": "2026-07-20T00:05:00+08:00",
-    "blocked_reason": "daily_cap_reached",
-    "blocked_at": "2026-07-18T23:11:25+00:00",
-    "blocked_note": "trending_repost daily cap 2/2 已達（.claude/skills/trending-repost/SKILL.md hard rule）：2026-07-19 已發 trending_repost_2026_07_19_台股槓桿 + trending_repost_2026_07_19_美債波動。本張為 P1 time_critical lane，非品質問題，純粹撞 cap → defer 到 07-20 首個 fire。解 block 後仍需先做時效性複查（中東變局/運價/原油期權偏斜），若題材已過期則改角度或 close。"
+    "status_history": [
+      {
+        "at": "2026-07-19T16:13:51.198415+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-20T00:05:00+08:00)"
+      },
+      {
+        "ts": "2026-07-19T16:14:05.049039+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-526d0a1c4806494b82b535b03e9dd872"
+      },
+      {
+        "ts": "2026-07-19T16:14:14.267225+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-526d0a1c4806494b82b535b03e9dd872"
+      },
+      {
+        "ts": "2026-07-19T16:38:06.673239+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-526d0a1c4806494b82b535b03e9dd872"
+      }
+    ],
+    "started_at": "2026-07-19T16:14:14.267210+00:00",
+    "completed_at": "2026-07-19T16:38:06.673226+00:00",
+    "result": "已發佈 mile_903fd2cf：2026-07-17 收盤四資產選擇權偏斜分析。原油 ±10% 偏斜 +10.9 波動點（買權貴）vs SPY −12.5（賣權貴），改用各自 ±1 標準差重算為 +16.5 / −8.4，符號不翻轉。另附 IV÷近月已實現比率 USO 1.20 / XLE 1.47 / SPY 1.30 / GLD 1.10。arc-dedup clean、anti_ai_gate PASS、Codex 一審 7 條 CRITICAL 全數修正。FB 端因 MCP 需 OAuth 未發，已建 followup fb_repost_mile_903fd2cf。"
   },
   {
     "id": "assign_d8b55d37",
@@ -42044,7 +41976,7 @@
     "description": "Codex 一審 FAIL（worktree dispatch-slot-1-558d7893-k1730 experiments/k1730/codex_review_v1.md + review_verdict.json，reviewed_commit 9060414）。四項修復：(1) 補 README.md（三件套硬規則），NULL 結論措辭降級 — 不可稱 permutation 為 decisive；(2) permutation 重設計：全樣本 shuffle 破壞 macro tensor 的時序結構但未保留 within-window 對齊，改 block/circular-shift placebo 並保留 target/HAR 不動的設計論證；(3) GEV multistart 收斂率 0.47-0.51 的解釋修正：1e10 常數 penalty + 寬隨機起點會機械性壓低收斂率，改 finite penalty 或起點策略後重測，再判定是否真多峰；(4) SSVS 未收斂（R-hat 1.61/ESS 6.25）：加鏈數/reparameterize 或明確把 PIP 降級為 diagnostic-only。完成後重生 verdict template + Codex 二審 PASS 才可 merge_worktree.sh。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-19T05:57:31.986493+00:00",
     "status_history": [
@@ -42104,13 +42036,32 @@
         "to": "pending",
         "by": "hourly-slot-1-da0bc206e2e24831b43805b8e9c6e8c2",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-19T15:39:36.092131+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-69892ba8560441649700e4691ef65dcd"
+      },
+      {
+        "ts": "2026-07-19T15:41:24.685632+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-69892ba8560441649700e4691ef65dcd"
+      },
+      {
+        "ts": "2026-07-19T16:08:37.373944+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-69892ba8560441649700e4691ef65dcd"
       }
     ],
-    "started_at": "2026-07-19T12:09:59.816199+00:00",
+    "started_at": "2026-07-19T15:41:24.685618+00:00",
     "last_released_at": "2026-07-19T14:50:05.678209+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "compute_job_id": "agent-brief_k1730_remediation-832ffa",
-    "result": "compute job agent-brief_k1730_remediation-832ffa RUNNING (started 2026-07-19T11:15Z); 本班確認 in-flight，未重派；待 PHASE A collect_completed"
+    "result": "production run 落地（quick_mode=false, finished 2026-07-19T16:04:42Z, 13448s, seed 42）。本班完成：19/19 estimator recovery tests PASS；README.md 由 production JSON 生成；verify_readme_alignment.py = ALIGNED（14 numeric claims）；修正 'Circular-shift' 誤稱（report_tables Table 8 標題會寫進 README，與 JSON design 欄位的 non-circular 矛盾）並把該誤稱加入 gate 禁用詞；清掉 collection doc 殘留的 v1 誇大（決定性/多峰/PIP 當推論）。剩：reproduce_spec.json 因 schema timeout_seconds 上限 3600s < 實際 13448s 而 invalid；Codex round 2 未跑。兩者見 assign_580c1b3e。\n\nstage 2 收件完成：production artifact 核實 + README 生成 + alignment gate ALIGNED + circular-shift 誤稱根治；round 2 審查與 reproduce_spec schema 阻擋移交 assign_580c1b3e",
+    "completed_at": "2026-07-19T16:08:37.373929+00:00"
   },
   {
     "id": "price_cache_stale_fill_0050_20250610",
@@ -43428,7 +43379,7 @@
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260719T105246594789Z_a1",
     "title": "[internal alert] PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
-    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 發生什麼\nPHASE-Z 連續 3 次無法完成這班的自動 commit（原因：commit_nonzero）。已停止重試 —— 同一班不再重跑。\n檔案仍在工作區、沒有遺失。\n\n## 現在該做什麼\n確認未提交檔案的作者後由該作者 commit。若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。\n\n## git commit 輸出（尾段）\nfindings=1 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.AnP4Hv baseline_findings=60 new=1 resolved=60\n[pre-commit]   NEW scripts/dispatch_supervisor/phase_z.py:1136 except OSError: continue\n[pre-commit]   [silent-fallback-audit] note: 60 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 發生什麼\nPHASE-Z 連續 3 次無法完成這班的自動 commit（原因：commit_nonzero）。已停止重試 —— 同一班不再重跑。\n檔案仍在工作區、沒有遺失。\n\n## 現在該做什麼\n確認未提交檔案的作者後由該作者 commit。若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。\n\n## git commit 輸出（尾段）\nd-gate.qqkrFE baseline_findings=60 new=2 resolved=60\n[pre-commit]   NEW scripts/audit_release_settings.py:172 except Exception: return []\n[pre-commit]   NEW src/volpred/ops/content.py:1968 except Exception: continue\n[pre-commit]   [silent-fallback-audit] note: 60 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
@@ -43446,7 +43397,7 @@
       "episode_id": "20260719T105246594789Z",
       "episode_started_at": "2026-07-19T10:52:46.594789+00:00",
       "attempt_number": 1,
-      "last_seen_at": "2026-07-19T10:55:49.026159+00:00",
+      "last_seen_at": "2026-07-19T16:11:52.247660+00:00",
       "consecutive_remediation_failures": 0,
       "attempt_history": [],
       "escalation_due": false,
@@ -43753,7 +43704,7 @@
   {
     "id": "assign_3bfa0662",
     "title": "PHASE-Z 卡住檔案 incident（8511fbbdfcce0cb0）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n45 個未提交檔案不是任何一班 fire 產出的，最長已連續 90 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 5 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 15 班\n- config/runtime_schedules.json — 34 班\n- conftest.py — 29 班\n- experiments/k1380/README.md — 90 班\n- experiments/k1380/k1380.py — 90 班\n- experiments/k1380/k1380_losses_all.npy — 90 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 90 班\n- experiments/k1380/k1380_results.json — 90 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 90 班\n- experiments/k1380/k1380_spa_from_cache.py — 90 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 90 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 15 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 15 班\n- scripts/build_knowledge_index.py — 15 班\n- scripts/continue_task_dispatch.py — 20 班\n- scripts/daily_checkup.py — 34 班\n- scripts/detect_price_split_breaks.py — 20 班\n- scripts/dispatch_slot_budget.py — 7 班\n- scripts/dispatch_supervisor/phase_z.py — 7 班\n- scripts/dreaming_review.py — 34 班\n- scripts/fb_realchrome_post.py — 29 班\n- scripts/fix_0050_split_break.py — 20 班\n- scripts/gen_codex_cli_reference.py — 85 班\n- scripts/merge_worktree.sh — 29 班\n- scripts/reclaim_stale_worktrees.py — 34 班\n- scripts/repoint_snapshot_from_db.py — 15 班\n- scripts/supabase_sync.py — 29 班\n- scripts/task_pool_claim.py — 20 班\n- scripts/telegram_poll.py — 47 班\n- scripts/tests/test_merge_worktree.sh — 29 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T123338771430Z:<路徑>`",
+    "description": "## 發生什麼\n45 個未提交檔案不是任何一班 fire 產出的，最長已連續 94 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 9 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 19 班\n- config/runtime_schedules.json — 38 班\n- conftest.py — 33 班\n- experiments/k1380/README.md — 94 班\n- experiments/k1380/k1380.py — 94 班\n- experiments/k1380/k1380_losses_all.npy — 94 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 94 班\n- experiments/k1380/k1380_results.json — 94 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 94 班\n- experiments/k1380/k1380_spa_from_cache.py — 94 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 94 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 19 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 19 班\n- scripts/build_knowledge_index.py — 19 班\n- scripts/continue_task_dispatch.py — 24 班\n- scripts/daily_checkup.py — 38 班\n- scripts/detect_price_split_breaks.py — 24 班\n- scripts/dispatch_slot_budget.py — 11 班\n- scripts/dispatch_supervisor/phase_z.py — 11 班\n- scripts/dreaming_review.py — 38 班\n- scripts/fb_realchrome_post.py — 33 班\n- scripts/fix_0050_split_break.py — 24 班\n- scripts/gen_codex_cli_reference.py — 89 班\n- scripts/merge_worktree.sh — 33 班\n- scripts/reclaim_stale_worktrees.py — 38 班\n- scripts/repoint_snapshot_from_db.py — 19 班\n- scripts/supabase_sync.py — 33 班\n- scripts/task_pool_claim.py — 24 班\n- scripts/telegram_poll.py — 51 班\n- scripts/tests/test_merge_worktree.sh — 33 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T123338771430Z:<路徑>`\n- `git show refs/volpred/quarantine/20260719T160946739394Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
     "status": "pending",
@@ -43810,65 +43761,66 @@
         "tests/test_task_pool_claim.py"
       ],
       "streaks": {
-        "config/experiment_artifact_exclusions.json": 15,
-        "config/runtime_schedules.json": 34,
-        "conftest.py": 29,
-        "experiments/k1380/README.md": 90,
-        "experiments/k1380/k1380.py": 90,
-        "experiments/k1380/k1380_losses_all.npy": 90,
-        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": 90,
-        "experiments/k1380/k1380_results.json": 90,
-        "experiments/k1380/k1380_results_INVALID_20260716.json": 90,
-        "experiments/k1380/k1380_spa_from_cache.py": 90,
-        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": 90,
-        "paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv": 15,
-        "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv": 15,
-        "scripts/build_knowledge_index.py": 15,
-        "scripts/continue_task_dispatch.py": 20,
-        "scripts/daily_checkup.py": 34,
-        "scripts/detect_price_split_breaks.py": 20,
-        "scripts/dispatch_slot_budget.py": 7,
-        "scripts/dispatch_supervisor/phase_z.py": 7,
-        "scripts/dreaming_review.py": 34,
-        "scripts/fb_realchrome_post.py": 29,
-        "scripts/fix_0050_split_break.py": 20,
-        "scripts/gen_codex_cli_reference.py": 85,
-        "scripts/merge_worktree.sh": 29,
-        "scripts/reclaim_stale_worktrees.py": 34,
-        "scripts/repoint_snapshot_from_db.py": 15,
-        "scripts/supabase_sync.py": 29,
-        "scripts/task_pool_claim.py": 20,
-        "scripts/telegram_poll.py": 47,
-        "scripts/tests/test_merge_worktree.sh": 29,
-        "scripts/tests/test_paid_gemini_embedding_guard.py": 15,
-        "scripts/tests/test_phase_z_foreign_incident.py": 7,
-        "scripts/tests/test_phase_z_ownership_class_gate.py": 7,
-        "scripts/tests/test_phase_z_quarantine_checkpoint.py": 7,
-        "scripts/tests/test_scheduler_max_slots.py": 34,
-        "src/volpred/ops/dreaming_revalidate.py": 20,
-        "src/volpred/ops/foreign_incident.py": 7,
-        "src/volpred/ops/next_tasks.py": 50,
-        "storage/article_assets/tw-margin-vol-leadlag/evidence.json": 20,
-        "storage/work_log.json.bak_graphify_verdict_20260717": 90,
-        "tests/.!71268!test_task_pool_claim.py": 20,
-        "tests/test_dreaming_revalidate.py": 20,
-        "tests/test_dreaming_review.py": 34,
-        "tests/test_supabase_sync_cache_purge.py": 29,
-        "tests/test_task_pool_claim.py": 20
+        "config/experiment_artifact_exclusions.json": 19,
+        "config/runtime_schedules.json": 38,
+        "conftest.py": 33,
+        "experiments/k1380/README.md": 94,
+        "experiments/k1380/k1380.py": 94,
+        "experiments/k1380/k1380_losses_all.npy": 94,
+        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": 94,
+        "experiments/k1380/k1380_results.json": 94,
+        "experiments/k1380/k1380_results_INVALID_20260716.json": 94,
+        "experiments/k1380/k1380_spa_from_cache.py": 94,
+        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": 94,
+        "paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv": 19,
+        "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv": 19,
+        "scripts/build_knowledge_index.py": 19,
+        "scripts/continue_task_dispatch.py": 24,
+        "scripts/daily_checkup.py": 38,
+        "scripts/detect_price_split_breaks.py": 24,
+        "scripts/dispatch_slot_budget.py": 11,
+        "scripts/dispatch_supervisor/phase_z.py": 11,
+        "scripts/dreaming_review.py": 38,
+        "scripts/fb_realchrome_post.py": 33,
+        "scripts/fix_0050_split_break.py": 24,
+        "scripts/gen_codex_cli_reference.py": 89,
+        "scripts/merge_worktree.sh": 33,
+        "scripts/reclaim_stale_worktrees.py": 38,
+        "scripts/repoint_snapshot_from_db.py": 19,
+        "scripts/supabase_sync.py": 33,
+        "scripts/task_pool_claim.py": 24,
+        "scripts/telegram_poll.py": 51,
+        "scripts/tests/test_merge_worktree.sh": 33,
+        "scripts/tests/test_paid_gemini_embedding_guard.py": 19,
+        "scripts/tests/test_phase_z_foreign_incident.py": 11,
+        "scripts/tests/test_phase_z_ownership_class_gate.py": 11,
+        "scripts/tests/test_phase_z_quarantine_checkpoint.py": 11,
+        "scripts/tests/test_scheduler_max_slots.py": 38,
+        "src/volpred/ops/dreaming_revalidate.py": 24,
+        "src/volpred/ops/foreign_incident.py": 11,
+        "src/volpred/ops/next_tasks.py": 54,
+        "storage/article_assets/tw-margin-vol-leadlag/evidence.json": 24,
+        "storage/work_log.json.bak_graphify_verdict_20260717": 94,
+        "tests/.!71268!test_task_pool_claim.py": 24,
+        "tests/test_dreaming_revalidate.py": 24,
+        "tests/test_dreaming_review.py": 38,
+        "tests/test_supabase_sync_cache_purge.py": 33,
+        "tests/test_task_pool_claim.py": 24
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260719T123338771430Z"
+        "refs/volpred/quarantine/20260719T123338771430Z",
+        "refs/volpred/quarantine/20260719T160946739394Z"
       ],
-      "fires": 5,
+      "fires": 9,
       "first_seen_at": "2026-07-19T12:33:39.275027+00:00",
-      "last_seen_at": "2026-07-19T15:20:29.186790+00:00"
+      "last_seen_at": "2026-07-19T16:39:34.180201+00:00"
     },
-    "updated_at": "2026-07-19T15:20:29.186790+00:00"
+    "updated_at": "2026-07-19T16:39:34.180201+00:00"
   },
   {
     "id": "assign_580c1b3e",
     "title": "K1730 v2 收件 stage 2：等 in-flight production run 落地 → README + 四項核實 + Codex round 2",
-    "description": "K1730 v2 收件 stage 2 — production 全樣本重跑「還在跑」，收 artifact 後補 README + Codex round 2。\n\n## 為什麼有這張單（parent job timeout 的真實狀況）\n\ncompute job `agent-brief_k1730_remediation-832ffa` 於 2026-07-19 20:43 台灣時間\n被 runner 以 5279s timeout 殺掉（exit 1）。但 **agent 起的 production run 沒有死** ——\n它在 kill 之後變成 ppid=1 孤兒仍在跑（2026-07-19 21:12 巡檢時 pid 89087\n`uv run python k1730_gevreg_midas_ssvs.py --workers 6`，6 worker、已跑 49 分鐘）。\n\n**所以本 split 的 stage 1 不需要（也不可以）重派。** 重派會第二次把同一支腳本\n灌進同一個 worktree、同時寫同一個 output JSON，把正在跑的結果覆蓋掉。\n\n## Stage 1（in-flight，不動它）\n\n- cwd: `.claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730`\n- log: `run_production_v2.log`（每 annual refit 一段，2008–2026 共 19 次）\n- 進度基準：21:09 巡檢時跑到 2012，約 6 分鐘/年 → **ETA 約 22:30–22:45 台灣時間**\n- 完成條件：`k1730_gevreg_midas_ssvs_results.json` 的 `quick_mode == false`\n  且 `finished_utc` 晚於 2026-07-19T12:20:34Z\n\n## 現況（已核實，不要重查）\n\n- 目前磁碟上的 `k1730_gevreg_midas_ssvs_results.json` 是 **quick_mode=true** 的快跑結果\n  （started 11:57:43Z / finished 12:20:20Z / runtime 1356s）。**不是最終結果，不可據以裁決。**\n  本班已備份成 `k1730_results_quickmode_20260719T2020.json`（production run 會覆寫原檔）。\n- 四張 fig（20:20）同樣來自 quick 跑，production 收工後會重出。\n- **`README.md` 目前不存在**，但 `REMEDIATION_v2.md` 第 0 節表格已寫「README present」——\n  這在此刻是 overclaim。README 由 `k1730_report_tables.py` 從 results JSON 生成，\n  必須等 production JSON 落地後才跑。\n- Codex v1 verdict = FAIL，四項 blocking defect 見 `review_verdict.json`。\n\n## 這張單要做的事（依序）\n\n1. 檢查 pid 89087 是否還活著、log 是否推進到 2026。\n   - 已完成 → 驗 `quick_mode == false` + `finished_utc` 新於上述時間。\n   - 還在跑（<22:50 前）→ 本班不收，把本單 blocked_until 往後推 30 分鐘，不要重派。\n   - 進程已死且 JSON 仍是 quick_mode=true → stage 1 真的失敗了，這時才依 split contract\n     用 `compute_queue.py enqueue --timeout-parent-job-id agent-brief_k1730_remediation-832ffa\n     --split-stage production_rerun` 重派，timeout < 5400s，並先確認 worktree 沒有殘留 worker。\n2. `uv run python k1730_report_tables.py` 生 `README.md`，再跑\n   `uv run python verify_readme_alignment.py` —— 必須逐項對齊 production JSON，\n   且不得出現 `decisive` 等 overclaim 措辭。\n3. 對照 `REMEDIATION_v2.md` 與 Codex v1 的四項 blocking defect 逐條核實是否真的落地\n   （permutation 重設計 / README 補件 / GEV penalty 收斂誠實化 / SSVS 非混合降級為 diagnostic-only）。\n   REMEDIATION_v2 若還有與事實不符的敘述（例如 README 狀態），先修文再送審。\n4. 派 Codex 二審（gpt-5.6-sol / high，沿用一審 prompt 加問四項是否已解決），\n   verdict 寫回 `review_verdict.json`。\n5. PASS → `scripts/merge_worktree.sh dispatch-slot-1-558d7893-k1730`；\n   FAIL → 建下一輪 remediation task，effort 沿 model_router ladder 升級。\n6. 合併後由主線程寫 knowledge.json（禁 agent 寫），並收尾 `assign_98a32740`。\n\nparent_job: agent-brief_k1730_remediation-832ffa\nsplit_stage: collect_and_review\n",
+    "description": "K1730 v2 收件 stage 3（stage 2 已由 hourly-slot-2-69892ba8 於 2026-07-20 00:00-00:30 完成）。\n\n## 已完成，不要重做\n- production run 已落地並核實：quick_mode=false / finished 2026-07-19T16:04:42Z / 13448s / seed 42\n- test_k1730_recovery.py 19/19 PASS\n- README.md 已由 k1730_report_tables.py 輸出 + 敘述組成（該腳本只印 stdout，不自己寫檔）\n- verify_readme_alignment.py = ALIGNED（14 numeric claims，2 份文件無禁用詞）\n- 'Circular-shift' 誤稱已修（report_tables Table 8 / 主腳本 4 處字串 / REMEDIATION_v2 §5），並加入 verify_readme_alignment.py 的 BANNED（negative lookbehind 放行 non-circular）\n- K1730_ARM_A_FULL_RUN_COLLECTION.md 的 v1 誇大已改成顯式 RETRACTED 段落\n\n## 本單要做的兩件事\n1. **reproduce_spec.json 目前 invalid**：已寫好 11 個 input 的 sha256，但 `volpred.reproduce_spec.v1` 規定 timeout_seconds ∈ [1,3600]，而本實驗真實耗時 13448s。填 3600 等於寫一個必然 timeout 的假值 —— 不要這樣做。要嘛擴 schema 上限（scripts/reproduce_check.py 的 validator）並說明長跑實驗的合理上限，要嘛依 AGENTS.md 寫 config/experiment_artifact_exclusions.json 並說明為什麼做不到。這是 merge gate 的硬阻擋。\n2. **Codex round 2**（gpt-5.6-sol / high，沿用 v1 prompt 加問四項是否已解決），verdict 寫回 review_verdict.json。審查者的起點是 REMEDIATION_v2.md §6。\n   PASS → scripts/merge_worktree.sh dispatch-slot-1-558d7893-k1730 → 主線程寫 knowledge.json（禁 agent 寫）→ 收尾 assign_98a32740。FAIL → 建下一輪 remediation，effort 沿 ladder 升級。\n\nparent_job: agent-brief_k1730_remediation-832ffa\nsplit_stage: review_and_merge\n",
     "task_type": "platform_ops",
     "priority": 1,
     "status": "pending",
@@ -43923,11 +43875,11 @@
     "description": "老闆 2026-07-19 20:14 來信「為什麼文章沒有照排程釋出 / 從底層修復重構」的**根因修復**。\n22:07 班已完成調查 + 止血（見 work_log task_id=platform_ops_release_audit_fix_mile_21e45133），本單是治本部分。\n\n調查結論：觸發源正常（LaunchAgent 48h 內 8 次 fire 全 exit 0），問題在供給側 + gate 死鎖。\n\n**R1（最高優先）lazypack gate 死鎖**\nmile_21e45133 / mile_47c4bc3e 的 lazypack job **從未被 enqueue**，gate 卻報「pending/failed」→ 指向一個查不到的 job id，永久卡死、skip_count 單調遞增至 9。\n改法：(i) 草稿建立路徑（scripts/refill_reader_facing_pool.py / feed-publisher 寫入端）必定 enqueue lazypack job，enqueue 失敗要硬報錯而非靜默；(ii) gate 端在報 pending/failed 前先判斷 job 是否存在 —— 不存在就當場 enqueue，而不是丟一個查不到的 id 給人類。\n風險：低（補漏呼叫，不改渲染邏輯）。\n\n**R4 審計盲區** scripts/audit_release_settings.py 只檢查設定欄位漂移，不檢查觸發節奏與 interval 是否對齊，所以一路報 ok。\n改法：新增檢查 —— 實際觸發節奏（LaunchAgent plist + crontab 聯集）必須 <= .release_settings.json 的 interval_minutes，否則 fail；另加 skip_count > 5 的草稿升級告警。R2 那種「改了觸發源沒改設定」的變更今後就會被擋。風險：極低（純增檢查）。\n\n**R3 自癒迴路** 三筆 platform_ops_release_audit_fix_* pending 28h 未派工（歷史同類皆 succeeded）。未追進 dispatcher 選取邏輯確認是 priority、slot 佔用還是其他原因 —— 要先查清再改。阻塞釋出的修復任務建議提權或加 age-based escalation。\n\n**R2 需老闆拍板（不要自行決定）** LaunchAgent 每 6h 觸發 vs interval_minutes=240(4h) x max=1 不對齊：正規路徑上限只有 4 篇/日，**目前 6/day 完全靠 check_alerts 每小時 fallback 撐著**。二擇一：(a) LaunchAgent 改 4h 節奏讓正規路徑自給自足、fallback 回歸備援；或 (b) 正式承認 fallback 為 canonical driver 並寫入 runtime_schedules.json。建議 (a)。改頻率會直接改變發文節奏，需同步確認 content_quality.py:206 release_cadence_threshold_hours 不會誤報 burst。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-19T14:33:16.527386+00:00",
     "updated_at": "2026-07-19T14:33:16.527386+00:00",
-    "started_at": null,
+    "started_at": "2026-07-19T15:43:39.107748+00:00",
     "last_released_at": null,
     "payload": {
       "parent_fire": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df",
@@ -43938,8 +43890,28 @@
         "status": "pending",
         "at": "2026-07-19T14:33:16.527386+00:00",
         "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      },
+      {
+        "ts": "2026-07-19T15:43:38.409808+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:43:39.107763+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:43:40.054456+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
       }
-    ]
+    ],
+    "completed_at": "2026-07-19T15:43:40.054443+00:00",
+    "result": "superseded by assign_0cd91346 (批次一次修到底)：R1 gate 誠實化+自動補排、R4 cadence/starved 檢查、compute_queue release-blocking 優先權、兩篇卡稿懶人包實際渲染。見 work_log 同 task_id。"
   },
   {
     "id": "member_qa_dedup_owner_convergence_20260719",
@@ -43973,7 +43945,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -43985,7 +43957,30 @@
     "release_audit_skipped_count": 20,
     "release_audit_issues": [
       "missing 懶人包圖組 section (async lazypack render pending/failed — inspect: uv run python scripts/compute_queue.py show lazypack-mile_21e45133 ; re-enqueue via scripts/lazypack_async_render.py enqueue)"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-19T15:43:40.917708+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:43:41.781476+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:43:42.687715+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      }
+    ],
+    "started_at": "2026-07-19T15:43:41.781459+00:00",
+    "completed_at": "2026-07-19T15:43:42.687682+00:00",
+    "result": "superseded by assign_0cd91346 (批次一次修到底)：R1 gate 誠實化+自動補排、R4 cadence/starved 檢查、compute_queue release-blocking 優先權、兩篇卡稿懶人包實際渲染。見 work_log 同 task_id。"
   },
   {
     "id": "platform_ops_release_audit_fix_mile_47c4bc3e_r2",
@@ -43994,7 +43989,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -44006,7 +44001,30 @@
     "release_audit_skipped_count": 20,
     "release_audit_issues": [
       "missing 懶人包圖組 section (async lazypack render pending/failed — inspect: uv run python scripts/compute_queue.py show lazypack-mile_47c4bc3e ; re-enqueue via scripts/lazypack_async_render.py enqueue)"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-19T15:43:43.752426+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:43:44.593118+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:43:45.396132+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      }
+    ],
+    "started_at": "2026-07-19T15:43:44.593103+00:00",
+    "completed_at": "2026-07-19T15:43:45.396115+00:00",
+    "result": "superseded by assign_0cd91346 (批次一次修到底)：R1 gate 誠實化+自動補排、R4 cadence/starved 檢查、compute_queue release-blocking 優先權、兩篇卡稿懶人包實際渲染。見 work_log 同 task_id。"
   },
   {
     "id": "platform_ops_compute_queue_release_blocking_priority",
@@ -44014,13 +44032,172 @@
     "description": "2026-07-19 release-starvation 調查的殘留項（work_log release_deadlock_repair_20260719_12）。\n\n`scripts/compute_queue.py:1149` 的 `queued.sort()` 只依 queued_at 排序 —— 純 FIFO、無任何優先權。\n後果：一個秒~分鐘級、且**直接擋住讀者可見發佈**的 lazypack render，會排在多個 60-90 分鐘的\nagent / experiment job 後面。release cadence 是 240 分鐘一篇，lazypack 只要等一輪就必然錯過\n發佈窗口，skip_count 隨之累積（本次實例 mile_21e45133 / mile_47c4bc3e 已 skip 20 次）。\n\n修法方向（未定案，需先量測）：給 job 一個 class/priority 欄位，讓 release-blocking 的短 job\n插隊到 heavy job 前面；或另開一條輕量 lane 與 heavy lane 並行。注意 worker 目前是單工 + 有 lock，\n改成並行要先確認 lock 語意與 quota bounce 邏輯不被破壞。\n\n驗收：lazypack job 從 enqueue 到 render 完成的 p95 latency < 一個 release cadence（240 分鐘）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch",
     "tags": [
       "compute_queue",
       "release_pool",
       "scheduling"
     ],
-    "created_at": "2026-07-19T15:17:50.615219+00:00"
+    "created_at": "2026-07-19T15:17:50.615219+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-19T15:43:46.337152+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:43:47.202152+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:43:47.959350+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      }
+    ],
+    "started_at": "2026-07-19T15:43:47.202139+00:00",
+    "completed_at": "2026-07-19T15:43:47.959334+00:00",
+    "result": "superseded by assign_0cd91346 (批次一次修到底)：R1 gate 誠實化+自動補排、R4 cadence/starved 檢查、compute_queue release-blocking 優先權、兩篇卡稿懶人包實際渲染。見 work_log 同 task_id。"
+  },
+  {
+    "id": "telegram-1128",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T15:28:43.188373+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1128）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n拉成同一批次 一次完成修復\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\nℹ️ [INFO] Re: [VolPred Boss Report] 2026-07-19 20:10 台灣時間 平台運營報告 — 三問回覆\n\n📌 三問回覆：兩個都是同一種病 —— 有 owner，但 owner 永遠輪不到\n\n老闆您好。您問的三件事已查完，兩件已在本班修到底層，一件在上一班已根治。逐題回。\n\n---\n\n📌 ① 為什麼文章沒有照排程釋出？\n\n不是缺稿，是寫好的稿發不出去，而且系統自認正常。\n\nrelease cadence 每 240 分鐘該放 1 篇，但連日 eligible=0。三篇草稿被內容閘門擋住：\n\n• 文章: 被擋次數 | 擋點\n• mile_aff342df: 24 | anti-AI 風格犯規\n• mile_21e45133: 20 | 缺懶人包圖組\n• mile_47c4bc3e: 20 | 缺懶人包圖組\n\n閘門擋得對，稿子確實不該那樣發。真正的問題是擋住之後沒有人真的去修。\n\n根因有兩層，都在 _materialize_release_audit_task：\n\n第一層 —— 修復任務被硬編碼成 P3，然後寫一次就再也不更新。\n一篇擋住讀者可見產出的稿子，它的修復任務被機械地定為 P3，於是永遠排在 11 個 P1 後面挨餓。\nmile_aff342df 從 07-18 16:00 建單到 07-19 22:32 才被處理，餓了 30.5 小時，另兩篇 21.5 小時。\n\n更關鍵的是：命中既有任務就直接 return，什麼都不做。所以**一張擋了 3 次的單和一張擋了 24 次的單，\n在任務池裡長得一模一樣**。「這篇已經卡了 30 小時」這個訊號從來沒有抵達排班。\nP3 不是誰判斷錯了，是根本沒有人在判斷。\n\n第二層 —— 已結案的任務會永久壓制重建。\n去重只比對 article_id，不看狀態。22:32 那班把三張單標了 succe\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T15:29:20.045267+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-19T15:30:35.907218+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-19T15:30:35.907203+00:00",
+    "result": "已建立批次單 assign_0cd91346（P1）合併 release_pipeline_rootcause_r1_r4_20260719 / platform_ops_release_audit_fix_mile_21e45133_r2 / platform_ops_release_audit_fix_mile_47c4bc3e_r2 / platform_ops_compute_queue_release_blocking_priority，已 Telegram 回覆（msg 1129）"
+  },
+  {
+    "id": "assign_0cd91346",
+    "title": "[批次] 文章釋出斷檔一次修到底：R1/R4 根因 + 3 篇卡稿 + compute_queue 優先權",
+    "description": "老闆 2026-07-19 Telegram 指示：「拉成同一批次 一次完成修復」。原本散成 4~5 張單、被 hourly dispatch 一次挑一張，導致同一個病要修好幾班。本單把它們合成一個 batch，由**同一班一次做完**，不得再拆回逐張排隊。\n\n合併範圍（做完後請把下列原單一併標為 superseded，並在 work_log 註明由本單承接）：\n1. release_pipeline_rootcause_r1_r4_20260719 (P1) — R1 lazypack gate 死鎖 + R4 審計盲區。R2 仍待老闆拍板，本批次不動 R2。\n2. platform_ops_release_audit_fix_mile_21e45133_r2 (P1) — 缺懶人包圖組，skip 20 次。\n3. platform_ops_release_audit_fix_mile_47c4bc3e_r2 (P1) — 缺懶人包圖組，skip 20 次。\n4. platform_ops_compute_queue_release_blocking_priority (P2) — compute_queue.py:1149 純 FIFO，release-blocking 短 job 排在 60-90 分鐘 heavy job 後面。\n\n執行順序（有依賴，勿平行）：\nA. 先修 compute_queue 優先權（第 4 項）—— 否則後面 re-enqueue 的 lazypack job 一樣會被 heavy job 卡住，等於白修。\nB. 修 R1 gate 死鎖：草稿建立路徑必定 enqueue lazypack job，enqueue 失敗硬報錯不靜默；gate 端報 pending/failed 前先確認 job 存在，不存在就當場 enqueue。\nC. 用修好的路徑實際跑出 mile_21e45133 / mile_47c4bc3e 兩篇的懶人包圖組，走 feed-publisher / lazypack-infographic 正規流程，**不得手改 feed 歷史資料繞過 audit**。\nD. 修 R4 審計盲區：擋住讀者可見產出的修復任務不得硬編碼 P3；命中既有任務要更新 skip_count / 升優先權，不能直接 return；去重要看狀態，已結案不得永久壓制重建。\n\n驗收（全部要真跑真驗，不接受宣稱）：\n- eligible drafts > 0，release cadence 實際放出至少 1 篇。\n- 兩篇卡稿的懶人包圖組實際渲染完成，audit 通過。\n- lazypack job 從 enqueue 到 render 完成的延遲不再被 heavy job 主導。\n- 重建一張被擋草稿的修復任務，確認優先權會隨 skip 次數升級、且已結案單不會壓制重建。\n\n限制：這是 P1 batch，scope 較大，允許超過單班 50 分鐘；若必須分段，段與段之間不得交還排班（不可被其他任務插隊）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-19T15:30:06.254678+00:00",
+    "created_by": "telegram_responder",
+    "status_history": [
+      {
+        "ts": "2026-07-19T15:32:27.566058+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:32:28.305365+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:50:20.326558+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      }
+    ],
+    "started_at": "2026-07-19T15:32:28.305350+00:00",
+    "completed_at": "2026-07-19T15:50:20.326546+00:00",
+    "result": "批次一次修到底完成：A compute_queue release-blocking 優先權（queue_priority，lazypack-*=1）；B release gate 誠實化 —— 真查 job 狀態、缺 job 且有 plan 就當場 enqueue、唯讀預覽無副作用；C 兩篇卡稿走正規流程渲染完成（21e45133 7圖 / 47c4bc3e 6圖，gate 皆回 []），content_gate_blocked 2→0、eligible 0→2；D audit 新增 cadence + starved-drafts 檢查（實跑抓到 R2 360min vs 240min）；E publish_draft --lazypack-plan 發後當場 enqueue、失敗 rc=8。新增 21 回歸測試、相關既有 578 passed。未達成：本班未實際 release（due_only，下次 due 03:15 CST，強發會 burst）；優先權由測試而非線上競爭證明；R2 待老闆拍板。"
+  },
+  {
+    "id": "telegram-1130",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T15:35:55.561157+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1130）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n全部都要合併跑\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n✅ 已拉成同一批次：assign_0cd91346（P1）\n\n原本散成 4 張單（R1/R4 根因、mile_21e45133、mile_47c4bc3e、compute_queue 優先權），被排班一次挑一張，所以同一個病要修好幾班。現在合成一單，規定同一班一次做完、中間不得交還排班被插隊。\n\n🔧 順序有依賴，寫死在單子裡：\n先修 compute_queue 純 FIFO（不然 re-enqueue 的 lazypack 一樣被 heavy job 卡住，等於白修）→ 再修 gate 死鎖 → 再實際渲染那兩篇的懶人包圖組 → 最後修 R4 審計盲區（P3 硬編碼、命中即 return、已結案永久壓制）。\n\n📌 R2 沒放進來，那個等您拍板。\n\n驗收要真跑：eligible drafts > 0 且實際放出至少 1 篇，不接受宣稱。已排入任務池，等下一班 dispatch 開工。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T15:36:53.186302+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-19T15:38:25.476083+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-19T15:38:25.476068+00:00",
+    "result": "已建立 assign_8752746d（P1，parent=assign_0cd91346）把 R2（LaunchAgent 4h 節奏對齊，採建議 a）與 R3（修復任務 28h 未派工根因）併入同一批次 Part B，規定同班接續；已 Telegram 回覆（msg 1131）"
+  },
+  {
+    "id": "assign_8752746d",
+    "title": "[批次 Part B] 併入 R2 觸發節奏對齊 + R3 自癒迴路（assign_0cd91346 續段，同班接續）",
+    "description": "老闆 2026-07-19 23:36 (台北) Telegram 指示：「全部都要合併跑」——**R2 不再等拍板，R3 也一併納入**。\n\n本單是 assign_0cd91346 的**第二段（Part B）**，不是獨立任務。承接規則與 Part A 相同：\n- 由**同一班一次做完**，Part A→Part B 之間不得交還排班、不得被其他任務插隊。\n- 若 Part A（assign_0cd91346）仍在跑，本單由該班接續；不得由另一班平行動工（會與 R1 的 gate 改動衝突）。\n\n追加範圍（來源：release_pipeline_rootcause_r1_r4_20260719 的 R2 / R3）：\n\n**R2 — 觸發節奏與 interval 不對齊（老闆已指示直接做，不再等拍板）**\nLaunchAgent 每 6h 觸發 vs .release_settings.json interval_minutes=240(4h) × max=1 不對齊：\n正規路徑上限只有 4 篇/日，目前 6/day 完全靠 check_alerts 每小時 fallback 撐著。\n採原單建議 (a)：**LaunchAgent 改 4h 節奏**，讓正規路徑自給自足、fallback 回歸備援角色。\n必附條件：\n- 同步確認 content_quality.py:206 release_cadence_threshold_hours 不會把 4h 節奏誤判成 burst。\n- 節奏來源寫回 config/runtime_schedules.json（canonical schedule spec），不得只改 plist。\n- 改完後跑 audit_release_settings.py（含 R4 新增的節奏對齊檢查）確認 pass。\n若實作中發現 (a) 有硬性阻礙（例如 4h 節奏會撞其他 job 或 quality gate 無法調和），**停下來回報**，不要自行改採 (b)。\n\n**R3 — 自癒迴路：修復任務 pending 28h 未派工**\n三筆 platform_ops_release_audit_fix_* pending 28h 未被 dispatcher 挑中（歷史同類皆 succeeded）。\n先查清根因（priority、slot 佔用、task_type 過濾、或 A0 抓取條件），**查清再改，不要先動手**。\n確認後：阻塞讀者可見產出的修復任務要提權或加 age-based escalation，與 R4 的 skip_count 升級邏輯合流，不要做成第二套平行機制。\n\n驗收（真跑真驗，不接受宣稱）：\n- R2：LaunchAgent/crontab 實際觸發間隔 <= interval_minutes，audit_release_settings.py pass，且 content_quality 不報 burst。\n- R3：能指出 28h 未派工的具體根因（有證據，不是推測），修完後用一張新建的 pending 修復任務驗證它會在合理時間內被挑中。\n- Part A + Part B 合起來：eligible drafts > 0 且 release cadence 實際放出至少 1 篇。\n\n限制：P1 batch，允許超過單班 50 分鐘。做完請把 release_pipeline_rootcause_r1_r4_20260719 標為 superseded，並在 work_log 註明 R1/R4 由 assign_0cd91346 承接、R2/R3 由本單承接。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-19T15:38:01.842086+00:00",
+    "payload": {
+      "boss_directive": "全部都要合併跑",
+      "telegram_msg": 1130,
+      "part_of_batch": "assign_0cd91346"
+    },
+    "parent_task_id": "assign_0cd91346",
+    "created_by": "telegram_responder",
+    "status_history": [
+      {
+        "ts": "2026-07-19T15:50:37.687187+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:50:38.216013+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      },
+      {
+        "ts": "2026-07-19T15:55:31.272163+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ac788c4e7e6e4482914640ba2b000868"
+      }
+    ],
+    "started_at": "2026-07-19T15:50:38.215998+00:00",
+    "completed_at": "2026-07-19T15:55:31.272147+00:00",
+    "result": "R2 完成：LaunchAgent 00/06/12/18 → 00/04/08/12/16/20 :07（launchctl print 實測 6 個 descriptor 生效）+ config/runtime_schedules.json release_pool.cron 7 */6 → 7 */4；burst(30min)/drought(4h+2h=6h) 皆不誤報，live burst_pairs=[]；audit cadence 由 FAIL(360 vs 240) → ok(240<=240)。R3 完成：根因非 dispatcher 而是優先權 —— 舊 fix task P3，P3 starvation 門檻 72h，前方 13 P1+22 P2，28h 等待是照設定運作；優先權已由 23:17 班修成 P2/P1（→24h/6h 門檻），本班依指示不加第二套機制，改以 test_release_fix_task_reachability.py（5 tests）釘住 skip_count 升級與 starvation ladder 的複合上界。未達成：本班仍未實際 release —— 下次 due 19:15Z，正規路徑會在 04:07 CST 觸發時放出；不 --force 以免在剛對齊的節奏上開洞。"
+  },
+  {
+    "id": "fb_repost_mile_903fd2cf",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "hourly_dispatch",
+    "created_at": "2026-07-20T00:38:06.450789+08:00",
+    "title": "FB 雙發佈補件：mile_903fd2cf（原油 vs 股市選擇權偏斜）",
+    "description": "trending_repost mile_903fd2cf 已於 2026-07-20 00:37 發佈到 VolPred feed，但 FB 端未發。原因：Facebook MCP 需要 OAuth，該 fire 為 non-interactive session 無法完成授權。\n\n待辦：依 .claude/skills/fb-publishing/SKILL.md + trending-repost/references/fb-ivanlai-tone.md 發到 Ivan Lai FB。\n- 發前必先 get_page_text 查牆確認未發過\n- 主貼文 200-400 字改寫版、不放連結、不貼 feed 內文\n- 圖片：結果圖 storage/assets/articles/oil_skew_curve_20260720.png + 懶人包 storage/lazypack_jobs/oil_call_skew_20260720/panels/oilskew0720_2_results.png\n- 第一則留言放 https://volpred.zeabur.app/v3/reports/mile_903fd2cf\n- 文案必過 scripts/anti_ai_gate.py\n- 完成後回填 storage/reports/trending_repost_log.json 的 fb_post_status / fb_post_url\n\nparent_task_id: trending_repost_2026_07_19_地緣避險"
   }
 ]
