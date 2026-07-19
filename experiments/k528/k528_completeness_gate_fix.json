@@ -1,0 +1,159 @@
+{
+  "stage": "completeness_gate_bypass_fix",
+  "parent_job_id": "agent-brief_k528_rerun_v3-6e4286",
+  "generated_at": "2026-07-19T22:53:12+08:00",
+  "worktree": ".claude/worktrees/dispatch-slot-3-30adeed7-k528nfp",
+
+  "defect_state": "already_closed_before_this_stage",
+  "defect_state_evidence": {
+    "summary": "The v6 blocking defect was real and is now closed, but it was NOT closed by this stage. It was closed by commit 726a34fb0, which landed 6 minutes after the v6 verdict was written and 14 minutes after the commit v6 reviewed. This stage did not change a single line of production code; it supplied the regression evidence that commit never had.",
+    "timeline": [
+      {"when": "2026-07-19T17:12:22+08:00", "what": "commit 3098ad5b5 — the bytes Codex reviewed for v6"},
+      {"when": "2026-07-19T17:20:00+08:00", "what": "review_verdict_v6.json written: FAIL, one blocking defect (the allowlist bypass)"},
+      {"when": "2026-07-19T17:24:05+08:00", "what": "k528_nfp_event_study.py mtime — the fix is written"},
+      {"when": "2026-07-19T17:26:16+08:00", "what": "commit 726a34fb0 — fix committed, message names the same three sub-fixes (a)(b)(c)"},
+      {"when": "2026-07-19T22:45-22:53+08:00", "what": "this stage — adversarial test + fixture added, no production code touched"}
+    ],
+    "empirical_proof_not_code_reading": {
+      "method": "The identical attack was executed against both the pre-fix gate source (git show 3098ad5b5) and the current one, via AST extraction of check_calendar_is_complete, against the real pinned ALFRED feed.",
+      "pre_fix_3098ad5b5": {"single_entry": "ACCEPTED — backdoor open, 2026-03 silently dropped", "multi_entry": "ACCEPTED — backdoor open, 2026-03 silently dropped"},
+      "current_726a34fb0": {"single_entry": "REJECTED", "multi_entry": "REJECTED"},
+      "rejection_message": "the raw feed has 1 month(s) that the selected calendar does not: ['2026-03']. A month present at the source and absent from the analysis is a silently shortened sample. This is not excusable via KNOWN_MISSING_MONTHS: that list is for months the source never published."
+    },
+    "what_726a34fb0_changed": {
+      "a_unconditional_raw_to_selected": "dropped = set(raw) - set(selected) - set(KNOWN_MISSING_MONTHS)  ->  dropped = set(raw) - set(selected). Raw data for a month means that month is not missing, whatever a list claims.",
+      "b_known_missing_claim_scans_whole_allowlist": "bogus = (m for m in KNOWN_MISSING_MONTHS if m in span and raw_by_month.get(m))  ->  drops the 'm in span' restriction. A claim about a month outside the observed span was exactly the one nobody re-checked.",
+      "c_allowlists_must_not_overlap": "new check: a month may not appear in both KNOWN_MISSING_MONTHS and REVIEWED_MULTI_ENTRY_MONTHS. 'Published nothing' and 'published several entries I reviewed' cannot both be true."
+    }
+  },
+
+  "adversarial_test": {
+    "path": "experiments/k528/test_k528_completeness_gate.py",
+    "sha256": "5cfd9931eaa75d27e57db4ec454e7fa359bef5d5284f9b120f24554016f7bb09",
+    "tests": [
+      "test_honest_calendar_is_accepted",
+      "test_tail_month_hidden_behind_both_allowlists_is_rejected[single_entry]",
+      "test_tail_month_hidden_behind_both_allowlists_is_rejected[multi_entry]",
+      "test_each_defence_independently_closes_the_bypass[unconditional_raw_to_selected]",
+      "test_each_defence_independently_closes_the_bypass[allowlists_must_not_overlap]",
+      "test_each_defence_independently_closes_the_bypass[known_missing_claim_checked_against_whole_raw_feed]",
+      "test_bypass_succeeds_when_all_three_defences_are_disabled[single_entry]",
+      "test_bypass_succeeds_when_all_three_defences_are_disabled[multi_entry]"
+    ],
+    "attack_simulated_verbatim": "From review_verdict_v6.json, quoted exactly: 'completeness could be bypassed by putting a tail month into KNOWN_MISSING_MONTHS (which made the raw->selected check skip it) while the counter-check that would expose the false claim only scanned the selected span; adding the month to REVIEWED_MULTI_ENTRY_MONTHS as well kept it accepted'.",
+    "attack_construction": {
+      "victim_month": "2026-03 — the tail month of the sample, which the real ALFRED feed genuinely published (2026-03-06)",
+      "step_1": "remove every 2026-03 date from the SELECTED calendar (the silent truncation being hidden)",
+      "step_2": "add 2026-03 to KNOWN_MISSING_MONTHS with a fabricated shutdown-style reason (the lie that used to excuse it)",
+      "step_3": "add 2026-03 to REVIEWED_MULTI_ENTRY_MONTHS with a matching raw/report shape (the second lie that kept it accepted)",
+      "two_variants": "single_entry uses the real one-entry 2026-03. multi_entry injects a second raw entry (2026-03-20) so the month also trips the 'unreviewed multi-entry month' check — this is the stronger form, in which REVIEWED_MULTI_ENTRY_MONTHS is genuinely load-bearing for the attacker rather than merely present.",
+      "why_the_window_check_does_not_mask_it": "Dropping one tail month leaves a 44-day tail shortfall, inside the 70-day MAX_WINDOW_SHORTFALL_DAYS tolerance, so check 3a does not fire. The test asserts the rejection message is NOT the window-coverage one, so a green run cannot be credited to the wrong check."
+    },
+    "hermeticity": {
+      "no_network": true,
+      "no_event_study_rerun": true,
+      "how": "k528_nfp_event_study.py is a flat top-level script with no __main__ guard — importing it would run the entire event study and overwrite the results JSON. The test therefore lifts check_calendar_is_complete plus its four module-level constants out with ast and execs them in isolation.",
+      "fixture": "experiments/k528/data/nfp_release_feed_fixture.json — the real ALFRED release-date feed (release_id NFP_US), 260 raw entries / 254 selected, fetched 2026-07-19, pinned so the test runs offline against real data rather than a hand-made shape."
+    }
+  },
+
+  "test_result_before": {
+    "meaning": "The suite run against the PRE-FIX gate source (3098ad5b5), i.e. what it would have reported had it existed when v6 was written. This is not 'before a fix by this stage' — this stage made no production change.",
+    "result": "FAIL — 7 failed, 1 passed",
+    "detail": "Both primary bypass tests failed (the pre-fix gate accepted the tampered calendar), all three per-defence tests failed, and both anti-vacuity tests failed. The single pass is test_honest_calendar_is_accepted, which is correct: the pre-fix gate also accepted the honest calendar."
+  },
+  "test_result_after": {
+    "meaning": "The suite run against the current worktree code (726a34fb0, unmodified by this stage).",
+    "result": "PASS — 8 passed in 1.27s",
+    "command": "uv run --extra dev pytest experiments/k528/ -q"
+  },
+
+  "mutation_check": {
+    "purpose": "A test that can never go red is not a gate. Two independent mutations were run.",
+    "mutation_1_revert_the_fix": {
+      "what": "Pointed the test's SCRIPT constant at the pre-fix source (git show 3098ad5b5).",
+      "turned_red": true,
+      "result": "7 failed, 1 passed"
+    },
+    "mutation_2_per_defence_lattice": {
+      "what": "Neutralised each of the three defences by rewriting its guard `if X:` -> `if False and X:` in the extracted source, across all 8 subsets, then ran the multi_entry attack.",
+      "results": [
+        {"disabled": [], "attack": "REJECTED"},
+        {"disabled": ["allowlists_must_not_overlap"], "attack": "REJECTED"},
+        {"disabled": ["known_missing_claim_checked_against_whole_raw_feed"], "attack": "REJECTED"},
+        {"disabled": ["unconditional_raw_to_selected"], "attack": "REJECTED"},
+        {"disabled": ["allowlists_must_not_overlap", "known_missing_claim_checked_against_whole_raw_feed"], "attack": "REJECTED"},
+        {"disabled": ["allowlists_must_not_overlap", "unconditional_raw_to_selected"], "attack": "REJECTED"},
+        {"disabled": ["known_missing_claim_checked_against_whole_raw_feed", "unconditional_raw_to_selected"], "attack": "REJECTED"},
+        {"disabled": ["allowlists_must_not_overlap", "known_missing_claim_checked_against_whole_raw_feed", "unconditional_raw_to_selected"], "attack": "ACCEPTED — backdoor open"}
+      ],
+      "interpretation": "Genuine defence in depth: each of the three checks independently closes the bypass, so no single-defence mutation can turn the primary test red. The attack is only accepted when all three are disabled — which is also the proof that the attack is valid and the test is not vacuous.",
+      "note_on_single_defence_mutations": "Because any one defence suffices, disabling one at a time does NOT turn the primary test red. That is a property of the code, not a weakness of the test, and it is why mutation_1 (full revert) and the all-three case are the mutations that carry the anti-vacuity burden."
+    },
+    "harness_cannot_silently_no_op": "_load_gate asserts every requested mutation string occurs exactly once before applying it, and asserts all five lifted names were found. If the gate is renamed or restructured the harness fails loudly rather than quietly testing nothing. This fired for real during mutation_1: the pre-fix source has no `if both:` check, so the per-defence test failed on the assertion instead of silently passing."
+  },
+
+  "files_changed": [
+    {
+      "path": "experiments/k528/test_k528_completeness_gate.py",
+      "change": "added",
+      "sha256": "5cfd9931eaa75d27e57db4ec454e7fa359bef5d5284f9b120f24554016f7bb09",
+      "purpose": "the adversarial regression test"
+    },
+    {
+      "path": "experiments/k528/data/nfp_release_feed_fixture.json",
+      "change": "added",
+      "sha256": "c02b97dd9318b3cc151bd07c76c2c207aedf9e4ca3985e59f86f7aff4d3603e2",
+      "purpose": "real ALFRED feed pinned with provenance so the test is offline and hermetic"
+    },
+    {
+      "path": "experiments/k528/k528_nfp_event_study.py",
+      "change": "UNTOUCHED",
+      "verified_by": "git diff --stat HEAD -- experiments/k528/k528_nfp_event_study.py returns empty"
+    }
+  ],
+
+  "sample_span_changed": false,
+  "sample_span_note": "No production code was modified, no selection logic changed, and the event study was not re-run. The honest calendar still yields 260 raw entries / 254 selected months over 2005-01-01..2026-03-27, with 2025-10 the single documented hole and the same six reviewed multi-entry months. Headline results are untouched.",
+
+  "existing_tests_still_green": {
+    "pytest": "uv run --extra dev pytest experiments/k528/ -q -> 8 passed",
+    "experiment_gates": "uv run python scripts/experiment_gates.py run --path experiments/k528 -> PASS, 3 files cleared 4 experiment-integrity gates"
+  },
+
+  "remaining_blockers": [
+    {
+      "id": "stale-canonical-verdict",
+      "severity": "blocks_merge",
+      "found_by": "this stage, running experiment_gates.py certify",
+      "detail": "The canonical experiments/k528/review_verdict.json is stale and unusable as a merge ticket. It pins reviewed_commit af2fad3569347e728b6fa29c90ddea38bf500e05 at 2026-07-19T13:15:30+08:00 with verdict FAIL — a v2-era verdict predating rounds v3 through v6 — and carries no reviewed_sha256 block at all. certify therefore reports BLOCKED (reviewer verdict is FAIL, not PASS). The v3-v6 verdicts live in separate numbered files that certify does not read.",
+      "not_fixed_here_because": "the brief scopes round-5 review and the merge decision to the next stage; hand-editing a verdict file is explicitly forbidden by .claude/rules/experiments.md"
+    },
+    {
+      "id": "claim-surface-drift-from-this-test",
+      "severity": "must_sequence_correctly",
+      "found_by": "this stage",
+      "detail": "The claim surface for certification is *.py + README.md + *_results.json. This stage adds a new .py (the test) and a new results-shaped JSON (this file) to experiments/k528/. Any round-5 verdict must therefore be generated with verdict-template AFTER these files land and be left untouched afterwards, or the sha pin will drift and certify will block again.",
+      "not_fixed_here_because": "sequencing is the next stage's to own"
+    },
+    {
+      "id": "single-month-upstream-truncation-undetected",
+      "severity": "residual_gap_distinct_from_the_v6_defect",
+      "found_by": "this stage, probing beyond the assigned defect",
+      "detail": "The v6 defect was 'month present in RAW, absent from SELECTED, excused by allowlist' — closed. A different route to the same outcome is still open: if the RAW feed itself is short by exactly one tail month, nothing catches it. Measured: dropping 1 tail month from both raw and selected is ACCEPTED (44d tail shortfall vs the 70d MAX_WINDOW_SHORTFALL_DAYS tolerance); dropping 2 or 3 is REJECTED by check 3a. The dropped/bogus/overlap checks cannot see it because they all compare raw against selected, and both are short together.",
+      "honest_caveat": "This is at least partly by design, not purely a bug. The 70-day tolerance exists so a run made before the latest month's report is published does not fail spuriously. From date arithmetic alone, 'the source is missing March' and 'March is not out yet' are genuinely indistinguishable. Closing it would need an independent expectation of how many releases should exist by a given date, which is a design decision beyond this stage's scope.",
+      "not_fixed_here_because": "out of scope — the brief confines this stage to the allowlist bypass and its test, and warns against widening the blast radius"
+    }
+  ],
+
+  "scope_compliance": {
+    "wrote_only_inside_worktree": true,
+    "touched_feed_json": false,
+    "touched_next_tasks_json": false,
+    "touched_knowledge_json": false,
+    "reran_event_study": false,
+    "merged_worktree": false,
+    "issued_verdict": false,
+    "used_no_verify_or_force_push": false
+  }
+}
