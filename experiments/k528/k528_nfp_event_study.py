@@ -13,22 +13,42 @@ K513 finding: NFP vol ratio = 1.09x (NS, p=0.195). This study digs deeper:
 Data sources:
   - SPY daily OHLCV: yfinance (2005-01 to 2026-03)
   - VIX daily close: yfinance (^VIX)
-  - NFP dates: programmatically generated (first Friday of each month)
+  - NFP dates: OFFICIAL BLS release calendar via ALFRED (FRED release id 50)
   - NFP actual values: FRED PAYEMS (monthly, for surprise calculation)
+
+CORRECTION 2026-07-19
+---------------------
+The original run dated every NFP to the first Friday of the month. That proxy is
+wrong for ~20% of the sample and it is wrong SYSTEMATICALLY, not randomly: BLS
+moves the release to the second Friday whenever the reference week falls late
+(28 dates land exactly 7 days early), and pulls it forward around holidays (12
+dates land 3-4 days late). It also invents a release in 2025-10 that never
+happened, and it forces every event onto a Friday when 16 of the 254 official
+releases are not on a Friday at all.
+
+Wrong event dates do not fail loudly. They count quiet days as event days and
+dump real event days into the control group, and the figures still render. So
+the dates now come from the official release calendar and the run FAILS CLOSED
+if that calendar is unreachable -- `get_first_friday` is gone, not deprecated.
+
+This script also emits a before/after comparison against the archived proxy-era
+results so the correction's effect on every published number is auditable
+(k528_nfp_official_dates_results.json).
 
 References:
   - Savor & Wilson (2013) "How Much Do Investors Care About Macroeconomic Risk?"
     JFE, core finding: scheduled macro announcements earn risk premium
   - Lucca & Moench (2015) "The Pre-FOMC Announcement Drift" JFE
   - K513: Our prior FOMC/NFP/CPI event study (2005-2025, 668 events)
+  - K1442: event-date audit that found this bug
 
 Author: VolPred Research System
-Date: 2026-03-27
+Date: 2026-03-27 (corrected 2026-07-19)
 """
 
 import json
 import warnings
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -36,28 +56,28 @@ import pandas as pd
 import yfinance as yf
 from scipy import stats
 
+from volpred.data.event_dates import nfp_release_dates
+
 warnings.filterwarnings("ignore")
 
-# ============================================================
-# 1. Helper: Generate NFP dates (first Friday of each month)
-# ============================================================
-def get_first_friday(year, month):
-    """Return the first Friday of a given year/month."""
-    first_day = datetime(year, month, 1)
-    # weekday(): Monday=0, Friday=4
-    days_until_friday = (4 - first_day.weekday()) % 7
-    return first_day + timedelta(days=days_until_friday)
+SAMPLE_START = "2005-01-01"
+SAMPLE_END = "2026-03-27"
 
+# ============================================================
+# 1. NFP dates: official BLS release calendar (no proxy, no fallback)
+# ============================================================
+def load_nfp_dates(start=SAMPLE_START, end=SAMPLE_END):
+    """Official NFP (Employment Situation) release dates.
 
-def generate_nfp_dates(start_year=2005, end_year=2026):
-    """Generate all NFP release dates (first Friday of each month)."""
-    dates = []
-    for year in range(start_year, end_year + 1):
-        end_month = 12 if year < 2026 else 3  # up to March 2026
-        for month in range(1, end_month + 1):
-            ff = get_first_friday(year, month)
-            dates.append(ff)
-    return dates
+    Deliberately has no except branch. If the release calendar cannot be
+    reached, this run must die -- a proxy calendar produces plausible numbers
+    from non-events, which is worse than no numbers at all. See the CORRECTION
+    note in the module docstring.
+    """
+    dates = nfp_release_dates(start, end)
+    if len(dates) == 0:
+        raise RuntimeError(f"official NFP calendar returned nothing for {start}..{end}")
+    return list(dates)
 
 
 # ============================================================
@@ -68,8 +88,8 @@ print("K528: NFP Event Study on SPY Volatility")
 print("=" * 60)
 
 print("\n[1/6] Downloading SPY and VIX data...")
-spy = yf.download("SPY", start="2005-01-01", end="2026-03-27", progress=False)
-vix = yf.download("^VIX", start="2005-01-01", end="2026-03-27", progress=False)
+spy = yf.download("SPY", start=SAMPLE_START, end=SAMPLE_END, progress=False)
+vix = yf.download("^VIX", start=SAMPLE_START, end=SAMPLE_END, progress=False)
 
 # Handle multi-level columns from yfinance
 if isinstance(spy.columns, pd.MultiIndex):
@@ -96,8 +116,14 @@ print(f"  VIX: {spy['VIX'].notna().sum()} days with VIX data")
 # ============================================================
 print("\n[2/6] Mapping NFP dates to trading days...")
 
-nfp_calendar = generate_nfp_dates(2005, 2026)
+nfp_calendar = load_nfp_dates()
 trading_dates = spy.index
+
+# The proxy forced every event onto a Friday. The official calendar does not,
+# and that is load-bearing for the Friday-baseline test below.
+n_friday = sum(1 for d in nfp_calendar if pd.Timestamp(d).weekday() == 4)
+print(f"  Official releases: {len(nfp_calendar)} "
+      f"({n_friday} Friday, {len(nfp_calendar) - n_friday} non-Friday)")
 
 # Map each NFP date to nearest trading day (could be holiday/early close)
 nfp_trading_dates = []
@@ -415,6 +441,265 @@ print(f"    → Focus on VIX level and broader market conditions instead")
 print(f"    → Consistent with K513 findings (NFP 1.09x, NS)")
 
 # ============================================================
+# 9b. Correction audit: every published number, before vs after
+# ============================================================
+# A mean can sit still while the median and the win rate move underneath it,
+# so no claim is judged on its mean alone. Each item carries mean / median /
+# win rate / n / significance, and the flip test looks at all of them.
+print(f"\n{'=' * 60}")
+print("CORRECTION AUDIT (proxy first-Friday -> official BLS calendar)")
+print("=" * 60)
+
+PROXY_PATH = Path(__file__).parent / "k528_nfp_event_study_results_PROXY_SUPERSEDED.json"
+if not PROXY_PATH.exists():
+    raise FileNotFoundError(
+        f"{PROXY_PATH.name} is missing. It is the archived proxy-era result and the "
+        "only record of what the published article claimed. Do not regenerate it."
+    )
+proxy = json.loads(PROXY_PATH.read_text())
+
+
+def win_rate(sample, reference):
+    """Share of `sample` above the median of `reference` (0.5 under the null)."""
+    ref_med = float(np.median(reference))
+    return float(np.mean(np.asarray(sample) > ref_med))
+
+
+# The proxy run only ever reported means, and a mean can hold still while the
+# median and the win rate move underneath it. Rather than leave the before-side
+# of those two columns null -- which would make the comparison unable to detect
+# exactly the failure it is looking for -- rebuild the proxy-era distributions
+# from the ARCHIVED per-event data. The dates come out of the archive, so this
+# reconstructs history without reintroducing a proxy calendar generator.
+proxy_events = proxy["event_data"]
+proxy_nfp_abs = np.array([e["event_abs_return"] for e in proxy_events])
+proxy_event_dates = pd.DatetimeIndex([pd.Timestamp(e["date"]) for e in proxy_events])
+proxy_non_nfp = spy[~spy.index.isin(set(proxy_event_dates))]
+proxy_non_nfp_abs = proxy_non_nfp["AbsReturn"].values
+proxy_fri_abs = proxy_non_nfp[proxy_non_nfp.index.weekday == 4]["AbsReturn"].values
+
+_p_pre_vix = np.array([e["pre_vix"] if e["pre_vix"] is not None else np.nan
+                       for e in proxy_events])
+_p_thr = proxy["regime_analysis"]["vix_median_split"]
+proxy_high_abs = proxy_nfp_abs[_p_pre_vix >= _p_thr]
+proxy_low_abs = proxy_nfp_abs[_p_pre_vix < _p_thr]
+
+# Sanity: the rebuilt means must reproduce the archived means, otherwise the
+# reconstruction is wrong and its medians cannot be trusted either.
+for _label, _rebuilt, _archived in (
+    ("nfp mean", proxy_nfp_abs.mean(), proxy["main_results"]["nfp_avg_abs_return"]),
+    ("baseline mean", proxy_non_nfp_abs.mean(), proxy["main_results"]["non_nfp_avg_abs_return"]),
+    ("high-vix mean", proxy_high_abs.mean(), proxy["regime_analysis"]["high_vix_nfp_abs_return"]),
+    ("low-vix mean", proxy_low_abs.mean(), proxy["regime_analysis"]["low_vix_nfp_abs_return"]),
+):
+    if not np.isclose(_rebuilt, _archived, rtol=1e-6):
+        raise AssertionError(
+            f"proxy reconstruction mismatch on {_label}: rebuilt {_rebuilt:.8f} "
+            f"vs archived {_archived:.8f}. Refusing to report medians derived "
+            "from a reconstruction that cannot reproduce the archived means."
+        )
+print("  proxy-era distributions reconstructed from archive (means reproduce)")
+
+audit_items = {}
+
+
+def record(key, label, before, after, note=""):
+    audit_items[key] = {"label": label, "before": before, "after": after, "note": note}
+
+
+# --- 1.10x : NFP vs all non-NFP days ---
+record(
+    "vol_ratio_vs_all", "NFP vs all non-NFP days (article: 1.10x)",
+    {
+        "mean_ratio": proxy["main_results"]["vol_ratio_vs_all"],
+        "nfp_mean": proxy["main_results"]["nfp_avg_abs_return"],
+        "baseline_mean": proxy["main_results"]["non_nfp_avg_abs_return"],
+        "p_value": proxy["statistical_tests"]["A_nfp_vs_all"]["p_value"],
+        "significant_5pct": proxy["statistical_tests"]["A_nfp_vs_all"]["significant_5pct"],
+        "n": proxy["sample"]["total_nfp_events"],
+        "median_ratio": float(np.median(proxy_nfp_abs) / np.median(proxy_non_nfp_abs)),
+        "win_rate": win_rate(proxy_nfp_abs, proxy_non_nfp_abs),
+    },
+    {
+        "mean_ratio": vol_ratio_all,
+        "nfp_mean": float(nfp_abs_returns.mean()),
+        "baseline_mean": baseline_abs_return,
+        "p_value": float(p_val_all),
+        "significant_5pct": bool(p_val_all < 0.05),
+        "n": int(len(df)),
+        "median_ratio": float(np.median(nfp_abs_returns) / np.median(non_nfp_abs_returns)),
+        "win_rate": win_rate(nfp_abs_returns, non_nfp_abs_returns),
+    },
+    note="proxy-side median_ratio / win_rate are reconstructed from the archived "
+         "per-event data, not from the proxy run's own output (it only reported means).",
+)
+
+# --- 1.17x : NFP vs Friday-only baseline ---
+record(
+    "vol_ratio_vs_friday", "NFP vs non-NFP Friday baseline (article: 1.17x)",
+    {
+        "mean_ratio": proxy["main_results"]["vol_ratio_vs_friday"],
+        "p_value": proxy["statistical_tests"]["B_nfp_vs_friday"]["p_value"],
+        "significant_5pct": proxy["statistical_tests"]["B_nfp_vs_friday"]["significant_5pct"],
+        "n": proxy["sample"]["total_nfp_events"],
+        "nfp_days_on_friday": proxy["sample"]["total_nfp_events"],
+        "median_ratio": float(np.median(proxy_nfp_abs) / np.median(proxy_fri_abs)),
+        "win_rate": win_rate(proxy_nfp_abs, proxy_fri_abs),
+    },
+    {
+        "mean_ratio": vol_ratio_fri,
+        "p_value": float(p_val_fri),
+        "significant_5pct": bool(p_val_fri < 0.05),
+        "n": int(len(df)),
+        "nfp_days_on_friday": int((df["weekday"] == 4).sum()),
+        "median_ratio": float(np.median(nfp_abs_returns) / np.median(friday_non_nfp_abs)),
+        "win_rate": win_rate(nfp_abs_returns, friday_non_nfp_abs),
+    },
+    note="Under the proxy every NFP day was a Friday by construction, so this "
+         "test compared Fridays with Fridays. On the official calendar it no "
+         "longer does, which is a change in what the test means, not just in "
+         "its value.",
+)
+
+# --- 2.17x : high-VIX vs low-VIX regime ---
+proxy_reg = proxy["regime_analysis"]
+record(
+    "regime_ratio", "High-VIX vs low-VIX NFP volatility (article: 2.17x)",
+    {
+        "mean_ratio": proxy_reg["high_vix_nfp_abs_return"] / proxy_reg["low_vix_nfp_abs_return"],
+        "high_mean": proxy_reg["high_vix_nfp_abs_return"],
+        "low_mean": proxy_reg["low_vix_nfp_abs_return"],
+        "n_high": proxy_reg["n_high"],
+        "n_low": proxy_reg["n_low"],
+        "p_value": proxy_reg["p_value"],
+        "significant_5pct": proxy_reg["p_value"] < 0.05,
+        "median_ratio": float(np.median(proxy_high_abs) / np.median(proxy_low_abs)),
+        "win_rate": win_rate(proxy_high_abs, proxy_low_abs),
+    },
+    {
+        "mean_ratio": float(high_vix.mean() / low_vix.mean()),
+        "high_mean": float(high_vix.mean()),
+        "low_mean": float(low_vix.mean()),
+        "n_high": int(len(high_vix)),
+        "n_low": int(len(low_vix)),
+        "p_value": float(p_regime),
+        "significant_5pct": bool(p_regime < 0.05),
+        "median_ratio": float(high_vix.median() / low_vix.median()),
+        "win_rate": win_rate(high_vix.values, low_vix.values),
+    },
+)
+
+# --- 0.45 : pre-event VIX correlation ---
+proxy_e = proxy["statistical_tests"]["E_vix_predictive"]
+record(
+    "vix_correlation", "Pre-event VIX vs event-day |return| (article: r=0.45)",
+    {
+        "pearson_r": proxy_e["pearson_r"],
+        "pearson_p": proxy_e["pearson_p"],
+        "spearman_rho": proxy_e["spearman_rho"],
+        "spearman_p": proxy_e["spearman_p"],
+        "slope_pct_per_vix_pt": proxy_e["slope"] * 100,
+        "n": proxy["sample"]["total_nfp_events"],
+        "significant_5pct": proxy_e["pearson_p"] < 0.05,
+    },
+    {
+        "pearson_r": float(r_vix),
+        "pearson_p": float(p_vix),
+        "spearman_rho": float(rho_vix),
+        "spearman_p": float(p_rho_vix),
+        "slope_pct_per_vix_pt": float(slope) * 100,
+        "n": int(len(vix_valid)),
+        "significant_5pct": bool(p_vix < 0.05),
+    },
+)
+
+# --- 16.71 : the VIX median that splits the regimes ---
+# The article uses this threshold to place a specific date (2026-07-01 VIX
+# 16.59) on the low-VIX side. If the threshold crosses 16.59 the article's
+# worked example inverts, so it is audited as a claim in its own right.
+proxy_thr = proxy_reg["vix_median_split"]
+record(
+    "vix_median_threshold", "VIX median split (article: 16.71)",
+    {
+        "threshold": proxy_thr,
+        "n": proxy["sample"]["total_nfp_events"],
+        "places_20260701_vix_1659_in": "low" if 16.59 < proxy_thr else "high",
+    },
+    {
+        "threshold": float(vix_median),
+        "n": int(df["pre_vix"].notna().sum()),
+        "places_20260701_vix_1659_in": "low" if 16.59 < float(vix_median) else "high",
+    },
+)
+
+# --- 254 : the sample itself ---
+proxy_dates = {r["date"] for r in proxy["event_data"]}
+new_dates = {r["date"] for r in results}
+record(
+    "sample", "NFP event sample (article: 254 events)",
+    {
+        "n": proxy["sample"]["total_nfp_events"],
+        "date_range": proxy["sample"]["date_range"],
+        "non_nfp_trading_days": proxy["sample"]["non_nfp_trading_days"],
+    },
+    {
+        "n": int(len(df)),
+        "date_range": f"{df['date'].iloc[0]} to {df['date'].iloc[-1]}",
+        "non_nfp_trading_days": int(non_nfp_mask.sum()),
+        "dates_in_common": len(proxy_dates & new_dates),
+        "proxy_only_dates": sorted(proxy_dates - new_dates),
+        "official_only_dates": sorted(new_dates - proxy_dates),
+    },
+    note="Equal counts do not mean equal samples -- check dates_in_common.",
+)
+
+
+def verdict_for(key):
+    """Flip test: significance change, sign change, or a >10% move in the headline."""
+    b, a = audit_items[key]["before"], audit_items[key]["after"]
+    reasons = []
+    if b.get("significant_5pct") is not None and a.get("significant_5pct") is not None:
+        if bool(b["significant_5pct"]) != bool(a["significant_5pct"]):
+            reasons.append(
+                "significance flipped "
+                f"({'sig' if b['significant_5pct'] else 'NS'} -> "
+                f"{'sig' if a['significant_5pct'] else 'NS'})"
+            )
+    # The mean is not trusted on its own: the median and the win rate are
+    # checked independently, because the failure mode this audit exists to
+    # catch is a stable mean sitting on top of a moved distribution.
+    for field in ("mean_ratio", "median_ratio", "pearson_r", "threshold", "n"):
+        if field in b and field in a and b[field] and a[field]:
+            rel = abs(a[field] - b[field]) / abs(b[field])
+            if rel > 0.10:
+                reasons.append(f"{field} moved {rel * 100:.1f}%")
+    if b.get("win_rate") and a.get("win_rate"):
+        if abs(a["win_rate"] - b["win_rate"]) > 0.05:
+            reasons.append(
+                f"win_rate moved {b['win_rate']:.3f} -> {a['win_rate']:.3f}"
+            )
+    if key == "vix_median_threshold" and b["places_20260701_vix_1659_in"] != a["places_20260701_vix_1659_in"]:
+        reasons.append("the article's worked example changes regime")
+    return ("CONCLUSION_FLIPPED" if reasons else "NUMERIC_ADJUSTMENT"), reasons
+
+
+print(f"\n  {'Claim':<46} {'Before':>12} {'After':>12}  Verdict")
+for key, item in audit_items.items():
+    v, reasons = verdict_for(key)
+    item["verdict"], item["verdict_reasons"] = v, reasons
+    headline = next((f for f in ("mean_ratio", "pearson_r", "threshold", "n")
+                     if f in item["before"]), None)
+    bf = item["before"].get(headline)
+    af = item["after"].get(headline)
+    fmt = (lambda x: f"{x:,.4f}" if isinstance(x, float) else str(x))
+    print(f"  {item['label']:<46} {fmt(bf):>12} {fmt(af):>12}  {v}")
+    for r in reasons:
+        print(f"      - {r}")
+
+n_flipped = sum(1 for i in audit_items.values() if i["verdict"] == "CONCLUSION_FLIPPED")
+print(f"\n  {n_flipped} of {len(audit_items)} audited claims changed materially.")
+
+# ============================================================
 # 10. Save results
 # ============================================================
 print("\n[6/6] Saving results...")
@@ -424,11 +709,18 @@ output = {
     "title": "NFP Event Study on SPY Volatility",
     "date": datetime.now(timezone.utc).isoformat(),
     "data_source": "yfinance (SPY, ^VIX), 2005-01 to 2026-03",
+    "event_date_source": {
+        "source": "official BLS release calendar via ALFRED (FRED release id 50)",
+        "accessor": "volpred.data.event_dates.nfp_release_dates",
+        "fallback": "none - the run raises if the calendar is unreachable",
+        "supersedes": "first-Friday-of-month proxy (wrong on ~20% of dates)",
+    },
     "sample": {
         "total_nfp_events": len(df),
         "date_range": f"{df['date'].iloc[0]} to {df['date'].iloc[-1]}",
         "non_nfp_trading_days": int(non_nfp_mask.sum()),
         "friday_baseline_days": int(friday_mask.sum()),
+        "nfp_days_on_friday": int((df["weekday"] == 4).sum()),
     },
     "main_results": {
         "nfp_avg_abs_return": float(nfp_abs_returns.mean()),
@@ -542,4 +834,40 @@ with open(out_path, "w") as f:
     json.dump(output, f, indent=2, default=str)
 
 print(f"  Saved to: {out_path}")
+
+# The correction audit is written separately: it is the artifact the article
+# correction is justified against, and it must stay readable without wading
+# through 254 events of per-day data.
+audit_out = {
+    "experiment_id": "K528",
+    "title": "NFP event-date correction: first-Friday proxy vs official BLS calendar",
+    "generated_at": datetime.now(timezone.utc).isoformat(),
+    "before_source": PROXY_PATH.name,
+    "after_source": out_path.name,
+    "event_date_source": output["event_date_source"],
+    "calendar_diff": {
+        "proxy_only_dates": sorted(proxy_dates - new_dates),
+        "official_only_dates": sorted(new_dates - proxy_dates),
+        "dates_in_common": len(proxy_dates & new_dates),
+        "n_proxy": len(proxy_dates),
+        "n_official": len(new_dates),
+        "nfp_days_on_friday_official": int((df["weekday"] == 4).sum()),
+    },
+    "win_rate_definition": (
+        "share of the sample exceeding the MEDIAN of its comparison group; "
+        "0.5 under the null"
+    ),
+    "items": audit_items,
+    "n_claims_flipped": n_flipped,
+    "n_claims_audited": len(audit_items),
+    "article_correction": {
+        "article_id": "mile_35eef830",
+        "status": "pending - filled in by the correction step",
+        "replacements": None,
+    },
+}
+audit_path = Path(__file__).parent / "k528_nfp_official_dates_results.json"
+with open(audit_path, "w") as f:
+    json.dump(audit_out, f, indent=2, default=str)
+print(f"  Saved to: {audit_path}")
 print("\nDone!")

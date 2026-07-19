@@ -328,3 +328,134 @@ class TestNoProxyResidue:
         assert [r["nfp_release_date"] for r in results["historical_nfp_table"]] == (
             EXPECTED_TRAILING_13
         )
+
+
+# ---------------------------------------------------------------------------
+# K528 -- the same proxy, the same bug, a 21-year sample.
+#
+# The sibling experiment above had 13 events. K528 had 254 and fed six numbers
+# straight into a published article (mile_35eef830). Correcting its calendar
+# swapped 46 of them, and the NFP-vs-Friday result stopped being significant
+# (p 0.0335 -> 0.0571). Same module rather than a new file: "NFP event dates
+# are official" is one concern and should keep one enforcement owner.
+# ---------------------------------------------------------------------------
+
+K528_DIR = REPO_ROOT / "experiments" / "k528"
+K528_PY = K528_DIR / "k528_nfp_event_study.py"
+K528_RESULTS = K528_DIR / "k528_nfp_event_study_results.json"
+K528_AUDIT = K528_DIR / "k528_nfp_official_dates_results.json"
+
+
+def _load_k528(path):
+    import json
+
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _k528_event_dates():
+    return [pd.Timestamp(e["date"]) for e in _load_k528(K528_RESULTS)["event_data"]]
+
+
+def assert_not_first_friday_proxy(dates):
+    """Reject a calendar carrying the first-Friday proxy's fingerprints.
+
+    Three independent signatures, because a partial revert should be caught as
+    readily as a total one. This is the function the mutation test below fires
+    a proxy calendar at: a guard nobody has ever seen fail is not a guard.
+    """
+    dates = pd.DatetimeIndex(dates)
+    if len(dates) == 0:
+        raise AssertionError("empty calendar")
+
+    if (dates.weekday == 4).all():
+        raise AssertionError(
+            f"all {len(dates)} releases fall on a Friday. The official calendar "
+            "does not: BLS moves the release off Friday at holiday and shutdown "
+            "boundaries. This is the proxy's signature."
+        )
+
+    on_first_friday = [
+        d for d in dates if d.date() == _first_friday(d.year, d.month)
+    ]
+    if len(on_first_friday) == len(dates):
+        raise AssertionError(
+            "every release sits on the first Friday of its month -- proxy calendar"
+        )
+
+    phantom = [d for d in dates if (d.year, d.month) == (2025, 10)]
+    if phantom:
+        raise AssertionError(
+            f"calendar contains an October 2025 release ({phantom[0].date()}). "
+            "The shutdown cancelled it; only the proxy invents one."
+        )
+
+
+class TestK528UsesOfficialCalendar:
+    def test_defines_no_first_friday_helper(self):
+        src = K528_PY.read_text(encoding="utf-8")
+        assert "def get_first_friday" not in src
+        assert "def generate_nfp_dates" not in src
+        assert "(4 - first_day.weekday()) % 7" not in src
+
+    def test_imports_the_official_calendar(self):
+        src = K528_PY.read_text(encoding="utf-8")
+        assert "from volpred.data.event_dates import nfp_release_dates" in src
+
+    def test_results_declare_the_official_source_and_no_fallback(self):
+        source = _load_k528(K528_RESULTS)["event_date_source"]
+        assert "nfp_release_dates" in source["accessor"]
+        assert source["fallback"] == "none - the run raises if the calendar is unreachable"
+
+    def test_event_dates_carry_no_proxy_signature(self):
+        assert_not_first_friday_proxy(_k528_event_dates())
+
+    def test_sample_is_not_uniformly_friday(self):
+        """231 of 253, not 253 of 253. The gap is the corrected dates."""
+        results = _load_k528(K528_RESULTS)
+        n, on_friday = results["sample"]["total_nfp_events"], results["sample"]["nfp_days_on_friday"]
+        assert n == 253
+        assert on_friday == 231
+        assert on_friday < n
+
+    def test_audit_records_the_dates_that_changed(self):
+        diff = _load_k528(K528_AUDIT)["calendar_diff"]
+        assert diff["dates_in_common"] == 207
+        # The equal-looking sample sizes hide a 46-date swap; assert the swap,
+        # not the count, or a silent revert reads as unchanged.
+        assert len(diff["proxy_only_dates"]) == 47
+        assert len(diff["official_only_dates"]) == 46
+        assert "2025-10-03" in diff["proxy_only_dates"]
+        assert "2025-11-20" in diff["official_only_dates"]
+
+
+class TestProxyMutationIsCaught:
+    """Mutation test. Reverting to the proxy must turn the suite red, and the
+    only way to know that is to build the proxy calendar and watch the guard
+    reject it."""
+
+    @staticmethod
+    def _proxy_calendar(start_year=2005, end_year=2026, end_month=3):
+        out = []
+        for year in range(start_year, end_year + 1):
+            last = 12 if year < end_year else end_month
+            for month in range(1, last + 1):
+                out.append(pd.Timestamp(_first_friday(year, month)))
+        return pd.DatetimeIndex(out)
+
+    def test_the_proxy_calendar_is_rejected(self):
+        with pytest.raises(AssertionError, match="Friday"):
+            assert_not_first_friday_proxy(self._proxy_calendar())
+
+    def test_phantom_october_2025_alone_is_enough_to_fail(self):
+        """A partial revert that keeps some real dates still gets caught."""
+        mixed = pd.DatetimeIndex(
+            _k528_event_dates() + [pd.Timestamp("2025-10-03")]
+        )
+        with pytest.raises(AssertionError, match="October 2025"):
+            assert_not_first_friday_proxy(mixed)
+
+    def test_the_guard_accepts_the_official_calendar(self, official):
+        """The other half of the mutation test: the guard must not reject
+        everything. A guard that always fails is as useless as one that never
+        does."""
+        assert_not_first_friday_proxy(official)
