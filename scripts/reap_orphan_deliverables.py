@@ -274,6 +274,28 @@ def _path_is_dirty(rel: str) -> bool:
     return status.returncode != 0 or bool(status.stdout.strip())
 
 
+_WORKTREE_PREFIX_RE = re.compile(r"^\.claude/worktrees/[^/]+/")
+
+
+def _landed_in_main(raw: object) -> str | None:
+    """Worktree-declared output that has since been merged into the checkout.
+
+    A job that ran in a worktree declares `.claude/worktrees/<wt>/experiments/…`.
+    Once the worktree merges, `merge_worktree.sh` removes it, so the declared
+    path stops existing while the deliverable itself is safe in the main tree —
+    the exact shape that produced seven bogus `no_existing_declared_files` holds
+    on 2026-07-19. Resolve the same repo-relative path in the checkout instead.
+    """
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    original = raw.strip().removeprefix("./")
+    stripped = _WORKTREE_PREFIX_RE.sub("", original)
+    if stripped == original:
+        return None  # never was a worktree path — nothing to re-resolve
+    rel, _reason = _exact_repo_file(stripped)
+    return rel
+
+
 def scan_job_deliverables() -> dict:
     """Find terminal compute jobs whose exact declared files need delivery."""
     candidates: list[dict] = []
@@ -313,6 +335,16 @@ def scan_job_deliverables() -> dict:
                 rejected.append({"path": raw, "reason": reason})
         exact = list(dict.fromkeys(exact))
         if not exact:
+            landed = [rel for rel in (_landed_in_main(raw) for raw in declared)
+                      if rel is not None]
+            if landed:
+                # Already in the checkout under its post-merge path. Nothing is
+                # at risk, so holding it only manufactures a triage task.
+                continue
+            if job.get("status") == "failed":
+                # A failed job produced no deliverable to preserve. Holding it
+                # asks a human to find an exit for something that never existed.
+                continue
             # Do not finalize the job: a timed-out producer may still land a
             # declared file before the next sweep, and preserving it is the goal.
             held.append({"job_id": str(job.get("id") or job_path.stem),
@@ -325,7 +357,11 @@ def scan_job_deliverables() -> dict:
         previous = {str(path) for path in previously_delivered}
         pending = [path for path in exact if path not in previous or _path_is_dirty(path)]
         if not pending:
-            if rejected:
+            # A declared output that `.gitignore` excludes (`__pycache__`,
+            # scratch `*_article.md`) is not a deliverable this reaper can ever
+            # deliver — every real output already landed. Holding on those alone
+            # is bookkeeping noise, not a preserved artifact.
+            if rejected and any(r.get("reason") != "git_ignored" for r in rejected):
                 held.append({
                     "job_id": str(job.get("id") or job_path.stem),
                     "reason": "declared_outputs_not_yet_deliverable",
@@ -490,7 +526,28 @@ def is_registered(rel: str, fm: dict, body: str, feed: list[dict]) -> tuple[bool
             refs = ((art.get("details") or {}).get("experiment_refs")) or []
             if isinstance(refs, list) and kids & {str(r).upper() for r in refs}:
                 return True, f"K-coverage → {art.get('id')}"
+
+    # Derivatives of an already-published article name it in the filename:
+    # `fb_mile_5a20a332.md` (FB copy), `k841_mile_179df5f5_correction.md`
+    # (errata). They carry no frontmatter title — they were never meant to enter
+    # the draft pool — so every probe above misses and they land in `no_title`
+    # held forever. The article id in the name is an exact back-link; use it.
+    named = _mile_ids(rel)
+    if named:
+        for art in feed:
+            if str(art.get("id") or "") in named:
+                return True, f"derivative of published {art.get('id')}"
     return False, ""
+
+
+# No leading \b: the id is usually prefixed (`fb_mile_…`), and `_` is a word
+# character, so \b would never fire on exactly the names this probe exists for.
+_MILE_ID_RE = re.compile(r"mile_[0-9a-f]{6,}(?![0-9a-f])")
+
+
+def _mile_ids(rel: str) -> set[str]:
+    """Feed article ids named by a draft's filename (not its body)."""
+    return set(_MILE_ID_RE.findall(PurePosixPath(rel).name))
 
 
 def _inflight_stems(tasks: list[dict]) -> set[str]:
@@ -738,6 +795,7 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
     records: list[tuple[str, str]] = []
     dirty_set: set[str] = set()
     deletion_dirs: set[str] = set()
+    pending_rename: dict[str, list[str]] = {}
 
     for line in status.stdout.splitlines():
         code, rel = line[:2], line[3:].strip()
@@ -747,8 +805,8 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
             # A disappearing file is not a deliverable. Committing the deletion
             # would be this script's first destructive act; report it instead.
             if all_files:
-                held.append({"path": rel, "kind": "deletion",
-                             "reason": "deletion_not_owned"})
+                pending_rename.setdefault(
+                    str(PurePosixPath(rel).parent), []).append(rel)
                 deletion_dirs.add(str(PurePosixPath(rel).parent))
             continue
         dirty_set.add(rel)
@@ -802,12 +860,25 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
             # additive half untracked). The reaper never commits deletions, so
             # adopting only the other half would land a half-applied rename and
             # silently duplicate invalidated data. Held → escalated by name.
-            held.append({"path": rel, "kind": "paired_deletion",
-                         "reason": f"paired_deletion_pending:{parent}"})
+            pending_rename.setdefault(parent, []).append(rel)
             continue
 
         collectable.append({"path": rel, "kind": PurePosixPath(rel).suffix.lstrip("."),
                             "reason": "untracked" if code == "??" else "modified"})
+
+    # One in-flight rename is one thing to do, not N orphans. k1380's deliberate
+    # `*_INVALID_20260716.*` invalidation produced eight held rows with two
+    # different "not owned" reasons, and the escalation task read as eight
+    # ownerless artifacts when the actual state was "a directory is mid-rename,
+    # waiting to be committed". Report the directory once, name its members.
+    for parent in sorted(pending_rename):
+        members = sorted(set(pending_rename[parent]))
+        held.append({"path": parent, "kind": "pending_rename",
+                     "reason": "pending_rename",
+                     "detail": f"{len(members)} 個檔案處於未 commit 的改名/修改中"
+                               f"（非無主）：{', '.join(members)}。"
+                               f"出口是 commit 這個目錄，不是找人認領。",
+                     "members": members})
 
     return {"namespace": ns_id, "collectable": collectable, "held": held,
             "skipped": skipped}

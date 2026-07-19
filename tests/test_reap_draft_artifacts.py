@@ -202,9 +202,148 @@ def test_deletion_is_never_committed(repo):
 
     scan = mod.scan_namespace("drafts")
     assert scan["collectable"] == []
-    assert scan["held"][0]["reason"] == "deletion_not_owned"
+    # Reported under its directory as an uncommitted rename/edit, not adopted.
+    assert scan["held"][0]["reason"] == "pending_rename"
+    assert "storage/drafts/K8_general_draft.md" in scan["held"][0]["members"]
     # Still in HEAD: the reaper reported the deletion, it did not ratify it.
     assert _git(root, "cat-file", "-e", "HEAD:storage/drafts/K8_general_draft.md").returncode == 0
+
+
+# ---------------------------------------------------------------------------
+# 2026-07-19 false-positive triad (assign_c0ad1962). Every one of these produced
+# a "無主產物" escalation task for something that was never ownerless. The cost
+# is not the alert — it is that a human opened 23 files to conclude "all fine".
+# ---------------------------------------------------------------------------
+
+
+def _feed(root: Path, articles: list[dict]) -> None:
+    _write(root / "storage" / "reports" / "feed.json",
+           json.dumps(articles, ensure_ascii=False))
+
+
+def test_derivative_of_published_article_is_not_an_orphan(repo, monkeypatch):
+    """`fb_mile_<id>.md` / `k841_mile_<id>_correction.md` name their article.
+
+    They carry no frontmatter title on purpose — they were never meant to enter
+    the draft pool — so the title/source_draft/K-coverage probes all miss and
+    they sat in `no_title` held for 14 shifts. The id in the filename is an
+    exact back-link to an already-published article.
+    """
+    mod, root = repo
+    monkeypatch.setattr(mod, "FEED_PATH", root / "storage" / "reports" / "feed.json")
+    _feed(root, [{"id": "mile_29018fa1", "title": "事件溫度計", "audience": "event"}])
+    for name in ("fb_mile_29018fa1.md", "k841_mile_29018fa1_correction.md"):
+        _write(root / "storage" / "drafts" / name,
+               "# mile_id: mile_29018fa1\n主貼文正文", mtime=OLD)
+
+    scan = mod.scan()
+    assert scan["held"] == []
+    assert scan["adoptable"] == []
+    assert scan["skipped"]["registered"] == 2
+
+
+def test_draft_naming_an_unpublished_id_is_still_held(repo, monkeypatch):
+    """The probe must be a back-link, not a filename-shaped excuse to skip."""
+    mod, root = repo
+    monkeypatch.setattr(mod, "FEED_PATH", root / "storage" / "reports" / "feed.json")
+    _feed(root, [{"id": "mile_deadbeef", "title": "other"}])
+    _write(root / "storage" / "drafts" / "fb_mile_29018fa1.md", "body", mtime=OLD)
+
+    scan = mod.scan()
+    assert [e["reason"] for e in scan["held"]] == ["no_title"]
+
+
+def _job(root: Path, job_id: str, **fields) -> None:
+    _write(root / "storage" / "ops" / "compute_queue" / f"{job_id}.json",
+           json.dumps({"id": job_id, **fields}))
+
+
+def test_merged_worktree_output_is_not_held(repo, monkeypatch):
+    """A job declares `.claude/worktrees/<wt>/…`; merge removes the worktree.
+
+    The deliverable is then safe in the checkout under the same repo-relative
+    path, but the declared path stops existing — which is how five k1704 jobs
+    became `no_existing_declared_files` holds while K1704 sat certified in main.
+    """
+    mod, root = repo
+    monkeypatch.setattr(mod, "QUEUE_DIR", root / "storage" / "ops" / "compute_queue")
+    _write(root / "experiments" / "k1704" / "K1704_results.json", "{}")
+    _git(root, "add", "-A")
+    _git(root, "commit", "-q", "-m", "merged result")
+    _job(root, "k1704-formal-cache-rerun", status="completed", output_paths=[
+        ".claude/worktrees/dispatch-slot-1-f217aefb-k1704/experiments/k1704/K1704_results.json"])
+
+    out = mod.scan_job_deliverables()
+    assert out["held"] == []
+    assert out["candidates"] == []
+
+
+def test_worktree_output_still_missing_is_held(repo, monkeypatch):
+    """k1730's shape: completed, unmerged, nothing in main — that one is real."""
+    mod, root = repo
+    monkeypatch.setattr(mod, "QUEUE_DIR", root / "storage" / "ops" / "compute_queue")
+    _job(root, "compute-k1730-arm-a", status="completed", output_paths=[
+        ".claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730/results.json"])
+
+    out = mod.scan_job_deliverables()
+    assert [h["reason"] for h in out["held"]] == ["no_existing_declared_files"]
+
+
+def test_failed_job_with_no_output_is_not_held(repo, monkeypatch):
+    """A job that exited non-zero produced nothing to preserve. Asking a human
+    to find an exit for a file that never existed is pure noise."""
+    mod, root = repo
+    monkeypatch.setattr(mod, "QUEUE_DIR", root / "storage" / "ops" / "compute_queue")
+    _job(root, "K1694-script-rerun-1211", status="failed",
+         output_paths=["experiments/K1694/K1694_results.json"])
+
+    assert mod.scan_job_deliverables()["held"] == []
+
+
+def test_gitignored_leftovers_do_not_hold_a_delivered_job(repo, monkeypatch):
+    """Every real output landed; the stragglers are `__pycache__` and a scratch
+    `*_article.md` that .gitignore excludes. Unreachable by design ≠ orphaned."""
+    mod, root = repo
+    monkeypatch.setattr(mod, "QUEUE_DIR", root / "storage" / "ops" / "compute_queue")
+    panels = root / "storage" / "lazypack_jobs" / "mile_a8d79d6a" / "panels"
+    _write(root / ".gitignore", "__pycache__/\n*_article.md\n")
+    _write(panels / "1_framework.png", "png")
+    _write(panels / "mile_a8d79d6a_article.md", "scratch")
+    _write(panels / "__pycache__" / "render.cpython-312.pyc", "pyc")
+    _git(root, "add", "-A")
+    _git(root, "commit", "-q", "-m", "panels delivered")
+    rel = "storage/lazypack_jobs/mile_a8d79d6a/panels"
+    _job(root, "lazypack-mile_a8d79d6a-r2", status="completed",
+         output_paths=[f"{rel}/1_framework.png", f"{rel}/mile_a8d79d6a_article.md",
+                       f"{rel}/__pycache__/render.cpython-312.pyc"],
+         delivered_paths=[f"{rel}/1_framework.png"])
+
+    assert mod.scan_job_deliverables()["held"] == []
+
+
+def test_pending_rename_is_one_held_row_not_eight(repo):
+    """k1380 deliberately archived a bad run as `*_INVALID_20260716.*`. The
+    reaper reported the three deletions and five surviving files as eight
+    separate ownerless artifacts across two reasons. It is one directory
+    mid-rename, and its exit is a commit — say that once."""
+    mod, root = repo
+    drafts = root / "storage" / "drafts"
+    for name in ("k1380_results.json", "k1380_losses_all.npy", "README.md"):
+        _write(drafts / name, "payload")
+    _git(root, "add", "-A")
+    _git(root, "commit", "-q", "-m", "k1380 run")
+    for name in ("k1380_results.json", "k1380_losses_all.npy"):
+        (drafts / name).unlink()
+        _write(drafts / name.replace(".", "_INVALID_20260716."), "payload", mtime=OLD)
+    _write(drafts / "README.md", "run voided, re-run queued", mtime=OLD)
+
+    scan = mod.scan_namespace("drafts")
+    assert scan["collectable"] == []
+    assert len(scan["held"]) == 1
+    entry = scan["held"][0]
+    assert entry["reason"] == "pending_rename"
+    assert entry["path"] == "storage/drafts"
+    assert len(entry["members"]) == 5
 
 
 def test_draft_collector_refuses_late_prestaged_collision(repo):

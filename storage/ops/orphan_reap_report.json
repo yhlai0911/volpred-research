@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-19T05:02:01.834442+00:00",
+  "generated_at": "2026-07-19T06:25:53.078900+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 28,
-    "grace": 1,
+    "registered": 29,
+    "grace": 0,
     "inflight": 0
   },
   "orphan_count": 0,
@@ -37,7 +37,24 @@
     },
     "experiments": {
       "collectable": [],
-      "held": [],
+      "held": [
+        {
+          "path": "experiments/k1380",
+          "kind": "pending_rename",
+          "reason": "pending_rename",
+          "detail": "8 個檔案處於未 commit 的改名/修改中（非無主）：experiments/k1380/README.md, experiments/k1380/k1380.py, experiments/k1380/k1380_losses_all.npy, experiments/k1380/k1380_losses_all_INVALID_20260716.npy, experiments/k1380/k1380_results.json, experiments/k1380/k1380_results_INVALID_20260716.json, experiments/k1380/k1380_spa_from_cache.py, experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py。出口是 commit 這個目錄，不是找人認領。",
+          "members": [
+            "experiments/k1380/README.md",
+            "experiments/k1380/k1380.py",
+            "experiments/k1380/k1380_losses_all.npy",
+            "experiments/k1380/k1380_losses_all_INVALID_20260716.npy",
+            "experiments/k1380/k1380_results.json",
+            "experiments/k1380/k1380_results_INVALID_20260716.json",
+            "experiments/k1380/k1380_spa_from_cache.py",
+            "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py"
+          ]
+        }
+      ],
       "skipped": {
         "grace": 0,
         "inflight": 0,
@@ -48,28 +65,7 @@
   },
   "held_escalations": [],
   "held_escalated_paths": [
-    "experiments/k1380/README.md",
-    "experiments/k1380/k1380.py",
-    "experiments/k1380/k1380_losses_all.npy",
-    "experiments/k1380/k1380_losses_all_INVALID_20260716.npy",
-    "experiments/k1380/k1380_results.json",
-    "experiments/k1380/k1380_results_INVALID_20260716.json",
-    "experiments/k1380/k1380_spa_from_cache.py",
-    "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py",
-    "job:K1694-script-rerun-1211",
     "job:compute-k1730-arm-a-production-quick-mode-1784358686",
-    "job:k1704-formal-cache-rerun-20260716",
-    "job:k1704-formal-rerun-20260716",
-    "job:k1704-input-ledger-delta-review-20260716",
-    "job:k1704-origin-ledger-delta-review-20260716",
-    "job:k1704-post-run-review-20260716",
-    "job:k1731-armB-corrected-rev5",
-    "job:lazypack-mile_a8d79d6a-r2",
-    "storage/drafts/digest_20260714.md",
-    "storage/drafts/fb_mile_5a20a332.md",
-    "storage/drafts/fb_mile_f78be848.md",
-    "storage/drafts/k1410_source_provenance_update.md",
-    "storage/drafts/k841_mile_179df5f5_correction.md",
-    "storage/drafts/k841_mile_b4304948_correction.md"
+    "job:k1731-armB-corrected-rev5"
   ]
 }

@@ -163,6 +163,10 @@ def test_d_paired_deletion_is_held_not_half_committed(env):
 
     reaper 永不 commit 刪除，所以只收另一半 = 落地一個做到一半的 rename，並且把已作廢
     的資料默默複製一份進版控。held + 指名，讓 TTL 升級去處理，不盲收。
+
+    2026-07-19（assign_c0ad1962）：held 仍在，但改成「每個目錄一列」。原本兩半各一列、
+    各帶一個「not owned」理由，八個檔案就是八列無主產物 —— 而真實狀態是「一個目錄正在
+    改名、等 commit」。列出成員即可，理由只需要一個。
     """
     mod, root = env
     _install_registry(mod, root, {"namespaces": [{"id": "experiments", "path": "experiments"}]})
@@ -176,10 +180,14 @@ def test_d_paired_deletion_is_held_not_half_committed(env):
 
     scan = mod.scan_namespace("experiments")
     assert scan["collectable"] == []
-    reasons = {e["path"]: e["reason"] for e in scan["held"]}
-    assert reasons["experiments/k1380/k1380_results.json"] == "deletion_not_owned"
-    assert (reasons["experiments/k1380/k1380_results_INVALID_20260716.json"]
-            == "paired_deletion_pending:experiments/k1380")
+    assert len(scan["held"]) == 1
+    entry = scan["held"][0]
+    assert entry["path"] == "experiments/k1380"
+    assert entry["reason"] == "pending_rename"
+    assert set(entry["members"]) == {
+        "experiments/k1380/k1380_results.json",
+        "experiments/k1380/k1380_results_INVALID_20260716.json",
+    }
     # 刪除從來沒有被批准過：HEAD 裡的原檔還在。
     assert _git(root, "cat-file", "-e",
                 "HEAD:experiments/k1380/k1380_results.json").returncode == 0

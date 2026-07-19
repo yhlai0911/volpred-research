@@ -1,12 +1,12 @@
 {
-  "last_seen_run_id": 29672635000,
+  "last_seen_run_id": 29674177829,
   "last_seen_conclusion": "failure",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
-  "last_task_id": "ci-red-29672635000",
+  "last_task_id": "ci-red-29674177829",
   "last_push_remediation": {
     "attempted": true,
-    "ahead": 6,
-    "head_sha": "c541b0ef15be1c96a75b907be7f23ccef553c0c5",
+    "ahead": 24,
+    "head_sha": "53a445cdd1e5f14e9e35bcec2e8594ec46e1e992",
     "pushed": true,
     "rc": 0,
     "outcome": "pushed",
@@ -14,32 +14,32 @@
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "29672635000:1",
-    "run_id": 29672635000,
+    "key": "29674177829:1",
+    "run_id": 29674177829,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29672635000",
-    "head_sha": "18b34417a7040a92ebcf2dea3ce37206840ef224",
-    "created_at": "2026-07-19T04:00:21Z",
-    "started_at": "2026-07-19T04:00:21Z",
-    "updated_at": "2026-07-19T04:10:07Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29674177829",
+    "head_sha": "c541b0ef15be1c96a75b907be7f23ccef553c0c5",
+    "created_at": "2026-07-19T05:00:30Z",
+    "started_at": "2026-07-19T05:00:30Z",
+    "updated_at": "2026-07-19T05:11:55Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "29672635000:1",
-    "run_id": 29672635000,
+    "key": "29674177829:1",
+    "run_id": 29674177829,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29672635000",
-    "head_sha": "18b34417a7040a92ebcf2dea3ce37206840ef224",
-    "created_at": "2026-07-19T04:00:21Z",
-    "started_at": "2026-07-19T04:00:21Z",
-    "updated_at": "2026-07-19T04:10:07Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29674177829",
+    "head_sha": "c541b0ef15be1c96a75b907be7f23ccef553c0c5",
+    "created_at": "2026-07-19T05:00:30Z",
+    "started_at": "2026-07-19T05:00:30Z",
+    "updated_at": "2026-07-19T05:11:55Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-07-19T05:00:08.232141+00:00",
+  "updated_at": "2026-07-19T06:00:07.842025+00:00",
   "processed_run_keys": [
     "29304886936:1",
     "29307406826:1",
@@ -166,7 +166,8 @@
     "29667909402:1",
     "29669499600:1",
     "29671078611:1",
-    "29672635000:1"
+    "29672635000:1",
+    "29674177829:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -356,7 +357,7 @@
   },
   "active_incident": {
     "incident_id": "ci-red-29671078611",
-    "phase": "verifying",
+    "phase": "escalated",
     "opened_at": "2026-07-19T04:00:07.628715+00:00",
     "first_failure": {
       "key": "29671078611:1",
@@ -371,19 +372,22 @@
       "updated_at": "2026-07-19T03:12:11Z",
       "attempt_history_complete": true
     },
-    "root_cause": "2026-07-19T04:10:01.5557491Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['k1732']",
+    "root_cause": "2026-07-19T05:11:50.1549467Z ##[error]The test suite mutated repo state. Tests must write to tmp_path only.",
     "root_cause_status": "complete",
     "failure_run_keys": [
       "29671078611:1",
-      "29672635000:1"
+      "29672635000:1",
+      "29674177829:1"
     ],
     "repair_task_ids": [
       "ci-red-29671078611",
-      "ci-red-29672635000"
+      "ci-red-29672635000",
+      "ci-red-29674177829"
     ],
     "dispatch_requested_task_ids": [
       "ci-red-29671078611",
-      "ci-red-29672635000"
+      "ci-red-29672635000",
+      "ci-red-29674177829"
     ],
     "notifications": {
       "detection": {
@@ -398,57 +402,75 @@
         "status": "sent",
         "sent_at": "2026-07-19T04:00:07.628715+00:00",
         "reported_cause": "2026-07-19T03:12:05.7620647Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['k1732']"
+      },
+      "escalation": {
+        "status": "sent",
+        "attempts": 1,
+        "last_attempt_at": "2026-07-19T06:00:07.842025+00:00",
+        "last_delivery": {
+          "sent": true,
+          "skipped": false,
+          "notification_id": "8930e1b4",
+          "send_error": null
+        },
+        "delivery_accepted": true,
+        "delivery_accepted_at": "2026-07-19T06:00:07.842025+00:00",
+        "sent_at": "2026-07-19T06:00:07.842025+00:00"
       }
     },
-    "root_cause_run_key": "29672635000:1",
+    "root_cause_run_key": "29674177829:1",
     "latest_failure": {
-      "key": "29672635000:1",
-      "run_id": 29672635000,
+      "key": "29674177829:1",
+      "run_id": 29674177829,
       "attempt": 1,
       "status": "completed",
       "conclusion": "failure",
-      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29672635000",
-      "head_sha": "18b34417a7040a92ebcf2dea3ce37206840ef224",
-      "created_at": "2026-07-19T04:00:21Z",
-      "started_at": "2026-07-19T04:00:21Z",
-      "updated_at": "2026-07-19T04:10:07Z",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29674177829",
+      "head_sha": "c541b0ef15be1c96a75b907be7f23ccef553c0c5",
+      "created_at": "2026-07-19T05:00:30Z",
+      "started_at": "2026-07-19T05:00:30Z",
+      "updated_at": "2026-07-19T05:11:55Z",
       "attempt_history_complete": true
     },
     "failure_heads": [
       "c212453bae5b2c49bd26fd298ea0060bc03aa182",
-      "18b34417a7040a92ebcf2dea3ce37206840ef224"
+      "18b34417a7040a92ebcf2dea3ce37206840ef224",
+      "c541b0ef15be1c96a75b907be7f23ccef553c0c5"
     ],
-    "failure_cycles": 2,
+    "failure_cycles": 3,
     "repair_task_statuses": {
       "ci-red-29671078611": "succeeded",
-      "ci-red-29672635000": "pending"
+      "ci-red-29672635000": "succeeded",
+      "ci-red-29674177829": "pending"
     },
-    "dispatch_request_count": 2,
-    "last_dispatch_request_at": "2026-07-19T05:00:08.232141+00:00",
+    "dispatch_request_count": 3,
+    "last_dispatch_request_at": "2026-07-19T06:00:07.842025+00:00",
     "push_intent": {
-      "head_sha": "c541b0ef15be1c96a75b907be7f23ccef553c0c5",
-      "run_key": "29672635000:1",
-      "recorded_at": "2026-07-19T05:00:08.232141+00:00"
+      "head_sha": "53a445cdd1e5f14e9e35bcec2e8594ec46e1e992",
+      "run_key": "29674177829:1",
+      "recorded_at": "2026-07-19T06:00:07.842025+00:00"
     },
     "last_push_remediation": {
       "attempted": true,
-      "ahead": 6,
-      "head_sha": "c541b0ef15be1c96a75b907be7f23ccef553c0c5",
+      "ahead": 24,
+      "head_sha": "53a445cdd1e5f14e9e35bcec2e8594ec46e1e992",
       "pushed": true,
       "rc": 0,
       "outcome": "pushed",
       "ahead_after": 0
     },
-    "last_push_remediation_at": "2026-07-19T05:00:08.232141+00:00",
-    "last_verified_push_head": "c541b0ef15be1c96a75b907be7f23ccef553c0c5",
+    "last_push_remediation_at": "2026-07-19T06:00:07.842025+00:00",
+    "last_verified_push_head": "53a445cdd1e5f14e9e35bcec2e8594ec46e1e992",
     "remediation_poll_keys": [
       "2026-07-19T04",
-      "2026-07-19T05"
+      "2026-07-19T05",
+      "2026-07-19T06"
     ],
-    "remediation_checks": 2,
+    "remediation_checks": 3,
     "repair_commit": "4b3875b053",
     "repair_commit_source": "task_result",
     "confirmed_root_cause": "pre-commit silent-fallback gate blocked the PHASE-Z closeout carrying k1732's knowledge entry, so a committed experiment had no knowledge row on a clean checkout",
-    "root_cause_source": "task_result"
+    "root_cause_source": "task_result",
+    "escalation_reason": "ci_failed_more_than_two_cycles: 3"
   }
 }

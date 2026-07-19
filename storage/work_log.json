@@ -21637,5 +21637,110 @@
     "owner": "hourly-slot-1-ad38a4f68174432288ad4d9947c3b59d",
     "commit": "pending-PHASE-Z",
     "summary": "CI 紅燈 run 29672635000 分診：連紅三班其實是兩個不同根因，不是一個。\n(1) 03:00/04:00 兩班紅在 test_knowledge_unrecorded_ratchet — k1732 有 archived results 但無 knowledge.json 條目。查證後確認此根因已由 12:06 的 commit 4b3875b05 補上並推送（entry item_id=k1732_certified_20260719, verdict=PASS, reviewer=Codex gpt-5.6-sol 三輪），CI 紅的那兩班測的是更早的 head_sha，本班無需重做。\n(2) 05:00 班（run 29674177829, c541b0ef1）是新根因：tests/test_task_pool_claim.py::test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task 走 cmd_complete -> _request_burst_fire -> dispatch_supervisor.state.request_fire，寫到 canonical storage/ops/dispatch_state.json，被 VOLPRED_NO_CANONICAL_WRITE gate 擋下。_request_burst_fire 本身有 except Exception fail-open，但 CanonicalWriteBlocked 是刻意繼承 BaseException 的 test 哨兵，設計上不允許被 fail-open 吞掉 —— 所以修法在測試側把 request_fire 導開，不是去動 production 的例外處理。\n修法：在 tests/test_task_pool_claim.py 加 autouse fixture burst_fire_requests，monkeypatch sup_state.request_fire 收集 reason；autouse 而非單測就地 patch，是因為任何一條 complete 到有 pending burst 的 task 都會走這條路，下一個新增的完成測試會重踩同一顆雷。另加一條 test_burst_fire_request_is_intercepted_not_written_to_canonical_state 直呼 _request_burst_fire 斷言 requested=True 且 reason 落在 recorder，證明 fixture 非空轉（本機 slot 佔用狀態下 complete 不必然走到 burst，故不能靠完成測試證明）。\n驗證：VOLPRED_NO_CANONICAL_WRITE=1 跑 tests/test_task_pool_claim.py 23 passed。全套件本機 3583 passed / 5 failed(18:56)，其餘 4 條為本機 dirty tree / 環境差異（CI 該班只紅這 1 條）。\n遺留（已開 P1 接手單 ci-red-k1719-unrecorded-knowledge）：全套件跑完後 ratchet 又轉紅，這次是 k1719 —— 13:14 本 checkout 還綠、13:38 轉紅，是別的 session 在這區間把 k1719 結果併進 main 而沒寫 knowledge 條目。同一 class 的新實例，不屬本班 claim 範圍且已近 50min cap，不做半套。\n另：本班一度加了 scripts/record_experiment_knowledge.py（想補 add_knowledge 無法帶 verdict/k_id 的機械缺口），查明 k1732 其實已被收錄後刪除 —— 沒有真正修到東西的腳本不留。\nroot_cause=unit test reached canonical dispatch_state.json via cmd_complete burst-fire; repair=tests/test_task_pool_claim.py autouse request_fire interception; repair_commit=pending-PHASE-Z"
+  },
+  {
+    "timestamp": "2026-07-19T13:55:11+08:00",
+    "task_type": "platform_ops",
+    "task_id": "worktree_harvest_wave2_dirty_stale_20260719",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-a5298474deaa4f8e81169256d64d5940",
+    "owner": "hourly-slot-2-a5298474deaa4f8e81169256d64d5940",
+    "commit": "d8e777d19",
+    "summary": "worktree harvest wave 2（本班處理 2/9，其餘留 pool）：agent lane 卡在 occupied 9/4、free=0，5 個 P2 餓死 41h 派不出去，根因是 8 個 stale worktree 全被 reclaim_stale_worktrees.py 判 dirty 保留待人工裁決，而那個裁決沒人做，於是從 36h 累積到 110h。\n\n(1) K1692（idle 99h）：worktree 是**已被 salvage 的冗餘副本**，非未收成果。用 verdict 內的 sha256 機械比對確認 —— results.json 與 README.md 在 canonical 與 worktree 位元相同（數字完全一致），K1692.py 僅差註解換行格式（多行改單行，邏輯等價）。canonical commit 86255ebdc 已收。已清空 worktree。附帶發現：verdict 記錄的 sha256（results 733b213a / py 78455510）與現存兩版都對不上，代表 review 後有註解層級改動未重新對帳 —— 不是數字造假，但 sha256 完整性驗證這個機制形同失效。\n\n(2) K1694（idle 99h）：**真的沒有結果**。canonical 完全沒有 experiments/K1694，worktree 只有腳本(32KB) + 三份已抓好的 CFTC/DCOT/RV 資料，無 results、無圖、無 review。task pool 的 status=succeeded 是陷阱 —— result=null，那個 succeeded 來自 K1692_K1694_starvation_dispatch，指的是「派工成功」不是「實驗成功」。knowledge.json 無 K1694 條目（知識庫未被污染）。已把腳本與資料收進 canonical（commit d8e777d19）並寫 README 標 INCOMPLETE / 禁止引用，建 followup k1694_rerun_after_salvage_20260719 重跑。已清空 worktree。\n\n(3) 未動 k1708 worktree：其 task k1708_fix_verdict_gate_20260717 仍由 slot-1 持有 in_progress，依 task 指示先確認不衝突，不介入。\n\n(4) 工具危險發現 → 建 P2 merge_worktree_k1262v4_overtrigger_20260719：對 K1692 worktree 跑 merge_worktree.sh --dry-run，K1262-v4 防護被 3 個噪音檔(.claude/settings.local.json / scripts/_legacy/*.py / storage/ops/event_ledger/*.json)誤判成 rev-list false negative，於是改用 `git log --all` 重建清單 = 47 個跨全 repo 分支的 commits，內含其他 worktree 進行中的 K1731 rev7、K528 NFP 重跑，以及 `bad: new silent fallback` 測試 fixture。非 dry-run 執行會把這些一起併進 main。因此本班兩個 worktree 都改走逐檔 git_writer_lock commit，未使用 merge_worktree.sh。"
+  },
+  {
+    "timestamp": "2026-07-19T14:04:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-k1719-unrecorded-knowledge",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-20ac4f92c19246138b08d6dcfe283faf",
+    "owner": "hourly-slot-1-20ac4f92c19246138b08d6dcfe283faf",
+    "commit": null,
+    "summary": "CI 紅燈修復（unrecorded-knowledge ratchet）：k1719 有 archived results 但 knowledge.json 無條目，`scripts/tests/test_knowledge_unrecorded_ratchet.py` 於 13:38 轉紅（結果在 13:14–13:38 間由他 session 併入 main）。\n\n主線程寫入 knowledge 條目（K1259：agent 不得寫），item_id=651fe11c、k_id=k1719、verdict=MIXED、review_verdict=PASS（Codex GPT-5 primary-path，無 blocking defect）。所有數字由 `/tmp/write_k1719_knowledge.py` 直讀 `k1719_results.json` 程式化取出，未經 README 或任何 agent 摘要轉述；寫入走 temp file + `os.replace` 原子更新，並先斷言無既有 k1719 條目。\n\nK1719 實質結論（ASIA-5 每日波動溢出階梯）：只有第一段有效。JAPAN CW t=11.588、QLIKE 改善 7.669%；其餘五個 target 全部 |t|<0.33，且 4/5 的 QLIKE 惡化（MALAYSIA −0.227%、SINGAPORE −0.453%、TAIWAN −0.656%、THAILAND −0.257%），INDONESIA 僅 +0.099%。東南亞 panel 平坦（t=0.184、單尾 p=0.4269、n_obs=3567）。預先登記的成功條件未達成（met=false：1/2 個 target 達 |CW t|>3、2/4 改善 QLIKE、panel |t|>3 未達）。判讀為「Taiwan → 東南亞」與「SPY/VIX/JAPAN → Taiwan」兩段的 NULL，而非國際傳導本身的 NULL —— US/VIX → Japan 那段極強。\n\n驗證：ratchet 由紅轉綠；併同 dm_hac_lag / nested_dm_misuse / mdd_scale ratchet 共 138 passed, 1 skipped。\n\n殘留（不擴大本班 scope）：k1719 仍缺 `reproduce_spec.json`（classification=unverified_missing_spec），無對應 CI gate、不造成紅燈，已另建 P3 task `k1719_reproduce_spec_backfill` 承接。"
+  },
+  {
+    "timestamp": "2026-07-19T14:12:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_price_cache_0050_split_break",
+    "outcome": "completed",
+    "actor": "hourly-slot-3-c4b019c6a4d147b4a1f2316f535c6d8f",
+    "owner": "hourly-slot-3-c4b019c6a4d147b4a1f2316f535c6d8f",
+    "commit": "(PHASE-Z)",
+    "summary": "0050.TW 2014-01-02 分割斷點：確診 + 修復 + 通用偵測器 + 全 repo 盤點。\n\n(1) 確診 —— 不是分割，是資料源的區段不一致。0050 在 2014-01-02 當天沒有分割；真正的 1:4 分割發生在 2025-06（cache 內 2025-06-10~06-17 五天 volume=0 的凍結 bar 正是停止交易期間）。yfinance 的回溯調整只套用到 2014-01-02 起的區段，2013-12-31 及之前仍是分割前計價，於是留下 x0.2494 的假斷點。adj_close 同步跳（37.41 -> 9.33）證明調整層完全沒有修正它。\n\n(2) 修復 —— scripts/fix_0050_split_break.py：2014-01-02 前 1238 列價格 /4、volume *4（用精確分割比 4.0，不是 58.70/14.6375=4.0102，後者混入當日真實報酬）。DB 已備份為 price_cache.db.bak_0050split。交叉驗證命中：修復後 2013-12-31 close=14.675 恰等於 2014-01-02 open=14.675，當日報酬 -0.256%。\n\n(3) 污染量級實測（修復前備份 vs 修復後，全樣本 0050）：年化波動 40.01% -> 21.61%（0050 是大盤 ETF，40% 本就不可能）；最極端日報酬 -138.9% -> -12.7%；月度 RV persistence AR(1) 0.043 -> 0.693。單一 bad tick 幾乎抹平了波動率叢聚這個 stylized fact。\n\n(4) 通用偵測器 scripts/detect_price_split_breaks.py（任務項 4）—— 雙模式。DB 模式用 adj_close coherence + 分割比判準：11 個 ticker 掃出 0050 唯一真斷點，VIX 的 20 筆大跳動（2018 Volmageddon / 2020 COVID / 2024-08-05 / 2025-04 關稅）全部正確歸為真實行情，未誤判。CSV 模式（--csv-scan）改用「真分割是永久水準位移、真實行情會回復」判準（前後 20 筆中位數比值），因為 snapshot 沒有 adj_close 可比對。\n\n(5) 關鍵發現 —— **DB 修好碰不到真正的污染載體**。已凍結的 pinned snapshot CSV 才是受害者：掃 1277 個檔命中 22 個，其中 16 個含 0050 斷點（含 paper/taiwan-vt 與 paper/garch-x-vix 兩篇論文的主資料檔），與獨立盤點 agent 的清單完全吻合。附帶抓到 K1677 的 MARA/PLUG 真實股票分割（真陽性）。殘餘 4 個誤報（kalshi 事件機率市場、GDELT 新聞計數 panel、long-format VIX）已在 docstring 標明 —— 這是 triage 工具不是自動修復器。\n\n偵測器開發中的一個自身 bug 也記下：早期版本用檔名含 vix 就整檔跳過，導致 0050_tw_vix_2007-2022.csv 這個論文主資料檔被漏報。已改為「檔名像 vol-index 且欄名全是通用 OHLC」才跳過。\n\n(6) 論文層矛盾（交給 followup）：paper/taiwan-vt/body_v3.tex:33 宣稱用 'compute returns from Adj Close' 處理此分割 —— 不成立，adj_close 本身就有斷點。真正救回結論的是 'exclude the split date'。報酬序列衍生量（GJR gamma / DM / VT Sharpe）因此實質安全，但價格水準衍生量仍污染，且方法描述需改寫否則 referee 照做會得到不同數字。\n\n(7) 本班不重跑那 16 個實驗（超 50min cap），改建 4 個 followup：paper_0050_snapshot_repoint_20260719 (P1 論文層)、k_reruns_0050_snapshot_contaminated_20260719 (P2 14 個 K)、clean_tw50_extreme_return_zeroing_20260719 (P2 獨立風險：clean_tw50_data() 把 |報酬|>50% 靜默歸零後 cumprod 重建價格，約 130 個呼叫點)、price_cache_stale_fill_0050_20250610 (P3 凍結假 bar 處置)。\n\n(8) storage/article_assets/tw-margin-vol-leadlag/evidence.json 的 known_defect 已標 RESOLVED —— 該文原本就自 2014-01-02 起算規避斷點，結論不受影響、無需重跑。"
+  },
+  {
+    "timestamp": "2026-07-19T14:12",
+    "task_type": "platform_ops",
+    "task_id": "dreaming_orphan_detector_stale_at_claim",
+    "actor": "hourly-slot-4-d7800aa653974b118b4d7ffa488a12e1",
+    "owner": "hourly-slot-4-d7800aa653974b118b4d7ffa488a12e1",
+    "title": "dreaming snapshot 在 claim / dispatch 前重驗原 detector（治本 stale-snapshot class）",
+    "summary": "新增 src/volpred/ops/dreaming_revalidate.py：dreaming 任務是某晚快照，條件可能被別的 actor 自然解除（2026-07-17 事故：k1697/k1699/k1608/k1609 四張 orphaned_experiment 在 backfill 補完 knowledge.json 三天後仍被派工，照描述執行會寫重複條目）。三處接線：(1) task_pool_claim._revalidate_dreaming_before_claim —— 條件已解除即關成 succeeded no-op 並拒絕 claim；(2) continue_task_dispatch._sweep_cleared_dreaming_tasks —— categorize 前掃，讓死條件不進 candidate、不進 24h starvation lockout（只掃無人認領的，避免把別 slot 進行中的工作在腳下關掉）；(3) apply_auto_dispatch 描述嵌入 REVALIDATION_INSTRUCTION，涵蓋沒有 revalidator 的 pattern。detector 的 _consumer_blob 改為委派共用 helper，確保 detector 與 revalidator 對「consumer」定義不漂移。Class sweep：10 個 pattern_type 全數稽核並在 module docstring 記錄 —— 只有 orphaned_experiment 屬 stale-snapshot 類（live 條件、他人可獨立滿足）；persistent_alert 已由 alert_remediation 擁有（不疊第二個 owner）；stale_knowledge 為 propose_only 判斷題，自動關會壓掉 review；其餘 7 個是歷史觀察窗，重跑 detector 回答的是不同問題。未註冊 pattern 一律 None = 無意見，絕不等於已解除。關鍵陷阱已測：dreaming 任務自己就是提及該 K-id 的 open task，不自我排除會清掉 100% 受檢任務。",
+    "verification": "tests/test_dreaming_revalidate.py 12 passed（新增）+ test_task_pool_claim.py 2 個 claim-guard 整合測試；-k 'dispatch or dreaming or claim or alert_remediation' 388 passed。真實資料驗證：k1697/k1699（事故當事 K）→ cleared=True（knowledge.json/paper/open task），k9999 → cleared=False。dispatcher --report 實跑無 crash，dreaming_cleared=[]（現存 pending dreaming 全是 missing_retry_strategy = 刻意未註冊，空值為正確結果非靜默失敗）。",
+    "files": [
+      "src/volpred/ops/dreaming_revalidate.py",
+      "scripts/dreaming_review.py",
+      "scripts/task_pool_claim.py",
+      "scripts/continue_task_dispatch.py",
+      "tests/test_dreaming_revalidate.py",
+      "tests/test_task_pool_claim.py"
+    ]
+  },
+  {
+    "timestamp": "2026-07-19T14:27:10+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_c0ad1962",
+    "outcome": "completed",
+    "actor": "hourly-slot-3-f909359c1c8d40aab70ba919d6afefbc",
+    "owner": "hourly-slot-3-f909359c1c8d40aab70ba919d6afefbc",
+    "commit": null,
+    "summary": "draft-reap false-positive 三類根修（assign_c0ad1962）。orphan_reap_disposition_20260719.md 判定 23 筆 held 幾乎全是 reaper 誤報而非垃圾；本班修偵測邏輯三處，讓誤報不再進 held、也就不再變成「解決 N 份長期無主的產物」的人工裁決任務。\n\n(a) draft namespace `no_title`：`fb_mile_<id>.md` / `<k>_mile_<id>_correction.md` 這類「已發佈文章的 FB 複本／errata 稿」本來就不打算進草稿池，所以沒有 frontmatter title，`is_registered` 的三道探針（source_draft / title / K-coverage）全部落空 → 永久 held。新增第四道探針：從**檔名**取 `mile_<hex>` 對 feed 文章 id 做精確反向連結，命中即視為已交付。regex 刻意不用前導 `\\b` —— id 幾乎都帶前綴（`fb_mile_…`），而 `_` 是 word character，`\\b` 對這些名字永遠不會 fire。\n\n(b) compute_queue job `no_existing_declared_files`：job 在 worktree 內宣告 `.claude/worktrees/<wt>/experiments/…`，merge_worktree.sh 合併後移除 worktree → 宣告路徑消失、但 deliverable 安全躺在主 checkout 同一 repo-relative 路徑。新增 `_landed_in_main()` 剝掉 worktree 前綴後在 checkout 重新解析，命中即不 held（5 筆 k1704 job 的成因，其時 K1704 早已 certified PASS）。另兩條：job `status=failed` 且無任何宣告檔存在 → 從未產出可保全之物，held 等於要人替不存在的檔找出口；宣告輸出全被 .gitignore 排除（`__pycache__` / 暫存 `*_article.md`）而真正的 deliverable 已交付 → 設計上不可達 ≠ 無主。\n\n(c) experiments/ pending rename：k1380 刻意把作廢 run 封存成 `*_INVALID_20260716.*`，reaper 以兩種「not owned」理由（deletion_not_owned / paired_deletion_pending）報出 8 列，讀起來像 8 份無主產物，真實狀態是「一個目錄正在改名、等 commit」。安全不變量不動（永不 commit 刪除、不收半個 rename），只把整個目錄收斂成一列 `pending_rename` 並列出成員，detail 直說出口是 commit 這個目錄。\n\nheld-state 對帳：跑 `--apply --max 0 --max-jobs 0` 讓 track_held 依新 scan 重建（state 每班由當前 held 重算，stale key 自然消失，無需手改 JSON）。18 列 → 3 列，且未產生新的 escalation 任務。存活的 3 列都是真信號：job k1730（completed 但未合併，deliverable 只在 worktree）、job k1731-armB-rev5（宣告輸出在仍存在的 worktree 內已不在原位）、experiments/k1380（待 commit 的改名）。"
+  },
+  {
+    "timestamp": "2026-07-19T14:52",
+    "task_type": "platform_ops",
+    "task_id": "assign_6c43a4d4",
+    "actor": "hourly-slot-1-22b2d7cd63ae49c6993bc3ea246ac142",
+    "owner": "hourly-slot-1-22b2d7cd63ae49c6993bc3ea246ac142",
+    "title": "snapaudit worktree triage：fevd-ordering ratchet 攔下的 agent job 判定為可救援並修綠",
+    "summary": "compute job agent-brief_snapaudit-3cae76（重複 snapshot 污染稽核，parent assign_7f508612）exit 4 = experiment_gate_failed，非工作失敗：worktree tree clean、5 commits、audit_results.json(54KB)+README(18KB) 齊備，唯一違規是 partition_cfc_va/dy_diag_param.py 用 Cholesky FEVD 產 net_btc / net receiver 方向性輸出（K865 ratchet）。先查證 audit_results.json 與 README 皆未引用任何方向性數字 → 稽核結論不依賴違規輸出，判定可保留、不重跑、不移除 worktree。修法：方向性宣稱改掛 order-invariant KPPS gFEVD（重用 experiments/k1025/k1025_v3.py 的 generalized_fevd，符合 audit_fevd_ordering.py 的 RE_KPPS_REUSE 獎勵重用），Cholesky 保留為非方向性對照臂。ratchet 的價值在此案被實證：舊腳本自己的輸出就是罪證 —— net_btc 均值在 {BTC,SPY,VIX} 排序下 +4.93（BTC 為淨傳遞者）、在 {VIX,SPY,BTC} 下 -8.43（淨接收者），符號完全由欄位順序決定；gFEVD 兩排序下逐位相同（total 22.90%、net -4.36），BTC 實為淨接收者。稽核判定不變且有結構性原因：dirty fixture 的 10 個重複日期（2026-05-04..05-15）btc_usd_adj_close 全為 NaN，而 BTC∩SPY∩VIX 估計樣本止於 2026-04-08（N=2196），污染整段落在樣本外。合併仍被 review_verdict.json（未填 template）擋著 → 另開 assign_4c385a36 走 Codex 一審 + merge。過程發現 compute worker 曾在同一 worktree 併發重試同一 brief，subagent 因 file-modified 保護未覆寫、改走獨立驗證。",
+    "verification": "experiment gate 實跑：[gate] PASS — 6 file(s) cleared 4 experiment-integrity gates；OK_GFEVD 標記 dy_diag_param.py order-invariant。subagent 獨立重跑 committed 腳本對 clean/dirty 兩 fixture 輸出到 /tmp 再 diff committed logs → 兩者皆 IDENTICAL（證明 log 非手寫、非過期），且 clean vs dirty 亦 IDENTICAL。worktree commit 90b4fe89e，tree clean，未合併。",
+    "files": [
+      ".claude/worktrees/dispatch-slot-1-858545f9-snapaudit/experiments/audit_dup_snapshot_20260719/partition_cfc_va/dy_diag_param.py",
+      ".claude/worktrees/dispatch-slot-1-858545f9-snapaudit/experiments/audit_dup_snapshot_20260719/partition_cfc_va/dy_clean.log",
+      ".claude/worktrees/dispatch-slot-1-858545f9-snapaudit/experiments/audit_dup_snapshot_20260719/partition_cfc_va/dy_dirty.log",
+      ".claude/worktrees/dispatch-slot-1-858545f9-snapaudit/experiments/audit_dup_snapshot_20260719/README.md",
+      "storage/next_tasks.json"
+    ]
+  },
+  {
+    "timestamp": "2026-07-19T14:28:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "snapaudit_fevd_gate_remediation_20260719",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-7e21182bf5734a9cb50124453e7f4570",
+    "owner": "hourly-slot-2-7e21182bf5734a9cb50124453e7f4570",
+    "commit": "90b4fe89e",
+    "summary": "PHASE A triage_failed：compute job `agent-brief_snapaudit-3cae76` exit 4。\n\n**診斷**：agent 本身沒失敗 —— run_agent_job exit=0、artifact_ok=True、6 筆 commit 在 worktree、audit_results.json 完整（44 consumers / 8 affected / 0 結論被推翻）。exit 4 來自 experiment gate 的 fevd-ordering ratchet，擋下 `partition_cfc_va/dy_diag_param.py` 在 Cholesky FEVD 上讀 BTC 的 NET / TO / FROM（K865 舊傷）。\n\n**gate 是對的，而且該檔自己的輸出就是證據**：net_btc 在 {BTC,SPY,VIX} 下 +4.93、{VIX,SPY,BTC} 下 −8.43 —— 「BTC 是不是淨傳染源」的正負號由欄位順序決定，不是由資料決定。\n\n**修正**：方向性結論改用 order-invariant KPPS GFEVD，且**重用** `experiments/k1025/k1025_v3.generalized_fevd`（同一篇 crypto-fear 論文自己的 canonical 估計式）而非再刻一份；Cholesky 保留為非方向性對照臂，形狀比照 k865b。順手把 `except Exception: return None` 的靜默丟窗改成 `warn(...)`（pre-commit silent-fallback gate 擋下）。\n\n**驗證**：\n- `audit_fevd_ordering.py` → `OK_GFEVD`（註記：重用優於再刻一份）\n- `experiment_gates.py run` → PASS（6 檔 / 4 道 gate）\n- `test_fevd_ordering_ratchet.py` → 2 passed\n- 兩份 fixture 重跑：GFEVD 跨兩種排序完全相同（net_btc −4.36），Cholesky 不同（total 18.05 vs 23.85）；`dy_clean.log` 與 `dy_dirty.log` byte-identical → 該 consumer 的「未受污染影響」判定不變\n- 實質更正：在 order-invariant 估計式下 BTC 是淨**接收**方（−4.36，63.8% 視窗），code-order Cholesky 那版報反了\n\n**未完成（已有 owner）**：worktree 合併被 review-certification gate 擋住（缺 review_verdict.json）—— 這是設計如此。已生成 sha256-pinned skeleton，並把 Codex primary-path review 送進 compute queue（`compute-codex-primary-path-review-audit-dup-snapshot-20260719-merge--1784442444`，timeout 2700s）。followup brief 已寫明：PASS → 填裁決 + `merge_worktree.sh` 合併 + 把 needs_compute_queue 的 6 條逐一 enqueue；FAIL → 不得合併，依 findings 建修正 task。長 review 不在 fire 內等（3000s cap，父等子 = SIGKILL）。"
+  },
+  {
+    "timestamp": "2026-07-19T14:31:55+08:00",
+    "task_type": "experiment",
+    "task_id": "agent-brief_k1708-faa327",
+    "outcome": "completed",
+    "actor": "hourly-slot-3-f909359c1c8d40aab70ba919d6afefbc",
+    "owner": "hourly-slot-3-f909359c1c8d40aab70ba919d6afefbc",
+    "commit": null,
+    "summary": "PHASE A collect_completed：收 compute job `agent-brief_k1708-faa327`（K1708 verdict-gate 修正，worktree dispatch-slot-2-8dda242d-k1708，commit cd135b00e）。\n\n獨立驗收（不採信 agent 自述）：親跑 `uv run pytest experiments/k1708/test_k1708.py -q` → 35 passed（117s）。核對 followup brief 每一條：`A_verdict_label_after_fix` = NULL（修前修後皆 NULL，兩個 reason 都成立，由 test_stored_full_sample_verdict_is_still_null pin 住）；scope 誠實（full_sample_rerun / worktree_merged / numbers_changed_to_pass_a_gate / knowledge_json_written 全 false）；B 的兩個方法論決定皆有 rationale 且已寫入 README（8/8.1/8.2/10/12/15 節）。\n\n修正方向確認為**收緊**而非放寬：CW 門檻由「單邊 5%（t>1.645）、三個模型無多重比較校正」還原為預註冊的 t>=3.0 + Holm-Bonferroni(alpha=0.05)；smoke run 中 HAR_S_BM 的 CW t=2.716 會過舊 gate 而不過新 gate，故收緊是實質 binding。此方向在數學上不可能把 NULL 翻成非 NULL，是修一個過鬆的 gate 時唯一安全的移動方向。\n\n未 merge、未寫 knowledge —— 依 brief，Codex re-review PASS 才可 merge。已建 `assign_79faa0b0`（paper_review，P2）承接 Codex re-review + PASS 後的 merge/knowledge 收尾，brief 列出六個必須嘗試推翻的點（含「新測試在舊邏輯下是否會 FAIL」這條，那是 gate 真被 pin 住的唯一證據），並註明本班已驗收項目避免重工。已 mark-followup-dispatched，pending-followup 佇列清空。"
+  },
+  {
+    "timestamp": "2026-07-19T15:08:00+08:00",
+    "task_type": "experiment",
+    "task_id": "k1708_fix_verdict_gate_20260717",
+    "outcome": "failed_review",
+    "actor": "hourly-slot-4-bcd67477f7f2436e935d1e5387f94217",
+    "owner": "hourly-slot-4-bcd67477f7f2436e935d1e5387f94217",
+    "commit": null,
+    "summary": "PHASE A 續辦：對 K1708 fix stage（worktree dispatch-slot-2-8dda242d-k1708, commit cd135b00e）跑 Codex primary-path **round-2 re-review** → **VERDICT: FAIL**，4 個 BLOCKER。依 gate 條件 **worktree 不 merge、knowledge 不寫**。\n\n執行方式：`bash scripts/codex_exec_bounded.sh --timeout 1500 -s read-only`（裸跑 codex exec 已被 PreToolUse hook 攔下，改走 bounded wrapper —— 攔截是對的，這種 review 本來就要有上界）。\n\n主線程獨立驗收（不採信 agent 自述）：親跑 `uv run --extra dev pytest experiments/k1708/test_k1708.py -q` → 35 passed (115.7s)；確認無 `*.quick.*` 殘留；確認 `experiments/k1708/` 在 main 上根本不存在 —— 這一點同時證實了 Codex 的 BLOCKER-3。\n\nCodex 判 PASS 的部分（下一輪不要重做）：Holm 實作正確、NESTING_REGISTRY 的 control 確由自身 forecast map 在受限參數下產生、regime_breakdown 用 nested pair、無 quick artifact、README §8.1/8.2/12/15 已誠實撤回先前「不改推論設計」的處置。\n\n4 個 BLOCKER：\n1. comparator（CW vs HAR_FIXED → CW vs own restriction）與 bar（1.645 → 3.0）**同時**改，故 agent 主張的「t>=3 ⊂ t>1.645，所以不可能把 NULL 轉正」論證不成立 —— 兩邊統計量不同，子集關係無從談起。\n2. `derive_verdict` 盲信 registry 欄位：未核對 control 身分、未重算 Holm，把 exact/reject 標籤貼到錯誤比較上仍可過關。\n3. `cd135b00e^` 無 `experiments/k1708/`，整份 K1708_results.json 以新增檔進 diff，沒有 pre-fix blob 可比 → 「數字未被動過」無法由 Git 證明（僅有旁證）。\n4. 四個號稱 gate/nesting regression 的新測試在 pre-fix logic 下也會返回 NULL 而通過（舊邏輯不讀新欄位）→ 不具鑑別力。\n\n產出：`storage/ops/k1708_codex_review_round2_20260719.md`（review 全文 + 主線程獨立驗收紀錄）。\n\n任務池收斂：`k1708_fix_verdict_gate_20260717` → failed（fix 未過審）；`assign_79faa0b0`（slot-3 於 14:31 建的同一件 re-review，與本班 collect 撞題）→ succeeded 並註明已由本班執行、勿重派；新建 `k1708_fix_verdict_gate_rev2_20260719`（P2，effort **max**，router at_ceiling=true —— 再 FAIL 即觸發 3-strike，禁同法重試）。compute job `agent-brief_k1708-faa327` 已 mark-followup-dispatched，pending-followup 佇列清空。"
   }
 ]

@@ -1,0 +1,36 @@
+{
+  "id": "compute-codex-primary-path-review-audit-dup-snapshot-20260719-merge--1784442444",
+  "title": "Codex primary-path review: audit_dup_snapshot_20260719 (merge gate)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/audit_dup_snapshot_20260719_prompt.md",
+    "storage/ops/codex_reviews/audit_dup_snapshot_20260719_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-19T06:27:24Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-primary-path-review-audit-dup-snapshot-20260719-merge--1784442444.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-primary-path-review-audit-dup-snapshot-20260719-merge--1784442444.stderr",
+  "result_artifact": "storage/ops/codex_reviews/audit_dup_snapshot_20260719_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/audit_dup_snapshot_20260719_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "讀 verdict.md 第一行 VERDICT:。PASS → 填 worktree dispatch-slot-1-858545f9-snapaudit 的 experiments/audit_dup_snapshot_20260719/review_verdict.json（skeleton 已生成、sha256 已 pin 住當前 bytes；只填 verdict/reviewer/reviewed_at/review_artifact，不要改 hash），在 worktree commit 後跑 bash scripts/merge_worktree.sh dispatch-slot-1-858545f9-snapaudit 完成合併，並把 needs_compute_queue 的 6 條逐一 enqueue。FAIL → 不得合併，依 findings 建修正 task（不要手改裁決檔）。任一路徑都要 complete task snapaudit_fevd_gate_remediation_20260719。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null
+}
