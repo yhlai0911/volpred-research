@@ -62,9 +62,11 @@ user-invocable: true
 8. 發 feed 文章：`uv run volpred ops publish-milestone --title "..." --description "..." --phase member_qa --category member_qa --audience member_qa --proposer 會員名稱 --status published --tags "會員提問,..."`  
    - **必須傳 `--category member_qa`、`--audience member_qa` 和 `--proposer 會員名稱`**（否則 badge 和署名不顯示）
    - **member_qa 是 reader-facing immediate flow**：不要先存 `draft` 等 release pool
+   - ⚠️ **發佈端查重 gate（2026-07-19 STRIKE 2）**：`details.question_id` 對應的問題若已有 published/scheduled 文章，publish 會直接 raise `MemberQaDuplicatePublishError` 並列出既有文章 id。這是唯一守在讀者可見面的閘門，上游 gate 全被繞過它仍成立。刻意續作（先發初步、後補深入）才加 `--supersedes <既有文章id[,...]>`，且必須列出**全部**既有答覆文章 id——它不是萬用旁路旗標。
 9. 連結文章到問題：`uv run volpred ops question-answer <question_id> --answer "摘要" --article-id <article_slug>`
    - `question-answer` 綁 published 文章後，問題應直接進 `answered`
    - ⚠️ **不要手動 patch 問題狀態**——交給 `question-answer` / `question-finish` 正式流程
+   - 冪等：該問題若已綁過 published 文章，`question-answer` 回傳 `skipped=already_answered`（不再綁第二篇、`answered_at` 只記首答）。這是正常拒絕，不是失敗——除非確為刻意續作（`allow_reanswer=True`）。
 10. `question-answer` 綁定成功即為終態（回傳 `status=answered`）。**`question-finish` 這個 CLI 指令不存在**（2026-07-12 K1700 收尾時實測 `No such command`）——不要再呼叫它；候選池的清理走 `question-ops-maintain`。
 11. 回報：處理了哪個問題、發了什麼文章、問題狀態（`answered` / `completed`）
 

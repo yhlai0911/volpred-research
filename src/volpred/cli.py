@@ -2338,6 +2338,15 @@ def ops_recalc_metrics() -> None:
 @click.option("--publish-at", default=None, help="Scheduled publish time (ISO datetime) when status=scheduled")
 @click.option("--audience", default=None, help="Target audience: general, research, daily, member_qa")
 @click.option("--proposer", default=None, help="Who proposed/asked this (member name for Q&A)")
+@click.option(
+    "--supersedes",
+    default=None,
+    help=(
+        "Comma-separated prior article id(s) this piece deliberately continues. "
+        "Required to publish a 2nd member_qa answer to the same question "
+        "(must name every already-published answer)."
+    ),
+)
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_publish_milestone(
     title: str,
@@ -2349,6 +2358,7 @@ def ops_publish_milestone(
     publish_at: str | None,
     audience: str | None,
     proposer: str | None,
+    supersedes: str | None,
     storage_dir: str,
 ) -> None:
     """Publish a milestone article through the unified publisher path."""
@@ -2357,6 +2367,10 @@ def ops_publish_milestone(
     details = _parse_json_input(details_json, default={})
     if not isinstance(details, dict):
         raise click.ClickException("--details-json must decode to an object")
+    if supersedes:
+        details["supersedes"] = [
+            part.strip() for part in supersedes.replace(",", " ").split() if part.strip()
+        ]
 
     pub_id = publish_milestone_article(
         title=title,

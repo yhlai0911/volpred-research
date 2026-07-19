@@ -1525,6 +1525,33 @@ class Publisher:
         import re
         # --- Dedupe check: reject exact title + warn similar topics ---
         feed = self._load_feed()
+
+        # --- G1: member_qa publish-time duplicate gate (2026-07-19 STRIKE 2) ---
+        # The ONLY gate standing on the reader-visible artifact. Every other
+        # member_qa dedup check guards an INTENT step (task creation, question
+        # claim) and is therefore skippable by any caller that writes an article
+        # by hand — which is exactly how the same member's question got answered
+        # twice (mile_d84aa7d0 / mile_0205a444). This one holds even when the
+        # entire upstream is bypassed, because nothing becomes reader-visible
+        # without passing through publish_milestone. Deliberate sequels pass by
+        # naming the prior article(s) in details['supersedes'].
+        # Implementation: volpred.ops.content.assert_member_qa_publish_allowed
+        # (lazy import — ops.content imports this module at load time).
+        if str(status or '') not in ('unpublished', 'retracted') and (
+            str(audience or '').strip() == 'member_qa'
+            or str(category or '').strip() == 'member_qa'
+            or str((details or {}).get('content_type') or '').strip() == 'member_qa'
+            or str(phase or '').startswith('member_qa')
+        ):
+            from volpred.ops.content import assert_member_qa_publish_allowed
+
+            assert_member_qa_publish_allowed(
+                (details or {}).get('question_id'),
+                feed=feed,
+                supersedes=(details or {}).get('supersedes'),
+                title=title,
+                storage_dir=str(self.reports_dir.parent),
+            )
         from datetime import timedelta
         cutoff_exact = datetime.now(timezone.utc) - timedelta(hours=24)
         for existing in feed:

@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "title": "台股大型股 ETF 融資餘額能不能預告波動：十二年查核懶人包",
+  "evidence": {
+    "stats": {
+      "path": "storage/article_assets/tw-margin-vol-leadlag/stats_raw.json",
+      "sha256": "e4370a0a88c20ef95a96b6d2caa63c376295e2c869ad819e1aed2377da3c93ac",
+      "label": "0050 融資餘額與已實現波動領先落後分析原始統計"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "一句順口話，藏著可以檢驗的預測",
+      "alt": "說明融資堆高導致波動放大的市場說法，以及觸發本次查核的下跌事件規模",
+      "sources": [
+        "stats"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "要檢驗的說法",
+          "body": [
+            "大跌隔天最省事的解釋是：融資堆太高，槓桿被清洗。",
+            "這句話藏著一個可以驗的預測：融資衝得快，後面的波動就該變大。",
+            "對照組只有一個，就是波動率自己。融資得在波動說完話之後還有話可講。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "當日跌幅",
+          "value": {
+            "source": "stats",
+            "path": "event.ret_2026_07_17_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          },
+          "note": "當年度最重的一天"
+        },
+        {
+          "kind": "metric",
+          "label": "二十日已實現波動 當天跳到",
+          "value": {
+            "source": "stats",
+            "path": "event.rv20_on_2026_07_17",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "資料口徑與已知的坑",
+      "alt": "說明樣本期間、樣本天數與訊號定義，以及價格快取分割斷點的處理方式",
+      "sources": [
+        "stats"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "怎麼算的",
+          "body": [
+            "訊號是融資餘額相對二十個交易日前的百分比變動。",
+            "被預測的是當天之後的已實現波動，完全不含當天以前的資訊。",
+            "價格快取有一個未回溯調整的分割斷點，硬接會製造假暴漲，因此樣本從斷點之後起算。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本起點",
+          "value": {
+            "source": "stats",
+            "path": "sample.start",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本終點",
+          "value": {
+            "source": "stats",
+            "path": "sample.end",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "交集交易日",
+          "value": {
+            "source": "stats",
+            "path": "sample.n_days",
+            "format": {
+              "kind": "integer",
+              "suffix": " 日"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "把波動率自己放進去以後",
+      "alt": "呈現融資訊號與波動自身的相關係數，以及加入融資後迴歸解釋力的增量與 t 值",
+      "sources": [
+        "stats"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "融資變動 對其後二十日波動 相關",
+          "value": {
+            "source": "stats",
+            "path": "correlations.corr_mchg20_fwdrv20",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "波動自己 對其後二十日波動 相關",
+          "value": {
+            "source": "stats",
+            "path": "correlations.corr_rv20_fwdrv20",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "加入融資後 解釋力增量",
+          "value": {
+            "source": "stats",
+            "path": "regression.h20.delta_R2_pp",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " pp"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "融資係數 t 值",
+          "value": {
+            "source": "stats",
+            "path": "regression.h20.t_margin_HAC",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "未達常用門檻"
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "唯一一格，融資真的說了新話",
+      "alt": "呈現波動分層後中波動組的融資訊號差距與拔靴區間，以及對避險時機的結論",
+      "sources": [
+        "stats"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "中波動層 融資快慢兩組 其後波動差距",
+          "value": {
+            "source": "stats",
+            "path": "double_sort.中波動.diff",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "show_plus": true,
+              "suffix": " pp"
+            }
+          },
+          "note": "兩組起跑點幾乎重疊"
+        },
+        {
+          "kind": "metric",
+          "label": "低波動層 同樣差距",
+          "value": {
+            "source": "stats",
+            "path": "double_sort.低波動.diff",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "show_plus": true,
+              "suffix": " pp"
+            }
+          },
+          "note": "拔靴區間橫跨零點"
+        },
+        {
+          "kind": "text",
+          "heading": "所以什麼時候有用",
+          "body": [
+            "市場已經在抖的時候，融資講的東西，波動率自己早就講過了。",
+            "市場睡著的時候，融資衝刺也衝不出什麼。",
+            "不冷不熱的那一段，融資快速堆高才真的領先了後面的震盪，那也正好是保險便宜的時候。"
+          ]
+        }
+      ]
+    }
+  ]
+}

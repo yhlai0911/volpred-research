@@ -32836,13 +32836,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T14:05:57.883222+00:00",
+    "completed_at": "2026-07-19T14:34:44.823920+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T14:05:57.883222+00:00",
-      "last_clean_observed_at": "2026-07-19T14:05:57.883222+00:00"
+      "resolved_at": "2026-07-19T14:34:44.823920+00:00",
+      "last_clean_observed_at": "2026-07-19T14:34:44.823920+00:00"
     }
   },
   {
@@ -39919,7 +39919,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -39931,7 +39931,30 @@
     "release_audit_skipped_count": 3,
     "release_audit_issues": [
       "anti_ai_style publish gate failed: [MUST] 1.1 不是...而是 套路對比: hit 1 次 — 範例 '不是「會不會跌」而是'. Rewrite per .claude/skills/anti-ai-style/references/editor-sop.md"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-19T14:18:42.125693+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      },
+      {
+        "ts": "2026-07-19T14:18:49.298075+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      },
+      {
+        "ts": "2026-07-19T14:30:28.976139+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      }
+    ],
+    "started_at": "2026-07-19T14:18:49.298061+00:00",
+    "completed_at": "2026-07-19T14:30:28.976127+00:00",
+    "result": "驗證後確認此篇在本班開工前已由他人完成 style_correction 並於 2026-07-19T12:27:28Z published（release_audit_status=resolved）。本班僅重跑 anti_ai_gate.py 確認 PASS，未做任何改動 — 非本班功勞，據實記錄。"
   },
   {
     "id": "assign_1394a67a",
@@ -40926,7 +40949,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -40938,7 +40961,30 @@
     "release_audit_skipped_count": 3,
     "release_audit_issues": [
       "missing 懶人包圖組 section (async lazypack render pending/failed — inspect: uv run python scripts/compute_queue.py show lazypack-mile_21e45133 ; re-enqueue via scripts/lazypack_async_render.py enqueue)"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-19T14:18:40.748109+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      },
+      {
+        "ts": "2026-07-19T14:18:47.743031+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      },
+      {
+        "ts": "2026-07-19T14:30:27.140651+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      }
+    ],
+    "started_at": "2026-07-19T14:18:47.743017+00:00",
+    "completed_at": "2026-07-19T14:30:27.140636+00:00",
+    "result": "補上 data-bound lazypack plan（evidence: article_assets/jpy_carry_move_transmission/evidence.json）並 enqueue lazypack-mile_21e45133（status=queued, 14:22:05Z）。本地 lazypack_render 4 panels 過 layout guard、數字逐項對得上 evidence。根因：草稿建立時從未 enqueue lazypack job，gate 卻報 pending/failed → 永久卡死、skip_count 單調遞增至 9。"
   },
   {
     "id": "platform_ops_release_audit_fix_mile_47c4bc3e",
@@ -40947,7 +40993,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -40959,7 +41005,30 @@
     "release_audit_skipped_count": 3,
     "release_audit_issues": [
       "missing 懶人包圖組 section (async lazypack render pending/failed — inspect: uv run python scripts/compute_queue.py show lazypack-mile_47c4bc3e ; re-enqueue via scripts/lazypack_async_render.py enqueue)"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-19T14:18:41.380704+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      },
+      {
+        "ts": "2026-07-19T14:18:48.329172+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      },
+      {
+        "ts": "2026-07-19T14:30:27.930381+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      }
+    ],
+    "started_at": "2026-07-19T14:18:48.329157+00:00",
+    "completed_at": "2026-07-19T14:30:27.930368+00:00",
+    "result": "同 21e45133：evidence 綁 article_assets/tw-margin-vol-leadlag/stats_raw.json，4 panels 過 layout guard，enqueue lazypack-mile_47c4bc3e（status=queued, 14:23:02Z）。"
   },
   {
     "id": "K1699_article_general",
@@ -43697,7 +43766,7 @@
   {
     "id": "assign_3bfa0662",
     "title": "PHASE-Z 卡住檔案 incident（8511fbbdfcce0cb0）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n45 個未提交檔案不是任何一班 fire 產出的，最長已連續 88 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 13 班\n- config/runtime_schedules.json — 32 班\n- conftest.py — 27 班\n- experiments/k1380/README.md — 88 班\n- experiments/k1380/k1380.py — 88 班\n- experiments/k1380/k1380_losses_all.npy — 88 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 88 班\n- experiments/k1380/k1380_results.json — 88 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 88 班\n- experiments/k1380/k1380_spa_from_cache.py — 88 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 88 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 13 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 13 班\n- scripts/build_knowledge_index.py — 13 班\n- scripts/continue_task_dispatch.py — 18 班\n- scripts/daily_checkup.py — 32 班\n- scripts/detect_price_split_breaks.py — 18 班\n- scripts/dispatch_slot_budget.py — 5 班\n- scripts/dispatch_supervisor/phase_z.py — 5 班\n- scripts/dreaming_review.py — 32 班\n- scripts/fb_realchrome_post.py — 27 班\n- scripts/fix_0050_split_break.py — 18 班\n- scripts/gen_codex_cli_reference.py — 83 班\n- scripts/merge_worktree.sh — 27 班\n- scripts/reclaim_stale_worktrees.py — 32 班\n- scripts/repoint_snapshot_from_db.py — 13 班\n- scripts/supabase_sync.py — 27 班\n- scripts/task_pool_claim.py — 18 班\n- scripts/telegram_poll.py — 45 班\n- scripts/tests/test_merge_worktree.sh — 27 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T123338771430Z:<路徑>`",
+    "description": "## 發生什麼\n45 個未提交檔案不是任何一班 fire 產出的，最長已連續 89 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 14 班\n- config/runtime_schedules.json — 33 班\n- conftest.py — 28 班\n- experiments/k1380/README.md — 89 班\n- experiments/k1380/k1380.py — 89 班\n- experiments/k1380/k1380_losses_all.npy — 89 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 89 班\n- experiments/k1380/k1380_results.json — 89 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 89 班\n- experiments/k1380/k1380_spa_from_cache.py — 89 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 89 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 14 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 14 班\n- scripts/build_knowledge_index.py — 14 班\n- scripts/continue_task_dispatch.py — 19 班\n- scripts/daily_checkup.py — 33 班\n- scripts/detect_price_split_breaks.py — 19 班\n- scripts/dispatch_slot_budget.py — 6 班\n- scripts/dispatch_supervisor/phase_z.py — 6 班\n- scripts/dreaming_review.py — 33 班\n- scripts/fb_realchrome_post.py — 28 班\n- scripts/fix_0050_split_break.py — 19 班\n- scripts/gen_codex_cli_reference.py — 84 班\n- scripts/merge_worktree.sh — 28 班\n- scripts/reclaim_stale_worktrees.py — 33 班\n- scripts/repoint_snapshot_from_db.py — 14 班\n- scripts/supabase_sync.py — 28 班\n- scripts/task_pool_claim.py — 19 班\n- scripts/telegram_poll.py — 46 班\n- scripts/tests/test_merge_worktree.sh — 28 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T123338771430Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
     "status": "pending",
@@ -43754,60 +43823,60 @@
         "tests/test_task_pool_claim.py"
       ],
       "streaks": {
-        "config/experiment_artifact_exclusions.json": 13,
-        "config/runtime_schedules.json": 32,
-        "conftest.py": 27,
-        "experiments/k1380/README.md": 88,
-        "experiments/k1380/k1380.py": 88,
-        "experiments/k1380/k1380_losses_all.npy": 88,
-        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": 88,
-        "experiments/k1380/k1380_results.json": 88,
-        "experiments/k1380/k1380_results_INVALID_20260716.json": 88,
-        "experiments/k1380/k1380_spa_from_cache.py": 88,
-        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": 88,
-        "paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv": 13,
-        "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv": 13,
-        "scripts/build_knowledge_index.py": 13,
-        "scripts/continue_task_dispatch.py": 18,
-        "scripts/daily_checkup.py": 32,
-        "scripts/detect_price_split_breaks.py": 18,
-        "scripts/dispatch_slot_budget.py": 5,
-        "scripts/dispatch_supervisor/phase_z.py": 5,
-        "scripts/dreaming_review.py": 32,
-        "scripts/fb_realchrome_post.py": 27,
-        "scripts/fix_0050_split_break.py": 18,
-        "scripts/gen_codex_cli_reference.py": 83,
-        "scripts/merge_worktree.sh": 27,
-        "scripts/reclaim_stale_worktrees.py": 32,
-        "scripts/repoint_snapshot_from_db.py": 13,
-        "scripts/supabase_sync.py": 27,
-        "scripts/task_pool_claim.py": 18,
-        "scripts/telegram_poll.py": 45,
-        "scripts/tests/test_merge_worktree.sh": 27,
-        "scripts/tests/test_paid_gemini_embedding_guard.py": 13,
-        "scripts/tests/test_phase_z_foreign_incident.py": 5,
-        "scripts/tests/test_phase_z_ownership_class_gate.py": 5,
-        "scripts/tests/test_phase_z_quarantine_checkpoint.py": 5,
-        "scripts/tests/test_scheduler_max_slots.py": 32,
-        "src/volpred/ops/dreaming_revalidate.py": 18,
-        "src/volpred/ops/foreign_incident.py": 5,
-        "src/volpred/ops/next_tasks.py": 48,
-        "storage/article_assets/tw-margin-vol-leadlag/evidence.json": 18,
-        "storage/work_log.json.bak_graphify_verdict_20260717": 88,
-        "tests/.!71268!test_task_pool_claim.py": 18,
-        "tests/test_dreaming_revalidate.py": 18,
-        "tests/test_dreaming_review.py": 32,
-        "tests/test_supabase_sync_cache_purge.py": 27,
-        "tests/test_task_pool_claim.py": 18
+        "config/experiment_artifact_exclusions.json": 14,
+        "config/runtime_schedules.json": 33,
+        "conftest.py": 28,
+        "experiments/k1380/README.md": 89,
+        "experiments/k1380/k1380.py": 89,
+        "experiments/k1380/k1380_losses_all.npy": 89,
+        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": 89,
+        "experiments/k1380/k1380_results.json": 89,
+        "experiments/k1380/k1380_results_INVALID_20260716.json": 89,
+        "experiments/k1380/k1380_spa_from_cache.py": 89,
+        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": 89,
+        "paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv": 14,
+        "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv": 14,
+        "scripts/build_knowledge_index.py": 14,
+        "scripts/continue_task_dispatch.py": 19,
+        "scripts/daily_checkup.py": 33,
+        "scripts/detect_price_split_breaks.py": 19,
+        "scripts/dispatch_slot_budget.py": 6,
+        "scripts/dispatch_supervisor/phase_z.py": 6,
+        "scripts/dreaming_review.py": 33,
+        "scripts/fb_realchrome_post.py": 28,
+        "scripts/fix_0050_split_break.py": 19,
+        "scripts/gen_codex_cli_reference.py": 84,
+        "scripts/merge_worktree.sh": 28,
+        "scripts/reclaim_stale_worktrees.py": 33,
+        "scripts/repoint_snapshot_from_db.py": 14,
+        "scripts/supabase_sync.py": 28,
+        "scripts/task_pool_claim.py": 19,
+        "scripts/telegram_poll.py": 46,
+        "scripts/tests/test_merge_worktree.sh": 28,
+        "scripts/tests/test_paid_gemini_embedding_guard.py": 14,
+        "scripts/tests/test_phase_z_foreign_incident.py": 6,
+        "scripts/tests/test_phase_z_ownership_class_gate.py": 6,
+        "scripts/tests/test_phase_z_quarantine_checkpoint.py": 6,
+        "scripts/tests/test_scheduler_max_slots.py": 33,
+        "src/volpred/ops/dreaming_revalidate.py": 19,
+        "src/volpred/ops/foreign_incident.py": 6,
+        "src/volpred/ops/next_tasks.py": 49,
+        "storage/article_assets/tw-margin-vol-leadlag/evidence.json": 19,
+        "storage/work_log.json.bak_graphify_verdict_20260717": 89,
+        "tests/.!71268!test_task_pool_claim.py": 19,
+        "tests/test_dreaming_revalidate.py": 19,
+        "tests/test_dreaming_review.py": 33,
+        "tests/test_supabase_sync_cache_purge.py": 28,
+        "tests/test_task_pool_claim.py": 19
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260719T123338771430Z"
       ],
-      "fires": 3,
+      "fires": 4,
       "first_seen_at": "2026-07-19T12:33:39.275027+00:00",
-      "last_seen_at": "2026-07-19T14:06:07.013231+00:00"
+      "last_seen_at": "2026-07-19T14:34:53.115045+00:00"
     },
-    "updated_at": "2026-07-19T14:06:07.013231+00:00"
+    "updated_at": "2026-07-19T14:34:53.115045+00:00"
   },
   {
     "id": "assign_580c1b3e",
@@ -43856,5 +43925,54 @@
       }
     ],
     "started_at": "2026-07-19T14:03:28.384458+00:00"
+  },
+  {
+    "id": "release_pipeline_rootcause_r1_r4_20260719",
+    "title": "文章釋出斷檔根因修復：R1 lazypack gate 死鎖 + R4 審計盲區（R2 待老闆拍板）",
+    "description": "老闆 2026-07-19 20:14 來信「為什麼文章沒有照排程釋出 / 從底層修復重構」的**根因修復**。\n22:07 班已完成調查 + 止血（見 work_log task_id=platform_ops_release_audit_fix_mile_21e45133），本單是治本部分。\n\n調查結論：觸發源正常（LaunchAgent 48h 內 8 次 fire 全 exit 0），問題在供給側 + gate 死鎖。\n\n**R1（最高優先）lazypack gate 死鎖**\nmile_21e45133 / mile_47c4bc3e 的 lazypack job **從未被 enqueue**，gate 卻報「pending/failed」→ 指向一個查不到的 job id，永久卡死、skip_count 單調遞增至 9。\n改法：(i) 草稿建立路徑（scripts/refill_reader_facing_pool.py / feed-publisher 寫入端）必定 enqueue lazypack job，enqueue 失敗要硬報錯而非靜默；(ii) gate 端在報 pending/failed 前先判斷 job 是否存在 —— 不存在就當場 enqueue，而不是丟一個查不到的 id 給人類。\n風險：低（補漏呼叫，不改渲染邏輯）。\n\n**R4 審計盲區** scripts/audit_release_settings.py 只檢查設定欄位漂移，不檢查觸發節奏與 interval 是否對齊，所以一路報 ok。\n改法：新增檢查 —— 實際觸發節奏（LaunchAgent plist + crontab 聯集）必須 <= .release_settings.json 的 interval_minutes，否則 fail；另加 skip_count > 5 的草稿升級告警。R2 那種「改了觸發源沒改設定」的變更今後就會被擋。風險：極低（純增檢查）。\n\n**R3 自癒迴路** 三筆 platform_ops_release_audit_fix_* pending 28h 未派工（歷史同類皆 succeeded）。未追進 dispatcher 選取邏輯確認是 priority、slot 佔用還是其他原因 —— 要先查清再改。阻塞釋出的修復任務建議提權或加 age-based escalation。\n\n**R2 需老闆拍板（不要自行決定）** LaunchAgent 每 6h 觸發 vs interval_minutes=240(4h) x max=1 不對齊：正規路徑上限只有 4 篇/日，**目前 6/day 完全靠 check_alerts 每小時 fallback 撐著**。二擇一：(a) LaunchAgent 改 4h 節奏讓正規路徑自給自足、fallback 回歸備援；或 (b) 正式承認 fallback 為 canonical driver 並寫入 runtime_schedules.json。建議 (a)。改頻率會直接改變發文節奏，需同步確認 content_quality.py:206 release_cadence_threshold_hours 不會誤報 burst。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-19T14:33:16.527386+00:00",
+    "updated_at": "2026-07-19T14:33:16.527386+00:00",
+    "started_at": null,
+    "last_released_at": null,
+    "payload": {
+      "parent_fire": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df",
+      "boss_email_uid": 12147
+    },
+    "status_history": [
+      {
+        "status": "pending",
+        "at": "2026-07-19T14:33:16.527386+00:00",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      }
+    ]
+  },
+  {
+    "id": "member_qa_dedup_owner_convergence_20260719",
+    "title": "member_qa 去重殘留收斂：question_id 回填 + 單一 owner 裁決函式（STRIKE 2 後續）",
+    "description": "老闆 2026-07-19 20:14 來信「為什麼會員提問又重複一次 / 從底層修復重構」的**殘留收斂**。\n22:07 班已落地 G1 發佈端 gate + G2 冪等 + G3 error_log 立案（STRIKE 2），24 tests green（見 work_log task_id=member_qa_dup_gate_strike2）。本單是刻意未做、明確排後續的部分。\n\n**殘留 1（最大繞過面）** 無 details.question_id 的 member_qa publish 仍是 unjudged 放行，目前只發 warn。要真正封死需先回填既有無綁定文章的 question_id，再把 gate 升成 fail-closed（缺 key 即拒發）。順序不可顛倒 —— 先升 gate 會把舊文章全擋住、停線。\n\n**殘留 2 單一 owner 收斂** question_id 仍是全系統識別鍵。claim_question_for_research 與 ensure_member_qa_task 各自呼叫 find_duplicate_question，且各自從**不同來源**取歷史（前者 _fetch_question_history(source)，後者 summary[\"answered_history\"]）—— 兩條路徑遲早漂移，違反 anti-stacking。\n設計：新增單一裁決函式 member_qa_duplicate_verdict(question_id, question_text) -> {verdict: clear|warn|block, matched_*, similarity, basis}，兩個消費端只准委派給它，history 取得也收進去成為單一資料來源。\n另：發佈端目前只認 exact question_id —— 會員重問若建了新 question 又沒被意圖端擋下，發佈端仍會放行。徹底修法是讓發佈端也用語意相似度查「同一提問人的近似問題已答過」。\n\n**殘留 3** _build_member_qa_task_description() 把可直接複製貼上的 --allow-duplicate 字串寫進 duplicate_review 任務描述（gate 自己發放繞過鑰匙）。改為必填 --new-angle 理由並寫入 work_log，缺值 exit 2。\n\n**殘留 4** 門檻校準基礎薄：19 列語料 / 171 對，incident pair 得 1.000 是因為 tokenizer 就是為它設計的（先剝數字）。合法對照組（國會議員 follow vs fade）0.386 vs 門檻 0.70，中間只有 0.31 餘裕且被單一樣本鎖住。0.35-0.70 warn 帶建議要求一次 LLM 語意裁決並**持久化**裁決結果（不得每次重算 —— 否則同一題在不同班次得到不同結論，重現「識別鍵不穩定」的老毛病）。\n\n**殘留 5** release_pool / status 改寫路徑（content.py:2288 附近）未加 G1；member_qa 目前不走該路徑所以非活漏洞，但改走時 gate 不會觸發。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-19T14:33:16.527386+00:00",
+    "updated_at": "2026-07-19T14:33:16.527386+00:00",
+    "started_at": null,
+    "last_released_at": null,
+    "payload": {
+      "parent_fire": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df",
+      "boss_email_uid": 12147,
+      "strike": 2
+    },
+    "status_history": [
+      {
+        "status": "pending",
+        "at": "2026-07-19T14:33:16.527386+00:00",
+        "by": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df"
+      }
+    ]
   }
 ]

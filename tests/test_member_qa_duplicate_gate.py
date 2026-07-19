@@ -269,3 +269,223 @@ def test_missing_history_key_fails_closed(monkeypatch, tmp_path):
     with pytest.raises(ValueError, match="answered_history"):
         questions.ensure_member_qa_task()
     assert not (tmp_path / "storage" / "next_tasks.json").exists()
+
+
+# --- gate 3: PUBLISH-TIME (the reader-visible artifact) ---------------------
+# This is the gate the 2026-07-19 incident actually needed: both upstream gates
+# guard an INTENT step and are bypassed by any caller that writes the article by
+# hand and calls publish_milestone directly.
+
+from volpred.ops import content  # noqa: E402
+
+
+ART_15PCT = "mile_d84aa7d0"
+ART_7PCT = "mile_0205a444"
+
+
+def _published_answer(article_id: str, question_id: str, **over) -> dict:
+    item = {
+        "id": article_id,
+        "title": "會員提問｜30 年每年成長",
+        "status": "published",
+        "audience": "member_qa",
+        "category": "member_qa",
+        "details": {"question_id": question_id},
+    }
+    item.update(over)
+    return item
+
+
+def _no_remote(monkeypatch):
+    """Supabase returns nothing (healthy, empty) - local feed decides."""
+    monkeypatch.setattr(content, "_select_rows", lambda table, select=None, **kw: [])
+
+
+def test_publish_gate_blocks_second_answer_to_the_same_question(monkeypatch):
+    _no_remote(monkeypatch)
+    feed = [_published_answer(ART_15PCT, ID_15PCT)]
+    with pytest.raises(content.MemberQaDuplicatePublishError) as exc:
+        content.assert_member_qa_publish_allowed(ID_15PCT, feed=feed)
+    # The error must name the article that already exists.
+    assert ART_15PCT in str(exc.value)
+
+
+def test_publish_gate_allows_a_first_answer(monkeypatch):
+    _no_remote(monkeypatch)
+    feed = [_published_answer(ART_15PCT, ID_15PCT)]
+    result = content.assert_member_qa_publish_allowed(ID_7PCT, feed=feed)
+    assert result["blocked"] is False
+    assert result["verdict"] == "clear"
+
+
+def test_publish_gate_counts_scheduled_answers_too(monkeypatch):
+    _no_remote(monkeypatch)
+    feed = [_published_answer(ART_15PCT, ID_15PCT, status="scheduled")]
+    with pytest.raises(content.MemberQaDuplicatePublishError):
+        content.assert_member_qa_publish_allowed(ID_15PCT, feed=feed)
+
+
+def test_publish_gate_ignores_unpublished_prior(monkeypatch):
+    """A retracted/unpublished prior (e.g. mile_530a28bc) is not a live answer."""
+    _no_remote(monkeypatch)
+    feed = [_published_answer(ART_15PCT, ID_15PCT, status="unpublished")]
+    assert content.assert_member_qa_publish_allowed(ID_15PCT, feed=feed)["blocked"] is False
+
+
+def test_supersedes_naming_the_prior_article_passes(monkeypatch):
+    _no_remote(monkeypatch)
+    feed = [_published_answer(ART_15PCT, ID_15PCT)]
+    result = content.assert_member_qa_publish_allowed(
+        ID_15PCT, feed=feed, supersedes=ART_15PCT
+    )
+    assert result["verdict"] == "supersedes"
+    assert result["blocked"] is False
+
+
+def test_supersedes_must_name_every_prior_answer(monkeypatch):
+    """Not an unconditional bypass: a truthy-but-wrong value must not clear."""
+    _no_remote(monkeypatch)
+    feed = [
+        _published_answer(ART_15PCT, ID_15PCT),
+        _published_answer("mile_other", ID_15PCT),
+    ]
+    with pytest.raises(content.MemberQaDuplicatePublishError):
+        content.assert_member_qa_publish_allowed(
+            ID_15PCT, feed=feed, supersedes=ART_15PCT
+        )
+    with pytest.raises(content.MemberQaDuplicatePublishError):
+        content.assert_member_qa_publish_allowed(ID_15PCT, feed=feed, supersedes="yes")
+    ok = content.assert_member_qa_publish_allowed(
+        ID_15PCT, feed=feed, supersedes=f"{ART_15PCT},mile_other"
+    )
+    assert ok["verdict"] == "supersedes"
+
+
+def test_publish_gate_sees_supabase_only_duplicates(monkeypatch):
+    """Prior answer absent from this checkout's feed but present remotely."""
+
+    def _rows(table, select=None, **kw):
+        if table == "question_articles":
+            return [{"question_id": ID_15PCT, "article_id": "uuid-1"}]
+        if table == "articles":
+            return [{"id": "uuid-1", "slug": ART_15PCT, "status": "published", "title": "x"}]
+        return []
+
+    monkeypatch.setattr(content, "_select_rows", _rows)
+    with pytest.raises(content.MemberQaDuplicatePublishError) as exc:
+        content.assert_member_qa_publish_allowed(ID_15PCT, feed=[])
+    assert ART_15PCT in str(exc.value)
+
+
+def test_supabase_outage_degrades_loudly_but_does_not_stall_the_line(monkeypatch, capsys):
+    """'Cannot cross-check' must not silently become 'clear' - but a remote
+    outage must not freeze member_qa publishing either."""
+
+    def _boom(table, select=None, **kw):
+        raise RuntimeError("supabase down")
+
+    monkeypatch.setattr(content, "_select_rows", _boom)
+    result = content.assert_member_qa_publish_allowed(ID_7PCT, feed=[])
+    assert result["blocked"] is False
+    assert result["verdict"] == "clear_degraded"
+    assert result["remote_ok"] is False
+    assert "DEGRADED" in capsys.readouterr().out
+
+
+def test_supabase_outage_still_blocks_a_locally_visible_duplicate(monkeypatch):
+    def _boom(table, select=None, **kw):
+        raise RuntimeError("supabase down")
+
+    monkeypatch.setattr(content, "_select_rows", _boom)
+    with pytest.raises(content.MemberQaDuplicatePublishError):
+        content.assert_member_qa_publish_allowed(
+            ID_15PCT, feed=[_published_answer(ART_15PCT, ID_15PCT)]
+        )
+
+
+def test_unreadable_local_feed_is_indeterminate_not_clear(monkeypatch):
+    _no_remote(monkeypatch)
+
+    def _boom(storage_dir="storage"):
+        raise OSError("feed.json unreadable")
+
+    monkeypatch.setattr(content, "load_feed", _boom)
+    with pytest.raises(content.MemberQaPublishGateIndeterminate):
+        content.assert_member_qa_publish_allowed(ID_15PCT)
+
+
+def test_publish_milestone_refuses_the_real_incident_pair(monkeypatch, tmp_path):
+    """End-to-end through Publisher.publish_milestone: the exact STRIKE 2 shape."""
+    from volpred.publisher.publisher import Publisher
+
+    _no_remote(monkeypatch)
+    pub = Publisher(storage_dir=str(tmp_path))
+    monkeypatch.setattr(
+        Publisher, "_load_feed", lambda self: [_published_answer(ART_15PCT, ID_15PCT)]
+    )
+    with pytest.raises(content.MemberQaDuplicatePublishError):
+        pub.publish_milestone(
+            title="會員提問｜想要30 年每年賺 7%",
+            description="body",
+            phase="member_qa",
+            details={"question_id": ID_15PCT, "content_type": "member_qa"},
+            audience="member_qa",
+            category="member_qa",
+        )
+
+
+# --- G2: answer_internal_question idempotency ------------------------------
+
+
+def test_answer_is_idempotent_when_a_published_answer_exists(monkeypatch):
+    monkeypatch.setattr(
+        questions,
+        "_existing_published_answer_articles",
+        lambda qid, exclude_article_id=None, storage_dir="storage": [ART_15PCT],
+    )
+
+    def _explode(*args, **kwargs):  # pragma: no cover - must never run
+        raise AssertionError("must not re-bind / re-stamp an answered question")
+
+    monkeypatch.setattr(questions, "_patch_where", _explode)
+    monkeypatch.setattr(questions, "_link_question_article", _explode)
+
+    result = questions.answer_internal_question(ID_15PCT, "answer", article_id=ART_7PCT)
+    assert result["skipped"] is True
+    assert result["reason"] == "already_answered"
+    assert result["existing_articles"] == [ART_15PCT]
+    assert result["linked_article"] is None
+
+
+def test_answered_at_is_a_first_answer_stamp(monkeypatch, tmp_path):
+    """Re-running the answer step for the SAME article must not move answered_at."""
+    patches: list[dict] = []
+    monkeypatch.setattr(
+        questions,
+        "_existing_published_answer_articles",
+        lambda qid, exclude_article_id=None, storage_dir="storage": [],
+    )
+    monkeypatch.setattr(questions, "_get_article_status", lambda slug: "published")
+    monkeypatch.setattr(
+        questions, "_question_answered_at", lambda qid: "2026-07-12T00:00:00+00:00"
+    )
+    monkeypatch.setattr(questions, "_link_question_article", lambda q, a: True)
+    monkeypatch.setattr(questions, "_ensure_article_question_metadata", lambda a, q: None)
+    monkeypatch.setattr(
+        questions, "_patch_where", lambda table, where, payload: patches.append(payload)
+    )
+
+    class _Mem:
+        def __init__(self, storage_dir="storage"):
+            pass
+
+        def answer_question(self, qid, answer):
+            return True
+
+    monkeypatch.setattr(questions, "MemorySystem", _Mem)
+
+    questions.answer_internal_question(
+        ID_15PCT, "answer", storage_dir=str(tmp_path), article_id=ART_15PCT
+    )
+    assert patches and "answered_at" not in patches[0]
+    assert patches[0]["status"] == "answered"

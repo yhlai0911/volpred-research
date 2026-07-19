@@ -158,12 +158,94 @@ def archive_question(question_id: str, reason: str = "manual") -> dict:
     }
 
 
+def _question_answered_at(question_id: str) -> str | None:
+    """Existing answered_at stamp, or None (also None when the lookup fails —
+    the caller then keeps the legacy stamping behaviour and warns)."""
+    try:
+        rows = _select_rows("questions", select="id,answered_at", id=question_id)
+        if rows:
+            value = rows[0].get("answered_at")
+            return str(value) if value else None
+    except Exception as exc:  # noqa: BLE001
+        _warn_question_ops(
+            f"answered_at lookup failed for question_id={question_id}: {exc}"
+        )
+    return None
+
+
+def _existing_published_answer_articles(
+    question_id: str,
+    *,
+    exclude_article_id: str | None = None,
+    storage_dir: str = "storage",
+) -> list[str]:
+    """Article ids already bound to `question_id` by a PUBLISHED answer.
+
+    Local feed first (authoritative for anything this repo published, and
+    available without network), Supabase question_articles as enrichment. A
+    Supabase failure is reported by `_warn_question_ops` inside the helper and
+    degrades coverage — it never manufactures a false "no prior answer".
+    """
+    seen: list[str] = []
+    try:
+        from .content import find_published_member_qa_articles
+
+        found = find_published_member_qa_articles(
+            question_id,
+            exclude_article_id=exclude_article_id,
+            storage_dir=storage_dir,
+        )
+        for item in found.get("articles") or []:
+            aid = str(item.get("id") or "")
+            if aid and aid not in seen:
+                seen.append(aid)
+        if not found.get("local_ok", True):
+            _warn_question_ops(
+                f"answer idempotency check blind (local feed unreadable) for "
+                f"question_id={question_id}"
+            )
+    except Exception as exc:  # noqa: BLE001
+        _warn_question_ops(
+            f"prior-answer lookup failed for question_id={question_id}: {exc}"
+        )
+    return seen
+
+
 def answer_internal_question(
     question_id: str,
     answer: str,
     storage_dir: str = "storage",
     article_id: str | None = None,
+    *,
+    allow_reanswer: bool = False,
 ) -> dict:
+    # --- G2 idempotency guard (2026-07-19 STRIKE 2) --------------------------
+    # Binding a SECOND published article to a question is the database-level
+    # shape of "the same member question was answered twice": it overwrites
+    # answered_at, adds another question_articles row, and makes the Q&A page
+    # show two answers. Publishing is gated separately (G1 in ops.content); this
+    # keeps the question<->article binding itself idempotent so a re-run of the
+    # answer step cannot silently re-stamp an already-answered question.
+    prior_articles = _existing_published_answer_articles(
+        question_id, exclude_article_id=article_id, storage_dir=storage_dir
+    )
+    if prior_articles and not allow_reanswer:
+        return {
+            "id": question_id,
+            "found": True,
+            "status": "answered",
+            "article_published": True,
+            "linked_article": None,
+            "skipped": True,
+            "reason": "already_answered",
+            "existing_articles": prior_articles,
+            "note": (
+                f"問題 {question_id} 已有已發佈的答覆文章 {prior_articles}；"
+                "不重複綁定、不覆蓋 answered_at。若確為刻意續作，"
+                "請用 allow_reanswer=True 明確覆寫。"
+            ),
+        }
+
     # Determine if the linked article is already published
     article_is_published = False
     if article_id:
@@ -189,12 +271,21 @@ def answer_internal_question(
         dump_json(filepath, questions)
         question_status = "researching"
 
-    # Update Supabase question status
+    # Update Supabase question status.
+    # G2: answered_at is a FIRST-answer timestamp, not a last-touch one. Re-running
+    # the answer step for the same article (retry, resync) must not move it — an
+    # advancing answered_at is what made the two STRIKE 2 answers look like two
+    # legitimately distinct events in the audit trail.
+    existing_answered_at = _question_answered_at(question_id) if article_is_published else None
     _patch_where("questions", {"id": question_id}, {
         "status": question_status,
         "answer": answer[:500] if answer else None,
         "updated_at": _utc_now(),
-        **({"answered_at": _utc_now()} if article_is_published else {}),
+        **(
+            {"answered_at": _utc_now()}
+            if article_is_published and not existing_answered_at
+            else {}
+        ),
     })
 
     linked_article = False

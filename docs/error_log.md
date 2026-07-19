@@ -104,8 +104,10 @@
 ## E. Dedup / narrative-arc / 重複內容 / recycling / K-id 撞號
 
 **規則**：派寫作 agent 前主線程做 3-layer 查重；同邏輯 arc 換外殼也算重複（arc-dedup）。dedup gate 若 fail-closed default 會變 8-day 內容黑洞（要 fail-open + audit trail）。K-id 配號前 `ls experiments/` + `ls .claude/worktrees/`，禁雙 agent 同號。鬼打牆根因在**釋出端**非研究端。**實驗做完沒寫進 knowledge.json = 對 dedup 完全隱形**（查重查不到 → 系統宣稱「全飽和」還去重跑同一題）——「寫 KB」不是收尾禮儀，它是 dedup 的資料前提。
-**機械 owner**：3-layer dedup（`.claude/rules/publishing.md`）+ arc-dedup gate + `.claude/rules/dedup-gate-audit.md`；release_dedup TTL 別凍死全池。**KB 覆蓋率**：`scripts/reproduce_check.py` 的 `KNOWLEDGE_UNRECORDED` issue（經 `daily_checkup.py` reproducibility 維度曝光）。
+**機械 owner**：3-layer dedup（`.claude/rules/publishing.md`）+ arc-dedup gate + `.claude/rules/dedup-gate-audit.md`；release_dedup TTL 別凍死全池。**KB 覆蓋率**：`scripts/reproduce_check.py` 的 `KNOWLEDGE_UNRECORDED` issue（經 `daily_checkup.py` reproducibility 維度曝光）。**member_qa 重複答覆**：`volpred.ops.content.assert_member_qa_publish_allowed`（發佈端硬 gate，唯一守在讀者可見面）+ `questions.claim_question_for_research` / `ensure_member_qa_task` 的 `question_similarity` 意圖端 gate + `answer_internal_question` 冪等；regression pin = `tests/test_member_qa_duplicate_gate.py`。
 **代表 incident**：
+- 2026-07-19 **STRIKE 2｜同一會員同一問題被完整研究並發佈兩次**：`yaoxk1431` 的「30 年每年成長 15%／7%」只改數字重問，`e79a7097`→`mile_d84aa7d0`（07-12 發佈）、`3e258ba2`→`mile_0205a444`（07-19 發佈）。根因是**全系統一律拿 `question_id` 當「同一個問題」的識別鍵**（`ensure_member_qa_task` docstring 明寫 "Dedupe key is question_id"）：新 row = 新 id = 不算重複。**為什麼前次修法沒擋住**：(a) 2026-03-31 修的是**並發**（同時被claim兩次），不是**重複**（隔一週再問一次），兩者根本不同軸；(b) 當日 `33cf84b8f`/`dde8e1666` 加的 `question_similarity()`/`find_duplicate_question()` 方向對，但兩道 gate 都守在**意圖端**（建 task、claim），主線程手寫文章直接呼叫 publish 即可整段繞過；(c) member_qa 被**明文排除**在發佈端查重外（`content.py` `_RELEASE_DEDUP_AUDIENCES={general,research}`、`publisher.py` topic-cluster type-exempt），即「讀者實際看到的那個 artifact 是唯一沒有 owner 的環節」。修復＝在 `publish_milestone` 加發佈端硬 gate（同 question_id 已有 published/scheduled 答覆即拒發，只認 `details['supersedes']` 具名續作通道）+ `answer_internal_question` 冪等（不重複綁文章、`answered_at` 只記首答）— Q3
+- 2026-03-31 **STRIKE 1｜同上 class（當時未立案）**：同一會員的台灣經濟提問 7 小時內被答兩次（`mile_530a28bc` / `mile_42ee876c`，前者事後 unpublished）。當時只當作並發競態處理、**沒有建立 class 條目**，因此沒有 3-STRIKE 計數、沒有升級路徑；2026-07-19 再犯時系統對「這是老問題」完全無知——這正是老闆問「為什麼**又**重複」的結構原因。教訓：class 沒立案 = 第二次發生時等於第一次 — Q1
 - 2026-07-19 K-id 撞號 STRIKE 2（k1732）：interactive session 掃 worktrees 取 max+1，撞上 registry 已預留題目（registry last=1739 vs experiments/ 最大 1718 的必然缺口）→ 機械化：`experiment_gates.py` certify 新增 `kid-registry` gate（K≥1719 無預留擋 merge，讀 canonical main registry）+ `kid_reserve.py reassign` 修復撞號 + rule 一行；被擠掉的題目查實為已完成 dup（k_etf_vs_etf_fragility_2026_06_14），順帶關掉重複生成的 pool task — Q3
 - 2026-07-14 136/1252 已完成實驗從未進 knowledge.json（對查重隱形）；同時 `research_program.md` 把 `experiments/k1536/` 誤標成 K1537 並編造「K1536 已被預留」的理由，衍生出一個要 scaffold 幽靈 K1537 的 stale task — Q3
 - 2026-06-10 **3-STRIKE** 文章 narrative-arc 重複（K1449/K1091）→ arc-dedup 三層重構 — Q2
@@ -323,7 +325,7 @@
 ## 3-STRIKE 分布
 
 - 明確 `3-STRIKE TRIGGER` 標記 entry：**26 條**（含大小寫變體共 36 條提及）。Q2=12、Q3=14、Q1=0。全文在對應季 archive。
-- 依 class（明確標記為主）：**§A 並發/dispatch** 最密集（2026-06-23 META、07-12 ×2、07-01 hourly-auth 等）；**§B git-owner/canonical-write**（07-10 ×2）；**§D silent-fallback**（06-20、06-23 test-hook）；**§E dedup/K-id**（06-10、06-23）；**§H final-text**（07-02 ×2）；**§I chart**（07-14、07-13）；**§J dreaming**（07-01）；**§K pool**（06-14）；**§L paper**（05-22）；**§M series**（07-06）；**§C worktree**（07-12 K1032）。
+- 依 class（明確標記為主）：**§A 並發/dispatch** 最密集（2026-06-23 META、07-12 ×2、07-01 hourly-auth 等）；**§B git-owner/canonical-write**（07-10 ×2）；**§D silent-fallback**（06-20、06-23 test-hook）；**§E dedup/K-id**（06-10、06-23、07-19 K-id 撞號、07-19 member_qa 重複答覆＝該 class 首次立案，STRIKE 1 為 2026-03-31 追認）；**§H final-text**（07-02 ×2）；**§I chart**（07-14、07-13）；**§J dreaming**（07-01）；**§K pool**（06-14）；**§L paper**（05-22）；**§M series**（07-06）；**§C worktree**（07-12 K1032）。
 - 查全部：`grep -rn '3-STRIKE' docs/error_log_archive/`。
 
 ## 2026-07-16 dreaming memory-skill gap 聚合 signature 吞掉新問題，且 owner 只靠名稱猜測 — FIXED
@@ -453,3 +455,40 @@ knowledge 條目 → 補；k1719 缺條目 → 補；第三班測試寫 canonica
 **教訓**：**逐筆補同一個 bug class = 把偵測成本外包給下一班的紅燈**。同一種紅燈出現第二次時，該修的
 就不是那一筆而是那道門。另一條更通用：**gate 的要求必須可被執行**——當規則對某類目標無法滿足時，
 正解是把該類明確排除並說明理由，不是留一條沒人做得到的規則等著被 `--no-verify` 繞過。
+
+## 2026-07-19 會員提問被答第二次：三道 gate 全守在「意圖」，讀者看到的 artifact 沒有 owner — FIXED（STRIKE 2）
+
+**incident**：會員 `yaoxk1431` 把同一個問題只改數字（每年成長 15% → 7%）重問一次，兩次都被完整
+研究、完整發佈：`e79a7097` → `member_qa_e79a7097_evaluate`（07-11）→ `mile_d84aa7d0`（07-12 published）；
+`3e258ba2` → `member_qa_3e258ba2_evaluate`（07-18）→ `mile_0205a444`（07-19 published）。老闆來信第一個字
+是「**又**」——2026-03-31 同一位會員的台灣經濟提問已經在 7 小時內被答過兩次（`mile_530a28bc` /
+`mile_42ee876c`）。
+
+**根因**：全系統把「同一個問題」定義成「同一個 `question_id`」。新 row = 新 id = 系統認定不是重複。
+歷次修法都只是把這個字面鍵放寬一格，沒有換軸：03-31 修的是**並發**（兩個 session 同時 claim），
+07-19 當日的 `33cf84b8f` / `dde8e1666` 加了 `question_similarity()` / `find_duplicate_question()`，方向正確，
+但**兩道新 gate 都站在意圖端**（建 task、claim question）。主線程手寫一篇文章直接呼叫
+`publish-milestone`，一道都不會經過。而 member_qa 恰好被**明文排除**在既有的發佈端查重外
+（`_RELEASE_DEDUP_AUDIENCES = {general, research}`；publisher 的 topic-cluster type-exempt），
+所以**讀者實際看到的那個 artifact，是整條鏈上唯一沒有 owner 的環節**。
+
+**修復（發佈端 = 最後一道，且是唯一守在讀者可見面的）**：
+1. `volpred.ops.content.assert_member_qa_publish_allowed()` — 同一 `question_id` 已有
+   published/scheduled 答覆時，`Publisher.publish_milestone` 直接 raise
+   `MemberQaDuplicatePublishError`（訊息列出既有文章 id）。上游全部被繞過它仍成立。
+2. **具名續作通道**：刻意的「先發初步、後補深入」用 `details['supersedes']`（CLI `--supersedes`）通過，
+   且必須**列出全部**既有答覆的文章 id。不做無條件旁路旗標——無條件旗標會退化成「一律加上」，
+   要求具名則逼作者去看已經存在什麼。
+3. `answer_internal_question()` 冪等：已有 published 答覆文章時不再綁第二篇（回傳
+   `skipped/already_answered`，需 `allow_reanswer=True` 明確覆寫）；`answered_at` 只記首答，
+   重跑不再往前推（會讓兩次答覆在稽核軌跡上看起來像兩個正當事件）。
+
+**fail-closed 但不靜默停擺**：本地 `feed.json` 是這個 repo 發佈過的一切的權威鏡像、且不需網路；
+Supabase 只是加強覆蓋。因此 (a) 本地 feed 讀不到 = 全盲 → 丟**不同的** exception 型別
+`MemberQaPublishGateIndeterminate`（「我沒查到」永遠不得被算成「確定沒有重複」）；(b) 本地判定 clear
+但 Supabase 查詢失敗 → 明確印出 DEGRADED 並放行，不讓外部服務中斷把整條 member_qa 線悶掉。
+
+**教訓（本次真正的那一條）**：這個 class **從未在 error_log 立案**，所以沒有 3-STRIKE 計數、沒有升級
+路徑，第二次發生時系統對「這是老問題」是無知的——老闆說「又」，系統說「新問題」。**沒立案的 class，
+第二次發生等於第一次。** 另一條：**查重要守在產出端，不能只守在意圖端**；意圖端的 gate 都是可繞過的，
+只有讀者看得到的那個 artifact 是無法繞過的必經點。

@@ -1,9 +1,15 @@
 {
-  "generated_at": "2026-07-19T14:34:53.640216",
+  "generated_at": "2026-07-19T22:10:53.039725",
   "overall": "warn",
   "critical_count": 0,
-  "warn_count": 5,
+  "warn_count": 6,
   "findings": [
+    {
+      "dimension": "content_pipeline",
+      "severity": "warn",
+      "message": "草稿池僅 3 篇（門檻 4）—— Mission 1 缺產出",
+      "recovery": "主動派寫作 agent 補池（feed-publisher，新鮮非 spy 主題）"
+    },
     {
       "dimension": "reader_metrics",
       "severity": "info",
@@ -13,7 +19,7 @@
     {
       "dimension": "dedup_calibration",
       "severity": "warn",
-      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=832, AI saturation=11 (threshold=5, margin=6), NFP control=3, FOMC theme=0 / hard=0",
+      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=831, AI saturation=11 (threshold=5, margin=6), NFP control=3, FOMC theme=0 / hard=0",
       "recovery": "uv run python scripts/daily_checkup.py --json  # 檢查 dedup_calibration"
     },
     {
@@ -25,7 +31,7 @@
     {
       "dimension": "reproducibility",
       "severity": "warn",
-      "message": "PRIORITY_UNVERIFIED: 231 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1010, k1023, k1025）",
+      "message": "PRIORITY_UNVERIFIED: 230 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1010, k1023, k1025）",
       "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
     },
     {

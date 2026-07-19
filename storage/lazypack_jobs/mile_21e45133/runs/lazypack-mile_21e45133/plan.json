@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "title": "美債波動與日圓套利平倉：傳導鏈查核懶人包",
+  "evidence": {
+    "move": {
+      "path": "storage/article_assets/jpy_carry_move_transmission/evidence.json",
+      "sha256": "3d212df51c7758067d9cc6fdfa0de05c91fb9899264add468d45f13a2f9b3cd9",
+      "label": "MOVE 跳升與日圓套利平倉事件研究 evidence"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "市場常講的那條鏈子",
+      "alt": "說明美債波動率、日圓與新興市場之間被假設的傳導鏈，以及本文的樣本規模",
+      "sources": [
+        "move"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "假設的傳導路徑",
+          "body": [
+            "美債波動率跳升，借日圓的槓桿部位風險預算被吃掉，被迫平倉。",
+            "平倉要買回日圓，日圓走強，資金撤出新興市場，於是股市挨打。",
+            "要成立，中間每一節都得接得上；斷一節，整條鏈子就只是說法。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "可判定事件的交易日",
+          "value": {
+            "source": "move",
+            "path": "meta.n_trading_days_with_valid_threshold",
+            "format": {
+              "kind": "integer",
+              "suffix": " 日"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "抓到的 MOVE 跳升次數",
+          "value": {
+            "source": "move",
+            "path": "meta.n_move_jump_events",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "怎麼查的",
+      "alt": "說明樣本期間、事件定義與統計檢定方法",
+      "sources": [
+        "move"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "資料與門檻",
+          "body": [
+            "yfinance 日收盤，標的含 MOVE、美元兌日圓、日圓 ETF、新興市場與韓國巴西 ETF。",
+            "當天 MOVE 變動排進自身滾動一年分布的最高一成就記一次事件，門檻只用當日以前資料算。",
+            "檢定用事件虛擬變數迴歸配 Newey-West 穩健標準誤，處理視窗重疊。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本起點",
+          "value": {
+            "source": "move",
+            "path": "meta.sample_start",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本終點",
+          "value": {
+            "source": "move",
+            "path": "meta.sample_end",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "去重疊後的獨立事件",
+          "value": {
+            "source": "move",
+            "path": "meta.n_declustered_events",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "兩段都接不上",
+      "alt": "呈現美元兌日圓事件後平均差異、日圓走強後新興市場表現與相關係數等主要結果",
+      "sources": [
+        "move"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "事件後十日 美元兌日圓差異",
+          "value": {
+            "source": "move",
+            "path": "event_study_all_events.USDJPY.horizons.h10.diff_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " pp"
+            }
+          },
+          "note": "正值代表日圓走弱，方向與平倉劇本相反"
+        },
+        {
+          "kind": "metric",
+          "label": "該項 p 值",
+          "value": {
+            "source": "move",
+            "path": "event_study_all_events.USDJPY.horizons.h10.pval",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "日圓急升後 新興市場十日差異",
+          "value": {
+            "source": "move",
+            "path": "link_b_yen_surge_to_EEM.results.h10.diff_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " pp"
+            }
+          },
+          "note": "正值代表新興市場反而偏強"
+        },
+        {
+          "kind": "metric",
+          "label": "MOVE 與美元兌日圓 日變動相關",
+          "value": {
+            "source": "move",
+            "path": "correlation.dMOVE_vs_dUSDJPY_full_sample",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "唯一一絲痕跡，還是過不了門檻",
+      "alt": "呈現子樣本切分後的最強結果與其統計顯著性，以及讀者可帶走的結論",
+      "sources": [
+        "move"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "跳升且日圓同步走強 新興市場五日差異",
+          "value": {
+            "source": "move",
+            "path": "conditional_split.move_jump_with_yen_up.EEM_h5.diff_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " pp"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "該子樣本 p 值",
+          "value": {
+            "source": "move",
+            "path": "conditional_split.move_jump_with_yen_up.EEM_h5.pval",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "事後挑分組條件，折扣要打得夠大"
+        },
+        {
+          "kind": "text",
+          "heading": "帶得走的兩件事",
+          "body": [
+            "把美債波動率當新興市場預警指標，在這個樣本上沒有支撐。",
+            "共用觸發源會製造同步，不會製造傳導。",
+            "找不到有兩種可能：效應不存在，或日頻資料太粗蓋掉了它。"
+          ]
+        }
+      ]
+    }
+  ]
+}

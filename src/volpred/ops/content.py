@@ -467,6 +467,258 @@ def _release_axis_waives_dup(item: dict, blockers: list[dict]) -> bool:
     return True
 
 
+# --- G1: member_qa publish-time duplicate gate (2026-07-19, STRIKE 2) --------
+# Incident history for this class:
+#   2026-03-31 (STRIKE 1) mile_530a28bc / mile_42ee876c — same member, same
+#     Taiwan-economy question answered twice within 7 hours.
+#   2026-07-19 (STRIKE 2) mile_d84aa7d0 (2026-07-12) / mile_0205a444
+#     (2026-07-19) — member yaoxk1431's "30 年每年成長 15% / 7%" question
+#     researched and published twice, one week apart.
+#
+# WHY THIS GATE LIVES AT PUBLISH TIME, not upstream:
+# every previous fix guarded an INTENT step (ensure_member_qa_task creating a
+# task, claim_question_for_research claiming a question). Those are all
+# skippable — a main thread that hand-writes an article and calls
+# publish-milestone directly never touches them, and that is exactly how
+# STRIKE 2 happened. The published article is the only artifact the reader
+# actually sees, and until now it was the ONE step with no owner. This gate is
+# the last line of defence: it holds even when every upstream gate is bypassed,
+# because nothing reaches a reader without passing through here.
+#
+# Deliberate follow-ups (先發初步、後補深入) are legitimate and must stay
+# possible, so the gate has ONE legal channel: details['supersedes'] (CLI:
+# --supersedes) must NAME the prior article id(s) it continues. Naming is the
+# point — an unconditional bypass flag would decay into "always set it", while
+# naming forces the author to look at what already exists.
+_MEMBER_QA_PUBLISHED_STATUSES = {"published", "scheduled"}
+
+
+class MemberQaDuplicatePublishError(ValueError):
+    """Raised when a member_qa article would be the 2nd published answer to a
+    question that already has one."""
+
+
+class MemberQaPublishGateIndeterminate(ValueError):
+    """Raised when the gate cannot establish whether a prior published answer
+    exists (e.g. the local feed is unreadable).
+
+    Fail-closed, but LOUD and distinguishable: 'we could not check' must never
+    be silently rendered as 'clear'. Callers/operators see a different error
+    class than a real duplicate so they can retry rather than assume a dup.
+    """
+
+
+def _member_qa_local_prior_answers(
+    question_id: str,
+    feed: list[dict],
+    *,
+    exclude_article_id: str | None = None,
+) -> list[dict]:
+    """Published/scheduled member_qa articles already bound to `question_id`."""
+    hits: list[dict] = []
+    for item in feed or []:
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("status") or "") not in _MEMBER_QA_PUBLISHED_STATUSES:
+            continue
+        details = item.get("details")
+        qid = None
+        if isinstance(details, dict):
+            qid = details.get("question_id")
+        qid = qid or item.get("question_id")
+        if not qid or str(qid) != str(question_id):
+            continue
+        if exclude_article_id and str(item.get("id")) == str(exclude_article_id):
+            continue
+        hits.append(
+            {
+                "id": item.get("id"),
+                "title": item.get("title"),
+                "status": item.get("status"),
+                "published_at": item.get("published_at") or item.get("created_at"),
+                "source": "local_feed",
+            }
+        )
+    return hits
+
+
+def _member_qa_remote_prior_answers(question_id: str) -> tuple[list[dict], str | None]:
+    """Supabase-side prior answers via question_articles → articles.
+
+    Returns (hits, error). `error` non-None means the remote side is UNKNOWN,
+    not clear. Supabase is an ENRICHMENT source here (it can see articles this
+    checkout never wrote); the local feed is the authoritative mirror of
+    everything this repo publishes, so a remote outage degrades coverage but
+    does not stall the member_qa line — see `assert_member_qa_publish_allowed`.
+    """
+    try:
+        links = _select_rows(
+            "question_articles", select="question_id,article_id", question_id=question_id
+        )
+    except Exception as exc:  # noqa: BLE001
+        return [], f"{type(exc).__name__}: {exc}"
+    hits: list[dict] = []
+    for link in links or []:
+        article_id = link.get("article_id") if isinstance(link, dict) else None
+        if not article_id:
+            continue
+        try:
+            rows = _select_rows("articles", select="id,slug,status,title", id=article_id)
+        except Exception as exc:  # noqa: BLE001
+            return hits, f"{type(exc).__name__}: {exc}"
+        for row in rows or []:
+            if str(row.get("status") or "") not in _MEMBER_QA_PUBLISHED_STATUSES:
+                continue
+            hits.append(
+                {
+                    "id": row.get("slug") or row.get("id"),
+                    "title": row.get("title"),
+                    "status": row.get("status"),
+                    "published_at": None,
+                    "source": "supabase",
+                }
+            )
+    return hits, None
+
+
+def find_published_member_qa_articles(
+    question_id: str,
+    *,
+    feed: list[dict] | None = None,
+    storage_dir: str = "storage",
+    exclude_article_id: str | None = None,
+) -> dict:
+    """Every already-published answer to `question_id`, plus source health.
+
+    Result keys:
+      articles          — de-duplicated prior published/scheduled answers
+      local_ok          — the authoritative local feed was readable
+      remote_ok         — the Supabase enrichment query succeeded
+      remote_error      — why it did not (None when remote_ok)
+    """
+    local_ok = True
+    if feed is None:
+        try:
+            feed = load_feed(storage_dir)
+        except Exception as exc:  # noqa: BLE001
+            from .diagnostics import warn
+
+            warn("member_qa_publish_gate", "local feed unreadable", err=str(exc))
+            feed, local_ok = [], False
+    hits = _member_qa_local_prior_answers(
+        question_id, feed or [], exclude_article_id=exclude_article_id
+    )
+    remote_hits, remote_error = _member_qa_remote_prior_answers(question_id)
+    for hit in remote_hits:
+        if exclude_article_id and str(hit.get("id")) == str(exclude_article_id):
+            continue
+        if any(str(h.get("id")) == str(hit.get("id")) for h in hits):
+            continue
+        hits.append(hit)
+    return {
+        "question_id": question_id,
+        "articles": hits,
+        "local_ok": local_ok,
+        "remote_ok": remote_error is None,
+        "remote_error": remote_error,
+    }
+
+
+def _normalize_supersedes(value) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        parts = [p.strip() for p in value.replace(",", " ").split()]
+    elif isinstance(value, (list, tuple, set)):
+        parts = [str(p).strip() for p in value]
+    else:
+        parts = [str(value).strip()]
+    return [p for p in parts if p]
+
+
+def assert_member_qa_publish_allowed(
+    question_id: str | None,
+    *,
+    feed: list[dict] | None = None,
+    supersedes=None,
+    title: str = "",
+    storage_dir: str = "storage",
+    exclude_article_id: str | None = None,
+) -> dict:
+    """Raise unless this member_qa article may become a reader-visible answer.
+
+    Blocks when the question already has ≥1 published/scheduled answer, unless
+    `supersedes` explicitly names ALL of them (the deliberate-sequel channel).
+    """
+    if not question_id:
+        # No binding key → the gate cannot judge. Loud, stamped, and allowed:
+        # blocking every legacy/unbound member_qa publish would stall the line
+        # for a condition the gate itself cannot resolve. Recorded so an
+        # unbound publish is auditable rather than invisible.
+        from .diagnostics import warn
+
+        warn(
+            "member_qa_publish_gate",
+            "member_qa publish carries no details.question_id — duplicate gate UNJUDGED",
+            title=str(title)[:80],
+        )
+        print(
+            "  ⚠️ member_qa publish has no details['question_id'] — duplicate gate "
+            "could not judge this article. Set it so the publish-time gate can protect readers."
+        )
+        return {"blocked": False, "verdict": "unjudged_no_question_id", "articles": []}
+
+    found = find_published_member_qa_articles(
+        question_id,
+        feed=feed,
+        storage_dir=storage_dir,
+        exclude_article_id=exclude_article_id,
+    )
+    if not found["local_ok"]:
+        # We are blind on the authoritative source: "unknown" must not be
+        # rendered as "no duplicate". Fail closed with a DISTINCT error type.
+        raise MemberQaPublishGateIndeterminate(
+            "member_qa_publish_gate_indeterminate: local feed unreadable, cannot "
+            f"verify whether question_id={question_id} already has a published answer. "
+            "Fix the feed read and retry — this is NOT a clearance."
+        )
+
+    priors = found["articles"]
+    if not priors:
+        if not found["remote_ok"]:
+            # Local (authoritative for anything this repo published) says clear;
+            # only the Supabase enrichment is down. Degrade explicitly instead of
+            # stalling the whole member_qa line on an external outage.
+            print(
+                "  ⚠️ member_qa publish gate DEGRADED: Supabase cross-check unavailable "
+                f"({found['remote_error']}); cleared on local feed only."
+            )
+            return {"blocked": False, "verdict": "clear_degraded", **found}
+        return {"blocked": False, "verdict": "clear", **found}
+
+    prior_ids = [str(a.get("id")) for a in priors]
+    declared = set(_normalize_supersedes(supersedes))
+    if declared and set(prior_ids).issubset(declared):
+        print(
+            f"  ↪️ member_qa sequel allowed: supersedes={sorted(declared)} "
+            f"(question_id={question_id})"
+        )
+        return {"blocked": False, "verdict": "supersedes", **found}
+
+    listed = "; ".join(
+        f"{a.get('id')} ({a.get('status')}, {a.get('source')}) '{str(a.get('title') or '')[:40]}'"
+        for a in priors
+    )
+    raise MemberQaDuplicatePublishError(
+        "member_qa_duplicate_publish_blocked: question_id="
+        f"{question_id} already has {len(priors)} published answer(s): {listed}. "
+        "This is the 2026-07-19 STRIKE 2 class (a member's question answered twice). "
+        "If this is a deliberate follow-up, re-run with "
+        f"details['supersedes']={prior_ids!r} (CLI: --supersedes "
+        f"{','.join(prior_ids)}); otherwise do not publish."
+    )
+
+
 def _extract_k_ids_from_item(item: dict) -> set[str]:
     refs: set[str] = set()
     details = item.get("details")
