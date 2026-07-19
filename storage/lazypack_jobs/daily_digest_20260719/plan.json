@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "title": "保證金骨牌的四個關節",
+  "subtitle": "去槓桿要成立，四節都得接上；多數時候接不上",
+  "evidence": {
+    "margin": {
+      "path": "storage/article_assets/tw-margin-vol-leadlag/stats_raw.json",
+      "sha256": "e4370a0a88c20ef95a96b6d2caa63c376295e2c869ad819e1aed2377da3c93ac",
+      "label": "0050 融資與已實現波動十二年統計"
+    },
+    "carry": {
+      "path": "storage/article_assets/jpy_carry_move_transmission/evidence.json",
+      "sha256": "3d212df51c7758067d9cc6fdfa0de05c91fb9899264add468d45f13a2f9b3cd9",
+      "label": "美債波動跳升與日圓套利傳導檢定"
+    },
+    "credit": {
+      "path": "experiments/k1499/k1499_results.json",
+      "sha256": "2852108e662ae6af5116d8f9b84ad34f8c70b985fb71bb67bb7aab694f5fc78e",
+      "label": "BDC 公開代理對信用資產波動的增量檢定"
+    },
+    "leverage": {
+      "path": "experiments/k1411/k1411_results.json",
+      "sha256": "4ab317771d31842db2c49db0e5d333680ad0128ff4f48246c610df3c1d5af312",
+      "label": "借貸資金持有槓桿 ETF 的資不抵債機率"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "editorial",
+      "title": "骨牌要倒，四個關節都得接上",
+      "alt": "保證金骨牌四個關節的框架說明",
+      "sources": [
+        "margin"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "關節一｜水位與變化率",
+          "body": [
+            "融資餘額站多高推不倒任何東西。有預測力的是變化率，而且只在特定波動環境裡才有。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "關節二｜跨資產同步性",
+          "body": [
+            "本地槓桿要變成全球事件，得有套利交易這類管道把壓力送出去。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "關節三｜信用端有沒有發抖",
+          "body": [
+            "有人開始擔心錢還不還得出來，骨牌才接得上。信用市場沉默就是斷的。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "關節四｜賣不掉風險",
+          "body": [
+            "槓桿最重的一擊落在流動性，不在帳面虧損。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "台股大型股波動跳升當日（年化）",
+          "value": {
+            "source": "margin",
+            "path": "/event/rv20_on_2026_07_17",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_joint12",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "關節一與關節二：本地訊號弱，外溢管道斷",
+      "alt": "融資變動與美債波動傳導的統計強度",
+      "sources": [
+        "margin",
+        "carry"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "融資變動對未來二十日波動的統計強度",
+          "value": {
+            "source": "margin",
+            "path": "/regression/h20/t_margin_HAC",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "波動率自身的統計強度",
+          "value": {
+            "source": "margin",
+            "path": "/regression/h20/t_rv20_HAC",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "中波動層內融資快慢兩組的其後波動差",
+          "value": {
+            "source": "margin",
+            "path": "/double_sort/中波動/diff",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "美債波動與日圓的全樣本相關係數",
+          "value": {
+            "source": "carry",
+            "path": "/correlation/dMOVE_vs_dUSDJPY_full_sample",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "美債波動跳升後新興市場十日統計強度",
+          "value": {
+            "source": "carry",
+            "path": "/event_study_all_events/EEM/horizons/h10/tstat",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_joint3",
+      "info": "results",
+      "style": "professional",
+      "title": "關節三：扣掉大盤後只剩一格過關",
+      "alt": "信用影子指標對高收益債未來波動的統計強度",
+      "sources": [
+        "credit"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "相對折價代理對高收益債未來五日",
+          "value": {
+            "source": "credit",
+            "path": "/hac_regressions/HYG/h5/modelC_navproxy_plus_spy/nav_discount_z/t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "同一代理，未來十日",
+          "value": {
+            "source": "credit",
+            "path": "/hac_regressions/HYG/h10/modelC_navproxy_plus_spy/nav_discount_z/t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "同一代理，未來二十一日",
+          "value": {
+            "source": "credit",
+            "path": "/hac_regressions/HYG/h21/modelC_navproxy_plus_spy/nav_discount_z/t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀",
+          "body": [
+            "門檻設在三。只有最短的一週期程跨過去，較長的兩個期程都掉回門檻以下。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4_joint4",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "關節四：到期還得起，過程中還不起",
+      "alt": "借貸資金持有槓桿 ETF 的到期與過程資不抵債機率",
+      "sources": [
+        "leverage"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "借錢持有一年，到期還不清的機率",
+          "value": {
+            "source": "leverage",
+            "path": "/Q4_credit_ruin/leverage_00631L_all_entries/1y/5pct/ruin_prob",
+            "format": {
+              "kind": "percent",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "借錢持有一年，過程中曾還不清",
+          "value": {
+            "source": "leverage",
+            "path": "/Q4_credit_ruin/leverage_00631L_all_entries/1y/5pct/ever_underwater_prob",
+            "format": {
+              "kind": "percent",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "持有五年，到期還不清的機率",
+          "value": {
+            "source": "leverage",
+            "path": "/Q4_credit_ruin/leverage_00631L_all_entries/5y/5pct/ruin_prob",
+            "format": {
+              "kind": "percent",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "持有五年，過程中曾還不清",
+          "value": {
+            "source": "leverage",
+            "path": "/Q4_credit_ruin/leverage_00631L_all_entries/5y/5pct/ever_underwater_prob",
+            "format": {
+              "kind": "percent",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "帶走這句",
+          "body": [
+            "長期趨勢救得了撐得住的人，救不了被迫下車的人。樣本不含金融海嘯等級崩盤，機率屬低估。"
+          ]
+        }
+      ]
+    }
+  ]
+}

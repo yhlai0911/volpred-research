@@ -9,11 +9,11 @@
     "2400"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queued_at": "2026-07-19T00:10:34Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-19T00:15:04Z",
+  "completed_at": "2026-07-19T00:24:48Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-review-k1731-arm-b-rev6-b1-b7-remediation-round-1784419834.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-review-k1731-arm-b-rev6-b1-b7-remediation-round-1784419834.stderr",
   "result_artifact": "storage/ops/codex_reviews/k1731_armB_rev6_verdict.md",
@@ -32,5 +32,16 @@
   "followup_dispatched": false,
   "timeout_seconds": 2700,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "fcee66a93e62eb274004650f6d9795a70fa5ba79",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k1731_armB_rev6_verdict.md"
+  ],
+  "delivered_at": "2026-07-19T01:01:16.186746+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }
