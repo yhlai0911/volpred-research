@@ -1,7 +1,7 @@
 {
   "paper": "volatility-absorption",
   "paper_version": "v3-active-scope-post-k1686",
-  "generated_at": "2026-07-19T13:35:22+00:00",
+  "generated_at": "2026-07-19T13:37:25+00:00",
   "alert_level": "green",
   "gate_status": "pass",
   "match_rate": 1.0,
@@ -748,7 +748,7 @@
       "metric": "T5 Low NFP p",
       "paper_value": 0.009,
       "actual_value": 0.008903685969855671,
-      "tol_pct": 5.0,
+      "tol_pct": 3.0,
       "rel_diff_pct": 1.0701558904925348,
       "status": "match",
       "source_path": "k741c.part_b_vix_regimes.Low.p_value"
@@ -793,7 +793,7 @@
       "metric": "T5 Medium NFP p",
       "paper_value": 0.027,
       "actual_value": 0.026752420748614576,
-      "tol_pct": 5.0,
+      "tol_pct": 3.0,
       "rel_diff_pct": 0.9169601903163858,
       "status": "match",
       "source_path": "k741c.part_b_vix_regimes.Medium.p_value"
@@ -874,7 +874,7 @@
       "metric": "T5 High NFP t",
       "paper_value": -0.34,
       "actual_value": -0.343638663756869,
-      "tol_pct": 5.0,
+      "tol_pct": 3.0,
       "rel_diff_pct": 1.0701952226085287,
       "status": "match",
       "source_path": "k741c.part_b_vix_regimes.High.t_stat"
