@@ -483,5 +483,3 @@ code review 天然會去看「程式有沒有照它想的跑」，而第一輪�
 - **可加碼**：第一輪 `range(1, h)` 讓 HAC 完全失效、且修正是**雙向**的（31 縮 / 9 漲）——
   這是一個具體、可驗證的「檢定設定細節如何改變結論」案例。
 - **資料來源**：`k1623_rev2_results.json` 的 `loss_function_sign_reversal[]` 與 `dm_comparisons[]`。
-</content>
-</invoke>
