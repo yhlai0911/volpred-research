@@ -126,6 +126,22 @@ def cmd_commit(args: argparse.Namespace) -> int:
         env = lease.child_env()
         popen = {"env": env, "text": True, "check": False,
                  "pass_fds": lease.child_pass_fds()}
+        # 2026-07-19: an explicitly named but gitignored path (main_v5 era:
+        # paper .pdf) made `git add -A` skip it with only an advice hint while
+        # the transaction still reported success — the caller believed the file
+        # was committed. Naming an ignored path is a caller error; fail loud.
+        ignored = [
+            p for p in paths
+            # plain `git` here: check-ignore rejects --literal-pathspecs magic
+            if subprocess.run(["git", "check-ignore", "-q", "--", p], cwd=repo, **popen).returncode == 0
+        ]
+        if ignored:
+            print(
+                "[git-writer-lock] BLOCKED: explicitly named path(s) are gitignored "
+                f"and would be silently skipped: {ignored}. Drop them or un-ignore.",
+                file=sys.stderr,
+            )
+            return 2
         preflight = subprocess.run(
             _git("diff", "--cached", "--quiet", "--", *paths), cwd=repo, **popen
         )

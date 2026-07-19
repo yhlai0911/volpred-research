@@ -589,3 +589,21 @@ def test_repo_owned_writers_route_through_canonical_lease() -> None:
     telegram_text = (ROOT / "scripts/telegram_responder.sh").read_text()
     assert "RESPONDER_WORKDIR" in telegram_text
     assert 'cd "$RESPONDER_WORKDIR"' in telegram_text
+
+
+def test_commit_blocks_explicitly_named_gitignored_path(tmp_path: Path) -> None:
+    """2026-07-19: naming a gitignored path (paper *.pdf case) let `git add -A`
+    skip it with only an advice hint while the caller believed it was committed.
+    The transaction must refuse loudly (exit 2) instead of silently narrowing."""
+    repo = _repo(tmp_path)
+    (repo / ".gitignore").write_text("*.bin\n")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "add gitignore")
+    (repo / "a.txt").write_text("hello")
+    (repo / "b.bin").write_text("blob")
+    proc = _cli(
+        repo, "commit", "--repo", str(repo), "--actor", "t",
+        "--message", "x", "--", "a.txt", "b.bin",
+    )
+    assert proc.returncode == 2, proc.stderr
+    assert "gitignored" in proc.stderr
