@@ -1,4 +1,4 @@
-"""Regression test against the VERBATIM ALFRED raw response.
+"""Regression test against the unedited ALFRED release-date feed.
 
 Why this file exists, separately from test_event_dates_release_selection.py:
 
@@ -9,9 +9,16 @@ not express the bug. The old per-month `max()` rule shipped 6 wrong NFP event
 dates and flipped a significance result with a fully green suite.
 
 The fix for a fixture that cannot express the bug is not a better assertion —
-it is real input. This module pins `_fetch`'s actual bytes for release id 50
-(Employment Situation, 2005-01-01..2026-07-19, 264 entries) and asserts the
-six regular releases survive selection.
+it is real input. This module pins the unedited return value of `_fetch` for
+release id 50 (Employment Situation, 2005-01-01..2026-07-19, 264 entries) and
+asserts the six regular releases survive selection.
+
+SCOPE — what this fixture is and is not (Codex v3 finding 6): it is `_fetch`'s
+output, i.e. the `release_dates[].date` list exactly as the live API returned
+it on 2026-07-19, with nothing removed. It is NOT the full HTTP response body,
+so it does not cover JSON envelope changes, pagination, or field renames — a
+schema break in `_fetch` itself would not be caught here. What it does cover is
+the selection semantics downstream of `_fetch`, which is where the k528 bug was.
 
 Fixture: tests/fixtures/fred_release_50_nfp_raw_20260719.json (never de-duplicate
 it — the duplicate pairs ARE the regression surface).

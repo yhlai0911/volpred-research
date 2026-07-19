@@ -335,9 +335,15 @@ class TestNoProxyResidue:
 #
 # The sibling experiment above had 13 events. K528 had 254 and fed six numbers
 # straight into a published article (mile_35eef830). Correcting its calendar
-# swapped 46 of them, and the NFP-vs-Friday result stopped being significant
-# (p 0.0335 -> 0.0571). Same module rather than a new file: "NFP event dates
-# are official" is one concern and should keep one enforcement owner.
+# swapped dates but reversed NO conclusion.
+#
+# An intermediate 2026-07-19 rerun did report the NFP-vs-Friday result flipping
+# to non-significant (p 0.0335 -> 0.0571). That was WRONG and is recorded here
+# so it is not repeated: the accessor was picking off-cycle revision entries for
+# six months, and on correct dates the comparison stays significant
+# (1.189x, p=0.021). A retraction of a correct finding was one Codex review away
+# from being published. Same module rather than a new file: "NFP event dates are
+# official" is one concern and should keep one enforcement owner.
 # ---------------------------------------------------------------------------
 
 K528_DIR = REPO_ROOT / "experiments" / "k528"
@@ -398,8 +404,12 @@ class TestK528UsesOfficialCalendar:
         assert "(4 - first_day.weekday()) % 7" not in src
 
     def test_imports_the_official_calendar(self):
+        """Match the import target, not the whole line: the script also imports
+        _fetch/RELEASE_IDS to validate the unselected feed, and pinning the exact
+        line text would fail on that without anything being wrong."""
         src = K528_PY.read_text(encoding="utf-8")
-        assert "from volpred.data.event_dates import nfp_release_dates" in src
+        assert "from volpred.data.event_dates import" in src
+        assert "nfp_release_dates" in src
 
     def test_results_declare_the_official_source_and_no_fallback(self):
         source = _load_k528(K528_RESULTS)["event_date_source"]
@@ -485,3 +495,134 @@ class TestProxyMutationIsCaught:
         everything. A guard that always fails is as useless as one that never
         does."""
         assert_not_first_friday_proxy(official)
+
+
+# ---------------------------------------------------------------------------
+# Holes found by Codex v3 against commit 6fd281901. Each of these shipped once
+# with a green suite, so each gets an assertion rather than a comment.
+# ---------------------------------------------------------------------------
+
+
+def _k528_module():
+    """Load the k528 script's pure helpers without running the analysis body."""
+    import ast
+    import types
+
+    src = K528_PY.read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    keep = [
+        n for n in tree.body
+        if isinstance(n, (ast.Import, ast.ImportFrom, ast.FunctionDef))
+        or (isinstance(n, ast.AnnAssign) and getattr(n.target, "id", "") == "KNOWN_MISSING_MONTHS")
+        or (isinstance(n, ast.Assign) and getattr(n.targets[0], "id", "") in (
+            "SAMPLE_START", "SAMPLE_END", "AMBIGUOUS_SAME_MONTH_GAP_DAYS"))
+    ]
+    mod = types.ModuleType("k528_helpers")
+    exec(compile(ast.Module(body=keep, type_ignores=[]), "k528", "exec"), mod.__dict__)
+    return mod
+
+
+class TestControlGroupHasNoNfpDays:
+    """A real NFP session sitting in the control group is the exact failure this
+    experiment exists to document -- it just happened at 1/253 scale instead of
+    46/254, via an event dropped for lacking a pre-window but never removed from
+    the baseline."""
+
+    def test_every_mapped_nfp_session_is_excluded_from_the_control_group(self):
+        sample = _load_k528(K528_RESULTS)["sample"]
+        audit = sample["event_mapping_audit"]
+        total_sessions = sample["non_nfp_trading_days"] + audit["n_mapped_to_sessions"]
+        assert sample["non_nfp_trading_days"] == total_sessions - audit["n_mapped_to_sessions"], (
+            "control group size must exclude ALL mapped NFP sessions, not just the "
+            "ones that survived the event-window filter"
+        )
+
+    def test_window_excluded_event_is_not_silently_analysed_or_kept_as_control(self):
+        audit = _load_k528(K528_RESULTS)["sample"]["event_mapping_audit"]
+        assert audit["n_valid_events"] + audit["n_excluded_for_window_buffer"] == \
+            audit["n_mapped_to_sessions"]
+        assert audit["window_excluded_dates"], "the partition must name what it dropped"
+
+
+class TestCalendarFailClosedCannotBeBypassed:
+    """Codex v3 finding 3: validating only the accessor's OUTPUT cannot work,
+    because the accessor collapses each month to one date before any check on
+    the output can look for an ambiguity."""
+
+    @pytest.fixture
+    def check(self):
+        return _k528_module().check_calendar_is_complete
+
+    def test_off_cycle_entry_earlier_in_the_month_is_ambiguous_not_silently_picked(self, check):
+        """The bypass: an off-cycle entry filed EARLIER than the report. A
+        per-month min() takes it without complaint and the cadence still passes."""
+        with pytest.raises(RuntimeError, match="too close together"):
+            check(
+                pd.to_datetime(["2024-01-05", "2024-02-01", "2024-03-08"]),
+                ["2024-01-05", "2024-02-01", "2024-02-02", "2024-03-08"],
+                "2024-01-01", "2024-12-31",
+            )
+
+    def test_selection_that_is_not_the_earliest_entry_fails(self, check):
+        with pytest.raises(RuntimeError, match="did not select the earliest"):
+            check(
+                pd.to_datetime(["2024-01-05", "2024-02-09", "2024-03-08"]),
+                ["2024-01-05", "2024-02-02", "2024-02-09", "2024-03-08"],
+                "2024-01-01", "2024-12-31",
+            )
+
+    def test_missing_month_inside_the_observed_span_fails(self, check):
+        """The old check exempted the first and last month unconditionally, so a
+        genuinely complete endpoint month could vanish for free."""
+        with pytest.raises(RuntimeError, match="missing 1 month"):
+            check(
+                pd.to_datetime(["2024-01-05", "2024-02-02", "2024-04-05"]),
+                ["2024-01-05", "2024-02-02", "2024-04-05"],
+                "2024-01-01", "2024-12-31",
+            )
+
+    def test_allowlist_cannot_silence_a_month_that_has_data(self, check):
+        """KNOWN_MISSING_MONTHS is for real cancellations. If it is taken on
+        faith it is just a way to make a failing check pass."""
+        mod = _k528_module()
+        mod.KNOWN_MISSING_MONTHS["2024-03"] = "fabricated"
+        with pytest.raises(RuntimeError, match="claims"):
+            mod.check_calendar_is_complete(
+                pd.to_datetime(["2024-01-05", "2024-02-02", "2024-04-05"]),
+                ["2024-01-05", "2024-02-02", "2024-03-08", "2024-04-05"],
+                "2024-01-01", "2024-12-31",
+            )
+
+    def test_a_legitimate_calendar_with_a_normal_revision_still_passes(self, check):
+        """The other half: a guard that rejects everything is as useless as one
+        that rejects nothing. A revision filed a week later is normal."""
+        out = check(
+            pd.to_datetime(["2024-01-05", "2024-02-02", "2024-03-08"]),
+            ["2024-01-05", "2024-02-02", "2024-02-09", "2024-03-08"],
+            "2024-01-01", "2024-12-31",
+        )
+        assert out["months_with_multiple_raw_entries"] == ["2024-02"]
+
+
+class TestFridayEstimandIsScopedHonestly:
+    """Codex v3 finding 4: restricting to Friday is a legitimate conditional
+    estimand, but it stops supporting statements about NFP releases in general,
+    and the restriction is not a neutral sample deletion."""
+
+    def test_results_scope_the_claim_to_friday_and_disclose_the_non_neutrality(self):
+        b = _load_k528(K528_RESULTS)["statistical_tests"]["B_nfp_vs_friday"]
+        assert "CONDITIONAL ON FRIDAY" in b["estimand"]
+        assert "Friday NFP" in b["claim_scope"]
+        nn = b["restriction_is_not_neutral"]
+        assert nn["excluded_are_quieter_by_pct"] > 0, (
+            "if the excluded events are quieter, the restriction RAISES the ratio "
+            "and that must be stated, not discovered by a reviewer"
+        )
+
+    def test_excluded_count_matches_the_weekday_breakdown(self):
+        """The results file once said 11 in prose and 16 in data."""
+        results = _load_k528(K528_RESULTS)
+        b = results["statistical_tests"]["B_nfp_vs_friday"]
+        non_friday = sum(1 for e in results["event_data"] if e["weekday"] != 4)
+        assert b["excluded_non_friday_events"]["n"] == non_friday == 16
+        assert str(non_friday) in b["estimand"]

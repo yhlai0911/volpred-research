@@ -27,13 +27,23 @@ numeric restatement, plus one estimand refinement that is disclosed in the note.
 
 THE ONE ESTIMAND CHANGE
 -----------------------
-Under the proxy every NFP landed on a Friday by construction, so "NFP days vs
-non-NFP Fridays" held weekday fixed for free. On the official calendar 16 of
-253 events are not Fridays, so that same comparison would put a weekday-mixed
-event group against a pure-Friday control group and let the Friday effect leak
-into the estimate. The corrected test restricts the event group to the 237
-Friday releases. This is stated in the article's correction note rather than
-folded in silently.
+The event group is a weekday mixture while the control group is pure Friday, so
+the Friday effect leaks into the estimate. The corrected test restricts the
+event group to the 237 Friday releases.
+
+Note against the tempting story: this defect was NOT introduced by the date
+correction. The proxy CALENDAR was all-Friday by construction, but mapping
+holiday-closed Fridays to the next open put 15 of its 254 events on a Monday
+(239/254 = 94.1% Friday, against 237/253 = 93.7% now). The old spec was already
+comparing a mixed group against a pure-Friday control; correcting the dates is
+what made it visible, not what caused it.
+
+Two consequences the article text must respect:
+  1. The test now identifies the effect of an NFP release ON A FRIDAY. Prose
+     quoting it says "在週五公布的 NFP", not "NFP".
+  2. The restriction is not a neutral deletion — the excluded events are 16.3%
+     quieter, so restricting RAISES the ratio (1.177x -> 1.189x). Both numbers
+     are disclosed in the correction note rather than only the flattering one.
 
 WHY THIS SCRIPT DOES NOT WRITE BY DEFAULT
 -----------------------------------------
@@ -95,15 +105,17 @@ REPLACEMENTS: list[tuple[str, str]] = [
         "VolPred 也把這層拿掉，改用「非 NFP 的週五」當基準：NFP 當日波動是這個基準的 1.17 倍，"
         "用 Welch t 檢定算下來，這個差距達到顯著水準。"
         "（另外拿全體非 NFP 日做一個只看排序、不看數值大小的無母數檢定，NFP 日的波動分佈同樣明顯偏高。）",
-        "VolPred 也把這層拿掉，改用「非 NFP 的週五」當基準。改用官方日曆之後，253 場 NFP 裡有 237 場"
-        "落在週五、16 場不是，所以這個比較只取在週五公布的那 237 場，讓兩邊的星期別一致："
-        "這 237 場的當日波動是週五基準的 1.19 倍，用 Welch t 檢定算下來，這個差距達到顯著水準（p=0.020）。"
+        "VolPred 也把這層拿掉，改用「非 NFP 的週五」當基準。253 場 NFP 裡有 237 場落在週五、"
+        "16 場不是，所以這個比較只取在週五公布的那 237 場，讓兩邊的星期別一致："
+        "這 237 場的當日波動是週五基準的 1.19 倍，用 Welch t 檢定算下來，這個差距達到顯著水準（p=0.021）。"
+        "要注意這個數字講的是「**在週五公布的** NFP」，不是 NFP 一般而言；被排掉的那 16 場本身比較平靜，"
+        "所以限定週五會把倍數墊高一些（不限定的話是 1.18 倍）。"
         "（另外拿全體非 NFP 日做一個只看排序、不看數值大小的無母數檢定，NFP 日的波動分佈同樣明顯偏高。）",
     ),
     (
         "所以精確的講法是：NFP 日確實比一般週五抖一點，差距顯著但不算誇張（1.17 倍）；"
         "但如果拿全部交易日當對照，這個放大效果（1.10 倍）連統計顯著都談不上。",
-        "所以精確的講法是：NFP 日確實比一般週五抖一點，差距顯著但不算誇張（1.19 倍）；"
+        "所以精確的講法是：在週五公布的 NFP 確實比一般週五抖一點，差距顯著但不算誇張（1.19 倍）；"
         "但如果拿全部交易日當對照，這個放大效果（1.11 倍）連統計顯著都談不上。",
     ),
     # --- regime split: threshold, group sizes, means, ratio ---
@@ -150,8 +162,8 @@ REPLACEMENTS: list[tuple[str, str]] = [
     (
         "第一，NFP 事件本身的波動放大效果，對全體交易日基準是 1.10 倍、未達顯著水準，"
         "對週五基準是 1.17 倍、達到顯著水準。",
-        "第一，NFP 事件本身的波動放大效果，對全體交易日基準是 1.11 倍、未達顯著水準，"
-        "對週五基準是 1.19 倍、達到顯著水準。",
+        "第一，NFP 事件本身的波動放大效果，對全體交易日基準是 1.11 倍、未達顯著水準；"
+        "若只看在週五公布的那 237 場、拿非 NFP 的週五當基準，是 1.19 倍、達到顯著水準。",
     ),
     (
         "高低體制差 2.17 倍，事前 VIX 對就業日波動的預測相關係數約 0.45。",
@@ -178,9 +190,12 @@ REPLACEMENTS: list[tuple[str, str]] = [
         "但那天並不存在）。改用官方日曆重跑後，樣本從 254 場變成 253 場。\n\n"
         "**方向性結論全部維持不變**：對全體交易日基準未達顯著、對週五基準達到顯著、"
         "真正拉開差距的是進場 VIX 體制——這三點在官方日期下都成立，只有數值小幅調整"
-        "（1.10→1.11 倍、1.17→1.19 倍、2.17→2.03 倍、相關係數 0.45→0.44）。"
-        "另有一項口徑調整：初版的 NFP 全部落在週五，週五基準比較是同星期別對同星期別；"
-        "官方日曆下有 16 場不在週五，因此該比較改為只取在週五公布的 237 場，維持兩邊星期別一致。\n\n"
+        "（1.10→1.11 倍、1.17→1.19 倍、2.17→2.03 倍、相關係數 0.45→0.44）。\n\n"
+        "另有一項口徑調整：週五基準的比較，事件組原本是全部樣本（星期別混合）、對照組卻只有週五，"
+        "兩邊不對等。現改為只取在週五公布的 237 場，維持兩邊星期別一致，"
+        "所以該數字講的是「在週五公布的 NFP」而非 NFP 一般而言。"
+        "被排掉的 16 場本身比較平靜，因此限定週五會把倍數墊高一些（不限定為 1.18 倍、限定為 1.19 倍），"
+        "兩個數字都列出以免只揭露比較好看的那個。\n\n"
         "**文中圖表與文末懶人包圖組仍是初版數據，正在重新產製**。"
         "逐項前後對照見 experiments/k528/k528_nfp_official_dates_results.json。",
     ),

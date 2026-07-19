@@ -58,25 +58,32 @@ import pandas as pd
 import yfinance as yf
 from scipy import stats
 
-from volpred.data.event_dates import nfp_release_dates
+from volpred.data.event_dates import RELEASE_IDS, _fetch, nfp_release_dates
 
 warnings.filterwarnings("ignore")
 
 SAMPLE_START = "2005-01-01"
 SAMPLE_END = "2026-03-27"
 
-# Months in [SAMPLE_START, SAMPLE_END] for which BLS published no Employment
-# Situation report at all. Anything absent from the calendar that is NOT listed
-# here is a data-integrity failure, not a known hole -- see check_calendar_is_complete.
-#
-# 2025-10: the federal government shutdown. ALFRED shows no release id 50 entry
-# between 2025-09-05 and 2025-11-20 (a 76-day gap against a ~30-day cadence);
-# the delayed September report came out on 11-20. This is the same shutdown that
-# cancelled the Oct-2025 CPI release described in volpred/data/event_dates.py.
-# It is a real absence of an event, which is why the month is excluded rather
-# than back-filled -- the first-Friday proxy INVENTED an event here, and that
-# phantom event is one of the reasons this experiment was rerun.
-KNOWN_MISSING_MONTHS: set[str] = {"2025-10"}
+# Months for which BLS published no Employment Situation report at all. Each
+# entry needs a documented reason, and check_calendar_is_complete VERIFIES the
+# claim against the raw feed before honouring it -- an allowlist that is taken
+# on faith is just a way to make a failing check pass, which is the failure mode
+# this whole experiment exists to document.
+KNOWN_MISSING_MONTHS: dict[str, str] = {
+    "2025-10": (
+        "Federal government shutdown. ALFRED shows no release id 50 entry between "
+        "2025-09-05 and 2025-11-20 (76 days against a ~30-day cadence); the delayed "
+        "September report landed on 11-20. Same shutdown that cancelled the Oct-2025 "
+        "CPI release described in volpred/data/event_dates.py. The first-Friday proxy "
+        "INVENTED an event here -- that phantom is one of the reasons for this rerun."
+    ),
+}
+
+# Two same-month entries closer together than this cannot be told apart as
+# "regular report" vs "off-cycle revision" by date order alone, so the run
+# refuses to guess. Revisions are filed weeks after the report, not days.
+AMBIGUOUS_SAME_MONTH_GAP_DAYS = 3
 
 
 def write_json_atomic(path: Path, payload) -> None:
@@ -106,43 +113,96 @@ def write_json_atomic(path: Path, payload) -> None:
 # ============================================================
 # 1. NFP dates: official BLS release calendar (no proxy, no fallback)
 # ============================================================
-def check_calendar_is_complete(dates, start, end):
+def check_calendar_is_complete(selected, raw, start, end):
     """Fail closed on a calendar that is merely PLAUSIBLE rather than complete.
 
     "Did the call succeed?" is the wrong question. A monthly release calendar
     that silently lost 2019 still returns a non-empty list, still produces
-    event windows, still renders. The three ways this input can be wrong
-    without being empty are: a month appears twice (off-cycle revision picked
-    up as a second event -- the k528 v2 BLOCKER), a month is missing, or the
-    range is not covered at all. All three raise here.
-    """
-    months = [pd.Timestamp(d).strftime("%Y-%m") for d in dates]
+    event windows, still renders.
 
-    dupes = sorted({m for m in months if months.count(m) > 1})
-    if dupes:
+    This validates the RAW feed as well as the accessor's per-month selection.
+    Validating only the selection cannot work: the accessor collapses each month
+    to one date before this function ever sees it, so a same-month ambiguity is
+    already resolved -- silently, and possibly wrongly -- by the time a check on
+    the output could look for it. That is precisely how the k528 v2 BLOCKER got
+    through (Codex v3 finding 3).
+
+    Four ways the input can be wrong without being empty, all of which raise:
+      1. a month has two entries too close together to tell report from revision
+      2. the selection is not the earliest entry of its month
+      3. a month is missing from the observed span
+      4. a month is claimed as a known hole but the raw feed actually has data
+    """
+    sel = [pd.Timestamp(d) for d in selected]
+    sel_months = [d.strftime("%Y-%m") for d in sel]
+
+    raw_by_month: dict[str, list[pd.Timestamp]] = {}
+    for d in raw:
+        ts = pd.Timestamp(d)
+        raw_by_month.setdefault(ts.strftime("%Y-%m"), []).append(ts)
+    for v in raw_by_month.values():
+        v.sort()
+
+    # 1 + 2: same-month resolution must be unambiguous AND actually taken.
+    ambiguous, mis_selected = [], []
+    sel_by_month = dict(zip(sel_months, sel))
+    for month, entries in raw_by_month.items():
+        if len(entries) > 1:
+            gap = (entries[1] - entries[0]).days
+            if gap < AMBIGUOUS_SAME_MONTH_GAP_DAYS:
+                ambiguous.append(f"{month}: {entries[0].date()} vs {entries[1].date()} ({gap}d apart)")
+        if month in sel_by_month and sel_by_month[month] != entries[0]:
+            mis_selected.append(
+                f"{month}: selected {sel_by_month[month].date()}, earliest is {entries[0].date()}"
+            )
+    if ambiguous:
         raise RuntimeError(
-            f"official NFP calendar returned {len(dupes)} month(s) with more than one "
-            f"release date: {dupes}. The Employment Situation is published once per "
-            "month; a second same-month entry is an off-cycle revision and must not be "
-            "treated as an event. Fix the accessor, do not de-duplicate here."
+            f"{len(ambiguous)} month(s) carry two release entries too close together to "
+            f"identify the Employment Situation report by date order: {ambiguous}. "
+            "Revisions are filed weeks after the report, not days -- this shape means the "
+            "feed changed or the release id is carrying something new. Refusing to guess."
+        )
+    if mis_selected:
+        raise RuntimeError(
+            f"accessor did not select the earliest entry in {len(mis_selected)} month(s): "
+            f"{mis_selected}. The later same-month entry is an off-cycle revision, not the "
+            "monthly report -- selecting it is the k528 v2 BLOCKER."
         )
 
-    expected = {
+    # 3: no month may vanish from the observed span. Anchoring on the observed
+    # span rather than [start, end] removes the endpoint fudge that used to
+    # exempt the first and last month unconditionally (Codex v3 finding 3).
+    span = {
         p.strftime("%Y-%m")
-        for p in pd.period_range(start=pd.Timestamp(start), end=pd.Timestamp(end), freq="M")
+        for p in pd.period_range(start=min(sel), end=max(sel), freq="M")
     }
-    # The endpoint months are partial by construction: a run ending 2026-03-27
-    # legitimately has 2026-03, but a run ending 2026-03-02 may not yet.
-    interior = {m for m in expected if m not in {min(expected), max(expected)}}
-    missing = sorted(interior - set(months) - KNOWN_MISSING_MONTHS)
+    missing = sorted(span - set(sel_months) - set(KNOWN_MISSING_MONTHS))
     if missing:
         raise RuntimeError(
-            f"official NFP calendar is missing {len(missing)} month(s) inside the sample "
-            f"window: {missing}. A partial calendar dumps real event days into the control "
+            f"official NFP calendar is missing {len(missing)} month(s) inside the observed "
+            f"span: {missing}. A partial calendar dumps real event days into the control "
             "group silently. Add them to KNOWN_MISSING_MONTHS only with a documented "
             "reason (e.g. a cancelled release), never to make this check pass."
         )
-    return {"n_months_expected": len(interior), "known_missing_months": sorted(KNOWN_MISSING_MONTHS)}
+
+    # 4: a claimed hole must actually be a hole in the RAW feed. Without this the
+    # allowlist is a bypass: any month could be declared 'known missing' and the
+    # check would stop looking at it.
+    bogus = sorted(m for m in KNOWN_MISSING_MONTHS if m in span and raw_by_month.get(m))
+    if bogus:
+        raise RuntimeError(
+            f"KNOWN_MISSING_MONTHS claims {bogus} published nothing, but the raw feed has "
+            f"entries for them: { {m: [str(d.date()) for d in raw_by_month[m]] for m in bogus} }. "
+            "The allowlist is for real cancellations, not for silencing a selection bug."
+        )
+
+    return {
+        "n_months_in_span": len(span),
+        "n_raw_entries": len(raw),
+        "months_with_multiple_raw_entries": sorted(m for m, v in raw_by_month.items() if len(v) > 1),
+        "known_missing_months": {m: KNOWN_MISSING_MONTHS[m] for m in sorted(KNOWN_MISSING_MONTHS)},
+        "ambiguity_gap_threshold_days": AMBIGUOUS_SAME_MONTH_GAP_DAYS,
+    }
 
 
 def load_nfp_dates(start=SAMPLE_START, end=SAMPLE_END):
@@ -156,7 +216,10 @@ def load_nfp_dates(start=SAMPLE_START, end=SAMPLE_END):
     dates = nfp_release_dates(start, end)
     if len(dates) == 0:
         raise RuntimeError(f"official NFP calendar returned nothing for {start}..{end}")
-    completeness = check_calendar_is_complete(dates, start, end)
+    # Pull the unselected feed as well: the accessor collapses each month to one
+    # date, so the only place a same-month ambiguity is still visible is here.
+    raw = _fetch(RELEASE_IDS["NFP_US"], start, end)
+    completeness = check_calendar_is_complete(dates, raw, start, end)
     return list(dates), completeness
 
 
@@ -337,20 +400,34 @@ print(f"  Date range: {df['date'].iloc[0]} to {df['date'].iloc[-1]}")
 # ============================================================
 print("\n[4/6] Computing non-NFP baseline...")
 
-nfp_set = set(valid_nfp)
+# Exclude EVERY NFP session from the control group, not just the ones that
+# survived the event-window filter. An event dropped for lacking a pre-window
+# is still an NFP day; leaving it in the control group is the exact failure this
+# experiment exists to fix ("dump real event days into the control group"), just
+# at 1/253 scale instead of 46/254. Found by self-audit before Codex v3.
+nfp_set = set(nfp_trading_dates)
 non_nfp_mask = ~spy.index.isin(nfp_set)
 non_nfp = spy[non_nfp_mask]
+n_leaked = len(set(nfp_trading_dates) & set(spy.index[non_nfp_mask]))
+if n_leaked:
+    raise RuntimeError(f"{n_leaked} NFP session(s) remained in the control group")
 
 baseline_abs_return = float(non_nfp["AbsReturn"].mean())
 baseline_abs_return_std = float(non_nfp["AbsReturn"].std())
 baseline_abs_return_median = float(non_nfp["AbsReturn"].median())
 
-# Friday-only baseline. Under the proxy every event was a Friday by
-# construction, so "all NFP events vs non-NFP Fridays" was a clean
-# weekday-held-fixed contrast. On the official calendar it is not: the event
-# group is a weekday mixture and the control group is pure Friday, so any
-# Friday-vs-other-weekday volatility difference loads directly onto the
-# estimate. The test below therefore holds weekday fixed on BOTH sides.
+# Friday-only baseline. The event group is a weekday MIXTURE while the control
+# group is pure Friday, so any Friday-vs-other-weekday volatility difference
+# loads straight onto the estimate. The test below holds weekday fixed on BOTH
+# sides.
+#
+# Note against the obvious story: this defect is NOT introduced by the date
+# correction. The proxy calendar was all-Friday by construction, but mapping
+# holiday-closed Fridays to the next open put 15 of its 254 events on a Monday
+# -- 239/254 = 94.1% Friday, against 237/253 = 93.7% here. The mixture was
+# always there and is essentially unchanged; the old spec was already comparing
+# a mixed group against a pure-Friday control. Correcting the dates is what made
+# it visible, not what caused it.
 friday_mask = non_nfp.index.weekday == 4
 friday_baseline = float(non_nfp[friday_mask]["AbsReturn"].mean())
 friday_baseline_std = float(non_nfp[friday_mask]["AbsReturn"].std())
@@ -377,13 +454,18 @@ vol_ratio_all = float(nfp_abs_returns.mean() / non_nfp_abs_returns.mean())
 # Estimand choice (k528 Codex v2 finding 5). Two repairs were available:
 #   (i)  restrict the event group to Friday releases, or
 #   (ii) keep all events and use weekday-matched controls.
-# This run takes (i). The non-Friday events are Thu 8 / Tue 2 / Wed 1 out of
-# 253 -- cells that thin make (ii) a weighted average dominated by three
-# single-digit strata, with standard errors driven by the 1-observation
-# Wednesday cell. That is a noisier estimator of a harder-to-state quantity.
-# (i) answers one clean question: on a Friday, does an NFP release raise
-# volatility? It costs the 11 non-Friday events, which are reported below as a
-# separate descriptive line rather than dropped in silence.
+# This run takes (i). The non-Friday events are a handful of thin weekday cells
+# out of 253 -- cells that thin make (ii) a weighted average dominated by a few
+# single-digit strata, with standard errors driven by the smallest of them.
+# That is a noisier estimator of a harder-to-state quantity. (i) answers one
+# clean question: on a Friday, does an NFP release raise volatility? It costs
+# the non-Friday events, which are reported below as a separate descriptive
+# line rather than dropped in silence.
+#
+# The exclusion is not neutral and should not be sold as such: the excluded
+# events are quieter than the Friday ones, so restricting RAISES the ratio
+# relative to the mixed spec. That is a property of the estimand, not evidence
+# of a stronger effect. Both numbers are reported.
 nfp_friday_mask = (df["weekday"] == 4).values
 nfp_friday_abs = nfp_abs_returns[nfp_friday_mask]
 nfp_nonfriday_abs = nfp_abs_returns[~nfp_friday_mask]
@@ -594,10 +676,12 @@ conclusions.append(
     f"p={p_val_all:.4f} ({'rejects' if p_val_all < sig_level else 'does not reject'} at 5%)"
 )
 conclusions.append(
-    f"Welch mean-difference, Friday NFP vs Friday non-NFP (weekday held fixed): "
-    f"{vol_ratio_fri:.2f}x, p={p_val_fri:.4f} "
+    f"Welch mean-difference, Friday NFP vs Friday non-NFP (CONDITIONAL ON FRIDAY, "
+    f"weekday held fixed): {vol_ratio_fri:.2f}x, p={p_val_fri:.4f} "
     f"({'rejects' if p_val_fri < sig_level else 'does not reject'} at 5%; "
-    f"n={len(nfp_friday_abs)} vs {len(friday_non_nfp_abs)})"
+    f"n={len(nfp_friday_abs)} vs {len(friday_non_nfp_abs)}). Scoped to Friday "
+    f"releases; the {len(nfp_nonfriday_abs)} non-Friday events are quieter, so this "
+    f"is not a statement about NFP releases in general."
 )
 conclusions.append(
     f"Mann-Whitney one-sided (stochastic dominance, not means), NFP vs all non-NFP: "
@@ -668,6 +752,17 @@ proxy_non_nfp = spy[~spy.index.isin(set(proxy_event_dates))]
 proxy_non_nfp_abs = proxy_non_nfp["AbsReturn"].values
 proxy_fri_abs = proxy_non_nfp[proxy_non_nfp.index.weekday == 4]["AbsReturn"].values
 
+# The proxy calendar was all-Friday by construction, but 15 of its 254 events
+# mapped to a Monday because the first Friday was a market holiday. So the
+# proxy-era Friday test was ALREADY weekday-mixed. To compare like with like,
+# rebuild the proxy side under the SAME estimand the corrected run uses
+# (Friday events only) rather than comparing a mixed `before` against a
+# restricted `after` and calling the difference a correction effect.
+_p_weekday = np.array([pd.Timestamp(e["date"]).weekday() for e in proxy_events])
+proxy_nfp_friday_abs = proxy_nfp_abs[_p_weekday == 4]
+_p_t_fri, _p_p_fri = stats.ttest_ind(proxy_nfp_friday_abs, proxy_fri_abs, equal_var=False)
+proxy_ratio_fri_restricted = float(proxy_nfp_friday_abs.mean() / proxy_fri_abs.mean())
+
 _p_pre_vix = np.array([e["pre_vix"] if e["pre_vix"] is not None else np.nan
                        for e in proxy_events])
 _p_thr = proxy["regime_analysis"]["vix_median_split"]
@@ -728,13 +823,27 @@ record(
 record(
     "vol_ratio_vs_friday", "NFP vs non-NFP Friday baseline (article: 1.17x)",
     {
-        "mean_ratio": proxy["main_results"]["vol_ratio_vs_friday"],
-        "p_value": proxy["statistical_tests"]["B_nfp_vs_friday"]["p_value"],
-        "significant_5pct": proxy["statistical_tests"]["B_nfp_vs_friday"]["significant_5pct"],
-        "n": proxy["sample"]["total_nfp_events"],
-        "nfp_days_on_friday": proxy["sample"]["total_nfp_events"],
-        "median_ratio": float(np.median(proxy_nfp_abs) / np.median(proxy_fri_abs)),
-        "win_rate": win_rate(proxy_nfp_abs, proxy_fri_abs),
+        # Same estimand as the `after` column: Friday events only.
+        "mean_ratio": proxy_ratio_fri_restricted,
+        "p_value": float(_p_p_fri),
+        "significant_5pct": bool(_p_p_fri < 0.05),
+        "n": int(len(proxy_nfp_friday_abs)),
+        "nfp_days_on_friday": int((_p_weekday == 4).sum()),
+        "median_ratio": float(np.median(proxy_nfp_friday_abs) / np.median(proxy_fri_abs)),
+        "win_rate": win_rate(proxy_nfp_friday_abs, proxy_fri_abs),
+        "estimand": "Friday NFP sessions vs Friday non-NFP sessions (weekday held fixed)",
+        "as_published_mixed_weekday": {
+            "mean_ratio": proxy["main_results"]["vol_ratio_vs_friday"],
+            "p_value": proxy["statistical_tests"]["B_nfp_vs_friday"]["p_value"],
+            "significant_5pct": proxy["statistical_tests"]["B_nfp_vs_friday"]["significant_5pct"],
+            "n": proxy["sample"]["total_nfp_events"],
+            "note": (
+                "what the proxy run actually published: all 254 events (239 Friday, "
+                "15 Monday) against non-NFP Fridays. This is the number the article "
+                "quoted, so it is kept, but it is NOT the like-for-like comparison "
+                "against the corrected column."
+            ),
+        },
     },
     {
         "mean_ratio": vol_ratio_fri,
@@ -753,14 +862,16 @@ record(
             "status": "DIAGNOSTIC ONLY - the pre-correction estimand, not quotable",
         },
     },
-    note="Two things changed at once here, and they must not be conflated. "
-         "(1) The dates were corrected. (2) The ESTIMAND was corrected: under "
-         "the proxy every NFP day was a Friday by construction, so this test "
-         "compared Fridays with Fridays; on the official calendar the event "
-         "group is a weekday mixture, so the like-for-like test now restricts "
-         "the event group to Friday releases. `diagnostic_mixed_weekday` holds "
-         "the date-corrected value of the OLD estimand, which is the apples-to-"
-         "apples comparison against the `before` column.",
+    note="Two things changed here and they are separated rather than conflated. "
+         "(1) The dates were corrected. (2) The ESTIMAND was corrected: the "
+         "event group is a weekday mixture while the control group is pure "
+         "Friday, so the test now restricts the event group to Friday releases. "
+         "Defect (2) was NOT created by (1) -- the proxy run was already mixed "
+         "(239/254 Friday, the other 15 being holiday-shifted Mondays), it was "
+         "simply never noticed. Both columns above therefore use the SAME "
+         "restricted estimand so the delta is attributable to the dates alone; "
+         "`as_published_mixed_weekday` (before) and `diagnostic_mixed_weekday` "
+         "(after) hold the old estimand on each side for reference.",
 )
 
 # --- 2.17x : high-VIX vs low-VIX regime ---
@@ -945,10 +1056,26 @@ output = {
         "B_nfp_vs_friday": {
             "test": "Welch t-test, Friday NFP sessions vs Friday non-NFP sessions",
             "estimand": (
-                "weekday held fixed on both sides. Event group restricted to NFP "
-                "releases that trade on a Friday; the 11 non-Friday events are "
-                "excluded rather than compared against a pure-Friday control group."
+                "CONDITIONAL ON FRIDAY. Weekday held fixed on both sides: the event "
+                "group is restricted to NFP releases that trade on a Friday, and the "
+                f"{int(len(nfp_nonfriday_abs))} non-Friday events are excluded rather "
+                "than compared against a pure-Friday control group."
             ),
+            "claim_scope": (
+                "This identifies the effect of an NFP release ON A FRIDAY. It does not "
+                "license a statement about NFP releases in general -- the excluded "
+                "non-Friday events are quieter, so the restriction raises the ratio "
+                "relative to the mixed-weekday spec. Any prose quoting this number must "
+                "say 'Friday NFP', not 'NFP'."
+            ),
+            "restriction_is_not_neutral": {
+                "excluded_mean_abs_return": float(nfp_nonfriday_abs.mean()) if len(nfp_nonfriday_abs) else None,
+                "friday_mean_abs_return": float(nfp_friday_abs.mean()),
+                "excluded_are_quieter_by_pct": (
+                    float((nfp_friday_abs.mean() - nfp_nonfriday_abs.mean()) / nfp_friday_abs.mean() * 100)
+                    if len(nfp_nonfriday_abs) else None
+                ),
+            },
             "n_event": int(len(nfp_friday_abs)),
             "n_control": int(len(friday_non_nfp_abs)),
             "vol_ratio": vol_ratio_fri,

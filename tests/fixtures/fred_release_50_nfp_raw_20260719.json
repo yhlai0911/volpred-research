@@ -8,7 +8,7 @@
     "sort_order": "asc"
   },
   "captured_at": "2026-07-19",
-  "note": "VERBATIM _fetch() output. Do NOT hand-edit or de-duplicate: the six same-month duplicate pairs ARE the regression surface (k528 Codex v2 BLOCKER 1).",
+  "note": "Unedited return value of volpred.data.event_dates._fetch() \u2014 the release_dates[].date list exactly as the live API returned it, nothing removed. NOT the full HTTP response body (no JSON envelope / pagination fields), so it does not cover a schema break inside _fetch itself. Do NOT hand-edit or de-duplicate: the six same-month duplicate pairs ARE the regression surface (k528 Codex v2 BLOCKER 1).",
   "release_dates": [
     "2005-01-07",
     "2005-02-04",
