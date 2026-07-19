@@ -1,0 +1,32 @@
+# K1731 arm B rev7 — sha256 freeze manifest
+# frozen 2026-07-19 10:35台灣時間 by dispatch-slot-1-bd00f90a-k1731 (round-7 remediation)
+# scope: .claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/
+# Any verdict produced against these bytes is invalidated if a hash below changes.
+#
+# Changes to the rev6 file list:
+#   - k1731_armB_rev6.json  ->  k1731_armB_rev7_remediation.json  (this round's result file)
+#   + k1731_finalize_report.py  ADDED: it is the canonical generator for the primary
+#     artifact and was edited this round (B1b). The rev6 manifest pinned the artifact
+#     but not the code that writes it.
+#
+# Round 7 also changed three repo-level files OUTSIDE this directory (the nested-DM
+# detector fix). They are not in the scope line above, but their hashes are recorded
+# at the end of this manifest so the same freeze contract covers them.
+
+180eddc6c811e3e503ad9968f3c11c021449ed2562e7d3b22b3db182ddc78084  README.md
+81b9243b807ee4acd85766becb6314dc4d74faf4d12aa10d9493a5183af5c4c4  k1731_armB_rev7_remediation.json
+5a492e47ef6a76a37a84d695d33303afcf29c9fdd48588ed9982149235a746b0  k1731_es_mixture_check.py
+302e805e40625ed3fc30de242b7eaca04f95f7a66bb95edd62415ba487738144  k1731_es_mixture_check_results.json
+42cc373d444aedd00657a423a2d0510296a85a3765fc5d221069b2a0eaff88f0  k1731_armB_verification.py
+667f1f484e562c8cec228110de43fd5ffa306301ae4e1667df149ede7eb05db5  k1731_armB_traceability_rows.json
+c80bced3e980504a338ba8507067a7cc1f4a77c775150728f468fa0e5dd1de21  k1731_regression_check_results.json
+1c659aca6e48a11c4a31d73c32f89e5d1e301fb8d6ed510314c2c61770c9d9ec  k1731_gevreg_midas_ssvs_returns_results_corrected_rev5.json
+9d17d206de188b7387196a0403067f6457ac82d6c085f69ea6ff6d53536299da  k1731_gevreg_midas_ssvs_returns.py
+0fcd913e17a3351f350cd546fa9208e254d6a169668da76688dfb52b326c944d  k1731_finalize_report.py
+ea77adf6520773696d47837cc1c61879060671374add2962c478db2fb7697161  k1731_models.py
+e67c8b35ce057e9a2a4e4834c1e99578ff7aec4367c26467fe0e45d265a9792b  k1731_scoring.py
+
+# --- out-of-directory, repo-level (detector fix) ---
+2903eb65c01999c29b95bff0a3b7b8f7849cf9aeaefde97f5f39c5e21f5cdbab  scripts/audit_nested_dm_misuse.py
+25a863ad2a2f331fea0b94559e3a39e16297f532b311dba06751d7ed171efff2  scripts/tests/test_nested_dm_misuse_ratchet.py
+592b0d0d8a34b3521f481848ab7f574aa158cba361c68e3a7a97ef28c5bb2c6d  storage/ops/nested_dm_misuse_baseline.json

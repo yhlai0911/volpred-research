@@ -32668,14 +32668,37 @@
     "description": ".claude/worktrees/dispatch-slot-2-c873d04d-k1709（branch exp/k1709-btc-etf-flow-vol）有 3 個未合併 commits（c97d690c6 等：推論設計重建、撤回 NULL 改判 INCONCLUSIVE）。主線程走 bash scripts/merge_worktree.sh + worktree-merge-verification skill + agent-result-verification 收割；合併後移除 worktree（回收 4.7GB）。來源：docs/refactor_plan_token_ops_waste.md WS2c（WS3b 清理時發現未收割）。 ⚠️ 2026-07-14 16:19 依賴更新：k1709_rev2_codex_verdict（15:45 完成）指出尚有 GW 措辭修正待做（見 storage/logs/compute/k1709_rev2_codex_verdict.stdout 結論）；合併必須排在該修正 commit 之後，merge 前 re-check worktree HEAD 已含修正。",
     "task_type": "experiment",
     "dispatch_lane": "main_thread",
-    "status": "blocked",
+    "status": "succeeded",
     "priority": 2,
     "source": "refactor_plan_token_ops_waste",
     "created_at": "2026-07-14T07:28:32.517134+00:00",
     "blocked_until": "2026-07-28T16:12:04+00:00",
     "blocked_reason": "prior_attempts_failed",
     "blocked_at": "2026-07-14T16:12:04+00:00",
-    "blocked_note": "Codex rev3 verdict=FAIL (2026-07-14T15:25Z, reviewed_commit f3f9d3034b): 4 blocking defects (D1 README summary 無 UNCONDITIONAL 限定 / D2 renderer 為第二 claim 作者且在 --relabel invariant 外 / D3 圖表無限定 GW nomenclature / D4 main() NameError)。K1709 不得進 main，直到 k1709_rev4_nameerror + k1709_rev4_claim_object + k1709_rev4_figure_labels 三條全 succeeded 且 Codex rev4 複審 PASS。verdict: storage/ops/codex_reviews/k1709_rev3_verdict.json"
+    "blocked_note": "Codex rev3 verdict=FAIL (2026-07-14T15:25Z, reviewed_commit f3f9d3034b): 4 blocking defects (D1 README summary 無 UNCONDITIONAL 限定 / D2 renderer 為第二 claim 作者且在 --relabel invariant 外 / D3 圖表無限定 GW nomenclature / D4 main() NameError)。K1709 不得進 main，直到 k1709_rev4_nameerror + k1709_rev4_claim_object + k1709_rev4_figure_labels 三條全 succeeded 且 Codex rev4 複審 PASS。verdict: storage/ops/codex_reviews/k1709_rev3_verdict.json",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:31:04.801586+00:00",
+        "from": "blocked",
+        "to": "claimed",
+        "by": "hourly-slot-1-5da97d74ae0f465c91811de6de7421f5"
+      },
+      {
+        "ts": "2026-07-19T02:31:17.186803+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-5da97d74ae0f465c91811de6de7421f5"
+      },
+      {
+        "ts": "2026-07-19T02:31:18.658760+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-5da97d74ae0f465c91811de6de7421f5"
+      }
+    ],
+    "started_at": "2026-07-19T02:31:17.186780+00:00",
+    "completed_at": "2026-07-19T02:31:18.658741+00:00",
+    "result": "裁定：3 個修訂 commits 已全數合併進 main，無成果遺失。證據：git merge-base --is-ancestor c97d690c6 HEAD 回 true（鏈 c97d690c6 六項方法論殘留處置 / 34c291a49 撤回 NULL 改判 INCONCLUSIVE / 9be94342d 獨立審查 6 項必修）；experiments/k1709/ 檔案在 main working tree 落地（README.md 25852B，含 GW/INCONCLUSIVE 措辭 19 處，即 rev2 修正已在內）。worktree dispatch-slot-2-c873d04d-k1709 與 branch exp/k1709-btc-etf-flow-vol 皆已不存在，但因 commits 已進 main，移除屬正常回收而非遺失。任務自 2026-07-14 起 blocked 純屬 reconcile 缺口，非工作未完成。"
   },
   {
     "id": "ws4c_error_log_compaction",
@@ -32953,13 +32976,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T02:13:30.517966+00:00",
+    "completed_at": "2026-07-19T02:58:45.005031+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T02:13:30.517966+00:00",
-      "last_clean_observed_at": "2026-07-19T02:13:30.517966+00:00"
+      "resolved_at": "2026-07-19T02:58:45.005031+00:00",
+      "last_clean_observed_at": "2026-07-19T02:58:45.005031+00:00"
     }
   },
   {
@@ -38996,7 +39019,10 @@
       "escalation_due": false,
       "fingerprint": [
         "tests/test_worker_hang_log_capture.py:61"
-      ]
+      ],
+      "resolved_at": "2026-07-19T02:47:45.114940+00:00",
+      "final_consecutive_remediation_failures": 0,
+      "superseded_by_distinct_incident_at": "2026-07-19T02:47:45.114940+00:00"
     },
     "status_history": [
       {
@@ -40552,10 +40578,31 @@
     "description": "來源：event_article_nfp_2026_07_03_t1 修正報告 §7（已合併，commit 8dfb83806）。\n\nexperiments/k528/k528_nfp_event_study.py 用 get_first_friday() proxy。實測全樣本（2005-02~2026-03，254 筆，FRED 官方涵蓋完整、無外插）：與官方日期相符 201、proxy 錯誤（該日無發布）53（20.9%）、官方發布被完全漏掉 52、幻影月份 1（2025-10）。偏誤系統性偏早（35 早 / 13 晚），其中 28 筆剛好早 7 天（BLS 因參考週改在第二個週五）、12 筆晚 3-4 天（假日提前）。\n\n衝擊面：線上文章 mile_35eef830 正文的所有主要數字 —— 1.10 倍、1.17 倍、2.17 倍體制差、相關係數 0.45、分界值 16.71、254 次樣本 —— 全部出自 k528。\n\n要做：(1) k528 改用 volpred.data.event_dates.nfp_release_dates（fail closed），全樣本重跑；(2) 逐項對照 2.17 倍體制差 / 0.45 / 16.71 是否翻轉或失去顯著性（教訓：平均值可能幾乎不動而中位數與勝率翻轉，不可只看平均）；(3) 若核心論點變動，用既有的 src/volpred/publisher/article_correction.py 做 in-place 更正 （唯一入口，all-or-nothing、每個替換必須恰好命中一次），**禁發第二篇更正文**；(4) 補官方日曆 regression tests + mutation test（還原 proxy 必須轉紅）；(5) Codex 審後才合併。\n\nparent: assign_358decfa",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "created_at": "2026-07-18T20:14:17.175688+00:00",
-    "created_by": "hourly-slot-1-9821e0723e124a95af0ae537ebd2dde0"
+    "created_by": "hourly-slot-1-9821e0723e124a95af0ae537ebd2dde0",
+    "claimed_by": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c",
+    "claimed_at": "2026-07-19T02:41:50.681102+00:00",
+    "claim_session_id": "1eb97cdc6dad",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:41:50.681117+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c"
+      },
+      {
+        "ts": "2026-07-19T02:41:54.392055+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c"
+      }
+    ],
+    "started_at": "2026-07-19T02:41:54.392039+00:00",
+    "dispatched_agent_job_id": "agent-brief_k528_nfp-e245d0",
+    "dispatched_worktree": ".claude/worktrees/dispatch-slot-3-30adeed7-k528nfp",
+    "dispatch_note": "2026-07-19 10:47 交 compute worker（xhigh agent，timeout 5400s）。完成由 PHASE A collect_completed followup 收：驗數字→Codex 審→merge_worktree→標 succeeded。重複 claim 前先查此 job 狀態。"
   },
   {
     "id": "assign_23b2a961",
@@ -41333,6 +41380,444 @@
         "at": "2026-07-19T02:11:16+00:00",
         "by": "hourly-slot-1-1c9c92adf5b44f3b951a8c7e2444fb60",
         "note": "delegated to compute agent job agent-brief_k1731_armB_rev7-7ece0f"
+      }
+    ]
+  },
+  {
+    "id": "telegram-1005",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T02:16:22.974682+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1005）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立即重構並修復所有錯誤的底層邏輯\n\n到底現在有多少派工沒完成？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:17:03.986001+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-19T02:19:42.301608+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-19T02:19:42.301590+00:00",
+    "result": "已回覆（msg 1006）：報派工真數字 113 未完成（86 pending/13 blocked/6 主線程/8 其他），逐筆檢視 blocked 原因後鎖定唯一真卡住的 k1709（worktree 已從磁碟消失但任務永遠 blocked，無 reconcile 機制）+ worktrees 46GB/16 目錄 vs git 註冊 21 條不一致。已開 P1 急件 assign_dc70193a 處理裁定+class sweep+磁碟回收。並回報昨日兩件（瀏覽數統一、急件分流）已修完線上驗證。"
+  },
+  {
+    "id": "assign_dc70193a",
+    "title": "[P1][arch] worktree ↔ task-pool reconcile：stale blocked 任務偵測 + 46GB worktree 回收",
+    "description": "老闆 Telegram msg 1005（2026-07-19 10:16 CST）：「立即重構並修復所有錯誤的底層邏輯」。responder 實查後鎖定的具體底層缺陷：\n\n== 缺陷 1：task pool 與 worktree 沒有 reconcile ==\nk1709_worktree_merge_verification 自 2026-07-14 起 status=blocked/prior_attempts_failed，任務內容是「合併 .claude/worktrees/dispatch-slot-2-c873d04d-k1709」。但該 worktree 目前**已不存在於磁碟**（ls 回 no such file）。也就是說：任務指向的資源消失了，任務卻沒有任何機制發現，永遠卡在 blocked。這類任務不會被 dispatch、也不會被關單，是純殭屍。\n\n要做：\n1. 裁定 k1709：查 git branch exp/k1709-btc-etf-flow-vol 與 reflog，確認那 3 個 commits (c97d690c6 等) 是已合併還是遺失。已合併 → 關單 succeeded 並註明；遺失 → 依 feedback_no_research_artifact_loss 走復原。禁止直接關單了事。\n2. 加機械 gate：blocked 任務若 description/payload 引用 .claude/worktrees/<name> 而該路徑不存在，巡檢要自動標記並升級（class sweep，不是只修這一筆）。同時掃全池找同 class 的其他殭屍。\n\n== 缺陷 2：worktree 磁碟與註冊失控 ==\n- .claude/worktrees 目前 46GB / 16 個目錄\n- git worktree list 有 21 條，比實際目錄多 → 有 stale 註冊沒 prune\n要做：對每個 worktree 判定 live/dead（依 feedback_parallel_impl_and_worktree_liveness 用 lsof，不可只看 mtime），dead 且已合併的走 merge_worktree.sh 正規回收；禁止裸 git worktree remove --force、禁止在合併前 cd 進 worktree。回收前後記錄磁碟數字。\n\n== 邊界 ==\n- 只做上述兩項，不要順手重構 dispatch_supervisor。\n- 完成後回寫 docs/error_log.md 根因段落。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-19T02:19:04.894693+00:00",
+    "created_by": "telegram_responder",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:19:44.456217+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-5da97d74ae0f465c91811de6de7421f5"
+      },
+      {
+        "ts": "2026-07-19T02:19:44.782243+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-5da97d74ae0f465c91811de6de7421f5"
+      },
+      {
+        "ts": "2026-07-19T02:33:29.191321+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-5da97d74ae0f465c91811de6de7421f5"
+      }
+    ],
+    "started_at": "2026-07-19T02:19:44.782228+00:00",
+    "completed_at": "2026-07-19T02:33:29.191168+00:00",
+    "result": "兩缺陷根治完成。缺陷1：k1709 裁定為已合併（c97d690c6 是 HEAD 祖先，檔案落地 main）→ 關單附證據；class sweep 全池 2910 筆確認同類殭屍僅此 1 筆；機械 gate = daily_checkup.py 第 11 維度 check_worktree_reconcile（branch 尚存 warn / branch 也沒了 critical，排除 in_progress 免誤報修復任務），實跑正確抓出 k1709 + 3 條 stale 註冊。缺陷2：根因是 reclaim_stale_worktrees.py 只查 dirty 漏查 merged —— 保留 branch 不等於收割成果，補 _unmerged_count fail-closed gate 後可移除數 6→2，攔下 4 個 worktree 共 9 個未合併 commits；prune 3 條 stale 註冊（21→18）、回收 2 個已合併 worktree，磁碟 46GB→42GB / 16→14 目錄。其餘 9 dirty + 4 unmerged 依 fail-closed 保留，衍生 assign_87bae720 (P2) 走 merge_worktree.sh 收割那 9 commits（預期再釋 ~11.7GB）。error_log Class C 已補根因。未觸碰 dispatch_supervisor。"
+  },
+  {
+    "id": "telegram-1007",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T02:20:33.267076+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1007）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n要立即做的 就不要派入排程而是直接做\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:21:17.319813+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-19T02:22:38.836233+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-19T02:22:38.836219+00:00"
+  },
+  {
+    "id": "telegram-1008",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T02:21:24.404940+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1008）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n開P1急件就會馬上做嗎？還是又加入到排程當中？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:22:54.127301+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-19T02:23:16.751058+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-19T02:23:16.751035+00:00"
+  },
+  {
+    "id": "telegram-1011",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T02:27:51.283125+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1011）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n那加快做完任務池的事情啊\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:28:29.457296+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-19T02:29:45.302872+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-19T02:29:45.302856+00:00",
+    "result": "已查任務池吞吐現況並回覆老闆（telegram msg 1015）。診斷：pending 86、daemon 健康、瓶頸為 max_slots=2。已用 volpred ops assign 建立 P1 throughput 任務（fire_requested）交派工實作。"
+  },
+  {
+    "id": "telegram-1012",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T02:28:15.114088+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1012）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n從現在開始到16:00 持續執行任務不停止\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:30:12.782238+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-19T02:31:06.183711+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-19T02:31:06.183681+00:00",
+    "result": "三則合併處理：已建立 P1 burst 任務 assign_cadde1b5（連續派工至 16:00 + 自動復原 + 逐項 Telegram 回報，fire_requested）。已於 telegram msg 1017 合併回覆老闆。"
+  },
+  {
+    "id": "telegram-1013",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T02:28:31.207832+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1013）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n16:00後恢復正常班次\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:30:13.513239+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-19T02:31:06.715672+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-19T02:31:06.715651+00:00",
+    "result": "三則合併處理：已建立 P1 burst 任務 assign_cadde1b5（連續派工至 16:00 + 自動復原 + 逐項 Telegram 回報，fire_requested）。已於 telegram msg 1017 合併回覆老闆。"
+  },
+  {
+    "id": "telegram-1014",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T02:28:42.455386+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1014）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n每完成一項就回報\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:30:15.229871+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-19T02:31:07.158617+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-19T02:31:07.158601+00:00",
+    "result": "三則合併處理：已建立 P1 burst 任務 assign_cadde1b5（連續派工至 16:00 + 自動復原 + 逐項 Telegram 回報，fire_requested）。已於 telegram msg 1017 合併回覆老闆。"
+  },
+  {
+    "id": "assign_794c4bc2",
+    "title": "[P1][throughput] 提高 dispatch 並行吞吐：max_slots 2 → N（老闆 2026-07-19 指示加快清任務池）",
+    "description": "老闆 Telegram 指示『加快做完任務池的事情』。現況（2026-07-19 10:28 CST 實查）：dispatch supervisor 健康運轉（pid 32223, heartbeat 02:28Z），config/runtime_schedules.json 的 max_slots=2 / max_concurrent_agents=4，pending 任務 86 筆，近 5 日完成量 57/98/53/46/57 件（平均約 62/日）。瓶頸在並行度上限而非 supervisor 可用性。\n\n要做：\n1. 盤點實際資源上限（Claude quota、本機 CPU/記憶體、worktree 磁碟、Codex failover 容量），算出安全的 max_slots 上限。\n2. 提高 config/runtime_schedules.json 的 max_slots / max_concurrent_agents，並確認 dispatch_supervisor scheduler 與 worktree 配置能吃得下（slot naming、worktree 清理、lock 競態）。\n3. 加 guard：quota_blocked 連續失敗時自動降回原並行度（dispatch_state.json completions 顯示 2026-07-16 有 quota_blocked 連發）。\n4. 觀察 24h 吞吐變化並回報實際 completed/day 是否提升。\n\n限制：不得為衝吞吐放寬既有 review/verify gate；throughput 提升必須來自並行度與排隊效率，不是跳過驗證。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-19T02:29:18.531847+00:00",
+    "created_by": "telegram-responder",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:29:47.406424+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f"
+      },
+      {
+        "ts": "2026-07-19T02:29:53.001103+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f"
+      },
+      {
+        "ts": "2026-07-19T02:38:14.176875+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f"
+      }
+    ],
+    "started_at": "2026-07-19T02:29:53.001066+00:00",
+    "completed_at": "2026-07-19T02:38:14.176858+00:00",
+    "result": "max_slots 2→4（config hot-load 即時生效）+ scheduler.load_max_slots 內建 quota de-rate guard（連 2 次 quota_blocked clamp 回 2，成功一次自愈）；標註 idle_policy.max_concurrent_agents 為無程式讀取的歷史欄位（agent 並行度唯一 owner = dispatch_slot_budget.py）；新增 test_scheduler_max_slots.py 9 case，167 dispatch/scheduler 測試全過，canonical-writers PASS。24h 吞吐驗收另建 assign_f59976b6（blocked_until 07-20 11:00）。"
+  },
+  {
+    "id": "email-12144-e40b35",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] [VolPred 警報][WARN] Dreaming review 2026-07-18 — dreami",
+    "description": "Gmail UID: 12144\nMessage-ID: <B7A1600C-99C0-4C33-A39A-A529750F7CC5@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 19 Jul 2026 10:17:22 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred 警報][WARN] Dreaming review 2026-07-18 — dreaming 重構完成，那封信不會再寄\n\n--- 用戶回信內容 ---\n不是叫我做\r\n你判定後就去優化執行啊\r\n\r\n立刻重構底層\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月19日 09:40 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: [VolPred 警報][WARN] Dreaming review 2026-07-18 — dreaming 重構完成，那封信不會再寄\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> Dreaming 重構完成 — 寄信閘門從「有沒有新東西」改成「有沒有人得動手」\r\n> \r\n> 你點名的那封信，本身就是最好的證據。我先說它錯在哪。\r\n> 那封信裡有幾件事需要你做？零件\r\n> \r\n> 內容\t數量\t誰的責任\r\n> missing_retry_strategy\t4\t機器（actuator 自 7/12 預設開，其中 2 個信裡就寫著已派出去的 task id）\r\n> persistent_alert\t5\t沒有人 —— 全部已停火 12.8–46.5 小時，48h 自動清掉\r\n> escalations\t0\t—\r\n> 信的「建議行動」自己寫著「escalations=0 → 不需要重構」。一封告訴收件人「你不用做事」的 WARN，就是雜訊。\r\n> 根因：閘門判錯了東西\r\n> \r\n> 寄信條件是這一行：\r\n> if new_findings or escalations:   # 判「有沒有新東西」\r\n> 但 dreaming 的設計目標把責任切得很清楚 —— auto_dispatch 是 actuator 的事，propose_only 才是人的事。兩者都算「新」，所以機器正在修的事照樣寄給你。\r\n> 還有第二層放大器：reconcile() 其實早就算出每個 finding 是不是 quiescent（已停火、自清中），但只拿來擋 strike 計數，算完就丟掉。於是一個正在自己康復的 警報，仍然以 active warning 的身分出現在你信箱。\r\n> 順手抓到一個文案與行為脫節一週：信裡寫「--apply-auto 才會派修復 task（預設關）」，但 actuator 7/12 就預設開了 —— 信在對你描述一個一週前就不存在的系統。\r\n> 改了什麼\r\n> \r\n> 新增 needs_human_attention() 作為對外音量的單一 owner，三條規則由強到弱：\r\n> critical（三振種子）→ 一律寄，這是這層存在的理由\r\n> quiescent（已停火自清中）→ 不寄，過去式沒有行動可做\r\n> 其餘只有 propose_only 要人；auto_dispatch 歸機器\r\n> 配套：quiescent 升為 finding 欄位活到閘門那一刻；報告加 actionable / machine_handled / quiescent三個讀數；閘門改 escalations or actionable_new；信裡逐項標「機器已派修復 task」/「已停火、自清中」，需要你看的排最前面。\r\n> 靜默不等於黑洞：報告照寫、decision log 照記、skip 理由印在 定時任務 log。\r\n> 驗證（真實資料，非只跑測試）\r\n> \r\n> 把 7/18 那份報告的 9 個 finding 對現行 baseline 重放（唯讀，沒動任何 canonical 檔）：\r\n> 還原當晚 → actionable_new=0、escalations=0 → 那封信不會再寄\r\n> 同一批 finding 餵進今晚 → 5 個 quiescent + 3 個機器自理全靜音，只有一個累到三振的 missing_retry_strategy 升 critical 送出 —— 升級路徑沒被削弱\r\n> 測試：test_dreaming_review.py 60 passed（新增 10 個，含把那 9 個 finding 當標本的回歸鎖，以及反向鎖「真的需要人判斷時不得被新閘門吞掉」）。連同 alerts / 自主循環健康度 共 146 passed。\r\n> 一個我沒有順手補的洞（刻意）\r\n> \r\n> quiescent 是靠「兩次 run 之間訊號有無推進」判定的，所以第一次出現的 finding 一律不算 quiescent —— 一個「初見即已停火」的 警報 還是會吵你一次，隔晚才靜音。\r\n> 我沒補，因為補它要另立一套判定，會和 reconcile 的 marker 邏輯變成雙 owner（正是 anti-stacking 要擋的）。而 警報 48h 自清 + persistent_alert 要累積 send_count 才成立，這個窗口很窄。已寫進 skill 文件的「已知邊界」，不是忘了。\r\n> 教訓（已進 error_log §J）\r\n> \r\n> 通知的閘門要判「收件人有事可做嗎」，不是「系統有新資料嗎」。 偵測器的產出天然全是新資料；用新奇度當閘門，必然把機器自己的例行工作寄給人 —— 而人一旦學會忽略這個寄件人，真正的 escalation 也會一起被忽略。那才是這個 bug 真正的代價。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-19T02:30:07.551972+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12144,
+    "email_message_id": "<B7A1600C-99C0-4C33-A39A-A529750F7CC5@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] [VolPred 警報][WARN] Dreaming review 2026-07-18 — dreaming 重構完成，那封信不會再寄",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:33:50.467192+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c"
+      },
+      {
+        "ts": "2026-07-19T02:33:53.470212+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c"
+      },
+      {
+        "ts": "2026-07-19T02:40:29.562109+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c"
+      }
+    ],
+    "started_at": "2026-07-19T02:33:53.470197+00:00",
+    "completed_at": "2026-07-19T02:40:29.562090+00:00",
+    "result": "重構 dreaming quiescent 判定：新增 _is_quiescent() 為唯一 owner，首見分支改用絕對形式（marker 距今 >= DREAMING_RUN_INTERVAL_HOURS=24h）。reconcile 兩分支全委派。真實 alert 重放 7 findings 首見情境 2 靜音/5 照送；66+178 tests passed。error_log §J 加自主性規則 + skill doc 已知邊界改寫。close email 已寄。"
+  },
+  {
+    "id": "assign_cadde1b5",
+    "title": "[P1][burst] 今日 10:30–16:00 CST 連續派工不停 + 每完成一項即時 Telegram 回報",
+    "description": "老闆 2026-07-19 Telegram 三則連發指示（msg 1012/1013/1014）：\n1. 『從現在開始到 16:00 持續執行任務不停止』\n2. 『16:00 後恢復正常班次』\n3. 『每完成一項就回報』\n\n要做（時效性：今天 2026-07-19 10:30–16:00 Asia/Taipei，過了窗口本任務作廢）：\n1. **連續派工**：在窗口內讓 dispatch supervisor 不留空檔 —— 一個 job 完成就立刻拉下一筆 pending（目前是 hourly cron 節奏，會有閒置間隔）。實作可走 supervisor 的 request_fire / 完成即續派，不要用 sleep 空轉。\n2. **16:00 自動復原**：窗口結束後恢復原本 hourly 節奏，不要讓 burst 設定殘留成常態。務必是自動的（排程或到期判斷），不是靠人記得改回來。\n3. **每完成一項即時回報**：每筆任務 succeeded/failed 就發一則 Telegram（），短、口語、含任務名 + 結果一行。要有冪等 guard 防同一任務重複回報。\n\n限制：\n- 不得為衝件數跳過 review/verify gate；連續派工只能來自減少閒置，不是降低標準。\n- quota_blocked 連發時要停下並回報，不要空轉刷失敗。\n- 與同時建立的 [P1][throughput] max_slots 任務協調，不要兩邊各自改 config 打架。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-19T02:30:34.574087+00:00",
+    "created_by": "telegram-responder",
+    "status_history": [
+      {
+        "ts": "2026-07-19T02:38:36.849471+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f"
+      },
+      {
+        "ts": "2026-07-19T02:38:37.085311+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f"
+      },
+      {
+        "ts": "2026-07-19T02:42:26.081967+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f"
+      }
+    ],
+    "started_at": "2026-07-19T02:38:37.085296+00:00",
+    "completed_at": "2026-07-19T02:42:26.081952+00:00",
+    "result": "burst window 機制上線：窗口存為截止時間（2026-07-19T16:00+08:00），連續派工由 task 完成時 request_fire 驅動（slot 滿則排隊，不平行派工），16:00 到期即自動復原 hourly 節奏（不需清理步驟）。每完成一項發一則 Telegram，冪等 guard = 任務列 burst_reported_at 寫在同一把 LOCK_EX 內。quota 連 2 次 blocked → suspend 且自愈。新增 dispatch_burst.py + CLI + 11 case 測試。",
+    "burst_reported_at": "2026-07-19T02:42:26.089661+00:00"
+  },
+  {
+    "id": "assign_87bae720",
+    "title": "[worktree harvest] 4 個 clean-but-unmerged worktree 共 9 commits 待正規合併（unmerged gate 攔下）",
+    "description": "本任務由 assign_dc70193a（worktree reconcile）衍生。reclaim_stale_worktrees.py 新加的 unmerged gate 攔下 4 個 clean-but-unmerged worktree，共 9 個 commits 未進 main。這些若照舊邏輯回收，checkout 會被移除、branch 雖保留但成果未收割 —— 正是 k1709 殭屍的成因。\n\n待收割（idle 皆 >60h，皆 clean tree）：\n- wt/dispatch-slot-1-3217f0b2-k1685        2 commits  (2.9G)\n- wt/dispatch-slot-1-3217f0b2-pushgate     1 commit   (2.9G)\n- wt/dispatch-slot-1-a56566ff-k1719        3 commits  (3.0G)\n- wt/dispatch-slot-2-5ddfeb00-k1583        3 commits  (2.9G)\n\n做法：逐一走正規 bash scripts/merge_worktree.sh（禁裸 git merge、禁 worktree remove --force、禁合併前 cd 進 worktree），套 worktree-merge-verification skill 驗證成果落地，合併後 checkout 由 reclaim_stale_worktrees.py --apply 自動回收（gate 會在 unmerged 歸零後放行）。預期釋出 ~11.7GB。\n\n一次做一個並驗證，不要批次盲合。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-19T02:31:59.489175+00:00",
+    "parent_task_id": "assign_dc70193a",
+    "created_by": "hourly-slot-1-5da97d74ae0f465c91811de6de7421f5"
+  },
+  {
+    "id": "assign_f59976b6",
+    "title": "[throughput] max_slots 2→4 上線後 24h 吞吐驗收（assign_794c4bc2 後半段）",
+    "description": "2026-07-19 10:40 CST 已把 config/runtime_schedules.json 的 dispatch supervisor max_slots 2→4，並在 scheduler.load_max_slots 加 quota de-rate guard（連 2 次 outcome=quota_blocked → clamp 回 2，成功一次自愈）。本 task 是老闆指示的第 4 步「觀察 24h 吞吐變化並回報」。\n\n基線（改動前，實測）：\n- 近 5 日 completed/day = 57 / 98 / 53 / 46 / 57（平均約 62/日）\n- pending 86-89 筆，slots 長期滿載（current_jobs_n=2/2）\n- 近 100 次 completion outcome：success 87 / quota_blocked 5 / codex_failover_recovered 5 / failure 1 / killed_timeout 1 / kill_failed_orphan_drained 1\n- weekly quota 32.3% used（anchor 已 stale 18 天，數字僅供量級參考）\n\n要做：\n1. 比對 2026-07-19 10:40 之後 24h 的 completed/day 與 slots_full skip 次數（storage/ops/dispatch_state.json completions + supervisor log 的 reason=slots_full）。\n2. 檢查是否出現新的 quota_blocked / killed_timeout / PHASE-Z cohort 衝突 —— 4 條主線程共用同一個 checkout，cohort-drained PHASE-Z 的競態是這次加碼最可能的新風險面。\n3. 檢查 worktree 與磁碟：改動前 18 個 worktree、磁碟 91% used（85GB free）。若 worktree 數或磁碟惡化，回報並考慮把 reclaim_stale_worktrees 排更頻繁。\n4. 回報實際 completed/day 是否提升；若沒提升，說明真瓶頸在哪（例如任務本身的 wall-clock、agent slot budget 4/6 而非 fire 並行度）。\n5. 若出現 quota 連發或 PHASE-Z 衝突，把 max_slots 調回 2 或 3 並記錄原因。\n\nparent_task_id: assign_794c4bc2",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "blocked",
+    "source": "scheduled",
+    "created_at": "2026-07-19T02:34:42.764949+00:00",
+    "parent_task_id": "assign_794c4bc2",
+    "created_by": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f",
+    "blocked_until": "2026-07-20T11:00:00+08:00",
+    "blocked_reason": "需累積 24h 觀察窗（max_slots 4 於 2026-07-19 10:40 CST 上線）"
+  },
+  {
+    "id": "alert_internal_silent_fallback_new_c67bec28dd_20260719T024745114940Z_a1",
+    "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=2 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.MjczH9 baseline_findings=64 new=2 resolved=64\n[pre-commit]   NEW scripts/task_pool_claim.py:563 except Exception: return None\n[pre-commit]   NEW src/volpred/ops/dispatch_burst.py:67 except OSError|JSONDecodeError: return None\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-19T02:47:45.114940+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "silent_fallback_new"
+    ],
+    "alert_key": "silent_fallback_new",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260719T024745114940Z",
+      "episode_started_at": "2026-07-19T02:47:45.114940+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-19T02:53:59.769617+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false,
+      "fingerprint": [
+        "scripts/task_pool_claim.py:563",
+        "src/volpred/ops/dispatch_burst.py:67"
+      ]
+    }
+  },
+  {
+    "id": "k1731_armB_rev7_codex_round7",
+    "title": "K1731 arm B rev7 — Codex round 7 primary-path review 收裁決",
+    "description": "rev7 remediation agent 回報 ready_for_codex_round7=true。主線程已獨立 bytes 核對四條 round-6 blocking issue（B1a README 表格/標題已改為 HAC diagnostic interval + † 無覆蓋保證；B1b primary JSON 'demonstrably' 歸零、inference_caveats 4 條已在；B5 estimation docstring 已改為 'reuses the same model implementation while these settings differ' 並列三項未控差異；detector 已 flag K1731），且 15 檔 sha256 對 k1731_armB_rev7_freeze.txt 全 OK。本 task = 跑 Codex round 7 並依裁決分流：PASS → 解除 assign_67f56b79 blocked；FAIL → 依 blocking issues 開下一輪 bounded remediation（不得原樣重派）。禁止合併 worktree、禁止 agent 寫 knowledge.json。",
+    "task_type": "paper_review",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "hourly_dispatch",
+    "created_at": "2026-07-19T03:02:00+00:00",
+    "created_by": "hourly-slot-1-4cb1880cf4cb4b6ead05b3565161b086",
+    "payload": {
+      "parent_task_id": "k1731_armB_rev7_remediation",
+      "parent_compute_job": "agent-brief_k1731_armB_rev7-7ece0f",
+      "worktree": ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+      "freeze_manifest": "storage/ops/codex_reviews/k1731_armB_rev7_freeze.txt",
+      "prompt": "storage/ops/codex_reviews/k1731_armB_rev7_prompt.md",
+      "verdict_out": "storage/ops/codex_reviews/k1731_armB_rev7_verdict.md",
+      "blocks_task": "assign_67f56b79"
+    },
+    "status_history": [
+      {
+        "status": "in_progress",
+        "at": "2026-07-19T03:02:00+00:00",
+        "by": "hourly-slot-1-4cb1880cf4cb4b6ead05b3565161b086",
+        "note": "codex round 7 launched inline by dispatch main thread"
+      }
+    ]
+  },
+  {
+    "id": "k1730_nested_dm_detector_exposure",
+    "title": "K1730 (arm A) 新被 nested-DM detector flag：t=+2.13 的 raw DM 同屬 nested 缺陷類",
+    "description": "K1731 rev7 為 audit_nested_dm_misuse.py 補上 coefficient-mask nesting AST channel 後，experiments/k1730/k1730_gevreg_midas_ssvs.py:142-143 由 PASS 翻 FAIL（test_role=review_required，已 frozen 進 nested_dm_misuse_baseline.json 為 exposed）。根因與 arm B 相同：restricted model 由 macro coefficient mask 歸零建立，兩條舊 AST channel 都看不到，scan_file 在 raw-DM classifier 前就 return None。影響面：arm A 的 t=+2.13 被 K1731 README 與 primary artifact 當作 cross-arm 論據引用；若該統計量同樣不具漸近常態極限，K1730 自身的宣稱層也需比照 K1731 做撤回或加註。要做：(1) 盤點 K1730 README/artifact 中所有依賴該 raw DM 的宣稱；(2) 決定撤回 vs 修正（與 K1731 一致性）；(3) 若 K1730 已有線上文章或論文引用，一併列出待更正清單。本 task 由 K1731 rev7 detector 修復衍生，owner 不是 K1731 — 不得塞回 K1731 scope。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "hourly_dispatch",
+    "created_at": "2026-07-19T03:02:00+00:00",
+    "created_by": "hourly-slot-1-4cb1880cf4cb4b6ead05b3565161b086",
+    "payload": {
+      "origin_task_id": "k1731_armB_rev7_remediation",
+      "detector": "scripts/audit_nested_dm_misuse.py",
+      "baseline": "storage/ops/nested_dm_misuse_baseline.json",
+      "site": "experiments/k1730/k1730_gevreg_midas_ssvs.py",
+      "evidence_lines": [
+        142,
+        143
+      ]
+    },
+    "status_history": [
+      {
+        "status": "pending",
+        "at": "2026-07-19T03:02:00+00:00",
+        "by": "hourly-slot-1-4cb1880cf4cb4b6ead05b3565161b086",
+        "note": "spawned from K1731 rev7 detector newly_flagged_sites"
       }
     ]
   }

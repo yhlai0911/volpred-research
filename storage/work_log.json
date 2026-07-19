@@ -21439,5 +21439,53 @@
     "outcome": "dispatched",
     "summary": "PHASE A collect_completed：K1731 arm B rev6 Codex verdict = FAIL（freeze 11 檔 sha256 全符，屬當前 bytes 裁決，非沿用 round 5）。B2/B3/B4/B6/B7 + 四項 structural check 全 PASS。主線程逐一 bytes 核對 4 條 blocking issue 全部屬實：README:188 仍稱 bounds、:195 表格把 nested 列標為有效 95% CI；primary JSON cross_arm_comparison 仍有 demonstrably 與無 caveat 的雙臂 OOS 推論；estimation py:4 docstring 仍稱 holds the entire engine fixed；audit_nested_dm_misuse.py 缺 coefficient-mask nesting AST channel 導致 K1731 gate PASS 是 false negative（193-site baseline 至少少算一處）。依 followup 規則不原樣重派，改 enqueue bounded rev7 agent job agent-brief_k1731_armB_rev7-7ece0f（opus/xhigh, timeout 3600, worktree dispatch-slot-1-bd00f90a-k1731, result artifact k1731_armB_rev7_remediation.json），brief 明訂不得動 estimated numbers、primary JSON 須由 finalize_report.py 重生、detector 須加 positive/negative test 並重掃 repo 更新 baseline、出口須產 rev7 freeze manifest 且不合併 worktree。followup 已 mark-dispatched；assign_67f56b79 blocked_until 由 07-19T18:00 延至 07-20T12:00 避免驗收未過即被放行。",
     "commit": null
+  },
+  {
+    "timestamp": "2026-07-19T10:48:00+08:00",
+    "task_id": "assign_dc70193a",
+    "task_type": "platform_ops",
+    "actor": "hourly-slot-1-5da97d74ae0f465c91811de6de7421f5",
+    "owner": "hourly-slot-1-5da97d74ae0f465c91811de6de7421f5",
+    "outcome": "succeeded",
+    "summary": "P1 急件 lane（boss Telegram msg 1005）worktree x task-pool reconcile 兩缺陷根治。缺陷1 裁定：k1709 的 3 個 commits 已全數進 main（git merge-base --is-ancestor c97d690c6 HEAD = true；experiments/k1709/ 檔案落地、README 含 GW/INCONCLUSIVE 措辭 19 處即 rev2 修正在內），無成果遺失，關單 succeeded 並附證據。Class sweep 掃全池 2910 筆：同 class 真殭屍僅此 1 筆（另 1 筆是本修復任務自身引用該路徑，屬 false positive）。缺陷1 機械 gate：daily_checkup.py 新增第 11 維度 check_worktree_reconcile —— open 任務引用的 .claude/worktrees/<name> 不存在即標記，branch 尚存=warn（commits 可救）、branch 也沒了=critical（僅存 reflog，artifact-loss 風險）；排除 in_progress 避免把修復任務判成病灶；另偵測 git worktree stale 註冊。實跑驗證：正確抓出 k1709 critical + 3 條 stale 註冊，無誤報。缺陷2 根因修正（本次最關鍵）：reclaim_stale_worktrees.py 的安全條件只查 dirty、漏查 merged —— 保留 branch 不等於收割成果，移除 unmerged checkout 正是 k1709 殭屍的成因。新增 _unmerged_count fail-closed gate（dry-run 與 apply 的 lock 內各評估一次）。效果：可移除數從 6 降為 2，攔下 4 個 clean-but-unmerged worktree 共 9 個 commits（k1685 2 / pushgate 1 / k1719 3 / k1583 3）免遭誤刪。缺陷2 回收：git worktree prune 清 3 條 stale 註冊（21→18）；reclaim --apply 移除 2 個已合併 worktree（k1630/k1649）。磁碟 46GB→42GB、16→14 目錄。未達更大回收量是刻意的：其餘 9 dirty + 4 unmerged 依 fail-closed 保留，已建 assign_87bae720 (P2) 走正規 merge_worktree.sh 收割那 9 個 commits，預期再釋出約 11.7GB。docs/error_log.md Class C 補根因段落 + 代表 incident。邊界遵守：未觸碰 dispatch_supervisor。",
+    "commit": null
+  },
+  {
+    "timestamp": "2026-07-19T10:38:08+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_794c4bc2",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f",
+    "owner": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f",
+    "commit": null,
+    "summary": "dispatch 並行吞吐加碼：max_slots 2→4 + quota de-rate guard（老闆 2026-07-19「加快清任務池」P1 急件）\n\n**盤點（實測，非估計）**\n- 硬體：10 CPU core / 64GB RAM / 磁碟 85GB free（91% used）；記憶體 active ~24GB。\n- Quota：weekly 32.3% used、67.7% remaining（anchor 已 stale 18 天，僅供量級參考）。\n- 近 100 次 completion outcome：success 87 / quota_blocked 5 / codex_failover_recovered 5 / failure 1 / killed_timeout 1 / kill_failed_orphan_drained 1。\n- 現況：current_jobs 2/2 長期滿載 → requested fire（email / telegram / 急件）會撞 `slots_full` 被延到下一 tick。瓶頸確認在 fire 並行度。\n\n**關鍵釐清（決定了加碼幅度）**：max_slots 放大的是「同時幾條 dispatch 主線程」，**不會**倍增 agent 數 —— agent 並行度的唯一 owner 是 `scripts/dispatch_slot_budget.py`（全 repo worktree progress-based occupancy，base 4 / P1 surge 6 / auth_blocked de-rate 2），與 max_slots 正交。所以 4 條主線程最壞情況 ≈ 4 主線程（IO-bound）+ 全域上限 4-6 個 agent，10 核吃得下；磁碟/worktree 的限制也仍由 slot budget 把關，不隨 max_slots 上升。\n\n**改動**\n1. `config/runtime_schedules.json`：`daemons[volpred-dispatch-supervisor].max_slots` 2→4，並補 `max_slots_rationale` 記錄依據與守門機制。\n2. `scripts/dispatch_supervisor/scheduler.py`：新增 `_quota_derate_active()` + `QUOTA_DERATE_STREAK=2`，接進 `load_max_slots()`。連續 2 次 `outcome=quota_blocked` → capacity clamp 回 `DEFAULT_MAX_SLOTS=2`；**成功一次即自愈**（quota 是時鐘型錯誤，與 latched 的 auth_blocked 不同，不能要人工解鎖）。guard 放在 `load_max_slots` 內部而非呼叫端，維持「誰問 slot 數都得到同一個答案」的 single-owner 規則。clamp 只降不升：configured ≤ 2 時不受影響。\n3. `config/runtime_schedules.json`：`idle_policy.max_concurrent_agents` 補 owner note —— 全 repo grep 確認**無任何程式讀取此欄位**，是歷史敘述值。標註以免日後有人改它以為生效、或讓它變成 agent 並行度的第二個 owner（老闆刻意要求 raise 的就是這個欄位，實際該改的是 dispatch_slot_budget.py）。\n4. 新測試 `scripts/tests/test_scheduler_max_slots.py`（9 case）：健康時吃 configured 值 / 連 2 quota clamp / 一次 success 自愈 / 單次 quota 不 de-rate / 不把低配置值抬高 / state 壞檔與缺檔 fail-open / canonical config 實檔斷言 max_slots==4。\n\n**驗證**\n- `uv run pytest scripts/tests/ -k \"dispatch or scheduler or supervisor or urgent\"` → 167 passed。\n- 實機 `load_max_slots()` 回傳 4、`_quota_derate_active()` 回傳 False（目前無 quota streak）。\n- `audit_canonical_writers.py` → PASS（0 unguarded / 0 mismatch / 0 parse error）。\n- 生效路徑：config 是 per-tick hot-load，立即生效；scheduler.py 程式碼由 `selfreload.py` 在 daemon idle 時自動 reload（不手動重啟，避免 SIGTERM 掉正在跑的 fire）。\n\n**限制遵守**：未放寬任何 review/verify gate；吞吐提升全部來自並行度，不是跳過驗證。\n\n**未收尾（已排程，非 partial）**：老闆第 4 步「觀察 24h 吞吐變化並回報」本質上需要 24h 觀察窗，無法在本班完成 → 建 `assign_f59976b6`（P2, blocked_until 2026-07-20T11:00+08:00，parent=assign_794c4bc2），已寫入改動前基線（近 5 日 57/98/53/46/57，平均 ~62/日）供對照，並列出 PHASE-Z cohort 競態、worktree/磁碟、quota 連發三個回退判準。"
+  },
+  {
+    "timestamp": "2026-07-19T02:40:35Z",
+    "actor": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c",
+    "owner": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c",
+    "task_type": "email_reply",
+    "task_id": "email-12144-e40b35",
+    "summary": "dreaming quiescent 首見洞重構：_is_quiescent() 單一 owner，首見改絕對形式(>=24h)。真實資料重放 2 靜音/5 照送；178 tests passed。error_log §J + skill doc 更新。",
+    "status": "succeeded"
+  },
+  {
+    "timestamp": "2026-07-19T10:42:25+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_cadde1b5",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f",
+    "owner": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f",
+    "commit": null,
+    "summary": "burst window：10:30–16:00 連續派工 + 每完成一項即時 Telegram 回報（老闆 Telegram msg 1012-1014 P1 急件）\n\n**設計核心：老闆要的兩件事（不留空檔、16:00 自動復原）其實是同一件事 —— 把窗口存成「截止時間」而不是「某人切換的模式」。**\n\n1. **連續派工 = completion-driven，不是 sleep 空轉**。任務完成的那一刻，正是 slot 可能剛空出來的那一刻，所以只在那個時刻檢查。`task_pool_claim.py complete` 在 burst 期間會呼叫 `state.request_fire()` —— 那只是在 supervisor 自己的鎖裡寫一個 flag，scheduler 下一個 ≤60s tick 循正常 `reserve_fire()` slot 路徑消費。**slot 滿就排隊，不會平行 double-dispatch**。不新增 daemon、不 polling、不 sleep。\n2. **16:00 自動復原 = 到期，不是清理**。過了 `until` 一秒，所有讀取一律回 inactive，剩下的自然就是原本的 hourly 節奏 —— **16:00 不需要有任何東西跑、不需要有人記得**。刻意不在到期時刪檔：需要「清理成功才會結束」的 burst，就是清理失敗時會超時存活的 burst。這正是暫時設定變成永久設定的機制。\n3. **每完成一項回報**：`format_completion` 產出一行（✅/❌ + 動詞 + 任務名 + id·type）。冪等 guard 是任務列自己的 `burst_reported_at` 欄位，**寫在寫入 terminal status 的同一把 LOCK_EX 內** —— 獨立 marker 檔可能與佇列說法不一致，寫在它所描述的那一列上則不可能。實際送出延到鎖外（network IO 不該壓在佇列鎖上）。\n\n**守門**\n- **Quota**：連 2 次 `quota_blocked` → burst suspend（沿用同班另一任務 assign_794c4bc2 建的 `scheduler.quota_derate_active`，capacity 的唯一 owner，不另建第二套判定）。是 suspend 不是 close —— quota 也是時鐘型錯誤，窗口該在額度回來時自己恢復。符合老闆「quota_blocked 連發時要停下，不要空轉刷失敗」。\n- **fail-open to inactive**：檔案缺失、壞 JSON、until 無法解析、burst 模組 import 失敗 → 一律「沒有 burst」，絕不會變成「永遠 burst」。\n- **通知失敗不影響任務**：Telegram 送失敗只記在回傳值，不會讓已完成的工作變成失敗。\n- **與 assign_794c4bc2 協調**（老闆明確要求兩邊別打架）：兩者正交且共用同一個 quota owner —— max_slots 管「同時幾條主線程」（config，2→4），burst 管「下一班什麼時候開始」（completion-driven）。burst 不碰 config，max_slots 不碰節奏。\n\n**新增/改動**\n- `src/volpred/ops/dispatch_burst.py`（新）：窗口讀寫 + `active()/status()` + quota suspend + 回報格式化。\n- `scripts/dispatch_burst_cli.py`（新）：`open --until --reason` / `status` / `close`。\n- `scripts/task_pool_claim.py`：`cmd_complete` 拆為 `_complete_locked`（鎖內）+ 鎖外的 `_send_burst_report` / `_request_burst_fire`；新增 `_burst_actions`。\n- `scripts/tests/test_dispatch_burst.py`（新，11 case）：到期即失效且不需清理步驟 / 壞檔與缺檔 fail-open / until 無法解析拒絕開窗 / quota 是 suspend 而非 close 且會自愈 / close 早停冪等 / 回報格式與長標題截斷。\n\n**驗證**\n- `uv run pytest scripts/tests/test_dispatch_burst.py scripts/tests/test_scheduler_max_slots.py` → 20 passed；`-k \"task_pool or claim\"` → 7 passed。\n- 實機開窗：`dispatch_burst_cli.py open --until 2026-07-19T16:00:00+08:00` → active=true, seconds_left=19096。\n- 本 task 自身的 `complete` 即為端對端驗證（觸發 Telegram 回報 + request_fire）。\n\n**限制遵守**：未動任何 review/verify gate；縮短的只有閒置間隔。"
+  },
+  {
+    "timestamp": "2026-07-19T02:43:41Z",
+    "actor": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c",
+    "owner": "hourly-slot-3-30adeed7eb56404a9e74ac2d7d6fbe1c",
+    "task_type": "experiment",
+    "task_id": "assign_ae004ae2",
+    "summary": "k528 NFP proxy 污染（254 筆中 53 筆 20.9% 非 NFP 日，系統性偏早）修復任務已 enqueue 給 compute worker：job agent-brief_k528_nfp-e245d0，worktree dispatch-slot-3-30adeed7-k528nfp（branch k528-nfp-official-dates），opus/xhigh timeout 5400s。brief 要求換 nfp_release_dates fail-closed 全樣本重跑、每項指標 mean+median+勝率並判翻轉、必要時走 article_correction.py in-place 更正 mile_35eef830（禁發第二篇）、補 mutation test。合併由後續 fire PHASE A 收。",
+    "status": "dispatched_async"
   }
 ]
