@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1739,
+  "last_k_id": 1740,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -1012,12 +1012,15 @@
       "topic_hash": "4346c2ef0c936853"
     },
     {
+      "amend_note": "experiments/k1732 = TAIEX CF-VaR deathcross backtest (boss-assigned 2026-07-19, published mile_29018fa1, certified). Hand-picked kid collided with this reservation (K1719 incident class #2). Displaced ETF macro-efficiency/fragility topic re-reserved under new number (see next reservation).",
+      "amended_at": "2026-07-19T05:50:22.291734+00:00",
+      "amended_by": "main-interactive",
       "claimed_at": "2026-07-18T00:00:01.917841+00:00",
       "claimed_by": "research_backlog_auto",
       "k_id": "K1732",
       "number": 1732,
       "source_max": 1731,
-      "status": "reserved",
+      "status": "consumed",
       "topic": "ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（EFA/EEM/EWJ/EWG/EWZ/INDA/XLK/XLF）事件窗，檢定 ETF-heavy 標的是否在宏觀 shock 日更快反映資訊但後續 co-volatility / reversal 更強（來源：JPM 2025 ETF macroefficiency + JFM 2025 ETF-based fragility）",
       "topic_hash": "020c9ea3475f9aef"
     },
@@ -1090,8 +1093,21 @@
       "status": "reserved",
       "topic": "商品期貨短期（1-4 週）動能與反轉「共存」驗證及 vol 條件 — yfinance 商品 ETF 代理（GLD/SLV/USO/UNG/CPER/PDBC），月/週 return series，檢定同 horizon 下動能與反轉是否因 vol 高低 regime 分離（JFEM 2026 commodity markets 發現短期動能-反轉並存，顛覆傳統 horizon 區分）；美股商品 ETF 代理版，免 tick（來源：JFEM/SSRN 2026 commodity short-term momentum-reversal coexistence）",
       "topic_hash": "bad154498f1504eb"
+    },
+    {
+      "amend_note": "displaced ETF topic turned out already completed (experiments/k_etf_vs_etf_fragility_2026_06_14, 2026-06-14 Codex PASS); no new experiment needed",
+      "amended_at": "2026-07-19T05:51:31.535277+00:00",
+      "amended_by": "main-interactive",
+      "claimed_at": "2026-07-19T05:50:22.994765+00:00",
+      "claimed_by": "main-interactive",
+      "k_id": "K1740",
+      "number": 1740,
+      "source_max": 1739,
+      "status": "released",
+      "topic": "ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（displaced from K1732 by collision repair 2026-07-19）",
+      "topic_hash": "183dd0ec7c96841a"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-19T00:00:02.460015+00:00"
+  "updated_at": "2026-07-19T05:51:31.535277+00:00"
 }

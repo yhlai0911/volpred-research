@@ -34523,7 +34523,7 @@
     "id": "k1396_scope_repair_daily_r2",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "created_at": "2026-07-15T08:34:29.171934+00:00",
     "source": "dm_hac_fix_k1379_paper9_exposure_audit",
     "description": "Audit K1396 independent protocol and public claims. Relabel daily-r-squared and steady-state A4f approximations accurately, withdraw canonical HAR-RV/non-inferiority wording unless supported, then update K1396 knowledge and feeds mile_7825c8a2 and mile_7fbc61c8.",
@@ -34553,11 +34553,26 @@
         "to": "pending_main_thread",
         "by": "handoff",
         "note": "Codex-completable scope finished. Experiment repair merged in 23848eea8; public articles mile_7825c8a2 and mile_7fbc61c8 formally corrected, synced, and committed in 5b1bd266e; reproducible fallback assets included. HTTP and Chrome live readback both passed on 2026-07-16: correction banners visible, 5/2 article images loaded, no horizontal overflow. Claude main thread only: use K1259-gated canonical knowledge writer to supersede k1396_har_rv_vs_a4f_paper9_c4; verdict SUPERSEDED, superseded_by K1379, withdraw canonical HAR-RV/exact-K988/parity/non-inferiority/nested raw-DM/small-gap claims."
+      },
+      {
+        "ts": "2026-07-19T05:45:59.503742+00:00",
+        "from": "pending_main_thread",
+        "to": "claimed",
+        "by": "main-interactive"
+      },
+      {
+        "ts": "2026-07-19T05:45:59.782958+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-interactive"
       }
     ],
     "started_at": "2026-07-15T18:49:02.961112+00:00",
     "handoff_note": "Codex-completable scope finished. Experiment repair merged in 23848eea8; public articles mile_7825c8a2 and mile_7fbc61c8 formally corrected, synced, and committed in 5b1bd266e; reproducible fallback assets included. HTTP and Chrome live readback both passed on 2026-07-16: correction banners visible, 5/2 article images loaded, no horizontal overflow. Claude main thread only: use K1259-gated canonical knowledge writer to supersede k1396_har_rv_vs_a4f_paper9_c4; verdict SUPERSEDED, superseded_by K1379, withdraw canonical HAR-RV/exact-K988/parity/non-inferiority/nested raw-DM/small-gap claims.",
-    "handoff_at": "2026-07-15T19:39:56.129456+00:00"
+    "handoff_at": "2026-07-15T19:39:56.129456+00:00",
+    "completed_at": "2026-07-19T05:45:59.782944+00:00",
+    "result": "audit confirmed: experiment-side repair done 2026-07-16 (README SUPERSEDED + scope_audit + certification); both articles mile_7825c8a2/mile_7fbc61c8 already published as corrections; remaining gap was knowledge entry 9741caaf still carrying 'HAR-RV non-inferiority PASS' — revised via canonical writer (title+body withdrawn/relabeled, superseded by K1379), synced to remote, committed.",
+    "burst_reported_at": "2026-07-19T05:45:59.795678+00:00"
   },
   {
     "id": "ci-red-29399240558",
@@ -36930,7 +36945,7 @@
     "description": "Codex primary review 2026-07-17 判 FAIL（全文 storage/ops/k1708_codex_review_20260717.md）。已確認為真：兩個原始 BLOCKER 真修好、CW 公式正確、NULL 由現行數字機械重算得出、provenance 三項對上凍結程式碼。**不要重跑全樣本、不要 merge worktree、不要為了過 gate 動數字。**\n\n三個 BLOCKER，分兩類：\n(A) 機械 bug，可直接修 — K1708.py:1941-1968 derive_verdict 沒實作宣告的跨市場條件：只讀 TAIFEX 的 QLIKE/CW，第二個市場只要 status=='OK' 就算 qualified、不需任何改善；Codex 實測最小 payload（SPY=OK 無 metrics、只有 TAIFEX 過）回傳 SUPPORTED = 假陽性路徑。亦未檢查 README.md:246-251 宣告的 GW / MCS / regime consistency。修法：讓 qualified 條件真的要求該市場有 admissible metrics 且達成宣告的改善，並補上宣告卻未實作的檢查；加一個會對舊邏輯失敗的非空洞 regression test（用 Codex 那個最小 payload 當種子）。本 run 的 NULL 不受影響（SPY/QQQ 為 FAIL_NO_DATA），修完應仍為 NULL — 若 label 變了就是修錯。\n(B) 推論設計，需研究判斷後才動 code — K1708.py:1394-1405 CW 被套用在「被評分的 level forecast 上並非精確 nested」的比較（HAR_FIXED 每日重估 β/σ²，KF/HARSL 每 252 日 refit 且σ² 不同，差異經 exp(mu+var/2) 進入預測；README.md:280-306 自己承認 δ=1 ≠ HAR_FIXED）；以及 K1708.py:1952-1960 把事前 DM-HLN |t|>=3 換成「三模型任一 CW 單尾 5%」且無 multiple-testing correction，方向一致時明顯較寬 = verdict-shopping 風險（揭露誠實，但不使較寬 gate 等價）。這兩條要先決定「哪個比較才真的 nested」與「哪個 gate 治理 verdict」，再改 code + README，不可反向配合現有數字。\n\n完成條件：(A) 修好 + 非空洞 test + 全套 test 綠、(B) 有明確方法論決定並寫進 README；然後才回到 Codex re-review → merge → 寫 knowledge（NULL 據實記錄）。worktree: .claude/worktrees/dispatch-slot-2-8dda242d-k1708（禁 force-remove）。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "tags": [
       "experiment",
       "k1708",
@@ -36942,9 +36957,6 @@
     "created_at": "2026-07-17T00:20:51.770447+00:00",
     "parent_task_id": "k1708_stage3_codex_review_merge_20260717",
     "dispatch_lane": "agent",
-    "claimed_by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615",
-    "claimed_at": "2026-07-19T03:46:17.812465+00:00",
-    "claim_session_id": "71d88edd9a8b",
     "status_history": [
       {
         "ts": "2026-07-19T03:46:17.812481+00:00",
@@ -36957,9 +36969,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      },
+      {
+        "ts": "2026-07-19T05:50:06.077176+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-19T03:49:01.899010+00:00"
+    "started_at": "2026-07-19T03:49:01.899010+00:00",
+    "last_released_at": "2026-07-19T05:50:06.077166+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "telegram-894",
@@ -37200,14 +37221,11 @@
     "description": "背景：assign_09984c91 修好 refresh_paper_snapshots.py 的並行 double-append 後，發現污染範圍不只 K1685 指出的 1 檔 —— 6 篇 paper 共 9 個 live snapshot 全數在 2026-05-04..05-15 被重複 append 10 天（byte-identical，同一次事故）。\n\n污染窗：git history 顯示 3ea7dbb9d (2026-05-04) 乾淨、f1bdea2d1 (2026-05-20) 已有 dup，至今日修復為止約 2 個月。期間任何讀這些 CSV 的 consumer 都會拿到序列中間多 10 天重複列 —— 對 rolling estimation / OOS split 而言不只是多 10 筆，是 05-04 之後的整條時間軸位移。\n\n受影響檔（已修復，surviving rows byte-identical，見 fire receipt）：\n  paper/garch-x-vix/data/{spy_vix_qqq_eem_fez_2000-2026,gld_vix_gvz_2000-2026,uso_vix_ovx_2005-2026}.csv\n  paper/leverage-direction/data/{spy_vix_2004-2026,spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026,vix_daily}.csv\n  paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv\n  paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv\n  paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv\n\n要做的事：\n1. 盤點 2026-05-20 後跑過、且 OOS 期間涵蓋 2026-05-04 之後、且直接讀上列 CSV（非自帶 pinned snapshot）   的實驗 / paper results。已知讀檔者：paper/garch-x-vix/reproduce.py、paper/garch-x-vix/scripts/summary_stats.py、   experiments/{k1392,K1380_v4,k1393,K1394,k1489,k1662,k1585}。\n2. 對每一個判定「是否受影響」：多數 consumer 沒有 drop_duplicates，需逐一確認。   K1685 用自己的 pinned data/k1685_spy_vix_snapshot.csv，初判不受影響 —— 仍請覆核。\n3. 受影響者在修好的 snapshot 上重跑，比對數字是否改變；有變動且已發表 / 在審 → 回報並修正。\n4. 誠實記錄：沒受影響也要寫明判定依據，不要只列受影響的。\n\n禁止：假設『反正只有 10 天、影響很小』就跳過重跑 —— 那是猜測不是驗證。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "source": "user",
     "created_at": "2026-07-17T03:13:54.767921+00:00",
     "parent_task_id": "assign_09984c91",
     "created_by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87",
-    "claimed_by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615",
-    "claimed_at": "2026-07-19T03:46:18.047968+00:00",
-    "claim_session_id": "869e4b07a711",
     "status_history": [
       {
         "ts": "2026-07-19T03:46:18.047984+00:00",
@@ -37220,9 +37238,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615"
+      },
+      {
+        "ts": "2026-07-19T05:50:06.077186+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-19T03:49:02.140503+00:00"
+    "started_at": "2026-07-19T03:49:02.140503+00:00",
+    "last_released_at": "2026-07-19T05:50:06.077184+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "email-12125-0e04bd",
@@ -38701,7 +38728,7 @@
     "title": "K1732: ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（EFA/EEM/EWJ/EWG/EWZ/INDA/XLK/XLF）事件窗，檢定 ETF-heavy 標的是否在宏觀 ",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 603). Original: ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（EFA/EEM/EWJ/EWG/EWZ/INDA/XLK/XLF）事件窗，檢定 ETF-heavy 標的是否在宏觀 shock 日更快反映資訊但後續 co-volatility / reversal 更強（來源：JPM 2025 ETF macroefficiency + JFM 2025 ETF-based fragility）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1732.py with signal.shift(1) + seed=42, (c) K1732_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38710,7 +38737,24 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-18T00:00:01Z"
+    "created_at": "2026-07-18T00:00:01Z",
+    "status_history": [
+      {
+        "ts": "2026-07-19T05:51:29.999640+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main-interactive"
+      },
+      {
+        "ts": "2026-07-19T05:51:30.250485+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-interactive"
+      }
+    ],
+    "completed_at": "2026-07-19T05:51:30.250478+00:00",
+    "result": "duplicate: topic already completed 2026-06-14 as experiments/k_etf_vs_etf_fragility_2026_06_14 (Codex PASS, reduced-form support with caveats). Backlog auto-regenerated it because research_program.md line was never checked off — now checked. K-id collision with boss-assigned k1732 (TAIEX CF-VaR) repaired via kid_reserve reassign (1732=consumed, 1740=released).",
+    "burst_reported_at": "2026-07-19T05:51:30.259948+00:00"
   },
   {
     "id": "K1733",
@@ -41082,11 +41126,29 @@
     "id": "assign_price_cache_0050_split_break",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "hourly_dispatch_finding",
     "created_at": "2026-07-19T06:45:00+08:00",
     "title": "price_cache 0050.TW 2014-01-02 未回溯調整的 4.01x 斷點修復 + 全 repo 影響盤點",
-    "description": "本班 slot-2 寫 trending_repost 台股融資題時，writer agent 發現並經主線程獨立覆核：data/cache/price_cache.db 的 0050.TW 在 2014-01-02 有未回溯調整的 4.01 倍價格斷點（2013-12-31 close 58.70 → 2014-01-02 close 14.6375；adj_close 亦同：37.41 → 9.33，亦即 adj_close 並未修正此斷點）。影響：任何跨 2014-01-02 的 0050 長樣本 rolling / realized-vol / 報酬序列都被污染。實測 writer 第一版分析中 RV persistence 相關係數被壓到 0.017，改由 2014-01-02 起算後才正常。待辦：(1) 確認 0050 該日是否真有分割或為資料源錯誤；(2) 修復 cache 或加 as-of 調整層；(3) 全 repo 盤點哪些既有 experiments / paper 用了跨此日期的 0050 長樣本並評估是否需重跑；(4) 檢查 price_cache 其他 ticker 是否有同類斷點（建議寫成通用 split-break 偵測器）。證據：storage/article_assets/tw-margin-vol-leadlag/evidence.json 的 known_defect 欄位。"
+    "description": "本班 slot-2 寫 trending_repost 台股融資題時，writer agent 發現並經主線程獨立覆核：data/cache/price_cache.db 的 0050.TW 在 2014-01-02 有未回溯調整的 4.01 倍價格斷點（2013-12-31 close 58.70 → 2014-01-02 close 14.6375；adj_close 亦同：37.41 → 9.33，亦即 adj_close 並未修正此斷點）。影響：任何跨 2014-01-02 的 0050 長樣本 rolling / realized-vol / 報酬序列都被污染。實測 writer 第一版分析中 RV persistence 相關係數被壓到 0.017，改由 2014-01-02 起算後才正常。待辦：(1) 確認 0050 該日是否真有分割或為資料源錯誤；(2) 修復 cache 或加 as-of 調整層；(3) 全 repo 盤點哪些既有 experiments / paper 用了跨此日期的 0050 長樣本並評估是否需重跑；(4) 檢查 price_cache 其他 ticker 是否有同類斷點（建議寫成通用 split-break 偵測器）。證據：storage/article_assets/tw-margin-vol-leadlag/evidence.json 的 known_defect 欄位。",
+    "claimed_by": "hourly-slot-3-c4b019c6a4d147b4a1f2316f535c6d8f",
+    "claimed_at": "2026-07-19T05:53:57.628683+00:00",
+    "claim_session_id": "c616283035cb",
+    "status_history": [
+      {
+        "ts": "2026-07-19T05:53:57.628703+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-c4b019c6a4d147b4a1f2316f535c6d8f"
+      },
+      {
+        "ts": "2026-07-19T05:53:58.110878+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-c4b019c6a4d147b4a1f2316f535c6d8f"
+      }
+    ],
+    "started_at": "2026-07-19T05:53:58.110863+00:00"
   },
   {
     "id": "member_qa_3e258ba2_research_write",
@@ -42269,11 +42331,35 @@
     "description": "由 assign_87bae720（worktree harvest wave 1）衍生。wave 1 已把 4 個 clean-but-unmerged\nworktree（9 commits）正規合併並回收 checkout。剩下的 9 個 stale worktree 是**另一種**卡法：\nreclaim_stale_worktrees.py 判定 `dirty — 有未提交工作，保留待人工裁決`，因此永遠不會自動回收，\n每班 dispatch report 都重報一次。\n\n待裁決（idle 皆 >17h；unmerged 欄位為「已 commit 但未進 main」的數量）：\n- codex-desktop-k1707                    idle 76h  unmerged 4  branch codex/k1707-pseudo-stress\n- dispatch-slot-1-1533dcbc-cqamend       idle 110h unmerged 2  branch ops/compute-queue-amend\n- dispatch-slot-1-30aeb902-taifexrv      idle 41h  unmerged 3\n- dispatch-slot-1-558d7893-k1730         idle 17h  unmerged 1\n- dispatch-slot-1-79726798-credit-firm   idle 36h  unmerged 0\n- dispatch-slot-1-b55db3be-2             idle 109h unmerged 0  branch fix/dispatch-slot-1-b55db3be-brief-leak\n- dispatch-slot-1-f53bca44-k1692         idle 99h  unmerged 0\n- dispatch-slot-1-f53bca44-k1694         idle 99h  unmerged 0\n- dispatch-slot-2-8dda242d-k1708         idle 54h  unmerged 0（另有 in_progress 任務 k1708_fix_verdict_gate_20260717，先確認不衝突）\n\n做法（一次一個，禁批次盲跑）：\n1. 進該 worktree 看 `git status` 的髒檔究竟是什麼 —— 區分 (a) 真成果未 commit (b) 執行殘渣／快取／\n   .pyc／log (c) 被中斷的半成品。\n2. (a) → 走正式 bash scripts/merge_worktree.sh（它會 auto-commit 再合併），套\n   worktree-merge-verification skill 驗證檔案落地。\n3. (b) → 補 .gitignore 或直接視為可丟棄，記錄在 work_log 說明丟了什麼。\n4. (c) → 判斷該 K 是否仍有價值；沒價值就記錄放棄理由，不要留著繼續占 slot。\n5. 全部處理完再跑 reclaim_stale_worktrees.py --apply 回收 checkout（branch 一律保留）。\n\n預期效益：現在 .claude/worktrees 共 52G / 18 個目錄，這 9 個 stale 約佔一半磁碟；\n且它們持續讓 dispatch slot occupancy 顯示為滿（occupied 9/4 → free=0），agent lane 整個派不出工。\n",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "system",
     "created_at": "2026-07-19T13:30:35.097860+08:00",
     "parent_task_id": "assign_87bae720",
-    "created_by": "hourly-slot-2-14bbc35a2051409480657ccdff8befbe"
+    "created_by": "hourly-slot-2-14bbc35a2051409480657ccdff8befbe",
+    "status_history": [
+      {
+        "ts": "2026-07-19T05:49:42.021421+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-a5298474deaa4f8e81169256d64d5940"
+      },
+      {
+        "ts": "2026-07-19T05:49:42.271336+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-a5298474deaa4f8e81169256d64d5940"
+      },
+      {
+        "ts": "2026-07-19T05:55:19.979963+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-a5298474deaa4f8e81169256d64d5940"
+      }
+    ],
+    "started_at": "2026-07-19T05:49:42.271322+00:00",
+    "completed_at": "2026-07-19T05:55:19.979951+00:00",
+    "result": "wave2 處理 2/9：K1692 確認為已 salvage 的冗餘副本（sha256 比對 results/README 位元相同）已清空；K1694 為真半成品，腳本+資料收進 canonical (d8e777d19) 並標 INCOMPLETE 禁引用，建重跑 followup；k1708 由 slot-1 持有未動；另發現 merge_worktree.sh K1262-v4 誤判會合 47 個跨分支 commit，已建 P2 task。剩餘 6 個 worktree 留 pool。",
+    "burst_reported_at": "2026-07-19T05:55:19.993712+00:00"
   },
   {
     "id": "assign_de5398c8",
@@ -42281,20 +42367,84 @@
     "description": "前置已完成（2026-07-19 main）：src/volpred/data/event_dates.py 已根修（per-month min() + 13-110d cadence fail-closed；6 個問題月份 live 驗證 6/6 正確；commit 見 git log 'fix(event_dates)'）。剩餘工作：(1) 把同一修正套進 worktree dispatch-slot-3-30adeed7-k528nfp 的 src/volpred/data/event_dates.py 副本（或 rebase）；(2) 用正確日曆重跑 k528_nfp_event_study.py official-dates 分析（Codex 已預算：NFP-vs-Friday 約 1.178x p~0.0249，顯著性不翻轉）；(3) 依新 results 重生 build_article_correction.py 的更正清單（原 18 條作廢禁用）；(4) 處理 Codex v2 findings 4-8（fail-closed 補強已在 main 完成、Friday baseline estimand、原子寫入、PROXY_SUPERSEDED metadata、方向性敘述）；(5) Codex 三審至 PASS 才可 merge + 套文章更正。參考：worktree experiments/k528/codex_review_v2.md（FAIL, 3 blockers）+ review_verdict.json。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
-    "created_at": "2026-07-19T05:31:50.506572+00:00"
+    "created_at": "2026-07-19T05:31:50.506572+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-19T05:43:50.466272+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-20ac4f92c19246138b08d6dcfe283faf"
+      },
+      {
+        "ts": "2026-07-19T05:44:21.134177+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-20ac4f92c19246138b08d6dcfe283faf"
+      },
+      {
+        "ts": "2026-07-19T05:45:39.457083+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-20ac4f92c19246138b08d6dcfe283faf"
+      }
+    ],
+    "started_at": "2026-07-19T05:44:21.134162+00:00",
+    "completed_at": "2026-07-19T05:45:39.457052+00:00",
+    "result": "派工完成：worktree dispatch-slot-3-30adeed7-k528nfp 的 v3 rerun 已 enqueue 為 agent job agent-brief_k528_rerun_v3-6e4286（opus/xhigh, timeout 5400s）。brief 涵蓋 Codex v2 三個 BLOCKER（同步 main 根修 305d118a3 的 per-month min() + 13-110d fail-closed、用正確日曆重跑、18 條更正作廢重生）與 findings 4-8（fail-closed 補完、Friday baseline estimand、方向性敘述、原子寫入、PROXY_SUPERSEDED metadata），並要求 Codex 三審 PASS 才可 merge。實際研究結果由該 job 產出，收件走 PHASE A followup（followup task 已註冊）。",
+    "burst_reported_at": "2026-07-19T05:45:39.479982+00:00"
   },
   {
     "id": "ci-red-k1719-unrecorded-knowledge",
     "task_type": "platform_ops",
     "priority": 1,
     "source": "hourly-slot-1",
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "main_thread",
     "dispatch_preempt": true,
     "created_at": "2026-07-19T13:52:00+08:00",
     "title": "CI 紅燈：k1719 有 archived results 但無 knowledge.json 條目（unrecorded-ratchet）",
-    "description": "scripts/tests/test_knowledge_unrecorded_ratchet.py 失敗：experiments/k1719 有 k1719_results.json 但 knowledge.json 無任何 k1719 條目。\n時序：2026-07-19 13:14 該測試在本 checkout 仍為綠，13:38 轉紅 —— k1719 結果是在這區間內由其他 session/worktree 併入 main 的（另有 idle 63h 的 .claude/worktrees/dispatch-slot-1-a56566ff-k1719）。\n與同日 13:07 班處理的 ci-red-29672635000 是同一 class 的新實例（該班兩個根因：k1732 缺條目已於 commit 4b3875b05 補上；tests/test_task_pool_claim.py burst-fire 觸及 canonical dispatch_state.json 已於本班修好）。\n動作：主線程讀 experiments/k1719/ 的 results + review verdict，寫 knowledge.json 條目（agent 不得寫 — K1259），數字直讀 results.json 不得轉述；k1719 另缺 reproduce_spec.json（classification=unverified_missing_spec），一併評估是否補。修完跑 uv run --extra dev python -m pytest scripts/tests/test_knowledge_unrecorded_ratchet.py 驗綠。"
+    "description": "scripts/tests/test_knowledge_unrecorded_ratchet.py 失敗：experiments/k1719 有 k1719_results.json 但 knowledge.json 無任何 k1719 條目。\n時序：2026-07-19 13:14 該測試在本 checkout 仍為綠，13:38 轉紅 —— k1719 結果是在這區間內由其他 session/worktree 併入 main 的（另有 idle 63h 的 .claude/worktrees/dispatch-slot-1-a56566ff-k1719）。\n與同日 13:07 班處理的 ci-red-29672635000 是同一 class 的新實例（該班兩個根因：k1732 缺條目已於 commit 4b3875b05 補上；tests/test_task_pool_claim.py burst-fire 觸及 canonical dispatch_state.json 已於本班修好）。\n動作：主線程讀 experiments/k1719/ 的 results + review verdict，寫 knowledge.json 條目（agent 不得寫 — K1259），數字直讀 results.json 不得轉述；k1719 另缺 reproduce_spec.json（classification=unverified_missing_spec），一併評估是否補。修完跑 uv run --extra dev python -m pytest scripts/tests/test_knowledge_unrecorded_ratchet.py 驗綠。",
+    "claimed_by": "hourly-slot-1-20ac4f92c19246138b08d6dcfe283faf",
+    "claimed_at": "2026-07-19T05:46:23.702595+00:00",
+    "claim_session_id": "c7558c3652ab",
+    "status_history": [
+      {
+        "ts": "2026-07-19T05:46:23.702608+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-20ac4f92c19246138b08d6dcfe283faf"
+      },
+      {
+        "ts": "2026-07-19T05:46:23.952872+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-20ac4f92c19246138b08d6dcfe283faf"
+      }
+    ],
+    "started_at": "2026-07-19T05:46:23.952860+00:00"
+  },
+  {
+    "id": "k1694_rerun_after_salvage_20260719",
+    "title": "K1694 重跑：FCM 清算集中度 HHI 與商品流動性風險（搶救回的半成品，零結果）",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-07-19T13:54:38.850847+08:00",
+    "source": "worktree_harvest_wave2_dirty_stale_20260719",
+    "topology": "compute_queue",
+    "description": "K1694 的腳本與資料已於 2026-07-19 從 stale worktree dispatch-slot-1-f53bca44-k1694 搶救進 canonical（commit d8e777d19），但**沒有任何結果產出** —— 見 experiments/K1694/README.md 的 INCOMPLETE 標記。\n\n背景陷阱：task pool 裡 id=K1694 的 status 是 succeeded，但 result=null；那個 succeeded 指的是「派工成功」不是「實驗成功」。不要因為看到 succeeded 就跳過。\n\n要做的：\n1. 跑通 experiments/K1694/K1694.py，產出 K1694_results.json + 圖\n2. 重點驗證 CFTC 發布日 lag 是否按**實際發布日**對齊（原 brief 核心設計，從未驗證）\n3. Codex primary-path review → review_verdict.json\n4. PASS 才寫 knowledge entry；FAIL 就記錄並收掉，不要留著再占 slot\n\n資料已在版控（fcm_monthly 151 列 / dcot_weekly 23,057 列 / rv_monthly 5,644 列），不需重抓。"
+  },
+  {
+    "id": "merge_worktree_k1262v4_overtrigger_20260719",
+    "title": "merge_worktree.sh 的 K1262-v4 防護誤判 → 會把 47 個跨分支 commit 合進 main",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-19T13:54:38.850847+08:00",
+    "source": "worktree_harvest_wave2_dirty_stale_20260719",
+    "topology": "subagent",
+    "description": "2026-07-19 harvest wave 2 實測發現的工具危險行為（尚未造成事故，因為只跑了 --dry-run）。\n\n重現：bash scripts/merge_worktree.sh --dry-run dispatch-slot-1-f53bca44-k1692\n\n發生什麼：\n- rev-list 正確回報該 branch 有 0 個自有 commit\n- 但 K1262-v4 的 file-presence diff 看到 worktree 有 3 個 main 沒有的檔案：.claude/settings.local.json、scripts/_legacy/weekly_quota_estimate.py、storage/ops/event_ledger/<hash>.json —— 這三個是 gitignore 級/搬移級/runtime 級噪音，不是實驗成果\n- 於是判定 rev-list false negative，改從 `git log --all` 重建 commit list = **47 個 commits**\n- 那 47 個是**整個 repo 所有分支**的 commit，包含其他 worktree 進行中的 K1731 rev7、K528 NFP 重跑、snapshot audit，以及 `bad: new silent fallback` / `base: clean tree` 這類測試 fixture commit\n\n危害：對一個實際上零自有 commit 的 worktree 跑非 dry-run，會把別人未完成的工作和測試 fixture 一起 cherry-pick 進 main。\n\nK1262-v4 的防護意圖是對的（K1618 曾因信 rev-list false negative 而砍掉未合併成果），問題在 fallback 的**取代範圍**：偵測到可疑就整個換成 `git log --all`，等於用全 repo 換掉單 branch。合理修法方向（待評估，勿直接照抄）：\n- file-presence diff 忽略 gitignore/runtime/_legacy 類路徑，降低誤判率\n- fallback 的 commit 來源限縮在該 branch 的 reflog / merge-base 之後，不要用 --all\n- 或在 fallback 觸發時 fail-closed 要求人工確認，而不是自動擴大範圍\n\n動工前先讀 scripts/merge_worktree.sh 開頭那段 K1618/K1262 的歷史註解，別把舊防護改掉。"
   }
 ]

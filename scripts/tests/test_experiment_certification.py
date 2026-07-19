@@ -213,8 +213,8 @@ def test_canonical_mdd_companion_can_be_certified_with_system_python(
     tmp_path: Path,
 ) -> None:
     _init_candidate_repo(tmp_path)
-    exp = _experiment(tmp_path, kid="k9996")
-    (exp / "k9996.py").write_text(K1695_CANONICAL_FIXTURE, encoding="utf-8")
+    exp = _experiment(tmp_path, kid="k1696")
+    (exp / "k1696.py").write_text(K1695_CANONICAL_FIXTURE, encoding="utf-8")
     _certify(exp, "PASS")
 
     proc = _isolated_certify(exp)
@@ -445,3 +445,35 @@ def test_certify_cli_is_stdlib_only(tmp_path: Path) -> None:
 
     assert isolated.returncode == 0, isolated.stderr
     assert "PASS" in isolated.stdout
+
+
+def test_kid_registry_gate_blocks_unreserved_new_kid(tmp_path, monkeypatch):
+    """K1719/k1732 collision class: numeric kids >= enforce floor must exist in
+    the canonical registry; hand-picked ids get blocked at certify time."""
+    import json as _json
+    import experiment_gates as eg
+
+    reg = tmp_path / "k_id_registry.json"
+    reg.write_text(_json.dumps({
+        "last_k_id": 9998,
+        "reservations": [{"k_id": "K9998", "number": 9998, "status": "reserved"}],
+    }))
+    monkeypatch.setattr(eg, "_canonical_registry_path", lambda: reg)
+
+    reserved = tmp_path / "k9998"
+    reserved.mkdir()
+    assert eg._kid_registry_violations(reserved) == []
+
+    unreserved = tmp_path / "k9999"
+    unreserved.mkdir()
+    violations = eg._kid_registry_violations(unreserved)
+    assert len(violations) == 1
+    assert violations[0].gate == "kid-registry"
+
+    legacy = tmp_path / "k100"
+    legacy.mkdir()
+    assert eg._kid_registry_violations(legacy) == []
+
+    named = tmp_path / "member_qa_abc"
+    named.mkdir()
+    assert eg._kid_registry_violations(named) == []
