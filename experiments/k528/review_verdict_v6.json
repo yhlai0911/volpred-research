@@ -1,0 +1,19 @@
+{
+  "kid": "k528",
+  "verdict": "FAIL",
+  "reviewer": "Codex gpt-5.6-sol / high",
+  "reviewed_at": "2026-07-19T17:20:00+08:00",
+  "reviewed_commit": "3098ad5b5",
+  "review_artifact": "experiments/k528/codex_review_v6.md",
+  "blocking_defects": [
+    "completeness could be bypassed by putting a tail month into KNOWN_MISSING_MONTHS (which made the raw->selected check skip it) while the counter-check that would expose the false claim only scanned the selected span; adding the month to REVIEWED_MULTI_ENTRY_MONTHS as well kept it accepted"
+  ],
+  "reviewed_sha256": {
+    "README.md": "a5c071445754cfeff8e247ed81d25da9772be6fccf297b8816bf720586582cc6",
+    "build_article_correction.py": "ae2bf6191444b3cfb0ff5af2bfbb53fb80398c691387e48b8cc3ebc5d49ddb63",
+    "k528_nfp_event_study.py": "f6d80219afc8a2ed586e4bda863d3f1a324379344b55fd2bc5618f092f574f5e",
+    "k528_nfp_event_study_results.json": "9eb72ebe21af86dd3e7bed632493d2b25af5e367a30b98b17e6e5ef2aab056e3",
+    "k528_nfp_official_dates_results.json": "89907216c5f556afc43d9c10f4f95aa908e2f53222085b3f9a5b8fbf174f6cfb"
+  },
+  "note": "Historical record of round 4 of the third-review cycle. Superseded by the next round."
+}

@@ -274,12 +274,31 @@ def check_calendar_is_complete(selected, raw, start, end):
     # a live raw fetch is exactly that shape) and neither the gap check nor the
     # window-coverage check sees it -- the observed span just ends one month
     # earlier and still looks continuous.
-    dropped = sorted(set(raw_by_month) - set(sel_months) - set(KNOWN_MISSING_MONTHS))
+    # UNCONDITIONAL: no KNOWN_MISSING_MONTHS subtraction here. If the raw feed has
+    # entries for a month, that month is not missing -- whatever a list says. The
+    # earlier version subtracted the allowlist, which let a tail month be dropped
+    # from the selection and then excused by declaring it "known missing", while
+    # the counter-check that would have caught the lie only looked inside the
+    # selected span (Codex v3 round-4 BLOCKER).
+    dropped = sorted(set(raw_by_month) - set(sel_months))
     if dropped:
         raise RuntimeError(
             f"the raw feed has {len(dropped)} month(s) that the selected calendar does not: "
             f"{dropped}. A month present at the source and absent from the analysis is a "
-            "silently shortened sample."
+            "silently shortened sample. This is not excusable via KNOWN_MISSING_MONTHS: "
+            "that list is for months the source never published."
+        )
+
+    # The two allowlists must not overlap. "This month published nothing" and
+    # "this month published several entries I reviewed" cannot both be true, and
+    # allowing both is what turned two independently-reasonable lists into a
+    # bypass when combined.
+    both = sorted(set(KNOWN_MISSING_MONTHS) & set(REVIEWED_MULTI_ENTRY_MONTHS))
+    if both:
+        raise RuntimeError(
+            f"month(s) {both} appear in both KNOWN_MISSING_MONTHS and "
+            "REVIEWED_MULTI_ENTRY_MONTHS. A month cannot both have published nothing and "
+            "have a reviewed multi-entry shape."
         )
 
     # 3a: the observed span must actually cover what was asked for. Checking only
@@ -315,7 +334,9 @@ def check_calendar_is_complete(selected, raw, start, end):
     # 4: a claimed hole must actually be a hole in the RAW feed. Without this the
     # allowlist is a bypass: any month could be declared 'known missing' and the
     # check would stop looking at it.
-    bogus = sorted(m for m in KNOWN_MISSING_MONTHS if m in span and raw_by_month.get(m))
+    # Scan the WHOLE allowlist, not just the part inside the observed span: a
+    # claim about a month outside the span is exactly the one nobody re-checks.
+    bogus = sorted(m for m in KNOWN_MISSING_MONTHS if raw_by_month.get(m))
     if bogus:
         raise RuntimeError(
             f"KNOWN_MISSING_MONTHS claims {bogus} published nothing, but the raw feed has "
@@ -850,8 +871,9 @@ for c in conclusions:
     print(f"  • {c}")
 
 print(f"\n  Practical implication:")
-print(f"    → Entry VIX regime is the larger and more reliably measured effect "
-      f"({high_vix.mean()/low_vix.mean():.2f}x, p={p_regime:.4g})")
+print(f"    → The VIX-regime gap is the largest number here "
+      f"({high_vix.mean()/low_vix.mean():.2f}x, p={p_regime:.4g}) -- largest number, "
+      f"NOT a tested ranking: different samples, different controls, in-sample median split")
 print(f"    → The NFP-day effect is smaller; mean and rank tests do not agree on it, "
       f"so it is not established either way")
 print(f"    → Non-significance of a mean test is not evidence of no effect")
@@ -1047,6 +1069,20 @@ record(
         "median_ratio": float(np.median(proxy_nfp_friday_abs) / np.median(proxy_fri_abs)),
         "win_rate": win_rate(proxy_nfp_friday_abs, proxy_fri_abs),
         "n_control_friday": int(len(proxy_fri_abs)),
+        # Recorded so the control count can be DERIVED in a test rather than
+        # restated: a regression that re-leaks one Friday while wrongly dropping
+        # another leaves the count unchanged (Codex v3 round-4 finding 2).
+        "control_derivation": {
+            "n_fridays_in_sample": int((spy.index.weekday == 4).sum()),
+            "n_friday_proxy_events": int((_p_weekday == 4).sum()),
+            "reconstructed_sessions_excluded": _leak_sessions,
+            "n_reconstructed_friday_sessions": int(
+                sum(1 for d in _proxy_extra_sessions if d.weekday() == 4)
+            ),
+            "excluded_session_is_absent_from_controls": bool(
+                not set(_proxy_extra_sessions) & set(proxy_non_nfp.index)
+            ),
+        },
         "estimand": "Friday NFP sessions vs Friday non-NFP sessions (weekday held fixed)",
         "as_published_mixed_weekday": {
             "mean_ratio": proxy["main_results"]["vol_ratio_vs_friday"],

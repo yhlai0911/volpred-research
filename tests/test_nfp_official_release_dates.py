@@ -585,13 +585,24 @@ class TestControlGroupHasNoNfpDays:
         assert _first_friday(2005, 1).isoformat() == "2005-01-07"
 
         before = _load_k528(K528_AUDIT)["items"]["vol_ratio_vs_friday"]["before"]
-        # Fridays in the sample, minus archived Friday events, minus that one
-        # reconstructed session -- computed here, not copied from the artifact.
         n_friday_events_archived = sum(
             1 for d in archived if pd.Timestamp(d).weekday() == 4
         )
         assert before["n"] == n_friday_events_archived == 239
-        assert before["n_control_friday"] == 832
+
+        # DERIVE the control count from independently recorded inputs. Asserting
+        # 832 alone passes for a regression that re-leaks 2005-01-07 while
+        # wrongly excluding some other Friday.
+        der = before["control_derivation"]
+        assert der["n_fridays_in_sample"] == 1072, "pinned Friday count for this sample"
+        expected = (
+            der["n_fridays_in_sample"]
+            - der["n_friday_proxy_events"]
+            - der["n_reconstructed_friday_sessions"]
+        )
+        assert before["n_control_friday"] == expected == 832
+        assert der["reconstructed_sessions_excluded"] == ["2005-01-07"]
+        assert der["excluded_session_is_absent_from_controls"] is True
 
     def test_proxy_before_column_uses_one_control_definition_throughout(self):
         """A `before` object whose mean comes from the leaky archive while its
@@ -677,7 +688,11 @@ class TestCalendarFailClosedCannotBeBypassed:
         faith it is just a way to make a failing check pass."""
         mod = _k528_module()
         mod.KNOWN_MISSING_MONTHS["2024-03"] = "fabricated"
-        with pytest.raises(RuntimeError, match="claims"):
+        # Either guard is a correct refusal: the raw->selected check now fires
+        # first (2024-03 is in raw but not selected), and the `claims` check
+        # backs it up. Matching only one would make this test brittle about
+        # which layer catches it rather than about it being caught.
+        with pytest.raises(RuntimeError, match="does not|claims"):
             mod.check_calendar_is_complete(
                 pd.to_datetime(["2024-01-05", "2024-02-02", "2024-04-05"]),
                 ["2024-01-05", "2024-02-02", "2024-03-08", "2024-04-05"],
@@ -708,6 +723,58 @@ class TestCalendarFailClosedCannotBeBypassed:
                 pd.to_datetime(["2024-01-05", "2024-02-02"]),
                 ["2024-01-05", "2024-02-02", "2024-03-08"],
                 "2024-01-01", "2024-03-31",
+            )
+
+    def test_allowlists_cannot_combine_to_excuse_a_dropped_month(self):
+        """Two independently reasonable lists that became a bypass together:
+        declare a tail month 'known missing' so the raw->selected check skips it,
+        and the counter-check that would catch the lie only looked inside the
+        selected span. (Codex v3 round-4 BLOCKER.)"""
+        mod = _k528_module()
+        mod.KNOWN_MISSING_MONTHS["2024-03"] = "fabricated"
+        with pytest.raises(RuntimeError, match="does not"):
+            mod.check_calendar_is_complete(
+                pd.to_datetime(["2024-01-05", "2024-02-02"]),
+                ["2024-01-05", "2024-02-02", "2024-03-08"],
+                "2024-01-01", "2024-03-31",
+            )
+
+    def test_allowlists_cannot_combine_even_with_a_reviewed_shape(self):
+        mod = _k528_module()
+        mod.KNOWN_MISSING_MONTHS["2024-03"] = "fabricated"
+        mod.REVIEWED_MULTI_ENTRY_MONTHS["2024-03"] = {
+            "raw": ["2024-03-08", "2024-03-15"], "report": "2024-03-08",
+        }
+        with pytest.raises(RuntimeError, match="does not"):
+            mod.check_calendar_is_complete(
+                pd.to_datetime(["2024-01-05", "2024-02-02"]),
+                ["2024-01-05", "2024-02-02", "2024-03-08", "2024-03-15"],
+                "2024-01-01", "2024-03-31",
+            )
+
+    def test_a_month_cannot_be_in_both_allowlists(self):
+        mod = _k528_module()
+        mod.KNOWN_MISSING_MONTHS["2024-02"] = "fabricated"
+        mod.REVIEWED_MULTI_ENTRY_MONTHS["2024-02"] = {
+            "raw": ["2024-02-02", "2024-02-09"], "report": "2024-02-02",
+        }
+        with pytest.raises(RuntimeError, match="both KNOWN_MISSING_MONTHS"):
+            mod.check_calendar_is_complete(
+                pd.to_datetime(["2024-01-05", "2024-02-02", "2024-03-08"]),
+                ["2024-01-05", "2024-02-02", "2024-02-09", "2024-03-08"],
+                "2024-01-01", "2024-03-31",
+            )
+
+    def test_known_missing_claim_is_checked_outside_the_selected_span_too(self):
+        """A claim about a month beyond the observed span is exactly the one
+        nobody re-checks."""
+        mod = _k528_module()
+        mod.KNOWN_MISSING_MONTHS["2024-04"] = "fabricated"
+        with pytest.raises(RuntimeError, match="does not|claims"):
+            mod.check_calendar_is_complete(
+                pd.to_datetime(["2024-01-05", "2024-02-02", "2024-03-08"]),
+                ["2024-01-05", "2024-02-02", "2024-03-08", "2024-04-05"],
+                "2024-01-01", "2024-04-30",
             )
 
     def test_truncated_feed_cannot_hide_behind_its_own_shrunken_span(self, check):
