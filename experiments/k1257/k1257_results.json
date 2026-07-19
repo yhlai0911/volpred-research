@@ -24,9 +24,18 @@
   "per_asset": {
     "SPY": {
       "n_oos": 1581,
-      "bma_qlike": -8.227435956662777,
-      "equal_weight_qlike": -8.20437496733921,
+      "n_common_sample": 1518,
+      "bma_qlike": -8.186392692633385,
+      "equal_weight_qlike": -8.16675102685744,
       "gjr_t_qlike": -8.135790746830748,
+      "qlike_own_sample": {
+        "bma": -8.227435956662777,
+        "equal_weight": -8.20437496733921,
+        "gjr_t": -8.135790746830748,
+        "n_bma": 1581,
+        "n_equal_weight": 1581,
+        "n_gjr_t": 1518
+      },
       "per_model_qlike": {
         "GARCH_N": -8.154045379478035,
         "GJR_N": -8.146190701632813,
@@ -34,6 +43,10 @@
         "EGARCH_N": -8.144335135176284,
         "HAR_ABS": -8.099141887473873,
         "A4f_IV2": -8.241646799418408
+      },
+      "posterior_semantics": {
+        "invalid_day_handling": "excluded_from_posterior_absorbing",
+        "note": "-inf log-weight after an invalid day is never recovered; final_weights==0.0 means 'dropped', tiny-but-nonzero means 'lost on likelihood'."
       },
       "dm_bma_vs_gjr": {
         "t_stat": -3.173938653766215,
@@ -86,24 +99,28 @@
       "regime_qlike": {
         "VIX<15": {
           "n_days": 283,
-          "bma_qlike": -9.218281135684055,
+          "n_common_sample": 236,
+          "bma_qlike": -9.149575087474872,
           "gjr_t_qlike": -9.085497962145313,
-          "equal_qlike": -9.149323351063149
+          "equal_qlike": -9.102486403556265
         },
         "15-20": {
           "n_days": 595,
-          "bma_qlike": -8.845472940469485,
+          "n_common_sample": 579,
+          "bma_qlike": -8.86338186574696,
           "gjr_t_qlike": -8.854287105511611,
-          "equal_qlike": -8.833216107870294
+          "equal_qlike": -8.847748768049605
         },
         "20-25": {
           "n_days": 355,
+          "n_common_sample": 355,
           "bma_qlike": -7.988614472712546,
           "gjr_t_qlike": -7.947400955199811,
           "equal_qlike": -7.973409005697536
         },
         ">25": {
           "n_days": 348,
+          "n_common_sample": 348,
           "bma_qlike": -6.608586634175188,
           "gjr_t_qlike": -6.488486383435704,
           "equal_qlike": -6.596363602893586
@@ -164,9 +181,18 @@
     },
     "GLD": {
       "n_oos": 1581,
+      "n_common_sample": 1581,
       "bma_qlike": -8.181168443888822,
       "equal_weight_qlike": -8.137113249478231,
       "gjr_t_qlike": -8.09042062066809,
+      "qlike_own_sample": {
+        "bma": -8.181168443888822,
+        "equal_weight": -8.137113249478231,
+        "gjr_t": -8.09042062066809,
+        "n_bma": 1581,
+        "n_equal_weight": 1581,
+        "n_gjr_t": 1581
+      },
       "per_model_qlike": {
         "GARCH_N": -8.116791287137037,
         "GJR_N": -8.095806033905006,
@@ -174,6 +200,10 @@
         "EGARCH_N": -8.089845927350694,
         "HAR_ABS": -8.067091230865335,
         "A4f_IV2": -8.188748199815198
+      },
+      "posterior_semantics": {
+        "invalid_day_handling": "excluded_from_posterior_absorbing",
+        "note": "-inf log-weight after an invalid day is never recovered; final_weights==0.0 means 'dropped', tiny-but-nonzero means 'lost on likelihood'."
       },
       "dm_bma_vs_gjr": {
         "t_stat": -3.379418886794974,
@@ -226,24 +256,28 @@
       "regime_qlike": {
         "VIX<15": {
           "n_days": 283,
+          "n_common_sample": 283,
           "bma_qlike": -8.544917946073095,
           "gjr_t_qlike": -8.49630228000812,
           "equal_qlike": -8.506880296576753
         },
         "15-20": {
           "n_days": 595,
+          "n_common_sample": 595,
           "bma_qlike": -8.283560884005555,
           "gjr_t_qlike": -8.193522316025339,
           "equal_qlike": -8.232540546866492
         },
         "20-25": {
           "n_days": 355,
+          "n_common_sample": 355,
           "bma_qlike": -8.126662046159469,
           "gjr_t_qlike": -8.079687713923189,
           "equal_qlike": -8.1191156173095
         },
         ">25": {
           "n_days": 348,
+          "n_common_sample": 348,
           "bma_qlike": -7.76589591574605,
           "gjr_t_qlike": -7.595018791827999,
           "equal_qlike": -7.691612798745476
@@ -304,9 +338,18 @@
     },
     "0050.TW": {
       "n_oos": 1524,
+      "n_common_sample": 1524,
       "bma_qlike": -7.679046170988067,
       "equal_weight_qlike": -7.69397775929242,
       "gjr_t_qlike": -7.682462845493507,
+      "qlike_own_sample": {
+        "bma": -7.679046170988067,
+        "equal_weight": -7.69397775929242,
+        "gjr_t": -7.682462845493507,
+        "n_bma": 1524,
+        "n_equal_weight": 1524,
+        "n_gjr_t": 1524
+      },
       "per_model_qlike": {
         "GARCH_N": -7.66806331024713,
         "GJR_N": -7.675993232483801,
@@ -314,6 +357,10 @@
         "EGARCH_N": -7.667318887560695,
         "HAR_ABS": -7.5779968884754725,
         "A4f_IV2": -7.6774473829611445
+      },
+      "posterior_semantics": {
+        "invalid_day_handling": "excluded_from_posterior_absorbing",
+        "note": "-inf log-weight after an invalid day is never recovered; final_weights==0.0 means 'dropped', tiny-but-nonzero means 'lost on likelihood'."
       },
       "dm_bma_vs_gjr": {
         "t_stat": 0.9798308714158287,
@@ -366,24 +413,28 @@
       "regime_qlike": {
         "VIX<15": {
           "n_days": 284,
+          "n_common_sample": 284,
           "bma_qlike": -8.068220839494519,
           "gjr_t_qlike": -8.067026383012154,
           "equal_qlike": -8.0636793991055
         },
         "15-20": {
           "n_days": 565,
+          "n_common_sample": 565,
           "bma_qlike": -7.961858957707948,
           "gjr_t_qlike": -7.971675307906155,
           "equal_qlike": -7.977760045081666
         },
         "20-25": {
           "n_days": 334,
+          "n_common_sample": 334,
           "bma_qlike": -7.4102698265086,
           "gjr_t_qlike": -7.410269829369396,
           "equal_qlike": -7.427867945792361
         },
         ">25": {
           "n_days": 341,
+          "n_common_sample": 341,
           "bma_qlike": -7.1495930000308165,
           "gjr_t_qlike": -7.149592996423162,
           "equal_qlike": -7.176524447067148
@@ -448,7 +499,7 @@
     "H2_bma_beats_equal": "FAIL",
     "H3_regime_weight_shift": "FAIL"
   },
-  "conclusions": "BMA posterior-weighted combination tested vs single-best (GJR-t) and equal-weight ensemble on SPY/GLD/0050.TW 2020-2026 OOS. Per-asset summary: SPY: BMA=-8.22744, GJR-t=-8.13579 (BMA-GJR=-0.09165, Harvey t=-3.17); Equal=-8.20437 (BMA-Eq=-0.02306, Harvey t=-1.37) | GLD: BMA=-8.18117, GJR-t=-8.09042 (BMA-GJR=-0.09075, Harvey t=-3.38); Equal=-8.13711 (BMA-Eq=-0.04406, Harvey t=-2.69) | 0050.TW: BMA=-7.67905, GJR-t=-7.68246 (BMA-GJR=+0.00342, Harvey t=+0.98); Equal=-7.69398 (BMA-Eq=+0.01493, Harvey t=+1.68). H1 verdict: PARTIAL; H2: FAIL; H3 (regime weight shift): FAIL. Research-honesty: null results reported as-is; the purpose of BMA is principled posterior weighting, not guaranteed QLIKE win. If posterior concentrates quickly on a single model, BMA effectively reduces to that model's forecast and differences vs single-best shrink.",
-  "runtime_seconds": 647.6,
+  "conclusions": "BMA posterior-weighted combination tested vs single-best (GJR-t) and equal-weight ensemble on SPY/GLD/0050.TW 2020-2026 OOS. Per-asset summary: SPY: n_common=1518, BMA=-8.18639, GJR-t=-8.13579 (BMA-GJR=-0.05060, Harvey t=-3.17); Equal=-8.16675 (BMA-Eq=-0.01964, Harvey t=-1.37) | GLD: n_common=1581, BMA=-8.18117, GJR-t=-8.09042 (BMA-GJR=-0.09075, Harvey t=-3.38); Equal=-8.13711 (BMA-Eq=-0.04406, Harvey t=-2.69) | 0050.TW: n_common=1524, BMA=-7.67905, GJR-t=-7.68246 (BMA-GJR=+0.00342, Harvey t=+0.98); Equal=-7.69398 (BMA-Eq=+0.01493, Harvey t=+1.68). H1 verdict: PARTIAL; H2: FAIL; H3 (regime weight shift): FAIL. All headline QLIKE figures are computed on the common valid days shared by BMA / Equal / GJR-t (n_common per asset above), the same sample the Harvey t is built from; per-series own-sample means are kept separately under qlike_own_sample. Research-honesty: null results reported as-is; the purpose of BMA is principled posterior weighting, not guaranteed QLIKE win. Posterior concentration is not hypothetical here \u2014 on every asset the terminal posterior puts ~1.0 on a single model, so BMA is in practice that model's forecast and the gap vs single-best is a statement about which model the posterior picked, not about combination gains. Invalid-day exclusion is absorbing (see posterior_semantics): a model dropped after a non-converged refit cannot regain weight.",
+  "runtime_seconds": 369.6,
   "quick_mode": false
 }
