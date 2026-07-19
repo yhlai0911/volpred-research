@@ -165,7 +165,7 @@ def main() -> int:
         ("T5 Elevated NFP mean abs", 1.046, nfp_reg["Elevated (20-25)"]["mean_abs_return_pct"], 1.0, "k741c.part_b_vix_regimes.Elevated.mean_abs_return_pct"),
         ("T5 Elevated NFP ratio", 1.19, nfp_reg["Elevated (20-25)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.Elevated.ratio"),
         ("T5 Elevated NFP t", 1.14, nfp_reg["Elevated (20-25)"]["t_stat"], 3.0, "k741c.part_b_vix_regimes.Elevated.t_stat"),
-        ("T5 Elevated NFP p", 0.254, nfp_reg["Elevated (20-25)"]["p_value"], 2.0, "k741c.part_b_vix_regimes.Elevated.p_value"),
+        ("T5 Elevated NFP p", 0.253, nfp_reg["Elevated (20-25)"]["p_value"], 1.0, "k741c.part_b_vix_regimes.Elevated.p_value"),
         ("T5 High NFP n", 28.0, float(nfp_reg["High (VIX>=25)"]["n"]), 0.0, "k741c.part_b_vix_regimes.High.n"),
         ("T5 High NFP mean abs", 1.417, nfp_reg["High (VIX>=25)"]["mean_abs_return_pct"], 1.0, "k741c.part_b_vix_regimes.High.mean_abs_return_pct"),
         ("T5 High NFP ratio", 0.94, nfp_reg["High (VIX>=25)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.High.ratio"),
