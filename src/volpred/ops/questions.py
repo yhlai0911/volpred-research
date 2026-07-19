@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import fcntl
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -58,7 +59,12 @@ def _link_question_article(question_id: str, article_slug: str) -> bool:
         return False
 
 
-def claim_question_for_research(question_id: str) -> dict:
+def claim_question_for_research(
+    question_id: str,
+    *,
+    allow_duplicate: bool = False,
+    source: str = "user",
+) -> dict:
     """Atomically claim a question for research using status transition as lock.
 
     Transition: status='ranked' → status='researching' (conditional).
@@ -68,8 +74,38 @@ def claim_question_for_research(question_id: str) -> dict:
 
     Uses Supabase conditional PATCH with return=representation, so we know
     whether any row was actually updated (not just HTTP success).
+
+    2026-07-19: this is also the duplicate gate. Every member_qa research run
+    must pass through here (`.claude/skills/member-questions/SKILL.md` step 5),
+    so refusing the claim mechanically prevents a re-asked question from being
+    researched and published a second time. `allow_duplicate=True` is the
+    explicit, logged override for a genuinely new angle.
     """
     now = _utc_now()
+
+    if not allow_duplicate:
+        current_rows = _select_rows(
+            "questions", select="id,question,status,source", id=question_id
+        )
+        if not current_rows:
+            return {"claimed": False, "question_id": question_id, "reason": "not_found"}
+        row_source = str(current_rows[0].get("source") or source)
+        duplicate = find_duplicate_question(
+            str(current_rows[0].get("question") or ""),
+            _fetch_question_history(row_source),
+            exclude_question_id=question_id,
+        )
+        if duplicate:
+            return {
+                "claimed": False,
+                "question_id": question_id,
+                "reason": (
+                    f"duplicate_of={duplicate['question_id']} "
+                    f"similarity={duplicate['similarity']} "
+                    f"status={duplicate['status']}"
+                ),
+                "duplicate_of": duplicate,
+            }
     affected = _patch_where_returning(
         "questions",
         {"id": question_id, "status": "ranked"},
@@ -244,6 +280,125 @@ MEMBER_QA_ACTIVE_TASK_STATUSES = {
 # question posted at 17:31 was processed at the 18:00 fire (酒店文 mile_9b76989e).
 # Boss wants a real cooldown so questions are not answered the moment they land.
 MEMBER_QA_MIN_AGE_SECONDS = 6 * 3600
+
+# ---------------------------------------------------------------------------
+# 2026-07-19 (boss: "為什麼會員提問又重複一次"): member-question duplicate gate.
+#
+# Incident: yaoxk1431 asked e79a7097 ("30 年資金穩定每年成長 15%，我該問什麼問題，
+# 我必須掌握投資的 15 個問題", 2026-07-11) and then 3e258ba2 (byte-identical except
+# 15% → 7%, 2026-07-18). Both were scored, ranked #1, claimed and published as
+# near-identical member_qa articles (mile_d84aa7d0 / mile_0205a444) a week apart.
+#
+# Why nothing stopped it: member_qa was the ONE content lane whose dedupe key was
+# the question UUID. A re-asked question is a new row → new UUID → every existing
+# check (task dedupe by question_id, min-age gate, atomic claim) passed. The
+# generation-time topic gate built on 2026-07-14 (volpred.ops.topic_dedup.
+# screen_topic) was only wired into the event + trending lanes.
+#
+# The gate below is deliberately mechanical (no LLM judgement in the loop):
+# digits are stripped before tokenizing, so "每年成長 15%" and "每年成長 7%" collapse
+# onto the same token set. Calibrated on the live 19-row user-question corpus
+# (171 pairs): the incident pair scores 1.000; the highest legitimate pair scores
+# 0.386 (7f6c50d9 vs 20dcd7d5 — congressional trades, follow vs fade, genuinely
+# two different studies); p95 = 0.167. BLOCK at 0.70 leaves a wide margin on both
+# sides. WARN at 0.35 annotates the task without blocking.
+MEMBER_QA_DUP_BLOCK_THRESHOLD = 0.70
+MEMBER_QA_DUP_WARN_THRESHOLD = 0.35
+
+# Statuses that mean "this question already consumed research capacity".
+MEMBER_QA_DUP_COMPARE_STATUSES = {
+    "answered",
+    "partially_answered",
+    "researching",
+    "completed",
+}
+
+
+def _question_tokens(text: str) -> set[str]:
+    """Tokenize a member question for duplicate detection.
+
+    Digits are stripped first — the 2026-07-19 incident differed only by the
+    target return number (15% vs 7%), so any tokenizer that keeps digits scores
+    the pair as "different". ASCII runs of >=2 letters and individual CJK
+    characters become tokens; everything else is punctuation noise.
+    """
+    if not text:
+        return set()
+    stripped = re.sub(r"[0-9０-９]+", "", text.lower())
+    tokens: set[str] = set(re.findall(r"[a-z]{2,}", stripped))
+    tokens |= set(re.findall(r"[一-鿿]", stripped))
+    return tokens
+
+
+def question_similarity(a: str, b: str) -> float:
+    """Jaccard overlap of digit-stripped question tokens (0.0 when either empty)."""
+    ta, tb = _question_tokens(a), _question_tokens(b)
+    if not ta or not tb:
+        return 0.0
+    union = len(ta | tb)
+    return len(ta & tb) / union if union else 0.0
+
+
+def find_duplicate_question(
+    question_text: str,
+    history: list[dict[str, Any]],
+    *,
+    exclude_question_id: str | None = None,
+    threshold: float = MEMBER_QA_DUP_BLOCK_THRESHOLD,
+) -> dict[str, Any] | None:
+    """Return the closest prior question at/above `threshold`, else None.
+
+    `history` rows need `question_id` (or `id`) and `question`. Only rows whose
+    status already consumed research capacity are considered — an unanswered
+    sibling in the ranking pool is not a reason to refuse work.
+    """
+    best: dict[str, Any] | None = None
+    for row in history or []:
+        if not isinstance(row, dict):
+            continue
+        prior_id = str(row.get("question_id") or row.get("id") or "").strip()
+        if not prior_id or prior_id == (exclude_question_id or ""):
+            continue
+        if str(row.get("status") or "") not in MEMBER_QA_DUP_COMPARE_STATUSES:
+            continue
+        similarity = question_similarity(question_text, str(row.get("question") or ""))
+        if similarity < threshold:
+            continue
+        if best is None or similarity > best["similarity"]:
+            best = {
+                "question_id": prior_id,
+                "question": row.get("question") or "",
+                "status": row.get("status") or "",
+                "similarity": round(similarity, 4),
+                "answered_at": row.get("answered_at"),
+                "linked_articles_count": row.get("linked_articles_count"),
+            }
+    return best
+
+
+def _fetch_question_history(source: str) -> list[dict[str, Any]]:
+    """Load prior questions for the duplicate gate.
+
+    No try/except: a guard rail inside a fail-open `try` is not a guard rail
+    (docs/error_log.md 2026-07-14 05:45). If Supabase is unreachable the caller
+    must fail, not proceed unchecked — the claim itself is a Supabase write, so
+    proceeding would fail anyway.
+    """
+    rows = _select_rows(
+        "questions",
+        select="id,question,status,answered_at,created_at",
+        order_by="id",  # stable key: _select_rows pages by offset past 1000 rows
+        source=source,
+    )
+    return [
+        {
+            "question_id": str(row.get("id") or ""),
+            "question": row.get("question") or "",
+            "status": row.get("status") or "",
+            "answered_at": row.get("answered_at"),
+        }
+        for row in rows
+    ]
 
 
 def _parse_time(value: Any) -> float:
@@ -468,6 +623,20 @@ def get_member_question_ranking_summary(
         },
         "ranked_table": ranked_table,
         "pending_questions": pending_questions,
+        # Full history for the duplicate gate. NOT truncated by `limit`: a
+        # question re-asked 6 months later must still be recognised, and the
+        # 2026-07-19 incident's twin sat outside any top-N window.
+        "answered_history": [
+            {
+                "question_id": str(row.get("id") or ""),
+                "question": row.get("question") or "",
+                "status": row.get("status") or "",
+                "answered_at": row.get("answered_at"),
+                "linked_articles_count": linked_counts.get(str(row.get("id") or ""), 0),
+            }
+            for row in question_rows
+            if str(row.get("status") or "") in MEMBER_QA_DUP_COMPARE_STATUSES
+        ],
         "candidate_pool": candidate_rows[: max(limit, 1)],
         "suggestions": suggestions,
     }
@@ -485,11 +654,26 @@ def ensure_member_qa_task(
     2. Latest pending-evaluation question as an evaluate→rerank→research task.
 
     Dedupe key is `question_id` against active next_tasks member_qa entries.
+
+    2026-07-19: a second dedupe key was added — question *meaning*. A question
+    that near-duplicates an already-answered one no longer materializes as a
+    research task; it becomes a `duplicate_review` task instead (the member
+    still gets served, but by linking the existing article rather than by
+    silently commissioning the same study twice).
     """
     summary = get_member_question_ranking_summary(source=source, limit=10)
     ranked_table = summary.get("ranked_table") if isinstance(summary.get("ranked_table"), list) else []
     pending_questions = summary.get("pending_questions") if isinstance(summary.get("pending_questions"), list) else []
     health = summary.get("health") if isinstance(summary.get("health"), dict) else {}
+
+    # Fail closed: without the history corpus the duplicate gate cannot run, and
+    # a gate that silently skips itself is exactly how 2026-07-19 happened.
+    if "answered_history" not in summary:
+        raise ValueError(
+            "question ranking summary is missing 'answered_history' — the member_qa "
+            "duplicate gate cannot run; refusing to materialize a task"
+        )
+    answered_history = summary.get("answered_history") or []
 
     if int(health.get("researching", 0) or 0) > 0:
         return {"created": False, "reason": "already_researching"}
@@ -506,13 +690,30 @@ def ensure_member_qa_task(
         return (now_ts - created) < MEMBER_QA_MIN_AGE_SECONDS
 
     gated_min_age = 0
+    # Duplicates are deferred, not dropped: a fresh question must not be starved
+    # behind a re-ask, but the member still deserves a reply, so the first
+    # deferred duplicate becomes the fallback candidate in `duplicate_review` mode.
+    deferred_duplicate: tuple[dict[str, Any], dict[str, Any]] | None = None
+
+    def _duplicate_of(item: dict[str, Any]) -> dict[str, Any] | None:
+        return find_duplicate_question(
+            str(item.get("question") or ""),
+            answered_history,
+            exclude_question_id=str(item.get("question_id") or ""),
+        )
 
     candidate: dict[str, Any] | None = None
+    duplicate: dict[str, Any] | None = None
     mode = "research"
     for item in ranked_table:
         if isinstance(item, dict) and str(item.get("status") or "") == "ranked":
             if _too_young(item):
                 gated_min_age += 1
+                continue
+            hit = _duplicate_of(item)
+            if hit is not None:
+                if deferred_duplicate is None:
+                    deferred_duplicate = (item, hit)
                 continue
             candidate = item
             break
@@ -523,9 +724,18 @@ def ensure_member_qa_task(
                 if _too_young(item):
                     gated_min_age += 1
                     continue
+                hit = _duplicate_of(item)
+                if hit is not None:
+                    if deferred_duplicate is None:
+                        deferred_duplicate = (item, hit)
+                    continue
                 candidate = item
                 mode = "evaluate"
                 break
+
+    if candidate is None and deferred_duplicate is not None:
+        candidate, duplicate = deferred_duplicate
+        mode = "duplicate_review"
 
     if candidate is None:
         reason = (
@@ -566,12 +776,14 @@ def ensure_member_qa_task(
                         "task_id": task.get("id"),
                     }
 
-            title = _build_member_qa_task_title(candidate)
+            title = _build_member_qa_task_title(candidate, duplicate=duplicate)
             task_id = _build_member_qa_task_id(question_id=question_id, mode=mode)
             task = {
                 "id": task_id,
                 "title": title,
-                "description": _build_member_qa_task_description(candidate, mode=mode),
+                "description": _build_member_qa_task_description(
+                    candidate, mode=mode, duplicate=duplicate
+                ),
                 "task_type": "member_qa",
                 "dispatch_lane": "agent",
                 # 會員在等答案 = user-facing 且有時效感，與 user-assigned 同級（老闆 Telegram msg 590）
@@ -585,6 +797,7 @@ def ensure_member_qa_task(
                 "proposer": candidate.get("proposer"),
                 "question_score": candidate.get("score"),
                 "task_mode": mode,
+                **({"duplicate_of": duplicate} if duplicate else {}),
             }
             validate_task_status(task["status"])
             normalize_task_priority(task)
@@ -598,15 +811,24 @@ def ensure_member_qa_task(
         "task_id": task_id,
         "question_id": question_id,
         "mode": mode,
+        **({"duplicate_of": duplicate} if duplicate else {}),
     }
 
 
 def _build_member_qa_task_id(*, question_id: str, mode: str) -> str:
-    suffix = "research" if mode == "research" else "evaluate"
+    suffix = {"research": "research", "duplicate_review": "duplicate_review"}.get(
+        mode, "evaluate"
+    )
     return f"member_qa_{question_id.split('-')[0]}_{suffix}"
 
 
-def _build_member_qa_task_title(candidate: dict[str, Any]) -> str:
+def _build_member_qa_task_title(
+    candidate: dict[str, Any], *, duplicate: dict[str, Any] | None = None
+) -> str:
+    if duplicate:
+        proposer = str(candidate.get("proposer") or "會員").strip()
+        question = " ".join(str(candidate.get("question") or "").split())
+        return f"[member_qa/dup] {proposer} 重複提問（似 {duplicate['question_id'][:8]}）：{question[:60]}"
     proposer = str(candidate.get("proposer") or "會員").strip()
     question = " ".join(str(candidate.get("question") or "").split())
     if not question:
@@ -614,13 +836,42 @@ def _build_member_qa_task_title(candidate: dict[str, Any]) -> str:
     return f"[member_qa] {proposer} 提問：{question[:80]}"
 
 
-def _build_member_qa_task_description(candidate: dict[str, Any], *, mode: str) -> str:
+def _build_member_qa_task_description(
+    candidate: dict[str, Any],
+    *,
+    mode: str,
+    duplicate: dict[str, Any] | None = None,
+) -> str:
     question_id = str(candidate.get("question_id") or "").strip()
     proposer = str(candidate.get("proposer") or "會員").strip()
     question = str(candidate.get("question") or "").strip()
     created_at = str(candidate.get("created_at") or "").strip()
     score = candidate.get("score")
     score_line = f"Current score: {score}\n" if isinstance(score, (int, float)) else ""
+    if mode == "duplicate_review" and duplicate:
+        workflow = (
+            "⚠️ 重複提問 —— 這題與已回答過的問題近乎同題（去除數字後 Jaccard "
+            f"{duplicate['similarity']}，門檻 {MEMBER_QA_DUP_BLOCK_THRESHOLD}）。\n"
+            f"既有問題：{duplicate['question_id']}（status={duplicate['status']}）\n"
+            f"既有題目：{duplicate['question']}\n\n"
+            "執行流程（預設不做新研究）：\n"
+            f"1. 找出既有問題已綁定的文章：uv run volpred ops question-ranking-summary --limit 20\n"
+            f"2. 用既有文章回覆本題：uv run volpred ops question-answer {question_id} "
+            "--answer \"（說明與既有文章的對應關係）\" --article-id <既有 article slug>\n"
+            "3. 只有在確認本題有既有文章沒回答到的新角度時，才做新研究，且必須\n"
+            f"   uv run volpred ops question-claim {question_id} --allow-duplicate\n"
+            "   並在 work_log 寫清楚「新角度是什麼、既有文章為何不足」。\n"
+            "   未加 --allow-duplicate 的 claim 會被機械擋下（exit 2）。\n"
+        )
+        return (
+            f"Member question id: {question_id}\n"
+            f"Proposer: {proposer}\n"
+            f"Created: {created_at}\n"
+            f"{score_line}"
+            f"\n原題：\n{question}\n\n"
+            f"{workflow}\n"
+            "注意：重複提問也要回覆會員，但預設是「連既有文章」，不是「再寫一篇」。"
+        )
     if mode == "research":
         workflow = (
             "執行流程：\n"

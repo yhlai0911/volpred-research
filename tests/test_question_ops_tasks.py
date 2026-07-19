@@ -23,6 +23,7 @@ def test_ensure_member_qa_task_creates_ranked_research_task(monkeypatch, tmp_pat
         "get_member_question_ranking_summary",
         lambda source="user", limit=10: {
             "health": {"researching": 0},
+            "answered_history": [],
             "ranked_table": [
                 {
                     "question_id": "abc12345-0000-0000-0000-000000000000",
@@ -54,6 +55,7 @@ def test_ensure_member_qa_task_creates_evaluate_task_when_only_pending(monkeypat
         "get_member_question_ranking_summary",
         lambda source="user", limit=10: {
             "health": {"researching": 0},
+            "answered_history": [],
             "ranked_table": [],
             "pending_questions": [
                 {
@@ -98,6 +100,7 @@ def test_ensure_member_qa_task_dedupes_existing_active_task(monkeypatch, tmp_pat
         "get_member_question_ranking_summary",
         lambda source="user", limit=10: {
             "health": {"researching": 0},
+            "answered_history": [],
             "ranked_table": [
                 {
                     "question_id": "dup00000-0000-0000-0000-000000000000",
@@ -129,6 +132,7 @@ def test_ensure_member_qa_task_min_age_gate_blocks_young_question(monkeypatch, t
         "get_member_question_ranking_summary",
         lambda source="user", limit=10: {
             "health": {"researching": 0},
+            "answered_history": [],
             "ranked_table": [
                 {
                     "question_id": "young0001-0000-0000-0000-000000000000",
@@ -161,6 +165,7 @@ def test_ensure_member_qa_task_min_age_gate_allows_aged_question(monkeypatch, tm
         "get_member_question_ranking_summary",
         lambda source="user", limit=10: {
             "health": {"researching": 0},
+            "answered_history": [],
             "ranked_table": [
                 {
                     "question_id": "aged0001-0000-0000-0000-000000000000",

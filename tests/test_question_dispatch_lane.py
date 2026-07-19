@@ -19,6 +19,7 @@ def test_member_qa_materializer_marks_agent_dispatch_lane(monkeypatch, tmp_path:
         "get_member_question_ranking_summary",
         lambda source="user", limit=10: {
             "health": {"researching": 0},
+            "answered_history": [],
             "ranked_table": [
                 {
                     "question_id": "abc12345-0000-0000-0000-000000000000",

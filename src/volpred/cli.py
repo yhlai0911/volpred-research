@@ -2400,6 +2400,17 @@ def ops_release_pool_by_settings(force: bool, storage_dir: str) -> None:
         console.print("[yellow]Skipped[/yellow] release run")
     else:
         console.print(f"[green]Released[/green] {result['released_count']} article(s) by cadence settings")
+    # Machine-readable outcome line (2026-07-19). Plain print, not rich: rich wraps
+    # at the captured-subprocess width and would corrupt the marker. Callers that
+    # piggy-back this command (scripts/check_alerts.py) must be able to tell a real
+    # release from a due-but-released-nothing run — exit code 0 means "the machinery
+    # ran", never "an article went out".
+    print(
+        "RELEASE_OUTCOME"
+        f" released={int(result.get('released_count') or 0)}"
+        f" skipped={1 if result.get('skipped') else 0}"
+        f" reason={result.get('reason') or ''}"
+    )
     _print_json({"action": "release_article_pool_by_settings", **result})
 
 
@@ -2961,20 +2972,37 @@ def ops_strategy_set_active(identifier: str, active: bool) -> None:
 
 @ops.command("question-claim")
 @click.argument("question_id")
-def ops_question_claim(question_id: str) -> None:
+@click.option(
+    "--allow-duplicate",
+    is_flag=True,
+    help="Override the duplicate gate for a genuinely new angle on a re-asked question. "
+    "Record the justification in work_log.",
+)
+def ops_question_claim(question_id: str, allow_duplicate: bool) -> None:
     """Atomically claim a ranked question for research (cross-session race protection).
 
     Uses status='ranked' → 'researching' transition as the lock. If another
     session already claimed this question, the command reports claimed=False
     with the current status. Exit code 0 on success, 2 on claim lost.
+
+    Also the member_qa duplicate gate (2026-07-19): a question that near-
+    duplicates an already-answered one cannot be claimed without
+    --allow-duplicate, so a re-ask cannot silently become a second article.
     """
     from volpred.ops import claim_question_for_research
 
-    result = claim_question_for_research(question_id)
+    result = claim_question_for_research(question_id, allow_duplicate=allow_duplicate)
     _print_json({"action": "question_claim", **result})
     if not result.get("claimed"):
         reason = result.get("reason", "unknown")
         console.print(f"[yellow]Claim lost:[/yellow] {question_id} — {reason}")
+        if result.get("duplicate_of"):
+            dup = result["duplicate_of"]
+            console.print(
+                f"[yellow]Duplicate gate:[/yellow] 這題與 {dup['question_id']} "
+                f"（status={dup['status']}）近乎同題 — 請先用既有文章回覆；"
+                f"確有新角度才加 --allow-duplicate 重試。"
+            )
         raise SystemExit(2)
     console.print(f"[green]Claimed[/green] {question_id}")
 

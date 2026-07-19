@@ -103,7 +103,9 @@ from .questions import (
     archive_question,
     build_question_rerank_workflow,
     claim_question_for_research,
+    find_duplicate_question,
     get_member_question_ranking_summary,
+    question_similarity,
     rerank_member_questions,
 )
 from .strategies import activate_strategy, deactivate_strategy, upsert_strategy_metadata
@@ -148,6 +150,8 @@ __all__ = [
     "route_internal_remediable_alert",
     "archive_question",
     "claim_question_for_research",
+    "find_duplicate_question",
+    "question_similarity",
     "build_platform_cycle_summary",
     "build_schedule_due_report",
     "build_schedule_report",

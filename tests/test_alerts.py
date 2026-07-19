@@ -836,7 +836,9 @@ def test_release_pool_starved_alert_includes_preview_counts(tmp_path: Path, monk
     assert condition["breached"] is True
     assert condition["level"] == "warn"
     assert "dedup_flagged: 46" in condition["body"]
-    assert "eligible_after_dedup: 0" in condition["body"]
+    # 2026-07-19: renamed from eligible_after_dedup — the count now reflects the
+    # content-quality gates too, so the old label under-described what it filtered.
+    assert "eligible_after_all_gates: 0" in condition["body"]
     assert condition["details"]["release_preview"]["pool_counts"]["eligible"] == 0
 
 

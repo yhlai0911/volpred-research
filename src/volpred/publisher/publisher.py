@@ -363,7 +363,7 @@ def _run_anti_ai_checks(text: str, *, fb_mode: bool) -> tuple[bool, list[str]]:
     return run_checks(text, fb_mode=fb_mode)
 
 
-def _log_anti_ai_gate_decision(
+def _log_anti_ai_gate_decision_impl(
     storage_dir: str,
     item: dict,
     *,
@@ -429,14 +429,26 @@ def _run_publish_anti_ai_gate(
     *,
     target_status: str | None = None,
     raise_on_block: bool = True,
+    log_decision: bool = True,
 ) -> list[str]:
     """Run anti-AI-style publish gate.
 
     Returns release-audit issues when `raise_on_block=False`; otherwise raises
     ValueError on hard-block. Gate malfunction is explicitly fail-open.
+
+    `log_decision=False` runs the identical verdict without appending to the
+    canonical dedup-decision ledger — for read-only callers such as
+    `preview_release_pool_by_settings`, which must be able to ask "would this
+    release?" without leaving a decision trail that implies a release was
+    attempted (2026-07-19).
     """
     if not _anti_ai_gate_applies(item, target_status=target_status):
         return []
+
+    def _log_anti_ai_gate_decision(*args, **kwargs):  # noqa: WPS430
+        if log_decision:
+            return _log_anti_ai_gate_decision_impl(*args, **kwargs)
+        return None
 
     warn_only, mode_reason = _anti_ai_gate_warn_only()
     try:
@@ -461,7 +473,8 @@ def _run_publish_anti_ai_gate(
             reason=f"gate_error_fail_open_degraded:{type(exc).__name__}:{exc}",
             mode=mode_reason,
         )
-        _send_anti_ai_gate_degraded_alert(storage_dir, item, exc)
+        if log_decision:
+            _send_anti_ai_gate_degraded_alert(storage_dir, item, exc)
         print(
             f"  [feed_publisher] WARN anti-AI gate fail-open for "
             f"{item.get('id', 'unknown')}: {exc}"

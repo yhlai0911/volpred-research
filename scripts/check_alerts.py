@@ -153,16 +153,49 @@ def _auto_trigger_release_pool_if_due() -> dict:
             timeout=180,
         )
         end = datetime.now(timezone.utc)
-        ok = result.returncode == 0
-        if ok:
+        ran = result.returncode == 0
+        if ran:
             _record_release_pool_fallback_fire(
                 start_iso=start.isoformat(timespec="seconds"),
                 end_iso=end.isoformat(timespec="seconds"),
                 returncode=result.returncode,
             )
+        # 2026-07-19 (boss 20:14 「為什麼文章沒有照排程釋出」): returncode 0 only
+        # proves the CLI ran. For 9 hours this function reported
+        # `release-pool-auto: ok ... reason=done` while every release run released
+        # zero articles — `done` was a hard-coded placeholder in the print below,
+        # never an outcome. Parse the CLI's RELEASE_OUTCOME marker so a due run that
+        # released nothing is reported as `starved`, not `ok`.
+        released_count = None
+        cli_reason = ""
+        for line in (result.stdout or "").splitlines():
+            if line.startswith("RELEASE_OUTCOME"):
+                for token in line.split()[1:]:
+                    key, _, value = token.partition("=")
+                    if key == "released":
+                        try:
+                            released_count = int(value)
+                        except ValueError:
+                            released_count = None
+                    elif key == "reason":
+                        cli_reason = value
+        if released_count is None:
+            outcome = "unknown_outcome"
+            ok = ran
+        elif released_count > 0:
+            outcome = f"released={released_count}"
+            ok = ran
+        else:
+            # Due, machinery healthy, zero articles out: this is the failure the
+            # boss saw. It must never render as ok.
+            outcome = f"starved released=0{(':' + cli_reason) if cli_reason else ''}"
+            ok = False
         return {
             "triggered": True,
             "ok": ok,
+            "ran": ran,
+            "released_count": released_count,
+            "outcome": outcome,
             "returncode": result.returncode,
             "age_min": round(age_min),
             "start_at": start.isoformat(),
@@ -278,6 +311,70 @@ def _auto_remediate_release_deadlock() -> dict:
         # cannot name a safe one — say so rather than guessing, and let the writer
         # pick any cluster outside the blocked set.
         required = [c for c in known if c not in blocked]
+
+        # 2026-07-19: a deadlock has two very different shapes and they need
+        # opposite medicine. Cluster-pressure deadlock => the pool needs NEW drafts
+        # in a passable cluster. Content-gate deadlock (anti-ai / missing 懶人包圖組 /
+        # audit) => the pool already holds near-ready articles and writing more is
+        # exactly the wrong move; those drafts must be REPAIRED. Before the preview
+        # ran the content gates it could not see this case at all, so every
+        # content-gate deadlock was invisible (eligible looked > 0 → not_deadlocked).
+        gate_blocked = preview.get("content_gate_blocked") or []
+        if gate_blocked:
+            def _blocker_kind(issues: list) -> str:
+                text = " ".join(str(i) for i in issues)
+                if "懶人包圖組" in text:
+                    return "lazypack_missing"
+                if "anti_ai_style" in text:
+                    return "anti_ai_style"
+                return "audit"
+
+            lines = []
+            for entry in gate_blocked:
+                lines.append(
+                    f"- `{entry.get('id')}` ({entry.get('audience')}, 已被擋 "
+                    f"{entry.get('skip_count')} 次) [{_blocker_kind(entry.get('issues') or [])}] "
+                    f"{entry.get('title')}\n    {'; '.join(str(i) for i in (entry.get('issues') or []))}"
+                )
+            task_id = f"release_deadlock_repair_{now.strftime('%Y%m%d_%H')}"
+            task = {
+                "id": task_id,
+                "title": "【P1 自動補救】release 死鎖：修好被內容閘門擋住的草稿",
+                "description": (
+                    f"release_pool 死鎖：草稿池有 {draft} 篇、eligible=0（due_now=true），"
+                    f"其中 {len(gate_blocked)} 篇是被**內容品質閘門**擋住，不是缺稿。\n\n"
+                    + "\n".join(lines)
+                    + "\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n"
+                    "- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。"
+                    "備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> "
+                    "--experiment <K> --plan <plan.json>`。\n"
+                    "- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，"
+                    "**不得**放寬閘門。\n"
+                    "改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。"
+                ),
+                "task_type": "platform_ops",
+                "priority": 1,
+                "status": "pending",
+                "source": "auto_remediation",
+                "created_at": now.isoformat(),
+                "blocked_article_ids": [e.get("id") for e in gate_blocked],
+                "trigger": "release_pool_content_gate_deadlock",
+            }
+            created = _append_next_task_locked(task, PROJECT_ROOT / "storage" / "next_tasks.json")
+            receipt.update(
+                {
+                    "attempted": True,
+                    "kind": "content_gate_deadlock",
+                    "draft": draft,
+                    "eligible": eligible,
+                    "content_gate_blocked": gate_blocked,
+                    "blocked_clusters": blocked,
+                    "required_clusters": required,
+                    ("task_id" if created else "existing_task_id"): task_id,
+                }
+            )
+            _write_json_atomic(receipt_path, receipt)
+            return receipt
 
         task_id = f"release_deadlock_refill_{now.strftime('%Y%m%d_%H')}"
         task = {
@@ -2579,11 +2676,15 @@ def main() -> int:
     _check_piggy_back_drift(due_summary)
     if release_trigger.get("triggered"):
         status = "ok" if release_trigger.get("ok") else "fail"
-        print(
-            f"  release-pool-auto: {status} "
-            f"age={release_trigger.get('age_min')}min "
-            f"reason={release_trigger.get('reason') or release_trigger.get('error') or 'done'}"
+        # `reason` was a placeholder that fell back to the literal 'done' — it said
+        # 'done' on every zero-output run. Report the parsed outcome (2026-07-19).
+        _reason = (
+            release_trigger.get("outcome")
+            or release_trigger.get("reason")
+            or release_trigger.get("error")
+            or "unknown_outcome"
         )
+        print(f"  release-pool-auto: {status} age={release_trigger.get('age_min')}min reason={_reason}")
     else:
         # 2026-04-19: Log skip state for debugging (piggy-back health check).
         print(
@@ -2593,11 +2694,20 @@ def main() -> int:
     # 2026-07-13: release gate-deadlock auto-remediation (boss msg 660)
     if deadlock_remediation.get("attempted"):
         _task = deadlock_remediation.get("task_id") or deadlock_remediation.get("existing_task_id")
+        _kind = deadlock_remediation.get("kind") or "cluster_pressure"
+        _gate_blocked = deadlock_remediation.get("content_gate_blocked") or []
         print(
-            f"  release-deadlock-remediation: draft={deadlock_remediation.get('draft')} "
-            f"eligible=0 blocked={deadlock_remediation.get('blocked_clusters')} "
+            f"  release-deadlock-remediation: kind={_kind} "
+            f"draft={deadlock_remediation.get('draft')} eligible=0 "
+            f"content_gate_blocked={len(_gate_blocked)} "
+            f"blocked={deadlock_remediation.get('blocked_clusters')} "
             f"required={deadlock_remediation.get('required_clusters')} task={_task}"
         )
+        for _e in _gate_blocked:
+            print(
+                f"    - {_e.get('id')} skips={_e.get('skip_count')} "
+                f"{'; '.join(str(i) for i in (_e.get('issues') or []))[:160]}"
+            )
     elif deadlock_remediation.get("error"):
         print(f"  release-deadlock-remediation: ERROR {deadlock_remediation['error']}")
 

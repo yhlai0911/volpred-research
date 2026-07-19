@@ -1588,6 +1588,75 @@ def _maybe_drought_release(
     }
 
 
+def release_content_gate_issues(
+    item: dict,
+    storage_dir: str = "storage",
+    *,
+    record: bool = True,
+) -> list[str]:
+    """Return the content-quality blockers that would stop ``item`` releasing.
+
+    2026-07-19 root-cause extraction (boss 20:14 「為什麼文章沒有照排程釋出」):
+    `release_pool_articles` evaluated these three gates INLINE, while
+    `preview_release_pool_by_settings` — the instrument that feeds the hourly
+    alert AND `_auto_remediate_release_deadlock` — stopped at the dedup/cluster
+    filters. The pool therefore reported `eligible=3` for 9 hours while the real
+    release path released 0 and the deadlock detector concluded `not_deadlocked`.
+    One evaluator, two callers: preview eligibility now means the same thing as
+    release eligibility.
+
+    No skip counters, no fix tasks, no feed mutation. Callers that need those side
+    effects (the release loop) own them. `record=False` additionally suppresses the
+    anti-AI gate's decision-ledger append and evaluates against a copy, so the
+    preview path is fully read-only.
+    """
+    if not record:
+        item = deepcopy(item)
+    audience = str(item.get("audience") or "").lower()
+    body_text = (
+        item.get("description")
+        or item.get("content")
+        or item.get("summary")
+        or ""
+    )
+    issues = list(
+        _audit_general_content(
+            audience,
+            list(item.get("tags") or []),
+            str(body_text),
+        )
+    )
+
+    if audience == "general":
+        try:
+            # Read content-first (NOT the audit gate's description-first
+            # body_text): the installed section lives in item["content"];
+            # "description" is the <=200-char SEO snippet.
+            _lz_text = item.get("content") or item.get("description") or ""
+            if not has_lazypack_section(str(_lz_text)):
+                issues.append(
+                    "missing 懶人包圖組 section (async lazypack render "
+                    "pending/failed — inspect: uv run python "
+                    "scripts/compute_queue.py show "
+                    f"lazypack-{item.get('id')} ; re-enqueue via "
+                    "scripts/lazypack_async_render.py enqueue)"
+                )
+        except Exception as exc:  # fail-open: never block release on a broken check
+            _warn_release_pool("lazypack release gate check failed; fail-open", exc)
+
+    issues.extend(
+        _run_publish_anti_ai_gate(
+            storage_dir,
+            item,
+            target_status="published",
+            raise_on_block=False,
+            log_decision=record,
+        )
+        or []
+    )
+    return issues
+
+
 def release_pool_articles(
     *,
     pub_id: str | None = None,
@@ -1857,51 +1926,11 @@ def release_pool_articles(
         # terminology + tag count cap. audit_strict effectively False here
         # so we don't crash the cron loop, but we DO refuse to flip status.
         audience = str(item.get("audience") or "").lower()
-        body_text = (
-            item.get("description")
-            or item.get("content")
-            or item.get("summary")
-            or ""
-        )
-        audit_issues = _audit_general_content(
-            audience,
-            list(item.get("tags") or []),
-            str(body_text),
-        )
-        # 2026-07-02 lazypack async pipeline (error_log 15:15 #4): drafts are
-        # created WITHOUT the 懶人包圖組 section (the deterministic render runs on the
-        # compute_queue lane, not inside the writing agent's 50-min cap), but a
-        # general article must not flip to published until the section landed.
-        # Reuses the release-audit skip counter + fix-task escalation below
-        # (single enforcement owner — anti-stacking) and fails open on checker
-        # malfunction per dedup-gate-audit.md.
-        if audience == "general":
-            try:
-                # Read content-first (NOT the audit gate's description-first
-                # body_text): the installed section lives in item["content"];
-                # "description" is the ≤200-char SEO snippet and would never
-                # contain it. Mirrors content_quality's coverage scan.
-                _lz_text = item.get("content") or item.get("description") or ""
-                if not has_lazypack_section(str(_lz_text)):
-                    audit_issues = list(audit_issues) + [
-                        "missing 懶人包圖組 section (async lazypack render "
-                        "pending/failed — inspect: uv run python "
-                        "scripts/compute_queue.py show "
-                        f"lazypack-{item.get('id')} ; re-enqueue via "
-                        "scripts/lazypack_async_render.py enqueue)"
-                    ]
-            except Exception as exc:  # fail-open: never block release on a broken check
-                _warn_release_pool(
-                    "lazypack release gate check failed; fail-open", exc
-                )
-        anti_ai_issues = _run_publish_anti_ai_gate(
-            storage_dir,
-            item,
-            target_status="published",
-            raise_on_block=False,
-        )
-        if anti_ai_issues:
-            audit_issues = list(audit_issues) + anti_ai_issues
+        # Gate evaluation lives in release_content_gate_issues() so the preview /
+        # deadlock detector judge the pool by the SAME rules (2026-07-19). The
+        # skip-counter + fix-task escalation below stays here — it is a release-run
+        # side effect, not part of the verdict.
+        audit_issues = release_content_gate_issues(item, storage_dir)
         if audit_issues:
             details = item.get("details")
             if not isinstance(details, dict):
@@ -2575,6 +2604,38 @@ def preview_release_pool_by_settings(
             filtered_candidates.append(item)
         candidates = filtered_candidates
 
+    # Content-quality gates (audit / lazypack / anti-ai), evaluated with the same
+    # helper the release loop uses. Before 2026-07-19 the preview stopped above and
+    # reported every dedup-clean draft as `eligible`, so the hourly alert printed
+    # "去重後可釋出=3" and `_auto_remediate_release_deadlock` saw eligible>0 →
+    # not_deadlocked, while the real release path released 0 for 9 hours straight.
+    content_gate_blocked: list[dict] = []
+    releasable: list[dict] = []
+    for item in candidates:
+        try:
+            issues = release_content_gate_issues(item, storage_dir, record=False)
+        except Exception as exc:  # fail-open: a broken checker must not fake a deadlock
+            _warn_release_pool("preview content gate check failed; fail-open", exc)
+            issues = []
+        if issues:
+            details = item.get("details")
+            content_gate_blocked.append(
+                {
+                    "id": item.get("id"),
+                    "title": item.get("title"),
+                    "audience": _article_audience(item),
+                    "issues": issues,
+                    "skip_count": (
+                        details.get("release_audit_skipped_count")
+                        if isinstance(details, dict)
+                        else None
+                    ),
+                }
+            )
+            continue
+        releasable.append(item)
+    candidates = releasable
+
     due_now = settings["mode"] in ("scheduled", "auto") and (
         next_release_at is None or next_release_at <= now
     )
@@ -2601,10 +2662,13 @@ def preview_release_pool_by_settings(
             "scheduled": sum(1 for item in pool_items if item.get("status") == "scheduled"),
             "eligible_before_dedup": len(candidates_before_dedup),
             "dedup_flagged": len(dedup_flagged),
+            "narrative_cluster_filtered": len(narrative_cluster_filtered),
+            "content_gate_blocked": len(content_gate_blocked),
             "eligible": len(candidates),
         },
         "narrative_cluster_pressure": narrative_pressure,
         "narrative_cluster_filtered": narrative_cluster_filtered,
+        "content_gate_blocked": content_gate_blocked,
         "next_candidates": next_candidates,
     }
 

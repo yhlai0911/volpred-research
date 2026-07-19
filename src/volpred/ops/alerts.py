@@ -190,7 +190,36 @@ def _release_pool_preview_for_alert(storage_dir: str) -> dict[str, Any]:
         # Dropping these was why starvation could only ever be seen in arrears.
         "due_now": bool(preview.get("due_now")) if isinstance(preview, dict) else False,
         "narrative_cluster_pressure": cluster_pressure if isinstance(cluster_pressure, dict) else {},
+        # 2026-07-19: drafts the content-quality gates (audit / 懶人包圖組 / anti-ai)
+        # would refuse. Without this the alert printed a releasable count that the
+        # release path could not honour, and the boss saw "可釋出=3" next to 9h of
+        # zero releases.
+        "content_gate_blocked": (
+            preview.get("content_gate_blocked")
+            if isinstance(preview, dict) and isinstance(preview.get("content_gate_blocked"), list)
+            else []
+        ),
     }
+
+
+def _render_content_gate_blocked(entries: list[Any]) -> list[str]:
+    """Name the drafts the content gates refused, and why (2026-07-19).
+
+    A bare count reproduces the original failure in miniature: the boss could see
+    that nothing released but not which article was stuck or on what. Each line is
+    actionable on its own — id, how many release runs it has already burned, and
+    the literal gate message.
+    """
+    lines: list[str] = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        issues = "; ".join(str(i) for i in (entry.get("issues") or []))
+        lines.append(
+            f"  - `{entry.get('id')}` ({entry.get('audience')}, 已連續被擋 "
+            f"{entry.get('skip_count')} 次): {issues[:220]}"
+        )
+    return lines
 
 
 RELEASE_DEADLOCK_RECEIPT = ("ops", "release_deadlock_remediation.json")
@@ -950,8 +979,11 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
                 f"- draft: {draft_count}",
                 f"- eligible_before_dedup: {pool_counts.get('eligible_before_dedup', 'unknown')}",
                 f"- dedup_flagged: {pool_counts.get('dedup_flagged', 'unknown')}",
-                f"- eligible_after_dedup: {eligible_count}",
+                f"- narrative_cluster_filtered: {pool_counts.get('narrative_cluster_filtered', 'unknown')}",
+                f"- content_gate_blocked: {pool_counts.get('content_gate_blocked', 'unknown')}",
+                f"- eligible_after_all_gates: {eligible_count}",
                 f"- 被 narrative_cluster gate 擋住的 cluster: {', '.join(str(c) for c in blocked_clusters) or '(none)'}",
+                *_render_content_gate_blocked(preview_summary.get("content_gate_blocked") or []),
                 "",
                 "## 系統已自動執行",
                 *_render_release_deadlock_remediation(remediation),
@@ -993,7 +1025,10 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
                 f"- scheduled: {pool_counts.get('scheduled', 'unknown')}",
                 f"- eligible_before_dedup: {pool_counts.get('eligible_before_dedup', 'unknown')}",
                 f"- dedup_flagged: {pool_counts.get('dedup_flagged', 'unknown')}",
-                f"- eligible_after_dedup: {pool_counts.get('eligible', 'unknown')}",
+                f"- narrative_cluster_filtered: {pool_counts.get('narrative_cluster_filtered', 'unknown')}",
+                f"- content_gate_blocked: {pool_counts.get('content_gate_blocked', 'unknown')}",
+                f"- eligible_after_all_gates: {pool_counts.get('eligible', 'unknown')}",
+                *_render_content_gate_blocked(preview_summary.get("content_gate_blocked") or []),
             ]
         elif preview_error:
             preview_lines = [f"- preview_error: {preview_error}"]
