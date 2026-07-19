@@ -277,6 +277,56 @@ def _path_is_dirty(rel: str) -> bool:
 _WORKTREE_PREFIX_RE = re.compile(r"^\.claude/worktrees/[^/]+/")
 
 
+def _tracked_clean_in_worktree(raw: object) -> bool:
+    """Return whether a declared output already has a worktree merge exit.
+
+    The canonical checkout intentionally ignores ``.claude/worktrees``.  A
+    compute job can nevertheless run there and commit its output on the
+    worktree branch.  Treating that file as merely ``git_ignored`` manufactures
+    an orphan alert and, worse, invites the main-checkout reaper to bypass the
+    review/merge gate.  Only a regular file that Git tracks *and* reports clean
+    in that exact worktree qualifies; untracked or modified outputs stay held.
+    """
+    if not isinstance(raw, str) or not raw.strip():
+        return False
+    candidate = Path(raw.strip())
+    candidate = candidate if candidate.is_absolute() else ROOT / candidate
+    if candidate.is_symlink() or not candidate.is_file():
+        return False
+    resolved = candidate.resolve(strict=False)
+    worktrees_root = (ROOT / ".claude" / "worktrees").resolve(strict=False)
+    try:
+        within = resolved.relative_to(worktrees_root)
+    except ValueError:  # silent-ok: declaration is outside managed worktrees
+        return False
+    if len(within.parts) < 2:
+        return False
+    worktree = worktrees_root / within.parts[0]
+    rel = PurePosixPath(*within.parts[1:]).as_posix()
+
+    env = os.environ.copy()
+    for key in _GIT_ENV_KEYS:
+        env.pop(key, None)
+    kwargs = {
+        "cwd": str(worktree),
+        "env": env,
+        "capture_output": True,
+        "text": True,
+    }
+    tracked = subprocess.run(
+        ["git", "--literal-pathspecs", "ls-files", "--error-unmatch", "--", rel],
+        **kwargs,
+    )
+    if tracked.returncode != 0:
+        return False
+    status = subprocess.run(
+        ["git", "--literal-pathspecs", "status", "--porcelain=v1",
+         "--untracked-files=all", "--", rel],
+        **kwargs,
+    )
+    return status.returncode == 0 and not status.stdout.strip()
+
+
 def _landed_in_main(raw: object) -> str | None:
     """Worktree-declared output that has since been merged into the checkout.
 
@@ -327,14 +377,21 @@ def scan_job_deliverables() -> dict:
 
         exact: list[str] = []
         rejected: list[dict] = []
+        worktree_owned = 0
         for raw in declared:
             rel, reason = _exact_repo_file(raw)
             if rel is not None:
                 exact.append(rel)
+            elif _tracked_clean_in_worktree(raw):
+                worktree_owned += 1
             else:
                 rejected.append({"path": raw, "reason": reason})
         exact = list(dict.fromkeys(exact))
         if not exact:
+            if worktree_owned == len(declared):
+                # Already committed on the job's worktree branch. Its only
+                # legitimate exit is the normal review + merge workflow.
+                continue
             landed = [rel for rel in (_landed_in_main(raw) for raw in declared)
                       if rel is not None]
             if landed:
