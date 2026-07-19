@@ -31301,8 +31301,8 @@
  },
  {
   "id": "k1396_har_rv_vs_a4f_paper9_c4",
-  "title": "K1396: HAR-RV vs A4f — Paper 9 C4 Non-inferiority (PASS)",
-  "body": "K1396 (PASS, Codex 0.132.0 review, 2026-05-22): HAR-RV benchmarks vs A4f under Patton QLIKE (OOS 2019-2026, n=1866, W=2000, refit q63, seed=42).\n\nMean QLIKE: HAR=1.5612, HAR_VIX=1.5229, A4f=1.5390.\nDM(A4f vs HAR): t=+0.87, p=0.39 — NOT Harvey-sig (|t|<3.0).\nDM(A4f vs HAR_VIX): t=-0.88, p=0.38 — NOT Harvey-sig.\nDM(HAR_VIX vs HAR): t=-2.60, p=0.009 — conventional sig only, NOT Harvey-sig.\n\nConclusion: A4f statistically non-inferior to HAR-type benchmarks under both r2-proxy (t=+0.29, p=0.77) and Patton QLIKE. A4f has 1.4% lower QLIKE than HAR (1.539 vs 1.561) but cannot claim Harvey-sig superiority.\n\nPaper 9 action: C4 honest limitation paragraph added to Section 7.4 (HAR-RV Benchmark Comparison). C4 status: ACKNOWLEDGED. HAR_VIX adding VIX² predictor to HAR achieves lowest QLIKE (1.523) but still not Harvey-sig vs A4f — all three are statistically indistinguishable at the Harvey threshold.",
+  "title": "K1396 更正: HAR-style daily-r² vs A4f 近似 — 非劣性宣稱撤回（superseded by K1379）",
+  "body": "K1396 更正版（2026-07-19 revise；原 2026-05-22 條目的公開宣稱經 2026-07-16 scope audit 判 FAIL_PUBLIC_CLAIM，本條目同步撤回）：\n\n原宣稱撤回：(1)「HAR-RV benchmark」— K1396 實際用 close-to-close daily r² 建 HAR-style 特徵，非 Corsi HAR-RV（需 intraday RV）；正確標籤 = HAR-style daily-r² NNLS。(2)「A4f non-inferiority PASS」— 未設 margin/reversed null/TOST，failure-to-reject 不能證明非劣性；撤回。(3) A4f 路徑為 blockwise steady-state-g 近似（每個 OOS 日 g 重設為無條件穩態，未遞迴 carry），與 K988 協定不符。(4) HAR-style daily-r²-VIX 巢套 daily-r²，raw QLIKE DM 不能支持 VIX 增量結論。\n\n保留為歷史診斷的數字（proxy=daily r²，僅描述性）：mean QLIKE HAR=1.5612 / HAR_VIX=1.5229 / A4f=1.5390；DM(A4f vs HAR) t=+0.87 p=0.39；DM(HAR_VIX vs HAR) t=-2.60 p=0.009（conventional only）。\n\nSuperseded by K1379（corrected Paper 9 daily-r² protocol）。文章更正：mile_7825c8a2、mile_7fbc61c8（已發佈）。憑證：experiments/k1396/{README.md, k1396_scope_audit.json, review_certification_20260716.md}。",
   "verdict": "PASS",
   "experiment_id": "K1396",
   "experiment_path": "experiments/k1396/",
@@ -31322,7 +31322,22 @@
   "related_experiments": [
    "K988"
   ],
-  "item_id": "9741caaf"
+  "item_id": "9741caaf",
+  "revisions": [
+   {
+    "revised_at": "2026-07-19T13:45:41.255445+08:00",
+    "actor": "main-interactive",
+    "reason": "k1396_scope_repair_daily_r2: withdraw HAR-RV/non-inferiority public claims per 2026-07-16 scope audit (FAIL_PUBLIC_CLAIM); relabel daily-r2 + steady-state A4f approximations",
+    "fields": [
+     "body",
+     "title"
+    ],
+    "before": {
+     "title": "K1396: HAR-RV vs A4f — Paper 9 C4 Non-inferiority (PASS)",
+     "body": "K1396 (PASS, Codex 0.132.0 review, 2026-05-22): HAR-RV benchmarks vs A4f under Patton QLIKE (OOS 2019-2026, n=1866, W=2000, refit q63, seed=42).\n\nMean QLIKE: HAR=1.5612, HAR_VIX=1.5229, A4f=1.5390.\nDM(A4f vs HAR): t=+0.87, p=0.39 — NOT Harvey-sig (|t|<3.0).\nDM(A4f vs HAR_VIX): t=-0.88, p=0.38 — NOT Harvey-sig.\nDM(HAR_VIX vs HAR): t=-2.60, p=0.009 — conventional sig only, NOT Harvey-sig.\n\nConclusion: A4f statistically non-inferior to HAR-type benchmarks under both r2-proxy (t=+0.29, p=0.77) and Patton QLIKE. A4f has 1.4% lower QLIKE than HAR (1.539 vs 1.561) but cannot claim Harvey-sig superiority.\n\nPaper 9 action: C4 honest limitation paragraph added to Section 7.4 (HAR-RV Benchmark Comparison). C4 status: ACKNOWLEDGED. HAR_VIX adding VIX² predictor to HAR achieves lowest QLIKE (1.523) but still not Harvey-sig vs A4f — all three are statistically indistinguishable at the Harvey threshold."
+    }
+   }
+  ]
  },
  {
   "item_id": "7c681d91",
@@ -42289,5 +42304,19 @@
    "review_verdict_file": "experiments/k1732/review_verdict.json",
    "commit": "45230fbc4"
   }
+ },
+ {
+  "item_id": "39255940",
+  "category": "research_correction",
+  "content": "[K1442-adjacent verdict=CORRECTION reviewer=Codex(read-only)+main-thread-recompute artifact=storage/event_articles/us_cpi_2026_06_11_t0 task=assign_a31a311d] The us_cpi_2026_06_11_t0 T+0 event article rebuilt its historical CPI comparison on the official FRED/ALFRED release-id-10 calendar (volpred.data.event_dates.cpi_release_dates, fail-closed, no first-Wednesday-style proxy). The hard-coded calendar held 14 dates, of which 7 were wrong: 2025-10-15 -> 2025-10-24, 2025-12-10 -> 2025-12-18, 2026-01-14 -> 2026-01-13, 2026-02-12 -> 2026-02-13, 2026-03-12 -> 2026-03-11, 2026-05-13 -> 2026-05-12, and 2025-11-13 which was a PHANTOM: BLS published no CPI at all in November 2025 (the October reference month was cancelled in the government shutdown and September was issued off-cycle on 2025-10-24), so the sample is 13 not 14. Effect on the claim: the draft had ranked 2026-06-10 4th; on the official calendar it ranks 1st of 13 at VIX +11.827 percent, more than 2x the runner-up 2026-01-13 (+5.688 percent). All three days the draft ranked above it were non-event days -- the phantom 2025-11-13 (+14.22 percent) plus two off-by-one dates whose VIX signs flip across adjacent sessions (2026-02-12 +17.96 percent vs official 2026-02-13 -1.057 percent; 2026-03-12 +12.629 percent vs official 2026-03-11 -2.808 percent). Corrected sample mean -0.847 percent, median -1.334 percent, 4 of 13 positive. Independently re-derived by the main thread, not taken from the agent's report: the 13 canonical dates were refetched from the module and every per-date VIX reaction recomputed from yfinance closes -- all headline figures reproduce exactly. The article was NOT published before the correction, so no reader-facing erratum was owed. Regression cover: tests/test_cpi_t0_official_release_dates.py, 39 tests, verified non-vacuous (reverting to the legacy list fails 8 of the 9 calendar tests; the survivor is test_target_release_is_resolved_from_the_calendar, because the legacy list happened to carry the correct 2026-06-10 and so resolved the right target for the wrong reason). Codex read-only review cleared lookahead, date-source leakage, row arithmetic and cwd independence, and produced 3 accepted fixes including a non-finite-quote guard in reaction_pct. Lesson: this is the same defect class as the K1442 event-date correction and the k528 NFP first-Friday proxy sweep -- a hand-maintained release calendar cannot represent a cancelled release, so it invents one. Any event study must resolve release dates from the canonical fail-closed module.",
+  "evidence": [
+   "storage/event_articles/us_cpi_2026_06_11_t0/k1442_cpi_date_fix_results.json",
+   "storage/event_articles/us_cpi_2026_06_11_t0/README.md",
+   "storage/event_articles/us_cpi_2026_06_11_t0/evidence.json",
+   "tests/test_cpi_t0_official_release_dates.py",
+   "experiments/k1442/related_event_date_audit.md"
+  ],
+  "confidence": 0.95,
+  "created_at": "2026-07-19T12:39:33.190192"
  }
 ]
