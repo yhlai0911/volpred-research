@@ -1,0 +1,127 @@
+{
+  "manifest_id": "optiondata_coverage_manifest",
+  "generated_at_taipei": "2026-07-19 14:06:21",
+  "generated_by": "task assign_6b29e647 (K-C data-engineering, no K-id)",
+  "source_root": "/Users/yhlai0911/Dropbox/TAIFEXDATA/OPTIONDATA",
+  "unit_note": "本清單用兩種單位並列。file = Dropbox 目錄下的檔案 entry；trading_day = 去重後的實際交易日 (YYYY_MM_DD)。研究單位是 trading_day；brief 的 13,093/1,024 是 file 口徑。",
+
+  "counts_files": {
+    "total_entries": 13111,
+    "data_files": 13107,
+    "non_data_files": 4,
+    "non_data_breakdown": {".DS_Store": 3, "index.html": 1},
+    "local_real": 1024,
+    "placeholder": 12083,
+    "placeholder_index_html_extra": 1,
+    "reconcile": "13107 data = 1024 real + 12083 placeholder; brief 的 13,093 是稍早近似值，現行實測 13,107 data files",
+    "real_breakdown_by_ext": {"csv": 536, "zip": 488}
+  },
+
+  "counts_trading_days": {
+    "total_expected": 3787,
+    "local_real": 536,
+    "placeholder_only": 3251,
+    "missing_no_entry": 0,
+    "date_range_all_entries": ["2011_01_03", "2026_07_17"],
+    "date_range_real": ["2022_01_03", "2025_12_31"],
+    "note": "1,024 real files 只覆蓋 536 個交易日，因為多數日子同時存 .csv 與 .zip 兩份冗餘 (每年 csv=zip 對數)。2024 只有 csv、無 zip。"
+  },
+
+  "real_coverage_by_year": {
+    "2022": {"real_days": 246, "status": "complete", "note": "全年 (含農曆年假斷點 01-26→02-07，正常)"},
+    "2023": {"real_days": 0, "status": "all_placeholder", "note": "整年缺 real (2022-12-30→2024-02-01 有 398 天洞)"},
+    "2024": {"real_days": 48, "placeholder_days": 194, "status": "fragmented", "note": "僅 48/242 散落日，多處數週斷點，時序上不可用"},
+    "2025": {"real_days": 242, "status": "complete", "note": "全年 (含農曆年假斷點 01-22→02-03，正常)"},
+    "pre_2022": {"real_days": 0, "years": "2011-2021", "status": "all_placeholder"},
+    "2026": {"real_days": 0, "placeholder_days": 127, "status": "all_placeholder", "note": "YTD 至 2026-07-17"}
+  },
+
+  "date_gaps_real": [
+    {"span": "2011-2021", "type": "all_placeholder", "days": 2735, "pullable": true},
+    {"span": "2023 全年", "type": "all_placeholder", "days": 239, "pullable": true, "impact": "切斷 2022 與 2024/2025 的連續性"},
+    {"span": "2024 (194/242)", "type": "partial_placeholder", "days": 194, "pullable": true, "impact": "2024 real 僅 48 散落日，不足以做時序"},
+    {"span": "2026 YTD", "type": "all_placeholder", "days": 127, "pullable": true}
+  ],
+
+  "strike_maturity_coverage": {
+    "method": "抽 2 個 real 代表日 stream-aggregate (未整檔載入)",
+    "file_schema": "9 欄 big5: 成交日期,商品代號,履約價格,到期月份(週別),買賣權別,成交時間,成交價格,成交數量(B or S),開盤集合競價",
+    "granularity": "tick-level，單日約 38 萬列",
+    "sample_2022_05_27": {
+      "total_rows": 384232,
+      "TXO_rows": 383395,
+      "TXO_share": 0.998,
+      "TXO_maturities": ["202206", "202206W1", "202207", "202208", "202209", "202212"],
+      "TXO_maturity_count": 6,
+      "TXO_strike_min": 12400,
+      "TXO_strike_max": 21000,
+      "TXO_distinct_strikes": 75,
+      "put_call": {"C": 179747, "P": 203648},
+      "other_products": ["TFO", "TEO", "CDO", "OKO", "OAO", "..."]
+    },
+    "sample_2025_01_02": {
+      "file_bytes": 105162665,
+      "TXO_maturity_count": 7,
+      "TXO_strike_min": 15800,
+      "TXO_strike_max": 29400,
+      "TXO_distinct_strikes": 123
+    },
+    "verdict": "每個 real 日都是完整選擇權鏈 (TXO 6-7 到期別含週選+季選、75-123 履約價、C/P 皆全) → 建 IV surface 的橫斷面粒度充足。blocker 純粹是時間覆蓋 (536/3787 天且分佈不具代表性)，非粒度。"
+  },
+
+  "gap_type_determination": {
+    "verdict": "100% cloud placeholder (可拉)，0 天根本不存在",
+    "evidence": {
+      "detection_method": "st_size==0 ⟺ Dropbox online-only；double-confirm 用 xattr com.dropbox.placeholder",
+      "xattr_correlation_check": "41 個 zero-byte 抽樣全帶 com.dropbox.placeholder (0 例外)；41 個 real 抽樣全無 (0 例外)",
+      "placeholder_has_xattr": "com.dropbox.placeholder + com.dropbox.attrs",
+      "real_has_xattr": "只有 com.dropbox.attrs",
+      "zip_representation_covers_all": "zip 表示法涵蓋全部 3787 天 (2011_01_03→2026_07_17)，含全部 3251 placeholder-only 日 → 每個缺口日都有可拉的 zip entry"
+    },
+    "missing_no_entry_caveat": "本清單所見 3787 個 entry 皆可拉。真正『不存在』(連 entry 都沒有) 只能對照官方 TAIFEX 交易日曆才能定論；per-year entry 數 (233-250) 與台股每年約 245 個交易日一致，無明顯整段缺漏 (2019=233 為單年最低，值得補查)。"
+  },
+
+  "fetch_recommendation": {
+    "pullable": true,
+    "mechanism": "Dropbox online-only 檔：讀取即觸發 File Provider 下載 (cat/dd file > /dev/null)，下載後 st_size 由 0 變真實 bytes",
+    "cheapest_path": "走 zip 表示法。real zip 平均 1.5MB/日 (壓縮)，real csv 平均 81.3MB/日。全史補齊：zip ~5GB vs csv ~264GB (差 54x)。",
+    "size_estimates": {
+      "real_csv_avg_MB": 81.3,
+      "real_zip_avg_MB": 1.5,
+      "full_placeholder_via_zip_GB_est": 4.9,
+      "full_placeholder_via_csv_GB_est": 264
+    },
+    "do_not_download_in_session": true,
+    "staged_plan": [
+      {
+        "tier": 1,
+        "label": "補 2023 + 2024 缺日 → 連續 2022-2025 四年 (IV surface 最小可信樣本)",
+        "days": 433,
+        "detail": "2023 全年 239 天 + 2024 缺 194 天，走 zip",
+        "size_GB_est": 0.65,
+        "priority": "先做",
+        "enqueue_cmd": "uv run python scripts/compute_queue.py enqueue --title 'Materialize OPTIONDATA zip 2023+2024gap' --script scripts/materialize_optiondata.py --interpreter 'uv run python' --script-args --years 2023 2024 --representation zip --result-artifact storage/ops/optiondata_materialize_2023_2024.json --timeout 7200"
+      },
+      {
+        "tier": 2,
+        "label": "補全史 (2011-2021 + 2026 YTD) 剩餘 placeholder",
+        "days": 2818,
+        "detail": "走 zip；2011-2019 用 zip_2011_2019/，2020-2021+2026 用 year/data_zip/",
+        "size_GB_est": 4.2,
+        "priority": "tier 1 驗證可用後再排",
+        "enqueue_cmd": "uv run python scripts/compute_queue.py enqueue --title 'Materialize OPTIONDATA zip full-history' --script scripts/materialize_optiondata.py --interpreter 'uv run python' --script-args --all-placeholder --representation zip --result-artifact storage/ops/optiondata_materialize_full.json --timeout 28800"
+      }
+    ],
+    "script_status": "scripts/materialize_optiondata.py 尚未存在 — 需主線程建立。規格：讀入本 manifest 的 placeholder 檔清單 → 對每個 zip placeholder 執行強制讀取觸發下載 → 驗證 st_size>0 → 記錄成功/失敗清單到 result-artifact。scope 限制下本 session 不建此 script、不下載。",
+    "timeout_rationale": "tier1 433 檔 × zip 小檔，但 Dropbox 逐檔 on-demand 下載受網速/API 節流影響，抓 2h buffer；tier2 2818 檔抓 8h。"
+  },
+
+  "verification_commands": {
+    "total_entries": "find $OD -type f | wc -l",
+    "real_vs_placeholder": "find $OD -type f -print0 | xargs -0 stat -f '%z|%N' | awk -F'|' '{if($1==0)z++;else r++}END{print z,r}'",
+    "real_data_files": "... | awk -F'|' '$1>0 && $2~/OptionsDaily/' | wc -l  # → 1024",
+    "distinct_real_days": "real 檔 basename 抽 OptionsDaily_YYYY_MM_DD | sort -u | wc -l  # → 536",
+    "distinct_all_days": "全 entry basename 抽日期 | sort -u | wc -l  # → 3787",
+    "placeholder_xattr": "xattr <zero-byte-file> | grep com.dropbox.placeholder"
+  }
+}
