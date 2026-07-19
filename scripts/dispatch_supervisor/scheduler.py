@@ -61,7 +61,10 @@ FALLBACK_CRON = "7 * * * *"
 # scheduling lived in LaunchAgent plist. Supervisor falls back to "7 * * * *".
 SCHEDULE_ID = "volpred-hourly-dispatch"
 DAEMON_ID = "volpred-dispatch-supervisor"
+# Also the floor the pool de-rates to during a quota outage: the capacity that
+# ran for months without exhausting the window is the safe thing to fall back to.
 DEFAULT_MAX_SLOTS = 2
+QUOTA_DERATE_STREAK = 2
 
 # Strong references keep launched fire tasks alive until their done callback
 # observes the result. Keys are immutable state job_ids, never reusable slots.
@@ -167,8 +170,41 @@ def load_cron_expr(*, schedules_path: Path = SCHEDULES_PATH, schedule_id: str = 
     return FALLBACK_CRON
 
 
+def quota_derate_active(state_path: Path) -> bool:
+    """True while the newest completions are an unbroken quota_blocked streak.
+
+    A quota block is not a failure of one fire — it says the WINDOW is spent,
+    so every additional slot burns its ~95K cold-load on a run that cannot do
+    any work. Above the baseline capacity that turns a surge into an amplifier
+    of the outage, which is why the de-rate exists at all.
+
+    Unlike ``auth_blocked`` (a latched flag needing `cli unblock-auth`), quota
+    resolves on a clock. So the signal must self-clear: one successful
+    completion breaks the streak and the configured capacity comes straight
+    back, with no human in the loop. Requiring two in a row keeps a single
+    unlucky fire from de-rating the pool.
+    """
+    try:
+        data = json.loads(state_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logging.warning("quota_streak_state_unreadable: %s (%s) — treating as no streak", state_path, exc)
+        return False
+    completions = data.get("completions")
+    if not isinstance(completions, list):
+        return False
+    streak = 0
+    for item in reversed(completions):
+        if not isinstance(item, dict) or item.get("outcome") != "quota_blocked":
+            break
+        streak += 1
+        if streak >= QUOTA_DERATE_STREAK:
+            return True
+    return False
+
+
 def load_max_slots(
     *, schedules_path: Path = SCHEDULES_PATH, daemon_id: str = DAEMON_ID,
+    state_path: Path = state.STATE_PATH,
 ) -> int:
     """Hot-load the daemon pool capacity from runtime_schedules.json.
 
@@ -176,6 +212,11 @@ def load_max_slots(
     or invalid values fall back to two; bool is rejected even though it is an
     ``int`` subclass.  A config reduction never kills existing workers — it
     only blocks new admission until occupancy falls below the new limit.
+
+    The configured value is a ceiling, not a promise: while a quota streak is
+    active the pool is clamped back to ``DEFAULT_MAX_SLOTS``. Keeping that here
+    rather than in the caller preserves the single-owner rule — everyone who
+    asks "how many slots exist" gets the same answer, de-rate included.
     """
     try:
         data = json.loads(schedules_path.read_text(encoding="utf-8"))
@@ -188,6 +229,13 @@ def load_max_slots(
         value = item.get("max_slots", DEFAULT_MAX_SLOTS)
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             LOG.warning("max_slots %r invalid — using %d", value, DEFAULT_MAX_SLOTS)
+            return DEFAULT_MAX_SLOTS
+        if value > DEFAULT_MAX_SLOTS and quota_derate_active(state_path):
+            LOG.warning(
+                "max_slots %d de-rated to %d: last %d completions were quota_blocked "
+                "(self-clears on the next successful fire)",
+                value, DEFAULT_MAX_SLOTS, QUOTA_DERATE_STREAK,
+            )
             return DEFAULT_MAX_SLOTS
         return value
     LOG.warning("daemon %s missing max_slots — using %d", daemon_id, DEFAULT_MAX_SLOTS)
