@@ -568,13 +568,41 @@ class TestControlGroupHasNoNfpDays:
 
     def test_proxy_side_control_group_is_also_clean(self):
         """The same leak existed on the proxy side of the before/after audit:
-        the archive holds the proxy's ANALYSED events, not its NFP sessions."""
-        audit = _load_k528(K528_AUDIT)
-        before = audit["items"]["vol_ratio_vs_friday"]["before"]
-        assert before["n_control_friday"] == 832, (
-            "proxy Friday control count must exclude the proxy's own "
-            "window-dropped January-2005 session"
+        the archive holds the proxy's ANALYSED events, not its NFP sessions.
+
+        Asserting `n_control_friday == 832` alone would not catch a regression
+        that re-leaks 2005-01-07 while dropping some other Friday -- the count
+        would still be 832. So reconstruct the property from the archived event
+        dates instead of restating a scalar. (Codex v3 round-3 finding 4.)
+        """
+        proxy = _load_k528(K528_DIR / "k528_nfp_event_study_results_PROXY_SUPERSEDED.json")
+        archived = {e["date"] for e in proxy["event_data"]}
+
+        # 2005-01-07 is the proxy's January-2005 event: it is the first Friday of
+        # that month AND it is absent from the archive, because the proxy's own
+        # window buffer dropped it. That combination is what made it a leak.
+        assert "2005-01-07" not in archived
+        assert _first_friday(2005, 1).isoformat() == "2005-01-07"
+
+        before = _load_k528(K528_AUDIT)["items"]["vol_ratio_vs_friday"]["before"]
+        # Fridays in the sample, minus archived Friday events, minus that one
+        # reconstructed session -- computed here, not copied from the artifact.
+        n_friday_events_archived = sum(
+            1 for d in archived if pd.Timestamp(d).weekday() == 4
         )
+        assert before["n"] == n_friday_events_archived == 239
+        assert before["n_control_friday"] == 832
+
+    def test_proxy_before_column_uses_one_control_definition_throughout(self):
+        """A `before` object whose mean comes from the leaky archive while its
+        median comes from the leak-free rebuild is not any single estimand."""
+        before = _load_k528(K528_AUDIT)["items"]["vol_ratio_vs_all"]["before"]
+        assert "as_published" in before, "the leaky published values must be nested, not inlined"
+        assert before["p_value"] != before["as_published"]["p_value"], (
+            "if these match, the top-level fields are still the archive's leaky values"
+        )
+        assert before["n_control"] == 5085
+        assert before["as_published"]["n_control"] == 5086
 
     def test_window_excluded_event_is_not_silently_analysed_or_kept_as_control(self):
         audit = _load_k528(K528_RESULTS)["sample"]["event_mapping_audit"]
@@ -597,10 +625,12 @@ class TestCalendarFailClosedCannotBeBypassed:
         per-month min() takes it without complaint and the cadence still passes.
         Only the reviewed-month allowlist catches this -- a day-gap threshold
         cannot, because three of the six real cases are 3 days apart."""
+        # 5 days apart, so the gap gate lets it through: only the reviewed-month
+        # allowlist can catch an off-cycle item filed BEFORE the report.
         with pytest.raises(RuntimeError, match="never been"):
             check(
                 pd.to_datetime(["2024-01-05", "2024-02-01", "2024-03-08"]),
-                ["2024-01-05", "2024-02-01", "2024-02-02", "2024-03-08"],
+                ["2024-01-05", "2024-02-01", "2024-02-06", "2024-03-08"],
                 "2024-01-01", "2024-03-31",
             )
 
@@ -654,6 +684,32 @@ class TestCalendarFailClosedCannotBeBypassed:
                 "2024-01-01", "2024-04-30",
             )
 
+    def test_reviewed_month_whose_raw_shape_changed_goes_back_for_review(self):
+        """The allowlist authorises the entry SET someone checked, not the month
+        name. A reviewed month that later gains an entry is a shape nobody
+        reviewed. (Codex v3 round-3 finding 2.)"""
+        mod = _k528_module()
+        mod.REVIEWED_MULTI_ENTRY_MONTHS["2024-02"] = {
+            "raw": ["2024-02-02", "2024-02-09"], "report": "2024-02-02",
+        }
+        with pytest.raises(RuntimeError, match="no longer matches"):
+            mod.check_calendar_is_complete(
+                pd.to_datetime(["2024-01-05", "2024-02-02", "2024-03-08"]),
+                ["2024-01-05", "2024-02-02", "2024-02-06", "2024-02-09", "2024-03-08"],
+                "2024-01-01", "2024-03-31",
+            )
+
+    def test_month_present_in_raw_but_missing_from_selection_fails(self, check):
+        """The near-boundary truncation the 70-day tolerance alone lets through:
+        raw has the month, the selection does not, and the observed span just
+        ends one month earlier while still looking continuous."""
+        with pytest.raises(RuntimeError, match="does not"):
+            check(
+                pd.to_datetime(["2024-01-05", "2024-02-02"]),
+                ["2024-01-05", "2024-02-02", "2024-03-08"],
+                "2024-01-01", "2024-03-31",
+            )
+
     def test_truncated_feed_cannot_hide_behind_its_own_shrunken_span(self, check):
         """Anchoring the gap check on the OBSERVED span cannot catch truncation:
         if the feed stops early the span shrinks with it and nothing looks
@@ -674,7 +730,9 @@ class TestCalendarFailClosedCannotBeBypassed:
 
     def test_selection_contradicting_the_human_verified_date_fails(self):
         mod = _k528_module()
-        mod.REVIEWED_MULTI_ENTRY_MONTHS["2024-02"] = "2024-02-06"
+        mod.REVIEWED_MULTI_ENTRY_MONTHS["2024-02"] = {
+            "raw": ["2024-02-01", "2024-02-06"], "report": "2024-02-06",
+        }
         with pytest.raises(RuntimeError, match="contradicts"):
             mod.check_calendar_is_complete(
                 pd.to_datetime(["2024-01-05", "2024-02-01", "2024-03-08"]),
@@ -687,7 +745,9 @@ class TestCalendarFailClosedCannotBeBypassed:
         that rejects nothing. A revision filed a week later, in a month someone
         has checked against the BLS archive, must go through."""
         mod = _k528_module()
-        mod.REVIEWED_MULTI_ENTRY_MONTHS["2024-02"] = "2024-02-02"
+        mod.REVIEWED_MULTI_ENTRY_MONTHS["2024-02"] = {
+            "raw": ["2024-02-02", "2024-02-09"], "report": "2024-02-02",
+        }
         out = mod.check_calendar_is_complete(
             pd.to_datetime(["2024-01-05", "2024-02-02", "2024-03-08"]),
             ["2024-01-05", "2024-02-02", "2024-02-09", "2024-03-08"],

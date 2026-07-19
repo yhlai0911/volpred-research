@@ -1,0 +1,20 @@
+{
+  "kid": "k528",
+  "verdict": "FAIL",
+  "reviewer": "Codex gpt-5.6-sol / high",
+  "reviewed_at": "2026-07-19T17:05:00+08:00",
+  "reviewed_commit": "58853f3ab",
+  "review_artifact": "experiments/k528/codex_review_v5.md",
+  "blocking_defects": [
+    "completeness accepted a month present in the raw feed but missing from the selection (near-boundary truncation the 70-day window tolerance cannot see)",
+    "REVIEWED_MULTI_ENTRY_MONTHS authorised by month name rather than by the reviewed raw entry set, so a reviewed month's feed could change shape without triggering re-review; removing the <3-day gap gate also removed a working detector"
+  ],
+  "reviewed_sha256": {
+    "README.md": "d752a80538b3d6b1612a6ede915a5eea69fd4386da48e2c92795d3014acb982c",
+    "build_article_correction.py": "c4e3cf99627faa7a60565e5e9df89d44f99de6bf7900716b59451e25637b2e31",
+    "k528_nfp_event_study.py": "8ee2b09de1cc7e698464fe6116087c1d358c1377447b857c5e5a1e4b81e40d36",
+    "k528_nfp_event_study_results.json": "29b0c4a765b7f72e87ed14797df392a7577b1d507fbcf236cb500f9e8529768d",
+    "k528_nfp_official_dates_results.json": "ca22092946125cfad1b00fcdd7794551e2f8bed7e4ed61426f34b7228eff0bc5"
+  },
+  "note": "Historical record of round 3 of the third-review cycle. Superseded by the next round."
+}

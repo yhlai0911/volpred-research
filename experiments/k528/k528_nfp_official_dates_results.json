@@ -1,7 +1,7 @@
 {
   "experiment_id": "K528",
   "title": "NFP event-date correction: first-Friday proxy vs official BLS calendar",
-  "generated_at": "2026-07-19T08:53:23.055332+00:00",
+  "generated_at": "2026-07-19T09:09:40.693789+00:00",
   "before_source": "k528_nfp_event_study_results_PROXY_SUPERSEDED.json",
   "after_source": "k528_nfp_event_study_results.json",
   "event_date_source": {
@@ -108,23 +108,32 @@
     "vol_ratio_vs_all": {
       "label": "NFP vs all non-NFP days (article: 1.10x)",
       "before": {
-        "mean_ratio": 1.1035360772013734,
+        "mean_ratio": 1.103357392674601,
         "nfp_mean": 0.008420922409653335,
-        "baseline_mean": 0.0076308537469923455,
-        "p_value": 0.1283682008960355,
+        "baseline_mean": 0.007632089534688792,
+        "p_value": 0.1289677501166497,
         "significant_5pct": false,
         "n": 254,
-        "median_ratio": 1.1884376842166304,
-        "win_rate": 0.5551181102362205
+        "n_control": 5085,
+        "median_ratio": 1.1883534558452653,
+        "win_rate": 0.5551181102362205,
+        "as_published": {
+          "mean_ratio": 1.1035360772013734,
+          "baseline_mean": 0.0076308537469923455,
+          "p_value": 0.1283682008960355,
+          "significant_5pct": false,
+          "n_control": 5086,
+          "note": "what the proxy run published. Its control group still contained the proxy's own window-dropped NFP session, so it is kept for the record but is not the like-for-like comparison."
+        }
       },
       "after": {
-        "mean_ratio": 1.1077777719197994,
-        "nfp_mean": 0.00845305173732809,
-        "baseline_mean": 0.0076306385193835365,
-        "p_value": 0.11206802266548598,
+        "mean_ratio": 1.107774388314181,
+        "nfp_mean": 0.008453035639588323,
+        "baseline_mean": 0.0076306472949354,
+        "p_value": 0.11207916081982183,
         "significant_5pct": false,
         "n": 253,
-        "median_ratio": 1.191581334504972,
+        "median_ratio": 1.1915749139917906,
         "win_rate": 0.5612648221343873
       },
       "note": "proxy-side median_ratio / win_rate are reconstructed from the archived per-event data, not from the proxy run's own output (it only reported means).",
@@ -134,12 +143,12 @@
     "vol_ratio_vs_friday": {
       "label": "NFP vs non-NFP Friday baseline (article: 1.17x)",
       "before": {
-        "mean_ratio": 1.166705672588405,
-        "p_value": 0.04213984873387389,
+        "mean_ratio": 1.1667059072917134,
+        "p_value": 0.04213965631945208,
         "significant_5pct": true,
         "n": 239,
         "nfp_days_on_friday": 239,
-        "median_ratio": 1.1979193428374169,
+        "median_ratio": 1.197858687735078,
         "win_rate": 0.5564853556485355,
         "n_control_friday": 832,
         "estimand": "Friday NFP sessions vs Friday non-NFP sessions (weekday held fixed)",
@@ -152,17 +161,17 @@
         }
       },
       "after": {
-        "mean_ratio": 1.1889932285781484,
-        "p_value": 0.02085474364987024,
+        "mean_ratio": 1.1889895608324512,
+        "p_value": 0.02085730047956932,
         "significant_5pct": true,
         "n": 237,
         "nfp_days_on_friday": 237,
-        "median_ratio": 1.2185765501135915,
+        "median_ratio": 1.2184019937867643,
         "win_rate": 0.569620253164557,
         "estimand": "Friday NFP sessions vs Friday non-NFP sessions (weekday held fixed)",
         "diagnostic_mixed_weekday": {
-          "mean_ratio": 1.1767600146677832,
-          "p_value": 0.025693120973358435,
+          "mean_ratio": 1.1767571319430215,
+          "p_value": 0.025695582939264633,
           "significant_5pct": true,
           "n": 253,
           "status": "DIAGNOSTIC ONLY - the pre-correction estimand, not quotable"
@@ -186,14 +195,14 @@
         "win_rate": 0.7165354330708661
       },
       "after": {
-        "mean_ratio": 2.0272689852570607,
-        "high_mean": 0.011276125213428842,
-        "low_mean": 0.005562224497800924,
+        "mean_ratio": 2.0272855154308878,
+        "high_mean": 0.011276133630976725,
+        "low_mean": 0.005562183296406598,
         "n_high": 128,
         "n_low": 125,
-        "p_value": 4.554489029639581e-09,
+        "p_value": 4.553196483578698e-09,
         "significant_5pct": true,
-        "median_ratio": 2.073364952892548,
+        "median_ratio": 2.0734693918115794,
         "win_rate": 0.6953125
       },
       "note": "",
@@ -212,11 +221,11 @@
         "significant_5pct": true
       },
       "after": {
-        "pearson_r": 0.4404312353143255,
-        "pearson_p": 1.9831312019194168e-13,
-        "spearman_rho": 0.3455048873701663,
-        "spearman_p": 1.6699985504624933e-08,
-        "slope_pct_per_vix_pt": 0.04256117035047841,
+        "pearson_r": 0.4404368774683295,
+        "pearson_p": 1.9815727302673932e-13,
+        "spearman_rho": 0.3455108154960857,
+        "spearman_p": 1.668996934776637e-08,
+        "slope_pct_per_vix_pt": 0.042561756448884734,
         "n": 253,
         "significant_5pct": true
       },
@@ -446,7 +455,7 @@
       },
       {
         "from": "樣本為 2005 年 2 月 4 日至 2026 年 3 月 6 日期間、共 254 次 NFP 公布日，資料源為 yfinance 的 SPY 與 VIX 日頻數據。",
-        "to": "樣本為 2005 年 2 月 4 日至 2026 年 3 月 6 日期間、共 253 次 NFP 公布日，NFP 發布日期取自美國勞工統計局官方發布日曆（透過 FRED release id 50 取得），資料源為 yfinance 的 SPY 與 VIX 日頻數據。\n\n**2026-07-19 更正說明**：本文初版的 NFP 日期是用「每月第一個週五」推算的。與 BLS 官方發布日曆比對後，約兩成對不上——參考週較晚時 BLS 會改在第二個週五發布，遇到假期則會提前，2025 年 10 月更因聯邦政府關門根本沒有發布（初版把這天算成了事件日，但那天並不存在）。改用官方日曆重跑後，樣本從 254 場變成 253 場。\n\n**方向性結論全部維持不變**：對全體交易日基準未達顯著、對週五基準達到顯著、真正拉開差距的是進場 VIX 體制——這三點在官方日期下都成立，只有數值小幅調整（1.10→1.11 倍、1.17→1.19 倍、2.17→2.03 倍、相關係數 0.45→0.44）。\n\n另有一項口徑調整：週五基準的比較，事件組原本是全部樣本（星期別混合）、對照組卻只有週五，兩邊不對等。現改為只取在週五公布的 237 場，維持兩邊星期別一致，所以該數字講的是「在週五公布的 NFP」而非 NFP 一般而言。被排掉的 16 場本身比較平靜，因此限定週五會把倍數墊高一些（不限定為 1.18 倍、限定為 1.19 倍），兩個數字都列出以免只揭露比較好看的那個。\n\n**文中圖表與文末懶人包圖組仍是初版數據，正在重新產製**。逐項前後對照見 experiments/k528/k528_nfp_official_dates_results.json。",
+        "to": "樣本為 2005 年 2 月 4 日至 2026 年 3 月 6 日期間、共 253 次 NFP 公布日，NFP 發布日期取自美國勞工統計局官方發布日曆（透過 FRED release id 50 取得），資料源為 yfinance 的 SPY 與 VIX 日頻數據。\n\n**2026-07-19 更正說明**：本文初版的 NFP 日期是用「每月第一個週五」推算的。與 BLS 官方發布日曆比對後，約兩成對不上——參考週較晚時 BLS 會改在第二個週五發布，遇到假期則會提前，2025 年 10 月更因聯邦政府關門根本沒有發布（初版把這天算成了事件日，但那天並不存在）。改用官方日曆重跑後，樣本從 254 場變成 253 場。\n\n**方向性結論全部維持不變**：對全體交易日基準未達顯著、對週五基準達到顯著、進場 VIX 高低兩組之間的差距是本研究中最大的數字——這三點在官方日期下都成立，只有數值小幅調整（1.10→1.11 倍、1.17→1.19 倍、2.17→2.03 倍、相關係數 0.45→0.44）。要說明的是，本文並沒有正式檢定「2.03 倍顯著大於 1.19 倍」——兩者的樣本與對照組都不同，而且 VIX 分組用的是事後中位數切點。兩個數字是並排比較量級，不是排名，也不是因果宣稱。\n\n另有一項口徑調整：週五基準的比較，事件組原本是全部樣本（星期別混合）、對照組卻只有週五，兩邊不對等。現改為只取在週五公布的 237 場，維持兩邊星期別一致，所以該數字講的是「在週五公布的 NFP」而非 NFP 一般而言。被排掉的 16 場本身比較平靜，因此限定週五會把倍數墊高一些（不限定為 1.18 倍、限定為 1.19 倍），兩個數字都列出以免只揭露比較好看的那個。\n\n**文中圖表與文末懶人包圖組仍是初版數據，正在重新產製**。逐項前後對照見 experiments/k528/k528_nfp_official_dates_results.json。",
         "hits": 1
       },
       {

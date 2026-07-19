@@ -1,0 +1,82 @@
+{
+  "kid": "k528",
+  "rerun_at": "2026-07-19T17:11:00+08:00",
+  "event_dates_fix_synced": true,
+  "event_dates_fix_commit": "305d118a3",
+  "six_problem_months_verified": {
+    "2006-05": "2006-05-05",
+    "2012-12": "2012-12-07",
+    "2013-05": "2013-05-03",
+    "2020-05": "2020-05-08",
+    "2024-01": "2024-01-05",
+    "2024-08": "2024-08-02"
+  },
+  "six_problem_months_note": "Verified against live ALFRED and against the BLS news-release archive. The previously selected dates (2006-05-08, 2012-12-12, 2013-05-06, 2020-05-11, 2024-01-10, 2024-08-21) are off-cycle seasonal-factor/benchmark revisions.",
+  "headline": {
+    "estimand": "Friday NFP sessions vs Friday non-NFP sessions (weekday held fixed)",
+    "nfp_vs_friday_ratio": 1.1889895608324512,
+    "p_value": 0.02085730047956932,
+    "n_events": 237,
+    "n_control": 834,
+    "significance_flip_holds": false,
+    "significance_flip_note": "The claimed 'significant -> not significant' flip does NOT hold, under either estimand. Friday-restricted: 1.189x p=0.0209. Old mixed-weekday spec on correct dates: 1.177x p=0.0257. Codex v2 predicted 1.1779/0.02488 for the mixed spec; the small delta is the control-group leak fix found in round 2. The flip was an artifact of six wrong event dates.",
+    "supporting": {
+      "nfp_vs_all_ratio": 1.107774388314181,
+      "nfp_vs_all_p": 0.11207916081982183,
+      "mann_whitney_one_sided_p": 0.0019410946261427346,
+      "diagnostic_mixed_weekday_ratio": 1.1767571319430215,
+      "diagnostic_mixed_weekday_p": 0.025695582939264633
+    }
+  },
+  "findings_addressed": {
+    "4": "fail-closed completed. check_calendar_is_complete now validates the RAW feed as well as the accessor's selection: malformed selection (duplicate month, month/date absent from raw), non-earliest selection, same-month pair too close to disambiguate, unreviewed or re-shaped multi-entry month, month present in raw but missing from selection, requested-window coverage, gaps inside the observed span, and a KNOWN_MISSING_MONTHS claim contradicted by the raw feed. Event->session mapping asserts one-to-one (unmapped in-sample release raises; two releases colliding on one session raises); window-buffer exclusions are recorded, not silent.",
+    "5": "Friday baseline estimand repaired by restricting the event group to Friday releases (237), so weekday is held fixed on both sides. weekday-matched controls rejected because the non-Friday cells are Mon 6 / Tue 2 / Wed 1 / Thu 7 -- too thin for a stable weighted average. Disclosed: the restriction is NOT neutral (excluded events are 16.3% quieter, so it raises the ratio), and the result is conditional on Friday. IMPORTANT: this defect predates the date correction -- the proxy run was already 239/254 Friday, not 254/254 as originally claimed.",
+    "6": "directional overreach removed. 'insignificant across all tests' is gone; every significance statement names its own test. Welch vs all days does not reject (p=0.112) while the one-sided Mann-Whitney does (p=0.0019), and the artifact says so instead of collapsing them. The VIX-regime comparison is stated as the largest number in the study, explicitly NOT as a formally-tested ranking or a causal claim.",
+    "7": "atomic writes: main results and audit use tempfile + fsync + os.replace. builder dry-run now writes nothing at all (verified by sha256 + mtime); recording is opt-in via --record-plan or --apply.",
+    "8": "archive JSON carries superseded=true, do_not_cite=true, superseded_by, retraction_reason, impact_on_published_numbers and the proxy date source in the object itself, so it is identifiable as retracted without its filename or README."
+  },
+  "corrections_rebuilt": {
+    "old_count": 18,
+    "new_count": 19,
+    "old_list_voided": true,
+    "void_reason": "The 18-item list was built against the contaminated rerun and contained a DIRECTIONAL reversal: it rewrote 'reaches significance' into 'p=0.057, just misses'. The article was right the first time. Applying it would have published a retraction of a correct finding.",
+    "directional_claims_changed": 0,
+    "status": "validated_not_applied",
+    "applied": false
+  },
+  "self_found_defects": [
+    "control group retained the window-excluded NFP session 2005-01-07 (found before Codex round 1 reported it independently)",
+    "the claim 'every proxy NFP was a Friday' was false (239/254); found by checking my own README claim against the archive",
+    "window-coverage hole: anchoring the completeness span on min..max(selected) cannot detect a truncated feed"
+  ],
+  "review_chain": [
+    {
+      "round": "v2",
+      "commit": "af2fad356",
+      "verdict": "FAIL",
+      "artifact": "experiments/k528/codex_review_v2.md"
+    },
+    {
+      "round": "v3",
+      "commit": "6fd281901",
+      "verdict": "FAIL",
+      "artifact": "experiments/k528/codex_review_v3.md"
+    },
+    {
+      "round": "v4",
+      "commit": "2abb3f68c",
+      "verdict": "FAIL",
+      "artifact": "experiments/k528/codex_review_v4.md"
+    },
+    {
+      "round": "v5",
+      "commit": "58853f3ab",
+      "verdict": "FAIL",
+      "artifact": "experiments/k528/codex_review_v5.md"
+    }
+  ],
+  "codex_v3_verdict": "FAIL",
+  "codex_latest_verdict": "PENDING_ROUND_6",
+  "merge_allowed": false,
+  "notes": "merge_allowed stays false until a Codex round returns PASS on the exact bytes it read. This file is not part of the certified claim surface (*.py + README.md + *_results.json), so it is written and updated around the review rounds by design. One correction worth recording against myself: in round 3 I removed a working same-month gap gate, claiming the real feed 'straddled' its threshold. It did not -- the condition was `gap < 3` and the real minimum is exactly 3, which passes. I had changed `<` to `<=` first and then deleted the gate on the strength of my own mistake. Codex caught it; the gate is restored at `< 3` and the allowlist now pins each reviewed month's full raw entry set rather than just its name."
+}

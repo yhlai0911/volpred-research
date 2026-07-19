@@ -80,31 +80,39 @@ KNOWN_MISSING_MONTHS: dict[str, str] = {
     ),
 }
 
-# NOTE: an earlier version of this file gated same-month ambiguity on a minimum
-# day-gap, on the premise that "revisions are filed weeks after the report, not
-# days". Running it against the real feed falsified that premise immediately:
-# three of the six genuine multi-entry months (2006-05, 2013-05, 2020-05) are
-# exactly 3 days apart. A threshold the real data straddles is not a safety
-# check, it is a knob that manufactures confidence, so it is gone. The reviewed
-# allowlist below is the actual control, and unlike a gap rule it is verifiable.
+# Two same-month entries closer together than this cannot be told apart as
+# "regular report" vs "off-cycle revision" by date order alone, so the run
+# refuses to guess.
+#
+# A correction I got wrong once and am recording so it is not repeated: I removed
+# this gate claiming the real feed "straddles" it, because three genuine cases
+# (2006-05, 2013-05, 2020-05) are exactly 3 days apart. That was a misreading of
+# my own condition -- the test is `gap < 3`, and a 3-day gap passes it. The real
+# data never falsified this gate; I falsified it by first changing `<` to `<=`
+# and then deleting it. It is restored, at `< 3`, where every real case passes.
+AMBIGUOUS_SAME_MONTH_GAP_DAYS = 3
 
-# The months where ALFRED returns two release-id-50 entries, with the entry that
-# is the actual Employment Situation report. Verified individually against the
-# BLS news-release archive (bls.gov/news.release/archives/empsit_<MMDDYYYY>.htm).
+# The months where ALFRED returns two release-id-50 entries, pinned as the FULL
+# raw date set plus which entry is the actual Employment Situation report. Each
+# verified individually against the BLS news-release archive
+# (bls.gov/news.release/archives/empsit_<MMDDYYYY>.htm).
 #
 # Why an explicit reviewed list rather than a rule: "earliest entry in the month"
 # is right for every case we have checked, but it is a HEURISTIC, and it fails
 # silently if an off-cycle item is ever filed BEFORE the report. There is no way
-# to tell those apart from dates alone. So the rule still runs, and on top of it
-# any month with multiple entries must appear here -- a new multi-entry month is
-# something a human has to look at, not something this script gets to assume.
-REVIEWED_MULTI_ENTRY_MONTHS: dict[str, str] = {
-    "2006-05": "2006-05-05",
-    "2012-12": "2012-12-07",
-    "2013-05": "2013-05-03",
-    "2020-05": "2020-05-08",
-    "2024-01": "2024-01-05",
-    "2024-08": "2024-08-02",
+# to tell those apart from dates alone.
+#
+# Why the full date set and not just the month key: authorising a MONTH means a
+# reviewed month whose feed later gains a third entry still sails through on a
+# review that never saw it. The approval has to be of the shape someone actually
+# looked at, so a change to that shape sends it back for review.
+REVIEWED_MULTI_ENTRY_MONTHS: dict[str, dict] = {
+    "2006-05": {"raw": ["2006-05-05", "2006-05-08"], "report": "2006-05-05"},
+    "2012-12": {"raw": ["2012-12-07", "2012-12-12"], "report": "2012-12-07"},
+    "2013-05": {"raw": ["2013-05-03", "2013-05-06"], "report": "2013-05-03"},
+    "2020-05": {"raw": ["2020-05-08", "2020-05-11"], "report": "2020-05-08"},
+    "2024-01": {"raw": ["2024-01-05", "2024-01-10"], "report": "2024-01-05"},
+    "2024-08": {"raw": ["2024-08-02", "2024-08-21"], "report": "2024-08-02"},
 }
 
 # How far the observed calendar may fall short of the requested window before the
@@ -194,14 +202,27 @@ def check_calendar_is_complete(selected, raw, start, end):
             f"selected dates that do not appear in the raw feed at all: {off_feed}."
         )
 
-    # 1: the accessor's per-month choice must be the earliest entry.
-    mis_selected = []
+    # 1: the accessor's per-month choice must be the earliest entry, and any
+    # same-month pair must be far enough apart to tell report from revision.
+    ambiguous, mis_selected = [], []
     sel_by_month = dict(zip(sel_months, sel))
     for month, entries in raw_by_month.items():
+        if len(entries) > 1:
+            gap = (entries[1] - entries[0]).days
+            if gap < AMBIGUOUS_SAME_MONTH_GAP_DAYS:
+                ambiguous.append(
+                    f"{month}: {entries[0].date()} vs {entries[1].date()} ({gap}d apart)"
+                )
         if month in sel_by_month and sel_by_month[month] != entries[0]:
             mis_selected.append(
                 f"{month}: selected {sel_by_month[month].date()}, earliest is {entries[0].date()}"
             )
+    if ambiguous:
+        raise RuntimeError(
+            f"{len(ambiguous)} month(s) carry two release entries too close together to "
+            f"identify the Employment Situation report by date order: {ambiguous}. "
+            "Refusing to guess which one is the monthly report."
+        )
     if mis_selected:
         raise RuntimeError(
             f"accessor did not select the earliest entry in {len(mis_selected)} month(s): "
@@ -223,15 +244,42 @@ def check_calendar_is_complete(selected, raw, start, end):
             "Situation report at bls.gov/news.release/archives/ and add it to "
             "REVIEWED_MULTI_ENTRY_MONTHS."
         )
-    contradicted = {
-        m: {"selected": str(sel_by_month[m].date()), "reviewed": REVIEWED_MULTI_ENTRY_MONTHS[m]}
+    # Approve the SHAPE, not the month. A reviewed month whose feed later gains
+    # or loses an entry is a shape nobody reviewed, so it goes back for review.
+    reshaped = {
+        m: {"now": [str(d.date()) for d in multi[m]], "reviewed": REVIEWED_MULTI_ENTRY_MONTHS[m]["raw"]}
         for m in multi
-        if m in sel_by_month and str(sel_by_month[m].date()) != REVIEWED_MULTI_ENTRY_MONTHS[m]
+        if [str(d.date()) for d in multi[m]] != REVIEWED_MULTI_ENTRY_MONTHS[m]["raw"]
+    }
+    if reshaped:
+        raise RuntimeError(
+            f"the raw feed for reviewed month(s) no longer matches what was reviewed: {reshaped}. "
+            "The approval covers the entry set someone actually checked, not the month name. "
+            "Re-verify against bls.gov/news.release/archives/ before proceeding."
+        )
+    contradicted = {
+        m: {"selected": str(sel_by_month[m].date()),
+            "reviewed": REVIEWED_MULTI_ENTRY_MONTHS[m]["report"]}
+        for m in multi
+        if m in sel_by_month and str(sel_by_month[m].date()) != REVIEWED_MULTI_ENTRY_MONTHS[m]["report"]
     }
     if contradicted:
         raise RuntimeError(
             f"selection contradicts the human-verified release date in {contradicted}. "
             "Either the feed changed or the accessor regressed; do not proceed on the guess."
+        )
+
+    # Every month the source published must survive into the selection. Without
+    # this, a month can vanish between raw and selected (stale accessor cache vs
+    # a live raw fetch is exactly that shape) and neither the gap check nor the
+    # window-coverage check sees it -- the observed span just ends one month
+    # earlier and still looks continuous.
+    dropped = sorted(set(raw_by_month) - set(sel_months) - set(KNOWN_MISSING_MONTHS))
+    if dropped:
+        raise RuntimeError(
+            f"the raw feed has {len(dropped)} month(s) that the selected calendar does not: "
+            f"{dropped}. A month present at the source and absent from the analysis is a "
+            "silently shortened sample."
         )
 
     # 3a: the observed span must actually cover what was asked for. Checking only
@@ -280,6 +328,7 @@ def check_calendar_is_complete(selected, raw, start, end):
         "n_raw_entries": len(raw),
         "months_with_multiple_raw_entries": sorted(multi),
         "reviewed_multi_entry_months": dict(sorted(REVIEWED_MULTI_ENTRY_MONTHS.items())),
+        "ambiguity_gap_threshold_days": AMBIGUOUS_SAME_MONTH_GAP_DAYS,
         "known_missing_months": {m: KNOWN_MISSING_MONTHS[m] for m in sorted(KNOWN_MISSING_MONTHS)},
         "window_coverage": {
             "requested": f"{start}..{end}",
@@ -902,6 +951,11 @@ proxy_nfp_friday_abs = proxy_nfp_abs[_p_weekday == 4]
 _p_t_fri, _p_p_fri = stats.ttest_ind(proxy_nfp_friday_abs, proxy_fri_abs, equal_var=False)
 proxy_ratio_fri_restricted = float(proxy_nfp_friday_abs.mean() / proxy_fri_abs.mean())
 
+# All-days comparison on the leak-free proxy control, so the `before` column of
+# that audit item is one estimand throughout rather than a mixture.
+_p_t_all, _p_p_all = stats.ttest_ind(proxy_nfp_abs, proxy_non_nfp_abs, equal_var=False)
+proxy_ratio_all_clean = float(proxy_nfp_abs.mean() / proxy_non_nfp_abs.mean())
+
 _p_pre_vix = np.array([e["pre_vix"] if e["pre_vix"] is not None else np.nan
                        for e in proxy_events])
 _p_thr = proxy["regime_analysis"]["vix_median_split"]
@@ -940,14 +994,31 @@ def record(key, label, before, after, note=""):
 record(
     "vol_ratio_vs_all", "NFP vs all non-NFP days (article: 1.10x)",
     {
-        "mean_ratio": proxy["main_results"]["vol_ratio_vs_all"],
-        "nfp_mean": proxy["main_results"]["nfp_avg_abs_return"],
-        "baseline_mean": proxy["main_results"]["non_nfp_avg_abs_return"],
-        "p_value": proxy["statistical_tests"]["A_nfp_vs_all"]["p_value"],
-        "significant_5pct": proxy["statistical_tests"]["A_nfp_vs_all"]["significant_5pct"],
-        "n": proxy["sample"]["total_nfp_events"],
+        # EVERY field on this side uses the leak-free control group. Mixing an
+        # archive-derived mean/p with a leak-free median/win-rate would make a
+        # single `before` object that is not any one estimand (Codex v3 round-3
+        # finding 3); the as-published values are nested instead.
+        "mean_ratio": proxy_ratio_all_clean,
+        "nfp_mean": float(proxy_nfp_abs.mean()),
+        "baseline_mean": float(proxy_non_nfp_abs.mean()),
+        "p_value": float(_p_p_all),
+        "significant_5pct": bool(_p_p_all < 0.05),
+        "n": int(len(proxy_nfp_abs)),
+        "n_control": int(len(proxy_non_nfp_abs)),
         "median_ratio": float(np.median(proxy_nfp_abs) / np.median(proxy_non_nfp_abs)),
         "win_rate": win_rate(proxy_nfp_abs, proxy_non_nfp_abs),
+        "as_published": {
+            "mean_ratio": proxy["main_results"]["vol_ratio_vs_all"],
+            "baseline_mean": proxy["main_results"]["non_nfp_avg_abs_return"],
+            "p_value": proxy["statistical_tests"]["A_nfp_vs_all"]["p_value"],
+            "significant_5pct": proxy["statistical_tests"]["A_nfp_vs_all"]["significant_5pct"],
+            "n_control": int(len(proxy_non_nfp_abs_archive)),
+            "note": (
+                "what the proxy run published. Its control group still contained the "
+                "proxy's own window-dropped NFP session, so it is kept for the record "
+                "but is not the like-for-like comparison."
+            ),
+        },
     },
     {
         "mean_ratio": vol_ratio_all,
@@ -1327,14 +1398,18 @@ output = {
     },
     "conclusions": conclusions,
     "practical_implication": (
-        f"Entry VIX regime is the dominant and most reliably measured effect here: "
+        f"The VIX-regime gap is the LARGEST NUMBER in this study, which is not the "
+        f"same as being the dominant effect and is not a causal statement: "
         f"{high_vix.mean()/low_vix.mean():.2f}x between high- and low-VIX NFP days "
         f"(p={p_regime:.4g}). The NFP-day effect itself is smaller and the tests do not "
         f"agree on it -- the Welch mean-difference test against all non-NFP days gives "
         f"{vol_ratio_all:.2f}x (p={p_val_all:.4f}) while the one-sided Mann-Whitney gives "
         f"p={p_val_wilcox:.5f}. Report both. A mean test that does not reject is not "
         "evidence that the effect is zero, and it does not license the claim that the "
-        "event 'is not NFP itself'."
+        "event 'is not NFP itself'. The two magnitudes are NOT formally compared: "
+        "different samples, different control groups, no test of whether the regime gap "
+        "exceeds the NFP gap, and the VIX split is an in-sample median. Read them side "
+        "by side, not as a ranking."
     ),
     "claim_scope_note": (
         "Every significance statement in this artifact is scoped to its own test. "
