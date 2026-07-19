@@ -22107,5 +22107,25 @@
     "owner": "codex",
     "backfilled_at": "2026-07-19T20:35:00.713558+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-20T05:13:28+08:00",
+    "task_type": "paper_review",
+    "task_id": "phase_a_verdict_intake_20260720",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
+    "owner": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
+    "commit": null,
+    "summary": "PHASE A 收件：三份 Codex primary-path 裁決全部 FAIL → 建 bounded remediation task，三個 worktree 一律禁 merge。\n\n- **K1698 rev2b round 3 = FAIL**（8 條 blocker）。共同根因：rev2b 的修正只落在 README 與 canonical q1/q2 欄位，PRIMARY JSON 的頂層敘述層沒跟著改；而那些字串是 `k1698.py:3154,:3238` 結果組裝區 hard-code 的 —— 改 JSON 沒用，重跑會再生。另 `review_receipt_rev2.json` / `review_verdict.json` 兩個被宣稱存在的檔案根本不存在（repo merge gate 正卡在這）。→ task `k1698_rev3_remediation`\n- **K741/K904 canonical round 2 = FAIL**。方法層全部驗過關（2×2 四格 hash 互異、估計窗誠實 194/3890/4084、forward mapper 零 backward 零 collision、BLS 發布日 spot-check 全對、bootstrap 逐值可重現、reproduce.py 123/123）—— 唯一 merge-blocking 是**宣稱強度**：`main_v3.tex:72,396` 仍寫 high-VIX 下 NFP 效應「vanishes / is absorbed」，但 ratio 0.94、p=0.731，difference-in-significance 不等於 significant difference。另有事實錯誤：comparison.md:69 的 +7d 應為 25 不是 26，且不可一律歸因「該月 1 號是週五」（9 個月是週三/四起）；:228,:300 的 gate 總數 112/122 應為 123。→ task `k741_canonical_round2_remediation`\n- **K528 round 5 = FAIL**（B1–B4）。B1 最實質：程式用**映射後 session weekday** 篩 237 筆，不是**發布日 weekday**（253 個發布日其實 243 個在週五，6 個 Good Friday 被推到週一而排除）→ 1.189× / p=0.0209 支持的是「NFP 在週五 session 被吸收」，不是「發布日在週五」，README 全文宣稱錯位。B2/B3 是 completeness gate fail-open（同刪 raw+selected 的首月或尾月，34d/44d shortfall 都在 70d 容忍內、三道檢查全看不到；價格端同樣無覆蓋/freshness gate）。B4 沒定義多重比較 family 就以 5% 宣稱顯著（六個主要檢定 Holm≈0.0417 尚可保留，全部 22 個 inferential outputs 則≈0.375）。殘留 gap single-month-upstream-truncation 經 Codex 裁定為 **blocking**。→ task `k528_round5_remediation`\n\n三條 compute followup 均已 `mark-followup-dispatched`，不會重派。knowledge.json 依 K1259 由主線程在各自 round PASS 後才寫。"
+  },
+  {
+    "timestamp": "2026-07-20T05:15:25+08:00",
+    "task_type": "experiment",
+    "task_id": "phase_a_collect_intake_20260720",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
+    "owner": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
+    "commit": null,
+    "summary": "PHASE A 收件：三個已完成 compute job 的結果驗收，並行派 collection subagent（opus；topology_override: worktree→subagent —— 這是既有產出的驗收與文件對齊，不是新實驗）。\n\n- **K1257 headline-realign = PASS，且抓出實質問題**。舊 README 的 SPY headline 是**混樣本**：BMA 用 own-sample n=1581 的 -8.2274，GJR-t 用 n=1518 的值，於是把差距誇大成 -8.1749 / t=-3.40 / p=0.0007。realign 到 common sample n=1518 後：BMA -8.186393 / Equal -8.166751 / GJR-t -8.135791，BMA−GJR = **-0.050602**，Harvey t = **-3.1739**、p = 0.001534 —— 效果縮小約 20%，但仍過 |t|>3 門檻，故 H1 的 SPY 結論未翻轉（H1 PARTIAL / H2 FAIL / H3 FAIL 三項全部不變）。根因是 SPY GJR-t 26 次 refit 有 1 次未收斂，連帶 63 個 invalid days；GLD / 0050.TW 無此問題、數字一位未動。README 另修 6 處事實錯誤（實作是 6 models 不是 7、HAR_ABS 不是 HAR-RV、A4f_IV2 不是 Realized GARCH、GLD 用 ^GVZ），並新增 posterior 吸收態的 Limitations（終端權重 SPY 的 GJR_t 恰為 0.0 是機制性 drop，非能力評價 —— 這正是 H3 regime-adaptive 主張被否定的原因）。已 enqueue codex review（stage 3）。\n- **K1258 artifact-schema-align = PASS**。報告層專屬重跑：20 個 asset×λ cell 與 2026-07-19 版逐值一致，無漂移；v2 forecast cache 三資產全命中（11.04 min → 0.09 min）。`conclusions` / `hypothesis_verdicts` 已補、H4=RECOMMENDATION(λ=1.0)。README:112 的「BMA-family ensemble is structurally limited」改為 scoped 措辭（限於 3 資產 × 5 個固定 λ × 單一 OOS 窗；adaptive λ、其他模型池、其他資產與窗口皆未測）。殘留 nit：`provenance.k1257_forecast_cache_reuse_note` 是只解釋 false 情況的 stale 字串，與現值 true 讀起來矛盾，下次動該腳本時應改成 value-conditional。\n- **K1623 rev3 = BLOCKED（但 B1–B5 + MINOR 全 PASS）**。收件 agent 逐條親自 grep / 重算而非採信 JSON 自述，並獨立確認三項自述為真：MC frozen 欄位 0 改 0 移僅 50 新增、A−B range [−0.0556, −0.0200] 由 frozen arm means 可重算、權威 max relative deviation = 0.005259349489457132。依 brief「有 blocked_items 即不放行」故**未** enqueue round 3：`mean_structure_generated_regressor_share_unmeasured` 需要第三臂 MC（known-level demean）才量得到 —— 現行兩臂都重估段均值，該成分在 A−B contrast 中相消，這是設計層的量測盲點不是疏漏。已建 task `k1623_mc_third_arm_mean_structure_share`（含「明確接受為 permanent scope limit」的替代路徑，但要求留書面裁決）。\n- 附帶修復：`experiments/k1623/README.md` 檔尾殘留 `</content>` / `</invoke>` 兩行工具呼叫碎片（自 rev2 commit f1e7ef686 即存在，rev3 未引入也未清除）。已在 worktree 以 writer lock 提交 `0dd6aa987`。此改動會變更 README 的 sha256 pin → round 3 送審前必須重跑 verdict-template 重生 review_verdict.json。\n\n六條 compute followup 全部 `mark-followup-dispatched`，pending-followup 佇列 6 → 0。knowledge.json 一律待各自 codex round PASS 後由主線程寫（K1259）。"
   }
 ]

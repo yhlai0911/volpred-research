@@ -1,0 +1,38 @@
+{
+  "id": "k1257-k1258-realign-codex-review",
+  "title": "K1257/K1258 headline-realign primary-path Codex review",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1257_k1258_realign_prompt.md",
+    "storage/ops/codex_reviews/k1257_k1258_realign_verdict.md",
+    "3000"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 5,
+  "queued_at": "2026-07-19T21:11:54Z",
+  "started_at": "2026-07-19T21:15:03Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1257-k1258-realign-codex-review.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1257-k1258-realign-codex-review.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1257_k1258_realign_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1257_k1258_realign_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1257/K1258 headline-realign Codex primary-path review 收件：讀 storage/ops/codex_reviews/k1257_k1258_realign_verdict.md。(1) 逐條核 Codex 對 common-sample realign 的裁決，重點：SPY n_common=1518 vs n_oos=1581（GJR-t 63 個 invalid days 來自 1 次 non-converged refit）、headline QLIKE 是否全部與 Harvey t 出自同一樣本、qlike_own_sample 是否被誤用。(2) 若 Codex 指出數字或敘述問題，只改 README/文檔，不動 k1257_results.json 數字。(3) PASS → 主線程寫 knowledge.json（H1 PARTIAL / H2 FAIL / H3 FAIL 未因 realign 改變；SPY BMA-GJR=-0.0506 @ Harvey t=-3.17 仍 PASS）。agent 禁寫 knowledge.json（K1259）。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "timeout_seconds": 3600,
+  "brief_source": null,
+  "brief_snapshot": null
+}

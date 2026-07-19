@@ -20,12 +20,12 @@
     "5280"
   ],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-19T20:11:18Z",
   "started_at": "2026-07-19T20:15:05Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-19T20:41:59Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1623_rev3_remediation-053de5.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1623_rev3_remediation-053de5.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev3_remediation.json",
@@ -39,9 +39,15 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": null,
   "timeout_seconds": 5400,
   "brief_source": "/tmp/brief_k1623_rev3_remediation.md",
-  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1623_rev3_remediation-053de5.md"
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1623_rev3_remediation-053de5.md",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623"
+  },
+  "followup_dispatched_at": "2026-07-19T21:14:53Z",
+  "followup_next_task_id": "collect_k1623_rev3_20260720"
 }

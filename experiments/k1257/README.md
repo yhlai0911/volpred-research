@@ -24,14 +24,15 @@ K500+ pairwise DM tests 已大量累積，每次比較兩個模型（GARCH / GJR
 
 ### 候選模型集合
 
-7 個 univariate variance specs (same as K1002 pipeline):
+**實作為 6 個** univariate variance specs（K1002 pipeline 的 daily-data 子集）:
 - GARCH(1,1) Normal
 - GJR(1,1,1) Normal
 - GJR(1,1,1) Student-t
 - EGARCH(1,1) Normal
-- HAR-RV (HAR of realized 5-min vol; if daily only, use |r|)
-- A4f-VIX² (asset-matched IV for SPY)
-- Realized GARCH (if 5-min data available)
+- **HAR_ABS**（HAR on |r| proxy；無 5-min RV 資料，故非 HAR-RV）
+- **A4f_IV2**（MF-GJR-X with asset-matched IV²：SPY `^VIX`²、GLD `^GVZ`²、0050.TW fallback `^VIX`²）
+
+> Realized GARCH 原列入 spec，但這 3 檔資產無 5-min 資料，**未實作**（候選集 = 6，不是 7）。
 
 ### BMA 公式
 
@@ -47,7 +48,7 @@ $$\hat\sigma^2_{t+1}^{BMA} = \sum_i w_{i,t+1} \hat\sigma^2_{t+1}^{(i)}$$
 ### Benchmarks
 
 - **GJR baseline** (最強 single-model): 應 BMA beat GJR QLIKE?
-- **Equal weight**: 7 models 等權，K482 已知 beat MCS-weighted — BMA 應 beat equal weight?
+- **Equal weight**: 6 models 等權，K482 已知 beat MCS-weighted — BMA 應 beat equal weight?
 - **Best-in-window** (oracle): rolling 1-year window 選 best model；unrealistic upper bound
 
 ## 預期結果
@@ -81,7 +82,9 @@ $$\hat\sigma^2_{t+1}^{BMA} = \sum_i w_{i,t+1} \hat\sigma^2_{t+1}^{(i)}$$
 
 ## Data sources
 
-- `yfinance` SPY + GLD + 0050.TW + ^VIX daily (auto_adjust=False)
+- `yfinance` SPY + GLD + 0050.TW daily (auto_adjust=False)
+- IV proxy（A4f_IV2 用）: SPY → `^VIX`、**GLD → `^GVZ`**、0050.TW → `^VIX`（fallback，無台股 IV index）
+- `^VIX` 另作為 4-bucket regime 分類器，**所有資產共用**
 - 若有 5-min: `experiments/k526/data/`, `experiments/k886/data/`
 
 ## 實驗三件套
@@ -94,13 +97,17 @@ $$\hat\sigma^2_{t+1}^{BMA} = \sum_i w_{i,t+1} \hat\sigma^2_{t+1}^{(i)}$$
 
 ## Results (executed 2026-04-20)
 
-### Per-asset OOS QLIKE (2020-2026, n_oos≈1580)
+### Per-asset OOS QLIKE (2020-2026, **common-sample**)
 
-| Asset | BMA | GJR-t (single best) | Equal-weight | DM BMA vs GJR-t | DM BMA vs Equal |
-|-------|-----|---------------------|--------------|------------------|------------------|
-| SPY | **-8.2274** | -8.1749 | -8.2044 | t=-3.40, p=0.0007, **Harvey PASS** | t=-1.36, p=0.17 |
-| GLD | **-8.1812** | -8.0904 | -8.1371 | t=-3.38, p=0.0007, **Harvey PASS** | t=-2.69, p=0.007 |
-| 0050.TW | -7.6790 | -7.6825 | **-7.6940** | t=+0.98, p=0.33 | t=+1.68, p=0.09 |
+所有 headline QLIKE 皆在 BMA / Equal / GJR-t **共同有效日**（`n_common_sample`）上計算，與 Harvey t 出自同一樣本。
+
+| Asset | n_common | BMA | GJR-t (single best) | Equal-weight | DM BMA vs GJR-t | DM BMA vs Equal |
+|-------|----------|-----|---------------------|--------------|------------------|------------------|
+| SPY | 1518 | **-8.1864** | -8.1358 | -8.1668 | t=-3.17, p=0.0015, **Harvey PASS** | t=-1.37, p=0.17 |
+| GLD | 1581 | **-8.1812** | -8.0904 | -8.1371 | t=-3.38, p=0.0007, **Harvey PASS** | t=-2.69, p=0.007 |
+| 0050.TW | 1524 | -7.6790 | -7.6825 | **-7.6940** | t=+0.98, p=0.33 | t=+1.68, p=0.09 |
+
+SPY 的 GJR-t 有 63 個 invalid forecast days（1 次 non-converged refit × 63 天 refit block），故 `n_common=1518 < n_oos=1581`；GLD / 0050.TW 的 `n_common` 等於各自 `n_oos`。各序列自身樣本上的平均值另存於 JSON `qlike_own_sample`（SPY: BMA -8.2274 @ n=1581、Equal -8.2044 @ n=1581、GJR-t -8.1358 @ n=1518），**不可與 headline 混用比較**。
 
 ### Hypothesis verdicts
 
@@ -120,6 +127,14 @@ $$\hat\sigma^2_{t+1}^{BMA} = \sum_i w_{i,t+1} \hat\sigma^2_{t+1}^{(i)}$$
 - A4f-IV² dominant on SPY/GLD confirms IV-augmented variance specs remain the workhorse — consistent with K1002 A4f-t being MCS-only-survivor.
 - 0050.TW's VIX is actually SPY's VIX (no GVZ-equivalent for Taiwan); if a Taiwan-specific IV index (e.g. TAIEX VIX) were substituted, A4f might also dominate there.
 - **Null result on H2/H3 is reported as-is per research-honesty principle**; H1 PARTIAL is the headline.
+
+### Limitations
+
+1. **Posterior 吸收態（absorbing state）** — 本實作的 invalid-day 處理是**不可逆的**：模型在某日 forecast 無效（refit 未收斂等）時，其 log-weight 被設為 −inf 並排除於 posterior 之外，且**永遠無法回復**。JSON `posterior_semantics` 已明記此語意：`final_weights == 0.0` 代表「被 drop」，而 tiny-but-nonzero（如 SPY 的 GARCH_N ≈ 8.4e-31）代表「靠 likelihood 輸掉」。SPY 的 GJR-t 即因 26 次 refit 中 1 次未收斂而被 drop 63 天，終端權重恰為 0.0——這是機制性剔除，不是 posterior 對其預測能力的評價。
+2. **Posterior 集中 ≠ regime adaptation** — 三檔資產的終端 posterior 都把 ~1.0 放在單一模型（SPY/GLD → A4f_IV2，0050.TW → GJR-t），且約 500 天內完成集中後不再反轉。因此 BMA 在實務上**就是那個模型的預測**，vs single-best 的差距是在說「posterior 挑對了哪個模型」，而非 combination 本身的增益。要保留 regime-adaptive 行為需 forgetting factor 或 sliding-window posterior（未實作）。
+3. **樣本不對齊風險** — 因 SPY 的 GJR-t 缺 63 天，任何跨模型比較都必須在 common sample 上做。早期版本的 headline 混用了 own-sample BMA 與 common-sample GJR-t，已於本次 realign 修正。
+4. **IV proxy 不對稱** — 0050.TW 沒有台股 IV index，A4f_IV2 用 `^VIX` 代打；regime 分類器也統一用 `^VIX`。0050.TW 的 A4f 劣勢（終端權重 5.4e-32）可能有相當部分來自 proxy 錯配，而非 IV-augmented spec 本身無效。
+5. **無 5-min 資料** — HAR 只能用 |r| proxy（HAR_ABS），Realized GARCH 完全未納入；候選集因此偏向 daily-frequency specs。
 
 ### Research-program linkage
 
@@ -157,7 +172,7 @@ $$\hat\sigma^2_{t+1}^{BMA} = \sum_i w_{i,t+1} \hat\sigma^2_{t+1}^{(i)}$$
 
 ## Open questions
 
-- Prior weight: uniform 1/7 or informed from K482 findings?
+- Prior weight: uniform 1/6 or informed from K482 findings?
 - BMA log-lik 的 numerical stability（log-sum-exp trick 必要）
 
 ## 等候 Codex 04-24 wake 執行 or 主線程手動跑

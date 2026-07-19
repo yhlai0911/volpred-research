@@ -109,7 +109,7 @@ $$\log w_{i,t+1} = \lambda \cdot \log w_{i,t} + \log p(y_{t+1}|M_i, \mathcal{F}_
 
 ### Key finding
 - **Forgetting factor fixes K1257's H3 concentration problem (H2 PASS) but does NOT produce predictive gains (H1 FAIL)**. The extra switching dissipates into noise — the BMA forecast is variance-weighted, and shifting mass away from the best model (A4f-IV² for SPY/GLD, GJR-t for 0050.TW) hurts calibration faster than it helps regime adaptation.
-- **Null-result positive**: strongly informs the research community that BMA-family ensemble is structurally limited for this task; regime-adaptive gains need **switching models / mixture-of-experts / regime-conditional priors**, not just log-posterior discounting.
+- **Null result, scoped**: within this design — 3 assets (SPY / GLD / 0050.TW) × 5 fixed λ ∈ {1.0, 0.99, 0.975, 0.95, 0.9} × a single 2020–2026 OOS window — log-posterior discounting alone did not yield a QLIKE improvement clearing the Harvey \|t\|>3 gate in any cell. This is evidence about *these* λ-discounted BMA specifications on *these* three series, not about the BMA family in general: untested alternatives include adaptive/estimated λ, other model pools, other assets, and other OOS windows. Whether **switching models / mixture-of-experts / regime-conditional priors** do better is a hypothesis this experiment motivates but does not test.
 - 0050.TW is the sole asset where λ<1 QLIKE improves marginally, but below Harvey significance — may be artefact of single-asset noise OR signal of TW-specific regime structure warranting a follow-up (K1259+).
 
 ### Hypotheses answered vs README predictions
