@@ -1,15 +1,21 @@
 {
   "content_type": "event_article",
-  "event_key": "CPI_US_2026_06_11",
+  "event_key": "CPI_US_2026_06_10",
+  "event_key_note": "Corrected 2026-07-19 from CPI_US_2026_06_11. The official June-2026 CPI release date is 2026-06-10 (FRED/ALFRED release id 10); the article body always used 06-10. The directory name us_cpi_2026_06_11_t0 is left unchanged because the task registry and the K1442 audit reference it by that path.",
   "event_series_slot": "T+0",
   "experiment_path": "storage/event_articles/us_cpi_2026_06_11_t0/",
-  "data_sources": "BLS CPI Summary USDL-26-0824; yfinance: ^VIX, ^VIX9D, SPY",
+  "data_sources": "BLS CPI Summary USDL-26-0824; FRED/ALFRED release id 10 (official CPI release calendar); yfinance: ^VIX, ^VIX9D, SPY",
   "image_url": "storage/event_articles/us_cpi_2026_06_11_t0/fig1_cpi_t0_reaction.png",
   "chart_urls": [
     "storage/event_articles/us_cpi_2026_06_11_t0/fig1_cpi_t0_reaction.png",
     "storage/event_articles/us_cpi_2026_06_11_t0/fig2_cpi_t0_event_window.png"
   ],
-  "topic_cluster": "vix"
-  ,
+  "topic_cluster": "vix",
+  "errata": {
+    "rerun_date": "2026-07-19",
+    "published_before_correction": false,
+    "summary": "Historical comparison rebuilt on the official CPI release calendar. 7 of 14 hard-coded dates were not release dates, one of them a phantom (2025-11-13). The release-day VIX move ranks 1st of 13 official releases, not 4th of 14.",
+    "source_audit": "experiments/k1442/related_event_date_audit.md"
+  },
   "dup_waiver": "False positive narrative-arc dedup: this piece is a US CPI 2026-06-10 event-day actual-vs-expected reaction study with 6/10 and 6/11 closes, not a Fed/MOVE/VIX cross-asset positioning article."
 }
