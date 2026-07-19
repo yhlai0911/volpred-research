@@ -1286,19 +1286,54 @@ def _materialize_release_audit_fix_task(
             if not isinstance(tasks, list):
                 raise ValueError("next_tasks.json is not a list")
 
-            for task in tasks:
-                if not isinstance(task, dict):
-                    continue
-                if task.get("id") == task_id or (
-                    task.get("source") == "release_pool_audit_skip_materializer"
-                    and str(task.get("article_id") or "") == item_id
-                    and item_id
-                ):
-                    return {
-                        "created": False,
-                        "reason": "task_already_exists",
-                        "task_id": task.get("id") or task_id,
-                    }
+            prior = [
+                task
+                for task in tasks
+                if isinstance(task, dict)
+                and (
+                    task.get("id") == task_id
+                    or (
+                        task.get("source") == "release_pool_audit_skip_materializer"
+                        and str(task.get("article_id") or "") == item_id
+                        and item_id
+                    )
+                )
+            ]
+            open_task = next(
+                (
+                    task
+                    for task in prior
+                    if str(task.get("status") or "") in _RELEASE_AUDIT_OPEN_STATUSES
+                ),
+                None,
+            )
+
+            if open_task is not None:
+                # Write-once was the bug: the task was filed at its opening
+                # priority and never learned it had gone on blocking. A
+                # finished article sat behind the P1 queue for 20-30h while
+                # its skip count climbed to 24 and nothing in the pool said
+                # so. Refresh the evidence and escalate while it is open.
+                refreshed = _refresh_release_audit_task(
+                    open_task, item, audit_issues, skip_count
+                )
+                if refreshed:
+                    write_tasks_to_handle(fh, tasks)
+                return {
+                    "created": False,
+                    "reason": "task_already_exists",
+                    "task_id": open_task.get("id") or task_id,
+                    "refreshed": refreshed,
+                    "priority": open_task.get("priority"),
+                }
+
+            if prior:
+                # Every prior attempt is closed, yet the audit is still skipping
+                # this article: the fix did not hold. Matching on article_id
+                # alone regardless of status meant one closed task suppressed
+                # re-materialization forever, leaving a still-blocked article
+                # with no owner at all. File the next round under its own id.
+                task_id = f"{task_id}_r{len(prior) + 1}"
 
             title_text = " ".join(str(item.get("title") or item_id or "untitled draft").split())
             task = {
@@ -1307,7 +1342,7 @@ def _materialize_release_audit_fix_task(
                 "description": _build_release_audit_task_description(item, audit_issues, skip_count),
                 "task_type": "platform_ops",
                 "dispatch_lane": "agent",
-                "priority": 3,
+                "priority": _release_audit_task_priority(skip_count),
                 "status": "pending",
                 "source": "release_pool_audit_skip_materializer",
                 "tags": ["release_pool", "audit_skip", "platform_ops"],
@@ -1324,6 +1359,75 @@ def _materialize_release_audit_fix_task(
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 
     return {"created": True, "task_id": task_id}
+
+
+# A blocked draft is a finished article the readers never see, so it opens at P2
+# rather than the old hardcoded P3 — but not at P1, which would let routine gate
+# misses dilute the lane reserved for genuinely urgent work. It earns P1 by
+# persisting: at the 240-minute release cadence, 6 skips is a full day during
+# which the cadence had a slot to fill and could not fill it.
+RELEASE_AUDIT_TASK_OPEN_PRIORITY = 2
+RELEASE_AUDIT_TASK_URGENT_PRIORITY = 1
+RELEASE_AUDIT_TASK_URGENT_SKIPS = 6
+
+# Escalation applies only to tasks still awaiting work. A closed task must not be
+# resurrected by a late audit tick; the audit would be reopening someone else's
+# completed decision.
+_RELEASE_AUDIT_OPEN_STATUSES = frozenset({"pending", "in_progress", "blocked"})
+
+
+def _release_audit_task_priority(skip_count: int) -> int:
+    """Priority for a release-blocked draft, as a function of how long it stuck."""
+    try:
+        skips = int(skip_count or 0)
+    except (TypeError, ValueError):
+        skips = 0
+    if skips >= RELEASE_AUDIT_TASK_URGENT_SKIPS:
+        return RELEASE_AUDIT_TASK_URGENT_PRIORITY
+    return RELEASE_AUDIT_TASK_OPEN_PRIORITY
+
+
+def _refresh_release_audit_task(
+    task: dict,
+    item: dict,
+    audit_issues: list,
+    skip_count: int,
+) -> bool:
+    """Re-state an existing blocker task's evidence and escalate if it persists.
+
+    Returns True when the task changed, so the caller only rewrites the file
+    when there is something to write. Priority moves one way only: a task the
+    owner deliberately raised must not be pushed back down by a routine tick.
+    """
+    if str(task.get("status") or "") not in _RELEASE_AUDIT_OPEN_STATUSES:
+        return False
+
+    changed = False
+    if task.get("release_audit_skipped_count") != skip_count:
+        task["release_audit_skipped_count"] = skip_count
+        changed = True
+    if task.get("release_audit_issues") != audit_issues:
+        # The blocker itself can change (a lazypack lands, anti-AI style trips
+        # instead); a stale issue list sends the next fire at the wrong problem.
+        task["release_audit_issues"] = audit_issues
+        changed = True
+
+    description = _build_release_audit_task_description(item, audit_issues, skip_count)
+    if task.get("description") != description:
+        task["description"] = description
+        changed = True
+
+    escalated = _release_audit_task_priority(skip_count)
+    try:
+        current = int(task.get("priority"))
+    except (TypeError, ValueError):
+        current = None
+    if current is None or escalated < current:
+        task["priority"] = escalated
+        normalize_task_priority(task)
+        changed = True
+
+    return changed
 
 
 def _next_release_audit_skip_count(details: dict) -> int:

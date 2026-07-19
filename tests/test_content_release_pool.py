@@ -675,7 +675,7 @@ def test_release_pool_audit_skip_materializes_fix_task_after_three_strikes(
     assert task["id"] == "platform_ops_release_audit_fix_mile_audit_bad"
     assert task["task_type"] == "platform_ops"
     assert task["dispatch_lane"] == "agent"
-    assert task["priority"] == 3
+    assert task["priority"] == 2
     assert task["status"] == "pending"
     assert task["article_id"] == "mile_audit_bad"
     assert "release_pool skipped draft `mile_audit_bad` 3 times" in task["description"]
@@ -689,11 +689,188 @@ def test_release_pool_audit_skip_materializes_fix_task_after_three_strikes(
     tasks_after = json.loads((storage_dir / "next_tasks.json").read_text(encoding="utf-8"))
     assert len(tasks_after) == 1
     assert rerun["audit_skipped"][0]["skip_count"] == 4
-    assert rerun["audit_skipped"][0]["materialized_task"] == {
-        "created": False,
-        "reason": "task_already_exists",
-        "task_id": "platform_ops_release_audit_fix_mile_audit_bad",
-    }
+    materialized = rerun["audit_skipped"][0]["materialized_task"]
+    assert materialized["created"] is False
+    assert materialized["reason"] == "task_already_exists"
+    assert materialized["task_id"] == "platform_ops_release_audit_fix_mile_audit_bad"
+    # The existing task must learn it went on blocking — that write-once gap is
+    # why a blocked article once sat at its opening priority for 30 hours.
+    assert materialized["refreshed"] is True
+    assert tasks_after[0]["release_audit_skipped_count"] == 4
+    assert "4 times" in tasks_after[0]["description"]
+
+
+def test_release_audit_task_escalates_to_p1_after_a_day_of_blocking(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """A draft still blocked after a full cadence day must reach the P1 lane.
+
+    Regression for 2026-07-19: blocker tasks were filed P3 and never updated, so
+    finished articles starved behind the P1 queue while the release cadence had
+    slots it could not fill.
+    """
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 21, 10, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(storage_dir / ".release_settings.json", {"mode": "auto", "include_drafts": True})
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_audit_starved",
+                "status": "draft",
+                "audience": "general",
+                "created_at": (frozen_now - timedelta(days=2)).isoformat(),
+                "title": "被閘門擋住很久的稿",
+                "description": "本文仍寫 t=3.2、p=0.01，應先修稿再釋出。",
+                "tags": ["一般讀者", "FOMC"],
+                "details": {"release_audit_skipped_count": 2},
+            }
+        ],
+    )
+
+    def _priority_now() -> int:
+        tasks = json.loads((storage_dir / "next_tasks.json").read_text(encoding="utf-8"))
+        return tasks[0]["priority"]
+
+    def _tick() -> dict:
+        return content.release_pool_articles(
+            limit=1,
+            due_only=False,
+            include_drafts=True,
+            storage_dir=str(storage_dir),
+        )
+
+    _tick()  # skip 3 → task opens
+    assert _priority_now() == 2, "a blocked article opens at P2, not the old P3"
+
+    for _ in range(2):  # skips 4, 5 — still under the one-day threshold
+        _tick()
+    assert _priority_now() == 2
+
+    _tick()  # skip 6 = a full day of unfillable cadence slots
+    assert _priority_now() == 1
+
+    tasks = json.loads((storage_dir / "next_tasks.json").read_text(encoding="utf-8"))
+    assert len(tasks) == 1, "escalation must update in place, not fork a new task"
+    assert tasks[0]["release_audit_skipped_count"] == 6
+
+
+def test_release_audit_task_escalation_never_demotes_or_reopens(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """Escalation is one-way, and a closed task is never resurrected."""
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 21, 10, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(storage_dir / ".release_settings.json", {"mode": "auto", "include_drafts": True})
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_audit_manual",
+                "status": "draft",
+                "audience": "general",
+                "created_at": (frozen_now - timedelta(days=2)).isoformat(),
+                "title": "已被人工升級的稿",
+                "description": "本文仍寫 t=3.2、p=0.01，應先修稿再釋出。",
+                "tags": ["一般讀者", "FOMC"],
+                "details": {"release_audit_skipped_count": 2},
+            }
+        ],
+    )
+
+    content.release_pool_articles(
+        limit=1, due_only=False, include_drafts=True, storage_dir=str(storage_dir)
+    )
+    tasks_path = storage_dir / "next_tasks.json"
+
+    # An owner deliberately raised it; a routine tick must not push it back down.
+    tasks = json.loads(tasks_path.read_text(encoding="utf-8"))
+    tasks[0]["priority"] = 1
+    _write_json(tasks_path, tasks)
+    content.release_pool_articles(
+        limit=1, due_only=False, include_drafts=True, storage_dir=str(storage_dir)
+    )
+    assert json.loads(tasks_path.read_text(encoding="utf-8"))[0]["priority"] == 1
+
+    # Once closed, a late audit tick must leave it closed.
+    tasks = json.loads(tasks_path.read_text(encoding="utf-8"))
+    tasks[0]["status"] = "succeeded"
+    tasks[0]["priority"] = 3
+    _write_json(tasks_path, tasks)
+    res = content.release_pool_articles(
+        limit=1, due_only=False, include_drafts=True, storage_dir=str(storage_dir)
+    )
+    closed = json.loads(tasks_path.read_text(encoding="utf-8"))[0]
+    assert closed["status"] == "succeeded"
+    assert closed["priority"] == 3
+
+
+def test_release_audit_refiles_when_a_closed_fix_did_not_hold(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """A closed task must not permanently suppress re-materialization.
+
+    Regression for 2026-07-19: dedup matched on article_id regardless of status,
+    so once a fix task was marked succeeded the article could go on being
+    skipped forever with no open owner in the pool.
+    """
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 21, 10, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(storage_dir / ".release_settings.json", {"mode": "auto", "include_drafts": True})
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_audit_relapse",
+                "status": "draft",
+                "audience": "general",
+                "created_at": (frozen_now - timedelta(days=2)).isoformat(),
+                "title": "修過但沒真的解掉的稿",
+                "description": "本文仍寫 t=3.2、p=0.01，應先修稿再釋出。",
+                "tags": ["一般讀者", "FOMC"],
+                "details": {"release_audit_skipped_count": 2},
+            }
+        ],
+    )
+    tasks_path = storage_dir / "next_tasks.json"
+
+    def _tick() -> dict:
+        return content.release_pool_articles(
+            limit=1, due_only=False, include_drafts=True, storage_dir=str(storage_dir)
+        )
+
+    _tick()
+    base_id = "platform_ops_release_audit_fix_mile_audit_relapse"
+
+    # Someone closes it, but the article is still blocked on the next tick.
+    tasks = json.loads(tasks_path.read_text(encoding="utf-8"))
+    tasks[0]["status"] = "succeeded"
+    _write_json(tasks_path, tasks)
+
+    res = _tick()
+    tasks_after = json.loads(tasks_path.read_text(encoding="utf-8"))
+    assert len(tasks_after) == 2, "a still-blocked article must regain an open owner"
+    assert tasks_after[0]["status"] == "succeeded", "the closed task stays closed"
+    refiled = tasks_after[1]
+    assert refiled["id"] == f"{base_id}_r2"
+    assert refiled["status"] == "pending"
+    assert refiled["article_id"] == "mile_audit_relapse"
+    assert res["audit_skipped"][0]["materialized_task"]["created"] is True
+
+    # And the refiled task is itself escalatable, not another write-once record.
+    _tick()
+    assert json.loads(tasks_path.read_text(encoding="utf-8"))[1][
+        "release_audit_skipped_count"
+    ] == 5
 
 
 def test_release_pool_audit_skip_before_materialize_stays_draft(

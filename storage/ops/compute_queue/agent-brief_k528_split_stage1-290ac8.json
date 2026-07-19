@@ -20,11 +20,11 @@
     "3480"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queued_at": "2026-07-19T09:47:19Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-19T14:45:05Z",
+  "completed_at": "2026-07-19T14:59:29Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k528_split_stage1-290ac8.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k528_split_stage1-290ac8.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528/k528_completeness_gate_fix.json",
@@ -44,5 +44,9 @@
   "brief_source": "/tmp/brief_k528_split_stage1.md",
   "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k528_split_stage1-290ac8.md",
   "parent_timeout_job_id": "agent-brief_k528_rerun_v3-6e4286",
-  "split_stage": "completeness_gate_bypass_fix"
+  "split_stage": "completeness_gate_bypass_fix",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528"
+  }
 }
