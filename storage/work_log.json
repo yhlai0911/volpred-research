@@ -21832,5 +21832,65 @@
     "owner": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff",
     "commit": null,
     "summary": "PHASE A — compute queue `split_required` followup：父 agent job `agent-brief_k528_rerun_v3-6e4286`\n（budget 5400s）逾時，依 split_contract 拆段。\n\n**先盤點才拆，沒有原樣重派**。查證發現三件父 job brief 裡不會有的事實：\n(1) 父 job 08:00 起跑後**即刻 `Execution error`**（exit -1），但 `artifact_ok=True` —— artifact 是舊的，\n不是它產的，不能當成果；(2) 之後有**別的行為者**在同一個 worktree 把第三輪 review 一路推到\n**round 4（v6，17:25-17:26）**，產出 v3/v4/v5/v6 四份 codex review 與對應 verdict；(3) v6 **FAIL**，\n且 blocking defect 只有一條、非常具體：完整性閘門可被繞過 —— 把尾端月份塞進 `KNOWN_MISSING_MONTHS`\n使 raw→selected 檢查跳過它，而唯一能揭穿假宣稱的反向檢查只掃 selected span，再同時掛進\n`REVIEWED_MULTI_ENTRY_MONTHS` 就照樣過關 ⇒ **樣本可被靜默截短而閘門全綠**。\n確認**目前無 live 行為者**（ps 無命中、無任務 claim 該 worktree），殘局無人接。\n\n**拆法（兩段皆已 materialize）**：\n- stage 1 = compute agent job `agent-brief_k528_split_stage1-290ac8`（opus/xhigh，timeout 3600 < 5400，\n  帶 `--timeout-parent-job-id` + `--split-stage completeness_gate_bypass_fix`，單一 artifact\n  `experiments/k528/k528_completeness_gate_fix.json`）。\n- stage 2 = 池內任務 `assign_06d6352d` P2（Codex round 5 + merge 裁決，帶前置條件與 timeout/flag 契約）。\n\n**brief 裡刻意寫進去的兩個防呆**：(a) `k528_nfp_event_study.py` 在 17:24 被動過、296-300/339 行**看起來**\n已有相關檢查，但 brief 明令**不得靠讀碼下結論** —— 要寫逐字重演 v6 攻擊路徑的對抗性測試，並用\nmutation check（癱瘓那道檢查看測試會不會紅）證明 gate 真的會咬人；若現況下測試就綠，要誠實寫\n`defect_state=already_closed_before_this_stage`，**不准謊稱是自己修的**。(b) 明令不重跑整份 event\nstudy（那正是父 job 逾時的原因），只碰閘門與測試。\n\n`mark-followup-dispatched` 已下，pending-followup 由 1 → 0。"
+  },
+  {
+    "timestamp": "2026-07-19T18:12:40+08:00",
+    "task_type": "paper_review",
+    "task_id": "k1623_rev2_codex_round2",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-6509cdb38cde4526b89fc04eed4f7500",
+    "owner": "hourly-slot-2-6509cdb38cde4526b89fc04eed4f7500",
+    "commit": null,
+    "summary": "PHASE A 收件：K1623 rev2 agent job（agent-brief_k1623_rev2-e343cd，exit 0, 17.8 min）已完成，本班做完整驗收 → 凍結 → 送 Codex round-2。\n\n**驗收（主線程獨立核對 bytes，非採信 agent 自述）**\n- `retracted_claims[]` 8 條（3 RETRACTED / 5 CORRECTED）與 README §0 撤回總表逐項對得上。三條 codex round-1 判 FAIL 的宣稱都已撤：真 long-memory 識別、「不可交易」、「多處顯著更差」。\n- `loss_function_sign_reversal[]`：3/5 資產（SPY / TW0050 / QQQ）的 ARFIMA-vs-HAR 排序隨 loss 反轉；QLIKE 選 HAR、MSE 選 ARFIMA（ratio 0.836–0.891）。但兩個 loss 下 focal 比較經 BH FDR 後**皆不顯著**（QLIKE 僅 QQQ/ARFIMA p=0.0332 名目顯著、BH 後 0 存活；MSE p∈[0.265,0.974]）。README 的敘述強度與此一致，未把反轉寫成「ARFIMA 勝」。\n- `reproduction_guard`：VIX/SPY/QQQ/N225 四資產 aggregate loss 重現到 1e-9；TW0050 誠實揭露為 near-replication（快取歷史被修訂，n 4263→4264，最大相對偏差 2.51e-3），並明寫「same forecasts」對 TW0050 為偽、不得如此陳述。\n- data vintage 已 pin 回第一輪 end date，避免把「檢定修好了」與「樣本移動了」混淆。\n\n**凍結 + gate**\n- `merge_worktree.sh` 被 review-certification gate **正確擋下**（experiments/k1623 無 `review_verdict.json`）。這是 K1709 事故後裝的閘門，本班不繞過。\n- worktree 未提交變更已 auto-commit 凍結為 `f1e7ef686`；`experiment_gates.py verdict-template` 產出 27 檔 claim-surface sha256 骨架。\n\n**送審（不在 fire 內跑 codex，避免 3000s cap SIGKILL）**\n- 8 問 primary-path review prompt → `storage/ops/codex_reviews/k1623_rev2_prompt.md`\n- 經 compute queue 派 `codex_review_job.sh`（job `compute-scripts-codex-review-job-sh-1784455914`，timeout 2700s，read-only sandbox）\n- 收件 task `k1623_rev2_codex_round2`（P2 paper_review）已建；agent job 標 followup_dispatched。\n\n**未完成（刻意留給收件班，非做一半）**：Codex 裁決、填 review_verdict.json、合併 worktree、主線程寫 knowledge.json、loss-reversal 排 daily_article。父 task `assign_5aa9d5f5` 維持 in_progress 直到裁決回來。"
+  },
+  {
+    "timestamp": "2026-07-19T18:50:05+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_07dcafa7",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-b8093de6441241c6911dd348e5486fc4",
+    "owner": "hourly-slot-1-b8093de6441241c6911dd348e5486fc4",
+    "commit": null,
+    "summary": "D2 落地：phase_z.py 新增 _FOREIGN_QUARANTINE_REF_PREFIX=refs/volpred/quarantine + _quarantine_stuck_foreign()。streak 過門檻且 producer 未持鎖的 foreign dirty bytes 用 git plumbing（hash-object → commit-tree → update-ref）checkpoint 進不可變 ref，全程走 git_writer_lock，不動工作區/真 index/HEAD、絕不進 main。class gate xfail-strict 翻成正式 assertion；新測試 test_phase_z_quarantine_checkpoint.py 10 tests 逐條證明工作區 byte-for-byte 不變（含 binary）、HEAD 不變、git show 取得回、live flock 路徑跳過。pytest 14 passed + phase_z 62 passed 零回歸。意義：卡 78 班的 44 個檔從「看得見但隨時會消失」變成「取得回」。"
+  },
+  {
+    "timestamp": "2026-07-19T18:50:22+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_ae341cb9",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-b8093de6441241c6911dd348e5486fc4",
+    "owner": "hourly-slot-1-b8093de6441241c6911dd348e5486fc4",
+    "commit": null,
+    "summary": "D3 落地：新增 src/volpred/ops/foreign_incident.py 作為 incident 單一 owner —— fingerprint=sorted(stuck paths) sha256[:16]（內容定址，數字浮動不影響去重）、upsert 同 fingerprint 只更新不新建、集合變大時 supersede 舊單、incident_closeable() 全稱判定（每個 dirty path 要有 live workspace 或 quarantine ref 覆蓋且 main checkout 乾淨）+ CLI --check exit 1。phase_z 收編既有 CRITICAL：只在 incident 新開時發一次，退避曲線僅留作 incident 建不起來的 fallback。dispatch_slot_budget.py 加 open-incident de-rate 4→2，排序在 P1 surge 之前（沿用 auth_blocked 形狀，維持單一 cap owner，未另立 gate）。新測試 16 tests；pytest -k 'phase_z or slot_budget' 86 passed（改動前 70）零回歸；mutation 三處驗證測試會咬。意義：CRITICAL 從無 owner 無 deadline 的紅色日誌，變成不處理就每班少 2 個 slot 的持久 incident。"
+  },
+  {
+    "timestamp": "2026-07-19T18:50:22+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12138-44af78",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-b8093de6441241c6911dd348e5486fc4",
+    "owner": "hourly-slot-1-b8093de6441241c6911dd348e5486fc4",
+    "commit": null,
+    "summary": "老闆回信只問一句「所以你要怎樣立刻去解決那些 critical 卻沒解決的問題？」→ 本班不出計畫，直接把外部第二意見的 D2/D3 兩張 P1 做完並通過測試，寄 close email（Telegram msg 1122 同步）。明確交代未做的：44 個卡住檔本身（D5 逐檔裁決，已無時間壓力因為取得回了）、D4 根治（worktree-per-fire + 序列化 integrator）仍未動，不假裝已根治。"
+  },
+  {
+    "timestamp": "2026-07-19T19:14:59+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_65b27c8b",
+    "outcome": "partial",
+    "actor": "hourly-slot-2-d5c99af8459244ce9560dd8f9bf42315",
+    "owner": "hourly-slot-2-d5c99af8459244ce9560dd8f9bf42315",
+    "commit": null,
+    "summary": "foreign incident `d930b5e23d12e238`（40 路徑）第 1 輪逐檔歸屬裁決。**未關單、未動任何檔案**，理由是結構性的，不是待辦漏做。\n\n推翻 incident 描述的前提：以「open 任務 description/title 明文指名該路徑」為判準（非目錄/suffix/mtime — 那三者正是外部意見點名的 semantics-as-provenance），40 個路徑中 **10 個有主**。最尖銳一筆：`scripts/detect_price_split_breaks.py` 逐字是 P1 `paper_0050_snapshot_repoint_20260719` 的驗證指令，兩個 0050 snapshot CSV 是它待重建的輸入 — 任何「卡 83 班 ⇒ 沒人要」的清理規則會直接摧毀 open P1 的工具與資產。這是 D5「不得由 cleanup layer 猜著收」的第二個實證反例。方法論教訓：「卡在工作區的班數」量的是「沒有人有權限提交它」，不是「沒有人要它」；在共享 checkout + agent 禁 git mutation 的規則下，這兩件事會被系統性混淆。\n\n第二個發現：**incident 沒有 actuator**。closeable 要求 40 路徑都不再 dirty，但三條路全封閉 —— PHASE-Z 只 commit `dirty_now - baseline`（foreign 檔依定義不在內）、fire 禁在 shared checkout 跑 git mutation（且此刻 3 slot 併行）、cleanup 自動收編被 D1 禁。D3 把「沒 actuator 的 CRITICAL 信」換成 incident，但 actuator 只接懲罰端（slot cap 4→2），沒接解除端 ⇒ 每班半速且沒有一班能靠自己走出來，違反本 class 自己的驗收標準「有限班數內必達 terminal state」。刻意不放寬降載、不標 succeeded 關單：兩者都解除壓力但不動檔案，是把 forcing function 變成靜音鍵。\n\n第三個發現（記錄未修）：`live_workspace_paths()` (foreign_incident.py:327) 判 coverage 用「檔案存在於某 registered worktree」，但 worktree 是全 repo checkout，任何 tracked 檔必然存在 ⇒ 26 個路徑的 coverage 是空證據，且全指向已 stale 6h 的 `agent-a0ef53c7c992ec1df`。never-lose 實質仍成立，但靠的是 quarantine ref（34/40）+ HEAD（3 個已刪除路徑），不是這一條。未修：foreign_incident.py 自身仍 untracked 且併行 slot 可能持有，飛行中改它正是本 class 反覆犯的錯。\n\n產出：`docs/governance/2026-07/foreign_incident_path_adjudication.md`（逐檔證據，可重跑）+ 新 P1 `assign_8c267b66`（給已裁決 foreign 路徑一條 writer-lock 序列化出口，D4 前最小止血，零猜測：只執行明文 disposition、拒動清單外路徑）。incident `assign_65b27c8b` 已 release 回 pending — 維持 open、降載維持生效是誠實狀態。"
+  },
+  {
+    "timestamp": "2026-07-19T19:33:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29682567936",
+    "outcome": "success",
+    "actor": "hourly-slot-1-f857078c8f684032ba63e4d0333ad7ad",
+    "owner": "hourly-slot-1-f857078c8f684032ba63e4d0333ad7ad",
+    "commit": "5a0f5f86e,c2a3c9110",
+    "summary": "CI 紅燈修復（run 29682567936）。root_cause=scripts/tests/test_check_experiment_artifacts.py 已 tracked，但其被測模組 scripts/check_experiment_artifacts.py 從未進 index（PHASE-Z 只 commit `dirty_now - baseline`，檔案在 fire 起始前就 untracked ⇒ 永遠不在 owned set），CI 於 collection 階段 ImportError 直接 rc=2。repair_commit=5a0f5f86e（git_writer_lock exact-path commit + push）。\n\n驗證不靠推論：git archive 出 HEAD(6bdd1934d) 純樹 → 沙盒 repo → 全套 pytest。補檔前 1 error，補檔後 `1 failed, 3607 passed`，唯一 failed 是 test_no_new_nested_raw_dm_sites，經 scan_file 逐檔比對確認是沙盒假 git 歷史造成（k1709 的 external adjudication reviewed_commit 在沙盒解不到）—— 非 CI 問題，canonical 樹該 ratchet 107 passed。故 CI 唯一阻塞就是缺檔。\n\nclass sweep 不只補檔：查為何 gate 沒擋。scripts/audit_test_imports.py 正是這個 concern 的唯一 owner，但 IMPORT_ROOTS 只認 volpred./scripts. 前綴，而這個 test 是 sys.path.insert(scripts) + `import check_experiment_artifacts`（bare name）⇒ 落在 gate 視野外。已補：任何 sys.path 變動的 test 檔中的 bare import，以 index-vs-worktree 判定（工作區有 scripts/<name>.py 而 candidate 沒有 = partial commit）。刻意不用 find_spec 判第三方 —— 試過，pytest 在無 --extra dev 的 env 會誤報 55 筆；index-vs-worktree 對環境零依賴，pytest 兩邊都沒有 scripts/pytest.py 故永不誤觸。repair_commit=c2a3c9110（含回歸測試）。\n\n同類但未動：src/volpred/ops/{foreign_incident,dreaming_revalidate}.py 亦 untracked，卻被 tracked 的 phase_z.py / task_pool_claim.py / dreaming_review.py module-level import。已由 slot-2 的 P1 assign_8c267b66 承接（writer-lock 序列化出口），不重複建單、不在飛行中替併行 slot 提交其檔案。"
   }
 ]
