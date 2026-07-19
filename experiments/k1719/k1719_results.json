@@ -1,0 +1,410 @@
+{
+  "data": {
+    "diagnostics_by_ticker": {
+      "INDONESIA": {
+        "daily_return_mean": 0.00042356464392190573,
+        "daily_return_std": 0.012314124722966224,
+        "first_date": "2005-01-03",
+        "last_date": "2025-12-30",
+        "missing_pct_on_union_calendar": 6.774075430245332,
+        "non_missing_prices": 5092,
+        "zero_return_count": 1
+      },
+      "JAPAN": {
+        "daily_return_mean": 0.00028711316829203236,
+        "daily_return_std": 0.014498736072518066,
+        "first_date": "2005-01-04",
+        "last_date": "2025-12-30",
+        "missing_pct_on_union_calendar": 5.931893079458074,
+        "non_missing_prices": 5138,
+        "zero_return_count": 1
+      },
+      "MALAYSIA": {
+        "daily_return_mean": 0.00012091464482989655,
+        "daily_return_std": 0.007301078554539073,
+        "first_date": "2005-01-03",
+        "last_date": "2025-12-30",
+        "missing_pct_on_union_calendar": 5.712193335774442,
+        "non_missing_prices": 5150,
+        "zero_return_count": 3
+      },
+      "SINGAPORE": {
+        "daily_return_mean": 0.00015439178769885848,
+        "daily_return_std": 0.010115046560529117,
+        "first_date": "2005-01-03",
+        "last_date": "2025-12-30",
+        "missing_pct_on_union_calendar": 3.8813621384108385,
+        "non_missing_prices": 5250,
+        "zero_return_count": 5
+      },
+      "SPY": {
+        "daily_return_mean": 0.0004034171236442577,
+        "daily_return_std": 0.012012426124952165,
+        "first_date": "2005-01-03",
+        "last_date": "2025-12-30",
+        "missing_pct_on_union_calendar": 3.2954961552544857,
+        "non_missing_prices": 5282,
+        "zero_return_count": 16
+      },
+      "TAIWAN": {
+        "daily_return_mean": 0.0003000228272073536,
+        "daily_return_std": 0.01162185384837172,
+        "first_date": "2005-01-03",
+        "last_date": "2025-12-30",
+        "missing_pct_on_union_calendar": 5.895276455510802,
+        "non_missing_prices": 5140,
+        "zero_return_count": 2
+      },
+      "THAILAND": {
+        "daily_return_mean": 0.00011943326775156787,
+        "daily_return_std": 0.011547238639997123,
+        "first_date": "2005-01-04",
+        "last_date": "2025-12-30",
+        "missing_pct_on_union_calendar": 6.481142438667155,
+        "non_missing_prices": 5108,
+        "zero_return_count": 3
+      },
+      "VIX": {
+        "daily_return_mean": 3.332681538482178e-06,
+        "daily_return_std": 0.07560013059958556,
+        "first_date": "2005-01-03",
+        "last_date": "2025-12-30",
+        "missing_pct_on_union_calendar": 3.2954961552544857,
+        "non_missing_prices": 5282,
+        "zero_return_count": 26
+      }
+    },
+    "observations_by_ticker": {
+      "INDONESIA": 5092,
+      "JAPAN": 5138,
+      "MALAYSIA": 5150,
+      "SINGAPORE": 5250,
+      "SPY": 5282,
+      "TAIWAN": 5140,
+      "THAILAND": 5108,
+      "VIX": 5282
+    },
+    "request_end_exclusive": "2025-12-31",
+    "request_start": "2005-01-01",
+    "snapshot_file": "k1719_source_snapshot.csv",
+    "snapshot_sha256": "e2b64d8fad02aa29c96b243abb74fab6f707fa24f3f5ddf95b1eb3622ddb8160",
+    "source": "Yahoo Finance via yfinance 1.2.0",
+    "tickers": {
+      "INDONESIA": "^JKSE",
+      "JAPAN": "^N225",
+      "MALAYSIA": "^KLSE",
+      "SINGAPORE": "^STI",
+      "SPY": "SPY",
+      "TAIWAN": "^TWII",
+      "THAILAND": "^SET.BK",
+      "VIX": "^VIX"
+    }
+  },
+  "experiment_id": "K1719",
+  "generated_at_policy": "omitted for byte reproducibility",
+  "limitations": [
+    "Daily bars cannot isolate overlapping intraday Tokyo/Taipei/Southeast-Asia transmission.",
+    "Squared daily return is a noisy variance proxy, not realized variance.",
+    "Inner joining common dates may select globally open trading days and omits holiday-specific transmission.",
+    "Results establish predictive association only, not a structural causal channel."
+  ],
+  "method": {
+    "dm": "volpred.stats.model_evaluation.dm_test, h=1, diagnostic-only under nesting",
+    "forecast_target": "log variance; evaluated on variance scale",
+    "formal_nested_test": "volpred.stats.model_evaluation.clark_west_test on log variance",
+    "harvey_threshold": 3.0,
+    "information_set": "returns, rolling means, and signals computed/shifted on each market-local session series before date join",
+    "minimum_training_observations": 504,
+    "rung_definitions": {
+      "INDONESIA": {
+        "added_upstream": [
+          "TAIWAN"
+        ],
+        "baseline_upstream": [
+          "SPY",
+          "VIX",
+          "JAPAN"
+        ]
+      },
+      "JAPAN": {
+        "added_upstream": [
+          "SPY",
+          "VIX"
+        ],
+        "baseline_upstream": []
+      },
+      "MALAYSIA": {
+        "added_upstream": [
+          "TAIWAN"
+        ],
+        "baseline_upstream": [
+          "SPY",
+          "VIX",
+          "JAPAN"
+        ]
+      },
+      "SINGAPORE": {
+        "added_upstream": [
+          "TAIWAN"
+        ],
+        "baseline_upstream": [
+          "SPY",
+          "VIX",
+          "JAPAN"
+        ]
+      },
+      "TAIWAN": {
+        "added_upstream": [
+          "JAPAN"
+        ],
+        "baseline_upstream": [
+          "SPY",
+          "VIX"
+        ]
+      },
+      "THAILAND": {
+        "added_upstream": [
+          "TAIWAN"
+        ],
+        "baseline_upstream": [
+          "SPY",
+          "VIX",
+          "JAPAN"
+        ]
+      }
+    },
+    "target": "daily squared close-to-close log return",
+    "window": 756
+  },
+  "seed": 42,
+  "southeast_asia_panel": {
+    "aggregation": "Clark-West adjusted loss averaged across assets by common date before HAC",
+    "alternative": "larger nested model has incremental predictive content",
+    "direction": "positive t favors the larger nested model",
+    "hac_lag": 16,
+    "harvey_strength_abs_t_gt_3": false,
+    "mean_adjusted_loss_diff": 0.0005181576509680674,
+    "n_assets": 4,
+    "n_obs": 3567,
+    "p_value_one_sided": 0.4269063597547243,
+    "p_value_two_sided": 0.8538127195094486,
+    "status": "ok",
+    "t_stat": 0.18425588563103526,
+    "test": "Clark-West (2007) nested MSPE-adjusted"
+  },
+  "success_criteria": {
+    "clark_west_abs_t_gt_3_targets": 1,
+    "clark_west_abs_t_gt_3_targets_required": 2,
+    "met": false,
+    "panel_clark_west_abs_t_gt_3_required": true,
+    "qlike_improved_targets": 2,
+    "qlike_improves_targets_required": 4
+  },
+  "targets": {
+    "INDONESIA": {
+      "clark_west_log_variance": {
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model",
+        "hac_lag": 16,
+        "harvey_strength_abs_t_gt_3": false,
+        "mean_adjusted_loss_diff": 0.002045166388374477,
+        "n_obs": 3900,
+        "p_value_one_sided": 0.37287784527855805,
+        "p_value_two_sided": 0.7457556905571161,
+        "status": "ok",
+        "t_stat": 0.32424085897714594,
+        "test": "Clark-West (2007) nested MSPE-adjusted"
+      },
+      "dm_harvey_strength_diagnostic": false,
+      "dm_ladder_vs_baseline_t": -0.25815057180181744,
+      "dm_two_sided_p": 0.7963043281064421,
+      "mse_baseline": 2.811912951958534e-07,
+      "mse_ladder": 2.8012348003408584e-07,
+      "n_oos": 3900,
+      "oos_end": "2025-12-30",
+      "oos_start": "2007-06-20",
+      "qlike_baseline": 3.125854157499486,
+      "qlike_improvement_pct": 0.09857441117261993,
+      "qlike_ladder": 3.122772865169616,
+      "spearman_baseline": {
+        "p": 5.797966120052768e-91,
+        "rho": 0.3156583075080058
+      },
+      "spearman_ladder": {
+        "p": 1.0747004179876028e-89,
+        "rho": 0.31351794424585677
+      }
+    },
+    "JAPAN": {
+      "clark_west_log_variance": {
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model",
+        "hac_lag": 17,
+        "harvey_strength_abs_t_gt_3": true,
+        "mean_adjusted_loss_diff": 0.5796596628210051,
+        "n_obs": 4438,
+        "p_value_one_sided": 2.362721794074841e-31,
+        "p_value_two_sided": 4.725443588149682e-31,
+        "status": "ok",
+        "t_stat": 11.588276684354375,
+        "test": "Clark-West (2007) nested MSPE-adjusted"
+      },
+      "dm_harvey_strength_diagnostic": false,
+      "dm_ladder_vs_baseline_t": -2.055698483811538,
+      "dm_two_sided_p": 0.039869976943901264,
+      "mse_baseline": 5.384107775720445e-07,
+      "mse_ladder": 5.062205871370368e-07,
+      "n_oos": 4438,
+      "oos_end": "2025-12-30",
+      "oos_start": "2007-03-19",
+      "qlike_baseline": 3.823631185942833,
+      "qlike_improvement_pct": 7.669289612778455,
+      "qlike_ladder": 3.5303858365683616,
+      "spearman_baseline": {
+        "p": 5.349249336751133e-68,
+        "rho": 0.2572211278963499
+      },
+      "spearman_ladder": {
+        "p": 3.8858228283446e-121,
+        "rho": 0.3408392350934575
+      }
+    },
+    "MALAYSIA": {
+      "clark_west_log_variance": {
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model",
+        "hac_lag": 16,
+        "harvey_strength_abs_t_gt_3": false,
+        "mean_adjusted_loss_diff": -0.0018474039598768929,
+        "n_obs": 3959,
+        "p_value_one_sided": 0.6096348443702343,
+        "p_value_two_sided": 0.7807303112595314,
+        "status": "ok",
+        "t_stat": -0.2783674399565683,
+        "test": "Clark-West (2007) nested MSPE-adjusted"
+      },
+      "dm_harvey_strength_diagnostic": false,
+      "dm_ladder_vs_baseline_t": 0.5024670092058584,
+      "dm_two_sided_p": 0.6153670070316535,
+      "mse_baseline": 4.3960900321446436e-08,
+      "mse_ladder": 4.399035280679802e-08,
+      "n_oos": 3959,
+      "oos_end": "2025-12-30",
+      "oos_start": "2007-05-29",
+      "qlike_baseline": 3.4734402011626866,
+      "qlike_improvement_pct": -0.22724330477872468,
+      "qlike_ladder": 3.4813333614653215,
+      "spearman_baseline": {
+        "p": 2.7181831154992405e-93,
+        "rho": 0.3172778362877029
+      },
+      "spearman_ladder": {
+        "p": 2.128173781684141e-92,
+        "rho": 0.31580283197186415
+      }
+    },
+    "SINGAPORE": {
+      "clark_west_log_variance": {
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model",
+        "hac_lag": 16,
+        "harvey_strength_abs_t_gt_3": false,
+        "mean_adjusted_loss_diff": 0.0007683047298343162,
+        "n_obs": 4059,
+        "p_value_one_sided": 0.44510034513149166,
+        "p_value_two_sided": 0.8902006902629833,
+        "status": "ok",
+        "t_stat": 0.13805026731373365,
+        "test": "Clark-West (2007) nested MSPE-adjusted"
+      },
+      "dm_harvey_strength_diagnostic": false,
+      "dm_ladder_vs_baseline_t": 0.8164136648787851,
+      "dm_two_sided_p": 0.41431150555622587,
+      "mse_baseline": 1.0352358571654777e-07,
+      "mse_ladder": 1.0491166225482306e-07,
+      "n_oos": 4059,
+      "oos_end": "2025-12-30",
+      "oos_start": "2007-05-16",
+      "qlike_baseline": 2.9192089783225046,
+      "qlike_improvement_pct": -0.4534015336681252,
+      "qlike_ladder": 2.9324447166011964,
+      "spearman_baseline": {
+        "p": 3.074328508302062e-128,
+        "rho": 0.36512129632639817
+      },
+      "spearman_ladder": {
+        "p": 6.528928763195901e-128,
+        "rho": 0.36468099130877313
+      }
+    },
+    "TAIWAN": {
+      "clark_west_log_variance": {
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model",
+        "hac_lag": 17,
+        "harvey_strength_abs_t_gt_3": false,
+        "mean_adjusted_loss_diff": 0.001770050065796287,
+        "n_obs": 4154,
+        "p_value_one_sided": 0.3923093750247876,
+        "p_value_two_sided": 0.7846187500495752,
+        "status": "ok",
+        "t_stat": 0.273305028758911,
+        "test": "Clark-West (2007) nested MSPE-adjusted"
+      },
+      "dm_harvey_strength_diagnostic": false,
+      "dm_ladder_vs_baseline_t": 1.605021101602671,
+      "dm_two_sided_p": 0.10856519400474562,
+      "mse_baseline": 1.6238731085562506e-07,
+      "mse_ladder": 1.618694914204886e-07,
+      "n_oos": 4154,
+      "oos_end": "2025-12-30",
+      "oos_start": "2007-05-02",
+      "qlike_baseline": 3.5924514927875384,
+      "qlike_improvement_pct": -0.6562841644118487,
+      "qlike_ladder": 3.61602818304888,
+      "spearman_baseline": {
+        "p": 6.404162694944912e-92,
+        "rho": 0.30789381241094727
+      },
+      "spearman_ladder": {
+        "p": 4.662544130649886e-90,
+        "rho": 0.30484649092228044
+      }
+    },
+    "THAILAND": {
+      "clark_west_log_variance": {
+        "alternative": "larger nested model has incremental predictive content",
+        "direction": "positive t favors the larger nested model",
+        "hac_lag": 16,
+        "harvey_strength_abs_t_gt_3": false,
+        "mean_adjusted_loss_diff": -0.0008224997439748135,
+        "n_obs": 3894,
+        "p_value_one_sided": 0.569864018582562,
+        "p_value_two_sided": 0.8602719628348761,
+        "status": "ok",
+        "t_stat": -0.17602797740171816,
+        "test": "Clark-West (2007) nested MSPE-adjusted"
+      },
+      "dm_harvey_strength_diagnostic": false,
+      "dm_ladder_vs_baseline_t": 0.7129992457574995,
+      "dm_two_sided_p": 0.47588895848489177,
+      "mse_baseline": 2.105494198808072e-07,
+      "mse_ladder": 2.1105539649943256e-07,
+      "n_oos": 3894,
+      "oos_end": "2025-12-30",
+      "oos_start": "2007-06-21",
+      "qlike_baseline": 3.3974708700745,
+      "qlike_improvement_pct": -0.25651978800189146,
+      "qlike_ladder": 3.4061860551478413,
+      "spearman_baseline": {
+        "p": 7.957133583239787e-112,
+        "rho": 0.34884288953730264
+      },
+      "spearman_ladder": {
+        "p": 9.314028629227359e-111,
+        "rho": 0.3472497725410138
+      }
+    }
+  },
+  "verdict": "MIXED"
+}
