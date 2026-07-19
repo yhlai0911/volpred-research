@@ -121,8 +121,15 @@ def release_dates(event: str, start: str, end: str, *, use_cache: bool = True) -
 
     if raw is None:
         raw = _fetch(RELEASE_IDS[event], start, end)
-        cache.parent.mkdir(parents=True, exist_ok=True)
-        cache.write_text(json.dumps(raw) + "\n")
+        if use_cache:
+            # use_cache=False must bypass the cache ENTIRELY — the old code
+            # skipped only the read and still wrote, which leaked canonical
+            # writes out of hermetic tests (CI repo-state guard, 2026-07-19).
+            from volpred.canonical_write import guard_canonical_write
+
+            guard_canonical_write(cache)
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(json.dumps(raw) + "\n")
 
     dates = pd.to_datetime(raw)
     if len(dates) == 0:

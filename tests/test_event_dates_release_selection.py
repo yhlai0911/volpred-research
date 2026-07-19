@@ -13,6 +13,13 @@ import pytest
 from volpred.data import event_dates
 
 
+@pytest.fixture(autouse=True)
+def _sandbox_cache_dir(monkeypatch, tmp_path):
+    # belt-and-suspenders with use_cache=False: no test may touch the
+    # canonical storage/data cache dir (CI repo-state guard, 2026-07-19).
+    monkeypatch.setattr(event_dates, "_CACHE_DIR", tmp_path)
+
+
 def _dates(monkeypatch, raw):
     monkeypatch.setattr(event_dates, "_fetch", lambda *_a, **_kw: list(raw))
     return event_dates.release_dates("NFP_US", "2024-01-01", "2024-12-31", use_cache=False)
