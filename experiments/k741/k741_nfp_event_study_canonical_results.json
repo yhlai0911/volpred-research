@@ -1,0 +1,399 @@
+{
+  "experiment_id": "k741-canonical",
+  "title": "NFP Event Study \u2014 official BLS release calendar re-run",
+  "parent_experiment": "k741",
+  "date": "2026-07-19",
+  "proposer": "\u4e3b\u7dda\u7a0b (task assign_1238781f)",
+  "executor": "Claude worktree agent",
+  "period": "2010-01 .. 2026-03",
+  "scope": "Parts A and B only \u2014 the parts cited by main_v3.tex. Archived Parts C (sector dispersion) and D (strategy) are not referenced by the paper and require sector ETFs absent from the pinned snapshot.",
+  "part_a_historical": {
+    "n_nfp": 194,
+    "n_non_nfp": 3911,
+    "nfp_mean_abs_return_pct": 0.8298702618881523,
+    "non_nfp_mean_abs_return_pct": 0.7123653150359393,
+    "friday_mean_abs_return_pct": 0.6982621445118242,
+    "ratio_vs_all": 1.1649504044793153,
+    "ratio_vs_friday": 1.1884795250762723,
+    "t_vs_all": 1.9791357741925433,
+    "p_vs_all": 0.0478674693713345,
+    "t_vs_friday": 2.138000664521951,
+    "p_vs_friday": 0.0328064178376204,
+    "wilcoxon_p_vs_all": 0.0006104013142580586,
+    "pct_positive": 57.21649484536082,
+    "mean_return_pct": 0.056655676588210274,
+    "vix_drops_pct": 65.97938144329896
+  },
+  "part_b_vix_regimes": {
+    "Low (VIX<15)": {
+      "n": 63,
+      "n_non_nfp": 1375,
+      "mean_abs_return_pct": 0.5267845478669022,
+      "median_abs_return_pct": 0.4391988635037203,
+      "std_return_pct": 0.6332360407249975,
+      "mean_return_pct": 0.2414101236509987,
+      "pct_positive": 71.42857142857143,
+      "mean_vix_change": -0.3434921446300685,
+      "non_nfp_mean_abs_return_pct": 0.40360355394224523,
+      "ratio": 1.3052029466080566,
+      "t_stat": 2.619306011782351,
+      "p_value": 0.008903685969855671
+    },
+    "Medium (15-20)": {
+      "n": 76,
+      "n_non_nfp": 1370,
+      "mean_abs_return_pct": 0.7880877046628053,
+      "median_abs_return_pct": 0.758613598188379,
+      "std_return_pct": 0.9556441778909535,
+      "mean_return_pct": 0.1768828543818147,
+      "pct_positive": 57.89473684210527,
+      "mean_vix_change": -0.31000004316631097,
+      "non_nfp_mean_abs_return_pct": 0.6395917327532555,
+      "ratio": 1.2321730633857915,
+      "t_stat": 2.2329787578608813,
+      "p_value": 0.025703089471781345
+    },
+    "Elevated (20-25)": {
+      "n": 27,
+      "n_non_nfp": 640,
+      "mean_abs_return_pct": 1.0455570299744268,
+      "median_abs_return_pct": 0.908737891272482,
+      "std_return_pct": 1.2945833160120601,
+      "mean_return_pct": -0.043892193551026346,
+      "pct_positive": 55.55555555555556,
+      "mean_vix_change": -0.050370604903609534,
+      "non_nfp_mean_abs_return_pct": 0.8726959148687983,
+      "ratio": 1.1980771448112217,
+      "t_stat": 1.2126075276519523,
+      "p_value": 0.2257105116529032
+    },
+    "High (VIX>=25)": {
+      "n": 28,
+      "n_non_nfp": 526,
+      "mean_abs_return_pct": 1.4172392473929993,
+      "median_abs_return_pct": 1.0019477067585214,
+      "std_return_pct": 1.8508762397380811,
+      "mean_return_pct": -0.5884158656800119,
+      "pct_positive": 25.0,
+      "mean_vix_change": 0.4553570747375487,
+      "non_nfp_mean_abs_return_pct": 1.5139539943858935,
+      "ratio": 0.9361177767940533,
+      "t_stat": -0.343638663756869,
+      "p_value": 0.7312488923708301
+    }
+  },
+  "proxy_arm_same_data": {
+    "part_a_historical": {
+      "n_nfp": 195,
+      "n_non_nfp": 3910,
+      "nfp_mean_abs_return_pct": 0.8163712177129483,
+      "non_nfp_mean_abs_return_pct": 0.7130084886081419,
+      "friday_mean_abs_return_pct": 0.700885491933988,
+      "ratio_vs_all": 1.1449670386205077,
+      "ratio_vs_friday": 1.1647711746184028,
+      "t_vs_all": 1.7450111710604628,
+      "p_vs_all": 0.08105778906624043,
+      "t_vs_friday": 1.8796204017653995,
+      "p_vs_friday": 0.06050825417622726,
+      "wilcoxon_p_vs_all": 0.003666620002277073,
+      "pct_positive": 59.48717948717949,
+      "mean_return_pct": 0.08687124241693682,
+      "vix_drops_pct": 68.71794871794872
+    },
+    "part_b_vix_regimes": {
+      "Low (VIX<15)": {
+        "n": 62,
+        "n_non_nfp": 1376,
+        "mean_abs_return_pct": 0.4982230176027321,
+        "median_abs_return_pct": 0.43383269963052085,
+        "std_return_pct": 0.6180242235872523,
+        "mean_return_pct": 0.20523883233863263,
+        "pct_positive": 69.35483870967742,
+        "mean_vix_change": -0.33306457150366964,
+        "non_nfp_mean_abs_return_pct": 0.4049800044293842,
+        "ratio": 1.2302410295657116,
+        "t_stat": 1.9655799941289092,
+        "p_value": 0.04953960479413378
+      },
+      "Medium (15-20)": {
+        "n": 78,
+        "n_non_nfp": 1368,
+        "mean_abs_return_pct": 0.7572579210083155,
+        "median_abs_return_pct": 0.751070514394131,
+        "std_return_pct": 0.9178509192452678,
+        "mean_return_pct": 0.22503363887234218,
+        "pct_positive": 61.53846153846154,
+        "mean_vix_change": -0.3644871711730956,
+        "non_nfp_mean_abs_return_pct": 0.6411324719208222,
+        "ratio": 1.1811255148870923,
+        "t_stat": 1.7666108018196856,
+        "p_value": 0.07750466419642743
+      },
+      "Elevated (20-25)": {
+        "n": 27,
+        "n_non_nfp": 640,
+        "mean_abs_return_pct": 1.0216871630321018,
+        "median_abs_return_pct": 0.8617710662656153,
+        "std_return_pct": 1.2664397194443504,
+        "mean_return_pct": 0.23333931922651427,
+        "pct_positive": 66.66666666666666,
+        "mean_vix_change": -0.5262964036729602,
+        "non_nfp_mean_abs_return_pct": 0.8737029248804278,
+        "ratio": 1.1693759216520039,
+        "t_stat": 1.037791704245175,
+        "p_value": 0.2997442385838709
+      },
+      "High (VIX>=25)": {
+        "n": 28,
+        "n_non_nfp": 526,
+        "mean_abs_return_pct": 1.4875317543621496,
+        "median_abs_return_pct": 1.0560517482526843,
+        "std_return_pct": 1.863882377049625,
+        "mean_return_pct": -0.7013464566018257,
+        "pct_positive": 25.0,
+        "mean_vix_change": 0.6671427999223979,
+        "non_nfp_mean_abs_return_pct": 1.510212187931262,
+        "ratio": 0.9849819556812206,
+        "t_stat": -0.08057805489323762,
+        "p_value": 0.9358067242587034
+      }
+    }
+  },
+  "provenance": {
+    "date_source": "FRED/ALFRED release id 50 (Employment Situation) via volpred.data.event_dates.nfp_release_dates",
+    "price_source": "paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv",
+    "price_snapshot_note": "Paper's pinned 2026-04-19 snapshot. Both arms share it, so the canonical-minus-proxy delta is a pure date-source effect. The archived k741 JSON used a live 2026-03 yfinance pull, so archived-minus-proxy is snapshot drift, reported separately in the comparison.",
+    "n_proxy_dates": 195,
+    "n_canonical_dates": 194,
+    "n_proxy_trading_days": 195,
+    "n_canonical_trading_days": 194,
+    "n_exact_date_matches": 161,
+    "months_shifted": [
+      {
+        "month": "2010-01",
+        "proxy": "2010-01-01",
+        "canonical": "2010-01-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2010-10",
+        "proxy": "2010-10-01",
+        "canonical": "2010-10-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2011-07",
+        "proxy": "2011-07-01",
+        "canonical": "2011-07-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2012-03",
+        "proxy": "2012-03-02",
+        "canonical": "2012-03-09",
+        "shift_days": 7
+      },
+      {
+        "month": "2013-03",
+        "proxy": "2013-03-01",
+        "canonical": "2013-03-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2013-10",
+        "proxy": "2013-10-04",
+        "canonical": "2013-10-22",
+        "shift_days": 18
+      },
+      {
+        "month": "2013-11",
+        "proxy": "2013-11-01",
+        "canonical": "2013-11-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2014-01",
+        "proxy": "2014-01-03",
+        "canonical": "2014-01-10",
+        "shift_days": 7
+      },
+      {
+        "month": "2014-07",
+        "proxy": "2014-07-04",
+        "canonical": "2014-07-03",
+        "shift_days": -1
+      },
+      {
+        "month": "2015-01",
+        "proxy": "2015-01-02",
+        "canonical": "2015-01-09",
+        "shift_days": 7
+      },
+      {
+        "month": "2015-05",
+        "proxy": "2015-05-01",
+        "canonical": "2015-05-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2015-07",
+        "proxy": "2015-07-03",
+        "canonical": "2015-07-02",
+        "shift_days": -1
+      },
+      {
+        "month": "2016-01",
+        "proxy": "2016-01-01",
+        "canonical": "2016-01-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2016-07",
+        "proxy": "2016-07-01",
+        "canonical": "2016-07-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2017-03",
+        "proxy": "2017-03-03",
+        "canonical": "2017-03-10",
+        "shift_days": 7
+      },
+      {
+        "month": "2017-12",
+        "proxy": "2017-12-01",
+        "canonical": "2017-12-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2018-03",
+        "proxy": "2018-03-02",
+        "canonical": "2018-03-09",
+        "shift_days": 7
+      },
+      {
+        "month": "2019-03",
+        "proxy": "2019-03-01",
+        "canonical": "2019-03-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2020-01",
+        "proxy": "2020-01-03",
+        "canonical": "2020-01-10",
+        "shift_days": 7
+      },
+      {
+        "month": "2020-05",
+        "proxy": "2020-05-01",
+        "canonical": "2020-05-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2020-07",
+        "proxy": "2020-07-03",
+        "canonical": "2020-07-02",
+        "shift_days": -1
+      },
+      {
+        "month": "2021-01",
+        "proxy": "2021-01-01",
+        "canonical": "2021-01-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2021-10",
+        "proxy": "2021-10-01",
+        "canonical": "2021-10-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2022-07",
+        "proxy": "2022-07-01",
+        "canonical": "2022-07-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2023-03",
+        "proxy": "2023-03-03",
+        "canonical": "2023-03-10",
+        "shift_days": 7
+      },
+      {
+        "month": "2023-12",
+        "proxy": "2023-12-01",
+        "canonical": "2023-12-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2024-03",
+        "proxy": "2024-03-01",
+        "canonical": "2024-03-08",
+        "shift_days": 7
+      },
+      {
+        "month": "2025-01",
+        "proxy": "2025-01-03",
+        "canonical": "2025-01-10",
+        "shift_days": 7
+      },
+      {
+        "month": "2025-07",
+        "proxy": "2025-07-04",
+        "canonical": "2025-07-03",
+        "shift_days": -1
+      },
+      {
+        "month": "2025-11",
+        "proxy": "2025-11-07",
+        "canonical": "2025-11-20",
+        "shift_days": 13
+      },
+      {
+        "month": "2025-12",
+        "proxy": "2025-12-05",
+        "canonical": "2025-12-16",
+        "shift_days": 11
+      },
+      {
+        "month": "2026-01",
+        "proxy": "2026-01-02",
+        "canonical": "2026-01-09",
+        "shift_days": 7
+      },
+      {
+        "month": "2026-02",
+        "proxy": "2026-02-06",
+        "canonical": "2026-02-11",
+        "shift_days": 5
+      }
+    ],
+    "phantom_months_in_proxy": [
+      {
+        "month": "2025-10",
+        "proxy_date": "2025-10-03"
+      }
+    ],
+    "months_missing_from_proxy": []
+  },
+  "methodology_deltas": [
+    {
+      "item": "release-date -> trading-day mapping",
+      "archived": "window [nd-1d, nd+3d], take first candidate",
+      "canonical_arm": "release date if it trades, else next trading day",
+      "why": "The archived window can return the trading day BEFORE the release when the release falls on a market holiday \u2014 a lookahead. Affects 5 Good Friday releases (2010-04-02, 2012-04-06, 2015-04-03, 2021-04-02, 2023-04-07). Fixing it is required by .claude/rules/experiments.md. The proxy arm keeps the archived mapping so the archived result stays reproducible."
+    },
+    {
+      "item": "t-test variant (NOT changed \u2014 flagged for the paper)",
+      "archived": "scipy stats.ttest_ind default equal_var=True (Student's)",
+      "canonical_arm": "identical (equal_var=True), for 1:1 comparability",
+      "why": "main_v3.tex abstract and Section~sec:nfp label these 'Welch's t-tests'. That label is incorrect for k741-sourced numbers: the archived script never passed equal_var=False. Sibling k904 DOES use Welch. This mislabel is independent of the date-proxy defect and needs a separate paper correction."
+    },
+    {
+      "item": "regime ratio / t / p persistence",
+      "archived": "computed and printed to stdout only; JSON stored n and means",
+      "canonical_arm": "persisted into the results JSON",
+      "why": "The paper table's ratio/t-stat/p columns were transcribed from stdout, so they were not machine-checkable by reproduce.py. Now they are."
+    }
+  ]
+}
