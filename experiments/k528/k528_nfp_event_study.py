@@ -80,10 +80,37 @@ KNOWN_MISSING_MONTHS: dict[str, str] = {
     ),
 }
 
-# Two same-month entries closer together than this cannot be told apart as
-# "regular report" vs "off-cycle revision" by date order alone, so the run
-# refuses to guess. Revisions are filed weeks after the report, not days.
-AMBIGUOUS_SAME_MONTH_GAP_DAYS = 3
+# NOTE: an earlier version of this file gated same-month ambiguity on a minimum
+# day-gap, on the premise that "revisions are filed weeks after the report, not
+# days". Running it against the real feed falsified that premise immediately:
+# three of the six genuine multi-entry months (2006-05, 2013-05, 2020-05) are
+# exactly 3 days apart. A threshold the real data straddles is not a safety
+# check, it is a knob that manufactures confidence, so it is gone. The reviewed
+# allowlist below is the actual control, and unlike a gap rule it is verifiable.
+
+# The months where ALFRED returns two release-id-50 entries, with the entry that
+# is the actual Employment Situation report. Verified individually against the
+# BLS news-release archive (bls.gov/news.release/archives/empsit_<MMDDYYYY>.htm).
+#
+# Why an explicit reviewed list rather than a rule: "earliest entry in the month"
+# is right for every case we have checked, but it is a HEURISTIC, and it fails
+# silently if an off-cycle item is ever filed BEFORE the report. There is no way
+# to tell those apart from dates alone. So the rule still runs, and on top of it
+# any month with multiple entries must appear here -- a new multi-entry month is
+# something a human has to look at, not something this script gets to assume.
+REVIEWED_MULTI_ENTRY_MONTHS: dict[str, str] = {
+    "2006-05": "2006-05-05",
+    "2012-12": "2012-12-07",
+    "2013-05": "2013-05-03",
+    "2020-05": "2020-05-08",
+    "2024-01": "2024-01-05",
+    "2024-08": "2024-08-02",
+}
+
+# How far the observed calendar may fall short of the requested window before the
+# run treats it as truncated. One monthly cycle plus slack; a feed that stops
+# early otherwise shrinks the "observed span" it is checked against and passes.
+MAX_WINDOW_SHORTFALL_DAYS = 70
 
 
 def write_json_atomic(path: Path, payload) -> None:
@@ -143,25 +170,38 @@ def check_calendar_is_complete(selected, raw, start, end):
     for v in raw_by_month.values():
         v.sort()
 
-    # 1 + 2: same-month resolution must be unambiguous AND actually taken.
-    ambiguous, mis_selected = [], []
+    # 0: the selection itself must be well-formed before anything is inferred
+    # from it. Building a month->date dict first would silently keep only the
+    # last of a duplicated month and hide exactly what we are looking for.
+    sel_month_counts: dict[str, int] = {}
+    for m in sel_months:
+        sel_month_counts[m] = sel_month_counts.get(m, 0) + 1
+    sel_dupes = sorted(m for m, c in sel_month_counts.items() if c > 1)
+    if sel_dupes:
+        raise RuntimeError(
+            f"selected calendar has more than one entry for {sel_dupes}. The Employment "
+            "Situation is monthly; a duplicated month means the accessor stopped collapsing."
+        )
+    invented = sorted(set(sel_months) - set(raw_by_month))
+    if invented:
+        raise RuntimeError(
+            f"selected calendar contains month(s) absent from the raw feed: {invented}. "
+            "The selection must be a subset of what the source actually published."
+        )
+    off_feed = sorted(str(d.date()) for d in sel if d not in raw_by_month.get(d.strftime("%Y-%m"), []))
+    if off_feed:
+        raise RuntimeError(
+            f"selected dates that do not appear in the raw feed at all: {off_feed}."
+        )
+
+    # 1: the accessor's per-month choice must be the earliest entry.
+    mis_selected = []
     sel_by_month = dict(zip(sel_months, sel))
     for month, entries in raw_by_month.items():
-        if len(entries) > 1:
-            gap = (entries[1] - entries[0]).days
-            if gap < AMBIGUOUS_SAME_MONTH_GAP_DAYS:
-                ambiguous.append(f"{month}: {entries[0].date()} vs {entries[1].date()} ({gap}d apart)")
         if month in sel_by_month and sel_by_month[month] != entries[0]:
             mis_selected.append(
                 f"{month}: selected {sel_by_month[month].date()}, earliest is {entries[0].date()}"
             )
-    if ambiguous:
-        raise RuntimeError(
-            f"{len(ambiguous)} month(s) carry two release entries too close together to "
-            f"identify the Employment Situation report by date order: {ambiguous}. "
-            "Revisions are filed weeks after the report, not days -- this shape means the "
-            "feed changed or the release id is carrying something new. Refusing to guess."
-        )
     if mis_selected:
         raise RuntimeError(
             f"accessor did not select the earliest entry in {len(mis_selected)} month(s): "
@@ -169,9 +209,48 @@ def check_calendar_is_complete(selected, raw, start, end):
             "monthly report -- selecting it is the k528 v2 BLOCKER."
         )
 
-    # 3: no month may vanish from the observed span. Anchoring on the observed
-    # span rather than [start, end] removes the endpoint fudge that used to
-    # exempt the first and last month unconditionally (Codex v3 finding 3).
+    # "Earliest wins" is a heuristic and cannot survive an off-cycle item filed
+    # BEFORE the report. Every multi-entry month therefore has to be one a human
+    # checked against the BLS archive, and the checked answer has to match.
+    multi = {m: v for m, v in raw_by_month.items() if len(v) > 1}
+    unreviewed = sorted(set(multi) - set(REVIEWED_MULTI_ENTRY_MONTHS))
+    if unreviewed:
+        raise RuntimeError(
+            f"{len(unreviewed)} month(s) carry multiple release entries but have never been "
+            f"checked against the BLS archive: "
+            f"{ {m: [str(d.date()) for d in multi[m]] for m in unreviewed} }. "
+            "Selecting the earliest is only a heuristic; verify which entry is the Employment "
+            "Situation report at bls.gov/news.release/archives/ and add it to "
+            "REVIEWED_MULTI_ENTRY_MONTHS."
+        )
+    contradicted = {
+        m: {"selected": str(sel_by_month[m].date()), "reviewed": REVIEWED_MULTI_ENTRY_MONTHS[m]}
+        for m in multi
+        if m in sel_by_month and str(sel_by_month[m].date()) != REVIEWED_MULTI_ENTRY_MONTHS[m]
+    }
+    if contradicted:
+        raise RuntimeError(
+            f"selection contradicts the human-verified release date in {contradicted}. "
+            "Either the feed changed or the accessor regressed; do not proceed on the guess."
+        )
+
+    # 3a: the observed span must actually cover what was asked for. Checking only
+    # for gaps INSIDE the observed span cannot catch truncation -- if the feed
+    # stops early, the span shrinks with it and nothing looks missing. Found by
+    # self-audit while Codex v3 round-2 was running.
+    want_start, want_end = pd.Timestamp(start), pd.Timestamp(end)
+    head_short = (min(sel) - want_start).days
+    tail_short = (want_end - max(sel)).days
+    if head_short > MAX_WINDOW_SHORTFALL_DAYS or tail_short > MAX_WINDOW_SHORTFALL_DAYS:
+        raise RuntimeError(
+            f"official NFP calendar does not cover the requested window "
+            f"{start}..{end}: first release {min(sel).date()} ({head_short}d in), "
+            f"last release {max(sel).date()} ({tail_short}d short of the end). "
+            f"Tolerance is {MAX_WINDOW_SHORTFALL_DAYS}d. A truncated feed silently "
+            "shortens the sample while every printed count still agrees with itself."
+        )
+
+    # 3b: no month may vanish from inside the observed span.
     span = {
         p.strftime("%Y-%m")
         for p in pd.period_range(start=min(sel), end=max(sel), freq="M")
@@ -199,9 +278,23 @@ def check_calendar_is_complete(selected, raw, start, end):
     return {
         "n_months_in_span": len(span),
         "n_raw_entries": len(raw),
-        "months_with_multiple_raw_entries": sorted(m for m, v in raw_by_month.items() if len(v) > 1),
+        "months_with_multiple_raw_entries": sorted(multi),
+        "reviewed_multi_entry_months": dict(sorted(REVIEWED_MULTI_ENTRY_MONTHS.items())),
         "known_missing_months": {m: KNOWN_MISSING_MONTHS[m] for m in sorted(KNOWN_MISSING_MONTHS)},
-        "ambiguity_gap_threshold_days": AMBIGUOUS_SAME_MONTH_GAP_DAYS,
+        "window_coverage": {
+            "requested": f"{start}..{end}",
+            "observed": f"{min(sel).date()}..{max(sel).date()}",
+            "head_shortfall_days": int(head_short),
+            "tail_shortfall_days": int(tail_short),
+            "tolerance_days": MAX_WINDOW_SHORTFALL_DAYS,
+        },
+        "residual_limitation": (
+            "Same-month selection uses 'earliest wins', which is a heuristic. It cannot "
+            "distinguish an off-cycle item filed BEFORE the report from the report itself, "
+            "so every multi-entry month must additionally appear in "
+            "REVIEWED_MULTI_ENTRY_MONTHS with a date verified against the BLS archive. A "
+            "new multi-entry month fails the run rather than being assumed."
+        ),
     }
 
 
@@ -748,9 +841,55 @@ def win_rate(sample, reference):
 proxy_events = proxy["event_data"]
 proxy_nfp_abs = np.array([e["event_abs_return"] for e in proxy_events])
 proxy_event_dates = pd.DatetimeIndex([pd.Timestamp(e["date"]) for e in proxy_events])
-proxy_non_nfp = spy[~spy.index.isin(set(proxy_event_dates))]
+
+# The archive holds the proxy run's ANALYSED events, which is not the same as
+# its NFP sessions: the proxy also had a January-2005 event that its own
+# window-buffer dropped, and leaving that day in the proxy control group is the
+# identical leak just repaired on the official side (Codex v3 round-2 BLOCKER 1).
+# Reconstructing it needs the first-Friday rule for exactly the months the
+# archive does not cover. That is legitimate here and only here: the audit's job
+# IS to reconstruct what the superseded run did. It is not reintroduced as a
+# data source -- every analysed date still comes from the archive.
+_archive_months = {d.strftime("%Y-%m") for d in proxy_event_dates}
+_sample_months = [
+    p.strftime("%Y-%m")
+    for p in pd.period_range(start=pd.Timestamp(SAMPLE_START), end=pd.Timestamp(SAMPLE_END), freq="M")
+]
+_proxy_extra_sessions = []
+for _m in _sample_months:
+    if _m in _archive_months:
+        continue
+    _y, _mm = int(_m[:4]), int(_m[5:])
+    _first = pd.Timestamp(year=_y, month=_mm, day=1)
+    _ff = _first + pd.Timedelta(days=(4 - _first.weekday()) % 7)   # first Friday
+    _cand = trading_dates[(trading_dates >= _ff) & (trading_dates <= _ff + pd.Timedelta(days=3))]
+    if len(_cand):
+        _proxy_extra_sessions.append(_cand[0])
+
+proxy_all_sessions = set(proxy_event_dates) | set(_proxy_extra_sessions)
+# The reconstruction must only ADD window-dropped months, never move an analysed
+# one; and the months it adds must be exactly those the archive is missing.
+if not set(proxy_event_dates) <= proxy_all_sessions:
+    raise AssertionError("proxy session reconstruction dropped an archived event")
+if len(proxy_all_sessions) != len(proxy_event_dates) + len(_proxy_extra_sessions):
+    raise AssertionError("proxy session reconstruction collided with an archived event")
+proxy_non_nfp = spy[~spy.index.isin(proxy_all_sessions)]
 proxy_non_nfp_abs = proxy_non_nfp["AbsReturn"].values
 proxy_fri_abs = proxy_non_nfp[proxy_non_nfp.index.weekday == 4]["AbsReturn"].values
+
+# Two proxy control groups, deliberately, because they answer different questions:
+#   _archive  -- excludes only the archive's ANALYSED events. Reproduces the
+#                published proxy-era means, which is how we verify the
+#                reconstruction is reading the archive correctly.
+#   (above)   -- also excludes the proxy's window-dropped session. Leak-free, so
+#                it is what the before/after comparison uses.
+# Keeping only the first would carry the leak into the audit; keeping only the
+# second would silently discard the faithfulness check.
+proxy_non_nfp_archive = spy[~spy.index.isin(set(proxy_event_dates))]
+proxy_non_nfp_abs_archive = proxy_non_nfp_archive["AbsReturn"].values
+_leak_sessions = sorted(str(d.date()) for d in _proxy_extra_sessions)
+if len(proxy_non_nfp_archive) - len(proxy_non_nfp) != len(_proxy_extra_sessions):
+    raise AssertionError("proxy control groups differ by something other than the reconstructed sessions")
 
 # The proxy calendar was all-Friday by construction, but 15 of its 254 events
 # mapped to a Monday because the first Friday was a market holiday. So the
@@ -770,10 +909,13 @@ proxy_high_abs = proxy_nfp_abs[_p_pre_vix >= _p_thr]
 proxy_low_abs = proxy_nfp_abs[_p_pre_vix < _p_thr]
 
 # Sanity: the rebuilt means must reproduce the archived means, otherwise the
-# reconstruction is wrong and its medians cannot be trusted either.
+# reconstruction is wrong and its medians cannot be trusted either. The baseline
+# is checked against the ARCHIVE'S control definition -- the leak-free one is a
+# deliberate departure from what was published, so holding it to the published
+# value would just re-import the leak.
 for _label, _rebuilt, _archived in (
     ("nfp mean", proxy_nfp_abs.mean(), proxy["main_results"]["nfp_avg_abs_return"]),
-    ("baseline mean", proxy_non_nfp_abs.mean(), proxy["main_results"]["non_nfp_avg_abs_return"]),
+    ("baseline mean", proxy_non_nfp_abs_archive.mean(), proxy["main_results"]["non_nfp_avg_abs_return"]),
     ("high-vix mean", proxy_high_abs.mean(), proxy["regime_analysis"]["high_vix_nfp_abs_return"]),
     ("low-vix mean", proxy_low_abs.mean(), proxy["regime_analysis"]["low_vix_nfp_abs_return"]),
 ):
@@ -784,6 +926,8 @@ for _label, _rebuilt, _archived in (
             "from a reconstruction that cannot reproduce the archived means."
         )
 print("  proxy-era distributions reconstructed from archive (means reproduce)")
+print(f"  proxy control group additionally excludes {len(_proxy_extra_sessions)} "
+      f"window-dropped NFP session(s): {_leak_sessions}")
 
 audit_items = {}
 
@@ -831,6 +975,7 @@ record(
         "nfp_days_on_friday": int((_p_weekday == 4).sum()),
         "median_ratio": float(np.median(proxy_nfp_friday_abs) / np.median(proxy_fri_abs)),
         "win_rate": win_rate(proxy_nfp_friday_abs, proxy_fri_abs),
+        "n_control_friday": int(len(proxy_fri_abs)),
         "estimand": "Friday NFP sessions vs Friday non-NFP sessions (weekday held fixed)",
         "as_published_mixed_weekday": {
             "mean_ratio": proxy["main_results"]["vol_ratio_vs_friday"],
@@ -1036,6 +1181,13 @@ output = {
         "nfp_days_on_friday": int((df["weekday"] == 4).sum()),
         "event_mapping_audit": mapping_audit,
         "calendar_completeness": calendar_completeness,
+        # Recorded independently so the control-group invariant
+        # (controls == total - mapped NFP sessions) is checkable rather than an
+        # algebraic identity between two numbers derived from each other.
+        "total_trading_days": int(len(spy)),
+        "control_group_excludes_all_nfp_sessions": bool(
+            len(set(nfp_trading_dates) & set(spy.index[non_nfp_mask])) == 0
+        ),
     },
     "main_results": {
         "nfp_avg_abs_return": float(nfp_abs_returns.mean()),

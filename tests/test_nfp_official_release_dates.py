@@ -504,21 +504,40 @@ class TestProxyMutationIsCaught:
 
 
 def _k528_module():
-    """Load the k528 script's pure helpers without running the analysis body."""
+    """Load the k528 script's functions and literal constants without running
+    the analysis body (which downloads data and would need a live API key).
+
+    Constants are selected by "is it a literal?", not by a hand-maintained name
+    list. The name-list version silently dropped every constant added after it
+    was written, and a helper that quietly omits what it is supposed to load
+    makes the tests exercise something other than the production code path.
+    """
     import ast
     import types
+
+    def _is_literal_assignment(node):
+        if not isinstance(node, (ast.Assign, ast.AnnAssign)) or node.value is None:
+            return False
+        try:
+            ast.literal_eval(node.value)
+        except (ValueError, SyntaxError):
+            return False  # silent-ok: "is this a literal?" probe; a non-literal is the expected answer, not a failure
+        return True
 
     src = K528_PY.read_text(encoding="utf-8")
     tree = ast.parse(src)
     keep = [
         n for n in tree.body
-        if isinstance(n, (ast.Import, ast.ImportFrom, ast.FunctionDef))
-        or (isinstance(n, ast.AnnAssign) and getattr(n.target, "id", "") == "KNOWN_MISSING_MONTHS")
-        or (isinstance(n, ast.Assign) and getattr(n.targets[0], "id", "") in (
-            "SAMPLE_START", "SAMPLE_END", "AMBIGUOUS_SAME_MONTH_GAP_DAYS"))
+        if isinstance(n, (ast.Import, ast.ImportFrom, ast.FunctionDef, ast.ClassDef))
+        or _is_literal_assignment(n)
     ]
     mod = types.ModuleType("k528_helpers")
     exec(compile(ast.Module(body=keep, type_ignores=[]), "k528", "exec"), mod.__dict__)
+    # Guard the loader: if this ever silently stops loading what the tests need,
+    # the tests below would pass vacuously or error confusingly.
+    for required in ("check_calendar_is_complete", "KNOWN_MISSING_MONTHS",
+                     "REVIEWED_MULTI_ENTRY_MONTHS", "MAX_WINDOW_SHORTFALL_DAYS"):
+        assert hasattr(mod, required), f"_k528_module failed to load {required}"
     return mod
 
 
@@ -529,12 +548,32 @@ class TestControlGroupHasNoNfpDays:
     the baseline."""
 
     def test_every_mapped_nfp_session_is_excluded_from_the_control_group(self):
+        """Assert against an INDEPENDENTLY recorded total.
+
+        The first version of this test defined total = controls + mapped and
+        then asserted controls == total - mapped, which is an algebraic identity
+        that passes for any value of controls -- including the leaking 5087 it
+        was written to catch. A test that cannot fail is worse than no test: it
+        reads as coverage. (Codex v3 round-2 finding 3.)
+        """
         sample = _load_k528(K528_RESULTS)["sample"]
         audit = sample["event_mapping_audit"]
-        total_sessions = sample["non_nfp_trading_days"] + audit["n_mapped_to_sessions"]
-        assert sample["non_nfp_trading_days"] == total_sessions - audit["n_mapped_to_sessions"], (
-            "control group size must exclude ALL mapped NFP sessions, not just the "
-            "ones that survived the event-window filter"
+        total = sample["total_trading_days"]
+        assert total == 5340, "pinned SPY session count for this sample window"
+        assert sample["non_nfp_trading_days"] == total - audit["n_mapped_to_sessions"] == 5086, (
+            "control group must exclude ALL mapped NFP sessions, not just the ones "
+            "that survived the event-window filter (5087 was the leaking value)"
+        )
+        assert sample["control_group_excludes_all_nfp_sessions"] is True
+
+    def test_proxy_side_control_group_is_also_clean(self):
+        """The same leak existed on the proxy side of the before/after audit:
+        the archive holds the proxy's ANALYSED events, not its NFP sessions."""
+        audit = _load_k528(K528_AUDIT)
+        before = audit["items"]["vol_ratio_vs_friday"]["before"]
+        assert before["n_control_friday"] == 832, (
+            "proxy Friday control count must exclude the proxy's own "
+            "window-dropped January-2005 session"
         )
 
     def test_window_excluded_event_is_not_silently_analysed_or_kept_as_control(self):
@@ -553,22 +592,44 @@ class TestCalendarFailClosedCannotBeBypassed:
     def check(self):
         return _k528_module().check_calendar_is_complete
 
-    def test_off_cycle_entry_earlier_in_the_month_is_ambiguous_not_silently_picked(self, check):
+    def test_off_cycle_entry_earlier_in_the_month_is_refused_not_silently_picked(self, check):
         """The bypass: an off-cycle entry filed EARLIER than the report. A
-        per-month min() takes it without complaint and the cadence still passes."""
-        with pytest.raises(RuntimeError, match="too close together"):
+        per-month min() takes it without complaint and the cadence still passes.
+        Only the reviewed-month allowlist catches this -- a day-gap threshold
+        cannot, because three of the six real cases are 3 days apart."""
+        with pytest.raises(RuntimeError, match="never been"):
             check(
                 pd.to_datetime(["2024-01-05", "2024-02-01", "2024-03-08"]),
                 ["2024-01-05", "2024-02-01", "2024-02-02", "2024-03-08"],
-                "2024-01-01", "2024-12-31",
+                "2024-01-01", "2024-03-31",
             )
+
+    def test_real_multi_entry_gaps_are_too_small_for_a_gap_rule(self):
+        """Pin the fact that killed the gap heuristic: 2006-05, 2013-05 and
+        2020-05 have the revision exactly 3 days after the report. Any future
+        'revisions are filed weeks later' rule is wrong on the real feed."""
+        import json
+
+        raw = json.loads(
+            (REPO_ROOT / "tests" / "fixtures" / "fred_release_50_nfp_raw_20260719.json")
+            .read_text(encoding="utf-8")
+        )["release_dates"]
+        by_month = {}
+        for d in raw:
+            by_month.setdefault(d[:7], []).append(d)
+        gaps = {
+            m: (pd.Timestamp(sorted(v)[1]) - pd.Timestamp(sorted(v)[0])).days
+            for m, v in by_month.items() if len(v) > 1
+        }
+        assert min(gaps.values()) == 3, gaps
+        assert sorted(m for m, g in gaps.items() if g == 3) == ["2006-05", "2013-05", "2020-05"]
 
     def test_selection_that_is_not_the_earliest_entry_fails(self, check):
         with pytest.raises(RuntimeError, match="did not select the earliest"):
             check(
                 pd.to_datetime(["2024-01-05", "2024-02-09", "2024-03-08"]),
                 ["2024-01-05", "2024-02-02", "2024-02-09", "2024-03-08"],
-                "2024-01-01", "2024-12-31",
+                "2024-01-01", "2024-03-31",
             )
 
     def test_missing_month_inside_the_observed_span_fails(self, check):
@@ -578,7 +639,7 @@ class TestCalendarFailClosedCannotBeBypassed:
             check(
                 pd.to_datetime(["2024-01-05", "2024-02-02", "2024-04-05"]),
                 ["2024-01-05", "2024-02-02", "2024-04-05"],
-                "2024-01-01", "2024-12-31",
+                "2024-01-01", "2024-04-30",
             )
 
     def test_allowlist_cannot_silence_a_month_that_has_data(self, check):
@@ -590,18 +651,70 @@ class TestCalendarFailClosedCannotBeBypassed:
             mod.check_calendar_is_complete(
                 pd.to_datetime(["2024-01-05", "2024-02-02", "2024-04-05"]),
                 ["2024-01-05", "2024-02-02", "2024-03-08", "2024-04-05"],
-                "2024-01-01", "2024-12-31",
+                "2024-01-01", "2024-04-30",
             )
 
-    def test_a_legitimate_calendar_with_a_normal_revision_still_passes(self, check):
+    def test_truncated_feed_cannot_hide_behind_its_own_shrunken_span(self, check):
+        """Anchoring the gap check on the OBSERVED span cannot catch truncation:
+        if the feed stops early the span shrinks with it and nothing looks
+        missing. Found by self-audit, not by a reviewer."""
+        dates = ["2024-01-05", "2024-02-02", "2024-03-08"]
+        with pytest.raises(RuntimeError, match="does not cover"):
+            check(pd.to_datetime(dates), dates, "2024-01-01", "2024-12-31")
+
+    def test_unreviewed_multi_entry_month_is_refused_not_guessed(self, check):
+        """'Earliest wins' cannot distinguish an off-cycle item filed BEFORE the
+        report from the report. A new multi-entry month must stop the run."""
+        with pytest.raises(RuntimeError, match="never been"):
+            check(
+                pd.to_datetime(["2024-01-05", "2024-02-01", "2024-03-08"]),
+                ["2024-01-05", "2024-02-01", "2024-02-06", "2024-03-08"],
+                "2024-01-01", "2024-03-31",
+            )
+
+    def test_selection_contradicting_the_human_verified_date_fails(self):
+        mod = _k528_module()
+        mod.REVIEWED_MULTI_ENTRY_MONTHS["2024-02"] = "2024-02-06"
+        with pytest.raises(RuntimeError, match="contradicts"):
+            mod.check_calendar_is_complete(
+                pd.to_datetime(["2024-01-05", "2024-02-01", "2024-03-08"]),
+                ["2024-01-05", "2024-02-01", "2024-02-06", "2024-03-08"],
+                "2024-01-01", "2024-03-31",
+            )
+
+    def test_a_reviewed_month_with_a_normal_revision_still_passes(self):
         """The other half: a guard that rejects everything is as useless as one
-        that rejects nothing. A revision filed a week later is normal."""
-        out = check(
+        that rejects nothing. A revision filed a week later, in a month someone
+        has checked against the BLS archive, must go through."""
+        mod = _k528_module()
+        mod.REVIEWED_MULTI_ENTRY_MONTHS["2024-02"] = "2024-02-02"
+        out = mod.check_calendar_is_complete(
             pd.to_datetime(["2024-01-05", "2024-02-02", "2024-03-08"]),
             ["2024-01-05", "2024-02-02", "2024-02-09", "2024-03-08"],
-            "2024-01-01", "2024-12-31",
+            "2024-01-01", "2024-03-31",
         )
         assert out["months_with_multiple_raw_entries"] == ["2024-02"]
+
+    def test_the_six_real_multi_entry_months_pass_on_the_real_feed(self):
+        """The strongest negative control available: the actual 264-entry ALFRED
+        feed, whose six duplicate months are exactly the reviewed ones."""
+        import json
+
+        mod = _k528_module()
+        raw = json.loads(
+            (REPO_ROOT / "tests" / "fixtures" / "fred_release_50_nfp_raw_20260719.json")
+            .read_text(encoding="utf-8")
+        )["release_dates"]
+        by_month = {}
+        for d in raw:
+            by_month.setdefault(d[:7], []).append(d)
+        sel = sorted(min(v) for v in by_month.values())
+        out = mod.check_calendar_is_complete(
+            pd.to_datetime(sel), raw, "2005-01-01", "2026-07-19"
+        )
+        assert out["months_with_multiple_raw_entries"] == sorted(
+            mod.REVIEWED_MULTI_ENTRY_MONTHS
+        )
 
 
 class TestFridayEstimandIsScopedHonestly:

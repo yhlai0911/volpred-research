@@ -1,0 +1,21 @@
+{
+  "kid": "k528",
+  "verdict": "FAIL",
+  "reviewer": "Codex gpt-5.6-sol / high",
+  "reviewed_at": "2026-07-19T16:20:00+08:00",
+  "reviewed_commit": "6fd281901",
+  "review_artifact": "experiments/k528/codex_review_v3.md",
+  "blocking_defects": [
+    "controls still contained the real NFP session 2005-01-07, contaminating both headline statistics",
+    "audit compared a mixed-weekday `before` against a Friday-restricted `after` while claiming apples-to-apples; the 'proxy was all-Friday' premise was false (239 Friday / 15 Monday)",
+    "calendar completeness was still bypassable: validating only the accessor's post-selection output cannot see a same-month ambiguity"
+  ],
+  "reviewed_sha256": {
+    "README.md": "c03d8d495a59544967a7142daa5ea38edd912aa49194729c4f292e08b1e5478d",
+    "build_article_correction.py": "78c7f864e4441202722ce733353090d9c7b5b21df97ac1db1fcbd615b257a9d6",
+    "k528_nfp_event_study.py": "cccc69b204f263dbb7dc787353e1e4398c44c73d4124c8cccefa79958825b7c6",
+    "k528_nfp_event_study_results.json": "fbdcf427d522042fb701f88e0be3d67072ebab4dc0f90c6ed7c4999e577552d2",
+    "k528_nfp_official_dates_results.json": "f8078c7a6b43ed09b8c2421922bc99b409065f880827110340164c43584e0dd2"
+  },
+  "note": "Historical record of one round of the third-review cycle. Superseded by the next round; retained because a verdict is only worth the snapshot it read, and deleting a FAIL teaches the wrong lesson."
+}

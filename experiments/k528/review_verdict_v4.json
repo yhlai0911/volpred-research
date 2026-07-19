@@ -1,0 +1,21 @@
+{
+  "kid": "k528",
+  "verdict": "FAIL",
+  "reviewer": "Codex gpt-5.6-sol / high",
+  "reviewed_at": "2026-07-19T16:45:00+08:00",
+  "reviewed_commit": "2abb3f68c",
+  "review_artifact": "experiments/k528/codex_review_v4.md",
+  "blocking_defects": [
+    "proxy-side `before` control group still leaked the proxy's own window-dropped 2005-01-07 session",
+    "calendar completeness accepted a fully truncated tail, a 3-day-equality gap, selected months absent from raw, and duplicate selected months",
+    "TestControlGroupHasNoNfpDays was an algebraic identity and could not fail"
+  ],
+  "reviewed_sha256": {
+    "README.md": "29e8781d3e1860ad041af2f0eecddf1177975daa89709efc16b7a88dfe0d3f8f",
+    "build_article_correction.py": "c4e3cf99627faa7a60565e5e9df89d44f99de6bf7900716b59451e25637b2e31",
+    "k528_nfp_event_study.py": "da6007e445d846268ea3216944c61b364fc6cd2aa7520d960412d0bf2f8c671e",
+    "k528_nfp_event_study_results.json": "fb536843e3c98fe38d7bdd8efc9fca043e245cc004a8ff8b9439148f67ea2137",
+    "k528_nfp_official_dates_results.json": "db7e35c3a9ada8e02661e1abcb636dfa07d8bf913ef05bc05af93441f760bdee"
+  },
+  "note": "Historical record of one round of the third-review cycle. Superseded by the next round; retained because a verdict is only worth the snapshot it read, and deleting a FAIL teaches the wrong lesson."
+}
