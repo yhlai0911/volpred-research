@@ -1,7 +1,7 @@
 {
   "experiment_id": "paper2_taiwan_indiv_rolling_gamma",
   "title": "Calendar-aligned rolling-w2000 GJR gamma for Taiwan-VT Table 2 (refreshed snapshots; common end 2026)",
-  "timestamp": "2026-07-12T20:04:20.408386+00:00",
+  "timestamp": "2026-07-19T06:52:35.800115+00:00",
   "purpose": "Rebuild body_v3.tex tab:gamma's rolling block on snapshots that are BOTH calendar-aligned AND current. Supersedes the 2026-07-07 run, whose common end (2025-01-22) was an artifact of two expired offline snapshots rather than a market fact, and whose 'RESOLVED' stamp on the Codex caveat was therefore false.",
   "method": "GJR-GARCH(1,1) MLE (arch pkg), Constant mean, Normal innovations, returns*100; rolling w=2000 last window ending on/before the variant's common end date; Bollerslev-Wooldridge robust t-values; persistence = alpha + 0.5*gamma + beta",
   "data": {
