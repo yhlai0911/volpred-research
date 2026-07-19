@@ -32818,13 +32818,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T19:00:54.508484+00:00",
+    "completed_at": "2026-07-19T20:00:53.893176+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T19:00:54.508484+00:00",
-      "last_clean_observed_at": "2026-07-19T19:00:54.508484+00:00"
+      "resolved_at": "2026-07-19T20:00:53.893176+00:00",
+      "last_clean_observed_at": "2026-07-19T20:00:53.893176+00:00"
     }
   },
   {
@@ -32836,13 +32836,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T19:12:09.936931+00:00",
+    "completed_at": "2026-07-19T20:21:11.226338+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T19:12:09.936931+00:00",
-      "last_clean_observed_at": "2026-07-19T19:12:09.936931+00:00"
+      "resolved_at": "2026-07-19T20:21:11.226338+00:00",
+      "last_clean_observed_at": "2026-07-19T20:21:11.226338+00:00"
     }
   },
   {
@@ -43214,7 +43214,7 @@
     "description": "## 發生什麼\n40 個未提交檔案不是任何一班 fire 產出的，最長已連續 83 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 8 班\n- config/runtime_schedules.json — 27 班\n- conftest.py — 22 班\n- experiments/k1380/README.md — 83 班\n- experiments/k1380/k1380.py — 83 班\n- experiments/k1380/k1380_losses_all.npy — 83 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 83 班\n- experiments/k1380/k1380_results.json — 83 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 83 班\n- experiments/k1380/k1380_spa_from_cache.py — 83 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 83 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 8 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 8 班\n- scripts/build_knowledge_index.py — 8 班\n- scripts/check_experiment_artifacts.py — 8 班\n- scripts/continue_task_dispatch.py — 13 班\n- scripts/daily_checkup.py — 27 班\n- scripts/detect_price_split_breaks.py — 13 班\n- scripts/dreaming_review.py — 27 班\n- scripts/fb_realchrome_post.py — 22 班\n- scripts/fix_0050_split_break.py — 13 班\n- scripts/gen_codex_cli_reference.py — 78 班\n- scripts/merge_worktree.sh — 22 班\n- scripts/reclaim_stale_worktrees.py — 27 班\n- scripts/repoint_snapshot_from_db.py — 8 班\n- scripts/supabase_sync.py — 22 班\n- scripts/task_pool_claim.py — 13 班\n- scripts/telegram_poll.py — 40 班\n- scripts/tests/test_merge_worktree.sh — 22 班\n- scripts/tests/test_paid_gemini_embedding_guard.py — 8 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T105239126312Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-19T10:52:39.269560+00:00",
     "payload": {
@@ -43331,10 +43331,30 @@
         "to": "pending",
         "by": "hourly-slot-2-d5c99af8459244ce9560dd8f9bf42315",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-19T20:09:26.265588+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ced9d83efd504911be388eccdfe22d97"
+      },
+      {
+        "ts": "2026-07-19T20:09:26.503173+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ced9d83efd504911be388eccdfe22d97"
+      },
+      {
+        "ts": "2026-07-19T20:18:06.725089+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ced9d83efd504911be388eccdfe22d97"
       }
     ],
-    "started_at": "2026-07-19T11:08:54.886993+00:00",
-    "last_released_at": "2026-07-19T11:14:02.994892+00:00"
+    "started_at": "2026-07-19T20:09:26.503157+00:00",
+    "last_released_at": "2026-07-19T11:14:02.994892+00:00",
+    "completed_at": "2026-07-19T20:18:06.725074+00:00",
+    "result": "收養（非清除）50 個 foreign paths：驗證後發現它們是正在運行卻從未提交的系統核心碼——含 foreign_incident.py（incident 系統本身）、phase_z.py quarantine checkpoint(+348)、dispatch_slot_budget.py 降載邏輯(+42) 及整組測試。逐位元比對確認 50/53 路徑在 quarantine ref 有完全一致 bytes、零 mismatch；對應 180 項測試全綠。另刪 2 個真垃圾（editor 暫存 .!71268!、1.2MB work_log .bak）並補 .gitignore。順帶修 7 處被 gate 擋下的 silent fallback。commit 86d564690。foreign_incident --check 現為 closeable=true。"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260719T105246594789Z_a1",
@@ -44190,7 +44210,7 @@
     "description": "## 發生什麼\n52 個未提交檔案不是任何一班 fire 產出的，最長已連續 97 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 22 班\n- config/runtime_schedules.json — 41 班\n- conftest.py — 36 班\n- experiments/k1380/README.md — 97 班\n- experiments/k1380/k1380.py — 97 班\n- experiments/k1380/k1380_losses_all.npy — 97 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 97 班\n- experiments/k1380/k1380_results.json — 97 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 97 班\n- experiments/k1380/k1380_spa_from_cache.py — 97 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 97 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 22 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 22 班\n- scripts/audit_release_settings.py — 4 班\n- scripts/build_knowledge_index.py — 22 班\n- scripts/compute_queue.py — 4 班\n- scripts/continue_task_dispatch.py — 27 班\n- scripts/daily_checkup.py — 41 班\n- scripts/detect_price_split_breaks.py — 27 班\n- scripts/dispatch_slot_budget.py — 14 班\n- scripts/dispatch_supervisor/phase_z.py — 14 班\n- scripts/dreaming_review.py — 41 班\n- scripts/fb_realchrome_post.py — 36 班\n- scripts/fix_0050_split_break.py — 27 班\n- scripts/gen_codex_cli_reference.py — 92 班\n- scripts/merge_worktree.sh — 36 班\n- scripts/publish_draft.py — 4 班\n- scripts/reclaim_stale_worktrees.py — 41 班\n- scripts/repoint_snapshot_from_db.py — 22 班\n- scripts/supabase_sync.py — 36 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T182113634184Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-19T18:21:13.721606+00:00",
     "payload": {
@@ -44311,6 +44331,41 @@
       "first_seen_at": "2026-07-19T18:21:13.708104+00:00",
       "last_seen_at": "2026-07-19T19:12:12.011759+00:00"
     },
-    "updated_at": "2026-07-19T19:12:12.011759+00:00"
+    "updated_at": "2026-07-19T19:12:12.011759+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-19T20:18:13.602325+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ced9d83efd504911be388eccdfe22d97"
+      },
+      {
+        "ts": "2026-07-19T20:18:13.829791+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ced9d83efd504911be388eccdfe22d97"
+      },
+      {
+        "ts": "2026-07-19T20:18:14.058517+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ced9d83efd504911be388eccdfe22d97"
+      }
+    ],
+    "started_at": "2026-07-19T20:18:13.829773+00:00",
+    "completed_at": "2026-07-19T20:18:14.058503+00:00",
+    "result": "同一批檔案的 superset incident（52 paths，fingerprint b05c62dbd08d48a5）。與 assign_65b27c8b 由同一次收養 commit 86d564690 一併解除；foreign_incident --check 回報 closeable=true、blockers=0。"
+  },
+  {
+    "id": "assign_eb78aedc",
+    "title": "PHASE-Z incident 關閉條件要能區分「無主殘留」與「未提交的活躍碼」",
+    "description": "## 發生什麼\n\n2026-07-20 04:xx（slot-1）處理 incident `assign_65b27c8b` / `assign_62a9afb6` 時發現：\n關閉條件叫人做的事，照字面執行會刪掉 incident 系統自己。\n\n清單裡的 53 個「無人認領的卡住檔案」其實是**正在運行卻從未提交**的核心系統碼：\n\n- `src/volpred/ops/foreign_incident.py`（untracked）= incident 模組本身\n- `scripts/dispatch_supervisor/phase_z.py` +348 行 = quarantine checkpoint 機制\n- `scripts/dispatch_slot_budget.py` +42 行 = incident → 降載的 enforcement owner\n- `scripts/tests/test_phase_z_*.py`、`test_scheduler_max_slots.py` 等整組測試（untracked）\n\n該班改採**收養**（commit `86d564690`，180 項測試綠 + 50/53 路徑 quarantine bytes 逐位元一致），\nincident 才以正當方式關閉、cap 由 2 恢復 6。\n\n## 問題在哪\n\n`incident_closeable()` 目前只問三件事：`quarantined` / `live_workspace` / `still_dirty_in_main`。\n這三個訊號**無法區分**兩種本質相反的狀態：\n\n| | 無主殘留（該清除） | 未提交的活躍碼（該收養） |\n|---|---|---|\n| still_dirty_in_main | true | true |\n| quarantined | true | true |\n| 正確動作 | 刪 | commit |\n\n於是關閉條件對後者給出的指示是錯的，而且錯得很安靜 —— 它會叫人刪掉系統賴以運作的東西。\n`foreign_incident.py` 的 docstring 說「刻意不做的事：不猜測這些 bytes 是誰的」（D1 停止猜測式收編），\n這個克制是對的；但「不猜擁有者」不該等於「不分辨死活」。**活性是可機械判定的，不需要猜。**\n\n## 該做什麼（設計方向，非硬性規格）\n\n在 `incident_closeable()` 之外加一層 **liveness classification**，可用的機械訊號例如：\n\n1. **被 import / 被執行**：路徑是否被 repo 內其他 tracked 檔 import 或呼叫\n   （`foreign_incident.py` 被 `dispatch_slot_budget.py` import，這關係在 tracked 檔裡看得到）。\n2. **有對應測試且測試綠**：`scripts/tests/test_<name>.py` 存在且通過。\n3. **untracked 但被 tracked 檔引用** = 最強的活性訊號，也是本次案例的特徵。\n\n分類結果應改變 incident 呈現給執行者的**指示**，而不是自動執行：\n- `dead` → 現行文字（保存後清除）\n- `live` → 「這是未提交的活躍碼，需要收養決策」，並附上活性證據\n\n## 驗收\n\n- 用本次 53 個路徑當 fixture，分類器要把 `foreign_incident.py` / `phase_z.py` / 測試組判為 `live`，\n  把 `tests/.!71268!*`、`work_log.json.bak_*` 判為 `dead`。\n- 新增測試放 `scripts/tests/`，比照既有 `test_phase_z_foreign_incident.py` 風格。\n- 不要為此再開第二個 gate 或第二條通知管道（反 alert-stacking）—— 這是既有 incident 的欄位升級。\n\n## 為什麼值得做\n\n這次是靠人工停下來查身分才沒鑄成大錯。下一班未必會查 —— 關閉條件寫得越像機械可驗，\n越容易被直接照做。把「別刪掉活的東西」變成機器判斷，才不用每次都指望執行者多想一步。\n",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "hourly-dispatch",
+    "created_at": "2026-07-19T20:19:59.885191+00:00",
+    "parent_task_id": "assign_65b27c8b",
+    "created_by": "hourly-slot-1-ced9d83efd504911be388eccdfe22d97"
   }
 ]

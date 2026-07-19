@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-19T19:00:47.296755+00:00",
+  "generated_at": "2026-07-19T20:00:47.269878+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
@@ -13,129 +13,30 @@
   "applied": true,
   "job_deliverable_candidates": [
     {
-      "job_id": "compute-k1257-bma-valid-mask-remediation-20260719",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1257-bma-valid-mask-remediation-20260719.json",
+      "job_id": "compute-k528-round-5-primary-path-review-split-child-of-agent-brief--1784488228",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k528-round-5-primary-path-review-split-child-of-agent-brief--1784488228.json",
       "execution_status": "completed",
       "paths": [
-        "experiments/k1257/k1257_results.json",
-        "experiments/k1257/k1257_qlike_comparison.png"
+        "storage/ops/codex_reviews/k528_round5_verdict.md"
       ],
       "existing_paths": [
-        "experiments/k1257/k1257_results.json",
-        "experiments/k1257/k1257_weight_evolution.png",
-        "experiments/k1257/k1257_qlike_comparison.png"
-      ],
-      "previously_delivered_paths": [
-        "experiments/k1257/k1257_qlike_comparison.png",
-        "experiments/k1257/k1257_results.json",
-        "experiments/k1257/k1257_weight_evolution.png"
-      ],
-      "rejected": []
-    },
-    {
-      "job_id": "compute-k1257-headline-realign-20260720",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1257-headline-realign-20260720.json",
-      "execution_status": "completed",
-      "paths": [
-        "experiments/k1257/k1257_results.json",
-        "experiments/k1257/k1257_weight_evolution.png",
-        "experiments/k1257/k1257_qlike_comparison.png"
-      ],
-      "existing_paths": [
-        "experiments/k1257/k1257_results.json",
-        "experiments/k1257/k1257_weight_evolution.png",
-        "experiments/k1257/k1257_qlike_comparison.png"
+        "storage/ops/codex_reviews/k528_round5_verdict.md"
       ],
       "previously_delivered_paths": [],
-      "rejected": []
-    },
-    {
-      "job_id": "compute-k1258-artifact-schema-align-20260720",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1258-artifact-schema-align-20260720.json",
-      "execution_status": "completed",
-      "paths": [
-        "experiments/k1258/k1258_results.json",
-        "experiments/k1258/k1258_qlike_by_lambda.png",
-        "experiments/k1258/k1258_weight_switch_freq.png"
-      ],
-      "existing_paths": [
-        "experiments/k1258/k1258_results.json",
-        "experiments/k1258/k1258_qlike_by_lambda.png",
-        "experiments/k1258/k1258_weight_switch_freq.png"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    },
-    {
-      "job_id": "compute-k1258-bma-valid-mask-remediation-20260719",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1258-bma-valid-mask-remediation-20260719.json",
-      "execution_status": "completed",
-      "paths": [
-        "experiments/k1258/k1258_results.json"
-      ],
-      "existing_paths": [
-        "experiments/k1258/k1258_results.json",
-        "experiments/k1258/forecasts_SPY.parquet",
-        "experiments/k1258/forecasts_GLD.parquet",
-        "experiments/k1258/forecasts_0050_TW.parquet",
-        "experiments/k1258/k1258_qlike_by_lambda.png",
-        "experiments/k1258/k1258_weight_switch_freq.png"
-      ],
-      "previously_delivered_paths": [
-        "experiments/k1258/forecasts_0050_TW.parquet",
-        "experiments/k1258/forecasts_GLD.parquet",
-        "experiments/k1258/forecasts_SPY.parquet",
-        "experiments/k1258/k1258_qlike_by_lambda.png",
-        "experiments/k1258/k1258_results.json",
-        "experiments/k1258/k1258_weight_switch_freq.png"
-      ],
       "rejected": []
     }
   ],
   "job_deliverable_held": [],
   "job_deliveries": [
     {
-      "job_id": "compute-k1257-bma-valid-mask-remediation-20260719",
+      "job_id": "compute-k528-round-5-primary-path-review-split-child-of-agent-brief--1784488228",
       "paths": [
-        "experiments/k1257/k1257_results.json",
-        "experiments/k1257/k1257_qlike_comparison.png"
+        "storage/ops/codex_reviews/k528_round5_verdict.md"
       ],
       "delivered": true,
       "delivery_status": "delivered",
-      "delivery_commit": "f62ea5b99e91b976d55d4efcf4419b45efad4739",
+      "delivery_commit": "3c39762f886ad69661962a67aec5631de8474377",
       "reason": "committed"
-    },
-    {
-      "job_id": "compute-k1257-headline-realign-20260720",
-      "paths": [
-        "experiments/k1257/k1257_results.json",
-        "experiments/k1257/k1257_weight_evolution.png",
-        "experiments/k1257/k1257_qlike_comparison.png"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "f62ea5b99e91b976d55d4efcf4419b45efad4739",
-      "reason": "already_committed"
-    },
-    {
-      "job_id": "compute-k1258-artifact-schema-align-20260720",
-      "paths": [
-        "experiments/k1258/k1258_results.json",
-        "experiments/k1258/k1258_qlike_by_lambda.png",
-        "experiments/k1258/k1258_weight_switch_freq.png"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "0d06e2bedddba2bf8af5aed8d71ac29d611faf73",
-      "reason": "committed"
-    },
-    {
-      "job_id": "compute-k1258-bma-valid-mask-remediation-20260719",
-      "paths": [
-        "experiments/k1258/k1258_results.json"
-      ],
-      "delivered": false,
-      "reason": "no_pending_paths"
     }
   ],
   "namespaces": {
@@ -163,7 +64,7 @@
       "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 3,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },

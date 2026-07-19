@@ -9,12 +9,12 @@
     "2400"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-19T19:10:28Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-19T19:15:02Z",
+  "completed_at": "2026-07-19T19:22:49Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k528-round-5-primary-path-review-split-child-of-agent-brief--1784488228.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k528-round-5-primary-path-review-split-child-of-agent-brief--1784488228.stderr",
   "result_artifact": "storage/ops/codex_reviews/k528_round5_verdict.md",
@@ -36,5 +36,16 @@
   "brief_source": null,
   "brief_snapshot": null,
   "parent_timeout_job_id": "agent-brief_k528_rerun_v3-6e4286",
-  "split_stage": "codex_round5_and_merge_decision"
+  "split_stage": "codex_round5_and_merge_decision",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "3c39762f886ad69661962a67aec5631de8474377",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k528_round5_verdict.md"
+  ],
+  "delivered_at": "2026-07-19T20:00:53.863131+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }
