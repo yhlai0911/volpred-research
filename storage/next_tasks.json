@@ -32818,13 +32818,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T18:00:52.264630+00:00",
+    "completed_at": "2026-07-19T19:00:54.508484+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T18:00:52.264630+00:00",
-      "last_clean_observed_at": "2026-07-19T18:00:52.264630+00:00"
+      "resolved_at": "2026-07-19T19:00:54.508484+00:00",
+      "last_clean_observed_at": "2026-07-19T19:00:54.508484+00:00"
     }
   },
   {
@@ -32836,13 +32836,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T18:21:11.579522+00:00",
+    "completed_at": "2026-07-19T19:12:09.936931+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T18:21:11.579522+00:00",
-      "last_clean_observed_at": "2026-07-19T18:21:11.579522+00:00"
+      "resolved_at": "2026-07-19T19:12:09.936931+00:00",
+      "last_clean_observed_at": "2026-07-19T19:12:09.936931+00:00"
     }
   },
   {
@@ -35195,58 +35195,15 @@
   },
   {
     "id": "assign_56ddf72b",
-    "title": "[code] 根因修復：daily_update dirty-guard 硬中止導致 host_cron_fail 反覆 critical（老闆指示最高模型/最大深度）",
-    "description": "老闆經 Telegram（msg 794）針對『為什麼一直出現各種錯誤』，指示：解決不了就用最高模型與最大深度去解。此任務即該深度修復，請以 max depth / 高 effort 執行，不要只補當日 alert。\n\n## 已驗證的具體證據（telegram_responder 只讀診斷，未改任何檔）\n1. 今天 2026-07-15 14:00 CST，cron daily_update_intraday exit=1，log 明說：\n   'refusing to overwrite output(s) already dirty before this run: [storage/reports/feed.json]' → 'tracked output already dirty; aborting before daily writes'。\n2. 這是硬失敗 exit=1（非 142 SIGALRM / 非 75 quota 這類自我恢復碼），所以直接升 host_cron_fail=critical。\n3. host_cron_fail signature 已跨 13 天（first_seen 2026-07-02 → last_seen 2026-07-15），屬慢性反覆，不是一次性。\n4. 當下 working tree：storage/reports/feed.json 為 unstaged-modified（dirty），全樹 21 changed / 18 staged。\n5. git_push_backup 有正常 commit/push（14:00:15 pushed 2 commits OK），但 feed.json 這類 publish 輸出仍被留在未提交狀態；且 daily_update 與 git_push_backup 都在 :00 同分鐘觸發，存在對 git working tree / canonical Git-writer lease 的競態。\n\n## 根因假說（需你深度查證後定案）\ndaily_update 的 dirty-guard 只要 fire 當下 tracked output（feed.json）dirty 就硬 abort exit=1。而 feed.json 常被 publish/release 寫入後未即時 commit，或與同分鐘的 git_push_backup commit 撞在一起 → 每天可穩定重踩。它其實是良性/暫態（下一輪多半自我恢復），卻用硬 exit=1 觸發 critical，就是老闆看到的『一直出錯』噪音。\n\n## 要交付的三層修復（請全部處理，附驗證）\nA. 正確性：讓 daily_update 的 dirty-guard 不要對『暫態 dirty』硬 abort — 改成等 lease/短 retry，或把 guard 收斂到真正的內容衝突，讓良性未提交的 feed.json 不會殺掉整輪。\nB. 根因：確保 feed.json 等 publish 輸出在發佈後即時被 commit，讓 working tree 不再慢性 dirty；並/或把 :00 同時觸碰 git tree 的 cron 錯開/序列化，消除競態。\nC. Alert 語意：評估這種『暫態 abort、下輪自我恢復』是否該升 critical。若不該，調整 host_cron_fail 判準（比照 142/75 自我恢復處理），停止 critical 噪音；真正持續斷線交給 outcome-level dead-man switch 抓。\n\n## 約束\n- 遵守 AGENTS.md『永遠修流程，不修資料』：不要手動 commit feed.json 收尾，要追到產生 dirty 的程式與 cron 時序並修流程。\n- 修完寫入 docs/error_log.md，並在 storage 對應設定/程式落地。\n- 參考既有 docs/refactor_plan_hourly_dispatch.md（142 結構根因）與 platform_ops_host_cron_recency_gate（先前 recency gate 修法）。\n\n[migrated 2026-07-16 from task_79833d7bcb46 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T06:06:42.999868+00:00]",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[code] 根因修復：daily_update dirty-guard 硬中止導致 host_cron_fail 反覆 critical（老闆指示最高模型/最大深度）",
+    "priority": 1,
     "source": "user",
     "created_at": "2026-07-16T14:42:55.764579+00:00",
-    "created_by": "single-gateway-migration",
-    "status_history": [
-      {
-        "ts": "2026-07-16T15:02:40.133712+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b"
-      },
-      {
-        "ts": "2026-07-16T15:03:00.996401+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b"
-      },
-      {
-        "ts": "2026-07-16T17:50:05.325852+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-slot-1-a9b8c1b680f144148a5d85440f8fc87b",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-16T18:07:39.038161+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-a439b41013384a93ba3994b6c6e48e56"
-      },
-      {
-        "ts": "2026-07-16T18:07:42.094057+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-a439b41013384a93ba3994b6c6e48e56"
-      },
-      {
-        "ts": "2026-07-16T18:13:25.842310+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-a439b41013384a93ba3994b6c6e48e56"
-      }
-    ],
-    "started_at": "2026-07-16T18:07:42.094041+00:00",
-    "last_released_at": "2026-07-16T17:50:05.325844+00:00",
-    "last_release_reason": "auto_release_stale_2h",
     "completed_at": "2026-07-16T18:13:25.842289+00:00",
-    "result": "根因=guard 是 latch：dirty 同時排除寫入集與 commit 集 → 唯一 committer 被自己擋死（frontend metrics 靜默 11 天 / feed.json 間歇 critical）。修法=啟用既有 classify_machine_churn（flock+parse 二分 churn/conflict），guard 收斂非移除。本班驗證：worktree 107 passed、main 整合 118 passed、逐行確認三道 hold 條件仍在且無雙份實作。已 merge 112af82a4，worktree/branch 清除。殘留風險（前端 metrics 無 freshness 偵測器）切 child task assign_90d7bdf9。"
+    "tombstone": true,
+    "archived_at": "2026-07-19T19:08:31.130831+00:00"
   },
   {
     "id": "assign_358decfa",
@@ -44230,7 +44187,7 @@
   {
     "id": "assign_62a9afb6",
     "title": "PHASE-Z 卡住檔案 incident（b05c62dbd08d48a5）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n52 個未提交檔案不是任何一班 fire 產出的，最長已連續 96 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 21 班\n- config/runtime_schedules.json — 40 班\n- conftest.py — 35 班\n- experiments/k1380/README.md — 96 班\n- experiments/k1380/k1380.py — 96 班\n- experiments/k1380/k1380_losses_all.npy — 96 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 96 班\n- experiments/k1380/k1380_results.json — 96 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 96 班\n- experiments/k1380/k1380_spa_from_cache.py — 96 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 96 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 21 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 21 班\n- scripts/audit_release_settings.py — 3 班\n- scripts/build_knowledge_index.py — 21 班\n- scripts/compute_queue.py — 3 班\n- scripts/continue_task_dispatch.py — 26 班\n- scripts/daily_checkup.py — 40 班\n- scripts/detect_price_split_breaks.py — 26 班\n- scripts/dispatch_slot_budget.py — 13 班\n- scripts/dispatch_supervisor/phase_z.py — 13 班\n- scripts/dreaming_review.py — 40 班\n- scripts/fb_realchrome_post.py — 35 班\n- scripts/fix_0050_split_break.py — 26 班\n- scripts/gen_codex_cli_reference.py — 91 班\n- scripts/merge_worktree.sh — 35 班\n- scripts/publish_draft.py — 3 班\n- scripts/reclaim_stale_worktrees.py — 40 班\n- scripts/repoint_snapshot_from_db.py — 21 班\n- scripts/supabase_sync.py — 35 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T182113634184Z:<路徑>`",
+    "description": "## 發生什麼\n52 個未提交檔案不是任何一班 fire 產出的，最長已連續 97 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 22 班\n- config/runtime_schedules.json — 41 班\n- conftest.py — 36 班\n- experiments/k1380/README.md — 97 班\n- experiments/k1380/k1380.py — 97 班\n- experiments/k1380/k1380_losses_all.npy — 97 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 97 班\n- experiments/k1380/k1380_results.json — 97 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 97 班\n- experiments/k1380/k1380_spa_from_cache.py — 97 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 97 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 22 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 22 班\n- scripts/audit_release_settings.py — 4 班\n- scripts/build_knowledge_index.py — 22 班\n- scripts/compute_queue.py — 4 班\n- scripts/continue_task_dispatch.py — 27 班\n- scripts/daily_checkup.py — 41 班\n- scripts/detect_price_split_breaks.py — 27 班\n- scripts/dispatch_slot_budget.py — 14 班\n- scripts/dispatch_supervisor/phase_z.py — 14 班\n- scripts/dreaming_review.py — 41 班\n- scripts/fb_realchrome_post.py — 36 班\n- scripts/fix_0050_split_break.py — 27 班\n- scripts/gen_codex_cli_reference.py — 92 班\n- scripts/merge_worktree.sh — 36 班\n- scripts/publish_draft.py — 4 班\n- scripts/reclaim_stale_worktrees.py — 41 班\n- scripts/repoint_snapshot_from_db.py — 22 班\n- scripts/supabase_sync.py — 36 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T182113634184Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
     "status": "pending",
@@ -44294,65 +44251,66 @@
         "tests/test_task_pool_claim.py"
       ],
       "streaks": {
-        "config/experiment_artifact_exclusions.json": 21,
-        "config/runtime_schedules.json": 40,
-        "conftest.py": 35,
-        "experiments/k1380/README.md": 96,
-        "experiments/k1380/k1380.py": 96,
-        "experiments/k1380/k1380_losses_all.npy": 96,
-        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": 96,
-        "experiments/k1380/k1380_results.json": 96,
-        "experiments/k1380/k1380_results_INVALID_20260716.json": 96,
-        "experiments/k1380/k1380_spa_from_cache.py": 96,
-        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": 96,
-        "paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv": 21,
-        "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv": 21,
-        "scripts/audit_release_settings.py": 3,
-        "scripts/build_knowledge_index.py": 21,
-        "scripts/compute_queue.py": 3,
-        "scripts/continue_task_dispatch.py": 26,
-        "scripts/daily_checkup.py": 40,
-        "scripts/detect_price_split_breaks.py": 26,
-        "scripts/dispatch_slot_budget.py": 13,
-        "scripts/dispatch_supervisor/phase_z.py": 13,
-        "scripts/dreaming_review.py": 40,
-        "scripts/fb_realchrome_post.py": 35,
-        "scripts/fix_0050_split_break.py": 26,
-        "scripts/gen_codex_cli_reference.py": 91,
-        "scripts/merge_worktree.sh": 35,
-        "scripts/publish_draft.py": 3,
-        "scripts/reclaim_stale_worktrees.py": 40,
-        "scripts/repoint_snapshot_from_db.py": 21,
-        "scripts/supabase_sync.py": 35,
-        "scripts/task_pool_claim.py": 26,
-        "scripts/telegram_poll.py": 53,
-        "scripts/tests/test_audit_release_cadence.py": 3,
-        "scripts/tests/test_merge_worktree.sh": 35,
-        "scripts/tests/test_paid_gemini_embedding_guard.py": 21,
-        "scripts/tests/test_phase_z_foreign_incident.py": 13,
-        "scripts/tests/test_phase_z_ownership_class_gate.py": 13,
-        "scripts/tests/test_phase_z_quarantine_checkpoint.py": 13,
-        "scripts/tests/test_release_blocking_priority.py": 3,
-        "scripts/tests/test_release_fix_task_reachability.py": 3,
-        "scripts/tests/test_scheduler_max_slots.py": 40,
-        "src/volpred/ops/content.py": 3,
-        "src/volpred/ops/dreaming_revalidate.py": 26,
-        "src/volpred/ops/foreign_incident.py": 13,
-        "src/volpred/ops/next_tasks.py": 56,
-        "storage/article_assets/tw-margin-vol-leadlag/evidence.json": 26,
-        "storage/work_log.json.bak_graphify_verdict_20260717": 96,
-        "tests/.!71268!test_task_pool_claim.py": 26,
-        "tests/test_dreaming_revalidate.py": 26,
-        "tests/test_dreaming_review.py": 40,
-        "tests/test_supabase_sync_cache_purge.py": 35,
-        "tests/test_task_pool_claim.py": 26
+        "config/experiment_artifact_exclusions.json": 22,
+        "config/runtime_schedules.json": 41,
+        "conftest.py": 36,
+        "experiments/k1380/README.md": 97,
+        "experiments/k1380/k1380.py": 97,
+        "experiments/k1380/k1380_losses_all.npy": 97,
+        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": 97,
+        "experiments/k1380/k1380_results.json": 97,
+        "experiments/k1380/k1380_results_INVALID_20260716.json": 97,
+        "experiments/k1380/k1380_spa_from_cache.py": 97,
+        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": 97,
+        "paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv": 22,
+        "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv": 22,
+        "scripts/audit_release_settings.py": 4,
+        "scripts/build_knowledge_index.py": 22,
+        "scripts/compute_queue.py": 4,
+        "scripts/continue_task_dispatch.py": 27,
+        "scripts/daily_checkup.py": 41,
+        "scripts/detect_price_split_breaks.py": 27,
+        "scripts/dispatch_slot_budget.py": 14,
+        "scripts/dispatch_supervisor/phase_z.py": 14,
+        "scripts/dreaming_review.py": 41,
+        "scripts/fb_realchrome_post.py": 36,
+        "scripts/fix_0050_split_break.py": 27,
+        "scripts/gen_codex_cli_reference.py": 92,
+        "scripts/merge_worktree.sh": 36,
+        "scripts/publish_draft.py": 4,
+        "scripts/reclaim_stale_worktrees.py": 41,
+        "scripts/repoint_snapshot_from_db.py": 22,
+        "scripts/supabase_sync.py": 36,
+        "scripts/task_pool_claim.py": 27,
+        "scripts/telegram_poll.py": 54,
+        "scripts/tests/test_audit_release_cadence.py": 4,
+        "scripts/tests/test_merge_worktree.sh": 36,
+        "scripts/tests/test_paid_gemini_embedding_guard.py": 22,
+        "scripts/tests/test_phase_z_foreign_incident.py": 14,
+        "scripts/tests/test_phase_z_ownership_class_gate.py": 14,
+        "scripts/tests/test_phase_z_quarantine_checkpoint.py": 14,
+        "scripts/tests/test_release_blocking_priority.py": 4,
+        "scripts/tests/test_release_fix_task_reachability.py": 4,
+        "scripts/tests/test_scheduler_max_slots.py": 41,
+        "src/volpred/ops/content.py": 4,
+        "src/volpred/ops/dreaming_revalidate.py": 27,
+        "src/volpred/ops/foreign_incident.py": 14,
+        "src/volpred/ops/next_tasks.py": 57,
+        "storage/article_assets/tw-margin-vol-leadlag/evidence.json": 27,
+        "storage/work_log.json.bak_graphify_verdict_20260717": 97,
+        "tests/.!71268!test_task_pool_claim.py": 27,
+        "tests/test_dreaming_revalidate.py": 27,
+        "tests/test_dreaming_review.py": 41,
+        "tests/test_supabase_sync_cache_purge.py": 36,
+        "tests/test_task_pool_claim.py": 27
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260719T182113634184Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-19T18:21:13.708104+00:00",
-      "last_seen_at": "2026-07-19T18:21:13.708104+00:00"
-    }
+      "last_seen_at": "2026-07-19T19:12:12.011759+00:00"
+    },
+    "updated_at": "2026-07-19T19:12:12.011759+00:00"
   }
 ]

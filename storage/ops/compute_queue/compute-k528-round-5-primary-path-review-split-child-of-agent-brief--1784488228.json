@@ -1,0 +1,40 @@
+{
+  "id": "compute-k528-round-5-primary-path-review-split-child-of-agent-brief--1784488228",
+  "title": "K528 round 5 primary-path review (split child of agent-brief_k528_rerun_v3-6e4286)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k528_round5_prompt.md",
+    "storage/ops/codex_reviews/k528_round5_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-19T19:10:28Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k528-round-5-primary-path-review-split-child-of-agent-brief--1784488228.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k528-round-5-primary-path-review-split-child-of-agent-brief--1784488228.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k528_round5_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k528_round5_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "收 K528 round 5 裁決並做 merge decision：(1) 讀 storage/ops/codex_reviews/k528_round5_verdict.md；(2) PASS → 先在 worktree dispatch-slot-3-30adeed7-k528nfp 用 verdict-template 重生 canonical experiments/k528/review_verdict.json（必須在 test_k528_completeness_gate.py / nfp_release_feed_fixture.json / k528_completeness_gate_fix.json 都已 landed 之後生成，生成後不得再改動任何 claim-surface 檔，否則 sha pin 會漂移、certify 會再擋），跑 experiment_gates.py certify 綠燈後才走正式 merge_worktree.sh；(3) FAIL → 逐條 blocking defect 建 bounded task，不得硬合併；(4) 無論哪一路，把殘留 gap single-month-upstream-truncation（44d 缺口 < 70d MAX_WINDOW_SHORTFALL_DAYS，raw 與 selected 一起短時三道檢查都看不到）依 codex 裁決處理：blocking 就修，acceptable 就寫進 README 的 limitations；(5) 主線程寫 knowledge.json（禁 agent 自寫，K1259）+ work_log。",
+    "task_type": "platform_ops",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "parent_timeout_job_id": "agent-brief_k528_rerun_v3-6e4286",
+  "split_stage": "codex_round5_and_merge_decision"
+}

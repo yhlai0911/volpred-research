@@ -5,12 +5,12 @@
   "interpreter": "uv run python",
   "args": [],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-19T18:17:15Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-19T18:30:03Z",
+  "completed_at": "2026-07-19T18:36:15Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1257-headline-realign-20260720.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1257-headline-realign-20260720.stderr",
   "result_artifact": "experiments/k1257/k1257_results.json",
@@ -32,5 +32,19 @@
   "source_task_id": null,
   "timeout_seconds": 5400,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/experiments/k1257"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "f62ea5b99e91b976d55d4efcf4419b45efad4739",
+  "delivered_paths": [
+    "experiments/k1257/k1257_qlike_comparison.png",
+    "experiments/k1257/k1257_results.json",
+    "experiments/k1257/k1257_weight_evolution.png"
+  ],
+  "delivered_at": "2026-07-19T19:00:53.932978+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }
