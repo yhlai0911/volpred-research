@@ -410,22 +410,48 @@ class TestK528UsesOfficialCalendar:
         assert_not_first_friday_proxy(_k528_event_dates())
 
     def test_sample_is_not_uniformly_friday(self):
-        """231 of 253, not 253 of 253. The gap is the corrected dates."""
+        """237 of 253, not 253 of 253. The gap is the corrected dates."""
         results = _load_k528(K528_RESULTS)
         n, on_friday = results["sample"]["total_nfp_events"], results["sample"]["nfp_days_on_friday"]
         assert n == 253
-        assert on_friday == 231
+        assert on_friday == 237
         assert on_friday < n
 
     def test_audit_records_the_dates_that_changed(self):
         diff = _load_k528(K528_AUDIT)["calendar_diff"]
-        assert diff["dates_in_common"] == 207
-        # The equal-looking sample sizes hide a 46-date swap; assert the swap,
-        # not the count, or a silent revert reads as unchanged.
-        assert len(diff["proxy_only_dates"]) == 47
-        assert len(diff["official_only_dates"]) == 46
+        assert diff["dates_in_common"] == 212
+        # The near-equal sample sizes hide a date swap; assert the swap, not the
+        # count, or a silent revert reads as unchanged.
+        assert len(diff["proxy_only_dates"]) == 42
+        assert len(diff["official_only_dates"]) == 41
         assert "2025-10-03" in diff["proxy_only_dates"]
         assert "2025-11-20" in diff["official_only_dates"]
+
+    def test_no_off_cycle_revision_date_is_treated_as_an_event(self):
+        """Direct pin on the k528 Codex v2 BLOCKER.
+
+        For six months ALFRED returns two release-id-50 entries; the later one
+        is a seasonal-factor/benchmark revision, not the Employment Situation.
+        An earlier rerun selected those six and moved the NFP-vs-Friday test
+        across the 5% line. Assert on the ARTIFACT, not just on the accessor:
+        the accessor being right does not prove the shipped results used it.
+        """
+        event_dates = {str(d.date()) for d in _k528_event_dates()}
+        off_cycle = {
+            "2006-05-08", "2012-12-12", "2013-05-06",
+            "2020-05-11", "2024-01-10", "2024-08-21",
+        }
+        regular = {
+            "2006-05-05", "2012-12-07", "2013-05-03",
+            "2020-05-08", "2024-01-05", "2024-08-02",
+        }
+        assert not (event_dates & off_cycle), (
+            f"off-cycle revision dates present in k528 event set: "
+            f"{sorted(event_dates & off_cycle)}"
+        )
+        assert regular <= event_dates, (
+            f"regular releases missing from k528 event set: {sorted(regular - event_dates)}"
+        )
 
 
 class TestProxyMutationIsCaught:

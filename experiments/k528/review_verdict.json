@@ -1,0 +1,20 @@
+{
+  "kid": "k528",
+  "verdict": "FAIL",
+  "reviewer": "Codex gpt-5.6-sol / high (re-run after first review never wrote verdict)",
+  "reviewed_at": "2026-07-19T13:15:30+08:00",
+  "reviewed_commit": "af2fad3569347e728b6fa29c90ddea38bf500e05",
+  "review_artifact": "experiments/k528/codex_review_v2.md",
+  "blocking_defects": [
+    "official-calendar accessor picks 6 wrong event dates: max() over multiple same-month FRED release-id-50 entries mistakes off-cycle releases for NFP (event_dates.py:96)",
+    "core sig->NS flip does not hold with correct dates (1.1779x, p~0.0249 still significant) — the 18 article corrections are contaminated and must not be applied",
+    "fail-closed incomplete: only all-empty month errors; partial/ambiguous calendar passes silently (event_dates.py:121)"
+  ],
+  "reviewed_sha256": {
+    "README.md": "a51a9c6a6abe9667fd86e58ad27a641d6732f5a6fccdc8e4e741ec1dec936083",
+    "build_article_correction.py": "922805051b2fa064b433485093b40b0e4677b69ea0e813e1576e6c02428fd6c9",
+    "k528_nfp_event_study.py": "d27afe1b822034272ae6c44493af092405e95cb55370651dda9734e7f1d2944a",
+    "k528_nfp_event_study_results.json": "84070e93f77f02abac8c5660e897e6093c6fb6835b3df520bb10dc33d7dde339",
+    "k528_nfp_official_dates_results.json": "41440b18d33134ad87772dafcbae0fc9603d1a5e53297111f1b6d76855040911"
+  }
+}

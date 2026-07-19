@@ -1,4 +1,17 @@
 {
+  "superseded": true,
+  "superseded_at": "2026-07-19",
+  "superseded_by": "k528_nfp_event_study_results.json",
+  "do_not_cite": true,
+  "event_date_source": {
+    "source": "PROXY - first Friday of each calendar month, computed in-script",
+    "accessor": "get_first_friday() (deleted; do not reintroduce)",
+    "official_source_it_should_have_used": "BLS Employment Situation release calendar via ALFRED, FRED release id 50 (volpred.data.event_dates.nfp_release_dates)"
+  },
+  "retraction_reason": "The first-Friday-of-month rule is wrong for roughly 20% of the sample and wrong SYSTEMATICALLY, not randomly: BLS moves the release to the second Friday when the reference week falls late, pulls it forward around holidays, and did not publish at all in 2025-10 during the federal shutdown -- for which this proxy invented an event day that never existed. Wrong event dates do not fail loudly: they count quiet days as event days and dump real event days into the control group, and every figure still renders.",
+  "impact_on_published_numbers": "Sample 254 -> 253 events. Headline numbers moved modestly (1.10->1.11x vs all days, 1.17->1.19x vs Friday, 2.17->2.03x regime gap, Pearson r 0.45->0.44, VIX median 16.71->16.69). No directional conclusion reversed.",
+  "audit_artifact": "k528_nfp_official_dates_results.json",
+  "note_for_machines": "This object exists so the file is identifiable as retracted WITHOUT relying on its filename or on README prose (k528 Codex v2 finding 8). If you are reading this key, do not use any number in this file.",
   "experiment_id": "K528",
   "title": "NFP Event Study on SPY Volatility",
   "date": "2026-03-27T12:26:19.183627+00:00",

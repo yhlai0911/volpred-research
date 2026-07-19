@@ -47,6 +47,8 @@ Date: 2026-03-27 (corrected 2026-07-19)
 """
 
 import json
+import os
+import tempfile
 import warnings
 from datetime import datetime, timezone
 from pathlib import Path
@@ -63,9 +65,86 @@ warnings.filterwarnings("ignore")
 SAMPLE_START = "2005-01-01"
 SAMPLE_END = "2026-03-27"
 
+# Months in [SAMPLE_START, SAMPLE_END] for which BLS published no Employment
+# Situation report at all. Anything absent from the calendar that is NOT listed
+# here is a data-integrity failure, not a known hole -- see check_calendar_is_complete.
+#
+# 2025-10: the federal government shutdown. ALFRED shows no release id 50 entry
+# between 2025-09-05 and 2025-11-20 (a 76-day gap against a ~30-day cadence);
+# the delayed September report came out on 11-20. This is the same shutdown that
+# cancelled the Oct-2025 CPI release described in volpred/data/event_dates.py.
+# It is a real absence of an event, which is why the month is excluded rather
+# than back-filled -- the first-Friday proxy INVENTED an event here, and that
+# phantom event is one of the reasons this experiment was rerun.
+KNOWN_MISSING_MONTHS: set[str] = {"2025-10"}
+
+
+def write_json_atomic(path: Path, payload) -> None:
+    """Write `payload` to `path` atomically.
+
+    A truncate-then-write leaves a half-written results file on the disk if the
+    run dies mid-dump, and a half-written results file is worse than none: it
+    still parses far enough to look like data to the next reader. Write to a
+    temp file in the same directory, fsync, then os.replace (atomic on POSIX).
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(payload, f, indent=2, default=str)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except FileNotFoundError:
+            pass  # silent-ok: best-effort cleanup of our own temp file; the original error re-raises below
+        raise
+
+
 # ============================================================
 # 1. NFP dates: official BLS release calendar (no proxy, no fallback)
 # ============================================================
+def check_calendar_is_complete(dates, start, end):
+    """Fail closed on a calendar that is merely PLAUSIBLE rather than complete.
+
+    "Did the call succeed?" is the wrong question. A monthly release calendar
+    that silently lost 2019 still returns a non-empty list, still produces
+    event windows, still renders. The three ways this input can be wrong
+    without being empty are: a month appears twice (off-cycle revision picked
+    up as a second event -- the k528 v2 BLOCKER), a month is missing, or the
+    range is not covered at all. All three raise here.
+    """
+    months = [pd.Timestamp(d).strftime("%Y-%m") for d in dates]
+
+    dupes = sorted({m for m in months if months.count(m) > 1})
+    if dupes:
+        raise RuntimeError(
+            f"official NFP calendar returned {len(dupes)} month(s) with more than one "
+            f"release date: {dupes}. The Employment Situation is published once per "
+            "month; a second same-month entry is an off-cycle revision and must not be "
+            "treated as an event. Fix the accessor, do not de-duplicate here."
+        )
+
+    expected = {
+        p.strftime("%Y-%m")
+        for p in pd.period_range(start=pd.Timestamp(start), end=pd.Timestamp(end), freq="M")
+    }
+    # The endpoint months are partial by construction: a run ending 2026-03-27
+    # legitimately has 2026-03, but a run ending 2026-03-02 may not yet.
+    interior = {m for m in expected if m not in {min(expected), max(expected)}}
+    missing = sorted(interior - set(months) - KNOWN_MISSING_MONTHS)
+    if missing:
+        raise RuntimeError(
+            f"official NFP calendar is missing {len(missing)} month(s) inside the sample "
+            f"window: {missing}. A partial calendar dumps real event days into the control "
+            "group silently. Add them to KNOWN_MISSING_MONTHS only with a documented "
+            "reason (e.g. a cancelled release), never to make this check pass."
+        )
+    return {"n_months_expected": len(interior), "known_missing_months": sorted(KNOWN_MISSING_MONTHS)}
+
+
 def load_nfp_dates(start=SAMPLE_START, end=SAMPLE_END):
     """Official NFP (Employment Situation) release dates.
 
@@ -77,7 +156,8 @@ def load_nfp_dates(start=SAMPLE_START, end=SAMPLE_END):
     dates = nfp_release_dates(start, end)
     if len(dates) == 0:
         raise RuntimeError(f"official NFP calendar returned nothing for {start}..{end}")
-    return list(dates)
+    completeness = check_calendar_is_complete(dates, start, end)
+    return list(dates), completeness
 
 
 # ============================================================
@@ -116,7 +196,7 @@ print(f"  VIX: {spy['VIX'].notna().sum()} days with VIX data")
 # ============================================================
 print("\n[2/6] Mapping NFP dates to trading days...")
 
-nfp_calendar = load_nfp_dates()
+nfp_calendar, calendar_completeness = load_nfp_dates()
 trading_dates = spy.index
 
 # The proxy forced every event onto a Friday. The official calendar does not,
@@ -125,28 +205,77 @@ n_friday = sum(1 for d in nfp_calendar if pd.Timestamp(d).weekday() == 4)
 print(f"  Official releases: {len(nfp_calendar)} "
       f"({n_friday} Friday, {len(nfp_calendar) - n_friday} non-Friday)")
 
-# Map each NFP date to nearest trading day (could be holiday/early close)
-nfp_trading_dates = []
+# Map each NFP date to the session that trades the news. The report drops at
+# 08:30 ET, before the open, so a release on a closed day is traded at the next
+# open -- hence "next trading day", not "nearest". Every release must land on
+# exactly one session and no two releases may share one: both failures shrink
+# the event set without shrinking any count that gets printed.
+release_to_session = {}
+unmapped = []
 for nfp_date in nfp_calendar:
     nfp_ts = pd.Timestamp(nfp_date)
-    # Find exact match or next trading day
     if nfp_ts in trading_dates:
-        nfp_trading_dates.append(nfp_ts)
+        release_to_session[nfp_ts] = nfp_ts
+        continue
+    mask = (trading_dates > nfp_ts) & (trading_dates <= nfp_ts + pd.Timedelta(days=3))
+    candidates = trading_dates[mask]
+    if len(candidates) > 0:
+        release_to_session[nfp_ts] = candidates[0]
     else:
-        # Find nearest trading day within 3 days
-        mask = (trading_dates >= nfp_ts) & (trading_dates <= nfp_ts + pd.Timedelta(days=3))
-        candidates = trading_dates[mask]
-        if len(candidates) > 0:
-            nfp_trading_dates.append(candidates[0])
+        unmapped.append(nfp_ts.date().isoformat())
 
-nfp_trading_dates = sorted(set(nfp_trading_dates))
+# In-sample releases must map. Releases outside the price series (the calendar
+# window can overhang the SPY history on either end) are excluded by design,
+# not by failure, so they are separated before the assertion.
+in_sample_unmapped = [
+    d for d in unmapped
+    if trading_dates[0] <= pd.Timestamp(d) <= trading_dates[-1]
+]
+if in_sample_unmapped:
+    raise RuntimeError(
+        f"{len(in_sample_unmapped)} official NFP release(s) inside the price sample found no "
+        f"trading session within 3 days: {in_sample_unmapped}. Silently skipping them would "
+        "drop real event days into the control group."
+    )
 
-# Only keep dates within our data range (with enough buffer for pre/post windows)
+collisions = {}
+for rel, sess in release_to_session.items():
+    collisions.setdefault(sess, []).append(rel.date().isoformat())
+colliding = {str(s.date()): sorted(v) for s, v in collisions.items() if len(v) > 1}
+if colliding:
+    raise RuntimeError(
+        f"two or more NFP releases mapped to the same trading session: {colliding}. "
+        "The de-duplication that used to hide this also silently reduced the event count."
+    )
+
+nfp_trading_dates = sorted(release_to_session.values())
+n_shifted = sum(1 for r, s in release_to_session.items() if r != s)
+
+# Window buffer: an event needs 5 sessions before and 5 after to have a window
+# at all. Excluding the edges is correct; doing it without saying so is not.
+window_excluded = [d for d in nfp_trading_dates
+                   if d < trading_dates[10] or d > trading_dates[-6]]
 valid_nfp = [d for d in nfp_trading_dates
              if d >= trading_dates[10] and d <= trading_dates[-6]]
 
-print(f"  Total NFP dates generated: {len(nfp_calendar)}")
-print(f"  Matched to trading days: {len(nfp_trading_dates)}")
+if len(valid_nfp) + len(window_excluded) != len(nfp_trading_dates):
+    raise RuntimeError("event-window partition lost events; refusing to continue")
+
+mapping_audit = {
+    "n_official_releases": len(nfp_calendar),
+    "n_mapped_to_sessions": len(nfp_trading_dates),
+    "n_shifted_to_next_session": n_shifted,
+    "n_outside_price_sample": len(unmapped),
+    "outside_price_sample_dates": sorted(unmapped),
+    "n_excluded_for_window_buffer": len(window_excluded),
+    "window_excluded_dates": [str(d.date()) for d in window_excluded],
+    "n_valid_events": len(valid_nfp),
+}
+
+print(f"  Total official releases: {len(nfp_calendar)}")
+print(f"  Mapped to trading sessions: {len(nfp_trading_dates)} ({n_shifted} shifted to next open)")
+print(f"  Outside price sample: {len(unmapped)}")
+print(f"  Excluded for window buffer: {len(window_excluded)}")
 print(f"  Valid (with pre/post window): {len(valid_nfp)}")
 
 # ============================================================
@@ -167,8 +296,15 @@ for nfp_date in valid_nfp:
     # Post-event: T+1 to T+5
     post_window = spy.iloc[pos+1:pos+6]
 
+    # Unreachable given the window-buffer partition above. Kept as an assertion
+    # rather than a `continue`: if the partition ever stops holding, the run
+    # must stop, not quietly analyse a smaller sample than it reports.
     if len(pre_window) < 5 or len(post_window) < 5:
-        continue
+        raise RuntimeError(
+            f"event {nfp_date.date()} has an incomplete window "
+            f"(pre={len(pre_window)}, post={len(post_window)}) despite passing the "
+            "window-buffer filter -- the partition and the window logic disagree"
+        )
 
     row = {
         "date": nfp_date.strftime("%Y-%m-%d"),
@@ -209,7 +345,12 @@ baseline_abs_return = float(non_nfp["AbsReturn"].mean())
 baseline_abs_return_std = float(non_nfp["AbsReturn"].std())
 baseline_abs_return_median = float(non_nfp["AbsReturn"].median())
 
-# Also compute Friday-only baseline (since NFP is always Friday)
+# Friday-only baseline. Under the proxy every event was a Friday by
+# construction, so "all NFP events vs non-NFP Fridays" was a clean
+# weekday-held-fixed contrast. On the official calendar it is not: the event
+# group is a weekday mixture and the control group is pure Friday, so any
+# Friday-vs-other-weekday volatility difference loads directly onto the
+# estimate. The test below therefore holds weekday fixed on BOTH sides.
 friday_mask = non_nfp.index.weekday == 4
 friday_baseline = float(non_nfp[friday_mask]["AbsReturn"].mean())
 friday_baseline_std = float(non_nfp[friday_mask]["AbsReturn"].std())
@@ -231,9 +372,32 @@ friday_non_nfp_abs = non_nfp[friday_mask]["AbsReturn"].values
 t_stat_all, p_val_all = stats.ttest_ind(nfp_abs_returns, non_nfp_abs_returns, equal_var=False)
 vol_ratio_all = float(nfp_abs_returns.mean() / non_nfp_abs_returns.mean())
 
-# --- Test B: NFP vs Friday-only baseline ---
-t_stat_fri, p_val_fri = stats.ttest_ind(nfp_abs_returns, friday_non_nfp_abs, equal_var=False)
-vol_ratio_fri = float(nfp_abs_returns.mean() / friday_non_nfp_abs.mean())
+# --- Test B: NFP vs Friday-only baseline (weekday held fixed on both sides) ---
+#
+# Estimand choice (k528 Codex v2 finding 5). Two repairs were available:
+#   (i)  restrict the event group to Friday releases, or
+#   (ii) keep all events and use weekday-matched controls.
+# This run takes (i). The non-Friday events are Thu 8 / Tue 2 / Wed 1 out of
+# 253 -- cells that thin make (ii) a weighted average dominated by three
+# single-digit strata, with standard errors driven by the 1-observation
+# Wednesday cell. That is a noisier estimator of a harder-to-state quantity.
+# (i) answers one clean question: on a Friday, does an NFP release raise
+# volatility? It costs the 11 non-Friday events, which are reported below as a
+# separate descriptive line rather than dropped in silence.
+nfp_friday_mask = (df["weekday"] == 4).values
+nfp_friday_abs = nfp_abs_returns[nfp_friday_mask]
+nfp_nonfriday_abs = nfp_abs_returns[~nfp_friday_mask]
+
+t_stat_fri, p_val_fri = stats.ttest_ind(nfp_friday_abs, friday_non_nfp_abs, equal_var=False)
+vol_ratio_fri = float(nfp_friday_abs.mean() / friday_non_nfp_abs.mean())
+
+# Diagnostic ONLY -- the pre-correction specification, kept so the correction
+# audit can show what the contaminated estimand was worth. Not a headline
+# number and not eligible to be quoted: its p-value mixes in weekday
+# composition, which is exactly the defect being repaired.
+t_stat_fri_mixed, p_val_fri_mixed = stats.ttest_ind(
+    nfp_abs_returns, friday_non_nfp_abs, equal_var=False)
+vol_ratio_fri_mixed = float(nfp_abs_returns.mean() / friday_non_nfp_abs.mean())
 
 # --- Test C: Wilcoxon rank-sum (non-parametric) ---
 u_stat, p_val_wilcox = stats.mannwhitneyu(nfp_abs_returns, non_nfp_abs_returns, alternative='greater')
@@ -312,11 +476,18 @@ print(f"  t-stat:               {t_stat_all:.3f}")
 print(f"  p-value:              {p_val_all:.4f}")
 print(f"  Significant (5%):     {'YES' if p_val_all < 0.05 else 'NO'}")
 
-print(f"\n--- B. NFP vs Friday-Only Baseline ---")
+print(f"\n--- B. Friday NFP vs Friday Non-NFP (weekday held fixed) ---")
+print(f"  Friday NFP |return|:  {nfp_friday_abs.mean():.6f} (n={len(nfp_friday_abs)})")
 print(f"  Friday baseline:      {friday_baseline:.6f} ({friday_baseline*100:.3f}%)")
 print(f"  Vol ratio (vs Fri):   {vol_ratio_fri:.3f}x")
 print(f"  t-stat:               {t_stat_fri:.3f}")
 print(f"  p-value:              {p_val_fri:.4f}")
+print(f"  Significant (5%):     {'YES' if p_val_fri < 0.05 else 'NO'}")
+print(f"  [excluded] non-Friday NFP events: n={len(nfp_nonfriday_abs)}, "
+      f"mean |ret|={nfp_nonfriday_abs.mean():.6f}" if len(nfp_nonfriday_abs) else "  [excluded] none")
+print(f"  [diagnostic, NOT a headline] all-events vs Friday baseline: "
+      f"{vol_ratio_fri_mixed:.4f}x, p={p_val_fri_mixed:.5f}")
+print(f"      ^ pre-correction estimand; p mixes in weekday composition")
 
 print(f"\n--- C. Wilcoxon Rank-Sum (non-parametric) ---")
 print(f"  U-stat:               {u_stat:.1f}")
@@ -412,15 +583,32 @@ print("=" * 60)
 sig_level = 0.05
 conclusions = []
 
-if p_val_all < sig_level:
-    conclusions.append(f"NFP days show significantly higher vol ({vol_ratio_all:.2f}x, p={p_val_all:.4f})")
-else:
-    conclusions.append(f"NFP days do NOT show significantly higher vol ({vol_ratio_all:.2f}x, p={p_val_all:.4f})")
-
-if p_val_fri < sig_level:
-    conclusions.append(f"Even vs Friday baseline, NFP is significant ({vol_ratio_fri:.2f}x, p={p_val_fri:.4f})")
-else:
-    conclusions.append(f"Vs Friday baseline, NFP is also not significant ({vol_ratio_fri:.2f}x, p={p_val_fri:.4f})")
+# Each conclusion names the test it came from. The previous run collapsed
+# several tests into "insignificant across all tests" while the one-sided
+# Mann-Whitney in the same artifact was significant at p<0.01 -- a summary that
+# contradicted its own numbers. A Welch test on |return| is a test of MEANS;
+# it not rejecting is not a finding that the distributions match, and it is
+# never evidence that the effect is zero.
+conclusions.append(
+    f"Welch mean-difference, NFP vs all non-NFP days: {vol_ratio_all:.2f}x, "
+    f"p={p_val_all:.4f} ({'rejects' if p_val_all < sig_level else 'does not reject'} at 5%)"
+)
+conclusions.append(
+    f"Welch mean-difference, Friday NFP vs Friday non-NFP (weekday held fixed): "
+    f"{vol_ratio_fri:.2f}x, p={p_val_fri:.4f} "
+    f"({'rejects' if p_val_fri < sig_level else 'does not reject'} at 5%; "
+    f"n={len(nfp_friday_abs)} vs {len(friday_non_nfp_abs)})"
+)
+conclusions.append(
+    f"Mann-Whitney one-sided (stochastic dominance, not means), NFP vs all non-NFP: "
+    f"p={p_val_wilcox:.5f} ({'rejects' if p_val_wilcox < sig_level else 'does not reject'} at 5%)"
+)
+if (p_val_all >= sig_level) != (p_val_wilcox >= sig_level):
+    conclusions.append(
+        "NOTE: the mean-difference and rank tests disagree. |return| is heavy-tailed, "
+        "so a rank test can detect a location shift the Welch mean test cannot. "
+        "Report both; do not summarise them as a single verdict."
+    )
 
 if vol_crush.mean() < 0 and p_crush < sig_level:
     conclusions.append(f"Vol crush pattern exists (post < pre, p={p_crush:.4f})")
@@ -435,10 +623,12 @@ else:
 for c in conclusions:
     print(f"  • {c}")
 
-print(f"\n  Practical implication for 04/03 NFP:")
-print(f"    → NFP alone does not warrant reducing SPY exposure")
-print(f"    → Focus on VIX level and broader market conditions instead")
-print(f"    → Consistent with K513 findings (NFP 1.09x, NS)")
+print(f"\n  Practical implication:")
+print(f"    → Entry VIX regime is the larger and more reliably measured effect "
+      f"({high_vix.mean()/low_vix.mean():.2f}x, p={p_regime:.4g})")
+print(f"    → The NFP-day effect is smaller; mean and rank tests do not agree on it, "
+      f"so it is not established either way")
+print(f"    → Non-significance of a mean test is not evidence of no effect")
 
 # ============================================================
 # 9b. Correction audit: every published number, before vs after
@@ -550,15 +740,27 @@ record(
         "mean_ratio": vol_ratio_fri,
         "p_value": float(p_val_fri),
         "significant_5pct": bool(p_val_fri < 0.05),
-        "n": int(len(df)),
+        "n": int(len(nfp_friday_abs)),
         "nfp_days_on_friday": int((df["weekday"] == 4).sum()),
-        "median_ratio": float(np.median(nfp_abs_returns) / np.median(friday_non_nfp_abs)),
-        "win_rate": win_rate(nfp_abs_returns, friday_non_nfp_abs),
+        "median_ratio": float(np.median(nfp_friday_abs) / np.median(friday_non_nfp_abs)),
+        "win_rate": win_rate(nfp_friday_abs, friday_non_nfp_abs),
+        "estimand": "Friday NFP sessions vs Friday non-NFP sessions (weekday held fixed)",
+        "diagnostic_mixed_weekday": {
+            "mean_ratio": vol_ratio_fri_mixed,
+            "p_value": float(p_val_fri_mixed),
+            "significant_5pct": bool(p_val_fri_mixed < 0.05),
+            "n": int(len(df)),
+            "status": "DIAGNOSTIC ONLY - the pre-correction estimand, not quotable",
+        },
     },
-    note="Under the proxy every NFP day was a Friday by construction, so this "
-         "test compared Fridays with Fridays. On the official calendar it no "
-         "longer does, which is a change in what the test means, not just in "
-         "its value.",
+    note="Two things changed at once here, and they must not be conflated. "
+         "(1) The dates were corrected. (2) The ESTIMAND was corrected: under "
+         "the proxy every NFP day was a Friday by construction, so this test "
+         "compared Fridays with Fridays; on the official calendar the event "
+         "group is a weekday mixture, so the like-for-like test now restricts "
+         "the event group to Friday releases. `diagnostic_mixed_weekday` holds "
+         "the date-corrected value of the OLD estimand, which is the apples-to-"
+         "apples comparison against the `before` column.",
 )
 
 # --- 2.17x : high-VIX vs low-VIX regime ---
@@ -721,6 +923,8 @@ output = {
         "non_nfp_trading_days": int(non_nfp_mask.sum()),
         "friday_baseline_days": int(friday_mask.sum()),
         "nfp_days_on_friday": int((df["weekday"] == 4).sum()),
+        "event_mapping_audit": mapping_audit,
+        "calendar_completeness": calendar_completeness,
     },
     "main_results": {
         "nfp_avg_abs_return": float(nfp_abs_returns.mean()),
@@ -739,10 +943,37 @@ output = {
             "significant_5pct": bool(p_val_all < 0.05),
         },
         "B_nfp_vs_friday": {
-            "test": "Welch t-test",
+            "test": "Welch t-test, Friday NFP sessions vs Friday non-NFP sessions",
+            "estimand": (
+                "weekday held fixed on both sides. Event group restricted to NFP "
+                "releases that trade on a Friday; the 11 non-Friday events are "
+                "excluded rather than compared against a pure-Friday control group."
+            ),
+            "n_event": int(len(nfp_friday_abs)),
+            "n_control": int(len(friday_non_nfp_abs)),
+            "vol_ratio": vol_ratio_fri,
             "t_stat": float(t_stat_fri),
             "p_value": float(p_val_fri),
             "significant_5pct": bool(p_val_fri < 0.05),
+            "excluded_non_friday_events": {
+                "n": int(len(nfp_nonfriday_abs)),
+                "mean_abs_return": float(nfp_nonfriday_abs.mean()) if len(nfp_nonfriday_abs) else None,
+            },
+        },
+        "B_diagnostic_mixed_weekday": {
+            "test": "Welch t-test, ALL NFP events vs Friday non-NFP sessions",
+            "status": "DIAGNOSTIC ONLY - do not quote",
+            "why_not_a_headline": (
+                "this is the pre-correction specification: a weekday-mixed event "
+                "group against a pure-Friday control group, so the p-value absorbs "
+                "any Friday-vs-other-weekday volatility difference. Retained solely "
+                "so the correction audit can show what the contaminated estimand was "
+                "worth (k528 Codex v2 finding 5)."
+            ),
+            "vol_ratio": vol_ratio_fri_mixed,
+            "t_stat": float(t_stat_fri_mixed),
+            "p_value": float(p_val_fri_mixed),
+            "significant_5pct": bool(p_val_fri_mixed < 0.05),
         },
         "C_wilcoxon": {
             "test": "Mann-Whitney U (one-sided)",
@@ -817,9 +1048,20 @@ output = {
     },
     "conclusions": conclusions,
     "practical_implication": (
-        "NFP does NOT warrant reducing SPY exposure. Vol ratio ~1.09x is statistically "
-        "insignificant across all tests. Consistent with K513. For 04/03 NFP: focus on "
-        "VIX level and broader conditions, not the NFP event itself."
+        f"Entry VIX regime is the dominant and most reliably measured effect here: "
+        f"{high_vix.mean()/low_vix.mean():.2f}x between high- and low-VIX NFP days "
+        f"(p={p_regime:.4g}). The NFP-day effect itself is smaller and the tests do not "
+        f"agree on it -- the Welch mean-difference test against all non-NFP days gives "
+        f"{vol_ratio_all:.2f}x (p={p_val_all:.4f}) while the one-sided Mann-Whitney gives "
+        f"p={p_val_wilcox:.5f}. Report both. A mean test that does not reject is not "
+        "evidence that the effect is zero, and it does not license the claim that the "
+        "event 'is not NFP itself'."
+    ),
+    "claim_scope_note": (
+        "Every significance statement in this artifact is scoped to its own test. "
+        "The superseded run summarised these as 'insignificant across all tests', "
+        "which contradicted the one-sided Mann-Whitney result in the same file "
+        "(k528 Codex v2 finding 6)."
     ),
     "references": [
         "K513: FOMC/NFP/CPI event study (2005-2025, 668 events)",
@@ -830,8 +1072,7 @@ output = {
 }
 
 out_path = Path(__file__).parent / "k528_nfp_event_study_results.json"
-with open(out_path, "w") as f:
-    json.dump(output, f, indent=2, default=str)
+write_json_atomic(out_path, output)
 
 print(f"  Saved to: {out_path}")
 
@@ -867,7 +1108,6 @@ audit_out = {
     },
 }
 audit_path = Path(__file__).parent / "k528_nfp_official_dates_results.json"
-with open(audit_path, "w") as f:
-    json.dump(audit_out, f, indent=2, default=str)
+write_json_atomic(audit_path, audit_out)
 print(f"  Saved to: {audit_path}")
 print("\nDone!")
