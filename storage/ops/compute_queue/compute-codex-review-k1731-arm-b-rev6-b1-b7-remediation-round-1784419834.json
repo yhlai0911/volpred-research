@@ -1,0 +1,36 @@
+{
+  "id": "compute-codex-review-k1731-arm-b-rev6-b1-b7-remediation-round-1784419834",
+  "title": "codex review: K1731 arm B rev6 (B1-B7 remediation round)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1731_armB_rev6_prompt.md",
+    "storage/ops/codex_reviews/k1731_armB_rev6_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-19T00:10:34Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-review-k1731-arm-b-rev6-b1-b7-remediation-round-1784419834.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-review-k1731-arm-b-rev6-b1-b7-remediation-round-1784419834.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1731_armB_rev6_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1731_armB_rev6_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1731 arm B rev6 Codex verdict 已產出。① 讀 verdict 第一行 PASS/FAIL。② PASS → K1731 arm B 可解 blocked：把 assign_67f56b79 flip 回 pending，並開 worktree merge 任務（正式 merge_worktree.sh）。③ FAIL → 逐條讀 Blocking issues，先自行 bytes 核對再決定接受，然後開 bounded 修正 job（不得原樣重派、不得跳過 freeze）。④ 無論結果都不要合併 worktree、不要寫 knowledge.json，除非 PASS 後另立任務。⑤ 若 verdict 說 sha256 與 freeze manifest (storage/ops/codex_reviews/k1731_armB_rev6_freeze.txt) 不符 → 該輪作廢，重新 freeze 後再送。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null
+}

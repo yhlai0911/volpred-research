@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-18T23:00:56.414851+00:00",
+  "generated_at": "2026-07-19T00:01:05.173393+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
@@ -12,18 +12,7 @@
   "adopted": [],
   "applied": true,
   "job_deliverable_candidates": [],
-  "job_deliverable_held": [
-    {
-      "job_id": "k1731-armB-corrected-rev5",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_gevreg_midas_ssvs_returns_results_corrected_rev5.json",
-          "reason": "git_ignored"
-        }
-      ]
-    }
-  ],
+  "job_deliverable_held": [],
   "job_deliveries": [],
   "namespaces": {
     "drafts": {
@@ -57,7 +46,14 @@
       "collections": []
     }
   },
-  "held_escalations": [],
+  "held_escalations": [
+    {
+      "task_id": "assign_6e8ece3f",
+      "paths": [
+        "job:k1731-armB-corrected-rev5"
+      ]
+    }
+  ],
   "held_escalated_paths": [
     "experiments/k1380/README.md",
     "experiments/k1380/k1380.py",
@@ -74,6 +70,7 @@
     "job:k1704-input-ledger-delta-review-20260716",
     "job:k1704-origin-ledger-delta-review-20260716",
     "job:k1704-post-run-review-20260716",
+    "job:k1731-armB-corrected-rev5",
     "job:lazypack-mile_a8d79d6a-r2",
     "storage/drafts/digest_20260714.md",
     "storage/drafts/fb_mile_5a20a332.md",

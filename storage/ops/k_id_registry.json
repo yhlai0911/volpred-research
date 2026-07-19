@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1734,
+  "last_k_id": 1739,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -1040,8 +1040,58 @@
       "status": "reserved",
       "topic": "EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carry 報酬分佈左尾是否在 risk-off 急速放大、unwind 是否領先 EM 股 vol；明確標示 leveraged/crowded position 數據 blocked 用 proxy（來源：BIS/IMF GFSR 2025；EM drawdown 為 EUR 的 3-5 倍）",
       "topic_hash": "81138f643ba37ae7"
+    },
+    {
+      "claimed_at": "2026-07-19T00:00:01.309229+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1735",
+      "number": 1735,
+      "source_max": 1734,
+      "status": "reserved",
+      "topic": "日內 diurnal pattern 是否「足夠」解釋 RV 變異 — yfinance 或可得 5-min 代理，用無母數方法檢定剔除已知日內 U 型季節後是否仍有顯著 intraday vol 變異，量化季節成分占 RV 的比例（方法論基礎題，校準我方所有日內 RV 估計）（來源：arXiv 2601 diurnal sufficiency nonparametric assessment）",
+      "topic_hash": "44d3f12395b4201a"
+    },
+    {
+      "claimed_at": "2026-07-19T00:00:01.545654+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1736",
+      "number": 1736,
+      "source_max": 1735,
+      "status": "reserved",
+      "topic": "偏度風險溢酬「期限結構」作長 horizon 尾部訊號 — 用 ^VIX、^SKEW（CBOE SKEW free）與 realized skewness 建 skew-premium term-structure proxy，檢定長端 skew-premium 是否對 6-12 個月 SPY 報酬/drawdown 有比短端更強的預測力；與 K43（SKEW/VIX3M level）不同，聚焦 term-structure slope 而非 level（來源：JFQA 2025 crash-risk premium / skewness swap；skew premium 長 horizon 較強）",
+      "topic_hash": "efb3cae076708ba7"
+    },
+    {
+      "claimed_at": "2026-07-19T00:00:01.931970+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1737",
+      "number": 1737,
+      "source_max": 1736,
+      "status": "reserved",
+      "topic": "Double-ML 因果 factor 檢定：價值/動能/品質是否有真正因果效應 — yfinance 美股月度橫斷面，用 DoubleML 框架（`econml`/`doubleml` 免費套件）對低/高 book-to-market、12-1M 動能、ROE 做 debiased ML，檢定控制高維 confounders 後 factor return 是否仍顯著；與既有純預測 factor ETF 題不同，聚焦因果識別（來源：López de Prado/JFQA 2026 causal factor investing；FAJ 2025 causal ML 趨勢）",
+      "topic_hash": "611cb6e9fa0cc3c1"
+    },
+    {
+      "claimed_at": "2026-07-19T00:00:02.256215+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1738",
+      "number": 1738,
+      "source_max": 1737,
+      "status": "reserved",
+      "topic": "財報盈餘驚喜（SUE）對次月 vol 的因果增量：DML + instrumental variable — yfinance 美股月度橫斷面 + FRED 宏觀控制，用 SUE 作處理變數、IV 做識別，估計 earnings surprise 對後續 1-3 個月 realized vol 的 ATE，明確 lag（來源：JFE 2025-26 event-driven causal inference；因果 ML 在盈餘波動的應用空白）",
+      "topic_hash": "78f9ca961d426f1b"
+    },
+    {
+      "claimed_at": "2026-07-19T00:00:02.460015+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1739",
+      "number": 1739,
+      "source_max": 1738,
+      "status": "reserved",
+      "topic": "商品期貨短期（1-4 週）動能與反轉「共存」驗證及 vol 條件 — yfinance 商品 ETF 代理（GLD/SLV/USO/UNG/CPER/PDBC），月/週 return series，檢定同 horizon 下動能與反轉是否因 vol 高低 regime 分離（JFEM 2026 commodity markets 發現短期動能-反轉並存，顛覆傳統 horizon 區分）；美股商品 ETF 代理版，免 tick（來源：JFEM/SSRN 2026 commodity short-term momentum-reversal coexistence）",
+      "topic_hash": "bad154498f1504eb"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-18T00:00:02.796964+00:00"
+  "updated_at": "2026-07-19T00:00:02.460015+00:00"
 }
