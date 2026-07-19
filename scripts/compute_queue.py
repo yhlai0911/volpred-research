@@ -253,6 +253,35 @@ def _is_review_job(artifact_path: Path | None) -> bool:
     return artifact_path is not None and artifact_path.name == _REVIEW_ARTIFACT_NAME
 
 
+def _review_verdict_unfilled(artifact_path: Path) -> list[str]:
+    """A review job's deliverable is a FILLED verdict, not a scaffold.
+
+    2026-07-19 k528: the verdict template was pre-generated, Codex never wrote
+    the adjudication, and the job still went `completed` because the artifact
+    existence check passed on eight `FILL:` placeholders. Existence is not the
+    postcondition — content is. Returns a list of problems (empty = filled).
+    """
+    try:
+        data = json.loads(artifact_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [f"unreadable: {exc}"]
+    if not isinstance(data, dict):
+        return ["not a JSON object"]
+    problems: list[str] = []
+    verdict = str(data.get("verdict", ""))
+    if verdict not in {"PASS", "CONDITIONAL PASS", "CONDITIONAL_PASS", "FAIL"}:
+        problems.append(f"verdict={verdict!r} is not an adjudication")
+    for key, value in data.items():
+        if isinstance(value, str) and value.startswith("FILL:"):
+            problems.append(f"{key} unfilled")
+        elif isinstance(value, list):
+            problems.extend(
+                f"{key}[] unfilled" for item in value
+                if isinstance(item, str) and item.startswith("FILL:")
+            )
+    return problems
+
+
 def _experiment_scope(job: dict[str, Any], artifact_path: Path | None) -> Path | None:
     """The `experiments/<kid>` directory this job produced, if any.
 
@@ -1116,6 +1145,19 @@ def run_next(args) -> int:
                     job["missing_result_artifact"] = str(artifact_path)
                     with stderr_p.open("a") as se:
                         se.write(f"\n[RESULT_ARTIFACT_MISSING] {artifact_path}\n")
+                elif _is_review_job(artifact_path) and (
+                    unfilled := _review_verdict_unfilled(artifact_path)
+                ):
+                    # The verdict file exists but was never adjudicated (or is
+                    # not a verdict at all). k528 2026-07-19: existence-only
+                    # check let a FILL: scaffold pass as a completed review.
+                    job["process_exit_code"] = proc.returncode
+                    job["exit_code"] = 5
+                    job["status"] = "failed"
+                    job["failure_reason"] = "review_verdict_unfilled"
+                    job["review_verdict_unfilled"] = unfilled
+                    with stderr_p.open("a") as se:
+                        se.write(f"\n[REVIEW_VERDICT_UNFILLED] {unfilled}\n")
                 else:
                     gate = _experiment_gate_failure(job, artifact_path)
                     if gate is not None:

@@ -583,3 +583,30 @@ def test_unreadable_verdict_warns_instead_of_silently_skipping(tmp_path: Path, m
     assert view is not None
     assert "possibly_superseded" not in view
     assert "review_verdict unreadable" in capsys.readouterr().err
+
+
+def test_review_verdict_unfilled_rejects_scaffold(tmp_path: Path) -> None:
+    """k528 2026-07-19: a pre-generated verdict template with FILL: placeholders
+    passed the existence-only postcondition and the review job went completed.
+    Content validation must reject scaffolds and non-adjudications."""
+    p = tmp_path / "review_verdict.json"
+    p.write_text(json.dumps({
+        "kid": "k528",
+        "verdict": "FILL: PASS or FAIL",
+        "reviewer": "FILL: model / effort",
+        "blocking_defects": ["FILL: one entry per defect"],
+        "reviewed_sha256": {"a.py": "deadbeef"},
+    }))
+    problems = module._review_verdict_unfilled(p)
+    assert any("verdict=" in x for x in problems)
+    assert any(x.startswith("reviewer") for x in problems)
+    assert any(x.startswith("blocking_defects") for x in problems)
+
+    p.write_text(json.dumps({
+        "kid": "k528", "verdict": "FAIL", "reviewer": "codex",
+        "blocking_defects": ["real defect"],
+    }))
+    assert module._review_verdict_unfilled(p) == []
+
+    p.write_text("not json {")
+    assert module._review_verdict_unfilled(p)
