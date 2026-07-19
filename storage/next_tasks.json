@@ -32973,13 +32973,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T06:01:43.382085+00:00",
+    "completed_at": "2026-07-19T07:01:19.445032+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T06:01:43.382085+00:00",
-      "last_clean_observed_at": "2026-07-19T06:01:43.382085+00:00"
+      "resolved_at": "2026-07-19T07:01:19.445032+00:00",
+      "last_clean_observed_at": "2026-07-19T07:01:19.445032+00:00"
     }
   },
   {
@@ -41492,7 +41492,7 @@
     "task_type": "platform_ops",
     "priority": 2,
     "description": "**這是 gate 的 false negative，不只是 K1731 的事。** K1731 arm B 的嵌套關係是用 coefficient mask 表達的（`active[n_beta-n_macro:] = 0.0` 後當 `active=` 傳給 `fit_gev_reg`），`audit_nested_dm_misuse` 的偵測器看不到這種寫法 → 它對 K1731 回 PASS 是**假陰性**，不可拿來當「B1 已清」的證據。\n\n**要做**：\n1. 幫偵測器加一條 AST channel：pattern =「array 的某個 slice 被賦零，然後當作 restriction 參數傳給 fitting function」。\n2. 重掃 `experiments/**`。現有 193-site baseline 很可能是低估；K1731 修好後應該要出現在 baseline 裡。\n3. 新掃出來的站點逐一分類（真嵌套誤用 / 誤報），別直接大改 baseline 數字。\n\n**成功判準**：偵測器能在 K1731 上正確報出嵌套；重掃後的 baseline 差異有逐條說明。\n**注意**：這是共用偵測器 + 凍結的 repo-wide baseline，改動範圍在 main repo 不在 worktree。",
-    "status": "pending",
+    "status": "succeeded",
     "source": "system",
     "created_at": "2026-07-19T00:11:44.936640+00:00",
     "created_by": "hourly-slot-1-20e8d1681051470882a27cfb0a328847",
@@ -41500,7 +41500,30 @@
       "origin": "k1731_armB_rev6.followup_needed.F2",
       "topology": "subagent"
     },
-    "status_history": []
+    "status_history": [
+      {
+        "ts": "2026-07-19T06:58:40.039721+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-4-2fcc9fbc6b3b44bb89cc99e7d2e0037a"
+      },
+      {
+        "ts": "2026-07-19T06:58:40.365661+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-4-2fcc9fbc6b3b44bb89cc99e7d2e0037a"
+      },
+      {
+        "ts": "2026-07-19T07:05:23.263811+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-4-2fcc9fbc6b3b44bb89cc99e7d2e0037a"
+      }
+    ],
+    "started_at": "2026-07-19T06:58:40.365646+00:00",
+    "completed_at": "2026-07-19T07:05:23.263796+00:00",
+    "result": "Added coefficient-mask AST nesting channel with conjunction guard; 4 focused tests pass. Full scanner: 1872 files, 228 affected, 12 safe, 0 errors, no canonical baseline delta. Candidate K1730=review_required and K1731=primary_raw_dm; baseline additions documented to land atomically with their reviewed experiment merge.",
+    "burst_reported_at": "2026-07-19T07:05:23.270403+00:00"
   },
   {
     "id": "k1731_F3_armA_production_recheck",

@@ -76,6 +76,21 @@ BIBLIOGRAPHIC_NESTED_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Coefficient-mask nesting. A restricted model is sometimes built without any
+# base/augmented naming: the author zeroes a coefficient block and hands that
+# indicator to an estimator. The channel deliberately requires both halves so
+# ordinary zeroed arrays (sample weights, burn-in masks, padding) stay quiet.
+COEF_MASK_NAME_RE = re.compile(
+    r"active|mask|restrict|unrestrict|constrain|nest|"
+    r"switch_?off|zero_?out|coef_?flags?|include_?flags?|"
+    r"free_?(?:params?|coefs?|betas?)|fixed_?(?:params?|coefs?|betas?)",
+    re.IGNORECASE,
+)
+MASK_FIT_CALL_RE = re.compile(
+    r"fit|estimate|refit|train|calibrate|regress|ssvs|mle|glm|ols",
+    re.IGNORECASE,
+)
+
 RAW_DM_CALL_RE = re.compile(
     r"(?:^|_)(?:dm(?:_test(?:_func|_hac)?|_hln|_stat)?|hln_dm|"
     r"diebold_mariano(?:_test)?|mariano_test)(?:_|$)",
@@ -201,8 +216,63 @@ def _call_name(node: ast.Call) -> str:
     return ""
 
 
-def _nested_ast_evidence(tree: ast.AST, lines: list[str]) -> list[Evidence]:
+def _is_zero_like(node: ast.AST | None) -> bool:
+    if isinstance(node, ast.Constant):
+        value = node.value
+        return isinstance(value, (int, float, bool)) and value == 0
+    if isinstance(node, ast.Call):
+        return bool(
+            re.fullmatch(r"zeros(?:_like)?", _call_name(node), re.IGNORECASE)
+        )
+    return False
+
+
+def _coef_mask_ast_evidence(tree: ast.AST, lines: list[str]) -> list[Evidence]:
+    """Find a zeroed coefficient block that reaches an estimator restriction."""
+    zeroed: dict[str, int] = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+            continue
+        if not _is_zero_like(node.value):
+            continue
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        for target in targets:
+            if not isinstance(target, ast.Subscript):
+                continue
+            name = _root_name(target.value)
+            if name is not None:
+                zeroed.setdefault(name, node.lineno)
+    if not zeroed:
+        return []
+
     evidence: list[Evidence] = []
+
+    def record(name: str, call_lineno: int) -> None:
+        evidence.append(_line(lines, zeroed[name]))
+        evidence.append(_line(lines, call_lineno))
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call) or not MASK_FIT_CALL_RE.search(
+            _call_name(node)
+        ):
+            continue
+        for keyword in node.keywords:
+            name = _root_name(keyword.value)
+            if name not in zeroed:
+                continue
+            if (keyword.arg and COEF_MASK_NAME_RE.search(keyword.arg)) or (
+                COEF_MASK_NAME_RE.search(name)
+            ):
+                record(name, node.lineno)
+        for argument in node.args:
+            name = _root_name(argument)
+            if name in zeroed and COEF_MASK_NAME_RE.search(name):
+                record(name, node.lineno)
+    return evidence
+
+
+def _nested_ast_evidence(tree: ast.AST, lines: list[str]) -> list[Evidence]:
+    evidence: list[Evidence] = _coef_mask_ast_evidence(tree, lines)
     all_names = {node.id.lower() for node in ast.walk(tree) if isinstance(node, ast.Name)}
 
     # Paired identifiers are strong path-level evidence even if construction and
