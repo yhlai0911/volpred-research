@@ -1,0 +1,465 @@
+#!/usr/bin/env python3
+"""Mechanical gate: an experiment that lands finished results must land its artifacts too.
+
+THE BUG CLASS
+-------------
+On 2026-07-19 CI went red three dispatch hours in a row (k1732 missing a knowledge
+entry -> k1719 missing one -> a test writing canonical state). The first two were the
+same bug: an experiment merged into main whose *artifacts* -- the ``knowledge.json``
+entry and the ``reproduce_spec.json`` -- were never written. Each was patched one
+experiment at a time, by a human noticing a red build. Nothing stopped the next one.
+
+Clearing the stock is not the fix. This gate freezes the class: an experiment
+directory carrying archived ``*_results.json`` must, at the moment it is merged,
+already have
+
+  1. an entry in ``storage/memory/knowledge.json`` mentioning its K-id, and
+  2. a ``reproduce_spec.json`` that parses and points at files that exist.
+
+SCOPE, AND WHY IT IS DRAWN HERE
+-------------------------------
+Only directories with archived ``*_results.json`` are gated. This is the same scope
+``scripts/tests/test_knowledge_unrecorded_ratchet.py`` already uses, and it is the only
+defensible one: a directory with no results has no finding to record and no canonical
+output to pin, so demanding artifacts of it would force someone to invent them. The
+2026-07-19 repo-wide sweep found 108 result-less directories (paper-writing sessions,
+``.gitkeep`` placeholders, abandoned stubs) -- fabricating 108 knowledge entries to make
+a number go green would be exactly the failure this gate exists to prevent.
+
+The knowledge half is further scoped to directories carrying a K-id, because
+``knowledge.json`` is keyed by K-id: for ``paper2_taiwan_indiv_rolling_gamma`` the gate
+has no key to look up, so demanding an entry would be an instruction nobody can carry
+out — and unsatisfiable gates get bypassed, not obeyed. Those directories still owe a
+``reproduce_spec.json``; their finding's home is the paper, not the K-record.
+
+The gate fires on experiments being ADDED OR MODIFIED, not on the 1,265-experiment
+backlog. ``reproduce_spec.json`` only became a convention in 2026-07 (k1683, k1699,
+K1710, and k1719 backfilled here); retroactively synthesising ~1,260 specs would mean
+inventing entrypoints, input hashes and seeds for runs nobody can re-execute. Forward
+ratchet, documented exclusions, no invented history.
+
+CALLED FROM TWO PLACES, ON PURPOSE
+----------------------------------
+* ``scripts/merge_worktree.sh``   -- pre-merge gate (blocks the merge)
+* ``.github/workflows/experiment-artifacts.yml`` -- CI gate (blocks the push/PR)
+
+Both invoke THIS script. Do not reimplement the check in either caller: two copies of a
+rule drift, and the drift is always discovered by the incident the rule was meant to stop.
+
+STDLIB ONLY
+-----------
+``merge_worktree.sh`` runs gates with bare ``python3``, never ``uv run`` -- a gate that
+cannot start is a gate that abstains (see the comment at its certify call site). So the
+module-level imports here are stdlib only. Strict spec validation lives in
+``scripts/reproduce_check.py``; this script uses it when the richer environment makes it
+importable and falls back to a structural check when it does not. The fallback is
+weaker, never absent, and the mode is printed so nobody has to guess which ran.
+
+Run:
+    python3 scripts/check_experiment_artifacts.py check --path experiments/k1719
+    python3 scripts/check_experiment_artifacts.py check --changed-since main
+    uv run python scripts/check_experiment_artifacts.py sweep --out storage/ops/sweep.json
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+KNOWLEDGE_REL = Path("storage/memory/knowledge.json")
+SPEC_NAME = "reproduce_spec.json"
+SPEC_SCHEMA = "volpred.reproduce_spec.v1"
+EXCLUSIONS_REL = Path("config/experiment_artifact_exclusions.json")
+
+# Same shape reproduce_check.knowledge_recorded_ids scans for. Two entry shapes coexist
+# in knowledge.json (modern item_id/content, legacy title/experiment_id) and neither has
+# a dedicated K-id field, so the whole entry is serialised and scanned. A field whitelist
+# was tried once and silently skipped every legacy entry.
+K_IN_BLOB_RE = re.compile(r"[Kk]\d{3,}")
+K_DIR_RE = re.compile(r"^([Kk]\d+)")
+
+
+def k_id(dir_name: str) -> str | None:
+    """Leading K-number of an experiment dir (``k1538_bond_fund...`` -> ``k1538``)."""
+    match = K_DIR_RE.match(dir_name)
+    return match.group(1).casefold() if match else None
+
+
+def _canonical_root() -> Path:
+    """The main checkout, not a worktree's copy.
+
+    knowledge.json is canonical shared state that agents must not write (K1259), so at
+    merge time the authoritative copy is the one in the main checkout -- a worktree
+    branch's stale copy would let an experiment pass against a knowledge base that no
+    longer exists. Mirrors ``experiment_gates._canonical_registry_path``.
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "--git-common-dir"],
+            cwd=str(Path(__file__).resolve().parent),
+            capture_output=True, text=True, timeout=10, check=True,
+        )
+        common = Path(proc.stdout.strip())
+        if not common.is_absolute():
+            common = (Path(__file__).resolve().parent / common).resolve()
+        return common.parent
+    except (OSError, subprocess.SubprocessError):
+        return REPO_ROOT
+
+
+def load_knowledge_ids(root: Path | None = None) -> set[str] | None:
+    """K-ids mentioned anywhere in the knowledge base. ``None`` = unreadable."""
+    path = (root or _canonical_root()) / KNOWLEDGE_REL
+    try:
+        entries = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        print(f"[artifacts] WARN — knowledge base unreadable at {path}: "
+              f"{type(exc).__name__}: {exc}", file=sys.stderr)
+        return None
+    if not isinstance(entries, list):
+        print(f"[artifacts] WARN — knowledge base at {path} is "
+              f"{type(entries).__name__}, expected a list.", file=sys.stderr)
+        return None
+    recorded: set[str] = set()
+    for entry in entries:
+        blob = json.dumps(entry, ensure_ascii=False) if isinstance(entry, dict) else str(entry)
+        recorded.update(m.casefold() for m in K_IN_BLOB_RE.findall(blob))
+    return recorded
+
+
+def load_exclusions(root: Path | None = None) -> dict[str, str]:
+    """``{k_id: reason}`` for experiments legitimately exempt from this gate."""
+    path = (root or REPO_ROOT) / EXCLUSIONS_REL
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}  # silent-ok: no exclusions file means no exclusions, the normal case
+    except (OSError, ValueError) as exc:
+        # An empty dict here is indistinguishable from "nothing is excluded", so a
+        # corrupt file would silently re-gate every documented exemption.
+        print(f"[artifacts] WARN — exclusions unreadable at {path}, proceeding with "
+              f"NO exclusions: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return {}
+    out: dict[str, str] = {}
+    for item in raw.get("exclusions", []):
+        if isinstance(item, dict) and isinstance(item.get("experiment"), str):
+            out[item["experiment"].casefold()] = str(item.get("reason", "")).strip()
+    return out
+
+
+def result_files(exp_dir: Path) -> list[Path]:
+    return sorted(exp_dir.glob("*_results.json"))
+
+
+def _spec_violation(exp_dir: Path) -> tuple[str | None, str]:
+    """``(violation_or_None, mode)`` for the reproduce_spec check."""
+    path = exp_dir / SPEC_NAME
+    if not path.is_file():
+        return f"missing {SPEC_NAME}", "existence"
+
+    # Strict path: reuse reproduce_check.load_spec so the gate and the reproducibility
+    # audit can never disagree about what a valid spec is.
+    try:
+        sys.path.insert(0, str(REPO_ROOT / "scripts"))
+        import reproduce_check  # type: ignore
+    except Exception:  # noqa: BLE001 - stdlib-only merge context; fall back, never abstain
+        reproduce_check = None  # type: ignore
+
+    if reproduce_check is not None:
+        spec, err = reproduce_check.load_spec(exp_dir)
+        if not spec:
+            return f"{SPEC_NAME} is invalid: {err}", "strict"
+        return None, "strict"
+
+    # Fallback: structural check only. Weaker than load_spec (no seed/tolerance/input
+    # -hash validation), but it still catches the empty, truncated and mislabelled files
+    # that are the common real failure.
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return f"{SPEC_NAME} does not parse: {exc}", "structural"
+    if not isinstance(raw, dict) or raw.get("schema_version") != SPEC_SCHEMA:
+        return f"{SPEC_NAME} schema_version must equal {SPEC_SCHEMA!r}", "structural"
+    entry = raw.get("entrypoint")
+    if not isinstance(entry, dict) or not isinstance(entry.get("path"), str):
+        return f"{SPEC_NAME} needs an entrypoint.path", "structural"
+    if not (exp_dir / entry["path"]).is_file():
+        return f"{SPEC_NAME} entrypoint.path does not exist: {entry['path']}", "structural"
+    canonical = raw.get("canonical_result")
+    if not isinstance(canonical, str) or not (exp_dir / canonical).is_file():
+        return f"{SPEC_NAME} canonical_result does not exist: {canonical!r}", "structural"
+    return None, "structural"
+
+
+def audit_experiment(
+    exp_dir: Path,
+    knowledge_ids: set[str] | None,
+    exclusions: dict[str, str],
+) -> dict[str, Any]:
+    """Audit one experiment directory. ``violations == []`` means it may be merged."""
+    name = exp_dir.name
+    kid = k_id(name)
+    record: dict[str, Any] = {
+        "experiment_id": name,
+        "path": f"experiments/{name}",
+        "k_id": kid,
+        "results_count": len(result_files(exp_dir)),
+        "has_knowledge_entry": None,
+        "has_reproduce_spec": (exp_dir / SPEC_NAME).is_file(),
+        "gated": False,
+        "excluded": False,
+        "exclusion_reason": None,
+        "violations": [],
+        "spec_check_mode": None,
+    }
+
+    if kid and kid in exclusions:
+        record["excluded"] = True
+        record["exclusion_reason"] = exclusions[kid]
+        return record
+    if name.casefold() in exclusions:
+        record["excluded"] = True
+        record["exclusion_reason"] = exclusions[name.casefold()]
+        return record
+
+    # Scope: no archived results -> nothing to record, nothing to pin. See module docstring.
+    if record["results_count"] == 0:
+        return record
+    record["gated"] = True
+
+    if kid is None:
+        # knowledge.json is keyed by K-id and this directory has none (paper-support
+        # runs such as ``paper2_taiwan_indiv_rolling_gamma``). Demanding "an entry
+        # mentioning paper2_..." would be unsatisfiable — the lookup the gate performs
+        # could never match it — and an unsatisfiable gate gets bypassed, not obeyed.
+        # The reproduce_spec requirement below still applies: the run has real output
+        # to pin. ``sweep`` draws the same K-id scope, so the two agree.
+        record["has_knowledge_entry"] = None
+    elif knowledge_ids is None:
+        # Unreadable knowledge base is itself a blocking condition: a gate that cannot
+        # read its evidence must not wave the merge through.
+        record["violations"].append(
+            f"{KNOWLEDGE_REL} is unreadable — cannot verify the knowledge entry"
+        )
+    else:
+        recorded = kid in knowledge_ids
+        record["has_knowledge_entry"] = recorded
+        if not recorded:
+            record["violations"].append(
+                f"no entry in {KNOWLEDGE_REL} mentions {kid or name} — the finding is "
+                "invisible to topic dedup and article selection"
+            )
+
+    spec_violation, mode = _spec_violation(exp_dir)
+    record["spec_check_mode"] = mode
+    if spec_violation:
+        record["violations"].append(spec_violation)
+
+    return record
+
+
+def _remedy(record: dict[str, Any]) -> list[str]:
+    """Copy-pasteable remediation. A gate that only says 'no' costs the next shift an hour."""
+    name = record["experiment_id"]
+    lines: list[str] = []
+    joined = " ".join(record["violations"])
+    if "knowledge.json" in joined:
+        lines += [
+            f"  # 1. Write the knowledge entry for {name} — MAIN THREAD ONLY (K1259: agents",
+            "  #    must not write knowledge.json). Take every number PROGRAMMATICALLY from",
+            f"  #    experiments/{name}/*_results.json — never retype from a README or an",
+            "  #    agent's summary (that is how fabricated findings enter the record).",
+            f"  uv run python -c \"import json,pathlib; "
+            f"print(json.dumps(json.loads(pathlib.Path('experiments/{name}')"
+            f".glob('*_results.json').__next__().read_text()), indent=2, ensure_ascii=False))\"",
+            f"  #    then append the entry via the memory writer (m.add_knowledge / "
+            "src/volpred/memory/system.py), which stamps provenance.",
+        ]
+    if SPEC_NAME in joined:
+        lines += [
+            f"  # 2. Write experiments/{name}/{SPEC_NAME} (schema {SPEC_SCHEMA}).",
+            f"  #    Copy the shape from experiments/k1719/{SPEC_NAME}; hash every input",
+            "  #    with sha256 and declare the seeds the script actually sets.",
+            f"  uv run python scripts/reproduce_check.py inventory  # confirms {name} -> runnable",
+        ]
+    lines += [
+        "  # 3. If this experiment is genuinely exempt (archived legacy work, no",
+        "  #    reproducible output), add it WITH A REASON to:",
+        f"  #    {EXCLUSIONS_REL}",
+    ]
+    return lines
+
+
+def cmd_check(args: argparse.Namespace) -> int:
+    targets: list[Path] = []
+    if args.path:
+        for raw in args.path:
+            p = Path(raw)
+            targets.append(p if p.is_absolute() else REPO_ROOT / p)
+    if args.changed_since:
+        try:
+            proc = subprocess.run(
+                ["git", "diff", "--name-only", f"{args.changed_since}...HEAD", "--", "experiments/"],
+                cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=60, check=True,
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            print(f"[artifacts] error: git diff failed: {exc}", file=sys.stderr)
+            return 2
+        names = sorted({
+            line.split("/")[1] for line in proc.stdout.splitlines()
+            if line.startswith("experiments/") and len(line.split("/")) >= 2
+        })
+        targets += [REPO_ROOT / "experiments" / n for n in names]
+
+    targets = [t for t in dict.fromkeys(targets) if t.is_dir()]
+    if not targets:
+        print("[artifacts] PASS — no experiment directory added or modified.")
+        return 0
+
+    knowledge_ids = load_knowledge_ids()
+    exclusions = load_exclusions()
+    records = [audit_experiment(t, knowledge_ids, exclusions) for t in targets]
+    failed = [r for r in records if r["violations"]]
+
+    for r in records:
+        if r["excluded"]:
+            print(f"[artifacts] SKIP — {r['path']} (excluded: {r['exclusion_reason']})")
+        elif not r["gated"]:
+            print(f"[artifacts] SKIP — {r['path']} (no archived *_results.json to record)")
+        elif not r["violations"]:
+            # Say which halves actually ran. A dir with no K-id was never checked
+            # against knowledge.json, and a PASS that implies otherwise is the kind
+            # of quiet overclaim that makes people trust a gate past its scope.
+            knowledge = "knowledge entry" if r["k_id"] else "no K-id (knowledge check n/a)"
+            print(f"[artifacts] PASS — {r['path']} ({knowledge} + {SPEC_NAME}, "
+                  f"spec check: {r['spec_check_mode']})")
+
+    if not failed:
+        return 0
+
+    print("", file=sys.stderr)
+    print("[artifacts] BLOCKED — experiment(s) merged without their artifacts:", file=sys.stderr)
+    for r in failed:
+        print(f"\n  {r['path']}", file=sys.stderr)
+        for v in r["violations"]:
+            print(f"    - {v}", file=sys.stderr)
+    print("\n[artifacts] WHY: 2026-07-19 turned CI red three dispatch hours in a row "
+          "(k1732, k1719) because\n"
+          "  experiments reached main while their knowledge entry / reproduce_spec did not. "
+          "Writing the\n  artifact now, while the author is still here, is cheaper than the "
+          "archaeology later.\n", file=sys.stderr)
+    print("[artifacts] FIX — run these:", file=sys.stderr)
+    for r in failed:
+        print(f"\n  ## {r['experiment_id']}", file=sys.stderr)
+        for line in _remedy(r):
+            print(line, file=sys.stderr)
+    return 1
+
+
+def cmd_sweep(args: argparse.Namespace) -> int:
+    exp_root = REPO_ROOT / "experiments"
+    dirs = sorted(
+        p for p in exp_root.iterdir()
+        if p.is_dir() and K_DIR_RE.match(p.name)
+    )
+    knowledge_ids = load_knowledge_ids()
+    exclusions = load_exclusions()
+    records = [audit_experiment(p, knowledge_ids, exclusions) for p in dirs]
+
+    gated = [r for r in records if r["gated"]]
+    missing = [r for r in gated if r["violations"]]
+    report = {
+        "schema_version": "volpred.experiment_artifact_sweep.v1",
+        "generated_at": args.generated_at,
+        "scope": {
+            "experiment_root": "experiments/",
+            "gated_rule": "directories with at least one archived *_results.json",
+            "rationale": (
+                "A directory with no archived results has no finding to record and no "
+                "canonical output to pin. Demanding artifacts of it would force someone "
+                "to invent them, which is the failure this gate exists to prevent."
+            ),
+        },
+        "counts": {
+            "experiment_dirs": len(records),
+            "gated": len(gated),
+            "not_gated_no_results": sum(
+                1 for r in records if not r["gated"] and not r["excluded"]
+            ),
+            "excluded": sum(1 for r in records if r["excluded"]),
+            "missing_knowledge_only": sum(
+                1 for r in missing
+                if any("knowledge.json" in v for v in r["violations"])
+                and not any(SPEC_NAME in v for v in r["violations"])
+            ),
+            "missing_spec_only": sum(
+                1 for r in missing
+                if any(SPEC_NAME in v for v in r["violations"])
+                and not any("knowledge.json" in v for v in r["violations"])
+            ),
+            "missing_both": sum(
+                1 for r in missing
+                if any("knowledge.json" in v for v in r["violations"])
+                and any(SPEC_NAME in v for v in r["violations"])
+            ),
+        },
+        "knowledge_base_readable": knowledge_ids is not None,
+        "missing": missing,
+        "not_gated_no_results": [
+            {
+                "experiment_id": r["experiment_id"],
+                "path": r["path"],
+                "reason": "no archived *_results.json — nothing to record or pin",
+            }
+            for r in records if not r["gated"] and not r["excluded"]
+        ],
+        "excluded": [
+            {
+                "experiment_id": r["experiment_id"],
+                "path": r["path"],
+                "reason": r["exclusion_reason"],
+            }
+            for r in records if r["excluded"]
+        ],
+    }
+    out = Path(args.out)
+    if not out.is_absolute():
+        out = REPO_ROOT / out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    c = report["counts"]
+    print(f"[sweep] {c['experiment_dirs']} experiment dirs; {c['gated']} gated; "
+          f"{len(missing)} with missing artifacts "
+          f"(knowledge-only {c['missing_knowledge_only']}, spec-only {c['missing_spec_only']}, "
+          f"both {c['missing_both']}); {c['not_gated_no_results']} not gated (no results); "
+          f"{c['excluded']} excluded")
+    print(f"[sweep] wrote {out}")
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    chk = sub.add_parser("check", help="Gate one or more experiment directories.")
+    chk.add_argument("--path", action="append", help="experiments/<kid> (repeatable)")
+    chk.add_argument("--changed-since", help="gate every experiment touched since this ref")
+    chk.set_defaults(func=cmd_check)
+
+    swp = sub.add_parser("sweep", help="Repo-wide artifact-completeness report.")
+    swp.add_argument("--out", required=True, help="write the JSON report here")
+    swp.add_argument("--generated-at", default="", help="timestamp to stamp into the report")
+    swp.set_defaults(func=cmd_sweep)
+
+    args = parser.parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
