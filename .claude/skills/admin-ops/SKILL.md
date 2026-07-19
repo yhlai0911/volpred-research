@@ -62,6 +62,7 @@ Use this skill when the task involves any of the following:
 - admin user/role management
 - ops jobs, audits, refresh, cache, or site health
 - reading platform analytics to guide future actions
+  - **讀者偏好迴圈**：`storage/analytics/reader_preferences.json`（週一 06:45 更新，附 report.md）；只採樣本合格 bucket 的結論，樣本不足不得當依據
 
 ## Do Not Use This Skill When
 

@@ -14,6 +14,8 @@ user-invocable: true
 
 # Publication Candidates — 雙軌選題機制
 
+**讀者偏好迴圈**：選題前先查 `storage/analytics/reader_preferences.json`（週一 06:45 更新，附同目錄 report.md）— 只採樣本合格 bucket 的結論，樣本不足不得當選題依據。
+
 ## Scope
 
 Use this skill for：

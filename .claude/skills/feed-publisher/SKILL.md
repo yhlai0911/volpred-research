@@ -60,6 +60,7 @@ Do **not** use this skill for：
 ## 選題來源（寫之前先查）
 
 **主題不是憑記憶挑——用 `publication-candidates` skill 系統化選。**
+**讀者偏好迴圈**：選題與圖文表配置先查 `storage/analytics/reader_preferences.json`（週一 06:45 更新）的合格結論；樣本不足 bucket 不得當依據。
 
 1. **研究驅動**：`uv run volpred ops publication-candidates-summary`
 2. **事件驅動**：WebSearch 近期 CPI/NFP/FOMC/TSMC/earnings season；`grep '財報公告日.txt'`；讀 `next_tasks.json` 事件任務
