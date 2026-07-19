@@ -73,6 +73,7 @@ import pandas as pd
 from scipy.optimize import minimize
 from scipy.stats import norm, t as t_dist
 from scipy.special import logsumexp
+from volpred.ops.diagnostics import warn
 import matplotlib
 
 matplotlib.use("Agg")
@@ -293,7 +294,8 @@ def fit_gjr_t(returns):
                            options={"maxiter": 300})
             if res.fun < best_nll:
                 best_nll, best = res.fun, res
-        except Exception:
+        except Exception as exc:
+            warn("k1258", "GJR-t multistart failed", start_df=df0, err=exc)
             continue
     if best is None:
         return {"params": np.array([var0 * 0.05, 0.05, 0.05, 0.90, 8.0]),
@@ -328,7 +330,8 @@ def fit_egarch_n(returns):
                            options={"maxiter": 300})
             if res.fun < best_nll:
                 best_nll, best = res.fun, res
-        except Exception:
+        except Exception as exc:
+            warn("k1258", "EGARCH multistart failed", start_omega=omega0, err=exc)
             continue
     if best is None:
         return {"params": np.array([-0.1, 0.1, -0.08, 0.95]),
@@ -380,7 +383,8 @@ def fit_a4f(returns, iv2):
                            options={"maxiter": 300})
             if res.fun < best_nll:
                 best_nll, best = res.fun, res
-        except Exception:
+        except Exception as exc:
+            warn("k1258", "A4f multistart failed", start_theta1=th1, err=exc)
             continue
     if best is None:
         return {"params": np.array([1e-5, 0.5, 0.05, 0.04, 0.06, 0.90]),
@@ -404,14 +408,31 @@ def log_pred_density(y, h, dist, df=None):
 # forecasts + log-likelihoods to a parquet cache so lambda sweep is O(T) not
 # O(T * 6 * 5 fits).
 # ---------------------------------------------------------------------------
+def _drop_unusable_fits(state, diagnostics, state_to_model):
+    """Count every refit result and remove failed optimizers from state."""
+    for state_key, model in state_to_model.items():
+        diagnostics[model]["fit_attempts"] += 1
+        fitted = state.get(state_key)
+        if fitted is None:
+            diagnostics[model]["fit_exceptions"] += 1
+        elif not bool(fitted.get("converged", False)):
+            diagnostics[model]["nonconverged_fits"] += 1
+            state[state_key] = None
+
+
 def build_forecasts(asset: str, df: pd.DataFrame) -> pd.DataFrame:
     cache_path = CACHE_DIR / f"forecasts_{asset.replace('.', '_')}.parquet"
     if cache_path.exists():
         try:
             cached = pd.read_parquet(cache_path)
-            print(f"  [cache] loaded {cache_path.name} rows={len(cached)}",
+            if (cached.attrs.get("posterior_semantics_version") == 2
+                    and isinstance(cached.attrs.get("forecast_diagnostics"), dict)):
+                print(f"  [cache] loaded {cache_path.name} rows={len(cached)}",
+                      flush=True)
+                cached.attrs["cache_reused"] = True
+                return cached
+            print(f"  [cache] stale schema in {cache_path.name}; rebuilding",
                   flush=True)
-            return cached
         except Exception as e:
             print(f"  [cache] failed to load ({e}); rebuilding")
 
@@ -430,6 +451,20 @@ def build_forecasts(asset: str, df: pd.DataFrame) -> pd.DataFrame:
     forecasts = {m: np.full(T, np.nan) for m in MODEL_NAMES}
     log_preds = {m: np.full(T, np.nan) for m in MODEL_NAMES}
     state = {"last_fit": -1}
+    state_to_model = {
+        "garch_n": "GARCH_N", "gjr_n": "GJR_N", "gjr_t": "GJR_t",
+        "egarch_n": "EGARCH_N", "har": "HAR_ABS", "a4f": "A4f_IV2",
+    }
+    diagnostics = {
+        model: {
+            "fit_attempts": 0,
+            "fit_exceptions": 0,
+            "nonconverged_fits": 0,
+            "invalid_forecast_days": 0,
+            "dropped_model_days": 0,
+        }
+        for model in MODEL_NAMES
+    }
     C_GAMMA_NORMAL = math.sqrt(2.0 / math.pi)
 
     for t in range(oos_start_idx, T):
@@ -468,6 +503,7 @@ def build_forecasts(asset: str, df: pd.DataFrame) -> pd.DataFrame:
                 state["a4f"] = fit_a4f(tr, tv)
             except Exception:
                 state["a4f"] = None
+            _drop_unusable_fits(state, diagnostics, state_to_model)
             state["last_fit"] = t
             if state.get("garch_n") is not None:
                 state["h_garch_n"] = state["garch_n"]["h"][-1]
@@ -531,6 +567,12 @@ def build_forecasts(asset: str, df: pd.DataFrame) -> pd.DataFrame:
             forecasts["A4f_IV2"][t] = h_t
             state["g_a4f"] = g_t
 
+        for model in MODEL_NAMES:
+            h_pred = forecasts[model][t]
+            if not np.isfinite(h_pred) or h_pred <= 0:
+                diagnostics[model]["invalid_forecast_days"] += 1
+                diagnostics[model]["dropped_model_days"] += 1
+
         # --- log predictive density p(y_t | M_i, F_{t-1}) ---
         y_t = returns[t]
         for m in MODEL_NAMES:
@@ -552,6 +594,9 @@ def build_forecasts(asset: str, df: pd.DataFrame) -> pd.DataFrame:
     for m in MODEL_NAMES:
         out[f"sigma2_{m}"] = forecasts[m]
         out[f"loglik_{m}"] = log_preds[m]
+    out.attrs["posterior_semantics_version"] = 2
+    out.attrs["forecast_diagnostics"] = diagnostics
+    out.attrs["cache_reused"] = False
 
     try:
         out.to_parquet(cache_path, engine="pyarrow")
@@ -578,12 +623,16 @@ def ffbma_posterior(log_lik_matrix: np.ndarray, lambda_: float,
     weight_hist = np.full((T, M), np.nan)
 
     for t in range(T):
-        # Record posterior BEFORE update (this is the posterior used to form
-        # the BMA forecast for day t — matches K1257 convention)
         ll_row = log_lik_matrix[t]
-        any_valid = np.any(np.isfinite(ll_row))
+        valid = np.isfinite(ll_row)
+        any_valid = np.any(valid)
         if any_valid:
-            weight_hist[t] = np.exp(log_w - logsumexp(log_w))
+            valid_prior = log_w[valid]
+            if not np.any(np.isfinite(valid_prior)):
+                valid_prior = np.full(valid.sum(), -np.log(valid.sum()))
+            weight_hist[t, valid] = np.exp(
+                valid_prior - logsumexp(valid_prior))
+            weight_hist[t, ~valid] = 0.0
 
         # Forgetting decay, then update with current log-likelihoods
         log_w = lambda_ * log_w
@@ -591,11 +640,12 @@ def ffbma_posterior(log_lik_matrix: np.ndarray, lambda_: float,
         log_w = np.maximum(log_w, log_floor)
 
         if any_valid:
-            # Only add likelihood for models with valid forecasts this day;
-            # models missing today keep their decayed weight unchanged.
-            valid = np.isfinite(ll_row)
-            log_w[valid] = log_w[valid] + ll_row[valid]
-            log_w = log_w - logsumexp(log_w)
+            next_log_w = np.full(M, -np.inf)
+            next_log_w[valid] = log_w[valid] + ll_row[valid]
+            finite_next = np.isfinite(next_log_w)
+            if finite_next.any():
+                next_log_w[finite_next] -= logsumexp(next_log_w[finite_next])
+                log_w = next_log_w
 
     return weight_hist
 
@@ -759,7 +809,7 @@ def evaluate_lambda(fc: pd.DataFrame, lambda_: float) -> Dict:
 # ---------------------------------------------------------------------------
 # Run one asset (5 lambdas)
 # ---------------------------------------------------------------------------
-def run_asset(asset: str) -> Dict:
+def run_asset(asset: str) -> Tuple[Dict, Dict, bool]:
     iv_ticker = IV_PROXY[asset]
     print(f"\n[Asset: {asset}] loading data...", flush=True)
     df = load_asset(asset, iv_ticker, DATA_START, DATA_END)
@@ -798,7 +848,9 @@ def run_asset(asset: str) -> Dict:
               f"Harvey t={r['harvey_dm_vs_lambda1']:+.2f} "
               f"pass={r['harvey_pass_vs_lambda1']}")
 
-    return {str(lam): per_lambda[lam] for lam in LAMBDAS}
+    return ({str(lam): per_lambda[lam] for lam in LAMBDAS},
+            fc.attrs["forecast_diagnostics"],
+            bool(fc.attrs.get("cache_reused", False)))
 
 
 # ---------------------------------------------------------------------------
@@ -912,9 +964,12 @@ def verdict_h4(per_asset: Dict, h1: Dict, h3: Dict) -> Dict:
 # ---------------------------------------------------------------------------
 def main():
     per_asset: Dict[str, Dict] = {}
+    forecast_diagnostics: Dict[str, Dict] = {}
+    cache_reuse_flags: Dict[str, bool] = {}
     for asset in ASSETS:
         try:
-            per_asset[asset] = run_asset(asset)
+            (per_asset[asset], forecast_diagnostics[asset],
+             cache_reuse_flags[asset]) = run_asset(asset)
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -933,9 +988,7 @@ def main():
     runtime = time.time() - START_TIME
 
     # Detect whether any forecast parquet was reused
-    cache_reuse = any(
-        (CACHE_DIR / f"forecasts_{a.replace('.', '_')}.parquet").exists()
-        for a in ASSETS)
+    cache_reuse = any(cache_reuse_flags.values())
 
     out = {
         "experiment_id": EXPERIMENT_ID,
@@ -952,9 +1005,11 @@ def main():
         "lambdas": LAMBDAS,
         "assets": ASSETS,
         "results": per_asset,
+        "forecast_diagnostics": forecast_diagnostics,
         "hypotheses": {"H1": h1, "H2": h2, "H3": h3, "H4": h4},
         "provenance": {
             "k1257_forecast_cache_reuse": cache_reuse,
+            "cache_reuse_by_asset": cache_reuse_flags,
             "cache_paths": [str((CACHE_DIR / f"forecasts_{a.replace('.', '_')}.parquet").name)
                             for a in ASSETS],
             "runtime_min": round(runtime / 60, 2),

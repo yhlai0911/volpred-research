@@ -47,6 +47,7 @@ from scipy import stats
 from scipy.optimize import minimize
 from scipy.stats import norm, t as t_dist
 from scipy.special import logsumexp
+from volpred.ops.diagnostics import warn
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -272,7 +273,8 @@ def fit_gjr_t(returns):
             if res.fun < best_nll:
                 best_nll = res.fun
                 best = res
-        except Exception:
+        except Exception as exc:
+            warn("k1257", "GJR-t multistart failed", start_df=df0, err=exc)
             continue
     if best is None:
         return {"params": np.array([var0 * 0.05, 0.05, 0.05, 0.90, 8.0]),
@@ -309,7 +311,8 @@ def fit_egarch_n(returns):
             if res.fun < best_nll:
                 best_nll = res.fun
                 best = res
-        except Exception:
+        except Exception as exc:
+            warn("k1257", "EGARCH multistart failed", start_omega=omega0, err=exc)
             continue
     if best is None:
         return {"params": np.array([-0.1, 0.1, -0.08, 0.95]),
@@ -364,7 +367,8 @@ def fit_a4f(returns, iv2):
             if res.fun < best_nll:
                 best_nll = res.fun
                 best = res
-        except Exception:
+        except Exception as exc:
+            warn("k1257", "A4f multistart failed", start_theta1=th1, err=exc)
             continue
     if best is None:
         return {"params": np.array([1e-5, 0.5, 0.05, 0.04, 0.06, 0.90]),
@@ -391,6 +395,18 @@ def log_pred_density(y, h, dist, df=None):
 # -----------------------------------------------------------------
 # OOS forecasting engine per asset
 # -----------------------------------------------------------------
+def _drop_unusable_fits(state, diagnostics, state_to_model):
+    """Count every refit result and remove failed optimizers from state."""
+    for state_key, model in state_to_model.items():
+        diagnostics[model]["fit_attempts"] += 1
+        fitted = state.get(state_key)
+        if fitted is None:
+            diagnostics[model]["fit_exceptions"] += 1
+        elif not bool(fitted.get("converged", False)):
+            diagnostics[model]["nonconverged_fits"] += 1
+            state[state_key] = None
+
+
 def run_asset(asset, df):
     print(f"\n[Asset: {asset}] N={len(df)}, span={df.index[0].date()} -> "
           f"{df.index[-1].date()}", flush=True)
@@ -416,6 +432,20 @@ def run_asset(asset, df):
     weight_history = np.full((T, len(MODEL_NAMES)), np.nan)
 
     state = {"last_fit": -1}
+    state_to_model = {
+        "garch_n": "GARCH_N", "gjr_n": "GJR_N", "gjr_t": "GJR_t",
+        "egarch_n": "EGARCH_N", "har": "HAR_ABS", "a4f": "A4f_IV2",
+    }
+    diagnostics = {
+        model: {
+            "fit_attempts": 0,
+            "fit_exceptions": 0,
+            "nonconverged_fits": 0,
+            "invalid_forecast_days": 0,
+            "dropped_model_days": 0,
+        }
+        for model in MODEL_NAMES
+    }
 
     C_GAMMA_NORMAL = math.sqrt(2.0 / math.pi)
 
@@ -461,6 +491,12 @@ def run_asset(asset, df):
             except Exception as e:
                 print(f"    fit_a4f FAIL: {e}")
                 state["a4f"] = None
+
+            # A returned optimizer result is not usable merely because the
+            # fit function did not raise.  Keep failures out of both the
+            # forecast and posterior paths, and make every exclusion
+            # auditable in the result artifact.
+            _drop_unusable_fits(state, diagnostics, state_to_model)
 
             state["last_fit"] = t
             # init recursive h_prev from last in-sample value
@@ -535,21 +571,27 @@ def run_asset(asset, df):
             forecasts["A4f_IV2"][t] = h_t
             state["g_a4f"] = g_t
 
-        # --- record weights BEFORE computing BMA forecast (posterior pre-t) ---
-        weight_history[t, :] = np.exp(log_weights)
-
         # --- BMA forecast = sum_i w_i * h_i (weight-sum variance) ---
         h_vec = np.array([forecasts[m][t] for m in MODEL_NAMES])
         valid = np.isfinite(h_vec) & (h_vec > 0)
+        for mi, model in enumerate(MODEL_NAMES):
+            if not valid[mi]:
+                diagnostics[model]["invalid_forecast_days"] += 1
+                diagnostics[model]["dropped_model_days"] += 1
         if valid.any():
-            # normalize weights over valid models
-            w_valid = np.exp(log_weights[valid] - logsumexp(log_weights[valid]))
+            valid_log_weights = log_weights[valid]
+            if not np.any(np.isfinite(valid_log_weights)):
+                valid_log_weights = np.full(valid.sum(), -np.log(valid.sum()))
+            w_valid = np.exp(valid_log_weights - logsumexp(valid_log_weights))
+            weight_history[t, valid] = w_valid
+            weight_history[t, ~valid] = 0.0
             bma_forecasts[t] = float(np.sum(w_valid * h_vec[valid]))
             eq_forecasts[t] = float(np.mean(h_vec[valid]))
         # else NaN
 
         # --- update log posterior using predictive density of y_t given F_{t-1} ---
         y_t = returns[t]
+        next_log_weights = np.full(len(MODEL_NAMES), -np.inf)
         for mi, m in enumerate(MODEL_NAMES):
             h_pred = forecasts[m][t]
             if not np.isfinite(h_pred) or h_pred <= 0:
@@ -561,11 +603,12 @@ def run_asset(asset, df):
             else:
                 lp = log_pred_density(y_t, h_pred, "normal")
             log_preds[m][t] = lp
-            # posterior update: log w_new = log w_old + log p(y_t | M_i)
-            log_weights[mi] = log_weights[mi] + lp
+            next_log_weights[mi] = log_weights[mi] + lp
 
-        # normalize via log-sum-exp
-        log_weights = log_weights - logsumexp(log_weights)
+        finite_next = np.isfinite(next_log_weights)
+        if finite_next.any():
+            next_log_weights[finite_next] -= logsumexp(next_log_weights[finite_next])
+            log_weights = next_log_weights
 
     # final state
     print(f"  final weights: " + ", ".join(
@@ -678,6 +721,7 @@ def run_asset(asset, df):
         "regime_qlike": regime_qlike,
         "final_weights": {m: float(np.exp(log_weights[i]))
                           for i, m in enumerate(MODEL_NAMES)},
+        "forecast_diagnostics": diagnostics,
     }
 
     # Keep arrays for charting
