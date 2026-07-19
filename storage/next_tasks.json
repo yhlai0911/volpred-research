@@ -32973,13 +32973,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T07:01:19.445032+00:00",
+    "completed_at": "2026-07-19T08:01:05.018133+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T07:01:19.445032+00:00",
-      "last_clean_observed_at": "2026-07-19T07:01:19.445032+00:00"
+      "resolved_at": "2026-07-19T08:01:05.018133+00:00",
+      "last_clean_observed_at": "2026-07-19T08:01:05.018133+00:00"
     }
   },
   {
@@ -32991,13 +32991,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T07:09:45.405645+00:00",
+    "completed_at": "2026-07-19T08:17:51.458434+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T07:09:45.405645+00:00",
-      "last_clean_observed_at": "2026-07-19T07:09:45.405645+00:00"
+      "resolved_at": "2026-07-19T08:17:51.458434+00:00",
+      "last_clean_observed_at": "2026-07-19T08:17:51.458434+00:00"
     }
   },
   {
@@ -35287,62 +35287,15 @@
   },
   {
     "id": "daily_digest_20260716",
-    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
-    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
-    "task_type": "daily_digest",
-    "priority": 1,
     "status": "succeeded",
-    "dispatch_lane": "agent",
-    "created_at": "2026-07-16T09:00:01.203122+08:00",
+    "task_type": "daily_digest",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "priority": 1,
     "source": "scheduled",
-    "tags": [
-      "daily_digest",
-      "reader_facing",
-      "精選導讀"
-    ],
-    "status_history": [
-      {
-        "ts": "2026-07-16T06:45:05.726257+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "main-session-interactive"
-      },
-      {
-        "ts": "2026-07-16T06:45:27.068771+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "main-session-interactive"
-      },
-      {
-        "ts": "2026-07-16T07:08:19.841651+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "main-session-interactive",
-        "note": "manual_release"
-      },
-      {
-        "ts": "2026-07-16T07:08:20.107792+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-desktop-recovery-digest"
-      },
-      {
-        "ts": "2026-07-16T07:08:20.375936+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-desktop-recovery-digest"
-      },
-      {
-        "ts": "2026-07-16T07:52:30.779385+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-desktop-recovery-digest"
-      }
-    ],
-    "started_at": "2026-07-16T07:08:20.375919+00:00",
-    "last_released_at": "2026-07-16T07:08:19.841636+00:00",
+    "created_at": "2026-07-16T09:00:01.203122+08:00",
     "completed_at": "2026-07-16T07:52:30.779370+00:00",
-    "result": "Published mile_9f5151dc: VIX/OVX fear half-life daily digest with 7 archive sources, 2 evidence charts, and 3 data-bound lazypack panels. Anti-AI and cross-model gates passed; feed sync failed=0, both public routes returned 200, commit be34b1966."
+    "tombstone": true,
+    "archived_at": "2026-07-19T08:01:00.658990+00:00"
   },
   {
     "id": "ci-red-29460210634",
@@ -35394,40 +35347,15 @@
   },
   {
     "id": "alert_strategy_metrics_freshness_20260716",
-    "title": "[alert] 策略 metrics 過期（strategy_metrics.json 停止更新）",
-    "description": "由 alert `strategy_metrics_freshness` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\nstrategy_metrics.json mtime 落後於最近一次「排定」的 daily_update 刷新（schedule-aware，\n非固定 26h；週日不誤報，因前次排定 fire 是週六）。\n- 檔案: storage/strategy_metrics.json\n- exists: True\n- age_hours: 21.71\n- 排程: daily_update cron 3 8 * * 1-6 (Asia/Taipei)\n- 最近排定刷新(UTC): 2026-07-16T00:03:00+00:00\n\n## 影響\n此檔由 daily_update job 重寫；mtime 落後於排定刷新代表該 job 停擺，\n線上策略卡 metrics 與排序會用到過期數據（違反 Mission 第 4 條：策略表現公正）。\n\n## 建議行動\n1. 查刷新 job log：tail -20 storage/logs/cron/daily_update.log。\n2. 確認排程是否該跑：uv run volpred ops schedule-due daily_update。\n3. 若確為 miss，手動補：VOLPRED_ALLOW_OFFSCHEDULE_DAILY_UPDATE=1 ~/.volpred/bin/cron_daily_update.sh。\n4. 確認 cron schedule 仍 active：config/runtime_schedules.json。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
-    "created_at": "2026-07-16T04:00:55.533190+00:00",
+    "task_type": "platform_ops",
+    "title": "[alert] 策略 metrics 過期（strategy_metrics.json 停止更新）",
+    "priority": 2,
     "source": "alert_remediation_bridge",
-    "tags": [
-      "alert",
-      "strategy_metrics_freshness"
-    ],
-    "status_history": [
-      {
-        "ts": "2026-07-16T07:04:10.820805+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "codex-failover-slot-1-da6dbdc69757420cb1601e46c154eac5"
-      },
-      {
-        "ts": "2026-07-16T07:04:19.474071+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "codex-failover-slot-1-da6dbdc69757420cb1601e46c154eac5"
-      },
-      {
-        "ts": "2026-07-16T07:15:54.962781+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "codex-failover-slot-1-da6dbdc69757420cb1601e46c154eac5"
-      }
-    ],
-    "started_at": "2026-07-16T07:04:19.474052+00:00",
+    "created_at": "2026-07-16T04:00:55.533190+00:00",
     "completed_at": "2026-07-16T07:15:54.962767+00:00",
-    "result": "Recovered stale strategy metrics: 14 strategies refreshed, JSON validated, Supabase cache 14/14 synced, freshness detector breached=false, tests/test_health_checks.py 11 passed. Root cause: scheduled run aborted on transient dirty feed.json guard. Off-schedule recovery completed the alert-critical stages; wrapper later exited 142 at the 600s watchdog after downstream market_daily sync."
+    "tombstone": true,
+    "archived_at": "2026-07-19T08:01:00.658990+00:00"
   },
   {
     "id": "research_direction_predictability_signforecast",
@@ -35536,20 +35464,15 @@
   },
   {
     "id": "ci-red-29475505993",
+    "status": "closed_no_action",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29475505993, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "closed_no_action",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29475505993",
-    "ci_run_key": "29475505993:1",
     "created_at": "2026-07-16T07:00:06.011679+00:00",
-    "title": "CI 紅燈修復（run 29475505993, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29475505993\nattempt: 1\nhead_sha: 5704f7cfd\n偵測摘要（仍須讀完整 failed log）：2026-07-16T06:13:24.4444208Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['k1704']\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29475505993 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
     "completed_at": "2026-07-16T07:00:06.011679+00:00",
-    "result": "CI watcher verified recovery before this repair task started; green_run=29477295356; no action required",
-    "ci_closed_after_green": true
+    "tombstone": true,
+    "archived_at": "2026-07-19T08:01:00.658990+00:00"
   },
   {
     "id": "alert_content_quality_20260716",
@@ -43293,7 +43216,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-19T07:06:35.389137+00:00",
     "source": "internal_alert_remediation_router",
     "tags": [
@@ -43315,6 +43238,66 @@
         "scripts/check_experiment_artifacts.py:115",
         "scripts/check_experiment_artifacts.py:131"
       ]
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-19T08:08:59.992174+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-8e591abb4bf64752bff8d173463d85be"
+      },
+      {
+        "ts": "2026-07-19T08:09:04.383328+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-8e591abb4bf64752bff8d173463d85be"
+      },
+      {
+        "ts": "2026-07-19T08:11:52.528829+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-8e591abb4bf64752bff8d173463d85be"
+      }
+    ],
+    "started_at": "2026-07-19T08:09:04.383313+00:00",
+    "completed_at": "2026-07-19T08:11:52.528817+00:00",
+    "result": "pre-commit Gate 2 新違規 3 處全修（check_experiment_artifacts.py:115/131 補 stderr WARN；detect_price_split_breaks.py:221 逐格 silent-ok + 新增 column-level 假陰性告警）。hook 模式 audit exit 0、new=0，baseline 未動。PHASE-Z commit 路徑已解除阻塞。"
+  },
+  {
+    "id": "ci-red-29677363216",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29677363216",
+    "ci_run_key": "29677363216:1",
+    "created_at": "2026-07-19T08:00:06.663427+00:00",
+    "title": "CI 紅燈修復（run 29677363216, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29677363216\nattempt: 1\nhead_sha: ae815f3e5\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29677363216 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T08:01:12.951339+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-24204889eaad491881707c58b7fff088"
+      },
+      {
+        "ts": "2026-07-19T08:03:22.255577+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-24204889eaad491881707c58b7fff088"
+      },
+      {
+        "ts": "2026-07-19T08:17:10.211980+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-24204889eaad491881707c58b7fff088"
+      }
+    ],
+    "started_at": "2026-07-19T08:03:22.255560+00:00",
+    "completed_at": "2026-07-19T08:17:10.211964+00:00",
+    "result": "根因 f0350b912 的 status==failed 早退把『沒產出』與『產物存在但被政策擋下』壓成同一格，且只同步了 namespace 測試。修法收窄早退條件（_NOTHING_WAS_PRODUCED）而非回退，兩邊原意都保住；補一條邊界測試釘住原意。驗證：目標測試 28 passed；全庫 3630 passed，另 3 失敗來自其他 slot 未提交的在途檔案、不在 HEAD 上。同根因姊妹任務 ci-red-29674177829 / alert_internal_phase_z_test_gate_red_7af47e56b9 應可直接關閉。"
   }
 ]

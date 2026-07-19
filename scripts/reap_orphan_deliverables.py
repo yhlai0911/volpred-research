@@ -240,6 +240,14 @@ def _write_job_receipt(path: Path, payload: dict) -> None:
     tmp.replace(path)
 
 
+# Rejection reasons that mean "the producer never wrote this file", as opposed
+# to "the file is there but this reaper is not allowed to deliver it".
+_NOTHING_WAS_PRODUCED = frozenset({
+    "missing_or_not_regular_file",
+    "not_a_nonempty_string",
+})
+
+
 def _exact_repo_file(raw: object) -> tuple[str | None, str | None]:
     """Validate one ownership declaration as an exact regular file in ROOT."""
     if not isinstance(raw, str) or not raw.strip():
@@ -398,9 +406,15 @@ def scan_job_deliverables() -> dict:
                 # Already in the checkout under its post-merge path. Nothing is
                 # at risk, so holding it only manufactures a triage task.
                 continue
-            if job.get("status") == "failed":
+            if job.get("status") == "failed" and all(
+                    r.get("reason") in _NOTHING_WAS_PRODUCED for r in rejected):
                 # A failed job produced no deliverable to preserve. Holding it
                 # asks a human to find an exit for something that never existed.
+                # The skip stops there on purpose: if a declared path *does*
+                # exist and was refused on policy grounds (outside the repo, a
+                # symlink, git-ignored), the artifact is real and this file's
+                # invariant applies — held + a readable reason, never silently
+                # dropped because the producer happened to exit non-zero.
                 continue
             # Do not finalize the job: a timed-out producer may still land a
             # declared file before the next sweep, and preserving it is the goal.

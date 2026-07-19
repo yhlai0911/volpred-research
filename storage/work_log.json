@@ -21752,5 +21752,35 @@
     "owner": "hourly-slot-1-5741c175270c4935a70126f41109eb54",
     "commit": null,
     "summary": "零付費 Gemini 收尾（急件 lane，assign_f8da7545 盤點出的殘餘付費面）。\n\n**根因**：boss msg936（2026-07-17）關掉付費 Gemini API 後，headless chat 已改走免費 agy CLI 且 `gemini_ask.py` 有 break-glass guard；但 `scripts/build_knowledge_index.py` 的 `EMBED_PROVIDER=gemini` 分支（`gemini-embedding-001`，$0.15/1M tokens）沒被覆蓋。agy 是 chat CLI，**無法**提供 embedding，所以這條分支沒有免費替代品也沒有 guard —— 距離重新開始計費只差一個環境變數。\n\n**改動**：\n- `scripts/build_knowledge_index.py`：新增 `PaidGeminiDisabled` 例外 + `_guard_paid_gemini_embeddings()`，掛在 `get_client()` 的 provider 分岔點（billable request 之前）。訊息點名 `VOLPRED_ALLOW_PAID_GEMINI=1` 覆寫路徑，break-glass 才可被發現。\n- 模組 docstring 加一段指路。\n- `scripts/tests/test_paid_gemini_embedding_guard.py`（新，4 測試）。\n\n**一個刻意的設計差異（重要，勿在後續重構中改掉）**：`gemini_ask.py` 的 guard 用 `raise SystemExit(2)`；這裡**故意改用 raise 一般 Exception**。`get_client()` 是 library code —— `volpred.ops.topic_similarity._real_embedder` 從 publisher 的 semantic-duplicate **fail-open** 路徑呼叫它，該路徑 `except Exception`。`SystemExit` 繼承 `BaseException` 會逃出那個 catch，publish 中途整個 process 被殺。這正是 2026-07-10 `MissingEmbeddingCredentials` 已經發生過一次的事故（當時 `sys.exit(1)` 讓 24 個測試在沒有 OpenAI key 的機器上全掛）。測試裡有一條專門 pin 住這點。\n\n**驗證**（實跑，非宣稱）：\n- `uv run pytest scripts/tests/test_paid_gemini_embedding_guard.py -q` → 4 passed\n- CLI 實測 `EMBED_PROVIDER=gemini` → `BLOCKED OK: EMBED_PROVIDER=gemini hits the PAID Gemini API, disabled per boss msg936...`\n- `-k \"gemini or knowledge\"` 全庫 → 5 passed, 0 failed（無回歸）\n- 全庫掃 `EMBED_PROVIDER`：除本檔與測試外**無任何設定點**，預設 openai 路徑不受影響 → 這道 guard 是純 ratchet，不改變任何現行行為。"
+  },
+  {
+    "timestamp": "2026-07-19T16:22:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_internal_silent_fallback_new_c67bec28dd_20260719T070635389137Z_a1",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-8e591abb4bf64752bff8d173463d85be",
+    "owner": "hourly-slot-2-8e591abb4bf64752bff8d173463d85be",
+    "commit": null,
+    "summary": "P1 internal alert：PHASE-Z 連 3 次 commit_nonzero 收不了班，根因是 pre-commit Gate 2（silent-fallback baseline）擋下新違規，整個工作區的產出因此裸躺在 dirty tree。\n\n**先重驗警報仍在 breached**（remediation 前置條件）：`audit_silent_fallbacks.py --strict --baseline` → new=3。比 alert 快照多一條 —— alert 只記了 check_experiment_artifacts.py:115/131，實跑另有 detect_price_split_breaks.py:221。照舊快照修會留一條繼續擋 commit。\n\n**三處修法各不相同，因為三處的「silent」性質不同**：\n- `check_experiment_artifacts.py:115` `load_knowledge_ids()` — 讀不到 knowledge.json 回 None，caller 收得到訊號但收不到原因。補 stderr WARN 帶 path + 例外型別。順手把下面同函式 `not isinstance(entries, list)` 的靜默 None 也補上（同一個資訊黑洞的另一半）。\n- `check_experiment_artifacts.py:131` `load_exclusions()` — 回 `{}` 和「本來就沒有排除項」**無法區分**，檔案一壞就會把所有已記錄的豁免實驗重新擋下來。拆成兩路：`FileNotFoundError` 是正常情境標 `# silent-ok`，其餘壞檔 WARN 並明說 proceeding with NO exclusions。\n- `detect_price_split_breaks.py:221` — 逐格 `float()` 失敗跳過是正常資料形狀（空格/NA/停牌），逐列示警會淹掉輸出，標 `# silent-ok`。**但整欄跳過不能安靜**：欄位被當價格欄卻無一格可解析時，下面的斷點迴圈直接不跑，該欄會被當成「乾淨無斷點」報出去 —— 靜默假陰性，正是這支偵測器存在的意義所在。改成保留逐格靜默、加一條 column-level WARN。\n\n**刻意不用 `from volpred.ops.diagnostics import warn`**（規則推薦寫法）：`check_experiment_artifacts.py` 是 stdlib-only by design（見其 docstring §STDLIB ONLY）— `merge_worktree.sh` 用裸 `python3` 跑它，加 volpred import 會讓這道 gate 在 merge 時直接起不來，變成「無法啟動 = 棄權」。改用該檔既有的 `[artifacts] ...` stderr 風格。\n\n**驗證（實跑）**：\n- hook 完全相同的呼叫（`--root . --strict --baseline ... --limit 20 <兩個改動檔>`）→ new=0, exit 0\n- 全庫 `--strict --baseline` → findings=60 baseline=60 new=0 resolved=0（未動到 baseline，純 ratchet）\n- `python3 scripts/check_experiment_artifacts.py check --changed-since main` → PASS, exit 0（裸 python3 仍可跑，stdlib-only 未破）\n- 行為實測：`load_knowledge_ids()` → 1335 ids；`load_exclusions()` → 0（確認為檔案本身 `exclusions: []`，非解析失敗）；缺檔 root → `{}`；壞檔 root → WARN 觸發且仍回 `{}`（fail-open 語意未變）\n- `detect_price_split_breaks.py --help` exit 0\n- 全庫 grep：無測試引用這兩支腳本，故無既有測試可跑；改動限於診斷輸出，唯一控制流變更（FileNotFoundError 分岔）已逐路徑實測回傳值不變。\n\ncommit 交 PHASE-Z（本班不碰 git）。"
+  },
+  {
+    "timestamp": "2026-07-19T16:30:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "worktree_harvest_wave3_dirty_stale_20260719",
+    "outcome": "partial",
+    "actor": "hourly-slot-2-8e591abb4bf64752bff8d173463d85be",
+    "owner": "hourly-slot-2-8e591abb4bf64752bff8d173463d85be",
+    "commit": null,
+    "summary": "stale worktree 回收：只做安全的那一個，其餘不動。\n\ndispatcher 連續多班報 8 個 stale slot（idle 38–113h）且 free=0，agent lane 完全停擺。dry-run 後只有 `dispatch-slot-1-f53bca44-k1694` 是 clean + 0 unmerged，`--apply` 回收之（branch `wt/...-k1694` 已確認保留）。\n\n其餘 7 個一律不碰，且**不是**因為謹慎過頭：6 個 dirty（有未提交工作）、`dispatch-slot-1-bd00f90a-k1731` 有 8 個 commits 未進 main 且僅 idle 5.6h（對應的 k1731 arm B 任務仍 in_progress，是活的工作）。強行回收就是 K1032 —— 「branch 還在」不等於成果收割了。\n\n**誠實記錄一個沒達成的預期**：回收後 dispatcher 仍報 occupied=10/4 free=0，槽位數字沒降。瓶頸不是這一個 clean worktree，而是那 7 個待裁決的；解除阻塞要靠逐個 merge_worktree.sh 收割或裁決放棄，那已由既有 P2 任務 `worktree_harvest_wave3_dirty_stale_20260719` 追蹤（故本班不重複建單）。本班未認領該任務，僅完成其中零風險的一步。"
+  },
+  {
+    "timestamp": "2026-07-19T16:17:02+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29677363216",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-24204889eaad491881707c58b7fff088",
+    "owner": "hourly-slot-1-24204889eaad491881707c58b7fff088",
+    "commit": null,
+    "summary": "CI 紅燈修復（run 29677363216, main Test Suite）：`test_orphan_reaper.py::test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths` StopIteration。\n\n**根因**：commit `f0350b912`（今日 14:42）在 `scripts/reap_orphan_deliverables.py` 的 `scan_job_deliverables()` 加了一條早退 —— `if job.get(\"status\") == \"failed\": continue`。它要治的是真實問題（worktree merge 後宣告路徑消失，產生 7 筆假的 `no_existing_declared_files` held），但那個問題其實已被同 commit 的 `_landed_in_main()` 解掉；多加的 status 判斷是粗筆刷，把「failed 且完全沒產出」和「failed 但檔案存在、只是被政策擋下」壓成同一格。該 commit 只同步了 `test_orphan_namespace_registry.py`，沒動 `test_orphan_reaper.py`，於是舊測試（decbc5108 立的）當場紅。\n\n**修法（收窄，不是回退）**：新增 `_NOTHING_WAS_PRODUCED = {missing_or_not_regular_file, not_a_nonempty_string}`，早退條件改為 failed **且所有 rejection 都屬於「producer 從未寫出這個檔」**。若宣告路徑真的存在、只是因 `outside_repo` / `symlink_not_owned` / `git_ignored` 被拒，仍然 held —— 這正是本檔案頂部的不變量：存在的產物一律 held + 可讀 reason，永不因為 producer 剛好非零退出就被靜默丟棄。兩邊原意都保住。\n\n**補護欄**：新增 `test_job_reaper_does_not_hold_a_failed_job_that_produced_nothing`，把 f0350b912 的原意釘住。這兩條測試現在互為邊界（同為 status=failed，差別只在宣告路徑是否存在），下一個想「簡化」這段的人會被擋下 —— 缺這條就是這次紅燈重演的路徑。\n\n**驗證（實跑）**：\n- 修前本地重現：`StopIteration` at test_orphan_reaper.py:341（與 CI 同一條）\n- `uv run pytest scripts/tests/test_orphan_reaper.py scripts/tests/test_orphan_namespace_registry.py -q` → 28 passed\n- 全庫 `uv run pytest -q` → 3630 passed, 3 failed（712s）\n\n**那 3 個失敗與本修復無關，且不在 HEAD 上**：`test_supabase_read_gate` / `test_audit_canonical_writers` / `test_agentic_cli_timeout_killpg`，分別指向其他 slot **未提交**的在途檔案（`scripts/supabase_sync.py` M、`src/volpred/ops/next_tasks.py` M、`scripts/gen_codex_cli_reference.py` 未追蹤）。CI 測的是 committed HEAD、只有 1 個失敗，與此一致。未代為修改他人在途工作。\n\n**同根因的姊妹任務（本班未動，因已由他人 claim）**：`ci-red-29674177829` 與 `alert_internal_phase_z_test_gate_red_7af47e56b9_...`（alert 標題直接點名 f0350b912）皆為同一條測試紅燈，claimed_by=hourly-slot-3 於 06:52Z 但至今工作區無對應改動。本修復落地後兩者應可直接關閉，不需重做。"
   }
 ]

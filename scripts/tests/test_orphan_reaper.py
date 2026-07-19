@@ -344,6 +344,32 @@ def test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths(
                        "outside_repo", "symlink_not_owned"}
 
 
+def test_job_reaper_does_not_hold_a_failed_job_that_produced_nothing(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """失敗且真的什麼都沒寫出來 → 不 held（f0350b912 的原意）。
+
+    這條和上一條互為邊界：同樣是 status=failed，差別只在「宣告的路徑是否真的存在」。
+    檔案不存在 = 沒有產出可保全，held 只會生出一張沒人解得掉的 triage；檔案存在但被
+    政策擋下 = 有東西，必須 held。少了這條，收窄 skip 的人會把它整條刪回去。
+    """
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    queue = root / "storage" / "ops" / "compute_queue"
+    queue.mkdir(parents=True)
+    (queue / "compute-nothing.json").write_text(json.dumps({
+        "id": "compute-nothing", "kind": "compute", "status": "failed",
+        "output_paths": ["experiments/k9/never_written.json"],
+    }), encoding="utf-8")
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+
+    result = reaper.scan_job_deliverables()
+    assert result["candidates"] == []
+    assert [item["job_id"] for item in result["held"]] == []
+
+
 def test_job_reaper_leaves_clean_tracked_worktree_output_for_merge(
     tmp_path: Path,
     monkeypatch,
