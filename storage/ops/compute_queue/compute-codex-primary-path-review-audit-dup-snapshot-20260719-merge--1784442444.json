@@ -9,10 +9,10 @@
     "2400"
   ],
   "env": {},
-  "status": "queued",
+  "status": "cancelled",
   "queued_at": "2026-07-19T06:27:24Z",
   "started_at": null,
-  "completed_at": null,
+  "completed_at": "2026-07-19T06:55:55Z",
   "exit_code": null,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-primary-path-review-audit-dup-snapshot-20260719-merge--1784442444.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-primary-path-review-audit-dup-snapshot-20260719-merge--1784442444.stderr",
@@ -29,8 +29,10 @@
     "task_type": "paper_review",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "timeout_seconds": 2700,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "cancelled_at": "2026-07-19T06:55:55Z",
+  "cancel_reason": "Superseded by in-slot Codex failover review; verdict FAIL due incomplete consumer coverage; do not dispatch stale PASS/merge followup."
 }

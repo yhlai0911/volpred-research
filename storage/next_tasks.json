@@ -32991,13 +32991,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T06:42:49.786307+00:00",
+    "completed_at": "2026-07-19T06:45:06.985821+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T06:42:49.786307+00:00",
-      "last_clean_observed_at": "2026-07-19T06:42:49.786307+00:00"
+      "resolved_at": "2026-07-19T06:45:06.985821+00:00",
+      "last_clean_observed_at": "2026-07-19T06:45:06.985821+00:00"
     }
   },
   {
@@ -37933,14 +37933,11 @@
     "description": "K1623（experiments/k1623/）於 2026-07-17 孤兒收尾時經 codex gpt-5.6-sol (reasoning=high) 獨立二審判 **FAIL**，依 K1259 規則不得寫入 knowledge.json，結論必須撤回而非收編。本 task 是它的 consumer 與修復出口。\n\n**FAIL 理由（二審 + 主線程驗證，算術全部一致，問題在「宣稱 vs 證據」）**：\n1. 識別宣稱不成立：至多 5（permissive 15）個 deterministic Bai-Perron mean break 扣不掉 Diebold-Inoue 所設想的隨機／密集 regime shift，故「純 level-shift 假象假說被拒絕、確有真 long-memory 成分」無識別定理支撐。且 demeaned d̂ 的 SE 直接沿用 raw ELW 漸近 SE，未計入斷點是估計出來的 generated-regressor 不確定性。\n2. 結論隨 loss function 反轉且未揭露：DM **只跑了 QLIKE**，而 ARFIMA 的 MSE 在 5 資產中有 4 個低於 HAR（SPY 0.889 / TW0050 0.836 / QQQ 0.874 / N225 0.891，低 11-16%）。README §4 宣稱報 QLIKE+MSE 兩個 loss，實際只對 QLIKE 做檢定，MSE 方向相反且完全未提。\n3. 「不可交易」無任何交易策略／成本／效用測試，純屬修辭。\n4. README §3 稱「多處反而顯著更差」→ 實際 10 個 ARFIMA/BreakHAR 比較中僅 1 個顯著（QQQ t=+2.47, p=0.0137），且對 5 個檢定做 Bonferroni 即不顯著；20 個 DM 比較全無多重比較修正。\n5. 描述與程式碼不符：§4 稱 BreakRobustHAR「只用最近 latest-break 之後樣本 refit」，但 k1623.py:471 `wstart = max(0, min(brk_start, i-22-60))` 在斷點太近時刻意把窗口推回斷點之前，無斷點時 fallback 到 trailing 750。\n6. §4/§9 headline 稱 ELW 為「Shimotsu-Phillips 可估非平穩 d」，但 code 只做 sample-mean demeaning（非 SP 的 unknown-mean μ̂(d) 加權）；fracdiff 截斷 FD_MAXK=2000 對 n=2,565-4,655 實際 binding，對 d̂=0.723 的 VIX（d>0.5，樣本平均在非平穩區不是有效 level 估計）影響最大。\n7. VIX 的 permissive 斷點選到 cap 上限 15/15（cap binding），故夾擠上界 20.3% 不構成上界。\n\n**可保留的描述性事實**（不依賴已崩的識別宣稱）：扣掉 BIC 斷點後 ELW d̂ 仍 0.46-0.65、扣掉 10-15 個 permissive 斷點後仍 0.19-0.58（殘餘低頻持續性未消失）；OOS n=749/資產，HAR 在 QLIKE 上是 5 資產冠軍或並列最佳；BreakHAR vs HAR 10 個比較全部不顯著（最小 p=0.0946）。\n\n**要做的**：\n1. 改寫 experiments/k1623/README.md：撤回 (a)「真 long memory 成分存在」identification 宣稱、(b)「不可交易」、(c)「多處顯著更差」；改為 loss-dependent 的誠實陳述。\n2. 補跑 MSE 的 DM 檢定 + 20 個比較的多重比較修正（BH 或 Bonferroni），把 loss 反轉寫進結果表。\n3. 修正 ELW 方法描述（sample-mean demeaning 非 SP）+ 揭露 FD_MAXK binding + VIX cap binding。\n4. 修正 BreakRobustHAR 描述使其與 k1623.py:471 實際行為一致（或改 code 對齊描述，二擇一並說明）。\n5. 完成後再送一次 codex 二審；CONDITIONAL PASS 以上才可寫 knowledge.json。\n6. 注意 §9 記載前一輪 codex（gpt-5.5）判「no CRITICAL/HIGH」與本輪 gpt-5.6-sol 直接衝突 —— 前輪 review 未捕捉上述問題，這本身是 reviewer 可靠度的教訓，值得記進 error_log。\n\n**可發佈 angle（撤回識別宣稱後仍成立）**：「同一組預測、同一批模型，換一個 loss function 結論就反轉：QLIKE 說樸素 HAR 贏遍 5 個資產，MSE 說 ARFIMA 在 4/5 資產低 11-16%」—— 純描述性、可從 JSON 直接驗證的方法論教訓（呼應 K1016）。此 angle 須待 (1)(2) 修完才可寫成文章。\n\nparent_task_id=dreaming_orphaned_experiment_k1623",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "source": "auto_discovered",
     "created_at": "2026-07-17T10:24:51.136605+00:00",
     "parent_task_id": "dreaming_orphaned_experiment_k1623",
     "created_by": "hourly-slot-1-6dc08119c9334720b72b5034a498085e",
-    "claimed_by": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
-    "claimed_at": "2026-07-19T04:41:53.386487+00:00",
-    "claim_session_id": "c605daf6a62b",
     "status_history": [
       {
         "ts": "2026-07-19T04:41:53.386501+00:00",
@@ -37953,11 +37950,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705"
+      },
+      {
+        "ts": "2026-07-19T06:50:06.179328+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-19T04:41:58.617369+00:00",
     "result": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
-    "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。"
+    "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
+    "last_released_at": "2026-07-19T06:50:06.179320+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "assign_42306eaa",
@@ -37965,14 +37971,11 @@
     "description": "K1698（experiments/k1698/，FTD E1 v2 — scale re-calibration gating，K1684 的 compliant rerun）於 2026-07-17 孤兒收尾時經 codex gpt-5.6-sol (reasoning=high) 獨立二審判 **FAIL**，依 K1259 規則不得寫入 knowledge.json。本 task 是它的 consumer 與修復出口。\n\n**先講公道話（這些 blocker 是真修的，別重做）**：數字全部可從 JSON 逐項對上、無 K1016 式反向宣稱 —— leg1 t=+1.4694/p=0.1424/n=436、own-target bridge −5.2522 vs primary −2.0642(p=0.0396)、校正因子 std(z)=1.20290 / MZ=1.21091 / HL=1.07465、placebo GJRf-a OOS=1.11910 / IS=0.99346、1% VaR trinity HAR+CF 14/450 (Kupiec p=0.000 FAIL) vs bridge 17/450、GJR+CF 2/450 PASS 但 c_emp=0.799 [0.63,1.02] 屬過度保守型 PASS、K854 bridge 11/14 格相符。K1684 的 n=377 縮樣已修（改 declared drop 3 cells，n=450）、atomic write（tmp→json.load→os.replace）、GATE_RULES 寫在 k1698.py:170 且 decide_gate_v2() 確實檢查 leg-2 —— 全部確認到位。\n\n**FAIL 理由（問題全在「數字 → 結論」與兩個號稱已解的 blocker）**：\n1. **lookahead 未解（致命）**：active contract 依整份日檔成交量選出（k1698.py:328 `v[dl==d].sum()`），含 13:30-13:45 的 tick，因此號稱「13:30 可得」的 RV predictor 用了視窗收盤後 15 分鐘的合約選擇資訊 —— 直接推翻 README「資訊集建構上不相交」的宣稱，並打在所有「新舊 RV 差 → divergence 是 artifact」結論的根上。\n2. **60 天邊界 audit 是空驗證**：rv_window_boundary_audit 取的是最早 60 個交易日（2017-01，夜盤上線前），JSON 內 12 筆 checks 的 night_pm_in_window / night_am_in_window 全是 None，而 None 不會令 ok=False；night_pm_stamped_before_file_date 更根本沒併進 all_ok。而 OOS(2023-24) 全在夜盤時代 → blocker 2 的機械證明並不存在。\n3. **accepting the null**：t=+1.469 (p=0.142) 只是「未證明 HAR 勝」，被寫成 H2_REJECTED +「divergence 是 construction artifact」。要立此論需 equivalence / noninferiority 檢定；−5.25→−2.06 是描述性比較，未對兩套 paired loss differential 之差做正式檢定。\n4. 「完全復現 K1684/K854 的世界」與 JSON 的 11/14 相矛盾（只有 HAR/RGL cells 逐格復現，差的 3 格全是 GJR 家族 10→9、3→2、9→7）。\n5. 「差全部來自 RV 重建」無分項 ablation —— 新 RV 同時改了 active contract／gap／alignment／連續 path 四件事，故「RV 建構吃掉最多」「殘餘 1.075 = composition/basis」皆未識別。\n6. JSON limitation #7 寫「>=100-start GJR/RGL」與 top-level rgl_multistart=40 自相矛盾（README 本身寫對）。\n7. k1698/ 目錄內無獨立 referee report/receipt，README §2 的「primary-path review PASS」無機械證據。\n\n**要做的（順序有依賴，別跳）**：\n1. 修 contract-selection lookahead：合約選擇只能用 13:30 前可得資訊（前一日 volume 或 rolling 規則），重跑 RV predictor。這一步不做，後面全部無意義。\n2. 修 rv_window_boundary_audit：抽樣必須涵蓋夜盤時代與 OOS 期（2023-24），None 應令 ok=False，night_pm_stamped_before_file_date 併進 all_ok。\n3. 無 lookahead 重跑後，做四層分項 ablation（active contract / gap / alignment / 連續 path）才能講「哪一項吃掉多少」。\n4. H2 若仍要主張「divergence 是 artifact」，改用 equivalence / noninferiority 檢定，不可拿 p=0.142 當證據。\n5. 修 limitation #7 與 rgl_multistart 的矛盾；把 review receipt 落成檔案。\n6. 重跑後再送 codex 二審；CONDITIONAL PASS 以上才可寫 knowledge.json。\n7. heavy compute 走 scripts/compute_queue.py enqueue，不要塞進 hourly fire。\n\n**可保留素材（修完才談短文）**：common-target vs own-target ranking 分歧、RV 建構敏感性、校正機器對 GJR placebo 同樣有效的否定結果、c_emp 作 ex-post calibration 診斷。\n\nparent_task_id=dreaming_orphaned_experiment_k1698",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "source": "auto_discovered",
     "created_at": "2026-07-17T10:24:51.180552+00:00",
     "parent_task_id": "dreaming_orphaned_experiment_k1698",
     "created_by": "hourly-slot-1-6dc08119c9334720b72b5034a498085e",
-    "claimed_by": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
-    "claimed_at": "2026-07-19T04:41:53.620680+00:00",
-    "claim_session_id": "65244bf4f1bc",
     "status_history": [
       {
         "ts": "2026-07-19T04:41:53.620695+00:00",
@@ -37985,11 +37988,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705"
+      },
+      {
+        "ts": "2026-07-19T06:50:06.179337+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-19T04:41:58.856904+00:00",
     "result": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
-    "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。"
+    "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
+    "last_released_at": "2026-07-19T06:50:06.179335+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "k1380_rerun_staged_correct_qlike",
@@ -40826,21 +40838,27 @@
     "description": "來源：event_article_nfp_2026_07_03_t1 修正報告 §7（已合併）。k528 另開任務，本任務處理其餘。\n\n仍用 first-Friday proxy：experiments/{k741,k661,k259,k904,k1608}、paper/volatility-absorption/experiments/{k741,k904}。k1608 用它當 calendar control。\n**k904 在 paper/ 底下 —— 先評估是否影響已投稿/待投稿論文的數字，這是本任務的第一優先。**\n\n要做：逐支評估影響幅度（不必全部重跑；先算該腳本樣本期內 proxy 錯誤率與偏誤方向），產出 impact matrix（腳本 × 錯誤率 × 對外數字是否引用 × 是否需重跑），再決定重跑順序。有引用到論文或線上文章的優先。\n\n另含：src/volpred/data/event_dates.py 的 release_dates() 用 .max() 取月份最後一筆，對 NFP 是錯的 —— 6 個月份（2006-05, 2012-12, 2013-05, 2020-05, 2024-01, 2024-08）在 ALFRED 有兩筆而就業報告都是第一筆。該函式與 CPI 共用，且既有測試 test_release_dates_uses_last_entry_when_release_has_same_month_revisions 明確要求 CPI 取最後一筆 → 正解是 per-event 語意，不可順手把 CPI 一起改掉（會動到 K1442 剛修好的 CPI 結果）。\n\nparent: assign_358decfa",
     "task_type": "experiment",
     "priority": 2,
-    "status": "claimed",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-18T20:14:17.175688+00:00",
     "created_by": "hourly-slot-1-9821e0723e124a95af0ae537ebd2dde0",
-    "claimed_by": "main-interactive",
-    "claimed_at": "2026-07-19T05:07:17.466112+00:00",
-    "claim_session_id": "interactive-20260719",
     "status_history": [
       {
         "ts": "2026-07-19T05:07:17.466126+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "main-interactive"
+      },
+      {
+        "ts": "2026-07-19T06:43:13.753360+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main-interactive"
       }
-    ]
+    ],
+    "completed_at": "2026-07-19T06:43:13.753342+00:00",
+    "result": "full-population sweep delivered (docs/governance/2026-07/firstfriday_proxy_sweep_20260719.md): 9 true NFP first-Friday proxy sites (vs brief's 6 — multi-pattern rescan caught 3 more), 8 archived experiments got README warnings (verified in-place), 0 active-code sites (live pipeline already canonical). Blind spots declared (.ipynb/tex not scanned; CPI/FOMC same-class proxies flagged but not swept). MAJOR finding: paper/volatility-absorption NFP table (abstract L43/L72 + Table tab:nfp + 4 regime rows) sources k741 first-Friday-proxy dates — canonical rerun needed pre-submission; followup task queued.",
+    "burst_reported_at": "2026-07-19T06:43:13.760242+00:00"
   },
   {
     "id": "ci-red-29658868526",
@@ -41384,7 +41402,7 @@
     "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:k1731-armB-corrected-rev5` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-18T19:00:53.185575+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。判定完成後這張任務關閉，held 記錄會自然消失。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "reap_orphan_deliverables_held_ttl",
     "created_at": "2026-07-19T00:01:09.730137+00:00",
     "payload": {
@@ -41399,7 +41417,25 @@
         "held_escalation"
       ]
     },
-    "created_by": "reap_orphan_deliverables"
+    "created_by": "reap_orphan_deliverables",
+    "claimed_by": "codex-failover-slot-3-fdddacd4ae174025bdb171ff5b995fb3",
+    "claimed_at": "2026-07-19T06:53:31.834737+00:00",
+    "claim_session_id": "4a49838b4da8",
+    "status_history": [
+      {
+        "ts": "2026-07-19T06:53:31.834750+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-3-fdddacd4ae174025bdb171ff5b995fb3"
+      },
+      {
+        "ts": "2026-07-19T06:53:37.313110+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-3-fdddacd4ae174025bdb171ff5b995fb3"
+      }
+    ],
+    "started_at": "2026-07-19T06:53:37.313094+00:00"
   },
   {
     "id": "alert_release_pool_gap_20260719",
@@ -42313,7 +42349,10 @@
       "fingerprint": [
         "scripts/tests/test_dispatch_burst.py::scripts.tests.test_dispatch_burst::test_quota_streak_suspends_but_does_not_end_the_window",
         "tests/test_task_pool_claim.py::tests.test_task_pool_claim::test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task"
-      ]
+      ],
+      "resolved_at": "2026-07-19T06:44:06.492747+00:00",
+      "final_consecutive_remediation_failures": 0,
+      "superseded_by_distinct_incident_at": "2026-07-19T06:44:06.492747+00:00"
     },
     "completed_at": "2026-07-19T04:59:39.868888+00:00",
     "status_history": [
@@ -42646,14 +42685,32 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29671078611",
     "ci_run_key": "29674177829:1",
     "created_at": "2026-07-19T06:00:07.842025+00:00",
     "title": "CI 紅燈修復（run 29674177829, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29674177829\nattempt: 1\nhead_sha: c541b0ef1\n偵測摘要（仍須讀完整 failed log）：2026-07-19T05:11:50.1549467Z ##[error]The test suite mutated repo state. Tests must write to tmp_path only.\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29674177829 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。"
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29674177829\nattempt: 1\nhead_sha: c541b0ef1\n偵測摘要（仍須讀完整 failed log）：2026-07-19T05:11:50.1549467Z ##[error]The test suite mutated repo state. Tests must write to tmp_path only.\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29674177829 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "claimed_by": "hourly-slot-3-fdddacd4ae174025bdb171ff5b995fb3",
+    "claimed_at": "2026-07-19T06:52:12.882041+00:00",
+    "claim_session_id": "4562fd6a509d",
+    "status_history": [
+      {
+        "ts": "2026-07-19T06:52:12.882056+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-fdddacd4ae174025bdb171ff5b995fb3"
+      },
+      {
+        "ts": "2026-07-19T06:52:17.875097+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-fdddacd4ae174025bdb171ff5b995fb3"
+      }
+    ],
+    "started_at": "2026-07-19T06:52:17.875084+00:00"
   },
   {
     "id": "k1719_reproduce_spec_backfill",
@@ -42697,12 +42754,30 @@
     "id": "paper_0050_snapshot_repoint_20260719",
     "priority": 1,
     "task_type": "paper_review",
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "created_at": "2026-07-19T14:25:00+08:00",
     "parent_task_id": "assign_price_cache_0050_split_break",
     "title": "P0 論文層：taiwan-vt / garch-x-vix 的 0050 pinned snapshot 仍含 4x 斷點，且方法描述與事實不符",
-    "description": "本班修好 price_cache.db 的 0050 2014-01-02 分割斷點後，用 scripts/detect_price_split_breaks.py --csv-scan 掃出真正的污染載體是已凍結的 pinned snapshot CSV（DB 修復碰不到），共 16 檔含 0050 斷點，其中兩個是論文主資料檔：\n(1) paper/taiwan-vt/data/0050_tw_twii_..._2008-2026.csv（0050_tw_adj_close/close/high/low/open 全部 x0.2494 @2014-01-02）\n(2) paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv（同上）\n\n**方法描述矛盾（必修）**：paper/taiwan-vt/body_v3.tex:33 宣稱 \"compute returns from Adj Close\" 來處理此分割 —— 這不成立，因為 adj_close 同步跳（37.41→9.33），並未修正斷點。真正救回結論的是後半句 \"exclude the split date\"。referee 照這段描述重做會得到不同數字。paper/garch-x-vix/main.tex:377 有同樣問題（宣稱依 lai2026vt 程序清理，但資料檔 ratio=4.010）。\n\n影響分層（獨立盤點結論）：報酬序列衍生量（GJR gamma / DM / VT Sharpe）因 exclude split date 而實質安全；**價格水準衍生量（rolling window 價格、drawdown 路徑、未剔除該日的 realized-vol）仍污染**。\n\n待辦：(a) 從已修好的 DB 重建兩個 snapshot CSV；(b) 重跑 experiments/paper2_taiwan_indiv_rolling_gamma（rolling gamma 對價格水準敏感，body_v3.tex:53 的 gamma=0.097 / t=3.60 需重驗）；(c) 改寫 body_v3.tex:33 與 main.tex:377 的方法描述使其與事實一致；(d) 驗證 main.tex:531 的 0050 列（DM t=1.44）是清理後算的。\n\n驗證指令：uv run python scripts/detect_price_split_breaks.py --csv-scan"
+    "description": "本班修好 price_cache.db 的 0050 2014-01-02 分割斷點後，用 scripts/detect_price_split_breaks.py --csv-scan 掃出真正的污染載體是已凍結的 pinned snapshot CSV（DB 修復碰不到），共 16 檔含 0050 斷點，其中兩個是論文主資料檔：\n(1) paper/taiwan-vt/data/0050_tw_twii_..._2008-2026.csv（0050_tw_adj_close/close/high/low/open 全部 x0.2494 @2014-01-02）\n(2) paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv（同上）\n\n**方法描述矛盾（必修）**：paper/taiwan-vt/body_v3.tex:33 宣稱 \"compute returns from Adj Close\" 來處理此分割 —— 這不成立，因為 adj_close 同步跳（37.41→9.33），並未修正斷點。真正救回結論的是後半句 \"exclude the split date\"。referee 照這段描述重做會得到不同數字。paper/garch-x-vix/main.tex:377 有同樣問題（宣稱依 lai2026vt 程序清理，但資料檔 ratio=4.010）。\n\n影響分層（獨立盤點結論）：報酬序列衍生量（GJR gamma / DM / VT Sharpe）因 exclude split date 而實質安全；**價格水準衍生量（rolling window 價格、drawdown 路徑、未剔除該日的 realized-vol）仍污染**。\n\n待辦：(a) 從已修好的 DB 重建兩個 snapshot CSV；(b) 重跑 experiments/paper2_taiwan_indiv_rolling_gamma（rolling gamma 對價格水準敏感，body_v3.tex:53 的 gamma=0.097 / t=3.60 需重驗）；(c) 改寫 body_v3.tex:33 與 main.tex:377 的方法描述使其與事實一致；(d) 驗證 main.tex:531 的 0050 列（DM t=1.44）是清理後算的。\n\n驗證指令：uv run python scripts/detect_price_split_breaks.py --csv-scan",
+    "claimed_by": "hourly-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98",
+    "claimed_at": "2026-07-19T06:47:25.039594+00:00",
+    "claim_session_id": "cdff442dbdbb",
+    "status_history": [
+      {
+        "ts": "2026-07-19T06:47:25.039610+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98"
+      },
+      {
+        "ts": "2026-07-19T06:47:30.578512+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98"
+      }
+    ],
+    "started_at": "2026-07-19T06:47:30.578496+00:00"
   },
   {
     "id": "k_reruns_0050_snapshot_contaminated_20260719",
@@ -42843,11 +42918,35 @@
     "description": "前置已完成（assign_6c43a4d4）：fevd-ordering gate 已修（Cholesky→重用 k1025_v3.generalized_fevd 的 KPPS gFEVD，commit 90b4fe89e），gate 全綠、clean/dirty log 位元相同、稽核判定不變（dup 區塊 2026-05-04..05-15 的 btc 全為 NaN，落在估計樣本 2026-04-08 之外）。剩下的 merge gate：experiments/audit_dup_snapshot_20260719/review_verdict.json 是未填的 template，需 Codex 一審才可合併。審查重點（沿用原 followup brief）：consumers_scanned 是否涵蓋 grep 出的全部讀檔者（不只 brief 列的 7 個）、每個 verdict 有 evidence、unaffected 也寫判定依據、K1685 pinned snapshot 有覆核、reruns 的 before/after 真有跑過（非估計）。另請一併判 dy_diag_param.py 透過 importlib exec_module 依賴 experiments/k1025/k1025_v3.py 是否為可接受的跨實驗耦合。PASS 才跑 scripts/merge_worktree.sh dispatch-slot-1-858545f9-snapaudit；needs_compute_queue 條目逐一 enqueue；若有已發表結果受影響 → 立即建 P1 更正 task。合併後由主線程寫 knowledge.json（禁 agent 寫），並把 assign_7f508612 標終態。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "system",
     "created_at": "2026-07-19T06:27:24.539817+00:00",
     "parent_task_id": "assign_7f508612",
-    "created_by": "hourly-slot-1-22b2d7cd63ae49c6993bc3ea246ac142"
+    "created_by": "hourly-slot-1-22b2d7cd63ae49c6993bc3ea246ac142",
+    "status_history": [
+      {
+        "ts": "2026-07-19T06:53:56.790352+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98"
+      },
+      {
+        "ts": "2026-07-19T06:53:57.026447+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98"
+      },
+      {
+        "ts": "2026-07-19T06:56:50.055281+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98"
+      }
+    ],
+    "started_at": "2026-07-19T06:53:57.026433+00:00",
+    "completed_at": "2026-07-19T06:56:50.055265+00:00",
+    "result": "verdict=FAIL; review_artifact=storage/ops/codex_reviews/audit_dup_snapshot_20260719_verdict.md; blocker=incomplete_consumer_coverage; remediation_task=assign_3df3d4c6; merge_performed=false; stale_review_job=cancelled",
+    "burst_reported_at": "2026-07-19T06:56:50.061816+00:00"
   },
   {
     "id": "assign_aa048c27",
@@ -42855,10 +42954,28 @@
     "description": "2026-07-19 觀察到的協調危害：agent-brief_snapaudit-3cae76 已 completed_at 05:58Z status=failed(experiment_gate_failed)，PHASE A 依規則派 triage followup（assign_6c43a4d4）；但同時有 compute worker（PID 40900，14:00 起）在把同一 brief 重試進同一 worktree .claude/worktrees/dispatch-slot-1-858545f9-snapaudit。triage subagent 的 Write 被 file-modified 保護擋下才沒互相覆寫，且它觀察到腳本在它兩次驗證之間又被改（5031→5536 bytes）。要查：(1) failed job 的 retry 條件是什麼、為何在 followup_dispatched 之後仍重試；(2) retry 與 followup 是否應互斥（例如 mark-followup-dispatched 即禁止 retry，或 retry 前先確認無 in_progress 的 triage task）；(3) 同一 worktree 是否該有 writer lock。不修表面，找 owner 收斂成單一 enforcement point。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "system",
     "created_at": "2026-07-19T06:28:31.488714+00:00",
-    "created_by": "hourly-slot-1-22b2d7cd63ae49c6993bc3ea246ac142"
+    "created_by": "hourly-slot-1-22b2d7cd63ae49c6993bc3ea246ac142",
+    "claimed_by": "codex-failover-slot-1-5741c175270c4935a70126f41109eb54",
+    "claimed_at": "2026-07-19T06:54:06.977491+00:00",
+    "claim_session_id": "0242d718877f",
+    "status_history": [
+      {
+        "ts": "2026-07-19T06:54:06.977507+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-5741c175270c4935a70126f41109eb54"
+      },
+      {
+        "ts": "2026-07-19T06:54:07.214929+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-5741c175270c4935a70126f41109eb54"
+      }
+    ],
+    "started_at": "2026-07-19T06:54:07.214910+00:00"
   },
   {
     "id": "telegram-1090",
@@ -42893,10 +43010,28 @@
     "description": "根因：2026-07-19 一天內 CI 三班連環紅（k1732 缺 knowledge 條目 → k1719 缺條目 → 測試寫 canonical），全是逐筆補、沒修流程。\n\n目標：把「實驗 artifact 完整性」變成機械 gate，不再靠人事後補。\n\n要做：\n1. 全量掃描 experiments/ 下所有已併入 main 的 experiment_id，比對 storage/memory/knowledge.json 是否有對應 K 條目、是否有 reproduce_spec.json。輸出缺漏清單（這是 bug class sweep，不是只修 k1719/k1732）。\n2. 一次補齊所有缺漏（含既有的 k1719_reproduce_spec_backfill，補完後把那張任務收掉）。\n3. 加 pre-merge / CI gate：新增或修改 experiments/<id>/ 時，若 knowledge.json 缺該 id 的條目或缺 reproduce_spec.json 就 fail，並給出可直接執行的補救指令。gate 要跑在 merge_worktree.sh 與 CI 兩處，避免只擋一邊。\n4. 寫入 docs/error_log.md（根因 + 防錯規則），並更新 AGENTS.md 或對應 skill 讓下一班知道這道 gate 存在。\n\n驗收：sweep 輸出 0 缺漏；故意造一個缺條目的 experiment 目錄能被 gate 擋下；CI 連續兩班綠。\n\n來源：老闆 2026-07-19 Telegram 指示（telegram-1090）。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-19T06:31:04.575105+00:00",
-    "created_by": "telegram_responder"
+    "created_by": "telegram_responder",
+    "claimed_by": "hourly-slot-1-5741c175270c4935a70126f41109eb54",
+    "claimed_at": "2026-07-19T06:46:13.901891+00:00",
+    "claim_session_id": "9ccb2fe32704",
+    "status_history": [
+      {
+        "ts": "2026-07-19T06:46:13.901907+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54"
+      },
+      {
+        "ts": "2026-07-19T06:46:26.544273+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54"
+      }
+    ],
+    "started_at": "2026-07-19T06:46:26.544259+00:00"
   },
   {
     "id": "assign_79faa0b0",
@@ -42966,5 +43101,127 @@
     "started_at": null,
     "status_history": [],
     "escalation_attempts": 1
+  },
+  {
+    "id": "assign_1238781f",
+    "title": "volatility-absorption 論文 NFP 表污染修復：k741(+k904 S4) 用 canonical 日曆重跑 + main_v3 數字更新",
+    "description": "來源：docs/governance/2026-07/firstfriday_proxy_sweep_20260719.md §3。main_v3.tex 的 NFP 表（abstract L43/L72、Results L368-396、tab:nfp、4 個 VIX regime 列、Wilcoxon p=0.0037）逐位對齊 k741_nfp_event_study_results.json part_a_historical，而 k741/k904 的 NFP 日期用 first-Friday proxy（已知 13 錯 7 類缺陷）。修復：(1) 用 volpred.data.event_dates.nfp_release_dates（2026-07-19 已根修 min()+cadence gate）重跑 k741 part_a + k904 task_s4_nfp；(2) 對照新舊統計量，更新 main_v3 NFP 表與 abstract 數字（或若方向翻轉則降級敘事）；(3) k528/k661 對應 feed 文章（feed×7/×2）數字回溯屬同 class，依重跑結果決定更正範圍；(4) S2/shock-type 數字乾淨不動。注意：k904 副本在 paper/ 下，主檔在 experiments/。論文 stage=revision，此為投稿前 blocker。",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-19T06:43:14.951396+00:00",
+    "claimed_by": "hourly-slot-1-5741c175270c4935a70126f41109eb54",
+    "claimed_at": "2026-07-19T06:46:14.388541+00:00",
+    "claim_session_id": "a6f4057647a8",
+    "status_history": [
+      {
+        "ts": "2026-07-19T06:46:14.388554+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54"
+      },
+      {
+        "ts": "2026-07-19T06:46:27.024391+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54"
+      }
+    ],
+    "started_at": "2026-07-19T06:46:27.024376+00:00"
+  },
+  {
+    "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260719T064406492747Z_a1",
+    "title": "[internal alert] PHASE-Z auto-commit 測試紅燈（f0350b91294c）",
+    "description": "由內部可自癒 alert_key `phase_z_test_gate_red` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 跑同一組測試為綠，HEAD 新增紅燈。\n- fire 時間: 14:42\n- commit: f0350b91294c\n- 變更程式檔: scripts/reap_orphan_deliverables.py, scripts/tests/test_orphan_namespace_registry.py, tests/test_reap_draft_artifacts.py\n- 跑的測試: scripts/tests/test_git_writer_lock.py scripts/tests/test_orphan_namespace_registry.py scripts/tests/test_orphan_reaper.py scripts/tests/test_reap_paper_artifacts.py tests/test_reap_draft_artifacts.py\n- pytest 退出碼: 1（HEAD） / 0（HEAD^，baseline=green）\n\n## 影響\n隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。\n\n## 修復線索（供接手任務）\n1. 隔離重現：\n   uv run --extra dev python -m pytest scripts/tests/test_git_writer_lock.py scripts/tests/test_orphan_namespace_registry.py scripts/tests/test_orphan_reaper.py scripts/tests/test_reap_paper_artifacts.py tests/test_reap_draft_artifacts.py -q\n2. 修掉紅燈或 revert 該 commit（gate 不自動 revert — revert 風險高於紅燈本身）。\n3. 失敗尾段：\n\n```\nts/test_orphan_reaper.py:341: StopIteration\n=========================== short test summary info ============================\nFAILED scripts/tests/test_orphan_reaper.py::test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths\n1 failed, 63 passed in 14.28s\nwarning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nUsing CPython 3.12.10\nCreating virtual environment at: .venv\n   Building volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-twyuptdj/head\n      Built volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-twyuptdj/head\nInstalled 125 packages in 547ms\n```",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "in_progress",
+    "created_at": "2026-07-19T06:44:06.492747+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "phase_z_test_gate_red"
+    ],
+    "alert_key": "phase_z_test_gate_red",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260719T064406492747Z",
+      "episode_started_at": "2026-07-19T06:44:06.492747+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-19T06:44:06.492747+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false,
+      "fingerprint": [
+        "scripts/tests/test_orphan_reaper.py::scripts.tests.test_orphan_reaper::test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths"
+      ]
+    },
+    "claimed_by": "hourly-slot-3-fdddacd4ae174025bdb171ff5b995fb3",
+    "claimed_at": "2026-07-19T06:52:11.856273+00:00",
+    "claim_session_id": "015b0d19d2ac",
+    "status_history": [
+      {
+        "ts": "2026-07-19T06:52:11.856288+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-fdddacd4ae174025bdb171ff5b995fb3"
+      },
+      {
+        "ts": "2026-07-19T06:52:17.639687+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-fdddacd4ae174025bdb171ff5b995fb3"
+      }
+    ],
+    "started_at": "2026-07-19T06:52:17.639673+00:00"
+  },
+  {
+    "id": "assign_26fb158e",
+    "title": "build_knowledge_index gemini embedding 分支加同款付費 guard（零付費 Gemini 收尾）",
+    "description": "來源：assign_f8da7545 收尾時 agent 盤點發現的殘餘付費 Gemini 面。scripts/build_knowledge_index.py 有 EMBED_PROVIDER=gemini 分支（google.genai + GEMINI_API_KEY，gemini-embedding-001），預設 openai、opt-in 才會打付費 API；agy 是 chat CLI 無法取代 embedding。依 msg936 精神補一道與 gemini_ask.py 相同的 VOLPRED_ALLOW_PAID_GEMINI=1 break-glass guard 在該分支入口 + 測試。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-19T06:45:31.372264+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-19T06:46:14.147263+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54"
+      },
+      {
+        "ts": "2026-07-19T06:46:26.788406+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54"
+      },
+      {
+        "ts": "2026-07-19T06:50:43.421748+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54"
+      }
+    ],
+    "started_at": "2026-07-19T06:46:26.788393+00:00",
+    "completed_at": "2026-07-19T06:50:43.421733+00:00",
+    "result": "build_knowledge_index.py EMBED_PROVIDER=gemini 分支加 PaidGeminiDisabled guard（VOLPRED_ALLOW_PAID_GEMINI=1 break-glass），置於 get_client() provider 邊界；刻意 raise 非 sys.exit（library code，publisher fail-open 路徑 except Exception 需接得到，避開 2026-07-10 MissingEmbeddingCredentials 同款事故）。新增 scripts/tests/test_paid_gemini_embedding_guard.py 4 測試全綠 + CLI 實測擋下。全庫掃無其他 EMBED_PROVIDER 設定點，預設 openai 路徑未受影響。",
+    "burst_reported_at": "2026-07-19T06:50:43.427804+00:00"
+  },
+  {
+    "id": "assign_3df3d4c6",
+    "title": "snapaudit remediation：補齊遺漏 consumers 後重審",
+    "description": "Codex primary-path review FAIL（storage/ops/codex_reviews/audit_dup_snapshot_20260719_verdict.md，MAJOR-1）。audit_results.json 宣稱 44 consumers 全有 verdict，但 needs_compute_queue 自己列出的真實 snapshot readers 未納入 consumers_scanned：至少 experiments/k1380，以及 K1394、k1319、k1382、k1391、k1392、k1393、k1396、k1398、k1497、k1498、k1585、K1587。逐一建立 evidence-backed affected/unaffected/unresolved verdict；可用 window/dedup/frame identity 證明者不必重算，無法判定者把 paired rerun 逐項 enqueue compute queue。同步修正 README/status/summary denominator 與 conclusions_changed_by_the_contamination，重生 sha-pinned review template，再送 Codex primary-path review。FAIL 前禁止 merge wt/dispatch-slot-1-858545f9-snapaudit。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-19T06:56:34.847587+00:00",
+    "parent_task_id": "assign_7f508612",
+    "created_by": "codex-failover-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98"
   }
 ]
