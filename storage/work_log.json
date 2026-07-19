@@ -22001,5 +22001,15 @@
       "storage/assets/articles/oil_skew_crossasset_20260720.png"
     ],
     "notes": "fb_post_pending：Facebook MCP 需 OAuth，本 fire 為 non-interactive session 無法授權，已建 followup。"
+  },
+  {
+    "timestamp": "2026-07-20T01:12:17+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_1238781f",
+    "outcome": "in_progress",
+    "actor": "hourly-slot-1-b94e244168a4499b8f75a7068c835cfd",
+    "owner": "hourly-slot-1-b94e244168a4499b8f75a7068c835cfd",
+    "commit": null,
+    "summary": "PHASE A 收 timeout job `agent-brief_k741_nfp_canonical-837c1f`（split_required，parent budget 5400s，14:13Z 被砍）。\n\n**先驗證再判斷，結果與「timeout=沒做完」的預設相反**：worktree `dispatch-slot-1-5741c175-k741`（branch `k741-nfp-canonical`）工作區乾淨、6 個 commit 已落地、result artifact 在被砍前 9 分鐘寫出（`artifact_ok=True`）。agent 是在收尾階段撞到 deadline，不是在計算中途。故本班不重派，改依 split_contract 拆成兩段有界子階段。\n\n**子階段 1/2（本班完成，驗證）**：\n- 讀 `k741_nfp_event_study_canonical_results.json`：2×2 factorial（date source × mapping rule）四格齊全、`factor_decomposition` 各因子在另一因子固定下取邊際、`provenance` 含 194 官方 vs 195 proxy、161 完全相符、33 個月錯日、逐月 shift 明細。非空殼、非捏造。\n- 在 worktree 跑 `paper/volatility-absorption/reproduce.py`：**Matched 123/123，rate 100%，alert green，gate pass**。T5 全區塊（含 194 releases mapped / 0 exclusions / 0 lookahead 三個斷言）綠。\n- 人工比對 `main_v3.tex` §sec:nfp 表格與兩處 footnote：63/0.527/1.31/2.62/0.009、76/0.788/1.23/2.22/0.027、27/1.046/1.19/1.14/0.253、28/1.417/0.94/-0.34/0.731、overall 1.16×/p=0.051、N=194/3890 — 逐項對得上 JSON，無孤兒數字。\n- 跑完 reproduce.py 只動到 `reproduce_report.json` 的 `generated_at`，已 restore 保持 merge 乾淨。\n\n**子階段 2/2（已 enqueue，本班不等）**：`merge_worktree.sh --dry-run` 被 cert gate ABORT — `experiments/k741` 缺 `review_verdict.json`（審查裁決必須綁被審的 bytes）。已寫 round-2 primary-path review prompt（針對 round 1 三條 FAIL：B1 單一 delta 混淆兩因子 / B2 估計窗漏 21 天 pre-sample / B3 mapper 在市場休市日往回解析的 lookahead，逐條要求指出檔案與 JSON path 佐證）並 enqueue 為 split child：`compute-k741-k904-canonical-nfp-round-2-codex-primary-path-review-sp-1784481092`（`--timeout-parent-job-id agent-brief_k741_nfp_canonical-837c1f --split-stage codex_review --timeout 2700`，短於 parent）。followup brief 已寫明 PASS→產 verdict template→merge→knowledge→裁定 k528×7/k661×2 feed 更正；FAIL→依 bounded list 派 remediation、禁手改裁決檔；並註明子階段 1 的驗證不要重跑。\n\nparent followup 已 `mark-followup-dispatched`。source task `assign_1238781f` 維持 in_progress（合併未完成，等 round-2 裁決）。"
   }
 ]

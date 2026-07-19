@@ -32818,13 +32818,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T16:00:56+00:00",
+    "completed_at": "2026-07-19T17:00:59.886049+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T16:00:56+00:00",
-      "last_clean_observed_at": "2026-07-19T16:00:56+00:00"
+      "resolved_at": "2026-07-19T17:00:59.886049+00:00",
+      "last_clean_observed_at": "2026-07-19T17:00:59.886049+00:00"
     }
   },
   {
@@ -32836,13 +32836,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T16:39:32.548995+00:00",
+    "completed_at": "2026-07-19T17:13:28.789254+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T16:39:32.548995+00:00",
-      "last_clean_observed_at": "2026-07-19T16:39:32.548995+00:00"
+      "resolved_at": "2026-07-19T17:13:28.789254+00:00",
+      "last_clean_observed_at": "2026-07-19T17:13:28.789254+00:00"
     }
   },
   {
@@ -42626,7 +42626,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "created_at": "2026-07-19T06:44:06.492747+00:00",
     "source": "internal_alert_remediation_router",
     "tags": [
@@ -42679,14 +42679,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-c4e0245440784d9d85cc94a56c32f209"
+      },
+      {
+        "ts": "2026-07-19T16:50:03.143974+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-c4e0245440784d9d85cc94a56c32f209",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-19T14:05:01.965814+00:00",
-    "last_released_at": "2026-07-19T09:50:06.221592+00:00",
-    "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "hourly-slot-1-c4e0245440784d9d85cc94a56c32f209",
-    "claimed_at": "2026-07-19T14:05:00.820092+00:00",
-    "claim_session_id": "cf84fd6ba5da"
+    "last_released_at": "2026-07-19T16:50:03.143966+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "assign_26fb158e",
@@ -43704,7 +43708,7 @@
   {
     "id": "assign_3bfa0662",
     "title": "PHASE-Z 卡住檔案 incident（8511fbbdfcce0cb0）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n45 個未提交檔案不是任何一班 fire 產出的，最長已連續 94 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 9 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 19 班\n- config/runtime_schedules.json — 38 班\n- conftest.py — 33 班\n- experiments/k1380/README.md — 94 班\n- experiments/k1380/k1380.py — 94 班\n- experiments/k1380/k1380_losses_all.npy — 94 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 94 班\n- experiments/k1380/k1380_results.json — 94 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 94 班\n- experiments/k1380/k1380_spa_from_cache.py — 94 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 94 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 19 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 19 班\n- scripts/build_knowledge_index.py — 19 班\n- scripts/continue_task_dispatch.py — 24 班\n- scripts/daily_checkup.py — 38 班\n- scripts/detect_price_split_breaks.py — 24 班\n- scripts/dispatch_slot_budget.py — 11 班\n- scripts/dispatch_supervisor/phase_z.py — 11 班\n- scripts/dreaming_review.py — 38 班\n- scripts/fb_realchrome_post.py — 33 班\n- scripts/fix_0050_split_break.py — 24 班\n- scripts/gen_codex_cli_reference.py — 89 班\n- scripts/merge_worktree.sh — 33 班\n- scripts/reclaim_stale_worktrees.py — 38 班\n- scripts/repoint_snapshot_from_db.py — 19 班\n- scripts/supabase_sync.py — 33 班\n- scripts/task_pool_claim.py — 24 班\n- scripts/telegram_poll.py — 51 班\n- scripts/tests/test_merge_worktree.sh — 33 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T123338771430Z:<路徑>`\n- `git show refs/volpred/quarantine/20260719T160946739394Z:<路徑>`",
+    "description": "## 發生什麼\n45 個未提交檔案不是任何一班 fire 產出的，最長已連續 95 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 10 次觀察到這組）\n- config/experiment_artifact_exclusions.json — 20 班\n- config/runtime_schedules.json — 39 班\n- conftest.py — 34 班\n- experiments/k1380/README.md — 95 班\n- experiments/k1380/k1380.py — 95 班\n- experiments/k1380/k1380_losses_all.npy — 95 班\n- experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 95 班\n- experiments/k1380/k1380_results.json — 95 班\n- experiments/k1380/k1380_results_INVALID_20260716.json — 95 班\n- experiments/k1380/k1380_spa_from_cache.py — 95 班\n- experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py — 95 班\n- paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv — 20 班\n- paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv — 20 班\n- scripts/build_knowledge_index.py — 20 班\n- scripts/continue_task_dispatch.py — 25 班\n- scripts/daily_checkup.py — 39 班\n- scripts/detect_price_split_breaks.py — 25 班\n- scripts/dispatch_slot_budget.py — 12 班\n- scripts/dispatch_supervisor/phase_z.py — 12 班\n- scripts/dreaming_review.py — 39 班\n- scripts/fb_realchrome_post.py — 34 班\n- scripts/fix_0050_split_break.py — 25 班\n- scripts/gen_codex_cli_reference.py — 90 班\n- scripts/merge_worktree.sh — 34 班\n- scripts/reclaim_stale_worktrees.py — 39 班\n- scripts/repoint_snapshot_from_db.py — 20 班\n- scripts/supabase_sync.py — 34 班\n- scripts/task_pool_claim.py — 25 班\n- scripts/telegram_poll.py — 52 班\n- scripts/tests/test_merge_worktree.sh — 34 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260719T123338771430Z:<路徑>`\n- `git show refs/volpred/quarantine/20260719T160946739394Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
     "status": "pending",
@@ -43761,61 +43765,61 @@
         "tests/test_task_pool_claim.py"
       ],
       "streaks": {
-        "config/experiment_artifact_exclusions.json": 19,
-        "config/runtime_schedules.json": 38,
-        "conftest.py": 33,
-        "experiments/k1380/README.md": 94,
-        "experiments/k1380/k1380.py": 94,
-        "experiments/k1380/k1380_losses_all.npy": 94,
-        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": 94,
-        "experiments/k1380/k1380_results.json": 94,
-        "experiments/k1380/k1380_results_INVALID_20260716.json": 94,
-        "experiments/k1380/k1380_spa_from_cache.py": 94,
-        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": 94,
-        "paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv": 19,
-        "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv": 19,
-        "scripts/build_knowledge_index.py": 19,
-        "scripts/continue_task_dispatch.py": 24,
-        "scripts/daily_checkup.py": 38,
-        "scripts/detect_price_split_breaks.py": 24,
-        "scripts/dispatch_slot_budget.py": 11,
-        "scripts/dispatch_supervisor/phase_z.py": 11,
-        "scripts/dreaming_review.py": 38,
-        "scripts/fb_realchrome_post.py": 33,
-        "scripts/fix_0050_split_break.py": 24,
-        "scripts/gen_codex_cli_reference.py": 89,
-        "scripts/merge_worktree.sh": 33,
-        "scripts/reclaim_stale_worktrees.py": 38,
-        "scripts/repoint_snapshot_from_db.py": 19,
-        "scripts/supabase_sync.py": 33,
-        "scripts/task_pool_claim.py": 24,
-        "scripts/telegram_poll.py": 51,
-        "scripts/tests/test_merge_worktree.sh": 33,
-        "scripts/tests/test_paid_gemini_embedding_guard.py": 19,
-        "scripts/tests/test_phase_z_foreign_incident.py": 11,
-        "scripts/tests/test_phase_z_ownership_class_gate.py": 11,
-        "scripts/tests/test_phase_z_quarantine_checkpoint.py": 11,
-        "scripts/tests/test_scheduler_max_slots.py": 38,
-        "src/volpred/ops/dreaming_revalidate.py": 24,
-        "src/volpred/ops/foreign_incident.py": 11,
-        "src/volpred/ops/next_tasks.py": 54,
-        "storage/article_assets/tw-margin-vol-leadlag/evidence.json": 24,
-        "storage/work_log.json.bak_graphify_verdict_20260717": 94,
-        "tests/.!71268!test_task_pool_claim.py": 24,
-        "tests/test_dreaming_revalidate.py": 24,
-        "tests/test_dreaming_review.py": 38,
-        "tests/test_supabase_sync_cache_purge.py": 33,
-        "tests/test_task_pool_claim.py": 24
+        "config/experiment_artifact_exclusions.json": 20,
+        "config/runtime_schedules.json": 39,
+        "conftest.py": 34,
+        "experiments/k1380/README.md": 95,
+        "experiments/k1380/k1380.py": 95,
+        "experiments/k1380/k1380_losses_all.npy": 95,
+        "experiments/k1380/k1380_losses_all_INVALID_20260716.npy": 95,
+        "experiments/k1380/k1380_results.json": 95,
+        "experiments/k1380/k1380_results_INVALID_20260716.json": 95,
+        "experiments/k1380/k1380_spa_from_cache.py": 95,
+        "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py": 95,
+        "paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv": 20,
+        "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv": 20,
+        "scripts/build_knowledge_index.py": 20,
+        "scripts/continue_task_dispatch.py": 25,
+        "scripts/daily_checkup.py": 39,
+        "scripts/detect_price_split_breaks.py": 25,
+        "scripts/dispatch_slot_budget.py": 12,
+        "scripts/dispatch_supervisor/phase_z.py": 12,
+        "scripts/dreaming_review.py": 39,
+        "scripts/fb_realchrome_post.py": 34,
+        "scripts/fix_0050_split_break.py": 25,
+        "scripts/gen_codex_cli_reference.py": 90,
+        "scripts/merge_worktree.sh": 34,
+        "scripts/reclaim_stale_worktrees.py": 39,
+        "scripts/repoint_snapshot_from_db.py": 20,
+        "scripts/supabase_sync.py": 34,
+        "scripts/task_pool_claim.py": 25,
+        "scripts/telegram_poll.py": 52,
+        "scripts/tests/test_merge_worktree.sh": 34,
+        "scripts/tests/test_paid_gemini_embedding_guard.py": 20,
+        "scripts/tests/test_phase_z_foreign_incident.py": 12,
+        "scripts/tests/test_phase_z_ownership_class_gate.py": 12,
+        "scripts/tests/test_phase_z_quarantine_checkpoint.py": 12,
+        "scripts/tests/test_scheduler_max_slots.py": 39,
+        "src/volpred/ops/dreaming_revalidate.py": 25,
+        "src/volpred/ops/foreign_incident.py": 12,
+        "src/volpred/ops/next_tasks.py": 55,
+        "storage/article_assets/tw-margin-vol-leadlag/evidence.json": 25,
+        "storage/work_log.json.bak_graphify_verdict_20260717": 95,
+        "tests/.!71268!test_task_pool_claim.py": 25,
+        "tests/test_dreaming_revalidate.py": 25,
+        "tests/test_dreaming_review.py": 39,
+        "tests/test_supabase_sync_cache_purge.py": 34,
+        "tests/test_task_pool_claim.py": 25
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260719T123338771430Z",
         "refs/volpred/quarantine/20260719T160946739394Z"
       ],
-      "fires": 9,
+      "fires": 10,
       "first_seen_at": "2026-07-19T12:33:39.275027+00:00",
-      "last_seen_at": "2026-07-19T16:39:34.180201+00:00"
+      "last_seen_at": "2026-07-19T17:13:30.411243+00:00"
     },
-    "updated_at": "2026-07-19T16:39:34.180201+00:00"
+    "updated_at": "2026-07-19T17:13:30.411243+00:00"
   },
   {
     "id": "assign_580c1b3e",
@@ -43842,7 +43846,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "pending",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29688074038",
@@ -43850,9 +43854,6 @@
     "created_at": "2026-07-19T14:00:05.273251+00:00",
     "title": "CI 紅燈修復（run 29688074038, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29688074038\nattempt: 1\nhead_sha: 33cf84b8f\n偵測摘要（仍須讀完整 failed log）：2026-07-19T13:12:04.1751374Z > raise ValueError(\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29688074038 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "claimed_by": "hourly-slot-1-c4e0245440784d9d85cc94a56c32f209",
-    "claimed_at": "2026-07-19T14:03:19.603279+00:00",
-    "claim_session_id": "980ca1bc11c4",
     "status_history": [
       {
         "ts": "2026-07-19T14:03:19.603293+00:00",
@@ -43865,9 +43866,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-c4e0245440784d9d85cc94a56c32f209"
+      },
+      {
+        "ts": "2026-07-19T16:50:03.143986+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-c4e0245440784d9d85cc94a56c32f209",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-19T14:03:28.384458+00:00"
+    "started_at": "2026-07-19T14:03:28.384458+00:00",
+    "last_released_at": "2026-07-19T16:50:03.143984+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "release_pipeline_rootcause_r1_r4_20260719",
@@ -44199,5 +44209,19 @@
     "created_at": "2026-07-20T00:38:06.450789+08:00",
     "title": "FB 雙發佈補件：mile_903fd2cf（原油 vs 股市選擇權偏斜）",
     "description": "trending_repost mile_903fd2cf 已於 2026-07-20 00:37 發佈到 VolPred feed，但 FB 端未發。原因：Facebook MCP 需要 OAuth，該 fire 為 non-interactive session 無法完成授權。\n\n待辦：依 .claude/skills/fb-publishing/SKILL.md + trending-repost/references/fb-ivanlai-tone.md 發到 Ivan Lai FB。\n- 發前必先 get_page_text 查牆確認未發過\n- 主貼文 200-400 字改寫版、不放連結、不貼 feed 內文\n- 圖片：結果圖 storage/assets/articles/oil_skew_curve_20260720.png + 懶人包 storage/lazypack_jobs/oil_call_skew_20260720/panels/oilskew0720_2_results.png\n- 第一則留言放 https://volpred.zeabur.app/v3/reports/mile_903fd2cf\n- 文案必過 scripts/anti_ai_gate.py\n- 完成後回填 storage/reports/trending_repost_log.json 的 fb_post_status / fb_post_url\n\nparent_task_id: trending_repost_2026_07_19_地緣避險"
+  },
+  {
+    "id": "alert_host_cron_fail_20260719",
+    "title": "[alert] Host cron failure detected",
+    "description": "由 alert `host_cron_fail` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=critical（max_consecutive_failures=3；non_hang_failure=True）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\n- scheduler_last_status: ok\n- scheduler_age_minutes: 131775.8\n- failing_logs:\n  - storage/logs/cron/release_settings_audit.log exit=1 at 2026-07-19T17:00:08.716668+00:00 recency=fresh_or_unscheduled\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-19T17:01:09.304677+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "host_cron_fail"
+    ]
   }
 ]
