@@ -7,226 +7,266 @@
 **Results**: `k741_nfp_event_study_canonical_results.json`,
 `k904_task_s4_nfp_canonical_results.json`
 
+> **Revision note.** The first version of this document reported a single
+> "proxy vs canonical" delta and called it a *pure date-source effect*. **That was wrong**, and a
+> Codex review (2026-07-19, verdict FAIL) caught it along with two other defects. The two arms
+> differed in the event calendar *and* in the release→trading-day mapping, so the delta mixed two
+> factors; and the k741 estimation frame leaked 21 pre-sample control days. Both are fixed here,
+> and the headline numbers changed as a result. §7 records what the first version claimed and why
+> it was wrong, because the error is instructive.
+
 ---
 
-## 0. How to read this (the comparison is three-way, not two-way)
+## 0. Design: a 2×2, not a two-arm comparison
 
-The archived k741/k904 JSONs differ from any re-run in **two** ways at once: the event-date
-source *and* the price snapshot (they used live yfinance pulls; yfinance retroactively revises
-history — the paper documents this in §robustness). A naive archived-vs-canonical diff would
-confound the two.
+Correcting the calendar changes **two** things at once:
 
-So both scripts run **two arms on one identical pinned price snapshot**
-(`paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv`, the paper's own
-2026-04-19 pinned data):
+| factor | archived | corrected |
+|---|---|---|
+| **(1) date source** | first-Friday-of-month proxy | official BLS release dates (FRED/ALFRED release id 50) |
+| **(2) mapping rule** | k741 `[nd−1d, nd+3d]` take-first; k904 closest-within-±3d | forward-only: release date if it trades, else next trading day |
 
-| column | meaning |
-|---|---|
-| **Paper** | what `main_v3.tex` currently prints |
-| **Proxy (same data)** | first-Friday proxy re-estimated on the pinned snapshot |
-| **Canonical** | official BLS release dates on the *same* pinned snapshot |
+Factor (2) is not cosmetic. Both archived rules resolve **backward** when a release lands on a
+market holiday, returning the trading day *before* the release — a lookahead. It hits 5 Good Friday
+releases (2010-04-02, 2012-04-06, 2015-04-03, 2021-04-02, 2023-04-07), on which BLS published but
+US equity markets were shut.
 
-**Canonical − Proxy is the clean date-source effect.** Proxy − Paper is snapshot drift plus
-transcription, reported separately in §4.
+So we run the full 2×2 and quote a date effect **only at a fixed mapper**. All four cells share one
+pinned price snapshot (`paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv`,
+the paper's 2026-04-19 pinned data), so no cell-to-cell difference is yfinance drift.
 
-**Validation that the re-implementation is faithful**: the proxy arm reproduces the archived
-JSONs essentially to the digit.
+**Headline spec = official dates + forward mapper + 2010-01-01 estimation start.** It is the only
+cell with neither a proxy calendar nor a lookahead.
 
-| check | archived JSON | proxy arm (pinned) |
+### Fidelity check
+
+An `archived_reproduction` cell (proxy + archived mapper + unsliced frame) reproduces the archived
+JSONs before any fix, confirming the re-implementation is faithful:
+
+| check | archived JSON | reproduction |
 |---|---|---|
 | k741 ratio vs all | 1.14481 | 1.14497 |
-| k741 p vs all | 0.08138 | 0.08113 |
-| k741 Low n / mean\|r\| | 62 / 0.4982 | 62 / 0.498 |
-| k904 overall ratio | 1.142569 | 1.142565 |
-| k904 overall t / p | 1.79390 / 0.074220 | 1.794 / 0.07422 |
-| k904 Low ratio / t / p | 1.23023 / 1.73813 / 0.08690 | 1.230 / 1.74 / 0.0869 |
-
-Snapshot drift is therefore **negligible** for these statistics. Everything below is the date fix.
+| k741 *p* vs all | 0.08138 | 0.08106 |
+| k904 overall ratio | 1.142569 | 1.142670 |
+| k904 Low ratio / *t* / *p* | 1.23023 / 1.73813 / 0.08690 | 1.230 / 1.74 / 0.0869 |
 
 ---
 
 ## 1. Date diff: how contaminated was the proxy?
 
-Official source: FRED/ALFRED release id 50 ("Employment Situation") via
-`volpred.data.event_dates.nfp_release_dates`.
-
 | | count |
 |---|---|
 | Proxy event dates (2010-01 … 2026-03) | 195 |
-| Canonical release dates, same span | 194 |
+| Official release dates, same span | 194 |
 | **Exact date match** | **161** |
-| **Months where the date is wrong** | **33** |
+| **Months with a wrong date** | **33** |
 | **Phantom months (proxy invents an event)** | **1** |
 
-**34 of 195 proxy event slots (17.4%) are wrong** — materially worse than the sweep's
-"13 wrong dates" estimate.
-
-Failure modes:
+**34 of 195 proxy event slots (17.4%) are wrong** — materially worse than the sweep's "13 dates".
 
 | pattern | n | example | cause |
 |---|---|---|---|
-| `+7d` | 26 | 2010-01-01 → 2010-01-08 | The 1st of the month falls on a Friday. The prior month's data is not ready, so BLS releases on the **second** Friday. The proxy always takes the first. |
-| `−1d` | 4 | 2025-07-04 → 2025-07-03 | July 4 holiday: BLS releases **Thursday**. The proxy takes Friday (market closed) and then maps forward to Monday — off by 2 trading days. |
-| shutdown delay | 2 | 2025-11-07 → 2025-11-20 (+13d), 2025-12-05 → 2025-12-16 (+11d) | Government-shutdown catch-up schedule. |
+| `+7d` | 26 | 2010-01-01 → 2010-01-08 | The 1st falls on a Friday; reference-month data are not ready, so BLS releases on the **second** Friday. The proxy always takes the first. |
+| `−1d` | 4 | 2025-07-04 → 2025-07-03 | July 4 holiday: BLS releases **Thursday**. The proxy takes Friday (market closed), then maps to Monday — off by 2 trading days. |
+| shutdown delay | 3 | 2013-10-04 → 2013-10-22 (+18d); 2025-11-07 → 2025-11-20; 2025-12-05 → 2025-12-16 | Shutdown catch-up schedules. |
 | other | 1 | 2026-02-06 → 2026-02-11 (+5d) | Rescheduled release. |
-| **phantom** | 1 | proxy asserts **2025-10-03** | **No NFP was released in Oct 2025** — cancelled during the shutdown. The proxy scored an ordinary trading day as an event day. |
-| 2013 shutdown | 1 | 2013-10-04 → 2013-10-22 (+18d) | Included in the 33. |
-
-A separate defect the fix also had to address: the archived date→trading-day mapping searched
-`[nd−1d, nd+3d]` (k741) / "closest within ±3d" (k904) and so resolved **backward** to the trading
-day *before* the release when a release landed on a market holiday. That is a **lookahead**, and it
-bites 5 Good Friday releases (2010-04-02, 2012-04-06, 2015-04-03, 2021-04-02, 2023-04-07) on which
-BLS published but US equity markets were shut. The canonical arms map forward only. Recorded as
-`methodology_deltas` in both result JSONs.
+| **phantom** | 1 | proxy asserts **2025-10-03** | **No NFP was released in Oct 2025** (cancelled during the shutdown). The proxy scored an ordinary trading day as an event. |
 
 ---
 
-## 2. Overall NFP effect — abstract L43 / L72, Results L368
+## 2. The 2×2, overall effect (k741 spec: Student's *t*, all-non-NFP baseline)
 
-k741 spec (Student's *t*, `equal_var=True`; see §5 on the paper's "Welch" label).
+| cell | ratio vs all | *p* | ratio vs Fri | *p* |
+|---|---|---|---|---|
+| proxy + archived mapper | 1.14871 | 0.0737 | 1.1687 | 0.0550 |
+| proxy + forward mapper | 1.17789 | 0.0326 | 1.1968 | 0.0254 |
+| official + archived mapper | 1.15096 | 0.0702 | 1.1754 | 0.0472 |
+| **official + forward mapper (HEADLINE)** | **1.16307** | **0.0506** | **1.1871** | **0.0343** |
 
-| statistic | Paper | Proxy (same data) | **Canonical** | Δ vs Paper | significance flip? |
-|---|---|---|---|---|---|
-| ratio vs all non-NFP | 1.14 | 1.1450 | **1.1650** | **+0.025** | — |
-| *p* vs all non-NFP | 0.081 | 0.0811 | **0.0479** | **−0.033** | **⚑ YES — 10% marginal → 5% significant** |
-| ratio vs Fridays | 1.16 | 1.1648 | **1.1885** | **+0.029** | — |
-| *p* vs Fridays | 0.061 | 0.0605 | **0.0328** | **−0.028** | **⚑ YES — 10% marginal → 5% significant** |
-| Wilcoxon *p* vs all | 0.0037 | 0.0037 | **0.0006** | −0.0031 | already <1%, strengthens |
-| N_NFP | 195 | 195 | **194** | **−1** | phantom 2025-10 removed |
-| N_non-NFP | 3,909 | 3,910 | **3,911** | +2 | |
-| Total trading days | 4,104 | 4,105 | **4,105** | **+1** | pinned snapshot has 1 more day |
+### Marginal effects — the key result, and it is counterintuitive
 
-k904 corroboration (Welch, all-non-NFP baseline, window to 2026-04):
-
-| statistic | Proxy (same data) | **Canonical** | flip? |
+| effect | holding fixed | change | verdict |
 |---|---|---|---|
-| overall ratio | 1.1426 | **1.1624** | — |
-| overall *p* | 0.0742 | **0.0401** | **⚑ 10% → 5%** |
-| vs-Friday ratio | 1.1634 | **1.1871** | — |
-| vs-Friday *p* | 0.0683 | **0.0361** | **⚑ 10% → 5%** |
+| **date source** | archived mapper | 1.1487 → 1.1510 (*p* 0.0737 → 0.0702) | **negligible** |
+| **date source** | forward mapper | 1.1779 → 1.1631 (*p* 0.0326 → **0.0506**) | official dates **WEAKEN** the pooled result |
+| **mapping rule** | official dates | 1.1510 → 1.1631 (*p* 0.0702 → 0.0506) | the material driver |
 
-**Two independent scripts, two sample windows, two test variants converge on the same canonical
-answer** (1.165 vs 1.162 overall; 1.189 vs 1.187 vs-Friday). The corroboration is real, not shared code.
+**On the pooled overall statistic, fixing the calendar does almost nothing; fixing the lookahead
+does the work.** And at the correct mapper, the official calendar makes the pooled ratio *smaller*,
+not larger. Any writeup attributing the movement to "using real BLS dates" is misattributing it.
+
+k904 (Welch, window to 2026-04) reproduces the same pattern independently:
+
+| cell | ratio | *p* |
+|---|---|---|
+| proxy + archived | 1.14267 | 0.0740 |
+| proxy + forward | 1.17458 | 0.0295 |
+| official + archived | 1.14488 | 0.0659 |
+| **official + forward (HEADLINE)** | **1.15983** | **0.0424** |
 
 ---
 
-## 3. Regime table `tab:nfp` — main_v3.tex L375–391
+## 3. Where the date fix *does* matter: the regime pattern
 
-| Regime | n Paper | **n Canon** | \|r\| Paper | **\|r\| Canon** | ratio Paper | **ratio Canon** | *t* Paper | ***t* Canon** | *p* Paper | ***p* Canon** | flip? |
+The pooled statistic hides the real effect. By regime (ratio / *p*):
+
+| cell | Low (V<15) | Medium (15–20) | Elevated (20–25) | High (V≥25) |
+|---|---|---|---|---|
+| proxy + archived | 1.230 / 0.050 | 1.175 / 0.090 | 1.187 / 0.244 | 0.985 / 0.936 |
+| proxy + forward | 1.232 / 0.046 | 1.223 / 0.032 | 1.223 / 0.164 | **1.010 / 0.959** |
+| official + archived | 1.299 / 0.011 | 1.194 / 0.060 | 1.186 / 0.254 | 0.936 / 0.731 |
+| **official + forward** | **1.305 / 0.009** | **1.230 / 0.027** | **1.186 / 0.254** | **0.936 / 0.731** |
+
+**Holding the mapper at forward, the calendar fix moves Low 1.232 → 1.305 and High 1.010 → 0.936.**
+Under the proxy calendar the High-VIX cell sits *at* 1.0 (no absorption); under the official
+calendar it drops clearly below 1.0. **The High-VIX cell is exactly the cell the absorption claim
+depends on**, so the calendar fix matters where it counts even though it barely moves the pooled
+average. This is the opposite of the story the pooled statistic tells, and it is why the
+decomposition had to be done properly.
+
+---
+
+## 4. Paper table `tab:nfp`: published vs corrected
+
+| Regime | n Paper | **n New** | \|r\| Paper | **\|r\| New** | ratio Paper | **ratio New** | *t* Paper | ***t* New** | *p* Paper | ***p* New** | flip? |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| Low (V<15) | 62 | **63** | 0.498 | **0.527** | 1.24 | **1.305** | 1.85 | **2.62** | 0.069 | **0.0089** | **⚑⚑ UPGRADE: 10% marginal → 1% significant** |
-| Medium (15–20) | 78 | **76** | 0.757 | **0.788** | 1.30 | **1.232** | 2.69 | **2.23** | 0.009 | **0.0257** | **⚑ DOWNGRADE: 1% → 5%** |
-| Elevated (20–25) | 27 | 27 | 1.022 | **1.046** | 1.18 | **1.198** | 1.10 | **1.21** | 0.279 | **0.2257** | not significant either way |
-| High (V≥25) | 28 | 28 | 1.488 | **1.417** | 0.95 | **0.936** | −0.29 | **−0.34** | 0.777 | **0.7312** | not significant either way |
+| Low (V<15) | 62 | **63** | 0.498 | **0.527** | 1.24 | **1.31** | 1.85 | **2.62** | 0.069 | **0.009** | **⚑⚑ 10% marginal → 1%** |
+| Medium (15–20) | 78 | **76** | 0.757 | **0.788** | 1.30 | **1.23** | 2.69 | **2.22** | 0.009 | **0.027** | **⚑ 1% → 5%** |
+| Elevated (20–25) | 27 | 27 | 1.022 | **1.046** | 1.18 | **1.19** | 1.10 | **1.14** | 0.279 | **0.254** | ns → ns |
+| High (V≥25) | 28 | 28 | 1.488 | **1.417** | 0.95 | **0.94** | −0.29 | **−0.34** | 0.777 | **0.731** | ns → ns |
 
-k904 canonical regimes agree: Low 1.305 (*p*=0.0260), Medium 1.230 (*p*=0.0285),
-Elevated 1.188 (*p*=0.2628), High 0.935 (*p*=0.7032).
+Overall: 1.14× (*p*=0.081) → **1.16× (*p*=0.051)**; vs Fridays 1.16× (*p*=0.061) → **1.19×
+(*p*=0.034)**. N_NFP 195 → **194**; total trading days 4,104 → **4,084**.
 
-### Direction and structure: intact, and cleaner
+### Verdict: numbers move, narrative holds — but do NOT upgrade the significance language
 
-- **No sign flips.** Every regime keeps its side of 1.0; High stays below 1.0 (0.936).
-- **The absorption gradient is now monotone.** Published: 1.24 → 1.30 → 1.18 → 0.95 (Medium
-  *above* Low, a bump the paper never explained). Canonical: **1.305 → 1.232 → 1.198 → 0.936**,
-  a clean monotone decline in ambient fear — *more* consistent with the absorption hypothesis,
-  not less.
-- **Net significance improves.** Overall crosses into 5%; Low gains two thresholds; Medium loses
-  one (1% → 5%, still significant). Nothing that was significant becomes insignificant.
+- **No sign flips.** Every regime keeps its side of 1.0; High stays below 1.0.
+- **The gradient is monotone**: 1.31 → 1.23 → 1.19 → 0.94, versus the published non-monotone
+  1.24 → 1.30 → 1.18 → 0.95. Cleaner, and more consistent with absorption.
+- **The pooled overall effect is still only marginal** (*p*=0.051). It did **not** cross into 5%.
+  An intermediate version of this work claimed it did; that claim came from the window leak (§5)
+  and is retracted.
+- The regime-level evidence (1% in calm, absent in crisis) is what carries the absorption reading.
 
-**Verdict: this is the "numbers move, narrative holds" branch of the brief.** No downgrade or
-removal of §sec:nfp is warranted. The corrected evidence supports the paper's claim more strongly
-than the contaminated evidence did.
+**No downgrade or removal of §sec:nfp is warranted.** `main_v3.tex` has been updated in place, with
+the significance language kept at "marginal at the 10% level" for the pooled statistic.
 
 ---
 
-## 4. ⚠️ Second, independent defect found: the published ratio/*t*/*p* are untraceable
+## 5. ⚠️ Window leak in the archived k741 (found by Codex review)
 
-While validating, the proxy arm reproduced the archived `n` and `mean|r|` **exactly** — but **not**
-the paper's `ratio`, `t`, and `p` columns:
+The archived k741 built its frame from `2009-12-01` (warm-up for `VIX_prev`) and then used the
+**whole frame** as the non-NFP control — putting **21 Dec-2009 control days** into a sample the
+paper describes as "January 2010 to March 2026". The archived numbers are not the window they claim.
 
-| Regime | Paper ratio/*t*/*p* | proxy repro (k741 spec) | archived k904 (Welch) |
+Material, and right at the decision boundary:
+
+| estimation start | ratio | *p* |
+|---|---|---|
+| 2009-12-01 (archived behaviour) | 1.16495 | **0.0479** |
+| **2010-01-01 (corrected)** | **1.16307** | **0.0506** |
+
+The leak is the entire difference between "significant at 5%" and "not". The corrected script keeps
+the warm-up for lag construction but slices to `2010-01-01` before estimating.
+k904 already sliced correctly and is unaffected.
+
+---
+
+## 6. ⚠️ Two further defects, independent of the proxy
+
+### 6a. The published ratio/*t*/*p* columns trace to no archived experiment
+
+The reproduction matches the archived `n` and `mean|r|` exactly but **not** the paper's
+`ratio`/`t`/`p`:
+
+| Regime | Paper | reproduction (k741 spec) | archived k904 (Welch) |
 |---|---|---|---|
 | Low | 1.24 / 1.85 / 0.069 | 1.230 / 1.97 / 0.0495 | 1.230 / 1.74 / 0.0869 |
-| Medium | **1.30 / 2.69 / 0.009** | **1.181 / 1.77 / 0.0775** | **1.175 / 1.70 / 0.0919** |
-| Elevated | 1.18 / 1.10 / 0.279 | 1.169 / 1.04 / 0.2997 | 1.149 / 0.91 / 0.3701 |
+| Medium | **1.30 / 2.69 / 0.009** | **1.175 / 1.72 / 0.0899** | **1.175 / 1.70 / 0.0919** |
 | High | 0.95 / −0.29 / 0.777 | 0.985 / −0.08 / 0.9358 | 0.984 / −0.09 / 0.9256 |
 
-I scanned **8 plausible spec variants** (VIX_prev vs contemporaneous VIX × all-non-NFP vs
-Friday-only baseline × Student vs Welch). **None reproduces the published row**, and Medium
-(1.30×, *p*=0.009) is far outside all of them.
+Eight plausible spec variants (VIX_prev vs contemporaneous × all-non-NFP vs Friday baseline ×
+Student vs Welch) were scanned; **none reproduces the published row**, and Medium (1.30×, *p*=0.009)
+is far outside all of them.
 
-**Root cause of the miss**: `paper/volatility-absorption/reproduce.py` binds only the regime `n`
-and `mean_abs` (lines 144–147) and the *overall* ratios (139–143). **It never binds the regime
-ratio/*t*/*p*.** Those three columns were transcribed from an older draft's stdout and no
-reproducibility check has ever covered them.
+**Root cause**: `reproduce.py` bound only the regime `n` and `mean_abs` — **never** ratio/*t*/*p*.
+Those columns were transcribed from an older draft's stdout and no reproducibility check ever
+covered them. Not listed in `errata_pending.md`.
 
-This is **independent of the proxy defect** and would have survived the date fix. The canonical
-re-run resolves both at once, because the new JSONs now *persist* regime ratio/*t*/*p* — so
-`reproduce.py` can bind them. **Recommend the main thread add those bindings** (not done here:
-`reproduce.py` is paper infrastructure, outside a worktree agent's remit).
+**Fixed here**: the canonical JSONs persist regime ratio/*t*/*p*, and `reproduce.py` now binds all
+six columns per regime (gate: 112/112, 100%, green).
 
-Not listed in `errata_pending.md`, which covers only the K903/K904 snapshot drifts.
+### 6b. "Welch's *t*-tests" is the wrong label
 
----
-
-## 5. ⚠️ Third defect: the paper calls these "Welch's *t*-tests" — they are not
-
-`main_v3.tex` L72 and §sec:nfp label the overall NFP numbers "Welch's *t*-tests". Those values
-(1.14, *p*=0.081; 1.16, *p*=0.061) come from k741, which calls
-`stats.ttest_ind(nfp_abs, non_abs)` — scipy's default is `equal_var=True`, i.e. **Student's**
-pooled-variance *t*-test. k741 never passes `equal_var=False`. (Sibling k904 *does* use Welch,
-which is likely where the label leaked in from.)
-
-Purely a labelling error — independent of the date proxy. The canonical k741 arm keeps
-`equal_var=True` for 1:1 comparability, so **the label must be corrected in the tex**, or the
-statistic switched to Welch deliberately. Both canonical arms are significant at 5% either way
-(Student *p*=0.0479, Welch *p*=0.0401), so the choice does not affect any claim.
+`main_v3.tex` labelled the k741-sourced numbers "Welch's *t*-tests". k741 calls
+`stats.ttest_ind(...)` with scipy's default `equal_var=True` — **Student's** pooled-variance test.
+(Sibling k904 does use Welch, which is likely where the label leaked in.) Corrected in the tex to
+"two-sample *t*-tests". Both variants are close here (Student *p*=0.0506, Welch *p*=0.0424), but
+note they straddle 5% — **the 5% call is spec-dependent**, which is itself a reason to keep the
+pooled language at "marginal".
 
 ---
 
-## 6. Feed back-correction: assessment only (not executed)
+## 7. What the first version of this document got wrong
+
+Recorded because the failure mode is reusable, not to pad the report.
+
+| claim | why it was wrong |
+|---|---|
+| "canonical − proxy is a pure date-source effect" | The two arms also differed in the mapping rule. The reported movement was mostly the **mapping** fix. Correct design is the 2×2 in §2. |
+| "overall *p* 0.081 → 0.048, crosses into 5%" | Both the confound above and the §5 window leak. Corrected value is **0.0506** — still marginal. |
+| "significant at the 5% level" written into `main_v3.tex` | Same root cause. Reverted to "marginal at the 10% level". |
+
+**Lesson**: when a fix changes two things at once, a two-arm comparison cannot identify either. The
+factorial costs one extra run and is the only honest way to attribute the movement. The failure was
+not arithmetic — every individual number was correctly computed — it was **attribution**.
+
+---
+
+## 8. Feed back-correction: assessment only (not executed)
 
 Per brief, judgement only — no `storage/` writes, no publishing.
 
 | K | feed articles | uses NFP dates? | recommendation |
 |---|---|---|---|
-| k528 | 7 | yes — same first-Friday proxy | **Erratum warranted for any article quoting a *p*-value or a "not significant" verdict**; headline direction is unchanged |
-| k661 | 2 | yes — same proxy | **Same**, plus check the "VIX>25 NFP effect vanishes" claim, which survives (0.936×, *p*=0.73) |
+| k528 | 7 | yes — same first-Friday proxy | **Erratum on the subset quoting statistics**; qualitative conclusions stand |
+| k661 | 2 | yes — same proxy | **Same**; its "VIX>25 NFP effect vanishes" claim *survives and strengthens* (0.936×, and under the proxy that cell was 1.01×, i.e. no effect at all) |
 
-Reasoning: the *direction* of every NFP claim survives the correction, so no article is
-**wrong in its conclusion**. What changed is **strength**: several results move from "marginally
-significant / not significant at 5%" to "significant at 5%", and Low-VIX moves to 1%. An article
-that told readers "the NFP effect is *not* statistically robust" is now understating the
-corrected evidence.
+Reasoning: no article's **direction** is overturned. What moved is strength, in both directions
+(Low upgraded to 1%, Medium downgraded to 5%, pooled overall still marginal). So this is an
+**erratum, not a retraction**.
 
-**Recommended scope: erratum note, not retraction, on the subset that quotes statistics.**
-Articles that only describe the qualitative pattern (NFP matters more in calm markets, vanishes in
-crises) need no change — that pattern is *strengthened*.
+**Two facts are now provably wrong wherever they appear** and are the thing to grep for first:
 
-**Caveat on my own confidence here**: I did not read the 9 articles. This ranking is inferred from
-the K-ids in the sweep report and the statistics that moved. The main thread should grep the actual
-article bodies for quoted *p*-values and N before deciding. The one thing I would check first is
-whether any article cites **N=195 NFP days** or **2025-10-03** as an event date — both are now
-provably wrong, independent of any significance question.
+1. **"195 NFP days"** — the correct count is 194.
+2. **2025-10-03 cited as an NFP release date** — no Employment Situation report was published that
+   month.
+
+**Caveat on my confidence**: I did not read the 9 articles. This ranking is inferred from the K-ids
+in the sweep report and from which statistics moved. The main thread should grep the article bodies
+for quoted *p*-values, `N = 195`, and `2025-10` before deciding scope.
 
 ---
 
-## 7. What I did not do / am not certain about
+## 9. What I did not do / am not certain about
 
-- **No Codex review yet.** `.claude/rules/experiments.md` makes Codex review the gate before
-  `knowledge.json`. Not run here; the main thread owns that gate.
+- **Codex re-review not run after these fixes.** The first review returned **FAIL** on exactly the
+  defects fixed above; the corrected scripts have **not** been re-reviewed. Under
+  `.claude/rules/experiments.md` the merge gate needs a fresh `review_verdict.json` pinned to the
+  current sha, so **a re-review is required before merge** — this is the single most important open
+  item.
 - **Parts C/D of k741 not re-run** (sector dispersion, NFP-day strategy). Verified by grep that
-  `main_v3.tex` cites neither, and they need sector ETFs absent from the pinned snapshot. If they
-  are ever published, they carry the same contamination.
-- **`task_s2_shock_types` deliberately untouched**, per brief — it keys on |ΔVIX|>2 and never
-  reads an NFP date.
+  `main_v3.tex` cites neither; they need sector ETFs absent from the pinned snapshot. If ever
+  published, they carry the same contamination.
+- **`task_s2_shock_types` deliberately untouched** — keys on |ΔVIX|>2, never reads an NFP date.
 - **`paper/volatility-absorption/experiments/k904_paper8_shock_nfp_fix.py` is a stale copy** of the
-  main `experiments/k904/` script. I did not modify it (paper-directory files are outside a
-  worktree agent's remit). **Recommend the main thread sync or delete it** — `reproduce.py` reads
-  the paper-directory copy's *results* JSON, so a divergent copy is a live reproducibility hazard.
-- **Snapshot choice is a judgement call I made**: pinned CSV over a fresh yfinance pull, to make
-  the date effect identifiable and the result reproducible in future. It means the canonical
-  numbers are on the paper's 2026-04-19 pinned snapshot rather than k741's original live pull. The
-  proxy-arm validation in §0 shows this costs essentially nothing, but it is a deviation worth
-  knowing about.
-- **The 4,104 → 4,105 total-trading-day change** is from the pinned snapshot, not the date fix. I
-  did not chase which single day differs from the archived live pull.
+  main script; not modified. Recommend the main thread sync or delete it.
+- **`reproduce.py` was modified** (bindings repointed to the canonical JSON). This is a paper-
+  directory file, which a worktree agent would normally leave alone — but `main_v3.tex` and the
+  gate must agree, and per `.claude/rules/paper-workflow.md` the gate is a submission precondition.
+  Flagging it explicitly for main-thread review.
+- **Snapshot choice is a judgement call**: pinned CSV over a fresh yfinance pull, so the factorial
+  is identifiable and the result reproducible later. The fidelity check in §0 shows it costs
+  essentially nothing.
+- **`FRED_API_KEY` is required** to re-run either canonical script (`use_cache=False`, so it calls
+  ALFRED live). It is not in the worktree `.env`; it was read from the main repo's `.env.local`.

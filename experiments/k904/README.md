@@ -7,9 +7,18 @@
 > - 新增 `k904_task_s4_nfp_canonical.py` / `k904_task_s4_nfp_canonical_results.json`。
 > - **`task_s2_shock_types` 未重跑也未更動** —— 它以 |ΔVIX|>2 分類，從不讀取 NFP 日期，
 >   proxy 缺陷碰不到它。重跑只會注入快照雜訊。
-> - 重跑結果：overall ratio 1.1426 → **1.1624**（p 0.0742 → **0.0401**），
->   Low 1.230 → **1.305**、High 0.984 → **0.935**。無符號翻轉，顯著性淨改善。
-> - proxy arm 逐位重現封存 JSON（1.142565 vs 1.142569），證明重寫忠實。
+> - **設計是 2×2 factorial**（日期來源 × mapping 規則），不是兩臂對照 ——
+>   修日曆會同時改「日期」與「release→trading-day 對應」，混在一起報會把 lookahead 修正
+>   誤歸因給日曆。第一版犯了這個錯，由 Codex review 判 FAIL 抓出。
+> - headline（official + forward mapper）：overall ratio **1.1598**（p **0.0424**）、
+>   Low **1.305**、High **0.935**。無符號翻轉。
+> - 分解：固定 archived mapper 時純日期效應 1.1427 → 1.1449（幾乎沒動）；
+>   真正推動 pooled 數字的是 mapper 修正。
+> - **endpoint 修正**：2026-04-03 是 Good Friday（BLS 有發、美股休市），reaction 日是
+>   2026-04-06。原本價格窗切在 2026-04-05，導致該事件在 official arm 被**靜默丟棄**
+>   而 proxy arm 卻往回對應到 04-02。價格窗已延到 2026-04-06，兩臂都是 195/195 完整對應。
+> - proxy arm 逐位重現封存 JSON（1.142670 vs 1.142569），證明重寫忠實。
+> - ⚠️ 修正後的腳本**尚未經 Codex 複審**，merge 前需重審。
 > - 完整對照與根因：`experiments/k741/nfp_canonical_vs_proxy_comparison.md`。
 > - ⚠️ `paper/volatility-absorption/experiments/k904_paper8_shock_nfp_fix.py` 是本檔的**過時副本**，
 >   本次未動（論文目錄不在 worktree agent 權限內）。建議主線程同步或刪除。

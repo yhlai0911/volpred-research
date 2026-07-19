@@ -62,40 +62,66 @@ Canonical 版只重跑論文引用的 Part A / Part B。原版 Part C（sector d
 33 個月份日期錯（26 個是「當月 1 號剛好是週五 → BLS 其實在第二個週五發布」），
 外加 1 個幻影月（2025-10 因政府停擺根本沒發布，proxy 卻把一個普通交易日當事件日）。
 
-另外修掉一個原版的 **lookahead**：原本 date→trading-day 對應會往回找（`[nd-1d, nd+3d]` 取第一個），
-遇到 release 落在休市日時會取到**發布前一個交易日**。影響 5 個 Good Friday
-（2010-04-02、2012-04-06、2015-04-03、2021-04-02、2023-04-07）。canonical 版只往前對應。
+### 為什麼是 2×2 factorial，不是兩臂對照
 
-### 結論：方向不變，且比污染版更乾淨
+修正日曆會**同時改兩件事**：(1) 日期來源、(2) release→trading-day 對應規則。
+原版對應規則遇到 release 落在休市日時會往回取到**發布前一個交易日**（lookahead），
+影響 5 個 Good Friday（2010-04-02、2012-04-06、2015-04-03、2021-04-02、2023-04-07）。
 
-兩個 arm（proxy / canonical）跑在**同一份 pinned 價格快照**上，所以差異是純日期效應。
-proxy arm 幾乎逐位重現封存 JSON（ratio 1.14497 vs 1.14481），證明重寫忠實、快照漂移可忽略。
+本檔第一版把兩者混在一起報成「純日期效應」—— **那是錯的**，由 Codex review
+（2026-07-19, verdict FAIL）抓出。現改為完整 2×2，日期效應只在**固定 mapper** 下引用。
+
+**關鍵且反直覺的結果**：在 pooled overall 統計上，修日曆幾乎沒動（1.1487 → 1.1510），
+真正推動數字的是**修 lookahead**；而且在正確 mapper 下，官方日曆反而讓 pooled ratio **變小**
+（1.1779 → 1.1631）。但在 **regime 層次**日期修正就很關鍵：High-VIX cell 從
+proxy 的 1.010（等於沒有 absorption）掉到 official 的 0.936 —— 那正是 absorption 主張所依賴的 cell。
+
+### 另一個被抓到的缺陷：樣本窗洩漏
+
+原版 frame 從 2009-12-01 建起（VIX_prev warm-up），卻把**整個 frame** 當 control，
+讓 21 個 2009-12 的日子進了論文宣稱的「2010-01 起」樣本。這在決策邊界上是決定性的：
+
+| 估計起點 | ratio | p |
+|---|---|---|
+| 2009-12-01（原版行為） | 1.16495 | **0.0479** |
+| **2010-01-01（修正）** | **1.16307** | **0.0506** |
+
+洩漏本身就是「5% 顯著」與「不顯著」的全部差距。k904 原本就切對，不受影響。
+
+### 結論：方向不變，但**不可**上調顯著性措辭
 
 | 統計量 | 論文原值 | canonical | 變化 |
 |---|---|---|---|
-| Overall ratio vs all | 1.14 (p=0.081) | **1.16 (p=0.048)** | ⚑ 10% marginal → 5% 顯著 |
-| Overall ratio vs Friday | 1.16 (p=0.061) | **1.19 (p=0.033)** | ⚑ 10% marginal → 5% 顯著 |
+| Overall ratio vs all | 1.14 (p=0.081) | **1.16 (p=0.051)** | 仍為 10% marginal，**未跨 5%** |
+| Overall ratio vs Friday | 1.16 (p=0.061) | **1.19 (p=0.034)** | 5% 顯著 |
 | Low (V<15) | 1.24 (p=0.069, n=62) | **1.31 (p=0.009, n=63)** | ⚑⚑ 升到 1% 顯著 |
-| Medium (15–20) | 1.30 (p=0.009, n=78) | **1.23 (p=0.026, n=76)** | ⚑ 1% → 5%（仍顯著） |
-| Elevated (20–25) | 1.18 (p=0.279) | **1.20 (p=0.226)** | 兩者皆不顯著 |
+| Medium (15–20) | 1.30 (p=0.009, n=78) | **1.23 (p=0.027, n=76)** | ⚑ 1% → 5%（仍顯著） |
+| Elevated (20–25) | 1.18 (p=0.279) | **1.19 (p=0.254)** | 兩者皆不顯著 |
 | High (V≥25) | 0.95 (p=0.777) | **0.94 (p=0.731)** | 兩者皆不顯著 |
 
-**沒有任何符號翻轉。** 修正後 regime 梯度變成**單調遞減**（1.31 → 1.23 → 1.20 → 0.94），
-比原本 Medium 高於 Low 的凸起更符合 absorption 假說。整體顯著性淨改善。
-→ 論文 NFP 小節**不需降級或移除**，`main_v3.tex` 已直接更新數字。
+**沒有任何符號翻轉**，且 regime 梯度變成**單調遞減**（1.31 → 1.23 → 1.19 → 0.94），
+比原本 Medium 高於 Low 的凸起更符合 absorption 假說。
+→ 論文 NFP 小節**不需降級或移除**；`main_v3.tex` 已更新，pooled 措辭維持
+「marginal at the 10% level」（本檔第一版誤寫成 5% 顯著，已撤回）。
 
-k904 `task_s4_nfp` 同步重跑（`experiments/k904/k904_task_s4_nfp_canonical.py`），
-不同視窗、不同檢定（Welch）獨立得到一致答案（overall 1.162、Low 1.305、High 0.935），
-是真佐證而非共用程式碼的假一致。
+k904 獨立佐證（不同視窗、Welch）：overall 1.160 (p=0.042)、Low 1.305、High 0.935。
+注意 k741 (Student, p=0.0506) 與 k904 (Welch, p=0.0424) **跨在 5% 兩側**——
+5% 的判定是 spec-dependent，這也是 pooled 措辭要保守的理由。
 
-### 另外發現的兩個獨立缺陷（非本次 proxy 造成）
+### 另外發現的兩個獨立缺陷（非 proxy 造成）
 
-1. **論文表格的 ratio / t / p 三欄無法追溯到任何實驗**。proxy arm 能逐位重現 `n` 與 `mean|r|`，
-   但重現不出論文的 ratio/t/p（Medium 論文 1.30/2.69/0.009，實際 1.181/1.77/0.078）。
-   掃過 8 種 spec 變體皆不符。根因：`reproduce.py` 只綁定 regime 的 `n` 與 `mean_abs`，
-   **從未綁定 ratio/t/p**，所以這三欄從來沒被復現檢查覆蓋過。canonical JSON 已把它們寫進檔案，
-   建議主線程補上 binding。
+1. **論文表格的 ratio / t / p 三欄無法追溯到任何實驗**。重現能逐位對上 `n` 與 `mean|r|`，
+   但對不上 ratio/t/p（Medium 論文 1.30/2.69/0.009，實際 1.175/1.72/0.090）。
+   掃過 8 種 spec 變體皆不符。根因：`reproduce.py` 只綁 regime 的 `n` 與 `mean_abs`，
+   **從未綁 ratio/t/p**。已修：canonical JSON 存下這些值，`reproduce.py` 改綁 canonical
+   並補齊每個 regime 六欄（gate 112/112, 100%, green）。
 2. **論文把這些檢定標成 "Welch's t-tests"，但 k741 用的是 Student's**
    （`stats.ttest_ind` 預設 `equal_var=True`）。已在 tex 改為 "two-sample $t$-tests"。
 
-細節與 feed 回溯建議見 `nfp_canonical_vs_proxy_comparison.md`。
+### ⚠️ 未完成：Codex 尚未複審
+
+第一輪 Codex review 對上述缺陷判 **FAIL**；修正後的腳本**尚未重審**。
+依 `.claude/rules/experiments.md`，merge 需要一份 pin 住現行 sha 的 `review_verdict.json`
+→ **合併前必須重跑 Codex review**。
+
+細節、2×2 全表與 feed 回溯建議見 `nfp_canonical_vs_proxy_comparison.md`。

@@ -41,7 +41,10 @@ def approx(actual: float, paper: float, tol_pct: float) -> bool:
 
 
 def main() -> int:
-    k741 = load_json(PAPER_DIR / "experiments" / "k741_nfp_event_study_results.json")
+    # Canonical BLS-calendar re-run (2026-07-19). The archived proxy JSON at
+    # PAPER_DIR/experiments/k741_nfp_event_study_results.json is retained for history but is
+    # NO LONGER the gate source: it identifies NFP days by a first-Friday proxy.
+    k741 = load_json(PROJECT / "experiments" / "k741" / "k741_nfp_event_study_canonical_results.json")
     k903 = load_json(PROJECT / "experiments" / "k903" / "k903_paper8_robustness_results.json")
     k1418 = load_json(PROJECT / "experiments" / "k1418" / "k1418_results.json")
     k1686 = load_json(PROJECT / "experiments" / "k1686" / "k1686_contemporaneous_null_results.json")
@@ -56,6 +59,7 @@ def main() -> int:
     mech = k1686["mechanism_diagnostic_within_regime_shock_rate"]
     calib = k1686["calibration_diagnostics"]
     nfp = k741["part_a_historical"]
+    nfp_reg = k741["part_b_vix_regimes"]
 
     claims = [
         # ---- Table 2: regime distribution (pinned; days = n_shock + n_normal) ----
@@ -136,15 +140,37 @@ def main() -> int:
         ("AppB TLT adjR2", 0.0290, cross_asset["TLT"]["r2_adj"], 3.0, "k1418.results[TLT].r2_adj"),
         ("AppB 0050 adjR2", -0.0013, cross_asset["0050.TW"]["r2_adj"], 5.0, "k1418.results[0050.TW].r2_adj"),
         # ---- Table 5 / NFP (C5) ----
-        ("T5 NFP ratio vs all", 1.14, nfp["ratio_vs_all"], 1.0, "k741.part_a_historical.ratio_vs_all"),
-        ("T5 NFP p vs all", 0.081, nfp["p_vs_all"], 1.0, "k741.part_a_historical.p_vs_all"),
-        ("T5 NFP ratio vs Friday", 1.16, nfp["ratio_vs_friday"], 1.0, "k741.part_a_historical.ratio_vs_friday"),
-        ("T5 NFP p vs Friday", 0.061, nfp["p_vs_friday"], 1.0, "k741.part_a_historical.p_vs_friday"),
-        ("T5 NFP total days 4104", 4104.0, float(nfp["n_nfp"] + nfp["n_non_nfp"]), 0.0, "k741.part_a_historical n_nfp+n_non_nfp"),
-        ("T5 Low NFP n", 62.0, float(k741["part_b_vix_regimes"]["Low (VIX<15)"]["n"]), 0.0, "k741.part_b_vix_regimes.Low.n"),
-        ("T5 Low NFP mean abs", 0.498, k741["part_b_vix_regimes"]["Low (VIX<15)"]["mean_abs_return_pct"], 1.0, "k741.part_b_vix_regimes.Low.mean_abs_return_pct"),
-        ("T5 Medium NFP mean abs", 0.757, k741["part_b_vix_regimes"]["Medium (15-20)"]["mean_abs_return_pct"], 1.0, "k741.part_b_vix_regimes.Medium.mean_abs_return_pct"),
-        ("T5 High NFP mean abs", 1.488, k741["part_b_vix_regimes"]["High (VIX>=25)"]["mean_abs_return_pct"], 1.0, "k741.part_b_vix_regimes.High.mean_abs_return_pct"),
+        # Rebound 2026-07-19 onto the canonical BLS-calendar re-run (task assign_1238781f).
+        # The old bindings pointed at the archived first-Friday-proxy JSON, which misdates 33 of
+        # 194 releases and invents an Oct-2025 event; they also never covered the regime
+        # ratio/t/p columns, which is why those three columns drifted unnoticed. All six
+        # regime columns are bound now.
+        ("T5 NFP ratio vs all", 1.16, nfp["ratio_vs_all"], 1.0, "k741c.part_a_historical.ratio_vs_all"),
+        ("T5 NFP p vs all", 0.051, nfp["p_vs_all"], 2.0, "k741c.part_a_historical.p_vs_all"),
+        ("T5 NFP ratio vs Friday", 1.19, nfp["ratio_vs_friday"], 1.0, "k741c.part_a_historical.ratio_vs_friday"),
+        ("T5 NFP p vs Friday", 0.034, nfp["p_vs_friday"], 2.0, "k741c.part_a_historical.p_vs_friday"),
+        ("T5 NFP n", 194.0, float(nfp["n_nfp"]), 0.0, "k741c.part_a_historical.n_nfp"),
+        ("T5 NFP total days 4084", 4084.0, float(nfp["n_nfp"] + nfp["n_non_nfp"]), 0.0, "k741c.part_a_historical n_nfp+n_non_nfp"),
+        ("T5 Low NFP n", 63.0, float(nfp_reg["Low (VIX<15)"]["n"]), 0.0, "k741c.part_b_vix_regimes.Low.n"),
+        ("T5 Low NFP mean abs", 0.527, nfp_reg["Low (VIX<15)"]["mean_abs_return_pct"], 1.0, "k741c.part_b_vix_regimes.Low.mean_abs_return_pct"),
+        ("T5 Low NFP ratio", 1.31, nfp_reg["Low (VIX<15)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.Low.ratio"),
+        ("T5 Low NFP t", 2.62, nfp_reg["Low (VIX<15)"]["t_stat"], 2.0, "k741c.part_b_vix_regimes.Low.t_stat"),
+        ("T5 Low NFP p", 0.009, nfp_reg["Low (VIX<15)"]["p_value"], 5.0, "k741c.part_b_vix_regimes.Low.p_value"),
+        ("T5 Medium NFP n", 76.0, float(nfp_reg["Medium (15-20)"]["n"]), 0.0, "k741c.part_b_vix_regimes.Medium.n"),
+        ("T5 Medium NFP mean abs", 0.788, nfp_reg["Medium (15-20)"]["mean_abs_return_pct"], 1.0, "k741c.part_b_vix_regimes.Medium.mean_abs_return_pct"),
+        ("T5 Medium NFP ratio", 1.23, nfp_reg["Medium (15-20)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.Medium.ratio"),
+        ("T5 Medium NFP t", 2.22, nfp_reg["Medium (15-20)"]["t_stat"], 2.0, "k741c.part_b_vix_regimes.Medium.t_stat"),
+        ("T5 Medium NFP p", 0.027, nfp_reg["Medium (15-20)"]["p_value"], 5.0, "k741c.part_b_vix_regimes.Medium.p_value"),
+        ("T5 Elevated NFP n", 27.0, float(nfp_reg["Elevated (20-25)"]["n"]), 0.0, "k741c.part_b_vix_regimes.Elevated.n"),
+        ("T5 Elevated NFP mean abs", 1.046, nfp_reg["Elevated (20-25)"]["mean_abs_return_pct"], 1.0, "k741c.part_b_vix_regimes.Elevated.mean_abs_return_pct"),
+        ("T5 Elevated NFP ratio", 1.19, nfp_reg["Elevated (20-25)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.Elevated.ratio"),
+        ("T5 Elevated NFP t", 1.14, nfp_reg["Elevated (20-25)"]["t_stat"], 3.0, "k741c.part_b_vix_regimes.Elevated.t_stat"),
+        ("T5 Elevated NFP p", 0.254, nfp_reg["Elevated (20-25)"]["p_value"], 2.0, "k741c.part_b_vix_regimes.Elevated.p_value"),
+        ("T5 High NFP n", 28.0, float(nfp_reg["High (VIX>=25)"]["n"]), 0.0, "k741c.part_b_vix_regimes.High.n"),
+        ("T5 High NFP mean abs", 1.417, nfp_reg["High (VIX>=25)"]["mean_abs_return_pct"], 1.0, "k741c.part_b_vix_regimes.High.mean_abs_return_pct"),
+        ("T5 High NFP ratio", 0.94, nfp_reg["High (VIX>=25)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.High.ratio"),
+        ("T5 High NFP t", -0.34, nfp_reg["High (VIX>=25)"]["t_stat"], 5.0, "k741c.part_b_vix_regimes.High.t_stat"),
+        ("T5 High NFP p", 0.731, nfp_reg["High (VIX>=25)"]["p_value"], 1.0, "k741c.part_b_vix_regimes.High.p_value"),
         # ---- NSI baseline / thresholds / subperiods / RV / controlled (k903, unchanged) ----
         ("Baseline beta", -0.000267, k903["baseline_regression"]["beta_hat"], 1.0, "k903.baseline_regression.beta_hat"),
         ("Baseline t", -1.77, k903["baseline_regression"]["t_stat_NW"], 2.0, "k903.baseline_regression.t_stat_NW"),

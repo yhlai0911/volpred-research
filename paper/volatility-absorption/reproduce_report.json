@@ -1,13 +1,13 @@
 {
   "paper": "volatility-absorption",
   "paper_version": "v3-active-scope-post-k1686",
-  "generated_at": "2026-07-14T06:48:41+00:00",
+  "generated_at": "2026-07-19T13:21:38+00:00",
   "alert_level": "green",
   "gate_status": "pass",
   "match_rate": 1.0,
   "verification_rate": "100.0%",
-  "total_checks": 95,
-  "matches": 95,
+  "total_checks": 112,
+  "matches": 112,
   "mismatches": 0,
   "critical_flags": [
     "Active gate restricted to reproducible evidence retained in main_v3.tex",
@@ -656,84 +656,237 @@
     },
     {
       "metric": "T5 NFP ratio vs all",
-      "paper_value": 1.14,
-      "actual_value": 1.14480815532081,
+      "paper_value": 1.16,
+      "actual_value": 1.1630737841891277,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.4217680105973805,
+      "rel_diff_pct": 0.26498139561446016,
       "status": "match",
-      "source_path": "k741.part_a_historical.ratio_vs_all"
+      "source_path": "k741c.part_a_historical.ratio_vs_all"
     },
     {
       "metric": "T5 NFP p vs all",
-      "paper_value": 0.081,
-      "actual_value": 0.08138068805166426,
-      "tol_pct": 1.0,
-      "rel_diff_pct": 0.46998524896822247,
+      "paper_value": 0.051,
+      "actual_value": 0.050561278499795845,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.8602382356944157,
       "status": "match",
-      "source_path": "k741.part_a_historical.p_vs_all"
+      "source_path": "k741c.part_a_historical.p_vs_all"
     },
     {
       "metric": "T5 NFP ratio vs Friday",
-      "paper_value": 1.16,
-      "actual_value": 1.1647696373172436,
+      "paper_value": 1.19,
+      "actual_value": 1.1870627058201109,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.41117563079686803,
+      "rel_diff_pct": 0.24683144368815824,
       "status": "match",
-      "source_path": "k741.part_a_historical.ratio_vs_friday"
+      "source_path": "k741c.part_a_historical.ratio_vs_friday"
     },
     {
       "metric": "T5 NFP p vs Friday",
-      "paper_value": 0.061,
-      "actual_value": 0.06051119813911774,
-      "tol_pct": 1.0,
-      "rel_diff_pct": 0.801314526036489,
+      "paper_value": 0.034,
+      "actual_value": 0.034323844521851984,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.9524838877999469,
       "status": "match",
-      "source_path": "k741.part_a_historical.p_vs_friday"
+      "source_path": "k741c.part_a_historical.p_vs_friday"
     },
     {
-      "metric": "T5 NFP total days 4104",
-      "paper_value": 4104.0,
-      "actual_value": 4104.0,
+      "metric": "T5 NFP n",
+      "paper_value": 194.0,
+      "actual_value": 194.0,
       "tol_pct": 0.0,
       "rel_diff_pct": 0.0,
       "status": "match",
-      "source_path": "k741.part_a_historical n_nfp+n_non_nfp"
+      "source_path": "k741c.part_a_historical.n_nfp"
+    },
+    {
+      "metric": "T5 NFP total days 4084",
+      "paper_value": 4084.0,
+      "actual_value": 4084.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.part_a_historical n_nfp+n_non_nfp"
     },
     {
       "metric": "T5 Low NFP n",
-      "paper_value": 62.0,
-      "actual_value": 62.0,
+      "paper_value": 63.0,
+      "actual_value": 63.0,
       "tol_pct": 0.0,
       "rel_diff_pct": 0.0,
       "status": "match",
-      "source_path": "k741.part_b_vix_regimes.Low.n"
+      "source_path": "k741c.part_b_vix_regimes.Low.n"
     },
     {
       "metric": "T5 Low NFP mean abs",
-      "paper_value": 0.498,
-      "actual_value": 0.49821851409215123,
+      "paper_value": 0.527,
+      "actual_value": 0.5267845478669022,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.04387833175727592,
+      "rel_diff_pct": 0.040882757703570284,
       "status": "match",
-      "source_path": "k741.part_b_vix_regimes.Low.mean_abs_return_pct"
+      "source_path": "k741c.part_b_vix_regimes.Low.mean_abs_return_pct"
+    },
+    {
+      "metric": "T5 Low NFP ratio",
+      "paper_value": 1.31,
+      "actual_value": 1.3052029466080566,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.366187281827746,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Low.ratio"
+    },
+    {
+      "metric": "T5 Low NFP t",
+      "paper_value": 2.62,
+      "actual_value": 2.619306011782351,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.02648809991027098,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Low.t_stat"
+    },
+    {
+      "metric": "T5 Low NFP p",
+      "paper_value": 0.009,
+      "actual_value": 0.008903685969855671,
+      "tol_pct": 5.0,
+      "rel_diff_pct": 1.0701558904925348,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Low.p_value"
+    },
+    {
+      "metric": "T5 Medium NFP n",
+      "paper_value": 76.0,
+      "actual_value": 76.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Medium.n"
     },
     {
       "metric": "T5 Medium NFP mean abs",
-      "paper_value": 0.757,
-      "actual_value": 0.7572577187000575,
+      "paper_value": 0.788,
+      "actual_value": 0.7880877046628053,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.03404474241182693,
+      "rel_diff_pct": 0.011130033350923463,
       "status": "match",
-      "source_path": "k741.part_b_vix_regimes.Medium.mean_abs_return_pct"
+      "source_path": "k741c.part_b_vix_regimes.Medium.mean_abs_return_pct"
+    },
+    {
+      "metric": "T5 Medium NFP ratio",
+      "paper_value": 1.23,
+      "actual_value": 1.2304641759014876,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.037737878169725035,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Medium.ratio"
+    },
+    {
+      "metric": "T5 Medium NFP t",
+      "paper_value": 2.22,
+      "actual_value": 2.217386741205163,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.11771436012780692,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Medium.t_stat"
+    },
+    {
+      "metric": "T5 Medium NFP p",
+      "paper_value": 0.027,
+      "actual_value": 0.026752420748614576,
+      "tol_pct": 5.0,
+      "rel_diff_pct": 0.9169601903163858,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Medium.p_value"
+    },
+    {
+      "metric": "T5 Elevated NFP n",
+      "paper_value": 27.0,
+      "actual_value": 27.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Elevated.n"
+    },
+    {
+      "metric": "T5 Elevated NFP mean abs",
+      "paper_value": 1.046,
+      "actual_value": 1.0455570299744268,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.04234895081962263,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Elevated.mean_abs_return_pct"
+    },
+    {
+      "metric": "T5 Elevated NFP ratio",
+      "paper_value": 1.19,
+      "actual_value": 1.1861837718555241,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.32069144071225186,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Elevated.ratio"
+    },
+    {
+      "metric": "T5 Elevated NFP t",
+      "paper_value": 1.14,
+      "actual_value": 1.1430190894271381,
+      "tol_pct": 3.0,
+      "rel_diff_pct": 0.26483240588931967,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Elevated.t_stat"
+    },
+    {
+      "metric": "T5 Elevated NFP p",
+      "paper_value": 0.254,
+      "actual_value": 0.25345212968294306,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.21569697521926856,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.Elevated.p_value"
+    },
+    {
+      "metric": "T5 High NFP n",
+      "paper_value": 28.0,
+      "actual_value": 28.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.High.n"
     },
     {
       "metric": "T5 High NFP mean abs",
-      "paper_value": 1.488,
-      "actual_value": 1.4875259167384096,
+      "paper_value": 1.417,
+      "actual_value": 1.4172392473929993,
       "tol_pct": 1.0,
-      "rel_diff_pct": 0.03186043424666495,
+      "rel_diff_pct": 0.01688407854617486,
       "status": "match",
-      "source_path": "k741.part_b_vix_regimes.High.mean_abs_return_pct"
+      "source_path": "k741c.part_b_vix_regimes.High.mean_abs_return_pct"
+    },
+    {
+      "metric": "T5 High NFP ratio",
+      "paper_value": 0.94,
+      "actual_value": 0.9361177767940533,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.4130024687177305,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.High.ratio"
+    },
+    {
+      "metric": "T5 High NFP t",
+      "paper_value": -0.34,
+      "actual_value": -0.343638663756869,
+      "tol_pct": 5.0,
+      "rel_diff_pct": 1.0701952226085287,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.High.t_stat"
+    },
+    {
+      "metric": "T5 High NFP p",
+      "paper_value": 0.731,
+      "actual_value": 0.7312488923708301,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.03404820394393228,
+      "status": "match",
+      "source_path": "k741c.part_b_vix_regimes.High.p_value"
     },
     {
       "metric": "Baseline beta",
