@@ -9,12 +9,12 @@
     "2400"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-19T17:11:32Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-19T17:15:01Z",
+  "completed_at": "2026-07-19T17:24:44Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k741-k904-canonical-nfp-round-2-codex-primary-path-review-sp-1784481092.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k741-k904-canonical-nfp-round-2-codex-primary-path-review-sp-1784481092.stderr",
   "result_artifact": "storage/ops/codex_reviews/k741_canonical_round2_verdict.md",
@@ -36,5 +36,16 @@
   "brief_source": null,
   "brief_snapshot": null,
   "parent_timeout_job_id": "agent-brief_k741_nfp_canonical-837c1f",
-  "split_stage": "codex_review"
+  "split_stage": "codex_review",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "376165c219f9b4b988c57530e19ace9cdc866e21",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k741_canonical_round2_verdict.md"
+  ],
+  "delivered_at": "2026-07-19T18:00:52.237525+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }

@@ -672,6 +672,20 @@ def run_asset(asset, df):
     dm_bma_vs_gjr = dm_harvey(qlike_bma_pw, qlike_gjr_t_pw)
     dm_bma_vs_eq = dm_harvey(qlike_bma_pw, qlike_eq_pw)
 
+    # --- common-sample mask for headline QLIKE -----------------------
+    # DM already restricts to days where the loss difference is finite, but
+    # the headline means used np.nanmean per series, so a model that drops
+    # days (e.g. SPY GJR_t loses the 63-day block after a non-converged
+    # refit) was compared against BMA/Equal on a *different* denominator.
+    # On SPY that inflated BMA-GJR_t by 81% and made the reported gap
+    # inconsistent with the Harvey t built from the aligned difference.
+    common_mask = (np.isfinite(qlike_bma_pw) & np.isfinite(qlike_eq_pw)
+                   & np.isfinite(qlike_gjr_t_pw))
+    n_common = int(common_mask.sum())
+
+    def _mean_common(pw):
+        return float(np.mean(pw[common_mask])) if n_common else float("nan")
+
     # --- regime-dependent weights (4 VIX buckets) ---
     regimes = {"VIX<15": (0, 15), "15-20": (15, 20),
                "20-25": (20, 25), ">25": (25, 999)}
@@ -696,19 +710,45 @@ def run_asset(asset, df):
         if mask.sum() < 10:
             regime_qlike[rname] = {"n_days": int(mask.sum())}
             continue
+        rmask = mask & common_mask
         regime_qlike[rname] = {
             "n_days": int(mask.sum()),
-            "bma_qlike": float(np.nanmean(qlike_bma_pw[mask])),
-            "gjr_t_qlike": float(np.nanmean(qlike_gjr_t_pw[mask])),
-            "equal_qlike": float(np.nanmean(qlike_eq_pw[mask])),
+            "n_common_sample": int(rmask.sum()),
+            "bma_qlike": float(np.mean(qlike_bma_pw[rmask])) if rmask.any() else float("nan"),
+            "gjr_t_qlike": float(np.mean(qlike_gjr_t_pw[rmask])) if rmask.any() else float("nan"),
+            "equal_qlike": float(np.mean(qlike_eq_pw[rmask])) if rmask.any() else float("nan"),
         }
 
     result = {
         "n_oos": int(n_oos),
-        "bma_qlike": float(np.nanmean(qlike_bma_pw)),
-        "equal_weight_qlike": float(np.nanmean(qlike_eq_pw)),
-        "gjr_t_qlike": float(np.nanmean(qlike_gjr_t_pw)),
+        "n_common_sample": n_common,
+        # Headline QLIKE = common valid days across BMA / Equal / GJR-t, so
+        # the reported gap is the same quantity the Harvey t is built from.
+        "bma_qlike": _mean_common(qlike_bma_pw),
+        "equal_weight_qlike": _mean_common(qlike_eq_pw),
+        "gjr_t_qlike": _mean_common(qlike_gjr_t_pw),
+        # Per-series own-sample means kept for transparency (NOT comparable
+        # across series when denominators differ).
+        "qlike_own_sample": {
+            "bma": float(np.nanmean(qlike_bma_pw)),
+            "equal_weight": float(np.nanmean(qlike_eq_pw)),
+            "gjr_t": float(np.nanmean(qlike_gjr_t_pw)),
+            "n_bma": int(np.isfinite(qlike_bma_pw).sum()),
+            "n_equal_weight": int(np.isfinite(qlike_eq_pw).sum()),
+            "n_gjr_t": int(np.isfinite(qlike_gjr_t_pw).sum()),
+        },
         "per_model_qlike": per_model_qlike,
+        # Documented semantics of the MAJOR-1 fix: a model whose forecast is
+        # invalid on day t is excluded from that day's posterior via -inf,
+        # which is ABSORBING — it cannot regain weight even if a later refit
+        # converges. On SPY GJR_t this is why final_weights is exactly 0.0
+        # (vs ~1e-30 for models that merely lost on likelihood).
+        "posterior_semantics": {
+            "invalid_day_handling": "excluded_from_posterior_absorbing",
+            "note": ("-inf log-weight after an invalid day is never "
+                     "recovered; final_weights==0.0 means 'dropped', "
+                     "tiny-but-nonzero means 'lost on likelihood'."),
+        },
         "dm_bma_vs_gjr": {
             "t_stat": dm_bma_vs_gjr[0], "p_value": dm_bma_vs_gjr[1],
             "harvey_pass": dm_bma_vs_gjr[2]
@@ -841,7 +881,8 @@ def main():
         diff_vs_gjr = r["bma_qlike"] - r["gjr_t_qlike"]
         diff_vs_eq = r["bma_qlike"] - r["equal_weight_qlike"]
         lines.append(
-            f"{a}: BMA={r['bma_qlike']:.5f}, GJR-t={r['gjr_t_qlike']:.5f} "
+            f"{a}: n_common={r.get('n_common_sample', r['n_oos'])}, "
+            f"BMA={r['bma_qlike']:.5f}, GJR-t={r['gjr_t_qlike']:.5f} "
             f"(BMA-GJR={diff_vs_gjr:+.5f}, Harvey t="
             f"{r['dm_bma_vs_gjr']['t_stat']:+.2f}); "
             f"Equal={r['equal_weight_qlike']:.5f} "
@@ -855,11 +896,19 @@ def main():
         f"H1 verdict: {verdicts['H1_bma_beats_gjr']}; "
         f"H2: {verdicts['H2_bma_beats_equal']}; "
         f"H3 (regime weight shift): {verdicts['H3_regime_weight_shift']}. "
+        "All headline QLIKE figures are computed on the common valid days "
+        "shared by BMA / Equal / GJR-t (n_common per asset above), the same "
+        "sample the Harvey t is built from; per-series own-sample means are "
+        "kept separately under qlike_own_sample. "
         "Research-honesty: null results reported as-is; the purpose of BMA "
-        "is principled posterior weighting, not guaranteed QLIKE win. If "
-        "posterior concentrates quickly on a single model, BMA effectively "
-        "reduces to that model's forecast and differences vs single-best "
-        "shrink."
+        "is principled posterior weighting, not guaranteed QLIKE win. "
+        "Posterior concentration is not hypothetical here — on every asset "
+        "the terminal posterior puts ~1.0 on a single model, so BMA is in "
+        "practice that model's forecast and the gap vs single-best is a "
+        "statement about which model the posterior picked, not about "
+        "combination gains. Invalid-day exclusion is absorbing (see "
+        "posterior_semantics): a model dropped after a non-converged refit "
+        "cannot regain weight."
     )
 
     # -----------------------------------------------------------------

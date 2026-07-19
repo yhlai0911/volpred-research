@@ -1,0 +1,36 @@
+{
+  "id": "compute-k1257-headline-realign-20260720",
+  "title": "K1257 rerun: common-sample headline QLIKE + posterior_semantics disclosure",
+  "script_path": "experiments/k1257/k1257_bma_volatility.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-19T18:17:15Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1257-headline-realign-20260720.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1257-headline-realign-20260720.stderr",
+  "result_artifact": "experiments/k1257/k1257_results.json",
+  "output_paths": [
+    "experiments/k1257/k1257_results.json",
+    "experiments/k1257/k1257_weight_evolution.png",
+    "experiments/k1257/k1257_qlike_comparison.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "Parent assign_9f0a31a8, stage 2 of 3. 收 K1257 headline-realign 重跑：(1) 確認 per_asset.SPY.n_common_sample==1518 且 bma_qlike≈-8.1864 / gjr_t_qlike≈-8.1358（BMA-GJR≈-0.0506，與 dm_bma_vs_gjr 的 Harvey t=-3.17 同一樣本），GLD/0050.TW 的 n_common_sample 應等於 n_oos 且數字不變；(2) 確認 qlike_own_sample 三個 n 有記錄且 SPY 的 n_gjr_t=1518 < n_bma=1581；(3) 確認 H1/H2/H3 verdict 未因 realign 改變（預期 PARTIAL/FAIL/FAIL），若改變必須在 knowledge 明寫；(4) 更新 experiments/k1257/README.md 的 stale 數字（:101 那列 SPY GJR-t -8.1749 / t=-3.40 / p=0.0007 → 新值）+ 修 README:32-34,:50 的 7 models / HAR-RV / Realized GARCH 描述（實作是 6 models、HAR_ABS、A4f_IV2、GLD 用 ^GVZ）+ 把 posterior 吸收態限制寫成一段 Limitations；(5) 完成後 enqueue scripts/codex_review_job.sh 做 primary-path review（prompt 檔 storage/ops/codex_reviews/k1257_k1258_realign_prompt.md 已備妥）。主線程寫 knowledge.json（禁 agent 自寫，K1259）。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "timeout_seconds": 5400,
+  "brief_source": null,
+  "brief_snapshot": null
+}

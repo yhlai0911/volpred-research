@@ -943,16 +943,24 @@ def verdict_h4(per_asset: Dict, h1: Dict, h3: Dict) -> Dict:
     # Else → report the single lambda that wins majority assets.
     if h1["verdict"] == "FAIL":
         rec = "lambda=1.0 (standard BMA); no forgetting variant improves QLIKE"
+        rec_lambda = 1.0
     elif h3["verdict"] == "PASS":
         rec = ("adaptive-needed: optimal lambda is asset-specific "
                f"({h3['optimal_per_asset']})")
+        rec_lambda = None
     else:
         # count most common optimum
         vals = list(h3["optimal_per_asset"].values())
         most = max(set(vals), key=vals.count)
         rec = f"lambda={most} (optimal for majority of tested assets)"
+        rec_lambda = most
     return {
-        "verdict": rec,
+        # H4 is a recommendation, not a testable hypothesis: keep a
+        # machine-parseable token so downstream tooling stops trying to read
+        # a whole sentence as a PASS/FAIL verdict.
+        "verdict": "RECOMMENDATION",
+        "recommendation": rec,
+        "recommended_lambda": rec_lambda,
         "rationale": ("Chosen by combining H1 (which lambdas actually beat "
                       "baseline QLIKE with Harvey |t|>3) and H3 (whether the "
                       "optimum is shared across assets)."),
@@ -1007,8 +1015,35 @@ def main():
         "results": per_asset,
         "forecast_diagnostics": forecast_diagnostics,
         "hypotheses": {"H1": h1, "H2": h2, "H3": h3, "H4": h4},
+        # Flat mirrors so this artifact reads like its sibling K1257 and so
+        # collectors do not have to walk into hypotheses[*] to get a verdict.
+        "hypothesis_verdicts": {
+            "H1_ffbma_beats_standard_bma": h1.get("verdict"),
+            "H2_switch_freq_increases": h2.get("verdict"),
+            "H3_optimal_lambda_asset_specific": h3.get("verdict"),
+            "H4_production_default": h4.get("recommendation", h4.get("verdict")),
+        },
+        "conclusions": (
+            "Forgetting-factor BMA (lambda in "
+            f"{LAMBDAS}) tested against standard BMA (lambda=1) on "
+            f"{'/'.join(ASSETS)} {'2020-2026'} OOS. "
+            f"H1 (ff-BMA beats standard BMA on QLIKE): {h1.get('verdict')}; "
+            f"H2 (lambda<1 raises weight-switch frequency): {h2.get('verdict')}; "
+            f"H3 (optimal lambda is asset-specific): {h3.get('verdict')}. "
+            f"Production default: {h4.get('recommendation', 'NA')}. "
+            "Research-honesty: discounting the log-posterior demonstrably "
+            "makes the weights move (H2), but movement is not accuracy — no "
+            "lambda<1 cell clears Harvey |t|>3 with lower QLIKE, so the null "
+            "stands. Evidence base is 3 assets x 5 fixed lambdas on a single "
+            "OOS window; this does not license claims about the BMA family "
+            "in general."
+        ),
         "provenance": {
             "k1257_forecast_cache_reuse": cache_reuse,
+            "k1257_forecast_cache_reuse_note": (
+                "false = the v1 caches were NOT reused; forecasts were "
+                "recomputed with posterior_semantics_version=2 and written "
+                "back to the parquet caches."),
             "cache_reuse_by_asset": cache_reuse_flags,
             "cache_paths": [str((CACHE_DIR / f"forecasts_{a.replace('.', '_')}.parquet").name)
                             for a in ASSETS],
