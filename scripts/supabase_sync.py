@@ -626,9 +626,12 @@ def revalidate_article_cache(slug: str) -> bool:
         method="POST",
     )
     try:
-        # Deliberately NOT _urlopen: that chokepoint is for Supabase REST and
-        # its GET guard/retry semantics do not apply to the mirror host.
-        with urlopen(req, timeout=10) as resp:
+        # Routed through _urlopen like every other egress: neither of its two
+        # behaviours touches this call (the read gate only blocks GET, and a
+        # bare POST is not replay-safe so it is never retried), so the mirror
+        # host keeps its exact semantics while the chokepoint stays the single
+        # place a future outbound call can be gated from.
+        with _urlopen(req, timeout=10) as resp:
             if 200 <= resp.status < 300:
                 return True
             reason = f"HTTP {resp.status}"

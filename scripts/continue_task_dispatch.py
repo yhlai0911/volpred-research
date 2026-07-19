@@ -940,6 +940,11 @@ def _sweep_cleared_dreaming_tasks() -> list[dict]:
     Same shape as `_sweep_cleared_ordinary_tasks` on the alert side. Best-effort:
     a failure here must never stop the dispatch report from being produced.
     """
+    # Outside the best-effort try, same as the alert-side sweep: writing the
+    # canonical queue from a foreign tree is not a transient hiccup to warn
+    # about and continue past, and a guard swallowed by `except Exception`
+    # reads like protection while only downgrading the violation to a log line.
+    guard_canonical_write(NEXT_TASKS)
     try:
         import fcntl
 
@@ -960,7 +965,6 @@ def _sweep_cleared_dreaming_tasks() -> list[dict]:
                     now=datetime.now(timezone.utc).isoformat(),
                 )
                 if closed:
-                    guard_canonical_write(NEXT_TASKS)
                     write_tasks_to_handle(fh, tasks)
                 return closed
             finally:

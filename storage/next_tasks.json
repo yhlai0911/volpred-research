@@ -32703,13 +32703,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T21:01:07.034930+00:00",
+    "completed_at": "2026-07-19T22:01:26.740952+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T21:01:07.034930+00:00",
-      "last_clean_observed_at": "2026-07-19T21:01:07.034930+00:00"
+      "resolved_at": "2026-07-19T22:01:26.740952+00:00",
+      "last_clean_observed_at": "2026-07-19T22:01:26.740952+00:00"
     }
   },
   {
@@ -32721,13 +32721,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T21:16:49.803972+00:00",
+    "completed_at": "2026-07-19T22:39:24.307240+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T21:16:49.803972+00:00",
-      "last_clean_observed_at": "2026-07-19T21:16:49.803972+00:00"
+      "resolved_at": "2026-07-19T22:39:24.307240+00:00",
+      "last_clean_observed_at": "2026-07-19T22:39:24.307240+00:00"
     }
   },
   {
@@ -32739,13 +32739,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-19T20:21:20.763676+00:00",
+    "completed_at": "2026-07-19T21:16:59.357721+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T20:21:20.763676+00:00",
-      "last_clean_observed_at": "2026-07-19T20:21:20.763676+00:00"
+      "resolved_at": "2026-07-19T21:16:59.357721+00:00",
+      "last_clean_observed_at": "2026-07-19T21:16:59.357721+00:00"
     }
   },
   {
@@ -35396,44 +35396,15 @@
   },
   {
     "id": "k1708_collect_fullrun_20260717",
-    "title": "[experiment] K1708 全樣本 run 收件：驗數字 + Codex 審 + merge worktree",
-    "description": "collect_completed followup for compute job k1708-fullrun-salvage-20260717 (exit 0, artifact present, quick_mode=false, verdict=NULL). 依 claude_followup.brief 七步：(1) artifact/quick_mode 確認 (2) 抽驗數字與 README 逐字相符 (3) 審 Clark-West 取代 DM-HLN 的 criterion_substitution + MC size 驗證 (4) 檢查 tuning.log 邊界解與 README §12 遵守 (5) Codex primary review (6) 正式 merge_worktree.sh dispatch-slot-2-8dda242d-k1708 (7) 依 verdict 寫 knowledge / 標 status。",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
-    "tags": [
-      "experiment",
-      "k1708",
-      "collection",
-      "followup"
-    ],
+    "task_type": "experiment",
+    "title": "[experiment] K1708 全樣本 run 收件：驗數字 + Codex 審 + merge worktree",
+    "priority": 2,
     "source": "compute_queue_followup",
     "created_at": "2026-07-16T21:08:43.979790+00:00",
-    "parent_task_id": "k1708-fullrun-salvage-20260717",
-    "dispatch_lane": "agent",
-    "status_history": [
-      {
-        "ts": "2026-07-16T21:08:48.138085+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-741484dd5d544845806da1672d6804cd"
-      },
-      {
-        "ts": "2026-07-16T21:08:48.375075+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-741484dd5d544845806da1672d6804cd"
-      },
-      {
-        "ts": "2026-07-16T21:22:16.032136+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-741484dd5d544845806da1672d6804cd"
-      }
-    ],
-    "started_at": "2026-07-16T21:08:48.375060+00:00",
     "completed_at": "2026-07-16T21:22:16.032121+00:00",
-    "result": "收件完成：數字驗證 PASS（零假數字、ledger 全列重算相符、verdict 機械推導、15 測試過），Codex primary review REQUEST_CHANGES 2 BLOCKER（stale sigma2 / MLE-production init mismatch）→ 不 merge、NULL 結論待修正後重跑確認。修正 job 已 enqueue: agent-brief_k1708_fix-e2b3f0（timeout 5400s，followup 會收件 re-review + merge）。"
+    "tombstone": true,
+    "archived_at": "2026-07-19T22:00:51.420790+00:00"
   },
   {
     "id": "trending_repost_2026_07_17_ai變現",
@@ -44466,5 +44437,257 @@
     "created_by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
     "parent_task_id": "collect_k1623_rev3_20260720",
     "description": "## 背景\nK1623 rev3 claim-alignment remediation 已於 2026-07-20 收件驗收：**B1–B5 + MINOR 全部 PASS**（逐條由收件 agent 親自 grep/重算，非採信 JSON 自述）。worktree `dispatch-slot-2-c5cafe39-k1623`，commit `08c6aefb8`（+ `0dd6aa987` README 尾端碎片清理）。\n\n依收件 brief「有 blocked_items 即不得 enqueue round 3」，**本任務是 round-3 送審前唯一剩下的 compute gate**。\n\n## 要解的 blocked item\n`mean_structure_generated_regressor_share_unmeasured` — 目前無法量化「**估計段均值**」（相對於「**定位斷點**」）在 generated-regressor 不確定性中佔多少。\n\n原因是結構性的：現行兩臂**都**重估段均值，所以該成分在 A−B contrast 中**相消**。要量測必須加**第三臂**：用**已知植入的 level 向量**做 demean（location + level 皆 oracle），則\n- A−B = 斷點定位 + 均值估計 的合計\n- B−C = 均值估計 的單獨貢獻\n\n## 已知的 frozen 數字（不可改動，供對照）\n- Arm A−B（現有）：VIX −0.019962 / SPY −0.045159 / TW0050 −0.055620 / QQQ −0.041103 / N225 −0.045547 → range **[−0.0556, −0.0200]**\n- 原 arm-A 總偏誤 range **[−0.0846, −0.0273]**（約兩倍，rev3 已更正此歸因）\n- `k1623_rev2_mc_results.json` 的既有欄位經 flatten-diff 驗證為 **0 改 0 移、僅 50 新增**；**第三臂必須同樣以新增欄位方式落地，不得改動 frozen 欄位**\n\n## 做法\n1. 在 worktree 內擴充 `k1623_rev2_mc.py` 增加 arm C（known-level demean），沿用同 seed / 同 DGP / 同 replication 數，確保 A/B/C 三臂共用同一組模擬路徑（否則 B−C 不是乾淨對比）。\n2. **寫完先給 Codex 審再跑**（實驗碼一律先審後跑）。\n3. 腳本完整可跑之後才走 `scripts/compute_queue.py enqueue`（heavy MC 禁塞 hourly fire），`--result-artifact` 指向新 JSON，`--followup-task-type experiment`。\n4. 結果回來後：更新 README §6.4，把目前「DISCLOSED, NOT FIXED」的 scope limit 換成實測佔比；`claim_corrections_rev3` 補一條。\n\n## 替代路徑（若判定不值得跑）\n明確接受此項為 **permanent scope limit**，在 README 與 MC JSON 寫死理由（兩臂設計上相消、需第三臂），然後直接 enqueue round 3。**此決定要留書面裁決，不可默默跳過。**\n\n## round 3 送審前的其他前置\n- README 尾端工具碎片已於 `0dd6aa987` 清除 → **會改 README 的 sha256 pin**，送審前必須重跑 `scripts/experiment_gates.py verdict-template` 重生 `review_verdict.json`（目前 verdict=FAIL，fail-closed，29 個 sha256 pin，certify 正擋著 merge）。\n- round 3 PASS 才可 `merge_worktree.sh dispatch-slot-2-c5cafe39-k1623` + 主線程寫 knowledge.json（K1259 禁 agent 自寫）+ 把 loss-reversal 題材排進 daily_article。"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_k1684_article_general",
+    "title": "[dreaming] missing_retry_strategy:K1684_article_general",
+    "description": "Failed task K1684_article_general has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：task K1684_article_general (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-19T21:25:00.858706+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:K1684_article_general",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "K1684_article_general"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_k1708_fix_verdict_gate_20260717",
+    "title": "[dreaming] missing_retry_strategy:k1708_fix_verdict_gate_20260717",
+    "description": "Failed task k1708_fix_verdict_gate_20260717 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：task k1708_fix_verdict_gate_20260717 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-19T21:25:00.858706+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:k1708_fix_verdict_gate_20260717",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "k1708_fix_verdict_gate_20260717"
+  },
+  {
+    "id": "dreaming_persistent_alert_0ddc7a520cfd9d1e",
+    "title": "[dreaming] persistent_alert:0ddc7a520cfd9d1e",
+    "description": "Alert `PHASE-Z 有檔案不是這班產出的，已略過` fired 6× over 5.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 3 晚偵測到此模式（首見 2026-07-16T21:25:01.228981+00:00）。\n證據：alert_key=0ddc7a520cfd9d1e title='PHASE-Z 有檔案不是這班產出的，已略過' send_count=6 span=5.1d (first 2026-07-13T19:38:15.333090+00:00 → last 2026-07-18T22:26:18.330710+00:00) — no fire in 23.0h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-19T21:25:00.858706+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:0ddc7a520cfd9d1e",
+      "pattern_type": "persistent_alert",
+      "occurrences": 3,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_e2f24397a43d4962",
+    "title": "[dreaming] persistent_alert:e2f24397a43d4962",
+    "description": "Alert `PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積` fired 6× over 5.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 3 晚偵測到此模式（首見 2026-07-17T21:25:01.224457+00:00）。\n證據：alert_key=e2f24397a43d4962 title='PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積' send_count=6 span=5.1d (first 2026-07-14T07:20:33.562689+00:00 → last 2026-07-19T09:22:57.292777+00:00) — no fire in 12.0h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-19T21:25:00.858706+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:e2f24397a43d4962",
+      "pattern_type": "persistent_alert",
+      "occurrences": 3,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "ci-red-29703582195",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29703582195",
+    "ci_run_key": "29703582195:1",
+    "created_at": "2026-07-19T22:00:07.425024+00:00",
+    "title": "CI 紅燈修復（run 29703582195, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29703582195\nattempt: 1\nhead_sha: bfde8ad0f\n偵測摘要（仍須讀完整 failed log）：2026-07-19T21:12:37.2807628Z E AssertionError: assert 'critical' == 'warn'\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29703582195 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T22:01:03.028427+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-98cbd19ffa64440bb043f939414d0749"
+      },
+      {
+        "ts": "2026-07-19T22:01:03.274740+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-98cbd19ffa64440bb043f939414d0749"
+      },
+      {
+        "ts": "2026-07-19T22:38:29.133041+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-98cbd19ffa64440bb043f939414d0749"
+      }
+    ],
+    "started_at": "2026-07-19T22:01:03.274724+00:00",
+    "completed_at": "2026-07-19T22:38:29.133027+00:00",
+    "result": "修好 CI run 29703582195 的 4 個失敗中 3 個真迴歸（第 4 個 daily_checkup 已自癒）：(1) supabase_sync.revalidate_article_cache 走回 _urlopen chokepoint（read gate 只擋 GET、bare POST 不 replay-safe → 行為零變化）；(2) continue_task_dispatch._sweep_cleared_dreaming_tasks 的 guard_canonical_write 提到 try 之外並登記進 audit ratchet（原本被 except Exception 吞掉 = 保護降級成 log line），連帶補 4 個測試漏做的 NEXT_TASKS→tmp_path redirect；(3) gen_codex_cli_reference.run_help 改 Popen+start_new_session+procutil.kill_pgid（原 subprocess.run timeout 只殺直接子、留孤兒）。全套 3730 passed。另發現既有 order-dependent flake test_every_shipped_alert_id_is_covered_by_some_disposition（單獨跑 pass，與本次改動無關）→ 已建 ci-flake-alert-disposition-order-20260720。"
+  },
+  {
+    "id": "trending_repost_2026_07_20_ai修正",
+    "title": "[trending_repost] 台積電調升資本支出股價反跌，半導體波動率拐點已至？",
+    "description": "以 TSMC 資本支出升至 600-640 億美元但股價與費半重挫 20% 為切入點，分析市場從「需求驅動」轉向「利潤率擔憂」的定價轉變。可量化：分析 SOX 隱含波動率（IV）與 CapeX 變動率的背離，以及偏斜度（Skew）揭示的下行避險成本。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-07-19T22:00:17+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "warn_arc_near_miss",
+      "blocked": false,
+      "reason": "fuzzy descriptive arc near-miss of mile_78899a5c, mile_f78be848, mile_b6a46796; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
+      "saturation": 3,
+      "theme_terms": [
+        "台積",
+        "積電",
+        "避險",
+        "成本",
+        "半導",
+        "導體"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_78899a5c",
+          "title": "費半跌了一成六，VIX 卻在睡覺：你的避險工具可能對錯了目標"
+        },
+        {
+          "id": "mile_f78be848",
+          "title": "台積電法說開完：成績單每項都贏，ADR 盤前卻跌近 4%，跌的是哪兩個數字？"
+        },
+        {
+          "id": "mile_b6a46796",
+          "title": "🛩️ 無人載具｜EP-Final：核心六檔剛好追上大盤，代價是兩倍波動與三倍回撤"
+        },
+        {
+          "id": "mile_bd06ccbc",
+          "title": "VIX 掉回 16.9 的假平靜：科技股才回檔逾一成，該盯的其實是這四件事"
+        },
+        {
+          "id": "mile_0fa841ed",
+          "title": "燒最多錢的科技巨頭，選擇權市場現在沒有多收「下跌保費」"
+        }
+      ],
+      "screened_at": "2026-07-19T22:00:20+00:00"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-19T22:08:15.312653+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-35c0f01cbb72492f8606c851fe4ed4e5"
+      },
+      {
+        "ts": "2026-07-19T22:08:18.705959+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-35c0f01cbb72492f8606c851fe4ed4e5"
+      },
+      {
+        "ts": "2026-07-19T22:31:55.463985+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-35c0f01cbb72492f8606c851fe4ed4e5"
+      }
+    ],
+    "started_at": "2026-07-19T22:08:18.705943+00:00",
+    "completed_at": "2026-07-19T22:31:55.463967+00:00",
+    "result": "arc-covered（mile_f78be848 7/16 + mile_78899a5c 7/18 已覆蓋 TSMC 反跌與費半 vol 背離）→ 依 publishing.md 換題執行，產出 mile_b7e98682「科技股財報日的波動放大 3.8 倍，然後兩天就沒了」（96 次財報事件、配對檢定 t=10.11 p=9.4e-17、+2 天起 NULL；anti_ai_gate exit 0；live 200）。FB 待 sync。"
+  },
+  {
+    "id": "trending_repost_2026_07_20_美債波動",
+    "title": "[trending_repost] 降息預期夢碎，美債隱含波動率定價的結構性轉變",
+    "description": "從 2026 年中通膨停留在 3.5% 且聯準會維持 3.50%-3.75% 利率切入，探討市場從預期降息轉向預防升息的風險溢價。可量化：MOVE 指數與美債期權偏斜度（skew）的相關性分析。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-07-19T22:00:19+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "warn_arc_near_miss",
+      "blocked": false,
+      "reason": "fuzzy descriptive arc near-miss of mile_21e45133, mile_d12825bb, mile_487275d0; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
+      "saturation": 2,
+      "theme_terms": [
+        "指數",
+        "結構",
+        "利率",
+        "相關",
+        "move",
+        "險溢"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_21e45133",
+          "title": "266 次美債波動跳升，日圓套利平倉的傳導鏈只在 2024 年 8 月接得起來"
+        },
+        {
+          "id": "mile_d12825bb",
+          "title": "同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感"
+        },
+        {
+          "id": "mile_487275d0",
+          "title": "資料版本洗到最乾淨後，黃金美債比特幣的波動還是先看自己"
+        },
+        {
+          "id": "mile_b0654561",
+          "title": "VIX 17，CAPE 41：股市在定價什麼，又沒定價什麼"
+        }
+      ],
+      "screened_at": "2026-07-19T22:00:21+00:00"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-19T22:10:14.918380+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-35c0f01cbb72492f8606c851fe4ed4e5"
+      },
+      {
+        "ts": "2026-07-19T22:31:55.705346+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-2-35c0f01cbb72492f8606c851fe4ed4e5"
+      }
+    ],
+    "completed_at": "2026-07-19T22:31:55.705332+00:00",
+    "result": "arc-covered 不寫：mile_d12825bb（7/6 MOVE 指數方向感，同機制同資產）+ mile_21e45133（7/19 美債波動跳升）已覆蓋；且今日 trending cap=2 已滿（既有 1 篇 + mile_b7e98682）。依 SKILL.md daily cap 與 publishing.md 查重規則不強推。"
+  },
+  {
+    "id": "ci-flake-alert-disposition-order-20260720",
+    "title": "CI flake：test_every_shipped_alert_id_is_covered_by_some_disposition 只在全套跑時紅",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "ci_red_triage",
+    "created_at": "2026-07-19T22:38:19.531675+00:00",
+    "description": "全套 pytest（3730 passed）中此測試失敗，單獨跑 pass → test-order-dependent。發現於 ci-red-29703582195 修復時；與該次修復（dispatcher sweep guard / supabase egress chokepoint / codex spawn killpg / audit ratchet）無關，四者皆不產生新 alert id。查法：pytest -p no:randomly 二分先前測試，找出污染 alert disposition 狀態的那支。"
   }
 ]

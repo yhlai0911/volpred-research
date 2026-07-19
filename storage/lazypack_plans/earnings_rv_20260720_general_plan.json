@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：科技股財報日的波動放大幾倍、撐幾天",
+  "evidence": {
+    "results": {
+      "path": "storage/experiments/earnings_rv_event_study.json",
+      "sha256": "06460c323cabe3b221cacd4adbe8d6c4ecfa317eaf89fc705534d3fdc5700544",
+      "label": "8 檔大型科技股財報日實現波動率事件研究"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "把財報週圈起來，圈對了嗎",
+      "alt": "說明常見的財報避險假設，以及本研究的樣本規模",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "常見做法",
+          "body": [
+            "財報那一週整週減碼、買保護，或空手等它過去。",
+            "背後假設：財報會讓股票進入一段比較亂的日子。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "要問的問題",
+          "body": [
+            "波動放大幾倍？撐幾天？",
+            "是一段期間，還是一個點？"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "財報事件數",
+          "value": {
+            "source": "results",
+            "path": "meta.n_events",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本起點",
+          "value": {
+            "source": "results",
+            "path": "meta.sample_first_event",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本終點",
+          "value": {
+            "source": "results",
+            "path": "meta.sample_last_event",
+            "format": {
+              "kind": "date"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "怎麼量的",
+      "alt": "說明事件日對齊方式、基準窗口與波動率定義",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "事件日怎麼對齊",
+          "body": [
+            "美股巨頭多在收盤後發財報，消化財報的是隔一個交易日。",
+            "台積電法說在美東清晨，當天收盤就反應完。逐筆依公布時間判定。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "基準與檢定",
+          "body": [
+            "平時水準取財報前約一個月、且跳開財報前一週的那段交易日。",
+            "配對檢定加重抽樣區間，種子固定，可完整複現。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "標的檔數",
+          "value": {
+            "source": "results",
+            "path": "meta.quarters_per_ticker_target",
+            "format": {
+              "kind": "integer",
+              "suffix": " 季／檔"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "平時年化波動",
+          "value": {
+            "source": "results",
+            "path": "headline.rv_base_pooled",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "放大集中在一天半",
+      "alt": "財報日與其後各日的波動放大倍數，以及財報後五天與前五天的比較",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "財報日放大倍數",
+          "value": {
+            "source": "results",
+            "path": "by_event_day.10.mean_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 倍"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "隔一天還剩",
+          "value": {
+            "source": "results",
+            "path": "by_event_day.11.mean_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 倍"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "財報日平均振幅",
+          "value": {
+            "source": "results",
+            "path": "headline.event_day_mean_abs_ret_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "平時平均振幅",
+          "value": {
+            "source": "results",
+            "path": "headline.baseline_mean_abs_ret_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "第幾天起測不出差異",
+          "value": {
+            "source": "results",
+            "path": "headline.pooled_first_insignificant_day",
+            "format": {
+              "kind": "integer",
+              "prefix": "第 +",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "財報後五天／前五天",
+          "value": {
+            "source": "results",
+            "path": "tests.post5_vs_pre5.ratio_mean",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 倍"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀",
+          "body": [
+            "財報後五天跟財報前五天的差距未達統計顯著，跟平時水準也分不出來。",
+            "整個財報波動的故事，扣掉那一天半就是空的。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "誰跳得最兇，答案不是輝達",
+      "alt": "橫斷面結果：平時波動高低與財報日放大倍數無關",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "放大最多",
+          "value": {
+            "source": "results",
+            "path": "per_ticker.0.ticker",
+            "format": {
+              "kind": "text"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "放大倍數",
+          "value": {
+            "source": "results",
+            "path": "per_ticker.0.vol_amp_rms",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 倍"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "輝達放大倍數",
+          "value": {
+            "source": "results",
+            "path": "per_ticker.6.vol_amp_rms",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 倍"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "平時波動與放大倍數的排序相關",
+          "value": {
+            "source": "results",
+            "path": "cross_section.spearman_rho",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "帶走三句話",
+          "body": [
+            "風險集中在一天半，保護買一整週等於多付時間價值。",
+            "空手等財報過去，隔沒兩天就可以回來。",
+            "平時安靜的股票（Meta、微軟）財報日反而放大最多。"
+          ]
+        }
+      ]
+    }
+  ]
+}

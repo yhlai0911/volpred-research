@@ -186,13 +186,16 @@ def test_load_pending_tasks_warns_on_bad_entries_and_keeps_valid(tmp_path, monke
     assert "index=0" in captured.err
 
 
-def test_build_report_exposes_disambiguated_pending_summary(monkeypatch):
+def test_build_report_exposes_disambiguated_pending_summary(monkeypatch, tmp_path):
     tasks = [
         _task("platform-1", "platform_ops", priority=3),
         _task("paper-1", "paper_review", priority=3),
         _task("event-1", "event_article", priority=1),
     ]
 
+    # build_report sweeps the queue file; point it at tmp_path like the other
+    # tests here so the sweep cannot touch the real one.
+    monkeypatch.setattr(dispatch, "NEXT_TASKS", tmp_path / "next_tasks.json")
     monkeypatch.setattr(dispatch, "count_active_slots", lambda: {"worktrees": [], "active_agents": [], "occupied": 0})
     monkeypatch.setattr(dispatch, "load_pending_tasks", lambda: tasks)
     monkeypatch.setattr(dispatch, "load_recent_task_type_counts", lambda limit=10: Counter())

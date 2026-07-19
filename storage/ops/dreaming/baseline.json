@@ -1,70 +1,140 @@
 {
   "schema": "dreaming_baseline.v1",
   "description": "Rolling per-signature consecutive-run strike counts. THREE_STRIKE consecutive runs escalate to critical.",
-  "updated_at": "2026-07-18T21:25:00.535671+00:00",
+  "updated_at": "2026-07-19T21:25:00.858706+00:00",
   "signatures": {
     "persistent_alert:0ddc7a520cfd9d1e": {
-      "strike_count": 2,
+      "strike_count": 3,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-16T21:25:01.228981+00:00",
-      "last_seen": "2026-07-18T21:25:00.535671+00:00",
-      "activity_marker": "2026-07-17T22:19:37.709235+00:00"
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": "2026-07-18T22:26:18.330710+00:00"
     },
     "missing_retry_strategy:trending_repost_2026_07_17_ai支出": {
-      "strike_count": 2,
+      "strike_count": 3,
       "pattern_type": "missing_retry_strategy",
       "first_seen": "2026-07-17T21:25:01.224457+00:00",
-      "last_seen": "2026-07-18T21:25:00.535671+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
       "activity_marker": null
     },
     "persistent_alert:e28b5068534016a7": {
       "strike_count": 2,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-17T21:25:01.224457+00:00",
-      "last_seen": "2026-07-18T21:25:00.535671+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
       "activity_marker": "2026-07-18T01:21:33.175796+00:00"
     },
-    "persistent_alert:800782d7aa16a35c": {
-      "strike_count": 1,
+    "persistent_alert:e2f24397a43d4962": {
+      "strike_count": 3,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-17T21:25:01.224457+00:00",
-      "last_seen": "2026-07-18T21:25:00.535671+00:00",
-      "activity_marker": "2026-07-16T22:57:38.804873+00:00"
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": "2026-07-19T09:22:57.292777+00:00"
     },
-    "persistent_alert:e2f24397a43d4962": {
+    "persistent_alert:8e08e46929dc07ef": {
       "strike_count": 2,
       "pattern_type": "persistent_alert",
       "first_seen": "2026-07-17T21:25:01.224457+00:00",
-      "last_seen": "2026-07-18T21:25:00.535671+00:00",
-      "activity_marker": "2026-07-18T08:38:14.485866+00:00"
-    },
-    "persistent_alert:8e08e46929dc07ef": {
-      "strike_count": 1,
-      "pattern_type": "persistent_alert",
-      "first_seen": "2026-07-17T21:25:01.224457+00:00",
-      "last_seen": "2026-07-18T21:25:00.535671+00:00",
-      "activity_marker": "2026-07-17T19:23:24.364455+00:00"
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": "2026-07-19T02:58:57.095557+00:00"
     },
     "missing_retry_strategy:fable0711_ftd_e1_scale_gating": {
-      "strike_count": 1,
+      "strike_count": 2,
       "pattern_type": "missing_retry_strategy",
       "first_seen": "2026-07-18T21:25:00.535671+00:00",
-      "last_seen": "2026-07-18T21:25:00.535671+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
       "activity_marker": null
     },
-    "missing_retry_strategy:trending_repost_2026_07_18_fed政策": {
+    "repeated_tool_failure:release_settings_audit.log:exit1": {
       "strike_count": 1,
-      "pattern_type": "missing_retry_strategy",
-      "first_seen": "2026-07-18T21:25:00.535671+00:00",
-      "last_seen": "2026-07-18T21:25:00.535671+00:00",
+      "pattern_type": "repeated_tool_failure",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
       "activity_marker": null
     },
-    "missing_retry_strategy:trending_repost_2026_07_18_台股崩跌": {
+    "missing_retry_strategy:K267_article_general_v2": {
       "strike_count": 1,
       "pattern_type": "missing_retry_strategy",
-      "first_seen": "2026-07-18T21:25:00.535671+00:00",
-      "last_seen": "2026-07-18T21:25:00.535671+00:00",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
       "activity_marker": null
+    },
+    "missing_retry_strategy:research_rp_4855ddb7a9": {
+      "strike_count": 1,
+      "pattern_type": "missing_retry_strategy",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": null
+    },
+    "missing_retry_strategy:research_spot_bitcoin_etf_flow_shock_btc_eth_vol": {
+      "strike_count": 1,
+      "pattern_type": "missing_retry_strategy",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": null
+    },
+    "missing_retry_strategy:research_private_market_rv_correlation_regime": {
+      "strike_count": 1,
+      "pattern_type": "missing_retry_strategy",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": null
+    },
+    "missing_retry_strategy:K1684_article_general": {
+      "strike_count": 1,
+      "pattern_type": "missing_retry_strategy",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": null
+    },
+    "missing_retry_strategy:trending_repost_2026_07_14_ai資本": {
+      "strike_count": 1,
+      "pattern_type": "missing_retry_strategy",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": null
+    },
+    "missing_retry_strategy:k1708_fix_verdict_gate_20260717": {
+      "strike_count": 1,
+      "pattern_type": "missing_retry_strategy",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": null
+    },
+    "persistent_alert:542378afb7b6a3b9": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": "2026-07-19T01:01:26.728405+00:00"
+    },
+    "persistent_alert:739fcf1bb7ffd6f1": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": "2026-07-19T00:01:19.424799+00:00"
+    },
+    "persistent_alert:2d99bdcd3277e3cc": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": "2026-07-19T01:01:33.948909+00:00"
+    },
+    "persistent_alert:e46b1923cd3787a9": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": "2026-07-19T06:52:34.169530+00:00"
+    },
+    "persistent_alert:31bfa7e7f9289f4c": {
+      "strike_count": 1,
+      "pattern_type": "persistent_alert",
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-19T21:25:00.858706+00:00",
+      "activity_marker": "2026-07-19T06:57:42.084971+00:00"
     }
   }
 }

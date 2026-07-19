@@ -22127,5 +22127,35 @@
     "owner": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
     "commit": null,
     "summary": "PHASE A 收件：三個已完成 compute job 的結果驗收，並行派 collection subagent（opus；topology_override: worktree→subagent —— 這是既有產出的驗收與文件對齊，不是新實驗）。\n\n- **K1257 headline-realign = PASS，且抓出實質問題**。舊 README 的 SPY headline 是**混樣本**：BMA 用 own-sample n=1581 的 -8.2274，GJR-t 用 n=1518 的值，於是把差距誇大成 -8.1749 / t=-3.40 / p=0.0007。realign 到 common sample n=1518 後：BMA -8.186393 / Equal -8.166751 / GJR-t -8.135791，BMA−GJR = **-0.050602**，Harvey t = **-3.1739**、p = 0.001534 —— 效果縮小約 20%，但仍過 |t|>3 門檻，故 H1 的 SPY 結論未翻轉（H1 PARTIAL / H2 FAIL / H3 FAIL 三項全部不變）。根因是 SPY GJR-t 26 次 refit 有 1 次未收斂，連帶 63 個 invalid days；GLD / 0050.TW 無此問題、數字一位未動。README 另修 6 處事實錯誤（實作是 6 models 不是 7、HAR_ABS 不是 HAR-RV、A4f_IV2 不是 Realized GARCH、GLD 用 ^GVZ），並新增 posterior 吸收態的 Limitations（終端權重 SPY 的 GJR_t 恰為 0.0 是機制性 drop，非能力評價 —— 這正是 H3 regime-adaptive 主張被否定的原因）。已 enqueue codex review（stage 3）。\n- **K1258 artifact-schema-align = PASS**。報告層專屬重跑：20 個 asset×λ cell 與 2026-07-19 版逐值一致，無漂移；v2 forecast cache 三資產全命中（11.04 min → 0.09 min）。`conclusions` / `hypothesis_verdicts` 已補、H4=RECOMMENDATION(λ=1.0)。README:112 的「BMA-family ensemble is structurally limited」改為 scoped 措辭（限於 3 資產 × 5 個固定 λ × 單一 OOS 窗；adaptive λ、其他模型池、其他資產與窗口皆未測）。殘留 nit：`provenance.k1257_forecast_cache_reuse_note` 是只解釋 false 情況的 stale 字串，與現值 true 讀起來矛盾，下次動該腳本時應改成 value-conditional。\n- **K1623 rev3 = BLOCKED（但 B1–B5 + MINOR 全 PASS）**。收件 agent 逐條親自 grep / 重算而非採信 JSON 自述，並獨立確認三項自述為真：MC frozen 欄位 0 改 0 移僅 50 新增、A−B range [−0.0556, −0.0200] 由 frozen arm means 可重算、權威 max relative deviation = 0.005259349489457132。依 brief「有 blocked_items 即不放行」故**未** enqueue round 3：`mean_structure_generated_regressor_share_unmeasured` 需要第三臂 MC（known-level demean）才量得到 —— 現行兩臂都重估段均值，該成分在 A−B contrast 中相消，這是設計層的量測盲點不是疏漏。已建 task `k1623_mc_third_arm_mean_structure_share`（含「明確接受為 permanent scope limit」的替代路徑，但要求留書面裁決）。\n- 附帶修復：`experiments/k1623/README.md` 檔尾殘留 `</content>` / `</invoke>` 兩行工具呼叫碎片（自 rev2 commit f1e7ef686 即存在，rev3 未引入也未清除）。已在 worktree 以 writer lock 提交 `0dd6aa987`。此改動會變更 README 的 sha256 pin → round 3 送審前必須重跑 verdict-template 重生 review_verdict.json。\n\n六條 compute followup 全部 `mark-followup-dispatched`，pending-followup 佇列 6 → 0。knowledge.json 一律待各自 codex round PASS 後由主線程寫（K1259）。"
+  },
+  {
+    "timestamp": "2026-07-20T06:24:47+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29703582195",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-98cbd19ffa64440bb043f939414d0749",
+    "owner": "hourly-slot-1-98cbd19ffa64440bb043f939414d0749",
+    "commit": null,
+    "summary": "CI 紅燈修復（run 29703582195）：3 個獨立迴歸 — supabase egress chokepoint bypass、canonical-writer guard 被 try/except 吞掉、codex help spawn 無 process group"
+  },
+  {
+    "timestamp": "2026-07-20T06:29:28+08:00",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_20_earnings_rv",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-35c0f01cbb72492f8606c851fe4ed4e5",
+    "owner": "hourly-slot-2-35c0f01cbb72492f8606c851fe4ed4e5",
+    "commit": null,
+    "summary": "科技股財報日實現波動率事件研究 → trending_repost 直接發佈（mile_b7e98682）。\n\n樣本：NVDA/AAPL/MSFT/AMZN/GOOGL/META/TSM/AMD 各 12 季，96 次財報，2023-07-20 ~ 2026-05-21，yfinance 日線 + earnings dates。\n\n結果：消化財報的第 0 天平均振幅 = 平時 3.82 倍（配對檢定 t=10.11，重抽樣 95% CI 2.76–4.49）；第 +1 天 1.53 倍（p=0.00016）；第 +2 天起全部不顯著。財報後 5 日 RV vs 前 5 日 = 1.09 倍（p=0.158，NULL）；vs 基準 = 0.99（p=0.83，NULL）。橫斷面：META 4.10x 最高、AAPL 1.49x 最低、NVDA 僅 1.97x 排第七；平時波動與放大倍數排序相關 rho=-0.21（p=0.61，無關）。\n\n方法要點：event day 依公布時間逐筆判定（after-close → 次一交易日；TSM 盤前 → 當日）；baseline 用 t-30..t-11 跳開財報前一週；day-by-day 檢定改用 log|r_k| - mean(log|r_base|) 的配對統計量以避開 Jensen bias（初版用 geo-mean ratio 會誤判「非事件日顯著低於常態」）。\n\n產出：evidence JSON storage/experiments/earnings_rv_event_study.json；2 張結果圖 + 4 張懶人包（deterministic lazypack_render，全數值 data-bound）。anti_ai_gate exit 0。FB 本班未做（無 Chrome MCP），log 記 pending。"
+  },
+  {
+    "timestamp": "2026-07-20T06:31:55+08:00",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_20_ai修正",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-35c0f01cbb72492f8606c851fe4ed4e5",
+    "owner": "hourly-slot-2-35c0f01cbb72492f8606c851fe4ed4e5",
+    "commit": null,
+    "summary": "PHASE A0 急件 lane 清空（time_critical ×2，urgent 0）。\n\nlane 裁決（主線程 3-layer 查重，非只看 gate）：\n- `trending_repost_2026_07_20_ai修正`（TSMC 資本支出調升股價反跌 / SOX vol）→ **arc-covered**。7 天內已由 `mile_f78be848`（7/16「台積電法說開完，ADR 反跌」）＋ `mile_78899a5c`（7/18「費半跌一成六，VIX 卻在睡覺」）覆蓋，本題等於兩篇交集。依 publishing.md「不寫，換題」，換題執行。\n- `trending_repost_2026_07_20_美債波動`（MOVE 指數 + 美債 skew 方向性）→ **arc-covered**。`mile_d12825bb`（7/6「同樣動一碼，債市只怕利率往上：MOVE 藏了一個方向感」）為同機制同資產，`mile_21e45133`（7/19 21:00）昨天才發美債波動。且今日 trending cap=2 已由既有 1 篇 + 本班換題篇填滿。不寫。\n\n換題產出：科技股財報日實現波動率事件研究 → `mile_b7e98682`（live 200 驗證）。敘事支點取自 `mile_06cc28af`（research 版：G2 財報季波動率**指數層級**效應不存在）→ 個股層級是否存在，避開近期所有 near-miss arc。\n\ntopology_override: inline→subagent（trending_repost 型別預設 inline；本班 lane 有 2 張時效件且 fire cap 剩 ~40min，主線程串行做不完 evidence+寫作+gate+publish，故 evidence/寫作交 opus subagent，dedup 與 lane 裁決留主線程）。\n\n驗證：feed entry published/audience=general、live HTTP 200、evidence JSON 96 事件、anti_ai_gate exit 0。標題「3.82 倍」已核對出處 = `by_event_day[day 0].mean_ratio`，與文中 +1 天 1.53 / +2 天 1.18 同口徑，可追溯。\n\n殘留：FB 未發（此 fire 無 Chrome MCP），已記 `storage/reports/trending_repost_log.json` fb_post_status=pending。"
   }
 ]

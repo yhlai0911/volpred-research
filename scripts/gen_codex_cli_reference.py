@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -32,6 +33,9 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from volpred.ops.diagnostics import warn
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from dispatch_supervisor import procutil  # noqa: E402
 
 DEFAULT_OUT = Path.home() / ".claude/skills/codex-cli/references/cli-reference.md"
 NPM_LATEST_URL = "https://registry.npmjs.org/@openai/codex/latest"
@@ -44,18 +48,35 @@ MAX_DEPTH = 2
 
 
 def run_help(path: list[str]) -> str | None:
-    """Return `codex help <path>` output, or None if the node has no help."""
+    """Return `codex help <path>` output, or None if the node has no help.
+
+    start_new_session + kill_pgid rather than `subprocess.run(timeout=...)`: that
+    timeout kills only the direct child, so a `codex` that had already shelled
+    out leaves the grandchild orphaned and still running. Same owner every other
+    agentic-CLI launcher uses (scripts/run_agent_job.py) — do not hand-roll one.
+    """
     try:
-        proc = subprocess.run(
+        proc = subprocess.Popen(
             ["codex", "help", *path],
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            timeout=HELP_TIMEOUT,
+            start_new_session=True,
         )
-    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+    except FileNotFoundError as e:
         warn("codex-ref", "codex help failed", path=" ".join(path) or "<root>", err=str(e))
         return None
-    out = (proc.stdout or "") + (proc.stderr or "")
+    try:
+        stdout, stderr = proc.communicate(timeout=HELP_TIMEOUT)
+    except subprocess.TimeoutExpired as e:
+        try:
+            procutil.kill_pgid(os.getpgid(proc.pid))
+        except (ProcessLookupError, PermissionError):
+            proc.kill()
+        proc.wait()
+        warn("codex-ref", "codex help failed", path=" ".join(path) or "<root>", err=str(e))
+        return None
+    out = (stdout or "") + (stderr or "")
     return out.strip() or None
 
 

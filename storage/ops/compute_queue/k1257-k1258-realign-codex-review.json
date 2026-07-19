@@ -9,12 +9,12 @@
     "3000"
   ],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-19T21:11:54Z",
   "started_at": "2026-07-19T21:15:03Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-19T21:23:36Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1257-k1258-realign-codex-review.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1257-k1258-realign-codex-review.stderr",
   "result_artifact": "storage/ops/codex_reviews/k1257_k1258_realign_verdict.md",
@@ -34,5 +34,16 @@
   "source_task_id": null,
   "timeout_seconds": 3600,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "d90132d0893b7fb444325a62a656d32b4fedc879",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k1257_k1258_realign_verdict.md"
+  ],
+  "delivered_at": "2026-07-19T22:01:26.709800+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }

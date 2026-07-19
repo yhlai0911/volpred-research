@@ -92,7 +92,9 @@ def test_unparseable_created_at_is_never_starved_and_never_crashes() -> None:
     assert task_age_hours({"id": "x", "created_at": "not-a-date"}) is None
 
 
-def test_lockout_collapses_the_candidate_menu(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_lockout_collapses_the_candidate_menu(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     """Starved work is the *only* thing on the menu — diversity cannot route around it.
 
     This is the mechanical half of the fix. An advisory "please take the oldest
@@ -105,6 +107,7 @@ def test_lockout_collapses_the_candidate_menu(monkeypatch: pytest.MonkeyPatch) -
 
     monkeypatch.setattr(ctd, "count_active_slots", lambda: {"occupied": 0, "worktrees": 0, "active_agents": 0})
     monkeypatch.setattr(ctd._slot_budget, "budget", lambda: {"cap": 4})
+    monkeypatch.setattr(ctd, "NEXT_TASKS", tmp_path / "next_tasks.json")
     monkeypatch.setattr(ctd, "_maybe_retire_covered_article_tasks", lambda **_kw: None)
     monkeypatch.setattr(ctd, "load_pending_tasks", lambda: [starving, fresh])
     monkeypatch.setattr(ctd, "load_recent_task_type_counts", lambda: None)
@@ -123,7 +126,7 @@ def test_lockout_collapses_the_candidate_menu(monkeypatch: pytest.MonkeyPatch) -
 
 
 def test_ci_incident_preempts_starvation_but_ordinary_fresh_work_stays_excluded(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """A generic request_fire must actually offer its fresh CI P1 to the worker."""
     import continue_task_dispatch as ctd
@@ -145,6 +148,7 @@ def test_ci_incident_preempts_starvation_but_ordinary_fresh_work_stays_excluded(
         lambda: {"occupied": 0, "worktrees": 0, "active_agents": 0},
     )
     monkeypatch.setattr(ctd._slot_budget, "budget", lambda: {"cap": 2})
+    monkeypatch.setattr(ctd, "NEXT_TASKS", tmp_path / "next_tasks.json")
     monkeypatch.setattr(ctd, "_maybe_retire_covered_article_tasks", lambda **_kw: None)
     monkeypatch.setattr(ctd, "load_pending_tasks", lambda: [ordinary, starving, ci_red])
     monkeypatch.setattr(ctd, "load_recent_task_type_counts", lambda: None)
@@ -163,7 +167,7 @@ def test_ci_incident_preempts_starvation_but_ordinary_fresh_work_stays_excluded(
 
 
 def test_ci_incident_preempts_normal_rotation_when_only_one_slot_is_free(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     import continue_task_dispatch as ctd
 
@@ -188,6 +192,7 @@ def test_ci_incident_preempts_normal_rotation_when_only_one_slot_is_free(
         lambda: {"occupied": 0, "worktrees": 0, "active_agents": 0},
     )
     monkeypatch.setattr(ctd._slot_budget, "budget", lambda: {"cap": 1})
+    monkeypatch.setattr(ctd, "NEXT_TASKS", tmp_path / "next_tasks.json")
     monkeypatch.setattr(ctd, "_maybe_retire_covered_article_tasks", lambda **_kw: None)
     monkeypatch.setattr(ctd, "load_pending_tasks", lambda: [ordinary, ci_red])
     monkeypatch.setattr(ctd, "load_recent_task_type_counts", lambda: None)
