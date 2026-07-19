@@ -1,0 +1,34 @@
+{
+  "id": "compute-k1257-bma-valid-mask-remediation-20260719",
+  "title": "K1257 BMA valid-mask and convergence remediation full rerun",
+  "script_path": "experiments/k1257/k1257_bma_volatility.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-19T07:20:27Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1257-bma-valid-mask-remediation-20260719.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1257-bma-valid-mask-remediation-20260719.stderr",
+  "result_artifact": "experiments/k1257/k1257_results.json",
+  "output_paths": [
+    "experiments/k1257/k1257_results.json",
+    "experiments/k1257/k1257_weight_evolution.png",
+    "experiments/k1257/k1257_qlike_comparison.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "Parent assign_9f0a31a8. Verify K1257 full rerun diagnostics contain fit_attempts, fit_exceptions, nonconverged_fits, invalid_forecast_days and dropped_model_days for every asset/model; compare QLIKE and H1-H3 to prior artifact and K1258 lambda=1; run Codex primary-path review; update K1257/K1258 knowledge entries if conclusions changed; close parent only after both queue jobs are collected.",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 10800,
+  "brief_source": null,
+  "brief_snapshot": null
+}

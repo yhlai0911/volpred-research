@@ -32991,13 +32991,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T06:45:06.985821+00:00",
+    "completed_at": "2026-07-19T07:09:45.405645+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T06:45:06.985821+00:00",
-      "last_clean_observed_at": "2026-07-19T06:45:06.985821+00:00"
+      "resolved_at": "2026-07-19T07:09:45.405645+00:00",
+      "last_clean_observed_at": "2026-07-19T07:09:45.405645+00:00"
     }
   },
   {
@@ -42152,7 +42152,10 @@
       "fingerprint": [
         "scripts/task_pool_claim.py:563",
         "src/volpred/ops/dispatch_burst.py:67"
-      ]
+      ],
+      "resolved_at": "2026-07-19T07:06:35.389137+00:00",
+      "final_consecutive_remediation_failures": 0,
+      "superseded_by_distinct_incident_at": "2026-07-19T07:06:35.389137+00:00"
     },
     "completed_at": "2026-07-19T04:59:41.336009+00:00",
     "status_history": [
@@ -42478,7 +42481,7 @@
     "description": "2026-04-29 的 K1258 primary-path Codex review（`experiments/k1258/codex_review_v2.md`，CONDITIONAL PASS / 2 MAJOR + 2 MED）提出的 MAJOR-1 / MAJOR-2 至今（2026-07-19，81 天）**完全未動**，且任務池中無任何對應修復單。本班 slot-4 在收斂 `assign_2398cbfe`（已作廢的 codex retry 單）時發現，並逐行覆核確認 bug 仍在。\n\n## MAJOR-1 — invalid-model posterior contamination（K1257 + K1258 共病，但嚴重度不同）\n\n**K1258**（`experiments/k1258/k1258_forgetting_factor_bma.py:585-598`）現況逐行確認未修：\n- `:597` 只對 `valid = np.isfinite(ll_row)` 的模型加 log-likelihood，invalid 模型保留其 decayed prior；\n- `:598` 全體一起 `logsumexp` 正規化 → invalid 模型仍分走機率質量；\n- 更嚴重：`:586` `weight_hist[t] = np.exp(log_w - logsumexp(log_w))` **沒有 valid mask**，被污染的權重直接進入 forecast 路徑。\n\n**K1257**（`experiments/k1257/k1257_bma_volatility.py:551-568`）同構但較輕：\n- `:553-556` invalid 模型 `continue`，`log_weights` 保留舊值；`:568` 全體正規化 → posterior 被污染；\n- 但 `:545-546` forecast 端有 `log_weights[valid]` 重新正規化 → **當期 forecast 受保護**，污染只透過 posterior 遞延到後續日期。\n\n→ 依 review 建議做**單一協調修復**（invalid 當日 log_w 設 `-inf` 再正規化，或 forecast/posterior 兩端一致套 valid mask），不可只修一支。\n\n## MAJOR-2 — 未收斂 fit 被採用，且 artifact 無法驗證\n\n`fit_garch_n:249` / `fit_gjr_t:303` / `fit_a4f:388` 都存了 `res.success` 為 `converged`，但 `build_forecasts:489` 只檢查 `state is not None`，**下游無任何排除**。本班確認 `k1258_results.json` 只有 `provenance.*`，**無 convergence / invalid-day / dropped-model-day 任何計數** → 從 artifact 無法驗證 MAJOR-1 究竟觸發過幾次。\n\n## 交付契約\n\n1. 協調修 K1257 + K1258 的 valid-mask 語意（forecast 與 posterior 兩端一致）。\n2. `converged=False` 視為當日不可用，排除於 forecast 與 posterior。\n3. results.json 補 per-asset per-model 的 convergence / invalid-day / dropped-day 計數，讓 MAJOR-1 的觸發次數可從 artifact 直接驗證。\n4. 重跑 3 assets × 5 λ × OOS 2020-2026 → **屬 heavy compute，強制走 `scripts/compute_queue.py enqueue`**，不得塞進 hourly fire。\n5. 比對修復前後的 QLIKE / H1-H4 結論：**若結論翻轉，必須更新 knowledge entry `727e23ee`（K1258，confidence 0.88）與 K1257 對應 entry**，不得只改數字不改結論。\n\n## 注意\n\n- 這是 E078「cross-model review 非選配」系列最後一塊未收尾的 remediation：K1259 / K1261 / K1262 / K1262b 皆為 FAIL 並各自處理，僅 BMA family 的兩張 CONDITIONAL PASS 被漏接。\n- 禁止在未重跑的情況下宣稱修好；禁止沿用舊 forecast cache（`provenance.k1257_forecast_cache_reuse` 已存在，修 K1257 後該 cache 即失效）。\n",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "pending_main_thread",
     "source": "agent",
     "created_at": "2026-07-19T05:22:34.285264+00:00",
     "payload": {
@@ -42490,7 +42493,31 @@
       "topology": "compute_queue"
     },
     "parent_task_id": "assign_2398cbfe",
-    "created_by": "hourly-slot-4-e402e39a537640f383ae81eb70556777"
+    "created_by": "hourly-slot-4-e402e39a537640f383ae81eb70556777",
+    "status_history": [
+      {
+        "ts": "2026-07-19T07:11:41.358929+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-0991bfbee74e4783aeec27f35b7d69ad"
+      },
+      {
+        "ts": "2026-07-19T07:12:03.110850+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-0991bfbee74e4783aeec27f35b7d69ad"
+      },
+      {
+        "ts": "2026-07-19T07:21:14.348189+00:00",
+        "from": "in_progress",
+        "to": "pending_main_thread",
+        "by": "codex-failover-slot-1-0991bfbee74e4783aeec27f35b7d69ad",
+        "note": "compute queued after repair commit 1af0e3fbf; await jobs compute-k1258-bma-valid-mask-remediation-20260719 and compute-k1257-bma-valid-mask-remediation-20260719; queue followups must verify diagnostics, compare conclusions, run Codex review, update knowledge if needed, then close parent"
+      }
+    ],
+    "started_at": "2026-07-19T07:12:03.110836+00:00",
+    "handoff_note": "compute queued after repair commit 1af0e3fbf; await jobs compute-k1258-bma-valid-mask-remediation-20260719 and compute-k1257-bma-valid-mask-remediation-20260719; queue followups must verify diagnostics, compare conclusions, run Codex review, update knowledge if needed, then close parent",
+    "handoff_at": "2026-07-19T07:21:14.348174+00:00"
   },
   {
     "id": "assign_f3419501",
@@ -43258,5 +43285,36 @@
     "created_at": "2026-07-19T06:56:34.847587+00:00",
     "parent_task_id": "assign_7f508612",
     "created_by": "codex-failover-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98"
+  },
+  {
+    "id": "alert_internal_silent_fallback_new_c67bec28dd_20260719T070635389137Z_a1",
+    "title": "[internal alert] PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 發生什麼\nPHASE-Z 連續 3 次無法完成這班的自動 commit（原因：commit_nonzero）。已停止重試 —— 同一班不再重跑。\n檔案仍在工作區、沒有遺失。\n\n## 現在該做什麼\n確認未提交檔案的作者後由該作者 commit。若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。\n\n## git commit 輸出（尾段）\nnew=2 resolved=60\n[pre-commit]   NEW scripts/check_experiment_artifacts.py:115 except OSError|ValueError: return None\n[pre-commit]   NEW scripts/check_experiment_artifacts.py:131 except OSError|ValueError: return {}\n[pre-commit]   [silent-fallback-audit] note: 60 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-19T07:06:35.389137+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "silent_fallback_new"
+    ],
+    "alert_key": "silent_fallback_new",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260719T070635389137Z",
+      "episode_started_at": "2026-07-19T07:06:35.389137+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-19T07:08:27.225500+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false,
+      "fingerprint": [
+        "scripts/check_experiment_artifacts.py:115",
+        "scripts/check_experiment_artifacts.py:131"
+      ]
+    }
   }
 ]
