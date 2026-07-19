@@ -1,0 +1,143 @@
+{
+  "task_id": "assign_a31a311d",
+  "source_audit": "experiments/k1442/related_event_date_audit.md",
+  "rerun_date": "2026-07-19",
+  "article_published_before_correction": false,
+  "date_source": "FRED/ALFRED release id 10 via volpred.data.event_dates.cpi_release_dates (fail-closed, no proxy)",
+  "sample_n_before": 14,
+  "sample_n_after": 13,
+
+  "dates_fixed": [
+    {
+      "old": "2025-10-15",
+      "new": "2025-10-24",
+      "kind": "misdated",
+      "note": "September-2025 reference month slipped 9 days; release delayed by the government shutdown. Old date carried VIX -0.817%, official date carries -5.376%.",
+      "impact_on_conclusion": "Both are negative and neither was near the top of the ranking; no effect on the headline rank claim."
+    },
+    {
+      "old": "2025-11-13",
+      "new": null,
+      "kind": "phantom",
+      "note": "BLS published NO CPI in November 2025. The October-2025 reference month was cancelled during the shutdown, so this release never existed. The hard-coded entry scored an ordinary market day as a CPI reaction and gave it VIX +14.22%.",
+      "impact_on_conclusion": "DECISIVE. This fabricated event was ranked 2nd, directly above the release under study, and was one of the three moves that demoted 2026-06-10 to 4th."
+    },
+    {
+      "old": "2025-12-10",
+      "new": "2025-12-18",
+      "kind": "misdated",
+      "note": "Shutdown backlog still unwinding. Old date carried VIX -6.852%, official date carries -4.257%.",
+      "impact_on_conclusion": "Both deep negative; changes the tail of the ranking, not the top. Shifts the sample mean slightly upward."
+    },
+    {
+      "old": "2026-01-14",
+      "new": "2026-01-13",
+      "kind": "misdated",
+      "note": "Proxy off by one day. Old date carried VIX +4.819%, official date carries +5.688%.",
+      "impact_on_conclusion": "Changes which day holds rank 2 in the corrected sample; does not affect rank 1."
+    },
+    {
+      "old": "2026-02-12",
+      "new": "2026-02-13",
+      "kind": "misdated",
+      "note": "Proxy off by one day. Old date carried VIX +17.96%, official date carries -1.057% — a sign flip of nearly 19 percentage points across adjacent sessions.",
+      "impact_on_conclusion": "DECISIVE. The old date was ranked 1st overall. On the official date the same event is mildly negative and ranks 6th of 13."
+    },
+    {
+      "old": "2026-03-12",
+      "new": "2026-03-11",
+      "kind": "misdated",
+      "note": "Proxy off by one day. Old date carried VIX +12.629%, official date carries -2.808% — another sign flip across adjacent sessions.",
+      "impact_on_conclusion": "DECISIVE. The old date was ranked 3rd overall. On the official date the same event ranks 9th of 13."
+    },
+    {
+      "old": "2026-05-13",
+      "new": "2026-05-12",
+      "kind": "misdated",
+      "note": "Proxy off by one day. Old date carried VIX -0.667%, official date carries -2.122%.",
+      "impact_on_conclusion": "Both negative and mid-table; no effect on the headline rank claim."
+    }
+  ],
+  "dates_already_correct": [
+    "2025-05-13", "2025-06-11", "2025-07-15", "2025-08-12", "2025-09-11",
+    "2026-04-10", "2026-06-10"
+  ],
+  "phantom_event_removed": "2025-11-13 — BLS published no Consumer Price Index release in November 2025 at all. The October-2025 reference month was cancelled during the government shutdown, and the September report had already been issued off-cycle on 2025-10-24. The hard-coded calendar could not represent a cancelled release, so it invented one, scored an ordinary session (VIX +14.22%) as a CPI reaction, and ranked that fabricated event 2nd — directly above the release the article was about. Confirmed absent from FRED/ALFRED release id 10; the canonical fetch sets include_release_dates_with_no_data=true and still returns no November-2025 entry.",
+
+  "official_cpi_release_dates": [
+    "2025-05-13", "2025-06-11", "2025-07-15", "2025-08-12", "2025-09-11",
+    "2025-10-24", "2025-12-18", "2026-01-13", "2026-02-13", "2026-03-11",
+    "2026-04-10", "2026-05-12", "2026-06-10"
+  ],
+  "vix_2026_06_10_pct": 11.827,
+  "rank_among_official": 1,
+  "rank_claimed_in_draft": 4,
+  "sanity_check_result": "CONFIRMED — the expected outcome held without any parameter adjustment. 2026-06-10 (+11.827%) is the largest CPI-day VIX reaction among the 13 official releases, ahead of 2026-01-13 (+5.688%) by more than 2x. All three moves the draft ranked above it were on non-event days.",
+  "official_sample_summary": {
+    "mean_pct": -0.847,
+    "median_pct": -1.334,
+    "n_positive": 4,
+    "n": 13
+  },
+
+  "png_kept": [
+    "fig1_cpi_t0_reaction.png",
+    "fig2_cpi_t0_event_window.png"
+  ],
+  "png_regenerated": [
+    "fig1_cpi_t0_reaction.png",
+    "fig2_cpi_t0_event_window.png"
+  ],
+  "png_verdict": "Both figures plot ONLY the 2026-06-09..06-11 event window. Neither renders a historical date, a rank, or the CPI sample, so both are structurally immune to the calendar bug and are KEPT on content grounds. Both were nevertheless rewritten by the rerun, hence appearing in both lists. Verified per-file rather than asserted: fig1 is byte-identical to the archived copy (sha256 8cf618f1fcace5364a77bfa6a8b5220b6a4f68158648de3cd0937a0de84f445c); fig2 differs in 252 of ~2.5M pixels by at most 1/255, which traces to yfinance restating SPY adjusted closes between the 2026-06-12 and 2026-07-19 downloads (dividends paid since), not to the date fix. VIX and VIX9D are unadjusted and bit-identical.",
+
+  "tests_added": [
+    "tests/test_cpi_t0_official_release_dates.py::TestLegacyCalendarWasWrong (17 tests)",
+    "tests/test_cpi_t0_official_release_dates.py::TestScriptUsesOfficialCalendar (9 tests)",
+    "tests/test_cpi_t0_official_release_dates.py::TestReactionArithmeticRejectsPoisonedQuotes (5 tests)",
+    "tests/test_cpi_t0_official_release_dates.py::TestOutputPathIsAnchoredToTheScript (2 tests)",
+    "tests/test_cpi_t0_official_release_dates.py::TestPublishedEvidenceMatchesTheOfficialCalendar (6 tests)"
+  ],
+  "tests_total": 39,
+  "test_negative_control": "Verified non-vacuous: temporarily reverting analysis.official_cpi_dates to the hard-coded LEGACY list produced 8 failures out of the 9 tests in TestScriptUsesOfficialCalendar (returns-official-sample, no-legacy-date-survives, sample-is-13, asks-for-release-id-10, phantom-month-fails-closed, off-session-fails-closed, empty-calendar-fails-closed, errata-table-recomputed). The single survivor is test_target_release_is_resolved_from_the_calendar, because the legacy list happened to contain the correct 2026-06-10 and so resolves the right target for the wrong reason; this is stated in the class docstring rather than rounded up to 'every test fails'. The script was then restored and the suite returned to 39 passed.",
+  "test_coverage_limits": "Stated rather than left to be discovered: (a) the legacy-calendar fixtures are hand-written and checked against each other, proving internal consistency and catching typos but not independently re-verifying FRED against BLS; (b) the evidence.json tests check artifact internal consistency and do not recompute reactions from market closes, so a price-arithmetic regression would pass unless the artifact were rerun (TestReactionArithmeticRejectsPoisonedQuotes covers that arithmetic separately); (c) the OUT_DIR tests pin a value, they do not chdir and rerun.",
+  "pytest": "pass — 39/39 on the new file. Full suite: 3545 passed, 1 failed, 7 skipped in 614s. The single failure is scripts/tests/test_knowledge_unrecorded_ratchet.py::test_no_finished_experiment_is_missing_from_the_knowledge_base, reporting that experiment k1732 has archived results but no knowledge.json entry. PRE-EXISTING AND UNRELATED: k1732 arrived in commit 45230fbc4, already on this branch's base, and this task touched neither experiments/k1732 nor knowledge.json. The test's own failure message says the entry must be written from the main thread because agents must not write knowledge.json (K1259), so it is not fixable from this worktree by design.",
+
+  "codex_review": {
+    "how": "scripts/codex_exec_bounded.sh --timeout 540 -s read-only, over analysis.py and the test file",
+    "cleared": [
+      "Lookahead: t-1 close -> t close is legitimate; the 08:30 ET release precedes the 09:30 open. Event window (t-1, t, t+1) and the ranking loop use no future prices to select the sample.",
+      "Date source: no path lets a legacy date into the sample; LEGACY_HARDCODED_DATES feeds only build_errata() and the legacy_sample_n field.",
+      "Row arithmetic: no off-by-one; the XNYS session guard makes get_loc + iloc[pos-1] mean the previous session.",
+      "cwd independence: all paths derive from __file__.resolve()."
+    ],
+    "findings_accepted_and_fixed": [
+      "The test class docstring claimed reverting fails EVERY test; it fails 8 of 9. Corrected to the true count with the survivor named.",
+      "The 'cwd drift' description of the original output path was wrong — it was an unportable ABSOLUTE path, not a cwd-relative one. This error came from the task brief and was repeated uncritically. Corrected in analysis.py, README.md and this file.",
+      "The session guard validates the index but not the values, so a NaN close would sort silently into the ranking. reaction_pct now raises on non-finite quotes and on a zero prior close, with 5 tests. Verified inert: evidence.json is byte-identical after the change."
+    ],
+    "findings_noted_not_acted_on": [
+      "event_dates.release_dates() silently collapses multiple same-month FRED entries to the last one. Canonical-module behaviour, documented in that module, out of scope for this errata.",
+      "yfinance history is not snapshotted, so a future rerun can shift if the vendor restates data — which is exactly what the SPY adjusted closes did between 2026-06-12 and 2026-07-19, recorded under png_verdict.",
+      "The ranking uses ordinal rather than tied ranks. No ties are present in this sample."
+    ]
+  },
+
+  "conclusion_changes": "The headline comparative claim INVERTED, in the direction that strengthens the article. Draft: '2026-06-10 ranked 4th of 14 CPI days, behind 2026-02-12 (+18.0%), 2026-03-12 (+12.6%) and 2025-07-15'. Corrected: it ranks 1st of 13 official releases, by more than 2x over rank 2. A second finding emerged that the draft did not have at all: across the 13 official releases the CPI-day VIX change averages -0.847% with a median of -1.334% and only 4 of 13 positive, so the modal CPI-day reaction is a vol CRUSH. 2026-06-10 was therefore not just the largest move but one running against the sample's modal direction. The event-window narrative (spike on the release day, most of it given back the next session) is unchanged and was never affected — that part of the draft was computed on the correct dates. The article body was rewritten accordingly and now carries an explicit small-sample hedge: n=13, descriptive statistics only, no test run.",
+
+  "honest_notes": "1) The result was strengthened, not preserved. Nothing was tuned, no parameter was searched, and the rank-1 outcome was reproduced by an independent pandas path before analysis.py was rewritten. The same independent path also reproduced the draft's wrong 'rank 4 of 14' from the legacy list, which is what confirms the diagnosis rather than merely asserting it. 2) An error the date fix did NOT cause: the draft's prose named 2025-07-15 as its third-largest move. 2025-07-15 is a genuine release date and its VIX move was +1.047% (4th of 13). That sentence contradicted the draft's own evidence.json, which ranked the phantom 2025-11-13 second. It was an independent prose fabrication layered on the calendar bug and is recorded rather than quietly deleted. 3) The directory name and original event_key said 2026-06-11; the official June-2026 release was 2026-06-10. details.json event_key is corrected to CPI_US_2026_06_10; the directory name is left alone because next_tasks.json and the K1442 audit reference it by path. The article body always used 06-10 correctly. 4) SPY levels in evidence.json differ from the archived copy (2026-06-09: 737.05 -> 735.16) because yfinance restates adjusted closes as dividends are paid. Percentage changes, which are what the article quotes, agree to 6 decimal places. No SPY level is quoted in the article. 5) Method deltas were added beyond the task scope, disclosed rather than waved off: an XNYS session filter (yfinance returns a ^VIX quote for Memorial Day 2026-05-25 when the exchange was shut, and every reaction here is row arithmetic), and non-finite/zero-prior-close guards in reaction_pct. Both verified inert on this data — 2026-05-25 neighbours no official release date, and evidence.json is byte-identical before and after the guards — but both are behavioural changes and are listed as such. 9) The task brief stated the output path was 'relative to cwd and drifts with execution location'. That is wrong: it was a hard-coded ABSOLUTE Desktop path, which with mkdir(parents=True) would resurrect a stale tree and write there from any cwd. I repeated the brief's characterisation without checking it, and Codex caught it. Same fix applies, but the defect is recorded as what it actually was. 6) n=13 is a small sample. The mean/median/positive-count figures are descriptive; no hypothesis test was run and none is claimed. 7) The article remains UNPUBLISHED and this task does not publish it. It is now over a month stale and its 'next week's FOMC' framing no longer holds; publishing it would require a retrospective reframe, not a copy-paste. 8) FRED_API_KEY is read from the repo-root .env, which git worktrees do not carry; it was exported explicitly for this run. That is environment provisioning, not an in-script credential.",
+
+  "files_changed": [
+    "storage/event_articles/us_cpi_2026_06_11_t0/analysis.py",
+    "storage/event_articles/us_cpi_2026_06_11_t0/evidence.json",
+    "storage/event_articles/us_cpi_2026_06_11_t0/article.md",
+    "storage/event_articles/us_cpi_2026_06_11_t0/details.json",
+    "storage/event_articles/us_cpi_2026_06_11_t0/README.md",
+    "storage/event_articles/us_cpi_2026_06_11_t0/fig1_cpi_t0_reaction.png",
+    "storage/event_articles/us_cpi_2026_06_11_t0/fig2_cpi_t0_event_window.png",
+    "storage/event_articles/us_cpi_2026_06_11_t0/_archive_20260719/",
+    "tests/test_cpi_t0_official_release_dates.py"
+  ],
+  "archive_dir": "storage/event_articles/us_cpi_2026_06_11_t0/_archive_20260719/",
+  "knowledge_json_written": false,
+  "knowledge_json_note": "K1259 rule: worktree agents do not write storage/memory/knowledge.json. The recordable findings are this file plus the commit message."
+}
