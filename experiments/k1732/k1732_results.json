@@ -1,0 +1,919 @@
+{
+ "experiment_id": "k1732",
+ "data": {
+  "source": "Yahoo Finance ^TWII (auto_adjust)",
+  "freq": "weekly W-FRI log returns",
+  "period": [
+   "1997-07-11",
+   "2026-07-17"
+  ],
+  "n_weeks": 1494,
+  "spec": {
+   "alpha": 0.05,
+   "moment_window": 26,
+   "ma": [
+    20,
+    30
+   ],
+   "moment_estimator": "pandas sample skew / excess kurt (bias-corrected)"
+  }
+ },
+ "event_definition": {
+  "primary_thr_weekly_log_ret": -0.05,
+  "alt_thr": -0.04,
+  "episode_gap_weeks": 13,
+  "n_onsets_primary": 30,
+  "n_onsets_alt": 26,
+  "onsets_primary": [
+   "1997-09-05",
+   "1998-05-29",
+   "1999-02-05",
+   "1999-07-16",
+   "2000-02-25",
+   "2000-09-01",
+   "2001-12-21",
+   "2003-02-07",
+   "2004-03-26",
+   "2006-06-09",
+   "2007-08-17",
+   "2007-12-14",
+   "2008-06-13",
+   "2009-08-21",
+   "2010-01-22",
+   "2011-02-11",
+   "2011-08-05",
+   "2014-10-17",
+   "2015-08-21",
+   "2016-01-08",
+   "2018-02-09",
+   "2020-01-31",
+   "2020-09-25",
+   "2021-01-29",
+   "2021-05-14",
+   "2022-06-17",
+   "2024-04-19",
+   "2025-04-11",
+   "2026-03-06",
+   "2026-07-17"
+  ]
+ },
+ "mechanical_equivalence": {
+  "note": "beta_k = -sigma*(1/24)(z^3-3z) 是 sigma 的線性變換 → beta_k 死亡交叉『恆等於』sigma 上升趨勢交叉；beta_s = -sigma*(0.2843+0.0376*skew) 高度近似。此為 mechanical 結果：beta 訊號在本質上是波動率趨勢訊號，偏態每單位貢獻 ~13% 係數比（樣本內相對調變見 range 欄位）。IS_k 才是 higher-moment specific 訊號。",
+  "corr_beta_k_neg_sigma": 1.0,
+  "corr_beta_s_neg_sigma": 0.9715,
+  "beta_s_skew_relative_modulation_range": [
+   -0.369,
+   0.2394
+  ],
+  "beta_k_crosses_equal_sigma_crosses": true
+ },
+ "signals": {
+  "beta_s": {
+   "n_onsets_evaluable": 28,
+   "hit_rate_active_at_t_minus_1": 0.4643,
+   "hits": 13,
+   "valid_per_paper_rate": 0.4286,
+   "valid_hits": 12,
+   "lead_weeks_median": 16.0,
+   "lead_weeks_iqr": [
+    7.0,
+    20.0
+   ],
+   "n_death_crosses": 28,
+   "precision_26w": 0.5357,
+   "warning_burden_frac_weeks_active": 0.4611,
+   "assoc_P_onset13_given_active": 0.2212,
+   "assoc_P_onset13_given_inactive": 0.268,
+   "assoc_diff": -0.0468,
+   "assoc_diff_ci95_blockboot": [
+    -0.1636,
+    0.0791
+   ],
+   "assoc_diff_ci99_blockboot": [
+    -0.1991,
+    0.1196
+   ],
+   "assoc_diff_p_circshift_onesided": 0.73825,
+   "assoc_perm_B": 5000,
+   "per_event": [
+    {
+     "onset": "1999-02-05",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 18,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "1999-07-16",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 9,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2000-02-25",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2000-09-01",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 6,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2001-12-21",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2003-02-07",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 7,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2004-03-26",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2006-06-09",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2007-08-17",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 3,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2007-12-14",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 20,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2008-06-13",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 45,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2009-08-21",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2010-01-22",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2011-02-11",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2011-08-05",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 10,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2014-10-17",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2015-08-21",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2016-01-08",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 18,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2018-02-09",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2020-01-31",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2020-09-25",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 25,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2021-01-29",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2021-05-14",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 2,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2022-06-17",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2024-04-19",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2025-04-11",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 38,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2026-03-06",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2026-07-17",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 16,
+     "valid_per_paper": true
+    }
+   ],
+   "alt_thr_hit_rate": 0.4167,
+   "alt_thr_n_onsets": 24
+  },
+  "beta_k": {
+   "n_onsets_evaluable": 28,
+   "hit_rate_active_at_t_minus_1": 0.4643,
+   "hits": 13,
+   "valid_per_paper_rate": 0.3929,
+   "valid_hits": 11,
+   "lead_weeks_median": 11.0,
+   "lead_weeks_iqr": [
+    5.0,
+    16.0
+   ],
+   "n_death_crosses": 26,
+   "precision_26w": 0.5385,
+   "warning_burden_frac_weeks_active": 0.4597,
+   "assoc_P_onset13_given_active": 0.2219,
+   "assoc_P_onset13_given_inactive": 0.2674,
+   "assoc_diff": -0.0455,
+   "assoc_diff_ci95_blockboot": [
+    -0.1636,
+    0.0624
+   ],
+   "assoc_diff_ci99_blockboot": [
+    -0.1982,
+    0.0891
+   ],
+   "assoc_diff_p_circshift_onesided": 0.71386,
+   "assoc_perm_B": 5000,
+   "per_event": [
+    {
+     "onset": "1999-02-05",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 16,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "1999-07-16",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 38,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2000-02-25",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2000-09-01",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 6,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2001-12-21",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 1,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2003-02-07",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 7,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2004-03-26",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2006-06-09",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2007-08-17",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 1,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2007-12-14",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 18,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2008-06-13",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2009-08-21",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2010-01-22",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2011-02-11",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2011-08-05",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 11,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2014-10-17",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2015-08-21",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2016-01-08",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 16,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2018-02-09",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 5,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2020-01-31",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2020-09-25",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 26,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2021-01-29",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2021-05-14",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 5,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2022-06-17",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2024-04-19",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2025-04-11",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2026-03-06",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2026-07-17",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 15,
+     "valid_per_paper": true
+    }
+   ],
+   "alt_thr_hit_rate": 0.375,
+   "alt_thr_n_onsets": 24
+  },
+  "IS_k": {
+   "n_onsets_evaluable": 28,
+   "hit_rate_active_at_t_minus_1": 0.7143,
+   "hits": 20,
+   "valid_per_paper_rate": 0.6071,
+   "valid_hits": 17,
+   "lead_weeks_median": 12.0,
+   "lead_weeks_iqr": [
+    5.75,
+    16.5
+   ],
+   "n_death_crosses": 71,
+   "precision_26w": 0.4507,
+   "warning_burden_frac_weeks_active": 0.4913,
+   "assoc_P_onset13_given_active": 0.3229,
+   "assoc_P_onset13_given_inactive": 0.1722,
+   "assoc_diff": 0.1507,
+   "assoc_diff_ci95_blockboot": [
+    0.0472,
+    0.2501
+   ],
+   "assoc_diff_ci99_blockboot": [
+    0.0203,
+    0.2852
+   ],
+   "assoc_diff_p_circshift_onesided": 0.0138,
+   "assoc_perm_B": 5000,
+   "per_event": [
+    {
+     "onset": "1999-02-05",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 2,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "1999-07-16",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 6,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2000-02-25",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 7,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2000-09-01",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2001-12-21",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2003-02-07",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2004-03-26",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 11,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2006-06-09",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 5,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2007-08-17",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 19,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2007-12-14",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2008-06-13",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 16,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2009-08-21",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 18,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2010-01-22",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2011-02-11",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 3,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2011-08-05",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 1,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2014-10-17",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 13,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2015-08-21",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 7,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2016-01-08",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 9,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2018-02-09",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 14,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2020-01-31",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2020-09-25",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 13,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2021-01-29",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 1,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2021-05-14",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2022-06-17",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 26,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2024-04-19",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 29,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2025-04-11",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 24,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2026-03-06",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 13,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2026-07-17",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    }
+   ],
+   "alt_thr_hit_rate": 0.75,
+   "alt_thr_n_onsets": 24
+  },
+  "sigma_uptrend_benchmark": {
+   "n_onsets_evaluable": 28,
+   "hit_rate_active_at_t_minus_1": 0.4643,
+   "hits": 13,
+   "valid_per_paper_rate": 0.3929,
+   "valid_hits": 11,
+   "lead_weeks_median": 11.0,
+   "lead_weeks_iqr": [
+    5.0,
+    16.0
+   ],
+   "n_death_crosses": 26,
+   "precision_26w": 0.5385,
+   "warning_burden_frac_weeks_active": 0.4597,
+   "assoc_P_onset13_given_active": 0.2219,
+   "assoc_P_onset13_given_inactive": 0.2674,
+   "assoc_diff": -0.0455,
+   "assoc_diff_ci95_blockboot": [
+    -0.1606,
+    0.0651
+   ],
+   "assoc_diff_ci99_blockboot": [
+    -0.1877,
+    0.1056
+   ],
+   "assoc_diff_p_circshift_onesided": 0.73445,
+   "assoc_perm_B": 5000,
+   "per_event": [
+    {
+     "onset": "1999-02-05",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 16,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "1999-07-16",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 38,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2000-02-25",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2000-09-01",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 6,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2001-12-21",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 1,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2003-02-07",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 7,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2004-03-26",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2006-06-09",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2007-08-17",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 1,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2007-12-14",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 18,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2008-06-13",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2009-08-21",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2010-01-22",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2011-02-11",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2011-08-05",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 11,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2014-10-17",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2015-08-21",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2016-01-08",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 16,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2018-02-09",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 5,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2020-01-31",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2020-09-25",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 26,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2021-01-29",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2021-05-14",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 5,
+     "valid_per_paper": true
+    },
+    {
+     "onset": "2022-06-17",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2024-04-19",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2025-04-11",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2026-03-06",
+     "active_at_t_minus_1": false,
+     "lead_weeks": null,
+     "valid_per_paper": false
+    },
+    {
+     "onset": "2026-07-17",
+     "active_at_t_minus_1": true,
+     "lead_weeks": 15,
+     "valid_per_paper": true
+    }
+   ],
+   "alt_thr_hit_rate": 0.375,
+   "alt_thr_n_onsets": 24
+  }
+ },
+ "case_2026_07_17": {
+  "beta_s": {
+   "active_at_t_minus_1": true,
+   "lead_weeks_at_t_minus_1": 16,
+   "last_death_cross": "2026-03-27"
+  },
+  "beta_k": {
+   "active_at_t_minus_1": true,
+   "lead_weeks_at_t_minus_1": 15,
+   "last_death_cross": "2026-04-03"
+  },
+  "IS_k": {
+   "active_at_t_minus_1": false,
+   "lead_weeks_at_t_minus_1": null,
+   "last_death_cross": "2026-07-17"
+  },
+  "sigma_uptrend_benchmark": {
+   "active_at_t_minus_1": true,
+   "lead_weeks_at_t_minus_1": 15,
+   "last_death_cross": "2026-04-03"
+  },
+  "week_ret": -0.061,
+  "isk_gap_last8": {
+   "2026-05-29": 0.008348,
+   "2026-06-05": 0.007624,
+   "2026-06-12": 0.007493,
+   "2026-06-19": 0.005564,
+   "2026-06-26": 0.002411,
+   "2026-07-03": 0.000963,
+   "2026-07-10": 0.002346,
+   "2026-07-17": -0.004197
+  }
+ },
+ "seed": 42,
+ "bootstrap": {
+  "B": 2000,
+  "block": 26,
+  "method": "circular block"
+ },
+ "estimator_sensitivity_ISk": {
+  "note": "population (bias=True) skew/exkurt 重算 IS_k 訊號 vs 基準 pandas bias-corrected",
+  "n_death_crosses_pop": 71,
+  "n_death_crosses_base": 71,
+  "n_cross_dates_differing": 6,
+  "n_active_weeks_differing": 5,
+  "n_weeks_compared": 1439
+ }
+}
