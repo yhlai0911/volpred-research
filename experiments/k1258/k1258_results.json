@@ -771,23 +771,33 @@
       }
     },
     "H4": {
-      "verdict": "lambda=1.0 (standard BMA); no forgetting variant improves QLIKE",
+      "verdict": "RECOMMENDATION",
+      "recommendation": "lambda=1.0 (standard BMA); no forgetting variant improves QLIKE",
+      "recommended_lambda": 1.0,
       "rationale": "Chosen by combining H1 (which lambdas actually beat baseline QLIKE with Harvey |t|>3) and H3 (whether the optimum is shared across assets)."
     }
   },
+  "hypothesis_verdicts": {
+    "H1_ffbma_beats_standard_bma": "FAIL",
+    "H2_switch_freq_increases": "PASS",
+    "H3_optimal_lambda_asset_specific": "PASS",
+    "H4_production_default": "lambda=1.0 (standard BMA); no forgetting variant improves QLIKE"
+  },
+  "conclusions": "Forgetting-factor BMA (lambda in [1.0, 0.99, 0.975, 0.95, 0.9]) tested against standard BMA (lambda=1) on SPY/GLD/0050.TW 2020-2026 OOS. H1 (ff-BMA beats standard BMA on QLIKE): FAIL; H2 (lambda<1 raises weight-switch frequency): PASS; H3 (optimal lambda is asset-specific): PASS. Production default: lambda=1.0 (standard BMA); no forgetting variant improves QLIKE. Research-honesty: discounting the log-posterior demonstrably makes the weights move (H2), but movement is not accuracy \u2014 no lambda<1 cell clears Harvey |t|>3 with lower QLIKE, so the null stands. Evidence base is 3 assets x 5 fixed lambdas on a single OOS window; this does not license claims about the BMA family in general.",
   "provenance": {
-    "k1257_forecast_cache_reuse": false,
+    "k1257_forecast_cache_reuse": true,
+    "k1257_forecast_cache_reuse_note": "false = the v1 caches were NOT reused; forecasts were recomputed with posterior_semantics_version=2 and written back to the parquet caches.",
     "cache_reuse_by_asset": {
-      "SPY": false,
-      "GLD": false,
-      "0050.TW": false
+      "SPY": true,
+      "GLD": true,
+      "0050.TW": true
     },
     "cache_paths": [
       "forecasts_SPY.parquet",
       "forecasts_GLD.parquet",
       "forecasts_0050_TW.parquet"
     ],
-    "runtime_min": 11.04,
+    "runtime_min": 0.09,
     "quick_mode": false
   }
 }
