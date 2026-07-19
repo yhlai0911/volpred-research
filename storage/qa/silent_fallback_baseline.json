@@ -1,7 +1,7 @@
 {
   "schema": "silent_fallback_baseline.v2",
   "description": "Known silent-fallback audit findings. CI strict mode fails only when current findings introduce line-insensitive signatures absent from this baseline.",
-  "count": 64,
+  "count": 60,
   "findings": [
     {
       "path": "scripts/backtest_3yr_final.py",
@@ -12,14 +12,14 @@
     },
     {
       "path": "scripts/daily_update.py",
-      "line": 57,
+      "line": 101,
       "exception": "ValueError",
       "action": "return None",
       "signature": "v1:890479f838e482be4308"
     },
     {
       "path": "scripts/daily_update.py",
-      "line": 66,
+      "line": 110,
       "exception": "ValueError",
       "action": "return None",
       "signature": "v1:364869467752d86bfbfb"
@@ -89,7 +89,7 @@
     },
     {
       "path": "scripts/gen_brand_assets.py",
-      "line": 48,
+      "line": 54,
       "exception": "Exception",
       "action": "continue",
       "signature": "v1:6630c1cdcedd77971a21"
@@ -110,7 +110,7 @@
     },
     {
       "path": "scripts/gmail_inbox_poll.py",
-      "line": 143,
+      "line": 146,
       "exception": "Exception",
       "action": "continue",
       "signature": "v1:0ddd47afac050f19e6d6"
@@ -201,21 +201,14 @@
     },
     {
       "path": "scripts/recalc_metrics.py",
-      "line": 210,
+      "line": 215,
       "exception": "HTTPError",
       "action": "pass",
       "signature": "v1:00f6017fcfd3eb0cf3db"
     },
     {
       "path": "scripts/refill_reader_facing_pool.py",
-      "line": 420,
-      "exception": "Exception",
-      "action": "return None",
-      "signature": "v1:dfb9029c983a6b2e302f"
-    },
-    {
-      "path": "scripts/refill_reader_facing_pool.py",
-      "line": 431,
+      "line": 387,
       "exception": "Exception",
       "action": "return []",
       "signature": "v1:67e5f81d452037ad4674"
@@ -229,7 +222,7 @@
     },
     {
       "path": "scripts/supabase_sync.py",
-      "line": 293,
+      "line": 476,
       "exception": "Exception",
       "action": "return None",
       "signature": "v1:b44204d522388428d3c4"
@@ -257,28 +250,28 @@
     },
     {
       "path": "src/volpred/charts/article_charts.py",
-      "line": 229,
+      "line": 254,
       "exception": "ImportError",
       "action": "pass",
       "signature": "v1:f1cb94232cc7d0728f31"
     },
     {
       "path": "src/volpred/cli.py",
-      "line": 99,
+      "line": 112,
       "exception": "OSError",
       "action": "pass",
       "signature": "v1:7f86b4fd521c00a99064"
     },
     {
       "path": "src/volpred/cli.py",
-      "line": 117,
+      "line": 130,
       "exception": "JSONDecodeError",
       "action": "pass",
       "signature": "v1:33d8a90e77762c7ca573"
     },
     {
       "path": "src/volpred/cli.py",
-      "line": 348,
+      "line": 361,
       "exception": "ImportError",
       "action": "pass",
       "signature": "v1:c7e51fedc53ec59455fe"
@@ -292,7 +285,7 @@
     },
     {
       "path": "src/volpred/memory/system.py",
-      "line": 260,
+      "line": 265,
       "exception": "ImportError",
       "action": "pass",
       "signature": "v1:69f838f616d6dec65ca5"
@@ -319,64 +312,50 @@
       "signature": "v1:d97b445f81c3ceb3a5b6"
     },
     {
-      "path": "src/volpred/ops/agent_spec.py",
-      "line": 165,
-      "exception": "ValueError",
-      "action": "continue",
-      "signature": "v1:cc7d43e4c4a236cde2de"
-    },
-    {
       "path": "src/volpred/ops/execution_brief.py",
-      "line": 565,
+      "line": 614,
       "exception": "JSONDecodeError",
       "action": "pass",
       "signature": "v1:814805cd1ce60462530c"
     },
     {
       "path": "src/volpred/ops/execution_brief.py",
-      "line": 629,
+      "line": 676,
       "exception": "TimeoutExpired",
       "action": "continue",
       "signature": "v1:13c82df312553a6cbf05"
     },
     {
       "path": "src/volpred/ops/execution_brief.py",
-      "line": 638,
+      "line": 687,
       "exception": "RuntimeError|ValidationError|JSONDecodeError",
       "action": "continue",
       "signature": "v1:f6c38abcea881790e732"
     },
     {
       "path": "src/volpred/ops/experiments.py",
-      "line": 192,
+      "line": 202,
       "exception": "UnicodeDecodeError",
       "action": "continue",
       "signature": "v1:84f051a1bd53c32c3ef7"
     },
     {
       "path": "src/volpred/ops/experiments.py",
-      "line": 301,
+      "line": 311,
       "exception": "StopIteration",
       "action": "return True",
       "signature": "v1:29767ab94b39ae60a9ff"
     },
     {
       "path": "src/volpred/ops/local_control_plane.py",
-      "line": 214,
+      "line": 223,
       "exception": "ValueError",
       "action": "return 0.0",
       "signature": "v1:6a2597d52097134ffa9d"
     },
     {
-      "path": "src/volpred/ops/papers.py",
-      "line": 541,
-      "exception": "Exception",
-      "action": "continue",
-      "signature": "v1:66cc2ca2c012982646c8"
-    },
-    {
       "path": "src/volpred/ops/questions.py",
-      "line": 250,
+      "line": 255,
       "exception": "ValueError",
       "action": "return 0.0",
       "signature": "v1:141ed674d77ca8b04477"
@@ -410,29 +389,22 @@
       "signature": "v1:b633a8f85859922b95db"
     },
     {
-      "path": "src/volpred/ops/writer_log.py",
-      "line": 65,
-      "exception": "Exception",
-      "action": "return None",
-      "signature": "v1:60db08836d1e8a36e577"
-    },
-    {
       "path": "src/volpred/publisher/prepublish_audit.py",
-      "line": 134,
+      "line": 141,
       "exception": "ValueError|TypeError",
       "action": "return None",
       "signature": "v1:a3c31691ce732f95d770"
     },
     {
       "path": "src/volpred/publisher/prepublish_audit.py",
-      "line": 366,
+      "line": 430,
       "exception": "JSONDecodeError",
       "action": "pass",
       "signature": "v1:814805cd1ce60462530c"
     },
     {
       "path": "src/volpred/publisher/prepublish_audit.py",
-      "line": 383,
+      "line": 447,
       "exception": "JSONDecodeError",
       "action": "return None",
       "signature": "v1:276c7870ba120ac00b77"
