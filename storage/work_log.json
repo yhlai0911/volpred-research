@@ -22041,5 +22041,71 @@
     "owner": "hourly-slot-1-ced9d83efd504911be388eccdfe22d97",
     "commit": "86d564690",
     "summary": "關掉兩張壓著 scheduler 的 PHASE-Z foreign-path incident（`assign_65b27c8b` 40 paths / `assign_62a9afb6` 52 paths，後者是前者的 superset）。cap 2 → 6。\n\n**這班最重要的一件事是「先查身分再動手」，因為關閉條件照字面執行會自我毀滅。**\n\nincident 的關閉條件是「每個 dirty path 都有 quarantine 覆蓋，且不得還髒在 main checkout」。字面上的收拾動作 = 從工作區清掉。但清單裡有這些東西：\n\n- `src/volpred/ops/foreign_incident.py`（**untracked**）—— incident 系統本身。我這班用來判定「這張單能不能關」的，就是這個從未進 main 的模組。照關閉條件清掉它，等於連同判定機制一起刪。\n- `scripts/dispatch_supervisor/phase_z.py` **+348 行** —— quarantine checkpoint 機制，也就是這批 bytes 之所以「已保存、可取回」的來源。\n- `scripts/dispatch_slot_budget.py` **+42 行** —— incident → 降載的唯一 enforcement owner。\n- `scripts/tests/test_phase_z_{foreign_incident,quarantine_checkpoint,ownership_class_gate}.py`、`test_scheduler_max_slots.py` 等**一整組對應測試**（untracked）。\n\n也就是說：**這套機制的程式碼被它自己判成 foreign**。沒有任何一班 fire「產出」它們，PHASE-Z 只收本班新產生的檔，於是 83 班無人認領。這不是紀律鬆懈，是關閉條件的前提對這批檔為假 —— `still_dirty_in_main` 無法區分「無主殘留」與「未提交的活躍碼」。\n\n**改採收養，證據兩條（都不是自我宣告）**：\n1. 逐位元比對：53 個路徑中 **50 個在 `refs/volpred/quarantine/*` 有完全一致的 bytes**，3 個是工作區刪除（k1380 原檔改名為 `_INVALID_20260716`）。**零 mismatch** → 清除確實可逆，但可逆不代表該做。\n2. 測試 gate：這批檔對應的測試 **180 passed, 1 skipped**。\n\n**同批清掉的真垃圾**（不收養）：`tests/.!71268!test_task_pool_claim.py`（編輯器暫存殘檔，卡 13 班）、`storage/work_log.json.bak_graphify_verdict_20260717`（1.2MB 一次性備份）。兩者 bytes 已在 quarantine ref，已刪除並補進 `.gitignore` 的 `.!*!*` / `storage/work_log.json.bak_*`，不再滾進下一張 incident。\n\n**順帶修掉 7 處 silent fallback**（pre-commit gate 擋下，沒繞過）：\n- `content.py:1968` 讀不動 lazypack job 就 `continue` → 加 warn。這個 gate 的 docstring 自己寫著「回報一個沒檢查過的狀態比擋下來更糟」，而它正在犯這條。\n- `audit_release_settings.py:172` `crontab -l` 失敗回 `[]` → 加 warn。空 list 與「真的沒有 release line」不可區分，靜默會讓 audit 把「查不到」報成「沒有」。\n- `phase_z.py:1136` 是 audit 誤判（失敗連同 errno 已記進 `skipped` 並隨 receipt 回報）→ 標 `silent-ok` 說明。\n- `k1380.py` 四處 multistart/grid 單點發散 → 標 `silent-ok`。**刻意不改行為**：失敗由 `best_p is None` 向 caller 表達，改捕捉範圍等於改實驗語意，需重跑驗證，超出本班範圍。\n\ncommit `86d564690`（47 files, +7786/−2654）。收尾驗證：`foreign_incident --check` 兩張皆 `closeable=true, blockers=0`；`dispatch_slot_budget` 的 `open_incident` 轉 null、cap 回 6。\n\n**留給後續**（已建 task）：關閉條件該能機械區分「無主殘留」與「未提交的活躍碼」。這次靠人工驗證才沒鑄成大錯 —— 下一次未必有人會停下來查。"
+  },
+  {
+    "timestamp": "2026-07-19T14:57:13+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-175b3b67c",
+    "outcome": "succeeded",
+    "summary": "fail snapaudit incomplete coverage review",
+    "commit": "175b3b67ce7b63098422884c743420f127aa3eed",
+    "owner": "codex",
+    "backfilled_at": "2026-07-19T20:35:00.713944+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-19T14:58:28+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-cb97c0b7f",
+    "outcome": "succeeded",
+    "summary": "serialize compute retry and triage ownership",
+    "commit": "cb97c0b7fb38de47e51adc13a34f56af89ae27c4",
+    "owner": "codex",
+    "backfilled_at": "2026-07-19T20:35:00.713939+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-19T14:58:59+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-ae815f3e5",
+    "outcome": "succeeded",
+    "summary": "fix worktree-owned orphan outputs",
+    "commit": "ae815f3e5495884d512ae6eda9c70ab0340613db",
+    "owner": "codex",
+    "backfilled_at": "2026-07-19T20:35:00.713932+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-19T15:05:33+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-363cae2a2",
+    "outcome": "succeeded",
+    "summary": "detect nested DM coefficient masks",
+    "commit": "363cae2a243c0f933d8911da2baa004edf7a07f6",
+    "owner": "codex",
+    "backfilled_at": "2026-07-19T20:35:00.713927+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-19T15:19:34+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-1af0e3fbf",
+    "outcome": "succeeded",
+    "summary": "guard BMA invalid model posterior",
+    "commit": "1af0e3fbfba10cdb4ac9e1cfcce8861bcd0c0765",
+    "owner": "codex",
+    "backfilled_at": "2026-07-19T20:35:00.713919+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-19T15:21:29+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-28a14f7c7",
+    "outcome": "succeeded",
+    "summary": "queue BMA remediation reruns",
+    "commit": "28a14f7c7533151a59687106a9bc09ba7beab334",
+    "owner": "codex",
+    "backfilled_at": "2026-07-19T20:35:00.713558+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
