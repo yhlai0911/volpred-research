@@ -174,6 +174,57 @@ def _script_reference(node: ast.AST, names: dict[str, tuple[str, ...]]) -> Path 
     return rel if rel.suffix == ".py" else None
 
 
+def _inserts_scripts_on_path(tree: ast.AST, names: dict[str, tuple[str, ...]]) -> bool:
+    """Does this test put the repo's ``scripts`` dir on ``sys.path``?
+
+    Tests that do this then import their subject by BARE name
+    (``import check_experiment_artifacts``), which no IMPORT_ROOTS prefix can
+    match.  That blind spot is what let the 2026-07-19 CI red land: the test was
+    committed while ``scripts/check_experiment_artifacts.py`` stayed untracked,
+    and this gate had nothing to say about it.
+    """
+    for node in ast.walk(tree):
+        if not (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in {"insert", "append"}
+            and isinstance(node.func.value, ast.Attribute)
+            and node.func.value.attr == "path"
+            and isinstance(node.func.value.value, ast.Name)
+            and node.func.value.value.id == "sys"
+        ):
+            continue
+        # The inserted expression is usually ``Path(__file__).resolve().parents[1]``,
+        # which no static evaluator can turn into "scripts" — the repo root is not
+        # in the source.  So ANY sys.path mutation arms the bare-name check; the
+        # resolver below only complains about names nothing outside the tree can
+        # satisfy, which keeps the false-positive surface at zero.
+        return True
+    return False
+
+
+def _bare_script_missing(root: Path, worktree: Path | None, name: str) -> bool:
+    """The partial-commit signature for a bare, scripts-dir import.
+
+    ``worktree`` is the live checkout the candidate ``root`` was derived from
+    (``--index`` mode only).  The check fires exactly when the working tree HAS
+    ``scripts/<name>.py`` and the candidate does NOT -- one half of a pair being
+    committed without the other.  Third-party names such as ``pytest`` can never
+    match, because no ``scripts/pytest.py`` exists on either side, so this needs
+    no knowledge of which packages happen to be installed.
+    """
+    if worktree is None or "." in name:
+        return False
+    return _scripts_module(worktree, name) and not _scripts_module(root, name)
+
+
+def _scripts_module(root: Path, name: str) -> bool:
+    scripts_dir = root / "scripts"
+    return (scripts_dir / f"{name}.py").is_file() or (
+        scripts_dir / name / "__init__.py"
+    ).is_file()
+
+
 def _dynamic_import_aliases(tree: ast.AST) -> tuple[set[str], set[str]]:
     """Names that denote importlib or importlib.import_module in one test."""
     modules = {"importlib"}
@@ -211,7 +262,7 @@ def _dynamic_import_name(
     return node.args[0].value if is_import else None
 
 
-def audit(root: Path) -> tuple[list[str], int, int]:
+def audit(root: Path, worktree: Path | None = None) -> tuple[list[str], int, int]:
     bad: list[str] = []
     checked = 0
     files = 0
@@ -233,11 +284,20 @@ def audit(root: Path) -> tuple[list[str], int, int]:
             continue
 
         importlib_names, import_module_names = _dynamic_import_aliases(tree)
+        path_names = _known_paths(tree)
+        bare_root = _inserts_scripts_on_path(tree, path_names)
 
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     if not _is_audited_module(alias.name):
+                        if bare_root and _bare_script_missing(root, worktree, alias.name):
+                            checked += 1
+                            bad.append(
+                                f"BAD {rel_test}:{node.lineno} — imports '{alias.name}' "
+                                f"after putting scripts/ on sys.path, but "
+                                f"scripts/{alias.name}.py does not exist"
+                            )
                         continue
                     checked += 1
                     if _module_path(root, alias.name) is None:
@@ -261,6 +321,13 @@ def audit(root: Path) -> tuple[list[str], int, int]:
                 continue
             module = node.module or ""
             if not _is_audited_module(module):
+                if module and bare_root and _bare_script_missing(root, worktree, module):
+                    checked += 1
+                    bad.append(
+                        f"BAD {rel_test}:{node.lineno} — imports from '{module}' "
+                        f"after putting scripts/ on sys.path, but "
+                        f"scripts/{module}.py does not exist"
+                    )
                 continue
 
             module_file = _module_path(root, module)
@@ -290,7 +357,7 @@ def audit(root: Path) -> tuple[list[str], int, int]:
         # A script loaded dynamically is an import dependency too.  Restrict
         # this path analysis to spec_from_file_location calls: arbitrary
         # scripts/*.py strings in tests are often deliberate temp-repo fixtures.
-        names = _known_paths(tree)
+        names = path_names
         seen_paths: set[tuple[int, Path]] = set()
         for node in ast.walk(tree):
             if not (
@@ -358,7 +425,7 @@ def _audit_index(root: Path) -> int:
         # candidate bytes with this trusted implementation.  Executing the
         # candidate's implementation here would let the candidate weaken its
         # own gate to `exit 0`.
-        bad, checked, files = audit(candidate)
+        bad, checked, files = audit(candidate, worktree=root)
         for line in bad:
             print(line)
         print(

@@ -22,6 +22,10 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 AUDIT = REPO / "scripts" / "audit_test_imports.py"
 
+sys.path.insert(0, str(REPO / "scripts"))
+
+import audit_test_imports  # noqa: E402
+
 
 def _tree(root: Path, source: str, test: str) -> Path:
     (root / "src" / "volpred" / "publisher").mkdir(parents=True)
@@ -253,3 +257,35 @@ def test_refuses_to_pass_a_tree_it_cannot_read(tmp_path: Path, missing: str) -> 
     (tmp_path / "tests").mkdir()
     res = _run(tmp_path)
     assert res.returncode == 2, f"missing {missing} tree silently passed:\n{res.stdout}{res.stderr}"
+
+
+def test_bare_scripts_import_left_untracked_is_a_partial_commit(tmp_path: Path) -> None:
+    """The 2026-07-19 CI red: committed test, untracked implementation.
+
+    ``scripts/tests/test_check_experiment_artifacts.py`` put ``scripts/`` on
+    ``sys.path`` and then imported its subject by BARE name, which matches no
+    IMPORT_ROOTS prefix — so this gate passed the commit and CI died at
+    collection instead.  The signature is index-vs-worktree, not "is it
+    installed": a third-party name has no ``scripts/<name>.py`` on either side.
+    """
+    worktree, candidate = tmp_path / "wt", tmp_path / "cand"
+    for root in (worktree, candidate):
+        (root / "scripts" / "tests").mkdir(parents=True)
+        (root / "scripts" / "tests" / "test_subject.py").write_text(
+            "import sys\n"
+            "from pathlib import Path\n"
+            "import pytest\n"
+            "sys.path.insert(0, str(Path(__file__).resolve().parents[1]))\n"
+            "import subject\n",
+            encoding="utf-8",
+        )
+    (worktree / "scripts" / "subject.py").write_text("VALUE = 1\n", encoding="utf-8")
+
+    bad, _, _ = audit_test_imports.audit(candidate, worktree=worktree)
+    assert [line for line in bad if "'subject'" in line], bad
+    assert not [line for line in bad if "pytest" in line], (
+        "third-party import must never be mistaken for a scripts-dir module"
+    )
+
+    (candidate / "scripts" / "subject.py").write_text("VALUE = 1\n", encoding="utf-8")
+    assert audit_test_imports.audit(candidate, worktree=worktree)[0] == []
