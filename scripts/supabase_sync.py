@@ -568,6 +568,86 @@ def extract_proposer(item: dict) -> str | None:
     return None
 
 
+# --- Frontend cache purge (2026-07-19, assign_sync_cache_purge) -------------
+#
+# Defect: this module writes articles straight to Supabase REST, bypassing the
+# frontend's /api/sync/[...path] route -- the only place that calls
+# revalidateTag('article') / revalidateTag(`article-<slug>`). A retraction done
+# via feed.json + sync_full() therefore updated the DB but never purged the
+# frontend cache, and getArticleInternal *throws* for a retracted row, so
+# unstable_cache's background revalidation had no new value to write and kept
+# re-serving the stale published body forever (mile_ebb5d6f5: HTTP 200 with full
+# content for >15min, far past `revalidate: 60` / page `revalidate = 300`).
+# Only a redeploy cleared it -- the other 12 retracted articles 404 by accident
+# of deploy history, not by mechanism.
+#
+# This module is the single enforcement owner for that purge (anti-stacking:
+# the frontend's getArticleInternal deliberately still throws; the report pages
+# already catch -> notFound()).
+_REVALIDATE_FAILURES: list[str] = []
+
+
+def _mirror_base_url() -> str:
+    from volpred.config.runtime import get_default_remote_url
+
+    return os.environ.get("VOLPRED_REMOTE_URL") or get_default_remote_url()
+
+
+def revalidate_article_cache(slug: str) -> bool:
+    """Purge the frontend unstable_cache tags for one article slug.
+
+    Returns True on success. Failures are recorded in _REVALIDATE_FAILURES and
+    printed LOUDLY -- an auth failure here silently disabling every purge is
+    exactly the 2026-06-11 incident (mirror writes 401'd unnoticed for a month),
+    so 401/403 gets its own explicit banner and sync_full()/the CLI surface it.
+    """
+    if not slug:
+        return True
+    # Same test-mode kill switch as every other outbound write in this module.
+    if _remote_writes_blocked():
+        return True
+
+    from volpred.mirror_auth import ops_admin_headers, ops_admin_token
+
+    url = f"{_mirror_base_url()}/api/sync/revalidate/article/{quote(str(slug), safe='')}"
+    if not ops_admin_token():
+        print(
+            f"  [supabase_sync] CACHE PURGE FAILED for {slug}: OPS_ADMIN_TOKEN is "
+            "unset, so /api/sync would 401. Retracted/unpublished articles will "
+            "keep being served from the frontend cache until a redeploy."
+        )
+        _REVALIDATE_FAILURES.append(slug)
+        return False
+
+    req = Request(
+        url,
+        data=b"",
+        headers={"Content-Type": "application/json", **ops_admin_headers()},
+        method="POST",
+    )
+    try:
+        # Deliberately NOT _urlopen: that chokepoint is for Supabase REST and
+        # its GET guard/retry semantics do not apply to the mirror host.
+        with urlopen(req, timeout=10) as resp:
+            if 200 <= resp.status < 300:
+                return True
+            reason = f"HTTP {resp.status}"
+    except HTTPError as exc:
+        reason = f"HTTP {exc.code}"
+        if exc.code in (401, 403):
+            reason += " UNAUTHORIZED (OPS_ADMIN_TOKEN rejected by the mirror)"
+    except Exception as exc:  # URLError, timeout, DNS...
+        reason = f"{type(exc).__name__}: {exc}"
+
+    print(
+        f"  [supabase_sync] CACHE PURGE FAILED for {slug}: {reason} ({url}). "
+        "Supabase row is correct but readers may still see the cached old "
+        "version -- rerun the sync once the mirror is reachable."
+    )
+    _REVALIDATE_FAILURES.append(slug)
+    return False
+
+
 def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     """Sync a single article (feed item) to Supabase.
 
@@ -705,6 +785,13 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
             tag_ok = _sync_article_tags(row["slug"], tags)
             if not tag_ok:
                 print(f"  Warning: article synced but tags missing for {row['slug']}")
+        # Purge the frontend cache for this slug. Required for EVERY sync, not
+        # just retractions: content edits were equally invisible for up to 60s,
+        # and status downgrades (published -> retracted/unpublished) were
+        # invisible indefinitely. Does not flip `ok` -- the DB write is this
+        # function's contract -- but sync_full() refuses to record the content
+        # hash for a slug whose purge failed, so the next run retries it.
+        revalidate_article_cache(row["slug"])
     return ok
 
 
@@ -886,6 +973,8 @@ def sync_article_status(slug: str, status: str) -> bool:
                     q_rows = _select_rows("questions", select="id,status", id=qid)
                     if q_rows and q_rows[0].get("status") == "researching":
                         _patch_where("questions", {"id": qid}, {"status": "answered", "answered_at": now_utc})
+    if ok:
+        revalidate_article_cache(slug)
     return ok
 
 
@@ -912,6 +1001,10 @@ def delete_article(slug: str) -> bool:
         # 409 / other error — don't silently succeed. Caller (cleanup_test_post)
         # must surface this to user.
         print(f"  [BUG-001 guard] articles DELETE for slug={slug} FAILED; row may still exist with FK blocker.")
+    else:
+        # A hard delete is the strongest possible visibility change; without the
+        # purge the frontend keeps serving the deleted body from unstable_cache.
+        revalidate_article_cache(slug)
     return ok
 
 
@@ -1289,13 +1382,20 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
                 if hash_changed or ts_changed or not last_sync_ts:
                     to_sync.append(item)
             ok = 0
+            purge_mark = len(_REVALIDATE_FAILURES)
             for item in to_sync:
                 if sync_article(item, storage_dir=storage):
                     ok += 1
                     # Only record the hash after a successful sync so a failed
-                    # push retries next run.
-                    article_hashes[item.get("id")] = _article_hash(item)
+                    # push retries next run. A failed frontend cache purge counts
+                    # as "not fully synced": the DB is right but readers may still
+                    # see the old body, so withhold the hash to force a retry.
+                    if item.get("id") not in _REVALIDATE_FAILURES[purge_mark:]:
+                        article_hashes[item.get("id")] = _article_hash(item)
             counts["articles"] = ok
+            failed_purges = _REVALIDATE_FAILURES[purge_mark:]
+            if failed_purges:
+                counts["cache_purge_failed"] = failed_purges
             state["feed_mtime"] = feed_mtime
             state["article_hashes"] = article_hashes
             if feed:
@@ -1352,24 +1452,39 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
     return counts
 
 
+def _report_counts(counts: dict) -> int:
+    """Print sync counts; return the process exit code.
+
+    A failed frontend cache purge exits non-zero so a broken/expired
+    OPS_ADMIN_TOKEN cannot hide behind a green 'Done.' the way the mirror 401s
+    did for a month in 2026-06.
+    """
+    for k, v in counts.items():
+        print(f"  {k}: {v}")
+    failed = counts.get("cache_purge_failed") or []
+    if failed:
+        print(
+            f"ERROR: frontend cache purge FAILED for {len(failed)} article(s): "
+            f"{failed}. Supabase is correct but readers may still be served the "
+            "cached old version. Check OPS_ADMIN_TOKEN and mirror reachability."
+        )
+        return 1
+    print("Done.")
+    return 0
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "full":
         print("Running incremental sync to Supabase...")
-        counts = sync_full()
-        for k, v in counts.items():
-            print(f"  {k}: {v}")
-        print("Done.")
+        sys.exit(_report_counts(sync_full()))
     elif len(sys.argv) > 1 and sys.argv[1] == "force-full":
         # Delete state file to force full resync
         state_path = Path("storage") / ".supabase_sync_state.json"
         if state_path.exists():
             state_path.unlink()
         print("Running FULL resync (state cleared)...")
-        counts = sync_full()
-        for k, v in counts.items():
-            print(f"  {k}: {v}")
-        print("Done.")
+        sys.exit(_report_counts(sync_full()))
     else:
         print("Usage: python scripts/supabase_sync.py full          # incremental")
         print("       python scripts/supabase_sync.py force-full    # full resync")

@@ -66,6 +66,10 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
+from volpred.ops.foreign_incident import (
+    QUARANTINE_REF_PREFIX,
+    upsert_incident,
+)
 from volpred.ops.machine_churn import classify_machine_churn
 from volpred.ops.git_writer_lock import (
     GitWriterLockError,
@@ -1060,6 +1064,270 @@ def _classify_machine_churn(repo_root: Path, candidates: list[str]) -> tuple[lis
     itself shut. One implementation, two callers; see that module for the reasoning.
     """
     return classify_machine_churn(repo_root, candidates, label="phase_z")
+
+
+# ── quarantine checkpoint (decision doc §4 D2) ───────────────────────────────
+# "不掃進 main" and "不遺失" are two different guarantees, and this module only
+# ever implemented the first. A dirty working tree is NOT preservation: those
+# bytes can be overwritten by the next writer, reset by a human, or swept by a
+# cleanup pass. 40+ paths sat foreign for up to 78 fires — visible, not safe.
+#
+# So: a path that is stuck (streak >= _FOREIGN_STREAK_CRITICAL) gets its current
+# bytes copied into an immutable ref under _FOREIGN_QUARANTINE_REF_PREFIX. The
+# rule the external review gave, verbatim:
+#
+#     不確定的內容一律自動保存，但絕不自動進 main。
+#
+# This is deliberately NOT an ownership decision and NOT an adoption heuristic
+# (D1 forbids a fourth guess): it does not claim the bytes are anyone's, does
+# not claim they are complete, and does not put them anywhere main can see. It
+# only makes them *retrievable* — `git show <ref>:<path>` — after the working
+# copy is gone. Whether they belong in main is still a human/D5 judgement.
+#
+# Everything below runs through git plumbing on a throwaway GIT_INDEX_FILE:
+# no `git add`, no `git commit`, no `git stash`, no HEAD move, no index write,
+# no working-tree write. The only shared mutations are object writes and one
+# `update-ref` on a namespace nothing else reads, and both are serialised by
+# volpred.ops.git_writer_lock like every other Git mutation in this module.
+# Single owner is volpred.ops.foreign_incident: the D3 close-condition check has
+# to look in exactly the namespace this writes to, and two string literals drift
+# silently — a drift here reads as "preserved but not retrievable".
+_FOREIGN_QUARANTINE_REF_PREFIX = QUARANTINE_REF_PREFIX
+# Bound on one checkpoint. 40 stuck paths is today's reality; a runaway producer
+# must not turn one fire into an unbounded plumbing loop inside the writer lease.
+_QUARANTINE_MAX_PATHS = 200
+_QUARANTINE_IDENTITY = {
+    "GIT_AUTHOR_NAME": "volpred-phase-z",
+    "GIT_AUTHOR_EMAIL": "phase-z@volpred.local",
+    "GIT_COMMITTER_NAME": "volpred-phase-z",
+    "GIT_COMMITTER_EMAIL": "phase-z@volpred.local",
+}
+
+
+def _quarantine_candidates(
+    repo_root: Path, stuck: list[str],
+) -> tuple[list[tuple[str, str]], dict[str, str]]:
+    """Split stuck paths into (checkpointable ``(mode, rel)``, skipped ``rel -> why``).
+
+    The live-editing gate is ``_classify_machine_churn``'s ``deferred`` bucket —
+    the same ``fcntl`` shared-lock probe every other writer in this repo uses. A
+    producer holding the lock is mid-write, so its bytes are a torn snapshot and
+    it is coming back for them anyway; checkpointing there would preserve a half
+    file and claim it was the state. There is deliberately no second liveness
+    notion here (see the decision doc §6: flock is the one signal this repo got
+    right, and inventing a rival to it is exactly the class of bug D1 stops).
+    """
+    _, deferred, _ = _classify_machine_churn(repo_root, stuck)
+    live = set(deferred)
+    payload: list[tuple[str, str]] = []
+    skipped: dict[str, str] = {}
+    for rel in stuck:
+        if rel in live:
+            skipped[rel] = "live_writer"
+            continue
+        src = repo_root / rel
+        try:
+            if src.is_symlink() or not src.is_file():
+                # A dirty *deletion* or a directory/symlink entry. Nothing to
+                # preserve: the pre-deletion bytes already live in HEAD.
+                skipped[rel] = "not_a_regular_file"
+                continue
+            mode = "100755" if os.access(src, os.X_OK) else "100644"
+        except OSError as exc:  # silent-ok: 不是靜默 —— 失敗連同 errno 記進 skipped，
+            skipped[rel] = f"stat_error: {exc}"  # 隨 checkpoint receipt 一起回報給呼叫端
+            continue
+        payload.append((mode, rel))
+    return payload, skipped
+
+
+def _quarantine_stuck_foreign(
+    repo_root: Path,
+    stuck: list[str],
+    *,
+    streaks: dict[str, int],
+    hhmm: str,
+    runner=subprocess.run,
+) -> dict:
+    """Checkpoint stuck foreign bytes into an immutable ref. Never fails a fire.
+
+    Returns a receipt dict that is folded into ``run_phase_z``'s result (and the
+    log line) so D3's incident/admission-control work has something mechanical to
+    read. No second state file: the ref namespace itself is the durable record.
+    """
+    result: dict = {
+        "ref": None, "created": False, "checkpointed": [], "skipped": {}, "reason": "",
+    }
+    if not stuck:
+        result["reason"] = "no_stuck_paths"
+        return result
+    considered = stuck[:_QUARANTINE_MAX_PATHS]
+    if len(stuck) > _QUARANTINE_MAX_PATHS:
+        LOG.warning("phase_z: %d stuck paths exceed the quarantine cap — checkpointing the "
+                    "%d longest-stuck this fire", len(stuck), _QUARANTINE_MAX_PATHS)
+    payload, skipped = _quarantine_candidates(repo_root, considered)
+    result["skipped"] = skipped
+    if not payload:
+        result["reason"] = "nothing_checkpointable"
+        return result
+
+    try:
+        with tempfile.TemporaryDirectory(prefix="volpred-phase-z-quarantine-") as tx:
+            env = os.environ.copy()
+            env["GIT_INDEX_FILE"] = str(Path(tx) / "index")  # never the real index
+            env.update(_QUARANTINE_IDENTITY)
+            with git_writer_lock(
+                repo_root,
+                actor=f"dispatch-phase-z-quarantine:{hhmm}",
+                timeout_s=_COMMIT_TIMEOUT_S,
+            ):
+                stored: list[str] = []
+                for mode, rel in payload:
+                    blob = _git(
+                        repo_root, "hash-object", "-w", "--no-filters", "--",
+                        str(repo_root / rel),
+                        timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                    )
+                    if blob.returncode != 0:
+                        skipped[rel] = f"hash_object_rc{blob.returncode}"
+                        continue
+                    sha = (blob.stdout or "").strip()
+                    staged = _git(
+                        repo_root, "update-index", "--add", "--cacheinfo",
+                        f"{mode},{sha},{rel}",
+                        timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                    )
+                    if staged.returncode != 0:
+                        skipped[rel] = f"update_index_rc{staged.returncode}"
+                        continue
+                    stored.append(rel)
+                if not stored:
+                    result["reason"] = "nothing_checkpointable"
+                    return result
+
+                write_tree = _git(
+                    repo_root, "write-tree", timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                )
+                if write_tree.returncode != 0:
+                    LOG.warning("phase_z: quarantine write-tree rc=%d: %s",
+                                write_tree.returncode, (write_tree.stderr or "")[-300:])
+                    result["reason"] = "write_tree_error"
+                    return result
+                tree_sha = (write_tree.stdout or "").strip()
+
+                # Same bytes as last fire → reuse that ref. Without this the same
+                # 40 paths would mint a new ref every hour forever, and a refs
+                # namespace nobody can read is a second kind of losing it.
+                previous = _git(
+                    repo_root, "for-each-ref", "--count=1", "--sort=-refname",
+                    "--format=%(refname) %(objectname)", _FOREIGN_QUARANTINE_REF_PREFIX,
+                    timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                )
+                if previous.returncode == 0 and (previous.stdout or "").strip():
+                    prior_ref, _, prior_sha = (previous.stdout or "").strip().partition(" ")
+                    prior_tree = _git(
+                        repo_root, "rev-parse", "--verify", f"{prior_sha.strip()}^{{tree}}",
+                        timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                    )
+                    if prior_tree.returncode == 0 and (prior_tree.stdout or "").strip() == tree_sha:
+                        result.update({"ref": prior_ref, "created": False,
+                                       "checkpointed": stored, "reason": "unchanged"})
+                        return result
+
+                ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+                ref = f"{_FOREIGN_QUARANTINE_REF_PREFIX}/{ts}"
+                body = "\n".join([
+                    "Foreign paths stuck for >= "
+                    f"{_FOREIGN_STREAK_CRITICAL} fires, checkpointed so the bytes survive "
+                    "the working tree. NOT a claim of ownership, completeness or "
+                    "readiness, and NOT reachable from main.",
+                    "",
+                    "Retrieve with: git show <ref>:<path>",
+                    "",
+                    *[f"- {rel} — {streaks.get(rel, 0)} fires" for rel in stored],
+                ])
+                # No parent: a quarantine checkpoint must never be an ancestor of
+                # anything, so it can never be fast-forwarded into main by mistake.
+                commit = _git(
+                    repo_root, "commit-tree", tree_sha,
+                    "-m", f"quarantine({hhmm}): {len(stored)} stuck foreign path(s)",
+                    "-m", body,
+                    timeout_s=_COMMIT_TIMEOUT_S, runner=runner, env=env,
+                )
+                if commit.returncode != 0:
+                    LOG.warning("phase_z: quarantine commit-tree rc=%d: %s",
+                                commit.returncode, (commit.stderr or "")[-300:])
+                    result["reason"] = "commit_tree_error"
+                    return result
+                commit_sha = (commit.stdout or "").strip()
+                # Empty old-value = "must not already exist"; a collision is a bug,
+                # never a silent overwrite of somebody's only copy.
+                landed = _git(
+                    repo_root, "update-ref", ref, commit_sha, "",
+                    timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                )
+                if landed.returncode != 0:
+                    LOG.warning("phase_z: quarantine update-ref rc=%d: %s",
+                                landed.returncode, (landed.stderr or "")[-300:])
+                    result["reason"] = "update_ref_error"
+                    return result
+                result.update({"ref": ref, "created": True, "checkpointed": stored,
+                               "commit": commit_sha, "reason": "checkpointed"})
+    except GitWriterLockError as exc:
+        LOG.warning("phase_z: quarantine skipped — git writer lock unavailable (%s)", exc)
+        result["reason"] = "lock_unavailable"
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        LOG.warning("phase_z: quarantine checkpoint failed (%s) — working tree untouched", exc)
+        result["reason"] = "error"
+    return result
+
+
+# ── persistent incident (decision doc §4 D3) ─────────────────────────────────
+
+def _open_stuck_incident(
+    repo_root: Path,
+    stuck: list[str],
+    *,
+    streaks: dict[str, int],
+    quarantine: dict,
+) -> dict:
+    """Create-or-update the single incident for this stuck set. Never fails a fire.
+
+    The queue write is the mechanism that turns "78 fires of red logs" into a
+    thing with an owner, a close condition and a cost (see
+    ``volpred.ops.foreign_incident``). It is still not worth taking a dispatch
+    fire down for: on failure this returns ``reason="error"``, which is exactly
+    the case where the caller falls back to the legacy backed-off CRITICAL rather
+    than going quiet.
+    """
+    if not stuck:
+        return {"fingerprint": None, "task_id": None, "created": False,
+                "updated": False, "reason": "no_stuck_paths"}
+    tasks_path = repo_root / "storage" / "next_tasks.json"
+    if not tasks_path.exists():
+        # A checkout with no task pool has no scheduler to de-rate, so there is
+        # nothing for an incident to control. PHASE-Z does not conjure the
+        # canonical queue into existence — that would be a new writer creating
+        # canonical state as a side effect. Say so, and let the caller page.
+        LOG.warning("phase_z: no task pool at %s — cannot open a stuck-path incident; "
+                    "falling back to the backed-off CRITICAL", tasks_path)
+        return {"fingerprint": None, "task_id": None, "created": False,
+                "updated": False, "reason": "no_queue"}
+    try:
+        receipt = upsert_incident(
+            paths=stuck,
+            streaks=streaks,
+            quarantine_ref=quarantine.get("ref"),
+            tasks_path=tasks_path,
+        )
+    except Exception as exc:  # noqa: BLE001 — a queue write must not fail a fire
+        LOG.warning("phase_z: stuck-path incident upsert failed (%s) — falling back "
+                    "to the backed-off CRITICAL so the condition is not silent", exc)
+        return {"fingerprint": None, "task_id": None, "created": False,
+                "updated": False, "reason": "error", "error": str(exc)}
+    LOG.info("phase_z: stuck-path incident %s (%s) — task=%s, fingerprint=%s",
+             receipt["reason"], "created" if receipt["created"] else "updated",
+             receipt["task_id"], receipt["fingerprint"])
+    return receipt
 
 
 # ── pre-fire guard ───────────────────────────────────────────────────────────
@@ -2286,12 +2554,38 @@ def run_phase_z(
                    key=lambda p: (-streaks[p], p))
     worst_streak = max(streaks.values(), default=0)
 
+    quarantine: dict = {"ref": None, "created": False, "checkpointed": [],
+                        "skipped": {}, "reason": "no_stuck_paths"}
     if stuck:
         LOG.warning("phase_z: %d foreign path(s) stuck for >=%d fires: %s",
                     len(stuck), _FOREIGN_STREAK_CRITICAL, stuck[:10])
-    # Observability is the log line above (every fire). Paging is backed off — see
-    # _streak_is_notifiable.
-    if stuck and any(_streak_is_notifiable(streaks[p]) for p in stuck):
+        # Preservation is unconditional and needs nobody's approval; only the
+        # question "does this belong in main" needs a human. Decision doc §4 D2.
+        quarantine = _quarantine_stuck_foreign(
+            repo_root, stuck, streaks=streaks, hhmm=hhmm, runner=runner,
+        )
+        LOG.info("phase_z: quarantine %s — ref=%s, %d path(s) checkpointed, %d skipped",
+                 quarantine["reason"], quarantine["ref"],
+                 len(quarantine["checkpointed"]), len(quarantine["skipped"]))
+
+    # D3: the stuck set becomes ONE persistent incident in the canonical queue,
+    # and that incident — not this alert — is what the scheduler reads. See
+    # volpred.ops.foreign_incident for why a CRITICAL alone changed nothing.
+    incident = _open_stuck_incident(repo_root, stuck, streaks=streaks,
+                                    quarantine=quarantine)
+
+    # Paging is now bounded by the incident, not by a retry curve: ONE page when
+    # the incident opens, then silence while it stays open. `_streak_is_notifiable`
+    # kept re-paging (3/6/12/24…) because a notification was the only mechanism
+    # available; re-paging on top of a live incident would be a second reminder
+    # channel for one condition, which is how both end up ignored. The escalation
+    # that used to live in the retry curve now lives in the de-rated slot cap.
+    # No incident means no de-rate and no owner, so silence would be strictly
+    # worse than the old noise: fall back to the legacy backed-off CRITICAL.
+    incident_failed = incident.get("reason") in {"error", "no_queue"}
+    if incident.get("created") or (
+        incident_failed and any(_streak_is_notifiable(streaks[p]) for p in stuck)
+    ):
         alert_fn(
             level="critical",
             # streak 每班 +1、count 會浮動 — 進 title 就等於每班一個新 dedup key，
@@ -2305,6 +2599,22 @@ def run_phase_z(
                 "單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— "
                 "它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。",
                 "",
+                *([
+                    "",
+                    "## 這封信的 owner",
+                    f"已開一張持久 incident：`{incident.get('task_id')}`"
+                    f"（fingerprint `{incident.get('fingerprint')}`）。這封信不會再重發 —— "
+                    "同一批檔案的後續班次只更新那張單。",
+                    "**未關的代價是 scheduler 降載**：`scripts/dispatch_slot_budget.py` "
+                    "看到未關 incident 就把每班 slot cap 壓下去，所以拖著不處理是有成本的。",
+                    "關閉條件（機械可驗）：`uv run python -m volpred.ops.foreign_incident --check`。",
+                ] if incident.get("task_id") else [
+                    "",
+                    "## 注意：incident 沒建起來",
+                    "任務池寫入失敗，所以這次退回舊的退避通知行為（3/6/12/24… 班）。"
+                    "scheduler 降載訊號這班不會生效 —— 先修任務池寫入。",
+                ]),
+                "",
                 "## 現在該做什麼",
                 "**沒有任何檔案會被丟棄。** 成品（草稿 / 實驗產出）由 "
                 "`uv run python scripts/reap_orphan_deliverables.py --apply` 走正規入池路徑自動收編 —— "
@@ -2316,6 +2626,21 @@ def run_phase_z(
                 "## 卡住的檔案（連續班數）",
                 *[f"- {p} — {streaks[p]} 班" for p in stuck[:30]],
                 *(["- …"] if len(stuck) > 30 else []),
+                *([
+                    "",
+                    "## 已保存（可取回）",
+                    f"這些 bytes 已 checkpoint 進不可變 ref `{quarantine['ref']}`"
+                    f"（{len(quarantine['checkpointed'])} 個檔案）。工作區、index、main 都沒有被動到；"
+                    "這只是保存，不是收養、不宣稱完成、也進不了 main。",
+                    "取回：`git show " + str(quarantine["ref"]) + ":<路徑>`",
+                ] if quarantine.get("ref") else []),
+                *([
+                    "",
+                    "## 未保存（producer 正在寫）",
+                    "以下路徑此刻被 writer 持有 flock，checkpoint 會存到寫到一半的內容，故略過：",
+                    *[f"- {p}" for p, why in sorted(quarantine["skipped"].items())
+                      if why == "live_writer"],
+                ] if any(w == "live_writer" for w in quarantine["skipped"].values()) else []),
             ]),
         )
 
@@ -2334,11 +2659,14 @@ def run_phase_z(
         LOG.info("phase_z: nothing this fire produced — %d foreign path(s) left alone", len(foreign))
         if not foreign:
             return {"committed": False, "reason": "nothing_owned", "foreign": [],
-                    "orphan_halves": orphan_halves}
+                    "orphan_halves": orphan_halves, "quarantine": quarantine,
+                    "incident": incident}
         if stuck:
             # the critical alert above already said everything this one would, louder.
             return {"committed": False, "reason": "nothing_owned",
-                    "foreign": foreign, "stuck": stuck, "orphan_halves": orphan_halves}
+                    "foreign": foreign, "stuck": stuck, "orphan_halves": orphan_halves,
+                    "quarantine": quarantine,
+                    "incident": incident}
         alert_fn(
             level="warn",
             title="PHASE-Z 有檔案未提交，但不是這班產出的",
@@ -2360,7 +2688,8 @@ def run_phase_z(
             ]),
         )
         return {"committed": False, "reason": "nothing_owned", "foreign": foreign,
-                "orphan_halves": orphan_halves}
+                "orphan_halves": orphan_halves, "quarantine": quarantine,
+                "incident": incident}
 
     LOG.info("phase_z: auto-committing %d path(s) from this fire + %d machine-churn path(s)"
              " + %d proved orphan half/halves",
@@ -2780,7 +3109,8 @@ def run_phase_z(
         return {"committed": True, "reason": "committed", "untracked": untracked,
                 "owned": owned, "foreign": foreign, "churn": churn,
                 "commit_head": out[-500:], "tests": tests, "index_refresh": refresh,
-                "orphan_halves": orphan_halves}
+                "orphan_halves": orphan_halves, "quarantine": quarantine,
+                "incident": incident}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything
     # dirty was a leaked-ignored file already rm --cached'd, or a race cleaned
     # it) from a genuine commit failure.
@@ -2802,4 +3132,6 @@ def run_phase_z(
         runner=runner,
     )
     return {"committed": False, "reason": "commit_nonzero", "untracked": untracked,
-            "owned": owned, "commit_tail": out[-600:], "rolled_back": True}
+            "owned": owned, "commit_tail": out[-600:], "rolled_back": True,
+            "quarantine": quarantine,
+            "incident": incident}

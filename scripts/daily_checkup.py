@@ -8,7 +8,7 @@
 靜默落後的資料（daily_update 卡 6/26、collect_us、twse_orderflow 死 12 天）、卡 1 年的
 頁面 cache，全部漏網，最後靠老闆當 QA 發現。本檢查補上 result-level 維度。
 
-十大維度（每個失敗都產生具體 finding，可被 alert 消費）：
+十一大維度（每個失敗都產生具體 finding，可被 alert 消費）：
 1. data_freshness   — 所有資料收集 job 是否照排程跑 + 關鍵資料檔是否新鮮（時效性資料優先）
 2. cron_completion  — 所有排程 job 最近一輪是否真的 fire + exit0
 3. content_pipeline — 草稿池 ≥ 門檻、今日有產出、published 文章皆含真圖表+數據表（非純散文）
@@ -19,6 +19,7 @@
 8. reader_metrics   — 讀者互動 metrics 是否已落地且足夠新鮮
 9. dedup_calibration — 真實 90d feed 上的 arc/theme 固定 probes 與 threshold margin
 10. reproducibility — 論文/feed 引用實驗的 report coverage、staleness 與 mismatch（唯讀）
+11. worktree_reconcile — open 任務指向的 worktree 是否還在磁碟上（抓 k1709 型殭屍任務）
 
 用法：
   uv run python scripts/daily_checkup.py            # 印報告
@@ -598,6 +599,81 @@ def check_reproducibility() -> list[dict]:
     return findings
 
 
+_WORKTREE_REF = re.compile(r"\.claude/worktrees/([A-Za-z0-9._-]+)")
+
+
+def check_worktree_reconcile() -> list[dict]:
+    """Open tasks whose worktree no longer exists on disk.
+
+    k1709 sat status=blocked from 2026-07-14 to 2026-07-19 pointing at
+    .claude/worktrees/dispatch-slot-2-c873d04d-k1709. The directory was gone, so
+    the task could never run; nothing looked for that, so it never closed either
+    — a pure zombie. This dimension is the missing feedback loop: it reconciles
+    task references against what is actually on disk.
+
+    The branch is what decides severity. Checkout gone but branch alive => the
+    commits are still reachable, so it is a bookkeeping problem (warn). Branch
+    gone too => the work is reachable only via reflog and is on the clock before
+    gc, which is the artifact-loss case (critical, per
+    feedback_no_research_artifact_loss).
+
+    in_progress is excluded on purpose: a task actively repairing a vanished
+    worktree necessarily names it, and flagging the repair as the disease is how
+    a checkup trains its reader to ignore it.
+    """
+    out = []
+    nt = STORAGE / "next_tasks.json"
+    try:
+        tasks = json.loads(nt.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        return [_finding("worktree_reconcile", "warn", f"讀不到 next_tasks.json: {exc}")]
+
+    wt_dir = ROOT / ".claude" / "worktrees"
+    try:
+        refs = subprocess.run(
+            ["git", "-C", str(ROOT), "for-each-ref", "--format=%(refname:short)"],
+            capture_output=True, text=True, timeout=20, check=True,
+        ).stdout.split()
+    except (subprocess.SubprocessError, OSError) as exc:
+        refs = []
+        out.append(_finding("worktree_reconcile", "warn", f"讀不到 git refs（branch 存活無法判定）: {exc}"))
+
+    for t in tasks:
+        if t.get("status") not in ("pending", "blocked", "queued"):
+            continue
+        names = set(_WORKTREE_REF.findall(json.dumps(t, ensure_ascii=False)))
+        missing = sorted(n for n in names if not (wt_dir / n).exists())
+        if not missing:
+            continue
+        # A worktree named wt/<name> or exp/<slug> may still have its branch.
+        orphaned = [n for n in missing if not any(n in r for r in refs)]
+        sev = "critical" if orphaned else "warn"
+        detail = f"branch 也不存在（成果僅存 reflog）: {orphaned}" if orphaned else "branch 尚存，commits 可救回"
+        out.append(_finding(
+            "worktree_reconcile", sev,
+            f"殭屍任務 {t.get('id')} [{t.get('status')}] 指向已消失的 worktree {missing} —— {detail}",
+            recovery=("查 git reflog / merge-base 裁定 commits 是否已進 main；"
+                      "已合併→關單並註明，未合併→依 feedback_no_research_artifact_loss 復原。禁止直接關單了事"),
+        ))
+
+    try:
+        wt_list = subprocess.run(
+            ["git", "-C", str(ROOT), "worktree", "list", "--porcelain"],
+            capture_output=True, text=True, timeout=20, check=True,
+        ).stdout
+        prunable = wt_list.count("prunable")
+        if prunable:
+            out.append(_finding(
+                "worktree_reconcile", "warn",
+                f"git worktree 有 {prunable} 條 stale 註冊（目錄已不存在但註冊還在）",
+                recovery="uv run python scripts/git_writer_lock.py run -- worktree prune",
+            ))
+    except (subprocess.SubprocessError, OSError) as exc:
+        out.append(_finding("worktree_reconcile", "warn", f"worktree list 失敗: {exc}"))
+
+    return out
+
+
 def run_all() -> dict:
     dims = {
         "data_freshness": check_data_freshness,
@@ -610,6 +686,7 @@ def run_all() -> dict:
         "reader_metrics": check_reader_metrics,
         "dedup_calibration": check_dedup_calibration,
         "reproducibility": check_reproducibility,
+        "worktree_reconcile": check_worktree_reconcile,
     }
     findings = []
     for name, fn in dims.items():

@@ -143,11 +143,11 @@
       {
         "id": "release_pool",
         "label": "文章池定時釋出",
-        "cron": "7 */6 * * *",
+        "cron": "7 */4 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_release_pool.sh",
         "log_path": "storage/logs/cron/release_pool.log",
         "command_deprecated": "release-pool-by-settings",
-        "description": "依節奏設定釋出文章池內容（2026-06-30 用戶指定 3h→6h；2026-07-02 用戶指定 6h→4h 加快曝光）。對應 .release_settings.json interval_minutes=240；LaunchAgent com.volpred.release-pool 是 direct schedule owner，check_alerts hourly 僅作 settings-aware fallback。2026-07-15 稽核確認 host crontab 與 LaunchAgent 在 :07 雙 fire，故 host_crontab_managed=false；release promotion 另以 publisher_feed lock 原子重驗，fallback 重疊時只允許一篇成功。",
+        "description": "依節奏設定釋出文章池內容。**2026-07-19（老闆 23:36 Telegram「全部都要合併跑」）觸發節奏對齊 interval_minutes=240**：LaunchAgent 由 6h（00/06/12/18 :07）改為 4h（00/04/08/12/16/20 :07）。在此之前 spec 與實際長期不一致 —— 2026-07-02 用戶已指定 6h→4h 且 .release_settings.json 早就是 240 分鐘，但 plist 與本欄 cron 仍是 */6，正規路徑上限只有 4 篇/日，實際 6/day 完全靠 check_alerts hourly fallback 撐著（fallback 成為事實上的 driver，斷檔時無人察覺）。改後正規路徑自給自足，fallback 回歸備援。burst 門檻 30 分鐘、drought 門檻 = interval 4h + grace 2h = 6h，4h 節奏兩者皆不誤報（已驗）。LaunchAgent com.volpred.release-pool 是 direct schedule owner；2026-07-15 稽核確認 host crontab 與 LaunchAgent 在 :07 雙 fire，故 host_crontab_managed=false；release promotion 另以 publisher_feed lock 原子重驗，fallback 重疊時只允許一篇成功。",
         "host_crontab_managed": false,
         "host_crontab_managed_note": "2026-07-15: LaunchAgent com.volpred.release-pool 為 direct owner；移除 host crontab 重複源（歷史 release_pool.log 已證實同篇重複 release/sync/notify）。",
         "mechanism": "launchd",
@@ -1369,6 +1369,7 @@
     "source_label": "Slot-aware idle continuation policy (updated 2026-04-17 for M1 Max 10-core, cap raised 3->4)",
     "note": "Use after a top-level agent completes its main task instead of a high-frequency heartbeat cron. This is a continuation/selection policy, not a standalone scheduler clock. Priority ordering decides WHICH task to pick; it does NOT mandate sequential execution.",
     "max_concurrent_agents": 4,
+    "max_concurrent_agents_owner_note": "⚠️ 此欄位無程式讀取（2026-07-19 全 repo grep 確認），是歷史敘述值。agent 並行度的唯一 enforcement owner = scripts/dispatch_slot_budget.py（base 4 / P1 surge 6 / auth_blocked de-rate 2 + worktree progress-based occupancy）。要改 agent 並行度請改該腳本；改這裡不會生效，也不要讓它變成第二個 owner。",
     "rules": [
       "硬體容量：M1 Max 10 核，同時最多 4 個 agent（每個約 1-2 核 + 1-2GB RAM + 1 個 worktree），保留 ≥1 核給主線程 buffer。",
       "每次觸發先 count 當前 running agents（.claude/worktrees/ + background task ids）。若 >= max_concurrent_agents 則跳過。",
@@ -1441,7 +1442,8 @@
       "entrypoint": "uv run python -m scripts.dispatch_supervisor.supervisor",
       "state_file": "storage/ops/dispatch_state.json",
       "log": "~/.volpred/logs/dispatch_supervisor.log",
-      "max_slots": 2,
+      "max_slots": 4,
+      "max_slots_rationale": "2026-07-19 老闆『加快清任務池』(assign_794c4bc2)：2→4。2 個 slot 長期滿載，requested fire（email/telegram/急件）撞 slots_full 被延到下一 tick。放大的是「同時幾條主線程」，不是 agent 數 —— agent 並行度的唯一 owner 仍是 scripts/dispatch_slot_budget.py（全 repo worktree occupancy，4/surge 6），不隨 max_slots 倍增。上限依據：10 CPU core（主線程 IO-bound）、64GB RAM、weekly quota 剩 67.7%、磁碟 85GB free（91% used，worktree 是這裡的真限制而非 slot 數）。守門：scheduler.load_max_slots 於連 2 次 outcome=quota_blocked 時自動 clamp 回 2，成功一次即自愈。",
       "fires": "hourly worker per volpred-hourly-dispatch `schedule` (croniter) + ASAP on state.fire_requested_at",
       "since": "2026-07-04T16:36:00+08:00",
       "description": "Canonical hourly dispatcher after the 3-strike refactor cutover (docs/refactor_plan_hourly_dispatch.md). Long-lived asyncio supervisor: scheduler tick 60s + independent health monitor + max_slots worker pool + retry ladder + cohort-drained PHASE-Z safety commit. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover it (single enforcement owner)."

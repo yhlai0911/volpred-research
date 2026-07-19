@@ -16,6 +16,10 @@ Safety rules, in order:
     checkout throws nothing away, and the work is recoverable via the branch.
   - A DIRTY worktree is never removed. Uncommitted work is work. It is reported
     and left alone for a human/main-thread decision.
+  - An UNMERGED worktree is never removed either. Committed-but-unmerged work is
+    also work, and the surviving branch is not a harvest — k1709 proved a branch
+    can vanish with its checkout and strand the task pointing at it. Those are
+    routed to merge_worktree.sh instead.
   - `git worktree remove --force` is BANNED repo-wide (CLAUDE.md) and is not
     used here, not even as a fallback.
   - Default is dry-run. `--apply` is required to kill or remove anything.
@@ -83,6 +87,41 @@ def _is_dirty(worktree: Path) -> bool:
         return True
 
 
+def _unmerged_count(branch: str | None) -> int:
+    """Commits on `branch` that main does not have yet.
+
+    Preserving the branch is NOT the same as harvesting the work. k1709 was a
+    clean worktree whose branch held 3 revision commits; the checkout went away,
+    the ref went away with it, and the task pointing at it sat blocked forever
+    with no mechanism to notice (2026-07-19 boss report). A clean tree only
+    proves nothing is uncommitted — it says nothing about whether those commits
+    ever reached main. Removing an unmerged checkout is how the next zombie gets
+    made, so it is gated here and routed to merge_worktree.sh instead.
+    """
+    if not branch:
+        return 0
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(REPO), "rev-list", "--count", f"HEAD..{branch}"],
+            capture_output=True, text=True, timeout=20, check=True,
+            **git_writer_subprocess_kwargs(),
+        ).stdout.strip()
+        return int(out or 0)
+    except (subprocess.SubprocessError, OSError, ValueError) as exc:
+        # Fail closed, same posture as _is_dirty: unprovable => do not touch.
+        warn("reclaim", f"rev-list 失敗 {branch} ({exc}) — 保守視為有未合併 commits，不移除")
+        return -1
+
+
+def _unmerged_reason(unmerged: int) -> str:
+    if unmerged < 0:
+        return "無法判定是否已合併 — 保守保留（fail closed）"
+    return (
+        f"unmerged — branch 有 {unmerged} 個 commits 未進 main；"
+        "先走 merge_worktree.sh 收割再回收（保留 branch 不等於收割成果）"
+    )
+
+
 def _branch_of(worktree: Path) -> str | None:
     try:
         return subprocess.run(
@@ -105,11 +144,13 @@ def reclaim(apply: bool) -> dict:
         branch = _branch_of(path)
         dirty = _is_dirty(path)
         pids = _holder_pids(path)
+        unmerged = _unmerged_count(branch)
         action = {
             "worktree": wt["name"],
             "branch": branch,
             "idle_hours": wt["idle_hours"],
             "dirty": dirty,
+            "unmerged_commits": unmerged,
             "holder_pids": pids,
             "killed": [],
             "removed": False,
@@ -117,6 +158,11 @@ def reclaim(apply: bool) -> dict:
 
         if dirty and not apply:
             action["skipped"] = "dirty — 有未提交工作，保留待人工裁決"
+            results.append(action)
+            continue
+
+        if unmerged != 0 and not apply:
+            action["skipped"] = _unmerged_reason(unmerged)
             results.append(action)
             continue
 
@@ -129,9 +175,17 @@ def reclaim(apply: bool) -> dict:
                 branch = _branch_of(path)
                 dirty = _is_dirty(path)
                 pids = _holder_pids(path)
-                action.update(branch=branch, dirty=dirty, holder_pids=pids)
+                unmerged = _unmerged_count(branch)
+                action.update(
+                    branch=branch, dirty=dirty, holder_pids=pids,
+                    unmerged_commits=unmerged,
+                )
                 if dirty:
                     action["skipped"] = "dirty — 有未提交工作，保留待人工裁決"
+                    results.append(action)
+                    continue
+                if unmerged != 0:
+                    action["skipped"] = _unmerged_reason(unmerged)
                     results.append(action)
                     continue
                 for pid in pids:

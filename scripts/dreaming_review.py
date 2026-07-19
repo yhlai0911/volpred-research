@@ -53,6 +53,7 @@ sys.path.insert(0, str(REPO / "scripts"))
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.common import project_path  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
+from volpred.ops import dreaming_revalidate  # noqa: E402
 from volpred.ops.loop_health import (  # noqa: E402
     LOOP_HEALTH_WINDOW_DAYS,
     RECURRENCE_DEGRADING_COUNT,
@@ -831,24 +832,11 @@ def _consumer_blob(storage_dir: str) -> str:
     but left no artifact behind is deliberately NOT a consumer: "closed" without a
     knowledge entry is exactly the failure this detector exists to catch.
     """
-    root = project_path(storage_dir).parent
-    blob: list[str] = []
-    for rel in ("storage/memory/knowledge.json", "storage/reports/feed.json"):
-        try:
-            blob.append((root / rel).read_text(encoding="utf-8", errors="ignore").lower())
-        except OSError as exc:
-            warn("dreaming", "orphan_experiments: consumer source unreadable", path=rel, err=str(exc))
-    try:
-        for tex in sorted((root / "paper").rglob("*.tex")):
-            blob.append(tex.read_text(encoding="utf-8", errors="ignore").lower())
-    except OSError as exc:
-        warn("dreaming", "orphan_experiments: paper tree unreadable", err=str(exc))
-    open_tasks = [
-        t for t in _load_next_tasks(storage_dir)
-        if str(t.get("status") or "").lower() in ("pending", "in_progress")
-    ]
-    blob.append(json.dumps(open_tasks, ensure_ascii=False).lower())
-    return "\n".join(blob)
+    # Delegated so the detector and the pre-dispatch revalidator cannot drift about
+    # what "consumer" means — a revalidator using a WIDER definition would clear
+    # tasks the detector would still flag, and a narrower one would clear none.
+    # No exclusions here: at detection time this finding has no task yet.
+    return dreaming_revalidate.consumer_blob(storage_dir)
 
 
 def detect_orphaned_experiments(
@@ -974,6 +962,47 @@ def write_baseline(storage_dir: str, baseline: dict[str, dict[str, Any]], now: d
 # Sentinel distinguishing a legacy baseline entry (no activity_marker key) from
 # one that explicitly stored `None`.
 _MARKER_MISSING = object()
+# Sentinel for a signature seen for the FIRST time — there is no previous run to
+# compare against, so quiescence must be answered in its absolute form.
+_NO_PREVIOUS_RUN = object()
+
+# Dreaming runs once a day (cron 05:25). This is the width of "did the signal
+# advance since we last looked" — the unit the relative quiescence test measures
+# implicitly, and the one the absolute test has to state explicitly.
+DREAMING_RUN_INTERVAL_HOURS = 24
+
+
+def _is_quiescent(activity_marker: str | None, prev_marker: Any, now: datetime) -> bool:
+    """quiescent ⟺ 底層訊號在最近一個 run interval 內沒有推進 —— 對外音量的事實基礎。
+
+    這是 quiescence 的**唯一** owner。一個問題（「這個 signal 還在發生嗎？」），
+    三種證據來源，依可靠度排序：
+
+    1. 有前一輪 marker → **相對**：marker 沒推進 = 已停火。最可靠，直接觀察到兩個
+       時點之間沒有新活動。
+    2. legacy baseline entry（marker 欄位還沒寫進去）→ advance 未知 → 保守 hold，
+       避免 deploy 邊界上記一次假 strike；下一輪就有 marker 可比，自我修正。
+    3. 首見（沒有前一輪）→ **絕對**：marker 距今已超過一個 run interval，等價於
+       「若上一輪就看得到它，這一輪比對必然判 quiescent」。
+
+    第 3 條就是 2026-07-19 boss email-12144 點名的洞。舊版只實作第 1 條，於是
+    「初見即已停火」的 alert 必吵一次、隔晚才靜音。當時判斷補它要另立一套判定、
+    會和 reconcile 的 marker 邏輯變成雙 owner（anti-stacking）—— 那個判斷錯在把
+    相對式當成 quiescence 的定義本身。定義其實是「一個 run interval 內沒推進」，
+    相對式只是它在「有前值」時的特例。統一成這個問法之後，第 3 條是同一個判準
+    換一種證據，不是第二個 owner。
+    """
+    if not activity_marker:
+        return False  # 沒有 marker → 無從判定活躍度，一律當活躍（寧可吵人）
+    if prev_marker is _MARKER_MISSING:
+        return True  # 見規則 2
+    if prev_marker is _NO_PREVIOUS_RUN:
+        ts = _parse_iso(activity_marker)
+        if ts is None:
+            return False  # marker 無法解析 → 不敢判 quiescent，fail toward 通知人
+        age_hours = (now.astimezone(timezone.utc) - ts).total_seconds() / 3600.0
+        return age_hours >= DREAMING_RUN_INTERVAL_HOURS
+    return prev_marker == activity_marker  # 見規則 1
 
 
 def reconcile(
@@ -1004,6 +1033,9 @@ def reconcile(
             f.occurrences = 1
             f.first_seen = iso
             f.last_seen = iso
+            # 首見也要判 quiescent：一個「初見即已停火」的 signal 沒有任何行動可做，
+            # 不該因為「這是第一次看到它」就當成活躍警報寄出去（boss email-12144）。
+            f.quiescent = _is_quiescent(f.activity_marker, _NO_PREVIOUS_RUN, now)
             new_findings.append(f)
         else:
             # A finding that carries an activity_marker only counts as an ACTIVE
@@ -1013,15 +1045,8 @@ def reconcile(
             # escalate. Prevents a single burst from false-escalating to critical
             # just because it lingers across daily runs inside the 48h window.
             prev_marker = prev.get("activity_marker", _MARKER_MISSING)
-            # quiescent when the marker did not demonstrably advance:
-            #   - same marker as last run → alert stopped firing, decaying
-            #   - legacy baseline entry (no marker key yet) → advance unknown,
-            #     stay conservative on the deploy boundary rather than count a
-            #     spurious strike; next run records the marker and self-corrects.
-            quiescent = f.activity_marker is not None and (
-                prev_marker == f.activity_marker or prev_marker is _MARKER_MISSING
-            )
-            f.quiescent = bool(quiescent)
+            quiescent = _is_quiescent(f.activity_marker, prev_marker, now)
+            f.quiescent = quiescent
             if not quiescent:
                 prev["strike_count"] = int(prev.get("strike_count", 0)) + 1
             prev["last_seen"] = iso
@@ -1372,7 +1397,8 @@ def apply_auto_dispatch(
                             f"— dreaming 連續 {f.occurrences} 晚偵測到此模式（首見 {f.first_seen}）。\n"
                             f"證據：{'; '.join(f.evidence) if f.evidence else '(無)'}\n"
                             f"治理檔（error_log / rules / knowledge.json）仍是 propose-only："
-                            f"接手的 agent 判斷後決定是否改，dreaming 不自動改。"
+                            f"接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n"
+                            f"{dreaming_revalidate.REVALIDATION_INSTRUCTION}"
                         ),
                         "task_type": f.task_type,
                         "priority": 2 if f.severity == "critical" else 3,

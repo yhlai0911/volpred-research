@@ -403,21 +403,13 @@ def _capture_permalink(page, anchor: str) -> str | None:
         return None
 
 
-def _add_first_comment(page, body: str, link: str) -> None:
-    """在剛發的貼文底下補第一則留言（連結）。用主文第一行前段當 anchor，在 timeline
-    以 JS innerText 比對定位「該貼文」的留言 textbox（profile 頁 div[role='article']
-    不穩，2026-07-07 改此法驗證可行），type URL（ASCII 不亂碼）+ Enter 送出。"""
-    anchor = body.strip().splitlines()[0][:12]
-    # 2026-07-19：原本 domcontentloaded + 3.5s 就掃 DOM，profile feed 常還沒 render
-    # （實測 body innerText 僅 2170 字、滿頁佔位）→ 定位不到貼文。改等 load + 15s，
-    # 並把「其他貼文」捲進視窗讓最新貼文真正掛上 DOM。
-    page.goto(FB_PROFILE_URL, wait_until="load", timeout=90_000)
-    page.wait_for_timeout(15_000)
-    try:
-        page.get_by_text("其他貼文", exact=True).first.scroll_into_view_if_needed(timeout=15_000)
-    except Exception:
-        page.mouse.wheel(0, 1250)  # fallback: 捲過置頂貼文，露出最新貼文
-    page.wait_for_timeout(5_000)
+def _locate_comment_box(page, anchor: str = ""):
+    """以 JS innerText 比對定位「含 anchor 的那篇貼文」的留言 textbox。
+
+    profile 頁 div[role='article'] 不穩（2026-07-07 改此法驗證可行）：改掃所有 div，
+    找同時含 anchor 與「的身分留言」且夠小（<1400 字）的容器，取其 role=textbox。
+    anchor="" 用於**單篇 permalink 頁**（頁上只有一篇貼文，不需 anchor 消歧）。
+    """
     js = """
     (anchor) => {
       const boxes = Array.from(document.querySelectorAll('div'));
@@ -431,10 +423,42 @@ def _add_first_comment(page, body: str, link: str) -> None:
       return null;
     }
     """
-    handle = page.evaluate_handle(js, anchor)
-    el = handle.as_element()
+    el = page.evaluate_handle(js, anchor).as_element()
     if not el:
         raise RuntimeError(f"找不到含「{anchor}」貼文的留言框")
+    return el
+
+
+def _verify_comment_sent(page, el, needle: str) -> bool:
+    """送出後回讀確認：留言框清空 + 頁面出現 needle。
+
+    2026-07-19：原本無條件印 [OK]。實測 mile_29018fa1 這樣誤報成功，貼文實際 0 留言，
+    引流連結整篇掉了。送出後一律回讀，不回讀不算成功。
+    """
+    for _ in range(6):
+        cleared = (el.inner_text() or "").strip() == ""
+        shown = needle in page.evaluate("() => document.body.innerText")
+        if cleared and shown:
+            return True
+        page.wait_for_timeout(2_500)
+    return False
+
+
+def _add_first_comment(page, body: str, link: str) -> None:
+    """在剛發的貼文底下補第一則留言（連結）。用主文第一行前段當 anchor，在 timeline
+    定位「該貼文」的留言 textbox，type URL（ASCII 不亂碼）+ Enter 送出。"""
+    anchor = body.strip().splitlines()[0][:12]
+    # 2026-07-19：原本 domcontentloaded + 3.5s 就掃 DOM，profile feed 常還沒 render
+    # （實測 body innerText 僅 2170 字、滿頁佔位）→ 定位不到貼文。改等 load + 15s，
+    # 並把「其他貼文」捲進視窗讓最新貼文真正掛上 DOM。
+    page.goto(FB_PROFILE_URL, wait_until="load", timeout=90_000)
+    page.wait_for_timeout(15_000)
+    try:
+        page.get_by_text("其他貼文", exact=True).first.scroll_into_view_if_needed(timeout=15_000)
+    except Exception:
+        page.mouse.wheel(0, 1250)  # fallback: 捲過置頂貼文，露出最新貼文
+    page.wait_for_timeout(5_000)
+    el = _locate_comment_box(page, anchor)
     el.scroll_into_view_if_needed()
     el.click()
     page.wait_for_timeout(800)
@@ -442,15 +466,9 @@ def _add_first_comment(page, body: str, link: str) -> None:
     page.wait_for_timeout(3_500)  # 等連結預覽
     page.keyboard.press("Enter")
     page.wait_for_timeout(4_500)
-    # 2026-07-19：原本無條件印 [OK]。實測 mile_29018fa1 這樣誤報成功，貼文實際 0 留言，
-    # 引流連結整篇掉了。送出後必須回讀確認：留言框清空 + 頁面出現該連結。
-    for _ in range(6):
-        cleared = (el.inner_text() or "").strip() == ""
-        shown = link.rsplit("/", 1)[-1] in page.evaluate("() => document.body.innerText")
-        if cleared and shown:
-            print(f"[OK] 第一則留言已送出並驗證：{link}")
-            return
-        page.wait_for_timeout(2_500)
+    if _verify_comment_sent(page, el, link.rsplit("/", 1)[-1]):
+        print(f"[OK] 第一則留言已送出並驗證：{link}")
+        return
     raise RuntimeError(f"留言送出後驗證失敗（留言框未清空或頁面查無連結）：{link}")
 
 
@@ -555,6 +573,96 @@ def cmd_delete_matching(anchor: str, confirm: bool) -> int:
         page.screenshot(path=str(after))
         print(f"[OK] 已送出刪除，事後截圖：{after}")
         return 0
+
+
+def cmd_comment_on(post_url: str, comment_file: Path, dry_run: bool) -> int:
+    """對**既有**貼文補一則留言（更正說明 / 補連結用）。
+
+    與 `_add_first_comment` 的差別只在定位方式：這裡直接 goto 單篇 permalink（頁上只有
+    一篇貼文 → anchor="" 即可），留言框互動邏輯共用 `_locate_comment_box`。
+    中文一律走剪貼簿整段貼上（keyboard.type 對中文 IME 會亂碼，SKILL §硬規則 4），
+    並沿用發文路徑的「貼上前一刻 pbcopy + pbpaste 驗證 + composer 回讀」三重防剪貼簿被搶。
+
+    --dry-run：貼完 + 截圖後停在送出前，不按 Enter。
+    """
+    from playwright.sync_api import sync_playwright
+
+    text = comment_file.read_text(encoding="utf-8").strip()
+    if not text:
+        print(f"[FAIL] 留言檔為空：{comment_file}")
+        return 2
+
+    # 送出後回讀用的 needle：優先取留言內 URL 的末段（ASCII，最不易被 FB 改寫），
+    # 沒有 URL 才退回中文前段。
+    m = re.search(r"https?://\S+", text)
+    needle = m.group(0).rstrip("/").rsplit("/", 1)[-1] if m else text[:12]
+
+    ver = ensure_fb_chrome()
+    if not ver:
+        print(f"[FAIL] CDP port {CDP_PORT} 沒開且自動啟動失敗 — 見 docs/fb_realchrome_setup.md")
+        return 2
+    SHOT_DIR.mkdir(parents=True, exist_ok=True)
+    with sync_playwright() as pw:
+        browser = _connect(pw)
+        page = _get_or_open_fb_page(browser)
+        if _login_state(page) == "login_wall":
+            print("[FAIL] FB 未登入 — 只有老闆能在 dedicated Chrome 手動登入")
+            browser.close()
+            return 3
+
+        page.goto(post_url, wait_until="load", timeout=90_000)
+        page.wait_for_timeout(8_000)
+        try:
+            el = _locate_comment_box(page, "")
+        except RuntimeError as e:
+            shot = SHOT_DIR / f"comment_on_nobox_{int(time.time())}.png"
+            page.screenshot(path=str(shot))
+            print(f"[FAIL] {e}；截圖 {shot}")
+            browser.close()
+            return 4
+        el.scroll_into_view_if_needed()
+        el.click()
+        page.wait_for_timeout(800)
+
+        subprocess.run(["pbcopy"], input=text.encode("utf-8"), check=True)
+        clip = subprocess.run(["pbpaste"], capture_output=True, text=True).stdout
+        if clip.strip() != text:
+            shot = SHOT_DIR / f"comment_on_clip_mismatch_{int(time.time())}.png"
+            page.screenshot(path=str(shot))
+            print(f"[ABORT] 剪貼簿驗證失敗（pbcopy 後 pbpaste != 留言）→ 不貼；截圖 {shot}")
+            browser.close()
+            return 5
+        page.keyboard.press("Meta+V")
+        page.wait_for_timeout(2_500)
+
+        composed = el.inner_text() or ""
+        shot = SHOT_DIR / f"comment_on_composed_{int(time.time())}.png"
+        page.screenshot(path=str(shot))
+        head = text[:16]
+        if head not in composed:
+            print(f"[ABORT] 留言框內容與留言檔不符（剪貼簿可能被搶）→ 不送出；截圖 {shot}")
+            print(f"        期望開頭: {head!r}")
+            print(f"        實際讀到: {composed[:60]!r}")
+            browser.close()
+            return 5
+        print(f"[OK] 留言已貼入留言框（{len(text)} 字），截圖 {shot}")
+
+        if dry_run:
+            print("[DRY-RUN] 停在送出前，未按 Enter。人工看上面截圖確認後再跑不帶 --dry-run 的版本。")
+            browser.close()
+            return 0
+
+        page.keyboard.press("Enter")
+        page.wait_for_timeout(5_000)
+        ok = _verify_comment_sent(page, el, needle)
+        shot = SHOT_DIR / f"comment_on_{'done' if ok else 'fail'}_{int(time.time())}.png"
+        page.screenshot(path=str(shot))
+        browser.close()
+        if ok:
+            print(f"[OK] 留言已送出並驗證（needle={needle!r}）；截圖 {shot}")
+            return 0
+        print(f"[FAIL] 留言送出後驗證失敗（留言框未清空或頁面查無 {needle!r}）；截圖 {shot}")
+        return 6
 
 
 def cmd_check() -> int:
@@ -931,13 +1039,17 @@ def main() -> int:
     g.add_argument("--post", metavar="DRAFT", help="發文：FB draft .md 路徑")
     g.add_argument("--delete-matching", metavar="ANCHOR",
                    help="撤掉重發用：定位 timeline 含此文字的最新貼文並刪除（預設只截圖，需 --confirm-delete 才真刪）")
+    g.add_argument("--comment-on", metavar="POST_URL",
+                   help="對既有貼文補一則留言（更正說明/補連結）：需搭配 --comment-file")
     g.add_argument("--recapture-permalink", metavar="MILE_ID",
                    help="回補既有已發貼文的 fb_post_url（導 timeline 抓永久連結，走正式 writer 回寫 canonical）")
     ap.add_argument("--posted-at", metavar="ISO",
                     help="搭配 --recapture-permalink：一併回補 fb_posted_at（ISO8601）")
     ap.add_argument("--confirm-delete", action="store_true",
                     help="搭配 --delete-matching：截圖驗證後真的移至垃圾桶（對外破壞性動作）")
-    ap.add_argument("--dry-run", action="store_true", help="搭配 --post：停在送出前")
+    ap.add_argument("--comment-file", metavar="PATH",
+                    help="搭配 --comment-on：留言正文 .md 路徑（中文走剪貼簿整段貼上）")
+    ap.add_argument("--dry-run", action="store_true", help="搭配 --post / --comment-on：停在送出前")
     ap.add_argument("--force", action="store_true",
                     help="繞過 idempotency guard 強制重發（已發過的 mile 也重貼；慎用）")
     args = ap.parse_args()
@@ -946,6 +1058,13 @@ def main() -> int:
         return cmd_check()
     if args.delete_matching:
         return cmd_delete_matching(args.delete_matching, confirm=args.confirm_delete)
+    if args.comment_on:
+        if not args.comment_file:
+            ap.error("--comment-on 需要搭配 --comment-file")
+        cf = Path(args.comment_file)
+        if not cf.exists():
+            ap.error(f"--comment-file 不存在：{cf}")
+        return cmd_comment_on(args.comment_on, cf, args.dry_run)
     if args.recapture_permalink:
         return cmd_recapture_permalink(args.recapture_permalink, posted_at=args.posted_at)
     return cmd_post(Path(args.post), args.dry_run, force=args.force)

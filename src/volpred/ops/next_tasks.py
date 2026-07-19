@@ -570,6 +570,13 @@ def _request_urgent_fire(record: dict[str, Any], path: Path) -> bool:
     pending）。這裡是 **single gateway**（`volpred ops assign` 唯一的 append 路
     徑），所以接在這裡就同時涵蓋 telegram / user / owner / boss 所有人為 ingress。
 
+    範圍界線（2026-07-19 查證，別再「補接線」）：`scripts/telegram_poll.py` 自己組
+    record 直寫佇列、不經本函式，看起來像漏網，其實不是 —— 它建的是
+    `telegram_reply`，屬 `DEDICATED_OWNER_TASK_TYPES`，`is_urgent()` 一律回 False，
+    因為那類有專屬 owner（`_spawn_responder()` 即時處理，失敗則由 poll 迴圈在
+    `RETRY_AGE_THRESHOLD_SEC`=120s 內重派），本來就不該叫醒 hourly dispatcher —— 叫
+    醒了它也只會 skip 掉 telegram_reply。硬接一行 `request_urgent_fire` 是 no-op。
+
     `request_fire()` 只是在 supervisor state 寫一個 flag（同一把 fcntl 鎖），由
     scheduler 下一個 ≤60s tick 消費並走正常 `reserve_fire()` slot —— 不 spawn 任何
     平行 agent，slot 滿就留著等，不是 double dispatch。

@@ -12,10 +12,20 @@ Until 2026-07-13 the cap lived as prose in `scripts/cron_hourly_dispatch_prompt.
 backlog, and it happily surges straight into a quota outage — and a quota outage
 takes the whole loop down, not just one fire.
 
-Rules (owner decision, Telegram msg 596/600):
+Rules (owner decision, Telegram msg 596/600; open-incident added 2026-07-19):
   auth_blocked (supervisor saw an auth/quota block)  -> 2   ride it out, don't burn
+  open PHASE-Z stuck-path incident                   -> 2   de-rate until it closes
   pending P1 >= P1_SURGE_AT                          -> 6   slots 5-6 reserved for P1/P2
   otherwise                                          -> 4   baseline
+
+The open-incident rule is the whole point of `volpred.ops.foreign_incident`, and
+it is deliberately the SAME shape as auth_blocked rather than a second gate
+somewhere else: a condition that does not change what the scheduler does is a
+red log, and PHASE-Z proved that empirically over 78 fires of correctly-sent
+CRITICAL alerts and zero action. It is checked BEFORE the P1 surge on purpose —
+surging concurrency while the working tree is full of paths nobody can attribute
+is how the ownership signal got unreliable in the first place, and a backlog of
+P1s is not a reason to make that worse.
 
 ## Occupancy (2026-07-13, task `ops_slot_capacity_and_zombie_worktrees`)
 
@@ -57,6 +67,7 @@ from collections import Counter
 from pathlib import Path
 
 from volpred.ops.diagnostics import warn
+from volpred.ops.foreign_incident import open_incidents
 
 REPO = Path(__file__).resolve().parent.parent
 TASKS_PATH = REPO / "storage" / "next_tasks.json"
@@ -212,13 +223,37 @@ def occupancy(now: float | None = None) -> dict:
     }
 
 
+def _open_incident_signal(tasks_path: Path) -> dict | None:
+    """The oldest unclosed PHASE-Z stuck-path incident, or None.
+
+    Read-only, and `open_incidents` never raises: a queue this cannot parse must
+    not take dispatch down. Oldest-first so the reason string names the incident
+    that has been costing capacity longest, not whichever one sorted last.
+    """
+    incidents = open_incidents(tasks_path)
+    if not incidents:
+        return None
+    incidents.sort(key=lambda t: str(t.get("created_at") or ""))
+    return incidents[0]
+
+
 def budget(tasks_path: Path = TASKS_PATH, state_path: Path = STATE_PATH) -> dict:
     pending = _pending_by_priority(tasks_path)
     blocked = _auth_blocked(state_path)
+    incident = _open_incident_signal(tasks_path)
     p1 = pending.get(1, 0)
 
     if blocked:
         cap, reason = DERATE_CAP, "auth/quota blocked — de-rated, 先保住 loop 存活"
+    elif incident is not None:
+        payload = incident.get("payload") or {}
+        stuck_n = len(payload.get("paths") or [])
+        cap = DERATE_CAP
+        reason = (
+            f"PHASE-Z 卡住檔案 incident {incident.get('id')} 未關"
+            f"（fingerprint {payload.get('fingerprint')}，{stuck_n} 個檔案無人收）"
+            " — de-rated，先收拾工作區再加班"
+        )
     elif p1 >= P1_SURGE_AT:
         cap, reason = SURGE_CAP, f"P1 backlog={p1} — surge；slot 5-6 只給 P1/P2"
     else:
@@ -230,6 +265,11 @@ def budget(tasks_path: Path = TASKS_PATH, state_path: Path = STATE_PATH) -> dict
         "reason": reason,
         "p1_only_slots": max(0, cap - BASE_CAP),
         "auth_blocked": blocked,
+        "open_incident": None if incident is None else {
+            "task_id": incident.get("id"),
+            "fingerprint": (incident.get("payload") or {}).get("fingerprint"),
+            "paths": len((incident.get("payload") or {}).get("paths") or []),
+        },
         "pending_by_priority": {str(k): v for k, v in sorted(pending.items())},
         "occupied": occ["occupied"],
         "free": max(0, cap - occ["occupied"]),

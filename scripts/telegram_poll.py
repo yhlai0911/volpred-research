@@ -125,6 +125,10 @@ def _append_task(text: str, msg_id: int, sender: str, reply_context: str = "") -
     tmp = NEXT_TASKS.with_suffix(".tmp")
     tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     tmp.replace(NEXT_TASKS)
+    # 這裡刻意 **不** 呼叫 next_tasks._request_urgent_fire：telegram_reply 有專屬
+    # owner（下面 _spawn_responder / _maybe_retry_stuck），不歸 hourly dispatcher
+    # 管，叫醒它也只會被 A0 skip 掉。理由完整寫在 next_tasks._request_urgent_fire
+    # 的 docstring，由 test_urgent_task_lane.py 的 dedicated-owner 測試釘住。
     return task_id
 
 
@@ -161,7 +165,7 @@ def _handle_update(update: dict) -> None:
     # 一次「已排入、稍後處理」，讓 boss 知道訊息沒掉。
     if not _spawn_responder(model=_pick_model(text)):
         send_telegram(
-            f"收到（已排 P1：{task_id}）。即時處理器暫時忙碌，稍後由排程接手回你。",
+            f"收到（已排 P1：{task_id}）。即時處理器暫時忙碌，兩分鐘內自動重派，不用等排程。",
             disable_notification=True,
         )
 

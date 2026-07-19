@@ -23,8 +23,6 @@ import ast
 import json
 from pathlib import Path
 
-import pytest
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PHASE_Z = REPO_ROOT / "scripts" / "dispatch_supervisor" / "phase_z.py"
 NAMESPACES = REPO_ROOT / "config" / "orphan_namespaces.json"
@@ -86,19 +84,37 @@ def test_decision_document_exists() -> None:
     assert "Ownership 必須由 execution isolation 產生" in text
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "D2/D3 not landed yet: a foreign path's only exit is still a CRITICAL alert "
-        "with no actuator (78 fires, zero action). When quarantine-checkpointing or "
-        "scheduler admission-control lands, this turns green — flip it to a real "
-        "assertion then. See the decision doc §4 D2/D3."
-    ),
-)
 def test_stuck_foreign_paths_have_a_durable_exit_besides_alerting() -> None:
     """A dirty working tree is not preservation: the bytes can be overwritten by
     the next writer, reset by a human, or swept by a cleanup pass. Until an
     uncertain path is checkpointed somewhere immutable, "never lose" is 0/1 —
-    we only satisfy "never sweep into main"."""
+    we only satisfy "never sweep into main".
+
+    D2 landed on 2026-07-19, so the xfail-strict this used to carry became a real
+    assertion (the docstring above it said to flip it on landing). What it pins is
+    only that the *exit exists* in phase_z.py and that the stuck-path branch
+    actually reaches it — the behavioural proof (working tree byte-identical, HEAD
+    unmoved, content retrievable via ``git show``, live-flock paths skipped) is in
+    ``scripts/tests/test_phase_z_quarantine_checkpoint.py`` against real git.
+    """
     source = PHASE_Z.read_text(encoding="utf-8")
-    assert QUARANTINE_MARKER in source
+    assert QUARANTINE_MARKER in source, (
+        f"the durable exit for stuck foreign paths is gone — see {DECISION_DOC} §4 D2.\n"
+        "Alerting alone is what produced 78 fires of zero action."
+    )
+    tree = _phase_z_tree()
+    checkpointers = {
+        node.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and "quarantine" in node.name
+    }
+    assert checkpointers, "the quarantine constant exists but nothing implements it"
+    called = {
+        node.func.id
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    }
+    assert checkpointers & called, (
+        f"quarantine helpers {sorted(checkpointers)} are defined but never called — "
+        "a preservation path nothing invokes is the same 0/1 as no path at all."
+    )

@@ -928,6 +928,48 @@ def _maybe_retire_covered_article_tasks(*, auto_refill: bool) -> dict | None:
         return None
 
 
+def _sweep_cleared_dreaming_tasks() -> list[dict]:
+    """Close dreaming tasks whose condition dissolved, before they can be candidates.
+
+    A dreaming finding is a snapshot of one night. Without this sweep a task whose
+    condition cleared on its own just sits pending until the 24h starvation lockout
+    force-feeds it to a fire, which burns a whole slot discovering it is a no-op —
+    or worse, executes the stale imperative (2026-07-17: four `orphaned_experiment`
+    tasks still demanding knowledge entries that backfill had already written).
+
+    Same shape as `_sweep_cleared_ordinary_tasks` on the alert side. Best-effort:
+    a failure here must never stop the dispatch report from being produced.
+    """
+    try:
+        import fcntl
+
+        from volpred.ops import dreaming_revalidate
+        from volpred.ops.next_tasks import write_tasks_to_handle
+
+        if not NEXT_TASKS.exists():
+            return []
+        with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)  # same lock every queue writer takes
+            try:
+                tasks = json.load(fh)
+                if not isinstance(tasks, list):
+                    return []
+                closed = dreaming_revalidate.sweep_cleared(
+                    tasks,
+                    by="dispatcher",
+                    now=datetime.now(timezone.utc).isoformat(),
+                )
+                if closed:
+                    guard_canonical_write(NEXT_TASKS)
+                    write_tasks_to_handle(fh, tasks)
+                return closed
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    except Exception as exc:  # noqa: BLE001
+        _warn_dispatch(f"dreaming revalidation sweep failed: {exc}")
+        return []
+
+
 def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> dict:
     """Build the dispatch report.
 
@@ -942,6 +984,9 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
     # Retire covered article tasks BEFORE categorizing so duplicates never reach
     # the agentable candidate list this run.
     _maybe_retire_covered_article_tasks(auto_refill=auto_refill)
+    # Same reason, dreaming's snapshots: a dissolved condition must not reach the
+    # candidate list, nor age into the starvation lockout that force-feeds it.
+    cleared_dreaming = _sweep_cleared_dreaming_tasks()
     pending = load_pending_tasks()
     recent_type_counts = load_recent_task_type_counts()
     cats = categorize(pending, recent_type_counts=recent_type_counts)
@@ -1055,6 +1100,9 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
                 for s in starved_main_thread[:10]
             ],
         },
+        # Auto-closing a task is a real decision; it must not be silent. Whoever
+        # reads this report should see which snapshots dissolved and why.
+        "dreaming_cleared": cleared_dreaming,
         "dispatch_candidates": [
             {
                 "id": t.get("id"),
@@ -1118,6 +1166,10 @@ def print_report(report: dict) -> None:
             f"  ⚠️ stale slot released: {st['name']} — 無進度 {idle}"
             f"（>{_slot_budget.STALE_HOURS}h）；不再占 slot，清理走 "
             f"scripts/reclaim_stale_worktrees.py"
+        )
+    for c in report.get("dreaming_cleared") or []:
+        print(
+            f"  ✅ dreaming no-op closed: {c['id']} [{c['pattern_type']}] — {c['detail']}"
         )
     print(
         f"[dispatch] pending: total={report['pending_total']} "

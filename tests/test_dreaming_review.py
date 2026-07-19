@@ -1158,3 +1158,82 @@ def test_email_does_not_describe_the_actuator_as_off(monkeypatch):
     sent = _capture_email(monkeypatch, _email_report(new=1, escalations=0))
     assert "預設關" not in sent["body"]
     assert "預設開啟" in sent["body"]
+
+
+# ---------------------------------------------------------------------------
+# 首見即已停火（boss email-12144 2026-07-19）
+#
+# 舊版 quiescent 只有「跟上一輪 marker 比」這一種形式，於是首見的 finding 一律算活躍
+# —— 一個「初見即已停火」的 alert 必吵老闆一次，隔晚才靜音。當時把它記成「已知邊界」
+# 留給老闆判斷；老闆的回覆是「不是叫我做，你判定後就去優化執行啊，立刻重構底層」。
+# 底層修法：quiescence 的定義是「一個 run interval 內沒推進」，相對式只是它在有前值
+# 時的特例；首見改問同一個問題的絕對形式，仍是同一個 owner（_is_quiescent）。
+# ---------------------------------------------------------------------------
+def _first_sight(marker, sig="persistent_alert:first"):
+    return dr.DreamFinding(
+        pattern_type="persistent_alert",
+        signature=sig,
+        severity="warn",
+        remediation="propose_only",
+        activity_marker=marker,
+    )
+
+
+def test_first_sight_stale_marker_is_quiescent():
+    """首見但 marker 已超過一個 run interval → 停火中，沒有行動可做，不該吵人。"""
+    stale = (NOW - timedelta(hours=dr.DREAMING_RUN_INTERVAL_HOURS + 1)).isoformat()
+    f = _first_sight(stale)
+    baseline: dict = {}
+    new, _, esc = dr.reconcile([f], baseline, NOW)
+    assert f.quiescent is True
+    assert new == [f], "仍算 new（報告要寫），只是不 actionable"
+    assert esc == []
+    assert dr.needs_human_attention(f) is False
+
+
+def test_first_sight_fresh_marker_still_wakes_the_human():
+    """反向鎖：首見且 marker 在一個 run interval 內推進過 → 真的還在燒，必須寄。"""
+    fresh = (NOW - timedelta(hours=dr.DREAMING_RUN_INTERVAL_HOURS - 1)).isoformat()
+    f = _first_sight(fresh)
+    dr.reconcile([f], {}, NOW)
+    assert f.quiescent is False
+    assert dr.needs_human_attention(f) is True
+
+
+def test_first_sight_unparseable_marker_fails_toward_notifying():
+    """marker 壞掉時不敢判 quiescent —— 靜音的代價比多吵一次高。"""
+    f = _first_sight("not-a-timestamp")
+    dr.reconcile([f], {}, NOW)
+    assert f.quiescent is False
+    assert dr.needs_human_attention(f) is True
+
+
+def test_first_sight_without_marker_is_never_quiescent():
+    """沒有 activity_marker 的 detector（多數）行為完全不變。"""
+    f = _first_sight(None, sig="persistent_alert:nomarker")
+    dr.reconcile([f], {}, NOW)
+    assert f.quiescent is False
+
+
+def test_first_sight_quiescent_finding_does_not_trip_the_email_gate(monkeypatch, tmp_path):
+    """端到端：整份報告只有一個首見即停火的 finding → 那封信不會寄。"""
+    storage = _storage(tmp_path)
+    sent: list = []
+    monkeypatch.setattr(
+        "volpred.ops.alerts.send_alert", lambda *a, **k: sent.append(1) or {"sent": True}
+    )
+    stale = (NOW - timedelta(hours=dr.DREAMING_RUN_INTERVAL_HOURS + 1)).isoformat()
+    monkeypatch.setattr(dr, "DETECTORS", [lambda s, snap, now: [_first_sight(stale)]])
+    rc = dr.main(storage_dir=str(storage), dry_run=False, apply_auto=False, now=NOW)
+    assert rc == 0
+    assert sent == [], "首見即停火 → actionable_new=0 → 不寄"
+
+
+def test_quiescence_has_a_single_owner():
+    """三種證據來源都走同一個判準函式；reconcile 不得自己再算一套。"""
+    src = (Path(__file__).resolve().parents[1] / "scripts" / "dreaming_review.py").read_text(
+        encoding="utf-8"
+    )
+    body = src.split("def reconcile(", 1)[1].split("\ndef ", 1)[0]
+    assert body.count("_is_quiescent(") == 2, "兩條分支都要委派給 owner"
+    assert "prev_marker ==" not in body, "quiescent 判定不得散回 reconcile（anti-stacking）"

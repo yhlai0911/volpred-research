@@ -155,6 +155,22 @@ run_merge_from_cwd() {
     (cd "$run_cwd" && bash "$test_dir/scripts/merge_worktree.sh" "$@" 2>&1) || true
 }
 
+# 2026-07-19: 跑腳本並保留 exit code（既有 helper 都用 `|| true` 吞掉 rc，
+# 但 case 20 的成功判準就是「必須非 0 退出」）。
+# 注意：呼叫端是 `output=$(run_merge_capture_rc ...)`，函式跑在 command-substitution
+# 的 subshell 裡 → 任何 shell 變數賦值都回不到 parent。所以 rc 走檔案傳遞，
+# 用 last_merge_rc 讀取。
+run_merge_capture_rc() {
+    local test_dir="$1"
+    shift
+    local rc=0
+    (cd "$test_dir" && bash "$test_dir/scripts/merge_worktree.sh" "$@") \
+        > "$TMP_BASE/last_run.out" 2>&1 || rc=$?
+    printf '%s' "$rc" > "$TMP_BASE/last_run.rc"
+    cat "$TMP_BASE/last_run.out"
+}
+last_merge_rc() { cat "$TMP_BASE/last_run.rc" 2>/dev/null || echo "NORC"; }
+
 # ============================================================
 # Test Case A: untracked experiments/ 無 commit → auto-commit + merge
 # ============================================================
@@ -1122,6 +1138,125 @@ test_case_19_foreign_staged_index_aborts_unchanged() {
 }
 
 
+# ============================================================
+# Test Case 20 (2026-07-19 SCOPE FIX): 成果只在 storage/、auto-commit 沒抓到
+# → 必須 ABORT（非 0 exit），不得印「可安全移除」、不得移除 worktree
+#
+# 這是 2026-07-17 hourly-slot-2 合併 dispatch-slot-1 時發現的失效路徑：K1262-v4 PRIMARY
+# 與 K1143-v2 兩層防線都只掃 worktree 的 experiments/，但 agent 成果早就不只放那裡。
+# 成果全在 storage/event_articles/ + auto-commit 沒捕捉到 → rev-list=0 且 experiments/
+# 是空的 → 舊版直接走「[OK] …experiments/ 也空，可安全移除」→ 未合併就砍 worktree。
+# 那次沒出事只是因為 auto-commit 剛好正常且 branch 還在。
+# ============================================================
+test_case_20_storage_only_work_autocommit_failed() {
+    echo "=== Case 20: 成果只在 storage/ + auto-commit 失效 → 必須 ABORT ==="
+    local test_dir
+    test_dir=$(setup_test_env "case20")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase20"
+
+    # Agent 成果全部在 storage/ —— 完全不碰 experiments/（= 舊防線的盲區）
+    mkdir -p "$wt/storage/event_articles"
+    echo "# 事件文章：CPI 跳升" > "$wt/storage/event_articles/cpi_20260717.md"
+    echo '{"kid": "evt1"}' > "$wt/storage/event_articles/cpi_20260717.json"
+
+    # Mock「auto-commit 沒有捕捉到 agent 成果」：
+    # 用 .git/info/exclude（位於 git-common-dir，linked worktree 共用）把成果路徑藏起來，
+    # 於是 worktree 內 `git status --porcelain` 是乾淨的 → 腳本判定 has_uncommitted=false
+    # → 根本不會觸發 auto-commit → rev-list=0。這正是 line 189 auto-commit 靜默沒生效
+    # 時的實際狀態，也是 K1143-v2 註解自己列出的成因之一（「gitignore 吃掉檔案」）。
+    echo "storage/event_articles/" >> "$test_dir/.git/info/exclude"
+
+    # sanity：確認 mock 真的生效，否則這個測試測不到目標路徑
+    if [[ -n "$(cd "$test_dir/$wt" && git status --porcelain)" ]]; then
+        fail "20-0: mock 失效 — git status 仍看得到成果，測不到 rev-list=0 路徑"
+        return
+    fi
+
+    local output rc
+    output=$(run_merge_capture_rc "$test_dir")
+    rc=$(last_merge_rc)
+
+    if [[ "$rc" != "0" ]] && [[ "$rc" != "NORC" ]]; then
+        pass "20-1: script 非 0 退出 (rc=$rc)"
+    else
+        fail "20-1: script exit 0 —— 未合併的成果被當成一次成功的整合"
+    fi
+
+    if echo "$output" | grep -q "ABORT"; then
+        pass "20-2: 印出 ABORT"
+    else
+        fail "20-2: 沒有 ABORT"
+        echo "$output" | tail -25
+    fi
+
+    if echo "$output" | grep -q "可安全移除"; then
+        fail "20-3: 竟宣告「可安全移除」（storage-only 盲區重現）"
+    else
+        pass "20-3: 未宣告「可安全移除」"
+    fi
+
+    # 最關鍵：成果檔與 worktree 必須都還在
+    if [[ -f "$test_dir/$wt/storage/event_articles/cpi_20260717.md" ]]; then
+        pass "20-4: worktree 成果檔仍在（無 silent data loss）"
+    else
+        fail "20-4: 成果檔遺失 — worktree 未合併就被移除 (silent data loss!)"
+    fi
+
+    if git worktree list --porcelain | grep -q "agent-testcase20"; then
+        pass "20-5: worktree 仍註冊（未被移除）"
+    else
+        fail "20-5: worktree 已被移除"
+    fi
+
+    # ABORT 訊息要指得出是哪個檔，否則人工復原無從下手
+    if echo "$output" | grep -q "storage/event_articles/cpi_20260717.md"; then
+        pass "20-6: ABORT 訊息列出具體檔案路徑"
+    else
+        fail "20-6: ABORT 訊息沒列出檔案路徑"
+    fi
+}
+
+# ============================================================
+# Test Case 21 (2026-07-19): --dry-run 不得自相矛盾
+# 舊版 dry-run 不真的 commit → rev-list 必然 0 → 同時印「會自動提交」與
+# 「可安全移除」，讓人誤判 worktree 是空的。
+# ============================================================
+test_case_21_dryrun_no_contradiction() {
+    echo "=== Case 21: --dry-run 訊息不自相矛盾 ==="
+    local test_dir
+    test_dir=$(setup_test_env "case21")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase21"
+    mkdir -p "$wt/storage/drafts"
+    echo "draft body" > "$wt/storage/drafts/d1.md"
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir" --dry-run)
+
+    if echo "$output" | grep -q "會自動提交" && echo "$output" | grep -q "可安全移除"; then
+        fail "21-1: dry-run 自相矛盾（同時宣稱會自動提交 + 可安全移除）"
+        echo "$output" | tail -25
+    else
+        pass "21-1: dry-run 無自相矛盾訊息"
+    fi
+
+    if echo "$output" | grep -q "會自動提交"; then
+        pass "21-2: dry-run 有回報「會自動提交」"
+    else
+        fail "21-2: dry-run 沒回報未提交變更"
+    fi
+
+    if [[ -f "$test_dir/$wt/storage/drafts/d1.md" ]]; then
+        pass "21-3: dry-run 未動 worktree 檔案"
+    else
+        fail "21-3: dry-run 竟動到 worktree 檔案"
+    fi
+}
+
+
 test_case_a
 echo ""
 test_case_b
@@ -1161,12 +1296,17 @@ test_case_18_unrelated_dirty_main_merges_in_place
 echo ""
 test_case_19_foreign_staged_index_aborts_unchanged
 echo ""
+test_case_20_storage_only_work_autocommit_failed
+echo ""
+test_case_21_dryrun_no_contradiction
+echo ""
 
 echo "================================"
 echo "Assertions PASS: $PASS"
 echo "Assertions FAIL: $FAIL"
-# Test case-level summary（19 cases；17/18/19 pin multi-slot dirty-main/index contract）
-TOTAL_CASES=19
+# Test case-level summary（21 cases；17/18/19 pin multi-slot dirty-main/index contract；
+# 20/21 pin the 2026-07-19 scope fix: 安全網掃全樹、dry-run 不自相矛盾）
+TOTAL_CASES=21
 if [[ $FAIL -eq 0 ]]; then
     echo "Test cases: PASS $TOTAL_CASES/$TOTAL_CASES"
 else

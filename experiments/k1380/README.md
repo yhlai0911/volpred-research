@@ -1,5 +1,52 @@
 # K1380 — Paper 9 White RC / Hansen SPA Test for 17-Spec Horse Race
 
+## STATUS: 2026-07-16 run DISCARDED (loss function was reversed) — re-run queued 2026-07-17
+
+The 2026-07-16 run reported that **no VIX-augmented spec beats GJR after multiple-testing
+correction** (SPA $p=1.000$, White RC on A4f $t=-0.272$, GJR lowest mean QLIKE 623.7). That
+conclusion was an artifact and **must not be cited or written into Paper 9**.
+
+**Root cause.** `k1380.py`'s `qlike()` computed the ratio as $\hat\sigma^2/r^2$ instead of
+$r^2/\hat\sigma^2$. Patton's (2011) proxy-robust QLIKE is
+$r^2/\hat\sigma^2 - \log(r^2/\hat\sigma^2) - 1$, which is rank-equivalent to the canonical
+$\log\hat\sigma^2 + r^2/\hat\sigma^2$ used in `paper/garch-x-vix/reproduce.py:927`. The reversed
+form is a different loss and is **not robust**: under $r^2 = \sigma^2\chi^2_1$, $E[1/r^2]$
+diverges, so its expectation is minimized by shrinking $\hat\sigma^2 \to 0$. It mechanically
+rewards under-forecasting.
+
+Verified numerically (2026-07-17, 400k draws, forecasts $= c \cdot \sigma^2_{\text{true}}$):
+
+| $c$ | robust $r^2/\hat\sigma^2$ | reversed $\hat\sigma^2/r^2$ |
+|---|---|---|
+| 1.00 (truth) | **1.271** (min) | 559,680 |
+| 0.50 | 1.578 | 279,840 |
+| 0.10 | 7.968 | 55,968 |
+| 0.02 | 46.356 | 11,195 |
+
+The robust loss is minimized at the truth; the reversed loss falls monotonically as forecasts
+shrink. GJR — which never receives VIX spikes and therefore forecasts lowest — wins by
+construction. Three corroborating symptoms, all consistent with this and with nothing else:
+
+1. **Scale.** Mean QLIKE $\approx 620$–$740$, versus $\approx 1.4$ for the same proxy, same OOS
+   window, same $n=1{,}852$ in the paper's own K1379 run (`main.tex`, HAR-benchmark subsection).
+   Loss max was $4.1\times10^8$ — the mean is dominated by near-zero-$r^2$ days.
+2. **Lost power.** A4f vs.\ GJR gave $t=-0.272$ here but $t=-4.37$ ($p=1.3\times10^{-5}$) in
+   K1379 on the identical sample. Noise from tiny-$r^2$ days swamped the signal, so SPA/RC
+   failing to reject is a power artifact, not evidence of no effect.
+3. **Bogus exclusions.** A5/C2/C3 were dropped as "numerically divergent" on mean QLIKE
+   255,122 / 9,349 / 3,904. Those are the specs with the *highest* forecasts — exactly what the
+   reversed loss punishes hardest. Their convergence must be re-assessed, not assumed.
+
+**Artifacts from that run are archived, not deleted** (`*_INVALID_20260716.*`).
+`k1380_losses_all_INVALID_20260716.npy` caches the *wrong* loss and cannot be repaired
+arithmetically ($x - \log x - 1$ is not injective), so `k1380_spa_from_cache_INVALID_20260716.py`
+is dead — the OOS forecasts have to be re-fitted. `k1380.py:647` is fixed and the re-run is in
+the compute queue; the Paper 9 "Multiple Testing" subsection waits on its output.
+
+Both possible outcomes are publishable: the multiple-testing correction either upholds the
+paper's A4f-over-GJR claim or overturns it. What is not acceptable is deciding it with a loss
+that rewards forecasting zero.
+
 ## Motivation
 
 Paper 9 (garch-x-vix) review v3 identified C3 (CRITICAL):

@@ -83,6 +83,40 @@ AGENT_BRIEF_DIR = ROOT / "storage" / "ops" / "agent_briefs"
 AGENT_DEFAULT_TIMEOUT = 5400  # 90 min
 AGENT_TIMEOUT_GRACE = 120
 
+# Scheduling priority (lower runs first). The queue used to be pure FIFO, which
+# is the right default only when every job costs the same. It does not: a
+# lazypack render is a few minutes and it is the last thing standing between a
+# finished draft and a reader, while a GARCH multistart or a research agent is
+# 60-90 minutes and nobody is waiting on the minute. FIFO put the reader behind
+# the compute (observed 2026-07-19: two general drafts skipped 20 release cycles
+# each). Priority restores the ordering that matters — release-blocking work
+# first, everything else in arrival order behind it.
+DEFAULT_QUEUE_PRIORITY = 5
+RELEASE_BLOCKING_PRIORITY = 1
+# Job-id prefixes whose completion unblocks a reader-facing release gate.
+RELEASE_BLOCKING_JOB_PREFIXES = ("lazypack-",)
+
+
+def _default_queue_priority(job_id: str) -> int:
+    """Priority for a job that did not declare one.
+
+    Derived from the id rather than stored per-caller so that jobs queued
+    before this field existed are scheduled correctly too — the alternative
+    (backfilling every queue file) would have to be re-run for every job that
+    a stale code path enqueues without the field.
+    """
+    if any(str(job_id).startswith(p) for p in RELEASE_BLOCKING_JOB_PREFIXES):
+        return RELEASE_BLOCKING_PRIORITY
+    return DEFAULT_QUEUE_PRIORITY
+
+
+def _scheduling_priority(job: dict) -> int:
+    """Effective run order key for a queued job; lower runs first."""
+    declared = job.get("queue_priority")
+    if isinstance(declared, int) and not isinstance(declared, bool):
+        return declared
+    return _default_queue_priority(str(job.get("id") or ""))
+
 # Quota re-queue. A quota-class death is not a failure of the work: the CLI
 # answers "You've hit your session limit · resets 10:20pm" in about five seconds
 # and the agent never exists. Nothing ran, nothing was spent, the worktree is
@@ -559,6 +593,11 @@ def enqueue(args) -> int:
         "args": args.script_args or [],
         "env": dict(kv.split("=", 1) for kv in (args.env or [])),
         "status": "queued",
+        "queue_priority": (
+            args.queue_priority
+            if isinstance(getattr(args, "queue_priority", None), int)
+            else _default_queue_priority(job_id)
+        ),
         "queued_at": utc_now(),
         "started_at": None,
         "completed_at": None,
@@ -737,6 +776,7 @@ def enqueue_agent(args) -> int:
         followup_brief=args.followup_brief,
         followup_task_type=args.followup_task_type,
         followup_priority=args.followup_priority,
+        queue_priority=getattr(args, "queue_priority", None),
         timeout=outer_timeout,
         brief_source=str(brief_path),
         brief_snapshot=str(frozen_brief),
@@ -1141,13 +1181,15 @@ def run_next(args) -> int:
                 # same five seconds against the same wall.
                 sleeping += 1
                 continue
-            queued.append((j.get("queued_at", ""), p, j))
+            queued.append((_scheduling_priority(j), j.get("queued_at", ""), p, j))
         if not queued:
             print(f"no queued jobs ready ({sleeping} waiting on not_before)"
                   if sleeping else "no queued jobs")
             return 0
+        # Priority first, arrival order within a priority: a release-blocking
+        # render no longer waits out a 90-minute agent that arrived first.
         queued.sort()
-        _, job_path, job = queued[0]
+        _prio, _, job_path, job = queued[0]
 
         # Mark running
         job["status"] = "running"
@@ -1490,6 +1532,7 @@ def main():
     e.add_argument("--followup-brief")
     e.add_argument("--followup-task-type")
     e.add_argument("--followup-priority", type=int)
+    e.add_argument("--queue-priority", type=int, help="Scheduling priority; lower runs first. Default 1 for release-blocking (lazypack-*) jobs, 5 otherwise.")
     e.add_argument("--timeout", type=int)
     e.add_argument("--timeout-parent-job-id")
     e.add_argument("--split-stage")
@@ -1517,6 +1560,7 @@ def main():
     ea.add_argument("--followup-brief")
     ea.add_argument("--followup-task-type")
     ea.add_argument("--followup-priority", type=int)
+    ea.add_argument("--queue-priority", type=int, help="Scheduling priority; lower runs first. Default 1 for release-blocking (lazypack-*) jobs, 5 otherwise.")
     ea.add_argument("--timeout", type=int)
     ea.add_argument("--timeout-parent-job-id")
     ea.add_argument("--split-stage")

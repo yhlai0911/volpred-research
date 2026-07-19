@@ -13,6 +13,14 @@ Run modes:
 Drift fields checked: mode, interval_minutes, max_articles_per_run, due_only,
 include_drafts, preferred_audiences, last_released_at.
 
+Beyond field drift (added 2026-07-19, R4), two checks that exit 1 because
+nothing downstream repairs them:
+- cadence: the real trigger cadence (LaunchAgent plist, plus any crontab entry
+  driving the pool) must be at least as frequent as interval_minutes, or the
+  configured rate is unreachable and a fallback is silently carrying it.
+- starved drafts: any draft/scheduled article the release loop has skipped more
+  than five times.
+
 Hook: suitable for hourly piggy-back via run_due_jobs (add an entry to
 config/runtime_schedules.json with cron='17 */6 * * *' if frequent audit needed).
 """
@@ -113,6 +121,136 @@ def _push_fix(local: dict) -> bool:
         return False
 
 
+_RELEASE_PLIST = "com.volpred.release-pool.plist"
+_RELEASE_CRON_MARKERS = ("cron_release_pool.sh", "release-pool", "release_pool")
+_STARVED_SKIP_THRESHOLD = 5
+
+
+def _launchagent_gap_minutes() -> tuple[int | None, list[str]]:
+    """Largest gap (minutes) between consecutive release-pool LaunchAgent fires."""
+    import plistlib
+
+    path = Path.home() / "Library" / "LaunchAgents" / _RELEASE_PLIST
+    if not path.exists():
+        return None, []
+    try:
+        plist = plistlib.loads(path.read_bytes())
+    except Exception as exc:  # noqa: BLE001
+        _warn_audit("release-pool plist unreadable", path=path, exc=exc)
+        return None, []
+
+    if isinstance(plist.get("StartInterval"), int):
+        secs = int(plist["StartInterval"])
+        return secs // 60, [f"StartInterval={secs}s"]
+
+    entries = plist.get("StartCalendarInterval") or []
+    if isinstance(entries, dict):
+        entries = [entries]
+    minutes: list[int] = []
+    for e in entries:
+        if not isinstance(e, dict) or "Hour" not in e:
+            # A calendar entry without an Hour fires every hour; cadence is then
+            # at most 60min and never the binding constraint here.
+            return 60, ["hourly calendar entry"]
+        minutes.append(int(e["Hour"]) * 60 + int(e.get("Minute") or 0))
+    if not minutes:
+        return None, []
+    minutes.sort()
+    if len(minutes) == 1:
+        return 24 * 60, [f"single daily fire at {minutes[0] // 60:02d}:{minutes[0] % 60:02d}"]
+    gaps = [b - a for a, b in zip(minutes, minutes[1:])]
+    gaps.append(minutes[0] + 24 * 60 - minutes[-1])  # wrap past midnight
+    labels = [f"{m // 60:02d}:{m % 60:02d}" for m in minutes]
+    return max(gaps), [f"LaunchAgent fires at {', '.join(labels)}"]
+
+
+def _crontab_release_lines() -> list[str]:
+    import subprocess
+
+    try:
+        out = subprocess.run(["crontab", "-l"], capture_output=True, text=True, timeout=10)
+    except Exception as exc:  # noqa: BLE001
+        # 空 list 與「crontab 真的沒有 release line」無法區分 —— 不講出來，
+        # audit 就會把「查不到」報成「沒有」。
+        from volpred.ops.diagnostics import warn
+
+        warn(f"crontab -l 執行失敗，本次 audit 略過 crontab 來源：{exc}")
+        return []
+    if out.returncode != 0:
+        return []
+    return [
+        line.strip()
+        for line in (out.stdout or "").splitlines()
+        if any(m in line for m in _RELEASE_CRON_MARKERS) and not line.strip().startswith("#")
+    ]
+
+
+def _cadence_check(local: dict) -> dict:
+    """Does the real trigger cadence actually honour interval_minutes?
+
+    2026-07-19 R4 (boss 20:14): this audit only compared settings fields, so it
+    printed `ok` for nine hours while the pool released nothing. The reason was
+    never a drifted field — the LaunchAgent fires every 6h while
+    interval_minutes says 4h, so the documented cadence was unreachable and the
+    hourly check_alerts fallback was quietly carrying the whole release rate. An
+    audit that cannot see its own trigger is checking the map, not the road.
+    """
+    interval = local.get("interval_minutes")
+    gap, notes = _launchagent_gap_minutes()
+    cron_lines = _crontab_release_lines()
+    result: dict = {
+        "interval_minutes": interval,
+        "launchagent_max_gap_minutes": gap,
+        "trigger_notes": notes,
+        "crontab_release_entries": cron_lines,
+        "ok": True,
+    }
+    if not isinstance(interval, int) or gap is None:
+        result["status"] = "unknown"
+        return result
+    if cron_lines:
+        # A crontab entry that also drives the pool tightens the real cadence;
+        # its schedule is not parsed here, so do not claim misalignment.
+        result["status"] = "cron_present_not_parsed"
+        return result
+    if gap > interval:
+        result["ok"] = False
+        result["status"] = "cadence_misaligned"
+        result["detail"] = (
+            f"trigger fires at most every {gap}min but interval_minutes="
+            f"{interval}min — the configured cadence is unreachable on the "
+            f"regular path; anything above that rate is coming from a fallback"
+        )
+    else:
+        result["status"] = "aligned"
+    return result
+
+
+def _starved_drafts(limit: int = 10) -> list[dict]:
+    """Drafts the release loop keeps skipping — the symptom R4 could not see."""
+    feed_path = PROJECT_ROOT / "storage" / "reports" / "feed.json"
+    if not feed_path.exists():
+        return []
+    try:
+        feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        _warn_audit("feed read failed; starved-draft check skipped", path=feed_path, exc=exc)
+        return []
+    starved = []
+    for item in feed if isinstance(feed, list) else []:
+        if not isinstance(item, dict) or item.get("status") not in ("draft", "scheduled"):
+            continue
+        skips = ((item.get("details") or {}).get("release_audit_skipped_count")) or 0
+        if isinstance(skips, int) and skips > _STARVED_SKIP_THRESHOLD:
+            starved.append({
+                "id": item.get("id"),
+                "title": str(item.get("title") or "")[:60],
+                "skipped": skips,
+            })
+    starved.sort(key=lambda x: -x["skipped"])
+    return starved[:limit]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fix", action="store_true", help="Push local → Supabase if drift detected")
@@ -125,17 +263,20 @@ def main() -> int:
         print(json.dumps(report) if args.json else "[audit] no local .release_settings.json")
         return 0
 
+    # Two checks that do not depend on Supabase being reachable, and that the
+    # settings-only audit was structurally blind to (2026-07-19 R4).
+    cadence = _cadence_check(local)
+    starved = _starved_drafts()
+
     remote = _load_remote()
     if remote is None:
         report = {"status": "no_remote_row", "ok": False, "local_keys": sorted(local.keys())}
-        print(json.dumps(report) if args.json else "[audit] supabase content_release_settings.id=default missing")
-        return 0
+        return _emit(report, cadence, starved, args)
 
     drift = _diff(local, remote)
     if not drift:
         report = {"status": "ok", "ok": True, "checked_fields": list(_AUDIT_FIELDS)}
-        print(json.dumps(report) if args.json else "[audit] release_settings local↔Supabase aligned")
-        return 0
+        return _emit(report, cadence, starved, args)
 
     report = {
         "status": "drift",
@@ -155,15 +296,49 @@ def main() -> int:
             report["drift_after_fix"] = len(remaining)
             report["status"] = "fixed" if not remaining else "drift_after_fix"
 
-    if args.json:
-        print(json.dumps(report, ensure_ascii=False))
-    else:
+    if not args.json:
         print(f"[audit] DRIFT detected: {len(drift)} field(s)")
         for entry in drift:
             print(f"  - {entry['field']}: local={entry['local']!r} remote={entry['remote']!r}")
         if args.fix:
             print(f"[audit] fix_attempted={report.get('fix_attempted')} fix_ok={report.get('fix_ok')}")
-    return 0
+    return _emit(report, cadence, starved, args)
+
+
+def _emit(report: dict, cadence: dict, starved: list[dict], args) -> int:
+    """Print the report and decide the exit code.
+
+    Field drift stays exit 0 (it has always been observability, and a --fix run
+    repairs it). A cadence that cannot reach the configured interval, or drafts
+    the loop has skipped more than five times, are different: nothing downstream
+    repairs them, and both were invisible until now. They fail.
+    """
+    report["cadence"] = cadence
+    report["starved_drafts"] = starved
+    blocking = (not cadence.get("ok", True)) or bool(starved)
+    if blocking:
+        report["ok"] = False
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False))
+    else:
+        if report.get("status") == "ok":
+            print("[audit] release_settings local↔Supabase aligned")
+        elif report.get("status") == "no_remote_row":
+            print("[audit] supabase content_release_settings.id=default missing")
+        if not cadence.get("ok", True):
+            print(f"[audit] CADENCE FAIL: {cadence.get('detail')}")
+            for note in cadence.get("trigger_notes") or []:
+                print(f"  - {note}")
+        elif cadence.get("status") == "aligned":
+            print(f"[audit] cadence ok (max gap "
+                  f"{cadence['launchagent_max_gap_minutes']}min <= "
+                  f"interval {cadence['interval_minutes']}min)")
+        if starved:
+            print(f"[audit] STARVED DRAFTS: {len(starved)} skipped >"
+                  f"{_STARVED_SKIP_THRESHOLD} times")
+            for d in starved:
+                print(f"  - {d['id']} skipped={d['skipped']} {d['title']}")
+    return 1 if blocking else 0
 
 
 if __name__ == "__main__":

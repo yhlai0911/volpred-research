@@ -3,6 +3,10 @@
 This script indexes ALL research artifacts into a single searchable vector database,
 enabling semantic retrieval of knowledge, thinking patterns, experiments, and more.
 
+EMBED_PROVIDER defaults to "openai". The "gemini" branch hits the PAID Gemini API
+and is blocked per boss msg936 (2026-07-17) unless VOLPRED_ALLOW_PAID_GEMINI=1 —
+see PaidGeminiDisabled / _guard_paid_gemini_embeddings().
+
 Usage:
     # Build/rebuild the full index (re-embeds everything)
     uv run python scripts/build_knowledge_index.py build
@@ -80,6 +84,37 @@ class MissingEmbeddingCredentials(RuntimeError):
     """
 
 
+class PaidGeminiDisabled(RuntimeError):
+    """`EMBED_PROVIDER=gemini` was requested but the PAID Gemini API is off.
+
+    Boss msg936 (2026-07-17) turned off the paid Gemini API; `gemini_ask.py`
+    got the same break-glass guard. Embeddings are the residual paid surface:
+    agy is a chat CLI and cannot serve `gemini-embedding-001`, so there is no
+    free substitute — the only options are the (default) OpenAI provider or an
+    explicit override.
+
+    Raised, never `sys.exit()`, for the reason spelled out in
+    `MissingEmbeddingCredentials`: this is library code reached from the
+    publisher's fail-open semantic-duplicate path, and `SystemExit` escapes
+    `except Exception`.
+    """
+
+
+def _guard_paid_gemini_embeddings() -> None:
+    """Block the paid Gemini embedding provider unless explicitly unblocked.
+
+    Placed at the provider boundary in `get_client()` so both CLI and
+    import-based callers hit it before any billable request is issued.
+    """
+    if os.environ.get("VOLPRED_ALLOW_PAID_GEMINI") == "1":
+        return
+    raise PaidGeminiDisabled(
+        "EMBED_PROVIDER=gemini hits the PAID Gemini API, disabled per boss "
+        "msg936. Use the default EMBED_PROVIDER=openai, or set "
+        "VOLPRED_ALLOW_PAID_GEMINI=1 to override."
+    )
+
+
 def get_client():
     _load_env()
     if EMBED_PROVIDER == "openai":
@@ -91,6 +126,7 @@ def get_client():
             )
         return openai.OpenAI(api_key=api_key)
     else:
+        _guard_paid_gemini_embeddings()
         from google import genai
         api_key = (
             os.environ.get("GEMINI_API_KEY")

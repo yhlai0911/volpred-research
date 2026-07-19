@@ -58,6 +58,7 @@ from volpred.ops.next_tasks import (  # noqa: E402
     write_tasks_to_handle,
 )
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
+from volpred.ops import dreaming_revalidate  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
@@ -190,6 +191,34 @@ def _is_codex_eligible_task(task: dict[str, Any]) -> bool:
         .lower()
     )
     return preferred_agent == "codex"
+
+
+def _revalidate_dreaming_before_claim(
+    task: dict[str, Any], *, owner: str
+) -> dict[str, Any] | None:
+    """Refuse a dreaming claim whose condition dissolved since the night it was seen.
+
+    A dreaming task is a snapshot. On 2026-07-17 four `orphaned_experiment` tasks
+    were dispatched three days after `kb_backfill_unrecorded_experiments` had already
+    written the knowledge entries they existed to demand — an agent following the
+    description literally writes DUPLICATES. Re-running the finding's own detector
+    here closes it as a fresh no-op instead, the same guard alerts already have.
+
+    Returns None for every task with no verdict (non-dreaming, unregistered pattern,
+    check failed, condition still true) — silence means dispatch as before.
+    """
+    verdict = dreaming_revalidate.revalidate(task)
+    if verdict is None or not verdict.cleared:
+        return None
+    dreaming_revalidate.close_as_cleared(task, verdict, by=owner, now=_now())
+    return {
+        "ok": False,
+        "reason": dreaming_revalidate.CLEARED_REASON,
+        "task_id": _task_key(task),
+        "pattern_type": verdict.pattern_type,
+        "detail": verdict.detail,
+        "status": "succeeded",
+    }
 
 
 def _expire_managed_event_before_claim(
@@ -461,6 +490,9 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
             deadline_result = _expire_managed_event_before_claim(task, owner=args.owner)
             if deadline_result is not None:
                 return deadline_result
+            dreaming_result = _revalidate_dreaming_before_claim(task, owner=args.owner)
+            if dreaming_result is not None:
+                return dreaming_result
         if _is_codex_owner(args.owner) and not _is_codex_eligible_task(task):
             return {
                 "ok": False,

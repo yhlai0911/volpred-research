@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import json
 import sys
@@ -913,3 +914,76 @@ def test_burst_fire_request_is_intercepted_not_written_to_canonical_state(
 
     assert result == {"requested": True, "pending_left": 3}
     assert burst_fire_requests == ["burst:K9999_example"]
+
+
+def _dreaming_orphan_task(kid: str = "k1697") -> dict:
+    return {
+        "id": f"dreaming_orphaned_experiment_{kid}",
+        "title": f"[dreaming] orphaned_experiment:{kid}",
+        "status": "pending",
+        "source": "dreaming",
+        "task_type": "experiment",
+        "dreaming": {
+            "signature": f"orphaned_experiment:{kid}",
+            "pattern_type": "orphaned_experiment",
+        },
+    }
+
+
+def test_claim_refuses_dreaming_task_whose_condition_already_cleared(
+    tmp_path, monkeypatch
+) -> None:
+    """A dissolved snapshot is closed as a no-op instead of being dispatched.
+
+    2026-07-17: four orphaned_experiment tasks were claimed and worked three days
+    after backfill had already written the knowledge entries they demanded. An
+    agent obeying the stale description writes duplicate entries.
+    """
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(json.dumps([_dreaming_orphan_task()]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    from volpred.ops import dreaming_revalidate as dr
+
+    monkeypatch.setattr(
+        dr,
+        "revalidate",
+        lambda task, storage_dir=None: dr.Revalidation(
+            "orphaned_experiment", True, dr.CLEARED_REASON, "k1697 consumed by knowledge.json"
+        ),
+    )
+
+    result = task_pool_claim.cmd_claim(
+        argparse.Namespace(id="dreaming_orphaned_experiment_k1697", owner="hourly-slot-4", session="s1")
+    )
+
+    assert result["ok"] is False
+    assert result["reason"] == "dreaming_condition_cleared"
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "succeeded"
+    assert saved[0]["claimed_by"] is None
+    assert "fresh no-op" in saved[0]["result"]
+
+
+def test_claim_proceeds_when_dreaming_condition_still_holds(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(json.dumps([_dreaming_orphan_task("k1800")]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    from volpred.ops import dreaming_revalidate as dr
+
+    monkeypatch.setattr(
+        dr,
+        "revalidate",
+        lambda task, storage_dir=None: dr.Revalidation(
+            "orphaned_experiment", False, "still_orphaned", "k1800 has no downstream consumer"
+        ),
+    )
+
+    result = task_pool_claim.cmd_claim(
+        argparse.Namespace(id="dreaming_orphaned_experiment_k1800", owner="hourly-slot-4", session="s1")
+    )
+
+    assert result["ok"] is True
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "claimed"

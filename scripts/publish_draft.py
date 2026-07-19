@@ -1515,6 +1515,11 @@ def main() -> int:
                         help="bypass the 懶人包圖組 (lazypack) requirement for "
                              "audience=general (use only for genuinely non-reader "
                              "pieces; default enforces .claude/rules/publishing.md §4)")
+    parser.add_argument("--lazypack-plan",
+                        help="evidence-bound plan.json for the 懶人包圖組. For a "
+                             "general draft/scheduled publish the async render is "
+                             "enqueued immediately after publish; an enqueue "
+                             "failure is a hard error, not a printed reminder.")
     parser.add_argument("--dry-run", action="store_true",
                         help="print metadata + sanitize report; do not invoke CLI")
 
@@ -1844,7 +1849,98 @@ def main() -> int:
         print(f"[publish_draft] stderr: {result.stderr[-700:]}", file=sys.stderr)
     if result.returncode == 0:
         _refresh_publication_candidates_after_feed_change("new_publish")
+        rc_lz = _settle_deferred_lazypack(
+            stdout=result.stdout or "",
+            body=body,
+            audience=audience,
+            status=status,
+            plan=getattr(args, "lazypack_plan", None),
+            bypass=getattr(args, "no_lazypack_gate", False),
+        )
+        if rc_lz != 0:
+            return rc_lz
     return result.returncode
+
+
+def _settle_deferred_lazypack(
+    *, stdout: str, body: str, audience: str, status: str,
+    plan: str | None, bypass: bool,
+) -> int:
+    """Close the obligation a deferred lazypack creates, at the moment it is created.
+
+    2026-07-19 (boss 20:14「為什麼文章沒有照排程釋出」): a draft published
+    without a 懶人包圖組 only got a *printed reminder* to enqueue the render
+    later. Two drafts — mile_21e45133, mile_47c4bc3e — were published against
+    that reminder and no render was ever queued; each then skipped 20 release
+    cycles while the release gate told humans to inspect a job id that did not
+    exist. A reminder addressed to whoever reads stdout is not an owner.
+
+    So: if a plan was supplied, the enqueue happens HERE and a failure is loud
+    and non-zero rather than a line of scrollback. With no plan there is
+    nothing to queue — that is a writer omission, and it is recorded on the
+    diagnostics channel so it shows up in an audit instead of only in a log
+    nobody re-reads. The release gate (content._lazypack_gate_issue) reports the
+    same gap truthfully and auto-enqueues the moment a plan lands.
+    """
+    if bypass or audience != "general":
+        return 0
+    try:
+        src_dir = ROOT / "src"
+        if str(src_dir) not in sys.path:
+            sys.path.insert(0, str(src_dir))
+        from volpred.publisher.publisher import (  # noqa: WPS433
+            has_lazypack_section,
+            lazypack_required_at,
+        )
+
+        if has_lazypack_section(body) or lazypack_required_at(status):
+            return 0  # already has one, or the publish-time gate already ruled
+        match = re.search(r"mile_[0-9a-f]{6,}", stdout)
+        if not match:
+            print("[publish_draft] LAZYPACK FOLLOW-UP: published but could not "
+                  "read the article id back from publish-milestone output; "
+                  "enqueue the render manually.", file=sys.stderr)
+            return 0
+        article_id = match.group(0)
+
+        if not plan:
+            from volpred.ops.diagnostics import warn  # noqa: WPS433
+
+            warn(
+                "lazypack_never_enqueued",
+                "general draft published with no lazypack plan; render was "
+                "never queued and the draft cannot be released until it is",
+                article_id=article_id,
+            )
+            print(f"[publish_draft] LAZYPACK NOT QUEUED for {article_id}: no "
+                  f"--lazypack-plan was given. The draft will NOT release until "
+                  f"a plan exists. Author one (lazypack-infographic skill), then: "
+                  f"uv run python scripts/lazypack_async_render.py enqueue "
+                  f"--article-id {article_id} --plan <plan.json>", file=sys.stderr)
+            return 0
+
+        proc = subprocess.run(
+            ["uv", "run", "python", "scripts/lazypack_async_render.py", "enqueue",
+             "--article-id", article_id, "--plan", plan],
+            capture_output=True, text=True, timeout=180,
+        )
+        if proc.returncode == 0:
+            print(f"[publish_draft] lazypack render queued for {article_id} "
+                  f"from {plan}")
+            return 0
+        print(f"\n[publish_draft] LAZYPACK ENQUEUE FAILED for {article_id} "
+              f"(plan={plan}, rc={proc.returncode}):\n"
+              f"{(proc.stderr or proc.stdout or '').strip()[-700:]}\n"
+              f"  The article IS published as a draft but has no render queued, "
+              f"so it will never pass the release gate. Fix the plan and run: "
+              f"uv run python scripts/lazypack_async_render.py enqueue "
+              f"--article-id {article_id} --plan {plan}", file=sys.stderr)
+        return 8
+    except Exception as exc:  # noqa: BLE001
+        print(f"[publish_draft] LAZYPACK FOLLOW-UP errored "
+              f"({type(exc).__name__}: {exc}) — enqueue the render manually.",
+              file=sys.stderr)
+        return 0
 
 
 if __name__ == "__main__":

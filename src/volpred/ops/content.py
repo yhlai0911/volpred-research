@@ -1944,6 +1944,141 @@ def _maybe_drought_release(
     }
 
 
+def _lazypack_job_state(article_id: str, storage_dir: str = "storage") -> tuple[str, str | None]:
+    """What the lazypack lane actually knows about ``article_id``.
+
+    Returns ``(state, job_id)`` where state is one of ``missing`` (no job was
+    ever queued), ``queued``/``running``/``failed``/``completed``.
+
+    2026-07-19 deadlock (boss 20:14): the gate used to *assume* a job existed
+    and print `lazypack-<id>` as the thing to go inspect. For mile_21e45133 and
+    mile_47c4bc3e no such job was ever enqueued, so the message pointed at a
+    file that does not exist and the draft skipped 20 release cycles with no
+    one able to act on the instruction. A gate that reports a state it did not
+    check is worse than one that blocks: it spends a human's attention on a
+    dead end. Look before speaking.
+    """
+    queue_dir = Path(storage_dir) / "ops" / "compute_queue"
+    if not queue_dir.exists():
+        return "missing", None
+    jobs: list[tuple[str, str, str]] = []
+    for path in sorted(queue_dir.glob(f"lazypack-{article_id}*.json")):
+        try:
+            job = json.loads(path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            # 讀不動的 job 檔會讓這個 gate 少看到一個 job，而它的回答會被當成
+            # 「已檢查過全部」——正是本函式 docstring 要避免的那種假回報。
+            from .diagnostics import warn
+
+            warn(f"lazypack job 檔讀取失敗，已略過：{path.name}: {exc}")
+            continue
+        # glob is a prefix match: lazypack-mile_ab must not answer for
+        # lazypack-mile_abcdef. Retries are the only legal suffix.
+        job_id = str(job.get("id") or path.stem)
+        if job_id != f"lazypack-{article_id}" and not job_id.startswith(
+            f"lazypack-{article_id}-r"
+        ):
+            continue
+        jobs.append((str(job.get("queued_at") or ""), job_id, str(job.get("status") or "")))
+    if not jobs:
+        return "missing", None
+    jobs.sort()
+    _, job_id, status = jobs[-1]
+    return (status or "unknown"), job_id
+
+
+def _lazypack_plan_path(article_id: str, storage_dir: str = "storage") -> Path | None:
+    """The authored, evidence-bound plan for ``article_id``, if one exists."""
+    root = Path(storage_dir) / "lazypack_jobs"
+    for candidate in (
+        root / article_id / "plan.json",
+        root / f"{article_id}_plan.json",
+    ):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _lazypack_gate_issue(
+    article_id: str, storage_dir: str = "storage", *, may_enqueue: bool = True
+) -> str:
+    """One honest sentence about why this article has no 懶人包圖組 yet.
+
+    When the render was simply never queued and a plan is on disk, queue it
+    here rather than reporting the gap: the gate is the one code path that
+    reliably notices, and a draft that needs one command is not a finding, it
+    is an omission to close. Without a plan there is nothing to queue — say so
+    explicitly instead of inventing a job id.
+
+    ``may_enqueue=False`` keeps the read-only preview caller side-effect free;
+    it still reports the true state, it just does not act on it.
+    """
+    state, job_id = _lazypack_job_state(article_id, storage_dir)
+
+    if state == "missing":
+        plan = _lazypack_plan_path(article_id, storage_dir)
+        if plan is not None and not may_enqueue:
+            return (
+                "missing 懶人包圖組 section; the render job was never queued "
+                f"(an evidence-bound plan is ready at {plan})"
+            )
+        if plan is None:
+            return (
+                "missing 懶人包圖組 section and NO render job was ever queued "
+                f"(checked {Path(storage_dir) / 'ops' / 'compute_queue'}/"
+                f"lazypack-{article_id}*.json) "
+                "— no evidence-bound plan on disk either; author one via the "
+                "lazypack-infographic skill, then: uv run python "
+                f"scripts/lazypack_async_render.py enqueue --article-id {article_id} "
+                "--plan <plan.json>"
+            )
+        try:
+            import subprocess
+
+            proc = subprocess.run(
+                [
+                    "uv", "run", "python", "scripts/lazypack_async_render.py",
+                    "enqueue", "--article-id", article_id, "--plan", str(plan),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            if proc.returncode == 0:
+                return (
+                    "missing 懶人包圖組 section; the render job was never queued "
+                    f"— auto-enqueued just now from {plan}. The */15 compute "
+                    "worker will render it; this draft releases on the next cycle."
+                )
+            return (
+                "missing 懶人包圖組 section; the render job was never queued and "
+                f"auto-enqueue from {plan} FAILED: "
+                f"{(proc.stderr or proc.stdout or '').strip()[:300]}"
+            )
+        except Exception as exc:  # noqa: BLE001 — reported, never raised at a gate
+            return (
+                "missing 懶人包圖組 section; the render job was never queued and "
+                f"auto-enqueue from {plan} raised {type(exc).__name__}: {exc}"
+            )
+
+    if state in ("queued", "running"):
+        return (
+            f"missing 懶人包圖組 section (render {state}, job {job_id}) — "
+            "waiting on the */15 compute worker, no action needed"
+        )
+    if state == "completed":
+        return (
+            f"missing 懶人包圖組 section although job {job_id} COMPLETED — the "
+            "render finished but the section was not installed; inspect: uv run "
+            f"python scripts/compute_queue.py show {job_id}"
+        )
+    return (
+        f"missing 懶人包圖組 section (render {state}, job {job_id}) — inspect: "
+        f"uv run python scripts/compute_queue.py show {job_id} ; re-enqueue via "
+        "scripts/lazypack_async_render.py enqueue"
+    )
+
+
 def release_content_gate_issues(
     item: dict,
     storage_dir: str = "storage",
@@ -1991,11 +2126,10 @@ def release_content_gate_issues(
             _lz_text = item.get("content") or item.get("description") or ""
             if not has_lazypack_section(str(_lz_text)):
                 issues.append(
-                    "missing 懶人包圖組 section (async lazypack render "
-                    "pending/failed — inspect: uv run python "
-                    "scripts/compute_queue.py show "
-                    f"lazypack-{item.get('id')} ; re-enqueue via "
-                    "scripts/lazypack_async_render.py enqueue)"
+                    _lazypack_gate_issue(
+                        str(item.get("id") or ""), storage_dir,
+                        may_enqueue=record
+                    )
                 )
         except Exception as exc:  # fail-open: never block release on a broken check
             _warn_release_pool("lazypack release gate check failed; fail-open", exc)
