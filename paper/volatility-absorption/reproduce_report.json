@@ -1,13 +1,13 @@
 {
   "paper": "volatility-absorption",
   "paper_version": "v3-active-scope-post-k1686",
-  "generated_at": "2026-07-19T13:49:50+00:00",
+  "generated_at": "2026-07-19T14:04:28+00:00",
   "alert_level": "green",
   "gate_status": "pass",
   "match_rate": 1.0,
   "verification_rate": "100.0%",
-  "total_checks": 122,
-  "matches": 122,
+  "total_checks": 123,
+  "matches": 123,
   "mismatches": 0,
   "critical_flags": [
     "Active gate restricted to reproducible evidence retained in main_v3.tex",
@@ -943,7 +943,16 @@
       "source_path": "k741c.regime_difference_test.p_two_sided"
     },
     {
-      "metric": "T5 regime trend rho",
+      "metric": "T5 regime trend rho observed",
+      "paper_value": -1.0,
+      "actual_value": -1.0,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.regime_difference_test.observed_spearman_trend"
+    },
+    {
+      "metric": "T5 regime trend rho boot mean",
       "paper_value": -0.63,
       "actual_value": -0.63478,
       "tol_pct": 3.0,

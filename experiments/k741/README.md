@@ -122,7 +122,7 @@ seed=20260719，保留波動叢聚，每個 replicate 重算所有 regime ratio�
 | calm − crisis ratio 差 | **+0.369** |
 | 95% CI | **[−0.097, 0.786]** ← **包含 0** |
 | p (two-sided) | **0.115** |
-| 有序趨勢 Spearman ρ | −0.635，CI [−1.00, 0.40] ← 也包含 0 |
+| 有序趨勢 Spearman ρ | 樣本內 **−1.000**（完全單調），但 bootstrap 平均 −0.635、CI [−1.00, 0.40] ← 包含 0，代表這個排序不穩定 |
 
 → **論文原本「regime decline 是 absorption 最強證據」的說法不成立**，已在 tex 降級為
 descriptive pattern，並明說推論改靠 SAR 證據。crisis cell 只有 28 天，檢定力極低，

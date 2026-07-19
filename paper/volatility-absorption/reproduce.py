@@ -183,7 +183,8 @@ def main() -> int:
         ("T5 regime diff CI lo", -0.10, nfp_rdt["ci95"][0], 5.0, "k741c.regime_difference_test.ci95[0]"),
         ("T5 regime diff CI hi", 0.79, nfp_rdt["ci95"][1], 2.0, "k741c.regime_difference_test.ci95[1]"),
         ("T5 regime diff p", 0.115, nfp_rdt["p_two_sided"], 2.0, "k741c.regime_difference_test.p_two_sided"),
-        ("T5 regime trend rho", -0.63, nfp_rdt["spearman_trend_mean"], 3.0, "k741c.regime_difference_test.spearman_trend_mean"),
+        ("T5 regime trend rho observed", -1.00, nfp_rdt["observed_spearman_trend"], 1.0, "k741c.regime_difference_test.observed_spearman_trend"),
+        ("T5 regime trend rho boot mean", -0.63, nfp_rdt["spearman_trend_mean"], 3.0, "k741c.regime_difference_test.spearman_trend_mean"),
         # Mapping completeness: headline cell must consume every official release.
         ("T5 headline releases mapped", 194.0, float(nfp_cells["official__forward_mapper"]["n_mapped"]), 0.0, "k741c.factorial_cells.official__forward_mapper.n_mapped"),
         ("T5 headline zero exclusions", 0.0, float(len(nfp_cells["official__forward_mapper"]["excluded_releases"])), 0.0, "k741c.factorial_cells.official__forward_mapper.excluded_releases"),

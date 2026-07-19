@@ -263,6 +263,9 @@ def regime_difference_test(d, n_boot=10000, block=20, seed=20260719):
     obs = ratios(w)
     low_lab, high_lab = "Low (VIX<15)", "High (VIX>=25)"
     obs_diff = obs[low_lab] - obs[high_lab]
+    obs_seq = np.array([obs[lab] for lab, _, _ in REGIMES], dtype=float)
+    obs_rho = float(np.corrcoef(np.arange(len(REGIMES), dtype=float),
+                                pd.Series(obs_seq).rank().to_numpy())[0, 1])
 
     T = len(w)
     n_blocks = int(np.ceil(T / block))
@@ -300,6 +303,7 @@ def regime_difference_test(d, n_boot=10000, block=20, seed=20260719):
         "p_two_sided": p_boot,
         "n_replicates_used": int(len(diffs)),
         "n_replicates_degenerate": int(degenerate),
+        "observed_spearman_trend": obs_rho,
         "spearman_trend_mean": float(np.mean(trends)) if trends else None,
         "spearman_trend_ci95": [float(np.percentile(trends, 2.5)),
                                 float(np.percentile(trends, 97.5))] if trends else None,
@@ -370,7 +374,8 @@ def main():
           f"CI95 {regime_test['ci95'][0]:.3f}..{regime_test['ci95'][1]:.3f}  "
           f"p={regime_test['p_two_sided']:.4f}  "
           f"{'EXCLUDES 0' if regime_test['ci_excludes_zero'] else 'INCLUDES 0'}")
-    print(f"  trend (Spearman rho vs regime rank): mean={regime_test['spearman_trend_mean']:.3f}  "
+    print(f"  trend (Spearman rho vs regime rank): observed={regime_test['observed_spearman_trend']:.3f} "
+          f"boot-mean={regime_test['spearman_trend_mean']:.3f}  "
           f"CI95 {regime_test['spearman_trend_ci95'][0]:.3f}..{regime_test['spearman_trend_ci95'][1]:.3f}")
 
     # Fidelity check against the archived JSON: archived cell, archived (unsliced) frame.

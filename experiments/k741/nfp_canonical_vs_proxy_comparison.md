@@ -153,7 +153,7 @@ per replicate:
 | calm − crisis ratio difference | **+0.369** |
 | 95% CI | **[−0.097, 0.786]** — **includes zero** |
 | *p* (two-sided) | **0.115** |
-| ordered trend, Spearman ρ | −0.635, CI [−1.00, 0.40] — also includes zero |
+| ordered trend, Spearman ρ | observed **−1.000** (perfectly ordered in sample); bootstrap mean −0.635, CI [−1.00, 0.40] — includes zero, so the ordering is not stable under resampling |
 
 **So the regime decline is not statistically established.** The point estimate is directionally
 right (+0.37), and with only 28 crisis-regime NFP days the test has little power — so this is
