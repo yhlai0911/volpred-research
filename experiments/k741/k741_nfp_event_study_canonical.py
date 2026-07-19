@@ -69,6 +69,7 @@ import warnings
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from scipy import stats
 
@@ -229,9 +230,94 @@ def part_b(d):
     return out
 
 
+def regime_difference_test(d, n_boot=10000, block=20, seed=20260719):
+    """Directly test the comparative claim, which per-regime tests do NOT establish.
+
+    The paper's hypothesis is `ratio_calm > ratio_high`. Reporting "significant in
+    calm, not significant in high" is difference-in-significance, not
+    significance-of-difference — two regimes can differ in p-value without their
+    ratios differing detectably. So we test the difference itself.
+
+    Circular moving-block bootstrap on the calendar-ordered daily series (block =
+    20 days, matching the paper's existing SAR inference) so that volatility
+    clustering is preserved; an iid resample would understate the standard error.
+    Each replicate re-derives every regime ratio from the resampled days, so the
+    event/control split is resampled jointly rather than treated as fixed.
+
+    Also reports an ordered-trend statistic (Spearman rho of ratio against regime
+    rank) for the monotone-decline claim.
+    """
+    rng = np.random.default_rng(seed)
+    w = d.dropna(subset=["VIX_prev", "Return"]).copy()
+    bounds = {lab: (lo, hi) for lab, lo, hi in REGIMES}
+
+    def ratios(frame):
+        out = {}
+        for lab, (lo, hi) in bounds.items():
+            m = (frame["VIX_prev"] >= lo) & (frame["VIX_prev"] < hi)
+            rn = frame.loc[m & frame["IsNFP"], "AbsReturn"]
+            ro = frame.loc[m & ~frame["IsNFP"], "AbsReturn"]
+            out[lab] = (rn.mean() / ro.mean()) if (len(rn) >= 3 and len(ro) >= 10 and ro.mean() > 0) else np.nan
+        return out
+
+    obs = ratios(w)
+    low_lab, high_lab = "Low (VIX<15)", "High (VIX>=25)"
+    obs_diff = obs[low_lab] - obs[high_lab]
+
+    T = len(w)
+    n_blocks = int(np.ceil(T / block))
+    diffs, trends, degenerate = [], [], 0
+    ranks = np.arange(len(REGIMES), dtype=float)
+    for _ in range(n_boot):
+        starts = rng.integers(0, T, size=n_blocks)
+        idx = np.concatenate([(np.arange(s, s + block) % T) for s in starts])[:T]
+        rep = ratios(w.iloc[idx])
+        dd = rep[low_lab] - rep[high_lab]
+        seq = np.array([rep[lab] for lab, _, _ in REGIMES], dtype=float)
+        if np.isnan(dd) or np.isnan(seq).any():
+            degenerate += 1
+            continue
+        diffs.append(dd)
+        # Spearman rho of ratio vs regime rank, computed inline to avoid a scipy call per replicate
+        sr = pd.Series(seq).rank().to_numpy()
+        trends.append(np.corrcoef(ranks, sr)[0, 1])
+
+    diffs = np.asarray(diffs)
+    ci = [float(np.percentile(diffs, 2.5)), float(np.percentile(diffs, 97.5))]
+    # two-sided bootstrap p for H0: diff = 0
+    p_boot = float(2 * min((diffs <= 0).mean(), (diffs >= 0).mean()))
+    p_boot = min(p_boot, 1.0)
+
+    return {
+        "hypothesis": "ratio(VIX<15) - ratio(VIX>=25) > 0  (absorption: NFP impact is smaller in crisis)",
+        "method": (f"circular moving-block bootstrap, block={block}d, B={n_boot}, seed={seed}; "
+                   "regime ratios re-derived per replicate"),
+        "observed_ratio_low": float(obs[low_lab]),
+        "observed_ratio_high": float(obs[high_lab]),
+        "observed_difference": float(obs_diff),
+        "ci95": ci,
+        "ci_excludes_zero": bool(ci[0] > 0 or ci[1] < 0),
+        "p_two_sided": p_boot,
+        "n_replicates_used": int(len(diffs)),
+        "n_replicates_degenerate": int(degenerate),
+        "spearman_trend_mean": float(np.mean(trends)) if trends else None,
+        "spearman_trend_ci95": [float(np.percentile(trends, 2.5)),
+                                float(np.percentile(trends, 97.5))] if trends else None,
+        "caveat": ("Small crisis-regime cell (n=28 NFP days) — the interval is wide and this test is "
+                   "low-powered. A non-rejection here is NOT evidence the regimes are equal."),
+    }
+
+
 def run_cell(frame, dates, mapper, label):
     mapped, excluded = mapper(dates, frame.index)
     backward = check_mapping(mapped, label, allow_backward=(mapper is map_archived))
+    if mapper is map_forward and (excluded or len(mapped) != len(dates)):
+        # Fail closed: a headline cell that quietly loses an event still produces
+        # plausible numbers. Recording the exclusion in JSON is not enough — nothing
+        # downstream reads it. (Codex round-2 finding 4.)
+        raise RuntimeError(
+            f"{label}: {len(dates) - len(mapped)} release(s) unmapped {excluded!r}; "
+            "extend the price window or add an explicit allowlist")
     d = frame.copy()
     d["IsNFP"] = d.index.isin(list(mapped.values()))
     d["IsFriday"] = d.index.dayofweek == 4
@@ -275,6 +361,17 @@ def main():
                   f"p={a['p_vs_all']:.5f}  (vs Fri {a['ratio_vs_friday']:.4f}, p={a['p_vs_friday']:.4f})")
 
     headline = cells["official__forward_mapper"]
+
+    hd = frame.copy()
+    hmapped, _ = map_forward(off, frame.index)
+    hd["IsNFP"] = hd.index.isin(list(hmapped.values()))
+    regime_test = regime_difference_test(hd)
+    print(f"\n  regime difference (calm - crisis): {regime_test['observed_difference']:.4f}  "
+          f"CI95 {regime_test['ci95'][0]:.3f}..{regime_test['ci95'][1]:.3f}  "
+          f"p={regime_test['p_two_sided']:.4f}  "
+          f"{'EXCLUDES 0' if regime_test['ci_excludes_zero'] else 'INCLUDES 0'}")
+    print(f"  trend (Spearman rho vs regime rank): mean={regime_test['spearman_trend_mean']:.3f}  "
+          f"CI95 {regime_test['spearman_trend_ci95'][0]:.3f}..{regime_test['spearman_trend_ci95'][1]:.3f}")
 
     # Fidelity check against the archived JSON: archived cell, archived (unsliced) frame.
     repro = run_cell(full, px, map_archived, "archived_reproduction")
@@ -329,6 +426,7 @@ def main():
                   "ETFs absent from the pinned snapshot."),
         "part_a_historical": headline["part_a_historical"],
         "part_b_vix_regimes": headline["part_b_vix_regimes"],
+        "regime_difference_test": regime_test,
         "factorial_cells": cells,
         "factor_decomposition": decomposition,
         "archived_reproduction_unsliced": repro,

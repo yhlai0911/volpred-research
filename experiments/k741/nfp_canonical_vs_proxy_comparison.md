@@ -114,8 +114,8 @@ The pooled statistic hides the real effect. By regime (ratio / *p*):
 |---|---|---|---|---|
 | proxy + archived | 1.230 / 0.050 | 1.175 / 0.090 | 1.187 / 0.244 | 0.985 / 0.936 |
 | proxy + forward | 1.232 / 0.046 | 1.223 / 0.032 | 1.223 / 0.164 | **1.010 / 0.959** |
-| official + archived | 1.299 / 0.011 | 1.194 / 0.060 | 1.186 / 0.254 | 0.936 / 0.731 |
-| **official + forward** | **1.305 / 0.009** | **1.230 / 0.027** | **1.186 / 0.254** | **0.936 / 0.731** |
+| official + archived | 1.299 / 0.011 | 1.194 / 0.060 | 1.186 / 0.253 | 0.936 / 0.731 |
+| **official + forward** | **1.305 / 0.009** | **1.230 / 0.027** | **1.186 / 0.253** | **0.936 / 0.731** |
 
 **Holding the mapper at forward, the calendar fix moves Low 1.232 → 1.305 and High 1.010 → 0.936.**
 Under the proxy calendar the High-VIX cell sits *at* 1.0 (no absorption); under the official
@@ -138,18 +138,49 @@ decomposition had to be done properly.
 Overall: 1.14× (*p*=0.081) → **1.16× (*p*=0.051)**; vs Fridays 1.16× (*p*=0.061) → **1.19×
 (*p*=0.034)**. N_NFP 195 → **194**; total trading days 4,104 → **4,084**.
 
-### Verdict: numbers move, narrative holds — but do NOT upgrade the significance language
+### ⚠️ The comparative claim itself was never tested — and does not survive testing
+
+Codex round-2 raised the decisive point: the paper reads "significant in calm, not significant in
+crisis" as evidence of absorption. That is **difference in significance, not significance of
+difference**. Two regimes can differ in *p*-value without their ratios differing detectably.
+
+`regime_difference_test` now tests the contrast directly — 20-day circular moving-block bootstrap
+(B = 10,000, seed 20260719) that preserves volatility clustering and re-derives every regime ratio
+per replicate:
+
+| quantity | value |
+|---|---|
+| calm − crisis ratio difference | **+0.369** |
+| 95% CI | **[−0.097, 0.786]** — **includes zero** |
+| *p* (two-sided) | **0.115** |
+| ordered trend, Spearman ρ | −0.635, CI [−1.00, 0.40] — also includes zero |
+
+**So the regime decline is not statistically established.** The point estimate is directionally
+right (+0.37), and with only 28 crisis-regime NFP days the test has little power — so this is
+**not** evidence the regimes are equal. But it does mean the NFP section cannot carry the absorption
+claim by itself.
+
+`main_v3.tex` has been downgraded accordingly: the regime pattern is now stated as a descriptive
+pattern consistent with absorption, the direct test is reported with its interval, and the paper
+explicitly rests its inference on the SAR evidence instead. This is a **pre-existing inferential gap
+in the paper, not a consequence of the proxy** — the re-run just surfaced it.
+
+### Verdict: numbers move, direction holds — but the significance language goes DOWN, not up
 
 - **No sign flips.** Every regime keeps its side of 1.0; High stays below 1.0.
-- **The gradient is monotone**: 1.31 → 1.23 → 1.19 → 0.94, versus the published non-monotone
-  1.24 → 1.30 → 1.18 → 0.95. Cleaner, and more consistent with absorption.
+- **The gradient is ordered**: 1.31 → 1.23 → 1.19 → 0.94, versus the published non-monotone
+  1.24 → 1.30 → 1.18 → 0.95. Cleaner, and directionally consistent with absorption.
 - **The pooled overall effect is still only marginal** (*p*=0.051). It did **not** cross into 5%.
   An intermediate version of this work claimed it did; that claim came from the window leak (§5)
   and is retracted.
-- The regime-level evidence (1% in calm, absent in crisis) is what carries the absorption reading.
+- **The regime contrast is not statistically established** (above). The per-regime significance
+  pattern is not a substitute for testing the difference.
 
-**No downgrade or removal of §sec:nfp is warranted.** `main_v3.tex` has been updated in place, with
-the significance language kept at "marginal at the 10% level" for the pooled statistic.
+**§sec:nfp does not need removing, but it did need downgrading**, and has been downgraded: the NFP
+evidence is now presented as a descriptive pattern, the pooled statistic is labelled "marginal at
+the 10% level", the direct regime-contrast test is reported with its zero-spanning interval, and the
+paper's inference is explicitly rested on the SAR evidence rather than on NFP. That is a weaker
+claim than the paper made before this task, and it is the honest one.
 
 ---
 
@@ -250,11 +281,23 @@ for quoted *p*-values, `N = 195`, and `2025-10` before deciding scope.
 
 ## 9. What I did not do / am not certain about
 
-- **Codex re-review not run after these fixes.** The first review returned **FAIL** on exactly the
-  defects fixed above; the corrected scripts have **not** been re-reviewed. Under
-  `.claude/rules/experiments.md` the merge gate needs a fresh `review_verdict.json` pinned to the
-  current sha, so **a re-review is required before merge** — this is the single most important open
-  item.
+- **Two Codex rounds run; a third is required before merge.**
+
+  | round | verdict | outcome |
+  |---|---|---|
+  | 1 | **FAIL** | confounded 2-arm design, window leak, k904 endpoint drop, `reproduce.py` bound to the proxy JSON — all fixed |
+  | 2 | **FAIL** | round-1 fixes all verified; 5 new findings (gate dilution, untested regime contrast, unbound footnote, mapping not fail-closed, stale 0.254 in claim surface) — all fixed |
+  | 3 | **not run** | ⚠️ required before merge |
+
+  No `review_verdict.json` exists for either k741 or k904, so `experiment_gates.py certify`
+  currently blocks the merge with `uncertified` — the correct state. **The main thread must run a
+  third review and let the gate generate the verdict**; do not hand-write one.
+- **Round-2 finding 1 was a pre-existing hole in the paper's own gate**: `match_rate >= 95%` meant a
+  broken headline could be diluted by 111 unrelated passing checks (Codex forced the headline *p* to
+  0.20 and still got `gate: pass`, exit 0). Now any mismatch fails. Verified adversarially: the same
+  sabotage returns exit 1 naming `T5 NFP p vs all`. This changes `reproduce.py`'s pass semantics for
+  the whole paper, not just NFP — **flagging explicitly for main-thread review**, since other
+  sections now have to be exactly right too (they currently are: 122/122).
 - **Parts C/D of k741 not re-run** (sector dispersion, NFP-day strategy). Verified by grep that
   `main_v3.tex` cites neither; they need sector ETFs absent from the pinned snapshot. If ever
   published, they carry the same contamination.

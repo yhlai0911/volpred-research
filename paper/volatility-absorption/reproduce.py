@@ -60,6 +60,9 @@ def main() -> int:
     calib = k1686["calibration_diagnostics"]
     nfp = k741["part_a_historical"]
     nfp_reg = k741["part_b_vix_regimes"]
+    nfp_dec = k741["factor_decomposition"]
+    nfp_rdt = k741["regime_difference_test"]
+    nfp_cells = k741["factorial_cells"]
 
     claims = [
         # ---- Table 2: regime distribution (pinned; days = n_shock + n_normal) ----
@@ -171,6 +174,20 @@ def main() -> int:
         ("T5 High NFP ratio", 0.94, nfp_reg["High (VIX>=25)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.High.ratio"),
         ("T5 High NFP t", -0.34, nfp_reg["High (VIX>=25)"]["t_stat"], 3.0, "k741c.part_b_vix_regimes.High.t_stat"),
         ("T5 High NFP p", 0.731, nfp_reg["High (VIX>=25)"]["p_value"], 1.0, "k741c.part_b_vix_regimes.High.p_value"),
+        # sec:nfp footnote quotes the date-effect decomposition, which is NOT the headline cell.
+        # Bound explicitly so the footnote cannot go stale while the gate stays green.
+        ("T5 fn date-effect from 1.149", 1.149, nfp_dec["date_effect_at_archived_mapper"]["ratio"][0], 1.0, "k741c.factor_decomposition.date_effect_at_archived_mapper.ratio[0]"),
+        ("T5 fn date-effect to 1.151", 1.151, nfp_dec["date_effect_at_archived_mapper"]["ratio"][1], 1.0, "k741c.factor_decomposition.date_effect_at_archived_mapper.ratio[1]"),
+        # sec:nfp regime-contrast test (difference-in-significance correction)
+        ("T5 regime diff point est", 0.37, nfp_rdt["observed_difference"], 3.0, "k741c.regime_difference_test.observed_difference"),
+        ("T5 regime diff CI lo", -0.10, nfp_rdt["ci95"][0], 5.0, "k741c.regime_difference_test.ci95[0]"),
+        ("T5 regime diff CI hi", 0.79, nfp_rdt["ci95"][1], 2.0, "k741c.regime_difference_test.ci95[1]"),
+        ("T5 regime diff p", 0.115, nfp_rdt["p_two_sided"], 2.0, "k741c.regime_difference_test.p_two_sided"),
+        ("T5 regime trend rho", -0.63, nfp_rdt["spearman_trend_mean"], 3.0, "k741c.regime_difference_test.spearman_trend_mean"),
+        # Mapping completeness: headline cell must consume every official release.
+        ("T5 headline releases mapped", 194.0, float(nfp_cells["official__forward_mapper"]["n_mapped"]), 0.0, "k741c.factorial_cells.official__forward_mapper.n_mapped"),
+        ("T5 headline zero exclusions", 0.0, float(len(nfp_cells["official__forward_mapper"]["excluded_releases"])), 0.0, "k741c.factorial_cells.official__forward_mapper.excluded_releases"),
+        ("T5 headline zero lookahead", 0.0, float(len(nfp_cells["official__forward_mapper"]["backward_mapped_lookahead_events"])), 0.0, "k741c.factorial_cells.official__forward_mapper.backward_mapped_lookahead_events"),
         # ---- NSI baseline / thresholds / subperiods / RV / controlled (k903, unchanged) ----
         ("Baseline beta", -0.000267, k903["baseline_regression"]["beta_hat"], 1.0, "k903.baseline_regression.beta_hat"),
         ("Baseline t", -1.77, k903["baseline_regression"]["t_stat_NW"], 2.0, "k903.baseline_regression.t_stat_NW"),
@@ -227,7 +244,13 @@ def main() -> int:
     matched = sum(1 for c in checks if c["status"] == "match")
     match_rate = matched / total * 100 if total else 0.0
     alert_level = "green" if match_rate >= 95 else ("amber" if match_rate >= 80 else "red")
-    gate_status = "pass" if match_rate >= 95 else "fail"
+
+    # A 95% rate is a health metric, not a reproducibility certification: with 112 checks it
+    # tolerates 5 wrong numbers, so a broken headline can be diluted by unrelated passing rows.
+    # Demonstrated adversarially (Codex round-2): forcing the headline p from 0.0506 to 0.20
+    # still returned 111/112, gate=pass, exit 0. Any mismatch now fails the gate.
+    mismatched = [c["metric"] for c in checks if c["status"] != "match"]
+    gate_status = "pass" if not mismatched else "fail"
 
     print(f"{'Metric':<38} {'Paper':>12} {'Actual':>12} {'diff %':>8} {'status':>10}")
     print("-" * 88)
@@ -239,6 +262,8 @@ def main() -> int:
         print(f"{c['metric'][:36]:<38} {pv_s} {av_s} {c['rel_diff_pct']:>7.2f}% {c['status']:>10}")
     print("-" * 88)
     print(f"Matched: {matched}/{total}  rate: {match_rate:.1f}%  alert: {alert_level}  gate: {gate_status}")
+    if mismatched:
+        print(f"[gate] FAIL — every bound number must match. Mismatched: {', '.join(mismatched)}")
 
     report = {
         "paper": "volatility-absorption",

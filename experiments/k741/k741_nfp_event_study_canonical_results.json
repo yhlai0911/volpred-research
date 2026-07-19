@@ -83,6 +83,27 @@
       "p_value": 0.7312488923708301
     }
   },
+  "regime_difference_test": {
+    "hypothesis": "ratio(VIX<15) - ratio(VIX>=25) > 0  (absorption: NFP impact is smaller in crisis)",
+    "method": "circular moving-block bootstrap, block=20d, B=10000, seed=20260719; regime ratios re-derived per replicate",
+    "observed_ratio_low": 1.3052029466080566,
+    "observed_ratio_high": 0.9361177767940533,
+    "observed_difference": 0.3690851698140033,
+    "ci95": [
+      -0.09715728090183867,
+      0.7863015793973872
+    ],
+    "ci_excludes_zero": false,
+    "p_two_sided": 0.115,
+    "n_replicates_used": 10000,
+    "n_replicates_degenerate": 0,
+    "spearman_trend_mean": -0.63478,
+    "spearman_trend_ci95": [
+      -1.0,
+      0.39999999999999997
+    ],
+    "caveat": "Small crisis-regime cell (n=28 NFP days) \u2014 the interval is wide and this test is low-powered. A non-rejection here is NOT evidence the regimes are equal."
+  },
   "factorial_cells": {
     "proxy__archived_mapper": {
       "part_a_historical": {

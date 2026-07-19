@@ -1,13 +1,13 @@
 {
   "paper": "volatility-absorption",
   "paper_version": "v3-active-scope-post-k1686",
-  "generated_at": "2026-07-19T13:37:25+00:00",
+  "generated_at": "2026-07-19T13:49:50+00:00",
   "alert_level": "green",
   "gate_status": "pass",
   "match_rate": 1.0,
   "verification_rate": "100.0%",
-  "total_checks": 112,
-  "matches": 112,
+  "total_checks": 122,
+  "matches": 122,
   "mismatches": 0,
   "critical_flags": [
     "Active gate restricted to reproducible evidence retained in main_v3.tex",
@@ -887,6 +887,96 @@
       "rel_diff_pct": 0.03404820394393228,
       "status": "match",
       "source_path": "k741c.part_b_vix_regimes.High.p_value"
+    },
+    {
+      "metric": "T5 fn date-effect from 1.149",
+      "paper_value": 1.149,
+      "actual_value": 1.1487090908696975,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.025318462167319138,
+      "status": "match",
+      "source_path": "k741c.factor_decomposition.date_effect_at_archived_mapper.ratio[0]"
+    },
+    {
+      "metric": "T5 fn date-effect to 1.151",
+      "paper_value": 1.151,
+      "actual_value": 1.1509592951325927,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.00353647848891144,
+      "status": "match",
+      "source_path": "k741c.factor_decomposition.date_effect_at_archived_mapper.ratio[1]"
+    },
+    {
+      "metric": "T5 regime diff point est",
+      "paper_value": 0.37,
+      "actual_value": 0.3690851698140033,
+      "tol_pct": 3.0,
+      "rel_diff_pct": 0.24725140162072853,
+      "status": "match",
+      "source_path": "k741c.regime_difference_test.observed_difference"
+    },
+    {
+      "metric": "T5 regime diff CI lo",
+      "paper_value": -0.1,
+      "actual_value": -0.09715728090183867,
+      "tol_pct": 5.0,
+      "rel_diff_pct": 2.842719098161334,
+      "status": "match",
+      "source_path": "k741c.regime_difference_test.ci95[0]"
+    },
+    {
+      "metric": "T5 regime diff CI hi",
+      "paper_value": 0.79,
+      "actual_value": 0.7863015793973872,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.4681545066598517,
+      "status": "match",
+      "source_path": "k741c.regime_difference_test.ci95[1]"
+    },
+    {
+      "metric": "T5 regime diff p",
+      "paper_value": 0.115,
+      "actual_value": 0.115,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.regime_difference_test.p_two_sided"
+    },
+    {
+      "metric": "T5 regime trend rho",
+      "paper_value": -0.63,
+      "actual_value": -0.63478,
+      "tol_pct": 3.0,
+      "rel_diff_pct": 0.7587301587301597,
+      "status": "match",
+      "source_path": "k741c.regime_difference_test.spearman_trend_mean"
+    },
+    {
+      "metric": "T5 headline releases mapped",
+      "paper_value": 194.0,
+      "actual_value": 194.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.factorial_cells.official__forward_mapper.n_mapped"
+    },
+    {
+      "metric": "T5 headline zero exclusions",
+      "paper_value": 0.0,
+      "actual_value": 0.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.factorial_cells.official__forward_mapper.excluded_releases"
+    },
+    {
+      "metric": "T5 headline zero lookahead",
+      "paper_value": 0.0,
+      "actual_value": 0.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.factorial_cells.official__forward_mapper.backward_mapped_lookahead_events"
     },
     {
       "metric": "Baseline beta",

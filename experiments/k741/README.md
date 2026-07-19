@@ -96,17 +96,39 @@ proxy 的 1.010（等於沒有 absorption）掉到 official 的 0.936 —— 那
 | Overall ratio vs Friday | 1.16 (p=0.061) | **1.19 (p=0.034)** | 5% 顯著 |
 | Low (V<15) | 1.24 (p=0.069, n=62) | **1.31 (p=0.009, n=63)** | ⚑⚑ 升到 1% 顯著 |
 | Medium (15–20) | 1.30 (p=0.009, n=78) | **1.23 (p=0.027, n=76)** | ⚑ 1% → 5%（仍顯著） |
-| Elevated (20–25) | 1.18 (p=0.279) | **1.19 (p=0.254)** | 兩者皆不顯著 |
+| Elevated (20–25) | 1.18 (p=0.279) | **1.19 (p=0.253)** | 兩者皆不顯著 |
 | High (V≥25) | 0.95 (p=0.777) | **0.94 (p=0.731)** | 兩者皆不顯著 |
 
-**沒有任何符號翻轉**，且 regime 梯度變成**單調遞減**（1.31 → 1.23 → 1.19 → 0.94），
+**沒有任何符號翻轉**，且 regime 梯度變成**有序遞減**（1.31 → 1.23 → 1.19 → 0.94），
 比原本 Medium 高於 Low 的凸起更符合 absorption 假說。
-→ 論文 NFP 小節**不需降級或移除**；`main_v3.tex` 已更新，pooled 措辭維持
-「marginal at the 10% level」（本檔第一版誤寫成 5% 顯著，已撤回）。
+`main_v3.tex` 已更新，pooled 措辭維持「marginal at the 10% level」
+（本檔第一版誤寫成 5% 顯著，已撤回）。
 
 k904 獨立佐證（不同視窗、Welch）：overall 1.160 (p=0.042)、Low 1.305、High 0.935。
 注意 k741 (Student, p=0.0506) 與 k904 (Welch, p=0.0424) **跨在 5% 兩側**——
 5% 的判定是 spec-dependent，這也是 pooled 措辭要保守的理由。
+
+### ⚠️ 最重要的發現：論文的「regime 對比」本身沒被檢定過
+
+Codex round-2 指出：論文用「calm 顯著、crisis 不顯著」承載 absorption 解讀，
+那是 **difference-in-significance，不是 significance-of-difference**。
+兩個 regime 的 p 值不同，不等於兩者的 ratio 有可偵測的差異。
+
+新增 `regime_difference_test`（20 日 circular moving-block bootstrap，B=10,000，
+seed=20260719，保留波動叢聚，每個 replicate 重算所有 regime ratio）**直接檢定該對比**：
+
+| 量 | 值 |
+|---|---|
+| calm − crisis ratio 差 | **+0.369** |
+| 95% CI | **[−0.097, 0.786]** ← **包含 0** |
+| p (two-sided) | **0.115** |
+| 有序趨勢 Spearman ρ | −0.635，CI [−1.00, 0.40] ← 也包含 0 |
+
+→ **論文原本「regime decline 是 absorption 最強證據」的說法不成立**，已在 tex 降級為
+descriptive pattern，並明說推論改靠 SAR 證據。crisis cell 只有 28 天，檢定力極低，
+所以**不能反過來說「兩 regime 相等」**——tex 也照這樣寫了。
+
+這不是 proxy 造成的，是論文既有的推論缺口，被這次重跑翻出來。
 
 ### 另外發現的兩個獨立缺陷（非 proxy 造成）
 
@@ -118,10 +140,16 @@ k904 獨立佐證（不同視窗、Welch）：overall 1.160 (p=0.042)、Low 1.30
 2. **論文把這些檢定標成 "Welch's t-tests"，但 k741 用的是 Student's**
    （`stats.ttest_ind` 預設 `equal_var=True`）。已在 tex 改為 "two-sample $t$-tests"。
 
-### ⚠️ 未完成：Codex 尚未複審
+### Codex review 歷程
 
-第一輪 Codex review 對上述缺陷判 **FAIL**；修正後的腳本**尚未重審**。
-依 `.claude/rules/experiments.md`，merge 需要一份 pin 住現行 sha 的 `review_verdict.json`
-→ **合併前必須重跑 Codex review**。
+| 輪次 | verdict | 結果 |
+|---|---|---|
+| Round 1 | **FAIL** | 混淆的兩臂設計、樣本窗洩漏、k904 endpoint 靜默丟事件、reproduce.py 仍綁舊 JSON —— 全部已修 |
+| Round 2 | **FAIL** | round-1 修正全部驗證通過；新開 5 項（gate 稀釋、regime 對比未檢定、footnote 未綁定、mapping 未 fail-closed、claim surface 殘留 0.254）—— 全部已修 |
+| Round 3 | **未跑** | ⚠️ merge 前必須重審 |
+
+依 `.claude/rules/experiments.md`，merge 需要一份 pin 住現行 sha 的 `review_verdict.json`；
+本 worktree **尚未產生**（`experiment_gates.py certify` 目前會以
+`uncertified: no review_verdict.json` 擋下）→ **主線程合併前務必重跑 Codex review 並產生裁決檔**。
 
 細節、2×2 全表與 feed 回溯建議見 `nfp_canonical_vs_proxy_comparison.md`。
