@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-19T09:00:53.569125+00:00",
+  "generated_at": "2026-07-19T09:43:23.566894+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
@@ -36,68 +36,26 @@
       "collections": []
     },
     "experiments": {
-      "collectable": [
-        {
-          "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/0050_tw.csv",
-          "kind": "csv",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/paper2_taiwan_indiv_rolling_gamma/paper2_taiwan_indiv_rolling_gamma_results.json",
-          "kind": "json",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1719/reproduce_spec.json",
-          "kind": "json",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/paper2_0050_split_repair_verification/verify_0050_gamma.py",
-          "kind": "py",
-          "reason": "untracked"
-        }
-      ],
-      "held": [
-        {
-          "path": "experiments/k1380",
-          "kind": "pending_rename",
-          "reason": "pending_rename",
-          "detail": "8 個檔案處於未 commit 的改名/修改中（非無主）：experiments/k1380/README.md, experiments/k1380/k1380.py, experiments/k1380/k1380_losses_all.npy, experiments/k1380/k1380_losses_all_INVALID_20260716.npy, experiments/k1380/k1380_results.json, experiments/k1380/k1380_results_INVALID_20260716.json, experiments/k1380/k1380_spa_from_cache.py, experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py。出口是 commit 這個目錄，不是找人認領。",
-          "members": [
-            "experiments/k1380/README.md",
-            "experiments/k1380/k1380.py",
-            "experiments/k1380/k1380_losses_all.npy",
-            "experiments/k1380/k1380_losses_all_INVALID_20260716.npy",
-            "experiments/k1380/k1380_results.json",
-            "experiments/k1380/k1380_results_INVALID_20260716.json",
-            "experiments/k1380/k1380_spa_from_cache.py",
-            "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py"
-          ]
-        }
-      ],
+      "collectable": [],
+      "held": [],
       "skipped": {
         "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": [
-        {
-          "namespace": "experiments",
-          "paths": [
-            "experiments/paper2_taiwan_indiv_rolling_gamma/data/0050_tw.csv",
-            "experiments/paper2_taiwan_indiv_rolling_gamma/paper2_taiwan_indiv_rolling_gamma_results.json",
-            "experiments/k1719/reproduce_spec.json",
-            "experiments/paper2_0050_split_repair_verification/verify_0050_gamma.py"
-          ],
-          "committed": true,
-          "detail": "[main a261539ce] chore(experiment-reap): collect orphaned experiment artifacts (4 files)\n 4 files changed, 1401 insertions(+), 1239 deletions(-)\n crea"
-        }
-      ]
+      "collections": []
     }
   },
-  "held_escalations": [],
+  "held_escalations": [
+    {
+      "task_id": "assign_1fd87db1",
+      "paths": [
+        "experiments/k1380"
+      ]
+    }
+  ],
   "held_escalated_paths": [
+    "experiments/k1380",
     "job:compute-k1730-arm-a-production-quick-mode-1784358686"
   ]
 }

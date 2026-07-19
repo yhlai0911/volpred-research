@@ -32897,13 +32897,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-19T09:01:16.811512+00:00",
+    "completed_at": "2026-07-19T09:43:28.446224+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T09:01:16.811512+00:00",
-      "last_clean_observed_at": "2026-07-19T09:01:16.811512+00:00"
+      "resolved_at": "2026-07-19T09:43:28.446224+00:00",
+      "last_clean_observed_at": "2026-07-19T09:43:28.446224+00:00"
     }
   },
   {
@@ -32915,13 +32915,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-19T09:22:57.143116+00:00",
+    "completed_at": "2026-07-19T09:49:38.365763+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T09:22:57.143116+00:00",
-      "last_clean_observed_at": "2026-07-19T09:22:57.143116+00:00"
+      "resolved_at": "2026-07-19T09:49:38.365763+00:00",
+      "last_clean_observed_at": "2026-07-19T09:49:38.365763+00:00"
     }
   },
   {
@@ -43273,5 +43273,158 @@
     "created_at": "2026-07-19T09:15:17.030506+00:00",
     "parent_task_id": "assign_98a32740",
     "result": null
+  },
+  {
+    "id": "telegram-1117",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-19T09:27:37.161086+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1117）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你解決不了 就立刻去問claude desktop\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積\n\n📌 白話結論\n這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 78 班都還在工作區。\n\n📌 影響\n影響文章品質、讀者信任與流量表現。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n（fire 時間: 17:22；40 個檔案，最長已連續 78 班）\n\n📌 發生什麼\n這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 78 班都還在工作區。單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— 它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。\n\n📌 現在該做什麼\n沒有任何檔案會被丟棄。 成品（草稿 / 實驗產出）由 uv run python scripts/reap_orphan_deliverables.py --apply 走正規入池路徑自動收編 —— 每小時 check_alerts 會自己跑一次，通常不必手動介入。\n剩下這些是它認不出來源的檔案：確認內容正確就由作者 commit。PHASE-Z 本身不自動收養（盲目收養正是先前三次事故的成因），但不收養不等於丟棄 —— 檔案留在工作區，沒有人會刪它。\n\n📌 卡住的檔案（連續班數）\n• experiments/k1380/README.md — 78 班\n• experiments/k1380/k1380.py — 78 班\n• experiments/k1380/k1380_losses_all.npy — 78 班\n• experiments/k1380/k1380_losses_all_INVALID_20260716.npy — 78 班\n• experiments/k1380/k1380_results.json — 78 \n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-19T09:27:59.782274+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-19T09:29:34.175124+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-19T09:29:34.175106+00:00"
+  },
+  {
+    "id": "assign_a006f8ed",
+    "title": "[P1][老闆指令] PHASE-Z 檔案堆積 78 班 — 走 Claude Desktop 外部第二意見",
+    "description": "老闆 Telegram msg 1117：「你解決不了 就立刻去問 claude desktop」。\n\n## 事實（responder 2026-07-19 已驗）\n- 工作區 41 個未提交條目仍在（git status --porcelain），最長 78 班。\n- 同時池內有 in_progress 的 alert_internal_phase_z_test_gate_red_7af47e56b9_20260719T064406492747Z_a1：PHASE-Z auto-commit 隔離測試紅燈，HEAD^ 綠、HEAD 紅，失敗點 scripts/tests/test_orphan_reaper.py::test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths (StopIteration, line 341)。\n- 因此本次堆積的**待驗假設**是：test gate 紅 → PHASE-Z 每班收班被擋 → 檔案永遠留在工作區。responder 只驗到相關性，未驗因果，接手者必須自己確認。\n- 池內歷史顯示此 class 已被 3-STRIKE 重構過多次（phase_z_test_gate_refactor / ops-orphan-autoadopt / assign_01127566 / assign_5f16a7c5 …）仍復發 → 已達「換模型/換外部意見」門檻。\n\n## 本任務要求（老闆明確指定路徑）\n1. 先修掉 test_orphan_reaper.py 那條紅燈（或按 gate 規則裁決），確認 PHASE-Z 能正常收班。\n2. **不要再自己開下一輪同類補丁**。把「PHASE-Z orphan/收班機制反覆復發」的完整脈絡（歷次重構任務 id + 現況）整理成一份問題陳述，經 Claude Desktop 取得外部第二意見的根因設計判斷，再依該意見決定重構方向。\n3. 收尾時把外部意見與裁決寫進 docs/error_log.md，並對 bug class 全量掃描 + 留機械 gate。\n\n注意：41 個條目不是同一來源（k1380 實驗產物 / 資料 csv / 新 scripts / .!71268! AFP 垃圾檔），逐類裁決，不得盲目 git add -A。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-19T09:29:10.412592+00:00",
+    "created_by": "telegram_responder",
+    "status_history": [
+      {
+        "ts": "2026-07-19T09:30:31.809510+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff"
+      },
+      {
+        "ts": "2026-07-19T09:30:32.035147+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff"
+      },
+      {
+        "ts": "2026-07-19T09:45:00.492421+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff"
+      }
+    ],
+    "started_at": "2026-07-19T09:30:32.035133+00:00",
+    "completed_at": "2026-07-19T09:45:00.492406+00:00",
+    "result": "外部第二意見（codex exec，Claude Desktop headless 不可達已揭露）已取得並存 docs/governance/2026-07/phase_z_ownership_external_review.md。推翻原因果假設（測試閘門是 post-commit 只發警報 + 該紅燈無人修自綠 = flaky + 78 班遠早於紅燈）。裁決 D1-D5 已定並入池 5 張（assign_07dcafa7/ae341cb9/c90c43c7/0e6a740b/86f26cf3）。error_log §B 加一條；class 全量掃描（3 個 provenance-guessing 位置）；機械 gate scripts/tests/test_phase_z_ownership_class_gate.py 3 passed+1 xfailed 並過 mutation check。刻意未動 44 個檔、未猜 flaky 修法。"
+  },
+  {
+    "id": "assign_07dcafa7",
+    "title": "[D2] PHASE-Z：卡住的 foreign 路徑自動 checkpoint 進 immutable quarantine ref",
+    "description": "外部第二意見裁決 D2（全文 docs/governance/2026-07/phase_z_ownership_external_review.md）。\n\n## 為什麼\n現行設計只保證「不誤掃進 main」，完全不保證「不遺失」。**dirty working tree 不是 durable\npreservation** —— 那些 bytes 可被下一個 writer 覆寫、被人 reset、被清理流程刪除。所以現在\n40 個檔卡 78 班的狀態不是「安全地等人來收」，是「暴露在隨時消失的風險裡，只是看得見」。\n\n## 要做什麼\n把界線從「不確定 ⇒ 不碰」移到「**不確定 ⇒ 隔離並持久化；但絕不自動進 main**」：\n- streak 過門檻的 foreign 路徑，PHASE-Z 用 plumbing（commit-tree / patch bundle）\n  checkpoint 進 `refs/volpred/quarantine/<ts>`；\n- **不動工作區、不動 main、不要求測試過、不宣稱完成**（純新增，不放寬任何既有安全性）；\n- 引入常數 `_FOREIGN_QUARANTINE_REF_PREFIX`（`scripts/tests/test_phase_z_ownership_class_gate.py`\n  的 xfail-strict 就是釘這個符號；落地後那條會 XPASS→必須翻成正式 assertion）；\n- 走 `git_writer_lock`，不得裸 git。\n\n## 完成判準\n新測試證明：checkpoint 後工作區 byte-for-byte 不變、main 的 HEAD 不變、ref 可 `git show`\n取回內容；且 producer 仍在編輯（live flock）的路徑**不**被 checkpoint。\n\nparent_email_task_id/parent: assign_a006f8ed",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-19T09:41:46.737440+00:00",
+    "parent_task_id": "assign_a006f8ed",
+    "created_by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff"
+  },
+  {
+    "id": "assign_ae341cb9",
+    "title": "[D3] foreign streak 過門檻改建持久 incident + scheduler admission control（取代再發一封 CRITICAL）",
+    "description": "外部第二意見裁決 D3（全文 docs/governance/2026-07/phase_z_ownership_external_review.md）。\n\n## 為什麼\nCRITICAL 警報**有正常發**（3/6/12/24… 班退避），**78 班零行動**。原因不是通知不夠大聲，是\n它是 notification 不是控制流程：沒有必須接手的單一 owner、沒有 deadline、**對 scheduler 沒有\n任何影響**、未解決不影響後續 fire、沒有可驗證的 terminal postcondition。逐字：「若 CRITICAL\n不會改變 scheduler 行為，它只是紅色日誌。」\n\n## 要做什麼\n1. streak 過門檻 → 建**一張**持久 incident 任務（同 fingerprint 不重複建），而非每次再發信；\n2. incident 未關 → scheduler 進 recovery/admission-held 或至少降載，**不再讓新 writer 無限制\n   往同一個共享 checkout 疊狀態**；\n3. incident 的 postcondition 必須機械可驗：每個 dirty path 都對應 live workspace **或**\n   immutable WIP/quarantine ref，且 main checkout 回到乾淨；\n4. 只有語意衝突與「是否進 main」才找人；保存動作不需要人批准（與 D2 相接）。\n\n## 注意\n這是 anti-stacking 敏感區：既有 alert 路徑要**收編**，不是再疊一層。\n\nparent: assign_a006f8ed",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-19T09:41:46.788360+00:00",
+    "parent_task_id": "assign_a006f8ed",
+    "created_by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff"
+  },
+  {
+    "id": "assign_c90c43c7",
+    "title": "[D4·架構] producer-scoped workspace：ownership 由 execution isolation 產生（先出設計，不直接改碼）",
+    "description": "外部第二意見裁決 D4（全文 docs/governance/2026-07/phase_z_ownership_external_review.md）——**本 class 的根治方向**。\n\n## 逐字判斷\n「你一直在讓 cleanup layer 解 ownership。Ownership 必須由 execution isolation 產生，\n不能由 cleanup layer 事後推理。」\n\n`owned = dirty_now - baseline` 只在「單一 writer、期間內 checkout quiescent」時成立。實際上：\n開班前已髒但本班又改 → 本班貢獻遺失；human/codex 改 → 誤算成本班產出；同 path 並行 → 根本\n無法拆 diff。這是資訊論上的不可歸因，不是 bug。\n\n## 目標形態\n每個 fire / interactive / codex session 各自 worktree + branch；ownership =\n`task_id + workspace ref + parent SHA`；收班先 commit 到該 task 的 WIP ref，測試過後由\n**序列化 integrator** 併 main；衝突留 branch 進 blocked，不留在共享 main。daemon 狀態改走\n單一 writer API/DB，不讓多個 daemon 直接改 main 的版本化檔。\n\n## 本任務的範圍（刻意切小）\n**只出設計文件 + 遷移路徑**，不動 phase_z：盤點所有假設 canonical cwd 的腳本、worktree\nlifecycle / 依賴與 cache 成本、整合延遲估計、分幾段落地、每段的回退點。切段後各自入池。\n\n## 硬規則\n不得在本任務內「順手」再加一個 recognizer / namespace / 收編條件 —— 那正是失敗 6 次的動作\n（D1），且 `scripts/tests/test_phase_z_ownership_class_gate.py` 會擋。\n\nparent: assign_a006f8ed",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-19T09:41:46.829454+00:00",
+    "parent_task_id": "assign_a006f8ed",
+    "created_by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff"
+  },
+  {
+    "id": "assign_0e6a740b",
+    "title": "[D5] K1380 那 8 個卡 78 班的檔逐類裁決（含 3 個 *_INVALID_20260716.*）",
+    "description": "外部第二意見裁決 D5（全文 docs/governance/2026-07/phase_z_ownership_external_review.md）。\n\n`experiments/k1380/` 有 8 個檔卡在工作區 78 班：`README.md`、`k1380.py`、\n`k1380_losses_all.npy`、`k1380_results.json`、`k1380_spa_from_cache.py`，以及三個被明確標記為\n`*_INVALID_20260716.*` 的版本（另有 `storage/work_log.json.bak_graphify_verdict_20260717`）。\n\n**不得由 cleanup layer 猜著收**：這正是外部意見點名的 semantics-as-provenance 反例 ——\n「在 `experiments/` 裡」不能證明作者、完整性或 readiness，而 `*_INVALID_*` 這個命名本身就說明\n有人做過裁決但沒收尾。需要知道 K1380 現況的人/任務逐檔裁決：哪些是有效結果該進 main、哪些是\n被作廢的舊版該刪、`.npy`/`.json` 是否該進 artifact exclusion。\n\n注意 `config/experiment_artifact_exclusions.json`（untracked、streak 3）看起來是同一件事的\n半成品，一併裁決。\n\nparent: assign_a006f8ed",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-19T09:41:46.864262+00:00",
+    "parent_task_id": "assign_a006f8ed",
+    "created_by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff"
+  },
+  {
+    "id": "assign_86f26cf3",
+    "title": "flaky test：test_orphan_reaper …symlink_and_ignored_paths（StopIteration）先建重現 harness 再談修",
+    "description": "`scripts/tests/test_orphan_reaper.py::test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths`\n在 07-19 14:42 的 PHASE-Z 隔離測試中紅（`StopIteration`，line 341 —— `result[\"held\"]` 裡找不到\n`compute-invalid`），但**沒有任何人修過它就自己綠了**：`git log f0350b91294c..HEAD --\nscripts/reap_orphan_deliverables.py scripts/tests/test_orphan_reaper.py` 零 commit，現在同一組\n5 個檔跑起來 66 passed。⇒ 環境相依 flaky。\n\n## 硬規則：先重現，不准先猜修法\n猜修法正是外部意見批評的「用結果特徵反推」（見 docs/governance/2026-07/phase_z_ownership_external_review.md §4）。要求先建 harness，在下列維度變動下\n各跑 N 次直到穩定重現：`TMPDIR`（macOS `/var` ↔ `/private/var` symlink，測試裡有\n`outside`/`symlink` 的 relative 計算）、git 版本、global `core.excludesFile`（測試依賴\n`.gitignore` 的 `*.tmp`）、並行度。重現不了就記錄「已知間歇、尚無重現」並保持觀察，**不要交出\n一個沒有證據的修法**。\n\nparent: assign_a006f8ed",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-19T09:41:46.901717+00:00",
+    "parent_task_id": "assign_a006f8ed",
+    "created_by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff"
+  },
+  {
+    "id": "assign_1fd87db1",
+    "title": "解決 1 份長期無主的產物（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `experiments/k1380` — pending_rename (namespace=experiments, first_seen=2026-07-19T06:25:58.450908+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。判定完成後這張任務關閉，held 記錄會自然消失。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-19T09:43:28.383398+00:00",
+    "payload": {
+      "held_paths": [
+        "experiments/k1380"
+      ],
+      "held_reasons": {
+        "experiments/k1380": "pending_rename"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
+    "created_by": "reap_orphan_deliverables"
+  },
+  {
+    "id": "assign_06d6352d",
+    "title": "[K528 split 2/2] Codex round 5 review + merge 裁決（等 stage 1 交付物才可開工）",
+    "description": "父 job `agent-brief_k528_rerun_v3-6e4286` 逾時，依 split_contract 拆兩段。\n**stage 1** = compute job `agent-brief_k528_split_stage1-290ac8`（completeness-gate bypass fix +\n對抗性迴歸），**本任務 = stage 2**。\n\n## 前置條件（未滿足不得開工）\n`.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528/k528_completeness_gate_fix.json`\n存在，且其 `mutation_check` 證明 gate 真的會咬人（測試永遠綠 = 不算過）。\n\n## 脈絡\n第三輪 review 已跑到 round 4（v6，17:26）給 **FAIL**，唯一 blocking defect 是完整性閘門可被\n`KNOWN_MISSING_MONTHS` + `REVIEWED_MULTI_ENTRY_MONTHS` 雙掛繞過而靜默截短樣本\n（逐字見 `experiments/k528/review_verdict_v6.json`）。stage 1 專責關掉它。\n\n## 本階段要做的\n1. 在**修好的樹**上跑 Codex round 5 review（走 `bash scripts/codex_exec_bounded.sh --timeout <N>`，\n   禁裸跑 `codex exec`）；產出 `codex_review_v7.md` + `review_verdict_v7.json`（用 verdict-template，\n   不手抄；SHA-pin 綁當下 bytes）。\n2. **PASS** → 走正式 `scripts/merge_worktree.sh` 合併，並套用重生的文章更正清單；\n   **FAIL** → 不合併，把殘餘 blocker 逐條建成新 task，不得自行放行。\n3. 主線程寫 `knowledge.json`（禁 agent 自寫，K1259）+ work_log。\n\n## 硬規則\n- compute child 的 timeout 必須 < 5400s，且帶 `--timeout-parent-job-id agent-brief_k528_rerun_v3-6e4286`\n  `--split-stage codex_round5_and_merge_decision`。\n- 禁原樣重派父 job 的 brief（`identical_retry_prohibited`）。\n- 這個 worktree 一整天被多個行為者輪流碰過（v2→v6 五份 review），**開工前先確認沒有 live 行為者**，\n  也不要假設 v6 之後的檔案狀態就是 stage 1 的產出。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-19T09:47:44.300788+00:00",
+    "created_by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff"
   }
 ]
