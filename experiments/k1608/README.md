@@ -1,5 +1,11 @@
 # K1608 - Blockbuster movie attention shocks and next-week market RV
 
+> ⚠️ **NFP 週旗標用 first-Friday proxy（次要 covariate）**
+>
+> `macro_proxy_flags()` 的 `nfp_proxy_week = any(d.weekday()==4 and 1<=d.day<=7 ...)` 用「當週是否含第一個週五」當 NFP 週旗標（同函式的 cpi/fomc 亦為日曆 proxy）。此 first-Friday proxy 已知不可靠（13 錯 7，含 2025-10 停擺幻影日）。此處僅為次要 macro-week covariate、非本實驗主結論（電影注意力衝擊 → 次週 RV），影響有限；但若要把該旗標當可信 NFP 標記使用，須改用 canonical `volpred.data.event_dates.nfp_release_dates`（fail-closed，官方 BLS/ALFRED 日曆）。
+> 根因/修正：`docs/error_log.md` 2026-07-12 CPI 條目、knowledge `390d9784`、K528 修正案。
+> （2026-07-19 first-Friday proxy 全庫 sweep 標記，assign_23b2a961）
+
 ## Question
 
 Does a large U.S. movie-going attention shock leave a detectable next-week footprint in broad-market returns, realized volatility, or consumer-discretionary / entertainment-exposed assets?

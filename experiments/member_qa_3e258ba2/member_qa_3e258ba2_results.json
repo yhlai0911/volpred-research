@@ -1,0 +1,225 @@
+{
+  "experiment_id": "member_qa_3e258ba2",
+  "question": "接下來 30 年資金穩定每年成長 7%，該掌握哪些投資問題",
+  "generated_at": "2026-07-19T13:36:22.297060",
+  "seed": 42,
+  "data": {
+    "shiller": {
+      "source": "Robert Shiller ie_data.xls (含股息 D + CPI)",
+      "n_months": 1829,
+      "period": "1871-02-01 → 2023-06-01",
+      "return_type": "含息 total return（名目與扣 CPI 實質兩版）"
+    },
+    "gspc": {
+      "source": "yfinance ^GSPC (價格指數，不含股息)",
+      "n_months": 1183,
+      "period": "1928-01-01 → 2026-07-01",
+      "return_type": "純價格報酬（低估真實含息報酬約一個股息殖利率）",
+      "caveat": "價格指數不含股息，故 30 年達標比例系統性低於含息口徑；僅作 cross-check"
+    }
+  },
+  "component1_volatility_drag": {
+    "nominal_total_return": {
+      "n_months": 1829,
+      "n_annual_obs": 152,
+      "arith_annual": 0.10664098795946664,
+      "geo_annual_cagr": 0.09124451831422964,
+      "sigma_annual": 0.18031501342384873,
+      "drag_empirical_pctpt": 0.015396469645236999,
+      "drag_theory_sigma2_over_2_pctpt": 0.016256752033021373,
+      "required_arithmetic_for_7pct_geo": {
+        "sigma_0.10": 0.07500000000000001,
+        "sigma_0.15": 0.08125,
+        "sigma_0.18": 0.0862,
+        "sigma_0.20": 0.09000000000000001,
+        "sigma_0.25": 0.10125,
+        "sigma_empirical_0.180": 0.08625675203302138
+      }
+    },
+    "real_total_return": {
+      "n_months": 1829,
+      "n_annual_obs": 152,
+      "arith_annual": 0.08402460729786357,
+      "geo_annual_cagr": 0.06866460948996678,
+      "sigma_annual": 0.17874961835781408,
+      "drag_empirical_pctpt": 0.015359997807896791,
+      "drag_theory_sigma2_over_2_pctpt": 0.015975713031532092,
+      "required_arithmetic_for_7pct_geo": {
+        "sigma_0.10": 0.07500000000000001,
+        "sigma_0.15": 0.08125,
+        "sigma_0.18": 0.0862,
+        "sigma_0.20": 0.09000000000000001,
+        "sigma_0.25": 0.10125,
+        "sigma_empirical_0.179": 0.08597571303153209
+      }
+    },
+    "note": "drag = 算術年化 − 幾何年化 ≈ σ²/2；波動越大，同一幾何目標需更高算術報酬"
+  },
+  "component2_rolling_30yr": {
+    "shiller_nominal": {
+      "n_windows": 1470,
+      "window_years": 30,
+      "fraction_ge_7pct": 0.8081632653061225,
+      "fraction_ge_5pct": 0.9959183673469387,
+      "fraction_ge_4pct": 0.998639455782313,
+      "fraction_ge_10pct": 0.4741496598639456,
+      "mean": 0.09456040593228904,
+      "median": 0.09897433774570652,
+      "std": 0.021876168672676163,
+      "min": 0.036352499466895116,
+      "min_window": "1902-07-01 → 1932-06-01",
+      "max": 0.14320101294901466,
+      "max_window": "1970-08-01 → 2000-07-01",
+      "p10": 0.0638529516721826,
+      "p25": 0.0745261350382499,
+      "p75": 0.10869408271034531,
+      "p90": 0.1242347675789162
+    },
+    "shiller_real": {
+      "n_windows": 1470,
+      "window_years": 30,
+      "fraction_ge_7pct": 0.4530612244897959,
+      "fraction_ge_5pct": 0.8108843537414966,
+      "fraction_ge_4pct": 0.9469387755102041,
+      "fraction_ge_10pct": 0.015646258503401362,
+      "mean": 0.06651009880700678,
+      "median": 0.06719964958588664,
+      "std": 0.01648756453161602,
+      "min": 0.01894895335233482,
+      "min_window": "1902-07-01 → 1932-06-01",
+      "max": 0.11153988804714099,
+      "max_window": "1932-07-01 → 1962-06-01",
+      "p10": 0.04489447963471307,
+      "p25": 0.05333476512745705,
+      "p75": 0.07945542906590003,
+      "p90": 0.08692941481472527
+    },
+    "gspc_price_nominal": {
+      "n_windows": 824,
+      "window_years": 30,
+      "fraction_ge_7pct": 0.5533980582524272,
+      "fraction_ge_5pct": 0.9490291262135923,
+      "fraction_ge_4pct": 0.9575242718446602,
+      "fraction_ge_10pct": 0.00849514563106796,
+      "mean": 0.07138578702561194,
+      "median": 0.07343876249970704,
+      "std": 0.014828378979936,
+      "min": 0.021256892542611094,
+      "min_window": "1929-09-01 → 1959-08-01",
+      "max": 0.10501877393229031,
+      "max_window": "1970-07-01 → 2000-06-01",
+      "p10": 0.055331994740605905,
+      "p25": 0.061793484176916436,
+      "p75": 0.08234165946487543,
+      "p90": 0.08829929249264122
+    }
+  },
+  "component3_sequence_of_returns": {
+    "block_bootstrap": {
+      "n_paths": 2000,
+      "block_months": 24,
+      "horizon_months": 360,
+      "lump_sum_initial": 10000.0,
+      "lump_terminal_p10": 42423.381255917,
+      "lump_terminal_p50": 139776.14333007514,
+      "lump_terminal_p90": 478332.3717153134,
+      "lump_cagr_p10": 0.04934953884034434,
+      "lump_cagr_p50": 0.09189550481177022,
+      "lump_cagr_p90": 0.13760369091782848,
+      "lump_frac_beat_7pct": 0.742,
+      "dca_monthly_contrib": 500.0,
+      "dca_total_invested": 180000.0,
+      "dca_terminal_p10": 401632.988613387,
+      "dca_terminal_p50": 943306.2470428336,
+      "dca_terminal_p90": 2307641.711877743
+    },
+    "permutation": {
+      "n_perms": 2000,
+      "fixed_window": "1993-07-01 → 2023-06-01",
+      "note": "固定同一組 30 年月報酬，只隨機打亂順序；lump-sum 應不變，有現金流者隨順序變動",
+      "lump_terminal_min": 170920.45923891044,
+      "lump_terminal_max": 170920.45923891148,
+      "lump_terminal_cv": 9.388428270659772e-16,
+      "dca_terminal_p10": 830668.5596737012,
+      "dca_terminal_p50": 1050470.4772931016,
+      "dca_terminal_p90": 1340717.104497226,
+      "dca_spread_p90_over_p10": 1.614021728502496,
+      "withdrawal_start": 1000000.0,
+      "withdrawal_4pct": {
+        "monthly": 3333.3333333333335,
+        "frac_depleted": 0.0,
+        "end_balance_p10": 8207572.046989193,
+        "end_balance_p50": 10142549.561683405,
+        "end_balance_p90": 11607895.679146044,
+        "end_balance_spread_p90_over_p10": 1.4142910488862783
+      },
+      "withdrawal_5pct": {
+        "monthly": 4166.666666666667,
+        "frac_depleted": 0.0,
+        "survive_p10_months": 360.0,
+        "survive_p50_months": 360.0
+      },
+      "withdrawal_extremes": {
+        "note": "同一組 30 年報酬，最差月份排前(bad-early) vs 最好月份排前(good-early)",
+        "rate_4pct": {
+          "rate": 0.04,
+          "bad_early_depleted": true,
+          "bad_early_survive_months": 43,
+          "bad_early_end_balance": 0.0,
+          "good_early_depleted": false,
+          "good_early_survive_months": 360,
+          "good_early_end_balance": 16156010.21077613
+        },
+        "rate_5pct": {
+          "rate": 0.05,
+          "bad_early_depleted": true,
+          "bad_early_survive_months": 38,
+          "bad_early_end_balance": 0.0,
+          "good_early_depleted": false,
+          "good_early_survive_months": 360,
+          "good_early_end_balance": 15922001.282497436
+        },
+        "rate_6pct": {
+          "rate": 0.06,
+          "bad_early_depleted": true,
+          "bad_early_survive_months": 35,
+          "bad_early_end_balance": 0.0,
+          "good_early_depleted": false,
+          "good_early_survive_months": 360,
+          "good_early_end_balance": 15687992.354218705
+        }
+      }
+    }
+  },
+  "display_values_for_article": {
+    "rolling_ge7_nominal_pct": 80.8,
+    "rolling_ge7_real_pct": 45.3,
+    "rolling_ge4_real_pct": 94.7,
+    "rolling_ge5_real_pct": 81.1,
+    "worst_30yr_nominal_pct": 3.64,
+    "best_30yr_nominal_pct": 14.32,
+    "n_windows": 1470,
+    "real_geo_annual_pct": 6.87,
+    "nominal_arith_annual_pct": 10.66,
+    "nominal_geo_annual_pct": 9.12,
+    "req_arith_for_7geo_sigma10_pct": 7.5,
+    "req_arith_for_7geo_sigma18_pct": 8.63,
+    "req_arith_for_7geo_sigma25_pct": 10.1,
+    "sigma_levels_pct": [
+      10,
+      18,
+      25
+    ],
+    "target_geo_pct": 7,
+    "bootstrap_p10_wan": 4.24,
+    "bootstrap_p50_wan": 13.98,
+    "bootstrap_p90_wan": 47.83,
+    "bootstrap_p10_cagr_pct": 4.93,
+    "bootstrap_p50_cagr_pct": 9.19,
+    "bootstrap_p90_cagr_pct": 13.76,
+    "bootstrap_ge7_pct": 74.2,
+    "lumpsum_terminal_cv": 9.388428270659772e-16,
+    "withdrawal_rate_pct": 4,
+    "percentile_90": 90
+  }
+}

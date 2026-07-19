@@ -21597,5 +21597,45 @@
     "owner": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
     "commit": "pending-PHASE-Z",
     "summary": "K1698 重跑（codex gpt-5.6-sol 判 FAIL）—— enqueue 至 compute queue agent lane，job `agent-brief_k1698_rev2-713b65`（opus/xhigh, timeout 7200s, worktree `.claude/worktrees/dispatch-slot-2-c5cafe39-k1698`, result artifact `experiments/k1698/k1698_rev2_results.json`）。\n\nbrief 要點（順序有依賴）：(1) 致命 lookahead 未解 —— active contract 依整份日檔成交量選出（k1698.py:328），含 13:30-13:45 tick，推翻「資訊集不相交」宣稱，須改用 13:30 前可得資訊後重跑；(2) 60 天邊界 audit 是空驗證 —— 抽最早 60 個交易日（2017-01，夜盤上線前），12 筆 checks 的 night_*_in_window 全為 None 且 None 不令 ok=False，須改抽夜盤期＋OOS(2023-24)；(3) accepting the null —— p=0.142 被寫成 H2_REJECTED，須改 equivalence/noninferiority；(4) 四層 ablation（contract/gap/alignment/path）才能講「哪一項吃掉多少」。brief 明列已修好、不必重做的 blocker （n=450 縮樣、atomic write、GATE_RULES leg-2 檢查）避免浪費。K1259：須 codex 二審。followup paper_review P2 已掛。"
+  },
+  {
+    "timestamp": "2026-07-19T13:23:30+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_2398cbfe",
+    "outcome": "completed",
+    "actor": "hourly-slot-4-e402e39a537640f383ae81eb70556777",
+    "owner": "hourly-slot-4-e402e39a537640f383ae81eb70556777",
+    "commit": null,
+    "summary": "收斂餓死 62.6h 的主線程 P2 `assign_2398cbfe`（[P35-retry] Codex K1258 review），結論是**該單早已作廢，但底下藏著 81 天沒人接的 review findings**。\n\n**做了什麼**\n1. 查 `~/.codex/config.toml` → 現為 `gpt-5.6-sol`，2026-04-24 的 `gpt-5.5 does not exist` blocker 已不存在。\n2. 但進一步發現 `experiments/k1258/codex_review_v2.md`（2026-04-29、Codex CLI 0.121.0 / gpt-5.4、CONDITIONAL PASS、0 CRITICAL / 0 SEVERE / 2 MAJOR / 2 MED / 1 MINOR）—— primary-path review **早就跑完了**，只是這張 4/24 的 retry 單從未回收。故**不重跑冗餘 codex job**（省一次 2400s 佇列工）。\n3. 逐行覆核 review 的兩個 MAJOR 是否已修 → **皆原封未動**：\n   - MAJOR-1 `k1258_forgetting_factor_bma.py:597-598`：invalid 模型保留 decayed prior 後全體正規化；且 `:586` `weight_hist[t]` 無 valid mask，污染直入 forecast 路徑。\n   - 覆核 K1257 `k1257_bma_volatility.py:551-568` 為同構但**較輕**（`:545-546` forecast 端有 valid 重正規化保護，污染僅經 posterior 遞延）—— 此嚴重度差異為本班新增判讀，review v2 未區分。\n   - MAJOR-2 `k1258_results.json` 只有 `provenance.*`，無 convergence / invalid-day / dropped-day 任何計數 → MAJOR-1 觸發次數無法從 artifact 驗證。\n4. 全池搜尋確認**沒有任何 K1258/K1257 修復單**存在（唯一相關者就是這張作廢 retry），即 E078 系列 5/5 中僅 BMA family 的 CONDITIONAL PASS 被漏接。\n5. 開 `assign_9f0a31a8`（P2 / experiment / topology=compute_queue）承接，交付契約含：協調修 K1257+K1258 valid-mask、converged=False 排除、results.json 補計數、重跑 3 assets × 5 λ OOS 2020-2026 走 compute_queue、結論翻轉須回改 knowledge `727e23ee`。\n\n**過程中修正的一個錯誤**：先用 `local_control_plane.create_task` 建單，發現它寫進 `storage/ops/tasks/`（100 筆，與 `next_tasks.json` 完全不相交）→ dispatcher 看不到。改用 `volpred.ops.next_tasks.append_next_task` 重建於 canonical queue 並驗證 `task_pool_claim list --status pending` 可見，隨即刪除錯 lane 的重複單 `task_6bb691c76967`。\n\n**未做**：沒有動 K1257/K1258 任何實驗代碼 —— 修復會改變結果、需重跑 heavy compute，屬 `assign_9f0a31a8` 範圍，不在 fire cap 內硬塞。"
+  },
+  {
+    "timestamp": "2026-07-19T13:27:51+08:00",
+    "task_type": "paper_decision",
+    "task_id": "Paper3_expansion_synthesis_decision_meta",
+    "outcome": "completed",
+    "actor": "hourly-slot-3-b1377383cb3144d1a4b2b6214fc691aa",
+    "owner": "hourly-slot-3-b1377383cb3144d1a4b2b6214fc691aa",
+    "commit": null,
+    "summary": "Paper 3 A 擴展 meta synthesis 裁決完成（P2，建單 2026-05-28 起掛 51 天）。\n\n**觸發條件從未成立**：任務要求 E1+E2+E3 全 succeeded，但 E3（商品臂）於 2026-05-29 失敗、\n無失敗原因記錄、無 partial 產物、7 週從未重試。實際 pooled N=22 pairs（E1 12 + E2 10），\n非規劃的 33-43；涵蓋 1 個資產類別而非 3 個。裁決據此明確劃定邊界，未對「跨資產類別」下任何結論。\n\n**裁決：Paper 3 A 的 λ_L threshold 主論點不成立**（不採此框架動筆 Section 4）。依強度：\n1. FZ0 尾部損失 88 檢定中 copula-favoured 0 個（BH 後兩方向皆 0）——copula 理論上最該贏的\n   維度完全無訊號；唯一 QLIKE 存活者 TW0050-N225 在 FZ 上僅 t=+0.16/+0.73\n2. QLIKE 44 檢定經 BH-FDR 後 copula 方向僅存 1 個（TW0050-N225/Student-t, p_adj=0.0040），\n   反向證據 6 個多於正向 3 個\n3. 唯一顯著的 λ_L scaling 關係（E2/Clayton rho=+0.903, p=0.00034）符號與預先登錄 H3 相反，\n   且不在 E1 複製；兩臂異質性顯著（Cochran Q=8.805, p=0.0030）→ naive pooling 非正當估計量\n4. 預先登錄 sector 型態失敗（MWU p=0.818，cross-sector 最大 copula-favoured t 僅 +0.509，\n   0/6 達 |t|>3.0）\n\n**途中發現的源頭缺陷**：E1 與 E2 用同一欄位名 `significant_harvey` 但兩把不同的尺——\nE1 是硬編 abs(t)>3.0 且完全未套 HLN（paper3_E1.py:717），E2 是 HLN 修正後比\nt.ppf(0.975,df)≈1.961（paper3_E2.py:784-791）。「E1 有 0 個顯著、E2 有 2 個顯著」的並列\n讀法無效。本 synthesis 丟棄兩邊 flag，一律從 (t, n_oos) 統一重算 p 再做 BH-FDR。\n\n**誠實補報**：Trinity VaR/ES 校準在 α=2.5% 是 copula 大勝（Copula-t 19/22 vs DCC 10/22），\n但 α=1% 反轉（18/22 vs 19/22）。此為校準主張非 λ_L 主張，救不了主論點，但不報會把負面\n結論講過頭。\n\n**方向建議（待老闆拍板，未自行推進）**：存活的唯一實證指向 research_program_archive §7\n當初列的選項 B（TAIFEX/亞洲 microstructure 特有），而非選項 A 要的通用 methodology——\n唯一過 BH-FDR 的是 TW0050-N225、唯一有訊號的 region 是 asia intraregional，與 2026-04-13\n「Lai 2024 PRS copula edge 是 TAIFEX microstructure 特有現象」的結論一致。這是第三次\n獨立確認，非新發現。\n\n**品質保證**：已過一輪對抗性複核（獨立 agent，指令為駁倒而非背書）→ CONDITIONAL_PASS、\nBLOCKERS 無。複核獨立重現 D1c 全部數字並確認符號慣例／BH-FDR 實作／p 值重算／pair join／\nsector 預先登錄清單皆正確；其提出的 10 項措辭收斂已全數反映。複核漏引的一點（Trinity 在\nα=1% 反轉）由本方補上。\n\n產物：experiments/paper3_expansion_synthesis/{paper3_synthesis.py, paper3_synthesis_results.json, README.md}\n純 meta 分析，未重跑任何模型；所有數字可追溯至 E1/E2 既存 results JSON。"
+  },
+  {
+    "timestamp": "2026-07-19T13:30:59+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_87bae720",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-14bbc35a2051409480657ccdff8befbe",
+    "owner": "hourly-slot-2-14bbc35a2051409480657ccdff8befbe",
+    "commit": null,
+    "summary": "[worktree harvest wave 1] 4 個 clean-but-unmerged worktree 共 9 commits 正規合併回 main，checkout 回收。\n\n做法：逐一走正式 `bash scripts/merge_worktree.sh <name>`（先 --dry-run 確認 commit 清單，再實跑），\n禁裸 git merge / 禁 --force remove / 禁合併前 cd 進 worktree（皆遵守）。\n\n- dispatch-slot-1-3217f0b2-k1685 (2 commits)：K1685 general-audience 草稿 + 3 張圖\n  → storage/drafts/K1685_general_draft.md、k1685_{cumulative_gap,dm_t_path,qlike_by_regime}.png\n- dispatch-slot-1-3217f0b2-pushgate (1 commit)：push-gate 改審「被 push 的那個 commit」而非\n  shared checkout 的髒樹 → scripts/audit_silent_fallbacks.py、scripts/cron_git_push_backup.sh、\n  tests/test_silent_fallback_audit.py\n- dispatch-slot-1-a56566ff-k1719 (3 commits)：K1719 spillover 實驗全套 7 檔（含 review_verdict.json）\n  → merge 時 cert gate 回 PASS（verdict 綁定當前 bytes、清過 1 道 integrity gate）；\n    腳本自帶的 experiments/ 完整性驗證回「所有新增檔已正確合併、modified 無 silent drop」\n- dispatch-slot-2-5ddfeb00-k1583 (3 commits)：K1583 general 草稿 + lazypack plan + 2 張圖\n\n驗證：8 個代表性 artifact 以 `git ls-files --error-unmatch` 確認已進版控（非只是留在工作區）。\nworktree 目錄數 22 → 18；4 條 wt/ branch 由腳本自行刪除。\n\n**衍生發現（已建 followup `worktree_harvest_wave2_dirty_stale_20260719` P2）**：\n剩下的 9 個 stale worktree 全部卡在另一種狀態 —— reclaim_stale_worktrees.py 判\n`dirty — 有未提交工作，保留待人工裁決`，所以永遠不會自動回收，每班 dispatch report 重報一次。\n其中 4 個另有未進 main 的 commit（k1707:4 / cqamend:2 / taifexrv:3 / k1730:1）。\n這 9 個是 `occupied 9/4 → free=0`（agent lane 本班派不出任何工）與 .claude/worktrees 52G 的主因。\n本班不順手處理：dirty 樹要逐一分辨「真成果 / 執行殘渣 / 半成品」，批次盲合正是 K1618 那類事故的做法。"
+  },
+  {
+    "timestamp": "2026-07-19T13:54:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29672635000",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-ad38a4f68174432288ad4d9947c3b59d",
+    "owner": "hourly-slot-1-ad38a4f68174432288ad4d9947c3b59d",
+    "commit": "pending-PHASE-Z",
+    "summary": "CI 紅燈 run 29672635000 分診：連紅三班其實是兩個不同根因，不是一個。\n(1) 03:00/04:00 兩班紅在 test_knowledge_unrecorded_ratchet — k1732 有 archived results 但無 knowledge.json 條目。查證後確認此根因已由 12:06 的 commit 4b3875b05 補上並推送（entry item_id=k1732_certified_20260719, verdict=PASS, reviewer=Codex gpt-5.6-sol 三輪），CI 紅的那兩班測的是更早的 head_sha，本班無需重做。\n(2) 05:00 班（run 29674177829, c541b0ef1）是新根因：tests/test_task_pool_claim.py::test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task 走 cmd_complete -> _request_burst_fire -> dispatch_supervisor.state.request_fire，寫到 canonical storage/ops/dispatch_state.json，被 VOLPRED_NO_CANONICAL_WRITE gate 擋下。_request_burst_fire 本身有 except Exception fail-open，但 CanonicalWriteBlocked 是刻意繼承 BaseException 的 test 哨兵，設計上不允許被 fail-open 吞掉 —— 所以修法在測試側把 request_fire 導開，不是去動 production 的例外處理。\n修法：在 tests/test_task_pool_claim.py 加 autouse fixture burst_fire_requests，monkeypatch sup_state.request_fire 收集 reason；autouse 而非單測就地 patch，是因為任何一條 complete 到有 pending burst 的 task 都會走這條路，下一個新增的完成測試會重踩同一顆雷。另加一條 test_burst_fire_request_is_intercepted_not_written_to_canonical_state 直呼 _request_burst_fire 斷言 requested=True 且 reason 落在 recorder，證明 fixture 非空轉（本機 slot 佔用狀態下 complete 不必然走到 burst，故不能靠完成測試證明）。\n驗證：VOLPRED_NO_CANONICAL_WRITE=1 跑 tests/test_task_pool_claim.py 23 passed。全套件本機 3583 passed / 5 failed(18:56)，其餘 4 條為本機 dirty tree / 環境差異（CI 該班只紅這 1 條）。\n遺留（已開 P1 接手單 ci-red-k1719-unrecorded-knowledge）：全套件跑完後 ratchet 又轉紅，這次是 k1719 —— 13:14 本 checkout 還綠、13:38 轉紅，是別的 session 在這區間把 k1719 結果併進 main 而沒寫 knowledge 條目。同一 class 的新實例，不屬本班 claim 範圍且已近 50min cap，不做半套。\n另：本班一度加了 scripts/record_experiment_knowledge.py（想補 add_knowledge 無法帶 verdict/k_id 的機械缺口），查明 k1732 其實已被收錄後刪除 —— 沒有真正修到東西的腳本不留。\nroot_cause=unit test reached canonical dispatch_state.json via cmd_complete burst-fire; repair=tests/test_task_pool_claim.py autouse request_fire interception; repair_commit=pending-PHASE-Z"
   }
 ]

@@ -1,0 +1,2146 @@
+{
+  "experiment_id": "Paper3_expansion_synthesis",
+  "inputs": {
+    "E1": "experiments/paper3_E1_individual_stocks_copula/paper3_E1_results.json",
+    "E2": "experiments/paper3_E2_cross_market_copula/paper3_E2_results.json",
+    "E3": "FAILED \u2014 no artifacts on disk; commodities arm absent"
+  },
+  "coverage": {
+    "planned_pairs": "33-43 (15 stocks + 10 markets + 8 commodities)",
+    "realised_pairs": 22,
+    "realised_breakdown": {
+      "E1_individual_stocks": 12,
+      "E2_cross_market": 10,
+      "E3_commodities": 0
+    },
+    "asset_classes_covered": 1,
+    "asset_classes_planned": 3
+  },
+  "caveats": {
+    "significance_bar_inconsistency": {
+      "severity": "material \u2014 motivates this re-computation",
+      "E1_rule": "paper3_E1.py:717 \u2014 significant_harvey = abs(t) > 3.0, hardcoded, no HLN correction applied at all",
+      "E2_rule": "paper3_E2.py:784-791 \u2014 t = t_raw * hln_factor, then significant_harvey = abs(t) > student_t.ppf(0.975, df) ~ 1.961",
+      "consequence": "the two arms publish the same field name under two different bars, so 'E1: 0 significant' and 'E2: 2 significant' are NOT comparable. Under E2's 1.96 bar, E1 would show NVDA-AMD (t=+1.974) as a copula-favoured hit and several DCC-favoured hits.",
+      "resolution": "this synthesis ignores both stored flags and recomputes every p-value from (t, n_oos) on one uniform rule, then applies BH-FDR."
+    },
+    "hln_coverage": {
+      "E1_hln_applied": false,
+      "E2_hln_applied": true,
+      "note": "E1 stores raw DM t. With n_oos > 1500 the HLN factor exceeds 0.9997, so applying it shifts E1's largest |t| (GOOGL-META/Clayton, 2.8880) only to 2.8875 \u2014 it cannot change any verdict at any bar considered here."
+    },
+    "best_copula_selection": "t_best = max(t_student_t, t_clayton) is a selected maximum; inference uses all 44 tests with BH-FDR instead.",
+    "overlapping_samples": "pairs share underlying assets (esp. TW0050, SPY), so BH-FDR independence is approximate \u2014 it is the lenient direction."
+  },
+  "D1_lambda_L_scaling": {
+    "pooled_student_t": {
+      "rho": -0.15866741953698477,
+      "p": 0.48064705182624157,
+      "n": 22
+    },
+    "pooled_clayton_matched": {
+      "rho": 0.20722755505364204,
+      "p": 0.35478551222580307,
+      "n": 22
+    },
+    "pooled_clayton_mismatched_lambdaL_t": {
+      "rho": 0.02089215132693394,
+      "p": 0.9264735945676482,
+      "n": 22
+    },
+    "E1_student_t": {
+      "rho": 0.04895104895104895,
+      "p": 0.8799185788786748,
+      "n": 12
+    },
+    "E2_student_t": {
+      "rho": 0.406060606060606,
+      "p": 0.24428229408662652,
+      "n": 10
+    },
+    "E1_clayton_matched": {
+      "rho": -0.006993006993006993,
+      "p": 0.9827917689028476,
+      "n": 12
+    },
+    "E2_clayton_matched": {
+      "rho": 0.9030303030303028,
+      "p": 0.00034361219776328245,
+      "n": 10
+    },
+    "prereg_H3_sign": "negative",
+    "headline": "the ONLY significant lambda_L relation in either source study is E2/Clayton, and its sign is POSITIVE \u2014 i.e. significantly OPPOSITE to the pre-registered H3 prediction. E1 is null. The correct statement is not 'no relation' but 'a significant relation running backwards in one study, null in the other'.",
+    "lambda_L_support": {
+      "E1_range": [
+        0.008928915226236182,
+        0.5521671969998067
+      ],
+      "E2_range": [
+        3.882000535852828e-05,
+        0.14248543433703414
+      ],
+      "note": "the two arms barely overlap in lambda_L support, so the pooled Spearman is not a pooled estimate of one within-study relation \u2014 read the per-study rows."
+    },
+    "heterogeneity_E1_vs_E2_clayton": {
+      "cochran_Q": 8.805064913510481,
+      "df": 1,
+      "p": 0.003003954560180285,
+      "verdict": "significant heterogeneity \u2014 a naive 22-pair pooled Spearman is NOT a defensible primary estimator; report the study-level rhos instead."
+    }
+  },
+  "D1b_threshold_split": {
+    "lambda_L_0.10": {
+      "threshold": 0.1,
+      "n_low": 14,
+      "n_high": 8,
+      "mean_t_low": 0.36823888399123655,
+      "mean_t_high": -0.19193111140859254,
+      "mannwhitney_u": 66.0,
+      "mannwhitney_p": 0.5251712168120837,
+      "confound": {
+        "high_group_studies": {
+          "E1": 7,
+          "E2": 1
+        },
+        "high_group_all_E1_same_sector": false
+      }
+    },
+    "lambda_L_0.15": {
+      "threshold": 0.15,
+      "n_low": 16,
+      "n_high": 6,
+      "mean_t_low": 0.35652575873015835,
+      "mean_t_high": -0.3474194425123267,
+      "mannwhitney_u": 61.0,
+      "mannwhitney_p": 0.3667725463391097,
+      "confound": {
+        "high_group_studies": {
+          "E1": 6,
+          "E2": 0
+        },
+        "high_group_all_E1_same_sector": true
+      }
+    },
+    "lambda_L_0.20": {
+      "threshold": 0.2,
+      "n_low": 17,
+      "n_high": 5,
+      "mean_t_low": 0.4516738494072688,
+      "mean_t_high": -0.8117119910629995,
+      "mannwhitney_u": 64.0,
+      "mannwhitney_p": 0.10116199589883801,
+      "confound": {
+        "high_group_studies": {
+          "E1": 5,
+          "E2": 0
+        },
+        "high_group_all_E1_same_sector": true
+      }
+    }
+  },
+  "D1c_multiple_testing": {
+    "n_tests": 44,
+    "raw_sig_copula_favoured": [
+      "NVDA-AMD/Student-t",
+      "TW0050-HSI/Student-t",
+      "TW0050-N225/Student-t"
+    ],
+    "raw_sig_dcc_favoured": [
+      "GOOGL-META/Clayton",
+      "XOM-CVX/Student-t",
+      "XOM-CVX/Clayton",
+      "AAPL-XOM/Student-t",
+      "AAPL-XOM/Clayton",
+      "MSFT-JPM/Student-t"
+    ],
+    "bh_fdr_5pct_survivors_copula": [
+      {
+        "pair": "TW0050-N225",
+        "model": "Student-t",
+        "t": 3.9229611340411856,
+        "p_bh_adj": 0.003974300823396135
+      }
+    ],
+    "bonferroni_5pct_survivors_copula": [
+      {
+        "pair": "TW0050-N225",
+        "model": "Student-t",
+        "t": 3.9229611340411856
+      }
+    ],
+    "bonferroni_alpha": 0.0011363636363636365
+  },
+  "D1e_fz_family": {
+    "n_tests": 88,
+    "n_pairs_covered": 22,
+    "bh_fdr_5pct_survivors_copula": [],
+    "bh_fdr_5pct_survivors_dcc": [],
+    "raw_sig_copula_favoured": [],
+    "raw_sig_dcc_favoured": [
+      "AAPL-MSFT/Student-t/alpha_0.025",
+      "AAPL-MSFT/Clayton/alpha_0.025"
+    ],
+    "spearman_lambdaL_vs_fz_t": {
+      "rho": -0.14081484574395484,
+      "p": 0.19066854751681583,
+      "n": 88
+    },
+    "note": "FZ0 loss on VaR/ES forecasts (Patton-Ziegel), lower = better; same DCC-first sign convention as the QLIKE family, so t > 0 favours the copula."
+  },
+  "D1f_trinity_calibration": {
+    "alpha_0.025": {
+      "DCC-A4f-ASYM": {
+        "pass": 10,
+        "of": 22,
+        "E1": "6/12",
+        "E2": "4/10"
+      },
+      "Copula-t-A4f-ASYM": {
+        "pass": 19,
+        "of": 22,
+        "E1": "12/12",
+        "E2": "7/10"
+      },
+      "Copula-Clayton-A4f-ASYM": {
+        "pass": 18,
+        "of": 22,
+        "E1": "11/12",
+        "E2": "7/10"
+      }
+    },
+    "alpha_0.010": {
+      "DCC-A4f-ASYM": {
+        "pass": 19,
+        "of": 22,
+        "E1": "11/12",
+        "E2": "8/10"
+      },
+      "Copula-t-A4f-ASYM": {
+        "pass": 18,
+        "of": 22,
+        "E1": "8/12",
+        "E2": "10/10"
+      },
+      "Copula-Clayton-A4f-ASYM": {
+        "pass": 19,
+        "of": 22,
+        "E1": "9/12",
+        "E2": "10/10"
+      }
+    },
+    "interpretation": "Copula-GARCH beats DCC on VaR/ES calibration at alpha=2.5% (Copula-t 19/22 vs DCC 10/22), but the ordering REVERSES at alpha=1% (Copula-t 18/22 vs DCC 19/22; in E1 alone, 8/12 vs 11/12). So the calibration advantage is real but NOT uniform across tail depth \u2014 it is a 2.5% phenomenon that does not survive into the deeper tail. This is a CALIBRATION claim, not a lambda_L-threshold claim: it does not rescue Paper 3 A's main argument, but the synthesis must report it so the negative finding is not overstated in the other direction."
+  },
+  "D2_sector_pattern": {
+    "n_same_sector": 6,
+    "n_cross_sector": 6,
+    "mean_t_same_sector": -0.49102890262714743,
+    "mean_t_cross_sector": -0.6989570831041241,
+    "mannwhitney_u": 20.0,
+    "mannwhitney_p": 0.8181818181818182,
+    "prereg_H2_claim": "cross-sector pairs reach Harvey |t| > 3.0",
+    "cross_sector_largest_magnitude_t_signed": -2.638820396239405,
+    "cross_sector_max_copula_favoured_t": 0.5093640540222444,
+    "n_cross_sector_reaching_t3": 0,
+    "E2_by_region_mean_t": {
+      "developed_cross_region": -0.05404495105597625,
+      "developed_vs_emerging_asia": -0.008615891525726338,
+      "asia_intraregional": 2.531525878452534
+    }
+  },
+  "D1d_survivor_concentration": {
+    "survivor_pairs": [
+      "TW0050-N225"
+    ],
+    "top3_pairs_by_best_t": [
+      {
+        "pair": "TW0050-N225",
+        "best_t": 3.9229611340411856
+      },
+      {
+        "pair": "TW0050-HSI",
+        "best_t": 2.0785522210793674
+      },
+      {
+        "pair": "NVDA-AMD",
+        "best_t": 1.974043300241037
+      }
+    ],
+    "note": "TW0050 occupies the top of the ranking; E2's asia_intraregional 'cluster' is 3 mutually overlapping pairs drawn from only 3 assets (TW0050, HSI, N225), so it is closer to one observation than to three."
+  },
+  "pair_table": [
+    {
+      "study": "E1",
+      "pair": "AAPL-MSFT",
+      "n_oos": 2763,
+      "lambda_L_t": 0.2522931222914406,
+      "lambda_L_clayton": 0.4580109185099783,
+      "corr": 0.5688108971662176,
+      "t_copula_t": -1.5580576139661497,
+      "t_clayton": -0.6964008532772253,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": true,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -2.1454447409073403,
+            "p_value": 0.03191730513338165,
+            "mean_loss_diff": -0.14876155744684497,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -2.535650948397932,
+            "p_value": 0.011223854489597451,
+            "mean_loss_diff": -0.1656093954841459,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -2.6095802931268963,
+            "p_value": 0.009065336903419005,
+            "mean_loss_diff": -0.019840507646088582,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -1.2989167811167293,
+            "p_value": 0.19397249001196337,
+            "mean_loss_diff": -0.09251583301092171,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.5933409379181462,
+            "p_value": 0.11108372758564013,
+            "mean_loss_diff": -0.1003383318416649,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.8203624520379091,
+            "p_value": 0.412009513860514,
+            "mean_loss_diff": -0.011481622238976705,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "GOOGL-META",
+      "n_oos": 2763,
+      "lambda_L_t": 0.3032015880556167,
+      "lambda_L_clayton": 0.5542133788895752,
+      "corr": 0.5217331898454979,
+      "t_copula_t": -1.5375477826180532,
+      "t_clayton": -2.888013440754529,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": true,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -1.2907499827490545,
+            "p_value": 0.19679038666669524,
+            "mean_loss_diff": -0.11920114842845853,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.468241100726945,
+            "p_value": 0.1420387435798153,
+            "mean_loss_diff": -0.12982251963391733,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.878247843240205,
+            "p_value": 0.06034726795631887,
+            "mean_loss_diff": -0.014396515465984678,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.7340256324887633,
+            "p_value": 0.4629331160568847,
+            "mean_loss_diff": -0.09230814202953465,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.7690689491657043,
+            "p_value": 0.44185238021167816,
+            "mean_loss_diff": -0.09020658799167054,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.302036873596559,
+            "p_value": 0.76262395375325,
+            "mean_loss_diff": -0.004908589302161581,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": false
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": false
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "NVDA-AMD",
+      "n_oos": 2763,
+      "lambda_L_t": 0.19705147905276052,
+      "lambda_L_clayton": 0.5269245030293142,
+      "corr": 0.5658541343746755,
+      "t_copula_t": 1.974043300241037,
+      "t_clayton": 1.461840051579591,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": true,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.027383754577920867,
+            "p_value": 0.9781536553593749,
+            "mean_loss_diff": 0.0023704471127020126,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.3874367181137179,
+            "p_value": 0.6984329251306582,
+            "mean_loss_diff": -0.03278752161320048,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -5.597201525637029,
+            "p_value": 2.1783943839275006e-08,
+            "mean_loss_diff": -0.03580950566398956,
+            "n": 2763,
+            "significant_harvey": true
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.4168905775199658,
+            "p_value": 0.6767584458581517,
+            "mean_loss_diff": -0.04038501998870527,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.891141463620668,
+            "p_value": 0.3728532830583562,
+            "mean_loss_diff": -0.08395790252261844,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -4.031550426546704,
+            "p_value": 5.5410104351805354e-05,
+            "mean_loss_diff": -0.042532265487214255,
+            "n": 2763,
+            "significant_harvey": true
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "JPM-BAC",
+      "n_oos": 2763,
+      "lambda_L_t": 0.5521671969998067,
+      "lambda_L_clayton": 0.7597770760416744,
+      "corr": 0.8483863387138584,
+      "t_copula_t": 0.6273833551564898,
+      "t_clayton": 0.1440968740680477,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": true,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.4180527096936404,
+            "p_value": 0.6759085796015474,
+            "mean_loss_diff": 0.03279722817834845,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.8171314309082859,
+            "p_value": 0.41385332269965713,
+            "mean_loss_diff": 0.06325569674173541,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 5.366047453057225,
+            "p_value": 8.048077606605267e-08,
+            "mean_loss_diff": 0.026211146553094228,
+            "n": 2763,
+            "significant_harvey": true
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.2771848406906636,
+            "p_value": 0.7816381791420243,
+            "mean_loss_diff": 0.026951576847956408,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 1.0586371075772294,
+            "p_value": 0.2897650804988744,
+            "mean_loss_diff": 0.1033151058570086,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 6.73812027813573,
+            "p_value": 1.6044872993518076e-11,
+            "mean_loss_diff": 0.06850035115251753,
+            "n": 2763,
+            "significant_harvey": true
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "GS-MS",
+      "n_oos": 2763,
+      "lambda_L_t": 0.5343937253134715,
+      "lambda_L_clayton": 0.7489838497660908,
+      "corr": 0.8425403113172796,
+      "t_copula_t": -0.29318944568267097,
+      "t_clayton": -1.1145004757683104,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": true,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.1643957986815818,
+            "p_value": 0.8694195707463801,
+            "mean_loss_diff": 0.01272327330443284,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.3260515348238703,
+            "p_value": 0.7443853645511723,
+            "mean_loss_diff": 0.02486794418559031,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 2.2446568243946685,
+            "p_value": 0.02479017178542059,
+            "mean_loss_diff": 0.010561606400333655,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.3385016024329487,
+            "p_value": 0.7349852197245578,
+            "mean_loss_diff": 0.03250623294805272,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.5692734870891626,
+            "p_value": 0.5691705564754699,
+            "mean_loss_diff": 0.05397836436504715,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 2.2906961211225574,
+            "p_value": 0.021980995130265753,
+            "mean_loss_diff": 0.02296479800182173,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "XOM-CVX",
+      "n_oos": 2763,
+      "lambda_L_t": 0.47912314525866145,
+      "lambda_L_clayton": 0.7028043578109298,
+      "corr": 0.8336094538252038,
+      "t_copula_t": -2.1588052288935375,
+      "t_clayton": -2.5675479921605806,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": true,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.7049029753547801,
+            "p_value": 0.48087061842401324,
+            "mean_loss_diff": -0.05399660240502099,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.6376441802076244,
+            "p_value": 0.5237053293765317,
+            "mean_loss_diff": -0.04735547041651109,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 1.5390112303538537,
+            "p_value": 0.12380155459520686,
+            "mean_loss_diff": 0.008679418210871195,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.40879324605521933,
+            "p_value": 0.682691396794213,
+            "mean_loss_diff": -0.03638680900506411,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.30092179938507607,
+            "p_value": 0.7634741268263369,
+            "mean_loss_diff": -0.025587675034351384,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 1.6072438502298008,
+            "p_value": 0.10800088625290655,
+            "mean_loss_diff": 0.01598506080632927,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": false
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "AAPL-XOM",
+      "n_oos": 2763,
+      "lambda_L_t": 0.020791389895434706,
+      "lambda_L_clayton": 0.10619234095480938,
+      "corr": 0.3036565584716096,
+      "t_copula_t": -2.638820396239405,
+      "t_clayton": -2.709093855910774,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": false,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.9056573587268453,
+            "p_value": 0.3651172389010213,
+            "mean_loss_diff": -0.07981910719458744,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.2849976822603337,
+            "p_value": 0.19879309395820266,
+            "mean_loss_diff": -0.10925570620091622,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -4.150893368215978,
+            "p_value": 3.311800433141556e-05,
+            "mean_loss_diff": -0.029954306980670285,
+            "n": 2763,
+            "significant_harvey": true
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.32206422509956634,
+            "p_value": 0.7474040397179085,
+            "mean_loss_diff": -0.0336054853342675,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.598708864166508,
+            "p_value": 0.5493670450954011,
+            "mean_loss_diff": -0.0591896755886483,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.7363398559967407,
+            "p_value": 0.08250375993201577,
+            "mean_loss_diff": -0.024085668112400115,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": false
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": false
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "GOOGL-CVX",
+      "n_oos": 2763,
+      "lambda_L_t": 0.05036552034014957,
+      "lambda_L_clayton": 0.13832713613218184,
+      "corr": 0.3210834934699519,
+      "t_copula_t": 0.30783597599226503,
+      "t_clayton": 0.3743394965742501,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": false,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -1.181226721377608,
+            "p_value": 0.23751266870749344,
+            "mean_loss_diff": -0.09498469496633052,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.4899255583000812,
+            "p_value": 0.1362438104858098,
+            "mean_loss_diff": -0.11560169756674904,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -3.413653893706072,
+            "p_value": 0.0006409794666159628,
+            "mean_loss_diff": -0.023016147900292522,
+            "n": 2763,
+            "significant_harvey": true
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.6707565566771634,
+            "p_value": 0.502375627028759,
+            "mean_loss_diff": -0.06560614001125344,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.056663535322551,
+            "p_value": 0.29066517258162894,
+            "mean_loss_diff": -0.09662640782519576,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -3.0179960611868157,
+            "p_value": 0.0025445221186680715,
+            "mean_loss_diff": -0.03375910543676555,
+            "n": 2763,
+            "significant_harvey": true
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "AMD-XOM",
+      "n_oos": 2763,
+      "lambda_L_t": 0.008928915226236182,
+      "lambda_L_clayton": 0.05919462720573888,
+      "corr": 0.208792627097543,
+      "t_copula_t": 0.43305348887821693,
+      "t_clayton": -0.711133576300996,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": false,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.5113333726189897,
+            "p_value": 0.6091176404172667,
+            "mean_loss_diff": -0.04151998247566463,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.7617122467717501,
+            "p_value": 0.44623176439757395,
+            "mean_loss_diff": -0.060653818913507775,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -3.943591126888643,
+            "p_value": 8.027046961241113e-05,
+            "mean_loss_diff": -0.01897307949259231,
+            "n": 2763,
+            "significant_harvey": true
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.6872962378745481,
+            "p_value": 0.4918960691048375,
+            "mean_loss_diff": -0.0832533435770896,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.8289634419930422,
+            "p_value": 0.4071250941869168,
+            "mean_loss_diff": -0.09775811016702374,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.6057806869793296,
+            "p_value": 0.10832210551026261,
+            "mean_loss_diff": -0.015497329464040605,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "MSFT-JPM",
+      "n_oos": 2763,
+      "lambda_L_t": 0.1116604994970457,
+      "lambda_L_clayton": 0.2688286591514325,
+      "corr": 0.4423612236688594,
+      "t_copula_t": -2.083044390841609,
+      "t_clayton": -1.529484457274147,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": false,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.6782875188482463,
+            "p_value": 0.497589410733959,
+            "mean_loss_diff": -0.05055788527389791,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.182023632603554,
+            "p_value": 0.23719632385759082,
+            "mean_loss_diff": -0.08350940929444567,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -3.979108325807198,
+            "p_value": 6.917421941309582e-05,
+            "mean_loss_diff": -0.02985874757431678,
+            "n": 2763,
+            "significant_harvey": true
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -1.1140834484888293,
+            "p_value": 0.2652433885922635,
+            "mean_loss_diff": -0.09248959966817367,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.5611824870970992,
+            "p_value": 0.11848069988024436,
+            "mean_loss_diff": -0.11751187500742509,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.881797310065926,
+            "p_value": 0.05986354119009531,
+            "mean_loss_diff": -0.023789254660253802,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "NVDA-BAC",
+      "n_oos": 2763,
+      "lambda_L_t": 0.08069101041158959,
+      "lambda_L_clayton": 0.23103351187001422,
+      "corr": 0.3557334112217861,
+      "t_copula_t": 0.5093640540222444,
+      "t_clayton": 0.21663088799192773,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": false,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.5680897189377,
+            "p_value": 0.569974048455067,
+            "mean_loss_diff": -0.0525005328682851,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.7752492112511787,
+            "p_value": 0.43819241419829436,
+            "mean_loss_diff": -0.06825437308734866,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -2.5786525559589237,
+            "p_value": 0.009918649258184255,
+            "mean_loss_diff": -0.020975130214991762,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.6048000689473438,
+            "p_value": 0.5453118478304595,
+            "mean_loss_diff": -0.062386367449518365,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.8046780299129774,
+            "p_value": 0.42100550088465893,
+            "mean_loss_diff": -0.0743403663605531,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.1732342122782018,
+            "p_value": 0.24070189590254432,
+            "mean_loss_diff": -0.019179149894476707,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": false
+        }
+      }
+    },
+    {
+      "study": "E1",
+      "pair": "META-JNJ",
+      "n_oos": 2763,
+      "lambda_L_t": 0.015385666460601648,
+      "lambda_L_clayton": 0.0870937053292093,
+      "corr": 0.15852038492574783,
+      "t_copula_t": -0.722131230436457,
+      "t_clayton": -1.4436936805643357,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": false,
+      "region_class": null,
+      "same_sector": false,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.1274952927694727,
+            "p_value": 0.8985483986057857,
+            "mean_loss_diff": 0.01672465904468203,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.007518185798387011,
+            "p_value": 0.9940014121360875,
+            "mean_loss_diff": -0.0009530508090777466,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -2.128667853936545,
+            "p_value": 0.033281750243783596,
+            "mean_loss_diff": -0.017035981134247175,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.460920173134653,
+            "p_value": 0.6448558779503373,
+            "mean_loss_diff": 0.09075193189991591,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.5377122417239742,
+            "p_value": 0.5907757264779656,
+            "mean_loss_diff": 0.09939567263237675,
+            "n": 2511,
+            "significant_harvey": false
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.3827418727307153,
+            "p_value": 0.7019111642386583,
+            "mean_loss_diff": 0.007513151962039636,
+            "n": 2763,
+            "significant_harvey": false
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": false
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": false
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E2",
+      "pair": "SPY-STOXX50",
+      "n_oos": 2067,
+      "lambda_L_t": 0.0861180995651992,
+      "lambda_L_clayton": 0.4257195547728771,
+      "corr": 0.5889674137814996,
+      "t_copula_t": -0.9649806429005807,
+      "t_clayton": 0.9151313251704818,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": true,
+      "region_class": "developed_cross_region",
+      "same_sector": null,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.7988724734482329,
+            "p_value": 0.42446894271578617,
+            "mean_loss_diff": -0.07536779091549146,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.799092639491671,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.1508058303342041,
+            "p_value": 0.24996379689395654,
+            "mean_loss_diff": -0.10392555406842556,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -1.1511229877965667,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -4.85224282448263,
+            "p_value": 1.3120592098379337e-06,
+            "mean_loss_diff": -0.03166475018414103,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -4.853416990942523,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.30607375721795743,
+            "p_value": 0.7595836108415626,
+            "mean_loss_diff": -0.03837110889720182,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.3061581099154988,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.40244920621737323,
+            "p_value": 0.6874008808243395,
+            "mean_loss_diff": -0.04705846288295502,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.4025601196013771,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.9776705269021312,
+            "p_value": 0.3283517664473574,
+            "mean_loss_diff": -0.015160579323596405,
+            "n": 2067,
+            "significant_harvey": false,
+            "t_stat_raw": -0.9779071077953466,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E2",
+      "pair": "SPY-N225",
+      "n_oos": 2067,
+      "lambda_L_t": 0.0042143684951753075,
+      "lambda_L_clayton": 0.024513103504840175,
+      "corr": 0.15805228798966592,
+      "t_copula_t": -0.27225425661971403,
+      "t_clayton": -0.8929889586828135,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": true,
+      "region_class": "developed_cross_region",
+      "same_sector": null,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.0269824753323244,
+            "p_value": 0.978476679524509,
+            "mean_loss_diff": 0.0037882800811381147,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.02698991159409775,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.15592738059625977,
+            "p_value": 0.8761076122216007,
+            "mean_loss_diff": -0.021548903924471455,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.15597035355576278,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -4.787732361191061,
+            "p_value": 1.8064333718451782e-06,
+            "mean_loss_diff": -0.025960571406923396,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -4.788890917133292,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.2625376159682168,
+            "p_value": 0.792936800205601,
+            "mean_loss_diff": 0.06014427584306216,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.26260997028017835,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.2112590597149021,
+            "p_value": 0.8327088575810239,
+            "mean_loss_diff": 0.04746029095395178,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.21131728186282156,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.3026130121431272,
+            "p_value": 0.1928520919632149,
+            "mean_loss_diff": -0.01655717638205089,
+            "n": 2067,
+            "significant_harvey": false,
+            "t_stat_raw": -1.3029282240079088,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E2",
+      "pair": "STOXX50-N225",
+      "n_oos": 2067,
+      "lambda_L_t": 0.002863119259418649,
+      "lambda_L_clayton": 0.124050617405345,
+      "corr": 0.315421428180441,
+      "t_copula_t": 1.075100046352366,
+      "t_clayton": 0.6198256036460676,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": true,
+      "region_class": "developed_cross_region",
+      "same_sector": null,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.33443792061406086,
+            "p_value": 0.7380877905126195,
+            "mean_loss_diff": -0.0409095570406382,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.3345300903610537,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.7462206051437342,
+            "p_value": 0.4556308549098741,
+            "mean_loss_diff": -0.08879544731767891,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.7464262605438475,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -7.371624746480966,
+            "p_value": 2.425851535402929e-13,
+            "mean_loss_diff": -0.049466073572911474,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -7.373408563747605,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.5880132655232636,
+            "p_value": 0.5565965829576471,
+            "mean_loss_diff": 0.12009807991229088,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.5881753196163287,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.344163205742178,
+            "p_value": 0.7307634420087936,
+            "mean_loss_diff": 0.0670996286292862,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.3442580557386714,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -3.372135755256172,
+            "p_value": 0.0007596253576201167,
+            "mean_loss_diff": -0.05351574886647812,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -3.3729517590806406,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E2",
+      "pair": "SPY-HSI",
+      "n_oos": 2067,
+      "lambda_L_t": 0.0005922799821387376,
+      "lambda_L_clayton": 0.04679900516977826,
+      "corr": 0.1940461809811649,
+      "t_copula_t": -1.5557238076033062,
+      "t_clayton": -1.5606310629719116,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": true,
+      "region_class": "developed_vs_emerging_asia",
+      "same_sector": null,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.333357506081364,
+            "p_value": 0.7389029615905574,
+            "mean_loss_diff": -0.027950463590642127,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.3334493780704532,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.6857080638612647,
+            "p_value": 0.49298484221286354,
+            "mean_loss_diff": -0.05590849137455728,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.6858970422481683,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -5.765916742365204,
+            "p_value": 9.343960620567574e-09,
+            "mean_loss_diff": -0.03051969423672303,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -5.767312003545304,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.4098647153919067,
+            "p_value": 0.6819535861111248,
+            "mean_loss_diff": -0.04620984144316048,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.4099776724604401,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.6213260344511711,
+            "p_value": 0.5344631947648826,
+            "mean_loss_diff": -0.06743010211230281,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.6214972694094865,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -2.3273228875324454,
+            "p_value": 0.020044262257615884,
+            "mean_loss_diff": -0.025623623549596724,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -2.3278860630730622,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E2",
+      "pair": "SPY-TW0050",
+      "n_oos": 2067,
+      "lambda_L_t": 3.882000535852828e-05,
+      "lambda_L_clayton": 0.04289789420458338,
+      "corr": 0.16814426533930993,
+      "t_copula_t": 0.19027915248755234,
+      "t_clayton": -1.3237419711113152,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": true,
+      "region_class": "developed_vs_emerging_asia",
+      "same_sector": null,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.15621314897616312,
+            "p_value": 0.8758823946649574,
+            "mean_loss_diff": 0.016067132837790193,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.15625620069228327,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.15352622969967636,
+            "p_value": 0.878000383512458,
+            "mean_loss_diff": -0.015245223412464825,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.1535685409116412,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -4.96071394109615,
+            "p_value": 7.597264742046982e-07,
+            "mean_loss_diff": -0.03629212983050908,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -4.961914355860507,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.25131602719344587,
+            "p_value": 0.8015982500760812,
+            "mean_loss_diff": 0.03700433618989644,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.2513852888806347,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.1752543597786454,
+            "p_value": 0.8608993314301528,
+            "mean_loss_diff": 0.02445153197152756,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.1753026591759462,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.274962010103419,
+            "p_value": 0.20246604907611013,
+            "mean_loss_diff": -0.02088094733741215,
+            "n": 2067,
+            "significant_harvey": false,
+            "t_stat_raw": -1.275270530860531,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E2",
+      "pair": "STOXX50-HSI",
+      "n_oos": 2067,
+      "lambda_L_t": 0.0065635862158406584,
+      "lambda_L_clayton": 0.1694197246424227,
+      "corr": 0.3444605497947036,
+      "t_copula_t": 0.4029610340530875,
+      "t_clayton": 0.1047799111765404,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": true,
+      "region_class": "developed_vs_emerging_asia",
+      "same_sector": null,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.6403309084201892,
+            "p_value": 0.5220383619957618,
+            "mean_loss_diff": -0.053370493747878965,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.6405073810454,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.201693029599022,
+            "p_value": 0.22963934191036312,
+            "mean_loss_diff": -0.0960599778887067,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -1.2020242113690134,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -6.363835767063479,
+            "p_value": 2.4167258935132446e-10,
+            "mean_loss_diff": -0.04584806859143666,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -6.36537571524502,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.3227180827896105,
+            "p_value": 0.7469459478490943,
+            "mean_loss_diff": 0.04094398274410426,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.3228070225963947,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.06535103923045699,
+            "p_value": 0.947901706663095,
+            "mean_loss_diff": 0.007771259510813823,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.06536904971425778,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -2.6111745060690836,
+            "p_value": 0.009088465523207885,
+            "mean_loss_diff": -0.04131897415912318,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -2.611806369237696,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": false
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E2",
+      "pair": "STOXX50-TW0050",
+      "n_oos": 2067,
+      "lambda_L_t": 0.00017521095525292458,
+      "lambda_L_clayton": 0.1050219628451591,
+      "corr": 0.2832700608127361,
+      "t_copula_t": 0.9280200549597609,
+      "t_clayton": -0.06284483764454815,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": true,
+      "region_class": "developed_vs_emerging_asia",
+      "same_sector": null,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.10615077268543825,
+            "p_value": 0.9154744648406046,
+            "mean_loss_diff": 0.010893077727510315,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.10618002741182678,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.466020880872118,
+            "p_value": 0.6412565051259771,
+            "mean_loss_diff": -0.04639035528706201,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.46614931435419593,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -9.096854353965321,
+            "p_value": 2.125436993018519e-19,
+            "mean_loss_diff": -0.05970154216832945,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -9.099055649666985,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.567428966468046,
+            "p_value": 0.5704929882534648,
+            "mean_loss_diff": 0.08885966631977742,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.5675853476110089,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.28720286537589523,
+            "p_value": 0.7739897952003834,
+            "mean_loss_diff": 0.0417086484288299,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.287282017331477,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -3.2573733112496566,
+            "p_value": 0.001142702115690972,
+            "mean_loss_diff": -0.05396181530290958,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -3.258161544367365,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": false
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E2",
+      "pair": "HSI-N225",
+      "n_oos": 2067,
+      "lambda_L_t": 0.014328936041440185,
+      "lambda_L_clayton": 0.3355245192026172,
+      "corr": 0.4611304506672695,
+      "t_copula_t": 1.5930642802370485,
+      "t_clayton": 0.7661609418830458,
+      "harvey_sig_t": false,
+      "harvey_sig_clayton": false,
+      "hln_applied": true,
+      "region_class": "asia_intraregional",
+      "same_sector": null,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.9733765484795324,
+            "p_value": 0.3304959662541903,
+            "mean_loss_diff": -0.09205452129933567,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.9736448071448099,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -1.445226338265737,
+            "p_value": 0.1485670422632622,
+            "mean_loss_diff": -0.13109784639774205,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -1.445624636836966,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -5.661932243833083,
+            "p_value": 1.7057461217813626e-08,
+            "mean_loss_diff": -0.04469229965520132,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -5.6633023423997395,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.05797275889811545,
+            "p_value": 0.9537767123189882,
+            "mean_loss_diff": 0.009310695123630752,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.05798873595750604,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.24972120031292358,
+            "p_value": 0.8028312367040822,
+            "mean_loss_diff": -0.038066456909584684,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.24979002247223295,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -3.7927004834145674,
+            "p_value": 0.00015329763429036358,
+            "mean_loss_diff": -0.05474989328180388,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -3.793618257289687,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E2",
+      "pair": "TW0050-HSI",
+      "n_oos": 2067,
+      "lambda_L_t": 0.14248543433703414,
+      "lambda_L_clayton": 0.4443927824027972,
+      "corr": 0.511795239709308,
+      "t_copula_t": 2.0785522210793674,
+      "t_clayton": 0.9992763096551205,
+      "harvey_sig_t": true,
+      "harvey_sig_clayton": false,
+      "hln_applied": true,
+      "region_class": "asia_intraregional",
+      "same_sector": null,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.23142028150643876,
+            "p_value": 0.8170144104291961,
+            "mean_loss_diff": -0.018145235771373378,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.23148406000606672,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.6106160367438962,
+            "p_value": 0.5415302978272942,
+            "mean_loss_diff": -0.04622094118691774,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.6107843200698813,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -4.752846214577587,
+            "p_value": 2.1439669614514296e-06,
+            "mean_loss_diff": -0.03149628351096939,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -4.7539963286209375,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": -0.007333404908053095,
+            "p_value": 0.9941496482527683,
+            "mean_loss_diff": -0.0007437624985845811,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.007335425964976695,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -0.39082993391673726,
+            "p_value": 0.6959688418892784,
+            "mean_loss_diff": -0.038064506579256314,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": -0.3909376450759868,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -3.7439175179697206,
+            "p_value": 0.00018612638011024734,
+            "mean_loss_diff": -0.04410828631081448,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -3.7448234871343358,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    },
+    {
+      "study": "E2",
+      "pair": "TW0050-N225",
+      "n_oos": 2067,
+      "lambda_L_t": 0.07139106771412082,
+      "lambda_L_clayton": 0.41550600504187307,
+      "corr": 0.5863764731474714,
+      "t_copula_t": 3.9229611340411856,
+      "t_clayton": 1.6487433262869113,
+      "harvey_sig_t": true,
+      "harvey_sig_clayton": false,
+      "hln_applied": true,
+      "region_class": "asia_intraregional",
+      "same_sector": null,
+      "dm_fz": {
+        "alpha_0.025": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.7252282696938119,
+            "p_value": 0.46840554381068855,
+            "mean_loss_diff": 0.09178946366628549,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.7254281396906322,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.379027917123813,
+            "p_value": 0.7047114920417284,
+            "mean_loss_diff": 0.04712442102625146,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.3791323756946604,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -6.682567449692284,
+            "p_value": 3.010214529813331e-11,
+            "mean_loss_diff": -0.04740518821832457,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -6.684184525928826,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        },
+        "alpha_0.010": {
+          "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+            "t_stat": 0.16352222549745246,
+            "p_value": 0.8701254908275438,
+            "mean_loss_diff": 0.0340909608980431,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.16356729156569058,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": 0.02007002047951165,
+            "p_value": 0.9839897227508327,
+            "mean_loss_diff": 0.004117710556941412,
+            "n": 1815,
+            "significant_harvey": false,
+            "t_stat_raw": 0.02007555169650505,
+            "hln_factor": 0.9997244799506874,
+            "critical_value": 1.9612725997331124
+          },
+          "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+            "t_stat": -2.3414178419433287,
+            "p_value": 0.019305243060750373,
+            "mean_loss_diff": -0.03659745381276888,
+            "n": 2067,
+            "significant_harvey": true,
+            "t_stat_raw": -2.3419844282412634,
+            "hln_factor": 0.9997580742676584,
+            "critical_value": 1.9611128896683714
+          }
+        }
+      },
+      "trinity": {
+        "DCC-A4f-ASYM": {
+          "alpha_0.025": false,
+          "alpha_0.010": true
+        },
+        "Copula-t-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        },
+        "Copula-Clayton-A4f-ASYM": {
+          "alpha_0.025": true,
+          "alpha_0.010": true
+        }
+      }
+    }
+  ]
+}

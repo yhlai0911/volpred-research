@@ -14,6 +14,32 @@ task_pool_claim = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(task_pool_claim)
 
+REPO_ROOT = MODULE_PATH.parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+
+@pytest.fixture(autouse=True)
+def burst_fire_requests(monkeypatch) -> list[str]:
+    """Keep `complete` from pulling the REAL supervisor's fire forward.
+
+    `cmd_complete` asks the supervisor to fire early whenever a completion may
+    have freed a slot, and `request_fire` writes storage/ops/dispatch_state.json
+    under its own lock. That path is canonical state, so under
+    VOLPRED_NO_CANONICAL_WRITE=1 it raises CanonicalWriteBlocked — a
+    BaseException the production fail-open handler deliberately cannot swallow
+    (2026-07-19 CI red, run 29674177829). Autouse rather than per-test: any
+    `complete` of a task with pending burst work reaches this, so the next test
+    to add one would rediscover the same red.
+
+    Returns the recorded reasons so a test can assert the request was made.
+    """
+    from scripts.dispatch_supervisor import state as sup_state
+
+    reasons: list[str] = []
+    monkeypatch.setattr(sup_state, "request_fire", lambda reason, *a, **kw: reasons.append(reason))
+    return reasons
+
 
 def test_complete_accepts_blocked_status(tmp_path, monkeypatch) -> None:
     next_tasks = tmp_path / "next_tasks.json"
@@ -140,7 +166,9 @@ def test_handoff_main_thread_clears_claim_and_sets_note(tmp_path, monkeypatch) -
     assert "claim_session_id" not in saved[0]
 
 
-def test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task(tmp_path, monkeypatch) -> None:
+def test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task(
+    tmp_path, monkeypatch, burst_fire_requests
+) -> None:
     next_tasks = tmp_path / "next_tasks.json"
     next_tasks.write_text(
         json.dumps(
@@ -201,6 +229,9 @@ def test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task(tmp_pat
     assert v2["predecessor"] == "K2001"
     assert v2["predecessor_codex_review_task"] == "K2001_codex_review_followup"
     assert v2["dispatch_lane"] == "agent"
+    # Whether the completion pulls the next fire forward depends on live slot
+    # occupancy, so assert only that nothing escaped to the real supervisor.
+    assert all(reason.startswith("burst:") for reason in burst_fire_requests)
 
 
 def test_codex_review_followup_conditional_pass_does_not_mark_source_failed(tmp_path, monkeypatch) -> None:
@@ -865,3 +896,20 @@ def test_status_history_cleanup_auto_release_marks_note(tmp_path, monkeypatch) -
     assert hist[-1]["to"] == "pending"
     assert "auto_release_stale_6h" in hist[-1].get("note", "")
     assert hist[-1]["by"] == "hourly-old"
+
+
+def test_burst_fire_request_is_intercepted_not_written_to_canonical_state(
+    burst_fire_requests,
+) -> None:
+    """Non-vacuity guard for the autouse fixture above.
+
+    Whether a given `complete` reaches `_request_burst_fire` depends on live slot
+    occupancy, so no completion test can prove the interception deterministically.
+    This one calls the helper directly: it must report success (the real
+    `request_fire` would raise CanonicalWriteBlocked under the CI gate) and the
+    reason must land in the recorder instead of dispatch_state.json.
+    """
+    result = task_pool_claim._request_burst_fire("K9999_example", 3)
+
+    assert result == {"requested": True, "pending_left": 3}
+    assert burst_fire_requests == ["burst:K9999_example"]
