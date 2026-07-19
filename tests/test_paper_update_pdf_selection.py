@@ -100,3 +100,24 @@ def test_count_tex_metrics_extracts_author_from_current_main_tex(tmp_path):
 
     assert metrics["title"] == "Current"
     assert metrics["authors"] == "Yi-Hao Lai, VolPred Research System"
+
+
+def test_select_current_main_artifact_handles_any_version_number(tmp_path):
+    """2026-07-19 vt-trend incident: hardcoded v2-v4 list silently uploaded
+    stale main_v4.pdf the day main_v5.pdf appeared. Selection must be
+    version-agnostic (main.pdf / main_v<N>.pdf for ANY N, newest mtime wins)."""
+    import os
+    import time
+    old = tmp_path / "main_v4.pdf"
+    old.write_bytes(b"old")
+    new = tmp_path / "main_v5.pdf"
+    new.write_bytes(b"new")
+    now = time.time()
+    os.utime(old, (now - 100, now - 100))
+    os.utime(new, (now, now))
+    assert _select_current_main_artifact(tmp_path, ".pdf") == new
+    # non-matching filenames (e.g. main_backup.pdf) must never be selected
+    decoy = tmp_path / "main_backup.pdf"
+    decoy.write_bytes(b"decoy")
+    os.utime(decoy, (now + 100, now + 100))
+    assert _select_current_main_artifact(tmp_path, ".pdf") == new
