@@ -1,0 +1,169 @@
+{
+  "experiment_id": "K528",
+  "artifact": "k528_round5_collection_verdict",
+  "what": "Independent collection-side verification of the four blocking defects in Codex round-5 verdict. This is a VERIFICATION result, not a review PASS. Every item below was checked against the files and by running code; no statement in k528_round5_remediation.json was accepted as evidence for itself.",
+  "reviewed_commit": "17f12d16c",
+  "verified_at": "2026-07-20T14:15:54+08:00",
+  "verifier": "collection agent (dispatch-slot-3), separate from the remediation agent",
+  "source_verdict": "storage/ops/codex_reviews/k528_round5_verdict.md (verdict FAIL, reviewed_commit 73dca01d0)",
+  "source_verdict_path_note": "The dispatch pointed at this path inside the worktree; it does not exist there. It lives in the MAIN repo working tree (/Users/yhlai0911/volpred-research/storage/ops/codex_reviews/k528_round5_verdict.md, 44 lines, uncommitted). Read from there.",
+
+  "overall": "NOT CLEARED FOR ROUND 6 - 2 of 4 blockers FAIL",
+  "summary": "B2 and B3 are genuinely fixed and I reproduced the pre-fix failure independently. B1 and B4 are substantially fixed on the research claim surface but each leaves one live, reader-facing overclaim that reproduces the exact defect Codex named. Both residuals are narrow and text-only; neither touches a number.",
+
+  "blockers": [
+    {
+      "id": "K528-R5-B1",
+      "title": "Friday estimand inconsistent with README claim",
+      "verdict": "FAIL",
+      "scope_of_failure": "Research claim surface (README + generator + results JSON) is CLEAN and single-estimand. The failure is confined to the reader-facing correction generator, which was not updated and still carries the old estimand.",
+      "what_passes": [
+        "experiments/k528/k528_nfp_event_study_results.json - sample.friday_estimand block present: filter='session weekday == Friday', n_release_date_on_friday=243, n_traded_in_friday_session=237, and all six Good Friday releases named individually with release_date / session_date / session_weekday / event_abs_return (2007-04-06, 2010-04-02, 2012-04-06, 2015-04-03, 2021-04-02, 2023-04-07). Not a prose mention - a structured, enumerated list.",
+        "experiments/k528/README.md:73-112 - explicit estimand-correction block; the operative phrasing is 'NFP 消息在週五交易 session 被吸收'; README:111-112 states the test identifies neither 'NFP 一般而言' nor '發布日在週五'.",
+        "experiments/k528/k528_nfp_event_study.py:894-950 - filter is df['weekday']==4 (session weekday) with friday_estimand emitted alongside; py:911-912 computes both _n_release_friday and _n_session_friday so the 243/237 gap is materialised rather than asserted.",
+        "grep for the old wording ('在週五公布', 'released on a Friday', '發布日在週五') across README.md / k528_nfp_event_study.py / results JSON returns no LIVE claim - README's only occurrences are inside the quoted correction notice at :75-76, which is the disclosure itself."
+      ],
+      "evidence_of_failure": [
+        "experiments/k528/build_article_correction.py:109 - '所以這個比較只取在週五公布的那 237 場' (reader-facing). This is verbatim the estimand Codex ruled out.",
+        "experiments/k528/build_article_correction.py:111 - '要注意這個數字講的是「在週五公布的」NFP'",
+        "experiments/k528/build_article_correction.py:118 - '在週五公布的 NFP 確實比一般週五抖一點'",
+        "experiments/k528/build_article_correction.py:168 - '若只看在週五公布的那 237 場'",
+        "experiments/k528/build_article_correction.py:200-201 - '現改為只取在週五公布的 237 場 ... 所以該數字講的是「在週五公布的 NFP」'",
+        "experiments/k528/build_article_correction.py:108 - '253 場 NFP 裡有 237 場落在週五、16 場不是' - factually wrong under the corrected calendar: 243 releases are DATED a Friday (10 are not); 237 are TRADED in a Friday session (16 are not). This sentence fuses the two counts into one wrong claim, which is precisely defect B1.",
+        "experiments/k528/build_article_correction.py:32 and :310 - 'restricts the event group to the 237 Friday releases' (English audit/memory text) - same conflation.",
+        "git log --oneline -3 -- experiments/k528/build_article_correction.py -> last touched 726a34fb0; NOT among the 8 files in remediation commit 17f12d16c."
+      ],
+      "why_this_is_blocking_and_not_a_nitpick": "This file is not dead code and not an internal note - it is the generator for the reader-facing correction text, invoked by the main thread as 'build_article_correction.py --apply' (see its :58-62 usage block). Run as-is it would publish the exact claim Codex ruled out, into an article whose entire purpose is correcting an earlier overclaim. The research layer was corrected and the publication layer was not, which is two estimands coexisting across the surface the dispatch asked me to sweep.",
+      "honesty_credit": "The remediation agent DID disclose this rather than conceal it: k528_round5_remediation.json unresolved[5] states the correction plan is unapplied and that 'the B1 relabelling means the correction text will need in a Friday trading session rather than released on a Friday'. That is an accurate self-report. But disclosure is not remediation, and the strings are fixable without writing storage/reports/feed.json - editing text constants in a dry-run generator is not a shared-state write, so the worktree constraint did not actually bar this fix.",
+      "what_would_close_it": "Update the five Chinese strings and the two English strings in build_article_correction.py to the session estimand, and correct :108 to state 243 dated-Friday / 237 Friday-session with the 6 Good Fridays as the reconciling gap. No number in any results file changes.",
+      "live_article_state_checked": "storage/reports/feed.json entry mile_35eef830 currently contains '在週五公布' x1 and has NO correction applied (no '更正', no '1.19'). So the stale wording is not yet published in corrected form - the article is still the pre-correction proxy version. This bounds the blast radius to 'not yet published' rather than 'already wrong in public', but it also means the next apply is exactly when the defect would ship."
+    },
+    {
+      "id": "K528-R5-B2",
+      "title": "raw and selected truncated together at an endpoint still passes",
+      "verdict": "PASS",
+      "basis": "Demonstrated by reverting the receiving logic to pre-fix and observing acceptance, then observing rejection on current. Not inferred from the presence of gate code.",
+      "evidence": [
+        "Pre-fix module lifted via: git show 73dca01d0:experiments/k528/k528_nfp_event_study.py > /tmp/k528_prefix/k528_nfp_event_study.py",
+        "grep -c LATEST_OBSERVED_RELEASE_DAY_OF_MONTH -> pre-fix 0, current 7; grep -c absent_required -> pre-fix 0, current 4. The endpoint check did not exist before 17f12d16c.",
+        "Current test suite run against the PRE-FIX module: 14 failed in 0.59s (all fail at _load_gate: \"could not lift ['LATEST_OBSERVED_RELEASE_DAY_OF_MONTH']\"). This proves the tests are coupled to the new logic, but it is a harness-level failure, so I did not stop here.",
+        "Sharper probe (/tmp/k528_probe.py) - same B2 attack fed to both gate versions directly, lifting only the gate function and the constants it reads: PRE-FIX 73dca01d0 -> head: ACCEPTED (deleted 2005-01; raw=259 selected=253; head_shortfall=34d tail_shortfall=21d); tail: ACCEPTED (deleted 2026-03; raw=259 selected=253; head_shortfall=6d tail_shortfall=44d). POST-FIX 17f12d16c -> head: RAISED ('the requested window 2005-01-01..2026-03-27 fully contains the publication window of 1 month(s) that the calendar has no release for: [2005-01]'); tail: RAISED (same, naming [2026-03]).",
+        "The probe independently reproduces Codex's own numbers verbatim - 259 raw / 253 selected, head shortfall 34d, tail shortfall 44d - which is an external check that the attack I ran is the attack Codex described.",
+        "Current suite on current code: 24 passed in 2.43s (test_k528_completeness_gate.py + test_k528_price_coverage_gate.py).",
+        "Anti-vacuity is built in, verified by reading: test_k528_completeness_gate.py:258-275 (test_endpoint_truncation_is_invisible_without_the_new_check) disables ONLY the new check, leaves every prior defence intact, and asserts the truncated calendar is ACCEPTED. _load_gate:126-133 asserts each mutation applies exactly once and refuses to report a green run otherwise.",
+        "test_k528_completeness_gate.py:277-292 pins the property that makes the gate work - required months derive from the REQUESTED window, not the observed feed (narrowing the window changes the requirement; truncating the feed does not)."
+      ],
+      "notes": "This is the strongest of the four. The gate is measured against the requested window, which a truncated feed cannot move, so it is not feed-checking-feed. The remaining hole (declare a month in KNOWN_MISSING_MONTHS AND delete it from raw) is disclosed in remediation unresolved[0] and is a documented-false-claim threat model, not silent truncation - I agree that is a different and lesser class."
+    },
+    {
+      "id": "K528-R5-B3",
+      "title": "price data tail truncation does not fail closed",
+      "verdict": "PASS",
+      "basis": "Gate bodies read line by line for fail-open, then exercised with deliberately deficient inputs.",
+      "evidence": [
+        "experiments/k528/k528_nfp_event_study.py:505-537 check_price_coverage - raises on empty frame and on head/tail shortfall beyond MAX_PRICE_COVERAGE_SHORTFALL_DAYS (10d). Called unconditionally at :541-542 for both SPY and ^VIX at module level; no try/except, no default, no flag to skip.",
+        "k528_nfp_event_study.py:554-590 check_vix_forward_fill_age - measures the longest NaN run BEFORE filling, raises if > MAX_VIX_FFILL_TRADING_DAYS (3, :159), and raises again if any NaN survives the ffill (start-of-sample gap). Called unconditionally at :592.",
+        "k528_nfp_event_study.py:655-662 - 'if unmapped: raise'. n_outside_price_sample is now forced to zero rather than reported and ignored; the comment at :647-654 states why the earlier design boundary no longer applies once both endpoints are verified.",
+        "Empirical probe (/tmp/k528_b3_probe.py), current gates, tolerance price=10d vix_ffill=3d: SPY tail short 1 month -> BLOCKED; SPY head short 1 month -> BLOCKED; empty download -> BLOCKED ('download returned no rows'); VIX missing 20 consecutive sessions -> BLOCKED ('the limit is 3'); VIX missing at sample start -> BLOCKED ('nothing to carry forward').",
+        "Negative controls in the same probe correctly ACCEPT: full window, tail short 8 days (inside 10d tolerance), VIX missing 2 sessions (holiday). A gate that raises on everything would have failed these - it did not, so the blocks above are discriminating, not indiscriminate.",
+        "Fail-open sweep: grep -nE 'try:|except|suppress|fallback' over the whole script returns 6 hits, all accounted for - :172-181 is temp-file cleanup inside write_json_atomic and re-raises on line 182 (the original error is not swallowed); :472 is a comment stating the calendar loader deliberately has no except branch; :187 and :1713 are comments/metadata ('fallback: none'). There is no exception handler anywhere in the analysis path."
+      ],
+      "notes": "Both guards were extracted into named functions specifically so a test can attack them; the script comment at :566-568 states the reasoning ('an unexercised guard and an absent guard fail the same way'), and test_k528_price_coverage_gate.py (10 tests) does exercise them. I confirmed the behaviour independently rather than relying on that suite."
+    },
+    {
+      "id": "K528-R5-B4",
+      "title": "no multiple-comparison family declared while claiming 5% significance",
+      "verdict": "FAIL",
+      "scope_of_failure": "The statistical content is correct and complete. Two problems remain: (a) the literal dispatch criterion - family defined BEFORE the rerun - is not met and cannot be met retroactively; (b) one sanctioned phrasing in README contradicts the artifact's own pre-registration disclosure.",
+      "what_passes": [
+        "Complete Holm lists for BOTH families, including every failing test - not only the survivors. confirmatory_family n=6: A 0.1121/0.1121 (fails), B 0.02085/0.04170 (survives), C 0.00194/0.00582, E_pearson 1.98e-13/1.19e-12, E_spearman 1.67e-08/6.68e-08, H 4.55e-09/2.28e-08. all_outputs_family n=22: every one listed, B 0.02085 -> p_holm 0.37533 (does NOT survive), plus all 12 G_month entries and D/F/I/J at p_holm 1.0 or 0.398.",
+        "These reproduce Codex's own indicative figures (~0.0417 confirmatory, ~0.375 all-outputs) to 3 significant figures, which is an independent cross-check on the correction arithmetic.",
+        "multiplicity.pre_registered = false, with pre_registration_note stating plainly: 'Not pre-registered. The confirmatory endpoints predate the date correction and this rerun, but were not lodged before the data were seen.'",
+        "README.md:193-198 presents all three readings side by side (nominal 0.0209 reject / Holm-6 0.0417 reject / Holm-22 0.375 DO NOT reject) rather than quoting only the favourable one.",
+        "The mechanical family stamp claimed in the commit message is real and does raise: k528_nfp_event_study.py:1912 _JSON_KEY_TO_FAMILY_NAME, applied at :1945-1952, with :1977-1984 collecting unstamped entries and raising RuntimeError ('A new test was added without being placed in a family'). Verified by reading the code path, not the commit message."
+      ],
+      "timing_evidence_requested_by_dispatch": {
+        "method": "git, not comments",
+        "rerun_commit": "e42dc25ad 2026-07-19 10:58:46 +0800 'NFP 事件日改用官方日曆重跑'",
+        "family_definition_first_appears": "17f12d16c (2026-07-20 12:54:55) - git log -S 'confirmatory_family' and -S 'B_nfp_vs_friday_welch' over the script each return exactly one commit: 17f12d16c. The family definition therefore POSTDATES the rerun by ~26 hours.",
+        "endpoints_first_appear": "461d23ae4 (2026-04-18 15:43:05), three months BEFORE the rerun. Verified by extracting that revision of the script and grepping it: ttest_ind(nfp_abs_returns, non_nfp_abs...) x1 (endpoint A), ttest_ind against friday_non_nfp_abs at :209 (endpoint B), mannwhitneyu x1 (C), pearsonr x1 (E), spearmanr x1 (E), ttest_ind(high_vix, low_vix) x1 (H). All six confirmatory endpoints existed pre-rerun.",
+        "conclusion": "The agent's claim 'the six endpoints predate the rerun' is TRUE and git-verifiable. The dispatch's stricter criterion - that the FAMILY DEFINITION predate the rerun - is FALSE and is unfixable after the fact. The artifact does not claim otherwise; it sets pre_registered=false. Codex's own minimal fix asked only for 'rerun 前既有的 confirmatory endpoints', which is satisfied."
+      },
+      "evidence_of_failure": [
+        "experiments/k528/README.md:199 - '**這個 family 不是預先登記的，必須講清楚。**' (this family is NOT pre-registered, and that must be stated plainly).",
+        "experiments/k528/README.md:203 - four lines later, under 可以寫的 (what you ARE allowed to write): '「nominal 顯著；在事先聲明的六項 confirmatory family 內通過 Holm 校正」'. '事先聲明' means declared in advance. The document therefore licenses a downstream writer to publish a pre-specification claim that the same document, and multiplicity.pre_registered=false, both deny.",
+        "This is the same failure mode as B1: the analysis layer is honest, the sanctioned-phrasing layer overclaims. README:203 is the single highest-leverage sentence in the file because it is the one a publishing agent copies."
+      ],
+      "what_would_close_it": "Delete '事先聲明的' from README:203 (e.g. '在六項 confirmatory family 內通過 Holm 校正（該 family 非預先登記，見上）'). One phrase. The non-pre-registration itself needs no further action - it is correctly disclosed and correctly mitigated by dual reporting, and I do not regard it as independently blocking."
+    }
+  ],
+
+  "b2_adversarial_demonstration": {
+    "requirement": "Show the test/gate FAILS on the pre-fix logic; a test that always passes is not a fix.",
+    "setup": "git show 73dca01d0:experiments/k528/k528_nfp_event_study.py > /tmp/k528_prefix/k528_nfp_event_study.py; current test file and data/nfp_release_feed_fixture.json copied alongside.",
+    "pre_fix_run": "(1) SUITE: `uv run --extra dev pytest /tmp/k528_prefix/test_k528_completeness_gate.py -q` -> `14 failed in 0.59s`, every failure at _load_gate: \"AssertionError: could not lift ['LATEST_OBSERVED_RELEASE_DAY_OF_MONTH'] out of k528_nfp_event_study.py\". (2) DIRECT GATE PROBE (`uv run python /tmp/k528_probe.py`), which is the decisive one because it bypasses the harness and exercises the gate itself: `=== PRE-FIX 73dca01d0 === 端點常數存在: False | head: ACCEPTED (刪掉 2005-01; raw=259 selected=253; head_shortfall=34d tail_shortfall=21d) | tail: ACCEPTED (刪掉 2026-03; raw=259 selected=253; head_shortfall=6d tail_shortfall=44d)`. Both endpoint truncations sail through, matching Codex's independent reproduction exactly.",
+    "post_fix_run": "(1) SUITE: `uv run --extra dev pytest experiments/k528/test_k528_completeness_gate.py experiments/k528/test_k528_price_coverage_gate.py -q` -> `24 passed in 2.43s`. (2) SAME DIRECT PROBE against 17f12d16c: `=== POST-FIX 17f12d16c === 端點常數存在: True | head: RAISED -> 'the requested window 2005-01-01..2026-03-27 fully contains the publication window of 1 month(s) that the calendar has no release for: [2005-01]' | tail: RAISED -> ... [2026-03]`. Both ends now fail closed and the rejection names the vanished month.",
+    "verdict": "DEMONSTRATED. The attack is accepted pre-fix and rejected post-fix, with Codex's own diagnostic numbers (259/253, 34d, 44d) reproduced independently."
+  },
+
+  "b3_gate_demonstration": {
+    "note": "Not required by the dispatch template but run for the same reason - a gate that has never been triggered fails the same way as an absent one.",
+    "blocked": [
+      "SPY tail truncated 1 month -> RuntimeError (does not cover the requested window)",
+      "SPY head truncated 1 month -> RuntimeError",
+      "SPY empty download -> RuntimeError (download returned no rows)",
+      "^VIX missing 20 consecutive sessions -> RuntimeError (limit is 3)",
+      "^VIX missing at sample start -> RuntimeError (nothing to carry forward)"
+    ],
+    "correctly_accepted_controls": [
+      "full requested window",
+      "tail short 8 days (inside the 10d holiday tolerance)",
+      "^VIX missing 2 sessions (holiday-length gap)"
+    ],
+    "interpretation": "Discriminating, not indiscriminate. Fail-open sweep found no exception handler anywhere in the analysis path."
+  },
+
+  "round6_enqueued": false,
+  "round6_job_id": null,
+  "round6_blocked_because": "Dispatch condition is 四條全 PASS. B1 and B4 FAIL. Per the same instruction I did not enqueue round 6, did not regenerate review_verdict.json, did not run experiment_gates.py certify, and did not merge.",
+  "merge_status": "NOT MERGED / NOT CERTIFIED",
+  "self_signed_pass": false,
+  "boundary_respected": "I did not modify any K528 experiment code, README, results JSON, or test. Fixing B1/B4 is next-round remediation scope; keeping the verification boundary clean is what keeps 'who fixed it' and 'who verified it' separable. The only files I created are this verdict and two throwaway probes under /tmp.",
+
+  "unresolved": [
+    {
+      "id": "K528-R5-B1",
+      "item": "build_article_correction.py still generates the retired estimand for readers.",
+      "why_it_fails": "Five Chinese strings (:109, :111, :118, :168, :200-201) say 在週五公布的 NFP, and :108 states '253 場 NFP 裡有 237 場落在週五、16 場不是', which conflates release-dated-Friday (243) with traded-in-Friday-session (237). :32 and :310 repeat the conflation in English as '237 Friday releases'. The file was not in remediation commit 17f12d16c.",
+      "what_is_needed": "Rewrite those seven strings to the session estimand and restate :108 as 243 dated Friday / 237 traded in a Friday session / 6 Good Fridays as the gap. No results number changes. This is a text-only edit to a dry-run generator and does not require writing storage/reports/feed.json, so the worktree shared-state constraint does not block it.",
+      "risk_if_shipped_unfixed": "The main thread runs this with --apply to publish the correction. As written it would publish, inside a correction article, the exact claim the correction exists to retract."
+    },
+    {
+      "id": "K528-R5-B4",
+      "item": "README:203 sanctions the phrase '事先聲明的六項 confirmatory family' while README:199 and multiplicity.pre_registered=false both state the family was not pre-registered.",
+      "why_it_fails": "It is the line telling a downstream writer what they may publish, so the contradiction propagates outward rather than staying internal.",
+      "what_is_needed": "Drop '事先聲明的' from README:203 and point to the non-pre-registration disclosure four lines above. One phrase."
+    },
+    {
+      "id": "K528-R5-B4-inherent",
+      "item": "The confirmatory family was defined after the data were seen (git: family labels first appear in 17f12d16c, ~26h after rerun e42dc25ad).",
+      "status": "NOT FIXABLE retroactively; correctly disclosed and correctly mitigated.",
+      "what_is_needed": "Nothing for this study. The six endpoints are git-verified to predate the rerun by three months (461d23ae4, 2026-04-18) and both families are reported side by side, which is what Codex's minimal fix asked for. Flagged so round 6 rules on it explicitly rather than inheriting my judgement.",
+      "note": "I do not treat this as independently blocking - only the README:203 wording above is."
+    },
+    {
+      "id": "collateral",
+      "item": "tests/test_nfp_official_release_dates.py was modified outside experiments/k528/ (65 -> 66 tests).",
+      "status": "Self-flagged by the remediation agent, NOT independently re-verified by me - it sits outside the four blockers I was scoped to.",
+      "what_is_needed": "Main thread should confirm the loosened regex still pins what it claims. The stated reason is credible on its face (the new endpoint expectation fires earlier than the span check, so the old error-string match went red while the code still raised), but I did not test it."
+    },
+    {
+      "id": "process",
+      "item": "storage/ops/codex_reviews/k528_round5_verdict.md is uncommitted and exists only in the main repo working tree.",
+      "status": "Not a K528 defect; a durability gap.",
+      "what_is_needed": "The verdict a remediation is judged against should be committed, or a worktree agent cannot read the thing it is being measured on. I read it via an absolute path into the main repo."
+    }
+  ],
+
+  "verification_method_note": "No claim in k528_round5_remediation.json was used as evidence for itself. Every PASS rests on either a file:line I read or a command I ran and pasted output from. Where the remediation agent's self-report turned out accurate (the endpoints predating the rerun; the mechanical family stamp; the disclosure of the unapplied correction) I confirmed it independently and say so; where it disclosed a gap honestly but left it open (B1's correction generator) I still count it as FAIL, because the dispatch criterion is residual-free, not disclosure-complete."
+}

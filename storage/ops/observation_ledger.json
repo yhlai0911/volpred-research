@@ -1,6 +1,6 @@
 {
   "schema": "observation_ledger.v1",
-  "updated_at": "2026-07-20T06:32:16.854715+00:00",
+  "updated_at": "2026-07-20T10:09:01.212645+00:00",
   "items": [
     {
       "id": "pregate_shadow",
@@ -37,6 +37,15 @@
       "action_on_expiry": "完成 assign_f59976b6 驗收：對照基線判定吞吐變化，決定維持 max_slots=4 或回退 2；回退判準 = PHASE-Z cohort 競態 / worktree 磁碟壓力 / quota 連發（de-rate guard 觸發史）",
       "status": "observing",
       "note": "ops_master 驗收留原 blocked task assign_f59976b6；此帳本項只保證『逾期未驗收』會浮上 dreaming"
+    },
+    {
+      "id": "wsb_isolation_pilot",
+      "what": "WS-B producer-scoped isolation pilot (platform_ops lane): PHASE-Z unknown-author/ownership incidents must be zero for 2 weeks; receipts in storage/ops/dispatch_workspace_receipts.jsonl + dispatch_state completions[].workspace",
+      "started_at": "2026-07-20T10:09:01.212285+00:00",
+      "deadline": "2026-08-03",
+      "action_on_expiry": "zero unknown-author incidents -> add governance to writer_isolation.lanes and open recognizer retirement case; any incident -> set writer_isolation.mode=off and file root-cause task",
+      "status": "observing",
+      "note": "refactor_plan_ops_master_2026_07 WS-B; commits 5d0cc4fb0 + 4f95639c5"
     }
   ]
 }
