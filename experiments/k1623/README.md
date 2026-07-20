@@ -42,6 +42,14 @@ BreakHAR vs HAR 10 個比較全部不顯著；扣斷點後 d̂ 仍為正（作�
 > 「5 資產冠軍」把一個 **HAR-vs-ARFIMA 的兩兩比較**擴張成了**全模型排名**宣稱。
 > 現行說法收窄為兩兩比較，與 §6.3 表格逐格對得上。
 
+> **rev3 降級（2026-07-20，Arm C）— 不在上表的第 9 條**：上表 8 條是 **rev2 對第一輪**的撤回／修正
+> （機讀版 `k1623_rev2_results.json` → `retracted_claims[]`）。**rev3 另外降級了 rev2 自己的一條宣稱**：
+> §6.4 MC 的 finding 2「SE 低估主因是 1/(2√m) 漸近公式本身」是**跨資產通則**，
+> 加入 Arm C 後只在 **2/5 資產**成立（嚴格看 MC 噪音只有 **1/5** 穩健），
+> 已降級為 **asset-dependent**。**完整說明與數據在 §6.4 finding 2，本表不重複。**
+> 這條**未**寫入 `retracted_claims[]`（該欄位的 scope 是 rev2-對-第一輪），
+> 其證據在 `k1623_rev3_armc_results.json`。
+
 ---
 
 ## 1. 動機與差異化
@@ -304,7 +312,7 @@ QQQ/AR1、QQQ/EWMA、N225/AR1、N225/EWMA。HAR 打敗 AR(1) 與 EWMA 不是本�
 
 **未受影響的結論**：BreakRobustHAR vs HAR 的 10 個比較（兩 loss）**全部不顯著**，最小 p=0.106。
 
-### 6.4 Generated-regressor Monte Carlo（rev2 新增，`k1623_rev2_mc.py`）
+### 6.4 Generated-regressor Monte Carlo（rev2 新增 `k1623_rev2_mc.py`；**rev3 加入 Arm C** `k1623_rev3_armc_mc.py`）
 
 brief 要求至少在 limitation 揭露「demeaned d̂ 的 SE 未計入斷點是估計出來的」。rev2 進一步**量化**它。
 
@@ -312,35 +320,78 @@ brief 要求至少在 limitation 揭露「demeaned d̂ 的 SE 未計入斷點是
 **已擬合的分段常數 level**。
 - **Arm A**（真實）= 模擬 → Bai-Perron **重新估計**斷點 → demean → ELW
 - **Arm B**（**僅位置** oracle）= 模擬 → 在**真實斷點位置** demean → ELW
+- **Arm C**（**完全 oracle**，rev3 新增，`k1623_rev3_armc_mc.py`）= 模擬 → 減去**已知的植入 level 向量**
+  → ELW（斷點位置與各段 level **都不估計**；數值上等於直接對原始 ARFIMA 路徑跑 ELW）
 
-> **⚠️ rev3 更正（Codex round 2 §7）— Arm B 不是「純 ELW」基準**：
+> **✅ rev3 更新（2026-07-20）— 原本的「已揭露、未修復」缺口現已量測**：
 > `k1623_rev2_mc.py:118-120` 的 Arm B 呼叫 `K.piecewise_demean(x, breaks_true)`，
 > **斷點「位置」用真值，但每段的「均值」仍是從模擬資料估出來的**（沒有用已知的植入 level 向量）。
-> 所以 Arm B **只 oracle 化了斷點位置，沒有消除 mean-structure 的 generated-regressor 不確定性**。
-> **後果（決定下表怎麼讀）**：A−B 對照隔離的是**「找斷點位置」的成本**；
-> **「估各段均值」的成本在兩臂都存在，被差分掉了 —— 本設計完全沒有量到它，也沒有為它設上界。**
-> 要量它需要第三臂（用已知植入 level 去 demean），本輪 scope 不重跑、故不新增。
+> 所以 Arm B **只 oracle 化了斷點位置**；A−B 只隔離「找斷點位置」的成本，
+> 「估各段均值」的成本在 A、B 兩臂都存在而被差分掉。
+> rev2 當時把這個缺口列為 **DISCLOSED, NOT FIXED**（揭露但未量測、也未設上界）。
+> **rev3 加入 Arm C 後，該項已從「未量測」變成「已量測」**：`B−C = −0.043 至 −0.022`（見下表）。
+> Arm A / Arm B 在 Arm C 這一輪**完整重現**了凍結的 rev2 數值（rtol=1e-9，5/5 資產），
+> 證明三臂踩在**同一批模擬路徑**上、B−C 是乾淨的配對對照。
+>
+> **⚠️ B−C 只能這樣讀（不可加碼）**：Arm C **不是 zero-mean oracle**。
+> `local_whittle(exact=True)` 依 Shimotsu-Phillips 定義，內部**仍然減去一個單一的樣本總均值**，
+> 且 A、B、C **三臂都一樣**。所以 Arm C 估 1 個總均值，Arm B 估 `n_breaks+1` 個分段均值 ——
+> **B−C 是「估分段均值」相對於「ELW 自身那一次單一總均值 demeaning」的<u>增量</u>成本**，
+> **不是「估計任何均值的總成本」**，也不可被引述為後者。
+> 真實資料上某種 demeaning 本來就不可免，所以增量才是對的比較口徑；
+> 但把增量說成總量，就是 rev2 對 Arm B 犯過、已經撤回的**同一類 overclaim**。
 
-| 資產 | d̂ (fitted) | 已發表漸近 SE | MC 抽樣 sd (Arm A) | SE 低估倍數 | 位置估計 sd 膨脹 (A/B) | 總偏誤 (Arm A) | Arm B 自身偏誤 | **斷點定位效應 (A−B)** | 斷點**數**精確回收率 |
-|---|---|---|---|---|---|---|---|---|---|
-| VIX | 0.645 | 0.0398 | 0.0518 | **1.30×** | 1.016 | −0.027 | −0.007 | **−0.020** | 78.4% |
-| SPY | 0.475 | 0.0472 | 0.0629 | **1.33×** | 1.053 | −0.085 | −0.039 | **−0.045** | 56.4% |
-| TW0050 | 0.563 | 0.0408 | 0.0496 | **1.21×** | 1.101 | −0.065 | −0.009 | **−0.056** | **7.0%** |
-| QQQ | 0.457 | 0.0472 | 0.0619 | **1.31×** | 1.034 | −0.077 | −0.036 | **−0.041** | 56.0% |
-| N225 | 0.460 | 0.0475 | 0.0602 | **1.27×** | 1.010 | −0.084 | −0.039 | **−0.046** | 63.4% |
+**表 A — 偏誤分解（加法可分解，`additivity_residual = 0.0`，5/5 資產）**
 
-（「總偏誤」= `arm_a.mean − d_demeaned_fitted`；「Arm B 自身偏誤」= `arm_b.mean − d_demeaned_fitted`
-＝ ELW 有限樣本行為 **＋ 在已知位置估段均值**；「A−B」= `arm_a.mean − arm_b.mean`。
-三欄全部可由 `k1623_rev2_mc_results.json` → `claim_corrections_rev3.corrected_attribution.per_asset`
-逐格對上，該欄位是由凍結的 arm means **計算**出來的，未重跑模擬。）
+| 資產 | d̂ (fitted) | 總偏誤 (Arm A) | **斷點定位 (A−B)** | **段均值估計 (B−C，增量)** | **生成迴歸子合計 (A−C)** | ELW 自身 (C−d̂) | 斷點**數**精確回收率 |
+|---|---|---|---|---|---|---|---|
+| VIX | 0.645 | −0.027 | **−0.020** | **−0.026** | **−0.046** | +0.018 | 78.4% |
+| SPY | 0.475 | −0.085 | **−0.045** | **−0.040** | **−0.085** | +0.001 | 56.4% |
+| TW0050 | 0.563 | −0.065 | **−0.056** | **−0.022** | **−0.078** | +0.013 | **7.0%** |
+| QQQ | 0.457 | −0.077 | **−0.041** | **−0.043** | **−0.084** | +0.007 | 56.0% |
+| N225 | 0.460 | −0.084 | **−0.046** | **−0.043** | **−0.089** | +0.004 | 63.4% |
+
+（定義：「總偏誤」= `arm_a.mean − d_demeaned_fitted`；「A−B」= `arm_a.mean − arm_b.mean`；
+「B−C」= `arm_b.mean − arm_c.mean`，**相對 ELW 自身單一總均值 demeaning 的增量**（見上方警告框）；
+「A−C」= (A−B) + (B−C) = 生成迴歸子偏誤合計；「C−d̂」= ELW 自身有限樣本偏誤，
+**含**其內建的單次 demeaning 與 FD_MAXK=2000 截斷效應，**不是**純 zero-generated-regressor 量。
+A−B 欄與凍結的 `k1623_rev2_mc_results.json` → `claim_corrections_rev3.corrected_attribution`
+**逐位元相同**；其餘欄位出自 `k1623_rev3_armc_results.json` → `per_asset.<資產>.bias_decomposition`。）
+
+**表 B — 抽樣 sd 分解（乘法：`sd_A/SE = f1 × f2 × f3`，`product_check` 5/5 相符）**
+
+| 資產 | 已發表漸近 SE | MC sd (Arm A) | SE 低估倍數 | f1 漸近公式 | f2 段均值估計 | f3 斷點定位 | 主導因子 |
+|---|---|---|---|---|---|---|---|
+| VIX | 0.0398 | 0.0518 | **1.30×** | **1.195** | 1.072 | 1.016 | 漸近公式 |
+| SPY | 0.0472 | 0.0629 | **1.33×** | **1.126** | 1.123 | 1.053 | 漸近公式（**幾乎並列，見下方警告**） |
+| TW0050 | 0.0408 | 0.0496 | **1.21×** | 1.043 | 1.058 | **1.101** | 斷點定位 |
+| QQQ | 0.0472 | 0.0619 | **1.31×** | 1.067 | **1.188** | 1.034 | 段均值估計 |
+| N225 | 0.0475 | 0.0602 | **1.27×** | 1.102 | **1.140** | 1.010 | 段均值估計 |
+
+（`f1 = sd_C/SE_published`（漸近公式自身的樂觀程度）、`f2 = sd_B/sd_C`（估段均值）、
+`f3 = sd_A/sd_B`（估斷點位置）。來源：`k1623_rev3_armc_results.json` → `per_asset.<資產>.sd_decomposition`
+與 `summary.dominant_sd_factor_per_asset`。）
 
 **四個發現（含一個與批評方向相反、仍如實報告）**：
 
 1. **已發表的 SE 確實低估**：真實抽樣 sd 是漸近 SE 的 **1.21–1.33 倍**，原信賴區間過窄。
-2. **但主因不是「找斷點位置」**——與批評所暗示的相反：斷點**定位**相對於位置-oracle 只貢獻
-   **1.01–1.10×**；低估主要來自 **1/(2√m) 漸近公式本身**在此樣本數與頻寬下過度樂觀。
-   **這樣報是因為模擬就是這樣顯示，不是因為這樣最能支持該批評。**
-   **限定**：此倍數只涵蓋定位成本；估段均值的那一份在 A、B 兩臂互相抵消，**未被量測**（見上方 Arm B 更正框）。
+2. **主因是哪一個，逐資產不同 —— rev2 的跨資產宣稱不成立（rev3 降級）**：
+   斷點**定位**相對於位置-oracle 只貢獻 **1.01–1.10×**，這點不變（與批評所暗示的相反，如實報告）。
+   但 **rev2 finding 2 原本寫「低估主要來自 1/(2√m) 漸近公式本身」，那是一句跨資產通則 ——
+   加入 Arm C 之後它不成立。** 三因子分別為：漸近公式 **1.043–1.195×**、
+   段均值估計 **1.058–1.188×**（**rev2 完全看不見這一項**，它在 A−B 被差分掉）、
+   斷點定位 **1.010–1.101×**。逐資產主導因子：
+   **VIX、SPY = 漸近公式；QQQ、N225 = 段均值估計；TW0050 = 斷點定位**。
+   **即「漸近公式為主因」只在 5 個資產中的 2 個成立**（`summary.dominant_sd_factor_per_asset`）。
+   **本段因此由「跨資產通則」降級為 asset-dependent 敘述**，不再宣稱單一主因。
+   > **⚠️ 而且這個 2/5 還是偏寬鬆的算法**：SPY 的 f1 = 1.1264 與 f2 = 1.1229 只差 **0.31%**，
+   > 而 500 次重複下單一 sd 估計的相對 Monte Carlo 標準誤約為 `1/√(2×499) ≈ 3.2%`
+   > （高斯近似的**粗略量級檢查**，非正式檢定；本 artifact 未保存逐次重複的 draw，無法做 bootstrap）。
+   > 兩者相差約一個數量級，故 **SPY 被歸給「漸近公式」實質上是擲硬幣，不是穩健排序**。
+   > 嚴格說只有 **VIX 一個資產**的漸近公式主導地位落在 MC 噪音之外。
+   > 這使上面的降級**更**站得住，而不是更弱 —— 如實記錄，不往有利方向解讀。
+   **質性上存活的**：三個因子**全部 > 1**，所以「已發表 SE 確實低估」這個結論本身不受影響；
+   改變的是**歸因**，不是低估這件事。
 3. **擬合斷點會機械性地把 d̂ 往下拉**，即使模擬的 DGP **恰好只含**被移除的那些 level shift。
    **正確歸因是配對 A−B contrast = −0.056 至 −0.020**（權威：
    `claim_corrections_rev3.corrected_attribution.break_location_estimation_effect_range_a_minus_b`）。
@@ -350,6 +401,11 @@ brief 要求至少在 limitation 揭露「demeaned d̂ 的 SE 未計入斷點是
    造成同一份 README 內部自相矛盾 —— 現已統一。
    質性結論不變：第一輪報告的 raw → demeaned d̂ 下降，**有一部分是擬合斷點的機械假象，
    不是額外 level shift 的證據**；這在**兩個方向**上都削弱了第一輪的解讀。
+   **rev3 補充**：A−B 仍是「找斷點位置」的正確歸因（數值未變）；
+   Arm C 使**生成迴歸子的合計**效應也可量測 = **A−C = −0.089 至 −0.046**
+   （`summary.total_generated_regressor_range_a_minus_c`），其中段均值估計佔 **28.8%–56.3%**
+   （`bias_decomposition.mean_estimation_share_of_generated_regressor`，5/5 資產
+   `shares_are_interpretable = true`，因三項偏誤同號故比重可解釋）。
 4. **斷點「數量」回收很吵**：精確回收斷點**數**的比例只有 **7%–78%**（TW0050 最差 7%）。
    **⚠️ rev3 撤回（Codex round 2 §7）**：凍結 JSON 的 `finding_4` 原本附帶一句
    「break **dates** are estimated with substantial uncertainty」——**本 artifact 不支撐這句**：
@@ -365,10 +421,20 @@ brief 要求至少在 limitation 揭露「demeaned d̂ 的 SE 未計入斷點是
 1. 此 MC 是 **model-conditional** 的——它假設 DGP **真的是** ARFIMA + 估計日期上的決定性斷點，
    量化的是**該模型下**的抽樣不確定性。
    **它不是對該模型的檢定，也不是支持該模型的證據，更無法處理 Diebold-Inoue 的隨機／密集 shift DGP。**
-2. **Arm B 只 oracle 化斷點位置**，仍估各段均值 → A−B 只隔離定位成本，
-   **mean-structure 的 generated-regressor 不確定性未被量測、未被設上界**。
-3. **只有斷點數量、沒有斷點日期**：本 artifact 無法對日期定位誤差說任何話。
-4. 高斯 innovation；FD_MAXK = 2000 截斷在此同樣 binding。
+2. **Arm B 只 oracle 化斷點位置**，仍估各段均值 → A−B 只隔離定位成本。
+   **rev3 更新**：mean-structure 那一份已由 Arm C 量測（B−C = −0.043 至 −0.022），
+   此項不再是未量測缺口 —— 但**只在下一條的限定內成立**。
+3. **Arm C 不是 zero-mean oracle**：`local_whittle(exact=True)` 在**三臂**都會減去一次單一樣本總均值。
+   故 (i) 該步驟在差分中抵消，**不汙染** B−C 與 A−C；
+   (ii) 但 **B−C 是相對該次單一 demeaning 的<u>增量</u>成本，不是「估計任何均值的總成本」**；
+   「ELW 自身偏誤 (C−d̂)」同理**不是**字面上的 zero-generated-regressor 量，且**含** FD_MAXK 截斷效應。
+   把任一項引述為更強的版本，等於對 Arm C 重犯 rev2 已為 Arm B 撤回的那個 overclaim。
+4. **Arm C 的 oracle 資訊在真實資料上不存在**：它減去的是模擬時**植入**的 level 向量，
+   因此 Arm C 是**分解工具，不是任何人能用的估計量**。
+5. **主導 sd 因子的排序不是穩健統計量**：500 reps 下單一 sd 估計的相對 MC 標準誤約 3.2%，
+   而 SPY 的前兩名只差 0.31%（見 finding 2 警告框）。該欄位應讀為描述性 argmax，不是檢定結果。
+6. **只有斷點數量、沒有斷點日期**：本 artifact 無法對日期定位誤差說任何話（Arm C 不改變這點）。
+7. 高斯 innovation；FD_MAXK = 2000 截斷在此同樣 binding，**且對 Arm C 也 binding**。
 
 ## 7. Verdict 與 caveats（rev2）
 
@@ -405,7 +471,13 @@ brief 要求至少在 limitation 揭露「demeaned d̂ 的 SE 未計入斷點是
 | `k1623_rev2_mc_results.json` | MC 結果 + scope 限制 | 新增；**rev3 附加 `claim_corrections_rev3`（原數值欄位一格未動）** |
 | `k1623_rev3_patch_mc_artifact.py` | rev3 標註工具：把 MC artifact 的失效宣稱逐條標記，並由凍結的 arm means **計算** A−B 正確歸因 | 新增（含 guard：任一原數值欄位被改動就拒絕寫入） |
 | `k1623_rev3_remediation.json` | rev3 本輪的 remediation 紀錄（逐 blocker 的 before/after + 自檢結果） | 新增 |
+| `k1623_rev3_armc_mc.py` | **Arm C**（完全 oracle）三臂 MC（500 reps, seed=42, ~308s）；內含對凍結 rev2 arm A/B 的 `ReproductionFailure` gate | 新增 |
+| `k1623_rev3_armc_results.json` | **Arm C 權威結果**：三臂 `bias_decomposition` / `sd_decomposition` / `reproduction_check_vs_frozen_rev2_mc` | 新增；**未修改 rev2 MC artifact 任何一格**（`supersedes_nothing`） |
 | `plots/` | 每資產 4 圖（共 20 張） | 未修改 |
+
+**Arm C 與凍結 artifact 的關係**：`k1623_rev3_armc_mc.py` 以唯讀方式開啟 `k1623_rev2_mc_results.json`，
+**只新增一臂、不改寫任何既有欄位**。Arm C 不消耗亂數，故 eps 串流與凍結 rev2 完全相同 ——
+這點由 arm A/B 的重現 gate（rtol=1e-9，5/5 資產 `all_ok = true`）**驗證**而非假設。
 
 **README 數字的來源分佈（rev3 更正）**：
 
@@ -419,8 +491,9 @@ brief 要求至少在 limitation 揭露「demeaned d̂ 的 SE 未計入斷點是
 | §6.2 d_raw / d_demean / 斷點數 / 頻寬 pattern | 第一輪 artifact | **`k1623_results.json`** |
 | §3 重現性、n、pin dates、最大相對偏差 | rev2 | `k1623_rev2_results.json` → `reproduction_guard` |
 | §6.3 全部（ratio / t / p / BH / Bonferroni / 反轉） | rev2 | `k1623_rev2_results.json` → `dm_comparisons[]`、`loss_function_sign_reversal[]` |
-| §6.4 表格前 6 欄 + 回收率 | MC | `k1623_rev2_mc_results.json` → `per_asset` |
-| §6.4 表格「Arm B 自身偏誤」「A−B」兩欄 | MC（rev3 由凍結 arm means **計算**，非重跑） | `k1623_rev2_mc_results.json` → `claim_corrections_rev3.corrected_attribution` |
+| §6.4 表 A「d̂」「總偏誤」、表 B「漸近 SE」「MC sd」「低估倍數」、回收率 | MC | `k1623_rev2_mc_results.json` → `per_asset` |
+| §6.4 表 A「A−B」欄 | MC（rev3 由凍結 arm means **計算**，非重跑；與 Arm C 那輪重跑值**逐位元相同**） | `k1623_rev2_mc_results.json` → `claim_corrections_rev3.corrected_attribution` |
+| §6.4 表 A「B−C」「A−C」「C−d̂」、表 B「f1/f2/f3」「主導因子」、finding 2 全部 | **Arm C**（rev3 新增，重跑三臂） | **`k1623_rev3_armc_results.json`** → `per_asset.*.{bias,sd}_decomposition`、`summary` |
 | §0 撤回表、§7 limitations | rev2 | `k1623_rev2_results.json` → `retracted_claims[]`、`residual_limitations[]` |
 
 **所以正確的說法是：每個 README 數字都能在上表指定的那一份 artifact 裡對上 —— 但不是全部都在 rev2 JSON 裡。**

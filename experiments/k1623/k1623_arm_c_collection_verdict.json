@@ -1,0 +1,208 @@
+{
+  "job_id": "compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674",
+  "collected_at": "2026-07-21T07:24:22.181512+08:00",
+  "collector": "claude-opus-4-8 / xhigh (compute worker, headless)",
+  "role": "collection review — verified artifacts and updated prose; did NOT re-run the MC",
+  "verdict": "PASS",
+  "reproduction_check": {
+    "all_ok_count": 5,
+    "expected": 5,
+    "per_asset": {
+      "VIX": true,
+      "SPY": true,
+      "TW0050": true,
+      "QQQ": true,
+      "N225": true
+    },
+    "rtol": "1e-9",
+    "detail": "All 5 assets report reproduction_check_vs_frozen_rev2_mc.all_ok = true. Arms A and B reproduce the frozen k1623_rev2_mc_results.json at rtol=1e-9 across n, bandwidth_m, d_demeaned_fitted, innovation_sigma, n_breaks_true, arm_a.mean/sd and arm_b.mean/sd. No ReproductionFailure raised; no tolerance was relaxed."
+  },
+  "bitwise_vs_frozen_rev2": {
+    "ok": true,
+    "comparison": "repr()-level identity of A-B against claim_corrections_rev3.corrected_attribution AND against the values pinned in the follow-up brief",
+    "per_asset": {
+      "VIX": {
+        "expected": -0.01996200161917383,
+        "actual": -0.01996200161917383,
+        "match": true
+      },
+      "SPY": {
+        "expected": -0.045159482487136415,
+        "actual": -0.045159482487136415,
+        "match": true
+      },
+      "TW0050": {
+        "expected": -0.05562014170297003,
+        "actual": -0.05562014170297003,
+        "match": true
+      },
+      "QQQ": {
+        "expected": -0.04110304364398498,
+        "actual": -0.04110304364398498,
+        "match": true
+      },
+      "N225": {
+        "expected": -0.045546793733964475,
+        "actual": -0.045546793733964475,
+        "match": true
+      }
+    }
+  },
+  "bitwise_vs_gatefail_snapshot": {
+    "ok": true,
+    "snapshot_found": true,
+    "snapshot_path": "/tmp/k1623_armc_gatefail_run_20260721.json",
+    "snapshot_sha256": "94081a31cae51d91f6ad7e635365ba23c06ff8546712489e91898cfd8a4455e5",
+    "snapshot_sha256_matches_brief": true,
+    "new_artifact_sha256": "8a04ef8ef50f7ea190cd353f9f674d4756c51cffc52847ed444488affb12eaf9",
+    "keys_that_differ": [
+      "generated_utc",
+      "total_runtime_sec"
+    ],
+    "detail": "Whole-file bytes differ ONLY in generated_utc (2026-07-20T19:20:14 vs T16:50:24) and total_runtime_sec (308.02 vs 395.74) — both run metadata, not results. Every numeric/result key is byte-identical, confirming the script bytes were unchanged and the RNG is deterministic, exactly as the brief predicted. The runtime delta reflects differing machine load between the two runs, not a computational difference."
+  },
+  "preview_reconciliation": {
+    "ok": true,
+    "mismatches": [],
+    "detail": "The quarantined pre-fix preview in k1623_arm_c_decision.json.preview_numbers_not_citable reconciles exactly: 20/20 bias-decomposition cells match to 4dp, all three sd_factor ranges match to 4dp, and dominant_sd_factor_per_asset is identical 5/5. Confirms the post-run fixes were wording-only. The preview remains NOT CITABLE; only the queued artifact is quoted."
+  },
+  "finding2_rewrite": {
+    "done": true,
+    "dominant_sd_factor_by_asset": {
+      "VIX": "asymptotic_formula",
+      "SPY": "asymptotic_formula",
+      "TW0050": "break_location",
+      "QQQ": "mean_estimation",
+      "N225": "mean_estimation"
+    },
+    "counts": {
+      "asymptotic_formula": 2,
+      "mean_estimation": 2,
+      "break_location": 1
+    },
+    "downgraded_to": "asset-dependent",
+    "what_changed": "rev2 finding 2 asserted as a CROSS-ASSET generalisation that the SE understatement comes mainly from the 1/(2 sqrt m) asymptotic formula. With arm C making the mean-estimation factor visible, that holds for only 2 of 5 assets (VIX, SPY); QQQ and N225 are mean_estimation-dominant and TW0050 is break_location-dominant. README 6.4 finding 2 is rewritten as a downgrade, not an extension.",
+    "what_survives": "All three sd factors exceed 1.0 for every asset, so the conclusion that the published SE IS understated (1.21-1.33x) is unchanged. Only the ATTRIBUTION was downgraded."
+  },
+  "dominant_factor_robustness": {
+    "n_reps": 500,
+    "crude_relative_mc_se_of_an_sd_estimate": 0.0317,
+    "method": "Gaussian approximation 1/sqrt(2(n-1)); the artifact stores only per-arm mean/sd (no per-replication draws), so no bootstrap was possible. This is an order-of-magnitude sanity check, NOT a formal test.",
+    "per_asset": {
+      "VIX": {
+        "top": "asymptotic_formula",
+        "runner_up": "mean_estimation",
+        "relative_gap": 0.11492,
+        "exceeds_crude_mc_se": true
+      },
+      "SPY": {
+        "top": "asymptotic_formula",
+        "runner_up": "mean_estimation",
+        "relative_gap": 0.00313,
+        "exceeds_crude_mc_se": false
+      },
+      "TW0050": {
+        "top": "break_location",
+        "runner_up": "mean_estimation",
+        "relative_gap": 0.04075,
+        "exceeds_crude_mc_se": true
+      },
+      "QQQ": {
+        "top": "mean_estimation",
+        "runner_up": "asymptotic_formula",
+        "relative_gap": 0.114,
+        "exceeds_crude_mc_se": true
+      },
+      "N225": {
+        "top": "mean_estimation",
+        "runner_up": "asymptotic_formula",
+        "relative_gap": 0.03449,
+        "exceeds_crude_mc_se": true
+      }
+    },
+    "caveat": "SPY's top-two gap is 0.31%, roughly an order of magnitude BELOW the ~3.2% crude MC SE, so its 'asymptotic_formula' label is effectively a coin flip. Strictly only VIX has a robustly dominant asymptotic-formula factor. This makes the downgrade stronger, not weaker, and is recorded in README 6.4 finding 2 and scope limit 5."
+  },
+  "bc_wording_check": {
+    "phrased_as_incremental_vs_elw_grand_mean": true,
+    "quote": "**B−C 是「估分段均值」相對於「ELW 自身那一次單一總均值 demeaning」的<u>增量</u>成本**，**不是「估計任何均值的總成本」**，也不可被引述為後者。",
+    "quote_located_in_readme": true,
+    "self_reread_performed": true,
+    "detail": "Re-read after writing, per brief. B-C is stated as the INCREMENTAL cost of estimating the n_breaks+1 segment means OVER ELW's own single grand-mean demeaning, with an explicit negative clause rejecting the 'total cost of estimating any mean' reading, and an explicit note that this would repeat the arm B overclaim rev2 retracted. The same limit is restated in MC scope limit 3 and in the table A definition note, so it cannot be lost by reading only the table.",
+    "quote_verification_method": "The quote is a de-wrapped reconstruction: in README 6.4 it spans two blockquote lines, so it is NOT a literal contiguous substring. Verified by normalising away newlines and '> ' blockquote prefixes, which matches. Recorded this way rather than claiming an exact substring match.",
+    "also_restated_at": [
+      "README 6.4 表 A 定義註（「相對 ELW 自身單一總均值 demeaning 的增量」）",
+      "README 6.4 MC scope 限制第 3 條"
+    ]
+  },
+  "readme_6_4_updated": true,
+  "readme_changes": [
+    "Section heading now names k1623_rev3_armc_mc.py alongside the rev2 MC script.",
+    "Design block gained an Arm C bullet (full oracle, known implanted level vector).",
+    "The 'DISCLOSED, NOT FIXED' box is replaced by a measured-result box reporting B-C = -0.043 to -0.022, plus a hard do-not-overread warning defining B-C as incremental over ELW's own single demeaning.",
+    "Single 10-column table split into table A (bias decomposition, with new B-C / A-C / C-dhat columns) and table B (sd decomposition, with f1/f2/f3 and dominant factor).",
+    "Finding 2 rewritten as a DOWNGRADE to asset-dependent, including the SPY near-tie MC-noise warning.",
+    "Finding 3 extended with the now-measurable total generated-regressor effect A-C = -0.089 to -0.046 and the 28.8%-56.3% mean-estimation share.",
+    "MC scope limits expanded from 4 to 7 items (arm C is not zero-mean; oracle info unavailable on real data; dominant-factor ranking is not a robust statistic).",
+    "Section 0 gained a rev3 pointer noting this downgrade is NOT part of retracted_claims[] (whose scope is rev2-vs-round-1).",
+    "Section 8 output table and the README-number-provenance table both list the two new arm C files."
+  ],
+  "experiment_gates_rerun": {
+    "status": "passed",
+    "command": "uv run python scripts/experiment_gates.py run --path experiments/k1623",
+    "output": "[gate] PASS — 6 file(s) under experiments/k1623 cleared 4 experiment-integrity gates.",
+    "dm_hac_lag_false_positive_resolved": true,
+    "verdict_template_regenerated": true,
+    "pins": 31,
+    "pins_before": 30,
+    "pins_note": "Regenerated after the README edit; k1623_rev3_armc_results.json is now pinned (it was untracked and unpinned at 30). Template is intentionally left UNFILLED (verdict field still 'FILL: ...'), which fail-closed blocks merge until a reviewer signs it — the correct state while Codex review is pending."
+  },
+  "blocking_open_items": [
+    "codex_primary_path_review_pending_until_2026-07-25 — Codex usage limit resets 2026-07-25. Current coverage is agy PASS + feature-dev:code-reviewer CONDITIONAL PASS, both FALLBACK paths. Per the K1259 lesson (subagent fallback PASS != primary-path PASS: Codex later found 12 residual defects in code a subagent had passed), primary-path Codex review is a BLOCKING precondition for round-3 release. Do not treat this collection PASS as closure.",
+    "review_verdict.json is an unfilled template — experiments/k1623 CANNOT merge to main until a reviewer fills verdict/reviewer/reviewed_at/reviewed_commit/review_artifact and the pinned sha256 still match current bytes.",
+    "worktree merge is explicitly forbidden this round per the follow-up brief (round 3 PASS only)."
+  ],
+  "process_gap": {
+    "what": "The feature-dev:code-reviewer subagent EXECUTED the experiment script it was briefed to review, violating the repo rule that experiment code is reviewed before it is run.",
+    "when": "2026-07-21 00:32 台灣時間",
+    "impact": "No numerical contamination — the unauthorized artifact was quarantined to /tmp/k1623_quarantine/, never committed, recorded only as preview_numbers_not_citable, and this round's reconciliation shows it matches the queued run exactly. The damage is to review independence, not to the numbers.",
+    "root_cause": "The review brief said 'review this code' but never said 'do not execute it'. Running code is normally diligent reviewing; for EXPERIMENT code it is a controlled action requiring the compute queue, the post-run gate, and provenance.",
+    "logged_to": [
+      "docs/error_log.md (class C representative-incident line)",
+      "docs/error_log_archive/2026-Q3.md (full entry)"
+    ]
+  },
+  "recommended_hardening": {
+    "target": ".claude/skills/autonomous-research/references/agent-brief-template.md",
+    "change": "Add a hard scope limit to the review-brief section: 'READ ONLY — do not execute the experiment script under review; cite existing artifacts for outputs, or return an execution request to the main thread so it goes through the compute queue.'",
+    "why_template_not_prose": "The constraint must arrive at dispatch time. Per anti-stacking, this belongs in the one brief template rather than as another prose reminder layer.",
+    "not_applied_here": "This worktree agent is scoped to experiments/k1623 and must not edit shared .claude/ surfaces; main thread should apply it."
+  },
+  "findings": [
+    "PASS on all four numeric gates: reproduction 5/5, A-B bitwise vs frozen rev2 5/5, results bitwise vs the gate-fail snapshot (metadata keys excluded), and full preview reconciliation.",
+    "The gate-fail snapshot differs from the new artifact ONLY in generated_utc and total_runtime_sec — confirming the earlier exit=4 was purely the dm-hac-lag site-key false positive and not a computational issue. The gate now PASSES on the same path.",
+    "NEW (not anticipated by the brief): the '2 of 5 assets' count for asymptotic_formula dominance is itself fragile. SPY's f1=1.1264 vs f2=1.1229 is a 0.31% gap against a ~3.2% crude MC standard error at 500 reps — an order of magnitude smaller. Only VIX is robustly asymptotic-formula-dominant. Recorded in README rather than silently restating the artifact's argmax; the artifact's own classification is left unmodified.",
+    "Two rounding defects in the collector's own first draft of the README were caught by a machine re-verification pass and fixed: N225 f3 written as 1.011 (artifact 1.0105 -> 1.010) and the mean-estimation share written as 29%-56% (actual 28.8%-56.3%). Every README number was then re-verified cell-by-cell against the artifacts.",
+    "claim_corrections_rev3 was NOT touched — no supersession entry was added, so the frozen 181-key artifact remains 0-modified/0-removed and _guard_frozen_artifact() was never challenged.",
+    "knowledge.json was NOT written, per the K1259 lesson that agents do not write the knowledge base."
+  ],
+  "integrity_declarations": {
+    "no_thresholds_relaxed": true,
+    "no_frozen_artifact_edited": true,
+    "knowledge_json_untouched": true,
+    "mc_not_rerun": true,
+    "wrote_only_inside_worktree": true,
+    "worktree_not_merged": true
+  },
+  "files_changed": [
+    "experiments/k1623/README.md (section 0 pointer, section 6.4 rewrite, section 8 tables)",
+    "experiments/k1623/review_verdict.json (regenerated template, 30 -> 31 pins)",
+    "experiments/k1623/k1623_arm_c_collection_verdict.json (new, this file)",
+    "docs/error_log.md (class C representative incident line)",
+    "docs/error_log_archive/2026-Q3.md (full incident entry)"
+  ],
+  "unresolved": [
+    "Primary-path Codex review of k1623_rev3_armc_mc.py — blocked on the usage limit until 2026-07-25.",
+    "review_verdict.json still requires a human/reviewer signature before k1623 can merge.",
+    "The agent-brief-template hardening is recommended but not applied (out of this worktree's scope)."
+  ]
+}
