@@ -1,12 +1,12 @@
 {
-  "last_seen_run_id": 29720455762,
+  "last_seen_run_id": 29723257493,
   "last_seen_conclusion": "failure",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-red-29715899562",
   "last_push_remediation": {
     "attempted": true,
-    "ahead": 30,
-    "head_sha": "f20c259d2cdf36f0ff2dd501e18d277d96b2a841",
+    "ahead": 1,
+    "head_sha": "9c3f36e19bcb8d160a4cce6ecd5260fdff0761e8",
     "pushed": true,
     "rc": 0,
     "outcome": "pushed",
@@ -14,32 +14,32 @@
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "29720455762:1",
-    "run_id": 29720455762,
+    "key": "29723257493:1",
+    "run_id": 29723257493,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29720455762",
-    "head_sha": "d28b26fe2b5303906b25434c99626ee5e2bd345a",
-    "created_at": "2026-07-20T06:00:20Z",
-    "started_at": "2026-07-20T06:00:20Z",
-    "updated_at": "2026-07-20T06:12:49Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29723257493",
+    "head_sha": "f20c259d2cdf36f0ff2dd501e18d277d96b2a841",
+    "created_at": "2026-07-20T07:00:20Z",
+    "started_at": "2026-07-20T07:00:20Z",
+    "updated_at": "2026-07-20T07:14:22Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "29720455762:1",
-    "run_id": 29720455762,
+    "key": "29723257493:1",
+    "run_id": 29723257493,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29720455762",
-    "head_sha": "d28b26fe2b5303906b25434c99626ee5e2bd345a",
-    "created_at": "2026-07-20T06:00:20Z",
-    "started_at": "2026-07-20T06:00:20Z",
-    "updated_at": "2026-07-20T06:12:49Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29723257493",
+    "head_sha": "f20c259d2cdf36f0ff2dd501e18d277d96b2a841",
+    "created_at": "2026-07-20T07:00:20Z",
+    "started_at": "2026-07-20T07:00:20Z",
+    "updated_at": "2026-07-20T07:14:22Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-07-20T07:00:07.054903+00:00",
+  "updated_at": "2026-07-20T08:00:02.297016+00:00",
   "processed_run_keys": [
     "29304886936:1",
     "29307406826:1",
@@ -196,7 +196,8 @@
     "29713698319:1",
     "29715899562:1",
     "29718141674:1",
-    "29720455762:1"
+    "29720455762:1",
+    "29723257493:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -350,12 +351,13 @@
       "updated_at": "2026-07-20T04:13:19Z",
       "attempt_history_complete": true
     },
-    "root_cause": "2026-07-20T06:12:44.2187990Z E AssertionError: Enforcement Layer Map is out of sync with disk — update .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md in the same commit as the hook/CI change.",
+    "root_cause": "2026-07-20T07:14:15.0805077Z E AssertionError: assert 'running' == 'failed'",
     "root_cause_status": "complete",
     "failure_run_keys": [
       "29715899562:1",
       "29718141674:1",
-      "29720455762:1"
+      "29720455762:1",
+      "29723257493:1"
     ],
     "repair_task_ids": [
       "ci-red-29715899562"
@@ -392,53 +394,55 @@
         "sent_at": "2026-07-20T07:00:07.054903+00:00"
       }
     },
-    "root_cause_run_key": "29720455762:1",
+    "root_cause_run_key": "29723257493:1",
     "latest_failure": {
-      "key": "29720455762:1",
-      "run_id": 29720455762,
+      "key": "29723257493:1",
+      "run_id": 29723257493,
       "attempt": 1,
       "status": "completed",
       "conclusion": "failure",
-      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29720455762",
-      "head_sha": "d28b26fe2b5303906b25434c99626ee5e2bd345a",
-      "created_at": "2026-07-20T06:00:20Z",
-      "started_at": "2026-07-20T06:00:20Z",
-      "updated_at": "2026-07-20T06:12:49Z",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29723257493",
+      "head_sha": "f20c259d2cdf36f0ff2dd501e18d277d96b2a841",
+      "created_at": "2026-07-20T07:00:20Z",
+      "started_at": "2026-07-20T07:00:20Z",
+      "updated_at": "2026-07-20T07:14:22Z",
       "attempt_history_complete": true
     },
     "failure_heads": [
       "f23d870c448b55796d229312b09ec659ec96a5db",
       "a9330b9d8174dfae05f56c2b766851654d11eff9",
-      "d28b26fe2b5303906b25434c99626ee5e2bd345a"
+      "d28b26fe2b5303906b25434c99626ee5e2bd345a",
+      "f20c259d2cdf36f0ff2dd501e18d277d96b2a841"
     ],
-    "failure_cycles": 3,
+    "failure_cycles": 4,
     "repair_task_statuses": {
       "ci-red-29715899562": "in_progress"
     },
     "dispatch_request_count": 1,
     "last_dispatch_request_at": "2026-07-20T05:00:06.025851+00:00",
     "push_intent": {
-      "head_sha": "f20c259d2cdf36f0ff2dd501e18d277d96b2a841",
-      "run_key": "29720455762:1",
-      "recorded_at": "2026-07-20T07:00:07.054903+00:00"
+      "head_sha": "9c3f36e19bcb8d160a4cce6ecd5260fdff0761e8",
+      "run_key": "29723257493:1",
+      "recorded_at": "2026-07-20T08:00:02.297016+00:00"
     },
     "last_push_remediation": {
       "attempted": true,
-      "ahead": 30,
-      "head_sha": "f20c259d2cdf36f0ff2dd501e18d277d96b2a841",
+      "ahead": 1,
+      "head_sha": "9c3f36e19bcb8d160a4cce6ecd5260fdff0761e8",
       "pushed": true,
       "rc": 0,
       "outcome": "pushed",
       "ahead_after": 0
     },
-    "last_push_remediation_at": "2026-07-20T07:00:07.054903+00:00",
-    "last_verified_push_head": "f20c259d2cdf36f0ff2dd501e18d277d96b2a841",
+    "last_push_remediation_at": "2026-07-20T08:00:02.297016+00:00",
+    "last_verified_push_head": "9c3f36e19bcb8d160a4cce6ecd5260fdff0761e8",
     "remediation_poll_keys": [
       "2026-07-20T05",
       "2026-07-20T06",
-      "2026-07-20T07"
+      "2026-07-20T07",
+      "2026-07-20T08"
     ],
-    "remediation_checks": 3,
-    "escalation_reason": "ci_failed_more_than_two_cycles: 3"
+    "remediation_checks": 4,
+    "escalation_reason": "ci_failed_more_than_two_cycles: 4"
   }
 }

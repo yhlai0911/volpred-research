@@ -32637,13 +32637,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T07:01:23.876530+00:00",
+    "completed_at": "2026-07-20T08:00:59.611755+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T07:01:23.876530+00:00",
-      "last_clean_observed_at": "2026-07-20T07:01:23.876530+00:00"
+      "resolved_at": "2026-07-20T08:00:59.611755+00:00",
+      "last_clean_observed_at": "2026-07-20T08:00:59.611755+00:00"
     }
   },
   {
@@ -32655,13 +32655,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T07:07:50.918316+00:00",
+    "completed_at": "2026-07-20T08:07:55.835867+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T07:07:50.918316+00:00",
-      "last_clean_observed_at": "2026-07-20T07:07:50.918316+00:00"
+      "resolved_at": "2026-07-20T08:07:55.835867+00:00",
+      "last_clean_observed_at": "2026-07-20T08:07:55.835867+00:00"
     }
   },
   {
@@ -32673,13 +32673,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T06:58:54.531740+00:00",
+    "completed_at": "2026-07-20T07:07:58.715720+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T06:58:54.531740+00:00",
-      "last_clean_observed_at": "2026-07-20T06:58:54.531740+00:00"
+      "resolved_at": "2026-07-20T07:07:58.715720+00:00",
+      "last_clean_observed_at": "2026-07-20T07:07:58.715720+00:00"
     }
   },
   {
@@ -45972,7 +45972,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "pending",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29715899562",
@@ -46011,14 +46011,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-3-e320a2e29b0f447c863719819d16e1e1"
+      },
+      {
+        "ts": "2026-07-20T08:00:21.956608+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-3-e320a2e29b0f447c863719819d16e1e1",
+        "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 75.5min >= grace 20min"
       }
     ],
     "started_at": "2026-07-20T06:44:59.563131+00:00",
-    "last_released_at": "2026-07-20T06:01:05.657528+00:00",
-    "last_release_reason": "liveness_reconcile_detached_7a67c6b0",
-    "claimed_by": "hourly-slot-3-e320a2e29b0f447c863719819d16e1e1",
-    "claimed_at": "2026-07-20T06:44:54.105361+00:00",
-    "claim_session_id": "d0594e3c6a47"
+    "last_released_at": "2026-07-20T08:00:21.956593+00:00",
+    "last_release_reason": "liveness_reconcile_detached_e320a2e2"
   },
   {
     "id": "alert_dedup_gate_health_20260720",
@@ -46063,12 +46067,23 @@
     "description": "K528 round-5 remediation 的獨立收件驗證（compute job agent-brief_k528_round5-79ab4f 已 completed）。\n\nAgent 宣稱修好 Codex round-5 的四個 blocking defect（artifact\n`experiments/k528/k528_round5_remediation.json`，worktree dispatch-slot-3-30adeed7-k528nfp @ 17f12d16c）。\n本任務 = 查證那份宣稱，不是相信它（K1016 教訓）。\n\n查證項：B1 Friday estimand 全文口徑一致（禁兩種說法並存）/ B2 對抗測試必須實地示範在 pre-fix 版本會 FAIL\n（永遠會過的測試等於沒修）/ B3 覆蓋+freshness gate 要有實測擋下的輸出、確認無 fail-open /\nB4 confirmatory family 的 pre-specification 要有 git 時序證據 + Holm 值完整列表。\n\n四條全 PASS 才 enqueue Codex round 6；round 6 PASS 才重生 review_verdict.json（須在所有 claim-surface\n檔 landed 之後，否則 sha pin 漂移）→ experiment_gates.py certify → merge_worktree.sh。禁自簽 PASS。\nknowledge.json 由主線程寫。\n\n已派 agent job（brief: storage/ops/agent_briefs/brief_k528_round5_collection.md），\n成果 artifact = experiments/k528/k528_round5_collection_verdict.json。\n",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "source": "dispatch",
     "created_at": "2026-07-20T05:14:01.557628+00:00",
     "created_by": "hourly-slot-2-6b2b5722e2f44b6787c2eb80ae87649b",
     "compute_job_id": "k528_round5_collection_retry",
-    "result": "dispatched to compute job k528_round5_collection; awaiting PHASE A collection\n\ndispatched to compute job k528_round5_collection_retry; awaiting PHASE A collection"
+    "result": "dispatched to compute job k528_round5_collection; awaiting PHASE A collection\n\ndispatched to compute job k528_round5_collection_retry; awaiting PHASE A collection",
+    "last_released_at": "2026-07-20T07:50:02.008731+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "status_history": [
+      {
+        "ts": "2026-07-20T07:50:02.008740+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "cleanup",
+        "note": "auto_release_stale_2h"
+      }
+    ]
   },
   {
     "id": "assign_5f17c382",
@@ -46119,7 +46134,7 @@
   {
     "id": "assign_f71399a3",
     "title": "PHASE-Z 卡住檔案 incident（6d1d05803b30ef94）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 4 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- storage/reports/INDEX.md — 4 班\n- storage/reports/index.json — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260720T065846820394Z:<路徑>`",
+    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 5 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- storage/reports/INDEX.md — 5 班\n- storage/reports/index.json — 5 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260720T065846820394Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
     "status": "pending",
@@ -46133,16 +46148,16 @@
         "storage/reports/index.json"
       ],
       "streaks": {
-        "storage/reports/INDEX.md": 4,
-        "storage/reports/index.json": 4
+        "storage/reports/INDEX.md": 5,
+        "storage/reports/index.json": 5
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260720T065846820394Z"
       ],
-      "fires": 2,
+      "fires": 3,
       "first_seen_at": "2026-07-20T06:58:46.917957+00:00",
-      "last_seen_at": "2026-07-20T07:07:51.151348+00:00"
+      "last_seen_at": "2026-07-20T08:07:56.065921+00:00"
     },
-    "updated_at": "2026-07-20T07:07:51.151348+00:00"
+    "updated_at": "2026-07-20T08:07:56.065921+00:00"
   }
 ]
