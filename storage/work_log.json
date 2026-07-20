@@ -22467,5 +22467,78 @@
     "owner": "hourly-slot-1-66cf06bab6cd401b8b7421375c177f64",
     "commit": null,
     "summary": "weekend data-job audit（急件 lane，boss 報「intraday 週六沒 fire + collect_us 停在 07-18」）。\n\n**Audit 結論：原兩條指控皆不成立，但挖出一個更嚴重的隱形故障。**\n\n機械化比對（croniter 期望 fire vs cron log 的 `exit N` 實際完成事件，過去 7 天，5 個資料 job）：\n- `daily_update_intraday` 07-18(六) 14:04 **有跑且 rc=0** → 「Sat fire missing」不成立。\n- `collect_us` cron `3 7 * * 2-6`，週日/週一本就不 fire；07-18 成功後下一班本來就是 07-21(二) → 「stuck」是正常排程行為。\n- `daily_update` / `collect_tw` / `fred_backfill_guard` 7 天零漏班零失敗。\n\n**真故障**：`daily_update_intraday` 07-16 與 07-20 兩班 `rc=142 duration=600s`（撞 perl alarm watchdog 被 SIGALRM 殺），從未有任何監控報過。\n\n**根因一（監控盲區）**：`daily_checkup.py` 的 data_freshness 只看 log **mtime** + croniter 漏班數。失敗的 job 照樣寫 log、照樣更新 mtime ⇒ 天天失敗的 job 永遠顯示「新鮮」。且 `daily_update_intraday` 根本不在 `DATA_JOBS_EXPECTED_H` 名單 —— 雙重盲區。\n**根因二（watchdog 建在過期常數上）**：600s alarm 註解寫「正常 ~2min 的 5x」，但 7/02–7/18 實測 duration 已是 250–390s，真實 margin 僅 ~1.6x，偶發 Supabase `URLError timed out` retry 就衝破。watchdog 沒壞，是照著早就不成立的 baseline 開火。\n\n**修復**：\n1. `daily_checkup.py`：新增 `_last_exit()`（只讀 log 尾 16KB），data_freshness 對每個 job 額外檢查最後一筆 `exit N`，rc≠0 → critical，rc=142 特別標為撞 watchdog；「有跑但失敗」與「根本沒跑」獨立報。`daily_update_intraday` 補進監控名單。\n2. `cron_daily_update.sh` / `cron_daily_update_intraday.sh`：watchdog 600s → 1200s（實測 p95 ~3x margin，14:00+20min 仍遠早於下一班，lock cascade 防護不變），註解改寫實測 baseline。canonical `scripts/` 與 runtime `~/.volpred/bin/` 已同步（diff 確認改動前無 drift，非盲目覆蓋）。\n3. `docs/error_log.md` 追加 entry（mtime≠成功 / 門檻常數需綁實測 baseline）。\n\n**驗證**：改後 `daily_checkup.py --json` → data_freshness 恰 1 筆 critical，正是 `daily_update_intraday 撞 watchdog timeout（duration=600s）`；其餘 rc=0 的 job 無誤報。兩支 wrapper `bash -n` 通過、runtime copy 確認為 1200。"
+  },
+  {
+    "timestamp": "2026-07-20T19:18:42+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_672c46de",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-ba8cf19340824bff9c43476ca8cbbe4e",
+    "owner": "hourly-slot-1-ba8cf19340824bff9c43476ca8cbbe4e",
+    "commit": null,
+    "summary": "派工 cadence A/B（急件 lane，boss telegram-1198「改 15 分鐘一班，實測 token 是否多很多」）。\n\n**答案：問題不在 cadence，在 pregate。** 舊 gate 全是 demand 訊號（『有沒有工作』），而池永遠有 P1/P2 → 近 7 天 164 次 fire 的 would_skip = 0，結構上不可能 skip。在那個 gate 下改 15 分鐘就是實打實 4x。\n\n**交付 1 — pregate 具備真正的 sub-hourly 語意**（scripts/hourly_dispatch_pregate.py）：\n- capacity：free dispatch slots（delegate scripts/dispatch_slot_budget.py，不二次推導 cap/occupancy）。有需求但沒 slot 不是工作，是佇列。\n- novelty：actionable signature（agentable P1/P2 的 **id**、compute followup、drought flag、critical section 名稱）。keyed on identity 而非 count —— 換掉一個 P1 是真的變了，儘管 pending 數沒動。\n- critical 也納入 novelty：它是**持續存在的 incident 狀態**（實例：CI watcher 自己擁有的 escalated incident、常駐 unhandled-alerts），跟 high_prio 同一種病；同一組 incident 重複 fire 買不到東西，但**新**的 critical 仍立刻破 novelty。\n- 三層優先：absolute（email / compute followup / drought — 會被 fire 消耗的佇列，永不否決，responsiveness invariant 保住）> cadence_due（防餓死地板）> critical（受 novelty）> high_prio（受 capacity + novelty）。全程 fail-open。\n- skip 不推進 novelty baseline（否則下一班會拿沒人看過的世界當基準，靜態池會 skip/proceed 交替震盪）。\n\n**交付 2 — 成本實測**（scripts/analyze_dispatch_cadence.py，新增，可重跑）：不需要 4 小時 wall clock —— 從池的實際變動史估。近 7 天 1077 次 agentable P1/P2 集合變動：\n  15min → 46.0% bin 有變動 → **1.84x**（非 4x）\n  30min → 67.3% → 1.35x\n  60min → 86.9% → 0.87x（比現況還省，因為現況 100% proceed）\ncapacity veto 會再往下壓；absolute demand 會往上推，兩者反向且無法從歷史重建，故標為估算而非預測。\n\n**測試**：tests/test_hourly_dispatch_pregate.py 補 8 個（同世界必 skip / 換 id 立刻破 novelty / 無 slot 否決 / email 無視兩個 veto / 重複 critical 不再 fire 但新 critical 會 / cadence_due 覆蓋兩 veto / slot 讀取失敗 fail-open / skip 不推進 baseline）。65 passed。順手修測試污染 production storage/ops/pregate_state.json 的路徑洩漏。\n\n**未做（刻意）**：cadence 未改、pregate 維持 shadow —— 老闆原始指令就是「未經實測不得直接改 production 排程」，且新邏輯尚無 production 觀察窗。shadow 觀察 + enforce 翻轉 + live A/B 需 4h wall clock，放不進 50min cap，已切為 dispatch_cadence_ab_live_20260720 (P2) 並寫清交接。\n\nconfig/runtime_schedules.json 的 metadata.policy_summary 與 pregate.note 已記錄結論與估算值。"
+  },
+  {
+    "timestamp": "2026-07-20T19:26:00+08:00",
+    "task_type": "daily_article",
+    "task_id": "K698_article_general_audience_rewrite_67b3714d",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-4b2e17eba41a43209a036f05522851a6",
+    "owner": "hourly-slot-2-4b2e17eba41a43209a036f05522851a6",
+    "commit": null,
+    "summary": "K698 audience correction：為已改標 research 的 mile_67b3714d 產出全新 general 伴讀文。\n\n- 選工：dispatcher STARVATION LOCKOUT 只開放 1 個 agentable candidate（P1，餓死 125.6h），claim 成功後 in_progress。\n- 查重：`check_arc_dedup.py --k-id K698 --audience general --text-file`（餵原文全文）→ verdict=clean，k_coverage/arc_duplicates/near_misses 皆空。先前用臆測標題跑出的 block_arc_dup 是 signature 失真造成的假警報，已用真實文本覆核。\n- 寫作：subagent（opus/medium per model_router）產 `storage/drafts/k698_general_draft.md`。原文所有數字、null result、限制與 2026-06-16 errata（DM p=0.137 未顯著、0.878/0.941 為 35 組樣本內掃描極值無多重比較校正、成本只算 SPY 一腿約低估一倍、「BH 50/50」實為每日固定配比、不構成投資建議）逐條白話保留並前置到讀者第一屏。\n- Gates：`anti_ai_gate.py` PASS（warn 1/3）；content-vs-source audit 首跑攔到 1 筆（tilt 寫成裸數 `30` 個百分點，source 存 0.3），改為 `30%` 後 PASS（9 claims vs 454 source values）；publish 時 sanitize_applied=0。\n- 發佈：主線程串行 `publish_draft.py` → `mile_fa098fc8`（status=draft, audience=general, experiment_refs=['K698']）。\n- 懶人包：subagent 產 `storage/lazypack_plans/k698_general_plan.json`（4 panels / 23 條 evidence binding，全部 data-bound，renderer --validate-only 通過），已 enqueue `lazypack-mile_fa098fc8` 交 */15 worker。\n- 附帶修正：plan 驗證發現原文 `-26.9%` 是 -0.2695 的截斷而非四捨五入，已把新稿改為 `-27.0%` 並以 `--update-action rounding_fix` 回寫 mile_fa098fc8，避免文章與圖組數值互相矛盾。\n- 觀察（未處理，留待後續）：`publish_draft.py` 的 lazypack 未排隊警告把 article_id 印成來源文 `mile_67b3714d` 而非新建的 `mile_fa098fc8`，疑似取錯 id 變數。"
+  },
+  {
+    "timestamp": "2026-07-20T19:30:12+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_fa098fc8",
+    "outcome": "fallback_failed",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "Codex bespoke lazypack failed (rc=1); deterministic renderer fallback failed (rc=1).",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_fa098fc8",
+    "article_id": "mile_fa098fc8",
+    "job_id": "lazypack-mile_fa098fc8",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/lazypack_render.py"
+  },
+  {
+    "timestamp": "2026-07-20T20:12:44+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_f71399a3",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-c0e716cfe14647b48433c5b448f3f63f",
+    "owner": "hourly-slot-1-c0e716cfe14647b48433c5b448f3f63f",
+    "commit": null,
+    "summary": "關閉 PHASE-Z foreign incident 6d1d05803b30ef94（連續 13 班、slot cap 被降載為 2）。根因追到 07-20 14:04 daily_update_intraday 被 SIGALRM 殺在 build_feed_index() 之後、commit_owned_outputs() 之前，留下 storage/reports/INDEX.md + index.json 兩個無主 derived artifact。確認 quarantine ref 20260720T065846820394Z 與工作區 byte-identical（cmp）後，經 git_writer_lock.py run restore 回 HEAD；兩檔可由 feed.json 完整重建，下一班 daily_update 自然重建並提交。foreign_incident --check 由 blockers=2 轉 closeable:true，dispatch_slot_budget cap 2→6。誤殺本身的 600→1200s watchdog 修正已部署且 runtime 副本 diff 確認同步。docs/error_log.md 補記下游代價與教訓。",
+    "verification": "foreign_incident --check exit 0 closeable:true; dispatch_slot_budget cap=6 open_incident=null; git status 兩路徑 clean"
+  },
+  {
+    "timestamp": "2026-07-20T20:16:22+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_internal_git_push_backup_hold_3f4834ce7a_20260720T100013000000Z_a1",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-c0e716cfe14647b48433c5b448f3f63f",
+    "owner": "hourly-slot-1-c0e716cfe14647b48433c5b448f3f63f",
+    "commit": null,
+    "summary": "解除 git-push-backup 的 5.2 小時 push hold（34 commit 卡在本地）。根因：silent-fallback gate 的 baseline diff 全部以 path 為 key，今天 a15fba0d7（ops-master E1E2 dead-code archive）把 14 個腳本 git mv 進 scripts/_legacy/（git 判 R100 純改名、零程式碼變更），於是讀成 new=14 / resolved=14，gate 照規則 hold 住每一個後續 commit。修法：diff_against_baseline 末端加 _match_relocated_files()，只在「某舊路徑與某新路徑的 signature multiset 完全相同」時才認定為整檔搬移並配對；同 fingerprint 多檔時依序消耗（先前版本在此 bail-out，還剩 2/14 誤報、hold 未解）。移動又改內容的檔案 multiset 不同 → 配不上 → gate 照樣開火（保守方向刻意選擇：漏報一個真 fallback 比多列一行搬移噪音嚴重）。audit --rev HEAD 由 new=14 轉 new=0 rc=0。",
+    "verification": "audit_silent_fallbacks.py --strict --rev HEAD --baseline storage/qa/silent_fallback_baseline.json → findings=60 new=0 resolved=0 rc=0；tests/test_silent_fallback_audit.py 19 passed（新增 3 個 relocation 迴歸測試，含保守行為的反例）"
+  },
+  {
+    "timestamp": "2026-07-20T20:35:47.635730+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_010d1a2d",
+    "actor": "hourly-slot-1-556b9797aec141f98222f0c0b8a27515",
+    "owner": "hourly-slot-1-556b9797aec141f98222f0c0b8a27515",
+    "title": "[死結] candidate_gate_self_modification 重新設計：拆批 + gate review lane",
+    "summary": "PHASE-Z 的 trusted-gate 檢查由「整批 rollback、無出口」改為候選 A（拆批）：gate 路徑從 owned/churn/adopted 切出保留不提交，其餘變更照常落地；同時以內容指紋 (_gate_review_fingerprint) 冪等建立 phase_z_gate_review_<fp> 審查任務，alert 只在新建單時發出且文案含確切檔名與可執行指令。gate-only 班次回報 reason=gate_deferred_only（不再誤報 nothing_owned）。時序威脅仍被擋（gate 變更不自動落地），連坐與死結消失。",
+    "files": [
+      "scripts/dispatch_supervisor/phase_z.py",
+      "tests/test_phase_z_ownership.py"
+    ],
+    "verification": "pytest tests/test_phase_z_ownership.py tests/test_phase_z_test_gate.py = 57 passed；新增 4 test（非 gate 檔落地 / gate 檔仍 dirty 未進 HEAD / gate-only reason / 不重複建單與重複警報 / 指紋隨內容變動）；真實建單路徑於 /tmp 佇列 smoke 過（第二次 created=False 去重）；audit_silent_fallbacks 與 audit_test_imports 均 exit 0。",
+    "topology_override": "subagent→inline：急件、脈絡已在主線程、修改點集中於單一函式，且本班 PHASE-Z 收尾即為實地驗證",
+    "notes": "既有失敗 tests/test_hourly_dispatch_pregate.py::test_skip_does_not_advance_the_novelty_baseline 與本次改動無關（pregate 不引用 phase_z，本班僅動上述兩檔），未納入本任務 scope。"
   }
 ]

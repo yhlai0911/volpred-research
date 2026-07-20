@@ -2362,6 +2362,93 @@ def _post_commit_test_gate(
             "alert": alert_result, **comparison, **base}
 
 
+def _gate_review_fingerprint(repo_root: Path, gate_paths: list[str]) -> str:
+    """Stable id for one *content* state of the deferred gate paths.
+
+    Same bytes still sitting dirty next fire → same id → ``if_exists='skip'``
+    turns the second queue attempt into a no-op. Edit the gate again → new id →
+    a fresh review task. This is what keeps the review lane from re-filing the
+    identical task every hour (the "連續 N 班同一 reason" failure mode).
+    """
+    digest = hashlib.sha256()
+    for rel in sorted(gate_paths):
+        blob = repo_root / rel
+        try:
+            body = blob.read_bytes()
+        except OSError:
+            body = b"<unreadable>"
+        digest.update(rel.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(hashlib.sha256(body).hexdigest().encode("ascii"))
+        digest.update(b"\0")
+    return digest.hexdigest()[:12]
+
+
+def _default_gate_review(*, repo_root: Path, gate_paths: list[str], hhmm: str) -> dict:
+    """File (idempotently) the review task that owns a deferred gate change.
+
+    PHASE-Z deliberately does not commit changes to the very files that gate it
+    (a commit N that weakens the gate would be judged by that weakened gate at
+    commit N+1). Before 2026-07-20 that check rolled back the *whole* batch and
+    left no exit: every fire retried, failed, alerted, and the workspace stayed
+    stuck forever (assign_010d1a2d). Now the gate paths are simply held back —
+    everything else commits — and this task is the forward path for them.
+    """
+    from volpred.ops.next_tasks import append_task_record
+
+    fp = _gate_review_fingerprint(repo_root, gate_paths)
+    task_id = f"phase_z_gate_review_{fp}"
+    listing = "\n".join(f"- `{p}`" for p in gate_paths)
+    record = {
+        "id": task_id,
+        "title": f"[gate review] PHASE-Z 保留了 {len(gate_paths)} 個 trusted-gate 檔案變更，待審查後提交",
+        "description": "\n".join([
+            f"PHASE-Z（fire {hhmm}）已把這班其餘變更正常提交，但**保留**下列 trusted-gate 路徑不提交：",
+            "",
+            listing,
+            "",
+            "## 為什麼保留",
+            "這些檔案就是 PHASE-Z 用來審判 commit 的 gate 本身。若讓它們自動落地，"
+            "下一班就會被『這班剛改過的 gate』審判 —— commit N 弱化 gate、commit N+1 被弱化的 gate 放行。"
+            "candidate worktree 用 pinned base_sha 執行 hook，擋得住同一批的自我審判，擋不住這條跨 commit 的時序威脅。",
+            "",
+            "## 下一步（擇一，做完這張單就結案）",
+            "1. 看 diff，確認變更沒有弱化檢查強度：",
+            "",
+            "```",
+            "git diff -- " + " ".join(gate_paths),
+            "```",
+            "",
+            "2. 認可 → 由審查者自行提交（PHASE-Z 不會代勞）：",
+            "",
+            "```",
+            "git add " + " ".join(gate_paths),
+            "git commit -m 'chore(gate): <說明這次 gate 變更做了什麼>'",
+            "```",
+            "",
+            "3. 不認可 → 還原：",
+            "",
+            "```",
+            "git checkout -- " + " ".join(gate_paths),
+            "```",
+            "",
+            "檔案留在工作區、沒有遺失；在本單結案前，每班 PHASE-Z 都會照常提交其餘變更。",
+        ]),
+        "task_type": "platform_ops",
+        "priority": 2,
+        "status": "pending",
+        "source": "phase_z_gate_review",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "gate_paths": list(gate_paths),
+    }
+    try:
+        _, created = append_task_record(record, path=str(repo_root / "storage" / "next_tasks.json"))
+    except Exception as exc:  # queue unwritable must not wedge the commit itself
+        LOG.warning("phase_z: cannot file gate-review task (%s)", exc)
+        return {"task_id": task_id, "created": False, "error": str(exc)}
+    return {"task_id": task_id, "created": created}
+
+
 def run_phase_z(
     *,
     repo_root: Path,
@@ -2375,6 +2462,7 @@ def run_phase_z(
     commit_receipt_override: dict | None = None,
     recovery_mode: bool = False,
     isolated_cohort: bool = False,
+    gate_review_fn=None,
 ) -> dict:
     """Deterministic post-fire commit. Returns an observability dict.
 
@@ -2415,6 +2503,7 @@ def run_phase_z(
     hhmm = now_hhmm or datetime.now().strftime("%H:%M")
     supplied_alert_fn = alert_fn
     alert_fn = alert_fn or _default_alert
+    gate_review_fn = gate_review_fn or _default_gate_review
     if internal_alert_fn is None:
         if supplied_alert_fn is None:
             internal_alert_fn = _default_internal_alert
@@ -2709,6 +2798,67 @@ def run_phase_z(
     if churn_deferred:
         LOG.info("phase_z: %d machine-churn path(s) busy/unreadable — next fire takes them: %s",
                  len(churn_deferred), churn_deferred)
+
+    # ── trusted-gate split (assign_010d1a2d) ───────────────────────────────
+    # A dirty gate file used to roll back the ENTIRE batch with no forward
+    # path: every fire retried, failed, alerted, and the workspace stayed stuck
+    # (24 innocent files held hostage by one). Two things were conflated —
+    # "this batch must not be judged by its own gate" (real, and already
+    # structurally impossible: the hook runs from a pinned base_sha) and "a
+    # weakened gate must not judge the NEXT commit" (real, and what actually
+    # needs handling). Split the batch: non-gate paths commit normally, gate
+    # paths stay dirty and get a review task that says exactly which file and
+    # exactly what to run. Deadlock gone, collateral gone, threat still held.
+    gate_deferred = sorted(set(owned + churn + adopted_halves) & _TRUSTED_GATE_PATHS)
+    gate_review: dict | None = None
+    if gate_deferred:
+        owned = [p for p in owned if p not in _TRUSTED_GATE_PATHS]
+        churn = [p for p in churn if p not in _TRUSTED_GATE_PATHS]
+        adopted_halves = [p for p in adopted_halves if p not in _TRUSTED_GATE_PATHS]
+        try:
+            gate_review = gate_review_fn(repo_root=repo_root, gate_paths=gate_deferred, hhmm=hhmm)
+        except Exception as exc:
+            LOG.warning("phase_z: gate-review hook raised (%s)", exc)
+            gate_review = {"task_id": None, "created": False, "error": str(exc)}
+        LOG.warning("phase_z: holding back %d trusted-gate path(s) for review (task=%s): %s",
+                    len(gate_deferred), (gate_review or {}).get("task_id"), gate_deferred)
+        # warn, not critical: the rest of the batch is landing normally and the
+        # review task is the forward path. Only alert when the task is newly
+        # filed — re-alerting every fire for an already-queued review is the
+        # hourly-noise failure mode this redesign exists to kill.
+        if (gate_review or {}).get("created"):
+            alert_fn(
+                level="warn",
+                title=f"PHASE-Z 保留 {len(gate_deferred)} 個 gate 檔待審查（其餘已正常提交）",
+                body="\n".join([
+                    f"（fire 時間: {hhmm}）",
+                    "",
+                    "## 發生什麼",
+                    "這班改到了 PHASE-Z 自己的 gate 檔。其餘變更**已照常提交**；下列 gate 檔保留在工作區，"
+                    "等審查後由審查者提交 —— 避免這班改過的 gate 反過來審判下一班的 commit。",
+                    "",
+                    "## 檔案",
+                    *[f"- {p}" for p in gate_deferred],
+                    "",
+                    "## 下一步",
+                    "1. 看 diff：`git diff -- " + " ".join(gate_deferred) + "`",
+                    "2. 認可就提交：`git add " + " ".join(gate_deferred) + " && git commit`",
+                    "3. 不認可就還原：`git checkout -- " + " ".join(gate_deferred) + "`",
+                    "",
+                    f"追蹤任務: {(gate_review or {}).get('task_id')}",
+                ]),
+            )
+
+    gate_extra = {"gate_deferred": gate_deferred, "gate_review": gate_review} if gate_deferred else {}
+
+    if not owned and not churn and not adopted_halves and gate_deferred:
+        # Everything this fire produced was a gate change: nothing left to
+        # commit, but this is NOT "nothing_owned" — say so, so a run of these
+        # is legible as one pending review rather than an idle fire.
+        _consume_pre_fire_snapshot(repo_root, runner)
+        return {"committed": False, "reason": "gate_deferred_only", "foreign": foreign,
+                "orphan_halves": orphan_halves, "quarantine": quarantine,
+                "incident": incident, **gate_extra}
 
     if not owned and not churn and not adopted_halves:
         _consume_pre_fire_snapshot(repo_root, runner)  # settled: nothing of ours to commit
@@ -3170,7 +3320,8 @@ def run_phase_z(
                 "commit_head": out[-500:], "tests": tests, "index_refresh": refresh,
                 "orphan_halves": orphan_halves, "quarantine": quarantine,
                 "incident": incident,
-                **({"isolation_residue": isolation_residue} if isolation_residue else {})}
+                **({"isolation_residue": isolation_residue} if isolation_residue else {}),
+                **gate_extra}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything
     # dirty was a leaked-ignored file already rm --cached'd, or a race cleaned
     # it) from a genuine commit failure.

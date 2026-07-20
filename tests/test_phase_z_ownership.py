@@ -89,6 +89,27 @@ def _fire(repo: Path, alerts: list | None = None, **kw) -> dict:
     )
 
 
+def _recording_review(filed: list, created: bool = True):
+    """Stand-in for the real review-lane filer: records what PHASE-Z handed it.
+
+    The real one writes the canonical queue; these tests are about the split
+    decision, not about next_tasks.json.
+    """
+    class _Review:
+        def __init__(self) -> None:
+            self.created = created
+            self.fingerprints: list[str] = []
+
+        def __call__(self, *, repo_root, gate_paths, hhmm):
+            self.fingerprints.append(phase_z._gate_review_fingerprint(repo_root, gate_paths))
+            if self.created:
+                filed.append(list(gate_paths))
+            return {"task_id": f"phase_z_gate_review_{self.fingerprints[-1]}",
+                    "created": self.created}
+
+    return _Review()
+
+
 # ── the incident ─────────────────────────────────────────────────────────────
 
 def test_another_writers_edit_is_not_committed(repo: Path) -> None:
@@ -356,21 +377,83 @@ def test_missing_immutable_hook_fails_closed(repo: Path) -> None:
     ).returncode != 0
 
 
-def test_candidate_cannot_modify_its_own_trusted_gate(repo: Path) -> None:
+def test_trusted_gate_change_is_held_back_without_blocking_the_batch(repo: Path) -> None:
+    """assign_010d1a2d: one dirty gate file used to roll back the whole batch.
+
+    The gate change must still not land automatically (a weakened gate would
+    judge the next fire's commit), but everything else must reach HEAD and the
+    deferred file must get a named forward path.
+    """
     phase_z.run_pre_fire_guard(repo_root=repo)
     _write(repo, "scripts/audit_test_imports.py", "raise SystemExit(0)\n")
     _write(repo, "scripts/audit_silent_fallbacks.py", "raise SystemExit(0)\n")
     _write(repo, "storage/qa/silent_fallback_baseline.json", "[]\n")
+    _write(repo, "experiments/k1/k1.py", "innocent bystander\n")
 
-    outcome = _fire(repo)
+    filed: list[list[str]] = []
+    outcome = _fire(repo, gate_review_fn=_recording_review(filed))
 
-    assert outcome["committed"] is False
-    assert outcome["reason"] == "candidate_gate_self_modification"
-    assert outcome["gate_changes"] == [
+    assert outcome["committed"] is True
+    assert "experiments/k1/k1.py" in _head_files(repo)          # collateral freed
+    assert outcome["gate_deferred"] == [
         "scripts/audit_silent_fallbacks.py",
         "scripts/audit_test_imports.py",
         "storage/qa/silent_fallback_baseline.json",
     ]
+    for rel in outcome["gate_deferred"]:                        # threat still held
+        assert rel not in _head_files(repo)
+        assert rel in _dirty(repo)
+    assert filed == [outcome["gate_deferred"]]                  # forward path exists
+
+
+def test_gate_only_fire_is_not_reported_as_nothing_owned(repo: Path) -> None:
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "scripts/audit_test_imports.py", "raise SystemExit(0)\n")
+
+    outcome = _fire(repo, gate_review_fn=_recording_review([]))
+
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "gate_deferred_only"
+    assert outcome["gate_deferred"] == ["scripts/audit_test_imports.py"]
+
+
+def test_unchanged_gate_change_does_not_refile_or_realert_each_fire(repo: Path) -> None:
+    """The deadlock's loudest symptom: the same reason, every hour, forever."""
+    filed: list[list[str]] = []
+    review = _recording_review(filed, created=True)
+
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "scripts/audit_test_imports.py", "raise SystemExit(0)\n")
+    _write(repo, "experiments/k1/first.py", "fire one\n")
+    alerts_one: list = []
+    first = _fire(repo, alerts=alerts_one, gate_review_fn=review)
+
+    # second fire: gate file still dirty, untouched; review task already queued
+    review.created = False
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "experiments/k1/second.py", "fire two\n")
+    alerts_two: list = []
+    second = _fire(repo, alerts=alerts_two, gate_review_fn=review)
+
+    assert first["committed"] is True and second["committed"] is True
+    assert "experiments/k1/second.py" in _head_files(repo)      # batch keeps flowing
+    # Fire two never re-enters the split at all: the gate file was already dirty
+    # at its baseline, so it is foreign to that fire and left alone. One review
+    # task, one alert, then silence — not the same reason every hour.
+    assert len(review.fingerprints) == 1
+    assert [t for _lvl, t in alerts_two if "gate" in t] == []
+    assert "scripts/audit_test_imports.py" in _dirty(repo)      # still awaiting review
+    assert "scripts/audit_test_imports.py" not in _head_files(repo)
+
+
+def test_gate_review_fingerprint_tracks_content(tmp_path: Path) -> None:
+    rel = "scripts/audit_test_imports.py"
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / rel).write_text("v1\n", encoding="utf-8")
+    first = phase_z._gate_review_fingerprint(tmp_path, [rel])
+    assert phase_z._gate_review_fingerprint(tmp_path, [rel]) == first
+    (tmp_path / rel).write_text("v2\n", encoding="utf-8")
+    assert phase_z._gate_review_fingerprint(tmp_path, [rel]) != first
 
 
 def test_candidate_gate_blocks_test_without_its_foreign_script(repo: Path) -> None:
