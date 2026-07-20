@@ -13,7 +13,7 @@
 | 機制 | 節奏 | 做什麼 |
 |---|---|---|
 | **dispatch-supervisor**（daemon） | 每 ≤60 秒評估 | 唯一派工引擎：挑任務、開 agent、看管執行、收屍 |
-| **compute-worker** | 每 15 分 | 重算力工作（回測/GARCH/bootstrap）排隊消化，不耗 token |
+| **compute-worker** | **連續運轉**（2026-07-20 D6） | 重算力工作（回測/GARCH/bootstrap）不耗 token — 佇列有工就連續消化到空、最多 3 個平行；15 分 tick 只是「掛了自動重啟」的保險 |
 | **check-alerts** | 每小時整點 | 唯一可靠的鬧鐘：先跑到期排程（piggyback），再檢查告警條件 |
 | **dreaming + loop-health** | 每日 05:25 / 每小時 | 慢迴圈找反覆出事的模式、快迴圈量測「系統有沒有在變好」 |
 
@@ -22,6 +22,7 @@
 1. **任務殭屍三層回收**：agent 被 kill 或 timeout → 當場把任務還回佇列（A2b/A2c）；漏網的 → 每小時 cleanup 用任何可用時間戳判齡回收（A2a）；連時間戳都沒有的 → 每小時 liveness reconciler 用「進程死亡 + 磁碟無 worktree」雙證據回收（A4）。**效果：任務不再卡死 20 小時沒人管**（上線當天就自然回收 8 筆歷史殭屍）。
 2. **發佈同步收斂網**：文章改稿一律走 publisher 單一出口，同時推 Supabase + Mirror，失敗進死信（C1）；每小時全量對帳把任何漏推的補齊（C2）；死信每 30 分自動重試、含 Mirror（C4）。**效果：「網站顯示舊內容一個月沒人發現」這類事故結構性絕跡**。
 3. **治理防漂移**：enforcement 總表與實況不一致 = CI 紅燈（F1）；dedup 內容黑洞有三條件自動告警（F2）；front-end feed 順序有機械 regression 鎖住「新的永遠在上面」。
+4. **佇列寫入與詞彙全面機械管制**（2026-07-20 A1b+A3）：佇列的每一條寫入路徑只能走 canonical helper（44 個寫入點全數收斂，新的非法寫法會被 `NEXT-TASKS-ROUTING` audit 攔下）；任務狀態與 blocked 原因只准受控詞彙，歷史汙染已全部清洗歸零（原值保留可稽核）— 任何新汙染 = CI 紅燈。
 
 ---
 
@@ -120,6 +121,6 @@
 
 ## 5. 活文件維護
 
-本檔由 ops master 重構的每個 Phase 收尾時同步更新（enforcement：計畫 §7 驗收清單含本檔）。
+**更新節奏（owner 2026-07-20 指定）：任何新優化或新功能落地時即時更新本檔**（不是等 Phase 收尾）；計畫 §7 每列驗收含「本檔已同步」。
 架構細節 → `docs/architecture.md`；排程真相 → `config/runtime_schedules.json`；
 控制面規則 → `.claude/rules/control-plane.md`；重構進度 → `docs/refactor_plan_ops_master_2026_07.md` §7。
