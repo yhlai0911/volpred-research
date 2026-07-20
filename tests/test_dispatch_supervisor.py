@@ -3448,3 +3448,191 @@ def test_scheduler_fire_unisolated_when_allocation_declined(tmp_path: Path, monk
     assert result["workspace"] is None
     assert "Producer-scoped workspace" not in received[0]["prompt_text"]
     assert finalized == []  # nothing allocated -> nothing finalized
+
+
+# -- WS-B commit 2: PHASE-Z baseline guessing demoted for isolated cohorts ----
+# The recognizer stays (retirement is a separate decision after a stable
+# month); what changes is AUTHORSHIP CLAIMING: an isolated cohort's repo-byte
+# output lands through its workspace merge gate, so PHASE-Z may no longer
+# commit non-machine-state paths by timing arithmetic. Machine-state churn
+# (scheduled jobs) keeps its adoption -- that is the fallback's residue lane.
+
+
+def test_phase_z_isolated_cohort_demotes_non_machine_owned(tmp_path: Path) -> None:
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "note.md").write_text("residue\n", encoding="utf-8")
+    (tmp_path / "storage" / "ops").mkdir(parents=True)
+    (tmp_path / "storage" / "ops" / "some_state.json").write_text("{}\n", encoding="utf-8")
+    alerts_seen: list[dict] = []
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        isolated_cohort=True,
+        alert_fn=lambda **kwargs: alerts_seen.append(kwargs) or {},
+    )
+    # machine state still adopted; the doc path is demoted, not committed
+    assert out["committed"] is True
+    assert out["owned"] == ["storage/ops/some_state.json"]
+    assert out["isolation_residue"] == ["docs/note.md"]
+    assert _git_head_count(tmp_path) == before + 1
+    tracked = subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "docs/note.md"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    assert tracked == ""  # never entered history
+    assert (tmp_path / "docs" / "note.md").exists()  # and never deleted
+    assert any("不代收" in a.get("title", "") for a in alerts_seen)
+
+
+def test_phase_z_isolated_cohort_all_residue_is_terminal(tmp_path: Path) -> None:
+    """All-residue outcome must land on a TERMINAL reason (nothing_owned) so
+    the scheduler releases the drain token -- no livelock behind the demotion."""
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "note.md").write_text("residue\n", encoding="utf-8")
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        isolated_cohort=True, alert_fn=lambda **_kwargs: {},
+    )
+    assert out["committed"] is False
+    assert out["reason"] == "nothing_owned"
+    assert out["isolation_residue"] == ["docs/note.md"]
+    assert scheduler._phase_z_terminal(out) is True
+    assert _git_head_count(tmp_path) == before
+    assert (tmp_path / "docs" / "note.md").exists()
+
+
+def test_phase_z_unisolated_cohort_keeps_legacy_adoption(tmp_path: Path) -> None:
+    """Contrast pin: without the isolation flag the legacy baseline fallback
+    still adopts fire-produced paths (unisolated lanes keep their safety net)."""
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "note.md").write_text("agent output\n", encoding="utf-8")
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        alert_fn=lambda **_kwargs: {},
+    )
+    assert out["committed"] is True
+    assert "isolation_residue" not in out
+    assert _git_head_count(tmp_path) == before + 1
+    tracked = subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "docs/note.md"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    assert tracked == "docs/note.md"
+
+
+def test_record_completion_stamps_isolated_on_pending(tmp_path: Path) -> None:
+    state_path = _tmp_state(tmp_path)
+    # isolated fire
+    lease = state.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                               log_path="/tmp/a.log", path=state_path)
+    state.attach_process(job_id=lease.job_id, expected_attempt=1, pid=1, pgid=1,
+                         started_wall=None, path=state_path)
+    state.attach_workspace(job_id=lease.job_id, workspace={
+        "name": "dispatch-slot-1-aaaaaaaa", "path": "/tmp/wt", "branch": "b",
+        "base_sha": "s", "lanes": ["platform_ops"],
+        "created_at": "2026-07-20T00:00:00+00:00", "setup_s": 1.0,
+    }, path=state_path)
+    state.record_completion(job_id=lease.job_id, exit_code=0, outcome="success",
+                            final_model="opus", path=state_path)
+    pending = state.read_state(state_path)["phase_z_pending"]
+    assert [item["isolated"] for item in pending] == [True]
+    state.finish_phase_z(cohort_id=lease.cohort_id, path=state_path)
+    # unisolated fire
+    lease2 = state.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                                log_path="/tmp/b.log", path=state_path)
+    state.attach_process(job_id=lease2.job_id, expected_attempt=1, pid=2, pgid=2,
+                         started_wall=None, path=state_path)
+    state.record_completion(job_id=lease2.job_id, exit_code=0, outcome="success",
+                            final_model="opus", path=state_path)
+    pending2 = state.read_state(state_path)["phase_z_pending"]
+    assert [item["isolated"] for item in pending2] == [False]
+
+
+def _seed_pending_drain(state_path: Path, isolated_flags: list[bool]) -> None:
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [
+            {"job_id": f"job{i}", "cohort_id": f"cohort{i}", "slot_id": i + 1,
+             "created_at": "2026-07-20T00:00:00+00:00", "isolated": flag}
+            for i, flag in enumerate(isolated_flags)
+        ]
+
+
+def test_scheduler_recovery_drain_passes_isolated_cohort(tmp_path: Path, monkeypatch) -> None:
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("p", encoding="utf-8")
+    captured: list[dict] = []
+
+    def spy_run_phase_z(**kwargs):
+        captured.append(kwargs)
+        return {"committed": False, "reason": "clean"}
+
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", spy_run_phase_z)
+    for flags, expected in (([True, True], True), ([True, False], False)):
+        state_path = _tmp_state(tmp_path / f"case_{expected}")
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+        _seed_pending_drain(state_path, flags)
+        scheduler._PHASE_Z_LOCK = None  # fresh loop per asyncio.run
+        result = asyncio.run(scheduler._tick_once(
+            state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+            log_path=tmp_path / "worker.log", dry_run=False, repo_root=tmp_path,
+        ))
+        assert result["action"] == "phase_z_recovered"
+        assert captured[-1]["isolated_cohort"] is expected
+
+
+def test_scheduler_fire_drain_passes_isolated_cohort(tmp_path: Path, monkeypatch) -> None:
+    """End-to-end wiring: an isolated fire's completion stamps the pending
+    item, and the fire task's own cohort drain hands isolated_cohort=True to
+    run_phase_z."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = tmp_path / "sched.json"
+    schedules.write_text(json.dumps({
+        "cron_jobs": [{"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}],
+        "daemons": [{"id": "volpred-dispatch-supervisor", "max_slots": 2,
+                     "writer_isolation": {"mode": "pilot", "lanes": ["platform_ops"]}}],
+    }), encoding="utf-8")
+    fake_ws = {"name": "dispatch-slot-1-fixed", "path": str(tmp_path / "ws"),
+               "branch": "worktree-dispatch-slot-1-fixed", "base_sha": "abc",
+               "lanes": ["platform_ops"], "created_at": "2026-07-20T00:00:00+00:00",
+               "setup_s": 1.0}
+    monkeypatch.setattr(scheduler.workspace_mod, "sweep_orphan_workspaces",
+                        lambda **kw: [])
+    monkeypatch.setattr(scheduler.workspace_mod, "allocate_workspace",
+                        lambda **kw: dict(fake_ws))
+    monkeypatch.setattr(scheduler.workspace_mod, "finalize_workspace",
+                        lambda **kw: {"disposition": "empty_removed"})
+    captured: list[dict] = []
+
+    def spy_run_phase_z(**kwargs):
+        captured.append(kwargs)
+        return {"committed": False, "reason": "clean"}
+
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", spy_run_phase_z)
+
+    def fake_run_worker(**kwargs):
+        state.record_completion(
+            job_id=kwargs["job_id"], exit_code=0, outcome="success",
+            final_model=worker.OPUS_MODEL, path=kwargs["state_path"],
+        )
+        return worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+    scheduler._PHASE_Z_LOCK = None  # fresh loop per asyncio.run
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log", dry_run=False,
+        repo_root=tmp_path, schedules_path=schedules,
+    ))
+    assert result["action"] == "fired"
+    assert captured and captured[-1]["isolated_cohort"] is True

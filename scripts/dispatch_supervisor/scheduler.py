@@ -447,8 +447,16 @@ async def _run_reserved_fire(
                 }
             else:
                 try:
+                    # WS-B: baseline authorship guessing is demoted to fallback
+                    # only when EVERY fire in the drained cohort was isolated
+                    # (state.record_completion stamps `isolated` per fire). One
+                    # unisolated sibling keeps the full legacy behaviour.
+                    isolated_cohort = all(
+                        bool(item.get("isolated")) for item in cohort_pending
+                    )
                     phase_z_outcome = await asyncio.to_thread(
                         phase_z.run_phase_z, repo_root=repo_root,
+                        isolated_cohort=isolated_cohort,
                     )
                     LOG.info("phase_z cohort drain job_id=%s outcome=%s", job_id, phase_z_outcome)
                 except Exception as exc:  # noqa: BLE001
@@ -691,7 +699,16 @@ async def _tick_once(
                 return {"action": "skip", "reason": "cohort_still_running"}
             if not pending_phase_z:
                 return {"action": "phase_z_already_drained", "phase_z": None}
-            outcome = await asyncio.to_thread(phase_z.run_phase_z, repo_root=repo_root)
+            # WS-B: same demotion rule as the fire-task drain — every pending
+            # fire must have been isolated for the recovery drain to skip
+            # baseline authorship guessing on repo bytes.
+            recovery_isolated = all(
+                bool(item.get("isolated")) for item in pending_phase_z
+            )
+            outcome = await asyncio.to_thread(
+                phase_z.run_phase_z, repo_root=repo_root,
+                isolated_cohort=recovery_isolated,
+            )
             if _phase_z_terminal(outcome):
                 for cohort in {str(item.get("cohort_id")) for item in pending_phase_z}:
                     state.finish_phase_z(cohort_id=cohort, path=state_path)
