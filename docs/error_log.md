@@ -572,3 +572,26 @@ watchdog 沒有壞，它是**照著一個早就不成立的 baseline 在開火**
 這種故障完全失明，而這正是最常見的故障形狀。第二條：**watchdog / timeout / 門檻類常數必須把實測 baseline
 寫進註解，並在 baseline 漂移時一起改** —— 註解裡的「正常 ~2min」放著沒人維護，就是它後來誤殺兩班的原因。
 第三條：老闆報的症狀可以是錯的，但**值得照著 audit 一遍** —— 這次兩條指控都不成立，卻挖出一個更嚴重的真問題。
+
+### 補記 2026-07-20 20:15 — 同一次誤殺的下游代價：13 班 slot cap 減半 — FIXED
+
+上面只修到「誤殺」與「沒人報」，漏了追**被殺之後工作區長什麼樣**。07-20 14:04 那班的實際順序是：
+14:04:59 `build_feed_index()` 重建完 `storage/reports/INDEX.md` + `index.json` → 之後的 sync health check /
+alert checks 吃掉剩餘時間 → 14:10:05 `rc=142` 被 SIGALRM 殺，**還沒走到檔尾的 `commit_owned_outputs()`**。
+兩個 derived artifact 就這樣被改寫卻沒提交，留在 main checkout。
+
+PHASE-Z 認得「這不是本班 fire 產出的檔」，於是照 D3 開出 foreign incident `assign_f71399a3`
+（fingerprint `6d1d05803b30ef94`）。而 incident 未關會經 `scripts/dispatch_slot_budget.py` **把 slot cap
+從 4 降到 2** —— 也就是一次 watchdog 誤殺，讓後續 **13 班**每班能派的工都少一半，
+而那 13 班沒有任何一班看得出自己為什麼被降載。
+
+**處置**：兩個檔的 bytes 早已 checkpoint 進 immutable ref
+（`refs/volpred/quarantine/20260720T065846820394Z`，本次 `cmp` 逐 byte 確認與工作區一致），且是
+可由 `feed.json` 完整重建的 derived artifact ⇒ 經 `git_writer_lock.py run` restore 回 HEAD，
+下一班 `daily_update` 自然重建並提交。`foreign_incident --check` 轉 `closeable: true`，cap 回 4。
+
+**教訓**：**修 timeout 只修了一半 —— 還要問「被殺在哪一行、留下什麼」**。凡是「產出 → (一段長工作) → 提交」
+這種順序，watchdog 的實際切點就決定了會不會留下無主檔；margin 加大只是降低機率，沒有消除形狀。
+第二條：**降載這類懲罰要能反查原因** —— 被降載的 13 班只看得到 cap=2，看不到「因為某班 14:04 被 SIGALRM
+殺在提交前」。`dispatch_slot_budget.py` 的 reason 字串有帶 incident id，這次就是靠它一路追回根因，
+這個設計要保留。
