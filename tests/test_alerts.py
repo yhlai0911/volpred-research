@@ -454,6 +454,67 @@ def test_send_alert_persists_dedup_and_skips_within_24h(tmp_path: Path, monkeypa
     assert dedup["alerts"][first["alert_key"]]["last_notification_id"] == "notif-1"
 
 
+def test_send_alert_appends_incident_candidates_for_sent_and_dedup_skipped(
+    tmp_path: Path, monkeypatch
+):
+    """WS-F3: every alert occurrence lands in the incident-candidates stream —
+    the sent one AND the dedup-skipped one. Dedup throttles the transport, not
+    the incident; the filing radar must count both."""
+    storage_dir = tmp_path / "storage"
+
+    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+        return {
+            "notification_id": "notif-1",
+            "subject": f"[VolPred Alert][{level.upper()}] {title}",
+            "sent": True,
+            "configured": True,
+            "send_error": None,
+        }
+
+    monkeypatch.setattr("volpred.ops.alerts._dispatch_alert_email", fake_dispatch)
+
+    first = send_alert("warn", "gate failure", "body", storage_dir=str(storage_dir))
+    second = send_alert("warn", "gate failure", "body", storage_dir=str(storage_dir))
+    assert first["sent"] is True
+    assert second["skipped"] is True
+
+    stream = storage_dir / "ops" / "incident_candidates.jsonl"
+    records = [json.loads(ln) for ln in stream.read_text(encoding="utf-8").splitlines()]
+    assert len(records) == 2
+    assert records[0]["event"] == "sent"
+    assert records[1]["event"] == "dedup_skip"
+    assert records[0]["dedupe_key"] == records[1]["dedupe_key"] == first["alert_key"]
+    assert [r["occurrence"] for r in records] == [1, 2]
+    assert records[1]["first_seen"] == records[0]["first_seen"]
+    assert records[0]["title"] == "gate failure"
+
+
+def test_send_alert_records_incident_candidate_even_when_transport_fails(
+    tmp_path: Path, monkeypatch
+):
+    """SMTP down/unconfigured still means the incident OCCURRED — the filing
+    radar must not go blind together with the mail."""
+    storage_dir = tmp_path / "storage"
+
+    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+        return {
+            "notification_id": "notif-x",
+            "subject": "s",
+            "sent": False,
+            "configured": False,
+            "send_error": "smtp unconfigured",
+        }
+
+    monkeypatch.setattr("volpred.ops.alerts._dispatch_alert_email", fake_dispatch)
+    send_alert("critical", "transport down incident", "body", storage_dir=str(storage_dir))
+
+    stream = storage_dir / "ops" / "incident_candidates.jsonl"
+    records = [json.loads(ln) for ln in stream.read_text(encoding="utf-8").splitlines()]
+    assert len(records) == 1
+    assert records[0]["event"] == "send_failed"
+    assert records[0]["occurrence"] == 1
+
+
 def test_send_alert_telegram_mirror_formats_markdown_without_mutating_email_body(
     tmp_path: Path, monkeypatch
 ):
