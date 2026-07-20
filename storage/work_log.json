@@ -22357,5 +22357,25 @@
     "owner": "hourly-slot-1-ddd409d1ec9b4a70acd3c7b91c002f62",
     "commit": null,
     "summary": "PHASE A0 死鎖修復：main_thread lane 隔離只做一半導致 hourly fire 全面餓死。\n\n現象：12:17 fire 的 A0 回 count=7（[refactor-master] P1 ×7），但全數 claim 得 reason=main_thread_lane；\nA0 規則「lane 有殘留就不進 PHASE A」+ 這些永遠 claim 不到 ⇒ commit f23d870c4（11:48）之後每班 fire 都卡死。\n下游證據：ctd --report 同時報 STARVATION LOCKOUT（P1 assign_67f56b79 已餓 42.2h）。\n\n根因：dispatch_lane 判定散在三個 owner 且詞彙漂移 — ctd 認 4 種拼法、claim gate 只比對字面 \"main_thread\"、\ntask_urgency（A0 判定 owner）完全不認得 lane。11:48 只把隔離 enforce 在 claim 入口，沒同步候選產生端。\n\n修法（收斂單一 owner）：lane 詞彙移進 next_tasks.py（controlled-vocabulary owner，同 TASK_STATUSES 形狀），\n新增 normalize_dispatch_lane / is_agent_claimable_lane（未設 lane 一律可派，避免凍住存量佇列）；\nctd 改 import、claim gate 改用 canonical set（順補 manual/interactive 破口）、task_urgency 新增 LANE_DEFERRED\n+ CLI deferred_main_thread 欄位（不進 lane 但保持可見，不製造隱形 backlog）。\n\n驗證：task_urgency 實測 count=0 / deferred_main_thread=7（死鎖解除，7 張仍可見）；claim 仍正確拒絕；\ntest_urgent_task_lane.py 42 passed（新增 6 case）；ctd --report 正常；claim/vocab 套件全綠。error_log 已立案。\n\n註：本班 A0 lane 的 7 張任務均為 main_thread lane，headless fire 依設計無法 claim（非本班可完成工作）；\nburst 指名的 assign_1238781f 進場時已 succeeded。故本班產出為 A0 死鎖本身的修復。"
+  },
+  {
+    "timestamp": "2026-07-20T13:11:46+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_d5f9a6f1",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-6b2b5722e2f44b6787c2eb80ae87649b",
+    "owner": "hourly-slot-2-6b2b5722e2f44b6787c2eb80ae87649b",
+    "commit": "0adb2db19",
+    "summary": "PHASE A triage：失敗 agent job `agent-brief_k1698_rev3-4dffab`（K1698 rev3 remediation）。\n\n**根因**：agent 把全量重跑丟到背景後就結束 turn（「重跑完成時我會被叫醒」— headless job 沒有這回事），\nprocess tree 隨之被收掉，重跑死在 `parsed 800/2192`，`k1698_rev3_remediation.json` 因此不存在 → runner 判 fail。\n不是計算太重，是把「等待」寄託在一個不存在的喚醒機制上。\n\n**可救援盤點（親自看 worktree，非採信摘要）**：8 條 blocker 的生成器修正完整存活\n（`k1698.py` +112/-20、README 7 行，頂層數字改由 h2 算出的 f-string 而非新一批 hard-code）；\nagent 未自簽 PASS、未偽造 artifact，誠信面乾淨。缺的只是「證明修正有傳到輸出」的那一次重跑。\n\n**處置**：\n1. 搶救成果 commit 進 worktree `dispatch-slot-2-c5cafe39-k1698`（0adb2db19，經 git_writer_lock）。\n2. 重跑改走 compute_queue（`k1698_rev3_rerun`, timeout 5400）— 這本來就是 heavy compute，\n   不該塞在有 turn 生命週期的 agent 裡。\n3. 建 stage-2 tracker `assign_d5f9a6f1`（P2），brief 寫死收件第一道檢查 =\n   sha256 必須 != `337078f2…` 且 `elapsed_sec` != 288.8：artifact 早就存在（07-19 rev2 舊檔），\n   存在性本身不構成重跑證據。後續 grep 舊字串 / README:349 runtime / verdict 保留 FILL 佔位禁自簽 /\n   Codex round 4 PASS 才可 merge。\n4. `mark-followup-dispatched --next-task-id assign_d5f9a6f1` 防重派。"
+  },
+  {
+    "timestamp": "2026-07-20T13:14:40+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_05939c1e",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-6b2b5722e2f44b6787c2eb80ae87649b",
+    "owner": "hourly-slot-2-6b2b5722e2f44b6787c2eb80ae87649b",
+    "commit": null,
+    "summary": "治本：agent job runner 為每份 brief 前置 headless runtime contract（`scripts/run_agent_job.py`）。\n\n**觸發**：同一 fire 的 K1698 triage。失敗的不是計算，是 agent 把全量重跑丟到背景後結束 turn，\n留下「背景重跑完成時我會被叫醒」——headless `claude -p` 沒有這回事，process tree 隨 turn 收掉，\n重跑死在 800/2192。那個 agent 的規劃在互動 session 裡完全正確；**沒有人告訴它它不在互動 session**。\n\n**為什麼放在 runner 而不是各自的 brief**：這是執行環境的性質，不是某一份任務的性質。\n放進 brief = 每個 dispatcher 都要記得寫，漏一次就重演一次（anti-stacking：一個 concern 一個\nenforcement owner）。runner 是唯一必經之路，前置成本一次寫死。\n\n**內容**（`BRIEF_PREAMBLE`，經 `_compose_brief()` 前置）兩條：\n1. Nothing wakes you up — 背景工作會隨 turn 死掉，長計算要在前景等。\n2. 只有 result artifact 會被收 — 散文不是結果；時間不夠也要寫 artifact，用 `unresolved` 誠實列缺口\n   （會被收的殘缺 artifact > 沒有的 artifact）。\n\n**驗證**：`tests/test_run_agent_job_brief_preamble.py` 3 passed（前置順序 / 兩種 failure mode 措辭 / 空 brief）。\n本 fire 稍後 enqueue 的 `k528_round5_collection` 是第一個吃到此 preamble 的 job。\n\n**同時完成**：K528 round-5 收件驗證派工（agent job `k528_round5_collection`，tracker `assign_05939c1e`）。\nbrief 寫死 B2 必須實地示範 pre-fix 版本 FAIL——一個永遠會過的對抗測試等於沒修，這是四條裡最容易造假的一條。"
   }
 ]

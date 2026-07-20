@@ -324,6 +324,19 @@
       "phase_z_probe_paths": ["storage/next_tasks.json"],
       "reason": "Handoff and stale-claim cleanup are machine queue/ops state."
     },
+    "liveness_reconcile": {
+      "entrypoint": "scripts/liveness_reconcile.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json", "storage/ops/liveness_receipts/**"],
+      "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/liveness_receipts/**"],
+      "reason": "WS-A4: the sweep releases stale claimed/in_progress rows through the canonical next_tasks writer and drops one adjudication receipt per run; both are machine queue/ops state."
+    },
+    "feed_sync": {
+      "entrypoint": "scripts/cron_feed_sync.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "WS-C2: one-way feed.json -> Supabase reconcile. The scheduled invocation only POSTs the projection; --no-delete withholds the destructive path from the single guarded delete owner, and the feed.json writer (reconcile_content_from_singles) is not on this entrypoint."
+    },
     "supabase_sync_drain": {
       "entrypoint": "scripts/drain_failed_supabase_syncs.py",
       "commit_owner": "scripts/drain_failed_supabase_syncs.py",

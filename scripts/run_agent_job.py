@@ -63,6 +63,38 @@ AUTH_RETRY_MIN_BUDGET_S = 600
 _TAIL_LINES = 200
 
 
+# Prepended to every brief. The agent runs headless: when its turn ends the
+# process tree goes with it, so anything it parked in the background dies
+# unfinished and unreported. On 2026-07-20 the K1698 rev3 job did exactly that —
+# edited the generator correctly, launched the full rerun in the background,
+# ended the turn saying "背景重跑完成時我會被叫醒", and was collected as a failed
+# job with the rerun dead at 800/2192 files. The agent's reasoning was sound for
+# an interactive session; nobody had told it that it wasn't in one. Telling it
+# is the runner's job, not each dispatcher's memory.
+BRIEF_PREAMBLE = """\
+<runtime-contract>
+You are running headless under the compute worker (`claude -p`), not in an
+interactive session. Two consequences you must plan around:
+
+1. **Nothing wakes you up.** When this turn ends, your process tree is torn
+   down. Work you left running in the background dies unfinished, and its
+   output is lost. Never park a computation in the background and end the
+   turn intending to return to it — run it in the foreground and wait.
+2. **Your result artifact is the only thing that is collected.** Prose in your
+   final message is not read as a result. If you run out of time or hit a
+   blocker, still write the artifact, with the `unresolved` field naming
+   exactly what remains and why — a partial artifact that is honest about its
+   gaps is collectable; a missing one is a failed job.
+</runtime-contract>
+
+"""
+
+
+def _compose_brief(brief_text: str) -> str:
+    """The brief the agent actually receives: runtime contract, then the task."""
+    return BRIEF_PREAMBLE + brief_text
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -202,7 +234,7 @@ def main() -> int:
     if not brief_path.exists():
         print(f"[run_agent_job] brief not found: {brief_path}", file=sys.stderr)
         return 2
-    brief = brief_path.read_text()
+    brief = _compose_brief(brief_path.read_text())
 
     workdir = Path(args.cwd)
     if not workdir.is_absolute():
