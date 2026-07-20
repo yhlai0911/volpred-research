@@ -1,18 +1,29 @@
 {
-  "generated_at": "2026-07-20T05:01:38.307812+00:00",
+  "generated_at": "2026-07-20T06:02:35.093002+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 33,
-    "grace": 2,
+    "registered": 35,
+    "grace": 0,
     "inflight": 0
   },
   "orphan_count": 0,
   "adopted": [],
   "applied": true,
   "job_deliverable_candidates": [],
-  "job_deliverable_held": [],
+  "job_deliverable_held": [
+    {
+      "job_id": "k1698_rev3_rerun",
+      "reason": "no_existing_declared_files",
+      "rejected": [
+        {
+          "path": ".claude/worktrees/dispatch-slot-2-c5cafe39-k1698/experiments/k1698/k1698_rev2_results.json",
+          "reason": "git_ignored"
+        }
+      ]
+    }
+  ],
   "job_deliveries": [],
   "namespaces": {
     "drafts": {

@@ -1,0 +1,39 @@
+{
+  "id": "k1698_rev3_codex_round4",
+  "title": "Codex primary-path review — K1698 rev3 (round 4)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1698_rev3_prompt.md",
+    "storage/ops/codex_reviews/k1698_rev3_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 5,
+  "queued_at": "2026-07-20T06:21:45Z",
+  "started_at": "2026-07-20T06:30:03Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1698_rev3_codex_round4.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1698_rev3_codex_round4.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1698_rev3_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1698_rev3_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "收 round 4 verdict：PASS 才可 merge worktree dispatch-slot-2-c5cafe39-k1698；FAIL 則列 blocker 續 rev4。verdict 在 storage/ops/codex_reviews/k1698_rev3_verdict.md；凍結清單 storage/ops/codex_reviews/k1698_rev3_freeze.txt（9 檔）。PASS 時務必由審查者填 experiments/k1698/review_verdict.json（kid/verdict/reviewed_sha256 schema，現為 FILL: pending Codex round 4），未填則 experiment_gates.py certify 會擋下合併。禁止自簽。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 71733
+}
