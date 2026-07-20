@@ -921,27 +921,64 @@ class TestFridayEstimandIsScopedHonestly:
             assert case["session_weekday"] == 0
             assert session > release, "the absorbing session must come after the release"
 
-    def test_reader_facing_surfaces_do_not_resurrect_the_release_dated_estimand(self):
-        """Round-5 B1 residual. The analysis layer was corrected first and the
-        publication layer was not, so the retired estimand survived in the
-        generator that writes the READER-facing correction. A claim that only
-        the results JSON is clean is worth nothing if the text shipped to
-        readers still says the thing the correction exists to retract.
+    def test_no_live_artifact_describes_the_237_as_a_release_count(self):
+        """Round-5 B1 residual, widened after round 6 caught a file two earlier
+        sweeps missed.
 
-        Guards the phrase, not the file: '在週五公布' may appear only where it is
-        being explicitly denied.
+        The defect is not a phrase, it is a MISBINDING: 237 is the count of
+        releases ABSORBED BY a Friday session; 243 is the count of releases
+        DATED a Friday. Saying '237 Friday releases' fuses them, and that is the
+        sentence B1 exists to retire.
+
+        So this checks the binding rather than blocklisting wording -- a
+        synonym for 'Friday releases' would still have to bind it to 237 to be
+        wrong, and a line that names BOTH numbers is drawing the distinction
+        rather than collapsing it, which is exactly what we want people to write.
+
+        Scope is every LIVE artifact under experiments/k528, not a hand-listed
+        few. Round-6 found the retired estimand alive in
+        k528_rerun_v3_summary.json -- a file README lists as an output artifact
+        -- precisely because the earlier sweeps scoped by the '*_results.json'
+        filename pattern. Review RECORDS are exempt: a verdict that quotes the
+        defect verbatim as its evidence is doing its job.
         """
-        retired = "在週五公布"
-        for path in (K528_CORRECTION_PY, K528_README):
+        review_records = (
+            "codex_review_",
+            "k528_round5_collection_verdict",
+            "k528_round5_remediation",
+            "k528_completeness_gate_fix",
+            "review_verdict",
+        )
+        release_language = (
+            "Friday releases",
+            "在週五公布",
+            "發布日在週五",
+            "released on a Friday",
+            "dated a Friday",
+        )
+        # A line may quote the wrong phrasing in order to rule it out.
+        denial_markers = ("wrong phrase", "既不是", "不是「發布日", "此前寫的是")
+
+        offenders = []
+        for path in sorted(K528_DIR.rglob("*")):
+            if not path.is_file() or path.suffix not in (".py", ".md", ".json"):
+                continue
+            if any(marker in path.name for marker in review_records):
+                continue
             for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-                if retired not in line:
+                if "237" not in line or "243" in line:
                     continue
-                assert any(
-                    marker in line for marker in ("既不是", "不是", "not ", "此前寫的是")
-                ), (
-                    f"{path.name}:{i} states the retired release-dated estimand "
-                    f"without denying it: {line.strip()!r}"
-                )
+                if not any(phrase in line for phrase in release_language):
+                    continue
+                if any(marker in line for marker in denial_markers):
+                    continue
+                offenders.append(f"{path.relative_to(K528_DIR)}:{i} {line.strip()[:140]}")
+
+        assert not offenders, (
+            "237 is a SESSION count, not a release count. These lines bind it to "
+            "release-dated language without naming the 243 that would draw the "
+            "distinction:\n  " + "\n  ".join(offenders)
+        )
 
     def test_readme_does_not_sanction_a_pre_registration_claim(self):
         """Round-5 B4 residual. The multiplicity family was defined after the
