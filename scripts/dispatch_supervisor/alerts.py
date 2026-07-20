@@ -226,6 +226,13 @@ def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path
             "- 該行程已確認消失；Supervisor 仍存活，下個整點會嘗試新 fire\n"
         )
 
+    # WS-A2b: killing a worker now hands its task-pool claim back to pending in
+    # the same breath. Report which ids moved so the boss can tell "the task is
+    # queued again" from "the task is stranded" without reading next_tasks.json.
+    repended = [str(tid) for tid in (job.get("repended_tasks") or []) if tid]
+    if repended:
+        impact += f"- 已把該 fire 持有的 task claim 退回 pending：{', '.join(repended)}\n"
+
     log_path = job.get("log_path") or ""
     tail = log_tail or read_log_tail(log_path)
     body = (

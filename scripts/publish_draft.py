@@ -98,8 +98,6 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from volpred.canonical_write import guard_canonical_write
-
 
 def _refresh_publication_candidates_after_feed_change(reason: str) -> None:
     """Best-effort refresh after feed mutations so K coverage is immediately current.
@@ -1107,8 +1105,10 @@ def apply_update(args) -> int:
       4. Replace .content; optionally .title (--update-title)
       5. Append errata audit-trail fields (update_action / update_at / update_summary)
       6. Optionally update details.cluster_waiver / details.dup_waiver
-      7. Atomically rewrite feed.json (the only Contentlayer source)
-      8. Optionally invoke feed-sync (--sync-supabase) — default is decoupled
+      7. Hand the patched entry to the publish/update gateway
+         (`Publisher.rewrite_and_sync_article`): locked feed.json rewrite +
+         Mirror PUT + Supabase sync, failures dead-lettered (WS-C1)
+      8. Optionally ALSO run a whole-feed reconcile (--sync-supabase)
     """
     draft_path = Path(args.draft_path)
     if not draft_path.is_absolute():
@@ -1420,20 +1420,33 @@ def apply_update(args) -> int:
     if details_changed:
         art["details"] = new_details
 
-    # Write feed.json — serialize with same lock + atomic-swap used by publisher.py
-    # to avoid silent data loss on concurrent publisher appends (Codex review P2).
-    from volpred.ops.shared_lock import shared_state_lock
+    # Single publish/update gateway (WS-C1). The update path used to write
+    # feed.json here directly and push neither projection, so a corrected
+    # article diverged across feed / Supabase / Mirror until a human ran
+    # feed-sync. `Publisher.rewrite_and_sync_article` is now the one exit for
+    # both new-publish and update: locked canonical rewrite + Mirror PUT +
+    # Supabase sync, with any projection failure dead-lettered for the drain.
+    sys.path.insert(0, str(ROOT / "src"))
+    from volpred.publisher.publisher import Publisher
+
     storage_dir = str(feed_path.parent.parent)
-    guard_canonical_write(feed_path)
-    with shared_state_lock("publisher_feed", storage_dir=storage_dir):
-        tmp_path = feed_path.with_name(f".{feed_path.name}.tmp")
-        tmp_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8")
-        tmp_path.replace(feed_path)
-    print(f"[publish_draft] wrote {feed_path.relative_to(ROOT)}")
+    publisher = Publisher(storage_dir=storage_dir)
+    sync_report = publisher.rewrite_and_sync_article(mile_id, art)
+    if not sync_report["feed_written"]:
+        print(f"error: feed rewrite failed: mile_id={mile_id} vanished from "
+              f"{feed_path} before the locked write", file=sys.stderr)
+        return 2
+    print(f"[publish_draft] wrote {feed_path.relative_to(ROOT) if feed_path.is_relative_to(ROOT) else feed_path}")
+    print(f"[publish_draft] mirror={sync_report['mirror']} "
+          f"supabase={sync_report['supabase']}")
+    for queue in sync_report["dead_letters"]:
+        print(f"[publish_draft] projection failure recorded to {queue} "
+              f"(drained by the retry cron)", file=sys.stderr)
 
     _refresh_publication_candidates_after_feed_change("update")
 
-    # Optional Supabase sync (decoupled by default)
+    # --sync-supabase keeps its original meaning: ALSO run a whole-feed
+    # reconcile. The per-article projection above is unconditional now.
     if getattr(args, "sync_supabase", False):
         cmd = ["uv", "run", "volpred", "ops", "feed-sync", "--apply"]
         print(f"[publish_draft] running feed-sync: {' '.join(cmd)}")
@@ -1445,9 +1458,6 @@ def apply_update(args) -> int:
             print(f"[publish_draft] feed-sync stderr: {result.stderr[-400:]}",
                   file=sys.stderr)
             return result.returncode
-    else:
-        print("[publish_draft] note: Supabase NOT auto-synced. Run "
-              "`uv run volpred ops feed-sync --apply` to push.")
 
     return 0
 

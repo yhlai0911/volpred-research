@@ -651,6 +651,75 @@ def revalidate_article_cache(slug: str) -> bool:
     return False
 
 
+def projected_content(item: dict, *, verbose: bool = True) -> str:
+    """Return the exact `content` string sync_article() writes to Supabase.
+
+    Split out 2026-07-20 (WS-C2). The write path sanitizes content before
+    POSTing (markdown-table pipe escaping + CJK-appositive em-dash → comma),
+    so the stored projection is deliberately NOT byte-identical to the
+    canonical feed.json text. `feed_sync.compute_diff` used to hash the raw
+    feed content against the stored content, which meant every article whose
+    feed text still contained a CJK appositive em-dash was reported "changed"
+    on every single run — 137 of 1852 articles, forever, converging never.
+    That is fatal for the hourly reconcile job (WS-C2): a safety net that
+    always reports drift is a safety net nobody reads.
+
+    Both the writer and the differ now call this one function, so "what the
+    projection should contain" has a single definition (anti-stacking) and
+    the reconcile loop is idempotent by construction.
+
+    `verbose=False` for the diff path: it is asking a question, not
+    performing a repair, so it must not narrate.
+    """
+    content = item.get("content") or item.get("description") or ""
+    if not content:
+        return ""
+
+    def _say(msg: str) -> None:
+        if verbose:
+            print(msg)
+
+    try:
+        from volpred.publisher.markdown_table_sanitizer import (
+            sanitize_markdown_tables,
+        )
+        sanitized, report = sanitize_markdown_tables(content)
+        if report.changed:
+            content = sanitized
+            _say(
+                f"  [supabase_sync] markdown_table_sanitizer auto-fixed "
+                f"{len(report.fixed_lines)} row(s) for "
+                f"{item.get('id', 'unknown')}: {report.summary()}"
+            )
+        if report.has_unfixed:
+            _say(
+                f"  [supabase_sync] WARN unfixable table rows for "
+                f"{item.get('id', 'unknown')}: lines={report.unfixed_lines}"
+            )
+    except Exception as exc:
+        _say(f"  [supabase_sync] markdown_table_sanitizer error: {exc}")
+
+    # Secondary anti-AI-style em-dash normalizer (2026-05-29): same
+    # belt-and-suspenders rationale — catches manual edits / legacy
+    # entries / hot-fix scripts that bypassed publisher._append_to_feed.
+    # Conservative CJK-appositive-only rewrite (landmine 9 fix (b)).
+    try:
+        from volpred.publisher.emdash_normalizer import normalize_emdash
+
+        normalized, emrep = normalize_emdash(content)
+        if emrep.changed:
+            content = normalized
+            _say(
+                f"  [supabase_sync] emdash_normalizer auto-fixed "
+                f"{emrep.replaced} em-dash(es) for "
+                f"{item.get('id', 'unknown')}: {emrep.summary()}"
+            )
+    except Exception as exc:
+        _say(f"  [supabase_sync] emdash_normalizer error: {exc}")
+
+    return content
+
+
 def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     """Sync a single article (feed item) to Supabase.
 

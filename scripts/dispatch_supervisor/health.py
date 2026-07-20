@@ -28,11 +28,14 @@ this module to decide explicitly rather than kill on unverified evidence).
 from __future__ import annotations
 
 import asyncio
+import importlib.util
 import logging
+import sys
 import traceback
 from pathlib import Path
+from types import ModuleType
 
-from . import alerts, procutil, selfreload, state
+from . import alerts, identity, procutil, selfreload, state
 
 LOG = logging.getLogger(__name__)
 
@@ -51,6 +54,79 @@ def _force_kill_pgid(pgid: int) -> bool:
     Returns whether the group is CONFIRMED gone (2026-07-11) — a denied killpg
     used to be indistinguishable from a successful one here."""
     return procutil.kill_pgid(pgid)
+
+
+def _task_pool_claim() -> ModuleType:
+    """Import `scripts/task_pool_claim.py` — the canonical next_tasks writer.
+
+    It is a top-level script, not a package member, so it is loaded by path
+    (same pattern as tests/test_task_pool_claim.py) and cached in sys.modules
+    so repeated kills don't re-execute its import side effects.  Loaded lazily:
+    the healthy path must not pay for it, and a broken task pool must not stop
+    the supervisor from booting.
+    """
+    cached = sys.modules.get("task_pool_claim")
+    if isinstance(cached, ModuleType):
+        return cached
+    module_path = Path(__file__).resolve().parents[1] / "task_pool_claim.py"
+    spec = importlib.util.spec_from_file_location("task_pool_claim", module_path)
+    if spec is None or spec.loader is None:  # pragma: no cover - packaging bug
+        raise ImportError(f"cannot load task_pool_claim from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["task_pool_claim"] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _repend_killed_job_claims(*, job_id: str, slot_id: int | str) -> list[str]:
+    """Hand a killed fire's task-pool claim back to the queue.
+
+    Killing a worker used to free only the dispatch_state slot: whatever task
+    the dead agent had claimed stayed `claimed`/`in_progress` until the stale
+    sweep noticed hours later, so a P1 task could sit dead with no process
+    behind it (refactor_plan_ops_master_2026_07 §1.2 P1 / WS-A2b).
+
+    Best-effort by construction. The kill is the safety-critical act and it has
+    already happened by the time we get here; a task pool that is locked,
+    corrupt or missing must therefore produce a WARNING and nothing more. The
+    stale-claim sweep stays as the backstop for exactly these cases.
+    """
+    if not job_id:
+        LOG.warning(
+            "health: cannot re-pend task claims after kill — no job_id for slot=%s "
+            "(claim tokens are slot+job scoped); leaving it to the stale sweep",
+            slot_id,
+        )
+        return []
+    slot_token = str(slot_id or "").strip() or "1"
+    if not slot_token.startswith("slot-"):
+        slot_token = f"slot-{slot_token}"
+    try:
+        owners = identity.task_claim_owners_for_job(slot_id=slot_token, job_id=job_id)
+        result = _task_pool_claim().release_owner_claims(
+            owners, reason=f"supervisor_kill_{job_id[:8]}"
+        )
+    except Exception as exc:  # noqa: BLE001 — kill must complete regardless
+        LOG.warning(
+            "health: re-pend of task claims for job_id=%s slot=%s FAILED (%s) — the "
+            "kill still completed; stale-claim cleanup remains the backstop",
+            job_id, slot_token, exc,
+        )
+        return []
+    released = [
+        str(entry.get("id") or "") for entry in (result.get("released") or [])
+    ]
+    if released:
+        LOG.warning(
+            "health: re-pended %d task(s) after killing job_id=%s slot=%s: %s",
+            len(released), job_id, slot_token, ", ".join(released),
+        )
+    else:
+        LOG.info(
+            "health: killed job_id=%s slot=%s held no live task-pool claim",
+            job_id, slot_token,
+        )
+    return released
 
 
 def _check_job(
@@ -84,12 +160,19 @@ def _check_job(
             outcome=f"{job.phase}_drained", final_model=job.model, path=state_path,
         )
         return "quarantine_drained" if closed is not None else None
-    identity = procutil.check_identity(job.pid, job.started_wall)
+    identity_verdict = procutil.check_identity(job.pid, job.started_wall)
+    repended_tasks: list[str] = []
     if job.age_seconds > max_age_s:
-        if identity == procutil.IDENTITY_MATCH:
+        if identity_verdict == procutil.IDENTITY_MATCH:
             LOG.warning("health: worker pgid=%d age=%.0fs > %.0fs cap — force-killing", job.pgid, job.age_seconds, max_age_s)
             if _force_kill_pgid(job.pgid):
                 exit_code, outcome = -9, "killed_timeout"
+                # The process is confirmed gone, so nothing can still be acting
+                # on its claim — release it now rather than stranding the task
+                # until the stale sweep (WS-A2b).
+                repended_tasks = _repend_killed_job_claims(
+                    job_id=job_id, slot_id=job.slot_id,
+                )
                 log_tail = ("(killed by health monitor)\n\n"
                             + alerts.read_log_tail(job.log_path))
             else:
@@ -103,7 +186,7 @@ def _check_job(
                     f"pgid={job.pgid} may still be running. Check `ps -g {job.pgid}` "
                     f"and kill by hand; this slot remains quarantined.)"
                 )
-        elif identity == procutil.IDENTITY_UNVERIFIED:
+        elif identity_verdict == procutil.IDENTITY_UNVERIFIED:
             # Codex review fix #4: no fingerprint was ever recorded for this
             # job — we cannot confirm this pid is still our worker and not a
             # PID-reuse collision, so we must NOT signal it. Quarantine the
@@ -123,7 +206,7 @@ def _check_job(
             # (already gone, or the OS recycled the pid to something else).
             LOG.warning(
                 "health: worker pid=%d aged out but identity=%s (pgid=%d) — skipping kill",
-                job.pid, identity, job.pgid,
+                job.pid, identity_verdict, job.pgid,
             )
             exit_code, outcome = -1, "silent_death"
             log_tail = "(identity mismatch/dead at max-age check — not killed, recorded as silent_death)"
@@ -170,17 +253,19 @@ def _check_job(
                      "pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
                      "attempt": job.attempt, "model": job.model,
                      "log_path": job.log_path,
-                     "survivors": procutil.pgid_members(job.pgid)},
+                     "survivors": procutil.pgid_members(job.pgid),
+                     # WS-A2b receipt: which task claims this kill handed back.
+                     "repended_tasks": repended_tasks},
                 log_tail=log_tail,
                 state_path=state_path,
             )
-        if identity != procutil.IDENTITY_MATCH:
+        if identity_verdict != procutil.IDENTITY_MATCH:
             return outcome
         return "killed" if outcome == "killed_timeout" else outcome
-    if identity in (procutil.IDENTITY_MISMATCH, procutil.IDENTITY_DEAD):
+    if identity_verdict in (procutil.IDENTITY_MISMATCH, procutil.IDENTITY_DEAD):
         LOG.warning(
             "health: worker pid=%d dead/reused (identity=%s) but state has current_job — recording silent failure",
-            job.pid, identity,
+            job.pid, identity_verdict,
         )
         # Same ownership rule as the hang path: only the caller that actually
         # closed the slot reports it.

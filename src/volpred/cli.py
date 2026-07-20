@@ -2295,7 +2295,11 @@ def ops_indicator_arena_sync(storage_dir: str, dry_run: bool) -> None:
               help="Dry-run shows diff only; --apply writes to Supabase")
 @click.option("--allow-delete/--no-delete", default=False, show_default=True,
               help="Allow DELETE of Supabase rows missing from feed.json")
-def ops_feed_sync(storage_dir: str, dry_run: bool, allow_delete: bool) -> None:
+@click.option("--quiet-when-clean", is_flag=True, default=False,
+              help="Print nothing when there is no drift (for the hourly "
+                   "reconcile job — only drift is worth a log line)")
+def ops_feed_sync(storage_dir: str, dry_run: bool, allow_delete: bool,
+                  quiet_when_clean: bool) -> None:
     """One-way reconcile feed.json (canonical) -> Supabase articles projection.
 
     Contentlayer pattern: feed.json is the single source of truth; this
@@ -2308,7 +2312,10 @@ def ops_feed_sync(storage_dir: str, dry_run: bool, allow_delete: bool) -> None:
         dry_run=dry_run,
         allow_delete=allow_delete,
         verbose=True,
+        quiet_when_clean=quiet_when_clean,
     )
+    if quiet_when_clean and result.get("clean"):
+        return
     _print_json({"action": "feed_sync", "result": result})
 
 

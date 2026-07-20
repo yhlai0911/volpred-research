@@ -100,6 +100,22 @@ def _never_spawn_the_real_pregate(monkeypatch) -> None:
     _stub_pregate(monkeypatch)
 
 
+@pytest.fixture(autouse=True)
+def _never_touch_the_real_task_pool(monkeypatch, tmp_path: Path) -> Path:
+    """Redirect the canonical claim CLI's pool at an empty tmp file.
+
+    Since WS-A2b a force-kill re-pends the claim its dead fire was holding,
+    which means EVERY hang test now reaches a next_tasks.json writer. Against
+    the real path that raises CanonicalWriteBlocked (a BaseException the
+    production fail-open handler deliberately cannot swallow). Autouse for the
+    same reason as the pregate stub above: opt-in protection is not protection.
+    """
+    pool = tmp_path / "autouse_next_tasks.json"
+    pool.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(health._task_pool_claim(), "NEXT_TASKS", pool)
+    return pool
+
+
 def test_pregate_is_stubbed_for_every_test_in_this_module() -> None:
     """If `_never_spawn_the_real_pregate` ever loses `autouse=True`, this fails
     here instead of quietly resuming writes to the production shadow log — the
@@ -1118,6 +1134,180 @@ def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
     assert kills == [456]
     assert len(alerts_called) == 1
     assert state.read_state(state_path)["current_job"] is None
+
+
+def _seed_claimed_task(
+    tmp_path: Path, monkeypatch, *, task_id: str, owner: str
+) -> Path:
+    """Point the canonical claim CLI at a throwaway pool holding one live claim.
+
+    The supervisor imports scripts/task_pool_claim.py by path and caches it in
+    sys.modules, so patching that module's NEXT_TASKS is what redirects the
+    production write path — no parallel fixture pool.
+    """
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": task_id,
+                    "status": "in_progress",
+                    "claimed_by": owner,
+                    "claimed_at": "2026-01-01T00:00:00+00:00",
+                    "claim_session_id": "sess-1",
+                },
+                {"id": "untouched_other_task", "status": "pending"},
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(health._task_pool_claim(), "NEXT_TASKS", next_tasks)
+    return next_tasks
+
+
+def _read_task(path: Path, task_id: str) -> dict:
+    return next(t for t in json.loads(path.read_text(encoding="utf-8")) if t["id"] == task_id)
+
+
+def test_health_kill_repends_the_claim_the_dead_fire_was_holding(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """WS-A2b: killing a worker used to free only the dispatch_state slot, so the
+    task it had claimed stayed in_progress until the stale sweep hours later."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
+    )
+    job_id = str(state.read_state(state_path)["current_jobs"][0]["job_id"])
+    owner = health.identity.task_claim_owner(
+        role="hourly", slot_id="slot-1", job_id=job_id,
+    )
+    next_tasks = _seed_claimed_task(
+        tmp_path, monkeypatch, task_id="assign_zombie", owner=owner,
+    )
+
+    alerts_called: list[dict] = []
+    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: True)
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
+    monkeypatch.setattr(
+        health.alerts, "send_hang_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+    monkeypatch.setattr(
+        health.procutil, "check_identity",
+        lambda pid, started_wall: procutil.IDENTITY_MATCH,
+    )
+    monkeypatch.setattr(
+        state, "get_current_jobs",
+        lambda path=state_path: [state.CurrentJob(
+            pid=123, pgid=456, schedule_id="hourly_dispatch",
+            started_at="2026-01-01T00:00:00+00:00", attempt=1, model="opus",
+            log_path="/tmp/x.log", job_id=job_id, slot_id=1,
+            started_wall="Wed Jan  1 00:00:00 2026", age_seconds=4000,
+        )],
+    )
+
+    action = health.check_once(state_path=state_path, max_age_s=3000)
+
+    assert action == "killed"
+    task = _read_task(next_tasks, "assign_zombie")
+    assert task["status"] == "pending"
+    assert "claimed_by" not in task
+    assert "claimed_at" not in task
+    assert task["last_release_reason"] == f"supervisor_kill_{job_id[:8]}"
+    assert task["status_history"][-1]["by"] == owner
+    # Untouched sibling proves the release is owner-scoped, not a pool reset.
+    assert _read_task(next_tasks, "untouched_other_task")["status"] == "pending"
+    # The re-pend is on the receipt, so the hang mail says what was requeued.
+    assert alerts_called[0]["job"]["repended_tasks"] == ["assign_zombie"]
+
+
+def test_health_kill_repends_codex_failover_claim_for_the_same_slot(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """A fire can hand the SAME slot/job to Codex mid-flight; health.py never
+    sees which executor claimed, so both role tokens must be released."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
+    )
+    job_id = str(state.read_state(state_path)["current_jobs"][0]["job_id"])
+    owner = health.identity.task_claim_owner(
+        role="codex-failover", slot_id="slot-1", job_id=job_id,
+    )
+    next_tasks = _seed_claimed_task(
+        tmp_path, monkeypatch, task_id="assign_codex_zombie", owner=owner,
+    )
+
+    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: True)
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
+    monkeypatch.setattr(health.alerts, "send_hang_alert", lambda **kwargs: True)
+    monkeypatch.setattr(
+        health.procutil, "check_identity",
+        lambda pid, started_wall: procutil.IDENTITY_MATCH,
+    )
+    monkeypatch.setattr(
+        state, "get_current_jobs",
+        lambda path=state_path: [state.CurrentJob(
+            pid=123, pgid=456, schedule_id="hourly_dispatch",
+            started_at="2026-01-01T00:00:00+00:00", attempt=1, model="opus",
+            log_path="/tmp/x.log", job_id=job_id, slot_id=1,
+            started_wall="Wed Jan  1 00:00:00 2026", age_seconds=4000,
+        )],
+    )
+
+    assert health.check_once(state_path=state_path, max_age_s=3000) == "killed"
+    assert _read_task(next_tasks, "assign_codex_zombie")["status"] == "pending"
+
+
+def test_health_kill_completes_even_when_the_task_pool_is_unreadable(
+    tmp_path: Path, monkeypatch, caplog
+) -> None:
+    """The kill is the safety-critical act. A broken task pool must degrade to a
+    WARNING (stale sweep is the backstop), never abort the kill/close path."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
+    )
+    job_id = str(state.read_state(state_path)["current_jobs"][0]["job_id"])
+
+    kills: list[int] = []
+    monkeypatch.setattr(
+        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+    )
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
+    monkeypatch.setattr(health.alerts, "send_hang_alert", lambda **kwargs: True)
+    monkeypatch.setattr(
+        health.procutil, "check_identity",
+        lambda pid, started_wall: procutil.IDENTITY_MATCH,
+    )
+
+    def _boom(*_args, **_kwargs):
+        raise OSError("next_tasks.json is locked")
+
+    monkeypatch.setattr(health._task_pool_claim(), "release_owner_claims", _boom)
+    monkeypatch.setattr(
+        state, "get_current_jobs",
+        lambda path=state_path: [state.CurrentJob(
+            pid=123, pgid=456, schedule_id="hourly_dispatch",
+            started_at="2026-01-01T00:00:00+00:00", attempt=1, model="opus",
+            log_path="/tmp/x.log", job_id=job_id, slot_id=1,
+            started_wall="Wed Jan  1 00:00:00 2026", age_seconds=4000,
+        )],
+    )
+
+    with caplog.at_level(logging.WARNING):
+        action = health.check_once(state_path=state_path, max_age_s=3000)
+
+    assert action == "killed"
+    assert kills == [456]
+    assert state.read_state(state_path)["current_job"] is None
+    assert "re-pend of task claims" in caplog.text
 
 
 def test_health_check_kills_overdue_job_skips_kill_on_identity_mismatch(

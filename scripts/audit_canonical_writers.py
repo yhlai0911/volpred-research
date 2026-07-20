@@ -114,7 +114,9 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "scripts/mark_fb_post_status.py:_write_json": {"write_text": 1},
     "scripts/merge_feed_files.py:<module>": {"open-write": 2},
     "scripts/migrate_fb_post_status_single_source.py:main": {"write_text": 1},
-    "scripts/publish_draft.py:apply_update": {"replace": 1, "write_text": 1},
+    # scripts/publish_draft.py:apply_update was a canonical feed writer until
+    # WS-C1 (2026-07-20): --update now routes through
+    # Publisher.rewrite_and_sync_article, so the script owns no feed mutation.
     "scripts/record_and_publish.py:record_and_publish": {"write_text": 1},
     "scripts/refill_reader_facing_pool.py:_append_task": {
         "mkdir": 1, "open-write": 1, "write_text": 1,

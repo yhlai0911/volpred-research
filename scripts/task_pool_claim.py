@@ -525,23 +525,70 @@ def cmd_start(args: argparse.Namespace) -> dict[str, Any]:
         return {"ok": True, "task_id": args.id, "status": "in_progress"}
 
 
+def _repend_task(
+    task: dict[str, Any], *, note: str, reason: str | None = None
+) -> str | None:
+    """Return one claimed/in_progress task to `pending` (single mutation site).
+
+    Every re-pend in this module goes through here so the claim fields, the
+    release timestamp and the status_history trace can never drift apart
+    between the manual, kill-triggered and stale-sweep paths.
+    """
+    prev_owner = task.get("claimed_by")
+    prev_status = (task.get("status") or "").lower() or "claimed"
+    task["status"] = "pending"
+    task.pop("claimed_by", None)
+    task.pop("claimed_at", None)
+    task.pop("claim_session_id", None)
+    task["last_released_at"] = _now()
+    if reason:
+        task["last_release_reason"] = reason
+    _record_status_history(
+        task,
+        frm=prev_status,
+        to="pending",
+        by=prev_owner or "release",
+        note=note,
+    )
+    return prev_owner
+
+
+def release_owner_claims(
+    owners: Any, *, reason: str, note: str | None = None
+) -> dict[str, Any]:
+    """Re-pend every live claim held by any of `owners`.
+
+    The dispatch supervisor's kill path uses this: when `health.py` force-kills
+    a hung worker it frees the dispatch_state slot, and the task that dead fire
+    was holding must go back to the pool in the same breath.  Before this
+    existed the claim stayed `claimed`/`in_progress` until the stale sweep
+    noticed hours later, so a P1 task could sit dead with nothing running behind
+    it (refactor_plan_ops_master_2026_07 §1.2 P1 / WS-A2b).
+
+    Owner-scoped rather than id-scoped because the supervisor knows which fire
+    it killed (slot+job → ownership token), not which task that fire claimed.
+    """
+    wanted = {str(owner) for owner in owners if str(owner or "").strip()}
+    if not wanted:
+        return {"ok": True, "released": [], "count": 0}
+    released: list[dict[str, Any]] = []
+    with _locked_load() as (_fh, tasks):
+        for task in tasks:
+            if not isinstance(task, dict):
+                continue
+            if (task.get("status") or "").lower() not in {"claimed", "in_progress"}:
+                continue
+            if str(task.get("claimed_by") or "") not in wanted:
+                continue
+            prev_owner = _repend_task(task, note=note or reason, reason=reason)
+            released.append({"id": _task_key(task), "owner": prev_owner})
+    return {"ok": True, "released": released, "count": len(released)}
+
+
 def cmd_release(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
-        prev_owner = task.get("claimed_by")
-        prev_status = (task.get("status") or "").lower() or "claimed"
-        task["status"] = "pending"
-        task.pop("claimed_by", None)
-        task.pop("claimed_at", None)
-        task.pop("claim_session_id", None)
-        task["last_released_at"] = _now()
-        _record_status_history(
-            task,
-            frm=prev_status,
-            to="pending",
-            by=prev_owner or "release",
-            note="manual_release",
-        )
+        prev_owner = _repend_task(task, note="manual_release")
         return {"ok": True, "task_id": args.id, "released_from": prev_owner}
 
 

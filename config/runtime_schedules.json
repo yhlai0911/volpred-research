@@ -369,6 +369,22 @@
         ]
       },
       {
+        "id": "feed_sync",
+        "label": "feed.json -> Supabase 全量對帳（收斂網）",
+        "cron": "5 * * * *",
+        "staleness_expected_minutes": 120,
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_feed_sync.sh",
+        "log_path": "storage/logs/cron/feed_sync.log",
+        "description": "WS-C2（refactor_plan_ops_master_2026_07 §3）：每小時 `volpred ops feed-sync --apply --no-delete --quiet-when-clean`，把 canonical feed.json 的變更收斂到 Supabase articles 投影。L3 診斷指出全系統原本沒有任何排程做全量對帳 —— 即時推送失敗、繞過 gateway 的手改、批次內容改寫，都會讓投影靜默落後直到有人發現。此 job 是那條收斂網（C1 收斂寫入端、C2 兜底端，互補不重疊）。無 drift 時 --quiet-when-clean 完全不輸出（只留 cron_lib start/exit receipt），有 drift 才記錄，避免每小時刷 log 讓人習慣性忽略。刻意不帶 --allow-delete：破壞性刪除屬於單一守門者 supabase_sync.reconcile_article_deletes（有 floor/cap/dump 不變式），不交給無人值守的每小時 job。排在 audit_publish_sync 之前，讓同一個 piggy-back tick 先收斂再稽核。由 run_due_jobs piggy-back 執行；piggy-back 由每小時 check_alerts 觸發，因此有效 cadence 為 60 分鐘。",
+        "host_crontab_managed": true,
+        "piggy_back_enabled": true,
+        "matchers": [
+          "ops feed-sync",
+          "feed_sync.log",
+          "cron_feed_sync.sh"
+        ]
+      },
+      {
         "id": "audit_publish_sync",
         "cron": "15 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_audit_publish_sync.sh",
@@ -377,6 +393,21 @@
         "host_crontab_managed": true,
         "piggy_back_enabled": true,
         "exit_semantics": "findings"
+      },
+      {
+        "id": "liveness_reconcile",
+        "label": "任務池 in-flight 宣告 vs 磁碟/進程 liveness 對帳",
+        "cron": "45 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_liveness_reconcile.sh",
+        "log_path": "storage/logs/cron/liveness_reconcile.log",
+        "description": "WS-A4（refactor_plan_ops_master_2026_07 §3）：每小時 `scripts/liveness_reconcile.py --apply`，把 next_tasks 的 claimed/in_progress 宣告拿去對磁碟（worktree 是否還在）與進程（dispatch_state 的 pid，經 dispatch_supervisor.procutil 做 pid-reuse-safe 指紋比對）兩項現實。兩項都證明死了、且 claim 已過 20 分鐘寬限期，才經 canonical helper task_pool_claim.release_owner_claims() 降回 pending 並寫 receipt 到 storage/ops/liveness_receipts/。任一項存活即否決降回：多數 fire 本來就不建 worktree（單看磁碟會誤殺整個佇列），而 worktree 還在代表可能有未合併成果（feedback_no_research_artifact_loss）。與 handoff_regen 的 `cleanup --stale-hours 2` 互補不重疊：那條是純年齡掃描（無證據、2h 才動手），這條是證據制（有兩項死亡證明、20 分鐘就能收回鬼佔的 slot）。吸收 k1709 殭屍教訓（in_flight=7 而實際 running=0）。排在 ops_dashboard(:30) 之後、handoff_regen(:50) 之前，讓 dashboard 讀到的是對帳前現況、handoff 讀到的是對帳後佇列。由 run_due_jobs piggy-back 執行（有效 cadence 60 分鐘）。",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": true,
+        "matchers": [
+          "liveness_reconcile.py",
+          "cron_liveness_reconcile.sh",
+          "liveness_reconcile.log"
+        ]
       },
       {
         "id": "audit_fb_pipeline",

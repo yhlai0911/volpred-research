@@ -17,7 +17,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from volpred.canonical_write import guard_canonical_write
@@ -30,11 +30,21 @@ def _norm_ts(value: str | None) -> str:
     (e.g. '...862770+00:00' -> '...86277+00:00'), which breaks naive
     string equality against feed.json's Python-isoformat timestamps.
     Parse both sides to datetime so equal instants compare equal.
+
+    2026-07-20 (WS-C2): also normalize the UTC offset. feed.json stores
+    Asia/Taipei-offset timestamps ('...T17:03:26+08:00') while Supabase
+    returns the same instant as '...T09:03:26+00:00'. Comparing raw
+    isoformat() strings marked those rows changed on every run, so the
+    hourly reconcile job would re-UPDATE them forever (non-idempotent,
+    permanently noisy). Convert to UTC before formatting so equal
+    instants compare equal regardless of the stored offset.
     """
     if not value:
         return ""
     try:
         dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if dt.tzinfo is not None:
+            dt = dt.astimezone(timezone.utc)
         return dt.isoformat()
     except Exception:
         return str(value or "")
@@ -431,13 +441,23 @@ def sync_feed_to_supabase(
     dry_run: bool = True,
     allow_delete: bool = False,
     verbose: bool = True,
+    quiet_when_clean: bool = False,
 ) -> dict:
     """Top-level one-way sync entrypoint.
 
     Canonical flow: feed.json changes -> call this -> Supabase projection updated.
     Never call anything that writes back to feed.json from DB.
+
+    `quiet_when_clean` (WS-C2): for the hourly reconcile job. When the diff is
+    empty there is nothing to say, so suppress all output — an hourly safety
+    net that prints a banner every run trains operators to ignore its log.
+    Drift, and only drift, is worth a line.
     """
     diff = compute_diff(storage_dir=storage_dir)
+
+    clean = not (diff["insert"] or diff["update"] or diff["real_delete"])
+    if quiet_when_clean and clean:
+        verbose = False
 
     if verbose:
         print(
@@ -456,7 +476,7 @@ def sync_feed_to_supabase(
     if dry_run:
         if verbose:
             print("[feed-sync] dry-run: no writes performed")
-        return {"mode": "dry_run", "diff": diff}
+        return {"mode": "dry_run", "clean": clean, "diff": diff}
 
     result = apply_diff(diff, storage_dir=storage_dir, allow_delete=allow_delete)
     if verbose:
@@ -465,4 +485,4 @@ def sync_feed_to_supabase(
             f"updated={result['updated']} deleted={result['deleted']} "
             f"skipped_deletes={result['skipped_deletes']} failed={result['failed']}"
         )
-    return {"mode": "apply", "diff": diff, "result": result}
+    return {"mode": "apply", "clean": clean, "diff": diff, "result": result}

@@ -169,7 +169,14 @@
 - **Phase 2 架構收斂（下週）**：WS-B、C3、C5、D1、D2、D4、E1、E2、F3、F4、F5、H2、H3、H5
 - **Phase 3 瘦身退役（兩週內）**：C6、C7、D3 全量、E3、E4、WS-G
 
-任務以 `refactor_master_<WSID>` 命名進 `storage/next_tasks.json`（P1/P2 依上表），description 指回本檔對應段落。**單一 dispatch scope ≤50min**：大項（A1 全量、WS-B、E1/E2）拆多筆連續任務。Phase N+1 任務由 Phase N 收尾時的主線程 enqueue（不預先塞爆 queue）。
+### 執行模式：獨立重構軌（owner 2026-07-20 糾正後修訂，取代原「入一般排程」設計）
+
+**重構任務不進一般 hourly 派工消化。** 理由：重構對象正是派工機器本身（佇列狀態機／supervisor／派工邏輯），讓排程 agent 改自己的執行機器 = 未隔離的自我改造 — 2026-07-20 11:1x 實證：3 個 hourly agent 同時在共用 main checkout 改 `task_pool_claim.py`／supervisor／publisher，與主線程賽跑（正是 WS-B 要根治的 un-isolated writer 病灶）。
+
+- 所有 `[refactor-master]` 任務一律 `dispatch_lane: "main_thread"`（機械隔離：hourly/Codex claim 看不見），仍留在 next_tasks 供追蹤與 §7 對帳
+- 執行 = **主線程專屬 refactor session** 逐 Phase 推進；動到 supervisor / 佇列機器的 WS 在 worktree 隔離做、gate 綠才 merge（WS-B 精神先行自用）；supervisor code 改動靠 selfreload 或 reload script 生效
+- 每 WS 收斂時做 Codex review + 線上 Check，才可標 ✅（過程 checkpoint commit 不算完成）
+- Phase N+1 任務由 Phase N 收尾時的主線程 enqueue（同樣 main_thread lane，不預先塞爆 queue）
 
 ## 6. 驗證 gates 總表（宣告完成的硬條件）
 
@@ -189,5 +196,6 @@
 | Phase 0：P8 急件 lane 查證（撤回誤診斷） | ✅ 2026-07-20 | `_request_urgent_fire` 已全接通；enqueue 實測 12/12 `fire_requested: true` |
 | Phase 0：D3-doc（cron_dispatch 標 SUPERSEDED） | ✅ 2026-07-20 | `refactor_plan_cron_dispatch.md` 檔頭 |
 | Phase 1 任務 enqueue（12 筆 refactor-master 系列） | ✅ 2026-07-20 | A2b/A1a/A1b/A4/C1/C2/H4 = P1；A3/C4/F1/F2/H2 = P2；經 `ops assign` single gateway |
-| Phase 0 殘：A2b kill→re-pend 接線 | 🔜 已入池 P1 | assign 任務 |
+| Phase 1：**A1a next_tasks writer 全量盤點分類** | ✅ 2026-07-20 · commit `pending-phase-z` | `docs/audit_next_tasks_writers.md`：掃到 **44 個 writer 呼叫點 / 33 檔**（印證 §1.3 A5「40+」），分類 **legal 25 / needs_helper 12 / delete 7**。Canonical helper 確認為 `src/volpred/ops/next_tasks.py` 三入口（`write_tasks_to_handle` primitive / `write_tasks_locked` one-shot / `append_next_task` single append gateway）。交叉驗證 `grep -rn next_tasks --include=*.{py,sh,md}` = 1,454 行 / 287 檔，差額 1,410 行逐類歸因（測試 fixture / 敘述性提及 / 唯讀查詢 / 路徑常數 / config 宣告 / 註解），無漏網寫入路徑。已附 A1b 可直接執行的建議動作與 gate 規格 |
+| Phase 0：A2b kill→re-pend 接線 | ✅ 2026-07-20 | commit `pending-phase-z`。`health.py` force-kill 成功後呼叫 `task_pool_claim.release_owner_claims()`（canonical helper，owner token 由 `identity.task_claim_owners_for_job()` 依 slot+job 產出，涵蓋 hourly / codex-failover 兩角色）；re-pend 的 task ids 進 hang alert receipt (`repended_tasks`) 與 LOG。task pool 讀寫失敗只記 WARNING，kill 流程照常完成（stale sweep 仍為 backstop）。3 新測試綠：`test_health_kill_repends_the_claim_the_dead_fire_was_holding`、`test_health_kill_repends_codex_failover_claim_for_the_same_slot`、`test_health_kill_completes_even_when_the_task_pool_is_unreadable` → `3 passed`；`tests/test_dispatch_supervisor.py` 全檔 `92 passed`，相鄰 8 檔 `117 passed` |
 | 其餘 | ⏳ 依 §5，Phase N 收尾時 enqueue Phase N+1 | — |
