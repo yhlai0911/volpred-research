@@ -674,24 +674,41 @@ def check_worktree_reconcile() -> list[dict]:
     return out
 
 
+#: The checkup's dimensions, in report order. Every entry must have a matching
+#: module-level ``check_<name>``. This is a public constant rather than a dict
+#: built inside ``run_all`` so that tests can enumerate the real list instead of
+#: hand-copying it: 2026-07-20 the ``worktree_reconcile`` dimension was added to
+#: ``run_all`` but not to the stub tuple in
+#: ``test_run_all_turns_reproducibility_checker_exception_into_warning``, so the
+#: real checker kept running inside a unit test. It is environment-dependent —
+#: on a dev box the worktrees exist and it stays quiet, on CI the clone has
+#: neither the checkouts nor the branches and it returns *critical* — so the test
+#: passed locally and failed only on CI, which is the worst place to find out.
+CHECKUP_DIMENSIONS = (
+    "data_freshness",
+    "cron_completion",
+    "content_pipeline",
+    "live_freshness",
+    "live_cache",
+    "mission_progress",
+    "alert_conditions",
+    "reader_metrics",
+    "dedup_calibration",
+    "reproducibility",
+    "worktree_reconcile",
+)
+
+
+def _checker(name: str):
+    """Resolve ``check_<name>`` at call time so monkeypatching still takes effect."""
+    return globals()[f"check_{name}"]
+
+
 def run_all() -> dict:
-    dims = {
-        "data_freshness": check_data_freshness,
-        "cron_completion": check_cron_completion,
-        "content_pipeline": check_content_pipeline,
-        "live_freshness": check_live_freshness,
-        "live_cache": check_live_cache,
-        "mission_progress": check_mission_progress,
-        "alert_conditions": check_alert_conditions,
-        "reader_metrics": check_reader_metrics,
-        "dedup_calibration": check_dedup_calibration,
-        "reproducibility": check_reproducibility,
-        "worktree_reconcile": check_worktree_reconcile,
-    }
     findings = []
-    for name, fn in dims.items():
+    for name in CHECKUP_DIMENSIONS:
         try:
-            findings.extend(fn())
+            findings.extend(_checker(name)())
         except Exception as exc:  # noqa: BLE001 — fail-open per no-silent-fallback：印出
             findings.append(_finding(name, "warn", f"檢查本身失敗: {exc}"))
     crit = [f for f in findings if f["severity"] == "critical"]
