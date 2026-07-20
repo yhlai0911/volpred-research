@@ -25,6 +25,16 @@ syncs, then RE-READ the queue before writing back and only remove ids we
 successfully synced (or whose article no longer exists in feed) — any ids
 appended concurrently during the drain are preserved.
 
+Attempt counting (WS-C4): the queues themselves stay in the C1 schema (a flat
+JSON list of mile_ids — publisher._record_dead_letter is the only producer and
+its idempotent membership check depends on that shape, as does the alert that
+counts queue length). Per-id retry counts therefore live in a drain-OWNED
+sibling ledger next to each queue (`.failed_<x>_syncs_attempts.json`, a
+`{mile_id: attempts}` dict): a failed retry increments, a successful/dropped id
+is removed, and ids that left the queue by other means are pruned. The ledger
+makes "this id has been stuck for N drain cycles" observable in the summary
+JSON instead of every still-failing id looking freshly failed.
+
 Usage:
   uv run python scripts/drain_failed_supabase_syncs.py            # drain
   uv run python scripts/drain_failed_supabase_syncs.py --dry-run  # report only
@@ -70,6 +80,31 @@ def _load_list(path: Path) -> list:
     except Exception as exc:
         _warn_drain("queue JSON read failed; treating as empty", path, exc)
         return []
+
+
+def _attempts_path(queue_path: Path) -> Path:
+    """Sibling attempts ledger for one queue (drain-owned, not C1 schema).
+
+    Derived from the queue path (not a module constant) so a test that
+    re-roots the queue into tmp automatically re-roots the ledger too —
+    no way to leak attempt writes into canonical storage by forgetting
+    to patch a second path.
+    """
+    return queue_path.with_name(f"{queue_path.stem}_attempts.json")
+
+
+def _load_attempts(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            return {str(k): int(v) for k, v in data.items()}
+        _warn_drain("attempts JSON is not a dict; treating as empty", path)
+        return {}
+    except Exception as exc:
+        _warn_drain("attempts JSON read failed; treating as empty", path, exc)
+        return {}
 
 
 def _resync_supabase(art: dict) -> bool:
@@ -164,7 +199,7 @@ def main() -> int:
         print("[drain] queues empty — nothing to do")
         return 0
 
-    paths = [s["path"] for s in active]
+    paths = [p for s in active for p in (s["path"], _attempts_path(s["path"]))]
     dirty_before = (
         dirty_paths_before_write(ROOT, paths, label="drain_failed_syncs")
         if not args.dry_run
@@ -197,6 +232,22 @@ def main() -> int:
             guard_canonical_write(spec["path"])
             spec["path"].write_text(json.dumps(remaining), encoding="utf-8")
             written.append(spec["path"])
+            # attempt ledger: resolved ids leave, still-failing ids +1; anything
+            # no longer queued (removed by other means) is pruned so the ledger
+            # cannot outgrow its queue.
+            attempts_file = _attempts_path(spec["path"])
+            attempts = _load_attempts(attempts_file)
+            for mid in resolved:
+                attempts.pop(mid, None)
+            for mid in summary["still_failing"]:
+                attempts[mid] = attempts.get(mid, 0) + 1
+            attempts = {mid: n for mid, n in attempts.items() if mid in set(remaining)}
+            guard_canonical_write(attempts_file)
+            attempts_file.write_text(
+                json.dumps(attempts, ensure_ascii=False), encoding="utf-8"
+            )
+            written.append(attempts_file)
+            summary["attempts"] = attempts
         if written:
             total = sum(
                 len(r["synced"]) + len(r["dropped_not_in_feed"]) for r in results.values()
@@ -218,6 +269,15 @@ def main() -> int:
             if args.dry_run
             else len(_load_list(spec["path"]))
         )
+        if "attempts" not in summary:
+            # dry-run / skipped queue: report the ledger as-is (read-only) so
+            # "stuck for N cycles" stays visible without mutating anything.
+            queued = set(_load_list(spec["path"]))
+            summary["attempts"] = {
+                mid: n
+                for mid, n in _load_attempts(_attempts_path(spec["path"])).items()
+                if mid in queued
+            }
 
     print(json.dumps({"dry_run": args.dry_run, "queues": results}, ensure_ascii=False, indent=2))
     return 0

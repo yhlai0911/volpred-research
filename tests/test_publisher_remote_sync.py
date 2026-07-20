@@ -140,6 +140,12 @@ def test_append_to_feed_uses_single_report_sync(
     tmp_path: Path,
     monkeypatch,
 ):
+    # WS-C4: the append path now routes through _mirror_article, which consults
+    # _mirror_enabled() BEFORE the PUT (and dead-letters a failure). Arm the
+    # mirror so the per-report sync actually runs — the assertion under test is
+    # still "single-report sync, never whole-feed sync".
+    monkeypatch.delenv("VOLPRED_NO_REMOTE_WRITE", raising=False)
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "https://mirror.test", raising=False)
     reports_dir = tmp_path / "reports"
     reports_dir.mkdir(parents=True)
     (reports_dir / "feed.json").write_text("[]", encoding="utf-8")
