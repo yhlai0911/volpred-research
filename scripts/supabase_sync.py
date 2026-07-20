@@ -6,7 +6,6 @@ Used by record_and_publish.py and daily_update.py.
 Requires: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars
 (or uses defaults from .env.local)
 """
-import hashlib
 import json
 import os
 import re
@@ -720,6 +719,78 @@ def projected_content(item: dict, *, verbose: bool = True) -> str:
     return content
 
 
+def projected_details(item: dict) -> dict:
+    """Return the exact `details` payload sync_article() writes to Supabase.
+
+    Split out 2026-07-20 (WS-C3): `feed_sync.compute_diff` is the single
+    canonical change detector, so it must compare the details blob the writer
+    would actually store — raw feed `details` plus the injected
+    `last_updated_at` (frontend reads details.last_updated_at to show
+    "更新於 <date hh:mm>") and the `_legacy` wrap for non-dict payloads.
+    One definition shared by writer and differ (anti-stacking) keeps the
+    hourly reconcile idempotent: if they projected differently, every row
+    with a top-level last_updated_at would report drift forever.
+    """
+    details = item.get("details")
+    if not isinstance(details, dict):
+        details = {} if details is None else {"_legacy": details}
+    if item.get("last_updated_at"):
+        details = {**details, "last_updated_at": item.get("last_updated_at")}
+    return details
+
+
+# details keys that live ONLY in Supabase, never in canonical feed.json.
+# Single definition shared by the writer (sync_article merges them back so a
+# re-sync cannot destroy them) and the differ (feed_sync.compute_diff ignores
+# them so their presence is not "drift"). Currently:
+#   - view_display: reader-facing view-count seed (boss email-12160/12163,
+#     scripts/seed_article_view_counts.py PATCHes it straight into the DB row;
+#     the seed exists nowhere else, so overwriting it is unrecoverable data
+#     loss and re-seeding would re-randomise the displayed numbers).
+# Discovered 2026-07-20 (WS-C3): the first full-details dry-run flagged
+# 1576/1854 rows "changed" — every seeded article — because the old wholesale
+# details overwrite had no concept of server-resident keys (and had in fact
+# been silently clobbering seeds on every article re-sync since 2026-07-18).
+SERVER_RESIDENT_DETAILS_KEYS = ("view_display",)
+
+
+def _fetch_server_resident_details(slug: str) -> dict | None:
+    """Return the server-resident details keys currently stored for `slug`.
+
+    {} when the row does not exist or holds none of the keys. None on read
+    failure — the caller must treat that as "do not write": proceeding would
+    overwrite resident keys we could not read, which is unrecoverable.
+    """
+    try:
+        rows = _select_rows("articles", select="details", slug=slug)
+    except Exception as exc:
+        print(
+            f"  [supabase_sync] WARN resident-details read failed for {slug}: "
+            f"{type(exc).__name__}: {exc} -- refusing to write (a blind write "
+            "would clobber server-resident keys like view_display)"
+        )
+        return None
+    if not rows:
+        return {}
+    existing = rows[0].get("details")
+    if not isinstance(existing, dict):
+        return {}
+    return {k: existing[k] for k in SERVER_RESIDENT_DETAILS_KEYS if k in existing}
+
+
+def projected_category(item: dict) -> str:
+    """Return the exact `category` value sync_article() writes to Supabase.
+
+    Same WS-C3 single-definition rationale as projected_details: the differ
+    must apply the member_qa/milestone fallback the writer applies, or every
+    feed item without an explicit category would compare unequal to its own
+    stored projection on every run.
+    """
+    return item.get("category") or (
+        "member_qa" if classify_audience(item) == "member_qa" else "milestone"
+    )
+
+
 def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     """Sync a single article (feed item) to Supabase.
 
@@ -745,20 +816,32 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     # last_updated_at is not a column on the articles table, so carry it inside the
     # synced `details` JSON blob (the frontend reads details.last_updated_at to show
     # "更新於 <date hh:mm>" when content was edited after publish — boss 2026-07-01).
-    details = item.get("details")
-    if not isinstance(details, dict):
-        details = {} if details is None else {"_legacy": details}
-    if item.get("last_updated_at"):
-        details = {**details, "last_updated_at": item.get("last_updated_at")}
+    # The injection lives in projected_details() so the differ shares it (WS-C3).
+    details = projected_details(item)
+    slug = item.get("id", "")
+    # Server-resident keys (view_display, ...) exist ONLY in the DB row; a
+    # wholesale details overwrite destroys them (2026-07-18..20: every
+    # re-synced article lost its view-count seed). Merge them back before
+    # writing. On read failure fail CLOSED — a blind write is unrecoverable
+    # data loss, while a skipped sync is retried by the next diff pass.
+    # Skipped under the test kill switch: no write will happen (_post returns
+    # False), so there is nothing to clobber and no reason to touch the
+    # blocked read gate.
+    if slug and not _remote_writes_blocked():
+        resident = _fetch_server_resident_details(slug)
+        if resident is None:
+            return False
+        if resident:
+            details = {**details, **resident}
     row = {
-        "slug": item.get("id", ""),
+        "slug": slug,
         "title": item.get("title", ""),
         "content": content,
         "excerpt": content[:200] + "..." if len(content) > 200 else content,
         "audience": classify_audience(item),
         "phase": item.get("phase"),
         "status": item.get("status", "published"),
-        "category": item.get("category") or ("member_qa" if classify_audience(item) == "member_qa" else "milestone"),
+        "category": projected_category(item),
         "proposer": extract_proposer(item),
         "author_id": "claude",
         "details": details,
@@ -829,8 +912,9 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         # just retractions: content edits were equally invisible for up to 60s,
         # and status downgrades (published -> retracted/unpublished) were
         # invisible indefinitely. Does not flip `ok` -- the DB write is this
-        # function's contract -- but sync_full() refuses to record the content
-        # hash for a slug whose purge failed, so the next run retries it.
+        # function's contract -- but sync_full() records the slug in
+        # state["purge_retry_slugs"] when the purge failed, so the next run
+        # re-syncs it and retries the purge.
         revalidate_article_cache(row["slug"])
     return ok
 
@@ -1324,29 +1408,6 @@ def sync_memory_entry(entry_id: str, entry_type: str, content: dict) -> bool:
     return _post("memory_entries", row)
 
 
-# Syncable article fields whose change must trigger a re-sync, regardless of
-# whether any timestamp was bumped. 2026-06-03 3-strike (refactor plan
-# docs/refactor_plan_prepublish_content_gate.md, 根因 B): the prior incremental
-# filter was timestamp-gated only — editing content without bumping updated_at
-# silently skipped the row (the K1413 correction was silent-dropped until
-# updated_at was force-bumped). Content-hash-based detection catches any
-# syncable-field change and is decoupled from timestamps.
-_ARTICLE_HASH_FIELDS = (
-    "content", "title", "excerpt", "status", "audience", "category", "details",
-)
-
-
-def _article_hash(item: dict) -> str:
-    """Stable sha256 over the syncable fields of an article.
-
-    Uses sort_keys + ensure_ascii=False so equal content always produces an
-    equal digest (idempotent) and any field change flips it.
-    """
-    payload = {k: item.get(k) for k in _ARTICLE_HASH_FIELDS}
-    blob = json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str)
-    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
-
-
 def _load_sync_state(storage: Path) -> dict:
     """Load last sync timestamp per category."""
     state_path = storage / ".supabase_sync_state.json"
@@ -1362,8 +1423,13 @@ def _save_sync_state(storage: Path, state: dict):
 
 
 def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = True) -> dict:
-    """Incremental sync: only upsert items changed since last sync.
-    Falls back to full sync on first run or if state file is missing.
+    """Sync feed/memory/risk state to Supabase; articles via the canonical diff.
+
+    Article change detection (WS-C3, 2026-07-20) is owned by
+    volpred.ops.feed_sync.compute_diff — feed.json projection vs the actual
+    Supabase rows. This function only decides WHEN to diff (feed mtime gate +
+    pending purge retries) and then pushes exactly the diffed set; it holds no
+    per-article change criterion of its own anymore.
 
     reconcile_deletes: after pushing, run reconcile_article_deletes() to remove
     Supabase `articles` rows whose slug is absent from the canonical feed.json.
@@ -1395,54 +1461,56 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
                 if isinstance(item, dict) and item.get("id") not in seen_ids:
                     feed.append(item)
     if feed:
+        # Engine-A state retired 2026-07-20 (WS-C3): the local hash/timestamp
+        # ledger was a second definition of "changed" that never saw remote
+        # drift. Drop stale keys so the state file cannot masquerade as a
+        # live detection input again.
+        state.pop("article_hashes", None)
+        state.pop("articles_last_ts", None)
+        purge_retry_raw = state.get("purge_retry_slugs")
+        purge_retry = [
+            s
+            for s in (purge_retry_raw if isinstance(purge_retry_raw, list) else [])
+            if isinstance(s, str) and s
+        ]
         last_feed_sync = state.get("feed_mtime", 0)
-        if feed_mtime > last_feed_sync:
-            last_sync_ts = state.get("articles_last_ts", "")
-            article_hashes = state.get("article_hashes")
-            if not isinstance(article_hashes, dict):
-                article_hashes = {}
-            # 2026-06-03 3-strike (根因 B): content-hash-based change detection.
-            # 2026-06-29 correction: feed.json is the article source of truth.
-            # Legacy reports/<id>.json files are intentionally ignored here; a
-            # stale single file must never overwrite a corrected feed entry.
-            # Selection condition (OR'd, defence-in-depth):
-            #   (a) article content hash differs from last-synced hash, OR
-            #   (b) legacy timestamp condition (back-compat; updated_at/published_at/
-            #       created_at after last_sync_ts — kept as fallback, not removed), OR
-            #   (c) no last_sync_ts (first run -> full).
-            to_sync = []
-            for item in feed:
-                slug = item.get("id")
-                cur_hash = _article_hash(item)
-                hash_changed = article_hashes.get(slug) != cur_hash
-                ts_changed = (
-                    (item.get("published_at") or item.get("created_at") or "") > last_sync_ts
-                    or (item.get("updated_at") or "") > last_sync_ts
-                )
-                if hash_changed or ts_changed or not last_sync_ts:
-                    to_sync.append(item)
+        if feed_mtime > last_feed_sync or purge_retry:
+            # WS-C3 (refactor_plan_ops_master_2026_07 §1.3 A1): per-article
+            # change detection is delegated to the single canonical differ,
+            # volpred.ops.feed_sync.compute_diff, which compares the projection
+            # sync_article() would WRITE (title/status/audience/published_at/
+            # content/category/phase/details/tags) against the ACTUAL Supabase
+            # rows. The old engine here — a local _article_hash ledger plus a
+            # timestamp fallback — was a second, different "changed" criterion:
+            # it never saw remote drift, re-pushed rows whose stored projection
+            # was already identical, and preserved the K1413 class of skew
+            # whenever its state file went stale.
+            # Retry semantics survive the cutover for free: a failed push
+            # leaves the DB differing from feed, so the next diff re-flags it
+            # (the old code encoded the same thing by withholding the hash).
+            # Lazy import: feed_sync imports helpers from this module at
+            # import time, so a module-level import would be circular.
+            from volpred.ops.feed_sync import compute_diff
+
+            diff = compute_diff(storage_dir=storage)
+            changed = set(diff.get("insert", [])) | set(diff.get("update", []))
+            # Slugs whose frontend cache purge failed last run are re-synced
+            # even when the DB projection already matches: the DB is right but
+            # readers may still see the cached old body, so sync_article must
+            # run again to retry the purge.
+            changed |= set(purge_retry)
+            to_sync = [item for item in feed if item.get("id") in changed]
             ok = 0
             purge_mark = len(_REVALIDATE_FAILURES)
             for item in to_sync:
                 if sync_article(item, storage_dir=storage):
                     ok += 1
-                    # Only record the hash after a successful sync so a failed
-                    # push retries next run. A failed frontend cache purge counts
-                    # as "not fully synced": the DB is right but readers may still
-                    # see the old body, so withhold the hash to force a retry.
-                    if item.get("id") not in _REVALIDATE_FAILURES[purge_mark:]:
-                        article_hashes[item.get("id")] = _article_hash(item)
             counts["articles"] = ok
             failed_purges = _REVALIDATE_FAILURES[purge_mark:]
             if failed_purges:
                 counts["cache_purge_failed"] = failed_purges
             state["feed_mtime"] = feed_mtime
-            state["article_hashes"] = article_hashes
-            if feed:
-                state["articles_last_ts"] = max(
-                    (item.get("updated_at") or item.get("published_at") or item.get("created_at") or "")
-                    for item in feed
-                )
+            state["purge_retry_slugs"] = sorted(set(failed_purges))
         else:
             counts["articles"] = 0  # skipped, unchanged
 
