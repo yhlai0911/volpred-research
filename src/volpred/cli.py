@@ -1766,7 +1766,11 @@ def ops_daily_planning_maintain(storage_dir: str, source: str, limit: int, stub_
 @ops.command("scheduler-summary")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_scheduler_summary(storage_dir: str) -> None:
-    """Show a compact scheduler + canonical schedule snapshot."""
+    """Show a compact canonical-schedule snapshot (spec vs materialized system tasks).
+
+    Command name kept for compatibility; the advisory shared-scheduler lane it
+    once summarized was retired 2026-07-20 (refactor_plan_ops_master_2026_07 D2).
+    """
     from volpred.ops import build_scheduler_summary
 
     summary = build_scheduler_summary(storage_dir=storage_dir)
@@ -2289,85 +2293,6 @@ def ops_event_preview(storage_dir: str) -> None:
 
     result = preview_event_jobs(storage_dir=storage_dir)
     console.print("[green]Event jobs preview[/green]")
-    _print_json(result)
-
-
-@ops.command("scheduler-preview")
-@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
-def ops_scheduler_preview(storage_dir: str) -> None:
-    """Preview what the shared scheduler would do on the next tick."""
-    from volpred.ops import scheduler_preview
-
-    result = scheduler_preview(storage_dir=storage_dir)
-    console.print("[green]Scheduler preview[/green]")
-    _print_json(result)
-
-
-@ops.command("scheduler-tick")
-@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
-def ops_scheduler_tick(storage_dir: str) -> None:
-    """Run one shared-scheduler orchestration tick."""
-    from volpred.ops import scheduler_tick
-
-    result = scheduler_tick(storage_dir=storage_dir)
-    if result.get("status") == "skipped":
-        console.print(f"[yellow]Scheduler skipped[/yellow] {result.get('reason')}")
-    else:
-        console.print("[green]Scheduler tick complete[/green]")
-    _print_json(result)
-
-
-@ops.command("scheduler-smoke")
-@click.option(
-    "--mode",
-    type=click.Choice(["coordinator", "executor", "both"], case_sensitive=False),
-    default="both",
-    show_default=True,
-    help="Which isolated smoke path to exercise",
-)
-@click.option("--base-dir", default=None, help="Optional artifact root for isolated smoke outputs")
-@click.option("--keep-artifacts/--cleanup", default=True, show_default=True, help="Keep or delete smoke artifacts")
-def ops_scheduler_smoke(mode: str, base_dir: str | None, keep_artifacts: bool) -> None:
-    """Run an isolated scheduler smoke without touching live storage or real agent CLIs."""
-    from volpred.ops import run_scheduler_smoke
-
-    result = run_scheduler_smoke(mode=mode, base_dir=base_dir, keep_artifacts=keep_artifacts)
-    console.print("[green]Scheduler smoke complete[/green]")
-    _print_json(result)
-
-
-@ops.command("scheduler-live-smoke")
-@click.option(
-    "--mode",
-    type=click.Choice(["coordinator", "claude-executor", "codex-executor", "all"], case_sensitive=False),
-    default="all",
-    show_default=True,
-    help="Which live path to exercise with the installed Claude/Codex CLIs",
-)
-@click.option("--base-dir", default=None, help="Optional artifact root for isolated smoke outputs")
-@click.option("--keep-artifacts/--cleanup", default=True, show_default=True, help="Keep or delete smoke artifacts")
-@click.option(
-    "--snapshot-storage-dir",
-    default="storage",
-    show_default=True,
-    help="Optional storage dir for writing the latest agent_cli_health snapshot",
-)
-def ops_scheduler_live_smoke(
-    mode: str,
-    base_dir: str | None,
-    keep_artifacts: bool,
-    snapshot_storage_dir: str | None,
-) -> None:
-    """Run a live scheduler smoke against installed agent CLIs using isolated storage."""
-    from volpred.ops import run_scheduler_live_smoke
-
-    result = run_scheduler_live_smoke(
-        mode=mode,
-        base_dir=base_dir,
-        keep_artifacts=keep_artifacts,
-        snapshot_storage_dir=snapshot_storage_dir,
-    )
-    console.print("[green]Scheduler live smoke complete[/green]")
     _print_json(result)
 
 

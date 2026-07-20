@@ -59,11 +59,10 @@ CONFIG_PATH = PROJECT_ROOT / "config" / "runtime_schedules.json"
 LAST_RUN_PATH = PROJECT_ROOT / "storage" / "ops" / "cron_last_run.json"
 PENDING_SESSIONS_PATH = PROJECT_ROOT / "storage" / "ops" / "pending_sessions.json"
 
-# Jobs handled specially elsewhere (check_alerts itself + shared_scheduler_tick
-# advisory) or that should not be invoked by this piggy-back.
+# Jobs handled specially elsewhere (check_alerts itself) or that should not be
+# invoked by this piggy-back.
 SKIP_JOB_IDS = {
     "check_alerts",           # we ARE check_alerts — would recurse
-    "shared_scheduler_tick",  # advisory-only in v12, host_crontab_managed=false
     # 2026-05-17: daily_update hangs (likely Supabase sync stall) — exceeded
     # 240s subprocess cap repeatedly → killed check_alerts wrapper at 300s for
     # 5 consecutive hours. Disabled from piggy-back; daily_update has its own
@@ -421,10 +420,10 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
     session_pending = _write_pending_sessions(session_items, state, now_local, now)
 
     # 2026-04-20: also expand event_jobs entries whose `not_before` has
-    # arrived. `shared_scheduler_tick` was the intended call site for this
-    # but v12 downgraded it to advisory-only (CLAUDE.md §control-plane) and
-    # its wrapper never runs on this host (scheduler_tick.log size=0 since
-    # 2026-04-19). Piggy-backing on hourly check_alerts ensures one_shot
+    # arrived. The advisory shared-scheduler lane was the intended call site
+    # for this, but it never ran on this host (dead since 2026-04-19) and was
+    # fully retired 2026-07-20 (ops-master D2) — this piggy-back is now the
+    # sole owner. Piggy-backing on hourly check_alerts ensures one_shot
     # event jobs (e.g. FOMC T-2 windows) materialize in the canonical next_tasks queue
     # within ~60 min of their `not_before` timestamp. Cost is cheap: iterates
     # event_jobs.items and no-ops pending/expired entries.

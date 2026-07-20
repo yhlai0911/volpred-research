@@ -45,11 +45,6 @@
             "tracked_outputs": ["storage/macro/tw_dgbas_bci_m.csv"],
             "reason": "The scheduled check is read-only; a stale result explicitly expands into an agent-reviewed manual update."
           },
-          "codex_quota_resume_2026_04_24": {
-            "policy": "expired_one_shot_agent_contract",
-            "tracked_outputs": ["storage/next_tasks.json", "storage/work_log.json", "dynamic task outputs"],
-            "reason": "Past-dated one-shot prompt; any replay uses the normal queue and agent delivery contracts."
-          },
           "journal_topic_scan": {
             "policy": "agent_delivery_contract",
             "tracked_outputs": ["research_program.md", "storage/next_tasks.json"],
@@ -165,13 +160,6 @@
       "policy": "no_repo_tracked_output",
       "tracked_outputs": [],
       "reason": "Writes ignored storage/market_status.json and Supabase state."
-    },
-    "shared_scheduler_tick": {
-      "entrypoint": "scripts/run_scheduler_tick.sh",
-      "policy": "phase_z_machine_state",
-      "tracked_outputs": ["storage/ops/scheduler_state.json", "storage/next_tasks.json"],
-      "phase_z_probe_paths": ["storage/ops/scheduler_state.json", "storage/next_tasks.json"],
-      "reason": "Scheduler state, event ledgers, and materialized queue rows are declared machine state."
     },
     "check_alerts": {
       "entrypoint": "scripts/check_alerts.py",

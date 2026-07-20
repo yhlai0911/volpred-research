@@ -8,7 +8,8 @@
 # - Single `crontab <file>` call per invocation (minimises macOS TCC prompts).
 # - Idempotent: running twice is a no-op if config is unchanged.
 # - Preserves all non-volpred crontab entries (anything without "# volpred-").
-# - Items with "host_crontab_managed": false are skipped (e.g. scheduler_tick).
+# - Items with "host_crontab_managed": false are skipped (e.g. daily_update,
+#   which is fired by its own LaunchAgent instead).
 # - The generated entry format is:
 #     <cron> <wrapper_abs> >> <repo>/<log_path> 2>&1 # volpred-<id>
 #   where <wrapper_abs> is the config's `wrapper_script` if absolute, else
