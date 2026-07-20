@@ -6,8 +6,11 @@ count 當前 slot 占用（.claude/worktrees/ + storage/ops/agents/ active），
 若 slot < cap (4) 且有可派 agent 的 task → 列出 / 派出（依 mode）。
 
 執行模式：
-  --dry-run    僅列 candidates 不派任何工作（default 安全）
-  --report     寫 report 到 storage/ops/dispatch_report_latest.json
+  --dry-run    read-only 巡檢：retire/sweep/refill/promote 一律不執行寫入，
+               report 只進 stdout、不落地（2026-07-20 WS-H4 修真：此旗標過去
+               宣告後從未被 main() 讀取，掛著 --dry-run 也跑含寫入的完整流程，
+               見 docs/dispatch-decision-pipeline-design.md §1.2）
+  --report     寫 report 到 storage/ops/dispatch_report_latest.json（--dry-run 時改印 stdout）
   --execute    真的 spawn agent（需 cron-runtime；目前主線程 fallback = print 指令給人類）
 
 main-thread-only 任務優先看 schema-level `dispatch_lane="main_thread"`；
@@ -733,7 +736,7 @@ def _promote_starved_article_tasks(limit: int) -> int:
         return 0
 
 
-def _maybe_refill_draft_pool(*, auto_refill: bool) -> dict | None:
+def _maybe_refill_draft_pool(*, auto_refill: bool, dry_run: bool = False) -> dict | None:
     """Force a daily_article-specific top-up when feed.json draft count is low.
 
     2026-07-01 3-STRIKE fix: `_maybe_refill` below only reacts to the
@@ -758,6 +761,17 @@ def _maybe_refill_draft_pool(*, auto_refill: bool) -> dict | None:
         _releasable_now = _releasable_draft_count()
     except Exception:  # noqa: BLE001 — 訊號取不到就不晉升，refill 路徑照舊
         _releasable_now = None
+    if dry_run:
+        # WS-H4 dry-run 修真：只預覽訊號，不晉升、不補池。這條路徑上任何寫入都是
+        # 「以為在 dry-run 卻改了 state」的事故面（design doc §1.2）。
+        return {
+            "ok": True,
+            "added": 0,
+            "dry_run": True,
+            "reason": "dry_run_refill_suppressed",
+            "deficit_at_check": _draft_pool_deficit(),
+            "would_promote_starved": _releasable_now == 0,
+        }
     if _releasable_now == 0:
         _promote_starved_article_tasks(DRAFT_POOL_FLOOR)
     deficit = _draft_pool_deficit()
@@ -821,7 +835,7 @@ def _maybe_refill_draft_pool(*, auto_refill: bool) -> dict | None:
         return {"ok": False, "added": 0, "reason": f"error: {exc}", "deficit_at_check": deficit}
 
 
-def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
+def _maybe_refill(agentable_count: int, *, auto_refill: bool, dry_run: bool = False) -> dict | None:
     """Auto-trigger pool refill when agentable < REFILL_FLOOR.
 
     Two-stage refill (2026-05-06 diversity fix):
@@ -837,6 +851,16 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
         return None
     if agentable_count >= REFILL_FLOOR:
         return None
+    if dry_run:
+        # WS-H4 dry-run 修真：refill 各 stage（diverse/event/article/research/
+        # pool-dry breaker）全是 next_tasks.json writer，dry-run 一律不觸發。
+        return {
+            "ok": True,
+            "added": 0,
+            "dry_run": True,
+            "reason": "dry_run_refill_suppressed",
+            "would_refill_gap": max(0, REFILL_FLOOR - agentable_count),
+        }
     sys.path.insert(0, str(ROOT / "scripts"))
     combined: dict = {"ok": True, "added": 0, "added_ids": [], "by_type": {}}
     try:
@@ -921,7 +945,7 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
     return combined
 
 
-def _maybe_retire_covered_article_tasks(*, auto_refill: bool) -> dict | None:
+def _maybe_retire_covered_article_tasks(*, auto_refill: bool, dry_run: bool = False) -> dict | None:
     """Retire pending `*_article_<audience>` tasks already covered in feed.json.
 
     2026-07-01 root cause: an article task can be queued when the K is genuinely
@@ -942,13 +966,14 @@ def _maybe_retire_covered_article_tasks(*, auto_refill: bool) -> dict | None:
         _warn_dispatch(f"covered_article_dedup import failed: {exc}")
         return None
     try:
-        return _retire_covered(apply=True)
+        # dry-run: same detection pass, apply=False so nothing is retired on disk.
+        return _retire_covered(apply=not dry_run)
     except Exception as exc:  # noqa: BLE001
         _warn_dispatch(f"covered_article_dedup sweep failed: {exc}")
         return None
 
 
-def _sweep_cleared_dreaming_tasks() -> list[dict]:
+def _sweep_cleared_dreaming_tasks(*, dry_run: bool = False) -> list[dict]:
     """Close dreaming tasks whose condition dissolved, before they can be candidates.
 
     A dreaming finding is a snapshot of one night. Without this sweep a task whose
@@ -960,6 +985,26 @@ def _sweep_cleared_dreaming_tasks() -> list[dict]:
     Same shape as `_sweep_cleared_ordinary_tasks` on the alert side. Best-effort:
     a failure here must never stop the dispatch report from being produced.
     """
+    if dry_run:
+        # WS-H4 dry-run 修真：同一套 revalidation 判定、零寫入。不取 flock、不過
+        # canonical-write guard（沒有寫入就沒有要 guard 的東西）——讓 --dry-run
+        # 從任何 checkout 都能當純診斷跑。
+        try:
+            from volpred.ops import dreaming_revalidate
+
+            if not NEXT_TASKS.exists():
+                return []
+            tasks = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
+            if not isinstance(tasks, list):
+                return []
+            return dreaming_revalidate.sweep_cleared(
+                tasks,
+                by="dispatcher-dry-run",
+                now=datetime.now(timezone.utc).isoformat(),
+            )
+        except Exception as exc:  # noqa: BLE001
+            _warn_dispatch(f"dreaming revalidation dry-run preview failed: {exc}")
+            return []
     # Outside the best-effort try, same as the alert-side sweep: writing the
     # canonical queue from a foreign tree is not a transient hiccup to warn
     # about and continue past, and a guard swallowed by `except Exception`
@@ -994,7 +1039,8 @@ def _sweep_cleared_dreaming_tasks() -> list[dict]:
         return []
 
 
-def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> dict:
+def build_report(*, auto_refill: bool = True, now: datetime | None = None,
+                 dry_run: bool = False) -> dict:
     """Build the dispatch report.
 
     `now` exists so starvation verdicts can be pinned to a fixed instant. Without
@@ -1003,19 +1049,25 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
     "fresh" P2 written on 2026-07-13 crossed its own 24h starvation line the next
     day and joined the starved set, so the lockout assertion started failing on a
     calendar boundary rather than on a code change (CI red, 2026-07-14).
+
+    `dry_run=True` (WS-H4, 2026-07-20) makes this a read-only pass: the
+    retire/sweep/refill/promote maintenance stages are suppressed or run in
+    preview mode, so `storage/next_tasks.json` is byte-identical before and
+    after. The report is still produced, flagged `dry_run: true`.
     """
     slots = count_active_slots()
     # Retire covered article tasks BEFORE categorizing so duplicates never reach
     # the agentable candidate list this run.
-    _maybe_retire_covered_article_tasks(auto_refill=auto_refill)
+    _maybe_retire_covered_article_tasks(auto_refill=auto_refill, dry_run=dry_run)
     # Same reason, dreaming's snapshots: a dissolved condition must not reach the
     # candidate list, nor age into the starvation lockout that force-feeds it.
-    cleared_dreaming = _sweep_cleared_dreaming_tasks()
+    cleared_dreaming = _sweep_cleared_dreaming_tasks(dry_run=dry_run)
     pending = load_pending_tasks()
     recent_type_counts = load_recent_task_type_counts()
     cats = categorize(pending, recent_type_counts=recent_type_counts)
 
-    refill_result = _maybe_refill(len(cats["agentable"]), auto_refill=auto_refill)
+    refill_result = _maybe_refill(len(cats["agentable"]), auto_refill=auto_refill,
+                                  dry_run=dry_run)
     if refill_result and refill_result.get("added"):
         # Reload after refill so the report shows the fresh tasks
         pending = load_pending_tasks()
@@ -1024,7 +1076,7 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
     # 2026-07-01 3-STRIKE fix: draft-pool-specific top-up runs independently of
     # the agentable-count-based `_maybe_refill` above — see `_maybe_refill_draft_pool`
     # docstring for why the two signals can diverge (task-type mix vs feed content).
-    draft_refill_result = _maybe_refill_draft_pool(auto_refill=auto_refill)
+    draft_refill_result = _maybe_refill_draft_pool(auto_refill=auto_refill, dry_run=dry_run)
     if draft_refill_result and draft_refill_result.get("added"):
         pending = load_pending_tasks()
         cats = categorize(pending, recent_type_counts=recent_type_counts)
@@ -1069,6 +1121,7 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "dry_run": dry_run,
         "slot_cap": slot_cap,
         "slot_budget": slot_budget,
         "slot_state": slots,
@@ -1167,6 +1220,9 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
 
 def print_report(report: dict) -> None:
     print(f"[dispatch] generated_at={report['generated_at']}")
+    if report.get("dry_run"):
+        print("[dispatch] DRY-RUN — read-only pass: retire/sweep/refill/promote "
+              "suppressed, report not persisted")
     s = report["slot_state"]
     pending_summary = report.get("pending_summary", {})
     pending_label = pending_summary.get(
@@ -1259,21 +1315,28 @@ def print_report(report: dict) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dry-run", action="store_true", help="只列 candidates，不派工")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="read-only 巡檢：不 retire/sweep/refill/promote、不寫任何檔案")
     parser.add_argument("--report", action="store_true", help="寫 report 到 dispatch_report_latest.json")
     parser.add_argument("--execute", action="store_true", help="reserved (尚未實作 actual spawn)")
     parser.add_argument("--no-refill", action="store_true",
                         help="skip auto-refill even if agentable < floor (debug only)")
     args = parser.parse_args()
 
-    report = build_report(auto_refill=not args.no_refill)
+    report = build_report(auto_refill=not args.no_refill, dry_run=args.dry_run)
     print_report(report)
 
     if args.report:
-        guard_canonical_write(REPORT_PATH)
-        REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-        REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
-        print(f"[dispatch] report written: {REPORT_PATH}")
+        if args.dry_run:
+            # dry-run must not persist anything — emit the payload to stdout instead.
+            print(json.dumps(report, indent=2, ensure_ascii=False))
+            print("[dispatch] DRY-RUN: report NOT written "
+                  f"(would have gone to {REPORT_PATH})")
+        else:
+            guard_canonical_write(REPORT_PATH)
+            REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+            REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
+            print(f"[dispatch] report written: {REPORT_PATH}")
 
     if args.execute:
         print("[dispatch] --execute not yet implemented; main-thread should pick up candidates and dispatch agents (Task tool / claude general-purpose / codex-rescue) per .claude/rules/agent-delegation.md")

@@ -23,6 +23,9 @@ have stopped. This avoids committing a sibling's half-written files.
 In `dry_run=True` mode (shadow phase per refactor_plan §4 phase 2) the
 scheduler logs "WOULD enqueue at <fire_at>" + updates last_fire_at but
 does NOT spawn a worker. Used to diff against legacy shell decisions.
+WS-H4 (2026-07-20): a dry-run tick walks the SAME pregate judgment as a
+cron fire (it used to bypass it) — dry-run and fire may only diverge at
+the write boundary (reserve_fire / worker spawn), never in the decision.
 """
 from __future__ import annotations
 
@@ -771,7 +774,13 @@ async def _tick_once(
     # Gates ONLY plain cron fires — requested fires always run. Shadow mode
     # never skips (pregate exits 1) but logs the would-be decision for the
     # observation window before the config flip to enforce.
-    if fire_reason == "cron" and not dry_run:
+    #
+    # WS-H4 (2026-07-20): dry-run used to bypass the pregate entirely, which made
+    # "--dry-run output == real fire decision" structurally impossible whenever
+    # mode != off (docs/dispatch-decision-pipeline-design.md §1.1). A dry-run
+    # tick now walks the SAME pregate judgment; the only remaining difference is
+    # downstream — it never reserves a slot / spawns a worker.
+    if fire_reason == "cron":
         pregate_cfg = load_pregate_config(schedules_path=schedules_path)
         if pregate_cfg["mode"] in ("shadow", "enforce"):
             pregate_skip = await asyncio.to_thread(
@@ -785,7 +794,10 @@ async def _tick_once(
                 # every tick for the rest of the hour
                 with state._locked_state(state_path) as (_fh, data):
                     data["last_fire_at"] = state._now()
-                return {"action": "pregate_skip", "prev_fire": prev_fire.isoformat()}
+                result = {"action": "pregate_skip", "prev_fire": prev_fire.isoformat()}
+                if dry_run:
+                    result["dry_run"] = True
+                return result
     if dry_run:
         LOG.info("DRY-RUN would fire (prev_scheduled=%s)", prev_fire.isoformat())
         # update last_fire_at so we don't re-log every tick — shadow run still tracks
