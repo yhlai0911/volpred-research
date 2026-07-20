@@ -581,7 +581,13 @@ def test_main_dry_run_writes_report_not_baseline(tmp_path, monkeypatch):
     assert sent == []  # no email on dry-run
 
 
-def test_main_non_dry_writes_baseline_and_emails(tmp_path, monkeypatch):
+def test_main_non_dry_writes_baseline_and_queues_instead_of_emailing(tmp_path, monkeypatch):
+    """A cron job exiting non-zero six times is a ticket, not the owner's morning.
+
+    This is the 2026-07-19 shape exactly (`repeated_tool_failure:...:exit1`), and it
+    used to assert one boss email. Post boss-telegram 「為什麼要我看？你自己處理」the
+    same run must produce a queued task and silence.
+    """
     storage = _storage(tmp_path)
     _cron_log(storage, "myjob", 1, 6)
     sent = []
@@ -590,7 +596,8 @@ def test_main_non_dry_writes_baseline_and_emails(tmp_path, monkeypatch):
     assert rc == 0
     assert (storage / "ops" / "dreaming" / "baseline.json").exists()
     assert (storage / "ops" / "autonomous_decisions.jsonl").exists()
-    assert len(sent) == 1  # new findings → one boss email
+    assert sent == [], "propose_only 已自動接手 → 不打擾老闆"
+    assert any("repeated_tool_failure" in i for i in _queued_ids(storage)), "但必須真的有人接"
 
 
 def test_dispatch_does_not_go_to_the_receipts_trail(tmp_path, monkeypatch):
@@ -764,9 +771,12 @@ def test_findings_land_in_the_queue_the_dispatcher_actually_reads(tmp_path):
     assert queued[0]["task_type"] == "platform_ops"
 
 
-def test_a_proposal_nobody_read_for_three_nights_becomes_work(tmp_path):
-    """`memory_skill_gap` sat at occurrences=15. Persistence is the signal, the same
-    rule PHASE-Z uses for a foreign path nobody comes back for."""
+def test_a_proposal_becomes_work_on_sight_not_after_three_nights(tmp_path):
+    """2026-07-20 (boss telegram 「為什麼要我看？你自己處理」): propose_only used to
+    wait three nights before becoming work — and the queue it waited in was the
+    owner's inbox, reported as 「需要你看」. Waiting to see whether a cron job keeps
+    exiting non-zero is a ticket, not a person's judgement. The wait is gone, not
+    moved."""
     storage = _storage(tmp_path)
     dr.apply_auto_dispatch(
         [
@@ -778,7 +788,7 @@ def test_a_proposal_nobody_read_for_three_nights_becomes_work(tmp_path):
 
     ids = _queued_ids(storage)
     assert any("memory_skill_gap" in i for i in ids), "15 nights unread is a backlog item"
-    assert not any("seen_once" in i for i in ids), "one sighting is still just a proposal"
+    assert any("seen_once" in i for i in ids), "首見也開單 —— 等三晚的那三晚是老闆在等"
 
 
 def test_queueing_the_same_signature_every_night_does_not_pile_up(tmp_path):
@@ -1010,9 +1020,10 @@ def test_email_quiet_run_is_info_and_still_declines_refactor(monkeypatch):
 
 def test_action_numbering_is_positional_not_hardcoded():
     """加一條 tier 行動時編號自動遞延 —— 這是「加資料不改邏輯」的實證。"""
-    tier = dr.select_dreaming_tier({"escalations": 1, "new": 1})
-    lines = dr.render_dreaming_actions(tier, {"escalations": 1, "new": 1, "date_str": "2026-07-18"})
-    assert [line.split(".")[0] for line in lines] == ["1", "2", "3", "4"]
+    ctx = {"escalations": 1, "new": 1, "human_only": 0, "date_str": "2026-07-18"}
+    tier = dr.select_dreaming_tier(ctx)
+    lines = dr.render_dreaming_actions(tier, ctx)
+    assert [line.split(".")[0] for line in lines] == ["1", "2", "3", "4", "5"]
 
 
 # ---------------------------------------------------------------------------
@@ -1057,11 +1068,40 @@ def test_escalation_always_needs_a_human_even_if_machine_owned():
     assert dr.needs_human_attention(f) is True
 
 
-def test_live_governance_proposal_needs_a_human():
-    """治理檔 propose-only 且仍在發生 → 只有主線程能判，必須寄。"""
+def test_live_governance_proposal_does_not_need_a_human():
+    """治理檔 propose-only 且仍在發生 → 開工單給 agent，不是寄信給老闆。
+
+    2026-07-20 boss telegram：「為什麼要我看？你自己處理」。7/19 那輪的 10 筆
+    propose_only（repeated_tool_failure / persistent_alert）全被算進「需要你看」，
+    但沒有一筆需要老闆的判斷 —— 治理檔不自動改寫 ≠ 沒人接手。
+    """
     f = _quiescent_alert_finding()
     f.quiescent = False
+    assert dr.needs_human_attention(f) is False
+
+
+def test_destructive_or_policy_finding_is_the_one_thing_left_for_a_human():
+    """human_only 是唯一保留的人工出口 —— 它必須真的還會浮出來。"""
+    f = _quiescent_alert_finding()
+    f.quiescent = False
+    f.remediation = dr.REMEDIATION_HUMAN_ONLY
     assert dr.needs_human_attention(f) is True
+
+
+def test_human_only_is_never_auto_queued(tmp_path):
+    """destructive / policy 的那條例外不得被 actuator 悄悄接手。"""
+    f = _quiescent_alert_finding(sig="persistent_alert:destructive")
+    f.quiescent = False
+    f.remediation = dr.REMEDIATION_HUMAN_ONLY
+    assert dr.apply_auto_dispatch([f], str(_storage(tmp_path)), NOW) == []
+
+
+def test_needs_human_attention_reads_dicts_and_findings_the_same_way():
+    """報告寫出去後只剩 dict；規則若有第二份實作，兩邊遲早漂移。"""
+    f = _quiescent_alert_finding()
+    f.quiescent = False
+    f.remediation = dr.REMEDIATION_HUMAN_ONLY
+    assert dr.needs_human_attention(f.to_dict()) is dr.needs_human_attention(f) is True
 
 
 def test_reconcile_marks_the_decaying_finding_quiescent():
@@ -1123,8 +1163,11 @@ def test_main_stays_silent_when_nothing_needs_a_human(tmp_path, monkeypatch):
     assert (storage / "ops" / "autonomous_decisions.jsonl").exists()
 
 
-def test_main_still_emails_when_a_governance_proposal_is_live(tmp_path, monkeypatch):
-    """反向鎖：真的需要人判斷時不得被新閘門吞掉。"""
+def test_main_still_emails_when_a_human_only_finding_is_live(tmp_path, monkeypatch):
+    """反向鎖：真的需要人判斷時（destructive / policy）不得被新閘門吞掉。
+
+    2026-07-20 前這條測的是 live propose_only —— 但那類現在自動開工單，寄信才是錯的。
+    """
     storage = _storage(tmp_path)
     sent = []
     monkeypatch.setattr(
@@ -1132,6 +1175,7 @@ def test_main_still_emails_when_a_governance_proposal_is_live(tmp_path, monkeypa
     )
     live = _quiescent_alert_finding()
     live.quiescent = False
+    live.remediation = dr.REMEDIATION_HUMAN_ONLY
     monkeypatch.setattr(dr, "DETECTORS", [lambda s, snap, now: [live]])
     rc = dr.main(storage_dir=str(storage), dry_run=False, apply_auto=False, now=NOW)
     assert rc == 0
@@ -1143,14 +1187,41 @@ def test_email_body_explains_why_a_finding_needs_no_action(monkeypatch):
     findings = [_auto_dispatch_finding(), _quiescent_alert_finding()]
     live = _quiescent_alert_finding("persistent_alert:live")
     live.quiescent = False
+    decide = _quiescent_alert_finding("persistent_alert:decide")
+    decide.quiescent = False
+    decide.remediation = dr.REMEDIATION_HUMAN_ONLY
     report = dr.build_report(
-        {"overall": "ok"}, [live, *findings], [live], [], [], NOW, dry_run=False, auto_actions=[],
+        {"overall": "ok"}, [live, *findings, decide], [live], [], [], NOW,
+        dry_run=False, auto_actions=[],
     )
     sent = _capture_email(monkeypatch, report)
     assert "機器已派修復 task" in sent["body"]
     assert "已停火、自清中" in sent["body"]
+    assert "已自動開工單" in sent["body"]
     body_lines = [ln for ln in sent["body"].splitlines() if ln.startswith("  - [")]
-    assert "persistent_alert:live" in body_lines[0], "需要人的排最前面"
+    assert "persistent_alert:decide" in body_lines[0], "需要人的排最前面"
+
+
+def test_email_never_tells_the_owner_to_go_look_at_something(monkeypatch):
+    """2026-07-20 boss telegram：「為什麼要我看？你自己處理」。
+
+    這封信的表頭曾寫「**需要你看 10**」，而那 10 筆全是 propose_only、全都該開工單。
+    措辭是契約的一部分：只要有出口，就寫「已自動接手」；剩下的欄位只認 human_only，
+    否則一個應為 0 的健康指標會長期不是 0，指標一旦說謊就沒人再看它。
+    """
+    report = dr.build_report(
+        {"overall": "ok"},
+        [_quiescent_alert_finding(f"persistent_alert:{i:016x}") for i in range(10)],
+        [], [], [], NOW, dry_run=False, auto_actions=[],
+    )
+    for f in report["findings"]:
+        f["quiescent"] = False  # 全部仍在發生 → 舊版會全算進「需要你看」
+    report["counts"]["actionable"] = 10  # 舊讀數即使還在，也不得出現在表頭
+    sent = _capture_email(monkeypatch, report)
+
+    assert "需要你看" not in sent["body"]
+    assert "已自動接手" in sent["body"]
+    assert "需要你決策 0" in sent["body"], "human_only=0 → 沒有一項落到老闆身上"
 
 
 def test_email_does_not_describe_the_actuator_as_off(monkeypatch):
@@ -1191,21 +1262,29 @@ def test_first_sight_stale_marker_is_quiescent():
     assert dr.needs_human_attention(f) is False
 
 
-def test_first_sight_fresh_marker_still_wakes_the_human():
-    """反向鎖：首見且 marker 在一個 run interval 內推進過 → 真的還在燒，必須寄。"""
+def test_first_sight_fresh_marker_still_gets_picked_up(tmp_path):
+    """反向鎖：首見且 marker 在一個 run interval 內推進過 → 真的還在燒，不得靜音。
+
+    2026-07-20 起「不靜音」的意思從「寄信給老闆」變成「開工單給 agent」——
+    propose_only 已有機器出口，所以這裡鎖的是 quiescent=False + 真的進了佇列。
+    """
     fresh = (NOW - timedelta(hours=dr.DREAMING_RUN_INTERVAL_HOURS - 1)).isoformat()
     f = _first_sight(fresh)
     dr.reconcile([f], {}, NOW)
     assert f.quiescent is False
-    assert dr.needs_human_attention(f) is True
+    assert [a["action"] for a in dr.apply_auto_dispatch([f], str(_storage(tmp_path)), NOW)] == [
+        "queued"
+    ]
 
 
-def test_first_sight_unparseable_marker_fails_toward_notifying():
-    """marker 壞掉時不敢判 quiescent —— 靜音的代價比多吵一次高。"""
+def test_first_sight_unparseable_marker_fails_toward_acting(tmp_path):
+    """marker 壞掉時不敢判 quiescent —— 靜音的代價比多開一張工單高。"""
     f = _first_sight("not-a-timestamp")
     dr.reconcile([f], {}, NOW)
     assert f.quiescent is False
-    assert dr.needs_human_attention(f) is True
+    assert [a["action"] for a in dr.apply_auto_dispatch([f], str(_storage(tmp_path)), NOW)] == [
+        "queued"
+    ]
 
 
 def test_first_sight_without_marker_is_never_quiescent():

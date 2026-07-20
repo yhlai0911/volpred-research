@@ -3,31 +3,31 @@
   "source": "claude_code_jsonl",
   "week_range": "2026-07-19 → 2026-07-26",
   "totals": {
-    "input_tokens": 1231,
-    "output_tokens": 413398,
-    "cache_read_tokens": 241005847,
-    "cache_create_tokens": 4117624,
-    "billable_total": 4532253,
-    "assistant_messages": 669,
-    "unique_sessions": 23,
-    "estimated_cost_usd": 469.7375
+    "input_tokens": 1251,
+    "output_tokens": 420726,
+    "cache_read_tokens": 241221972,
+    "cache_create_tokens": 4259229,
+    "billable_total": 4681206,
+    "assistant_messages": 677,
+    "unique_sessions": 26,
+    "estimated_cost_usd": 473.2667
   },
   "by_model": {
     "claude-opus-4-8": {
-      "input_tokens": 373,
-      "output_tokens": 35709,
-      "cache_read_tokens": 17700914,
-      "cache_create_tokens": 2042162,
-      "messages": 209,
-      "estimated_cost_usd": 67.5257
+      "input_tokens": 377,
+      "output_tokens": 37002,
+      "cache_read_tokens": 17750694,
+      "cache_create_tokens": 2092520,
+      "messages": 211,
+      "estimated_cost_usd": 68.6416
     },
     "claude-opus-4-7": {
-      "input_tokens": 32,
-      "output_tokens": 20187,
-      "cache_read_tokens": 526055,
-      "cache_create_tokens": 223666,
-      "messages": 12,
-      "estimated_cost_usd": 6.4973
+      "input_tokens": 48,
+      "output_tokens": 26222,
+      "cache_read_tokens": 692400,
+      "cache_create_tokens": 314913,
+      "messages": 18,
+      "estimated_cost_usd": 8.9106
     },
     "claude-fable-5": {
       "input_tokens": 826,
@@ -48,24 +48,24 @@
   },
   "by_category": {
     "bash_other": {
-      "input_tokens": 620,
-      "output_tokens": 162090,
+      "input_tokens": 622,
+      "output_tokens": 162439,
       "cache_read_tokens": 130355550,
-      "cache_create_tokens": 2264186,
-      "messages": 340,
-      "billable_total": 2426896,
-      "estimated_cost_usd": 250.1529,
+      "cache_create_tokens": 2313966,
+      "messages": 341,
+      "billable_total": 2477027,
+      "estimated_cost_usd": 251.1124,
       "emoji": "💭",
       "description": "其他 Bash 操作"
     },
     "investigation": {
-      "input_tokens": 284,
-      "output_tokens": 68857,
-      "cache_read_tokens": 58983098,
-      "cache_create_tokens": 813795,
-      "messages": 152,
-      "billable_total": 882936,
-      "estimated_cost_usd": 108.9018,
+      "input_tokens": 298,
+      "output_tokens": 71594,
+      "cache_read_tokens": 59065692,
+      "cache_create_tokens": 897546,
+      "messages": 156,
+      "billable_total": 969438,
+      "estimated_cost_usd": 110.8015,
       "emoji": "🔍",
       "description": "閱讀 / 搜尋檔案"
     },
@@ -92,13 +92,13 @@
       "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
     },
     "text_only": {
-      "input_tokens": 46,
-      "output_tokens": 37549,
-      "cache_read_tokens": 4967010,
-      "cache_create_tokens": 120196,
-      "messages": 25,
-      "billable_total": 157791,
-      "estimated_cost_usd": 12.5211,
+      "input_tokens": 50,
+      "output_tokens": 41791,
+      "cache_read_tokens": 5100541,
+      "cache_create_tokens": 128270,
+      "messages": 28,
+      "billable_total": 170111,
+      "estimated_cost_usd": 13.1909,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
@@ -265,28 +265,37 @@
       "cache_create_tokens": 4117624,
       "messages": 669,
       "billable_total": 4532253,
-      "estimated_cost_usd": 469.7375
+      "estimated_cost_usd": 458.2077
+    },
+    "2026-07-20": {
+      "input_tokens": 20,
+      "output_tokens": 7328,
+      "cache_read_tokens": 216125,
+      "cache_create_tokens": 141605,
+      "messages": 8,
+      "billable_total": 148953,
+      "estimated_cost_usd": 15.059
     }
   },
   "drilldown": {
     "text_only": {
-      "messages": 627,
-      "billable_total": 4852402,
+      "messages": 640,
+      "billable_total": 5023812,
       "length_buckets": [
         {
           "name": "<200 chars",
-          "messages": 619,
-          "billable_total": 4762893
+          "messages": 630,
+          "billable_total": 4923507
         },
         {
           "name": "2000+ chars",
-          "messages": 3,
-          "billable_total": 75228
+          "messages": 4,
+          "billable_total": 83050
         },
         {
           "name": "800-2000 chars",
-          "messages": 4,
-          "billable_total": 12465
+          "messages": 5,
+          "billable_total": 15439
         },
         {
           "name": "200-800 chars",
@@ -297,18 +306,18 @@
       "reason_groups": [
         {
           "name": "non-text assistant message",
-          "messages": 521,
-          "billable_total": 3286951
+          "messages": 531,
+          "billable_total": 3446041
         },
         {
           "name": "other",
-          "messages": 84,
-          "billable_total": 1329528
+          "messages": 86,
+          "billable_total": 1334026
         },
         {
           "name": "reviews/findings",
-          "messages": 10,
-          "billable_total": 190673
+          "messages": 11,
+          "billable_total": 198495
         },
         {
           "name": "experiment/result narration",
@@ -334,8 +343,8 @@
       "top_signatures": [
         {
           "name": "(content types: thinking)",
-          "messages": 499,
-          "billable_total": 3134916
+          "messages": 506,
+          "billable_total": 3281686
         },
         {
           "name": "Agent 訊息批次送達（內容與我已從磁碟驗收的一致）。新增動作只有一項：gemini embedding 分支的殘餘付費面 → 排 P4 收尾任務。查 CI 進度：",
@@ -349,8 +358,8 @@
         },
         {
           "name": "(content types: tool_use)",
-          "messages": 22,
-          "billable_total": 152035
+          "messages": 25,
+          "billable_total": 164355
         },
         {
           "name": "收到 — 直接執行。範圍：**正式 K 實驗**（把論文三訊號在台股做完整歷史 backtest）→ Codex 審查 → 寫知識庫 → **事件文章發佈**（真圖表 + 查重 + 懶人包）。先做開工前置：查 K 編號、掃知識庫相似 K、讀實驗前導與 error log 教訓。",
@@ -378,6 +387,11 @@
           "billable_total": 11652
         },
         {
+          "name": "Based on my review of the diff and the changed files: **Scope of change:** This adds a staleness gate in the CI-red watchdog. When a red CI run's `createdAt` pr",
+          "messages": 1,
+          "billable_total": 7822
+        },
+        {
           "name": "確認 5 次。逐項修正文章：",
           "messages": 1,
           "billable_total": 6864
@@ -386,22 +400,17 @@
           "name": "β 段落 edit 沒對上，讀該段實際內容：",
           "messages": 1,
           "billable_total": 6613
-        },
-        {
-          "name": "寫文章正文（主線程親寫，anti-AI 紀律）：",
-          "messages": 1,
-          "billable_total": 6567
         }
       ]
     },
     "bash_other": {
-      "messages": 387,
-      "billable_total": 3050648,
+      "messages": 388,
+      "billable_total": 3100779,
       "family_breakdown": [
         {
           "name": "other bash",
-          "messages": 193,
-          "billable_total": 1092708
+          "messages": 194,
+          "billable_total": 1142839
         },
         {
           "name": "log tailing",
@@ -481,6 +490,11 @@
           "billable_total": 69596
         },
         {
+          "name": "git -C /Users/yhlai0911/volpred-research",
+          "messages": 1,
+          "billable_total": 50131
+        },
+        {
           "name": "echo \"=== is",
           "messages": 1,
           "billable_total": 49026
@@ -492,11 +506,6 @@
         },
         {
           "name": "echo \"=== git",
-          "messages": 1,
-          "billable_total": 47806
-        },
-        {
-          "name": "echo \"=== grep",
           "messages": 1,
           "billable_total": 47806
         }
@@ -543,6 +552,11 @@
           "billable_total": 99964
         },
         {
+          "name": "git -C /Users/yhlai0911/volpred-research rev-parse --show-toplevel && git -C /Users/yhlai0911/volpred-research rev-parse --short HEAD",
+          "messages": 1,
+          "billable_total": 50131
+        },
+        {
           "name": "echo \"=== is frontend-v2-fix gitignored by canonical repo? ===\" && git check-ignore frontend-v2-fix 2>/dev/null && echo \"(ignored above)\" || echo \"(NOT ignored / no output)\"; echo ",
           "messages": 1,
           "billable_total": 49026
@@ -556,19 +570,14 @@
           "name": "echo \"=== git ls-files analytics/telemetry hits ===\" && git ls-files | grep -iE 'analytic|telemetry|beacon|plausible|umami|tracking|pageview|gtag|ga4' | head -50; echo \"=== END ===",
           "messages": 1,
           "billable_total": 47806
-        },
-        {
-          "name": "echo \"=== grep source for analytics keywords ===\" && grep -riE 'beacon|plausible|umami|telemetry|analytics|gtag|ga4|pageview|track_view|sendBeacon' --include='*.ts' --include='*.ts",
-          "messages": 1,
-          "billable_total": 47806
         }
       ]
     },
     "cache_diagnostics": {
-      "sessions_in_window": 23,
-      "cache_create_tokens": 13117625,
-      "billable_total": 14563457,
-      "cache_create_share_pct": 90.1,
+      "sessions_in_window": 26,
+      "cache_create_tokens": 13406863,
+      "billable_total": 14871500,
+      "cache_create_share_pct": 90.2,
       "top_sessions_by_cache_create": [
         {
           "session_id": "b33d9ed9-2639-433a-b0e3-126855639351",

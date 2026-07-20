@@ -129,6 +129,23 @@ PERSISTENT_ALERT_DELEGATED_OWNERS = {
 # they are exempted from ever escalating past their initial severity ("info").
 NEVER_CRITICAL_PATTERN_TYPES = frozenset({"memory_skill_gap", "memory_hygiene"})
 
+# Remediation 分類 —— 決定 finding 的**出口**，不是決定「誰被打擾」。
+#
+# 2026-07-20（boss telegram：「為什麼要我看？你自己處理」）：前一版只有兩類，而
+# `propose_only` 同時背了兩個意思 ——「不自動改治理檔」（正確的保守）與「等人來看」
+# （把工作退回給老闆）。後者讓 7/19 那輪的 10 筆 propose_only 全被算進「需要你看」，
+# 而它們全是 repeated_tool_failure / persistent_alert 這種該開工單去查的東西。
+# 治理檔不自動改 ≠ 沒人接手：接手的是 hourly dispatch 派出的 agent，不是老闆。
+#
+#   auto_dispatch — 機器自己修：開 task，agent 可直接改 code。
+#   propose_only  — 治理檔（error_log / rules / knowledge.json）不自動改寫，但**自動
+#                   開工單**交 hourly dispatch，由 agent 判斷後決定是否改。
+#   human_only    — 唯一需要人的出口：destructive，或需要 policy 決策者拍板。
+#                   這類**不自動派工**，數量應趨近 0；每多一筆都要說得出為什麼。
+REMEDIATION_AUTO_DISPATCH = "auto_dispatch"
+REMEDIATION_PROPOSE_ONLY = "propose_only"
+REMEDIATION_HUMAN_ONLY = "human_only"
+
 # Governance files dreaming may PROPOSE changes to but must NEVER write.
 GOVERNANCE_FILES = (
     "docs/error_log.md",
@@ -165,7 +182,8 @@ class DreamFinding:
     signature: str
     severity: str  # info | warn | critical
     evidence: list[str] = field(default_factory=list)
-    remediation: str = "propose_only"  # propose_only | auto_dispatch
+    # propose_only | auto_dispatch | human_only — 三個出口的語意見 REMEDIATION_* 常數。
+    remediation: str = "propose_only"
     remediation_ref: str | None = None
     proposal: str | None = None
     # The task this finding is ABOUT (not the task dreaming creates to fix it).
@@ -1072,7 +1090,7 @@ def reconcile(
 # ---------------------------------------------------------------------------
 # Report + email + auto-remediation
 # ---------------------------------------------------------------------------
-def needs_human_attention(finding: DreamFinding) -> bool:
+def needs_human_attention(finding: DreamFinding | dict[str, Any]) -> bool:
     """這個 finding 是否需要「人」看？—— dreaming 對外音量的唯一判準。
 
     設計目標（`loop-health-and-dreaming.md` §Auto vs Propose）把責任切得很清楚：
@@ -1086,17 +1104,34 @@ def needs_human_attention(finding: DreamFinding) -> bool:
     12.8–46.5h，48h 自清），escalations=0。零項需要老闆，信照寄，而且信裡自己寫著
     「escalations=0 → 不需要重構」。**一封告訴收件人「你不用做事」的 WARN，就是雜訊。**
 
+    2026-07-20（boss telegram：「為什麼要我看？你自己處理」）補上第三條修正：
+    `propose_only` 不再算「要人」。它現在會自動進 next_tasks（見 apply_auto_dispatch），
+    所以已經有人接手了 —— 只是那個人是 agent。舊版把它算進「需要你看」，7/19 那輪就
+    產生了「需要你看 10」，而那 10 筆全是該開工單去查的 repeated_tool_failure /
+    persistent_alert，沒有一筆需要老闆的判斷。
+
     三條規則，由強到弱：
-    1. escalated（severity=critical）→ 一律要人：這是連 3 次未解的 Three-Strike 種子，
-       正是這層存在的理由。
+    1. escalated（severity=critical）→ 要人：連 3 次未解的 Three-Strike 種子，
+       要不要動根是 policy 決策，正是這層存在的理由。
     2. quiescent → 不要人：條件已經停止發生，正在自清。回報過去式沒有行動可做。
-    3. 其餘 → 只有 propose_only 要人（治理判斷）；auto_dispatch 歸機器。
+    3. 其餘 → 只有 human_only 要人（destructive / policy）；auto_dispatch 與
+       propose_only 都已經有機器出口。
+
+    接受 DreamFinding 或它的 `to_dict()` 形式：報告寫出去之後（build_report / 寄信）
+    手上只剩 dict，而這條規則必須只有一個實作 —— 排序時重寫一次條件，就是文案與行為
+    分屬兩處、只有一處被改的老毛病。
     """
-    if finding.severity == "critical":
+    if isinstance(finding, dict):
+        severity = finding.get("severity")
+        quiescent = bool(finding.get("quiescent"))
+        remediation = finding.get("remediation")
+    else:
+        severity, quiescent, remediation = finding.severity, finding.quiescent, finding.remediation
+    if severity == "critical":
         return True
-    if finding.quiescent:
+    if quiescent:
         return False
-    return finding.remediation == "propose_only"
+    return remediation == REMEDIATION_HUMAN_ONLY
 
 
 def build_report(
@@ -1126,15 +1161,26 @@ def build_report(
             "new": len(new_findings),
             "resolved": len(resolved),
             "escalations": len(escalations),
-            "propose_only": sum(1 for f in findings if f.remediation == "propose_only"),
-            "auto_dispatch_eligible": sum(1 for f in findings if f.remediation == "auto_dispatch"),
+            "propose_only": sum(1 for f in findings if f.remediation == REMEDIATION_PROPOSE_ONLY),
+            "auto_dispatch_eligible": sum(
+                1 for f in findings if f.remediation == REMEDIATION_AUTO_DISPATCH
+            ),
+            # human_only 是唯一還會落到人身上的類別（destructive / policy）。單獨數，
+            # 因為它是這套分類的健康指標：長期應趨近 0，不該悄悄長回去。
+            "human_only": sum(1 for f in findings if f.remediation == REMEDIATION_HUMAN_ONLY),
             # 音量控制的三個讀數（見 needs_human_attention）。`actionable_new` 是寄信閘門：
             # 「新」不再等於「值得打擾」，只有新 **且** 需要人判斷的才算。
             "actionable": sum(1 for f in findings if needs_human_attention(f)),
             "actionable_new": sum(1 for f in new_findings if needs_human_attention(f)),
             "quiescent": sum(1 for f in findings if f.quiescent),
+            # 機器接手 = auto_dispatch 或 propose_only（後者自 2026-07-20 起也自動開單）。
+            # 與 quiescent 互斥：停火中的東西沒有人也沒有機器在動它，兩個數字要能相加。
             "machine_handled": sum(
-                1 for f in findings if f.remediation == "auto_dispatch" and not needs_human_attention(f)
+                1
+                for f in findings
+                if f.remediation in (REMEDIATION_AUTO_DISPATCH, REMEDIATION_PROPOSE_ONLY)
+                and not f.quiescent
+                and not needs_human_attention(f)
             ),
         },
     }
@@ -1163,10 +1209,10 @@ def append_decision(storage_dir: str, now: datetime, report: dict[str, Any]) -> 
             f"{report['counts'].get('actionable', 0)} actionable / "
             f"{report['counts'].get('machine_handled', 0)} machine-handled / "
             f"{report['counts'].get('quiescent', 0)} quiescent); "
-            f"governance findings propose-only."
+            f"propose_only auto-queued; governance files unwritten."
         ),
         "outcome": f"report storage/ops/dreaming/{now.strftime('%Y-%m-%d')}.json",
-        "next": "主線程審 proposals;治理檔不自動改",
+        "next": "propose_only 已自動開工單交 hourly dispatch;治理檔仍不自動改",
     }
     with log.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
@@ -1194,8 +1240,11 @@ class DreamingSeverityTier:
 # 不論嚴重度都要講的行動（報告位置、propose-only 邊界）。放在專屬行動之前。
 _DREAMING_COMMON_ACTIONS_HEAD: tuple[str, ...] = (
     "看完整報告：`storage/ops/dreaming/{date_str}.json`。",
-    "治理類 findings（error_log / rules / knowledge.json）為 **propose-only** — 主線程審 "
-    "proposal 後手動決定是否套用，dreaming 不自動改。",
+    # 2026-07-20（boss telegram：「為什麼要我看？你自己處理」）：這行原本寫「主線程審
+    # proposal 後手動決定」，把治理檔的寫入邊界講成了「等人」。邊界沒變，接手的人變了。
+    "治理檔（error_log / rules / knowledge.json）dreaming 仍**不自動改寫** —— 但 "
+    "propose_only findings 已**自動開工單**進 `storage/next_tasks.json`，由 hourly "
+    "dispatch 派 agent 判斷後決定是否改。**不需要你動手**。",
 )
 
 # 放在專屬行動之後的通用行動。
@@ -1205,6 +1254,8 @@ _DREAMING_COMMON_ACTIONS_TAIL: tuple[str, ...] = (
     # 不存在的系統。文案與行為分屬兩處、只有一處被改 —— 與 tier 表要修的是同一個病。
     "auto_dispatch 類（orphaned failure / missing retry）→ actuator **預設開啟**，"
     "已自動進 `storage/next_tasks.json`，不需要你動手；`--no-apply-auto` 才會關掉。",
+    "唯一還會落到你身上的是 **human_only**（destructive / 需要 policy 決策）"
+    "—— 本輪 {human_only} 筆。這個數字長期應該是 0；不是 0 就代表有東西該被機械化而還沒。",
 )
 
 # escalations=0 時 findings 都是小型/漸進處理（補 retry 策略、memory 整併），反射式推
@@ -1269,25 +1320,28 @@ def send_dreaming_email(report: dict[str, Any], now: datetime, storage_dir: str)
 
     lines = ["## 觸發條件"]
     lines.append(
-        f"- findings={c['findings']}（**需要你看 {c.get('actionable', 0)}**、"
-        f"機器已接手 {c.get('machine_handled', 0)}、自清中 {c.get('quiescent', 0)}；"
+        # 「需要你決策」只認 human_only。critical escalation 雖然也會觸發寄信，但它
+        # 早就有 task 在跑 —— 把它算進「需要你決策」會讓一個應為 0 的健康指標長期不是 0，
+        # 指標一旦說謊就沒人再看它（這正是 7/19「需要你看 10」的翻版）。
+        f"- findings={c['findings']}（**已自動接手 {c.get('machine_handled', 0)}**、"
+        f"自清中 {c.get('quiescent', 0)}、"
+        f"需要你決策 {c.get('human_only', 0)}（destructive / policy，應為 0）；"
         f"new={c['new']}, resolved={c['resolved']}, escalations={c['escalations']}）；"
         f"loop-health overall={report['loop_health'].get('overall')}"
     )
     # 需要人的排前面，其餘標明「為什麼不需要你動手」—— 一封信裡混著兩種東西而不說明
     # 差別，收件人就得自己一條一條判，等於把分類工作退回給人。
-    ranked = sorted(
-        report["findings"],
-        key=lambda f: (f.get("quiescent") or f.get("remediation") == "auto_dispatch"),
-    )
+    ranked = sorted(report["findings"], key=lambda f: not needs_human_attention(f))
     for f in ranked[:8]:
         gov = f" → propose {f['governance_target']}" if f.get("governance_target") else ""
         if f.get("quiescent"):
             note = " — 已停火、自清中"
-        elif f.get("remediation") == "auto_dispatch":
+        elif f.get("remediation") == REMEDIATION_AUTO_DISPATCH:
             note = " — 機器已派修復 task"
+        elif f.get("remediation") == REMEDIATION_PROPOSE_ONLY:
+            note = " — 已自動開工單，hourly dispatch 接手"
         else:
-            note = ""
+            note = " — **需要你決策**（destructive / policy）"
         lines.append(
             f"  - [{f['severity']}] {f['pattern_type']}: {f['signature']} "
             f"(×{f['occurrences']}){gov}{note}"
@@ -1303,14 +1357,9 @@ def send_dreaming_email(report: dict[str, Any], now: datetime, storage_dir: str)
             "## 建議行動",
         ]
     )
-    lines.extend(render_dreaming_actions(tier, {**c, "date_str": date_str}))
+    # human_only 補預設：舊報告（無此 count）重寄時不該因 KeyError 整封信寄不出去。
+    lines.extend(render_dreaming_actions(tier, {"human_only": 0, **c, "date_str": date_str}))
     return send_alert(level, title, "\n".join(lines), storage_dir=storage_dir)
-
-
-# A finding this old has stopped being a proposal and started being a backlog item.
-# Dreaming re-derives the same signatures every night, so `occurrences` is literally
-# the number of nights it has gone unread.
-_ROT_THRESHOLD = 3
 
 
 def _dreaming_task_id(signature: str) -> str:
@@ -1346,18 +1395,28 @@ def apply_auto_dispatch(
     agent to look, which is exactly the human-in-the-loop the boundary was protecting,
     minus the part where nobody ever looks.
 
-    Two classes qualify:
+    2026-07-20 (boss telegram: 「為什麼要我看？你自己處理」) closed the remaining gap.
+    `propose_only` used to wait three nights before becoming work, on the
+    theory that persistence is the signal. But the thing doing the waiting was the
+    owner's inbox: for those three nights the finding was reported as 「需要你看」, i.e.
+    the queue it sat in was a human one. Waiting to see whether a cron job keeps
+    exiting non-zero is not judgement worth a person's morning — it is a ticket.
+    So propose_only queues on sight too, and the wait is gone rather than moved.
+
+    What still does NOT queue is `human_only` (destructive / policy). That is the one
+    exception, it is explicit, and its count should stay near zero.
+
+    Qualifying classes:
       * `auto_dispatch`  — designed for this from the start (warn and up; a warn-level
         orphaned failure is still a failure nobody retried).
-      * `propose_only` that has recurred >= _ROT_THRESHOLD nights — persistence is the
-        signal, the same rule PHASE-Z uses for a stuck foreign path. A proposal read
-        by nobody for three nights running does not become more true on the fourth.
+      * `propose_only`   — queues on sight. Governance files stay unwritten; what lands
+        is a task asking an agent to look.
     """
     actions: list[dict[str, Any]] = []
     eligible = [
         f for f in findings
-        if (f.remediation == "auto_dispatch" and f.severity in ("warn", "critical"))
-        or (f.remediation == "propose_only" and (f.occurrences or 0) >= _ROT_THRESHOLD)
+        if (f.remediation == REMEDIATION_AUTO_DISPATCH and f.severity in ("warn", "critical"))
+        or f.remediation == REMEDIATION_PROPOSE_ONLY
     ]
     if not eligible:
         return actions
@@ -1401,7 +1460,9 @@ def apply_auto_dispatch(
                             f"{dreaming_revalidate.REVALIDATION_INSTRUCTION}"
                         ),
                         "task_type": f.task_type,
-                        "priority": 2 if f.severity == "critical" else 3,
+                        # info 級（memory 整併等月度治理）壓在 P4：propose_only 現在
+                        # 每晚都會開單，不分級就會把 P3 淹掉，急件反而排在後面。
+                        "priority": {"critical": 2, "warn": 3}.get(f.severity, 4),
                         "status": "pending",
                         "source": "dreaming",
                         "created_at": now.isoformat(),

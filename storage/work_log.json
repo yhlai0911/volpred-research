@@ -22187,5 +22187,35 @@
     "owner": "hourly-slot-1-e4a55dd521aa4e38b8222e605656fae0",
     "commit": null,
     "summary": "CI 紅燈雙 P1 收斂 + 診斷出被困在工作區的修復。\n\n原 ci-red-29688074038 與 phase_z_test_gate_red alert 是同一根因（commit 33cf84b8f，questions.py:672 fail-closed ValueError），已由 dde8e1666 修復；以 clean clone 重驗原 26 檔測試組 375 passed、GitHub run 29691954121 success，兩張皆據實結案（後者按 task 契約記 fresh no-op）。\n\n但重驗時發現 main CI 仍連 3 班紅燈（29703582195/29705358452/29707163513），是另一條根因，且前兩張對應 task 已被誤標 succeeded（未以 GitHub 綠燈驗證即結案）。\n\n以 clean clone 機械證實新根因：HEAD 的 test_daily_checkup_reproducibility 用寫死 9-name tuple，未涵蓋 worktree_reconcile，CI clone 無 worktrees → check_worktree_reconcile 真跑 → critical。修復（scripts/daily_checkup.py 的 CHECKUP_DIMENSIONS + 改為推導的 test）早已寫好但從未 commit，只躺在 canonical 工作區。實證：clone HEAD → 1 failed；只補 test 半邊 → 2 failed（AttributeError）；補齊兩半 → 15 passed。\n\n關鍵發現：phase_z._orphan_half_candidates 依設計排除 test 檔（防止被削弱的 assertion 自我 adopt，理由正當），但本案修復必須含 test 半邊，source 半邊單獨 adopt 不會讓任何測試轉綠 → 永遠不被 adopt → CI 永久紅。這是結構性死角，非 bug。\n\n未自行跑 git（PHASE-Z 契約）。已開 ci-red-stranded-checkup-half-20260720（P1，含完整證據與治本建議），並標註為 assign_8c267b66（foreign incident 缺 actuator）的具體已證實測試案例。"
+  },
+  {
+    "timestamp": "2026-07-20T09:26:24+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_0a1d74ae",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f",
+    "owner": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f",
+    "commit": null,
+    "summary": "Dreaming propose_only 從『等老闆看』改成『自動派工』（boss telegram：「為什麼要我看？你自己處理」）。\n\n根因：propose_only 一個標籤背了兩件事 ——『治理檔不自動改寫』（正確的保守）與『等人來看』（把工作退回給老闆）。7/19 那輪 10 筆 propose_only 全被 needs_human_attention 算進「需要你看 10」，而它們全是 repeated_tool_failure:release_settings_audit.log:exit1 與 persistent_alert:*，沒有一筆需要老闆的判斷。舊版還要求 propose_only 連 3 晚才開單 —— 那三晚的等待隊列就是老闆的信箱。\n\n改法（scripts/dreaming_review.py）：(1) 新增第三類 remediation `human_only`（destructive / policy），成為唯一的人工出口；(2) needs_human_attention 只認 critical 與 human_only，propose_only 不再算要人，並改為同時接受 DreamFinding 與 to_dict()，讓規則只有一份實作（原本排序處會重寫一次條件）；(3) apply_auto_dispatch 對 propose_only 首見即開單，移除 _ROT_THRESHOLD 三晚等待，human_only 不派工；(4) 開單 priority 依 severity 分級 critical=P2/warn=P3/info=P4，避免每晚開單淹掉 P3；(5) email 表頭「需要你看 N」改為「已自動接手 N / 自清中 M / 需要你決策 human_only（應為 0）」—— 決策欄只認 human_only，把已有 task 的 critical escalation 算進去會讓這個健康指標長期說謊；(6) counts 新增 human_only，machine_handled 與 quiescent 改為互斥可相加。\n\n回填驗證：跑一輪真實 dreaming review → findings=17、propose_only=10、human_only=0、auto_remediation 新開 8 張 task（release_settings_audit exit1 + 7 張 persistent_alert），3 筆 critical escalation 經查也都已有對應 task。offline render 該輪 email body 確認「需要你看」已消失、17 筆每一筆都標明出口。\n\n測試：tests/test_dreaming_review.py 更新 6 條既有契約測試（三晚等待、live propose_only 要人、7/18 email 標本等）並新增 5 條鎖新契約（human_only 不自動派工、human_only 是唯一人工出口、dict/dataclass 同一判準、email 措辭永不出現「需要你看」）。全庫 2655 passed / 6 skipped。\n\n文件同步：platform-ops-manager SKILL.md + references/loop-health-and-dreaming.md 的 §Auto vs Propose 與寄信閘門段落改寫（含「為什麼不再等三晚」的理由）。未自行跑 git（PHASE-Z 契約）。"
+  },
+  {
+    "timestamp": "2026-07-20T09:29:08+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_7f508612",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f",
+    "owner": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f",
+    "commit": null,
+    "summary": "餓死 70h 的 P2 稽核任務出班（dispatch report STARVATION LOCKOUT 首位）：稽核 2026-05-20~07-17 期間讀到重複 snapshot 的實驗結果。\n\n載具依 task-routing = worktree + xhigh，屬 20-60min 級研究工作，不塞進 50min fire：建 registered worktree dispatch-slot-2-dcc222db-snapaudit（branch snapaudit-dcc222db），brief 寫檔後 enqueue-agent 交 detached compute worker，job=agent-brief_snapaudit_7f508612-f41a08。\n\nbrief 要點：consumer 名單當起點不當終點（要自己 grep 那 9 個檔名）、逐一判定不得憑推定、受影響者必須在修好的 snapshot 上真的重跑、未受影響者也要寫判定依據、禁止「只有 10 天影響很小」跳過。success criterion = experiments/snapshot_dup_audit_20260720/audit_results.json。\n\ntask 留 in_progress 並記 compute_job_id + dispatch_note（勿重派），由 PHASE A followup 收件後結案。"
+  },
+  {
+    "timestamp": "2026-07-20T09:35:00+08:00",
+    "task_type": "daily_digest",
+    "task_id": "daily_digest_20260720",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-b0f6761fd2ad44bab00554d0320efc5a",
+    "owner": "hourly-slot-1-b0f6761fd2ad44bab00554d0320efc5a",
+    "commit": null,
+    "summary": "PHASE A0 急件 lane（task_urgency 唯一命中，time_critical）：第 29 期每日精選導讀 mile_2974cf85〈晶片殺進熊市，大盤卻沒跟上：用「震央定位法」判斷該撿還是該跑〉已 published。\n\n載具 = subagent + opus/medium（model_router type_default，無 override）。時事驅動：費半 7/17 收 11,673.89、距 6/22 高點 14,634.72 回撤 20.23% 進熊市，同日標普僅 -2.00%、VIX 18.77；市場數字由 yfinance 重算，腳本 experiments/digest29/digest29_epicenter.py、結果 digest29_results.json。\n\n具名框架「震央定位法」（震源深度／波及範圍／餘震長度三座標），三格定位表放第二節當骨幹、文末代入當日盤面。\n\n主線程獨立驗證（未採信 agent 自述）：feed.json status=published、details.content_type=daily_digest、tags 含精選導讀、title 未以「每日精選導讀｜」起頭；digest_articles 8 篇 slug 逐一比對確認皆存在 archive，發佈日 2026-04-08→2026-07-18 = 跨度 101 天（硬擋門檻 14 天、warn 門檻 45 天皆過）；正文 9,880 字元（4,451 中文字）；線上 https://volpred.zeabur.app/v3/reports/mile_2974cf85 HTTP 200。\n\nGate：anti_ai_gate exit 0（warn 1/3 僅段落長度），未用 --force。圖表分工正確 — 7 張 inline 證據圖貼對應論證段，文末 3 張為 gen_lazypack_codex.py PRIMARY 路徑另生的框架合成 poster，未拿內文證據圖充數。\n\n主題與近 8 期（去槓桿／波動率油門／財報換錨／地緣半衰期／AI 電力／避風港／預警訊號）無重複。\n\nAgent 誠實回報偏差：editor-sop Check 3.1 的跨模型事實查證未跑 round-trip，改以 yfinance 重算 + 逐一回對來源文章原文替代。"
   }
 ]

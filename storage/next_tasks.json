@@ -32703,13 +32703,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T00:07:57.936064+00:00",
+    "completed_at": "2026-07-20T01:03:10.409548+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T00:07:57.936064+00:00",
-      "last_clean_observed_at": "2026-07-20T00:07:57.936064+00:00"
+      "resolved_at": "2026-07-20T01:03:10.409548+00:00",
+      "last_clean_observed_at": "2026-07-20T01:03:10.409548+00:00"
     }
   },
   {
@@ -32721,13 +32721,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T00:17:28.227732+00:00",
+    "completed_at": "2026-07-20T01:31:51.876170+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T00:17:28.227732+00:00",
-      "last_clean_observed_at": "2026-07-20T00:17:28.227732+00:00"
+      "resolved_at": "2026-07-20T01:31:51.876170+00:00",
+      "last_clean_observed_at": "2026-07-20T01:31:51.876170+00:00"
     }
   },
   {
@@ -35444,42 +35444,15 @@
   },
   {
     "id": "assign_arcdedup_bigtech_vocab_20260717",
-    "title": "[platform_ops] arc-dedup entity 詞表補大型科技股/AI-CapEx cluster — 修 refill 3/3 產重複題",
-    "description": "根因（2026-07-17 06:0x fire 實證）：昨晚 22:00 reader_facing_refill 產的 3 條 P1 trending topic 全部是 30 日內 general 已發文的 arc 重複（ai變現→mile_f5f4cb43 06-30；ai支出→mile_0fa841ed 07-05；債市→mile_d12825bb 07-06），每條都吃掉一個 fire 的主 slot 才被人工查出來。\n\narc gate 是 entity-anchored，但 src/volpred/publisher/arc_dedup.py 的 _ENTITY_SURFACE 完全沒有大型科技股/AI-CapEx cluster 詞彙：『微軟與 Google…科技股 IV skew』抽出 entities=[]（thin signature → gate 根本沒看）；『雲端四巨頭年燒六千億…科技股波動率偏斜』只抽到 USD（來自「六千億美元」的誤抽），撈回不相干的 SpaceX 文當 near-miss、漏掉真 dup。\n\narc_dedup.py line ~1439 註解自己已量到這件事（五篇同故事文章散成 {USD}/{NASDAQ,USD}/{SEMIS,VIX}/{US_EQUITY}/{USD}），當時的對策是 theme_saturation(門檻5)，但今天三題 saturation 只有 2/3/4 → 全部溜過。2026-07-13 事故三天後原樣重演。\n\n修法：比照 VOL_TARGETING(2026-06-14) / MERGER_ARB(2026-07-01) 前例，把 cluster 註冊成可見 entity，讓 arc gate 依設計運作，而非依賴 saturation 計數器。",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-16T22:12:57+00:00",
+    "task_type": "platform_ops",
+    "title": "[platform_ops] arc-dedup entity 詞表補大型科技股/AI-CapEx cluster — 修 refill 3/3 產重複題",
+    "priority": 1,
     "source": "hourly_dispatch_root_cause",
-    "tags": [
-      "platform_ops",
-      "arc_dedup",
-      "content_pipeline",
-      "root_cause"
-    ],
-    "status_history": [
-      {
-        "ts": "2026-07-16T22:13:03.494687+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
-      },
-      {
-        "ts": "2026-07-16T22:13:03.726729+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
-      },
-      {
-        "ts": "2026-07-17T00:21:24.411714+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-fb33cf3792fe4714bc046c0611301117"
-      }
-    ],
-    "started_at": "2026-07-16T22:13:03.726716+00:00",
+    "created_at": "2026-07-16T22:12:57+00:00",
     "completed_at": "2026-07-17T00:21:24.411698+00:00",
-    "result": "詞表實作（BIG_TECH/CAPEX_CYCLE cluster）已隨 53f601b7b 進 main 並保留；但該 fire 的 agent 沒跑測試就結束，safety-net commit 送出未驗證成果 → main 紅燈 4 test。由 ci-red-29541122360（slot-1 08:0x）補完未竟的另一半：根因是 matcher 的 descriptive 分支把 mechanism unspecified 當 mismatch，使本 cluster 仍撈不到雙胞胎。修後兩個 incident topic 均由 matcher 指名 mile_f5f4cb43。全套測試綠。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T01:08:29.318678+00:00"
   },
   {
     "id": "K1724",
@@ -35665,45 +35638,15 @@
   },
   {
     "id": "k1708_stage3_codex_review_merge_20260717",
-    "title": "[experiment] K1708 stage 3：Codex 審凍結程式碼+全樣本數字 → merge worktree → 寫 knowledge",
-    "description": "collect_completed followup for compute jobs k1708-split-verify-freeze (verdict=PASS) 與 k1708-split-gated-rerun (SKIPPED_GATE，其 stale 宣稱已被 verify report 的 brief_premise_superseded 推翻，勿沿用)。verify report 已確認：full_rerun_required=false、code_trace sha256/size/mtime_ns 三項均對上磁碟上的 K1708.py (43bffdd)、quick_mode=false、runtime 1571.6s、三市場齊全、18 tests pass、兩個 BLOCKER 皆修。本任務三步：(1) Codex 對凍結程式碼 + 全樣本數字 re-review（重點：兩 BLOCKER 是否真解、修正有無引入新 look-ahead、Clark-West 取代 DM-HLN 的 criterion_substitution 是否站得住）(2) 過了走正式 scripts/merge_worktree.sh dispatch-slot-2-8dda242d-k1708（禁 force-remove）(3) 依 verdict=NULL 據實寫 knowledge。",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
-    "tags": [
-      "experiment",
-      "k1708",
-      "collection",
-      "followup",
-      "codex_review"
-    ],
+    "task_type": "experiment",
+    "title": "[experiment] K1708 stage 3：Codex 審凍結程式碼+全樣本數字 → merge worktree → 寫 knowledge",
+    "priority": 2,
     "source": "compute_queue_followup",
     "created_at": "2026-07-17T00:10:12.421820+00:00",
-    "parent_task_id": "k1708-split-verify-freeze",
-    "dispatch_lane": "main_thread",
-    "status_history": [
-      {
-        "ts": "2026-07-17T00:10:18.376825+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-2-2bf322e554cf427189253a069c30d154"
-      },
-      {
-        "ts": "2026-07-17T00:10:18.694832+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-2-2bf322e554cf427189253a069c30d154"
-      },
-      {
-        "ts": "2026-07-17T00:21:16.958574+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-2-2bf322e554cf427189253a069c30d154"
-      }
-    ],
-    "started_at": "2026-07-17T00:10:18.694816+00:00",
     "completed_at": "2026-07-17T00:21:16.958558+00:00",
-    "result": "Codex primary review 跑完（bounded 900s, read-only）→ VERDICT: FAIL，依 brief 不 merge、不重跑。通過項：兩個原始 BLOCKER 真修好、CW 公式對算一致、NULL 為 derive_verdict 機械重算（非手填）、provenance 三項對上凍結 K1708.py 43bffdd。新 3 BLOCKER：CW 套用在非精確 nested 的比較 / 事前 DM-HLN |t|>=3 被換成較寬 CW gate 且無 multiple-testing correction / derive_verdict 第二市場只要 status==OK 即 qualified = 假陽性路徑（本 run 未受影響）。全文 storage/ops/k1708_codex_review_20260717.md。已開 k1708_fix_verdict_gate_20260717。worktree 保持未合併。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T01:08:29.318678+00:00"
   },
   {
     "id": "k1708_fix_verdict_gate_20260717",
@@ -35771,78 +35714,39 @@
   },
   {
     "id": "telegram-894",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 894）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-17T00:43:46.096832+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 894）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n徹底立刻解決\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] supervisor hang_killed\n\n📌 白話結論\n• pid: 22187\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n📌 Supervisor SIGKILL'd 一個 worker（hang > 50min cap）\n\n📌 Job\n• pid: 22187\n• pgid: 22187\n• started_at: 2026-07-16T22:07:35.961187+00:00\n• attempt: 1\n• model: claude-opus-4-8\n• log: /Users/yhlai0911/.volpred/logs/dispatch_supervisor_worker.slot-1.fb33cf37.log\n\n📌 影響\n• 本輪 hourly fire 沒派工成功；pool 沒消化\n• 該行程已確認消失；Supervisor 仍存活，下個整點會嘗試新 fire\n\n📌 Worker log tail\n\n```\n(empty)\n```\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-17T00:44:06.950746+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram_responder"
-      },
-      {
-        "ts": "2026-07-17T00:46:07.235124+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram_responder"
-      }
-    ],
-    "completed_at": "2026-07-17T00:46:07.235110+00:00"
+    "completed_at": "2026-07-17T00:46:07.235110+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-20T01:08:29.318678+00:00"
   },
   {
     "id": "telegram-895",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 895）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-17T00:44:05.314828+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 895）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n徹底離開解決\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] PHASE-Z auto-commit 測試紅燈（53f601b7bd5b）\n\n📌 白話結論\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。\n• fire 時間: 06:57\n• commit: 53f601b7bd5b\n• 變更程式檔: src/volpred/publisher/arc_dedup.py, tests/test_arc_dedup.py, tests/test_check_arc_dedup_thin_signature.py\n• 跑的測試: tests/test_arc_dedup.py tests/test_arc_dedup_calibration.py tests/test_check_arc_dedup_thin_signature.py\n• pytest 退出碼: 1\n\n📌 影響\n隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。\n\n🛠️ 建議行動\n1. 本機重跑確認：\nuv run --extra dev python -m pytest tests/test_arc_dedup.py tests/test_arc_dedup_calibration.py tests/test_check_arc_dedup_thin_signature.py -q\n2. 修掉紅燈或 revert 該 commit（gate 不自動 rever\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-17T00:46:24.345553+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram_responder"
-      },
-      {
-        "ts": "2026-07-17T00:47:21.367147+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram_responder"
-      }
-    ],
-    "completed_at": "2026-07-17T00:47:21.367133+00:00"
+    "completed_at": "2026-07-17T00:47:21.367133+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-20T01:08:29.318678+00:00"
   },
   {
     "id": "telegram-896",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 896）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-17T00:44:22.448538+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 896）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n徹底立刻解決\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] PHASE-Z auto-commit 測試紅燈（53f601b7bd5b）\n\n📌 白話結論\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。\n• fire 時間: 06:57\n• commit: 53f601b7bd5b\n• 變更程式檔: src/volpred/publisher/arc_dedup.py, tests/test_arc_dedup.py, tests/test_check_arc_dedup_thin_signature.py\n• 跑的測試: tests/test_arc_dedup.py tests/test_arc_dedup_calibration.py tests/test_check_arc_dedup_thin_signature.py\n• pytest 退出碼: 1\n\n📌 影響\n隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。\n\n🛠️ 建議行動\n1. 本機重跑確認：\nuv run --extra dev python -m pytest tests/test_arc_dedup.py tests/test_arc_dedup_calibration.py tests/test_check_arc_dedup_thin_signature.py -q\n2. 修掉紅燈或 revert 該 commit（gate 不自動 rever\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-17T00:46:24.579175+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram_responder"
-      },
-      {
-        "ts": "2026-07-17T00:47:21.589898+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram_responder"
-      }
-    ],
-    "completed_at": "2026-07-17T00:47:21.589881+00:00"
+    "completed_at": "2026-07-17T00:47:21.589881+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-20T01:08:29.318678+00:00"
   },
   {
     "id": "assign_6cc19bfb",
@@ -36008,7 +35912,7 @@
     "description": "背景：assign_09984c91 修好 refresh_paper_snapshots.py 的並行 double-append 後，發現污染範圍不只 K1685 指出的 1 檔 —— 6 篇 paper 共 9 個 live snapshot 全數在 2026-05-04..05-15 被重複 append 10 天（byte-identical，同一次事故）。\n\n污染窗：git history 顯示 3ea7dbb9d (2026-05-04) 乾淨、f1bdea2d1 (2026-05-20) 已有 dup，至今日修復為止約 2 個月。期間任何讀這些 CSV 的 consumer 都會拿到序列中間多 10 天重複列 —— 對 rolling estimation / OOS split 而言不只是多 10 筆，是 05-04 之後的整條時間軸位移。\n\n受影響檔（已修復，surviving rows byte-identical，見 fire receipt）：\n  paper/garch-x-vix/data/{spy_vix_qqq_eem_fez_2000-2026,gld_vix_gvz_2000-2026,uso_vix_ovx_2005-2026}.csv\n  paper/leverage-direction/data/{spy_vix_2004-2026,spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026,vix_daily}.csv\n  paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv\n  paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv\n  paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv\n\n要做的事：\n1. 盤點 2026-05-20 後跑過、且 OOS 期間涵蓋 2026-05-04 之後、且直接讀上列 CSV（非自帶 pinned snapshot）   的實驗 / paper results。已知讀檔者：paper/garch-x-vix/reproduce.py、paper/garch-x-vix/scripts/summary_stats.py、   experiments/{k1392,K1380_v4,k1393,K1394,k1489,k1662,k1585}。\n2. 對每一個判定「是否受影響」：多數 consumer 沒有 drop_duplicates，需逐一確認。   K1685 用自己的 pinned data/k1685_spy_vix_snapshot.csv，初判不受影響 —— 仍請覆核。\n3. 受影響者在修好的 snapshot 上重跑，比對數字是否改變；有變動且已發表 / 在審 → 回報並修正。\n4. 誠實記錄：沒受影響也要寫明判定依據，不要只列受影響的。\n\n禁止：假設『反正只有 10 天、影響很小』就跳過重跑 —— 那是猜測不是驗證。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-17T03:13:54.767921+00:00",
     "parent_task_id": "assign_09984c91",
@@ -36032,11 +35936,28 @@
         "to": "pending",
         "by": "hourly-slot-1-858545f95a864e298ddb4bc144a8c615",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-20T01:28:28.503421+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f"
+      },
+      {
+        "ts": "2026-07-20T01:28:38.374231+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f"
       }
     ],
-    "started_at": "2026-07-19T03:49:02.140503+00:00",
+    "started_at": "2026-07-20T01:28:38.374215+00:00",
     "last_released_at": "2026-07-19T05:50:06.077184+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f",
+    "claimed_at": "2026-07-20T01:28:28.503406+00:00",
+    "claim_session_id": "7f73d6f4b5dc",
+    "compute_job_id": "agent-brief_snapaudit_7f508612-f41a08",
+    "dispatch_note": "已 enqueue 為 detached agent job（compute worker */15 執行）；由 PHASE A followup 收件後結案，勿重派"
   },
   {
     "id": "email-12125-0e04bd",
@@ -44669,7 +44590,7 @@
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260719T233802955371Z_a1",
     "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=1 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.stQk6f baseline_findings=60 new=1 resolved=60\n[pre-commit]   NEW scripts/check_alerts.py:1325 except ValueError: return None\n[pre-commit]   [silent-fallback-audit] note: 60 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=1 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.VkqS23 baseline_findings=60 new=1 resolved=60\n[pre-commit]   NEW scripts/check_alerts.py:1325 except ValueError: return None\n[pre-commit]   [silent-fallback-audit] note: 60 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
@@ -44687,7 +44608,7 @@
       "episode_id": "20260719T233802955371Z",
       "episode_started_at": "2026-07-19T23:38:02.955371+00:00",
       "attempt_number": 1,
-      "last_seen_at": "2026-07-20T00:07:46.856153+00:00",
+      "last_seen_at": "2026-07-20T01:07:49.067642+00:00",
       "consecutive_remediation_failures": 0,
       "attempt_history": [],
       "escalation_due": false,
@@ -44795,10 +44716,308 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "dispatch",
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T00:20:00+00:00",
     "title": "main CI 連 3 班紅燈：daily_checkup 修復被困在工作區（test-half 結構性無法 adopt）",
-    "description": "由 slot-1 fire 2026-07-20 08:07 診斷並以 clean clone 證實。\n\n## 根因（已機械證實，非推測）\nmain HEAD 的 tests/test_daily_checkup_reproducibility.py::test_run_all_turns_reproducibility_checker_exception_into_warning 使用寫死的 9 個 checker_names tuple，未涵蓋 worktree_reconcile。CI clone 沒有 worktrees → check_worktree_reconcile 真跑 → critical，assert 'critical' == 'warn' 失敗。\n\n修復其實早已寫好，但**只存在於 canonical 工作區、從未 commit**：\n- scripts/daily_checkup.py（新增 CHECKUP_DIMENSIONS）\n- tests/test_daily_checkup_reproducibility.py（改為從 CHECKUP_DIMENSIONS 推導，不再手抄）\n兩者是**不可分割的一對**：只補 test 半邊會 AttributeError（no attribute 'CHECKUP_DIMENSIONS'）。\n\n## 證據（clean clone，非 dev box）\n- clone main HEAD → 該測試 1 failed（完全重現 CI run 29707163513）\n- 只 cp test 半邊 → 2 failed（AttributeError）\n- cp 兩個半邊 → 15 passed（3 個 daily_checkup 測試檔全綠）\n- HEAD 上原 26 檔測試組 375 passed（舊 alert 的 questions.py ValueError 已由 dde8e1666 修掉）\n\n## 為什麼自動機制救不回來（結構性，非 bug）\nphase_z._orphan_half_candidates 明確排除 test 檔（_is_test_path），理由正當：允許 working-tree test 當候選，等於讓「被削弱的 assertion」把自己 adopt 進去（probe 會量到候選自己放寬的溫度計）。但本案的修復**必須包含 test 半邊**，於是落入死角：source 半邊單獨 adopt 不會讓任何測試由紅轉綠 → 不被 adopt → 兩邊永遠 foreign → CI 永遠紅。\n\n## 為什麼前幾班沒解決\nci-red-29703582195 / ci-red-29705358452 都被標 succeeded，但 CI 當時仍紅 —— 結案未以 GitHub 綠燈驗證。\n\n## 需要的動作\n1. 把上述兩個檔以序列化 writer（git_writer_lock）單次 commit 進 main，push，等 CI 綠。\n2. 治本：為「修復必含 test 半邊」設計一條安全出口（例如：要求 test 半邊的 assertion 不得減少 / 需 Codex 二審裁決），補進 phase_z 或 assign_8c267b66 的 actuator 設計。\n3. 檢討 ci-red 結案條件：未見 GitHub 綠燈不得標 succeeded。\n\n關聯：assign_8c267b66（foreign incident 缺 actuator）— 本案是該 task 的具體、已證實的測試案例。"
+    "description": "由 slot-1 fire 2026-07-20 08:07 診斷並以 clean clone 證實。\n\n## 根因（已機械證實，非推測）\nmain HEAD 的 tests/test_daily_checkup_reproducibility.py::test_run_all_turns_reproducibility_checker_exception_into_warning 使用寫死的 9 個 checker_names tuple，未涵蓋 worktree_reconcile。CI clone 沒有 worktrees → check_worktree_reconcile 真跑 → critical，assert 'critical' == 'warn' 失敗。\n\n修復其實早已寫好，但**只存在於 canonical 工作區、從未 commit**：\n- scripts/daily_checkup.py（新增 CHECKUP_DIMENSIONS）\n- tests/test_daily_checkup_reproducibility.py（改為從 CHECKUP_DIMENSIONS 推導，不再手抄）\n兩者是**不可分割的一對**：只補 test 半邊會 AttributeError（no attribute 'CHECKUP_DIMENSIONS'）。\n\n## 證據（clean clone，非 dev box）\n- clone main HEAD → 該測試 1 failed（完全重現 CI run 29707163513）\n- 只 cp test 半邊 → 2 failed（AttributeError）\n- cp 兩個半邊 → 15 passed（3 個 daily_checkup 測試檔全綠）\n- HEAD 上原 26 檔測試組 375 passed（舊 alert 的 questions.py ValueError 已由 dde8e1666 修掉）\n\n## 為什麼自動機制救不回來（結構性，非 bug）\nphase_z._orphan_half_candidates 明確排除 test 檔（_is_test_path），理由正當：允許 working-tree test 當候選，等於讓「被削弱的 assertion」把自己 adopt 進去（probe 會量到候選自己放寬的溫度計）。但本案的修復**必須包含 test 半邊**，於是落入死角：source 半邊單獨 adopt 不會讓任何測試由紅轉綠 → 不被 adopt → 兩邊永遠 foreign → CI 永遠紅。\n\n## 為什麼前幾班沒解決\nci-red-29703582195 / ci-red-29705358452 都被標 succeeded，但 CI 當時仍紅 —— 結案未以 GitHub 綠燈驗證。\n\n## 需要的動作\n1. 把上述兩個檔以序列化 writer（git_writer_lock）單次 commit 進 main，push，等 CI 綠。\n2. 治本：為「修復必含 test 半邊」設計一條安全出口（例如：要求 test 半邊的 assertion 不得減少 / 需 Codex 二審裁決），補進 phase_z 或 assign_8c267b66 的 actuator 設計。\n3. 檢討 ci-red 結案條件：未見 GitHub 綠燈不得標 succeeded。\n\n關聯：assign_8c267b66（foreign incident 缺 actuator）— 本案是該 task 的具體、已證實的測試案例。",
+    "claimed_by": "hourly-slot-3-d26cd59fa96448559efd749ab918a805",
+    "claimed_at": "2026-07-20T01:19:28.250523+00:00",
+    "claim_session_id": "237a632e996d",
+    "status_history": [
+      {
+        "ts": "2026-07-20T01:19:28.250539+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-d26cd59fa96448559efd749ab918a805"
+      },
+      {
+        "ts": "2026-07-20T01:19:28.488097+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-d26cd59fa96448559efd749ab918a805"
+      }
+    ],
+    "started_at": "2026-07-20T01:19:28.488079+00:00"
+  },
+  {
+    "id": "daily_digest_20260720",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-20T09:00:00.885777+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-20T01:08:44.800019+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-b0f6761fd2ad44bab00554d0320efc5a"
+      },
+      {
+        "ts": "2026-07-20T01:08:51.020194+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-b0f6761fd2ad44bab00554d0320efc5a"
+      },
+      {
+        "ts": "2026-07-20T01:30:23.412506+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-b0f6761fd2ad44bab00554d0320efc5a"
+      }
+    ],
+    "started_at": "2026-07-20T01:08:51.020177+00:00",
+    "completed_at": "2026-07-20T01:30:23.412489+00:00",
+    "result": "第29期精選導讀 mile_2974cf85〈晶片殺進熊市，大盤卻沒跟上：用「震央定位法」判斷該撿還是該跑〉已 published。4,451 中文字、8 篇 archive 佐證跨度 101 天、7 張 inline 證據圖 + 3 張框架 poster、anti_ai_gate exit 0、線上 HTTP 200。主線程獨立驗證 slug/跨度/content_type/tags 全通過。"
+  },
+  {
+    "id": "telegram-1140",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-20T01:10:17.709334+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1140）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n為什麼要我看？你自己處理\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] Dreaming review 2026-07-19 — 13 new / 3 escalations\n\n📌 白話結論\n• findings=19（需要你看 10、機器已接手 8、自清中 1；new=13, resolved=3, escalations=3）；loop-health overall=warn\n\n📌 影響\n影響研究結論累積與論文推進。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\n• findings=19（需要你看 10、機器已接手 8、自清中 1；new=13, resolved=3, escalations=3）；loop-health overall=warn\n• [warn] repeated_tool_failure: repeated_tool_failure:release_settings_audit.log:exit1 (×1) → propose docs/error_log.md\n• [warn] persistent_alert: persistent_alert:542378afb7b6a3b9 (×1) → propose docs/error_log.md\n• [warn] persistent_alert: persistent_alert:739fcf1bb7ffd6f1 (×1) → propose docs/error_log.md\n• [warn] persistent_alert: persistent_alert:2d99bdcd3277e3cc (×1) → propose docs/error_log.md\n• [warn] persistent_alert: persistent_alert:e46b1923cd3787a9 (×1)\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-20T01:10:42.960703+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-20T01:11:58.461601+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-20T01:11:58.461586+00:00"
+  },
+  {
+    "id": "assign_0a1d74ae",
+    "title": "Dreaming propose_only 改為自動派工，不再推給老闆",
+    "description": "老闆 2026-07-20 Telegram 指示：『為什麼要我看？你自己處理』。針對 dreaming review 2026-07-19 告警中『需要你看 10』的分類。\n\n根因：storage/ops/dreaming/2026-07-19.json 中 counts.propose_only=10，這些 finding 的 remediation=='propose_only' 不會進 auto_remediation 佇列（該輪只有 4 筆 queued），於是被 alert 呈現成『需要你看』丟回給人。\n\n要做的事：\n1. 找到 dreaming review 產生 finding 與 alert 的實作（remediation 分流 + alert body 組裝），把 propose_only 從『人工待辦』改成『自動建立 task-pool 任務交 hourly dispatch』。propose_only 的語意應該是『不自動改 code，但自動開工單去調查』，不是『等老闆看』。\n2. alert body 移除『需要你看 N』這種把工作丟回老闆的措辭，改為『已自動接手 N』（呼應既有 feedback：alert body 要寫已自動修復，不寫建議行動）。\n3. 保留人工介入的唯一例外：risk 為 destructive / 需要 policy 決策者。這類要明確標記，且數量應趨近 0。\n4. 回填處理 2026-07-19 那 10 筆 propose_only（多為 repeated_tool_failure:release_settings_audit.log:exit1 與 persistent_alert:*），逐一建工單或修掉根因。\n5. 完成後跑一輪 dreaming review 驗證 propose_only 不再出現在『需要你看』欄位。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-20T01:11:26.527347+00:00",
+    "created_by": "telegram_responder",
+    "status_history": [
+      {
+        "ts": "2026-07-20T01:12:42.239590+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f"
+      },
+      {
+        "ts": "2026-07-20T01:12:45.730709+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f"
+      },
+      {
+        "ts": "2026-07-20T01:26:30.753863+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f"
+      }
+    ],
+    "started_at": "2026-07-20T01:12:45.730692+00:00",
+    "completed_at": "2026-07-20T01:26:30.753847+00:00",
+    "result": "propose_only 改為首見即自動開工單（移除三晚等待）；新增 human_only 為唯一人工出口；email 表頭『需要你看 N』→『已自動接手 N / 需要你決策 human_only（應為 0）』。回填驗證：17 findings / propose_only=10 / human_only=0 / 新開 8 張 task。全庫 2655 passed。"
+  },
+  {
+    "id": "email-12122-200626",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] CI 自動修復未成功（ci-red-29703582195）",
+    "description": "Gmail UID: 12122\nMessage-ID: <2A41E2FD-5152-476D-B8AF-B0AB680C9BC2@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 20 Jul 2026 09:13:31 +0800\nSubject: Re: [VolPred Alert][CRITICAL] CI 自動修復未成功（ci-red-29703582195）\n\n--- 用戶回信內容 ---\n立刻想辦法重購修復\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月20日 08:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> CI 自動修復未成功（ci-red-29703582195）\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 原因：remediation_stalled_more_than_two_checks: 3\r\n> \r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> 自動修復需要支援\r\n> \r\n> 原因：remediation_stalled_more_than_two_checks: 3\r\n> 原始失敗：2026-07-19T22:11:47.6583348Z E AssertionError: assert 'critical' == 'warn'\r\n> 已失敗 cycles：2\r\n> repair tasks：{'ci-red-29703582195': 'succeeded', 'ci-red-29705358452': 'succeeded'}\r\n> \r\n> 最新 failure run：29705358452\r\n> https://github.com/yhlai0911/volpred-research/actions/runs/29705358452\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "in_progress",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-20T01:15:07.222156+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12122,
+    "email_message_id": "<2A41E2FD-5152-476D-B8AF-B0AB680C9BC2@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] CI 自動修復未成功（ci-red-29703582195）",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-slot-3-d26cd59fa96448559efd749ab918a805",
+    "claimed_at": "2026-07-20T01:16:31.382560+00:00",
+    "claim_session_id": "0a56abb5e9a6",
+    "status_history": [
+      {
+        "ts": "2026-07-20T01:16:31.382580+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-d26cd59fa96448559efd749ab918a805"
+      },
+      {
+        "ts": "2026-07-20T01:16:34.435167+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-d26cd59fa96448559efd749ab918a805"
+      }
+    ],
+    "started_at": "2026-07-20T01:16:34.435151+00:00"
+  },
+  {
+    "id": "dreaming_repeated_tool_failure_release_settings_audit_log_exit1",
+    "title": "[dreaming] repeated_tool_failure:release_settings_audit.log:exit1",
+    "description": "Cron job `release_settings_audit.log` returned a non-zero exit 11× in the window. Investigate the wrapper/script root cause (API death / auth / path). If sustained, open docs/refactor_plan_<job>.md (Three-Strike).\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：release_settings_audit.log:exit1 ×11 over 0.36d (first 2026-07-19T16:17:01+00:00 → last 2026-07-20T01:02:09+00:00)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T01:18:48.350731+00:00",
+    "dreaming": {
+      "signature": "repeated_tool_failure:release_settings_audit.log:exit1",
+      "pattern_type": "repeated_tool_failure",
+      "occurrences": 2,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_e28b5068534016a7",
+    "title": "[dreaming] persistent_alert:e28b5068534016a7",
+    "description": "Alert `⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用` fired 6× over 58.5d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-17T21:25:01.224457+00:00）。\n證據：alert_key=e28b5068534016a7 title='⚠️ gemini_ask.py 已呼叫 — 產生 Gemini API 費用' send_count=6 span=58.5d (first 2026-05-20T14:09:29.104141+00:00 → last 2026-07-18T01:21:33.175796+00:00) — no fire in 48.0h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T01:18:48.350731+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:e28b5068534016a7",
+      "pattern_type": "persistent_alert",
+      "occurrences": 2,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_542378afb7b6a3b9",
+    "title": "[dreaming] persistent_alert:542378afb7b6a3b9",
+    "description": "Alert `發文脫班（無新文超過 release 節奏門檻）` fired 6× over 15.7d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：alert_key=542378afb7b6a3b9 title='發文脫班（無新文超過 release 節奏門檻）' send_count=6 span=15.7d (first 2026-07-03T08:00:30.344539+00:00 → last 2026-07-19T01:01:26.728405+00:00) — no fire in 24.3h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T01:18:48.350731+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:542378afb7b6a3b9",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_739fcf1bb7ffd6f1",
+    "title": "[dreaming] persistent_alert:739fcf1bb7ffd6f1",
+    "description": "Alert `Release pool starved > 8.0h (cron healthy)` fired 5× over 15.0d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：alert_key=739fcf1bb7ffd6f1 title='Release pool starved > 8.0h (cron healthy)' send_count=5 span=15.0d (first 2026-07-04T01:00:41.430041+00:00 → last 2026-07-19T00:01:19.424799+00:00) — no fire in 25.3h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T01:18:48.350731+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:739fcf1bb7ffd6f1",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_2d99bdcd3277e3cc",
+    "title": "[dreaming] persistent_alert:2d99bdcd3277e3cc",
+    "description": "Alert `內容品質巡檢：發文間隔過久` fired 5× over 15.0d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：alert_key=2d99bdcd3277e3cc title='內容品質巡檢：發文間隔過久' send_count=5 span=15.0d (first 2026-07-04T01:00:45.625562+00:00 → last 2026-07-19T01:01:33.948909+00:00) — no fire in 24.3h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T01:18:48.350731+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:2d99bdcd3277e3cc",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_e46b1923cd3787a9",
+    "title": "[dreaming] persistent_alert:e46b1923cd3787a9",
+    "description": "Alert `supervisor quota_blocked（額度恢復後自動復工）` fired 10× over 12.8d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：alert_key=e46b1923cd3787a9 title='supervisor quota_blocked（額度恢復後自動復工）' send_count=10 span=12.8d (first 2026-07-06T11:08:02.667095+00:00 → last 2026-07-19T06:52:34.169530+00:00) — no fire in 18.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T01:18:48.350731+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:e46b1923cd3787a9",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_8e08e46929dc07ef",
+    "title": "[dreaming] persistent_alert:8e08e46929dc07ef",
+    "description": "Alert `PHASE-Z 產出已 commit，但 agent 沒交代原因` fired 5× over 4.7d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-17T21:25:01.224457+00:00）。\n證據：alert_key=8e08e46929dc07ef title='PHASE-Z 產出已 commit，但 agent 沒交代原因' send_count=5 span=4.7d (first 2026-07-14T11:18:12.227684+00:00 → last 2026-07-19T02:58:57.095557+00:00) — no fire in 22.3h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T01:18:48.350731+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:8e08e46929dc07ef",
+      "pattern_type": "persistent_alert",
+      "occurrences": 2,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_31bfa7e7f9289f4c",
+    "title": "[dreaming] persistent_alert:31bfa7e7f9289f4c",
+    "description": "Alert `Claude→Codex failover 已接手（Claude 端：quota）` fired 4× over 3.5d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：alert_key=31bfa7e7f9289f4c title='Claude→Codex failover 已接手（Claude 端：quota）' send_count=4 span=3.5d (first 2026-07-15T18:20:01.436446+00:00 → last 2026-07-19T06:57:42.084971+00:00) — no fire in 18.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T01:18:48.350731+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:31bfa7e7f9289f4c",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "email-12125-3afb3c",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] FB pipeline: 0 stale + 0 early + 1 auto-expired",
+    "description": "Gmail UID: 12125\nMessage-ID: <6330C996-55A3-4841-909B-2CCCEC58219C@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 20 Jul 2026 09:15:18 +0800\nSubject: Re: [VolPred Alert][WARN] FB pipeline: 0 stale + 0 early + 1 auto-expired\n\n--- 用戶回信內容 ---\n為什麼又發不出去？理由是什麼？立刻使用Computer use發佈\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月20日 08:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> FB pipeline: 0 stale + 0 early + 1 auto-expired\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> mile_78899a5c (2026-07-18)\r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> Auto-expired（pending/awaiting >48h → expired_skip）1 篇\r\n> \r\n> mile_78899a5c (2026-07-18)\r\n> 根因\r\n> \r\n> 個人 FB 帳號無 headless API。stale 累積 = 等不到 interactive session。\r\n> \r\n> 永久規則\r\n> \r\n> 見 docs/fb_pipeline_permanent_fix.md（個人帳號 + Claude-in-Chrome；Page/Graph API 已撤回）。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "pending",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-20T01:30:08.667409+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12125,
+    "email_message_id": "<6330C996-55A3-4841-909B-2CCCEC58219C@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] FB pipeline: 0 stale + 0 early + 1 auto-expired",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
   }
 ]

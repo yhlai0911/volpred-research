@@ -36,18 +36,23 @@ memory_governance / persistent_alert / orphaned_experiment。每個 fail-open（
 讀 dreaming report 時依 `remediation` 欄判斷：
 
 - **AUTO（一律安全，dreaming 自己做）**：寫 dated report、append `autonomous_decisions.jsonl`、寄 email。
-- **AUTO-DISPATCH（低風險衍生狀態，建修復 task）**：actuator 自 2026-07-12 **預設開啟**。`auto_dispatch` finding（如 missing retry / orphan）在 warn 即進 `storage/next_tasks.json`；`propose_only` finding 連續 3 晚仍存在才進 queue，且 task 只要求 agent 審核，不直接改治理檔。`--dry-run` 才不派工。
-- **PROPOSE-ONLY（治理檔，絕不自動改）**：`docs/error_log.md` / `.claude/rules/*` / `CLAUDE.md` / `storage/memory/knowledge.json` / `docs/refactor_plan_*`。dreaming 只把建議寫進 report 的 `proposal` 欄 + `governance_target` + email。**主線程審完才手動套用。**
+- **AUTO-DISPATCH（低風險衍生狀態，建修復 task）**：actuator 自 2026-07-12 **預設開啟**。`auto_dispatch` finding（如 missing retry / orphan）在 warn 即進 `storage/next_tasks.json`。`--dry-run` 才不派工。
+- **PROPOSE-ONLY（治理檔不自動改寫，但**自動開工單**）**：`docs/error_log.md` / `.claude/rules/*` / `CLAUDE.md` / `storage/memory/knowledge.json` / `docs/refactor_plan_*` 這些檔 dreaming 永不自己寫。但自 2026-07-20（boss telegram「為什麼要我看？你自己處理」）起，propose_only finding **首見即進 `storage/next_tasks.json`**（severity → priority：critical=P2 / warn=P3 / info=P4），由 hourly dispatch 派 agent 判斷後決定是否改治理檔。**接手的是 agent，不是老闆。**
+- **HUMAN-ONLY（唯一的人工出口）**：`remediation="human_only"` = destructive 或需要 policy 決策者拍板。這類不自動派工、會出現在 email 的「需要你決策」欄。**數量長期應趨近 0**；不是 0 就代表有東西該被機械化而還沒。
 
-## 對外音量：寄信閘門 = 「有人得動手嗎」（2026-07-19）
+### 為什麼 propose_only 不再等三晚
 
-`needs_human_attention(finding)` 是 dreaming 唯一的對外音量判準，順序由強到弱：
+舊版讓 propose_only 連續出現 3 晚才開單，理由是「持續存在才是訊號」。問題在於**那三晚的等待隊列是老闆的信箱**：期間它被算進「需要你看 N」。等著看一支 cron job 是不是還在 exit 1，不是值得佔用一個人早晨的判斷，那是一張工單。所以等待被**取消**，不是被搬家。
 
-1. `severity=critical`（Three-Strike 種子）→ **一律寄**，這是本層存在的理由。
+## 對外音量：寄信閘門 = 「有人得動手嗎」（2026-07-19；2026-07-20 修正）
+
+`needs_human_attention(finding)` 是 dreaming 唯一的對外音量判準（接受 DreamFinding 或其 `to_dict()`，規則只有一份實作），順序由強到弱：
+
+1. `severity=critical`（Three-Strike 種子，動不動根是 policy 決策）→ **一律寄**。
 2. `quiescent`（底層訊號在最近一個 run interval 內未推進 = 已停火、正在自清）→ 不寄。
-3. 其餘只有 `propose_only` 要人（治理判斷）；`auto_dispatch` 歸 actuator。
+3. 其餘只有 `human_only` 要人；`auto_dispatch` 與 `propose_only` 都已有機器出口。
 
-報告 `counts` 因此多三個讀數：`actionable` / `machine_handled` / `quiescent`，
+報告 `counts` 因此多四個讀數：`actionable` / `machine_handled` / `quiescent` / `human_only`（`machine_handled` 與 `quiescent` 互斥，可相加），
 `main()` 的閘門是 `escalations or actionable_new`。**靜默 ≠ 黑洞** —— 報告照寫、
 `autonomous_decisions.jsonl` 照記、skip 理由印在 cron log。
 

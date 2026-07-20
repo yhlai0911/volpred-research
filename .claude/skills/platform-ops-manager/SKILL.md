@@ -151,7 +151,7 @@ ops cycle 除了「loop 還活著嗎」（freshness）+「基礎設施健康嗎�
 
 - **Fast loop** `uv run volpred ops loop-health` — 4 指標（first_pass_success / task_outcome / error_recurrence / correction_trend），搭 hourly fire 便車、零新排程，breach 走既有 alert email。
 - **Slow loop** `uv run volpred ops dreaming-run [--dry-run]` — 每日 05:25 cron，跨 session 找重複失敗模式，產 findings + proposal，new/escalation 寄 email。
-- **硬邊界**：治理檔（error_log / rules / CLAUDE.md / knowledge.json）一律 **propose-only**，dreaming 永不直接改；但 actuator 自 2026-07-12 預設開啟：`auto_dispatch` finding 直接進 canonical queue，連續 3 晚未處理的 `propose_only` finding 也只會建立「請 agent 審核」的 task。`--dry-run` 才完全不派工。
+- **硬邊界**：治理檔（error_log / rules / CLAUDE.md / knowledge.json）dreaming 永不直接改。但「不自動改」≠「等老闆」：actuator 自 2026-07-12 預設開啟，`auto_dispatch` finding 直接進 canonical queue；自 2026-07-20 起 `propose_only` finding **首見即開「請 agent 審核」的 task**（不再等 3 晚）。唯一保留給人的是 `human_only`（destructive / policy），數量應趨近 0。`--dry-run` 才完全不派工。
 - 收到 dreaming email → 讀 `storage/ops/dreaming/<date>.json`，治理 proposal 手動審後套用，escalations(critical) 開 refactor_plan 走 Three-Strike。
 - 完整 SOP：`references/loop-health-and-dreaming.md`。
 
