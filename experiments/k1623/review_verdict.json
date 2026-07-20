@@ -1,23 +1,22 @@
 {
   "kid": "k1623",
-  "verdict": "FAIL",
-  "reviewer": "codex gpt-5.6-sol (round 2) — NOT a review of these bytes. rev3 applied the round-2 remediation; no independent reviewer has seen the result yet.",
-  "reviewed_at": "2026-07-20T04:38:14+08:00",
-  "reviewed_commit": "f1e7ef686bff28109ffa4daf3339f3f97d80e81f",
-  "review_artifact": "storage/ops/codex_reviews/k1623_rev2_verdict.md",
+  "verdict": "FILL: PASS or FAIL — anything but PASS blocks the merge",
+  "reviewer": "FILL: model / effort",
+  "reviewed_at": "FILL: ISO8601",
+  "reviewed_commit": "FILL: the frozen SHA you read",
+  "review_artifact": "FILL: relpath of the written review",
   "blocking_defects": [
-    "HOLDING FAIL BY DESIGN, fail-closed. The five round-2 BLOCKERs (B1 TW0050 deviation, B2 HAR champion claim, B3 unqualified same-forecasts, B4 MC attribution/scope, B5 unsupported uniqueness) plus the MINOR nested-family wording have all been remediated in rev3 — see experiments/k1623/k1623_rev3_remediation.json for the per-blocker before/after record and the mechanical self-check.",
-    "These sha256 values pin the POST-remediation bytes, but the verdict above is still the round-2 one. A verdict is only worth the snapshot it reviewed, so this stays FAIL until a round-3 reviewer reads THESE bytes and rules on them. Merging is correctly blocked.",
-    "Open, disclosed, not fixed: the mean-structure share of the generated-regressor problem is unmeasured because both MC arms re-estimate segment means and it cancels in A-minus-B. Measuring it needs a third arm, i.e. a re-run, which is outside the rev3 no-recompute scope. See blocked_items[0] in the remediation artifact."
+    "FILL: one entry per defect that makes this a FAIL; [] if PASS"
   ],
   "reviewed_sha256": {
-    "README.md": "e8f6bfb83471fc89e44829e43ade26182a8ef7d54b3c2190dfb6f8f24a03c6b3",
+    "README.md": "96b6f452c65c8ee2403a38ae3b8ab7a98add01ba0b7cbb58792cdab6abf584e4",
     "k1623.py": "b7538d7b9996a9bca041b2ea131ae28d22db70c033a8f504271d4696b860afa7",
     "k1623_results.json": "4c0195df6ef2052fd11378d2211aa3747efdd34ef7b12f3d32f0fd85023469d7",
     "k1623_rev2.py": "0edfba3fa9c2e4d0c457d52f884faecef4e46b20ddd0677d8ea3853e94538453",
-    "k1623_rev2_mc.py": "39473bc47c304bda3b7edbface2e43dd46624a2cc40e674d1fa932909c5e512f",
+    "k1623_rev2_mc.py": "31e87bfb2807f6238f5a2ab3d4db4199af9a5ebd801b68ed90e2240a1d6f3b74",
     "k1623_rev2_mc_results.json": "484601b002089f89dd40c90fbc99c8f34409eb9a28b07f2c123042f9529c4809",
     "k1623_rev2_results.json": "eab6d7df8371e2bd0772cda48d8996e64112a04f12d27dc0ff5a5b80e836b6e2",
+    "k1623_rev3_armc_mc.py": "0e7ff1c950865d16ac7a7ee985f60ecd4da11f8c60900e914d331cf75ba81557",
     "k1623_rev3_patch_mc_artifact.py": "897736c82ca2d5530bfbc77155de03891cf4f35435e68d10ff3bc3f7355f3d40",
     "k1623_rev3_selfcheck.py": "ad8a1140679e67d9c4af7fcb95591c40ffcb49994b272587108939a64cc85ef1",
     "plots/N225_acf.png": "7e8bf88f16929c1ba1a261390d0c0a3cec64f434f15f4b661fb50fbf8b2cc5a5",

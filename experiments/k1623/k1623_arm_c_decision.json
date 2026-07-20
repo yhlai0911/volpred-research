@@ -1,0 +1,113 @@
+{
+  "task_id": "k1623_mc_third_arm_mean_structure_share",
+  "decision": "run_arm_c",
+  "rationale": "The third arm was worth running and is now enqueued. Three reasons. (1) COST: the frozen two-arm run took 306s; adding arm C costs one extra ELW call per replication and the full three-arm run measured 444s -- there was never a resource argument for accepting the scope limit permanently. (2) THE QUANTITY IS NOT NEGLIGIBLE: a pre-fix trial run (see preview_numbers_not_citable) puts B-C at -0.0225 to -0.0431, comparable in magnitude to the break-location effect A-B (-0.0200 to -0.0556). Declaring it a permanent scope limit would have written off an effect as large as the one the experiment does report. (3) IT CHANGES A PUBLISHED CLAIM: rev2 finding_2 asserts the SE understatement comes mainly from the asymptotic 1/(2 sqrt m) formula. With mean estimation finally visible, the dominant sd factor is asymptotic_formula for only 2 of 5 assets. That claim needs revising, not extending -- which is exactly what an unmeasured component was hiding.",
+  "arm_c_definition": {
+    "what": "simulate -> subtract the KNOWN implanted level vector -> ELW (both break location and segment level are oracle)",
+    "decomposition": "A-B = locating breaks (frozen); B-C = estimating segment means at known locations (NEW); A-C = total generated-regressor = (A-B)+(B-C); C-d_fitted = ELW's own finite-sample bias",
+    "precision_caveat_enforced_in_artifact": "Arm C is NOT a zero-mean oracle. local_whittle(exact=True) still subtracts one global sample mean internally, in all three arms. This does NOT contaminate the B-C or A-C contrasts (identical across arms, so it differences out), but it does mean B-C is the INCREMENTAL cost of estimating n_breaks+1 segment means over that single demeaning -- not 'the cost of estimating any mean at all'. Both reviewers independently required this be stated; quoting the stronger version would repeat, for arm C, the exact overclaim rev2 had to retract for arm B."
+  },
+  "arm_c_script": {
+    "path": "experiments/k1623/k1623_rev3_armc_mc.py",
+    "shared_paths_with_ab": true,
+    "shared_paths_evidence": "PROVEN, not argued. The script re-runs arms A and B alongside C and gates on reproducing the frozen artifact at rtol=1e-9. In the trial run the recomputed A-B matched the frozen values BIT-FOR-BIT to all 18 significant digits on all 5 assets (e.g. TW0050 -0.05562014170297003 in both). Mechanism: SEED/N_REPS/BURN/MAX_BREAKS/MIN_FRAC/fractional_integrate/segment_means are imported from k1623_rev2_mc rather than re-typed, and arm C consumes no random numbers, so the eps stream is drawn exactly as in the frozen run.",
+    "seed": "SEED=42, per-asset stream offset SEED + 1000*idx over K.ASSETS order (imported, not re-typed)",
+    "replications": 500,
+    "why_a_sibling_file_not_an_edit_to_k1623_rev2_mc_py": "The task asked to extend k1623_rev2_mc.py, but that script writes k1623_rev2_mc_results.json via atomic_write_json, and that file's current bytes are the rev2 output PLUS the rev3 remediation patch (the 58-field claim_corrections_rev3 block, cited as the source for two columns of README 6.4). Re-running it would have destroyed the patch block and renamed summary keys -- i.e. mutated frozen fields, which the task forbids. The two requirements were in direct conflict; a sibling script that imports the constants and opens the frozen JSON read-only satisfies both, and additionally buys a reproduction gate that the in-place edit could not have provided."
+  },
+  "codex_script_review": {
+    "verdict": "FALLBACK REVIEWS ONLY — agy PASS + code-reviewer subagent CONDITIONAL PASS (both conditions applied). NOT a primary-path Codex PASS.",
+    "primary_path_status": "UNAVAILABLE — codex exec returned 'You've hit your usage limit ... try again at Jul 25th, 2026 1:30 PM'. This is a quota wall with a stated reset date, not a config fault: codex --version (0.144.6) and codex login status (Logged in using ChatGPT) are both healthy, so the .claude/rules/experiments.md diagnostic ladder does not apply and no config change can restore credits.",
+    "reviewers": [
+      {"name": "agy CLI (Antigravity)", "family": "Gemini-family", "verdict": "PASS"},
+      {"name": "feature-dev:code-reviewer subagent", "family": "Claude, fresh context", "verdict": "CONDITIONAL PASS", "conditions_applied": true}
+    ],
+    "converged_finding": "Both reviewers independently identified the same defect: the artifact text claimed arm C meant 'no part of the mean structure is estimated', which is false because ELW demeans internally. Fixed in 6 sites (docstring, arm_c what_it_is, new one_caveat_do_not_overread field, bias_decomposition definition, finding_1, finding_2, scope_limits) plus an inline code comment that neither reviewer flagged. All fixes are wording-only: no change to DGP, RNG, gate logic, or any computed field.",
+    "blocking_followup": "Per the K1259 precedent recorded in .claude/rules/experiments.md ('Subagent fallback PASS != primary-path Codex PASS'), this script MUST be re-reviewed by Codex once credits reset (>= 2026-07-25). That re-review is a blocking precondition for round-3 sign-off, not a formality: in K1259 a subagent PASS was followed a day later by Codex finding 12 residual defects in the same code.",
+    "report": "storage/ops/codex_reviews/k1623_armC_script_review.md"
+  },
+  "compute_queue": {
+    "enqueued": true,
+    "job_id": "compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527",
+    "queue_receipt": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527.json",
+    "script_path": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev3_armc_mc.py",
+    "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev3_armc_results.json",
+    "timeout_sec": 3600,
+    "expected_runtime_sec": 444,
+    "followup_task_type": "experiment",
+    "followup_brief_chars": 2061,
+    "verified_queued": true,
+    "verification": "receipt confirmed present in the MAIN repo queue directory; script_path confirmed to exist on disk; worktree queue directory confirmed to hold 0 stray receipts",
+    "enqueue_incident_two_discarded_attempts": {
+      "attempt_1": {
+        "id": "compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-1784565286",
+        "problem": "Enqueued by running the WORKTREE's copy of scripts/compute_queue.py. Since ROOT = Path(__file__).resolve().parents[1], the receipt was written to the worktree's storage/ops/compute_queue/ -- storage/ is a real directory in the worktree, not a symlink. The compute worker daemon runs from the main repo and scans only the main repo's queue directory, so this job was UNREACHABLE: it would have sat 'queued' forever while looking successfully enqueued. Receipt deleted.",
+        "why_it_nearly_slipped_through": "The enqueue command printed 'enqueued: <id>' and the id appeared in `compute_queue.py list` -- but that list was also the worktree's. Both confirmations were self-consistent and both were wrong. Caught by explicitly checking the MAIN repo's directory for the id."
+      },
+      "attempt_2": {
+        "id": "compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565489",
+        "problem": "Correct repo, but the --followup-brief shell fallback resolved to the literal string 'PLACEHOLDER' because the brief file did not exist yet. Cancelled via the queue's own cancel subcommand with a stated reason rather than deleted, since it was a real main-repo job.",
+        "disposition": "cancelled, not deleted"
+      },
+      "generalisable_lesson": "`compute_queue.py enqueue` has no --cwd option, and cwd defaults to ROOT. A worktree agent must therefore enqueue by invoking the MAIN repo's compute_queue.py with ABSOLUTE --script / --result-artifact / --output-path pointing into the worktree. Relative paths would resolve against the main repo, where an unmerged worktree script does not exist. Confirmed safe here because k1623.py's _resolve_db() walks HERE.parents to find the price cache and the script anchors everything on HERE = Path(__file__).parent, so it is cwd-independent."
+    }
+  },
+  "preview_numbers_not_citable": {
+    "STATUS": "NOT CANONICAL — DO NOT CITE. Recorded so the queued run can be reconciled against it.",
+    "provenance": "The feature-dev:code-reviewer subagent EXECUTED the script it was briefed to review (violating the repo rule 實驗碼一律先審後跑), producing an artifact at 2026-07-21 00:32 台灣時間 from pre-wording-fix bytes, outside the compute queue and without the runner's gate pass. The file was moved out of the experiment directory to /tmp/k1623_quarantine/armc_prefix_unauthorized_run.json and NOT committed, so it cannot be mistaken for the reviewed result or pinned by the verdict template.",
+    "why_recorded_anyway": "Every fix applied after that run was wording-only, so the queued run is expected to reproduce these values exactly. If it does not, the discrepancy is itself a finding and must be investigated, not reconciled.",
+    "reproduction_gate": "passed 5/5 assets; recomputed A-B matched the frozen artifact bit-for-bit",
+    "bias_decomposition": {
+      "VIX":    {"a_minus_b": -0.0200, "b_minus_c": -0.0257, "a_minus_c": -0.0457, "c_minus_fitted": 0.0183},
+      "SPY":    {"a_minus_b": -0.0452, "b_minus_c": -0.0403, "a_minus_c": -0.0854, "c_minus_fitted": 0.0008},
+      "TW0050": {"a_minus_b": -0.0556, "b_minus_c": -0.0225, "a_minus_c": -0.0781, "c_minus_fitted": 0.0134},
+      "QQQ":    {"a_minus_b": -0.0411, "b_minus_c": -0.0430, "a_minus_c": -0.0841, "c_minus_fitted": 0.0069},
+      "N225":   {"a_minus_b": -0.0455, "b_minus_c": -0.0431, "a_minus_c": -0.0886, "c_minus_fitted": 0.0044}
+    },
+    "sd_factor_ranges": {
+      "f1_asymptotic_formula": [1.0429, 1.1952],
+      "f2_mean_estimation": [1.0575, 1.1884],
+      "f3_break_location": [1.0105, 1.1006]
+    },
+    "dominant_sd_factor_per_asset": {"VIX": "asymptotic_formula", "SPY": "asymptotic_formula", "TW0050": "break_location", "QQQ": "mean_estimation", "N225": "mean_estimation"},
+    "implication_for_readme_6_4": "rev2 finding_2 ('most of the SE understatement comes from the asymptotic formula itself') holds for only 2 of 5 assets once mean estimation is visible. It must be DOWNGRADED to asset-dependent, not merely extended. Flagged in the follow-up brief."
+  },
+  "frozen_fields_untouched": {
+    "verified_by": "flatten-diff",
+    "method": "flattened git HEAD:experiments/k1623/k1623_rev2_mc_results.json against the working-tree copy, comparing every leaf path",
+    "keys_at_head": 181,
+    "keys_now": 181,
+    "changed": 0,
+    "removed": 0,
+    "added": 0,
+    "corroboration": "git diff --stat on the path is empty; sha256 484601b002089f89dd40c90fbc99c8f34409eb9a28b07f2c123042f9529c4809 unchanged after the guard test",
+    "hardening_added": "k1623_rev2_mc.py gained _guard_frozen_artifact(): a plain re-run now refuses (fail-closed, before loading any data) when the on-disk artifact carries a claim_corrections_rev3 block, with --force-overwrite as the deliberate escape hatch. Verified live -- the guard fired and the frozen sha256 was unchanged afterwards. This converts a prose-only convention into a mechanical gate; previously any agent told 'run the MC' would have silently destroyed the rev3 audit trail. Both reviewers were asked about this decision and both endorsed it as consistent with 永遠修流程，不修資料."
+  },
+  "verdict_template_regenerated": true,
+  "verdict_template_detail": {
+    "command": "uv run python scripts/experiment_gates.py verdict-template --path experiments/k1623 --out experiments/k1623/review_verdict.json",
+    "pins_before": 29,
+    "pins_after": 30,
+    "new_pin": "k1623_rev3_armc_mc.py",
+    "trigger": "README.md sha changed in 0dd6aa987 (stray tool-call fragments stripped), plus the new script entering the claim surface",
+    "verdict_field": "left at the fail-closed 'FILL:' placeholder — no reviewer has certified these bytes, and the round-3 verdict cannot be signed until the arm-C results land AND Codex re-reviews. certify therefore still blocks merge, which is intended.",
+    "must_regenerate_again": "YES — k1623_rev3_armc_results.json will re-pin the claim surface when the queued job writes it. The regeneration done in this job reflects pre-results bytes only."
+  },
+  "experiment_gates": "PASS — scripts/experiment_gates.py run --path experiments/k1623: 6 files cleared 4 experiment-integrity gates",
+  "hard_prohibitions_observed": {
+    "no_worktree_merge": true,
+    "no_knowledge_json_write": true,
+    "no_frozen_field_mutation": true,
+    "no_force_push_or_no_verify": true,
+    "no_fabricated_numbers": "every number here is either read from a committed artifact or from the quarantined trial run, and the latter is explicitly marked non-citable"
+  },
+  "unresolved": [
+    "The canonical arm-C artifact does not exist yet — the job is queued, not collected. This job's scope ended at enqueue by design.",
+    "Codex primary-path review has NOT happened (usage limit until 2026-07-25). Two fallback reviews are on record; per K1259 they do not substitute. BLOCKING for round-3 sign-off.",
+    "review_verdict.json must be regenerated once more after the results JSON lands, and its verdict fields are still unfilled placeholders (fail-closed by design).",
+    "README §6.4 has not been updated — deliberately deferred to the collecting fire, which has the real numbers. The follow-up brief specifies that finding 2 needs DOWNGRADING to asset-dependent rather than extending.",
+    "PROCESS GAP, not covered by any existing gate: a review subagent executed the experiment code it was briefed to review. Worth an error_log entry and possibly a brief-template hardening, but shared docs are out of scope for a worktree agent, so it is escalated here rather than fixed.",
+    "PROCESS GAP 2, also ungated: a worktree agent running the worktree's own scripts/compute_queue.py enqueues into a queue directory no worker reads, and every local confirmation (the 'enqueued:' line, `list`) agrees it worked. Nothing detects this. Candidate fixes for the owner to weigh: have enqueue warn or refuse when ROOT is a linked worktree, or add a --cwd option to plain enqueue as enqueue-agent already has. Escalated, not fixed -- scripts/ is shared state.",
+    "The silent-fallback pre-commit gate caught a real defect in the new _guard_frozen_artifact(): the original except clause returned silently on an unreadable artifact, i.e. it allowed the clobber in exactly the case most warranting a stop. Fixed to raise fail-closed before commit. Noted here because the gate, not either reviewer, is what caught it."
+  ]
+}

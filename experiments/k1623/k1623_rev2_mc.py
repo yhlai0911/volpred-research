@@ -42,6 +42,18 @@ understates the true sampling sd, which is the headline this MC was built for.
 Measuring the mean-estimation share as well would need a third arm that demeans
 with the known implanted level; rev3 does not add one (no-recompute scope).
 
+THAT THIRD ARM NOW EXISTS -- IN A SIBLING SCRIPT (rev3, arm C)
+--------------------------------------------------------------
+See `k1623_rev3_armc_mc.py`. It runs arms A, B and C on the SAME simulated paths
+(same seed, same DGP, same stream offsets, all imported from this module) and
+writes its own artifact, `k1623_rev3_armc_results.json`.
+
+It is a separate script on purpose. This script's output file,
+`k1623_rev2_mc_results.json`, is FROZEN evidence whose current bytes are this
+run's output PLUS the rev3 remediation patch applied by
+`k1623_rev3_patch_mc_artifact.py`. Re-running THIS script would overwrite that
+file and silently destroy the patch. Hence the overwrite guard in main() below.
+
 WHAT THIS DOES NOT DO
 ---------------------
 This is a MODEL-CONDITIONAL exercise. It assumes the data really were generated
@@ -177,8 +189,50 @@ def analyse(label: str, y: np.ndarray, rng: np.random.Generator) -> dict:
     }
 
 
+def _guard_frozen_artifact() -> None:
+    """Refuse to overwrite the rev3-patched artifact by accident.
+
+    `k1623_rev2_mc_results.json` on disk is NOT simply this script's output: the
+    rev3 remediation (`k1623_rev3_patch_mc_artifact.py`) added the
+    `claim_corrections_rev3` block, which supersedes four published claims and is
+    the cited source for two columns of README 6.4. A plain re-run of this script
+    calls atomic_write_json on that path and would delete all of it with no
+    warning -- the exact "fix the data instead of the process" failure the repo
+    forbids. Re-running is still allowed, but it has to be deliberate.
+    """
+    if not OUT.exists():
+        return
+    if "--force-overwrite" in sys.argv:
+        print(f"WARNING: --force-overwrite given; {OUT.name} will be REPLACED and any "
+              f"rev3 patch block in it will be lost.", file=sys.stderr)
+        return
+    try:
+        existing = json.loads(OUT.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        # Fail CLOSED, not open. An artifact that exists but will not parse is an
+        # anomaly to investigate -- it is the worst moment to allow a clobber,
+        # since whatever is wrong with it would be destroyed along with it.
+        raise SystemExit(
+            f"REFUSING to overwrite {OUT.name}: it exists but could not be read or parsed "
+            f"({exc.__class__.__name__}: {exc}). A frozen artifact that will not parse is a "
+            f"reason to stop and look, not a reason to overwrite. Inspect it first; pass "
+            f"--force-overwrite only if you have decided it is genuinely disposable."
+        ) from exc
+    if "claim_corrections_rev3" not in existing:
+        return                       # unpatched output -> a re-run is harmless
+    raise SystemExit(
+        f"REFUSING to overwrite {OUT.name}: it carries a `claim_corrections_rev3` block that "
+        f"was applied AFTER this script last ran, and re-running would destroy it.\n"
+        f"  - to add the third (mean-structure) arm, run k1623_rev3_armc_mc.py instead; it "
+        f"writes its own artifact and opens this one read-only\n"
+        f"  - to genuinely regenerate this artifact from scratch, pass --force-overwrite and "
+        f"re-apply k1623_rev3_patch_mc_artifact.py afterwards"
+    )
+
+
 def main() -> None:
     t0 = time.time()
+    _guard_frozen_artifact()
     orig = json.loads(RESULTS_ORIG.read_text(encoding="utf-8"))
     per_asset = {}
     for idx, (ticker, kind, label) in enumerate(K.ASSETS):
