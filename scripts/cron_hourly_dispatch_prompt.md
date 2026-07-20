@@ -5,7 +5,7 @@ Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-con
 **Routing canonical**：`.claude/rules/task-routing.md`（capability / concurrency / workflow exceptions）+ `scripts/model_router.py`（model / effort / topology）。派工前依 `task_type` 查兩個 owner，不在本 prompt 維護固定型別數。
 
 **統一任務池 + claim 流程（HARD RULE，2026-05-25 用戶要求）**：
-1. **第一動作 = 一次定位，禁止翻抽屜**：`uv run python scripts/ops_snapshot.py`（0.4s 回傳 backbone/queue/pool/alerts/git 全狀態 JSON）+ 讀 `storage/ops/handoff_latest.md`（敘事脈絡）。**之後不得再用零散 ls / git status / jq 重複定位**（2026-07-14 WS1b：repo-navigation bash 一週 1,945 則 / 10.1M tokens 的根治）。
+1. **第一動作 = 一次定位，禁止翻抽屜**：`uv run python scripts/ops_snapshot.py`（0.4s 回傳 backbone/queue/pool/alerts/git 全狀態 JSON）+ 讀 `storage/ops/handoff_latest.md`（敘事脈絡）。**之後不得再用零散 ls / git status / jq 重複定位**（2026-07-14 WS1b：repo-navigation bash 一週 1,945 則 / 10.1M tokens 的根治）。**點狀查詢也走同一儀器**（G2 子命令，取代手寫 jq）：查單一 task `--task <id_or_title>`、查 feed 文章 `--article <id_or_slug>`、查排程 job 活性 `--job <schedule_id>`、盤 worktrees `--worktrees`、看派工 receipts `--receipts N`、篩佇列 `--queue --status S --type T --limit N`。輸出是決策極簡欄位（<2KB），不會把整檔拉進 context。
 2. **派工前先 claim**：先確認 `$VOLPRED_TASK_CLAIM_OWNER` 非空，再跑 `uv run python scripts/task_pool_claim.py claim --id <id> --owner "$VOLPRED_TASK_CLAIM_OWNER"`。這是 supervisor 依 slot_id + job_id 產生的唯一且 retry-stable ownership token；缺值必須停止並回報 dispatcher identity error，禁止退回日期/小時或自訂名稱。拒絕 `wrong_status` / `already_claimed` 時換另一 task，禁強推。
 3. 開工標 in_progress：`uv run python scripts/task_pool_claim.py start --id <id>`
 4. 完工標 succeeded/failed：`uv run python scripts/task_pool_claim.py complete --id <id> --status succeeded --result "<摘要>"`
@@ -40,19 +40,17 @@ PHASE 0 — Email reply 任務（**最高優先**，超越 compute queue followu
 
 ### Phase 0.A — 先處理已 in_progress 但未 close 的 email_reply
 ```bash
-uv run python scripts/task_pool_claim.py list --status in_progress --limit 50 2>/dev/null \
-  | jq '[.tasks[] | select(.task_type=="email_reply")]'
+uv run python scripts/ops_snapshot.py --queue --status in_progress --type email_reply
 ```
-對每一條（讀 `result` field 看上輪 plan + linked task ids）：
-- jq query linked_task_ids 的當前 status
+對每一條（用 `ops_snapshot --task <id>` 看上輪 plan + linked task ids —— result 前 200 字就夠判斷）：
+- 逐一 `ops_snapshot --task <linked_id>` 查 linked_task_ids 的當前 status
 - 若**全部 succeeded** → 寄 **CLOSE email**（`Re: <原 subj>` body=「完成項目摘要 + commit hash + 對應 task id」）→ complete --status succeeded
 - 若有 failed → 寄 **close-with-failure email** 說明哪步失敗+原因 → complete --status failed
 - 若仍 in_progress → 跳過本輪不動，下次 tick 再 check（避免 nagging）
 
 ### Phase 0.B — 新 pending email_reply 入單
 ```bash
-uv run python scripts/task_pool_claim.py list --status pending --limit 50 2>/dev/null \
-  | jq '[.tasks[] | select(.task_type=="email_reply")][0]'
+uv run python scripts/ops_snapshot.py --queue --type email_reply --limit 1
 ```
 若有最舊一條 → 走 5 步：
 

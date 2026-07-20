@@ -10,9 +10,21 @@ JSON，一次呼叫取代整輪翻抽屜。
     uv run python scripts/ops_snapshot.py            # compact JSON to stdout
     uv run python scripts/ops_snapshot.py --pretty   # 縮排版（人讀）
 
+結構化子查詢（ops-master G2, 2026-07-20）—— 取代 session 內散彈 jq/grep：
+    --task <id_or_title_substr>   # next_tasks 單任務定位（id/status/priority/lane/claimed_by/result 前 200 字）
+    --article <mile_id_or_slug>   # feed.json 文章定位（id/title/status/published_at/audience；絕不回 content）
+    --job <schedule_id>           # runtime_schedules spec + job_liveness() 判活（D1 單一 evidence 源）
+    --worktrees                   # 各 worktree 名/branch/unmerged/dirty/age，一列一個
+    --receipts N                  # dispatch_state completions 尾 N 筆精簡欄位
+    --queue [--status S --type T --limit N]  # 佇列計數 + 精簡列表
+子查詢一律回「決策需要的極簡欄位」，嚴禁整檔 dump —— 單次輸出設計上 <2KB
+（tests/test_ops_snapshot_queries.py 有 size 斷言 gate，防儀器自己變 token 黑洞）。
+
 定位邊界（anti-stacking）：本 script 是「狀態定位」，不是健康裁決 ——
 result-level 健康檢查的 owner 是 scripts/daily_checkup.py，alert 裁決的 owner 是
-scripts/check_alerts.py。本 script 只讀不寫、不寄信、不判 breach。
+scripts/check_alerts.py，liveness evidence merge 的 owner 是
+volpred.ops.schedules.job_liveness（本 script 只轉述它的結果）。
+本 script 只讀不寫、不寄信、不判 breach。
 """
 from __future__ import annotations
 
@@ -27,6 +39,19 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parent.parent
 STORAGE = ROOT / "storage"
 TPE = ZoneInfo("Asia/Taipei")
+
+# 子查詢輸出紀律：截斷上限（欄位級），防單筆長 result/description 撐爆輸出
+_RESULT_CLIP = 200
+_TITLE_CLIP = 80
+_MATCH_CAP = 5
+_RECEIPT_CAP = 20
+
+
+def _clip(value, n: int):
+    if value is None:
+        return None
+    s = str(value)
+    return s if len(s) <= n else s[: n - 1] + "…"
 
 
 def _read_json(path: Path):
@@ -78,11 +103,10 @@ def backbone() -> dict:
     }
 
 
-def queue() -> dict:
-    d = _read_json(STORAGE / "next_tasks.json")
-    tasks = d.get("tasks", d) if isinstance(d, dict) else d
-    if not isinstance(tasks, list):
-        return {"error": "unexpected next_tasks shape"}
+def queue(path: Path | None = None) -> dict:
+    tasks = _load_tasks(path)
+    if isinstance(tasks, dict):
+        return {"error": tasks["_error"]}
     out: dict[str, object] = {}
     pending = [t for t in tasks if t.get("status") == "pending"]
     by_prio: dict[str, int] = {}
@@ -162,20 +186,320 @@ def pointers() -> dict:
     return out
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--pretty", action="store_true")
-    args = ap.parse_args()
-    snap = {
-        "ts_taipei": datetime.now(TPE).strftime("%Y-%m-%d %H:%M:%S"),
-        "backbone": backbone(),
-        "queue": queue(),
-        "content_pool": content_pool(),
-        "alerts": alerts_state(),
-        "git": git_state(),
-        "pointers": pointers(),
+# ── 結構化子查詢（ops-master G2）─────────────────────────────────────────────
+
+
+def _load_tasks(path: Path | None = None) -> list | dict:
+    d = _read_json(path or STORAGE / "next_tasks.json")
+    if isinstance(d, dict) and "_error" in d:
+        return d
+    tasks = d.get("tasks", d) if isinstance(d, dict) else d
+    if not isinstance(tasks, list):
+        return {"_error": "unexpected next_tasks shape"}
+    return tasks
+
+
+def _task_row(t: dict) -> dict:
+    row = {
+        "id": t.get("id"),
+        "status": t.get("status"),
+        "priority": t.get("priority"),
+        "type": t.get("task_type"),
+        "lane": t.get("dispatch_lane") or t.get("lane"),
+        "claimed_by": t.get("claimed_by"),
+        "title": _clip(t.get("title"), _TITLE_CLIP),
+        "result": _clip(t.get("result") or t.get("result_summary"), _RESULT_CLIP),
     }
-    print(json.dumps(snap, ensure_ascii=False, indent=2 if args.pretty else None))
+    if t.get("tombstone"):
+        row["tombstone"] = True
+    return {k: v for k, v in row.items() if v is not None}
+
+
+def task_query(needle: str, *, path: Path | None = None) -> dict:
+    """單任務定位：exact id 優先，否則 id/title case-insensitive substring。"""
+    tasks = _load_tasks(path)
+    if isinstance(tasks, dict):
+        return {"error": tasks["_error"]}
+    exact = [t for t in tasks if t.get("id") == needle]
+    if exact:
+        hits = exact
+    else:
+        low = needle.lower()
+        hits = [
+            t
+            for t in tasks
+            if low in str(t.get("id", "")).lower() or low in str(t.get("title", "")).lower()
+        ]
+    return {
+        "query": needle,
+        "matched": len(hits),
+        "tasks": [_task_row(t) for t in hits[:_MATCH_CAP]],
+    }
+
+
+def article_query(needle: str, *, path: Path | None = None) -> dict:
+    """feed 文章定位（不含 content）：id exact → id/slug substring → title substring。"""
+    feed_path = path or STORAGE / "reports" / "feed.json"
+    d = _read_json(feed_path)
+    if isinstance(d, dict) and "_error" in d:
+        return {"error": d["_error"]}
+    arts = d.get("articles", d) if isinstance(d, dict) else d
+    if not isinstance(arts, list):
+        return {"error": "unexpected feed shape"}
+
+    def _slug(a: dict) -> str:
+        det = a.get("details")
+        return str(det.get("slug", "")) if isinstance(det, dict) else ""
+
+    exact = [a for a in arts if a.get("id") == needle]
+    if exact:
+        hits = exact
+    else:
+        low = needle.lower()
+        hits = [
+            a
+            for a in arts
+            if low in str(a.get("id", "")).lower() or low in _slug(a).lower()
+        ] or [a for a in arts if low in str(a.get("title", "")).lower()]
+    return {
+        "query": needle,
+        "matched": len(hits),
+        "articles": [
+            {
+                "id": a.get("id"),
+                "title": _clip(a.get("title"), _TITLE_CLIP),
+                "status": a.get("status"),
+                "published_at": a.get("published_at"),
+                "audience": a.get("audience"),
+            }
+            for a in hits[:_MATCH_CAP]
+        ],
+    }
+
+
+def job_query(
+    schedule_id: str,
+    *,
+    config: dict | None = None,
+    marker_state: dict | None = None,
+    repo_root: Path | None = None,
+) -> dict:
+    """runtime_schedules spec + D1 job_liveness()（單一 liveness evidence 源）。"""
+    src = ROOT / "src"
+    if str(src) not in sys.path:
+        sys.path.insert(0, str(src))
+    from volpred.ops.schedules import job_liveness  # noqa: PLC0415 (deferred: base snapshot stays stdlib-fast)
+
+    if config is None:
+        from volpred.config import load_runtime_schedules  # noqa: PLC0415
+
+        config = load_runtime_schedules()
+
+    found: tuple[str, dict] | None = None
+    substr: tuple[str, dict] | None = None
+    low = schedule_id.lower()
+    for section_name, section in config.items():
+        items = section.get("items") if isinstance(section, dict) else None
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            item_id = str(item.get("id", ""))
+            if item_id == schedule_id:
+                found = (section_name, item)
+                break
+            if substr is None and low in item_id.lower():
+                substr = (section_name, item)
+        if found:
+            break
+    picked = found or substr
+    if picked is None:
+        return {"query": schedule_id, "matched": 0}
+    section_name, item = picked
+    live = job_liveness(item, marker_state=marker_state, repo_root=repo_root or ROOT)
+    spec = {
+        "id": item.get("id"),
+        "section": section_name,
+        "cron": item.get("cron"),
+        "label": _clip(item.get("label"), _TITLE_CLIP),
+        "wrapper_script": item.get("wrapper_script"),
+        "log_path": item.get("log_path") or item.get("log"),
+        "host_crontab_managed": item.get("host_crontab_managed"),
+        "piggy_back_enabled": item.get("piggy_back_enabled"),
+    }
+    return {
+        "query": schedule_id,
+        "matched": 1,
+        "spec": {k: v for k, v in spec.items() if v is not None},
+        "liveness": {
+            "last_success": live.last_success.isoformat() if live.last_success else None,
+            "last_success_age_min": _age_min(
+                live.last_success.isoformat() if live.last_success else None
+            ),
+            "success_source": live.success_source,
+            "last_activity": live.last_activity.isoformat() if live.last_activity else None,
+            "last_activity_age_min": _age_min(
+                live.last_activity.isoformat() if live.last_activity else None
+            ),
+            "marker_eligible": live.marker_eligible,
+        },
+    }
+
+
+def worktrees_query(*, repo_root: Path | None = None, main_branch: str = "main") -> dict:
+    """各 worktree 一列：name/branch/unmerged(ahead of main)/dirty/age_h。"""
+    root = repo_root or ROOT
+
+    def _g(args: list[str], cwd: Path) -> str:
+        try:
+            return subprocess.run(
+                ["git", *args], cwd=cwd, capture_output=True, text=True, timeout=15
+            ).stdout.strip()
+        except Exception as e:  # noqa: BLE001
+            print(f"[ops_snapshot] WARN git {args[:2]} failed: {e}", file=sys.stderr)
+            return ""
+
+    porcelain = _g(["worktree", "list", "--porcelain"], root)
+    entries: list[dict] = []
+    cur: dict = {}
+    for line in porcelain.splitlines():
+        if line.startswith("worktree "):
+            if cur:
+                entries.append(cur)
+            cur = {"path": line.split(" ", 1)[1]}
+        elif line.startswith("branch "):
+            cur["branch"] = line.split(" ", 1)[1].removeprefix("refs/heads/")
+        elif line == "detached":
+            cur["branch"] = "(detached)"
+    if cur:
+        entries.append(cur)
+
+    rows = []
+    for e in entries[1:]:  # git 保證第一個 entry 是主 repo，跳過
+        p = Path(e["path"])
+        branch = e.get("branch", "?")
+        ahead: int | None = None
+        if branch not in ("?", "(detached)"):
+            raw = _g(["rev-list", "--count", f"{main_branch}..{branch}"], root)
+            ahead = int(raw) if raw.isdigit() else None
+        status = _g(["status", "--porcelain"], p) if p.is_dir() else ""
+        age_h = None
+        try:
+            age_h = round(
+                (datetime.now(timezone.utc).timestamp() - p.stat().st_mtime) / 3600, 1
+            )
+        except OSError as exc:
+            print(f"[ops_snapshot] WARN worktree stat failed {p}: {exc}", file=sys.stderr)
+        row = {
+            "name": p.name,
+            "unmerged": ahead,
+            "dirty": len(status.splitlines()) if status else 0,
+            "age_h": age_h,
+        }
+        if branch not in (f"worktree-{p.name}", f"wt/{p.name}"):
+            row["branch"] = _clip(branch, 48)  # 非慣例命名才值得多佔欄位
+        rows.append(row)
+    return {"n": len(rows), "worktrees": rows}
+
+
+def receipts_query(n: int, *, path: Path | None = None) -> dict:
+    """dispatch_state completions 尾 n 筆精簡欄位（execution receipts）。"""
+    st = _read_json(path or STORAGE / "ops" / "dispatch_state.json")
+    if "_error" in st:
+        return {"error": st["_error"]}
+    comps = st.get("completions") or []
+    n = max(1, min(int(n), _RECEIPT_CAP))
+    rows = [
+        {
+            "at": c.get("completed_at"),
+            "job": str(c.get("job_id", ""))[:8] or None,
+            "slot": c.get("slot_id"),
+            "reason": _clip(c.get("fire_reason"), 48),
+            "exit": c.get("exit_code"),
+            "outcome": c.get("outcome"),
+            "dur_s": c.get("duration_s"),
+        }
+        for c in comps[-n:]
+    ]
+    return {"total": len(comps), "shown": len(rows), "receipts": rows}
+
+
+def queue_query(
+    status: str | None = None,
+    task_type: str | None = None,
+    limit: int = 10,
+    *,
+    path: Path | None = None,
+) -> dict:
+    """佇列計數 + 精簡列表。預設 status=pending；limit 上限 20。"""
+    tasks = _load_tasks(path)
+    if isinstance(tasks, dict):
+        return {"error": tasks["_error"]}
+    status = status or "pending"
+    limit = max(1, min(int(limit), 20))
+    hits = [
+        t
+        for t in tasks
+        if t.get("status") == status
+        and (task_type is None or t.get("task_type") == task_type)
+    ]
+    hits.sort(key=lambda t: (t.get("priority", 9), str(t.get("created_at", ""))))
+    counts = queue(path)
+    counts.pop("top_pending", None)  # 與下方 tasks 列表重複，砍掉省輸出
+    rows = []
+    for t in hits[:limit]:
+        row = _task_row(t)
+        row.pop("result", None)  # 列表模式不帶 result，單任務細節走 --task
+        row.pop("status", None)  # 已由 filter 隱含
+        rows.append(row)
+    return {
+        "filter": {"status": status, **({"type": task_type} if task_type else {})},
+        "matched": len(hits),
+        "counts": counts,
+        "tasks": rows,
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--pretty", action="store_true")
+    ap.add_argument("--task", metavar="ID_OR_TITLE", help="next_tasks 單任務定位")
+    ap.add_argument("--article", metavar="ID_OR_SLUG", help="feed 文章定位（不含 content）")
+    ap.add_argument("--job", metavar="SCHEDULE_ID", help="排程 spec + liveness")
+    ap.add_argument("--worktrees", action="store_true", help="worktree 清單（一列一個）")
+    ap.add_argument("--receipts", type=int, metavar="N", help="dispatch completions 尾 N 筆")
+    ap.add_argument("--queue", action="store_true", help="佇列計數 + 精簡列表")
+    ap.add_argument("--status", help="--queue 的 status filter（預設 pending）")
+    ap.add_argument("--type", dest="task_type", help="--queue 的 task_type filter")
+    ap.add_argument("--limit", type=int, default=10, help="--queue 列表上限（預設 10，cap 20）")
+    args = ap.parse_args()
+
+    out: dict = {}
+    if args.task:
+        out["task"] = task_query(args.task)
+    if args.article:
+        out["article"] = article_query(args.article)
+    if args.job:
+        out["job"] = job_query(args.job)
+    if args.worktrees:
+        out["worktrees"] = worktrees_query()
+    if args.receipts is not None:
+        out["receipts"] = receipts_query(args.receipts)
+    if args.queue:
+        out["queue"] = queue_query(args.status, args.task_type, args.limit)
+
+    if not out:  # 無子查詢 → 完整定位 snapshot（原行為）
+        out = {
+            "ts_taipei": datetime.now(TPE).strftime("%Y-%m-%d %H:%M:%S"),
+            "backbone": backbone(),
+            "queue": queue(),
+            "content_pool": content_pool(),
+            "alerts": alerts_state(),
+            "git": git_state(),
+            "pointers": pointers(),
+        }
+    print(json.dumps(out, ensure_ascii=False, indent=2 if args.pretty else None))
     return 0
 
 

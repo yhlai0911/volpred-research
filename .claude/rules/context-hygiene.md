@@ -13,12 +13,18 @@ paths:
 ## 硬規則
 
 1. **禁止整檔 Read** `storage/reports/feed.json`（2000+ 篇 feed 全量）。
-   - 合法入口：`jq`、`grep`、單篇 `storage/reports/<id>.json`。
-   - 一次需要多篇時用 `jq` 投影最少欄位（`{id, title, status, published_at}`）。
+   - **首選入口（G2 結構化儀器，2026-07-20）**：`uv run python scripts/ops_snapshot.py --article <id_or_slug>`
+     — 回 id/title/status/published_at/audience 極簡欄位（<2KB），絕不回 content。
+   - 需要 content 才讀單篇 `storage/reports/<id>.json`；子命令欄位不夠的特殊投影才手寫 `jq`/`grep`。
 2. **禁止整檔 Read** `storage/memory/knowledge.json`（2000+ K 條目）。
    - 合法入口：`jq '[.[] | select(...)] | map(...)' storage/memory/knowledge.json`。
    - 查特定 K 用 `jq '.[] | select(.item_id == "K1098")'`。
 3. **禁止整檔 Read** 其他大 JSON (`paper_trading.json`, `strategy_metrics.json` 等)。用 jq 先 pre-filter。
+3b. **佇列 / 排程 / 派工 receipts / worktrees 的點狀查詢一律走 `ops_snapshot` 子命令**，不手寫 jq：
+   - 單一 task：`ops_snapshot --task <id_or_title_substr>`（含 result 前 200 字）
+   - 佇列篩選：`ops_snapshot --queue --status S --type T --limit N`（取代 `jq 'select(.status==...)' storage/next_tasks.json`）
+   - 排程 job spec + 活性：`ops_snapshot --job <schedule_id>`（liveness 走 D1 `job_liveness` 單一 evidence 源，取代 grep cron log / jq runtime_schedules）
+   - dispatch receipts 尾巴：`ops_snapshot --receipts N`；worktree 盤點：`ops_snapshot --worktrees`
 4. **重複性流程用 skill**，不要把長 SOP 貼進主對話（`.claude/skills/` 有對應 skill 就用）。
 5. **sub-agent 隔離** — 若新任務與當前上下文、已載入 skills、或主對話無關，**必須另開乾淨 sub-agent**。目的：隔離大搜尋、大量 logs、文件探索、無關 side task，減少 context 汙染與 token 損耗。
 

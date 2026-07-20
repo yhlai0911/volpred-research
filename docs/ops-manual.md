@@ -114,8 +114,15 @@
 | 看平台現況（30 秒） | `uv run python scripts/ops_snapshot.py` |
 | 大體檢（result-level） | `uv run python scripts/daily_checkup.py` |
 | 指派任務 | `uv run volpred ops assign --title "..." --description "..." --priority 1` |
-| 看任務佇列 | `uv run python scripts/task_pool_claim.py list --status pending --limit 10` |
+| 看任務佇列（計數＋列表） | `uv run python scripts/ops_snapshot.py --queue --status pending --limit 10` |
+| 查單一任務狀態 | `uv run python scripts/ops_snapshot.py --task <id 或標題關鍵字>` |
+| 查某篇文章狀態（不拉 content） | `uv run python scripts/ops_snapshot.py --article <mile_id 或 slug>` |
+| 查排程 job 有沒有活著 | `uv run python scripts/ops_snapshot.py --job <schedule_id>` |
+| 盤點 worktrees（未合併/dirty） | `uv run python scripts/ops_snapshot.py --worktrees` |
+| 看最近幾班派工結果 | `uv run python scripts/ops_snapshot.py --receipts 5` |
 | 監控 dashboard | http://127.0.0.1:8787 |
+
+（G2 子命令一律回極簡 JSON <2KB，取代手寫 jq/grep 翻 `next_tasks.json` / `feed.json` / cron log。）
 
 ---
 
