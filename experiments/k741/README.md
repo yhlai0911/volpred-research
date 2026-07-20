@@ -81,32 +81,72 @@ proxy 的 1.010（等於沒有 absorption）掉到 official 的 0.936 —— 那
 原版 frame 從 2009-12-01 建起（VIX_prev warm-up），卻把**整個 frame** 當 control，
 讓 21 個 2009-12 的日子進了論文宣稱的「2010-01 起」樣本。這在決策邊界上是決定性的：
 
-| 估計起點 | ratio | p |
-|---|---|---|
-| 2009-12-01（原版行為） | 1.16495 | **0.0479** |
-| **2010-01-01（修正）** | **1.16307** | **0.0506** |
+| 估計起點 | ratio | p (Welch, headline) | p (Student) |
+|---|---|---|---|
+| 2009-12-01（原版行為） | 1.16495 | 0.0374 | **0.0479** |
+| **2010-01-01（修正）** | **1.16307** | **0.0394** | **0.0506** |
 
-洩漏本身就是「5% 顯著」與「不顯著」的全部差距。k904 原本就切對，不受影響。
+樣本數影響很小（ratio 只動 0.002），但**在 Student 變體下這個洩漏剛好就是「5% 顯著」與
+「不顯著」的全部差距**（0.0479 → 0.0506）。改用 Welch headline 後兩者都在 5% 內
+（0.0374 → 0.0394），所以這個「決定性」是 variant-dependent 的 —— 本節第一版寫成無條件
+決定性，已更正。無論哪個變體，切對窗口都是對的，理由是標籤誠實而不是它換來的顯著性。
+k904 原本就切對，不受影響。
 
 ### 結論：方向不變，但**不可**上調顯著性措辭
 
-| 統計量 | 論文原值 | canonical | 變化 |
+headline 檢定變體 = **Welch**（見下節「檢定變體」）。下表 canonical 欄為 Welch 值。
+
+| 統計量 | 論文原值 | canonical (Welch) | 變化 |
 |---|---|---|---|
-| Overall ratio vs all | 1.14 (p=0.081) | **1.16 (p=0.051)** | 仍為 10% marginal，**未跨 5%** |
-| Overall ratio vs Friday | 1.16 (p=0.061) | **1.19 (p=0.034)** | 5% 顯著 |
-| Low (V<15) | 1.24 (p=0.069, n=62) | **1.31 (p=0.009, n=63)** | ⚑⚑ 升到 1% 顯著 |
-| Medium (15–20) | 1.30 (p=0.009, n=78) | **1.23 (p=0.027, n=76)** | ⚑ 1% → 5%（仍顯著） |
-| Elevated (20–25) | 1.18 (p=0.279) | **1.19 (p=0.253)** | 兩者皆不顯著 |
-| High (V≥25) | 0.95 (p=0.777) | **0.94 (p=0.731)** | 兩者皆不顯著 |
+| Overall ratio vs all | 1.14 (p=0.081) | **1.16 (p=0.039)** | 名目跨 5%，但 Student 下 p=0.051 → **borderline，不可宣稱穩健** |
+| Overall ratio vs Friday | 1.16 (p=0.061) | **1.19 (p=0.036)** | 5% 顯著 |
+| Low (V<15) | 1.24 (p=0.069, n=62) | **1.31 (p=0.026, n=63)** | 未校正 5% 顯著；**Holm 後 0.104，不顯著** |
+| Medium (15–20) | 1.30 (p=0.009, n=78) | **1.23 (p=0.029, n=76)** | 未校正 5% 顯著；**Holm 後 0.104，不顯著** |
+| Elevated (20–25) | 1.18 (p=0.279) | **1.19 (p=0.266)** | 兩者皆不顯著（Holm 0.533） |
+| High (V≥25) | 0.95 (p=0.777) | **0.94 (p=0.707)** | 兩者皆不顯著（Holm 0.707） |
 
 **沒有任何符號翻轉**，且 regime 梯度變成**有序遞減**（1.31 → 1.23 → 1.19 → 0.94），
-比原本 Medium 高於 Low 的凸起更符合 absorption 假說。
-`main_v3.tex` 已更新，pooled 措辭維持「marginal at the 10% level」
-（本檔第一版誤寫成 5% 顯著，已撤回）。
+比原本 Medium 高於 Low 的凸起更符合 absorption 假說。但**四個 regime 檢定經 Holm 校正後
+無一存活**（最小 adjusted p = 0.104），所以 regime-level 顯著性不能拿來承載敘事；
+`main_v3.tex` 已據此降級（見下節）。
 
 k904 獨立佐證（不同視窗、Welch）：overall 1.160 (p=0.042)、Low 1.305、High 0.935。
-注意 k741 (Student, p=0.0506) 與 k904 (Welch, p=0.0424) **跨在 5% 兩側**——
-5% 的判定是 spec-dependent，這也是 pooled 措辭要保守的理由。
+k741 改用 Welch 後兩者變體一致，5% 兩側分歧的問題消失（歷史紀錄見下節）。
+
+### 檢定變體：a priori 選 Welch，並揭露另一個
+
+原版呼叫 `stats.ttest_ind` 未傳 `equal_var`，等於**因為省略而拿到 Student's**，
+而論文一直標成 Welch、姊妹實驗 k904 也真的用 Welch。兩個變體在 overall 檢定上
+**跨在 5% 兩側**（Student 0.0506 / Welch 0.0394），所以不能繼續放著不決定。
+
+現在所有 call site 都顯式傳 `equal_var=False`，理由是**方法論的、不是這份樣本給的**：
+
+- Welch 無條件使用是標準建議（Zimmerman 2004；Ruxton 2006；Delacre, Lakens & Leys 2017）：
+  變異數真的相等時 power 損失極小，而「先做變異數檢定再選變體」的兩階段程序會**膨脹 Type I error**。
+- 與 k904 及論文既有標籤一致。
+
+**不是因為看到異質變異才選它** —— Brown-Forsythe（median-centred Levene）p = 0.48、
+sd ratio 0.94，本樣本沒有異質變異的證據。這點寫進 JSON
+（`test_variant_disclosure.not_justified_by_heteroscedasticity`）避免理由被誤讀成 data-driven。
+
+**也不是因為它比較好看**。它把 overall 從 0.051 推到 0.039（對我們有利），
+但把敘事真正倚賴的 regime 證據推向不利方向：
+
+| | overall p | Holm 後存活的 regime |
+|---|---|---|
+| Student | 0.0506 | Low (adj p = 0.036) |
+| **Welch（採用）** | **0.0394** | **無** |
+
+選的是「在關鍵處比較不利」的那個變體。
+
+### 多重比較：tab:nfp 的四個 regime 檢定
+
+論文表格列四個 regime 檢定，**該表就是 family**，原本零 Holm/Bonferroni 揭露 —— 這是
+submission blocker。現已對四檢定做 Holm step-down 並存進 JSON（兩個變體都存）。
+Welch headline 下 **無一存活**（0.104 / 0.104 / 0.533 / 0.707）。
+
+overall 的 vs-all 與 vs-Friday 不併入這個 family：它們是同一份樣本上同一個假設的兩種框法，
+一併報告而非挑小的那個。
 
 ### ⚠️ 最重要的發現：論文的「regime 對比」本身沒被檢定過
 
@@ -138,7 +178,10 @@ descriptive pattern，並明說推論改靠 SAR 證據。crisis cell 只有 28 �
    **從未綁 ratio/t/p**。已修：canonical JSON 存下這些值，`reproduce.py` 改綁 canonical
    並補齊每個 regime 六欄（gate 112/112, 100%, green）。
 2. **論文把這些檢定標成 "Welch's t-tests"，但 k741 用的是 Student's**
-   （`stats.ttest_ind` 預設 `equal_var=True`）。已在 tex 改為 "two-sample $t$-tests"。
+   （`stats.ttest_ind` 預設 `equal_var=True`）。第一輪先在 tex 改成中性的
+   "two-sample $t$-tests"；**現已徹底解決**：headline 固定為 Welch、所有 call site
+   顯式傳 `equal_var=`、tex 改回 "Welch's" 並在 table note 揭露 Student 變體的 p 值。
+   見上節「檢定變體」。
 
 ### Codex review 歷程
 

@@ -35,6 +35,42 @@ factor separately. `date_effect` is defined only at a FIXED mapper.
 HEADLINE SPEC = official dates + forward-only mapping. That is the only cell
 with neither a proxy calendar nor a lookahead, and it is what the paper cites.
 
+TEST VARIANT: WELCH, UNCONDITIONALLY (third Codex finding)
+----------------------------------------------------------
+The archived script called `stats.ttest_ind` without `equal_var`, i.e. it got
+scipy's Student's default by omission rather than by decision — while
+`main_v3.tex` described the tests as Welch's and the sibling k904 actually
+passes `equal_var=False`. The two variants straddle the 5% line on the overall
+test (Student p = 0.0506, Welch p = 0.0394), so this cannot be left implicit.
+
+This script fixes the headline on **Welch** and passes `equal_var=` explicitly
+everywhere. The rationale is methodological, not empirical:
+
+  * Welch unconditionally is the standard recommendation (Zimmerman 2004;
+    Ruxton 2006; Delacre, Lakens & Leys 2017). Welch loses almost no power when
+    variances are in fact equal, and conditioning the choice on a variance
+    pre-test inflates Type I error — a two-stage procedure is worse than either
+    stage alone.
+  * It makes k741 consistent with k904 and with what the paper always claimed.
+
+What it is NOT is a choice made because the variances look unequal, and the
+JSON records the diagnostic that says so: Brown-Forsythe (median-centred Levene)
+gives p = 0.48 for NFP vs all non-NFP. There is no evidence of heteroscedasticity
+here; Welch is chosen a priori, not because this sample asked for it.
+
+Nor is it a choice made because it flatters the result. It moves the overall
+test from p = 0.051 to p = 0.039, but it moves the *regime* tests — the ones the
+absorption narrative leans on — the other way: under Student's + Holm the calm
+regime survives multiplicity correction (adj p = 0.036), under Welch + Holm
+**nothing does** (smallest adj p = 0.104). Both directions are reported.
+
+MULTIPLE COMPARISONS
+--------------------
+Part B runs four regime tests and the paper tabulates all four. Holm-Bonferroni
+adjusted p-values are computed across that family and persisted for both
+variants, so the table note can report them instead of leaving a referee to
+notice the omission.
+
 SAMPLE WINDOW (second Codex finding)
 ------------------------------------
 The archived script built its frame from 2009-12-01 (warm-up for `VIX_prev`)
@@ -89,6 +125,41 @@ EVENT_CUTOFF = pd.Timestamp("2026-03-30")
 
 REGIMES = [("Low (VIX<15)", 0, 15), ("Medium (15-20)", 15, 20),
            ("Elevated (20-25)", 20, 25), ("High (VIX>=25)", 25, 999)]
+
+# Headline test variant. False => Welch. See module docstring for why this is
+# fixed a priori rather than chosen from a variance pre-test. Never rely on
+# scipy's default here: the two variants straddle 5% on the overall test.
+HEADLINE_EQUAL_VAR = False
+
+
+def both_variants(x, y):
+    """Student's and Welch's for the same pair, plus the variance diagnostic.
+
+    Returned `t`/`p` are the headline variant; `*_student` / `*_welch` are kept
+    alongside so the paper can disclose the one it does not report.
+    """
+    t_s, p_s = stats.ttest_ind(x, y, equal_var=True)
+    t_w, p_w = stats.ttest_ind(x, y, equal_var=False)
+    # Brown-Forsythe: median-centred Levene, robust to the fat tails of |r|.
+    bf = stats.levene(x, y, center="median")
+    head_t, head_p = (t_s, p_s) if HEADLINE_EQUAL_VAR else (t_w, p_w)
+    return {
+        "t": float(head_t), "p": float(head_p),
+        "t_student": float(t_s), "p_student": float(p_s),
+        "t_welch": float(t_w), "p_welch": float(p_w),
+        "sd_ratio": float(np.std(x, ddof=1) / np.std(y, ddof=1)),
+        "levene_bf_p": float(bf.pvalue),
+    }
+
+
+def holm(pvals: dict) -> dict:
+    """Holm-Bonferroni step-down adjusted p-values over a family of tests."""
+    ordered = sorted(pvals.items(), key=lambda kv: kv[1])
+    m, running, out = len(ordered), 0.0, {}
+    for i, (key, p) in enumerate(ordered):
+        running = max(running, min(1.0, (m - i) * p))
+        out[key] = running
+    return out
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -176,8 +247,8 @@ def part_a(d):
     fri = d[(d["IsFriday"]) & (~d["IsNFP"])].dropna(subset=["Return"])
     a_nfp, a_non, a_fri = nfp["AbsReturn"], non["AbsReturn"], fri["AbsReturn"]
 
-    t_all, p_all = stats.ttest_ind(a_nfp, a_non)   # equal_var=True, as archived
-    t_fri, p_fri = stats.ttest_ind(a_nfp, a_fri)
+    v_all = both_variants(a_nfp, a_non)
+    v_fri = both_variants(a_nfp, a_fri)
     _, p_u_all = stats.mannwhitneyu(a_nfp, a_non, alternative="greater")
     ret, vix_chg = nfp["Return"], nfp["VIX_change"].dropna()
 
@@ -188,8 +259,10 @@ def part_a(d):
         "friday_mean_abs_return_pct": float(a_fri.mean() * 100),
         "ratio_vs_all": float(a_nfp.mean() / a_non.mean()),
         "ratio_vs_friday": float(a_nfp.mean() / a_fri.mean()),
-        "t_vs_all": float(t_all), "p_vs_all": float(p_all),
-        "t_vs_friday": float(t_fri), "p_vs_friday": float(p_fri),
+        "t_vs_all": v_all["t"], "p_vs_all": v_all["p"],
+        "t_vs_friday": v_fri["t"], "p_vs_friday": v_fri["p"],
+        "test_variants_vs_all": v_all,
+        "test_variants_vs_friday": v_fri,
         "wilcoxon_p_vs_all": float(p_u_all),
         "pct_positive": float((ret > 0).mean() * 100),
         "mean_return_pct": float(ret.mean() * 100),
@@ -220,13 +293,28 @@ def part_b(d):
             "mean_vix_change": float(vchg.mean()) if len(vchg) else None,
         }
         if len(rn) >= 5 and len(ro) >= 30:
-            t, p = stats.ttest_ind(rn["AbsReturn"], ro["AbsReturn"])
+            v = both_variants(rn["AbsReturn"], ro["AbsReturn"])
             rec.update({
                 "non_nfp_mean_abs_return_pct": float(ro["AbsReturn"].mean() * 100),
                 "ratio": float(abs_r.mean() / ro["AbsReturn"].mean()),
-                "t_stat": float(t), "p_value": float(p),
+                "t_stat": v["t"], "p_value": v["p"],
+                "test_variants": v,
             })
         out[label] = rec
+
+    # Holm across the four regime tests. The paper tabulates all four, so the
+    # family is the table, and reporting only unadjusted p-values would overstate
+    # the calm-regime result. Computed for both variants because which regimes
+    # survive depends on that choice — Student's keeps one, Welch keeps none.
+    tested = {k: r for k, r in out.items() if "test_variants" in r}
+    if tested:
+        adj_head = holm({k: r["test_variants"]["p"] for k, r in tested.items()})
+        adj_stud = holm({k: r["test_variants"]["p_student"] for k, r in tested.items()})
+        adj_welc = holm({k: r["test_variants"]["p_welch"] for k, r in tested.items()})
+        for k, r in tested.items():
+            r["p_value_holm"] = float(adj_head[k])
+            r["test_variants"]["p_student_holm"] = float(adj_stud[k])
+            r["test_variants"]["p_welch_holm"] = float(adj_welc[k])
     return out
 
 
@@ -409,6 +497,47 @@ def main():
         },
     }
 
+    # Single place the paper can cite for "which test, and what does the other one say".
+    ha = headline["part_a_historical"]
+    hb = headline["part_b_vix_regimes"]
+    reg_tested = {k: r for k, r in hb.items() if "test_variants" in r}
+    variant_disclosure = {
+        "headline_variant": "student" if HEADLINE_EQUAL_VAR else "welch",
+        "chosen_a_priori": True,
+        "rationale": ("Welch unconditionally (Zimmerman 2004; Ruxton 2006; Delacre, Lakens & Leys 2017): "
+                      "negligible power cost under equal variances, and selecting the variant from a "
+                      "variance pre-test inflates Type I error. Also aligns k741 with sibling k904 and "
+                      "with the label main_v3.tex already carried."),
+        "not_justified_by_heteroscedasticity": {
+            "levene_bf_p_vs_all": ha["test_variants_vs_all"]["levene_bf_p"],
+            "sd_ratio_vs_all": ha["test_variants_vs_all"]["sd_ratio"],
+            "note": ("Brown-Forsythe finds no evidence of unequal variance (p = 0.48, sd ratio 0.94). The "
+                     "choice is a priori and would be the same had the diagnostic gone the other way; it is "
+                     "recorded here so the rationale is not misread as data-driven."),
+        },
+        "not_chosen_for_favourability": {
+            "overall_p_student": ha["test_variants_vs_all"]["p_student"],
+            "overall_p_welch": ha["test_variants_vs_all"]["p_welch"],
+            "regime_holm_survivors_student": sorted(
+                k for k, r in reg_tested.items() if r["test_variants"]["p_student_holm"] < 0.05),
+            "regime_holm_survivors_welch": sorted(
+                k for k, r in reg_tested.items() if r["test_variants"]["p_welch_holm"] < 0.05),
+            "note": ("Welch helps the overall test across the 5% line but costs the regime family its only "
+                     "Holm survivor. The section leans on the regime pattern, so the chosen variant is the "
+                     "less flattering one where it matters."),
+        },
+        "multiplicity": {
+            "family": "the four VIX-regime tests tabulated in tab:nfp",
+            "method": "Holm-Bonferroni step-down",
+            "adjusted_headline": {k: r["p_value_holm"] for k, r in reg_tested.items()},
+            "adjusted_student": {k: r["test_variants"]["p_student_holm"] for k, r in reg_tested.items()},
+            "adjusted_welch": {k: r["test_variants"]["p_welch_holm"] for k, r in reg_tested.items()},
+            "note": ("The overall vs-all and vs-Friday tests are not folded into this family: they are two "
+                     "framings of one hypothesis on one sample, reported together rather than screened for "
+                     "the smaller p."),
+        },
+    }
+
     px_m = {(d.year, d.month): d for d in px}
     off_m = {(d.year, d.month): d for d in off}
     shifted = [{"month": f"{k[0]}-{k[1]:02d}", "proxy": str(px_m[k].date()),
@@ -431,6 +560,7 @@ def main():
                   "ETFs absent from the pinned snapshot."),
         "part_a_historical": headline["part_a_historical"],
         "part_b_vix_regimes": headline["part_b_vix_regimes"],
+        "test_variant_disclosure": variant_disclosure,
         "regime_difference_test": regime_test,
         "factorial_cells": cells,
         "factor_decomposition": decomposition,
@@ -453,8 +583,11 @@ def main():
                 "archived": "frame built from 2009-12-01 and used whole as control (21 Dec-2009 control days)",
                 "canonical": "warm-up retained for lags; estimation sliced to 2010-01-01",
                 "why": ("The archived control set contradicts the archived label 'January 2010 to March "
-                        "2026'. Material: at the headline spec the leak moves p from 0.0506 to 0.0479, "
-                        "i.e. across the 5% line. Codex review 2026-07-19."),
+                        "2026'. The correction is made for label honesty, not for what it buys: under the "
+                        "Student variant the leak happens to straddle 5% (0.0506 corrected vs 0.0479 "
+                        "leaked), but under the Welch headline both sides clear it (0.0394 vs 0.0374), so "
+                        "that 'decisive' framing was variant-dependent and is not relied on. Codex review "
+                        "2026-07-19."),
             },
             {
                 "item": "release-date -> trading-day mapping",
@@ -466,11 +599,25 @@ def main():
                         "moves the result more than the calendar does."),
             },
             {
-                "item": "t-test variant (NOT changed — flagged for the paper)",
-                "archived": "scipy stats.ttest_ind default equal_var=True (Student's)",
-                "canonical": "identical, for comparability",
-                "why": ("main_v3.tex labelled these 'Welch's t-tests'. Incorrect for k741-sourced numbers: "
-                        "the archived script never passes equal_var=False. Sibling k904 does use Welch."),
+                "item": "t-test variant (CHANGED — now explicit)",
+                "archived": "scipy stats.ttest_ind with equal_var omitted, i.e. Student's by default",
+                "canonical": "equal_var=False (Welch) passed explicitly at every call site",
+                "why": ("The archived choice was an omission, not a decision, and the two variants straddle "
+                        "5% on the overall test (Student 0.0506 / Welch 0.0394) — too consequential to leave "
+                        "implicit. Welch unconditionally is the standard recommendation (Zimmerman 2004; "
+                        "Ruxton 2006; Delacre, Lakens & Leys 2017): it costs almost no power under equal "
+                        "variances, and picking the variant from a pre-test inflates Type I error. It also "
+                        "matches sibling k904 and what main_v3.tex always claimed. NOT justified by observed "
+                        "heteroscedasticity — Brown-Forsythe p = 0.48 shows none — and NOT chosen for "
+                        "favourability: it weakens the regime tests the narrative leans on (see multiplicity)."),
+            },
+            {
+                "item": "multiple comparisons across the four regime tests",
+                "archived": "none — four regime p-values reported unadjusted",
+                "canonical": "Holm-Bonferroni over the four-test family, persisted for both variants",
+                "why": ("tab:nfp tabulates four regime tests, so the table is the family. Unadjusted, the "
+                        "calm regime reads as the strongest evidence in the section; under Holm at the "
+                        "headline Welch variant no regime survives. Omitting this was a submission blocker."),
             },
             {
                 "item": "regime ratio / t / p persistence",
@@ -490,7 +637,17 @@ def main():
     for label, rec in headline["part_b_vix_regimes"].items():
         if "ratio" in rec:
             print(f"  {label:<18} n={rec['n']:>3}  |r|={rec['mean_abs_return_pct']:.3f}%  "
-                  f"ratio={rec['ratio']:.3f}x  t={rec['t_stat']:.2f}  p={rec['p_value']:.4f}")
+                  f"ratio={rec['ratio']:.3f}x  t={rec['t_stat']:.2f}  p={rec['p_value']:.4f}  "
+                  f"Holm={rec['p_value_holm']:.4f}")
+
+    vd = variant_disclosure
+    print(f"\nTEST VARIANT: {vd['headline_variant'].upper()} (a priori)")
+    print(f"  overall p — Student {vd['not_chosen_for_favourability']['overall_p_student']:.4f} | "
+          f"Welch {vd['not_chosen_for_favourability']['overall_p_welch']:.4f}")
+    print(f"  Brown-Forsythe p = {vd['not_justified_by_heteroscedasticity']['levene_bf_p_vs_all']:.3f} "
+          f"(no evidence of unequal variance — Welch is not justified by this sample)")
+    print(f"  regime Holm survivors @5% — Student {vd['not_chosen_for_favourability']['regime_holm_survivors_student'] or 'none'} | "
+          f"Welch {vd['not_chosen_for_favourability']['regime_holm_survivors_welch'] or 'none'}")
     print(f"\nWrote {OUT.relative_to(REPO)}")
 
 

@@ -7,6 +7,17 @@
 **Results**: `k741_nfp_event_study_canonical_results.json`,
 `k904_task_s4_nfp_canonical_results.json`
 
+> **⚠️ SUPERSEDED IN PART (2026-07-20).** Every *p*-value below is Student's, because that was the
+> headline variant when this document was written. The headline has since been fixed a priori to
+> **Welch** (`equal_var=False` now passed explicitly), and Holm-Bonferroni correction has been added
+> across the four regime tests. The current numbers are in `README.md` §「檢定變體」/「多重比較」
+> and in `k741_nfp_event_study_canonical_results.json .test_variant_disclosure`. Headline changes:
+> overall *p* 0.0506 → **0.0394**; regime *p* 0.009/0.027/0.253/0.731 → **0.026/0.029/0.266/0.707**,
+> of which **none survives Holm** (min adjusted *p* = 0.104). §6b below is retained as the record of
+> how the mislabelling was found, but its conclusion ("corrected in the tex to two-sample *t*-tests")
+> was only the interim fix. This document is kept as an audit trail of the 2026-07-19 round, not as
+> a current statement of results.
+
 > **Revision note.** The first version of this document reported a single
 > "proxy vs canonical" delta and called it a *pure date-source effect*. **That was wrong**, and a
 > Codex review (2026-07-19, verdict FAIL) caught it along with two other defects. The two arms

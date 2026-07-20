@@ -18,7 +18,11 @@
 >   2026-04-06。原本價格窗切在 2026-04-05，導致該事件在 official arm 被**靜默丟棄**
 >   而 proxy arm 卻往回對應到 04-02。價格窗已延到 2026-04-06，兩臂都是 195/195 完整對應。
 > - proxy arm 逐位重現封存 JSON（1.142670 vs 1.142569），證明重寫忠實。
-> - ⚠️ 修正後的腳本**尚未經 Codex 複審**，merge 前需重審。
+> - 複審狀態以 `experiments/k904/review_verdict.json` 為準（gate 產生、Codex 填寫、
+>   pin 住審查當下的 sha256）。本行不複述裁決，以免與裁決檔漂移。
+> - 檢定變體：本實驗**一直**顯式用 Welch（`equal_var=False`）。姊妹實驗 k741 原本因省略
+>   參數而落在 Student's，已於 2026-07-20 統一為 Welch，兩者不再分歧
+>   （見 `experiments/k741/README.md` §「檢定變體」）。
 > - 完整對照與根因：`experiments/k741/nfp_canonical_vs_proxy_comparison.md`。
 > - ⚠️ `paper/volatility-absorption/experiments/k904_paper8_shock_nfp_fix.py` 是本檔的**過時副本**，
 >   本次未動（論文目錄不在 worktree agent 權限內）。建議主線程同步或刪除。
