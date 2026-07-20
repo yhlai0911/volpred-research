@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import fcntl
 import json
+import sys
+import threading
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -77,6 +81,173 @@ def test_acquire_lock_warns_when_lock_cannot_be_written(
     assert "[compute_queue] WARN worker lock write failed; skipping run" in captured.err
     assert ".worker.lock" in captured.err
     assert "FileNotFoundError" in captured.err
+
+
+def _queued_stub_job(
+    queue_dir: Path,
+    log_dir: Path,
+    job_id: str,
+    *,
+    interpreter: str = "python",
+    script_path: str = "sleep.py",
+    args: list[str] | None = None,
+    queued_at: str = "2026-07-20T00:00:00Z",
+) -> Path:
+    path = queue_dir / f"{job_id}.json"
+    path.write_text(
+        json.dumps(
+            {
+                "id": job_id,
+                "status": "queued",
+                "title": job_id,
+                "queued_at": queued_at,
+                "script_path": script_path,
+                "interpreter": interpreter,
+                "args": args or [],
+                "env": {},
+                "stdout_file": str(log_dir / f"{job_id}.stdout"),
+                "stderr_file": str(log_dir / f"{job_id}.stderr"),
+                "result_artifact": None,
+                "timeout_seconds": 30,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_run_loop_drains_queue_and_bounds_parallelism(tmp_path: Path, monkeypatch) -> None:
+    """D6: one run-loop invocation consumes EVERY queued job, at most N at once.
+
+    Three sleep-type jobs, bound 2: the gauge must reach 2 (it actually ran in
+    parallel — work-conserving) and never exceed 2 (the bound held).
+    """
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    paths = [
+        _queued_stub_job(queue_dir, module.LOG_DIR, f"sleepy-{i}",
+                         queued_at=f"2026-07-20T00:00:0{i}Z")
+        for i in range(3)
+    ]
+
+    gauge = {"current": 0, "max": 0}
+    gauge_lock = threading.Lock()
+
+    def fake_sleep_job(*args, **kwargs):
+        with gauge_lock:
+            gauge["current"] += 1
+            gauge["max"] = max(gauge["max"], gauge["current"])
+        time.sleep(0.5)
+        with gauge_lock:
+            gauge["current"] -= 1
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(module.subprocess, "run", fake_sleep_job)
+
+    assert module.run_loop(SimpleNamespace(max_parallel=2)) == 0
+
+    for path in paths:
+        assert json.loads(path.read_text())["status"] == "completed"
+    assert gauge["max"] == 2
+
+
+def test_run_loop_drains_three_real_sleep_jobs_in_one_invocation(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """End-to-end with real subprocesses: 3 x 1.0s sleeps, bound 3.
+
+    Serial consumption would need >= 3.0s; the drain loop must finish them all
+    in a single invocation and visibly in parallel (< 2.5s wall clock).
+    """
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    paths = [
+        _queued_stub_job(
+            queue_dir,
+            module.LOG_DIR,
+            f"real-sleep-{i}",
+            interpreter=sys.executable,
+            script_path="-c",
+            args=["import time; time.sleep(1.0)"],
+            queued_at=f"2026-07-20T00:00:0{i}Z",
+        )
+        for i in range(3)
+    ]
+
+    started = time.monotonic()
+    assert module.run_loop(SimpleNamespace(max_parallel=3)) == 0
+    elapsed = time.monotonic() - started
+
+    for path in paths:
+        job = json.loads(path.read_text())
+        assert job["status"] == "completed", job
+        assert job["exit_code"] == 0
+    assert elapsed < 2.5, f"drain was not parallel: took {elapsed:.2f}s for 3x1.0s sleeps"
+
+
+def test_run_loop_second_instance_exits_immediately_while_lock_held(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    """The launchd */15 tick is restart insurance: it must lose the flock and
+    exit at once while a drain loop is alive, leaving the queue untouched.
+
+    flock conflicts between two open file descriptions behave identically in
+    one process and across processes, so holding the lock on a separate fd is a
+    faithful stand-in for the live drain loop.
+    """
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    job_path = _queued_stub_job(queue_dir, module.LOG_DIR, "untouched")
+
+    holder = module.LOCK_FILE.open("a+", encoding="utf-8")
+    try:
+        fcntl.flock(holder.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        rc = module.run_loop(SimpleNamespace(max_parallel=1))
+    finally:
+        fcntl.flock(holder.fileno(), fcntl.LOCK_UN)
+        holder.close()
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "worker already running (lock held); skip" in out
+    assert "drain-loop: start" not in out
+    assert json.loads(job_path.read_text())["status"] == "queued"
+
+
+def test_claim_job_is_atomic_second_claimer_refused(tmp_path: Path, monkeypatch) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = _queued_stub_job(queue_dir, module.LOG_DIR, "claim-me")
+
+    first = module._claim_job(path, context="test-claim")
+    assert first is not None
+    assert first["status"] == "running"
+    assert json.loads(path.read_text())["status"] == "running"
+
+    assert module._claim_job(path, context="test-claim") is None
+
+
+def test_resolve_max_parallel_prefers_cli_then_config_then_default(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    cfg_dir = tmp_path / "config"
+    cfg_dir.mkdir()
+    cfg = cfg_dir / "runtime_schedules.json"
+    cfg.write_text(json.dumps(
+        {"cron_jobs": [{"id": "volpred-compute-worker", "max_parallel": 2}]}
+    ), encoding="utf-8")
+
+    assert module._resolve_max_parallel(5) == 5  # CLI beats config
+    assert module._resolve_max_parallel(None) == 2  # config beats default
+
+    cfg.write_text(json.dumps({"cron_jobs": []}), encoding="utf-8")
+    assert module._resolve_max_parallel(None) == module.DRAIN_MAX_PARALLEL_DEFAULT
 
 
 def test_compute_queue_has_no_silent_fallback_audit_findings() -> None:

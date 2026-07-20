@@ -242,32 +242,41 @@ def test_the_runner_actually_calls_the_gate() -> None:
 
     This is the load-bearing assertion. Every other test here checks that the
     gate *works*; the bug we are fixing was a gate that worked and was never
-    reached. `run_next` marking a job `completed` without consulting the gate is
+    reached. The runner marking a job `completed` without consulting the gate is
     how K1709 shipped, so assert the call is there, on that path, by AST -- not
     by grep, and not by trusting that nobody will refactor it out.
+
+    D6 (2026-07-20): execution moved from run_next's body into _execute_job so
+    that run-next and run-loop share ONE completion path. The invariants become:
+    the single `completed` assignment in the whole module lives in _execute_job,
+    _execute_job consults the gate, and every worker entrypoint (run_next AND
+    run_loop) routes execution through _run_claimed -> _execute_job.
     """
     source = (REPO_ROOT / "scripts" / "compute_queue.py").read_text(encoding="utf-8")
     tree = ast.parse(source)
-
-    run_next = next(
-        node
+    functions = {
+        node.name: node
         for node in tree.body
-        if isinstance(node, ast.FunctionDef) and node.name == "run_next"
-    )
-    calls = {
-        node.func.id
-        for node in ast.walk(run_next)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        if isinstance(node, ast.FunctionDef)
     }
-    assert "_experiment_gate_failure" in calls, (
-        "run_next() no longer consults the experiment gates before marking a job "
-        "completed. That is the K1709 hole reopening: the detectors are fine, "
+
+    def _called_names(scope: ast.AST) -> set[str]:
+        return {
+            node.func.id
+            for node in ast.walk(scope)
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        }
+
+    execute_job = functions["_execute_job"]
+    assert "_experiment_gate_failure" in _called_names(execute_job), (
+        "_execute_job() no longer consults the experiment gates before marking a "
+        "job completed. That is the K1709 hole reopening: the detectors are fine, "
         "they just never run on the agent's work."
     )
 
     completes = [
         node
-        for node in ast.walk(run_next)
+        for node in ast.walk(tree)
         if isinstance(node, ast.Assign)
         and any(
             isinstance(t, ast.Subscript)
@@ -281,9 +290,27 @@ def test_the_runner_actually_calls_the_gate() -> None:
         and node.value.value == "completed"
     ]
     assert len(completes) == 1, (
-        "There must be exactly one place run_next() calls a job completed, so "
-        "the gate cannot be bypassed by a second path."
+        "There must be exactly one place in compute_queue.py that calls a job "
+        "completed, so the gate cannot be bypassed by a second path."
     )
+    execute_span = range(execute_job.lineno, execute_job.end_lineno + 1)
+    assert completes[0].lineno in execute_span, (
+        "The single completion site must live inside _execute_job — the one "
+        "function that consults the gate."
+    )
+
+    for entrypoint in ("run_next", "run_loop"):
+        # run_loop hands _run_claimed to pool.submit rather than calling it
+        # directly, so check referenced names, not just direct call targets.
+        referenced = {
+            node.id
+            for node in ast.walk(functions[entrypoint])
+            if isinstance(node, ast.Name)
+        }
+        assert "_run_claimed" in referenced, (
+            f"{entrypoint}() no longer routes execution through _run_claimed, so "
+            "its jobs would bypass the gated completion path in _execute_job."
+        )
 
 
 def _agent_job(root: Path, artifact: Path, job_id: str = "job-1") -> dict:
