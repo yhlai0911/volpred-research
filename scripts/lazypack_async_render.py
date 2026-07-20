@@ -636,6 +636,14 @@ def cmd_run(a: argparse.Namespace) -> int:
         _record_job_outputs(job_id, out_dir, specs, before)
     if final_rc != 0:
         receipt_path.unlink(missing_ok=True)
+        if not a.render_cmd:
+            # Explicit terminal classification for the compute queue: the
+            # deterministic self-repair layer is quota-independent, so a chain
+            # that STILL failed is a real failure of the work — stale codex
+            # quota lines earlier in this same log must not trigger the
+            # queue's quota backoff-requeue (compute_queue._stderr_failure_class
+            # honors the last marker over its regexes).
+            print("[FAILURE_CLASS] none", file=sys.stderr)
         print(f"error: render step failed rc={final_rc}", file=sys.stderr)
         return 2
 

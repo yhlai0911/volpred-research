@@ -76,6 +76,7 @@ sys.path.insert(0, str(ROOT / "src"))
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from scripts.dispatch_supervisor import procutil  # noqa: E402
+from scripts.dispatch_supervisor.failure_class import classify_output  # noqa: E402
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
@@ -844,15 +845,61 @@ def _arg_value(args: Any, flag: str) -> str | None:
     return args[index + 1] if index + 1 < len(args) else None
 
 
-def _runner_failure_class(job: dict[str, Any]) -> str | None:
-    """What the runner said killed the agent — `auth`, `quota`, `transient`, or None.
+# Producers may stamp an explicit terminal classification into their own stderr
+# (the lazypack render chain writes `[FAILURE_CLASS] none` after its three-layer
+# fallback, because stale codex quota lines earlier in the same log would
+# otherwise read as a quota death). The LAST marker wins; `none` means "a real
+# failure of the work — do not backoff-requeue".
+_FAILURE_CLASS_MARKER_RE = re.compile(
+    r"^\[FAILURE_CLASS\]\s+(auth|quota|transient|none)\s*$", re.MULTILINE
+)
+_STDERR_CLASS_TAIL_BYTES = 16_384
 
-    Written by scripts/run_agent_job.py into the job_metadata receipt. Absent on
-    jobs that predate the field, which read as None: the old triage brief.
+
+def _stderr_failure_class(job: dict[str, Any]) -> str | None:
+    """Classify a compute-kind job's death from its stderr tail.
+
+    Compute-kind jobs have no runner receipt (`job_metadata` is an agent-runner
+    artifact), so before assign_5195e5ae D3 the quota backoff-requeue was
+    structurally dead for them: a lazypack job killed by a codex quota wall
+    failed terminally while the same wall would have re-queued an agent job.
+    Reuses the supervisor's single-owner classifier over the stderr tail; an
+    explicit `[FAILURE_CLASS]` producer marker overrides the regexes.
+    """
+    stderr_file = job.get("stderr_file")
+    if not stderr_file:
+        return None
+    path = Path(str(stderr_file))
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        with path.open("rb") as fh:
+            fh.seek(0, os.SEEK_END)
+            size = fh.tell()
+            fh.seek(max(0, size - _STDERR_CLASS_TAIL_BYTES))
+            tail = fh.read().decode("utf-8", errors="replace")
+    except OSError as e:
+        warn("compute_queue", "stderr unreadable; failure class unavailable",
+             job=job.get("id"), path=str(path), err=str(e))
+        return None
+    markers = _FAILURE_CLASS_MARKER_RE.findall(tail)
+    if markers:
+        return None if markers[-1] == "none" else markers[-1]
+    return classify_output(tail)
+
+
+def _runner_failure_class(job: dict[str, Any]) -> str | None:
+    """What killed the job — `auth`, `quota`, `transient`, or None.
+
+    Agent-kind jobs: written by scripts/run_agent_job.py into the job_metadata
+    receipt (absent on jobs that predate the field, which read as None: the old
+    triage brief).  Compute-kind jobs carry no runner receipt, so their class
+    comes from the stderr tail via `_stderr_failure_class` — that is what lets
+    `_requeue_quota_blocked` cover both kinds with one mechanism.
     """
     meta_path = job.get("job_metadata")
     if not meta_path:
-        return None
+        return _stderr_failure_class(job)
     path = Path(meta_path)
     if not path.is_absolute():
         path = ROOT / path
@@ -922,6 +969,75 @@ def _requeue_quota_blocked(job: dict[str, Any]) -> bool:
     job["completed_at"] = None
     job["exit_code"] = None
     return True
+
+
+# Canonical pending queue for escalation tasks (module constant so tests can
+# point it at a fixture; production never overrides it).
+NEXT_TASKS_PATH = ROOT / "storage" / "next_tasks.json"
+
+
+def _job_arg(job: dict[str, Any], flag: str) -> str | None:
+    args = job.get("args") or []
+    for i, value in enumerate(args):
+        if value == flag and i + 1 < len(args):
+            return str(args[i + 1])
+    return None
+
+
+def _maybe_open_lazypack_repair_task(job: dict[str, Any]) -> None:
+    """Terminal lazypack render failure → a real P1 repair task, never a black hole.
+
+    assign_5195e5ae D3: before this, a lazypack job whose whole renderer chain
+    failed simply sat as a failed receipt — no task, no owner, while the alert
+    body claimed a retry mechanism that did not exist.  A non-quota terminal
+    failure now files idempotent P1 work into the canonical pool (stable id per
+    article, `if_exists='skip'`), so the article stranded in draft has an owner
+    the dispatcher is guaranteed to feed.  Quota deaths never reach here — they
+    take the `_requeue_quota_blocked` backoff instead.
+    """
+    job_id = str(job.get("id") or "")
+    if not job_id.startswith("lazypack-"):
+        return
+    article_id = _job_arg(job, "--article-id") or job_id.removeprefix("lazypack-")
+    task_id = f"lazypack_render_repair_{article_id}"
+    record = {
+        "id": task_id,
+        "title": f"[lazypack] {article_id} 懶人包 render 三層全敗，文章卡在草稿",
+        "description": (
+            f"compute job `{job_id}` 的懶人包 render 鏈（codex → agy → deterministic "
+            f"self-repair）全數失敗，文章 `{article_id}` 因缺 `## 懶人包圖組` 被 release "
+            "gate 擋住。\n\n"
+            "先重新驗證：文章若已補上圖組（後續 job 救回），只記錄 no-op 後完成。\n"
+            "仍缺圖時依序排查：\n"
+            f"1. 讀 stderr 找出 deterministic 層的具體 violation：{job.get('stderr_file')}\n"
+            f"2. plan 檔：{_job_arg(job, '--plan')} — 三層都救不回通常代表 plan 的文案量"
+            "超過版面（縮短 blocks 文字或拆面板），修 plan 後重新 enqueue。\n"
+            "3. 若是 renderer bug，修 scripts/lazypack_render.py 並補 regression test。\n"
+            f"重新排隊：uv run python scripts/lazypack_async_render.py enqueue "
+            f"--article-id {article_id} --plan <fixed-plan>"
+        ),
+        "task_type": "platform_ops",
+        "priority": 1,
+        "status": "pending",
+        "source": "compute_queue_lazypack_failure",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "tags": ["lazypack", "render_failure"],
+        "payload": {
+            "job_id": job_id,
+            "article_id": article_id,
+            "exit_code": job.get("exit_code"),
+            "stderr_file": job.get("stderr_file"),
+        },
+    }
+    try:
+        from volpred.ops.next_tasks import append_task_record
+
+        _, created = append_task_record(record, path=NEXT_TASKS_PATH, if_exists="skip")
+        print(f"repair-task: {task_id} "
+              f"{'created (P1)' if created else 'already pending — not duplicated'}")
+    except Exception as exc:  # noqa: BLE001 — escalation must not mask the receipt
+        warn("compute_queue", "lazypack repair task creation failed",
+             job=job_id, task_id=task_id, err=f"{type(exc).__name__}: {exc}")
 
 
 def _agent_workdir(job: dict[str, Any]) -> str | None:
@@ -1565,6 +1681,10 @@ def _execute_job(job_path: Path, job: dict[str, Any]) -> None:
                 print(f"quota-blocked: {job['id']} never started — re-queued "
                       f"(bounce {job['quota_requeues']}/{QUOTA_REQUEUE_MAX}, "
                       f"not_before={job['not_before']})")
+            else:
+                # Non-quota terminal failure: lazypack jobs escalate to a real
+                # P1 repair task instead of a receipt nobody owns (D3).
+                _maybe_open_lazypack_repair_task(job)
         else:
             artifact_path = _declared_result_artifact(job)
             if artifact_path is not None and not artifact_path.exists():
