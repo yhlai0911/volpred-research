@@ -156,9 +156,10 @@ EVENT_CUTOFF = pd.Timestamp("2026-03-30")
 REGIMES = [("Low (VIX<15)", 0, 15), ("Medium (15-20)", 15, 20),
            ("Elevated (20-25)", 20, 25), ("High (VIX>=25)", 25, 999)]
 
-# Headline test variant. False => Welch. See module docstring for why this is
-# fixed a priori rather than chosen from a variance pre-test. Never rely on
-# scipy's default here: the two variants straddle 5% on the overall test.
+# Headline test variant. False => Welch. It is a fixed default rather than
+# something picked from a variance pre-test, but it was settled during revision
+# with both p-values known, NOT pre-specified — see the module docstring. Never
+# rely on scipy's default here: the two variants straddle 5% on the overall test.
 HEADLINE_EQUAL_VAR = False
 
 
@@ -657,17 +658,28 @@ def main():
                         "implicit. Welch unconditionally is the standard recommendation (Zimmerman 2004; "
                         "Ruxton 2006; Delacre, Lakens & Leys 2017): it costs almost no power under equal "
                         "variances, and picking the variant from a pre-test inflates Type I error. It also "
-                        "matches sibling k904 and what main_v3.tex always claimed. NOT justified by observed "
-                        "heteroscedasticity — Brown-Forsythe p = 0.48 shows none — and NOT chosen for "
-                        "favourability: it weakens the regime tests the narrative leans on (see multiplicity)."),
+                        "matches sibling k904 and what main_v3.tex always claimed. It is NOT a response to "
+                        "observed heteroscedasticity — Brown-Forsythe p = 0.48 shows none. It was, however, "
+                        "settled during revision with both p-values already known, so it is NOT "
+                        "pre-specified and no 'a priori' defence is offered; see "
+                        "test_variant_disclosure.when_chosen for the full statement."),
             },
             {
-                "item": "multiple comparisons across the four regime tests",
-                "archived": "none — four regime p-values reported unadjusted",
-                "canonical": "Holm-Bonferroni over the four-test family, persisted for both variants",
-                "why": ("tab:nfp tabulates four regime tests, so the table is the family. Unadjusted, the "
-                        "calm regime reads as the strongest evidence in the section; under Holm at the "
-                        "headline Welch variant no regime survives. Omitting this was a submission blocker."),
+                "item": "multiple comparisons",
+                "archived": "none — all six p-values (two overall, four regime) reported unadjusted",
+                "canonical": ("Holm-Bonferroni over EVERY plausible family — overall pair, regimes only, "
+                              "primary overall + regimes, all six — with regime values persisted for both "
+                              "test variants"),
+                "why": ("Unadjusted, the calm regime reads as the strongest evidence in the section and the "
+                        "overall effect reads as significant; neither survives correction. An interim "
+                        "revision corrected only the four regime tests, reasoning that 'the table is the "
+                        "family' and excluding the two overall comparisons as two framings of one "
+                        "hypothesis. Codex rejected that on 2026-07-20: a family follows the set of "
+                        "inferential claims rather than a LaTeX table boundary, the two overall tests use "
+                        "different control samples (all non-NFP vs Fridays only), and that exclusion was "
+                        "the only grouping preserving a sub-5% headline. Reporting every family removes "
+                        "the degree of freedom instead of exercising it. Nothing clears 5% under any of "
+                        "them; see test_variant_disclosure.multiplicity."),
             },
             {
                 "item": "regime ratio / t / p persistence",

@@ -1400,13 +1400,13 @@
       "item": "t-test variant (CHANGED \u2014 now explicit)",
       "archived": "scipy stats.ttest_ind with equal_var omitted, i.e. Student's by default",
       "canonical": "equal_var=False (Welch) passed explicitly at every call site",
-      "why": "The archived choice was an omission, not a decision, and the two variants straddle 5% on the overall test (Student 0.0506 / Welch 0.0394) \u2014 too consequential to leave implicit. Welch unconditionally is the standard recommendation (Zimmerman 2004; Ruxton 2006; Delacre, Lakens & Leys 2017): it costs almost no power under equal variances, and picking the variant from a pre-test inflates Type I error. It also matches sibling k904 and what main_v3.tex always claimed. NOT justified by observed heteroscedasticity \u2014 Brown-Forsythe p = 0.48 shows none \u2014 and NOT chosen for favourability: it weakens the regime tests the narrative leans on (see multiplicity)."
+      "why": "The archived choice was an omission, not a decision, and the two variants straddle 5% on the overall test (Student 0.0506 / Welch 0.0394) \u2014 too consequential to leave implicit. Welch unconditionally is the standard recommendation (Zimmerman 2004; Ruxton 2006; Delacre, Lakens & Leys 2017): it costs almost no power under equal variances, and picking the variant from a pre-test inflates Type I error. It also matches sibling k904 and what main_v3.tex always claimed. It is NOT a response to observed heteroscedasticity \u2014 Brown-Forsythe p = 0.48 shows none. It was, however, settled during revision with both p-values already known, so it is NOT pre-specified and no 'a priori' defence is offered; see test_variant_disclosure.when_chosen for the full statement."
     },
     {
-      "item": "multiple comparisons across the four regime tests",
-      "archived": "none \u2014 four regime p-values reported unadjusted",
-      "canonical": "Holm-Bonferroni over the four-test family, persisted for both variants",
-      "why": "tab:nfp tabulates four regime tests, so the table is the family. Unadjusted, the calm regime reads as the strongest evidence in the section; under Holm at the headline Welch variant no regime survives. Omitting this was a submission blocker."
+      "item": "multiple comparisons",
+      "archived": "none \u2014 all six p-values (two overall, four regime) reported unadjusted",
+      "canonical": "Holm-Bonferroni over EVERY plausible family \u2014 overall pair, regimes only, primary overall + regimes, all six \u2014 with regime values persisted for both test variants",
+      "why": "Unadjusted, the calm regime reads as the strongest evidence in the section and the overall effect reads as significant; neither survives correction. An interim revision corrected only the four regime tests, reasoning that 'the table is the family' and excluding the two overall comparisons as two framings of one hypothesis. Codex rejected that on 2026-07-20: a family follows the set of inferential claims rather than a LaTeX table boundary, the two overall tests use different control samples (all non-NFP vs Fridays only), and that exclusion was the only grouping preserving a sub-5% headline. Reporting every family removes the degree of freedom instead of exercising it. Nothing clears 5% under any of them; see test_variant_disclosure.multiplicity."
     },
     {
       "item": "regime ratio / t / p persistence",
