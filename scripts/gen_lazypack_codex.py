@@ -435,11 +435,18 @@ def _run_codex(prompt: str, out_dir: Path, timeout_s: float,
 
 
 def _write_script(prompt: str, script: Path, out_dir: Path, budget_s: float,
-                  model: str | None) -> tuple[int, str, str]:
-    """Run the sole primary writer. The async caller owns renderer fallback."""
-    rc, tail = _run_codex(prompt, out_dir, budget_s, model)
+                  model: str | None, *, run_writer=None,
+                  writer_name: str = "codex") -> tuple[int, str, str]:
+    """Run one bespoke code-writer. The async caller owns renderer fallback.
+
+    ``run_writer`` lets a sibling harness (scripts/gen_lazypack_agy.py) reuse
+    the whole write→render→repair loop with a different CLI while this module
+    stays the single owner of the prompt contract and the budget machinery.
+    """
+    run = run_writer or _run_codex
+    rc, tail = run(prompt, out_dir, budget_s, model)
     if script.exists():
-        return rc, tail, "codex"
+        return rc, tail, writer_name
     return rc or 1, tail, "none"
 
 
@@ -475,16 +482,20 @@ def _missing_panels(out_dir: Path, panels: list[dict]) -> list[Path]:
 
 def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path,
               *, budget_s: float, model: str | None,
-              evidence_labels: dict[str, str] | None = None) -> int:
-    """codex writes the script → we run it → bounded repair rounds. All phases
-    share one deadline, so no single step can wedge the caller."""
+              evidence_labels: dict[str, str] | None = None,
+              run_writer=None, writer_name: str = "codex") -> int:
+    """The writer CLI writes the script → we run it → bounded repair rounds.
+    All phases share one deadline, so no single step can wedge the caller.
+    ``run_writer``/``writer_name`` select the code-writing CLI (default codex;
+    scripts/gen_lazypack_agy.py passes its own runner)."""
     deadline = time.monotonic() + budget_s
 
     def remaining() -> float:
         return deadline - time.monotonic()
 
     font = _resolve_cjk_font()
-    print(f"[gen_lazypack_codex] CJK font: {font or 'NONE FOUND (codex will pick)'}",
+    print(f"[gen_lazypack_{writer_name}] CJK font: "
+          f"{font or f'NONE FOUND ({writer_name} will pick)'}",
           file=sys.stderr)
     script = out_dir / RENDER_SCRIPT_NAME
 
@@ -509,8 +520,8 @@ def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path
         evidence_labels=evidence_labels,
     )
     if script.exists():
-        print(f"[gen_lazypack_codex] {script.name} already exists — running it "
-              f"before calling codex", file=sys.stderr)
+        print(f"[gen_lazypack_{writer_name}] {script.name} already exists — running "
+              f"it before calling {writer_name}", file=sys.stderr)
         prompt = None
 
     for attempt in range(REPAIR_ROUNDS + 1):
@@ -518,18 +529,20 @@ def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path
             phase = "write" if attempt == 0 else f"repair {attempt}/{REPAIR_ROUNDS}"
             codex_budget = min(_codex_write_timeout(panels), remaining())
             if codex_budget <= 30:
-                print(f"ERROR: budget exhausted before codex {phase} "
+                print(f"ERROR: budget exhausted before {writer_name} {phase} "
                       f"({remaining():.0f}s left of {budget_s:.0f}s)", file=sys.stderr)
                 return 2
-            print(f"[gen_lazypack_codex] codex {phase} (≤{codex_budget:.0f}s) "
-                  f"→ {script}", file=sys.stderr)
+            print(f"[gen_lazypack_{writer_name}] {writer_name} {phase} "
+                  f"(≤{codex_budget:.0f}s) → {script}", file=sys.stderr)
             rc, tail, writer = _write_script(prompt, script, out_dir,
-                                             codex_budget, model)
+                                             codex_budget, model,
+                                             run_writer=run_writer,
+                                             writer_name=writer_name)
             if not script.exists():
                 print(f"ERROR: no writer produced {script} during {phase} "
                       f"(rc={rc})\n{tail}", file=sys.stderr)
                 return 2 if rc in (2, 3) else 1
-            if writer != "codex":
+            if writer != writer_name:
                 print(f"ERROR: unexpected writer result: {writer}", file=sys.stderr)
                 return 1
 
@@ -537,7 +550,7 @@ def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path
         if render_budget <= 10:
             print("ERROR: budget exhausted before local render", file=sys.stderr)
             return 2
-        print(f"[gen_lazypack_codex] running {script.name} locally "
+        print(f"[gen_lazypack_{writer_name}] running {script.name} locally "
               f"(≤{render_budget:.0f}s)", file=sys.stderr)
         ok, failure = _run_render_script(script, render_budget)
         missing = _missing_panels(out_dir, panels)
@@ -549,7 +562,7 @@ def _generate(title: str, panels: list[dict], sources: list[Path], out_dir: Path
             return 0
 
         failure = failure or f"script exited 0 but panels are missing/empty: {missing}"
-        print(f"[gen_lazypack_codex] render failed: {failure.splitlines()[0]}",
+        print(f"[gen_lazypack_{writer_name}] render failed: {failure.splitlines()[0]}",
               file=sys.stderr)
         if attempt == REPAIR_ROUNDS:
             break
