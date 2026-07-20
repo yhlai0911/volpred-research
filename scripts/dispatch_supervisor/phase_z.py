@@ -219,6 +219,7 @@ _MACHINE_STATE_PREFIXES = (
 )
 _MACHINE_STATE_FILES = (
     "storage/.failed_supabase_syncs.json",  # shared publisher/drain retry queue
+    "storage/.failed_mirror_syncs.json",    # same, Mirror side (WS-C4)
     "storage/.knowledge_index_state.json",  # scheduled index freshness ledger
     "storage/next_tasks.json",       # the pending queue
     # Append-only ledger written through scripts/append_work_log.py — by fires, and

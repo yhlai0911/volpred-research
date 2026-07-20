@@ -1339,6 +1339,26 @@ class Publisher:
         """
         self._record_dead_letter(".failed_mirror_syncs.json", pub_id)
 
+    def _mirror_article(self, pub_id: str, item: dict) -> bool:
+        """PUT one article to the Mirror, dead-lettering a real failure (WS-C4).
+
+        Single exit for "push this article to the Mirror" on the publish and
+        unpublish paths, which used to drop :meth:`_sync_report_to_remote`'s
+        return value on the floor — a rejected PUT was a bare print, which is
+        how a 401 stayed unnoticed for a month.
+
+        A disabled Mirror returns True: nothing was attempted, so nothing
+        failed. Dead-lettering it would queue every article on every
+        no-remote run and drown the real failures.
+        """
+        if not self._mirror_enabled():
+            return True
+        if self._sync_report_to_remote(pub_id, item):
+            return True
+        self._record_failed_mirror_sync(pub_id)
+        print(f"  Mirror sync FAILED for {pub_id} -- recorded to .failed_mirror_syncs.json")
+        return False
+
     def _remote_writes_allowed(self) -> bool:
         """False under the conftest/production kill switch (no network writes)."""
         return os.environ.get("VOLPRED_NO_REMOTE_WRITE") != "1"
@@ -2487,7 +2507,7 @@ class Publisher:
         guard_canonical_write(self._feed_file)
         with open(self._feed_file, 'w') as f:
             json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
-        self._sync_report_to_remote(pub_id, target_item)
+        self._mirror_article(pub_id, target_item)
         sync_ok = False
         try:
             import sys

@@ -32721,13 +32721,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T03:27:39.934200+00:00",
+    "completed_at": "2026-07-20T03:48:18.692276+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T03:27:39.934200+00:00",
-      "last_clean_observed_at": "2026-07-20T03:27:39.934200+00:00"
+      "resolved_at": "2026-07-20T03:48:18.692276+00:00",
+      "last_clean_observed_at": "2026-07-20T03:48:18.692276+00:00"
     }
   },
   {
@@ -32739,13 +32739,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T03:08:06.803741+00:00",
+    "completed_at": "2026-07-20T03:28:02.223416+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T03:08:06.803741+00:00",
-      "last_clean_observed_at": "2026-07-20T03:08:06.803741+00:00"
+      "resolved_at": "2026-07-20T03:28:02.223416+00:00",
+      "last_clean_observed_at": "2026-07-20T03:28:02.223416+00:00"
     }
   },
   {
@@ -43208,7 +43208,7 @@
     "title": "K1718: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1718 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1718 [NULL, reviewed]: In the 2015-2026 Japan sample with annual expanding OOS forecasts from 2020 onward, lagged US VIX passed none of six pre-registered Nikkei 225 / TOPIX ETF model-family cells. Each cell required both lower Patton QLIKE and a Holm-adjusted one-sided Clark-We",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
     "audience_correction_rewrite": false,
@@ -43221,9 +43221,6 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-19T12:01:52+00:00",
-    "claimed_by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96",
-    "claimed_at": "2026-07-20T03:09:49.894017+00:00",
-    "claim_session_id": "8a4c6c1156ae",
     "status_history": [
       {
         "ts": "2026-07-20T03:09:49.894037+00:00",
@@ -43236,9 +43233,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96"
+      },
+      {
+        "ts": "2026-07-20T03:35:00.187539+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96",
+        "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 25.2min >= grace 20min"
       }
     ],
-    "started_at": "2026-07-20T03:09:50.760823+00:00"
+    "started_at": "2026-07-20T03:09:50.760823+00:00",
+    "last_released_at": "2026-07-20T03:35:00.187523+00:00",
+    "last_release_reason": "liveness_reconcile_detached_51a8c53b"
   },
   {
     "id": "email-12147-ca71e9",
@@ -43307,7 +43313,7 @@
     "title": "K1495: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1495 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1495 PARTIAL_PASS（Codex review PASS）：用SPY相對RSP的21日落後累積報酬差作為cap-weight集中度pulse代理（expanding 80百分位定義高regime，避免偷看未來），檢驗其對未來21日市場波動的條件資訊，樣本2004-05-28至2026-05-13，n=5,524。H1 PASS：高集中regime下SPY未來21日RV=18.16% vs 非高regime 14.41%，Welch t=9.47（p≈7.5e-21），stationary bootstrap 95% CI [+0.95pp",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
     "audience_correction_rewrite": false,
@@ -43320,9 +43326,6 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-19T12:19:24+00:00",
-    "claimed_by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96",
-    "claimed_at": "2026-07-20T03:09:49.130426+00:00",
-    "claim_session_id": "c655a95edf4d",
     "status_history": [
       {
         "ts": "2026-07-20T03:09:49.130444+00:00",
@@ -43335,9 +43338,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96"
+      },
+      {
+        "ts": "2026-07-20T03:35:00.187547+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96",
+        "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 25.2min >= grace 20min"
       }
     ],
-    "started_at": "2026-07-20T03:09:49.482497+00:00"
+    "started_at": "2026-07-20T03:09:49.482497+00:00",
+    "last_released_at": "2026-07-20T03:35:00.187545+00:00",
+    "last_release_reason": "liveness_reconcile_detached_51a8c53b"
   },
   {
     "id": "release_deadlock_repair_20260719_12",
@@ -45232,7 +45244,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "pending",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29711772660",
@@ -45240,9 +45252,6 @@
     "created_at": "2026-07-20T02:29:04.830665+00:00",
     "title": "CI 紅燈修復（run 29711772660, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29711772660\nattempt: 1\nhead_sha: ecd8cc3b0\n偵測摘要（仍須讀完整 failed log）：2026-07-20T02:11:42.2405143Z E AssertionError: 1 個新腳本畫中文卻沒設 CJK 字型 → 會渲染成豆腐字：\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29711772660 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "claimed_by": "hourly-slot-1-8ac4cbc80b334ee2b3c4d13e4398344a",
-    "claimed_at": "2026-07-20T02:37:14.300832+00:00",
-    "claim_session_id": "48c00d7115aa",
     "status_history": [
       {
         "ts": "2026-07-20T02:37:14.300848+00:00",
@@ -45255,9 +45264,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-8ac4cbc80b334ee2b3c4d13e4398344a"
+      },
+      {
+        "ts": "2026-07-20T03:35:00.228918+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-8ac4cbc80b334ee2b3c4d13e4398344a",
+        "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 57.8min >= grace 20min"
       }
     ],
-    "started_at": "2026-07-20T02:37:14.530215+00:00"
+    "started_at": "2026-07-20T02:37:14.530215+00:00",
+    "last_released_at": "2026-07-20T03:35:00.228904+00:00",
+    "last_release_reason": "liveness_reconcile_detached_8ac4cbc8"
   },
   {
     "id": "telegram-1153",
@@ -45335,7 +45353,7 @@
     "description": "health.py force-kill worker 後只釋放 dispatch_state slot、不釋放 next_tasks claim（health.py:88-179、worker.py:369）。補 kill→re-pend 接線 + 單元測試（kill 後 task 回 pending）。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-A2。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-20T03:12:12.183192+00:00",
     "created_by": "refactor_master_plan",
@@ -45364,11 +45382,23 @@
         "to": "pending",
         "by": "release",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T03:29:46.287140+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-746b2d2f041b4e6692d575610d7b4875"
+      },
+      {
+        "ts": "2026-07-20T03:30:33.100082+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-746b2d2f041b4e6692d575610d7b4875"
       }
     ],
     "started_at": "2026-07-20T03:13:10.228895+00:00",
-    "completed_at": "2026-07-20T03:22:26.157159+00:00",
-    "result": "WS-A2b 完成：health.py force-kill 後經 task_pool_claim.release_owner_claims（owner-scoped，走既有 _locked_load，未新增寫入路徑）同步 re-pend claim；identity.py 補 task_claim_owners_for_job 涵蓋 codex-failover；alerts 增印 re-pend ids。主線程實跑 tests/test_dispatch_supervisor.py = 92 passed。⚠️ 未完全關閉 P1：worker.py 自身 timeout kill 路徑仍無 re-pend 且為更常觸發者，已建 follow-up assign_2637119e (A2c)。",
+    "completed_at": "2026-07-20T03:30:33.100068+00:00",
+    "result": "WS-A2b 完成：health.py force-kill 後經 task_pool_claim.release_owner_claims（owner-scoped，走既有 _locked_load，未新增寫入路徑）同步 re-pend claim；identity.py 補 task_claim_owners_for_job 涵蓋 codex-failover；alerts 增印 re-pend ids。主線程實跑 tests/test_dispatch_supervisor.py = 92 passed。⚠️ 未完全關閉 P1：worker.py 自身 timeout kill 路徑仍無 re-pend 且為更常觸發者，已建 follow-up assign_2637119e (A2c)。\n\n驗證屬實：A2b 已於 commit 3ebb40542 落地（health.py:106 呼叫 task_pool_claim.release_owner_claims；tests/test_dispatch_supervisor.py:1293 覆蓋 release 失敗路徑），本班複跑 92 passed。task 記錄先前未結案，本班補標。剩餘缺口由 A2c(assign_2637119e) 承接。",
     "burst_reported_at": "2026-07-20T03:22:26.164072+00:00",
     "last_released_at": "2026-07-20T03:23:08.720137+00:00",
     "dispatch_lane": "main_thread",
@@ -45417,7 +45447,7 @@
     "description": "依 A1a 清單把非法 writer 改走 next_tasks.py helper；cron_hourly_dispatch_prompt.md:63 的 jq 指示改為 task_pool_claim 子命令；新增 audit（非 helper 寫路徑=0）掛既有 pre-push runner。依賴 A1a 完成。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-A1。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "source": "user",
     "created_at": "2026-07-20T03:12:12.748476+00:00",
     "created_by": "refactor_master_plan",
@@ -45452,13 +45482,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-4-d85d3cf2fd014adfb6d9fc3c796db72e"
+      },
+      {
+        "ts": "2026-07-20T03:45:01.573634+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-4-d85d3cf2fd014adfb6d9fc3c796db72e",
+        "note": "manual_release"
       }
     ],
     "started_at": "2026-07-20T03:21:47.343160+00:00",
-    "last_released_at": "2026-07-20T03:17:04.950151+00:00",
-    "claimed_by": "hourly-slot-4-d85d3cf2fd014adfb6d9fc3c796db72e",
-    "claimed_at": "2026-07-20T03:21:44.246930+00:00",
-    "claim_session_id": "cb3ae4a0e1eb",
+    "last_released_at": "2026-07-20T03:45:01.573615+00:00",
     "dispatch_lane": "main_thread",
     "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
   },
@@ -45468,7 +45502,7 @@
     "description": "每小時對帳 in_flight/claimed vs worktree 存在性 vs 進程(lsof)，脫鉤自動降回 pending 並記 receipt。吸收 k1709 殭屍教訓。含注入假 in_flight 的 regression test。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-A4。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-20T03:12:13.020926+00:00",
     "created_by": "refactor_master_plan",
@@ -45491,12 +45525,33 @@
         "to": "pending",
         "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T03:31:43.725513+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-7a8837cf2e004ef9bd36bc562fc73855"
+      },
+      {
+        "ts": "2026-07-20T03:31:46.499131+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-7a8837cf2e004ef9bd36bc562fc73855"
+      },
+      {
+        "ts": "2026-07-20T03:37:07.191485+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-7a8837cf2e004ef9bd36bc562fc73855"
       }
     ],
-    "started_at": "2026-07-20T03:13:11.282451+00:00",
+    "started_at": "2026-07-20T03:31:46.499113+00:00",
     "last_released_at": "2026-07-20T03:23:08.998144+00:00",
     "dispatch_lane": "main_thread",
-    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling",
+    "completed_at": "2026-07-20T03:37:07.191471+00:00",
+    "result": "A4 liveness reconciler 驗收落地：碼已存在(commit 3ebb40542)但從未線上跑。本班複驗掛載(runtime_schedules 45 * * * * + piggy_back_enabled=true + TCC wrapper diff 相同)、跑回歸測試 11 passed、線上 --apply 釋放 3 筆真殭屍(K1495/K1718/ci-red-29711772660)並落 receipt、冪等複跑 detached=0 未誤殺持有 worktree 的 claim。§7 已加 A4 列(✅)。殘留 worktree-veto in_flight 5 筆另開 assign_3684bd32。",
+    "burst_reported_at": "2026-07-20T03:37:07.198537+00:00"
   },
   {
     "id": "assign_0810c050",
@@ -45504,7 +45559,7 @@
     "description": "apply_update 直寫 feed 不推 Supabase/Mirror 不記死信（publish_draft.py:1100,1428,1448）→ 改走 publisher._rewrite_feed_entry + sync_article + 死信記錄；補三方一致整合測試。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-C1。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-20T03:12:13.309184+00:00",
     "created_by": "refactor_master_plan",
@@ -45527,12 +45582,33 @@
         "to": "pending",
         "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T03:37:34.770018+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-7a8837cf2e004ef9bd36bc562fc73855"
+      },
+      {
+        "ts": "2026-07-20T03:37:38.712059+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-7a8837cf2e004ef9bd36bc562fc73855"
+      },
+      {
+        "ts": "2026-07-20T03:40:48.255371+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-7a8837cf2e004ef9bd36bc562fc73855"
       }
     ],
-    "started_at": "2026-07-20T03:13:10.470912+00:00",
+    "started_at": "2026-07-20T03:37:38.712043+00:00",
     "last_released_at": "2026-07-20T03:23:09.274533+00:00",
     "dispatch_lane": "main_thread",
-    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling",
+    "completed_at": "2026-07-20T03:40:48.255358+00:00",
+    "result": "C1 驗收落章：實作已在 commit 3ebb40542。複驗 rewrite_and_sync_article 為 in-place rewrite 單一出口(feed+Mirror+Supabase+死信)、publish_draft 舊直寫路徑已同 commit 移除(grep 零殘留)、整合測試 6 passed 涵蓋三方一致+死信+dry-run+kill-switch、audit_canonical_writers PASS。殘留兩項另立案：Mirror 死信重試歸 C4(assign_ac3c3aa6)；article_correction 第三條重寫路徑開 assign_bc2ab360。§7 已加 C1 列(✅)。",
+    "burst_reported_at": "2026-07-20T03:40:48.261542+00:00"
   },
   {
     "id": "assign_0328eeeb",
@@ -45563,10 +45639,29 @@
         "to": "pending",
         "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T03:37:44.258921+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798"
+      },
+      {
+        "ts": "2026-07-20T03:38:26.079643+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798"
+      },
+      {
+        "ts": "2026-07-20T03:45:02.022663+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798",
+        "note": "manual_release"
       }
     ],
-    "started_at": "2026-07-20T03:13:10.853964+00:00",
-    "last_released_at": "2026-07-20T03:23:09.531808+00:00",
+    "started_at": "2026-07-20T03:38:26.079625+00:00",
+    "last_released_at": "2026-07-20T03:45:02.022648+00:00",
     "dispatch_lane": "main_thread",
     "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
   },
@@ -45576,7 +45671,7 @@
     "description": "派工裁決散在 5 檔（supervisor scheduler/continue_task_dispatch/pregate/slot_budget/legacy shell）。先產設計文件 docs/dispatch-decision-pipeline-design.md：單一 decision pipeline、continue_task_dispatch 降純 library、priority/starvation/cluster budget/burst 集中。設計完成後主線程裁決再落地。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-H4。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-20T03:12:14.008649+00:00",
     "created_by": "refactor_master_plan",
@@ -45599,12 +45694,33 @@
         "to": "pending",
         "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T03:37:44.495076+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798"
+      },
+      {
+        "ts": "2026-07-20T03:38:26.319673+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798"
+      },
+      {
+        "ts": "2026-07-20T03:42:55.752435+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798"
       }
     ],
-    "started_at": "2026-07-20T03:17:05.190087+00:00",
+    "started_at": "2026-07-20T03:38:26.319659+00:00",
     "last_released_at": "2026-07-20T03:23:09.807736+00:00",
     "dispatch_lane": "main_thread",
-    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling",
+    "completed_at": "2026-07-20T03:42:55.752418+00:00",
+    "result": "H4 設計文件完成：docs/dispatch-decision-pipeline-design.md (456行)。盤點實際裁決點 10 個(計畫只寫5)，10 條重疊/矛盾；最嚴重=priority 解析 4 種實作 3 種 default(ctd:38→999 / pregate:158→9 / slot_budget:102→4 / task_urgency:96→None)。新發現 scheduler.py:774 dry-run 完全不跑 pregate(驗收條結構性不可達)；pregate 生產 mode 已查證=shadow。補 §8 scope boundary 9 條 + §9 open questions 6 項待主線程裁決(Q3 pregate enforce 分支移除 / Q4 ctd --dry-run 假旗標會真寫入 next_tasks.json 為現存風險)。未動 production code。",
+    "burst_reported_at": "2026-07-20T03:42:55.761857+00:00"
   },
   {
     "id": "assign_58773e64",
@@ -45617,7 +45733,36 @@
     "created_at": "2026-07-20T03:12:14.293200+00:00",
     "created_by": "refactor_master_plan",
     "dispatch_lane": "main_thread",
-    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:37:44.732629+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798"
+      },
+      {
+        "ts": "2026-07-20T03:38:25.595745+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T03:40:23.596377+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-746b2d2f041b4e6692d575610d7b4875"
+      },
+      {
+        "ts": "2026-07-20T03:41:08.162012+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "hourly-slot-1-746b2d2f041b4e6692d575610d7b4875",
+        "note": "manual_release"
+      }
+    ],
+    "last_released_at": "2026-07-20T03:41:08.162000+00:00"
   },
   {
     "id": "assign_ac3c3aa6",
@@ -45630,7 +45775,30 @@
     "created_at": "2026-07-20T03:12:14.679733+00:00",
     "created_by": "refactor_master_plan",
     "dispatch_lane": "main_thread",
-    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:40:46.157090+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-4-13e1fcabe797436b9938e3f05c98d986"
+      },
+      {
+        "ts": "2026-07-20T03:40:49.475426+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-4-13e1fcabe797436b9938e3f05c98d986"
+      },
+      {
+        "ts": "2026-07-20T03:45:02.449504+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-4-13e1fcabe797436b9938e3f05c98d986",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-20T03:41:08.646375+00:00",
+    "last_released_at": "2026-07-20T03:45:02.449490+00:00"
   },
   {
     "id": "assign_016df764",
@@ -45643,7 +45811,30 @@
     "created_at": "2026-07-20T03:12:15.056323+00:00",
     "created_by": "refactor_master_plan",
     "dispatch_lane": "main_thread",
-    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:38:25.834064+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798"
+      },
+      {
+        "ts": "2026-07-20T03:38:26.581434+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798"
+      },
+      {
+        "ts": "2026-07-20T03:45:02.836331+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-3-b7ca748239d44fbb840a2eccece5f798",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-20T03:38:26.581422+00:00",
+    "last_released_at": "2026-07-20T03:45:02.836317+00:00"
   },
   {
     "id": "assign_b5b1a434",
@@ -45656,7 +45847,30 @@
     "created_at": "2026-07-20T03:12:15.383777+00:00",
     "created_by": "refactor_master_plan",
     "dispatch_lane": "main_thread",
-    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:41:18.936600+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-746b2d2f041b4e6692d575610d7b4875"
+      },
+      {
+        "ts": "2026-07-20T03:41:19.175895+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-746b2d2f041b4e6692d575610d7b4875"
+      },
+      {
+        "ts": "2026-07-20T03:45:03.209284+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-746b2d2f041b4e6692d575610d7b4875",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-20T03:41:19.175883+00:00",
+    "last_released_at": "2026-07-20T03:45:03.209269+00:00"
   },
   {
     "id": "assign_e040fd8e",
@@ -45677,12 +45891,58 @@
     "description": "A2b（assign_5a5e7ec6）已把 health.py force-kill 路徑接上 task_pool_claim.release_owner_claims，測試綠（tests/test_dispatch_supervisor.py 3 新測試 + 92 passed）。但 A2b agent 主動揭露、主線程 grep 複驗屬實：scripts/dispatch_supervisor/worker.py 全檔無任何 re-pend 呼叫。worker.py:392 的 proc.wait(timeout=timeout_s) 逾時後走 SIGTERM→SIGKILL（:399-402），這條路徑贏得 CAS 時 health.py 的分支根本不會跑 —— 而 worker.py docstring:27 自陳 health 只是 belt-and-suspenders 層，代表 worker 自身 timeout 才是實務上更常觸發的那條（health 通常晚約 1 秒）。結論：P1「kill 後 claim 不落地成殭屍」尚未真正關閉，只關了較少見的那一半。 做什麼：把 worker.py 的 timeout kill 路徑（含 killed_timeout outcome 落地處 :661/:685）接上同一個 release_owner_claims helper，禁止另開寫入路徑；補測試斷言 worker 自身 timeout 後 task 回 pending。順帶評估 A2b flag#1：health.py:263-291 的 silent_death / failure（identity MISMATCH/DEAD）路徑同樣不釋放 claim，但因進程未經我方確認死亡，釋放與否是裁決題 —— 若判定不在此處釋放，需確認 WS-A4 liveness reconciler 確實覆蓋該類，並在計畫 §7 寫明分工，不要兩邊都以為對方管。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-20T03:21:42.263053+00:00",
     "parent_task_id": "assign_5a5e7ec6",
     "created_by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e",
     "dispatch_lane": "main_thread",
-    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:30:34.485968+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-746b2d2f041b4e6692d575610d7b4875"
+      },
+      {
+        "ts": "2026-07-20T03:30:34.723019+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-746b2d2f041b4e6692d575610d7b4875"
+      },
+      {
+        "ts": "2026-07-20T03:40:07.850552+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-746b2d2f041b4e6692d575610d7b4875"
+      }
+    ],
+    "started_at": "2026-07-20T03:30:34.723003+00:00",
+    "completed_at": "2026-07-20T03:40:07.850536+00:00",
+    "result": "worker.py timeout kill 路徑接上 re-pend（新共用模組 scripts/dispatch_supervisor/claim_release.py，health/worker 同呼叫、未新增第二條 next_tasks writer）。釋放無條件不 gate CAS：hang 蘊含 kill 已確認、release 冪等（task_pool_claim.py:579-581 雙重過濾）、gate 反而會漏掉 health 關成 silent_death 的 job。flag#1 裁決歸 WS-A4（liveness_reconcile.py:330-338 的 grace+DEAD+無worktree 三重 AND 是 health 給不出的證據），分工寫進計畫 §7。主線程獨立複跑 143 passed；順手修好 test_hang_alert_ownership.py 既有紅燈（測試誤觸 canonical next_tasks）。",
+    "burst_reported_at": "2026-07-20T03:40:07.864255+00:00"
+  },
+  {
+    "id": "assign_3684bd32",
+    "title": "[refactor-master A4-residual] worktree-veto 殘留 in_flight 裁決出口",
+    "description": "A4 liveness reconciler 上線後的已知殘留（設計內非 bug）：5 筆 in_flight 的 fire 已死，但 worktree 仍在磁碟 → 被 A4 的磁碟否決保留（feedback_no_research_artifact_loss），最舊 idle ~25h（dispatch-slot-1-b55db3be-2 等達 130h）。缺的是「dead fire + 殘留 worktree」的裁決出口：逐一判定 worktree 內有無未合併成果 → merge_worktree.sh 整合 或 判無可救援後移除 + release claim。scope：先做盤點 + 裁決規則，再考慮自動化。依據 docs/refactor_plan_ops_master_2026_07.md §7 A4 列。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-20T03:36:13.351816+00:00",
+    "created_by": "hourly-slot-2-7a8837cf2e004ef9bd36bc562fc73855"
+  },
+  {
+    "id": "assign_bc2ab360",
+    "title": "C1 殘留：article_correction 第三條 in-place 重寫路徑收編或退役",
+    "description": "WS-C1 驗收時發現：src/volpred/publisher/article_correction.py:apply_article_correction 自行 atomic 寫 feed.json + 直呼 supabase_sync.sync_article，不推 Mirror、不記死信（改以 CorrectionNotSynced raise 收場），與 Publisher.rewrite_and_sync_article 形成第二/第三條 in-place 重寫路徑，違反 §2 anti-stacking「一 concern 一 owner」。全 repo grep 顯示零 production caller（僅 audit_canonical_writers.py 白名單登記 + 測試提及）。任務：判定它是 (a) 該收編為 rewrite_and_sync_article 的呼叫者，或 (b) 已被 C1 取代該退役移除白名單。二選一，不留第三態。依據 docs/refactor_plan_ops_master_2026_07.md §7 C1 列殘留(2)。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-20T03:40:12.665467+00:00",
+    "created_by": "hourly-slot-2-7a8837cf2e004ef9bd36bc562fc73855"
   }
 ]

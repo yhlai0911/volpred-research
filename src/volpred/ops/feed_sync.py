@@ -57,6 +57,7 @@ if str(_SCRIPTS_DIR) not in sys.path:
 from supabase_sync import (  # noqa: E402
     _select_rows,
     classify_audience,
+    projected_content,
     reconcile_article_deletes,
     sync_article,
 )
@@ -219,7 +220,14 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
         d = db_by_slug[slug]
         # 2026-04-20: include content hash in diff so post-publish content
         # extensions propagate to Supabase (K1257 article incident).
-        feed_content = (f.get("content") or f.get("description") or "")
+        # 2026-07-20 (WS-C2): hash the content sync_article() would actually
+        # WRITE, not the raw feed text. The write path sanitizes markdown
+        # table pipes and CJK-appositive em-dashes, so the stored projection
+        # is deliberately not byte-identical to feed.json. Hashing raw feed
+        # text marked 137/1854 articles changed on every run — the hourly
+        # reconcile re-UPDATEd them forever and --quiet-when-clean was never
+        # quiet, which is fatal for a safety net nobody then reads.
+        feed_content = projected_content(f, verbose=False)
         db_content = d.get("content") or ""
         content_changed = (
             hashlib.md5(feed_content.encode("utf-8")).hexdigest()

@@ -286,6 +286,7 @@ def health_snapshot(storage_dir: str = "storage") -> dict:
     open_questions = load_json(storage / "memory" / "open_questions.json", [])
     paper_trading = load_json(storage / "paper_trading.json", {})
     failed_syncs = load_json(storage / ".failed_supabase_syncs.json", [])
+    failed_mirror_syncs = load_json(storage / ".failed_mirror_syncs.json", [])
     sync_state = load_json(storage / ".supabase_sync_state.json", {})
     scheduler_state = get_scheduler_state(storage_dir=storage_dir)
     agent_cli_health = load_json(storage / "ops" / "agent_cli_health.json", {})
@@ -304,6 +305,7 @@ def health_snapshot(storage_dir: str = "storage") -> dict:
         "paper_trading_entries": total_entries,
         "risk_forecast_exists": (storage / "risk_forecast.json").exists(),
         "failed_supabase_syncs": len(failed_syncs),
+        "failed_mirror_syncs": len(failed_mirror_syncs),
         "has_incremental_sync_state": bool(sync_state),
         "scheduler_last_tick_at": scheduler_state.get("last_tick_at"),
         "scheduler_last_status": scheduler_state.get("last_status"),

@@ -328,8 +328,11 @@
       "entrypoint": "scripts/drain_failed_supabase_syncs.py",
       "commit_owner": "scripts/drain_failed_supabase_syncs.py",
       "policy": "self_commit",
-      "tracked_outputs": ["storage/.failed_supabase_syncs.json"],
-      "reason": "The queue is shared PHASE-Z machine state, but the drain also performs an ownership-safe immediate commit so resolved rows do not wait for the next dispatch."
+      "tracked_outputs": [
+        "storage/.failed_supabase_syncs.json",
+        "storage/.failed_mirror_syncs.json"
+      ],
+      "reason": "Both projection dead-letter queues are shared PHASE-Z machine state, but the drain also performs an ownership-safe immediate commit so resolved rows do not wait for the next dispatch."
     },
     "indicator_arena_daily": {
       "entrypoint": "scripts/indicator_arena_daily.py",

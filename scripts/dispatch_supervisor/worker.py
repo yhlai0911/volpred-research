@@ -37,7 +37,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
-from . import alerts, codex_failover, failure_class, identity, procutil, state
+from . import (
+    alerts, claim_release, codex_failover, failure_class, identity, procutil, state,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -649,6 +651,28 @@ def run_worker(
             # Sanitize sentinel to canonical SIGKILL hang code before persisting:
             # state file readers + alerts expect a real POSIX exit code, not -1000.
             persisted_exit = 137 if exit_code == TIMEOUT_KILLED_SENTINEL else exit_code
+            # WS-A2c: hand the dead fire's task-pool claim back BEFORE the CAS,
+            # so this runs on both return points below (the one that closed the
+            # job and the one that lost to health.py). Deliberately
+            # unconditional:
+            #   - The kill already happened and is CONFIRMED — reaching category
+            #     "hang" requires _kill_pgid() to have returned True (a surviving
+            #     group is classified "hang_survived" instead), so nothing can
+            #     still be acting on this claim.
+            #   - Double-release is a no-op. release_owner_claims
+            #     (scripts/task_pool_claim.py:579-582) skips any row that is no
+            #     longer claimed/in_progress, so if health.py already re-pended
+            #     this job we simply release nothing.
+            #   - Doing it only when we WIN the CAS would leave a real hole:
+            #     health.py closes some aged-out jobs as silent_death /
+            #     timeout_unverified WITHOUT re-pending, and in those cases
+            #     `entry is None` here would mean nobody hands the claim back.
+            # Best-effort: the helper swallows its own failures (WARNING only),
+            # so neither killed_timeout nor the hang alert can be blocked by a
+            # locked or corrupt task pool. The stale sweep is still the backstop.
+            repended_tasks = claim_release.repend_killed_job_claims(
+                job_id=job_id, slot_id=slot_id, source="worker",
+            )
             # record_completion is the atomic hand-off; a non-None return means
             # WE closed this job and therefore own the incident report. It hands
             # back the job as it was at that instant, so we never re-read
@@ -678,7 +702,9 @@ def run_worker(
                          # observed at alert time: macOS can and does refuse
                          # killpg, so report whether the SIGKILL actually landed
                          # rather than asserting it did (see procutil.kill_pgid).
-                         "survivors": procutil.pgid_members(pgid) if pgid > 0 else []},
+                         "survivors": procutil.pgid_members(pgid) if pgid > 0 else [],
+                         # WS-A2c receipt: which task claims this kill handed back.
+                         "repended_tasks": repended_tasks},
                     log_tail=log_tail, state_path=state_path,
                 )
             return WorkerResult(

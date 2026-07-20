@@ -493,6 +493,20 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
             dreaming_result = _revalidate_dreaming_before_claim(task, owner=args.owner)
             if dreaming_result is not None:
                 return dreaming_result
+        lane = str(task.get("dispatch_lane") or "").strip().lower()
+        if (lane == "main_thread" or existing_status == "pending_main_thread") and not getattr(
+            args, "main_thread", False
+        ):
+            # 2026-07-20 owner 糾正（refactor_plan_ops_master_2026_07 §5 獨立軌）：
+            # lane 只擋候選排序不夠 —— burst/urgent fire 會點名 claim，隔離必須
+            # enforce 在 claim 這個唯一入口。互動主線程用 --main-thread 明示越過。
+            return {
+                "ok": False,
+                "reason": "main_thread_lane",
+                "dispatch_lane": lane or None,
+                "status": existing_status,
+                "hint": "reserved for main thread; pass --main-thread from an interactive session",
+            }
         if _is_codex_owner(args.owner) and not _is_codex_eligible_task(task):
             return {
                 "ok": False,
@@ -866,7 +880,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
 
-    p = sub.add_parser("claim"); p.add_argument("--id", required=True); p.add_argument("--owner", required=True); p.add_argument("--session"); p.set_defaults(fn=cmd_claim)
+    p = sub.add_parser("claim"); p.add_argument("--id", required=True); p.add_argument("--owner", required=True); p.add_argument("--session"); p.add_argument("--main-thread", action="store_true", dest="main_thread", help="claim a main_thread-lane task (interactive session only)"); p.set_defaults(fn=cmd_claim)
     p = sub.add_parser("start"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_start)
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)

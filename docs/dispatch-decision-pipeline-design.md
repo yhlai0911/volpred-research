@@ -26,7 +26,9 @@
 | cron due 判定 | `scripts/dispatch_supervisor/scheduler.py:560-582`、`:720` | `_due_to_fire()` |
 | burst / 外部急件 | `scripts/dispatch_supervisor/scheduler.py:722-738` | `state.consume_fire_request()`；requested fire **繞過 pregate**（`:774` 只 gate `fire_reason == "cron"`） |
 | pregate 呼叫點 | `scripts/dispatch_supervisor/scheduler.py:770-788` | enforce 模式會 `action=pregate_skip` 並吃掉 slot |
-| dry-run 分支 | `scripts/dispatch_supervisor/scheduler.py:789-794` | `action=dry_run_fire`，**在 pregate 之後、prompt 載入之前**返回 |
+| dry-run 分支 | `scripts/dispatch_supervisor/scheduler.py:789-794` | `action=dry_run_fire`，位置在 pregate 區塊之後、prompt 載入之前返回 |
+
+**dry-run 繞過 pregate（2026-07-20 覆核新增）**：`scripts/dispatch_supervisor/scheduler.py:774` 的條件是 `if fire_reason == "cron" and not dry_run:`。即 **dry-run 路徑根本不執行 pregate**。含意：H4 驗收條要求的「`--dry-run` 輸出與實際 fire 決策一致性」在現行 scheduler 上**結構性不可能成立**——只要 pregate mode 非 `off`，cron fire 會過 pregate 而 dry-run 不會，兩者天生分歧。這是除 §1.2 的 ctd `--dry-run` bug 之外的**第二個** dry-run 語意缺陷，且位於計畫指定的收斂終點（supervisor）內。§3.5 的 `decide()` 純函數化正好一併解掉：pregate 降為 `DecisionInput.demand` 輸入後，dry-run 與 fire 吃同一份輸入、走同一個 `decide()`，差別只剩是否 `reserve_fire`。
 
 **自帶寫入路徑**：有。`:711-713`（bootstrap `last_fire_at`）、`:786-787`（pregate_skip 吃 slot）、`:792-793`（dry_run 也寫 `last_fire_at`）、`:800-806`（`state.reserve_fire`）。皆走 `state._locked_state` / `state.reserve_fire`，屬受控 writer。
 
@@ -370,7 +372,92 @@ pregate 的存在理由是省下 ~95K 的 cold-load（`scripts/hourly_dispatch_p
 | 1 | 派工職責散在 **5 檔** | 實測 **10 個裁決點**（見 §1.6）：多出 `task_urgency.py`、`cron_hourly_dispatch_prompt.md`、`task_pool_claim.py`、`dispatch_burst.py`、`ops/scheduler.py` | H4 範圍應擴為 10；否則收斂後 `task_urgency` 與 prompt 仍會各自裁決 |
 | 2 | `continue_task_dispatch.py` 有「advisory 分身」問題 | 比預期更嚴重：**零生產 caller**，唯一消費者是 LLM prompt。它已不是「分身」，而是「建議書」 | 降 library 的工作量比預期小（無 caller 要改），但回歸風險比預期大（無 CI 覆蓋實際行為） |
 | 3 | 驗收要求「`--dry-run` 輸出與實際 fire 決策一致性測試」 | `--dry-run` 在 `continue_task_dispatch.py:1260` 宣告後**從未被讀取**；`main():1267` 無條件執行含寫入的 `build_report`。現況不存在可比對的 dry-run 語意 | 必須先加 H4-0（修 bug），才有東西可測。這是計畫未預期的前置工項 |
-| 4 | pregate「明文 observational（D3）」暗示它已接近 observational | pregate 在 enforce 模式下具**真實否決權**且會消耗 slot（`scheduler.py:781-788`）。是否 observational 取決於 `schedules.json` 的 mode 值，非程式碼常數 | 需確認生產環境當前 mode 值（本文件未讀取生產 `schedules.json`，**未確認，需確認**） |
+| 4 | pregate「明文 observational（D3）」暗示它已接近 observational | **已查證（2026-07-20）**：生產 `config/runtime_schedules.json:1450-1454` 為 `"pregate": {"mode": "shadow", "window_hours": 3.0}`。故 pregate 目前**行為上確實 observational**（`scheduler.py:781` 的 `if pregate_skip` 註解明寫 "only reachable in enforce mode"），但 enforce 分支仍在程式內、可經 config 熱重載（`scheduler.py:457-497`）單改一個字串就取得否決權。同 config note 寫「觀察 2-3 班判斷正確後改 enforce」——與 `refactor_plan_token_ops_waste` 的「刻意不翻 enforce」裁定**相矛盾**（正是 §1.2 P3 記載的 spec/裁定脫節） | D3 應把 mode 收斂為單一值並移除 enforce 分支，而非留著靠 config 自律。此為 open question Q3 |
 | 5 | 「priority / starvation / cluster budget / burst 四項」為主要衝突 | 實測最嚴重的是**第五項：priority 解析本身**（4 種實作、3 種 default）。它是前四項的共同上游——不先修它，其餘三項的收斂結果仍會因輸入不一致而分歧 | 建議把 priority 正規化提為 H4-1（最先做），列為第五項裁決 |
 | 6 | `dispatch_slot_budget.py` 是需要收斂的 owner 之一 | 它是唯一**無寫入路徑、純函數、已有測試**的模組（`tests/test_dispatch_slot_budget.py`）。它不是問題，缺的是 **enforcement**——`prompt.md:126` 自稱「唯一 enforcement owner」，實際 enforcement 是 LLM 自律 | 建議 `slot_budget` **不改**，直接當 `DecisionInput` 的輸入產生器；要修的是消費端 |
-| 7 | legacy shell 需退役 | plist 存在磁碟但 `launchctl` 未載入，已是 dormant。`cron_hourly_dispatch.sh` 內的裁決（`:158-176`、`:201`）目前不生效 | D3 的工作是**檔案歸檔**而非行為變更，風險低，可提前做以縮小 H4 的 owner 數 |
+| 7 | legacy shell 需退役 | plist 存在磁碟但 `launchctl list` 僅見 `com.volpred.dispatch-supervisor`（PID 20346）與 `com.volpred.telegram-poll`，無 hourly-dispatch。`cron_hourly_dispatch.sh` 內的裁決（`:158-176`、`:201`）目前不生效 | D3 的工作是**檔案歸檔**而非行為變更，風險低，可提前做以縮小 H4 的 owner 數 |
+| 8 | （計畫未提）rule 層對 ctd 的定位 | `.claude/rules/control-plane.md:28` 明文「dispatcher `scripts/continue_task_dispatch.py` 從這挑工」、`:124`/`:142`/`:150` 也把 categorize / vocab / refill 的 owner 指到該檔。降 library 後這四處全部過期 | H4-3 必須同 PR 改 `control-plane.md`，否則 rule 層會繼續把 ctd 當 authority（A8「權威索引落後誘發新開一層」的同型風險） |
+
+---
+
+## 8. 不做什麼（scope boundary）
+
+明文列出**本 WS 不碰**的東西，避免下一輪 agent 讀到本文件後 over-reach：
+
+| # | 不做 | 理由 |
+| --- | --- | --- |
+| S1 | **不改 `dispatch_slot_budget.py` 的計算邏輯** | 它是五個 owner 中唯一純函數、無寫入、已有測試（`tests/test_dispatch_slot_budget.py`）。要修的是消費端沒有機械 enforcement，不是它本身。cap 數值（BASE/SURGE/DERATE）**不在本 WS 調整** |
+| S2 | **不改 `state.reserve_fire` / lease / dispatch_state.json 的治理** | §1.3 已認定「dispatch_state.json 治理成熟（lock + AST gate）是模範」。H4 只新增消費者，不動 writer 契約 |
+| S3 | **不動 worker spawn / worktree 隔離** | 那是 WS-B（producer-scoped isolation）的範圍。H4 止於「決定派哪張」，不管「怎麼跑」 |
+| S4 | **不做 next_tasks.json 的 writer 全面收斂** | 那是 WS-A1。H4-3 只負責把 **ctd 這一個檔** 的寫入路徑搬走，其餘 40+ writer 不碰 |
+| S5 | **不做狀態機/status 詞彙收斂** | WS-A 的範圍。H4 把 status 當**輸入**讀，不重新定義終態語意 |
+| S6 | **不新增第二層 gate** | 反 anti-stacking。H4 是**淨減少** enforcement 點（10 → 1 裁決 owner）。任何「再加一個檢查器來確認 pipeline 沒錯」的提案一律拒絕；正確做法是把約束寫成 `tests/test_dispatch_decision.py` 的斷言或 §4.2 的 audit grep |
+| S7 | **不改 hourly prompt 的研究內容段落** | H4-5 只刪 prompt 內**裁決性**條文（cap 數字、lane 條件），把散文縮成指向 `Decision` 的 pointer。PHASE A/B 的研究任務描述不動 |
+| S8 | **不做 token 成本優化** | pregate 的省 token 效果是 R3 的**約束**（不得劣化 >20%），不是本 WS 的目標 |
+| S9 | **不刪 `storage/logs/hourly_pregate.jsonl` 與 `crosscheck_pregate_outcomes.py`** | 它們是 H4-4 前後的對照基準線，必須跨越切換點存活 |
+
+---
+
+## 9. 待裁決事項（open questions — 給主線程／老闆）
+
+每項附選項與推薦。**本文件不自行決定任何一項。**
+
+### Q1 — H4 的 owner 範圍要不要從 5 擴到 10？
+
+計畫寫「5 檔」，實測 10 個裁決點（§1.6）。
+
+- **(a) 維持 5 檔**：範圍可控，但 `task_urgency` / prompt / `task_pool_claim` / `dispatch_burst` 仍各自裁決，收斂後 burst 與 priority 仍有多 owner ⇒ H4 的驗收條「裁決集中在一個模組」實質不成立。
+- **(b) 擴為 10，一次做完**：範圍近乎翻倍，跨 `scripts/` 與 `src/volpred/ops/` 兩樹，單一 PR 風險高。
+- **(c) 擴為 10 但分兩批**：H4-1..H4-4 先收 A–E 五檔＋priority 正規化（含 F 的 `_priority`）；F–J 的 burst 收斂另立 H4-7。
+
+**推薦 (c)**。理由：priority 正規化（4 種實作）必須一次做完否則無意義，但 burst（5 owner、跨 ingress 與裁決兩種語意，R5）值得獨立一輪並先有 trace test 當基準。
+
+### Q2 — `continue_task_dispatch.py` 的 CLI 要保留還是刪除？
+
+該檔零生產 caller，唯一消費者是 prompt（`cron_hourly_dispatch_prompt.md:118`、`:141`）。
+
+- **(a) 全刪 CLI，純 library**：最乾淨，但 prompt 的兩處 `--report` 呼叫要同步改為讀 pipeline receipt，且失去人工診斷入口。
+- **(b) 保留 read-only 診斷 CLI**：`--dry-run` 修成真 no-write、刪 `--execute`；prompt 改讀 `Decision` receipt，CLI 只給人用。
+- **(c) 現狀不動**，只搬寫入路徑。
+
+**推薦 (b)**。理由：診斷入口有實際價值（17h member_qa 餓死事故就是靠人跑這支發現的，`continue_task_dispatch.py:70-77`），但必須先修 §1.2 的 `--dry-run` 假旗標，否則「診斷」動作本身會改 state。
+
+### Q3 — pregate 的 enforce 分支：移除還是保留？
+
+生產 mode 已是 `shadow`（§7 item 4），但 enforce 分支仍在 `scheduler.py:781-788`，改一個 config 字串即生效；而 token_ops_waste gate 已裁定「刻意不翻 enforce」。
+
+- **(a) 移除 enforce 分支**：程式碼即宣告，config 的 `mode` 退化為「是否寫 log」。符合 D3「明文 observational」。
+- **(b) 保留分支、config 註記 deadline**：留一條快速回退路徑，但違反「觀察期必有 deadline」原則的精神（此觀察期已掛 18 天，§1.2 P3）。
+- **(c) 先翻 enforce 觀察，再決定**：與既有裁定衝突。
+
+**推薦 (a)**，且與 H4-4 同 commit。理由：現況是「裁定說不翻、shell 註解說 validating ~1 week、config note 說觀察 2-3 班後改 enforce」三方脫節，任何保留都在延續脫節。真要回退，git revert 單一 commit 比留一個熱重載開關安全。
+
+### Q4 — dry-run 一致性的驗收標的是哪一個 dry-run？
+
+現有兩個都壞：ctd 的 `--dry-run` 從未被讀（§1.2），scheduler 的 dry-run 繞過 pregate（§1.1）。
+
+- **(a) 以 scheduler 的 `_tick(dry_run=True)` 為準**：貼近 H4「收斂到 supervisor」的終態，但需先修 pregate 繞過問題（即需 H4-4 先落地）。
+- **(b) 以 ctd 的 `--dry-run` 為準**：可在 H4-0 立即修好、立即測，但測的是即將降為 library 的東西，H4-4 後要重寫測試。
+- **(c) 兩個都修，驗收綁 scheduler**。
+
+**推薦 (c)**。理由：ctd 的 dry-run bug 是**現在就會造成真實 state mutation** 的安全問題（任何人以為在 dry-run 卻觸發 refill/retire/sweep），不應等 H4-4；但 H4 的正式驗收條應綁在終態（scheduler）上。
+
+### Q5 — priority default 統一為哪個值？
+
+現況 999（ctd 隊尾）／9（pregate）／4（slot_budget）／`None`（task_urgency）。
+
+- **(a) 統一為隊尾（999）**：語意最安全（缺欄位不會意外插隊），但會改變 `slot_budget` 的 surge 判定（R2）——一批缺 priority 的任務從「等同 P4」變隊尾，`pending P1>=3` 的計數不受影響但 cap 相關統計會動。
+- **(b) 統一為 4**：對 `slot_budget` 零行為變更，但 ctd 側缺欄位任務會從隊尾躍升至 P4，可能排到真 P4 之前。
+- **(c) 先一次性 normalize 資料（補齊所有缺欄位），再統一為 999**。
+
+**推薦 (c)**，normalize 掛在 A3 的 status migration 同批次（A3 已有 `status_original` 保留原值的先例）。理由：符合「永遠修流程不修資料」的下半句——流程修好後才做一次性 migration，且此處 default 之爭的根因是資料髒，補乾淨後 default 選哪個都不再有行為差異。
+
+### Q6 — H4-2 的 shadow 期要多久？
+
+本文件 §5 暫定 72h（約 72 fires）差異率 0。
+
+- **(a) 72h**：符合原則 5「觀察期必有 deadline」，但樣本量小（72 次 fire 中真正有候選的更少）。
+- **(b) 7 天**：樣本足，但與「pregate shadow 掛 18 天」的前車之鑑同型 —— 長觀察期本身就是拖延的偽裝。
+- **(c) 以事件數為準**：累積 30 次「有候選且實際 fire」的 tick 差異率為 0 即通過，設 7 天硬上限，逾期未達標即視為設計有問題並回報。
+
+**推薦 (c)**。理由：時間窗會被低活動期稀釋；事件數才是真正的統計量，加硬上限則避免無限觀察。

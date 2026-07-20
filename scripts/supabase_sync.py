@@ -736,44 +736,12 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     runs the anti-AI-style em-dash normalizer (CJK appositive `——`/`—` →
     comma) so manual/legacy/hot-fix content gets the landmine-9 fix too.
     """
-    content = item.get("content") or item.get("description") or ""
-    if content:
-        try:
-            from volpred.publisher.markdown_table_sanitizer import (
-                sanitize_markdown_tables,
-            )
-            sanitized, report = sanitize_markdown_tables(content)
-            if report.changed:
-                content = sanitized
-                print(
-                    f"  [supabase_sync] markdown_table_sanitizer auto-fixed "
-                    f"{len(report.fixed_lines)} row(s) for "
-                    f"{item.get('id', 'unknown')}: {report.summary()}"
-                )
-            if report.has_unfixed:
-                print(
-                    f"  [supabase_sync] WARN unfixable table rows for "
-                    f"{item.get('id', 'unknown')}: lines={report.unfixed_lines}"
-                )
-        except Exception as exc:
-            print(f"  [supabase_sync] markdown_table_sanitizer error: {exc}")
-        # Secondary anti-AI-style em-dash normalizer (2026-05-29): same
-        # belt-and-suspenders rationale — catches manual edits / legacy
-        # entries / hot-fix scripts that bypassed publisher._append_to_feed.
-        # Conservative CJK-appositive-only rewrite (landmine 9 fix (b)).
-        try:
-            from volpred.publisher.emdash_normalizer import normalize_emdash
-
-            normalized, emrep = normalize_emdash(content)
-            if emrep.changed:
-                content = normalized
-                print(
-                    f"  [supabase_sync] emdash_normalizer auto-fixed "
-                    f"{emrep.replaced} em-dash(es) for "
-                    f"{item.get('id', 'unknown')}: {emrep.summary()}"
-                )
-        except Exception as exc:
-            print(f"  [supabase_sync] emdash_normalizer error: {exc}")
+    # 2026-07-20 (WS-C2): the sanitize pipeline that used to be inlined here
+    # now lives in projected_content(), which feed_sync.compute_diff also
+    # calls. One definition of "what the projection should contain" keeps the
+    # hourly reconcile idempotent — when the writer and the differ normalize
+    # differently, every affected row reports drift forever.
+    content = projected_content(item, verbose=True)
     # last_updated_at is not a column on the articles table, so carry it inside the
     # synced `details` JSON blob (the frontend reads details.last_updated_at to show
     # "更新於 <date hh:mm>" when content was edited after publish — boss 2026-07-01).

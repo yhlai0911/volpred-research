@@ -16,7 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from scripts.dispatch_supervisor import health, phase_z, procutil, scheduler, state, supervisor, worker
+from scripts.dispatch_supervisor import (
+    claim_release, health, phase_z, procutil, scheduler, state, supervisor, worker,
+)
 
 
 def _tmp_state(tmp_path: Path) -> Path:
@@ -1308,6 +1310,186 @@ def test_health_kill_completes_even_when_the_task_pool_is_unreadable(
     assert kills == [456]
     assert state.read_state(state_path)["current_job"] is None
     assert "re-pend of task claims" in caplog.text
+
+
+# --- WS-A2c: worker.py's OWN timeout must re-pend too -----------------------
+#
+# health.py is the belt-and-suspenders layer (~1s behind); the path that
+# actually wins the CAS in production is `worker._run_one_attempt`'s
+# `Popen.wait(timeout=)` firing → category "hang" → killed_timeout. WS-A2b only
+# closed the health half, so a real hang still stranded its claim.
+
+
+def _seed_worker_hang(
+    tmp_path: Path,
+    monkeypatch,
+    *,
+    task_id: str,
+    role: str = "hourly",
+    close_first: bool = False,
+) -> tuple[Path, Path, list[dict], dict]:
+    """Drive run_worker down the hang path with one live claim in the pool.
+
+    The claim owner embeds the job_id, which run_worker mints internally, so the
+    pool can only be seeded from inside the fake attempt.
+    """
+    state_path = _tmp_state(tmp_path)
+    log_path = tmp_path / "worker.log"
+    hang_alerts: list[dict] = []
+    seen: dict = {}
+
+    def fake_run_one_attempt(**kwargs):
+        _reserve_like_production(kwargs)
+        seen["job_id"] = kwargs["job_id"]
+        seen["slot_id"] = kwargs["slot_id"]
+        owner = claim_release.identity.task_claim_owner(
+            role=role, slot_id=kwargs["slot_id"], job_id=kwargs["job_id"],
+        )
+        seen["owner"] = owner
+        seen["next_tasks"] = _seed_claimed_task(
+            tmp_path, monkeypatch, task_id=task_id, owner=owner,
+        )
+        if close_first:
+            # Simulate health.py's watchdog winning the atomic close ~1s ahead
+            # of us, so our own record_completion returns None below.
+            seen["health_closed"] = state.record_completion(
+                job_id=kwargs["job_id"], expected_attempt=kwargs["attempt"],
+                expected_phase="classifying", exit_code=-1,
+                outcome="silent_death", final_model="opus", path=state_path,
+            ) is not None
+        return worker.TIMEOUT_KILLED_SENTINEL, 12.0, "timed out — SIGKILL'd by watchdog"
+
+    monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
+    monkeypatch.setattr(
+        worker.alerts, "send_hang_alert",
+        lambda **kwargs: hang_alerts.append(kwargs) or True,
+    )
+    return state_path, log_path, hang_alerts, seen
+
+
+def test_worker_own_timeout_repends_the_claim_the_dead_fire_was_holding(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """WS-A2c (a): the worker's own watchdog kill must hand the claim back."""
+    state_path, log_path, hang_alerts, seen = _seed_worker_hang(
+        tmp_path, monkeypatch, task_id="assign_worker_zombie",
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt", log_path=log_path, state_path=state_path,
+        sleep_fn=lambda sec: None,
+    )
+
+    assert result.outcome == "killed_timeout"
+    assert result.attempts == 1, "hang must NOT trigger retry"
+    task = _read_task(seen["next_tasks"], "assign_worker_zombie")
+    assert task["status"] == "pending"
+    assert "claimed_by" not in task
+    assert task["last_release_reason"] == f"supervisor_kill_{seen['job_id'][:8]}"
+    assert task["status_history"][-1]["by"] == seen["owner"]
+    # Owner-scoped, not a pool reset.
+    assert _read_task(seen["next_tasks"], "untouched_other_task")["status"] == "pending"
+    # Receipt rides along on the hang mail, same as the health path.
+    assert hang_alerts[0]["job"]["repended_tasks"] == ["assign_worker_zombie"]
+
+
+def test_worker_own_timeout_repends_codex_failover_claim_for_the_same_slot(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Both role tokens: the fire may have handed the slot to Codex mid-flight."""
+    state_path, log_path, _alerts, seen = _seed_worker_hang(
+        tmp_path, monkeypatch, task_id="assign_worker_codex_zombie",
+        role="codex-failover",
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt", log_path=log_path, state_path=state_path,
+        sleep_fn=lambda sec: None,
+    )
+
+    assert result.outcome == "killed_timeout"
+    assert _read_task(seen["next_tasks"], "assign_worker_codex_zombie")["status"] == "pending"
+
+
+def test_worker_hang_result_and_alert_survive_a_broken_task_pool(
+    tmp_path: Path, monkeypatch, caplog
+) -> None:
+    """WS-A2c (b): re-pend is best-effort. A locked/corrupt pool degrades to a
+    WARNING and must never block killed_timeout landing or the hang alert."""
+    state_path, log_path, hang_alerts, seen = _seed_worker_hang(
+        tmp_path, monkeypatch, task_id="assign_worker_stuck",
+    )
+
+    def _boom(*_args, **_kwargs):
+        raise OSError("next_tasks.json is locked")
+
+    monkeypatch.setattr(claim_release._task_pool_claim(), "release_owner_claims", _boom)
+
+    with caplog.at_level(logging.WARNING):
+        result = worker.run_worker(
+            prompt_text="prompt", log_path=log_path, state_path=state_path,
+            sleep_fn=lambda sec: None,
+        )
+
+    assert result.outcome == "killed_timeout"
+    assert result.exit_code == 137
+    assert len(hang_alerts) == 1, "a broken pool must not swallow the hang alert"
+    assert hang_alerts[0]["job"]["repended_tasks"] == []
+    assert "re-pend of task claims" in caplog.text
+    # Untouched: the stale-claim sweep remains the backstop for this row.
+    assert _read_task(seen["next_tasks"], "assign_worker_stuck")["status"] == "in_progress"
+
+
+def test_worker_repends_even_when_health_won_the_close(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """WS-A2c (c): losing the CAS (`entry is None`) must NOT skip the re-pend.
+
+    health.py closes some aged-out jobs as silent_death / timeout_unverified
+    WITHOUT releasing anything, so a win-only re-pend would leave the claim
+    stranded exactly when nobody else is going to hand it back. Releasing
+    unconditionally is safe because release_owner_claims is idempotent.
+    """
+    state_path, log_path, hang_alerts, seen = _seed_worker_hang(
+        tmp_path, monkeypatch, task_id="assign_worker_lost_race", close_first=True,
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt", log_path=log_path, state_path=state_path,
+        sleep_fn=lambda sec: None,
+    )
+
+    assert seen["health_closed"] is True
+    assert result.outcome == "killed_timeout"
+    # Loser of the CAS stays silent on mail (2026-07-12 contract) but still
+    # requeues the work.
+    assert hang_alerts == []
+    assert _read_task(seen["next_tasks"], "assign_worker_lost_race")["status"] == "pending"
+
+
+def test_release_owner_claims_is_idempotent_for_an_already_pending_task(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The safety argument for calling the helper from both worker and health:
+    a second release matches nothing rather than double-reporting or resetting
+    a row a successor fire may already have claimed."""
+    owner = claim_release.identity.task_claim_owner(
+        role="hourly", slot_id="slot-1", job_id="deadbeefcafe",
+    )
+    next_tasks = _seed_claimed_task(
+        tmp_path, monkeypatch, task_id="assign_twice", owner=owner,
+    )
+
+    first = claim_release.repend_killed_job_claims(
+        job_id="deadbeefcafe", slot_id="slot-1", source="worker",
+    )
+    second = claim_release.repend_killed_job_claims(
+        job_id="deadbeefcafe", slot_id=1, source="health",
+    )
+
+    assert first == ["assign_twice"]
+    assert second == [], "a second release must be a no-op, not a re-report"
+    assert _read_task(next_tasks, "assign_twice")["status"] == "pending"
 
 
 def test_health_check_kills_overdue_job_skips_kill_on_identity_mismatch(

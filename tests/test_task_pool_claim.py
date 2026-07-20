@@ -711,7 +711,11 @@ def test_codex_owner_cannot_claim_claude_only_task(
     assert rc == 1
     payload = json.loads(capsys.readouterr().out)
     assert payload["ok"] is False
-    assert payload["reason"] == "not_codex_eligible"
+    # pending_main_thread is refused by the earlier main-thread-lane gate
+    # (2026-07-20, refactor_plan_ops_master_2026_07 s5); other claude-only
+    # types still fall through to the codex-eligibility refusal.
+    expected = "main_thread_lane" if status == "pending_main_thread" else "not_codex_eligible"
+    assert payload["reason"] == expected
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == status
     assert "claimed_by" not in saved[0]
@@ -1047,3 +1051,68 @@ def test_claim_proceeds_when_dreaming_condition_still_holds(tmp_path, monkeypatc
     assert result["ok"] is True
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "claimed"
+
+
+def test_claim_refuses_main_thread_lane_for_dispatch_agents(tmp_path, monkeypatch, capsys) -> None:
+    # Independent refactor track gate (refactor_plan_ops_master_2026_07 s5):
+    # lane filtering in candidate ranking is not enough -- burst/urgent fires
+    # name a task id and claim it directly (observed twice on 2026-07-20), so
+    # isolation must be enforced at the single claim entrance.
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "refactor_lane_task",
+                    "task_type": "platform_ops",
+                    "status": "pending",
+                    "priority": 1,
+                    "dispatch_lane": "main_thread",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys, "argv",
+        ["task_pool_claim.py", "claim", "--id", "refactor_lane_task", "--owner", "hourly-slot-2-abc"],
+    )
+    task_pool_claim.main()
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is False
+    assert payload["reason"] == "main_thread_lane"
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "pending"
+    assert "claimed_by" not in saved[0]
+
+
+def test_claim_main_thread_flag_allows_interactive_claim(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "refactor_lane_task",
+                    "task_type": "platform_ops",
+                    "status": "pending",
+                    "priority": 1,
+                    "dispatch_lane": "main_thread",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys, "argv",
+        ["task_pool_claim.py", "claim", "--id", "refactor_lane_task", "--owner", "claude-main", "--main-thread"],
+    )
+    task_pool_claim.main()
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "claimed"
+    assert saved[0]["claimed_by"] == "claude-main"

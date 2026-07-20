@@ -98,11 +98,73 @@ memory_governance / persistent_alert / orphaned_experiment。每個 fail-open（
 
 | 層 | Owner 機制 | 管什麼 | 現駐 checks |
 |---|---|---|---|
-| **L1 機械不變量** | project/user `.claude/settings.json` hooks + `scripts/git_hooks/pre-push`（單一 runner）+ `.github/workflows/` | 每 turn / 每 push 必須成立的格式性約束 | Stop: project final-text、user-global receipt-gated task-completion speech、save_session_state；PreToolUse deny（`pretooluse-bash-optimizer.sh`，單一 deny 清單）: worktree remove --force、zeabur deploy 直呼、整檔讀 canonical JSON、**共用 main checkout 上的 `git commit --amend`**（2026-07-10 補；amend 假設「HEAD 是我剛做的」，主 checkout 多 actor 併發時不成立 — 曾覆蓋他人 commit message 並吞掉其在途檔案；worktree 內 amend 不擋）；pre-push: encoding sweep + silent-fallback baseline；CI: provenance、encoding、silent-fallback、**pytest**（2026-07-10 補；此前約 1700 個測試在 CI 零執行，兩個紅燈爛數週。**零憑證下必須全綠** — 這性質本身擋掉 import-time side effect 再爬回來；why 見 error_log 同日兩條 entry）；**cron wrapper manifest**（2026-07-10 補；`scripts/tests/test_cron_wrapper_manifest.py` — 改了 `scripts/cron_*.sh` 卻沒跑 `sync_cron_wrappers.py --apply`，`config/cron_wrapper_manifest.json` 的 sha256 就對不上 → CI 紅。launchd 執行的是 `~/.volpred/bin/`，CI 看不到那條機器本地路徑，manifest 是唯一可驗證的耦合證據）；**tree-clean**（2026-07-10 補；pytest.yml 內 `Assert the suite mutated no repo state` step — 「測試寫 canonical state」整個 class 的唯一 owner。判準不是「哪些檔算 canonical」而是「跑完測試 checkout 有沒有變」。**只放 CI 不放 pre-push**：開發機的 cron 本來就會改那些檔） |
+| **L1 機械不變量** | `.claude/settings.json` hooks + `.claude/hooks/pretooluse-bash-optimizer.sh`（單一 deny 清單）+ `scripts/git_hooks/`（4 hook + 1 helper）+ `.github/workflows/` | 每 turn / 每 commit / 每 push 必須成立的格式性約束 | **逐條清單見下方 L1 實況盤點（4 張 AUDIT 表）**——此格刻意不再列散文清單：2026-07-20 盤點發現它漏了 3 個 hook / 4 條 deny / 1 個 workflow / 全部 5 個 git hook 檔（A8 finding）。散文清單維護不了，改由 `scripts/audit_enforcement_map.py` 機械比對 |
 | **L2 營運存活** | `check_alerts`（hourly piggy-back，單一 alert registry）+ email dedup | 「X 還活著/新鮮嗎」 | release gap / draft low / host cron fail / knowledge stale / paper stale / push backlog / **wrapper_drift**（2026-07-10 補；live `~/.volpred/bin` 副本 ≠ repo canonical → 你的編輯根本沒上線。收編進既有 `_check_piggy_back_drift` 的 `wrapper_missing` 回報路徑，不新增 script/cron） |
 | **L2b 派工失敗** | `dispatch_supervisor/alerts.py`（daemon 內建，唯一 owner — 2026-07-05 明確化） | hourly dispatch 的失敗/掛/額度/認證 alert | completion_failure / hang / quota（outage-scoped，一次事故一信）/ auth / orphan / loop_crash。`host_cron_fail` **刻意不覆蓋** supervisor（legacy log 已凍結）；dashboard health_cron 只量 daemon 存活（dispatch_state.json mtime），不量成敗——成敗歸這層 |
 | **L3 改善迴圈** | `loop_health`（fast）+ `dreaming_review`（slow，propose-only） | 「loop 有沒有在變好」 | 4 指標 + 5 detector；事故經 error_log 結構化 entry 餵進來，不另建 watchdog |
 | **L4 行為指引** | CLAUDE.md（頂層 mandate）→ `.claude/rules/`（path 觸發）→ memory（背景 why）→ skills（SOP） | 需要判斷的行為 | 同一 concern 在 L4 內也只佔一個主位，其他位置放 pointer |
+
+### L1 實況盤點（2026-07-20 WS-F1 全量重盤；由 CI 機械守）
+
+下面四張表**不是文件，是被機械比對的清單**。`scripts/audit_enforcement_map.py` 會從磁碟重建同樣四份 inventory 並 diff；不一致就 exit 1，掛在 `.github/workflows/knowledge-provenance.yml` 的 `audit` job。**新增／移除任何 hook、deny、CI job、git hook，必須同 commit 改這裡**，否則 CI 紅。
+
+#### L1-a Claude Code hooks（`.claude/settings.json`；`settings.local.json` 目前無 hooks 區）
+
+<!-- AUDIT:HOOKS -->
+| 事件 | matcher | owner script（repo 相對路徑） | 擋什麼 / 做什麼 | 觸發時機 |
+|---|---|---|---|---|
+| `SessionStart` | `*` | `scripts/auto_start_codex_loop.sh` | 冪等啟動 detached `codex_loop.sh`（非 gate，是 bootstrap） | 每次 session 開始 |
+| `SessionStart` | `*` | `scripts/warm_tcc_authorization.sh` | macOS TCC 授權預熱。**已是 legacy**：repo 2026-07-02 搬離 Desktop 後根因已消失，腳本自述現為 no-op/降級路徑 | 每次 session 開始 |
+| `UserPromptSubmit` | `*` | `.claude/hooks/email_pool_reminder.sh` | `next_tasks.json` 有 pending `email_reply` 時注入提醒，防止互動 session 略過老闆回信去做 feature | 每個互動 prompt |
+| `Stop` | `*` | `scripts/save_session_state.sh` | 落 session state 快照 | 每次 turn 結束 |
+| `Stop` | `*` | `scripts/hooks/enforce_final_text.py` | turn 以 tool call 收尾、無最終文字回報 → block stop（3-strike 後升級的機械層） | 每次 turn 結束 |
+| `Stop` | `*` | `scripts/hooks/enforce_fire_receipt.py` | dispatch fire 有產出卻沒寫 `fire_receipt.py` → block stop（2026-07-16：14 天內 186/266 fire 漏 receipt） | 每次 turn 結束 |
+| `PreCompact` | `*` | `scripts/save_session_state.sh` | 同上，compact 前保存 | context compact 前 |
+| `PreToolUse` | `Bash` | `.claude/hooks/pretooluse-bash-optimizer.sh` | **L1 deny 清單唯一 owner**（7 條，見 L1-b）+ 非 deny 的指令改寫／提示 | 每次 Bash tool call |
+| `PreToolUse` | `ScheduleWakeup` | `scripts/hooks/deny_wakeup_interactive.py` | 互動 turn（非 autonomous fire）禁用 ScheduleWakeup；fail-open | 每次 ScheduleWakeup tool call |
+| `PreToolUse` | `Read` | `scripts/hooks/read_context_budget.py` | 無 limit/offset 的整檔 Read 補預設行數上限（token 紀律，非安全 gate） | 每次 Read tool call |
+
+盤點註記：`.claude/settings.json` 與 `.claude/settings.local.json` 的 `permissions` 皆**只有 `allow`（5 / 91 條）、`deny` 為空陣列**。真正的 deny 全在 L1-b 的 hook 層，不在 `permissions.deny`——查 deny 時不要只看 settings。`scripts/hooks/` 另有 `commit_message_guard.py`、`git_mutation_guard.py` 兩支**未直接註冊為 hook** 的模組（由 bash optimizer 呼用）；`.claude/hooks/run-compact-bash.sh` 同樣未註冊。
+
+#### L1-b PreToolUse deny 規則（8 條）
+
+key = deny 訊息開頭到第一個 `（` 或 `。` 為止（audit 用同一規則從磁碟重建）。
+
+<!-- AUDIT:DENY -->
+| deny key | owner | 擋什麼 | 為什麼 |
+|---|---|---|---|
+| `禁止在 dispatch fire 內 spawn headless agent` | `pretooluse-bash-optimizer.sh` | fire 內 `claude -p` / `agy -p` | fire 有 3000s hard cap，研究 agent 要 20-60min → 三次 `hang_killed`（2026-07-12）。改走 `compute_queue.py enqueue-agent` |
+| `禁止 git worktree remove --force` | `pretooluse-bash-optimizer.sh` | `git worktree remove --force` | K1032 / K1618 誤刪未合併實驗。改走 `merge_worktree.sh` |
+| `禁止直呼 zeabur deploy` | `pretooluse-bash-optimizer.sh` | `zeabur deploy` 直呼 | 部署須走 `deploy-zeabur-safe.sh`（鎖 service ID） |
+| `禁止整檔讀取 feed.json / knowledge.json` | `pretooluse-bash-optimizer.sh` | `cat`/整檔 reader 讀 canonical JSON | token 紀律；`jq`/`grep`/`head` 不受攔 |
+| `禁止裸跑 codex exec` | `pretooluse-bash-optimizer.sh` | 裸 `codex exec` | 2026-07-11 卡 >30min 撞 hard cap。改走 `codex_exec_bounded.sh --timeout` 或 compute queue |
+| `共用 main checkout 禁止裸 Git mutation` | `pretooluse-bash-optimizer.sh` | 共用 main checkout 上的 stage/merge/checkout/ref mutation | reference-transaction hook 只能在 ref 階段擋，太晚。改走 `git_writer_lock.py commit`。registered linked worktree 不受攔 |
+| `禁止用 git commit -m 內嵌非 ASCII` | `pretooluse-bash-optimizer.sh` | `git commit -m` 內含中文/emoji | strike 3；shell 會產出非 UTF-8 message，push 後只有 force push 改得掉＝不可回復。改用 `-F /tmp/msg.txt` |
+| `hook:scripts/hooks/deny_wakeup_interactive.py` | 該 hook 自身 | 互動 turn 的 `ScheduleWakeup` | 該 tool 回應會被模型當回合終點，用戶問題被吃掉（2026-07-02 五犯） |
+
+#### L1-c CI（`.github/workflows/`，5 workflow / 5 job；全部 `push`(main) + `pull_request` + `workflow_dispatch`）
+
+<!-- AUDIT:CI -->
+| workflow 檔 | job id | 跑什麼 step | 擋什麼 |
+|---|---|---|---|
+| `experiment-artifacts.yml` | `artifacts` | Resolve base commit → Gate experiments added or modified | 新增/修改的實驗必須帶齊 artifact |
+| `knowledge-provenance.yml` | `audit` | Validate knowledge.json provenance baseline；Validate next_tasks.json status vocabulary baseline；**Validate Enforcement Layer Map**（2026-07-20 本次新增） | jq/Edit 繞過 Python writer 的手改；map 過期 |
+| `pytest.yml` | `pytest` | 裝依賴 → 蓋 sentinel → Validate feed audience consistency → Run test suite → Assert the suite mutated no repo state | 測試紅燈；**tree-clean**＝「測試寫 canonical state」整個 class 的唯一 owner。cron wrapper manifest 由 `scripts/tests/test_cron_wrapper_manifest.py` 在此 job 內執行（不是獨立 workflow） |
+| `silent-fallbacks.yml` | `audit` | Audit silent fallbacks | 新增裸 `except: return []` 類靜默 fallback（baseline 制） |
+| `source-encoding.yml` | `audit` | Audit source encoding | mojibake / 非 UTF-8 原始碼 |
+
+#### L1-d git hooks（canonical = `scripts/git_hooks/`；`.git/hooks/` 為安裝副本，兩者現逐 byte 相同）
+
+無 `core.hooksPath` 設定（`git config --get core.hooksPath` 空），故 Git 讀的是 `.git/hooks/`；`scripts/git_hooks/install.sh` 負責同步。audit 會在有 `.git/hooks/` 的機器上額外比對部署一致性（CI 上 `.git/hooks` 不存在，該檢查自動跳過）。
+
+<!-- AUDIT:GITHOOKS -->
+| 檔名 | 擋什麼 | 觸發時機 |
+|---|---|---|
+| `pre-commit` | Gate -1 hook deploy/source 原子性；Gate 0 candidate-index 測試相依閉包（`audit_test_imports.py` 不得被自己移除）；Gate 1 source encoding；Gate 2 silent fallbacks。**只審本 commit 觸及的 `.py`**（tree-wide 會讓 A 被 B 的半成品擋住） | `git commit` |
+| `pre-push` | Gate 1 encoding／Gate 2 silent-fallback／Gate 3 test-import，**逐一對「被推的 commit 自己的 tree」**跑（非工作區）。權威層：`--no-verify` 與 supervisor auto-commit 都躲不掉 | `git push` |
+| `prepare-commit-msg` | commit message 非 ASCII/非 UTF-8 位元組。**`--no-verify` 不會跳過此 hook**，故這是不可回復錯誤的真正 gate；PreToolUse 那條只是更早的 UX 警告 | 每次產生 commit message |
+| `reference-transaction` | `refs/heads/main` 或主 worktree HEAD 移動時，必須已持有 canonical Git-writer lease（只驗不取，避免與 Git ref lock 反向鎖序死結） | 任何 ref transaction |
+| `git-writer-lease-verify.py` | 上一條的驗證實作（helper，非 Git 事件本身） | 由 `reference-transaction` 呼用 |
 
 **「測試不得寫 canonical state」的三道防線分工**（2026-07-10 三振後定案，勿再加第四層）：
 - **預防** = `volpred.ops.canonical_write.guard_canonical_write()`，接在 writer 上（不是每個 caller），env 會被 `subprocess` / `uv run` / 孤兒孫程序繼承。**鎖是例外**：`shared_lock.sandboxed_lock_path()` **重導向**而非 raise，因為受測程式真的需要一把 fcntl 鎖才能跑完（raise 會刪掉覆蓋率）。判準：受測碼需不需要這個 side effect 才能跑完？需要→重導向，不需要→raise。

@@ -30,8 +30,20 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
-from scripts.dispatch_supervisor import alerts, health, procutil, worker  # noqa: E402
+from scripts.dispatch_supervisor import alerts, claim_release, health, procutil, worker  # noqa: E402
 from scripts.dispatch_supervisor import state as st  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _throwaway_task_pool(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Both hang paths now re-pend the dead fire's task claims (WS-A2b/A2c), so
+    every test in this file reaches the canonical next_tasks writer. Point it at
+    tmp_path: the repo's canonical-write gate raises `CanonicalWriteBlocked`
+    (a BaseException, deliberately unswallowable by the best-effort re-pend
+    handler) the moment a test touches the real pool."""
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(claim_release._task_pool_claim(), "NEXT_TASKS", pool)
 
 
 @pytest.fixture()
