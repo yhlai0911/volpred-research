@@ -8,6 +8,14 @@ Single source of truth for BLOCKED_REASONS — imported by:
 Drift was observed 2026-05-27 (mark_task_blocked had 7 entries, dispatcher had 9,
 and K1383 used `diversity_rule_post_null_quartet` which neither knew about).
 Adding new reasons here is the only sanctioned way to extend the vocab.
+
+2026-07-20 (refactor_plan_ops_master WS-A3): the vocab gate now also covers the
+`blocked_reason` FIELD on the canonical queue (audit in
+``volpred.ops.next_tasks.write_tasks_to_handle`` + CI baseline in
+``scripts/validate_next_tasks_status.py``). Two reasons were legitimized because
+live sanctioned flows already wrote them (the vocab lagged the process):
+``awaiting_codex_review`` (scripts/sync_next_tasks_status.py review-gate) and
+``awaiting_owner_decision`` (pairs with status=blocked_on_user).
 """
 
 from __future__ import annotations
@@ -24,8 +32,10 @@ BLOCKED_REASONS: frozenset[str] = frozenset(
         "codex_quota_reset_pending",        # ChatGPT-account daily quota exhausted — paired with blocked_until
         "paid_data_source_decision_pending",  # task gated on user/admin paid-API decision
         "diversity_rule_post_null_quartet", # paused per CLAUDE.md ML novel-method NULL-quartet diversity rule
-        "awaiting_event_window",            # event_jobs not_before > now — paired with blocked_until=not_before
+        "awaiting_event_window",            # time-window wait (event_jobs not_before, observation windows) — paired with blocked_until
         "daily_cap_reached",                # task_type hit its per-day publish cap — paired with blocked_until=next local midnight
+        "awaiting_codex_review",            # review gate: experiment done, Codex review artifact missing (sync_next_tasks_status.py)
+        "awaiting_owner_decision",          # awaiting boss/owner sign-off — pairs with status=blocked_on_user
     }
 )
 

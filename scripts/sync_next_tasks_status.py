@@ -301,7 +301,9 @@ def main() -> int:
             followup_id = _followup_task_id(task_id)
             previous_status = tasks[idx].get("status")
             tasks[idx]["status"] = "blocked"
-            tasks[idx]["blocked_reason"] = "awaiting_codex_review"
+            # Strict vocab path (WS-A3): raises loudly if the reason ever
+            # drifts out of blocked_reasons.py again.
+            tasks[idx]["blocked_reason"] = validate_blocked_reason("awaiting_codex_review")
             tasks[idx]["review_gate_status"] = "awaiting_review"
             tasks[idx]["review_gate_detected_at"] = now_iso
             tasks[idx]["review_gate_previous_status"] = previous_status
