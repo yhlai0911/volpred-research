@@ -32673,13 +32673,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T05:43:45.313187+00:00",
+    "completed_at": "2026-07-20T06:33:54.545634+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T05:43:45.313187+00:00",
-      "last_clean_observed_at": "2026-07-20T05:43:45.313187+00:00"
+      "resolved_at": "2026-07-20T06:33:54.545634+00:00",
+      "last_clean_observed_at": "2026-07-20T06:33:54.545634+00:00"
     }
   },
   {
@@ -33648,7 +33648,7 @@
     "id": "audience_article_general_audience_rewrite_92ec8a9f",
     "title": "Audience correction: rewrite a true general companion for 我用 AI 測了 11 種模型預測股市波動——結果最笨的方法贏了",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_92ec8a9f. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs [missing: reconstruct provenance before writing]; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
-    "priority": 3,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
@@ -33661,7 +33661,8 @@
       "rewrite-general",
       "content-quality"
     ],
-    "created_at": "2026-07-15T05:31:13.971087+00:00"
+    "created_at": "2026-07-15T05:31:13.971087+00:00",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "alert_host_cron_fail_20260715",
@@ -36175,31 +36176,34 @@
     "id": "article_k1697_rolling_gamma_moving_target",
     "title": "[發文] K1697：沿用多時的台股 Table 2 數字重跑後復現不出來，rolling last-window γ 是移動標靶",
     "task_type": "daily_article",
-    "priority": 3,
+    "priority": 1,
     "status": "pending",
     "source": "orphan_closeout",
     "created_at": "2026-07-17T08:55:00+00:00",
-    "description": "K1697 收尾（knowledge item ad2825d0，Codex gpt-5.4/high CONDITIONAL PASS，conf 0.85）判定可發佈。\n\n角度：legacy TWII rolling γ=0.272/t=3.18 無存活 JSON、不可復現；calendar-aligned fresh snapshot（common_end 2026-07-09）重建為 γ=0.198/t=1.86，掉出 5% 顯著。更有價值的是端點敏感度：同 spec 的 TWII γ 為 0.157(2025-01) → 0.269(2026-04) → 0.198(2026-07)，三個月移動 0.07 —— rolling last-window 這種『最新一段窗口』的統計數字本質上是移動標靶，不該當結論引用。\n\n**禁止的角度**（Codex 明確降級）：『台股指數槓桿效應是個股的 6.2 倍』（分母是 9 個全不顯著 γ 的平均、與 0 無異、無 CI，rawclose 變體就跳到 9.0×）、『0056 確定比 TWII 強』（無差異檢定）。\n\n證據：experiments/k1697/k1697_results.json；knowledge item ad2825d0。\nparent_task_id: dreaming_orphaned_experiment_k1697"
+    "description": "K1697 收尾（knowledge item ad2825d0，Codex gpt-5.4/high CONDITIONAL PASS，conf 0.85）判定可發佈。\n\n角度：legacy TWII rolling γ=0.272/t=3.18 無存活 JSON、不可復現；calendar-aligned fresh snapshot（common_end 2026-07-09）重建為 γ=0.198/t=1.86，掉出 5% 顯著。更有價值的是端點敏感度：同 spec 的 TWII γ 為 0.157(2025-01) → 0.269(2026-04) → 0.198(2026-07)，三個月移動 0.07 —— rolling last-window 這種『最新一段窗口』的統計數字本質上是移動標靶，不該當結論引用。\n\n**禁止的角度**（Codex 明確降級）：『台股指數槓桿效應是個股的 6.2 倍』（分母是 9 個全不顯著 γ 的平均、與 0 無異、無 CI，rawclose 變體就跳到 9.0×）、『0056 確定比 TWII 強』（無差異檢定）。\n\n證據：experiments/k1697/k1697_results.json；knowledge item ad2825d0。\nparent_task_id: dreaming_orphaned_experiment_k1697",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "article_k1699_forecast_timing_convention",
     "title": "[發文] K1699：同一模型同一資料，只因改變『你幾點做預測』，DM 從 +5.06 崩到 0/6 顯著",
     "task_type": "daily_article",
-    "priority": 3,
+    "priority": 1,
     "status": "pending",
     "source": "orphan_closeout",
     "created_at": "2026-07-17T08:55:00+00:00",
-    "description": "K1699 收尾（knowledge item 04ca3bea，codex follow-up PASS_WITH_CAVEAT，conf 0.78）判定可發佈。\n\n角度：嚴格 close-time（t−1 收盤）口徑下，PRG Extended 對 GJR(1,1) 在 SPY/QQQ/GLD/EEM/0050.TW/TAIFEX 六市場 0/6 達 Harvey 顯著（DM t ∈ [−0.54,+2.28]）。canonical（混合時點）headline 的 DM +5.06 是時點混合 artifact。高 overnight-share 市場無例外（TAIFEX ON 佔比 60.99% → t=−0.49；GLD 53.09% → −0.44）。誠實的 null 才是這條研究線的正確結局。\n\n**注意**：不可引用 nominal QLIKE 勝負 4/6（1-ulp 擾動即可翻轉）；唯一穩健陳述是 DM 全表的不顯著性。可提 refit cadence 不對稱（GJR/HAR 63d vs PRG 126/252d）為限制。\n\n證據：experiments/k1699/k1699_results.json、reproduce_report.json（537/537 scalar match）；knowledge item 04ca3bea。\nparent_task_id: dreaming_orphaned_experiment_k1699"
+    "description": "K1699 收尾（knowledge item 04ca3bea，codex follow-up PASS_WITH_CAVEAT，conf 0.78）判定可發佈。\n\n角度：嚴格 close-time（t−1 收盤）口徑下，PRG Extended 對 GJR(1,1) 在 SPY/QQQ/GLD/EEM/0050.TW/TAIFEX 六市場 0/6 達 Harvey 顯著（DM t ∈ [−0.54,+2.28]）。canonical（混合時點）headline 的 DM +5.06 是時點混合 artifact。高 overnight-share 市場無例外（TAIFEX ON 佔比 60.99% → t=−0.49；GLD 53.09% → −0.44）。誠實的 null 才是這條研究線的正確結局。\n\n**注意**：不可引用 nominal QLIKE 勝負 4/6（1-ulp 擾動即可翻轉）；唯一穩健陳述是 DM 全表的不顯著性。可提 refit cadence 不對稱（GJR/HAR 63d vs PRG 126/252d）為限制。\n\n證據：experiments/k1699/k1699_results.json、reproduce_report.json（537/537 scalar match）；knowledge item 04ca3bea。\nparent_task_id: dreaming_orphaned_experiment_k1699",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "article_k1608_boxoffice_null",
     "title": "[發文] K1608：大片週末後股市會動嗎？1,098 個週末的誠實檢定說：測不到",
     "task_type": "daily_article",
-    "priority": 4,
+    "priority": 1,
     "status": "pending",
     "source": "orphan_closeout",
     "created_at": "2026-07-17T08:55:00+00:00",
-    "description": "K1608 收尾（knowledge item 2e68e715，Codex gpt-5.6-sol CONDITIONAL PASS，conf 0.75）判定可發佈。\n\n角度：用 2005-2026 共 1,098 個週末的 Wikipedia 公開票房資料檢定 blockbuster attention shock 對次週 SPY 報酬與 RV 的影響 —— 24 組資產×outcome 檢定無一達名目 5% 顯著（SPY 報酬 t=−0.90、RV t=+0.03，最大 |t| 僅 1.78）。重點是免費公開代理變數的精度天花板，以及 null 本身就是結果。\n\n**禁止的角度**：『電影不影響市場』。正確框架是 failure-to-detect —— SPY 報酬 95% CI [−0.64%,+0.24%] 仍涵蓋經濟顯著效果，|t|≥3 gate 需要 5 日 0.67% 的效果才過關，power 低。另需誠實揭露：Wikipedia 記的多是週一公布的 actual gross，outcome 卻自週一起算，故這不是『週日可交易訊號』的檢定。\n\n證據：experiments/k1608/k1608_results.json；knowledge item 2e68e715。\nparent_task_id: dreaming_orphaned_experiment_k1608"
+    "description": "K1608 收尾（knowledge item 2e68e715，Codex gpt-5.6-sol CONDITIONAL PASS，conf 0.75）判定可發佈。\n\n角度：用 2005-2026 共 1,098 個週末的 Wikipedia 公開票房資料檢定 blockbuster attention shock 對次週 SPY 報酬與 RV 的影響 —— 24 組資產×outcome 檢定無一達名目 5% 顯著（SPY 報酬 t=−0.90、RV t=+0.03，最大 |t| 僅 1.78）。重點是免費公開代理變數的精度天花板，以及 null 本身就是結果。\n\n**禁止的角度**：『電影不影響市場』。正確框架是 failure-to-detect —— SPY 報酬 95% CI [−0.64%,+0.24%] 仍涵蓋經濟顯著效果，|t|≥3 gate 需要 5 日 0.67% 的效果才過關，power 低。另需誠實揭露：Wikipedia 記的多是週一公布的 actual gross，outcome 卻自週一起算，故這不是『週日可交易訊號』的檢定。\n\n證據：experiments/k1608/k1608_results.json；knowledge item 2e68e715。\nparent_task_id: dreaming_orphaned_experiment_k1608",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "dreaming_orphan_detector_stale_at_claim",
@@ -40683,7 +40687,7 @@
     "description": "rev7 remediation agent 回報 ready_for_codex_round7=true。主線程已獨立 bytes 核對四條 round-6 blocking issue（B1a README 表格/標題已改為 HAC diagnostic interval + † 無覆蓋保證；B1b primary JSON 'demonstrably' 歸零、inference_caveats 4 條已在；B5 estimation docstring 已改為 'reuses the same model implementation while these settings differ' 並列三項未控差異；detector 已 flag K1731），且 15 檔 sha256 對 k1731_armB_rev7_freeze.txt 全 OK。本 task = 跑 Codex round 7 並依裁決分流：PASS → 解除 assign_67f56b79 blocked；FAIL → 依 blocking issues 開下一輪 bounded remediation（不得原樣重派）。禁止合併 worktree、禁止 agent 寫 knowledge.json。",
     "task_type": "paper_review",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "hourly_dispatch",
     "created_at": "2026-07-19T03:02:00+00:00",
     "created_by": "hourly-slot-1-4cb1880cf4cb4b6ead05b3565161b086",
@@ -40709,10 +40713,26 @@
         "to": "pending",
         "by": "cleanup",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-20T06:48:16.833757+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-3-e320a2e29b0f447c863719819d16e1e1"
+      },
+      {
+        "ts": "2026-07-20T06:48:17.118427+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-3-e320a2e29b0f447c863719819d16e1e1"
       }
     ],
     "last_released_at": "2026-07-20T03:12:37.507781+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "codex-failover-slot-3-e320a2e29b0f447c863719819d16e1e1",
+    "claimed_at": "2026-07-20T06:48:16.833738+00:00",
+    "claim_session_id": "cc45c15de6be",
+    "started_at": "2026-07-20T06:48:17.118411+00:00"
   },
   {
     "id": "k1730_nested_dm_detector_exposure",
@@ -43914,7 +43934,7 @@
     "title": "K741/K904 canonical NFP round-2 remediation（Codex FAIL：high-VIX「效應消失」過度宣稱 + 報告 stale 數字）",
     "task_type": "paper_review",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "description": "## 來源\n`storage/ops/codex_reviews/k741_canonical_round2_verdict.md` 第一行 → **VERDICT: FAIL**。\nworktree `.claude/worktrees/dispatch-slot-1-5741c175-k741` **禁止 merge**，禁手改裁決檔。\n\n## 已驗證為真、不必重做的部分\n2×2 factorial 是真的（四格 event-day hash 互異）、估計窗誠實（194 NFP / 3,890 non-NFP / 4,084 rows）、forward mapper 無 lookahead（0 backward、0 collision、五個 Good Friday 全部前推）、BLS 發布日 spot-check 全對（含 2013-10-22 停擺延後、2025-11-20 延後、2025-10 未發布）、bootstrap 逐值可重現（diff 0.369085、CI [-0.097157, 0.786302]、p 0.115）、`reproduce.py` 123/123 green、tex 數字與 JSON 逐項相符。**不要重跑。**\n\n## 主要 merge-blocking defect：宣稱強度\n`p=0.731`、ratio 0.94 **不能**支持「消失」或等價。difference-in-significance 的更正雖寫在後段，但前面的定性句沒有被治好。\n\n1. `paper/volatility-absorption/main_v3.tex:72` — 移除「When VIX exceeds 25, the NFP effect vanishes」這類定性宣稱。\n2. `paper/volatility-absorption/main_v3.tex:396` — 移除把「marginal contribution to volatility is absorbed」當機制層事實陳述（該句出現在承認 direct contrast 未成立之前）。\n3. `experiments/k741/nfp_canonical_vs_proxy_comparison.md:264` — 移除「效應消失的宣稱 survives and strengthens」；事實只是點估計 0.936 往下移，p=0.731。\n\n## 事實性錯誤\n4. `nfp_canonical_vs_proxy_comparison.md:69` — `+7d` shifts 應為 **25**（不是 26），且**不可**把 25 個月一律歸因「該月 1 號是週五」：其中 9 個月是週三或週四起始（2012-03、2014-01、2017-03、2025-01 等）。官方日期沒錯，錯的是報告的分類解釋。\n5. `nfp_canonical_vs_proxy_comparison.md:228,300` — stale gate 總數 `112/112` 與「currently 122/122」應更正為 **123/123**（committed `reproduce_report.json` 與 no-write 執行皆然）。\n\n## NOTE（非 blocking，但要處理）\n- T5 綁定主表、date-effect 註腳、contrast、observed rho、bootstrap mean（`reproduce.py:151-191`），但**未綁**印出的 trend CI `[-1.00, 0.40]` 與數個 provenance counts → 未來漂移不會被抓到。建議補綁。\n- k904 的 `run_cell` 在 exclusions 上不 fail-closed（k741 有）；committed 結果是 195/195、零 exclusion，故列 NOTE。\n- bootstrap 是 joint pairs moving-block，會讓 event 數與間距變動；固定日曆 residual bootstrap 回答的是稍不同的條件推論問題。結論既然是描述性、非拒絕，此 caveat 不使宣稱失效，但應寫進 limitations。\n\n## 修完之後\n- enqueue codex round 3 primary-path review；PASS 才用 `scripts/experiment_gates.py verdict-template` 產 `experiments/k741/review_verdict.json` 與 `experiments/k904/review_verdict.json`，再走正式 `scripts/merge_worktree.sh dispatch-slot-1-5741c175-k741`\n- 合併後主線程寫 knowledge.json（K741 canonical：first-Friday proxy 34/195 錯、headline ratio 1.14→1.16、p 0.081→0.051、regime contrast bootstrap CI 含 0 故論文改描述性）\n- 另依 comparison.md 的 feed 回溯建議裁定 k528×7 / k661×2 是否發更正（可另開 task）",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T21:12:18.321563+00:00",
@@ -43932,9 +43952,24 @@
         "to": "pending",
         "by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T06:40:27.716268+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-d1389e5d89654a4688a2ba7b3ef246b9"
+      },
+      {
+        "ts": "2026-07-20T06:40:28.006428+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-d1389e5d89654a4688a2ba7b3ef246b9"
       }
     ],
-    "last_released_at": "2026-07-19T21:12:32.006803+00:00"
+    "last_released_at": "2026-07-19T21:12:32.006803+00:00",
+    "completed_at": "2026-07-20T06:40:28.006410+00:00",
+    "result": "由 k741-nfp-canonical round-2/3 修訂涵蓋並經 Codex PASS：high-VIX 過度宣稱已改為 hedged（0.94x p=0.707 + n=28 不足以確立反轉 + 直接對比檢定 [-0.10,0.79] 含 0）；stale 數字已全面對齊 canonical JSON（0.039/0.072/0.051/0.104/0.707/0.026/0.029 逐項核對相符）。已隨 620b16755 併入 main。",
+    "burst_reported_at": "2026-07-20T06:40:28.023036+00:00"
   },
   {
     "id": "k528_round5_remediation",
@@ -45803,7 +45838,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-20T03:55:20.632647+00:00",
     "source": "internal_alert_remediation_router",
     "tags": [
@@ -45826,19 +45861,46 @@
         "tests/test_mirror_dead_letter_drain.py::tests.test_mirror_dead_letter_drain::test_drain_keeps_persistently_failing_mirror_ids",
         "tests/test_mirror_dead_letter_drain.py::tests.test_mirror_dead_letter_drain::test_failed_mirror_put_on_publish_is_dead_lettered"
       ]
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-20T06:47:57.912165+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-e63b916ab7174a5497d1a2186e6115b9"
+      },
+      {
+        "ts": "2026-07-20T06:47:58.239226+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-e63b916ab7174a5497d1a2186e6115b9"
+      },
+      {
+        "ts": "2026-07-20T06:51:29.365616+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-e63b916ab7174a5497d1a2186e6115b9"
+      }
+    ],
+    "started_at": "2026-07-20T06:47:58.239208+00:00",
+    "completed_at": "2026-07-20T06:51:29.365586+00:00",
+    "result": "fresh no-op: current HEAD 76befe965819 already contains descendant fix 8dc5ab04b. Focused mirror dead-letter suite is 13/13 passed; the PHASE-Z affected set has 405 passed, 1 skipped and all three alert fingerprint nodes pass. Pytest's nonzero exit is only the separate CI-parity live-file ratchet (.env/worktree/runtime-state reads), not this alert. No code or external state changed.",
+    "burst_reported_at": "2026-07-20T06:51:29.383912+00:00"
   },
   {
     "id": "assign_759a28f3",
     "title": "K741 NFP 數字更正後的 8 篇 feed 文章更正（blocked on 論文數字定案）",
     "description": "volatility-absorption 論文 NFP 數字更正後，8 篇既有 feed 文章引用的是**修正前**的 NFP\n統計（舊：n_nfp=195, ratio 1.145, p=0.081）。canonical 重跑後為 n_nfp=194, ratio 1.163,\np=0.051(Student)/0.039(Welch)，且 Low-VIX regime 從 p=0.069 變 p=0.009。sign 未翻轉，\n但數字與顯著性敘述需更正。\n\n**blocked_until 解除條件**：compute job `agent-brief_k741_cert_merge-1b4755` 完成、\n`k741-nfp-canonical` 通過 Codex 認證並經 merge_worktree.sh 合併 main（避免論文數字未定案就更正兩次）。\n\n更正順序（依 slot-3 收件摘要 feed_correction_priority）：\n- P1: mile_eda69bfb, mile_d721672b\n- P2: mile_630d0010, mile_44fb4b90, mile_a1fd229a, mile_d9129566, mile_ffb14405\n- P3: mile_76475146\n\n每篇走既有 article_correction 路徑，更正需誠實標註（不得靜默改數字）。\n\nparent: assign_1238781f\nsource artifact: .claude/worktrees/dispatch-slot-3-b5fbc1f4-nfpcal/experiments/k741/nfp_calendar_fix_summary.json\n",
     "task_type": "daily_article",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "source": "agent",
     "created_at": "2026-07-20T04:09:49.469746+00:00",
     "parent_task_id": "assign_1238781f",
-    "created_by": "hourly-slot-2-ea6a300239ac4fbd894ed0d58d3adee4"
+    "created_by": "hourly-slot-2-ea6a300239ac4fbd894ed0d58d3adee4",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "unblocked_note": "論文數字已定案並併入 main（620b16755，Codex k741/k904 PASS）。canonical 數字：overall 1.16x Welch p=0.039（Student 0.051；Holm over overall pair 0.072）；regimes Low 1.31x p=0.026 / Medium 1.23x p=0.029 / Elevated 1.19x p=0.266 / High 0.94x p=0.707；Holm 後無一存活（最小 adjusted p=0.104）。已發佈文章仍引用 first-Friday proxy 數字（1.23/1.17/1.15/0.98、overall 1.14 p=0.074）與 proxy 圖 k904_chart3_nfp_by_vix.png；canonical 圖為 k904_chart3_nfp_by_vix_canonical.png。更正時務必同步撤回「regime 顯著」與「效應消失」的強宣稱。",
+    "upstream_task": "assign_33e84191 (已 succeeded)"
   },
   {
     "id": "assign_d569f0c4",
@@ -45858,28 +45920,53 @@
     "description": "compute job compute-k741-k904-nfp-canonical-certification-review-unblocks-merge--1784520762 跑完後：(1) 讀 storage/ops/codex_reviews/k741_k904_nfp_canonical_verdict.md 第一行 VERDICT。(2) PASS → uv run python scripts/experiment_gates.py verdict-template --path .claude/worktrees/dispatch-slot-1-5741c175-k741/experiments/k741 產生骨架，填 reviewer/reviewed_at/reviewed_commit=a713e41ce/review_artifact/blocking_defects=[]，寫成該目錄的 review_verdict.json；k904 同法。(3) bash scripts/merge_worktree.sh dispatch-slot-1-5741c175-k741，再 merge dispatch-slot-3-b5fbc1f4-nfpcal（doc-only，被同一 gate 擋）。(4) 合併後在 main 跑 paper/volatility-absorption/reproduce.py 確認仍 123/123。(5) 依 Q2 裁決 Welch vs Student（目前 canonical 用 Student，overall p=0.0506；Welch 為 0.0394，跨 5% 邊界）；依 Q3 決定 tab:nfp multiplicity 揭露是 blocking 或投稿前補。(6) FAIL → 建 remediation task，不得合併。parent: assign_1238781f / compute job agent-brief_nfp_calendar_fix-0f5f57。",
     "task_type": "paper_review",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "system",
     "created_at": "2026-07-20T04:13:19.289540+00:00",
-    "created_by": "hourly-slot-3-70874e53770e4fcca67b8d54d94a0a8d"
+    "created_by": "hourly-slot-3-70874e53770e4fcca67b8d54d94a0a8d",
+    "status_history": [
+      {
+        "ts": "2026-07-20T06:36:09.584822+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-d1389e5d89654a4688a2ba7b3ef246b9"
+      },
+      {
+        "ts": "2026-07-20T06:36:09.917903+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-d1389e5d89654a4688a2ba7b3ef246b9"
+      },
+      {
+        "ts": "2026-07-20T06:42:07.548052+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-d1389e5d89654a4688a2ba7b3ef246b9"
+      }
+    ],
+    "started_at": "2026-07-20T06:36:09.917888+00:00",
+    "completed_at": "2026-07-20T06:42:07.548030+00:00",
+    "result": "Codex k741/k904 均 PASS；14 檔 reviewed_sha256 全相符；Holm 三家族獨立重算一致（0.0722/0.1039/0.1558，無存活）；pytest 51 passed；論文數字逐項對回 canonical JSON。artifact gate 擋下缺 reproduce_spec.json，補齊 k741/k904 兩份（network=allow FRED、k741 seed 20260719、ignore /date）後 gate PASS，合併為 620b16755，worktree 已清理。後續 8 篇 feed 更正交棒 assign_759a28f3（已 annotate canonical 數字）。",
+    "burst_reported_at": "2026-07-20T06:42:07.561078+00:00"
   },
   {
     "id": "assign_94fde28e",
     "title": "[NFP canonical] feed 8 篇 NFP 文章數字更正（blocked on paper 數字定稿）",
     "description": "NFP 事件日改用官方 BLS 行事曆後（n 195→194、ratio 1.1448→1.1631、p 0.081→0.051/0.039），以下 feed 文章引用舊數字需更正：P1 mile_eda69bfb, mile_d721672b；P2 mile_630d0010, mile_44fb4b90, mile_a1fd229a, mile_d9129566, mile_ffb14405；P3 mile_76475146。blocked_on：paper 數字定稿（Welch vs Student 未決 → 先更正會改兩次）。依 AGENTS.md 第 13 條『推翻舊結論必須回溯更正』，定稿後逐篇更正並記 docs/error_log.md。parent: assign_1238781f。",
     "task_type": "daily_article",
-    "priority": 3,
+    "priority": 1,
     "status": "pending",
     "source": "system",
     "created_at": "2026-07-20T04:13:19.337705+00:00",
-    "created_by": "hourly-slot-3-70874e53770e4fcca67b8d54d94a0a8d"
+    "created_by": "hourly-slot-3-70874e53770e4fcca67b8d54d94a0a8d",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "ci-red-29715899562",
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29715899562",
@@ -45906,11 +45993,26 @@
         "to": "pending",
         "by": "hourly-slot-1-7a67c6b057ad4d9a9a69fdd43f5b64d8",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 60.1min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-20T06:44:54.105378+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-e320a2e29b0f447c863719819d16e1e1"
+      },
+      {
+        "ts": "2026-07-20T06:44:59.563150+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-e320a2e29b0f447c863719819d16e1e1"
       }
     ],
-    "started_at": "2026-07-20T05:01:03.198538+00:00",
+    "started_at": "2026-07-20T06:44:59.563131+00:00",
     "last_released_at": "2026-07-20T06:01:05.657528+00:00",
-    "last_release_reason": "liveness_reconcile_detached_7a67c6b0"
+    "last_release_reason": "liveness_reconcile_detached_7a67c6b0",
+    "claimed_by": "hourly-slot-3-e320a2e29b0f447c863719819d16e1e1",
+    "claimed_at": "2026-07-20T06:44:54.105361+00:00",
+    "claim_session_id": "d0594e3c6a47"
   },
   {
     "id": "alert_dedup_gate_health_20260720",
