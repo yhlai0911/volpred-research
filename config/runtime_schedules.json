@@ -395,6 +395,21 @@
         ]
       },
       {
+        "id": "reclaim_stale_worktrees",
+        "label": "stale worktree 產物裁決開單（WS-I 落地保證）",
+        "cron": "25 */6 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_reclaim_stale_worktrees.sh",
+        "log_path": "storage/logs/cron/reclaim_stale_worktrees.log",
+        "description": "WS-I（工作產物落地保證）：每 6 小時 `scripts/reclaim_stale_worktrees.py --open-tasks` — dry-run 盤點 stale worktrees，對每個 held（dirty 或 unmerged）worktree 冪等開一張 P3 main_thread 裁決任務（id=worktree_salvage_<name>），出口三選一：merge_worktree.sh 整合 / path-scoped 救援 / 判定放棄後正規 remove（禁 --force）。動機：偵測一直都有（reclaim dry-run、daily_checkup worktree_reconcile、liveness worktree-veto）但沒有 actuator，2026-07-20 累積 16 個 stale worktrees、最久 138h，k1380 的有效 results 困在未提交 worktree 而 main 只有 INVALID 版。本 job 絕不帶 --apply：破壞性 kill/remove 仍是主線程手動決策。與 liveness_reconcile(:45) 分工：那條收回 claim（任務池側），這條收割產物（磁碟側）。由 run_due_jobs piggy-back 執行。",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": true,
+        "matchers": [
+          "reclaim_stale_worktrees.py",
+          "cron_reclaim_stale_worktrees.sh",
+          "reclaim_stale_worktrees.log"
+        ]
+      },
+      {
         "id": "audit_fb_pipeline",
         "cron": "20 */6 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_audit_fb_pipeline.sh",

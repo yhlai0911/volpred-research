@@ -24,9 +24,22 @@ Safety rules, in order:
     used here, not even as a fallback.
   - Default is dry-run. `--apply` is required to kill or remove anything.
 
+Detection alone is not landing (WS-I, 2026-07-20): a held worktree (dirty or
+unmerged) used to surface only as a ``skipped`` line in a dry-run nobody was
+scheduled to read, so 16 worktrees accumulated up to 138h of stranded work
+(k1380's only valid results sat uncommitted in agent-a6325a478bff05509 while
+main carried the INVALID copy). ``--open-tasks`` is the actuator: every held
+worktree becomes ONE idempotent adjudication task (``worktree_salvage_<name>``,
+P3, main_thread lane) in the pending queue, so the merge/salvage/discard
+decision reaches a decision-maker instead of dying in a log. This is also the
+mandated exit path for the merge-certify gate: a worktree whose merge was
+refused (no verdict / FAIL / sha drift) stays held here until someone rules on
+it — blocked, but never silently parked forever.
+
 Usage:
     uv run python scripts/reclaim_stale_worktrees.py            # dry-run
     uv run python scripts/reclaim_stale_worktrees.py --apply
+    uv run python scripts/reclaim_stale_worktrees.py --open-tasks
 """
 
 from __future__ import annotations
@@ -213,11 +226,100 @@ def reclaim(apply: bool) -> dict:
     return {"apply": apply, "stale_count": len(results), "actions": results}
 
 
+SALVAGE_TASK_PREFIX = "worktree_salvage_"
+
+
+def _is_held(action: dict) -> bool:
+    """Held = this worktree carries work the reclaimer refuses to touch."""
+    return bool(action.get("dirty")) or action.get("unmerged_commits", 0) != 0
+
+
+def build_salvage_task(action: dict, *, now_iso: str) -> dict:
+    """One adjudication task per held worktree; id is the idempotency key."""
+    name = action["worktree"]
+    facts = (
+        f"idle={action.get('idle_hours')}h "
+        f"unmerged={action.get('unmerged_commits')} "
+        f"dirty={action.get('dirty')} branch={action.get('branch')}"
+    )
+    return {
+        "id": f"{SALVAGE_TASK_PREFIX}{name}",
+        "task_type": "platform_ops",
+        "priority": 3,
+        "source": "auto_discovered",
+        "status": "pending",
+        "dispatch_lane": "main_thread",
+        "created_at": now_iso,
+        "created_by": "reclaim_stale_worktrees",
+        "title": f"worktree 產物裁決：{name}（{facts}）",
+        "description": (
+            f"stale worktree `.claude/worktrees/{name}` 持有未落地成果（{facts}），"
+            "reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，"
+            "三選一，不准放著：\n"
+            "1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 "
+            f"`bash scripts/merge_worktree.sh {name}`；\n"
+            "2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → "
+            "path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），"
+            "抽完按 3 收尾；\n"
+            "3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 "
+            "`git worktree remove`（禁 --force）+ 保留 branch。\n"
+            "裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+        ),
+    }
+
+
+def open_salvage_tasks(results: dict, *, queue_path: Path | None = None) -> list[dict]:
+    """Actuator: held-worktree findings → pending adjudication tasks.
+
+    Idempotent by task id (``append_task_record`` if_exists='skip'); a re-run
+    while the task is still queued is a no-op. Append failures are loud
+    (no-silent-fallback) and reported per worktree in the receipt.
+    """
+    from datetime import datetime, timezone
+
+    from volpred.ops.next_tasks import append_task_record
+
+    path = queue_path if queue_path is not None else REPO / "storage" / "next_tasks.json"
+    now_iso = datetime.now(timezone.utc).isoformat()
+    receipts: list[dict] = []
+    for action in results.get("actions", []):
+        if not _is_held(action):
+            continue
+        task = build_salvage_task(action, now_iso=now_iso)
+        receipt = {"worktree": action["worktree"], "task_id": task["id"]}
+        try:
+            _, created = append_task_record(task, path=path, if_exists="skip")
+            receipt["created"] = created
+        except Exception as exc:  # noqa: BLE001 — 一單失敗不擋其他單，但必留 trace
+            warn(
+                "reclaim_salvage",
+                f"append_task_record 失敗 {action['worktree']} ({type(exc).__name__}: {exc})",
+            )
+            receipt["created"] = False
+            receipt["error"] = f"{type(exc).__name__}: {exc}"
+        receipts.append(receipt)
+    return receipts
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true", help="真的 kill + remove（預設 dry-run）")
+    ap.add_argument(
+        "--open-tasks",
+        action="store_true",
+        help="對每個 held（dirty/unmerged）worktree 冪等開一張 P3 裁決任務",
+    )
+    ap.add_argument(
+        "--queue",
+        default=None,
+        help="salvage task 佇列路徑（預設 canonical storage/next_tasks.json；測試/驗證用）",
+    )
     args = ap.parse_args()
     out = reclaim(apply=args.apply)
+    if args.open_tasks:
+        out["salvage_tasks"] = open_salvage_tasks(
+            out, queue_path=Path(args.queue) if args.queue else None
+        )
     print(json.dumps(out, ensure_ascii=False, indent=2))
     if not args.apply and out["stale_count"]:
         print("\n[dry-run] 加 --apply 才會實際 kill + remove（branch 一律保留）")
