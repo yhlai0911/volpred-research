@@ -110,3 +110,38 @@ def test_supabase_sync_preserves_source_dates_and_stale_flags(monkeypatch):
             "gld_stale": False,
         },
     }
+
+
+def test_adjudicated_local_only_keys_strip_without_daily_warn(monkeypatch, capsys):
+    """2026-07-20 D5 adjudication: overnight_gap / gap_alert_level are
+    canonical-local-only. They must be stripped from the market_daily row
+    (table has no such columns) WITHOUT the daily schema-mismatch warning
+    that spammed sync logs for 5 straight days."""
+    captured = {}
+    monkeypatch.setattr(supabase_sync, "SUPABASE_KEY", "test-key")
+    monkeypatch.setattr(supabase_sync, "_post", lambda table, row: captured.update(row=row) or True)
+
+    market = {
+        "spy_close": 751.83,
+        "overnight_gap": -0.011509,
+        "gap_alert_level": "yellow",
+    }
+    assert supabase_sync.sync_market_daily("2026-07-20", market) is True
+    assert captured["row"] == {"trade_date": "2026-07-20", "spy_close": 751.83}
+    assert "schema-mismatch" not in capsys.readouterr().out
+
+
+def test_genuinely_unknown_key_still_warns_loudly(monkeypatch, capsys):
+    """The adjudication must not weaken the fail-open+warn design: a key that
+    is neither whitelisted nor adjudicated local-only still strips AND warns
+    (2026-04-17 silent-400 outage class stays observable)."""
+    captured = {}
+    monkeypatch.setattr(supabase_sync, "SUPABASE_KEY", "test-key")
+    monkeypatch.setattr(supabase_sync, "_post", lambda table, row: captured.update(row=row) or True)
+
+    market = {"spy_close": 751.83, "nk225_close": 39100.0}
+    assert supabase_sync.sync_market_daily("2026-07-20", market) is True
+    assert "nk225_close" not in captured["row"]
+    out = capsys.readouterr().out
+    assert "schema-mismatch warning" in out
+    assert "nk225_close" in out

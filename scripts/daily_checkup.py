@@ -10,6 +10,8 @@
 
 十一大維度（每個失敗都產生具體 finding，可被 alert 消費）：
 1. data_freshness   — 所有資料收集 job 是否照排程跑 + 關鍵資料檔是否新鮮（時效性資料優先）
+                      + DB 入庫驗證（canonical 最新 trade_date vs Supabase 端收據；
+                      老闆 2026-07-20「抓完數據要確認資料庫已正確存入」）
 2. cron_completion  — 所有排程 job 最近一輪是否真的 fire + exit0
 3. content_pipeline — 草稿池 ≥ 門檻、今日有產出、published 文章皆含真圖表+數據表（非純散文）
 4. live_freshness   — 線上 API 回傳的 data_date 是否 ≈ 最新交易日（抓「頁面卡舊資料」）
@@ -78,6 +80,22 @@ DATA_FILE_JOBS = [
         "uv run python scripts/collect_taifex_tick.py",
     ),
 ]
+
+# ── data_freshness sub-check: DB 入庫驗證（db_landing）───────────────────────
+# 老闆 2026-07-20 指令：「抓完數據要確認資料庫已正確存入」。sync 端印 "synced N"
+# 只是送出方的 exit-code 級證據；這裡直接查 Supabase 收到什麼（result-level 收據）：
+# canonical 本地（storage/paper_trading.json）最新 trade_date + 當日 row 數
+# vs DB 端最新 trade_date + 當日 row 數。不一致 = finding + 自動開 P1 修復單
+# （actuator 原則：gate 無死局，finding 必附可執行 recovery CLI）。
+# (table, date_col, local-state fn 名, recovery CLI)
+DB_LANDING_TABLES = (
+    ("market_daily", "trade_date", "_local_market_daily_state",
+     "uv run python scripts/supabase_sync.py market-daily  # canonical 全量重推（idempotent upsert）"),
+    ("paper_trades", "trade_date", "_local_paper_trades_state",
+     "uv run python scripts/daily_update.py  # idempotent：publish 有 monotone gate，重跑只補 sync"),
+)
+
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 _now = datetime.datetime.now()
 
@@ -187,6 +205,162 @@ def check_data_freshness() -> list[dict]:
                 f"{job}: 最新資料檔已 {a:.0f}h（預期 ≤{expected}h，由 {parent} 子步驟收）—— 資料落後",
                 recovery=recovery,
             ))
+    # result-level：DB 入庫驗證（canonical vs Supabase 收據）
+    out.extend(_db_landing_findings())
+    return out
+
+
+def _supabase_mod():
+    """Resolve scripts/supabase_sync at call time（同 reproduce_check 的 import 慣例）。"""
+    try:
+        from scripts import supabase_sync
+    except ModuleNotFoundError:  # direct ``python scripts/daily_checkup.py``
+        import supabase_sync  # type: ignore[no-redef]
+    return supabase_sync
+
+
+def _local_market_daily_state() -> tuple[str | None, int, list[str]]:
+    """canonical `_market_daily` 的（最新 trade_date, 該日 row 數, 全部日期）。"""
+    pt = json.loads((STORAGE / "paper_trading.json").read_text())
+    md = pt.get("_market_daily") or {}
+    dates = sorted(d for d in md if isinstance(d, str) and _ISO_DATE_RE.match(d))
+    if not dates:
+        return None, 0, []
+    return dates[-1], 1, dates  # 一天一 row（trade_date 是 conflict key）
+
+
+def _local_paper_trades_state() -> tuple[str | None, int, list[str]]:
+    """canonical 各策略 entries 的（全局最新 trade_date, 該日策略 row 數, 全部日期）。
+
+    只有「latest 停在全局最新日」的策略計入當日 row 數 —— 已停更/下架策略的
+    latest 停在舊日期，不會把 DB 端正常的部分入庫誤判成缺 row。
+    """
+    pt = json.loads((STORAGE / "paper_trading.json").read_text())
+    latest_per_strategy: list[str] = []
+    all_dates: set[str] = set()
+    for key, val in pt.items():
+        if key.startswith("_") or not isinstance(val, dict):
+            continue
+        dates = []
+        for e in val.get("entries") or []:
+            if not isinstance(e, dict):
+                continue
+            d = e.get("trade_date") or e.get("data_date") or e.get("date")
+            if isinstance(d, str) and _ISO_DATE_RE.match(d):
+                dates.append(d)
+        if dates:
+            latest_per_strategy.append(max(dates))
+            all_dates.update(dates)
+    if not latest_per_strategy:
+        return None, 0, []
+    latest = max(latest_per_strategy)
+    return latest, sum(1 for d in latest_per_strategy if d == latest), sorted(all_dates)
+
+
+def _db_landing_probe(ss, table: str, date_col: str) -> tuple[str | None, int]:
+    """DB 端（最新 date, 該日 row 數）。失敗 raise —— 呼叫端轉 finding，不 silent。"""
+    base = f"{ss.SUPABASE_URL}/rest/v1/{table}"
+    req = urllib.request.Request(
+        f"{base}?select={date_col}&order={date_col}.desc&limit=1", headers=ss.HEADERS)
+    rows = json.loads(ss._urlopen(req, timeout=20).read().decode("utf-8"))
+    if not rows:
+        return None, 0
+    latest = str(rows[0][date_col])
+    req2 = urllib.request.Request(
+        f"{base}?select={date_col}&{date_col}=eq.{latest}",
+        headers={**ss.HEADERS, "Prefer": "count=exact", "Range-Unit": "items", "Range": "0-0"})
+    resp = ss._urlopen(req2, timeout=20)
+    content_range = (resp.headers.get("Content-Range") or "").rsplit("/", 1)[-1]
+    if not content_range.isdigit():
+        raise ValueError(f"unexpected Content-Range for {table}: {content_range!r}")
+    return latest, int(content_range)
+
+
+def _open_db_landing_repair_task(table: str, msg: str, recovery: str, local_latest: str) -> str:
+    """開/確認 P1 修復單（actuator：finding 不留死局）。失敗 raise，呼叫端 fail-loud。
+
+    dedup：id 以 (table, canonical 最新日) 為 key —— 缺口未解時每天重跑 checkup
+    不會重複開單；缺口日推進（= 新 episode）才開新單。
+    """
+    from volpred.ops.next_tasks import append_task_record
+
+    task_id = f"db_landing_repair_{table}_{local_latest}"
+    record = {
+        "id": task_id,
+        "title": f"【P1 自動補救】DB 入庫落後：{table}",
+        "description": (
+            f"daily_checkup db_landing 偵測：{msg}\n\n"
+            f"修復（正式 CLI，不手改 DB）：\n  {recovery}\n\n"
+            "修完重跑 `uv run python scripts/daily_checkup.py` 驗證 finding 消失後才關單。"
+        ),
+        "task_type": "platform_ops",
+        "priority": 1,
+        "status": "pending",
+        "source": "daily_checkup_db_landing",
+        "created_at": _now.isoformat(),
+        "trigger": "db_landing_mismatch",
+    }
+    _rec, created = append_task_record(
+        record, path=STORAGE / "next_tasks.json", if_exists="skip")
+    return f"已開修復單 {task_id}" if created else f"修復單已存在 {task_id}"
+
+
+def _db_landing_findings() -> list[dict]:
+    """result-level 入庫驗證：canonical vs Supabase。對齊 → 安靜；不一致 → finding+修復單。"""
+    ss = _supabase_mod()
+    if ss._remote_reads_blocked():
+        # 測試/CI 明確封鎖遠端讀 —— 留 stderr trace（no-silent-fallback），不產 finding
+        print("[daily_checkup] db_landing: remote reads blocked (VOLPRED_NO_REMOTE_READ=1) — skip",
+              file=sys.stderr)
+        return []
+    if not ss.SUPABASE_URL or not ss.SUPABASE_KEY:
+        return [_finding(
+            "data_freshness", "warn",
+            "db_landing: 缺 Supabase 憑證（.env.local）—— DB 入庫驗證無法執行",
+            recovery="確認 .env.local 的 SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY")]
+    out: list[dict] = []
+    for table, date_col, local_fn, recovery in DB_LANDING_TABLES:
+        try:
+            local_latest, local_count, local_dates = globals()[local_fn]()
+        except Exception as exc:  # silent-ok: not silent — warn finding below IS the trace
+            out.append(_finding("data_freshness", "warn",
+                                f"db_landing/{table}: canonical 讀取失敗: {exc}"))
+            continue
+        if local_latest is None:
+            out.append(_finding("data_freshness", "warn",
+                                f"db_landing/{table}: canonical（paper_trading.json）無可比對資料"))
+            continue
+        try:
+            db_latest, db_count = _db_landing_probe(ss, table, date_col)
+        except Exception as exc:  # silent-ok: not silent — warn finding below IS the trace
+            out.append(_finding("data_freshness", "warn",
+                                f"db_landing/{table}: DB 查詢失敗（無法驗證入庫）: {exc}"))
+            continue
+        msg, sev = None, "warn"
+        if db_latest is None:
+            sev = "critical"
+            msg = f"DB 表全空，canonical 最新 {local_latest}（{len(local_dates)} 個資料日）完全沒入庫"
+        elif db_latest < local_latest:
+            behind = sum(1 for d in local_dates if d > db_latest)
+            sev = "critical" if behind >= 3 else "warn"
+            msg = (f"DB 落後 canonical：DB 最新 {db_latest} < 本地最新 {local_latest}"
+                   f"（落後 {behind} 個資料日）")
+        elif db_latest == local_latest and db_count < local_count:
+            msg = (f"最新日 {local_latest} 入庫不完整：DB {db_count} row < "
+                   f"canonical {local_count} row")
+        elif db_latest > local_latest:
+            msg = (f"DB 端最新 {db_latest} 比 canonical {local_latest} 新 —— "
+                   "canonical 是 SoT，不應發生（查誰在直寫 DB）")
+        if msg is None:
+            continue  # 對齊 → 安靜
+        try:
+            receipt = _open_db_landing_repair_task(table, msg, recovery, local_latest)
+        except Exception as exc:
+            receipt = None
+            out.append(_finding("data_freshness", "warn",
+                                f"db_landing/{table}: 修復單建立失敗（actuator 故障，須人工開單）: {exc}"))
+        full_msg = f"db_landing/{table}: {msg}" + (f" —— {receipt}" if receipt else "")
+        out.append(_finding("data_freshness", sev, full_msg, recovery=recovery))
     return out
 
 

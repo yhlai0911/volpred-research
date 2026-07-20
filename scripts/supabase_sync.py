@@ -250,6 +250,23 @@ _MARKET_DAILY_COLUMNS = {
     "sigma_spy_ann", "sigma_gld_ann",
 }
 
+# 2026-07-20 adjudication (ops-master D5, boss "database landing verification"):
+# `overnight_gap` / `gap_alert_level` are CANONICAL-LOCAL-ONLY by decision, not
+# by accident — deliberately NOT synced to the market_daily table:
+#   - the live table has no such columns (15 cols verified 2026-07-20; adding a
+#     key here without ALTER first 400s every row, see warning above);
+#   - frontend-v2-fix has zero consumers of either key (grep 2026-07-20);
+#   - only 9/883 canonical rows are non-null (daily_update clears them on
+#     no-alert days) and both are derivable from spy_open / prior spy_close
+#     which already sync;
+#   - the alert content still reaches readers via the daily bulletin article
+#     (`details.overnight_gap` / `details.gap_alert_level`) and rides along in
+#     paper_trades.entry JSONB.
+# Listing a key here silences the daily schema-mismatch warning WITHOUT widening
+# the column whitelist. A genuinely unknown key still warns loudly (fail-open +
+# warn design stays intact). Regression: tests/test_daily_update_market_freshness.py.
+_MARKET_DAILY_LOCAL_ONLY = {"overnight_gap", "gap_alert_level"}
+
 
 def _post(table: str, data: list | dict) -> bool:
     """POST (upsert) to Supabase table. Returns success.
@@ -1282,7 +1299,12 @@ def sync_market_daily(trade_date: str, market: dict) -> bool:
     # 2026-05-04 finding #4 修整：whitelist 早已 enforce (上面 row=)，但 stripped 欄位
     # 不可見導致 audit agent 誤判「未 enforce」+ caller 不知 schema mismatch。
     # 補 print warning 提升可觀察性 — caller 可看到 daily_update 在塞 unknown keys。
-    stripped = {k for k in market.keys() if k not in _MARKET_DAILY_COLUMNS and k != "trade_date"}
+    stripped = {
+        k for k in market.keys()
+        if k not in _MARKET_DAILY_COLUMNS
+        and k != "trade_date"
+        and k not in _MARKET_DAILY_LOCAL_ONLY  # adjudicated local-only, no daily noise
+    }
     if stripped:
         print(
             f"  [sync_market_daily] schema-mismatch warning: trade_date={trade_date} "
@@ -1525,6 +1547,27 @@ if __name__ == "__main__":
             state_path.unlink()
         print("Running FULL resync (state cleared)...")
         sys.exit(_report_counts(sync_full()))
+    elif len(sys.argv) > 1 and sys.argv[1] == "market-daily":
+        # Formal recovery CLI for the daily_checkup db_landing sub-check:
+        # repush canonical _market_daily (storage/paper_trading.json) into the
+        # market_daily table via idempotent upserts — never hand-edit the DB.
+        # daily_update only pushes the last 30 dates; this covers the full
+        # window by default, or a narrower one via --since YYYY-MM-DD.
+        require_creds()  # fail loud, not a silent (0, 0) no-op
+        since = None
+        if "--since" in sys.argv:
+            try:
+                since = sys.argv[sys.argv.index("--since") + 1]
+            except IndexError:
+                print("ERROR: --since requires a YYYY-MM-DD argument")
+                sys.exit(2)
+        pt_path = Path("storage") / "paper_trading.json"
+        md = json.loads(pt_path.read_text()).get("_market_daily") or {}
+        ok, fail = sync_market_daily_backfill(md, since=since)
+        window = f"since {since}" if since else f"all {len(md)} dates"
+        print(f"market_daily repush ({window}): ok={ok} fail={fail}")
+        sys.exit(1 if fail else 0)
     else:
         print("Usage: python scripts/supabase_sync.py full          # incremental")
         print("       python scripts/supabase_sync.py force-full    # full resync")
+        print("       python scripts/supabase_sync.py market-daily [--since YYYY-MM-DD]  # repush canonical market_daily")
