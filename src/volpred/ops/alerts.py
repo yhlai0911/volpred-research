@@ -312,6 +312,62 @@ def _save_alert_dedup(storage_dir: str, payload: dict[str, Any]) -> None:
     dump_json(path, payload)
 
 
+def _incident_candidates_path(storage_dir: str = "storage") -> Path:
+    return _ops_path(storage_dir, "incident_candidates.jsonl")
+
+
+def _record_incident_candidate(
+    storage_dir: str,
+    *,
+    dedupe_key: str,
+    level: str,
+    title: str,
+    first_seen: str,
+    occurrence: int,
+    event: str,
+    now: datetime,
+) -> None:
+    """Append an error_log FILING CANDIDATE for this alert occurrence (WS-F3).
+
+    Draft stream only — this never touches docs/error_log.md (governance files
+    are propose-only; the main thread adjudicates candidates into real entries).
+    ``scripts/dreaming_review.py::detect_unfiled_incident_class`` reads this
+    stream: a dedupe key seen >=2 times with no corresponding error_log entry
+    means the class was never filed, so its second occurrence was exactly as
+    blind as its first (refactor_plan_ops_master_2026_07 P-class).
+
+    Fail-open on I/O: candidate recording must never break the alert transport.
+    (CanonicalWriteBlocked derives from BaseException, so the test-leak gate
+    still fires through the OSError handler below.)
+    """
+    path = _incident_candidates_path(storage_dir)
+    guard_canonical_write(path)
+    record = {
+        "at": now.isoformat(),
+        "dedupe_key": dedupe_key,
+        "level": level,
+        "title": title,
+        "first_seen": first_seen,
+        "occurrence": occurrence,
+        "event": event,  # sent | dedup_skip | send_failed
+    }
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+            try:
+                fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    except OSError as exc:
+        warn(
+            "incident_candidates",
+            "append failed; alert transport unaffected",
+            err=str(exc)[:200],
+            key=dedupe_key[:16],
+        )
+
+
 _TELEGRAM_LEVEL_EMOJI = {
     "critical": "🔴",
     "warn": "⚠️",
@@ -537,6 +593,15 @@ def send_alert(
     dedup_state = _load_alert_dedup(storage_dir)
     existing = dedup_state["alerts"].get(dedup_key) or {}
     last_sent_at = _parse_iso_datetime(existing.get("last_sent_at"))
+    # WS-F3: every occurrence of the alert condition counts toward the filing
+    # radar, dedup-skipped ones included — dedup throttles the TRANSPORT, not
+    # the incident. Computed before either branch mutates the dedup entry.
+    incident_occurrence = (
+        int(existing.get("send_count", 0) or 0)
+        + int(existing.get("skip_count", 0) or 0)
+        + 1
+    )
+    incident_first_seen = str(existing.get("first_sent_at") or now.isoformat())
 
     if (
         not force_send
@@ -547,6 +612,16 @@ def send_alert(
         existing["skip_count"] = int(existing.get("skip_count", 0) or 0) + 1
         dedup_state["alerts"][dedup_key] = existing
         _save_alert_dedup(storage_dir, dedup_state)
+        _record_incident_candidate(
+            storage_dir,
+            dedupe_key=dedup_key,
+            level=normalized_level,
+            title=normalized_title,
+            first_seen=incident_first_seen,
+            occurrence=incident_occurrence,
+            event="dedup_skip",
+            now=now,
+        )
         return {
             "level": normalized_level,
             "title": normalized_title,
@@ -615,6 +690,18 @@ def send_alert(
             "skip_count": int(existing.get("skip_count", 0) or 0),
         }
         _save_alert_dedup(storage_dir, dedup_state)
+    # WS-F3: a failed transport (SMTP down / unconfigured) still means the
+    # incident OCCURRED — the filing radar must not go blind with the mail.
+    _record_incident_candidate(
+        storage_dir,
+        dedupe_key=dedup_key,
+        level=normalized_level,
+        title=normalized_title,
+        first_seen=incident_first_seen,
+        occurrence=incident_occurrence,
+        event="sent" if delivery["sent"] else "send_failed",
+        now=now,
+    )
     return result
 
 

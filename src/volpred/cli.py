@@ -736,6 +736,110 @@ def ops_dreaming_run(storage_dir: str, dry_run: bool) -> None:
     raise SystemExit(rc)
 
 
+@ops.group("observation")
+def ops_observation() -> None:
+    """Observation-period deadline ledger (design principle 5, WS-F5).
+
+    Every shadow / disabled-but-alive / deprecated state must be registered
+    here WITH a deadline and an action-on-expiry. Items past deadline with no
+    decision surface as a dreaming_review breach finding (nightly), which
+    queues a task to either execute the expiry action or extend explicitly.
+    Ledger: storage/ops/observation_ledger.json (owner:
+    volpred.ops.observation_ledger — the only schema/validation authority).
+    """
+
+
+@ops_observation.command("add")
+@click.option("--id", "item_id", required=True, help="Stable slug, e.g. pregate_shadow")
+@click.option("--what", required=True, help="What is being observed (state + where it lives)")
+@click.option("--deadline", default=None, help="ISO deadline (required unless --permanent)")
+@click.option("--action-on-expiry", default=None, help="What happens at the deadline (required unless --permanent)")
+@click.option("--permanent", is_flag=True, help="Deliberately observational forever — requires --note citing the ruling")
+@click.option("--started-at", default=None, help="ISO start of the observation (default: now)")
+@click.option("--note", default=None, help="Context / ruling reference")
+@click.option("--storage-dir", default="storage", show_default=True)
+def ops_observation_add(
+    item_id: str,
+    what: str,
+    deadline: str | None,
+    action_on_expiry: str | None,
+    permanent: bool,
+    started_at: str | None,
+    note: str | None,
+    storage_dir: str,
+) -> None:
+    """Register an observation item (validates principle 5 at creation)."""
+    from volpred.ops import observation_ledger as obs
+
+    item = obs.add_item(
+        storage_dir,
+        item_id=item_id,
+        what=what,
+        deadline=deadline,
+        action_on_expiry=action_on_expiry,
+        status=obs.STATUS_PERMANENT if permanent else obs.STATUS_OBSERVING,
+        started_at=started_at,
+        note=note,
+    )
+    console.print(f"[green]Observation registered[/green] {item['id']} ({item['status']})")
+    _print_json(item)
+
+
+@ops_observation.command("list")
+@click.option("--storage-dir", default="storage", show_default=True)
+@click.option("--all", "show_all", is_flag=True, help="Include decided (closed) items")
+def ops_observation_list(storage_dir: str, show_all: bool) -> None:
+    """List observation items; overdue ones are marked."""
+    from datetime import datetime, timezone
+
+    from volpred.ops import observation_ledger as obs
+
+    ledger = obs.load_ledger(storage_dir)
+    now = datetime.now(timezone.utc)
+    overdue_ids = {i.get("id") for i in obs.overdue_items(storage_dir, now=now)}
+    shown = []
+    for item in ledger["items"]:
+        if not show_all and item.get("status") == obs.STATUS_DECIDED:
+            continue
+        shown.append(item)
+        mark = "OVERDUE" if item.get("id") in overdue_ids else item.get("status", "?")
+        # No square brackets: rich console.print would eat them as markup tags.
+        console.print(
+            f"  {mark:<10} {item.get('id')} deadline={item.get('deadline') or '-'} "
+            f"— {str(item.get('what') or '')[:90]}"
+        )
+    if not shown:
+        console.print("  (no open observation items)")
+    _print_json({"count": len(shown), "overdue": sorted(x for x in overdue_ids if x), "items": shown})
+
+
+@ops_observation.command("resolve")
+@click.option("--id", "item_id", required=True)
+@click.option("--resolution", required=True, help="What was decided/done")
+@click.option("--storage-dir", default="storage", show_default=True)
+def ops_observation_resolve(item_id: str, resolution: str, storage_dir: str) -> None:
+    """Close an item: the expiry action (or an explicit decision) happened."""
+    from volpred.ops import observation_ledger as obs
+
+    item = obs.resolve_item(storage_dir, item_id, resolution=resolution)
+    console.print(f"[green]Observation decided[/green] {item['id']}")
+    _print_json(item)
+
+
+@ops_observation.command("extend")
+@click.option("--id", "item_id", required=True)
+@click.option("--deadline", required=True, help="New ISO deadline")
+@click.option("--reason", required=True, help="Why the window is being extended")
+@click.option("--storage-dir", default="storage", show_default=True)
+def ops_observation_extend(item_id: str, deadline: str, reason: str, storage_dir: str) -> None:
+    """Extend an observing item's deadline — the extension trail stays on the item."""
+    from volpred.ops import observation_ledger as obs
+
+    item = obs.extend_deadline(storage_dir, item_id, deadline=deadline, reason=reason)
+    console.print(f"[yellow]Observation extended[/yellow] {item['id']} → {deadline}")
+    _print_json(item)
+
+
 @ops.group("experiments")
 def ops_experiments() -> None:
     """Inspect and gradually normalize experiments/ structure."""

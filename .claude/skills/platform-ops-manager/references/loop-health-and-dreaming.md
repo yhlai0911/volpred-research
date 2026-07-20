@@ -28,7 +28,13 @@
 
 目前涵蓋 repeated_tool_failure / recurring_error / stale_knowledge /
 missing_retry_strategy / loop_metric_regression / semantic_concentration /
-memory_governance / persistent_alert / orphaned_experiment。每個 fail-open（warn 後 skip）。
+memory_governance / persistent_alert / unfiled_incident_class（WS-F3：alert 同
+dedupe key ≥2 次但 error_log 無立案 → 提「此 class 未立案」；訊號源 =
+`storage/ops/incident_candidates.jsonl`，由 alerts.py 寄信路徑 append）/
+observation_ledger_breach（WS-F5：`storage/ops/observation_ledger.json` 觀察項
+逾期未決策 = breach；CLI `volpred ops observation`，permanent 項免 deadline）/
+orphaned_experiment。每個 fail-open（warn 後 skip）。**清單以
+`scripts/dreaming_review.py::DETECTORS` 為準**，本檔數不進位時以程式為真。
 輸出 `storage/ops/dreaming/<date>.json` + 滾動 `baseline.json`（per-signature 連續 run strike count）。
 
 ## Auto vs Propose — 硬邊界（研究誠實 + 永遠修流程不修資料）
@@ -101,7 +107,7 @@ memory_governance / persistent_alert / orphaned_experiment。每個 fail-open（
 | **L1 機械不變量** | `.claude/settings.json` hooks + `.claude/hooks/pretooluse-bash-optimizer.sh`（單一 deny 清單）+ `scripts/git_hooks/`（4 hook + 1 helper）+ `.github/workflows/` | 每 turn / 每 commit / 每 push 必須成立的格式性約束 | **逐條清單見下方 L1 實況盤點（4 張 AUDIT 表）**——此格刻意不再列散文清單：2026-07-20 盤點發現它漏了 3 個 hook / 4 條 deny / 1 個 workflow / 全部 5 個 git hook 檔（A8 finding）。散文清單維護不了，改由 `scripts/audit_enforcement_map.py` 機械比對 |
 | **L2 營運存活** | `check_alerts`（hourly piggy-back，單一 alert registry）+ email dedup | 「X 還活著/新鮮嗎」 | release gap / draft low / host cron fail / knowledge stale / paper stale / push backlog / **wrapper_drift**（2026-07-10 補；live `~/.volpred/bin` 副本 ≠ repo canonical → 你的編輯根本沒上線。收編進既有 `_check_piggy_back_drift` 的 `wrapper_missing` 回報路徑，不新增 script/cron） |
 | **L2b 派工失敗** | `dispatch_supervisor/alerts.py`（daemon 內建，唯一 owner — 2026-07-05 明確化） | hourly dispatch 的失敗/掛/額度/認證 alert | completion_failure / hang / quota（outage-scoped，一次事故一信）/ auth / orphan / loop_crash。`host_cron_fail` **刻意不覆蓋** supervisor（legacy log 已凍結）；dashboard health_cron 只量 daemon 存活（dispatch_state.json mtime），不量成敗——成敗歸這層 |
-| **L3 改善迴圈** | `loop_health`（fast）+ `dreaming_review`（slow，propose-only） | 「loop 有沒有在變好」 | 4 指標 + 5 detector；事故經 error_log 結構化 entry 餵進來，不另建 watchdog |
+| **L3 改善迴圈** | `loop_health`（fast）+ `dreaming_review`（slow，propose-only） | 「loop 有沒有在變好」 | 4 指標 + detector 清單以 `dreaming_review.py::DETECTORS` 為準（硬編數字已兩度 drift）；事故經 error_log 結構化 entry + incident_candidates.jsonl（F3）餵進來，不另建 watchdog |
 | **L4 行為指引** | CLAUDE.md（頂層 mandate）→ `.claude/rules/`（path 觸發）→ memory（背景 why）→ skills（SOP） | 需要判斷的行為 | 同一 concern 在 L4 內也只佔一個主位，其他位置放 pointer |
 
 ### L1 實況盤點（2026-07-20 WS-F1 全量重盤；由 CI 機械守）

@@ -1316,3 +1316,194 @@ def test_quiescence_has_a_single_owner():
     body = src.split("def reconcile(", 1)[1].split("\ndef ", 1)[0]
     assert body.count("_is_quiescent(") == 2, "兩條分支都要委派給 owner"
     assert "prev_marker ==" not in body, "quiescent 判定不得散回 reconcile（anti-stacking）"
+
+
+# ---------------------------------------------------------------------------
+# WS-F3: unfiled incident classes (incident_candidates.jsonl → error_log gap)
+# ---------------------------------------------------------------------------
+def _incident_stream(storage: Path, key: str, title: str, n: int, *, level: str = "warn") -> None:
+    lines = []
+    for i in range(n):
+        lines.append(json.dumps({
+            "at": _iso(float(n - i)),  # oldest first
+            "dedupe_key": key,
+            "level": level,
+            "title": title,
+            "first_seen": _iso(float(n)),
+            "occurrence": i + 1,
+            "event": "sent" if i == 0 else "dedup_skip",
+        }))
+    (storage / "ops" / "incident_candidates.jsonl").write_text(
+        "\n".join(lines) + "\n", encoding="utf-8"
+    )
+
+
+def test_unfiled_incident_class_flagged_after_two_occurrences(tmp_path):
+    """同 dedupe key ×2 + error_log 無對應條目 → detector 可見（F3 驗收）。"""
+    storage = _storage(tmp_path)
+    key = "a" * 64
+    _incident_stream(storage, key, "release pool starved", 2)
+    # error_log exists but says nothing about this class
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text("# error log\n(unrelated)\n", encoding="utf-8")
+
+    findings = dr.detect_unfiled_incident_class(str(storage), {}, NOW)
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.signature == f"unfiled_incident_class:{key[:16]}"
+    assert f.severity == "warn"
+    assert f.remediation == "propose_only"  # governance file — agent adjudicates, never auto-write
+    assert f.governance_target == "docs/error_log.md"
+    assert "release pool starved" in (f.proposal or "")
+    assert f.activity_marker is not None
+
+
+def test_filed_incident_class_is_not_reproposed(tmp_path):
+    """已立案（title 出現在 error_log）→ 不重複提（F3 驗收下半）。"""
+    storage = _storage(tmp_path)
+    key = "b" * 64
+    _incident_stream(storage, key, "release pool starved", 3)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text(
+        "## 2026-07-01 Release Pool Starved incident\nroot cause ...\n", encoding="utf-8"
+    )
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_incident_class_filed_by_dedupe_key_prefix_counts_as_filed(tmp_path):
+    storage = _storage(tmp_path)
+    key = "c" * 64
+    _incident_stream(storage, key, "obscure alert title", 2)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text(
+        f"## filed via key: {key[:16]}\n", encoding="utf-8"
+    )
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_incident_class_filed_in_archive_counts_as_filed(tmp_path):
+    storage = _storage(tmp_path)
+    key = "d" * 64
+    _incident_stream(storage, key, "archived class", 2)
+    (tmp_path / "docs" / "error_log_archive").mkdir(parents=True)
+    (tmp_path / "docs" / "error_log.md").write_text("# index only\n", encoding="utf-8")
+    (tmp_path / "docs" / "error_log_archive" / "2026-Q2.md").write_text(
+        "## archived class incident\n", encoding="utf-8"
+    )
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_single_occurrence_is_not_an_unfiled_class(tmp_path):
+    """一次性 alert 不構成 class — 第二次才升格（F3 門檻）。"""
+    storage = _storage(tmp_path)
+    _incident_stream(storage, "e" * 64, "one-off blip", 1)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text("# empty\n", encoding="utf-8")
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_unfiled_incident_detector_missing_stream_is_no_signal(tmp_path):
+    storage = _storage(tmp_path)
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_unfiled_incident_end_to_end_via_send_alert(tmp_path, monkeypatch):
+    """整合驗收：注入同 key alert ×2（第二次 dedup-skip）→ detector 可見。"""
+    import volpred.ops.alerts as alerts_module  # noqa: F401
+
+    storage = _storage(tmp_path)
+    monkeypatch.setattr(
+        "volpred.ops.alerts._dispatch_alert_email",
+        lambda **kw: {"notification_id": "n1", "subject": "s", "sent": True,
+                      "configured": True, "send_error": None},
+    )
+    from volpred.ops.alerts import send_alert
+
+    first = send_alert("warn", "phantom cron regression", "body", storage_dir=str(storage))
+    second = send_alert("warn", "phantom cron regression", "body", storage_dir=str(storage))
+    assert first["sent"] and second["skipped"]
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text("# nothing filed\n", encoding="utf-8")
+
+    findings = dr.detect_unfiled_incident_class(str(storage), {}, dr.datetime.now(dr.timezone.utc))
+    assert [f.pattern_type for f in findings] == ["unfiled_incident_class"]
+    assert "phantom cron regression" in findings[0].evidence[0]
+
+
+# ---------------------------------------------------------------------------
+# WS-F5: observation ledger deadline breaches
+# ---------------------------------------------------------------------------
+def _obs(storage: Path):
+    from volpred.ops import observation_ledger as obs
+    return obs
+
+
+def test_observation_ledger_overdue_item_breaches(tmp_path):
+    """注入逾期項 → detector 可見（F5 驗收）。"""
+    storage = _storage(tmp_path)
+    obs = _obs(storage)
+    obs.add_item(
+        str(storage), item_id="legacy_retirement", what="disabled-but-alive legacy wrapper",
+        deadline=_iso(3.0), action_on_expiry="retire it", now=NOW - timedelta(days=10),
+    )
+    findings = dr.detect_observation_ledger_breach(str(storage), {}, NOW)
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.signature == "observation_ledger_breach:legacy_retirement"
+    assert f.severity == "warn"
+    assert f.remediation == "auto_dispatch"  # expiry action is concrete agent work
+    assert "retire it" in (f.proposal or "")
+    assert "observation resolve" in (f.proposal or "")
+
+
+def test_observation_ledger_permanent_item_is_exempt(tmp_path):
+    """permanent-observational（免 deadline 的裁定）不誤報（F5 驗收下半）。"""
+    storage = _storage(tmp_path)
+    obs = _obs(storage)
+    obs.add_item(
+        str(storage), item_id="pregate_shadow", what="deliberate shadow",
+        status=obs.STATUS_PERMANENT, note="gate ruling: do not flip enforce",
+    )
+    assert dr.detect_observation_ledger_breach(str(storage), {}, NOW) == []
+
+
+def test_observation_ledger_future_deadline_not_flagged(tmp_path):
+    storage = _storage(tmp_path)
+    obs = _obs(storage)
+    obs.add_item(
+        str(storage), item_id="still_observing", what="active window",
+        deadline=(NOW + timedelta(days=5)).isoformat(), action_on_expiry="decide",
+    )
+    assert dr.detect_observation_ledger_breach(str(storage), {}, NOW) == []
+
+
+def test_observation_ledger_decided_item_is_closed(tmp_path):
+    storage = _storage(tmp_path)
+    obs = _obs(storage)
+    obs.add_item(
+        str(storage), item_id="done_item", what="was observed",
+        deadline=_iso(3.0), action_on_expiry="decide", now=NOW - timedelta(days=10),
+    )
+    obs.resolve_item(str(storage), "done_item", resolution="executed the expiry action")
+    assert dr.detect_observation_ledger_breach(str(storage), {}, NOW) == []
+
+
+def test_observation_ledger_malformed_observing_item_without_deadline_breaches(tmp_path):
+    """observing 卻沒 deadline（繞過 CLI 手改 JSON 才可能）＝ deadline-less limbo，
+    正是帳本要防的狀態 → 必須浮上來，不能靜默跳過。"""
+    storage = _storage(tmp_path)
+    _write(
+        storage / "ops" / "observation_ledger.json",
+        {"schema": "observation_ledger.v1", "items": [
+            {"id": "limbo_item", "what": "no deadline", "status": "observing",
+             "started_at": _iso(20.0), "deadline": None, "action_on_expiry": "decide"},
+        ]},
+    )
+    findings = dr.detect_observation_ledger_breach(str(storage), {}, NOW)
+    assert len(findings) == 1
+    assert "missing/unparseable" in findings[0].evidence[0]
+
+
+def test_observation_ledger_missing_file_is_no_signal(tmp_path):
+    storage = _storage(tmp_path)
+    assert dr.detect_observation_ledger_breach(str(storage), {}, NOW) == []

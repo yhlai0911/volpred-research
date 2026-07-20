@@ -107,6 +107,19 @@ PERSISTENT_ALERT_MIN_FIRE_COUNT = 3
 PERSISTENT_ALERT_MIN_SPAN_DAYS = 3
 PERSISTENT_ALERT_RECOVERED_HOURS = 48
 
+# Unfiled-incident-class thresholds (WS-F3, refactor_plan_ops_master_2026_07):
+# alerts.py appends every alert occurrence (sent AND dedup-skipped) to
+# storage/ops/incident_candidates.jsonl. A dedupe key seen >= MIN times whose
+# class has no corresponding docs/error_log.md entry means the incident was
+# never FILED — so its second occurrence was exactly as blind as its first.
+# Distinct from detect_persistent_alerts, which asks "does the condition keep
+# recurring?" (>=3 fires over >=3 days, still active); this asks "did anyone
+# write the class down?" and fires from the second occurrence regardless of
+# span or recency — an unfiled class stays unfiled until someone files it.
+UNFILED_INCIDENT_MIN_OCCURRENCES = 2
+UNFILED_INCIDENT_WINDOW_DAYS = 30
+UNFILED_INCIDENT_MAX_FINDINGS = 8
+
 # Anti-stacking ownership: these umbrella alert titles intentionally aggregate
 # heterogeneous incidents, while a more granular detector already owns their
 # recurrence. `Host cron failure detected` stores the actual job only in
@@ -817,6 +830,210 @@ def detect_persistent_alerts(
 
 
 # ---------------------------------------------------------------------------
+# Unfiled incident classes — alerts that recur but were never written down
+# ---------------------------------------------------------------------------
+def _error_log_blob(storage_dir: str) -> str:
+    """docs/error_log.md (+ archives), lowercased, for filed-or-not checks.
+
+    Missing files read as empty: a fresh checkout has nothing filed yet, and
+    the detector should say so rather than crash.
+    """
+    root = project_path(storage_dir).parent
+    parts: list[str] = []
+    main_log = root / "docs" / "error_log.md"
+    if main_log.is_file():
+        try:
+            parts.append(main_log.read_text(encoding="utf-8"))
+        except OSError as exc:
+            warn("dreaming", "error_log read failed", err=str(exc))
+    archive_dir = root / "docs" / "error_log_archive"
+    if archive_dir.is_dir():
+        for f in sorted(archive_dir.glob("*.md")):
+            try:
+                parts.append(f.read_text(encoding="utf-8"))
+            except OSError as exc:
+                warn("dreaming", "error_log archive read failed", path=str(f), err=str(exc))
+    return "\n".join(parts).lower()
+
+
+def detect_unfiled_incident_class(
+    storage_dir: str, snapshot: dict[str, Any], now: datetime
+) -> list[DreamFinding]:
+    """Alert classes that occurred >=2 times but were never filed in error_log.
+
+    WS-F3 (refactor_plan_ops_master_2026_07): "a class nobody filed makes its
+    second occurrence identical to its first" — the error_log is the memory
+    that turns occurrence N into pattern recognition, and filing used to depend
+    entirely on main-thread discipline at alert time. alerts.py now appends
+    every occurrence to storage/ops/incident_candidates.jsonl (the draft
+    stream); this detector closes the loop by flagging any dedupe key with
+    >=UNFILED_INCIDENT_MIN_OCCURRENCES occurrences in the window whose title
+    (or dedupe-key prefix) appears nowhere in docs/error_log.md or its
+    archives. Filing stays propose-only: what queues is a task asking an agent
+    to adjudicate the candidate into a real entry (or record why not).
+
+    The filing contract that makes this loop CLOSEABLE: an entry counts as
+    filed when it contains the alert title verbatim or the dedupe key's first
+    16 hex chars. The queued proposal says so explicitly.
+    """
+    path = project_path(storage_dir) / "ops" / "incident_candidates.jsonl"
+    if not path.is_file():
+        return []  # silent-ok: no alert has ever fired on this storage — no signal yet
+    cutoff = now.astimezone(timezone.utc) - timedelta(days=UNFILED_INCIDENT_WINDOW_DAYS)
+    groups: dict[str, dict[str, Any]] = {}
+    try:
+        raw_lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        warn("dreaming", "incident_candidates read failed; skipping", err=str(exc))
+        return []
+    for line in raw_lines:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            record = json.loads(line)
+        except ValueError as exc:
+            warn("dreaming", "incident_candidates malformed line skipped",
+                 err=str(exc)[:120], head=line[:80])
+            continue
+        if not isinstance(record, dict):
+            warn("dreaming", "incident_candidates non-dict line skipped", head=line[:80])
+            continue
+        key = str(record.get("dedupe_key") or "")
+        if not key:
+            continue
+        at = _parse_iso(record.get("at"))
+        if at is None or at < cutoff:
+            continue
+        group = groups.setdefault(
+            key,
+            {"count": 0, "first": at, "last": at, "title": "", "level": ""},
+        )
+        group["count"] += 1
+        group["first"] = min(group["first"], at)
+        group["last"] = max(group["last"], at)
+        # Latest record wins for presentation fields (titles are stable per key
+        # by construction — the key hashes level+title).
+        group["title"] = str(record.get("title") or group["title"])
+        group["level"] = str(record.get("level") or group["level"])
+
+    candidates = [
+        (key, g) for key, g in groups.items()
+        if g["count"] >= UNFILED_INCIDENT_MIN_OCCURRENCES and g["title"].strip()
+    ]
+    if not candidates:
+        return []
+
+    blob = _error_log_blob(storage_dir)
+    out: list[DreamFinding] = []
+    candidates.sort(key=lambda kv: kv[1]["count"], reverse=True)
+    for key, g in candidates:
+        title = g["title"].strip()
+        filed = title.lower() in blob or key[:16] in blob
+        if filed:
+            continue  # class already has an error_log entry — do not re-propose
+        if len(out) >= UNFILED_INCIDENT_MAX_FINDINGS:
+            break
+        span_days = (g["last"] - g["first"]).total_seconds() / 86400
+        out.append(
+            DreamFinding(
+                pattern_type="unfiled_incident_class",
+                signature=f"unfiled_incident_class:{key[:16]}",
+                severity="warn",
+                remediation="propose_only",
+                evidence=[
+                    f"dedupe_key={key[:16]} title={title!r} occurred {g['count']}x "
+                    f"over {span_days:.1f}d (first {g['first'].isoformat()} → "
+                    f"last {g['last'].isoformat()}) with NO docs/error_log.md entry"
+                ],
+                proposal=(
+                    f"Alert class `{title}` occurred {g['count']}x but was never filed in "
+                    f"docs/error_log.md — the class has no institutional memory, so each "
+                    f"recurrence restarts diagnosis from zero. Adjudicate the candidate "
+                    f"(storage/ops/incident_candidates.jsonl, dedupe_key {key[:16]}...) "
+                    f"into a real error_log entry: root cause, lesson, enforcement owner. "
+                    f"Include the alert title verbatim (or the dedupe-key prefix "
+                    f"{key[:16]}) in the entry so this detector recognises the filing. "
+                    f"If the class is deliberately not worth filing, record that decision "
+                    f"in the entry instead — silence is the only wrong answer."
+                ),
+                governance_target="docs/error_log.md",
+                # Strike only while the class keeps occurring; a decayed one holds.
+                activity_marker=g["last"].isoformat(),
+            )
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Observation ledger — shadow/deprecated states past their decision deadline
+# ---------------------------------------------------------------------------
+def detect_observation_ledger_breach(
+    storage_dir: str, snapshot: dict[str, Any], now: datetime
+) -> list[DreamFinding]:
+    """Observation items past deadline with no decision (WS-F5, principle 5).
+
+    storage/ops/observation_ledger.json (owner: volpred.ops.observation_ledger;
+    CLI `volpred ops observation`) registers every shadow / disabled-but-alive /
+    deprecated state WITH a deadline and an action-on-expiry. This detector is
+    the enforcement half: an item still `observing` past its deadline — or an
+    observing item whose deadline is missing/unparseable (only possible by
+    editing the JSON around the CLI) — is a breach. `permanent` items are
+    exempt by definition (their exemption is a recorded ruling, e.g. pregate
+    shadow after the token_ops_waste gate adjudication); `decided` items are
+    closed. The queued task's job is to either execute action_on_expiry or
+    extend the deadline explicitly with a reason — limbo is the only breach.
+    """
+    try:
+        from volpred.ops import observation_ledger as obs
+    except ImportError as exc:  # fail-open: dreaming must not die on this
+        warn("dreaming", "observation_ledger import failed; skipping", err=str(exc))
+        return []
+    try:
+        overdue = obs.overdue_items(storage_dir, now=now)
+    except (OSError, ValueError) as exc:
+        warn("dreaming", "observation_ledger read failed; skipping", err=str(exc))
+        return []
+    out: list[DreamFinding] = []
+    for item in overdue:
+        item_id = str(item.get("id") or "").strip() or "unknown"
+        deadline = obs.parse_deadline(item.get("deadline"))
+        if deadline is None:
+            breach_desc = "deadline missing/unparseable — deadline-less limbo"
+            overdue_note = ""
+        else:
+            days_over = (now.astimezone(timezone.utc) - deadline).total_seconds() / 86400
+            breach_desc = f"deadline {item.get('deadline')} passed"
+            overdue_note = f" ({days_over:.1f}d overdue)"
+        action = str(item.get("action_on_expiry") or "").strip() or "(no action recorded)"
+        out.append(
+            DreamFinding(
+                pattern_type="observation_ledger_breach",
+                signature=f"observation_ledger_breach:{item_id}",
+                severity="warn",
+                # The expiry action is concrete, pre-declared work an agent can
+                # execute (retire a legacy path, run an acceptance check) — not
+                # a governance-file rewrite, so it dispatches directly.
+                remediation="auto_dispatch",
+                evidence=[
+                    f"observation item `{item_id}`: {breach_desc}{overdue_note} — "
+                    f"what: {str(item.get('what') or '')[:160]}"
+                ],
+                proposal=(
+                    f"觀察項 `{item_id}` 逾期未決策。到期動作：{action}。"
+                    f"二選一，不准留在 limbo：(a) 執行到期動作並 "
+                    f"`uv run volpred ops observation resolve --id {item_id} "
+                    f"--resolution <做了什麼>`；(b) 有充分理由才 "
+                    f"`uv run volpred ops observation extend --id {item_id} "
+                    f"--deadline <ISO> --reason <為什麼>`（展期紀錄留在帳本上）。"
+                ),
+                activity_marker=None,  # an overdue item IS active until decided
+            )
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Orphaned experiments — research that was done and then silently dropped
 # ---------------------------------------------------------------------------
 # Ownership of a RESULT used to be bound, implicitly, to the lifetime of the
@@ -942,6 +1159,8 @@ DETECTORS = (
     detect_semantic_concentration,
     detect_memory_governance,
     detect_persistent_alerts,
+    detect_unfiled_incident_class,
+    detect_observation_ledger_breach,
     detect_orphaned_experiments,
 )
 
