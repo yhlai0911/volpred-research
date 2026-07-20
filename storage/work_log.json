@@ -22729,5 +22729,28 @@
     "owner": "hourly-slot-1-0a4f97f4eafa4ee8a65686a0f0adbfde",
     "commit": null,
     "summary": "K1731 arm B rev8 收件（PHASE A collect_completed）：主線程獨立重跑三個 gate，不採信 remediation JSON 自述。ratchet 108/108 PASS；k1731_armB_verification.py exit 0、107 checks、problems=0、README claim scan 0 violation；regression gate 重跑 3826 compared / 3834 accounted / 8 renamed-value-preserved / UNEXPECTED 0 → numeric leaf drift=0。額外做 negative control（rev8 fallback 審查抓到的致命點是舊版 verification 永遠 exit 0）：注入 \"The macro null rests on the PIP evidence plus the DM diagnostic.\" 到 README → exit 1 + 1 violation，移除後 byte-identical 且 exit 0，確認 gate 可失敗。結論：gate 層 PASS 但 round 不能結案 —— Codex round-8 對 round-8b frozen bytes 無判決（CLI usage limit，quota 重置 2026-07-25 13:30），fallback 審查本身回 FAIL，且依 .claude/rules/experiments.md:36 subagent fallback ≠ primary-path Codex PASS。處置：不合併 worktree、不寫 knowledge.json；assign_67f56b79 → blocked / codex_quota_reset_pending / blocked_until=2026-07-25T13:30+08:00（PRE-PHASE-0 sweep 會自動 flip 回 pending）；compute job agent-brief_k1731_rev8-52736d 標 followup_dispatched。receipt：storage/ops/codex_reviews/k1731_armB_rev8_independent_gate_verification.md"
+  },
+  {
+    "timestamp": "2026-07-20T14:51:43+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-d33a72331",
+    "outcome": "succeeded",
+    "summary": "close resolved phase z mirror alert",
+    "commit": "d33a723313c4690d1940248da211e537bf0bf441",
+    "owner": "codex",
+    "backfilled_at": "2026-07-20T20:35:01.075841+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-20T14:55:51+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-56f6cc84a",
+    "outcome": "succeeded",
+    "summary": "adjudicate K1731 round 7",
+    "commit": "56f6cc84a7ca7c6578f9217c9fd84f86d9ee5a3a",
+    "owner": "codex",
+    "backfilled_at": "2026-07-20T20:35:01.075501+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K1731"
   }
 ]
