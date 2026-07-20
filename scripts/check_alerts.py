@@ -251,6 +251,51 @@ def _auto_remediate_publish_drought() -> dict:
         return {"attempted": False, "error": str(exc)}
 
 
+def _auto_remediate_lazypack_stuck() -> dict:
+    """Hourly actuator behind SELF_REMEDIATING['lazypack_render_stuck'].
+
+    assign_5195e5ae D4a: the remediation registry claimed "render retry is
+    wired into the alert path" while nothing implemented it — stranded render
+    failures fell into a black hole and the alert body described a fiction.
+    Delegates to the single owner of the lazypack job lifecycle
+    (`scripts/lazypack_async_render.py requeue-stranded`): idempotent per
+    failed job id, capped attempts per article, safe to re-run (every renderer
+    layer recomputes the panel set from the hash-pinned plan). Runs BEFORE the
+    alert email so the alert truthfully reports what was already re-queued.
+    Bounded subprocess, non-fatal: failures are captured, never raised.
+    """
+    from datetime import datetime, timezone
+    import subprocess
+
+    script = PROJECT_ROOT / "scripts" / "lazypack_async_render.py"
+    try:
+        start = datetime.now(timezone.utc)
+        proc = subprocess.run(
+            ["/opt/homebrew/bin/uv", "run", "python", str(script), "requeue-stranded"],
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        summary: dict = {}
+        for line in reversed((proc.stdout or "").splitlines()):
+            line = line.strip()
+            if line.startswith("{"):
+                try:
+                    summary = json.loads(line)
+                    break
+                except json.JSONDecodeError:
+                    continue  # silent-ok: scanning stdout in reverse for last valid JSON line; non-JSON candidates expected
+        summary["returncode"] = proc.returncode
+        summary["ran_at"] = start.isoformat()
+        if not summary.get("attempted"):
+            return summary or {"attempted": False, "reason": "no_json_output",
+                               "stderr_tail": (proc.stderr or "")[-200:]}
+        return summary
+    except Exception as exc:  # noqa: BLE001
+        return {"attempted": False, "error": str(exc)}
+
+
 def _write_json_atomic(path: Path, payload: dict) -> None:
     """Serialize fully, then replace. A half-written receipt would make the alert
     body lie about what the system did (per control-plane rule: never leave partial
@@ -2741,6 +2786,13 @@ def main() -> int:
     # email (if it still fires) truthfully reports what the system already did.
     drought_remediation = _auto_remediate_publish_drought()
 
+    # assign_5195e5ae D4a: stranded lazypack render failures get their promised
+    # hourly re-enqueue BEFORE the alert email, so lazypack_render_stuck's
+    # self-remediation claim is mechanically true (idempotent per failed job,
+    # attempt-capped per article; escalation past the cap is owned by the P1
+    # repair task compute_queue files on terminal failure).
+    lazypack_requeue = _auto_remediate_lazypack_stuck()
+
     # 2026-07-13 (boss msg 624): adopt finished-but-unregistered deliverables into
     # the pool before the alert fires, so a completed article is delivered rather
     # than surfaced as a discard/keep decision for the boss.
@@ -2811,6 +2863,18 @@ def main() -> int:
         print(
             f"  publish-drought-remediation: skip "
             f"reason={drought_remediation.get('reason', drought_remediation.get('error', 'unknown'))}"
+        )
+    # assign_5195e5ae D4a: stranded lazypack render re-enqueue receipt
+    if lazypack_requeue.get("attempted"):
+        print(
+            f"  lazypack-requeue: requeued={len(lazypack_requeue.get('requeued') or [])} "
+            f"skipped={len(lazypack_requeue.get('skipped') or [])} "
+            f"ids={[r.get('new_job_id') for r in (lazypack_requeue.get('requeued') or [])]}"
+        )
+    else:
+        print(
+            f"  lazypack-requeue: skip "
+            f"reason={lazypack_requeue.get('reason', lazypack_requeue.get('error', 'unknown'))}"
         )
     # 2026-07-13: orphan deliverable adoption (boss msg 624 — 產出即交付)
     adopted = [a for a in (orphan_reap.get("adopted") or []) if a.get("adopted")]

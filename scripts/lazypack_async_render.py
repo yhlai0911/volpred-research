@@ -32,11 +32,14 @@ Usage:
     --plan storage/lazypack_jobs/mile_31b2b0bb/plan.json \
     --out-dir storage/lazypack_jobs/mile_31b2b0bb/panels
 
-The deterministic scripts/lazypack_render.py remains the explicit fallback when
-Codex is unavailable or exhausts its bounded repairs. Every fallback attempt is
-written to work_log; it is never silent. plan.json still uses the strict,
+Renderer chain (assign_5195e5ae D2): codex bespoke (gen_lazypack_codex.py) →
+agy bespoke (gen_lazypack_agy.py, free Antigravity CLI) → deterministic
+self-repair (lazypack_render.py, bounded mechanical retune, zero LLM). A codex
+quota wall is classified from its output (dispatch_supervisor.failure_class)
+and fast-skips to agy in seconds. Every layer hand-off is written to work_log
+via `_record_fallback`; it is never silent. plan.json still uses the strict,
 versioned schema owned by scripts/lazypack_render.py, so evidence hashes and
-numeric bindings are validated before either renderer runs.
+numeric bindings are validated before any renderer runs.
 """
 from __future__ import annotations
 
@@ -48,6 +51,7 @@ import shlex
 import subprocess
 import sys
 import tempfile
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -56,6 +60,8 @@ ROOT = Path(__file__).resolve().parents[1]
 for _p in (str(ROOT), str(ROOT / "src"), str(ROOT / "scripts")):
     if _p not in sys.path:
         sys.path.insert(0, _p)
+
+from volpred.ops.diagnostics import warn  # noqa: E402
 
 JOB_ID_PREFIX = "lazypack-"
 BESPOKE_SCRIPT_NAME = "render_lazypack.py"
@@ -218,6 +224,145 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
     return rc
 
 
+# -------------------------------------------------------- requeue-stranded ----
+
+# One alert-driven retry per failed job id, and a hard ceiling on total render
+# attempts per article. Past the ceiling the P1 repair task filed by
+# compute_queue._maybe_open_lazypack_repair_task owns the escalation — an
+# unbounded retry ladder would just re-prove the same plan cannot fit.
+MAX_RENDER_ATTEMPTS_PER_ARTICLE = 3
+
+
+def requeue_stranded(storage_dir: str | Path = "storage") -> dict:
+    """Idempotently re-enqueue stranded failed lazypack jobs (alert actuator).
+
+    assign_5195e5ae D4a: `SELF_REMEDIATING['lazypack_render_stuck']` claimed
+    "render retry is wired into the alert path" while no such wiring existed —
+    failures fell into a black hole and the alert body described a fiction.
+    This function IS that wiring now: scripts/check_alerts.py calls it hourly
+    (before the alert email) so the claim is mechanically true.
+
+    A job is stranded exactly as the alert defines it (failed, no later
+    queued/running/completed job for the same article, article still missing
+    its 懶人包圖組 section).  Re-running is safe: every renderer layer recomputes
+    the full panel set from the hash-pinned plan.  Idempotency: the failed job
+    is stamped `alert_requeued_as=<new id>` under the receipt lock, so one
+    failed job can never mint two retries.
+    """
+    import compute_queue as cq
+
+    storage_root = _resolve(storage_dir)
+    summary: dict = {"requeued": [], "skipped": [], "attempted": True}
+
+    from volpred.publisher.publisher import has_lazypack_section
+
+    def _has_section(article_id: str) -> bool:
+        art = _find_article(article_id, storage_root)
+        return art is not None and has_lazypack_section(str(art.get("content") or ""))
+
+    with cq._receipt_lock():
+        jobs: dict[Path, dict] = {}
+        for path in sorted(cq.QUEUE_DIR.glob("lazypack-*.json")):
+            try:
+                jobs[path] = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                warn("lazypack_requeue", "queue receipt unreadable; skipped",
+                     path=path.name, err=str(exc))
+
+        def _article_of(job: dict) -> str:
+            args = job.get("args") or []
+            for i, value in enumerate(args):
+                if value == "--article-id" and i + 1 < len(args):
+                    return str(args[i + 1])
+            return ""
+
+        by_article: dict[str, list[tuple[Path, dict]]] = {}
+        for path, job in jobs.items():
+            article = _article_of(job)
+            if article:
+                by_article.setdefault(article, []).append((path, job))
+
+        for article, rows in sorted(by_article.items()):
+            statuses = {job.get("status") for _, job in rows}
+            if statuses & {"queued", "running", "completed"}:
+                continue  # a live or successful job already owns this article
+            if _has_section(article):
+                continue  # the section landed some other way — nothing stranded
+            failed = [(p, j) for p, j in rows if j.get("status") == "failed"]
+            if not failed:
+                continue
+            # Newest failure is the one the alert points at.
+            path, job = max(
+                failed, key=lambda pair: str(pair[1].get("completed_at") or "")
+            )
+            if job.get("alert_requeued_as"):
+                summary["skipped"].append(
+                    {"article_id": article, "job_id": job.get("id"),
+                     "reason": "already_requeued",
+                     "requeued_as": job.get("alert_requeued_as")}
+                )
+                continue
+            if len(rows) >= MAX_RENDER_ATTEMPTS_PER_ARTICLE:
+                warn("lazypack_requeue",
+                     "attempt ceiling reached; escalation owned by the P1 repair task",
+                     article_id=article, attempts=len(rows))
+                summary["skipped"].append(
+                    {"article_id": article, "job_id": job.get("id"),
+                     "reason": "attempt_ceiling", "attempts": len(rows)}
+                )
+                continue
+
+            base_id = f"{JOB_ID_PREFIX}{article}"
+            taken = {str(j.get("id") or p.stem) for p, j in jobs.items()}
+            new_id, n = base_id, 2
+            while new_id in taken:
+                new_id = f"{base_id}-r{n}"
+                n += 1
+
+            script_args = list(job.get("args") or [])
+            if "--job-id" in script_args:
+                script_args[script_args.index("--job-id") + 1] = new_id
+            else:
+                script_args += ["--job-id", new_id]
+
+            ns = argparse.Namespace(
+                id=new_id,
+                title=job.get("title") or f"lazypack render {article}",
+                script=job.get("script_path") or "scripts/lazypack_async_render.py",
+                interpreter=job.get("interpreter") or "uv run python",
+                script_args=script_args,
+                env=None,
+                result_artifact=job.get("result_artifact"),
+                output_paths=list(job.get("output_paths") or []),
+                followup_brief=None,
+                followup_task_type=None,
+                followup_priority=None,
+                timeout=job.get("timeout_seconds") or DEFAULT_TIMEOUT_S,
+            )
+            rc = cq.enqueue(ns)
+            if rc != 0:
+                warn("lazypack_requeue", "re-enqueue failed",
+                     article_id=article, new_id=new_id, rc=rc)
+                summary["skipped"].append(
+                    {"article_id": article, "job_id": job.get("id"),
+                     "reason": "enqueue_failed", "rc": rc}
+                )
+                continue
+            job["alert_requeued_as"] = new_id
+            cq._write_job_file(path, job)
+            summary["requeued"].append(
+                {"article_id": article, "failed_job_id": job.get("id"),
+                 "new_job_id": new_id}
+            )
+    return summary
+
+
+def cmd_requeue_stranded(a: argparse.Namespace) -> int:
+    summary = requeue_stranded(a.storage_dir)
+    print(json.dumps(summary, ensure_ascii=False))
+    return 0
+
+
 # -------------------------------------------------------------------- run ----
 
 
@@ -348,12 +493,22 @@ def _record_fallback(
     job_id: str | None,
     primary_rc: int,
     fallback_rc: int,
+    stage: str = "codex->deterministic",
+    primary_renderer: str = "scripts/gen_lazypack_codex.py",
+    fallback_renderer: str = "scripts/lazypack_render.py",
+    failure_class: str | None = None,
 ) -> None:
-    """Persist the policy-significant renderer downgrade under the work-log lock."""
+    """Persist one policy-significant renderer downgrade under the work-log lock.
+
+    Every layer hand-off in the codex → agy → deterministic chain calls this
+    with its own ``stage`` so no downgrade is ever silent; ``failure_class``
+    carries the quota/auth/transient classification of the layer that failed
+    (None = a real failure of the work itself).
+    """
     from append_work_log import append_entries
 
     actor = os.environ.get("VOLPRED_TASK_CLAIM_OWNER") or "lazypack-async-worker"
-    event_id = f"lazypack_fallback:{job_id or article_id}"
+    event_id = f"lazypack_fallback:{job_id or article_id}:{stage}"
     entry = {
         "timestamp": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
         "task_type": "platform_ops",
@@ -363,15 +518,18 @@ def _record_fallback(
         "owner": actor,
         "commit": None,
         "summary": (
-            "Codex bespoke lazypack failed "
-            f"(rc={primary_rc}); deterministic renderer fallback "
+            f"{primary_renderer} failed (rc={primary_rc}"
+            f"{f', class={failure_class}' if failure_class else ''}); "
+            f"{fallback_renderer} "
             f"{'succeeded' if fallback_rc == 0 else f'failed (rc={fallback_rc})'}."
         ),
         "fallback_event_id": event_id,
         "article_id": article_id,
         "job_id": job_id,
-        "primary_renderer": "scripts/gen_lazypack_codex.py",
-        "fallback_renderer": "scripts/lazypack_render.py",
+        "stage": stage,
+        "failure_class": failure_class,
+        "primary_renderer": primary_renderer,
+        "fallback_renderer": fallback_renderer,
     }
 
     def _dedupe(existing: list[dict], candidates: list[dict]) -> list[dict]:
@@ -386,22 +544,25 @@ def _record_fallback(
     )
 
 
-def _codex_command(
+def _bespoke_command(
     a: argparse.Namespace,
     *,
+    harness: str,
     document: dict,
     plan_path: Path,
     out_dir: Path,
+    budget_s: float | None = None,
 ) -> list[str]:
+    """One bespoke code-writing layer command (gen_lazypack_codex/agy share a CLI)."""
     cmd = [
         sys.executable,
-        str(ROOT / "scripts" / "gen_lazypack_codex.py"),
+        str(ROOT / "scripts" / harness),
         "--article-id", a.article_id,
         "--title", a.title or str(document.get("title") or f"{a.article_id} 懶人包"),
         "--plan", str(plan_path),
         "--out-dir", str(out_dir),
-        # The strict plan itself tells Codex which evidence binding belongs to
-        # each panel; evidence files provide the hash-verified source values.
+        # The strict plan itself tells the writer which evidence binding belongs
+        # to each panel; evidence files provide the hash-verified source values.
         "--source", str(plan_path),
     ]
     for spec in document["evidence"].values():
@@ -410,7 +571,163 @@ def _codex_command(
         cmd += ["--source", str(_resolve(source))]
     for experiment in a.experiment:
         cmd += ["--experiment", experiment]
+    if budget_s is not None:
+        cmd += ["--budget-s", str(int(budget_s))]
     return cmd
+
+
+def _codex_command(
+    a: argparse.Namespace,
+    *,
+    document: dict,
+    plan_path: Path,
+    out_dir: Path,
+) -> list[str]:
+    return _bespoke_command(
+        a, harness="gen_lazypack_codex.py", document=document,
+        plan_path=plan_path, out_dir=out_dir,
+    )
+
+
+# One wall-clock budget shared by the codex + agy bespoke layers, leaving the
+# deterministic self-repair render (seconds) plus upload/append/sync inside the
+# 1800s compute_queue job timeout. Below the floor the agy layer is skipped —
+# a starved bespoke attempt would only burn the deterministic layer's window.
+BESPOKE_WALL_BUDGET_S = 1500
+AGY_MIN_BUDGET_S = 180
+
+
+def _run_bespoke_layer(cmd: list[str]) -> tuple[int, str | None]:
+    """Run one code-writing layer; tee its output and classify its failure.
+
+    Returns ``(rc, failure_class)`` where ``failure_class`` reuses the
+    supervisor's single-owner classifier (dispatch_supervisor.failure_class):
+    ``quota``/``auth``/``transient`` or None for a real failure of the work.
+    The quota case is what makes the chain fast-skip instead of dying against
+    a wall that outlasts the job (2026-07-20: every lazypack job burned its
+    slot on a codex window exhausted until ~07-25).
+    """
+    proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
+    out = getattr(proc, "stdout", None) or ""
+    err = getattr(proc, "stderr", None) or ""
+    if out:
+        sys.stdout.write(out)
+    if err:
+        sys.stderr.write(err)
+    if proc.returncode == 0:
+        return 0, None
+    from dispatch_supervisor.failure_class import classify_output
+
+    return proc.returncode, classify_output((out + "\n" + err)[-16000:])
+
+
+def _run_render_chain(
+    a: argparse.Namespace,
+    *,
+    document: dict,
+    plan_path: Path,
+    out_dir: Path,
+    specs: list[tuple[str, str]],
+    storage_dir: Path,
+    job_id: str | None,
+    receipt_path: Path,
+    run_token: str,
+) -> tuple[int, str]:
+    """codex → agy → deterministic-self-repair. Returns (rc, renderer_used).
+
+    Every layer hand-off is persisted via `_record_fallback` (never silent) and
+    carries the failed layer's quota/auth/transient classification.  A codex
+    quota wall (2026-07-20 outage class) fast-skips to agy in seconds — the
+    codex CLI itself fails fast on quota, and the classifier stops the chain
+    from re-driving it.  The deterministic renderer's own bounded self-repair
+    (scripts/lazypack_render.py) is the terminal layer, so a job only fails
+    when all three genuinely cannot produce a green panel set.
+    """
+    deadline = time.monotonic() + BESPOKE_WALL_BUDGET_S
+
+    codex_cmd = _bespoke_command(
+        a, harness="gen_lazypack_codex.py", document=document,
+        plan_path=plan_path, out_dir=out_dir,
+    )
+    codex_rc, codex_class = _run_bespoke_layer(codex_cmd)
+    if codex_rc == 0:
+        _write_render_receipt(
+            receipt_path, renderer="scripts/gen_lazypack_codex.py",
+            run_token=run_token, plan_path=plan_path, out_dir=out_dir, specs=specs,
+        )
+        return 0, "codex-bespoke"
+
+    _clear_expected_panels(out_dir, specs)
+    remaining = deadline - time.monotonic()
+    if codex_class == "quota":
+        print(
+            f"[lazypack_async] codex quota wall detected (rc={codex_rc}) — "
+            "fast-skipping to the agy bespoke layer",
+            file=sys.stderr,
+        )
+    else:
+        print(
+            f"[lazypack_async] codex bespoke renderer failed rc={codex_rc} "
+            f"(class={codex_class}); trying the agy bespoke layer",
+            file=sys.stderr,
+        )
+    if remaining >= AGY_MIN_BUDGET_S:
+        agy_cmd = _bespoke_command(
+            a, harness="gen_lazypack_agy.py", document=document,
+            plan_path=plan_path, out_dir=out_dir, budget_s=remaining,
+        )
+        agy_rc, agy_class = _run_bespoke_layer(agy_cmd)
+    else:
+        agy_rc, agy_class = 2, None
+        warn(
+            "lazypack_async",
+            "agy layer skipped: bespoke wall budget exhausted by codex",
+            remaining_s=int(remaining),
+            article_id=a.article_id,
+            job_id=job_id,
+        )
+    _record_fallback(
+        storage_dir=storage_dir,
+        article_id=a.article_id,
+        job_id=job_id,
+        primary_rc=codex_rc,
+        fallback_rc=agy_rc,
+        stage="codex->agy",
+        primary_renderer="scripts/gen_lazypack_codex.py",
+        fallback_renderer="scripts/gen_lazypack_agy.py",
+        failure_class=codex_class,
+    )
+    if agy_rc == 0:
+        _write_render_receipt(
+            receipt_path, renderer="scripts/gen_lazypack_agy.py",
+            run_token=run_token, plan_path=plan_path, out_dir=out_dir, specs=specs,
+        )
+        return 0, "agy-bespoke"
+
+    _clear_expected_panels(out_dir, specs)
+    print(
+        f"[lazypack_async] bespoke layers failed (codex rc={codex_rc}, "
+        f"agy rc={agy_rc}); using the deterministic self-repair renderer",
+        file=sys.stderr,
+    )
+    fallback_cmd = [
+        sys.executable, str(ROOT / "scripts" / "lazypack_render.py"),
+        "--plan", str(plan_path), "--out-dir", str(out_dir),
+        "--receipt", str(receipt_path), "--run-token", run_token,
+    ]
+    proc = subprocess.run(fallback_cmd, cwd=str(ROOT))
+    _record_fallback(
+        storage_dir=storage_dir,
+        article_id=a.article_id,
+        job_id=job_id,
+        primary_rc=agy_rc,
+        fallback_rc=proc.returncode,
+        stage="agy->deterministic",
+        primary_renderer="scripts/gen_lazypack_agy.py",
+        fallback_renderer="scripts/lazypack_render.py",
+        failure_class=agy_class,
+    )
+    return proc.returncode, "deterministic-self-repair"
 
 
 def cmd_run(a: argparse.Namespace) -> int:
@@ -427,61 +744,46 @@ def cmd_run(a: argparse.Namespace) -> int:
     receipt_dir.mkdir(parents=True, exist_ok=True)
     receipt_path = receipt_dir / f"{run_token}.json"
 
-    # 1) Render. Both primary and fallback recompute every expected panel from
-    # the hash-pinned plan instead of trusting stale PNGs by file size.
-    if a.render_cmd:
-        renderer_used = "test-hook"
-        print(f"[lazypack_async] TEST HOOK ACTIVE: --render-cmd {a.render_cmd!r} "
-              f"(bypasses the primary/fallback renderer chain; smoke/tests only)")
-        cmd = shlex.split(a.render_cmd) + [str(plan_path), str(out_dir)]
-    else:
-        renderer_used = "codex-bespoke"
-        cmd = _codex_command(
-            a, document=document, plan_path=plan_path, out_dir=out_dir
-        )
-
+    # 1) Render. Every layer recomputes every expected panel from the
+    # hash-pinned plan instead of trusting stale PNGs by file size.
+    # Chain: codex bespoke → agy bespoke → deterministic self-repair renderer.
     before = _snapshot_outputs(out_dir, specs)
     _clear_expected_panels(out_dir, specs)
     try:
-        proc = subprocess.run(cmd, cwd=str(ROOT))
-        if not a.render_cmd and proc.returncode != 0:
-            primary_rc = proc.returncode
-            renderer_used = "deterministic-fallback"
-            _clear_expected_panels(out_dir, specs)
-            fallback_cmd = [
-                sys.executable, str(ROOT / "scripts" / "lazypack_render.py"),
-                "--plan", str(plan_path), "--out-dir", str(out_dir),
-                "--receipt", str(receipt_path), "--run-token", run_token,
-            ]
-            print(
-                f"[lazypack_async] Codex bespoke renderer failed rc={primary_rc}; "
-                "using deterministic fallback",
-                file=sys.stderr,
-            )
-            proc = subprocess.run(fallback_cmd, cwd=str(ROOT))
-            _record_fallback(
-                storage_dir=storage_dir,
-                article_id=a.article_id,
-                job_id=job_id,
-                primary_rc=primary_rc,
-                fallback_rc=proc.returncode,
-            )
-        elif not a.render_cmd:
-            _write_render_receipt(
-                receipt_path,
-                renderer="scripts/gen_lazypack_codex.py",
-                run_token=run_token,
+        if a.render_cmd:
+            renderer_used = "test-hook"
+            print(f"[lazypack_async] TEST HOOK ACTIVE: --render-cmd {a.render_cmd!r} "
+                  f"(bypasses the primary/fallback renderer chain; smoke/tests only)")
+            cmd = shlex.split(a.render_cmd) + [str(plan_path), str(out_dir)]
+            proc = subprocess.run(cmd, cwd=str(ROOT))
+            final_rc = proc.returncode
+        else:
+            final_rc, renderer_used = _run_render_chain(
+                a,
+                document=document,
                 plan_path=plan_path,
                 out_dir=out_dir,
                 specs=specs,
+                storage_dir=storage_dir,
+                job_id=job_id,
+                receipt_path=receipt_path,
+                run_token=run_token,
             )
     finally:
         # A test hook or interrupted renderer may have written a partial staging
         # result; record only final files that actually reached the owned path.
         _record_job_outputs(job_id, out_dir, specs, before)
-    if proc.returncode != 0:
+    if final_rc != 0:
         receipt_path.unlink(missing_ok=True)
-        print(f"error: render step failed rc={proc.returncode}", file=sys.stderr)
+        if not a.render_cmd:
+            # Explicit terminal classification for the compute queue: the
+            # deterministic self-repair layer is quota-independent, so a chain
+            # that STILL failed is a real failure of the work — stale codex
+            # quota lines earlier in this same log must not trigger the
+            # queue's quota backoff-requeue (compute_queue._stderr_failure_class
+            # honors the last marker over its regexes).
+            print("[FAILURE_CLASS] none", file=sys.stderr)
+        print(f"error: render step failed rc={final_rc}", file=sys.stderr)
         return 2
 
     after = {out_dir / f"{stem}.png": _file_fingerprint(out_dir / f"{stem}.png")
@@ -612,6 +914,15 @@ def main() -> int:
     r.add_argument("--no-sync", action="store_true",
                    help="TEST HOOK: skip single-article Supabase sync")
     r.set_defaults(func=cmd_run)
+
+    q = sub.add_parser(
+        "requeue-stranded",
+        help="idempotently re-enqueue stranded failed lazypack jobs "
+             "(hourly alert actuator; see SELF_REMEDIATING['lazypack_render_stuck'])",
+    )
+    q.add_argument("--storage-dir", default="storage",
+                   help="storage root (tests only; default: storage)")
+    q.set_defaults(func=cmd_requeue_stranded)
 
     args = ap.parse_args()
     return args.func(args)

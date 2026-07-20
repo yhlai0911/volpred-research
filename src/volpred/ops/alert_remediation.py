@@ -44,11 +44,32 @@ from volpred.ops.next_tasks import normalize_task_priority, write_tasks_to_handl
 
 # The alert repaired the breach itself before sending. Its body reports the
 # repair; enqueuing a task on top would double-book the work.
-SELF_REMEDIATING: dict[str, str] = {
-    "publishing_freshness": "scripts/remediate_publish_drought.py ladder runs in check_alerts before the email",
-    "lazypack_render_stuck": "render retry is wired into the alert path",
-    "series_registry": "series drift is reconciled against config/article_series.json",
-    "draft_pool_low": "continue_task_dispatch._maybe_refill_draft_pool tops the pool up each fire",
+# Every claim must name a mechanically verifiable OWNER — `<file>:<function>`
+# whose file exists, whose function is defined there, and which the alert path
+# actually invokes (tests/test_self_remediating_owners.py enforces all three).
+# assign_5195e5ae D4: this used to be dict[str, str] prose, and one entry
+# ("render retry is wired into the alert path") was simply false — the claimed
+# mechanism did not exist, so lazypack render failures fell into a black hole
+# while the registry suppressed both the task and the honest email. A claim
+# without an owner is a lie waiting to happen; entries that cannot name one
+# belong in the default task-creating disposition instead (series_registry was
+# downgraded exactly that way: its "reconciled automatically" claim was an
+# audit + a suggestion to run --apply, not a remediation).
+SELF_REMEDIATING: dict[str, dict[str, str]] = {
+    "publishing_freshness": {
+        "claim": "remediate_publish_drought ladder runs in check_alerts before the email",
+        "owner": "scripts/check_alerts.py:_auto_remediate_publish_drought",
+    },
+    "lazypack_render_stuck": {
+        "claim": "stranded failed renders are idempotently re-enqueued hourly in "
+                 "check_alerts before the email; past the attempt cap the P1 repair "
+                 "task filed by compute_queue owns escalation",
+        "owner": "scripts/check_alerts.py:_auto_remediate_lazypack_stuck",
+    },
+    "draft_pool_low": {
+        "claim": "the dispatcher tops the draft pool up on every hourly fire",
+        "owner": "scripts/continue_task_dispatch.py:_maybe_refill_draft_pool",
+    },
 }
 
 # Genuinely the owner's call. Keep this set small and justified — every entry is
@@ -67,6 +88,10 @@ ALERT_TASK_TYPE: dict[str, str] = {
     "content_quality": "governance",
     "cluster_cap_drift": "governance",
     "loop_health": "governance",
+    # assign_5195e5ae D4c: downgraded from SELF_REMEDIATING — the alert audits
+    # drift and *suggests* `series_registry.py --apply`; it does not apply it.
+    # An audit plus advice is a task for the platform, not a completed repair.
+    "series_registry": "governance",
 }
 
 _LEVEL_PRIORITY = {"critical": 1, "warn": 2, "info": 3}
@@ -923,7 +948,13 @@ def remediate_condition(
         return {"disposition": "not_breached", "alert_id": alert_id}
 
     if alert_id in SELF_REMEDIATING:
-        return {"disposition": "self_remediating", "alert_id": alert_id, "why": SELF_REMEDIATING[alert_id]}
+        entry = SELF_REMEDIATING[alert_id]
+        return {
+            "disposition": "self_remediating",
+            "alert_id": alert_id,
+            "why": entry["claim"],
+            "owner": entry["owner"],
+        }
 
     if alert_id in OWNER_DECISION:
         return {"disposition": "owner_decision", "alert_id": alert_id, "why": OWNER_DECISION[alert_id]}
