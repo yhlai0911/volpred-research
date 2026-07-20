@@ -100,18 +100,18 @@ def _warn_cron_review(message: str, path: Path | None = None, exc: Exception | N
 
 
 def _piggy_back_end(job_id: str) -> datetime | None:
-    """Read piggy-back last-success timestamp from cron_last_run.json."""
-    if not LAST_RUN_PATH.exists():
-        return None
-    try:
-        state = json.loads(LAST_RUN_PATH.read_text())
-    except (OSError, ValueError) as exc:
-        _warn_cron_review("piggy-back state read failed; ignoring fallback timestamp", LAST_RUN_PATH, exc)
-        return None
-    if not isinstance(state, dict):
-        _warn_cron_review("piggy-back state schema is not an object; ignoring fallback timestamp", LAST_RUN_PATH)
-        return None
-    raw = state.get(job_id) if isinstance(state, dict) else None
+    """Read piggy-back last-success timestamp from cron_last_run.json.
+
+    WS-D1 (2026-07-20): loading/parsing goes through the canonical
+    `volpred.ops.schedules` marker reader — the marker file is scope-limited
+    (piggyback + cron_lib self-reports only; `_meta` documents this in-file),
+    and this module's log-banner + mtime layers remain the authoritative
+    evidence for launchd-direct jobs.
+    """
+    from volpred.ops.schedules import load_cron_marker_state  # noqa: WPS433
+
+    state = load_cron_marker_state(LAST_RUN_PATH)
+    raw = state.get(job_id)
     if not raw:
         return None
     try:

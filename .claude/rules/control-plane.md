@@ -182,7 +182,7 @@ uv run volpred ops release-task <task_id> --reason "claim 誤抓 / codex CLI 過
 ### 運作要點
 
 - Canonical schedule source: `config/runtime_schedules.json`
-- Per-job last-run state: `storage/ops/cron_last_run.json`（UTC ISO timestamps）
+- Per-job last-run state: `storage/ops/cron_last_run.json`（UTC ISO timestamps）。**Scope = piggyback fires + cron_lib 自報 wrappers only**（檔內 `_meta` 自述）：launchd 直跑（`host_crontab_managed: false`）且 wrapper 未 source cron_lib 的 job 在此永遠陳舊（daily_update 曾凍結 2026-04-25 三個月）。**判活性唯一入口 = `volpred.ops.schedules.job_liveness()`**（merge marker + execution-log exit-0 banner + mtime；WS-D1 2026-07-20），任何 monitor 不得只讀 marker 判死活。
 - Timezone: host crontab 用 local time (`Asia/Taipei`)；scheduler 評估 due 用 LOCAL_TZ
 - Subprocess timeout: 600s per job；sequential invocation（避免同時多 yfinance / heavy job）
 - Skip list: `check_alerts`（recurse）、`shared_scheduler_tick`（advisory）、`host_crontab_managed: false`

@@ -115,7 +115,7 @@ def job_id_for_wrapper(wrapper: str | Path, *, schedules_path: Path = SCHEDULES_
     return matches[0]
 
 
-def _read(path: Path) -> dict[str, str]:
+def _read(path: Path) -> dict:
     """Load the marker map. A corrupt file must NOT silently become {} — the very
     next write would then erase every other job's marker."""
     if not path.exists():
@@ -126,7 +126,7 @@ def _read(path: Path) -> dict[str, str]:
     return data
 
 
-def _atomic_write(path: Path, data: dict[str, str]) -> None:
+def _atomic_write(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=f".{path.name}.tmp")
     try:
@@ -141,12 +141,33 @@ def _atomic_write(path: Path, data: dict[str, str]) -> None:
         raise
 
 
-def merge_last_run(updates: dict[str, str], *, path: Path = LAST_RUN_PATH) -> dict[str, str]:
+# Schema note stamped into the file itself (WS-D1 2026-07-20): this marker map is
+# NOT a universal liveness source. It only records exit-0 markers from run_due_jobs
+# piggyback fires and from wrappers sourcing cron_lib.sh. A launchd-direct job
+# (`host_crontab_managed: false`) without cron_lib self-report never refreshes here
+# (daily_update froze at 2026-04-25 for ~3 months while running healthy). Monitors
+# must resolve liveness via `volpred.ops.schedules.job_liveness()`, never from this
+# file alone. Readers skip `_`-prefixed keys.
+_META_KEY = "_meta"
+_META = {
+    "scope": "piggyback-and-cron_lib-self-report-only",
+    "note": (
+        "exit-0 success markers from run_due_jobs piggyback fires + cron_lib.sh "
+        "self-reporting wrappers. NOT universal liveness: host_crontab_managed=false "
+        "jobs without self-report never refresh here. Resolve liveness via "
+        "volpred.ops.schedules.job_liveness()."
+    ),
+    "writers": ["scripts/run_due_jobs.py", "scripts/cron_mark_last_run.py"],
+}
+
+
+def merge_last_run(updates: dict[str, str], *, path: Path = LAST_RUN_PATH) -> dict:
     """Merge `updates` into the marker map under an exclusive lock.
 
     Read-modify-write, not overwrite: keys this caller does not name keep whatever
     another writer set. Returns the merged map. Raises on I/O or JSON errors;
-    callers that must not fail (cron wrappers) catch and log.
+    callers that must not fail (cron wrappers) catch and log. Every write also
+    (re)stamps the `_meta` scope record so the file self-documents its coverage.
     """
     if not updates:
         return _read(path)
@@ -157,6 +178,7 @@ def merge_last_run(updates: dict[str, str], *, path: Path = LAST_RUN_PATH) -> di
         try:
             data = _read(path)
             data.update(updates)
+            data[_META_KEY] = _META
             _atomic_write(path, data)
             return data
         finally:

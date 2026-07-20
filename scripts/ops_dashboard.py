@@ -12,7 +12,7 @@ Layers reported:
 Each section emits {ok|warn|critical} + 1-line tldr + actionable next.
 """
 from __future__ import annotations
-import json, os, sys, time, calendar
+import json, os, sys, time
 from pathlib import Path
 from urllib import request, error
 from urllib.parse import quote
@@ -468,30 +468,32 @@ def main():
     except Exception:
         croniter = None
         local_tz = None
+    # WS-D1 (2026-07-20): evidence merge (piggyback marker + execution-log
+    # banner/mtime) is owned by volpred.ops.schedules.job_liveness — the single
+    # liveness source. The previous inline marker+mtime merge was one of four
+    # parallel partial implementations of the same fallback (anti-stacking).
+    from volpred.ops.schedules import job_liveness
+    items_by_id = {
+        item["id"]: item
+        for item in (schedules.get("system_crontab", {}) or {}).get("items", [])
+        if isinstance(item, dict) and item.get("id")
+    }
     for job, grace_min in monitored.items():
-        last = cron.get(job, "")
-        last_ts = None
-        if last:
-            try:
-                last_ts = calendar.timegm(time.strptime(last[:19], "%Y-%m-%dT%H:%M:%S"))
-            except Exception:
-                last_ts = None
-        # LaunchAgent-fired (piggy_back_skip) jobs touch their log on each fire but
-        # do NOT update cron_last_run.json → use log mtime as additional "did it fire"
-        # evidence (success/failure is host_cron_fail's job, not staleness).
-        log_rel = job_log_map.get(job)
-        if log_rel:
-            log_path = REPO / log_rel
-            try:
-                if log_path.exists():
-                    last_ts = max(last_ts or 0, int(log_path.stat().st_mtime))
-            except Exception as exc:
-                cron_warnings.append({
-                    "job": job,
-                    "source": "log_mtime",
-                    "log_path": str(log_path),
-                    "error": f"{type(exc).__name__}: {exc}",
-                })
+        # Synthetic item for cron_jobs-section jobs (hourly_dispatch etc.) and
+        # for the explicit job_log_map overrides seeded above.
+        item = dict(items_by_id.get(job) or {"id": job})
+        if job_log_map.get(job):
+            item["log_path"] = job_log_map[job]
+        try:
+            live = job_liveness(item, marker_state=cron, repo_root=REPO)
+        except Exception as exc:
+            cron_warnings.append({
+                "job": job,
+                "source": "job_liveness",
+                "error": f"{type(exc).__name__}: {exc}",
+            })
+            live = None
+        last_ts = int(live.last_activity.timestamp()) if live and live.last_activity else None
         if not last_ts:
             # 2026-06-10 process-audit 4-1: a monitored job with NO fire
             # evidence at all (no cron_last_run entry, no log file) was
