@@ -1,12 +1,12 @@
 {
   "note": "held 的時間軸。超過 held_escalation_shifts 班仍無主 → 指名任務。一筆記錄消失 = 那個路徑已經有出口了。",
-  "updated_at": "2026-07-20T12:01:00.939609+00:00",
+  "updated_at": "2026-07-20T13:12:13.518361+00:00",
   "shifts_to_escalate": 6,
   "entries": {
     "job:compute-k1730-arm-a-production-quick-mode-1784358686": {
       "first_seen": "2026-07-18T17:01:05.109670+00:00",
-      "shifts": 49,
-      "last_seen": "2026-07-20T12:01:00.939609+00:00",
+      "shifts": 51,
+      "last_seen": "2026-07-20T13:12:13.518361+00:00",
       "reason": "no_existing_declared_files",
       "namespace": "compute_queue",
       "task_id": "assign_d8b55d37",
@@ -14,12 +14,19 @@
     },
     "job:k1698_rev3_rerun": {
       "first_seen": "2026-07-20T06:02:43.060897+00:00",
-      "shifts": 7,
-      "last_seen": "2026-07-20T12:01:00.939609+00:00",
+      "shifts": 9,
+      "last_seen": "2026-07-20T13:12:13.518361+00:00",
       "reason": "no_existing_declared_files",
       "namespace": "compute_queue",
       "task_id": "assign_fedadc8d",
       "escalated_at": "2026-07-20T11:01:41.556129+00:00"
+    },
+    "job:lazypack-mile_fa098fc8": {
+      "first_seen": "2026-07-20T13:02:29.286312+00:00",
+      "shifts": 2,
+      "last_seen": "2026-07-20T13:12:13.518361+00:00",
+      "reason": "declared_outputs_not_yet_deliverable",
+      "namespace": "compute_queue"
     }
   }
 }

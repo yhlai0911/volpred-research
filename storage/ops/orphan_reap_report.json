@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-20T12:00:54.510611+00:00",
+  "generated_at": "2026-07-20T13:12:03.798082+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
@@ -11,18 +11,11 @@
   "orphan_count": 0,
   "adopted": [],
   "applied": true,
-  "job_deliverable_candidates": [
+  "job_deliverable_candidates": [],
+  "job_deliverable_held": [
     {
       "job_id": "lazypack-mile_fa098fc8",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_fa098fc8.json",
-      "execution_status": "failed",
-      "paths": [
-        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8/plan.json"
-      ],
-      "existing_paths": [
-        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8/plan.json"
-      ],
-      "previously_delivered_paths": [],
+      "reason": "declared_outputs_not_yet_deliverable",
       "rejected": [
         {
           "path": "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8/panels/panel_signal.png",
@@ -43,25 +36,13 @@
       ]
     }
   ],
-  "job_deliverable_held": [],
-  "job_deliveries": [
-    {
-      "job_id": "lazypack-mile_fa098fc8",
-      "paths": [
-        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8/plan.json"
-      ],
-      "delivered": true,
-      "delivery_status": "partial_delivered",
-      "delivery_commit": "f3d03b8f85fbf0b8449563fab874eba9f5dffa9d",
-      "reason": "committed"
-    }
-  ],
+  "job_deliveries": [],
   "namespaces": {
     "drafts": {
       "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 1,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },

@@ -32368,13 +32368,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T09:01:06.252284+00:00",
+    "completed_at": "2026-07-20T13:12:13.560285+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T09:01:06.252284+00:00",
-      "last_clean_observed_at": "2026-07-20T09:01:06.252284+00:00"
+      "resolved_at": "2026-07-20T13:12:13.560285+00:00",
+      "last_clean_observed_at": "2026-07-20T13:12:13.560285+00:00"
     }
   },
   {
@@ -32386,13 +32386,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T12:38:31.771843+00:00",
+    "completed_at": "2026-07-20T13:14:24.623459+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T12:38:31.771843+00:00",
-      "last_clean_observed_at": "2026-07-20T12:38:31.771843+00:00"
+      "resolved_at": "2026-07-20T13:14:24.623459+00:00",
+      "last_clean_observed_at": "2026-07-20T13:14:24.623459+00:00"
     }
   },
   {
@@ -33295,7 +33295,7 @@
     "title": "Audience correction: rewrite a true general companion for 投資策略是不是越複雜越厲害？我們把 14 套方法排在一起，答案有點反直覺",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_2fb1dfb3. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K740']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -33311,7 +33311,25 @@
     ],
     "created_at": "2026-07-15T05:31:13.971087+00:00",
     "k_id": "K740",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "claimed_by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f",
+    "claimed_at": "2026-07-20T13:09:50.761336+00:00",
+    "claim_session_id": "f74a02944aef",
+    "status_history": [
+      {
+        "ts": "2026-07-20T13:09:50.761352+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f"
+      },
+      {
+        "ts": "2026-07-20T13:09:51.084500+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f"
+      }
+    ],
+    "started_at": "2026-07-20T13:09:51.084485+00:00"
   },
   {
     "id": "K1096_article_general_audience_rewrite_4e5a221e",
@@ -33378,7 +33396,7 @@
     "title": "Audience correction: rewrite a true general companion for VIX 不是萬能的——它在什麼時候最有用、什麼時候完全沒用？",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_2cfa32a4. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K942', 'K943']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -33396,7 +33414,25 @@
     "created_at": "2026-07-15T05:31:13.971087+00:00",
     "k_id": "K942",
     "experiment_id": "K943",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "claimed_by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f",
+    "claimed_at": "2026-07-20T13:09:51.439685+00:00",
+    "claim_session_id": "b1e2e1473836",
+    "status_history": [
+      {
+        "ts": "2026-07-20T13:09:51.439700+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f"
+      },
+      {
+        "ts": "2026-07-20T13:09:51.771199+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f"
+      }
+    ],
+    "started_at": "2026-07-20T13:09:51.771183+00:00"
   },
   {
     "id": "audience_article_general_audience_rewrite_92ec8a9f",
@@ -35994,78 +36030,27 @@
   },
   {
     "id": "email-12130-a433ec",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z failed-closeout 內容已變更，拒絕跨班提交",
-    "description": "Gmail UID: 12130\nMessage-ID: <831A91B0-3E51-4A53-9853-B99A7ABC117F@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Fri, 17 Jul 2026 19:53:45 +0800\nSubject: Re: [VolPred Alert][CRITICAL] PHASE-Z failed-closeout 內容已變更，拒絕跨班提交\n\n--- 用戶回信內容 ---\n立刻檢查底層原因重構後修復\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月17日 19:07 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> PHASE-Z failed-closeout 內容已變更，拒絕跨班提交\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 原 fire 的 ownership receipt 還在，但下列路徑已不再等於被 gate 擋下時的 bytes。\r\n> \r\n> 影響\r\n> \r\n> 影響文章品質、讀者信任與流量表現。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> 原 fire 的 ownership receipt 還在，但下列路徑已不再等於被 gate 擋下時的 bytes。\r\n> 為避免把後來 session 的修改冒充原 fire 產出，系統沒有 commit 或覆蓋任何檔案。\r\n> \r\n> scripts/compute_queue.py\r\n> storage/next_tasks_archive/2026-07.jsonl\r\n> storage/reports/token_usage/weekly_2026-07-12.json\r\n> storage/reports/token_usage/weekly_2026-07-12.md\r\n> storage/work_log.json\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-17T12:00:08.613908+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z failed-closeout 內容已變更，拒絕跨班提交",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12130,
-    "email_message_id": "<831A91B0-3E51-4A53-9853-B99A7ABC117F@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] PHASE-Z failed-closeout 內容已變更，拒絕跨班提交",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-17T12:01:34.060018+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-fe2d5c687e484452a07278f2910303ec"
-      },
-      {
-        "ts": "2026-07-17T12:01:46.999034+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-fe2d5c687e484452a07278f2910303ec"
-      },
-      {
-        "ts": "2026-07-17T12:09:09.313148+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-fe2d5c687e484452a07278f2910303ec"
-      }
-    ],
-    "started_at": "2026-07-17T12:01:46.999016+00:00",
+    "created_at": "2026-07-17T12:00:08.613908+00:00",
     "completed_at": "2026-07-17T12:09:09.313135+00:00",
-    "result": "PHASE-Z failed-closeout 25h CRITICAL 迴圈已修復並解除。根因：recover_failed_closeout 先比 hash 才問路徑是否還需 commit，且對 work_log.json/next_tasks_archive/token_usage 等共用 append-only 帳本做 byte-pin（隔班必然漂移，永遠不可能吻合）。實測 receipt 40 條中 34 條早被後續班次 commit、0 條還髒 → 成果從未有風險，卻連發 27 次同一封 CRITICAL。修法：(1) 不髒的路徑不會被 stage → 視為完成；(2) 髒且漂移者問 git log --since 是否已有後續 commit 帶走 → 有=正常進度靜默，無=維持 refuse+CRITICAL。以 git 歷史取代會漂移的 hot-path 清單。驗收：真實 receipt 40/40 landed、0 alert、HEAD 未動；47 測試綠；新 pin 經反向驗證。close email 已寄 (d2ccb9fc)。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T13:08:18.343261+00:00"
   },
   {
     "id": "assign_9d7292c1",
-    "title": "收 K1719 TAIFEX intraday RV 首發 K：驗數字 + 合併 worktree + 寫 knowledge + 衍生 2 brief",
-    "description": "compute followup collect_completed of agent-brief_taifex_rv_line-835e05. (1) 驗 experiments/k1719/k1719_results.json 數字與 handoff 一致（agent-result-verification skill, K1016 教訓）；(2) 查 OOS 無 lookahead、baseline 是誠實 daily HAR、樣本期間誠實記載；(3) worktree-merge-verification + merge_worktree.sh 合併 wt/dispatch-slot-1-30aeb902-taifexrv；(4) 主線程寫 knowledge.json（agent 禁寫，K1259）；(5) 把 handoff planned_k_briefs 的 2 條建成 pending task。",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "收 K1719 TAIFEX intraday RV 首發 K：驗數字 + 合併 worktree + 寫 knowledge + 衍生 2 brief",
+    "priority": 2,
     "source": "agent",
     "created_at": "2026-07-17T12:08:49.287054+00:00",
-    "created_by": "hourly-slot-2-4f0198b927234ee8bb9b5652ceaa9f08",
-    "status_history": [
-      {
-        "ts": "2026-07-17T12:08:53.133692+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-2-4f0198b927234ee8bb9b5652ceaa9f08"
-      },
-      {
-        "ts": "2026-07-17T12:08:53.365063+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-2-4f0198b927234ee8bb9b5652ceaa9f08"
-      },
-      {
-        "ts": "2026-07-17T12:29:59.272200+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-2-4f0198b927234ee8bb9b5652ceaa9f08"
-      }
-    ],
-    "started_at": "2026-07-17T12:08:53.365049+00:00",
     "completed_at": "2026-07-17T12:29:59.272182+00:00",
-    "result": "驗證通過（重跑 bit-identical，seed=42；代碼 shift(1)/common ledger/canonical DM 均正確）。發現並修正 K1719 撞號：ASIA-5 spillover 7/16 經 kid_reserve.py 正式預留在先，TAIFEX 讓號→經配號器正式配得 K1729，全面改號後重跑數字不變。未 merge 屬刻意：merge gate 要求 Codex PASS 裁決（sha-pin 現行 bytes），Codex 審逾 10min 未收斂 → 依規定改派 compute job agent-brief_k1729_certify-83eb58（認證→merge→寫 knowledge），worktree/branch 完整保留，不捏造裁決、不繞 gate（K1709 教訓）。建單：assign_680433de(K-B 條件夜盤，含 n<100 kill criterion) / assign_6b29e647(選擇權 tick blocker) / assign_762984a5(配號治本：kid_reserve 未接線進 experiment brief = 撞號根因)。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T13:08:18.343261+00:00"
   },
   {
     "id": "assign_680433de",
@@ -45808,7 +45793,9 @@
       "last_seen_at": "2026-07-20T12:01:00.969994+00:00",
       "consecutive_remediation_failures": 0,
       "attempt_history": [],
-      "escalation_due": false
+      "escalation_due": false,
+      "resolved_at": "2026-07-20T13:00:13+00:00",
+      "final_consecutive_remediation_failures": 0
     },
     "status_history": [
       {
@@ -46409,13 +46396,31 @@
     "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 2 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 2\n- eligible_before_dedup: 2\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 2\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: risk_mgmt\n  - `mile_d26308ba` (general, 已連續被擋 2 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n  - `mile_fa57f77d` (general, 已連續被擋 2 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260720_11`，指定只補仍可放行的 cluster：(任意)。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-20T11:01:52.406602+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "release_pool_deadlock"
-    ]
+    ],
+    "claimed_by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f",
+    "claimed_at": "2026-07-20T13:12:52.627817+00:00",
+    "claim_session_id": "0406afd282b6",
+    "status_history": [
+      {
+        "ts": "2026-07-20T13:12:52.627833+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f"
+      },
+      {
+        "ts": "2026-07-20T13:12:52.953076+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f"
+      }
+    ],
+    "started_at": "2026-07-20T13:12:52.953059+00:00"
   },
   {
     "id": "telegram-1198",
@@ -46525,10 +46530,10 @@
   {
     "id": "platform_ops_release_audit_fix_mile_d26308ba",
     "title": "Fix release-pool audit blockers: 集中度警報響起時，等權重指數震得比大盤還兇",
-    "description": "release_pool skipped draft `mile_d26308ba` 4 times because the general-audience audit failed.\n\nTitle: 集中度警報響起時，等權重指數震得比大盤還兇\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "description": "release_pool skipped draft `mile_d26308ba` 8 times because the general-audience audit failed.\n\nTitle: 集中度警報響起時，等權重指數震得比大盤還兇\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
@@ -46538,7 +46543,7 @@
     ],
     "created_at": "2026-07-20T12:00:52.189104+00:00",
     "article_id": "mile_d26308ba",
-    "release_audit_skipped_count": 4,
+    "release_audit_skipped_count": 8,
     "release_audit_issues": [
       "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>"
     ]
@@ -46546,10 +46551,10 @@
   {
     "id": "platform_ops_release_audit_fix_mile_fa57f77d",
     "title": "Fix release-pool audit blockers: 東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗",
-    "description": "release_pool skipped draft `mile_fa57f77d` 4 times because the general-audience audit failed.\n\nTitle: 東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "description": "release_pool skipped draft `mile_fa57f77d` 8 times because the general-audience audit failed.\n\nTitle: 東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
@@ -46559,7 +46564,7 @@
     ],
     "created_at": "2026-07-20T12:00:52.189104+00:00",
     "article_id": "mile_fa57f77d",
-    "release_audit_skipped_count": 4,
+    "release_audit_skipped_count": 8,
     "release_audit_issues": [
       "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>"
     ]
@@ -46638,10 +46643,26 @@
     "description": "根因（已查證，責任程式 scripts/dispatch_supervisor/phase_z.py）：\n\n1. commit gate（scripts/git_hooks/pre-commit）粒度是「整筆 commit 全過或全擋」。本次是 Gate 2 silent-fallback 抓到 scripts/analyze_dispatch_cadence.py:50 與 scripts/hourly_dispatch_pregate.py:337,374 三筆 new finding，整筆 candidate 被擋。\n2. 同一筆 candidate 內含高頻共享狀態檔（storage/reports/feed.json、storage/work_log.json、storage/ops/compute_queue/*.json）。_ensure_failed_closeout()（phase_z.py:473）把它們連同 .py 一起 pin 進 receipt（.git/volpred_phase_z_failed_closeout.json），按 sha256+size fingerprint。\n3. 這三類檔案每小時被十幾個 daemon 改寫（feed_sync/daily_update/record_and_publish/append_work_log/compute_queue lifecycle…），下一班 fingerprint 必 drift。\n4. recover_failed_closeout()（phase_z.py:722-734）判定 dirty + fingerprint 不符 + 不在 carried → released，reason drifted_uncarried，發 WARN。\n\n結論：這是**設計上必然重複**的警報，不是偶發。只要 commit gate 擋下任何一筆含 hot state file 的 commit，就會生出一組保證 drift 的認領。phase_z.py:674-680 docstring 已記錄 2026-07-17 同型事件（連續 25 小時重送 CRITICAL）。\n\n修復方向（交由執行 agent 判斷取捨，勿照抄）：\n- hot shared mutable state（_MACHINE_STATE_PREFIXES / _MACHINE_STATE_FILES 中屬 append-only ledger 或每小時重寫的檔）沒有「延後補交」語意 —— 下一班 pre-fire baseline 自然收編。這類路徑應在 _ensure_failed_closeout 建 receipt 時就**排除**，只 pin 真正需要補交的 code/artifact 路徑。\n- 若某路徑真的完全不 pin 任何東西，receipt 應不建立，警報自然消失。\n- 需同步更新 phase_z.py 內相關 docstring 與 docs/error_log.md。\n\n驗收：跑一次會被 gate 擋下的 candidate（可用測試模擬），確認 receipt 不再收錄 feed.json / work_log.json / compute_queue job，且下一班不再發 drifted_uncarried WARN。加機械 gate/test 防回歸。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-20T12:15:39.600879+00:00",
-    "created_by": "telegram_responder"
+    "created_by": "telegram_responder",
+    "status_history": [
+      {
+        "ts": "2026-07-20T13:01:09.621952+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-20T13:01:09.949284+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-20T13:01:09.949263+00:00",
+    "result": "建立端：_ensure_failed_closeout 以 _is_machine_state 排除 hot-state 檔不 pin（churn lane 本來就會收）；消費端：舊 receipt 的 machine-state 認領靜默釋放（reason=machine_state_unpinned）不再發放棄警報。新增 2 regression tests；phase_z 全套 78 tests 綠。"
   },
   {
     "id": "assign_a8ae4225",
@@ -46649,7 +46670,7 @@
     "description": "## 發生什麼\n6 個未提交檔案不是任何一班 fire 產出的，最長已連續 4 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- config/runtime_schedules.json — 4 班\n- scripts/analyze_dispatch_cadence.py — 4 班\n- scripts/hourly_dispatch_pregate.py — 4 班\n- storage/drafts/k698_general_draft.md — 4 班\n- storage/lazypack_plans/k698_general_plan.json — 4 班\n- tests/test_hourly_dispatch_pregate.py — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260720T121946844955Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-20T12:19:46.936266+00:00",
     "payload": {
@@ -46678,7 +46699,23 @@
       "first_seen_at": "2026-07-20T12:19:46.918689+00:00",
       "last_seen_at": "2026-07-20T12:39:19.233797+00:00"
     },
-    "updated_at": "2026-07-20T12:39:19.233797+00:00"
+    "updated_at": "2026-07-20T12:39:19.233797+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-20T12:55:55.623536+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-20T12:56:04.421955+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-20T12:56:04.421935+00:00",
+    "result": "工作區 3 批全部審查落地（c7caed63c gate 檔 review lane / 519a26d65 pregate / 44d23dab6 k698+postmortem），foreign_incident --check 回 closeable:true 全 paths covered。silent-fallback 3 筆修本體非塞 baseline；pregate 測試 hermetic 化 30/30 綠。"
   },
   {
     "id": "telegram-1208",
@@ -46750,5 +46787,94 @@
     "started_at": "2026-07-20T12:26:19.731173+00:00",
     "completed_at": "2026-07-20T12:35:52.642534+00:00",
     "result": "PHASE-Z trusted-gate 死結重新設計（候選 A 拆批）：gate 路徑保留待審、其餘變更照常提交；冪等 review-lane 任務 + 具名可執行的 alert 文案；新增 4 個機械 test，phase_z 相關 57 passed，兩道 audit gate exit 0。"
+  },
+  {
+    "id": "platform_ops_release_audit_fix_mile_fa098fc8",
+    "title": "Fix release-pool audit blockers: 大跌隔天會反彈嗎？數字說會，但我們自己的檢定沒過關",
+    "description": "release_pool skipped draft `mile_fa098fc8` 6 times because the general-audience audit failed.\n\nTitle: 大跌隔天會反彈嗎？數字說會，但我們自己的檢定沒過關\n\nIssues:\n- missing 懶人包圖組 section (render failed, job lazypack-mile_fa098fc8) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_fa098fc8 ; re-enqueue via scripts/lazypack_async_render.py enqueue\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "source": "release_pool_audit_skip_materializer",
+    "tags": [
+      "release_pool",
+      "audit_skip",
+      "platform_ops"
+    ],
+    "created_at": "2026-07-20T13:01:35.978141+00:00",
+    "article_id": "mile_fa098fc8",
+    "release_audit_skipped_count": 6,
+    "release_audit_issues": [
+      "missing 懶人包圖組 section (render failed, job lazypack-mile_fa098fc8) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_fa098fc8 ; re-enqueue via scripts/lazypack_async_render.py enqueue"
+    ]
+  },
+  {
+    "id": "release_deadlock_repair_20260720_13",
+    "title": "【P1 自動補救】release 死鎖：修好被內容閘門擋住的草稿",
+    "description": "release_pool 死鎖：草稿池有 3 篇、eligible=0（due_now=true），其中 3 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_d26308ba` (general, 已被擋 5 次) [lazypack_missing] 集中度警報響起時，等權重指數震得比大盤還兇\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>\n- `mile_fa57f77d` (general, 已被擋 5 次) [lazypack_missing] 東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>\n- `mile_fa098fc8` (general, 已被擋 3 次) [lazypack_missing] 大跌隔天會反彈嗎？數字說會，但我們自己的檢定沒過關\n    missing 懶人包圖組 section (render failed, job lazypack-mile_fa098fc8) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_fa098fc8 ; re-enqueue via scripts/lazypack_async_render.py enqueue\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "auto_remediation",
+    "created_at": "2026-07-20T13:01:36.988810+00:00",
+    "blocked_article_ids": [
+      "mile_d26308ba",
+      "mile_fa57f77d",
+      "mile_fa098fc8"
+    ],
+    "trigger": "release_pool_content_gate_deadlock"
+  },
+  {
+    "id": "K1409_article_general",
+    "title": "K1409: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1409 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'paradigm/decisive null', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1409 [PASS]：「0056/00878/00919 月月配息 1 萬」退休現金流規劃的 block-bootstrap 檢驗。資料來源 yfinance，抓取日 2026-05-29，三檔共同重疊期 2022-11 至 2026-05（43 個月），本金約新台幣 161 萬。方法：joint block bootstrap（block=3 個月，共用同一組起點保留跨資產連動），配息保留真實除息月曆、僅對每股配息金額 bootstrap，seed=20260530，N_SIM=5000；Codex review CONDITIONAL_PASS（",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_publish_drought_emergency",
+    "audience_correction_rewrite": false,
+    "k_id": "K1409",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "publish-drought-emergency",
+      "reader-facing"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-20T13:02:20+00:00"
+  },
+  {
+    "id": "alert_content_quality_20260720",
+    "title": "[alert] 內容品質巡檢：發文間隔過久",
+    "description": "由 alert `content_quality` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- 發文節奏: 發文空窗 — 距最新發文 420.21min > 6.0h 門檻（作用窗 TPE hour=21）\n\n## 影響\n內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\n\n## 建議行動（主線程 auto-remediation）\n1. 同一天出現超過一篇每日精選導讀 → 檢視 `storage/ops/content_quality_report.json` items，挑 1 篇 retract：`uv run volpred ops unpublish --mile-id <id>`；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\n2. 發文太密集 → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\n3. 發文間隔過久 → 立即 `release-pool-by-settings` 或派 fresh-arc 日常文章 補位；同時查 release deadlock (`docs/refactor_plan_release_layer_deadlock.md`)。\n4. 標題前綴重複 → 前端 header 與 title 擇一移除前綴；前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。\n5. 懶人包覆蓋不足 → 針對 missing_examples 走 `lazypack-infographic` skill 補圖：primary=確定性 renderer （`lazypack_render.py`，plan.json 綁 evidence、零 LLM）；需 LLM codegen 時用 `codex exec`（boss 2026-06-30/07-15 directive），NotebookLM 僅為 fallback，不得當首選。append `## 懶人包圖組` 後用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。",
+    "task_type": "governance",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-20T13:02:43.157553+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "content_quality"
+    ]
+  },
+  {
+    "id": "K1597_article_general",
+    "title": "K1597: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1597 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1597 [NULL]：TAIFEX TX 期貨日盤 5分鐘 RV（2017-05-16～2021-12-30，1,138 個交易日）測試 stable-tail/codifference/LFSM-lite 特徵能否改善 HAR/HARQ 的次日 RV 預測。Roughness：frequency-ratio H=0.0545、variogram H=0.1428(R²=0.979)。非高斯性明確（Δlog RV 超峰態1.13, Jarque-Bera p=6.8e-17, Student-t df=8.94），但 Hill tail alpha（",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_publish_drought_emergency",
+    "audience_correction_rewrite": false,
+    "k_id": "K1597",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "publish-drought-emergency",
+      "reader-facing"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-20T13:12:03+00:00"
   }
 ]
