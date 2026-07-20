@@ -1288,3 +1288,81 @@ def test_detection_notice_marks_unknown_cause_but_still_fires(tmp_path):
     assert first_line == "白話原因：原因待查"
     assert RED1["url"] in run.detections[0]["body"]
     assert sent == []
+
+
+def _complete_repair_task_at(tmp_path, completed_at, *, commit="abc1234"):
+    tasks = _tasks(tmp_path)
+    tasks[0]["status"] = "succeeded"
+    tasks[0]["result"] = f"root_cause={CAUSE}; repair_commit={commit}"
+    tasks[0]["completed_at"] = completed_at
+    (tmp_path / "next_tasks.json").write_text(json.dumps(tasks), encoding="utf-8")
+
+
+def test_red_run_queued_before_the_repair_landed_does_not_open_a_second_task(tmp_path):
+    """A run created before the repair completed is stale evidence, not a retry.
+
+    2026-07-20: incident ``ci-red-29703582195``'s repair completed at 22:38:29Z,
+    but run 29705358452 had been queued at 22:01:20Z against a tree three commits
+    older. The watcher read "repair succeeded yet still red" and opened a second
+    P1 repair task; the fixer that claimed it found all four failing tests already
+    green on HEAD and had nothing to repair.
+    """
+    run, sent, dispatches = _harness(tmp_path)
+    run(RED1)
+    _complete_repair_task_at(tmp_path, "2026-07-13T09:05:00+00:00")
+
+    # RED2 was created at 09:00, i.e. before the repair completed at 09:05.
+    stale_red = {**RED2, "createdAt": "2026-07-13T09:00:00Z"}
+    summary = run(stale_red)
+
+    assert summary["task_added"] is False
+    assert summary["stale_failure"]["repair_task_id"] == "ci-red-29233920234"
+    assert len(_tasks(tmp_path)) == 1
+    assert dispatches == ["ci-red-29233920234"]
+    assert sent == []
+
+
+def test_red_run_created_after_the_repair_still_opens_a_retry_task(tmp_path):
+    """The staleness guard defers by one cycle at most, it must not swallow a real retry."""
+    run, _sent, _dispatches = _harness(tmp_path)
+    run(RED1)
+    _complete_repair_task_at(tmp_path, "2026-07-13T09:05:00+00:00")
+
+    fresh_red = {**RED2, "createdAt": "2026-07-13T09:10:00Z"}
+    summary = run(fresh_red)
+
+    assert summary["task_added"] is True
+    assert "stale_failure" not in summary
+    assert {task["id"] for task in _tasks(tmp_path)} == {
+        "ci-red-29233920234",
+        check_alerts._ci_task_id(fresh_red),
+    }
+
+
+def test_stale_reds_do_not_escalate_to_the_boss(tmp_path):
+    """Stale evidence must not inflate the "fixer keeps failing" counter either.
+
+    Same defect as the duplicate-task path, different surface: while a fix is in
+    flight, hourly CI keeps producing reds on pre-fix shas. Three of them cross
+    CI_MAX_SILENT_FAILURE_CYCLES and mail the boss an escalation for a bug that
+    was already repaired.
+    """
+    run, sent, _dispatches = _harness(tmp_path)
+    run(RED1)
+    _complete_repair_task_at(tmp_path, "2026-07-13T09:30:00+00:00")
+
+    summaries = [
+        run({**red, "createdAt": stamp})
+        for red, stamp in (
+            (RED2, "2026-07-13T09:05:00Z"),
+            (RED3, "2026-07-13T09:10:00Z"),
+            ({**RED2, "databaseId": 29233920237}, "2026-07-13T09:15:00Z"),
+        )
+    ]
+
+    assert all(summary["task_added"] is False for summary in summaries)
+    incident = _state(tmp_path)["active_incident"]
+    assert len(incident["stale_failure_run_keys"]) == 3
+    assert "escalation_reason" not in incident
+    assert sent == []
+    assert len(_tasks(tmp_path)) == 1

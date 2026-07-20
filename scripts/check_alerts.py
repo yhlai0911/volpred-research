@@ -1316,6 +1316,55 @@ def _ci_commit_covered(repair_commit: str, green_head: str) -> bool:
     return proc.returncode == 0
 
 
+def _parse_iso(value) -> datetime | None:
+    """Aware UTC datetime, or None for anything unparseable/naive."""
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:  # silent-ok: fail-open — unparseable ts means "cannot prove stale", caller keeps task + escalation
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
+def _ci_failure_predates_repair(run: dict, records: dict[str, dict]) -> dict | None:
+    """Was this red run queued against a tree that predates the repair?
+
+    A repair task that reached ``succeeded`` at time T means a fix was declared
+    done at T. A run *created* before T never contained that fix — it would have
+    failed no matter how good the repair was. Opening a second repair task on it
+    sends the next fixer after a bug that is already gone.
+
+    2026-07-20: incident ``ci-red-29703582195``'s repair completed 22:38:29Z, but
+    run 29705358452 had been queued at 22:01:20Z, three commits behind. The
+    watcher saw "repair succeeded yet still red" and opened ``ci-red-29705358452``;
+    the fixer that claimed it found all four failing tests already green on HEAD.
+
+    Timestamps, not commit ancestry, because the repair commit is only known when
+    the fixer emits the structured ``repair_commit=`` line — and the fire that
+    missed it is exactly the one that produced this incident.
+
+    Fail-open: no parseable ``completed_at``/``createdAt`` means no suppression.
+    Suppression also only defers by one CI cycle — if the repair really did not
+    work, the next run is created after T, is not stale, and opens its own task.
+    """
+    run_created = _parse_iso(run.get("createdAt"))
+    if run_created is None:
+        return None
+    for task_id, record in records.items():
+        if str(record.get("status") or "").lower() not in {"succeeded", "succeeded_null_result"}:
+            continue
+        completed = _parse_iso(record.get("completed_at"))
+        if completed is None or run_created >= completed:
+            continue
+        return {
+            "repair_task_id": str(task_id),
+            "repair_completed_at": str(record.get("completed_at")),
+            "run_created_at": str(run.get("createdAt")),
+        }
+    return None
+
+
 def _request_ci_repair_dispatch(task_id: str) -> dict:
     """Use the existing supervisor fire request; never start a second dispatcher."""
     try:
@@ -1707,6 +1756,17 @@ def _reduce_ci_run(
         has_active_task = any(value in CI_ACTIVE_TASK_STATUSES for value in statuses.values())
         failed_tasks = _ci_failed_task_ids(records)
         should_ensure = not task_ids or (is_new_failure and not has_active_task and not failed_tasks)
+        if should_ensure and task_ids:
+            # Never suppress an incident's *first* task — only retries, where a
+            # completed repair gives us something to be stale relative to.
+            stale = _ci_failure_predates_repair(run, records)
+            if stale:
+                should_ensure = False
+                summary["stale_failure"] = stale
+                incident["last_stale_failure"] = {**stale, "run_key": run_key, "at": now_iso}
+                stale_keys = incident.setdefault("stale_failure_run_keys", [])
+                if run_key not in stale_keys:
+                    stale_keys.append(run_key)
         hard_failure: str | None = None
         if should_ensure:
             task = _build_ci_repair_task(
@@ -1747,8 +1807,15 @@ def _reduce_ci_run(
         failed_tasks = _ci_failed_task_ids(records)
         if failed_tasks:
             hard_failure = f"repair_task_terminal_failure: {', '.join(failed_tasks)}"
-        elif len(failure_keys) > CI_MAX_SILENT_FAILURE_CYCLES:
-            hard_failure = f"ci_failed_more_than_two_cycles: {len(failure_keys)}"
+        else:
+            # Runs queued before the repair landed are stale evidence, not proof the
+            # fixer keeps failing. Counting them escalates to the boss for a bug that
+            # was already fixed -- the same defect as the duplicate-task path above,
+            # just surfacing in the escalation counter instead of the task pool.
+            stale_keys = set(incident.get("stale_failure_run_keys") or [])
+            live_cycles = len([key for key in failure_keys if key not in stale_keys])
+            if live_cycles > CI_MAX_SILENT_FAILURE_CYCLES:
+                hard_failure = f"ci_failed_more_than_two_cycles: {live_cycles}"
         if hard_failure:
             _ci_set_escalation(incident, hard_failure)
 
