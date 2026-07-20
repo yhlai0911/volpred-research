@@ -32368,13 +32368,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T14:02:02.722207+00:00",
+    "completed_at": "2026-07-20T15:01:32.551601+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T14:02:02.722207+00:00",
-      "last_clean_observed_at": "2026-07-20T14:02:02.722207+00:00"
+      "resolved_at": "2026-07-20T15:01:32.551601+00:00",
+      "last_clean_observed_at": "2026-07-20T15:01:32.551601+00:00"
     }
   },
   {
@@ -32386,13 +32386,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T14:36:50.234078+00:00",
+    "completed_at": "2026-07-20T15:26:41.621299+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T14:36:50.234078+00:00",
-      "last_clean_observed_at": "2026-07-20T14:36:50.234078+00:00"
+      "resolved_at": "2026-07-20T15:26:41.621299+00:00",
+      "last_clean_observed_at": "2026-07-20T15:26:41.621299+00:00"
     }
   },
   {
@@ -32404,13 +32404,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T13:15:00.873977+00:00",
+    "completed_at": "2026-07-20T14:37:28.237162+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T13:15:00.873977+00:00",
-      "last_clean_observed_at": "2026-07-20T13:15:00.873977+00:00"
+      "resolved_at": "2026-07-20T14:37:28.237162+00:00",
+      "last_clean_observed_at": "2026-07-20T14:37:28.237162+00:00"
     }
   },
   {
@@ -33446,7 +33446,7 @@
     "title": "Audience correction: rewrite a true general companion for VIX 不是萬能的——它在什麼時候最有用、什麼時候完全沒用？",
     "description": "parent_task_id=content_audience_mislabel_backlog_45; source_article=mile_2cfa32a4. The source was corrected from general to research because canonical publisher inference found reader-visible academic density. Produce a NEW general-audience companion through publish_draft.py; do not relabel or weaken the corrected research source. Read feed-publisher and anti-ai-style skills; preserve every source number, null result, limitation, lookahead caveat, and errata in plain language. Use structured experiment refs ['K942', 'K943']; publish status=draft, audience=general, and require sanitize_applied=0. If evidence/provenance is insufficient, block with the exact missing source instead of inventing content.",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "dispatch_lane": "agent",
     "source": "audience_correction_backfill",
@@ -33484,12 +33484,32 @@
         "to": "pending",
         "by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 47.6min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-20T15:09:34.397074+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-1608803031384a6db4a01108a7ae8aea"
+      },
+      {
+        "ts": "2026-07-20T15:09:40.966754+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-1608803031384a6db4a01108a7ae8aea"
+      },
+      {
+        "ts": "2026-07-20T15:25:11.119668+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-1608803031384a6db4a01108a7ae8aea"
       }
     ],
-    "started_at": "2026-07-20T13:09:51.771183+00:00",
+    "started_at": "2026-07-20T15:09:40.966741+00:00",
     "last_released_at": "2026-07-20T14:00:28.385077+00:00",
     "last_release_reason": "liveness_reconcile_detached_005f17cf",
-    "arc_precheck_warning": "⚠️ 同批 sibling audience_article_general_audience_rewrite_92ec8a9f 於 2026-07-20 判定 arc-covered 而未寫。本題（VIX 何時有用/何時沒用）開工前先手動比對 general 已發文章，確認缺口再寫；check_arc_dedup 對無 K-id 主題會回 unjudged_thin_signature，等於沒查。"
+    "arc_precheck_warning": "⚠️ 同批 sibling audience_article_general_audience_rewrite_92ec8a9f 於 2026-07-20 判定 arc-covered 而未寫。本題（VIX 何時有用/何時沒用）開工前先手動比對 general 已發文章，確認缺口再寫；check_arc_dedup 對無 K-id 主題會回 unjudged_thin_signature，等於沒查。",
+    "completed_at": "2026-07-20T15:25:11.119652+00:00",
+    "result": "發佈 mile_9291c34c（general/draft，experiment_refs=[K942,K943]，sanitize_applied=0）；anti_ai_gate PASS；arc-dedup clean；正文零 K-id/模型術語（原改判根因已消除）；lazypack strict-v1 plan+evidence 已 enqueue lazypack-mile_9291c34c。原 research 稿 mile_2cfa32a4 未動。"
   },
   {
     "id": "audience_article_general_audience_rewrite_92ec8a9f",
@@ -34636,40 +34656,15 @@
   },
   {
     "id": "alert_telegram_reply_backlog_20260716",
-    "title": "[alert] 老闆 Telegram 訊息沒被回（responder 停擺）",
-    "description": "由 alert `telegram_reply_backlog` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n老闆經 Telegram 傳來的訊息有 1 則沒被回，最久一則已等 39.3 分鐘（狀態 pending）。\n- telegram-877: pending, 已等 39.3 分鐘\n- 門檻: warn>30.0分 / critical>120.0分\n\n## 影響\n老闆以為訊息送出就會被處理，但實際上沒有任何回覆 —— 這個故障面從外部完全看不出來（訊息照收、任務照排），只有老闆本人會發現。\n\n## 診斷指引（此條無自動修復：根因分歧，盲目重啟不對症）\n1. tail -20 /Users/yhlai0911/.volpred/logs/telegram_responder.log\n   — 看是 FATAL（缺依賴 / 環境漂移）還是 exit=1（Claude 額度用盡）。\n2. 額度爆 → 等 reset 或改 TELEGRAM_RESPONDER_MODEL；缺依賴 → 修 scripts/telegram_responder.sh 的啟動關卡。\n3. hourly dispatch 是兜底（~1h）；critical 代表連兜底都沒接到。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
-    "created_at": "2026-07-16T14:25:49.726166+00:00",
+    "task_type": "platform_ops",
+    "title": "[alert] 老闆 Telegram 訊息沒被回（responder 停擺）",
+    "priority": 2,
     "source": "alert_remediation_bridge",
-    "tags": [
-      "alert",
-      "telegram_reply_backlog"
-    ],
-    "status_history": [
-      {
-        "ts": "2026-07-17T14:32:08.368736+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
-      },
-      {
-        "ts": "2026-07-17T14:36:51.254522+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
-      },
-      {
-        "ts": "2026-07-17T14:51:12.142147+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
-      }
-    ],
-    "started_at": "2026-07-17T14:36:51.254507+00:00",
+    "created_at": "2026-07-16T14:25:49.726166+00:00",
     "completed_at": "2026-07-17T14:51:12.142134+00:00",
-    "result": "Fresh re-validation no-op：依 _REVALIDATION_INSTRUCTION 重跑原 detector _parse_telegram_reply_backlog_state → breached=false, stuck_count=0。確認非假安靜：responder 今日 16:48 CST 跑完 exit=0 並將佇列排空，185 筆 telegram_reply 全 succeeded。警報已自然解除，未執行任何修復動作。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T15:07:00.883896+00:00"
   },
   {
     "id": "assign_168aeaf8",
@@ -35231,28 +35226,15 @@
   },
   {
     "id": "alert_host_cron_fail_20260717",
-    "title": "[alert] Host cron failure detected",
-    "description": "由 alert `host_cron_fail` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=warn（max_consecutive_failures=1；non_hang_failure=False）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\n- scheduler_last_status: ok\n- scheduler_age_minutes: 127876.1\n- failing_logs:\n  - storage/logs/cron/daily_update_intraday.log exit=142 at 2026-07-16T06:10:04+00:00 recency=fresh_or_unscheduled\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
-    "created_at": "2026-07-17T00:01:27.390426+00:00",
+    "task_type": "platform_ops",
+    "title": "[alert] Host cron failure detected",
+    "priority": 2,
     "source": "alert_remediation_bridge",
-    "tags": [
-      "alert",
-      "host_cron_fail"
-    ],
+    "created_at": "2026-07-17T00:01:27.390426+00:00",
     "completed_at": "2026-07-17T14:58:53.995371+00:00",
-    "result": "ordinary alert cleared before dispatch",
-    "status_history": [
-      {
-        "ts": "2026-07-17T14:58:53.995371+00:00",
-        "from": "pending",
-        "to": "succeeded",
-        "by": "alert_remediation_router",
-        "note": "condition_cleared_automatically"
-      }
-    ]
+    "tombstone": true,
+    "archived_at": "2026-07-20T15:07:00.883896+00:00"
   },
   {
     "id": "k1708_stage3_codex_review_merge_20260717",
@@ -46918,12 +46900,23 @@
     "description": "由 alert `content_quality` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- 發文節奏: 發文空窗 — 距最新發文 420.21min > 6.0h 門檻（作用窗 TPE hour=21）\n\n## 影響\n內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\n\n## 建議行動（主線程 auto-remediation）\n1. 同一天出現超過一篇每日精選導讀 → 檢視 `storage/ops/content_quality_report.json` items，挑 1 篇 retract：`uv run volpred ops unpublish --mile-id <id>`；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\n2. 發文太密集 → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\n3. 發文間隔過久 → 立即 `release-pool-by-settings` 或派 fresh-arc 日常文章 補位；同時查 release deadlock (`docs/refactor_plan_release_layer_deadlock.md`)。\n4. 標題前綴重複 → 前端 header 與 title 擇一移除前綴；前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。\n5. 懶人包覆蓋不足 → 針對 missing_examples 走 `lazypack-infographic` skill 補圖：primary=確定性 renderer （`lazypack_render.py`，plan.json 綁 evidence、零 LLM）；需 LLM codegen 時用 `codex exec`（boss 2026-06-30/07-15 directive），NotebookLM 僅為 fallback，不得當首選。append `## 懶人包圖組` 後用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。",
     "task_type": "governance",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-20T13:02:43.157553+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "content_quality"
+    ],
+    "completed_at": "2026-07-20T15:01:43.779389+00:00",
+    "result": "ordinary alert cleared before dispatch",
+    "status_history": [
+      {
+        "ts": "2026-07-20T15:01:43.779389+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "alert_remediation_router",
+        "note": "condition_cleared_automatically"
+      }
     ]
   },
   {
@@ -46950,7 +46943,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29715899562",
@@ -46977,11 +46970,26 @@
         "to": "pending",
         "by": "hourly-slot-1-46f4806ad9284ffab40d867049a112b6",
         "note": "supervisor_kill_46f4806a"
+      },
+      {
+        "ts": "2026-07-20T15:07:17.230897+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-3dc6917c257b4a87a349a08bc8a7f9e6"
+      },
+      {
+        "ts": "2026-07-20T15:07:28.568222+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-3dc6917c257b4a87a349a08bc8a7f9e6"
       }
     ],
-    "started_at": "2026-07-20T14:04:03.816234+00:00",
+    "started_at": "2026-07-20T15:07:28.568206+00:00",
     "last_released_at": "2026-07-20T14:17:30.140282+00:00",
-    "last_release_reason": "supervisor_kill_46f4806a"
+    "last_release_reason": "supervisor_kill_46f4806a",
+    "claimed_by": "hourly-slot-1-3dc6917c257b4a87a349a08bc8a7f9e6",
+    "claimed_at": "2026-07-20T15:07:17.230883+00:00",
+    "claim_session_id": "7b5741d84fff"
   },
   {
     "id": "release_deadlock_repair_20260720_14",
@@ -47024,10 +47032,33 @@
     "description": "今日兩班（11:23 slot-4.d7800aa6 前後、22:01 slot-1.46f4806a）worker log 僅 15 bytes 'Execution error'：claude CLI 落地 fatal 但行程不退出，hang-kill 960s 才收屍，白吃 16 分鐘 slot + CRITICAL 噪音。修法（三層皆看）：(1) worker.py 輸出監看：log 出現已知 fatal marker（'Execution error' 等）且輸出停滯 >60s → 立即 kill process group、分類 transient（非 hang）、當場 release claim 供同班或下班重派；(2) claude CLI stderr 必須落到 worker log（現在只有 15 bytes，無法歸因 API/session-limit/其他）；(3) regression test：fake worker 印 fatal marker 後 sleep → 驗證秒級回收與 claim release、且不觸發 no-retry-on-hang 契約。驗收：兩個真實 log 形狀（15-byte Execution error）進測試 fixture；hang 類 alert 對此形狀不再發（改記 transient receipt）。參考 docs/error_log.md 2026-07-20 22:17 條目。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-20T14:32:42.037123+00:00",
-    "dispatch_lane": "main_thread"
+    "dispatch_lane": "main_thread",
+    "status_history": [
+      {
+        "ts": "2026-07-20T14:40:50.938448+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4e48bd5c465c488285d37abb5976675d"
+      },
+      {
+        "ts": "2026-07-20T14:40:51.252913+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4e48bd5c465c488285d37abb5976675d"
+      },
+      {
+        "ts": "2026-07-20T14:58:57.988567+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-4e48bd5c465c488285d37abb5976675d"
+      }
+    ],
+    "started_at": "2026-07-20T14:40:51.252898+00:00",
+    "completed_at": "2026-07-20T14:58:57.988545+00:00",
+    "result": "worker fatal-marker fast-fail 落地：is_terse_fatal_only + _wait_with_fatal_probe（60s stall）→ 秒級 kill、fatal_fastfail 分類、當場 repend claim、不發 hang alert；--debug-file sidecar 從 attempt 2 起補歸因；11-case regression test（真實 15-byte incident bytes + 散文反例 + 非空心對照組）；docs/error_log.md 條目改 FIXED。228 項 supervisor 既有測試全綠。"
   },
   {
     "id": "assign_f4ea49aa",
@@ -47038,5 +47069,35 @@
     "status": "pending",
     "source": "agent",
     "created_at": "2026-07-20T14:34:21.210935+00:00"
+  },
+  {
+    "id": "alert_internal_silent_fallback_new_c67bec28dd_20260720T150147300691Z_a1",
+    "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=1 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.uTxWY2 baseline_findings=60 new=1 resolved=60\n[pre-commit]   NEW scripts/dispatch_supervisor/worker.py:269 except TimeoutExpired: pass\n[pre-commit]   [silent-fallback-audit] note: 60 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-20T15:01:47.300691+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "silent_fallback_new"
+    ],
+    "alert_key": "silent_fallback_new",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260720T150147300691Z",
+      "episode_started_at": "2026-07-20T15:01:47.300691+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-20T15:06:07.539360+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false,
+      "fingerprint": [
+        "scripts/dispatch_supervisor/worker.py:269"
+      ]
+    }
   }
 ]

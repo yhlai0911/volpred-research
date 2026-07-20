@@ -22600,5 +22600,50 @@
     "owner": "hourly-slot-2-b83580161d5e4cc1831a48238c517b1a",
     "commit": null,
     "summary": "發佈 general draft `mile_d9ff126f`「排第一名的那套策略，設定是最單純的那一級」（experiment_refs=[K740]）。\n\n**先前判斷更正**：本班稍早曾以「剩餘時間不足」為由釋回本任務，該判斷基於錯誤的時鐘估算\n（誤以為 22:45，實為 22:28）。發現後收回重做並完成，非重複派工。\n\n**是否該寫的查證**：最高風險對照篇 `mile_343b9daf`「我測了 10 種投資策略，結果最笨的那個贏了」\n(general, 2026-03-18) 是 **2010-2024 歷史回測**、10 套策略、冠軍 50/50 SPY/GLD。\n本篇是 **2023-01-04 ~ 2026-03-27 往前追蹤的紙上交易**、14 套、冠軍保守型 VT（Piecewise），\n且首次把「複雜度 vs 風險調整後報酬」做成明確檢定（結果是 null）。回測 vs forward-tracked 是\n實質證據等級差異 → 差異化成立，故寫。\n\n**數字全部與 `experiments/k740/k740_strategy_meta_analysis_results.json` 逐項核對**：\ncomposite 0.79、3.158、mdd -2.48%、月勝率 87.2%、CAGR 18.01%、單月最慘 -1.61%、恢復 39 天；\nSPY-only 1.173 vs SPY+GLD 2.544（差 1.371）；複雜度關聯 rho 0.294 / p 0.3079；\n月頻 2.339 vs 日頻 2.213。另補入來源文章沒有的 turnover-netsharpe rho 0.763 / p 0.0015，\n並明確標註不可因果解讀（可能是策略類型混淆，非「多動」本身）。\n\n**Gates**：`anti_ai_gate` PASS（warn 1/3，僅段落長度）；`sanitize_applied=0`；\n以 `publisher._infer_audience` 實測 hits=[] → 回傳 general —— 這是本任務的關鍵驗證：\n來源被 flip 成 research 正是因為命中 Sharpe + p-value/Spearman 兩個關鍵詞，\n新版全篇零學術關鍵詞才不會再被判回去、使任務目的落空。\n\n**誠實揭露**：null result 明確寫成「沒有測到『更複雜會更好』的證據」而非「證明複雜沒用」；\n紙上交易非真實成交、三年多期間特殊、14 套為小樣本等 caveat 全部以白話保留在正文。\n\n**未竟事項（已建 followup task，非遺留）**：未附 `--lazypack-plan`，該 draft 在 lazypack render\n落地前不會被 release_pool 放行。同時回報疑似 bug：publish_draft 的 `lazypack_never_enqueued`\n警告印出的 article_id 是來源文章 mile_2fb1dfb3 而非本次新建的 mile_d9ff126f。"
+  },
+  {
+    "timestamp": "2026-07-20T22:46:51+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_fa098fc8",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_fa098fc8-r2:codex->agy",
+    "article_id": "mile_fa098fc8",
+    "job_id": "lazypack-mile_fa098fc8-r2",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-20T22:58:45+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_97bf1e6d",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-4e48bd5c465c488285d37abb5976675d",
+    "owner": "hourly-slot-1-4e48bd5c465c488285d37abb5976675d",
+    "commit": null,
+    "summary": "supervisor worker fatal-marker 快速失敗：terse CLI fatal（log 只有 15-byte 'Execution error'）且 60s 無成長 → 秒級 kill pgid、分類 fatal_fastfail（非 hang）、當場 repend claim、併入 transient retry ladder、不發 hang alert。原判定『stderr 沒進 worker log』有誤（_spawn 早已stderr=STDOUT，15 bytes 就是 CLI 全部輸出）；真缺口是 CLI 太安靜，改以 --debug-file sidecar 且只從 attempt 2 起啟用（避免 debug 若走 stdout 反而關掉 fast-fail）。當日實際 5 班中此形狀，非 2 班。",
+    "files": [
+      "scripts/dispatch_supervisor/failure_class.py",
+      "scripts/dispatch_supervisor/worker.py",
+      "scripts/dispatch_supervisor/state.py",
+      "tests/test_worker_fatal_marker_fastfail.py",
+      "docs/error_log.md"
+    ],
+    "tests": "tests/test_worker_fatal_marker_fastfail.py 11 passed; supervisor regression suites 228 passed"
+  },
+  {
+    "timestamp": "2026-07-20T23:25:03+08:00",
+    "task_type": "daily_article",
+    "task_id": "K942_article_general_audience_rewrite_2cfa32a4",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-1608803031384a6db4a01108a7ae8aea",
+    "owner": "hourly-slot-2-1608803031384a6db4a01108a7ae8aea",
+    "commit": null,
+    "summary": "K942 一般讀者版 companion 文章：從餓死佇列（aged 129.6h）清出，寫完並發佈為 draft。\n\n背景：線上文章 mile_2cfa32a4 原標 audience=general，2026-07-15 被 publisher inference 改判為\nresearch（reader-visible 學術訊號：正文出現 K-id、GARCH）。修正方式是另寫一篇真正的 general\ncompanion，原 research 稿保持不動。\n\n做了什麼：\n- 前置 gate：check_arc_dedup --k-id K942 --audience general → verdict=clean（無 K-coverage、無 arc dup）；\n  另跑 publishing.md 層 2 grep canonical feed（storage/reports/feed.json）確認無 K942 general 覆蓋。\n- 派 writer subagent（opus/medium，per model_router；topology=subagent）寫 storage/drafts/K942_general_draft.md，\n  1618 字、2 表 2 圖，量化交叉分析一層（regime × horizon 疊乘的最好/最壞格）。\n- 主線程串行發佈：publish_draft.py → mile_9291c34c（audience=general, status=draft,\n  experiment_refs=[\"K942\",\"K943\"], sanitize_applied=0）。\n\n證據與誠實性：\n- 所有數字逐字轉錄自來源文章，未重新估計。regime +8.7/+0.5/+17.3；horizon +6.4/+18.4/-5.7。\n- 兩個 null/負向結果沒有被吞掉：一般區間 +0.5%（寫成全文主軸之一，圖上灰色標「等同沒用」）、\n  一個月 -5.7%（畫成向下紅棒，明講是倒扣）。\n- 另立但書：樣本僅 SPY 十年；原始分析未附顯著性檢定（文中明寫不得當已驗證結論）；\n  波動可預測不等於方向可預測（53.7% vs 市場 62% 上漲時間）。\n\nGate 結果：\n- anti_ai_gate.py exit 0（PASS，warn=1/3，唯一 WARN 是表格區塊被判為長段落）。\n- K-id / GARCH / QLIKE / HAR-RV / R² 全文掃描為零 —— 這是本任務的根因約束，圖檔也刻意不用\n  K942 命名，避免圖片路徑進 content 後再度觸發 _infer_audience 的 K\\d+ 規則（writer 主動發現）。\n\nLazypack：release gate 要求 general draft 必須有懶人包才能 release。作了 strict v1 plan\n（storage/drafts/K942_lazypack_plan.json）+ evidence JSON（K942_lazypack_evidence.json，\nsha256 綁定，所有數字走 binding 不得裸寫），已 enqueue = lazypack-mile_9291c34c，*/15 compute\nworker 會 render + append + sync。\n\n順帶發現（未修，非本任務範圍）：publish_draft.py 的 LAZYPACK NOT QUEUED 警告印錯 article id ——\n本次發佈的是 mile_9291c34c，警告卻指向既有的 mile_167ed77b，照著它的指令做會 enqueue 到錯誤文章。"
   }
 ]

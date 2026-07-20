@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "title": "恐慌指數該多久看一次",
+  "subtitle": "美股大盤指數基金 SPY，十年日資料，資料來源 yfinance",
+  "evidence": {
+    "vix": {
+      "path": "storage/drafts/K942_lazypack_evidence.json",
+      "sha256": "f927daf3797c4e4ee4140c9f59e51116ecb0b5d9c1952c565b01c5ba2250463f",
+      "label": "SPY 恐慌指數效用拆解（轉錄自來源文章）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "sources": ["vix"],
+      "title": "它的價值不固定，看兩件事",
+      "subtitle": "市場當下在哪個溫度、你想預測多久以後",
+      "alt": "懶人包一：恐慌指數的價值取決於市場狀態與預測窗口",
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "改善幅度是什麼意思",
+          "body": [
+            "同一套推估未來震盪幅度的做法，一版不看恐慌指數、一版看。",
+            "比兩版誰更接近後來真實發生的震盪，差距換算成百分比。",
+            "正數代表看了有幫助；負數代表加進去以後反而更糟。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "兩個切法",
+          "body": [
+            {
+              "template": "市場狀態：極端平靜（低於 {calm}）／一般水準／極端恐慌（高於 {panic}）",
+              "bindings": {
+                "calm": {"source": "vix", "path": "thresholds.calm_level", "format": {"kind": "integer"}},
+                "panic": {"source": "vix", "path": "thresholds.panic_level", "format": {"kind": "integer"}}
+              }
+            },
+            "預測窗口：一日／一週／一個月"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "樣本",
+          "body": [
+            "美股大盤指數基金 SPY，期間 二〇一六 到 二〇二五，資料來源 yfinance。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "sources": ["vix"],
+      "title": "好消息在兩端，壞消息在中間和遠處",
+      "alt": "懶人包二：市場狀態與預測窗口的改善幅度數字",
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "極端平靜（指數低於十五）",
+          "value": {"source": "vix", "path": "regime_improvement_pct.calm_below_15", "format": {"kind": "percent", "digits": 1, "show_plus": true}},
+          "note": "市場出奇安靜時，訊號偏強"
+        },
+        {
+          "kind": "metric",
+          "label": "一般水準（指數十五到二十五）",
+          "value": {"source": "vix", "path": "regime_improvement_pct.normal_15_to_25", "format": {"kind": "percent", "digits": 1, "show_plus": true}},
+          "note": "等同沒用；而市場大部分時間就待在這裡"
+        },
+        {
+          "kind": "metric",
+          "label": "極端恐慌（指數高於二十五）",
+          "value": {"source": "vix", "path": "regime_improvement_pct.panic_above_25", "format": {"kind": "percent", "digits": 1, "show_plus": true}},
+          "note": "全表最高"
+        },
+        {
+          "kind": "metric",
+          "label": "預測窗口：一日",
+          "value": {"source": "vix", "path": "horizon_improvement_pct.one_day", "format": {"kind": "percent", "digits": 1, "show_plus": true}},
+          "note": "太短，資訊被當天雜訊蓋掉"
+        },
+        {
+          "kind": "metric",
+          "label": "預測窗口：一週",
+          "value": {"source": "vix", "path": "horizon_improvement_pct.one_week", "format": {"kind": "percent", "digits": 1, "show_plus": true}},
+          "note": "甜蜜點"
+        },
+        {
+          "kind": "metric",
+          "label": "預測窗口：一個月",
+          "value": {"source": "vix", "path": "horizon_improvement_pct.one_month", "format": {"kind": "percent", "digits": 1, "show_plus": true}},
+          "note": "負的：加進去以後預測比不加還差，是倒扣"
+        },
+        {
+          "kind": "text",
+          "heading": "兩個純算術對照",
+          "body": [
+            {
+              "template": "極端恐慌那格是一般水準那格的 {ratio} 倍。",
+              "bindings": {
+                "ratio": {"source": "vix", "path": "derived_arithmetic.panic_over_normal_ratio", "format": {"kind": "number", "digits": 1}}
+              }
+            },
+            {
+              "template": "一週與一個月之間，相差 {gap} 個百分點。",
+              "bindings": {
+                "gap": {"source": "vix", "path": "derived_arithmetic.week_minus_month_pp", "format": {"kind": "number", "digits": 1}}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "sources": ["vix"],
+      "title": "怎麼改看盤習慣，以及不能過度解讀什麼",
+      "alt": "懶人包三：行動建議與三條限制",
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "行動三條",
+          "body": [
+            {
+              "template": "頻率降到一週一次。每天調倉是拿只值 {d1} 的訊號去做每次要付手續費的決定；改成每週看一次，同一個指標值 {w1}。",
+              "bindings": {
+                "d1": {"source": "vix", "path": "horizon_improvement_pct.one_day", "format": {"kind": "percent", "digits": 1, "show_plus": true}},
+                "w1": {"source": "vix", "path": "horizon_improvement_pct.one_week", "format": {"kind": "percent", "digits": 1, "show_plus": true}}
+              }
+            },
+            {
+              "template": "只在跌破 {calm} 或站上 {panic} 時認真對待；落在中間區間時它給的資訊接近零。",
+              "bindings": {
+                "calm": {"source": "vix", "path": "thresholds.calm_level", "format": {"kind": "integer"}},
+                "panic": {"source": "vix", "path": "thresholds.panic_level", "format": {"kind": "integer"}}
+              }
+            },
+            {
+              "template": "一個月才調一次配置的長期投資人可以直接不看，那個窗口是 {m1}。",
+              "bindings": {
+                "m1": {"source": "vix", "path": "horizon_improvement_pct.one_month", "format": {"kind": "percent", "digits": 1, "show_plus": true}}
+              }
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "三條限制（同等重要）",
+          "body": [
+            {
+              "template": "一、{sample}",
+              "bindings": {
+                "sample": {"source": "vix", "path": "caveats.sample", "format": {"kind": "text"}}
+              }
+            },
+            {
+              "template": "二、{sig}",
+              "bindings": {
+                "sig": {"source": "vix", "path": "caveats.significance", "format": {"kind": "text"}}
+              }
+            },
+            {
+              "template": "三、方向不可預測：另一份週頻報酬分析中，方向猜對率最高只到 {hit}，而同期市場有 {up} 的時間往上走，比「每次都猜漲」還差 {short} 個百分點。",
+              "bindings": {
+                "hit": {"source": "vix", "path": "direction_predictability.best_hit_rate_pct", "format": {"kind": "percent", "digits": 1}},
+                "up": {"source": "vix", "path": "direction_predictability.market_up_time_pct", "format": {"kind": "percent", "digits": 0}},
+                "short": {"source": "vix", "path": "direction_predictability.shortfall_pp", "format": {"kind": "number", "digits": 1}}
+              }
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "一句話帶走",
+          "body": [
+            "它回答的是「這週該承擔多少風險」，回答不了「該壓多還是壓空」。"
+          ]
+        }
+      ]
+    }
+  ]
+}
