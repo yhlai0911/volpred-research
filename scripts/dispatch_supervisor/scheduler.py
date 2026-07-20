@@ -23,10 +23,14 @@ have stopped. This avoids committing a sibling's half-written files.
 In `dry_run=True` mode (shadow phase per refactor_plan §4 phase 2) the
 scheduler logs "WOULD enqueue at <fire_at>" + updates last_fire_at but
 does NOT spawn a worker. Used to diff against legacy shell decisions.
+WS-H4 (2026-07-20): a dry-run tick walks the SAME pregate judgment as a
+cron fire (it used to bypass it) — dry-run and fire may only diverge at
+the write boundary (reserve_fire / worker spawn), never in the decision.
 """
 from __future__ import annotations
 
 import asyncio
+import dataclasses
 import json
 import logging
 import os
@@ -45,7 +49,7 @@ if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
-from . import alerts, phase_z, state, worker
+from . import alerts, decision, phase_z, state, worker
 
 LOG = logging.getLogger(__name__)
 
@@ -691,53 +695,69 @@ async def _tick_once(
             "action": "phase_z_recovered", "phase_z": outcome,
             "pending_jobs": len(pending_phase_z),
         }
-    if snap.get("auth_blocked"):
-        return {"action": "skip", "reason": "auth_blocked"}
+    # ── WS-H4 step 2: collect inputs, let decision.decide() own the verdict ──
+    # All reads happen here; decide() is pure. Dry-run and fire consume the
+    # SAME Decision — they may only diverge at the write boundary below.
     current_jobs = snap.get("current_jobs") or []
     capacity = max_slots if max_slots is not None else load_max_slots(schedules_path=schedules_path)
-    if len(current_jobs) >= capacity:
-        # A pending request deliberately survives a full-pool skip and is
-        # consumed only after a later tick sees capacity.
-        return {
-            "action": "skip", "reason": "slots_full",
-            "active_slots": len(current_jobs), "max_slots": capacity,
-        }
-    if _parse_last_fire(snap.get("last_fire_at")) is None:
-        # Cold start, or `dispatch_state.json` was lost / clobbered by an
-        # external writer (the daemon logs its own resets; a silent loss is
-        # someone else's write). `_due_to_fire` now refuses to treat "unknown"
-        # as "due" — so stamp the field and let the NEXT real slot fire.
-        # Without this bootstrap the daemon would never fire again.
-        with state._locked_state(state_path) as (_fh, data):
-            if _parse_last_fire(data.get("last_fire_at")) is None:
-                data["last_fire_at"] = state._now()
-        LOG.warning(
-            "last_fire_at missing/unparseable (cold start or external state loss) — "
-            "bootstrapped to now; the next scheduled slot fires normally. "
-            "NOT firing an off-slot catch-up (2026-07-10: that cost 9 stray ~95K cold-loads)."
-        )
-        return {"action": "skip", "reason": "bootstrap_last_fire_at"}
     due, prev_fire = _due_to_fire(cron_expr=cron_expr, last_fire_at=snap.get("last_fire_at"))
-    fire_reason = "cron"
-    if not due:
-        # External ASAP trigger (e.g. boss replied to an email — see
-        # state.request_fire): fire now instead of waiting for the next cron
-        # slot. Consumed atomically so one request produces exactly one fire.
-        requested = state.consume_fire_request(state_path)
-        if requested is not None:
-            LOG.info("fire request consumed (reason=%s) — firing off-cadence", requested)
-            due = True
-            fire_reason = f"requested:{requested}"
-    else:
-        # Cron is due anyway — clear any pending request so it doesn't cause
-        # a SECOND fire right after this one (the request is satisfied). Keep
-        # the request visible in fire_reason: a requested fire must never be
-        # pregate-skipped (boss asked for it), so it can't stay plain "cron".
-        requested = state.consume_fire_request(state_path)
-        if requested is not None:
-            fire_reason = f"cron+requested:{requested}"
-    if not due:
+    pregate_cfg = load_pregate_config(schedules_path=schedules_path)
+    # Peek (not consume) the out-of-band request: a request deliberately
+    # survives auth / full-pool / bootstrap skips, so consumption may only
+    # happen after the admission gates pass (below).
+    peeked_request = (
+        str(snap.get("fire_request_reason") or "unspecified")
+        if snap.get("fire_requested_at") else None
+    )
+    dec_input = decision.DecisionInput(
+        auth_blocked=bool(snap.get("auth_blocked")),
+        active_slots=len(current_jobs),
+        capacity=capacity,
+        quota_derated=quota_derate_active(state_path),
+        last_fire_known=_parse_last_fire(snap.get("last_fire_at")) is not None,
+        due=due,
+        prev_fire=prev_fire.isoformat(),
+        fire_request=peeked_request,
+        pregate_mode=pregate_cfg["mode"],
+    )
+    dec = decision.decide(dec_input)
+    if dec.action == decision.ACTION_SKIP:
+        if dec.reason == "auth_blocked":
+            return {"action": "skip", "reason": "auth_blocked"}
+        if dec.reason == "slots_full":
+            return {
+                "action": "skip", "reason": "slots_full",
+                "active_slots": len(current_jobs), "max_slots": capacity,
+            }
+        if dec.reason == "bootstrap_last_fire_at":
+            # Cold start, or `dispatch_state.json` was lost / clobbered by an
+            # external writer (the daemon logs its own resets; a silent loss is
+            # someone else's write). `_due_to_fire` refuses to treat "unknown"
+            # as "due" — so stamp the field and let the NEXT real slot fire.
+            # Without this bootstrap the daemon would never fire again.
+            with state._locked_state(state_path) as (_fh, data):
+                if _parse_last_fire(data.get("last_fire_at")) is None:
+                    data["last_fire_at"] = state._now()
+            LOG.warning(
+                "last_fire_at missing/unparseable (cold start or external state loss) — "
+                "bootstrapped to now; the next scheduled slot fires normally. "
+                "NOT firing an off-slot catch-up (2026-07-10: that cost 9 stray ~95K cold-loads)."
+            )
+            return {"action": "skip", "reason": "bootstrap_last_fire_at"}
         return {"action": "skip", "reason": "not_due", "prev_fire": prev_fire.isoformat()}
+    # Admission gates passed — consume any pending request atomically NOW
+    # (one request produces exactly one fire; consumed even when cron was due
+    # anyway so it cannot cause a SECOND fire right after this one).
+    consumed = state.consume_fire_request(state_path)
+    if consumed != dec_input.fire_request:
+        # Lost the atomic-consume race, or a request landed after the snapshot:
+        # re-decide with the value this tick actually owns.
+        dec_input = dataclasses.replace(dec_input, fire_request=consumed)
+        dec = decision.decide(dec_input)
+        if dec.action == decision.ACTION_SKIP:
+            return {"action": "skip", "reason": "not_due", "prev_fire": prev_fire.isoformat()}
+    if consumed is not None and not due:
+        LOG.info("fire request consumed (reason=%s) — firing off-cadence", consumed)
     # Git conflict guard (2026-07-10 rewire; see phase_z.run_pre_fire_guard).
     # Orphaned by the 7/4 cutover — its only caller was the now-unloaded
     # cron_hourly_dispatch.sh, while the concurrent-writer risk it backstops
@@ -771,21 +791,35 @@ async def _tick_once(
     # Gates ONLY plain cron fires — requested fires always run. Shadow mode
     # never skips (pregate exits 1) but logs the would-be decision for the
     # observation window before the config flip to enforce.
-    if fire_reason == "cron" and not dry_run:
-        pregate_cfg = load_pregate_config(schedules_path=schedules_path)
-        if pregate_cfg["mode"] in ("shadow", "enforce"):
-            pregate_skip = await asyncio.to_thread(
-                _run_pregate,
-                mode=pregate_cfg["mode"], window_hours=pregate_cfg["window_hours"],
-            )
-            if pregate_skip:  # only reachable in enforce mode
-                LOG.info("pregate SKIP — no work worth the cold-load; slot consumed (prev_scheduled=%s)",
-                         prev_fire.isoformat())
-                # consume the slot like dry_run does, so we don't re-evaluate
-                # every tick for the rest of the hour
-                with state._locked_state(state_path) as (_fh, data):
-                    data["last_fire_at"] = state._now()
-                return {"action": "pregate_skip", "prev_fire": prev_fire.isoformat()}
+    #
+    # WS-H4 (2026-07-20): dry-run used to bypass the pregate entirely, which made
+    # "--dry-run output == real fire decision" structurally impossible whenever
+    # mode != off (docs/dispatch-decision-pipeline-design.md §1.1). Both paths
+    # now collect the demand signal here and hand it to the SAME decide(); only
+    # the write boundary (reserve_fire / worker spawn) differs.
+    if dec.action == decision.ACTION_COLLECT_DEMAND:
+        pregate_skip = await asyncio.to_thread(
+            _run_pregate,
+            mode=pregate_cfg["mode"], window_hours=pregate_cfg["window_hours"],
+        )
+        dec_input = dataclasses.replace(dec_input, demand={"pregate_skip": bool(pregate_skip)})
+        dec = decision.decide(dec_input)
+        if dec.action == decision.ACTION_SKIP:  # reason=pregate_skip, enforce mode only
+            LOG.info("pregate SKIP — no work worth the cold-load; slot consumed (prev_scheduled=%s)",
+                     prev_fire.isoformat())
+            # consume the slot like dry_run does, so we don't re-evaluate
+            # every tick for the rest of the hour
+            with state._locked_state(state_path) as (_fh, data):
+                data["last_fire_at"] = state._now()
+            result = {"action": "pregate_skip", "prev_fire": prev_fire.isoformat()}
+            if dry_run:
+                result["dry_run"] = True
+            return result
+    if dec.action != decision.ACTION_FIRE:  # decide() contract: fire is all that remains
+        LOG.error("decision pipeline returned unexpected action=%r reason=%r — skipping tick",
+                  dec.action, dec.reason)
+        return {"action": "skip", "reason": f"decision_error:{dec.action}"}
+    fire_reason = dec.fire_reason or "cron"
     if dry_run:
         LOG.info("DRY-RUN would fire (prev_scheduled=%s)", prev_fire.isoformat())
         # update last_fire_at so we don't re-log every tick — shadow run still tracks
