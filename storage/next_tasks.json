@@ -32703,13 +32703,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T03:01:07.889525+00:00",
+    "completed_at": "2026-07-20T04:01:18.199436+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T03:01:07.889525+00:00",
-      "last_clean_observed_at": "2026-07-20T03:01:07.889525+00:00"
+      "resolved_at": "2026-07-20T04:01:18.199436+00:00",
+      "last_clean_observed_at": "2026-07-20T04:01:18.199436+00:00"
     }
   },
   {
@@ -32721,13 +32721,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T03:48:18.692276+00:00",
+    "completed_at": "2026-07-20T04:15:55.988600+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T03:48:18.692276+00:00",
-      "last_clean_observed_at": "2026-07-20T03:48:18.692276+00:00"
+      "resolved_at": "2026-07-20T04:15:55.988600+00:00",
+      "last_clean_observed_at": "2026-07-20T04:15:55.988600+00:00"
     }
   },
   {
@@ -32739,13 +32739,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T03:28:02.223416+00:00",
+    "completed_at": "2026-07-20T03:49:03.870608+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T03:28:02.223416+00:00",
-      "last_clean_observed_at": "2026-07-20T03:28:02.223416+00:00"
+      "resolved_at": "2026-07-20T03:49:03.870608+00:00",
+      "last_clean_observed_at": "2026-07-20T03:49:03.870608+00:00"
     }
   },
   {
@@ -35840,7 +35840,7 @@
     "description": "背景：assign_09984c91 修好 refresh_paper_snapshots.py 的並行 double-append 後，發現污染範圍不只 K1685 指出的 1 檔 —— 6 篇 paper 共 9 個 live snapshot 全數在 2026-05-04..05-15 被重複 append 10 天（byte-identical，同一次事故）。\n\n污染窗：git history 顯示 3ea7dbb9d (2026-05-04) 乾淨、f1bdea2d1 (2026-05-20) 已有 dup，至今日修復為止約 2 個月。期間任何讀這些 CSV 的 consumer 都會拿到序列中間多 10 天重複列 —— 對 rolling estimation / OOS split 而言不只是多 10 筆，是 05-04 之後的整條時間軸位移。\n\n受影響檔（已修復，surviving rows byte-identical，見 fire receipt）：\n  paper/garch-x-vix/data/{spy_vix_qqq_eem_fez_2000-2026,gld_vix_gvz_2000-2026,uso_vix_ovx_2005-2026}.csv\n  paper/leverage-direction/data/{spy_vix_2004-2026,spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026,vix_daily}.csv\n  paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv\n  paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv\n  paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv\n\n要做的事：\n1. 盤點 2026-05-20 後跑過、且 OOS 期間涵蓋 2026-05-04 之後、且直接讀上列 CSV（非自帶 pinned snapshot）   的實驗 / paper results。已知讀檔者：paper/garch-x-vix/reproduce.py、paper/garch-x-vix/scripts/summary_stats.py、   experiments/{k1392,K1380_v4,k1393,K1394,k1489,k1662,k1585}。\n2. 對每一個判定「是否受影響」：多數 consumer 沒有 drop_duplicates，需逐一確認。   K1685 用自己的 pinned data/k1685_spy_vix_snapshot.csv，初判不受影響 —— 仍請覆核。\n3. 受影響者在修好的 snapshot 上重跑，比對數字是否改變；有變動且已發表 / 在審 → 回報並修正。\n4. 誠實記錄：沒受影響也要寫明判定依據，不要只列受影響的。\n\n禁止：假設『反正只有 10 天、影響很小』就跳過重跑 —— 那是猜測不是驗證。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "source": "user",
     "created_at": "2026-07-17T03:13:54.767921+00:00",
     "parent_task_id": "assign_09984c91",
@@ -35876,14 +35876,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f"
+      },
+      {
+        "ts": "2026-07-20T03:50:06.368218+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-20T01:28:38.374215+00:00",
-    "last_released_at": "2026-07-19T05:50:06.077184+00:00",
+    "last_released_at": "2026-07-20T03:50:06.368204+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "hourly-slot-2-dcc222dba40f4c6087a4c17c8907962f",
-    "claimed_at": "2026-07-20T01:28:28.503406+00:00",
-    "claim_session_id": "7f73d6f4b5dc",
     "compute_job_id": "agent-brief_snapaudit_7f508612-f41a08",
     "dispatch_note": "已 enqueue 為 detached agent job（compute worker */15 執行）；由 PHASE A followup 收件後結案，勿重派"
   },
@@ -38948,7 +38952,7 @@
     "description": "K1731 arm B 拆段 2／2（parent timeout job: agent-brief_k1731_armB-f3e688）。\n\n**前置**：拆段 1 = compute job `k1731-armB-split-verification`，產出\n`.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_armB_verification.json`。\n**開工前先讀那份 artifact**；不存在或 `verdict != ready_to_merge` → 不要合併，改依 blocking_issues\n開 bounded 修正 job（timeout<3600，禁整份重跑），並把本任務再 block 一輪。\n\n**verdict=ready_to_merge 才做這四件事**：\n1. `merge_worktree.sh` 正式合併 `dispatch-slot-1-bd00f90a-k1731`（禁裸 git merge / 禁 force-remove）。\n2. 主線程寫 knowledge.json —— **只引 verification artifact 指定的 canonical_artifact 那一份 results\n   JSON**。工作區同時有 `_results.json` 與 `_results_corrected.json`，引錯就是把已知有錯的數字寫進\n   長期記憶。\n3. arm A(K1730) + arm B(K1731) 結果都齊了 → 依老闆 msg 946/947 判斷寫文章還是論文。\n4. 回報老闆（`scripts/progress_report.py`，--actor 傳 $VOLPRED_TASK_CLAIM_OWNER）。\n\n**產出**：merge receipt + knowledge id + 一句話的文章/論文判斷。\n**成功判準**：worktree 已合併且無殘留 branch；knowledge entry 的數字出處可回溯到 canonical artifact。\n\nblocked_until=2026-07-18T20:15:06+08:00（給拆段 1 的 3600s 跑完 + reaper 收件的時間）。 [2026-07-19 10:xx] Codex rev6 判 FAIL（4 條 blocking issue 已核對屬實），rev7 remediation 委派給 agent job agent-brief_k1731_armB_rev7-7ece0f，之後仍需 Codex round 7；blocked_until 由 07-19T18:00 延到 07-20T12:00，避免在驗收未過時被 unblock sweep 放行成合併任務。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "blocked",
+    "status": "pending",
     "source": "system",
     "created_at": "2026-07-18T10:15:06.957501+00:00",
     "payload": {
@@ -39020,18 +39024,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-f59ba8cd2d384523bb27f862c0f58168"
+      },
+      {
+        "at": "2026-07-20T04:04:39.882205+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-20T12:00:00+08:00)"
       }
     ],
     "started_at": "2026-07-18T21:08:16.571378+00:00",
     "last_released_at": "2026-07-18T18:10:41.402602+00:00",
-    "blocked_until": "2026-07-20T12:00:00+08:00",
-    "blocked_reason": "prior_attempts_failed",
     "claimed_by": "hourly-slot-2-f59ba8cd2d384523bb27f862c0f58168",
     "claimed_at": "2026-07-18T21:08:16.333485+00:00",
     "claim_session_id": "946dca0cc176",
-    "result": "拆段 2a 完成（hourly-slot-2-f59ba8cd）：讀 k1731_armB_esfix.json → verdict=ready_for_codex_review、blocking_issues=[]、regression PASS(3834 leaves / 0 out-of-allowlist)、README traceability 50/50。依 scripts/codex_review_job.sh 規範（整份 experiment 一審 10-40min，禁 in-fire spawn）已 enqueue Codex 一審 job compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008，prompt=storage/ops/codex_reviews/k1731_armB_rev5_prompt.md，verdict 出口=storage/ops/codex_reviews/k1731_armB_rev5_verdict.md。受審 bytes 已凍結於 storage/ops/codex_reviews/k1731_armB_rev5_freeze.sha256（20 檔 sha256）—— 合併前須比對一致。拆段 2b（verdict-template → merge_worktree.sh → knowledge.json 只引 rev5 → 文章/論文判斷 → progress_report）由該 job 的 compute-queue followup 接手。",
-    "blocked_at": "2026-07-19T00:11:44.936640+00:00",
-    "blocked_note": "2026-07-19T08:2x hourly-slot-1: rev6 remediation 已完成（artifact k1731_armB_rev6.json，verdict=ready_for_codex_review）。B1-B7 七條全部處理，B1 走**撤回**路線（不假裝做了嵌套校正）；regression gate PASS（3,834 leaves / 0 out-of-allowlist / drift_detected=false，即 rev6 沒動任何估計數字）。主線程已 bytes 抽查 B1/B2/B6 三條無誤。受審 bytes 凍結於 storage/ops/codex_reviews/k1731_armB_rev6_freeze.txt（11 檔 sha256）。新一輪 Codex 審已 enqueue：compute-codex-review-k1731-arm-b-rev6-b1-b7-remediation-round-1784419834。**本任務維持 blocked 直到該輪 VERDICT: PASS**；PASS 後由其 followup 解 block 並走正式 merge_worktree.sh。另注意：rev6 揭露 audit_nested_dm_misuse 對 mask-based 嵌套是假陰性（見 k1731_F2_...），該 gate 的 PASS 不得引用為 B1 已清的證據。"
+    "result": "拆段 2a 完成（hourly-slot-2-f59ba8cd）：讀 k1731_armB_esfix.json → verdict=ready_for_codex_review、blocking_issues=[]、regression PASS(3834 leaves / 0 out-of-allowlist)、README traceability 50/50。依 scripts/codex_review_job.sh 規範（整份 experiment 一審 10-40min，禁 in-fire spawn）已 enqueue Codex 一審 job compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008，prompt=storage/ops/codex_reviews/k1731_armB_rev5_prompt.md，verdict 出口=storage/ops/codex_reviews/k1731_armB_rev5_verdict.md。受審 bytes 已凍結於 storage/ops/codex_reviews/k1731_armB_rev5_freeze.sha256（20 檔 sha256）—— 合併前須比對一致。拆段 2b（verdict-template → merge_worktree.sh → knowledge.json 只引 rev5 → 文章/論文判斷 → progress_report）由該 job 的 compute-queue followup 接手。"
   },
   {
     "id": "telegram-985",
@@ -42151,7 +42157,7 @@
     "description": "來源：docs/governance/2026-07/firstfriday_proxy_sweep_20260719.md §3。main_v3.tex 的 NFP 表（abstract L43/L72、Results L368-396、tab:nfp、4 個 VIX regime 列、Wilcoxon p=0.0037）逐位對齊 k741_nfp_event_study_results.json part_a_historical，而 k741/k904 的 NFP 日期用 first-Friday proxy（已知 13 錯 7 類缺陷）。修復：(1) 用 volpred.data.event_dates.nfp_release_dates（2026-07-19 已根修 min()+cadence gate）重跑 k741 part_a + k904 task_s4_nfp；(2) 對照新舊統計量，更新 main_v3 NFP 表與 abstract 數字（或若方向翻轉則降級敘事）；(3) k528/k661 對應 feed 文章（feed×7/×2）數字回溯屬同 class，依重跑結果決定更正範圍；(4) S2/shock-type 數字乾淨不動。注意：k904 副本在 paper/ 下，主檔在 experiments/。論文 stage=revision，此為投稿前 blocker。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-19T06:43:14.951396+00:00",
     "status_history": [
@@ -42192,16 +42198,21 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd"
+      },
+      {
+        "ts": "2026-07-20T04:11:06.532804+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd"
       }
     ],
     "started_at": "2026-07-20T03:13:45.384521+00:00",
     "last_released_at": "2026-07-20T03:12:37.507787+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "compute_job_id": "agent-brief_k741_nfp_canonical-837c1f",
-    "result": "dispatched to compute job agent-brief_k741_nfp_canonical-837c1f; awaiting PHASE A collection",
-    "claimed_by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd",
-    "claimed_at": "2026-07-20T03:13:41.984479+00:00",
-    "claim_session_id": "4badc38c4e1d"
+    "result": "dispatched to compute job agent-brief_k741_nfp_canonical-837c1f; awaiting PHASE A collection\n\n重跑完成並經主線程逐格核實：canonical BLS 曆 n_nfp=194/3890, ratio 1.163, p 0.051(Student), 四 regime 1.305/1.230/1.186/0.936；main_v3.tex 已逐位對齊、敘事誠實降級、sign 未翻轉。兩份獨立實作互證 AGREE。成果在 branch k741-nfp-canonical（未合併，被 review-certification gate 正確擋住：缺 review_verdict.json）。後續已派：compute job agent-brief_k741_cert_merge-1b4755（Student/Welch 定案 + Holm 多重比較揭露 + Codex 認證 → 其 followup 負責 merge）、assign_759a28f3（8 篇 feed 更正，待論文定案）、assign_d569f0c4（派工 task_id collision 檢查 — 本 task 被重複派工白燒一輪 agent）。",
+    "completed_at": "2026-07-20T04:11:06.532789+00:00",
+    "burst_reported_at": "2026-07-20T04:11:06.541642+00:00"
   },
   {
     "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260719T064406492747Z_a1",
@@ -42230,7 +42241,10 @@
       "escalation_due": false,
       "fingerprint": [
         "scripts/tests/test_orphan_reaper.py::scripts.tests.test_orphan_reaper::test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths"
-      ]
+      ],
+      "resolved_at": "2026-07-20T03:55:20.632647+00:00",
+      "final_consecutive_remediation_failures": 0,
+      "superseded_by_distinct_incident_at": "2026-07-20T03:55:20.632647+00:00"
     },
     "status_history": [
       {
@@ -43208,7 +43222,7 @@
     "title": "K1718: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1718 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1718 [NULL, reviewed]: In the 2015-2026 Japan sample with annual expanding OOS forecasts from 2020 onward, lagged US VIX passed none of six pre-registered Nikkei 225 / TOPIX ETF model-family cells. Each cell required both lower Patton QLIKE and a Holm-adjusted one-sided Clark-We",
     "priority": 1,
-    "status": "pending",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
     "audience_correction_rewrite": false,
@@ -43240,11 +43254,22 @@
         "to": "pending",
         "by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 25.2min >= grace 20min"
+      },
+      {
+        "at": "2026-07-20T03:57:42+00:00",
+        "from": "pending",
+        "to": "superseded",
+        "reason": "general-audience article for K1718 already in feed (mile_fa57f77d); auto-retired to prevent duplicate dispatch"
       }
     ],
     "started_at": "2026-07-20T03:09:50.760823+00:00",
     "last_released_at": "2026-07-20T03:35:00.187523+00:00",
-    "last_release_reason": "liveness_reconcile_detached_51a8c53b"
+    "last_release_reason": "liveness_reconcile_detached_51a8c53b",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-20T03:57:42+00:00",
+    "blocked_note": "general-audience article for K1718 already in feed (mile_fa57f77d); auto-retired to prevent duplicate dispatch",
+    "terminalized_at": "2026-07-20T03:57:42+00:00",
+    "terminalized_reason": "deprecated"
   },
   {
     "id": "email-12147-ca71e9",
@@ -43313,7 +43338,7 @@
     "title": "K1495: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1495 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1495 PARTIAL_PASS（Codex review PASS）：用SPY相對RSP的21日落後累積報酬差作為cap-weight集中度pulse代理（expanding 80百分位定義高regime，避免偷看未來），檢驗其對未來21日市場波動的條件資訊，樣本2004-05-28至2026-05-13，n=5,524。H1 PASS：高集中regime下SPY未來21日RV=18.16% vs 非高regime 14.41%，Welch t=9.47（p≈7.5e-21），stationary bootstrap 95% CI [+0.95pp",
     "priority": 1,
-    "status": "pending",
+    "status": "superseded",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
     "audience_correction_rewrite": false,
@@ -43345,11 +43370,22 @@
         "to": "pending",
         "by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 25.2min >= grace 20min"
+      },
+      {
+        "at": "2026-07-20T03:57:42+00:00",
+        "from": "pending",
+        "to": "superseded",
+        "reason": "general-audience article for K1495 already in feed (mile_d26308ba); auto-retired to prevent duplicate dispatch"
       }
     ],
     "started_at": "2026-07-20T03:09:49.482497+00:00",
     "last_released_at": "2026-07-20T03:35:00.187545+00:00",
-    "last_release_reason": "liveness_reconcile_detached_51a8c53b"
+    "last_release_reason": "liveness_reconcile_detached_51a8c53b",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-20T03:57:42+00:00",
+    "blocked_note": "general-audience article for K1495 already in feed (mile_d26308ba); auto-retired to prevent duplicate dispatch",
+    "terminalized_at": "2026-07-20T03:57:42+00:00",
+    "terminalized_reason": "deprecated"
   },
   {
     "id": "release_deadlock_repair_20260719_12",
@@ -44102,8 +44138,8 @@
     "title": "K1698 rev3 bounded remediation（Codex round 3 FAIL：PRIMARY JSON 與 README 不一致 + 生成器殘留舊字串）",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
-    "description": "## 來源\n`storage/ops/codex_reviews/k1698_rev2b_verdict.md` → **VERDICT: FAIL**（round 3）。\nworktree `dispatch-slot-2-c5cafe39-k1698` **禁止 merge**，直到 round 4 PASS。\n\n## 共同根因\nrev2b 的修正多半只落在 README 與 canonical q1/q2 欄位，**PRIMARY JSON（`k1698_rev2_results.json`）的頂層敘述層沒跟著改**；而且那些字串是 `k1698.py` 結果組裝區 hard-code 的，所以**改 JSON 沒用、重跑會再生**。修法必須落在生成器再重跑。\n\n## 逐條 blocker（皆 FAIL）\n1. **CRITICAL-1** — PRIMARY JSON 仍主張已作廢的 non-invariant loss-level margin（invariant 計算本身是對的，錯在頂層宣稱）。\n2. **MAJOR-2** — mask 與輸出已修，但 README 仍寫「三天改變」，實際是**兩天**。\n3. **MAJOR-4** — PRIMARY JSON `honest_reading` 仍寫 q2 有 formal support（`|t|=3.13>3`），未帶 bandwidth flip / post-hoc / multiplicity 三個 caveat（`results.json:124`）。這等於把 rev2b 宣稱已移除的推論放回去。\n4. **MAJOR-5** — 只有 q2 有 `PREREGISTRATION_STATUS: POST_HOC`；q1 equivalence 與 `rv_ablation` 在 PRIMARY JSON 無此欄位，且 generated `limitations` 無全域 post-hoc/multiplicity 揭露。\n5. **MINOR-6** — PRIMARY JSON `what_the_route_prose_over_reads` 仍是「~14% of benchmark loss」與舊的「below 20%」grid 措辭，與 canonical q1 的 `delta_min_at_5pct` 精確門檻矛盾（`results.json:123`）。\n6. **STILL-OPEN-7** — `review_receipt_rev2.json` 與 `review_verdict.json` **都不存在**，但 README:56 與 `results.json:12` 都宣稱有。repo merge gate 本來就要求 `review_verdict.json`。\n7. **新 MAJOR — 生成器殘留**：`k1698.py:3154`、`:3238` 的結果組裝區仍 hard-code 舊 rev2 字串，重跑會重現 false loss-level margin、14%/20% 措辭與 q2 overclaim。**必須改生成器後重新產生，禁止直接手改 JSON。**\n8. **新 MINOR — runtime drift**：README 寫約 260 秒，frozen receipt 與 JSON 是 **288.8 秒**。\n\n## PASS 的部分（不要動）\n- MAJOR-3（active-contract stamp / evidence-based classification / anywhere-abort）\n- STILL-OPEN-3（route label 修訂透明、原字串保留兩份、`route_label_amended=true`）\n- headline gate 與 FRL/JoF short-note route 的措辭誠實，`GATE_REASON` 已明說 HAR 優越與等價**皆未成立**\n\n## 驗收\n- 全部 8 條逐條給 before/after + 檔案:行號證據\n- 改完在 worktree 內重跑產生新 JSON（不是手改），確認殘留字串消失\n- 產出 `review_verdict.json`（用 `scripts/experiment_gates.py verdict-template`）\n- 完成後 enqueue codex round 4 primary-path review；**round 4 PASS 才可 merge**\n- knowledge.json 由主線程寫（K1259 禁 agent 自寫）",
+    "status": "in_progress",
+    "description": "## 來源\n`storage/ops/codex_reviews/k1698_rev2b_verdict.md` → **VERDICT: FAIL**（round 3）。\nworktree `dispatch-slot-2-c5cafe39-k1698` **禁止 merge**，直到 round 4 PASS。\n\n## 共同根因\nrev2b 的修正多半只落在 README 與 canonical q1/q2 欄位，**PRIMARY JSON（`k1698_rev2_results.json`）的頂層敘述層沒跟著改**；而且那些字串是 `k1698.py` 結果組裝區 hard-code 的，所以**改 JSON 沒用、重跑會再生**。修法必須落在生成器再重跑。\n\n## 逐條 blocker（皆 FAIL）\n1. **CRITICAL-1** — PRIMARY JSON 仍主張已作廢的 non-invariant loss-level margin（invariant 計算本身是對的，錯在頂層宣稱）。\n2. **MAJOR-2** — mask 與輸出已修，但 README 仍寫「三天改變」，實際是**兩天**。\n3. **MAJOR-4** — PRIMARY JSON `honest_reading` 仍寫 q2 有 formal support（`|t|=3.13>3`），未帶 bandwidth flip / post-hoc / multiplicity 三個 caveat（`results.json:124`）。這等於把 rev2b 宣稱已移除的推論放回去。\n4. **MAJOR-5** — 只有 q2 有 `PREREGISTRATION_STATUS: POST_HOC`；q1 equivalence 與 `rv_ablation` 在 PRIMARY JSON 無此欄位，且 generated `limitations` 無全域 post-hoc/multiplicity 揭露。\n5. **MINOR-6** — PRIMARY JSON `what_the_route_prose_over_reads` 仍是「~14% of benchmark loss」與舊的「below 20%」grid 措辭，與 canonical q1 的 `delta_min_at_5pct` 精確門檻矛盾（`results.json:123`）。\n6. **STILL-OPEN-7** — `review_receipt_rev2.json` 與 `review_verdict.json` **都不存在**，但 README:56 與 `results.json:12` 都宣稱有。repo merge gate 本來就要求 `review_verdict.json`。\n7. **新 MAJOR — 生成器殘留**：`k1698.py:3154`、`:3238` 的結果組裝區仍 hard-code 舊 rev2 字串，重跑會重現 false loss-level margin、14%/20% 措辭與 q2 overclaim。**必須改生成器後重新產生，禁止直接手改 JSON。**\n8. **新 MINOR — runtime drift**：README 寫約 260 秒，frozen receipt 與 JSON 是 **288.8 秒**。\n\n## PASS 的部分（不要動）\n- MAJOR-3（active-contract stamp / evidence-based classification / anywhere-abort）\n- STILL-OPEN-3（route label 修訂透明、原字串保留兩份、`route_label_amended=true`）\n- headline gate 與 FRL/JoF short-note route 的措辭誠實，`GATE_REASON` 已明說 HAR 優越與等價**皆未成立**\n\n## 驗收\n- 全部 8 條逐條給 before/after + 檔案:行號證據\n- 改完在 worktree 內重跑產生新 JSON（不是手改），確認殘留字串消失\n- 產出 `review_verdict.json`（用 `scripts/experiment_gates.py verdict-template`）\n- 完成後 enqueue codex round 4 primary-path review；**round 4 PASS 才可 merge**\n- knowledge.json 由主線程寫（K1259 禁 agent 自寫）\n\n---\n**執行已委派（2026-07-20 12:15，hourly-slot-1-632eeea9）**：compute agent job `agent-brief_k1698_rev3-4dffab`（opus/xhigh，worktree `dispatch-slot-2-c5cafe39-k1698`，產出 `experiments/k1698/k1698_rev3_remediation.json`）。完成後由 compute queue followup 接手逐條驗收 + 送 Codex round 4。本 task 標 in_progress 以免被 dispatcher 重複挑走。",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T21:12:18.321563+00:00",
     "created_by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
@@ -44120,9 +44156,25 @@
         "to": "pending",
         "by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T04:04:18.640705+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-632eeea982ad44d4b59767a1d467a311"
+      },
+      {
+        "ts": "2026-07-20T04:06:06.192470+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-632eeea982ad44d4b59767a1d467a311"
       }
     ],
-    "last_released_at": "2026-07-19T21:12:31.754406+00:00"
+    "last_released_at": "2026-07-19T21:12:31.754406+00:00",
+    "claimed_by": "hourly-slot-1-632eeea982ad44d4b59767a1d467a311",
+    "claimed_at": "2026-07-20T04:04:18.640689+00:00",
+    "claim_session_id": "af85c429fc2c",
+    "started_at": "2026-07-20T04:06:06.192450+00:00"
   },
   {
     "id": "k741_canonical_round2_remediation",
@@ -44156,8 +44208,8 @@
     "title": "K528 round-5 remediation（Codex FAIL：Friday estimand 錯置 + completeness gate 三處 fail-open + 未定義多重比較 family）",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
-    "description": "## 來源\n`storage/ops/codex_reviews/k528_round5_verdict.md` → 四條 blocking defect（B1–B4），worktree `dispatch-slot-3-30adeed7-k528nfp` **禁止 merge / 禁止 certify**。\n\n## 逐條 blocker\n\n**B1 — Friday estimand 與 README 宣稱不一致**\n證據：`k528_nfp_event_study.py:434-449,615-636`；`README.md:24,78-87,113,138`；`data/nfp_release_feed_fixture.json:41,77,101,139,212,236`\n程式用**映射後的交易 session weekday** 篩 237 筆，不是官方**發布日** weekday。253 個有效發布日其實有 **243 個在週五**；6 個 Good Friday 發布日被映射到下週一因而被排除。所以 1.189× / p=0.0209 支持的是「NFP 消息在週五交易 session 被吸收」，**不是**「發布日在週五」。\n最小修法：同時保存 `release_date` 與 `session_date`；若保留現行分析，全文改稱 **Friday trading-session estimand** 並揭露 6 個 Good Friday 案例。若要回答「發布日在週五」，須改用 release weekday 篩 243 筆 + 重新設計 weekday-matched controls + 重跑。\n\n**B2 — raw 與 selected 同步截短一個端點月仍會通過**\n證據：`k528_nfp_event_study.py:118-121,304-325`；`k528_completeness_gate_fix.json:140-145`\n獨立重現：誠實 fixture 260 raw / 254 selected；同刪 `2005-01` → 259/253、head shortfall 34 天仍通過；同刪 `2026-03` → 259/253、tail shortfall 44 天仍通過。70 天容忍度容得下整個月消失，raw-selected / 缺月 / allowlist 三道檢查全看不到。不推翻現有 archived 數字，但推翻 README 的 fail-closed 宣稱。\n最小修法：對這個**固定歷史樣本**釘住預期首尾月份或預期發布數；或用獨立 as-of/release-schedule 判斷應已發布的月份。**新增同時刪 raw+selected 首/尾月的對抗測試。**\n\n**B3 — 價格資料尾端截短也不 fail closed**\n證據：`k528_nfp_event_study.py:396-415,453-465`\n`yf.download` 後沒有 SPY/^VIX 覆蓋範圍或 freshness gate。SPY 尾端少一個月 → 後續 NFP 被歸 `outside_price_sample` 但仍出結論；VIX 尾端短缺 → `ffill()` 沿用陳舊 VIX。當前結果檔確實零筆 outside，但流程未來重跑仍可合法縮樣。\n最小修法：固定歷史樣本要求 SPY/^VIX 覆蓋至預期端點、`n_outside_price_sample == 0`、限制 VIX forward-fill 最大資料年齡。\n\n**B4 — 未定義多重比較 family 卻以 5% 宣稱顯著**\n證據：`README.md:66-67,99,113,137-140`；`k528_nfp_event_study.py:611-710`；`k528_nfp_event_study_results.json:117-175,178-284`\n腳本產生 A–J、12 個月份、兩種 VIX 相關等多個 p 值，無 multiplicity correction 也無 confirmatory/exploratory 分界。週五結果 p=0.0209 只能稱 **nominal significance**。若 family 限於 README 的六個主要檢定，Holm 後約 0.0417（結論可保留）；若涵蓋全部 22 個 inferential outputs，Holm 約 0.375。現在沒有預先定義 family，無法判斷哪個口徑合法。\n最小修法：指定 rerun 前既有的 confirmatory endpoints、報告 Holm／Romano-Wolf 調整值、其餘明標 exploratory。**未完成前不得無限定地寫「顯著」。**\n\n## 殘留 gap（single-month upstream truncation）的裁決 = **blocking**\n理由：這是完全落後於執行日的固定歷史樣本，不是「當月可能尚未發布」的即時查詢。70 天容忍允許完整首月或尾月消失，與 README 的 fail-closed 宣稱及本輪 PASS gate 直接衝突。除非額外加入獨立 endpoint expectation，或至少**撤回 fail-closed 宣稱**並明確限制適用範圍，否則不得視為可接受的設計取捨。\n\n## 非阻擋觀察（不必修，但別退步）\n- v6 allowlist 後門確已關閉（`k528_nfp_event_study.py:272-345`）；`test_k528_completeness_gate.py:175-216` 的 8 項測試獨立重跑 8 passed\n- 事件級資料內部一致：253 筆日期唯一，平均報酬 / 237-16 分組 / VIX 中位數 / regime Welch / Pearson / Spearman 逐位吻合\n- 無 event-window lookahead（`:434-449,480-545`）\n- VIX regime 門檻用全樣本中位數 → 事後、樣本內分組，README:123-129 已誠實界定為條件關聯；**不可**當 OOS 預測證據\n- `results.json:308` 的 \"predicts\" 建議改 \"is associated with\"\n- **未發現造假、湊數字或 proxy fallback**（`:371-386` 無 fallback/except，`fallback: none`）；上述是 fail-open completeness defect，不是偽造證據\n\n## 修完之後\nenqueue codex round 6 primary-path review → PASS 才在 worktree 用 verdict-template 重生 `experiments/k528/review_verdict.json`（必須在所有 claim-surface 檔 landed 之後生成，否則 sha pin 漂移）→ `experiment_gates.py certify` 綠燈 → 正式 `merge_worktree.sh`。knowledge.json 由主線程寫（K1259）。",
+    "status": "in_progress",
+    "description": "## 來源\n`storage/ops/codex_reviews/k528_round5_verdict.md` → 四條 blocking defect（B1–B4），worktree `dispatch-slot-3-30adeed7-k528nfp` **禁止 merge / 禁止 certify**。\n\n## 逐條 blocker\n\n**B1 — Friday estimand 與 README 宣稱不一致**\n證據：`k528_nfp_event_study.py:434-449,615-636`；`README.md:24,78-87,113,138`；`data/nfp_release_feed_fixture.json:41,77,101,139,212,236`\n程式用**映射後的交易 session weekday** 篩 237 筆，不是官方**發布日** weekday。253 個有效發布日其實有 **243 個在週五**；6 個 Good Friday 發布日被映射到下週一因而被排除。所以 1.189× / p=0.0209 支持的是「NFP 消息在週五交易 session 被吸收」，**不是**「發布日在週五」。\n最小修法：同時保存 `release_date` 與 `session_date`；若保留現行分析，全文改稱 **Friday trading-session estimand** 並揭露 6 個 Good Friday 案例。若要回答「發布日在週五」，須改用 release weekday 篩 243 筆 + 重新設計 weekday-matched controls + 重跑。\n\n**B2 — raw 與 selected 同步截短一個端點月仍會通過**\n證據：`k528_nfp_event_study.py:118-121,304-325`；`k528_completeness_gate_fix.json:140-145`\n獨立重現：誠實 fixture 260 raw / 254 selected；同刪 `2005-01` → 259/253、head shortfall 34 天仍通過；同刪 `2026-03` → 259/253、tail shortfall 44 天仍通過。70 天容忍度容得下整個月消失，raw-selected / 缺月 / allowlist 三道檢查全看不到。不推翻現有 archived 數字，但推翻 README 的 fail-closed 宣稱。\n最小修法：對這個**固定歷史樣本**釘住預期首尾月份或預期發布數；或用獨立 as-of/release-schedule 判斷應已發布的月份。**新增同時刪 raw+selected 首/尾月的對抗測試。**\n\n**B3 — 價格資料尾端截短也不 fail closed**\n證據：`k528_nfp_event_study.py:396-415,453-465`\n`yf.download` 後沒有 SPY/^VIX 覆蓋範圍或 freshness gate。SPY 尾端少一個月 → 後續 NFP 被歸 `outside_price_sample` 但仍出結論；VIX 尾端短缺 → `ffill()` 沿用陳舊 VIX。當前結果檔確實零筆 outside，但流程未來重跑仍可合法縮樣。\n最小修法：固定歷史樣本要求 SPY/^VIX 覆蓋至預期端點、`n_outside_price_sample == 0`、限制 VIX forward-fill 最大資料年齡。\n\n**B4 — 未定義多重比較 family 卻以 5% 宣稱顯著**\n證據：`README.md:66-67,99,113,137-140`；`k528_nfp_event_study.py:611-710`；`k528_nfp_event_study_results.json:117-175,178-284`\n腳本產生 A–J、12 個月份、兩種 VIX 相關等多個 p 值，無 multiplicity correction 也無 confirmatory/exploratory 分界。週五結果 p=0.0209 只能稱 **nominal significance**。若 family 限於 README 的六個主要檢定，Holm 後約 0.0417（結論可保留）；若涵蓋全部 22 個 inferential outputs，Holm 約 0.375。現在沒有預先定義 family，無法判斷哪個口徑合法。\n最小修法：指定 rerun 前既有的 confirmatory endpoints、報告 Holm／Romano-Wolf 調整值、其餘明標 exploratory。**未完成前不得無限定地寫「顯著」。**\n\n## 殘留 gap（single-month upstream truncation）的裁決 = **blocking**\n理由：這是完全落後於執行日的固定歷史樣本，不是「當月可能尚未發布」的即時查詢。70 天容忍允許完整首月或尾月消失，與 README 的 fail-closed 宣稱及本輪 PASS gate 直接衝突。除非額外加入獨立 endpoint expectation，或至少**撤回 fail-closed 宣稱**並明確限制適用範圍，否則不得視為可接受的設計取捨。\n\n## 非阻擋觀察（不必修，但別退步）\n- v6 allowlist 後門確已關閉（`k528_nfp_event_study.py:272-345`）；`test_k528_completeness_gate.py:175-216` 的 8 項測試獨立重跑 8 passed\n- 事件級資料內部一致：253 筆日期唯一，平均報酬 / 237-16 分組 / VIX 中位數 / regime Welch / Pearson / Spearman 逐位吻合\n- 無 event-window lookahead（`:434-449,480-545`）\n- VIX regime 門檻用全樣本中位數 → 事後、樣本內分組，README:123-129 已誠實界定為條件關聯；**不可**當 OOS 預測證據\n- `results.json:308` 的 \"predicts\" 建議改 \"is associated with\"\n- **未發現造假、湊數字或 proxy fallback**（`:371-386` 無 fallback/except，`fallback: none`）；上述是 fail-open completeness defect，不是偽造證據\n\n## 修完之後\nenqueue codex round 6 primary-path review → PASS 才在 worktree 用 verdict-template 重生 `experiments/k528/review_verdict.json`（必須在所有 claim-surface 檔 landed 之後生成，否則 sha pin 漂移）→ `experiment_gates.py certify` 綠燈 → 正式 `merge_worktree.sh`。knowledge.json 由主線程寫（K1259）。\n\n---\n**執行已委派（2026-07-20 12:15，hourly-slot-1-632eeea9）**：compute agent job `agent-brief_k528_round5-79ab4f`（opus/xhigh，worktree `dispatch-slot-3-30adeed7-k528nfp`，產出 `experiments/k528/k528_round5_remediation.json`）。完成後由 compute queue followup 接手逐條驗收 + 送 Codex round 6。本 task 標 in_progress 以免被 dispatcher 重複挑走。",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T21:12:18.321563+00:00",
     "created_by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
@@ -44174,9 +44226,25 @@
         "to": "pending",
         "by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T04:04:18.959770+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-632eeea982ad44d4b59767a1d467a311"
+      },
+      {
+        "ts": "2026-07-20T04:06:06.506887+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-632eeea982ad44d4b59767a1d467a311"
       }
     ],
-    "last_released_at": "2026-07-19T21:12:32.394368+00:00"
+    "last_released_at": "2026-07-19T21:12:32.394368+00:00",
+    "claimed_by": "hourly-slot-1-632eeea982ad44d4b59767a1d467a311",
+    "claimed_at": "2026-07-20T04:04:18.959750+00:00",
+    "claim_session_id": "130c328ddfe1",
+    "started_at": "2026-07-20T04:06:06.506866+00:00"
   },
   {
     "id": "collect_k1623_rev3_20260720",
@@ -45244,7 +45312,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29711772660",
@@ -45271,11 +45339,32 @@
         "to": "pending",
         "by": "hourly-slot-1-8ac4cbc80b334ee2b3c4d13e4398344a",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 57.8min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-20T03:58:10.412439+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-632eeea982ad44d4b59767a1d467a311"
+      },
+      {
+        "ts": "2026-07-20T03:58:15.204718+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-632eeea982ad44d4b59767a1d467a311"
+      },
+      {
+        "ts": "2026-07-20T04:03:49.868962+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-632eeea982ad44d4b59767a1d467a311"
       }
     ],
-    "started_at": "2026-07-20T02:37:14.530215+00:00",
+    "started_at": "2026-07-20T03:58:15.204702+00:00",
     "last_released_at": "2026-07-20T03:35:00.228904+00:00",
-    "last_release_reason": "liveness_reconcile_detached_8ac4cbc8"
+    "last_release_reason": "liveness_reconcile_detached_8ac4cbc8",
+    "completed_at": "2026-07-20T04:03:49.868947+00:00",
+    "result": "root_cause=audit_cjk_chart_fonts.py 的 STYLE_HELPERS escape hatch 未登記 _setup_style，導致有正確呼叫 CJK 樣式 helper 的 experiments/digest29/digest29_chart.py 被誤判為豆腐字違規（false positive，非真的缺字型）; repair_commit=ded6761ee。綠燈驗證：main Test Suite run 29713698319 (2026-07-20T03:00:56Z) = success；本地 test_cjk_chart_font_ratchet.py 7 passed；audit scan() = []。Class sweep：AST 掃全 repo 18 個設 CJK font chain 的函式，16 個為同檔定義+使用（source-text fallback 已覆蓋），跨模組 helper 僅 _setup_style（已登記）與 k1660 make_charts（呼叫端 clean）→ 同 class 無殘留。",
+    "burst_reported_at": "2026-07-20T04:03:49.881246+00:00"
   },
   {
     "id": "telegram-1153",
@@ -45944,5 +46033,83 @@
     "source": "agent",
     "created_at": "2026-07-20T03:40:12.665467+00:00",
     "created_by": "hourly-slot-2-7a8837cf2e004ef9bd36bc562fc73855"
+  },
+  {
+    "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260720T035520632647Z_a1",
+    "title": "[internal alert] PHASE-Z auto-commit 測試紅燈（f23d870c448b）",
+    "description": "由內部可自癒 alert_key `phase_z_test_gate_red` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 已有紅燈，但 HEAD 新增了 HEAD^ 沒有的失敗 node。\n- fire 時間: 11:48\n- commit: f23d870c448b\n- 變更程式檔: scripts/audit_enforcement_map.py, scripts/dispatch_supervisor/claim_release.py, scripts/dispatch_supervisor/health.py, scripts/dispatch_supervisor/phase_z.py, scripts/dispatch_supervisor/worker.py, scripts/drain_failed_supabase_syncs.py, scripts/supabase_sync.py, scripts/task_pool_claim.py, scripts/tests/test_hang_alert_ownership.py, src/volpred/ops/feed_sync.py, src/volpred/ops/health.py, src/volpred/publisher/publisher.py, tests/test_dispatch_supervisor.py, tests/test_mirror_dead_letter_drain.py, tests/test_task_pool_claim.py\n- 跑的測試: scripts/tests/test_hang_alert_ownership.py scripts/tests/test_phase_z_drain_retry.py scripts/tests/test_phase_z_foreign_incident.py scripts/tests/test_phase_z_orphan_half.py scripts/tests/test_phase_z_ownership_class_gate.py scripts/tests/test_phase_z_quarantine_checkpoint.py scripts/tests/test_phase_z_receipt.py scripts/tests/test_phase_z_runtime_state_ownership.py scripts/tests/test_phase_z_untracked_closeout.py tests/test_dispatch_supervisor.py tests/test_drain_failed_supabase_syncs.py tests/test_feed_sync.py tests/test_health.py tests/test_health_checks.py tests/test_mirror_dead_letter_drain.py tests/test_phase_z_ownership.py tests/test_phase_z_test_gate.py tests/test_publisher_anti_ai_gate.py tests/test_publisher_audience_audit.py tests/test_publisher_provenance.py tests/test_publisher_remote_sync.py tests/test_publisher_throttle.py tests/test_supabase_sync_cache_purge.py tests/test_supabase_sync_hash.py tests/test_supabase_sync_import_safety.py tests/test_task_pool_claim.py tests/test_worker_actor_env.py tests/test_worker_hang_log_capture.py\n- pytest 退出碼: 1（HEAD） / 1（HEAD^，baseline=red）\n\n## 影響\n隔離對照已排除 live daemon race 與 collection error；新增的失敗 node 可歸因本 commit。\n\n## 修復線索（供接手任務）\n1. 隔離重現：\n   uv run --extra dev python -m pytest scripts/tests/test_hang_alert_ownership.py scripts/tests/test_phase_z_drain_retry.py scripts/tests/test_phase_z_foreign_incident.py scripts/tests/test_phase_z_orphan_half.py scripts/tests/test_phase_z_ownership_class_gate.py scripts/tests/test_phase_z_quarantine_checkpoint.py scripts/tests/test_phase_z_receipt.py scripts/tests/test_phase_z_runtime_state_ownership.py scripts/tests/test_phase_z_untracked_closeout.py tests/test_dispatch_supervisor.py tests/test_drain_failed_supabase_syncs.py tests/test_feed_sync.py tests/test_health.py tests/test_health_checks.py tests/test_mirror_dead_letter_drain.py tests/test_phase_z_ownership.py tests/test_phase_z_test_gate.py tests/test_publisher_anti_ai_gate.py tests/test_publisher_audience_audit.py tests/test_publisher_provenance.py tests/test_publisher_remote_sync.py tests/test_publisher_throttle.py tests/test_supabase_sync_cache_purge.py tests/test_supabase_sync_hash.py tests/test_supabase_sync_import_safety.py tests/test_task_pool_claim.py tests/test_worker_actor_env.py tests/test_worker_hang_log_capture.py -q\n2. 修掉新增的失敗 node；HEAD^ 既有的紅燈是另一件事，不要混在同一次修復裡。\n3. 失敗尾段：\n\n```\n_on_publish_is_dead_lettered\nFAILED tests/test_mirror_dead_letter_drain.py::test_drain_clears_mirror_queue_when_put_recovers\nFAILED tests/test_mirror_dead_letter_drain.py::test_drain_keeps_persistently_failing_mirror_ids\n3 failed, 395 passed, 2 skipped in 170.16s (0:02:50)\nwarning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nUsing CPython 3.12.10\nCreating virtual environment at: .venv\n   Building volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-mk6t0jf7/head\n      Built volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-mk6t0jf7/head\nInstalled 125 packages in 589ms\n```",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-20T03:55:20.632647+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "phase_z_test_gate_red"
+    ],
+    "alert_key": "phase_z_test_gate_red",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260720T035520632647Z",
+      "episode_started_at": "2026-07-20T03:55:20.632647+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-20T03:55:20.632647+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false,
+      "fingerprint": [
+        "tests/test_mirror_dead_letter_drain.py::tests.test_mirror_dead_letter_drain::test_drain_clears_mirror_queue_when_put_recovers",
+        "tests/test_mirror_dead_letter_drain.py::tests.test_mirror_dead_letter_drain::test_drain_keeps_persistently_failing_mirror_ids",
+        "tests/test_mirror_dead_letter_drain.py::tests.test_mirror_dead_letter_drain::test_failed_mirror_put_on_publish_is_dead_lettered"
+      ]
+    }
+  },
+  {
+    "id": "assign_759a28f3",
+    "title": "K741 NFP 數字更正後的 8 篇 feed 文章更正（blocked on 論文數字定案）",
+    "description": "volatility-absorption 論文 NFP 數字更正後，8 篇既有 feed 文章引用的是**修正前**的 NFP\n統計（舊：n_nfp=195, ratio 1.145, p=0.081）。canonical 重跑後為 n_nfp=194, ratio 1.163,\np=0.051(Student)/0.039(Welch)，且 Low-VIX regime 從 p=0.069 變 p=0.009。sign 未翻轉，\n但數字與顯著性敘述需更正。\n\n**blocked_until 解除條件**：compute job `agent-brief_k741_cert_merge-1b4755` 完成、\n`k741-nfp-canonical` 通過 Codex 認證並經 merge_worktree.sh 合併 main（避免論文數字未定案就更正兩次）。\n\n更正順序（依 slot-3 收件摘要 feed_correction_priority）：\n- P1: mile_eda69bfb, mile_d721672b\n- P2: mile_630d0010, mile_44fb4b90, mile_a1fd229a, mile_d9129566, mile_ffb14405\n- P3: mile_76475146\n\n每篇走既有 article_correction 路徑，更正需誠實標註（不得靜默改數字）。\n\nparent: assign_1238781f\nsource artifact: .claude/worktrees/dispatch-slot-3-b5fbc1f4-nfpcal/experiments/k741/nfp_calendar_fix_summary.json\n",
+    "task_type": "daily_article",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-20T04:09:49.469746+00:00",
+    "parent_task_id": "assign_1238781f",
+    "created_by": "hourly-slot-2-ea6a300239ac4fbd894ed0d58d3adee4"
+  },
+  {
+    "id": "assign_d569f0c4",
+    "title": "派工加 task_id collision 檢查：同一 task 被兩條路徑重複派工（K741 白燒一輪 agent）",
+    "description": "**根因事故**：2026-07-20 同一個 task (assign_1238781f) 的 NFP 曆修正被兩條 dispatch\n路徑各派了一次 —— `dispatch-slot-1-5741c175-k741`(branch k741-nfp-canonical, 6 commits) 與\n`dispatch-slot-3-b5fbc1f4-nfpcal`。後者跑完整整一輪 xhigh agent job（~27 分鐘）才在收尾時自己\n`git log --all` 發現撞題，把自己的實作 revert 掉。**一整個 agent run 的算力與 token 白燒。**\n\n現有防護只有 K-number 檢查，抓不到這一類（同 task_id、不同 worktree、不同 K 命名）。\n\n**要做的**：在派工路徑加 task_id collision 檢查 —— 派 worktree/agent job 前先掃\n`git log --all --grep=<task_id>` + `git worktree list`，命中未合併的既有 branch 就拒派並回報既有\nworktree 路徑，而不是開第二條。\n\n檢查落點請找**唯一 enforcement owner**（不要疊第三層 gate）：候選是 compute_queue enqueue-agent\n與 worktree 建立路徑；依 CLAUDE.md anti-stacking，機械化後 prompt 側散文縮成 pointer。\n\n**驗收**：寫一個 test 重現本次情境（既有未合併 branch 帶 task_id → 第二次派工被擋）。\n\nparent: assign_1238781f\n",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-20T04:09:49.522588+00:00",
+    "parent_task_id": "assign_1238781f",
+    "created_by": "hourly-slot-2-ea6a300239ac4fbd894ed0d58d3adee4"
+  },
+  {
+    "id": "assign_33e84191",
+    "title": "[NFP canonical] 收 Codex certification 裁決 → 認證 k741/k904 → 合併 k741-nfp-canonical",
+    "description": "compute job compute-k741-k904-nfp-canonical-certification-review-unblocks-merge--1784520762 跑完後：(1) 讀 storage/ops/codex_reviews/k741_k904_nfp_canonical_verdict.md 第一行 VERDICT。(2) PASS → uv run python scripts/experiment_gates.py verdict-template --path .claude/worktrees/dispatch-slot-1-5741c175-k741/experiments/k741 產生骨架，填 reviewer/reviewed_at/reviewed_commit=a713e41ce/review_artifact/blocking_defects=[]，寫成該目錄的 review_verdict.json；k904 同法。(3) bash scripts/merge_worktree.sh dispatch-slot-1-5741c175-k741，再 merge dispatch-slot-3-b5fbc1f4-nfpcal（doc-only，被同一 gate 擋）。(4) 合併後在 main 跑 paper/volatility-absorption/reproduce.py 確認仍 123/123。(5) 依 Q2 裁決 Welch vs Student（目前 canonical 用 Student，overall p=0.0506；Welch 為 0.0394，跨 5% 邊界）；依 Q3 決定 tab:nfp multiplicity 揭露是 blocking 或投稿前補。(6) FAIL → 建 remediation task，不得合併。parent: assign_1238781f / compute job agent-brief_nfp_calendar_fix-0f5f57。",
+    "task_type": "paper_review",
+    "priority": 1,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-20T04:13:19.289540+00:00",
+    "created_by": "hourly-slot-3-70874e53770e4fcca67b8d54d94a0a8d"
+  },
+  {
+    "id": "assign_94fde28e",
+    "title": "[NFP canonical] feed 8 篇 NFP 文章數字更正（blocked on paper 數字定稿）",
+    "description": "NFP 事件日改用官方 BLS 行事曆後（n 195→194、ratio 1.1448→1.1631、p 0.081→0.051/0.039），以下 feed 文章引用舊數字需更正：P1 mile_eda69bfb, mile_d721672b；P2 mile_630d0010, mile_44fb4b90, mile_a1fd229a, mile_d9129566, mile_ffb14405；P3 mile_76475146。blocked_on：paper 數字定稿（Welch vs Student 未決 → 先更正會改兩次）。依 AGENTS.md 第 13 條『推翻舊結論必須回溯更正』，定稿後逐篇更正並記 docs/error_log.md。parent: assign_1238781f。",
+    "task_type": "daily_article",
+    "priority": 3,
+    "status": "pending",
+    "source": "system",
+    "created_at": "2026-07-20T04:13:19.337705+00:00",
+    "created_by": "hourly-slot-3-70874e53770e4fcca67b8d54d94a0a8d"
   }
 ]

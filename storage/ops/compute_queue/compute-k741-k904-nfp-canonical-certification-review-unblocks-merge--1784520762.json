@@ -1,0 +1,38 @@
+{
+  "id": "compute-k741-k904-nfp-canonical-certification-review-unblocks-merge--1784520762",
+  "title": "k741/k904 NFP canonical certification review (unblocks merge of k741-nfp-canonical)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k741_k904_nfp_canonical_prompt.md",
+    "storage/ops/codex_reviews/k741_k904_nfp_canonical_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-20T04:12:42Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k741-k904-nfp-canonical-certification-review-unblocks-merge--1784520762.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k741-k904-nfp-canonical-certification-review-unblocks-merge--1784520762.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k741_k904_nfp_canonical_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k741_k904_nfp_canonical_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "收 Codex NFP certification 裁決：(1) 讀 storage/ops/codex_reviews/k741_k904_nfp_canonical_verdict.md 第一行 VERDICT；(2) PASS -> 用 uv run python scripts/experiment_gates.py verdict-template --path <wt>/experiments/k741 產生骨架、填 reviewer/reviewed_at/reviewed_commit=a713e41ce/review_artifact/blocking_defects=[]，寫進 .claude/worktrees/dispatch-slot-1-5741c175-k741/experiments/k741/review_verdict.json，k904 同法；(3) 跑 bash scripts/merge_worktree.sh dispatch-slot-1-5741c175-k741 再 merge dispatch-slot-3-b5fbc1f4-nfpcal（doc-only，同一 gate 擋住）；(4) merge 後在 main 跑 paper/volatility-absorption/reproduce.py 確認仍 123/123；(5) 依 Q2 裁決決定 Welch/Student 是否要改，依 Q3 決定 multiplicity 揭露是 blocking 還是投稿前補（建 paper task）；(6) 建 feed 更正 task：P1 mile_eda69bfb mile_d721672b / P2 mile_630d0010 mile_44fb4b90 mile_a1fd229a mile_d9129566 mile_ffb14405 / P3 mile_76475146；(7) FAIL -> 依清單建 remediation task，不得合併。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null
+}
