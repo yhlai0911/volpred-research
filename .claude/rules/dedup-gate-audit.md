@@ -59,12 +59,14 @@ except Exception as e:
     return "pass"  # fail-open，記 log
 ```
 
-### 4. 每週 audit 一次
+### 4. 持續 audit（已實作，2026-07-20 WS-F2）
 
-`scripts/audit_dedup_gate_decisions.py`（待建）每週掃 `dedup_decisions.jsonl`：
-- block rate > 30% → 寄 alert（可能 gate 過鬆變過嚴）
-- 連續 N hours 無 pass → critical（black hole 復發）
-- 同一 narrative arc block ≥3 次 → review 是否該人工 unlock
+裁決 owner = `src/volpred/ops/dedup_gate_audit.py::audit_dedup_decisions`（7 天窗）：
+- block rate > 30%（≥10 筆決策才計）→ warn（可能 gate 過鬆變過嚴）
+- 連續 24h 無 pass 且 gate 有在 block → **critical**（black hole 復發特徵；純 idle 不算，交給 publishing_freshness）
+- 同一 narrative arc block ≥3 次 → warn（review 是否該人工 unlock）
+
+Alert 出口 = `volpred.ops.alerts._parse_dedup_gate_health_state`（condition id `dedup_gate_health`，掛在 `build_alert_condition_report` registry，hourly check_alerts 自動掃，單一 alert owner per `.claude/rules/alert.md`）。手動 / cron 檢視：`uv run python scripts/audit_dedup_gate_decisions.py`（healthy → exit 0，任一條 breach → exit 1）。Regression gate：`tests/test_dedup_gate_audit.py`。
 
 ## Why
 
