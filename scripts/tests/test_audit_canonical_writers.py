@@ -62,7 +62,7 @@ def test_guarded_registered_storage_writer_passes(
         """from pathlib import Path
 from volpred.canonical_write import guard_canonical_write
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "storage" / "next_tasks.json"
+OUT = ROOT / "storage" / "work_log.json"
 
 def save(payload):
     guard_canonical_write(OUT)
@@ -228,7 +228,7 @@ def test_string_replace_named_path_is_not_a_filesystem_mutation(
         tmp_path,
         """from pathlib import Path
 from volpred.canonical_write import guard_canonical_write
-OUT = Path("storage") / "next_tasks.json"
+OUT = Path("storage") / "work_log.json"
 
 def save(path="hello"):
     guard_canonical_write(OUT)
@@ -285,7 +285,7 @@ def test_conditional_guard_must_select_the_write_mode(
         tmp_path,
         f'''from pathlib import Path
 from volpred.canonical_write import guard_canonical_write
-OUT = Path("storage") / "next_tasks.json"
+OUT = Path("storage") / "work_log.json"
 
 def save(apply, force):
     if {guard_predicate}:
@@ -325,3 +325,140 @@ def test_real_active_tree_matches_frozen_owner_inventory(auditor) -> None:
         "src/volpred/ops/feed_sync.py:reconcile_content_from_singles",
     }
     assert formerly_missed_alias_writers <= inventoried_owners
+
+
+# --- WS-A1 next_tasks helper-routing gate ------------------------------------
+# The owner ratchet asks "is this mutation registered?"; the routing gate asks
+# "does the writer actually land bytes through the canonical helper?". A
+# registered, guarded owner that still serializes next_tasks.json by hand must
+# fail (docs/audit_next_tasks_writers.md gap note; break-then-verify 2026-07-20:
+# 57 violations on the pre-A1b tree, 0 after convergence).
+
+
+def test_next_tasks_full_write_flagged_even_when_owner_registered(
+    auditor, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _fixture_tree(
+        tmp_path,
+        """from pathlib import Path
+from volpred.canonical_write import guard_canonical_write
+OUT = Path("storage") / "next_tasks.json"
+
+def save(payload):
+    guard_canonical_write(OUT)
+    OUT.write_text(payload)
+""",
+    )
+    monkeypatch.setitem(
+        auditor.LOW_LEVEL_OWNERS,
+        "src/volpred/writer.py:save",
+        {"write_text": 1},
+    )
+    result = auditor.audit(tmp_path)
+    assert not result.ok
+    assert result.violations == ()  # owner+guard mechanics are satisfied...
+    assert any(  # ...but the routing gate still rejects the hand-rolled write
+        "full-payload write_text" in finding
+        for finding in result.helper_routing_violations
+    ), auditor._render_text(result)
+
+
+def test_next_tasks_rmw_through_canonical_helper_passes(
+    auditor, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _fixture_tree(
+        tmp_path,
+        """from pathlib import Path
+from volpred.canonical_write import guard_canonical_write
+from volpred.ops.next_tasks import write_tasks_to_handle
+OUT = Path("storage") / "next_tasks.json"
+
+def save(tasks):
+    guard_canonical_write(OUT)
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    if not OUT.exists():
+        OUT.write_text("[]\\n")
+    with OUT.open("r+") as fh:
+        write_tasks_to_handle(fh, tasks)
+""",
+    )
+    monkeypatch.setitem(
+        auditor.LOW_LEVEL_OWNERS,
+        "src/volpred/writer.py:save",
+        {"mkdir": 1, "open-write": 1, "write_text": 1},
+    )
+    result = auditor.audit(tmp_path)
+    assert result.ok, auditor._render_text(result)
+
+
+def test_next_tasks_json_dump_on_locked_handle_flagged(
+    auditor, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _fixture_tree(
+        tmp_path,
+        """import json
+from pathlib import Path
+from volpred.canonical_write import guard_canonical_write
+OUT = Path("storage") / "next_tasks.json"
+
+def save(tasks):
+    guard_canonical_write(OUT)
+    with OUT.open("r+") as fh:
+        fh.truncate()
+        json.dump(tasks, fh)
+""",
+    )
+    monkeypatch.setitem(
+        auditor.LOW_LEVEL_OWNERS,
+        "src/volpred/writer.py:save",
+        {"open-write": 1},
+    )
+    result = auditor.audit(tmp_path)
+    assert not result.ok
+    findings = "\n".join(result.helper_routing_violations)
+    assert "json.dump on next_tasks handle" in findings
+    assert ".truncate() on next_tasks" in findings
+    assert "without calling a canonical helper" in findings
+
+
+def test_doc_line_teaching_jq_rewrite_of_next_tasks_flagged(
+    auditor, tmp_path: Path
+) -> None:
+    doc = tmp_path / ".claude" / "skills" / "demo" / "SKILL.md"
+    doc.parent.mkdir(parents=True)
+    doc.write_text(
+        "jq 'map(.done=true)' storage/next_tasks.json > /tmp/nt "
+        "&& mv /tmp/nt storage/next_tasks.json\n",
+        encoding="utf-8",
+    )
+    readonly = tmp_path / "scripts" / "readme.md"
+    readonly.parent.mkdir(parents=True)
+    readonly.write_text(
+        "jq '.[0]' storage/next_tasks.json 2>/dev/null | head\n", encoding="utf-8"
+    )
+    result = auditor.audit(tmp_path)
+    findings = list(result.helper_routing_violations)
+    assert len(findings) == 1, findings  # read-only jq queries stay legal
+    assert ".claude/skills/demo/SKILL.md:1" in findings[0]
+
+
+def test_experiment_next_tasks_writer_flagged_and_baseline_frozen(
+    auditor, tmp_path: Path
+) -> None:
+    body = (
+        "import json\n"
+        "from pathlib import Path\n"
+        'OUT = Path("storage") / "next_tasks.json"\n'
+        'with open(OUT, "w") as f:\n'
+        "    json.dump([], f)\n"
+    )
+    new = tmp_path / "experiments" / "K9999" / "finish.py"
+    new.parent.mkdir(parents=True)
+    new.write_text(body, encoding="utf-8")
+    frozen = tmp_path / "experiments" / "K1387" / "write_knowledge.py"
+    frozen.parent.mkdir(parents=True)
+    frozen.write_text(body, encoding="utf-8")
+    result = auditor.audit(tmp_path)
+    findings = "\n".join(result.helper_routing_violations)
+    assert "experiments/K9999/finish.py" in findings
+    assert "K1387" not in findings  # frozen evidence, ratchet may only shrink

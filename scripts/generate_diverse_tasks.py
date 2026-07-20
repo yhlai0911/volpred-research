@@ -61,8 +61,8 @@ CORRECTIVE_ERRATA_TOKENS = (
 EXPERIMENTS_DIR = ROOT / "experiments"
 RESEARCH_PROGRAM = ROOT / "research_program.md"
 
-from volpred.canonical_write import guard_canonical_write  # noqa: E402
-from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
+from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from volpred.ops.next_tasks import write_tasks_locked  # noqa: E402
 
 
 def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list, list]:
@@ -88,14 +88,18 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
 
 
 def _save_tasks(payload: dict | list, tasks: list) -> None:
-    guard_canonical_write(NEXT_TASKS)
-    normalize_task_priorities(tasks)
-    if isinstance(payload, dict) and "tasks" in payload:
-        payload["tasks"] = tasks
-        out = payload
-    else:
-        out = tasks
-    NEXT_TASKS.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    """WS-A1b: canonical one-shot writer (flock + serialize-first) replaces the
+    unlocked full-file write_text. This path is LIVE — continue_task_dispatch.
+    _maybe_refill calls generate(dry_run=False) every refill cycle (the A1a
+    audit's delete classification missed that caller). Legacy dict-root wrapper
+    is read tolerance only; writing it back is refused loudly."""
+    if isinstance(payload, dict):
+        _diag_warn(
+            "generate_diverse_tasks",
+            "next_tasks dict-root shape is no longer writable; canonical root is a list",
+        )
+        raise ValueError("next_tasks.json root must be a list (single-gateway 2026-07-16)")
+    write_tasks_locked(NEXT_TASKS, tasks)
 
 
 def _existing_ids(tasks: list) -> set[str]:

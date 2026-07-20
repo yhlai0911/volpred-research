@@ -29,8 +29,7 @@ NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 FEED = ROOT / "storage" / "reports" / "feed.json"
 TPE = ZoneInfo("Asia/Taipei")
 
-from volpred.canonical_write import guard_canonical_write  # noqa: E402
-from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
+from volpred.ops.next_tasks import append_task_record, write_tasks_locked  # noqa: E402
 
 DESCRIPTION = (
     "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。"
@@ -153,13 +152,13 @@ def _reconcile_stale_digest_task(task_id: str) -> None:
             changed = True
     if not changed:
         return
-    guard_canonical_write(NEXT_TASKS)
+    # WS-A1b: canonical one-shot writer (flock + serialize-first) instead of the
+    # unlocked tmp+replace. Fail-open semantics preserved: write failure warns,
+    # never blocks the digest main flow.
     try:
-        tmp = NEXT_TASKS.with_suffix(".json.tmp")
-        tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=2) + "\n")
-        tmp.replace(NEXT_TASKS)
+        write_tasks_locked(NEXT_TASKS, tasks)
         print(f"[digest-enqueue] reconciled stale task {task_id} → succeeded")
-    except OSError as exc:
+    except Exception as exc:  # noqa: BLE001 — fail-open by contract, warn keeps it observable
         _warn_digest_enqueue("reconcile write failed", NEXT_TASKS, exc)
 
 
@@ -214,13 +213,14 @@ def main() -> int:
         print(f"[digest-enqueue] DRY-RUN would add: {task_id} (today={today})")
         return 0
 
-    tasks.append(task)
-    normalize_task_priorities(tasks)
-    guard_canonical_write(NEXT_TASKS)
-    tmp = NEXT_TASKS.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=2) + "\n")
-    tmp.replace(NEXT_TASKS)
-    print(f"[digest-enqueue] added {task_id} (P1 daily_digest); pool now {len(tasks)} tasks")
+    # WS-A1b: canonical append helper — bootstrap + LOCK_EX + duplicate-id skip
+    # under the SAME lock (the earlier _digest_task_exists_today check is an
+    # unlocked fast path; the helper's id check is the authoritative one).
+    _record, created = append_task_record(task, path=NEXT_TASKS, if_exists="skip")
+    if not created:
+        print(f"[digest-enqueue] skip: 任務 {task_id} 已在池中（helper 鎖內查重）")
+        return 0
+    print(f"[digest-enqueue] added {task_id} (P1 daily_digest)")
     return 0
 
 

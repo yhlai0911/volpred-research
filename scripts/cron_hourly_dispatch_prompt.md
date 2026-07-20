@@ -60,11 +60,12 @@ uv run python scripts/task_pool_claim.py list --status pending --limit 50 2>/dev
 2. **ANALYZE**: 讀 description 內「用戶回信內容」+「原始助理寄出內容」→ 分類 (question / command / dispatch / observation / urgent)
 3. **PLAN**: 寫 1-5 個 bullet 計畫 — 每 bullet 含「動作 / 預期產出 / ETA」。對需要 sub-task 的動作，下 `task_pool_claim.py claim` 建 linked sub-task（task_type 對應；description 含 parent_email_task_id 反向追蹤）
 4. **(SKIP — ack 已由 gmail-poll 寄)** ❌ 不要再寄 plan email。用戶在收信當下已收到 ack（含 task_id / type / priority / ETA / 完成 email 承諾）— 你只負責執行 + close。
-5. **記 plan 到 task.result** (jq edit next_tasks.json 補欄位)：
+5. **記 plan 到 task**（一律走 `task_pool_claim.py annotate` — **禁止**用 jq 產生新檔再蓋回佇列檔，那會繞過 flock 與 status vocab gate）：
    ```bash
-   jq --arg id <task_id> --arg plan '<plan text>' --argjson subs '["sub_id_1","sub_id_2"]' \
-     '(.[] | select(.id==$id)) |= (.plan = $plan | .linked_task_ids = $subs | .needs_close_reply = true)' \
-     storage/next_tasks.json > /tmp/nt && mv /tmp/nt storage/next_tasks.json
+   uv run python scripts/task_pool_claim.py annotate --id <task_id> \
+     --set plan='<plan text>' \
+     --set-json linked_task_ids='["sub_id_1","sub_id_2"]' \
+     --set-json needs_close_reply=true
    ```
 6. **EXECUTE**：當下 tick 能完成的立即做（小型 question 直接答完；指令直接 commit）；大型任務派 agent / 進 compute queue / 留 sub-task 給未來 tick 接。
 7. **本 tick close 判定**：若所有 linked sub-tasks 都已 succeeded（或本就無 sub-task 因為 question 直接回答完）→ 寄 close email + complete --status succeeded。否則**留 in_progress**，下次 tick Phase 0.A 接手。

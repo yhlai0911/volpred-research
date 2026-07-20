@@ -34,6 +34,7 @@ NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
+from volpred.ops.next_tasks import write_tasks_to_handle  # noqa: E402
 
 TERMINAL = {"succeeded", "failed", "deprecated"}
 STALE_CLAIM_FIELDS = ("claimed_by", "claimed_at", "claim_session_id")
@@ -104,21 +105,21 @@ def main() -> int:
                         })
 
             if args.apply:
-                # Pre-serialize to a string first so a serialization failure
-                # cannot leave partial JSON on disk (control-plane invariant).
+                # WS-A1b: canonical primitive on the already-held LOCK_EX handle
+                # owns the serialize-first-then-truncate invariant that used to
+                # be hand-copied here. NOTE: A1a classified this script delete,
+                # but daily_checkup.py:408 surfaces it as the null-id recovery
+                # command — it stays, converged onto the helper instead.
                 try:
-                    payload = json.dumps(tasks, indent=2, ensure_ascii=False)
+                    write_tasks_to_handle(fh, tasks)
                 except (TypeError, ValueError) as e:
                     warn("backfill_null_ids", "serialize failed, aborting write", err=str(e))
                     return 2
-                fh.seek(0)
-                fh.truncate()
-                fh.write(payload)
         finally:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 
-    mode = "APPLY" if args.apply else "DRY-RUN"
-    print(f"=== Backfill null task ids ({mode}) ===")
+    run_label = "APPLY" if args.apply else "DRY-RUN"
+    print(f"=== Backfill null task ids ({run_label}) ===")
     print(f"rows touched: {len(changes)}")
     for c in changes:
         claim = f" | cleared_claim={c['cleared_claim_fields']}" if c["cleared_claim_fields"] else ""

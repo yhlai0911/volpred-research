@@ -43,7 +43,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
 sys.path.insert(0, str(ROOT / "src"))
-from volpred.canonical_write import guard_canonical_write  # noqa: E402
+from volpred.ops.next_tasks import write_tasks_locked  # noqa: E402
 from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS  # noqa: E402
 from volpred.ops.blocked_reasons import is_valid as _valid_blocked_reason  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
@@ -51,7 +51,6 @@ from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 # It is now owned by volpred.ops.next_tasks (which enforces the same invariant on
 # every writer, not just this CLI) so the number cannot drift into two.
 from volpred.ops.next_tasks import default_blocked_until as _default_blocked_until  # noqa: E402
-from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
 # 2026-07-10: this module used to define its OWN `shared_state_lock` — same name, same
 # semantics, its own hardcoded LOCK_DIR — shadowing the real one. It therefore never
 # picked up the sandboxing that keeps tests off the production lock, and
@@ -111,17 +110,22 @@ def _load() -> tuple[dict | list, list]:
 
 
 def _save(payload: dict | list, tasks: list) -> None:
-    guard_canonical_write(NEXT_TASKS)
-    normalize_task_priorities(tasks)
-    if isinstance(payload, dict) and "tasks" in payload:
-        payload["tasks"] = tasks
-        out = payload
-    else:
-        out = tasks
-    tmp = NEXT_TASKS.with_name(f".{NEXT_TASKS.name}.tmp")
-    tmp.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    json.loads(tmp.read_text(encoding="utf-8"))
-    tmp.replace(NEXT_TASKS)
+    """Persist the full task list via the canonical one-shot writer (WS-A1b).
+
+    The old tmp+replace held no LOCK_EX — the host-UI daemon's only repo
+    mutation could clobber a concurrent claim/dispatch write wholesale.
+    write_tasks_locked owns flock + serialize-first + priority normalization.
+    The legacy dict-root wrapper is read tolerance only; the canonical queue
+    root has been a list since the 2026-07-16 single-gateway refactor
+    (append_next_task refuses non-list roots), so writing it back is refused
+    loudly instead of silently re-materializing a retired schema.
+    """
+    if isinstance(payload, dict):
+        _warn_block_cli(
+            "next_tasks dict-root shape is no longer writable; canonical root is a list"
+        )
+        raise ValueError("next_tasks.json root must be a list (single-gateway 2026-07-16)")
+    write_tasks_locked(NEXT_TASKS, tasks)
 
 
 def _validate_task_schema(task: dict) -> None:
