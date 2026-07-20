@@ -20,12 +20,12 @@
     "5280"
   ],
   "env": {},
-  "status": "running",
+  "status": "failed",
   "queue_priority": 5,
   "queued_at": "2026-07-20T05:36:48Z",
   "started_at": "2026-07-20T06:09:03Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-20T09:15:05Z",
+  "exit_code": -4,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k528_round5_collection_retry.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k528_round5_collection_retry.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528/k528_round5_collection_verdict.json",
@@ -44,5 +44,13 @@
   "timeout_seconds": 5400,
   "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/brief_k528_round5_collection.md",
   "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/k528_round5_collection_retry.md",
-  "claimed_by_pid": 25073
+  "claimed_by_pid": 25073,
+  "failure_reason": "worker_killed",
+  "reap": {
+    "at": "2026-07-20T09:15:05Z",
+    "by_pid": 39136,
+    "context": "run-loop",
+    "evidence": "pid=25073 confirmed gone (ps reports no such process)",
+    "orphaned_started_at": "2026-07-20T06:09:03Z"
+  }
 }

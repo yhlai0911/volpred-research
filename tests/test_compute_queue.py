@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import fcntl
 import json
+import subprocess
 import sys
 import threading
 import time
@@ -1079,3 +1080,35 @@ def test_requeue_still_refuses_non_admissible_failures(
     err = capsys.readouterr().err
     assert "cannot requeue" in err
     assert json.loads(path.read_text())["status"] == "failed"
+
+
+def _git(cwd: Path, *args: str) -> None:
+    subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True)
+
+
+def test_canonical_root_reanchors_queue_when_script_lives_in_a_worktree(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """A worktree-anchored queue is read by no worker, so enqueue there is silent loss.
+
+    K1698's round-5 Codex review was enqueued from inside a worktree on 2026-07-20 and
+    never ran: the job file landed in the worktree's own storage/ops/compute_queue.
+    """
+    canonical = tmp_path / "canonical"
+    canonical.mkdir()
+    _git(canonical, "init", "-b", "main")
+    _git(canonical, "config", "user.email", "t@t")
+    _git(canonical, "config", "user.name", "t")
+    (canonical / "seed.txt").write_text("seed", encoding="utf-8")
+    _git(canonical, "add", "seed.txt")
+    _git(canonical, "commit", "-m", "seed")
+
+    worktree = tmp_path / "wt"
+    _git(canonical, "worktree", "add", str(worktree), "-b", "side")
+    assert (worktree / ".git").is_file()  # linked worktrees carry a .git *file*
+
+    monkeypatch.setattr(module, "ROOT", worktree)
+    assert module._canonical_root() == canonical.resolve()
+
+    monkeypatch.setattr(module, "ROOT", canonical)
+    assert module._canonical_root() == canonical

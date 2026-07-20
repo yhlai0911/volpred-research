@@ -39,6 +39,7 @@ from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import (  # noqa: E402
     enforce_blocked_until,
     normalize_priority,
+    validate_blocked_reason,
     write_tasks_to_handle,
 )
 

@@ -69,7 +69,7 @@ def test_runner_verifies_worktree_result_without_writing_main(monkeypatch, tmp_p
     metadata = main / "storage/ops/agent_jobs/job-test.json"
 
     monkeypatch.setattr(run_agent_job, "ROOT", main)
-    monkeypatch.setattr(run_agent_job, "CLAUDE_BIN", str(fake))
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
     monkeypatch.setattr(
         sys,
         "argv",
@@ -102,7 +102,7 @@ def test_runner_fails_when_successful_agent_omits_declared_result(
     rel_artifact = "experiments/k-missing/k-missing_results.json"
 
     monkeypatch.setattr(run_agent_job, "ROOT", main)
-    monkeypatch.setattr(run_agent_job, "CLAUDE_BIN", str(fake))
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
     monkeypatch.setattr(
         sys,
         "argv",
@@ -134,7 +134,7 @@ def test_runner_never_overwrites_absolute_worktree_result(monkeypatch, tmp_path:
     metadata = main / "storage/ops/agent_jobs/job-absolute.json"
 
     monkeypatch.setattr(run_agent_job, "ROOT", main)
-    monkeypatch.setattr(run_agent_job, "CLAUDE_BIN", str(fake))
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
     monkeypatch.setattr(
         sys,
         "argv",
@@ -277,7 +277,7 @@ def test_runner_defense_in_depth_rejects_non_worktree_cwd(
     brief.write_text("do not start")
     fake = _fake_agent(tmp_path / "fake-claude", "exit 99\n")
     monkeypatch.setattr(run_agent_job, "ROOT", main)
-    monkeypatch.setattr(run_agent_job, "CLAUDE_BIN", str(fake))
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
     monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_: False)
     monkeypatch.setattr(
         sys,

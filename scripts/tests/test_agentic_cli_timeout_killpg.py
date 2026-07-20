@@ -54,6 +54,16 @@ AGENTIC_MARKERS = ("claude", "codex", "agy")
 SPAWNERS = {"run", "Popen", "call", "check_call", "check_output"}
 TIMEOUT_CALLS = {"run", "call", "check_call", "check_output", "communicate", "wait"}
 
+# Pure-metadata probes: the binary prints one line and exits, spawning nothing.
+# `codex --version` is how src/volpred/ops/alerts.py checks the failover binary is
+# executable, and there is no agent, no subprocess and therefore nothing to orphan
+# — the hazard this gate exists for ("its real work happens in subprocesses of its
+# own") is definitionally absent. Narrow on purpose: a real invocation always
+# carries a prompt or a subcommand, so argv consisting ONLY of these flags is the
+# one shape that can be ruled out by inspection. Anything the detector cannot read
+# as a literal flag list stays flagged.
+PROBE_ONLY_FLAGS = {"--version", "-V", "--help", "-h"}
+
 # Files that launch an agentic CLI but genuinely need no group kill, with the reason.
 # Keep this list short and argued; it is the blind spot of this gate.
 EXEMPT: dict[str, str] = {
@@ -89,14 +99,44 @@ def _string_constants(node: ast.AST) -> list[str]:
     return [n.value for n in ast.walk(node) if isinstance(n, ast.Constant) and isinstance(n.value, str)]
 
 
-def _head_candidates(node: ast.AST, const_map: dict[str, list[str]]) -> list[str]:
+def _resolver_strings(fn: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
+    """String constants a helper function could hand back as a binary path.
+
+    Body-wide, not `return`-statement-only: a resolver almost never returns a
+    literal, it returns a local that a literal flowed into —
+        found = shutil.which("claude"); ...; return found
+    Pinning to return literals would see nothing there. The docstring is dropped
+    because it is prose, not an argv[0] candidate.
+    """
+    body = list(fn.body)
+    if (
+        body
+        and isinstance(body[0], ast.Expr)
+        and isinstance(body[0].value, ast.Constant)
+        and isinstance(body[0].value.value, str)
+    ):
+        body = body[1:]
+    out: list[str] = []
+    for stmt in body:
+        out.extend(_string_constants(stmt))
+    return out
+
+
+def _head_candidates(
+    node: ast.AST,
+    const_map: dict[str, list[str]],
+    resolver_map: dict[str, list[str]] | None = None,
+) -> list[str]:
     """Every string argv[0] could evaluate to."""
+    resolver_map = resolver_map or {}
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         return [node.value]
     if isinstance(node, ast.Name):
         return const_map.get(node.id, [])
-    if isinstance(node, ast.Call):  # e.g. shutil.which("codex")
-        return _string_constants(node)
+    if isinstance(node, ast.Call):  # e.g. shutil.which("codex"), _resolve_claude_bin()
+        fn = node.func
+        called = fn.id if isinstance(fn, ast.Name) else (fn.attr if isinstance(fn, ast.Attribute) else "")
+        return _string_constants(node) + resolver_map.get(called, [])
     return []
 
 
@@ -105,12 +145,30 @@ def _analyze(path: Path) -> dict:
     src = path.read_text(encoding="utf-8", errors="replace")
     tree = ast.parse(src, filename=str(path))
 
+    # Helper functions that answer "where does the binary live". Built first because
+    # the const_map pass below resolves calls through it.
+    resolver_map: dict[str, list[str]] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            strs = _resolver_strings(node)
+            if strs:
+                resolver_map.setdefault(node.name, strs)
+
     # Resolve names back to the strings they might hold, so an argv assembled anywhere
-    # but the call site still resolves. Three shapes, all of which occur in this repo:
+    # but the call site still resolves. Four shapes, all of which occur in this repo:
     #   AGY = "/Users/.../agy"                                       -> Constant
     #   CLAUDE_BIN = os.environ.get("VOLPRED_CLAUDE_BIN", "claude")  -> Call, several
     #                                                                   candidate strings
+    #   claude_bin = _resolve_claude_bin()                           -> Call into a local
+    #                                                                   resolver (see below)
     #   argv = [CLAUDE_BIN, "-p", ...]; Popen(argv)                  -> List of the above
+    #
+    # The resolver shape is why this gate went blind once already: run_agent_job.py
+    # hoisted its lookup into `_resolve_claude_bin()` (2026-07-20, launchd PATH fix)
+    # and the literal "claude" left the call site, so the detector stopped seeing a
+    # launcher it had been built from — reporting green on the exact file the K1685
+    # orphan incident came from. A static gate that silently stops matching is worse
+    # than no gate, so names bound to a local helper's result now resolve through it.
     #
     # A name maps to a LIST of candidates, not one string: os.environ.get yields both
     # the env var's name and its default, and only the default is the binary. Collapse
@@ -126,7 +184,7 @@ def _analyze(path: Path) -> dict:
             for n in names:
                 const_map[n] = [node.value.value]
         elif isinstance(node.value, ast.Call):
-            strs = _string_constants(node.value)
+            strs = _head_candidates(node.value, const_map, resolver_map)
             if strs:
                 for n in names:
                     const_map.setdefault(n, strs)
@@ -139,7 +197,7 @@ def _analyze(path: Path) -> dict:
         names = [t.id for t in node.targets if isinstance(t, ast.Name)]
         if not names or not node.value.elts:
             continue
-        head_map_val = _head_candidates(node.value.elts[0], const_map)
+        head_map_val = _head_candidates(node.value.elts[0], const_map, resolver_map)
         if head_map_val:
             for n in names:
                 head_map.setdefault(n, head_map_val)
@@ -163,7 +221,12 @@ def _analyze(path: Path) -> dict:
             # very much is not (scripts/email_fast_path.py, caught doing exactly that).
             argv = node.args[0]
             if isinstance(argv, (ast.List, ast.Tuple)) and argv.elts:
-                heads = _head_candidates(argv.elts[0], const_map)
+                rest = argv.elts[1:]
+                if rest and all(
+                    isinstance(e, ast.Constant) and e.value in PROBE_ONLY_FLAGS for e in rest
+                ):
+                    continue  # `codex --version` — prints and exits, nothing to orphan
+                heads = _head_candidates(argv.elts[0], const_map, resolver_map)
             elif isinstance(argv, ast.Name):
                 heads = head_map.get(argv.id, const_map.get(argv.id, []))
             elif isinstance(argv, ast.Constant) and isinstance(argv.value, str):
