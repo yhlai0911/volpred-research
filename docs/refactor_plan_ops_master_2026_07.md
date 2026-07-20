@@ -59,6 +59,7 @@
 4. **永遠修流程不修資料**：殭屍任務、汙染終態、分岔投影一律「先修產生它的程式 → 再讓修好的流程自然收斂資料」；一次性 migration 只在流程修復後做、且記錄原值。
 5. **觀察期必有 deadline**：任何 shadow / disabled-but-alive / deprecated 狀態，建立時同步寫死到期日與到期動作（翻轉或退役），逾期未決策 = dreaming detector 可見的 breach。
 6. **每 WS 落地順序**：snapshot commit → 改碼 → 測試 → Codex review → 部署/掛載 → 線上 Check → §7 狀態表更新。宣告完成必附實測證據。
+7. **Gate 流暢無死局**（owner 2026-07-20 硬規）：檢查關卡不得為檢查而中斷流程；每個 block 型 gate 必附出口（自動修復路徑／時限寬限／升級裁決三選一）；audit 觸發時開單不只擋（actuator 原則）；新 gate 上線前做「死局測試」證明工作最終能流出。memory：`feedback_gates_smooth_no_deadlock`。
 
 ---
 
