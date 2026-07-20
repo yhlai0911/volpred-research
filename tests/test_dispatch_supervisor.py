@@ -18,6 +18,7 @@ import pytest
 
 from scripts.dispatch_supervisor import (
     claim_release, health, phase_z, procutil, scheduler, state, supervisor, worker,
+    workspace,
 )
 
 
@@ -3030,3 +3031,608 @@ def test_supervisor_restart_unexpected_still_emails(tmp_path: Path, monkeypatch)
     )
     assert second is False
     assert len(sends) == 1
+
+
+# -- WS-B producer-scoped workspaces (execution isolation pilot) --------------
+# Ownership must be produced by execution isolation, not inferred by a cleanup
+# layer afterwards (external adjudication; refactor_plan_ops_master §WS-B).
+# These tests pin: machine-built registered worktree, receipt-bound identity,
+# gate-green-only integration, and the no-deadlock exit (red output ALWAYS
+# ends up as a claimable P2 remediation task, never rots in a worktree).
+
+
+def _iso_cfg(**overrides) -> dict:
+    cfg = {"mode": "pilot", "lanes": ["platform_ops"], "max_total": 3,
+           "disk_floor_gib": 0.0}
+    cfg.update(overrides)
+    return cfg
+
+
+def _ws_allocate(repo: Path, *, job_id: str = "a" * 32, slot: str = "slot-1",
+                 config: dict | None = None, active_isolated: int = 0):
+    return workspace.allocate_workspace(
+        repo_root=repo, slot_id=slot, job_id=job_id,
+        config=config or _iso_cfg(), active_isolated=active_isolated,
+    )
+
+
+def _ws_receipt_events(repo: Path) -> list[dict]:
+    dest = repo / workspace.RECEIPTS_RELPATH
+    if not dest.exists():
+        return []
+    return [json.loads(line) for line in dest.read_text(encoding="utf-8").splitlines()]
+
+
+def _tmp_queue(tmp_path: Path) -> Path:
+    queue = tmp_path / "queue" / "next_tasks.json"
+    queue.parent.mkdir(parents=True, exist_ok=True)
+    queue.write_text("[]", encoding="utf-8")
+    return queue
+
+
+def test_workspace_allocate_creates_registered_worktree(tmp_path: Path) -> None:
+    from volpred.ops.git_writer_lock import is_registered_linked_worktree
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    assert ws is not None
+    path = Path(ws["path"])
+    assert path == repo / ".claude" / "worktrees" / "dispatch-slot-1-aaaaaaaa"
+    assert path.is_dir()
+    assert ws["branch"] == "worktree-dispatch-slot-1-aaaaaaaa"
+    # identity is machine-derived and mechanically verifiable -- the same door
+    # run_agent_job/compute_queue already use for the experiment lane.
+    assert is_registered_linked_worktree(repo, path)
+    head = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
+                          capture_output=True, text=True, check=True).stdout.strip()
+    assert ws["base_sha"] == head
+    events = _ws_receipt_events(repo)
+    assert [e["event"] for e in events] == ["allocated"]
+    assert events[0]["branch"] == ws["branch"]
+    assert isinstance(ws["setup_s"], float)
+
+
+def test_workspace_allocate_disk_floor_fails_closed(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo, config=_iso_cfg(disk_floor_gib=10**9))
+    assert ws is None
+    events = _ws_receipt_events(repo)
+    assert events and events[0]["event"] == "allocation_skipped"
+    assert events[0]["reason"] == "disk_floor"
+    assert not (repo / ".claude" / "worktrees").exists()
+
+
+def test_workspace_allocate_respects_caps(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    # active cap: never a second concurrent isolated fire
+    assert _ws_allocate(repo, active_isolated=1) is None
+    # total cap counts kept worktrees too
+    first = _ws_allocate(repo, job_id="b" * 32)
+    assert first is not None
+    second = _ws_allocate(repo, job_id="c" * 32, config=_iso_cfg(max_total=1))
+    assert second is None
+    reasons = [e.get("reason") for e in _ws_receipt_events(repo)
+               if e["event"] == "allocation_skipped"]
+    assert reasons == ["active_cap", "total_cap"]
+
+
+def test_workspace_finalize_empty_removed(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    out = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="success",
+        queue_path=_tmp_queue(tmp_path),
+    )
+    assert out["disposition"] == "empty_removed"
+    assert not Path(ws["path"]).exists()
+    branch_probe = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "--verify", ws["branch"]],
+        capture_output=True, text=True, check=False,
+    )
+    assert branch_probe.returncode != 0  # branch cleaned up with the worktree
+    assert [e["event"] for e in _ws_receipt_events(repo)] == ["allocated", "finalized"]
+
+
+def test_workspace_finalize_gate_green_merges(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "scripts").mkdir(exist_ok=True)
+    (wt / "scripts" / "wsb_pilot_change.py").write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "-A"], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(wt), "commit", "-qm", "pilot change"],
+                   check=True, capture_output=True)
+    merges: list[str] = []
+
+    def fake_gate(**kwargs):
+        return {"verdict": "green", "rc": 0, "targets": ["tests/test_x.py"],
+                "duration_s": 0.1, "output_tail": ""}
+
+    def fake_merge(**kwargs):
+        merges.append(kwargs["workspace"]["name"])
+        return {"ok": True, "rc": 0, "reason": "merged", "output_tail": ""}
+
+    out = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="success",
+        queue_path=_tmp_queue(tmp_path), gate_fn=fake_gate, merge_fn=fake_merge,
+    )
+    assert out["disposition"] == "merged"
+    assert merges == ["dispatch-slot-1-aaaaaaaa"]
+    assert out["gate"]["verdict"] == "green"
+
+
+def test_workspace_finalize_gate_red_opens_remediation_and_keeps_worktree(
+    tmp_path: Path,
+) -> None:
+    """The no-deadlock invariant: a red gate NEVER strands the output. It must
+    become a pending P2 task the normal dispatch loop is guaranteed to pick up,
+    with the worktree preserved -- and re-running the finalizer must not
+    duplicate the task."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "broken.py").write_text("x = 1\n", encoding="utf-8")
+
+    def red_gate(**kwargs):
+        return {"verdict": "red", "rc": 1, "targets": ["tests/test_y.py"],
+                "duration_s": 0.1, "output_tail": "FAILED tests/test_y.py::t"}
+
+    def never_merge(**kwargs):  # pragma: no cover - gate red must block merging
+        raise AssertionError("merge must not run on a red gate")
+
+    out = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="success",
+        queue_path=queue, gate_fn=red_gate, merge_fn=never_merge,
+    )
+    assert out["disposition"] == "remediation_opened"
+    assert out["reason"] == "gate_red"
+    assert wt.exists()  # output preserved, never force-removed
+    tasks = json.loads(queue.read_text(encoding="utf-8"))
+    assert len(tasks) == 1
+    task = tasks[0]
+    assert task["id"] == "wsb_remed_dispatch-slot-1-aaaaaaaa"
+    assert task["priority"] == 2
+    assert task["status"] == "pending"
+    assert task["task_type"] == "platform_ops"
+    assert task["payload"]["worktree"] == ws["path"]
+    assert task["payload"]["branch"] == ws["branch"]
+    assert "merge_worktree.sh" in task["description"]
+    # idempotent: a second finalize pass (orphan sweep rerun) files nothing new
+    out2 = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="success",
+        queue_path=queue, gate_fn=red_gate, merge_fn=never_merge,
+    )
+    assert out2["disposition"] == "remediation_opened"
+    tasks2 = json.loads(queue.read_text(encoding="utf-8"))
+    assert len(tasks2) == 1
+
+
+def test_workspace_finalize_unclean_worker_never_merges(tmp_path: Path) -> None:
+    """A hang/failure fire's bytes are unverified -- they go to remediation,
+    never through the gate to main."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    (Path(ws["path"]) / "partial.py").write_text("x = 1\n", encoding="utf-8")
+    called = {"gate": 0, "merge": 0}
+
+    def spy_gate(**kwargs):  # pragma: no cover - must not run
+        called["gate"] += 1
+        return {"verdict": "green", "rc": 0, "targets": [], "duration_s": 0}
+
+    def spy_merge(**kwargs):  # pragma: no cover - must not run
+        called["merge"] += 1
+        return {"ok": True, "rc": 0, "reason": "merged", "output_tail": ""}
+
+    out = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="killed_timeout",
+        queue_path=queue, gate_fn=spy_gate, merge_fn=spy_merge,
+    )
+    assert out["disposition"] == "remediation_opened"
+    assert out["reason"] == "worker_killed_timeout"
+    assert called == {"gate": 0, "merge": 0}
+    assert Path(ws["path"]).exists()
+    tasks = json.loads(queue.read_text(encoding="utf-8"))
+    assert len(tasks) == 1 and tasks[0]["status"] == "pending"
+
+
+def test_workspace_finalize_merge_failure_opens_remediation(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    (Path(ws["path"]) / "change.py").write_text("x = 1\n", encoding="utf-8")
+    out = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="success", queue_path=queue,
+        gate_fn=lambda **kw: {"verdict": "green", "rc": 0, "targets": [],
+                              "duration_s": 0.0, "output_tail": ""},
+        merge_fn=lambda **kw: {"ok": False, "rc": 1, "reason": "merge_failed",
+                               "output_tail": "[ABORT] conflict"},
+    )
+    assert out["disposition"] == "remediation_opened"
+    assert out["reason"] == "merge_failed"
+    assert Path(ws["path"]).exists()
+    assert len(json.loads(queue.read_text(encoding="utf-8"))) == 1
+
+
+def test_workspace_finalize_unregistered_dir_untouched(tmp_path: Path) -> None:
+    """A directory squatting on the namespace is not ours -- never removed,
+    never merged (independent-repo impersonation defence, error_log §C)."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    fake = repo / ".claude" / "worktrees" / "dispatch-slot-1-deadbeef"
+    fake.mkdir(parents=True)
+    (fake / "loot.txt").write_text("x", encoding="utf-8")
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace={"name": fake.name, "path": str(fake),
+                   "branch": "worktree-dispatch-slot-1-deadbeef", "base_sha": ""},
+        worker_outcome="success", queue_path=_tmp_queue(tmp_path),
+    )
+    assert out["disposition"] == "unregistered"
+    assert (fake / "loot.txt").exists()
+
+
+def test_workspace_sweep_closes_true_orphans_only(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    protected_ws = _ws_allocate(repo, job_id="b" * 32)
+    orphan_ws = _ws_allocate(repo, job_id="c" * 32, slot="slot-2")
+    assert protected_ws is not None and orphan_ws is not None
+    results = workspace.sweep_orphan_workspaces(
+        repo_root=repo, protected_job_ids=["b" * 32], queue_path=queue,
+    )
+    # orphan (empty) removed; protected workspace untouched
+    assert [r["disposition"] for r in results] == ["empty_removed"]
+    assert not Path(orphan_ws["path"]).exists()
+    assert Path(protected_ws["path"]).exists()
+
+
+def test_workspace_isolation_config_defaults_off(tmp_path: Path) -> None:
+    missing = workspace.load_isolation_config(schedules_path=tmp_path / "nope.json")
+    assert missing["mode"] == "off"
+    no_daemon = tmp_path / "sched.json"
+    no_daemon.write_text(json.dumps({"cron_jobs": []}), encoding="utf-8")
+    assert workspace.load_isolation_config(schedules_path=no_daemon)["mode"] == "off"
+    pilot = tmp_path / "sched2.json"
+    pilot.write_text(json.dumps({"daemons": [{
+        "id": "volpred-dispatch-supervisor",
+        "writer_isolation": {"mode": "pilot", "lanes": ["platform_ops"],
+                             "max_total": 2, "disk_floor_gib": 5},
+    }]}), encoding="utf-8")
+    cfg = workspace.load_isolation_config(schedules_path=pilot)
+    assert cfg == {"mode": "pilot", "lanes": ["platform_ops"], "max_total": 2,
+                   "disk_floor_gib": 5.0}
+
+
+def test_workspace_allocation_refused_on_canonical_checkout_under_test_gate() -> None:
+    """Class gate (project_canonical_write_test_leak_gate): a pytest process --
+    conftest arms VOLPRED_NO_CANONICAL_WRITE=1 -- must never grow worktrees on
+    the real checkout through this module."""
+    assert os.environ.get("VOLPRED_NO_CANONICAL_WRITE") == "1"
+    assert workspace.allocate_workspace(
+        repo_root=workspace.ROOT, slot_id="slot-1", job_id="f" * 32,
+        config=_iso_cfg(),
+    ) is None
+    assert workspace.sweep_orphan_workspaces(
+        repo_root=workspace.ROOT, protected_job_ids=[],
+    ) == []
+
+
+def test_scheduler_fire_attaches_workspace_and_finalizes(tmp_path: Path, monkeypatch) -> None:
+    """Fire-path integration: pilot config -> allocate -> receipt on the state
+    job + prompt section -> finalize after the worker -> workspace receipt rides
+    the completions ring (ownership audit trail)."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = tmp_path / "sched.json"
+    schedules.write_text(json.dumps({
+        "cron_jobs": [{"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}],
+        "daemons": [{"id": "volpred-dispatch-supervisor", "max_slots": 2,
+                     "writer_isolation": {"mode": "pilot", "lanes": ["platform_ops"]}}],
+    }), encoding="utf-8")
+    fake_ws = {"name": "dispatch-slot-1-fixed", "path": str(tmp_path / "ws"),
+               "branch": "worktree-dispatch-slot-1-fixed", "base_sha": "abc",
+               "lanes": ["platform_ops"], "created_at": "2026-07-20T00:00:00+00:00",
+               "setup_s": 1.0}
+    allocated: list[dict] = []
+    finalized: list[dict] = []
+    monkeypatch.setattr(scheduler.workspace_mod, "sweep_orphan_workspaces",
+                        lambda **kw: [])
+    monkeypatch.setattr(
+        scheduler.workspace_mod, "allocate_workspace",
+        lambda **kw: allocated.append(kw) or dict(fake_ws),
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod, "finalize_workspace",
+        lambda **kw: finalized.append(kw) or {"disposition": "empty_removed"},
+    )
+    received: list[dict] = []
+
+    def fake_run_worker(**kwargs):
+        received.append(kwargs)
+        # the worker owns the normal completion close, like production
+        state.record_completion(
+            job_id=kwargs["job_id"], exit_code=0, outcome="success",
+            final_model=worker.OPUS_MODEL, path=kwargs["state_path"],
+        )
+        return worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log", dry_run=False,
+        repo_root=tmp_path, schedules_path=schedules,
+    ))
+
+    assert result["action"] == "fired"
+    assert result["workspace"] == {"disposition": "empty_removed"}
+    # allocation happened once, machine-side, before the worker
+    assert len(allocated) == 1
+    # prompt carries the binding instructions
+    prompt_text = received[0]["prompt_text"]
+    assert "Producer-scoped workspace" in prompt_text
+    assert fake_ws["path"] in prompt_text
+    assert fake_ws["branch"] in prompt_text
+    assert "不得自行 merge" in prompt_text
+    # finalize ran with the worker's outcome
+    assert len(finalized) == 1
+    assert finalized[0]["worker_outcome"] == "success"
+    assert finalized[0]["workspace"]["name"] == "dispatch-slot-1-fixed"
+    # ownership audit trail: the completion entry carries the workspace receipt
+    snap = state.read_state(state_path)
+    assert snap["completions"][-1]["workspace"]["name"] == "dispatch-slot-1-fixed"
+    assert snap["completions"][-1]["workspace"]["branch"] == fake_ws["branch"]
+
+
+def test_scheduler_fire_unisolated_when_allocation_declined(tmp_path: Path, monkeypatch) -> None:
+    """Allocation refusal (caps/disk/lock) must never veto the fire."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = tmp_path / "sched.json"
+    schedules.write_text(json.dumps({
+        "cron_jobs": [{"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}],
+        "daemons": [{"id": "volpred-dispatch-supervisor", "max_slots": 2,
+                     "writer_isolation": {"mode": "pilot"}}],
+    }), encoding="utf-8")
+    monkeypatch.setattr(scheduler.workspace_mod, "sweep_orphan_workspaces",
+                        lambda **kw: [])
+    monkeypatch.setattr(scheduler.workspace_mod, "allocate_workspace",
+                        lambda **kw: None)
+    finalized: list[dict] = []
+    monkeypatch.setattr(scheduler.workspace_mod, "finalize_workspace",
+                        lambda **kw: finalized.append(kw))
+    received: list[dict] = []
+
+    def fake_run_worker(**kwargs):
+        received.append(kwargs)
+        return worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log", dry_run=False,
+        repo_root=tmp_path, schedules_path=schedules,
+    ))
+    assert result["action"] == "fired"
+    assert result["workspace"] is None
+    assert "Producer-scoped workspace" not in received[0]["prompt_text"]
+    assert finalized == []  # nothing allocated -> nothing finalized
+
+
+# -- WS-B commit 2: PHASE-Z baseline guessing demoted for isolated cohorts ----
+# The recognizer stays (retirement is a separate decision after a stable
+# month); what changes is AUTHORSHIP CLAIMING: an isolated cohort's repo-byte
+# output lands through its workspace merge gate, so PHASE-Z may no longer
+# commit non-machine-state paths by timing arithmetic. Machine-state churn
+# (scheduled jobs) keeps its adoption -- that is the fallback's residue lane.
+
+
+def test_phase_z_isolated_cohort_demotes_non_machine_owned(tmp_path: Path) -> None:
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "note.md").write_text("residue\n", encoding="utf-8")
+    (tmp_path / "storage" / "ops").mkdir(parents=True)
+    (tmp_path / "storage" / "ops" / "some_state.json").write_text("{}\n", encoding="utf-8")
+    alerts_seen: list[dict] = []
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        isolated_cohort=True,
+        alert_fn=lambda **kwargs: alerts_seen.append(kwargs) or {},
+    )
+    # machine state still adopted; the doc path is demoted, not committed
+    assert out["committed"] is True
+    assert out["owned"] == ["storage/ops/some_state.json"]
+    assert out["isolation_residue"] == ["docs/note.md"]
+    assert _git_head_count(tmp_path) == before + 1
+    tracked = subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "docs/note.md"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    assert tracked == ""  # never entered history
+    assert (tmp_path / "docs" / "note.md").exists()  # and never deleted
+    assert any("不代收" in a.get("title", "") for a in alerts_seen)
+
+
+def test_phase_z_isolated_cohort_all_residue_is_terminal(tmp_path: Path) -> None:
+    """All-residue outcome must land on a TERMINAL reason (nothing_owned) so
+    the scheduler releases the drain token -- no livelock behind the demotion."""
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "note.md").write_text("residue\n", encoding="utf-8")
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        isolated_cohort=True, alert_fn=lambda **_kwargs: {},
+    )
+    assert out["committed"] is False
+    assert out["reason"] == "nothing_owned"
+    assert out["isolation_residue"] == ["docs/note.md"]
+    assert scheduler._phase_z_terminal(out) is True
+    assert _git_head_count(tmp_path) == before
+    assert (tmp_path / "docs" / "note.md").exists()
+
+
+def test_phase_z_unisolated_cohort_keeps_legacy_adoption(tmp_path: Path) -> None:
+    """Contrast pin: without the isolation flag the legacy baseline fallback
+    still adopts fire-produced paths (unisolated lanes keep their safety net)."""
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "note.md").write_text("agent output\n", encoding="utf-8")
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        alert_fn=lambda **_kwargs: {},
+    )
+    assert out["committed"] is True
+    assert "isolation_residue" not in out
+    assert _git_head_count(tmp_path) == before + 1
+    tracked = subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "docs/note.md"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    assert tracked == "docs/note.md"
+
+
+def test_record_completion_stamps_isolated_on_pending(tmp_path: Path) -> None:
+    state_path = _tmp_state(tmp_path)
+    # isolated fire
+    lease = state.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                               log_path="/tmp/a.log", path=state_path)
+    state.attach_process(job_id=lease.job_id, expected_attempt=1, pid=1, pgid=1,
+                         started_wall=None, path=state_path)
+    state.attach_workspace(job_id=lease.job_id, workspace={
+        "name": "dispatch-slot-1-aaaaaaaa", "path": "/tmp/wt", "branch": "b",
+        "base_sha": "s", "lanes": ["platform_ops"],
+        "created_at": "2026-07-20T00:00:00+00:00", "setup_s": 1.0,
+    }, path=state_path)
+    state.record_completion(job_id=lease.job_id, exit_code=0, outcome="success",
+                            final_model="opus", path=state_path)
+    pending = state.read_state(state_path)["phase_z_pending"]
+    assert [item["isolated"] for item in pending] == [True]
+    state.finish_phase_z(cohort_id=lease.cohort_id, path=state_path)
+    # unisolated fire
+    lease2 = state.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                                log_path="/tmp/b.log", path=state_path)
+    state.attach_process(job_id=lease2.job_id, expected_attempt=1, pid=2, pgid=2,
+                         started_wall=None, path=state_path)
+    state.record_completion(job_id=lease2.job_id, exit_code=0, outcome="success",
+                            final_model="opus", path=state_path)
+    pending2 = state.read_state(state_path)["phase_z_pending"]
+    assert [item["isolated"] for item in pending2] == [False]
+
+
+def _seed_pending_drain(state_path: Path, isolated_flags: list[bool]) -> None:
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [
+            {"job_id": f"job{i}", "cohort_id": f"cohort{i}", "slot_id": i + 1,
+             "created_at": "2026-07-20T00:00:00+00:00", "isolated": flag}
+            for i, flag in enumerate(isolated_flags)
+        ]
+
+
+def test_scheduler_recovery_drain_passes_isolated_cohort(tmp_path: Path, monkeypatch) -> None:
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("p", encoding="utf-8")
+    captured: list[dict] = []
+
+    def spy_run_phase_z(**kwargs):
+        captured.append(kwargs)
+        return {"committed": False, "reason": "clean"}
+
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", spy_run_phase_z)
+    for flags, expected in (([True, True], True), ([True, False], False)):
+        state_path = _tmp_state(tmp_path / f"case_{expected}")
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+        _seed_pending_drain(state_path, flags)
+        scheduler._PHASE_Z_LOCK = None  # fresh loop per asyncio.run
+        result = asyncio.run(scheduler._tick_once(
+            state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+            log_path=tmp_path / "worker.log", dry_run=False, repo_root=tmp_path,
+        ))
+        assert result["action"] == "phase_z_recovered"
+        assert captured[-1]["isolated_cohort"] is expected
+
+
+def test_scheduler_fire_drain_passes_isolated_cohort(tmp_path: Path, monkeypatch) -> None:
+    """End-to-end wiring: an isolated fire's completion stamps the pending
+    item, and the fire task's own cohort drain hands isolated_cohort=True to
+    run_phase_z."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = tmp_path / "sched.json"
+    schedules.write_text(json.dumps({
+        "cron_jobs": [{"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}],
+        "daemons": [{"id": "volpred-dispatch-supervisor", "max_slots": 2,
+                     "writer_isolation": {"mode": "pilot", "lanes": ["platform_ops"]}}],
+    }), encoding="utf-8")
+    fake_ws = {"name": "dispatch-slot-1-fixed", "path": str(tmp_path / "ws"),
+               "branch": "worktree-dispatch-slot-1-fixed", "base_sha": "abc",
+               "lanes": ["platform_ops"], "created_at": "2026-07-20T00:00:00+00:00",
+               "setup_s": 1.0}
+    monkeypatch.setattr(scheduler.workspace_mod, "sweep_orphan_workspaces",
+                        lambda **kw: [])
+    monkeypatch.setattr(scheduler.workspace_mod, "allocate_workspace",
+                        lambda **kw: dict(fake_ws))
+    monkeypatch.setattr(scheduler.workspace_mod, "finalize_workspace",
+                        lambda **kw: {"disposition": "empty_removed"})
+    captured: list[dict] = []
+
+    def spy_run_phase_z(**kwargs):
+        captured.append(kwargs)
+        return {"committed": False, "reason": "clean"}
+
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", spy_run_phase_z)
+
+    def fake_run_worker(**kwargs):
+        state.record_completion(
+            job_id=kwargs["job_id"], exit_code=0, outcome="success",
+            final_model=worker.OPUS_MODEL, path=kwargs["state_path"],
+        )
+        return worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+    scheduler._PHASE_Z_LOCK = None  # fresh loop per asyncio.run
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log", dry_run=False,
+        repo_root=tmp_path, schedules_path=schedules,
+    ))
+    assert result["action"] == "fired"
+    assert captured and captured[-1]["isolated_cohort"] is True

@@ -2374,8 +2374,24 @@ def run_phase_z(
     pre_fire_dirty: set[str] | list[str] | None = None,
     commit_receipt_override: dict | None = None,
     recovery_mode: bool = False,
+    isolated_cohort: bool = False,
 ) -> dict:
     """Deterministic post-fire commit. Returns an observability dict.
+
+    ``isolated_cohort`` (WS-B demotion, 2026-07-20): True when EVERY fire in
+    the drained cohort ran with a producer-scoped workspace (see workspace.py).
+    Isolated fires land their repo-byte output through their own worktree merge
+    gate, so the baseline arithmetic below may no longer CLAIM authorship of
+    non-machine-state paths by timing alone — a new dirty code/docs path on the
+    canonical checkout during an isolated fire is either another writer or an
+    isolation breach, and committing it under the fire's name is exactly the
+    guessing this pilot retires. Such paths are demoted to
+    ``isolation_residue``: left in the tree, surfaced once, and picked up by
+    the existing foreign-streak machinery if they stick around. Machine-state
+    adoption (scheduled-job churn — the residue lane isolation cannot cover)
+    is unchanged, and ``isolated_cohort=False`` keeps the full legacy fallback
+    for unisolated fires. The recognizer itself is retained (retirement is a
+    separate decision after a stable month — plan §WS-B).
 
     Returns keys: ``committed`` (bool), ``reason`` (str), and — when it acted —
     ``untracked`` (list of leaked-ignored paths removed from the index),
@@ -2487,6 +2503,45 @@ def run_phase_z(
     )
     owned = sorted(dirty_now - baseline)
     dirty_before = sorted(dirty_now & baseline)
+    # ── WS-B demotion: isolated cohorts get NO baseline authorship guessing ──
+    # for repo bytes. Every fire in this cohort had its own workspace, so its
+    # repo-byte output landed (or went to remediation) through the worktree
+    # merge gate — a non-machine-state path that turned dirty on the canonical
+    # checkout during the fire is another writer or an isolation breach, and
+    # timing arithmetic can no longer prove which. Leave it, say so once, and
+    # let the foreign-streak machinery own it if it sticks around. Machine
+    # state (scheduled-job churn) keeps its adoption — that residue lane is
+    # exactly what the fallback still exists for.
+    isolation_residue: list[str] = []
+    if isolated_cohort:
+        isolation_residue = [p for p in owned if not _is_machine_state(p)]
+        owned = [p for p in owned if _is_machine_state(p)]
+        if isolation_residue:
+            LOG.warning(
+                "phase_z: isolated cohort — declining to claim %d non-machine "
+                "path(s) by timing: %s", len(isolation_residue), isolation_residue[:10],
+            )
+            alert_fn(
+                level="warn",
+                title="PHASE-Z 隔離班次出現 canonical checkout 殘留 — 不代收",
+                body="\n".join([
+                    f"（fire 時間: {hhmm}；{len(isolation_residue)} 個檔案）",
+                    "",
+                    "## 發生什麼",
+                    "這班 fire 全程有自己的 producer-scoped workspace（WS-B），repo 產出",
+                    "應該走 worktree merge gate 落地。但 canonical checkout 在本班期間",
+                    "出現了新的非機器狀態 dirty 檔 —— 可能是別的 session 正在編輯，",
+                    "也可能是 agent 違規直寫。時間差推理無法分辨作者，PHASE-Z 不再代收。",
+                    "",
+                    "## 現在該做什麼",
+                    "檔案留在工作區、沒有遺失。若是你的 session 在編輯，照常 commit；",
+                    "若連續多班無人認領，foreign-streak 機制會開 incident。",
+                    "",
+                    "## 檔案",
+                    *[f"- {p}" for p in isolation_residue[:30]],
+                    *(["- …"] if len(isolation_residue) > 30 else []),
+                ]),
+            )
     # The snapshot is consumed only on a SETTLED outcome (committed / clean /
     # nothing_owned / nothing_to_commit — the scheduler's terminal set). A failed
     # commit attempt (pre-commit gate block, add/reset error) keeps the baseline,
@@ -2661,13 +2716,15 @@ def run_phase_z(
         if not foreign:
             return {"committed": False, "reason": "nothing_owned", "foreign": [],
                     "orphan_halves": orphan_halves, "quarantine": quarantine,
-                    "incident": incident}
+                    "incident": incident,
+                    **({"isolation_residue": isolation_residue} if isolation_residue else {})}
         if stuck:
             # the critical alert above already said everything this one would, louder.
             return {"committed": False, "reason": "nothing_owned",
                     "foreign": foreign, "stuck": stuck, "orphan_halves": orphan_halves,
                     "quarantine": quarantine,
-                    "incident": incident}
+                    "incident": incident,
+                    **({"isolation_residue": isolation_residue} if isolation_residue else {})}
         alert_fn(
             level="warn",
             title="PHASE-Z 有檔案未提交，但不是這班產出的",
@@ -2690,7 +2747,8 @@ def run_phase_z(
         )
         return {"committed": False, "reason": "nothing_owned", "foreign": foreign,
                 "orphan_halves": orphan_halves, "quarantine": quarantine,
-                "incident": incident}
+                "incident": incident,
+                **({"isolation_residue": isolation_residue} if isolation_residue else {})}
 
     LOG.info("phase_z: auto-committing %d path(s) from this fire + %d machine-churn path(s)"
              " + %d proved orphan half/halves",
@@ -3111,7 +3169,8 @@ def run_phase_z(
                 "owned": owned, "foreign": foreign, "churn": churn,
                 "commit_head": out[-500:], "tests": tests, "index_refresh": refresh,
                 "orphan_halves": orphan_halves, "quarantine": quarantine,
-                "incident": incident}
+                "incident": incident,
+                **({"isolation_residue": isolation_residue} if isolation_residue else {})}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything
     # dirty was a leaked-ignored file already rm --cached'd, or a race cleaned
     # it) from a genuine commit failure.

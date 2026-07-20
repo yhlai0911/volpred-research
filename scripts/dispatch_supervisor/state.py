@@ -26,6 +26,10 @@ Schema (version 1)::
           "scheduled_for": "<ISO|null>",
           "fire_reason": "cron|requested:*|cron+requested:*",
           "fire_key": str | null,                 # atomic cron-slot dedup identity
+          "workspace": {                          # WS-B: producer-scoped worktree receipt
+            "name": str, "path": str, "branch": str, "base_sha": str,
+            "lanes": [str], "created_at": "<ISO>", "setup_s": float
+          },                                      # only present when the fire is isolated
           "restart_cleanup_pending": true,
           "cleanup_recorded": true,
           "cleanup_outcome": str
@@ -48,6 +52,8 @@ Schema (version 1)::
         "scheduled_for": "<ISO|null>",            # cron slot this fire services (naive local ISO)
         "fire_reason": "cron|requested:*|cron+requested:*",
         "fire_key": str | null,
+        "workspace": {"name": str, "path": str, "branch": str, "base_sha": str,
+                      "lanes": [str], "created_at": "<ISO>", "setup_s": float},
         "restart_cleanup_pending": true,          # only present while a restart-orphan investigation is in flight
         "cleanup_recorded": true,                 # append_completion_entry() stamped this orphan's entry
         "cleanup_outcome": str                    # …and which outcome, so a crash-before-finalize retry
@@ -55,8 +61,9 @@ Schema (version 1)::
       "phase_z_pending": [                       # released workers whose slot still drains PHASE-Z
         {
           "job_id": str, "cohort_id": str, "slot_id": int,
-          "created_at": "<ISO>"
-        }
+          "created_at": "<ISO>",
+          "isolated": bool                       # WS-B: this fire ran with a workspace →
+        }                                        #   cohort drain may demote baseline guessing
       ],
       "completions": [                           # ring buffer (max 100 entries)
         {
@@ -68,6 +75,8 @@ Schema (version 1)::
           # 下三者只在 orphan 路徑（append_completion_entry 且 job 有 pid）出現，
           # 供事後人工核對是哪個行程 — 一般 record_completion() 的 entry 沒有。
           "pid": int, "pgid": int, "started_wall": str,
+          # 只在 WS-B 隔離 fire 出現：ownership 由 worktree 隔離產生的 receipt。
+          "workspace": {"name": str, "path": str, "branch": str, "base_sha": str},
           "outcome": "success" | "failure" | "killed_timeout" | "kill_failed_orphan" |
                      "silent_death" |
                      "timeout_unverified" | "killed_supervisor_restart" |
@@ -631,6 +640,8 @@ def append_completion_entry(
             entry["pid"] = job.get("pid")
             entry["pgid"] = job.get("pgid")
             entry["started_wall"] = job.get("started_wall")
+        if job.get("workspace") is not None:
+            entry["workspace"] = job.get("workspace")
         completions = data.get("completions") or []
         completions.append(entry)
         if len(completions) > COMPLETIONS_MAX:
@@ -651,6 +662,7 @@ def append_completion_entry(
                         "cohort_id": job.get("cohort_id"),
                         "slot_id": job.get("slot_id"),
                         "created_at": _now(),
+                        "isolated": job.get("workspace") is not None,
                     })
                 data["phase_z_pending"] = pending
                 _sync_projection(data)
@@ -923,6 +935,28 @@ def attach_process(
         _sync_projection(data)
 
 
+def attach_workspace(
+    *, job_id: str, workspace: dict[str, Any], path: Path = STATE_PATH,
+) -> bool:
+    """Bind a WS-B producer-scoped workspace receipt to a reserved fire.
+
+    Written by the scheduler right after `workspace.allocate_workspace()` and
+    BEFORE the worker spawns, so restart-orphan cleanup and the finalizer can
+    always find the worktree this fire owns. Returns False when the job is
+    already gone (completion raced us) — the caller's own Workspace object is
+    then the only handle and finalize still runs off it.
+    """
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            LOG.warning("attach_workspace: job %s not found", job_id)
+            return False
+        _index, job = found
+        job["workspace"] = dict(workspace)
+        _sync_projection(data)
+        return True
+
+
 def update_started_wall(
     *, pid: int, started_wall: str, job_id: str | None = None,
     expected_attempt: int | None = None, path: Path = STATE_PATH,
@@ -1052,6 +1086,10 @@ def record_completion(
             "final_model": final_model,
             "outcome": outcome,
         }
+        if job.get("workspace") is not None:
+            # WS-B ownership receipt: the completion ring is where an auditor
+            # reverse-maps a merged branch to the fire that produced it.
+            entry["workspace"] = job.get("workspace")
         completions = data.get("completions") or []
         completions.append(entry)
         if len(completions) > COMPLETIONS_MAX:
@@ -1068,6 +1106,7 @@ def record_completion(
                         "cohort_id": job.get("cohort_id"),
                         "slot_id": job.get("slot_id"),
                         "created_at": _now(),
+                        "isolated": job.get("workspace") is not None,
                     })
                 data["phase_z_pending"] = pending
             cohort_drained = not any(
