@@ -32373,13 +32373,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T20:00:54.680765+00:00",
+    "completed_at": "2026-07-20T21:00:59.911134+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T20:00:54.680765+00:00",
-      "last_clean_observed_at": "2026-07-20T20:00:54.680765+00:00"
+      "resolved_at": "2026-07-20T21:00:59.911134+00:00",
+      "last_clean_observed_at": "2026-07-20T21:00:59.911134+00:00"
     }
   },
   {
@@ -32391,13 +32391,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T20:14:57.668144+00:00",
+    "completed_at": "2026-07-20T21:21:09.198240+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T20:14:57.668144+00:00",
-      "last_clean_observed_at": "2026-07-20T20:14:57.668144+00:00"
+      "resolved_at": "2026-07-20T21:21:09.198240+00:00",
+      "last_clean_observed_at": "2026-07-20T21:21:09.198240+00:00"
     }
   },
   {
@@ -32409,13 +32409,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T19:13:48.349780+00:00",
+    "completed_at": "2026-07-20T20:15:08.002589+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T19:13:48.349780+00:00",
-      "last_clean_observed_at": "2026-07-20T19:13:48.349780+00:00"
+      "resolved_at": "2026-07-20T20:15:08.002589+00:00",
+      "last_clean_observed_at": "2026-07-20T20:15:08.002589+00:00"
     }
   },
   {
@@ -34673,46 +34673,15 @@
   },
   {
     "id": "assign_168aeaf8",
-    "title": "K1684 E2：own-market realized target 的 forecast-tail divergence cross-OOS gate",
-    "description": "K1684 R3 primary Codex review 為 CONDITIONAL_PASS，但 E1 是 H2_UNSUPPORTED，不能選 paper route。執行 E2：選擇 forecast 與 realized target 為同一市場/標的的資料，OOS n>=2500；對 HAR-RV 與 GJR 使用相同資訊集、相同 lag、相同共同樣本，做 QLIKE + canonical DM/HAC/Harvey、1%/5% Kupiec+Christoffersen CC+Basel、Acerbi-Szekely Z1、FZ0。至少做跨 OOS/regime，scale/delta-c uncertainty 加 moving/block-bootstrap sensitivity。先讀 docs/error_log.md、knowledge K1684、experiment-preamble，檢索至少 3 篇文獻；固定 seed；不得用 cross-asset RV plug-in 冒充 own-market test。成功標準：三件套齊、lookahead mechanical audit、結果不論正負皆誠實報告、Codex review 後才決定 paper route。\n\n[migrated 2026-07-16 from task_18c9c0bd9722 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-12T14:48:11.761939+00:00]",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "K1684 E2：own-market realized target 的 forecast-tail divergence cross-OOS gate",
+    "priority": 2,
     "source": "agent",
     "created_at": "2026-07-16T14:42:55.569435+00:00",
-    "created_by": "single-gateway-migration",
-    "status_history": [
-      {
-        "ts": "2026-07-17T16:10:56.537584+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876"
-      },
-      {
-        "ts": "2026-07-17T16:10:56.781388+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876"
-      },
-      {
-        "ts": "2026-07-17T18:50:05.533451+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-17T20:14:57.241467+00:00",
-        "from": "pending",
-        "to": "succeeded",
-        "by": "complete"
-      }
-    ],
-    "started_at": "2026-07-17T16:10:56.781372+00:00",
-    "last_released_at": "2026-07-17T18:50:05.533442+00:00",
-    "last_release_reason": "auto_release_stale_2h",
     "completed_at": "2026-07-17T20:14:57.241452+00:00",
-    "result": "K1684 E2 own-market FTD cross-OOS gate 完成：H2_UNSUPPORTED（誠實 null）。compute agent 已跑（commit dd211a5e5），本班收尾=Gemini cert PASS + merge + knowledge 85df8797。詳見 experiments/k1684_e2/"
+    "tombstone": true,
+    "archived_at": "2026-07-20T21:07:38.851947+00:00"
   },
   {
     "id": "assign_a458fc01",
@@ -36183,37 +36152,15 @@
   },
   {
     "id": "k1684_e2_cert_merge_knowledge",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "K1684 E2 收尾：codex 認證 → merge worktree → 主線程寫 knowledge → complete assign_168aeaf8",
+    "priority": 2,
     "source": "hourly-dispatch",
     "created_at": "2026-07-18T01:51:58.507568+08:00",
-    "title": "K1684 E2 收尾：codex 認證 → merge worktree → 主線程寫 knowledge → complete assign_168aeaf8",
-    "description": "K1684 E2 (own-market realized-target forecast-tail-divergence cross-OOS gate) 實驗已於 2026-07-18 00:15-01:00 由 compute agent 跑完，worktree=dispatch-slot-1-79726798-k1684e2, 凍結 commit dd211a5e5。\n\n【已完成/已驗證，勿重跑】裁決 H2_UNSUPPORTED（誠實 null）。主線程已對 k1684_e2_results.json 逐項核對數字，與 agent stdout 一致：\n- 無偏 co² proxy 兩市場 HAR 未顯著贏 GJR（SPX DM t=+1.82、N225 t=+1.31）\n- SPX GK raw t=-5.58(顯著) → 對稱乘法 bias 校正後 t=-1.70(不顯著)，raw 跨 proxy 符號翻轉 → calibration-to-biased-proxy artifact\n- N225 recal GK/RS t≈-3.09 仍顯著偏 HAR，但無偏 co² 不支持 → 以無偏 proxy 為主裁\n- 1% VaR trinity: 只有 HAR+histsim 過，GJR 零格過（尾部失敗對稱，非 HAR 專有）\n- lookahead audit 兩市場皆 passed\n\n【剩餘工作 — 本班兩次 codex 認證審查都 stall（session 019f710f 01:12、019f7128 01:40 皆卡在 reasoning 無最終裁決），未能過 merge 的 review-certification gate】\n1) 重派 codex 認證審查（若再 stall 改用 gemini_ask.py 或改天再試），讀凍結實驗，把裁決寫入 experiments/k1684_e2/review_verdict.json（skeleton 已在 worktree，reviewed_sha256 已填好正確 hash，勿動；只填 verdict/reviewer/reviewed_at/reviewed_commit=dd211a5e5/review_artifact/blocking_defects）。審查焦點=README §8 三爭點（bias 校正口徑是否足以下 UNSUPPORTED / N225 caveat / paper route=FRL 方法論短文是否合理）。\n2) verdict=PASS → bash scripts/merge_worktree.sh dispatch-slot-1-79726798-k1684e2\n3) 主線程（非 agent，K1259）依已 merge 的 JSON 寫 K1684 E2 knowledge：H2_UNSUPPORTED，記三個關鍵數字 + 'apparent forecast-tail divergence = realized-measure 建構 + proxy-bias 的產物，非 HAR-vs-GARCH 穩健性質'（延續 E1 cross-asset 錯配 → E2 within-asset calibration artifact）\n4) complete assign_168aeaf8 --status succeeded（該 task 由 dead slot 79726798 claim，complete 不檢 owner）\n\nparent_compute_followup=k1684_e2_own_market_ftd_cross_oos; parent_email_task_id=null",
-    "escalation_attempts": 0,
-    "status_history": [
-      {
-        "ts": "2026-07-17T20:10:40.936535+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-226e2800ce494498a1c3e91698cb8c2a"
-      },
-      {
-        "ts": "2026-07-17T20:10:41.170873+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-226e2800ce494498a1c3e91698cb8c2a"
-      },
-      {
-        "ts": "2026-07-17T20:14:57.010026+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-226e2800ce494498a1c3e91698cb8c2a"
-      }
-    ],
-    "started_at": "2026-07-17T20:10:41.170858+00:00",
     "completed_at": "2026-07-17T20:14:57.010009+00:00",
-    "result": "Gemini 3.1-pro 認證審查 PASS（2 codex cert stall 後改用），review_verdict.json 填 PASS+blocking=[]，merge_worktree.sh 合併 dispatch-slot-1-79726798-k1684e2 到 main（檔案驗證完整），主線程寫 knowledge 85df8797（H2_UNSUPPORTED）"
+    "tombstone": true,
+    "archived_at": "2026-07-20T21:07:38.851947+00:00"
   },
   {
     "id": "dreaming_missing_retry_strategy_paper9_c3_multiple_testing_subsection",
@@ -43432,7 +43379,7 @@
     "title": "K528 round-5 remediation（Codex FAIL：Friday estimand 錯置 + completeness gate 三處 fail-open + 未定義多重比較 family）",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "description": "## 來源\n`storage/ops/codex_reviews/k528_round5_verdict.md` → 四條 blocking defect（B1–B4），worktree `dispatch-slot-3-30adeed7-k528nfp` **禁止 merge / 禁止 certify**。\n\n## 逐條 blocker\n\n**B1 — Friday estimand 與 README 宣稱不一致**\n證據：`k528_nfp_event_study.py:434-449,615-636`；`README.md:24,78-87,113,138`；`data/nfp_release_feed_fixture.json:41,77,101,139,212,236`\n程式用**映射後的交易 session weekday** 篩 237 筆，不是官方**發布日** weekday。253 個有效發布日其實有 **243 個在週五**；6 個 Good Friday 發布日被映射到下週一因而被排除。所以 1.189× / p=0.0209 支持的是「NFP 消息在週五交易 session 被吸收」，**不是**「發布日在週五」。\n最小修法：同時保存 `release_date` 與 `session_date`；若保留現行分析，全文改稱 **Friday trading-session estimand** 並揭露 6 個 Good Friday 案例。若要回答「發布日在週五」，須改用 release weekday 篩 243 筆 + 重新設計 weekday-matched controls + 重跑。\n\n**B2 — raw 與 selected 同步截短一個端點月仍會通過**\n證據：`k528_nfp_event_study.py:118-121,304-325`；`k528_completeness_gate_fix.json:140-145`\n獨立重現：誠實 fixture 260 raw / 254 selected；同刪 `2005-01` → 259/253、head shortfall 34 天仍通過；同刪 `2026-03` → 259/253、tail shortfall 44 天仍通過。70 天容忍度容得下整個月消失，raw-selected / 缺月 / allowlist 三道檢查全看不到。不推翻現有 archived 數字，但推翻 README 的 fail-closed 宣稱。\n最小修法：對這個**固定歷史樣本**釘住預期首尾月份或預期發布數；或用獨立 as-of/release-schedule 判斷應已發布的月份。**新增同時刪 raw+selected 首/尾月的對抗測試。**\n\n**B3 — 價格資料尾端截短也不 fail closed**\n證據：`k528_nfp_event_study.py:396-415,453-465`\n`yf.download` 後沒有 SPY/^VIX 覆蓋範圍或 freshness gate。SPY 尾端少一個月 → 後續 NFP 被歸 `outside_price_sample` 但仍出結論；VIX 尾端短缺 → `ffill()` 沿用陳舊 VIX。當前結果檔確實零筆 outside，但流程未來重跑仍可合法縮樣。\n最小修法：固定歷史樣本要求 SPY/^VIX 覆蓋至預期端點、`n_outside_price_sample == 0`、限制 VIX forward-fill 最大資料年齡。\n\n**B4 — 未定義多重比較 family 卻以 5% 宣稱顯著**\n證據：`README.md:66-67,99,113,137-140`；`k528_nfp_event_study.py:611-710`；`k528_nfp_event_study_results.json:117-175,178-284`\n腳本產生 A–J、12 個月份、兩種 VIX 相關等多個 p 值，無 multiplicity correction 也無 confirmatory/exploratory 分界。週五結果 p=0.0209 只能稱 **nominal significance**。若 family 限於 README 的六個主要檢定，Holm 後約 0.0417（結論可保留）；若涵蓋全部 22 個 inferential outputs，Holm 約 0.375。現在沒有預先定義 family，無法判斷哪個口徑合法。\n最小修法：指定 rerun 前既有的 confirmatory endpoints、報告 Holm／Romano-Wolf 調整值、其餘明標 exploratory。**未完成前不得無限定地寫「顯著」。**\n\n## 殘留 gap（single-month upstream truncation）的裁決 = **blocking**\n理由：這是完全落後於執行日的固定歷史樣本，不是「當月可能尚未發布」的即時查詢。70 天容忍允許完整首月或尾月消失，與 README 的 fail-closed 宣稱及本輪 PASS gate 直接衝突。除非額外加入獨立 endpoint expectation，或至少**撤回 fail-closed 宣稱**並明確限制適用範圍，否則不得視為可接受的設計取捨。\n\n## 非阻擋觀察（不必修，但別退步）\n- v6 allowlist 後門確已關閉（`k528_nfp_event_study.py:272-345`）；`test_k528_completeness_gate.py:175-216` 的 8 項測試獨立重跑 8 passed\n- 事件級資料內部一致：253 筆日期唯一，平均報酬 / 237-16 分組 / VIX 中位數 / regime Welch / Pearson / Spearman 逐位吻合\n- 無 event-window lookahead（`:434-449,480-545`）\n- VIX regime 門檻用全樣本中位數 → 事後、樣本內分組，README:123-129 已誠實界定為條件關聯；**不可**當 OOS 預測證據\n- `results.json:308` 的 \"predicts\" 建議改 \"is associated with\"\n- **未發現造假、湊數字或 proxy fallback**（`:371-386` 無 fallback/except，`fallback: none`）；上述是 fail-open completeness defect，不是偽造證據\n\n## 修完之後\nenqueue codex round 6 primary-path review → PASS 才在 worktree 用 verdict-template 重生 `experiments/k528/review_verdict.json`（必須在所有 claim-surface 檔 landed 之後生成，否則 sha pin 漂移）→ `experiment_gates.py certify` 綠燈 → 正式 `merge_worktree.sh`。knowledge.json 由主線程寫（K1259）。\n\n---\n**執行已委派（2026-07-20 12:15，hourly-slot-1-632eeea9）**：compute agent job `agent-brief_k528_round5-79ab4f`（opus/xhigh，worktree `dispatch-slot-3-30adeed7-k528nfp`，產出 `experiments/k528/k528_round5_remediation.json`）。完成後由 compute queue followup 接手逐條驗收 + 送 Codex round 6。本 task 標 in_progress 以免被 dispatcher 重複挑走。",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T21:12:18.321563+00:00",
@@ -43488,12 +43435,26 @@
         "to": "pending",
         "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e",
         "note": "supervisor_kill_a0db212c"
+      },
+      {
+        "ts": "2026-07-20T21:19:29.844235+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-b07e77ee721a45c8b2ae9a65dc409227"
+      },
+      {
+        "ts": "2026-07-20T21:19:30.078471+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-b07e77ee721a45c8b2ae9a65dc409227"
       }
     ],
     "last_released_at": "2026-07-20T16:18:56.732657+00:00",
     "started_at": "2026-07-20T16:11:46.486883+00:00",
     "last_release_reason": "supervisor_kill_a0db212c",
-    "residual_scope_from_round5_collection": "ROUND-5 COLLECTION VERDICT (storage/ops/codex_reviews/k528_round5_collection_verdict.json, reviewed_commit 17f12d16c): B2/B3 PASS (pre-fix FAIL + post-fix PASS both demonstrated). B1/B4 FAIL — 兩處皆為 text-only、不動任何數字。\nB1: experiments/k528/build_article_correction.py 仍對讀者產出已退役的 estimand。7 處字串（:32 :109 :111 :118 :168 :200-201 :310）寫「在週五公布的 NFP」/「237 Friday releases」，且 :108「253 場 NFP 裡有 237 場落在週五、16 場不是」把 release-dated-Friday 與 traded-in-Friday-session 混為一談。正解（已對 k528_nfp_event_study_results.json sample.friday_estimand 逐項查證）：253 total / 243 release date 為週五 / 其中 6 場遇假日順延到下個交易時段 / 237 場實際在週五時段交易。改寫為 session estimand，:108 重述為 243 dated Friday、237 traded in Friday session、6 場順延。\nB4: experiments/k528/README.md:203「事先聲明的六項 confirmatory family」與 :199 及 multiplicity.pre_registered=false 直接矛盾。刪「事先聲明的」並指向上方四行的未預先登記揭露。\nB4-inherent（family 於見資料後定義）與 collateral（tests/test_nfp_official_release_dates.py 65→66，寬鬆化 regex 未經獨立複驗）留給 round 6 明文裁決，非本輪 blocker。\nGATE：B1/B4 修完才可 enqueue Codex round 6；round 6 PASS 才重生 review_verdict.json → experiment_gates.py certify → merge_worktree.sh。目前 merge_status=NOT MERGED / NOT CERTIFIED。"
+    "residual_scope_from_round5_collection": "ROUND-5 COLLECTION VERDICT (storage/ops/codex_reviews/k528_round5_collection_verdict.json, reviewed_commit 17f12d16c): B2/B3 PASS (pre-fix FAIL + post-fix PASS both demonstrated). B1/B4 FAIL — 兩處皆為 text-only、不動任何數字。\nB1: experiments/k528/build_article_correction.py 仍對讀者產出已退役的 estimand。7 處字串（:32 :109 :111 :118 :168 :200-201 :310）寫「在週五公布的 NFP」/「237 Friday releases」，且 :108「253 場 NFP 裡有 237 場落在週五、16 場不是」把 release-dated-Friday 與 traded-in-Friday-session 混為一談。正解（已對 k528_nfp_event_study_results.json sample.friday_estimand 逐項查證）：253 total / 243 release date 為週五 / 其中 6 場遇假日順延到下個交易時段 / 237 場實際在週五時段交易。改寫為 session estimand，:108 重述為 243 dated Friday、237 traded in Friday session、6 場順延。\nB4: experiments/k528/README.md:203「事先聲明的六項 confirmatory family」與 :199 及 multiplicity.pre_registered=false 直接矛盾。刪「事先聲明的」並指向上方四行的未預先登記揭露。\nB4-inherent（family 於見資料後定義）與 collateral（tests/test_nfp_official_release_dates.py 65→66，寬鬆化 regex 未經獨立複驗）留給 round 6 明文裁決，非本輪 blocker。\nGATE：B1/B4 修完才可 enqueue Codex round 6；round 6 PASS 才重生 review_verdict.json → experiment_gates.py certify → merge_worktree.sh。目前 merge_status=NOT MERGED / NOT CERTIFIED。",
+    "completed_at": "2026-07-20T21:19:30.078458+00:00",
+    "result": "compute job agent-brief_k528_round5_a0db212c-cce6c8 已於 2026-07-20 16:52 完成並交付 k528_round5_remediation.json；獨立收件審查 (k528_round6_collection_verify) 判 B1-B4 全 PASS。後續分流到 k528_round7_gate_hardening + k528_primary_codex_certify_merge。"
   },
   {
     "id": "collect_k1623_rev3_20260720",
@@ -47199,5 +47160,65 @@
     "dispatch_lane": "agent",
     "title": "PHASE-Z commit 原子性：同一 fire 的變更集要嘛全進要嘛全不進",
     "description": "根因見 docs/error_log.md 2026-07-21 00:29 條目。\n\n事實：5e36d1720 commit 了 worker.py + alerts.py + tests/test_worker_fatal_marker_fastfail.py，\n獨漏三者都 import 的 failure_class.py。main 紅 32 分鐘（run 29761977060 實證 16 個 AttributeError），\n且 worker.py:314/324 是 production 判死路徑 —— 那段時間 DOA 偵測器本身是壞的。\n99aa30d7b 的 PHASE-Z hash-pinned recovery 補交收尾。\n\n問題：recovery 機制以「路徑」為恢復單位（逐檔 fingerprint 比對、逐檔補交），\n但正確性的單位是「變更集」。部分 commit 這個形狀本身沒有 enforcement owner。\n\n要做的：設計並落地一個 owner，使同一 fire 的產出無法被部分 commit。\n可能方向（需先評估，勿直接照抄）：\n(a) PHASE-Z commit 前對 staged tree 跑 import/collect smoke（pytest --collect-only），\n    未通過則整批不 commit 而非部分 commit；\n(b) 把 failed-closeout receipt 的恢復單位從 path 升級為 changeset，部分成功即整批 rollback；\n(c) pre-commit gate 偵測「staged 測試 import 了未 staged 的模組符號」。\n\n驗收：要有 regression test 釘住「部分 commit 不可能發生」，且不得讓 PHASE-Z 在\nmachine-churn-only 的班次變成必失敗（那會回歸到 agent 產出裸躺工作區的舊病）。"
+  },
+  {
+    "id": "k528_round6_collection_verify",
+    "title": "K528 round-5/6 收件審查：獨立驗 B1-B4 + fallback-reviewer PASS 的效力",
+    "description": "收 compute job agent-brief_k528_round5_a0db212c-cce6c8。讀 experiments/k528/k528_round5_remediation.json + storage/ops/codex_reviews/k528_round6_verdict.md，親自驗 B1-B4（不沿用 reviewer 的 PASS）：實跑 gate 測試、grep claim surface、確認 Holm 調整、確認 price coverage gate。PASS 才排 merge + certify；FAIL 建 round-7 remediation。",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "compute_queue_followup",
+    "parent_compute_job_id": "agent-brief_k528_round5_a0db212c-cce6c8",
+    "created_at": "2026-07-20T21:08:59.966705+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-20T21:09:05.183354+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-b07e77ee721a45c8b2ae9a65dc409227"
+      },
+      {
+        "ts": "2026-07-20T21:09:05.416456+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-b07e77ee721a45c8b2ae9a65dc409227"
+      },
+      {
+        "ts": "2026-07-20T21:19:53.874534+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-b07e77ee721a45c8b2ae9a65dc409227"
+      }
+    ],
+    "started_at": "2026-07-20T21:09:05.416439+00:00",
+    "completed_at": "2026-07-20T21:19:53.874517+00:00",
+    "result": "OVERALL=PASS（B1-B4 全數以自產證據獨立驗證），但 merge_recommendation=do_not_merge：primary-path Codex 未跑成功（額度 2026-07-25 重置）。裁決檔 experiments/k528/k528_round6_collection_verdict.json，已 commit 於 worktree branch k528-nfp-official-dates (5b1f154c1)。分流：k528_round7_gate_hardening (P2 pending, N1/N2/N3) + k528_primary_codex_certify_merge (blocked until 2026-07-25)。"
+  },
+  {
+    "id": "k528_round7_gate_hardening",
+    "title": "K528 round-7: B1 gate 從 5 詞 blocklist 改成真正的結構性不變量 (N1/N2/N3)",
+    "description": "收件審查 (k528_round6_collection_verdict.json) 判 B1-B4 全 PASS，但點出 3 個 non-blocking: N1 (最重要) round-6 裁決自稱的「結構性不變量」gate 其實是 5 詞 blocklist + 兩個無條件豁免 —— 實測 6 個注入有 4 個同義改寫溜過 (如「237 場 NFP 是週五發布的」/「published on a Friday」)，且同行只要出現 243 (即使語意無關) 整行豁免、denial marker 可被挾持。今天樹是乾淨的所以 B1 判 PASS，但這個 gate 擋不住改寫後的迴歸。N2 README.md:268「237 筆在週五」無 243 對照 (內部章節，gate 掃不到)。N3 線上文章 mile_35eef830 errata 只記 2026-07-18 事件日更正，未說明 proxy 期數字已被取代。Worktree: .claude/worktrees/dispatch-slot-3-30adeed7-k528nfp (branch k528-nfp-official-dates, HEAD 5b1f154c1)。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "collection_review",
+    "parent_task_id": "k528_round6_collection_verify",
+    "created_at": "2026-07-20T21:19:00.806181+00:00"
+  },
+  {
+    "id": "k528_primary_codex_certify_merge",
+    "title": "K528: primary-path Codex 認證 + merge worktree (Codex 額度 2026-07-25 後)",
+    "description": "B1-B4 已由獨立收件審查驗過 PASS，唯一未關的 gate 是 primary-path Codex 沒跑成功 (額度到 2026-07-25)。依 .claude/rules/experiments.md，fallback reviewer PASS != Codex PASS，不得 merge。額度回來後: 跑 primary-path codex exec review -> PASS 則走正式 merge_worktree.sh 整合 branch k528-nfp-official-dates (HEAD 5b1f154c1) 並 certify K528; FAIL 則建 round-8。先做 k528_round7_gate_hardening 再送 Codex，免得同一輪被打回。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "blocked",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_until": "2026-07-25T09:00:00+08:00",
+    "source": "collection_review",
+    "parent_task_id": "k528_round6_collection_verify",
+    "created_at": "2026-07-20T21:19:00.806181+00:00",
+    "blocked_at": "2026-07-20T21:19:15+00:00",
+    "blocked_note": "primary-path codex exec unavailable until quota reset; fallback reviewer PASS is not a Codex PASS per .claude/rules/experiments.md"
   }
 ]

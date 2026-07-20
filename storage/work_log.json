@@ -22752,5 +22752,16 @@
     "backfilled_at": "2026-07-20T20:35:01.075501+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1731"
+  },
+  {
+    "timestamp": "2026-07-21T05:19:46+08:00",
+    "task_type": "experiment",
+    "task_id": "k528_round6_collection_verify",
+    "outcome": "succeeded",
+    "summary": "K528 round-6 收件審查：獨立驗 B1-B4 全 PASS（release-vocab 全樹重掃 + 反空洞注入、v6 後門 probe 雙型皆 RAISED、price coverage 10 tests 含 3 負控制、Holm step-down 手算與 JSON 吻合、殘留 gap probe 重現 259/253）。merge_recommendation=do_not_merge：primary-path Codex 未跑（額度到 2026-07-25），fallback PASS != Codex PASS。3 個 non-blocking 進 round-7，主要是 round-6 自稱的「結構性不變量」gate 實為 5 詞 blocklist，6 個注入中 4 個同義改寫溜過。",
+    "commit": "5b1f154c1",
+    "owner": "hourly-slot-1-b07e77ee721a45c8b2ae9a65dc409227",
+    "actor": "hourly-slot-1-b07e77ee721a45c8b2ae9a65dc409227",
+    "k_id": "K528"
   }
 ]
