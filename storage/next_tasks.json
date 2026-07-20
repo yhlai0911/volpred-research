@@ -32368,13 +32368,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T15:01:32.551601+00:00",
+    "completed_at": "2026-07-20T16:01:21.873775+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T15:01:32.551601+00:00",
-      "last_clean_observed_at": "2026-07-20T15:01:32.551601+00:00"
+      "resolved_at": "2026-07-20T16:01:21.873775+00:00",
+      "last_clean_observed_at": "2026-07-20T16:01:21.873775+00:00"
     }
   },
   {
@@ -32386,13 +32386,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T15:26:41.621299+00:00",
+    "completed_at": "2026-07-20T16:19:01.420305+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T15:26:41.621299+00:00",
-      "last_clean_observed_at": "2026-07-20T15:26:41.621299+00:00"
+      "resolved_at": "2026-07-20T16:19:01.420305+00:00",
+      "last_clean_observed_at": "2026-07-20T16:19:01.420305+00:00"
     }
   },
   {
@@ -36036,62 +36036,15 @@
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260717T111834524387Z_a1",
-    "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=3 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.fRuWal baseline_findings=64 new=3 resolved=64\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:53 except TimeoutExpired|FileNotFoundError: return None\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:64 except StopIteration: return []\n[pre-commit]   NEW scripts/gen_codex_cli_reference.py:102 except URLError|TimeoutError|JSONDecodeError|OSError: return None\n[pre-commit]   [silent-fallback-audit] note: 64 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
-    "task_type": "platform_ops",
-    "dispatch_lane": "agent",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-17T11:18:34.524387+00:00",
+    "task_type": "platform_ops",
+    "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
+    "priority": 1,
     "source": "internal_alert_remediation_router",
-    "tags": [
-      "alert",
-      "internal-remediable",
-      "silent_fallback_new"
-    ],
-    "alert_key": "silent_fallback_new",
-    "internal_remediable": true,
-    "internal_alert_state": {
-      "episode_id": "20260717T111834524387Z",
-      "episode_started_at": "2026-07-17T11:18:34.524387+00:00",
-      "attempt_number": 1,
-      "last_seen_at": "2026-07-17T15:08:06.220685+00:00",
-      "consecutive_remediation_failures": 0,
-      "attempt_history": [],
-      "escalation_due": false,
-      "fingerprint": [
-        "experiments/k1380/k1380.py:137",
-        "experiments/k1380/k1380.py:219",
-        "experiments/k1380/k1380.py:292",
-        "experiments/k1380/k1380.py:362"
-      ],
-      "resolved_at": "2026-07-18T03:21:50.838252+00:00",
-      "final_consecutive_remediation_failures": 0,
-      "superseded_by_distinct_incident_at": "2026-07-18T03:21:50.838252+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-17T15:09:50.145744+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-065a3adc36174665b72683f3a4534377"
-      },
-      {
-        "ts": "2026-07-17T15:09:55.160326+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-065a3adc36174665b72683f3a4534377"
-      },
-      {
-        "ts": "2026-07-17T15:11:37.643387+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-065a3adc36174665b72683f3a4534377"
-      }
-    ],
-    "started_at": "2026-07-17T15:09:55.160311+00:00",
+    "created_at": "2026-07-17T11:18:34.524387+00:00",
     "completed_at": "2026-07-17T15:11:37.643370+00:00",
-    "result": "gen_codex_cli_reference.py 3 silent fallbacks fixed (warn×2 + silent-ok×1); audit findings 3→0; --check smoke OK; PHASE-Z candidate now passes pre-commit gate"
+    "tombstone": true,
+    "archived_at": "2026-07-20T16:08:23.925014+00:00"
   },
   {
     "id": "email-12130-a433ec",
@@ -43558,11 +43511,30 @@
         "to": "pending",
         "by": "hourly-slot-1-632eeea982ad44d4b59767a1d467a311",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 56.4min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-20T16:09:35.031670+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e"
+      },
+      {
+        "ts": "2026-07-20T16:11:46.486902+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e"
+      },
+      {
+        "ts": "2026-07-20T16:18:56.732671+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e",
+        "note": "supervisor_kill_a0db212c"
       }
     ],
-    "last_released_at": "2026-07-20T05:00:40.897991+00:00",
-    "started_at": "2026-07-20T04:06:06.506866+00:00",
-    "last_release_reason": "liveness_reconcile_detached_632eeea9",
+    "last_released_at": "2026-07-20T16:18:56.732657+00:00",
+    "started_at": "2026-07-20T16:11:46.486883+00:00",
+    "last_release_reason": "supervisor_kill_a0db212c",
     "residual_scope_from_round5_collection": "ROUND-5 COLLECTION VERDICT (storage/ops/codex_reviews/k528_round5_collection_verdict.json, reviewed_commit 17f12d16c): B2/B3 PASS (pre-fix FAIL + post-fix PASS both demonstrated). B1/B4 FAIL — 兩處皆為 text-only、不動任何數字。\nB1: experiments/k528/build_article_correction.py 仍對讀者產出已退役的 estimand。7 處字串（:32 :109 :111 :118 :168 :200-201 :310）寫「在週五公布的 NFP」/「237 Friday releases」，且 :108「253 場 NFP 裡有 237 場落在週五、16 場不是」把 release-dated-Friday 與 traded-in-Friday-session 混為一談。正解（已對 k528_nfp_event_study_results.json sample.friday_estimand 逐項查證）：253 total / 243 release date 為週五 / 其中 6 場遇假日順延到下個交易時段 / 237 場實際在週五時段交易。改寫為 session estimand，:108 重述為 243 dated Friday、237 traded in Friday session、6 場順延。\nB4: experiments/k528/README.md:203「事先聲明的六項 confirmatory family」與 :199 及 multiplicity.pre_registered=false 直接矛盾。刪「事先聲明的」並指向上方四行的未預先登記揭露。\nB4-inherent（family 於見資料後定義）與 collateral（tests/test_nfp_official_release_dates.py 65→66，寬鬆化 regex 未經獨立複驗）留給 round 6 明文裁決，非本輪 blocker。\nGATE：B1/B4 修完才可 enqueue Codex round 6；round 6 PASS 才重生 review_verdict.json → experiment_gates.py certify → merge_worktree.sh。目前 merge_status=NOT MERGED / NOT CERTIFIED。"
   },
   {
@@ -43677,7 +43649,31 @@
     "created_at": "2026-07-19T21:14:41.330868+00:00",
     "created_by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
     "parent_task_id": "collect_k1623_rev3_20260720",
-    "description": "## 背景\nK1623 rev3 claim-alignment remediation 已於 2026-07-20 收件驗收：**B1–B5 + MINOR 全部 PASS**（逐條由收件 agent 親自 grep/重算，非採信 JSON 自述）。worktree `dispatch-slot-2-c5cafe39-k1623`，commit `08c6aefb8`（+ `0dd6aa987` README 尾端碎片清理）。\n\n依收件 brief「有 blocked_items 即不得 enqueue round 3」，**本任務是 round-3 送審前唯一剩下的 compute gate**。\n\n## 要解的 blocked item\n`mean_structure_generated_regressor_share_unmeasured` — 目前無法量化「**估計段均值**」（相對於「**定位斷點**」）在 generated-regressor 不確定性中佔多少。\n\n原因是結構性的：現行兩臂**都**重估段均值，所以該成分在 A−B contrast 中**相消**。要量測必須加**第三臂**：用**已知植入的 level 向量**做 demean（location + level 皆 oracle），則\n- A−B = 斷點定位 + 均值估計 的合計\n- B−C = 均值估計 的單獨貢獻\n\n## 已知的 frozen 數字（不可改動，供對照）\n- Arm A−B（現有）：VIX −0.019962 / SPY −0.045159 / TW0050 −0.055620 / QQQ −0.041103 / N225 −0.045547 → range **[−0.0556, −0.0200]**\n- 原 arm-A 總偏誤 range **[−0.0846, −0.0273]**（約兩倍，rev3 已更正此歸因）\n- `k1623_rev2_mc_results.json` 的既有欄位經 flatten-diff 驗證為 **0 改 0 移、僅 50 新增**；**第三臂必須同樣以新增欄位方式落地，不得改動 frozen 欄位**\n\n## 做法\n1. 在 worktree 內擴充 `k1623_rev2_mc.py` 增加 arm C（known-level demean），沿用同 seed / 同 DGP / 同 replication 數，確保 A/B/C 三臂共用同一組模擬路徑（否則 B−C 不是乾淨對比）。\n2. **寫完先給 Codex 審再跑**（實驗碼一律先審後跑）。\n3. 腳本完整可跑之後才走 `scripts/compute_queue.py enqueue`（heavy MC 禁塞 hourly fire），`--result-artifact` 指向新 JSON，`--followup-task-type experiment`。\n4. 結果回來後：更新 README §6.4，把目前「DISCLOSED, NOT FIXED」的 scope limit 換成實測佔比；`claim_corrections_rev3` 補一條。\n\n## 替代路徑（若判定不值得跑）\n明確接受此項為 **permanent scope limit**，在 README 與 MC JSON 寫死理由（兩臂設計上相消、需第三臂），然後直接 enqueue round 3。**此決定要留書面裁決，不可默默跳過。**\n\n## round 3 送審前的其他前置\n- README 尾端工具碎片已於 `0dd6aa987` 清除 → **會改 README 的 sha256 pin**，送審前必須重跑 `scripts/experiment_gates.py verdict-template` 重生 `review_verdict.json`（目前 verdict=FAIL，fail-closed，29 個 sha256 pin，certify 正擋著 merge）。\n- round 3 PASS 才可 `merge_worktree.sh dispatch-slot-2-c5cafe39-k1623` + 主線程寫 knowledge.json（K1259 禁 agent 自寫）+ 把 loss-reversal 題材排進 daily_article。"
+    "description": "## 背景\nK1623 rev3 claim-alignment remediation 已於 2026-07-20 收件驗收：**B1–B5 + MINOR 全部 PASS**（逐條由收件 agent 親自 grep/重算，非採信 JSON 自述）。worktree `dispatch-slot-2-c5cafe39-k1623`，commit `08c6aefb8`（+ `0dd6aa987` README 尾端碎片清理）。\n\n依收件 brief「有 blocked_items 即不得 enqueue round 3」，**本任務是 round-3 送審前唯一剩下的 compute gate**。\n\n## 要解的 blocked item\n`mean_structure_generated_regressor_share_unmeasured` — 目前無法量化「**估計段均值**」（相對於「**定位斷點**」）在 generated-regressor 不確定性中佔多少。\n\n原因是結構性的：現行兩臂**都**重估段均值，所以該成分在 A−B contrast 中**相消**。要量測必須加**第三臂**：用**已知植入的 level 向量**做 demean（location + level 皆 oracle），則\n- A−B = 斷點定位 + 均值估計 的合計\n- B−C = 均值估計 的單獨貢獻\n\n## 已知的 frozen 數字（不可改動，供對照）\n- Arm A−B（現有）：VIX −0.019962 / SPY −0.045159 / TW0050 −0.055620 / QQQ −0.041103 / N225 −0.045547 → range **[−0.0556, −0.0200]**\n- 原 arm-A 總偏誤 range **[−0.0846, −0.0273]**（約兩倍，rev3 已更正此歸因）\n- `k1623_rev2_mc_results.json` 的既有欄位經 flatten-diff 驗證為 **0 改 0 移、僅 50 新增**；**第三臂必須同樣以新增欄位方式落地，不得改動 frozen 欄位**\n\n## 做法\n1. 在 worktree 內擴充 `k1623_rev2_mc.py` 增加 arm C（known-level demean），沿用同 seed / 同 DGP / 同 replication 數，確保 A/B/C 三臂共用同一組模擬路徑（否則 B−C 不是乾淨對比）。\n2. **寫完先給 Codex 審再跑**（實驗碼一律先審後跑）。\n3. 腳本完整可跑之後才走 `scripts/compute_queue.py enqueue`（heavy MC 禁塞 hourly fire），`--result-artifact` 指向新 JSON，`--followup-task-type experiment`。\n4. 結果回來後：更新 README §6.4，把目前「DISCLOSED, NOT FIXED」的 scope limit 換成實測佔比；`claim_corrections_rev3` 補一條。\n\n## 替代路徑（若判定不值得跑）\n明確接受此項為 **permanent scope limit**，在 README 與 MC JSON 寫死理由（兩臂設計上相消、需第三臂），然後直接 enqueue round 3。**此決定要留書面裁決，不可默默跳過。**\n\n## round 3 送審前的其他前置\n- README 尾端工具碎片已於 `0dd6aa987` 清除 → **會改 README 的 sha256 pin**，送審前必須重跑 `scripts/experiment_gates.py verdict-template` 重生 `review_verdict.json`（目前 verdict=FAIL，fail-closed，29 個 sha256 pin，certify 正擋著 merge）。\n- round 3 PASS 才可 `merge_worktree.sh dispatch-slot-2-c5cafe39-k1623` + 主線程寫 knowledge.json（K1259 禁 agent 自寫）+ 把 loss-reversal 題材排進 daily_article。",
+    "status_history": [
+      {
+        "ts": "2026-07-20T16:09:35.296529+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e"
+      },
+      {
+        "ts": "2026-07-20T16:11:46.776910+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e"
+      },
+      {
+        "ts": "2026-07-20T16:18:56.732679+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e",
+        "note": "supervisor_kill_a0db212c"
+      }
+    ],
+    "started_at": "2026-07-20T16:11:46.776886+00:00",
+    "last_released_at": "2026-07-20T16:18:56.732677+00:00",
+    "last_release_reason": "supervisor_kill_a0db212c"
   },
   {
     "id": "dreaming_missing_retry_strategy_k1684_article_general",
@@ -45709,7 +45705,31 @@
     "source": "agent",
     "created_at": "2026-07-20T06:55:20.543246+00:00",
     "parent_task_id": "k1731_armB_rev7_codex_round7",
-    "created_by": "codex-failover-slot-3-e320a2e29b0f447c863719819d16e1e1"
+    "created_by": "codex-failover-slot-3-e320a2e29b0f447c863719819d16e1e1",
+    "status_history": [
+      {
+        "ts": "2026-07-20T16:09:34.760352+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e"
+      },
+      {
+        "ts": "2026-07-20T16:11:46.150573+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e"
+      },
+      {
+        "ts": "2026-07-20T16:18:56.732690+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e",
+        "note": "supervisor_kill_a0db212c"
+      }
+    ],
+    "started_at": "2026-07-20T16:11:46.150556+00:00",
+    "last_released_at": "2026-07-20T16:18:56.732688+00:00",
+    "last_release_reason": "supervisor_kill_a0db212c"
   },
   {
     "id": "assign_f71399a3",
@@ -46943,7 +46963,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "pending",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29715899562",
@@ -46982,14 +47002,37 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-3dc6917c257b4a87a349a08bc8a7f9e6"
+      },
+      {
+        "ts": "2026-07-20T16:00:29.590406+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-3dc6917c257b4a87a349a08bc8a7f9e6",
+        "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 53.2min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-20T16:09:34.473632+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e"
+      },
+      {
+        "ts": "2026-07-20T16:11:47.079667+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e"
+      },
+      {
+        "ts": "2026-07-20T16:18:56.732698+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e",
+        "note": "supervisor_kill_a0db212c"
       }
     ],
-    "started_at": "2026-07-20T15:07:28.568206+00:00",
-    "last_released_at": "2026-07-20T14:17:30.140282+00:00",
-    "last_release_reason": "supervisor_kill_46f4806a",
-    "claimed_by": "hourly-slot-1-3dc6917c257b4a87a349a08bc8a7f9e6",
-    "claimed_at": "2026-07-20T15:07:17.230883+00:00",
-    "claim_session_id": "7b5741d84fff"
+    "started_at": "2026-07-20T16:11:47.079644+00:00",
+    "last_released_at": "2026-07-20T16:18:56.732696+00:00",
+    "last_release_reason": "supervisor_kill_a0db212c"
   },
   {
     "id": "release_deadlock_repair_20260720_14",
@@ -47073,7 +47116,7 @@
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260720T150147300691Z_a1",
     "title": "[internal alert] PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=1 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.uTxWY2 baseline_findings=60 new=1 resolved=60\n[pre-commit]   NEW scripts/dispatch_supervisor/worker.py:269 except TimeoutExpired: pass\n[pre-commit]   [silent-fallback-audit] note: 60 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n候選 commit 已完整回滾；hook side effects 隔離於 disposable candidate。\n\n[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n[pre-commit]   [silent-fallback-audit] findings=1 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.OsJsUx baseline_findings=60 new=1 resolved=60\n[pre-commit]   NEW scripts/dispatch_supervisor/worker.py:269 except TimeoutExpired: pass\n[pre-commit]   [silent-fallback-audit] note: 60 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
@@ -47091,7 +47134,7 @@
       "episode_id": "20260720T150147300691Z",
       "episode_started_at": "2026-07-20T15:01:47.300691+00:00",
       "attempt_number": 1,
-      "last_seen_at": "2026-07-20T15:06:07.539360+00:00",
+      "last_seen_at": "2026-07-20T16:07:15.713906+00:00",
       "consecutive_remediation_failures": 0,
       "attempt_history": [],
       "escalation_due": false,
@@ -47099,5 +47142,27 @@
         "scripts/dispatch_supervisor/worker.py:269"
       ]
     }
+  },
+  {
+    "id": "starved_draft_mile_fa57f77d",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "auto_discovered",
+    "status": "pending",
+    "created_at": "2026-07-20T16:17:00.610457+00:00",
+    "created_by": "audit_release_settings",
+    "title": "release 連續跳過 10 次：mile_fa57f77d 卡池裁決",
+    "description": "文章 mile_fa57f77d（東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗）已被 release loop 跳過 10 次（門檻 5）。裁決出口三選一，不准繼續讓它空轉：\n1. 修 gate：查 feed 該篇 details.release_audit_* 的 skip 原因，若是 gate 誤攔（audience/dedup/quality 判錯）修 gate 後讓它自然釋出；\n2. 手動釋出：內容確實可發 → 走正式 release pool / feed-publisher 流程發佈；\n3. retire：內容不該發（過時/重複/品質不足，寫明理由）→ 正式下架該 draft。\n裁決寫進本 task 的 result。來源：scripts/audit_release_settings.py --fix（WS-I）。"
+  },
+  {
+    "id": "starved_draft_mile_fa098fc8",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "auto_discovered",
+    "status": "pending",
+    "created_at": "2026-07-20T16:17:00.610457+00:00",
+    "created_by": "audit_release_settings",
+    "title": "release 連續跳過 8 次：mile_fa098fc8 卡池裁決",
+    "description": "文章 mile_fa098fc8（大跌隔天會反彈嗎？數字說會，但我們自己的檢定沒過關）已被 release loop 跳過 8 次（門檻 5）。裁決出口三選一，不准繼續讓它空轉：\n1. 修 gate：查 feed 該篇 details.release_audit_* 的 skip 原因，若是 gate 誤攔（audience/dedup/quality 判錯）修 gate 後讓它自然釋出；\n2. 手動釋出：內容確實可發 → 走正式 release pool / feed-publisher 流程發佈；\n3. retire：內容不該發（過時/重複/品質不足，寫明理由）→ 正式下架該 draft。\n裁決寫進本 task 的 result。來源：scripts/audit_release_settings.py --fix（WS-I）。"
   }
 ]

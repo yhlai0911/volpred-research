@@ -243,7 +243,18 @@ def _analyze(path: Path) -> dict:
         if any(k.arg == "start_new_session" for k in node.keywords):
             new_session = True
 
-    kills_group = ("killpg" in src) or ("kill_pgid" in src)
+    # `kill_tree` is procutil's strict superset of `kill_pgid`: it signals the
+    # group via kill_pgid AND walks the `ps` parent table for descendants that
+    # called setsid() and thereby escaped the group (procutil.py, 2026-07-13
+    # mile_aa4713db). Omitting it here made this gate red on the file that had
+    # adopted the STRONGER kill — gen_lazypack_agy.py, which does exactly what
+    # the docstring above asks for. Its sibling gen_lazypack_codex.py passed only
+    # because the word "killpg" survives in one prose docstring line describing
+    # the kill it no longer uses; deleting that comment would have turned a
+    # correct file red. Substring matching on the owner's NAME is the contract,
+    # so the set of accepted owners has to include every real one.
+    KILL_OWNERS = ("killpg", "kill_pgid", "kill_tree")
+    kills_group = any(owner in src for owner in KILL_OWNERS)
     return {
         "spawns_agentic": spawns_agentic,
         "has_timeout": has_timeout,

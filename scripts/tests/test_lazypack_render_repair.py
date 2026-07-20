@@ -137,14 +137,29 @@ def _overlap_plan(tmp_path: Path) -> Path:
 
 
 def test_synthetic_plan_fails_round_zero_with_overlap(tmp_path, cjk_test_font):
-    """Without repair rounds the incident plan must still die on OVERLAP.
+    """Without repair rounds the incident plan must still die on a layout guard.
 
     This pins the synthetic plan to the defect class it claims to reproduce —
     if a future geometry change makes round 0 pass, the repair test below
-    would silently stop exercising the repair path.
+    would silently stop exercising the repair path. That "round 0 must not
+    render cleanly" property is the load-bearing one and is asserted strictly.
+
+    WHICH guard trips first is deliberately not pinned. The plan's defect is a
+    row squeezed too small for its content; the renderer can notice that either
+    as OVERLAP (two ink boxes collide) or as TextFitError (the note cannot fit
+    its rect even at the minimum point size). Which one fires depends on the
+    host font's advance widths: macOS resolves FONT_FAMILY to a font whose
+    metrics collide the boxes, while the Ubuntu runner's Noto Sans CJK renders
+    the same string narrower, so the note runs out of vertical room first
+    ("complete text cannot fit 670x15px at 15pt"). Matching only "OVERLAP" made
+    this test pass on the author's laptop and fail in CI (run 29757690888) for
+    identical code — the same OS/font-identity coupling class pytest.yml's
+    header documents. Both messages name the same squeezed-row defect, and
+    test_repair_rounds_recover_the_overlap_plan still asserts OVERLAP appears
+    in the repair log, so the incident's own defect class stays covered.
     """
     plan = _overlap_plan(tmp_path)
-    with pytest.raises(RuntimeError, match="OVERLAP"):
+    with pytest.raises(RuntimeError, match="OVERLAP|cannot fit"):
         lr.render_plan(plan, tmp_path / "out0", max_repair_rounds=0)
     assert not list((tmp_path / "out0").glob("*.png"))
 

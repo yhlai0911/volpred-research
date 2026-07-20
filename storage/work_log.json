@@ -22645,5 +22645,22 @@
     "owner": "hourly-slot-2-1608803031384a6db4a01108a7ae8aea",
     "commit": null,
     "summary": "K942 一般讀者版 companion 文章：從餓死佇列（aged 129.6h）清出，寫完並發佈為 draft。\n\n背景：線上文章 mile_2cfa32a4 原標 audience=general，2026-07-15 被 publisher inference 改判為\nresearch（reader-visible 學術訊號：正文出現 K-id、GARCH）。修正方式是另寫一篇真正的 general\ncompanion，原 research 稿保持不動。\n\n做了什麼：\n- 前置 gate：check_arc_dedup --k-id K942 --audience general → verdict=clean（無 K-coverage、無 arc dup）；\n  另跑 publishing.md 層 2 grep canonical feed（storage/reports/feed.json）確認無 K942 general 覆蓋。\n- 派 writer subagent（opus/medium，per model_router；topology=subagent）寫 storage/drafts/K942_general_draft.md，\n  1618 字、2 表 2 圖，量化交叉分析一層（regime × horizon 疊乘的最好/最壞格）。\n- 主線程串行發佈：publish_draft.py → mile_9291c34c（audience=general, status=draft,\n  experiment_refs=[\"K942\",\"K943\"], sanitize_applied=0）。\n\n證據與誠實性：\n- 所有數字逐字轉錄自來源文章，未重新估計。regime +8.7/+0.5/+17.3；horizon +6.4/+18.4/-5.7。\n- 兩個 null/負向結果沒有被吞掉：一般區間 +0.5%（寫成全文主軸之一，圖上灰色標「等同沒用」）、\n  一個月 -5.7%（畫成向下紅棒，明講是倒扣）。\n- 另立但書：樣本僅 SPY 十年；原始分析未附顯著性檢定（文中明寫不得當已驗證結論）；\n  波動可預測不等於方向可預測（53.7% vs 市場 62% 上漲時間）。\n\nGate 結果：\n- anti_ai_gate.py exit 0（PASS，warn=1/3，唯一 WARN 是表格區塊被判為長段落）。\n- K-id / GARCH / QLIKE / HAR-RV / R² 全文掃描為零 —— 這是本任務的根因約束，圖檔也刻意不用\n  K942 命名，避免圖片路徑進 content 後再度觸發 _infer_audience 的 K\\d+ 規則（writer 主動發現）。\n\nLazypack：release gate 要求 general draft 必須有懶人包才能 release。作了 strict v1 plan\n（storage/drafts/K942_lazypack_plan.json）+ evidence JSON（K942_lazypack_evidence.json，\nsha256 綁定，所有數字走 binding 不得裸寫），已 enqueue = lazypack-mile_9291c34c，*/15 compute\nworker 會 render + append + sync。\n\n順帶發現（未修，非本任務範圍）：publish_draft.py 的 LAZYPACK NOT QUEUED 警告印錯 article id ——\n本次發佈的是 mile_9291c34c，警告卻指向既有的 mile_167ed77b，照著它的指令做會 enqueue 到錯誤文章。"
+  },
+  {
+    "timestamp": "2026-07-20T23:31:15+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_9291c34c",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_9291c34c:codex->agy",
+    "article_id": "mile_9291c34c",
+    "job_id": "lazypack-mile_9291c34c",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
   }
 ]
