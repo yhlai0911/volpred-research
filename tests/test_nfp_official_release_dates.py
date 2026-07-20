@@ -675,12 +675,36 @@ class TestCalendarFailClosedCannotBeBypassed:
 
     def test_missing_month_inside_the_observed_span_fails(self, check):
         """The old check exempted the first and last month unconditionally, so a
-        genuinely complete endpoint month could vanish for free."""
-        with pytest.raises(RuntimeError, match="missing 1 month"):
+        genuinely complete endpoint month could vanish for free.
+
+        Since the round-5 endpoint expectation landed, this scenario is caught by
+        that check first (2024-03's whole publication window sits inside the
+        requested window, so it is REQUIRED). Match either layer -- same reasoning
+        as test_allowlist_cannot_silence_a_month_that_has_data below: the point is
+        that it is caught, not which guard gets there first.
+        """
+        with pytest.raises(RuntimeError, match="missing 1 month|has no release for"):
             check(
                 pd.to_datetime(["2024-01-05", "2024-02-02", "2024-04-05"]),
                 ["2024-01-05", "2024-02-02", "2024-04-05"],
                 "2024-01-01", "2024-04-30",
+            )
+
+    def test_span_gap_check_still_fires_where_the_endpoint_expectation_cannot(self, check):
+        """Keep the span check under its own coverage rather than letting the new
+        layer silently inherit it.
+
+        The requested window here stops on 2024-03-10, so 2024-03's publication
+        window is NOT fully contained and the endpoint expectation correctly does
+        not require it. The month is still a hole inside the OBSERVED span
+        (2024-01..2024-04), and that is what this guard is for. If the span check
+        were ever deleted as redundant, this test goes red.
+        """
+        with pytest.raises(RuntimeError, match="missing 1 month"):
+            check(
+                pd.to_datetime(["2024-01-05", "2024-02-02", "2024-04-05"]),
+                ["2024-01-05", "2024-02-02", "2024-04-05"],
+                "2024-01-01", "2024-03-10",
             )
 
     def test_allowlist_cannot_silence_a_month_that_has_data(self, check):

@@ -65,6 +65,7 @@ GATE_CONSTANTS = (
     "REVIEWED_MULTI_ENTRY_MONTHS",
     "AMBIGUOUS_SAME_MONTH_GAP_DAYS",
     "MAX_WINDOW_SHORTFALL_DAYS",
+    "LATEST_OBSERVED_RELEASE_DAY_OF_MONTH",
 )
 
 # The three checks added in 726a34fb0 to close the back door, keyed by the
@@ -76,6 +77,12 @@ DEFENCES = {
     "allowlists_must_not_overlap": "if both:",
     "known_missing_claim_checked_against_whole_raw_feed": "if bogus:",
 }
+
+# The check added for Codex round-5 B2. Kept separate from DEFENCES above because
+# it closes a different attack: those three catch a month that vanishes from the
+# SELECTION while the raw feed still has it. This one catches a month that
+# vanishes from BOTH at once, which leaves every feed-relative check consistent.
+ENDPOINT_DEFENCE = "if absent_required:"
 
 
 def _load_gate(disable: tuple[str, ...] = ()):
@@ -106,8 +113,9 @@ def _load_gate(disable: tuple[str, ...] = ()):
     )
 
     source = "\n\n".join(chunks)
+    all_defences = {**DEFENCES, "endpoint_expectation": ENDPOINT_DEFENCE}
     for key in disable:
-        needle = DEFENCES[key]
+        needle = all_defences[key]
         n = source.count(needle)
         assert n == 1, (
             f"expected exactly one occurrence of {needle!r} (defence {key!r}) in the gate "
@@ -198,6 +206,104 @@ def test_each_defence_independently_closes_the_bypass(keep):
     ns = _load_gate(disable=tuple(k for k in DEFENCES if k != keep))
     with pytest.raises(RuntimeError):
         ns[GATE_FUNC](*_tamper(ns, multi_entry=True))
+
+
+# --------------------------------------------------------------------------
+# Codex round-5 B2: the endpoint month deleted from raw AND selected together.
+#
+# The three defences above all reason about the feed using the feed -- they
+# compare raw against selected, or look inside the observed span. Delete a month
+# from both sides at once and every one of them is satisfied: raw and selected
+# still agree, the span is still gap-free, and the 70-day window tolerance is
+# wide enough to swallow a whole month at either end. Codex reproduced this
+# independently (259 raw / 253 selected either way, head shortfall 34d / tail
+# shortfall 44d, both accepted).
+# --------------------------------------------------------------------------
+def _truncate_endpoint(end: str):
+    """Delete the first or last month from BOTH the raw feed and the selection."""
+    raw, selected, window = _feed()
+    months = sorted({d[:7] for d in raw})
+    victim = months[0] if end == "head" else months[-1]
+    raw = [d for d in raw if not d.startswith(victim)]
+    selected = [d for d in selected if not d.startswith(victim)]
+    assert victim not in {d[:7] for d in raw}, "the mutation did not remove the month"
+    assert victim not in {d[:7] for d in selected}
+    return selected, raw, window["start"], window["end"], victim
+
+
+@pytest.mark.parametrize("end", ["head", "tail"])
+def test_endpoint_month_deleted_from_raw_and_selected_is_rejected(end):
+    """The B2 attack. Must fail closed on the required-month expectation."""
+    ns = _load_gate()
+    selected, raw, start, stop, victim = _truncate_endpoint(end)
+    with pytest.raises(RuntimeError) as exc:
+        ns[GATE_FUNC](selected, raw, start, stop)
+    msg = str(exc.value)
+    assert victim in msg, f"the rejection must name the month that vanished; got: {msg}"
+    # It must be caught by the endpoint expectation, not incidentally by the
+    # coarse window tolerance -- which is the check that was already there and
+    # already demonstrated not to catch this.
+    assert "does not cover the requested window" not in msg
+    assert "fully contains the publication window" in msg
+
+
+@pytest.mark.parametrize("end", ["head", "tail"])
+def test_endpoint_truncation_is_invisible_without_the_new_check(end):
+    """Anti-vacuity, and the evidence that this defect was real.
+
+    With ONLY the required-month check neutralised -- every pre-existing defence
+    left intact -- the truncated calendar is ACCEPTED. That is the pre-fix
+    behaviour Codex round-5 B2 described, reproduced here so the test above
+    cannot be mistaken for a test of something that was already working.
+    """
+    ns = _load_gate(disable=("endpoint_expectation",))
+    selected, raw, start, stop, victim = _truncate_endpoint(end)
+    out = ns[GATE_FUNC](selected, raw, start, stop)  # no raise: the hole
+    assert victim not in {d[:7] for d in selected}, "the month is silently gone"
+    shortfall = out["window_coverage"]
+    assert (
+        shortfall["head_shortfall_days"] <= ns["MAX_WINDOW_SHORTFALL_DAYS"]
+        and shortfall["tail_shortfall_days"] <= ns["MAX_WINDOW_SHORTFALL_DAYS"]
+    ), "the 70d tolerance is what let this through; if it no longer does, re-derive this test"
+
+
+def test_endpoint_expectation_is_derived_from_the_window_not_the_feed():
+    """The property that makes the check work at all.
+
+    If the required-month set were computed from the observed feed, deleting a
+    month would delete the expectation with it. Narrowing the REQUESTED window
+    must change the requirement; truncating the feed must not.
+    """
+    ns = _load_gate()
+    raw, selected, w = _feed()
+    full = ns[GATE_FUNC](selected, raw, w["start"], w["end"])["endpoint_expectation"]
+    assert full["required_first_month"] == "2005-01"
+    assert full["required_last_month"] == "2026-03"
+
+    # Same feed, window asking for less -> fewer required months.
+    narrowed = ns[GATE_FUNC](selected, raw, "2005-01-01", "2025-06-30")["endpoint_expectation"]
+    assert narrowed["required_last_month"] == "2025-06"
+    assert narrowed["n_required_months"] < full["n_required_months"]
+
+
+def test_release_later_than_the_constant_invalidates_the_expectation():
+    """The constant is self-policing.
+
+    LATEST_OBSERVED_RELEASE_DAY_OF_MONTH is the premise of the required-month
+    rule. A release later in its month than the constant allows means the premise
+    has expired, and the run must say so rather than quietly under-requiring.
+    """
+    ns = _load_gate()
+    raw, selected, w = _feed()
+    victim = max(d[:7] for d in raw)
+    late = f"{victim}-28"
+    # MOVE the tail release later, do not add a second one: a second entry would
+    # trip the duplicate-month and unreviewed-multi-entry checks first, and the
+    # test would pass while proving nothing about the constant.
+    raw = sorted([d for d in raw if not d.startswith(victim)] + [late])
+    selected = sorted([d for d in selected if not d.startswith(victim)] + [late])
+    with pytest.raises(RuntimeError, match="LATEST_OBSERVED_RELEASE_DAY_OF_MONTH"):
+        ns[GATE_FUNC](selected, raw, w["start"], w["end"])
 
 
 @pytest.mark.parametrize("multi_entry", [False, True], ids=["single_entry", "multi_entry"])

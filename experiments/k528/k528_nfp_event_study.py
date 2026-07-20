@@ -118,7 +118,45 @@ REVIEWED_MULTI_ENTRY_MONTHS: dict[str, dict] = {
 # How far the observed calendar may fall short of the requested window before the
 # run treats it as truncated. One monthly cycle plus slack; a feed that stops
 # early otherwise shrinks the "observed span" it is checked against and passes.
+#
+# This tolerance is NOT the endpoint defence -- see EXPECTED_MONTHS below. 70 days
+# is wide enough for an entire endpoint month to vanish from raw AND selected
+# together, which is exactly the hole Codex round-5 B2 reproduced. It is kept
+# because it catches a different shape (a feed that is wildly off-window), but it
+# is no longer the thing standing between this run and a silently shortened sample.
 MAX_WINDOW_SHORTFALL_DAYS = 70
+
+# The latest day-of-month on which the Employment Situation has ever been
+# published in this sample: 2013-10-22, delayed by the October 2013 federal
+# shutdown (the 2025 shutdown produced 2025-11-20 and 2025-12-16, both earlier in
+# the month). Regular releases land on the first or second Friday, i.e. day 1-14;
+# this bound is the shutdown-delayed worst case plus nothing.
+#
+# It exists so the required-month expectation below can be derived from the
+# REQUESTED WINDOW ALONE. That independence is the whole point: every other check
+# in this function reasons about the feed using the feed, so a feed that is short
+# at one end simply moves the yardstick with it. Codex round-5 B2:
+#
+#     deleting 2005-01 from raw AND selected together -> 259/253, head shortfall
+#     34d, passes; deleting 2026-03 the same way -> 259/253, tail shortfall 44d,
+#     passes
+#
+# Nothing in the old gate could see either, because after the deletion the
+# observed span, the raw->selected diff and the allowlists were all self-consistent.
+# The requested window is the one fact the feed cannot edit.
+LATEST_OBSERVED_RELEASE_DAY_OF_MONTH = 22
+
+# How far SPY / ^VIX may fall short of the requested window at either end. The
+# window edges are calendar dates, the data are sessions, so a few days of slack
+# is structural (2005-01-01 is a Saturday; yfinance's `end` is exclusive). Ten
+# days covers the longest holiday weekend and is still a fifth of the ~30 days it
+# would take to lose a month.
+MAX_PRICE_COVERAGE_SHORTFALL_DAYS = 10
+
+# How many consecutive SPY sessions may carry a forward-filled VIX. Observed max
+# in this sample is 0 -- ^VIX and SPY trade the same calendar -- so this is pure
+# headroom for a stray holiday mismatch, not an accommodation of anything real.
+MAX_VIX_FFILL_TRADING_DAYS = 3
 
 
 def write_json_atomic(path: Path, payload) -> None:
@@ -317,6 +355,46 @@ def check_calendar_is_complete(selected, raw, start, end):
             "shortens the sample while every printed count still agrees with itself."
         )
 
+    # 3a-bis: THE ENDPOINT EXPECTATION. Every check above (and 3a) reasons about
+    # the feed using the feed, so deleting an endpoint month from raw and selected
+    # at the same time moves every yardstick with it and nothing looks wrong. This
+    # check derives what MUST be there from the requested window alone.
+    #
+    # A month is required when the window contains the whole interval in which its
+    # report could have been published: day 1 (earliest possible) through
+    # LATEST_OBSERVED_RELEASE_DAY_OF_MONTH (shutdown-delayed worst case). Anything
+    # narrower would demand a release the window may legitimately cut off.
+    #
+    # The constant is self-policing: if the feed ever carries a release later in
+    # its month than the constant allows, the premise of this rule has expired and
+    # the run says so instead of quietly under-requiring.
+    latest_day_seen = max((d.day for d in sel), default=0)
+    if latest_day_seen > LATEST_OBSERVED_RELEASE_DAY_OF_MONTH:
+        offenders = sorted(str(d.date()) for d in sel if d.day > LATEST_OBSERVED_RELEASE_DAY_OF_MONTH)
+        raise RuntimeError(
+            f"release(s) {offenders} fall later in their month than "
+            f"LATEST_OBSERVED_RELEASE_DAY_OF_MONTH={LATEST_OBSERVED_RELEASE_DAY_OF_MONTH}. "
+            "That constant is the premise of the required-month endpoint check; a later "
+            "release means the premise is stale and the endpoint expectation would silently "
+            "under-require. Re-derive the constant against the BLS archive before proceeding."
+        )
+
+    required_months = sorted(
+        p.strftime("%Y-%m")
+        for p in pd.period_range(start=want_start, end=want_end, freq="M")
+        if p.to_timestamp() >= want_start
+        and p.to_timestamp().replace(day=LATEST_OBSERVED_RELEASE_DAY_OF_MONTH) <= want_end
+    )
+    absent_required = sorted(set(required_months) - set(sel_months) - set(KNOWN_MISSING_MONTHS))
+    if absent_required:
+        raise RuntimeError(
+            f"the requested window {start}..{end} fully contains the publication window of "
+            f"{len(absent_required)} month(s) that the calendar has no release for: "
+            f"{absent_required}. This is derived from the REQUESTED WINDOW, not from the feed, "
+            "so it still fires when a month is deleted from the raw feed and the selection at "
+            "the same time -- the case the observed-span checks structurally cannot see."
+        )
+
     # 3b: no month may vanish from inside the observed span.
     span = {
         p.strftime("%Y-%m")
@@ -358,12 +436,32 @@ def check_calendar_is_complete(selected, raw, start, end):
             "tail_shortfall_days": int(tail_short),
             "tolerance_days": MAX_WINDOW_SHORTFALL_DAYS,
         },
+        "endpoint_expectation": {
+            "derived_from": "requested window only -- never from the feed",
+            "latest_observed_release_day_of_month": LATEST_OBSERVED_RELEASE_DAY_OF_MONTH,
+            "n_required_months": len(required_months),
+            "required_first_month": required_months[0] if required_months else None,
+            "required_last_month": required_months[-1] if required_months else None,
+            "excused_by_known_missing": sorted(set(required_months) & set(KNOWN_MISSING_MONTHS)),
+            "why": (
+                "Codex round-5 B2: deleting an endpoint month from the raw feed and the "
+                "selection together left every feed-relative check self-consistent (259 raw / "
+                "253 selected, shortfall inside the 70d tolerance) and the sample silently "
+                "shortened. The requested window is the one fact a truncated feed cannot edit."
+            ),
+        },
         "residual_limitation": (
-            "Same-month selection uses 'earliest wins', which is a heuristic. It cannot "
-            "distinguish an off-cycle item filed BEFORE the report from the report itself, "
-            "so every multi-entry month must additionally appear in "
-            "REVIEWED_MULTI_ENTRY_MONTHS with a date verified against the BLS archive. A "
-            "new multi-entry month fails the run rather than being assumed."
+            "Two heuristics remain. (1) Same-month selection uses 'earliest wins', which "
+            "cannot distinguish an off-cycle item filed BEFORE the report from the report "
+            "itself, so every multi-entry month must additionally appear in "
+            "REVIEWED_MULTI_ENTRY_MONTHS with a date verified against the BLS archive. A new "
+            "multi-entry month fails the run rather than being assumed. (2) The endpoint "
+            "expectation can still be silenced by adding a required month to "
+            "KNOWN_MISSING_MONTHS. That is deliberate -- 2025-10 really was cancelled -- and "
+            "it is bounded by check 4, which verifies against the RAW feed that a claimed "
+            "hole is a real hole. What remains uncovered is a month deleted from the raw feed "
+            "AND declared missing in writing: a documented false claim, not a silent "
+            "truncation. This gate is fail-closed against the latter, not the former."
         ),
     }
 
@@ -403,6 +501,47 @@ if isinstance(spy.columns, pd.MultiIndex):
 if isinstance(vix.columns, pd.MultiIndex):
     vix.columns = vix.columns.get_level_values(0)
 
+
+def check_price_coverage(frame, ticker, start, end):
+    """Fail closed on a price series that does not reach both ends of the window.
+
+    Codex round-5 B3: there was no coverage check here at all. A SPY download
+    ending a month early does not raise and does not produce NaNs -- the releases
+    past the end simply get filed under `n_outside_price_sample` and the run
+    reports a conclusion on a quietly shorter sample. A short ^VIX tail is worse
+    still, because the ffill below turns it into stale-but-present numbers.
+
+    Same principle as the calendar gate: the requested window is the yardstick,
+    because it is the one thing a truncated download cannot move.
+    """
+    if len(frame) == 0:
+        raise RuntimeError(f"{ticker}: download returned no rows for {start}..{end}")
+    head_short = (frame.index[0] - pd.Timestamp(start)).days
+    tail_short = (pd.Timestamp(end) - frame.index[-1]).days
+    if head_short > MAX_PRICE_COVERAGE_SHORTFALL_DAYS or tail_short > MAX_PRICE_COVERAGE_SHORTFALL_DAYS:
+        raise RuntimeError(
+            f"{ticker} does not cover the requested window {start}..{end}: first bar "
+            f"{frame.index[0].date()} ({head_short}d in), last bar {frame.index[-1].date()} "
+            f"({tail_short}d short of the end). Tolerance is "
+            f"{MAX_PRICE_COVERAGE_SHORTFALL_DAYS}d (long holiday weekend). A truncated price "
+            "series shortens this fixed historical sample without shortening any count that "
+            "gets printed."
+        )
+    return {
+        "ticker": ticker,
+        "n_rows": int(len(frame)),
+        "observed": f"{frame.index[0].date()}..{frame.index[-1].date()}",
+        "head_shortfall_days": int(head_short),
+        "tail_shortfall_days": int(tail_short),
+        "tolerance_days": MAX_PRICE_COVERAGE_SHORTFALL_DAYS,
+    }
+
+
+price_coverage = {
+    "SPY": check_price_coverage(spy, "SPY", SAMPLE_START, SAMPLE_END),
+    "^VIX": check_price_coverage(vix, "^VIX", SAMPLE_START, SAMPLE_END),
+}
+
 # Calculate returns
 spy["Return"] = spy["Close"].pct_change()
 spy["AbsReturn"] = spy["Return"].abs()
@@ -412,10 +551,51 @@ spy.dropna(subset=["Return"], inplace=True)
 # Merge VIX
 vix_close = vix[["Close"]].rename(columns={"Close": "VIX"})
 spy = spy.join(vix_close, how="left")
-spy["VIX"] = spy["VIX"].ffill()  # forward fill for holidays
+
+def check_vix_forward_fill_age(vix_series):
+    """Bound how long a forward-filled VIX may be carried, BEFORE filling.
+
+    `ffill()` is silent by construction: a ^VIX series that stops a month early
+    leaves the last real quote stamped on every session after it, and the regime
+    split and the correlation then run on a constant that looks like data.
+    Holidays justify carrying a quote for a session or two; they do not justify
+    carrying one for a month.
+
+    A function rather than inline code so it can be attacked by a test. An
+    unexercised guard and an absent guard fail the same way.
+    """
+    missing = vix_series.isna()
+    run = max_run = 0
+    for m in missing:
+        run = run + 1 if m else 0
+        max_run = max(max_run, run)
+    if max_run > MAX_VIX_FFILL_TRADING_DAYS:
+        raise RuntimeError(
+            f"^VIX is missing for up to {max_run} consecutive SPY sessions; the limit is "
+            f"{MAX_VIX_FFILL_TRADING_DAYS}. Forward-filling across a gap that long would carry "
+            "a stale VIX into the regime split and the correlation as if it were an "
+            "observation. A run this long is a truncated or partial ^VIX download, not a holiday."
+        )
+    filled = vix_series.ffill()
+    if filled.isna().any():
+        raise RuntimeError(
+            f"{int(filled.isna().sum())} session(s) still have no VIX after forward fill. The "
+            "gap is at the START of the sample, where there is nothing to carry forward."
+        )
+    return filled, {
+        "n_sessions_without_native_vix": int(missing.sum()),
+        "max_consecutive_ffill_trading_days": int(max_run),
+        "limit_trading_days": MAX_VIX_FFILL_TRADING_DAYS,
+    }
+
+
+spy["VIX"], vix_ffill_audit = check_vix_forward_fill_age(spy["VIX"])
+price_coverage["vix_forward_fill"] = vix_ffill_audit
 
 print(f"  SPY: {len(spy)} trading days ({spy.index[0].date()} to {spy.index[-1].date()})")
-print(f"  VIX: {spy['VIX'].notna().sum()} days with VIX data")
+print(f"  VIX: {spy['VIX'].notna().sum()} days with VIX data "
+      f"({vix_ffill_audit['n_sessions_without_native_vix']} forward-filled, "
+      f"longest run {vix_ffill_audit['max_consecutive_ffill_trading_days']}d)")
 
 # ============================================================
 # 3. Map NFP dates to trading days
@@ -464,6 +644,23 @@ if in_sample_unmapped:
         "drop real event days into the control group."
     )
 
+# Codex round-5 B3, second half. The clause above forgives a release that falls
+# OUTSIDE the price series, on the reasoning that the calendar window may overhang
+# the price history. For this sample that reasoning does not apply: the calendar
+# and the price download were asked for the same fixed, fully-elapsed window, and
+# check_price_coverage has already confirmed both series reach both ends of it. So
+# an overhang here is not a design boundary, it is a short download that the
+# coverage tolerance was too coarse to catch -- and `n_outside_price_sample` is
+# precisely where such a release would go to be counted and then ignored.
+if unmapped:
+    raise RuntimeError(
+        f"{len(unmapped)} official NFP release(s) fall outside the price sample: "
+        f"{sorted(unmapped)}. SPY covers {price_coverage['SPY']['observed']} and the calendar "
+        f"was requested for {SAMPLE_START}..{SAMPLE_END}; with both endpoints verified, every "
+        "release must land on a session. Counting these as 'outside the sample' and carrying "
+        "on is how a truncated price series produces a conclusion on a shorter sample."
+    )
+
 collisions = {}
 for rel, sess in release_to_session.items():
     collisions.setdefault(sess, []).append(rel.date().isoformat())
@@ -476,6 +673,38 @@ if colliding:
 
 nfp_trading_dates = sorted(release_to_session.values())
 n_shifted = sum(1 for r, s in release_to_session.items() if r != s)
+
+# Both dates travel together from here on. Codex round-5 B1: the run kept only the
+# session date, so `weekday` below meant SESSION weekday while the README read it
+# as RELEASE weekday. The two differ on exactly the releases that fall on a market
+# holiday, and every one of those in this sample is a Good Friday -- so the
+# "Friday" event group was 237 sessions, not the 243 Friday releases the prose
+# described. The collision check above makes this inverse well-defined.
+session_to_release = {s: r for r, s in release_to_session.items()}
+assert len(session_to_release) == len(release_to_session)
+
+# A release whose weekday and session weekday disagree must be a release on a
+# non-trading day -- that is the only mechanism that can shift one. Stating it as
+# an invariant rather than a comment means a future change to the mapping rule
+# (say, "nearest session" instead of "next session") cannot quietly redefine the
+# event group while the prose keeps describing the old one.
+weekday_shifted = sorted(
+    r for r, s in release_to_session.items() if r.weekday() != s.weekday()
+)
+misattributed = [r for r in weekday_shifted if r in set(trading_dates)]
+if misattributed:
+    raise RuntimeError(
+        f"release(s) {[str(d.date()) for d in misattributed]} changed weekday despite being "
+        "trading days themselves. The release-to-session mapping is no longer 'same day, else "
+        "next open' and the weekday-matched estimand below is not what it claims to be."
+    )
+
+# The Friday releases that are absorbed by a non-Friday session, named rather than
+# counted. These are the six the README used to fold silently into "NFP released
+# on a Friday".
+friday_release_nonfriday_session = sorted(
+    r for r, s in release_to_session.items() if r.weekday() == 4 and s.weekday() != 4
+)
 
 # Window buffer: an event needs 5 sessions before and 5 after to have a window
 # at all. Excluding the edges is correct; doing it without saying so is not.
@@ -532,11 +761,25 @@ for nfp_date in valid_nfp:
             "window-buffer filter -- the partition and the window logic disagree"
         )
 
+    release_ts = session_to_release[nfp_date]
+
     row = {
+        # `date` is the SESSION -- the day whose return is measured. Kept under the
+        # original key so the before/after audit against the archived proxy run
+        # still lines up. `release_date` is when BLS published. They differ for the
+        # six Good Friday releases; see friday_estimand in the results JSON.
         "date": nfp_date.strftime("%Y-%m-%d"),
+        "session_date": nfp_date.strftime("%Y-%m-%d"),
+        "release_date": release_ts.strftime("%Y-%m-%d"),
         "year": nfp_date.year,
         "month": nfp_date.month,
-        "weekday": nfp_date.weekday(),  # should be 4 (Friday)
+        # SESSION weekday. This is the one the Friday test filters on, and it is
+        # the correct one: the quantity being compared is a session return, and the
+        # confound being held fixed is the day-of-week effect of that session.
+        "weekday": nfp_date.weekday(),
+        "session_weekday": nfp_date.weekday(),
+        "release_weekday": release_ts.weekday(),
+        "session_shifted_from_release": bool(release_ts != nfp_date),
         "event_return": float(event_day["Return"]),
         "event_abs_return": float(event_day["AbsReturn"]),
         "pre_avg_abs_return": float(pre_window["AbsReturn"].mean()),
@@ -620,15 +863,34 @@ vol_ratio_all = float(nfp_abs_returns.mean() / non_nfp_abs_returns.mean())
 # This run takes (i). The non-Friday events are a handful of thin weekday cells
 # out of 253 -- cells that thin make (ii) a weighted average dominated by a few
 # single-digit strata, with standard errors driven by the smallest of them.
-# That is a noisier estimator of a harder-to-state quantity. (i) answers one
-# clean question: on a Friday, does an NFP release raise volatility? It costs
-# the non-Friday events, which are reported below as a separate descriptive
-# line rather than dropped in silence.
+# That is a noisier estimator of a harder-to-state quantity.
+#
+# WHICH "FRIDAY" (Codex round-5 B1). The filter is SESSION weekday, so the
+# estimand is:
+#
+#     among trading sessions that fall on a Friday, do those that absorb an NFP
+#     release show larger |return| than those that do not
+#
+# NOT "among NFP releases dated a Friday". The two differ by six Good Fridays
+# (2007-04-06, 2010-04-02, 2012-04-06, 2015-04-03, 2021-04-02, 2023-04-07) --
+# published on a Friday, but the market was shut, so the news is absorbed by the
+# following Monday. 243 of the 253 releases are dated a Friday; 237 are traded on
+# one. Earlier drafts of the README described the filter as the former while the
+# code did the latter.
+#
+# Session weekday is the right filter, and not merely the convenient one. The
+# measured quantity is a SESSION return and the confound being held fixed is the
+# day-of-week effect OF THAT SESSION. Filtering on release weekday would put six
+# Monday returns into a comparison against a pure-Friday control group, which
+# reintroduces exactly the weekday contamination this restriction exists to
+# remove. Option (ii) -- release weekday plus weekday-matched controls -- is
+# internally coherent but answers a different question with a noisier estimator.
 #
 # The exclusion is not neutral and should not be sold as such: the excluded
 # events are quieter than the Friday ones, so restricting RAISES the ratio
 # relative to the mixed spec. That is a property of the estimand, not evidence
-# of a stronger effect. Both numbers are reported.
+# of a stronger effect. Both numbers are reported, and the six Good Friday events
+# are reported separately below rather than dropped in silence.
 nfp_friday_mask = (df["weekday"] == 4).values
 nfp_friday_abs = nfp_abs_returns[nfp_friday_mask]
 nfp_nonfriday_abs = nfp_abs_returns[~nfp_friday_mask]
@@ -643,6 +905,56 @@ vol_ratio_fri = float(nfp_friday_abs.mean() / friday_non_nfp_abs.mean())
 t_stat_fri_mixed, p_val_fri_mixed = stats.ttest_ind(
     nfp_abs_returns, friday_non_nfp_abs, equal_var=False)
 vol_ratio_fri_mixed = float(nfp_abs_returns.mean() / friday_non_nfp_abs.mean())
+
+# The estimand, stated in machine-readable form so the prose cannot drift from it
+# again. Everything here is recomputed from `df`, not copied from the narrative.
+_n_release_friday = int((df["release_weekday"] == 4).sum())
+_n_session_friday = int((df["session_weekday"] == 4).sum())
+_gf = df[(df["release_weekday"] == 4) & (df["session_weekday"] != 4)]
+friday_estimand = {
+    "filter": "session weekday == Friday",
+    "estimand": (
+        "Among trading sessions falling on a Friday, do the sessions that absorb an NFP "
+        "release show larger |return| than those that do not? This is a claim about the "
+        "session that trades the news, NOT about releases dated a Friday."
+    ),
+    "n_events_total": int(len(df)),
+    "n_release_date_on_friday": _n_release_friday,
+    "n_traded_in_friday_session": _n_session_friday,
+    "friday_releases_absorbed_by_a_later_session": {
+        "n": int(len(_gf)),
+        "dates": [
+            {
+                "release_date": r["release_date"],
+                "session_date": r["session_date"],
+                "session_weekday": int(r["session_weekday"]),
+                "event_abs_return": float(r["event_abs_return"]),
+            }
+            for _, r in _gf.iterrows()
+        ],
+        "mean_abs_return": float(_gf["event_abs_return"].mean()) if len(_gf) else None,
+        "why_excluded": (
+            "Every one is a Good Friday: BLS published, the market was shut, the news is "
+            "absorbed by the following Monday. Their returns are Monday returns and cannot "
+            "enter a comparison whose control group is pure Friday without reintroducing the "
+            "weekday confound the restriction exists to remove."
+        ),
+    },
+    "why_session_and_not_release_weekday": (
+        "The measured quantity is a session return and the confound held fixed is the "
+        "day-of-week effect of that session. Filtering on release weekday would place these "
+        "Monday returns against a Friday-only control group."
+    ),
+    "what_this_does_not_identify": (
+        "Not 'NFP in general' (the sample is conditioned on Friday sessions) and not "
+        "'releases dated a Friday' (six such releases are traded on a Monday and excluded)."
+    ),
+}
+if _n_release_friday - _n_session_friday != len(_gf):
+    raise RuntimeError(
+        "release-Friday / session-Friday counts do not reconcile with the shifted set; the "
+        "estimand description would be wrong."
+    )
 
 # --- Test C: Wilcoxon rank-sum (non-parametric) ---
 u_stat, p_val_wilcox = stats.mannwhitneyu(nfp_abs_returns, non_nfp_abs_returns, alternative='greater')
@@ -708,6 +1020,120 @@ pos_returns = (df["event_return"] > 0).sum()
 neg_returns = (df["event_return"] < 0).sum()
 # Binomial test: is there a directional bias?
 binom_p = float(stats.binomtest(pos_returns, pos_returns + neg_returns, 0.5).pvalue)
+
+
+# ============================================================
+# 6b. Multiplicity (Codex round-5 B4)
+# ============================================================
+# The script emits 22 p-values and used to call one of them "significant at 5%"
+# with no family declared. That is not a defensible 5% claim, it is a nominal one.
+#
+# Holm rather than Romano-Wolf: Holm controls FWER under ARBITRARY dependence,
+# which is what this family needs -- it mixes Welch t, Mann-Whitney U and two
+# correlation tests on overlapping samples, and there is no single resampling
+# scheme that is jointly valid for all four. Romano-Wolf would be more powerful
+# if such a scheme existed; inventing one to gain power would be the wrong trade
+# in a review that is specifically about not overstating.
+def holm_adjust(pvals):
+    """Holm step-down adjusted p-values, monotone and capped at 1."""
+    m = len(pvals)
+    order = sorted(range(m), key=lambda i: pvals[i])
+    adj, running = [0.0] * m, 0.0
+    for rank, i in enumerate(order):
+        running = max(running, (m - rank) * pvals[i])
+        adj[i] = min(1.0, running)
+    return adj
+
+
+# The confirmatory family: the six tests README's "方法 / 檢定" line has named as
+# the study's tests since before this rerun, and the only ones the published
+# article makes directional claims from. Naming them is what makes the correction
+# auditable -- an unnamed family is a family chosen after seeing the p-values.
+#
+# Honest caveat, stated here and in the README: this study was never
+# pre-registered. "Pre-specified" means these endpoints predate the date
+# correction and the rerun, not that they were lodged before the data were seen.
+# The all-outputs family below is reported alongside precisely so that the narrow
+# family cannot be mistaken for a result that survives any choice of family.
+confirmatory = [
+    ("A_nfp_vs_all_welch", float(p_val_all)),
+    ("B_nfp_vs_friday_welch", float(p_val_fri)),
+    ("C_mannwhitney_one_sided", float(p_val_wilcox)),
+    ("E_vix_pearson", float(p_vix)),
+    ("E_vix_spearman", float(p_rho_vix)),
+    ("H_vix_regime_welch", float(p_regime)),
+]
+confirmatory_adj = holm_adjust([p for _, p in confirmatory])
+
+# Every inferential output the script produces, so the sensitivity below cannot
+# be accused of a convenient boundary. B_diagnostic_mixed_weekday is deliberately
+# NOT here: it is the superseded pre-correction specification, retained so the
+# correction audit can show what the contaminated estimand was worth, and it is
+# marked ineligible to quote wherever it appears. Including a number nobody may
+# cite would inflate the penalty on the numbers people do cite.
+exploratory = [
+    ("D_vol_crush", float(p_crush)),
+    ("F_vix_buildup", float(p_buildup)) if p_buildup is not None else None,
+    ("I_time_trend", float(p_trend)),
+    ("J_direction_binomial", float(binom_p)),
+] + [(f"G_month_{m}", float(v["p_val"])) for m, v in sorted(monthly_stats.items(), key=lambda kv: int(kv[0]))]
+exploratory = [e for e in exploratory if e is not None]
+
+all_outputs = confirmatory + exploratory
+all_adj = holm_adjust([p for _, p in all_outputs])
+
+_b_idx = [n for n, _ in confirmatory].index("B_nfp_vs_friday_welch")
+_b_all_idx = [n for n, _ in all_outputs].index("B_nfp_vs_friday_welch")
+
+multiplicity = {
+    "method": "Holm step-down (FWER, valid under arbitrary dependence)",
+    "why_not_romano_wolf": (
+        "The family mixes Welch t, Mann-Whitney U and two correlation statistics on "
+        "overlapping samples; no single resampling scheme is jointly valid for all four, and "
+        "manufacturing one to buy power is the wrong trade in a correction about overstatement."
+    ),
+    "pre_registered": False,
+    "pre_registration_note": (
+        "Not pre-registered. The confirmatory endpoints predate the date correction and this "
+        "rerun, but were not lodged before the data were seen. Both families are therefore "
+        "reported and the narrow one is not presented as the only defensible reading."
+    ),
+    "confirmatory_family": {
+        "n": len(confirmatory),
+        "members": [
+            {"test": n, "p_nominal": p, "p_holm": a, "survives_5pct": bool(a < 0.05)}
+            for (n, p), a in zip(confirmatory, confirmatory_adj)
+        ],
+    },
+    "all_outputs_family": {
+        "n": len(all_outputs),
+        "members": [
+            {"test": n, "p_nominal": p, "p_holm": a, "survives_5pct": bool(a < 0.05)}
+            for (n, p), a in zip(all_outputs, all_adj)
+        ],
+    },
+    "headline_friday_test": {
+        "p_nominal": float(p_val_fri),
+        "p_holm_confirmatory_family": float(confirmatory_adj[_b_idx]),
+        "p_holm_all_outputs_family": float(all_adj[_b_all_idx]),
+        "verdict": (
+            "Survives Holm within the six-test confirmatory family; does NOT survive Holm "
+            "against all 22 inferential outputs. Report as nominally significant, "
+            "Holm-robust only within the declared confirmatory family."
+        ),
+    },
+    "exploratory_note": (
+        "Everything outside the confirmatory family -- the 12 monthly cells, vol crush, VIX "
+        "buildup, time trend and direction binomial -- is EXPLORATORY. Nominal p-values are "
+        "reported for description; none may be quoted as a 5% finding."
+    ),
+}
+
+print("\n--- Multiplicity (Holm) ---")
+print(f"  Confirmatory family: {len(confirmatory)} tests")
+for (n, p), a in zip(confirmatory, confirmatory_adj):
+    print(f"    {n:28s} p={p:.4g}  Holm={a:.4g}  {'PASS' if a < 0.05 else 'fail'}")
+print(f"  Friday test vs all {len(all_outputs)} outputs: Holm={all_adj[_b_all_idx]:.4g}")
 
 print("\n" + "=" * 60)
 print("RESULTS")
@@ -862,10 +1288,17 @@ if vol_crush.mean() < 0 and p_crush < sig_level:
 else:
     conclusions.append(f"No significant vol crush pattern (p={p_crush:.4f})")
 
+# "Associated with", not "predicts". Both series are measured contemporaneously
+# in-sample and nothing here is a forecast; "predicts" invites exactly the
+# out-of-sample reading this study cannot support (Codex round-5, non-blocking).
 if r_vix is not None and p_vix < sig_level:
-    conclusions.append(f"Pre-event VIX predicts event vol (r={r_vix:.3f}, p={p_vix:.4f})")
+    conclusions.append(
+        f"Pre-event VIX is associated with event vol (r={r_vix:.3f}, p={p_vix:.4f}; "
+        "in-sample association, not a forecast)")
 else:
-    conclusions.append(f"Pre-event VIX does NOT predict event vol (r={r_vix:.3f}, p={p_vix:.4f})" if r_vix else "VIX regression: insufficient data")
+    conclusions.append(
+        f"Pre-event VIX shows no significant association with event vol "
+        f"(r={r_vix:.3f}, p={p_vix:.4f})" if r_vix else "VIX regression: insufficient data")
 
 for c in conclusions:
     print(f"  • {c}")
@@ -1285,9 +1718,12 @@ output = {
         "date_range": f"{df['date'].iloc[0]} to {df['date'].iloc[-1]}",
         "non_nfp_trading_days": int(non_nfp_mask.sum()),
         "friday_baseline_days": int(friday_mask.sum()),
-        "nfp_days_on_friday": int((df["weekday"] == 4).sum()),
+        "nfp_days_on_friday": int((df["session_weekday"] == 4).sum()),
+        "nfp_releases_dated_friday": int((df["release_weekday"] == 4).sum()),
         "event_mapping_audit": mapping_audit,
         "calendar_completeness": calendar_completeness,
+        "price_coverage": price_coverage,
+        "friday_estimand": friday_estimand,
         # Recorded independently so the control-group invariant
         # (controls == total - mapped NFP sessions) is checkable rather than an
         # algebraic identity between two numbers derived from each other.
@@ -1432,6 +1868,7 @@ output = {
         "positive_rate": float((april_nfp["event_return"] > 0).mean()),
         "vol_ratio": monthly_stats.get("4", {}).get("vol_ratio"),
     },
+    "multiplicity": multiplicity,
     "conclusions": conclusions,
     "practical_implication": (
         f"The VIX-regime gap is the LARGEST NUMBER in this study, which is not the "
@@ -1451,7 +1888,12 @@ output = {
         "Every significance statement in this artifact is scoped to its own test. "
         "The superseded run summarised these as 'insignificant across all tests', "
         "which contradicted the one-sided Mann-Whitney result in the same file "
-        "(k528 Codex v2 finding 6)."
+        "(k528 Codex v2 finding 6). Every `significant_5pct` flag here is NOMINAL: see "
+        "the top-level `multiplicity` block and the per-test `multiplicity` stamp for the "
+        "family each was judged in and its Holm-adjusted value. The Friday result is "
+        "Holm-robust within the six-test confirmatory family and is NOT Holm-robust against "
+        "all 22 inferential outputs; neither the confirmatory family nor this study as a "
+        "whole was pre-registered."
     ),
     "references": [
         "K513: FOMC/NFP/CPI event study (2005-2025, 668 events)",
@@ -1460,6 +1902,86 @@ output = {
     ],
     "event_data": results,  # full per-event data
 }
+
+# Codex round-5 B4: a bare `significant_5pct: true` sitting next to 21 other
+# p-values is an unqualified 5% claim. Stamp every flag with the family it was
+# judged in, mechanically -- a hand-written note on six entries would drift the
+# first time a test is added.
+_holm = {m["test"]: m for m in multiplicity["all_outputs_family"]["members"]}
+_confirmatory_names = {n for n, _ in confirmatory}
+_JSON_KEY_TO_FAMILY_NAME = {
+    ("statistical_tests", "A_nfp_vs_all"): "A_nfp_vs_all_welch",
+    ("statistical_tests", "B_nfp_vs_friday"): "B_nfp_vs_friday_welch",
+    ("statistical_tests", "C_wilcoxon"): "C_mannwhitney_one_sided",
+    ("statistical_tests", "D_vol_crush"): "D_vol_crush",
+    ("statistical_tests", "F_vix_buildup"): "F_vix_buildup",
+    ("regime_analysis", None): "H_vix_regime_welch",
+    ("time_trend", None): "I_time_trend",
+    ("directional_bias", None): "J_direction_binomial",
+}
+
+
+def _stamp(entry, family_name):
+    rec = _holm.get(family_name)
+    if rec is None:
+        return
+    confirmatory_member = family_name in _confirmatory_names
+    entry["multiplicity"] = {
+        "family": "confirmatory" if confirmatory_member else "exploratory",
+        "p_nominal": rec["p_nominal"],
+        "p_holm_all_outputs_family": rec["p_holm"],
+        "p_holm_confirmatory_family": (
+            dict(zip([n for n, _ in confirmatory], confirmatory_adj))[family_name]
+            if confirmatory_member else None
+        ),
+        "how_to_report": (
+            "Nominal, then Holm within the declared confirmatory family."
+            if confirmatory_member else
+            "EXPLORATORY -- nominal p reported for description only; not quotable as a 5% finding."
+        ),
+    }
+
+
+for (section, key), fam in _JSON_KEY_TO_FAMILY_NAME.items():
+    target = output.get(section)
+    if target is None:
+        continue
+    if key is not None:
+        target = target.get(key)
+    if isinstance(target, dict):
+        _stamp(target, fam)
+
+for _mk, _mv in output.get("seasonal_analysis", {}).items():
+    _stamp(_mv, f"G_month_{_mk}")
+
+if "E_vix_predictive" in output["statistical_tests"]:
+    _e = output["statistical_tests"]["E_vix_predictive"]
+    _e["multiplicity"] = {
+        "family": "confirmatory",
+        "pearson": {
+            "p_nominal": float(p_vix),
+            "p_holm_confirmatory_family": float(
+                dict(zip([n for n, _ in confirmatory], confirmatory_adj))["E_vix_pearson"]),
+            "p_holm_all_outputs_family": float(_holm["E_vix_pearson"]["p_holm"]),
+        },
+        "spearman": {
+            "p_nominal": float(p_rho_vix),
+            "p_holm_confirmatory_family": float(
+                dict(zip([n for n, _ in confirmatory], confirmatory_adj))["E_vix_spearman"]),
+            "p_holm_all_outputs_family": float(_holm["E_vix_spearman"]["p_holm"]),
+        },
+    }
+
+_unstamped = [
+    k for k, v in output["statistical_tests"].items()
+    if isinstance(v, dict) and "multiplicity" not in v and k != "B_diagnostic_mixed_weekday"
+]
+if _unstamped:
+    raise RuntimeError(
+        f"statistical_tests entries {_unstamped} carry a p-value but no multiplicity stamp. "
+        "A new test was added without being placed in a family -- which is how an undeclared "
+        "family gets rebuilt after being fixed."
+    )
 
 out_path = Path(__file__).parent / "k528_nfp_event_study_results.json"
 write_json_atomic(out_path, output)

@@ -1,7 +1,7 @@
 {
   "experiment_id": "K528",
   "title": "NFP event-date correction: first-Friday proxy vs official BLS calendar",
-  "generated_at": "2026-07-19T09:24:40.094779+00:00",
+  "generated_at": "2026-07-20T04:42:56.564457+00:00",
   "before_source": "k528_nfp_event_study_results_PROXY_SUPERSEDED.json",
   "after_source": "k528_nfp_event_study_results.json",
   "event_date_source": {
@@ -108,14 +108,14 @@
     "vol_ratio_vs_all": {
       "label": "NFP vs all non-NFP days (article: 1.10x)",
       "before": {
-        "mean_ratio": 1.1033594557473099,
+        "mean_ratio": 1.103358194620936,
         "nfp_mean": 0.008420922409653335,
-        "baseline_mean": 0.007632075264130319,
-        "p_value": 0.12896085509290342,
+        "baseline_mean": 0.0076320839875090455,
+        "p_value": 0.12896506936983523,
         "significant_5pct": false,
         "n": 254,
         "n_control": 5085,
-        "median_ratio": 1.1883534558452653,
+        "median_ratio": 1.1884655752391828,
         "win_rate": 0.5551181102362205,
         "as_published": {
           "mean_ratio": 1.1035360772013734,
@@ -127,13 +127,13 @@
         }
       },
       "after": {
-        "mean_ratio": 1.1077801107719454,
-        "nfp_mean": 0.008453063485870105,
-        "baseline_mean": 0.007630633014325986,
-        "p_value": 0.11206123565782941,
+        "mean_ratio": 1.1077807990339792,
+        "nfp_mean": 0.008453078026838303,
+        "baseline_mean": 0.007630641399643018,
+        "p_value": 0.11205788667986934,
         "significant_5pct": false,
         "n": 253,
-        "median_ratio": 1.191516393857052,
+        "median_ratio": 1.1914693568207806,
         "win_rate": 0.5612648221343873
       },
       "note": "proxy-side median_ratio / win_rate are reconstructed from the archived per-event data, not from the proxy run's own output (it only reported means).",
@@ -143,12 +143,12 @@
     "vol_ratio_vs_friday": {
       "label": "NFP vs non-NFP Friday baseline (article: 1.17x)",
       "before": {
-        "mean_ratio": 1.1667052740784034,
-        "p_value": 0.042140402537530375,
+        "mean_ratio": 1.1667081397245742,
+        "p_value": 0.042137331055261636,
         "significant_5pct": true,
         "n": 239,
         "nfp_days_on_friday": 239,
-        "median_ratio": 1.19782963241905,
+        "median_ratio": 1.1979107888359801,
         "win_rate": 0.5564853556485355,
         "n_control_friday": 832,
         "control_derivation": {
@@ -170,17 +170,17 @@
         }
       },
       "after": {
-        "mean_ratio": 1.1889938017719657,
-        "p_value": 0.020854619846468338,
+        "mean_ratio": 1.1889982196572566,
+        "p_value": 0.020851625645371012,
         "significant_5pct": true,
         "n": 237,
         "nfp_days_on_friday": 237,
-        "median_ratio": 1.218529637773619,
+        "median_ratio": 1.2186663731319562,
         "win_rate": 0.569620253164557,
         "estimand": "Friday NFP sessions vs Friday non-NFP sessions (weekday held fixed)",
         "diagnostic_mixed_weekday": {
-          "mean_ratio": 1.176760423086546,
-          "p_value": 0.025692950091979555,
+          "mean_ratio": 1.1767652746472554,
+          "p_value": 0.02568902194866471,
           "significant_5pct": true,
           "n": 253,
           "status": "DIAGNOSTIC ONLY - the pre-correction estimand, not quotable"
@@ -204,14 +204,14 @@
         "win_rate": 0.7165354330708661
       },
       "after": {
-        "mean_ratio": 2.027286442901926,
-        "high_mean": 0.01127617245434428,
-        "low_mean": 0.005562199902152548,
+        "mean_ratio": 2.0272798595291537,
+        "high_mean": 0.011276179946920817,
+        "low_mean": 0.00556222166067381,
         "n_high": 128,
         "n_low": 125,
-        "p_value": 4.552693094868466e-09,
+        "p_value": 4.552792256864544e-09,
         "significant_5pct": true,
-        "median_ratio": 2.073424873351278,
+        "median_ratio": 2.073142871963874,
         "win_rate": 0.6953125
       },
       "note": "",
@@ -230,11 +230,11 @@
         "significant_5pct": true
       },
       "after": {
-        "pearson_r": 0.44043360312161073,
-        "pearson_p": 1.9824770222298577e-13,
+        "pearson_r": 0.44043666142565835,
+        "pearson_p": 1.9816323833899423e-13,
         "spearman_rho": 0.3455048873701663,
         "spearman_p": 1.6699985504624933e-08,
-        "slope_pct_per_vix_pt": 0.04256148730637378,
+        "slope_pct_per_vix_pt": 0.042561696717978235,
         "n": 253,
         "significant_5pct": true
       },
@@ -367,113 +367,7 @@
   "n_claims_audited": 6,
   "article_correction": {
     "article_id": "mile_35eef830",
-    "status": "validated_not_applied",
-    "n_replacements": 19,
-    "all_matched_exactly_once": true,
-    "supersedes": {
-      "voided_list_size": 18,
-      "voided_at": "2026-07-19",
-      "reason": "the 18-item list was built against a rerun whose accessor picked off-cycle ALFRED entries for six months, which pushed the NFP-vs-Friday test across the 5% line. It would have retracted a finding that is in fact correct."
-    },
-    "directional_claims_changed": 0,
-    "replacements": [
-      {
-        "from": "總共 254 次 NFP 公布日的資料算過一遍",
-        "to": "總共 253 次 NFP 公布日的資料算過一遍",
-        "hits": 1
-      },
-      {
-        "from": "NFP 當日 SPY 的平均絕對日報酬是 0.842%，非 NFP 交易日是 0.763%，兩者相除是 1.10 倍。",
-        "to": "NFP 當日 SPY 的平均絕對日報酬是 0.845%，非 NFP 交易日是 0.763%，兩者相除是 1.11 倍。",
-        "hits": 1
-      },
-      {
-        "from": "換句話說，這 1.10 倍的差距",
-        "to": "換句話說，這 1.11 倍的差距",
-        "hits": 1
-      },
-      {
-        "from": "VolPred 也把這層拿掉，改用「非 NFP 的週五」當基準：NFP 當日波動是這個基準的 1.17 倍，用 Welch t 檢定算下來，這個差距達到顯著水準。（另外拿全體非 NFP 日做一個只看排序、不看數值大小的無母數檢定，NFP 日的波動分佈同樣明顯偏高。）",
-        "to": "VolPred 也把這層拿掉，改用「非 NFP 的週五」當基準。253 場 NFP 裡有 237 場落在週五、16 場不是，所以這個比較只取在週五公布的那 237 場，讓兩邊的星期別一致：這 237 場的當日波動是週五基準的 1.19 倍，用 Welch t 檢定算下來，這個差距達到顯著水準（p=0.021）。要注意這個數字講的是「**在週五公布的** NFP」，不是 NFP 一般而言；被排掉的那 16 場本身比較平靜，所以限定週五會把倍數墊高一些（不限定的話是 1.18 倍）。（另外拿全體非 NFP 日做一個只看排序、不看數值大小的無母數檢定，NFP 日的波動分佈同樣明顯偏高。）",
-        "hits": 1
-      },
-      {
-        "from": "所以精確的講法是：NFP 日確實比一般週五抖一點，差距顯著但不算誇張（1.17 倍）；但如果拿全部交易日當對照，這個放大效果（1.10 倍）連統計顯著都談不上。",
-        "to": "所以精確的講法是：在週五公布的 NFP 確實比一般週五抖一點，差距顯著但不算誇張（1.19 倍）；但如果拿全部交易日當對照，這個放大效果（1.11 倍）在 Welch 平均差檢定下未達顯著（p=0.11）—— 要注意同一組對照下，只看排序的無母數檢定反而是顯著的（p=0.002），兩種檢定不一致，不能合併成一句「沒有效果」。",
-        "hits": 1
-      },
-      {
-        "from": "那 254 次 NFP 日裡",
-        "to": "那 253 次 NFP 日裡",
-        "hits": 1
-      },
-      {
-        "from": "VolPred 把這 254 個 NFP 交易日，按公布前一個交易日收盤的 VIX 水準切成兩半，分界點是歷史中位數 16.71。VIX 高於中位數的 127 次 NFP，SPY 當日平均絕對報酬是 1.15%；VIX 低於中位數的 127 次，只有 0.53%。兩者相差 2.17 倍",
-        "to": "VolPred 把這 253 個 NFP 交易日，按公布前一個交易日收盤的 VIX 水準切成兩半，分界點是歷史中位數 16.69。VIX 高於中位數的 128 次 NFP，SPY 當日平均絕對報酬是 1.13%；VIX 低於中位數的 125 次，只有 0.56%。兩者相差 2.03 倍",
-        "hits": 1
-      },
-      {
-        "from": "相關係數落在 0.45 左右（換另一種排序算法也給出一致的 0.38）",
-        "to": "相關係數落在 0.44 左右（換另一種排序算法也給出一致的 0.35）",
-        "hits": 1
-      },
-      {
-        "from": "VIX 每高 1 點，就業日的預期絕對報酬就多墊高約 0.044 個百分點。",
-        "to": "VIX 每高 1 點，就業日的預期絕對報酬就多墊高約 0.043 個百分點。",
-        "hits": 1
-      },
-      {
-        "from": "![圖1：VIX 高低體制下的 NFP 日波動差距（2.17 倍）]",
-        "to": "![圖1：VIX 高低體制下的 NFP 日波動差距（2.03 倍）]",
-        "hits": 1
-      },
-      {
-        "from": "貼在歷史分界線 16.71 的下緣",
-        "to": "貼在歷史分界線 16.69 的下緣",
-        "hits": 1
-      },
-      {
-        "from": "落在低體制的 NFP，當日絕對報酬的 base case 約 0.53%，而不是高體制的 1.15%。",
-        "to": "落在低體制的 NFP，當日絕對報酬的 base case 約 0.56%，而不是高體制的 1.13%。",
-        "hits": 1
-      },
-      {
-        "from": "7/1 收盤的 16.59 距離 16.71 只差 0.12 點",
-        "to": "7/1 收盤的 16.59 距離 16.69 只差 0.10 點",
-        "hits": 1
-      },
-      {
-        "from": "第一，NFP 事件本身的波動放大效果，對全體交易日基準是 1.10 倍、未達顯著水準，對週五基準是 1.17 倍、達到顯著水準。",
-        "to": "第一，NFP 事件本身的波動放大效果，對全體交易日基準是 1.11 倍、未達顯著水準；若只看在週五公布的那 237 場、拿非 NFP 的週五當基準，是 1.19 倍、達到顯著水準。",
-        "hits": 1
-      },
-      {
-        "from": "高低體制差 2.17 倍，事前 VIX 對就業日波動的預測相關係數約 0.45。",
-        "to": "高低體制差 2.03 倍，事前 VIX 對就業日波動的預測相關係數約 0.44。",
-        "hits": 1
-      },
-      {
-        "from": "這跟 k528 在 254 場歷史樣本上得到的傾向一致",
-        "to": "這跟 k528 在 253 場歷史樣本上得到的傾向一致",
-        "hits": 1
-      },
-      {
-        "from": "254 場歷史樣本加上 7/2 這場實測",
-        "to": "253 場歷史樣本加上 7/2 這場實測",
-        "hits": 1
-      },
-      {
-        "from": "樣本為 2005 年 2 月 4 日至 2026 年 3 月 6 日期間、共 254 次 NFP 公布日，資料源為 yfinance 的 SPY 與 VIX 日頻數據。",
-        "to": "樣本為 2005 年 2 月 4 日至 2026 年 3 月 6 日期間、共 253 次 NFP 公布日，NFP 發布日期取自美國勞工統計局官方發布日曆（透過 FRED release id 50 取得），資料源為 yfinance 的 SPY 與 VIX 日頻數據。\n\n**2026-07-19 更正說明**：本文初版的 NFP 日期是用「每月第一個週五」推算的。與 BLS 官方發布日曆比對後，約兩成對不上——參考週較晚時 BLS 會改在第二個週五發布，遇到假期則會提前，2025 年 10 月更因聯邦政府關門根本沒有發布（初版把這天算成了事件日，但那天並不存在）。改用官方日曆重跑後，樣本從 254 場變成 253 場。\n\n**方向性結論全部維持不變**：對全體交易日基準在 Welch 平均差檢定下未達顯著（同組對照的無母數檢定則顯著，兩者不一致）、對週五基準達到顯著、進場 VIX 高低兩組之間的差距是本研究中最大的數字——這三點在官方日期下都成立，只有數值小幅調整（1.10→1.11 倍、1.17→1.19 倍、2.17→2.03 倍、相關係數 0.45→0.44）。要說明的是，本文並沒有正式檢定「2.03 倍顯著大於 1.19 倍」——兩者的樣本與對照組都不同，而且 VIX 分組用的是事後中位數切點。兩個數字是並排比較量級，不是排名，也不是因果宣稱。\n\n另有一項口徑調整：週五基準的比較，事件組原本是全部樣本（星期別混合）、對照組卻只有週五，兩邊不對等。現改為只取在週五公布的 237 場，維持兩邊星期別一致，所以該數字講的是「在週五公布的 NFP」而非 NFP 一般而言。被排掉的 16 場本身比較平靜，因此限定週五會把倍數墊高一些（不限定為 1.18 倍、限定為 1.19 倍），兩個數字都列出以免只揭露比較好看的那個。\n\n**文中圖表與文末懶人包圖組仍是初版數據，正在重新產製**。逐項前後對照見 experiments/k528/k528_nfp_official_dates_results.json。",
-        "hits": 1
-      },
-      {
-        "from": "VIX 高低體制以歷史中位數 16.71 為切點，兩組樣本各 127 筆；",
-        "to": "VIX 高低體制以歷史中位數 16.69 為切點，兩組樣本分別為 128 與 125 筆；",
-        "hits": 1
-      }
-    ],
-    "apply_result": null,
-    "residual_gap": "The two inline charts (nfp_20260703_regime.png, nfp_20260703_baseline.png) and the two lazypack images still render proxy-era numbers. Text and images now disagree; the article carries a visible note saying so. Regenerating and re-uploading them is follow-up work outside this worktree's scope."
+    "status": "pending - filled in by the correction step",
+    "replacements": null
   }
 }
