@@ -96,8 +96,6 @@ from .execution_brief import (
     task_requires_coordinator,
     task_unmet_preconditions,
 )
-from .smoke import run_scheduler_live_smoke, run_scheduler_smoke
-from .scheduler import get_scheduler_state, scheduler_preview, scheduler_tick
 from .questions import (
     answer_internal_question,
     archive_question,
@@ -226,15 +224,10 @@ __all__ = [
     "release_pool_articles",
     "release_pool_by_settings",
     "run_executor_task",
-    "run_scheduler_live_smoke",
-    "run_scheduler_smoke",
     "session_bootstrap",
     "session_finish_task",
     "session_next_task",
     "session_shutdown",
-    "scheduler_preview",
-    "get_scheduler_state",
-    "scheduler_tick",
     "restore_rollback_point",
     "migrate_experiment_files",
     "scaffold_experiment",

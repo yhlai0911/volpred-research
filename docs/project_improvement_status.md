@@ -100,7 +100,7 @@ attribution、error_log 壓縮、治理疊層收斂、K1709 合併）已進 next
 
 - [ ] B4.1: 寫 launchd plist `~/Library/LaunchAgents/com.volpred.continue-task.plist` cron `*/30 * * * *`
 - [ ] B4.2: 跑 `bash scripts/install_host_crontab.sh` rebuild canonical crontab + 補 continue_task entry（解 #1, #6）
-- [ ] B4.3: 移除 `runtime_schedules.json system_crontab.shared_scheduler_tick`（已死，piggy-back 接管）（解 #7）
+- [x] B4.3: 移除 `runtime_schedules.json system_crontab.shared_scheduler_tick`（已死，piggy-back 接管）（解 #7）— 2026-07-20 ops-master D2 完成：整條 advisory scheduler lane（scheduler.py / scheduler-tick·preview·smoke CLI / run_scheduler_tick.sh / schedule spec / writer-ownership entry）退役，readers（summaries/health/alerts/control-plane snapshot/docs）同 commit 拔除
 - [ ] B4.4: `session_startup.md §2.0` replay 改為 enforced script `scripts/replay_pending_sessions.py`（解 #1, #2）
 
 ### Effort × Risk × Mission Impact

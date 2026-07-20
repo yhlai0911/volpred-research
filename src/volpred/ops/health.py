@@ -8,7 +8,6 @@ from zoneinfo import ZoneInfo
 from .common import load_json, project_path
 from .diagnostics import warn
 from .schedules import get_job_cron, previous_scheduled_fire
-from .scheduler import get_scheduler_state
 
 _TAIPEI = ZoneInfo("Asia/Taipei")
 # strategy_metrics.json is refreshed by the daily_update job. Its schedule is
@@ -288,8 +287,8 @@ def health_snapshot(storage_dir: str = "storage") -> dict:
     failed_syncs = load_json(storage / ".failed_supabase_syncs.json", [])
     failed_mirror_syncs = load_json(storage / ".failed_mirror_syncs.json", [])
     sync_state = load_json(storage / ".supabase_sync_state.json", {})
-    scheduler_state = get_scheduler_state(storage_dir=storage_dir)
-    agent_cli_health = load_json(storage / "ops" / "agent_cli_health.json", {})
+    # 2026-07-20 ops-master D2: agent_cli_health.json readout removed — its only
+    # writer was the retired scheduler live-smoke lane (file frozen since 2026-04-18).
     event_ledger_dir = storage / "ops" / "event_ledger"
     rollback_dir = storage / "ops" / "rollback_points"
 
@@ -307,9 +306,6 @@ def health_snapshot(storage_dir: str = "storage") -> dict:
         "failed_supabase_syncs": len(failed_syncs),
         "failed_mirror_syncs": len(failed_mirror_syncs),
         "has_incremental_sync_state": bool(sync_state),
-        "scheduler_last_tick_at": scheduler_state.get("last_tick_at"),
-        "scheduler_last_status": scheduler_state.get("last_status"),
-        "agent_cli_health": agent_cli_health if isinstance(agent_cli_health, dict) and agent_cli_health else None,
         "event_ledger_entries": len(list(event_ledger_dir.glob("*.json"))) if event_ledger_dir.exists() else 0,
         "rollback_points": len(rollback_points),
         "latest_rollback_point": rollback_points[-1].name if rollback_points else None,

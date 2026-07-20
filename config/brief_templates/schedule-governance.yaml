@@ -8,9 +8,7 @@ required_files:
   - "docs/project_improvement_status.md"
   - "docs/architecture.md"
   - "config/runtime_schedules.json"
-  - "scripts/run_scheduler_tick.sh"
-  - "scripts/install_scheduler_cron.sh"
-  - "scripts/uninstall_scheduler_cron.sh"
+  - "scripts/install_host_crontab.sh"
 recommended_files:
   - "AGENTS.md"
   - "docs/error_log.md"
@@ -18,7 +16,7 @@ forbidden_large_files:
   - "storage/reports/feed.json"
   - "storage/memory/knowledge.json"
 relevant_commands:
-  - "uv run volpred ops scheduler-preview"
+  - "uv run volpred ops scheduler-summary"
   - "uv run volpred ops event-preview"
   - "uv run volpred ops health"
 why_this_agent: "這是 schedule governance 任務，正式治理與最終收斂由 Claude 負責。"

@@ -174,21 +174,6 @@
         "piggy_back_skip_reason": "host crontab fires reliably; 2026-05-29 incident confirmed double-fire (host + piggy-back). See docs/error_log.md."
       },
       {
-        "id": "shared_scheduler_tick",
-        "label": "shared scheduler tick",
-        "cron": "*/10 * * * *",
-        "wrapper_script": "scripts/run_scheduler_tick.sh",
-        "log_path": "storage/logs/cron/scheduler_tick.log",
-        "command_deprecated": "run_scheduler_tick.sh",
-        "description": "每 10 分鐘觸發一次 shared scheduler，由 Claude coordinator 調控 Claude/Codex 任務派工。",
-        "host_crontab_managed": false,
-        "note": "host_crontab_managed=false — 目前此 tick 不由 host crontab 管理（v12 降為 advisory）；install_host_crontab.sh 會略過。",
-        "matchers": [
-          "run_scheduler_tick.sh",
-          "volpred-scheduler-tick"
-        ]
-      },
-      {
         "id": "check_alerts",
         "label": "ops alert checks (release_pool / draft / cron) — LaunchAgent canonical",
         "cron": "0 * * * *",
@@ -682,13 +667,6 @@
         "prompt": "更新 NDC 景氣指標：執行 ndc-indicator-maintain --stub-if-no-work；只有 canonical CSV 落後時才展開人工更新流程",
         "recurring": true,
         "description": "每月 28 日更新 NDC 景氣指標。"
-      },
-      {
-        "id": "codex_quota_resume_2026_04_24",
-        "cron": "30 10 24 4 *",
-        "prompt": "Codex quota 已於 2026-04-24 10:27 reset。依 queue 最高 priority 派 Codex:\n1. uv run volpred ops tasks --status queued\n2. 檢查 task_7d2c (P25 crypto-fear audit) + task_06584aeee667 (P30 release-task CLI)\n3. 若仍 queued → dispatch codex:codex-rescue subagent（預設 serialize；若任務完全獨立可最多 3 個）\n4. 派工 brief 照 .claude/skills/autonomous-research/references/agent-brief-template.md\n5. Append work_log.json 記 quota-resumed event",
-        "recurring": false,
-        "description": "One-shot: Codex quota reset 後 resume 2 延後 tasks (2026-04-19 quota 耗盡對策)。fire 一次自動 delete。"
       },
       {
         "id": "journal_topic_scan",
@@ -1423,9 +1401,9 @@
       "canonical_script": "scripts/cron_hourly_dispatch.sh",
       "tcc_bypass_copy": "~/.volpred/bin/cron_hourly_dispatch.sh",
       "installed_at": "2026-05-12T06:18:11Z",
-      "deprecated": true,
-      "deprecated_at": "2026-07-04T16:36:00+08:00",
-      "deprecated_reason": "Deliverable 7 cutover: replaced by com.volpred.dispatch-supervisor LaunchAgent (real-run daemon). Legacy LaunchAgent launchctl-disabled; shell wrapper kept on disk as the plan §7 one-command rollback artifact until Deliverable 8 archives it to scripts/_legacy/.",
+      "status": "retired",
+      "retired_at": "2026-07-04T16:36:00+08:00",
+      "reason": "Deliverable 7 cutover: execution replaced by com.volpred.dispatch-supervisor LaunchAgent (real-run daemon); legacy LaunchAgent launchctl-disabled. Shell wrapper kept on disk as the plan §7 one-command rollback artifact until D3 archives it to scripts/_legacy/. Entry itself stays because `schedule`/`pregate` remain canonical inputs for the supervisor (see note_schedule_still_canonical). Marked {status: retired} 2026-07-20 (ops-master D2).",
       "host_crontab_managed": false,
       "note_schedule_still_canonical": "dispatch_supervisor/scheduler.py load_cron_expr() reads this entry's `schedule` field — keep it accurate even though the command is deprecated.",
       "pregate": {

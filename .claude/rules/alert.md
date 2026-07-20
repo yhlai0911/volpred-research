@@ -24,7 +24,7 @@ paths:
   1. `release_pool_gap` — `storage/logs/cron/release_pool.log` 最後 fire 時間距今 > 2 小時 → critical（>4h）/ warn
   2. `draft_pool_low` — `feed.json` 中 `draft` 文章數 < 4 → warn（=0 升級為 critical）
   3. `host_cron_fail` — **v12 後僅看** `storage/logs/cron/*.log` 最新 `=== exit N ===` 非 0 → critical。
-     scheduler-tick staleness 在 v12 已降級為 advisory-only（body 內 readout 供參考，不貢獻 breach judgement）。
+     （advisory scheduler lane 已於 2026-07-20 ops-master D2 退役；body 內原 scheduler_state readout 一併移除。）
   4. `member_qa_stale` — `questions` 表 pending（status=`evaluating`/`pending`/未 ranked）`created_at` 距 now 超過 24h → warn / 超過 72h → critical（2026-04-26 新增；防 5 天 silent gap 再現）。
   5. `push_backlog` — `git rev-list origin/main..main` 最老未推 commit 滯留 >3h → warn / >8h → critical（2026-07-04 新增；26h push-hold incident 教訓：silent-fallback gate 正確擋 push 但無機制強迫行動——此條件直接量測傷害「未推積壓年齡」，held/分岔/認證/網路任何原因同樣浮現，且不受該 job 自身 warn email 的 24h dedup 影響）。
   6. `orphan_branch` — 未合併工作失去 owner 的**兩個對稱面**（2026-07-10 新增 case A、2026-07-11 補 case B）。worktree 移除路徑有六層防護（K1032/K1114/K1262/K1618），但**每一層保護的都是 worktree**；worktree 一消失、或 worktree 在但 ref 不在，工作就沒有 owner 也沒有訊號。

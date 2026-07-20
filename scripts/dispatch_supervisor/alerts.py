@@ -15,6 +15,19 @@ Dedup windows match `refactor_plan_hourly_dispatch.md §3.3 alerts dedup table`:
   loop_crash           : 300s   (per-component key; crash-loop must not spam)
   orphan_restart       : 60s
   quota_blocked        : outage-scoped (cleared on next success; 7d backstop window)
+
+Division of labor vs `src/volpred/ops/alerts.py` (2026-07-20 ops-master D4 —
+two dedup stores by design, do not merge and do not add a third):
+
+- THIS module (dispatch_state, per-class second-scale windows) = anti-FLOOD:
+  a crash-looping daemon can hit the same failure several times a minute; this
+  layer throttles the burst before it reaches the `send-alert` CLI at all.
+- `volpred.ops.alerts` (`storage/ops/alert_dedup.json`, 24h per (level,title),
+  30d retention) = anti-BOMBARDMENT: the same standing condition re-detected
+  across hourly runs must not re-email the boss for a day. We pass `--force`
+  deliberately: burst dedup (here) and standing-condition dedup (there) answer
+  different questions, and a daemon alert that survived its flood window must
+  not be silently swallowed by yesterday's ledger entry.
 """
 from __future__ import annotations
 

@@ -16,7 +16,7 @@ uv run volpred ops health                            # 本地營運健康檢查
 uv run volpred ops queue-summary                     # 緊湊 queue 摘要（低 token 巡檢首選）
 uv run volpred ops daily-planning-maintain --stub-if-no-work  # 每日規劃 gate；沒 gap 直接 tiny stub
 uv run volpred ops continue-task-maintain --stub-if-no-work   # continuation gate；沒 runnable work 直接 tiny stub
-uv run volpred ops scheduler-summary                 # 緊湊 scheduler / crontab 摘要
+uv run volpred ops scheduler-summary                 # 緊湊 canonical schedule / crontab 摘要（advisory scheduler lane 已退役，命令名保留相容）
 uv run volpred ops token-summary                     # 緊湊 token / cost 摘要（讀既有 daily reports）
 uv run volpred ops token-usage-maintain --stub-if-no-work  # token 日報/週報 wrapper；已新鮮時直接 tiny stub
 uv run volpred ops token-policy-summary              # token / context canonical 門檻摘要
@@ -31,10 +31,6 @@ uv run volpred ops platform-patrol-maintain --stub-if-no-work  # 平台巡檢 wr
 uv run volpred ops question-ops-summary              # 緊湊會員問題摘要（先看 pending，再決定是否開完整 workflow）
 uv run volpred ops question-ops-maintain --stub-if-no-work     # 會員問題 gate；沒 pending 直接 tiny stub
 uv run volpred ops memory-health-summary             # 緊湊記憶健康摘要（先看大小 / duplicates / orphan worktrees）
-uv run volpred ops scheduler-preview                 # 預覽 shared scheduler 下一輪會做什麼
-uv run volpred ops scheduler-tick                    # 手動跑一輪 shared scheduler
-uv run volpred ops scheduler-smoke --cleanup         # 隔離 mock smoke，不碰真實 Claude/Codex CLI
-uv run volpred ops scheduler-live-smoke --cleanup    # 隔離 live smoke，真打本機 Claude/Codex CLI
 uv run volpred ops article-backups --repair          # 確保每篇已發布文章都有本地單篇 JSON，可用於 DB 災難復原
 uv run volpred ops sync-all                          # 統一入口：手動 Supabase sync
 uv run volpred ops daily-update                      # 統一入口：每日更新

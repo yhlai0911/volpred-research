@@ -1,3 +1,23 @@
+"""Ops alert registry + email/Telegram transport with a 24h dedup ledger.
+
+Alert dedup has exactly TWO stores with an explicit division of labor
+(2026-07-20 ops-master D4 — do not merge them, do not add a third):
+
+- THIS module — `storage/ops/alert_dedup.json`, 24h window per (level, title)
+  key = anti-BOMBARDMENT: the same standing condition (draft pool low, cron
+  fail, ...) re-detected across hourly check_alerts runs must not re-email the
+  boss for a day. Entries idle > `ALERT_DEDUP_RETENTION` (30d) are pruned on
+  every save (`_save_alert_dedup`).
+- `scripts/dispatch_supervisor/alerts.py` — per-class second-scale windows
+  (60s-3600s) kept inside dispatch_state = anti-FLOOD: a crash-looping daemon
+  may hit the same failure several times a minute; its dedup throttles the
+  burst *before* it even reaches `send-alert`. Alerts that pass the daemon's
+  flood gate still land here (it calls `send-alert --force` because burst
+  semantics differ from standing-condition semantics).
+
+Enforcement Layer Map (loop-health-and-dreaming.md) carries the same split.
+"""
+
 from __future__ import annotations
 
 import fcntl
@@ -40,11 +60,13 @@ from .health import (
     check_paper_trading_gaps,
     check_strategy_metrics_freshness,
 )
-from .scheduler import get_scheduler_state
-
 ALERT_RECIPIENT = "yihao.lai@gmail.com"
 ALERT_LEVELS = ("info", "warn", "critical")
 ALERT_DEDUP_WINDOW = timedelta(hours=24)
+# D4 retention: dedup ledger entries with no activity for this long are pruned
+# at every save — the ledger is a rolling throttle window, not an archive
+# (incident history lives in incident_candidates.jsonl / notifications/).
+ALERT_DEDUP_RETENTION = timedelta(days=30)
 TELEGRAM_ALERT_MAX_CHARS = 4096
 
 # These alerts describe repair work the platform can perform itself.  They must
@@ -305,10 +327,49 @@ def _load_alert_dedup(storage_dir: str = "storage") -> dict[str, Any]:
     }
 
 
+def _prune_alert_dedup(payload: dict[str, Any], *, now: datetime) -> int:
+    """Drop dedup entries idle longer than ALERT_DEDUP_RETENTION. Returns count."""
+    alerts = payload.get("alerts")
+    if not isinstance(alerts, dict):
+        return 0
+    cutoff = now - ALERT_DEDUP_RETENTION
+    stale_keys: list[str] = []
+    for key, entry in alerts.items():
+        if not isinstance(entry, dict):
+            stale_keys.append(key)
+            continue
+        last_activity = max(
+            (
+                ts
+                for ts in (
+                    _parse_iso_datetime(entry.get("last_sent_at")),
+                    _parse_iso_datetime(entry.get("last_skipped_at")),
+                    _parse_iso_datetime(entry.get("first_sent_at")),
+                )
+                if ts is not None
+            ),
+            default=None,
+        )
+        if last_activity is None or last_activity < cutoff:
+            stale_keys.append(key)
+    for key in stale_keys:
+        del alerts[key]
+    if stale_keys:
+        warn(
+            "alert_dedup_retention",
+            "pruned stale dedup entries",
+            pruned=len(stale_keys),
+            retention_days=ALERT_DEDUP_RETENTION.days,
+        )
+    return len(stale_keys)
+
+
 def _save_alert_dedup(storage_dir: str, payload: dict[str, Any]) -> None:
     path = _alert_dedup_path(storage_dir)
     guard_canonical_write(path)
-    payload["updated_at"] = _utc_now().isoformat()
+    now = _utc_now()
+    _prune_alert_dedup(payload, now=now)
+    payload["updated_at"] = now.isoformat()
     dump_json(path, payload)
 
 
@@ -1881,19 +1942,10 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
                 latest["trailing_exit_codes"] = codes
                 latest["consecutive_failures"] = consec
 
-    # v12 (2026-04-19): shared_scheduler_tick cron removed; scheduler-tick now advisory-only.
-    # scheduler_state staleness 不再視為 host_cron_fail — checker 改只看實際 cron log exit codes。
-    # 保留 scheduler_state readout 供 body info，但不貢獻 breach judgement。
-    scheduler_state = get_scheduler_state(storage_dir=storage_dir)
-    scheduler_last_tick_at = _parse_iso_datetime(scheduler_state.get("last_tick_at"))
-    scheduler_last_status = str(scheduler_state.get("last_status") or "never")
-    scheduler_age_minutes = None
-    scheduler_issue = None  # v12: 永遠 None，scheduler-tick 不再作為 alert 條件
-    if scheduler_last_tick_at is not None:
-        scheduler_age = now - scheduler_last_tick_at
-        scheduler_age_minutes = round(scheduler_age.total_seconds() / 60.0, 1)
-
-    breached = bool(failing_logs)  # v12: 只看 cron log exit codes，不看 scheduler staleness
+    # v12 (2026-04-19): scheduler_state staleness 不再視為 host_cron_fail — checker
+    # 改只看實際 cron log exit codes。2026-07-20 ops-master D2: advisory scheduler lane
+    # 全面退役，body 內的 scheduler_state readout 一併移除。
+    breached = bool(failing_logs)  # 只看 cron log exit codes
     # Severity calibration (2026-07-04, boss Telegram msg 114/121/141 — repeated
     # CRITICAL noise on self-recovering hangs): a self-recovering exit code (142
     # SIGALRM hang / 75 Claude Max quota window) NEVER escalates to CRITICAL, even
@@ -1923,12 +1975,7 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
         f"若非零 exit 已超過下一個預定 fire + {HOST_CRON_RECENCY_GRACE}，視為 stale marker，"
         "不再每小時重判。"
         "反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。",
-        f"- scheduler_last_tick_at: {scheduler_last_tick_at.isoformat() if scheduler_last_tick_at else 'missing'}（僅供參考，v12 後不作為 breach 判準）",
-        f"- scheduler_last_status: {scheduler_last_status}",
-        f"- scheduler_age_minutes: {scheduler_age_minutes if scheduler_age_minutes is not None else 'missing'}",
     ]
-    if scheduler_issue:
-        body_lines.append(f"- scheduler_issue: {scheduler_issue}")
     if failing_logs:
         body_lines.append("- failing_logs:")
         for row in failing_logs:
@@ -1962,10 +2009,6 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
         "title": "Host cron failure detected",
         "body": "\n".join(body_lines) if breached else "",
         "details": {
-            "scheduler_last_tick_at": scheduler_last_tick_at.isoformat() if scheduler_last_tick_at else None,
-            "scheduler_last_status": scheduler_last_status,
-            "scheduler_age_minutes": scheduler_age_minutes,
-            "scheduler_issue": scheduler_issue,
             "failing_logs": failing_logs,
             "stale_logs": stale_logs,
             "host_cron_recency_grace_minutes": int(HOST_CRON_RECENCY_GRACE.total_seconds() // 60),
