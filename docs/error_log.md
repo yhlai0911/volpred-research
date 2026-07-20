@@ -595,3 +595,14 @@ PHASE-Z 認得「這不是本班 fire 產出的檔」，於是照 D3 開出 fore
 第二條：**降載這類懲罰要能反查原因** —— 被降載的 13 班只看得到 cap=2，看不到「因為某班 14:04 被 SIGALRM
 殺在提交前」。`dispatch_slot_budget.py` 的 reason 字串有帶 incident id，這次就是靠它一路追回根因，
 這個設計要保留。
+
+### 2026-07-20 22:17 — dispatch worker「Execution error」15-byte log + hang 16 分鐘（今日第二次）— OPEN(P1)
+
+兩班 worker（11:23 `slot-4.d85d3cf2`、22:01 `slot-1.46f4806a`）log 都只有 15 bytes「Execution error」：
+claude CLI 落地即 fatal 但**行程不退出**，supervisor hang-kill 於 960s 收屍。安全網有效（claim
+`ci-red-29744499806` 正確 re-pend、下一班重派），但代價 = 每次白吃 16 分鐘 slot + 一封 CRITICAL。
+「Execution error」是 CLI 端 terse fatal（API/session-limit 類），log 無 stderr 細節、無法歸因。
+已開 P1 main_thread 單 `assign_exec_error_fastfail`：(1) worker 偵測 fatal-marker + 輸出停滯 → 秒級
+kill、分類 transient、當場 release claim（不等 hang cap）；(2) claude CLI stderr 導入 worker log 供歸因。
+**教訓**：hang cap 是 last-resort，不是 first detector — 已知 fatal 訊息出現時等 16 分鐘毫無意義；
+以及 15-byte log 這種「有殼無屍」形狀本身就該是可分類訊號。
