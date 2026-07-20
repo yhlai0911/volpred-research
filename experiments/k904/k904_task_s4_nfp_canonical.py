@@ -45,6 +45,24 @@ purpose: Welch's t-test (`equal_var=False`), baseline = ALL non-NFP days, VIX
 regime cuts 15/20/25 on VIX_prev, estimation from 2010-01-01 (archived k904
 already sliced correctly here — unlike k741, it has no warm-up leak).
 
+FIGURE (fourth Codex finding, 2026-07-20)
+-----------------------------------------
+`k904_chart3_nfp_by_vix.png` plots the ARCHIVED PROXY ratios (1.23 / 1.17 /
+1.15 / 0.98) under a legend reading "K904 重做比率", and titles them as the NFP
+shock being "absorbed" and "disappearing" in high fear. Both are wrong for this
+experiment: those are not the canonical numbers (1.305 / 1.230 / 1.165 / 0.935),
+and no interaction test here supports a categorical absorption claim — the
+archived bootstrap on that contrast gives one-tailed p = 0.127 with a 95%
+interval of [-0.181, 0.647].
+
+That PNG is left byte-identical on purpose. It is the figure of the archived run
+and it backs an already-published feed article, so silently repainting it would
+edit published content from a worktree. It is relabelled as archived in the
+README, and this script now emits `k904_chart3_nfp_by_vix_canonical.png` from
+the canonical cell with descriptive, non-causal labelling. Re-pointing the
+published article at the canonical figure is a main-thread decision, recorded as
+a residual rather than actioned here.
+
 Author: VolPred Research System
 [提出: 主線程 task assign_1238781f, 執行: Claude worktree agent]
 """
@@ -66,6 +84,7 @@ warnings.filterwarnings("ignore")
 
 PINNED_CSV = REPO / "paper" / "volatility-absorption" / "data" / "spy_gld_tlt_qqq_eem_vix_2005-2026.csv"
 OUT = Path(__file__).resolve().parent / "k904_task_s4_nfp_canonical_results.json"
+FIG_OUT = Path(__file__).resolve().parent / "k904_chart3_nfp_by_vix_canonical.png"
 
 WIN_START = "2010-01-01"
 WIN_END = "2026-04-06"                      # extended so the 2026-04-03 reaction day is observable
@@ -177,6 +196,16 @@ def estimate(df, nfp_days):
 def run_cell(df, dates, mapper, label):
     mapped, excluded = mapper(dates, df.index)
     backward = check_mapping(mapped, label, allow_backward=(mapper is map_archived))
+    if mapper is map_forward and (excluded or len(mapped) != len(dates)):
+        # Fail closed. Recording the exclusion in JSON is not enough: nothing downstream
+        # reads it, so a headline cell that quietly loses an event still prints entirely
+        # plausible statistics from a reduced sample. That is precisely the silent
+        # sample-loss the 2026-04-06 endpoint extension exists to prevent, and it was
+        # reachable here until now (Codex review 2026-07-20, B1). Archived-mapper cells
+        # are exempt on purpose — reproducing their defects is their whole job.
+        raise RuntimeError(
+            f"{label}: {len(dates) - len(mapped)} release(s) unmapped {excluded!r}; "
+            "extend the price window or add an explicit allowlist")
     res = estimate(df, list(mapped.values()))
     res.update({
         "n_releases_in": int(len(dates)), "n_mapped": int(len(mapped)),
@@ -184,6 +213,59 @@ def run_cell(df, dates, mapper, label):
         "backward_mapped_lookahead_events": backward,
     })
     return res
+
+
+def write_canonical_figure(headline):
+    """Emit the regime figure FROM the canonical cell, so it cannot drift from it.
+
+    The archived `k904_chart3_nfp_by_vix.png` plots proxy-arm numbers under a
+    "K904 重做比率" legend and an absorption title neither this experiment nor the
+    archived one establishes. Rather than repaint that file — it backs a published
+    article — this writes a separate canonical figure with descriptive labelling.
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    for cand in ("Heiti TC", "PingFang TC", "Arial Unicode MS", "Songti TC"):
+        if any(f.name == cand for f in matplotlib.font_manager.fontManager.ttflist):
+            plt.rcParams["font.sans-serif"] = [cand]
+            break
+    plt.rcParams["axes.unicode_minus"] = False
+
+    regimes = headline["by_vix_regime"]
+    labels = [lab for _, _, lab in REGIMES if "ratio" in regimes.get(lab, {})]
+    ratios = [regimes[lab]["ratio"] for lab in labels]
+    ns = [regimes[lab]["n_nfp"] for lab in labels]
+    ps = [regimes[lab]["p_value"] for lab in labels]
+
+    # Two-line tick labels: the raw regime keys collide on a single axis line.
+    short = {"Low (V<15)": "Low\nVIX < 15", "Medium (15<=V<20)": "Medium\n15–20",
+             "Elevated (20<=V<25)": "Elevated\n20–25", "High (V>=25)": "High\nVIX ≥ 25"}
+    fig, ax = plt.subplots(figsize=(8.4, 5.0))
+    bars = ax.bar([short.get(lab, lab) for lab in labels], ratios,
+                  color=["#3b6ea5" if r >= 1 else "#a5533b" for r in ratios])
+    ax.axhline(1.0, color="#444", lw=1, ls="--")
+    ax.text(ax.get_xlim()[1], 1.0, " 無效應", va="center", ha="left", fontsize=8, color="#444")
+    for b, r, n, p in zip(bars, ratios, ns, ps):
+        # Anchor above the y=1 line, not above the bar: a sub-1.0 bar would otherwise
+        # print its second label line straight through the reference line.
+        ax.text(b.get_x() + b.get_width() / 2, max(r, 1.0) + max(ratios) * 0.035,
+                f"{r:.3f}\nn={n}, p={p:.3f}", ha="center", va="bottom", fontsize=9)
+    ax.set_ylabel("NFP 日 / 非 NFP 日 平均 |報酬| 比率")
+    ax.set_ylim(0, max(ratios) * 1.30)
+    ax.set_title("NFP 日相對波動，依前一日 VIX 分層（K904 canonical，官方 BLS 日曆）\n"
+                 "描述性結果：四個檢定皆未做多重比較校正，regime 間差異未經檢定",
+                 fontsize=11)
+    ax.text(0.5, -0.16,
+            "資料：SPY / ^VIX 2026-04-19 pinned snapshot，2010-01-01..2026-04-06；"
+            "Welch t-test；來源 k904_task_s4_nfp_canonical_results.json .factorial_cells"
+            ".official__forward_mapper.by_vix_regime",
+            transform=ax.transAxes, ha="center", va="top", fontsize=7.5, color="#555")
+    fig.tight_layout()
+    fig.savefig(FIG_OUT, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Wrote {FIG_OUT.relative_to(REPO)}")
 
 
 def main():
@@ -300,6 +382,7 @@ def main():
         ],
     }
     OUT.write_text(json.dumps(payload, indent=2) + "\n")
+    write_canonical_figure(cells["official__forward_mapper"])
 
     o, v = headline["overall"], headline["vs_friday"]
     print(f"\n{'=' * 74}\nHEADLINE (official dates + forward mapper)")

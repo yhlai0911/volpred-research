@@ -16,13 +16,36 @@
 >   真正推動 pooled 數字的是 mapper 修正。
 > - **endpoint 修正**：2026-04-03 是 Good Friday（BLS 有發、美股休市），reaction 日是
 >   2026-04-06。原本價格窗切在 2026-04-05，導致該事件在 official arm 被**靜默丟棄**
->   而 proxy arm 卻往回對應到 04-02。價格窗已延到 2026-04-06，兩臂都是 195/195 完整對應。
-> - proxy arm 逐位重現封存 JSON（1.142670 vs 1.142569），證明重寫忠實。
+>   而 proxy arm 卻往回對應到 04-02。價格窗已延到 2026-04-06，**兩個 official arm 都是
+>   195/195 完整對應**（archived mapper 把 04-03 往回對到 04-02，forward mapper 對到 04-06）。
+>   兩個 proxy arm 是 **196/196** —— 多的那一筆是 proxy 虛構的 2025-10 幻影月（該月政府停擺、
+>   BLS 沒發報告）。本檔第一版寫成「兩臂都是 195/195」，那是錯的，已更正
+>   （Codex review 2026-07-20, B2）。
+> - proxy arm **近似**重現封存 JSON：1.1426730810 vs 封存 1.1425688254，絕對差
+>   1.04e-4（相對 9.1e-5）。這**不是**逐位/bit-level 重現 —— 四位小數就已經不同
+>   （1.1427 vs 1.1426）。差異來源是封存版用 live yfinance、本版用 pinned snapshot。
+>   本檔第一版寫成「逐位重現」且未給容差，已更正。
+> - **fail-closed**：forward/canonical cell 只要有任何 release 對應不到就 raise，不再
+>   只把 exclusion 記進 JSON 就繼續算（Codex review 2026-07-20, B1）。archived mapper
+>   cell 刻意豁免 —— 重現它的缺陷正是它存在的目的。
 > - 複審狀態以 `experiments/k904/review_verdict.json` 為準（gate 產生、Codex 填寫、
 >   pin 住審查當下的 sha256）。本行不複述裁決，以免與裁決檔漂移。
 > - 檢定變體：本實驗**一直**顯式用 Welch（`equal_var=False`）。姊妹實驗 k741 原本因省略
 >   參數而落在 Student's，已於 2026-07-20 統一為 Welch，兩者不再分歧
 >   （見 `experiments/k741/README.md` §「檢定變體」）。
+> - **圖表**（Codex review 2026-07-20, B3）：
+>   `k904_chart3_nfp_by_vix.png` 是**封存 proxy 版的圖**，畫的是 1.23 / 1.17 / 1.15 / 0.98
+>   （proxy arm），legend 卻只寫「K904 重做比率」，標題還宣稱衝擊「隨 VIX 升高被吸收」、
+>   「高恐慌時消失」—— 兩者都不成立：canonical 值是 1.305 / 1.230 / 1.165 / 0.935，
+>   而且本實驗沒有做 regime 間的 interaction test（封存版做過，one-tailed p=0.127、
+>   95% CI [-0.181, 0.647]，撐不起那個標題）。**不要把它當成現行 k904 結果引用。**
+>   該檔 bytes 刻意不動：它是封存版的圖，且已被一篇上線文章使用，從 worktree 直接重繪
+>   等於偷改已發佈內容。
+>   **現行 canonical 圖是 `k904_chart3_nfp_by_vix_canonical.png`**，由
+>   `k904_task_s4_nfp_canonical.py` 直接從 canonical cell 產生（因此不會與結果漂移），
+>   標題與註記為描述性、不含因果宣稱，並標明四個檢定未做多重比較校正。
+>   ⚠️ **待主線程裁決**：已發佈文章（`storage/reports/feed.json` 的 k904 篇）仍指向舊圖，
+>   且內文引用的是 proxy 數字。是否更正該文由主線程決定 —— worktree 不動 feed.json。
 > - 完整對照與根因：`experiments/k741/nfp_canonical_vs_proxy_comparison.md`。
 > - ⚠️ `paper/volatility-absorption/experiments/k904_paper8_shock_nfp_fix.py` 是本檔的**過時副本**，
 >   本次未動（論文目錄不在 worktree agent 權限內）。建議主線程同步或刪除。
