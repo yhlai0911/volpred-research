@@ -1116,3 +1116,55 @@ def test_claim_main_thread_flag_allows_interactive_claim(tmp_path, monkeypatch, 
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "claimed"
     assert saved[0]["claimed_by"] == "claude-main"
+
+
+# --- annotate (WS-A1b: replaces the cron-prompt jq-rewrite instruction) ------
+
+
+def _annotate_args(**kw) -> argparse.Namespace:
+    return argparse.Namespace(id=kw.get("id"), set=kw.get("set"), set_json=kw.get("set_json"))
+
+
+def test_annotate_sets_string_and_json_fields_under_lock(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps([{"id": "email-1", "status": "in_progress", "priority": 1}]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    out = task_pool_claim.cmd_annotate(
+        _annotate_args(
+            id="email-1",
+            set=["plan=step one; step two"],
+            set_json=['linked_task_ids=["a","b"]', "needs_close_reply=true"],
+        )
+    )
+    assert out == {
+        "ok": True,
+        "task_id": "email-1",
+        "fields": ["linked_task_ids", "needs_close_reply", "plan"],
+    }
+    row = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert row["plan"] == "step one; step two"
+    assert row["linked_task_ids"] == ["a", "b"]
+    assert row["needs_close_reply"] is True
+    assert row["status"] == "in_progress"  # untouched
+
+
+def test_annotate_refuses_lifecycle_fields(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(json.dumps([{"id": "t1", "status": "pending"}]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    with pytest.raises(SystemExit, match="lifecycle/identity"):
+        task_pool_claim.cmd_annotate(_annotate_args(id="t1", set=["status=succeeded"]))
+    assert json.loads(next_tasks.read_text(encoding="utf-8"))[0]["status"] == "pending"
+
+
+def test_annotate_rejects_bad_json_and_empty_updates(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(json.dumps([{"id": "t1", "status": "pending"}]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    with pytest.raises(SystemExit, match="invalid JSON"):
+        task_pool_claim.cmd_annotate(_annotate_args(id="t1", set_json=["linked=[broken"]))
+    with pytest.raises(SystemExit, match="nothing to set"):
+        task_pool_claim.cmd_annotate(_annotate_args(id="t1"))

@@ -506,30 +506,26 @@ def _materialize_pool_dry_diagnostic_task(now: datetime | None = None) -> dict:
                     "added_ids": [],
                 }
 
+            if isinstance(payload, dict):
+                # WS-A1b：dict 包裝殼只剩讀取容忍；canonical root 自 2026-07-16
+                # single-gateway 起固定為 list（兩份 live queue 皆已實測
+                # list-root）。原本這裡保留一份 write_tasks_to_handle 的手抄
+                # serialize-first 複本 —— 正是 helper 演進時最會漂移的形狀 ——
+                # 現改為 loud reject，與其他 writer 的 dict-root 處置一致。
+                _diag_warn(
+                    "next_tasks_write",
+                    "dict-root next_tasks shape is no longer writable; canonical root is a list",
+                )
+                return {
+                    "ok": False,
+                    "added": 0,
+                    "error": "next_tasks.json root must be a list (single-gateway 2026-07-16)",
+                }
             tasks.insert(0, task)
             normalize_task_priorities(tasks)
-            if isinstance(payload, dict):
-                # legacy dict 包裝殼：仍須 serialize-first 再 truncate，避免
-                # dump 中途失敗留下截斷 JSON（2026-07-05 corruption pattern）；
-                # encode 檢查比照 write_tasks_to_handle，lone surrogate 先 scrub
-                # 再 truncate，確保 write 階段不可能再失敗
-                serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
-                try:
-                    serialized.encode("utf-8")
-                except UnicodeEncodeError as exc:
-                    _diag_warn(
-                        "next_tasks_write",
-                        "scrubbed non-encodable char(s) before write (pool_dry legacy dict)",
-                        err=str(exc),
-                    )
-                    serialized = serialized.encode("utf-8", "replace").decode("utf-8")
-                fh.seek(0)
-                fh.truncate()
-                fh.write(serialized)
-            else:
-                from volpred.ops.next_tasks import write_tasks_to_handle
+            from volpred.ops.next_tasks import write_tasks_to_handle
 
-                write_tasks_to_handle(fh, tasks)
+            write_tasks_to_handle(fh, tasks)
             return {
                 "ok": True,
                 "added": 1,

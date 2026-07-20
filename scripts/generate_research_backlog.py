@@ -40,9 +40,8 @@ SCRIPTS_DIR = ROOT / "scripts"
 sys.path.insert(0, str(ROOT / "src"))
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
-from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
-from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
+from volpred.ops.next_tasks import normalize_task_priority, write_tasks_locked  # noqa: E402
 from kid_reserve import reserve_k_id  # noqa: E402
 JOURNAL_DISCOVERY_LIVE_STATUSES = {"pending", "claimed", "in_progress", "blocked", "pending_main_thread"}
 JOURNAL_DISCOVERY_COOLDOWN_HOURS = 6
@@ -96,25 +95,15 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
 
 
 def _save_tasks(payload: dict | list, tasks: list) -> None:
-    guard_canonical_write(NEXT_TASKS)
-    normalize_task_priorities(tasks)
-    if isinstance(payload, dict) and "tasks" in payload:
-        payload["tasks"] = tasks
-        out = payload
-    else:
-        out = tasks
-    NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
-    if not NEXT_TASKS.exists():
-        NEXT_TASKS.write_text("[]\n", encoding="utf-8")
-    with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
-        try:
-            fh.seek(0)
-            fh.truncate()
-            json.dump(out, fh, ensure_ascii=False, indent=2)
-            fh.write("\n")
-        finally:
-            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    """WS-A1b: canonical one-shot writer (flock + serialize-first + priority
+    normalization) replaces the hand-rolled truncate-then-json.dump. Legacy
+    dict-root wrapper is read tolerance only — the canonical queue root has
+    been a list since the 2026-07-16 single-gateway refactor — so writing it
+    back is refused loudly."""
+    if isinstance(payload, dict):
+        _warn_backlog("next_tasks dict-root shape is no longer writable; canonical root is a list")
+        raise ValueError("next_tasks.json root must be a list (single-gateway 2026-07-16)")
+    write_tasks_locked(NEXT_TASKS, tasks)
 
 
 def _existing_ids(tasks: list) -> set[str]:

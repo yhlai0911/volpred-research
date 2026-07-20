@@ -39,7 +39,7 @@ from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import (  # noqa: E402
     enforce_blocked_until,
     normalize_priority,
-    normalize_task_priorities,
+    write_tasks_to_handle,
 )
 
 K_ID_RE = re.compile(r"^K\d+[a-z_]*$")
@@ -334,27 +334,26 @@ def main() -> int:
             tasks[idx]["review_gate_followup_task_id"] = followup_id
             review_followups_created += 1
 
-        # Write back (preserve original list/dict shape) under the SAME
-        # fcntl.LOCK_EX-on-file protocol task_pool_claim.py uses, so an apply
-        # can never interleave with a live dispatcher/agent's read-modify-write
-        # (2026-07-05: previously this was an unlocked read_text/write_text —
-        # racing an in-flight hourly worker could silently drop its update).
+        # Write back under the SAME fcntl.LOCK_EX-on-file protocol
+        # task_pool_claim.py uses, so an apply can never interleave with a live
+        # dispatcher/agent's read-modify-write. WS-A1b: the serialize-first
+        # invariant used to be a hand-copied clone of write_tasks_to_handle —
+        # the exact "drifts when the helper evolves" shape — now it IS the
+        # helper. The legacy dict-root wrapper is read tolerance only (the
+        # canonical queue root has been a list since the 2026-07-16
+        # single-gateway refactor; both live queues verified list-root
+        # 2026-07-20), so writing it back is refused loudly.
         guard_canonical_write(NEXT_TASKS)
         with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
             fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
             try:
                 original = json.load(fh)
-                normalize_task_priorities(tasks)
                 if isinstance(original, dict):
-                    original["tasks"] = tasks
-                    payload = json.dumps(original, indent=2, ensure_ascii=False)
-                else:
-                    payload = json.dumps(tasks, indent=2, ensure_ascii=False)
-                payload.encode("utf-8")  # serialize-validate BEFORE truncate
-                fh.seek(0)
-                fh.truncate()
-                fh.write(payload)
-                fh.write("\n")
+                    raise SystemExit(
+                        "next_tasks.json root must be a list (single-gateway "
+                        "2026-07-16); refusing to rewrite a dict-root queue"
+                    )
+                write_tasks_to_handle(fh, tasks)
             finally:
                 fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
         print(

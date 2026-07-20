@@ -657,6 +657,65 @@ def _request_urgent_fire(record: dict[str, Any], path: Path) -> bool:
         return False
 
 
+def append_task_record(
+    record: dict[str, Any],
+    *,
+    path: str | Path = "storage/next_tasks.json",
+    if_exists: str = "skip",
+) -> tuple[dict[str, Any], bool]:
+    """Append one caller-built task record to the queue under LOCK_EX.
+
+    Record-preserving sibling of :func:`append_next_task` (WS-A1b writer
+    convergence): ingress writers whose record shape is an external contract
+    (``telegram-<msg_id>`` reply-right guard ids, gmail ``email_reply`` payload
+    fields, ``daily_digest_YYYYMMDD`` dedupe ids) must not have the gateway
+    rebuild their record — but they must share the same bootstrap + flock +
+    duplicate-id + serialize-first discipline. This is the one implementation;
+    ``append_next_task`` routes through it.
+
+    ``if_exists='skip'`` returns ``(existing_record, False)`` when the id is
+    already queued (idempotent ingress replay); ``'raise'`` raises ValueError.
+
+    After the lock is released an urgent record (``task_urgency.is_urgent``)
+    requests an out-of-band supervisor fire; ``record['fire_requested']`` is a
+    **return-only receipt** (CLI print / test assertion), deliberately not
+    persisted — it is the outcome of this append, not task state. Dedicated
+    owner types (email_reply / telegram_reply) are never urgent here by design;
+    their ingest daemons own their own immediate paths (see
+    ``_request_urgent_fire`` docstring).
+    """
+    if if_exists not in {"skip", "raise"}:
+        raise ValueError(f"if_exists must be 'skip' or 'raise', got {if_exists!r}")
+    task_id = record.get("id")
+    if not isinstance(task_id, str) or not task_id.strip():
+        raise ValueError("task record must carry a non-empty string 'id'")
+
+    p = Path(path)
+    guard_canonical_write(p)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    if not p.exists():
+        p.write_text("[]\n", encoding="utf-8")
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            raw = fh.read()
+            tasks = json.loads(raw) if raw.strip() else []
+            if not isinstance(tasks, list):
+                raise ValueError("next_tasks.json root is not a list")
+            for existing in tasks:
+                if isinstance(existing, dict) and existing.get("id") == task_id:
+                    if if_exists == "raise":
+                        raise ValueError(f"duplicate task id {task_id}")
+                    return existing, False
+            tasks.append(record)
+            write_tasks_to_handle(fh, tasks)
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    # 急件不進排班：入池成功後（鎖已釋放）立刻請 supervisor 派工。
+    record["fire_requested"] = _request_urgent_fire(record, p)
+    return record, True
+
+
 def append_next_task(
     *,
     title: str,
@@ -695,26 +754,5 @@ def append_next_task(
     if created_by:
         record["created_by"] = created_by
 
-    p = Path(path)
-    guard_canonical_write(p)
-    if not p.exists():
-        p.write_text("[]\n", encoding="utf-8")
-    with p.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
-        try:
-            raw = fh.read()
-            tasks = json.loads(raw) if raw.strip() else []
-            if not isinstance(tasks, list):
-                raise ValueError("next_tasks.json root is not a list")
-            existing = {t.get("id") for t in tasks if isinstance(t, dict)}
-            if record["id"] in existing:
-                raise ValueError(f"duplicate task id {record['id']}")
-            tasks.append(record)
-            write_tasks_to_handle(fh, tasks)
-        finally:
-            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
-    # 急件不進排班：入池成功後（鎖已釋放）立刻請 supervisor 派工。
-    # `fire_requested` 是 **return-only receipt**（給 CLI 印 / 給測試斷言），
-    # 刻意不寫回佇列 —— 它是這次 append 的動作結果，不是 task 的狀態欄位。
-    record["fire_requested"] = _request_urgent_fire(record, p)
+    record, _created = append_task_record(record, path=path, if_exists="raise")
     return record

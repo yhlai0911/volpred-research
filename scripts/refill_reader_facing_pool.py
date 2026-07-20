@@ -11,7 +11,6 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
-import fcntl
 
 ROOT = Path(__file__).resolve().parents[1]
 STORAGE = ROOT / "storage"
@@ -39,7 +38,7 @@ from volpred.ops.event_jobs import (  # noqa: E402
     build_pending_event_task,
     expand_due_event_jobs,
 )
-from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
+from volpred.ops.next_tasks import append_task_record, normalize_task_priority  # noqa: E402
 from volpred.ops.topic_dedup import TopicScreen, log_decision, screen_topic  # noqa: E402
 
 _diag_warn = warn  # legacy alias used by _warn_refill_reader (was undefined -> NameError)
@@ -86,28 +85,12 @@ def _load_next_tasks() -> list[dict[str, Any]]:
 
 
 def _append_task(task: dict[str, Any]) -> bool:
-    guard_canonical_write(NEXT_TASKS)
+    """WS-A1b: canonical append helper owns bootstrap + LOCK_EX + dup-skip +
+    serialize-first (the old truncate-then-json.dump was the 2026-07-05
+    truncation-incident pattern)."""
     normalize_task_priority(task)
-    NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
-    if not NEXT_TASKS.exists():
-        NEXT_TASKS.write_text("[]\n", encoding="utf-8")
-    with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
-        try:
-            data = json.load(fh)
-            if not isinstance(data, list):
-                raise ValueError("next_tasks.json is not a list")
-            if any(isinstance(item, dict) and item.get("id") == task["id"] for item in data):
-                return False
-            data.append(task)
-            normalize_task_priorities(data)
-            fh.seek(0)
-            fh.truncate()
-            json.dump(data, fh, ensure_ascii=False, indent=2)
-            fh.write("\n")
-            return True
-        finally:
-            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    _record, created = append_task_record(task, path=NEXT_TASKS, if_exists="skip")
+    return created
 
 
 def _load_runtime_event_items() -> list[dict[str, Any]]:

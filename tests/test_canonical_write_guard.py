@@ -113,7 +113,8 @@ def test_guard_sentinel_pierces_broad_exception_handler():
     ("module_name", "argv", "call_style"),
     [
         ("scripts.backfill_null_task_ids", ["backfill_null_task_ids.py", "--dry-run"], "argv"),
-        ("scripts.backfill_task_types", ["backfill_task_types.py", "--dry-run"], "argv"),
+        # scripts.backfill_task_types retired to scripts/_legacy/ (WS-A1b):
+        # one-off backfill already executed; its queue write path is gone.
         ("scripts.dedupe_next_tasks", ["dedupe_next_tasks.py"], "argv"),
         ("scripts.unblock_expired_blocked_tasks", [], "apply_false"),
     ],

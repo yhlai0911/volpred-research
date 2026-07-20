@@ -29,7 +29,7 @@ if str(ROOT / "src") not in sys.path:
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
-from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
+from volpred.ops.next_tasks import write_tasks_to_handle  # noqa: E402
 
 STATUS_RANK = {
     "succeeded": 60,
@@ -162,11 +162,9 @@ def main() -> int:
                 "apply": args.apply,
             }
             if args.apply and dropped:
-                normalize_task_priorities(deduped)
-                fh.seek(0)
-                fh.truncate()
-                json.dump(deduped, fh, ensure_ascii=False, indent=2)
-                fh.write("\n")
+                # WS-A1b: canonical primitive on the already-held LOCK_EX handle
+                # (serialize-first + priority normalization + status audits).
+                write_tasks_to_handle(fh, deduped)
             if args.json:
                 print(json.dumps(summary, ensure_ascii=False, indent=2))
             else:

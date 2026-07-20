@@ -758,6 +758,53 @@ def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str
         return out, burst
 
 
+#: annotate 只准動 free-form metadata；生命週期/身分欄位各有專屬入口
+#: （claim/start/complete/release/mark_task_blocked），繞過那些入口 = 繞過
+#: 它們的 guard 與 status vocab 檢查。
+ANNOTATE_PROTECTED_FIELDS = frozenset({
+    "id", "status", "priority", "task_type", "created_at", "completed_at",
+    "claimed_by", "claimed_at", "claim_session_id",
+    "blocked_reason", "blocked_at", "blocked_until",
+})
+
+
+def cmd_annotate(args: argparse.Namespace) -> dict[str, Any]:
+    """Set free-form metadata fields (plan / linked_task_ids / ...) on one task.
+
+    WS-A1b: replaces the cron-dispatch-prompt era ``jq ... > /tmp/nt && mv``
+    instruction — that pipeline rewrote the whole queue OUTSIDE the flock and
+    the status-vocab audit, and it was teaching agents (N-times amplification).
+    This lands through _locked_load → write_tasks_to_handle like every other
+    queue mutation.
+    """
+    updates: dict[str, Any] = {}
+    for raw in args.set or []:
+        key, sep, value = raw.partition("=")
+        if not sep or not key:
+            raise SystemExit(f"annotate: --set expects FIELD=VALUE, got {raw!r}")
+        updates[key] = value
+    for raw in args.set_json or []:
+        key, sep, value = raw.partition("=")
+        if not sep or not key:
+            raise SystemExit(f"annotate: --set-json expects FIELD=JSON, got {raw!r}")
+        try:
+            updates[key] = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise SystemExit(f"annotate: --set-json {key}: invalid JSON ({exc}): {value!r}")
+    if not updates:
+        raise SystemExit("annotate: nothing to set (use --set FIELD=VALUE / --set-json FIELD=JSON)")
+    protected = sorted(set(updates) & ANNOTATE_PROTECTED_FIELDS)
+    if protected:
+        raise SystemExit(
+            f"annotate: refusing lifecycle/identity fields {protected}; "
+            "use claim/start/complete/release or scripts/mark_task_blocked.py"
+        )
+    with _locked_load() as (_fh, tasks):
+        task = _find(tasks, args.id)
+        task.update(updates)
+    return {"ok": True, "task_id": args.id, "fields": sorted(updates)}
+
+
 def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_readonly() as tasks:
         out: list[dict[str, Any]] = []
@@ -893,6 +940,11 @@ def main() -> int:
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)
     p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed", "blocked"], default="succeeded"); p.add_argument("--result"); p.set_defaults(fn=cmd_complete)
+    p = sub.add_parser("annotate", help="set free-form metadata fields on a task (locked canonical write; replaces jq-edit)")
+    p.add_argument("--id", required=True)
+    p.add_argument("--set", action="append", metavar="FIELD=VALUE", help="set FIELD to a string VALUE (repeatable)")
+    p.add_argument("--set-json", action="append", dest="set_json", metavar="FIELD=JSON", help="set FIELD to a parsed JSON value (repeatable)")
+    p.set_defaults(fn=cmd_annotate)
     p = sub.add_parser("list")
     p.add_argument("--status")
     p.add_argument("--owner")

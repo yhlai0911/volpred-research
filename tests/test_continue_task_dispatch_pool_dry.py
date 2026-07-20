@@ -26,22 +26,23 @@ def test_pool_dry_diag_list_queue_appends_via_canonical_helper(tmp_path, monkeyp
     assert saved[0]["id"].startswith(ctd.POOL_DRY_DIAGNOSTIC_PREFIX)
 
 
-def test_pool_dry_diag_legacy_dict_scrubs_surrogate_and_file_stays_valid(tmp_path, monkeypatch) -> None:
-    # Codex CONDITIONAL_PASS 條件（2026-07-20）：legacy dict 分支需與 helper 同等
-    # 的 encode 防護 —— \ud800 escape 經 json.load 會變 lone surrogate，dump 後
-    # encode 必炸；scrub 要在 truncate 前完成，序列化/編碼失敗不得留下壞檔。
+def test_pool_dry_diag_legacy_dict_root_is_rejected_before_any_write(tmp_path, monkeypatch) -> None:
+    # WS-A1b（取代 2026-07-20 Codex CONDITIONAL_PASS 釘住的舊契約）：dict 包裝殼
+    # 只剩讀取容忍，canonical root 自 2026-07-16 single-gateway 起固定為 list。
+    # 原本這裡維護一份 write_tasks_to_handle 的手抄 serialize-first 複本（helper
+    # 演進時必漂移）；現在 dict-root 在「任何寫入之前」就 loud reject —— 原測試
+    # 關心的「不得留下截斷/壞編碼檔案」由此獲得更強保證：檔案 byte 不動。
     q = tmp_path / "next_tasks.json"
-    q.write_text(
+    original = (
         '{"tasks": [{"id": "x", "title": "bad \\ud800 char", '
-        '"status": "pending", "priority": 3, "task_type": "platform_ops"}]}\n',
-        encoding="utf-8",
+        '"status": "pending", "priority": 3, "task_type": "platform_ops"}]}\n'
     )
+    q.write_text(original, encoding="utf-8")
     monkeypatch.setattr(ctd, "NEXT_TASKS", q)
 
     res = ctd._materialize_pool_dry_diagnostic_task()
 
-    assert res["ok"] is True
-    assert res["added"] == 1
-    saved = json.loads(q.read_text(encoding="utf-8"))  # 仍是合法 JSON = 無截斷、無壞編碼
-    assert isinstance(saved, dict)
-    assert len(saved["tasks"]) == 2
+    assert res["ok"] is False
+    assert res["added"] == 0
+    assert "must be a list" in res["error"]
+    assert q.read_text(encoding="utf-8") == original  # untouched, still valid JSON

@@ -118,3 +118,26 @@ A1b 完成後，新增 audit 掛進既有 pre-push audit runner（單一 owner�
 | 註解 / docstring / error_log 事故敘述 | ~60 | 如 `phase_z.py:166-246`、`cli.py` docstring |
 
 **結論**：無漏網寫入路徑。唯一「grep 掃不到」的殘餘風險是 agent 在 dispatch 期間即興用 Edit/Bash 直改佇列 —— 該面向由 PHASE-Z（WS-B execution isolation）與上列 gate 規則 2 覆蓋，不屬本表範圍。
+
+---
+
+## A1b 執行後記（2026-07-20，worktree agent-aae0802fcba9f05f7）
+
+收斂已落地；本表以下判定在實作時被**證據推翻或細化**（均已在 code comment 標注）：
+
+| 原判定 | 實作裁決 | 證據 |
+|---|---|---|
+| N1 gmail：`_trigger_immediate_dispatch` 可移除，`append_next_task` 內建 `_request_urgent_fire` 已涵蓋 | **保留** `_trigger_immediate_dispatch`，只換寫入原語 | `email_reply` ∈ `DEDICATED_OWNER_TASK_TYPES`，`task_urgency.is_urgent()` 一律回 False（`classify()` 對 dedicated-owner 直接歸 scheduled）— 移除即斷 email 即時派工；task_urgency docstring 明文「各自的 ingest 已經有自己的即時路徑」 |
+| D4 `backfill_null_task_ids.py` delete（「唯一引用是 CI ratchet 測試」） | **改列 needs_helper**：換 `write_tasks_to_handle`，檔案保留 | `scripts/daily_checkup.py:408` 以它為 null-id finding 的 recovery 命令（live 功能引用） |
+| D6 `generate_diverse_tasks.py` delete（「無排程、無 skill/rule 引用」） | **改列 needs_helper**：`_save_tasks` 換 `write_tasks_locked`，檔案保留 | `continue_task_dispatch.py:841` `_maybe_refill` 每輪 refill live 呼叫 `generate(dry_run=False)` → `_save_tasks` |
+| D7 `task_generator_v2.py` 移 `_legacy/`（待人工裁決 H4 交集） | **保留檔案、只移除寫入路徑**（`--commit` 分支整段刪除，計算邏輯與 dry-run/JSON 報表留給 H4） | 貼合 A1b brief「移除該寫入路徑（保留讀取邏輯）」，H4 收編候選計算不受影響 |
+| D1 K1387 `write_knowledge.py` 刪除整檔 | **檔案不動**，凍結為 gate baseline（`NEXT_TASKS_EXPERIMENT_BASELINE`，only-shrink ratchet） | 比照 `scripts/tests/test_work_log_writer_gate.py::BASELINE` 先例：「experiment artifacts are evidence, not live code」（research-honesty）+ memory `feedback_no_research_artifact_loss`；gate 已取消 experiments/ 豁免，該檔不再隱形 |
+| legal 表 `continue_task_dispatch:_materialize_pool_dry_diagnostic_task`「不動」 | legacy-dict 分支的手抄 serialize-first 複本改為 **loud reject**（list 分支本就走 helper） | 兩份 live queue 實測 list-root；dict 手抄複本正是 §N9 指出的 drift 形狀 |
+
+Gate 落地（收編進 `scripts/audit_canonical_writers.py`，單一 owner）：`NEXT-TASKS-ROUTING` 檢查
+= 文末三條建議全數實作（AST helper-routing + 文字規則 + experiments 掃描）。
+Break-then-verify：pre-A1b tree **57 violations**、收斂後 **0**；模擬新增
+`experiments/K9999/write_knowledge.py` 被咬、K1387 baseline 正確凍結。
+新增 canonical helper：`next_tasks.append_task_record()`（record-preserving append gateway；
+`append_next_task` 收斂為其 caller）；新增 `task_pool_claim.py annotate` 子命令取代
+cron prompt 的 jq+mv 指示。
