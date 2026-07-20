@@ -1,13 +1,13 @@
 {
   "paper": "volatility-absorption",
   "paper_version": "v3-active-scope-post-k1686",
-  "generated_at": "2026-07-20T05:14:15+00:00",
+  "generated_at": "2026-07-20T05:39:36+00:00",
   "alert_level": "green",
   "gate_status": "pass",
   "match_rate": 1.0,
   "verification_rate": "100.0%",
-  "total_checks": 130,
-  "matches": 130,
+  "total_checks": 135,
+  "matches": 135,
   "mismatches": 0,
   "critical_flags": [
     "Active gate restricted to reproducible evidence retained in main_v3.tex",
@@ -943,13 +943,58 @@
       "source_path": "k741c.part_b_vix_regimes.High.p_value_holm"
     },
     {
-      "metric": "T5 regime Holm min (none survives)",
+      "metric": "T5 Holm min: overall pair",
+      "paper_value": 0.072,
+      "actual_value": 0.07222481912175503,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.3122487802153302,
+      "status": "match",
+      "source_path": "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.overall_pair"
+    },
+    {
+      "metric": "T5 Holm min: regimes only",
       "paper_value": 0.104,
       "actual_value": 0.10387824533088244,
       "tol_pct": 3.0,
       "rel_diff_pct": 0.11707179722841801,
       "status": "match",
-      "source_path": "k741c.part_b_vix_regimes.*.p_value_holm (min)"
+      "source_path": "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.regimes_only"
+    },
+    {
+      "metric": "T5 Holm min: primary + regimes",
+      "paper_value": 0.13,
+      "actual_value": 0.12984780666360304,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.11707179722843135,
+      "status": "match",
+      "source_path": "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.primary_overall_plus_regimes"
+    },
+    {
+      "metric": "T5 Holm min: all six",
+      "paper_value": 0.155,
+      "actual_value": 0.15581736799632367,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.527334191176565,
+      "status": "match",
+      "source_path": "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.all_six"
+    },
+    {
+      "metric": "T5 nothing clears 5pct under any family",
+      "paper_value": 0.0,
+      "actual_value": 0.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.test_variant_disclosure.multiplicity.anything_clears_5pct"
+    },
+    {
+      "metric": "T5 variant not pre-specified",
+      "paper_value": 0.0,
+      "actual_value": 0.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741c.test_variant_disclosure.chosen_a_priori"
     },
     {
       "metric": "T5 fn date-effect from 1.149",

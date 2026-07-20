@@ -113,40 +113,53 @@ headline 檢定變體 = **Welch**（見下節「檢定變體」）。下表 cano
 k904 獨立佐證（不同視窗、Welch）：overall 1.160 (p=0.042)、Low 1.305、High 0.935。
 k741 改用 Welch 後兩者變體一致，5% 兩側分歧的問題消失（歷史紀錄見下節）。
 
-### 檢定變體：a priori 選 Welch，並揭露另一個
+### 檢定變體：選 Welch，但**不是** a priori（2026-07-20 Codex FAIL 後更正）
 
 原版呼叫 `stats.ttest_ind` 未傳 `equal_var`，等於**因為省略而拿到 Student's**，
 而論文一直標成 Welch、姊妹實驗 k904 也真的用 Welch。兩個變體在 overall 檢定上
 **跨在 5% 兩側**（Student 0.0506 / Welch 0.0394），所以不能繼續放著不決定。
 
-現在所有 call site 都顯式傳 `equal_var=False`，理由是**方法論的、不是這份樣本給的**：
+現在所有 call site 都顯式傳 `equal_var=False`。方法論理由是站得住的：
 
 - Welch 無條件使用是標準建議（Zimmerman 2004；Ruxton 2006；Delacre, Lakens & Leys 2017）：
   變異數真的相等時 power 損失極小，而「先做變異數檢定再選變體」的兩階段程序會**膨脹 Type I error**。
 - 與 k904 及論文既有標籤一致。
+- **不是因為看到異質變異才選它** —— Brown-Forsythe p = 0.48、sd ratio 0.94，本樣本沒有異質變異證據。
+  主張是「Welch 本來就該是預設」，與這份診斷結果無關。
 
-**不是因為看到異質變異才選它** —— Brown-Forsythe（median-centred Levene）p = 0.48、
-sd ratio 0.94，本樣本沒有異質變異的證據。這點寫進 JSON
-（`test_variant_disclosure.not_justified_by_heteroscedasticity`）避免理由被誤讀成 data-driven。
+**但本檔第一版寫成「a priori 選定」，那是不實陳述，已撤回。** 這個決定是在改稿階段做的，
+當時兩個 p 值都已經看到了。知道哪個變體落在 5% 哪一側之後才選，就不能用「事前指定」來辯護。
+能誠實提供的替代說法只有兩點：(a) 兩個變體到處都併陳，沒有藏；(b) 這個選擇在敘事真正倚賴之處
+**對自己不利**：
 
-**也不是因為它比較好看**。它把 overall 從 0.051 推到 0.039（對我們有利），
-但把敘事真正倚賴的 regime 證據推向不利方向：
-
-| | overall p | Holm 後存活的 regime |
+| | overall p | regime family Holm 後存活 |
 |---|---|---|
 | Student | 0.0506 | Low (adj p = 0.036) |
 | **Welch（採用）** | **0.0394** | **無** |
 
-選的是「在關鍵處比較不利」的那個變體。
+這比事前指定弱，而且就照這個強度寫，不裝飾。真正的結論是：**這個結果對一個合理的輔助設定
+選擇很脆弱，而脆弱本身就是發現。**
 
-### 多重比較：tab:nfp 的四個 regime 檢定
+### 多重比較：family 不只是那張表（2026-07-20 Codex FAIL 後更正）
 
-論文表格列四個 regime 檢定，**該表就是 family**，原本零 Holm/Bonferroni 揭露 —— 這是
-submission blocker。現已對四檢定做 Holm step-down 並存進 JSON（兩個變體都存）。
-Welch headline 下 **無一存活**（0.104 / 0.104 / 0.533 / 0.707）。
+本檔第一版只對四個 regime 檢定做 Holm，理由寫「該表就是 family」，並把 overall 的 vs-all 與
+vs-Friday 排除在外，說它們是「同一假設的兩種框法」。**Codex 判這個界線不具原則性**：family 跟隨
+的是推論主張的集合，不是 LaTeX 表格邊界；而且那兩個 overall 檢定用的是**不同的對照樣本**
+（全部 non-NFP vs 只有週五），回答不同的比較問題。排除它們**剛好**是唯一能保住 sub-5% headline
+的切法 —— 那叫方便，不叫原則。
 
-overall 的 vs-all 與 vs-Friday 不併入這個 family：它們是同一份樣本上同一個假設的兩種框法，
-一併報告而非挑小的那個。
+現在改成把每一種合理的 family 都算出來報告，直接消掉這個 degree of freedom：
+
+| family | 最小 Holm adjusted p |
+|---|---|
+| 兩個 overall 檢定 | **0.0722** |
+| 四個 regime 檢定 | 0.1039 |
+| 主 overall + 四 regime（5 檢定） | 0.1298 |
+| 全部六個檢定 | 0.1558 |
+
+→ **在任何一種 family 下都沒有東西過 5%**，包括 overall 效應本身（它連對上自己的
+companion 檢定都撐不住）。論文的 NFP 節因此全節降級為 descriptive，推論改靠 SAR 證據
+—— 這點論文本來就這樣寫，現在數字也對上了。
 
 ### ⚠️ 最重要的發現：論文的「regime 對比」本身沒被檢定過
 
@@ -176,7 +189,8 @@ descriptive pattern，並明說推論改靠 SAR 證據。crisis cell 只有 28 �
    但對不上 ratio/t/p（Medium 論文 1.30/2.69/0.009，實際 1.175/1.72/0.090）。
    掃過 8 種 spec 變體皆不符。根因：`reproduce.py` 只綁 regime 的 `n` 與 `mean_abs`，
    **從未綁 ratio/t/p**。已修：canonical JSON 存下這些值，`reproduce.py` 改綁 canonical
-   並補齊每個 regime 六欄（gate 112/112, 100%, green）。
+   並補齊每個 regime 六欄。gate 當時 112/112；加入 Welch 揭露與 Holm 綁定後為
+   **135/135, 100%, green**（數字以 `paper/volatility-absorption/reproduce_report.json` 為準）。
 2. **論文把這些檢定標成 "Welch's t-tests"，但 k741 用的是 Student's**
    （`stats.ttest_ind` 預設 `equal_var=True`）。第一輪先在 tex 改成中性的
    "two-sample $t$-tests"；**現已徹底解決**：headline 固定為 Welch、所有 call site

@@ -35,8 +35,8 @@ factor separately. `date_effect` is defined only at a FIXED mapper.
 HEADLINE SPEC = official dates + forward-only mapping. That is the only cell
 with neither a proxy calendar nor a lookahead, and it is what the paper cites.
 
-TEST VARIANT: WELCH, UNCONDITIONALLY (third Codex finding)
-----------------------------------------------------------
+TEST VARIANT: WELCH — CHOSEN IN REVISION, NOT PRE-SPECIFIED
+------------------------------------------------------------
 The archived script called `stats.ttest_ind` without `equal_var`, i.e. it got
 scipy's Student's default by omission rather than by decision — while
 `main_v3.tex` described the tests as Welch's and the sibling k904 actually
@@ -44,32 +44,57 @@ passes `equal_var=False`. The two variants straddle the 5% line on the overall
 test (Student p = 0.0506, Welch p = 0.0394), so this cannot be left implicit.
 
 This script fixes the headline on **Welch** and passes `equal_var=` explicitly
-everywhere. The rationale is methodological, not empirical:
+everywhere. Two things must be said about that choice, and the second one is
+the uncomfortable one.
 
-  * Welch unconditionally is the standard recommendation (Zimmerman 2004;
-    Ruxton 2006; Delacre, Lakens & Leys 2017). Welch loses almost no power when
-    variances are in fact equal, and conditioning the choice on a variance
-    pre-test inflates Type I error — a two-stage procedure is worse than either
-    stage alone.
-  * It makes k741 consistent with k904 and with what the paper always claimed.
+The methodological case for Welch is sound. Welch unconditionally is the
+standard recommendation (Zimmerman 2004; Ruxton 2006; Delacre, Lakens & Leys
+2017): it loses almost no power when variances are in fact equal, and
+conditioning the choice on a variance pre-test inflates Type I error, so the
+two-stage procedure is worse than either stage alone. It also makes k741
+consistent with k904 and with the label the paper already carried. Note this is
+NOT a claim that the variances look unequal — Brown-Forsythe (median-centred
+Levene) gives p = 0.48 for NFP vs all non-NFP, i.e. no evidence of
+heteroscedasticity at all. The argument is that Welch is the right default
+regardless of what that diagnostic says.
 
-What it is NOT is a choice made because the variances look unequal, and the
-JSON records the diagnostic that says so: Brown-Forsythe (median-centred Levene)
-gives p = 0.48 for NFP vs all non-NFP. There is no evidence of heteroscedasticity
-here; Welch is chosen a priori, not because this sample asked for it.
+**But it was settled during revision, with both p-values already on the table,
+and an earlier draft of this file called it "a priori". That was not true and
+has been withdrawn** (Codex review 2026-07-20, verdict FAIL). A choice made in
+full knowledge of which side of 5% each variant lands on cannot be defended by
+calling it pre-specified. What can honestly be offered instead is:
 
-Nor is it a choice made because it flatters the result. It moves the overall
-test from p = 0.051 to p = 0.039, but it moves the *regime* tests — the ones the
-absorption narrative leans on — the other way: under Student's + Holm the calm
-regime survives multiplicity correction (adj p = 0.036), under Welch + Holm
-**nothing does** (smallest adj p = 0.104). Both directions are reported.
+  * both variants are reported everywhere, so nothing is hidden; and
+  * the choice is against interest where the section's argument actually lives.
+    Welch helps the overall test (0.051 -> 0.039) but costs the regime family
+    its only Holm survivor: under Student's the calm regime survives correction
+    (adj p = 0.036), under Welch nothing does (smallest adj p = 0.104).
 
-MULTIPLE COMPARISONS
---------------------
-Part B runs four regime tests and the paper tabulates all four. Holm-Bonferroni
-adjusted p-values are computed across that family and persisted for both
-variants, so the table note can report them instead of leaving a referee to
-notice the omission.
+That is weaker than pre-specification and is stated as such rather than dressed
+up. The honest summary is that this result is fragile to a defensible auxiliary
+choice, which is itself the finding.
+
+MULTIPLE COMPARISONS — AND WHY THE FAMILY IS NOT JUST THE TABLE
+---------------------------------------------------------------
+An earlier draft applied Holm only to the four regime tests, on the grounds that
+"the table is the family", and excluded the two overall comparisons by calling
+them two framings of one hypothesis. Codex rejected that (2026-07-20): a family
+follows the set of inferential claims, not a LaTeX table boundary, and the two
+overall tests use *different control samples* (all non-NFP days vs Fridays only)
+to answer different comparator questions. Excluding them happened to preserve a
+sub-5% headline. That is convenient, not principled.
+
+So this script now computes Holm over every grouping a referee might reasonably
+ask for, and the paper reports them:
+
+  * the two overall comparisons        -> both adjusted p = 0.0722
+  * the four regime tests              -> smallest adjusted p = 0.1039
+  * overall vs-all + the four regimes  -> smallest adjusted p = 0.1298
+  * all six tests together             -> smallest adjusted p = 0.1558
+
+**Under every one of these families, nothing clears 5%.** The NFP section is
+therefore reported as descriptive throughout; the paper's inference rests on the
+SAR evidence, as it already said it did.
 
 SAMPLE WINDOW (second Codex finding)
 ------------------------------------
@@ -88,8 +113,13 @@ Both arms share ONE pinned snapshot
 (`paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv`, the
 paper's 2026-04-19 pinned data) so no cell differs by yfinance drift. An
 `archived_reproduction` cell (proxy + archived mapper + unsliced frame) is
-emitted purely to demonstrate the re-implementation reproduces the archived
-JSON before any fix is applied.
+emitted to show *component* fidelity of the re-implementation before any fix is
+applied. It is an approximate, not exact, reproduction and should not be read as
+one: the archived JSON reports ratio 1.14481 / p 0.08138, and this cell gives
+ratio 1.14497 with Student p 0.08106 — close, with the residual attributable to
+archived-live vs pinned prices. Its headline p is reported under the Welch
+variant (0.06995) like every other cell, so compare it against the Student
+alternative stored alongside, not against the archived number directly.
 
 Scope: Parts A and B only — the parts main_v3.tex cites. Archived Parts C
 (sector dispersion) and D (strategy) are cited nowhere in the paper (verified by
@@ -501,40 +531,60 @@ def main():
     ha = headline["part_a_historical"]
     hb = headline["part_b_vix_regimes"]
     reg_tested = {k: r for k, r in hb.items() if "test_variants" in r}
+    # Holm over every grouping a referee might reasonably call the family. The earlier
+    # "the table is the family" boundary was rejected on review as convenient: it was the
+    # one grouping that preserved a sub-5% headline. Reporting all of them removes the
+    # degree of freedom entirely.
+    p_overall = {"overall vs all non-NFP": ha["p_vs_all"], "overall vs Fridays": ha["p_vs_friday"]}
+    p_regimes = {k: r["p_value"] for k, r in reg_tested.items()}
+    families = {
+        "overall_pair": holm(p_overall),
+        "regimes_only": holm(p_regimes),
+        "primary_overall_plus_regimes": holm({"overall vs all non-NFP": ha["p_vs_all"], **p_regimes}),
+        "all_six": holm({**p_overall, **p_regimes}),
+    }
+
     variant_disclosure = {
         "headline_variant": "student" if HEADLINE_EQUAL_VAR else "welch",
-        "chosen_a_priori": True,
-        "rationale": ("Welch unconditionally (Zimmerman 2004; Ruxton 2006; Delacre, Lakens & Leys 2017): "
-                      "negligible power cost under equal variances, and selecting the variant from a "
-                      "variance pre-test inflates Type I error. Also aligns k741 with sibling k904 and "
-                      "with the label main_v3.tex already carried."),
+        "chosen_a_priori": False,
+        "when_chosen": ("during the 2026-07 revision, with both variants' p-values already known. An "
+                        "earlier draft of this file described the choice as 'a priori'; that claim was "
+                        "false and was withdrawn after Codex review 2026-07-20 (verdict FAIL)."),
+        "rationale": ("Welch unconditionally is the standard recommendation (Zimmerman 2004; Ruxton 2006; "
+                      "Delacre, Lakens & Leys 2017): negligible power cost under equal variances, and "
+                      "selecting the variant from a variance pre-test inflates Type I error. It also aligns "
+                      "k741 with sibling k904 and with the label main_v3.tex already carried. The reasoning "
+                      "is sound but it is NOT pre-specification, and is not presented as such."),
         "not_justified_by_heteroscedasticity": {
             "levene_bf_p_vs_all": ha["test_variants_vs_all"]["levene_bf_p"],
             "sd_ratio_vs_all": ha["test_variants_vs_all"]["sd_ratio"],
-            "note": ("Brown-Forsythe finds no evidence of unequal variance (p = 0.48, sd ratio 0.94). The "
-                     "choice is a priori and would be the same had the diagnostic gone the other way; it is "
-                     "recorded here so the rationale is not misread as data-driven."),
+            "note": ("Brown-Forsythe finds no evidence of unequal variance (p = 0.48, sd ratio 0.94), so the "
+                     "choice is not a response to this sample looking heteroscedastic. Welch is argued to be "
+                     "the right default regardless of what the diagnostic says."),
         },
-        "not_chosen_for_favourability": {
+        "against_interest_where_it_counts": {
             "overall_p_student": ha["test_variants_vs_all"]["p_student"],
             "overall_p_welch": ha["test_variants_vs_all"]["p_welch"],
             "regime_holm_survivors_student": sorted(
                 k for k, r in reg_tested.items() if r["test_variants"]["p_student_holm"] < 0.05),
             "regime_holm_survivors_welch": sorted(
                 k for k, r in reg_tested.items() if r["test_variants"]["p_welch_holm"] < 0.05),
-            "note": ("Welch helps the overall test across the 5% line but costs the regime family its only "
-                     "Holm survivor. The section leans on the regime pattern, so the chosen variant is the "
-                     "less flattering one where it matters."),
+            "note": ("Offered in place of pre-specification, and weaker than it: Welch helps the overall "
+                     "test across 5% but costs the regime family its only Holm survivor, and the section's "
+                     "argument lives in the regimes. Both directions are reported everywhere."),
         },
         "multiplicity": {
-            "family": "the four VIX-regime tests tabulated in tab:nfp",
             "method": "Holm-Bonferroni step-down",
-            "adjusted_headline": {k: r["p_value_holm"] for k, r in reg_tested.items()},
-            "adjusted_student": {k: r["test_variants"]["p_student_holm"] for k, r in reg_tested.items()},
-            "adjusted_welch": {k: r["test_variants"]["p_welch_holm"] for k, r in reg_tested.items()},
-            "note": ("The overall vs-all and vs-Friday tests are not folded into this family: they are two "
-                     "framings of one hypothesis on one sample, reported together rather than screened for "
-                     "the smaller p."),
+            "families_reported": families,
+            "min_adjusted_p_by_family": {k: min(v.values()) for k, v in families.items()},
+            "anything_clears_5pct": any(min(v.values()) < 0.05 for v in families.values()),
+            "adjusted_student_regimes": {k: r["test_variants"]["p_student_holm"] for k, r in reg_tested.items()},
+            "adjusted_welch_regimes": {k: r["test_variants"]["p_welch_holm"] for k, r in reg_tested.items()},
+            "note": ("Every plausible family is reported rather than one chosen. Under all of them nothing "
+                     "clears 5%, including the two overall comparisons on their own (both adjusted to "
+                     "0.0722). An earlier draft excluded the overall pair by calling them two framings of "
+                     "one hypothesis; they use different control samples (all non-NFP vs Fridays only), and "
+                     "that exclusion was the only grouping preserving a sub-5% headline."),
         },
     }
 
@@ -641,13 +691,17 @@ def main():
                   f"Holm={rec['p_value_holm']:.4f}")
 
     vd = variant_disclosure
-    print(f"\nTEST VARIANT: {vd['headline_variant'].upper()} (a priori)")
-    print(f"  overall p — Student {vd['not_chosen_for_favourability']['overall_p_student']:.4f} | "
-          f"Welch {vd['not_chosen_for_favourability']['overall_p_welch']:.4f}")
+    ai = vd["against_interest_where_it_counts"]
+    print(f"\nTEST VARIANT: {vd['headline_variant'].upper()} (chosen in revision, NOT pre-specified)")
+    print(f"  overall p — Student {ai['overall_p_student']:.4f} | Welch {ai['overall_p_welch']:.4f}")
     print(f"  Brown-Forsythe p = {vd['not_justified_by_heteroscedasticity']['levene_bf_p_vs_all']:.3f} "
           f"(no evidence of unequal variance — Welch is not justified by this sample)")
-    print(f"  regime Holm survivors @5% — Student {vd['not_chosen_for_favourability']['regime_holm_survivors_student'] or 'none'} | "
-          f"Welch {vd['not_chosen_for_favourability']['regime_holm_survivors_welch'] or 'none'}")
+    print(f"  regime Holm survivors @5% — Student {ai['regime_holm_survivors_student'] or 'none'} | "
+          f"Welch {ai['regime_holm_survivors_welch'] or 'none'}")
+    print("\nMULTIPLICITY — smallest Holm-adjusted p by family:")
+    for fam, mn in vd["multiplicity"]["min_adjusted_p_by_family"].items():
+        print(f"  {fam:<30} {mn:.4f}{'  <-- clears 5%' if mn < 0.05 else ''}")
+    print(f"  anything clears 5%: {vd['multiplicity']['anything_clears_5pct']}")
     print(f"\nWrote {OUT.relative_to(REPO)}")
 
 

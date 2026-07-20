@@ -63,6 +63,7 @@ def main() -> int:
     nfp_dec = k741["factor_decomposition"]
     nfp_rdt = k741["regime_difference_test"]
     nfp_cells = k741["factorial_cells"]
+    nfp_mult = k741["test_variant_disclosure"]["multiplicity"]["min_adjusted_p_by_family"]
 
     claims = [
         # ---- Table 2: regime distribution (pinned; days = n_shock + n_normal) ----
@@ -188,12 +189,28 @@ def main() -> int:
         ("T5 High NFP t", -0.38, nfp_reg["High (VIX>=25)"]["t_stat"], 3.0, "k741c.part_b_vix_regimes.High.t_stat"),
         ("T5 High NFP p", 0.707, nfp_reg["High (VIX>=25)"]["p_value"], 1.0, "k741c.part_b_vix_regimes.High.p_value"),
         ("T5 High NFP p Holm", 0.707, nfp_reg["High (VIX>=25)"]["p_value_holm"], 1.0, "k741c.part_b_vix_regimes.High.p_value_holm"),
-        # The claim the section now rests on is a NEGATIVE one — "no regime survives Holm".
-        # Bind the smallest adjusted p so that claim breaks the gate if it ever stops holding,
-        # rather than silently becoming false while every other row stays green.
-        ("T5 regime Holm min (none survives)", 0.104,
-         min(r["p_value_holm"] for r in nfp_reg.values() if "p_value_holm" in r), 3.0,
-         "k741c.part_b_vix_regimes.*.p_value_holm (min)"),
+        # The claims this section now rests on are NEGATIVE ones — "nothing survives Holm under
+        # any family". Bind the smallest adjusted p of every reported family so those claims
+        # break the gate if they ever stop holding, rather than silently becoming false while
+        # every other row stays green. The family boundary is itself a researcher degree of
+        # freedom, so all four groupings the paper quotes are bound, not just the flattering one.
+        ("T5 Holm min: overall pair", 0.072, nfp_mult["overall_pair"], 2.0,
+         "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.overall_pair"),
+        ("T5 Holm min: regimes only", 0.104, nfp_mult["regimes_only"], 3.0,
+         "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.regimes_only"),
+        ("T5 Holm min: primary + regimes", 0.130, nfp_mult["primary_overall_plus_regimes"], 2.0,
+         "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.primary_overall_plus_regimes"),
+        ("T5 Holm min: all six", 0.155, nfp_mult["all_six"], 2.0,
+         "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.all_six"),
+        # "nothing clears 5% under any family" — the single sentence the section turns on.
+        ("T5 nothing clears 5pct under any family", 0.0,
+         float(k741["test_variant_disclosure"]["multiplicity"]["anything_clears_5pct"]), 0.0,
+         "k741c.test_variant_disclosure.multiplicity.anything_clears_5pct"),
+        # The variant choice is disclosed as NOT pre-specified; bind that too, so the honest
+        # framing cannot quietly revert to an 'a priori' claim.
+        ("T5 variant not pre-specified", 0.0,
+         float(k741["test_variant_disclosure"]["chosen_a_priori"]), 0.0,
+         "k741c.test_variant_disclosure.chosen_a_priori"),
         # sec:nfp footnote quotes the date-effect decomposition, which is NOT the headline cell.
         # Bound explicitly so the footnote cannot go stale while the gate stays green.
         ("T5 fn date-effect from 1.149", 1.149, nfp_dec["date_effect_at_archived_mapper"]["ratio"][0], 1.0, "k741c.factor_decomposition.date_effect_at_archived_mapper.ratio[0]"),

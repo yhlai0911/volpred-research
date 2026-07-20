@@ -157,44 +157,72 @@
   },
   "test_variant_disclosure": {
     "headline_variant": "welch",
-    "chosen_a_priori": true,
-    "rationale": "Welch unconditionally (Zimmerman 2004; Ruxton 2006; Delacre, Lakens & Leys 2017): negligible power cost under equal variances, and selecting the variant from a variance pre-test inflates Type I error. Also aligns k741 with sibling k904 and with the label main_v3.tex already carried.",
+    "chosen_a_priori": false,
+    "when_chosen": "during the 2026-07 revision, with both variants' p-values already known. An earlier draft of this file described the choice as 'a priori'; that claim was false and was withdrawn after Codex review 2026-07-20 (verdict FAIL).",
+    "rationale": "Welch unconditionally is the standard recommendation (Zimmerman 2004; Ruxton 2006; Delacre, Lakens & Leys 2017): negligible power cost under equal variances, and selecting the variant from a variance pre-test inflates Type I error. It also aligns k741 with sibling k904 and with the label main_v3.tex already carried. The reasoning is sound but it is NOT pre-specification, and is not presented as such.",
     "not_justified_by_heteroscedasticity": {
       "levene_bf_p_vs_all": 0.48019579642411037,
       "sd_ratio_vs_all": 0.9376421850246934,
-      "note": "Brown-Forsythe finds no evidence of unequal variance (p = 0.48, sd ratio 0.94). The choice is a priori and would be the same had the diagnostic gone the other way; it is recorded here so the rationale is not misread as data-driven."
+      "note": "Brown-Forsythe finds no evidence of unequal variance (p = 0.48, sd ratio 0.94), so the choice is not a response to this sample looking heteroscedastic. Welch is argued to be the right default regardless of what the diagnostic says."
     },
-    "not_chosen_for_favourability": {
+    "against_interest_where_it_counts": {
       "overall_p_student": 0.050561278499795845,
       "overall_p_welch": 0.039351447808146874,
       "regime_holm_survivors_student": [
         "Low (VIX<15)"
       ],
       "regime_holm_survivors_welch": [],
-      "note": "Welch helps the overall test across the 5% line but costs the regime family its only Holm survivor. The section leans on the regime pattern, so the chosen variant is the less flattering one where it matters."
+      "note": "Offered in place of pre-specification, and weaker than it: Welch helps the overall test across 5% but costs the regime family its only Holm survivor, and the section's argument lives in the regimes. Both directions are reported everywhere."
     },
     "multiplicity": {
-      "family": "the four VIX-regime tests tabulated in tab:nfp",
       "method": "Holm-Bonferroni step-down",
-      "adjusted_headline": {
-        "Low (VIX<15)": 0.10387824533088244,
-        "Medium (15-20)": 0.10387824533088244,
-        "Elevated (20-25)": 0.5329009894214751,
-        "High (VIX>=25)": 0.706661156646142
+      "families_reported": {
+        "overall_pair": {
+          "overall vs Fridays": 0.07222481912175503,
+          "overall vs all non-NFP": 0.07222481912175503
+        },
+        "regimes_only": {
+          "Low (VIX<15)": 0.10387824533088244,
+          "Medium (15-20)": 0.10387824533088244,
+          "Elevated (20-25)": 0.5329009894214751,
+          "High (VIX>=25)": 0.706661156646142
+        },
+        "primary_overall_plus_regimes": {
+          "Low (VIX<15)": 0.12984780666360304,
+          "Medium (15-20)": 0.12984780666360304,
+          "overall vs all non-NFP": 0.12984780666360304,
+          "Elevated (20-25)": 0.5329009894214751,
+          "High (VIX>=25)": 0.706661156646142
+        },
+        "all_six": {
+          "Low (VIX<15)": 0.15581736799632367,
+          "Medium (15-20)": 0.15581736799632367,
+          "overall vs Fridays": 0.15581736799632367,
+          "overall vs all non-NFP": 0.15581736799632367,
+          "Elevated (20-25)": 0.5329009894214751,
+          "High (VIX>=25)": 0.706661156646142
+        }
       },
-      "adjusted_student": {
+      "min_adjusted_p_by_family": {
+        "overall_pair": 0.07222481912175503,
+        "regimes_only": 0.10387824533088244,
+        "primary_overall_plus_regimes": 0.12984780666360304,
+        "all_six": 0.15581736799632367
+      },
+      "anything_clears_5pct": false,
+      "adjusted_student_regimes": {
         "Low (VIX<15)": 0.035614743879422685,
         "Medium (15-20)": 0.08025726224584373,
         "Elevated (20-25)": 0.5069042593658861,
         "High (VIX>=25)": 0.7312488923708301
       },
-      "adjusted_welch": {
+      "adjusted_welch_regimes": {
         "Low (VIX<15)": 0.10387824533088244,
         "Medium (15-20)": 0.10387824533088244,
         "Elevated (20-25)": 0.5329009894214751,
         "High (VIX>=25)": 0.706661156646142
       },
-      "note": "The overall vs-all and vs-Friday tests are not folded into this family: they are two framings of one hypothesis on one sample, reported together rather than screened for the smaller p."
+      "note": "Every plausible family is reported rather than one chosen. Under all of them nothing clears 5%, including the two overall comparisons on their own (both adjusted to 0.0722). An earlier draft excluded the overall pair by calling them two framings of one hypothesis; they use different control samples (all non-NFP vs Fridays only), and that exclusion was the only grouping preserving a sub-5% headline."
     }
   },
   "regime_difference_test": {
