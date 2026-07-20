@@ -32373,13 +32373,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T19:01:08.388479+00:00",
+    "completed_at": "2026-07-20T20:00:54.680765+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T19:01:08.388479+00:00",
-      "last_clean_observed_at": "2026-07-20T19:01:08.388479+00:00"
+      "resolved_at": "2026-07-20T20:00:54.680765+00:00",
+      "last_clean_observed_at": "2026-07-20T20:00:54.680765+00:00"
     }
   },
   {
@@ -32391,13 +32391,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T19:13:37.264439+00:00",
+    "completed_at": "2026-07-20T20:14:57.668144+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T19:13:37.264439+00:00",
-      "last_clean_observed_at": "2026-07-20T19:13:37.264439+00:00"
+      "resolved_at": "2026-07-20T20:14:57.668144+00:00",
+      "last_clean_observed_at": "2026-07-20T20:14:57.668144+00:00"
     }
   },
   {
@@ -32409,13 +32409,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T18:16:09.237350+00:00",
+    "completed_at": "2026-07-20T19:13:48.349780+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T18:16:09.237350+00:00",
-      "last_clean_observed_at": "2026-07-20T18:16:09.237350+00:00"
+      "resolved_at": "2026-07-20T19:13:48.349780+00:00",
+      "last_clean_observed_at": "2026-07-20T19:13:48.349780+00:00"
     }
   },
   {
@@ -35637,57 +35637,15 @@
   },
   {
     "id": "phase_z_alert_bypasses_remediation_bridge",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "PHASE-Z alert 繞過 alert_remediation bridge — body 還在叫老闆行動（老闆 msg 907 P1）",
     "priority": 1,
     "source": "boss_telegram_907",
-    "status": "succeeded",
     "created_at": "2026-07-17T05:27:56.323174+00:00",
-    "title": "PHASE-Z alert 繞過 alert_remediation bridge — body 還在叫老闆行動（老闆 msg 907 P1）",
-    "description": "老闆 Telegram msg 907：「我說過不要建議我行動是你自己立刻去處理」——針對 PHASE-Z auto-commit 測試紅燈 CRITICAL 信。\n\n根因（已診斷，不必重查）：\n- scripts/dispatch_supervisor/phase_z.py:1600 的 alert body 仍寫死 \"## 建議行動\" + 兩行 CLI 指令給老闆跑。\n- 更根本：phase_z.py 直接呼叫 alert_fn(level=\"critical\", ...) 送信，**完全繞過 src/volpred/ops/alert_remediation.py bridge**。grep 證實 remediate_condition / remediate_internal_alert 只在 alerts.py 與 alert_remediation.py 內被呼叫，dispatch_supervisor 一個都沒接。\n- 所以 2026-07-13 的 class sweep（27 alert / 24 帶建議行動）只涵蓋 condition-based alert（check_alerts.py 路徑），dispatch_supervisor 自己直發的 alert 是漏網之魚。feedback_alert_is_a_task_not_a_chore 的「預設自動建任務」不變式在這條路徑上不成立。\n\n要做：\n1. phase_z test-gate CRITICAL 走 remediation bridge：註冊 ALERT_TASK_TYPE（或明確列入 SELF_REMEDIATING/OWNER_DECISION 並寫理由，禁止未分類後門）。\n2. body 行動段改為「## 已自動處理 + 任務 id」，刪掉 imperative 的「## 建議行動」。措辭誠實前提 = 任務必須真的被建出來（不可只改文案）。\n3. **class sweep 不可只修 phase_z**：全量掃 dispatch_supervisor/ 所有直呼 alert_fn 的點，逐一分類；留機械 gate（測試）擋未來新增的 alert 繞過 bridge。\n4. 測試：涵蓋「phase_z 紅燈 → 有 task 產出 + body 不含『建議行動』」。\n\n參考 memory：feedback_alert_is_a_task_not_a_chore、feedback_alerts_auto_act_not_suggest、feedback_declare_complete_requires_class_sweep。",
-    "status_history": [
-      {
-        "ts": "2026-07-17T14:13:04.890942+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
-      },
-      {
-        "ts": "2026-07-17T14:14:15.658259+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c"
-      },
-      {
-        "ts": "2026-07-17T16:50:05.496588+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-slot-1-9dbaebe9c8884091a4fb5eadfa855a3c",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-17T19:09:28.725670+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-e4a21e656c2d4ff4814d55e57a5d2373"
-      },
-      {
-        "ts": "2026-07-17T19:09:35.976425+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-e4a21e656c2d4ff4814d55e57a5d2373"
-      },
-      {
-        "ts": "2026-07-17T19:18:46.221903+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-e4a21e656c2d4ff4814d55e57a5d2373"
-      }
-    ],
-    "started_at": "2026-07-17T19:09:35.976410+00:00",
-    "last_released_at": "2026-07-17T16:50:05.496585+00:00",
-    "last_release_reason": "auto_release_stale_2h",
     "completed_at": "2026-07-17T19:18:46.221888+00:00",
-    "result": "phase_z test-gate 紅燈改走 internal remediation bridge（新增 alert_key phase_z_test_gate_red）：紅燈自動建 P1 修復任務、首次不進老闆信箱；刪除 body 的『## 建議行動』imperative，改為『## 修復線索（供接手任務）』；backward-compat seam 補 fingerprint kwarg。機械 gate 測試斷言 phase_z.py 永不再出現『## 建議行動』。class sweep：唯一 bypass 已修，send_auth_alert 的建議行動屬正當 OWNER_DECISION。tests 全綠（18 gate + 38 ownership + 88 alert）。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T20:08:24.041908+00:00"
   },
   {
     "id": "phase_z_orphan_receipt_feature_split_20260717",
@@ -38114,7 +38072,7 @@
     "description": "K1731 arm B 拆段 2／2（parent timeout job: agent-brief_k1731_armB-f3e688）。\n\n**前置**：拆段 1 = compute job `k1731-armB-split-verification`，產出\n`.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_armB_verification.json`。\n**開工前先讀那份 artifact**；不存在或 `verdict != ready_to_merge` → 不要合併，改依 blocking_issues\n開 bounded 修正 job（timeout<3600，禁整份重跑），並把本任務再 block 一輪。\n\n**verdict=ready_to_merge 才做這四件事**：\n1. `merge_worktree.sh` 正式合併 `dispatch-slot-1-bd00f90a-k1731`（禁裸 git merge / 禁 force-remove）。\n2. 主線程寫 knowledge.json —— **只引 verification artifact 指定的 canonical_artifact 那一份 results\n   JSON**。工作區同時有 `_results.json` 與 `_results_corrected.json`，引錯就是把已知有錯的數字寫進\n   長期記憶。\n3. arm A(K1730) + arm B(K1731) 結果都齊了 → 依老闆 msg 946/947 判斷寫文章還是論文。\n4. 回報老闆（`scripts/progress_report.py`，--actor 傳 $VOLPRED_TASK_CLAIM_OWNER）。\n\n**產出**：merge receipt + knowledge id + 一句話的文章/論文判斷。\n**成功判準**：worktree 已合併且無殘留 branch；knowledge entry 的數字出處可回溯到 canonical artifact。\n\nblocked_until=2026-07-18T20:15:06+08:00（給拆段 1 的 3600s 跑完 + reaper 收件的時間）。 [2026-07-19 10:xx] Codex rev6 判 FAIL（4 條 blocking issue 已核對屬實），rev7 remediation 委派給 agent job agent-brief_k1731_armB_rev7-7ece0f，之後仍需 Codex round 7；blocked_until 由 07-19T18:00 延到 07-20T12:00，避免在驗收未過時被 unblock sweep 放行成合併任務。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "source": "system",
     "created_at": "2026-07-18T10:15:06.957501+00:00",
     "payload": {
@@ -38192,14 +38150,31 @@
         "from": "blocked",
         "to": "pending",
         "reason": "blocked_until_expired (2026-07-20T12:00:00+08:00)"
+      },
+      {
+        "ts": "2026-07-20T20:09:07.977194+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-0a4f97f4eafa4ee8a65686a0f0adbfde"
+      },
+      {
+        "ts": "2026-07-20T20:09:14.489596+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-0a4f97f4eafa4ee8a65686a0f0adbfde"
       }
     ],
-    "started_at": "2026-07-18T21:08:16.571378+00:00",
+    "started_at": "2026-07-20T20:09:14.489579+00:00",
     "last_released_at": "2026-07-18T18:10:41.402602+00:00",
-    "claimed_by": "hourly-slot-2-f59ba8cd2d384523bb27f862c0f58168",
-    "claimed_at": "2026-07-18T21:08:16.333485+00:00",
-    "claim_session_id": "946dca0cc176",
-    "result": "拆段 2a 完成（hourly-slot-2-f59ba8cd）：讀 k1731_armB_esfix.json → verdict=ready_for_codex_review、blocking_issues=[]、regression PASS(3834 leaves / 0 out-of-allowlist)、README traceability 50/50。依 scripts/codex_review_job.sh 規範（整份 experiment 一審 10-40min，禁 in-fire spawn）已 enqueue Codex 一審 job compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008，prompt=storage/ops/codex_reviews/k1731_armB_rev5_prompt.md，verdict 出口=storage/ops/codex_reviews/k1731_armB_rev5_verdict.md。受審 bytes 已凍結於 storage/ops/codex_reviews/k1731_armB_rev5_freeze.sha256（20 檔 sha256）—— 合併前須比對一致。拆段 2b（verdict-template → merge_worktree.sh → knowledge.json 只引 rev5 → 文章/論文判斷 → progress_report）由該 job 的 compute-queue followup 接手。"
+    "claimed_by": "hourly-slot-1-0a4f97f4eafa4ee8a65686a0f0adbfde",
+    "claimed_at": "2026-07-20T20:09:07.977180+00:00",
+    "claim_session_id": "e9cd53712eba",
+    "result": "拆段 2a 完成（hourly-slot-2-f59ba8cd）：讀 k1731_armB_esfix.json → verdict=ready_for_codex_review、blocking_issues=[]、regression PASS(3834 leaves / 0 out-of-allowlist)、README traceability 50/50。依 scripts/codex_review_job.sh 規範（整份 experiment 一審 10-40min，禁 in-fire spawn）已 enqueue Codex 一審 job compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008，prompt=storage/ops/codex_reviews/k1731_armB_rev5_prompt.md，verdict 出口=storage/ops/codex_reviews/k1731_armB_rev5_verdict.md。受審 bytes 已凍結於 storage/ops/codex_reviews/k1731_armB_rev5_freeze.sha256（20 檔 sha256）—— 合併前須比對一致。拆段 2b（verdict-template → merge_worktree.sh → knowledge.json 只引 rev5 → 文章/論文判斷 → progress_report）由該 job 的 compute-queue followup 接手。",
+    "blocked_until": "2026-07-25T13:30:00+08:00",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_at": "2026-07-20T20:13:03+00:00",
+    "blocked_note": "rev8 三個 gate 主線程獨立重現全 PASS（ratchet 108/108、verification 107 checks/0 problems/exit 0、regression 3834 leaves/0 unexpected）+ negative control 確認 gate 可失敗（注入違規句 exit 1）。但 Codex round-8 對 round-8b frozen bytes 的判決不存在（CLI usage limit，quota 重置 2026-07-25 13:30），fallback 審查回 FAIL 且依 .claude/rules/experiments.md:36 不可替代 primary-path Codex PASS。gate 層過、claim 層待審 → 不合併 worktree。receipt: storage/ops/codex_reviews/k1731_armB_rev8_independent_gate_verification.md",
+    "gate_verification_receipt": "storage/ops/codex_reviews/k1731_armB_rev8_independent_gate_verification.md"
   },
   {
     "id": "telegram-985",
@@ -43627,7 +43602,7 @@
     "title": "K1623 blocked item：第三臂 MC 量化「估計段均值」在 generated-regressor 不確定性中的佔比（round-3 送審前的唯一 compute gate）",
     "task_type": "experiment",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T21:14:41.330868+00:00",
     "created_by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
@@ -43664,14 +43639,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-021010e0d92f449db2f4d9f0f5b6b8c5"
+      },
+      {
+        "ts": "2026-07-20T20:00:13.405287+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-021010e0d92f449db2f4d9f0f5b6b8c5",
+        "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 49.9min >= grace 20min"
       }
     ],
     "started_at": "2026-07-20T19:10:17.044035+00:00",
-    "last_released_at": "2026-07-20T16:18:56.732677+00:00",
-    "last_release_reason": "supervisor_kill_a0db212c",
-    "claimed_by": "hourly-slot-1-021010e0d92f449db2f4d9f0f5b6b8c5",
-    "claimed_at": "2026-07-20T19:10:16.806620+00:00",
-    "claim_session_id": "1179bda597f5",
+    "last_released_at": "2026-07-20T20:00:13.405273+00:00",
+    "last_release_reason": "liveness_reconcile_detached_021010e0",
     "compute_job_id": "compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674",
     "result": "dispatched to compute job compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674; awaiting PHASE A collection",
     "plan": "前次 MC job exit=4 為 dm-hac-lag gate false positive（凍結站點 k1623.py::dm_hln 因 worktree 路徑前綴對不上 baseline key），已由 commit 5c0e9099d 修好並實測 gate PASS。重新 enqueue compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674；等 compute worker 跑完後由後續 fire PHASE A 收件（對帳 /tmp/k1623_armc_gatefail_run_20260721.json）。"
