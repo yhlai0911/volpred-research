@@ -43,7 +43,20 @@
       "adversarial_test": "experiments/k528/test_k528_completeness_gate.py::test_endpoint_truncation_is_invisible_without_the_new_check",
       "test_fails_when_month_deleted": true,
       "verified_by": "Fixed in 17f12d16c. The collection reviewer independently reproduced pre-fix ACCEPTED / post-fix RAISED for both endpoints (deleting 2005-01 and 2026-03), reproducing Codex's own 259/253, head 34d, tail 44d figures verbatim. Not re-derived by me this round; re-attacked fresh and re-confirmed by both round-6 reviewers.",
-      "residual_gap_ruling": "The round-5 'single-month upstream truncation' gap is CLOSED by this endpoint expectation, not merely disclosed. Both round-6 reviewers ruled it closed."
+      "residual_gap_ruling": "The round-5 'single-month upstream truncation' gap is CLOSED by this endpoint expectation, not merely disclosed. Both round-6 reviewers ruled it closed.",
+      "independently_reproduced_by_this_agent": {
+        "why": "The dispatch ruled the residual 'single-month upstream truncation' gap BLOCKING and required it be actually closed, not merely disclosed. That is the one claim I had been taking from a prior round's reviewer rather than reproducing, so I reproduced it.",
+        "probe": "experiments/k528/verify_residual_gap_probe.py",
+        "method": "Lift check_calendar_is_complete from source by executing module-level statements one at a time (skipping the 80 that need network/price deps), then feed it the honest fixture and the attack. Only the gate is exercised.",
+        "results": {
+          "negative_control_honest_calendar": "ACCEPTED (260 raw / 254 selected) - so the gate discriminates rather than raising on everything",
+          "delete_2005-01_from_raw_AND_selected": "RAISED (260->259 raw, 254->253 selected)",
+          "delete_2026-03_from_raw_AND_selected": "RAISED (260->259 raw, 254->253 selected)",
+          "error_message": "the requested window 2005-01-01..2026-03-27 fully contains the publication window of 1 month(s) that the calendar has no release for",
+          "cross_check": "259/253 reproduces Codex's own round-5 figures verbatim, confirming the attack I ran is the attack Codex described"
+        },
+        "verdict": "residual gap CLOSED - verified first-hand, not inherited"
+      }
     },
     "B3": {
       "fix": "yf.download previously had no gate at all. Added coverage and freshness gates that fail closed, extracted into named functions specifically so tests can attack them.",
@@ -125,7 +138,8 @@
   },
   "commits": [
     "17f12d16c",
-    "52fde3f49"
+    "52fde3f49",
+    "8a95624b4"
   ],
   "rerun": {
     "exit_code": 0,
@@ -172,6 +186,11 @@
           "yfinance float drift - non-blocking, honestly disclosed",
           "two of the three new gates are string-pinning and could in principle be walked past by a synonym (e.g. 預先登記 instead of 事先聲明); judged an acceptable boundary because the third gate checks the 243/237/6 relationship at the DATA level rather than by string match"
         ]
+      },
+      {
+        "name": "fresh-context code-reviewer subagent (Claude)",
+        "status": "did not return before this artifact was finalised",
+        "note": "Launched with the same adversarial brief. Its verdict is NOT part of this PASS. If it returned after the fact, its output is in the session task record, not in this artifact."
       }
     ],
     "verdict_artifact": "storage/ops/codex_reviews/k528_round6_verdict.md",
@@ -208,9 +227,9 @@
     "The correction to the live article (mile_35eef830) is VALIDATED but NOT APPLIED. Applying it is the main thread's job from the repo root, because storage/reports/feed.json is shared canonical state this worktree must not write."
   ],
   "unresolved": [
-    "Primary-path Codex round-6 review (quota resets 2026-07-25).",
-    "Apply the validated article correction from the repo root (main thread), then regenerate the charts and lazypack images so text and images agree.",
-    "The second round-6 reviewer (fresh-context code-reviewer subagent) was still running when this artifact was written; its verdict is recorded in the round6_verdict.md if it returned."
+    "Primary-path Codex round-6 review (quota resets 2026-07-25). This is the gating item for certify/merge.",
+    "Apply the validated article correction to mile_35eef830 from the repo root (main thread), then regenerate the two inline charts and two lazypack images so text and images agree.",
+    "The second round-6 reviewer (fresh-context subagent) did not return in time; the round-6 PASS rests on the agy reviewer plus my own first-hand reproductions."
   ],
   "first_pass_record_17f12d16c": {
     "experiment_id": "K528",
