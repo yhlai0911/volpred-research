@@ -233,7 +233,21 @@ def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path
             )
         )
     else:
-        headline = "# Supervisor SIGKILL'd 一個 worker（hang > 50min cap）"
+        # Say how long it actually sat, computed from started_at — the old
+        # hardcoded「hang > 50min cap」was wrong for every 2026-07-20/21 kill
+        # (real caps were 10-16 min) and alert prose must not outrun the facts.
+        elapsed_min: float | None = None
+        try:
+            from datetime import datetime
+            started = datetime.fromisoformat(str(job.get("started_at")))
+            now = datetime.now(started.tzinfo) if started.tzinfo else datetime.now()
+            elapsed_min = max(0.0, (now - started).total_seconds() / 60.0)
+        except (TypeError, ValueError) as exc:
+            LOG.warning("hang alert: unparseable started_at %r (%s)",
+                        job.get("started_at"), exc)
+        stuck = (f"卡住約 {elapsed_min:.0f} 分鐘" if elapsed_min is not None
+                 else "超過本班 hang 上限")
+        headline = f"# Supervisor SIGKILL'd 一個 worker（{stuck}後回收）"
         impact = (
             "- 本輪 hourly fire 沒派工成功；pool 沒消化\n"
             "- 該行程已確認消失；Supervisor 仍存活，下個整點會嘗試新 fire\n"
