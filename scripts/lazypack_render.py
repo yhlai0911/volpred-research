@@ -16,6 +16,16 @@ Usage::
 All panels are first written to a private staging directory and pass the shared
 layout guard before any final PNG is replaced.  A bad later panel therefore
 cannot leave a mixed partial set in the owned output directory.
+
+Bounded mechanical self-repair (2026-07-20, assign_5195e5ae D1): the same plan
+re-rendered with the same geometry fails the same way forever — the guard used
+to raise on the first defect and the job died with zero recovery
+(mile_fa098fc8: metric value 「0.5%」 on its own note, 59% overlap, permanent).
+``render_plan`` now checks the guard's rules BEFORE saving and, on any
+CLIPPED / OVERLAP / OVERFLOW / text-fit defect, redraws the whole set with a
+mechanically adjusted tuning — taller canvas (taller cards) and smaller fonts —
+for at most ``MAX_REPAIR_ROUNDS`` rounds.  Pure code, zero LLM calls.  The
+guard's save-time gate stays installed as the final enforcement owner.
 """
 from __future__ import annotations
 
@@ -27,6 +37,7 @@ import os
 import re
 import shutil
 import string
+import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -54,6 +65,11 @@ rcParams["font.sans-serif"] = list(FONT_FAMILY_CANDIDATES)
 rcParams["axes.unicode_minus"] = False
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
+
+from volpred.ops.diagnostics import warn  # noqa: E402
+
 WIDTH = 1600
 HEIGHT = 1000
 DPI = 150
@@ -126,6 +142,39 @@ class FittedText:
     spacing: int
     bbox_x0: int
     bbox_y0: int
+
+
+@dataclass(frozen=True)
+class RenderTuning:
+    """One mechanical layout adjustment the self-repair loop may apply.
+
+    ``height`` grows the canvas (and with it every card, because the content
+    area is derived from it), which is the real fix for the metric-card floor
+    collision class (label/value/note minimum heights overlapping inside a
+    too-short card — mile_fa098fc8).  ``font_scale`` shrinks every preferred
+    AND minimum font size, which shrinks the measured line boxes that the
+    layout guard collides.  Long-line wrapping needs no knob: ``_wrap_text``
+    re-wraps automatically at the new sizes and widths on every redraw.
+    """
+
+    label: str = "baseline"
+    height: int = HEIGHT
+    font_scale: float = 1.0
+
+    def fs(self, size: int) -> int:
+        """Scaled font size; floors at 9pt so repair can never render unreadably."""
+        return max(9, int(round(size * self.font_scale)))
+
+
+# Round 0 is the house geometry; each later round trades a little type size for
+# a lot of vertical room. Deterministic — same plan, same rounds, same pixels.
+MAX_REPAIR_ROUNDS = 3
+REPAIR_TUNINGS: tuple[RenderTuning, ...] = (
+    RenderTuning(),
+    RenderTuning(label="repair-1", height=1150, font_scale=0.95),
+    RenderTuning(label="repair-2", height=1300, font_scale=0.88),
+    RenderTuning(label="repair-3", height=1500, font_scale=0.80),
+)
 
 
 THEMES = {
@@ -761,6 +810,7 @@ def _block_weight(block: dict[str, Any]) -> float:
 
 def _draw_text_card(
     draw: ImageDraw.ImageDraw, rect: Rect, block: dict[str, Any], theme: dict[str, str],
+    tuning: RenderTuning,
 ) -> None:
     draw.rounded_rectangle(
         (rect.x, rect.y, rect.x1, rect.y1), radius=24,
@@ -769,16 +819,18 @@ def _draw_text_card(
     inner = rect.inset(28, 24)
     heading_area = Rect(inner.x, inner.y, inner.w, min(58, max(42, inner.h // 4)))
     heading = _draw_fitted(
-        draw, block["heading"], heading_area, 31, 22, fill=theme["ink"]
+        draw, block["heading"], heading_area, tuning.fs(31), tuning.fs(22),
+        fill=theme["ink"],
     )
     body_y = inner.y + heading.height + 18
     body_area = Rect(inner.x, body_y, inner.w, inner.y1 - body_y)
     bullets = "\n".join(f"• {line}" for line in block["body"])
-    _draw_fitted(draw, bullets, body_area, 27, 17, fill=theme["muted"])
+    _draw_fitted(draw, bullets, body_area, tuning.fs(27), tuning.fs(17), fill=theme["muted"])
 
 
 def _draw_metric_card(
     draw: ImageDraw.ImageDraw, rect: Rect, block: dict[str, Any], theme: dict[str, str],
+    tuning: RenderTuning,
 ) -> None:
     draw.rounded_rectangle(
         (rect.x, rect.y, rect.x1, rect.y1), radius=24,
@@ -787,7 +839,8 @@ def _draw_metric_card(
     draw.rectangle((rect.x + 24, rect.y + 20, rect.x + 76, rect.y + 27), fill=theme["accent"])
     inner = rect.inset(24, 18)
     label_area = Rect(inner.x, inner.y + 17, inner.w, max(30, int(inner.h * 0.22)))
-    _draw_fitted(draw, block["label"], label_area, 24, 17, fill=theme["muted"])
+    _draw_fitted(draw, block["label"], label_area, tuning.fs(24), tuning.fs(17),
+                 fill=theme["muted"])
     value_y = label_area.y1 + 4
     note_height = max(0, int(inner.h * 0.22)) if block.get("note") else 0
     value_area = Rect(
@@ -795,12 +848,13 @@ def _draw_metric_card(
         max(38, inner.y1 - value_y - note_height - (8 if note_height else 0)),
     )
     _draw_fitted(
-        draw, block["value"], value_area, 52, 27, fill=theme["value"],
-        valign="middle",
+        draw, block["value"], value_area, tuning.fs(52), tuning.fs(27),
+        fill=theme["value"], valign="middle",
     )
     if block.get("note"):
         note_area = Rect(inner.x, inner.y1 - note_height, inner.w, note_height)
-        _draw_fitted(draw, block["note"], note_area, 20, 15, fill=theme["muted"])
+        _draw_fitted(draw, block["note"], note_area, tuning.fs(20), tuning.fs(15),
+                     fill=theme["muted"])
 
 
 def _draw_header(
@@ -809,15 +863,16 @@ def _draw_header(
     panel: dict[str, Any],
     evidence: dict[str, Any],
     theme: dict[str, str],
+    tuning: RenderTuning,
 ) -> None:
     draw.rectangle((0, 0, WIDTH, 205), fill=theme["header"])
     draw.rectangle((0, 0, 18, 205), fill=theme["accent"])
     _draw_fitted(
-        draw, document["title"], Rect(72, 20, 1450, 28), 21, 17,
+        draw, document["title"], Rect(72, 20, 1450, 28), tuning.fs(21), tuning.fs(17),
         fill="#C9D7E3",
     )
     _draw_fitted(
-        draw, panel["title"], Rect(72, 57, 1450, 92), 50, 28,
+        draw, panel["title"], Rect(72, 57, 1450, 92), tuning.fs(50), tuning.fs(28),
         fill="#FFFFFF",
     )
     subtitle_spec = panel.get("subtitle", document.get("subtitle"))
@@ -827,18 +882,32 @@ def _draw_header(
             else _resolve_content(subtitle_spec, evidence, "plan.subtitle")
         )
         _draw_fitted(
-            draw, subtitle, Rect(72, 163, 1450, 27), 21, 15,
+            draw, subtitle, Rect(72, 163, 1450, 27), tuning.fs(21), tuning.fs(15),
             fill="#DDE7EE",
         )
 
 
+# Vertical budget the fixed chrome takes out of every canvas: header block
+# (205 + 27 gap = 232 above the content area) plus the footer zone (103 below
+# it). The content area is whatever the canvas height leaves over, so a taller
+# repair-round canvas turns 1:1 into taller cards.
+_CHROME_TOP = 232
+_CHROME_BOTTOM = 103
+
+
+def _content_area(tuning: RenderTuning) -> Rect:
+    return Rect(72, _CHROME_TOP, 1456, tuning.height - _CHROME_TOP - _CHROME_BOTTOM)
+
+
 def _draw_footer(
     draw: ImageDraw.ImageDraw, panel: dict[str, Any], theme: dict[str, str],
+    tuning: RenderTuning,
 ) -> None:
-    draw.rectangle((72, 928, 1528, 930), fill=theme["border"])
+    draw.rectangle((72, tuning.height - 72, 1528, tuning.height - 70), fill=theme["border"])
     source = "資料來源：" + "、".join(panel["source_labels"])
     _draw_fitted(
-        draw, source, Rect(72, 946, 1456, 31), 18, 13, fill=theme["muted"]
+        draw, source, Rect(72, tuning.height - 54, 1456, 31),
+        tuning.fs(18), tuning.fs(13), fill=theme["muted"]
     )
 
 
@@ -846,9 +915,10 @@ def _render_concept_or_method(
     draw: ImageDraw.ImageDraw,
     panel: dict[str, Any],
     theme: dict[str, str],
+    tuning: RenderTuning,
 ) -> None:
     blocks = panel["blocks"]
-    area = Rect(72, 232, 1456, 665)
+    area = _content_area(tuning)
     if panel["info"] == "method":
         columns = 1 if len(blocks) <= 4 else 2
     else:
@@ -856,34 +926,37 @@ def _render_concept_or_method(
     weights = [_block_weight(block) for block in blocks]
     for block, rect in zip(blocks, _row_rects(area, len(blocks), columns, weights)):
         if block["kind"] == "metric":
-            _draw_metric_card(draw, rect, block, theme)
+            _draw_metric_card(draw, rect, block, theme, tuning)
         else:
-            _draw_text_card(draw, rect, block, theme)
+            _draw_text_card(draw, rect, block, theme, tuning)
 
 
 def _render_results(
     draw: ImageDraw.ImageDraw,
     panel: dict[str, Any],
     theme: dict[str, str],
+    tuning: RenderTuning,
 ) -> None:
     metrics = [b for b in panel["blocks"] if b["kind"] == "metric"]
     texts = [b for b in panel["blocks"] if b["kind"] == "text"]
-    full = Rect(72, 232, 1456, 665)
+    full = _content_area(tuning)
     if not metrics:
         columns = 1 if len(texts) == 1 else min(3, len(texts))
         for block, rect in zip(
             texts, _row_rects(full, len(texts), columns, [_block_weight(x) for x in texts])
         ):
-            _draw_text_card(draw, rect, block, theme)
+            _draw_text_card(draw, rect, block, theme, tuning)
         return
     metric_rows = 1 if len(metrics) <= 4 else 2
-    metric_height = 240 if metric_rows == 1 else 342
+    # Scale the metric strip with the canvas so a repair round grows metric
+    # cards too — the floor-collision class lives inside exactly these cards.
+    metric_height = int(round((240 if metric_rows == 1 else 342) * tuning.height / HEIGHT))
     if not texts:
         metric_height = full.h
     metric_area = Rect(full.x, full.y, full.w, metric_height)
     metric_columns = min(4, len(metrics)) if metric_rows == 1 else math.ceil(len(metrics) / 2)
     for block, rect in zip(metrics, _row_rects(metric_area, len(metrics), metric_columns)):
-        _draw_metric_card(draw, rect, block, theme)
+        _draw_metric_card(draw, rect, block, theme, tuning)
     if texts:
         text_y = metric_area.y1 + 20
         text_area = Rect(full.x, text_y, full.w, full.y1 - text_y)
@@ -891,26 +964,127 @@ def _render_results(
         for block, rect in zip(
             texts, _row_rects(text_area, len(texts), columns, [_block_weight(x) for x in texts])
         ):
-            _draw_text_card(draw, rect, block, theme)
+            _draw_text_card(draw, rect, block, theme, tuning)
 
 
 def _render_panel(
     document: dict[str, Any], panel: dict[str, Any], evidence: dict[str, Any],
+    tuning: RenderTuning,
 ) -> Image.Image:
     theme = THEMES[panel["style"]]
-    image = Image.new("RGB", (WIDTH, HEIGHT), "#FFFFFF")
+    image = Image.new("RGB", (WIDTH, tuning.height), "#FFFFFF")
     draw = ImageDraw.Draw(image)
-    _draw_header(draw, document, panel, evidence, theme)
+    _draw_header(draw, document, panel, evidence, theme, tuning)
     if panel["info"] in {"concept", "method"}:
-        _render_concept_or_method(draw, panel, theme)
+        _render_concept_or_method(draw, panel, theme, tuning)
     else:
-        _render_results(draw, panel, theme)
-    _draw_footer(draw, panel, theme)
+        _render_results(draw, panel, theme, tuning)
+    _draw_footer(draw, panel, theme, tuning)
     return image
 
 
-def render_plan(plan_path: str | Path, out_dir: str | Path) -> list[Path]:
+def _render_all_panels(
+    document: dict[str, Any],
+    panels: list[dict[str, Any]],
+    evidence: dict[str, Any],
+    tuning: RenderTuning,
+) -> list[tuple[dict[str, Any], Image.Image]]:
+    """Render every panel at one tuning, closing partials on a text-fit fault."""
+    rendered: list[tuple[dict[str, Any], Image.Image]] = []
+    try:
+        for panel in panels:
+            rendered.append((panel, _render_panel(document, panel, evidence, tuning)))
+    except TextFitError:
+        for _, image in rendered:
+            image.close()
+        raise
+    return rendered
+
+
+def _repaired_render(
+    document: dict[str, Any],
+    panels: list[dict[str, Any]],
+    evidence: dict[str, Any],
+    max_repair_rounds: int,
+) -> tuple[list[tuple[dict[str, Any], Image.Image]], RenderTuning, list[dict[str, Any]]]:
+    """Bounded mechanical self-repair: render → guard-check → retune → redraw.
+
+    Returns ``(rendered, tuning, repair_log)`` for the first tuning whose whole
+    set passes the layout guard's rules.  Raises the LAST round's fault when
+    every allowed tuning fails: ``TextFitError`` keeps its type (callers and
+    tests distinguish it) and layout violations raise ``RuntimeError`` exactly
+    like the guard's own save gate.  Zero LLM calls — every adjustment is a
+    fixed geometry/font retune from ``REPAIR_TUNINGS``.
+    """
+    from lazypack_layout_guard import find_pil_violations
+
+    rounds = REPAIR_TUNINGS[: max(0, int(max_repair_rounds)) + 1]
+    repair_log: list[dict[str, Any]] = []
+    last_text_fit: TextFitError | None = None
+    last_violations: list[str] = []
+    for round_index, tuning in enumerate(rounds):
+        try:
+            rendered = _render_all_panels(document, panels, evidence, tuning)
+        except TextFitError as exc:
+            last_text_fit = exc
+            last_violations = [f"TEXTFIT: {exc}"]
+        else:
+            last_text_fit = None
+            last_violations = [
+                f"[{panel['name']}.png] {violation}"
+                for panel, image in rendered
+                for violation in find_pil_violations(image)
+            ]
+            if not last_violations:
+                return rendered, tuning, repair_log
+            for _, image in rendered:
+                image.close()
+        repair_log.append({
+            "round": round_index,
+            "tuning": tuning.label,
+            "violations": list(last_violations),
+        })
+        warn(
+            "lazypack_render",
+            "layout defects at this tuning; mechanical self-repair continues"
+            if round_index < len(rounds) - 1 else
+            "layout defects and no repair rounds left",
+            round=round_index,
+            tuning=tuning.label,
+            defects=len(last_violations),
+            first=last_violations[0] if last_violations else "",
+        )
+    if last_text_fit is not None:
+        raise last_text_fit
+    detail = "\n".join(f"  - {v}" for v in last_violations[:12])
+    raise RuntimeError(
+        f"LAYOUT CHECK FAILED after {len(rounds) - 1} mechanical repair round(s) — "
+        f"the panel set would ship unreadable:\n{detail}\n"
+        "Every tuning (taller canvas, smaller fonts, re-wrapped lines) still "
+        "violates the layout guard; the plan itself needs less copy per panel."
+    )
+
+
+def render_plan(
+    plan_path: str | Path,
+    out_dir: str | Path,
+    *,
+    max_repair_rounds: int = MAX_REPAIR_ROUNDS,
+) -> list[Path]:
     """Render a complete plan atomically; return final PNG paths in panel order."""
+    paths, _report = render_plan_with_report(
+        plan_path, out_dir, max_repair_rounds=max_repair_rounds
+    )
+    return paths
+
+
+def render_plan_with_report(
+    plan_path: str | Path,
+    out_dir: str | Path,
+    *,
+    max_repair_rounds: int = MAX_REPAIR_ROUNDS,
+) -> tuple[list[Path], dict[str, Any]]:
+    """`render_plan` plus a machine-readable self-repair report for manifests."""
     document, evidence = load_plan(plan_path)
     panels = _resolve_panels(document, evidence)  # resolve every field before writes
     destination = Path(out_dir).expanduser().resolve()
@@ -920,17 +1094,26 @@ def render_plan(plan_path: str | Path, out_dir: str | Path) -> list[Path]:
     from lazypack_layout_guard import install as install_layout_guard
 
     install_layout_guard(collect=False, write_clean=True)
+    rendered, tuning, repair_log = _repaired_render(
+        document, panels, evidence, max_repair_rounds
+    )
+    report: dict[str, Any] = {
+        "repair_rounds_used": len(repair_log),
+        "tuning": tuning.label,
+        "canvas_height": tuning.height,
+        "font_scale": tuning.font_scale,
+        "repair_log": repair_log,
+    }
     stage = Path(tempfile.mkdtemp(prefix=".lazypack-render-", dir=destination))
     staged: list[Path] = []
     finals = [destination / f"{panel['name']}.png" for panel in panels]
     try:
-        for panel in panels:
-            image = _render_panel(document, panel, evidence)
+        for panel, image in rendered:
             target = stage / f"{panel['name']}.png"
             image.save(target, format="PNG", dpi=(DPI, DPI), optimize=False)
             image.close()
             with Image.open(target) as check:
-                if check.size != (WIDTH, HEIGHT) or check.format != "PNG":
+                if check.size != (WIDTH, tuning.height) or check.format != "PNG":
                     raise RuntimeError(f"invalid rendered panel: {target}")
             staged.append(target)
         backups: dict[Path, Path] = {}
@@ -959,7 +1142,7 @@ def render_plan(plan_path: str | Path, out_dir: str | Path) -> list[Path]:
             raise
     finally:
         shutil.rmtree(stage, ignore_errors=True)
-    return finals
+    return finals, report
 
 
 def write_render_receipt(
@@ -996,8 +1179,8 @@ def write_render_receipt(
     return receipt
 
 
-def _manifest(paths: Iterable[Path]) -> dict[str, Any]:
-    return {
+def _manifest(paths: Iterable[Path], report: dict[str, Any] | None = None) -> dict[str, Any]:
+    manifest = {
         "renderer": "scripts/lazypack_render.py",
         "llm_calls": 0,
         "panels": [
@@ -1005,6 +1188,13 @@ def _manifest(paths: Iterable[Path]) -> dict[str, Any]:
             for path in paths
         ],
     }
+    if report is not None:
+        manifest["self_repair"] = {
+            k: report[k]
+            for k in ("repair_rounds_used", "tuning", "canvas_height", "font_scale")
+            if k in report
+        }
+    return manifest
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1029,12 +1219,12 @@ def main(argv: list[str] | None = None) -> int:
         _resolve_panels(document, evidence)
         print(json.dumps({"valid": True, "panels": len(document["panels"])}, ensure_ascii=False))
         return 0
-    paths = render_plan(args.plan, args.out_dir)
+    paths, report = render_plan_with_report(args.plan, args.out_dir)
     if args.receipt:
         write_render_receipt(
             args.receipt, run_token=args.run_token, plan_path=args.plan, paths=paths
         )
-    print(json.dumps(_manifest(paths), ensure_ascii=False, indent=2))
+    print(json.dumps(_manifest(paths, report), ensure_ascii=False, indent=2))
     return 0
 
 

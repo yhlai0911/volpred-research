@@ -493,8 +493,12 @@ def test_later_text_fit_failure_leaves_no_partial_final_pngs(
     plan["panels"][1]["blocks"][0]["body"] = ["極" * 2000]
     path = _write_plan(tmp_path, plan)
     out = tmp_path / "out"
+    # Repair disabled: this test pins ATOMICITY (a late text-fit fault leaves
+    # no partial finals) — the mechanical repair rounds' taller canvas could
+    # legitimately fit this copy, which is covered by
+    # test_lazypack_render_repair.py instead.
     with pytest.raises(lr.TextFitError):
-        lr.render_plan(path, out)
+        lr.render_plan(path, out, max_repair_rounds=0)
     assert not list(out.glob("*.png"))
 
 
