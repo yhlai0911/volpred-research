@@ -32655,13 +32655,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T06:33:40.821272+00:00",
+    "completed_at": "2026-07-20T06:58:46.569556+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T06:33:40.821272+00:00",
-      "last_clean_observed_at": "2026-07-20T06:33:40.821272+00:00"
+      "resolved_at": "2026-07-20T06:58:46.569556+00:00",
+      "last_clean_observed_at": "2026-07-20T06:58:46.569556+00:00"
     }
   },
   {
@@ -32673,13 +32673,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T06:33:54.545634+00:00",
+    "completed_at": "2026-07-20T06:57:31.876316+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T06:33:54.545634+00:00",
-      "last_clean_observed_at": "2026-07-20T06:33:54.545634+00:00"
+      "resolved_at": "2026-07-20T06:57:31.876316+00:00",
+      "last_clean_observed_at": "2026-07-20T06:57:31.876316+00:00"
     }
   },
   {
@@ -46115,5 +46115,33 @@
     "created_at": "2026-07-20T06:55:20.543246+00:00",
     "parent_task_id": "k1731_armB_rev7_codex_round7",
     "created_by": "codex-failover-slot-3-e320a2e29b0f447c863719819d16e1e1"
+  },
+  {
+    "id": "assign_f71399a3",
+    "title": "PHASE-Z 卡住檔案 incident（6d1d05803b30ef94）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- storage/reports/INDEX.md — 3 班\n- storage/reports/index.json — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260720T065846820394Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-20T06:58:46.934764+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "6d1d05803b30ef94",
+      "paths": [
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json"
+      ],
+      "streaks": {
+        "storage/reports/INDEX.md": 3,
+        "storage/reports/index.json": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260720T065846820394Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-20T06:58:46.917957+00:00",
+      "last_seen_at": "2026-07-20T06:58:46.917957+00:00"
+    }
   }
 ]
