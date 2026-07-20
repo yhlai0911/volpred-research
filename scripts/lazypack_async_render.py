@@ -61,6 +61,8 @@ for _p in (str(ROOT), str(ROOT / "src"), str(ROOT / "scripts")):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+from volpred.ops.diagnostics import warn  # noqa: E402
+
 JOB_ID_PREFIX = "lazypack-"
 BESPOKE_SCRIPT_NAME = "render_lazypack.py"
 DEFAULT_TIMEOUT_S = 1800  # bespoke generation budget (1500s) + upload/sync headroom
@@ -220,6 +222,145 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
               f"worker will render + append + sync. Inspect: "
               f"uv run python scripts/compute_queue.py show {job_id}")
     return rc
+
+
+# -------------------------------------------------------- requeue-stranded ----
+
+# One alert-driven retry per failed job id, and a hard ceiling on total render
+# attempts per article. Past the ceiling the P1 repair task filed by
+# compute_queue._maybe_open_lazypack_repair_task owns the escalation — an
+# unbounded retry ladder would just re-prove the same plan cannot fit.
+MAX_RENDER_ATTEMPTS_PER_ARTICLE = 3
+
+
+def requeue_stranded(storage_dir: str | Path = "storage") -> dict:
+    """Idempotently re-enqueue stranded failed lazypack jobs (alert actuator).
+
+    assign_5195e5ae D4a: `SELF_REMEDIATING['lazypack_render_stuck']` claimed
+    "render retry is wired into the alert path" while no such wiring existed —
+    failures fell into a black hole and the alert body described a fiction.
+    This function IS that wiring now: scripts/check_alerts.py calls it hourly
+    (before the alert email) so the claim is mechanically true.
+
+    A job is stranded exactly as the alert defines it (failed, no later
+    queued/running/completed job for the same article, article still missing
+    its 懶人包圖組 section).  Re-running is safe: every renderer layer recomputes
+    the full panel set from the hash-pinned plan.  Idempotency: the failed job
+    is stamped `alert_requeued_as=<new id>` under the receipt lock, so one
+    failed job can never mint two retries.
+    """
+    import compute_queue as cq
+
+    storage_root = _resolve(storage_dir)
+    summary: dict = {"requeued": [], "skipped": [], "attempted": True}
+
+    from volpred.publisher.publisher import has_lazypack_section
+
+    def _has_section(article_id: str) -> bool:
+        art = _find_article(article_id, storage_root)
+        return art is not None and has_lazypack_section(str(art.get("content") or ""))
+
+    with cq._receipt_lock():
+        jobs: dict[Path, dict] = {}
+        for path in sorted(cq.QUEUE_DIR.glob("lazypack-*.json")):
+            try:
+                jobs[path] = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                warn("lazypack_requeue", "queue receipt unreadable; skipped",
+                     path=path.name, err=str(exc))
+
+        def _article_of(job: dict) -> str:
+            args = job.get("args") or []
+            for i, value in enumerate(args):
+                if value == "--article-id" and i + 1 < len(args):
+                    return str(args[i + 1])
+            return ""
+
+        by_article: dict[str, list[tuple[Path, dict]]] = {}
+        for path, job in jobs.items():
+            article = _article_of(job)
+            if article:
+                by_article.setdefault(article, []).append((path, job))
+
+        for article, rows in sorted(by_article.items()):
+            statuses = {job.get("status") for _, job in rows}
+            if statuses & {"queued", "running", "completed"}:
+                continue  # a live or successful job already owns this article
+            if _has_section(article):
+                continue  # the section landed some other way — nothing stranded
+            failed = [(p, j) for p, j in rows if j.get("status") == "failed"]
+            if not failed:
+                continue
+            # Newest failure is the one the alert points at.
+            path, job = max(
+                failed, key=lambda pair: str(pair[1].get("completed_at") or "")
+            )
+            if job.get("alert_requeued_as"):
+                summary["skipped"].append(
+                    {"article_id": article, "job_id": job.get("id"),
+                     "reason": "already_requeued",
+                     "requeued_as": job.get("alert_requeued_as")}
+                )
+                continue
+            if len(rows) >= MAX_RENDER_ATTEMPTS_PER_ARTICLE:
+                warn("lazypack_requeue",
+                     "attempt ceiling reached; escalation owned by the P1 repair task",
+                     article_id=article, attempts=len(rows))
+                summary["skipped"].append(
+                    {"article_id": article, "job_id": job.get("id"),
+                     "reason": "attempt_ceiling", "attempts": len(rows)}
+                )
+                continue
+
+            base_id = f"{JOB_ID_PREFIX}{article}"
+            taken = {str(j.get("id") or p.stem) for p, j in jobs.items()}
+            new_id, n = base_id, 2
+            while new_id in taken:
+                new_id = f"{base_id}-r{n}"
+                n += 1
+
+            script_args = list(job.get("args") or [])
+            if "--job-id" in script_args:
+                script_args[script_args.index("--job-id") + 1] = new_id
+            else:
+                script_args += ["--job-id", new_id]
+
+            ns = argparse.Namespace(
+                id=new_id,
+                title=job.get("title") or f"lazypack render {article}",
+                script=job.get("script_path") or "scripts/lazypack_async_render.py",
+                interpreter=job.get("interpreter") or "uv run python",
+                script_args=script_args,
+                env=None,
+                result_artifact=job.get("result_artifact"),
+                output_paths=list(job.get("output_paths") or []),
+                followup_brief=None,
+                followup_task_type=None,
+                followup_priority=None,
+                timeout=job.get("timeout_seconds") or DEFAULT_TIMEOUT_S,
+            )
+            rc = cq.enqueue(ns)
+            if rc != 0:
+                warn("lazypack_requeue", "re-enqueue failed",
+                     article_id=article, new_id=new_id, rc=rc)
+                summary["skipped"].append(
+                    {"article_id": article, "job_id": job.get("id"),
+                     "reason": "enqueue_failed", "rc": rc}
+                )
+                continue
+            job["alert_requeued_as"] = new_id
+            cq._write_job_file(path, job)
+            summary["requeued"].append(
+                {"article_id": article, "failed_job_id": job.get("id"),
+                 "new_job_id": new_id}
+            )
+    return summary
+
+
+def cmd_requeue_stranded(a: argparse.Namespace) -> int:
+    summary = requeue_stranded(a.storage_dir)
+    print(json.dumps(summary, ensure_ascii=False))
+    return 0
 
 
 # -------------------------------------------------------------------- run ----
@@ -502,8 +643,6 @@ def _run_render_chain(
     (scripts/lazypack_render.py) is the terminal layer, so a job only fails
     when all three genuinely cannot produce a green panel set.
     """
-    from volpred.ops.diagnostics import warn
-
     deadline = time.monotonic() + BESPOKE_WALL_BUDGET_S
 
     codex_cmd = _bespoke_command(
@@ -775,6 +914,15 @@ def main() -> int:
     r.add_argument("--no-sync", action="store_true",
                    help="TEST HOOK: skip single-article Supabase sync")
     r.set_defaults(func=cmd_run)
+
+    q = sub.add_parser(
+        "requeue-stranded",
+        help="idempotently re-enqueue stranded failed lazypack jobs "
+             "(hourly alert actuator; see SELF_REMEDIATING['lazypack_render_stuck'])",
+    )
+    q.add_argument("--storage-dir", default="storage",
+                   help="storage root (tests only; default: storage)")
+    q.set_defaults(func=cmd_requeue_stranded)
 
     args = ap.parse_args()
     return args.func(args)
