@@ -196,7 +196,9 @@ def _ensure_followup_task() -> dict[str, Any]:
         "task_type": "platform_ops",
         "priority": 4,
         "status": "blocked",
-        "blocked_reason": "waiting_graphify_14d_observation_window",
+        # WS-A3: in-vocab time-window reason (was the out-of-vocab hand-rolled
+        # "waiting_graphify_14d_observation_window"); paired with blocked_until.
+        "blocked_reason": "awaiting_event_window",
         "blocked_until": FOLLOWUP_BLOCKED_UNTIL,
         "tags": ["platform_ops", "graphify", "pilot", "followup"],
         "source": "codex_graphify_codeonly_pilot",

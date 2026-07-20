@@ -12,10 +12,16 @@ Single enforcement owner for two invariants on the canonical queue:
    ``fail_no_data_data_source_blocker`` /
    ``partially_resolved_K1180_done_awaiting_K1179`` /
    ``phase1_failed_codex_review_superseded_by_v2`` /
-   ``setup_done_superseded_by_v2``, one each). Those 27 legacy rows are frozen as
-   the baseline (永遠修流程，不修資料); the regression stop lives in
+   ``setup_done_superseded_by_v2``, one each). Those 27 legacy rows were frozen
+   as the baseline (永遠修流程，不修資料); the regression stop lives in
    ``scripts/validate_next_tasks_status.py``. New writes route through
    ``write_tasks_to_handle`` / ``write_tasks_locked`` here.
+   2026-07-20 WS-A3 (refactor_plan_ops_master): with every writer on the
+   canonical helper, the frozen rows are mapped back to the controlled vocab by
+   the one-time ``scripts/migrate_status_vocab.py`` (original value preserved
+   per-row in ``status_original``); after apply the baseline drops to 0.
+   The same migration + ``_audit_blocked_reasons`` extend the vocab gate to the
+   ``blocked_reason`` field (canonical vocab: ``blocked_reasons.py``).
 
 2. **Corruption-safe writes** (serialize-first-then-truncate). ``content.py`` and
    ``questions.py`` previously did ``fh.seek(0); fh.truncate(); json.dump(...)`` --
@@ -46,6 +52,8 @@ from typing import IO, Any
 
 from volpred.canonical_write import guard_canonical_write
 
+from .blocked_reasons import BLOCKED_REASONS
+from .blocked_reasons import is_valid as is_valid_blocked_reason
 from .diagnostics import warn
 
 
@@ -247,6 +255,74 @@ def validate_task_status(status: str | None) -> str:
             "src/volpred/ops/next_tasks.py if it is a real new state"
         )
     return str(status).strip().lower()
+
+
+class InvalidBlockedReason(ValueError):
+    """Raised when a task blocked_reason is not in the controlled vocabulary."""
+
+
+# Frozen count of rows whose ``blocked_reason`` predates the vocab gate
+# (2026-07-20 WS-A3): 3 rows — one free-text K400 range note, one long
+# owner-sign-off prose paragraph, one hand-written ``decomposed_into_subtasks``.
+# scripts/migrate_status_vocab.py maps them back (original preserved in
+# ``blocked_reason_original``); after apply this drops to 0.
+# MIRRORED in scripts/validate_next_tasks_status.py::DEFAULT_BLOCKED_REASON_BASELINE
+# (deps-free CI runner cannot import this module); tests/test_task_status_vocab.py
+# asserts the two stay equal.
+LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE = 3
+
+
+def validate_blocked_reason(reason: str | None) -> str:
+    """Return the normalized blocked_reason, or raise ``InvalidBlockedReason``.
+
+    Strict raise for callers that set a NEW blocked_reason (mark_task_blocked
+    already enforces via argparse choices; sync_next_tasks_status's review gate
+    and any future writer call this). The whole-file write path deliberately
+    does NOT raise on frozen legacy rows -- see ``_audit_blocked_reasons``.
+    """
+    if not is_valid_blocked_reason(reason):
+        raise InvalidBlockedReason(
+            f"blocked_reason {reason!r} not in BLOCKED_REASONS; add it to "
+            "src/volpred/ops/blocked_reasons.py if it is a real new reason"
+        )
+    return str(reason).strip().lower()
+
+
+def _audit_blocked_reasons(tasks: list[Any]) -> int:
+    """Surface out-of-vocab ``blocked_reason`` values (observable, non-fatal).
+
+    Same non-fatal contract as ``_audit_task_statuses`` and for the same reason:
+    raising on a whole-file rewrite would brick every materializer while the
+    frozen legacy rows are still in the queue. Warns only ABOVE the baseline;
+    the mechanical stop is scripts/validate_next_tasks_status.py's gate.
+
+    Counts the field wherever it is set (including terminal rows -- the
+    sync review-gate deliberately keeps blocked_reason as audit trail after
+    release), so a polluted value cannot hide behind a status flip.
+    """
+    bad: list[str] = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        reason = task.get("blocked_reason")
+        if reason is None:
+            continue
+        if not isinstance(reason, str):
+            bad.append(repr(reason)[:60])
+            continue
+        if not reason.strip():
+            continue  # empty string == absent
+        if not is_valid_blocked_reason(reason):
+            bad.append(reason[:60])
+    if len(bad) > LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE:
+        warn(
+            "next_tasks_blocked_reason",
+            "out-of-vocab blocked_reason(s) ABOVE frozen baseline -- new pollution",
+            count=len(bad),
+            baseline=LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE,
+            examples=bad[:5],
+        )
+    return len(bad)
 
 
 class InvalidBlockedUntil(ValueError):
@@ -537,6 +613,7 @@ def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
     _normalize_priorities_tolerant(tasks)
     _audit_task_statuses(tasks)
     _audit_blocked_until(tasks)
+    _audit_blocked_reasons(tasks)
     payload = json.dumps(tasks, indent=2, ensure_ascii=False)
     try:
         payload.encode("utf-8")
