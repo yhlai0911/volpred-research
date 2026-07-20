@@ -22763,5 +22763,24 @@
     "owner": "hourly-slot-1-b07e77ee721a45c8b2ae9a65dc409227",
     "actor": "hourly-slot-1-b07e77ee721a45c8b2ae9a65dc409227",
     "k_id": "K528"
+  },
+  {
+    "timestamp": "2026-07-21T06:58:00+08:00",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_21_美期中選舉",
+    "outcome": "succeeded",
+    "summary": "期中選舉 VIX 事件研究 + 讀者向文章（mile_b222a5d7，audience=general，status=draft）。六次期中選舉（2002-2022）事件窗口：主要發現是市場敘事的時間點錯了 —— VIX 高點落在投票日前約 18 個交易日（正規化中位數 123.5，6 次中 4 次高於選前一日），到投票日已退掉約兩成；開票隔天再掉 4.9%（中位數 -3.8%，5/6 下跌，bootstrap 單尾 p=0.027 對照 6,824 個交易日）。剔除 2018 極端值（-18.0%）後五次平均僅 -2.2%，扣成本無剩餘。IV-RV 價差（vol 口徑）六次平均 +3.3，但 2018(-2.4)/2022(-2.9) 兩次選前 VIX 最貴的機會賣方倒賠。現況 VIX 18.65，距選舉 106 曆日，同 horizon 歷史六次平均 21.2，排第 3。驗證：code-reviewer 審查 + 主線程實測六個選舉日與交易日資料 exact match（t-1/t/t+1 = 週一/二/三），已加 assert 防 dropna 靜默位移；依審查意見把 vrp_post 改名 iv_rv_spread_post 並修正過度宣稱的註解。anti_ai_gate PASS，check_arc_dedup 無 K-COVERAGE / ARC DUPLICATE，feed 手動 grep 期中選舉 0 命中。懶人包 3 panel 已 render 並 enqueue（lazypack-mile_b222a5d7）。",
+    "topology_override": "inline→inline（研究+寫作主線程自做；code review 走 subagent）",
+    "deviations": "trending_repost 慣例為直接 published + FB 雙發佈；本次因 lazypack gate（general+published 強制懶人包）且 50min cap 已到，改走 gate 訊息明載的 draft + async lazypack 路徑。FB 發佈未執行，待 release cron 發佈後補 —— 已建 followup task。",
+    "owner": "hourly-slot-1-f06750e74e9b463faf132a084b218949",
+    "actor": "hourly-slot-1-f06750e74e9b463faf132a084b218949",
+    "artifacts": [
+      "scripts/analysis/midterm_vix_event_study.py",
+      "storage/experiments/midterm_vix_event_study.json",
+      "storage/figures/midterm_vix_event_paths.png",
+      "storage/figures/midterm_vix_crush_distribution.png",
+      "storage/drafts/trending_midterm_vix_20260721_draft.md",
+      "storage/lazypack_jobs/midterm_vix_20260721/plan.json"
+    ]
   }
 ]

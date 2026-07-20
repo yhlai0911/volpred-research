@@ -1,8 +1,8 @@
 # Codex CLI — 完整指令與參數對照（機器產生，勿手改）
 
-- **產生時間**：2026-07-17 21:26 台灣時間
-- **來源**：本機 `codex help` 逐節點輸出（`codex-cli 0.144.1`）
-- **npm `@openai/codex` latest**：0.144.5
+- **產生時間**：2026-07-20 09:01 台灣時間
+- **來源**：本機 `codex help` 逐節點輸出（`codex-cli 0.144.6`）
+- **npm `@openai/codex` latest**：0.144.6
 - **重新產生**：`uv run python scripts/gen_codex_cli_reference.py`
 
 > 這份檔是**本機實際安裝的 binary 自己吐的**，不是人寫的摘要。任何與這裡衝突的說明，以這裡為準；要改內容請改 CLI 版本或重跑產生器，不要手改本檔。

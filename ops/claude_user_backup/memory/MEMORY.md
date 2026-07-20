@@ -82,6 +82,8 @@
 - [feedback_time_sensitive_work_is_p1.md](feedback_time_sensitive_work_is_p1.md) — 時效性研究/發文 = P1，與 user-assigned 同級
 - [feedback_tasks_survive_session_close.md](feedback_tasks_survive_session_close.md) — backbone 須 session-independent
 - [feedback_task_end_summary_format.md](feedback_task_end_summary_format.md) — 任務結束 4 項摘要格式
+- [feedback_refactor_independent_execution.md](feedback_refactor_independent_execution.md) — 重構走獨立軌（main_thread lane），不進一般派工
+- [feedback_gates_smooth_no_deadlock.md](feedback_gates_smooth_no_deadlock.md) — gate 要流暢有出口，block 必附修復/寬限/裁決三選一，禁死局
 
 ## Feedback — 工程紀律
 - [feedback_declare_complete_requires_class_sweep.md](feedback_declare_complete_requires_class_sweep.md) — 宣告完成前對 bug class 全量掃描 + 留機械 gate

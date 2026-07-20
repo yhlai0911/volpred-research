@@ -32373,13 +32373,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T21:00:59.911134+00:00",
+    "completed_at": "2026-07-20T22:01:11.616970+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T21:00:59.911134+00:00",
-      "last_clean_observed_at": "2026-07-20T21:00:59.911134+00:00"
+      "resolved_at": "2026-07-20T22:01:11.616970+00:00",
+      "last_clean_observed_at": "2026-07-20T22:01:11.616970+00:00"
     }
   },
   {
@@ -32391,13 +32391,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T21:21:09.198240+00:00",
+    "completed_at": "2026-07-20T22:23:22.485649+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T21:21:09.198240+00:00",
-      "last_clean_observed_at": "2026-07-20T21:21:09.198240+00:00"
+      "resolved_at": "2026-07-20T22:23:22.485649+00:00",
+      "last_clean_observed_at": "2026-07-20T22:23:22.485649+00:00"
     }
   },
   {
@@ -32409,13 +32409,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T20:15:08.002589+00:00",
+    "completed_at": "2026-07-20T21:21:19.528904+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T20:15:08.002589+00:00",
-      "last_clean_observed_at": "2026-07-20T20:15:08.002589+00:00"
+      "resolved_at": "2026-07-20T21:21:19.528904+00:00",
+      "last_clean_observed_at": "2026-07-20T21:21:19.528904+00:00"
     }
   },
   {
@@ -34780,37 +34780,15 @@
   },
   {
     "id": "assign_1fa7f2f4",
-    "title": "CI 失敗通知要附白話根因（別只轉『All jobs failed』）",
-    "description": "老闆回饋（Telegram msg 822）：GitHub「Test Suite: All jobs have failed」原始通知只有失敗狀態＋技術術語，沒說錯在哪。要改 CI-failure 通知轉發流程：偵測到 Test Suite / workflow 失敗時，自動抓 gh run view --log-failed，抽出實際 FAIL/AssertionError 那一行，在推 Telegram/通知前面加一句白話根因（例：『feed audience 一致性測試掛：某篇文章 audience 標錯』）。要求：(1) 一句白話原因擺最前面；(2) 保留原始連結給要看細節的人；(3) 抽不到就標『原因待查』不要靜默。實測樣本：run 29406571212=feed audience mismatch、29402856478=DM test 缺 HAC、29399240558=cron wrapper manifest 過期——三次各不同因，正好證明需要逐次抽因。改的是通知轉發程式，走正式流程勿在 responder 動。\n\n[migrated 2026-07-16 from task_978eaaac9793 (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-15T10:22:12.234306+00:00]",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "CI 失敗通知要附白話根因（別只轉『All jobs failed』）",
+    "priority": 2,
     "source": "user",
     "created_at": "2026-07-16T14:42:55.841240+00:00",
-    "created_by": "single-gateway-migration",
-    "status_history": [
-      {
-        "ts": "2026-07-17T21:09:04.651592+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-b877f6453ef5406681b2054b035e61bb"
-      },
-      {
-        "ts": "2026-07-17T21:09:04.880289+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-b877f6453ef5406681b2054b035e61bb"
-      },
-      {
-        "ts": "2026-07-17T21:19:09.965420+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-b877f6453ef5406681b2054b035e61bb"
-      }
-    ],
-    "started_at": "2026-07-17T21:09:04.880270+00:00",
     "completed_at": "2026-07-17T21:19:09.965401+00:00",
-    "result": "CI 紅燈 detection 通知加白話根因：check_alerts.py 新增 _notify_ci_detection（每 incident 一則 warn 通知，白話根因擺第一行、保留 run 連結、抽不到標原因待查非靜默、ledger 冪等），+3 tests，pytest 49 passed"
+    "tombstone": true,
+    "archived_at": "2026-07-20T22:07:56.620580+00:00"
   },
   {
     "id": "assign_a31a311d",
@@ -47220,5 +47198,261 @@
     "created_at": "2026-07-20T21:19:00.806181+00:00",
     "blocked_at": "2026-07-20T21:19:15+00:00",
     "blocked_note": "primary-path codex exec unavailable until quota reset; fallback reviewer PASS is not a Codex PASS per .claude/rules/experiments.md"
+  },
+  {
+    "id": "dreaming_repeated_tool_failure_dispatch_supervisor_killed_timeout_exi",
+    "title": "[dreaming] repeated_tool_failure:dispatch_supervisor:killed_timeout:exit143",
+    "description": "Cron job `dispatch_supervisor` returned a non-zero exit 8× in the window. Investigate the wrapper/script root cause (API death / auth / path). If sustained, open docs/refactor_plan_<job>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-20T21:25:01.081546+00:00）。\n證據：dispatch_supervisor:killed_timeout:exit143 ×8 over 0.54d (first 2026-07-20T03:23:25.609889+00:00 → last 2026-07-20T16:18:56.762350+00:00) — clean for 5.1h since last occurrence (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T21:25:01.081546+00:00",
+    "dreaming": {
+      "signature": "repeated_tool_failure:dispatch_supervisor:killed_timeout:exit143",
+      "pattern_type": "repeated_tool_failure",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_b74691d14763e77c",
+    "title": "[dreaming] persistent_alert:b74691d14763e77c",
+    "description": "Alert `Claude→Codex failover 接手失敗（Claude 端：quota）` fired 22× over 10.0d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-20T21:25:01.081546+00:00）。\n證據：alert_key=b74691d14763e77c title='Claude→Codex failover 接手失敗（Claude 端：quota）' send_count=22 span=10.0d (first 2026-07-10T14:25:34.143753+00:00 → last 2026-07-20T13:14:19.870321+00:00) — no fire in 8.2h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T21:25:01.081546+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:b74691d14763e77c",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_800782d7aa16a35c",
+    "title": "[dreaming] persistent_alert:800782d7aa16a35c",
+    "description": "Alert `supervisor hang_killed` fired 9× over 9.4d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-20T21:25:01.081546+00:00）。\n證據：alert_key=800782d7aa16a35c title='supervisor hang_killed' send_count=9 span=9.4d (first 2026-07-11T06:57:41.105045+00:00 → last 2026-07-20T16:18:57.019986+00:00) — no fire in 5.1h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-20T21:25:01.081546+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:800782d7aa16a35c",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "trending_repost_2026_07_21_ai變現",
+    "title": "[trending_repost] AI變現期來臨：科技巨頭隱含波動率偏斜的風險定價",
+    "description": "分析 AI 重大投資後續變現率對 Nasdaq 指數波動率的影響。可量化：比較資本支出成長率與個股選擇權隱含波動率（IV）偏斜（Skew）的歷史相關性，評估下行保護成本。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-20T22:00:14+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "warn_arc_near_miss",
+      "blocked": false,
+      "reason": "fuzzy descriptive arc near-miss of mile_78899a5c, mile_0fa841ed, mile_8a5e80b0; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
+      "saturation": 2,
+      "theme_terms": [
+        "投資",
+        "比較",
+        "指數",
+        "科技",
+        "成本",
+        "相關"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_78899a5c",
+          "title": "費半跌了一成六，VIX 卻在睡覺：你的避險工具可能對錯了目標"
+        },
+        {
+          "id": "mile_0fa841ed",
+          "title": "燒最多錢的科技巨頭，選擇權市場現在沒有多收「下跌保費」"
+        },
+        {
+          "id": "mile_8a5e80b0",
+          "title": "AI 資本支出的裂縫：指數安靜，個股先吵起來"
+        },
+        {
+          "id": "mile_b221e550",
+          "title": "法說季開打前，Mag 7 的期權市場悄悄在說一件事"
+        },
+        {
+          "id": "mile_d1609f75",
+          "title": "五家公司砸了四千四百億，波動率卻睡著了"
+        }
+      ],
+      "screened_at": "2026-07-20T22:00:16+00:00"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-20T22:08:24.524661+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f06750e74e9b463faf132a084b218949"
+      },
+      {
+        "ts": "2026-07-20T22:22:07.871270+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "hourly-slot-1-f06750e74e9b463faf132a084b218949",
+        "note": "manual_release"
+      }
+    ],
+    "note": "arc saturated: check_arc_dedup 回報 5 篇科技波動率 near-miss（mile_08fefa59 AI基建變現 / mile_78899a5c 費半 / mile_bd06ccbc / mile_2e91f5bb / mile_66c3fc3b）。本班改做期中選舉 VIX 題（arc 全新）。此題需換角度或併入既有 arc 後續。",
+    "last_released_at": "2026-07-20T22:22:07.871254+00:00"
+  },
+  {
+    "id": "trending_repost_2026_07_21_晶片回檔",
+    "title": "[trending_repost] 半導體資本支出退潮？從選擇權波動率偏斜看晶片股回檔風險",
+    "description": "從台積電強勢財報後晶片板塊大跌切入，探討市場對AI高額CapEx與未來需求不確定性的恐慌。可量化角度：分析費城半導體指數（SOX）與台指選擇權隱含波動率（IV）的期限結構與偏斜度，評估市場避險情緒的定價合理性。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-20T22:00:19+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "warn_arc_near_miss",
+      "blocked": false,
+      "reason": "fuzzy descriptive arc near-miss of mile_2974cf85, mile_78899a5c, mile_28f844aa; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
+      "saturation": 2,
+      "theme_terms": [
+        "指數",
+        "恐慌",
+        "財報",
+        "結構",
+        "台指",
+        "台積"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_2974cf85",
+          "title": "晶片殺進熊市，大盤卻沒跟上：用「震央定位法」判斷該撿還是該跑"
+        },
+        {
+          "id": "mile_78899a5c",
+          "title": "費半跌了一成六，VIX 卻在睡覺：你的避險工具可能對錯了目標"
+        },
+        {
+          "id": "mile_28f844aa",
+          "title": "財報不是成績單，是換錨日：台積電每項都贏卻跌 4%，用四個問題重讀一場法說"
+        },
+        {
+          "id": "mile_f78be848",
+          "title": "台積電法說開完：成績單每項都贏，ADR 盤前卻跌近 4%，跌的是哪兩個數字？"
+        },
+        {
+          "id": "mile_ed21255d",
+          "title": "財報季開跑前，把你的「財報控制盤」盤一次：一個開關會亮，四個旋鈕有三個沒接線"
+        }
+      ],
+      "screened_at": "2026-07-20T22:00:22+00:00"
+    }
+  },
+  {
+    "id": "trending_repost_2026_07_21_美期中選舉",
+    "title": "[trending_repost] 美期中選舉將至，如何利用 VIX 遠期曲線進行波動率套利？",
+    "description": "隨著2026年11月美國期中選舉臨近，市場不確定性開始反映在期權市場。通過分析VIX期貨遠期曲線的結構變化，探討買權與賣權跨式組合的建倉時機。可量化：歷史選舉年前三個月VIX期限結構溢價的收斂速度。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-07-20T22:00:20+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "dedup_screen": {
+      "verdict": "unjudged_thin_signature",
+      "blocked": false,
+      "reason": "arc gate had no anchor (no distinctive entity, no experiment ref) — it did not look; theme saturation 0 < 5 is the only signal that ran. Caller must do the 3-layer dedup check.",
+      "saturation": 0,
+      "theme_terms": [
+        "結構",
+        "組合",
+        "三個",
+        "美國",
+        "權市",
+        "期限"
+      ],
+      "near_misses": [],
+      "screened_at": "2026-07-20T22:00:22+00:00"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-20T22:11:56.627881+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f06750e74e9b463faf132a084b218949"
+      },
+      {
+        "ts": "2026-07-20T22:11:56.880691+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f06750e74e9b463faf132a084b218949"
+      },
+      {
+        "ts": "2026-07-20T22:22:07.617905+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-f06750e74e9b463faf132a084b218949"
+      }
+    ],
+    "started_at": "2026-07-20T22:11:56.880676+00:00",
+    "completed_at": "2026-07-20T22:22:07.617887+00:00",
+    "result": "期中選舉 VIX 事件研究 + 讀者向文章 mile_b222a5d7（general/draft）。主發現：VIX 高點在投票日前約 18 交易日（正規化中位數 123.5，4/6），到投票日退掉約兩成；開票隔天再掉 4.9%（中位數 -3.8%，5/6，bootstrap p=0.027 對照 6824 日）。剔除 2018 極端值後五次僅 -2.2%。IV-RV 價差平均 +3.3 但 2018/2022 賣方倒賠。事件日對齊已實測 exact match 並加 assert。anti_ai_gate PASS、arc dedup 無命中。懶人包 3 panel 已 enqueue。FB 雙發佈另建 followup fb_dual_publish_mile_b222a5d7。"
+  },
+  {
+    "id": "assign_dcd117ad",
+    "title": "解決 1 份長期無主的產物（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-20T17:01:21.564298+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。判定完成後這張任務關閉，held 記錄會自然消失。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-20T22:01:11.546068+00:00",
+    "payload": {
+      "held_paths": [
+        "job:compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527"
+      ],
+      "held_reasons": {
+        "job:compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527": "no_existing_declared_files"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
+    "created_by": "reap_orphan_deliverables"
+  },
+  {
+    "id": "fb_dual_publish_mile_b222a5d7",
+    "title": "[FB 補發] mile_b222a5d7 期中選舉 VIX 文章的 Ivan Lai FB 雙發佈",
+    "task_type": "trending_repost",
+    "status": "pending",
+    "priority": 2,
+    "source": "auto_discovered",
+    "created_at": "2026-07-20T22:58:00+00:00",
+    "description": "mile_b222a5d7（選後賣波動率？六次期中選舉的紀錄說，你進場已經晚了三週）於 2026-07-21 06:07 班次以 status=draft 發佈（lazypack gate 要求 general+published 必須先有懶人包，該班 50min cap 已到）。trending_repost 慣例的 FB 雙發佈尚未執行。\n\n前置條件：release cron 把 mile_b222a5d7 flip 成 published（懶人包 job lazypack-mile_b222a5d7 render 完成後）。確認 published 後再做，否則第一則留言的連結會 404。\n\n執行：依 .claude/skills/fb-publishing/SKILL.md + trending-repost/references/fb-ivanlai-tone.md，主貼文改寫 200-400 字（不貼 feed 內文）、必附圖（事件路徑圖 + 懶人包）、主貼文不放連結、VolPred 連結放第一則留言且必須是 https://volpred.zeabur.app/v3/reports/mile_b222a5d7（先 curl -I 驗 200）。發文前跑 scripts/anti_ai_gate.py（FB mode 預設 ON）。\n\nparent_task_id: trending_repost_2026_07_21_美期中選舉"
   }
 ]

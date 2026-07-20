@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-20T21:00:53.449154+00:00",
+  "generated_at": "2026-07-20T22:01:04.385063+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
@@ -15,16 +15,6 @@
   "job_deliverable_held": [
     {
       "job_id": "compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev3_armc_results.json",
-          "reason": "git_ignored"
-        }
-      ]
-    },
-    {
-      "job_id": "compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527",
       "reason": "no_existing_declared_files",
       "rejected": [
         {
@@ -67,8 +57,16 @@
       "collections": []
     }
   },
-  "held_escalations": [],
+  "held_escalations": [
+    {
+      "task_id": "assign_dcd117ad",
+      "paths": [
+        "job:compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527"
+      ]
+    }
+  ],
   "held_escalated_paths": [
+    "job:compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527",
     "job:compute-k1730-arm-a-production-quick-mode-1784358686",
     "job:k1698_rev3_rerun"
   ]
