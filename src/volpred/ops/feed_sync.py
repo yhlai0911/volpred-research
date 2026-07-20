@@ -55,9 +55,12 @@ if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from supabase_sync import (  # noqa: E402
+    SERVER_RESIDENT_DETAILS_KEYS,
     _select_rows,
     classify_audience,
+    projected_category,
     projected_content,
+    projected_details,
     reconcile_article_deletes,
     sync_article,
 )
@@ -141,63 +144,38 @@ def _fetch_supabase_articles() -> dict[str, dict]:
     2026-07-15: added `audience`. Audience is reader-facing routing metadata,
     and a local audience correction must propagate even when title, status,
     timestamps, body, tags, and experiment refs are otherwise unchanged.
+
+    2026-07-20 (WS-C3): added `category` and `phase`. compute_diff became the
+    single change-detection engine for sync_full as well, so it must cover
+    everything engine A's _article_hash covered — category was hash-covered
+    but never compared here (a category fix would sync only via the hash
+    engine), and phase is a written column both engines missed.
     """
     rows = _select_rows(
         "articles",
-        select="slug,status,title,published_at,updated_at,content,details,audience",
+        select=(
+            "slug,status,title,published_at,updated_at,content,details,"
+            "audience,category,phase"
+        ),
         order_by="id",
     )
     return {r["slug"]: r for r in rows if r.get("slug")}
 
 
-def _item_fingerprint(item: dict) -> str:
-    """Stable fingerprint for a feed item (for change detection)."""
-    parts = [
-        str(item.get("title") or ""),
-        str(item.get("status") or ""),
-        str(item.get("published_at") or ""),
-        str(item.get("audience") or ""),
-        # content hash (cheap)
-        hashlib.md5(
-            (item.get("content") or item.get("description") or "").encode("utf-8")
-        ).hexdigest(),
-    ]
-    return hashlib.md5("|".join(parts).encode("utf-8")).hexdigest()[:16]
-
-
-def _row_fingerprint(row: dict) -> str:
-    parts = [
-        str(row.get("title") or ""),
-        str(row.get("status") or ""),
-        str(row.get("published_at") or ""),
-    ]
-    # content hash not available from minimal query; caller triggers UPDATE
-    # only when any visible field differs — content drift is detected by
-    # status/title/published_at change on the feed side.
-    return hashlib.md5("|".join(parts).encode("utf-8")).hexdigest()[:16]
-
-
-def _experiment_refs(details: object) -> list[str]:
-    """Extract sorted experiment_refs from a details jsonb payload.
-
-    Tolerates None, missing key, or non-list value so the diff stays
-    robust against legacy rows.
-    """
-    if not isinstance(details, dict):
-        return []
-    refs = details.get("experiment_refs")
-    if not isinstance(refs, list):
-        return []
-    return sorted(str(ref) for ref in refs if ref)
-
-
 def compute_diff(storage_dir: str | Path = "storage") -> dict:
     """Compare feed.json (canonical) against Supabase articles (projection).
 
+    WS-C3 (2026-07-20): this is the SINGLE canonical change-detection engine.
+    scripts/supabase_sync.py::sync_full delegates its per-article selection
+    here; the parallel _article_hash/timestamp criterion was deleted. The
+    invariant is: **compare every non-derived column sync_article() writes**
+    (excerpt and proposer derive from content; author_id is constant; slug is
+    the key), each via the same projection helper the writer uses.
+
     Returns dict with:
       - insert: slugs in feed but not DB
-      - update: slugs in both but differ on
-        (status/title/published_at/content/tags/experiment_refs/audience)
+      - update: slugs in both but differ on (status/title/published_at/
+        content/tags/audience/category/phase/details)
       - delete: slugs in DB but not feed
       - feed_count, db_count
     """
@@ -234,9 +212,8 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
             != hashlib.md5(db_content.encode("utf-8")).hexdigest()
         )
 
-        # 2026-04-26: detect tag drift (article_tags join table) and
-        # details.experiment_refs drift (jsonb on the row). Without these
-        # the K-id retroactive migration's tag/details changes never sync.
+        # 2026-04-26: detect tag drift (article_tags join table). Without this
+        # the K-id retroactive migration's tag changes never sync.
         feed_tags = sorted(
             str(t)
             for t in (f.get("tags") or [])
@@ -244,10 +221,6 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
         )
         db_tags = db_tags_by_slug.get(slug, [])
         tags_changed = feed_tags != db_tags
-
-        feed_refs = _experiment_refs(f.get("details"))
-        db_refs = _experiment_refs(d.get("details"))
-        refs_changed = feed_refs != db_refs
 
         # Compare the exact projection sync_article() writes, rather than the
         # raw optional field. Seventy-five legacy published feed entries omit
@@ -257,14 +230,49 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
         db_audience = str(d.get("audience") or "")
         audience_changed = feed_audience != db_audience
 
+        # WS-C3 (2026-07-20): engine-A parity fills. category was covered by
+        # sync_full's _article_hash but never compared here — a category-only
+        # fix would have stopped syncing once the hash engine was deleted.
+        # details is now compared as the FULL projected jsonb (supersedes the
+        # experiment_refs-only check: refs live inside details), so edits like
+        # fb_post_url / event_series_slot / last_updated_at propagate. phase
+        # is a written column BOTH engines missed; covered for the invariant
+        # "every non-derived written column is compared". Projection helpers
+        # are shared with the writer so the reconcile stays idempotent.
+        category_changed = projected_category(f) != str(d.get("category") or "")
+        phase_changed = str(f.get("phase") or "") != str(d.get("phase") or "")
+        # Server-resident keys (view_display view-count seeds, PATCHed straight
+        # into the DB by seed_article_view_counts.py) are legitimately absent
+        # from canonical feed.json — stripped from BOTH sides so they are
+        # neither reported as drift (first full-details dry-run: 1576/1854
+        # rows flagged solely by them) nor kept alive by a stray feed copy.
+        # A non-dict DB value (pre-_legacy-wrap rows) is compared as-is: it
+        # can never equal the always-dict projection, so the row re-syncs
+        # once and converges to the wrapped form the writer produces.
+        strip = SERVER_RESIDENT_DETAILS_KEYS
+        feed_details = {
+            k: v for k, v in projected_details(f).items() if k not in strip
+        }
+        db_details = d.get("details")
+        if db_details is None:
+            db_details = {}
+        if isinstance(db_details, dict):
+            db_details = {k: v for k, v in db_details.items() if k not in strip}
+        details_changed = feed_details != db_details
+
         if (
             (f.get("title") or "") != (d.get("title") or "")
-            or (f.get("status") or "") != (d.get("status") or "")
+            # Mirror the writer's missing-key default ("published") so a feed
+            # entry without an explicit status compares equal to its own
+            # stored projection instead of re-updating forever.
+            or (f.get("status", "published") or "") != (d.get("status") or "")
             or audience_changed
             or _norm_ts(f.get("published_at")) != _norm_ts(d.get("published_at"))
             or content_changed
             or tags_changed
-            or refs_changed
+            or category_changed
+            or phase_changed
+            or details_changed
         ):
             to_update.append(slug)
 
