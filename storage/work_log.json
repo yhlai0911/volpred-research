@@ -22227,5 +22227,35 @@
     "owner": "hourly-slot-1-0ee193652e634046b88c561cb7f75bbb",
     "commit": null,
     "summary": "老闆回信問「為什麼又發不出去？理由是什麼？立刻使用 Computer use 發佈」（mile_78899a5c 費半/VIX 文 7/18 發 feed、FB 端 48h 到期被 auto-expire）。\n\n根因不是 doc 寫的「個人帳號無 headless API、等不到互動 session」——fb_realchrome_post.py --check 當場 PASS（CDP alive、connect_over_cdp 成功、logged_in），cron 環境本來就發得出去。真正卡住的是兩件事：\n(1) FB 文案從來沒被寫出來 —— canonical 稿 storage/drafts/fb_mile_78899a5c.md 不存在。7/18 那班發完 feed 只建了 followup task fb_repost_mile_78899a5c，稿子沒產出，而該 task 的 description 仍寫「請在 interactive session」，於是每小時被跳過直到 TTL 到期。\n(2) realchrome worker 有兩個會讓發文失敗/發錯的 bug（本班 dry-run 實地抓到，見下）。\n\n修復 scripts/fb_realchrome_post.py 兩處：\n  a. 附圖 selector 取 input[type=file].first，命中的是沒有 multiple 屬性的那個（accept 以 video/* 開頭）→ 多圖 set_input_files 直接炸 \"Non-multiple file input can only accept single file\" → 附圖 ABORT 不發。改為優先取 [multiple]，退化時逐張附上，張數仍由既有 _composer_photo_count 校驗。\n  b. 【較嚴重】填字的 div[role=dialog] ... .first 會命中**舊貼文 permalink dialog 的留言框**（上一輪 --check 把分頁留在某篇貼文頁，那個 dialog 也有 contenteditable 且 DOM 排序在前）。dry-run 截圖實證：464 字主文被填進 6/3 CPI 貼文的留言框，圖卻附在真 composer 上 —— 真發會產出「舊文一則超長留言 + 一篇無字純圖新貼文」。新增 _composer_dialog()，以「同時含 file input + contenteditable」鎖定唯一 composer，填字/附圖/清附件卡共用同一定義；另在發文前若 URL 停在 /posts/ 就先導回個人頁，斷掉污染源。\n\n產出：撰寫 FB 文案（464 字，Ivan Lai 口吻，主貼文無連結，附 3 圖：vol_thermometers + concentrated_pain + lz3_takeaway），anti_ai_gate exit 0（warn 1/3 段落長度），未用 --force。\n\n發佈驗證（未只採信腳本回報）：dry-run 兩輪看截圖確認文字落在「建立貼文」composer 內、背景乾淨；真發後主文 + 第一則留言（volpred 連結）皆送出，feed.json fb_post_status=success。腳本 recapture-permalink 抓不到 URL，故以 CDP 直接讀 timeline 核實：貼文在牆上、分享對象=所有人、已有 1 則留言。permalink anchor 比對失敗為非阻塞次要缺陷，未修，留記錄。"
+  },
+  {
+    "timestamp": "2026-07-20T10:20:00+08:00",
+    "task_type": "trending_repost",
+    "task_id": "fb_repost_mile_b7e98682",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-2-167ab5d35ccd447b9452e8e3e7543ba1",
+    "owner": "hourly-slot-2-167ab5d35ccd447b9452e8e3e7543ba1",
+    "commit": null,
+    "summary": "急件 lane（task_urgency time_critical，唯一一張）：mile_b7e98682〈科技股財報日的波動放大 3.8 倍，然後兩天就沒了〉FB 雙發佈補件。缺的只有 canonical FB 稿——feed 7/19 已發，FB 端從未產出稿子。\n\n產出 storage/drafts/fb_mile_b7e98682.md：421 字 Ivan Lai 口吻改寫（非 feed 內文複製），主貼文無連結，第一則留言貼 /v3/reports/mile_b7e98682（curl 驗 200）；附 3 圖（fig1_event_time_path + fig2_cross_section + lazypack panel_takeaway，三張 curl 皆 200）。anti_ai_gate exit 0（PASS，warn 1/3 段落長度），未用 --force。初稿 449 字超出 SOP 200-400 帶，逐句收到 421 再發。\n\n發佈：--check PASS（CDP alive、logged_in）→ --post --dry-run 兩項截圖人工核（文字落在「建立貼文」dialog 內、中文無亂碼、composer 照片偵測 3、body 無連結）→ 真發。主文送出 + 第一則留言送出並回讀驗證（留言框清空且頁面出現 mile_b7e98682）——留言是在 timeline 用主文 anchor 定位到該貼文後送出的，等於同時證明貼文已在牆上。\n\ncanonical 狀態：feed.json 與 trending_repost_log.json 皆 fb_post_status=success（腳本寫在 entry 頂層，非 SOP 文件所寫的 details.*；文件此處已 stale）；supabase full sync no_drift（1852/1852）。順手把 log 裡過時的 fb_skip_reason「fire 無 Chrome MCP」改標 superseded，避免與 success 並存誤導 audit。\n\n未解次要缺陷（不阻塞，第 2 次出現）：--recapture-permalink 以主文首 12 字當 anchor 掃 timeline 抓永久連結，本篇連跑 6 次皆 FAIL，故 fb_post_url 仍為 null（slot-1 發 mile_78899a5c 時同樣失敗）。已連兩篇重現 → 值得單獨修，本班未動。"
+  },
+  {
+    "timestamp": "2026-07-20T10:35:00+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12122-200626",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-d121416449ba4fe2b75f1519cd504dbb",
+    "owner": "hourly-slot-1-d121416449ba4fe2b75f1519cd504dbb",
+    "commit": null,
+    "summary": "老闆回信「立刻想辦法重構修復」（CI 自動修復未成功 ci-red-29703582195）。查下來是兩段紅燈，不是同一個。\n\n第一段（daily_checkup，老闆信裡指的那個）已由 09:18 / 09:21 兩個 commit 修完並驗證：16151f1f4 讓測試從 CHECKUP_DIMENSIONS 推導 checker 清單（原本手抄 9 個名字、漏了 worktree_reconcile，dev box 有 worktrees 所以安靜、CI clone 沒有所以 critical）；b7f6d5a70 修 watchdog 不再把「修復落地前就排隊的紅燈」當成修復失敗。CI 於 01:24Z run 29710871722 轉綠，watchdog 自動把 ci-red-29710342451 標 closed_no_action —— 證明 watchdog 修復本身有效。追蹤單 ci-red-stranded-checkup-half-20260720 已結案 succeeded。\n\n第二段是本班在驗證時發現的**新**紅燈（HEAD ecd8cc3b，02:00Z run 29711772660 + 29711772665 雙紅），根因單一：d70bf626a digest(29) 那班把 experiments/digest29/ 送進 main 卻缺兩樣東西。\n  (a) Experiment Artifacts Gate — 缺 reproduce_spec.json。已補（entrypoint digest29_epicenter.py / canonical_result digest29_results.json / network allow 因為走 yfinance / randomness not_applicable，腳本無亂數）。\n  (b) Test Suite — CJK 字型 ratchet 把 digest29_chart.py 判違規。這是 gate 的 false positive：該腳本呼叫 volpred.charts.article_charts._setup_style()，那個函式確實建立 CJK 字型鏈（含 Noto Sans CJK SC，Linux 也涵蓋），只是 audit 的 STYLE_HELPERS 是手抄清單、沒收錄它。與第一段同型的失敗：硬編清單跟不上新增的實作。\n\n修法沒有放寬 gate，反而收緊：STYLE_HELPERS 加入 _setup_style，並新增 test_every_style_helper_actually_sets_a_cjk_font_chain —— 要求清單裡每個名字都要在 repo 找得到定義、且定義裡真的出現 CJK 字面。這條新測試立刻抓到既有的洞：apply_article_style 與 setup_cjk 兩個名字無定義也無呼叫者，而檢查是靜態 AST，等於任何腳本只要寫一行 setup_cjk() 就能過關（執行時才 NameError）。兩者已移除。\n\n驗證：audit --strict exit 0（0 違規，baseline 仍為 0）；check_experiment_artifacts --changed-since b7f6d5a70 三個 experiment 全 PASS（digest29 spec check: strict）；pytest 針對 cjk / prepublish / artifact / reproduce 四個面向 78 passed。全套 pytest 本機超過 10 分鐘未跑完（本班 cap 內不划算），改由 push 後 CI 驗證。"
+  },
+  {
+    "timestamp": "2026-07-20T10:44:31.356607+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29711772660",
+    "actor": "hourly-slot-1-8ac4cbc80b334ee2b3c4d13e4398344a",
+    "owner": "hourly-slot-1-8ac4cbc80b334ee2b3c4d13e4398344a",
+    "title": "CI 紅燈修復：CJK 字型 gate 誤判 digest29（誤判非豆腐字）",
+    "summary": "root_cause=audit_cjk_chart_fonts.STYLE_HELPERS 未收錄 volpred.charts.article_charts._setup_style，導致所有寫在 canonical charts 模組上的圖表腳本被靜態誤判為未設 CJK 字型；repair_commit=ded6761ee. 同時移除 STYLE_HELPERS 中無定義、無呼叫端的 apply_article_style / setup_cjk —— 靜態檢查下假名字與真 helper 一樣能清 gate，等於隱形破洞（class sweep 確認無腳本靠其過關）。治本：新增 test_every_style_helper_actually_sets_a_cjk_font_chain，強制 tuple 中每個名字都要有真實定義且函式體命名 CJK 字型。驗證：ratchet 7 passed / 全 scan 0 violations / baseline 仍空 /assertion 只增不減。修復先前困在工作區未 commit，與 ci-red-stranded-checkup-half-20260720 同結構性死角（phase_z._orphan_half_candidates 排除 test 檔），循 git_writer_lock 序列化出口落地。",
+    "result": "succeeded"
   }
 ]

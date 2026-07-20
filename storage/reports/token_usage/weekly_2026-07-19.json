@@ -3,23 +3,23 @@
   "source": "claude_code_jsonl",
   "week_range": "2026-07-19 → 2026-07-26",
   "totals": {
-    "input_tokens": 1251,
-    "output_tokens": 420726,
-    "cache_read_tokens": 241221972,
-    "cache_create_tokens": 4259229,
-    "billable_total": 4681206,
-    "assistant_messages": 677,
-    "unique_sessions": 26,
-    "estimated_cost_usd": 473.2667
+    "input_tokens": 1253,
+    "output_tokens": 421778,
+    "cache_read_tokens": 241237858,
+    "cache_create_tokens": 4293650,
+    "billable_total": 4716681,
+    "assistant_messages": 678,
+    "unique_sessions": 27,
+    "estimated_cost_usd": 474.0149
   },
   "by_model": {
     "claude-opus-4-8": {
-      "input_tokens": 377,
-      "output_tokens": 37002,
-      "cache_read_tokens": 17750694,
-      "cache_create_tokens": 2092520,
-      "messages": 211,
-      "estimated_cost_usd": 68.6416
+      "input_tokens": 379,
+      "output_tokens": 38054,
+      "cache_read_tokens": 17766580,
+      "cache_create_tokens": 2126941,
+      "messages": 212,
+      "estimated_cost_usd": 69.3897
     },
     "claude-opus-4-7": {
       "input_tokens": 48,
@@ -92,13 +92,13 @@
       "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
     },
     "text_only": {
-      "input_tokens": 50,
-      "output_tokens": 41791,
-      "cache_read_tokens": 5100541,
-      "cache_create_tokens": 128270,
-      "messages": 28,
-      "billable_total": 170111,
-      "estimated_cost_usd": 13.1909,
+      "input_tokens": 52,
+      "output_tokens": 42843,
+      "cache_read_tokens": 5116427,
+      "cache_create_tokens": 162691,
+      "messages": 29,
+      "billable_total": 205586,
+      "estimated_cost_usd": 13.9391,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
@@ -265,27 +265,27 @@
       "cache_create_tokens": 4117624,
       "messages": 669,
       "billable_total": 4532253,
-      "estimated_cost_usd": 458.2077
+      "estimated_cost_usd": 455.4803
     },
     "2026-07-20": {
-      "input_tokens": 20,
-      "output_tokens": 7328,
-      "cache_read_tokens": 216125,
-      "cache_create_tokens": 141605,
-      "messages": 8,
-      "billable_total": 148953,
-      "estimated_cost_usd": 15.059
+      "input_tokens": 22,
+      "output_tokens": 8380,
+      "cache_read_tokens": 232011,
+      "cache_create_tokens": 176026,
+      "messages": 9,
+      "billable_total": 184428,
+      "estimated_cost_usd": 18.5346
     }
   },
   "drilldown": {
     "text_only": {
-      "messages": 640,
-      "billable_total": 5023812,
+      "messages": 642,
+      "billable_total": 5094762,
       "length_buckets": [
         {
           "name": "<200 chars",
-          "messages": 630,
-          "billable_total": 4923507
+          "messages": 632,
+          "billable_total": 4994457
         },
         {
           "name": "2000+ chars",
@@ -306,8 +306,8 @@
       "reason_groups": [
         {
           "name": "non-text assistant message",
-          "messages": 531,
-          "billable_total": 3446041
+          "messages": 533,
+          "billable_total": 3516991
         },
         {
           "name": "other",
@@ -343,8 +343,8 @@
       "top_signatures": [
         {
           "name": "(content types: thinking)",
-          "messages": 506,
-          "billable_total": 3281686
+          "messages": 507,
+          "billable_total": 3317161
         },
         {
           "name": "Agent 訊息批次送達（內容與我已從磁碟驗收的一致）。新增動作只有一項：gemini embedding 分支的殘餘付費面 → 排 P4 收尾任務。查 CI 進度：",
@@ -358,8 +358,8 @@
         },
         {
           "name": "(content types: tool_use)",
-          "messages": 25,
-          "billable_total": 164355
+          "messages": 26,
+          "billable_total": 199830
         },
         {
           "name": "收到 — 直接執行。範圍：**正式 K 實驗**（把論文三訊號在台股做完整歷史 backtest）→ Codex 審查 → 寫知識庫 → **事件文章發佈**（真圖表 + 查重 + 懶人包）。先做開工前置：查 K 編號、掃知識庫相似 K、讀實驗前導與 error log 教訓。",
@@ -574,9 +574,9 @@
       ]
     },
     "cache_diagnostics": {
-      "sessions_in_window": 26,
-      "cache_create_tokens": 13406863,
-      "billable_total": 14871500,
+      "sessions_in_window": 27,
+      "cache_create_tokens": 13475705,
+      "billable_total": 14942450,
       "cache_create_share_pct": 90.2,
       "top_sessions_by_cache_create": [
         {
