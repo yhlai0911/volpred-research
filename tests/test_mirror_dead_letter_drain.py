@@ -212,3 +212,74 @@ def test_drain_dry_run_touches_neither_queue(storage, monkeypatch):
     _run_drain(monkeypatch, storage, mirror_ok=True, dry_run=True)
 
     assert _queue(storage) == [MILE_ID]
+
+
+# --- attempt counting (WS-C4): stuck ids must age visibly ---------------------
+
+ATTEMPTS_LEDGER = ".failed_mirror_syncs_attempts.json"
+
+
+def _attempts(storage_dir: Path, name: str = ATTEMPTS_LEDGER) -> dict:
+    path = storage_dir / name
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def test_drain_counts_attempts_for_persistently_failing_ids(storage, monkeypatch):
+    """Two failed drain cycles -> attempts=2; recovery removes the ledger entry.
+
+    The queue itself stays a flat C1 id list (publisher's idempotent append and
+    the length-counting alert depend on that shape); ageing lives in the
+    sibling ledger so "stuck for N cycles" is observable.
+    """
+    (storage / "reports" / "feed.json").write_text(
+        json.dumps([_article()]), encoding="utf-8"
+    )
+    (storage / MIRROR_QUEUE).write_text(json.dumps([MILE_ID]), encoding="utf-8")
+
+    _run_drain(monkeypatch, storage, mirror_ok=False)
+    assert _queue(storage) == [MILE_ID]
+    assert _attempts(storage) == {MILE_ID: 1}
+
+    _run_drain(monkeypatch, storage, mirror_ok=False)
+    assert _attempts(storage) == {MILE_ID: 2}
+
+    _run_drain(monkeypatch, storage, mirror_ok=True)
+    assert _queue(storage) == []
+    assert _attempts(storage) == {}, "a recovered id must not keep a stale attempt count"
+
+
+def test_drain_dry_run_does_not_touch_the_attempts_ledger(storage, monkeypatch):
+    (storage / "reports" / "feed.json").write_text(
+        json.dumps([_article()]), encoding="utf-8"
+    )
+    (storage / MIRROR_QUEUE).write_text(json.dumps([MILE_ID]), encoding="utf-8")
+
+    _run_drain(monkeypatch, storage, mirror_ok=False, dry_run=True)
+
+    assert not (storage / ATTEMPTS_LEDGER).exists()
+
+
+def test_supabase_queue_gets_the_same_attempt_ledger(storage, monkeypatch):
+    """Both queues share one drain loop, so both age the same way."""
+    (storage / "reports" / "feed.json").write_text(
+        json.dumps([_article()]), encoding="utf-8"
+    )
+    (storage / ".failed_supabase_syncs.json").write_text(
+        json.dumps([MILE_ID]), encoding="utf-8"
+    )
+
+    drain = _load_drain_module()
+    monkeypatch.setattr(drain, "ROOT", storage.parent)
+    monkeypatch.setattr(drain, "QUEUE_PATH", storage / ".failed_supabase_syncs.json")
+    monkeypatch.setattr(drain, "MIRROR_QUEUE_PATH", storage / MIRROR_QUEUE)
+    monkeypatch.setattr(drain, "FEED_PATH", storage / "reports" / "feed.json")
+    monkeypatch.setattr(drain, "_resync_supabase", lambda art: False)
+    monkeypatch.setattr(drain, "guard_canonical_write", lambda path: None)
+    monkeypatch.setattr(drain, "dirty_paths_before_write", lambda *a, **k: frozenset())
+    monkeypatch.setattr(drain, "writable_output_paths", lambda *a, **k: True)
+    monkeypatch.setattr(drain, "commit_owned_outputs", lambda *a, **k: None)
+    monkeypatch.setattr(sys, "argv", ["drain"])
+
+    assert drain.main() == 0
+    assert _queue(storage, ".failed_supabase_syncs.json") == [MILE_ID]
+    assert _attempts(storage, ".failed_supabase_syncs_attempts.json") == {MILE_ID: 1}

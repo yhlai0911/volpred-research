@@ -2707,7 +2707,11 @@ class Publisher:
                             f"not present in persisted feed (entries={len(verify_feed)})"
                         )
                 if _record_id:
-                    self._sync_report_to_remote(str(_record_id), item)
+                    # WS-C4: the MAIN publish path used to drop this return
+                    # value (a rejected PUT was a bare print — the "401 for a
+                    # month" class). _mirror_article dead-letters the failure
+                    # into .failed_mirror_syncs.json for the drain cron.
+                    self._mirror_article(str(_record_id), item)
                 return str(item.get('id'))
         except Exception as exc:
             result_label = f"error: {type(exc).__name__}: {exc}"[:200]
