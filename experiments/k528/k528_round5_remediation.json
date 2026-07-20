@@ -139,7 +139,9 @@
   "commits": [
     "17f12d16c",
     "52fde3f49",
-    "8a95624b4"
+    "8a95624b4",
+    "28cd34fe1",
+    "7ffbeb96f"
   ],
   "rerun": {
     "exit_code": 0,
@@ -188,13 +190,43 @@
         ]
       },
       {
-        "name": "fresh-context code-reviewer subagent (Claude)",
-        "status": "did not return before this artifact was finalised",
-        "note": "Launched with the same adversarial brief. Its verdict is NOT part of this PASS. If it returned after the fact, its output is in the session task record, not in this artifact."
+        "name": "fresh-context code-reviewer subagent (Claude), read-only tools",
+        "verdict_as_returned": "FAIL",
+        "verdict_after_remediation": "the single blocking finding was fixed in 7ffbeb96f",
+        "tooling_limitation_self_disclosed": "Had Read/Grep/Glob only, no Bash. It said so up front and labelled every ruling as read-derived vs cross-referenced against the two reviewers that did execute.",
+        "blocking_finding": {
+          "where": "experiments/k528/k528_rerun_v3_summary.json findings_addressed.5",
+          "what": "'restricting the event group to Friday releases (237)' -- 237 is the SESSION-traded count, so calling it 'Friday releases' is the B1 conflation restated verbatim in spirit. No denial marker anywhere near it.",
+          "why_two_prior_sweeps_missed_it": "Both the collection reviewer and I scoped the claim surface by the '*_results.json' FILENAME PATTERN; this file is '*_summary.json'. Scoping an audit by filename pattern builds the blind spot into the method. README:224 lists this file in the output-artifacts table, so a reader can reach it.",
+          "counterargument_considered": "The file's own notes field pre-emptively scopes it out of the sha256-pinned certification surface, and strictly a '*_summary.json' is not a '*_results.json'. Rejected: round 5's own standard for B1 was 'disclosure is not remediation'. Applying that bar consistently, being outside the mechanical gate does not make the sentence true.",
+          "status": "FIXED in 7ffbeb96f - descriptive metadata only, no computed number changed"
+        },
+        "second_finding_non_blocking": "The two new gates were string-pinning and evadable by synonym; it also showed my denial heuristic was loose enough that a line like '這不是很稀奇，在週五公布的...' would pass. Accepted and fixed in the same commit.",
+        "concurred_with_agy_on": [
+          "B2",
+          "B3",
+          "B4",
+          "residual_gap",
+          "B1 rationale is sound, not re-run avoidance"
+        ],
+        "notable_independent_point": "Switching the filter to release-weekday would NOT have required a re-run at all -- release_weekday is already a column on every event row. That undercuts the 'relabelling to avoid work' theory more directly than my own argument did.",
+        "artifact": "returned inline; summarised in storage/ops/codex_reviews/k528_round6_verdict.md"
       }
     ],
     "verdict_artifact": "storage/ops/codex_reviews/k528_round6_verdict.md",
-    "MUST_REVERIFY_BEFORE_CERTIFY": "Per .claude/rules/experiments.md, a subagent/fallback PASS is NOT equivalent to a primary-path Codex PASS (K1259 precedent: a fallback PASS was later overturned by Codex on the same code). Codex quota resets 2026-07-25; round 6 must be re-run on the primary path before any certify/merge decision."
+    "MUST_REVERIFY_BEFORE_CERTIFY": "Per .claude/rules/experiments.md, a subagent/fallback PASS is NOT equivalent to a primary-path Codex PASS (K1259 precedent: a fallback PASS was later overturned by Codex on the same code). Codex quota resets 2026-07-25; round 6 must be re-run on the primary path before any certify/merge decision.",
+    "gate_hardening_after_round6": {
+      "replaced": "test_reader_facing_surfaces_do_not_resurrect_the_release_dated_estimand (string blocklist over 2 hand-listed files)",
+      "with": "test_no_live_artifact_describes_the_237_as_a_release_count (structural invariant over ALL live artifacts)",
+      "invariant": "237 is the session-traded count and 243 the release-dated count. A line that binds 237 to release-dated language WITHOUT naming 243 is collapsing the two. A synonym for 'Friday releases' still has to bind it to 237 to be wrong, and naming both numbers is exactly the correct writing we want -- so the gate rewards the right phrasing instead of banning strings.",
+      "scope": "every .py/.md/.json under experiments/k528; review records (verdict/remediation/codex_review_*) exempt because quoting the defect verbatim is their job",
+      "anti_vacuity": {
+        "vs 52fde3f49 k528_rerun_v3_summary.json (the round-6 finding)": "1 failed",
+        "vs 17f12d16c build_article_correction.py (the original B1)": "1 failed",
+        "note": "the old string gate caught only the second; the new gate catches both - strictly stronger, not a reword"
+      }
+    },
+    "verdict_summary": "Two independent fallback reviewers. agy (non-Claude, executed code) returned PASS on all four blockers. The fresh-context Claude reviewer (read-only) returned FAIL on one blocking residual that agy and I both missed; it was fixed in 7ffbeb96f along with the gate weakness the same reviewer flagged. Both reviewers independently agreed the B1 session-estimand decision is sound. Primary-path Codex remains quota-blocked and must still re-verify."
   },
   "merge_status": "NOT MERGED / NOT CERTIFIED - per dispatch, and additionally because round 6 has not been run on the primary Codex path",
   "constraints_honoured": [
@@ -218,18 +250,18 @@
     }
   ],
   "residual_limitations": [
-    "The confirmatory family was defined AFTER the data were seen (git-verified: family labels first appear in 17f12d16c, ~26h after rerun e42dc25ad). Not fixable retroactively. Mitigated by pre_registered=false and by reporting both families side by side; the six endpoints themselves are git-verified to predate the rerun by three months.",
+    "The confirmatory family was defined AFTER the data were seen (git-verified: family labels first appear in 17f12d16c, ~26h after rerun e42dc25ad). Not fixable retroactively. Mitigated by pre_registered=false and by reporting both families side by side; the six endpoints themselves predate the rerun by three months.",
     "Not bit-reproducible: re-running re-downloads yfinance data and adjusted-close values drift in the ~13th significant figure. Reproducible to reported precision only.",
-    "Two of the three new gates (reader-facing sweep, README pre-registration) are string-based. A semantically equivalent synonym would evade them. The friday_estimand gate is structural (it checks 243/237/6 and verifies each named release is a Friday absorbed by a Monday) and is not evadable this way.",
-    "KNOWN_MISSING_MONTHS remains a documented-false-claim surface: declaring a month in the allowlist AND deleting it from raw would pass. This is a different and lesser threat class than silent truncation (it requires a visible, reviewable edit to the allowlist), and is disclosed rather than closed.",
-    "Round 6 was reviewed by fallback reviewers only; primary-path Codex was quota-blocked until 2026-07-25 and must re-verify before certify/merge.",
+    "The README pre-registration gate is still a string check ('事先聲明'); a synonym such as '預先登記' would evade it. The two B1 gates are now structural. This one is not, and is recorded rather than claimed closed.",
+    "KNOWN_MISSING_MONTHS remains a documented-false-claim surface: declaring a month in the allowlist AND deleting it from raw would pass. A lesser threat class than silent truncation (it requires a visible, reviewable allowlist edit), disclosed rather than closed.",
+    "Round 6 was reviewed by fallback reviewers only; primary-path Codex was quota-blocked until 2026-07-25 and must re-verify before certify/merge. Note that one fallback reviewer DID find a real blocking defect the other missed, which is a reason to take the pending Codex pass seriously rather than treat it as a formality.",
     "The article's two inline charts and two lazypack images still render proxy-era numbers. The correction text carries a visible note saying so. Regenerating them is follow-up work outside this worktree.",
-    "The correction to the live article (mile_35eef830) is VALIDATED but NOT APPLIED. Applying it is the main thread's job from the repo root, because storage/reports/feed.json is shared canonical state this worktree must not write."
+    "The correction to the live article (mile_35eef830) is VALIDATED but NOT APPLIED. Applying it is the main thread's job from the repo root, because storage/reports/feed.json is shared canonical state this worktree must not write.",
+    "Audit-scope lesson recorded rather than buried: two consecutive sweeps missed a live artifact because both scoped by the '*_results.json' filename pattern. Scoping an audit by filename pattern builds a blind spot into the method; the replacement gate enumerates all .py/.md/.json under the experiment directory instead."
   ],
   "unresolved": [
-    "Primary-path Codex round-6 review (quota resets 2026-07-25). This is the gating item for certify/merge.",
-    "Apply the validated article correction to mile_35eef830 from the repo root (main thread), then regenerate the two inline charts and two lazypack images so text and images agree.",
-    "The second round-6 reviewer (fresh-context subagent) did not return in time; the round-6 PASS rests on the agy reviewer plus my own first-hand reproductions."
+    "Primary-path Codex round-6 review (quota resets 2026-07-25). Gating item for certify/merge.",
+    "Apply the validated article correction to mile_35eef830 from the repo root (main thread), then regenerate the two inline charts and two lazypack images so text and images agree."
   ],
   "first_pass_record_17f12d16c": {
     "experiment_id": "K528",

@@ -1,8 +1,55 @@
 # K528 round 6 verdict
 
-verdict: **PASS (fallback reviewers)** — *not* a primary-path Codex PASS
-reviewed_commit: `52fde3f49`
+verdict: **PASS after remediation (fallback reviewers)** — *not* a primary-path Codex PASS
+reviewed_commit: `52fde3f49`，殘留修復於 `7ffbeb96f`
 reviewed_at: 2026-07-21（台灣時間）
+
+> **修訂紀錄**：本檔初版在只收到第一位 reviewer（agy，判 PASS）時就寫成 PASS。
+> 第二位 reviewer 隨後回來判 **FAIL**，並找到一處 agy 與我都漏掉的 blocking 殘留。
+> 該殘留已於 `7ffbeb96f` 修掉，gate 也一併補強。**初版那個 PASS 當時下得太早** ——
+> 保留這段而不是把檔案洗掉重寫，因為「兩位 reviewer 只回來一位就先宣告通過」
+> 本身就是這輪值得記住的教訓。
+
+---
+
+## 兩位 fallback reviewer 的結果
+
+| Reviewer | 執行能力 | 裁決 | 關鍵貢獻 |
+|---|---|---|---|
+| **agy**（Antigravity 1.1.4，非 Claude 模型） | 有 Bash：重跑主腳本、跑 pytest、自做反空洞驗證 | **PASS** ×4 | 實測層面的獨立重現 |
+| **fresh-context code-reviewer**（Claude，唯讀） | 只有 Read/Grep/Glob，**自己一開頭就聲明** | **FAIL** | 找到兩人皆漏的 blocking 殘留 |
+
+**值得記的一點**：有執行能力的 reviewer 判 PASS，只能讀檔的 reviewer 判 FAIL —— 而
+FAIL 是對的。它靠的不是跑得比較多，是**掃描範圍界定得比較誠實**（見下）。
+
+### 第二位 reviewer 的 blocking 發現（已修）
+
+`k528_rerun_v3_summary.json` 的 `findings_addressed.5` 寫
+`"restricting the event group to Friday releases (237)"`。**237 是 session 計數**，
+稱它為 "Friday releases" 就是 B1 那句錯話再說一次，附近沒有任何否定語。
+README:224 把這支列在「產出檔案」表，讀者拿得到。
+
+**為什麼前兩次掃描都漏**：收件審查與我都用 `*_results.json` 這個**檔名樣式**界定
+claim surface，而這支是 `*_summary.json`。**用檔名樣式界定稽核範圍 = 把盲區內建進方法。**
+
+該檔 notes 自稱不在 sha256 認證面內 —— 技術上成立，但 round-5 對 B1 的判準是
+「揭露不等於修復」。同一把尺量下來它就還沒關。已於 `7ffbeb96f` 改寫，無計算結果變動。
+
+### 第二位 reviewer 的 non-blocking 批評（也已修）
+
+原 gate 是釘字串，同義詞可繞過；而且我的否定詞判斷寬到
+「這**不是**很稀奇，在週五公布的…」都會放行。已改成**結構性不變量**：
+237 是 session 計數、243 是 release 計數，一行綁 237 到 release 語彙卻沒有 243 拉開區別
+就算違規；掃描範圍改成 `experiments/k528` 底下所有 `.py/.md/.json`，review 紀錄檔豁免。
+
+反空洞實測（新 gate 兩個方向都咬）：對 `52fde3f49` 的 rerun_v3_summary → 1 failed；
+對 `17f12d16c` 的 generator → 1 failed。**舊 gate 只咬得到後者。**
+
+### 兩位 reviewer 一致同意的
+
+B2 / B3 / B4 / 殘留 gap 全 PASS；**B1 採 session estimand 的理由成立、不是為了規避重跑**。
+第二位 reviewer 補了一個比我自己的論證更直接的點：改用 release weekday **根本不需要重跑**
+（`release_weekday` 早就是每列事件上的欄位），所以「為了省事才 relabel」的假說站不住。
 
 ---
 
