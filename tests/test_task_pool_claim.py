@@ -4,6 +4,7 @@ import argparse
 import importlib.util
 import json
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -554,7 +555,10 @@ def test_list_stale_warns_on_invalid_claimed_at(tmp_path, monkeypatch, capsys) -
     assert "task_id=bad_claim_timestamp" in captured.err
 
 
-def test_cleanup_warns_on_invalid_claimed_at_without_releasing(tmp_path, monkeypatch, capsys) -> None:
+def test_cleanup_releases_unprovable_claim_with_no_timestamps(tmp_path, monkeypatch, capsys) -> None:
+    # WS-A2（refactor_plan_ops_master_2026_07）：claimed_at 壞值且無任何生命週期
+    # 欄位可推年齡 = 無法證明活著 → 視為無限 stale 立即回收。
+    # 舊行為（warn 後跳過、永不回收）正是 2026-07-20 稽核實證的殭屍任務盲點。
     next_tasks = tmp_path / "next_tasks.json"
     next_tasks.write_text(
         json.dumps(
@@ -590,14 +594,70 @@ def test_cleanup_warns_on_invalid_claimed_at_without_releasing(tmp_path, monkeyp
     assert rc == 0
     captured = capsys.readouterr()
     payload = json.loads(captured.out)
-    assert payload["count"] == 0
+    assert payload["count"] == 1
+    assert payload["released"][0]["id"] == "bad_cleanup_timestamp"
+    assert payload["released"][0]["age_h"] is None
+    assert payload["released"][0]["age_source"] is None
     assert "[claim] WARN claimed_at parse failed" in captured.err
     assert "site=cleanup_stale" in captured.err
     assert "task_id=bad_cleanup_timestamp" in captured.err
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
-    assert saved[0]["status"] == "in_progress"
-    assert saved[0]["claimed_by"] == "codex-vscode"
-    assert saved[0]["claim_session_id"] == "abc123"
+    assert saved[0]["status"] == "pending"
+    assert "claimed_by" not in saved[0]
+    assert "claim_session_id" not in saved[0]
+
+
+def test_cleanup_missing_claimed_at_falls_back_to_created_at(tmp_path, monkeypatch, capsys) -> None:
+    # WS-A2：in_progress 但 claimed_at 全空（實證殭屍 k1731_armB_rev7_* 形態）
+    # → 用 created_at 推年齡；夠老就回收、新鮮就留著。
+    stale_created = (datetime.now(timezone.utc) - timedelta(hours=30)).isoformat()
+    fresh_created = datetime.now(timezone.utc).isoformat()
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "zombie_no_claimed_at",
+                    "task_type": "platform_ops",
+                    "status": "in_progress",
+                    "created_at": stale_created,
+                },
+                {
+                    "id": "fresh_no_claimed_at",
+                    "task_type": "platform_ops",
+                    "status": "in_progress",
+                    "created_at": fresh_created,
+                },
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "cleanup",
+            "--stale-hours",
+            "2",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert payload["count"] == 1
+    assert payload["released"][0]["id"] == "zombie_no_claimed_at"
+    assert payload["released"][0]["age_source"] == "created_at"
+    assert payload["released"][0]["age_h"] is not None
+    saved = {t["id"]: t for t in json.loads(next_tasks.read_text(encoding="utf-8"))}
+    assert saved["zombie_no_claimed_at"]["status"] == "pending"
+    assert saved["fresh_no_claimed_at"]["status"] == "in_progress"
 
 
 @pytest.mark.parametrize(

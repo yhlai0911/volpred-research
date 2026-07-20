@@ -506,10 +506,28 @@ def _materialize_pool_dry_diagnostic_task(now: datetime | None = None) -> dict:
 
             tasks.insert(0, task)
             normalize_task_priorities(tasks)
-            fh.seek(0)
-            fh.truncate()
-            json.dump(payload if isinstance(payload, dict) else tasks, fh, indent=2, ensure_ascii=False)
-            fh.write("\n")
+            if isinstance(payload, dict):
+                # legacy dict 包裝殼：仍須 serialize-first 再 truncate，避免
+                # dump 中途失敗留下截斷 JSON（2026-07-05 corruption pattern）；
+                # encode 檢查比照 write_tasks_to_handle，lone surrogate 先 scrub
+                # 再 truncate，確保 write 階段不可能再失敗
+                serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+                try:
+                    serialized.encode("utf-8")
+                except UnicodeEncodeError as exc:
+                    _diag_warn(
+                        "next_tasks_write",
+                        "scrubbed non-encodable char(s) before write (pool_dry legacy dict)",
+                        err=str(exc),
+                    )
+                    serialized = serialized.encode("utf-8", "replace").decode("utf-8")
+                fh.seek(0)
+                fh.truncate()
+                fh.write(serialized)
+            else:
+                from volpred.ops.next_tasks import write_tasks_to_handle
+
+                write_tasks_to_handle(fh, tasks)
             return {
                 "ok": True,
                 "added": 1,

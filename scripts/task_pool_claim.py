@@ -754,22 +754,51 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
             if status not in {"claimed", "in_progress"}:
                 continue
             claimed_at = t.get("claimed_at")
-            if not claimed_at:
-                continue
-            claimed_dt = parse_iso_warn(
-                claimed_at,
-                tag="claim",
-                field_name="claimed_at",
-                fallback=None,
-                site="cleanup_stale",
-                task_id=_task_key(t),
-            )
+            claimed_dt = None
+            age_source = "claimed_at"
+            if claimed_at:
+                claimed_dt = parse_iso_warn(
+                    claimed_at,
+                    tag="claim",
+                    field_name="claimed_at",
+                    fallback=None,
+                    site="cleanup_stale",
+                    task_id=_task_key(t),
+                )
             if claimed_dt is None:
-                continue
-            age_h = (now - claimed_dt).total_seconds() / 3600
+                # claim 沒留（或留了壞的）claimed_at：退而用其他生命週期欄位推
+                # 年齡；全缺 = 無法證明活著，視為無限 stale 立即回收
+                # （P4 claimed_at 盲點，refactor_plan_ops_master_2026_07 WS-A2）
+                for fallback_field in ("started_at", "updated_at", "created_at"):
+                    raw = t.get(fallback_field)
+                    if not raw:
+                        continue
+                    claimed_dt = parse_iso_warn(
+                        raw,
+                        tag="claim",
+                        field_name=fallback_field,
+                        fallback=None,
+                        site="cleanup_stale_fallback",
+                        task_id=_task_key(t),
+                    )
+                    if claimed_dt is not None:
+                        age_source = fallback_field
+                        break
+            if claimed_dt is None:
+                age_h = float("inf")
+                age_source = None
+            else:
+                age_h = (now - claimed_dt).total_seconds() / 3600
             if age_h >= args.stale_hours:
                 prev_owner = t.get("claimed_by")
-                released.append({"id": _task_key(t), "owner": prev_owner, "age_h": round(age_h, 1)})
+                released.append(
+                    {
+                        "id": _task_key(t),
+                        "owner": prev_owner,
+                        "age_h": round(age_h, 1) if claimed_dt is not None else None,
+                        "age_source": age_source,
+                    }
+                )
                 t["status"] = "pending"
                 t.pop("claimed_by", None)
                 t.pop("claimed_at", None)

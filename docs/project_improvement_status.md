@@ -1,6 +1,16 @@
 # Project Improvement Status
 
-Last updated: **2026-07-14 (token/ops 浪費結構性優化)**
+Last updated: **2026-07-20 (ops master 全面重構計畫)**
+
+## 2026-07-20 Ops Master Consolidation（active — 最高優先）
+
+Owner 指令「重構所有運營程式碼：底層邏輯/流程/架構三層徹底改、去重複、滿足 PDCA/loop
+engineering、含 email/Telegram 互動與派工邏輯」。五路平行稽核（控制面/scripts/enforcement/
+發佈管線/事故根因）後產出**收編型 master plan** = `docs/refactor_plan_ops_master_2026_07.md`
+（§7 狀態表為 canonical，吸收既有 11 份 refactor plan 全部殘留項，此後 ops 重構單一入口）。
+當日 Phase 0 完成：truncate-before-serialize corruption 路徑修復（continue_task_dispatch）、
+cleanup claimed_at 盲點修復 + 5 筆殭屍任務自然回收（task_pool_claim）、cron_dispatch plan
+標 SUPERSEDED、12 筆 Phase 1 任務入池（refactor-master 系列，P1/P2）。
 
 ## 2026-07-14 Token/Ops 浪費重構（active）
 
