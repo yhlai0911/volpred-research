@@ -47,6 +47,7 @@ SITE = "https://volpred.zeabur.app"
 # 週末/假日不交易的 job 用較寬窗口；真正時效性（盤中/tick）窗口較緊。
 DATA_JOBS_EXPECTED_H = {
     "daily_update": 26,            # 每日 08:03
+    "daily_update_intraday": 26,   # 每日 14:00（台股盤後；2026-07-20 補監控，見下方 exit-code 檢查）
     "collect_tw": 30,              # 工作日 15:00
     "collect_us": 30,             # 週二-六 07:03（跳週一，故放寬）
     "fred_backfill_guard": 30,
@@ -142,6 +143,30 @@ def _missed_fires(cron: str, log_mtime: datetime.datetime) -> int:
     return missed
 
 
+_EXIT_RE = re.compile(r"exit (\d+) at .*?(?:\(duration=([\d.]+)s\))?\s*===")
+
+
+def _last_exit(log: Path) -> tuple[int, float | None] | None:
+    """log 尾端最後一筆 `exit N at ... (duration=Xs)` → (rc, duration_s)。
+
+    2026-07-20：mtime 只證明 job「有寫 log」，不證明它「有成功」。
+    daily_update_intraday 連續撞 600s watchdog（rc=142）卻天天更新 mtime，
+    schedule-aware 檢查因此永遠判它新鮮 —— 靠老闆手動發現。見 error_log 2026-07-20。
+    """
+    try:
+        with open(log, "rb") as fh:                # log 可達數百 KB，只讀尾端
+            fh.seek(0, os.SEEK_END)
+            fh.seek(max(0, fh.tell() - 16384))
+            tail = fh.read().decode("utf-8", "ignore")
+    except OSError:
+        return None  # silent-ok: missing/unreadable log surfaces as its own freshness finding upstream
+    hits = _EXIT_RE.findall(tail)
+    if not hits:
+        return None
+    rc, dur = hits[-1]
+    return int(rc), float(dur) if dur else None
+
+
 # ── 1. data_freshness ───────────────────────────────────────────────────────
 def check_data_freshness() -> list[dict]:
     out = []
@@ -152,6 +177,16 @@ def check_data_freshness() -> list[dict]:
         if a is None:
             out.append(_finding("data_freshness", "warn", f"{job}: 無 cron log（從未跑？）"))
             continue
+        # 「有跑但失敗」與「根本沒跑」是兩種故障，各自獨立報。
+        last = _last_exit(log)
+        if last and last[0] != 0:
+            rc, dur = last
+            why = f"撞 watchdog timeout（duration={dur:.0f}s）" if rc == 142 else f"rc={rc}"
+            out.append(_finding(
+                "data_freshness", "critical",
+                f"{job}: 最後一次執行失敗 —— {why}（{a:.0f}h 前）；log mtime 仍新，漏班檢查看不到",
+                recovery=f"tail -40 storage/logs/cron/{job}.log  # 查失敗點，再跑對應 wrapper",
+            ))
         cron = crons.get(job)
         missed = _missed_fires(cron, datetime.datetime.fromtimestamp(os.path.getmtime(log))) if cron else -1
         if missed >= 0:  # schedule-aware（primary）
