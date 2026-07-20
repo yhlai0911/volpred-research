@@ -482,6 +482,18 @@ def _ensure_failed_closeout(
     """Persist first-failure ownership once; never re-pin later edited bytes."""
     if not owned:
         return False
+    machine = [rel for rel in owned if _is_machine_state(rel)]
+    if machine:
+        # Hot daemon-written state is never pinned (assign_33e4c59f): a dozen
+        # writers touch these files every hour, so the fingerprint is guaranteed
+        # to drift and the claim can only ever end in a "released" warn. Deferral
+        # has no meaning for bytes that are stale a minute later — the churn lane
+        # re-adopts these paths under the next fire's own baseline.
+        LOG.info("phase_z: not pinning %d machine-state path(s) into failed closeout: %s",
+                 len(machine), machine[:10])
+        owned = [rel for rel in owned if not _is_machine_state(rel)]
+        if not owned:
+            return False
     dest = _failed_closeout_path(repo_root, runner)
     if dest is None:
         return False
@@ -711,6 +723,21 @@ def recover_failed_closeout(
     payload = _read_failed_closeout(repo_root, runner)
     if payload is None:
         return {"committed": False, "reason": "no_failed_closeout"}
+    stale_machine = sorted(
+        e["path"] for e in payload["paths"] if _is_machine_state(e["path"]))
+    if stale_machine:
+        # Receipts written before assign_33e4c59f may still pin hot machine
+        # state. Release those claims silently: under the current invariant they
+        # would never have been pinned, and warning about their inevitable drift
+        # was the recurring "放棄認領" orphan alert (2026-07-20). Working bytes
+        # are untouched; the churn lane owns them.
+        LOG.info("phase_z: releasing %d pre-invariant machine-state claim(s) silently: %s",
+                 len(stale_machine), stale_machine[:10])
+        _release_closeout_claims(
+            repo_root, stale_machine, runner, reason="machine_state_unpinned")
+        payload = _read_failed_closeout(repo_root, runner)
+        if payload is None:
+            return {"committed": False, "reason": "no_failed_closeout"}
     dirty = _dirty_paths(repo_root, runner)
     if dirty is None:
         return {"committed": False, "reason": "status_error"}
