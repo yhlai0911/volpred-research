@@ -13,7 +13,7 @@ K1257 結論：standard Bayesian Model Averaging 的 posterior update
 
 $$w_{i,t+1} \propto w_{i,t} \cdot p(y_{t+1}|M_i)$$
 
-是 product-of-likelihood，經 ~500 天 accumulation 後 best model 的 weight exponential → 1，posterior **lose all uncertainty** 且 **cannot un-concentrate** 當 regime 轉換。結果：H3（regime-adaptive weight shift）**FAIL**。
+是 product-of-likelihood，累積若干年 log-lik 後 best model 的 weight exponential → 1（K1257 README 的「約 500 天」係 weight-evolution 圖的目測描述，非量化 hitting-time），posterior **lose all uncertainty** 且 **cannot un-concentrate** 當 regime 轉換。結果：H3（regime-adaptive weight shift）**FAIL**。
 
 **K1258 問題**：加入 forgetting factor $\lambda \in (0, 1]$ 到 posterior update 能否救回 regime-adaptivity？
 
@@ -60,10 +60,10 @@ $$\log w_{i,t+1} = \lambda \cdot \log w_{i,t} + \log p(y_{t+1}|M_i, \mathcal{F}_
 - Null: forgetting-factor BMA QLIKE ≥ standard BMA QLIKE
 - Alt: λ<1 variant QLIKE < λ=1 baseline + Harvey |t| > 3
 
-### H2: Forgetting-factor BMA 恢復 regime tracking
+### H2: Forgetting-factor BMA 恢復 posterior switching / deconcentration
 
-- 每 λ variant 計算 regime-avg weight（VIX regime buckets）
-- 檢驗 max-weight model 是否在 regime 間 switch（K1257 standard 沒 switch）
+- 每 λ variant 計算 regime-avg weight（VIX regime buckets）作為描述性輸出
+- **實際檢驗的統計量**：max-weight model 的 switch frequency 是否 ≥ 2× λ=1 baseline（`k1258_forgetting_factor_bma.py:885`）。這是 unconditional 的切換頻率，**不是**「切換與 VIX regime 對齊」的檢定
 
 ### H3: Optimal λ 因 asset 而異
 
@@ -99,13 +99,26 @@ $$\log w_{i,t+1} = \lambda \cdot \log w_{i,t} + \log p(y_{t+1}|M_i, \mathcal{F}_
 
 | Hypothesis | Verdict | Key evidence |
 |---|---|---|
-| **H1** QLIKE improvement | **FAIL** | No λ<1 cell hits Harvey \|t\|>3 + lower QLIKE. SPY/GLD λ<1 QLIKE worse (Harvey +1.3 to +2.66); 0050.TW λ<1 marginally better but Harvey max \|t\|=2.00 (below 3 threshold). |
-| **H2** regime tracking restored | **PASS** | All 3 assets: weight-switch-freq λ=0.90 >> λ=1 (SPY 1.1%→19.9%, GLD 2.5%→24.0%, 0050.TW 0.3%→21.5%). Posterior avg max-weight drops 0.93→0.29, confirming ff-BMA structurally un-concentrates. |
+| **H1** QLIKE improvement | **FAIL** | No λ<1 cell hits Harvey \|t\|>3 + lower QLIKE. SPY/GLD λ<1 QLIKE worse (Harvey t spans +0.207 to +2.659 across the 8 SPY/GLD λ<1 cells); 0050.TW λ<1 marginally better but Harvey max \|t\|=2.00 (below 3 threshold). |
+| **H2** switching / deconcentration restored | **PASS** | All 3 assets: weight-switch-freq λ=0.90 >> λ=1 (SPY 1.1%→19.81%, GLD 2.5%→24.0%, 0050.TW 0.3%→21.5%). Posterior avg max-weight drops 0.93→0.29, confirming ff-BMA structurally un-concentrates. **What the code tests is switch frequency ≥2× the λ=1 baseline** (`k1258_forgetting_factor_bma.py:885`) — i.e. that the posterior moves and stays diffuse. It does **not** test whether the switches align with VIX regimes, so this is not evidence of restored regime tracking. |
 | **H3** asset-specific optimal λ | **PASS** | SPY opt=1.0, GLD opt=1.0, 0050.TW opt=0.90 — 0050.TW differs. |
 | **H4** production default | λ=1.0 (standard BMA) | No forgetting variant beats baseline QLIKE with Harvey gate. 0050.TW QLIKE gain at λ=0.90 (+0.016 QLIKE units) is real but sub-threshold. |
 
 ### Apples-to-apples sanity check
-- K1258 λ=1.0 QLIKE **byte-identical** to K1257 BMA QLIKE across all 3 assets (diff=0.00 to numerical precision). Confirms refactor preserves K1257 baseline.
+- K1258 λ=1.0 QLIKE is **byte-identical to K1257's `qlike_own_sample` BMA figure** across all 3 assets (diff=0.00 to numerical precision; e.g. SPY −8.227435956662777 in both). Confirms the refactor preserves the K1257 baseline.
+- **限定**：這條等式**只**對 K1257 的 own-sample 欄位成立。K1257 現行 headline 已 realign 為 common-sample（SPY headline BMA = **−8.18639**，n_common=1518），而 K1258 的 λ sweep 全部跑在各序列自身樣本上。**不可**把 K1258 λ=1 的數字直接與 K1257 headline 表比較。
+
+### Multiple comparisons — 為什麼 `|t|>3` 已經是 de-facto FWER 保護
+
+本實驗跑 **m = 12 個 λ<1 vs λ=1 的 Harvey DM 檢定**（3 assets × 4 個 λ ∈ {0.99, 0.975, 0.95, 0.90}）。
+
+| 量 | 值 |
+|---|---|
+| 檢定數 m | 12 |
+| 5% Bonferroni 校正門檻 | 0.05 / 12 = **0.00417** |
+| 本實驗實際門檻 `\|t\|>3` 的 two-sided p（t-dist, df≈1580） | **≈0.00274** |
+
+`\|t\|>3` 對應的 p 值比 12-comparison 的 Bonferroni 門檻**更嚴**（0.00274 < 0.00417），因此 H1 FAIL 的裁決不可能是 multiplicity 造成的假陰性放寬；反過來說，若有任何 cell 曾通過 `\|t\|>3`，它也已自動通過 family-wise 校正。這是本設計的 **de-facto FWER 保護**，不是事後才補的校正。
 
 ### Key finding
 - **Forgetting factor fixes K1257's H3 concentration problem (H2 PASS) but does NOT produce predictive gains (H1 FAIL)**. The extra switching dissipates into noise — the BMA forecast is variance-weighted, and shifting mass away from the best model (A4f-IV² for SPY/GLD, GJR-t for 0050.TW) hurts calibration faster than it helps regime adaptation.
@@ -152,6 +165,7 @@ $$\log w_{i,t+1} = \lambda \cdot \log w_{i,t} + \log p(y_{t+1}|M_i, \mathcal{F}_
 ## 為什麼這是重要的
 
 - K1257 文章 mile_5173955c 已承諾「forgetting-factor / sliding-window 是下一步」— 本實驗兌現承諾
-- 若 K1258 PASS：**解決 K1257 H3 FAIL**，ensemble framework 復活 regime-adaptive promise
-- 若 K1258 FAIL：更強 NULL 結論 — standard BMA + forgetting 都不夠，需更根本改變（e.g. switching models / mixtures of experts）
-- 任一結果都是 **research positive** — FAIL 時告訴社群「別花更多時間在 BMA family」，PASS 時提供 production-ready adaptive weighting.
+- 若 K1258 PASS：K1257 H3 的 concentration 問題有一個具體修法，ensemble framework 的 adaptive-weighting 路線值得續推
+- 若 K1258 FAIL：得到一個**範圍受限的 NULL** — 在本設計下（3 檔資產、固定 λ 網格、單一 2020–2026 OOS window），log-posterior discounting 這一種 forgetting 機制不足以產生預測增益
+
+**實際結果的正確讀法（不可外推）**：H1 FAIL 是 **descriptive** 的——它說的是「這 5 個固定 λ、這 6 個模型、這 3 檔序列、這一個 OOS window」下沒有 cell 通過 Harvey \|t\|>3。它**不**構成「BMA family 沒有前途」的證據，也**不**足以建議社群停止投入 BMA 方向：adaptive/estimated λ、其他 model pool、其他資產、其他 window、以及 switching models / mixture-of-experts / regime-conditional priors 全部未被本實驗檢驗。把單一 null cell 升級成 family-level 判決，正是本 README 先前版本的過度外推。

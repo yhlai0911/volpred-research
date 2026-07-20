@@ -1,7 +1,7 @@
 # K1257 — Bayesian Model Averaging (BMA) Volatility Forecast
 
 - **Experiment ID**: `k1257`
-- **Status**: **done**（executed 2026-04-20；runtime 343.8s, 3 assets, 6 models, 2020-2026 OOS）
+- **Status**: **done**（executed 2026-04-20；runtime 369.6s per `k1257_results.json:runtime_seconds`, 3 assets, 6 models, 2020-2026 OOS）
 - **Created At**: 2026-04-20T01:40:00+08:00
 - **Executed At**: 2026-04-20T09:55:00+08:00
 - **Proposer**: Claude (novelty-quota backlog from `research_program.md` 面向 A「Under-explored methodologies」)
@@ -119,7 +119,19 @@ SPY 的 GJR-t 有 63 個 invalid forecast days（1 次 non-converged refit × 63
 
 - H1: BMA PARTIAL — posterior correctly identifies IV-augmented A4f as superior for US/US-linked assets, but posterior concentration means BMA gain over GJR-t only when single best ≠ GJR-t.
 - H2: BMA FAIL — no Harvey-significant gain over equal-weight; supports K482's "equal-weight ensemble puzzle" for SPY/GLD, and on 0050.TW equal-weight is numerically best.
-- H3: Regime-adaptive weighting hypothesis rejected — cumulative likelihood update drives posterior to a single model within ~500 days and it never un-concentrates, so BMA ≠ regime-adaptive in this implementation.
+- H3: Regime-adaptive weighting hypothesis rejected — cumulative likelihood update drives the posterior to a single model and it never un-concentrates, so BMA ≠ regime-adaptive in this implementation. （**「約 500 天」是 `k1257_weight_evolution.png` 的圖示描述（eyeballed from figure），不是量化指標**：本實驗未計算 effective number of models 或 concentration hitting-time，故此數字不可引用為 estimate。）
+
+### Multiple comparisons — 為什麼 `|t|>3` 已經是 de-facto FWER 保護
+
+本實驗的 headline 檢定數 **m = 3**（H1 的 BMA vs GJR-t，跨 SPY / GLD / 0050.TW；H2 的 BMA vs Equal 另為一組同樣 m=3 的檢定）。
+
+| 量 | 值 |
+|---|---|
+| 檢定數 m | 3（每個 hypothesis family 各 3 個 asset-level DM 檢定） |
+| 5% Bonferroni 校正門檻 | 0.05 / 3 = **0.0167** |
+| 本實驗實際門檻 `\|t\|>3` 的 two-sided p（t-dist, df = n_common−1 ≈ 1517–1580） | **≈0.00274** |
+
+`\|t\|>3` 對應的 p 遠嚴於 3-comparison 的 Bonferroni 門檻（0.00274 ≪ 0.0167），所以 SPY（t=−3.17, p=0.0015）與 GLD（t=−3.38, p=0.0007）的 H1 PASS 在 family-wise 校正後仍然成立，H2 的 FAIL 也不是門檻放寬造成的。採用固定 `|t|>3` 門檻即已提供 **de-facto FWER 保護**，無需另做 post-hoc 校正。（姊妹實驗 K1258 的 m=12，Bonferroni 門檻 0.00417，同樣寬於 0.00274。）
 
 ### Interpretation
 
@@ -131,7 +143,7 @@ SPY 的 GJR-t 有 63 個 invalid forecast days（1 次 non-converged refit × 63
 ### Limitations
 
 1. **Posterior 吸收態（absorbing state）** — 本實作的 invalid-day 處理是**不可逆的**：模型在某日 forecast 無效（refit 未收斂等）時，其 log-weight 被設為 −inf 並排除於 posterior 之外，且**永遠無法回復**。JSON `posterior_semantics` 已明記此語意：`final_weights == 0.0` 代表「被 drop」，而 tiny-but-nonzero（如 SPY 的 GARCH_N ≈ 8.4e-31）代表「靠 likelihood 輸掉」。SPY 的 GJR-t 即因 26 次 refit 中 1 次未收斂而被 drop 63 天，終端權重恰為 0.0——這是機制性剔除，不是 posterior 對其預測能力的評價。
-2. **Posterior 集中 ≠ regime adaptation** — 三檔資產的終端 posterior 都把 ~1.0 放在單一模型（SPY/GLD → A4f_IV2，0050.TW → GJR-t），且約 500 天內完成集中後不再反轉。因此 BMA 在實務上**就是那個模型的預測**，vs single-best 的差距是在說「posterior 挑對了哪個模型」，而非 combination 本身的增益。要保留 regime-adaptive 行為需 forgetting factor 或 sliding-window posterior（未實作）。
+2. **Posterior 集中 ≠ regime adaptation** — 三檔資產的終端 posterior 都把 ~1.0 放在單一模型（SPY/GLD → A4f_IV2，0050.TW → GJR-t），且集中後不再反轉（「約 500 天」係從 `k1257_weight_evolution.png` **目測**得出的圖示描述，無 effective-number／hitting-time 指標支撐，不應當作量化估計引用）。因此 BMA 在實務上**就是那個模型的預測**，vs single-best 的差距是在說「posterior 挑對了哪個模型」，而非 combination 本身的增益。要保留 regime-adaptive 行為需 forgetting factor 或 sliding-window posterior（未實作）。
 3. **樣本不對齊風險** — 因 SPY 的 GJR-t 缺 63 天，任何跨模型比較都必須在 common sample 上做。早期版本的 headline 混用了 own-sample BMA 與 common-sample GJR-t，已於本次 realign 修正。
 4. **IV proxy 不對稱** — 0050.TW 沒有台股 IV index，A4f_IV2 用 `^VIX` 代打；regime 分類器也統一用 `^VIX`。0050.TW 的 A4f 劣勢（終端權重 5.4e-32）可能有相當部分來自 proxy 錯配，而非 IV-augmented spec 本身無效。
 5. **無 5-min 資料** — HAR 只能用 |r| proxy（HAR_ABS），Realized GARCH 完全未納入；候選集因此偏向 daily-frequency specs。
@@ -175,6 +187,8 @@ SPY 的 GJR-t 有 63 個 invalid forecast days（1 次 non-converged refit × 63
 - Prior weight: uniform 1/6 or informed from K482 findings?
 - BMA log-lik 的 numerical stability（log-sum-exp trick 必要）
 
-## 等候 Codex 04-24 wake 執行 or 主線程手動跑
+## 執行紀錄
 
-此 K-next spec 為 novelty-quota backlog 具體化 — feed-coverage 0 topic。寫 script + run 是下一步，預計 30-60 min runtime（7 model × 2520 IS fit + 63 天 refit）。
+本 K 源於 novelty-quota backlog（feed-coverage 0 topic）。**已於 2026-04-20 執行完畢**：實際候選集為 **6 個模型**（Realized GARCH 因無 5-min 資料未實作），rolling window 1250、refit 每 63 天、seed 42，實測 runtime **369.6s**（`k1257_results.json:runtime_seconds`）。
+
+> 註：本段先前殘留「7 model × 2520」與「等候執行」的舊 spec 文字，與實際 6-model 執行結果衝突，已於 2026-07-20 移除。

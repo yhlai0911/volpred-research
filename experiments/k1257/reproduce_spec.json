@@ -1,0 +1,35 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "k1257_bma_volatility.py",
+    "args": []
+  },
+  "canonical_result": "k1257_results.json",
+  "inputs": [
+    {
+      "path": "src/volpred/ops/diagnostics.py",
+      "sha256": "b8cc3188687c79dd364a3836de859a97e7da6b381b717d42c1e0479923d618d4"
+    }
+  ],
+  "timeout_seconds": 1800,
+  "network": "allow",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/runtime_seconds"
+    ],
+    "ignore_reasons": {
+      "/runtime_seconds": "Wall-clock timing of the run; machine-dependent and not part of the empirical claim surface."
+    }
+  }
+}

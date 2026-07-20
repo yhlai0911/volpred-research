@@ -32721,13 +32721,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T01:31:51.876170+00:00",
+    "completed_at": "2026-07-20T01:33:33.987523+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T01:31:51.876170+00:00",
-      "last_clean_observed_at": "2026-07-20T01:31:51.876170+00:00"
+      "resolved_at": "2026-07-20T01:33:33.987523+00:00",
+      "last_clean_observed_at": "2026-07-20T01:33:33.987523+00:00"
     }
   },
   {
@@ -32739,13 +32739,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-19T22:39:49.692257+00:00",
+    "completed_at": "2026-07-20T01:32:15.815373+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-19T22:39:49.692257+00:00",
-      "last_clean_observed_at": "2026-07-19T22:39:49.692257+00:00"
+      "resolved_at": "2026-07-20T01:32:15.815373+00:00",
+      "last_clean_observed_at": "2026-07-20T01:32:15.815373+00:00"
     }
   },
   {
@@ -44594,7 +44594,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-19T23:38:02.955371+00:00",
     "source": "internal_alert_remediation_router",
     "tags": [
@@ -44614,8 +44614,21 @@
       "escalation_due": false,
       "fingerprint": [
         "scripts/check_alerts.py:1325"
-      ]
-    }
+      ],
+      "resolved_at": "2026-07-20T01:32:15.815373+00:00",
+      "final_consecutive_remediation_failures": 0
+    },
+    "completed_at": "2026-07-20T01:32:15.815373+00:00",
+    "result": "internal alert cleared before dispatch",
+    "status_history": [
+      {
+        "ts": "2026-07-20T01:32:15.815373+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "alert_remediation_router",
+        "note": "condition_cleared_automatically"
+      }
+    ]
   },
   {
     "id": "K1741",
