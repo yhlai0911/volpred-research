@@ -32547,13 +32547,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T10:12:10.040656+00:00",
+    "completed_at": "2026-07-20T11:07:32.442297+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T10:12:10.040656+00:00",
-      "last_clean_observed_at": "2026-07-20T10:12:10.040656+00:00"
+      "resolved_at": "2026-07-20T11:07:32.442297+00:00",
+      "last_clean_observed_at": "2026-07-20T11:07:32.442297+00:00"
     }
   },
   {
@@ -32565,13 +32565,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T09:18:21.742433+00:00",
+    "completed_at": "2026-07-20T10:12:18.803899+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T09:18:21.742433+00:00",
-      "last_clean_observed_at": "2026-07-20T09:18:21.742433+00:00"
+      "resolved_at": "2026-07-20T10:12:18.803899+00:00",
+      "last_clean_observed_at": "2026-07-20T10:12:18.803899+00:00"
     }
   },
   {
@@ -35633,61 +35633,15 @@
   },
   {
     "id": "ci-red-29553786006",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29553786006, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29553786006",
-    "ci_run_key": "29553786006:1",
     "created_at": "2026-07-17T05:00:07.001569+00:00",
-    "title": "CI 紅燈修復（run 29553786006, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29553786006\nattempt: 1\nhead_sha: 00b07f07f\n偵測摘要（仍須讀完整 failed log）：2026-07-17T04:12:11.7377896Z scripts/tests/test_k1386_methodology_repair.py:63: AssertionError\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29553786006 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-17T06:02:10.372698+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-af34ee72a6af40f4b5688d2fbaf9461a"
-      },
-      {
-        "ts": "2026-07-17T06:02:10.629435+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-af34ee72a6af40f4b5688d2fbaf9461a"
-      },
-      {
-        "ts": "2026-07-17T08:50:03.202356+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-slot-1-af34ee72a6af40f4b5688d2fbaf9461a",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-17T10:07:54.458928+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-6dc08119c9334720b72b5034a498085e"
-      },
-      {
-        "ts": "2026-07-17T10:08:00.821330+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-6dc08119c9334720b72b5034a498085e"
-      },
-      {
-        "ts": "2026-07-17T10:10:02.106483+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-6dc08119c9334720b72b5034a498085e"
-      }
-    ],
-    "started_at": "2026-07-17T10:08:00.821314+00:00",
-    "last_released_at": "2026-07-17T08:50:03.202348+00:00",
-    "last_release_reason": "auto_release_stale_2h",
     "completed_at": "2026-07-17T10:10:02.106469+00:00",
-    "result": "root_cause=雙根因：(1) test_k1386_methodology_repair 把 snapshot refresh 並行 double-append 的 10 筆殘留 pin 成期望值 raw_rows==4129；(2) PHASE-Z receipt feature 半落地（測試已 land、_classify_parent_baseline 實作缺）; repair_commit=c586acc43(測試改 pin 乾淨狀態 4119/dup==0)+52516623a(phase-z 實作原子落地)+9a2afe1dc(auto-commit subject pin 更新); verify=main Test Suite 連三班綠（29561716600 07:00 / 29564959077 08:00 / 29568433309 09:00）；本班本地重跑 test_k1386_methodology_repair 9 passed + tests/test_phase_z_test_gate.py 14 passed；class sweep grep 4129/duplicate_date_count/duplicate_rows_removed 全 repo 無其他 pin 污染站點。本班為驗證結案，無新增修復。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T10:20:07.549162+00:00"
   },
   {
     "id": "assign_sync_cache_purge_20260717",
@@ -45934,7 +45888,7 @@
   {
     "id": "assign_f71399a3",
     "title": "PHASE-Z 卡住檔案 incident（6d1d05803b30ef94）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 7 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 5 次觀察到這組）\n- storage/reports/INDEX.md — 7 班\n- storage/reports/index.json — 7 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260720T065846820394Z:<路徑>`",
+    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 10 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 8 次觀察到這組）\n- storage/reports/INDEX.md — 10 班\n- storage/reports/index.json — 10 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260720T065846820394Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
     "status": "pending",
@@ -45948,17 +45902,17 @@
         "storage/reports/index.json"
       ],
       "streaks": {
-        "storage/reports/INDEX.md": 7,
-        "storage/reports/index.json": 7
+        "storage/reports/INDEX.md": 10,
+        "storage/reports/index.json": 10
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260720T065846820394Z"
       ],
-      "fires": 5,
+      "fires": 8,
       "first_seen_at": "2026-07-20T06:58:46.917957+00:00",
-      "last_seen_at": "2026-07-20T10:12:10.263434+00:00"
+      "last_seen_at": "2026-07-20T10:32:00.826104+00:00"
     },
-    "updated_at": "2026-07-20T10:12:10.263434+00:00"
+    "updated_at": "2026-07-20T10:32:00.826104+00:00"
   },
   {
     "id": "k1698_rev4_round5_collect",
@@ -45983,8 +45937,8 @@
   },
   {
     "id": "alert_internal_git_push_backup_hold_3f4834ce7a_20260720T100013000000Z_a1",
-    "title": "[internal alert] push_backlog: 11 個 commit 已 3.3 小時推不上 GitHub",
-    "description": "由內部可自癒 alert_key `git_push_backup_hold` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- 未推上 GitHub 的 commit 數：11\n- 最老一筆已滯留：3.3 小時（警戒 3h / 嚴重 8h）\n- 來源：`git rev-list origin/main..main`（每小時 check-alerts 巡檢）\n\n## 影響\n每小時自動備份推送連續多班沒成功（品質關卡擋下 / 分岔 / 認證 / 網路）。本機工作越久沒上雲端，機器故障時遺失的研究與程式就越多——直接威脅可復現性承諾。\n\n## 建議行動\n1. `tail -40 storage/logs/cron/git_push_backup.log` 看最近被擋/失敗原因\n2. 若是 `HELD: N new silent fallback(s)`：跑 `uv run python scripts/audit_silent_fallbacks.py --strict --baseline storage/qa/silent_fallback_baseline.json`，把 NEW 位置按 `.claude/rules/no-silent-fallback.md` 修掉（加 log 或 `# silent-ok:` 標註）並 commit\n3. 手動重跑解封：`bash scripts/cron_git_push_backup.sh`\n4. 確認 `git rev-list --count origin/main..main` 回 0",
+    "title": "[internal alert] push_backlog: 29 個 commit 已 4.3 小時推不上 GitHub",
+    "description": "由內部可自癒 alert_key `git_push_backup_hold` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- 未推上 GitHub 的 commit 數：29\n- 最老一筆已滯留：4.3 小時（警戒 3h / 嚴重 8h）\n- 來源：`git rev-list origin/main..main`（每小時 check-alerts 巡檢）\n\n## 影響\n每小時自動備份推送連續多班沒成功（品質關卡擋下 / 分岔 / 認證 / 網路）。本機工作越久沒上雲端，機器故障時遺失的研究與程式就越多——直接威脅可復現性承諾。\n\n## 建議行動\n1. `tail -40 storage/logs/cron/git_push_backup.log` 看最近被擋/失敗原因\n2. 若是 `HELD: N new silent fallback(s)`：跑 `uv run python scripts/audit_silent_fallbacks.py --strict --baseline storage/qa/silent_fallback_baseline.json`，把 NEW 位置按 `.claude/rules/no-silent-fallback.md` 修掉（加 log 或 `# silent-ok:` 標註）並 commit\n3. 手動重跑解封：`bash scripts/cron_git_push_backup.sh`\n4. 確認 `git rev-list --count origin/main..main` 回 0",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
@@ -46002,7 +45956,7 @@
       "episode_id": "20260720T100013000000Z",
       "episode_started_at": "2026-07-20T10:00:13+00:00",
       "attempt_number": 1,
-      "last_seen_at": "2026-07-20T10:01:53.205211+00:00",
+      "last_seen_at": "2026-07-20T11:01:41.631404+00:00",
       "consecutive_remediation_failures": 0,
       "attempt_history": [],
       "escalation_due": false
@@ -46199,5 +46153,404 @@
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-3-b5fbc1f4-nfpcal（idle=6.1h unmerged=2 dirty=False branch=wt/dispatch-slot-3-b5fbc1f4-nfpcal）",
     "description": "stale worktree `.claude/worktrees/dispatch-slot-3-b5fbc1f4-nfpcal` 持有未落地成果（idle=6.1h unmerged=2 dirty=False branch=wt/dispatch-slot-3-b5fbc1f4-nfpcal），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-3-b5fbc1f4-nfpcal`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+  },
+  {
+    "id": "assign_a2899901",
+    "title": "[data-ops] weekend data-job audit: intraday Sat fire missing + collect_us last success 07-18",
+    "description": "2026-07-20 verification found: (1) daily_update_intraday (cron 0 14 * * 1-6) has NO fire record for Sat 07-19 - determine if piggyback missed it or Saturday is a de-facto no-op (TW market closed) and if so fix the cron spec to 1-5 with a note; (2) collect_us last exit 0 = 07-18 - verify US Friday close data actually landed (via daily_update Sat 08:03 run or otherwise) and canonical storage has no gap for 07-18 US session. Fix spec/flow per findings (never hand-patch data). Skill: data-collection-ops. Plan ref: ops-manual data pipeline.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-20T10:19:16.108961+00:00",
+    "created_by": "refactor_master_plan",
+    "status_history": [
+      {
+        "ts": "2026-07-20T10:20:13.774030+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-66cf06bab6cd401b8b7421375c177f64"
+      },
+      {
+        "ts": "2026-07-20T10:20:26.698167+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-66cf06bab6cd401b8b7421375c177f64"
+      },
+      {
+        "ts": "2026-07-20T10:27:21.675835+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-66cf06bab6cd401b8b7421375c177f64"
+      }
+    ],
+    "started_at": "2026-07-20T10:20:26.698144+00:00",
+    "completed_at": "2026-07-20T10:27:21.675819+00:00",
+    "result": "Audit 結論：boss 報的兩條（intraday 週六沒 fire / collect_us 停 07-18）皆為誤報——07-18 intraday rc=0 有跑，collect_us cron 2-6 週日週一本就不 fire。但挖出隱形真故障：daily_update_intraday 07-16+07-20 rc=142 撞 600s watchdog，無監控可見。已修 (1) daily_checkup 加 exit-code 檢查+補監控名單（治 mtime≠成功盲區）(2) watchdog 600s→1200s（實測 baseline 250-390s，原 margin 僅 1.6x）(3) error_log entry。已驗證。"
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-1-1533dcbc-cqamend",
+    "title": "WS-B workspace remediation: dispatch-slot-1-1533dcbc-cqamend (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-1-1533dcbc-cqamend could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1533dcbc-cqamend\n- branch: ops/compute-queue-amend\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=2\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-1533dcbc-cqamend` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:31.721906+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-1-1533dcbc-cqamend",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1533dcbc-cqamend",
+      "branch": "ops/compute-queue-amend",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-1-30aeb902-taifexrv",
+    "title": "WS-B workspace remediation: dispatch-slot-1-30aeb902-taifexrv (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-1-30aeb902-taifexrv could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-30aeb902-taifexrv\n- branch: wt/dispatch-slot-1-30aeb902-taifexrv\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=3\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-30aeb902-taifexrv` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:32.207694+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-1-30aeb902-taifexrv",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-30aeb902-taifexrv",
+      "branch": "wt/dispatch-slot-1-30aeb902-taifexrv",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-1-558d7893-k1730",
+    "title": "WS-B workspace remediation: dispatch-slot-1-558d7893-k1730 (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-1-558d7893-k1730 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730\n- branch: wt/dispatch-slot-1-558d7893-k1730\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=1\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-558d7893-k1730` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:32.933377+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-1-558d7893-k1730",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730",
+      "branch": "wt/dispatch-slot-1-558d7893-k1730",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-1-79726798-credit-firm",
+    "title": "WS-B workspace remediation: dispatch-slot-1-79726798-credit-firm (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-1-79726798-credit-firm could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-79726798-credit-firm\n- branch: wt/dispatch-slot-1-79726798-credit-firm\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=0\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-79726798-credit-firm` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:34.251121+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-1-79726798-credit-firm",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-79726798-credit-firm",
+      "branch": "wt/dispatch-slot-1-79726798-credit-firm",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-1-858545f9-snapaudit",
+    "title": "WS-B workspace remediation: dispatch-slot-1-858545f9-snapaudit (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-1-858545f9-snapaudit could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-858545f9-snapaudit\n- branch: wt/dispatch-slot-1-858545f9-snapaudit\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=7\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-858545f9-snapaudit` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:36.438477+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-1-858545f9-snapaudit",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-858545f9-snapaudit",
+      "branch": "wt/dispatch-slot-1-858545f9-snapaudit",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-1-b55db3be-2",
+    "title": "WS-B workspace remediation: dispatch-slot-1-b55db3be-2 (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-1-b55db3be-2 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b55db3be-2\n- branch: fix/dispatch-slot-1-b55db3be-brief-leak\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=0\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-b55db3be-2` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:37.635590+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-1-b55db3be-2",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b55db3be-2",
+      "branch": "fix/dispatch-slot-1-b55db3be-brief-leak",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-1-bd00f90a-k1731",
+    "title": "WS-B workspace remediation: dispatch-slot-1-bd00f90a-k1731 (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-1-bd00f90a-k1731 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731\n- branch: wt/dispatch-slot-1-bd00f90a-k1731\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=False unique_commits=8\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-bd00f90a-k1731` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:39.792278+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-1-bd00f90a-k1731",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+      "branch": "wt/dispatch-slot-1-bd00f90a-k1731",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-1-f53bca44-k1692",
+    "title": "WS-B workspace remediation: dispatch-slot-1-f53bca44-k1692 (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-1-f53bca44-k1692 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f53bca44-k1692\n- branch: wt/dispatch-slot-1-f53bca44-k1692\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=0\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-f53bca44-k1692` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:40.521008+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-1-f53bca44-k1692",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f53bca44-k1692",
+      "branch": "wt/dispatch-slot-1-f53bca44-k1692",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-2-8dda242d-k1708",
+    "title": "WS-B workspace remediation: dispatch-slot-2-8dda242d-k1708 (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-2-8dda242d-k1708 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-8dda242d-k1708\n- branch: wt/dispatch-slot-2-8dda242d-k1708\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=1\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-2-8dda242d-k1708` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:41.972423+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-2-8dda242d-k1708",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-8dda242d-k1708",
+      "branch": "wt/dispatch-slot-2-8dda242d-k1708",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-2-c5cafe39-k1623",
+    "title": "WS-B workspace remediation: dispatch-slot-2-c5cafe39-k1623 (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-2-c5cafe39-k1623 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623\n- branch: worktree-dispatch-slot-2-c5cafe39-k1623\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=False unique_commits=3\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-2-c5cafe39-k1623` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:42.768468+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-2-c5cafe39-k1623",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623",
+      "branch": "worktree-dispatch-slot-2-c5cafe39-k1623",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-2-c5cafe39-k1698",
+    "title": "WS-B workspace remediation: dispatch-slot-2-c5cafe39-k1698 (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-2-c5cafe39-k1698 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1698\n- branch: worktree-dispatch-slot-2-c5cafe39-k1698\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=4\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-2-c5cafe39-k1698` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:44.453610+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-2-c5cafe39-k1698",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1698",
+      "branch": "worktree-dispatch-slot-2-c5cafe39-k1698",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-2-dcc222db-snapaudit",
+    "title": "WS-B workspace remediation: dispatch-slot-2-dcc222db-snapaudit (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-2-dcc222db-snapaudit could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dcc222db-snapaudit\n- branch: snapaudit-dcc222db\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=2\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-2-dcc222db-snapaudit` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:45.164986+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-2-dcc222db-snapaudit",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dcc222db-snapaudit",
+      "branch": "snapaudit-dcc222db",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-3-30adeed7-k528nfp",
+    "title": "WS-B workspace remediation: dispatch-slot-3-30adeed7-k528nfp (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-3-30adeed7-k528nfp could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp\n- branch: k528-nfp-official-dates\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=8\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-3-30adeed7-k528nfp` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:45.954365+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-3-30adeed7-k528nfp",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp",
+      "branch": "k528-nfp-official-dates",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "wsb_remed_dispatch-slot-3-b5fbc1f4-nfpcal",
+    "title": "WS-B workspace remediation: dispatch-slot-3-b5fbc1f4-nfpcal (worker_orphaned)",
+    "description": "Producer-scoped workspace dispatch-slot-3-b5fbc1f4-nfpcal could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-b5fbc1f4-nfpcal\n- branch: wt/dispatch-slot-3-b5fbc1f4-nfpcal\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=False unique_commits=2\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-3-b5fbc1f4-nfpcal` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_workspace_gate",
+    "created_at": "2026-07-20T10:19:47.085471+00:00",
+    "payload": {
+      "workspace": "dispatch-slot-3-b5fbc1f4-nfpcal",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-b5fbc1f4-nfpcal",
+      "branch": "wt/dispatch-slot-3-b5fbc1f4-nfpcal",
+      "base_sha": "",
+      "reason": "worker_orphaned"
+    }
+  },
+  {
+    "id": "alert_internal_silent_fallback_new_c67bec28dd_20260720T102954146012Z_a1",
+    "title": "[internal alert] PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
+    "description": "由內部可自癒 alert_key `silent_fallback_new` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 發生什麼\nPHASE-Z 連續 3 次無法完成這班的自動 commit（原因：commit_nonzero）。已停止重試 —— 同一班不再重跑。\n檔案仍在工作區、沒有遺失。\n\n## 現在該做什麼\n確認未提交檔案的作者後由該作者 commit。若下方顯示被 pre-commit gate 擋下，先修 gate 指出的問題再 commit。\n\n## git commit 輸出（尾段）\nback-audit] findings=1 baseline=/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-gate.5oXZn7 baseline_findings=60 new=1 resolved=60\n[pre-commit]   NEW scripts/daily_checkup.py:161 except OSError: return None\n[pre-commit]   [silent-fallback-audit] note: 60 baseline finding(s) no longer present; reduce the baseline in a separate cleanup commit.\n[pre-commit] Fix each: add 'from volpred.ops.diagnostics import warn' + warn(...) before the fallback,\n[pre-commit] or mark it '# silent-ok: <reason>' when it is genuinely a legit silent path.\n[pre-commit] Rule: .claude/rules/no-silent-fallback.md",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-20T10:29:54.146012+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "silent_fallback_new"
+    ],
+    "alert_key": "silent_fallback_new",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260720T102954146012Z",
+      "episode_started_at": "2026-07-20T10:29:54.146012+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-20T10:32:08.791466+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false,
+      "fingerprint": [
+        "scripts/daily_checkup.py:161"
+      ]
+    }
+  },
+  {
+    "id": "worktree_salvage_dispatch-slot-2-c5cafe39-k1698",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "created_at": "2026-07-20T11:00:50.217663+00:00",
+    "created_by": "reclaim_stale_worktrees",
+    "title": "worktree 產物裁決：dispatch-slot-2-c5cafe39-k1698（idle=4.2h unmerged=4 dirty=True branch=worktree-dispatch-slot-2-c5cafe39-k1698）",
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-2-c5cafe39-k1698` 持有未落地成果（idle=4.2h unmerged=4 dirty=True branch=worktree-dispatch-slot-2-c5cafe39-k1698），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-2-c5cafe39-k1698`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+  },
+  {
+    "id": "worktree_salvage_dispatch-slot-3-30adeed7-k528nfp",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "created_at": "2026-07-20T11:00:50.217663+00:00",
+    "created_by": "reclaim_stale_worktrees",
+    "title": "worktree 產物裁決：dispatch-slot-3-30adeed7-k528nfp（idle=4.7h unmerged=8 dirty=True branch=k528-nfp-official-dates）",
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp` 持有未落地成果（idle=4.7h unmerged=8 dirty=True branch=k528-nfp-official-dates），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-3-30adeed7-k528nfp`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+  },
+  {
+    "id": "release_deadlock_repair_20260720_11",
+    "title": "【P1 自動補救】release 死鎖：修好被內容閘門擋住的草稿",
+    "description": "release_pool 死鎖：草稿池有 2 篇、eligible=0（due_now=true），其中 2 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_d26308ba` (general, 已被擋 2 次) [lazypack_missing] 集中度警報響起時，等權重指數震得比大盤還兇\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>\n- `mile_fa57f77d` (general, 已被擋 2 次) [lazypack_missing] 東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "auto_remediation",
+    "created_at": "2026-07-20T11:01:33.259044+00:00",
+    "blocked_article_ids": [
+      "mile_d26308ba",
+      "mile_fa57f77d"
+    ],
+    "trigger": "release_pool_content_gate_deadlock"
+  },
+  {
+    "id": "assign_fedadc8d",
+    "title": "解決 1 份長期無主的產物（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:k1698_rev3_rerun` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-20T06:02:43.060897+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。判定完成後這張任務關閉，held 記錄會自然消失。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-20T11:01:41.556234+00:00",
+    "payload": {
+      "held_paths": [
+        "job:k1698_rev3_rerun"
+      ],
+      "held_reasons": {
+        "job:k1698_rev3_rerun": "no_existing_declared_files"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
+    "created_by": "reap_orphan_deliverables"
+  },
+  {
+    "id": "alert_release_pool_deadlock_20260720",
+    "title": "[alert] Release pool deadlocked — 2 drafts, 0 eligible (due now)",
+    "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 2 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 2\n- eligible_before_dedup: 2\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 2\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: risk_mgmt\n  - `mile_d26308ba` (general, 已連續被擋 2 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n  - `mile_fa57f77d` (general, 已連續被擋 2 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260720_11`，指定只補仍可放行的 cluster：(任意)。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-20T11:01:52.406602+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "release_pool_deadlock"
+    ]
+  },
+  {
+    "id": "telegram-1198",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "claimed",
+    "created_at": "2026-07-20T11:05:56.660854+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1198）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n任務可以每15分鐘一班試試\n但要測試2小時內的token耗用是否比一小時一班多很多\n\n畢竟有很多任務並不需要耗用token\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] Release pool deadlocked — 2 drafts, 0 eligible (due now)\n\n📌 白話結論\n一般讀者文章缺少快速理解圖組，會降低閱讀與分享效果。\n\n📌 影響\n影響文章品質、讀者信任與流量表現。\n\n🛠️ 行動\n先替缺圖的文章補懶人包，再確認新文章的發佈 gate 會擋住同類問題。\n\n---\n\n🛠️ 已自動處理\n已建立任務 alert_release_pool_deadlock_20260720（平台維運, P1），下一班 dispatch 會認領執行。任務逾時未被認領時，dispatcher 的 starvation lockout 會強制把它推上候選清單。老闆無需動作。\n\n🚦 觸發條件\n釋出已到期（due_now），草稿池有 2 篇，但通過所有 gate 的只有 0 篇。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n• draft: 2\n• eligible_before_dedup: 2\n• dedup_flagged: 0\n• narrative_cluster_filtered: 0\n• content_gate_blocked: 2\n• eligible_after_all_gates: 0\n• 被 narrative_cluster gate 擋住的 cluster: risk_mgmt\n• mile_d26308ba (general, 已連續被擋 2 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound p\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram_responder",
+    "claimed_at": "2026-07-20T11:06:28.159125+00:00",
+    "claim_session_id": "b51acea782aa",
+    "status_history": [
+      {
+        "ts": "2026-07-20T11:06:28.159142+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      }
+    ]
   }
 ]

@@ -538,3 +538,37 @@ ctd `--report` 正常，claim/vocab 相關套件全綠。
 會製造一種最惡劣的形狀 —— 任務看得見、排得進、清不掉，而清不掉的 lane 剛好是「清完才能往下走」的前置條件。
 新增一個 gate 時必須同時問：**誰在產生候選？它認得這個 gate 嗎？** 另一條：控制詞彙（status / lane / reason）
 一旦出現第二份字面值就會漂移，且漂移處必然是破口 —— 這次是 `manual` 擋不住 burst。
+
+## 2026-07-20 daily_update watchdog 誤殺 + 「跑過」被當成「跑成功」 — FIXED
+
+**現象**：老闆報「intraday 週六沒 fire、collect_us 最後成功停在 07-18」。實查兩條指控**都不成立**：
+`daily_update_intraday` 07-18(六) 14:04 有跑且 rc=0；`collect_us` cron 是 `3 7 * * 2-6`，
+週日/週一本就不 fire，07-18 成功後下一班本來就是 07-21(二) —— 兩者皆為正常行為。
+但同一次 audit 撈出**真故障**：`daily_update_intraday` 07-16 與 07-20 兩班 `rc=142 duration=600s`
+（撞 perl alarm watchdog 被 SIGALRM 殺），且**沒有任何監控報過**。
+
+**根因一（監控盲區：mtime ≠ 成功）**：`daily_checkup.py::check_data_freshness` 判新鮮度只用 cron log 的
+**mtime** + croniter 漏班數。失敗的 job 照樣把失敗訊息寫進 log、照樣更新 mtime ⇒ 一個天天失敗的 job
+在 data_freshness 眼中**永遠是新鮮的**。加上 `daily_update_intraday` 根本不在 `DATA_JOBS_EXPECTED_H`
+名單裡 —— 雙重盲區，只能靠老闆肉眼發現。
+
+**根因二（watchdog margin 建立在過期常數上）**：兩支 wrapper 的 600s alarm 是 2026-06-30 為防 lock cascade
+所加，註解寫「正常 ~2min 的 5x」。但 7/02–7/18 實測 duration 已是 **250–390s**（sync 步驟長大），
+真實 margin 只剩 ~1.6x ⇒ 偶發 Supabase `URLError timed out` retry 就衝破上限。
+watchdog 沒有壞，它是**照著一個早就不成立的 baseline 在開火**。
+
+**解決**：
+1. `daily_checkup.py` 新增 `_last_exit()`（只讀 log 尾 16KB）→ data_freshness 對每個 job 額外檢查
+   最後一筆 `exit N`，rc≠0 直接 critical，rc=142 特別標示為撞 watchdog；「有跑但失敗」與「根本沒跑」
+   各自獨立報。`daily_update_intraday` 補進 `DATA_JOBS_EXPECTED_H`。
+2. `cron_daily_update.sh` / `cron_daily_update_intraday.sh` watchdog 600s → **1200s**（對實測 p95 ~3x
+   margin；14:00+20min 仍遠早於下一班，lock cascade 防護不變），註解改寫實測 baseline 而非過期臆測。
+   canonical `scripts/` 與 runtime `~/.volpred/bin/` 同步（diff 確認改動前無 drift）。
+
+**驗證**：改後跑 `daily_checkup.py --json` → data_freshness 恰好 1 筆 critical，正是
+`daily_update_intraday 撞 watchdog timeout（duration=600s）`；其餘 rc=0 的 job 無誤報。
+
+**教訓**：**「有 log」不等於「有成功」** —— 任何以 mtime 為新鮮度指標的監控，都會對「持續失敗但持續寫 log」
+這種故障完全失明，而這正是最常見的故障形狀。第二條：**watchdog / timeout / 門檻類常數必須把實測 baseline
+寫進註解，並在 baseline 漂移時一起改** —— 註解裡的「正常 ~2min」放著沒人維護，就是它後來誤殺兩班的原因。
+第三條：老闆報的症狀可以是錯的，但**值得照著 audit 一遍** —— 這次兩條指控都不成立，卻挖出一個更嚴重的真問題。

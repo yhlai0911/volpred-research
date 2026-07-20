@@ -1,7 +1,32 @@
 {
-  "attempted": false,
-  "ran_at": "2026-07-20T10:01:41.538752+00:00",
-  "reason": "not_deadlocked",
+  "attempted": true,
+  "ran_at": "2026-07-20T11:01:33.259044+00:00",
+  "kind": "content_gate_deadlock",
   "draft": 2,
-  "eligible": 0
+  "eligible": 0,
+  "content_gate_blocked": [
+    {
+      "id": "mile_d26308ba",
+      "title": "集中度警報響起時，等權重指數震得比大盤還兇",
+      "audience": "general",
+      "issues": [
+        "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>"
+      ],
+      "skip_count": 2
+    },
+    {
+      "id": "mile_fa57f77d",
+      "title": "東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗",
+      "audience": "general",
+      "issues": [
+        "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>"
+      ],
+      "skip_count": 2
+    }
+  ],
+  "blocked_clusters": [
+    "risk_mgmt"
+  ],
+  "required_clusters": [],
+  "task_id": "release_deadlock_repair_20260720_11"
 }
