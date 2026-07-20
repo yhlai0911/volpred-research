@@ -212,4 +212,8 @@
 | Phase 1：F2 dedup-gate-audit 兌現 | ✅ 2026-07-20 | worktree commit `bbbaefc89` → merge `262e20934`；main 複驗 71 tests 綠；歷史資料實跑抓到真 warn（10 arc ×4 block） |
 | **D6 compute-worker work-conserving 連續運轉 + 有界平行** | ✅ 2026-07-20 | worktree commit `d161229e4` → merged；run-loop + fcntl flock 互斥（crash 即釋放）+ 原子 claim + max_parallel=min(3,cpu//3)（config 可覆寫）；wrapper 經 sync_cron_wrappers 原子安裝、lockstep 綠；**live 實證**：首次 drain 即撿起真 compute job 連續執行。**已知缺口 → D6b**（`assign_5f17c382`，main_thread lane）：SIGTERM 殺 drain loop 會留孤兒 running receipt（本日實測），需 pid-liveness reaper + requeue 兩筆 k741 codex job（等額度） |
 | **A3 status/blocked_reason vocab migration** | ✅ 2026-07-20 | worktree `4cbcd54f1` → merged；canonical queue migration + 六鏡像 baseline 27→0/3→0 **同一 commit**（13:30）；validator 0/3077×2 綠；81 tests 綠；原值全保留 |
+| **D6b compute stale-running reaper** | ✅ 2026-07-20 | worktree `c817c95fe` → merge `86e142305`；flock-invariant + pid-reuse-safe 指紋五種裁決、孤兒子行程 skip 防護；requeue 收 worker_killed；36+43+107 tests 綠；:15 班 launchd drain 已自然接手 |
+| **H2 出站回報收斂** | ✅ 2026-07-20 | worktree `04e03a477` → merged；token 三班→一班（owner=token_report_daily 含落檔收編）、work_summary 併入 boss_report 20:10 日結班並退役（wrapper/_legacy、LaunchAgent bootout、host crontab 殘班修正已執行）；**定期信 ≤7→4 班/日**；通道矩陣入 Layer Map（skill 通知已寄）；merge 後 manifest/policy 26 tests 綠 |
+| **CI 紅燈裁定（2026-07-20 12:00/13:00 兩班）** | ✅ 非迴歸 | 6 個紅全屬「重構中間態被 hourly auto-push」（manifest 缺項/writer policy 未註冊/map 時序）；現 HEAD 本地複驗 27 passed 全綠；14:00 班 in-progress 預期綠 |
+| Phase 2：E1E2 scripts 瘦身 | 🔄 agent 全量 pytest 收斂中（一次越界刪空目錄已糾正、零實質損失） | — |
 | 其餘 | ⏳ 依 §5，Phase N 收尾時 enqueue Phase N+1 | — |
