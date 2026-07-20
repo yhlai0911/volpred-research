@@ -31648,15 +31648,20 @@
     "task_type": "governance",
     "priority": 2,
     "source": "weekly_requeue:governance_self_revise_operating_docs",
-    "status": "blocked",
+    "status": "pending",
     "dispatch_lane": "agent",
     "created_at": "2026-07-13T19:40:55.371841+00:00",
-    "blocked_reason": "awaiting_event_window",
-    "blocked_until": "2026-07-20T19:00:00+00:00",
-    "blocked_note": "Weekly cadence — auto-unblock 2026-07-21 03:00 Asia/Taipei",
     "recurrence_key": "governance_operating_docs_weekly",
     "title": "自我修訂運作指示文件（2026-07-21 週次）",
-    "description": "Telegram msg 604 standing directive 的日期化 successor。依 pdca-operations Act 做每週 doc-drift audit：比對 CLAUDE.md / AGENTS.md / .claude/rules / .claude/skills 與實際 hook、dispatcher、schedule；用 fresh-session A/B 驗證 path-trigger（只有內建 Read/open 可當 trigger，Bash rg/jq/cat 不算）；把已機械化 prose 縮成 pointer、合併矛盾，不新增第二套 enforcement。同步檢查 Codex discovery surface。輸出 docs/governance/YYYY-MM/ 一頁報告；改既有 skill 必寄 email。完成時建立下一個唯一日期化 blocked successor，不重用 task id、不得立即 pending。"
+    "description": "Telegram msg 604 standing directive 的日期化 successor。依 pdca-operations Act 做每週 doc-drift audit：比對 CLAUDE.md / AGENTS.md / .claude/rules / .claude/skills 與實際 hook、dispatcher、schedule；用 fresh-session A/B 驗證 path-trigger（只有內建 Read/open 可當 trigger，Bash rg/jq/cat 不算）；把已機械化 prose 縮成 pointer、合併矛盾，不新增第二套 enforcement。同步檢查 Codex discovery surface。輸出 docs/governance/YYYY-MM/ 一頁報告；改既有 skill 必寄 email。完成時建立下一個唯一日期化 blocked successor，不重用 task id、不得立即 pending。",
+    "status_history": [
+      {
+        "at": "2026-07-20T19:07:52.945374+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-20T19:00:00+00:00)"
+      }
+    ]
   },
   {
     "id": "platform_ops_materialize_daily_checkup_schedule",
@@ -32368,13 +32373,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T18:00:58.422967+00:00",
+    "completed_at": "2026-07-20T19:01:08.388479+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T18:00:58.422967+00:00",
-      "last_clean_observed_at": "2026-07-20T18:00:58.422967+00:00"
+      "resolved_at": "2026-07-20T19:01:08.388479+00:00",
+      "last_clean_observed_at": "2026-07-20T19:01:08.388479+00:00"
     }
   },
   {
@@ -32386,13 +32391,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T18:15:44.523455+00:00",
+    "completed_at": "2026-07-20T19:13:37.264439+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T18:15:44.523455+00:00",
-      "last_clean_observed_at": "2026-07-20T18:15:44.523455+00:00"
+      "resolved_at": "2026-07-20T19:13:37.264439+00:00",
+      "last_clean_observed_at": "2026-07-20T19:13:37.264439+00:00"
     }
   },
   {
@@ -32404,13 +32409,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T17:17:00.997122+00:00",
+    "completed_at": "2026-07-20T18:16:09.237350+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T17:17:00.997122+00:00",
-      "last_clean_observed_at": "2026-07-20T17:17:00.997122+00:00"
+      "resolved_at": "2026-07-20T18:16:09.237350+00:00",
+      "last_clean_observed_at": "2026-07-20T18:16:09.237350+00:00"
     }
   },
   {
@@ -34723,37 +34728,15 @@
   },
   {
     "id": "assign_43a2ee48",
-    "title": "信用壓力→高槓桿 AI 股波動率：firm-level 分組檢定（aggregate 版已 NULL，控制 VIX 為硬門檻）",
-    "description": "來源：老闆 2026-07-16 Telegram msg877（財經捕手 SpaceX 破發文）。本 brief 是兩個並行 session 的判斷合併版（原 storage/ops/tasks/task_31d75ca61913 + research_program.md msg877 拆解段），取代雙方各自的版本。\n\n【必讀先前 NULL 教訓 — aggregate 版已做過且全 NULL，不得重做】K872：FRED HY OAS 對 fwd vol raw r=0.55，但與 VIX corr=0.77，控制 VIX 後 delta-R²=0。T14：credit+yield 僅 +1.6% incremental R²（econ trivial）。K1621：EM sovereign credit vol proxies 不 lead EM equity vol。另 K1529/K1515/K1538 同軸皆弱。\n\n【本題唯一差異化空間 = firm-level 分組對比】文章真正的主張是 issuer-specific：高槓桿公司（ORCL、CRWV 等）自己的信用壓力 → 自己的 equity vol。設計：高槓桿 AI 標的 vs 低槓桿 hyperscaler（MSFT/GOOGL）對照組，HAR-RV baseline vs HAR-RV-X（lagged credit spread Δ），樣本 2015-2026 含兩次空頭；嚴格 signal shift(1)；QLIKE + DM-HLN + Harvey |t|>3 + canonical HAC bandwidth。\n\n【硬性成功門檻（比一般更嚴）】主檢定必須是「控制 VIX 之後」的增量（加 VIX 當第二 exogenous 或先對 VIX 正交化），且高槓桿組的增量必須顯著大於低槓桿對照組（分組差異才是文章的可檢定含義）。單純 raw 相關顯著 = 直接 NULL 結論（K872 已證那是 VIX 的影子）。個股 CDS 需 Markit（付費）不可得 → 用 HY/IG OAS + 個別公司債 ETF proxy，限制如實揭露。SPCX n=22 天樣本不足，只能當 case illustration 不得入檢定。文章的具體數字（-40%、6/22 -16.5%、250 億美元、7.5% 殖利率）未經查證，不得引用為事實。null 如實報告。",
-    "task_type": "experiment",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "信用壓力→高槓桿 AI 股波動率：firm-level 分組檢定（aggregate 版已 NULL，控制 VIX 為硬門檻）",
+    "priority": 2,
     "source": "user",
     "created_at": "2026-07-16T14:42:55.644818+00:00",
-    "created_by": "single-gateway-migration",
-    "status_history": [
-      {
-        "ts": "2026-07-17T16:12:26.802802+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876"
-      },
-      {
-        "ts": "2026-07-17T16:12:27.030219+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876"
-      },
-      {
-        "ts": "2026-07-17T18:12:01.809641+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-79726798c811477a97b1a617bd3b4876"
-      }
-    ],
-    "started_at": "2026-07-17T16:12:27.030204+00:00",
     "completed_at": "2026-07-17T18:12:01.809624+00:00",
-    "result": "firm-level 信用壓力→高槓桿AI股波動率：純NULL。panel credit×HighLev t=-0.95(p=0.34方向相反)；HIGH-LEV組Clark-West t=-0.97 Harvey FAIL；raw corr=0.031 partial|VIX=0.014。延續K872 VIX-sufficiency家族。knowledge=ad85cb2d。產物→experiments/credit_stress_firm_level/。NULL不發文章。原compute job誤判failed實為artifact檔名不符(結果完整)。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T19:07:52.945624+00:00"
   },
   {
     "id": "assign_4470644e",
@@ -43644,7 +43627,7 @@
     "title": "K1623 blocked item：第三臂 MC 量化「估計段均值」在 generated-regressor 不確定性中的佔比（round-3 送審前的唯一 compute gate）",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T21:14:41.330868+00:00",
     "created_by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
@@ -43669,11 +43652,29 @@
         "to": "pending",
         "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e",
         "note": "supervisor_kill_a0db212c"
+      },
+      {
+        "ts": "2026-07-20T19:10:16.806635+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-021010e0d92f449db2f4d9f0f5b6b8c5"
+      },
+      {
+        "ts": "2026-07-20T19:10:17.044054+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-021010e0d92f449db2f4d9f0f5b6b8c5"
       }
     ],
-    "started_at": "2026-07-20T16:11:46.776886+00:00",
+    "started_at": "2026-07-20T19:10:17.044035+00:00",
     "last_released_at": "2026-07-20T16:18:56.732677+00:00",
-    "last_release_reason": "supervisor_kill_a0db212c"
+    "last_release_reason": "supervisor_kill_a0db212c",
+    "claimed_by": "hourly-slot-1-021010e0d92f449db2f4d9f0f5b6b8c5",
+    "claimed_at": "2026-07-20T19:10:16.806620+00:00",
+    "claim_session_id": "1179bda597f5",
+    "compute_job_id": "compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674",
+    "result": "dispatched to compute job compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674; awaiting PHASE A collection",
+    "plan": "前次 MC job exit=4 為 dm-hac-lag gate false positive（凍結站點 k1623.py::dm_hln 因 worktree 路徑前綴對不上 baseline key），已由 commit 5c0e9099d 修好並實測 gate PASS。重新 enqueue compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674；等 compute worker 跑完後由後續 fire PHASE A 收件（對帳 /tmp/k1623_armc_gatefail_run_20260721.json）。"
   },
   {
     "id": "dreaming_missing_retry_strategy_k1684_article_general",

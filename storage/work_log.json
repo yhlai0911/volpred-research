@@ -22709,5 +22709,15 @@
       "scripts/tests/test_experiment_gates.py"
     ],
     "open_item": "K1623 arm C 的 collect_completed followup 未派（本班只解除阻擋因素），仍留在 compute queue 待下班 PHASE A 收件。"
+  },
+  {
+    "timestamp": "2026-07-21T03:12:03+08:00",
+    "task_type": "experiment",
+    "task_id": "k1623_mc_third_arm_mean_structure_share",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-021010e0d92f449db2f4d9f0f5b6b8c5",
+    "owner": "hourly-slot-1-021010e0d92f449db2f4d9f0f5b6b8c5",
+    "commit": null,
+    "summary": "K1623 arm C：診斷「compute job 失敗」實為 gate false positive，並重新排隊取得乾淨受理。\n\n**收件對象**：agent job `agent-brief_k1623_armc_a0db212c-59fd87`（collect_completed，exit=0）。\n決策 artifact `k1623_arm_c_decision.json` 回報 decision=run_arm_c 且已 enqueue MC job。\n\n**發現**：該 MC job `...-work-1784565527` 於 2026-07-21 00:43 CST 以 exit=4 失敗，\n但 stdout 顯示腳本**完整跑完**（395.74s，5 資產結果齊全，results JSON 已寫出 33KB）。\n失敗點在 post-run experiment gate：\n\n    [dm-hac-lag] .claude/worktrees/.../experiments/k1623/k1623.py::dm_hln (degenerate_at_h1)\n\n**根因**：`experiments/k1623/k1623.py::dm_hln` 早已列在\n`storage/ops/dm_hac_lag_baseline.json` degenerate_sites（148 個凍結站點之一），\n屬 legacy debt，依 experiment_gates.py 的 scoping rule 本應豁免。當時 gate 以 worktree\n路徑前綴組 site key，與 baseline key 對不上 → 把凍結站點誤判為新違規。\n此 bug 已於同日 02:15 由 commit 5c0e9099d(`fix(gates): dm-hac-lag/fevd site key 依掃描根正規化`)\n修復 —— 比 job 失敗晚 1.5 小時，故該 job 沒吃到修正。\n\n**驗證**：以修好後的 gate 重掃同一路徑 → `[gate] PASS — 6 file(s) ... cleared 4 experiment-integrity gates`（exit 0）。\n\n**處置**：`requeue` 依設計只收 auth/quota/worker_killed，不收 gate 失敗（正確設計，\n不繞過）。改為全新 enqueue `compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674`\n（same script/artifact，timeout 3600，source-task-id 綁 pool task）。\n腳本位元未變且 RNG 決定性 → 重跑應與前次逐位元相同；前次產出已快照到\n`/tmp/k1623_armc_gatefail_run_20260721.json`（sha256 94081a31…4455e5）供收件對帳，\n**不同即為 finding，須查根因不得湊數**。\n\n**未當成功結果引用**：前次 artifact 全程僅作對帳基準，未進入任何 claim；\nREADME 6.4 / finding_2 的降級改寫留給下一輪收件 agent（brief 已寫死）。\n\n**待辦（已寫入 followup brief）**：Codex primary-path 尚未審過（usage limit 至 2026-07-25），\n依 K1259 教訓為 round-3 放行的 blocking 前提；另 review subagent 誤跑受審實驗碼之\nprocess gap 待記 error_log。"
   }
 ]
