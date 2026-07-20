@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1740,
+  "last_k_id": 1745,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -1106,8 +1106,58 @@
       "status": "released",
       "topic": "ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（displaced from K1732 by collision repair 2026-07-19）",
       "topic_hash": "183dd0ec7c96841a"
+    },
+    {
+      "claimed_at": "2026-07-20T00:00:02.242727+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1741",
+      "number": 1741,
+      "source_max": 1740,
+      "status": "reserved",
+      "topic": "放空企業債作股票尾部對沖的效率 vs put/VIX overlay — yfinance HYG/JNK（放空 proxy，用 inverse 或 short return series）疊 SPY，跨 2018Q4/2020/2022/2025 四類 drawdown 比較「short-credit hedge」vs put-proxy / long-VXX 的 beta-adjusted crisis-alpha 與平時 drag；明確標示放空成本/借券費 blocked 用保守 proxy；與既有 tail-hedge 成本軸（06-14b line 505）正交——這裡換對沖工具為 credit-short（來源：arXiv 2504.06289「On the Efficacy of Shorting Corporate Bonds as a Tail Risk Hedging Solution」2025）",
+      "topic_hash": "03257c7c99043809"
+    },
+    {
+      "claimed_at": "2026-07-20T00:00:02.764447+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1742",
+      "number": 1742,
+      "source_max": 1741,
+      "status": "reserved",
+      "topic": "⚠️ **中信心（dispatch 前須再查證轉譯）— 州最低工資調升生效日的邊界不連續設計 → 勞力密集零售/餐飲股波動反應** — 複用 AEJ:Applied 州界不連續識別設計，用公開州最低工資調升生效日曆，對勞力密集零售/餐飲類股（CMG/MCD/SBUX/TGT/M 等曝險不同州比例個股籃）做事件窗 RV/left-tail 比較 + 與非曝險對照股 DID；與既有 labor-shortage 軸（需求面稀缺）不同機制——這裡是明確法規生效日的成本面衝擊 + clean identification（來源：AEJ:Applied 州界最低工資不連續設計是勞動經濟學×asset pricing 交叉持續範式，但 2025-26 特定新文章未證實，屬推測）。",
+      "topic_hash": "b752952d2a1be7b3"
+    },
+    {
+      "claimed_at": "2026-07-20T00:00:02.997679+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1743",
+      "number": 1743,
+      "source_max": 1742,
+      "status": "reserved",
+      "topic": "TSM ADR vs 2330.TW 波動傳導與創紀錄 ADR 溢價：AI 時代價格發現往哪邊移** — yfinance TSM/2330.TW/TWD=X 日資料（可加本機日內），拆隔夜/日內段檢定 lead-lag 與溢價變動對雙邊 vol 預測力；2024-26 ADR 溢價歷史級高位是現成敘事鉤（JF/JFM cross-listing price-discovery 經典線）。與 #157（TAIEX 隔夜 VRP）不同——雙上市資訊份額弧，台灣讀者高共鳴。",
+      "topic_hash": "c4ed84890e8e8e4f"
+    },
+    {
+      "claimed_at": "2026-07-20T00:00:03.257971+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1744",
+      "number": 1744,
+      "source_max": 1743,
+      "status": "reserved",
+      "topic": "拉美 private-credit funding-gap 擴張與 EM 波動傳導** — 用 CFA 2026 Latin America private-credit funding-gap 論述作制度背景，建立 EM local-bank / credit / FX ETF proxy（ILF/EWW/ECH/EPU/EWZ/CEW/EMLC/EMB/UUP），檢定 private-credit supply-expansion proxy 或 fundraising/news intensity 是否伴隨 EM RV 壓縮、尾部風險重估或美元敏感度改變；與一般 BDC/private-credit spillover 題正交——這裡是區域 funding-gap / LatAm transmission（來源：CFA Institute 2026 Latin America private credit + CFA 2026 private markets growth report）。",
+      "topic_hash": "5e969296385696c3"
+    },
+    {
+      "claimed_at": "2026-07-20T00:00:03.850579+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1745",
+      "number": 1745,
+      "source_max": 1744,
+      "status": "reserved",
+      "topic": "TVP-HAR：時變參數 HAR（狀態空間 / Kalman filter）取代靜態 OLS-HAR** — 對 SPY/0050.TW/TX 日 RV，用 Kalman/random-walk 讓 HAR 的日/週/月係數隨時間演化，DM-HLN + Giacomini-Rossi fluctuation test 檢定時變係數 OOS 是否勝固定係數 HAR，並看係數路徑是否在 leverage/regime 轉換時漂移；yfinance/TAIFEX 免費（來源：Journal of Forecasting 2025 TVP-HAR for VIX 趨勢層級）。與 line 1452 factor-loading TVP（第一主成分 vol factor 的負荷時變）正交——這裡是 **HAR 自身日/週/月係數的連續時變**，非因子負荷；與 line 1478 level-shift（離散斷點）正交（連續演化 ≠ 結構斷點）。",
+      "topic_hash": "9cfda9753d4505d6"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-19T05:51:31.535277+00:00"
+  "updated_at": "2026-07-20T00:00:03.850579+00:00"
 }
