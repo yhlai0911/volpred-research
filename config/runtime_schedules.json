@@ -354,21 +354,6 @@
         ]
       },
       {
-        "id": "work_summary_6h",
-        "label": "6h 工作摘要 email (HTML, 用戶 2026-05-17 要求)",
-        "cron": "5 20 * * *",
-        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_work_summary.sh",
-        "log_path": "storage/logs/cron/work_summary.log",
-        "description": "每日 20:05 一班工作日結 email（git commits + work_log + 文章 + worktree agents + notifications，窗口 24h）。2026-07-14 WS4a 由每 6h 降為每日一班；待 WS5 併入 boss_report 後本 entry 廢棄。LaunchAgent canonical (com.volpred.work-summary, host_crontab_managed=false)。",
-        "host_crontab_managed": false,
-        "launchagent_label": "com.volpred.work-summary",
-        "matchers": [
-          "work_summary_6h.py",
-          "cron_work_summary.sh",
-          "com.volpred.work-summary"
-        ]
-      },
-      {
         "id": "feed_sync",
         "label": "feed.json -> Supabase 全量對帳（收斂網）",
         "cron": "5 * * * *",
@@ -442,7 +427,7 @@
         "cron": "10 8,14,20 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_boss_report.sh",
         "log_path": "storage/logs/cron/boss_report.log",
-        "description": "台灣時間 08:10/14:10/20:10 三班寄 boss HTML 報告（state + decisions + recommendations）。2026-07-14 refactor_plan_token_ops_waste WS4a：原每 4h 六班與 work_summary 每 6h 四班重疊，老闆日收 ~14 封系統信 → 降為 3+1 班；完整合併（work_summary 內容併入 boss_report、單一 owner）排 WS5 治理收斂任務。",
+        "description": "台灣時間 08:10/14:10/20:10 三班寄 boss HTML 報告（state + decisions + recommendations）。窗口由 wrapper 依班次帶旗標：08:10 --window-hours 12（涵蓋前晚 20:10 起）、14:10 --window-hours 6、20:10 --daily-close（24h 窗口 + 日結 sections：Mission-5 / 文章 / work_log / worktree agents / notifications / top files）。2026-07-20 WS-H2：work_summary_6h 已退役併入 20:10 daily close（scripts/_legacy/work_summary_6h.py），boss 定期營運 email 只剩本 job 一個 owner。注意：host crontab 舊行 `10 */4` 需以 scripts/install_host_crontab.sh 重灌對齊本 spec。",
         "host_crontab_managed": true,
         "piggy_back_enabled": true
       },
@@ -559,11 +544,11 @@
       },
       {
         "id": "token_report_daily",
-        "label": "每日 token 使用報表 email",
+        "label": "每日 token 報表 email + 落檔（唯一 token cadence owner）",
         "cron": "0 8 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_token_report.sh",
         "log_path": "storage/logs/cron/token_report.log",
-        "description": "每日 08:00 台灣寄多角度 token 使用報表(HTML)給 admin: 週cap(校準官方)/當日/當週每日/使用類型/模型/reasoning佔比/cache_read。走 piggy-back run_due_jobs。",
+        "description": "每日 08:00 台灣：先跑 volpred ops token-usage-maintain（落 storage/reports/token_usage/ 日報/週報 JSON；2026-07-20 WS-H2 自已退役的 token_usage_daily session cron 收編），再寄多角度 token 使用報表(HTML)給老闆：週cap(校準官方)/當日/當週每日/使用類型/模型/reasoning佔比/cache_read。走 piggy-back run_due_jobs。WS-H2 收斂後這是唯一的 token 排程與唯一的 token email——不要再開第二班。",
         "matchers": [
           "token_report_email.py",
           "cron_token_report.sh"
@@ -620,7 +605,7 @@
   },
   "remote_triggers": {
     "source_label": "Canonical remote trigger spec",
-    "note": "Cloud triggers survive across local sessions. Cron expressions here are UTC, not Asia/Taipei. [2026-06-24] platform_ops_patrol + token_usage_daily_report 已停用（dual-source 分岔治理）。",
+    "note": "Cloud triggers survive across local sessions. Cron expressions here are UTC, not Asia/Taipei. [2026-06-24] platform_ops_patrol + token_usage_daily_report 已停用（dual-source 分岔治理）。 [2026-07-20 WS-H2] token_usage_daily_report spec 已移除（cloud trigger trig_015iaE6yv3V9V1opjUAA5R2V 自 2026-06-24 即 disabled；token 收斂為 token_report_daily 單班）。",
     "items": [
       {
         "id": "platform_ops_patrol",
@@ -631,18 +616,6 @@
         "description": "平台巡檢雲端 trigger。",
         "prompt": "平台巡檢：執行 platform-patrol-maintain --stub-if-no-work；若有訊號再看 detail CLI 並建立後續任務",
         "trigger_id": "trig_01HzWX2ZUmsGHnzwciGpHeNz",
-        "enabled": false,
-        "disabled_at": "2026-06-24",
-        "disabled_reason": "停用以消除 dual-source git 分岔（與本機研究主線從 6/4 分岔，雲端 push origin/main 造成 history divergence + 假警報）。本機 cron git_push_backup 接手備份。詳見 memory project_cloud_agent_git_divergence。"
-      },
-      {
-        "id": "token_usage_daily_report",
-        "name": "token-usage-daily-report",
-        "cron": "43 14 * * *",
-        "timezone": "UTC",
-        "local_time": "每日 22:43（台灣時間）",
-        "description": "Token 日報雲端 trigger。",
-        "trigger_id": "trig_015iaE6yv3V9V1opjUAA5R2V",
         "enabled": false,
         "disabled_at": "2026-06-24",
         "disabled_reason": "停用以消除 dual-source git 分岔（與本機研究主線從 6/4 分岔，雲端 push origin/main 造成 history divergence + 假警報）。本機 cron git_push_backup 接手備份。詳見 memory project_cloud_agent_git_divergence。"
@@ -687,13 +660,6 @@
         "prompt": "知識索引維護：執行 knowledge-index-maintain --stub-if-no-work；若有動作再回報 after summary",
         "recurring": true,
         "description": "每 6 小時執行知識索引低噪音維護與 after-check。"
-      },
-      {
-        "id": "token_usage_daily",
-        "cron": "23 22 * * *",
-        "prompt": "Token 用量日報：執行 token-usage-maintain --stub-if-no-work；只有缺日報或週報時才生成並回報 after summary",
-        "recurring": true,
-        "description": "每日 token 使用量摘要。"
       },
       {
         "id": "ndc_indicator_refresh",

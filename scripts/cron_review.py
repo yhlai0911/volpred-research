@@ -78,7 +78,9 @@ JOBS = {
     "release_pool":     ("com.volpred.release-pool",         "release_pool.log",    8,   "release_pool",          "release_pool"),
     "market_cal":       ("com.volpred.market-calendar-sync", "market_cal.log",      200, "market_calendar_sync",  "market_calendar_sync"),
     "memory_health":    ("com.volpred.memory-health-daily",  "memory_health.log",   30,  "memory_health_daily",   "memory_health_daily"),
-    "work_summary":     ("com.volpred.work-summary",         "work_summary.log",    12,  None,                    "work_summary_6h"),
+    # work_summary row removed 2026-07-20 (WS-H2): job retired, merged into
+    # boss_report --daily-close. Keeping the row would false-flag stale forever
+    # once the LaunchAgent is booted out.
 }
 
 # Slack: 容許 actual_last_fire 比 expected_last_fire 慢多少還算 OK。

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Boss report — HTML email to user every 4h (or on demand).
+"""Boss report — the SOLE periodic operations email to the boss.
+
+Cadence (config/runtime_schedules.json `boss_report_4h`, TW 08:10 / 14:10 / 20:10):
+  - 08:10 morning  : --window-hours 12 (covers overnight since the 20:10 close)
+  - 14:10 midday   : --window-hours 6  (covers since 08:10)
+  - 20:10 evening  : --daily-close     (24h window + day-close sections)
 
 Structure (per user 2026-05-19 directive — user is boss, receives reports only):
   1. Platform state (dashboard snapshot)
@@ -8,12 +13,22 @@ Structure (per user 2026-05-19 directive — user is boss, receives reports only
   4. Signal for boss (strategic input wanted, no ask)
   5. Next cycle plan (no input needed)
   6. Direction recommendations
+  Daily-close extras (2026-07-20 WS-H2, merged from retired work_summary_6h):
+  Mission-5 progress, articles published/drafted, work-log entries, active
+  worktree agents, notifications, top files changed.
 
-Reuses EmailNotifier.notify(html_body=...) — same multipart/alternative as 6h summary.
+Channel contract (WS-H2): work_summary_6h is RETIRED — its content lives here
+in the 20:10 daily-close edition. Do not add a second periodic boss email; the
+outbound-channel matrix in .claude/skills/platform-ops-manager/references/
+loop-health-and-dreaming.md is the owner of that rule.
+
+Reuses EmailNotifier.notify(html_body=...) (multipart/alternative).
 """
 from __future__ import annotations
+import argparse
 import html
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -41,6 +56,17 @@ NOW_TW = NOW.astimezone(TW)             # 顯示用台灣時間
 WINDOW = timedelta(hours=4)
 SINCE = NOW - WINDOW
 _REPORT_WARNINGS: list[str] = []
+
+
+def _configure_window(hours: float) -> None:
+    """Set the module-level reporting window before build_html().
+
+    Collectors read module globals WINDOW/SINCE at call time, so mutating them
+    once at startup (main/argparse) reconfigures every section consistently.
+    """
+    global WINDOW, SINCE
+    WINDOW = timedelta(hours=hours)
+    SINCE = NOW - WINDOW
 
 
 def _warn_report(source: str, exc: Exception) -> None:
@@ -211,6 +237,158 @@ def _next_actions():
     return actions[:8]
 
 
+# ── daily-close collectors (ported 2026-07-20 WS-H2 from retired work_summary_6h) ──
+
+def _parse_ts_utc(value):
+    """ISO string -> aware UTC datetime, or None (caller logs context)."""
+    if not value:
+        return None
+    dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+def _work_log_entries():
+    """work_log.json entries whose timestamp falls inside the window."""
+    path = PROJECT_ROOT / "storage" / "work_log.json"
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        _warn_report("work_log read failed", exc)
+        return []
+    if not isinstance(data, list):
+        _warn_report("work_log schema invalid",
+                     TypeError(f"expected list, got {type(data).__name__}"))
+        return []
+    out = []
+    for entry in data:
+        if not isinstance(entry, dict):
+            continue
+        ts = entry.get("ts") or entry.get("timestamp") or entry.get("completed_at")
+        try:
+            dt = _parse_ts_utc(ts)
+        except Exception as exc:
+            _warn_report("work_log entry timestamp unparseable", exc)
+            continue
+        if dt is not None and dt >= SINCE:
+            out.append(entry)
+    return out
+
+
+def _articles_in_window():
+    """Feed articles published (or drafted) inside the window."""
+    feed_path = PROJECT_ROOT / "storage" / "reports" / "feed.json"
+    empty = {"published": [], "drafts": []}
+    if not feed_path.exists():
+        return empty
+    try:
+        feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        _warn_report("feed read failed", exc)
+        return empty
+    if not isinstance(feed, list):
+        _warn_report("feed schema invalid",
+                     TypeError(f"expected list, got {type(feed).__name__}"))
+        return empty
+    pub, drafts = [], []
+    for art in feed:
+        if not isinstance(art, dict):
+            continue
+        try:
+            pub_dt = _parse_ts_utc(art.get("published_at"))
+        except Exception:
+            pub_dt = None  # silent-ok: historical feed rows carry free-form timestamps; one bad row must not spam 1000+ warnings
+        try:
+            create_dt = _parse_ts_utc(art.get("created_at"))
+        except Exception:
+            create_dt = None  # silent-ok: same free-form historical timestamp tolerance as published_at above
+        row = {"id": art.get("id"), "title": str(art.get("title", ""))[:100],
+               "audience": art.get("audience", "")}
+        if pub_dt and pub_dt >= SINCE and art.get("status") == "published":
+            pub.append({**row, "ts": pub_dt.astimezone(TW).strftime("%H:%M")})
+        elif create_dt and create_dt >= SINCE and art.get("status") == "draft":
+            drafts.append({**row, "ts": create_dt.astimezone(TW).strftime("%H:%M")})
+    return {"published": pub, "drafts": drafts}
+
+
+def _new_notifications():
+    """Notification JSON files written inside the window."""
+    nd = PROJECT_ROOT / "storage" / "notifications"
+    if not nd.exists():
+        return []
+    out = []
+    for f in sorted(nd.glob("*.json")):
+        if f.name == "notification_log.json":
+            continue
+        try:
+            mtime = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
+        except OSError:
+            continue  # silent-ok: stat race — notification file removed between glob and stat
+        if mtime < SINCE:
+            continue
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+            title = data.get("subject") or data.get("title") or str(data.get("message", ""))[:80]
+            title = plainify_boss_text(title)
+            level = data.get("level") or (data.get("metadata") or {}).get("alert_level", "")
+        except Exception as exc:
+            _warn_report(f"notification parse failed ({f.name})", exc)
+            title, level = f.name, ""
+        out.append({"time": mtime.astimezone(TW).strftime("%H:%M"), "title": title, "level": level})
+    return out
+
+
+def _active_worktrees():
+    wd = PROJECT_ROOT / ".claude" / "worktrees"
+    if not wd.exists():
+        return []
+    return [d.name for d in wd.iterdir() if d.is_dir() and d.name != ".DS_Store"]
+
+
+def _files_changed_in_window():
+    raw = _git(["log", f"--since={SINCE.isoformat()}", "--name-only", "--pretty=format:"])
+    files: dict = {}
+    for ln in raw.splitlines():
+        ln = ln.strip()
+        if ln:
+            files[ln] = files.get(ln, 0) + 1
+    return files
+
+
+_KNUM_RE = re.compile(r"\bk\d{3,4}\b", re.IGNORECASE)
+
+
+def _mission_progress(commits, articles):
+    """Heuristic Mission-5 scoring from this window's activity (from work_summary_6h)."""
+    progress = {}
+    m1 = len(articles["published"]) + len(articles["drafts"])
+    progress["M1 把文章寫好"] = {
+        "evidence": f"{len(articles['published'])} published + {len(articles['drafts'])} drafts",
+        "status": "active" if m1 > 0 else "idle"}
+    exp = [c for c in commits if _KNUM_RE.search(c["subject"])
+           or any(k in c["subject"].lower() for k in ["experiment", "research("])]
+    kn = [c for c in commits if "knowledge" in c["subject"].lower()]
+    progress["M2 把實驗與研究做好"] = {
+        "evidence": f"{len(exp)} experiment commits + {len(kn)} knowledge updates",
+        "status": "active" if (exp or kn) else "idle"}
+    paper = [c for c in commits if "paper" in c["subject"].lower()]
+    progress["M3 把學術論文寫好"] = {
+        "evidence": f"{len(paper)} paper-related commits",
+        "status": "active" if paper else "idle"}
+    ops = [c for c in commits if any(k in c["subject"].lower()
+           for k in ["fix(", "fix:", "alert", "cron", "release", "ops:", "ops("])]
+    progress["M4 把網頁平台運營好"] = {
+        "evidence": f"{len(ops)} ops/fix commits",
+        "status": "active" if ops else "idle"}
+    progress["M5 把曝光流量拉高"] = {
+        "evidence": f"{len(articles['published'])} published (流量 surface)",
+        "status": "active" if articles["published"] else "idle"}
+    return progress
+
+
 def _esc(s):
     return html.escape(str(s) if s is not None else "")
 
@@ -272,7 +450,7 @@ def _iso_to_tw(iso_str):
         return iso_str[:16]
 
 
-def build_html():
+def build_html(daily_close: bool = False):
     _REPORT_WARNINGS.clear()
     dash = _dashboard()
     commits = _commits_in_window()
@@ -282,8 +460,15 @@ def build_html():
     next_actions = _next_actions()
     intent = _cycle_intent()
     blockers = _blockers()
+    articles = _articles_in_window() if daily_close else {"published": [], "drafts": []}
+    work = _work_log_entries() if daily_close else []
+    worktrees = _active_worktrees() if daily_close else []
+    notifs = _new_notifications() if daily_close else []
+    files_changed = _files_changed_in_window() if daily_close else {}
+    mission = _mission_progress(commits, articles) if daily_close else {}
 
-    title = f"[VolPred Boss Report] {NOW_TW.strftime('%Y-%m-%d %H:%M')} 台灣時間 平台運營報告"
+    edition = "每日日結" if daily_close else "平台運營報告"
+    title = f"[VolPred Boss Report] {NOW_TW.strftime('%Y-%m-%d %H:%M')} 台灣時間 {edition}"
     overall_color = {"ok": "#0a8a3a", "warn": "#d97706", "critical": "#b91c1c", "error": "#6b7280"}.get(dash.get("overall_status", "ok"), "#444")
 
     css = """<style>
@@ -358,6 +543,63 @@ def build_html():
         for c in commits[:15]:
             parts.append(f"<tr><td class='commit'>{_esc(c['sha'])}</td><td>{_esc(c['subject'])}</td><td class='small'>{_esc(c['iso'][11:16])}</td></tr>")
         parts.append("</table>")
+
+    # 2b. Daily-close sections (20:10 edition; merged from retired work_summary_6h)
+    if daily_close:
+        parts.append("<h2>②-b 日結 · Mission 5 大目標推進（24h）</h2>")
+        parts.append("<table><tr><th>Mission</th><th>狀態</th><th>證據</th></tr>")
+        for name, row in mission.items():
+            cls = "ok" if row["status"] == "active" else "small"
+            parts.append(f"<tr><td>{_esc(name)}</td><td class='{cls}'>{_esc(row['status'])}</td>"
+                         f"<td class='small'>{_esc(row['evidence'])}</td></tr>")
+        parts.append("</table>")
+
+        parts.append(f"<h2>②-c 日結 · 文章（published {len(articles['published'])} / drafts {len(articles['drafts'])}）</h2>")
+        if articles["published"] or articles["drafts"]:
+            parts.append("<table><tr><th>時間</th><th>狀態</th><th>標題</th><th>受眾</th></tr>")
+            for a in articles["published"]:
+                parts.append(f"<tr><td class='small'>{_esc(a['ts'])}</td><td class='ok'>published</td>"
+                             f"<td>{_esc(plainify_boss_text(a['title']))}</td><td class='small'>{_esc(a['audience'])}</td></tr>")
+            for a in articles["drafts"]:
+                parts.append(f"<tr><td class='small'>{_esc(a['ts'])}</td><td class='small'>draft</td>"
+                             f"<td>{_esc(plainify_boss_text(a['title']))}</td><td class='small'>{_esc(a['audience'])}</td></tr>")
+            parts.append("</table>")
+        else:
+            parts.append("<p class='small'>窗口內無新文章。</p>")
+
+        parts.append(f"<h2>②-d 日結 · Work log（{len(work)} 筆）</h2>")
+        if work:
+            parts.append("<ul>")
+            for entry in work[:20]:
+                label = entry.get("task_type") or entry.get("type") or "task"
+                summary = entry.get("summary") or entry.get("title") or entry.get("task_id") or ""
+                parts.append(f"<li class='small'><span class='pill'>{_esc(plainify_boss_text(label))}</span> "
+                             f"{_esc(plainify_boss_text(str(summary)[:140]))}</li>")
+            parts.append("</ul>")
+        else:
+            parts.append("<p class='small'>窗口內無 work log 條目。</p>")
+
+        if worktrees:
+            parts.append(f"<h2>②-e 日結 · 進行中 worktree agents（{len(worktrees)}）</h2><ul>")
+            for w in worktrees:
+                parts.append(f"<li class='small'><code>{_esc(w)}</code></li>")
+            parts.append("</ul>")
+
+        if notifs:
+            parts.append(f"<h2>②-f 日結 · Notifications（{len(notifs)}）</h2>")
+            parts.append("<table><tr><th>時間</th><th>Level</th><th>標題</th></tr>")
+            for n in notifs[:20]:
+                cls = "critical" if n.get("level") == "critical" else "small"
+                parts.append(f"<tr><td class='small'>{_esc(n['time'])}</td><td class='{cls}'>{_esc(n.get('level') or '-')}</td>"
+                             f"<td class='small'>{_esc(n['title'])}</td></tr>")
+            parts.append("</table>")
+
+        if files_changed:
+            top = sorted(files_changed.items(), key=lambda x: -x[1])[:10]
+            parts.append("<h2>②-g 日結 · Top files changed</h2><ul>")
+            for path, cnt in top:
+                parts.append(f"<li class='small'><code>{_esc(path)}</code> × {cnt}</li>")
+            parts.append("</ul>")
 
     # 3. Pending pool snapshot
     parts.append("<h2>③ Pending 池與論文組合</h2>")
@@ -444,6 +686,12 @@ def build_html():
     for c in commits[:10]:
         plain_lines.append(f"  {c['sha']} {c['subject']}")
     plain_lines.append(f"\n== Pending: {pending['total']} ==")
+    if daily_close:
+        plain_lines.append(
+            f"\n== Daily close (24h) == published={len(articles['published'])} "
+            f"drafts={len(articles['drafts'])} work_log={len(work)} "
+            f"worktrees={len(worktrees)} notifications={len(notifs)}"
+        )
     plain_lines.append(f"\n== Next actions ==")
     for a in next_actions[:5]:
         plain_lines.append(f"  {plainify_boss_text(a)}")
@@ -452,15 +700,30 @@ def build_html():
     return title, "".join(parts), plain
 
 
-def main():
-    title, html_body, plain = build_html()
+def _parse_args(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[1])
+    parser.add_argument("--daily-close", action="store_true",
+                        help="24h window + day-close sections (the 20:10 edition)")
+    parser.add_argument("--window-hours", type=float, default=None,
+                        help="override reporting window in hours (default 4; daily-close forces 24)")
+    parser.add_argument("--force", action="store_true",
+                        help="bypass email dedup for manual / immediate re-send")
+    return parser.parse_args(argv)
+
+
+def main(argv=None):
+    args = _parse_args(argv)
+    if args.daily_close:
+        _configure_window(24.0)
+    elif args.window_hours:
+        _configure_window(args.window_hours)
+    title, html_body, plain = build_html(daily_close=args.daily_close)
     try:
         from volpred.publisher.email_notifier import EmailNotifier
         notifier = EmailNotifier()
         # Use notify() with html_body for multipart/alternative
         from volpred.ops.alerts import ALERT_RECIPIENT
-        # CLI flag --force bypasses dedup for manual / immediate re-send
-        force = "--force" in sys.argv
+        force = args.force
         result = notifier.notify(
             subject=title,
             body=plain,
