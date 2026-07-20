@@ -596,7 +596,7 @@ PHASE-Z 認得「這不是本班 fire 產出的檔」，於是照 D3 開出 fore
 殺在提交前」。`dispatch_slot_budget.py` 的 reason 字串有帶 incident id，這次就是靠它一路追回根因，
 這個設計要保留。
 
-### 2026-07-20 22:17 — dispatch worker「Execution error」15-byte log + hang 16 分鐘（今日第二次）— OPEN(P1)
+### 2026-07-20 22:17 — dispatch worker「Execution error」15-byte log + hang 16 分鐘（今日五次）— FIXED
 
 兩班 worker（11:23 `slot-4.d85d3cf2`、22:01 `slot-1.46f4806a`）log 都只有 15 bytes「Execution error」：
 claude CLI 落地即 fatal 但**行程不退出**，supervisor hang-kill 於 960s 收屍。安全網有效（claim
@@ -606,3 +606,42 @@ claude CLI 落地即 fatal 但**行程不退出**，supervisor hang-kill 於 960
 kill、分類 transient、當場 release claim（不等 hang cap）；(2) claude CLI stderr 導入 worker log 供歸因。
 **教訓**：hang cap 是 last-resort，不是 first detector — 已知 fatal 訊息出現時等 16 分鐘毫無意義；
 以及 15-byte log 這種「有殼無屍」形狀本身就該是可分類訊號。
+
+**FIXED 2026-07-20 22:5x**（`assign_97bf1e6d`，slot-1 主線程）。盤點修正：當日**不是兩班而是五班**
+中此形狀（`slot-1.46f4806a` / `slot-1.746b2d2f` / `slot-3.b5fbc1f4` / `slot-4.13e1fcab` /
+`slot-4.d85d3cf2`），每檔精確 15 bytes、無換行。
+
+- **偵測**：`failure_class.is_terse_fatal_only()` — 整份 output 只由 fatal marker 行組成才算數。
+  刻意不是「出現 marker 就算」：worker log `slot-1.4684d8b7` 第 15 行是**正常 agent 中文散文**內含
+  「Execution error」字樣，寬鬆比對會殺掉健康 fire。誤判方向是不對稱的：漏判只賠今天已經在賠的一個
+  slot，誤判會殺掉正在工作的 fire。
+- **收屍**：`worker._wait_with_fatal_probe()` 取代單發 `proc.wait(timeout=)`，每 5s 探一次；
+  marker-only 且 60s 無成長 → 立刻 kill pgid，回 `FATAL_FASTFAIL_SENTINEL`。**注意**：健康的
+  `claude -p` 整段執行期間 log 是 0 bytes（本機所有 in-flight worker log 皆然），所以「輸出停滯」
+  單獨不具鑑別力 —— marker 才是訊號，停滯只是給 grace window。
+- **不是 hang**：分類為 `fatal_fastfail` → 當場 `repend_killed_job_claims`（claim 立刻回池）→ 併入
+  transient 契約走既有 retry ladder。**不發 hang alert**，改記 completions `outcome=fatal_fastfail`。
+
+**補記 2026-07-21 00:4x — 上面的 marker probe 是 patch on wrong model，00:07 第六次殺證明其盲**
+（3-strike 重設計 `5e36d1720`）。實測翻案：六個 incident log 的 **mtime 全部等於 kill 時間** —
+「Execution error」是 CLI 死掉那一刻才 flush 出來的，活著的整段 hang 期間主 log 是 **0 bytes**，
+而健康的 `claude -p` 主 log 也是 0 bytes。**主 log 這個通道在活體期間結構性無資訊**，marker probe
+永遠等不到 marker（00:07 班 fired 00:08、殺於 00:18，probe 全程只看到空檔案）。重設計改用**正向
+活性訊號**：debug sidecar（`--debug-file`）每 attempt 必開（原本只 attempt≥2 — 恰好所有事故都在
+attempt 1）；健康 CLI 從啟動起持續寫 debug 事件，DOA 的在出生幾秒內凍結。判死條件 = 主 log 安靜
+且（sidecar 180s 零 bytes，或 sidecar 凍結在啟動窗 120s 內達到的大小且 240s 無成長）；啟動窗**之後**
+才安靜的 run（長 tool call 形狀）永不誤殺。附帶：hang 警報標題那句「hang > 50min cap」對每次事故
+都是假的（實際 10-16 分鐘）— 改為由 started_at 算實際卡住時長（**警報文案不得超出事實**，同
+SELF_REMEDIATING truth-gate 教訓）。**教訓**：偵測器要建立在「訊號真的存在於該通道」的驗證上 —
+11:48 的 probe 假設 marker 會早印，沒有先 stat 一次 mtime 對 kill 時間，一個 `ls -la` 就能戳破的
+假設跑了 13 個小時。16+16+18 regression tests 綠（含五形狀 fake-clock pins）。
+- **歸因**：原判定「stderr 沒進 worker log」有誤 —— `_spawn` 早就 `stderr=subprocess.STDOUT`，那 15
+  bytes 就是 CLI 吐的全部。真正缺口是 CLI 太安靜，改用 `--debug-file` 側寫 sidecar，且**只從
+  attempt 2 起啟用**：`--debug-file` 會隱含開 debug mode，本機未驗證 debug 是否也走 stdout；若會，
+  worker log 就不再是 marker-only，sidecar 會反過來把 fast-fail 靜默關掉。attempt 1 保持乾淨拿秒級
+  收屍，attempt 2 換歸因。下次真實事故留下的第一份 sidecar 決定能否放寬到 attempt 1。
+- **測試**：`tests/test_worker_fatal_marker_fastfail.py`（11 cases）—— 真實 15-byte incident bytes 與
+  真實散文反例都進 fixture；含非空心對照組（持續產出的 child 必須不被誤殺）與 e2e（claim 有回池、
+  hang alert 未發、耗時秒級）。
+- **未解**：960s 那一刀是誰下的仍未查明（`exit=143` SIGTERM，非本專案 timeout 路徑、非 health.py 的
+  3000s cap）。fast-fail 讓它變成無關緊要，但若日後有其他 16 分鐘現象，這條線索還在。
