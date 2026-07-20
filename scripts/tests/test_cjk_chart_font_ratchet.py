@@ -94,6 +94,34 @@ def test_detector_rejects_uninvoked_apply_cjk_style_import(audit):
     assert not audit._establishes_cjk_font(src)
 
 
+def test_every_style_helper_actually_sets_a_cjk_font_chain(audit):
+    """A name may only sit in STYLE_HELPERS if its definition earns it.
+
+    STYLE_HELPERS is the gate's only escape hatch: calling one of these clears
+    the check. That makes appending a name the cheapest way to silence a red
+    build without fixing anything. So each listed name must resolve to a real
+    definition in the repo whose body names a CJK face — otherwise the tuple
+    could quietly grow into a hole.
+    """
+    import ast
+
+    for helper in audit.STYLE_HELPERS:
+        found = []
+        for path in audit._iter_python_files():
+            try:
+                tree = ast.parse(path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError, SyntaxError):  # silent-ok: skipping an unparseable file can only hide a definition, and a helper with none found fails the assert below — errs toward failing the gate, never toward passing it
+                continue
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef) and node.name == helper:
+                    found.append(ast.get_source_segment(
+                        path.read_text(encoding="utf-8"), node) or "")
+        assert found, f"STYLE_HELPERS 列了 {helper!r}，但 repo 裡沒有這個函式的定義"
+        assert any(
+            any(face in body for face in audit.CJK_FACES) for body in found
+        ), f"{helper!r} 被當成 CJK style helper，但它的定義沒有建立任何 CJK 字型鏈"
+
+
 def test_detector_ignores_chinese_docstrings(audit):
     """CJK in a docstring or log line is not rendered — must not be flagged."""
     import ast
