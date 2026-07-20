@@ -40687,7 +40687,7 @@
     "description": "rev7 remediation agent 回報 ready_for_codex_round7=true。主線程已獨立 bytes 核對四條 round-6 blocking issue（B1a README 表格/標題已改為 HAC diagnostic interval + † 無覆蓋保證；B1b primary JSON 'demonstrably' 歸零、inference_caveats 4 條已在；B5 estimation docstring 已改為 'reuses the same model implementation while these settings differ' 並列三項未控差異；detector 已 flag K1731），且 15 檔 sha256 對 k1731_armB_rev7_freeze.txt 全 OK。本 task = 跑 Codex round 7 並依裁決分流：PASS → 解除 assign_67f56b79 blocked；FAIL → 依 blocking issues 開下一輪 bounded remediation（不得原樣重派）。禁止合併 worktree、禁止 agent 寫 knowledge.json。",
     "task_type": "paper_review",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "hourly_dispatch",
     "created_at": "2026-07-19T03:02:00+00:00",
     "created_by": "hourly-slot-1-4cb1880cf4cb4b6ead05b3565161b086",
@@ -40725,14 +40725,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-3-e320a2e29b0f447c863719819d16e1e1"
+      },
+      {
+        "ts": "2026-07-20T06:55:35.876051+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-3-e320a2e29b0f447c863719819d16e1e1"
       }
     ],
     "last_released_at": "2026-07-20T03:12:37.507781+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "codex-failover-slot-3-e320a2e29b0f447c863719819d16e1e1",
-    "claimed_at": "2026-07-20T06:48:16.833738+00:00",
-    "claim_session_id": "cc45c15de6be",
-    "started_at": "2026-07-20T06:48:17.118411+00:00"
+    "started_at": "2026-07-20T06:48:17.118411+00:00",
+    "completed_at": "2026-07-20T06:55:35.875998+00:00",
+    "result": "Codex round 7 completed against 15/15 matching frozen hashes: VERDICT FAIL. B5/detector/baseline/provenance and existing gates pass (108 tests; 69 checks; 3834 leaves, 0 unexpected), but canonical DM generator and PRIMARY GEV-HAR cells still say interval bounds the effect, while README opening/section 6 use in-sample PIP to assert an OOS null. Verdict: storage/ops/codex_reviews/k1731_armB_rev7_verdict.md. Bounded rev8 remediation queued as assign_24ebe308; merge/knowledge remain gated.",
+    "burst_reported_at": "2026-07-20T06:55:35.884865+00:00"
   },
   {
     "id": "k1730_nested_dm_detector_exposure",
@@ -46097,5 +46103,17 @@
     "source": "user",
     "created_at": "2026-07-20T05:40:07.073428+00:00",
     "created_by": "hourly-slot-1-bc31c9780e6849e0b3e323e2575ea3b9"
+  },
+  {
+    "id": "assign_24ebe308",
+    "title": "K1731 arm B rev8 bounded claim-layer remediation",
+    "description": "Codex round 7 verdict FAIL。只修三個 claim-layer blocker，不重跑估計：(1) k1731_gevreg_midas_ssvs_returns.py 的 DM interpretation 必須依 nested/non-nested 分流，GEV-HAR 兩列只能標 diagnostic-only、無 coverage/bound；(2) 從 canonical source/finalizer 重生三份 results JSON，禁止手改，numeric leaves 必須零漂移；(3) README opening 與 Honest conclusions 不得再用 in-sample PIP 支撐 OOS does-not-improve null，應降為 weak in-sample selection + uncorrected directional OOS diagnostic。修後跑 108-test nested-DM ratchet、69-check verification、3834-leaf regression，重建 freeze 並送 Codex round 8。完整裁決見 storage/ops/codex_reviews/k1731_armB_rev7_verdict.md。禁止合併 worktree、禁止寫 knowledge；assign_67f56b79 維持 blocked，round 8 PASS 才解除。",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-20T06:55:20.543246+00:00",
+    "parent_task_id": "k1731_armB_rev7_codex_round7",
+    "created_by": "codex-failover-slot-3-e320a2e29b0f447c863719819d16e1e1"
   }
 ]
