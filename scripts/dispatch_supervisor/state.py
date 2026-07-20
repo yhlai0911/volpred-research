@@ -81,7 +81,11 @@ Schema (version 1)::
                      "silent_death" |
                      "timeout_unverified" | "killed_supervisor_restart" |
                      "orphan_gone_or_reused" | "orphan_unverified_not_killed" |
-                     "reservation_abandoned_no_pid" | "quota_blocked" | "auth_blocked"
+                     "reservation_abandoned_no_pid" | "quota_blocked" | "auth_blocked" |
+                     # 2026-07-20：CLI 落地即 fatal（log 只有 "Execution error"）
+                     # 但行程不退出，worker 於 ~60s 主動收屍 —— 非 hang，非一般
+                     # failure，故獨立命名以便 completion history 可辨識此形狀。
+                     "fatal_fastfail"
         }
       ],
       "auth_blocked": false,                      # set true on 'Not logged in' — halts ticks

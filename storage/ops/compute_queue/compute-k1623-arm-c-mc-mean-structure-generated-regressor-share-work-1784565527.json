@@ -1,0 +1,44 @@
+{
+  "id": "compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527",
+  "title": "K1623 arm C MC (mean-structure generated-regressor share) [worktree dispatch-slot-2-c5cafe39-k1623]",
+  "script_path": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev3_armc_mc.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-20T16:38:47Z",
+  "started_at": "2026-07-20T16:43:44Z",
+  "completed_at": "2026-07-20T16:50:26Z",
+  "exit_code": 4,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1623-arm-c-mc-mean-structure-generated-regressor-share-work-1784565527.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev3_armc_results.json",
+  "output_paths": [
+    ".claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev3_armc_results.json"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1623 arm C 收件。閉合 blocked item mean_structure_generated_regressor_share_unmeasured。\n\n⚠️ 本 job 的 script 與產出都在 worktree 內（未 merge 進 main）：\n   /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/\n   收件請在該 worktree 內操作。**本輪禁止 merge**（round 3 PASS 才可）。\n\n【1】先驗收 gate，不要先看結論\n- jq '.per_asset[].reproduction_check_vs_frozen_rev2_mc.all_ok' 必須 5/5 true。\n- A-B 必須與凍結 k1623_rev2_mc_results.json 的 claim_corrections_rev3.corrected_attribution 逐位元相同：\n  VIX -0.01996200161917383 / SPY -0.045159482487136415 / TW0050 -0.05562014170297003 /\n  QQQ -0.04110304364398498 / N225 -0.045546793733964475\n- 若 script 拋 ReproductionFailure：代表 numpy/scipy 版本或 OHLC cache 自凍結後漂移。\n  **去查漂移，不要放寬 rtol**（reviewer 2 明確指示）。\n\n【2】與 preview 對帳\nexperiments/k1623/k1623_arm_c_decision.json 的 preview_numbers_not_citable 記錄了一次 pre-fix 試跑值\n（由 review subagent 誤跑產生，已隔離、不可引用）。排隊跑出來的數字**應該完全相同**\n（後續 fix 全是文字、無數值變更）。**不同就是 finding，要查，不要湊。**\n\n【3】更新 README 6.4 — 這次不是補一句，是要改結論\n- 把 \"DISCLOSED, NOT FIXED\" 的 scope limit 換成實測 B-C；表格加 arm C 欄。\n- **finding 2 必須改寫**：rev2 宣稱 SE 低估主因是 1/(2 sqrt m) 漸近公式。加入 arm C 後，\n  dominant sd factor 只有 2/5 資產是 asymptotic_formula（VIX、SPY），QQQ/N225 是 mean_estimation，\n  TW0050 是 break_location。原宣稱**跨資產不成立**，要降級為 asset-dependent，不可只補充。\n- B-C 只能寫成「相對 ELW 自身單一 grand-mean demeaning 的**增量**成本」，\n  **不可**寫成「估計任何均值的成本」（arm C 不是 zero-mean oracle，ELW 內部仍減一個 sample mean）。\n  這點兩位 reviewer 都獨立指出，是 arm B 那次 retract 的同一類 overclaim。\n\n【4】claim_corrections_rev3 只准新增\n凍結 JSON 已用 flatten-diff 驗證 0 改 0 移（181 keys）。要補 supersession 走 patch script\n（比照 k1623_rev3_patch_mc_artifact.py），**禁止手改 JSON**。\n注意 k1623_rev2_mc.py 現已有 _guard_frozen_artifact()，直接重跑會 fail-closed 擋下。\n\n【5】收尾\n- 重跑 experiment_gates.py verdict-template（新 results JSON 會改 claim surface，目前 30 pins）。\n- **Codex primary-path 尚未審過**（usage limit 到 2026-07-25）。目前只有 agy PASS +\n  code-reviewer subagent CONDITIONAL PASS 兩份 fallback。依 K1259 教訓，\n  **Codex 額度恢復後必須重審，這是 round-3 放行的 blocking 前提**。\n- 另有一個 process gap 待處理：review subagent 執行了它被指派審查的實驗碼（違反先審後跑）。\n  建議記 docs/error_log.md 並強化 review brief template。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "timeout_seconds": 3600,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 41689,
+  "claimed_by_pid_start_wall": "Tue Jul 21 00:15:04 2026",
+  "process_exit_code": 0,
+  "failure_reason": "experiment_gate_failed",
+  "experiment_gate": {
+    "status": "failed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623",
+    "exit_code": 1,
+    "report": "[gate] FAIL — 1 violation(s) under .claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623:\n\n  [dm-hac-lag]\n    - .claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623.py::dm_hln  (degenerate_at_h1)\n    → A DM statistic without a HAC variance (or with a degenerate lag) overstates significance. Use the canonical delegate with an explicit HAC bandwidth. Owner: scripts/tests/test_dm_hac_lag_ratchet.py\n\nThis experiment is not accepted. Your own tests passing only shows it ran the way you meant it to; these gates check it does not break a rule the repo already learned the hard way."
+  }
+}

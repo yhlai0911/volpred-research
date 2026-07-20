@@ -32368,13 +32368,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T16:01:21.873775+00:00",
+    "completed_at": "2026-07-20T17:00:14+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T16:01:21.873775+00:00",
-      "last_clean_observed_at": "2026-07-20T16:01:21.873775+00:00"
+      "resolved_at": "2026-07-20T17:00:14+00:00",
+      "last_clean_observed_at": "2026-07-20T17:00:14+00:00"
     }
   },
   {
@@ -32386,13 +32386,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T16:19:01.420305+00:00",
+    "completed_at": "2026-07-20T17:00:42.345408+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T16:19:01.420305+00:00",
-      "last_clean_observed_at": "2026-07-20T16:19:01.420305+00:00"
+      "resolved_at": "2026-07-20T17:00:42.345408+00:00",
+      "last_clean_observed_at": "2026-07-20T17:00:42.345408+00:00"
     }
   },
   {
@@ -47164,5 +47164,17 @@
     "created_by": "audit_release_settings",
     "title": "release 連續跳過 8 次：mile_fa098fc8 卡池裁決",
     "description": "文章 mile_fa098fc8（大跌隔天會反彈嗎？數字說會，但我們自己的檢定沒過關）已被 release loop 跳過 8 次（門檻 5）。裁決出口三選一，不准繼續讓它空轉：\n1. 修 gate：查 feed 該篇 details.release_audit_* 的 skip 原因，若是 gate 誤攔（audience/dedup/quality 判錯）修 gate 後讓它自然釋出；\n2. 手動釋出：內容確實可發 → 走正式 release pool / feed-publisher 流程發佈；\n3. retire：內容不該發（過時/重複/品質不足，寫明理由）→ 正式下架該 draft。\n裁決寫進本 task 的 result。來源：scripts/audit_release_settings.py --fix（WS-I）。"
+  },
+  {
+    "id": "worktree_salvage_agent-a6c24bd9ce9c2924a",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "created_at": "2026-07-20T17:00:41.261197+00:00",
+    "created_by": "reclaim_stale_worktrees",
+    "title": "worktree 產物裁決：agent-a6c24bd9ce9c2924a（idle=7.8h unmerged=1 dirty=False branch=worktree-agent-a6c24bd9ce9c2924a）",
+    "description": "stale worktree `.claude/worktrees/agent-a6c24bd9ce9c2924a` 持有未落地成果（idle=7.8h unmerged=1 dirty=False branch=worktree-agent-a6c24bd9ce9c2924a），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh agent-a6c24bd9ce9c2924a`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
   }
 ]

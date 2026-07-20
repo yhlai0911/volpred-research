@@ -41,6 +41,38 @@ QUOTA_RE = re.compile(
 )
 TRANSIENT_RE = re.compile(r"(529|Overloaded|ECONNRESET|ETIMEDOUT|Connection reset|rate.?limit)", re.I)
 
+# Terse CLI fatals: the whole run's output is one of these lines and nothing
+# else — the CLI died before it produced any work, but the PROCESS did not exit.
+# 2026-07-20 produced five such fires (worker logs slot-1.46f4806a,
+# slot-1.746b2d2f, slot-3.b5fbc1f4, slot-4.13e1fcab, slot-4.d85d3cf2), each
+# exactly 15 bytes `Execution error` with no trailing newline, each reaped only
+# by the hang cap ~960s later. 16 minutes of a 50-minute slot plus a CRITICAL
+# hang email, for a run that was already dead at second one.
+#
+# Anchored to a WHOLE line on purpose. `Execution error` also appears as prose
+# inside real agent output (worker log slot-1.4684d8b7 line 15 is a Chinese
+# sentence containing it), and matching that would kill a healthy fire.
+FATAL_MARKER_RE = re.compile(r"^\s*Execution error\.?\s*$", re.I)
+
+
+def is_terse_fatal_only(output: str | None) -> bool:
+    """True when a run's output is nothing BUT terse fatal marker lines.
+
+    Deliberately stricter than "a marker appears somewhere". A healthy
+    `claude -p` writes nothing to its log until it finishes (every in-flight
+    worker log on this host is 0 bytes), so "output stalled" cannot by itself
+    distinguish dead from working — the marker is the whole signal, and it is
+    only trustworthy when it is the ENTIRE output. Any other content means the
+    agent was producing something, and we fall back to the hang cap.
+
+    The asymmetry is intentional: a false negative costs one slot (today's
+    behaviour), a false positive kills a working fire.
+    """
+    text = (output or "").strip()
+    if not text:
+        return False
+    return all(FATAL_MARKER_RE.match(line) for line in text.splitlines() if line.strip())
+
 
 def classify_output(output: str | None) -> str | None:
     """Name the failure class visible in a failed run's output, or None.
