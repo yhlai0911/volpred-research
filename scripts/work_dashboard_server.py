@@ -65,12 +65,12 @@ JOB_DESC = {
     "handoff_regen": "重生 handoff 文件 + 清理逾時 claim",
     "question_research": "巡會員提問、materialize 問答任務",
     "reader_facing_refill": "補事件/trending/會員問答候選池",
-    "work_summary_6h": "每 6h 寄工作摘要 email 給老闆",
+    "work_summary_6h": "（已退役 2026-07-20，併入 boss_report 20:10 日結）工作摘要 email",
     "log_rotate": "截斷過大的 log 檔（防 codex_loop.log 暴脹）",
     "codex_update": "週度更新 codex-cli 輔助 agent 到最新版",
     "shared_scheduler_tick": "shared scheduler（v12 已降級 advisory）",
     "continue_task_stub": "slot-aware 續跑心跳",
-    "token_usage_daily": "每日 token 使用量摘要",
+    "token_usage_daily": "（已退役 2026-07-20，落檔併入 token_report_daily 08:00）token 摘要",
     "ndc_indicator_refresh": "每月更新 NDC 景氣指標",
 }
 

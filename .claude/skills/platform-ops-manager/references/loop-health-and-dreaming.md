@@ -104,6 +104,24 @@ memory_governance / persistent_alert / orphaned_experiment。每個 fail-open（
 | **L3 改善迴圈** | `loop_health`（fast）+ `dreaming_review`（slow，propose-only） | 「loop 有沒有在變好」 | 4 指標 + 5 detector；事故經 error_log 結構化 entry 餵進來，不另建 watchdog |
 | **L4 行為指引** | CLAUDE.md（頂層 mandate）→ `.claude/rules/`（path 觸發）→ memory（背景 why）→ skills（SOP） | 需要判斷的行為 | 同一 concern 在 L4 內也只佔一個主位，其他位置放 pointer |
 
+### 出站通道矩陣（2026-07-20 WS-H2；對老闆的每一種出站訊息 = 一個 cadence 一個 owner）
+
+老闆收信量**只降不升**。新增任何對外班次（email / Telegram）前先查此表：同類訊息已有 owner 就收編進去，
+不開第二班。歷史教訓：token 曾同時掛三個 spec（host cron email + 已停用 cloud trigger + session cron 落檔），
+boss 定期信曾 boss_report（4h 六班）+ work_summary（6h 四班）日收 ~14 封 —— WS-H2 全部收斂如下。
+
+| 通道 × 用途 | 唯一 owner | cadence | 備註 |
+|---|---|---|---|
+| Telegram · 互動回覆 | telegram responder（`telegram_responder.sh` 派發） | 事件驅動 | 先回覆再 complete（memory `feedback_responder_reply_before_complete`） |
+| Telegram · 逐程序進度回報 | `scripts/progress_report.py` | 每個工作程序 | 唯一 owner（老闆 msg 796）；宣稱完成必附實測 |
+| Email · 定期營運報告 | `scripts/boss_report.py`（job `boss_report_4h`） | 08:10 / 14:10 / 20:10，20:10 = `--daily-close` 日結（已併退役的 work_summary_6h） | 唯一的定期 boss email；host crontab 舊行 `10 */4` 須用 `install_host_crontab.sh` 對齊 |
+| Email · token 用量報表 | `scripts/token_report_email.py`（job `token_report_daily`，wrapper 先跑 token-usage-maintain 落檔） | 每日 08:00 一封 | token 唯一排程與唯一 email；`token_usage_daily_report`（cloud）與 `token_usage_daily`（session cron）已除役 |
+| Email · alert / 異常 | L2 `check_alerts` registry（`send-alert` CLI 同一 EmailNotifier 出口） | 事件驅動 + email dedup | 新 freshness 檢查落 L2，不開新信 |
+| Email · dreaming 摘要 | `dreaming_review`（寄信閘門 = `needs_human_attention`） | 每日 05:25，靜默班次不寄 | 見上方「對外音量」節 |
+| Email · skill 修改通知 / 重大決策 | 主線程手動 `send-alert` | 事件驅動 | per memory `feedback_skill_autonomy` / `feedback_email_on_major_decisions` |
+
+違反（同 concern 第二個寄信者 / 第二個班次）= 疊床架屋，處置同收編規則第 5 條。
+
 ### L1 實況盤點（2026-07-20 WS-F1 全量重盤；由 CI 機械守）
 
 下面四張表**不是文件，是被機械比對的清單**。`scripts/audit_enforcement_map.py` 會從磁碟重建同樣四份 inventory 並 diff；不一致就 exit 1，掛在 `.github/workflows/knowledge-provenance.yml` 的 `audit` job。**新增／移除任何 hook、deny、CI job、git hook，必須同 commit 改這裡**，否則 CI 紅。

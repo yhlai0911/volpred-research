@@ -1691,8 +1691,9 @@ def ops_token_summary(storage_dir: str, days: int) -> None:
 def ops_token_usage_maintain(storage_dir: str, days: int, tail_lines: int, check_only: bool, stub_if_no_work: bool) -> None:
     """Run the canonical token-usage daily/weekly report maintenance loop with optional no-work stub output."""
     from volpred.ops import run_token_usage_maintenance
-    from volpred.ops.pending_replay import mark_self_replayed
-    mark_self_replayed("token_usage_daily")
+    # WS-H2 2026-07-20: no mark_self_replayed here — the token_usage_daily
+    # session cron is retired; this CLI now runs from cron_token_report.sh
+    # (host cron), so there is no session-replay ledger entry to reconcile.
 
     result = run_token_usage_maintenance(
         storage_dir=storage_dir,
