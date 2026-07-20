@@ -210,5 +210,6 @@
 | **操作手冊 `docs/ops-manual.md`**（owner 2026-07-20 指定交付物：平台運作＋派工＋email/Telegram 新設計，白話＋範例） | ✅ 初版 2026-07-20；每 Phase 收尾同步更新（驗收清單含本檔） | `docs/ops-manual.md` |
 | Phase 1：C4 Mirror 死信重試 | ✅ 2026-07-20 | worktree commit `8dc5ab04b` → merge `661f50ed7`；main 複驗 29 tests 綠；dry-run 注入實證 |
 | Phase 1：F2 dedup-gate-audit 兌現 | ✅ 2026-07-20 | worktree commit `bbbaefc89` → merge `262e20934`；main 複驗 71 tests 綠；歷史資料實跑抓到真 warn（10 arc ×4 block） |
-| **D6 compute-worker work-conserving 連續運轉 + 有界平行**（owner 2026-07-20 新指令：不耗 token 就不該每 15 分只做一件；有算力就持續做、可平行） | 🔄 獨立軌 worktree agent 實作中（13:0x 派出） | drain loop + flock 互斥 + 平行度上限；launchd tick 降級為重啟保險 |
+| **D6 compute-worker work-conserving 連續運轉 + 有界平行** | ✅ 2026-07-20 | worktree commit `d161229e4` → merged；run-loop + fcntl flock 互斥（crash 即釋放）+ 原子 claim + max_parallel=min(3,cpu//3)（config 可覆寫）；wrapper 經 sync_cron_wrappers 原子安裝、lockstep 綠；**live 實證**：首次 drain 即撿起真 compute job 連續執行。**已知缺口 → D6b**（`assign_5f17c382`，main_thread lane）：SIGTERM 殺 drain loop 會留孤兒 running receipt（本日實測），需 pid-liveness reaper + requeue 兩筆 k741 codex job（等額度） |
+| **A3 status/blocked_reason vocab migration** | ✅ 2026-07-20 | worktree `4cbcd54f1` → merged；canonical queue migration + 六鏡像 baseline 27→0/3→0 **同一 commit**（13:30）；validator 0/3077×2 綠；81 tests 綠；原值全保留 |
 | 其餘 | ⏳ 依 §5，Phase N 收尾時 enqueue Phase N+1 | — |
