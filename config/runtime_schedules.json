@@ -3,7 +3,7 @@
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
     "updated_at": "2026-07-14",
-    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection."
+    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本完全取決於 pregate。demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，實測近 7 天 1077 次 agentable P1/P2 集合變動，15min 僅 46.0% 的 bin 有變動 → 相對現況 hourly 約 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。capacity veto 會再往下壓。cadence 尚未改動，待 shadow 觀察窗與 live A/B 後決定。"
   },
   "system_crontab": {
     "source_label": "Canonical system crontab spec",
@@ -1409,7 +1409,7 @@
       "pregate": {
         "mode": "shadow",
         "window_hours": 3.0,
-        "note": "2026-07-10 pregate rewire: scheduler.py load_pregate_config() 每 tick 熱重載此欄位。shadow=只記錄 would-skip 到 storage/logs/hourly_pregate.jsonl 不改變行為；觀察 2-3 班判斷正確後改 enforce。requested fire（老闆觸發）永不被 gate。"
+        "note": "2026-07-10 pregate rewire: scheduler.py load_pregate_config() 每 tick 熱重載此欄位。shadow=只記錄 would-skip 到 storage/logs/hourly_pregate.jsonl 不改變行為；觀察 2-3 班判斷正確後改 enforce。requested fire（老闆觸發）永不被 gate。2026-07-20（telegram-1198）pregate 加入 capacity + novelty 兩訊號，gate 才真的能 skip：舊版全是 demand 訊號（『有沒有工作』），而池永遠有 P1/P2，7 天 164 fire 的 would_skip=0，結構上不可能 skip。仍維持 shadow —— 新邏輯尚無 production 觀察窗，先累積 would_skip 分佈再議 enforce。"
       }
     },
     {

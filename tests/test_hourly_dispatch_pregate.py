@@ -136,6 +136,8 @@ def test_decide_proceeds_on_true_critical(tmp_path, monkeypatch):
     monkeypatch.setattr(pregate, "has_high_prio", lambda tasks: False)
     monkeypatch.setattr(pregate, "COMPUTE_QUEUE", tmp_path / "no_queue")
     monkeypatch.setattr(pregate, "has_publish_drought", lambda: False)
+    monkeypatch.setattr(pregate, "STATE", tmp_path / "pregate_state.json")
+    monkeypatch.setattr(pregate, "free_slots", lambda: 4)
 
     result = pregate.decide(window_hours=3.0)
     assert result["proceed"] is True
@@ -160,6 +162,15 @@ def _isolate_main(tmp_path, monkeypatch):
     monkeypatch.setattr(pregate, "NEXT_TASKS", next_tasks)
     monkeypatch.setattr(pregate, "WORK_LOG", work_log)
     monkeypatch.setattr(pregate, "LOG", log)
+    # main() persists the novelty baseline on every proceed — isolate it or a
+    # test run overwrites the production gate's state file.
+    monkeypatch.setattr(pregate, "STATE", tmp_path / "pregate_state.json")
+    monkeypatch.setattr(pregate, "free_slots", lambda: 4)
+    # absolute-demand signals read repo-global paths — left live, a real compute
+    # followup or drought forces PROCEED and the skip assertions depend on what
+    # the production queue happens to hold (2026-07-20: exactly that flake).
+    monkeypatch.setattr(pregate, "COMPUTE_QUEUE", tmp_path / "no_queue")
+    monkeypatch.setattr(pregate, "has_publish_drought", lambda: False)
     return log
 
 
@@ -201,6 +212,11 @@ def _cadence_env(tmp_path, monkeypatch, tasks, work_log=None):
     monkeypatch.setattr(pregate, "COMPUTE_QUEUE", tmp_path / "no_queue")
     monkeypatch.setattr(pregate, "has_publish_drought", lambda: False)
     monkeypatch.setattr(pregate, "has_high_prio", lambda tasks: False)
+    # STATE holds the novelty baseline. Left unpatched, decide() reads — and
+    # main() WRITES — the production storage/ops/pregate_state.json, so a test
+    # run would silently move the real gate's baseline.
+    monkeypatch.setattr(pregate, "STATE", tmp_path / "pregate_state.json")
+    monkeypatch.setattr(pregate, "free_slots", lambda: 4)
 
 
 def _task(*, ttype="experiment", status="succeeded", completed_at=None, claimed_by="codex-cli"):
@@ -331,3 +347,134 @@ def test_substantive_types_single_source_with_crosscheck():
 
     assert cc.SUBSTANTIVE is pregate.SUBSTANTIVE_TYPES
     assert "daily_digest" in pregate.SUBSTANTIVE_TYPES
+
+
+# ------ 15-minute cadence semantics--2026-07-20, telegram-1198--------------------------------------------------
+# The gate was demand-only ("is there work?"), which is the right question at
+# 60 minutes and the wrong one at 15: the pool always holds P1/P2, so
+# high_prio was true on 164/164 fires and would_skip was 0. capacity + novelty
+# ask "can a fire add throughput?" and "has anything changed?" instead.
+
+
+def _fifteen_min_env(tmp_path, monkeypatch, tasks, *, free=4, critical=0):
+    """decide() env for the sub-hourly signals, with cadence deliberately quiet."""
+    recent = (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat()
+    _cadence_env(tmp_path, monkeypatch,
+                 [_task(completed_at=recent)] + list(tasks))
+    _write_json(tmp_path / "dash.json", {"section_critical": critical,
+                                         "sections": [{"section": "s1", "status": "critical"}] * critical})
+    monkeypatch.setattr(pregate, "free_slots", lambda: free)
+    monkeypatch.setattr(pregate, "has_high_prio", lambda tasks: True)
+
+
+def _p1(task_id):
+    return {"id": task_id, "task_type": "experiment", "status": "pending", "priority": 1}
+
+
+def test_unchanged_world_skips_the_second_fire(tmp_path, monkeypatch):
+    """THE 15-min fix: an identical pool + no new work must not re-fire."""
+    _fifteen_min_env(tmp_path, monkeypatch, [_p1("a"), _p1("b")])
+
+    first = pregate.decide(window_hours=3.0)
+    assert first["proceed"] is True and first["reasons"]["novel"] is True
+    pregate._write_signature(first["signature"])
+
+    second = pregate.decide(window_hours=3.0)
+    assert second["reasons"]["novel"] is False
+    assert second["proceed"] is False
+
+
+def test_changed_pool_breaks_novelty_immediately(tmp_path, monkeypatch):
+    """Keyed on identity, not counts: swapping one P1 for another IS a change."""
+    _fifteen_min_env(tmp_path, monkeypatch, [_p1("a"), _p1("b")])
+    pregate._write_signature(pregate.decide(window_hours=3.0)["signature"])
+
+    _fifteen_min_env(tmp_path, monkeypatch, [_p1("a"), _p1("c")])  # same count
+    after = pregate.decide(window_hours=3.0)
+    assert after["reasons"]["novel"] is True
+    assert after["proceed"] is True
+
+
+def test_no_free_slot_vetoes_the_high_prio_path(tmp_path, monkeypatch):
+    """Demand without capacity is a queue, not work."""
+    _fifteen_min_env(tmp_path, monkeypatch, [_p1("a")], free=0)
+    result = pregate.decide(window_hours=3.0)
+    assert result["reasons"]["capacity"] is False
+    assert result["proceed"] is False
+
+
+def test_email_backlog_ignores_both_vetoes(tmp_path, monkeypatch):
+    """Absolute demand: a queue this fire drains. Responsiveness invariant."""
+    _fifteen_min_env(tmp_path, monkeypatch,
+                     [{"id": "e1", "task_type": "email_reply", "status": "pending"}],
+                     free=0)
+    pregate._write_signature(pregate.decide(window_hours=3.0)["signature"])
+
+    repeat = pregate.decide(window_hours=3.0)
+    assert repeat["reasons"]["novel"] is False and repeat["reasons"]["capacity"] is False
+    assert repeat["proceed"] is True  # still fires --- email is never vetoed
+
+
+def test_repeat_critical_stops_re_firing_but_a_new_one_does_not(tmp_path, monkeypatch):
+    """critical is an incident STATE, not a queue --- identical set buys nothing."""
+    _fifteen_min_env(tmp_path, monkeypatch, [], critical=1)
+    monkeypatch.setattr(pregate, "has_high_prio", lambda tasks: False)
+    pregate._write_signature(pregate.decide(window_hours=3.0)["signature"])
+
+    repeat = pregate.decide(window_hours=3.0)
+    assert repeat["reasons"]["critical"] is True
+    assert repeat["proceed"] is False  # same incident, no second cold-load
+
+    _write_json(tmp_path / "dash.json",
+                {"section_critical": 2,
+                 "sections": [{"section": "s1", "status": "critical"},
+                              {"section": "s2", "status": "critical"}]})
+    escalated = pregate.decide(window_hours=3.0)
+    assert escalated["reasons"]["novel"] is True
+    assert escalated["proceed"] is True  # a NEW critical fires at once
+
+
+def test_cadence_due_overrides_both_vetoes(tmp_path, monkeypatch):
+    """The starvation floor: a static pool can never stall research forever."""
+    stale = (datetime.now(timezone.utc) - timedelta(hours=9)).isoformat()
+    _cadence_env(tmp_path, monkeypatch, [_task(completed_at=stale), _p1("a")])
+    monkeypatch.setattr(pregate, "free_slots", lambda: 0)
+    monkeypatch.setattr(pregate, "has_high_prio", lambda tasks: True)
+    pregate._write_signature(pregate.decide(window_hours=3.0)["signature"])
+
+    result = pregate.decide(window_hours=3.0)
+    assert result["reasons"]["novel"] is False and result["reasons"]["capacity"] is False
+    assert result["reasons"]["cadence_due"] is True
+    assert result["proceed"] is True
+
+
+def test_slot_read_failure_fails_open_to_capacity_available(tmp_path, monkeypatch):
+    _fifteen_min_env(tmp_path, monkeypatch, [_p1("a")])
+
+    def boom():
+        raise RuntimeError("slot budget exploded")
+
+    monkeypatch.setattr(pregate, "free_slots", boom)
+    result = pregate.decide(window_hours=3.0)
+    assert result["reasons"]["free_slots"] is None
+    assert result["reasons"]["capacity"] is True
+    assert result["proceed"] is True
+
+
+def test_skip_does_not_advance_the_novelty_baseline(tmp_path, monkeypatch):
+    """A skipped fire looked at nothing --- it must not claim it did."""
+    log = _isolate_main(tmp_path, monkeypatch)
+    state = tmp_path / "pregate_state.json"
+    _write_json(state, {"last_proceed_signature": "stale-baseline"})
+    # _isolate_main ships an EMPTY task file, which reads as "cadence unknown"
+    # -> due -> proceed. Give it a recent substantive completion so cadence is
+    # quiet and the capacity veto is what actually decides here.
+    recent = (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat()
+    _write_json(tmp_path / "next_tasks.json", [_task(completed_at=recent)])
+    monkeypatch.setattr(pregate, "free_slots", lambda: 0)
+    monkeypatch.setattr(pregate, "has_high_prio", lambda tasks: True)
+
+    rc = pregate.main(["--invoker", "test"])  # real mode
+    assert rc == 0  # skip
+    assert json.loads(state.read_text())["last_proceed_signature"] == "stale-baseline"
+    assert json.loads(log.read_text().strip().splitlines()[-1])["decision"] == "skip"
