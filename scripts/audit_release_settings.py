@@ -7,7 +7,10 @@ goes stale → admin UI / cross-session readers see wrong release cadence.
 
 Run modes:
 - default: compare, print drift report, exit 0 even on drift (observability)
-- --fix:  push local payload to Supabase to repair drift (idempotent PATCH)
+- --fix:  push local payload to Supabase to repair drift (idempotent PATCH),
+          and queue one idempotent P3 repair task per starved draft (WS-I
+          actuator — the starved exit 1 must have an exit path, not just a
+          verdict; see _open_starved_tasks)
 - --json: emit structured JSON to stdout for log scrapers / downstream alerts
 
 Drift fields checked: mode, interval_minutes, max_articles_per_run, due_only,
@@ -251,6 +254,65 @@ def _starved_drafts(limit: int = 10) -> list[dict]:
     return starved[:limit]
 
 
+def _open_starved_tasks(starved: list[dict], *, queue_path: Path | None = None) -> list[dict]:
+    """Actuator: starved-draft findings → pending repair tasks (WS-I, 2026-07-20).
+
+    The starved check used to exit 1 with no consumer: mile_47c4bc3e was skipped
+    20 times over repeated audit fires and nothing ever queued a repair — the
+    exit code was a verdict without an exit path. One idempotent P3 task per
+    starved article (id ``starved_draft_<article_id>``) gives the block a way
+    out; re-runs while the task is queued are no-ops. Append failures are loud
+    (no-silent-fallback) and land in the per-article receipt.
+    """
+    from datetime import datetime, timezone
+
+    from volpred.ops.next_tasks import append_task_record
+
+    path = (
+        queue_path
+        if queue_path is not None
+        else PROJECT_ROOT / "storage" / "next_tasks.json"
+    )
+    now_iso = datetime.now(timezone.utc).isoformat()
+    receipts: list[dict] = []
+    for d in starved:
+        art_id = d.get("id")
+        if not art_id:
+            _warn_audit("starved draft entry without id; cannot open repair task")
+            receipts.append({"article_id": None, "created": False, "error": "missing article id"})
+            continue
+        task = {
+            "id": f"starved_draft_{art_id}",
+            "task_type": "platform_ops",
+            "priority": 3,
+            "source": "auto_discovered",
+            "status": "pending",
+            "created_at": now_iso,
+            "created_by": "audit_release_settings",
+            "title": f"release 連續跳過 {d.get('skipped')} 次：{art_id} 卡池裁決",
+            "description": (
+                f"文章 {art_id}（{d.get('title', '')}）已被 release loop 跳過 "
+                f"{d.get('skipped')} 次（門檻 {_STARVED_SKIP_THRESHOLD}）。裁決出口三選一，"
+                "不准繼續讓它空轉：\n"
+                "1. 修 gate：查 feed 該篇 details.release_audit_* 的 skip 原因，若是 gate "
+                "誤攔（audience/dedup/quality 判錯）修 gate 後讓它自然釋出；\n"
+                "2. 手動釋出：內容確實可發 → 走正式 release pool / feed-publisher 流程發佈；\n"
+                "3. retire：內容不該發（過時/重複/品質不足，寫明理由）→ 正式下架該 draft。\n"
+                "裁決寫進本 task 的 result。來源：scripts/audit_release_settings.py --fix（WS-I）。"
+            ),
+        }
+        receipt = {"article_id": art_id, "task_id": task["id"]}
+        try:
+            _, created = append_task_record(task, path=path, if_exists="skip")
+            receipt["created"] = created
+        except Exception as exc:  # noqa: BLE001 — 一單失敗不擋其他單，但必留 trace
+            _warn_audit(f"starved-draft task append failed for {art_id}", exc=exc)
+            receipt["created"] = False
+            receipt["error"] = f"{type(exc).__name__}: {exc}"
+        receipts.append(receipt)
+    return receipts
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fix", action="store_true", help="Push local → Supabase if drift detected")
@@ -267,16 +329,20 @@ def main() -> int:
     # settings-only audit was structurally blind to (2026-07-19 R4).
     cadence = _cadence_check(local)
     starved = _starved_drafts()
+    # --fix is repair mode: starvation findings must land as queued repair
+    # tasks, not just an exit code (WS-I actuator; observability-only runs
+    # stay read-only).
+    starved_tasks = _open_starved_tasks(starved) if (args.fix and starved) else []
 
     remote = _load_remote()
     if remote is None:
         report = {"status": "no_remote_row", "ok": False, "local_keys": sorted(local.keys())}
-        return _emit(report, cadence, starved, args)
+        return _emit(report, cadence, starved, args, starved_tasks=starved_tasks)
 
     drift = _diff(local, remote)
     if not drift:
         report = {"status": "ok", "ok": True, "checked_fields": list(_AUDIT_FIELDS)}
-        return _emit(report, cadence, starved, args)
+        return _emit(report, cadence, starved, args, starved_tasks=starved_tasks)
 
     report = {
         "status": "drift",
@@ -302,19 +368,29 @@ def main() -> int:
             print(f"  - {entry['field']}: local={entry['local']!r} remote={entry['remote']!r}")
         if args.fix:
             print(f"[audit] fix_attempted={report.get('fix_attempted')} fix_ok={report.get('fix_ok')}")
-    return _emit(report, cadence, starved, args)
+    return _emit(report, cadence, starved, args, starved_tasks=starved_tasks)
 
 
-def _emit(report: dict, cadence: dict, starved: list[dict], args) -> int:
+def _emit(
+    report: dict,
+    cadence: dict,
+    starved: list[dict],
+    args,
+    *,
+    starved_tasks: list[dict] | None = None,
+) -> int:
     """Print the report and decide the exit code.
 
     Field drift stays exit 0 (it has always been observability, and a --fix run
     repairs it). A cadence that cannot reach the configured interval, or drafts
-    the loop has skipped more than five times, are different: nothing downstream
-    repairs them, and both were invisible until now. They fail.
+    the loop has skipped more than five times, are different: they fail — and
+    since WS-I (2026-07-20) a --fix run also queues one idempotent repair task
+    per starved draft, so the failing exit code has an exit path instead of
+    being a verdict nobody consumes.
     """
     report["cadence"] = cadence
     report["starved_drafts"] = starved
+    report["starved_draft_tasks"] = starved_tasks or []
     blocking = (not cadence.get("ok", True)) or bool(starved)
     if blocking:
         report["ok"] = False
@@ -338,6 +414,10 @@ def _emit(report: dict, cadence: dict, starved: list[dict], args) -> int:
                   f"{_STARVED_SKIP_THRESHOLD} times")
             for d in starved:
                 print(f"  - {d['id']} skipped={d['skipped']} {d['title']}")
+        for t in starved_tasks or []:
+            mark = "opened" if t.get("created") else ("ERROR" if t.get("error") else "already queued")
+            print(f"[audit] repair task {t.get('task_id')}: {mark}"
+                  + (f" ({t['error']})" if t.get("error") else ""))
     return 1 if blocking else 0
 
 
