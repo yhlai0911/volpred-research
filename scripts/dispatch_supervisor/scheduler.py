@@ -49,7 +49,7 @@ if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
-from . import alerts, decision, phase_z, state, worker
+from . import alerts, decision, phase_z, state, worker, workspace as workspace_mod
 
 LOG = logging.getLogger(__name__)
 
@@ -287,9 +287,13 @@ def _slot_prompt(
     job_id: str,
     workdir: Path,
     repo_root: Path,
+    workspace: dict[str, Any] | None = None,
 ) -> str:
     """Inject the stable namespace and non-main launch boundary."""
     prefix = f"dispatch-{slot_id}-{job_id[:8]}"
+    workspace_section = (
+        workspace_mod.prompt_fragment(workspace) + "\n" if workspace else ""
+    )
     return (
         "[Supervisor multi-slot context]\n"
         f"slot_id={slot_id}; job_id={job_id}; worktree_prefix={prefix}.\n"
@@ -305,6 +309,7 @@ def _slot_prompt(
         "merge_worktree.sh 完整整合；不得留下未合併 branch/worktree。"
         "task-pool claim/complete 必須用 canonical_root 的絕對 script path，讓 fcntl control"
         "plane 寫 canonical queue。最後依原 PHASE Z 只留 fire receipt，不自行 git add/commit。\n\n"
+        + workspace_section
         + prompt
     )
 
@@ -347,9 +352,11 @@ async def _run_reserved_fire(
     state_path: Path,
     repo_root: Path,
     workdir: Path | None = None,
+    fire_workspace: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run one already-admitted logical fire and close its cohort safely."""
     phase_z_outcome: dict | None = None
+    workspace_outcome: dict | None = None
     result = None
     worker_exc: BaseException | None = None
     try:
@@ -397,6 +404,23 @@ async def _run_reserved_fire(
                 path=state_path,
             )
     finally:
+        # ── WS-B workspace finalize (before the PHASE-Z drain) ──────────────
+        # The isolated lane's output lands (or goes to remediation) through its
+        # OWN gate here, so PHASE-Z only ever sees canonical-root residue.
+        # finalize_workspace never raises; belt-and-suspenders anyway because a
+        # crash here must not skip the cohort drain below.
+        if fire_workspace is not None:
+            try:
+                worker_outcome = result.outcome if result is not None else "failure"
+                workspace_outcome = await asyncio.to_thread(
+                    workspace_mod.finalize_workspace,
+                    repo_root=repo_root, workspace=fire_workspace,
+                    worker_outcome=worker_outcome, job_id=job_id,
+                )
+                LOG.info("workspace finalize job_id=%s disposition=%s",
+                         job_id, (workspace_outcome or {}).get("disposition"))
+            except Exception as exc:  # noqa: BLE001
+                LOG.exception("workspace finalize crashed job_id=%s: %s", job_id, exc)
         global _PHASE_Z_LOCK
         if _PHASE_Z_LOCK is None:
             _PHASE_Z_LOCK = asyncio.Lock()
@@ -450,6 +474,7 @@ async def _run_reserved_fire(
         "attempts": result.attempts, "exit_code": result.exit_code,
         "phase_z": phase_z_outcome, "fire_reason": fire_reason,
         "job_id": job_id, "slot_id": slot_id,
+        "workspace": workspace_outcome,
     }
 
 
@@ -849,12 +874,55 @@ async def _tick_once(
         state.release_reservation(job_id=job_id, path=state_path)
         LOG.error("cannot create repo-external dispatch cwd job_id=%s: %s", job_id, exc)
         return {"action": "skip", "reason": "scratch_workdir_error", "error": str(exc)}
+    # ── WS-B producer-scoped workspace (pilot) ──────────────────────────────
+    # Allocation is strictly fail-open: any refusal (mode off, caps, disk floor,
+    # writer-lock busy, git error) fires the slot UNISOLATED and PHASE-Z's
+    # baseline fallback keeps covering it. Runs in a thread: `git worktree add`
+    # checks out the full tree and must not stall the event loop (health_loop
+    # heartbeats share it).
+    fire_workspace: dict[str, Any] | None = None
+    iso_cfg = workspace_mod.load_isolation_config(schedules_path=schedules_path)
+    if iso_cfg["mode"] == "pilot":
+        try:
+            # Protect every job the state file still remembers (live, draining,
+            # or completed) — the sweep may only close TRUE orphans whose fire
+            # left no state behind. See sweep_orphan_workspaces docstring.
+            fresh = state.read_state(state_path)
+            protected = (
+                [str(j.get("job_id")) for j in (fresh.get("current_jobs") or [])]
+                + [str(i.get("job_id")) for i in (fresh.get("phase_z_pending") or [])]
+                + [str(c.get("job_id")) for c in (fresh.get("completions") or [])]
+                + [job_id]
+            )
+            swept = await asyncio.to_thread(
+                workspace_mod.sweep_orphan_workspaces,
+                repo_root=repo_root, protected_job_ids=protected,
+            )
+            if swept:
+                LOG.info("workspace orphan sweep closed %d workspace(s): %s",
+                         len(swept), [s.get("disposition") for s in swept])
+            active_isolated = sum(
+                1 for j in current_jobs if j.get("workspace") is not None
+            )
+            fire_workspace = await asyncio.to_thread(
+                workspace_mod.allocate_workspace,
+                repo_root=repo_root, slot_id=slot_id, job_id=job_id,
+                config=iso_cfg, active_isolated=active_isolated,
+            )
+        except Exception as exc:  # noqa: BLE001 — isolation must never veto dispatch
+            LOG.warning("workspace allocation crashed (non-fatal, firing unisolated): %s", exc)
+            fire_workspace = None
+        if fire_workspace is not None:
+            state.attach_workspace(
+                job_id=job_id, workspace=fire_workspace, path=state_path,
+            )
     prompt = _slot_prompt(
         prompt,
         slot_id=slot_id,
         job_id=job_id,
         workdir=workdir,
         repo_root=repo_root,
+        workspace=fire_workspace,
     )
     LOG.info(
         "firing worker job_id=%s slot=%s prev_scheduled=%s log=%s",
@@ -875,7 +943,7 @@ async def _tick_once(
         job_id=job_id, cohort_id=lease.cohort_id, slot_id=slot_id, prompt=prompt,
         scheduled_for=prev_fire.isoformat(), fire_reason=fire_reason,
         log_path=job_log_path, state_path=state_path, repo_root=repo_root,
-        workdir=workdir,
+        workdir=workdir, fire_workspace=fire_workspace,
     )
     if not background:
         return await coro
