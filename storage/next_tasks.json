@@ -32373,13 +32373,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T22:01:11.616970+00:00",
+    "completed_at": "2026-07-20T23:12:42.415989+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T22:01:11.616970+00:00",
-      "last_clean_observed_at": "2026-07-20T22:01:11.616970+00:00"
+      "resolved_at": "2026-07-20T23:12:42.415989+00:00",
+      "last_clean_observed_at": "2026-07-20T23:12:42.415989+00:00"
     }
   },
   {
@@ -32391,13 +32391,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T22:23:22.485649+00:00",
+    "completed_at": "2026-07-20T23:16:09.058733+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T22:23:22.485649+00:00",
-      "last_clean_observed_at": "2026-07-20T22:23:22.485649+00:00"
+      "resolved_at": "2026-07-20T23:16:09.058733+00:00",
+      "last_clean_observed_at": "2026-07-20T23:16:09.058733+00:00"
     }
   },
   {
@@ -32409,13 +32409,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T21:21:19.528904+00:00",
+    "completed_at": "2026-07-20T22:23:51.540407+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T21:21:19.528904+00:00",
-      "last_clean_observed_at": "2026-07-20T21:21:19.528904+00:00"
+      "resolved_at": "2026-07-20T22:23:51.540407+00:00",
+      "last_clean_observed_at": "2026-07-20T22:23:51.540407+00:00"
     }
   },
   {
@@ -36193,146 +36193,27 @@
   },
   {
     "id": "trending_repost_2026_07_18_fed政策",
-    "title": "[trending_repost] 聯準會重塑升息預期，如何用 VIX 衡量政策轉向風險？",
-    "description": "從聯準會新主席偏鷹立場與 6 月 CPI 意外降溫的矛盾切入，分析市場對利率政策不確定性的定價。可量化：比較 FOMC 會前短期隱含波動率與偏度（Skew）在政策轉向宣告前後的變化。",
-    "task_type": "trending_repost",
-    "priority": 1,
     "status": "failed",
-    "created_at": "2026-07-17T22:00:15+00:00",
+    "task_type": "trending_repost",
+    "title": "[trending_repost] 聯準會重塑升息預期，如何用 VIX 衡量政策轉向風險？",
+    "priority": 1,
     "source": "reader_facing_refill",
-    "tags": [
-      "trending_repost",
-      "reader_facing",
-      "auto_refill"
-    ],
-    "dedup_screen": {
-      "verdict": "warn_arc_near_miss",
-      "blocked": false,
-      "reason": "fuzzy descriptive arc near-miss of mile_d12825bb, mile_35eef830, mile_76475146; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
-      "saturation": 0,
-      "theme_terms": [
-        "比較",
-        "利率",
-        "fomc",
-        "後的",
-        "skew",
-        "cpi"
-      ],
-      "near_misses": [
-        {
-          "id": "mile_d12825bb",
-          "title": "同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感"
-        },
-        {
-          "id": "mile_35eef830",
-          "title": "6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%：讓市場抖動的從來不是「就業數字」本身"
-        },
-        {
-          "id": "mile_76475146",
-          "title": "事件日前別急著躲：NFP、CPI、FOMC 留下的共同線索"
-        },
-        {
-          "id": "mile_671d4c75",
-          "title": "債市和股市同時在怕，但怕的不是同一件事"
-        },
-        {
-          "id": "mile_a1fd229a",
-          "title": "市場很安靜，你該緊張還是放鬆？我們把 VIX 這件事一次講清楚"
-        }
-      ],
-      "screened_at": "2026-07-17T22:00:17+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-17T22:08:38.026435+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726"
-      },
-      {
-        "ts": "2026-07-17T22:08:46.102049+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726"
-      },
-      {
-        "ts": "2026-07-17T22:11:00.606681+00:00",
-        "from": "in_progress",
-        "to": "failed",
-        "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726"
-      }
-    ],
-    "started_at": "2026-07-17T22:08:46.102034+00:00",
+    "created_at": "2026-07-17T22:00:15+00:00",
     "completed_at": "2026-07-17T22:11:00.606667+00:00",
-    "result": "arc-saturated：FOMC-VIX 事件窗 + CBOE SKEW 增量預測力（NULL）已於 feed 發表 ~15 篇（mile_f46b6320/d6d27fbb/c5abaed7/64b710d3 等）；本週無新 FOMC 錨點，改寫僅重複既有 NULL 結論。改派同批真實事件 ai支出。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T23:07:38.524087+00:00"
   },
   {
     "id": "trending_repost_2026_07_18_台股崩跌",
-    "title": "[trending_repost] 台股創單日最大跌幅，選擇權 Skew 透露何種超跌訊號？",
-    "description": "以 7/17 台股歷史性崩跌 2,953 點切入，分析台指期與台積電個股選擇權波動率微笑（skew）的極端偏斜。可量化：歷史恐慌崩盤日的波動率極值與隨後 30 天超額報酬的均值回歸相關性。",
-    "task_type": "trending_repost",
-    "priority": 1,
     "status": "failed",
-    "created_at": "2026-07-17T22:00:23+00:00",
+    "task_type": "trending_repost",
+    "title": "[trending_repost] 台股創單日最大跌幅，選擇權 Skew 透露何種超跌訊號？",
+    "priority": 1,
     "source": "reader_facing_refill",
-    "tags": [
-      "trending_repost",
-      "reader_facing",
-      "auto_refill"
-    ],
-    "dedup_screen": {
-      "verdict": "warn_arc_near_miss",
-      "blocked": false,
-      "reason": "fuzzy descriptive arc near-miss of mile_aff342df, mile_5a20a332, mile_aee1c78c; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
-      "saturation": 4,
-      "theme_terms": [
-        "台股",
-        "恐慌",
-        "訊號",
-        "的波",
-        "台指",
-        "台積"
-      ],
-      "near_misses": [
-        {
-          "id": "mile_aff342df",
-          "title": "五檔股票扛起大盤 27.8% 權重：這種市場的保險，整張買太貴，用價差買省一半"
-        },
-        {
-          "id": "mile_5a20a332",
-          "title": "🌡️ 事件溫度計｜海外擴廠拖累毛利？台積電法說會前夕，市場到底在怕什麼"
-        },
-        {
-          "id": "mile_aee1c78c",
-          "title": "台積電法說會前，選擇權市場替『法說行情』加了多少價？答案：幾乎沒有"
-        },
-        {
-          "id": "mile_7b95b816",
-          "title": "年度等權再平衡，真的比抱著不動強嗎？台美 30 年實測拆給你看"
-        },
-        {
-          "id": "mile_02c71e74",
-          "title": "別再把美國 VIX 直接乘 1.4 來看台股風險了"
-        }
-      ],
-      "screened_at": "2026-07-17T22:00:25+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-17T22:11:00.881075+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726"
-      },
-      {
-        "ts": "2026-07-17T22:11:01.141650+00:00",
-        "from": "claimed",
-        "to": "failed",
-        "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726"
-      }
-    ],
+    "created_at": "2026-07-17T22:00:23+00:00",
     "completed_at": "2026-07-17T22:11:01.141635+00:00",
-    "result": "unverifiable event / fabrication risk：^TWII 2026-07-17 bar = NaN，無任何崩跌資料；7/16 收 45625（前日 -0.01% 持平）。seed 宣稱『歷史性崩跌 2953 點(-6.5%)』與實際資料矛盾，屬 refill scanner 合成主題。研究誠實原則禁止寫。建議修 reader_facing_refill 對 TW 事件加 primary-source 驗證。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T23:07:38.524087+00:00"
   },
   {
     "id": "trending_repost_2026_07_18_ai支出",
@@ -43541,7 +43422,7 @@
     "title": "K1623 blocked item：第三臂 MC 量化「估計段均值」在 generated-regressor 不確定性中的佔比（round-3 送審前的唯一 compute gate）",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T21:14:41.330868+00:00",
     "created_by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
@@ -43590,8 +43471,8 @@
     "started_at": "2026-07-20T19:10:17.044035+00:00",
     "last_released_at": "2026-07-20T20:00:13.405273+00:00",
     "last_release_reason": "liveness_reconcile_detached_021010e0",
-    "compute_job_id": "compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674",
-    "result": "dispatched to compute job compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674; awaiting PHASE A collection",
+    "compute_job_id": "agent-brief_k1623_armc_collection-f737f9",
+    "result": "dispatched to compute job compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1623_armc_collection-f737f9; awaiting PHASE A collection",
     "plan": "前次 MC job exit=4 為 dm-hac-lag gate false positive（凍結站點 k1623.py::dm_hln 因 worktree 路徑前綴對不上 baseline key），已由 commit 5c0e9099d 修好並實測 gate PASS。重新 enqueue compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674；等 compute worker 跑完後由後續 fire PHASE A 收件（對帳 /tmp/k1623_armc_gatefail_run_20260721.json）。"
   },
   {
@@ -45505,12 +45386,23 @@
     "description": "由 alert `dedup_gate_health` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- [warn] 10 個 narrative arc 被 block ≥3 次（最多 mile_d12825bb：4 次）— review 是否人工 unlock\n\n## 影響\ndedup/publish gate 是 feed 的總閘門（Mission #1/#4/#5 上游）。2026-06-23 同款故障曾讓平台 8 天零新文，靠老闆肉眼才發現；這則警報就是那次事故承諾的機械偵測器。\n\n## 觀察\n- 近 7 天決策：564 放行 / 94 block / 42 其他（hold/skip）\n- 最近一次放行：2026-07-20T03:25:45.900899+00:00\n- block 最多的 gate：{'legacy:block_arc_dup': 52, 'anti_ai_style': 31, 'task_generation': 7, 'legacy:block_k_coverage': 2, 'release_pool_arc_dedup': 1}\n\n## 修復入口\n完整裁決：`uv run python scripts/audit_dedup_gate_decisions.py`；black hole → 檢查 `src/volpred/publisher/publisher.py` 與 `volpred.ops.content` 的 gate 是否違反 fail-open（rule §3）；同 arc 重複 block → review 是否人工 unlock 該 arc。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-20T05:02:28.655009+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "dedup_gate_health"
+    ],
+    "completed_at": "2026-07-20T23:12:55.000584+00:00",
+    "result": "ordinary alert cleared before dispatch",
+    "status_history": [
+      {
+        "ts": "2026-07-20T23:12:55.000584+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "alert_remediation_router",
+        "note": "condition_cleared_automatically"
+      }
     ]
   },
   {
@@ -46312,14 +46204,30 @@
     "description": "release_pool 死鎖：草稿池有 2 篇、eligible=0（due_now=true），其中 2 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_d26308ba` (general, 已被擋 2 次) [lazypack_missing] 集中度警報響起時，等權重指數震得比大盤還兇\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>\n- `mile_fa57f77d` (general, 已被擋 2 次) [lazypack_missing] 東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_remediation",
     "created_at": "2026-07-20T11:01:33.259044+00:00",
     "blocked_article_ids": [
       "mile_d26308ba",
       "mile_fa57f77d"
     ],
-    "trigger": "release_pool_content_gate_deadlock"
+    "trigger": "release_pool_content_gate_deadlock",
+    "status_history": [
+      {
+        "ts": "2026-07-20T23:14:12.235850+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      },
+      {
+        "ts": "2026-07-20T23:14:12.472322+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      }
+    ],
+    "completed_at": "2026-07-20T23:14:12.472302+00:00",
+    "result": "MOOT — 上游死鎖根因已解：mile_d26308ba / mile_fa57f77d 的 lazypack render job 2026-07-20T14:15:23Z exit=0，兩篇皆已 status=published 且含懶人包段落。本任務所指的 gate blocker 不復存在，無事可修，結案避免佔用 P1 slot budget。"
   },
   {
     "id": "assign_fedadc8d",
@@ -46350,7 +46258,7 @@
     "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 2 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 2\n- eligible_before_dedup: 2\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 2\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: risk_mgmt\n  - `mile_d26308ba` (general, 已連續被擋 2 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n  - `mile_fa57f77d` (general, 已連續被擋 2 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260720_11`，指定只補仍可放行的 cluster：(任意)。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-20T11:01:52.406602+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
@@ -46376,11 +46284,31 @@
         "to": "pending",
         "by": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 47.6min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-20T23:12:24.169945+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      },
+      {
+        "ts": "2026-07-20T23:12:24.418454+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      },
+      {
+        "ts": "2026-07-20T23:14:11.990857+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
       }
     ],
-    "started_at": "2026-07-20T13:12:52.953059+00:00",
+    "started_at": "2026-07-20T23:12:24.418430+00:00",
     "last_released_at": "2026-07-20T14:00:28.385117+00:00",
-    "last_release_reason": "liveness_reconcile_detached_005f17cf"
+    "last_release_reason": "liveness_reconcile_detached_005f17cf",
+    "completed_at": "2026-07-20T23:14:11.990805+00:00",
+    "result": "release_pool_deadlock 已自然解除，驗證後 fresh no-op 結案（未執行舊快照修復）。根因=mile_d26308ba/mile_fa57f77d 缺懶人包圖組且無 render job；兩支 lazypack job 已於 2026-07-20T14:15:23Z 完成 exit=0（storage/ops/compute_queue/lazypack-mile_*.json），兩篇現況 status=published 且 content 含「懶人包」段落（jq 驗於 storage/reports/feed.json）。重跑原 detector scripts/check_alerts.py → breaches=0。"
   },
   {
     "id": "telegram-1198",
@@ -46507,7 +46435,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -46519,7 +46447,23 @@
     "release_audit_skipped_count": 10,
     "release_audit_issues": [
       "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-20T23:14:12.712254+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      },
+      {
+        "ts": "2026-07-20T23:14:12.954081+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      }
+    ],
+    "completed_at": "2026-07-20T23:14:12.954067+00:00",
+    "result": "MOOT — 上游死鎖根因已解：mile_d26308ba / mile_fa57f77d 的 lazypack render job 2026-07-20T14:15:23Z exit=0，兩篇皆已 status=published 且含懶人包段落。本任務所指的 gate blocker 不復存在，無事可修，結案避免佔用 P1 slot budget。"
   },
   {
     "id": "platform_ops_release_audit_fix_mile_fa57f77d",
@@ -46528,7 +46472,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -46540,7 +46484,23 @@
     "release_audit_skipped_count": 10,
     "release_audit_issues": [
       "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-20T23:14:13.229022+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      },
+      {
+        "ts": "2026-07-20T23:14:13.694251+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      }
+    ],
+    "completed_at": "2026-07-20T23:14:13.694234+00:00",
+    "result": "MOOT — 上游死鎖根因已解：mile_d26308ba / mile_fa57f77d 的 lazypack render job 2026-07-20T14:15:23Z exit=0，兩篇皆已 status=published 且含懶人包段落。本任務所指的 gate blocker 不復存在，無事可修，結案避免佔用 P1 slot budget。"
   },
   {
     "id": "release_deadlock_repair_20260720_12",
@@ -47253,7 +47213,7 @@
     "description": "分析 AI 重大投資後續變現率對 Nasdaq 指數波動率的影響。可量化：比較資本支出成長率與個股選擇權隱含波動率（IV）偏斜（Skew）的歷史相關性，評估下行保護成本。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "failed",
     "created_at": "2026-07-20T22:00:14+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -47311,10 +47271,24 @@
         "to": "pending",
         "by": "hourly-slot-1-f06750e74e9b463faf132a084b218949",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T23:07:57.911245+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      },
+      {
+        "ts": "2026-07-20T23:10:11.333053+00:00",
+        "from": "claimed",
+        "to": "failed",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
       }
     ],
     "note": "arc saturated: check_arc_dedup 回報 5 篇科技波動率 near-miss（mile_08fefa59 AI基建變現 / mile_78899a5c 費半 / mile_bd06ccbc / mile_2e91f5bb / mile_66c3fc3b）。本班改做期中選舉 VIX 題（arc 全新）。此題需換角度或併入既有 arc 後續。",
-    "last_released_at": "2026-07-20T22:22:07.871254+00:00"
+    "last_released_at": "2026-07-20T22:22:07.871254+00:00",
+    "completed_at": "2026-07-20T23:10:11.333036+00:00",
+    "result": "NOT WRITTEN — arc-covered (主線程 3-layer 查重)。同資產(科技巨頭/Mag7)×同機制(IV skew/下跌保費)×同結論軸(AI變現風險是否被選擇權市場定價) 已由 mile_0fa841ed「燒最多錢的科技巨頭，選擇權市場現在沒有多收下跌保費」(2026-07-05, general) 完整覆蓋；另 mile_8a5e80b0(6/27) / mile_b221e550(6/23) / mile_d1609f75(6/5) 同 arc。refill 的 dedup_screen 已標 warn_arc_near_miss(saturation=2, fail-open)，依 publishing.md 契約由 caller 做最終判定 → 判定=重複，不寫。"
   },
   {
     "id": "trending_repost_2026_07_21_晶片回檔",
@@ -47322,7 +47296,7 @@
     "description": "從台積電強勢財報後晶片板塊大跌切入，探討市場對AI高額CapEx與未來需求不確定性的恐慌。可量化角度：分析費城半導體指數（SOX）與台指選擇權隱含波動率（IV）的期限結構與偏斜度，評估市場避險情緒的定價合理性。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "failed",
     "created_at": "2026-07-20T22:00:19+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -47366,7 +47340,23 @@
         }
       ],
       "screened_at": "2026-07-20T22:00:22+00:00"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-20T23:10:11.566765+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      },
+      {
+        "ts": "2026-07-20T23:10:11.813836+00:00",
+        "from": "claimed",
+        "to": "failed",
+        "by": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56"
+      }
+    ],
+    "completed_at": "2026-07-20T23:10:11.813822+00:00",
+    "result": "NOT WRITTEN — arc-covered (主線程 3-layer 查重)。半導體×選擇權偏斜×回檔風險 已由 mile_78899a5c「費半跌了一成六，VIX 卻在睡覺」(2026-07-18，3 天前) + mile_2974cf85「晶片殺進熊市，大盤卻沒跟上」(2026-07-20，1 天前) + mile_0941e2f0(6/28 半導體修正 選擇權偏斜) 覆蓋，且最近兩篇在 72h 內。refill dedup_screen 標 warn_arc_near_miss (fail-open) → caller 判定=重複，不寫。"
   },
   {
     "id": "trending_repost_2026_07_21_美期中選舉",

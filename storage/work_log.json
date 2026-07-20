@@ -22782,5 +22782,52 @@
       "storage/drafts/trending_midterm_vix_20260721_draft.md",
       "storage/lazypack_jobs/midterm_vix_20260721/plan.json"
     ]
+  },
+  {
+    "timestamp": "2026-07-21T06:31:08+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_b222a5d7",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_b222a5d7:codex->agy",
+    "article_id": "mile_b222a5d7",
+    "job_id": "lazypack-mile_b222a5d7",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-21T07:12:06+08:00",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_21_arc_covered_dedup",
+    "outcome": "arc_covered_not_written",
+    "actor": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56",
+    "owner": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56",
+    "commit": null,
+    "summary": "PHASE A0 time-critical lane 清空（2 條 trending_repost），兩條皆判定 arc-covered 不寫。\n\n- `trending_repost_2026_07_21_ai變現`（科技巨頭 × IV skew × AI 變現風險定價）\n  → 與 `mile_0fa841ed`「燒最多錢的科技巨頭，選擇權市場現在沒有多收下跌保費」(2026-07-05, general)\n  同資產、同機制、同結論軸；另 mile_8a5e80b0 / mile_b221e550 / mile_d1609f75 同 arc。\n- `trending_repost_2026_07_21_晶片回檔`（半導體 × 偏斜 × 回檔風險）\n  → 與 `mile_78899a5c`(2026-07-18，3 天前) + `mile_2974cf85`(2026-07-20，1 天前)\n  + `mile_0941e2f0`(6/28) 同 arc，最近兩篇在 72h 內。\n\n判定依據：refill 生成端的 `dedup_screen` 兩條都已標 `warn_arc_near_miss`\n(saturation=2，fail-open)，依 publishing.md 契約由 caller 做最終判定；\n主線程補跑 `check_arc_dedup.py --audience general`（兩題皆 exit 0 但回 near-miss + 具名清單）\n並 grep `storage/reports/feed.json` 做層-2 查重後判定重複。\n\n系統面結論：**不是 bug**。生成端 screen 依設計 fail-open 並具名列出 near-miss，\n消費端（本 fire）依契約攔下 —— 兩層各司其職。無需開 followup。\n\n註：今日 trending_repost 已用 1/2 (`trending_repost_2026_07_21_美期中選舉` 06:58)，\n本次兩條皆不寫，故今日仍為 1/2、未觸 cap。"
+  },
+  {
+    "timestamp": "2026-07-21T07:12:06+08:00",
+    "task_type": "experiment",
+    "task_id": "k1623_mc_third_arm_mean_structure_share",
+    "outcome": "dispatched_to_agent_queue",
+    "actor": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56",
+    "owner": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56",
+    "commit": null,
+    "summary": "PHASE A compute-queue followup 清空：K1623 arm C 收件（collect_completed）已派工。\n\n上游 job `compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674`\n於 2026-07-20 19:20 UTC 成功完成（exit=0、experiment_gate=passed），\n`claude_followup` 待派。依 model_router（experiment → opus / **xhigh**）判定為長工作，\n**不可用 Agent tool 也不可 spawn `claude -p`**（3000s fire cap），改走\n`compute_queue.py enqueue-agent` 交 detached worker。\n\n- 新 job：`agent-brief_k1623_armc_collection-f737f9`\n- cwd：`.claude/worktrees/dispatch-slot-2-c5cafe39-k1623`（本輪禁 merge，round-3 PASS 才可）\n- result-artifact：`experiments/k1623/k1623_arm_c_collection_verdict.json`\n- source task `k1623_mc_third_arm_mean_structure_share` → in_progress（A0 不再重覆浮出）\n- 原 job 已 `mark-followup-dispatched`，pending-followup 佇列歸零\n\nBrief 重點（`/tmp/brief_k1623_armc_collection.md`）：先驗 gate 再看結論\n（reproduction 5/5 + A−B 對凍結 rev2 逐位元 + 對 gate-fail 快照\nsha256 94081a31… 應逐位元相同，不同即 finding 不得湊）；README 6.4 的 finding 2\n必須從「SE 低估主因是 1/(2√m) 漸近公式」**降級為 asset-dependent**\n（實測只有 VIX/SPY 2/5 屬 asymptotic_formula）；B−C 只准寫成「相對 ELW 自身\ngrand-mean demeaning 的增量成本」，寫成「估計任何均值的成本」即重蹈 arm B retract；\nCodex primary-path 未審（額度到 2026-07-25）列為 blocking_open_items 不得消失。"
+  },
+  {
+    "timestamp": "2026-07-21T07:14:34+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_release_pool_deadlock_20260720",
+    "outcome": "resolved_fresh_noop",
+    "actor": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56",
+    "owner": "hourly-slot-1-52e01761f97e42ce80c9439b3eb11a56",
+    "commit": null,
+    "summary": "release_pool_deadlock critical alert 結案 —— 驗證後判定「已自然解除」，走 fresh no-op，\n未照 2026-07-20 11:00Z 的舊快照執行修復（alert description 明文要求：改變發布/外部狀態前\n必須用原 detector 重新驗證仍 breached）。\n\n**重新驗證（本 fire，2026-07-21 07:2x CST）**\n- 重跑原 detector `scripts/check_alerts.py` → `breaches=0 sent=0`\n- release-pool-auto: `skip reason=interval_not_due_age=11min`（非 due_now，死鎖前提不成立）\n\n**根因與現況（逐項查證，非推測）**\nalert 快照時的 blocker 是兩篇 general 稿缺「懶人包圖組」且從未排過 render job。\n- `storage/ops/compute_queue/lazypack-mile_d26308ba.json` → status=completed, exit_code=0,\n  completed_at=2026-07-20T14:15:23Z\n- `storage/ops/compute_queue/lazypack-mile_fa57f77d.json` → 同上\n- `storage/reports/feed.json`：兩篇皆 `status=published`、`audience=general`、\n  content 含「懶人包」（jq test 驗證 has_lazypack=true，len 3557 / 3491）\n\n即 alert 建立後 ~3.25h，lazypack render 補齊 → 內容閘門放行 → 兩篇已發出。\n死鎖是**真的解了**，不是被 interval gate 掩蓋。\n\n**連帶清掉 3 個已失效的 P1（stale backlog，佔 slot budget）**\n- `release_deadlock_repair_20260720_11`（自動補救任務）\n- `platform_ops_release_audit_fix_mile_d26308ba`\n- `platform_ops_release_audit_fix_mile_fa57f77d`\n三者指向的 gate blocker 皆已不存在 → 標 succeeded (MOOT)，附查證依據。\n背景：P1 pending=43 已觸發 dispatch_slot_budget surge（cap 6），\n清掉「無事可做卻永遠排在最前面」的 P1 是讓 surge 訊號恢復意義的必要動作。\n\n**未動的事**：沒有跑 `release-pool-by-settings --force`（該指令會提前發文、破壞 cadence，\n且無 dry-run 模式），改以 artifact + feed 狀態直接查證 eligibility。"
   }
 ]
