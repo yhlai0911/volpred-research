@@ -53,6 +53,9 @@ AGENTIC_MARKERS = ("claude", "codex", "agy")
 
 SPAWNERS = {"run", "Popen", "call", "check_call", "check_output"}
 TIMEOUT_CALLS = {"run", "call", "check_call", "check_output", "communicate", "wait"}
+# Every function that actually reaps a timed-out spawn's whole group. Matched as
+# a called name in the AST, so the word appearing in a docstring does not count.
+KILL_OWNERS = {"killpg", "kill_pgid", "kill_tree"}
 
 # Pure-metadata probes: the binary prints one line and exits, spawning nothing.
 # `codex --version` is how src/volpred/ops/alerts.py checks the failover binary is
@@ -205,6 +208,7 @@ def _analyze(path: Path) -> dict:
     spawns_agentic = False
     has_timeout = False
     new_session = False
+    kills_group = False
 
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -243,18 +247,22 @@ def _analyze(path: Path) -> dict:
         if any(k.arg == "start_new_session" for k in node.keywords):
             new_session = True
 
-    # `kill_tree` is procutil's strict superset of `kill_pgid`: it signals the
-    # group via kill_pgid AND walks the `ps` parent table for descendants that
-    # called setsid() and thereby escaped the group (procutil.py, 2026-07-13
-    # mile_aa4713db). Omitting it here made this gate red on the file that had
-    # adopted the STRONGER kill — gen_lazypack_agy.py, which does exactly what
-    # the docstring above asks for. Its sibling gen_lazypack_codex.py passed only
-    # because the word "killpg" survives in one prose docstring line describing
-    # the kill it no longer uses; deleting that comment would have turned a
-    # correct file red. Substring matching on the owner's NAME is the contract,
-    # so the set of accepted owners has to include every real one.
-    KILL_OWNERS = ("killpg", "kill_pgid", "kill_tree")
-    kills_group = any(owner in src for owner in KILL_OWNERS)
+        # Accept any of the three group-killers actually CALLED. `kill_tree` is
+        # procutil's strict superset of `kill_pgid`: it signals the group via
+        # kill_pgid AND walks the `ps` parent table for descendants that called
+        # setsid() and thereby escaped the group (procutil.py, 2026-07-13
+        # mile_aa4713db). Omitting it made this gate red on the file that had
+        # adopted the STRONGER kill — gen_lazypack_agy.py (CI run 29757690888).
+        #
+        # Read from the AST, not from `src`. A substring scan cannot tell a real
+        # call from the same word sitting in a docstring: gen_lazypack_codex.py
+        # calls kill_tree but was passing on the word "killpg" left behind in
+        # prose describing the kill it no longer uses, so deleting a comment
+        # would have turned a correct file red. The other three properties here
+        # are already read from the AST; this one was the odd man out.
+        if fname in KILL_OWNERS:
+            kills_group = True
+
     return {
         "spawns_agentic": spawns_agentic,
         "has_timeout": has_timeout,

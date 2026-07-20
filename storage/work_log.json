@@ -22662,5 +22662,20 @@
     "failure_class": "quota",
     "primary_renderer": "scripts/gen_lazypack_codex.py",
     "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-21T01:15:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci_red_29744499806_killpg_gate_ast",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-23bcf38a31114fc29aa0e0e09c20965c",
+    "owner": "hourly-slot-1-23bcf38a31114fc29aa0e0e09c20965c",
+    "commit": null,
+    "summary": "CI-red fire triage: 兩個 failure 已由 ff4c521a2 正確修復（非放水，已獨立驗證 kill_tree 確為 kill_pgid 的 superset）。根治殘餘根因：test_agentic_cli_timeout_killpg 的 kills_group 判定原以子字串掃原始碼，是四個判定中唯一非 AST 的，導致 gen_lazypack_codex.py 靠 docstring 殘留的 killpg 字樣過關、而真正採用更強 kill_tree 的 gen_lazypack_agy.py 被誤判為違規。改為與其他三項同樣讀 AST call name。",
+    "verification": "合成反向測試：只有 docstring 含 killpg 而無真呼叫的檔案，舊版誤判合格、新版正確判違規；真呼叫檔通過。兩個真實 renderer 皆 pass。",
+    "ci_run": "29757690888",
+    "files": [
+      "scripts/tests/test_agentic_cli_timeout_killpg.py"
+    ]
   }
 ]
