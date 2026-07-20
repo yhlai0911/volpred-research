@@ -216,7 +216,10 @@
 | **D6b compute stale-running reaper** | ✅ 2026-07-20 | worktree `c817c95fe` → merge `86e142305`；flock-invariant + pid-reuse-safe 指紋五種裁決、孤兒子行程 skip 防護；requeue 收 worker_killed；36+43+107 tests 綠；:15 班 launchd drain 已自然接手 |
 | **H2 出站回報收斂** | ✅ 2026-07-20 | worktree `04e03a477` → merged；token 三班→一班（owner=token_report_daily 含落檔收編）、work_summary 併入 boss_report 20:10 日結班並退役（wrapper/_legacy、LaunchAgent bootout、host crontab 殘班修正已執行）；**定期信 ≤7→4 班/日**；通道矩陣入 Layer Map（skill 通知已寄）；merge 後 manifest/policy 26 tests 綠 |
 | **CI 紅燈裁定（2026-07-20 12:00/13:00 兩班）** | ✅ 非迴歸 | 6 個紅全屬「重構中間態被 hourly auto-push」（manifest 缺項/writer policy 未註冊/map 時序）；現 HEAD 本地複驗 27 passed 全綠；14:00 班 in-progress 預期綠 |
-| Phase 2：E1E2 scripts 瘦身 | 🔄 agent 全量 pytest 收斂中（一次越界刪空目錄已糾正、零實質損失） | — |
+| Phase 2：**E1E2 scripts 瘦身** | ✅ 2026-07-20 | worktree `a15fba0d7` → merge `0a3e41be2`；removed 13 / archived 43（含 K55/K79 論文源碼依不遺失原則改歸 _legacy 保檔）/ 反查救回 7 支活工具；3789 tests 綠；其列 4 pre-existing 紅在 main 已被先前修復覆蓋（26 passed 複驗）；頂層 285→231 |
+| **C3 雙 sync 引擎合併** | ✅ 2026-07-20 | worktree `ecfdfa389` → merge `8b2cffb25`；compute_diff 唯一判準（補 category/details/phase 盲點）；**順手抓到 pre-existing 資料流失 bug**：`details.view_display` seed 被每次 re-sync 清掉 → SERVER_RESIDENT_DETAILS_KEYS 保護落地；線上 dry-run 1576→3 flagged；35 tests 綠。**殘留主線程決策**：257 篇 pre-freeze 文章補種 view seed（`seed_article_view_counts.py --apply` rank-preserving） |
+| **GitGuardian 事件（04e03a477/a0dfd2d）** | ✅ 誤報結案 2026-07-20 | 高熵字串 = wrapper manifest 的 SHA-256 checksum；私有 repo、無機密形狀、.env 從未入 git；`.gitguardian.yaml` 防再誤報；**待老闆**：GG dashboard 點 resolve as FP |
+| 其餘 | ⏳ 依 §5，Phase N 收尾時 enqueue Phase N+1 | — |
 | **F3+F5 閉環訊號源補強** | ✅ 2026-07-20 | worktree `a078af56a` → merge `63060b573`；F3 = alert 三出口記 incident_candidates.jsonl + dreaming `detect_unfiled_incident_class`（立案辨識契約機械可閉合）；F5 = `observation_ledger.py` + `volpred ops observation` CLI + 逾期 breach detector，4 現存觀察項入帳（pregate=permanent、Deliverable-8 07-27、claim-next 07-30、multi-slot 07-21）；main 複驗 92 tests + map audit 全對齊；skill 通知已寄；手冊已同步 |
 | **WS-I 工作產物落地保證**（owner 2026-07-20 新指令：杜絕無效工作 — 知識庫/文章/論文必記錄、寫了必發得出、worktree 產物必可溯源） | 🔄 agent 盤點+補 actuator 中 | 活證據：18 idle worktrees 部分含未合併 commit、mile_47c4bc3e 被 skip 20 次、169 K 目錄 code-without-results；方法 = 既有機制地圖 → 只補「偵測有了沒 actuator」的真缺口（findings→開單管線），不疊新儀器 |
 | 其餘 | ⏳ 依 §5，Phase N 收尾時 enqueue Phase N+1 | — |
