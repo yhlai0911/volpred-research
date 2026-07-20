@@ -1,0 +1,112 @@
+{
+  "task": "assign_1238781f followup — K741/K904 NFP canonical: multiplicity disclosure + Codex certification",
+  "date": "2026-07-20",
+  "branch": "k741-nfp-canonical",
+  "test_variant_chosen": "welch",
+  "test_variant_rationale": "Welch unconditionally is the standard recommendation (Zimmerman 2004; Ruxton 2006; Delacre, Lakens & Leys 2017): negligible power cost under equal variances, and selecting the variant from a variance pre-test inflates Type I error. It also aligns k741 with sibling k904 and with the label main_v3.tex already carried. The reasoning is sound but it is NOT pre-specification, and is not presented as such.",
+  "test_variant_chosen_a_priori": false,
+  "test_variant_when_chosen": "during the 2026-07 revision, with both variants' p-values already known. An earlier draft of this file described the choice as 'a priori'; that claim was false and was withdrawn after Codex review 2026-07-20 (verdict FAIL).",
+  "brief_premise_corrected": "The dispatch brief suggested Welch on the grounds that n=194 vs 3890 and 'dispersion is unequal'. That premise is empirically false here: Brown-Forsythe p = 0.48, sd ratio 0.94 — no evidence of heteroscedasticity. Welch is adopted on the unconditional-default argument (Zimmerman 2004; Ruxton 2006; Delacre et al. 2017), NOT because this sample is unequal-variance.",
+  "overall_p_student": 0.050561278499795845,
+  "overall_p_welch": 0.039351447808146874,
+  "levene_brown_forsythe_p": 0.48019579642411037,
+  "holm_adjusted": {
+    "Low": 0.10387824533088244,
+    "Medium": 0.10387824533088244,
+    "Elevated": 0.5329009894214751,
+    "High": 0.706661156646142
+  },
+  "holm_survivors": [],
+  "holm_families_min_adjusted_p": {
+    "overall_pair": 0.07222481912175503,
+    "regimes_only": 0.10387824533088244,
+    "primary_overall_plus_regimes": 0.12984780666360304,
+    "all_six": 0.15581736799632367
+  },
+  "anything_clears_5pct_under_any_family": false,
+  "narrative_downgraded": true,
+  "narrative_downgrade_summary": "Overall effect no longer claimed significant (Holm over the two overall comparisons adjusts both to 0.072, and Student's gives 0.051). Regime-level significance withdrawn entirely — nothing survives Holm under any family. The absorption mechanism paragraph reframed from observed fact to one interpretation, with its two missing supports stated inline.",
+  "reproduce_gate": "135/135",
+  "xelatex_rc": 0,
+  "xelatex_pages": 44,
+  "xelatex_undefined_refs": 0,
+  "pytest": "100 passed (6 files: nfp_official_release_dates, event_dates, event_dates_release_selection, reproduce_check, paper_adjudication_gap_alert, cpi_t0_official_release_dates)",
+  "experiment_gates": {
+    "k741": "PASS",
+    "k904": "PASS"
+  },
+  "codex_verdict_k741": "PASS",
+  "codex_verdict_k904": "PASS",
+  "codex_review_rounds": {
+    "k741": [
+      {
+        "round": 1,
+        "commit": "4af5056bb",
+        "verdict": "FAIL",
+        "blockers": [
+          "'a priori' / 'not chosen for favourability' not supportable — variant chosen knowing both p-values",
+          "Holm family excluded the two overall tests without principled basis; overall pair alone adjusts to 0.0722"
+        ]
+      },
+      {
+        "round": 2,
+        "commit": "0d2835eb0",
+        "verdict": "FAIL",
+        "blockers": [
+          "both withdrawn defences still alive in methodology_deltas, which regenerates into the JSON",
+          "same for the HEADLINE_EQUAL_VAR comment",
+          "interpretation paragraph stated the absorption mechanism as observed fact"
+        ]
+      },
+      {
+        "round": 3,
+        "commit": "97a89ba97",
+        "verdict": "PASS",
+        "blockers": []
+      }
+    ],
+    "k904": [
+      {
+        "round": 1,
+        "commit": "97a89ba97",
+        "verdict": "FAIL",
+        "blockers": [
+          "map_forward exclusions recorded but run_cell did not raise — headline event loss not fail-closed",
+          "README falsely claimed both arms 195/195 (proxy arms are 196/196) and called a 1.04e-4 mismatch bit-level reproduction",
+          "chart3 presents archived proxy ratios as current K904 with an unsupported absorption conclusion"
+        ]
+      },
+      {
+        "round": 2,
+        "commit": "834b6144c",
+        "verdict": "PASS",
+        "blockers": []
+      }
+    ]
+  },
+  "verdict_files": [
+    "experiments/k741/review_verdict.json",
+    "experiments/k904/review_verdict.json"
+  ],
+  "review_artifacts": [
+    "experiments/k741/review_k741_codex_20260720.md",
+    "experiments/k741/review_k741_codex_20260720_round2.md",
+    "experiments/k741/review_k741_codex_20260720_round3.md",
+    "experiments/k904/review_k904_codex_20260720.md",
+    "experiments/k904/review_k904_codex_20260720_round2.md"
+  ],
+  "commits": [
+    "0854571e4 docs(k741,k904): archive the five Codex review artifacts from this round",
+    "834b6144c fix(k904): fail closed on unmapped releases; correct two false README claims; canonical figure",
+    "97a89ba97 fix(k741,paper): purge the withdrawn defences from methodology_deltas; soften mechanism",
+    "0d2835eb0 fix(k741,paper): withdraw the \"a priori\" claim and widen the Holm family",
+    "4af5056bb fix(k741,paper): fix the t-test variant a priori and disclose multiplicity"
+  ],
+  "merge_blockers_remaining": [],
+  "residuals_for_main_thread": [
+    "PUBLISHED CONTENT: the k904 feed article (storage/reports/feed.json) still shows k904_chart3_nfp_by_vix.png and quotes proxy-arm numbers (1.23/1.17/1.15/0.98, overall 1.14/p=0.074) in its prose. Those are now known to come from the first-Friday proxy. The canonical figure (k904_chart3_nfp_by_vix_canonical.png) and numbers exist; re-pointing or correcting the published article is outward-facing and was NOT actioned from the worktree (feed.json is off-limits to worktree agents).",
+    "The archived chart3 PNG bytes were deliberately left untouched for the same reason; the k904 README now labels it archived-proxy and not to be cited as current.",
+    "paper/volatility-absorption/experiments/ holds stale copies of the pre-canonical k741/k904 scripts. reproduce.py binds to the repo-level experiments/ dir, so the gate is unaffected, but a referee replicating from paper/ alone would not find the canonical scripts. Pre-existing; not introduced or fixed here.",
+    "The canonical k741 script requires FRED_API_KEY and hits the FRED network API (use_cache=False). The worktree has no .env, so the key must be exported from the main repo to re-run."
+  ]
+}
