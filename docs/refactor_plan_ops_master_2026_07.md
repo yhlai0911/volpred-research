@@ -217,4 +217,5 @@
 | **CI 紅燈裁定（2026-07-20 12:00/13:00 兩班）** | ✅ 非迴歸 | 6 個紅全屬「重構中間態被 hourly auto-push」（manifest 缺項/writer policy 未註冊/map 時序）；現 HEAD 本地複驗 27 passed 全綠；14:00 班 in-progress 預期綠 |
 | Phase 2：E1E2 scripts 瘦身 | 🔄 agent 全量 pytest 收斂中（一次越界刪空目錄已糾正、零實質損失） | — |
 | **F3+F5 閉環訊號源補強** | ✅ 2026-07-20 | worktree `a078af56a` → merge `63060b573`；F3 = alert 三出口記 incident_candidates.jsonl + dreaming `detect_unfiled_incident_class`（立案辨識契約機械可閉合）；F5 = `observation_ledger.py` + `volpred ops observation` CLI + 逾期 breach detector，4 現存觀察項入帳（pregate=permanent、Deliverable-8 07-27、claim-next 07-30、multi-slot 07-21）；main 複驗 92 tests + map audit 全對齊；skill 通知已寄；手冊已同步 |
+| **WS-I 工作產物落地保證**（owner 2026-07-20 新指令：杜絕無效工作 — 知識庫/文章/論文必記錄、寫了必發得出、worktree 產物必可溯源） | 🔄 agent 盤點+補 actuator 中 | 活證據：18 idle worktrees 部分含未合併 commit、mile_47c4bc3e 被 skip 20 次、169 K 目錄 code-without-results；方法 = 既有機制地圖 → 只補「偵測有了沒 actuator」的真缺口（findings→開單管線），不疊新儀器 |
 | 其餘 | ⏳ 依 §5，Phase N 收尾時 enqueue Phase N+1 | — |
