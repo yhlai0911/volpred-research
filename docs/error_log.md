@@ -162,8 +162,8 @@
 
 ## I. Chart / CJK 豆腐字 / renderer domain model
 
-**規則**：每篇 reader-facing 文章要有真圖表，不可用 ASCII / 文字框冒充；中文圖必設 CJK 字型（有 helper 還要有 enforcement，否則復發）。懶人包 renderer 是 data-bound plan.json 渲染，LLM 只草擬文案 / 選 evidence path，**絕不重寫渲染 code**（每篇都讓 LLM 重寫 = domain model 錯誤）。
-**機械 owner**：`scripts/lazypack_render.py`（strict data-bound）+ font enforcement + `lazypack-infographic` skill。
+**規則**：每篇 reader-facing 文章要有真圖表，不可用 ASCII / 文字框冒充；中文圖必設 CJK 字型（有 helper 還要有 enforcement，否則復發）。懶人包 renderer 是 data-bound plan.json 渲染，**主線程 LLM** 只草擬文案 / 選 evidence path，**絕不重寫渲染 code**（每篇都讓主線程 LLM 即興重寫 = domain model 錯誤）。〔2026-07-15 boss directive 補充：codex bespoke path（`gen_lazypack_codex.py`）是**受控例外** — codex 寫的 per-article 腳本 bounded、存檔、可重跑、receipt 驗證，與本條禁的「主線程即興重寫、無留痕」不同類；現行順位 codex=PRIMARY、deterministic=logged FALLBACK，見 `lazypack-infographic` skill。〕
+**機械 owner**：`scripts/gen_lazypack_codex.py`（PRIMARY）+ `scripts/lazypack_render.py`（strict data-bound FALLBACK）+ font enforcement + `lazypack-infographic` skill。
 **代表 incident**：
 - 2026-07-14 09:07 **3-STRIKE** 豆腐字圖表第三次上線 + CI 時間炸彈測試 — Q3
 - 2026-07-13 22:48 CJK 圖表豆腐字第二次復發：有 helper、沒有 enforcement — Q3

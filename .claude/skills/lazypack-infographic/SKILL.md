@@ -14,21 +14,34 @@ description: |
 
 每篇一般讀者文章在 reader-visible 邊界必須有文末 `## 懶人包圖組`，通常含 2–4 張獨立 PNG。每張只講一種資訊型態：概念、方法、結果或結論；禁止把全部資訊塞進單張。
 
-## Primary path：strict plan → deterministic renderer
+## 渲染鏈：codex bespoke = PRIMARY，deterministic = FALLBACK
 
-唯一 primary renderer 是：
+三層順位（boss 2026-07-15 拍板；provenance 見下方「視覺分層」）：
 
-```bash
-uv run python scripts/lazypack_render.py --plan <plan.json> --out-dir <dir>
-```
+1. **PRIMARY = `codex exec` bespoke poster**：
 
-這條路徑只讀結構化 plan 與 plan 宣告的 evidence JSON，以固定模板產生 PNG；不呼叫 Codex、Claude、NotebookLM 或影像模型，也不為每篇文章生成 Python 程式。模板目前支援 `concept`、`method`、`results`（`takeaway` 由結果型模板呈現）；自動折行、縮字與卡片配置由 renderer 負責。
+   ```bash
+   uv run python scripts/gen_lazypack_codex.py \
+     --article-id <mile_id> --plan <plan.json> --out-dir <dir>
+   ```
 
-LLM 的責任只到：讀 evidence、選 panel、寫繁中短文、指定 JSON 欄位綁定。LLM 不得把 evidence 數字抄成 literal、不得寫 renderer、不得在 layout fail 後修補程式。
+   codex **寫**一支 data-bound Pillow/matplotlib 腳本、本 process 本地執行；腳本存檔於 out-dir、可重跑復現。
+
+2. **FALLBACK = deterministic renderer**（模板級外觀，只准當 fallback）：
+
+   ```bash
+   uv run python scripts/lazypack_render.py --plan <plan.json> --out-dir <dir>
+   ```
+
+   codex 不可用（CLI 故障 / **額度耗盡** / 逾時 / 修復輪耗盡）時**順位自動生效** — async 管線由 `_record_fallback` 機械留痕；互動 session 手動走 fallback 必須在 work_log 註記。禁止 silent fallback。
+
+3. **NotebookLM AI-poster = 最後備援**：僅前兩條都不可用時人工授權 + 覆核；不得自動 fallback。
+
+兩條渲染路徑吃**同一份 strict plan v1**（schema 見下；owner = `lazypack_render.py`），evidence hash 驗證與 data-bound 硬規則不因 renderer 而異。主線程 LLM 的責任只到：讀 evidence、選 panel、寫繁中短文、指定 JSON 欄位綁定。主線程 LLM 不得把 evidence 數字抄成 literal、不得自己寫渲染腳本、不得在 layout fail 後修補程式 — bespoke 腳本由 codex 寫、修復輪也由 codex 修（`gen_lazypack_codex.py` bounded repair rounds）。
 
 ## 生圖時機：draft async、立即發佈同步
 
-- **draft（一般 daily_article 等）**：正文 publish 成 draft 後 enqueue；compute worker 以同一 deterministic renderer 出圖、上傳、append section、單篇 re-sync。
+- **draft（一般 daily_article 等）**：正文 publish 成 draft 後 enqueue；compute worker 走 codex-primary 渲染鏈（失敗自動 logged fallback 到 deterministic renderer）出圖、上傳、append section、單篇 re-sync。
 
   ```bash
   uv run python scripts/lazypack_async_render.py enqueue \
@@ -37,7 +50,7 @@ LLM 的責任只到：讀 evidence、選 panel、寫繁中短文、指定 JSON �
   uv run python scripts/compute_queue.py show lazypack-<mile_id>
   ```
 
-- **立即發佈（event_article / trending_repost / published daily_digest）**：先同步執行 renderer，完成上傳與 section append 後才 publish。
+- **立即發佈（event_article / trending_repost / published daily_digest）**：先同步執行同一 codex-primary 渲染鏈（`gen_lazypack_codex.py`；失敗才 logged fallback 到 `lazypack_render.py`），完成上傳與 section append 後才 publish。
 
 Gate 邊界單一來源：`volpred.publisher.publisher.lazypack_required_at()`；draft/scheduled 建檔可先放行，published 必須已有 section。
 
@@ -130,12 +143,12 @@ Root 必填 `schema_version: 1`、`title`、`evidence`、`panels`。`evidence` �
 老闆 2026-07-15 晚間直接指令：「懶人包圖不是改走 codex 生成嗎？現在的懶人包圖還是 render 得很醜」— 據此，原「未來選項」正式啟動，**`codex exec` bespoke poster（`scripts/gen_lazypack_codex.py`）成為所有 reader-facing 懶人包的預設 primary**（不再限旗艦篇）：
 
 1. **PRIMARY = `codex exec` bespoke poster**（`scripts/gen_lazypack_codex.py`）：codex **寫**一支 data-bound Pillow/matplotlib 腳本、本 process 本地執行；每個數字由 evidence JSON 讀出、腳本存檔可重跑（研究誠實不變）；ChatGPT 訂閱 flat-rate 零增量成本。CLI：`--article-id <mile_id> --source <evidence.json> --plan <plan.json> --out-dir <dir>`。
-2. **FALLBACK = 確定性 renderer（`lazypack_render.py`）**：codex 不可用（CLI 故障 / 逾時 / 修復輪耗盡）時的可靠退路 — 零 LLM、秒級、零幻覺，但視覺是模板級（老闆已兩度嫌醜），**只准當 fallback，fallback 使用必須在 work_log 註記**（不得 silent）。
+2. **FALLBACK = 確定性 renderer（`lazypack_render.py`）**：codex 不可用（CLI 故障 / 額度耗盡 / 逾時 / 修復輪耗盡）時的可靠退路，**順位自動生效** — 零 LLM、秒級、零幻覺，但視覺是模板級（老闆已兩度嫌醜），**只准當 fallback；async 管線由 `_record_fallback` 機械留痕，互動 session 手動 fallback 必須在 work_log 註記**（不得 silent）。
 3. **NotebookLM AI-poster → 最後備援**：僅在前兩條都不可用時人工授權 + 覆核；不得自動 fallback。
 
 按張計費影像 API（`gpt-image-2`、付費 Gemini key 等）仍禁止用於此流程。
 
-> **管線改寫（進行中）**：`lazypack_async_render.py` 目前仍深度綁定 deterministic renderer（strict plan + hash-receipt）；改接 codex 路徑屬 platform_ops task `lazypack_async_codex_primary`（2026-07-15 建）。管線改完前：**互動 session / dispatch agent 發佈 reader-facing 文章時直接呼叫 `gen_lazypack_codex.py`（PRIMARY），不要 enqueue 舊 async 佇列**；async 佇列只服務歷史 backlog。
+> **管線改寫已落地（2026-07-16 commit c89a87021）**：`lazypack_async_render.py` 已接 codex-primary — compute worker `run` 先跑 `gen_lazypack_codex.py`，失敗才走 deterministic fallback 並寫 `_record_fallback` 事件（receipt 記 `primary_renderer` / `fallback_renderer`；gate = `tests/test_lazypack_async_pipeline.py`）。draft 文章照常 enqueue async 佇列即可；同步（立即發佈）與 async 兩條 lane 現在是同一條渲染鏈。
 
 ## 發佈後處理
 
@@ -145,7 +158,8 @@ Root 必填 `schema_version: 1`、`title`、`evidence`、`panels`。`evidence` �
 
 ## 交叉參考
 
-- `scripts/lazypack_render.py --help`（plan schema、format、CLI）
-- renderer 與 async pipeline tests（合法/缺欄位/舊 list/layout regression）
+- `scripts/gen_lazypack_codex.py`（PRIMARY bespoke harness；flow / timeout / repair rounds 見其 docstring）
+- `scripts/lazypack_render.py --help`（plan schema、format、CLI；strict plan v1 的 owner）
+- renderer 與 async pipeline tests（合法/缺欄位/舊 list/layout regression、primary→fallback receipt）
 - `.claude/rules/publishing.md`（reader-visible gate）
-- `scripts/lazypack_async_render.py`（draft queue）
+- `scripts/lazypack_async_render.py`（draft queue；codex-primary + logged fallback）
