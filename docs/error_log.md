@@ -492,3 +492,15 @@ Supabase 只是加強覆蓋。因此 (a) 本地 feed 讀不到 = 全盲 → 丟*
 路徑，第二次發生時系統對「這是老問題」是無知的——老闆說「又」，系統說「新問題」。**沒立案的 class，
 第二次發生等於第一次。** 另一條：**查重要守在產出端，不能只守在意圖端**；意圖端的 gate 都是可繞過的，
 只有讀者看得到的那個 artifact 是無法繞過的必經點。
+
+## 2026-07-20 feed「排列時間亂」二度被老闆點名 → 顯示層 cluster 重排全面退役 — FIXED（STRIKE 2）
+
+**現象**：老闆問「前端文章排列時間為什麼是亂的？」。實查：跨日單調 invariant（2026-07-07 day-bucket 修復）仍成立，亂感來自**同日內 diversify interleave**（設計保留的日內重排）+ 首頁精選區塊夾舊文。同類感知問題第二次（前次 2026-07-07「7/5 排在 7/6 後」）。
+
+**根因（domain model）**：「主題分散」這個 concern 有兩個 owner — 發佈端 per-cluster cadence budget（正確層）+ 顯示層 `diversifyFeedItems` 重排（錯誤層）。上次只把顯示層重排「加界」（day-bucket），沒有收斂 owner；日內重排殘留照樣違反讀者「新的在上面」心智模型。
+
+**解決（anti-stacking 收斂）**：顯示層重排全面退役 — `feed-diversify.mjs` + 舊 chronology 測試刪除；`page.tsx`/`FeedBrowser`/`v3 useV3Data`/`radar-data`/feed API 的 `diversify` 參數全移除；`getCachedClusterFeed`→`getCachedFeedViaRpc`（保住 2026-06-22 首頁 TTFB cache 教訓）。主題分散唯一 owner = 發佈端 cluster cadence（既有 cluster-cap alert 續管）。`verify-regressions.mjs` 改立**硬 invariant：feed published_at 嚴格不增**；順修 7/1 起就紅的 paper formatUpdated guard。前端 commit `1f3cab0`，deploy-zeabur-safe 上線。
+
+**驗證**：線上 `/api/publications/feed?limit=12` 12/12 非增序；draft 正確排除；typecheck/build/static regression 全綠。附帶查證非本因：Supabase 3 筆 published_at NULL 列皆 `unpublished`（前端 status filter 已排除）；最新兩篇未現身為 `draft`（release 前正常）。
+
+**教訓**：顯示層「有界重排」仍是重排 — strike 2 就該把 concern 收斂回單一 owner，而不是把錯誤層修得更精緻。讀者面順序類 invariant 一律寫進 regression verifier，且 verifier 要真的有人跑（本次發現它自 7/1 紅著沒人知 → 已修，後續由 F1 layer-map audit 把 verify:regressions 掛進 CI 的缺口記入 ops master plan WS-F1）。
