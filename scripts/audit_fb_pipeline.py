@@ -137,16 +137,26 @@ def _canonical_fb_draft_path(mile_id: str) -> Path:
 
 
 def _scan_missing_drafts(data: list) -> list[dict]:
-    """awaiting_interactive_session entries whose canonical draft file is absent.
+    """Non-terminal entries whose canonical draft file is absent.
 
     This catches the failure mode where a writer marked the handoff status but
     never persisted the finished post to storage/drafts/fb_<mile_id>.md, so an
-    interactive session has no reference copy to publish from."""
+    interactive session has no reference copy to publish from.
+
+    2026-07-20 widened from HANDOFF_STATUSES to all non-terminal statuses.
+    The scan used to look only at `awaiting_interactive_session`, but the
+    common failure shape is a `pending_*` entry that never got a draft written
+    (the publish班 filed a fb_repost_* followup instead of persisting the post).
+    Those stayed invisible here and simply aged out at the 48h TTL — a scan of
+    feed.json on 2026-07-20 found 23 of 31 `expired_skip` entries had no draft
+    that ever existed. A missing draft means the item can never succeed, so it
+    should surface immediately regardless of status or age, not expire quietly.
+    """
     missing = []
     seen: set[str] = set()
     for e in data:
         s = str(e.get("fb_post_status", "")).strip().lower()
-        if s not in HANDOFF_STATUSES:
+        if not s or s in TERMINAL_STATUSES:
             continue
         mile_id = e.get("mile_id")
         if not mile_id or mile_id in seen:

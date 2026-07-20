@@ -22217,5 +22217,15 @@
     "owner": "hourly-slot-1-b0f6761fd2ad44bab00554d0320efc5a",
     "commit": null,
     "summary": "PHASE A0 急件 lane（task_urgency 唯一命中，time_critical）：第 29 期每日精選導讀 mile_2974cf85〈晶片殺進熊市，大盤卻沒跟上：用「震央定位法」判斷該撿還是該跑〉已 published。\n\n載具 = subagent + opus/medium（model_router type_default，無 override）。時事驅動：費半 7/17 收 11,673.89、距 6/22 高點 14,634.72 回撤 20.23% 進熊市，同日標普僅 -2.00%、VIX 18.77；市場數字由 yfinance 重算，腳本 experiments/digest29/digest29_epicenter.py、結果 digest29_results.json。\n\n具名框架「震央定位法」（震源深度／波及範圍／餘震長度三座標），三格定位表放第二節當骨幹、文末代入當日盤面。\n\n主線程獨立驗證（未採信 agent 自述）：feed.json status=published、details.content_type=daily_digest、tags 含精選導讀、title 未以「每日精選導讀｜」起頭；digest_articles 8 篇 slug 逐一比對確認皆存在 archive，發佈日 2026-04-08→2026-07-18 = 跨度 101 天（硬擋門檻 14 天、warn 門檻 45 天皆過）；正文 9,880 字元（4,451 中文字）；線上 https://volpred.zeabur.app/v3/reports/mile_2974cf85 HTTP 200。\n\nGate：anti_ai_gate exit 0（warn 1/3 僅段落長度），未用 --force。圖表分工正確 — 7 張 inline 證據圖貼對應論證段，文末 3 張為 gen_lazypack_codex.py PRIMARY 路徑另生的框架合成 poster，未拿內文證據圖充數。\n\n主題與近 8 期（去槓桿／波動率油門／財報換錨／地緣半衰期／AI 電力／避風港／預警訊號）無重複。\n\nAgent 誠實回報偏差：editor-sop Check 3.1 的跨模型事實查證未跑 round-trip，改以 yfinance 重算 + 逐一回對來源文章原文替代。"
+  },
+  {
+    "timestamp": "2026-07-20T09:47:00+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12125-3afb3c",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-0ee193652e634046b88c561cb7f75bbb",
+    "owner": "hourly-slot-1-0ee193652e634046b88c561cb7f75bbb",
+    "commit": null,
+    "summary": "老闆回信問「為什麼又發不出去？理由是什麼？立刻使用 Computer use 發佈」（mile_78899a5c 費半/VIX 文 7/18 發 feed、FB 端 48h 到期被 auto-expire）。\n\n根因不是 doc 寫的「個人帳號無 headless API、等不到互動 session」——fb_realchrome_post.py --check 當場 PASS（CDP alive、connect_over_cdp 成功、logged_in），cron 環境本來就發得出去。真正卡住的是兩件事：\n(1) FB 文案從來沒被寫出來 —— canonical 稿 storage/drafts/fb_mile_78899a5c.md 不存在。7/18 那班發完 feed 只建了 followup task fb_repost_mile_78899a5c，稿子沒產出，而該 task 的 description 仍寫「請在 interactive session」，於是每小時被跳過直到 TTL 到期。\n(2) realchrome worker 有兩個會讓發文失敗/發錯的 bug（本班 dry-run 實地抓到，見下）。\n\n修復 scripts/fb_realchrome_post.py 兩處：\n  a. 附圖 selector 取 input[type=file].first，命中的是沒有 multiple 屬性的那個（accept 以 video/* 開頭）→ 多圖 set_input_files 直接炸 \"Non-multiple file input can only accept single file\" → 附圖 ABORT 不發。改為優先取 [multiple]，退化時逐張附上，張數仍由既有 _composer_photo_count 校驗。\n  b. 【較嚴重】填字的 div[role=dialog] ... .first 會命中**舊貼文 permalink dialog 的留言框**（上一輪 --check 把分頁留在某篇貼文頁，那個 dialog 也有 contenteditable 且 DOM 排序在前）。dry-run 截圖實證：464 字主文被填進 6/3 CPI 貼文的留言框，圖卻附在真 composer 上 —— 真發會產出「舊文一則超長留言 + 一篇無字純圖新貼文」。新增 _composer_dialog()，以「同時含 file input + contenteditable」鎖定唯一 composer，填字/附圖/清附件卡共用同一定義；另在發文前若 URL 停在 /posts/ 就先導回個人頁，斷掉污染源。\n\n產出：撰寫 FB 文案（464 字，Ivan Lai 口吻，主貼文無連結，附 3 圖：vol_thermometers + concentrated_pain + lz3_takeaway），anti_ai_gate exit 0（warn 1/3 段落長度），未用 --force。\n\n發佈驗證（未只採信腳本回報）：dry-run 兩輪看截圖確認文字落在「建立貼文」composer 內、背景乾淨；真發後主文 + 第一則留言（volpred 連結）皆送出，feed.json fb_post_status=success。腳本 recapture-permalink 抓不到 URL，故以 CDP 直接讀 timeline 核實：貼文在牆上、分享對象=所有人、已有 1 則留言。permalink anchor 比對失敗為非阻塞次要缺陷，未修，留記錄。"
   }
 ]

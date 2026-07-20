@@ -324,6 +324,27 @@ def _composer_photo_count(page) -> int:
     return page.evaluate(_COMPOSER_PHOTO_COUNT_JS)
 
 
+def _composer_dialog(page):
+    """回「建立貼文」composer dialog 的 Locator。
+
+    2026-07-20 3-strike fix — 頁面上常同時開著**多個** `div[role='dialog']`：
+    上一輪 --check 停在某篇貼文的 permalink，那個「Ivan Lai 的貼文」dialog 也含
+    contenteditable 留言框，且在 DOM 排序中先於 composer → 舊的
+    `div[role='dialog'] div[role=textbox]`.first 會抓到**舊貼文的留言框**。
+    dry-run 實測：整篇 464 字主文被貼進 6/3 那篇 CPI 貼文的留言框，圖卻附在真正的
+    composer 上；真發會產出「舊文一則長留言 + 一篇無字純圖新貼文」。
+
+    判準與 _COMPOSER_PHOTO_COUNT_JS 一致：composer 是唯一同時具備 file input
+    與 contenteditable textbox 的 dialog。填字與附圖共用這一個定義，不再各自 `.first`。
+    """
+    return (
+        page.locator("div[role='dialog']")
+        .filter(has=page.locator("input[type='file']"))
+        .filter(has=page.locator("div[role='textbox'][contenteditable='true']"))
+        .first
+    )
+
+
 def _get_or_open_fb_page(browser):
     """在既有 context 找 facebook.com 分頁；沒有就開新分頁導到個人頁。
 
@@ -798,6 +819,14 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
             browser.close()
             return 3
 
+        # 2026-07-20 fix：--check 等前一輪操作會把分頁留在某篇貼文的 permalink，
+        # 那頁的「Ivan Lai 的貼文」dialog 帶著留言框，是上面 _composer_dialog 要閃避的
+        # 污染源本身。發文前先回個人頁根，讓 composer 是頁面上唯一的 dialog。
+        if "/posts/" in (page.url or "") or "permalink" in (page.url or ""):
+            print(f"[INFO] 分頁停在貼文 permalink → 導回個人頁再發（原 URL: {page.url}）")
+            page.goto(FB_PROFILE_URL, wait_until="domcontentloaded", timeout=60_000)
+            page.wait_for_timeout(3_000)
+
         # 1) 開 composer：點「在想些什麼」觸發鈕
         opened = False
         for sel in [
@@ -819,8 +848,8 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
             # 以「dialog 是否真的出現」為準，而非 click 的回傳。
             page.wait_for_timeout(3_000)
             try:
-                page.locator(
-                    "div[role='dialog'] div[role='textbox'][contenteditable='true']"
+                _composer_dialog(page).locator(
+                    "div[role='textbox'][contenteditable='true']"
                 ).first.wait_for(state="visible", timeout=8_000)
                 opened = True
                 print("[INFO] click 回報失敗但 composer 已開 → 續行")
@@ -838,8 +867,11 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
         # 2026-07-07 fix：`.first` 原本會抓到背景 profile 頁的留言框
         # （aria-label='以 Ivan Lai 的身分留言'），被 composer modal overlay 攔截 →
         # click timeout。scope 到 div[role='dialog'] 只剩 composer 那一個 textbox。
-        editor = page.locator(
-            "div[role='dialog'] div[role='textbox'][contenteditable='true']"
+        # 2026-07-20 fix：頁面可同時有多個 dialog（舊貼文 permalink 也含留言框）→
+        # 改用 _composer_dialog() 的 file-input+textbox 判準精確鎖定，見該函式 docstring。
+        composer = _composer_dialog(page)
+        editor = composer.locator(
+            "div[role='textbox'][contenteditable='true']"
         ).first
         editor.wait_for(state="visible", timeout=8_000)
         editor.click(timeout=8_000)
@@ -855,7 +887,7 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
         # 只清文字，附著的 link preview 卡要另外按「移除貼文的連結預覽」/「全部移除」。
         for rm_label in ["移除貼文的連結預覽", "全部移除"]:
             try:
-                rm = page.locator(f"div[role='dialog'] [aria-label='{rm_label}']").first
+                rm = composer.locator(f"[aria-label='{rm_label}']").first
                 if rm.count() > 0:
                     rm.click(timeout=4_000)
                     page.wait_for_timeout(800)
@@ -911,9 +943,8 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
                 #   - cleanup 點單一「移除貼文附件」鈕（一次清空全部附件）
                 #   - 計 composer 內 blob: img 且渲染尺寸≥60px（排除 0×0 svg/data 圖示）= 真實張數
                 for _ in range(6):
-                    rm = page.locator(
-                        "div[role='dialog'] [aria-label='移除貼文附件'], "
-                        "div[role='dialog'] [aria-label='Remove attachment']"
+                    rm = composer.locator(
+                        "[aria-label='移除貼文附件'], [aria-label='Remove attachment']"
                     ).first
                     if rm.count() == 0 or not rm.is_visible():
                         break
@@ -926,10 +957,22 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
                     print("[ABORT] 找不到 composer dialog（無 file input + editor）→ 不發")
                     browser.close()
                     return 8
-                finp = page.locator("div[role='dialog'] input[type='file']").first
+                # 2026-07-20 fix — composer dialog 內不只一個 file input，且 `.first` 命中的
+                # 那個沒有 `multiple` 屬性（accept 清單以 video/* 開頭），多檔 set 會炸
+                # "Non-multiple file input can only accept single file" → 附圖 ABORT。
+                # 正解：優先挑帶 `multiple` 的 input；真的只有單檔 input 時逐張附上
+                # （FB 單檔 input 每次 set 是「再加一張」，不是替換），最後仍由下方
+                # _composer_photo_count 校驗總數，附不齊照樣 ABORT。
+                finp = composer.locator("input[type='file'][multiple]").first
                 if finp.count() == 0:
-                    finp = page.locator("input[type='file']").first
-                finp.set_input_files(local)
+                    finp = composer.locator("input[type='file']").first
+                if finp.evaluate("el => el.multiple"):
+                    finp.set_input_files(local)
+                else:
+                    print(f"[INFO] file input 不支援多檔 → 逐張附上 {len(local)} 張")
+                    for one in local:
+                        finp.set_input_files(one)
+                        page.wait_for_timeout(1_500)
                 page.wait_for_timeout(3_000 + 1_500 * len(local))  # 等縮圖上傳
                 # 照片 tile 可能稍晚 render；poll 至達 N 或穩定（≤6s 額外等待）
                 thumbs = _composer_photo_count(page)
