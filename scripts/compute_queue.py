@@ -33,6 +33,11 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
     not_before (ISO UTC|null, optional) — worker must not start it before this
     quota_requeues (int, optional)      — times the quota wall bounced this job
     requeue_history (list, optional)    — one record per bounced attempt
+    claimed_by_pid (int|null)           — worker pid that claimed the job
+    claimed_by_pid_start_wall (str|null) — `ps lstart` fingerprint of that pid
+                                           (pid-reuse-safe liveness, see D6b reaper)
+    reap (dict, optional)               — D6b receipt: how a stranded running job
+                                           was judged dead and finalized
 
 Usage:
     enqueue:   uv run python scripts/compute_queue.py enqueue --script X --title Y ...
@@ -43,7 +48,8 @@ Usage:
     run-loop:  uv run python scripts/compute_queue.py run-loop  (drain until empty)
     show:      uv run python scripts/compute_queue.py show <id>
     cancel:    uv run python scripts/compute_queue.py cancel --id ID --reason WHY
-    requeue:   uv run python scripts/compute_queue.py requeue --id ID  (auth/quota only)
+    requeue:   uv run python scripts/compute_queue.py requeue --id ID
+               (auth/quota/worker_killed failures only)
     mark-followup-dispatched: ... --id <id>
 """
 from __future__ import annotations
@@ -67,6 +73,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from scripts.dispatch_supervisor import procutil  # noqa: E402
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
@@ -1672,6 +1681,13 @@ def requeue(args) -> int:
     mean the CLI turned the agent away at the door: no compute, no tokens, an
     untouched worktree. Every other class has a worktree whose state is the whole
     question — re-running it would race the salvage, so this refuses.
+
+    D6b adds one more admissible class: `failure_reason=worker_killed`, stamped
+    by the stale-running reaper when the WORKER died (SIGTERM/crash) with the
+    job still claimed. Unlike auth/quota this does NOT guarantee the job never
+    ran — the reaper already refused to finalize while the dead worker's process
+    group had live members, but for kind=agent jobs the operator should still
+    confirm the worktree holds nothing worth salvaging before re-running.
     """
     path = QUEUE_DIR / f"{args.id}.json"
     with _receipt_lock():
@@ -1694,20 +1710,24 @@ def requeue(args) -> int:
             )
             return 2
         failure = _runner_failure_class(job)
-        if failure not in ("auth", "quota"):
+        worker_killed = job.get("failure_reason") == "worker_killed"
+        if failure not in ("auth", "quota") and not worker_killed:
             print(
                 f"error: cannot requeue {args.id} — failure_class={failure}. Only auth/quota "
-                f"deaths are safe to re-run blind, because only they guarantee the agent never "
-                f"started. Triage this one's worktree instead.",
+                f"deaths and reaper-stamped worker_killed jobs are safe to re-run: auth/quota "
+                f"guarantee the agent never started, worker_killed means the worker (not the "
+                f"job) died. Triage this one's worktree instead.",
                 file=sys.stderr,
             )
             return 2
+        blocked_kind = failure if failure in ("auth", "quota") else "worker_killed"
 
         job.setdefault("requeue_history", []).append({
             "at": utc_now(),
-            "reason": f"manual:{failure}",
+            "reason": f"manual:{blocked_kind}",
             "exit_code": job.get("exit_code"),
             "started_at": job.get("started_at"),
+            "failure_reason": job.get("failure_reason"),
             "by": os.environ.get("VOLPRED_ACTOR") or os.environ.get("VOLPRED_TASK_CLAIM_OWNER"),
         })
         job["status"] = "queued"
@@ -1715,8 +1735,18 @@ def requeue(args) -> int:
         job["completed_at"] = None
         job["exit_code"] = None
         job["not_before"] = None
+        # The retired attempt's verdict and claim identity now live in
+        # requeue_history / reap; leaving them on a queued job would let a
+        # LATER unrelated failure inherit `worker_killed` and slip past this
+        # very gate on a second requeue.
+        job["failure_reason"] = None
+        job["claimed_by_pid"] = None
+        job["claimed_by_pid_start_wall"] = None
         _write_job_file(path, job)
-    print(f"requeued: {args.id} (was {failure}-blocked; the agent never ran)")
+    if blocked_kind == "worker_killed":
+        print(f"requeued: {args.id} (worker died mid-claim; job re-runs from scratch)")
+    else:
+        print(f"requeued: {args.id} (was {blocked_kind}-blocked; the agent never ran)")
     return 0
 
 
@@ -1805,7 +1835,8 @@ def main():
 
     rq = sub.add_parser(
         "requeue",
-        help="Re-queue an auth/quota-blocked FAILED agent job (one that never ran). Refuses any other failure.",
+        help="Re-queue a FAILED job that never really ran: auth/quota-blocked agent jobs, "
+             "or reaper-stamped worker_killed jobs. Refuses any other failure.",
     )
     rq.add_argument("--id", required=True)
     rq.set_defaults(func=requeue)

@@ -852,3 +852,230 @@ def test_review_verdict_unfilled_rejects_scaffold(tmp_path: Path) -> None:
 
     p.write_text("not json {")
     assert module._review_verdict_unfilled(p)
+
+
+# ---------------------------------------------------------------------------
+# D6b: stale-running reaper + worker_killed requeue
+# ---------------------------------------------------------------------------
+
+def _running_stub_job(
+    queue_dir: Path,
+    log_dir: Path,
+    job_id: str,
+    *,
+    pid: int | None,
+    start_wall: str | None = None,
+    kind: str = "compute",
+) -> Path:
+    """A receipt exactly as a killed worker would leave it: status=running."""
+    path = queue_dir / f"{job_id}.json"
+    path.write_text(
+        json.dumps(
+            {
+                "id": job_id,
+                "status": "running",
+                "title": job_id,
+                "kind": kind,
+                "queued_at": "2026-07-20T00:00:00Z",
+                "started_at": "2026-07-20T00:05:00Z",
+                "script_path": "sleep.py",
+                "interpreter": "python",
+                "args": [],
+                "env": {},
+                "stdout_file": str(log_dir / f"{job_id}.stdout"),
+                "stderr_file": str(log_dir / f"{job_id}.stderr"),
+                "result_artifact": None,
+                "timeout_seconds": 30,
+                "claimed_by_pid": pid,
+                "claimed_by_pid_start_wall": start_wall,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _dead_pid() -> int:
+    """A pid that is confirmed gone: spawn, exit, wait (reaped by us)."""
+    proc = subprocess.Popen([sys.executable, "-c", "pass"])
+    proc.wait()
+    return proc.pid
+
+
+def test_reaper_finalizes_running_receipt_with_dead_pid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """2026-07-20 incident shape: drain loop SIGTERM'd, claimed receipt stuck at
+    running with a dead claimer pid. Worker start must finalize it to
+    failed/worker_killed so triage and requeue can own the retry."""
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = _running_stub_job(
+        queue_dir, module.LOG_DIR, "orphan-dead-pid",
+        pid=_dead_pid(), start_wall="Mon Jan  1 00:00:00 2001",
+    )
+
+    assert module.run_next(SimpleNamespace()) == 0
+
+    job = json.loads(path.read_text())
+    assert job["status"] == "failed"
+    assert job["failure_reason"] == "worker_killed"
+    assert job["exit_code"] == module.WORKER_KILLED_EXIT_CODE
+    assert job["completed_at"]
+    assert "confirmed gone" in job["reap"]["evidence"]
+    assert job["reap"]["orphaned_started_at"] == "2026-07-20T00:05:00Z"
+    assert "reaped: orphan-dead-pid" in capsys.readouterr().out
+    stderr_text = Path(job["stderr_file"]).read_text(encoding="utf-8")
+    assert "[WORKER_KILLED]" in stderr_text
+
+
+def test_reaper_flock_verdict_reaps_receipt_without_pid(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Receipt with no claimed_by_pid (pre-D6 claim path): holding the worker
+    flock is itself proof no live worker owns the claim -> reap."""
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = _running_stub_job(queue_dir, module.LOG_DIR, "orphan-no-pid", pid=None)
+
+    assert module.run_loop(SimpleNamespace(max_parallel=1)) == 0
+
+    job = json.loads(path.read_text())
+    assert job["status"] == "failed"
+    assert job["failure_reason"] == "worker_killed"
+    assert "no claimed_by_pid" in job["reap"]["evidence"]
+
+
+def test_reaper_spares_live_claimer_with_matching_fingerprint(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """A live pid whose lstart fingerprint matches the receipt must NEVER be
+    reaped, whatever the flock says — never finalize work we cannot explain."""
+    from scripts.dispatch_supervisor import procutil
+
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    proc = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    try:
+        fingerprint = procutil.get_process_start_wall(proc.pid)
+        assert fingerprint and fingerprint is not procutil.PROBE_FAILED
+        path = _running_stub_job(
+            queue_dir, module.LOG_DIR, "live-claimer",
+            pid=proc.pid, start_wall=fingerprint,
+        )
+
+        assert module.run_next(SimpleNamespace()) == 0
+
+        assert json.loads(path.read_text())["status"] == "running"
+    finally:
+        proc.kill()
+        proc.wait()
+
+
+def test_reaper_reaps_recycled_pid_on_fingerprint_mismatch(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Alive pid + differing fingerprint = the number was recycled by an
+    unrelated process; the claimer itself is dead -> reap."""
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    proc = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    try:
+        path = _running_stub_job(
+            queue_dir, module.LOG_DIR, "recycled-pid",
+            pid=proc.pid, start_wall="Wed Jan  1 00:00:00 1997",
+        )
+
+        assert module.run_next(SimpleNamespace()) == 0
+
+        job = json.loads(path.read_text())
+        assert job["status"] == "failed"
+        assert job["failure_reason"] == "worker_killed"
+        assert "pid recycled" in job["reap"]["evidence"]
+    finally:
+        proc.kill()
+        proc.wait()
+
+
+def test_reaper_skips_dead_claimer_with_live_orphaned_children(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Dead worker whose process group still holds live members: the job's
+    computation may still be executing, so the reaper must wait it out."""
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    dead = _dead_pid()
+    path = _running_stub_job(queue_dir, module.LOG_DIR, "dead-with-children", pid=dead)
+    monkeypatch.setattr(
+        module.procutil, "pgid_members_checked", lambda pgid: [4242] if pgid == dead else []
+    )
+
+    assert module.run_next(SimpleNamespace()) == 0
+
+    assert json.loads(path.read_text())["status"] == "running"
+    assert "reaped:" not in capsys.readouterr().out
+
+
+def test_requeue_accepts_worker_killed_and_clears_verdict(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = queue_dir / "reaped-job.json"
+    path.write_text(json.dumps({
+        "id": "reaped-job",
+        "status": "failed",
+        "kind": "agent",
+        "queued_at": "2026-07-20T00:00:00Z",
+        "started_at": "2026-07-20T00:05:00Z",
+        "completed_at": "2026-07-20T01:00:00Z",
+        "exit_code": module.WORKER_KILLED_EXIT_CODE,
+        "failure_reason": "worker_killed",
+        "followup_dispatched": False,
+        "claimed_by_pid": 4242,
+        "claimed_by_pid_start_wall": "Mon Jan  1 00:00:00 2001",
+        "reap": {"at": "2026-07-20T01:00:00Z", "evidence": "test"},
+    }))
+
+    assert module.requeue(SimpleNamespace(id="reaped-job")) == 0
+    assert "requeued: reaped-job" in capsys.readouterr().out
+
+    job = json.loads(path.read_text())
+    assert job["status"] == "queued"
+    assert job["failure_reason"] is None
+    assert job["claimed_by_pid"] is None
+    assert job["claimed_by_pid_start_wall"] is None
+    assert job["started_at"] is None
+    assert job["exit_code"] is None
+    history = job["requeue_history"]
+    assert history[-1]["reason"] == "manual:worker_killed"
+    assert history[-1]["failure_reason"] == "worker_killed"
+
+    # The cleared verdict must not let a LATER unrelated failure ride the same
+    # gate: fail the job again with no admissible class and requeue must refuse.
+    job["status"] = "failed"
+    job["exit_code"] = 1
+    path.write_text(json.dumps(job))
+    assert module.requeue(SimpleNamespace(id="reaped-job")) == 2
+    assert "cannot requeue" in capsys.readouterr().err
+
+
+def test_requeue_still_refuses_non_admissible_failures(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = queue_dir / "hard-fail.json"
+    path.write_text(json.dumps({
+        "id": "hard-fail",
+        "status": "failed",
+        "kind": "agent",
+        "exit_code": 1,
+        "failure_reason": "result_artifact_missing",
+        "followup_dispatched": False,
+    }))
+
+    assert module.requeue(SimpleNamespace(id="hard-fail")) == 2
+    err = capsys.readouterr().err
+    assert "cannot requeue" in err
+    assert json.loads(path.read_text())["status"] == "failed"
