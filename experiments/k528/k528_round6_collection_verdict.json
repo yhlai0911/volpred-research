@@ -1,0 +1,149 @@
+{
+  "reviewer": "hourly-slot-1 collection review",
+  "reviewed_commit": "cdf467637be0f58650246db3b9b47ea52395441f",
+  "reviewed_at": "2026-07-21T13:16:00+08:00",
+  "method_note": "No reviewer's PASS was inherited. Every ruling below rests on a command this reviewer ran in the worktree. Where a prior round's claim could not be reproduced as stated, that is recorded even when the underlying blocker still closes.",
+  "blockers": {
+    "B1": {
+      "verdict": "PASS",
+      "evidence": [
+        "grep -rn '237' experiments/k528 -> 183 hits across 14 files. Enumerated per-file rather than by filename pattern (the root cause of the two earlier misses): README.md 8, k528_nfp_event_study.py 4, k528_rerun_v3_summary.json 3, k528_nfp_official_dates_results.json 4, build_article_correction.py 11, k528_nfp_event_study_results.json 80, PROXY_SUPERSEDED 73, remainder in codex_review_v*.md review records.",
+        "Ran my OWN semantic sweep with an 18-phrase release vocabulary (vs the gate's 5), over all 7 live artifacts: 10 lines bind 237 to any release wording; 9 of them also name 243 on the same line (distinction drawn); the 10th is build_article_correction.py:41 which is an explicit denial ('\"237 Friday releases\" is therefore the wrong phrase'). ZERO live misbindings.",
+        "find experiments/k528 -type f ! -name '*.py' ! -name '*.md' ! -name '*.json' -> only two empty .gitkeep files, so the gate's suffix filter is not hiding a live artifact today.",
+        "Checked the reader-facing surface OUTSIDE experiments/k528: storage/reports/feed.json article mile_35eef830 contains 0 occurrences of '237' and 0 of '243', so the retired estimand is not live in published reader content.",
+        "uv run pytest tests/test_nfp_official_release_dates.py::TestFridayEstimandIsScopedHonestly -q -> 5 passed.",
+        "Full suite: uv run pytest tests/test_nfp_official_release_dates.py experiments/k528/test_k528_completeness_gate.py experiments/k528/test_k528_price_coverage_gate.py -q -> 93 passed in 2.31s."
+      ],
+      "anti_vacuity": "Injected the verbatim round-6 defect string 'restricting the event group to Friday releases (237)' into k528_rerun_v3_summary.json -> gate FAILED, naming summary.json:20. Restored; gate green. The gate is NOT vacuous.",
+      "residuals": [],
+      "caveat_not_blocking": "The round-6 verdict (storage/ops/codex_reviews/k528_round6_verdict.md:41-43) describes the replacement gate as a 'structural invariant'. It is not: test_no_live_artifact_describes_the_237_as_a_release_count is still a 5-entry phrase blocklist with two blanket exemptions. I confirmed three evasion classes by injection (see anti_vacuity_tests). This does not reopen B1 -- the current tree is clean by my own broader sweep -- but the gate is weaker than the round-6 write-up claims, so it should not be relied on as the sole future guard."
+    },
+    "B2": {
+      "verdict": "PASS",
+      "evidence": [
+        "uv run pytest experiments/k528/test_k528_completeness_gate.py -q -> 14 passed.",
+        "Wrote my own probe (/tmp/my_b2_probe.py) driving the v6 dual-allowlist attack directly rather than trusting the suite's naming. Negative control: honest feed (raw=260 selected=254, window 2005-01-01..2026-03-27) -> ACCEPTED, so the gate discriminates rather than raising on everything.",
+        "v6 BACKDOOR, single_entry (tail month 2026-03 placed in KNOWN_MISSING_MONTHS + REVIEWED_MULTI_ENTRY_MONTHS simultaneously) -> RAISED: 'the raw feed has 1 month(s) that the selected calendar does not: [2026-03]. A month present at the source and absent from the analysis is a silently shortened sample. This is not excusable'.",
+        "v6 BACKDOOR, multi_entry (same, plus a second raw entry so the month also trips the unreviewed-multi-entry check) -> RAISED with the same message. The v6 backdoor is CLOSED in both forms.",
+        "Production-source binding proved by mutation: neutralised 'if absent_required:' -> 'if False and absent_required:' in the REAL experiments/k528/k528_nfp_event_study.py. 4 tests turned red, and the harness itself refused to report a false green ('expected exactly one occurrence ... refusing to report a green run that proved nothing'). Restored; file byte-identical to HEAD.",
+        "The suite loads the gate from the production script via AST (_load_gate parses SCRIPT), so the tests are bound to shipped code, not to a copy."
+      ],
+      "residuals": []
+    },
+    "B3": {
+      "verdict": "PASS",
+      "evidence": [
+        "uv run pytest experiments/k528/test_k528_price_coverage_gate.py -q -> 10 passed. Coverage includes both rejection cases (tail/head month missing, empty download, truncated VIX tail, VIX missing at start) and negative controls (full coverage, 8d holiday gap inside tolerance, short VIX gap forward-filled) -- so the gate discriminates.",
+        "Read check_price_coverage at k528_nfp_event_study.py:505-543 and confirmed it is invoked UNCONDITIONALLY at module level for both tickers (price_coverage = {'SPY': check_price_coverage(...), '^VIX': check_price_coverage(...)}, lines 540-543) with no try/except and no skip flag, so it cannot be swallowed.",
+        "Anti-vacuity by mutation of production source: neutralised the head/tail shortfall raise (line 521) -> test_truncated_price_series_is_rejected[tail_month_missing] and [head_month_missing] both turned red with 'DID NOT RAISE <class RuntimeError>'. Restored; file byte-identical to HEAD."
+      ],
+      "residuals": []
+    },
+    "B4": {
+      "verdict": "PASS",
+      "evidence": [
+        "Recomputed Holm-Bonferroni MYSELF from the raw p-values in k528_nfp_event_study_results.json.multiplicity, using a step-down implementation written from the definition (sort ascending, p_adj_(i) = min(1, max over j<=i of (n-j+1)*p_(j))), no library.",
+        "confirmatory_family (n=6): all 6 reported p_holm match my recomputation to <=1e-12 relative. Key value B_nfp_vs_friday_welch raw=0.020854283650821093 -> reported 0.041708567301642185, mine 0.041708567301642185. MISMATCHES: NONE.",
+        "all_outputs_family (n=22): all 22 reported p_holm match my recomputation. B_nfp_vs_friday_welch raw=0.020854283650821093 -> reported 0.37537710571477967, mine 0.37537710571477967 (does NOT survive 5%). MISMATCHES: NONE.",
+        "Declared n matches actual member count for both families (6 and 22). All survives_5pct flags are consistent with p_holm<0.05 -- no hand-set flag.",
+        "Traced the nominal p-values back to the ACTUAL test blocks rather than the multiplicity block's own copy: multiplicity A_nfp_vs_all_welch 0.1120636094 == statistical_tests.A_nfp_vs_all.p_value; B_nfp_vs_friday_welch 0.0208543 == statistical_tests.B_nfp_vs_friday.p_value. The family is not self-referential.",
+        "Conclusion sentence check: conclusions[1] reads 'nominal p=0.0209 (rejects at 5% BEFORE any multiplicity correction -- the family-adjusted values live in `multiplicity` and must be quoted alongside this one)'. It cites the raw p but LABELS it nominal and mandates the adjusted values alongside, which is the honest form.",
+        "README.md:203-205 -- the 'what you MAY write' line no longer contains 事先聲明; grep '事先聲明' experiments/k528/README.md -> 0 hits, and the line now requires disclosing that the result does not survive Holm across all 22 outputs. multiplicity.pre_registered is false and README:199 says so.",
+        "README:196-197 reports all three readings side by side (nominal 0.0209 reject / Holm-6 0.0417 reject / Holm-22 0.375 do NOT reject)."
+      ],
+      "residuals": [],
+      "non_blocking_observations": [
+        "statistical_tests.B_diagnostic_mixed_weekday.p_value = 0.0256921 is the one p-value in statistical_tests that is NOT a member of the family called 'all inferential outputs' (22). Excluding it is defensible -- it is a DIAGNOSTIC ONLY re-reading of the same B hypothesis and counting it twice would be wrong -- but the family label overstates completeness slightly. I checked the impact: at n=23 B's Holm would be 0.0209*19 = 0.396 instead of 0.375, still not rejecting. No conclusion changes.",
+        "conclusions[2] (p=0.00194) and conclusions[5] (p=0.0000) quote raw p without the nominal-vs-adjusted treatment that conclusions[1] received. Both still reject under Holm in BOTH families (C: 0.0058 and 0.0368), so no claim is overstated, but the labelling is asymmetric."
+      ]
+    }
+  },
+  "residual_gap_probe": {
+    "verdict": "CLOSED",
+    "evidence": [
+      "uv run python experiments/k528/verify_residual_gap_probe.py -> ran clean, exit 0.",
+      "Probe lifted the gate from source (skipped 80 module-level statements needing network deps). Constants observed: LATEST_OBSERVED_RELEASE_DAY_OF_MONTH=22, MAX_WINDOW_SHORTFALL_DAYS=70, KNOWN_MISSING_MONTHS={'2025-10': federal shutdown}.",
+      "Negative control (honest untouched calendar, raw=260 selected=254) -> ACCEPTED, gate did not fire.",
+      "Attack, delete 2005-01 from raw AND selected (260->259 raw, 254->253 selected) -> RAISED: 'the requested window 2005-01-01..2026-03-27 fully contains the publication window of 1 month(s) that the calendar has no release for'.",
+      "Attack, delete 2026-03 from raw AND selected (260->259, 254->253) -> RAISED with the same message.",
+      "Probe's own summary line: 'residual gap CLOSED (honest accepted, both endpoint attacks raised): True'. The 259/253 figures reproduce Codex's round-5 numbers verbatim, confirming this is the attack Codex described."
+    ]
+  },
+  "anti_vacuity_tests": [
+    {
+      "what": "B1 gate: injected the verbatim round-6 defect 'restricting the event group to Friday releases (237)' into k528_rerun_v3_summary.json",
+      "expected": "gate should FAIL",
+      "actual": "FAILED, naming k528_rerun_v3_summary.json:20 in the assertion message",
+      "passed": true
+    },
+    {
+      "what": "B1 gate evasion probe A: injected 4 SYNONYM misbindings semantically identical to '237 Friday releases' -- '237 場 NFP 是週五發布的', 'the 237 NFP announcements published on a Friday', '237 releases whose publication day was a Friday', '限定週五發布的 237 場 NFP 事件'",
+      "expected": "gate should FAIL (round-6 verdict claims it enforces a structural invariant, not a wordlist)",
+      "actual": "1 passed -- gate did NOT fire on any of the four. release_language is a fixed 5-phrase blocklist ('Friday releases', '在週五公布', '發布日在週五', 'released on a Friday', 'dated a Friday'); none of my four phrasings is in it.",
+      "passed": false
+    },
+    {
+      "what": "B1 gate evasion probe B: exemption hijacks -- (a) 'restricting the event group to Friday releases (237); sample spans 243 trading weeks' (243 present but semantically unrelated), (b) '既不是 proxy 的問題 -- 237 Friday releases were used' (denial marker present but not denying THIS claim)",
+      "expected": "gate should FAIL",
+      "actual": "1 passed -- gate did NOT fire on either. The 'if \"243\" in line: skip' rule and the denial_markers list are unconditional line-level exemptions, so any co-occurrence of 243 or of a denial token on the same line buys a free pass.",
+      "passed": false
+    },
+    {
+      "what": "B2 gate: neutralised the endpoint defence in PRODUCTION source (k528_nfp_event_study.py, 'if absent_required:' -> 'if False and absent_required:')",
+      "expected": "gate should FAIL",
+      "actual": "4 tests failed; the harness additionally refused to report a false green ('expected exactly one occurrence ... refusing to report a green run that proved nothing'). Restored, file byte-identical to HEAD.",
+      "passed": true
+    },
+    {
+      "what": "B2 backdoor: my own probe placing tail month 2026-03 in KNOWN_MISSING_MONTHS + REVIEWED_MULTI_ENTRY_MONTHS simultaneously, both single-entry and multi-entry forms",
+      "expected": "gate should FAIL (raise)",
+      "actual": "RAISED in both forms, and the honest-feed negative control was ACCEPTED, so the raise is discriminating rather than blanket.",
+      "passed": true
+    },
+    {
+      "what": "B3 gate: neutralised the price-coverage shortfall raise in PRODUCTION source (k528_nfp_event_study.py:521)",
+      "expected": "gate should FAIL",
+      "actual": "test_truncated_price_series_is_rejected[tail_month_missing] and [head_month_missing] both failed with 'DID NOT RAISE'. Restored, file byte-identical to HEAD.",
+      "passed": true
+    }
+  ],
+  "overall_verdict": "PASS",
+  "merge_recommendation": "do_not_merge",
+  "merge_rationale": "B1-B4 and the residual gap are all closed on the evidence I produced myself, so this collection review does not block. Merge is nevertheless withheld for a governance reason that is not mine to waive: primary-path Codex never ran (account quota exhausted until 2026-07-25), and .claude/rules/experiments.md holds that a fallback PASS is not a Codex PASS. The round-6 verdict states this itself. Re-run round 6 on the primary path before certify/merge.",
+  "new_blocking_defects": [],
+  "non_blocking_defects": [
+    {
+      "id": "N1",
+      "where": "tests/test_nfp_official_release_dates.py:952-975",
+      "what": "test_no_live_artifact_describes_the_237_as_a_release_count is described in the round-6 verdict as a '結構性不變量' but is implemented as a 5-phrase blocklist with two unconditional line-level exemptions ('243' anywhere on the line, or any denial marker anywhere on the line). I confirmed three evasion classes by injection. B1 stays closed today because the tree is genuinely clean, but this gate will not catch a rephrased regression.",
+      "suggested_fix": "Either widen to a real structural check (parse the number's governing noun phrase, or require any line stating 237 in a claim context to also state 243) or downgrade the round-6 verdict's description of it so no future round over-trusts it."
+    },
+    {
+      "id": "N2",
+      "where": "experiments/k528/README.md:268",
+      "what": "'樣本 253 筆、237 筆在週五' -- 237 bound to a bare '在週五' with no 243 on the line. Ambiguous between the release-dated and session-traded readings. Not caught by the gate ('在週五' alone is not in release_language). Internal 防迴歸 section, not reader-facing, and the surrounding README repeatedly draws the 243/237 distinction, so I did not rule it a B1 residual -- but it is the exact shape of the sentence B1 exists to retire.",
+      "suggested_fix": "Restate as '237 筆在週五 session' to match the estimand used everywhere else in the file."
+    },
+    {
+      "id": "N3",
+      "where": "storage/reports/feed.json, article mile_35eef830",
+      "what": "The round-6 verdict's next-steps item 4 says the live article still carries proxy-era figures but '文中已有可見說明'. The article's errata field records only the 2026-07-18 event-date correction (K1442); it does not disclose that the proxy-era numbers (254 次公布, 1.17 倍) are superseded by the official-calendar rerun. Body text contains no 更正/勘誤 marker. The article carries neither 237 nor 243, so this is NOT a B1 residual, but the 'visible note' claim is broader than what is actually in the artifact.",
+      "suggested_fix": "When --apply is run from repo root, ensure the errata entry names the proxy->official supersession, not only the event date."
+    }
+  ],
+  "verification_hygiene": {
+    "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp",
+    "branch": "k528-nfp-official-dates",
+    "head_at_review": "cdf467637be0f58650246db3b9b47ea52395441f",
+    "mutations_made_and_reverted": [
+      "experiments/k528/k528_rerun_v3_summary.json (3 injection rounds)",
+      "experiments/k528/README.md (backed up, not modified in the end)",
+      "experiments/k528/k528_nfp_event_study.py (2 production-source mutations)"
+    ],
+    "post_review_state": "git status --porcelain -> 0 lines. All three touched files diffed byte-identical against HEAD. Full suite re-run after restoration -> 93 passed. Nothing committed, nothing merged, no file outside this worktree written.",
+    "not_verified_by_me": [
+      "The full k528_nfp_event_study.py rerun was NOT re-executed by me (it requires a FRED key and live yfinance downloads). I therefore did not independently confirm the reported yfinance float-drift figures (1322/4075 leaves, max relative change 1.65e-3). All my B4 arithmetic was done against the committed results JSON, which I did verify is internally consistent and traceable to its own statistical_tests blocks."
+    ]
+  },
+  "notes": "All four blockers close on first-hand evidence, and every gate I attacked bit when its production-side defence was removed -- B2 and B3 are bound to the shipped script via AST extraction, which is a genuinely strong design, and the B2 harness even refuses to report a green run when its own mutation fails to apply. The one thing that did not survive independent checking is a claim ABOUT a gate rather than a blocker itself: the round-6 verdict promotes the new B1 test to a 'structural invariant', and it is not one -- four synonym phrasings and two exemption hijacks all walked past it in my injections. I still rule B1 PASS because I re-swept the claim surface myself with an 18-phrase vocabulary across every live artifact plus the published article, and found zero misbindings; the weakness is prospective, not current. Recorded as N1 so round 7 does not inherit the overstatement the way round 5 inherited 'the results JSON is CLEAN'. Merge stays blocked on the primary-path Codex requirement, which is a governance gate outside this review's authority to clear."
+}
