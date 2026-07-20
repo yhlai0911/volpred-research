@@ -454,6 +454,74 @@ def test_send_alert_persists_dedup_and_skips_within_24h(tmp_path: Path, monkeypa
     assert dedup["alerts"][first["alert_key"]]["last_notification_id"] == "notif-1"
 
 
+def test_send_alert_save_prunes_dedup_entries_idle_beyond_retention(tmp_path: Path, monkeypatch):
+    """2026-07-20 ops-master D4: alert_dedup.json is a rolling throttle window,
+    not an archive — entries idle > ALERT_DEDUP_RETENTION (30d) are pruned on
+    every save so the ledger cannot grow without bound (was 769KB)."""
+    storage_dir = tmp_path / "storage"
+    dedup_path = storage_dir / "ops" / "alert_dedup.json"
+    dedup_path.parent.mkdir(parents=True, exist_ok=True)
+    now = datetime.now(timezone.utc)
+    stale_ts = (now - timedelta(days=45)).isoformat()
+    fresh_ts = (now - timedelta(days=2)).isoformat()
+    dedup_path.write_text(
+        json.dumps(
+            {
+                "updated_at": stale_ts,
+                "alerts": {
+                    "stale-key": {
+                        "level": "warn",
+                        "title": "long gone",
+                        "first_sent_at": stale_ts,
+                        "last_sent_at": stale_ts,
+                        "last_skipped_at": None,
+                        "send_count": 3,
+                        "skip_count": 9,
+                    },
+                    "fresh-key": {
+                        "level": "warn",
+                        "title": "still relevant",
+                        "first_sent_at": fresh_ts,
+                        "last_sent_at": fresh_ts,
+                        "last_skipped_at": None,
+                        "send_count": 1,
+                        "skip_count": 0,
+                    },
+                    "corrupt-key": "not-a-dict",
+                },
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+        return {
+            "notification_id": "notif-1",
+            "subject": f"[VolPred Alert][{level.upper()}] {title}",
+            "sent": True,
+            "configured": True,
+            "send_error": None,
+        }
+
+    monkeypatch.setattr("volpred.ops.alerts._dispatch_alert_email", fake_dispatch)
+
+    result = send_alert(
+        "info",
+        "new alert",
+        "body",
+        recipient="yihao.lai@gmail.com",
+        storage_dir=str(storage_dir),
+    )
+    assert result["sent"] is True
+
+    dedup = json.loads(dedup_path.read_text(encoding="utf-8"))
+    assert "stale-key" not in dedup["alerts"]
+    assert "corrupt-key" not in dedup["alerts"]
+    assert "fresh-key" in dedup["alerts"]
+    assert result["alert_key"] in dedup["alerts"]
+
+
 def test_send_alert_appends_incident_candidates_for_sent_and_dedup_skipped(
     tmp_path: Path, monkeypatch
 ):
@@ -791,8 +859,8 @@ def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):
         ),
     )
     # Simulate a failing host cron so host_cron_fail breach triggers.
-    # Per control-plane rule (v12): host_cron_fail 只看 storage/logs/cron/*.log 最新
-    # "=== exit N ===" 非 0。scheduler_state staleness 不再 count (advisory only).
+    # host_cron_fail 只看 storage/logs/cron/*.log 最新 "=== exit N ===" 非 0
+    # （advisory scheduler lane 已於 2026-07-20 ops-master D2 退役）。
     _write_text(
         storage_dir / "logs" / "cron" / "daily_update.log",
         "\n".join(
@@ -802,15 +870,6 @@ def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):
                 "=== [daily_update] exit 1 at Sun Apr 19 13:00:10 CST 2026 ===",
             ]
         ),
-    )
-    _write_json(
-        storage_dir / "ops" / "scheduler_state.json",
-        {
-            "last_tick_at": (now - timedelta(hours=1)).isoformat(),
-            "last_status": "ok",
-            "last_reason": None,
-            "last_result": None,
-        },
     )
 
     # Inject a fixture paper_root: with paper_root=None, _parse_paper_stale_state
@@ -1028,10 +1087,6 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
         storage_dir / "logs" / "cron" / "daily_update.log",
         f"=== [daily_update] exit 1 at {(now - timedelta(minutes=5)).isoformat()} ===\n",
     )
-    _write_json(
-        storage_dir / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-04-19T00:00:00+00:00", "last_status": "invalid_state"},
-    )
     # Isolate M2/M3 staleness conditions so this test asserts only the cron/pool set.
     # Fresh knowledge entry (< 2d before `now`) keeps knowledge_stale quiet.
     _write_json(
@@ -1182,10 +1237,6 @@ def test_host_cron_fail_severity_calibration(tmp_path: Path):
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-06-15T00:00:00+00:00", "last_status": "ok"},
-    )
     now = datetime.now(timezone.utc)
 
     def write_exits(codes):
@@ -1246,10 +1297,6 @@ def test_host_cron_fail_quota_window_is_self_recovering(tmp_path: Path):
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-07-02T00:00:00+00:00", "last_status": "ok"},
-    )
     now = datetime.now(timezone.utc)
 
     def write_exits(codes):
@@ -1310,10 +1357,6 @@ def test_host_cron_fail_git_push_held_is_benign(tmp_path: Path):
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-07-03T00:00:00+00:00", "last_status": "ok"},
-    )
     now = datetime.now(timezone.utc)
 
     def write_push_exits(codes):
@@ -1356,10 +1399,6 @@ def test_host_cron_fail_ignores_stale_nonzero_exit(tmp_path: Path, monkeypatch):
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-07-06T00:00:00+00:00", "last_status": "ok"},
-    )
     monkeypatch.setattr(
         "volpred.ops.alerts.load_runtime_schedules",
         lambda: {
@@ -1398,10 +1437,6 @@ def test_host_cron_fail_fresh_nonzero_exit_still_critical(tmp_path: Path, monkey
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-07-06T00:00:00+00:00", "last_status": "ok"},
-    )
     monkeypatch.setattr(
         "volpred.ops.alerts.load_runtime_schedules",
         lambda: {
@@ -1440,10 +1475,6 @@ def test_host_cron_fail_unknown_exit_timestamp_caps_at_warn(tmp_path: Path, monk
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-07-06T00:00:00+00:00", "last_status": "ok"},
-    )
     monkeypatch.setattr(
         "volpred.ops.alerts.load_runtime_schedules",
         lambda: {
