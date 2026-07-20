@@ -206,7 +206,7 @@
 | Phase 1：**F1 Enforcement Layer Map 更新 + 一致性 audit 掛 CI** | ✅ 2026-07-20 | map 更新（loop-health-and-dreaming.md +64，commit f23d870c4）+ `scripts/audit_enforcement_map.py`（實跑 OK：10 hooks / 8 deny / 5 CI / 5 git hooks 全對齊）+ CI trigger `tests/test_enforcement_map_audit.py`（騎 pytest.yml，map 過期 = 紅 build）。H2 通道矩陣寫入待 H2 執行時補 |
 | Phase 1：**A1b writer 收斂執行 + NEXT-TASKS-ROUTING gate** | ✅ 2026-07-20 | worktree commit `da04993c6` → merge `552edeb5d`；12 needs_helper 全收斂、7 delete 裁決（2 筆 A1a 誤判改保留並記錄）、新 `append_task_record` 單一 append gateway、`annotate` CLI 取代 prompt jq、gate 對舊樹咬 57 violations → 修後 0；main 複驗測試綠 + auditor PASS；skill 修改通知已寄 |
 | Phase 1：**H4 設計裁決** | ✅ 2026-07-20 13:1x 主線程核准 decide() 純函數收斂方向；設計覆核發現兩個 dry-run 語意缺陷（ctd `--dry-run` 旗標從未被讀、scheduler dry-run 繞過 pregate）— 已納入實作 Step 1 止血 | `docs/dispatch-decision-pipeline-design.md`；實作 agent 執行中 |
-| Phase 1：A3 migration / H4 實作 / D6 | 🔄 三個獨立軌 worktree agent 平行執行中（13:0x-13:1x 派出） | 完成後主線程驗收 merge |
+| Phase 1：**H4 派工決策單一 pipeline** | ✅ 2026-07-20 | worktree `5ebbf9837`+`d20ac68ec` → merged；Step1 dry-run 語意修真（ctd `--dry-run` byte-identical 實證、scheduler dry-run 過同一 pregate）；Step2 `dispatch_supervisor/decision.py` 純函數 `decide()`（頻率/純度由 source-audit 測試機械鎖）、dry 與 fire 同輸入同裁決 dataclass-equal；main 複驗 144 tests 綠；4 點偏離皆記錄（含 pregate-enforce 保留待 Q3 裁決） |
 | **操作手冊 `docs/ops-manual.md`**（owner 2026-07-20 指定交付物：平台運作＋派工＋email/Telegram 新設計，白話＋範例） | ✅ 初版 2026-07-20；每 Phase 收尾同步更新（驗收清單含本檔） | `docs/ops-manual.md` |
 | Phase 1：C4 Mirror 死信重試 | ✅ 2026-07-20 | worktree commit `8dc5ab04b` → merge `661f50ed7`；main 複驗 29 tests 綠；dry-run 注入實證 |
 | Phase 1：F2 dedup-gate-audit 兌現 | ✅ 2026-07-20 | worktree commit `bbbaefc89` → merge `262e20934`；main 複驗 71 tests 綠；歷史資料實跑抓到真 warn（10 arc ×4 block） |
