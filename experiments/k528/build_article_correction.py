@@ -29,18 +29,29 @@ THE ONE ESTIMAND CHANGE
 -----------------------
 The event group is a weekday mixture while the control group is pure Friday, so
 the Friday effect leaks into the estimate. The corrected test restricts the
-event group to the 237 Friday releases.
+event group to the 237 releases ABSORBED BY a Friday session.
+
+WHICH "FRIDAY" (Codex round-5 B1). The filter is SESSION weekday, not release
+weekday, and the two do not agree. Of the 253 releases, 243 are DATED a Friday
+but only 237 TRADE in one: the six Good Fridays (2007-04-06, 2010-04-02,
+2012-04-06, 2015-04-03, 2021-04-02, 2023-04-07) were published while the market
+was shut, so the news is absorbed by the following Monday. Their returns are
+Monday returns and cannot enter a comparison whose control group is pure Friday
+without putting back the weekday confound the restriction exists to remove.
+"237 Friday releases" is therefore the wrong phrase for this number in either
+direction -- 237 is a session count, 243 is the release count.
 
 Note against the tempting story: this defect was NOT introduced by the date
 correction. The proxy CALENDAR was all-Friday by construction, but mapping
 holiday-closed Fridays to the next open put 15 of its 254 events on a Monday
-(239/254 = 94.1% Friday, against 237/253 = 93.7% now). The old spec was already
-comparing a mixed group against a pure-Friday control; correcting the dates is
-what made it visible, not what caused it.
+(239/254 = 94.1% Friday SESSIONS, against 237/253 = 93.7% now). The old spec was
+already comparing a mixed group against a pure-Friday control; correcting the
+dates is what made it visible, not what caused it.
 
 Two consequences the article text must respect:
-  1. The test now identifies the effect of an NFP release ON A FRIDAY. Prose
-     quoting it says "在週五公布的 NFP", not "NFP".
+  1. The test identifies the effect of an NFP release ABSORBED BY A FRIDAY
+     SESSION. Prose quoting it says 「消息落在週五交易日的 NFP」, not "NFP" and
+     not 「在週五公布的 NFP」 -- the latter would be the 243, not the 237.
   2. The restriction is not a neutral deletion — the excluded events are 16.3%
      quieter, so restricting RAISES the ratio (1.177x -> 1.189x). Both numbers
      are disclosed in the correction note rather than only the flattering one.
@@ -105,17 +116,20 @@ REPLACEMENTS: list[tuple[str, str]] = [
         "VolPred 也把這層拿掉，改用「非 NFP 的週五」當基準：NFP 當日波動是這個基準的 1.17 倍，"
         "用 Welch t 檢定算下來，這個差距達到顯著水準。"
         "（另外拿全體非 NFP 日做一個只看排序、不看數值大小的無母數檢定，NFP 日的波動分佈同樣明顯偏高。）",
-        "VolPred 也把這層拿掉，改用「非 NFP 的週五」當基準。253 場 NFP 裡有 237 場落在週五、"
-        "16 場不是，所以這個比較只取在週五公布的那 237 場，讓兩邊的星期別一致："
-        "這 237 場的當日波動是週五基準的 1.19 倍，用 Welch t 檢定算下來，這個差距達到顯著水準（p=0.021）。"
-        "要注意這個數字講的是「**在週五公布的** NFP」，不是 NFP 一般而言；被排掉的那 16 場本身比較平靜，"
+        "VolPred 也把這層拿掉，改用「非 NFP 的週五」當基準。253 場 NFP 裡，有 243 場的公布日是週五，"
+        "但其中 6 場碰上 Good Friday 休市（BLS 照常發布，市場沒開），行情要等下週一才反應；"
+        "真正在週五盤被消化掉的是 237 場。這個比較只取那 237 場，讓兩邊的星期別一致："
+        "這 237 場的當日波動是週五基準的 1.19 倍，用 Welch t 檢定算下來，這個差距達到顯著水準"
+        "（p=0.021，這是未經多重比較校正的 nominal 值）。"
+        "要注意這個數字講的是「**消息落在週五交易日的** NFP」，既不是「公布日在週五的 NFP」"
+        "（那是 243 場），也不是 NFP 一般而言；被排掉的那 16 場本身比較平靜，"
         "所以限定週五會把倍數墊高一些（不限定的話是 1.18 倍）。"
         "（另外拿全體非 NFP 日做一個只看排序、不看數值大小的無母數檢定，NFP 日的波動分佈同樣明顯偏高。）",
     ),
     (
         "所以精確的講法是：NFP 日確實比一般週五抖一點，差距顯著但不算誇張（1.17 倍）；"
         "但如果拿全部交易日當對照，這個放大效果（1.10 倍）連統計顯著都談不上。",
-        "所以精確的講法是：在週五公布的 NFP 確實比一般週五抖一點，差距顯著但不算誇張（1.19 倍）；"
+        "所以精確的講法是：消息落在週五交易日的 NFP 確實比一般週五抖一點，差距顯著但不算誇張（1.19 倍）；"
         "但如果拿全部交易日當對照，這個放大效果（1.11 倍）在 Welch 平均差檢定下未達顯著"
         "（p=0.11）—— 要注意同一組對照下，只看排序的無母數檢定反而是顯著的（p=0.002），"
         "兩種檢定不一致，不能合併成一句「沒有效果」。",
@@ -165,7 +179,7 @@ REPLACEMENTS: list[tuple[str, str]] = [
         "第一，NFP 事件本身的波動放大效果，對全體交易日基準是 1.10 倍、未達顯著水準，"
         "對週五基準是 1.17 倍、達到顯著水準。",
         "第一，NFP 事件本身的波動放大效果，對全體交易日基準是 1.11 倍、未達顯著水準；"
-        "若只看在週五公布的那 237 場、拿非 NFP 的週五當基準，是 1.19 倍、達到顯著水準。",
+        "若只看消息落在週五交易日的那 237 場、拿非 NFP 的週五當基準，是 1.19 倍、達到顯著水準。",
     ),
     (
         "高低體制差 2.17 倍，事前 VIX 對就業日波動的預測相關係數約 0.45。",
@@ -197,8 +211,10 @@ REPLACEMENTS: list[tuple[str, str]] = [
         "要說明的是，本文並沒有正式檢定「2.03 倍顯著大於 1.19 倍」——兩者的樣本與對照組都不同，"
         "而且 VIX 分組用的是事後中位數切點。兩個數字是並排比較量級，不是排名，也不是因果宣稱。\n\n"
         "另有一項口徑調整：週五基準的比較，事件組原本是全部樣本（星期別混合）、對照組卻只有週五，"
-        "兩邊不對等。現改為只取在週五公布的 237 場，維持兩邊星期別一致，"
-        "所以該數字講的是「在週五公布的 NFP」而非 NFP 一般而言。"
+        "兩邊不對等。現改為只取消息在週五交易日被消化的 237 場，維持兩邊星期別一致，"
+        "所以該數字講的是「消息落在週五交易日的 NFP」——"
+        "既不是「公布日在週五的 NFP」（公布日在週五的其實有 243 場，其中 6 場遇 Good Friday 休市、"
+        "行情落在下週一，因此不算在內），也不是 NFP 一般而言。"
         "被排掉的 16 場本身比較平靜，因此限定週五會把倍數墊高一些（不限定為 1.18 倍、限定為 1.19 倍），"
         "兩個數字都列出以免只揭露比較好看的那個。\n\n"
         "**文中圖表與文末懶人包圖組仍是初版數據，正在重新產製**。"
@@ -307,8 +323,9 @@ def main() -> int:
                 "release calendar. Sample 254 -> 253 events; headline numbers restated "
                 "(1.10->1.11x vs all days, 1.17->1.19x vs Friday, 2.17->2.03x regime gap, "
                 "r 0.45->0.44). No directional conclusion changes. The Friday comparison "
-                "now restricts the event group to the 237 Friday releases so weekday is "
-                "held fixed on both sides."
+                "now restricts the event group to the 237 releases absorbed by a Friday "
+                "SESSION so weekday is held fixed on both sides -- 243 releases are dated "
+                "a Friday, but six of those are Good Fridays traded the following Monday."
             ),
             action="content_correction",
             storage_dir=str(storage_dir),

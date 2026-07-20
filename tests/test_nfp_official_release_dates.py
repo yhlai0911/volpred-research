@@ -350,6 +350,8 @@ K528_DIR = REPO_ROOT / "experiments" / "k528"
 K528_PY = K528_DIR / "k528_nfp_event_study.py"
 K528_RESULTS = K528_DIR / "k528_nfp_event_study_results.json"
 K528_AUDIT = K528_DIR / "k528_nfp_official_dates_results.json"
+K528_README = K528_DIR / "README.md"
+K528_CORRECTION_PY = K528_DIR / "build_article_correction.py"
 
 
 def _load_k528(path):
@@ -876,11 +878,87 @@ class TestFridayEstimandIsScopedHonestly:
     def test_results_scope_the_claim_to_friday_and_disclose_the_non_neutrality(self):
         b = _load_k528(K528_RESULTS)["statistical_tests"]["B_nfp_vs_friday"]
         assert "CONDITIONAL ON FRIDAY" in b["estimand"]
-        assert "Friday NFP" in b["claim_scope"]
+        # Round-5 B1 tightened this. The old assertion pinned "Friday NFP", which
+        # is exactly the ambiguity Codex flagged: it reads equally as "dated a
+        # Friday" (243) and "traded in a Friday session" (237). Pinning the
+        # session phrasing alone would still let a writer say "released on a
+        # Friday" elsewhere, so the scope must ALSO rule that reading out.
+        assert "ABSORBED BY A FRIDAY SESSION" in b["claim_scope"]
+        assert "NFP traded in a Friday session" in b["claim_scope"]
+        assert "not 'NFP released on a Friday'" in b["claim_scope"], (
+            "the claim scope must explicitly retire the release-dated reading, "
+            "not merely assert the session-dated one"
+        )
         nn = b["restriction_is_not_neutral"]
         assert nn["excluded_are_quieter_by_pct"] > 0, (
             "if the excluded events are quieter, the restriction RAISES the ratio "
             "and that must be stated, not discovered by a reviewer"
+        )
+
+    def test_friday_estimand_pins_release_vs_session_and_names_the_good_fridays(self):
+        """Round-5 B1. The defect was that two different counts were fused into
+        one word: 243 releases are DATED a Friday, 237 TRADE in a Friday session.
+        The artifact must carry both numbers and reconcile them, and the six
+        releases that differ must be named individually -- an aggregate count is
+        re-derivable from a bug, a name list is not.
+        """
+        est = _load_k528(K528_RESULTS)["sample"]["friday_estimand"]
+        assert est["n_release_date_on_friday"] == 243
+        assert est["n_traded_in_friday_session"] == 237
+
+        gf = est["friday_releases_absorbed_by_a_later_session"]
+        assert gf["n"] == 6
+        assert len(gf["dates"]) == gf["n"], "the count and the name list must agree"
+        assert (
+            est["n_release_date_on_friday"] - est["n_traded_in_friday_session"] == gf["n"]
+        ), "the 243/237 gap must be fully accounted for by the named releases"
+
+        for case in gf["dates"]:
+            release = pd.Timestamp(case["release_date"])
+            session = pd.Timestamp(case["session_date"])
+            assert release.weekday() == 4, f"{release} is not a Friday release"
+            assert session.weekday() == 0, f"{session} is not a Monday session"
+            assert case["session_weekday"] == 0
+            assert session > release, "the absorbing session must come after the release"
+
+    def test_reader_facing_surfaces_do_not_resurrect_the_release_dated_estimand(self):
+        """Round-5 B1 residual. The analysis layer was corrected first and the
+        publication layer was not, so the retired estimand survived in the
+        generator that writes the READER-facing correction. A claim that only
+        the results JSON is clean is worth nothing if the text shipped to
+        readers still says the thing the correction exists to retract.
+
+        Guards the phrase, not the file: '在週五公布' may appear only where it is
+        being explicitly denied.
+        """
+        retired = "在週五公布"
+        for path in (K528_CORRECTION_PY, K528_README):
+            for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                if retired not in line:
+                    continue
+                assert any(
+                    marker in line for marker in ("既不是", "不是", "not ", "此前寫的是")
+                ), (
+                    f"{path.name}:{i} states the retired release-dated estimand "
+                    f"without denying it: {line.strip()!r}"
+                )
+
+    def test_readme_does_not_sanction_a_pre_registration_claim(self):
+        """Round-5 B4 residual. The multiplicity family was defined after the
+        data were seen, and the artifact says so. The README's 'what you may
+        write' line is the sentence a publishing agent copies, so if it licenses
+        '事先聲明' (declared in advance) the contradiction propagates outward
+        even though every number is correct.
+        """
+        multiplicity = _load_k528(K528_RESULTS)["multiplicity"]
+        assert multiplicity["pre_registered"] is False, (
+            "if this ever becomes True the claim must be backed by a real "
+            "pre-registration, not by editing the flag"
+        )
+        readme = K528_README.read_text(encoding="utf-8")
+        assert "事先聲明" not in readme, (
+            "README must not sanction a pre-specification claim while "
+            "multiplicity.pre_registered is False"
         )
 
     def test_excluded_count_matches_the_weekday_breakdown(self):

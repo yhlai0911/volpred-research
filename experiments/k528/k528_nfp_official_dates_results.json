@@ -1,7 +1,7 @@
 {
   "experiment_id": "K528",
   "title": "NFP event-date correction: first-Friday proxy vs official BLS calendar",
-  "generated_at": "2026-07-20T04:42:56.564457+00:00",
+  "generated_at": "2026-07-20T16:21:04.162220+00:00",
   "before_source": "k528_nfp_event_study_results_PROXY_SUPERSEDED.json",
   "after_source": "k528_nfp_event_study_results.json",
   "event_date_source": {
@@ -108,14 +108,14 @@
     "vol_ratio_vs_all": {
       "label": "NFP vs all non-NFP days (article: 1.10x)",
       "before": {
-        "mean_ratio": 1.103358194620936,
+        "mean_ratio": 1.1033586198711247,
         "nfp_mean": 0.008420922409653335,
-        "baseline_mean": 0.0076320839875090455,
-        "p_value": 0.12896506936983523,
+        "baseline_mean": 0.007632081045994748,
+        "p_value": 0.1289636505345802,
         "significant_5pct": false,
         "n": 254,
         "n_control": 5085,
-        "median_ratio": 1.1884655752391828,
+        "median_ratio": 1.1882969817027025,
         "win_rate": 0.5551181102362205,
         "as_published": {
           "mean_ratio": 1.1035360772013734,
@@ -127,13 +127,13 @@
         }
       },
       "after": {
-        "mean_ratio": 1.1077807990339792,
-        "nfp_mean": 0.008453078026838303,
-        "baseline_mean": 0.007630641399643018,
-        "p_value": 0.11205788667986934,
+        "mean_ratio": 1.107779531142352,
+        "nfp_mean": 0.008453064404674977,
+        "baseline_mean": 0.007630637836355491,
+        "p_value": 0.11206360938619585,
         "significant_5pct": false,
         "n": 253,
-        "median_ratio": 1.1914693568207806,
+        "median_ratio": 1.1915894654774213,
         "win_rate": 0.5612648221343873
       },
       "note": "proxy-side median_ratio / win_rate are reconstructed from the archived per-event data, not from the proxy run's own output (it only reported means).",
@@ -143,12 +143,12 @@
     "vol_ratio_vs_friday": {
       "label": "NFP vs non-NFP Friday baseline (article: 1.17x)",
       "before": {
-        "mean_ratio": 1.1667081397245742,
-        "p_value": 0.042137331055261636,
+        "mean_ratio": 1.166705572077902,
+        "p_value": 0.042139992029859054,
         "significant_5pct": true,
         "n": 239,
         "nfp_days_on_friday": 239,
-        "median_ratio": 1.1979107888359801,
+        "median_ratio": 1.1979005289191478,
         "win_rate": 0.5564853556485355,
         "n_control_friday": 832,
         "control_derivation": {
@@ -170,23 +170,23 @@
         }
       },
       "after": {
-        "mean_ratio": 1.1889982196572566,
-        "p_value": 0.020851625645371012,
+        "mean_ratio": 1.188994637894018,
+        "p_value": 0.020854283650821093,
         "significant_5pct": true,
         "n": 237,
         "nfp_days_on_friday": 237,
-        "median_ratio": 1.2186663731319562,
+        "median_ratio": 1.218410782735008,
         "win_rate": 0.569620253164557,
         "estimand": "Friday NFP sessions vs Friday non-NFP sessions (weekday held fixed)",
         "diagnostic_mixed_weekday": {
-          "mean_ratio": 1.1767652746472554,
-          "p_value": 0.02568902194866471,
+          "mean_ratio": 1.176761914801308,
+          "p_value": 0.025692059659997518,
           "significant_5pct": true,
           "n": 253,
           "status": "DIAGNOSTIC ONLY - the pre-correction estimand, not quotable"
         }
       },
-      "note": "Two things changed here and they are separated rather than conflated. (1) The dates were corrected. (2) The ESTIMAND was corrected: the event group is a weekday mixture while the control group is pure Friday, so the test now restricts the event group to Friday releases. Defect (2) was NOT created by (1) -- the proxy run was already mixed (239/254 Friday, the other 15 being holiday-shifted Mondays), it was simply never noticed. Both columns above therefore use the SAME restricted estimand so the delta is attributable to the dates alone; `as_published_mixed_weekday` (before) and `diagnostic_mixed_weekday` (after) hold the old estimand on each side for reference.",
+      "note": "Two things changed here and they are separated rather than conflated. (1) The dates were corrected. (2) The ESTIMAND was corrected: the event group is a weekday mixture while the control group is pure Friday, so the test now restricts the event group to the releases that are absorbed by a Friday SESSION (237 of the 243 releases dated a Friday; the other six are Good Fridays traded the following Monday). Defect (2) was NOT created by (1) -- the proxy run was already mixed (239/254 Friday, the other 15 being holiday-shifted Mondays), it was simply never noticed. Both columns above therefore use the SAME restricted estimand so the delta is attributable to the dates alone; `as_published_mixed_weekday` (before) and `diagnostic_mixed_weekday` (after) hold the old estimand on each side for reference.",
       "verdict": "NUMERIC_ADJUSTMENT",
       "verdict_reasons": []
     },
@@ -204,14 +204,14 @@
         "win_rate": 0.7165354330708661
       },
       "after": {
-        "mean_ratio": 2.0272798595291537,
-        "high_mean": 0.011276179946920817,
-        "low_mean": 0.00556222166067381,
+        "mean_ratio": 2.0272974059363413,
+        "high_mean": 0.011276193504303303,
+        "low_mean": 0.005562180206655571,
         "n_high": 128,
         "n_low": 125,
-        "p_value": 4.552792256864544e-09,
+        "p_value": 4.551849137823982e-09,
         "significant_5pct": true,
-        "median_ratio": 2.073142871963874,
+        "median_ratio": 2.073377788061646,
         "win_rate": 0.6953125
       },
       "note": "",
@@ -230,11 +230,11 @@
         "significant_5pct": true
       },
       "after": {
-        "pearson_r": 0.44043666142565835,
-        "pearson_p": 1.9816323833899423e-13,
+        "pearson_r": 0.44043638429674903,
+        "pearson_p": 1.9817089060479586e-13,
         "spearman_rho": 0.3455048873701663,
         "spearman_p": 1.6699985504624933e-08,
-        "slope_pct_per_vix_pt": 0.042561696717978235,
+        "slope_pct_per_vix_pt": 0.04256184186836176,
         "n": 253,
         "significant_5pct": true
       },

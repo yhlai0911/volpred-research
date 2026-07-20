@@ -858,7 +858,7 @@ vol_ratio_all = float(nfp_abs_returns.mean() / non_nfp_abs_returns.mean())
 # --- Test B: NFP vs Friday-only baseline (weekday held fixed on both sides) ---
 #
 # Estimand choice (k528 Codex v2 finding 5). Two repairs were available:
-#   (i)  restrict the event group to Friday releases, or
+#   (i)  restrict the event group to the releases traded in a Friday session, or
 #   (ii) keep all events and use weekday-matched controls.
 # This run takes (i). The non-Friday events are a handful of thin weekday cells
 # out of 253 -- cells that thin make (ii) a weighted average dominated by a few
@@ -1265,11 +1265,17 @@ conclusions.append(
     f"p={p_val_all:.4f} ({'rejects' if p_val_all < sig_level else 'does not reject'} at 5%)"
 )
 conclusions.append(
-    f"Welch mean-difference, Friday NFP vs Friday non-NFP (CONDITIONAL ON FRIDAY, "
-    f"weekday held fixed): {vol_ratio_fri:.2f}x, p={p_val_fri:.4f} "
-    f"({'rejects' if p_val_fri < sig_level else 'does not reject'} at 5%; "
-    f"n={len(nfp_friday_abs)} vs {len(friday_non_nfp_abs)}). Scoped to Friday "
-    f"releases; the {len(nfp_nonfriday_abs)} non-Friday events are quieter, so this "
+    f"Welch mean-difference, NFP traded in a Friday session vs Friday non-NFP "
+    f"(CONDITIONAL ON THE FRIDAY SESSION, weekday held fixed): {vol_ratio_fri:.2f}x, "
+    f"nominal p={p_val_fri:.4f} "
+    f"({'rejects' if p_val_fri < sig_level else 'does not reject'} at 5% BEFORE any "
+    f"multiplicity correction -- the family-adjusted values live in `multiplicity` and "
+    f"must be quoted alongside this one; "
+    f"n={len(nfp_friday_abs)} vs {len(friday_non_nfp_abs)}). Scoped to the releases "
+    f"ABSORBED BY a Friday session, not to releases DATED a Friday: "
+    f"{_n_release_friday} are dated a Friday but only {_n_session_friday} trade in one, "
+    f"the {len(_gf)} Good Friday releases in between being absorbed by the following "
+    f"Monday. The {len(nfp_nonfriday_abs)} excluded events are quieter, so this "
     f"is not a statement about NFP releases in general."
 )
 conclusions.append(
@@ -1550,7 +1556,9 @@ record(
     note="Two things changed here and they are separated rather than conflated. "
          "(1) The dates were corrected. (2) The ESTIMAND was corrected: the "
          "event group is a weekday mixture while the control group is pure "
-         "Friday, so the test now restricts the event group to Friday releases. "
+         "Friday, so the test now restricts the event group to the releases that "
+         "are absorbed by a Friday SESSION (237 of the 243 releases dated a Friday; "
+         "the other six are Good Fridays traded the following Monday). "
          "Defect (2) was NOT created by (1) -- the proxy run was already mixed "
          "(239/254 Friday, the other 15 being holiday-shifted Mondays), it was "
          "simply never noticed. Both columns above therefore use the SAME "
@@ -1757,11 +1765,14 @@ output = {
                 "than compared against a pure-Friday control group."
             ),
             "claim_scope": (
-                "This identifies the effect of an NFP release ON A FRIDAY. It does not "
-                "license a statement about NFP releases in general -- the excluded "
-                "non-Friday events are quieter, so the restriction raises the ratio "
-                "relative to the mixed-weekday spec. Any prose quoting this number must "
-                "say 'Friday NFP', not 'NFP'."
+                "This identifies the effect of an NFP release ABSORBED BY A FRIDAY "
+                "SESSION. It does not license a statement about NFP releases in general "
+                "-- the excluded events are quieter, so the restriction raises the ratio "
+                "relative to the mixed-weekday spec -- and it is NOT a statement about "
+                "releases DATED a Friday, six of which are Good Fridays traded the "
+                "following Monday and therefore excluded. Any prose quoting this number "
+                "must say 'NFP traded in a Friday session', not 'NFP' and not "
+                "'NFP released on a Friday'."
             ),
             "restriction_is_not_neutral": {
                 "excluded_mean_abs_return": float(nfp_nonfriday_abs.mean()) if len(nfp_nonfriday_abs) else None,

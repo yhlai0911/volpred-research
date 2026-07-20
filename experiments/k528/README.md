@@ -200,7 +200,8 @@ Mann-Whitney 的 p=0.0088 明確顯著 —— 那句總結**與它自己的數�
 （可由修正前的腳本版本查證），但**沒有**在看到資料之前被登記下來。所以：
 
 - 兩種 family 的結果**並列呈現**，不挑對自己有利的那個講
-- 可以寫的：「nominal 顯著；在事先聲明的六項 confirmatory family 內通過 Holm 校正」
+- 可以寫的：「nominal 顯著；在六項 confirmatory family 內通過 Holm 校正（**該 family 非預先登記**，
+  且對全部 22 個 inferential outputs 校正後不拒絕 —— 見上方三種讀法）」
 - **不可以寫的**：不加限定的「顯著」、或宣稱它對任何 family 選擇都穩健
 
 **為什麼用 Holm 不用 Romano-Wolf**：這個 family 混了 Welch t、Mann-Whitney U 與兩個相關檢定，
