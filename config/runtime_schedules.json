@@ -1458,10 +1458,11 @@
       "schedule": "*/15 * * * *",
       "command": "/Users/yhlai0911/.volpred/bin/cron_compute_worker.sh",
       "log": "storage/logs/cron/compute_worker.log",
-      "description": "Compute queue worker — picks 1 queued heavy-CPU job (MLE/bootstrap/data fetch), runs without Claude tokens. Token-conserving split: feeds interpretation agents via hourly_dispatch PHASE A.",
+      "description": "Compute queue worker — work-conserving drain loop (D6 2026-07-20): `run-loop` consumes ALL queued heavy-CPU jobs (MLE/bootstrap/data fetch/agent) continuously with bounded parallelism, exiting only when the queue is empty; runs without Claude tokens. Parallel bound: `max_parallel` on this entry if set, else min(3, cpu//3) — keeps M1 Max headroom for dispatch agents + interactive session. The */15 tick is RESTART INSURANCE only: a tick landing while a drain loop is alive loses the flock worker mutex and exits immediately; ticks also revive jobs sleeping on not_before (quota windows). Token-conserving split: feeds interpretation agents via hourly_dispatch PHASE A.",
       "canonical_script": "scripts/cron_compute_worker.sh",
       "tcc_bypass_copy": "~/.volpred/bin/cron_compute_worker.sh",
-      "installed_at": "2026-05-12T06:41:51Z"
+      "installed_at": "2026-05-12T06:41:51Z",
+      "updated_at": "2026-07-20T05:10:00Z"
     }
   ],
   "daemons": [
