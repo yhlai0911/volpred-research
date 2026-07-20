@@ -4853,6 +4853,110 @@ def _parse_series_registry_state(storage_dir: str) -> dict[str, Any]:
     }
 
 
+def _parse_dedup_gate_health_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Does anyone read the dedup gate's own audit trail? (WS-F2, rule §4)
+
+    2026-06-23: the dedup gate silently blocked every article for 8 days and
+    the owner found out by looking at the feed. The gates now log every
+    decision to storage/logs/dedup_decisions.jsonl — this condition is the
+    reader that was promised in `.claude/rules/dedup-gate-audit.md` §4.
+
+    Adjudication is owned by ``volpred.ops.dedup_gate_audit`` (same brain as
+    `scripts/audit_dedup_gate_decisions.py`); this condition only maps its
+    verdict onto the alert contract. critical = black-hole recurrence (gate
+    firing, zero passes for 24h); warn = block rate > 30% weekly, or one arc
+    blocked ≥3 times. Fail-open: an audit crash is reported as its own warn
+    (a broken watchdog must not look green), but never raises.
+    """
+    from .dedup_gate_audit import audit_dedup_decisions
+
+    try:
+        verdict = audit_dedup_decisions(storage_dir=storage_dir, now=now)
+    except Exception as exc:  # noqa: BLE001 — watchdog itself must fail loud-but-soft
+        warn("dedup_gate_health", "audit crashed", err=str(exc))
+        return {
+            "id": "dedup_gate_health",
+            "breached": True,
+            "level": "warn",
+            "title": "dedup gate audit 本身掛了（黑洞偵測失明）",
+            "body": "\n".join([
+                "## 觸發條件",
+                f"`audit_dedup_decisions` 拋例外：{exc}",
+                "",
+                "## 影響",
+                "這是 2026-06-23 內容黑洞的復發偵測器；它掛掉期間 dedup gate 若再度全 block，"
+                "沒有任何機制會發現。",
+                "",
+                "## 修復",
+                "跑 `uv run python scripts/audit_dedup_gate_decisions.py` 重現 traceback，"
+                "修 `src/volpred/ops/dedup_gate_audit.py`。",
+            ]),
+            "details": {"error": str(exc)},
+        }
+
+    findings = verdict.get("findings") or []
+    if not findings:
+        return {
+            "id": "dedup_gate_health",
+            "breached": False,
+            "level": "info",
+            "title": "dedup_gate_health ok",
+            "body": "",
+            "details": {
+                "totals": verdict.get("totals"),
+                "block_rate": verdict.get("conditions", {}).get("block_rate", {}).get("rate"),
+            },
+        }
+
+    level = "critical" if any(f.get("level") == "critical" for f in findings) else "warn"
+    conditions = verdict.get("conditions", {})
+    body = "\n".join([
+        "## 觸發條件",
+        *(f"- [{f['level']}] {f['summary']}" for f in findings),
+        "",
+        "## 影響",
+        "dedup/publish gate 是 feed 的總閘門（Mission #1/#4/#5 上游）。2026-06-23 同款故障"
+        "曾讓平台 8 天零新文，靠老闆肉眼才發現；這則警報就是那次事故承諾的機械偵測器。",
+        "",
+        "## 觀察",
+        f"- 近 {verdict.get('window', {}).get('lookback_days')} 天決策："
+        f"{verdict.get('totals', {}).get('allow')} 放行 / {verdict.get('totals', {}).get('block')} block / "
+        f"{verdict.get('totals', {}).get('other')} 其他（hold/skip）",
+        f"- 最近一次放行：{conditions.get('no_pass_blackhole', {}).get('last_allow_ts') or '（窗內無）'}",
+        f"- block 最多的 gate：{conditions.get('block_rate', {}).get('top_blocking_gates')}",
+        "",
+        "## 修復入口",
+        "完整裁決：`uv run python scripts/audit_dedup_gate_decisions.py`；"
+        "black hole → 檢查 `src/volpred/publisher/publisher.py` 與 `volpred.ops.content` 的 gate "
+        "是否違反 fail-open（rule §3）；同 arc 重複 block → review 是否人工 unlock 該 arc。",
+    ])
+    return {
+        "id": "dedup_gate_health",
+        "breached": True,
+        "level": level,
+        "title": f"dedup gate 健康異常：{findings[0]['summary'][:60]}",
+        "body": body,
+        "details": {
+            "findings": findings,
+            "totals": verdict.get("totals"),
+            "conditions": {
+                "block_rate": {
+                    k: conditions.get("block_rate", {}).get(k)
+                    for k in ("breached", "rate", "blocks", "decisions")
+                },
+                "no_pass_blackhole": {
+                    k: conditions.get("no_pass_blackhole", {}).get(k)
+                    for k in ("breached", "streak_hours", "recent_blocks", "recent_allows")
+                },
+                "arc_repeat_block": {
+                    "breached": conditions.get("arc_repeat_block", {}).get("breached"),
+                    "repeat_arcs": conditions.get("arc_repeat_block", {}).get("repeat_arcs"),
+                },
+            },
+        },
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -4889,6 +4993,7 @@ def build_alert_condition_report(
         _parse_paper_trading_gaps_state(storage_dir),             # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_disk_usage_state(storage_dir),                     # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_content_quality_state(storage_dir, current),       # 2026-06-24 meta-fix: content patrol layer
+        _parse_dedup_gate_health_state(storage_dir, current),     # 2026-07-20 WS-F2: dedup-gate-audit rule §4 兌現（2026-06-23 8-day 黑洞復發偵測）
         _parse_cluster_cap_drift_state(storage_dir),              # 2026-06-29 K1333 publish discovered vix 6.1x / spy 8.3x overshoot
         _parse_loop_health_state(storage_dir, current),           # 2026-06-29 loop-engineering: is the loop improving?
         _parse_series_registry_state(storage_dir),                # 2026-07-06 迷思實驗室 4-mistake incident: series-brand drift detector (SoT = config/article_series.json)
