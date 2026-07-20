@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+import json
+import re
 import subprocess
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone, tzinfo
+from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from volpred.config import get_runtime_schedules_path, load_runtime_schedules
+from volpred.config import (
+    get_project_root,
+    get_runtime_schedules_path,
+    load_runtime_schedules,
+)
 
 _TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 
@@ -297,3 +305,221 @@ def build_schedule_report() -> dict[str, Any]:
         "live_system_crontab_note": live["note"],
         "system_crontab_items": live["items"],
     }
+
+
+# ── Job liveness single source (WS-D1, refactor_plan_ops_master_2026_07) ─────
+#
+# `storage/ops/cron_last_run.json` records exit-0 SUCCESS markers stamped by
+# (a) run_due_jobs piggy-back fires and (b) wrappers sourcing scripts/cron_lib.sh.
+# It is NOT a universal liveness source: a launchd-direct job
+# (`host_crontab_managed: false`) whose wrapper does not self-report never
+# refreshes there — `daily_update` sat frozen at 2026-04-25 for ~3 months while
+# running healthy every morning (banner `exit 0` fresh in its execution log).
+# Every monitor that judged liveness from the marker alone therefore misread a
+# live job as dead, and each reader grew its own partial log-fallback patch.
+#
+# This block is the ONLY sanctioned way to answer "when did job X last
+# run/succeed". Readers (check_alerts staleness, ops_dashboard, cron_review,
+# work_dashboard_server, generate_diverse_tasks) must resolve evidence through
+# `job_liveness()` instead of reading the marker file / log mtimes ad hoc
+# (anti-stacking: one enforcement owner for the evidence merge).
+
+CRON_MARKER_PATH = get_project_root() / "storage" / "ops" / "cron_last_run.json"
+CRON_MARKER_META_KEY = "_meta"
+CRON_MARKER_SCOPE = "piggyback-and-cron_lib-self-report-only"
+
+# Exit banner emitted by scripts/cron_lib.sh::cron_emit_exit and by bespoke
+# wrappers (e.g. cron_daily_update.sh):  === [job] exit 0 at <ts> (duration=…) ===
+_EXIT_BANNER_RE = re.compile(
+    r"===\s*\[[^\]]+\]\s+exit\s+(?P<code>-?\d+)\s+at\s+(?P<ts>\S+)"
+)
+_LOG_TAIL_BYTES = 65536
+
+
+@dataclass(frozen=True)
+class JobLiveness:
+    """Merged run evidence for one scheduled job.
+
+    - `last_success`: freshest exit-0 evidence — max(marker, log exit-0 banner).
+    - `last_activity`: freshest any-outcome evidence — max(last_success, log
+      mtime). Use for "did it fire" displays; keep `last_success` for staleness
+      alerting so a job that fires but always fails still goes stale (the
+      marker's contract).
+    """
+
+    job_id: str
+    marker_eligible: bool
+    marker_raw: str | None
+    marker_at: datetime | None
+    banner_at: datetime | None
+    log_mtime: datetime | None
+    log_path: Path | None
+    last_success: datetime | None
+    success_source: str | None  # "piggyback_marker" | "log_banner" | None
+    last_activity: datetime | None
+
+
+def load_cron_marker_state(path: Path | None = None) -> dict[str, str]:
+    """Canonical reader of cron_last_run.json (drops `_`-prefixed meta keys).
+
+    Corrupt / missing file → {} plus, for corruption, a diagnostics warn — the
+    liveness merge then falls back to execution-log evidence rather than
+    crashing every monitor at once.
+    """
+    marker_path = path or CRON_MARKER_PATH
+    if not marker_path.exists():
+        return {}
+    try:
+        data = json.loads(marker_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        from volpred.ops.diagnostics import warn
+
+        warn("schedules", "cron_last_run read failed; markers unavailable",
+             path=str(marker_path), err=f"{type(exc).__name__}: {exc}")
+        return {}
+    if not isinstance(data, dict):
+        from volpred.ops.diagnostics import warn
+
+        warn("schedules", "cron_last_run schema is not an object; markers unavailable",
+             path=str(marker_path))
+        return {}
+    return {
+        key: value
+        for key, value in data.items()
+        if isinstance(key, str) and not key.startswith("_")
+    }
+
+
+def marker_eligible(item: dict[str, Any]) -> bool:
+    """Is cron_last_run a *live* source for this job?
+
+    Mirrors the run_due_jobs dispatch predicate: `host_crontab_managed: false`
+    jobs are never piggy-back fired unless they opt back in with
+    `piggy_back_enabled: true`. (A self-reporting wrapper may still stamp a
+    marker for an ineligible job — `job_liveness` treats any present marker as
+    genuine success evidence but never as the *only* source for such jobs.)
+    """
+    managed = item.get("host_crontab_managed")
+    return not (managed is False and item.get("piggy_back_enabled") is not True)
+
+
+def _parse_marker_ts(raw: Any) -> datetime | None:
+    if not raw or not isinstance(raw, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:  # silent-ok: caller keeps marker_raw and surfaces it loudly (evaluate_cron_staleness unparsable_marker verdict + WARN; gdt log-fallback WARN)
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def _parse_banner_ts(raw: str) -> datetime | None:
+    """Parse a wrapper banner timestamp (`2026-07-20T08:08:09+0800`, UTC ISO,
+    or naive local) → aware UTC datetime."""
+    candidate = raw.strip().rstrip(",;")
+    m = re.match(r"(.*[+-]\d{2})(\d{2})$", candidate)
+    if m:  # +0800 → +08:00 (fromisoformat on older interpreters)
+        candidate = f"{m.group(1)}:{m.group(2)}"
+    try:
+        parsed = datetime.fromisoformat(candidate)
+    except ValueError:  # silent-ok: probe — non-timestamp token means try the next banner line; log mtime remains the activity floor either way
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=_TAIPEI_TZ)  # wrappers log in host-local time
+    return parsed.astimezone(timezone.utc)
+
+
+def _resolve_log_path(item: dict[str, Any], repo_root: Path) -> Path | None:
+    raw = item.get("log_path") or item.get("log")
+    if not raw or not isinstance(raw, str):
+        return None
+    expanded = Path(raw).expanduser()
+    return expanded if expanded.is_absolute() else repo_root / expanded
+
+
+def _log_evidence(log_path: Path | None) -> tuple[datetime | None, datetime | None]:
+    """(last exit-0 banner ts, log mtime) from the tail of the execution log."""
+    if log_path is None or not log_path.exists():
+        return None, None
+    if not log_path.is_file():
+        from volpred.ops.diagnostics import warn
+
+        warn("schedules", "cron log path exists but is not a file; no log evidence",
+             path=str(log_path))
+        return None, None
+    try:
+        mtime = datetime.fromtimestamp(log_path.stat().st_mtime, tz=timezone.utc)
+    except OSError:
+        mtime = None
+    banner_at: datetime | None = None
+    try:
+        with log_path.open("rb") as fh:
+            fh.seek(0, 2)
+            size = fh.tell()
+            fh.seek(max(0, size - _LOG_TAIL_BYTES))
+            tail = fh.read().decode("utf-8", errors="ignore")
+    except OSError as exc:
+        from volpred.ops.diagnostics import warn
+
+        warn("schedules", "cron log tail read failed; banner evidence unavailable",
+             path=str(log_path), err=f"{type(exc).__name__}: {exc}")
+        return None, mtime
+    for line in reversed(tail.splitlines()):
+        m = _EXIT_BANNER_RE.search(line)
+        if m is None:
+            continue
+        if m.group("code") != "0":
+            continue  # success evidence only; failures must be allowed to go stale
+        banner_at = _parse_banner_ts(m.group("ts"))
+        if banner_at is not None:
+            break
+    return banner_at, mtime
+
+
+def job_liveness(
+    item: dict[str, Any],
+    *,
+    marker_state: dict[str, str] | None = None,
+    repo_root: Path | None = None,
+) -> JobLiveness:
+    """Merge marker + execution-log evidence for one schedule item.
+
+    `item` is a `system_crontab.items` entry (or a synthetic dict with at least
+    `id`, optionally `log_path` / `host_crontab_managed` / `piggy_back_enabled`).
+    Pass a preloaded `marker_state` when evaluating many jobs; omit it to read
+    the canonical marker file.
+    """
+    root = repo_root or get_project_root()
+    job_id = str(item.get("id") or "")
+    state = marker_state if marker_state is not None else load_cron_marker_state()
+    raw = state.get(job_id)
+    marker_raw = raw if isinstance(raw, str) else None
+    marker_at = _parse_marker_ts(marker_raw)
+    banner_at, log_mtime = _log_evidence(_resolve_log_path(item, root))
+
+    success_candidates = [
+        (marker_at, "piggyback_marker"),
+        (banner_at, "log_banner"),
+    ]
+    last_success, success_source = None, None
+    for ts, source in success_candidates:
+        if ts is not None and (last_success is None or ts > last_success):
+            last_success, success_source = ts, source
+
+    activity_candidates = [ts for ts in (last_success, log_mtime) if ts is not None]
+    last_activity = max(activity_candidates) if activity_candidates else None
+
+    return JobLiveness(
+        job_id=job_id,
+        marker_eligible=marker_eligible(item),
+        marker_raw=marker_raw,
+        marker_at=marker_at,
+        banner_at=banner_at,
+        log_mtime=log_mtime,
+        log_path=_resolve_log_path(item, root),
+        last_success=last_success,
+        success_source=success_source,
+        last_activity=last_activity,
+    )

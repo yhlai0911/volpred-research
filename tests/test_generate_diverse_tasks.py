@@ -443,31 +443,41 @@ def test_governance_error_log_sweep_skips_existing_current_bucket(tmp_path, monk
     assert tasks == []
 
 
-def test_parse_banner_ts_accepts_hhmm_without_seconds() -> None:
-    """Python script banners like `=== 台股數據收集: 2026-06-11 15:00 ===` use HH:MM
-    (no seconds). _parse_banner_ts must accept them, otherwise _latest_cron_log_ts
-    walks backward past every recent run and returns an ancient cron_lib banner —
-    triggering a false 'cron staleness' alarm (2026-06-11 root cause)."""
-    ts = generate_diverse_tasks._parse_banner_ts(
-        "=== 台股數據收集: 2026-06-11 15:00 ==="
+def test_fresh_log_with_only_odd_banners_is_not_flagged_stale(
+    tmp_path, monkeypatch
+) -> None:
+    """WS-D1 regression (supersedes the retired local `_parse_banner_ts` tests):
+    a log whose banners are non-canonical (HH:MM python prints, old cron_lib
+    lines) but which was WRITTEN recently must not trigger a false staleness
+    task — `job_liveness.last_activity` uses log mtime as the activity floor,
+    so banner-format drift can no longer resurrect the 2026-06-11 false alarm."""
+    cron_last_run = tmp_path / "cron_last_run.json"
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    cron_logs = tmp_path / "cron"
+    cron_logs.mkdir()
+
+    cron_last_run.write_text(json.dumps({}), encoding="utf-8")
+    runtime_schedules.write_text(
+        json.dumps({
+            "system_crontab": {
+                "items": [{"id": "collect_tw_data", "cron": "0 15 * * 1-5"}]
+            }
+        }),
+        encoding="utf-8",
     )
-    assert ts is not None
-    # 15:00 Asia/Taipei = 07:00 UTC
-    assert ts.hour == 7 and ts.minute == 0
-    assert ts.year == 2026 and ts.month == 6 and ts.day == 11
-
-
-def test_parse_banner_ts_warns_on_date_like_invalid_banner(capsys) -> None:
-    ts = generate_diverse_tasks._parse_banner_ts(
-        "=== [daily_update] exit 0 at 2026-02-31T09:00:00+0000 ===",
-        source="daily_update.log",
+    # Old-dated banners only — but the file itself is freshly written (mtime now).
+    (cron_logs / "collect_tw_data.log").write_text(
+        "=== [collect_tw_data] exit 0 at 2026-05-28T07:00:24.467842+00:00 (duration=16.7s) ===\n"
+        "=== 台股數據收集: 2026-06-11 15:00 ===\n",
+        encoding="utf-8",
     )
 
-    assert ts is None
-    err = capsys.readouterr().err
-    assert "[diverse_gen] WARN cron log timestamp parse failed" in err
-    assert "2026-02-31T09:00:00+00:00" in err
-    assert "daily_update.log" in err
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LAST_RUN", cron_last_run)
+    monkeypatch.setattr(generate_diverse_tasks, "RUNTIME_SCHEDULES", runtime_schedules)
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", cron_logs)
+
+    tasks = generate_diverse_tasks.gen_platform_ops_tasks(existing=set())
+    assert tasks == []
 
 
 def test_parse_cron_gap_warns_on_bad_minute_interval(capsys) -> None:
@@ -529,39 +539,6 @@ def test_bad_cron_last_run_timestamp_uses_fresh_log_fallback(
     err = capsys.readouterr().err
     assert "[diverse_gen] WARN cron_last_run timestamp parse failed" in err
     assert "using log fallback" in err
-
-
-def test_latest_cron_log_ts_picks_latest_hhmm_banner_over_old_seconds_banner(
-    tmp_path, monkeypatch
-) -> None:
-    """Regression: when a log contains old cron_lib banners (with seconds) followed
-    by newer python-print banners (HH:MM only), detector must return the newer one."""
-    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
-    monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", tmp_path / "cron")
-    (tmp_path / "cron").mkdir()
-    log = tmp_path / "cron" / "x.log"
-    log.write_text(
-        "=== [collect_tw_data] exit 0 at 2026-05-28T07:00:24.467842+00:00 (duration=16.7s) ===\n"
-        "=== 台股數據收集: 2026-06-11 15:00 ===\n",
-        encoding="utf-8",
-    )
-    ts = generate_diverse_tasks._latest_cron_log_ts("x", "cron/x.log")
-    assert ts is not None
-    assert ts.year == 2026 and ts.month == 6 and ts.day == 11
-
-
-def test_latest_cron_log_ts_warns_on_unreadable_log(tmp_path, monkeypatch, capsys) -> None:
-    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
-    monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", tmp_path / "cron")
-    (tmp_path / "cron" / "x.log").mkdir(parents=True)
-
-    ts = generate_diverse_tasks._latest_cron_log_ts("x", "cron/x.log")
-
-    assert ts is None
-    captured = capsys.readouterr()
-    assert "[diverse_gen] WARN cron log read failed; skipping log timestamp" in captured.err
-    assert "x.log" in captured.err
-    assert "IsADirectoryError" in captured.err
 
 
 def test_experiment_dir_with_descriptive_suffix_covers_kid() -> None:

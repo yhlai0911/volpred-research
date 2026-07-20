@@ -137,7 +137,9 @@ def test_piggy_back_drift_warns_on_bad_job_timestamp(tmp_path: Path, monkeypatch
     assert result["drifts"] == ["unparsable_marker: paper_sync_all 'not-a-timestamp'"]
     assert "[check_alerts] WARN cron_last_run timestamp parse failed" in captured.err
     assert "job_id=paper_sync_all" in captured.err
-    assert "Invalid isoformat string" in captured.err
+    # WS-D1: parsing moved into volpred.ops.schedules.job_liveness; the WARN now
+    # carries the raw marker instead of datetime's "Invalid isoformat string".
+    assert "not-a-timestamp" in captured.err
     assert "piggy-back-drift:" in captured.out
 
 

@@ -31,6 +31,14 @@ from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
+
+# WS-D1 (2026-07-20): liveness evidence merge is owned by volpred.ops.schedules.
+# cron_last_run.json alone lies for launchd-direct jobs (daily_update marker froze
+# at 2026-04-25 while the job ran healthy every morning) — the dashboard showed
+# the boss a dead job for ~3 months.
+from volpred.ops.schedules import job_liveness  # noqa: E402
 TZ = ZoneInfo("Asia/Taipei")
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
@@ -272,13 +280,17 @@ def build_work() -> dict:
         ntw, nrel, nsort, nday = _fmt_tw(_next_fire_dt(item.get("cron", ""), warnings, str(jid or "?")))
         cat = JOB_CAT.get(jid, "other")
         cname, ccolor = CAT_META.get(cat, CAT_META["other"])
+        # Single liveness source (WS-D1): marker + execution-log banner/mtime
+        # merged by job_liveness — never the raw cron_last_run marker alone.
+        live = job_liveness(item, marker_state=last_run, repo_root=ROOT)
+        last_iso = live.last_activity.isoformat() if live.last_activity else ""
         schedule.append({
             "id": jid, "cron": item.get("cron", "?"),
             "label": item.get("label") or (item.get("description") or "")[:36],
             "desc": JOB_DESC.get(jid) or (item.get("description") or "")[:34],
             "cat": cname, "color": ccolor,
             "next_tw": ntw, "next_rel": nrel, "_sort": nsort, "_day": nday,
-            "last": _rel_time(last_run.get(jid, "")),
+            "last": _rel_time(last_iso),
             "skip": bool(item.get("piggy_back_skip") or item.get("host_crontab_managed") is False),
         })
     schedule.sort(key=lambda s: s["_sort"])  # 預設依接下來發生順序

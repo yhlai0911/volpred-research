@@ -7,9 +7,13 @@ reader-visible numbers to hash-pinned JSON fields; Codex writes one bespoke
 renderer, this process runs it locally, and the async caller verifies a receipt
 before upload/install. ``scripts/lazypack_render.py`` is the explicit fallback.
 
-Boss directive (2026-06-30): generate reader-facing 懶人包 infographics with
-`codex exec` (ChatGPT-subscription Codex CLI — flat-rate, NOT per-image metered),
-NOT NotebookLM (now the FALLBACK, see gen_lazypack_infographic.py).
+Boss directive (2026-06-30, upgraded 2026-07-15): generate reader-facing 懶人包
+infographics with `codex exec` (ChatGPT-subscription Codex CLI — flat-rate, NOT
+per-image metered). Fallback chain: deterministic ``scripts/lazypack_render.py``
+is the auto-activating, LOGGED fallback whenever codex is unavailable (CLI
+failure / quota exhaustion / timeout / repair rounds exhausted) — never silent;
+NotebookLM AI-poster (gen_lazypack_infographic.py) is the LAST resort, manual
+authorization + review only, never an automatic fallback.
 
 Why codex exec is primary:
   - Codex WRITES a Python render script (matplotlib/PIL) fed the evidence package,
@@ -22,8 +26,9 @@ Why codex exec is primary:
   - Controllable poster layout (bento-grid / sections / big numbers) by code.
 
 A frozen example of the kind of data-bound Pillow renderer codex should write
-lives at scripts/lazypack_render_example_spacex.py (article-specific; reference
-only). This harness makes codex write a BESPOKE renderer per article instead.
+lives at scripts/_legacy/lazypack_render_example_spacex.py (article-specific;
+reference only — retired to _legacy/ 2026-07-20, WS-C5). This harness makes
+codex write a BESPOKE renderer per article instead.
 
 Flow (2026-07-11 rewrite — see below): gather evidence package → codex WRITES a
 render script (bounded call, no execution) → THIS process runs it locally with
@@ -168,7 +173,9 @@ _STYLE_HINTS = {
     "editorial": "雜誌編輯風、清楚層級、一個主視覺 + 註解",
     "scientific": "研討會壁報風、方法步驟 + 圖表，標資料來源",
 }
-_REFERENCE_RENDERER = ROOT / "scripts" / "lazypack_render_example_spacex.py"
+_REFERENCE_RENDERER = (
+    ROOT / "scripts" / "_legacy" / "lazypack_render_example_spacex.py"
+)
 
 
 def _panel_must_show(panel: dict) -> str:

@@ -2504,8 +2504,10 @@ def _auto_remediate_ci_red() -> dict:
     return _handle_ci_runs(runs, now_iso=datetime.now(timezone.utc).isoformat())
 
 
-# The monitor cannot meaningfully monitor itself; `host_crontab_managed: false`
-# means the entry documents something this host does not schedule.
+# The monitor cannot meaningfully monitor itself. (Note: `host_crontab_managed:
+# false` no longer means "skip" — WS-D1 2026-07-20: launchd-direct jobs are
+# judged from execution-log exit-0 banners via volpred.ops.schedules.job_liveness,
+# because their cron_last_run markers can freeze while the job runs healthy.)
 STALENESS_EXCLUDED_JOB_IDS = frozenset({"check_alerts"})
 STALENESS_TOLERANCE = 2.0  # a job is stale past 2× its longest legitimate gap
 
@@ -2535,8 +2537,9 @@ def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) ->
     """One record per configured job — nothing is silently skipped.
 
     Every entry in `system_crontab.items` gets a verdict:
-      excluded / unmanaged   — deliberately not checked, with a reason
-      never_ran              — configured but has NEVER recorded a run
+      excluded               — deliberately not checked, with a reason
+      unscheduled            — no cron expression (KeepAlive daemon etc.)
+      never_ran              — configured but has NO run evidence anywhere
       bad_cron               — cron expression croniter cannot parse
       unparsable_marker      — marker exists but is not a timestamp
       stale / ok             — compared against 2× the cron's longest legit gap
@@ -2544,18 +2547,29 @@ def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) ->
     Returning `never_ran` and `bad_cron` as verdicts rather than `continue`
     statements is the point: the old loop dropped both on the floor, which is how
     `indicator_arena_daily` (never once recorded) stayed invisible.
+
+    Evidence source (WS-D1, 2026-07-20): `volpred.ops.schedules.job_liveness` is
+    the single liveness merge. `cron_last_run.json` only covers piggyback fires
+    and cron_lib self-reports; launchd-direct jobs (`host_crontab_managed:
+    false`) are judged from their execution-log exit-0 banner instead. The old
+    blanket `unmanaged` skip made a dead launchd job invisible here while its
+    frozen marker (daily_update @2026-04-25) misled every other reader.
     """
+    from volpred.ops.schedules import job_liveness  # noqa: WPS433 (deferred; SRC_DIR wired above)
+
     records: list[dict] = []
     for item in items:
         job_id = item.get("id")
         cron = item.get("cron")
         if not job_id:
             continue
-        if item.get("host_crontab_managed") is False:
-            records.append({"job_id": job_id, "status": "unmanaged", "detail": "host_crontab_managed=false"})
-            continue
         if job_id in STALENESS_EXCLUDED_JOB_IDS:
             records.append({"job_id": job_id, "status": "excluded", "detail": "the monitor itself"})
+            continue
+        if not cron:
+            records.append({"job_id": job_id, "status": "unscheduled",
+                            "detail": "no cron expression (daemon/KeepAlive job — "
+                                      "its own alert conditions own liveness)"})
             continue
 
         try:
@@ -2570,28 +2584,31 @@ def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) ->
             records.append({"job_id": job_id, "status": "bad_cron", "detail": f"cron={cron!r} ({exc})"})
             continue
 
-        last_iso = state.get(job_id)
-        if not last_iso:
+        live = job_liveness(item, marker_state=state, repo_root=PROJECT_ROOT)
+        if live.last_success is None:
+            if live.marker_raw:
+                _warn_check_alerts(
+                    f"cron_last_run timestamp parse failed for job_id={job_id}",
+                    state_path,
+                    ValueError(f"unparsable marker: {live.marker_raw!r}"),
+                )
+                records.append({"job_id": job_id, "status": "unparsable_marker",
+                                "detail": repr(live.marker_raw)})
+                continue
+            detail = f"no cron_last_run entry (cron={cron})"
+            if not live.marker_eligible:
+                detail += " and no exit-0 banner in execution log"
             records.append({"job_id": job_id, "status": "never_ran",
-                            "detail": f"no cron_last_run entry (cron={cron})",
-                            "period_min": period_min})
-            continue
-        try:
-            last_dt = datetime.fromisoformat(str(last_iso).replace("Z", "+00:00"))
-        except Exception as exc:  # noqa: BLE001
-            _warn_check_alerts(
-                f"cron_last_run timestamp parse failed for job_id={job_id}",
-                state_path, exc,
-            )
-            records.append({"job_id": job_id, "status": "unparsable_marker", "detail": repr(last_iso)})
+                            "detail": detail, "period_min": period_min})
             continue
 
-        age_min = (now - last_dt).total_seconds() / 60
+        age_min = (now - live.last_success).total_seconds() / 60
         records.append({
             "job_id": job_id,
             "status": "stale" if age_min > STALENESS_TOLERANCE * period_min else "ok",
             "age_min": age_min,
             "period_min": period_min,
+            "evidence": live.success_source,
         })
     return records
 

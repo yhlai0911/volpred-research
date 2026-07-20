@@ -360,82 +360,23 @@ def _effective_expected_gap_seconds(item: dict) -> int | None:
     return _parse_cron_gap_seconds(str(item.get("cron") or ""))
 
 
-def _warn_banner_ts_parse_failed(raw: str, exc: Exception, source: str | None) -> None:
-    source_text = f" source={source}" if source else ""
-    _warn_diverse(
-        "cron log timestamp parse failed; skipping matched banner timestamp "
-        f"raw={raw!r}{source_text} error={type(exc).__name__}: {exc}"
-    )
-
-
-def _parse_banner_ts(text: str, *, source: str | None = None) -> datetime | None:
-    m = re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:\+00:00|\+\d{4})", text)
-    if m:
-        raw = m.group(0)
-        if re.search(r"[+-]\d{4}$", raw):
-            raw = raw[:-5] + raw[-5:-2] + ":" + raw[-2:]
-        try:
-            return datetime.fromisoformat(raw).astimezone(timezone.utc)
-        except ValueError as exc:
-            _warn_banner_ts_parse_failed(raw, exc, source)
-    m = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}", text)
-    if m:
-        raw = m.group(0)
-        try:
-            return datetime.strptime(
-                raw.replace("T", " "),
-                "%Y-%m-%d %H:%M:%S",
-            ).replace(tzinfo=timezone(timedelta(hours=8))).astimezone(timezone.utc)
-        except ValueError as exc:
-            _warn_banner_ts_parse_failed(raw, exc, source)
-    m = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?!:)", text)
-    if m:
-        raw = m.group(0)
-        try:
-            return datetime.strptime(
-                raw.replace("T", " "),
-                "%Y-%m-%d %H:%M",
-            ).replace(tzinfo=timezone(timedelta(hours=8))).astimezone(timezone.utc)
-        except ValueError as exc:
-            _warn_banner_ts_parse_failed(raw, exc, source)
-            return None
-    return None
-
-
-def _latest_cron_log_ts(job_id: str, log_rel: str | None = None) -> datetime | None:
-    if log_rel:
-        candidate = ROOT / log_rel if not log_rel.startswith("/") else Path(log_rel)
-        log_path = candidate if candidate.exists() else CRON_LOGS / f"{job_id}.log"
-    else:
-        log_path = CRON_LOGS / f"{job_id}.log"
-    if not log_path.exists():
-        return None
-    try:
-        lines = log_path.read_text(encoding="utf-8", errors="ignore").splitlines()
-    except OSError as exc:
-        _warn_diverse(
-            "cron log read failed; skipping log timestamp "
-            f"path={log_path} error={type(exc).__name__}: {exc}"
-        )
-        return None
-    for line in reversed(lines):
-        if "===" not in line:
-            continue
-        ts = _parse_banner_ts(line, source=str(log_path))
-        if ts is not None:
-            return ts
-    try:
-        return datetime.fromtimestamp(log_path.stat().st_mtime, tz=timezone.utc)
-    except OSError as exc:
-        _warn_diverse(
-            "cron log stat failed; skipping log timestamp "
-            f"path={log_path} error={type(exc).__name__}: {exc}"
-        )
-        return None
-
-
 def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
-    """Detect stale cron jobs — prefer recent log banner over stale cron_last_run."""
+    """Detect stale cron jobs.
+
+    Evidence source (WS-D1, 2026-07-20): `volpred.ops.schedules.job_liveness`
+    merges the piggyback marker with execution-log banner/mtime — the single
+    liveness source shared by every monitor. This module's former local banner
+    parser (`_parse_banner_ts` / `_latest_cron_log_ts`) was one of four parallel
+    partial implementations of the same fallback and is retired (anti-stacking).
+
+    `host_crontab_managed: false` jobs stay excluded from TASK GENERATION only
+    (policy, not source selection): the set still contains deliberately-dormant
+    advisory entries (e.g. `shared_scheduler_tick`, WS-D2 retirement) that would
+    spawn bogus repair tasks. Their real liveness is surfaced by check_alerts'
+    staleness records and the dashboards via the same helper.
+    """
+    from volpred.ops.schedules import job_liveness  # noqa: WPS433 (src on sys.path above)
+
     if not CRON_LAST_RUN.exists() or not RUNTIME_SCHEDULES.exists():
         return []
     last_run = _load_json_dict(CRON_LAST_RUN, source="cron_last_run")
@@ -456,30 +397,21 @@ def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
         expected = _effective_expected_gap_seconds(item)
         if expected is None:
             continue
-        last_iso = last_run.get(cid)
         log_rel = item.get("log_path")
-        log_dt = _latest_cron_log_ts(cid, log_rel)
-        if not last_iso:
-            if log_dt is None:
-                continue
-            last_dt = log_dt
-            last_iso = log_dt.isoformat()
-        else:
-            try:
-                last_dt = datetime.fromisoformat(last_iso.replace("Z", "+00:00"))
-            except Exception as exc:
-                _warn_diverse(
-                    "cron_last_run timestamp parse failed; using log fallback when available "
-                    f"id={cid!r} value={last_iso!r} "
-                    f"error={type(exc).__name__}: {exc}"
-                )
-                if log_dt is None:
-                    continue
-                last_dt = log_dt
-                last_iso = log_dt.isoformat()
-        if log_dt and log_dt > last_dt:
-            last_dt = log_dt
-            last_iso = last_dt.isoformat()
+        probe = dict(item)
+        if not probe.get("log_path"):
+            # historic default: every cron job logs to storage/logs/cron/<id>.log
+            probe["log_path"] = str(CRON_LOGS / f"{cid}.log")
+        live = job_liveness(probe, marker_state=last_run, repo_root=ROOT)
+        if live.marker_raw and live.marker_at is None:
+            _warn_diverse(
+                "cron_last_run timestamp parse failed; using log fallback when available "
+                f"id={cid!r} value={live.marker_raw!r}"
+            )
+        last_dt = live.last_activity
+        if last_dt is None:
+            continue
+        last_iso = last_dt.isoformat()
         gap = int((now - last_dt).total_seconds())
         if gap > 2 * expected and gap > 3600:  # absolute floor 1h to skip recently-fired
             stale.append((cid, last_iso, gap, expected, log_rel))
