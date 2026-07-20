@@ -32368,13 +32368,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T17:01:21.593691+00:00",
+    "completed_at": "2026-07-20T18:00:58.422967+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T17:01:21.593691+00:00",
-      "last_clean_observed_at": "2026-07-20T17:01:21.593691+00:00"
+      "resolved_at": "2026-07-20T18:00:58.422967+00:00",
+      "last_clean_observed_at": "2026-07-20T18:00:58.422967+00:00"
     }
   },
   {
@@ -32386,13 +32386,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T17:16:37.839887+00:00",
+    "completed_at": "2026-07-20T18:15:44.523455+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T17:16:37.839887+00:00",
-      "last_clean_observed_at": "2026-07-20T17:16:37.839887+00:00"
+      "resolved_at": "2026-07-20T18:15:44.523455+00:00",
+      "last_clean_observed_at": "2026-07-20T18:15:44.523455+00:00"
     }
   },
   {
@@ -32404,13 +32404,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T17:01:14.364250+00:00",
+    "completed_at": "2026-07-20T17:17:00.997122+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T17:01:14.364250+00:00",
-      "last_clean_observed_at": "2026-07-20T17:01:14.364250+00:00"
+      "resolved_at": "2026-07-20T17:17:00.997122+00:00",
+      "last_clean_observed_at": "2026-07-20T17:17:00.997122+00:00"
     }
   },
   {
@@ -46963,7 +46963,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29715899562",
@@ -47028,11 +47028,31 @@
         "to": "pending",
         "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e",
         "note": "supervisor_kill_a0db212c"
+      },
+      {
+        "ts": "2026-07-20T18:01:18.597548+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f2da5f4c245f44fb814f1d28dfb44b54"
+      },
+      {
+        "ts": "2026-07-20T18:01:18.848543+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f2da5f4c245f44fb814f1d28dfb44b54"
+      },
+      {
+        "ts": "2026-07-20T18:13:52.942325+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-f2da5f4c245f44fb814f1d28dfb44b54"
       }
     ],
-    "started_at": "2026-07-20T16:11:47.079644+00:00",
+    "started_at": "2026-07-20T18:01:18.848529+00:00",
     "last_released_at": "2026-07-20T16:18:56.732696+00:00",
-    "last_release_reason": "supervisor_kill_a0db212c"
+    "last_release_reason": "supervisor_kill_a0db212c",
+    "completed_at": "2026-07-20T18:13:52.942311+00:00",
+    "result": "CI 紅燈解除：main HEAD 1227aba16 run 29765905016 = success。根因為 5e36d1720 漏交 failure_class.py（worker.py/測試皆 import），已由 99aa30d7b recovery 補交；歸因寫入 docs/error_log.md，原子性缺口開單 assign_commit_atomicity_gate。"
   },
   {
     "id": "release_deadlock_repair_20260720_14",
@@ -47189,5 +47209,15 @@
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：agent-a6c24bd9ce9c2924a（idle=7.8h unmerged=1 dirty=False branch=worktree-agent-a6c24bd9ce9c2924a）",
     "description": "stale worktree `.claude/worktrees/agent-a6c24bd9ce9c2924a` 持有未落地成果（idle=7.8h unmerged=1 dirty=False branch=worktree-agent-a6c24bd9ce9c2924a），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh agent-a6c24bd9ce9c2924a`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+  },
+  {
+    "id": "assign_commit_atomicity_gate",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "title": "PHASE-Z commit 原子性：同一 fire 的變更集要嘛全進要嘛全不進",
+    "description": "根因見 docs/error_log.md 2026-07-21 00:29 條目。\n\n事實：5e36d1720 commit 了 worker.py + alerts.py + tests/test_worker_fatal_marker_fastfail.py，\n獨漏三者都 import 的 failure_class.py。main 紅 32 分鐘（run 29761977060 實證 16 個 AttributeError），\n且 worker.py:314/324 是 production 判死路徑 —— 那段時間 DOA 偵測器本身是壞的。\n99aa30d7b 的 PHASE-Z hash-pinned recovery 補交收尾。\n\n問題：recovery 機制以「路徑」為恢復單位（逐檔 fingerprint 比對、逐檔補交），\n但正確性的單位是「變更集」。部分 commit 這個形狀本身沒有 enforcement owner。\n\n要做的：設計並落地一個 owner，使同一 fire 的產出無法被部分 commit。\n可能方向（需先評估，勿直接照抄）：\n(a) PHASE-Z commit 前對 staged tree 跑 import/collect smoke（pytest --collect-only），\n    未通過則整批不 commit 而非部分 commit；\n(b) 把 failed-closeout receipt 的恢復單位從 path 升級為 changeset，部分成功即整批 rollback；\n(c) pre-commit gate 偵測「staged 測試 import 了未 staged 的模組符號」。\n\n驗收：要有 regression test 釘住「部分 commit 不可能發生」，且不得讓 PHASE-Z 在\nmachine-churn-only 的班次變成必失敗（那會回歸到 agent 產出裸躺工作區的舊病）。"
   }
 ]

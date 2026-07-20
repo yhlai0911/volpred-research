@@ -22677,5 +22677,37 @@
     "files": [
       "scripts/tests/test_agentic_cli_timeout_killpg.py"
     ]
+  },
+  {
+    "timestamp": "2026-07-21T02:35:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29744499806",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-f2da5f4c245f44fb814f1d28dfb44b54",
+    "owner": "hourly-slot-1-f2da5f4c245f44fb814f1d28dfb44b54",
+    "commit": null,
+    "summary": "CI 紅燈結案 + 歸因。紅燈本體已解除：main HEAD 1227aba16 的 run 29765905016 為 success。查證兩批不同失敗：(1) run 29744499806 那 9 個（enforcement map / cron manifest / mdd ratchet / scheduled writer policy 等）在最新 run 已不復現，本地當前 HEAD 亦全綠；(2) run 29761977060 的 16 個 AttributeError 才是主根因 —— 5e36d1720 commit 了 worker.py + alerts.py + 測試，獨漏三者都 import 的 failure_class.py，99aa30d7b 的 PHASE-Z hash-pinned recovery 於 32 分鐘後補交。升級發現：worker.py:314/324 是 production 判死路徑，該窗口內 DOA 偵測器本身會 AttributeError，不只是測試紅。已記 docs/error_log.md 並開單 assign_commit_atomicity_gate 處理「部分 commit 無 enforcement owner」。",
+    "verification": "gh run view 29765905016 = completed/success（HEAD 1227aba16）；git show b20d0e97e:scripts/dispatch_supervisor/failure_class.py | grep -c is_terse_fatal_only = 0，而 merge-base --is-ancestor 5e36d1720 b20d0e97e = YES，證實實作缺漏而非測試搶跑；本地 58 passed 覆蓋舊那批失敗檔。",
+    "ci_run": "29765905016",
+    "files": [
+      "docs/error_log.md",
+      "storage/next_tasks.json"
+    ]
+  },
+  {
+    "timestamp": "2026-07-21T02:14",
+    "task_type": "platform_ops",
+    "task": "experiment_gate_worktree_path_normalization",
+    "actor": "hourly-slot-2-4c36901347414c2cbe32dae4a95c2d04",
+    "owner": "hourly-slot-2-4c36901347414c2cbe32dae4a95c2d04",
+    "summary": "experiment_gates 的 dm-hac-lag 與 fevd-ordering 兩個 adapter 用 auditor 模組自身 repo root 組 site key，掃 linked worktree 時 key 帶 .claude/worktrees/<wt>/ 前綴，與 repo-relative 的 ratchet baseline 永不相符，已凍結站點被判為新違規。K1623 arm C 因此被標 failed（實際 process_exit_code=0、reproduction gate 5/5、33KB 結果已產出）。修法比照既有 mdd/nested 兩個 adapter：auditor 加 root 參數，gate 傳 _candidate_root(path)。",
+    "verification": "gate 對該 worktree 由 FAIL 轉 PASS；worktree 與 main 產出同一 site key 且命中 baseline；test_experiment_gates 14 passed（含新增 worktree-prefix 回歸測試）；test_dm_hac_lag_ratchet 20 passed 無回歸。",
+    "files": [
+      "scripts/audit_dm_hac_lag.py",
+      "scripts/audit_fevd_ordering.py",
+      "scripts/experiment_gates.py",
+      "scripts/tests/test_experiment_gates.py"
+    ],
+    "open_item": "K1623 arm C 的 collect_completed followup 未派（本班只解除阻擋因素），仍留在 compute queue 待下班 PHASE A 收件。"
   }
 ]

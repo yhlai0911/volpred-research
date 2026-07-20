@@ -170,6 +170,43 @@ def test_frozen_legacy_debt_does_not_block_a_new_agent(tmp_path: Path) -> None:
     )
 
 
+def test_baselined_site_inside_a_linked_worktree_is_still_recognised(
+    tmp_path: Path,
+) -> None:
+    """A worktree path prefix must not turn frozen debt into a new violation.
+
+    K1623 arm C, 2026-07-21: the MC ran clean (reproduction gate 5/5, results
+    on disk) and the compute job was still marked failed. The gate had scanned
+    the worktree copy of an already-baselined file and keyed the site as
+    ``.claude/worktrees/<wt>/experiments/k1623/k1623.py::dm_hln`` -- a key no
+    baseline can contain. Two adapters (dm-hac-lag, fevd-ordering) built their
+    key against the auditor module's own repo root instead of the scanned
+    file's root, so every worktree experiment inherited the whole frozen
+    population as new debt. The other two adapters already passed a root; these
+    two were the ones that did not.
+    """
+    root = _portable_checkout(tmp_path)
+    site = json.loads(
+        (root / "storage" / "ops" / "dm_hac_lag_baseline.json").read_text()
+    )["degenerate_sites"][0]
+    baselined = site.split("::")[0]
+
+    # A linked worktree is its own git toplevel nested inside the checkout,
+    # which is exactly what makes the two roots diverge.
+    worktree = root / ".claude" / "worktrees" / "wt-x"
+    dst = worktree / baselined
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(REPO_ROOT / baselined, dst)
+    subprocess.run(["git", "init", "-q"], cwd=str(worktree), check=True)
+
+    proc = _run_gate(root, str(dst.parent))
+
+    assert proc.returncode == 0, (
+        f"{baselined} is frozen in the dm-hac-lag baseline; scanning it through "
+        "a worktree prefix must not re-litigate it.\n" + proc.stdout + proc.stderr
+    )
+
+
 def test_invalid_fixed_memory_role_can_never_hide_behind_legacy_baseline(
     tmp_path: Path,
 ) -> None:

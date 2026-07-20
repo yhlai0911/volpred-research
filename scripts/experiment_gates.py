@@ -152,7 +152,7 @@ def _scan_nested_dm(path: Path) -> Iterable[tuple[str, str]]:
 def _scan_dm_hac(path: Path) -> Iterable[tuple[str, str]]:
     import audit_dm_hac_lag as dm_hac
 
-    for finding in dm_hac.scan_file(path):
+    for finding in dm_hac.scan_file(path, _candidate_root(path)):
         if finding.verdict in dm_hac.RATCHET_VERDICTS:
             yield f"{finding.file}::{finding.function}", finding.verdict
 
@@ -168,7 +168,7 @@ def _scan_mdd(path: Path) -> Iterable[tuple[str, str]]:
 def _scan_fevd(path: Path) -> Iterable[tuple[str, str]]:
     import audit_fevd_ordering as fevd
 
-    site = fevd.classify(path)
+    site = fevd.classify(path, _candidate_root(path))
     if site is not None and site.classification in ("VIOLATION", "MISLABELED"):
         yield site.path, site.classification
 

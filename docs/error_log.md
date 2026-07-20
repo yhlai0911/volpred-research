@@ -645,3 +645,24 @@ SELF_REMEDIATING truth-gate 教訓）。**教訓**：偵測器要建立在「訊
   hang alert 未發、耗時秒級）。
 - **未解**：960s 那一刀是誰下的仍未查明（`exit=143` SIGTERM，非本專案 timeout 路徑、非 health.py 的
   3000s cap）。fast-fail 讓它變成無關緊要，但若日後有其他 16 分鐘現象，這條線索還在。
+
+### 2026-07-21 00:29 — 測試與其相依實作被拆成兩個 commit，main 紅 32 分鐘（CI ci-red-29744499806 收尾時查出）
+
+`5e36d1720`（00:29，3-strike sidecar-liveness 重設計）commit 了 `alerts.py` / `worker.py` /
+`tests/test_worker_fatal_marker_fastfail.py` 三個檔，**獨漏 `failure_class.py`** —— 而後兩者都
+import 它。main 從 00:29 起 16 個測試 `AttributeError: module ... has no attribute 'is_terse_fatal_only'`
+（run 29761977060 / head b20d0e97e 實測）。`99aa30d7b`（01:01）的 PHASE-Z hash-pinned recovery
+把該檔補交，紅燈窗口約 32 分鐘。
+
+**比測試紅更嚴重的一面**：`worker.py` `:314`/`:324` 是 **production 判死路徑**，直接呼叫
+`failure_class.is_terse_fatal_only()`。那 32 分鐘內任何 worker 走到 fatal-fastfail 分支都會
+AttributeError —— 也就是前一則條目剛修好的 DOA 偵測器，在自己落地的當下是壞的。CI 紅只是這件事
+最吵的症狀，不是全部。
+
+**教訓**：PHASE-Z 的 failed-closeout recovery 機制**有效但粒度錯了** —— 它以「路徑」為恢復單位
+（逐檔比對 fingerprint、逐檔補交），而正確性的單位是「變更集」。一組同進同出的檔案被部分 commit，
+留下的中間狀態必然是紅的、而且可能是**會執行的壞碼**，不只是紅測試。恢復機制把窗口從無限縮到
+32 分鐘，但沒有消除「部分 commit」這個形狀本身。同 2026-07-20 22:17 條目的教訓形狀：安全網有效
+≠ 缺陷已消除。
+
+**尚未修**：本次僅完成歸因與記錄；「同一 fire 的產出要嘛全進要嘛全不進」的原子性尚無 enforcement owner。
