@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import threading
@@ -44,7 +45,51 @@ from scripts.dispatch_supervisor import failure_class, procutil  # noqa: E402
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-CLAUDE_BIN = os.environ.get("VOLPRED_CLAUDE_BIN", "claude")
+
+# Where the CLI actually lives when PATH can't be trusted. launchd hands its jobs
+# a minimal PATH that omits ~/.local/bin — `cron_compute_worker.sh` already works
+# around that for `uv` by spelling out /opt/homebrew/bin/uv, but nobody did the
+# same for `claude`, so every kind=agent job drained by the launchd worker died
+# on FileNotFoundError one second after start (2026-07-20: k528_round5_collection,
+# exit 1 at 05:16:21). kind=compute jobs never exec the CLI, which is why the
+# breakage stayed invisible until an agent job happened to land on that worker.
+# Fixing it here rather than in the wrapper keeps one owner for "can we exec the
+# CLI": launchd, cron and interactive runs all resolve through this function.
+_CLAUDE_FALLBACK_PATHS = (
+    Path.home() / ".local" / "bin" / "claude",
+    Path("/opt/homebrew/bin/claude"),
+    Path("/usr/local/bin/claude"),
+)
+
+
+def _resolve_claude_bin() -> str:
+    """Return an executable path for the Claude CLI, or raise saying why not.
+
+    Never falls back to the bare name `claude` on failure: that just defers the
+    same FileNotFoundError to Popen, where it surfaces as a traceback and gets
+    classified as a research failure instead of a host misconfiguration.
+    """
+    override = os.environ.get("VOLPRED_CLAUDE_BIN")
+    if override:
+        # An explicit override that doesn't resolve is a config error, not a
+        # licence to silently search elsewhere.
+        found = shutil.which(override)
+        if found:
+            return found
+        raise FileNotFoundError(
+            f"VOLPRED_CLAUDE_BIN={override!r} is not an executable on this host"
+        )
+    found = shutil.which("claude")
+    if found:
+        return found
+    for candidate in _CLAUDE_FALLBACK_PATHS:
+        if os.access(candidate, os.X_OK):
+            return str(candidate)
+    raise FileNotFoundError(
+        "claude CLI not found on PATH nor at "
+        + ", ".join(str(p) for p in _CLAUDE_FALLBACK_PATHS)
+        + " — set VOLPRED_CLAUDE_BIN to its absolute path"
+    )
 
 
 # An auth wall costs five seconds and zero tokens: the CLI answers "Not logged in"
@@ -272,8 +317,17 @@ def main() -> int:
         )
         return 2
 
+    try:
+        claude_bin = _resolve_claude_bin()
+    except FileNotFoundError as exc:
+        # Exit 2 (config error), not 1: a job that never started is a host
+        # problem for the owner to fix, not a failed piece of research for a
+        # triage agent to go read a worktree about.
+        print(f"[run_agent_job] {exc}", file=sys.stderr)
+        return 2
+
     argv = [
-        CLAUDE_BIN, "-p", "--dangerously-skip-permissions",
+        claude_bin, "-p", "--dangerously-skip-permissions",
         "--effort", args.effort, "--model", args.model, brief,
     ]
 

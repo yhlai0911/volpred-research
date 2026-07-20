@@ -742,25 +742,15 @@
   },
   {
     "id": "K1106_article_general",
-    "title": "K1106: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K1106 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
-    "priority": 4,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K1106: write general-audience article (auto-discovered uncovered K)",
+    "priority": 4,
     "source": "auto_discovered",
-    "k_id": "K1106",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
     "created_at": "2026-05-05T02:25:11+00:00",
     "completed_at": "2026-05-05",
-    "completion_artifact": "mile_334a3f26",
-    "last_note": "[2026-05-11] Re-opened: sync_next_tasks_status falsely marked succeeded based on knowledge.json experiment entry; actual feed has NO article covering K1106. Verified post build_publication_candidates fix 0d9f31a1.",
-    "closure_note": "[2026-05-11] mile_334a3f26 (2026-05-05) experiment_refs=K1106b family-match. build_publication_candidates dedup now honors K-family (K1106 ↔ K1106b/c). agent identified this dedup_conflict before publish; my reopen earlier was based on incomplete dedup.",
-    "completion_note": "article already published in feed.json (5 refs); stale cleanup 2026-05-13",
-    "status_original": "completed",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00"
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "K1108d",
@@ -1594,24 +1584,15 @@
   },
   {
     "id": "K518_article_general",
-    "title": "K518: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K518 has verdict signal (score=3, reasons=None) but no general article. Verdict preview: ",
-    "priority": 3,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K518: write general-audience article (auto-discovered uncovered K)",
+    "priority": 3,
     "source": "auto_discovered",
-    "k_id": "K518",
-    "tags": [
-      "auto-discovered",
-      "audience-general"
-    ],
     "created_at": "2026-05-04T10:09:59+00:00",
     "completed_at": "2026-05-04",
-    "completion_artifact": "mile_5cc42b58 UNPUBLISHED (dup of mile_67169c30)",
-    "failure_reason": "duplicate_dispatch_then_unpublished",
-    "completion_note": "article already published in feed.json (6 refs); stale cleanup 2026-05-13",
-    "status_original": "completed",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00"
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "K520_article_general",
@@ -2104,29 +2085,15 @@
   },
   {
     "id": "K665_article_general",
-    "title": "K665: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K665 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: 產品化/簡化, 執行: Claude] 12/VIX 連續公式簡化為 lookup table。Table B（3 行）：VIX<15→100%, 15-25→50%, >25→20%。Sharpe 0.703 vs continuous 0.722（retention 97.4%），weight changes 23/yr vs 231/yr（10x 減少）。Table A（5 行）甚至勝過 continuous（102.8%）。反直覺：越細越差（7 行 92.9%）——粗略離散化恰好產生更好的平均配置。VIX Action Card: 3 ",
-    "priority": 4,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K665: write general-audience article (auto-discovered uncovered K)",
+    "priority": 4,
     "source": "auto_discovered",
-    "k_id": "K665",
-    "tags": [
-      "lookup-table",
-      "simplification",
-      "VIX-action-card",
-      "practical",
-      "product",
-      "retail-investor",
-      "auto-discovered",
-      "audience-general"
-    ],
     "created_at": "2026-05-10T18:08:09+00:00",
-    "last_note": "[2026-05-10T18:09:36Z] HARD CONFLICT: K665 already covered by mile_b5fe2026 (\"不會算數也能用的投資策略——一張三行表格就夠了\", published 2026-03-30, audience=null legacy). Article body cites K665 by name, identical 3-row table + 97.4% retention + 23/yr trading + 102.8% 5-row finding + 2 real charts. New general-audience K665 article would be near-byte-duplicate. Layer-3 legacy null-audience check caught it (per K852 / K622/K630 教訓).",
-    "updated_at": "2026-05-10T18:09:36Z",
-    "completion_note": "article already published in feed.json (4 refs); stale cleanup 2026-05-13",
-    "status_original": "completed",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00"
+    "tombstone": true,
+    "completed_at": "2026-05-10T18:09:36Z",
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "K666_article_general",
@@ -3161,28 +3128,15 @@
   },
   {
     "id": "K979_article_general",
-    "title": "K979: write general-audience article (auto-discovered uncovered K)",
-    "description": "K K979 has verdict signal (score=0, reasons=[]) but no general article. Verdict preview: [提出: research_program.md CBOE, 執行: Claude] SPY+VIX+SKEW 2010-2026 (4004 obs)。VIX-SKEW 相關 -0.197（低，不同維度）。SKEW t-stat after VIX control: 1.876(1d)/1.108(5d)/0.687(22d)——全部不顯著。Delta OOS R² ≈ 0（negligible）。DM test: stat=-0.004, p=0.997。SKEW quintile sort 看似有單調性，但反映 VIX-SKEW 負相關而非獨立信號",
-    "priority": 4,
     "status": "succeeded",
     "task_type": "daily_article",
+    "title": "K979: write general-audience article (auto-discovered uncovered K)",
+    "priority": 4,
     "source": "auto_discovered",
-    "k_id": "K979",
-    "tags": [
-      "SKEW",
-      "CBOE",
-      "NULL",
-      "VIX-sufficiency",
-      "tail-risk",
-      "auto-discovered",
-      "audience-general"
-    ],
     "created_at": "2026-05-09T10:08:08+00:00",
     "completed_at": "2026-05-09T11:55:00+00:00",
-    "findings": "4-dim hard dup vs mile_1b2ad1f8 (K447 SKEW general, 2026-05-05, 4 天前): audience+結論+SEO keyword+tags 全重疊。Agent dedup Layer-2 (jq title-test + grep + LanceDB dist 0.401) HARD STOP refusal — 正確守 publishing.md「LanceDB dist 0.5-0.7 必差異化角度」規則。Auto-discovery 把 K979 列為 missing-general 因為 K-id 角度無 general 文，但 topic family (SKEW) 已被 K447 covered — 這是 publication-candidates clustering 弱點。",
-    "completion_note": "article already published in feed.json (9 refs); stale cleanup 2026-05-13",
-    "status_original": "completed",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00"
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "K979_article_research",
@@ -3210,23 +3164,15 @@
   },
   {
     "id": "K980_post_publish_codex_primary_reverify",
-    "title": "K980 mile_3655a10a Codex primary-path re-verification (post quota reset)",
-    "priority": 4,
-    "description": "Per K1259 教訓 (2026-04-29) closure bar: main-thread/subagent fallback PASS != primary-path Codex PASS. K980 mile_3655a10a got CONDITIONAL PASS from 2026-05-11 main-thread fallback review (Codex CLI quota-blocked). Re-run Codex primary path after quota resets 2026-05-12 19:46 PT to upgrade to full PASS. Use prompt at /tmp/k980_codex_review_prompt.txt or rebuild equivalent. Compare verdict with main-thread fallback findings. Update knowledge entry K980_review review_path field upon completion.",
     "status": "succeeded",
     "task_type": "paper_review",
+    "title": "K980 mile_3655a10a Codex primary-path re-verification (post quota reset)",
+    "priority": 4,
     "source": "K980_post_publish_review_followup",
-    "earliest_start": "2026-05-13T03:50:00Z",
     "created_at": "2026-05-10T22:12:46Z",
-    "blocks": [],
-    "blocked_by": [],
-    "blocked_reason": "codex_quota_reset_pending",
-    "blocked_until": "2026-05-13T02:46:00Z",
-    "blocked_note": "Codex CLI 0.121.0 ChatGPT-account daily quota exhausted 2026-05-11 by 7 paper_reviews. Quota resets 2026-05-12 19:46 PT. Per K1259 lesson, primary-path re-verify needed to upgrade fallback CONDITIONAL/PASS → canonical PASS.",
     "completed_at": "2026-05-17T13:16:16.224216Z",
-    "completion_note": "Codex primary-path review complete: FAIL — TGJR estimation-evaluation mismatch (MAJOR). NULL result conclusion directionally intact. Article kept draft. K980-v2 added for proper joint threshold-GARCH estimation.",
-    "status_original": "completed",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00"
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "K980_post_publish_codex_review",
@@ -3991,29 +3937,14 @@
   },
   {
     "id": "Paper_folders_backfill_selfcontained",
-    "title": "論文資料夾 self-contained 補齊：data/scripts/results/experiments.md",
     "status": "succeeded",
+    "task_type": "paper_review",
+    "title": "論文資料夾 self-contained 補齊：data/scripts/results/experiments.md",
     "priority": 3,
     "created_at": "2026-04-17T15:33:04+08:00",
-    "description": "Audit 2026-04-17: 10 個 paper/ 有 6 個缺項（參考 agent-specs/claude_rules/paper-workflow.md 新增規範）。缺口清單：(1) crypto-fear-channel (Paper 10, kick-off) — 缺 data/script/results（kickoff 階段，可暫緩）;(2) garch-x-vix (Paper 9, submitted) — 缺 results/figures 與 expref;(3) vix-sufficiency (Paper 4, 39 pages) — 缺 results/figures 與 experiments 索引;(4) volatility-absorption — 缺 results;(5) vt-crowding-abm — 缺 results + expref;(6) vt-insurance-cost — 缺 results。處理策略：主線程分批補 experiments.md + figures soft-link（從對應 experiments/kXXX/）+ scripts/README.md 指向實驗入口檔。不需搬移原始資料（仍在 experiments/kXXX/），只需建立引用。參考樣板：paper/leverage-direction/、paper/taiwan-vt/、paper/vt-trend-following/。注意：Kickoff 階段（outline-only）可暫緩，body drafting 開始時必須補齊；第一次投稿前再做完整性檢查。 | 2026-04-17 done (commit 5b785551 + merge 3ba96c4b): Paper 9 (garch-x-vix) + Paper 4 (vix-sufficiency) 完成 self-contained 索引 — experiments.md, data_sources.md, scripts/README.md, results/README.md, figures/ soft-links. .tex 未動。剩 Paper 6 (prg-periodic-garch 缺 expref) / volatility-absorption / vt-crowding-abm / vt-insurance-cost 缺 results. 孤兒 figure: K1118/K1116b/K504/K1134/K889 (在 experiments.md 標 TODO).",
-    "tags": [
-      "paper",
-      "infrastructure",
-      "compliance"
-    ],
     "completed_at": "2026-04-17T15:47:34+08:00",
-    "task_type": "paper_review",
-    "backfill_log": [
-      {
-        "old": null,
-        "new": "paper_review",
-        "rationale": "paper + default (errata/footnote/clarif)",
-        "at": "2026-05-25"
-      }
-    ],
-    "status_original": "partially_completed",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00",
-    "vocab_migration_rationale": "Committed batch delivered (Paper 9 + Paper 4 self-contained indexes, commits 5b785551/3ba96c4b recorded in-row); remainder explicitly re-scoped in-row to later checkpoints (body drafting / pre-submission completeness check). Partial-scope close with real durable output."
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "TSMC_0417_optional",
@@ -4038,29 +3969,14 @@
   },
   {
     "id": "VolAbsorption_missing_scripts_recovery",
-    "title": "volatility-absorption 缺 K716-K722 原始 .py 腳本 — 投稿前必須重建",
     "status": "succeeded",
+    "task_type": "paper_body",
+    "title": "volatility-absorption 缺 K716-K722 原始 .py 腳本 — 投稿前必須重建",
     "priority": 4,
     "created_at": "2026-04-17T15:59:00+08:00",
-    "description": "Paper folder audit (commit 65bdf9ef, 2026-04-17) 發現 paper/volatility-absorption/ 對應 K716/K717/K718/K719/K720/K721/K722 的 .py 原始腳本不在 repo（只有 results JSON）。**投稿 hard requirement**: 審稿人需要完整 replication package，缺腳本會 desk-reject。處理方案：(1) 從 git log 查這些 K 編號是否曾存在於 experiments/ 然後被刪（git log -- experiments/k71X/）; (2) 若曾存在，從 git blob 恢復到 paper/volatility-absorption/scripts/legacy_k71X/; (3) 若 never existed 於 tracked experiments，從 results JSON + main_v2.tex method 描述重建; (4) 更新 paper/volatility-absorption/scripts/README.md 標明恢復狀態. **必做 before Paper 5 投稿**. | 2026-04-17 深查: `git log --all -- experiments/k71[6-9]*.py k72[0-2]*.py` 空 → 腳本 **從未被 commit**. 所有 K716-K722 README 是 2026-04-16 migration 的 stub（\"待補充\"），僅 results JSON 有效. K716 JSON 結構示例: VIX tertile buckets (calm/normal/elevated/high/crisis) × (shock_days, shock_abs_r, normal_abs_r, ratio) + regression_raw_slope/normalized_slope/conclusion. **重建路徑必走**: (a) 從 main_v2.tex methodology 段 + results JSON 結構反推 → 寫 reconstruct_k71X.py 能重產相同 JSON; (b) validate 重建腳本 output 與舊 JSON 一致 (allclose); (c) 若輸出不同，論文需更正或明註 \"original script lost, reconstruction approximate\"；不可偽造一致性. [DONE commit 86d10c7b: 7 scripts 重建. K716 (SAR core) MATCHED 全 5 SAR values 1% 內, NSI slope -0.00027 vs -0.00028 rounding; K717-K722 APPROXIMATE — 所有 **qualitative findings 全確認**（endogenous absorption / paralysis flags / VRP positive / 0050.TW NO）. 但**數值 divergence** 3 處（K716 t-stat sample filter 差異, K718 0050.TW slope magnitude 差, K721 rate-shock 0.060 vs 0.066 9%, K722 corr 0.57 vs 0.68 17%）. 投稿前決策: 見 VolAbsorption_errata_decision (P4).]",
-    "tags": [
-      "paper",
-      "submission-critical",
-      "volatility-absorption"
-    ],
     "completed_at": "2026-04-17T16:18:08+08:00",
-    "task_type": "paper_body",
-    "backfill_log": [
-      {
-        "old": null,
-        "new": "paper_body",
-        "rationale": "paper + body-rewrite verbs",
-        "at": "2026-05-25"
-      }
-    ],
-    "status_original": "partially_completed",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00",
-    "vocab_migration_rationale": "Core deliverable done per in-row DONE note (commit 86d10c7b: 7 scripts reconstructed; K716 MATCHED within 1%, K717-K722 approximate with all qualitative findings confirmed). Residual divergences documented honestly in-row, not hidden."
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "add_conclusion_field_linter_at_experiment_completion",
@@ -4160,25 +4076,15 @@
   },
   {
     "id": "experiment_scaffold_k400",
-    "title": "Experiment scaffold: K400 (research_program backlog)",
-    "description": "K400 mentioned in research_program.md but no experiments/k400/ directory yet. Create three-part scaffold per CLAUDE.md `.claude/rules/experiments.md`: (a) README.md (motivation + method + expected output + lookahead policy), (b) k400.py initial implementation (with signal.shift(1) + seed), (c) plan placeholder k400_results.json schema. Do NOT run the experiment — just scaffold + stage for main thread to review.",
-    "priority": 4,
     "status": "closed_no_action",
     "task_type": "experiment",
+    "title": "Experiment scaffold: K400 (research_program backlog)",
+    "priority": 4,
     "source": "diverse_gen",
-    "tags": [
-      "experiment",
-      "scaffold",
-      "research-program-backlog"
-    ],
     "created_at": "2026-05-08T05:35:50+00:00",
-    "blocked_reason": "deprecated",
     "completed_at": "2026-05-08T07:42:00+00:00",
-    "status_original": "dropped_false_positive",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00",
-    "blocked_reason_original": "K400 was extracted from range expression \"K400-K1258\" — not a specific K-id. Source filter improved 2026-05-08 to strip range expressions.",
-    "blocked_note": "K400 was extracted from range expression \"K400-K1258\" — not a specific K-id. Source filter improved 2026-05-08 to strip range expressions.",
-    "vocab_migration_rationale": "Free-text explanation of why the task was invalid (K400 extracted from a range expression, not a real K-id; source filter fixed 2026-05-08). Task no longer relevant -> deprecated."
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "extend_tw_staleness_to_publish_milestone",
@@ -4580,23 +4486,15 @@
   },
   {
     "id": "paper2_body_update_table3_canonical",
-    "title": "Paper 2 body update: Table 3 用 K1175 canonical numbers 取代 inconsistent originals",
-    "description": "BLOCKER D1 resolved by K1175 (Paper 2 Table 3 canonical replication 2010-2026). 主線程必更新 paper/taiwan-vt/body.tex Table 3: BH Return/Vol/Sharpe 從原 10.2/20.8/0.729 → 14.48/18.13/0.799 (self-consistent); MDD 從 -41.3% → -33.83% (yfinance 2022 bear actual); 加 caveat note 2010-2026 sample period limit (no pre-2009 due to yfinance 0050.TW start). 重編譯 PDF + paper-update CLI + reproducible audit re-validate. K1175 audit log 在 experiments/k1175/k1175_vs_paper2_table3_diff.md.",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "paper_body",
+    "title": "Paper 2 body update: Table 3 用 K1175 canonical numbers 取代 inconsistent originals",
+    "priority": 1,
     "source": "paper2_table3_canonical_K1175_2026_05_10",
-    "tags": [
-      "paper2",
-      "body-update",
-      "table3",
-      "main-thread"
-    ],
     "created_at": "2026-05-10T16:30:00+00:00",
     "completed_at": "2026-05-10T16:50:00+00:00",
-    "findings": "body_v3.tex K1175 canonical 已 promote 到 body.tex + L492 conclusion 同步修 (0.729→0.799 / 41.3→33.8 / 0.796→0.701 / 18.4→21.2). main.pdf re-compile 成功. **paper-update CLI sync 未跑** — paper-workflow.md 規則 2 阻擋: reproduce.py gate fail (alert=yellow, status=fail, 108 checks 多 UNTRACEABLE — TSMC/VIXTWN/individual gamma/Appendix TZ Sharpe 等 pre-existing 缺 source binding, 非 K1175 引入). 需 follow-up: fix reproduce gate untraceable bindings 才能 sync platform.",
-    "status_original": "completed_local",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00"
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "paper2_reproduce_gate_fix_untraceable_bindings",
@@ -4612,21 +4510,14 @@
   },
   {
     "id": "paper2_table3_canonical_K1175_completed",
-    "title": "Paper 2 Table 3 VT canonical replication (K1175) completed — BLOCKER D1 resolved",
-    "description": "experiments/k1175/ Paper 2 Table 3 VT 2010-2026 canonical replication 完成 (agent unintended dispatch via K-id collision, but real finding). Critical issues found: (1) Paper Table 3 BH numbers arithmetically inconsistent — claimed Return=10.2/Vol=20.8/Sharpe=0.729 但 10.2/20.8=0.490 ≠0.729; (2) MDD -41.3% 需 pre-2009 資料 yfinance 0050.TW 不能達到 (start 2009-01-02, max -33.83% 2022 bear); (3) K1175 canonical 2010-2026: Return=14.48%, Vol=18.13%, Sharpe=0.799 self-consistent. Per \"永遠修流程不修資料\" + research 誠實原則 #6 推翻舊結論回溯更正: Paper 2 Table 3 必修。Need decision: revise paper body OR retract Table 3 numbers.",
-    "priority": 1,
     "status": "succeeded",
     "task_type": "paper_decision",
-    "completed_at": "2026-05-10T16:30:00+00:00",
-    "tags": [
-      "paper2",
-      "table3",
-      "errata",
-      "canonical-replication"
-    ],
+    "title": "Paper 2 Table 3 VT canonical replication (K1175) completed — BLOCKER D1 resolved",
+    "priority": 1,
     "created_at": "2026-05-10T16:30:00+00:00",
-    "status_original": "completed",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00"
+    "completed_at": "2026-05-10T16:30:00+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "paper_leverage_direction_self_contained",
@@ -5193,25 +5084,15 @@
   },
   {
     "id": "rewrite_mile_0c1f9687_citation_fix",
-    "title": "mile_0c1f9687 light rewrite: Harvey citation + title categorization + footer cleanup",
-    "description": "Per Codex 24h-rule audit CONDITIONAL_PASS 2026-05-08: (1) cite Harvey-Liu-Zhu 2016 (not Liu-Zhu) — research integrity attribution fix; (2) title or intro disclaimer for UMCSENT (consumer confidence) and TED (bank stress) categorization; (3) cleanup empty **** footer placeholder. Use scripts/publish_draft.py --update mile_0c1f9687. errata.update_action=citation_fix_2026_05_08.",
-    "priority": 5,
     "status": "failed",
     "task_type": "paper_review",
+    "title": "mile_0c1f9687 light rewrite: Harvey citation + title categorization + footer cleanup",
+    "priority": 5,
     "source": "mile_0c1f9687_audit_followup",
-    "tags": [
-      "rewrite-light",
-      "citation-fix",
-      "use-publish-draft-update-flag"
-    ],
     "created_at": "2026-05-08T06:42:00+00:00",
-    "started_at": "2026-05-08T06:46:00+00:00",
-    "agent_id": "afcf41a530615869e",
     "completed_at": "2026-05-08T06:55:00+00:00",
-    "findings": "PARTIAL: 6081->6315 chars (+234). UMCSENT/TED disclaimer ADDED cleanly. Footer cleanup likely OK. BUT MED-1 Harvey citation NOT fully fixed — sanitizer replaced \"Harvey\" with \"嚴格統治\" (same K663 collateral pattern). Citation now reads duplicate \"嚴格統計, 嚴格統計, Liu and Zhu\" — broken. Structural sanitizer-vs-citation tension queued.",
-    "status_original": "partial",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00",
-    "vocab_migration_rationale": "Primary purpose (Harvey citation research-integrity fix) explicitly NOT achieved per findings (sanitizer corrupted the citation; structural follow-up queued). Secondary items landing does not make the task's stated goal met."
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "rewrite_mile_a0ac369d_correlation_table_fix",
@@ -6797,22 +6678,15 @@
   },
   {
     "id": "paper3_vt_fix_review_v2_5HIGH",
-    "title": "Paper 3 (vt-trend-following): 修正 review_v2 的 5 HIGH issues",
-    "priority": 3,
-    "description": "Paper 4 (leverage-direction) review_v2.tex 有 5 HIGH issues 待修正：\n1. 樣本期間不一致\n2. BAB proxy（SPLV→AQR）\n3. MDD 只有 5 美股\n4. 1.4% 數字不可驗證\n5. 需引用 K687/K697/K688\n\nSource: research_program.md line 249 (was auto-generated as K1307 — ID conflict resolved 2026-05-18)",
     "status": "succeeded",
     "task_type": "paper_review",
+    "title": "Paper 3 (vt-trend-following): 修正 review_v2 的 5 HIGH issues",
+    "priority": 3,
     "source": "research_backlog_auto",
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
     "created_at": "2026-05-17T20:00:49Z",
     "completed_at": "2026-05-18T15:24:36Z",
-    "notes": " | 2026-05-18: Text fixes A.1+B.1+C.1 done. B.2+B.3 queued as K1371/K1372.",
-    "status_original": "partial_success",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00",
-    "vocab_migration_rationale": "3/5 HIGH fixes delivered here; remaining 2 explicitly re-tasked as K1371/K1372 per in-row notes -- this row's own share completed with successor tasks owning the rest."
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "paper9_codex_adversarial_review",
@@ -7082,26 +6956,15 @@
   },
   {
     "id": "K1387",
-    "title": "K1387: Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)",
-    "priority": 3,
-    "description": "Auto-generated from research_program.md unchecked item (line 412). Original: Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1387.py with signal.shift(1) + seed=42, (c) K1387_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
     "status": "succeeded_null_result",
     "task_type": "experiment",
+    "title": "K1387: Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)",
+    "priority": 3,
     "source": "research_backlog_auto",
-    "tags": [
-      "experiment",
-      "autonomous-research"
-    ],
     "created_at": "2026-05-19T00:00:04Z",
-    "kid_reassigned": {
-      "from": "K1310",
-      "at": "2026-05-20",
-      "reason": "kid_collision — generate_research_backlog id-assignment bug (fixed)"
-    },
     "completed_at": "2026-05-20T20:13:54.997616+00:00",
-    "verdict": "NULL",
-    "status_original": "completed_null",
-    "vocab_migrated_at": "2026-07-20T05:28:22+00:00"
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "K_NEW_A_paper9_covid_subperiod",
@@ -32790,13 +32653,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T05:19:18.006871+00:00",
+    "completed_at": "2026-07-20T05:43:19.751593+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T05:19:18.006871+00:00",
-      "last_clean_observed_at": "2026-07-20T05:19:18.006871+00:00"
+      "resolved_at": "2026-07-20T05:43:19.751593+00:00",
+      "last_clean_observed_at": "2026-07-20T05:43:19.751593+00:00"
     }
   },
   {
@@ -35974,40 +35837,15 @@
   },
   {
     "id": "assign_4470644e_s1_t7_retract",
-    "title": "[errata stage 1/2] 撤稿或重寫 mile_ebb5d6f5（CPI T-7）— 含虛構事件與不實資料來源聲明",
-    "description": "依已驗證的 errata artifact 正式處理已發布文章 mile_ebb5d6f5（🌡️ 事件溫度計｜US CPI 2026-06-13 預覽（T-7））。\n\nseverity = **retract-or-rewrite**（artifact 判定，非本任務可下修）。理由不只是數字錯：\n1. 文章宣告的發布日 2026-06-13 是**星期六** — 不可能的發布日；\n2. 文章敘述了一次**從未發生的發布**（phantom release，CPIAUCSL 2025-10-01 == '.' 已於 source 直接證實）；\n3. 文章兩次聲稱「CPI 發布日期據 BLS 官方行事曆」— **此 provenance 聲明不實**（實際是硬編的每月 13 號 proxy）。\n→ artifact 明示：sentence-level 改數字無法修復，必須撤稿或重寫。\n\n核心數字反轉（12 events，原資料窗）：均值 +2.184% → **-1.90%**；方向 7 up/6 down（原文稱「抽籤」）→ 3 up/9 down（sign test 兩尾 p=0.146，偏下但 N=12 不顯著）。\n顯著性一律引用 **null-imposed stationary block bootstrap**（Politis & Romano 1994, 10000 reps, block=5, seed 20260717, ratio p=0.4823），**不要引 t-test**（artifact 已載明其 IID 假設低估 SE，僅為與舊版可比而保留）。\n\n成功判準（single artifact）：mile_ebb5d6f5 在線上已撤稿或已重寫且 live URL 可驗；anti_ai_gate exit 0；errata audit trail 保留；不得沿用舊敘事。\n\n【上游已完成 — 不要重跑分析】errata artifact 已產出並經獨立驗證：\n- storage/event_articles/errata_cpi_dates_20260717.json（已 merge 進 main，commit 7322c1330）\n- 驗證腳本 storage/event_articles/verify_errata_cpi_dates_20260717.py — hourly-slot-2 於 2026-07-17 12:20 親自重跑：198 checks PASS / 0 FAIL / exit 0。\n- 舊證據已封存於各文章目錄 archive_pre_errata_20260717/；圖已重繪。\n\n【⚠️ 父任務 assign_4470644e 的描述有一個已被推翻的數字 — 不要照抄】\n父描述寫「T-7 舊均值 +2.184% 會翻為約 -0.847%」。這是錯的。經驗證：\n- 維持原文資料窗（12 events）→ 正確均值 = **-1.90%**\n- -0.847% 是**延伸窗**（13 events，含 2026-06-10 那次 VIX +11.83%）的值，對應的是另一篇已發布 errata mile_9560b9cc（2026-07-12）。\n- 兩者都對，差別只在窗口。**絕對不要把 -1.90% 改成 -0.847% 來「對齊」父描述或 mile_9560b9cc。**\n  errata artifact 的 independent_check.reconciliation_with_published_errata 已載明此事並經算術驗證。\n\n【reader-facing 硬規則】開工前必讀 3 canonical paths：\n- .claude/skills/trending-repost/SKILL.md\n- .claude/skills/anti-ai-style/SKILL.md\n- .claude/rules/publishing.md\n發佈前必過 uv run python scripts/anti_ai_gate.py --file <draft>（exit 0 才可發）。\n主線程才可寫 feed.json / sync；不得在 worktree 內碰 feed。\n",
-    "task_type": "event_article",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "event_article",
+    "title": "[errata stage 1/2] 撤稿或重寫 mile_ebb5d6f5（CPI T-7）— 含虛構事件與不實資料來源聲明",
+    "priority": 1,
     "source": "agent",
     "created_at": "2026-07-17T04:13:02.028369+00:00",
-    "created_by": "hourly-slot-2-f86ed3a5490b4cf783d502754ed1654a",
-    "parent_task_id": "assign_4470644e",
-    "timeout_parent_job_id": "agent-brief_assign_4470644e_cpi_dates-36c589",
-    "split_stage": "t7_retract_or_rewrite",
-    "status_history": [
-      {
-        "ts": "2026-07-17T05:08:41.482483+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-2-f5a615b1a47940cf876f30010844227d"
-      },
-      {
-        "ts": "2026-07-17T05:08:49.605033+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-2-f5a615b1a47940cf876f30010844227d"
-      },
-      {
-        "ts": "2026-07-17T05:24:07.155686+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-2-f5a615b1a47940cf876f30010844227d"
-      }
-    ],
-    "started_at": "2026-07-17T05:08:49.605021+00:00",
     "completed_at": "2026-07-17T05:24:07.155670+00:00",
-    "result": "撤稿 mile_ebb5d6f5（CPI 2026-06-13 T-7 預覽）。選撤稿而非重寫：發布日不存在（06-13 是週六，官方為 06-10），premise 無效且事件已過期，更正內容已由 mile_9560b9cc 覆蓋（重寫=arc dup）。feed.json status=retracted + retracted_reason/note/superseded_by/errata_ref。線上驗證 /v3/reports 與 /reports 皆 404，對照組 mile_9560b9cc 仍 200，sitemap/rss 無殘留。⚠️ 過程發現平台缺陷：supabase_sync 直寫 Supabase 繞過 /api/sync，從不 revalidateTag；加上 getArticleInternal 對撤稿文 throw 使 unstable_cache 拿不到新值而永續發舊值 → 撤稿在讀者端 15 分鐘以上未生效（遠超 revalidate=300）。改走 POST /api/sync/reports/<id>.json 即刻生效。治本 followup=assign_sync_cache_purge_20260717；stage 2 的 description 已補此 workaround。FB 舊貼文撤稿說明 followup=assign_fb_retract_note_ebb5d6f5_20260717。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "assign_4470644e_s2_t2_rewrite",
@@ -36083,44 +35921,15 @@
   },
   {
     "id": "email-12128-3027b2",
-    "title": "[email_reply] Re: [VolPred Alert][INFO] [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f",
-    "description": "Gmail UID: 12128\nMessage-ID: <A8DBEC78-E8A6-450E-B40A-26A3B2FBFE36@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 17 Jul 2026 12:48:48 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）— 已修復（根因：lock 檔名長度無上限）\n\n--- 用戶回信內容 ---\n立即從底層完成重構修復\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月17日 12:10 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）— 已修復（根因：lock 檔名長度無上限）\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> PHASE-Z 測試紅燈已修復（底層邏輯）\r\n> \r\n> 結論：紅燈修好了，但根因不在 00b07f07f 那個 commit 的邏輯，也不是壞測試。真正的錯是 lock 檔名長度沒有上限 —— 同一棵程式碼，checkout 放在哪決定它綠不綠。\r\n> 為什麼本機綠、gate 紅\r\n> \r\n> 先重現，不猜：\r\n> 環境\t結果\r\n> 本機 checkout（/Users/yhlai0911/volpred-research）\t8 passed\r\n> PHASE-Z 隔離 clone（/private/var/folders/.../head）\t8 failed\r\n> 拿到被截斷的尾段擋住的真正例外：\r\n> OSError: [Errno 63] File name too long:\r\n> /var/folders/.../volpred-sandboxed-locks/private__var__folders__...__head__storage__ops__locks__paper_snapshot_...spy_vix_2000-2026.csv.lock\r\n> 根因\r\n> \r\n> 兩層「把絕對路徑壓平成單一檔名」疊在一起，而且長度無上限：\r\n> _snapshot_lock_name() 把 CSV 的絕對路徑壓成 lock key\r\n> sandboxed_lock_path() 再把整個 lock 絕對路徑壓成 /tmp 下的一個檔名\r\n> 超過檔名上限（NAME_MAX = 255 bytes）就在 lock_file.exists() 的 os.stat 炸掉。本機路徑短，壓出來約 200 字元、剛好過關；PHASE-Z 的 clone 深了約 90 字元 → 270 字元、直接紅。\r\n> 這是地雷不是 bug：它不挑這個測試，對每一個走 sandboxed lock 的測試都成立，只是還沒有人把 checkout 放得夠深。\r\n> 修法\r\n> \r\n> src/volpred/ops/shared_lock.py 加 _bounded_filename(candidate, key=...)：\r\n> 只在超過 255 bytes 時作用 —— 既有 lock 檔名一字未改，向後相容\r\n> 保留可辨識的尾段（尾段才是區分兩個 lock 的部分），砍掉前面共用的目錄\r\n> 前面掛 sha256[:16]。只截斷會讓兩個不同的 lock 併成同一個檔 → 靜默放寬互斥，那比 crash 更糟；digest 保住一對一\r\n> sandbox 側與 canonical 側（storage/ops/locks/<name>.lock）共用同一個函式 —— 兩邊本來是同一顆地雷，不留半修狀態\r\n> 驗證（紅 → 綠雙向）\r\n> \r\n> 2 個新回歸測試放進未修的 clone → 重現同一個 Errno 63（證明測試真的抓得到）\r\n> 修好的 shared_lock.py 放進原本 8 failed 的深路徑 clone → 14 passed\r\n> 全部 lock 相關測試 → 76 passed / 2 skipped\r\n> 一個沒動的次要瑕疵\r\n> \r\n> 警報寫「HEAD^ 綠、HEAD 新增紅燈」，但實際 parent_returncode=5 —— 測試檔在 HEAD^ 還不存在，對照組根本沒跑任何測試，「綠」是誤述。這次的歸因結論仍然成立（那個 commit 確實引進了會紅的測試），所以我沒有擴大範圍去改 gate；先記在這裡，要不要單獨修請指示。\r\n> task: email-12125-0e04bd ／ 變更：src/volpred/ops/shared_lock.py、tests/test_shared_lock.py\n",
-    "task_type": "email_reply",
-    "priority": 3,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-17T05:00:07.596963+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f",
+    "priority": 3,
     "source": "gmail_inbox_poll",
-    "email_uid": 12128,
-    "email_message_id": "<A8DBEC78-E8A6-450E-B40A-26A3B2FBFE36@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][INFO] [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）— 已修復（根因：lock 檔名長度無上限）",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-17T05:01:29.689827+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-974d7182551e47adb7e4cfec88192836"
-      },
-      {
-        "ts": "2026-07-17T05:01:29.927855+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-974d7182551e47adb7e4cfec88192836"
-      },
-      {
-        "ts": "2026-07-17T05:08:27.144166+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-974d7182551e47adb7e4cfec88192836"
-      }
-    ],
-    "started_at": "2026-07-17T05:01:29.927839+00:00",
+    "created_at": "2026-07-17T05:00:07.596963+00:00",
     "completed_at": "2026-07-17T05:08:27.144147+00:00",
-    "result": "底層重構完成：新增 _classify_parent_baseline 成為 parent baseline 語意的單一判定點（green/red/no_coverage/unusable），取代 parent_rc not in (0,1,5) 成員測試；警報三段敘述改由 baseline 推導，不再寫死「HEAD^ 綠」。no_coverage 時明說對照組無證據、無法排除缺陷早於本 commit，建議不再預設 revert。紅→綠雙向驗證：3 新回歸測試在未修 clone 全紅 + probe 重現舊碼誤述；修後 gate 14 passed / phase_z 全域 50 passed。已寄 close email。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "ci-red-29553786006",
@@ -36252,29 +36061,15 @@
   },
   {
     "id": "telegram-907",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 907）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-17T05:25:47.225048+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 907）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我說過不要建議我行動是你自己立刻去處理\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\nℹ️ [INFO] Re: [VolPred 警報][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）— 底層重構完成：「HEAD^ 綠」誤述已修\n\n📌 PHASE-Z 誤述已從底層修好 — 「HEAD^ 綠」不再是寫死的字串\n\n收到「立即從底層完成重構修復」。修的是我上一封信自己標出、當時沒動的那個瑕疵。已完成並驗證。\n\n📎 根因不是文案，是資料流在中途把證據等級抹平了\n\n警報會說謊，是因為兩件事疊在一起：\n\n• 層: 舊行為 | 問題\n• 判定: parent_rc not in (0, 1, 5) → 可歸因 | rc=0（父版真的跑了、全綠）和 rc=5（父版一個測試都沒跑）被併成同一類\n• 敘述: body 寫死 \"HEAD^ 綠、HEAD 新增紅燈\" | 對照組沒證明過的事，被當成既成事實印出來\n\nrc=5 的意思是「測試檔在 HEAD^ 還不存在」——證據的缺席，不是綠的證據。這個區別在成員測試那一步就被抹掉，後面沒有任何地方救得回來。所以這不是改一句話的事，是判定點根本不存在。\n\n📌 修法：把「父版證明了什麼」變成單一判定點\n\nscripts/dispatch_supervisor/phase_z.py 新增：\n\n```python\n_classify_parent_baseline(parent_rc, parent_ran)\n-> green | red | no_coverage | unusable\n```\n\n• 這是唯一決定 baseline 語意的地方，取代散在兩處的 parent_rc == 比對\n• rc=0 但 ran=[] 也歸 no_coverage（防禦性：沒跑就是沒證據）\n• 警報三段敘述（觸發條件 / 影響 / 建議行動）全部改由 baseline 推導，不再寫死\n\n📌 歸因結論沒變\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-17T05:26:17.927676+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram_responder"
-      },
-      {
-        "ts": "2026-07-17T05:28:23.697517+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram_responder"
-      }
-    ],
     "completed_at": "2026-07-17T05:28:23.697495+00:00",
-    "result": "已回覆（msg 909）。診斷：phase_z.py 直呼 alert_fn 繞過 alert_remediation bridge，body 寫死「建議行動」。已建 P1 phase_z_alert_bypasses_remediation_bridge 交下班處理。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T05:31:29.800650+00:00"
   },
   {
     "id": "phase_z_alert_bypasses_remediation_bridge",
@@ -46231,7 +46026,41 @@
     "source": "dispatch",
     "created_at": "2026-07-20T05:14:01.557628+00:00",
     "created_by": "hourly-slot-2-6b2b5722e2f44b6787c2eb80ae87649b",
-    "compute_job_id": "k528_round5_collection",
-    "result": "dispatched to compute job k528_round5_collection; awaiting PHASE A collection"
+    "compute_job_id": "k528_round5_collection_retry",
+    "result": "dispatched to compute job k528_round5_collection; awaiting PHASE A collection\n\ndispatched to compute job k528_round5_collection_retry; awaiting PHASE A collection"
+  },
+  {
+    "id": "assign_5f17c382",
+    "title": "[refactor-master D6b] compute queue stale-running reaper",
+    "description": "D6 known gap (2026-07-20 live incident): drain loop killed by SIGTERM leaves claimed jobs as orphan running receipts (agent-brief_k741_cert_merge-1b4755 + compute-k741-...-1784520762, processes dead, receipts stuck running; cancel CLI correctly refuses to touch running). Fix the flow: add a reaper (in run-loop startup and/or tick) that checks receipt pid liveness via procutil fingerprint; dead process -> finalize receipt failed reason=worker_killed + eligible for requeue. Then requeue the two k741 jobs (they must wait for codex quota anyway). Plan: refactor_plan_ops_master_2026_07 WS-D6.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T05:30:50.683850+00:00",
+    "created_by": "refactor_master_plan",
+    "dispatch_lane": "main_thread"
+  },
+  {
+    "id": "assign_d94aac64",
+    "title": "[dispatch] burst fire 為 main_thread-lane task 而起：urgency 判定與最終 lane 不一致",
+    "description": "觀察（未證實機制，需主線程查證）：本班 fire 的 fire_reason=\"requested:user:assign_5f17c382\"，格式正是 _request_urgent_fire 的 f\"{source}:{id}\"。但 assign_5f17c382 的 dispatch_lane=main_thread，現在跑 task_urgency.classify() 回 deferred、is_urgent()=False —— 依現行程式碼根本不該觸發 request_fire。推測是 ingest 當下記錄尚無 dispatch_lane（is_agent_claimable_lane 對未設 lane 回 True），lane 由後續 writer 補蓋，導致 urgency 判定與最終 lane 不一致。後果：burst fire 起了一整班，卻在 claim gate 被正確拒絕（reason=main_thread_lane），該班對觸發它的 task 完全無能為力。同批 refactor-master 共 8 條 P1 都是 main_thread lane，若每條各燒一班就是 8 個空轉 fire，且從 fire 記錄看會誤以為任務正在被處理。查證起點：append_task_record 在鎖釋放後才算 urgency（src/volpred/ops/next_tasks.py:792）；created_by=refactor_master_plan 但 repo 內無同名腳本，疑為互動 session ad-hoc 建立。修法方向（擇一，勿疊）：(a) append 時先蓋好 lane 再判 urgency；(b) _request_urgent_fire 對非 agent-claimable lane 明確拒絕並留 warn；(c) main_thread task 若確需人為 fire，改用不同 fire_reason 前綴讓 supervisor 不當成可派工。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T05:38:51.600054+00:00",
+    "created_by": "hourly-slot-1-bc31c9780e6849e0b3e323e2575ea3b9"
+  },
+  {
+    "id": "assign_be12d6c6",
+    "title": "[verification] 測試輸出 hook 把 no tests ran 判為 Tests passed（false green，已重現）",
+    "description": "已直接重現並讀到判定式。hook 用一行 grep 決定通過與否，把 `no tests ran` 和 `N passed` 並列為通過條件（alternation 的第二支就是 `(no tests ran)`）。\n\n重現：`uv run python -m pytest tests/definitely_does_not_exist.py -q` → 畫面顯示 「Tests passed.」，實際日誌是 `no tests ran in 0.30s` + `ERROR: file or directory not found`。\n\n本班（hourly-slot-1-bc31c978）就中過一次：跑 tests/test_run_agent_job.py（該檔根本不存在）拿到 Tests passed，差點把它當成驗證通過寫進回報。\n\n嚴重性：這是驗證儀器本身的 bug。任何 agent 打錯測試檔名、或測試檔被移走／改名，都會拿到綠燈並據以宣稱「已驗證」—— 正是 CLAUDE.md 最在意的假宣告，而且 hook 讓它看起來有機械背書，比沒有 hook 更危險。\n\n諷刺的是該檔 line 28 的註解寫明這段就是為了「避免把真正的 pytest 失敗誤報成 Tests passed」，但 `(no tests ran)` 這個 alternation 又把同一類錯誤放了回來。\n\n修法：把 `no tests ran` 從通過條件移除，改成獨立的 WARN/FAIL 分支（收集到 0 個測試本來就不是通過）；並考慮改認 pytest 自己的 exit code（5 = no tests collected、4 = usage error）而非只 grep 文字。\n\n未自行修改：該 hook 位於 ~/.claude（user-global，影響所有專案，不在本 repo），動老闆的全域驗證儀器前先請示。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T05:40:07.073428+00:00",
+    "created_by": "hourly-slot-1-bc31c9780e6849e0b3e323e2575ea3b9"
   }
 ]

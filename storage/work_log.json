@@ -22377,5 +22377,15 @@
     "owner": "hourly-slot-2-6b2b5722e2f44b6787c2eb80ae87649b",
     "commit": null,
     "summary": "治本：agent job runner 為每份 brief 前置 headless runtime contract（`scripts/run_agent_job.py`）。\n\n**觸發**：同一 fire 的 K1698 triage。失敗的不是計算，是 agent 把全量重跑丟到背景後結束 turn，\n留下「背景重跑完成時我會被叫醒」——headless `claude -p` 沒有這回事，process tree 隨 turn 收掉，\n重跑死在 800/2192。那個 agent 的規劃在互動 session 裡完全正確；**沒有人告訴它它不在互動 session**。\n\n**為什麼放在 runner 而不是各自的 brief**：這是執行環境的性質，不是某一份任務的性質。\n放進 brief = 每個 dispatcher 都要記得寫，漏一次就重演一次（anti-stacking：一個 concern 一個\nenforcement owner）。runner 是唯一必經之路，前置成本一次寫死。\n\n**內容**（`BRIEF_PREAMBLE`，經 `_compose_brief()` 前置）兩條：\n1. Nothing wakes you up — 背景工作會隨 turn 死掉，長計算要在前景等。\n2. 只有 result artifact 會被收 — 散文不是結果；時間不夠也要寫 artifact，用 `unresolved` 誠實列缺口\n   （會被收的殘缺 artifact > 沒有的 artifact）。\n\n**驗證**：`tests/test_run_agent_job_brief_preamble.py` 3 passed（前置順序 / 兩種 failure mode 措辭 / 空 brief）。\n本 fire 稍後 enqueue 的 `k528_round5_collection` 是第一個吃到此 preamble 的 job。\n\n**同時完成**：K528 round-5 收件驗證派工（agent job `k528_round5_collection`，tracker `assign_05939c1e`）。\nbrief 寫死 B2 必須實地示範 pre-fix 版本 FAIL——一個永遠會過的對抗測試等於沒修，這是四條裡最容易造假的一條。"
+  },
+  {
+    "timestamp": "2026-07-20T13:37:54+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_05939c1e",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-bc31c9780e6849e0b3e323e2575ea3b9",
+    "owner": "hourly-slot-1-bc31c9780e6849e0b3e323e2575ea3b9",
+    "commit": null,
+    "summary": "治本：agent job runner 自己解析 Claude CLI 路徑，不再指望每個 launcher 的 PATH（scripts/run_agent_job.py）。\n\n**觸發**：PHASE A 收 triage_failed followup（job k528_round5_collection，exit=1）。看 stderr 才發現失敗的不是研究，\n是 `FileNotFoundError: 'claude'` —— job 起跑一秒就死，agent 從未存在。worktree git status 全乾淨、verdict artifact 不存在，\n證實無任何成果遺失，屬原樣重派而非 remediation。\n\n**根因**：launchd 給 job 的 PATH 極簡，不含 `~/.local/bin`（CLI 實際所在）。`cron_compute_worker.sh` 的作者已經知道這件事——\n所以 `uv` 寫死成 `/opt/homebrew/bin/uv`——但沒有人為 `claude` 做同樣的事。kind=compute 的 job 從不 exec CLI，\n所以這個洞只有在 kind=agent 的 job 剛好落在 launchd 起的 worker 上才發作：12:30 那次 agent job exit=0，\n13:16:20 launchd 新起 wrapper 的那次秒死。**隨 launcher 間歇發作**，這是它躲過這麼久的原因。\n\n**為什麼修在 runner 而不是 wrapper**：concern 是「能不能 exec CLI」，唯一必經之路是 runner。\n修 wrapper 等於每個 launcher（launchd / cron / 互動）都要各自記得補 PATH，漏一個就重演（anti-stacking：一個 concern 一個 owner）。\n`_resolve_claude_bin()`：VOLPRED_CLAUDE_BIN 覆寫優先 → PATH → 已知安裝位置；全找不到就**大聲拋錯並 exit 2（config error）**，\n不退回裸名 `claude`——退回只會把同一個 FileNotFoundError 延後到 Popen，被 failure_class 讀成研究失敗，\n再派一個 triage agent 去看一個根本沒問題的 worktree（這次就是這樣浪費掉的）。\n\n**驗證**：在真正的失敗條件下重現並確認修好——`env -i PATH=/usr/bin:/bin` 下 `shutil.which('claude')` 回 None（原 bug 重現），\nresolver 仍解出 /Users/yhlai0911/.local/bin/claude。新增 tests/test_run_agent_job_claude_bin.py 4 條回歸測試\n（launchd PATH 情境 / 全找不到要拋錯 / 覆寫優先 / 壞覆寫不得靜默改搜別處）。36 passed。\n已重派 k528_round5_collection_retry（queued）+ mark-followup-dispatched。\n\n**順帶發現（未修，已回報）**：測試 hook 對不存在的測試檔回報 `Tests passed`，實際是 `no tests ran` + file not found。\nfalse green，會讓人以為驗證過了。\n\n**未動**：本班 fire 的觸發任務 assign_5f17c382（D6b reaper）是 dispatch_lane=main_thread，claim gate 正確拒絕，未強推。"
   }
 ]
