@@ -32721,13 +32721,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T04:15:55.988600+00:00",
+    "completed_at": "2026-07-20T04:29:20.688369+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T04:15:55.988600+00:00",
-      "last_clean_observed_at": "2026-07-20T04:15:55.988600+00:00"
+      "resolved_at": "2026-07-20T04:29:20.688369+00:00",
+      "last_clean_observed_at": "2026-07-20T04:29:20.688369+00:00"
     }
   },
   {
@@ -32739,13 +32739,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T03:49:03.870608+00:00",
+    "completed_at": "2026-07-20T04:16:16.815718+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T03:49:03.870608+00:00",
-      "last_clean_observed_at": "2026-07-20T03:49:03.870608+00:00"
+      "resolved_at": "2026-07-20T04:16:16.815718+00:00",
+      "last_clean_observed_at": "2026-07-20T04:16:16.815718+00:00"
     }
   },
   {
@@ -35893,44 +35893,15 @@
   },
   {
     "id": "email-12125-0e04bd",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）",
-    "description": "Gmail UID: 12125\nMessage-ID: <6BAB46F4-B4F4-49AA-9CC2-C6AB37D50886@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Fri, 17 Jul 2026 11:56:19 +0800\nSubject: Re: [VolPred Alert][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）\n\n--- 用戶回信內容 ---\n立刻修復解決，從底層邏輯解決\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月17日 11:27 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> safety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。\r\n> \r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> 觸發條件\r\n> \r\n> safety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 綠、HEAD 新增紅燈。\r\n> \r\n> fire 時間: 11:26\r\n> commit: 00b07f07f6a4\r\n> 變更程式檔: scripts/refresh_paper_snapshots.py, tests/test_refresh_paper_snapshots_concurrent_append.py\r\n> 跑的測試: tests/test_refresh_paper_snapshots_concurrent_append.py\r\n> pytest 退出碼: 1\r\n> 影響\r\n> \r\n> 隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。\r\n> \r\n> 建議行動\r\n> \r\n> 本機重跑確認：\r\n> uv run --extra dev python -m pytest tests/test_refresh_paper_snapshots_concurrent_append.py -q\r\n> 修掉紅燈或 revert 該 commit（gate 不自動 revert — revert 風險高於紅燈本身）。\r\n> 失敗尾段：\r\n> s_and_preserves_survivors\r\n> FAILED tests/test_refresh_paper_snapshots_concurrent_append.py::test_repair_refuses_non_identical_duplicates\r\n> FAILED tests/test_refresh_paper_snapshots_concurrent_append.py::test_repair_dry_run_reports_without_writing\r\n> 8 failed, 2 warnings in 13.05s\r\n> warning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\r\n> Using CPython 3.12.10\r\n> Creating virtual environment at: .venv\r\n>    Building volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-y4v71j1t/head\r\n>       Built volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-y4v71j1t/head\r\n> Installed 125 packages in 712ms\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-17T04:00:08.903906+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12125,
-    "email_message_id": "<6BAB46F4-B4F4-49AA-9CC2-C6AB37D50886@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] PHASE-Z auto-commit 測試紅燈（00b07f07f6a4）",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-17T04:01:19.167826+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-75800dadbb7c40359c68e8bfb0d995c3"
-      },
-      {
-        "ts": "2026-07-17T04:01:21.712524+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-75800dadbb7c40359c68e8bfb0d995c3"
-      },
-      {
-        "ts": "2026-07-17T04:10:40.046673+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-75800dadbb7c40359c68e8bfb0d995c3"
-      }
-    ],
-    "started_at": "2026-07-17T04:01:21.712509+00:00",
+    "created_at": "2026-07-17T04:00:08.903906+00:00",
     "completed_at": "2026-07-17T04:10:40.046658+00:00",
-    "result": "根因非該 commit 邏輯：sandboxed_lock_path + _snapshot_lock_name 兩層路徑壓平無長度上限 → 深路徑 clone 超過 NAME_MAX(255) 觸發 OSError Errno 63，本機路徑短剛好過關。修法：shared_lock.py 加 _bounded_filename（保留尾段 + sha256[:16] 保 injectivity），sandbox/canonical 兩側共用；≤255 檔名不變。驗證：新測試在未修 clone 重現 Errno 63、修後深路徑 clone 14 passed、lock 相關 76 passed。close email 已寄。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T04:17:44.549641+00:00"
   },
   {
     "id": "assign_4470644e_s1_t7_retract",

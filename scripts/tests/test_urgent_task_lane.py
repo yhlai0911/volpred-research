@@ -35,10 +35,12 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.ops import next_tasks as nt  # noqa: E402
 from volpred.ops.task_urgency import (  # noqa: E402
+    LANE_DEFERRED,
     LANE_SCHEDULED,
     LANE_TIME_CRITICAL,
     LANE_URGENT,
     classify,
+    deferred_lane,
     dispatch_lane,
     is_urgent,
     is_urgent_source,
@@ -271,3 +273,55 @@ def test_telegram_poll_does_not_wire_an_urgent_fire() -> None:
         "telegram_reply 有專屬 owner，不該請 hourly out-of-band fire"
     )
     assert "_spawn_responder" in src, "專屬 owner 消失的話，上面的豁免就不再成立"
+
+
+# --- 6. main_thread lane：漏掉時是餓死，不只是 double-claim（2026-07-20）------
+#
+# `dispatch_lane="main_thread"` 保留給互動 session，claim gate（commit f23d870c4,
+# 11:48）會拒絕 headless owner。本模組當時不認得 lane，照樣把這些任務排進 A0 最
+# 前面。A0 的規則是「lane 還有殘留 → 本班不進 PHASE A」，而 hourly fire 永遠
+# claim 不到這些任務 ⇒ 11:48 起每一班 fire 都卡死，一般排班全面餓死。
+#
+# 實例：7 張 [refactor-master] P1（source=user，03:12 建單）在 12:17 那班仍讓
+# `claim` 回 reason=main_thread_lane。
+
+def _main_thread_task(task_id: str = "assign_caf5b087", **extra) -> dict:
+    extra.setdefault("dispatch_lane", "main_thread")
+    return _task(task_id, source="user", **extra)
+
+
+def test_main_thread_lane_task_is_not_in_a0_lane() -> None:
+    """事故的精確形狀：source+priority 全中，但 headless fire claim 不到。"""
+    task = _main_thread_task()
+    assert is_urgent_source(task["source"]) is True, "前提：urgency 判定本身會命中"
+    assert classify(task) == LANE_DEFERRED
+    assert is_urgent(task) is False, "claim 不到的任務不該叫醒一班誰都做不了的 fire"
+    assert dispatch_lane([task]) == [], "進了 A0 lane = 每班 fire 都清不掉 ⇒ 餓死"
+
+
+@pytest.mark.parametrize("lane", ["main", "main_thread", "main-thread", "manual", "interactive"])
+def test_all_main_thread_spellings_excluded(lane: str) -> None:
+    """詞彙不一致正是根因 —— 4 種拼法（含連字號）都得認得。"""
+    assert dispatch_lane([_main_thread_task(dispatch_lane=lane)]) == []
+
+
+def test_agent_lane_and_unset_lane_still_dispatchable() -> None:
+    """誤擋防線：擋錯邊會把整個佇列凍住（絕大多數任務沒有 lane 欄位）。"""
+    assert classify(_task("t", source="user")) == LANE_URGENT, "未設 lane 必須照舊可派"
+    for lane in ("agent", "auto", "headless", "worker", ""):
+        task = _task("t", source="user", dispatch_lane=lane)
+        assert classify(task) == LANE_URGENT, f"lane={lane!r} 是可派的，不得被擋"
+
+
+def test_deferred_tasks_stay_observable() -> None:
+    """不進 A0 ≠ 消失 —— 主線程 backlog 若從報告消失就沒人會發現它在積。"""
+    tasks = [_main_thread_task("a"), _task("b", source="user")]
+    assert [t["id"] for t in deferred_lane(tasks)] == ["a"]
+    assert [t["id"] for t in dispatch_lane(tasks)] == ["b"]
+
+
+def test_claim_gate_and_urgency_share_one_vocabulary() -> None:
+    """兩邊各留一套字面值就是這次的根因，釘住「同一個 owner」。"""
+    src = (ROOT / "scripts" / "task_pool_claim.py").read_text(encoding="utf-8")
+    assert "MAIN_THREAD_DISPATCH_LANES" in src, "claim gate 必須用 canonical set"
+    assert 'lane == "main_thread"' not in src, "不得回退成單一字面值比對"

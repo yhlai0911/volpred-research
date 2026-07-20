@@ -504,3 +504,37 @@ Supabase 只是加強覆蓋。因此 (a) 本地 feed 讀不到 = 全盲 → 丟*
 **驗證**：線上 `/api/publications/feed?limit=12` 12/12 非增序；draft 正確排除；typecheck/build/static regression 全綠。附帶查證非本因：Supabase 3 筆 published_at NULL 列皆 `unpublished`（前端 status filter 已排除）；最新兩篇未現身為 `draft`（release 前正常）。
 
 **教訓**：顯示層「有界重排」仍是重排 — strike 2 就該把 concern 收斂回單一 owner，而不是把錯誤層修得更精緻。讀者面順序類 invariant 一律寫進 regression verifier，且 verifier 要真的有人跑（本次發現它自 7/1 紅著沒人知 → 已修，後續由 F1 layer-map audit 把 verify:regressions 掛進 CI 的缺口記入 ops master plan WS-F1）。
+
+## 2026-07-20 main_thread lane 隔離讓 hourly fire 全面餓死 — FIXED
+
+**現象**：12:17 那班 fire 跑 PHASE A0 得 `count=7`（7 張 `[refactor-master]` P1，`source=user`，03:12 建單），
+但逐一 claim 全數回 `reason=main_thread_lane`。A0 的規則是「lane 還有殘留 → 本班不進 PHASE A」，
+而這 7 張 headless fire **永遠** claim 不到 ⇒ **11:48 之後每一班 fire 都卡死在 A0，一般排班工作全面餓死**。
+下游證據：`continue_task_dispatch --report` 同時報 STARVATION LOCKOUT，P1 `assign_67f56b79` 已餓 42.2h。
+
+**根因（anti-stacking：同一 concern 三個 owner，詞彙各自漂移）**：
+`dispatch_lane` 的判定散在三處且互不相同 —
+`continue_task_dispatch.py:109` 認 4 種拼法（main / main_thread / manual / interactive）、
+`task_pool_claim.py:496` 的 claim gate 只硬比對字面 `"main_thread"`、
+`task_urgency.py`（PHASE A0 的判定 owner）**完全不認得 lane**。
+commit `f23d870c4`（11:48）把隔離 enforce 在 claim 入口是對的，但沒有同步 A0 的候選判定 —
+於是「擋得住 claim」和「排不進 lane」變成兩件事，claim 不到的任務照樣排在 A0 最前面。
+副作用二：`lane="manual"` 的任務進不了 PHASE B 候選、卻擋不住 burst 點名 claim（詞彙不一致的直接後果）。
+
+**解決（收斂回單一 owner）**：lane 詞彙移進 `src/volpred/ops/next_tasks.py`（controlled-vocabulary owner，
+同 `TASK_STATUSES` 的形狀）：`AGENT_/MAIN_THREAD_/BLOCKED_DISPATCH_LANES` + `normalize_dispatch_lane()`
++ `is_agent_claimable_lane()`（未設 lane 一律可派 — 絕大多數存量任務沒有這個欄位，預設保留會凍住整個佇列）。
+三個消費端全部改用同一套：ctd 改 import、claim gate 改用 canonical set（順帶補上 manual/interactive 破口）、
+`task_urgency` 新增 `LANE_DEFERRED`。這類任務不進 A0 可動 lane、`is_urgent()` 回 False
+（不叫醒一班誰都做不了的 fire），但 CLI 仍以 `deferred_main_thread` / `deferred` 獨立列出 —
+**不進 lane ≠ 消失**，主線程的 backlog 要看得見。
+
+**驗證**：`uv run python -m volpred.ops.task_urgency` 實測 `count=0` / `deferred_main_thread=7`（7 張 id 全在），
+死鎖解除；claim 仍正確回 `main_thread_lane`（隔離語意未被洗掉）；
+`test_urgent_task_lane.py` 42 passed（新增 6 case 釘死餓死方向 + 誤擋防線 + 兩端共用同一詞彙）；
+ctd `--report` 正常，claim/vocab 相關套件全綠。
+
+**教訓**：**隔離只做一半 = 餓死**。把某類任務「擋在 claim 入口」而不同步「排出候選 lane」，
+會製造一種最惡劣的形狀 —— 任務看得見、排得進、清不掉，而清不掉的 lane 剛好是「清完才能往下走」的前置條件。
+新增一個 gate 時必須同時問：**誰在產生候選？它認得這個 gate 嗎？** 另一條：控制詞彙（status / lane / reason）
+一旦出現第二份字面值就會漂移，且漂移處必然是破口 —— 這次是 `manual` 擋不住 burst。

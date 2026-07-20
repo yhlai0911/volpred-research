@@ -185,6 +185,47 @@ TASK_STATUSES: frozenset[str] = frozenset(
 LEGACY_OUT_OF_VOCAB_BASELINE = 27
 
 
+# Canonical dispatch-lane vocabulary — who is allowed to claim a task.
+# Same shape as TASK_STATUSES above: this is the ONLY sanctioned place to add a
+# lane. Before 2026-07-20 the vocabulary was copy-pasted across three owners
+# (continue_task_dispatch.py listed 4 main-thread spellings, task_pool_claim.py's
+# claim gate hard-coded only "main_thread", task_urgency.py knew nothing about
+# lanes at all). That divergence is what let `dispatch_lane="manual"` be filtered
+# out of PHASE B candidates yet still be claimable by a burst fire.
+AGENT_DISPATCH_LANES: frozenset[str] = frozenset(
+    {"agent", "agentable", "auto", "auto_dispatch", "headless", "worker"}
+)
+MAIN_THREAD_DISPATCH_LANES: frozenset[str] = frozenset(
+    {"main", "main_thread", "manual", "interactive"}
+)
+BLOCKED_DISPATCH_LANES: frozenset[str] = frozenset({"blocked", "blocked_on_user", "hold"})
+
+
+def normalize_dispatch_lane(task: dict) -> str:
+    """Return the task's normalized schema-level dispatch lane ("" if unset).
+
+    Accepts both ``dispatch_lane`` and the legacy camelCase ``dispatchLane``,
+    and folds ``main-thread`` → ``main_thread`` so hyphen/underscore spellings
+    are the same lane.
+    """
+    if not isinstance(task, dict):
+        return ""
+    raw = task.get("dispatch_lane") or task.get("dispatchLane") or ""
+    return str(raw).strip().lower().replace("-", "_")
+
+
+def is_agent_claimable_lane(task: dict) -> bool:
+    """Return True iff a headless/hourly session may claim this task.
+
+    An unset lane stays claimable — the vast majority of the queue predates the
+    field, and defaulting those to "reserved" would freeze the whole pool.
+    """
+    lane = normalize_dispatch_lane(task)
+    if not lane:
+        return True
+    return lane not in MAIN_THREAD_DISPATCH_LANES and lane not in BLOCKED_DISPATCH_LANES
+
+
 def is_valid_status(status: str | None) -> bool:
     """Return True iff ``status`` is a registered task status."""
     if not status:

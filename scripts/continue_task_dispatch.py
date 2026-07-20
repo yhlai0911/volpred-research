@@ -105,9 +105,11 @@ MAIN_THREAD_MARKERS = re.compile(
     r"main\s*thread|NOT\s*agent|main-thread|主線程",
     re.IGNORECASE,
 )
-AGENT_DISPATCH_LANES = {"agent", "agentable", "auto", "auto_dispatch", "headless", "worker"}
-MAIN_THREAD_DISPATCH_LANES = {"main", "main_thread", "manual", "interactive"}
-BLOCKED_DISPATCH_LANES = {"blocked", "blocked_on_user", "hold"}
+from volpred.ops.next_tasks import (  # noqa: E402
+    AGENT_DISPATCH_LANES,
+    BLOCKED_DISPATCH_LANES,
+    MAIN_THREAD_DISPATCH_LANES,
+)
 
 # 2026-05-04 finding: dispatcher previously had no concept of "blocked".
 # Tasks that can never be dispatched (awaiting external auth, prior compute

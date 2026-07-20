@@ -493,10 +493,18 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
             dreaming_result = _revalidate_dreaming_before_claim(task, owner=args.owner)
             if dreaming_result is not None:
                 return dreaming_result
-        lane = str(task.get("dispatch_lane") or "").strip().lower()
-        if (lane == "main_thread" or existing_status == "pending_main_thread") and not getattr(
-            args, "main_thread", False
-        ):
+        from volpred.ops.next_tasks import (
+            MAIN_THREAD_DISPATCH_LANES,
+            normalize_dispatch_lane,
+        )
+
+        lane = normalize_dispatch_lane(task)
+        # 2026-07-20：原本只比對字面 "main_thread"，但 ctd 的候選過濾認得 4 種拼法
+        # （main / main_thread / manual / interactive）。詞彙不一致 ⇒ lane="manual"
+        # 的任務進不了 PHASE B 候選、卻擋不住 burst 點名 claim。改用 canonical set。
+        if (
+            lane in MAIN_THREAD_DISPATCH_LANES or existing_status == "pending_main_thread"
+        ) and not getattr(args, "main_thread", False):
             # 2026-07-20 owner 糾正（refactor_plan_ops_master_2026_07 §5 獨立軌）：
             # lane 只擋候選排序不夠 —— burst/urgent fire 會點名 claim，隔離必須
             # enforce 在 claim 這個唯一入口。互動主線程用 --main-thread 明示越過。
