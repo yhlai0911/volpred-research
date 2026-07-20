@@ -32721,13 +32721,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T03:07:54.842095+00:00",
+    "completed_at": "2026-07-20T03:27:39.934200+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T03:07:54.842095+00:00",
-      "last_clean_observed_at": "2026-07-20T03:07:54.842095+00:00"
+      "resolved_at": "2026-07-20T03:27:39.934200+00:00",
+      "last_clean_observed_at": "2026-07-20T03:27:39.934200+00:00"
     }
   },
   {
@@ -32739,13 +32739,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T02:45:50.235645+00:00",
+    "completed_at": "2026-07-20T03:08:06.803741+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T02:45:50.235645+00:00",
-      "last_clean_observed_at": "2026-07-20T02:45:50.235645+00:00"
+      "resolved_at": "2026-07-20T03:08:06.803741+00:00",
+      "last_clean_observed_at": "2026-07-20T03:08:06.803741+00:00"
     }
   },
   {
@@ -35046,37 +35046,15 @@
   },
   {
     "id": "assign_09984c91",
-    "title": "修 paper snapshot refresh 並行 append 重複日期",
-    "description": "K1685 發現 paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv 在 2026-05-04..05-15 各重複兩列。Root hypothesis: scripts/refresh_paper_snapshots.py append-only path 無 per-file cross-process lock，兩個 refresh 可同時讀同一 old_last 並重複 append。修流程、不手改 CSV：加 per-file lock，lock 內重讀 current last date，new_only date 去重/排序，write 前後 unique-date fail-closed；新增兩 process 同批 append regression test；再走 canonical snapshot regeneration/refresh 修復受污染檔並驗證 consumers。Evidence: experiments/k1685/README.md + k1685 results data_integrity_finding。\n\n[migrated 2026-07-16 from task_64b5bcc0a23f (single-gateway migration 2026-07-16 (docs/refactor_plan_single_gateway_task_system.md)); original created_at 2026-07-11T21:34:48.572870+00:00]",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "修 paper snapshot refresh 並行 append 重複日期",
+    "priority": 1,
     "source": "agent",
     "created_at": "2026-07-16T14:42:55.724940+00:00",
-    "created_by": "single-gateway-migration",
-    "status_history": [
-      {
-        "ts": "2026-07-17T03:08:24.027090+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87"
-      },
-      {
-        "ts": "2026-07-17T03:08:29.000301+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87"
-      },
-      {
-        "ts": "2026-07-17T03:15:05.597261+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-164b2297fd004cc0af310af58f636d87"
-      }
-    ],
-    "started_at": "2026-07-17T03:08:29.000286+00:00",
     "completed_at": "2026-07-17T03:15:05.597242+00:00",
-    "result": "root_cause=append path 讀 old_last 後跨越整個 yfinance download 才無鎖 append，TOCTOU 窗導致並行 refresh 各自用過期 boundary 重複 append 同批日期。fix=per-file fcntl lock + 鎖內重讀 boundary + isin/drop_duplicates 過濾 + 寫前寫後 unique-date fail-closed（違反則 truncate 回滾）。class_sweep=污染達 6 papers/9 files（非 K1685 指出的 1 檔），全數以新增的 --repair-duplicates 修復，逐檔比對 HEAD 確認存活列 byte-identical。tests=tests/test_refresh_paper_snapshots_concurrent_append.py 8 passed（含 Barrier 重現事故時序的 two-process test；另跑 mutation check 確認 pre-fix 邏輯會產 dup）。followup=assign_7f508612（2026-05-20~07-17 曝險窗的 consumer 結果稽核）。"
+    "tombstone": true,
+    "archived_at": "2026-07-20T03:21:33.190493+00:00"
   },
   {
     "id": "assign_56ddf72b",
@@ -36616,7 +36594,7 @@
     "description": "K1623（experiments/k1623/）於 2026-07-17 孤兒收尾時經 codex gpt-5.6-sol (reasoning=high) 獨立二審判 **FAIL**，依 K1259 規則不得寫入 knowledge.json，結論必須撤回而非收編。本 task 是它的 consumer 與修復出口。\n\n**FAIL 理由（二審 + 主線程驗證，算術全部一致，問題在「宣稱 vs 證據」）**：\n1. 識別宣稱不成立：至多 5（permissive 15）個 deterministic Bai-Perron mean break 扣不掉 Diebold-Inoue 所設想的隨機／密集 regime shift，故「純 level-shift 假象假說被拒絕、確有真 long-memory 成分」無識別定理支撐。且 demeaned d̂ 的 SE 直接沿用 raw ELW 漸近 SE，未計入斷點是估計出來的 generated-regressor 不確定性。\n2. 結論隨 loss function 反轉且未揭露：DM **只跑了 QLIKE**，而 ARFIMA 的 MSE 在 5 資產中有 4 個低於 HAR（SPY 0.889 / TW0050 0.836 / QQQ 0.874 / N225 0.891，低 11-16%）。README §4 宣稱報 QLIKE+MSE 兩個 loss，實際只對 QLIKE 做檢定，MSE 方向相反且完全未提。\n3. 「不可交易」無任何交易策略／成本／效用測試，純屬修辭。\n4. README §3 稱「多處反而顯著更差」→ 實際 10 個 ARFIMA/BreakHAR 比較中僅 1 個顯著（QQQ t=+2.47, p=0.0137），且對 5 個檢定做 Bonferroni 即不顯著；20 個 DM 比較全無多重比較修正。\n5. 描述與程式碼不符：§4 稱 BreakRobustHAR「只用最近 latest-break 之後樣本 refit」，但 k1623.py:471 `wstart = max(0, min(brk_start, i-22-60))` 在斷點太近時刻意把窗口推回斷點之前，無斷點時 fallback 到 trailing 750。\n6. §4/§9 headline 稱 ELW 為「Shimotsu-Phillips 可估非平穩 d」，但 code 只做 sample-mean demeaning（非 SP 的 unknown-mean μ̂(d) 加權）；fracdiff 截斷 FD_MAXK=2000 對 n=2,565-4,655 實際 binding，對 d̂=0.723 的 VIX（d>0.5，樣本平均在非平穩區不是有效 level 估計）影響最大。\n7. VIX 的 permissive 斷點選到 cap 上限 15/15（cap binding），故夾擠上界 20.3% 不構成上界。\n\n**可保留的描述性事實**（不依賴已崩的識別宣稱）：扣掉 BIC 斷點後 ELW d̂ 仍 0.46-0.65、扣掉 10-15 個 permissive 斷點後仍 0.19-0.58（殘餘低頻持續性未消失）；OOS n=749/資產，HAR 在 QLIKE 上是 5 資產冠軍或並列最佳；BreakHAR vs HAR 10 個比較全部不顯著（最小 p=0.0946）。\n\n**要做的**：\n1. 改寫 experiments/k1623/README.md：撤回 (a)「真 long memory 成分存在」identification 宣稱、(b)「不可交易」、(c)「多處顯著更差」；改為 loss-dependent 的誠實陳述。\n2. 補跑 MSE 的 DM 檢定 + 20 個比較的多重比較修正（BH 或 Bonferroni），把 loss 反轉寫進結果表。\n3. 修正 ELW 方法描述（sample-mean demeaning 非 SP）+ 揭露 FD_MAXK binding + VIX cap binding。\n4. 修正 BreakRobustHAR 描述使其與 k1623.py:471 實際行為一致（或改 code 對齊描述，二擇一並說明）。\n5. 完成後再送一次 codex 二審；CONDITIONAL PASS 以上才可寫 knowledge.json。\n6. 注意 §9 記載前一輪 codex（gpt-5.5）判「no CRITICAL/HIGH」與本輪 gpt-5.6-sol 直接衝突 —— 前輪 review 未捕捉上述問題，這本身是 reviewer 可靠度的教訓，值得記進 error_log。\n\n**可發佈 angle（撤回識別宣稱後仍成立）**：「同一組預測、同一批模型，換一個 loss function 結論就反轉：QLIKE 說樸素 HAR 贏遍 5 個資產，MSE 說 ARFIMA 在 4/5 資產低 11-16%」—— 純描述性、可從 JSON 直接驗證的方法論教訓（呼應 K1016）。此 angle 須待 (1)(2) 修完才可寫成文章。\n\nparent_task_id=dreaming_orphaned_experiment_k1623",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "source": "auto_discovered",
     "created_at": "2026-07-17T10:24:51.136605+00:00",
     "parent_task_id": "dreaming_orphaned_experiment_k1623",
@@ -36640,12 +36618,19 @@
         "to": "pending",
         "by": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-20T03:12:37.507752+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "cleanup",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-19T04:41:58.617369+00:00",
     "result": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。\n\ndispatched to compute job agent-brief_k1623_rev2-e343cd; awaiting PHASE A collection",
     "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
-    "last_released_at": "2026-07-19T06:50:06.179320+00:00",
+    "last_released_at": "2026-07-20T03:12:37.507743+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "compute_job_id": "agent-brief_k1623_rev2-e343cd"
   },
@@ -36655,7 +36640,7 @@
     "description": "K1698（experiments/k1698/，FTD E1 v2 — scale re-calibration gating，K1684 的 compliant rerun）於 2026-07-17 孤兒收尾時經 codex gpt-5.6-sol (reasoning=high) 獨立二審判 **FAIL**，依 K1259 規則不得寫入 knowledge.json。本 task 是它的 consumer 與修復出口。\n\n**先講公道話（這些 blocker 是真修的，別重做）**：數字全部可從 JSON 逐項對上、無 K1016 式反向宣稱 —— leg1 t=+1.4694/p=0.1424/n=436、own-target bridge −5.2522 vs primary −2.0642(p=0.0396)、校正因子 std(z)=1.20290 / MZ=1.21091 / HL=1.07465、placebo GJRf-a OOS=1.11910 / IS=0.99346、1% VaR trinity HAR+CF 14/450 (Kupiec p=0.000 FAIL) vs bridge 17/450、GJR+CF 2/450 PASS 但 c_emp=0.799 [0.63,1.02] 屬過度保守型 PASS、K854 bridge 11/14 格相符。K1684 的 n=377 縮樣已修（改 declared drop 3 cells，n=450）、atomic write（tmp→json.load→os.replace）、GATE_RULES 寫在 k1698.py:170 且 decide_gate_v2() 確實檢查 leg-2 —— 全部確認到位。\n\n**FAIL 理由（問題全在「數字 → 結論」與兩個號稱已解的 blocker）**：\n1. **lookahead 未解（致命）**：active contract 依整份日檔成交量選出（k1698.py:328 `v[dl==d].sum()`），含 13:30-13:45 的 tick，因此號稱「13:30 可得」的 RV predictor 用了視窗收盤後 15 分鐘的合約選擇資訊 —— 直接推翻 README「資訊集建構上不相交」的宣稱，並打在所有「新舊 RV 差 → divergence 是 artifact」結論的根上。\n2. **60 天邊界 audit 是空驗證**：rv_window_boundary_audit 取的是最早 60 個交易日（2017-01，夜盤上線前），JSON 內 12 筆 checks 的 night_pm_in_window / night_am_in_window 全是 None，而 None 不會令 ok=False；night_pm_stamped_before_file_date 更根本沒併進 all_ok。而 OOS(2023-24) 全在夜盤時代 → blocker 2 的機械證明並不存在。\n3. **accepting the null**：t=+1.469 (p=0.142) 只是「未證明 HAR 勝」，被寫成 H2_REJECTED +「divergence 是 construction artifact」。要立此論需 equivalence / noninferiority 檢定；−5.25→−2.06 是描述性比較，未對兩套 paired loss differential 之差做正式檢定。\n4. 「完全復現 K1684/K854 的世界」與 JSON 的 11/14 相矛盾（只有 HAR/RGL cells 逐格復現，差的 3 格全是 GJR 家族 10→9、3→2、9→7）。\n5. 「差全部來自 RV 重建」無分項 ablation —— 新 RV 同時改了 active contract／gap／alignment／連續 path 四件事，故「RV 建構吃掉最多」「殘餘 1.075 = composition/basis」皆未識別。\n6. JSON limitation #7 寫「>=100-start GJR/RGL」與 top-level rgl_multistart=40 自相矛盾（README 本身寫對）。\n7. k1698/ 目錄內無獨立 referee report/receipt，README §2 的「primary-path review PASS」無機械證據。\n\n**要做的（順序有依賴，別跳）**：\n1. 修 contract-selection lookahead：合約選擇只能用 13:30 前可得資訊（前一日 volume 或 rolling 規則），重跑 RV predictor。這一步不做，後面全部無意義。\n2. 修 rv_window_boundary_audit：抽樣必須涵蓋夜盤時代與 OOS 期（2023-24），None 應令 ok=False，night_pm_stamped_before_file_date 併進 all_ok。\n3. 無 lookahead 重跑後，做四層分項 ablation（active contract / gap / alignment / 連續 path）才能講「哪一項吃掉多少」。\n4. H2 若仍要主張「divergence 是 artifact」，改用 equivalence / noninferiority 檢定，不可拿 p=0.142 當證據。\n5. 修 limitation #7 與 rgl_multistart 的矛盾；把 review receipt 落成檔案。\n6. 重跑後再送 codex 二審；CONDITIONAL PASS 以上才可寫 knowledge.json。\n7. heavy compute 走 scripts/compute_queue.py enqueue，不要塞進 hourly fire。\n\n**可保留素材（修完才談短文）**：common-target vs own-target ranking 分歧、RV 建構敏感性、校正機器對 GJR placebo 同樣有效的否定結果、c_emp 作 ex-post calibration 診斷。\n\nparent_task_id=dreaming_orphaned_experiment_k1698",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "source": "auto_discovered",
     "created_at": "2026-07-17T10:24:51.180552+00:00",
     "parent_task_id": "dreaming_orphaned_experiment_k1698",
@@ -36679,12 +36664,19 @@
         "to": "pending",
         "by": "hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-20T03:12:37.507761+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "cleanup",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-19T04:41:58.856904+00:00",
     "result": "rev2b 已完成並自審修掉 round-2 六項缺陷；主線程逐條驗過 contract-selection / boundary audit / TOST 三項；Codex round 3 已進 compute queue compute-k1698-rev2b-codex-round-3-primary-path-review-1784463137，裁決前不得 merge",
     "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
-    "last_released_at": "2026-07-19T06:50:06.179335+00:00",
+    "last_released_at": "2026-07-20T03:12:37.507759+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "compute_job_id": "agent-brief_k1698_rev2-713b65"
   },
@@ -40523,7 +40515,7 @@
     "description": "Codex rev6 判 FAIL（freeze hash 全符，屬當前 bytes 裁決）。4 條 blocking issue 主線程已逐一 bytes 核對屬實：(1) README:188/195 仍稱 bounds 並把 nested 列標為有效 95% CI；(2) primary JSON cross_arm_comparison 仍有 demonstrably 與無 caveat 的雙臂 OOS 推論；(3) estimation py:4 docstring 仍稱 holds the entire engine fixed，與已揭露的三項差異衝突；(4) audit_nested_dm_misuse.py 缺 coefficient-mask nesting AST channel，導致 K1731 gate PASS 是 false negative、193-site baseline 至少少算一處。執行已委派給 compute agent job agent-brief_k1731_armB_rev7-7ece0f（xhigh, worktree dispatch-slot-1-bd00f90a-k1731, 產出 experiments/k1731/k1731_armB_rev7_remediation.json），完成後由 compute queue followup 接手驗收 + 送 Codex round 7。parent_compute_job=compute-codex-review-k1731-arm-b-rev6-b1-b7-remediation-round-1784419834",
     "task_type": "experiment",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "source": "hourly_dispatch",
     "created_at": "2026-07-19T02:11:16+00:00",
     "created_by": "hourly-slot-1-1c9c92adf5b44f3b951a8c7e2444fb60",
@@ -40539,8 +40531,17 @@
         "at": "2026-07-19T02:11:16+00:00",
         "by": "hourly-slot-1-1c9c92adf5b44f3b951a8c7e2444fb60",
         "note": "delegated to compute agent job agent-brief_k1731_armB_rev7-7ece0f"
+      },
+      {
+        "ts": "2026-07-20T03:12:37.507777+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "cleanup",
+        "note": "auto_release_stale_2h"
       }
-    ]
+    ],
+    "last_released_at": "2026-07-20T03:12:37.507775+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "telegram-1005",
@@ -40908,13 +40909,19 @@
     "description": "2026-07-19 10:40 CST 已把 config/runtime_schedules.json 的 dispatch supervisor max_slots 2→4，並在 scheduler.load_max_slots 加 quota de-rate guard（連 2 次 outcome=quota_blocked → clamp 回 2，成功一次自愈）。本 task 是老闆指示的第 4 步「觀察 24h 吞吐變化並回報」。\n\n基線（改動前，實測）：\n- 近 5 日 completed/day = 57 / 98 / 53 / 46 / 57（平均約 62/日）\n- pending 86-89 筆，slots 長期滿載（current_jobs_n=2/2）\n- 近 100 次 completion outcome：success 87 / quota_blocked 5 / codex_failover_recovered 5 / failure 1 / killed_timeout 1 / kill_failed_orphan_drained 1\n- weekly quota 32.3% used（anchor 已 stale 18 天，數字僅供量級參考）\n\n要做：\n1. 比對 2026-07-19 10:40 之後 24h 的 completed/day 與 slots_full skip 次數（storage/ops/dispatch_state.json completions + supervisor log 的 reason=slots_full）。\n2. 檢查是否出現新的 quota_blocked / killed_timeout / PHASE-Z cohort 衝突 —— 4 條主線程共用同一個 checkout，cohort-drained PHASE-Z 的競態是這次加碼最可能的新風險面。\n3. 檢查 worktree 與磁碟：改動前 18 個 worktree、磁碟 91% used（85GB free）。若 worktree 數或磁碟惡化，回報並考慮把 reclaim_stale_worktrees 排更頻繁。\n4. 回報實際 completed/day 是否提升；若沒提升，說明真瓶頸在哪（例如任務本身的 wall-clock、agent slot budget 4/6 而非 fire 並行度）。\n5. 若出現 quota 連發或 PHASE-Z 衝突，把 max_slots 調回 2 或 3 並記錄原因。\n\nparent_task_id: assign_794c4bc2",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "blocked",
+    "status": "pending",
     "source": "scheduled",
     "created_at": "2026-07-19T02:34:42.764949+00:00",
     "parent_task_id": "assign_794c4bc2",
     "created_by": "hourly-slot-2-e0190cfc630b4f698c3743cf832f750f",
-    "blocked_until": "2026-07-20T11:00:00+08:00",
-    "blocked_reason": "需累積 24h 觀察窗（max_slots 4 於 2026-07-19 10:40 CST 上線）"
+    "status_history": [
+      {
+        "at": "2026-07-20T03:08:27.094512+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-20T11:00:00+08:00)"
+      }
+    ]
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260719T024745114940Z_a1",
@@ -40967,7 +40974,7 @@
     "description": "rev7 remediation agent 回報 ready_for_codex_round7=true。主線程已獨立 bytes 核對四條 round-6 blocking issue（B1a README 表格/標題已改為 HAC diagnostic interval + † 無覆蓋保證；B1b primary JSON 'demonstrably' 歸零、inference_caveats 4 條已在；B5 estimation docstring 已改為 'reuses the same model implementation while these settings differ' 並列三項未控差異；detector 已 flag K1731），且 15 檔 sha256 對 k1731_armB_rev7_freeze.txt 全 OK。本 task = 跑 Codex round 7 並依裁決分流：PASS → 解除 assign_67f56b79 blocked；FAIL → 依 blocking issues 開下一輪 bounded remediation（不得原樣重派）。禁止合併 worktree、禁止 agent 寫 knowledge.json。",
     "task_type": "paper_review",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "source": "hourly_dispatch",
     "created_at": "2026-07-19T03:02:00+00:00",
     "created_by": "hourly-slot-1-4cb1880cf4cb4b6ead05b3565161b086",
@@ -40986,8 +40993,17 @@
         "at": "2026-07-19T03:02:00+00:00",
         "by": "hourly-slot-1-4cb1880cf4cb4b6ead05b3565161b086",
         "note": "codex round 7 launched inline by dispatch main thread"
+      },
+      {
+        "ts": "2026-07-20T03:12:37.507782+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "cleanup",
+        "note": "auto_release_stale_2h"
       }
-    ]
+    ],
+    "last_released_at": "2026-07-20T03:12:37.507781+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "k1730_nested_dm_detector_exposure",
@@ -42157,13 +42173,35 @@
         "to": "pending",
         "by": "hourly-slot-1-5741c175270c4935a70126f41109eb54",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-20T03:12:37.507789+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "cleanup",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-20T03:13:41.984493+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd"
+      },
+      {
+        "ts": "2026-07-20T03:13:45.384537+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd"
       }
     ],
-    "started_at": "2026-07-19T06:46:27.024376+00:00",
-    "last_released_at": "2026-07-19T08:50:03.171264+00:00",
+    "started_at": "2026-07-20T03:13:45.384521+00:00",
+    "last_released_at": "2026-07-20T03:12:37.507787+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "compute_job_id": "agent-brief_k741_nfp_canonical-837c1f",
-    "result": "dispatched to compute job agent-brief_k741_nfp_canonical-837c1f; awaiting PHASE A collection"
+    "result": "dispatched to compute job agent-brief_k741_nfp_canonical-837c1f; awaiting PHASE A collection",
+    "claimed_by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd",
+    "claimed_at": "2026-07-20T03:13:41.984479+00:00",
+    "claim_session_id": "4badc38c4e1d"
   },
   {
     "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260719T064406492747Z_a1",
@@ -43170,7 +43208,7 @@
     "title": "K1718: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1718 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1718 [NULL, reviewed]: In the 2015-2026 Japan sample with annual expanding OOS forecasts from 2020 onward, lagged US VIX passed none of six pre-registered Nikkei 225 / TOPIX ETF model-family cells. Each cell required both lower Patton QLIKE and a Holm-adjusted one-sided Clark-We",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
     "audience_correction_rewrite": false,
@@ -43182,7 +43220,25 @@
       "reader-facing"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-19T12:01:52+00:00"
+    "created_at": "2026-07-19T12:01:52+00:00",
+    "claimed_by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96",
+    "claimed_at": "2026-07-20T03:09:49.894017+00:00",
+    "claim_session_id": "8a4c6c1156ae",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:09:49.894037+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96"
+      },
+      {
+        "ts": "2026-07-20T03:09:50.760845+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96"
+      }
+    ],
+    "started_at": "2026-07-20T03:09:50.760823+00:00"
   },
   {
     "id": "email-12147-ca71e9",
@@ -43251,7 +43307,7 @@
     "title": "K1495: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1495 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1495 PARTIAL_PASS（Codex review PASS）：用SPY相對RSP的21日落後累積報酬差作為cap-weight集中度pulse代理（expanding 80百分位定義高regime，避免偷看未來），檢驗其對未來21日市場波動的條件資訊，樣本2004-05-28至2026-05-13，n=5,524。H1 PASS：高集中regime下SPY未來21日RV=18.16% vs 非高regime 14.41%，Welch t=9.47（p≈7.5e-21），stationary bootstrap 95% CI [+0.95pp",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
     "audience_correction_rewrite": false,
@@ -43263,7 +43319,25 @@
       "reader-facing"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-19T12:19:24+00:00"
+    "created_at": "2026-07-19T12:19:24+00:00",
+    "claimed_by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96",
+    "claimed_at": "2026-07-20T03:09:49.130426+00:00",
+    "claim_session_id": "c655a95edf4d",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:09:49.130444+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96"
+      },
+      {
+        "ts": "2026-07-20T03:09:49.482514+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96"
+      }
+    ],
+    "started_at": "2026-07-20T03:09:49.482497+00:00"
   },
   {
     "id": "release_deadlock_repair_20260719_12",
@@ -45254,5 +45328,361 @@
         "note": "condition_cleared_automatically"
       }
     ]
+  },
+  {
+    "id": "assign_5a5e7ec6",
+    "title": "[refactor-master A2b] supervisor kill worker 時同步 re-pend next_tasks claim",
+    "description": "health.py force-kill worker 後只釋放 dispatch_state slot、不釋放 next_tasks claim（health.py:88-179、worker.py:369）。補 kill→re-pend 接線 + 單元測試（kill 後 task 回 pending）。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-A2。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:12.183192+00:00",
+    "created_by": "refactor_master_plan",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:13:02.764803+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:13:10.228911+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:22:26.157176+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:23:08.720154+00:00",
+        "from": "succeeded",
+        "to": "pending",
+        "by": "release",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-20T03:13:10.228895+00:00",
+    "completed_at": "2026-07-20T03:22:26.157159+00:00",
+    "result": "WS-A2b 完成：health.py force-kill 後經 task_pool_claim.release_owner_claims（owner-scoped，走既有 _locked_load，未新增寫入路徑）同步 re-pend claim；identity.py 補 task_claim_owners_for_job 涵蓋 codex-failover；alerts 增印 re-pend ids。主線程實跑 tests/test_dispatch_supervisor.py = 92 passed。⚠️ 未完全關閉 P1：worker.py 自身 timeout kill 路徑仍無 re-pend 且為更常觸發者，已建 follow-up assign_2637119e (A2c)。",
+    "burst_reported_at": "2026-07-20T03:22:26.164072+00:00",
+    "last_released_at": "2026-07-20T03:23:08.720137+00:00",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_9f769a71",
+    "title": "[refactor-master A1a] next_tasks.json 40+ writer 全量盤點分類",
+    "description": "全 repo 掃描開啟 next_tasks.json 寫模式的呼叫點，分類：合法（走 canonical helper）/ 需改 helper / 需刪。清單落檔 docs/audit_next_tasks_writers.md 供 A1b 執行。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-A1。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:12.467571+00:00",
+    "created_by": "refactor_master_plan",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:13:02.518881+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:13:09.975084+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:20:46.431111+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      }
+    ],
+    "started_at": "2026-07-20T03:13:09.975070+00:00",
+    "completed_at": "2026-07-20T03:20:46.431099+00:00",
+    "result": "WS-A1a �?�??�?44 writer �?��?��?/33 �?�?��?�?legal 25/needs_helper 12/delete 7�?�?��? docs/audit_next_tasks_writers.md�??canonical helper 確�?�?� src/volpred/ops/next_tasks.py �?�?��?��??主�?�?�?��? telegram_poll.py �?��?? + refill_task_pool.py �?��??屬實�??§7 已�?��?��??",
+    "burst_reported_at": "2026-07-20T03:20:46.443347+00:00",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_caf5b087",
+    "title": "[refactor-master A1b] 佇列 writer 收斂執行 + 防再犯 audit",
+    "description": "依 A1a 清單把非法 writer 改走 next_tasks.py helper；cron_hourly_dispatch_prompt.md:63 的 jq 指示改為 task_pool_claim 子命令；新增 audit（非 helper 寫路徑=0）掛既有 pre-push runner。依賴 A1a 完成。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-A1。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:12.748476+00:00",
+    "created_by": "refactor_master_plan",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:16:18.835524+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd"
+      },
+      {
+        "ts": "2026-07-20T03:16:22.558448+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd"
+      },
+      {
+        "ts": "2026-07-20T03:17:04.950165+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-20T03:21:44.246944+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-4-d85d3cf2fd014adfb6d9fc3c796db72e"
+      },
+      {
+        "ts": "2026-07-20T03:21:47.343180+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-4-d85d3cf2fd014adfb6d9fc3c796db72e"
+      }
+    ],
+    "started_at": "2026-07-20T03:21:47.343160+00:00",
+    "last_released_at": "2026-07-20T03:17:04.950151+00:00",
+    "claimed_by": "hourly-slot-4-d85d3cf2fd014adfb6d9fc3c796db72e",
+    "claimed_at": "2026-07-20T03:21:44.246930+00:00",
+    "claim_session_id": "cb3ae4a0e1eb",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_4d1dbf1f",
+    "title": "[refactor-master A4] liveness reconciler：佇列宣告 vs 磁碟/進程對帳",
+    "description": "每小時對帳 in_flight/claimed vs worktree 存在性 vs 進程(lsof)，脫鉤自動降回 pending 並記 receipt。吸收 k1709 殭屍教訓。含注入假 in_flight 的 regression test。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-A4。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:13.020926+00:00",
+    "created_by": "refactor_master_plan",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:13:03.486392+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:13:11.282465+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:23:08.998158+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-20T03:13:11.282451+00:00",
+    "last_released_at": "2026-07-20T03:23:08.998144+00:00",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_0810c050",
+    "title": "[refactor-master C1] publish_draft --update 改走 publisher gateway",
+    "description": "apply_update 直寫 feed 不推 Supabase/Mirror 不記死信（publish_draft.py:1100,1428,1448）→ 改走 publisher._rewrite_feed_entry + sync_article + 死信記錄；補三方一致整合測試。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-C1。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:13.309184+00:00",
+    "created_by": "refactor_master_plan",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:13:03.005732+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:13:10.470932+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:23:09.274548+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-20T03:13:10.470912+00:00",
+    "last_released_at": "2026-07-20T03:23:09.274533+00:00",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_0328eeeb",
+    "title": "[refactor-master C2] feed→Supabase 全量對帳排程",
+    "description": "runtime_schedules 新增 hourly piggyback job 跑 volpred ops feed-sync --apply，作為所有「寫 feed 未即時推」路徑的收斂網；驗證 audit_publish_sync surfaces 歸零。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-C2。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:13.685689+00:00",
+    "created_by": "refactor_master_plan",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:13:03.243691+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:13:10.853978+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e"
+      },
+      {
+        "ts": "2026-07-20T03:23:09.531819+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-20T03:13:10.853964+00:00",
+    "last_released_at": "2026-07-20T03:23:09.531808+00:00",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_dacd4847",
+    "title": "[refactor-master H4] 派工決策單一 pipeline（design-first）",
+    "description": "派工裁決散在 5 檔（supervisor scheduler/continue_task_dispatch/pregate/slot_budget/legacy shell）。先產設計文件 docs/dispatch-decision-pipeline-design.md：單一 decision pipeline、continue_task_dispatch 降純 library、priority/starvation/cluster budget/burst 集中。設計完成後主線程裁決再落地。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-H4。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:14.008649+00:00",
+    "created_by": "refactor_master_plan",
+    "status_history": [
+      {
+        "ts": "2026-07-20T03:16:56.685631+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd"
+      },
+      {
+        "ts": "2026-07-20T03:17:05.190104+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd"
+      },
+      {
+        "ts": "2026-07-20T03:23:09.807752+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-3-b5fbc1f4b05244a39df0636fc0bf98bd",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-20T03:17:05.190087+00:00",
+    "last_released_at": "2026-07-20T03:23:09.807736+00:00",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_58773e64",
+    "title": "[refactor-master A3] status/blocked_reason migration + vocab gate 擴欄",
+    "description": "汙染終態映射回受控詞彙（原值存 status_original）、baseline 27→0、vocab gate 擴覆蓋 blocked_reason 欄位。先修 writer（A1b 完成後執行）再一次性 migration。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-A3。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:14.293200+00:00",
+    "created_by": "refactor_master_plan",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_ac3c3aa6",
+    "title": "[refactor-master C4] Mirror 推送失敗納入死信/重試",
+    "description": "Mirror 失敗只 print 不記死信（publisher.py:2807-2814），drain 只吃 Supabase 死信。統一失敗語意：Mirror 失敗同記 .failed_supabase_syncs.json（或並列死信檔），drain 同時處理；注入失敗的測試。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-C4。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:14.679733+00:00",
+    "created_by": "refactor_master_plan",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_016df764",
+    "title": "[refactor-master F1] Enforcement Layer Map 更新 + 一致性 audit",
+    "description": "loop-health-and-dreaming.md map 過期（漏 3 hook/4 deny/2 CI/5 git hooks）。全面更新 + 建 map-vs-實況一致性 audit 掛既有 CI；同 commit 寫入 H2 出站通道職責矩陣。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-F1。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:15.056323+00:00",
+    "created_by": "refactor_master_plan",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_b5b1a434",
+    "title": "[refactor-master F2] dedup-gate-audit rule 承諾兌現或修訂",
+    "description": "rule 承諾的 audit_dedup_gate_decisions.py 從未建、三條 alert 無實作。二擇一：建 audit（block rate>30%/連續無 pass 黑洞/同 arc block≥3）掛排程；或判定過度設計則修 rule 移除承諾。不留懸空。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-F2。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:15.383777+00:00",
+    "created_by": "refactor_master_plan",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_e040fd8e",
+    "title": "[refactor-master H2] 出站回報收斂：token 報告三合一 + 通道矩陣",
+    "description": "token 報告一天三班（token_report_daily 08:00/token_usage_daily_report 14:43/token_usage_daily 22:23）合併為一班；boss_report_4h vs work_summary_6h 職責裁決；Telegram=互動+進度、email=摘要+決策+alert 矩陣落檔。 計畫依據: docs/refactor_plan_ops_master_2026_07.md §WS-H2。scope ≤50min；完成後更新計畫 §7 狀態表（附 commit hash + 實測證據）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:12:15.694547+00:00",
+    "created_by": "refactor_master_plan",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
+  },
+  {
+    "id": "assign_2637119e",
+    "title": "[refactor-master A2c] worker.py 自身 timeout kill 路徑同步 re-pend claim（A2b 未覆蓋的主要路徑）",
+    "description": "A2b（assign_5a5e7ec6）已把 health.py force-kill 路徑接上 task_pool_claim.release_owner_claims，測試綠（tests/test_dispatch_supervisor.py 3 新測試 + 92 passed）。但 A2b agent 主動揭露、主線程 grep 複驗屬實：scripts/dispatch_supervisor/worker.py 全檔無任何 re-pend 呼叫。worker.py:392 的 proc.wait(timeout=timeout_s) 逾時後走 SIGTERM→SIGKILL（:399-402），這條路徑贏得 CAS 時 health.py 的分支根本不會跑 —— 而 worker.py docstring:27 自陳 health 只是 belt-and-suspenders 層，代表 worker 自身 timeout 才是實務上更常觸發的那條（health 通常晚約 1 秒）。結論：P1「kill 後 claim 不落地成殭屍」尚未真正關閉，只關了較少見的那一半。 做什麼：把 worker.py 的 timeout kill 路徑（含 killed_timeout outcome 落地處 :661/:685）接上同一個 release_owner_claims helper，禁止另開寫入路徑；補測試斷言 worker 自身 timeout 後 task 回 pending。順帶評估 A2b flag#1：health.py:263-291 的 silent_death / failure（identity MISMATCH/DEAD）路徑同樣不釋放 claim，但因進程未經我方確認死亡，釋放與否是裁決題 —— 若判定不在此處釋放，需確認 WS-A4 liveness reconciler 確實覆蓋該類，並在計畫 §7 寫明分工，不要兩邊都以為對方管。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-20T03:21:42.263053+00:00",
+    "parent_task_id": "assign_5a5e7ec6",
+    "created_by": "hourly-slot-2-a0fea6a35b6a4d0797fbd50b995fe25e",
+    "dispatch_lane": "main_thread",
+    "lane_note": "owner 2026-07-20: refactor exec independent of general scheduling"
   }
 ]
