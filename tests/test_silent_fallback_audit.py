@@ -388,6 +388,54 @@ def test_baseline_diff_ignores_line_shift_when_signature_matches() -> None:
     assert resolved_findings == []
 
 
+def _finding(path: str, line: int, signature: str) -> "audit_silent_fallbacks.Finding":
+    return audit_silent_fallbacks.Finding(path, line, "Exception", "continue", signature=signature)
+
+
+def test_baseline_diff_treats_whole_file_relocation_as_unchanged() -> None:
+    """`git mv` must not read as a new silent fallback (2026-07-20 push hold)."""
+    before = [_finding("scripts/a.py", 10, "v1:x"), _finding("scripts/a.py", 40, "v1:y")]
+    after = [_finding("scripts/_legacy/a.py", 11, "v1:x"), _finding("scripts/_legacy/a.py", 41, "v1:y")]
+
+    new_findings, resolved_findings = audit_silent_fallbacks.diff_against_baseline(after, before)
+
+    assert new_findings == []
+    assert resolved_findings == []
+
+
+def test_baseline_diff_relocation_match_survives_shared_fingerprints() -> None:
+    """Two files moved with identical findings: pairing is ambiguous but the answer is not."""
+    before = [_finding("scripts/a.py", 10, "v1:same"), _finding("scripts/b.py", 20, "v1:same")]
+    after = [
+        _finding("scripts/_legacy/a.py", 10, "v1:same"),
+        _finding("scripts/_legacy/b.py", 20, "v1:same"),
+    ]
+
+    new_findings, resolved_findings = audit_silent_fallbacks.diff_against_baseline(after, before)
+
+    assert new_findings == []
+    assert resolved_findings == []
+
+
+def test_baseline_diff_still_holds_when_moved_file_also_gained_a_fallback() -> None:
+    """Move + edit in one commit stops matching entirely — deliberately conservative.
+
+    Relocation is claimed only on an exact whole-file signature multiset, so a file
+    that moved AND gained a handler pairs with nothing and reports both lines. The
+    gate firing here is correct (a real new fallback did appear); listing the moved
+    sibling alongside it is accepted noise. The alternative — matching leftovers
+    line-by-line across paths — could absorb a genuinely new handler that happens to
+    share a scope name and body, and masking one is worse than naming two.
+    """
+    before = [_finding("scripts/a.py", 10, "v1:x")]
+    after = [_finding("scripts/_legacy/a.py", 11, "v1:x"), _finding("scripts/_legacy/a.py", 30, "v1:new")]
+
+    new_findings, resolved_findings = audit_silent_fallbacks.diff_against_baseline(after, before)
+
+    assert sorted(item.signature for item in new_findings) == ["v1:new", "v1:x"]
+    assert [item.path for item in resolved_findings] == ["scripts/a.py"]
+
+
 def test_baseline_diff_counts_duplicate_stable_findings() -> None:
     existing = audit_silent_fallbacks.Finding(
         "scripts/a.py",
