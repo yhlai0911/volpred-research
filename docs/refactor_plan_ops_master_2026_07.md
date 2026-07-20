@@ -216,4 +216,5 @@
 | **H2 出站回報收斂** | ✅ 2026-07-20 | worktree `04e03a477` → merged；token 三班→一班（owner=token_report_daily 含落檔收編）、work_summary 併入 boss_report 20:10 日結班並退役（wrapper/_legacy、LaunchAgent bootout、host crontab 殘班修正已執行）；**定期信 ≤7→4 班/日**；通道矩陣入 Layer Map（skill 通知已寄）；merge 後 manifest/policy 26 tests 綠 |
 | **CI 紅燈裁定（2026-07-20 12:00/13:00 兩班）** | ✅ 非迴歸 | 6 個紅全屬「重構中間態被 hourly auto-push」（manifest 缺項/writer policy 未註冊/map 時序）；現 HEAD 本地複驗 27 passed 全綠；14:00 班 in-progress 預期綠 |
 | Phase 2：E1E2 scripts 瘦身 | 🔄 agent 全量 pytest 收斂中（一次越界刪空目錄已糾正、零實質損失） | — |
+| **F3+F5 閉環訊號源補強** | ✅ 2026-07-20 | worktree `a078af56a` → merge `63060b573`；F3 = alert 三出口記 incident_candidates.jsonl + dreaming `detect_unfiled_incident_class`（立案辨識契約機械可閉合）；F5 = `observation_ledger.py` + `volpred ops observation` CLI + 逾期 breach detector，4 現存觀察項入帳（pregate=permanent、Deliverable-8 07-27、claim-next 07-30、multi-slot 07-21）；main 複驗 92 tests + map audit 全對齊；skill 通知已寄；手冊已同步 |
 | 其餘 | ⏳ 依 §5，Phase N 收尾時 enqueue Phase N+1 | — |
