@@ -49,6 +49,11 @@ def _run(monkeypatch, tmp_path, attempts, extra_argv=()):
     # These tests exercise auth-retry classification, not the cwd guard; accept
     # the tmp workdir as if it were a registered linked worktree.
     monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_a, **_k: True)
+    # `_run_attempt` is faked above, so the binary is never actually spawned — but
+    # main() still resolves it before writing metadata, and a CI runner has no
+    # `claude` on PATH. Without this the guard returns 2 and these tests fail on
+    # the host difference rather than on the behaviour they pin.
+    monkeypatch.setattr(run_agent_job, "_resolve_claude_bin", lambda: "/usr/bin/true")
 
     brief = tmp_path / "brief.md"
     brief.write_text("do the thing")

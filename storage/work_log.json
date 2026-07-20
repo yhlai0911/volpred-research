@@ -22540,5 +22540,65 @@
     "verification": "pytest tests/test_phase_z_ownership.py tests/test_phase_z_test_gate.py = 57 passed；新增 4 test（非 gate 檔落地 / gate 檔仍 dirty 未進 HEAD / gate-only reason / 不重複建單與重複警報 / 指紋隨內容變動）；真實建單路徑於 /tmp 佇列 smoke 過（第二次 created=False 去重）；audit_silent_fallbacks 與 audit_test_imports 均 exit 0。",
     "topology_override": "subagent→inline：急件、脈絡已在主線程、修改點集中於單一函式，且本班 PHASE-Z 收尾即為實地驗證",
     "notes": "既有失敗 tests/test_hourly_dispatch_pregate.py::test_skip_does_not_advance_the_novelty_baseline 與本次改動無關（pregate 不引用 phase_z，本班僅動上述兩檔），未納入本任務 scope。"
+  },
+  {
+    "timestamp": "2026-07-20T22:15:17+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_fa57f77d",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "Codex bespoke lazypack failed (rc=1); deterministic renderer fallback succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_fa57f77d",
+    "article_id": "mile_fa57f77d",
+    "job_id": "lazypack-mile_fa57f77d",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/lazypack_render.py"
+  },
+  {
+    "timestamp": "2026-07-20T22:15:17+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_d26308ba",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "Codex bespoke lazypack failed (rc=1); deterministic renderer fallback succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_d26308ba",
+    "article_id": "mile_d26308ba",
+    "job_id": "lazypack-mile_d26308ba",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/lazypack_render.py"
+  },
+  {
+    "timestamp": "2026-07-20T22:21:16+08:00",
+    "task_type": "daily_article",
+    "task_id": "audience_article_general_audience_rewrite_92ec8a9f",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-b83580161d5e4cc1831a48238c517b1a",
+    "owner": "hourly-slot-2-b83580161d5e4cc1831a48238c517b1a",
+    "commit": null,
+    "summary": "Audience-correction rewrite 判定為 arc-covered，未寫新文（正確結果，非執行失敗）。\n\n**任務前提查證**：mile_92ec8a9f 於 audience audit 後被 general→research。兩個儀器判定相反 —\n`publisher._infer_audience`（source of truth）因文中命中 QLIKE + GARCH 兩個學術關鍵詞、達 rule 6 門檻 → research；\n`audit_audience_classification.py` 則給 tier=LOW、density=0.77/1000字、recommended_audience=general。\nflip 機械上正確，但「被 flip 走」不等於「general 讀者出現覆蓋缺口」——後者才是本任務的真正目標，必須另外驗。\n\n**3-layer 查重結果（決定性）**：`check_arc_dedup.py --audience general` 回 exit 0 但 verdict=\n`unjudged_thin_signature`（無 K-id、無資產實體，gate 自陳「沒有清你，是看不了」），因此依 publishing.md\n手動做第 3 層。來源文章的三個獨立角度在 general audience 皆已有**更新的**覆蓋：\n\n| 來源角度 | 已覆蓋文章 | audience | 發佈日 |\n|---|---|---|---|\n| 複雜度天花板／簡單勝複雜 | mile_a0eb0ddc | general | 2026-06-23 |\n| 換一把尺→名次改變（＝本文「假冠軍 1.15% 是測量錯誤」同構故事） | mile_b6803426 | general | 2026-06-20 |\n| 大量實驗後站得住的結論比例（＝本文 31 法中 52% 零／負價值） | mile_23312ae9 | general | 2026-06-11 |\n\n三者全部晚於來源（2026-03-17）。寫 companion 將是三重 arc 重複。\n\n**Provenance 不足（第二個獨立 block 理由）**：來源 experiment_refs=[]、無 experiment README、\nprovenance 僅一行散文 byline（Phase P / R10 GINN / Q22 CCS）。GINN 的 1.15% 改善在\nstorage/memory/knowledge.json 定位不到對應條目 → 無法逐一核實數字。任務 description 明文授權此情況\nblock 而非杜撰內容。\n\n**防再犯**：同一 parent（content_audience_mislabel_backlog_45）共 5 筆，2 succeeded／2 pending／1 本筆。\n已 annotate 兩筆 pending（K740「14 套方法越複雜越厲害」屬同一條複雜度天花板 arc、K942 VIX 適用性）\n`arc_precheck_warning`，要求開工前先手動比對 mile_a0eb0ddc / mile_b6803426 再決定寫或回報 arc-covered，\n避免重演 2026-07-11「gate 回 exit 0 但線上早有同題，兩個 writer agent 白做工」。\n\n**未做（超出本任務範圍，僅記錄）**：backlog 產生器只依「audience 被 flip」建 rewrite 任務，未檢查目標\naudience 是否真有覆蓋缺口 —— 這是系統性誤報來源，值得日後單獨處理。本班未改該產生器。"
+  },
+  {
+    "timestamp": "2026-07-20T22:26:42+08:00",
+    "task_type": "daily_article",
+    "task_id": "K740_article_general_audience_rewrite_2fb1dfb3",
+    "outcome": "prepared_released",
+    "actor": "hourly-slot-2-b83580161d5e4cc1831a48238c517b1a",
+    "owner": "hourly-slot-2-b83580161d5e4cc1831a48238c517b1a",
+    "commit": null,
+    "summary": "K740 general companion：完成 layer-1 + layer-2 查重與 writer brief，未寫文，已釋回 pending。\n\n**與 sibling 92ec8a9f 的差異（本筆判定「可能該寫」，非 arc-covered）**：mile_2fb1dfb3 講的是\n**交易策略配置**（14 套策略、SPY vs SPY+GLD、再平衡頻率），不是波動率模型，與 92ec8a9f 的\n複雜度天花板 arc 不同構。且它有 structured experiment ref K740、腳本與結果 JSON 齊全，\nprovenance 可核實 —— 這是 92ec8a9f 所沒有的。\n\n**查重結果**：`check_arc_dedup --k-id K740 --audience general` → exit 0、verdict\n`warn_arc_near_miss`（近似清單無一命中本題結論，但依 gate 自陳「不是綠燈」）。手動掃 405 篇\ngeneral published：SPY+GLD 分散主題覆蓋極密集。**最高風險對照篇 = mile_343b9daf\n「我測了 10 種投資策略，結果最笨的那個贏了」(2026-03-18)**，疑為同一份 meta-analysis 的早期版\n（10 套 vs 本次 14 套）。差異化若成立，應在於本次是 14 套、forward-tracked 至 2026-03-27，\n且首次把「複雜度 vs 風險調整後報酬」做成明確統計檢定（rho 0.294 / p 0.308 = null）。\n最終寫或不寫，交由接手者讀完 mile_343b9daf 全文後判定 —— brief 已寫明「若無實質新資訊就回報\narc-covered，不要產出第二篇同義文章」。\n\n**flip 根因**：`_infer_audience` rule 6 命中 Sharpe + p-value/Spearman 兩個關鍵詞 → research，\n不是因為行文艱澀（原文其實已很白話）。general 版必須避開這些詞，否則會再被判回 research、\n任務目的落空。此點已寫進 brief 的硬性要求。\n\n**產出**：`storage/ops/brief_k740_general_companion.md` —— 含背景、已完成查重（要求不要重做）、\n四組必須逐字保留的數字與其來源 JSON、null result 誠實揭露要求、紙上交易 caveat、\n3 canonical paths、anti_ai_gate 硬閘、發佈參數、收尾步驟。task 上已 annotate `ready_brief_path`\n指向它。\n\n**為何未寫（scope 切小，非做一半）**：完整寫作 + editor SOP + anti_ai_gate 需 20-40 分鐘，\n超出本班剩餘預算；`enqueue-agent` 要求 registered linked worktree，而 agent 會在本班結束後才跑、\n本班無法依規完成 merge_worktree.sh 整合（現存已有 22 個未合併 worktree，不宜再加一個）。\n故選擇「把最耗查證、最容易被跳過的前置工作做完並留檔，釋回讓下一班以完整預算 inline 寫」，\n避免 partial 提交或孤兒 worktree。"
+  },
+  {
+    "timestamp": "2026-07-20T22:35:10+08:00",
+    "task_type": "daily_article",
+    "task_id": "K740_article_general_audience_rewrite_2fb1dfb3",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-b83580161d5e4cc1831a48238c517b1a",
+    "owner": "hourly-slot-2-b83580161d5e4cc1831a48238c517b1a",
+    "commit": null,
+    "summary": "發佈 general draft `mile_d9ff126f`「排第一名的那套策略，設定是最單純的那一級」（experiment_refs=[K740]）。\n\n**先前判斷更正**：本班稍早曾以「剩餘時間不足」為由釋回本任務，該判斷基於錯誤的時鐘估算\n（誤以為 22:45，實為 22:28）。發現後收回重做並完成，非重複派工。\n\n**是否該寫的查證**：最高風險對照篇 `mile_343b9daf`「我測了 10 種投資策略，結果最笨的那個贏了」\n(general, 2026-03-18) 是 **2010-2024 歷史回測**、10 套策略、冠軍 50/50 SPY/GLD。\n本篇是 **2023-01-04 ~ 2026-03-27 往前追蹤的紙上交易**、14 套、冠軍保守型 VT（Piecewise），\n且首次把「複雜度 vs 風險調整後報酬」做成明確檢定（結果是 null）。回測 vs forward-tracked 是\n實質證據等級差異 → 差異化成立，故寫。\n\n**數字全部與 `experiments/k740/k740_strategy_meta_analysis_results.json` 逐項核對**：\ncomposite 0.79、3.158、mdd -2.48%、月勝率 87.2%、CAGR 18.01%、單月最慘 -1.61%、恢復 39 天；\nSPY-only 1.173 vs SPY+GLD 2.544（差 1.371）；複雜度關聯 rho 0.294 / p 0.3079；\n月頻 2.339 vs 日頻 2.213。另補入來源文章沒有的 turnover-netsharpe rho 0.763 / p 0.0015，\n並明確標註不可因果解讀（可能是策略類型混淆，非「多動」本身）。\n\n**Gates**：`anti_ai_gate` PASS（warn 1/3，僅段落長度）；`sanitize_applied=0`；\n以 `publisher._infer_audience` 實測 hits=[] → 回傳 general —— 這是本任務的關鍵驗證：\n來源被 flip 成 research 正是因為命中 Sharpe + p-value/Spearman 兩個關鍵詞，\n新版全篇零學術關鍵詞才不會再被判回去、使任務目的落空。\n\n**誠實揭露**：null result 明確寫成「沒有測到『更複雜會更好』的證據」而非「證明複雜沒用」；\n紙上交易非真實成交、三年多期間特殊、14 套為小樣本等 caveat 全部以白話保留在正文。\n\n**未竟事項（已建 followup task，非遺留）**：未附 `--lazypack-plan`，該 draft 在 lazypack render\n落地前不會被 release_pool 放行。同時回報疑似 bug：publish_draft 的 `lazypack_never_enqueued`\n警告印出的 article_id 是來源文章 mile_2fb1dfb3 而非本次新建的 mile_d9ff126f。"
   }
 ]

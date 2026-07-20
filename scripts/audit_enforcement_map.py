@@ -111,6 +111,15 @@ def _script_path_from_command(command: str) -> str:
         token = token.removeprefix("./")
         if token.startswith("scripts/") or token.startswith(".claude/"):
             return token
+        # settings.json is tracked but carries absolute commands, so the prefix
+        # baked in is whatever machine last wrote it. Stripping only the CURRENT
+        # REPO made this audit pass on the author's host and fail everywhere else
+        # (CI red 2026-07-20: every hook came back "<unparsed: /Users/...>").
+        # Anchor on the repo-relative tail instead — host-independent.
+        for anchor in ("/scripts/", "/.claude/"):
+            index = token.rfind(anchor)
+            if index != -1:
+                return token[index + 1:]
     return f"<unparsed: {command[:60]}>"
 
 
@@ -174,9 +183,21 @@ def disk_git_hooks() -> set[str]:
 def deploy_parity_problems() -> list[str]:
     """Compare the in-repo canonical git hooks against the installed .git/hooks.
 
-    Skipped entirely when .git/hooks is absent (CI checkouts, exported trees).
+    Deploy parity is a host concern: it asks whether install.sh has been run on
+    THIS machine. Skipped when .git/hooks holds no installed hook at all — a
+    pristine checkout that never ran install.sh, i.e. every CI runner. The old
+    guard tested `.git/hooks` existence, but `git clone` always creates that
+    directory (full of `*.sample`), so the skip never fired and CI reported all
+    5 canonical hooks as missing (CI red 2026-07-20). A host that installed some
+    hooks and then lost one still fails, which is the drift worth catching.
     """
     if not GIT_HOOKS_LIVE.is_dir():
+        return []
+    installed = {
+        p.name for p in GIT_HOOKS_LIVE.iterdir()
+        if p.is_file() and not p.name.endswith(".sample")
+    }
+    if not installed:
         return []
     problems: list[str] = []
     for name in sorted(disk_git_hooks()):

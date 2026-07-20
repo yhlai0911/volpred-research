@@ -1,6 +1,6 @@
 {
   "attempted": true,
-  "ran_at": "2026-07-20T13:11:11.688777+00:00",
+  "ran_at": "2026-07-20T14:00:54.607019+00:00",
   "kind": "content_gate_deadlock",
   "draft": 3,
   "eligible": 0,
@@ -12,7 +12,7 @@
       "issues": [
         "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>"
       ],
-      "skip_count": 7
+      "skip_count": 9
     },
     {
       "id": "mile_fa57f77d",
@@ -21,7 +21,7 @@
       "issues": [
         "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>"
       ],
-      "skip_count": 7
+      "skip_count": 9
     },
     {
       "id": "mile_fa098fc8",
@@ -30,12 +30,12 @@
       "issues": [
         "missing 懶人包圖組 section (render failed, job lazypack-mile_fa098fc8) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_fa098fc8 ; re-enqueue via scripts/lazypack_async_render.py enqueue"
       ],
-      "skip_count": 5
+      "skip_count": 7
     }
   ],
   "blocked_clusters": [
     "risk_mgmt"
   ],
   "required_clusters": [],
-  "existing_task_id": "release_deadlock_repair_20260720_13"
+  "task_id": "release_deadlock_repair_20260720_14"
 }

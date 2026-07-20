@@ -308,6 +308,13 @@
       "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/liveness_receipts/**"],
       "reason": "WS-A4: the sweep releases stale claimed/in_progress rows through the canonical next_tasks writer and drops one adjudication receipt per run; both are machine queue/ops state."
     },
+    "reclaim_stale_worktrees": {
+      "entrypoint": "scripts/reclaim_stale_worktrees.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json"],
+      "phase_z_probe_paths": ["storage/next_tasks.json"],
+      "reason": "WS-I: the 6-hourly sweep is dry-run over the worktree population and never mutates Git; its only tracked write is one idempotent P3 adjudication row per held worktree, opened through the canonical next_tasks writer (machine queue state). Destructive merge/remove stays a main-thread decision, so this entrypoint owns no other repo path."
+    },
     "feed_sync": {
       "entrypoint": "scripts/cron_feed_sync.sh",
       "policy": "no_repo_tracked_output",
