@@ -26,7 +26,7 @@ paths:
 - `storage/ops/` 內 task / approval / execution / rollback 檔案是控制面資料，**不手動亂改收尾**；`storage/ops/tasks/` 內 TaskRecord 是 **execution receipts / audit trail**（已完成 history），**不是 pending queue**
 - **任務唯一入口 = `storage/next_tasks.json`（2026-07-16 single-gateway refactor）**：`volpred ops assign` 已重定向為 next_tasks.json 的 thin wrapper（不再寫 `storage/ops/tasks/`）。歷史教訓：assign 原寫入的 queue 無任何 dispatcher 消費，16 個任務黑洞 5 天（含結論已推翻仍排隊的 K1695 舊文章）；兩個並行 session 各用一套入口 → 對老闆同一則訊息矛盾雙回覆。**機械 owner（唯一）**：`scripts/tests/test_ops_tasks_receipts_only.py`（CI 斷言 ops/tasks 非終態=0）。老闆訊息的**回覆權綁 claim**：`telegram-send --reply-to-task <id>` guard 對已完成/他人持有的任務拒發（防雙回覆）。設計全文：`docs/refactor_plan_single_gateway_task_system.md`。
 - `storage/next_tasks.json` = de-facto **pending queue**（2026-05-04 audit 後確認的實際分工：唯一有 pending P1-P4 的池，dispatcher `scripts/continue_task_dispatch.py` 從這挑工）— 完成的 task 同步靠 `scripts/sync_next_tasks_status.py` 反查 experiments + knowledge.json 標 succeeded；原 v12 設計把它標 legacy 但 `storage/ops/tasks/` 從未被任何 caller 用作 pending queue（全是 receipts）→ 2026-05-04 改規則承認此分工
-- `uv run volpred ops scheduler-tick` executor lane **目前只做 advisory snapshot**；正式 task claim/finish 必須來自主線程 direct dispatch 或明確 bootstrapped session
+- advisory scheduler lane（`scheduler-tick` / `scheduler-preview` / `scheduler_state.json`）**已於 2026-07-20 全面退役**（ops-master D2；死亡自 2026-04-19）；正式 task claim/finish 必須來自主線程 direct dispatch 或 dispatch-supervisor lane
 - Session cron 與 system crontab **需與 canonical runtime schedule 一致**
 - Admin UI 目前是 **observer**；UI 與 canonical spec 不一致時以 canonical spec / local state 為準
 
@@ -185,7 +185,7 @@ uv run volpred ops release-task <task_id> --reason "claim 誤抓 / codex CLI 過
 - Per-job last-run state: `storage/ops/cron_last_run.json`（UTC ISO timestamps）
 - Timezone: host crontab 用 local time (`Asia/Taipei`)；scheduler 評估 due 用 LOCAL_TZ
 - Subprocess timeout: 600s per job；sequential invocation（避免同時多 yfinance / heavy job）
-- Skip list: `check_alerts`（recurse）、`shared_scheduler_tick`（advisory）、`host_crontab_managed: false`
+- Skip list: `check_alerts`（recurse）、`host_crontab_managed: false`
 
 ### 工作流
 
@@ -197,7 +197,7 @@ uv run volpred ops release-task <task_id> --reason "claim 誤抓 / codex CLI 過
 6. `run_due_jobs` 尾端再呼叫 `expand_due_event_jobs`（2026-04-20 新增）— 把 `event_jobs.items` 中 `not_before ≤ now ≤ deadline` 的條目 materialize 成 control-plane task
 7. `run_due_jobs` 再呼叫 `_write_pending_sessions`（2026-04-25 新增）— 掃 `session_crons.items`，把當下 due 但 session 離線未 fire 的 job 記入 `storage/ops/pending_sessions.json`；下次 session 啟動由 `scripts/session_startup.md §2.0` replay
 
-Why 第 6 步：原設計這由 `shared_scheduler_tick` 呼叫但該項目降級 advisory 後 host 端並未真 fire（`scheduler_tick.log` 自 2026-04-19 起 size=0），缺 trigger → event_jobs populate 後永遠停 pending。Piggy-back 接管後 ~60min latency materialize。
+Why 第 6 步：原設計這由 advisory scheduler tick 呼叫，但該 lane 從未在 host 端真 fire（log 自 2026-04-19 起 size=0；2026-07-20 ops-master D2 已整條退役），缺 trigger → event_jobs populate 後永遠停 pending。Piggy-back 接管後 ~60min latency materialize，現為唯一 owner。
 
 Why 第 7 步：session cron（`CronCreate`）只在 Claude Code session alive 時 fire。macOS CronCreate 本就不可靠，session 又會被 `/exit` 或閒置關閉 → 8 條 session cron 中 spec 列 9 但實務上常只 1 條存活（2026-04-24 觀察）。Piggy-back 雖不能「代替 session 執行」（prompt 型 workflow 需主線程），但能記錄 pending，避免整個 window 靜默漏掉；下次 session 啟動的 replay 機制恢復 continuity。
 
@@ -219,12 +219,12 @@ Why 第 7 步：session cron（`CronCreate`）只在 Claude Code session alive �
 - **命令/參數變動**：改 `config/runtime_schedules.json` 的對應 item（`cron`、`wrapper_script`、`log_path`）→ 跑 `install_host_crontab.sh`（單次 `crontab <file>` 呼叫完成）
 - **邏輯變動（flags、env、pre-exec 設定）**：直接改 `scripts/cron_*.sh` wrapper；crontab entry 本身不動，**無需重跑 install**（避免觸發 macOS TCC App Management prompt）
 - **⚠️ 派工執行體的程式改動規則（2026-07-05 更新 — 執行體已從 shell wrapper 換成 supervisor daemon）**：hourly dispatch 自 2026-07-04 cutover 起由 `com.volpred.dispatch-supervisor`（`scripts/dispatch_supervisor/*.py` 常駐 daemon）執行；legacy `cron_hourly_dispatch.sh` 已 launchctl-disabled（留作一鍵回滾 artifact，Deliverable 8 歸檔前勿刪）。改 supervisor code 的規矩：(a) daemon 常駐，**改完必重載才生效**——一律走 `bash scripts/reload_dispatch_supervisor.sh`（2026-07-10 機械化：內建 current_job==null in-flight guard + 寫 planned-restart marker 抑制部署噪音 INFO alert + `kickstart -k`；`--force` 才覆蓋 guard）；**禁止手動裸 `kickstart -k`**（漏寫 marker → 老闆收部署噪音 alert，見 error_log 2026-07-10）；(b) in-flight guard 已由 wrapper enforce（restart 的 orphan-cleanup 會 kill in-flight worker）；(c) `scripts/cron_hourly_dispatch_prompt.md` 改動不需重載（每次 fire 重讀）。歷史脈絡（bash wrapper 邊執行邊 re-read、2026-07-02 21:07 incident）見 error_log；其他仍在用的 `cron_*.sh` wrapper 若要「fire 內改自己」仍適用舊禁令原理。
-- `scripts/cron_*.sh` 必維持最小結構：`#!/bin/bash` + `cd <repo>` + `exec <command>`；需要 env / PATH 擴展時參考 `scripts/run_scheduler_tick.sh`
+- `scripts/cron_*.sh` 必維持最小結構：`#!/bin/bash` + `cd <repo>` + `exec <command>`；需要 env / PATH 擴展時參考 `scripts/cron_check_alerts.sh`
 - 每個新 wrapper 必 `chmod +x`；install script 檢查到 non-executable 會 fail-fast
 - **FDA / macOS TCC（2026-04-19 確立；2026-07-02 現況更新）**：host-cron wrapper 實體檔案**必放** `~/.volpred/bin/cron_*.sh`。原因（歷史）：repo 曾在 `~/Desktop/volpred-research`，macOS TCC 擋 `cron` daemon exec Desktop/ 保護路徑內的 `.sh`（回 `Operation not permitted`）。**2026-07-02 起 repo 已搬到 `~/volpred-research`（非 TCC 保護區），TCC 不再適用於 repo 本身**——但 wrapper 留在 `~/.volpred/bin` 的慣例**維持不變**（獨立於 repo 移動 / rename 的穩定執行點 + 與 log 同層）。舊 Desktop 路徑留有 symlink 安全網，任何殘留引用仍可解析（但在 launchd context 走 symlink 會重新經過 Desktop TCC，發現殘留引用一律改為新路徑，不依賴 symlink）
   - `scripts/cron_*.sh` 仍是 canonical source，改動後 `cp scripts/cron_*.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_*.sh` 同步
   - `config/runtime_schedules.json` 的 `wrapper_script` 欄位**必填絕對路徑**（`/Users/<u>/.volpred/bin/cron_*.sh`）；install script 偵測 `/` 前綴 bypass REPO_ROOT prefix
   - 新增/修改 wrapper 後必跑 `env -i HOME=$HOME PATH=/usr/bin:/bin ~/.volpred/bin/cron_<id>.sh` 模擬 cron env 驗證能 exec
 - Install script idempotent：重跑不應產生 crontab diff；若 diff 非預期先查 config，**不為了 match 手改 crontab**
-- 不想被 host crontab 管理的 item 在 config 加 `"host_crontab_managed": false`（e.g. `shared_scheduler_tick` 在 v12 已降級 advisory，不納入 host crontab）
+- 不想被 host crontab 管理的 item 在 config 加 `"host_crontab_managed": false`（e.g. `daily_update` 由自己的 LaunchAgent fire，不納入 host crontab）
 - 非 volpred 的既有 crontab entries 由 install script 自動保留（透過 `# volpred-` 標記區隔）
