@@ -39,8 +39,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 DEFAULT_PATH = ROOT / "storage" / "next_tasks.json"
-DEFAULT_BASELINE = 27
-DEFAULT_BLOCKED_REASON_BASELINE = 3
+DEFAULT_BASELINE = 0
+DEFAULT_BLOCKED_REASON_BASELINE = 0
 
 
 def _light_load_vocab():

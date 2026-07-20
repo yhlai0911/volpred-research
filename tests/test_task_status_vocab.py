@@ -19,14 +19,14 @@ from volpred.ops import next_tasks as nt
 ROOT = Path(__file__).resolve().parents[1]
 REAL_NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 VALIDATOR = ROOT / "scripts" / "validate_next_tasks_status.py"
-BASELINE = 27
+BASELINE = 0
 # Frozen 2026-07-18: blocked rows carrying no blocked_until. See
 # next_tasks.LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE for provenance.
 BLOCKED_NO_UNTIL_BASELINE = 0
 # Frozen 2026-07-20 (WS-A3): out-of-vocab blocked_reason rows. See
 # next_tasks.LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE for provenance;
 # scripts/migrate_status_vocab.py --update-baselines flips this to the residue.
-BLOCKED_REASON_BASELINE = 3
+BLOCKED_REASON_BASELINE = 0
 
 
 # ---------------------------------------------------------------- vocabulary --
@@ -140,7 +140,9 @@ def test_audit_is_non_fatal_on_legacy_pollution(tmp_path, capsys):
     # returned to callers and CI's baseline gate is the hard stop. stderr fires
     # only ABOVE the frozen baseline — see test_status_audit_warns_above_baseline.
     assert nt._audit_task_statuses([{"id": "legacy", "status": "completed"}]) == 1
-    assert "out-of-vocab" not in capsys.readouterr().err
+    # Post-A3 migration the frozen baseline is 0: ANY pollution is above
+    # baseline and must be loud (the quiet-below-baseline era ended 2026-07-20).
+    assert "out-of-vocab" in capsys.readouterr().err
 
 
 # ------------------------------------------------------- content materializer --
@@ -341,7 +343,9 @@ def test_whole_file_write_tolerates_malformed_legacy_priority(tmp_path, capsys):
 
 def test_status_audit_is_quiet_at_or_below_baseline(tmp_path, capsys):
     """A frozen, known fact must not be re-warned on every dispatch write."""
-    tasks = [{"id": "legacy", "status": "completed", "priority": 3}]
+    # Baseline is 0 post-A3: "at or below baseline" now means a fully clean
+    # payload. Clean writes stay quiet on the hot dispatch path.
+    tasks = [{"id": "clean", "status": "pending", "priority": 3}]
     p = tmp_path / "next_tasks.json"
     p.write_text("[]", encoding="utf-8")
     with p.open("r+", encoding="utf-8") as fh:
@@ -569,7 +573,9 @@ def test_blocked_reason_audit_is_quiet_at_or_below_baseline_and_never_rewrites(t
         nt.write_tasks_to_handle(fh, tasks)  # must not raise
     written = json.loads(p.read_text(encoding="utf-8"))
     assert written[0]["blocked_reason"] == "some_legacy_free_text", "audit must report, not rewrite"
-    assert "blocked_reason" not in capsys.readouterr().err
+    # Baseline 0 post-A3: one polluted row is above baseline, so the audit is
+    # loud; it still only reports and never rewrites the value.
+    assert "blocked_reason" in capsys.readouterr().err
     assert nt._audit_blocked_reasons(tasks) == 1
 
 

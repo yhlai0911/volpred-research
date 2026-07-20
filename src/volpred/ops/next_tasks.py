@@ -190,7 +190,7 @@ TASK_STATUSES: frozenset[str] = frozenset(
 # MIRRORED in scripts/validate_next_tasks_status.py::DEFAULT_BASELINE, which
 # cannot import this module (it runs on a deps-free CI runner).
 # tests/test_task_status_vocab.py asserts the two stay equal.
-LEGACY_OUT_OF_VOCAB_BASELINE = 27
+LEGACY_OUT_OF_VOCAB_BASELINE = 0
 
 
 # Canonical dispatch-lane vocabulary — who is allowed to claim a task.
@@ -269,7 +269,7 @@ class InvalidBlockedReason(ValueError):
 # MIRRORED in scripts/validate_next_tasks_status.py::DEFAULT_BLOCKED_REASON_BASELINE
 # (deps-free CI runner cannot import this module); tests/test_task_status_vocab.py
 # asserts the two stay equal.
-LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE = 3
+LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE = 0
 
 
 def validate_blocked_reason(reason: str | None) -> str:
