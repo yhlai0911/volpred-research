@@ -206,4 +206,7 @@
 | Phase 1：**F1 Enforcement Layer Map 更新 + 一致性 audit 掛 CI** | ✅ 2026-07-20 | map 更新（loop-health-and-dreaming.md +64，commit f23d870c4）+ `scripts/audit_enforcement_map.py`（實跑 OK：10 hooks / 8 deny / 5 CI / 5 git hooks 全對齊）+ CI trigger `tests/test_enforcement_map_audit.py`（騎 pytest.yml，map 過期 = 紅 build）。H2 通道矩陣寫入待 H2 執行時補 |
 | Phase 1：A1b / C4 / F2 | 🔄 獨立軌 worktree agent 執行中（2026-07-20 12:1x 派出） | 完成後主線程驗收 merge |
 | Phase 1：H4 設計裁決、A3（依賴 A1b） | ⏳ 下個獨立軌 session | `docs/dispatch-decision-pipeline-design.md` 已有草案 |
+| **操作手冊 `docs/ops-manual.md`**（owner 2026-07-20 指定交付物：平台運作＋派工＋email/Telegram 新設計，白話＋範例） | ✅ 初版 2026-07-20；每 Phase 收尾同步更新（驗收清單含本檔） | `docs/ops-manual.md` |
+| Phase 1：C4 Mirror 死信重試 | ✅ 2026-07-20 | worktree commit `8dc5ab04b` → merge `661f50ed7`；main 複驗 29 tests 綠；dry-run 注入實證 |
+| Phase 1：F2 dedup-gate-audit 兌現 | ✅ 2026-07-20 | worktree commit `bbbaefc89` → merge `262e20934`；main 複驗 71 tests 綠；歷史資料實跑抓到真 warn（10 arc ×4 block） |
 | 其餘 | ⏳ 依 §5，Phase N 收尾時 enqueue Phase N+1 | — |
