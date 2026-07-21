@@ -226,7 +226,7 @@ def reclaim(apply: bool) -> dict:
     return {"apply": apply, "stale_count": len(results), "actions": results}
 
 
-SALVAGE_TASK_PREFIX = "worktree_salvage_"
+SALVAGE_INCIDENT_KIND = "worktree_unmerged"
 
 
 def _is_held(action: dict) -> bool:
@@ -234,71 +234,156 @@ def _is_held(action: dict) -> bool:
     return bool(action.get("dirty")) or action.get("unmerged_commits", 0) != 0
 
 
-def build_salvage_task(action: dict, *, now_iso: str) -> dict:
-    """One adjudication task per held worktree; id is the idempotency key."""
-    name = action["worktree"]
-    facts = (
-        f"idle={action.get('idle_hours')}h "
-        f"unmerged={action.get('unmerged_commits')} "
-        f"dirty={action.get('dirty')} branch={action.get('branch')}"
-    )
+def _build_aggregate_salvage_task(*, incident_id: str, episode: int,
+                                  task_id: str, now_iso: str) -> dict:
+    """ONE adjudication task per incident episode, never one per worktree.
+
+    The per-worktree ``worktree_salvage_<name>`` shape was plan §2.3's
+    per-instance bug: 19 tasks with zero duplicates and one root cause.  The
+    held worktrees now live as instances of the single ``worktree_unmerged``
+    incident; this task is the batch adjudication exit.
+    """
     return {
-        "id": f"{SALVAGE_TASK_PREFIX}{name}",
+        "id": task_id,
         "task_type": "platform_ops",
         "priority": 3,
-        "source": "auto_discovered",
+        "source": "incident_router",
         "status": "pending",
         "dispatch_lane": "main_thread",
+        "incident_id": incident_id,
         "created_at": now_iso,
         "created_by": "reclaim_stale_worktrees",
-        "title": f"worktree 產物裁決：{name}（{facts}）",
+        "title": f"worktree 產物批次裁決（worktree_unmerged，episode {episode}）",
         "description": (
-            f"stale worktree `.claude/worktrees/{name}` 持有未落地成果（{facts}），"
-            "reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，"
-            "三選一，不准放著：\n"
+            "一個或多個 stale worktree 持有未落地成果，reclaim 依 fail-closed 規則"
+            f"不動它們。全部未清實例見 `storage/ops/incidents.json` 的 `{incident_id}` "
+            "row（instances[] 中 cleared_at 為空者）。這單是批次裁決出口，逐實例三選一，"
+            "不准放著：\n"
             "1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 "
-            f"`bash scripts/merge_worktree.sh {name}`；\n"
+            "`bash scripts/merge_worktree.sh <name>`；\n"
             "2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → "
             "path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），"
             "抽完按 3 收尾；\n"
             "3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 "
             "`git worktree remove`（禁 --force）+ 保留 branch。\n"
-            "裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+            "裁決寫進本 task 的 result；worktree 消失後下次 reclaim 會自動 clear 對應 "
+            "instance。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I / "
+            "incident-lifecycle P3）。"
         ),
     }
 
 
 def open_salvage_tasks(results: dict, *, queue_path: Path | None = None) -> list[dict]:
-    """Actuator: held-worktree findings → pending adjudication tasks.
+    """Actuator: held-worktree findings → ONE aggregate adjudication task.
 
-    Idempotent by task id (``append_task_record`` if_exists='skip'); a re-run
-    while the task is still queued is a no-op. Append failures are loud
-    (no-silent-fallback) and reported per worktree in the receipt.
+    Each held worktree registers as an instance of the ``worktree_unmerged``
+    incident (plan §3.3); the incident carries at most one aggregate task per
+    episode.  Instances whose worktree directory no longer exists are cleared
+    here (reconciliation), so the incident can resolve once everything is
+    adjudicated and quiet for 24h.  Failures are loud (no-silent-fallback).
     """
     from datetime import datetime, timezone
 
+    from volpred.ops import incident as incident_store
     from volpred.ops.next_tasks import append_task_record
 
     path = queue_path if queue_path is not None else REPO / "storage" / "next_tasks.json"
-    now_iso = datetime.now(timezone.utc).isoformat()
+    store = path.parent / "ops" / "incidents.json"
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
     receipts: list[dict] = []
+
+    held_names = {
+        a["worktree"] for a in results.get("actions", []) if _is_held(a)
+    }
     for action in results.get("actions", []):
         if not _is_held(action):
             continue
-        task = build_salvage_task(action, now_iso=now_iso)
-        receipt = {"worktree": action["worktree"], "task_id": task["id"]}
+        name = action["worktree"]
+        receipt: dict = {"worktree": name}
         try:
-            _, created = append_task_record(task, path=path, if_exists="skip")
-            receipt["created"] = created
-        except Exception as exc:  # noqa: BLE001 — 一單失敗不擋其他單，但必留 trace
+            outcome = incident_store.route_breach(
+                store,
+                kind=SALVAGE_INCIDENT_KIND,
+                instance_key=name,
+                instance_detail={
+                    "branch": action.get("branch"),
+                    "idle_hours": action.get("idle_hours"),
+                    "dirty": action.get("dirty"),
+                    "unmerged_commits": action.get("unmerged_commits"),
+                },
+                details=f"held worktree {name}",
+                now=now,
+                task_status_probe=incident_store.next_tasks_status_probe(path),
+            )
+            receipt["incident_id"] = outcome.get("incident_id")
+            receipt["action"] = outcome.get("action")
+            if outcome["action"] == "escalate":
+                esc = incident_store.actuate_escalation(
+                    store, str(outcome["incident_id"]), queue_path=path, now=now
+                )
+                receipt["task_id"] = esc.get("root_cause_task_id")
+                receipt["created"] = bool(esc.get("task_created"))
+            elif outcome["action"] == "create_task":
+                task = _build_aggregate_salvage_task(
+                    incident_id=str(outcome["incident_id"]),
+                    episode=int(outcome.get("episode_count") or 0),
+                    task_id=str(outcome["suggested_task_id"]),
+                    now_iso=now_iso,
+                )
+                stored, created = append_task_record(task, path=path, if_exists="skip")
+                if stored.get("throttled_by_remediation_cap"):
+                    incident_store.record_throttled(
+                        store, str(outcome["incident_id"]), now=now
+                    )
+                    receipt["created"] = False
+                    receipt["throttled"] = True
+                else:
+                    incident_store.bind_task(
+                        store, str(outcome["incident_id"]), str(stored.get("id")), now=now
+                    )
+                    receipt["task_id"] = stored.get("id")
+                    receipt["created"] = created
+            else:
+                receipt["task_id"] = outcome.get("active_task_id")
+                receipt["created"] = False
+        except Exception as exc:  # noqa: BLE001 — 一實例失敗不擋其他實例，但必留 trace
             warn(
                 "reclaim_salvage",
-                f"append_task_record 失敗 {action['worktree']} ({type(exc).__name__}: {exc})",
+                f"incident routing 失敗 {name} ({type(exc).__name__}: {exc})",
             )
             receipt["created"] = False
             receipt["error"] = f"{type(exc).__name__}: {exc}"
         receipts.append(receipt)
+
+    _reconcile_cleared_instances(store, now=now, currently_held=held_names)
     return receipts
+
+
+def _reconcile_cleared_instances(store: Path, *, now, currently_held: set[str]) -> None:
+    """Instances whose worktree directory is gone have been adjudicated."""
+    from volpred.ops import incident as incident_store
+
+    row = incident_store.load_incident(
+        store, incident_store.incident_id_for(SALVAGE_INCIDENT_KIND)
+    )
+    if not row:
+        return
+    for inst in row.get("instances") or []:
+        key = str(inst.get("key") or "")
+        if not key or inst.get("cleared_at") or key in currently_held:
+            continue
+        if not (slot_budget.WORKTREES_DIR / key).exists():
+            try:
+                incident_store.clear_instance(
+                    store,
+                    kind=SALVAGE_INCIDENT_KIND,
+                    instance_key=key,
+                    now=now,
+                    by="reclaim_reconcile",
+                )
+            except Exception as exc:  # noqa: BLE001 — bookkeeping; next pass retries
+                warn("reclaim_salvage", f"clear_instance 失敗 {key} ({exc})")
 
 
 def main() -> None:

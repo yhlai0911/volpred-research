@@ -853,6 +853,55 @@ def route_internal_remediable_alert(
             "routing_failure": True,
             "remediation": remediation,
         }
+    if remediation.get("notify_due"):
+        # machine_self record+notify (incident-lifecycle §6): the FIRST episode
+        # of a machine-self incident is announced once; repeats stay silent
+        # (counted in the store), and episode >= 2 escalates instead.
+        from volpred.ops import incident
+
+        incident_id = str(remediation.get("incident_id") or "")
+        notify_body = "\n".join(
+            [
+                "## Incident 已記錄",
+                f"incident `{incident_id}`（kind `{normalized_key}`，"
+                f"第 {remediation.get('occurrence_count')} 次觸發，"
+                f"episode {remediation.get('episode_count')}）。",
+                "此類（machine_self）不自動開修復單 —— 修復動作要靠壞掉的機器本身"
+                "執行，實測從不收斂；復發（episode>=2）將升級為單一[根因重構]任務。",
+                "",
+                "## 原始警報",
+                str(body),
+            ]
+        )
+        delivery = send_alert(
+            normalized_level,
+            str(title),
+            notify_body,
+            recipient=recipient,
+            storage_dir=storage_dir,
+        )
+        owner_reached = bool(
+            delivery.get("sent")
+            or (delivery.get("skipped") and delivery.get("skip_reason") == "dedup_24h")
+        )
+        if owner_reached and incident_id:
+            incident.record_notified(
+                incident.store_path_for(storage_dir),
+                incident_id,
+                now=now,
+                notification_id=(
+                    str(delivery.get("notification_id"))
+                    if delivery.get("notification_id")
+                    else None
+                ),
+            )
+        return {
+            **delivery,
+            "internal_alert_key": normalized_key,
+            "escalated": False,
+            "remediation": remediation,
+        }
+
     if not remediation.get("escalate"):
         return {
             "level": normalized_level,
@@ -866,74 +915,38 @@ def route_internal_remediable_alert(
             "escalated": False,
             "remediation": remediation,
         }
-    if suppress_owner_transport:
-        # A parent incident watcher may own the only terminal notification.
-        # Keep escalation_due unacknowledged so the next standalone detector
-        # can deliver it; suppression never skips task creation or failure count.
-        return {
-            "level": normalized_level,
-            "title": str(title),
-            "recipient": recipient,
-            "internal_alert_key": normalized_key,
-            "sent": False,
-            "skipped": True,
-            "skip_reason": "internal_owner_transport_suppressed",
-            "notification_id": None,
-            "escalated": False,
-            "remediation": remediation,
-        }
 
-    attempts = int(remediation.get("consecutive_remediation_failures") or 0)
-    failure_reason = str(remediation.get("last_failure_reason") or "未留下失敗原因")
-    episode_id = str(remediation.get("episode_id") or "unknown")
-    # Stable within one episode (so a delivery crash dedups), distinct after an
-    # explicit recovery (so a genuinely new incident within 24h still emails).
-    escalation_title = f"內部自動修復連續失敗（{normalized_key}；episode {episode_id}）"
-    escalation_body = "\n".join(
-        [
-            "## 自動修復失敗",
-            f"同一 alert_key `{normalized_key}` 已自動嘗試 {attempts} 次，仍未解除。",
-            f"失敗原因：{failure_reason}",
-            f"P1 任務：`{remediation.get('task_id')}`（已再次排入任務池）",
-            "",
-            "## 原始警報",
-            str(body),
-        ]
-    )
-    delivery = send_alert(
-        normalized_level,
-        escalation_title,
-        escalation_body,
-        recipient=recipient,
-        storage_dir=storage_dir,
-    )
-    owner_reached = bool(
-        delivery.get("sent")
-        or (
-            delivery.get("skipped")
-            and delivery.get("skip_reason") == "dedup_24h"
-        )
-    )
-    escalation_ack: dict[str, Any] | None = None
-    if owner_reached:
-        from .alert_remediation import mark_internal_alert_escalated
+    # Escalation due: run the §5 actuator exactly once — ONE [根因重構] task via
+    # the append gateway + ONE mail; the incident is suppressed afterwards.
+    # ``suppress_owner_transport`` lets a parent incident watcher own the only
+    # notification: the task is still opened, the mail is left due, and the next
+    # standalone detector pass delivers it (actuator receipts are idempotent).
+    from volpred.ops import incident
 
-        escalation_ack = mark_internal_alert_escalated(
-            alert_key=normalized_key,
-            task_id=str(remediation.get("task_id") or ""),
-            storage_dir=storage_dir,
-            notification_id=(
-                str(delivery.get("notification_id"))
-                if delivery.get("notification_id")
-                else None
-            ),
-            now=now,
-        )
+    incident_id = str(remediation.get("incident_id") or "")
+    receipt = incident.actuate_escalation(
+        incident.store_path_for(storage_dir),
+        incident_id,
+        queue_path=incident.store_path_for(storage_dir).parents[1] / "next_tasks.json",
+        now=now,
+        notify=lambda level_, title_, body_: send_alert(
+            level_, title_, body_, recipient=recipient, storage_dir=storage_dir
+        ),
+        send_mail=not suppress_owner_transport,
+    )
     return {
-        **delivery,
+        "level": normalized_level,
+        "title": str(title),
+        "recipient": recipient,
         "internal_alert_key": normalized_key,
+        "sent": bool(receipt.get("notified")),
+        "skipped": not bool(receipt.get("notified")),
+        "skip_reason": (
+            "internal_owner_transport_suppressed" if suppress_owner_transport else None
+        ),
+        "notification_id": (receipt.get("delivery") or {}).get("notification_id"),
         "escalated": True,
-        "escalation_ack": escalation_ack,
+        "escalation": receipt,
         "remediation": remediation,
     }
 

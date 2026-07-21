@@ -1742,10 +1742,18 @@ def test_push_backlog_routes_only_when_latest_cause_is_silent_fallback_hold(
     assert outage["details"]["internal_alert_key"] is None
 
 
-def test_held_push_backlog_creates_p1_without_email_or_telegram(
+def test_held_push_backlog_records_incident_notifies_once_and_mints_no_task(
     tmp_path: Path,
     monkeypatch,
 ):
+    """incident-lifecycle P3 flip of the old contract (plan §6).
+
+    OLD: first internal signal = silent + P1 repair task per episode — 19 a1
+    tasks for one alert_key, none converged (machine_self repairs run on the
+    broken machinery itself).  NEW: machine_self kinds record the incident,
+    notify ONCE per episode, and never mint auto-repair tasks; repeats stay off
+    the transport entirely.
+    """
     storage = tmp_path / "storage"
     _write_json(storage / "next_tasks.json", [])
     condition = {
@@ -1756,22 +1764,22 @@ def test_held_push_backlog_creates_p1_without_email_or_telegram(
         "body": "held by NEW silent fallback",
         "details": {"internal_alert_key": "git_push_backup_hold"},
     }
-    monkeypatch.setattr(
-        alerts_module,
-        "build_alert_condition_report",
-        lambda **kwargs: {
+
+    def _report(**kwargs):
+        return {
             "generated_at": "2026-07-14T12:00:00+00:00",
             "recipient": "yihao.lai@gmail.com",
-            "conditions": [condition],
+            "conditions": [dict(condition)],
             "breach_count": 1,
-        },
-    )
+        }
+
+    monkeypatch.setattr(alerts_module, "build_alert_condition_report", _report)
+    deliveries: list[str] = []
     monkeypatch.setattr(
         alerts_module,
         "send_alert",
-        lambda *args, **kwargs: (_ for _ in ()).throw(
-            AssertionError("suppressed internal route reached email/Telegram transport")
-        ),
+        lambda level, title, body, **kwargs: deliveries.append(title)
+        or {"sent": True, "skipped": False, "notification_id": f"n{len(deliveries)}"},
     )
 
     report = check_alert_conditions(
@@ -1779,11 +1787,28 @@ def test_held_push_backlog_creates_p1_without_email_or_telegram(
         now=datetime(2026, 7, 14, 12, 0, tzinfo=timezone.utc),
     )
 
-    assert report["alerts"][0]["skip_reason"] == "internal_auto_remediation"
+    # First episode: exactly one notification (§6 記錄+通知), zero repair tasks.
+    assert len(deliveries) == 1
+    assert report["alerts"][0]["sent"] is True
     tasks = json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
-    assert len(tasks) == 1
-    assert tasks[0]["priority"] == 1
-    assert tasks[0]["alert_key"] == "git_push_backup_hold"
+    assert tasks == []
+    from volpred.ops import incident
+
+    rows = incident.list_incidents(storage / "ops" / "incidents.json")
+    assert len(rows) == 1
+    assert rows[0]["kind"] == "git_push_backup_hold"
+    assert rows[0]["class"] == incident.CLASS_MACHINE_SELF
+
+    # Repeat signal: counted on the incident, nothing new on the transport.
+    report2 = check_alert_conditions(
+        storage_dir=str(storage),
+        now=datetime(2026, 7, 14, 13, 0, tzinfo=timezone.utc),
+    )
+    assert len(deliveries) == 1
+    assert report2["alerts"][0]["skip_reason"] == "internal_auto_remediation"
+    assert json.loads((storage / "next_tasks.json").read_text(encoding="utf-8")) == []
+    rows = incident.list_incidents(storage / "ops" / "incidents.json")
+    assert rows[0]["occurrence_count"] == 2
 
 
 def test_healthy_push_backlog_resolves_only_the_backup_hold_key(

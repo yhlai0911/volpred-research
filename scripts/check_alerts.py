@@ -1784,6 +1784,8 @@ def _reduce_ci_run(
             checkpoint()
 
         is_new_failure = _ci_record_failure(incident, run)
+        if is_new_failure:
+            _ci_incident_store_sync("breach", incident, run_key=run_key)
         failure_keys = incident.setdefault("failure_run_keys", [])
         incident.pop("recovery_candidate", None)
         incident.pop("unverified_green_candidate", None)
@@ -1824,6 +1826,8 @@ def _reduce_ci_run(
                     task_ids.append(task["id"])
                 state["last_task_id"] = task["id"]
                 summary["task_id"] = task["id"]
+                if summary["task_added"]:
+                    _ci_incident_store_sync("bind", incident, task_id=task["id"])
             except Exception as exc:  # noqa: BLE001
                 warn("ci_watch", "P1 repair task append failed", err=str(exc), task_id=task["id"])
                 hard_failure = f"append_failed: {type(exc).__name__}: {exc}"
@@ -2312,6 +2316,7 @@ def _notify_ci_incident(
     incident["phase"] = "recovered"
     incident["recovered_at"] = now_iso
     incident["verified_green_run"] = candidate
+    _ci_incident_store_sync("resolved", incident)
     state["last_closed_incident"] = copy.deepcopy(incident)
     state.pop("active_incident", None)
     summary["reason"] = "recovery_notified"
@@ -2795,6 +2800,24 @@ def main() -> int:
     # the pool before the alert fires, so a completed article is delivered rather
     # than surfaced as a discard/keep decision for the boss.
     orphan_reap = _auto_reap_orphan_deliverables()
+
+    # G6 (incident-lifecycle P2): flush today's 24h-cap refusals into ONE daily
+    # summary mail. Owner = remediation_throttle.flush_denial_summary; the alert
+    # transport's 24h title dedup collapses the hourly calls to one delivery.
+    try:
+        from volpred.ops import remediation_throttle as _throttle
+
+        throttle_summary = _throttle.flush_denial_summary(
+            ledger_path=_throttle.ledger_path_for(CI_NEXT_TASKS)
+        )
+    except Exception as exc:  # noqa: BLE001 — summary flush must not break the alert pass
+        warn("remediation_throttle", "flush failed in check_alerts", err=str(exc))
+        throttle_summary = {"sent": False, "reason": f"flush_error: {exc}"}
+    if throttle_summary.get("denials"):
+        print(
+            f"  remediation-throttle: denials_today={throttle_summary.get('denials')} "
+            f"summary_sent={throttle_summary.get('sent')}"
+        )
 
     report = check_alert_conditions(storage_dir="storage")
     print("=== ops check-alerts ===")

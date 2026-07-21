@@ -62,26 +62,39 @@ def _reclaim_results() -> dict:
     }
 
 
-def test_salvage_actuator_opens_one_task_per_held_worktree(tmp_path: Path) -> None:
+def test_salvage_actuator_opens_one_aggregate_task_for_all_held(tmp_path: Path) -> None:
+    """incident-lifecycle P3 (plan §2.3/G3): N held worktrees ⇒ 1 incident ⇒ 1 task.
+
+    The per-worktree ``worktree_salvage_<name>`` shape is GONE — 19 of those
+    tasks for one root cause was the incident that mandated this refactor.
+    """
+    from volpred.ops import incident
+
     queue = tmp_path / "next_tasks.json"
     receipts = reclaim_stale_worktrees.open_salvage_tasks(
         _reclaim_results(), queue_path=queue
     )
 
-    assert [r["created"] for r in receipts] == [True, True]
+    assert len(receipts) == 2  # the clean+merged worktree must NOT register
     tasks = _read_queue(queue)
-    assert len(tasks) == 2  # the clean+merged worktree must NOT open a task
-    by_id = {t["id"]: t for t in tasks}
-    assert set(by_id) == {
-        "worktree_salvage_dispatch-slot-1-aaaa-k9998",
-        "worktree_salvage_dispatch-slot-2-bbbb-k9999",
+    assert len(tasks) == 1  # ONE aggregate adjudication task, not one per worktree
+    task = tasks[0]
+    assert task["status"] == "pending"
+    assert task["priority"] == 3
+    assert task["dispatch_lane"] == "main_thread"
+    assert task["source"] == "incident_router"
+    assert "merge_worktree.sh" in task["description"]  # exit path is spelled out
+    assert "incidents.json" in task["description"]  # instances live in the store
+
+    store = queue.parent / "ops" / "incidents.json"
+    rows = incident.list_incidents(store)
+    assert len(rows) == 1
+    assert rows[0]["kind"] == "worktree_unmerged"
+    assert {i["key"] for i in rows[0]["instances"]} == {
+        "dispatch-slot-1-aaaa-k9998",
+        "dispatch-slot-2-bbbb-k9999",
     }
-    for task in tasks:
-        assert task["status"] == "pending"
-        assert task["priority"] == 3
-        assert task["dispatch_lane"] == "main_thread"
-        assert task["source"] == "auto_discovered"
-        assert "merge_worktree.sh" in task["description"]  # exit path is spelled out
+    assert task["id"] == rows[0]["current_task_id"]
 
 
 def test_salvage_actuator_is_idempotent_across_reruns(tmp_path: Path) -> None:
@@ -91,8 +104,8 @@ def test_salvage_actuator_is_idempotent_across_reruns(tmp_path: Path) -> None:
         _reclaim_results(), queue_path=queue
     )
 
-    assert [r["created"] for r in receipts] == [False, False]
-    assert len(_read_queue(queue)) == 2  # no duplicates on the recurring sweep
+    assert all(r["created"] is False for r in receipts)
+    assert len(_read_queue(queue)) == 1  # no duplicates on the recurring sweep
 
 
 def test_salvage_append_failure_is_loud_and_does_not_block_others(
@@ -117,9 +130,12 @@ def test_salvage_append_failure_is_loud_and_does_not_block_others(
 
     assert receipts[0]["created"] is False
     assert "disk said no" in receipts[0]["error"]
-    assert receipts[1]["created"] is True  # one failure must not abort the sweep
+    # The failed append leaves the episode unbound; the next held worktree's
+    # routing retries the SAME aggregate task — one failure never aborts the sweep.
+    assert receipts[1]["created"] is True
+    assert len(_read_queue(queue)) == 1
     err = capsys.readouterr().err
-    assert "append_task_record" in err and "disk said no" in err  # no-silent-fallback
+    assert "disk said no" in err  # no-silent-fallback
 
 
 def test_reclaim_cli_flag_attaches_salvage_receipts(monkeypatch, tmp_path: Path) -> None:
@@ -133,7 +149,7 @@ def test_reclaim_cli_flag_attaches_salvage_receipts(monkeypatch, tmp_path: Path)
         ["reclaim_stale_worktrees.py", "--open-tasks", "--queue", str(queue)],
     )
     reclaim_stale_worktrees.main()
-    assert len(_read_queue(queue)) == 2
+    assert len(_read_queue(queue)) == 1
 
 
 def _starved() -> list[dict]:
