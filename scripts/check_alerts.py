@@ -719,6 +719,7 @@ def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
     """flock-append one task to the pending queue (same discipline as refill scripts)."""
     import fcntl
 
+    from volpred.ops import remediation_throttle
     from volpred.ops.next_tasks import normalize_task_priority, write_tasks_to_handle
 
     guard_canonical_write(next_tasks_path)
@@ -726,6 +727,7 @@ def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
     next_tasks_path.parent.mkdir(parents=True, exist_ok=True)
     if not next_tasks_path.exists():
         next_tasks_path.write_text("[]\n", encoding="utf-8")
+    throttled = False
     with next_tasks_path.open("r+", encoding="utf-8") as fh:
         fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
         try:
@@ -734,11 +736,23 @@ def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
                 raise ValueError("next_tasks.json is not a list")
             if any(isinstance(t, dict) and t.get("id") == task["id"] for t in data):
                 return False
-            data.append(task)
-            write_tasks_to_handle(fh, data)
-            return True
+            # G6 24h 全域上限（incident-lifecycle P2）：決策 owner =
+            # volpred.ops.remediation_throttle；CI repair 亦屬自動補救，超額不開單。
+            if remediation_throttle.is_auto_remediation(task) and remediation_throttle.over_cap(
+                data
+            ):
+                throttled = True
+            else:
+                data.append(task)
+                write_tasks_to_handle(fh, data)
         finally:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    if throttled:
+        remediation_throttle.record_denial(
+            task, ledger_path=remediation_throttle.ledger_path_for(next_tasks_path)
+        )
+        return False
+    return True
 
 
 def _ci_run_key(run: dict) -> str:
@@ -2797,6 +2811,24 @@ def main() -> int:
     # the pool before the alert fires, so a completed article is delivered rather
     # than surfaced as a discard/keep decision for the boss.
     orphan_reap = _auto_reap_orphan_deliverables()
+
+    # G6 (incident-lifecycle P2): flush today's 24h-cap refusals into ONE daily
+    # summary mail. Owner = remediation_throttle.flush_denial_summary; the alert
+    # transport's 24h title dedup collapses the hourly calls to one delivery.
+    try:
+        from volpred.ops import remediation_throttle as _throttle
+
+        throttle_summary = _throttle.flush_denial_summary(
+            ledger_path=_throttle.ledger_path_for(CI_NEXT_TASKS)
+        )
+    except Exception as exc:  # noqa: BLE001 — summary flush must not break the alert pass
+        warn("remediation_throttle", "flush failed in check_alerts", err=str(exc))
+        throttle_summary = {"sent": False, "reason": f"flush_error: {exc}"}
+    if throttle_summary.get("denials"):
+        print(
+            f"  remediation-throttle: denials_today={throttle_summary.get('denials')} "
+            f"summary_sent={throttle_summary.get('sent')}"
+        )
 
     report = check_alert_conditions(storage_dir="storage")
     print("=== ops check-alerts ===")

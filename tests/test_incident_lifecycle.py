@@ -165,6 +165,125 @@ def test_g3_five_instances_one_incident_one_task(store, queue) -> None:
     assert len(tasks) == 1, "five instances must share ONE aggregate task"
 
 
+# ── G6 ───────────────────────────────────────────────────────────────────────
+
+
+def _auto_remediation_record(i: int, now: datetime) -> dict:
+    return {
+        "id": f"inc_syntheticfp{i:02d}_e1",
+        "title": f"[incident] synthetic {i}",
+        "description": "auto disposition",
+        "task_type": "platform_ops",
+        "priority": 2,
+        "status": "pending",
+        "source": "incident_router",
+        "incident_id": f"inc_syntheticfp{i:02d}",
+        "created_at": now.isoformat(),
+    }
+
+
+def test_g6_rolling_24h_cap_refuses_task_nine_and_ledgers_it(queue, tmp_path) -> None:
+    """G6: 滾動 24h 自動補救任務 > 上限（8）→ 超出的一律不開單、記 ledger。"""
+    from volpred.ops import remediation_throttle as throttle
+
+    now = datetime.now(timezone.utc)
+    for i in range(throttle.MAX_AUTO_REMEDIATION_PER_DAY):
+        _, created = append_task_record(
+            _auto_remediation_record(i, now - timedelta(hours=1)), path=queue
+        )
+        assert created
+    ninth = _auto_remediation_record(99, now)
+    record, created = append_task_record(ninth, path=queue)
+    assert created is False
+    assert record.get("throttled_by_remediation_cap") is True
+    assert len(_load_tasks(queue)) == throttle.MAX_AUTO_REMEDIATION_PER_DAY
+
+    ledger = throttle.ledger_path_for(queue)
+    lines = [json.loads(l) for l in ledger.read_text(encoding="utf-8").splitlines() if l.strip()]
+    assert len(lines) == 1
+    assert lines[0]["task_id"] == ninth["id"]
+
+    # 非補救類任務不受 cap 影響（cap 只擋 auto-remediation class）。
+    ordinary = {
+        "id": "assign_deadbeef",
+        "title": "daily article",
+        "description": "x",
+        "task_type": "daily_article",
+        "priority": 3,
+        "status": "pending",
+        "source": "auto_discovered",
+        "created_at": now.isoformat(),
+    }
+    _, created = append_task_record(ordinary, path=queue)
+    assert created is True
+
+
+def test_g6_tasks_older_than_24h_leave_the_window(queue) -> None:
+    from volpred.ops import remediation_throttle as throttle
+
+    now = datetime.now(timezone.utc)
+    for i in range(throttle.MAX_AUTO_REMEDIATION_PER_DAY):
+        append_task_record(
+            _auto_remediation_record(i, now - timedelta(hours=30)), path=queue
+        )
+    _, created = append_task_record(_auto_remediation_record(50, now), path=queue)
+    assert created is True
+
+
+def test_g6_daily_summary_is_one_mail_with_date_stable_title(queue, tmp_path) -> None:
+    """G6 尾款：每日彙整 1 封 — title 內嵌日期，transport 24h dedup 收斂為一封。"""
+    from volpred.ops import remediation_throttle as throttle
+
+    now = datetime.now(timezone.utc)
+    ledger = throttle.ledger_path_for(queue)
+    for i in range(3):
+        throttle.record_denial(_auto_remediation_record(i, now), ledger_path=ledger, now=now)
+
+    calls: list[tuple] = []
+
+    def notify(level, title, body):
+        calls.append((level, title))
+        return {"sent": True}
+
+    first = throttle.flush_denial_summary(ledger_path=ledger, now=now, notify=notify)
+    second = throttle.flush_denial_summary(ledger_path=ledger, now=now, notify=notify)
+    assert first["denials"] == 3
+    assert first["sent"] and second["sent"]
+    # 同一天兩次 flush 的 title 完全相同 ⇒ transport sha256(level|title) 24h dedup
+    # 機械上收斂為一封（dedup owner = alerts transport，不在本模組疊第二層）。
+    assert calls[0][1] == calls[1][1]
+    assert now.date().isoformat() in calls[0][1]
+
+
+def test_g6_internal_alert_writer_is_capped_too(tmp_path) -> None:
+    """alert_remediation 自帶 flock 的 writer 也要受同一個 cap（同一決策 owner）。"""
+    from volpred.ops import remediation_throttle as throttle
+    from volpred.ops.alert_remediation import remediate_internal_alert
+
+    storage = tmp_path / "storage"
+    storage.mkdir()
+    queue_path = storage / "next_tasks.json"
+    now = datetime.now(timezone.utc)
+    rows = [
+        _auto_remediation_record(i, now - timedelta(hours=2))
+        for i in range(throttle.MAX_AUTO_REMEDIATION_PER_DAY)
+    ]
+    queue_path.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
+
+    outcome = remediate_internal_alert(
+        {"id": "phase_z_test_gate_red", "breached": True, "level": "warn",
+         "title": "gate red", "body": "x"},
+        alert_key="phase_z_test_gate_red",
+        storage_dir=str(storage),
+        now=now,
+    )
+    assert outcome.get("created") is False
+    assert outcome.get("reason") == "remediation_throttled"
+    assert len(json.loads(queue_path.read_text(encoding="utf-8"))) == (
+        throttle.MAX_AUTO_REMEDIATION_PER_DAY
+    )
+
+
 # ── supporting invariants (P1) ───────────────────────────────────────────────
 
 

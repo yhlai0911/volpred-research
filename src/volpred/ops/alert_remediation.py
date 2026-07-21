@@ -371,12 +371,43 @@ def _upsert_internal_clean_watermark(
     return existing, True
 
 
+def _throttled_outcome(
+    tasks: list[Any],
+    task: dict[str, Any],
+    *,
+    storage_dir: str,
+    now: datetime,
+) -> dict[str, Any] | None:
+    """G6 choke point for this writer (decision owner = remediation_throttle).
+
+    This writer appends under its own flock instead of the
+    ``append_task_record`` gateway, so the cap must be consulted here too.
+    Returns the denial outcome, or None when the append may proceed.
+    """
+    from volpred.ops import remediation_throttle
+
+    if not remediation_throttle.over_cap(tasks, now=now):
+        return None
+    remediation_throttle.record_denial(
+        task,
+        ledger_path=remediation_throttle.ledger_path_for(_tasks_path(storage_dir)),
+        now=now,
+    )
+    return {
+        "created": False,
+        "reason": "remediation_throttled",
+        "task_id": task.get("id"),
+        "escalate": False,
+    }
+
+
 def _route_internal_task(
     tasks: list[Any],
     condition: dict[str, Any],
     *,
     alert_key: str,
     now: datetime,
+    storage_dir: str = "storage",
 ) -> dict[str, Any]:
     """Ensure one active attempt per key without reusing a completed task id.
 
@@ -521,6 +552,9 @@ def _route_internal_task(
                 now=now,
                 fingerprint=incoming_fp,
             )
+            denied = _throttled_outcome(tasks, task, storage_dir=storage_dir, now=now)
+            if denied is not None:
+                return denied
             tasks.append(task)
             return {
                 "created": True,
@@ -568,6 +602,9 @@ def _route_internal_task(
             last_failure_reason=failure_reason,
             fingerprint=(previous_fp | incoming_fp) or None,
         )
+        denied = _throttled_outcome(tasks, task, storage_dir=storage_dir, now=now)
+        if denied is not None:
+            return denied
         tasks.append(task)
         return {
             "created": True,
@@ -596,6 +633,9 @@ def _route_internal_task(
         now=now,
         fingerprint=incoming_fp,
     )
+    denied = _throttled_outcome(tasks, task, storage_dir=storage_dir, now=now)
+    if denied is not None:
+        return denied
     tasks.append(task)
     return {
         "created": True,
@@ -798,6 +838,7 @@ def _enqueue(
                         condition,
                         alert_key=alert_key,
                         now=now,
+                        storage_dir=storage_dir,
                     )
                     write_tasks_to_handle(fh, tasks)
                     return outcome
@@ -808,6 +849,9 @@ def _enqueue(
                 if existing is not None:
                     return {"created": False, "reason": "already_queued_today", "task_id": tid}
 
+                denied = _throttled_outcome(tasks, task, storage_dir=storage_dir, now=now)
+                if denied is not None:
+                    return denied
                 tasks.append(task)
                 write_tasks_to_handle(fh, tasks)
                 return {
@@ -922,6 +966,12 @@ def _rewrite_body(body: str, outcome: dict[str, Any]) -> str:
         header = (
             "## 已自動處理\n"
             f"任務 `{outcome['task_id']}` 今日稍早已建立，仍在處理中。**老闆無需動作。**\n"
+        )
+    elif outcome.get("reason") == "remediation_throttled":
+        header = (
+            "## 已達自動補救上限（G6 止血）\n"
+            "滾動 24h 內自動補救任務已達全域上限，本警報此次不開單；"
+            "拒絕已記入 throttle ledger，每日彙整一封摘要信。**老闆無需動作。**\n"
         )
     else:
         header = (

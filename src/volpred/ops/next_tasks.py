@@ -835,6 +835,12 @@ def append_task_record(
     # P1。boss 來源 / 時效類 / dedicated-owner ingress 原樣通過。
     clamp_machine_priority_inflation(record)
 
+    # G6 24h 全域上限（incident-lifecycle P2）：決策 owner =
+    # volpred.ops.remediation_throttle；這裡只是 gateway 的 choke point。
+    from volpred.ops import remediation_throttle
+
+    throttle_denied = False
+
     p = Path(path)
     guard_canonical_write(p)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -852,14 +858,28 @@ def append_task_record(
                     if if_exists == "raise":
                         raise ValueError(f"duplicate task id {task_id}")
                     return existing, False
-            tasks.append(record)
-            write_tasks_to_handle(fh, tasks)
+            if remediation_throttle.is_auto_remediation(record) and remediation_throttle.over_cap(
+                tasks
+            ):
+                throttle_denied = True
+            else:
+                tasks.append(record)
+                write_tasks_to_handle(fh, tasks)
             # 不擋，只記錄：閘門在 generator entry point（pool_pressure 模組 docstring
             # 說明為何不在此層 enforce），所以任何新的自動 caller 天然繞得過去。這行
             # 讓「繞過」在 log 現形，而不是靜默灌水。
-            _warn_if_over_pending_cap(record, tasks)
+            if not throttle_denied:
+                _warn_if_over_pending_cap(record, tasks)
         finally:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    if throttle_denied:
+        # 鎖已釋放才寫 ledger（ledger 快，但原則上 side effect 不佔 queue flock）。
+        # 摘要信由 check_alerts 的 flush_denial_summary 每日彙整一封（G6）。
+        remediation_throttle.record_denial(
+            record, ledger_path=remediation_throttle.ledger_path_for(p)
+        )
+        record["throttled_by_remediation_cap"] = True
+        return record, False
     # 急件不進排班：入池成功後（鎖已釋放）立刻請 supervisor 派工。
     record["fire_requested"] = _request_urgent_fire(record, p)
     return record, True
