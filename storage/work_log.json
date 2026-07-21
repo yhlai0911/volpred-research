@@ -22980,5 +22980,110 @@
     "owner": "hourly-slot-1-cee77b098f6a44cc8bb88f18a4599ae2",
     "commit": null,
     "summary": "急件 lane（`assign_10927b4e`，老闆 telegram-1231/1232「重新設計不要補丁」）收束為\n`blocked / awaiting_owner_decision`。\n\n**本班刻意不重做設計**。查證後確認設計文件已於 12:28 交付：\n`docs/refactor_plan_incident_lifecycle.md`（318 行，含實測證據、三個結構性根因、incident 狀態機、\nG1-G7 機械 gate、P1-P5 分階段計畫），並於 12:29 寄出審核通知給老闆\n（`alert_dedup.json` 記錄 notification `0881f11f`，send_count=1）。\n\ntask description 明訂交付順序為「設計文件 → 老闆過目 → 分 Phase 實作」，故核可前不得動工。\n\n**為何非收束不可**：任務交付後仍留在 `pending`，supervisor 因此為同一 task 連續發了兩次\n`request_fire`（12:40 與 12:50，本班即第二次）。**這正是本任務要根治的空轉，在本任務自身上的複製** ——\n一個已完成待審的工作項，因為狀態沒有「等人」這一格而被反覆重派。改用\n`mark_task_blocked.py --reason awaiting_owner_decision`（`blocked` 屬 BLOCKED_DISPATCH_LANES，\n不再進派工），until=2026-08-04：老闆兩週未裁決則自動重新浮現，不會永久沉沒。\n\n同時以 `annotate` 在 task 上留下 design_doc 路徑、交付與通知時間、awaiting_owner_review 旗標、\n以及 next_action（核可後依 §9 分 P1-P5；其中 P2「24h 全域上限止血」設計上可先行）。\n\n**未做且不該由本班做的事**：設計文件本身仍是 untracked，未進 main。"
+  },
+  {
+    "timestamp": "2026-07-21T13:09:47+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-29797353050",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-80ff027811e142edabf2a3be484a5db2",
+    "owner": "hourly-slot-1-80ff027811e142edabf2a3be484a5db2",
+    "commit": "75a597735",
+    "summary": "CI run 29797353050 紅燈修復。根因不是 lazypack renderer 壞掉，而是測試把「bug 仍會發生」寫成契約：77c6eefc5 移除 _draw_metric_card 的 38px value-band 下限（mile_fa098fc8 真正的 bug）之後，test_synthetic_plan_fails_round_zero_with_overlap 斷言的 OVERLAP 不再發生（DID NOT RAISE），連帶 test_repair_rounds_recover_the_overlap_plan 的 repair_rounds_used>=1 變成 0>=1 —— 修復落地看起來像回歸。前一班（cee77b09, killed_timeout 12:59）已在工作區改好但未提交，本班驗證後採用：拆成 defect pin（掃 7 種卡片高度，只能乾淨繪製或 TextFitError，斷言蘊涵而非失敗）與 repair-loop pin（round-0 故障用 monkeypatch 注入，不再靠 host 字型碰巧壞掉），另補 e2e 與 clean-plan 不啟動修復。驗證 scripts/tests -k lazypack 94 passed。覆蓋率相對舊版加強。提交載體用 git_writer_lock.py commit 精確列舉單一路徑：此檔在 fire 起始前已 dirty 對 PHASE-Z 屬 foreign，而 _orphan_half_candidates 明文排除 test 檔，test-only 紅燈修復沒有自動出口，需具名裁決。工作區另兩個 dirty code 檔（task_pool_claim.py / next_tasks.py，他人在途）未動。"
+  },
+  {
+    "timestamp": "2026-07-21T13:13:40+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_3f794845",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-3-4089e39c08e945d1ad355f66792270d5",
+    "owner": "hourly-slot-3-4089e39c08e945d1ad355f66792270d5",
+    "commit": "db6228af8",
+    "summary": "關閉 foreign-path incident acc9bba0eea5942f（assign_3f794845）——它未關會把 scheduler slot cap 壓在 2。7 個卡住路徑中 6 個已被 quarantine ref 或 live workspace 覆蓋，唯一 blocker 是 scripts/task_pool_claim.py 仍髒在 main checkout。\n\n裁決不是「清掉髒檔」而是「採用」，理由是機械可驗的：HEAD 60ee5f819（本日 13:02）已提交 scripts/tests/test_stale_reaper_compute_guard.py，而該測試直接呼叫 tpc._compute_job_alive；用 ast 解析 HEAD 版 task_pool_claim.py 確認該函式不存在 → main 當下是紅的，是「測試進了、實作沒進」的半截落地。工作區那份髒檔正是缺的實作（_compute_job_alive + cmd_cleanup 跳過 in-flight compute job + 回傳 skipped_compute_in_flight）。採用後 scripts/tests -k \"task_pool or claim or stale or reaper\" 58 passed。\n\n順手修回 exec bit：髒檔把 mode 從 100755 掉成 100644，chmod 755 還原後才提交。\n\n提交載體用 scripts/git_writer_lock.py commit 精確列舉單一路徑（此檔在 fire 起始前已 dirty，對 PHASE-Z 屬 foreign，不會被自動收）。工作區另一個 dirty code 檔 src/volpred/ops/next_tasks.py（他人在途）未動。\n\n驗證：uv run python -m volpred.ops.foreign_incident --check → closeable=true, blockers=[]；dispatch_slot_budget.py cap 由 2 回升到 6（open_incident=null）。"
+  },
+  {
+    "timestamp": "2026-07-21T13:13:40+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_5aa9d5f5",
+    "outcome": "blocked",
+    "actor": "hourly-slot-3-4089e39c08e945d1ad355f66792270d5",
+    "owner": "hourly-slot-3-4089e39c08e945d1ad355f66792270d5",
+    "commit": null,
+    "summary": "assign_5aa9d5f5（K1623 rev2 修復）在 starvation lockout 名單上高居第一，aged 90.8h。裁決是 triage 後標 blocked，不是重派——重派會是同一份已完成工作的第 4 次重跑。\n\n證據鏈：task 的 compute_job_id = agent-brief_k1623_rev2-e343cd，該 job status=completed（2026-07-19T09:47Z），後續 agent-brief_k1623_rev3_remediation-053de5 也 completed（rev3 修掉 10 個 blocker），產出都在 worktree dispatch-slot-2-c5cafe39-k1623/experiments/k1623/。最新一份 k1623_arm_c_collection_verdict.json（2026-07-21T07:24）verdict=PASS，但同檔明文寫著這不是 closure：blocking_open_items 列出 (1) 本輪明令禁止 merge worktree；(2) release 卡在 k1623_rev3_armc_mc.py 的 primary-path Codex review，Codex 額度 2026-07-25 才重置，現有 agy PASS 與 code-reviewer CONDITIONAL PASS 都是 fallback path，依 K1259 教訓不能當數；(3) review_verdict.json 仍是未簽名的模板。\n\n用 scripts/mark_task_blocked.py 標 reason=codex_quota_reset_pending until=2026-07-25（annotate 正確拒絕了 lifecycle 欄位，改走 canonical owner）。到期後 PRE-PHASE-0 的 unblock_expired_blocked_tasks.py 會自動翻回 pending。\n\n系統性觀察（依 drain-first 指示未另開新任務，記在此）：這張單餓死 90.8h 的原因不是沒人做，是它掛的 compute job 完成時 followup_mode=null，沒有任何收件路徑會回頭收它。完成但無 followup 的 job 會讓對應 task 永久停在 pending 並持續進 starved 名單。這與本班另一件事（stale reaper 看不見在飛的 compute job）是同一族的落差：task 與 compute job 兩邊的生命週期沒有雙向綁定。"
+  },
+  {
+    "timestamp": "2026-07-21T13:16:18+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_fa098fc8",
+    "outcome": "fallback_succeeded",
+    "actor": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "owner": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_fa098fc8-r3:codex->agy",
+    "article_id": "mile_fa098fc8",
+    "job_id": "lazypack-mile_fa098fc8-r3",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-21T13:20:12+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_d9ff126f",
+    "outcome": "fallback_succeeded",
+    "actor": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "owner": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_d9ff126f:codex->agy",
+    "article_id": "mile_d9ff126f",
+    "job_id": "lazypack-mile_d9ff126f",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-21T13:21:10+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_8c267b66",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "owner": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "commit": null,
+    "topology_override": "subagent→inline（安全關鍵 writer，主線程持有全部約束脈絡）",
+    "summary": "建 foreign 路徑裁決 actuator：src/volpred/ops/foreign_disposition.py + scripts/foreign_disposition.py + 10 個回歸測試（全過）。三不變式：只動清單內路徑（明確 pathspec，永不 git add -A，事後比對 dirty 差集抓 collateral）、處置前 bytes 須在 quarantine ref 或 HEAD 可取回、處置後機械驗證不再 dirty。在 canonical writer lock 下序列化，lock 內重跑 preflight。刻意未碰 live_workspace_paths() 的空證據問題（任務明文交代不要順手修，留 D4 同批）。註：本班期間 incident assign_3f794845 已由他班清乾淨，actuator 尚未實戰於它。"
+  },
+  {
+    "timestamp": "2026-07-21T13:21:10+08:00",
+    "task_type": "platform_ops",
+    "task_id": "release_deadlock_repair_20260720_14",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "owner": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "commit": null,
+    "summary": "release 死鎖收斂：3 篇中 mile_d26308ba / mile_fa57f77d 已由前班修復並釋出；殘留 mile_fa098fc8 的 lazypack job 為 failed，根因兩層 —— Codex renderer 撞用量上限（至 7/25），fallback 確定性 renderer 被 layout guard 擋（0.5% 與註解重疊 59%）。layout 修正已在 lazypack_render.py 落地，重跑 self-repair round 1 通過，經 lazypack-mile_fa098fc8-r3 正式管線完成。"
+  },
+  {
+    "timestamp": "2026-07-21T13:21:10+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_f4ea49aa",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "owner": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "commit": null,
+    "summary": "K740 general draft mile_d9ff126f 補 evidence-bound lazypack plan（storage/lazypack_plans/mile_d9ff126f_plan.json，3 panels，全數字綁 k740_strategy_meta_analysis_results.json 並帶 sha256）。plan validator 擋下 alt/note 裡的裸數字，已改為綁定或去數字化。baseline 0 repair round 通過，目視確認無重疊、數字與來源一致（rho=0.294 / p=0.308 / 分散溢酬 0.896）。經 lazypack-mile_d9ff126f 正式管線完成。release gate：content_gate_blocked 1→0、eligible 0→1。"
+  },
+  {
+    "timestamp": "2026-07-21T13:21:10+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_08eab4e5",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "owner": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
+    "commit": null,
+    "summary": "老闆產線解阻指示（本班份額）。已清：PHASE-Z incident acc9bba0eea5942f 關閉 → slot cap 2→6（吞吐直接翻倍以上，本班期間他班清路徑、本班驗證並補上缺失的解除端 actuator）；release 死鎖實質清空 → eligible 0→1。未清殘留（各有專屬 task，非本班能在 cap 內完整收尾）：ci-red-29797353050（slot-1 本班持有）、snapdupfix_k1319 / snapdupfix_k1592。另澄清：release pool 另 2 篇由 narrative-cluster 多樣性閘門擋住，屬品質閘門正常運作，依老闆指示不計入阻塞。"
   }
 ]

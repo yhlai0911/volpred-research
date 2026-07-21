@@ -32430,13 +32430,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-21T05:02:13.907867+00:00",
+    "completed_at": "2026-07-21T05:22:43.878439+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T05:02:13.907867+00:00",
-      "last_clean_observed_at": "2026-07-21T05:02:13.907867+00:00"
+      "resolved_at": "2026-07-21T05:22:43.878439+00:00",
+      "last_clean_observed_at": "2026-07-21T05:22:43.878439+00:00"
     }
   },
   {
@@ -35847,7 +35847,7 @@
     "description": "K1623（experiments/k1623/）於 2026-07-17 孤兒收尾時經 codex gpt-5.6-sol (reasoning=high) 獨立二審判 **FAIL**，依 K1259 規則不得寫入 knowledge.json，結論必須撤回而非收編。本 task 是它的 consumer 與修復出口。\n\n**FAIL 理由（二審 + 主線程驗證，算術全部一致，問題在「宣稱 vs 證據」）**：\n1. 識別宣稱不成立：至多 5（permissive 15）個 deterministic Bai-Perron mean break 扣不掉 Diebold-Inoue 所設想的隨機／密集 regime shift，故「純 level-shift 假象假說被拒絕、確有真 long-memory 成分」無識別定理支撐。且 demeaned d̂ 的 SE 直接沿用 raw ELW 漸近 SE，未計入斷點是估計出來的 generated-regressor 不確定性。\n2. 結論隨 loss function 反轉且未揭露：DM **只跑了 QLIKE**，而 ARFIMA 的 MSE 在 5 資產中有 4 個低於 HAR（SPY 0.889 / TW0050 0.836 / QQQ 0.874 / N225 0.891，低 11-16%）。README §4 宣稱報 QLIKE+MSE 兩個 loss，實際只對 QLIKE 做檢定，MSE 方向相反且完全未提。\n3. 「不可交易」無任何交易策略／成本／效用測試，純屬修辭。\n4. README §3 稱「多處反而顯著更差」→ 實際 10 個 ARFIMA/BreakHAR 比較中僅 1 個顯著（QQQ t=+2.47, p=0.0137），且對 5 個檢定做 Bonferroni 即不顯著；20 個 DM 比較全無多重比較修正。\n5. 描述與程式碼不符：§4 稱 BreakRobustHAR「只用最近 latest-break 之後樣本 refit」，但 k1623.py:471 `wstart = max(0, min(brk_start, i-22-60))` 在斷點太近時刻意把窗口推回斷點之前，無斷點時 fallback 到 trailing 750。\n6. §4/§9 headline 稱 ELW 為「Shimotsu-Phillips 可估非平穩 d」，但 code 只做 sample-mean demeaning（非 SP 的 unknown-mean μ̂(d) 加權）；fracdiff 截斷 FD_MAXK=2000 對 n=2,565-4,655 實際 binding，對 d̂=0.723 的 VIX（d>0.5，樣本平均在非平穩區不是有效 level 估計）影響最大。\n7. VIX 的 permissive 斷點選到 cap 上限 15/15（cap binding），故夾擠上界 20.3% 不構成上界。\n\n**可保留的描述性事實**（不依賴已崩的識別宣稱）：扣掉 BIC 斷點後 ELW d̂ 仍 0.46-0.65、扣掉 10-15 個 permissive 斷點後仍 0.19-0.58（殘餘低頻持續性未消失）；OOS n=749/資產，HAR 在 QLIKE 上是 5 資產冠軍或並列最佳；BreakHAR vs HAR 10 個比較全部不顯著（最小 p=0.0946）。\n\n**要做的**：\n1. 改寫 experiments/k1623/README.md：撤回 (a)「真 long memory 成分存在」identification 宣稱、(b)「不可交易」、(c)「多處顯著更差」；改為 loss-dependent 的誠實陳述。\n2. 補跑 MSE 的 DM 檢定 + 20 個比較的多重比較修正（BH 或 Bonferroni），把 loss 反轉寫進結果表。\n3. 修正 ELW 方法描述（sample-mean demeaning 非 SP）+ 揭露 FD_MAXK binding + VIX cap binding。\n4. 修正 BreakRobustHAR 描述使其與 k1623.py:471 實際行為一致（或改 code 對齊描述，二擇一並說明）。\n5. 完成後再送一次 codex 二審；CONDITIONAL PASS 以上才可寫 knowledge.json。\n6. 注意 §9 記載前一輪 codex（gpt-5.5）判「no CRITICAL/HIGH」與本輪 gpt-5.6-sol 直接衝突 —— 前輪 review 未捕捉上述問題，這本身是 reviewer 可靠度的教訓，值得記進 error_log。\n\n**可發佈 angle（撤回識別宣稱後仍成立）**：「同一組預測、同一批模型，換一個 loss function 結論就反轉：QLIKE 說樸素 HAR 贏遍 5 個資產，MSE 說 ARFIMA 在 4/5 資產低 11-16%」—— 純描述性、可從 JSON 直接驗證的方法論教訓（呼應 K1016）。此 angle 須待 (1)(2) 修完才可寫成文章。\n\nparent_task_id=dreaming_orphaned_experiment_k1623",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "blocked",
     "source": "auto_discovered",
     "created_at": "2026-07-17T10:24:51.136605+00:00",
     "parent_task_id": "dreaming_orphaned_experiment_k1623",
@@ -35878,14 +35878,37 @@
         "to": "pending",
         "by": "cleanup",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-21T05:11:37.271783+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-4089e39c08e945d1ad355f66792270d5"
+      },
+      {
+        "ts": "2026-07-21T05:12:33.967945+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-4089e39c08e945d1ad355f66792270d5"
+      },
+      {
+        "ts": "2026-07-21T05:12:34.210240+00:00",
+        "from": "in_progress",
+        "to": "blocked",
+        "by": "hourly-slot-3-4089e39c08e945d1ad355f66792270d5"
       }
     ],
-    "started_at": "2026-07-19T04:41:58.617369+00:00",
-    "result": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。\n\ndispatched to compute job agent-brief_k1623_rev2-e343cd; awaiting PHASE A collection",
+    "started_at": "2026-07-21T05:12:33.967931+00:00",
+    "result": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。\n\ndispatched to compute job agent-brief_k1623_rev2-e343cd; awaiting PHASE A collection\n\nTriage, not a re-run. Compute job agent-brief_k1623_rev2-e343cd (and rev3 remediation 053de5) both COMPLETED 2026-07-19; artifacts live in worktree dispatch-slot-2-c5cafe39-k1623 (rev3 fixed 10 blockers). Arm-C collection verdict 2026-07-21T07:24 = PASS but explicitly NOT closure: merge is forbidden this round and release is gated on primary-path Codex review of k1623_rev3_armc_mc.py, blocked on Codex usage limit until 2026-07-25 (agy + code-reviewer are FALLBACK paths only, per K1259). Also review_verdict.json is still an unsigned template. Task was pending-and-starved for 90.8h only because the finished compute job carried followup_mode=null, so nothing ever collected it. Re-dispatch would have been a 4th duplicate run of already-completed work.",
     "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1623_rev2-e343cd` (opus/xhigh, timeout 5400s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1623; artifact=experiments/k1623/k1623_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
     "last_released_at": "2026-07-20T03:12:37.507743+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "compute_job_id": "agent-brief_k1623_rev2-e343cd"
+    "compute_job_id": "agent-brief_k1623_rev2-e343cd",
+    "completed_at": "2026-07-21T05:12:34.210225+00:00",
+    "blocked_until": "2026-07-25",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_at": "2026-07-21T05:12:42+00:00",
+    "blocked_note": "K1623 rev2/rev3 compute jobs already COMPLETED 2026-07-19 (artifacts in worktree dispatch-slot-2-c5cafe39-k1623). Arm-C collection verdict 2026-07-21T07:24 = PASS but merge explicitly forbidden this round; release gated on primary-path Codex review of k1623_rev3_armc_mc.py. Codex usage limit resets 2026-07-25. review_verdict.json also still an unsigned template. Evidence: experiments/k1623/k1623_arm_c_collection_verdict.json blocking_open_items."
   },
   {
     "id": "assign_42306eaa",
@@ -41835,11 +41858,34 @@
     "description": "foreign incident `d930b5e23d12e238` 續辦第 2 段。全文證據：\ndocs/governance/2026-07/foreign_incident_path_adjudication.md\n\n## 問題（結構性，不是待辦漏做）\nincident `assign_65b27c8b` 的關閉條件是「40 個路徑都不再髒在 main checkout」，但能讓它們變乾淨的三條路全部封閉：\n(a) PHASE-Z 只 commit `dirty_now - baseline`，foreign 檔依定義不在其中；\n(b) dispatch 規則硬禁 agent 在 shared checkout 跑 git mutation（且併行 slot 會撞）；\n(c) cleanup layer 自動收編已被 D1 明令停止。\n⇒ incident 的 actuator 只接在懲罰端（slot cap 4→2），沒接在解除端。每班半速派工且沒有一班能靠自己走出來，\n違反本 class 自己的驗收標準「有限班數內必達 terminal state」。\n\n## 要做什麼\n給「已裁決的 foreign 路徑」一條**有寫入權限的序列化出口**，讓裁決結果能真的落地。\n`src/volpred/ops/git_writer_lock.py` 的 `run_locked` 是現成的序列化寫入器，不需新造。\n\n出口必須滿足（否則就是本 class 第 7 次補丁）：\n1. **只執行已明文裁決的處置**，不自己推斷歸屬。輸入是一份逐路徑 disposition（commit / delete / leave），\n   由知道該檔案的人或任務產生 —— 出口本身零猜測。\n2. 每次處置前後都可機械驗證：處置前 bytes 已在 quarantine ref 或 HEAD 可取回；處置後該路徑不再 dirty。\n3. 在 canonical writer lock 下序列化，且拒絕動不在 disposition 清單裡的路徑（防 `git add -A` 類事故重演）。\n\n## 注意（已驗證的反例，勿重蹈）\n40 個路徑中 **10 個有 open 任務指名**，非「沒人要」。尤其\n`scripts/detect_price_split_breaks.py` 逐字是 P1 `paper_0050_snapshot_repoint_20260719` 的驗證指令，\n兩個 0050 snapshot CSV 是它待重建的輸入。任何「卡太久 ⇒ 清掉」的規則都會摧毀 open P1 的資產。\n這 10 個應由各自 owner 任務在自己的 worktree 處置，不進本出口。\n\n## 順帶（不要順手修）\n`live_workspace_paths()`（foreign_incident.py:327）判 coverage 用「檔案存在於某 registered worktree」，\n但 worktree 是全 repo checkout，任何 tracked 檔必然存在 ⇒ 26 個路徑的 coverage 是空證據。\n修法應附「該 worktree 內此路徑相對其 HEAD 確有差異」的真實斷言，並與 D4 同批做\n（foreign_incident.py 自身仍 untracked，飛行中改它正是本 class 反覆犯的錯）。\n\nparent: assign_65b27c8b",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-19T11:13:50.481103+00:00",
     "parent_task_id": "assign_65b27c8b",
-    "created_by": "hourly-slot-2-d5c99af8459244ce9560dd8f9bf42315"
+    "created_by": "hourly-slot-2-d5c99af8459244ce9560dd8f9bf42315",
+    "status_history": [
+      {
+        "ts": "2026-07-21T05:11:23.332713+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:11:23.578673+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:21:21.271144+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      }
+    ],
+    "started_at": "2026-07-21T05:11:23.578659+00:00",
+    "completed_at": "2026-07-21T05:21:21.271127+00:00",
+    "result": "建 foreign 路徑裁決 actuator（volpred.ops.foreign_disposition + CLI + 10 測試全過）：明確 pathspec 只動清單內路徑、處置前 bytes 須可取回、處置後機械驗證，全程 canonical writer lock 且 lock 內重跑 preflight。未動 live_workspace_paths()（依任務交代留 D4）。"
   },
   {
     "id": "assign_6bf4ae0a",
@@ -46326,7 +46372,7 @@
     "description": "release_pool 死鎖：草稿池有 3 篇、eligible=0（due_now=true），其中 3 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_d26308ba` (general, 已被擋 3 次) [lazypack_missing] 集中度警報響起時，等權重指數震得比大盤還兇\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>\n- `mile_fa57f77d` (general, 已被擋 3 次) [lazypack_missing] 東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>\n- `mile_fa098fc8` (general, 已被擋 1 次) [lazypack_missing] 大跌隔天會反彈嗎？數字說會，但我們自己的檢定沒過關\n    missing 懶人包圖組 section (render failed, job lazypack-mile_fa098fc8) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_fa098fc8 ; re-enqueue via scripts/lazypack_async_render.py enqueue\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_remediation",
     "created_at": "2026-07-20T12:00:52.840903+00:00",
     "blocked_article_ids": [
@@ -46334,7 +46380,30 @@
       "mile_fa57f77d",
       "mile_fa098fc8"
     ],
-    "trigger": "release_pool_content_gate_deadlock"
+    "trigger": "release_pool_content_gate_deadlock",
+    "status_history": [
+      {
+        "ts": "2026-07-21T05:21:31.208063+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:21:31.442392+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:21:31.668514+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      }
+    ],
+    "started_at": "2026-07-21T05:21:31.442376+00:00",
+    "completed_at": "2026-07-21T05:21:31.668499+00:00",
+    "result": "與 release_deadlock_repair_20260720_14 為同一組 3 篇草稿的重複自動補救單；該死鎖已於本班實質清空（content_gate_blocked 1→0、eligible 0→1），無獨立殘留工作。"
   },
   {
     "id": "telegram-1203",
@@ -46605,7 +46674,7 @@
     "description": "release_pool 死鎖：草稿池有 3 篇、eligible=0（due_now=true），其中 3 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_d26308ba` (general, 已被擋 5 次) [lazypack_missing] 集中度警報響起時，等權重指數震得比大盤還兇\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>\n- `mile_fa57f77d` (general, 已被擋 5 次) [lazypack_missing] 東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>\n- `mile_fa098fc8` (general, 已被擋 3 次) [lazypack_missing] 大跌隔天會反彈嗎？數字說會，但我們自己的檢定沒過關\n    missing 懶人包圖組 section (render failed, job lazypack-mile_fa098fc8) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_fa098fc8 ; re-enqueue via scripts/lazypack_async_render.py enqueue\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_remediation",
     "created_at": "2026-07-20T13:01:36.988810+00:00",
     "blocked_article_ids": [
@@ -46615,7 +46684,30 @@
     ],
     "trigger": "release_pool_content_gate_deadlock",
     "duplicate_of": "release_deadlock_repair_20260720_12",
-    "triage_note": "同一 release 死鎖每小時複製一張（12/13/14 點各一）；以 _12 為單一 owner，本張勿再獨立派工"
+    "triage_note": "同一 release 死鎖每小時複製一張（12/13/14 點各一）；以 _12 為單一 owner，本張勿再獨立派工",
+    "status_history": [
+      {
+        "ts": "2026-07-21T05:21:31.900760+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:21:32.132559+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:21:32.374292+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      }
+    ],
+    "started_at": "2026-07-21T05:21:32.132544+00:00",
+    "completed_at": "2026-07-21T05:21:32.374277+00:00",
+    "result": "與 release_deadlock_repair_20260720_14 為同一組 3 篇草稿的重複自動補救單；該死鎖已於本班實質清空（content_gate_blocked 1→0、eligible 0→1），無獨立殘留工作。"
   },
   {
     "id": "K1409_article_general",
@@ -46782,7 +46874,7 @@
     "description": "release_pool 死鎖：草稿池有 3 篇、eligible=0（due_now=true），其中 3 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_d26308ba` (general, 已被擋 9 次) [lazypack_missing] 集中度警報響起時，等權重指數震得比大盤還兇\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_d26308ba*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_d26308ba --plan <plan.json>\n- `mile_fa57f77d` (general, 已被擋 9 次) [lazypack_missing] 東京開盤前，紐約的恐慌指數已經收盤了：六格全掛的日本波動實驗\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_fa57f77d*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_fa57f77d --plan <plan.json>\n- `mile_fa098fc8` (general, 已被擋 7 次) [lazypack_missing] 大跌隔天會反彈嗎？數字說會，但我們自己的檢定沒過關\n    missing 懶人包圖組 section (render failed, job lazypack-mile_fa098fc8) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_fa098fc8 ; re-enqueue via scripts/lazypack_async_render.py enqueue\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_remediation",
     "created_at": "2026-07-20T14:00:54.607019+00:00",
     "blocked_article_ids": [
@@ -46792,7 +46884,30 @@
     ],
     "trigger": "release_pool_content_gate_deadlock",
     "duplicate_of": "release_deadlock_repair_20260720_12",
-    "triage_note": "同一 release 死鎖每小時複製一張（12/13/14 點各一）；以 _12 為單一 owner，本張勿再獨立派工"
+    "triage_note": "同一 release 死鎖每小時複製一張（12/13/14 點各一）；以 _12 為單一 owner，本張勿再獨立派工",
+    "status_history": [
+      {
+        "ts": "2026-07-21T05:12:09.647246+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:12:09.884003+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:21:21.495670+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      }
+    ],
+    "started_at": "2026-07-21T05:12:09.883988+00:00",
+    "completed_at": "2026-07-21T05:21:21.495656+00:00",
+    "result": "release 死鎖清空：3 篇中 2 篇前班已釋出，殘留 mile_fa098fc8 因 Codex 用量上限 + layout guard 雙層失敗，重跑 self-repair 通過並經 r3 正式管線完成。"
   },
   {
     "id": "K1253_article_general",
@@ -46853,9 +46968,32 @@
     "description": "hourly-slot-2 於 2026-07-20 22:32 發佈 general draft mile_d9ff126f（排第一名的那套策略，設定是最單純的那一級，experiment_refs=[K740]），anti_ai_gate PASS、sanitize_applied=0、_infer_audience 驗證回 general。但未附 --lazypack-plan，publish_draft 警告該 draft 在 lazypack render 落地前不會被 release_pool 放行。TODO：依 lazypack-infographic skill 產 plan（primary path = codex exec 寫 data-bound poster script，數字綁 experiments/k740/k740_strategy_meta_analysis_results.json），再跑 scripts/lazypack_async_render.py enqueue --article-id mile_d9ff126f --experiment K740 --plan <plan.json>。附帶回報一個疑似 bug：publish_draft 的 lazypack_never_enqueued 警告印出的 article_id 是來源文章 mile_2fb1dfb3 而非本次新建的 mile_d9ff126f，建議查 warning 的 id 解析。",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
-    "created_at": "2026-07-20T14:34:21.210935+00:00"
+    "created_at": "2026-07-20T14:34:21.210935+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-21T05:16:45.108030+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:16:45.339815+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:21:21.731736+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      }
+    ],
+    "started_at": "2026-07-21T05:16:45.339800+00:00",
+    "completed_at": "2026-07-21T05:21:21.731721+00:00",
+    "result": "mile_d9ff126f 補 evidence-bound lazypack plan（3 panels 全綁 k740 results + sha256），正式管線渲染完成；release gate content_gate_blocked 1→0、eligible 0→1。"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260720T150147300691Z_a1",
@@ -47592,7 +47730,10 @@
       "escalation_due": false,
       "fingerprint": [
         "scripts/tests/test_lazypack_render_repair.py::scripts.tests.test_lazypack_render_repair::test_repair_rounds_recover_the_overlap_plan"
-      ]
+      ],
+      "resolved_at": "2026-07-21T05:03:38.185591+00:00",
+      "final_consecutive_remediation_failures": 0,
+      "superseded_by_distinct_incident_at": "2026-07-21T05:03:38.185591+00:00"
     },
     "status_history": [
       {
@@ -47693,7 +47834,7 @@
     "task_type": "platform_ops",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29797353050",
@@ -47720,11 +47861,31 @@
         "to": "pending",
         "by": "hourly-slot-1-cee77b098f6a44cc8bb88f18a4599ae2",
         "note": "supervisor_kill_cee77b09"
+      },
+      {
+        "ts": "2026-07-21T05:07:39.108347+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-80ff027811e142edabf2a3be484a5db2"
+      },
+      {
+        "ts": "2026-07-21T05:07:39.342600+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-80ff027811e142edabf2a3be484a5db2"
+      },
+      {
+        "ts": "2026-07-21T05:09:51.541164+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-80ff027811e142edabf2a3be484a5db2"
       }
     ],
-    "started_at": "2026-07-21T04:58:57.800532+00:00",
+    "started_at": "2026-07-21T05:07:39.342585+00:00",
     "last_released_at": "2026-07-21T04:59:50.339205+00:00",
-    "last_release_reason": "supervisor_kill_cee77b09"
+    "last_release_reason": "supervisor_kill_cee77b09",
+    "completed_at": "2026-07-21T05:09:51.541149+00:00",
+    "result": "測試把『bug 仍會發生』寫成契約；77c6eefc5 真正修好 38px floor 後反而 DID NOT RAISE。改為 defect pin（7 種高度只能乾淨或 TextFitError）+ 注入式 repair-loop pin，host-independent。commit 75a597735，lazypack 94 tests passed。"
   },
   {
     "id": "wsb_remed_dispatch-slot-1-20b291d5-k1436",
@@ -48191,7 +48352,7 @@
     "description": "## 發生什麼\n7 個未提交檔案不是任何一班 fire 產出的，最長已連續 7 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- .claude/rules/context-hygiene.md — 7 班\n- AGENTS.md — 7 班\n- docs/error_log.md — 7 班\n- docs/governance/2026-07/doc_drift_audit_20260721.md — 7 班\n- scripts/task_pool_claim.py — 7 班\n- scripts/tests/test_lazypack_render_repair.py — 4 班\n- scripts/tests/test_stale_reaper_compute_guard.py — 7 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T044809156645Z:<路徑>`\n- `git show refs/volpred/quarantine/20260721T050045142530Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-21T04:48:09.246089+00:00",
     "payload": {
@@ -48223,6 +48384,138 @@
       "first_seen_at": "2026-07-21T04:48:09.231130+00:00",
       "last_seen_at": "2026-07-21T05:00:45.241701+00:00"
     },
-    "updated_at": "2026-07-21T05:00:45.241701+00:00"
+    "updated_at": "2026-07-21T05:00:45.241701+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-21T05:08:59.563397+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-4089e39c08e945d1ad355f66792270d5"
+      },
+      {
+        "ts": "2026-07-21T05:09:11.200382+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-4089e39c08e945d1ad355f66792270d5"
+      },
+      {
+        "ts": "2026-07-21T05:10:46.881565+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-3-4089e39c08e945d1ad355f66792270d5"
+      }
+    ],
+    "started_at": "2026-07-21T05:09:11.200367+00:00",
+    "completed_at": "2026-07-21T05:10:46.881545+00:00",
+    "result": "Adopted scripts/task_pool_claim.py stale-reaper compute-guard (_compute_job_alive + cleanup skip) into main as db6228af8. HEAD 60ee5f819 had committed the test without the impl -> main was red; 58 related tests now pass. foreign_incident --check now closeable=true, blockers=[]. Exec bit 755 restored (dirty copy had dropped it)."
+  },
+  {
+    "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260721T050338185591Z_a1",
+    "title": "[internal alert] PHASE-Z auto-commit 測試紅燈（60ee5f819e9b）",
+    "description": "由內部可自癒 alert_key `phase_z_test_gate_red` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 跑同一組測試為綠，HEAD 新增紅燈。\n- fire 時間: 13:02\n- commit: 60ee5f819e9b\n- 變更程式檔: scripts/daily_checkup.py, scripts/dreaming_review.py, scripts/generate_diverse_tasks.py, scripts/generate_research_backlog.py, scripts/refill_task_pool.py, scripts/tests/test_stale_reaper_compute_guard.py, src/volpred/ops/pool_pressure.py, tests/test_pool_pressure.py\n- 跑的測試: scripts/tests/test_stale_reaper_compute_guard.py tests/test_daily_checkup_data_freshness.py tests/test_daily_checkup_db_landing.py tests/test_daily_checkup_live_freshness.py tests/test_daily_checkup_reproducibility.py tests/test_daily_checkup_schedule.py tests/test_dreaming_review.py tests/test_generate_diverse_tasks.py tests/test_generate_research_backlog.py tests/test_pool_pressure.py tests/test_refill_task_pool.py\n- pytest 退出碼: 1（HEAD） / 0（HEAD^，baseline=green）\n\n## 影響\n隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。\n\n## 修復線索（供接手任務）\n1. 隔離重現：\n   uv run --extra dev python -m pytest scripts/tests/test_stale_reaper_compute_guard.py tests/test_daily_checkup_data_freshness.py tests/test_daily_checkup_db_landing.py tests/test_daily_checkup_live_freshness.py tests/test_daily_checkup_reproducibility.py tests/test_daily_checkup_schedule.py tests/test_dreaming_review.py tests/test_generate_diverse_tasks.py tests/test_generate_research_backlog.py tests/test_pool_pressure.py tests/test_refill_task_pool.py -q\n2. 修掉紅燈或 revert 該 commit（gate 不自動 revert — revert 風險高於紅燈本身）。\n3. 失敗尾段：\n\n```\n_guard.py::test_terminal_job_allows_release[cancelled]\nERROR scripts/tests/test_stale_reaper_compute_guard.py::test_missing_job_file_allows_release\nERROR scripts/tests/test_stale_reaper_compute_guard.py::test_no_compute_job_id_allows_release\n198 passed, 10 errors in 17.64s\nwarning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nUsing CPython 3.12.10\nCreating virtual environment at: .venv\n   Building volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-ajucqz0q/head\n      Built volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-ajucqz0q/head\nInstalled 125 packages in 543ms\n```",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-21T05:03:38.185591+00:00",
+    "source": "internal_alert_remediation_router",
+    "tags": [
+      "alert",
+      "internal-remediable",
+      "phase_z_test_gate_red"
+    ],
+    "alert_key": "phase_z_test_gate_red",
+    "internal_remediable": true,
+    "internal_alert_state": {
+      "episode_id": "20260721T050338185591Z",
+      "episode_started_at": "2026-07-21T05:03:38.185591+00:00",
+      "attempt_number": 1,
+      "last_seen_at": "2026-07-21T05:03:38.185591+00:00",
+      "consecutive_remediation_failures": 0,
+      "attempt_history": [],
+      "escalation_due": false,
+      "fingerprint": [
+        "scripts/tests/test_stale_reaper_compute_guard.py::scripts.tests.test_stale_reaper_compute_guard::test_live_job_blocks_release[claimed]",
+        "scripts/tests/test_stale_reaper_compute_guard.py::scripts.tests.test_stale_reaper_compute_guard::test_live_job_blocks_release[pending]",
+        "scripts/tests/test_stale_reaper_compute_guard.py::scripts.tests.test_stale_reaper_compute_guard::test_live_job_blocks_release[queued]",
+        "scripts/tests/test_stale_reaper_compute_guard.py::scripts.tests.test_stale_reaper_compute_guard::test_live_job_blocks_release[running]",
+        "scripts/tests/test_stale_reaper_compute_guard.py::scripts.tests.test_stale_reaper_compute_guard::test_missing_job_file_allows_release",
+        "scripts/tests/test_stale_reaper_compute_guard.py::scripts.tests.test_stale_reaper_compute_guard::test_no_compute_job_id_allows_release",
+        "scripts/tests/test_stale_reaper_compute_guard.py::scripts.tests.test_stale_reaper_compute_guard::test_terminal_job_allows_release[cancelled]",
+        "scripts/tests/test_stale_reaper_compute_guard.py::scripts.tests.test_stale_reaper_compute_guard::test_terminal_job_allows_release[completed]",
+        "scripts/tests/test_stale_reaper_compute_guard.py::scripts.tests.test_stale_reaper_compute_guard::test_terminal_job_allows_release[failed]",
+        "scripts/tests/test_stale_reaper_compute_guard.py::scripts.tests.test_stale_reaper_compute_guard::test_terminal_job_allows_release[timeout]"
+      ]
+    }
+  },
+  {
+    "id": "telegram-1248",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-21T05:04:11.446642+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1248）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n依照你的建議做 但要以越早清空任務池以不堵塞為目標\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⏰ 15:00 前清空整池，做不到 — 直說。\n\n📊 現況（12:45 實查）\n待辦 190 張：P1 40、P2 60、P3 88、其他 2。\n近 7 日實際完成速率 70/日 ≈ 2.9/小時。剩 2 小時 15 分 → 最多清 6~8 張。差距是 25 倍，不是趕一下就能補的。\n\n🧠 而且「清空」本身不該是目標\n88 張 P3 裡大半是 K1708~K1750 研究題庫存。那是選題池，清空等於明天沒題目做。\n\n✅ 我建議改成這樣（你要的其實是「不阻塞」）\n15:00 前我清掉真正卡住流程的那幾張：release 死鎖 3 張、CI 紅燈、PHASE-Z incident、snapshot-dup HIGH 2 張。清完 = 產線沒有東西擋著。\n研究/發文 backlog 照排程走，不當阻塞算。\n\n🔄 drain-first 已在跑\nassign_2d40d261 正在執行中（抑制新任務生成 + 優先清舊）。這張就是你上次指示落地的那條。\n\n要我改成「15:00 前把 40 張 P1 全清」也可以，但那要犧牲品質關卡，我不建議。你點頭我就照上面的走。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T05:04:31.981981+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-21T05:05:40.647605+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-21T05:05:40.647592+00:00",
+    "result": "已用 Telegram 回覆（msg 1249）：確認照批准方案走，並把 drain 吞吐設為主目標；後續執行排入 assign_08eab4e5（P1, fire_requested）。同時更正 assign_2d40d261 已於 12:43 完成而非執行中。"
+  },
+  {
+    "id": "assign_08eab4e5",
+    "title": "[老闆指示 2026-07-21] 產線解阻 + 最大化 drain 吞吐（approved plan）",
+    "description": "老闆 2026-07-21 13:04 台北時間回覆：'依照你的建議做 但要以越早清空任務池以不堵塞為目標'。\n\n批准的方案（telegram msg 1248 對話）：\n1) 15:00 前優先清掉真正卡住產線的阻塞項：release 死鎖 3 張、CI 紅燈、PHASE-Z incident、snapshot-dup HIGH 2 張。清完 = 產線沒有東西擋著。\n2) 研究/發文 backlog 照排程走，不當阻塞算。\n3) 老闆額外加碼的方向：整體目標是「越早清空池、越不堵塞越好」→ 在不犧牲品質關卡的前提下，持續把 drain 吞吐推到上限。\n\n執行要求：\n- 阻塞類任務一律插隊到 P1 最前。\n- 抑制新任務生成（drain-first，延續已完成的 assign_2d40d261）直到 pending 明顯下降。\n- 吞吐驗收接 assign_f59976b6（max_slots 2→4 的 24h 吞吐驗收）。\n- 不得為了衝數字跳過品質 gate；被 gate 擋住的任務標明原因，不算阻塞。\n\n現況快照（13:04 台北實查 storage/next_tasks.json）：pending 188（P1 38、P2 60、P3 88、其他 2）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-21T05:05:13.938130+00:00",
+    "created_by": "telegram_responder",
+    "status_history": [
+      {
+        "ts": "2026-07-21T05:06:28.573118+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:06:47.073539+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      },
+      {
+        "ts": "2026-07-21T05:21:32.643925+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-d67174768057485d99423d97bccc25cb"
+      }
+    ],
+    "started_at": "2026-07-21T05:06:47.073521+00:00",
+    "completed_at": "2026-07-21T05:21:32.643911+00:00",
+    "result": "本班份額：PHASE-Z incident 關閉驗證 + 補上缺失的解除端 actuator（slot cap 2→6）、release 死鎖清空（eligible 0→1）。殘留有專屬 task：ci-red-29797353050（slot-1 持有）、snapdupfix_k1319/k1592。另 2 篇草稿由 narrative-cluster 多樣性閘門擋住，屬品質閘門正常運作、不計阻塞。"
+  },
+  {
+    "id": "phase_z_test_only_orphan_no_exit",
+    "title": "PHASE-Z: test-only 的紅燈修復沒有自動出口，CI 可能永遠紅",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "auto_discovered",
+    "created_at": "2026-07-21T05:10:20.615004+00:00",
+    "description": "2026-07-21 ci-red-29797353050 實例暴露的類別缺口。\n\n_adopt_orphan_halves 的存在理由（phase_z.py 註解原文）是「Without this exit such a path is foreign forever and CI stays red forever」，但 _orphan_half_candidates 用 _is_test_path 明文排除 test 檔。當紅燈的修復本身**只改 test 檔**（例如測試把「bug 仍會發生」寫成契約，真正修好之後反而 DID NOT RAISE），這條路徑就同時滿足「foreign forever」與「沒有自動出口」——正是那段註解要防的結局。本次靠 hourly fire 具名用 git_writer_lock.py 手動裁決才解掉。\n\n排除 test 檔的理由是正當的（自動採納可能收進一個被削弱的測試以換綠燈），所以不要單純拿掉排除。要找的是一條「能證明不是削弱」的證據形式，或一條明確的人為裁決出口（例如 foreign-streak 命中 test 檔時直接開 incident 並在通知裡附上可執行的 git_writer_lock 指令），而不是讓它靜靜卡著。\n\n參考：commit 75a597735、docs/error_log.md 2026-07-10、phase_z.py _adopt_orphan_halves 註解。"
   }
 ]
