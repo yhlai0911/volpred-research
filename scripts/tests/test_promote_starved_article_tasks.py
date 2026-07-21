@@ -91,3 +91,29 @@ def test_no_pending_articles_promotes_nothing_and_leaves_file_untouched(tmp_path
 def test_missing_file_fails_open(tmp_path, monkeypatch):
     monkeypatch.setattr(ctd, "NEXT_TASKS", tmp_path / "nope.json")
     assert ctd._promote_starved_article_tasks(6) == 0
+
+
+def test_promotion_is_deliberate_exception_to_machine_p1_clamp(tmp_path, monkeypatch):
+    """Pin (2026-07-21 dispatch-lanes absorb): this promote path must KEEP writing
+    P1 for machine-source tasks. The admission clamp
+    (clamp_machine_priority_inflation) governs generators self-declaring P1 at
+    creation; this actuator elevates AFTER measuring releasable==0 live, which is
+    exactly the kind of real urgency the clamp exists to protect. If someone
+    'absorbs' this write into append_task_record, the clamp would immediately cap
+    the promotion back to P2 and drought escalation dies — this test fails first.
+    """
+    tasks = [
+        {**_task("machine_art", priority=4), "source": "auto_discovered"},
+        {**_task("emergency_art", priority=2), "source": "auto_publish_drought_emergency"},
+    ]
+    p = _write(tmp_path, tasks)
+    monkeypatch.setattr(ctd, "NEXT_TASKS", p)
+
+    promoted = ctd._promote_starved_article_tasks(ctd.DRAFT_POOL_FLOOR)
+
+    assert promoted == 2
+    after = {t["id"]: t for t in _read(p)}
+    for tid in ("machine_art", "emergency_art"):
+        assert after[tid]["priority"] == 1, "promote must not be routed through the admission clamp"
+        assert "priority_capped_from" not in after[tid]
+        assert "auto-promoted" in after[tid]["priority_note"]

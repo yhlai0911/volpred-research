@@ -186,3 +186,54 @@ def test_wrapper_drift_entries_quiet_on_a_non_checkout_root(tmp_path: Path, monk
     check_alerts = _load_check_alerts_module()
     monkeypatch.setattr(check_alerts, "PROJECT_ROOT", tmp_path)
     assert check_alerts._wrapper_drift_entries() == []
+
+
+def test_append_next_task_locked_routes_machine_p1_through_gateway_clamp(tmp_path: Path):
+    """2026-07-21 dispatch-lanes absorb: the CI-red P1 writer must pass the
+    append_task_record admission clamp — machine-source P1 is admitted as P2
+    (priority_capped_from=1). Timeliness rides on dispatch_preempt + the CI
+    watcher's request_fire loop, not on the priority digit."""
+    check_alerts = _load_check_alerts_module()
+    queue = tmp_path / "next_tasks.json"
+    task = check_alerts._build_ci_repair_task(
+        {"databaseId": 999001, "attempt": 1, "headSha": "abc123def", "url": "https://x/runs/999001"},
+        now_iso="2026-07-21T00:00:00+00:00",
+    )
+    assert task["priority"] == 1  # builder still declares P1 intent
+
+    created = check_alerts._append_next_task_locked(task, queue)
+
+    assert created is True
+    persisted = json.loads(queue.read_text(encoding="utf-8"))
+    assert [t["id"] for t in persisted] == ["ci-red-999001"]
+    assert persisted[0]["priority"] == 2
+    assert persisted[0]["priority_capped_from"] == 1
+    assert persisted[0]["dispatch_preempt"] is True  # the actual timeliness carrier survives
+
+    # id-dedup contract preserved: replay returns False, queue unchanged.
+    replay = check_alerts._build_ci_repair_task(
+        {"databaseId": 999001, "attempt": 1, "headSha": "abc123def", "url": "https://x/runs/999001"},
+        now_iso="2026-07-21T01:00:00+00:00",
+    )
+    assert check_alerts._append_next_task_locked(replay, queue) is False
+    assert len(json.loads(queue.read_text(encoding="utf-8"))) == 1
+
+
+def test_append_next_task_locked_keeps_time_critical_machine_p1(tmp_path: Path):
+    """Clamp pass-through: a machine-built time-critical type keeps P1 (the
+    2026-07-12 boss directive lives in task_urgency, not in this caller)."""
+    check_alerts = _load_check_alerts_module()
+    queue = tmp_path / "next_tasks.json"
+    task = {
+        "id": "evt_x",
+        "title": "event",
+        "task_type": "event_article",
+        "priority": 1,
+        "status": "pending",
+        "source": "auto_remediation",
+        "created_at": "2026-07-21T00:00:00+00:00",
+    }
+    assert check_alerts._append_next_task_locked(task, queue) is True
+    persisted = json.loads(queue.read_text(encoding="utf-8"))
+    assert persisted[0]["priority"] == 1
+    assert "priority_capped_from" not in persisted[0]

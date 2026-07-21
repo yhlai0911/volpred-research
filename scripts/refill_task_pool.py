@@ -45,7 +45,7 @@ CANDIDATES = ROOT / "storage" / "publication_candidates.json"
 
 sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
-from volpred.ops.next_tasks import write_tasks_locked  # noqa: E402
+from volpred.ops.next_tasks import append_task_record  # noqa: E402
 from volpred.ops.pool_pressure import pool_admits_new_work  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
@@ -84,16 +84,9 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
     raise SystemExit(f"failed to parse {NEXT_TASKS} after {max_retries} retries: {last_err}")
 
 
-def _save_tasks(payload: dict | list, tasks: list) -> None:
-    """WS-A1b: canonical one-shot writer (flock + serialize-first) replaces the
-    unlocked full-file write_text (load was LOCK_SH only → classic lost-update
-    exposure). Legacy dict-root wrapper is read tolerance only — the canonical
-    queue root has been a list since the 2026-07-16 single-gateway refactor —
-    so writing it back is refused loudly."""
-    if isinstance(payload, dict):
-        _warn_refill("next_tasks dict-root shape is no longer writable; canonical root is a list")
-        raise ValueError("next_tasks.json root must be a list (single-gateway 2026-07-16)")
-    write_tasks_locked(NEXT_TASKS, tasks)
+# _save_tasks（WS-A1b 全檔重寫 writer）已於 2026-07-21 dispatch-lanes 收編移除：
+# refill 的寫入面改為逐筆 append_task_record（見 refill() 尾段），dict-root 的
+# loud refusal 由 gateway 的 "root is not a list" ValueError 同等接手。
 
 
 def _existing_ids(tasks: list) -> set[str]:
@@ -1395,7 +1388,7 @@ def refill(
         return {"ok": False, "reason": "publication_candidates.json missing", "added": 0}
 
     cand_data = json.loads(CANDIDATES.read_text(encoding="utf-8"))
-    payload, tasks = _load_tasks()
+    _, tasks = _load_tasks()  # root payload 不再回寫（寫入面 = gateway append，見尾段）
     existing = _existing_ids(tasks)
     live_kids = _live_kids(tasks)
     already_covered_general = _kids_with_audience_article("general")
@@ -1772,12 +1765,23 @@ def refill(
         **({"candidates_freshness": freshness} if freshness else {}),
         }
 
-    tasks.extend(new_entries)
-    _save_tasks(payload, tasks)
+    # 2026-07-21 dispatch-lanes 收編：新任務逐筆走單一 gateway ``append_task_record``
+    # （R2 admission clamp 的唯一 enforcement 點），取代舊的「整份 snapshot 蓋回去」
+    # （_load_tasks 之後別的 writer append 會被全檔重寫蓋掉的 lost-update 面也一併消
+    # 失）。emergency P1 會被 clamp 到 P2 —— 斷稿時效不靠生成端自封 P1：
+    # remediate_publish_drought 先 force-release 既有草稿，真乾涸（releasable==0）由
+    # dispatch 端 _promote_starved_article_tasks 現場量測後批次晉升 P1（該處是 clamp
+    # 的 deliberate exception，見 continue_task_dispatch.py）。``if_exists='skip'``
+    # 保留原 snapshot dedup 契約並讓併發下的重複 id 誠實地不計入 added。
+    added_ids: list[str] = []
+    for entry in new_entries:
+        _, created = append_task_record(entry, path=NEXT_TASKS, if_exists="skip")
+        if created:
+            added_ids.append(entry["id"])
     return {
         "ok": True,
-        "added": len(new_entries),
-        "added_ids": [e["id"] for e in new_entries],
+        "added": len(added_ids),
+        "added_ids": added_ids,
         **cluster_note,
         **({"fallback": fallback_reason} if fallback_reason else {}),
         **({"candidates_freshness": freshness} if freshness else {}),

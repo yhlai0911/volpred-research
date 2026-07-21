@@ -716,29 +716,27 @@ def _ci_latest_completed_run() -> dict | None:
 
 
 def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
-    """flock-append one task to the pending queue (same discipline as refill scripts)."""
-    import fcntl
+    """Append one caller-built task via the single ingress gateway.
 
-    from volpred.ops.next_tasks import normalize_task_priority, write_tasks_to_handle
+    2026-07-21 dispatch-lanes 收編：這裡原本是一個私有 flock writer（自己 open +
+    dedup + write_tasks_to_handle），繞過 ``append_task_record`` —— 本檔的機器產
+    P1（CI 紅燈修復、release 死鎖補救）因此躲掉 R2 admission clamp。改為委派
+    gateway（結構允許：本函式自身就是完整的 read-modify-write，沒有外部持鎖），
+    caller 契約不變（caller-built record；重複 id 回 False），flock / guard /
+    dedup / clamp / pending-cap 觀測全由 gateway 單點供給。
 
-    guard_canonical_write(next_tasks_path)
-    normalize_task_priority(task)
-    next_tasks_path.parent.mkdir(parents=True, exist_ok=True)
-    if not next_tasks_path.exists():
-        next_tasks_path.write_text("[]\n", encoding="utf-8")
-    with next_tasks_path.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
-        try:
-            data = json.load(fh)
-            if not isinstance(data, list):
-                raise ValueError("next_tasks.json is not a list")
-            if any(isinstance(t, dict) and t.get("id") == task["id"] for t in data):
-                return False
-            data.append(task)
-            write_tasks_to_handle(fh, data)
-            return True
-        finally:
-            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    CI 紅燈修復的時效**不靠 P1 數字**，clamp 到 P2 不削弱它：
+    (a) record 上的 ``dispatch_preempt`` 讓它領跑 scheduled menu 並穿透
+        starvation lockout（continue_task_dispatch.py:1176）；
+    (b) CI watcher 每輪 still-red poll 都重新 request_fire 直到任務離開 pending
+        （``_ci_dispatch_pending_task``）。
+    release 死鎖補救同理：死鎖 detector 每小時重評，且文章類任務在真乾涸時由
+    dispatch 端 ``_promote_starved_article_tasks`` 現場量測後晉升。
+    """
+    from volpred.ops.next_tasks import append_task_record
+
+    _, created = append_task_record(task, path=next_tasks_path, if_exists="skip")
+    return created
 
 
 def _ci_run_key(run: dict) -> str:

@@ -77,9 +77,9 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "scripts/build_publication_candidates.py:_write_output_atomically": {
         "os.replace": 1, "write_text": 1,
     },
-    "scripts/check_alerts.py:_append_next_task_locked": {
-        "mkdir": 1, "open-write": 1, "write_text": 1,
-    },
+    # scripts/check_alerts.py:_append_next_task_locked was a direct flock writer
+    # until 2026-07-21 (dispatch-lanes absorb): it now delegates to the
+    # append_task_record gateway and owns no direct mutation.
     "scripts/check_alerts.py:_ci_close_pending_repair_tasks": {"open-write": 1},
     "scripts/continue_task_dispatch.py:_materialize_pool_dry_diagnostic_task": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
@@ -189,7 +189,6 @@ GENERIC_OWNER_TARGETS: Mapping[str, frozenset[str]] = {
         {"tasks_path"}
     ),
     "scripts/backfill_arc_dedup_metadata.py:_write_json_atomic": frozenset({"path"}),
-    "scripts/check_alerts.py:_append_next_task_locked": frozenset({"next_tasks_path"}),
     "scripts/check_alerts.py:_ci_close_pending_repair_tasks": frozenset(
         {"next_tasks_path"}
     ),

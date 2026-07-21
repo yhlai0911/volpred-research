@@ -740,6 +740,16 @@ def _promote_starved_article_tasks(limit: int) -> int:
     修法：釋出池真乾涸（releasable==0）時，晉升既有 pending 文章任務到 P1（最多
     `limit` 個、一次到位），而不是加開新任務 —— 保留 in-flight 自我節制（防
     pile-up），只修 dispatch 搆不到的問題。Fail-open：任何錯誤回 0 並留 trace。
+
+    **本函式是 R2 admission clamp（``clamp_machine_priority_inflation``）的
+    deliberate exception，不得收編進 gateway**（2026-07-21 dispatch-lanes）：
+    clamp 擋的是生成端在**建單時**自封 P1（機器來源無權宣告自己緊急）；這裡是
+    dispatch 端在**現場量測到 releasable==0** 後的事後晉升 —— 緊急性來自當下實測
+    的乾涸訊號，不是生成器的自我宣告，語意上正是 clamp 要保護的那種「真時效」
+    授權點。若把這條 in-place 提升改走 append_task_record，clamp 會把晉升立刻
+    夾回 P2，drought escalation 整條失效（pin test：
+    scripts/tests/test_promote_starved_article_tasks.py
+    ::test_promotion_is_deliberate_exception_to_machine_p1_clamp）。
     """
     if not NEXT_TASKS.exists():
         return 0

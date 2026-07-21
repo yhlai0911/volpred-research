@@ -166,7 +166,13 @@ def test_reader_facing_emergency_refill_only_adds_general_daily_article(tmp_path
     assert [t["id"] for t in data] == ["K2002_article_general"]
     task = data[0]
     assert task["task_type"] == "daily_article"
-    assert task["priority"] == 1
+    # 2026-07-21 dispatch-lanes absorb: the emergency branch declares P1 but the
+    # write now rides the append_task_record gateway, whose admission clamp caps
+    # machine-source P1 at P2. Drought timeliness is owned by force-release plus
+    # the dispatch-side _promote_starved_article_tasks actuator (the clamp's
+    # deliberate exception), not by the generator's self-declared digit.
+    assert task["priority"] == 2
+    assert task["priority_capped_from"] == 1
     assert task["source"] == "auto_publish_drought_emergency"
     assert "publish-drought-emergency" in task["tags"]
     assert "reader-facing" in task["tags"]

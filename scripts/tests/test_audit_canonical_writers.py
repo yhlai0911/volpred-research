@@ -312,8 +312,10 @@ def test_real_active_tree_matches_frozen_owner_inventory(auditor) -> None:
     assert result.ok, auditor._render_text(result)
     assert result.inventory, "coverage canary: audit inventoried zero canonical mutations"
     inventoried_owners = {item.owner for item in result.inventory}
+    # scripts/check_alerts.py:_append_next_task_locked left this set on
+    # 2026-07-21 (dispatch-lanes absorb): it now delegates to the
+    # append_task_record gateway and owns no direct canonical mutation.
     formerly_missed_alias_writers = {
-        "scripts/check_alerts.py:_append_next_task_locked",
         "scripts/check_alerts.py:_ci_close_pending_repair_tasks",
         "scripts/extract_base64_images.py:main",
         "scripts/slim_feed_description.py:main",

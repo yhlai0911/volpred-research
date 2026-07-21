@@ -161,7 +161,12 @@ def test_first_red_starts_repair_without_boss_notification(tmp_path):
     assert sent == []
     assert dispatches == ["ci-red-29233920234"]
     task = _tasks(tmp_path)[0]
-    assert task["priority"] == 1
+    # 2026-07-21 dispatch-lanes absorb: the builder declares P1, but the append
+    # now rides the single gateway whose admission clamp caps machine-source P1
+    # at P2. Timeliness is carried by dispatch_preempt + the watcher's
+    # request_fire loop (asserted below / in dispatches), not the digit.
+    assert task["priority"] == 2
+    assert task["priority_capped_from"] == 1
     assert task["task_type"] == "platform_ops"
     assert task["dispatch_lane"] == "agent"
     assert task["dispatch_preempt"] is True
