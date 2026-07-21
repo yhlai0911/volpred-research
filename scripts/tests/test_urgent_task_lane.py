@@ -337,3 +337,71 @@ def test_claim_gate_and_urgency_share_one_vocabulary() -> None:
     src = (ROOT / "scripts" / "task_pool_claim.py").read_text(encoding="utf-8")
     assert "MAIN_THREAD_DISPATCH_LANES" in src, "claim gate 必須用 canonical set"
     assert 'lane == "main_thread"' not in src, "不得回退成單一字面值比對"
+
+
+# --- 7. admission 端：機器來源 P1 夾制（2026-07-21 dispatch-lanes R2） ---------
+#
+# 2026-07-21 實測：pending 181、P1 33 個，boss 來源只有 8 個 —— 25 個是產生器
+# 自封的 P1。P1 語意是「boss 當下要的 + 時效性」；機器自封 P1 等於取消 priority，
+# boss 新急件在 33 張 P1 裡排隊。gateway（append_task_record）夾制：機器來源、
+# 非時效類、非 dedicated-owner ingress 的 P1 → P2 + `priority_capped_from: 1`。
+# 只 clamp 不 block（writer 層不能 block —— 邊界同 pool_pressure docstring）。
+
+def _append(tmp_path, **extra) -> dict:
+    queue = tmp_path / "next_tasks.json"
+    record = _task(extra.pop("id", "adm_t1"), **extra)
+    rec, created = nt.append_task_record(record, path=queue)
+    assert created is True
+    return rec
+
+
+def test_machine_p1_is_clamped_to_p2_with_stamp(tmp_path, capsys) -> None:
+    rec = _append(tmp_path, source="auto_discovered")
+    assert rec["priority"] == 2
+    assert rec["priority_capped_from"] == 1
+    # 落地的也要是夾過的（不是只改記憶體 copy）
+    persisted = nt_load(tmp_path / "next_tasks.json")
+    assert persisted[0]["priority"] == 2
+    assert persisted[0]["priority_capped_from"] == 1
+    assert "task_admission" in capsys.readouterr().err, "夾制必須可觀測（no-silent-fallback）"
+
+
+@pytest.mark.parametrize("source", [
+    "agent", "orphan_closeout", "auto_publish_drought_emergency",
+    "internal_alert_remediation_router",
+])
+def test_known_machine_p1_inflators_all_clamped(tmp_path, source: str) -> None:
+    """2026-07-21 盤點到的自封 P1 產生器 source，一個都不能漏。"""
+    rec = _append(tmp_path, source=source)
+    assert rec["priority"] == 2
+    assert rec["priority_capped_from"] == 1
+
+
+def test_boss_p1_is_not_clamped(tmp_path) -> None:
+    rec = _append(tmp_path, source="boss-telegram-msg110")
+    assert rec["priority"] == 1
+    assert "priority_capped_from" not in rec
+    assert is_urgent(rec) is True, "夾制不得誤傷急件 lane"
+
+
+def test_machine_time_critical_p1_is_not_clamped(tmp_path) -> None:
+    """時效任務依 2026-07-12 boss 指令必須 P1 —— 機器源也一樣。"""
+    for i, tt in enumerate(("event_article", "trending_repost", "daily_digest")):
+        rec = _append(tmp_path, id=f"tc_{i}", task_type=tt, source="reader_facing_refill")
+        assert rec["priority"] == 1, tt
+        assert "priority_capped_from" not in rec
+
+
+def test_dedicated_owner_ingress_p1_is_not_clamped(tmp_path) -> None:
+    """email_reply / telegram_reply 有專屬 owner，priority 對它們是 pass-through。"""
+    for i, tt in enumerate(("email_reply", "telegram_reply")):
+        rec = _append(tmp_path, id=f"own_{i}", task_type=tt, source="gmail_inbox_poll")
+        assert rec["priority"] == 1, tt
+        assert "priority_capped_from" not in rec
+
+
+def test_machine_p2_passes_untouched(tmp_path) -> None:
+    """夾制只針對 P1；P2 以下不動（否則整個 priority 階梯都被壓扁）。"""
+    rec = _append(tmp_path, source="auto_discovered", priority=2)
+    assert rec["priority"] == 2
+    assert "priority_capped_from" not in rec
