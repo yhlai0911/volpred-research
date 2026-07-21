@@ -35876,13 +35876,36 @@
     "title": "[發文] K1697：沿用多時的台股 Table 2 數字重跑後復現不出來，rolling last-window γ 是移動標靶",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "orphan_closeout",
     "created_at": "2026-07-17T08:55:00+00:00",
     "description": "K1697 收尾（knowledge item ad2825d0，Codex gpt-5.4/high CONDITIONAL PASS，conf 0.85）判定可發佈。\n\n角度：legacy TWII rolling γ=0.272/t=3.18 無存活 JSON、不可復現；calendar-aligned fresh snapshot（common_end 2026-07-09）重建為 γ=0.198/t=1.86，掉出 5% 顯著。更有價值的是端點敏感度：同 spec 的 TWII γ 為 0.157(2025-01) → 0.269(2026-04) → 0.198(2026-07)，三個月移動 0.07 —— rolling last-window 這種『最新一段窗口』的統計數字本質上是移動標靶，不該當結論引用。\n\n**禁止的角度**（Codex 明確降級）：『台股指數槓桿效應是個股的 6.2 倍』（分母是 9 個全不顯著 γ 的平均、與 0 無異、無 CI，rawclose 變體就跳到 9.0×）、『0056 確定比 TWII 強』（無差異檢定）。\n\n證據：experiments/k1697/k1697_results.json；knowledge item ad2825d0。\nparent_task_id: dreaming_orphaned_experiment_k1697",
     "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-21T13:08:32.807376+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
+      },
+      {
+        "ts": "2026-07-21T13:09:08.232360+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
+      },
+      {
+        "ts": "2026-07-21T13:17:16.015419+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
+      }
+    ],
+    "started_at": "2026-07-21T13:09:08.232343+00:00",
+    "completed_at": "2026-07-21T13:17:16.015402+00:00",
+    "result": "K1697 general 版草稿完成並通過驗證。交付 storage/drafts/K1697_general_draft.md（6.6KB，1 表 2 圖）+ storage/assets/k1697_twii_rolling_gamma_endpoint.png + k1697_rolling_gamma_cross_section.png + 兩支可重跑繪圖腳本（數值 hard-bound 到 JSON）。主線程獨立複驗：anti_ai_gate 重跑 exit=0（warn=1/3，唯一 WARN 是 markdown 表格被 FB-mode 誤判為長段落）；數字抽驗對上 experiments/k1697/k1697_results.json（gamma=0.19752→0.198、gamma_t=1.8577→1.86、window 2018-04-19~2026-07-09、n_obs=2000 全符）；兩個 Codex 降級的禁止角度均未出現（無 6.2x/9.0x amplification 敘述、無 0056 優於 TWII 宣稱，且主動加註未做差異檢定）。dedup gate 事前已跑：general=clean，research 版被 arc-dup 擋故未寫。agent 自行抓到並修正一處錯誤（九檔個股 t 上界誤植 1.28→正確 1.58，1.28 為不在該組的台積電）。懶人包圖組依 SOP 由 publish 後 lazypack_async_render enqueue 處理，不在本次範圍。"
   },
   {
     "id": "article_k1699_forecast_timing_convention",
@@ -37589,37 +37612,15 @@
   },
   {
     "id": "assign_8a80c2fb",
-    "title": "K1730 arm A 全量 production 結果收件與驗證（GEVReg-MIDAS-SSVS）",
-    "description": "收 compute job compute-k1730-arm-a-production-quick-mode-1784358686 的全量結果：驗 quick_mode=false、與 quick-mode 逐項對照、lookahead 三項 0 violations、跨模型校準表、permutation test 解讀、SSVS MCMC 收斂診斷；寫 knowledge.json、合併 worktree dispatch-slot-1-558d7893-k1730。Codex 代碼審 k1730_models.py 另立 followup。",
-    "task_type": "experiment",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "K1730 arm A 全量 production 結果收件與驗證（GEVReg-MIDAS-SSVS）",
+    "priority": 1,
     "source": "system",
     "created_at": "2026-07-18T12:09:59.574980+00:00",
-    "created_by": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f",
-    "status_history": [
-      {
-        "ts": "2026-07-18T12:10:03.692714+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f"
-      },
-      {
-        "ts": "2026-07-18T12:10:03.942068+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f"
-      },
-      {
-        "ts": "2026-07-18T12:12:25.929641+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-60b14fa66918477594ecd98ef2540e3f"
-      }
-    ],
-    "started_at": "2026-07-18T12:10:03.942053+00:00",
     "completed_at": "2026-07-18T12:12:25.929627+00:00",
-    "result": "K1730 arm A 全量結果收件驗證完成：quick_mode=false、lookahead 0 violations、與 quick-mode 結論一致。裁決 NULL（DM favours benchmark p=0.046；permutation 打亂 macro 反而更好）。knowledge item f932cb04。merge 待 Codex 裁決 → assign_a72fa4f6"
+    "tombstone": true,
+    "archived_at": "2026-07-21T13:07:32.524456+00:00"
   },
   {
     "id": "assign_a72fa4f6",
@@ -39407,7 +39408,7 @@
     "description": "2026-07-19 10:40 CST 已把 config/runtime_schedules.json 的 dispatch supervisor max_slots 2→4，並在 scheduler.load_max_slots 加 quota de-rate guard（連 2 次 outcome=quota_blocked → clamp 回 2，成功一次自愈）。本 task 是老闆指示的第 4 步「觀察 24h 吞吐變化並回報」。\n\n基線（改動前，實測）：\n- 近 5 日 completed/day = 57 / 98 / 53 / 46 / 57（平均約 62/日）\n- pending 86-89 筆，slots 長期滿載（current_jobs_n=2/2）\n- 近 100 次 completion outcome：success 87 / quota_blocked 5 / codex_failover_recovered 5 / failure 1 / killed_timeout 1 / kill_failed_orphan_drained 1\n- weekly quota 32.3% used（anchor 已 stale 18 天，數字僅供量級參考）\n\n要做：\n1. 比對 2026-07-19 10:40 之後 24h 的 completed/day 與 slots_full skip 次數（storage/ops/dispatch_state.json completions + supervisor log 的 reason=slots_full）。\n2. 檢查是否出現新的 quota_blocked / killed_timeout / PHASE-Z cohort 衝突 —— 4 條主線程共用同一個 checkout，cohort-drained PHASE-Z 的競態是這次加碼最可能的新風險面。\n3. 檢查 worktree 與磁碟：改動前 18 個 worktree、磁碟 91% used（85GB free）。若 worktree 數或磁碟惡化，回報並考慮把 reclaim_stale_worktrees 排更頻繁。\n4. 回報實際 completed/day 是否提升；若沒提升，說明真瓶頸在哪（例如任務本身的 wall-clock、agent slot budget 4/6 而非 fire 並行度）。\n5. 若出現 quota 連發或 PHASE-Z 衝突，把 max_slots 調回 2 或 3 並記錄原因。\n\nparent_task_id: assign_794c4bc2",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "scheduled",
     "created_at": "2026-07-19T02:34:42.764949+00:00",
     "parent_task_id": "assign_794c4bc2",
@@ -39418,8 +39419,29 @@
         "from": "blocked",
         "to": "pending",
         "reason": "blocked_until_expired (2026-07-20T11:00:00+08:00)"
+      },
+      {
+        "ts": "2026-07-21T13:10:57.747487+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
+      },
+      {
+        "ts": "2026-07-21T13:10:58.093819+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
+      },
+      {
+        "ts": "2026-07-21T13:14:26.443635+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
       }
-    ]
+    ],
+    "started_at": "2026-07-21T13:10:58.093803+00:00",
+    "completed_at": "2026-07-21T13:14:26.443619+00:00",
+    "result": "max_slots 2→4 驗收完成（報告 storage/ops/throughput_audit_max_slots_20260721.md）。裁決=不調回。(1) 吞吐未能證實提升：變更後唯一完整日 07-20=62，恰等於基線平均 62.0，而基線全距 45-98 已覆蓋所有觀測值 → 樣本不足，另立 throughput_recheck_max_slots_20260725 複驗。(2) 真瓶頸不是 slot cap：68 cohort 中 66% 只發 1 slot、用滿 4 slot 僅 2 次、slots_full 全期僅 1 次。(3) ⚠️ 發現實質新風險 cohort-wide kill sweep：同 cohort 3 slot 於 1.5s 內全數 killed_timeout 但 duration 差距達 131s vs 671s 且全未達 3000s cap → 非 per-job timeout，加碼使爆炸半徑加倍，另立 P2 cohort_wide_kill_sweep_20260721。(4) quota_blocked 4 次未惡化、safety-net auto-commit=0、worktree 18→4、磁碟 91%→13% used 皆優於基線。(5) orphan-half 認領高併發下失效 38 次，另立 phase_z_orphan_half_cap_high_concurrency_20260721。"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260719T024745114940Z_a1",
@@ -40390,7 +40412,7 @@
     "id": "paper_0050_snapshot_repoint_20260719",
     "priority": 2,
     "task_type": "paper_review",
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-19T14:25:00+08:00",
     "parent_task_id": "assign_price_cache_0050_split_break",
@@ -40428,16 +40450,36 @@
         "to": "pending",
         "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-21T13:08:33.048167+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
+      },
+      {
+        "ts": "2026-07-21T13:09:08.471655+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
+      },
+      {
+        "ts": "2026-07-21T13:19:42.746918+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
       }
     ],
-    "started_at": "2026-07-19T06:47:30.578496+00:00",
+    "started_at": "2026-07-21T13:09:08.471641+00:00",
     "last_released_at": "2026-07-21T11:24:12.314329+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "priority_capped_from": 1,
     "migrated_at": "2026-07-21T06:58:10.992290+00:00",
     "findings": "[2026-07-21 19:2x hourly-slot-1 盤點] 本班未完成本單，但把狀態釘死了，下班不必重查：\n\n(a) **已完成**（本班驗證）。paper/taiwan-vt/data/0050_tw_twii_..._2008-2026.csv 與\n    paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv 現在跨 2014-01-02 連續：\n    adj_close 2013-12-31=9.3531 → 2014-01-02=9.3292（-0.26%），close 14.6750 → 14.6375。\n    原本的 x0.2494 斷點已不存在。兩檔仍未提交（在工作區已 8 班），bytes 已在\n    quarantine ref。→ (a) 不必重做，只需確認提交。\n\n(b)(c)(d) **仍未做**。\n\n⚠️ **本單的「驗證指令」在本班之前是壞的，會回報假全綠**：\nscripts/detect_price_split_breaks.py 曾被 dead-code sweep（commit a15fba0d7）移到\nscripts/_legacy/，而它的 REPO_ROOT 是 `parent.parent`（深度假設）→ 移動後指向 scripts/，\n所有 glob 匹配 0 檔 → `--csv-scan` 印「0 個檔 / 有斷點的檔案：0 / 0」並 exit 0，\n與「掃完全乾淨」無法區分。docs/governance/2026-07/foreign_incident_path_adjudication.md\n早已逐字警告過這個路徑會被 cleanup 誤清（D5 的第二個反例），仍然發生了 —— 這是第三個。\n\n本班已修（三層）：(1) git mv 復位回 scripts/；(2) REPO_ROOT 改為向上尋找 .git marker，\n不再假設深度；(3) **掃到 0 檔改為 exit 2 並印錯誤** —— 沉默不得再被讀成乾淨。\nexit code 契約現為 0=乾淨 / 1=有斷點 / 2=掃描本身壞了。\n\n**真實污染清單（本班實測，19 / 1279 檔）**：\nK1395, K1611, K1677(px_MARA/px_PLUG), k1360(kalshi x2), k1406, k1411,\nk1539(gdelt panel), k1556, k1588, k1630, k1636, k1659, k1660, k1661, k1671,\nk1697, k1711(ohlc_0050_TW.csv)。\n注意其中 K1677 / k1360 / k1539 / k1556 / k1588 命中的是 ×2.0 @2018-02-06，\n那是 Volmageddon 的真實行情或非 0050 標的，**不是 0050 分割** —— 交給 k_reruns_* 那單時\n要先分流，別把真實極端行情當污染修掉。\n\n**(c) 的未決問題（下一班請勿憑推測改論文）**：body_v3.tex:33 現在寫的是\n\"use auto_adjust=False, compute returns from Adj Close, construct adjusted opens ...,\nand exclude the split date\"。但資料檔既已 repoint 成連續序列，就不存在 spurious split\nreturn，\"exclude the split date\" 是否仍是實際跑數字的流程、抑或已成過時描述，\n取決於 (b) 重跑用的是哪條 pipeline。**先做 (b)，再依實際跑法改 (c)**，否則只是把一個\n不符事實的描述換成另一個。garch-x-vix/main.tex:377 同理（現稱依 lai2026vt 程序清理）。",
     "findings_20260721_2036": "[2026-07-21 20:3x hourly-slot-1-d4e78c67 盤點，未認領本單，只釘死事實供下班使用]\n\n(b) 的目標實驗選錯了，照原描述做會白跑：\n\n1. body_v3.tex:53 的 0050 gamma=0.097 / t=3.60，行內 source 註解明寫來自\n   `experiments/k892/k892_verify_tw_gamma_results.json`\n   `.summary.assets[\"0050.TW\"].full_sample`（D3 errata 2026-05-26），\n   **不是** experiments/paper2_taiwan_indiv_rolling_gamma。原描述把 (b) 指向後者。\n\n2. paper2_taiwan_indiv_rolling_gamma **本來就不受污染**：它依 fetch_snapshots.py\n   把每條序列抓進自己的 data/ 再離線估計，其 data/0050_tw.csv 跨 2014-01-02 已連續\n   （adj_close 2013-12-31=9.353103 → 2014-01-02=9.329202，-0.26%），\n   且 detect_price_split_breaks.py --csv-scan 的 19 檔污染清單裡沒有它。\n   → 對這支重跑不會改變任何數字。\n\n3. experiments/k892/ **沒有 data/ 目錄**，污染清單裡也沒有 k892 任何檔案。\n   所以 0050 gamma 的實際輸入不是已凍結的 snapshot CSV。\n   下一班做 (b) 前必須先答：k892 當時是 live-fetch 還是讀 price_cache.db？\n   若讀 DB，則 DB 已於 2026-07-19 修好斷點 → 重跑 k892 才是真正的 (b)，\n   且要對照 D3 errata 的 n_obs=4219 是否變動。若是 live-fetch 則需先確認可重現性。\n\n結論：(b) 應改寫為「重跑 k892（確認其資料來源後）」，而非 paper2_taiwan_indiv_rolling_gamma。\n(c)(d) 仍照前一班的順序，等 (b) 有實際跑法後再改論文描述。\n\n另：detect_price_split_breaks.py --csv-scan 本班實測仍回報 19 / 1279 檔含斷點、exit 0，\n與前一班修好的 exit code 契約一致（0=乾淨 / 1=有斷點 / 2=掃描壞了）——\n注意這裡 exit 0 但有 19 檔命中，代表 --csv-scan 的 exit code 語意與 docstring 契約可能不一致，\n下班順手確認一下（有斷點應該回 1）。",
-    "findings_20260721_2036_correction": "[更正 20:26] 上一則 findings 末段說『--csv-scan exit 0 但有 19 檔命中、契約可能不一致』是我誤讀：當時 $? 取到的是 pipe 尾端 tail 的狀態。實測 'detect_price_split_breaks.py --csv-scan > file; echo $?' 回 exit=1，與『0=乾淨 / 1=有斷點 / 2=掃描壞了』契約完全一致。前一班修的 exit code 契約沒有問題，不必追。findings 的其餘三點（(b) 目標應為 k892 而非 paper2_taiwan_indiv_rolling_gamma；paper2 自帶 snapshot 已連續；k892 無 data/ 目錄需先確認資料來源）為實測，仍然成立。"
+    "findings_20260721_2036_correction": "[更正 20:26] 上一則 findings 末段說『--csv-scan exit 0 但有 19 檔命中、契約可能不一致』是我誤讀：當時 $? 取到的是 pipe 尾端 tail 的狀態。實測 'detect_price_split_breaks.py --csv-scan > file; echo $?' 回 exit=1，與『0=乾淨 / 1=有斷點 / 2=掃描壞了』契約完全一致。前一班修的 exit code 契約沒有問題，不必追。findings 的其餘三點（(b) 目標應為 k892 而非 paper2_taiwan_indiv_rolling_gamma；paper2 自帶 snapshot 已連續；k892 無 data/ 目錄需先確認資料來源）為實測，仍然成立。",
+    "completed_at": "2026-07-21T13:19:42.746897+00:00",
+    "result": "四項全數收斂，CONCLUSION_IMPACT = NONE（無任何論文數字變動、無顯著性翻轉）。(a) 前提已過期：兩篇論文的 pinned CSV 早已修好（c616c65f7 / b9ca19010），本次雙重驗證 —— 對 price_cache.db 逐列比對 close/open/high/low ratio min=max=1.000000（taiwan-vt 4229 列、garch-x-vix 3193 列），且 csv-scan 的 19 個斷點檔【全在 experiments/ 之下、無一在 paper/】。無需重建、無需備份。(b) body_v3.tex:53 的 0.097/t=3.60 來自 k892 全樣本擬合（非 rolling 實驗），乾淨資料重擬得 gamma=0.0970 / t=3.5965 / loglik=-6319.355，對上記錄值 5-6 位精確復現。並跑出決定性 4-cell 診斷：CLEAN 含/排分割日皆 0.0965/3.582；CONTAMINATED 含分割日崩為 0.0268/0.469、排分割日回到 0.0965/3.5816 —— 數字證實『排除分割日是 return 類的全部修法，讀 Adj Close 不是』。(c) body_v3.tex:33 與 main.tex:377 已改寫為與事實一致：明說 adj_close 同步跳（37.41→9.33，兩欄 ratio 皆 0.2494）故讀 Adj Close 無效，並分離兩層修法（snapshot 重建護價格水準量、排除分割日護報酬衍生量）；順帶修正 main.tex 一個壞 \\ref（tab:validation 不存在→tab:cross_asset）。兩篇 xelatex exit=0、無 undefined reference。(d) main.tex:531 的 DM t=1.44 確認為清理後計算：k994_results.json 的 dm_t=-1.4388 精確對上，k994.py:405 於形成報酬前呼叫 clean_tw50_data()，該函式對 ratio∈(3.5,4.5) 的前段除以 4、資料已一致時為 no-op，兩條輸入分支皆得 split-consistent 序列。主線程獨立複驗：csv-scan 確認 paper/ 零命中、git diff 確認兩處 tex 改動落檔且內容具體誠實。衍生 P2 followup k892_k994_pinned_snapshot_repoint_20260721（k892/k994 執行時直打 yfinance、論文附的 pinned snapshot 無腳本消費 —— 可重現性宣稱與程式行為不一致）；並已 annotate k_reruns_0050_snapshot_contaminated_20260719 附上 19 檔分類與『先判斷斷點是否落在估計窗口內』的 triage 指引。"
   },
   {
     "id": "k_reruns_0050_snapshot_contaminated_20260719",
@@ -40448,7 +40490,8 @@
     "created_at": "2026-07-19T14:25:00+08:00",
     "parent_task_id": "assign_price_cache_0050_split_break",
     "title": "P1：14 個 K 實驗的 0050 pinned snapshot 含 4x 斷點需重跑（HAR-RV / realized-vol / long-memory 最痛）",
-    "description": "承 assign_price_cache_0050_split_break。price_cache.db 已修，但下列已凍結 snapshot 仍含 2014-01-02 的 x0.2494 斷點，其結果是舊污染資料算的：\nK1395, K1611, k1406, k1411, k1630, k1636, k1659, k1660, k1661, k1671, k1697, k1711(ohlc_0050_TW.csv), experiments/paper2_taiwan_indiv_rolling_gamma。\n\n污染量級（本班實測，全樣本 0050）：年化波動 40.01% -> 21.61%；最極端日報酬 -138.9% -> -12.7%；月度 RV persistence AR(1) 0.043 -> 0.693。也就是說波動率叢聚這個 stylized fact 原本幾乎被單一 bad tick 抹平 —— 任何吃這批 snapshot 的 GARCH / HAR / long-memory 結果都不可信。\n\n注意 k1711 來源不一致：ohlc_0050_TW.csv 髒、panel_0050_TW.csv 乾淨，需查明哪個進了模型。\n\n確認安全不必動（起始日 >= 2014-01-02 或實測 ratio=1.003）：k1684, k1698, k1637, k1090, k1090b, K1710, k1699, K1423, k1583, K1038, paper/prg-periodic-garch。約 130 個呼叫 src/volpred/utils.py 的 clean_tw50_data() 的檔案在 code 層已修補（但未逐檔驗證呼叫是否在資料進模型之前 —— paper/garch-x-vix 是可疑案例）。\n\n作法：優先從已修好的 DB 重建 snapshot 再重跑，逐一比對重跑前後統計量，差異大者才是真受害。驗證：uv run python scripts/detect_price_split_breaks.py --csv-scan"
+    "description": "承 assign_price_cache_0050_split_break。price_cache.db 已修，但下列已凍結 snapshot 仍含 2014-01-02 的 x0.2494 斷點，其結果是舊污染資料算的：\nK1395, K1611, k1406, k1411, k1630, k1636, k1659, k1660, k1661, k1671, k1697, k1711(ohlc_0050_TW.csv), experiments/paper2_taiwan_indiv_rolling_gamma。\n\n污染量級（本班實測，全樣本 0050）：年化波動 40.01% -> 21.61%；最極端日報酬 -138.9% -> -12.7%；月度 RV persistence AR(1) 0.043 -> 0.693。也就是說波動率叢聚這個 stylized fact 原本幾乎被單一 bad tick 抹平 —— 任何吃這批 snapshot 的 GARCH / HAR / long-memory 結果都不可信。\n\n注意 k1711 來源不一致：ohlc_0050_TW.csv 髒、panel_0050_TW.csv 乾淨，需查明哪個進了模型。\n\n確認安全不必動（起始日 >= 2014-01-02 或實測 ratio=1.003）：k1684, k1698, k1637, k1090, k1090b, K1710, k1699, K1423, k1583, K1038, paper/prg-periodic-garch。約 130 個呼叫 src/volpred/utils.py 的 clean_tw50_data() 的檔案在 code 層已修補（但未逐檔驗證呼叫是否在資料進模型之前 —— paper/garch-x-vix 是可疑案例）。\n\n作法：優先從已修好的 DB 重建 snapshot 再重跑，逐一比對重跑前後統計量，差異大者才是真受害。驗證：uv run python scripts/detect_price_split_breaks.py --csv-scan",
+    "triage_20260721": "本班 paper_0050_snapshot_repoint_20260719 稽核順帶盤點：csv-scan 現況 19/1279 有斷點，且【全部落在 experiments/ 之下，兩篇論文的 pinned snapshot 已於 c616c65f7 / b9ca19010 修好、現已驗證 clean】，故本 task 不再是論文 blocker。分類：0050 真斷點 = K1395/K1611/k1406/k1411/k1630/k1636/k1659/k1660/k1661/k1671/k1697/k1711；K1677 MARA/PLUG = 真實分割（非污染）；k1360 kalshi + k1539 GDELT = 非價格欄位的 false positive；k1556/k1588 = 2018-02-06 Volmageddon VIX open（真實事件）。重跑前請先逐檔判斷【斷點是否落在該實驗的估計窗口內】—— 實例：k1697 的 0050 斷點在 2014-01-02，但其估計窗口是 2018-04-11~2026-07-09（trailing 2000 obs），斷點在窗外，數字未受影響、無需重跑。盲目重跑 12 個會浪費大量 compute。"
   },
   {
     "id": "clean_tw50_extreme_return_zeroing_20260719",
@@ -47343,7 +47386,7 @@
     "title": "K1597: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1597 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1597 [NULL]：TAIFEX TX 期貨日盤 5分鐘 RV（2017-05-16～2021-12-30，1,138 個交易日）測試 stable-tail/codifference/LFSM-lite 特徵能否改善 HAR/HARQ 的次日 RV 預測。Roughness：frequency-ratio H=0.0545、variogram H=0.1428(R²=0.979)。非高斯性明確（Δlog RV 超峰態1.13, Jarque-Bera p=6.8e-17, Student-t df=8.94），但 Hill tail alpha（",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
     "audience_correction_rewrite": false,
@@ -47359,7 +47402,30 @@
     "priority_capped_from": 1,
     "migrated_at": "2026-07-21T06:58:10.992290+00:00",
     "data_source_note": "**寫作資料來源在 `experiments/k1597/`，不要只讀 knowledge.json 的 K1597 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K1597 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k1597/k1597_results.json`\n分析腳本：`experiments/k1597/k1597.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-21T13:15:05.469908+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
+      },
+      {
+        "ts": "2026-07-21T13:15:05.878762+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
+      },
+      {
+        "ts": "2026-07-21T13:24:19.509989+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583"
+      }
+    ],
+    "started_at": "2026-07-21T13:15:05.878744+00:00",
+    "completed_at": "2026-07-21T13:24:19.509973+00:00",
+    "result": "K1597 讀者向草稿完成並通過主線程複驗。交付 storage/drafts/K1597_general_draft.md（7.9KB / 4020 字）+ storage/assets/k1597_tail_vs_forecast_zh.png + experiments/k1597/make_k1597_reader_fig.py（數字全從 JSON 讀、無硬編）。複驗：anti_ai_gate 重跑 exit=0（warn 1/3，僅段落長度且含表格區塊）；數字抽驗對上 k1597_results.json（n_days=1138、H=0.05446/0.14282 R²=0.97937、Hill alpha 3.626/4.210/3.930 全符），agent 另以腳本機械核對 38 個數字 0 fail。NULL 結果如實書寫，結尾明列不安全說法。最有價值的兩點是 agent 從 JSON 挖出、原 verdict 預覽未提的：(a) 四個尾部指數落在 3.58-4.21，alpha-stable 的 alpha<2 前提在跑模型前就不成立；(b) LFSM_lite 的 24 次重配適 alpha 全被夾到上限 2.0 —— 那個『處理 alpha-stable 的模型』從未真正在 alpha-stable 參數區間運作過。裁決點：agent 升報本文會被 _infer_audience 覆寫成 research；主線程對交付稿實測 _infer_audience 確認回傳 research（規則 5 K-id + 規則 6 學術關鍵詞 ≥2）。處置 = 稿件照原樣進草稿池（內容合格，數字不得為了過 gate 而拿掉），general drought 未解另立 P2 audience_gate_general_lane_starvation_20260721 追設計張力。懶人包圖組依 SOP 於 release flip published 前才 enforce，不在本次範圍。"
   },
   {
     "id": "ci-red-29744499806",
@@ -49688,5 +49754,87 @@
     "source": "user",
     "created_at": "2026-07-21T12:19:18.423534+00:00",
     "created_by": "hourly-slot-1-d4e78c67"
+  },
+  {
+    "id": "cohort_wide_kill_sweep_20260721",
+    "title": "[incident] cohort-wide kill sweep：同 cohort 3 個 slot 於 1.5s 內全數 killed_timeout，duration 全未達 3000s cap",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-21T13:14:14.434697+00:00",
+    "source": "dispatch",
+    "parent_task_id": "assign_f59976b6",
+    "description": "驗收 assign_f59976b6 時發現的實質新風險（證據見 storage/ops/throughput_audit_max_slots_20260721.md 第 3 節）。\n\n現象（~/.volpred/logs/dispatch_supervisor.log）：\n  11:23:29 slot-2 killed_timeout duration=671.5s\n  11:23:30 slot-4 killed_timeout duration=131.2s\n  11:23:31 slot-3 killed_timeout duration=611.7s\n  11:44:59 slot-3 killed_timeout duration=450.4s\n  11:44:59 slot-1 killed_timeout duration=930.5s\n  11:45:00 slot-4 killed_timeout duration=270.5s\n\n同 cohort 多 slot 在 1.5 秒內同時返回，但各自 duration 差距極大（131s vs 671s），且全部遠低於 3000s hard cap ⇒ 不是 per-job timeout，是 supervisor 層整批 kill。剛跑 131s（剛起步）的 slot 被連坐殺掉。\n\n影響：max_slots 2→4 讓單次 sweep 的爆炸半徑加倍。10 次 killed_timeout 中 6 次來自這 2 個 sweep；killed_timeout 由變更前 1-2/日 升到 07-20 的 7/日。\n\n要做：(1) 定位觸發者 —— supervisor watchdog / cohort drain 逾時 / launchd 層，讀 scripts/dispatch_supervisor/scheduler.py 的 kill 路徑；(2) 若確為整批 kill，改成 per-slot 判定，勿連坐未逾時的 slot；(3) 補一條 regression test。"
+  },
+  {
+    "id": "throughput_recheck_max_slots_20260725",
+    "title": "[throughput] max_slots 2→4 吞吐複驗：補足 3-4 個完整日樣本後重下判斷",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-07-21T13:14:14.434697+00:00",
+    "source": "dispatch",
+    "parent_task_id": "assign_f59976b6",
+    "description": "assign_f59976b6 首次驗收（2026-07-21）結論：吞吐**未能證實提升**，因為變更後只有 1 個乾淨完整日（07-20 = 62，恰等於基線平均 62.0），而基線本身日間全距為 45–98，已覆蓋所有觀測值。\n\n基線（07-14~18）：57 / 98 / 53 / 45 / 57，平均 62.0、中位數 57。\n變更後：07-19 = 111（含變更前 10.7h）、07-20 = 62、07-21 = 99（未整日）。\n\n要做：待 07-22~07-25 累積 3-4 個完整日後，重跑同一比對\n  jq -r '.[] | select(.status==\"succeeded\") | (.completed_at // .updated_at // \"\")[0:10]' storage/next_tasks.json | sort | uniq -c\n並更新 storage/ops/throughput_audit_max_slots_20260721.md 第 1 節。\n\n注意：首驗已發現 66% 的 cohort 只發 1 個 slot、slots_full 全期僅 1 次 —— 若複驗仍無提升，結論應指向上游（supervisor 每 cohort 發幾條主線程 / 單張任務 wall-clock），而非再調 max_slots。"
+  },
+  {
+    "id": "phase_z_orphan_half_cap_high_concurrency_20260721",
+    "title": "[gate 缺陷] PHASE-Z orphan-half 認領在高併發下失效：38 次 'candidates exceeds cap 8' 直接放棄",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-07-21T13:14:14.434697+00:00",
+    "source": "dispatch",
+    "parent_task_id": "assign_f59976b6",
+    "description": "驗收 assign_f59976b6 時發現（證據見 storage/ops/throughput_audit_max_slots_20260721.md 第 4 節）。\n\n現象：dispatch_supervisor.log 全期出現 38 次 'phase_z: orphan-half probe skipped — N candidates exceeds cap 8'（實例 2026-07-20 03:12 為 23 candidates）。多條主線程共用同一個 checkout 時，單次 drain 的 foreign 清單長達 50+ 檔，orphan-half 認領機制因超過全域 cap 8 直接整批放棄。\n\n影響：不會造成錯誤 commit（foreign 已被正確排除，safety-net auto-commit 自 07-19 起 = 0 次），但**孤兒半成品的自動回收在高併發下等於沒開**。max_slots 加碼後此情形只會更常見。\n\n要做：把全域 cap 8 改為依 ownership 分群後再套 cap（每個 owner 各自判定），讓「別人的髒檔很多」不再連帶淹掉自己那幾個孤兒半成品的認領。改動點：scripts/dispatch_supervisor/phase_z.py 的 orphan-half probe；需補 test。"
+  },
+  {
+    "id": "k892_k994_pinned_snapshot_repoint_20260721",
+    "title": "[reproducibility] k892 / k994 執行時直接打 yfinance，論文附的 pinned snapshot 沒有任何腳本在讀",
+    "task_type": "paper_review",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-21T13:19:03.439519+00:00",
+    "source": "dispatch",
+    "parent_task_id": "paper_0050_snapshot_repoint_20260719",
+    "description": "由 paper_0050_snapshot_repoint_20260719 稽核衍生（agent 主動發現，超出原 brief 四項）。\n\n問題：k892（line 38）與 k994（lines 371/392）在執行時**直接向 yfinance 拉即時資料**，兩者都沒有讀任何 pinned CSV；experiments/k892/data/ 下只有 .gitkeep。但兩篇論文都隨附了 pinned snapshot —— 那些檔案**沒有任何分析腳本在消費**。\n\n影響：paper/taiwan-vt body_v3.tex:53 的 0050 GJR gamma=0.097 / t=3.60（來自 k892）與 paper/garch-x-vix main.tex:531 的 DM t=1.44（來自 k994）今天都能精確復現（本次已驗：k892 重擬 gamma=0.0970 / t=3.5965 / loglik=-6319.355，對上記錄值 5-6 位），**但 referee 重跑 k892 拿到的是他當天的 yfinance 回傳值**，不是論文的資料。這是可重現性宣稱與實際程式行為不一致，不是數字錯誤。\n\n要做：把 k892 / k994 的資料入口改為讀 pinned CSV（保留 yfinance 為 fallback 但需顯式開關），重跑確認數字不變，並在兩篇論文的 data section 說明 pinned snapshot 就是分析輸入。\n\n附帶（cosmetic，可一併修）：body_v3.tex:53 表格宣稱窗口 'January 2009 to March 2026 (4,217 trading days)'，但 0.097/3.60 的擬合實際用 n=4219 且結束於 2026-04-04。誠實截到 2026-03-31 得 gamma=0.0965 / t=3.58，即表中 '3.60' 與其自述窗口差 0.02。"
+  },
+  {
+    "id": "audience_gate_general_lane_starvation_20260721",
+    "title": "[設計張力] reader-facing K 文章無法引用自己的證據而不被 reclassify 成 research —— general lane 結構性餓死",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-21T13:23:57.284792+00:00",
+    "source": "dispatch",
+    "parent_task_id": "K1597_article_general",
+    "description": "由 K1597_article_general 交付時的裁決點衍生（agent 主動升報，主線程已用 _infer_audience 實測確認）。\n\n**張力**：K1597_article_general 這張任務的存在理由，description 寫得很清楚 —— 'no general article in feed.json. Emergency reader-facing publish-drought remediation'。也就是說它要補的是 **general** 池。\n\n但同一份 .claude/rules/publishing.md 另外要求文章『數字必對齊實驗檔 + 標 K 編號』。照做的結果是文中必然出現 K-id 與 QLIKE / Diebold-Mariano / Harvey 等詞，而 src/volpred/publisher/publisher.py:829 的 _infer_audience 規則 5（title 含 K\\d+）與規則 6（title+content+tags 命中 ≥2 個學術關鍵詞）會在 publish 時把 audience 覆寫成 research。\n\n實測（主線程於 2026-07-21 對交付稿 storage/drafts/K1597_general_draft.md 直接呼叫 _infer_audience）：回傳 **research**。稿件本身已過 anti_ai_gate（exit 0）、38 個數字機械核對 0 fail，內容沒有問題。\n\n**後果**：任何忠實引用證據的 K 文章都會被判成 research ⇒ general 池**在設計上就補不進去** ⇒ drought remediation 任務即使完美執行也達不成它自己的目的。這不是某個 agent 寫壞了，是兩條 rule 相衝。\n\n**注意 _infer_audience 的 docstring 立場**：它明說此機制是為了防止 agent 把 research-grade 內容隨手標成 general（mile_d0d66405 事故）。所以不能簡單放寬 —— 要區分的是『research 內容偽裝成 general』與『general 文章誠實引用數字』。\n\n可能方向（需裁決，勿逕自實作）：\n  (a) 讓 K-id 走 tags/metadata 而非正文與標題，正文只留白話數字 → 規則 5 不觸發，規則 6 仍可能觸發；\n  (b) 為 daily_article 加 type-locked exemption（publisher.py:1819 已有 TYPE-LOCKED EXEMPTIONS 先例）；\n  (c) 承認 general 版必須是另一種寫法（術語全部白話化、數字保留但不點 K 編號），     並把這個要求寫進 daily_article 的 brief 模板，讓 writer 一開始就知道；\n  (d) 接受 reclassify，改由別的 task type 補 general 池。\n\n本次處置：K1597 稿件**照原樣進草稿池**（內容合格，數字不可為了過 gate 而拿掉）；general drought 則仍未解，由本 task 追。"
+  },
+  {
+    "id": "assign_9f2e66c0",
+    "title": "PHASE-Z 卡住檔案 incident（e6d41a4c4d47136c）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- scripts/detect_price_split_breaks.py — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T132618571673Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-21T13:26:18.661333+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "e6d41a4c4d47136c",
+      "paths": [
+        "scripts/detect_price_split_breaks.py"
+      ],
+      "streaks": {
+        "scripts/detect_price_split_breaks.py": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260721T132618571673Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-21T13:26:18.645166+00:00",
+      "last_seen_at": "2026-07-21T13:26:18.645166+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]

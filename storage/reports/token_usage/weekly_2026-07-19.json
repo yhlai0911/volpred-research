@@ -3,14 +3,14 @@
   "source": "claude_code_jsonl",
   "week_range": "2026-07-19 → 2026-07-26",
   "totals": {
-    "input_tokens": 12156,
-    "output_tokens": 1305044,
-    "cache_read_tokens": 817095059,
-    "cache_create_tokens": 16617111,
-    "billable_total": 17934311,
-    "assistant_messages": 3209,
+    "input_tokens": 12160,
+    "output_tokens": 1306932,
+    "cache_read_tokens": 818165226,
+    "cache_create_tokens": 16618943,
+    "billable_total": 17938035,
+    "assistant_messages": 3211,
     "unique_sessions": 58,
-    "estimated_cost_usd": 1635.2741
+    "estimated_cost_usd": 1637.0553
   },
   "by_model": {
     "claude-opus-4-8": {
@@ -30,12 +30,12 @@
       "estimated_cost_usd": 8.9106
     },
     "claude-fable-5": {
-      "input_tokens": 8894,
-      "output_tokens": 1233416,
-      "cache_read_tokens": 788488484,
-      "cache_create_tokens": 12748408,
-      "messages": 2851,
-      "estimated_cost_usd": 1514.405
+      "input_tokens": 8898,
+      "output_tokens": 1235304,
+      "cache_read_tokens": 789558651,
+      "cache_create_tokens": 12750240,
+      "messages": 2853,
+      "estimated_cost_usd": 1516.1862
     },
     "<synthetic>": {
       "input_tokens": 0,
@@ -70,13 +70,13 @@
       "description": "閱讀 / 搜尋檔案"
     },
     "text_only": {
-      "input_tokens": 320,
-      "output_tokens": 181118,
-      "cache_read_tokens": 68121126,
-      "cache_create_tokens": 995724,
-      "messages": 174,
-      "billable_total": 1177162,
-      "estimated_cost_usd": 134.4402,
+      "input_tokens": 324,
+      "output_tokens": 183006,
+      "cache_read_tokens": 69191293,
+      "cache_create_tokens": 997556,
+      "messages": 176,
+      "billable_total": 1180886,
+      "estimated_cost_usd": 136.2214,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
@@ -298,7 +298,7 @@
       "cache_create_tokens": 4117624,
       "messages": 669,
       "billable_total": 4532253,
-      "estimated_cost_usd": 413.2568
+      "estimated_cost_usd": 413.6211
     },
     "2026-07-20": {
       "input_tokens": 10159,
@@ -307,27 +307,27 @@
       "cache_create_tokens": 10710566,
       "messages": 2152,
       "billable_total": 11463230,
-      "estimated_cost_usd": 1045.2324
+      "estimated_cost_usd": 1046.1537
     },
     "2026-07-21": {
-      "input_tokens": 766,
-      "output_tokens": 149141,
-      "cache_read_tokens": 109525829,
-      "cache_create_tokens": 1788921,
-      "messages": 388,
-      "billable_total": 1938828,
-      "estimated_cost_usd": 176.7849
+      "input_tokens": 770,
+      "output_tokens": 151029,
+      "cache_read_tokens": 110595996,
+      "cache_create_tokens": 1790753,
+      "messages": 390,
+      "billable_total": 1942552,
+      "estimated_cost_usd": 177.2806
     }
   },
   "drilldown": {
     "text_only": {
-      "messages": 1521,
-      "billable_total": 16580928,
+      "messages": 1524,
+      "billable_total": 16586740,
       "length_buckets": [
         {
           "name": "<200 chars",
-          "messages": 1395,
-          "billable_total": 16203276
+          "messages": 1396,
+          "billable_total": 16205364
         },
         {
           "name": "200-800 chars",
@@ -336,8 +336,8 @@
         },
         {
           "name": "800-2000 chars",
-          "messages": 55,
-          "billable_total": 130784
+          "messages": 57,
+          "billable_total": 134508
         },
         {
           "name": "2000+ chars",
@@ -348,13 +348,13 @@
       "reason_groups": [
         {
           "name": "non-text assistant message",
-          "messages": 1209,
-          "billable_total": 11622665
+          "messages": 1210,
+          "billable_total": 11624753
         },
         {
           "name": "other",
-          "messages": 189,
-          "billable_total": 3861474
+          "messages": 191,
+          "billable_total": 3865198
         },
         {
           "name": "quota/rate-limit",
@@ -395,8 +395,8 @@
       "top_signatures": [
         {
           "name": "(content types: thinking)",
-          "messages": 1166,
-          "billable_total": 9495517
+          "messages": 1167,
+          "billable_total": 9497605
         },
         {
           "name": "(content types: tool_use)",
@@ -744,20 +744,20 @@
     },
     "cache_diagnostics": {
       "sessions_in_window": 58,
-      "cache_create_tokens": 50079426,
-      "billable_total": 54848301,
+      "cache_create_tokens": 50082389,
+      "billable_total": 54854113,
       "cache_create_share_pct": 91.3,
       "top_sessions_by_cache_create": [
         {
           "session_id": "330d83e4-6ab1-4f47-83f1-12e3ae8c2ce3",
-          "messages": 1575,
-          "billable_total": 16606776,
-          "cache_create_tokens": 14980009,
-          "cache_read_tokens": 564145613,
-          "duration_minutes": 2025.8,
+          "messages": 1578,
+          "billable_total": 16612588,
+          "cache_create_tokens": 14982972,
+          "cache_read_tokens": 565751214,
+          "duration_minutes": 2026.9,
           "cache_create_share_pct": 90.2,
           "first_ts": "2026-07-20T02:47:51.048000+00:00",
-          "last_ts": "2026-07-21T12:33:41.909000+00:00"
+          "last_ts": "2026-07-21T12:34:42.286000+00:00"
         },
         {
           "session_id": "b33d9ed9-2639-433a-b0e3-126855639351",

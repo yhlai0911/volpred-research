@@ -23463,5 +23463,89 @@
     "owner": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
     "commit": null,
     "summary": "K1253_article_general 判定不可發表並 close 為 failed。K1253 是環境還原後的 smoke test（needs_human=True、provenance UNVERIFIED、README 明寫不作研究結論引用），沒有可對外的研究結論。與 K709 同根因，治本單 assign_6e0b03ec。本班至此清掉 main-thread lane 兩張永遠做不完的幽靈 P1。"
+  },
+  {
+    "timestamp": "2026-07-21T20:46:21+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_a73bb294",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_a73bb294:codex->agy",
+    "article_id": "mile_a73bb294",
+    "job_id": "lazypack-mile_a73bb294",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-21T21:14:37.308324+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_f59976b6",
+    "actor": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583",
+    "owner": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583",
+    "title": "[throughput] max_slots 2→4 上線後 24h 吞吐驗收",
+    "summary": "裁決不調回 max_slots。吞吐未能證實提升（變更後唯一完整日 07-20=62 = 基線平均 62.0；基線全距 45-98 已覆蓋所有觀測值），另立複驗 task。真瓶頸不是 slot cap：66% cohort 只發 1 slot，slots_full 全期僅 1 次。發現實質新風險 cohort-wide kill sweep（同 cohort 3 slot 於 1.5s 內同死、duration 131s vs 671s、全未達 3000s cap）→ 另立 P2。quota_blocked 未惡化、safety-net auto-commit=0、worktree 18→4、磁碟 91%→13% used。",
+    "artifacts": [
+      "storage/ops/throughput_audit_max_slots_20260721.md"
+    ],
+    "followups": [
+      "cohort_wide_kill_sweep_20260721",
+      "throughput_recheck_max_slots_20260725",
+      "phase_z_orphan_half_cap_high_concurrency_20260721"
+    ],
+    "topology": "inline"
+  },
+  {
+    "timestamp": "2026-07-21T21:20:00.934385+08:00",
+    "task_type": "daily_article",
+    "task_id": "article_k1697_rolling_gamma_moving_target",
+    "actor": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583",
+    "owner": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583",
+    "title": "K1697 general 版：rolling last-window γ 是移動標靶",
+    "summary": "草稿完成並通過主線程獨立複驗。anti_ai_gate 重跑 exit=0；數字抽驗對上 k1697_results.json（gamma 0.19752→0.198、t 1.8577→1.86、window 2018-04-19~2026-07-09、n_obs=2000）；兩個 Codex 降級的禁止角度均未出現。額外追查：draft 引用的 0050 γ=0.105/t=2.01 其來源 CSV 雖被 csv-scan 標為含 2014-01-02 分割斷點，但該實驗窗口起於 2018-04-11，斷點在窗外，數字未受影響。",
+    "artifacts": [
+      "storage/drafts/K1697_general_draft.md",
+      "storage/assets/k1697_twii_rolling_gamma_endpoint.png",
+      "storage/assets/k1697_rolling_gamma_cross_section.png"
+    ],
+    "topology": "subagent"
+  },
+  {
+    "timestamp": "2026-07-21T21:20:00.934385+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_0050_snapshot_repoint_20260719",
+    "actor": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583",
+    "owner": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583",
+    "title": "0050 分割污染稽核：論文 snapshot + 方法描述修正",
+    "summary": "四項全收斂，CONCLUSION_IMPACT=NONE。(a) 前提過期 — 兩篇論文 pinned CSV 早已修好，逐列比對 ratio min=max=1.000000，csv-scan 19 個斷點全在 experiments/ 之下。(b) k892 全樣本重擬 gamma=0.0970/t=3.5965 精確復現 body_v3.tex:53；4-cell 診斷證實排除分割日是 return 類的全部修法。(c) 兩處方法描述改寫為與事實一致，xelatex 皆 exit=0。(d) DM t=1.44 確認清理後計算。衍生 P2：k892/k994 執行時直打 yfinance，論文 pinned snapshot 無腳本消費。",
+    "artifacts": [
+      "paper/taiwan-vt/body_v3.tex",
+      "paper/garch-x-vix/main.tex"
+    ],
+    "followups": [
+      "k892_k994_pinned_snapshot_repoint_20260721"
+    ],
+    "topology": "subagent"
+  },
+  {
+    "timestamp": "2026-07-21T21:24:19.882167+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1597_article_general",
+    "actor": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583",
+    "owner": "hourly-slot-1-f67fc2370ced4cb783c16caf396cb583",
+    "title": "K1597 讀者向 NULL 結果文章（TAIFEX TX 粗糙度/厚尾特徵未改善 HAR 預測）",
+    "summary": "草稿 + 中文雙面板圖 + 渲染腳本。複驗：anti_ai_gate exit=0、數字抽驗對上 k1597_results.json（n_days=1138、H=0.05446/0.14282、Hill alpha 3.626/4.210/3.930）。核心論據：四個尾部指數 3.58-4.21 使 alpha-stable 的 alpha<2 前提在建模前即不成立；LFSM_lite 24 次重配適 alpha 全被夾到上限 2.0。裁決：實測 _infer_audience 回傳 research，稿件照原樣進池，general drought 另立 P2 追。",
+    "artifacts": [
+      "storage/drafts/K1597_general_draft.md",
+      "storage/assets/k1597_tail_vs_forecast_zh.png"
+    ],
+    "followups": [
+      "audience_gate_general_lane_starvation_20260721"
+    ],
+    "topology": "subagent"
   }
 ]
