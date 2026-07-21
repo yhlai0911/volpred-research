@@ -7,10 +7,25 @@ the same plan re-rendered identically forever, so the article stayed stranded
 in draft.  ``render_plan`` now retunes (taller canvas, smaller fonts) for at
 most ``MAX_REPAIR_ROUNDS`` rounds, pure code, zero LLM calls.
 
-The synthetic plan below reproduces the incident geometry: a ``method`` panel
-with nine blocks (one text + eight metrics, one metric carrying a note) lays
-out as a 2-column, 5-row grid whose squeezed rows collide the metric value with
-its note at the baseline tuning — exactly the mile_fa098fc8 defect class.
+Two separate properties are anchored here, and keeping them separate is the
+point (2026-07-21, CI run 29797353050):
+
+1. The DEFECT is gone — a metric card can never draw its value through its
+   note.  Pinned directly on ``_draw_metric_card`` over a sweep of card
+   heights: each height must either render without OVERLAP or refuse with
+   ``TextFitError``.  Never a silent collision.
+2. The REPAIR LOOP works — a defective baseline is retuned, recovered, and
+   logged.  Pinned by INJECTING a round-0 fault, not by hoping a plan's
+   geometry happens to be defective on this host.
+
+The earlier version of this file fused the two: it asserted that a synthetic
+"incident geometry" plan must fail at round 0, then used that failure to drive
+the repair loop.  That made the repair coverage a hostage of host font metrics
+— and when 77c6eefc54d0 removed the value band's 38px floor (the actual
+mile_fa098fc8 bug), the plan stopped being defective at all.  CI went red
+asserting the bug still reproduced, which is exactly backwards: the fix landing
+should not look like a regression.  A test for a fix must not be written as
+"the bug still happens".
 
 Run: uv run --extra dev python -m pytest scripts/tests/test_lazypack_render_repair.py -v
 """
@@ -23,7 +38,7 @@ from pathlib import Path
 
 import pytest
 from matplotlib import font_manager
-from PIL import Image, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = ROOT / "scripts"
@@ -70,8 +85,14 @@ def _metric(label: str, path: str, note: str | None = None, **fmt) -> dict:
     return block
 
 
-def _overlap_plan(tmp_path: Path) -> Path:
-    """A plan whose first render round MUST trip OVERLAP (incident geometry)."""
+def _incident_plan(tmp_path: Path) -> Path:
+    """The mile_fa098fc8 geometry: 9 blocks in a `method` panel, one with a note.
+
+    Kept as a realistic end-to-end shape, NOT as a guaranteed failure. Whether
+    its rows are tight enough to trip a guard depends on the host font's advance
+    widths, so nothing here may assert that a round fails — only that if a round
+    does fail, it is never with OVERLAP.
+    """
     evidence = tmp_path / "evidence.json"
     evidence.write_text(
         json.dumps({
@@ -105,8 +126,9 @@ def _overlap_plan(tmp_path: Path) -> Path:
             },
             {
                 # The incident panel class: method + 9 blocks → 2 columns × 5
-                # rows → each row's metric card is short enough that the value
-                # area's 38px floor extends into the note area.
+                # rows → each row's metric card is short. Under the old 38px
+                # value-band floor that shortness became an overlap; the bands
+                # are measured now, so it can only become an honest TextFitError.
                 "name": "2_turnover",
                 "info": "method",
                 "style": "editorial",
@@ -136,47 +158,97 @@ def _overlap_plan(tmp_path: Path) -> Path:
     return path
 
 
-def test_synthetic_plan_fails_round_zero_with_overlap(tmp_path, cjk_test_font):
-    """Without repair rounds the incident plan must still die on a layout guard.
+@pytest.mark.parametrize("card_height", [120, 150, 180, 210, 260, 320, 400])
+def test_metric_card_never_draws_its_value_through_its_note(
+    card_height, cjk_test_font,
+):
+    """The mile_fa098fc8 defect itself: a short card must refuse, not collide.
 
-    This pins the synthetic plan to the defect class it claims to reproduce —
-    if a future geometry change makes round 0 pass, the repair test below
-    would silently stop exercising the repair path. That "round 0 must not
-    render cleanly" property is the load-bearing one and is asserted strictly.
+    This is the direct pin for the fix in 77c6eefc54d0. The old code sized the
+    value band as ``max(38, remaining)``; in a short card the honest remainder
+    was 2px, the 38px floor won, and the value ran straight through the note.
+    Bands are measured and laid out sequentially now, so for EVERY card height
+    the outcome must be one of exactly two things — a clean render, or a loud
+    ``TextFitError``. A floor that outgrows its container is not a layout.
 
-    WHICH guard trips first is deliberately not pinned. The plan's defect is a
-    row squeezed too small for its content; the renderer can notice that either
-    as OVERLAP (two ink boxes collide) or as TextFitError (the note cannot fit
-    its rect even at the minimum point size). Which one fires depends on the
-    host font's advance widths: macOS resolves FONT_FAMILY to a font whose
-    metrics collide the boxes, while the Ubuntu runner's Noto Sans CJK renders
-    the same string narrower, so the note runs out of vertical room first
-    ("complete text cannot fit 670x15px at 15pt"). Matching only "OVERLAP" made
-    this test pass on the author's laptop and fail in CI (run 29757690888) for
-    identical code — the same OS/font-identity coupling class pytest.yml's
-    header documents. Both messages name the same squeezed-row defect, and
-    test_repair_rounds_recover_the_overlap_plan still asserts OVERLAP appears
-    in the repair log, so the incident's own defect class stays covered.
+    Asserting an implication ("if it renders, no OVERLAP") rather than a
+    failure ("this height must break") is what makes this hold on every host:
+    which heights are tight depends on the font, but "never silently collide"
+    does not.
     """
-    plan = _overlap_plan(tmp_path)
-    with pytest.raises(RuntimeError, match="OVERLAP|cannot fit"):
-        lr.render_plan(plan, tmp_path / "out0", max_repair_rounds=0)
-    assert not list((tmp_path / "out0").glob("*.png"))
+    from lazypack_layout_guard import find_pil_violations, install
+
+    install(collect=False, write_clean=True)
+    image = Image.new("RGB", (lr.WIDTH, lr.HEIGHT), "white")
+    draw = ImageDraw.Draw(image)
+    rect = lr.Rect(60, 60, 420, card_height)
+    block = {
+        "kind": "metric",
+        "label": "低門檻情境 觸發門檻",
+        "value": "18.9%",
+        "note": "幾乎每兩天就要動一次",
+    }
+    try:
+        lr._draw_metric_card(draw, rect, block, lr.THEMES["editorial"], lr.RenderTuning())
+    except lr.TextFitError:  # silent-ok: test — refusing to fit IS the assertion here
+        return  # refusing is the correct outcome for a card with no room
+    overlaps = [v for v in find_pil_violations(image) if "OVERLAP" in v]
+    assert not overlaps, (
+        f"metric card {rect.w}x{card_height}px drew colliding ink instead of "
+        f"refusing: {overlaps}"
+    )
 
 
-def test_repair_rounds_recover_the_overlap_plan(tmp_path, cjk_test_font):
-    plan = _overlap_plan(tmp_path)
+def test_repair_rounds_recover_a_defective_baseline(tmp_path, cjk_test_font, monkeypatch):
+    """The repair contract, with the round-0 fault injected rather than hoped for.
+
+    Injecting is what decouples this from host font metrics. The loop's promise
+    is 'a defective baseline gets retuned, recovered, and logged' — that promise
+    is the same whether the baseline failed because of Noto's advance widths or
+    because this test said so.
+    """
+    real_render_all = lr._render_all_panels
+
+    def fail_baseline_only(document, panels, evidence, tuning):
+        if tuning.label == "baseline":
+            raise lr.TextFitError("injected round-0 fault: 'X' cannot fit 670x23px at 27pt")
+        return real_render_all(document, panels, evidence, tuning)
+
+    monkeypatch.setattr(lr, "_render_all_panels", fail_baseline_only)
+
+    plan = _incident_plan(tmp_path)
     paths, report = lr.render_plan_with_report(plan, tmp_path / "out")
+
     assert [p.name for p in paths] == ["1_concept.png", "2_turnover.png"]
-    assert report["repair_rounds_used"] >= 1
+    assert report["repair_rounds_used"] == 1
     assert report["canvas_height"] > lr.HEIGHT
     # Every failed round must leave an inspectable trace naming the defect.
     assert report["repair_log"], "failed rounds must be logged, never silent"
-    assert any("OVERLAP" in v for entry in report["repair_log"]
-               for v in entry["violations"])
+    assert report["repair_log"][0]["tuning"] == "baseline"
+    assert any("injected round-0 fault" in v
+               for v in report["repair_log"][0]["violations"])
     for path in paths:
         with Image.open(path) as image:
             assert image.format == "PNG"
+            assert image.size == (lr.WIDTH, report["canvas_height"])
+
+
+def test_incident_plan_renders_and_never_reports_an_overlap(tmp_path, cjk_test_font):
+    """End-to-end on the real incident geometry, asserted host-independently.
+
+    The plan must ship. Whether it needs a repair round is the host font's
+    business, but no round may ever report OVERLAP — that collision class is
+    what 77c6eefc54d0 removed, and its return is the regression worth catching.
+    """
+    plan = _incident_plan(tmp_path)
+    paths, report = lr.render_plan_with_report(plan, tmp_path / "out")
+
+    assert [p.name for p in paths] == ["1_concept.png", "2_turnover.png"]
+    overlaps = [v for entry in report["repair_log"] for v in entry["violations"]
+                if "OVERLAP" in v]
+    assert not overlaps, f"metric value/note collision is back: {overlaps}"
+    for path in paths:
+        with Image.open(path) as image:
             assert image.size == (lr.WIDTH, report["canvas_height"])
 
 
