@@ -1,0 +1,77 @@
+{
+  "status": "already_covered",
+  "pool_task": "research_har_mcs_spy_0050_tw_tx_tsfm_timesfm_ttm_log_har",
+  "adjudicated_at": "2026-07-22T05:41:00+08:00",
+  "adjudicated_by": "dispatch-slot-1 worktree agent (opus/xhigh)",
+  "covered_by": {
+    "kid": "k1711",
+    "path": "experiments/k1711",
+    "knowledge_item_id": "k1711_reviewed_20260716",
+    "verdict": "PASS",
+    "reviewer": "codex/gpt-5 independent full-surface review",
+    "reviewed_at": "2026-07-16T02:46:31+08:00",
+    "reviewed_commit": "63520b4dae8b62d55650904ed51fab1739386f65",
+    "certification_intact": true,
+    "certification_check": "shasum -a 256 -c against review_verdict.json reviewed_sha256 -> 11/11 files OK, no drift"
+  },
+  "why_stopped": "Brief instruction 4 mandates status=already_covered and halt when an isomorphic conclusion exists. K1711 is not merely similar: its stated research question is verbatim the brief's question, and its scope is a strict superset of every deliverable requested.",
+  "requirement_coverage": [
+    {
+      "brief_requirement": "research question framed as 'does the combination enter the MCS superior set', not 'who wins'",
+      "k1711": "Does adding zero-shot TSFMs (and their bias-corrected combinations with log-HAR) to a log-HAR pool change the Hansen MCS superior set?",
+      "status": "covered_verbatim"
+    },
+    {
+      "brief_requirement": "assets SPY / 0050.TW / TX",
+      "k1711": "all three scored; SPY n=2519, 0050.TW n=2426, pooled common dates 2344",
+      "status": "covered"
+    },
+    {
+      "brief_requirement": "Log-HAR baseline",
+      "k1711": "base_pool = [RW, AR1, HAR, HAR-A]",
+      "status": "covered_superset"
+    },
+    {
+      "brief_requirement": "TimesFM + TTM free open weights, zero-shot",
+      "k1711": "tsfm_pool includes TimesFM, TTM (raw) plus TimesFM-MZ, TTM-MZ (recalibrated)",
+      "status": "covered_superset"
+    },
+    {
+      "brief_requirement": "combination (a) equal-weight (b) Mincer-Zarnowitz bias-corrected",
+      "k1711": "COMB-EW, COMB-MZ, plus COMB-GR (Granger-Ramanathan)",
+      "status": "covered_superset"
+    },
+    {
+      "brief_requirement": "MCS + DM-HLN, QLIKE and MSE each",
+      "k1711": "MCS computed under both qlike and mse at alpha in {0.01, 0.05, 0.10}; Harvey-corrected DM present via harvey_significant / harvey_threshold fields",
+      "status": "covered_superset"
+    },
+    {
+      "brief_requirement": "out-of-sample discipline, no lookahead, MZ coefficients estimated on training window only",
+      "k1711": "nested inference contract documented; Codex full-surface review PASS with blocking_defects=[]",
+      "status": "covered_and_independently_reviewed"
+    }
+  ],
+  "k1711_conclusion_verbatim": {
+    "formal_verdict": "TSFM_BEARING_MODELS_SURVIVE_MCS_NO_WINNER_OR_INCREMENTAL_CLAIM",
+    "primary_scope": {
+      "window": "pseudo_oos",
+      "proxy": "rv",
+      "loss": "qlike",
+      "horizon": 1,
+      "alpha": 0.1
+    },
+    "pooled_superior_set": ["HAR-A", "COMB-MZ"],
+    "raw_tsfm_survival": "Raw TimesFM and TTM survived none of the three primary per-asset superior sets; survivors were MZ-recalibrated or HAR-bearing combinations.",
+    "reading": "MCS non-rejection, not a TSFM win and not evidence of incremental predictive content."
+  },
+  "why_a_rerun_would_not_help": "K1711's headline limitation is that the exercise is retrospective pseudo-OOS: TimesFM and TTM weights post-date the evaluation sample. That is a permanent property of evaluating today's public zero-shot weights on historical data, not an artifact of how K1711 was run. A fresh run in this worktree would reproduce the identical caveat while consuming a second xhigh budget, and would land as the tenth ML-ceiling null the brief explicitly warns against.",
+  "unresolved": [
+    "Nested QLIKE pairs (HAR vs HAR-bearing combinations) remain INCONCLUSIVE_NO_VALID_GENERAL_LOSS_NESTED_TEST. This is a genuine open methodological gap, but it is a known repo-wide limitation (see reference memory 'nested + pinball + expanding has no valid inference method'), not something this task could close. Clark-West is admissible only for secondary MSE inference and cannot be repurposed for QLIKE.",
+    "Measurement quality is heterogeneous across markets: SPY and 0050.TW use daily OHLC Garman-Klass proxies while only TX uses local 5-min RV. Harmonising SPY/0050.TW onto intraday RV would be a legitimate follow-up experiment, distinct from re-running K1711 as specified.",
+    "Model-vintage-clean evaluation is bounded by disclosure: TimesFM has a documented training cutoff but TTM's is unstated, so the post-2024-01 robustness window cannot be certified contamination-free."
+  ],
+  "recommended_next_action": "Do not open a new kid for this pool task. Close the pool task as covered by K1711. If the underlying motivation was article-pool refill (per the task description, 'Article pool exhausted'), K1711 is PASS-reviewed and has four publication-ready figures but no reader-facing article recorded — routing it to feed-publisher is the higher-value follow-up and serves Mission #1 directly.",
+  "files_written": ["dedup_verdict_tsfm_har_mcs.json"],
+  "shared_state_modified": "none — no experiments/ kid created, no kid reserved, no storage/memory or feed.json writes, K1711 certified bytes untouched"
+}
