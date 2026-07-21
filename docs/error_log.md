@@ -667,3 +667,31 @@ AttributeError —— 也就是前一則條目剛修好的 DOA 偵測器，在�
 ≠ 缺陷已消除。
 
 **尚未修**：本次僅完成歸因與記錄；「同一 fire 的產出要嘛全進要嘛全不進」的原子性尚無 enforcement owner。
+
+### 2026-07-22 01:21 — K741 NFP canonical 重跑推翻既有文章結論：mile_eda69bfb 回溯更正（1/7，AGENTS.md 第 13 條）
+
+`k741-nfp-canonical` 改用官方 BLS 發布日曆 + forward-only 交易日對應後（已於 `dde428fab` /
+`620b16755` 認證合併 main），既有 8 篇 feed 文章引用的全部 Part A/B 數字失效。本班更正第一篇
+`mile_eda69bfb`，走 `volpred.publisher.article_correction`（errata `numbers_correction`），
+所有新數字由 `experiments/k741/k741_nfp_event_study_canonical_results.json` 讀出、不手打。
+
+**更正幅度比原任務描述大**：任務 `assign_759a28f3` 寫的是「sign 未翻轉，數字與顯著性敘述需更正，
+Low-VIX 從 p=0.069 變 p=0.009」。但 Codex 三輪 review 後的認證終態（`k741_cert_merge_summary.json`）
+是 **顯著性整個撤回**：對「vs 全體」「vs 週五」兩個總體檢定做 Holm 校正後 p=0.0722，regime 層級
+無一存活（Low/Medium 校正後 0.1039、Elevated 0.533、High 0.707），`anything_clears_5pct_under_any_family
+= false`。原文寫的「這個差異…確實存在，不只是碰巧」（依據無母數 p=0.00369）必須降級為
+「方向站得住，顯著性站不住」，不是換個數字就好。
+
+**第二個陷阱**：canonical scope 只有 Parts A/B。策略回測（13.97%/11.896%、Sharpe 0.816/0.720）與
+T±n 漂移數字屬 Parts C/D，**沒有重跑**。這些數字留在文中但已明文標註「在舊的替代日曆下算的」——
+靜默保留等同把舊日曆結果冒充成 canonical。
+
+**教訓**：任務描述是**建單當下**的認知快照，不是交付規格。這張單建於 07-20 04:09，而顯著性撤回
+發生在其後的 Codex round 1-3。照描述做會產出「數字對、結論錯」的更正，比不更正更糟——因為它會
+帶著新鮮的 errata 時戳。更正類任務開工前必須重讀**認證終態產物**（此處 `*_cert_merge_summary.json`），
+以它為準，不以建單描述為準。
+
+**未完**：另 6 篇（d721672b / 630d0010 / 44fb4b90 / a1fd229a / ffb14405 / 76475146）待同深度處理；
+`mile_d9129566` 已 retracted，不需更正。`assign_759a28f3` 已 release 回池並帶 progress/finding 註記。
+另發現 `article_correction` 無法更正 title，而 `mile_eda69bfb` / `mile_d721672b` 標題都寫著「195 次」
+——目前只能改內文，標題仍是舊數，需補 title 支援。

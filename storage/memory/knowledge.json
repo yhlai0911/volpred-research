@@ -42498,5 +42498,21 @@
   ],
   "confidence": 0.9,
   "created_at": "2026-07-22T00:19:39.079590"
+ },
+ {
+  "item_id": "ffdc6a33",
+  "category": "methodology",
+  "content": "K1708 rev2 收件裁決（2026-07-22 主線程獨立驗證，非採信 agent 自述）。方法論教訓：**schema 遷移會讓 regression test 靜默失去鑑別力**。\n\n背景：K1708 的 verdict gate 在 2026-07-17 被查出假陽性，修正時 comparator 從 `cw_vs_benchmark_primary` 換成 `cw_vs_own_restriction_primary`。隨修正加的 4 個 regression test 全部用**新 schema** 寫 fixture 並斷言 NULL —— 但舊 gate 讀不到新欄位，一律 default 回 NULL，所以那 4 個測試在**修正前後都通過**，等於沒測到東西。Codex round-2 抓到這點並判 FAIL。\n\n修法（已獨立驗證）：fixture 改成**雙 schema**（同時帶新舊兩個欄位，也就是真正 rerun 後的形狀），並把「舊 gate 必須 SUPPORTED、新 gate 必須 NULL」兩件事**同時**寫成斷言，另加 guard-on-the-guard 確保 fixture 未加 mutation 時真的能過新 gate。\n\n本次獨立驗證（主線程實跑，未採信 agent 表格）：\n1. production checkout 複跑 `pytest experiments/k1708/test_k1708.py` → **54 passed**（修改前 35）。\n2. legacy probe（/tmp 獨立複本，只把生產 gate 換成重建的 pre-fix `legacy_derive_verdict`，其餘一字不改）→ **24 failed / 30 passed**；`-k discriminate` 下 4 個 case 全 FAIL（`assert 'SUPPORTED' == 'NULL'`）+ guard 亦 FAIL。**新測試確實咬得住新舊差異**。\n3. provenance 六個數字**獨立從 `K1708_results.json` 重算**（不呼叫 agent 自己寫的 `provenance_check_recorded_numbers()`）：QLIKE 改善 HAR_KF_DISC +0.776% / HAR_KF_MLE +1.460% / HAR_S_BM −1.677%；CW t = 1.202 / 1.545 / −1.209，六項全中，且 p 與 1−Φ(t) 精確吻合（|Δ|<1e-9）。\n4. 確認 stored payload **沒有** `cw_vs_own_restriction_primary` 欄位 → agent 宣稱「新 gate 從未在真實資料上被評估過、BLOCKER 1 的經驗缺口不重跑補不上」屬實，非推託。\n\n**研究結論本身仍是 NULL 且未定案**：K1708 full-sample verdict = NULL（舊 gate 因三個 CW t 都沒過 1.645；新 gate 因這份 artifact 沒有精確 nested 的比較欄位 —— 兩個 NULL 都成立）。本條記的是 gate/test 層的修復與方法論教訓，**不是** state-space 模型優於 HAR 的任何主張。Codex primary-path 二審尚未執行（額度 2026-07-25 13:30 台北恢復），worktree `dispatch-slot-1-457427c2-k1708` **未合併**，依 brief 留 blocked 而不以 fallback reviewer 代替。\n\n可遷移規則：**任何改動 comparator / schema 的修正，其 regression test 必須在「修正前的邏輯」上實跑一次並確認 FAIL**；只斷言修正後的期望值無法區分「修好了」與「測試根本沒接到線」。",
+  "evidence": [
+   ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/REMEDIATION_rev2.md",
+   ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_results.json",
+   ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/test_k1708.py",
+   "storage/ops/k1708_codex_review_round2_20260719.md",
+   "storage/logs/hooks/test_20260722T010916_25125.log",
+   "storage/logs/hooks/test_20260722T011145_31764.log",
+   "storage/logs/hooks/test_20260722T011355_40077.log"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-22T01:15:11.303738"
  }
 ]

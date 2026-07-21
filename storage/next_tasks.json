@@ -37167,38 +37167,15 @@
   },
   {
     "id": "assign_01127566",
-    "title": "[重構·立刻] orphan reaper 底層重新設計：namespace registry 取代逐目錄 recognizer + held TTL 強制出口",
-    "description": "老闆 Telegram msg 963 指令：「立刻徹底解決這種白癡設計，底層邏輯重新設計和重構」。\n本任務**取代** assign_bc041e57（原本只打算補 experiments/ recognizer 的補丁式修法）。不要兩張單平行實作。\n\n== 根因（為什麼同一個坑第三次） ==\nscripts/reap_orphan_deliverables.py 有 998 行，用「每種產物一個 recognizer 函式」的形狀：\nscan_job_deliverables()（queue receipt output_paths）、scan_paper_build_artifacts()（paper/）、\nscan_drafts()（storage/drafts/）。每新增一種產物目錄就要再寫一個 recognizer，\n沒寫 = 該目錄的檔案沒有任何出口 → 永久 held → alert 永遠解不掉。\n2026-07-17 才為 storage/drafts/ 把預設從白名單反轉成「預設收編」（見檔內 660-666 行註解），\n但那次反轉只在 drafts 的 recognizer 內部做，沒有上升為全域規則，所以 experiments/ 又中同一招。\n**問題不是少一個 recognizer，是這個架構要求人記得補 recognizer。**\n\n== 要求的重構（不是補丁） ==\n1. **namespace registry 取代 recognizer 函式**：受管目錄改成 config 宣告（建議 config/ 下新檔或\n   併入既有 config），每筆 {path, default: adopt|hold, exclusions, owner_source, max_file_bytes,\n   max_files}。scan/collect 變成一個泛型引擎吃 registry，不再是三份平行實作。\n   驗收：新增一個受管目錄只需加一筆 config，**不得**新增任何 recognizer 函式。\n2. **全域預設反轉**：drafts 那條「預設收編、只擋真正的垃圾（tmp/swp/pyc/快取目錄/dotfile/symlink/巨檔）」\n   升級為 registry 的預設值，不是單一目錄的特例。experiments/ 直接套用即得出口。\n3. **held 不得是永久狀態**（呼應 audit terminal set 不可含 awaiting_*）：held 記錄帶 first_seen，\n   超過 N 班（建議 6）自動 escalate 成一張指名該路徑清單的任務，並停止重複噴同一句 alert。\n   目前 held 只有 reason、沒有時間軸，所以無主檔案可以無限期卡著。\n4. **ownership 不再依賴「作者自己回來 commit」**：作者 session 結束後永不回來是常態不是例外。\n   出口必須由 registry 預設 + escalation 提供，不能由已死的 session 提供。\n\n== 不可破壞的既有不變量 ==\n- 被擋的一律 held + 可讀 reason；永不刪除、永不 checkout（檔案頂部不變量）\n- git ownership 只認 exact 普通檔（不吃 symlink）\n- PHASE-Z 只 commit 自己那班產的檔 —— 這條是對的（盲目收養正是先前事故成因），\n  重構是給 reaper 補出口，不是放寬 PHASE-Z\n- 收編走 _git_transaction lease + receipt lock，順序不變\n\n== 遺留案例 ==\nk1380 那批：.npy/.json/.py 是 deleted 狀態、對應 *_INVALID_20260716.* 是 untracked，\n看起來是刻意的 invalidation rename。實作前先確認語意再決定收編或指名 escalate，不要盲收。\n\n== 驗收 ==\n- 回歸測試：(a) 新目錄只加 config 即有出口 (b) held 超過 TTL 會產生 escalation 任務\n  (c) 既有 drafts/paper/job 三條路徑行為不變 (d) 垃圾檔仍被擋且帶 reason\n- 測試須 hermetic（不得操作真 repo git）\n- 重構後刪掉被取代的死碼，不留 legacy 分支\n\n來源：telegram-963（parent telegram-958 線）",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[重構·立刻] orphan reaper 底層重新設計：namespace registry 取代逐目錄 recognizer + held TTL 強制出口",
+    "priority": 1,
     "source": "telegram",
     "created_at": "2026-07-18T08:47:16.483217+00:00",
-    "parent_task_id": "telegram-963",
-    "created_by": "telegram_responder",
-    "status_history": [
-      {
-        "ts": "2026-07-18T16:08:23.000085+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b"
-      },
-      {
-        "ts": "2026-07-18T16:09:14.700140+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b"
-      },
-      {
-        "ts": "2026-07-18T16:27:37.203082+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-9a0267cd8e384d6fa84d6668d9c6d13b"
-      }
-    ],
-    "started_at": "2026-07-18T16:09:14.700124+00:00",
     "completed_at": "2026-07-18T16:27:37.203068+00:00",
-    "result": "namespace registry 重構落地：config/orphan_namespaces.json + 泛型 scan/collect 引擎取代 3 份 recognizer（刪 ~310 行死碼，ratchet 擋復活）；全域預設反轉 → experiments/ 自動有出口；held 帶 first_seen/shifts，6 班後 escalate 成指名路徑任務並停止重複 alert；k1380 依泛型 paired_deletion_pending 規則 hold（刻意 invalidation rename，不盲收）。56 tests pass，audit_canonical_writers PASS，dry-run exit 0。PHASE-Z commit 範圍未動。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T17:08:10.193575+00:00"
   },
   {
     "id": "assign_ff29dceb",
@@ -37339,58 +37316,15 @@
   },
   {
     "id": "assign_a64e9f61",
-    "title": "[P1][arch] 急件與一般排程分流：Telegram ingest 接 request_fire + A0 白名單改用 source+priority",
-    "description": "老闆架構硬指令（Telegram msg 981）：「急件和一般排程應該要分開。急件就不進入排班直接派工，一般排程才進入排班。」\n\n== 現況實查（telegram-981，2026-07-18 18:1x）==\n底層機制已存在且正確，缺的只是接線：\n- scripts/dispatch_supervisor/state.py:684 request_fire(reason) = out-of-band 立即派工\n- scripts/dispatch_supervisor/scheduler.py:723 明確保證 requested fire 繞過所有 gate（'Gates ONLY plain cron fires — requested fires always run'）\n- 已接上：scripts/gmail_inbox_poll.py:754 (email_reply:*)、scripts/check_alerts.py:1168 (ci_red:*)\n- **未接上：Telegram**。Telegram P1 只 append 進 storage/next_tasks.json 等 hourly cron → 這就是 email 急件立刻做、Telegram 急件等下一班的全部原因。\n\n== 要修兩處（缺一不可）==\n1. **ingest 端**：Telegram 訊息建出 P1 任務時呼叫 dispatch_state.request_fire(f'telegram:{task_id}')，比照 gmail_inbox_poll.py:754。找 telegram ingest 實作位置（src/volpred/ops/telegram.py 或對應 poller）。\n2. **派工端**：request_fire 只是 generic wake-up 不是 targeted claim（continue_task_dispatch.py:970 註解自陳）。scripts/cron_hourly_dispatch_prompt.md PHASE A0 的時效 P1 過濾條件目前是\n   task_type in (event_article, trending_repost, daily_digest) or source == 'user'\n   → 漏掉 source='telegram'，且『本班主產出 = 最舊那個時效 P1』每班只做一張。\n   改為以 **source + priority** 判定急件（列舉 task_type 正是這次漏掉的根因），並讓一班可連續清完所有急件才進一般排程。\n\n== 實例（老闆親眼看到的後果）==\n瀏覽數不一致拆成 assign_998ad2be（source=telegram，A0 抓不到）與 assign_33a9151f（source=user，抓得到但排在 assign_6349aa2c 後），16:49/17:42 建單，18:06 老闆再問時兩張都還 pending；17:08 那班跑的是 K1730（P3 研究）。\n\n== 驗收 ==\n- 新增測試：source=telegram 的 P1 建立後 request_fire 被呼叫、且 A0 判定為急件。\n- 改 A0 白名單前先跑 stage×paths 矩陣（見 feedback_path_narrowing_audit 紀律）。\n- 改完把 assign_998ad2be / assign_33a9151f（瀏覽數）當第一個實測案例跑通。\n\n來源：telegram-980 / telegram-981",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[P1][arch] 急件與一般排程分流：Telegram ingest 接 request_fire + A0 白名單改用 source+priority",
+    "priority": 1,
     "source": "user",
     "created_at": "2026-07-18T10:10:30.615399+00:00",
-    "created_by": "telegram_responder",
-    "status_history": [
-      {
-        "ts": "2026-07-18T14:08:53.347980+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d"
-      },
-      {
-        "ts": "2026-07-18T14:08:53.574529+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d"
-      },
-      {
-        "ts": "2026-07-18T16:50:03.140866+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-slot-1-c3749124d2e847069214731df570cd5d",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-18T17:08:12.027814+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
-      },
-      {
-        "ts": "2026-07-18T17:10:22.947153+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
-      },
-      {
-        "ts": "2026-07-18T17:15:41.828077+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-2-5184d5a61e2f4aec80b852abc65950db"
-      }
-    ],
-    "started_at": "2026-07-18T17:10:22.947138+00:00",
-    "last_released_at": "2026-07-18T16:50:03.140857+00:00",
-    "last_release_reason": "auto_release_stale_2h",
     "completed_at": "2026-07-18T17:15:41.828062+00:00",
-    "result": "驗收關單：ingest 端(append_next_task->_request_urgent_fire)與派工端(A0 改用 volpred.ops.task_urgency source+priority 判定、連續清 lane)兩處接線已於 4684b5e02 落地，測試 33 passed，實測案例 assign_998ad2be/assign_33a9151f 皆 succeeded。本班補釘 dedicated-owner 邊界 regression test（telegram_reply 非漏網，屬 _spawn_responder+120s retry 專屬 owner）+ 修正 fail-open 訊息誤導。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T17:16:06.927406+00:00"
   },
   {
     "id": "assign_67f56b79",
@@ -40937,7 +40871,7 @@
     "description": "[experiment] K1708 fix stage rev2 — Codex round-2 (2026-07-19) 回 FAIL，4 個 BLOCKER。\n\nReview 全文：storage/ops/k1708_codex_review_round2_20260719.md\nWorktree：.claude/worktrees/dispatch-slot-2-8dda242d-k1708（commit cd135b00e，**未 merge**）\n上一輪 review：storage/ops/k1708_codex_review_20260717.md\n\nRound-2 PASS 的部分（不要重做）：Holm 實作正確、NESTING_REGISTRY 的 control 由自身 forecast map\n在受限參數下產生、regime_breakdown 用 nested pair、無 quick artifact 殘留、README §8.1/8.2/12/15\n已誠實撤回。pytest 35 passed（主線程獨立複跑 115.7s 確認）。\n\n要修的 4 個 BLOCKER：\n1. **gate 鬆緊無法證明**：comparator（CW vs HAR_FIXED → CW vs own restriction）與 bar\n   （1.645 → 3.0）同時改，所以「t>=3 是 t>1.645 的子集，故不可能把 NULL 轉正」這個論證不成立\n   —— 兩邊統計量本身就不同。要嘛證明新 gate 在同一 comparator 下的保守性，要嘛改用可驗證的\n   方式（例如對 stored ledger 同時算出兩種 gate 的結果並列表）。K1708.py:1513,1560-1561\n2. **verdict 盲信欄位**：derive_verdict 未核對 registry control 身分、未重算 Holm；只要把\n   exact/reject 標籤貼到錯誤的比較上就能過關。要在 verdict 端做 identity + 重算防呆。\n   K1708.py:2176-2182\n3. **untouched 不可驗證**：cd135b00e^ 沒有 experiments/k1708/，整份 K1708_results.json 以新增檔\n   進入 diff，沒有 pre-fix blob 可比。需要獨立佐證（例如用 2026-07-17 review 文件已記錄的數字\n   QLIKE +0.776/+1.460/-1.677%、CW t=1.202/1.545/-1.209 對 stored payload 逐項核對並寫成\n   provenance 段），或明講此性質只能靠旁證。\n4. **新測試不咬**：test_gate_holds_the_pre_registered_t_bar / test_inexact_nesting_flag_is_load_bearing\n   / test_regime_consistency_needs_both_regionsscored / test_stored_full_sample_verdict_is_still_null\n   在 pre-fix logic 下同樣返回 NULL 而通過（舊 logic 不讀新欄位）。regression test 必須在舊邏輯下\n   FAIL 才有價值。registry 測試也只驗名稱與 boolean，沒呼叫真正的 forecast generator。\n   test_k1708.py:535-548, 625-640\n\n硬規則（承襲）：\n- **不得為了過 gate 動任何數字**；full-sample rerun 仍不在本 stage 範圍（先修 gate 與測試，再談 rerun）。\n- 完成後再跑一次 codex 二審（bash scripts/codex_exec_bounded.sh，read-only），PASS 才 merge worktree。\n- knowledge.json 由主線程寫，agent 不得寫。\n\n**Model**: opus / max (per model_router, attempt=1, at_ceiling=true) —— 已到 ladder 天花板，\n若本輪再 FAIL，觸發 3-strike：拆題 / 補文獻 / escalate 給老闆，禁止同法再試。\n",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T15:05:00+08:00",
     "parent_task_id": "k1708_fix_verdict_gate_20260717",
@@ -40948,14 +40882,19 @@
       "escalated-max"
     ],
     "dispatch_lane": "agent",
-    "claimed_by": null,
-    "claimed_at": null,
-    "claim_session_id": null,
     "started_at": null,
-    "status_history": [],
+    "status_history": [
+      {
+        "ts": "2026-07-21T17:17:03.374963+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "complete"
+      }
+    ],
     "escalation_attempts": 1,
     "compute_job_id": "k1708_fix_verdict_gate_rev2_20260722",
-    "result": "dispatched to compute job k1708_fix_verdict_gate_rev2_20260722; awaiting PHASE A collection"
+    "result": "dispatched to compute job k1708_fix_verdict_gate_rev2_20260722; awaiting PHASE A collection\n\n4 �?? round-2 BLOCKER 修復�?�??並�?主�?�?�?��?�?�??�?�?�? pytest 54 passed�?�?�建 legacy probe �??�??�?�測試�??�??�?��??�?24 failed/30 passed�?4 �?? discriminate case + guard �?� FAIL�?�?provenance �??�?��??�?��?�??�?�?��?�? p=1-Phi(t) �?��??�?確�? stored payload �?� own-restriction �?�?�?? BLOCKER 1 缺�?�屬實�??knowledge ffdc6a33�?methodology�?schema �?�移�??�? regression test �??�?失�?��??�?��??�?�??Codex primary-path �?審�?��?��?�?�?度 2026-07-25 13:30 �?�復�?�?worktree �?��??併�?�?�? assign_50256f5f 已 blocked �?�該�??�?�??K1708 �?究 verdict �?�?� NULL�??",
+    "completed_at": "2026-07-21T17:17:03.374947+00:00"
   },
   {
     "id": "assign_1238781f",
@@ -43732,7 +43671,31 @@
     "status": "pending",
     "source": "ci_red_triage",
     "created_at": "2026-07-19T22:38:19.531675+00:00",
-    "description": "全套 pytest（3730 passed）中此測試失敗，單獨跑 pass → test-order-dependent。發現於 ci-red-29703582195 修復時；與該次修復（dispatcher sweep guard / supabase egress chokepoint / codex spawn killpg / audit ratchet）無關，四者皆不產生新 alert id。查法：pytest -p no:randomly 二分先前測試，找出污染 alert disposition 狀態的那支。"
+    "description": "全套 pytest（3730 passed）中此測試失敗，單獨跑 pass → test-order-dependent。發現於 ci-red-29703582195 修復時；與該次修復（dispatcher sweep guard / supabase egress chokepoint / codex spawn killpg / audit ratchet）無關，四者皆不產生新 alert id。查法：pytest -p no:randomly 二分先前測試，找出污染 alert disposition 狀態的那支。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T17:23:28.752927+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-3746dee053a64935a354de2b172b23de"
+      },
+      {
+        "ts": "2026-07-21T17:23:29.001105+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-3746dee053a64935a354de2b172b23de"
+      },
+      {
+        "ts": "2026-07-21T17:25:57.023739+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-3746dee053a64935a354de2b172b23de",
+        "note": "supervisor_kill_3746dee0"
+      }
+    ],
+    "started_at": "2026-07-21T17:23:29.001086+00:00",
+    "last_released_at": "2026-07-21T17:25:57.023726+00:00",
+    "last_release_reason": "supervisor_kill_3746dee0"
   },
   {
     "id": "ci-red-29705358452",
@@ -45385,7 +45348,33 @@
     "unblocked_note": "論文數字已定案並併入 main（620b16755，Codex k741/k904 PASS）。canonical 數字：overall 1.16x Welch p=0.039（Student 0.051；Holm over overall pair 0.072）；regimes Low 1.31x p=0.026 / Medium 1.23x p=0.029 / Elevated 1.19x p=0.266 / High 0.94x p=0.707；Holm 後無一存活（最小 adjusted p=0.104）。已發佈文章仍引用 first-Friday proxy 數字（1.23/1.17/1.15/0.98、overall 1.14 p=0.074）與 proxy 圖 k904_chart3_nfp_by_vix.png；canonical 圖為 k904_chart3_nfp_by_vix_canonical.png。更正時務必同步撤回「regime 顯著」與「效應消失」的強宣稱。",
     "upstream_task": "assign_33e84191 (已 succeeded)",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-21T17:17:15.815386+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-0a156df1656e4355838979df5c2ea4db"
+      },
+      {
+        "ts": "2026-07-21T17:17:16.053633+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-0a156df1656e4355838979df5c2ea4db"
+      },
+      {
+        "ts": "2026-07-21T17:22:06.408582+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-0a156df1656e4355838979df5c2ea4db",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-21T17:17:16.053617+00:00",
+    "canonical_numbers_verified": "[2026-07-22 01:3x 由 hourly slot-1 驗證後補入 — 執行更正前務必先讀]\n\n**blocker 已解除**：k741 canonical 已合併 main（`experiments/k741/k741_nfp_event_study_canonical_results.json` + `k741_cert_merge_summary.json` 都在 main）。Welch vs Student 已定案：`test_variant_chosen = \"welch\"`（理由：Zimmerman 2004 / Ruxton 2006 / Delacre et al. 2017 的 unconditional Welch；且 summary 誠實記載此選擇 **非 a priori**，是在兩個 p 值已知後才做，先前宣稱 a priori 的說法已於 Codex review 2026-07-20 撤回）。\n\n**⚠️ 兩張 P1 任務描述裡的目標數字有誤，照抄會寫錯**：\n- 描述寫「Low-VIX regime 從 p=0.069 變 p=0.009」—— `0.009` 是 **Student** 值（p_student=0.008904），但 canonical 選的是 **Welch**：p_welch = **0.0260**。\n- 更關鍵：canonical 有做 **Holm 多重比較校正**，校正後 **四個 VIX regime 全部不顯著**（p_welch_holm 最小值 = 0.1039）。原文章「VIX 體制決定一切」「低 VIX 時差距 3 倍」這類敘述若只換數字不改敘述，會變成**未校正的顯著性宣稱**，違反 AGENTS.md 第 10 條（結論強度不得超過證據）。\n\n**canonical 權威數字（part_a_historical，全部取自 canonical results.json）**：\n- n_nfp = **194**（舊 195）、n_non_nfp = **3890**（舊 3909）\n- NFP 日 SPY 平均絕對報酬 = **0.8299%**；非 NFP 日 = **0.7135%**；普通週五 = **0.6991%**\n- ratio_vs_all = **1.1631**（舊 1.1448）、ratio_vs_friday = **1.1871**\n- 選定檢定 Welch：t = **2.0731**, p = **0.0394**（Student 對照：t=1.9558, p=0.0506 — 恰在 5% 邊緣，故變異數選擇會改變「是否顯著」的敘述，必須明講用哪個）\n- vs 週五：t_welch = 2.1047, p = 0.0361\n- Wilcoxon p = **0.000639**（注意：`mile_eda69bfb` 現寫「p 達 0.00369」= 舊值，需一併更正）\n- pct_positive = 57.22%、mean_return_pct = 0.0567%、vix_drops_pct = 65.98%\n\n**part_b_vix_regimes（ratio / p_welch / p_welch_holm）**：\n- Low (VIX<15): 1.3052 / 0.0260 / **0.1039**\n- Medium (15-20): 1.2305 / 0.0285 / **0.1039**\n- Elevated (20-25): 1.1862 / 0.2665 / **0.5329**\n- High (VIX>=25): 0.9361 / 0.7067 / **0.7067**\n\n**執行路徑**：唯一合法更正入口 = `src/volpred/publisher/article_correction.py:apply_article_correction`（含 publisher_feed 寫鎖 + errata trail + Supabase 投影同步）。**禁止手改 feed.json 或直接 PATCH Supabase**（模組 docstring 明載，兩者都會跳過 errata 與鎖並讓 feed.json 與 Supabase 漂移）。每個 replacement 的 old 字串必須在 body 中**恰好出現一次**，否則整批不寫入並丟 `CorrectionNotApplied` —— 這是安全性質不是麻煩。\n\n**額外注意**：`mile_eda69bfb` 與 `mile_d721672b` 的**標題裡就有「195 次」**，而 `apply_article_correction` 只改 content 與 details，不改 title —— 標題更正需另找路徑或擴充該模組，不可漏掉（讀者第一眼看到的就是標題）。`mile_d9129566` 目前 status=retracted，需先判斷是否仍需更正。",
+    "progress": "1/8 done (2026-07-22 fire slot-2): mile_eda69bfb corrected in place via volpred.publisher.article_correction (errata numbers_correction). Canonical source: experiments/k741/k741_nfp_event_study_canonical_results.json + k741_cert_merge_summary.json. Remaining: mile_d721672b (P1), mile_630d0010 / mile_44fb4b90 / mile_a1fd229a / mile_ffb14405 (P2), mile_76475146 (P3). mile_d9129566 is status=retracted -> no correction needed, drop from list.",
+    "finding": "Blocker IS resolved (k741-nfp-canonical merged at dde428fab/620b16755). Correction is LARGER than this task description says: the description claims only n/ratio/p change and Low-VIX becomes p=0.009, but the final certified state withdraws significance entirely - Holm over the overall pair gives p=0.0722 and no regime survives Holm under any family (anything_clears_5pct_under_any_family=false). Articles claiming significance must be downgraded, not just renumbered. Also canonical scope is Parts A/B only: strategy backtest and T+-n drift were NOT rerun and must be labelled as old-calendar rather than silently kept.",
+    "last_released_at": "2026-07-21T17:22:06.408568+00:00"
   },
   {
     "id": "assign_d569f0c4",
@@ -45440,13 +45429,36 @@
     "description": "NFP 事件日改用官方 BLS 行事曆後（n 195→194、ratio 1.1448→1.1631、p 0.081→0.051/0.039），以下 feed 文章引用舊數字需更正：P1 mile_eda69bfb, mile_d721672b；P2 mile_630d0010, mile_44fb4b90, mile_a1fd229a, mile_d9129566, mile_ffb14405；P3 mile_76475146。blocked_on：paper 數字定稿（Welch vs Student 未決 → 先更正會改兩次）。依 AGENTS.md 第 13 條『推翻舊結論必須回溯更正』，定稿後逐篇更正並記 docs/error_log.md。parent: assign_1238781f。",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "system",
     "created_at": "2026-07-20T04:13:19.337705+00:00",
     "created_by": "hourly-slot-3-70874e53770e4fcca67b8d54d94a0a8d",
     "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-21T17:19:57.725588+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-3746dee053a64935a354de2b172b23de"
+      },
+      {
+        "ts": "2026-07-21T17:19:57.971247+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-3746dee053a64935a354de2b172b23de"
+      },
+      {
+        "ts": "2026-07-21T17:20:52.877490+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-3746dee053a64935a354de2b172b23de"
+      }
+    ],
+    "started_at": "2026-07-21T17:19:57.971234+00:00",
+    "completed_at": "2026-07-21T17:20:52.877473+00:00",
+    "result": "裁決為【重複單，由 assign_759a28f3 承接】，不另行更正以免同一批文章被兩個 lane 各改一次。證據：兩張任務涵蓋完全相同的 8 個 mile_id（eda69bfb/d721672b/630d0010/44fb4b90/a1fd229a/d9129566/ffb14405/76475146）與相同的 P1/P2/P3 更正順序，同源 parent assign_1238781f；本單 04:13 建立、比 assign_759a28f3 的 04:09 晚 4 分鐘且無 parent 連結。assign_759a28f3 已於本班被同 cohort 另一 slot claim 為 in_progress，故本單結案。\n\n附帶查核（已寫入 assign_759a28f3 的 canonical_numbers_verified 欄位）：(1) 兩單所述 blocker『paper 數字定稿未決』**已解除** —— k741 canonical 與 cert summary 皆已在 main，test_variant_chosen=welch 定案；此為兩單餓死 37h+ 的真正原因（blocker 解除後沒人回頭複查）。(2) **兩單描述的目標數字有誤**：『Low-VIX p=0.009』是 Student 值，canonical 選定的 Welch 為 p=0.0260；且 canonical 已做 Holm 校正，校正後四個 VIX regime 全不顯著（min p_holm=0.1039），照描述盲改會產出未校正的顯著性宣稱。(3) 補齊 canonical 權威數字表與唯一合法更正入口 apply_article_correction，並點出 apply_article_correction 不改 title、但兩篇 P1 的標題裡就寫著錯的『195 次』。"
   },
   {
     "id": "ci-red-29715899562",
@@ -50463,7 +50475,7 @@
     "description": "## 發生什麼\n11 個未提交檔案不是任何一班 fire 產出的，最長已連續 11 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- scripts/detect_price_split_breaks.py — 11 班\n- scripts/dispatch_slot_budget.py — 5 班\n- scripts/dispatch_supervisor/phase_z.py — 5 班\n- scripts/reap_orphan_deliverables.py — 5 班\n- scripts/tests/test_orphan_namespace_registry.py — 5 班\n- scripts/tests/test_phase_z_foreign_incident.py — 5 班\n- src/volpred/ops/foreign_incident.py — 5 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png — 9 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png — 9 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png — 9 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py — 9 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T145552170670Z:<路徑>`\n- `git show refs/volpred/quarantine/20260721T152724627485Z:<路徑>`\n- `git show refs/volpred/quarantine/20260721T163924245506Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-21T14:55:52.987182+00:00",
     "payload": {
@@ -50520,7 +50532,11 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-21T16:39:25.776517+00:00"
+    "updated_at": "2026-07-21T16:39:25.776517+00:00",
+    "superseded_at": "2026-07-21T17:26:04.826376+00:00",
+    "superseded_by": "assign_8ddaca82",
+    "completed_at": "2026-07-21T17:26:04.826376+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
   },
   {
     "id": "telegram-1275",
@@ -50760,5 +50776,86 @@
     ],
     "created_at": "2026-07-21T16:40:00Z",
     "description": "設計依據：docs/governance/2026-07/d4_producer_scoped_workspace_design.md §0 與 §5（S0/S1）。\n\n**主線程已獨立驗證的事實**（不是 agent 轉述）：\n- config/runtime_schedules.json 的 volpred-hourly-dispatch 條目 writer_isolation.mode = 'pilot'（lanes=[platform_ops], max_total=3），也就是隔離**已經開著**。\n- storage/ops/dispatch_workspace_receipts.jsonl 共 628 筆：578 筆 finalized、50 筆 allocation_skipped。\n- 578 筆 finalized 的 worker_outcome **100% 是 orphaned**，disposition 100% 是 remediation_opened。\n- 全檔 grep 'merged' = **0**。也就是 happy path 從上線到現在**一次都沒走通**。\n- remediation 最常見的三筆都是 {\"created\": false}（各 38 次）—— 「絕不 strand」的保證沒有成立。\n- 從未出現 allocated 事件 → setup latency 至今無任何實測值。\n\n**自鎖迴圈**：失敗 → 保留 worktree → 佔滿 max_total=3 → 新 fire 拿不到隔離（50 次 allocation_skipped 原因 100% 是 total_cap）→ 全退回 shared main → PHASE-Z 繼續猜作者。旁證：受害 worktree 名單裡的 dispatch-slot-1-558d7893-k1730 與 dispatch-slot-1-bd00f90a-k1731，本班 2026-07-22 00:0x 都親眼確認過狀態異常（前者目錄已回收、成果只剩 quarantine salvage ref；後者卡 experiment certification gate 未合併）。\n\n**S0（先做，不要跳過）**：設計文件把 `scripts/dispatch_supervisor/workspace.py:93` 的 `_JOB8_RE` 不接受 `-<slug>` 尾綴、而實測 17 個 workspace 全部帶 slug，列為 578/578 全判 orphan 的**待驗假設**。先寫一個能重現的測試證實或推翻它 —— **不要憑這個假設直接改碼**。若成立，這是一個 regex 的修，不是架構問題；若不成立，真因另有其處，繼續往下查。\n\n**S1**：解自鎖 —— quarantine 只留 branch 不留目錄，讓失敗不再吃掉 max_total 額度。\n\n**硬規則**：不得在此加任何新的 recognizer / namespace / 收編條件（D1，已失敗 6 次），scripts/tests/test_phase_z_ownership_class_gate.py 會擋。S2-S7 各自入池，不要在本單一次做完。"
+  },
+  {
+    "id": "assign_50256f5f",
+    "title": "[K1708 rev2 收件後] Codex primary-path 二審 + worktree 合併裁決（額度 2026-07-25 13:30 台北恢復後才可開工）",
+    "description": "前置：K1708 rev2 remediation 已由主線程於 2026-07-22 01:0x 獨立驗證完畢（work_log + knowledge ffdc6a33）。四個 round-2 BLOCKER 的處置證據已核實：pytest 54 passed 複跑通過；legacy probe 24 failed/30 passed、-k discriminate 4 case 全 FAIL 證明新測試有鑑別力；provenance 六數字獨立重算全中；stored payload 確無 cw_vs_own_restriction_primary（BLOCKER 1 經驗缺口屬實）。\n\n本任務 = 唯一未完成的一步：Codex primary-path 二審。brief 明令不得以 fallback reviewer 代替、亦不得因審不了而宣稱通過，故本任務 blocked 至 Codex 額度恢復（2026-07-25 13:30 台北）。\n\n開工步驟：\n1. 確認 Codex 額度已恢復；用 codex exec 對 worktree .claude/worktrees/dispatch-slot-1-457427c2-k1708 的 experiments/k1708/{K1708.py,test_k1708.py,README.md,REMEDIATION_rev2.md} 跑 primary-path round-3 review，重點看 round-2 四個 BLOCKER 是否真的關閉。\n2. PASS 才用 bash scripts/merge_worktree.sh 合併 dispatch-slot-1-457427c2-k1708；FAIL 則已達 router ladder 天花板，觸發 3-strike（拆題 / 補文獻 / escalate 老闆），禁止同法再試。\n3. 合併後才談 full-sample rerun（rerun 會首次產生 own-restriction 統計量，gate_transition_audit 的 cross-comparator 欄位屆時才有內容，BLOCKER 1 的經驗缺口也才可能補上）。\n\n注意：K1708 的研究 verdict 仍是 NULL，本線是 gate/test 修復，不是 state-space 優於 HAR 的主張。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "blocked",
+    "source": "user",
+    "created_at": "2026-07-21T17:15:31.310327+00:00",
+    "created_by": "hourly-slot-1-3746dee053a64935a354de2b172b23de",
+    "blocked_until": "2026-07-25T13:30:00+08:00",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_at": "2026-07-21T17:15:54+00:00",
+    "blocked_note": "K1708 rev2 已由主線程獨立驗證完畢（knowledge ffdc6a33）；僅剩 Codex primary-path 二審。brief 明令不得以 fallback reviewer 代替，故 blocked 至額度恢復。",
+    "fire_requested": false
+  },
+  {
+    "id": "assign_8ddaca82",
+    "title": "PHASE-Z 卡住檔案 incident（f12ceb87e6de7324）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n20 個未提交檔案不是任何一班 fire 產出的，最長已連續 12 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/refactor_commit_ownership_state_machine.md — 3 班\n- scripts/dedupe_next_tasks.py — 3 班\n- scripts/detect_price_split_breaks.py — 12 班\n- scripts/dispatch_slot_budget.py — 6 班\n- scripts/dispatch_supervisor/phase_z.py — 6 班\n- scripts/reap_orphan_deliverables.py — 6 班\n- scripts/tests/test_fire_manifest.py — 3 班\n- scripts/tests/test_orphan_namespace_registry.py — 6 班\n- scripts/tests/test_phase_z_foreign_incident.py — 6 班\n- scripts/worktree_gc.py — 3 班\n- src/volpred/ops/fire_manifest.py — 3 班\n- src/volpred/ops/foreign_incident.py — 6 班\n- src/volpred/ops/next_tasks.py — 3 班\n- src/volpred/ops/task_signature.py — 3 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png — 10 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png — 10 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png — 10 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py — 10 班\n- tests/test_task_signature.py — 3 班\n- tests/test_worktree_gc.py — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T172602987941Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-21T17:26:04.841370+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "f12ceb87e6de7324",
+      "paths": [
+        "docs/refactor_commit_ownership_state_machine.md",
+        "scripts/dedupe_next_tasks.py",
+        "scripts/detect_price_split_breaks.py",
+        "scripts/dispatch_slot_budget.py",
+        "scripts/dispatch_supervisor/phase_z.py",
+        "scripts/reap_orphan_deliverables.py",
+        "scripts/tests/test_fire_manifest.py",
+        "scripts/tests/test_orphan_namespace_registry.py",
+        "scripts/tests/test_phase_z_foreign_incident.py",
+        "scripts/worktree_gc.py",
+        "src/volpred/ops/fire_manifest.py",
+        "src/volpred/ops/foreign_incident.py",
+        "src/volpred/ops/next_tasks.py",
+        "src/volpred/ops/task_signature.py",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py",
+        "tests/test_task_signature.py",
+        "tests/test_worktree_gc.py"
+      ],
+      "streaks": {
+        "docs/refactor_commit_ownership_state_machine.md": 3,
+        "scripts/dedupe_next_tasks.py": 3,
+        "scripts/detect_price_split_breaks.py": 12,
+        "scripts/dispatch_slot_budget.py": 6,
+        "scripts/dispatch_supervisor/phase_z.py": 6,
+        "scripts/reap_orphan_deliverables.py": 6,
+        "scripts/tests/test_fire_manifest.py": 3,
+        "scripts/tests/test_orphan_namespace_registry.py": 6,
+        "scripts/tests/test_phase_z_foreign_incident.py": 6,
+        "scripts/worktree_gc.py": 3,
+        "src/volpred/ops/fire_manifest.py": 3,
+        "src/volpred/ops/foreign_incident.py": 6,
+        "src/volpred/ops/next_tasks.py": 3,
+        "src/volpred/ops/task_signature.py": 3,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png": 10,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png": 10,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png": 10,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py": 10,
+        "tests/test_task_signature.py": 3,
+        "tests/test_worktree_gc.py": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260721T172602987941Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-21T17:26:04.826376+00:00",
+      "last_seen_at": "2026-07-21T17:26:04.826376+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]
