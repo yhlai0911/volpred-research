@@ -9358,7 +9358,7 @@
     "id": "K492_article_general_v2",
     "title": "K492: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K492 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Method: Manual classification + statistical analysis of all K414-K491 results Reference: Harvey, Liu, Zhu (2016) ...and the Cross-Section of Expected Returns, RFS Reference: Timmermann (2006) Forecast Combinations, Handbook of Economic Forecasting",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -9379,7 +9379,8 @@
     "adjudication_reason": "check_arc_dedup K492/general exit 0 -- still uncovered, article is still wanted",
     "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "data_source_note": "**寫作資料來源在 `experiments/k492/`，不要只讀 knowledge.json 的 K492 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K492 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k492/k492_research_efficiency_results.json`\n分析腳本：`experiments/k492/k492_research_efficiency.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。"
   },
   {
     "id": "K861_article_general",
@@ -14263,7 +14264,7 @@
     "id": "K709_article_general_v2",
     "title": "K709: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K709 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: K663/K706 延伸, 執行: Claude] 利率條件 60/40↔40/60 SPY/GLD（rising→more SPY, falling→more GLD）。Falling regime GLD +30.8% vs SPY +13.4%（huge gap）但 lag 6m window 後 conditional Sharpe 0.869 vs BH 0.850 Δ=+0.019——太小不值得。Rate regime 佔比：rising 21%, stable 62%, falling 19%。結論：利率資訊到達太晚（6m lag",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -14287,7 +14288,8 @@
     "adjudication_reason": "check_arc_dedup K709/general exit 0 -- still uncovered, article is still wanted",
     "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "data_source_note": "**寫作資料來源在 `experiments/k709/`，不要只讀 knowledge.json 的 K709 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K709 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k709/k709_results.json`\n分析腳本：`experiments/k709/k709.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。"
   },
   {
     "id": "K717_article_general_v2",
@@ -32440,13 +32442,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-21T08:06:11.618127+00:00",
+    "completed_at": "2026-07-21T08:32:42.877120+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T08:06:11.618127+00:00",
-      "last_clean_observed_at": "2026-07-21T08:06:11.618127+00:00"
+      "resolved_at": "2026-07-21T08:32:42.877120+00:00",
+      "last_clean_observed_at": "2026-07-21T08:32:42.877120+00:00"
     }
   },
   {
@@ -32458,13 +32460,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-21T07:25:52.484104+00:00",
+    "completed_at": "2026-07-21T08:06:52.697604+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T07:25:52.484104+00:00",
-      "last_clean_observed_at": "2026-07-21T07:25:52.484104+00:00"
+      "resolved_at": "2026-07-21T08:06:52.697604+00:00",
+      "last_clean_observed_at": "2026-07-21T08:06:52.697604+00:00"
     }
   },
   {
@@ -32741,7 +32743,7 @@
     "id": "K1348_article_general",
     "title": "K1348: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1348 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1348 [CONDITIONAL_PASS]：檢定ETF(SPY/IVV/VTI/QQQ)季末heartbeat trade是否對成分股造成微結構vol pressure。資料：yfinance日頻，2014-01-01~2026-06-17，panel N=59,489。Volume channel：2/4 ETF顯著擴張（IVV t=+3.46,p=0.0006；VTI t=+3.24,p=0.0013），panel OLS(HC1,asset/year FE)係數+0.0417,t=+5.84。range_vol channel：0/4顯著，p",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -32754,7 +32756,8 @@
     "created_at": "2026-07-14T19:08:06+00:00",
     "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "data_source_note": "**寫作資料來源在 `experiments/k1348/`，不要只讀 knowledge.json 的 K1348 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K1348 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k1348/k1348_results.json`\n分析腳本：`experiments/k1348/k1348.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。"
   },
   {
     "id": "content_audience_mislabel_backlog_45",
@@ -35766,7 +35769,7 @@
     "id": "article_k1697_rolling_gamma_moving_target",
     "title": "[發文] K1697：沿用多時的台股 Table 2 數字重跑後復現不出來，rolling last-window γ 是移動標靶",
     "task_type": "daily_article",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "source": "orphan_closeout",
     "created_at": "2026-07-17T08:55:00+00:00",
@@ -35779,7 +35782,7 @@
     "id": "article_k1699_forecast_timing_convention",
     "title": "[發文] K1699：同一模型同一資料，只因改變『你幾點做預測』，DM 從 +5.06 崩到 0/6 顯著",
     "task_type": "daily_article",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "source": "orphan_closeout",
     "created_at": "2026-07-17T08:55:00+00:00",
@@ -35792,7 +35795,7 @@
     "id": "article_k1608_boxoffice_null",
     "title": "[發文] K1608：大片週末後股市會動嗎？1,098 個週末的誠實檢定說：測不到",
     "task_type": "daily_article",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "source": "orphan_closeout",
     "created_at": "2026-07-17T08:55:00+00:00",
@@ -45640,192 +45643,448 @@
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：agent-a0ef53c7c992ec1df（idle=28.9h unmerged=0 dirty=True branch=worktree-agent-a0ef53c7c992ec1df）",
-    "description": "stale worktree `.claude/worktrees/agent-a0ef53c7c992ec1df` 持有未落地成果（idle=28.9h unmerged=0 dirty=True branch=worktree-agent-a0ef53c7c992ec1df），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh agent-a0ef53c7c992ec1df`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/agent-a0ef53c7c992ec1df` 持有未落地成果（idle=28.9h unmerged=0 dirty=True branch=worktree-agent-a0ef53c7c992ec1df），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh agent-a0ef53c7c992ec1df`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:15.512685+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:15.785428+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:15.785408+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：STUCK === 有 worktree 因安全檢查 ABORT 而未合併（見上方 [ABORT]）— exit 1 ===；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_agent-a23b02df50bfa4a57",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：agent-a23b02df50bfa4a57（idle=28.7h unmerged=0 dirty=True branch=worktree-agent-a23b02df50bfa4a57）",
-    "description": "stale worktree `.claude/worktrees/agent-a23b02df50bfa4a57` 持有未落地成果（idle=28.7h unmerged=0 dirty=True branch=worktree-agent-a23b02df50bfa4a57），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh agent-a23b02df50bfa4a57`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/agent-a23b02df50bfa4a57` 持有未落地成果（idle=28.7h unmerged=0 dirty=True branch=worktree-agent-a23b02df50bfa4a57），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh agent-a23b02df50bfa4a57`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:16.052963+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:16.363454+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:16.363435+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       uv run python scripts/experiment_gates.py verdict-template --path experiments/<kid> )；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_agent-a6325a478bff05509",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：agent-a6325a478bff05509（idle=27.6h unmerged=0 dirty=True branch=worktree-agent-a6325a478bff05509）",
-    "description": "stale worktree `.claude/worktrees/agent-a6325a478bff05509` 持有未落地成果（idle=27.6h unmerged=0 dirty=True branch=worktree-agent-a6325a478bff05509），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh agent-a6325a478bff05509`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/agent-a6325a478bff05509` 持有未落地成果（idle=27.6h unmerged=0 dirty=True branch=worktree-agent-a6325a478bff05509），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh agent-a6325a478bff05509`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:16.713511+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:17.159579+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:17.159556+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       uv run python scripts/experiment_gates.py verdict-template --path experiments/<kid> )；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_codex-desktop-k1707",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：codex-desktop-k1707（idle=105.1h unmerged=4 dirty=True branch=codex/k1707-pseudo-stress）",
-    "description": "stale worktree `.claude/worktrees/codex-desktop-k1707` 持有未落地成果（idle=105.1h unmerged=4 dirty=True branch=codex/k1707-pseudo-stress），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh codex-desktop-k1707`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/codex-desktop-k1707` 持有未落地成果（idle=105.1h unmerged=4 dirty=True branch=codex/k1707-pseudo-stress），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh codex-desktop-k1707`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:17.453159+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:17.827822+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:17.827805+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       uv run python scripts/experiment_gates.py verdict-template --path experiments/<kid> )；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-1-1533dcbc-cqamend",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-1-1533dcbc-cqamend（idle=138.7h unmerged=2 dirty=True branch=ops/compute-queue-amend）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-1533dcbc-cqamend` 持有未落地成果（idle=138.7h unmerged=2 dirty=True branch=ops/compute-queue-amend），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-1533dcbc-cqamend`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-1533dcbc-cqamend` 持有未落地成果（idle=138.7h unmerged=2 dirty=True branch=ops/compute-queue-amend），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-1533dcbc-cqamend`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:18.250843+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:18.618203+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:18.618190+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：MERGED_AND_REMOVED；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-1-30aeb902-taifexrv",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-1-30aeb902-taifexrv（idle=69.3h unmerged=3 dirty=True branch=wt/dispatch-slot-1-30aeb902-taifexrv）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-30aeb902-taifexrv` 持有未落地成果（idle=69.3h unmerged=3 dirty=True branch=wt/dispatch-slot-1-30aeb902-taifexrv），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-30aeb902-taifexrv`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-30aeb902-taifexrv` 持有未落地成果（idle=69.3h unmerged=3 dirty=True branch=wt/dispatch-slot-1-30aeb902-taifexrv），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-30aeb902-taifexrv`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:19.055502+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:19.399259+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:19.399244+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：swept 2026-07-21 (worktree removed; bytes preserved)；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-1-558d7893-k1730",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-1-558d7893-k1730（idle=17.9h unmerged=1 dirty=True branch=wt/dispatch-slot-1-558d7893-k1730）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-558d7893-k1730` 持有未落地成果（idle=17.9h unmerged=1 dirty=True branch=wt/dispatch-slot-1-558d7893-k1730），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-558d7893-k1730`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-558d7893-k1730` 持有未落地成果（idle=17.9h unmerged=1 dirty=True branch=wt/dispatch-slot-1-558d7893-k1730），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-558d7893-k1730`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:19.733668+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:20.145278+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:20.145263+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：STUCK === 有 worktree 因安全檢查 ABORT 而未合併（見上方 [ABORT]）— exit 1 ===；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-1-79726798-credit-firm",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-1-79726798-credit-firm（idle=64.5h unmerged=0 dirty=True branch=wt/dispatch-slot-1-79726798-credit-firm）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-79726798-credit-firm` 持有未落地成果（idle=64.5h unmerged=0 dirty=True branch=wt/dispatch-slot-1-79726798-credit-firm），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-79726798-credit-firm`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-79726798-credit-firm` 持有未落地成果（idle=64.5h unmerged=0 dirty=True branch=wt/dispatch-slot-1-79726798-credit-firm），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-79726798-credit-firm`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:20.509381+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:20.861913+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:20.861893+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       uv run python scripts/experiment_gates.py verdict-template --path experiments/<kid> )；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-1-858545f9-snapaudit",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-1-858545f9-snapaudit（idle=27.6h unmerged=7 dirty=True branch=wt/dispatch-slot-1-858545f9-snapaudit）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-858545f9-snapaudit` 持有未落地成果（idle=27.6h unmerged=7 dirty=True branch=wt/dispatch-slot-1-858545f9-snapaudit），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-858545f9-snapaudit`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-858545f9-snapaudit` 持有未落地成果（idle=27.6h unmerged=7 dirty=True branch=wt/dispatch-slot-1-858545f9-snapaudit），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-858545f9-snapaudit`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:21.348975+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:21.676410+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:21.676396+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       90b4fe89e audit(dup-snapshot): move DY direction claim onto KPPS GFEVD; clears fevd-)；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-1-b55db3be-2",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-1-b55db3be-2（idle=137.3h unmerged=0 dirty=True branch=fix/dispatch-slot-1-b55db3be-brief-leak）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-b55db3be-2` 持有未落地成果（idle=137.3h unmerged=0 dirty=True branch=fix/dispatch-slot-1-b55db3be-brief-leak），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-b55db3be-2`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-b55db3be-2` 持有未落地成果（idle=137.3h unmerged=0 dirty=True branch=fix/dispatch-slot-1-b55db3be-brief-leak），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-b55db3be-2`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:21.962263+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:22.348293+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:22.348276+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：MERGED_AND_REMOVED；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-1-bd00f90a-k1731",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-1-bd00f90a-k1731（idle=31.4h unmerged=8 dirty=False branch=wt/dispatch-slot-1-bd00f90a-k1731）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-bd00f90a-k1731` 持有未落地成果（idle=31.4h unmerged=8 dirty=False branch=wt/dispatch-slot-1-bd00f90a-k1731），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-bd00f90a-k1731`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-bd00f90a-k1731` 持有未落地成果（idle=31.4h unmerged=8 dirty=False branch=wt/dispatch-slot-1-bd00f90a-k1731），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-bd00f90a-k1731`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:22.733660+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:23.055694+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:23.055676+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：swept 2026-07-21 (worktree removed; bytes preserved)；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-1-f53bca44-k1692",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-1-f53bca44-k1692（idle=128.8h unmerged=0 dirty=True branch=wt/dispatch-slot-1-f53bca44-k1692）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-f53bca44-k1692` 持有未落地成果（idle=128.8h unmerged=0 dirty=True branch=wt/dispatch-slot-1-f53bca44-k1692），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-f53bca44-k1692`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-1-f53bca44-k1692` 持有未落地成果（idle=128.8h unmerged=0 dirty=True branch=wt/dispatch-slot-1-f53bca44-k1692），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-1-f53bca44-k1692`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:23.489684+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:23.850016+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:23.850002+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:  delete mode 100644 experiments/k1552/data/aggregate_daily.csv)；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-2-8dda242d-k1708",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-2-8dda242d-k1708（idle=27.7h unmerged=1 dirty=True branch=wt/dispatch-slot-2-8dda242d-k1708）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-2-8dda242d-k1708` 持有未落地成果（idle=27.7h unmerged=1 dirty=True branch=wt/dispatch-slot-2-8dda242d-k1708），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-2-8dda242d-k1708`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-2-8dda242d-k1708` 持有未落地成果（idle=27.7h unmerged=1 dirty=True branch=wt/dispatch-slot-2-8dda242d-k1708），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-2-8dda242d-k1708`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:24.135818+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:24.529939+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:24.529919+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       cd135b00e fix(k1708): close verdict-gate false positive; move CW to the comparison t)；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-2-c5cafe39-k1623",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-2-c5cafe39-k1623（idle=12.8h unmerged=3 dirty=False branch=worktree-dispatch-slot-2-c5cafe39-k1623）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-2-c5cafe39-k1623` 持有未落地成果（idle=12.8h unmerged=3 dirty=False branch=worktree-dispatch-slot-2-c5cafe39-k1623），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-2-c5cafe39-k1623`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-2-c5cafe39-k1623` 持有未落地成果（idle=12.8h unmerged=3 dirty=False branch=worktree-dispatch-slot-2-c5cafe39-k1623），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-2-c5cafe39-k1623`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:24.949892+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:25.247721+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:25.247701+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       uv run python scripts/experiment_gates.py verdict-template --path experiments/<kid> )；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-2-dcc222db-snapaudit",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-2-dcc222db-snapaudit（idle=7.9h unmerged=2 dirty=True branch=snapaudit-dcc222db）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-2-dcc222db-snapaudit` 持有未落地成果（idle=7.9h unmerged=2 dirty=True branch=snapaudit-dcc222db），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-2-dcc222db-snapaudit`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-2-dcc222db-snapaudit` 持有未落地成果（idle=7.9h unmerged=2 dirty=True branch=snapaudit-dcc222db），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-2-dcc222db-snapaudit`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:25.635812+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:26.069936+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:26.069919+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       uv run python scripts/experiment_gates.py verdict-template --path experiments/<kid> )；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-3-b5fbc1f4-nfpcal",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T10:00:56.269360+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-3-b5fbc1f4-nfpcal（idle=6.1h unmerged=2 dirty=False branch=wt/dispatch-slot-3-b5fbc1f4-nfpcal）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-3-b5fbc1f4-nfpcal` 持有未落地成果（idle=6.1h unmerged=2 dirty=False branch=wt/dispatch-slot-3-b5fbc1f4-nfpcal），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-3-b5fbc1f4-nfpcal`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-3-b5fbc1f4-nfpcal` 持有未落地成果（idle=6.1h unmerged=2 dirty=False branch=wt/dispatch-slot-3-b5fbc1f4-nfpcal），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-3-b5fbc1f4-nfpcal`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:26.403043+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:26.855423+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:26.855396+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       uv run python scripts/experiment_gates.py verdict-template --path experiments/<kid> )；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "assign_a2899901",
@@ -45867,7 +46126,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-1533dcbc-cqamend could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1533dcbc-cqamend\n- branch: ops/compute-queue-amend\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=2\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-1533dcbc-cqamend` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:31.721906+00:00",
     "payload": {
@@ -45876,7 +46135,23 @@
       "branch": "ops/compute-queue-amend",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:27.215447+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:19.468395+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:19.468374+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-1-30aeb902-taifexrv",
@@ -45884,7 +46159,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-30aeb902-taifexrv could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-30aeb902-taifexrv\n- branch: wt/dispatch-slot-1-30aeb902-taifexrv\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=3\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-30aeb902-taifexrv` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:32.207694+00:00",
     "payload": {
@@ -45893,7 +46168,23 @@
       "branch": "wt/dispatch-slot-1-30aeb902-taifexrv",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:27.823866+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:19.750790+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:19.750771+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-1-558d7893-k1730",
@@ -45901,7 +46192,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-558d7893-k1730 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-558d7893-k1730\n- branch: wt/dispatch-slot-1-558d7893-k1730\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=1\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-558d7893-k1730` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:32.933377+00:00",
     "payload": {
@@ -45910,7 +46201,23 @@
       "branch": "wt/dispatch-slot-1-558d7893-k1730",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:28.514050+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:20.021847+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:20.021828+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-1-79726798-credit-firm",
@@ -45918,7 +46225,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-79726798-credit-firm could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-79726798-credit-firm\n- branch: wt/dispatch-slot-1-79726798-credit-firm\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=0\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-79726798-credit-firm` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:34.251121+00:00",
     "payload": {
@@ -45927,7 +46234,23 @@
       "branch": "wt/dispatch-slot-1-79726798-credit-firm",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:29.033659+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:20.301827+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:20.301810+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-1-858545f9-snapaudit",
@@ -45935,7 +46258,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-858545f9-snapaudit could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-858545f9-snapaudit\n- branch: wt/dispatch-slot-1-858545f9-snapaudit\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=7\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-858545f9-snapaudit` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:36.438477+00:00",
     "payload": {
@@ -45944,7 +46267,23 @@
       "branch": "wt/dispatch-slot-1-858545f9-snapaudit",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:29.873693+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:20.575827+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:20.575813+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-1-b55db3be-2",
@@ -45952,7 +46291,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-b55db3be-2 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-b55db3be-2\n- branch: fix/dispatch-slot-1-b55db3be-brief-leak\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=0\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-b55db3be-2` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:37.635590+00:00",
     "payload": {
@@ -45961,7 +46300,23 @@
       "branch": "fix/dispatch-slot-1-b55db3be-brief-leak",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:30.523007+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:20.992010+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:20.991996+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-1-bd00f90a-k1731",
@@ -45969,7 +46324,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-bd00f90a-k1731 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731\n- branch: wt/dispatch-slot-1-bd00f90a-k1731\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=False unique_commits=8\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-bd00f90a-k1731` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:39.792278+00:00",
     "payload": {
@@ -45978,7 +46333,23 @@
       "branch": "wt/dispatch-slot-1-bd00f90a-k1731",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:31.169618+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:21.489778+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:21.489756+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-1-f53bca44-k1692",
@@ -45986,7 +46357,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-f53bca44-k1692 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f53bca44-k1692\n- branch: wt/dispatch-slot-1-f53bca44-k1692\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=0\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-f53bca44-k1692` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:40.521008+00:00",
     "payload": {
@@ -45995,7 +46366,23 @@
       "branch": "wt/dispatch-slot-1-f53bca44-k1692",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:31.792918+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:21.962116+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:21.962102+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-2-8dda242d-k1708",
@@ -46003,7 +46390,7 @@
     "description": "Producer-scoped workspace dispatch-slot-2-8dda242d-k1708 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-8dda242d-k1708\n- branch: wt/dispatch-slot-2-8dda242d-k1708\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=1\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-2-8dda242d-k1708` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:41.972423+00:00",
     "payload": {
@@ -46012,7 +46399,23 @@
       "branch": "wt/dispatch-slot-2-8dda242d-k1708",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:32.525982+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:22.480021+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:22.480006+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-2-c5cafe39-k1623",
@@ -46020,7 +46423,7 @@
     "description": "Producer-scoped workspace dispatch-slot-2-c5cafe39-k1623 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623\n- branch: worktree-dispatch-slot-2-c5cafe39-k1623\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=False unique_commits=3\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-2-c5cafe39-k1623` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:42.768468+00:00",
     "payload": {
@@ -46029,7 +46432,23 @@
       "branch": "worktree-dispatch-slot-2-c5cafe39-k1623",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:33.225270+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:22.817485+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:22.817469+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-2-c5cafe39-k1698",
@@ -46037,7 +46456,7 @@
     "description": "Producer-scoped workspace dispatch-slot-2-c5cafe39-k1698 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1698\n- branch: worktree-dispatch-slot-2-c5cafe39-k1698\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=4\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-2-c5cafe39-k1698` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:44.453610+00:00",
     "payload": {
@@ -46046,7 +46465,23 @@
       "branch": "worktree-dispatch-slot-2-c5cafe39-k1698",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:33.848211+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:23.109521+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:23.109503+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-2-dcc222db-snapaudit",
@@ -46054,7 +46489,7 @@
     "description": "Producer-scoped workspace dispatch-slot-2-dcc222db-snapaudit could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dcc222db-snapaudit\n- branch: snapaudit-dcc222db\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=2\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-2-dcc222db-snapaudit` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:45.164986+00:00",
     "payload": {
@@ -46063,7 +46498,23 @@
       "branch": "snapaudit-dcc222db",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:34.398319+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:23.643505+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:23.643484+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-3-30adeed7-k528nfp",
@@ -46071,7 +46522,7 @@
     "description": "Producer-scoped workspace dispatch-slot-3-30adeed7-k528nfp could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp\n- branch: k528-nfp-official-dates\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=8\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-3-30adeed7-k528nfp` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:45.954365+00:00",
     "payload": {
@@ -46080,7 +46531,23 @@
       "branch": "k528-nfp-official-dates",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:35.125932+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:24.031779+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:24.031761+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-3-b5fbc1f4-nfpcal",
@@ -46088,7 +46555,7 @@
     "description": "Producer-scoped workspace dispatch-slot-3-b5fbc1f4-nfpcal could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-b5fbc1f4-nfpcal\n- branch: wt/dispatch-slot-3-b5fbc1f4-nfpcal\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=False unique_commits=2\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-3-b5fbc1f4-nfpcal` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-20T10:19:47.085471+00:00",
     "payload": {
@@ -46097,7 +46564,23 @@
       "branch": "wt/dispatch-slot-3-b5fbc1f4-nfpcal",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:35.774532+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:24.348600+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:24.348580+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260720T102954146012Z_a1",
@@ -46147,24 +46630,56 @@
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T11:00:50.217663+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-2-c5cafe39-k1698（idle=4.2h unmerged=4 dirty=True branch=worktree-dispatch-slot-2-c5cafe39-k1698）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-2-c5cafe39-k1698` 持有未落地成果（idle=4.2h unmerged=4 dirty=True branch=worktree-dispatch-slot-2-c5cafe39-k1698），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-2-c5cafe39-k1698`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-2-c5cafe39-k1698` 持有未落地成果（idle=4.2h unmerged=4 dirty=True branch=worktree-dispatch-slot-2-c5cafe39-k1698），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-2-c5cafe39-k1698`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:36.461238+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:36.765264+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:36.765246+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       uv run python scripts/experiment_gates.py verdict-template --path experiments/<kid> )；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "worktree_salvage_dispatch-slot-3-30adeed7-k528nfp",
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T11:00:50.217663+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：dispatch-slot-3-30adeed7-k528nfp（idle=4.7h unmerged=8 dirty=True branch=k528-nfp-official-dates）",
-    "description": "stale worktree `.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp` 持有未落地成果（idle=4.7h unmerged=8 dirty=True branch=k528-nfp-official-dates），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-3-30adeed7-k528nfp`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp` 持有未落地成果（idle=4.7h unmerged=8 dirty=True branch=k528-nfp-official-dates），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh dispatch-slot-3-30adeed7-k528nfp`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:37.166277+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:37.685971+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:37.685949+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked:       5b1f154c1 docs(k528): round-6 collection verdict -- B1-B4 independently verified PAS)；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "release_deadlock_repair_20260720_11",
@@ -46832,7 +47347,8 @@
     "topic_cluster": null,
     "created_at": "2026-07-20T13:02:20+00:00",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "data_source_note": "**寫作資料來源在 `experiments/k1409/`，不要只讀 knowledge.json 的 K1409 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K1409 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k1409/k1409_results.json`\n分析腳本：`experiments/k1409/k1409.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。"
   },
   {
     "id": "alert_content_quality_20260720",
@@ -46878,7 +47394,8 @@
     "topic_cluster": null,
     "created_at": "2026-07-20T13:12:03+00:00",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "data_source_note": "**寫作資料來源在 `experiments/k1597/`，不要只讀 knowledge.json 的 K1597 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K1597 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k1597/k1597_results.json`\n分析腳本：`experiments/k1597/k1597.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。"
   },
   {
     "id": "ci-red-29744499806",
@@ -47036,7 +47553,8 @@
     "topic_cluster": null,
     "created_at": "2026-07-20T14:01:52+00:00",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "data_source_note": "**寫作資料來源在 `experiments/k1253/`，不要只讀 knowledge.json 的 K1253 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K1253 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k1253/k1253_results.json`\n分析腳本：`experiments/k1253/k1253.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。"
   },
   {
     "id": "assign_97bf1e6d",
@@ -47175,12 +47693,28 @@
     "task_type": "platform_ops",
     "priority": 3,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-20T17:00:41.261197+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物裁決：agent-a6c24bd9ce9c2924a（idle=7.8h unmerged=1 dirty=False branch=worktree-agent-a6c24bd9ce9c2924a）",
-    "description": "stale worktree `.claude/worktrees/agent-a6c24bd9ce9c2924a` 持有未落地成果（idle=7.8h unmerged=1 dirty=False branch=worktree-agent-a6c24bd9ce9c2924a），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh agent-a6c24bd9ce9c2924a`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。"
+    "description": "stale worktree `.claude/worktrees/agent-a6c24bd9ce9c2924a` 持有未落地成果（idle=7.8h unmerged=1 dirty=False branch=worktree-agent-a6c24bd9ce9c2924a），reclaim 依 fail-closed 規則不動它，但保留不等於收割 —— 這單是裁決出口，三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh agent-a6c24bd9ce9c2924a`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I）。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:38.020753+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:38.352912+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:38.352896+00:00",
+    "result": "2026-07-21 no-residue 清運裁決：CHECKPOINTED_AND_REMOVED (branch kept; merge blocked: CONFLICT (modify/delete): config/brief_templates/schedule-governance.yaml deleted in workt)；殘餘收割由 worktree_unmerged incident 的 aggregate 任務接手。"
   },
   {
     "id": "assign_commit_atomicity_gate",
@@ -48046,7 +48580,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-20b291d5-k1436 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-20b291d5-k1436\n- branch: wt/dispatch-slot-1-20b291d5-k1436\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=False unique_commits=4\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-20b291d5-k1436` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-21T04:01:14.648444+00:00",
     "payload": {
@@ -48055,7 +48589,23 @@
       "branch": "wt/dispatch-slot-1-20b291d5-k1436",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:38.883485+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:24.838984+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:24.838955+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-1-20b291d5-snapdup",
@@ -48063,7 +48613,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-20b291d5-snapdup could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-20b291d5-snapdup\n- branch: wt/dispatch-slot-1-20b291d5-snapdup\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=False unique_commits=1\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-20b291d5-snapdup` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-21T04:01:14.962405+00:00",
     "payload": {
@@ -48072,7 +48622,23 @@
       "branch": "wt/dispatch-slot-1-20b291d5-snapdup",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:39.446832+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:25.183915+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:25.183901+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "snapdupfix_k1319",
@@ -48255,7 +48821,7 @@
     "description": "老闆連兩則訊息（telegram-1231/1232）：自動修復一直對同一批問題反覆開任務浪費算力，且「已經很多次你還是修不好，叫你重新設計重新架構你又不要」。裁決：本任務是重新設計，禁止再交出「加個去重旗標」等表層補丁。\n\n實測證據（storage/next_tasks.json，2026-07-21 查）：\n- 自動補救類任務 7/18=3、7/19=13、7/20=24 筆，單調爆量。\n- 近 2 天重複群：PHASE-Z 系列 alert/incident 約 19 張（auto-commit 被 pre-commit 擋→收班失敗→噴 alert→開任務）、CI 紅燈修復 14 張（同 run 反覆 attempt）、WS-B worker_orphaned 一次噴 7 張、[dreaming] persistent_alert 11 張。\n- 治本任務早就在池子裡（assign_eb78aedc / assign_e7643d81 / assign_commit_atomicity_gate），alert 仍在 7/21 03:19 再開新張 → 這不是「某個 bug 沒修好」，是自動修復迴圈本身沒有收斂語意。\n\n重新設計要回答的問題（先出設計文件，不直接改碼）：\n1. incident 的一等公民模型：目前 alert→task 是無狀態映射，同一 incident 每次偵測就是一張新任務。設計需要有 incident 實體（fingerprint、首次發生、發生次數、目前處置任務、狀態機 open/mitigating/suppressed/resolved），任務是它的子項而非它本身。\n2. 收斂判準：什麼叫「這個 incident 已經處理完」？沒有 resolution 條件就會永遠重開。\n3. 升級路徑：自動修復 N 次未收斂 → 停止自動修復，升級為根因重構任務（不是繼續重試）。\n4. 症狀 vs 根因的分流：PHASE-Z 這種「執行機器自己壞掉」的 incident 不該進一般自動修復迴圈。\n5. 反迴歸機械 gate：測試證明同 fingerprint 連續觸發不會產生第 2 張任務，且 24h 內自動補救任務總量有上限。\n6. 清理：現存重複 pending 合併/關閉，回報清掉幾張。\n\n範圍：src/volpred/ops/alerts.py、alert_remediation.py、loop_health.py、machine_churn.py 一帶。\n執行軌：main_thread lane（改的是運營機器本身，依 feedback_refactor_independent_execution 不得走 hourly 派工）。交付順序：設計文件 → 老闆過目 → 分 Phase 實作。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-21T04:15:03.571384+00:00",
     "created_by": "telegram_responder",
@@ -48294,6 +48860,12 @@
         "from": "pending",
         "to": "claimed",
         "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:25.563967+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
       }
     ],
     "last_released_at": "2026-07-21T07:03:15.588409+00:00",
@@ -48306,9 +48878,8 @@
     "blocked_reason": "awaiting_owner_decision",
     "blocked_at": "2026-07-21T04:53:03+00:00",
     "blocked_note": "設計文件 docs/refactor_plan_incident_lifecycle.md 已於 2026-07-21 12:28 交付，12:29 已寄通知給老闆（0881f11f）。task description 明訂交付順序=設計文件→老闆過目→分 Phase 實作，故在核可前不得動工。維持 pending 會讓 supervisor 反覆 request_fire 同一任務（12:40 與 12:50 各一次），正是本任務要根治的空轉在自身上的複製。",
-    "claimed_by": "main_thread",
-    "claimed_at": "2026-07-21T07:03:15.932044+00:00",
-    "claim_session_id": "674c88e5f96d"
+    "completed_at": "2026-07-21T08:20:25.563945+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "telegram-1234",
@@ -48586,7 +49157,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-21T05:03:38.185591+00:00",
     "source": "internal_alert_remediation_router",
     "tags": [
@@ -48618,7 +49189,23 @@
       ]
     },
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:40.287073+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:18:40.755677+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:18:40.755659+00:00",
+    "result": "phase_z_test_gate_red 該紅燈已由 75a597735 修復、CI run 29805658287 群全綠；incident 模型（883903a96）接管後續。"
   },
   {
     "id": "telegram-1248",
@@ -48709,7 +49296,7 @@
     "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- src/volpred/ops/next_tasks.py — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T061710864788Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-21T06:17:10.963704+00:00",
     "payload": {
@@ -48729,7 +49316,30 @@
       "last_seen_at": "2026-07-21T06:17:10.948231+00:00"
     },
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:22:59.514729+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c"
+      },
+      {
+        "ts": "2026-07-21T08:22:59.792827+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c"
+      },
+      {
+        "ts": "2026-07-21T08:23:22.867476+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c"
+      }
+    ],
+    "started_at": "2026-07-21T08:22:59.792804+00:00",
+    "completed_at": "2026-07-21T08:23:22.867458+00:00",
+    "result": "foreign_incident --check 全綠後關閉（closeable=true, blockers=[]）。src/volpred/ops/next_tasks.py 三條腿獨立驗證：(1) quarantine ref refs/volpred/quarantine/20260721T061710864788Z 存有 854 行、可 git show 取回；(2) live workspace .claude/worktrees/dispatch-slot-1-20b291d5-snapdup 有副本（35592 bytes, 07-21 11:09），該檔有登記在案的歸屬 worktree 與擁有者；(3) main checkout 該路徑 git status 空、已不髒。未做任何刪除或覆寫 — 條件是本班觀察到時就已滿足，本班只做驗證與關單。關單目的是解除 dispatch_slot_budget.py 的 de-rate（cap 2 -> baseline）。"
   },
   {
     "id": "wsb_remed_dispatch-slot-1-375ba0e3-k1380",
@@ -48737,7 +49347,7 @@
     "description": "Producer-scoped workspace dispatch-slot-1-375ba0e3-k1380 could not be merged (reason=worker_orphaned). The worktree and branch are PRESERVED — nothing was lost and nothing may be force-removed.\n- worktree: /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-375ba0e3-k1380\n- branch: wt/dispatch-slot-1-375ba0e3-k1380\n- base_sha: \n- failure detail (tail):\nfire ended with outcome=orphaned; dirty=True unique_commits=3\nSteps: inspect the worktree, fix or drop the change IN the worktree, get its targeted tests green, then land it via `bash scripts/merge_worktree.sh dispatch-slot-1-375ba0e3-k1380` (which removes the worktree on success). If the output is judged not worth keeping, document why, then remove with plain `git worktree remove` + `git branch -D` — NEVER `--force` removal of a dirty tree.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_workspace_gate",
     "created_at": "2026-07-21T07:08:34.395587+00:00",
     "payload": {
@@ -48746,7 +49356,23 @@
       "branch": "wt/dispatch-slot-1-375ba0e3-k1380",
       "base_sha": "",
       "reason": "worker_orphaned"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:18:41.247759+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-21T08:20:26.053239+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "main_thread"
+      }
+    ],
+    "completed_at": "2026-07-21T08:20:26.053218+00:00",
+    "result": "incident-lifecycle P5 收斂：per-instance 模型退役（merge 883903a96），此單語意由 incident store 接管（worker_orphaned/worktree_unmerged instances[]）；對應 worktree 已於 2026-07-21 no-residue 清運處置完畢（bytes 保存於 branch/quarantine ref）。"
   },
   {
     "id": "k1380_stage_refactor_collect",
@@ -48764,7 +49390,7 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29808977711",
@@ -48792,10 +49418,78 @@
         "to": "pending",
         "by": "hourly-slot-1-02320893377f4180ad7671082f7959a5",
         "note": "supervisor_kill_02320893"
+      },
+      {
+        "ts": "2026-07-21T08:24:04.500082+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c"
+      },
+      {
+        "ts": "2026-07-21T08:24:11.264310+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c"
+      },
+      {
+        "ts": "2026-07-21T08:26:40.003814+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c"
       }
     ],
-    "started_at": "2026-07-21T08:02:10.844493+00:00",
+    "started_at": "2026-07-21T08:24:11.264294+00:00",
     "last_released_at": "2026-07-21T08:06:06.642090+00:00",
-    "last_release_reason": "supervisor_kill_02320893"
+    "last_release_reason": "supervisor_kill_02320893",
+    "completed_at": "2026-07-21T08:26:40.003797+00:00",
+    "result": "root_cause=dispatch-lanes R2 admission clamp (clamp_machine_priority_inflation) caps machine-source P1 to P2, but test_db_lag_flags_critical_and_opens_p1_repair_task still asserted priority==1 (assert 2==1); a second, independent failure on the newer head was scripts/tests/test_compute_queue_amend.py raising NameError: name 'bdir' is not defined across 12 tests; repair_commit=2990c2b5f. 兩者皆已修復並驗證：本地 tests/test_daily_checkup_db_landing.py 6 passed、scripts/tests/test_compute_queue_amend.py 12 passed，且 'bdir' 已不存在於該檔。修復所在 commit 2990c2b5f 位於 origin/main..main 未推送區間；push 由 cron_git_push_backup.sh 擁有（hourly，健康：last_success 16:01 'nothing to push (ahead=0)'，16:00 已推到 eb8a9e220），將於 17:00 帶出。**注意：本班未自行 git push**（git mutation 非 fire 職責，PHASE-Z / push cron 為 owner）。依本任務第 5 點，最終 GitHub 綠燈由 CI watcher 獨立驗證；若 17:00 後仍紅，watcher 會自動開新的 ci-red 單，不會漏接。"
+  },
+  {
+    "id": "k1729_codex_primary_reverify",
+    "title": "K1729 Codex 二審（primary path；fallback PASS 不算 closure）",
+    "task_type": "paper_review",
+    "priority": 2,
+    "status": "blocked",
+    "blocked_until": "2026-07-25",
+    "blocked_reason": "codex_quota_reset_pending",
+    "source": "auto_discovered",
+    "created_at": "2026-07-21T08:20:00+00:00",
+    "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
+    "description": "K1729（TAIFEX 5 分鐘 RV vs 日頻報酬平方當 HAR regressor）已於 2026-07-21 修復 rev1 兩項 Codex FAIL 缺陷並合併進 main，但**審查走的是 fallback path 不是 Codex**：\nCodex CLI 於 2026-07-21 14:33 台灣時間回硬性額度上限（'try again at Jul 25th, 2026'），依 .claude/rules/experiments.md 改派兩路獨立審查（fresh-context adversarial code-reviewer subagent + agy/Antigravity Gemini），兩路皆 PASS。\n\n**依同一條規則，fallback PASS != primary-path Codex PASS**，此 K 在 Codex 對這份 bytes 二審通過前不得視為 closed。knowledge.json 條目已把 reviewer_source 註明為 fallback。\n\n要做什麼：\n1. 確認 Codex CLI 額度已恢復（>= 2026-07-25）\n2. 對 **這份 bytes** 跑 Codex review：experiments/k1729/k1729.py + k1729_results.json（sha256 2f30de1989439d6c6e4b94b989bfa9b3960c47f3804ef4c3f2ac9d0f191886e8）\n3. 重點覆核三項（前兩項是 rev1 FAIL 的修復，第三項是本次新增的裁決）：\n   (a) target 端 ex-post 選約 lookahead 是否真的修掉 —— ex-ante ledger（RULE E：持有近月合約至公告的第三個週三結算日、假日調整後轉倉）在兩個 target 是否都仍 HAR_RV5_WINS\n   (b) README §7 營運宣稱是否已收回射程 —— 只能宣稱『預測增益不為零』，不得宣稱『這條資料線值得維護』（那是成本效益判斷，本實驗三個量一個都沒測）\n   (c) nested-DM gate 被判 pattern-match false positive 的理由是否站得住 —— 兩模型 regressor 集合互斥（5 分鐘 RV d/w/m vs 日頻開收報酬平方 d/w/m），走既有 reviewed_nonnested 退場路徑（先例 K1049 / k1100b），未新建 bypass 機制\n4. 判定寫回 experiments/k1729/review_verdict.json（新增 codex_primary 區段，勿覆蓋 fallback 紀錄），並更新 knowledge.json 條目的 reviewer_source\n5. 若 Codex 提出 blocking defect → 依 3-strike 規則處理，不得直接標 closed\n\nparent_compute_job=agent-brief_k1729_repair-986ef4\nmerge_commit_branch=wt/dispatch-slot-1-30aeb902-taifexrv (29daa5d1c，已合併並刪除)",
+    "blocked_at": "2026-07-21T08:14:21+00:00",
+    "blocked_note": "Codex CLI hard usage limit 2026-07-21 14:33 TPE (official: try again at Jul 25th, 2026). K1729 reviewed via sanctioned fallback dual-reviewer path, both PASS; fallback PASS != primary-path PASS per .claude/rules/experiments.md, so this K stays open until Codex re-verifies these bytes."
+  },
+  {
+    "id": "compute_queue_result_artifact_path_contract",
+    "title": "compute_queue: --result-artifact 與 brief 檔名無一致性檢查，成功 job 被靜默判 failed",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "auto_discovered",
+    "created_at": "2026-07-21T08:30:00+00:00",
+    "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
+    "description": "**症狀（實例）**：job `agent-brief_k1729_repair-986ef4`（opus/xhigh，跑 48 分鐘）job_metadata 記錄 `exit_code: 0, timed_out: false, failure_class: null`，experiment_gates 4/4 PASS、certify PASS、103+38 測試綠燈、雙審皆 PASS —— 但 compute_queue 判它 `status=failed`，唯一理由是 `runner_exit_code: 1`，而那個 1 來自 run_agent_job 的後置條件檢查：\n`[run_agent_job] expected result artifact missing: .../experiments/k1729/results.json`\n\n**根因**：enqueue 時 `--result-artifact` 宣告了 `experiments/k1729/results.json`，但 brief 要求 agent 產出的（也是本 repo 既有慣例，k1719 / k1380 / k1731 皆同）是 `experiments/k1729/k1729_results.json`。兩者之間**沒有任何一致性檢查**：\n- enqueue 端不驗 `--result-artifact` 的檔名是否出現在 brief 裡\n- runner 端只做 exact-path 存在性檢查，不做同目錄 `*_results.json` 的 near-miss 提示\n- followup 分流因此把一個成功的 job 送進 `triage_failed` lane\n\n**為什麼要治**：triage_failed 的預設動作包含「fresh-worktree re-enqueue」。本次若照做就是白燒第二個 48 分鐘 xhigh agent，而且產出會與 main 上已合併的版本分岔。成本與模型額度都是實的（本週 Codex 已因額度用罄退到 fallback 審查路徑）。\n\n**要做什麼（擇一或並行，但要有防再犯測試）**：\n1. enqueue 端 gate：`enqueue-agent` 時讀 brief-file，若 `--result-artifact` 的 basename 未出現在 brief 文字中 → 拒絕入列（或至少 WARN 並記錄），理由是這個不一致 100% 會在 48 分鐘後才以 failed 的形式現形，越早擋越便宜\n2. runner 端 near-miss：artifact 缺失時，掃同目錄是否存在 `*_results.json` / `*results*.json`，有的話把候選路徑寫進 stderr 與 job_metadata，讓收件端一眼看出是路徑契約問題而非實驗失敗\n3. followup 分流：job_metadata 出現 `exit_code=0 且 timed_out=false 且 runner_exit_code!=0` 這個組合時，followup_mode 不應是 `triage_failed`（那語意是「agent 沒成功」），應另立一個 `artifact_contract_mismatch` mode，brief 直說「先查路徑契約，不要重派」\n\n**禁止的修法**：把後置條件檢查拿掉、或改成「目錄下有任何檔就算過」。那個檢查存在的理由是防止 agent 宣稱完成卻沒產出 —— 弱化它等於把 K1259 那類「假完成」放行。要修的是契約沒被驗證，不是契約本身。\n\n**相鄰缺陷（同家族、不同 bug，勿合併處理）**：`compute_queue_failed_script_job_followup_blind_spot`（2026-07-21 14:15 立案）—— 那筆是 `_pending_followup_view()` 把非 agent 的 script job followup 吞掉；本筆是 artifact 路徑契約無驗證。兩筆都屬 compute_queue followup 正確性。\n\n**證據**：\n- storage/ops/agent_jobs/agent-brief_k1729_repair-986ef4.json\n- storage/logs/compute/agent-brief_k1729_repair-986ef4.stderr\n- work_log 2026-07-21T16:2x 的 agent-brief_k1729_repair-986ef4 entry"
+  },
+  {
+    "id": "k1731_f1_bootstrap_merge_deadlock",
+    "title": "K1731 F1 三方循環相依：shard 要 merge、merge 要 knowledge、knowledge 要 shard 結果",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "auto_discovered",
+    "created_at": "2026-07-21T08:35:00+00:00",
+    "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
+    "description": "來源：PHASE A 收 `agent-brief_k1731_f1-29394c`（timeout 5279s / 88min，followup_mode=split_required）。\n\n## 結論先講：**這個 job 不該被 re-split，split_required 這個分類對它是錯的**\n\ncompute_queue 的 split_contract 要求 `child_timeout_lt_seconds=5400`。但 F1 的 bootstrap 單次完整 pipeline 實測 26.4 分鐘（README §11.3），6 workers 平行，smoke 實測 `f1/bootstrap_smoke_c0.json` 6 replicates / 3547.7s。硬套 90 分鐘上限 → 300 replicates 要拆成約 150 個 shard，而且 production MCMC 是**釘死在 entry point 裡**的（README §11.6：刻意不做成 flag，以免未來的 caller 悄悄改跑便宜設定、bootstrap 到一個被污染的統計量上；validate-mcmc 實測便宜設定會讓 mean pinball loss 偏移達受測差異本身的 30%）。**再切一次不是把工作變小，是把設計打壞。**\n\n## 工作其實早就切好了\n\n`run_nested_bootstrap_shard.py` 的 docstring 就是為分片寫的（seed 契約：shard 間距必須 >= 自己的 n_boot，assemble 時從記錄的 data_seed 反查碰撞、不信任 caller；procedure seed 固定 42 因為 multistart 與 MCMC stream 屬於受測方法本身、不是被模擬的抽樣噪音）。兩個 shard 已入列：\n- `k1731-f1-boot-c0-parametric`（c=0, B=200, timeout 22h）\n- `k1731-f1-boot-c0-block`（c=0, B=100, block_len=20, timeout 11h）\n\n兩者現在都是 `status=failed, exit_code=2`，秒殺。stderr 就一行：\n`can't open file '<main-repo>/experiments/k1731/run_nested_bootstrap_shard.py': No such file or directory`\n\n**這不是意外，agent 事先就寫在 README §11.6**：compute_queue 把 script_path 解析到主 repo root，腳本只存在於 worktree，所以「兩個 shard 會在數秒內 file-not-found 失敗，直到這個 branch 被 merge」。已驗證 `compute_queue.py enqueue` **沒有 --cwd**（只有 enqueue-agent 有），所以這個限制是真的、繞不掉。\n\n## 真正的阻塞：三方循環相依（agent 記了其中兩條邊，沒點出這是個環）\n\n1. **shard 跑不了** → 因為 branch 沒 merge（script_path 解析到 main）\n2. **branch merge 不了** → 因為 `check_experiment_artifacts.py` 要求 knowledge.json 有 k1731 條目（已驗證 canonical knowledge.json 的 k1731 條目數 = **0**）\n3. **knowledge 條目寫不了（誠實地）** → 因為 F1 的發現要等 bootstrap 跑完才存在；宣告的 result artifact `k1731_F1_bootstrap_interval.json` 依設計此刻本來就不該存在\n\n## 兩條候選出口（請擇一，並在 work_log 記選擇理由）\n\n**出口 A（建議）：先寫 arm B 的 knowledge 條目，用它解 merge 鎖，不碰 F1。**\narm B 已完成且經多輪 remediation 與獨立審查（`k1731_armB_rev8_remediation.json`、`k1731_armB_verification.json`、`k1731_armB_traceability_rows.json`、17 個未合併 commit）。它的發現**現在就存在**，本來就欠一筆 knowledge。寫它既誠實又解鎖 —— 不是繞過 gate，是補上真的欠的東西。merge 後 `compute_queue.py requeue --id k1731-f1-boot-c0-parametric` / `--id k1731-f1-boot-c0-block`（README §11.6 已指明 requeue 是預定回收路徑）。\n⚠️ 寫 arm B 條目時**射程只能到 arm B**，禁止順手替 F1 預寫任何結論。\n\n**出口 B：用絕對路徑 `--script` 指進 worktree，先跑再說。**\n未驗證是否可行（runner 對絕對 script_path 的行為要先實測，別假設 pathlib 語意）。即便可行也**不建議**：一個 22 小時的 job 綁在隨時可能被 merge/移除的 worktree 上，中途消失就是整輪重來——而 agent 選 merge-first 正是為了避這個。若採此路，必須先小規模實測（B=1）確認 runner 吃絕對路徑。\n\n## 順帶查證的兩件事（都已排除，不必重查）\n\n- worktree 內 `f1/rolling_gw_prod.json`（generated 08:05:21Z）與 `f1/bootstrap_smoke_c0.json` 寫入時間**晚於 kill（07:43:07Z）22 分鐘**。已確認**現在沒有任何 k1731 進程存活**，最可能是 tree-kill 漏掉的 multiprocessing worker 完成後寫出——產物本身有效，非污染。\n- README 頂端 commit `dc3e5be04` 記錄了另一個已修的陷阱：第一次 enqueue 跑的是 **worktree 那份 CLI**，job 被寫進 worktree 自己的 `storage/ops/compute_queue/`，worker 永遠讀不到，**而且它印 `enqueued: <id>` 回成功**。已改用主 repo CLI 重新入列並清掉殘留。\n\n## 禁止\n- ❌ 依 split_required 的字面把兩個 shard 再切成 <5400s 的子段（見開頭理由）\n- ❌ 用 `config/experiment_artifact_exclusions.json` 把 k1731 排除掉來硬解 merge 鎖\n- ❌ 為了解鎖而替 F1 預寫一個 bootstrap 還沒跑出來的結論\n\nparent_compute_job=agent-brief_k1731_f1-29394c\nworktree=.claude/worktrees/dispatch-slot-1-bd00f90a-k1731（17 unmerged commits，HEAD dc3e5be04）"
+  },
+  {
+    "id": "article_task_generator_evidence_pointer",
+    "title": "auto-discovered K-article 產生器沒指向資料，也沒驗 K 條目撐不撐得起證據包",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "auto_discovered",
+    "created_at": "2026-07-21T08:45:00+00:00",
+    "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
+    "description": "## 症狀\n`K492_article_general_v2` 餓死 **1238.3 小時（51 天）**，門檻 24h，超過 1214h。id 帶 `[retry-v2]` 後綴，代表至少已經燒掉一個 agent run。它不是唯一一個：\n\n## Class sweep（本班實測，6/6 全中）\n| task | K 條目字元數 | experiments/ 目錄 |\n|---|---|---|\n| K492_article_general_v2 | 247 | 有 |\n| K709_article_general_v2 | 301 | 有 |\n| K1348_article_general | 456 | 有 |\n| K1409_article_general | 649→790 區間 | 有 |\n| K1597_article_general | 649 | 有 |\n| K1253_article_general | 630 | 有 |\n\n**6 個全部都有 `experiments/<kid>/` 與 results json，6 個的 knowledge 條目全部過薄。**\nK492 的條目全文只有 247 字元，內容是一句 method 加兩則參考文獻，**沒有任何結果數字**，`evidence: None`。但 `experiments/k492/k492_research_efficiency_results.json` 裡是一份紮實的 68 實驗 meta 研究（null 率 35.3%、positive 22.1%、cross-OOS 失敗率 52.9%、每 8.5 個實驗換一個 validated finding）—— 完全撐得起一篇文章。\n\n## 根因\n產生器（auto-discovered uncovered K）掃 knowledge.json 找「沒被文章覆蓋的 K」就開單，brief 只寫 K-id。它從不檢查兩件事：\n1. 這個 K 的條目**有沒有可寫的發現**（不只是有沒有條目）\n2. 真正的資料在 `experiments/<kid>/`，**brief 從沒指過去**\n\n於是 writer agent 只讀得到一段沒有數字的方法句，而 reader-facing 硬規要求證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。它只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。**任務因此永遠做不完，而 starvation 邏輯會一再把它推上來，每次都再燒一次。**\n\n## 本班已做的止血（不是修根因）\n6 張任務都補了 `data_source_note` 欄位，指明 `experiments/<kid>/` 的實際 results 檔名，並寫明「數字一律 programmatic 讀出，禁止從 README 或說明重打」。**下一班可以直接寫了。**\n\n## 要做什麼（治根因）\n1. 產生器開單時就把 `experiments/<kid>/` 的 results 檔路徑寫進 description，不要只給 K-id\n2. 加 substance gate：K 條目沒有可寫發現**且** `experiments/<kid>/` 也沒有 results json → **不開單**（開了也只會餓死 + 燒 agent）；只有條目薄但 experiments 有料 → 開單並指過去\n3. 回頭掃既有 pending 的 article 任務，把不符 (2) 的收掉，別讓它們繼續占 starvation 名額\n4. 防再犯測試：給一個「knowledge 條目無數字 + 無 experiments 目錄」的 K，斷言產生器不開單\n\n## 禁止\n- ❌ 把餓死門檻調高來讓警訊消失（那是關掉儀器，不是修問題）\n- ❌ 讓 writer「找不到資料就自己找個相近的 K 代替」——那是換題不換單，會產出對不上任務的文章\n"
   }
 ]
