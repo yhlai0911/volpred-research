@@ -678,6 +678,21 @@ def _legacy_priority_to_p(legacy: int) -> int:
 CANONICAL_NEXT_TASKS = Path(__file__).resolve().parents[3] / "storage" / "next_tasks.json"
 
 
+def _warn_if_over_pending_cap(record: dict[str, Any], tasks: list[Any]) -> None:
+    """Route-around detector for the drain-first gate. Never raises.
+
+    Observability only — enforcement lives at the generator entry points
+    (see ``volpred.ops.pool_pressure`` module docstring for why not here).
+    An append must never fail because the watchdog did.
+    """
+    try:
+        from volpred.ops.pool_pressure import warn_if_over_cap
+
+        warn_if_over_cap(record, tasks)
+    except Exception:  # noqa: BLE001 — silent-ok: observability must not break ingress
+        pass
+
+
 def _request_urgent_fire(record: dict[str, Any], path: Path) -> bool:
     """急件入池 → 立刻要求 supervisor out-of-band 派工，不等下一班 hourly cron。
 
@@ -839,6 +854,10 @@ def append_task_record(
                     return existing, False
             tasks.append(record)
             write_tasks_to_handle(fh, tasks)
+            # 不擋，只記錄：閘門在 generator entry point（pool_pressure 模組 docstring
+            # 說明為何不在此層 enforce），所以任何新的自動 caller 天然繞得過去。這行
+            # 讓「繞過」在 log 現形，而不是靜默灌水。
+            _warn_if_over_pending_cap(record, tasks)
         finally:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
     # 急件不進排班：入池成功後（鎖已釋放）立刻請 supervisor 派工。
