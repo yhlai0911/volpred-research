@@ -1,5 +1,5 @@
 {
-  "executed_k_id": "k1719",
+  "executed_k_id": "k1729",
   "verdict": "PASS",
   "headline_numbers": {
     "qlike_baseline": 0.2237478084493344,
@@ -7,7 +7,7 @@
     "dm_t": -3.6805195082126385,
     "dm_p": 0.00023758940764562198
   },
-  "headline_numbers_note": "上列為 primary target rv_5min 的全樣本 OOS 數字；baseline=HAR-DAILY, model=HAR-RV5。secondary target daily_r2（偏袒 baseline 的 proxy）：qlike_baseline=1.443710, qlike_model=1.394991, dm_t=-3.367, dm_p=0.00077, n=2536。兩者皆逐一對得上 experiments/k1719/k1719_results.json。",
+  "headline_numbers_note": "上列為 primary target rv_5min 的全樣本 OOS 數字；baseline=HAR-DAILY, model=HAR-RV5。secondary target daily_r2（偏袒 baseline 的 proxy）：qlike_baseline=1.443710, qlike_model=1.394991, dm_t=-3.367, dm_p=0.00077, n=2536。兩者皆逐一對得上 experiments/k1729/k1729_results.json。",
   "sample": {
     "start": "2016-01-20",
     "end": "2026-07-16",
@@ -17,7 +17,7 @@
     ]
   },
   "sample_note": "此為實際 OOS 評估 ledger（rv_5min target）。來源 CSV 全檔為 2012-01-02~2026-07-16 / 3,550 天，前 1,000 列供 rolling window warmup，故 OOS 自 2016-01-20 起。daily_r2 target 的 ledger 為 2016-01-20~2026-07-16, n=2536（多排除 21 天 r2=0）。",
-  "results_json_path": "experiments/k1719/k1719_results.json",
+  "results_json_path": "experiments/k1729/k1729_results.json",
   "planned_k_briefs": [
     {
       "k_id": "k1720 (proposed)",
@@ -29,7 +29,7 @@
       "k_id": "無（資料工程任務，不配 K）",
       "question": "解除選擇權 tick 的資料 blocker：OPTIONDATA 僅同步 1,024/13,093 檔（其餘為 Dropbox cloud-only placeholder），任何 IV surface 實驗都會落在不具代表性的片段上。",
       "h0": "不適用（無假說，這是 blocker 解除而非實驗）",
-      "cost": "清點 ~20 min；若全量拉取 ~41GB+ 必須走 compute_queue，數小時。交付 coverage manifest 供後續判斷樣本是否足夠。K1719 既已證明 intraday 有增益，這方向先驗不差，但先解 blocker 再談研究。"
+      "cost": "清點 ~20 min；若全量拉取 ~41GB+ 必須走 compute_queue，數小時。交付 coverage manifest 供後續判斷樣本是否足夠。K1729 既已證明 intraday 有增益，這方向先驗不差，但先解 blocker 再談研究。"
     }
   ],
   "branch": "wt/dispatch-slot-1-30aeb902-taifexrv",
