@@ -150,7 +150,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-21T18:08:29.726887+00:00"
+     "last_seen_at": "2026-07-21T19:08:24.697074+00:00"
     },
     {
      "cleared_at": null,
@@ -163,7 +163,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-21T18:08:30.074091+00:00"
+     "last_seen_at": "2026-07-21T19:08:25.048118+00:00"
     },
     {
      "cleared_at": null,
@@ -176,7 +176,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-21T18:08:30.953006+00:00"
+     "last_seen_at": "2026-07-21T19:08:25.879230+00:00"
     },
     {
      "cleared_at": null,
@@ -189,14 +189,14 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-21T18:08:30.424410+00:00"
+     "last_seen_at": "2026-07-21T19:08:25.389059+00:00"
     }
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-bd00f90a-k1731 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-21T18:08:30.953006+00:00",
+   "last_seen_at": "2026-07-21T19:08:25.879230+00:00",
    "notified_at": null,
-   "occurrence_count": 45,
+   "occurrence_count": 49,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -204,9 +204,58 @@
    "task_history": [],
    "task_mode": "adjudication",
    "throttled": {
-    "count": 45,
-    "last_at": "2026-07-21T18:08:31.174994+00:00",
+    "count": 49,
+    "last_at": "2026-07-21T19:08:26.099445+00:00",
     "last_reason": "remediation_cap_24h"
+   }
+  },
+  "inc_7af47e56b999": {
+   "class": "machine_self",
+   "clean_observations": [],
+   "current_task_id": null,
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-21T18:20:42.499421+00:00",
+   "escalation": null,
+   "fingerprint": "7af47e56b99927a2e6093cd8736dae95e501d4ecfa9931bcab1a3f0c9f8faffe",
+   "fingerprint_parts": [],
+   "first_seen_at": "2026-07-21T18:20:42.499421+00:00",
+   "incident_id": "inc_7af47e56b999",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-21T18:20:42.499421+00:00",
+     "key": "tests/test_member_qa_duplicate_gate.py::tests.test_member_qa_duplicate_gate::test_claim_gate_does_not_swallow_history_lookup_failures",
+     "last_seen_at": "2026-07-21T18:20:42.499421+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-21T18:20:42.499421+00:00",
+     "key": "tests/test_member_qa_duplicate_gate.py::tests.test_member_qa_duplicate_gate::test_claim_is_refused_for_a_re_asked_question",
+     "last_seen_at": "2026-07-21T18:20:42.499421+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-21T18:20:42.499421+00:00",
+     "key": "tests/test_member_qa_duplicate_gate.py::tests.test_member_qa_duplicate_gate::test_claim_override_reaches_the_patch",
+     "last_seen_at": "2026-07-21T18:20:42.499421+00:00"
+    }
+   ],
+   "kind": "phase_z_test_gate_red",
+   "last_breach_detail": "PHASE-Z auto-commit 測試紅燈（721b734a1350）",
+   "last_seen_at": "2026-07-21T18:20:42.499421+00:00",
+   "notification_id": "01ca7dcb",
+   "notified_at": "2026-07-21T18:20:42.499421+00:00",
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [],
+   "task_mode": "none",
+   "throttled": {
+    "count": 0,
+    "last_at": null
    }
   },
   "inc_c67bec28dd29": {
@@ -265,6 +314,6 @@
    }
   }
  },
- "updated_at": "2026-07-21T18:19:25.395509+00:00",
+ "updated_at": "2026-07-21T19:17:57.933333+00:00",
  "version": 1
 }

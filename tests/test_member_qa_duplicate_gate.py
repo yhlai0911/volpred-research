@@ -38,6 +38,14 @@ Q_CONGRESS_FADE = (
     "賣出買入最多（或增加買入最多）的 同時買入賣出最多（或增加賣出最多）的"
 )
 
+# A pair engineered to sit in the WARN band (0.35 <= s < 0.70): a real follow-up
+# that overlaps an answered question but adds predictors it did not cover. The
+# band membership is asserted in the test, not assumed here.
+Q_GAP_BASE = "台指期夜盤的隔夜跳空能否用日內 realized vol 預測？"
+Q_GAP_FOLLOWUP = (
+    "台指期夜盤的隔夜跳空風險，能不能用日內波動率加上成交量與外資買賣超一起預測？"
+)
+
 
 def _patch_project_path(monkeypatch, tmp_path: Path) -> None:
     def fake_project_path(*parts: str) -> Path:
@@ -136,7 +144,13 @@ def test_claim_override_reaches_the_patch(monkeypatch):
         return [{"id": ID_7PCT, "status": "researching"}]
 
     monkeypatch.setattr(questions, "_patch_where_returning", _patch)
-    result = questions.claim_question_for_research(ID_7PCT, allow_duplicate=True)
+    monkeypatch.setattr(questions, "_record_duplicate_override", lambda qid, r: True)
+    # 2026-07-19 residual 3: the override now costs a written reason.
+    result = questions.claim_question_for_research(
+        ID_7PCT,
+        allow_duplicate=True,
+        new_angle="既有文章只回答 15% 目標，本題要的是 7% 下的提領率",
+    )
     assert result["claimed"] is True
     assert calls and calls[0][1]["status"] == "ranked"
 
@@ -162,17 +176,39 @@ def test_claim_gate_does_not_swallow_history_lookup_failures(monkeypatch):
 # --- gate 2: task materialization -----------------------------------------
 
 
-def _summary(ranked, *, history, pending=None):
+def _summary(ranked, *, pending=None):
+    """Ranking summary WITHOUT a history corpus.
+
+    2026-07-19 residual 2: `ensure_member_qa_task` no longer reads history from
+    the summary. History belongs to `member_qa_duplicate_verdict` alone, so
+    these fixtures feed it via `_patch_history` instead — if a future change
+    reintroduces a second corpus here, the tests below stop constraining it.
+    """
     return {
         "health": {"researching": 0},
         "ranked_table": ranked,
         "pending_questions": pending or [],
-        "answered_history": history,
     }
+
+
+def _patch_history(monkeypatch, history):
+    """Stub THE single history source (there is only one)."""
+    monkeypatch.setattr(questions, "_fetch_question_history", lambda source: history)
 
 
 def test_re_asked_question_becomes_duplicate_review_not_research(monkeypatch, tmp_path):
     _patch_project_path(monkeypatch, tmp_path)
+    _patch_history(
+        monkeypatch,
+        [
+            {
+                "question_id": ID_15PCT,
+                "question": Q_15PCT,
+                "status": "answered",
+                "linked_articles_count": 1,
+            }
+        ],
+    )
     monkeypatch.setattr(
         questions,
         "get_member_question_ranking_summary",
@@ -186,15 +222,7 @@ def test_re_asked_question_becomes_duplicate_review_not_research(monkeypatch, tm
                     "score": 82,
                     "created_at": "2026-07-18T06:19:41+00:00",
                 }
-            ],
-            history=[
-                {
-                    "question_id": ID_15PCT,
-                    "question": Q_15PCT,
-                    "status": "answered",
-                    "linked_articles_count": 1,
-                }
-            ],
+            ]
         ),
     )
 
@@ -208,14 +236,24 @@ def test_re_asked_question_becomes_duplicate_review_not_research(monkeypatch, tm
     task = tasks[0]
     assert task["task_mode"] == "duplicate_review"
     assert task["duplicate_of"]["question_id"] == ID_15PCT
-    assert "--allow-duplicate" in task["description"]
     # The description must NOT read like a normal research commission.
     assert "預設不做新研究" in task["description"]
+    # 2026-07-19 residual 3: the gate must not hand out its own bypass key.
+    # A pasteable override command in the task description is a gate that
+    # opens itself, so the description carries the *requirement*, not the
+    # command. (`--help` is where the syntax lives.)
+    assert "--allow-duplicate" not in task["description"]
+    assert "question-claim --help" in task["description"]
+    assert "exit 2" in task["description"]
 
 
 def test_fresh_question_is_not_starved_behind_a_duplicate(monkeypatch, tmp_path):
     _patch_project_path(monkeypatch, tmp_path)
     fresh_id = "aaaaaaaa-0000-0000-0000-000000000000"
+    _patch_history(
+        monkeypatch,
+        [{"question_id": ID_15PCT, "question": Q_15PCT, "status": "answered"}],
+    )
     monkeypatch.setattr(
         questions,
         "get_member_question_ranking_summary",
@@ -235,10 +273,7 @@ def test_fresh_question_is_not_starved_behind_a_duplicate(monkeypatch, tmp_path)
                     "status": "ranked",
                     "created_at": "2026-07-18T06:19:41+00:00",
                 },
-            ],
-            history=[
-                {"question_id": ID_15PCT, "question": Q_15PCT, "status": "answered"}
-            ],
+            ]
         ),
     )
 
@@ -248,27 +283,298 @@ def test_fresh_question_is_not_starved_behind_a_duplicate(monkeypatch, tmp_path)
     assert result["question_id"] == fresh_id
 
 
-def test_missing_history_key_fails_closed(monkeypatch, tmp_path):
+def test_unreachable_history_fails_closed(monkeypatch, tmp_path):
+    """Fail-closed survives the move to a single owner.
+
+    Previously this was pinned as "summary is missing 'answered_history'".
+    History no longer arrives via the summary, so the same property is pinned
+    where it now lives: if the one corpus cannot be loaded, no task is written.
+    """
     _patch_project_path(monkeypatch, tmp_path)
     monkeypatch.setattr(
         questions,
         "get_member_question_ranking_summary",
-        lambda source="user", limit=10: {
-            "health": {"researching": 0},
-            "ranked_table": [
+        lambda source="user", limit=10: _summary(
+            [
                 {
                     "question_id": ID_7PCT,
                     "question": Q_7PCT,
                     "status": "ranked",
                     "created_at": "2026-07-18T06:19:41+00:00",
                 }
-            ],
-            "pending_questions": [],
-        },
+            ]
+        ),
     )
-    with pytest.raises(ValueError, match="answered_history"):
+
+    def _boom(source):
+        raise RuntimeError("supabase down")
+
+    monkeypatch.setattr(questions, "_fetch_question_history", _boom)
+    with pytest.raises(RuntimeError):
         questions.ensure_member_qa_task()
     assert not (tmp_path / "storage" / "next_tasks.json").exists()
+
+
+# --- residual 2: ONE adjudicator, ONE corpus -------------------------------
+
+
+def test_neither_consumer_adjudicates_on_its_own():
+    """Source-level pin: the consumers delegate, they do not re-implement.
+
+    `find_duplicate_question` stays as the adjudicator's internal detail, so a
+    runtime stub cannot tell "consumer called it" from "the owner called it".
+    Reading the two consumer bodies can: neither may name the low-level matcher
+    or a history fetch, and both must name the owner.
+    """
+    import inspect
+
+    for fn in (questions.claim_question_for_research, questions.ensure_member_qa_task):
+        body = inspect.getsource(fn)
+        assert "member_qa_duplicate_verdict(" in body, fn.__name__
+        assert "find_duplicate_question(" not in body, fn.__name__
+        assert "_fetch_question_history(" not in body, fn.__name__
+        assert "answered_history" not in body, fn.__name__
+
+
+def _history_rows():
+    return [{"question_id": ID_15PCT, "question": Q_15PCT, "status": "answered"}]
+
+
+def test_claim_delegates_to_the_single_adjudicator(monkeypatch):
+    """`claim_question_for_research` must not compute its own verdict."""
+    monkeypatch.setattr(
+        questions,
+        "_select_rows",
+        lambda table, select=None, **kw: [
+            {"id": ID_7PCT, "question": Q_7PCT, "status": "ranked", "source": "user"}
+        ],
+    )
+    calls: list[tuple] = []
+    real = questions.member_qa_duplicate_verdict
+
+    def _spy(question_id, question_text, **kw):
+        calls.append((question_id, question_text, kw.get("source")))
+        return real(question_id, question_text, **kw)
+
+    _patch_history(monkeypatch, _history_rows())
+    monkeypatch.setattr(questions, "member_qa_duplicate_verdict", _spy)
+
+    result = questions.claim_question_for_research(ID_7PCT)
+    assert result["claimed"] is False
+    assert len(calls) == 1
+    assert calls[0][0] == ID_7PCT
+
+
+def test_materializer_delegates_to_the_single_adjudicator(monkeypatch, tmp_path):
+    """`ensure_member_qa_task` must use the same owner and the same corpus."""
+    _patch_project_path(monkeypatch, tmp_path)
+    _patch_history(monkeypatch, _history_rows())
+    monkeypatch.setattr(
+        questions,
+        "get_member_question_ranking_summary",
+        lambda source="user", limit=10: _summary(
+            [
+                {
+                    "question_id": ID_7PCT,
+                    "question": Q_7PCT,
+                    "proposer": "yaoxk1431",
+                    "status": "ranked",
+                    "created_at": "2026-07-18T06:19:41+00:00",
+                }
+            ]
+        ),
+    )
+    calls: list[str] = []
+    real = questions.member_qa_duplicate_verdict
+
+    def _spy(question_id, question_text, **kw):
+        calls.append(question_id)
+        return real(question_id, question_text, **kw)
+
+    monkeypatch.setattr(questions, "member_qa_duplicate_verdict", _spy)
+
+    result = questions.ensure_member_qa_task()
+    assert result["mode"] == "duplicate_review"
+    assert calls == [ID_7PCT]
+
+
+def test_both_consumers_share_one_history_fetch_per_source(monkeypatch, tmp_path):
+    """The corpus is fetched by the adjudicator, and cached within a pass."""
+    fetches: list[str] = []
+
+    def _fetch(source):
+        fetches.append(source)
+        return _history_rows()
+
+    monkeypatch.setattr(questions, "_fetch_question_history", _fetch)
+    _patch_project_path(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        questions,
+        "get_member_question_ranking_summary",
+        lambda source="user", limit=10: _summary(
+            [
+                {
+                    "question_id": ID_7PCT,
+                    "question": Q_7PCT,
+                    "status": "ranked",
+                    "created_at": "2026-07-18T06:19:41+00:00",
+                },
+                {
+                    "question_id": "bbbbbbbb-0000-0000-0000-000000000000",
+                    "question": Q_15PCT,
+                    "status": "ranked",
+                    "created_at": "2026-07-18T06:19:41+00:00",
+                },
+            ]
+        ),
+    )
+    questions.ensure_member_qa_task()
+    # Two candidates adjudicated, one corpus load — the cache is a cache, and
+    # the corpus is not re-derived per candidate.
+    assert fetches == ["user"]
+
+
+# --- residual 2: verdict tri-state ----------------------------------------
+
+
+def test_verdict_is_block_for_the_incident_pair(monkeypatch):
+    _patch_history(monkeypatch, _history_rows())
+    verdict = questions.member_qa_duplicate_verdict(ID_7PCT, Q_7PCT)
+    assert verdict["verdict"] == "block"
+    assert verdict["matched_question_id"] == ID_15PCT
+    assert verdict["similarity"] >= questions.MEMBER_QA_DUP_BLOCK_THRESHOLD
+    assert "block" in verdict["basis"]
+
+
+def test_verdict_is_warn_between_the_thresholds(monkeypatch):
+    """A follow-up that overlaps an answered question without repeating it.
+
+    The pair is checked to actually sit in the warn band first: a threshold or
+    tokenizer change that moves it out must fail as "the fixture no longer
+    exercises warn", not silently stop testing the middle verdict.
+    """
+    assert (
+        questions.MEMBER_QA_DUP_WARN_THRESHOLD
+        <= questions.question_similarity(Q_GAP_BASE, Q_GAP_FOLLOWUP)
+        < questions.MEMBER_QA_DUP_BLOCK_THRESHOLD
+    )
+    _patch_history(
+        monkeypatch,
+        [{"question_id": ID_15PCT, "question": Q_GAP_BASE, "status": "answered"}],
+    )
+    verdict = questions.member_qa_duplicate_verdict(ID_7PCT, Q_GAP_FOLLOWUP)
+    assert verdict["verdict"] == "warn"
+    assert (
+        questions.MEMBER_QA_DUP_WARN_THRESHOLD
+        <= verdict["similarity"]
+        < questions.MEMBER_QA_DUP_BLOCK_THRESHOLD
+    )
+    assert verdict["matched_question_id"] == ID_15PCT
+
+
+def test_verdict_is_clear_for_an_unrelated_question(monkeypatch):
+    _patch_history(monkeypatch, _history_rows())
+    verdict = questions.member_qa_duplicate_verdict(
+        ID_7PCT, "BTC 的波動率預測能不能用傳統 GARCH？有什麼要注意的？"
+    )
+    assert verdict["verdict"] == "clear"
+    assert verdict["matched_question_id"] is None
+    assert verdict["matched"] is None
+
+
+def test_warn_does_not_block_the_claim(monkeypatch):
+    """warn is an annotation, not a refusal — it must reach the PATCH."""
+    _patch_history(
+        monkeypatch,
+        [
+            {
+                "question_id": ID_15PCT,
+                "question": Q_CONGRESS_FOLLOW,
+                "status": "answered",
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        questions,
+        "_select_rows",
+        lambda table, select=None, **kw: [
+            {
+                "id": ID_7PCT,
+                "question": Q_CONGRESS_FADE,
+                "status": "ranked",
+                "source": "user",
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        questions,
+        "_patch_where_returning",
+        lambda table, where, payload: [{"id": ID_7PCT, "status": "researching"}],
+    )
+    assert questions.claim_question_for_research(ID_7PCT)["claimed"] is True
+
+
+# --- residual 3: the gate must not hand out its own bypass key -------------
+
+
+def test_override_without_a_reason_is_refused(monkeypatch):
+    def _explode(*args, **kwargs):  # pragma: no cover - must never run
+        raise AssertionError("a reasonless override must not reach the PATCH")
+
+    monkeypatch.setattr(questions, "_patch_where_returning", _explode)
+    for reason in (None, "", "   "):
+        with pytest.raises(questions.MemberQaOverrideReasonRequired):
+            questions.claim_question_for_research(
+                ID_7PCT, allow_duplicate=True, new_angle=reason
+            )
+
+
+def test_override_with_a_reason_is_written_to_the_work_log(monkeypatch):
+    entries: list[dict] = []
+    monkeypatch.setattr(
+        questions,
+        "_patch_where_returning",
+        lambda table, where, payload: [{"id": ID_7PCT, "status": "researching"}],
+    )
+    monkeypatch.setattr(
+        questions,
+        "_record_duplicate_override",
+        lambda qid, reason: entries.append({"qid": qid, "reason": reason}) or True,
+    )
+    result = questions.claim_question_for_research(
+        ID_7PCT,
+        allow_duplicate=True,
+        new_angle="既有文章只談 15% 目標的資產配置，本題要的是 7% 下的提領率",
+    )
+    assert result["claimed"] is True
+    assert result["duplicate_override_logged"] is True
+    assert entries and entries[0]["qid"] == ID_7PCT
+    assert "提領率" in entries[0]["reason"]
+
+
+def test_override_reason_routes_through_the_locked_work_log_writer(monkeypatch):
+    """Never a hand-rolled JSON append (scripts/tests/test_work_log_writer_gate)."""
+    import scripts.append_work_log as awl
+
+    seen: list[dict] = []
+    monkeypatch.setattr(awl, "append_entry", lambda entry, **kw: seen.append(entry) or 1)
+    assert questions._record_duplicate_override(ID_7PCT, "新角度：提領率") is True
+    assert seen and seen[0]["task_type"] == "member_qa"
+    assert "提領率" in seen[0]["summary"]
+    assert ID_7PCT in seen[0]["summary"]
+
+
+def test_cli_question_claim_exits_2_without_new_angle():
+    """The bypass path is unusable without a written reason."""
+    from click.testing import CliRunner
+
+    from volpred.cli import cli
+
+    result = CliRunner().invoke(
+        cli, ["ops", "question-claim", ID_7PCT, "--allow-duplicate"]
+    )
+    assert result.exit_code == 2
+    assert "--new-angle" in result.output
 
 
 # --- gate 3: PUBLISH-TIME (the reader-visible artifact) ---------------------

@@ -18143,7 +18143,26 @@
     "status": "pending",
     "adjudicated_at": "2026-07-18T15:14:21.054308+00:00",
     "adjudicated_by": "hourly-slot-1-22a06d16729b49caaf877cd2bbde5cfc",
-    "adjudication_reason": "a known-in-advance event schedule is constructible from published calendars; no external party is being waited on"
+    "adjudication_reason": "a known-in-advance event schedule is constructible from published calendars; no external party is being waited on",
+    "status_history": [
+      {
+        "ts": "2026-07-21T19:09:32.408306+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f5a22a5fa3fc45419e8baf63a5236f3f"
+      },
+      {
+        "ts": "2026-07-21T19:17:57.558818+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-f5a22a5fa3fc45419e8baf63a5236f3f",
+        "note": "supervisor_kill_f5a22a5f"
+      }
+    ],
+    "compute_job_id": "agent-brief_k1095v2-5c236f",
+    "result": "dispatched to compute job agent-brief_k1095v2-5c236f; awaiting PHASE A collection",
+    "last_released_at": "2026-07-21T19:17:57.558799+00:00",
+    "last_release_reason": "supervisor_kill_f5a22a5f"
   },
   {
     "id": "paper_review_mile_28e6123e",
@@ -37666,44 +37685,15 @@
   },
   {
     "id": "email-12137-d49553",
-    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] CI 自動修復未成功（ci-red-29651115228）",
-    "description": "Gmail UID: 12137\nMessage-ID: <E10FA350-4D02-42E9-A61E-20CFAADA2B68@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 19 Jul 2026 02:01:59 +0800\nSubject: Re: [VolPred Alert][CRITICAL] CI 自動修復未成功（ci-red-29651115228）\n\n--- 用戶回信內容 ---\n立刻解決 從底層重構來徹底解決\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月19日 02:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> CI 自動修復未成功（ci-red-29651115228）\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> 原因：ci_failed_more_than_two_cycles: 3\r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> 自動修復需要支援\r\n> \r\n> 原因：ci_failed_more_than_two_cycles: 3\r\n> 原始失敗：2026-07-18T16:04:20.9274559Z ImportError while importing test module '/home/runner/work/volpred-research/volpred-research/tests/test_covered_article_dedup.py'.\r\n> 已失敗 cycles：3\r\n> repair tasks：{'ci-red-29651115228': 'in_progress'}\r\n> 最新 failure run：29653262702\r\n> https://github.com/yhlai0911/volpred-research/actions/runs/29653262702\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-18T18:15:06.348125+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] CI 自動修復未成功（ci-red-29651115228）",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12137,
-    "email_message_id": "<E10FA350-4D02-42E9-A61E-20CFAADA2B68@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][CRITICAL] CI 自動修復未成功（ci-red-29651115228）",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-18T18:16:12.713133+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f"
-      },
-      {
-        "ts": "2026-07-18T18:19:02.045047+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f"
-      },
-      {
-        "ts": "2026-07-18T18:57:56.122914+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-6b245c8f4ee74316b5dfd80ec968450f"
-      }
-    ],
-    "started_at": "2026-07-18T18:19:02.045031+00:00",
+    "created_at": "2026-07-18T18:15:06.348125+00:00",
     "completed_at": "2026-07-18T18:57:56.122885+00:00",
-    "result": "根因=partial commit（4684b5e02 land 測試但 asset 留工作區）。底層修法：phase_z.py 加證據門檻的孤兒採用規則（HEAD 紅測試補該路徑內容後轉綠才收，disposable clone 跑 pytest，fail-closed）+ 13 tests。實測 19 dirty 只採用 cron_hourly_dispatch_prompt.md。CI 紅燈 2→1，未全綠：剩 test_phase_z_drain_retry.py 為測試檔，規則刻意不自動收（防放寬斷言）→ P1 assign_ee93acd2。close email 已寄。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T19:08:41.792848+00:00"
   },
   {
     "id": "assign_ee93acd2",
@@ -42505,8 +42495,8 @@
     "source": "user",
     "created_at": "2026-07-19T14:33:16.527386+00:00",
     "updated_at": "2026-07-19T14:33:16.527386+00:00",
-    "started_at": "2026-07-21T18:15:54.070030+00:00",
-    "last_released_at": "2026-07-21T18:19:25.034136+00:00",
+    "started_at": "2026-07-21T19:10:01.080679+00:00",
+    "last_released_at": "2026-07-21T19:17:57.558935+00:00",
     "payload": {
       "parent_fire": "hourly-slot-1-f1effcec82a94c788a870b0cd7ae68df",
       "boss_email_uid": 12147,
@@ -42536,9 +42526,28 @@
         "to": "pending",
         "by": "hourly-slot-1-3ab34f370c9e4c4ca748cc83ca45a2af",
         "note": "supervisor_kill_3ab34f37"
+      },
+      {
+        "ts": "2026-07-21T19:09:32.161109+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f5a22a5fa3fc45419e8baf63a5236f3f"
+      },
+      {
+        "ts": "2026-07-21T19:10:01.080697+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f5a22a5fa3fc45419e8baf63a5236f3f"
+      },
+      {
+        "ts": "2026-07-21T19:17:57.558937+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-f5a22a5fa3fc45419e8baf63a5236f3f",
+        "note": "supervisor_kill_f5a22a5f"
       }
     ],
-    "last_release_reason": "supervisor_kill_3ab34f37"
+    "last_release_reason": "supervisor_kill_f5a22a5f"
   },
   {
     "id": "platform_ops_release_audit_fix_mile_21e45133_r2",
@@ -50965,7 +50974,7 @@
   {
     "id": "assign_869d772d",
     "title": "PHASE-Z 卡住檔案 incident（a6a90b254c2a1d39）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n21 個未提交檔案不是任何一班 fire 產出的，最長已連續 13 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/refactor_commit_ownership_state_machine.md — 4 班\n- scripts/audit_silent_fallbacks.py — 3 班\n- scripts/dedupe_next_tasks.py — 4 班\n- scripts/detect_price_split_breaks.py — 13 班\n- scripts/dispatch_slot_budget.py — 7 班\n- scripts/dispatch_supervisor/phase_z.py — 7 班\n- scripts/reap_orphan_deliverables.py — 7 班\n- scripts/tests/test_fire_manifest.py — 4 班\n- scripts/tests/test_orphan_namespace_registry.py — 7 班\n- scripts/tests/test_phase_z_foreign_incident.py — 7 班\n- scripts/worktree_gc.py — 4 班\n- src/volpred/ops/fire_manifest.py — 4 班\n- src/volpred/ops/foreign_incident.py — 7 班\n- src/volpred/ops/next_tasks.py — 4 班\n- src/volpred/ops/task_signature.py — 4 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png — 11 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png — 11 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png — 11 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py — 11 班\n- tests/test_task_signature.py — 4 班\n- tests/test_worktree_gc.py — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T181926552448Z:<路徑>`",
+    "description": "## 發生什麼\n21 個未提交檔案不是任何一班 fire 產出的，最長已連續 14 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/refactor_commit_ownership_state_machine.md — 5 班\n- scripts/audit_silent_fallbacks.py — 4 班\n- scripts/dedupe_next_tasks.py — 5 班\n- scripts/detect_price_split_breaks.py — 14 班\n- scripts/dispatch_slot_budget.py — 8 班\n- scripts/dispatch_supervisor/phase_z.py — 8 班\n- scripts/reap_orphan_deliverables.py — 8 班\n- scripts/tests/test_fire_manifest.py — 5 班\n- scripts/tests/test_orphan_namespace_registry.py — 8 班\n- scripts/tests/test_phase_z_foreign_incident.py — 8 班\n- scripts/worktree_gc.py — 5 班\n- src/volpred/ops/fire_manifest.py — 5 班\n- src/volpred/ops/foreign_incident.py — 8 班\n- src/volpred/ops/next_tasks.py — 5 班\n- src/volpred/ops/task_signature.py — 5 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png — 12 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png — 12 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png — 12 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py — 12 班\n- tests/test_task_signature.py — 5 班\n- tests/test_worktree_gc.py — 5 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T181926552448Z:<路徑>`\n- `git show refs/volpred/quarantine/20260721T191758916943Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -50998,35 +51007,62 @@
         "tests/test_worktree_gc.py"
       ],
       "streaks": {
-        "docs/refactor_commit_ownership_state_machine.md": 4,
-        "scripts/audit_silent_fallbacks.py": 3,
-        "scripts/dedupe_next_tasks.py": 4,
-        "scripts/detect_price_split_breaks.py": 13,
-        "scripts/dispatch_slot_budget.py": 7,
-        "scripts/dispatch_supervisor/phase_z.py": 7,
-        "scripts/reap_orphan_deliverables.py": 7,
-        "scripts/tests/test_fire_manifest.py": 4,
-        "scripts/tests/test_orphan_namespace_registry.py": 7,
-        "scripts/tests/test_phase_z_foreign_incident.py": 7,
-        "scripts/worktree_gc.py": 4,
-        "src/volpred/ops/fire_manifest.py": 4,
-        "src/volpred/ops/foreign_incident.py": 7,
-        "src/volpred/ops/next_tasks.py": 4,
-        "src/volpred/ops/task_signature.py": 4,
-        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png": 11,
-        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png": 11,
-        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png": 11,
-        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py": 11,
-        "tests/test_task_signature.py": 4,
-        "tests/test_worktree_gc.py": 4
+        "docs/refactor_commit_ownership_state_machine.md": 5,
+        "scripts/audit_silent_fallbacks.py": 4,
+        "scripts/dedupe_next_tasks.py": 5,
+        "scripts/detect_price_split_breaks.py": 14,
+        "scripts/dispatch_slot_budget.py": 8,
+        "scripts/dispatch_supervisor/phase_z.py": 8,
+        "scripts/reap_orphan_deliverables.py": 8,
+        "scripts/tests/test_fire_manifest.py": 5,
+        "scripts/tests/test_orphan_namespace_registry.py": 8,
+        "scripts/tests/test_phase_z_foreign_incident.py": 8,
+        "scripts/worktree_gc.py": 5,
+        "src/volpred/ops/fire_manifest.py": 5,
+        "src/volpred/ops/foreign_incident.py": 8,
+        "src/volpred/ops/next_tasks.py": 5,
+        "src/volpred/ops/task_signature.py": 5,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png": 12,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png": 12,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png": 12,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py": 12,
+        "tests/test_task_signature.py": 5,
+        "tests/test_worktree_gc.py": 5
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260721T181926552448Z"
+        "refs/volpred/quarantine/20260721T181926552448Z",
+        "refs/volpred/quarantine/20260721T191758916943Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-21T18:19:28.005194+00:00",
-      "last_seen_at": "2026-07-21T18:19:28.005194+00:00"
+      "last_seen_at": "2026-07-21T19:18:00.362983+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-21T19:07:47.433778+00:00",
+      "deferred": [
+        "docs/refactor_commit_ownership_state_machine.md: 已保存，且 4.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/audit_silent_fallbacks.py: 已保存，且 3.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dedupe_next_tasks.py: 已保存，且 4.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/detect_price_split_breaks.py: 已保存，且 7.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_slot_budget.py: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_supervisor/phase_z.py: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/reap_orphan_deliverables.py: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_fire_manifest.py: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_orphan_namespace_registry.py: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_phase_z_foreign_incident.py: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/worktree_gc.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/fire_manifest.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/foreign_incident.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 4.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/task_signature.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png: 已保存，且 6.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png: 已保存，且 6.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png: 已保存，且 6.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py: 已保存，且 6.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_task_signature.py: 已保存，且 4.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_worktree_gc.py: 已保存，且 4.8 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-21T19:18:00.362983+00:00"
   }
 ]

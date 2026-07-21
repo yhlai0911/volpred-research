@@ -14,6 +14,9 @@ def _patch_project_path(monkeypatch, tmp_path: Path) -> None:
         return path
 
     monkeypatch.setattr(questions, "project_path", fake_project_path)
+    # The duplicate corpus is owned by member_qa_duplicate_verdict, not by the
+    # ranking summary — stub the single fetch so these tests stay offline.
+    monkeypatch.setattr(questions, "_fetch_question_history", lambda source: [])
 
 
 def test_ensure_member_qa_task_creates_ranked_research_task(monkeypatch, tmp_path: Path):

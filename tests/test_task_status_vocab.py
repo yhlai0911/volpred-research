@@ -196,6 +196,9 @@ def test_questions_materializer_routes_through_hardened_writer(tmp_path, monkeyp
         return path
 
     monkeypatch.setattr(questions, "project_path", fake_project_path)
+    # The duplicate corpus is owned by member_qa_duplicate_verdict, not by the
+    # ranking summary — stub the single fetch so this test stays offline.
+    monkeypatch.setattr(questions, "_fetch_question_history", lambda source: [])
     monkeypatch.setattr(
         questions,
         "get_member_question_ranking_summary",

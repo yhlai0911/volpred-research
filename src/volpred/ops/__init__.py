@@ -103,6 +103,8 @@ from .questions import (
     claim_question_for_research,
     find_duplicate_question,
     get_member_question_ranking_summary,
+    member_qa_duplicate_verdict,
+    MemberQaOverrideReasonRequired,
     question_similarity,
     rerank_member_questions,
 )
@@ -149,6 +151,8 @@ __all__ = [
     "archive_question",
     "claim_question_for_research",
     "find_duplicate_question",
+    "member_qa_duplicate_verdict",
+    "MemberQaOverrideReasonRequired",
     "question_similarity",
     "build_platform_cycle_summary",
     "build_schedule_due_report",

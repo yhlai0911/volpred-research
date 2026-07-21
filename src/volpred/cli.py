@@ -3027,9 +3027,17 @@ def ops_strategy_set_active(identifier: str, active: bool) -> None:
     "--allow-duplicate",
     is_flag=True,
     help="Override the duplicate gate for a genuinely new angle on a re-asked question. "
-    "Record the justification in work_log.",
+    "Requires --new-angle.",
 )
-def ops_question_claim(question_id: str, allow_duplicate: bool) -> None:
+@click.option(
+    "--new-angle",
+    default=None,
+    help="REQUIRED with --allow-duplicate: what does this question ask that the "
+    "existing article does not already answer? Written to work_log.",
+)
+def ops_question_claim(
+    question_id: str, allow_duplicate: bool, new_angle: str | None
+) -> None:
     """Atomically claim a ranked question for research (cross-session race protection).
 
     Uses status='ranked' → 'researching' transition as the lock. If another
@@ -3039,11 +3047,31 @@ def ops_question_claim(question_id: str, allow_duplicate: bool) -> None:
     Also the member_qa duplicate gate (2026-07-19): a question that near-
     duplicates an already-answered one cannot be claimed without
     --allow-duplicate, so a re-ask cannot silently become a second article.
+    The override is not free — it requires --new-angle "<理由>", which is
+    written to work_log; without it the command exits 2.
     """
-    from volpred.ops import claim_question_for_research
+    from volpred.ops import (
+        MemberQaOverrideReasonRequired,
+        claim_question_for_research,
+    )
 
-    result = claim_question_for_research(question_id, allow_duplicate=allow_duplicate)
+    try:
+        result = claim_question_for_research(
+            question_id, allow_duplicate=allow_duplicate, new_angle=new_angle
+        )
+    except MemberQaOverrideReasonRequired as exc:
+        console.print(f"[red]Override refused:[/red] {exc}")
+        console.print(
+            '[yellow]用法:[/yellow] --allow-duplicate --new-angle "本題問的是 X，'
+            '既有文章 mile_xxxx 只回答了 Y"'
+        )
+        raise SystemExit(2) from exc
     _print_json({"action": "question_claim", **result})
+    if result.get("duplicate_override_logged") is False:
+        console.print(
+            "[yellow]警告:[/yellow] 繞過理由未能寫入 work_log — 請手動補 "
+            "scripts/append_work_log.py 記錄，否則本次繞過無稽核軌跡。"
+        )
     if not result.get("claimed"):
         reason = result.get("reason", "unknown")
         console.print(f"[yellow]Claim lost:[/yellow] {question_id} — {reason}")
@@ -3052,7 +3080,7 @@ def ops_question_claim(question_id: str, allow_duplicate: bool) -> None:
             console.print(
                 f"[yellow]Duplicate gate:[/yellow] 這題與 {dup['question_id']} "
                 f"（status={dup['status']}）近乎同題 — 請先用既有文章回覆；"
-                f"確有新角度才加 --allow-duplicate 重試。"
+                f"確有新角度才以 --allow-duplicate --new-angle \"<理由>\" 重試。"
             )
         raise SystemExit(2)
     console.print(f"[green]Claimed[/green] {question_id}")

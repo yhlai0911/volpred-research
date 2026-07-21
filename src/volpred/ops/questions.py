@@ -59,10 +59,58 @@ def _link_question_article(question_id: str, article_slug: str) -> bool:
         return False
 
 
+class MemberQaOverrideReasonRequired(ValueError):
+    """Raised when the duplicate gate is overridden without a written reason.
+
+    2026-07-19 residual 3: a gate that hands out its own bypass key is not a
+    gate. `allow_duplicate=True` costs a sentence explaining what the re-asked
+    question wants that the existing article does not already answer, and that
+    sentence lands in the work log — so an override is an auditable decision
+    rather than a flag someone pasted from the task description.
+    """
+
+
+def _record_duplicate_override(question_id: str, new_angle: str) -> bool:
+    """Write an exercised duplicate-gate override into the work log.
+
+    Goes through `scripts/append_work_log.append_entry` (the single locked
+    writer — `scripts/tests/test_work_log_writer_gate.py`), never a hand-rolled
+    JSON append. Returns whether the entry landed; a failure is reported to the
+    operator rather than swallowed, because an unrecorded override is exactly
+    the invisible second study this gate exists to prevent.
+    """
+    try:
+        from scripts.append_work_log import append_entry
+
+        append_entry(
+            {
+                "timestamp": _utc_now(),
+                "task_type": "member_qa",
+                "task_id": f"member_qa_duplicate_override_{question_id.split('-')[0]}",
+                "outcome": "completed",
+                "actor": "question_ops",
+                "owner": "question_ops",
+                "commit": None,
+                "summary": (
+                    f"member_qa duplicate gate overridden for question_id={question_id}. "
+                    f"新角度：{new_angle}"
+                ),
+            }
+        )
+        return True
+    except Exception as exc:  # noqa: BLE001
+        _warn_question_ops(
+            f"duplicate-gate override for question_id={question_id} was NOT recorded "
+            f"in work_log ({exc}); reason text: {new_angle}"
+        )
+        return False
+
+
 def claim_question_for_research(
     question_id: str,
     *,
     allow_duplicate: bool = False,
+    new_angle: str | None = None,
     source: str = "user",
 ) -> dict:
     """Atomically claim a question for research using status transition as lock.
@@ -79,7 +127,12 @@ def claim_question_for_research(
     must pass through here (`.claude/skills/member-questions/SKILL.md` step 5),
     so refusing the claim mechanically prevents a re-asked question from being
     researched and published a second time. `allow_duplicate=True` is the
-    explicit, logged override for a genuinely new angle.
+    explicit, logged override for a genuinely new angle, and it is only
+    accepted together with a written `new_angle` reason (see
+    `MemberQaOverrideReasonRequired`).
+
+    Adjudication is delegated to `member_qa_duplicate_verdict` — this function
+    neither fetches history nor computes similarity itself.
     """
     now = _utc_now()
 
@@ -123,10 +176,22 @@ def claim_question_for_research(
         {"status": "researching", "updated_at": now},
     )
     if affected:
+        override_meta: dict[str, Any] = {}
+        if allow_duplicate:
+            # The override only becomes auditable once it is written down, and
+            # it is written only after the claim actually lands — a refused
+            # claim is not an override anyone exercised.
+            override_meta = {
+                "duplicate_override_reason": reason_text,
+                "duplicate_override_logged": _record_duplicate_override(
+                    question_id, reason_text
+                ),
+            }
         return {
             "claimed": True,
             "question_id": question_id,
             "question": affected[0],
+            **override_meta,
         }
     # Check current status to explain why claim failed
     current = _select_rows(
@@ -850,14 +915,11 @@ def ensure_member_qa_task(
     pending_questions = summary.get("pending_questions") if isinstance(summary.get("pending_questions"), list) else []
     health = summary.get("health") if isinstance(summary.get("health"), dict) else {}
 
-    # Fail closed: without the history corpus the duplicate gate cannot run, and
-    # a gate that silently skips itself is exactly how 2026-07-19 happened.
-    if "answered_history" not in summary:
-        raise ValueError(
-            "question ranking summary is missing 'answered_history' — the member_qa "
-            "duplicate gate cannot run; refusing to materialize a task"
-        )
-    answered_history = summary.get("answered_history") or []
+    # No local history read here on purpose (2026-07-19 residual 2): adjudication
+    # and its corpus both belong to `member_qa_duplicate_verdict`. Fail-closed is
+    # preserved by that function — it loads history without a fail-open `try`, so
+    # an unreachable corpus raises instead of silently clearing every candidate.
+    verdict_cache: dict[str, list[dict[str, Any]]] = {}
 
     if int(health.get("researching", 0) or 0) > 0:
         return {"created": False, "reason": "already_researching"}
@@ -880,11 +942,19 @@ def ensure_member_qa_task(
     deferred_duplicate: tuple[dict[str, Any], dict[str, Any]] | None = None
 
     def _duplicate_of(item: dict[str, Any]) -> dict[str, Any] | None:
-        return find_duplicate_question(
+        """Blocking prior for `item`, per the single adjudicator.
+
+        Only a `block` verdict defers a candidate — `warn` is a note, not a
+        refusal, and matching the pre-existing behaviour here keeps this change
+        a re-ownership rather than a silent threshold change.
+        """
+        result = member_qa_duplicate_verdict(
+            str(item.get("question_id") or ""),
             str(item.get("question") or ""),
-            answered_history,
-            exclude_question_id=str(item.get("question_id") or ""),
+            source=source,
+            history_cache=verdict_cache,
         )
+        return result["matched"] if result["verdict"] == "block" else None
 
     candidate: dict[str, Any] | None = None
     duplicate: dict[str, Any] | None = None
@@ -1042,10 +1112,11 @@ def _build_member_qa_task_description(
             f"1. 找出既有問題已綁定的文章：uv run volpred ops question-ranking-summary --limit 20\n"
             f"2. 用既有文章回覆本題：uv run volpred ops question-answer {question_id} "
             "--answer \"（說明與既有文章的對應關係）\" --article-id <既有 article slug>\n"
-            "3. 只有在確認本題有既有文章沒回答到的新角度時，才做新研究，且必須\n"
-            f"   uv run volpred ops question-claim {question_id} --allow-duplicate\n"
-            "   並在 work_log 寫清楚「新角度是什麼、既有文章為何不足」。\n"
-            "   未加 --allow-duplicate 的 claim 會被機械擋下（exit 2）。\n"
+            "3. 只有在確認本題有既有文章沒回答到的新角度時，才考慮做新研究。\n"
+            "   繞過查重 gate 需要「寫得出理由」才成立：claim 時必須同時提供\n"
+            "   新角度說明（缺理由 → exit 2），該理由會自動寫入 work_log 供事後稽核。\n"
+            "   指令請查 `uv run volpred ops question-claim --help`；本描述刻意不附\n"
+            "   可直接複製的繞過指令 —— gate 不該自己發鑰匙（2026-07-19 殘留 3）。\n"
         )
         return (
             f"Member question id: {question_id}\n"
