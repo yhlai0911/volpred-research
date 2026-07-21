@@ -1032,9 +1032,13 @@ def _maybe_open_lazypack_repair_task(job: dict[str, Any]) -> None:
     try:
         from volpred.ops.next_tasks import append_task_record
 
-        _, created = append_task_record(record, path=NEXT_TASKS_PATH, if_exists="skip")
-        print(f"repair-task: {task_id} "
-              f"{'created (P1)' if created else 'already pending — not duplicated'}")
+        # Admission may clamp machine-source P1 → P2 (dispatch-lanes R2); report
+        # the priority the pool actually admitted, not the one we asked for.
+        rec, created = append_task_record(record, path=NEXT_TASKS_PATH, if_exists="skip")
+        admitted = f"created (P{rec.get('priority')})" if created else (
+            "already pending — not duplicated"
+        )
+        print(f"repair-task: {task_id} {admitted}")
     except Exception as exc:  # noqa: BLE001 — escalation must not mask the receipt
         warn("compute_queue", "lazypack repair task creation failed",
              job=job_id, task_id=task_id, err=f"{type(exc).__name__}: {exc}")

@@ -31,7 +31,10 @@ A0 抓不到）與 `assign_33a9151f`（source=user，抓得到但排在別人後
                       trending_repost / daily_digest）。它們 source 是
                       `reader_facing_refill` 之類的機器來源，靠 task_type 認得
                       出來，這裡保留 type 判定（2026-07-16 daily_digest 脫班案
-                      的修補，移掉會回歸）。
+                      的修補，移掉會回歸）。**只看 type、不看 priority**
+                      （2026-07-21 dispatch-lanes R1）：時效性來自任務類型本身，
+                      priority 數字打錯（手建 P2 event_article）不該讓它退回
+                      scheduled lane 排隊等時效歸零。
 * ``scheduled``     —— 其餘全部，走一般排班。
 
 排序：urgent 全部（依 created_at）→ time_critical 全部（依 created_at）。一班
@@ -134,7 +137,9 @@ def classify(task: dict) -> str:
     prio = _priority(task)
     if prio == URGENT_PRIORITY and is_urgent_source(task.get("source")):
         return LANE_URGENT
-    if prio == URGENT_PRIORITY and task.get("task_type") in TIME_CRITICAL_TASK_TYPES:
+    # Type-only, no priority gate: perishability is a property of the task
+    # type, not of the priority digit someone typed (module docstring §判定模型).
+    if task.get("task_type") in TIME_CRITICAL_TASK_TYPES:
         return LANE_TIME_CRITICAL
     return LANE_SCHEDULED
 

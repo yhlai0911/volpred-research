@@ -12,8 +12,10 @@ Two structural holes are pinned here:
 
 2. A lazypack job whose whole renderer chain failed left only a failed receipt
    — no task, no owner (the alert claimed a retry that did not exist).  A
-   non-quota terminal failure now files an idempotent P1 repair task into the
-   canonical pool.
+   non-quota terminal failure now files an idempotent repair task into the
+   canonical pool (requested P1; the gateway's machine-source admission clamp
+   — dispatch-lanes R2, 2026-07-21 — admits it at P2 with
+   ``priority_capped_from: 1``).
 
 Run: uv run --extra dev python -m pytest tests/test_compute_queue_lazypack_failure.py -v
 """
@@ -98,7 +100,7 @@ def test_non_quota_failure_is_not_requeued(tmp_path, monkeypatch):
     assert job["status"] == "failed"
 
 
-def test_terminal_lazypack_failure_files_idempotent_p1_task(
+def test_terminal_lazypack_failure_files_idempotent_repair_task(
     tmp_path, monkeypatch, capsys
 ):
     _patch_paths(tmp_path, monkeypatch)
@@ -109,7 +111,10 @@ def test_terminal_lazypack_failure_files_idempotent_p1_task(
     assert len(tasks) == 1
     task = tasks[0]
     assert task["id"] == "lazypack_render_repair_mile_test1"
-    assert task["priority"] == 1
+    # Machine-source P1 is clamped at admission (dispatch-lanes R2): the
+    # producer asks for P1, the pool admits P2 with an auditable stamp.
+    assert task["priority"] == 2
+    assert task["priority_capped_from"] == 1
     assert task["status"] == "pending"
     assert task["task_type"] == "platform_ops"
     assert task["payload"]["job_id"] == "lazypack-mile_test1"
@@ -120,7 +125,7 @@ def test_terminal_lazypack_failure_files_idempotent_p1_task(
     tasks = json.loads((tmp_path / "next_tasks.json").read_text(encoding="utf-8"))
     assert len(tasks) == 1
     out = capsys.readouterr().out
-    assert "created (P1)" in out
+    assert "created (P2)" in out
     assert "already pending" in out
 
 

@@ -107,6 +107,18 @@ def queue(path: Path | None = None) -> dict:
     tasks = _load_tasks(path)
     if isinstance(tasks, dict):
         return {"error": tasks["_error"]}
+    # dispatch-lanes R4（2026-07-21）：lane 可視化重用唯一判定 owner（task_urgency /
+    # next_tasks lane vocab），不在這裡複製條件。Deferred import 同 --job 的慣例，
+    # base snapshot 維持 stdlib-fast 啟動。
+    src = ROOT / "src"
+    if str(src) not in sys.path:
+        sys.path.insert(0, str(src))
+    from volpred.ops.next_tasks import (  # noqa: PLC0415 (deferred: base snapshot stays stdlib-fast)
+        MAIN_THREAD_DISPATCH_LANES,
+        normalize_dispatch_lane,
+    )
+    from volpred.ops.task_urgency import LANE_URGENT, classify  # noqa: PLC0415
+
     out: dict[str, object] = {}
     pending = [t for t in tasks if t.get("status") == "pending"]
     by_prio: dict[str, int] = {}
@@ -115,6 +127,20 @@ def queue(path: Path | None = None) -> dict:
         by_prio[k] = by_prio.get(k, 0) + 1
     out["pending"] = len(pending)
     out["pending_by_priority"] = dict(sorted(by_prio.items()))
+    # boss 急件（LANE_URGENT）待派數：>0 且下一班還沒 fire = 有人在等
+    out["urgent_pending"] = sum(1 for t in pending if classify(t) == LANE_URGENT)
+    # 互動主線程收件匣：headless fire 清不掉的 backlog，session 開頭要看得見。
+    # 兩種表徵都算（漏一種 = 儀器 false-empty）：dispatch_lane=main_thread 的
+    # pending，加上 handoff-main-thread CLI 轉出的 status=pending_main_thread。
+    out["main_thread_inbox"] = sum(
+        1
+        for t in tasks
+        if (
+            t.get("status") == "pending"
+            and normalize_dispatch_lane(t) in MAIN_THREAD_DISPATCH_LANES
+        )
+        or t.get("status") == "pending_main_thread"
+    )
     out["in_flight"] = sum(1 for t in tasks if t.get("status") in ("claimed", "in_progress"))
     out["blocked"] = sum(1 for t in tasks if t.get("status") == "blocked")
     out["top_pending"] = [

@@ -734,6 +734,55 @@ def _request_urgent_fire(record: dict[str, Any], path: Path) -> bool:
         return False
 
 
+def clamp_machine_priority_inflation(record: dict[str, Any]) -> bool:
+    """機器來源的 P1 在 admission 夾到 P2（2026-07-21 dispatch-lanes R2）。
+
+    2026-07-21 實測：pending 181、P1 33 個，boss 來源（telegram/user）只有 8 個，
+    其餘 25 個是系統產生器自封的 P1（auto_discovered / agent / orphan_closeout /
+    auto_publish_drought_emergency / internal_alert_remediation_router …）。P1 的
+    語意是「boss 當下要的 + 時效性」；產生器人人自封 P1 等於取消 priority —— boss
+    的新急件在 33 張 P1 裡排隊，這正是 telegram/email 任務被池阻塞的另一半根因
+    （選擇端那一半見 continue_task_dispatch.py 的 lane rank）。
+
+    夾制條件（判定全部重用 `task_urgency`，禁止第二套 source 清單）：
+
+    * source **不是** 人為 ingress（`is_urgent_source` False），且
+    * task_type **不是** 時效類（TIME_CRITICAL_TASK_TYPES —— 時效任務依 2026-07-12
+      boss 指令必須 P1），且
+    * task_type **不是** dedicated-owner ingress（email_reply / telegram_reply ——
+      各有專屬即時 owner，priority 對它們是 pass-through），且
+    * priority 解析後 == 1
+
+    → priority 夾到 2、蓋 ``priority_capped_from: 1``、留一行 warn。
+
+    **只 clamp 不 block**：writer 層不能 block 的邊界同 `pool_pressure` 模組
+    docstring —— 走到 gateway 的任務語意上已被上游接受，在這裡拒絕會把失敗散進
+    每個 caller 的錯誤路徑；水位煞車屬生成端（pool_pressure 已 own），這裡只矯正
+    priority 語意。回傳是否有夾。
+    """
+    from volpred.ops import task_urgency  # lazy: task_urgency imports this module
+
+    if task_urgency.is_urgent_source(record.get("source")):
+        return False
+    task_type = record.get("task_type")
+    if task_type in task_urgency.TIME_CRITICAL_TASK_TYPES:
+        return False
+    if task_type in task_urgency.DEDICATED_OWNER_TASK_TYPES:
+        return False
+    if priority_sort_key(record.get("priority"), default=999) != 1:
+        return False
+    record["priority"] = 2
+    record["priority_capped_from"] = 1
+    warn(
+        "task_admission",
+        "machine-source P1 clamped to P2 (priority_capped_from=1)",
+        task_id=str(record.get("id")),
+        source=str(record.get("source")),
+        task_type=str(task_type),
+    )
+    return True
+
+
 def append_task_record(
     record: dict[str, Any],
     *,
@@ -766,6 +815,10 @@ def append_task_record(
     task_id = record.get("id")
     if not isinstance(task_id, str) or not task_id.strip():
         raise ValueError("task record must carry a non-empty string 'id'")
+
+    # R2 admission clamp（單一 gateway = 單一 enforcement 點）：機器來源不得自封
+    # P1。boss 來源 / 時效類 / dedicated-owner ingress 原樣通過。
+    clamp_machine_priority_inflation(record)
 
     p = Path(path)
     guard_canonical_write(p)
