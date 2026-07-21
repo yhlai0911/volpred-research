@@ -41,7 +41,7 @@
 
 - **唯一入口**：`uv run volpred ops assign --title ... --description ... --priority N`。所有人為任務（你、我、Telegram、email）都走這裡 — 不再有第二個佇列。
 - **唯一佇列**：`storage/next_tasks.json`。所有寫入走 canonical helper（防檔案寫壞），claim/complete 走 `scripts/task_pool_claim.py`（跨 session 檔案鎖）。
-- **優先序**：P1 急件 ≈ 時效性 > P2 排程 > P3 日常。任務年齡會解鎖飢餓保護（P1 超過 6 小時沒人接會被強制推頭）。
+- **優先序（2026-07-21 重構，根治「你的任務排不上」）**：選擇順序 = **你的急件（boss 來源 P1）永遠第一** → 時效性任務（event_article 等，看類型不看數字）→ 其餘按 P2/P3 + 飢餓保護 + 多樣性輪替。**系統自動產生的任務禁止自封 P1**（入池時機械夾到 P2）— P1 從此只屬於你和真急件，「大家都是 P1 = 沒有優先序」的通膨結構性消失。生成端另有水位閘（池太深自動停產，你的任務不受閘）。
 
 ### 2.2 急件直達（你最常用的）
 
