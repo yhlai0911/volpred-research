@@ -755,6 +755,60 @@ def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
     return True
 
 
+def _ci_incident_store_sync(
+    event: str,
+    incident: dict,
+    *,
+    run_key: str | None = None,
+    task_id: str | None = None,
+) -> None:
+    """Mirror CI incidents into the shared incident store (identity + counters).
+
+    CI watch is the ONE pre-existing path that already had a real incident
+    object (plan §2.2 — "做對的那條路已經在 repo 裡了"), so its repair/verify
+    flow stays untouched (task_mode=external).  The store contributes the
+    shared identity, never-resetting counters, and the G6 cap visibility.
+
+    Fingerprint deviation from plan §3.3 (documented design ruling): the plan
+    suggests ``kind + root_cause 分類``, but root cause is discovered
+    asynchronously and legitimately CHANGES across runs within one incident
+    (see the root_cause-rebinding comment in ``_reduce_ci_run``) — an identity
+    that mutates mid-incident is no identity.  CI's run-anchored
+    ``incident_id`` is stable from open to close, so it is the fingerprint
+    part; failing runs are the instances.
+    """
+    try:
+        from volpred.ops import incident as incident_store
+
+        store = PROJECT_ROOT / "storage" / "ops" / "incidents.json"
+        ci_id = str(incident.get("incident_id") or "")
+        if not ci_id:
+            return
+        parts = (ci_id,)
+        if event == "breach":
+            incident_store.route_breach(
+                store,
+                kind="ci_red",
+                fingerprint_parts=parts,
+                instance_key=run_key,
+                details=str(incident.get("root_cause") or "")[:200],
+            )
+        elif event == "bind" and task_id:
+            incident_store.bind_task(
+                store, incident_store.incident_id_for("ci_red", parts), task_id
+            )
+        elif event == "resolved":
+            incident_store.observe_clean(
+                store,
+                kind="ci_red",
+                fingerprint_parts=parts,
+                criterion="ci_verified_green",
+                by=ci_id,
+            )
+    except Exception as exc:  # noqa: BLE001 — the CI flow must never die on store bookkeeping
+        warn("ci_watch", "incident store sync failed", event=event, err=str(exc))
+
+
 def _ci_run_key(run: dict) -> str:
     return f"{run.get('databaseId')}:{int(run.get('attempt') or 1)}"
 
@@ -1800,6 +1854,8 @@ def _reduce_ci_run(
             checkpoint()
 
         is_new_failure = _ci_record_failure(incident, run)
+        if is_new_failure:
+            _ci_incident_store_sync("breach", incident, run_key=run_key)
         failure_keys = incident.setdefault("failure_run_keys", [])
         incident.pop("recovery_candidate", None)
         incident.pop("unverified_green_candidate", None)
@@ -1840,6 +1896,8 @@ def _reduce_ci_run(
                     task_ids.append(task["id"])
                 state["last_task_id"] = task["id"]
                 summary["task_id"] = task["id"]
+                if summary["task_added"]:
+                    _ci_incident_store_sync("bind", incident, task_id=task["id"])
             except Exception as exc:  # noqa: BLE001
                 warn("ci_watch", "P1 repair task append failed", err=str(exc), task_id=task["id"])
                 hard_failure = f"append_failed: {type(exc).__name__}: {exc}"
@@ -2328,6 +2386,7 @@ def _notify_ci_incident(
     incident["phase"] = "recovered"
     incident["recovered_at"] = now_iso
     incident["verified_green_run"] = candidate
+    _ci_incident_store_sync("resolved", incident)
     state["last_closed_incident"] = copy.deepcopy(incident)
     state.pop("active_incident", None)
     summary["reason"] = "recovery_notified"

@@ -399,44 +399,83 @@ def _open_remediation_task(
     detail: str,
     queue_path: Path | None = None,
 ) -> dict[str, Any]:
-    """The no-deadlock exit: red output becomes a P2 pending task, never rot.
+    """The no-deadlock exit, incident-first (plan §3.3 ``worker_orphaned``).
 
-    Deterministic id (`wsb_remed_<name>`) + `if_exists="skip"` make repeated
-    finalize passes (orphan sweep re-runs) idempotent — exactly one task per
-    workspace, and the normal dispatch loop is guaranteed to pick it up.
+    The old shape — one ``wsb_remed_<name>`` task per workspace — was plan
+    §2.3's per-instance bug: 16 tasks, zero duplicates, one root cause.  Now
+    every unmergeable workspace registers as an INSTANCE of the single
+    ``worker_orphaned`` incident, and the incident carries at most ONE
+    aggregate adjudication task per episode (deterministic id ⇒ idempotent
+    across finalize/orphan-sweep re-runs).
     """
+    from volpred.ops import incident as incident_store
+
     queue = Path(queue_path) if queue_path is not None else Path(repo_root) / QUEUE_RELPATH
+    store = Path(repo_root) / "storage" / "ops" / "incidents.json"
+    try:
+        outcome = incident_store.route_breach(
+            store,
+            kind="worker_orphaned",
+            instance_key=workspace["name"],
+            instance_detail={
+                "worktree": workspace["path"],
+                "branch": workspace["branch"],
+                "base_sha": workspace.get("base_sha", ""),
+                "reason": reason,
+                "detail_tail": detail[-400:],
+            },
+            details=f"WS-B workspace {workspace['name']} unmergeable ({reason})",
+            task_status_probe=incident_store.next_tasks_status_probe(queue),
+        )
+    except Exception as exc:  # noqa: BLE001 — observable; next finalize pass retries
+        LOG.error("workspace incident routing FAILED for %s: %s", workspace["name"], exc)
+        return {"task_id": None, "created": False, "error": str(exc)[:300]}
+
+    incident_id = str(outcome.get("incident_id") or "")
+    action = str(outcome.get("action") or "")
+    if action == "escalate":
+        receipt = incident_store.actuate_escalation(
+            store, incident_id, queue_path=queue
+        )
+        return {
+            "task_id": receipt.get("root_cause_task_id"),
+            "created": bool(receipt.get("task_created")),
+            "incident_id": incident_id,
+            "action": action,
+        }
+    if action != "create_task":
+        # Aggregate task already in flight (or incident suppressed): the new
+        # instance is recorded on the incident; no per-instance task is minted.
+        return {
+            "task_id": outcome.get("active_task_id"),
+            "created": False,
+            "incident_id": incident_id,
+            "action": action,
+        }
+
     record = {
-        "id": f"wsb_remed_{workspace['name']}",
-        "title": f"WS-B workspace remediation: {workspace['name']} ({reason})",
+        "id": str(outcome.get("suggested_task_id")),
+        "title": (
+            f"WS-B workspace 批次裁決（worker_orphaned，episode "
+            f"{outcome.get('episode_count')}）"
+        ),
         "description": (
-            f"Producer-scoped workspace {workspace['name']} could not be merged "
-            f"(reason={reason}). The worktree and branch are PRESERVED — nothing "
-            "was lost and nothing may be force-removed.\n"
-            f"- worktree: {workspace['path']}\n"
-            f"- branch: {workspace['branch']}\n"
-            f"- base_sha: {workspace.get('base_sha', '')}\n"
-            f"- failure detail (tail):\n{detail[-1200:]}\n"
-            "Steps: inspect the worktree, fix or drop the change IN the worktree, "
-            "get its targeted tests green, then land it via "
-            "`bash scripts/merge_worktree.sh " + workspace["name"] + "` "
-            "(which removes the worktree on success). If the output is judged "
-            "not worth keeping, document why, then remove with plain "
-            "`git worktree remove` + `git branch -D` — NEVER `--force` removal "
-            "of a dirty tree."
+            "一個或多個 producer-scoped workspace 無法自動 merge。worktree 與 "
+            "branch 一律保留（禁 --force）。這是 incident "
+            f"`{incident_id}` 的唯一 aggregate 裁決任務 —— 全部未清實例見 "
+            "`storage/ops/incidents.json` 該 row 的 instances[]（cleared_at 為空者）。\n"
+            "逐實例三選一：fix-in-worktree 後 `bash scripts/merge_worktree.sh <name>`；"
+            "path-scoped 抽取可救檔；或記明理由後 plain `git worktree remove` + "
+            "`git branch -D`。裁決完把該實例自然清除（成功 merge 會自動 "
+            "clear_instance）。來源: scripts/dispatch_supervisor/workspace.py。"
         ),
         "task_type": "platform_ops",
         "priority": 2,
         "status": "pending",
-        "source": "dispatch_workspace_gate",
+        "dispatch_lane": "main_thread",
+        "source": "incident_router",
+        "incident_id": incident_id,
         "created_at": _now_iso(),
-        "payload": {
-            "workspace": workspace["name"],
-            "worktree": workspace["path"],
-            "branch": workspace["branch"],
-            "base_sha": workspace.get("base_sha", ""),
-            "reason": reason,
-        },
     }
     try:
         created_record, created = append_task_record(record, path=queue, if_exists="skip")
@@ -446,7 +485,29 @@ def _open_remediation_task(
         LOG.error("workspace remediation task append FAILED for %s: %s",
                   workspace["name"], exc)
         return {"task_id": None, "created": False, "error": str(exc)[:300]}
-    return {"task_id": created_record.get("id"), "created": created}
+    if created_record.get("throttled_by_remediation_cap"):
+        incident_store.record_throttled(store, incident_id)
+        return {"task_id": None, "created": False, "incident_id": incident_id,
+                "action": "throttled"}
+    incident_store.bind_task(store, incident_id, str(created_record.get("id")))
+    return {"task_id": created_record.get("id"), "created": created,
+            "incident_id": incident_id, "action": action}
+
+
+def _clear_workspace_instance(*, repo_root: Path, workspace_name: str) -> None:
+    """Merged workspace ⇒ its ``worker_orphaned`` instance (if any) is cleared."""
+    from volpred.ops import incident as incident_store
+
+    store = Path(repo_root) / "storage" / "ops" / "incidents.json"
+    try:
+        incident_store.clear_instance(
+            store,
+            kind="worker_orphaned",
+            instance_key=workspace_name,
+            by="workspace_finalize",
+        )
+    except Exception as exc:  # noqa: BLE001 — bookkeeping; merge outcome already stands
+        LOG.warning("workspace instance clear failed for %s: %s", workspace_name, exc)
 
 
 # ── finalization ─────────────────────────────────────────────────────────────
@@ -571,6 +632,10 @@ def _finalize_inner(
                 "remediation": remediation}
 
     head = _git(repo_root, "rev-parse", "HEAD", runner=runner, timeout_s=30)
+    # Landed: if an earlier failure registered this workspace on the
+    # worker_orphaned incident, its instance is now cleared (incident resolves
+    # once ALL instances are cleared and quiet >=24h — plan §4).
+    _clear_workspace_instance(repo_root=repo_root, workspace_name=name)
     return {**base, "disposition": "merged",
             "gate": {k: gate.get(k) for k in ("verdict", "rc", "targets", "duration_s")},
             "main_sha": (head.stdout or "").strip() if head.returncode == 0 else ""}

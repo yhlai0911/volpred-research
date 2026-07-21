@@ -372,6 +372,7 @@ def route_breach(
     kind: str,
     fingerprint_parts: Iterable[Any] = (),
     instance_key: str | None = None,
+    instance_keys: Iterable[str] | None = None,
     instance_detail: dict[str, Any] | None = None,
     details: str | None = None,
     now: datetime | None = None,
@@ -412,6 +413,10 @@ def route_breach(
             row["last_breach_detail"] = str(details)[:600]
         if instance_key:
             _upsert_instance(row, str(instance_key), current, instance_detail)
+        for key in instance_keys or ():
+            text = str(key or "").strip()
+            if text:
+                _upsert_instance(row, text, current, None)
         # A breach breaks any clean streak — one clean is never enough (G7).
         row["clean_observations"] = []
 
@@ -438,7 +443,10 @@ def _decide_breach(
     state = str(row.get("state") or STATE_OPEN)
 
     if task_mode == TASK_MODE_EXTERNAL:
-        if int(row.get("episode_count") or 0) == 0:
+        # External owners (CI watch) run their own repair flow; the store only
+        # keeps identity + monotone counters.  A recurrence after resolution is
+        # still a new episode of the SAME incident.
+        if int(row.get("episode_count") or 0) == 0 or state == STATE_RESOLVED:
             _open_new_episode(row, now)
         return {"action": "external"}
 
@@ -547,9 +555,10 @@ def observe_clean(
 ) -> dict[str, Any]:
     """Record a clean observation; resolve ONLY on sustained clean.
 
-    ``criterion='task_succeeded'`` is the one-shot escape hatch (plan §4 row 3)
-    for single-job kinds whose success IS the resolution — callers must pass it
-    explicitly; the default path demands a streak.
+    An explicit ``criterion`` is the one-shot escape hatch (plan §4 row 3) for
+    kinds whose external verification IS the resolution (``task_succeeded``,
+    ``ci_verified_green``) — callers must name it; the default path demands a
+    sustained clean streak.
     """
     current = _utc(now)
     with _locked_store(store_path) as store:
@@ -569,7 +578,7 @@ def observe_clean(
             return {"resolved": False, "changed": False, "incident_id": iid,
                     "state": row["state"], "reason": "escalated_awaits_root_cause"}
 
-        if criterion == "task_succeeded":
+        if criterion:
             closable = str(row.get("current_task_id") or "") or None
             _resolve(row, criterion=criterion, by=by, now=current)
             return {"resolved": True, "changed": True, "incident_id": iid,
@@ -771,6 +780,153 @@ def record_throttled(
         throttled["last_reason"] = reason
         return {"recorded": True, "incident_id": incident_id,
                 "throttled_count": throttled["count"]}
+
+
+# ── escalation actuator (plan §5) ────────────────────────────────────────────
+
+
+def _escalation_task_record(row: dict[str, Any], now: datetime) -> dict[str, Any]:
+    failures = row.get("episode_failures") or []
+    history = row.get("task_history") or []
+    instances = row.get("instances") or []
+    failure_lines = "\n".join(
+        f"- e{f.get('episode')} `{f.get('task_id')}`（{f.get('status')}）: "
+        f"{str(f.get('failure_reason') or '')[:160]}"
+        for f in failures[-6:]
+    ) or "-（本類不開自動修復單，無處置任務史）"
+    instance_lines = "\n".join(
+        f"- `{i.get('key')}`（first_seen {i.get('first_seen_at')}，"
+        f"cleared={'yes' if i.get('cleared_at') else 'no'}）"
+        for i in instances[:12]
+    )
+    if len(instances) > 12:
+        instance_lines += f"\n- …及另外 {len(instances) - 12} 個（見 incidents.json）"
+    record: dict[str, Any] = {
+        "id": suggested_root_cause_task_id(row),
+        "title": f"[根因重構] {row.get('kind')}（incident {row.get('incident_id')}，"
+                 f"第 {row.get('episode_count')} 個 episode 未收斂）",
+        "description": (
+            f"Incident `{row.get('incident_id')}`（kind `{row.get('kind')}`，"
+            f"class {row.get('class')}）自動處置未收斂，依 3-strike 升級為根因重構。\n\n"
+            f"- fingerprint: `{row.get('fingerprint')}`\n"
+            f"- first_seen_at: {row.get('first_seen_at')}\n"
+            f"- occurrence_count: {row.get('occurrence_count')}（偵測次數，永不歸零）\n"
+            f"- episode_count: {row.get('episode_count')}\n"
+            f"- 前次處置任務: {[h.get('task_id') for h in history[-6:]]}\n"
+            f"- 各次失敗原因:\n{failure_lines}\n"
+            + (f"- instances:\n{instance_lines}\n" if instance_lines else "")
+            + "\n此後本 incident 永久停止自動開修復單（suppressed），直到本任務 "
+            "succeeded 才解除。交付物 = 三層（底層邏輯/流程/架構）根因修正 + regression "
+            "gate，不是再一張補丁。來源: src/volpred/ops/incident.py actuate_escalation。"
+        ),
+        "task_type": "platform_ops",
+        # 老闆裁決（2026-07-21 dispatch-lanes 重構後）：escalation 單不得偽裝
+        # boss 來源（plan §5 原案 source=user 已被否決）——P1 是「boss 當下要的 +
+        # 時效性」的語意，機器升級單靠 P1 搶位等於取消 priority。escalated 單接受
+        # P2 + time-insensitive；「恰好一張、不重複」的機械保證來自 escalated 狀態
+        # 的唯一性（G4：actuated 後永不再開），不靠 priority 搶位。
+        "priority": 2,
+        "status": "pending",
+        "source": "incident_escalation",
+        "incident_id": row.get("incident_id"),
+        "created_at": now.isoformat(),
+    }
+    if str(row.get("class")) == CLASS_MACHINE_SELF:
+        # machine_self 根因 = 執行機器本身；修它的人不能是那台壞掉的機器 → 主線程 lane。
+        record["dispatch_lane"] = "main_thread"
+    return record
+
+
+def actuate_escalation(
+    store_path: str | Path,
+    incident_id: str,
+    *,
+    queue_path: str | Path,
+    now: datetime | None = None,
+    notify: Callable[..., dict[str, Any]] | None = None,
+    send_mail: bool = True,
+) -> dict[str, Any]:
+    """Do the *exactly three things* of plan §5, idempotently.
+
+    1. ONE ``[根因重構]`` task via the ``append_task_record`` gateway
+       (deterministic id ⇒ replays dedup; source=incident_escalation is exempt
+       from the G6 cap — the loop's exit is never capped).
+    2. ONE escalation mail (stable title ⇒ transport 24h dedup).
+    3. The incident stops auto-dispositions permanently (escalated state; the
+       breach router treats it as suppressed once both receipts exist).
+
+    A crash between steps leaves the receipt missing, and the next breach
+    observation returns ``escalate`` again — both steps are idempotent.
+    """
+    current = _utc(now)
+    row = load_incident(store_path, incident_id)
+    if row is None:
+        return {"actuated": False, "reason": "unknown_incident", "incident_id": incident_id}
+    escalation = row.get("escalation") if isinstance(row.get("escalation"), dict) else {}
+    receipt: dict[str, Any] = {"incident_id": incident_id, "actuated": True}
+
+    task_id = str(escalation.get("root_cause_task_id") or "")
+    if not task_id:
+        from volpred.ops.next_tasks import append_task_record  # lazy: avoid import cycle
+
+        record = _escalation_task_record(row, current)
+        stored, created = append_task_record(record, path=queue_path, if_exists="skip")
+        task_id = str(stored.get("id") or record["id"])
+        receipt["task_created"] = created
+        record_escalation(store_path, incident_id, root_cause_task_id=task_id, now=current)
+    receipt["root_cause_task_id"] = task_id
+
+    if send_mail and not escalation.get("notified_at"):
+        title = f"[根因重構升級] {row.get('kind')}（incident {incident_id}）"
+        body = "\n".join(
+            [
+                "## 觸發條件",
+                f"incident `{incident_id}`（kind `{row.get('kind')}`）已達 "
+                f"{row.get('episode_count')} 個 episode 未收斂"
+                f"（class {row.get('class')} 門檻 "
+                f"{ESCALATION_THRESHOLD.get(str(row.get('class')), 3)}）。",
+                "",
+                "## 系統已自動執行",
+                f"已開立唯一根因重構任務 `{task_id}`；本 incident 此後永久停止自動開"
+                "修復單（知道但不吵），直到該任務 succeeded 才解除。",
+                "",
+                "## 影響",
+                f"occurrence_count={row.get('occurrence_count')}，"
+                f"任務池不再因此根因增生新單。",
+            ]
+        )
+        if notify is None:
+            from volpred.ops.alerts import send_alert as notify  # lazy: alerts is heavy
+        try:
+            delivery = notify("warn", title, body)
+        except Exception as exc:  # noqa: BLE001 — mail failure leaves the due bit; next breach retries
+            warn("incident_store", "escalation mail failed", incident_id=incident_id,
+                 err=f"{type(exc).__name__}: {exc}")
+            delivery = {"sent": False, "error": str(exc)[:200]}
+        receipt["delivery"] = delivery
+        owner_reached = bool(
+            delivery.get("sent")
+            or (delivery.get("skipped") and delivery.get("skip_reason") == "dedup_24h")
+        )
+        if owner_reached:
+            record_escalation(
+                store_path,
+                incident_id,
+                notified=True,
+                notification_id=(
+                    str(delivery.get("notification_id"))
+                    if delivery.get("notification_id")
+                    else None
+                ),
+                now=current,
+            )
+        receipt["notified"] = owner_reached
+    elif not send_mail:
+        receipt["notified"] = False
+        receipt["notify_suppressed"] = True
+    else:
+        receipt["notified"] = True
+    return receipt
 
 
 # ── task-status probe helper ─────────────────────────────────────────────────

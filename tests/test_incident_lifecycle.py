@@ -255,8 +255,9 @@ def test_g6_daily_summary_is_one_mail_with_date_stable_title(queue, tmp_path) ->
     assert now.date().isoformat() in calls[0][1]
 
 
-def test_g6_internal_alert_writer_is_capped_too(tmp_path) -> None:
-    """alert_remediation 自帶 flock 的 writer 也要受同一個 cap（同一決策 owner）。"""
+def test_g6_internal_alert_path_is_capped_and_recorded_on_incident(tmp_path) -> None:
+    """內部路的開單走 gateway，同受 cap；且拒絕記到 incident（G6 尾款）。"""
+    from volpred.ops import incident
     from volpred.ops import remediation_throttle as throttle
     from volpred.ops.alert_remediation import remediate_internal_alert
 
@@ -270,10 +271,11 @@ def test_g6_internal_alert_writer_is_capped_too(tmp_path) -> None:
     ]
     queue_path.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
 
+    # synthetic kind → DEFAULT_POLICY = ordinary/auto_repair → create_task 路。
     outcome = remediate_internal_alert(
-        {"id": "phase_z_test_gate_red", "breached": True, "level": "warn",
+        {"id": "synthetic_gate_red", "breached": True, "level": "warn",
          "title": "gate red", "body": "x"},
-        alert_key="phase_z_test_gate_red",
+        alert_key="synthetic_gate_red",
         storage_dir=str(storage),
         now=now,
     )
@@ -282,6 +284,12 @@ def test_g6_internal_alert_writer_is_capped_too(tmp_path) -> None:
     assert len(json.loads(queue_path.read_text(encoding="utf-8"))) == (
         throttle.MAX_AUTO_REMEDIATION_PER_DAY
     )
+    row = incident.load_incident(
+        storage / "ops" / "incidents.json",
+        incident.incident_id_for("synthetic_gate_red"),
+    )
+    assert row is not None
+    assert row["throttled"]["count"] == 1  # G6: 拒絕記在 incident row 上
 
 
 # ── supporting invariants (P1) ───────────────────────────────────────────────

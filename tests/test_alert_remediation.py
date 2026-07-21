@@ -161,475 +161,6 @@ def test_cleared_sweep_leaves_absent_alerts_untouched(pool) -> None:
     assert _tasks(pool)[0]["status"] == "pending"
 
 
-def test_internal_alert_uses_stable_p1_task_and_suppresses_active_repeats(
-    pool,
-) -> None:
-    first = ar.remediate_internal_alert(
-        _condition("silent_fallback_new"),
-        alert_key="silent_fallback_new",
-        storage_dir=str(pool),
-        now=NOW,
-    )
-    changed_title = _condition("silent_fallback_new")
-    changed_title["title"] = "push held — 17 NEW findings"
-    second = ar.remediate_internal_alert(
-        changed_title,
-        alert_key="silent_fallback_new",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=1),
-    )
-
-    assert first["created"] is True
-    assert first["priority"] == 1
-    assert first["escalate"] is False
-    assert second["reason"] == "remediation_active"
-    assert second["escalate"] is False
-    queued = _tasks(pool)
-    assert len(queued) == 1
-    assert queued[0]["id"].startswith(
-        ar.task_id_for_alert_key("silent_fallback_new") + "_"
-    )
-    assert queued[0]["priority"] == 1
-    assert queued[0]["task_type"] == "platform_ops"
-    assert queued[0]["internal_alert_state"]["consecutive_remediation_failures"] == 0
-
-
-def test_internal_alert_escalates_only_after_two_completed_repairs_still_fail(
-    pool,
-    monkeypatch,
-) -> None:
-    from volpred.ops import alerts
-
-    deliveries: list[dict] = []
-
-    def fake_send(level, title, body, **kwargs):
-        deliveries.append({"level": level, "title": title, "body": body, **kwargs})
-        return {"sent": True, "skipped": False, "notification_id": "n-1", "title": title}
-
-    monkeypatch.setattr(alerts, "send_alert", fake_send)
-    first = alerts.route_internal_remediable_alert(
-        alert_key="phase_z_baseline_missing",
-        level="warn",
-        title="PHASE-Z baseline missing",
-        body="first fire",
-        storage_dir=str(pool),
-        now=NOW,
-    )
-    assert first["sent"] is False
-    assert first["skip_reason"] == "internal_auto_remediation"
-
-    _finish_only_task(
-        pool,
-        status="succeeded",
-        at=NOW + timedelta(minutes=20),
-        result="restored snapshot",
-    )
-    second = alerts.route_internal_remediable_alert(
-        alert_key="phase_z_baseline_missing",
-        level="warn",
-        title="PHASE-Z baseline missing — another count",
-        body="second fire",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=8),
-    )
-    assert second["sent"] is False
-    assert second["remediation"]["consecutive_remediation_failures"] == 1
-    assert deliveries == []
-
-    _finish_only_task(
-        pool,
-        status="failed",
-        at=NOW + timedelta(hours=8, minutes=20),
-        result="snapshot writer still unavailable",
-    )
-    third = alerts.route_internal_remediable_alert(
-        alert_key="phase_z_baseline_missing",
-        level="warn",
-        title="PHASE-Z baseline missing — count changed again",
-        body="third fire",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=16),
-    )
-
-    assert third["escalated"] is True
-    assert len(deliveries) == 1
-    assert deliveries[0]["title"].startswith(
-        "內部自動修復連續失敗（phase_z_baseline_missing；episode "
-    )
-    assert "已自動嘗試 2 次" in deliveries[0]["body"]
-    assert "snapshot writer still unavailable" in deliveries[0]["body"]
-    queued = _tasks(pool)
-    assert len({task["id"] for task in queued}) == 3
-    assert [task["status"] for task in queued].count("pending") == 1
-    assert queued[-1]["internal_alert_state"]["escalation_sent_at"]
-
-
-def test_internal_alert_resolution_resets_a_later_episode(pool, monkeypatch) -> None:
-    from volpred.ops import alerts
-
-    monkeypatch.setattr(
-        alerts,
-        "send_alert",
-        lambda *args, **kwargs: pytest.fail("fresh episode must not email"),
-    )
-    alerts.route_internal_remediable_alert(
-        alert_key="silent_fallback_new",
-        level="warn",
-        title="held",
-        body="NEW one",
-        storage_dir=str(pool),
-        now=NOW,
-    )
-    _finish_only_task(
-        pool,
-        status="succeeded",
-        at=NOW + timedelta(minutes=10),
-        result="fixed",
-    )
-    resolved = alerts.resolve_internal_remediable_alert(
-        alert_key="silent_fallback_new",
-        storage_dir=str(pool),
-        now=NOW + timedelta(minutes=20),
-    )
-    recurrence = alerts.route_internal_remediable_alert(
-        alert_key="silent_fallback_new",
-        level="warn",
-        title="held again",
-        body="unrelated NEW later",
-        storage_dir=str(pool),
-        now=NOW + timedelta(minutes=40),
-    )
-
-    assert resolved["resolved"] is True
-    assert recurrence["escalated"] is False
-    assert recurrence["remediation"]["consecutive_remediation_failures"] == 0
-
-
-def test_internal_attempt_ids_prevent_stale_completion_from_terminalising_new_worker(
-    pool,
-) -> None:
-    first = ar.remediate_internal_alert(
-        _condition("silent_fallback_new"),
-        alert_key="silent_fallback_new",
-        storage_dir=str(pool),
-        now=NOW,
-    )
-    _finish_only_task(
-        pool,
-        status="succeeded",
-        at=NOW + timedelta(minutes=20),
-        result="attempt A done",
-    )
-    second = ar.remediate_internal_alert(
-        _condition("silent_fallback_new"),
-        alert_key="silent_fallback_new",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=1),
-    )
-    assert first["task_id"] != second["task_id"]
-
-    # A late idempotent completion receipt for attempt A can only touch A's row.
-    tasks = _tasks(pool)
-    attempt_a = next(task for task in tasks if task["id"] == first["task_id"])
-    attempt_a["status"] = "failed"
-    attempt_a["result"] = "late stale receipt"
-    (pool / "next_tasks.json").write_text(
-        json.dumps(tasks, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-
-    repeated = ar.remediate_internal_alert(
-        _condition("silent_fallback_new"),
-        alert_key="silent_fallback_new",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=2),
-    )
-    active = next(task for task in _tasks(pool) if task["id"] == second["task_id"])
-    assert repeated["reason"] == "remediation_active"
-    assert repeated["task_id"] == second["task_id"]
-    assert repeated["escalate"] is False
-    assert active["status"] == "pending"
-
-
-def test_internal_router_orders_clean_breach_and_completion_observations(pool) -> None:
-    key = "git_push_backup_hold"
-    clean_first = ar.resolve_internal_alert(
-        alert_key=key,
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=10),
-    )
-    stale_breach = ar.remediate_internal_alert(
-        _condition(key),
-        alert_key=key,
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=5),
-    )
-    first = ar.remediate_internal_alert(
-        _condition(key),
-        alert_key=key,
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=11),
-    )
-
-    assert clean_first["resolved"] is True
-    assert stale_breach["reason"] == "stale_breach_observation"
-    assert first["attempt_number"] == 1
-
-    _finish_only_task(
-        pool,
-        status="failed",
-        at=NOW + timedelta(hours=20),
-        result="repair completed after an old observation",
-    )
-    precompletion_breach = ar.remediate_internal_alert(
-        _condition(key),
-        alert_key=key,
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=19),
-    )
-    second = ar.remediate_internal_alert(
-        _condition(key),
-        alert_key=key,
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=21),
-    )
-    stale_clean = ar.resolve_internal_alert(
-        alert_key=key,
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=20),
-    )
-
-    assert precompletion_breach["reason"] == "awaiting_post_completion_observation"
-    assert second["consecutive_remediation_failures"] == 1
-    assert stale_clean["reason"] == "stale_resolution_observation"
-    active = next(task for task in _tasks(pool) if task["id"] == second["task_id"])
-    assert active["status"] == "pending"
-
-
-def test_due_escalation_survives_transport_crash_until_acknowledged(
-    pool,
-    monkeypatch,
-) -> None:
-    from volpred.ops import alerts
-
-    alerts.route_internal_remediable_alert(
-        alert_key="phase_z_baseline_missing",
-        level="warn",
-        title="missing",
-        body="attempt zero",
-        storage_dir=str(pool),
-        now=NOW,
-    )
-    _finish_only_task(
-        pool,
-        status="failed",
-        at=NOW + timedelta(minutes=20),
-        result="first repair failed",
-    )
-    alerts.route_internal_remediable_alert(
-        alert_key="phase_z_baseline_missing",
-        level="warn",
-        title="missing",
-        body="attempt one",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=1),
-    )
-    _finish_only_task(
-        pool,
-        status="failed",
-        at=NOW + timedelta(hours=1, minutes=20),
-        result="second repair failed",
-    )
-
-    monkeypatch.setattr(
-        alerts,
-        "send_alert",
-        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("transport crashed")),
-    )
-    with pytest.raises(RuntimeError, match="transport crashed"):
-        alerts.route_internal_remediable_alert(
-            alert_key="phase_z_baseline_missing",
-            level="warn",
-            title="missing",
-            body="attempt two",
-            storage_dir=str(pool),
-            now=NOW + timedelta(hours=2),
-        )
-
-    latest = _tasks(pool)[-1]
-    assert latest["status"] == "pending"
-    assert latest["internal_alert_state"]["escalation_due"] is True
-    assert "escalation_sent_at" not in latest["internal_alert_state"]
-
-    deliveries: list[str] = []
-    monkeypatch.setattr(
-        alerts,
-        "send_alert",
-        lambda level, title, body, **kwargs: deliveries.append(title) or {
-            "sent": True,
-            "skipped": False,
-            "notification_id": "retry-ok",
-        },
-    )
-    retried = alerts.route_internal_remediable_alert(
-        alert_key="phase_z_baseline_missing",
-        level="warn",
-        title="missing",
-        body="retry delivery",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=2, minutes=5),
-    )
-    quiet = alerts.route_internal_remediable_alert(
-        alert_key="phase_z_baseline_missing",
-        level="warn",
-        title="missing",
-        body="already acknowledged",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=2, minutes=10),
-    )
-
-    assert retried["escalated"] is True
-    assert retried["escalation_ack"]["recorded"] is True
-    assert quiet["escalated"] is False
-    assert len(deliveries) == 1
-    assert deliveries[0].startswith(
-        "內部自動修復連續失敗（phase_z_baseline_missing；episode "
-    )
-
-
-def test_parent_owned_transport_suppression_keeps_escalation_due_for_retry(
-    pool,
-    monkeypatch,
-) -> None:
-    from volpred.ops import alerts
-
-    for attempt, base in enumerate((NOW, NOW + timedelta(hours=1)), start=1):
-        alerts.route_internal_remediable_alert(
-            alert_key="git_push_backup_hold",
-            level="warn",
-            title="push held",
-            body=f"attempt {attempt}",
-            storage_dir=str(pool),
-            now=base,
-        )
-        _finish_only_task(
-            pool,
-            status="failed",
-            at=base + timedelta(minutes=20),
-            result=f"repair {attempt} failed",
-        )
-
-    monkeypatch.setattr(
-        alerts,
-        "send_alert",
-        lambda *args, **kwargs: pytest.fail("parent-owned invocation must not transport"),
-    )
-    suppressed = alerts.route_internal_remediable_alert(
-        alert_key="git_push_backup_hold",
-        level="warn",
-        title="push held",
-        body="CI watcher owns this invocation",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=2),
-        suppress_owner_transport=True,
-    )
-
-    active = next(
-        task for task in _tasks(pool)
-        if task.get("status") in {"pending", "claimed", "in_progress"}
-    )
-    assert suppressed["skip_reason"] == "internal_owner_transport_suppressed"
-    assert suppressed["remediation"]["consecutive_remediation_failures"] == 2
-    assert active["internal_alert_state"]["escalation_due"] is True
-    assert "escalation_sent_at" not in active["internal_alert_state"]
-
-    monkeypatch.setattr(
-        alerts,
-        "send_alert",
-        lambda *args, **kwargs: {
-            "sent": True,
-            "skipped": False,
-            "notification_id": "standalone-retry",
-        },
-    )
-    retried = alerts.route_internal_remediable_alert(
-        alert_key="git_push_backup_hold",
-        level="warn",
-        title="push held",
-        body="standalone detector retry",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=2, minutes=5),
-    )
-
-    assert retried["escalated"] is True
-    assert retried["escalation_ack"]["recorded"] is True
-
-
-def test_explicitly_resolved_episode_gets_a_fresh_escalation_dedup_identity(
-    pool,
-    monkeypatch,
-) -> None:
-    from volpred.ops import alerts
-
-    titles: list[str] = []
-    monkeypatch.setattr(
-        alerts,
-        "send_alert",
-        lambda level, title, body, **kwargs: titles.append(title) or {
-            "sent": True,
-            "skipped": False,
-            "notification_id": f"n-{len(titles)}",
-        },
-    )
-
-    for episode in range(2):
-        base = NOW + timedelta(hours=episode * 6)
-        alerts.route_internal_remediable_alert(
-            alert_key="phase_z_baseline_missing",
-            level="warn",
-            title="missing",
-            body=f"episode {episode}",
-            storage_dir=str(pool),
-            now=base,
-        )
-        _finish_only_task(
-            pool,
-            status="failed",
-            at=base + timedelta(minutes=10),
-            result="repair one failed",
-        )
-        alerts.route_internal_remediable_alert(
-            alert_key="phase_z_baseline_missing",
-            level="warn",
-            title="missing",
-            body=f"episode {episode}",
-            storage_dir=str(pool),
-            now=base + timedelta(hours=1),
-        )
-        _finish_only_task(
-            pool,
-            status="failed",
-            at=base + timedelta(hours=1, minutes=10),
-            result="repair two failed",
-        )
-        alerts.route_internal_remediable_alert(
-            alert_key="phase_z_baseline_missing",
-            level="warn",
-            title="missing",
-            body=f"episode {episode}",
-            storage_dir=str(pool),
-            now=base + timedelta(hours=2),
-        )
-        alerts.resolve_internal_remediable_alert(
-            alert_key="phase_z_baseline_missing",
-            storage_dir=str(pool),
-            now=base + timedelta(hours=2, minutes=5),
-        )
-
-    assert len(titles) == 2
-    assert titles[0] != titles[1]
-
-
 def test_internal_alert_router_failure_is_not_silently_suppressed(pool, monkeypatch) -> None:
     from volpred.ops import alert_remediation, alerts
 
@@ -726,94 +257,191 @@ def test_every_shipped_alert_id_is_covered_by_some_disposition() -> None:
     assert not unknown_task_types, f"ALERT_TASK_TYPE names alerts that no longer ship: {unknown_task_types}"
 
 
-def test_disjoint_fingerprint_is_a_new_incident_not_a_failed_repair(pool, monkeypatch) -> None:
-    """2026-07-15: three different files each tripped `silent_fallback_new` once.
+# ── internal-remediable alerts: incident-store wiring (P3 rewrite) ───────────
+#
+# The old episode/attempt machinery (internal_alert_state parasitic in
+# next_tasks rows, clean watermarks, disjoint-fingerprint episode resets) was
+# plan §2.1/§3.3's root cause and is GONE.  These tests pin the replacement:
+# identity + counters live in storage/ops/incidents.json; machine_self kinds
+# record + notify without minting repair tasks; resolution needs sustained
+# clean; the second episode escalates.
 
-    Each repair succeeded, but the coarse alert_key conflated the distinct
-    findings into「同一修復連續失敗」and false-escalated to the owner. A disjoint
-    fingerprint must open a fresh episode (counter reset), never escalate.
+
+def _store(pool):
+    return pool / "ops" / "incidents.json"
+
+
+def _internal_condition(fingerprint=None) -> dict:
+    cond = {
+        "id": "silent_fallback_new",
+        "breached": True,
+        "level": "warn",
+        "title": "silent fallback NEW",
+        "body": "## 觸發條件\nsomething held\n",
+    }
+    if fingerprint is not None:
+        cond["fingerprint"] = fingerprint
+    return cond
+
+
+def test_internal_breach_records_incident_without_minting_tasks(pool) -> None:
+    """machine_self（§6）：記錄 + 通知，不再每次 breach 開一張 a1。"""
+    from volpred.ops import incident
+
+    first = ar.remediate_internal_alert(
+        _internal_condition(), alert_key="silent_fallback_new",
+        storage_dir=str(pool), now=NOW,
+    )
+    assert first["notify_due"] is True
+    assert first["created"] is False
+    assert _tasks(pool) == []
+
+    second = ar.remediate_internal_alert(
+        _internal_condition(), alert_key="silent_fallback_new",
+        storage_dir=str(pool), now=NOW + timedelta(hours=1),
+    )
+    # notified_at is unset (transport not yet acknowledged) so notify stays due;
+    # either way NO task rows appear and the SAME incident row counts up.
+    assert second["created"] is False
+    assert _tasks(pool) == []
+    rows = incident.list_incidents(_store(pool))
+    assert len(rows) == 1
+    assert rows[0]["occurrence_count"] == 2
+    assert rows[0]["class"] == incident.CLASS_MACHINE_SELF
+    assert rows[0]["task_mode"] == incident.TASK_MODE_NONE
+
+
+def test_internal_fingerprints_become_instances_not_new_incidents(pool) -> None:
+    """plan §3.3 inversion: fingerprint 決定 incident；file:line 實例只進陣列。
+
+    舊制把 disjoint fingerprint 當「全新 episode + 計數歸零」——方向相反，正是
+    19 張 a1 的機械成因。
     """
-    from volpred.ops import alerts
+    from volpred.ops import incident
+
+    ar.remediate_internal_alert(
+        _internal_condition(["a.py:10"]), alert_key="silent_fallback_new",
+        storage_dir=str(pool), now=NOW,
+    )
+    ar.remediate_internal_alert(
+        _internal_condition(["b.py:99"]), alert_key="silent_fallback_new",
+        storage_dir=str(pool), now=NOW + timedelta(hours=3),
+    )
+    rows = incident.list_incidents(_store(pool))
+    assert len(rows) == 1
+    keys = {i["key"] for i in rows[0]["instances"]}
+    assert keys == {"a.py:10", "b.py:99"}
+    assert rows[0]["occurrence_count"] == 2
+
+
+def test_internal_resolution_needs_sustained_clean_then_relapse_escalates(pool) -> None:
+    """G7 於 wiring 層：一次乾淨不 resolve；復發（episode 2）觸發 machine_self 升級。"""
+    from volpred.ops import incident
+
+    ar.remediate_internal_alert(
+        _internal_condition(), alert_key="silent_fallback_new",
+        storage_dir=str(pool), now=NOW,
+    )
+    one_clean = ar.resolve_internal_alert(
+        alert_key="silent_fallback_new", storage_dir=str(pool), now=NOW + timedelta(hours=1)
+    )
+    assert one_clean["resolved"] is False  # 一次乾淨不足以 resolve
+
+    for hours in (2, 14, 27):
+        outcome = ar.resolve_internal_alert(
+            alert_key="silent_fallback_new", storage_dir=str(pool),
+            now=NOW + timedelta(hours=hours),
+        )
+    assert outcome["resolved"] is True
+    row = incident.list_incidents(_store(pool))[0]
+    assert row["state"] == incident.STATE_RESOLVED
+    assert row["episode_count"] == 1
+
+    relapse = ar.remediate_internal_alert(
+        _internal_condition(), alert_key="silent_fallback_new",
+        storage_dir=str(pool), now=NOW + timedelta(hours=40),
+    )
+    assert relapse["escalate"] is True
+    assert relapse["episode_count"] == 2  # machine_self threshold = 2 (G5)
+    assert _tasks(pool) == []  # 升級的開單由 actuator 負責，不在 route 這層
+
+
+def test_wrapper_sends_first_notification_then_stays_silent(pool, monkeypatch) -> None:
+    from volpred.ops import alerts, incident
 
     deliveries: list[dict] = []
 
     def fake_send(level, title, body, **kwargs):
-        deliveries.append({"title": title})
-        return {"sent": True, "skipped": False, "notification_id": "n", "title": title}
+        deliveries.append({"level": level, "title": title, "body": body})
+        return {"sent": True, "skipped": False, "notification_id": f"n{len(deliveries)}"}
 
     monkeypatch.setattr(alerts, "send_alert", fake_send)
 
-    alerts.route_internal_remediable_alert(
-        alert_key="silent_fallback_new",
-        level="warn",
-        title="blocked A",
-        body="fileA",
-        storage_dir=str(pool),
-        now=NOW,
-        fingerprint=["scripts/a.py:10"],
+    first = alerts.route_internal_remediable_alert(
+        alert_key="silent_fallback_new", level="warn", title="held",
+        body="NEW one", storage_dir=str(pool), now=NOW,
     )
-    _finish_only_task(pool, status="succeeded", at=NOW + timedelta(minutes=20), result="marked a.py")
-
-    # A *different* file trips the gate — not a failed repair of a.py.
-    second = alerts.route_internal_remediable_alert(
-        alert_key="silent_fallback_new",
-        level="warn",
-        title="blocked B",
-        body="fileB",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=2),
-        fingerprint=["scripts/b.py:20"],
-    )
-    assert second["remediation"]["reason"] == "distinct_incident_new_episode"
-    assert second["remediation"]["consecutive_remediation_failures"] == 0
-    _finish_only_task(pool, status="succeeded", at=NOW + timedelta(hours=2, minutes=20), result="marked b.py")
-
-    # A third distinct file — still must not escalate.
-    third = alerts.route_internal_remediable_alert(
-        alert_key="silent_fallback_new",
-        level="warn",
-        title="blocked C",
-        body="fileC",
-        storage_dir=str(pool),
-        now=NOW + timedelta(hours=4),
-        fingerprint=["scripts/c.py:30"],
-    )
-    assert third["remediation"]["consecutive_remediation_failures"] == 0
-    assert deliveries == [], "distinct one-off findings must never page the owner"
-    # The superseded episodes are retired, not left dangling unresolved.
-    resolved = [t for t in _tasks(pool) if t.get("internal_alert_state", {}).get("resolved_at")]
-    assert len(resolved) == 2
-
-
-def test_same_fingerprint_surviving_repair_still_escalates(pool, monkeypatch) -> None:
-    """Regression guard: a genuinely persistent finding (same file:line after a
-    claimed repair) must still count as a failure and escalate at two."""
-    from volpred.ops import alerts
-
-    deliveries: list[dict] = []
-
-    def fake_send(level, title, body, **kwargs):
-        deliveries.append({"title": title, "body": body})
-        return {"sent": True, "skipped": False, "notification_id": "n", "title": title}
-
-    monkeypatch.setattr(alerts, "send_alert", fake_send)
-    fp = ["scripts/stubborn.py:42"]
-
-    alerts.route_internal_remediable_alert(
-        alert_key="silent_fallback_new", level="warn", title="t1", body="b1",
-        storage_dir=str(pool), now=NOW, fingerprint=fp,
-    )
-    _finish_only_task(pool, status="succeeded", at=NOW + timedelta(minutes=20), result="claimed fixed")
-    second = alerts.route_internal_remediable_alert(
-        alert_key="silent_fallback_new", level="warn", title="t2", body="b2",
-        storage_dir=str(pool), now=NOW + timedelta(hours=8), fingerprint=fp,
-    )
-    assert second["remediation"]["consecutive_remediation_failures"] == 1
-    _finish_only_task(pool, status="succeeded", at=NOW + timedelta(hours=8, minutes=20), result="claimed fixed again")
-    third = alerts.route_internal_remediable_alert(
-        alert_key="silent_fallback_new", level="warn", title="t3", body="b3",
-        storage_dir=str(pool), now=NOW + timedelta(hours=16), fingerprint=fp,
-    )
-    assert third["escalated"] is True
+    assert first["sent"] is True
     assert len(deliveries) == 1
-    assert "已自動嘗試 2 次" in deliveries[0]["body"]
+    assert "Incident 已記錄" in deliveries[0]["body"]
+
+    second = alerts.route_internal_remediable_alert(
+        alert_key="silent_fallback_new", level="warn", title="held",
+        body="NEW one", storage_dir=str(pool), now=NOW + timedelta(hours=2),
+    )
+    assert second["skipped"] is True
+    assert second["skip_reason"] == "internal_auto_remediation"
+    assert len(deliveries) == 1  # 已通知過的 episode 不再寄
+    row = incident.list_incidents(_store(pool))[0]
+    assert row["notified_at"] is not None
+    assert _tasks(pool) == []
+
+
+def test_wrapper_escalation_opens_one_root_cause_task_and_one_mail(pool, monkeypatch) -> None:
+    from volpred.ops import alerts, incident
+
+    deliveries: list[dict] = []
+
+    def fake_send(level, title, body, **kwargs):
+        deliveries.append({"level": level, "title": title})
+        return {"sent": True, "skipped": False, "notification_id": f"n{len(deliveries)}"}
+
+    monkeypatch.setattr(alerts, "send_alert", fake_send)
+
+    def fire(now):
+        return alerts.route_internal_remediable_alert(
+            alert_key="silent_fallback_new", level="warn", title="held",
+            body="NEW one", storage_dir=str(pool), now=now,
+        )
+
+    fire(NOW)  # episode 1 + notification
+    for hours in (2, 14, 27):  # sustained clean ⇒ resolved
+        ar.resolve_internal_alert(
+            alert_key="silent_fallback_new", storage_dir=str(pool),
+            now=NOW + timedelta(hours=hours),
+        )
+    result = fire(NOW + timedelta(hours=40))  # relapse ⇒ escalate (threshold 2)
+    assert result["escalated"] is True
+
+    tasks = _tasks(pool)
+    root = [t for t in tasks if t.get("source") == "incident_escalation"]
+    assert len(root) == 1
+    assert root[0]["title"].startswith("[根因重構]")
+    # 裁決（2026-07-21）：不偽裝 boss 來源、不搶 P1 —— P2 + main_thread lane；
+    # 唯一性靠 escalated 狀態，不靠 priority。
+    assert root[0]["priority"] == 2
+    assert root[0]["source"] == "incident_escalation"
+    assert root[0]["dispatch_lane"] == "main_thread"
+    mails_after_escalation = len(deliveries)
+
+    # 之後再觸發 10 次：0 張新任務、0 封新信（suppressed 但 occurrence 續計）。
+    for i in range(10):
+        out = fire(NOW + timedelta(hours=41 + i))
+        assert out.get("escalated") in {True, False}
+    assert len(_tasks(pool)) == len(tasks)
+    assert len(deliveries) == mails_after_escalation
+    row = incident.list_incidents(_store(pool))[0]
+    assert row["state"] == incident.STATE_ESCALATED
+    assert row["occurrence_count"] == 12
+
+

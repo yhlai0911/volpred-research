@@ -3232,13 +3232,23 @@ def test_workspace_finalize_gate_red_opens_remediation_and_keeps_worktree(
     tasks = json.loads(queue.read_text(encoding="utf-8"))
     assert len(tasks) == 1
     task = tasks[0]
-    assert task["id"] == "wsb_remed_dispatch-slot-1-aaaaaaaa"
+    # incident-lifecycle P3: per-workspace wsb_remed_<name> ids are GONE — the
+    # workspace registers as an instance of the worker_orphaned incident and the
+    # queue carries ONE aggregate adjudication task (plan §2.3/G3).
     assert task["priority"] == 2
     assert task["status"] == "pending"
     assert task["task_type"] == "platform_ops"
-    assert task["payload"]["worktree"] == ws["path"]
-    assert task["payload"]["branch"] == ws["branch"]
+    assert task["dispatch_lane"] == "main_thread"
+    assert task["source"] == "incident_router"
     assert "merge_worktree.sh" in task["description"]
+    assert "incidents.json" in task["description"]
+    from volpred.ops import incident as incident_store
+
+    rows = incident_store.list_incidents(repo / "storage" / "ops" / "incidents.json")
+    assert len(rows) == 1
+    assert rows[0]["kind"] == "worker_orphaned"
+    assert {i["key"] for i in rows[0]["instances"]} == {"dispatch-slot-1-aaaaaaaa"}
+    assert rows[0]["current_task_id"] == task["id"]
     # idempotent: a second finalize pass (orphan sweep rerun) files nothing new
     out2 = workspace.finalize_workspace(
         repo_root=repo, workspace=ws, worker_outcome="success",
