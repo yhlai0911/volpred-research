@@ -225,7 +225,9 @@ def test_worker_hang_alert_and_no_retry(tmp_path: Path, monkeypatch) -> None:
         attempts.append(kwargs["attempt"])
         _reserve_like_production(kwargs)
         log_path.write_text("worker timed out", encoding="utf-8")
-        return 137, 12.0, "worker timed out"
+        # Our own watchdog kill surfaces as the sentinel (2026-07-21: a raw 137
+        # now means an OUTSIDE kill and takes the external_signal path instead).
+        return worker.TIMEOUT_KILLED_SENTINEL, 12.0, "worker timed out"
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
     monkeypatch.setattr(
@@ -1692,9 +1694,11 @@ def test_classify_normalizes_negative_signal_codes() -> None:
     assert worker._normalize_signal_exit(0) == 0
     assert worker._normalize_signal_exit(1) == 1
     assert worker._normalize_signal_exit(None) == 1
-    assert worker._classify(worker._normalize_signal_exit(-15), "") == "hang"
-    assert worker._classify(worker._normalize_signal_exit(-9), "") == "hang"
-    assert worker._classify(worker._normalize_signal_exit(-14), "") == "hang"
+    # 2026-07-21: raw signal exits are by construction OUTSIDE kills (our own
+    # kills return sentinels), so they classify as external_signal, not hang.
+    assert worker._classify(worker._normalize_signal_exit(-15), "") == "external_signal"
+    assert worker._classify(worker._normalize_signal_exit(-9), "") == "external_signal"
+    assert worker._classify(worker._normalize_signal_exit(-14), "") == "external_signal"
 
 
 def test_classify_timeout_sentinel_is_hang() -> None:
@@ -1814,31 +1818,45 @@ def test_worker_timeout_path_short_circuits_retry(tmp_path: Path, monkeypatch) -
     # sanitisation.
 
 
-def test_worker_signal_killed_outside_timeout_also_classified_as_hang(
+def test_worker_killed_by_external_signal_is_not_reported_as_a_hang(
     tmp_path: Path, monkeypatch
 ) -> None:
-    """If the child dies from SIGTERM/SIGKILL/SIGALRM by external means (not
-    our own watchdog), `_run_one_attempt` still receives a negative wait()
-    return. `_normalize_signal_exit` converts to 128+signum so HANG_EXIT_CODES
-    set membership triggers and `_classify` returns "hang" → no retry.
+    """External SIGTERM ≠ hang (2026-07-21 redesign, email-12150).
+
+    Every kill the supervisor initiates returns through a sentinel, so a raw
+    143 can ONLY be an outside kill. The old contract classified it "hang" and
+    mailed a「卡住 N 分鐘」CRITICAL about a fire that was working to its last
+    second — three times in one day. New contract: outcome=external_signal,
+    claims handed back, one WARN via the dedicated alert, NO hang alert, no
+    in-fire retry.
     """
     state_path = _tmp_state(tmp_path)
     log_path = tmp_path / "worker.log"
     attempts: list[int] = []
-    hang_alerts: list[dict] = []
+    external_alerts: list[dict] = []
+    released: list[dict] = []
 
     def fake_run_one_attempt(**kwargs):
         attempts.append(kwargs["attempt"])
         _reserve_like_production(kwargs)
-        log_path.write_text("external SIGTERM (e.g. launchd kill)", encoding="utf-8")
+        log_path.write_text("Execution error", encoding="utf-8")
         # Externally signal-killed → negative is normalized at the boundary
-        return worker._normalize_signal_exit(-15), 7.0, "external SIGTERM"  # → 143 SIGTERM
+        return worker._normalize_signal_exit(-15), 7.0, "Execution error"  # → 143
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
     monkeypatch.setattr(
-        worker.alerts,
-        "send_hang_alert",
-        lambda **kwargs: hang_alerts.append(kwargs) or True,
+        worker.alerts, "send_hang_alert",
+        lambda **kwargs: pytest.fail(
+            "hang alert sent for an external signal — the false CRITICAL is back"
+        ),
+    )
+    monkeypatch.setattr(
+        worker.alerts, "send_external_signal_alert",
+        lambda **kwargs: external_alerts.append(kwargs) or True,
+    )
+    monkeypatch.setattr(
+        worker.claim_release, "repend_killed_job_claims",
+        lambda **kw: released.append(kw) or ["task-under-test"],
     )
 
     result = worker.run_worker(
@@ -1848,11 +1866,22 @@ def test_worker_signal_killed_outside_timeout_also_classified_as_hang(
         sleep_fn=lambda sec: None,
     )
 
-    assert result.outcome == "killed_timeout"
-    assert result.attempts == 1
+    assert result.outcome == "external_signal"
+    assert result.attempts == 1, "no in-fire retry — the killer is still out there"
     assert attempts == [1]
-    assert len(hang_alerts) == 1
-    assert result.exit_code == 143  # not sentinel — normalized POSIX code
+    assert result.exit_code == 143
+    assert len(external_alerts) == 1
+    assert external_alerts[0]["signum"] == 15
+    assert released and released[0]["source"] == "worker-external-signal"
+
+
+def test_supervisor_initiated_kill_is_still_a_hang() -> None:
+    """The sentinel path keeps its no-retry hang contract — only RAW signal
+    exits reclassify. If this goes red the redesign leaked onto real hangs."""
+    assert worker._classify(worker.TIMEOUT_KILLED_SENTINEL, "") == "hang"
+    assert worker._classify(143, "") == "external_signal"
+    assert worker._classify(137, "") == "external_signal"
+    assert worker._classify(worker._normalize_signal_exit(-14), "") == "external_signal"
 
 
 def test_load_cron_expr_reads_schedule_field_first(tmp_path: Path) -> None:

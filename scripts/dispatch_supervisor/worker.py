@@ -184,7 +184,13 @@ def _classify(exit_code: int, output: str) -> str:
     if exit_code == 0:
         return "success"
     if exit_code in HANG_EXIT_CODES:
-        return "hang"
+        # A raw signal exit can ONLY be an outside kill: every kill WE initiate
+        # returns through a sentinel above (timeout / fatal probes), never as
+        # the child's own wait() status. Until 2026-07-21 this fell into "hang"
+        # — three healthy fires killed mid-work at ~600s by an unidentified
+        # external SIGTERM were mailed to the owner as「卡住」CRITICALs
+        # (email-12150, assign_7f15f261).
+        return "external_signal"
     return failure_class.classify_output(output) or "hard_failure"
 
 
@@ -865,6 +871,47 @@ def run_worker(
             # history can tell this shape apart from an ordinary failed run.
             category = "transient"
             attempt_outcome = "fatal_fastfail"
+
+        if category == "external_signal":
+            # Dead child WE never killed: something outside the supervisor
+            # signalled the group (sender unknown — this receipt is the
+            # attribution groundwork, assign_7f15f261). Same claim-release as a
+            # hang (the process is confirmed gone; the claim must not strand),
+            # but the notification is an honest WARN naming the signal, never a
+            #「卡住 N 分鐘」CRITICAL about a fire that was working to its last
+            # second (2026-07-21: three healthy fires died this way at ~600s).
+            # No in-fire retry: the killer is still out there and a fresh fire
+            # from the next tick re-dispatches the released claims anyway.
+            repended_tasks = claim_release.repend_killed_job_claims(
+                job_id=job_id, slot_id=slot_id, source="worker-external-signal",
+            )
+            signum = exit_code - 128 if exit_code > 128 else exit_code
+            LOG.warning(
+                "worker attempt=%d killed by EXTERNAL signal %d after %.1fs "
+                "(not our watchdog); released claims=%s",
+                attempt, signum, total_duration, repended_tasks or "none",
+            )
+            entry = state.record_completion(
+                job_id=job_id, expected_attempt=attempt,
+                expected_phase="classifying",
+                exit_code=exit_code, outcome="external_signal", final_model=model,
+                path=state_path,
+            )
+            if entry is not None:
+                dead = entry["job"]
+                alerts.send_external_signal_alert(
+                    job={"pid": dead.get("pid", -1),
+                         "pgid": int(dead.get("pgid") or -1),
+                         "started_at": entry.get("fire_at"), "attempt": attempt,
+                         "model": model, "log_path": dead.get("log_path", ""),
+                         "repended_tasks": repended_tasks},
+                    signum=signum, duration_s=total_duration,
+                    state_path=state_path,
+                )
+            return WorkerResult(
+                exit_code=exit_code, outcome="external_signal", final_model=model,
+                attempts=attempt, duration_s=total_duration, log_tail=log_tail,
+            )
 
         if category == "hang":
             # Sanitize sentinel to canonical SIGKILL hang code before persisting:

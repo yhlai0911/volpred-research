@@ -213,6 +213,42 @@ def read_log_tail(log_path: str, *, limit: int = 2000) -> str:
         return f"(worker log unreadable: {exc})"
 
 
+def send_external_signal_alert(
+    *, job: dict[str, Any], signum: int, duration_s: float,
+    state_path: Path = state.STATE_PATH,
+) -> bool:
+    """A worker died from a signal the supervisor never sent. WARN, not CRITICAL.
+
+    Dedup 6h per signal number: the 2026-07-21 killer struck three fires in one
+    day and each got its own「卡住」CRITICAL — one honest WARN per shape per
+    six hours carries the same information without the pager storm.
+    """
+    key = f"external_signal:{signum}"
+    if state.should_dedup_alert(key, window_s=21600, path=state_path):
+        LOG.warning("external-signal alert deduped (%s)", key)
+        return False
+    repended = [str(tid) for tid in (job.get("repended_tasks") or []) if tid]
+    body = (
+        f"# Worker 被外部訊號終止（signal {signum}，非系統 watchdog）\n\n"
+        f"## 發生什麼\n"
+        f"這班 worker 跑了約 {duration_s / 60.0:.0f} 分鐘後收到 signal {signum} 終止。\n"
+        f"**不是系統自己的 hang/watchdog 殺的**（我方 kill 走 sentinel 路徑，不會以 raw exit 出現），\n"
+        f"送訊號者目前無法歸因 — 本封與 completion receipt（outcome=external_signal）就是歸因線索的起點。\n\n"
+        f"## Job\n"
+        f"- pid: {job.get('pid')} / pgid: {job.get('pgid')}\n"
+        f"- started_at: {job.get('started_at')}\n"
+        f"- attempt: {job.get('attempt')} / model: {job.get('model')}\n"
+        f"- log: {job.get('log_path')}\n\n"
+        f"## 自癒\n"
+        + (f"- 持有的 task claim 已退回 pending：{', '.join(repended)}\n" if repended
+           else "- 該 fire 沒有持有任何 task claim\n")
+        + "- 下一班 fire 照常重派；無需人工介入。同 signal 6 小時內不再重發此通知。\n"
+    )
+    _send("warn", f"Worker 被外部 signal {signum} 終止（非 watchdog；已自動回收）", body)
+    state.mark_alert_sent(key, path=state_path)
+    return True
+
+
 def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path = state.STATE_PATH) -> bool:
     """Hang-killed alert. Dedup 10min."""
     key = f"hang_killed:{job.get('job_id') or job.get('pid') or 'unknown'}"
