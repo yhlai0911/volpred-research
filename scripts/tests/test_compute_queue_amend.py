@@ -33,11 +33,10 @@ from scripts import compute_queue  # noqa: E402
 def queue(tmp_path, monkeypatch):
     """Redirect every canonical write into tmp. Tests must never touch storage/."""
     qdir = tmp_path / "queue"
-    bdir = tmp_path / "briefs"
+    monkeypatch.setattr(compute_queue, "ROOT", tmp_path)
     monkeypatch.setattr(compute_queue, "QUEUE_DIR", qdir)
     monkeypatch.setattr(compute_queue, "LOG_DIR", tmp_path / "logs")
     monkeypatch.setattr(compute_queue, "AGENT_JOB_DIR", tmp_path / "agent_jobs")
-    monkeypatch.setattr(compute_queue, "AGENT_BRIEF_DIR", bdir)
     qdir.mkdir(parents=True)
     return qdir
 

@@ -57,13 +57,26 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 
 QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
 LOCK_FILE = QUEUE_DIR / ".worker.lock"
 LOG_DIR = ROOT / "storage" / "logs" / "compute"
 AGENT_JOB_DIR = ROOT / "storage" / "ops" / "agent_jobs"
-AGENT_BRIEF_DIR = ROOT / "storage" / "ops" / "agent_briefs"
+
+
+def agent_brief_dir() -> Path:
+    """Where enqueue freezes agent briefs — derived from ROOT at call time.
+
+    Not a module constant like its siblings above, and that is the point: a test
+    that redirects this module at a tmp root patches ROOT, and every constant
+    bound at import time silently keeps pointing at the real checkout. The brief
+    dir was exactly that miss — enqueue_agent wrote into the live
+    storage/ops/agent_briefs/ from inside the suite until CI's repo-state assert
+    caught it (2026-07-15). Deriving it here means one patch covers it.
+    """
+    return ROOT / "storage" / "ops" / "agent_briefs"
 
 # Agent jobs. A research agent needs 20-60min of wall clock (that is the whole
 # reason it cannot live inside a ~50min dispatch fire), so the default budget has
@@ -407,8 +420,10 @@ def enqueue_agent(args) -> int:
     # not accept. Snapshotting makes the spec immutable the moment it is queued, and
     # incidentally rescues briefs written to /tmp from being swept before the job runs.
     # To change a queued brief now: `amend --brief-file`, which refuses once it is running.
-    AGENT_BRIEF_DIR.mkdir(parents=True, exist_ok=True)
-    frozen_brief = AGENT_BRIEF_DIR / f"{job_id}.md"
+    brief_dir = agent_brief_dir()
+    frozen_brief = brief_dir / f"{job_id}.md"
+    guard_canonical_write(frozen_brief)
+    brief_dir.mkdir(parents=True, exist_ok=True)
     frozen_brief.write_text(brief_path.read_text(encoding="utf-8"), encoding="utf-8")
 
     # `result_artifact` is the AGENT'S output, never the runner's summary. Resolve
