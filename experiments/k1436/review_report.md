@@ -1,7 +1,7 @@
 # K1436 — independent review record
 
-**Verdict: PASS** (after one round of CONDITIONAL_PASS + fix + re-review)
-**Reviewed commit**: `4458e73a0`
+**Verdict: PASS** (CONDITIONAL_PASS -> fix -> PASS, then re-attested after an additive change)
+**Reviewed commit**: `0b3ab65ee`
 **Reviewer**: `feature-dev:code-reviewer` subagent, fresh context, read-only.
 **Reviewer source**: fallback path. Codex CLI (primary) was unavailable —
 `codex exec` returned `You've hit your usage limit ... try again at Jul 25th, 2026`.
@@ -55,3 +55,20 @@ gate rejected it (HAR-RV is nested in HAR-RV+funding). Switching to Clark-West m
 same forecasts from p ≈ 0.36–0.41 to p ≈ 0.04–0.08. The conclusion stayed NULL, but the
 raw-DM version would have reported a comfortable, far-from-significant null that was
 partly an artifact of the wrong test.
+
+## Round 3 — PASS (re-attestation after an additive change)
+
+After round 2 I noticed the dispatch brief required a `limitations[]` field in
+`k1436_results.json`, which was missing (the caveats existed only in the README). Added it
+in `k1436.py` as a 9-item mirror of README §9 — purely additive, no computation touched.
+That drifted the claim-surface sha and correctly invalidated the round-2 verdict, so it was
+re-reviewed rather than hand-patched.
+
+Reviewer confirmed: the diff contains only the `limitations` list; `clark_west`,
+`dm_with_sensitivity`, `evaluate`, `rolling_forecast` (including the causal training
+slice), `hac_ols`, both feature builders, `assert_no_lookahead`, and the verdict expression
+are byte-identical to round 2; all 9 JSON items map 1:1 to README §9 with no caveat
+weakened in either direction; and every numeric field is unchanged apart from the
+`run_at_utc` stamp that `reproduce_spec.json` declares ignorable.
+
+Final frozen commit: `0b3ab65ee`.
