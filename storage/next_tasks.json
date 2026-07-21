@@ -37221,37 +37221,15 @@
   },
   {
     "id": "assign_6349aa2c",
-    "title": "回報格式 v3：結構化回報加『已排定任務時程』+『本班已完成任務』兩欄（老闆 msg 973）",
-    "description": "老闆 2026-07-18 Telegram msg 973 要求：以後的運營回報要能看到『近期已排定任務的時程』和『已完成的任務列表』。\n\n實作範圍（canonical，不是散文提醒）：\n1. 更新回報模板 SOP（沿用 governance_telegram_structured_progress_report_format 落地的位置，pdca-operations / 運營經理 SOP + 對應 code path），在既有『結論/驗證/產物/阻塞/下一步』後加兩欄：\n   - 已完成（本班）：<task_id + 一句話，最多 5 條，多的寫「+N 件」>\n   - 已排程：<接下來 24h 的 scheduled job / pending P1-P2 任務 + 預計時間，最多 5 條>\n2. 兩欄必須由程式自動生成，不可手打：已完成 = next_tasks.json 本班 status 轉 succeeded 的任務；已排程 = config/runtime_schedules.json 的下次 fire 時間 + next_tasks.json pending 依 priority 排序。寫一個 helper（例如 src/volpred/ops/report_sections.py）給所有回報點共用。\n3. 套用到所有結構化回報點（每日大體檢、autonomous loop summary、alert 收班回報、email summary）。\n4. 驗證：實際跑一次產生的回報貼進 telegram 給老闆看，確認兩欄有真實內容不是空的。\n\n注意：回報要有上限（各 5 條），不能把 32 筆 pending 全倒出來變成長報告——老闆要的是掃一眼知道進度，不是 dump。",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "回報格式 v3：結構化回報加『已排定任務時程』+『本班已完成任務』兩欄（老闆 msg 973）",
+    "priority": 1,
     "source": "user",
     "created_at": "2026-07-18T09:24:12.997288+00:00",
-    "created_by": "telegram-responder",
-    "status_history": [
-      {
-        "ts": "2026-07-18T10:08:08.897668+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-d1a349e0f02e456ea5c10f3437e29730"
-      },
-      {
-        "ts": "2026-07-18T10:08:09.124560+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-d1a349e0f02e456ea5c10f3437e29730"
-      },
-      {
-        "ts": "2026-07-18T10:12:23.729996+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-d1a349e0f02e456ea5c10f3437e29730"
-      }
-    ],
-    "started_at": "2026-07-18T10:08:09.124546+00:00",
     "completed_at": "2026-07-18T10:12:23.729980+00:00",
-    "result": "回報格式 v3：新增 src/volpred/ops/report_sections.py（已完成/已排程兩欄程式生成、各≤5條+N件、owner token 歸屬）並接進 progress_report.py 唯一 owner；13 新測試通過"
+    "tombstone": true,
+    "archived_at": "2026-07-21T11:08:10.273188+00:00"
   },
   {
     "id": "telegram-976",
@@ -37313,53 +37291,27 @@
   },
   {
     "id": "telegram-980",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 980）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-18T10:05:08.090086+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 980）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n← 研究動態\n一般讀者\n2026/07/18 上午06:01\n23 次瀏覽\n同樣叫短債，USDC 出事時一檔波動放大 2.8 倍，另一檔幾乎沒變\n風險管理\nSHY\nBIL\n穩定幣\n短期公債\nUSDC\n讀者互動\n已追蹤瀏覽 0 次，登入會員可按讚與收藏。\n\n\n按讚\n0\n\n收藏\n0\n\n分享\n0\n分享到：\nLINE\nFacebook\nX / Twitter\n複製連結\n\n為什麼要等下一班？為什麼不能直接改\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-18T10:05:36.466711+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram_responder"
-      },
-      {
-        "ts": "2026-07-18T10:08:36.206029+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram_responder"
-      }
-    ],
-    "completed_at": "2026-07-18T10:08:36.206011+00:00"
+    "completed_at": "2026-07-18T10:08:36.206011+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-21T11:08:10.273188+00:00"
   },
   {
     "id": "telegram-981",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 981）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-18T10:06:23.350715+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 981）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n急件和一般排程應該要分開 急件就不進入排班直接派工作 一般排程才進入排班 這樣有很難理解？有很難架構？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-18T10:08:56.801162+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram_responder"
-      },
-      {
-        "ts": "2026-07-18T10:11:07.912896+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram_responder"
-      }
-    ],
-    "completed_at": "2026-07-18T10:11:07.912883+00:00"
+    "completed_at": "2026-07-18T10:11:07.912883+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-21T11:08:10.273188+00:00"
   },
   {
     "id": "assign_a64e9f61",
@@ -37528,28 +37480,15 @@
   },
   {
     "id": "telegram-985",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 985）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-18T10:17:13.905720+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 985）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n每日token分析報告還有在發信嗎\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-18T10:17:36.400404+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-18T10:18:47.160449+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-18T10:18:47.160433+00:00"
+    "completed_at": "2026-07-18T10:18:47.160433+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-21T11:08:10.273188+00:00"
   },
   {
     "id": "telegram-988",
@@ -39912,7 +39851,7 @@
     "description": "2026-04-29 的 K1258 primary-path Codex review（`experiments/k1258/codex_review_v2.md`，CONDITIONAL PASS / 2 MAJOR + 2 MED）提出的 MAJOR-1 / MAJOR-2 至今（2026-07-19，81 天）**完全未動**，且任務池中無任何對應修復單。本班 slot-4 在收斂 `assign_2398cbfe`（已作廢的 codex retry 單）時發現，並逐行覆核確認 bug 仍在。\n\n## MAJOR-1 — invalid-model posterior contamination（K1257 + K1258 共病，但嚴重度不同）\n\n**K1258**（`experiments/k1258/k1258_forgetting_factor_bma.py:585-598`）現況逐行確認未修：\n- `:597` 只對 `valid = np.isfinite(ll_row)` 的模型加 log-likelihood，invalid 模型保留其 decayed prior；\n- `:598` 全體一起 `logsumexp` 正規化 → invalid 模型仍分走機率質量；\n- 更嚴重：`:586` `weight_hist[t] = np.exp(log_w - logsumexp(log_w))` **沒有 valid mask**，被污染的權重直接進入 forecast 路徑。\n\n**K1257**（`experiments/k1257/k1257_bma_volatility.py:551-568`）同構但較輕：\n- `:553-556` invalid 模型 `continue`，`log_weights` 保留舊值；`:568` 全體正規化 → posterior 被污染；\n- 但 `:545-546` forecast 端有 `log_weights[valid]` 重新正規化 → **當期 forecast 受保護**，污染只透過 posterior 遞延到後續日期。\n\n→ 依 review 建議做**單一協調修復**（invalid 當日 log_w 設 `-inf` 再正規化，或 forecast/posterior 兩端一致套 valid mask），不可只修一支。\n\n## MAJOR-2 — 未收斂 fit 被採用，且 artifact 無法驗證\n\n`fit_garch_n:249` / `fit_gjr_t:303` / `fit_a4f:388` 都存了 `res.success` 為 `converged`，但 `build_forecasts:489` 只檢查 `state is not None`，**下游無任何排除**。本班確認 `k1258_results.json` 只有 `provenance.*`，**無 convergence / invalid-day / dropped-model-day 任何計數** → 從 artifact 無法驗證 MAJOR-1 究竟觸發過幾次。\n\n## 交付契約\n\n1. 協調修 K1257 + K1258 的 valid-mask 語意（forecast 與 posterior 兩端一致）。\n2. `converged=False` 視為當日不可用，排除於 forecast 與 posterior。\n3. results.json 補 per-asset per-model 的 convergence / invalid-day / dropped-day 計數，讓 MAJOR-1 的觸發次數可從 artifact 直接驗證。\n4. 重跑 3 assets × 5 λ × OOS 2020-2026 → **屬 heavy compute，強制走 `scripts/compute_queue.py enqueue`**，不得塞進 hourly fire。\n5. 比對修復前後的 QLIKE / H1-H4 結論：**若結論翻轉，必須更新 knowledge entry `727e23ee`（K1258，confidence 0.88）與 K1257 對應 entry**，不得只改數字不改結論。\n\n## 注意\n\n- 這是 E078「cross-model review 非選配」系列最後一塊未收尾的 remediation：K1259 / K1261 / K1262 / K1262b 皆為 FAIL 並各自處理，僅 BMA family 的兩張 CONDITIONAL PASS 被漏接。\n- 禁止在未重跑的情況下宣稱修好；禁止沿用舊 forecast cache（`provenance.k1257_forecast_cache_reuse` 已存在，修 K1257 後該 cache 即失效）。\n",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-19T05:22:34.285264+00:00",
     "payload": {
@@ -39963,19 +39902,38 @@
         "to": "pending",
         "by": "hourly-slot-1-140bf551898c452c95a8f656d91ad049",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-21T11:13:38.635999+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc"
+      },
+      {
+        "ts": "2026-07-21T11:13:44.000449+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc"
+      },
+      {
+        "ts": "2026-07-21T11:15:26.123232+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc"
       }
     ],
-    "started_at": "2026-07-19T18:08:41.576502+00:00",
+    "started_at": "2026-07-21T11:13:44.000436+00:00",
     "handoff_note": "compute queued after repair commit 1af0e3fbf; await jobs compute-k1258-bma-valid-mask-remediation-20260719 and compute-k1257-bma-valid-mask-remediation-20260719; queue followups must verify diagnostics, compare conclusions, run Codex review, update knowledge if needed, then close parent",
     "handoff_at": "2026-07-19T07:21:14.348174+00:00",
-    "result": "Stage 1 (collect 2026-07-19 reruns) done 2026-07-20 by hourly-slot-1-140bf551898c452c95a8f656d91ad049: both jobs exit 0, MAJOR-1/2 confirmed fixed by read-only verification agent (CONDITIONAL PASS). Verification found a NEW report-layer defect introduced by the fix: SPY headline QLIKE mixed samples (BMA/Equal n=1581 vs GJR-t n=1518 after a 63-day drop), inflating BMA-GJR-t by 81% and making conclusions inconsistent with its own Harvey t. DM verdicts unaffected. Both scripts patched this fire (common-sample headline + posterior_semantics disclosure + K1258 parseable H4/flat conclusions). Blocked on: compute-k1257-headline-realign-20260720 and compute-k1258-artifact-schema-align-20260720 (stage 2), then Codex primary-path review using storage/ops/codex_reviews/k1257_k1258_realign_prompt.md (stage 3). Do not close until stage 3 verdict lands.",
+    "result": "Stage 1 (collect 2026-07-19 reruns) done 2026-07-20 by hourly-slot-1-140bf551898c452c95a8f656d91ad049: both jobs exit 0, MAJOR-1/2 confirmed fixed by read-only verification agent (CONDITIONAL PASS). Verification found a NEW report-layer defect introduced by the fix: SPY headline QLIKE mixed samples (BMA/Equal n=1581 vs GJR-t n=1518 after a 63-day drop), inflating BMA-GJR-t by 81% and making conclusions inconsistent with its own Harvey t. DM verdicts unaffected. Both scripts patched this fire (common-sample headline + posterior_semantics disclosure + K1258 parseable H4/flat conclusions). Blocked on: compute-k1257-headline-realign-20260720 and compute-k1258-artifact-schema-align-20260720 (stage 2), then Codex primary-path review using storage/ops/codex_reviews/k1257_k1258_realign_prompt.md (stage 3). Do not close until stage 3 verdict lands.\n\n覆核後判定為未關閉的幽靈單：交付契約 1-4 已於 07-19/20 完成。valid-mask 兩支同構修復（K1258:627-635 / K1257:576-588，weight[~valid]=0）、converged=False 以 -inf 吸收態排除、results.json 已有 per-asset per-model nonconverged/invalid/dropped 計數（SPY GJR_t 實測 1/63/63，MAJOR-1 觸發次數可從 artifact 驗證）、重跑經 compute queue 完成（e099fa3bc/f62ea5b99/1af0e3fbf）。殘餘的 Codex CONDITIONAL PASS 放行條件（機器可讀 drop 語意、重複 diagnostics 合併、hash-bound review_verdict.json）已由既有 pending 單 k1257_k1258_semantics_and_certification P2 承接，故不重複建單。派 agent 前先驗前提，省下一次 xhigh 全重跑。",
     "linked_compute_job_ids": [
       "compute-k1257-headline-realign-20260720",
       "compute-k1258-artifact-schema-align-20260720"
     ],
     "codex_review_prompt": "storage/ops/codex_reviews/k1257_k1258_realign_prompt.md",
     "last_released_at": "2026-07-19T20:50:04.135347+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "completed_at": "2026-07-21T11:15:26.123217+00:00"
   },
   {
     "id": "assign_f3419501",
@@ -40145,12 +40103,35 @@
     "title": "[worktree harvest wave 3] 剩餘 6 個 dirty stale worktree 待裁決（agent lane 仍卡滿）",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-19T13:56:03.464889+08:00",
     "source": "worktree_harvest_wave2_dirty_stale_20260719",
     "topology": "inline",
     "description": "承接 wave 2（2026-07-19 13:xx，slot-2）。wave 2 已裁決並清空 K1692、K1694 兩個；剩下這些仍 dirty、仍占 agent slot：\n\n- codex-desktop-k1707              idle 77h  unmerged 4  branch codex/k1707-pseudo-stress\n- dispatch-slot-1-1533dcbc-cqamend idle 110h unmerged 2  branch ops/compute-queue-amend\n- dispatch-slot-1-30aeb902-taifexrv idle 41h unmerged 3\n- dispatch-slot-1-79726798-credit-firm idle 36h unmerged 0\n- dispatch-slot-1-b55db3be-2       idle 109h unmerged 0  branch fix/...-brief-leak\n- dispatch-slot-2-8dda242d-k1708   idle 54h  unmerged 0  （task k1708_fix_verdict_gate_20260717 若仍 in_progress 就別碰，先確認持有者是否已死）\n\n**wave 2 學到的三件事，照做可省很多時間**：\n\n1. **先比 sha256 再決定要不要合併**。K1692 看起來是 99h 未收的完整成果（連 Codex PASS verdict 都在），實際上 canonical 早就有了（commit 86255ebdc salvage 進去的），worktree 是冗餘副本。比 canonical 與 worktree 的 shasum 一秒就分辨得出來，比讀 diff 快得多。\n\n2. **task status=succeeded 不代表實驗成功**。K1694 的 succeeded 來自 dispatch task，result=null，實際零結果。判斷有無成果要看檔案（有沒有 results.json / 圖 / verdict），不要看 status。\n\n3. **⚠️ 不要對這些 worktree 跑 merge_worktree.sh**。它的 K1262-v4 防護會被 gitignore/runtime 類噪音檔誤判，改用 `git log --all` 重建 commit list，對零自有 commit 的 worktree 會列出 47 個跨全 repo 分支的 commits（含別人進行中的工作與測試 fixture）。wave 2 是靠 --dry-run 才發現的。改走：確認要保的檔 → 複製進 canonical → `uv run python scripts/git_writer_lock.py commit --actor <owner> --message <ASCII> -- <逐檔路徑>`（該工具要求逐檔指定，不吃目錄）。工具修復另有 task merge_worktree_k1262v4_overtrigger_20260719，若已修好則本條作廢、可正常用 merge_worktree.sh。\n\nunmerged>0 的三個（k1707/cqamend/taifexrv）比較重：它們有真的 branch commit，要判斷該 branch 的 commit 是否該進 main，不能只看工作區髒檔。\n\n收尾：全部處理完跑 `uv run python scripts/reclaim_stale_worktrees.py --apply` 回收 checkout（branch 保留）。目標是讓 dispatch report 的 occupied 從 9/4 降下來，現在 5 個 P2 餓死 41h 就是因為 free=0 派不出去。\n\n**⚠️ wave 2 踩到的第四個陷阱（reclaim 的 stale gate）**：把 worktree 工作區清乾淨之後，目錄 mtime 被更新 → reclaim_stale_worktrees.py 的 idle_hours 歸零 → 它不再認為那是 stale，於是 --apply 也不會回收，checkout 繼續占 slot。wave 2 的 K1692 / K1694 兩個就卡在這個狀態：**成果已保全、工作區已清空，但 checkout 還在**。\n\n所以順序要反過來：先確認要保的檔已進 canonical，然後**直接移除 checkout**，不要先清乾淨再指望 reclaim。移除走 canonical helper（共用 checkout 禁裸 git）：\n`uv run python scripts/git_writer_lock.py run -- git worktree remove .claude/worktrees/<name>`（branch 保留）。\n待移除：dispatch-slot-1-f53bca44-k1692、dispatch-slot-1-f53bca44-k1694（兩者皆已 clean、成果已在 canonical，移除是安全的）。\n\n順帶值得評估：reclaim_stale_worktrees.py 的 idle 判定用目錄 mtime，會被「維護動作本身」重置，等於懲罰有人去整理它。若要治本，idle 應該看 branch 最後 commit 時間或外部 progress ledger，而不是 checkout 的 mtime。",
-    "evidence_20260720_1430": "實測更新（hourly-slot-2 於 2026-07-20 14:30 CST 重跑 reclaim_stale_worktrees.py dry-run）：stale_count 已從 task 標題寫的 6 個增為 15 個，且 15 個「全部」被 skip、--apply 會移除 0 個 —— 12 個 skip 理由為 dirty（有未提交工作），3 個為 unmerged（branch 有 commits 未進 main，如 dispatch-slot-2-c5cafe39-k1623 有 3 個）。結論：dispatch report 指向的 reclaim_stale_worktrees.py 對現況是 no-op，不是解方；腳本設計上就拒碰 dirty/unmerged，這條路清不出任何 slot，必須逐個人工裁決（merge_worktree.sh 收割 or 判定丟棄）。最老者 dispatch-slot-1-1533dcbc-cqamend idle 135.2h、codex-desktop-k1707 idle 101.6h（含 4 個 unmerged commits）。補充：本班 dispatch report 顯示 occupied=7/6 是在「已釋放這 15 個 stale slot 之後」的數字，故 agent lane 卡滿的直接成因是另外 7 個非 stale（idle<4h）worktree，與這 15 個 dirty stale 是兩個獨立問題 —— 清完這 15 個不會立刻解開 lane，別把兩者當同一件事處理。"
+    "evidence_20260720_1430": "實測更新（hourly-slot-2 於 2026-07-20 14:30 CST 重跑 reclaim_stale_worktrees.py dry-run）：stale_count 已從 task 標題寫的 6 個增為 15 個，且 15 個「全部」被 skip、--apply 會移除 0 個 —— 12 個 skip 理由為 dirty（有未提交工作），3 個為 unmerged（branch 有 commits 未進 main，如 dispatch-slot-2-c5cafe39-k1623 有 3 個）。結論：dispatch report 指向的 reclaim_stale_worktrees.py 對現況是 no-op，不是解方；腳本設計上就拒碰 dirty/unmerged，這條路清不出任何 slot，必須逐個人工裁決（merge_worktree.sh 收割 or 判定丟棄）。最老者 dispatch-slot-1-1533dcbc-cqamend idle 135.2h、codex-desktop-k1707 idle 101.6h（含 4 個 unmerged commits）。補充：本班 dispatch report 顯示 occupied=7/6 是在「已釋放這 15 個 stale slot 之後」的數字，故 agent lane 卡滿的直接成因是另外 7 個非 stale（idle<4h）worktree，與這 15 個 dirty stale 是兩個獨立問題 —— 清完這 15 個不會立刻解開 lane，別把兩者當同一件事處理。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T11:08:52.939605+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc"
+      },
+      {
+        "ts": "2026-07-21T11:08:53.178214+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc"
+      },
+      {
+        "ts": "2026-07-21T11:13:12.218025+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc"
+      }
+    ],
+    "started_at": "2026-07-21T11:08:53.178200+00:00",
+    "completed_at": "2026-07-21T11:13:12.218015+00:00",
+    "result": "wave 3 六個 worktree 的 checkout 均已不存在，改裁決殘留 branch：credit-firm 三檔 sha256 與 main 逐項相同=冗餘；codex/k1707-pseudo-stress 與 main 是兩份不同實作撞同一路徑（main 持有 reviewed_sha256 相符的 PASS 版）=不可合併，另建 task 裁決去留；k1708 維持不合併作 rev2 基底（並記其 auto-commit 含 next_tasks.json 不可合併）。清掉 codex-failover-k841 空 checkout（141.5h/0 commit）。根因發現：snapdup 閒置 7.2h 是認證 job 撞上 Codex 額度上限（鎖到 7/25）而非 agent 死亡，verdict.md 為 0 bytes 卻被投遞；已建 P2 fallback 認證 task。附帶暴露 compute_queue --pending-followup 看不到此類 failed job 的 filter 缺口。"
   },
   {
     "id": "telegram-1065",
@@ -40431,13 +40412,27 @@
         "to": "pending",
         "by": "hourly-slot-2-2835aeeb3bca4d15a1f20a201e7c7f98",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-21T11:20:03.783015+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc"
+      },
+      {
+        "ts": "2026-07-21T11:24:12.314344+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc",
+        "note": "manual_release"
       }
     ],
     "started_at": "2026-07-19T06:47:30.578496+00:00",
-    "last_released_at": "2026-07-19T08:50:03.171252+00:00",
+    "last_released_at": "2026-07-21T11:24:12.314329+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "findings": "[2026-07-21 19:2x hourly-slot-1 盤點] 本班未完成本單，但把狀態釘死了，下班不必重查：\n\n(a) **已完成**（本班驗證）。paper/taiwan-vt/data/0050_tw_twii_..._2008-2026.csv 與\n    paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv 現在跨 2014-01-02 連續：\n    adj_close 2013-12-31=9.3531 → 2014-01-02=9.3292（-0.26%），close 14.6750 → 14.6375。\n    原本的 x0.2494 斷點已不存在。兩檔仍未提交（在工作區已 8 班），bytes 已在\n    quarantine ref。→ (a) 不必重做，只需確認提交。\n\n(b)(c)(d) **仍未做**。\n\n⚠️ **本單的「驗證指令」在本班之前是壞的，會回報假全綠**：\nscripts/detect_price_split_breaks.py 曾被 dead-code sweep（commit a15fba0d7）移到\nscripts/_legacy/，而它的 REPO_ROOT 是 `parent.parent`（深度假設）→ 移動後指向 scripts/，\n所有 glob 匹配 0 檔 → `--csv-scan` 印「0 個檔 / 有斷點的檔案：0 / 0」並 exit 0，\n與「掃完全乾淨」無法區分。docs/governance/2026-07/foreign_incident_path_adjudication.md\n早已逐字警告過這個路徑會被 cleanup 誤清（D5 的第二個反例），仍然發生了 —— 這是第三個。\n\n本班已修（三層）：(1) git mv 復位回 scripts/；(2) REPO_ROOT 改為向上尋找 .git marker，\n不再假設深度；(3) **掃到 0 檔改為 exit 2 並印錯誤** —— 沉默不得再被讀成乾淨。\nexit code 契約現為 0=乾淨 / 1=有斷點 / 2=掃描本身壞了。\n\n**真實污染清單（本班實測，19 / 1279 檔）**：\nK1395, K1611, K1677(px_MARA/px_PLUG), k1360(kalshi x2), k1406, k1411,\nk1539(gdelt panel), k1556, k1588, k1630, k1636, k1659, k1660, k1661, k1671,\nk1697, k1711(ohlc_0050_TW.csv)。\n注意其中 K1677 / k1360 / k1539 / k1556 / k1588 命中的是 ×2.0 @2018-02-06，\n那是 Volmageddon 的真實行情或非 0050 標的，**不是 0050 分割** —— 交給 k_reruns_* 那單時\n要先分流，別把真實極端行情當污染修掉。\n\n**(c) 的未決問題（下一班請勿憑推測改論文）**：body_v3.tex:33 現在寫的是\n\"use auto_adjust=False, compute returns from Adj Close, construct adjusted opens ...,\nand exclude the split date\"。但資料檔既已 repoint 成連續序列，就不存在 spurious split\nreturn，\"exclude the split date\" 是否仍是實際跑數字的流程、抑或已成過時描述，\n取決於 (b) 重跑用的是哪條 pipeline。**先做 (b)，再依實際跑法改 (c)**，否則只是把一個\n不符事實的描述換成另一個。garch-x-vix/main.tex:377 同理（現稱依 lai2026vt 程序清理）。"
   },
   {
     "id": "k_reruns_0050_snapshot_contaminated_20260719",
@@ -40454,12 +40449,35 @@
     "id": "clean_tw50_extreme_return_zeroing_20260719",
     "priority": 2,
     "task_type": "experiment",
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-19T14:25:00+08:00",
     "parent_task_id": "assign_price_cache_0050_split_break",
     "title": "獨立資料完整性風險：clean_tw50_data() 把任何 |日報酬|>50% 靜默歸零後 cumprod 重建價格",
-    "description": "本班盤點 0050 斷點時附帶發現，與該斷點無關但風險獨立。src/volpred/utils.py 的 clean_tw50_data() 內有：\n\n    extreme_mask = clean_returns.abs() > 0.50\n    clean_returns[extreme_mask] = 0.0   # 然後 cumprod 重建價格\n\n任何真實的單日 +/-50% 報酬會被**靜默歸零並重寫整條價格序列**，無警告、無記錄。對 0050 日資料大概無害，但此函式被約 130 個檔案呼叫，且套用在其他資產與更長樣本上（k1580 從 1990 開始、k1711_data 從 1999 開始）—— 那些期間存在真實的極端單日行情，會被無聲抹掉。\n\n待辦：(1) 盤點所有呼叫點的資產與樣本期間，找出實際被歸零的日期清單（先加 log 再跑）；(2) 決定正確語意 —— 極端報酬應該是「警告 + 保留」或「標記 NaN」，而非靜默歸零；(3) 評估已歸檔結果中有多少受此影響。"
+    "description": "本班盤點 0050 斷點時附帶發現，與該斷點無關但風險獨立。src/volpred/utils.py 的 clean_tw50_data() 內有：\n\n    extreme_mask = clean_returns.abs() > 0.50\n    clean_returns[extreme_mask] = 0.0   # 然後 cumprod 重建價格\n\n任何真實的單日 +/-50% 報酬會被**靜默歸零並重寫整條價格序列**，無警告、無記錄。對 0050 日資料大概無害，但此函式被約 130 個檔案呼叫，且套用在其他資產與更長樣本上（k1580 從 1990 開始、k1711_data 從 1999 開始）—— 那些期間存在真實的極端單日行情，會被無聲抹掉。\n\n待辦：(1) 盤點所有呼叫點的資產與樣本期間，找出實際被歸零的日期清單（先加 log 再跑）；(2) 決定正確語意 —— 極端報酬應該是「警告 + 保留」或「標記 NaN」，而非靜默歸零；(3) 評估已歸檔結果中有多少受此影響。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T11:15:51.124571+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc"
+      },
+      {
+        "ts": "2026-07-21T11:15:51.358253+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc"
+      },
+      {
+        "ts": "2026-07-21T11:19:38.284242+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc"
+      }
+    ],
+    "started_at": "2026-07-21T11:15:51.358238+00:00",
+    "completed_at": "2026-07-21T11:19:38.284228+00:00",
+    "result": "靜默歸零已移除，改為警告+保留+記錄（EXTREME_RETURN_INCIDENTS），警告文字直接分流『呼叫端用錯 cleaner』與『0050 有未修斷點』兩種成因。先量測後改：新增 scripts/audit_tw50_extreme_returns.py 掃 19 條真實 0050 序列（2009-01-02..2026-07-10）→ 0 天觸發，safety net 從未在真實資料開火。零影響證明：以 git show HEAD 的舊版函式對同 19 條序列做 before/after sha256 比對 → 19/19 逐位元相同，不動任何已發表數字。補上 tests/test_utils_clean_tw50.py（6 passed，含極端報酬須保留的核心 regression）—— 此函式先前 131 個呼叫點零測試覆蓋。交付項 (3) 歷史影響評估未收尾：呼叫點變數名泛稱無法判定是否有非 0050 資產被餵入，已讓誤用在警告中當場現形。"
   },
   {
     "id": "assign_c0ad1962",
@@ -49489,5 +49507,90 @@
     "source": "hourly_dispatch",
     "created_at": "2026-07-21T10:48:00+00:00",
     "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+  },
+  {
+    "id": "telegram-1258",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-21T10:51:38.110546+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1258）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我能知道tolen耗用最大的一次文字讀取是什麼檔嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T10:51:57.301187+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-21T10:52:44.585987+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-21T10:52:44.585971+00:00"
+  },
+  {
+    "id": "telegram-1260",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-21T10:57:02.317179+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1260）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n這些要怎麼改善？我記得我也沒有讀過這麼多次的handoff_latest.md啊\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n📊 單次最兇的檔案讀取：\n\nscripts/dispatch_supervisor/phase_z.py — 59,365 字元，約 1.7 萬 token（一次讀完整檔）。\n並列前段：paper/leverage-direction/body_v_ijf.tex（~1.69 萬）、vt-crowding-abm/main.tex（~1.66 萬）。\n\n🔥 但真正的 token 黑洞不是單次，是累積：\nstorage/ops/handoff_latest.md 被讀了 143 次，累計 463 萬字元 ≈ 132 萬 token，比第二名（phase_z.py，46 次 / 13.8 萬 token）高一個量級。\n\n📁 統計範圍：這個 repo 的 1006 個 transcript、2356 次 Read；token 用 字元/3.5 估算（非官方 tokenizer）。\n\n💡 一句話：handoff 每個 session 開場都全文讀，是最值得瘦身或改成分段讀的目標。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T10:57:37.142366+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-21T10:58:24.227452+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-21T10:58:24.227435+00:00"
+  },
+  {
+    "id": "assign_8437dd49",
+    "title": "handoff_latest.md 瘦身 + 分段讀（token 黑洞治理）",
+    "description": "根因：handoff_latest.md 53KB，其中自動產生的當前快照（第 1~112 行，§1-§9）只有 6.2KB，剩下 46.9KB（88%）全是「候補/手動補充」區的歷史殘留 — 10 條 FB awaiting interactive、5 條已標 RESOLVED、最舊到 2026-05-29、最新條目也是 2026-07-07（兩週前）。每個 session 開場依 AGENTS.md「開工前必讀」全文讀，143 次累計 132 萬 token。老闆本人沒讀過，全是 agent 讀的。\n\n要做三件事：\n1. 歸檔候補區：把「候補/手動補充」以下所有超過 14 天或已標 RESOLVED 的條目搬到 storage/ops/handoff_archive/YYYY-MM.md，主檔只留未解決且 14 天內的。預期主檔 53KB → ~10KB。\n2. regen 時自動歸檔：在產生 handoff_latest.md 的程式（每小時 :50 那支）加自動 rotation — 候補區條目超過 14 天或標 RESOLVED 即移到 archive，避免再次累積。\n3. 改讀法：AGENTS.md / 相關 skill 的「開工前必讀 handoff_latest.md」改成「讀 §1-§9 自動區（前 ~112 行）；候補區按需求 grep」，並在檔頭加一行導引註明分區與建議讀法。\n\n驗收：主檔 <15KB；archive 檔存在且內容完整無遺失；regen 跑一次後候補區不再回填舊條目；AGENTS.md 讀法已更新。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-21T10:58:06.390717+00:00",
+    "created_by": "telegram-responder"
+  },
+  {
+    "id": "snapdup_cert_fallback_codex_usage_limit_20260721",
+    "title": "audit_snapshot_dup_20260721 認證審查改走 fallback reviewer（Codex 額度鎖到 7/25）",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "machine",
+    "created_at": "2026-07-21T11:12:22.469480+00:00",
+    "created_by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc",
+    "parent_task_id": "worktree_harvest_wave3_dirty_stale_20260721",
+    "description": "[worktree harvest wave 3 衍生] snapdup worktree 卡住的根因已定位。\n\n**根因**：compute job `compute-codex-audit-snapshot-dup-20260721-1784607109`\n（Codex 認證審查）status=failed / exit_code=1，12 秒就結束。\nstderr（storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict.md.stderr 末兩行）：\n`ERROR: You've hit your usage limit ... try again at Jul 25th, 2026 1:30 PM.`\n→ **不是腳本 bug，是外部額度耗盡**。verdict.md 是 0 bytes（reap_orphan_deliverables\n以 partial_delivered 投遞了空檔，delivery_commit=cbd1636e9）。\n\n**連帶影響**：worktree `.claude/worktrees/dispatch-slot-1-20b291d5-snapdup`\n（commit 1c30466ae，clean，3864 行稽核成果）沒有 verdict 就過不了 certification gate，\n已閒置 7.2h 並持續占用 agent slot。gate 擋得對，卡的是認證本身。\n\n**另一個發現（值得單獨修）**：這張 failed job 沒有出現在\n`compute_queue.py list --pending-followup` 裡（本班實測回傳 []），\nfollowup_dispatched=false 且 completed_at 有值。PHASE A 的 triage_failed lane\n因此看不到它 —— 失敗的 job 就這樣無聲沉底 7 小時。這是 pending-followup filter 的漏洞。\n\n**要做的事**：\n1. 走專案既有的 usage-limit fallback 路徑 —— 前例在 canonical\n   experiments/k1707/review_verdict.json:\n   `\"reviewer\": \"fresh-context code-reviewer fallback after external Codex usage-limit failure\"`。\n   同法對 experiments/audit_snapshot_dup_20260721 做認證審查\n   （prompt 現成：storage/ops/codex_reviews/audit_snapshot_dup_20260721_prompt.md）。\n2. 判準照 prompt 寫的：PASS = 「這些數字與裁決可以直接拿去行動」，不是「大致合理」。\n   這份稽核會被拿去建 P1 修正任務、可能撤回已發表數字 —— 不要放水。\n3. 之後照原 followup brief 收尾（寫 review_verdict.json → merge_worktree → 主線程寫 knowledge）。\n   原 brief 全文在該 compute job 的 claude_followup.brief。\n4. 若判定應等 Codex（7/25 後）而非 fallback，就明講並把本 task blocked_until 設到 7/25，\n   不要讓 worktree 無限期占 slot 又沒人記得。\n\n**禁止**：手改 verdict 檔繞過 gate；把 0-byte verdict 當成 PASS。"
+  },
+  {
+    "id": "k1707_pseudo_stress_branch_path_collision_20260721",
+    "title": "codex/k1707-pseudo-stress 與 canonical K1707 是兩份不同實作撞同一路徑 — 裁決去留",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "source": "machine",
+    "created_at": "2026-07-21T11:12:22.469480+00:00",
+    "created_by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc",
+    "parent_task_id": "worktree_harvest_wave3_dirty_stale_20260721",
+    "description": "[worktree harvest wave 3 衍生] branch `codex/k1707-pseudo-stress`（5 個未合併 commit）\n本班已裁決為 **不可合併**，但殘留一個該決定的問題。\n\n**證據**：branch 與 main 的 experiments/k1707/K1707.py 不是同一份程式的兩個版本，\n是**兩份完全不同的實作撞在同一個檔名上**：\n- main（467 行，commit 36c78b4d2「complete K1707 option auction stress audit」07-16 08:40）：\n  aggregate_raw / build_stress_audit / support_gate / descriptive_benefits / make_figures\n- branch（433 行，tip 07-16 08:49）：\n  aggregate_pseudo_data / load_vix_lagged / attach_vix_signal / exact_label_permutation /\n  holm_adjust / run_inference\n\nmain 另有 branch 完全沒有的 figures/、post_run_review.md、review_verdict.json，\n且該 verdict 的 reviewed_sha256 與 main 現有 blob **逐項相符**\n（K1707.py=d0b21ed71e49…、results=aa2705d7cea1…、README=24a13db1382d…，本班實算核對）。\n→ main 這份是通過認證的成果；合併 branch 會用未經審查的另一份實作把它蓋掉。\n\n**要裁決的**：branch 那份 pseudo-sample 診斷（含 permutation inference + Holm）是否仍有價值。\n- 有價值 → 給它自己的路徑（例如 experiments/k1707_pseudo_stress/），走正常 review 後入 main，\n  不要塞回 experiments/k1707/。\n- 沒價值 → 明確記錄放棄理由後刪 branch，別讓它繼續當幽靈。\n\n**附帶**：branch commit d1263807f 的 `astype(\"datetime64[ns]\")` 正規化（aggregate_pseudo_data /\nload_vix_lagged / attach_vix_signal 三處）是針對 branch 自己那份實作的 dtype 修正。\nmain 沒有 attach_vix_signal，**不要盲目 port 到 main** —— 先確認 main 那份有沒有同類 dtype 問題，\n有才修，且要走自己的 review。"
   }
 ]
