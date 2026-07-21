@@ -60,6 +60,46 @@ def test_priority_is_read_from_the_id_for_jobs_queued_before_the_field_existed()
     assert cq._scheduling_priority(_job("lazypack-mile_47c4bc3e", "2026-07-19T14:23:02Z")) == 1
 
 
+def test_a_p1_job_is_not_stuck_behind_p2_work_that_merely_arrived_first():
+    """The originally reported inversion, as the worker sorts it.
+
+    assign_98a32740 (P1, K1730 remediation, queued 06:18Z) sat behind two P2
+    agent jobs queued 04:44Z and waited ~3h on a single-slot serial worker.
+    Nobody passed --queue-priority, so all three collapsed onto
+    DEFAULT_QUEUE_PRIORITY and the sort fell back to the FIFO it replaced.
+    """
+    p2_early_a = _job("agent-brief_k1623_rev2", "2026-07-19T04:44:00Z",
+                      claude_followup={"priority": 2})
+    p2_early_b = _job("agent-brief_k1698_rev2", "2026-07-19T04:44:30Z",
+                      claude_followup={"priority": 2})
+    p1_late = _job("agent-assign_98a32740", "2026-07-19T06:18:00Z",
+                   claude_followup={"priority": 1})
+
+    order = sorted(
+        (cq._scheduling_priority(j), j["queued_at"], j["id"])
+        for j in (p2_early_a, p2_early_b, p1_late)
+    )
+    assert [row[2] for row in order] == [
+        "agent-assign_98a32740",
+        "agent-brief_k1623_rev2",
+        "agent-brief_k1698_rev2",
+    ], "the P1 job must run first, and the P2 pair must keep arrival order"
+
+
+def test_a_release_blocking_render_keeps_its_floor_under_a_low_priority_followup():
+    """Inheriting followup urgency must not be able to demote a reader-blocking render."""
+    render = _job("lazypack-mile_47c4bc3e", "2026-07-19T14:23:02Z",
+                  claude_followup={"priority": 4})
+    assert cq._scheduling_priority(render) == cq.RELEASE_BLOCKING_PRIORITY
+
+
+def test_a_job_without_a_followup_still_falls_back_to_the_id_derived_default():
+    assert cq._scheduling_priority(_job("compute-x", "")) == cq.DEFAULT_QUEUE_PRIORITY
+    assert cq._scheduling_priority(_job("compute-x", "", claude_followup=None)) == (
+        cq.DEFAULT_QUEUE_PRIORITY
+    )
+
+
 def test_a_render_queued_last_still_runs_before_an_hour_long_job_queued_first():
     """The exact ordering that starved the two drafts, as the worker sorts it."""
     heavy = _job("compute-garch-pooled-mle", "2026-07-19T10:00:00Z")

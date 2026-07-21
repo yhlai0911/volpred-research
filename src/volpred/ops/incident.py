@@ -163,7 +163,7 @@ def _parse_iso(value: Any) -> datetime | None:
         return None
     try:
         parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError):  # silent-ok: parse helper returns None for non-ISO input by design
         return None
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)

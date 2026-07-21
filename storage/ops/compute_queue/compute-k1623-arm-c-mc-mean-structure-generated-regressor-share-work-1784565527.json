@@ -26,7 +26,7 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": null,
   "timeout_seconds": 3600,
   "brief_source": null,
@@ -40,5 +40,7 @@
     "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623",
     "exit_code": 1,
     "report": "[gate] FAIL — 1 violation(s) under .claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623:\n\n  [dm-hac-lag]\n    - .claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623.py::dm_hln  (degenerate_at_h1)\n    → A DM statistic without a HAC variance (or with a degenerate lag) overstates significance. Use the canonical delegate with an explicit HAC bandwidth. Owner: scripts/tests/test_dm_hac_lag_ratchet.py\n\nThis experiment is not accepted. Your own tests passing only shows it ran the way you meant it to; these gates check it does not break a rule the repo already learned the hard way."
-  }
+  },
+  "followup_dispatched_at": "2026-07-21T15:13:26Z",
+  "followup_next_task_id": "compute_followup_backlog_adjudication_20260721"
 }

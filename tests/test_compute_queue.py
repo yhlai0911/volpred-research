@@ -557,10 +557,17 @@ def test_pending_followup_distinguishes_completed_collection_and_failed_agent_tr
     payload = json.loads(capsys.readouterr().out)
     assert [(row["id"], row["followup_mode"]) for row in payload] == [
         ("completed-agent", "collect_completed"),
+        # No worktree is not the same as nothing to act on: a failed compute job
+        # has no cwd by construction, and an agent job that ran in the main repo
+        # resolves to none. Both still carry the enqueuer's followup brief and a
+        # source task waiting on it, so both get triaged rather than dropped.
+        # (Ordering is by queue filename, where '-' sorts before '.'.)
+        ("failed-agent-main", "triage_failed"),
         ("failed-agent", "split_required"),
+        ("failed-compute", "triage_failed"),
         ("timeout-compute", "split_required"),
     ]
-    failed = payload[1]
+    failed = payload[2]
     assert failed["claude_followup"]["task_type"] == "platform_ops"
     assert failed["claude_followup"]["priority"] == 1
     assert "SPLIT REQUIRED" in failed["claude_followup"]["brief"]
@@ -637,6 +644,44 @@ def test_pending_followup_triages_legacy_failed_agent_with_cwd_arg(
     payload = json.loads(capsys.readouterr().out)
     assert payload[0]["followup_mode"] == "triage_failed"
     assert payload[0]["claude_followup"]["priority"] == 2
+
+
+def test_pending_followup_surfaces_gate_failed_compute_job_with_source_task(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A compute job that fails its experiment gate must reach a human.
+
+    k1730_armA_production_run_20260721 ran to completion (process_exit_code=0),
+    failed the nested-dm-misuse gate, and was then dropped by the collector
+    because it had no worktree. Its source task k1731_F3_armA_production_recheck
+    sat pending for 62.9h with `result: awaiting PHASE A collection` — a wait
+    that could never end. Nineteen other receipts were in the same hole.
+    """
+    _patch_queue_paths(tmp_path, monkeypatch)
+    job = {
+        "id": "k1730-armA-production",
+        "status": "failed",
+        "kind": "compute",
+        "cwd": None,
+        "script_path": "experiments/k1730/k1730_gevreg_midas_ssvs.py",
+        "exit_code": 4,
+        "process_exit_code": 0,
+        "failure_reason": "experiment_gate_failed",
+        "experiment_gate": {"status": "failed", "report": "[gate] FAIL — nested-dm-misuse"},
+        "source_task_id": "k1731_F3_armA_production_recheck",
+        "followup_dispatched": False,
+        "claude_followup": {"brief": "recheck arm A numbers", "task_type": "experiment", "priority": 2},
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None, "gate-failed compute job was dropped instead of triaged"
+    assert view["followup_mode"] == "triage_failed"
+    brief = view["claude_followup"]["brief"]
+    assert "nested-dm-misuse" in brief, "the gate violation must travel with the triage"
+    assert "UNCERTIFIED" in brief, "must not read as 'the run produced nothing'"
+    assert "recheck arm A numbers" in brief, "the enqueuer's original followup must survive"
 
 
 def test_pending_followup_detects_agent_inner_timeout_from_runner_metadata(

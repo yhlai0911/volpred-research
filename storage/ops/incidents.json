@@ -144,26 +144,26 @@
      "detail": {
       "base_sha": "",
       "branch": "wt/dispatch-slot-1-20b291d5-snapdup",
-      "detail_tail": "fire ended with outcome=orphaned; dirty=False unique_commits=1",
+      "detail_tail": "fire ended with outcome=orphaned; dirty=True unique_commits=1",
       "reason": "worker_orphaned",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-20b291d5-snapdup"
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-21T13:07:17.277709+00:00"
+     "last_seen_at": "2026-07-21T15:14:05.453768+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "base_sha": "",
       "branch": "wt/dispatch-slot-1-375ba0e3-k1380",
-      "detail_tail": "fire ended with outcome=orphaned; dirty=False unique_commits=4",
+      "detail_tail": "fire ended with outcome=orphaned; dirty=True unique_commits=4",
       "reason": "worker_orphaned",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-375ba0e3-k1380"
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-21T13:07:17.544864+00:00"
+     "last_seen_at": "2026-07-21T15:14:06.446513+00:00"
     },
     {
      "cleared_at": null,
@@ -176,14 +176,14 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-21T13:07:17.811226+00:00"
+     "last_seen_at": "2026-07-21T15:14:07.531928+00:00"
     }
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-bd00f90a-k1731 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-21T13:07:17.811226+00:00",
+   "last_seen_at": "2026-07-21T15:14:07.531928+00:00",
    "notified_at": null,
-   "occurrence_count": 15,
+   "occurrence_count": 30,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -191,12 +191,67 @@
    "task_history": [],
    "task_mode": "adjudication",
    "throttled": {
-    "count": 15,
-    "last_at": "2026-07-21T13:07:17.827150+00:00",
+    "count": 30,
+    "last_at": "2026-07-21T15:14:07.645279+00:00",
     "last_reason": "remediation_cap_24h"
+   }
+  },
+  "inc_c67bec28dd29": {
+   "class": "machine_self",
+   "clean_observations": [],
+   "current_task_id": null,
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-21T14:10:28.040441+00:00",
+   "escalation": null,
+   "fingerprint": "c67bec28dd29d34b049b7392658cd11483bbd9f9a6c0d64273a2b1e4bc31e5b9",
+   "fingerprint_parts": [],
+   "first_seen_at": "2026-07-21T14:10:28.040441+00:00",
+   "incident_id": "inc_c67bec28dd29",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-21T14:10:28.040441+00:00",
+     "key": "src/volpred/ops/foreign_incident.py:384",
+     "last_seen_at": "2026-07-21T15:07:37.367019+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-21T14:47:21.418321+00:00",
+     "key": "scripts/worktree_gc.py:293",
+     "last_seen_at": "2026-07-21T15:07:37.367019+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-21T14:47:21.418321+00:00",
+     "key": "src/volpred/ops/fire_manifest.py:172",
+     "last_seen_at": "2026-07-21T15:07:37.367019+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-21T14:47:21.418321+00:00",
+     "key": "src/volpred/ops/task_signature.py:488",
+     "last_seen_at": "2026-07-21T15:07:37.367019+00:00"
+    }
+   ],
+   "kind": "silent_fallback_new",
+   "last_breach_detail": "PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
+   "last_seen_at": "2026-07-21T15:07:37.367019+00:00",
+   "notification_id": "2a07caa0",
+   "notified_at": "2026-07-21T14:10:28.040441+00:00",
+   "occurrence_count": 10,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [],
+   "task_mode": "none",
+   "throttled": {
+    "count": 0,
+    "last_at": null
    }
   }
  },
- "updated_at": "2026-07-21T13:26:06.787928+00:00",
+ "updated_at": "2026-07-21T15:27:24.117824+00:00",
  "version": 1
 }

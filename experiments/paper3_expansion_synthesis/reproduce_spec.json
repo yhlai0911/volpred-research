@@ -1,0 +1,26 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "rescore_e1_unified_criterion.py",
+    "args": []
+  },
+  "canonical_result": "e1_rescored_unified_criterion.json",
+  "inputs": [
+    {
+      "path": "experiments/paper3_E1_individual_stocks_copula/paper3_E1_results.json",
+      "sha256": "ddb415b4ec45a1bc5e9ea4a413da430933ebb1d9716e489644fadeb79a418915"
+    }
+  ],
+  "timeout_seconds": 120,
+  "network": "deny",
+  "randomness": {
+    "status": "not_applicable",
+    "reason": "closed-form rescoring of stored t-statistics; no sampling, no estimation, no RNG"
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [],
+    "ignore_reasons": {}
+  }
+}

@@ -23,7 +23,7 @@
     "task_type": "experiment",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "timeout_seconds": 10800,
   "brief_source": null,
   "brief_snapshot": null,
@@ -34,5 +34,7 @@
     "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-eeb5a46e-tsfm-har/experiments/k1711",
     "exit_code": 1,
     "report": "[gate] FAIL — 1 violation(s) under .claude/worktrees/dispatch-slot-1-eeb5a46e-tsfm-har/experiments/k1711:\n\n  [nested-dm-misuse]\n    - experiments/k1711/k1711.py  (primary_raw_dm)\n    → Raw DM/HLN is not valid inference under a nested-model null. Use Clark-West (2007) for squared-error, or a general-loss / recursive-bootstrap design for QLIKE/pinball, and wire THAT into the verdict. If the DM is descriptive only, say so with `nested-dm: diagnostic-only` and keep it out of the claim sink. A primary unconditional GW/DM statistic under nesting is accepted only with the versioned fixed-memory cell manifest, matching runtime provenance, locally narrow claims, and a trusted external PASS receipt. Owner: scripts/tests/test_nested_dm_misuse_ratchet.py\n\nThis experiment is not accepted. Your own tests passing only shows it ran the way you meant it to; these gates check it does not break a rule the repo already learned the hard way."
-  }
+  },
+  "followup_dispatched_at": "2026-07-21T15:13:33Z",
+  "followup_next_task_id": "compute_followup_backlog_adjudication_20260721"
 }

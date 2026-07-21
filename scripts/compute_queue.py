@@ -148,11 +148,32 @@ def _default_queue_priority(job_id: str) -> int:
 
 
 def _scheduling_priority(job: dict) -> int:
-    """Effective run order key for a queued job; lower runs first."""
+    """Effective run order key for a queued job; lower runs first.
+
+    An explicit `queue_priority` always wins. Otherwise the job inherits the
+    urgency of the work waiting on it: `claude_followup.priority` is the pool
+    priority of the task this job was dispatched for, and a P1 task's job has no
+    business queueing behind P2 work that merely arrived earlier. Without this,
+    every job that did not pass --queue-priority landed on DEFAULT_QUEUE_PRIORITY
+    and the sort degenerated to the FIFO it was meant to replace — which is the
+    inversion originally reported (assign_98a32740, a P1 agent job, waited ~3h
+    behind two P2 jobs queued 90 minutes earlier).
+
+    Taken as a min so the id-derived floor still holds: a release-blocking
+    lazypack render stays at RELEASE_BLOCKING_PRIORITY even if the task it
+    reports to is P3. Reading the followup rather than backfilling queue files
+    also keeps jobs enqueued by older code paths scheduled correctly.
+    """
     declared = job.get("queue_priority")
     if isinstance(declared, int) and not isinstance(declared, bool):
         return declared
-    return _default_queue_priority(str(job.get("id") or ""))
+    floor = _default_queue_priority(str(job.get("id") or ""))
+    followup = job.get("claude_followup")
+    if isinstance(followup, dict):
+        inherited = followup.get("priority")
+        if isinstance(inherited, int) and not isinstance(inherited, bool):
+            return min(floor, inherited)
+    return floor
 
 # Drain-loop parallelism (D6, owner directive 2026-07-20). The worker costs no
 # Claude tokens, so serializing it to one job per 15-minute tick was pure queue
@@ -1161,7 +1182,15 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
         return None
     timed_out = _job_timed_out(job)
     workdir = _agent_workdir(job)
-    if not workdir and not timed_out:
+    # "No worktree" is not the same as "nothing to act on". Only kind=agent jobs
+    # ever carry a cwd, so this guard used to drop EVERY failed compute job on the
+    # floor — including ones whose enqueuer attached a claude_followup and a
+    # source_task_id and is sitting in the task pool waiting for that collection.
+    # k1730_armA_production_run_20260721 failed its experiment gate and starved its
+    # parent task k1731_F3_armA_production_recheck for 62.9h that way; 20 receipts
+    # were in that hole at once. A job with nothing to follow up on says so
+    # explicitly via followup_dispatched (see cancel()), which is checked above.
+    if not workdir and not timed_out and not job.get("claude_followup"):
         return None
 
     original = job.get("claude_followup") or {}
@@ -1224,16 +1253,27 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
             triage_lines.append(f"Followup to run once it completes (context only): {original_brief}")
     else:
         triage_lines = [
-            "TRIAGE FAILED AGENT JOB — this job did not complete successfully.",
-            f"Job: {job.get('id')} (exit_code={job.get('exit_code')})",
-            f"Worktree/cwd: {workdir}",
+            "TRIAGE FAILED JOB — this job did not complete successfully.",
+            f"Job: {job.get('id')} (exit_code={job.get('exit_code')}, "
+            f"failure_reason={job.get('failure_reason')})",
+            f"Worktree/cwd: {workdir or '(none — this is a compute job, it ran against the repo)'}",
+            f"Script: {job.get('script_path')}",
             f"Result artifact (may be missing, partial, or stale): {job.get('result_artifact')}",
             f"Runner metadata: {job.get('job_metadata')}",
             f"stdout/stderr: {job.get('stdout_file')} | {job.get('stderr_file')}",
-            "Inspect what actually exists in the worktree. Decide whether to preserve/commit and continue, "
+            "Inspect what actually exists on disk. Decide whether to preserve/commit and continue, "
             "re-enqueue from a fresh worktree, or document that nothing is salvageable. Do not treat any "
             "artifact as a successful result without validation, and never force-remove the worktree.",
         ]
+        if job.get("failure_reason") == "experiment_gate_failed":
+            gate = job.get("experiment_gate") or {}
+            triage_lines += [
+                "",
+                "The SCRIPT ran to completion (process_exit_code=0) — the repo experiment gate is what "
+                "failed, so any artifact it wrote is UNCERTIFIED, not absent. Fix the violation below "
+                "and re-run; do not adopt the numbers as-is and do not weaken the gate.",
+                str(gate.get("report") or "").strip(),
+            ]
         if original_brief:
             triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
 

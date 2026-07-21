@@ -162,7 +162,9 @@ def test_a_genuinely_failed_job_still_gets_the_triage_brief(tmp_path):
     }
 
     row = compute_queue_followup(job)
-    assert "TRIAGE FAILED AGENT JOB" in row["claude_followup"]["brief"]
+    # Header dropped the word AGENT: failed compute jobs reach this branch too,
+    # now that a missing worktree no longer drops them from the collector.
+    assert "TRIAGE FAILED JOB" in row["claude_followup"]["brief"]
 
 
 def compute_queue_followup(job):
