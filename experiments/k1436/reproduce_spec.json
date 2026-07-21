@@ -1,0 +1,48 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "k1436.py",
+    "args": []
+  },
+  "canonical_result": "k1436_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1436/data/btc_funding_rate_8h.csv",
+      "sha256": "e8c51ea42902d290d740112360d9ec6d8439ca522945e0eac8f97b71978a10b7"
+    },
+    {
+      "path": "experiments/k1436/data/btcusdt_5m.csv",
+      "sha256": "9e968be56162f7b7726ececd485a02bfec28d2533c0ba7fb867503b014db96d6"
+    },
+    {
+      "path": "experiments/k1436/data/fetch_provenance.json",
+      "sha256": "68d593bd3cce22ad13f61cc557cec945589924346d5df33d615b7b44f09a4ba6"
+    },
+    {
+      "path": "src/volpred/stats/model_evaluation.py",
+      "sha256": "c33b4617cf92e92696d2cb15d4eafa39316e1422332f7ef154cce7195a8493ca"
+    }
+  ],
+  "timeout_seconds": 900,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ],
+    "note": "np.random.seed(42) plus np.random.default_rng(42) inside assert_no_lookahead, which only selects which rows to audit. Estimation is closed-form OLS; no result depends on the draw."
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/run_at_utc"
+    ],
+    "ignore_reasons": {
+      "/run_at_utc": "datetime.now() execution stamp written after every scientific quantity is computed; no estimate or verdict reads it. The data-fetch timestamp that IS part of the claim surface lives in /data_provenance/fetched_at_utc, is read from the committed provenance file, and is not ignored."
+    }
+  }
+}
