@@ -891,6 +891,21 @@ def run_worker(
                 "(not our watchdog); released claims=%s",
                 attempt, signum, total_duration, repended_tasks or "none",
             )
+            # Killer tracer (2026-07-21, 4th unattributed kill): POSIX cannot
+            # name the sender, but a janitor/cron that kills is ALIVE this very
+            # second — snapshot the process table so the next occurrence names
+            # every candidate. Pure evidence capture; never blocks the path.
+            try:
+                snap = subprocess.run(
+                    ["ps", "-axo", "pid,ppid,etime,command"],
+                    capture_output=True, text=True, timeout=10,
+                ).stdout
+                snap_path = log_path.parent / (
+                    f"{log_path.stem}.attempt{attempt}.killsnap.txt")
+                snap_path.write_text(snap, encoding="utf-8")
+                LOG.warning("external-signal process snapshot: %s", snap_path)
+            except Exception as exc:  # noqa: BLE001
+                LOG.warning("external-signal snapshot failed: %s", exc)
             entry = state.record_completion(
                 job_id=job_id, expected_attempt=attempt,
                 expected_phase="classifying",
