@@ -1195,9 +1195,11 @@ def test_email_body_explains_why_a_finding_needs_no_action(monkeypatch):
         dry_run=False, auto_actions=[],
     )
     sent = _capture_email(monkeypatch, report)
-    assert "機器已派修復 task" in sent["body"]
+    # 2026-07-21：這兩行原本是「機器已派修復 task」/「已自動開工單，hourly dispatch 接手」。
+    # 兩句都在描述「單開好了」，卻讀起來像「已經在修/已修好」。逐行措辭與表頭同一標準。
+    assert "已開工單，尚未執行" in sent["body"]
+    assert "機器已派修復" not in sent["body"]
     assert "已停火、自清中" in sent["body"]
-    assert "已自動開工單" in sent["body"]
     body_lines = [ln for ln in sent["body"].splitlines() if ln.startswith("  - [")]
     assert "persistent_alert:decide" in body_lines[0], "需要人的排最前面"
 
@@ -1206,8 +1208,11 @@ def test_email_never_tells_the_owner_to_go_look_at_something(monkeypatch):
     """2026-07-20 boss telegram：「為什麼要我看？你自己處理」。
 
     這封信的表頭曾寫「**需要你看 10**」，而那 10 筆全是 propose_only、全都該開工單。
-    措辭是契約的一部分：只要有出口，就寫「已自動接手」；剩下的欄位只認 human_only，
+    措辭是契約的一部分：只要有出口，就寫機器擁有它；剩下的欄位只認 human_only，
     否則一個應為 0 的健康指標會長期不是 0，指標一旦說謊就沒人再看它。
+
+    2026-07-21 修正：當時的措辭是「已自動接手 N」，矯枉過正到另一邊 —— 把「開了單」
+    講成「處理好了」。正確的表頭同時擋掉兩種謊：不叫人去看，也不宣稱已修好。
     """
     report = dr.build_report(
         {"overall": "ok"},
@@ -1220,7 +1225,8 @@ def test_email_never_tells_the_owner_to_go_look_at_something(monkeypatch):
     sent = _capture_email(monkeypatch, report)
 
     assert "需要你看" not in sent["body"]
-    assert "已自動接手" in sent["body"]
+    assert "已自動開單" in sent["body"]
+    assert "已自動接手" not in sent["body"]
     assert "需要你決策 0" in sent["body"], "human_only=0 → 沒有一項落到老闆身上"
 
 
@@ -1507,3 +1513,160 @@ def test_observation_ledger_malformed_observing_item_without_deadline_breaches(t
 def test_observation_ledger_missing_file_is_no_signal(tmp_path):
     storage = _storage(tmp_path)
     assert dr.detect_observation_ledger_breach(str(storage), {}, NOW) == []
+
+
+# ---------------------------------------------------------------------------
+# 誠實計數（2026-07-21 boss telegram-1224）：「已自動接手 N」把「開了 N 張單」講成
+# 「解決了 N 個問題」。那 7 張當時已 pending 四天。開單 ≠ 修好，措辭必須分開。
+# ---------------------------------------------------------------------------
+def _machine_finding(sig="missing_retry_strategy:k42"):
+    return dr.DreamFinding(
+        pattern_type="missing_retry_strategy",
+        signature=sig,
+        severity="warn",
+        remediation="auto_dispatch",
+    )
+
+
+def _report_with(findings):
+    return dr.build_report(
+        {"overall": "ok"}, findings, [], [], [], NOW, dry_run=True, auto_actions=[]
+    )
+
+
+def test_queued_but_unexecuted_is_never_reported_as_fixed(monkeypatch):
+    """核心迴歸鎖：task 還在 pending 時，信裡不得出現任何「已修好」的說法。"""
+    f = _machine_finding()
+    f.task_status = "pending"
+    sent = _capture_email(monkeypatch, _report_with([f]))
+    body = sent["body"]
+    assert "已自動開單 1（尚未執行）" in body
+    assert "已修復 0" in body
+    # 舊措辭與任何「機器已經處理完」的暗示都不得復活。
+    assert "已自動接手" not in body
+    assert "機器已派修復" not in body
+    assert "尚未執行" in body
+
+
+def test_succeeded_task_is_the_only_thing_counted_as_fixed(monkeypatch):
+    f = _machine_finding()
+    f.task_status = "succeeded"
+    report = _report_with([f])
+    assert report["counts"]["machine_fixed"] == 1
+    assert report["counts"]["machine_queued"] == 0
+    body = _capture_email(monkeypatch, report)["body"]
+    assert "已自動開單 0（尚未執行）" in body
+    assert "已修復 1" in body
+
+
+def test_failed_remediation_is_not_hidden_inside_the_queued_count(monkeypatch):
+    """failed 的工單既不是「修好」也不是「排隊中」—— 混進排隊會看起來只是慢。"""
+    f = _machine_finding()
+    f.task_status = "failed"
+    report = _report_with([f])
+    assert report["counts"] == {**report["counts"], "machine_stalled": 1, "machine_queued": 0}
+    body = _capture_email(monkeypatch, report)["body"]
+    assert "工單未成 1" in body
+
+
+def test_unknown_task_status_counts_as_not_done(monkeypatch):
+    """查不到 task（queue 壞了 / 還沒開）時只能猜「還沒好」，不能猜「已修好」。"""
+    report = _report_with([_machine_finding()])
+    assert report["counts"]["machine_queued"] == 1
+    assert report["counts"]["machine_fixed"] == 0
+
+
+def test_machine_handled_still_equals_the_sum_of_the_split(monkeypatch):
+    a, b, c = (_machine_finding(f"missing_retry_strategy:k{i}") for i in (1, 2, 3))
+    a.task_status, b.task_status, c.task_status = "pending", "succeeded", "failed"
+    counts = _report_with([a, b, c])["counts"]
+    assert counts["machine_handled"] == 3
+    assert (
+        counts["machine_queued"] + counts["machine_fixed"] + counts["machine_stalled"]
+        == counts["machine_handled"]
+    )
+
+
+def test_old_report_without_the_new_counts_still_renders(monkeypatch):
+    """舊報告重寄不可 KeyError，且沒有新欄位時一律當作「尚未執行」。"""
+    report = _email_report(new=1, escalations=0)
+    report["counts"]["machine_handled"] = 4  # 舊 schema：只有這一個數
+    body = _capture_email(monkeypatch, report)["body"]
+    assert "已自動開單 4（尚未執行）" in body
+    assert "已修復 0" in body
+
+
+# ---------------------------------------------------------------------------
+# finding → task 的邊。之前只有「第一次開單那晚」才寫 remediation_ref，之後每一晚都
+# 報 None，所以報告答不出「修好了嗎」。task id 是 signature 的純函數，重建即可。
+# ---------------------------------------------------------------------------
+def test_task_state_is_recovered_on_later_runs_not_just_the_night_it_queued(tmp_path):
+    storage = _storage(tmp_path)
+    f = _machine_finding()
+    dr.apply_auto_dispatch([f], str(storage), NOW)
+    fresh = _machine_finding()  # 新的一晚重新偵測出同一個 signature
+    assert fresh.remediation_ref is None
+    dr.annotate_task_states([fresh], str(storage))
+    assert fresh.remediation_ref == f"next_task:{dr._dreaming_task_id(fresh.signature)}"
+    assert fresh.task_status == "pending"
+
+
+def test_annotate_is_fail_open_when_the_queue_is_unreadable(tmp_path):
+    storage = _storage(tmp_path)
+    (storage / "next_tasks.json").write_text("{not json", encoding="utf-8")
+    f = _machine_finding()
+    dr.annotate_task_states([f], str(storage))  # 不得爆掉
+    assert f.task_status is None
+
+
+# ---------------------------------------------------------------------------
+# 優先權隨 severity 升級（2026-07-21）：reconcile() 第三次會把 signature 升成
+# critical，但 task 的 priority 停留在「第一次開單那晚」的 severity。實況：三張
+# critical-derived 的單卡在 P3（72h starvation），alert 一直紅。
+# ---------------------------------------------------------------------------
+def _queued(storage, task_id):
+    tasks = json.loads((storage / "next_tasks.json").read_text())
+    return next(t for t in tasks if t["id"] == task_id)
+
+
+def test_escalated_severity_tightens_the_priority_of_the_existing_task(tmp_path):
+    storage = _storage(tmp_path)
+    warn_f = _machine_finding()
+    dr.apply_auto_dispatch([warn_f], str(storage), NOW)
+    tid = dr._dreaming_task_id(warn_f.signature)
+    assert _queued(storage, tid)["priority"] == 3
+
+    crit = _machine_finding()
+    crit.severity = "critical"  # 三振後 reconcile() 升級
+    actions = dr.apply_auto_dispatch([crit], str(storage), NOW)
+    assert _queued(storage, tid)["priority"] == 2
+    assert [a["action"] for a in actions] == ["reprioritized"]
+    # 沒有開出第二張單 —— 升級是改既有的列，不是繞過去重。
+    assert len(json.loads((storage / "next_tasks.json").read_text())) == 1
+
+
+def test_priority_is_only_ever_tightened_never_relaxed(tmp_path):
+    storage = _storage(tmp_path)
+    crit = _machine_finding()
+    crit.severity = "critical"
+    dr.apply_auto_dispatch([crit], str(storage), NOW)
+    tid = dr._dreaming_task_id(crit.signature)
+    assert _queued(storage, tid)["priority"] == 2
+    dr.apply_auto_dispatch([_machine_finding()], str(storage), NOW)  # 降回 warn
+    assert _queued(storage, tid)["priority"] == 2
+
+
+def test_a_finished_task_is_not_reprioritized_back_to_life(tmp_path):
+    storage = _storage(tmp_path)
+    f = _machine_finding()
+    dr.apply_auto_dispatch([f], str(storage), NOW)
+    tid = dr._dreaming_task_id(f.signature)
+    tasks = json.loads((storage / "next_tasks.json").read_text())
+    tasks[0]["status"] = "succeeded"
+    (storage / "next_tasks.json").write_text(json.dumps(tasks), encoding="utf-8")
+
+    crit = _machine_finding()
+    crit.severity = "critical"
+    assert dr.apply_auto_dispatch([crit], str(storage), NOW) == []
+    assert _queued(storage, tid)["priority"] == 3
+    assert _queued(storage, tid)["status"] == "succeeded"

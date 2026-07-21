@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1745,
+  "last_k_id": 1750,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -1156,8 +1156,58 @@
       "status": "reserved",
       "topic": "TVP-HAR：時變參數 HAR（狀態空間 / Kalman filter）取代靜態 OLS-HAR** — 對 SPY/0050.TW/TX 日 RV，用 Kalman/random-walk 讓 HAR 的日/週/月係數隨時間演化，DM-HLN + Giacomini-Rossi fluctuation test 檢定時變係數 OOS 是否勝固定係數 HAR，並看係數路徑是否在 leverage/regime 轉換時漂移；yfinance/TAIFEX 免費（來源：Journal of Forecasting 2025 TVP-HAR for VIX 趨勢層級）。與 line 1452 factor-loading TVP（第一主成分 vol factor 的負荷時變）正交——這裡是 **HAR 自身日/週/月係數的連續時變**，非因子負荷；與 line 1478 level-shift（離散斷點）正交（連續演化 ≠ 結構斷點）。",
       "topic_hash": "9cfda9753d4505d6"
+    },
+    {
+      "claimed_at": "2026-07-21T00:00:02.119576+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1746",
+      "number": 1746,
+      "source_max": 1745,
+      "status": "reserved",
+      "topic": "VaR/ES 預測的 bottom-up（成分加總）vs top-down（組合層直估）誰贏**（中高信心）— yfinance 多資產 basket（SPY/TLT/GLD/HYG/QQQ），比較「先預測各成分 VaR/ES 再加總」與「直接對組合報酬估 VaR/ES」的 Kupiec/Christoffersen/DQ/ES backtest 與 MCS；測 cross-sectional aggregation 是否改善尾部覆蓋。aggregation grep=0，與 line 1335（coherent estimator guardrail）、conformal 弧正交——這裡是 aggregation direction 本身（來源：Journal of Forecasting 2025 cross-sectional aggregation ES/VaR）。",
+      "topic_hash": "5e272f0ad5c5ef44"
+    },
+    {
+      "claimed_at": "2026-07-21T00:00:02.409665+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1747",
+      "number": 1747,
+      "source_max": 1746,
+      "status": "reserved",
+      "topic": "ML forecast comparison 的 estimation-risk inference audit** — 在相同 SPY/QQQ RV 任務重跑 Lasso/樹模型 vs HAR，比較傳統 DM 與納入 learner 收斂速度、loss-score 條件、sample split 的 predictive-ability inference；用 Monte Carlo 檢查 size，外層 holdout 防 selector/learner 自身 overfit。與 C+ ML-ceiling 賽馬正交：本題問「既有顯著性檢定是否有效」，不再疊新架構（來源：[JBES 2026, Extending Predictive-Ability Inference to Machine Learning](https://www.tandfonline.com/doi/abs/10.1080/07350015.2025.2562964)）。",
+      "topic_hash": "3116df5384aecc34"
+    },
+    {
+      "claimed_at": "2026-07-21T00:00:02.796030+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1748",
+      "number": 1748,
+      "source_max": 1747,
+      "status": "reserved",
+      "topic": "Primary-dealer settlement fails 作 Treasury market-plumbing 預警** — 用 FR2004 Treasury/MBS/agency fails-to-deliver/receive 週資料，嚴格從週四發布後才讓 fails z-score 進模型，預測下一週 TLT/IEF/MBB RV、range 與股債相關；threshold local projection + HAR/HAR+fails expanding OOS，依 target H 設 HAC/embargo。與 equity T+1 settlement 制度斷點正交：這是 collateral daisy-chain 的實際壓力量（來源：[NY Fed fails primer](https://www.newyorkfed.org/markets/pridealers_failsprimer.html)；[NY Fed data hub](https://www.newyorkfed.org/markets/data-hub)）。",
+      "topic_hash": "22e34779b1c30e94"
+    },
+    {
+      "claimed_at": "2026-07-21T00:00:03.035156+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1749",
+      "number": 1749,
+      "source_max": 1748,
+      "status": "reserved",
+      "topic": "「盤整越久噴越兇」** 低波動盤整 regime 後是否真接大波動（契合波動率專長 low-vol→high-vol transition）",
+      "topic_hash": "97db442e78e3f460"
+    },
+    {
+      "claimed_at": "2026-07-21T00:00:03.264934+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1750",
+      "number": 1750,
+      "source_max": 1749,
+      "status": "reserved",
+      "topic": "IPO 市場熱度（Renaissance IPO ETF 相對 SPY）對 SPY 波動率的 OOS 預測增量** — 見上 §3；主檢定 = 控制 VIX 後的 delta-QLIKE 與 DM-HLN，raw 相關不算數。",
+      "topic_hash": "b457fa523bf8363b"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-20T00:00:03.850579+00:00"
+  "updated_at": "2026-07-21T00:00:03.264934+00:00"
 }

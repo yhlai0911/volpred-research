@@ -32373,13 +32373,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-20T23:12:42.415989+00:00",
+    "completed_at": "2026-07-21T00:08:14.494924+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T23:12:42.415989+00:00",
-      "last_clean_observed_at": "2026-07-20T23:12:42.415989+00:00"
+      "resolved_at": "2026-07-21T00:08:14.494924+00:00",
+      "last_clean_observed_at": "2026-07-21T00:08:14.494924+00:00"
     }
   },
   {
@@ -32391,13 +32391,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-20T23:16:09.058733+00:00",
+    "completed_at": "2026-07-21T00:11:44.558958+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T23:16:09.058733+00:00",
-      "last_clean_observed_at": "2026-07-20T23:16:09.058733+00:00"
+      "resolved_at": "2026-07-21T00:11:44.558958+00:00",
+      "last_clean_observed_at": "2026-07-21T00:11:44.558958+00:00"
     }
   },
   {
@@ -32409,13 +32409,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T22:23:51.540407+00:00",
+    "completed_at": "2026-07-20T23:16:20.927786+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T22:23:51.540407+00:00",
-      "last_clean_observed_at": "2026-07-20T22:23:51.540407+00:00"
+      "resolved_at": "2026-07-20T23:16:20.927786+00:00",
+      "last_clean_observed_at": "2026-07-20T23:16:20.927786+00:00"
     }
   },
   {
@@ -34969,38 +34969,15 @@
   },
   {
     "id": "assign_90d7bdf9",
-    "title": "[code] 前端 strategy_metrics staleness 沒有偵測器（assign_56ddf72b 殘留風險 #1）",
-    "description": "父任務 assign_56ddf72b 已移除 daily_update dirty-guard 的 latch，frontend-v2-fix/data/strategy_metrics.json 不再卡住（曾靜默 11 天未 commit、每輪 exit 0 無 alert）。但**盲點未補**：alerts.py 的 strategy_metrics_freshness 量的是 storage/strategy_metrics.json 的 mtime，**不是** frontend-v2-fix/data/strategy_metrics.json。若前端那份未來因別的原因再度停止更新，仍然沒有任何人會知道 —— 這正是「降噪不等於降盲」。\n\n**Scope（bounded，勿擴大）**：在 alerts.py 加一條量測 frontend-v2-fix/data/strategy_metrics.json 新鮮度的條件（比照既有 strategy_metrics_freshness 的 26h 門檻與 signature 風格），並補 hermetic regression test 證明「前端檔停更 → 會 alert」且「正常更新 → 不 alert」。\n\n**禁止**：不要順手重構 alerts.py、不要調整既有 signature 的門檻、不要碰 dirty-guard（已修完）。\n\n**證據來源**：docs/fix_56ddf72b_dirty_guard.md §2.C 與 §4 殘留風險 #1（agent 誠實自陳未做）。\n父任務 merge commit: 112af82a4。",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[code] 前端 strategy_metrics staleness 沒有偵測器（assign_56ddf72b 殘留風險 #1）",
+    "priority": 2,
     "source": "system",
     "created_at": "2026-07-16T18:12:31.947860+00:00",
-    "parent_task_id": "assign_56ddf72b",
-    "created_by": "hourly-slot-1-a439b41013384a93ba3994b6c6e48e56",
-    "status_history": [
-      {
-        "ts": "2026-07-17T23:09:24.030723+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-e5d3aed9d33e488a883e5fab9002d876"
-      },
-      {
-        "ts": "2026-07-17T23:09:31.372239+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-e5d3aed9d33e488a883e5fab9002d876"
-      },
-      {
-        "ts": "2026-07-17T23:13:52.078701+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-e5d3aed9d33e488a883e5fab9002d876"
-      }
-    ],
-    "started_at": "2026-07-17T23:09:31.372224+00:00",
     "completed_at": "2026-07-17T23:13:52.078687+00:00",
-    "result": "frontend strategy_metrics 盲點偵測器：health.check_frontend_strategy_metrics_freshness + alerts wrapper/註冊 + 4 hermetic tests。pytest 15+62 passed，live report 新條件註冊且無誤報（age 17.2h→ok）。bounded scope，未動既有 signature/dirty-guard。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T00:02:53.034054+00:00"
   },
   {
     "id": "k1708_collect_fullrun_20260717",
@@ -43422,7 +43399,7 @@
     "title": "K1623 blocked item：第三臂 MC 量化「估計段均值」在 generated-regressor 不確定性中的佔比（round-3 送審前的唯一 compute gate）",
     "task_type": "experiment",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T21:14:41.330868+00:00",
     "created_by": "hourly-slot-1-a50bbc2182dc41278e98f2d26341b1e3",
@@ -43466,14 +43443,40 @@
         "to": "pending",
         "by": "hourly-slot-1-021010e0d92f449db2f4d9f0f5b6b8c5",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 49.9min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-20T23:50:04.252984+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "cleanup",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-21T00:09:13.361141+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-6b5a26ab7b794badb7b4d45af5543358"
+      },
+      {
+        "ts": "2026-07-21T00:09:13.614278+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-6b5a26ab7b794badb7b4d45af5543358"
+      },
+      {
+        "ts": "2026-07-21T00:10:36.028975+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-6b5a26ab7b794badb7b4d45af5543358"
       }
     ],
-    "started_at": "2026-07-20T19:10:17.044035+00:00",
-    "last_released_at": "2026-07-20T20:00:13.405273+00:00",
-    "last_release_reason": "liveness_reconcile_detached_021010e0",
+    "started_at": "2026-07-21T00:09:13.614257+00:00",
+    "last_released_at": "2026-07-20T23:50:04.252976+00:00",
+    "last_release_reason": "auto_release_stale_2h",
     "compute_job_id": "agent-brief_k1623_armc_collection-f737f9",
-    "result": "dispatched to compute job compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1623_armc_collection-f737f9; awaiting PHASE A collection",
-    "plan": "前次 MC job exit=4 為 dm-hac-lag gate false positive（凍結站點 k1623.py::dm_hln 因 worktree 路徑前綴對不上 baseline key），已由 commit 5c0e9099d 修好並實測 gate PASS。重新 enqueue compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674；等 compute worker 跑完後由後續 fire PHASE A 收件（對帳 /tmp/k1623_armc_gatefail_run_20260721.json）。"
+    "result": "dispatched to compute job compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1623_armc_collection-f737f9; awaiting PHASE A collection\n\nArm C MC 完成並通過收件審查 verdict=PASS（reproduction 5/5、A-B bitwise vs frozen rev2 5/5、vs gate-fail snapshot 僅差 metadata、preview 對帳 20/20）。README 6.4 finding2 降級為 asset-dependent，SE 低估 1.21-1.33x 結論不變。round-3 放行改由 k1623_round3_codex_primary_review_gate 承接（blocked codex_quota_reset_pending until 2026-07-25）。worktree 未 merge。",
+    "plan": "前次 MC job exit=4 為 dm-hac-lag gate false positive（凍結站點 k1623.py::dm_hln 因 worktree 路徑前綴對不上 baseline key），已由 commit 5c0e9099d 修好並實測 gate PASS。重新 enqueue compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674；等 compute worker 跑完後由後續 fire PHASE A 收件（對帳 /tmp/k1623_armc_gatefail_run_20260721.json）。",
+    "completed_at": "2026-07-21T00:10:36.028960+00:00"
   },
   {
     "id": "dreaming_missing_retry_strategy_k1684_article_general",
@@ -47444,5 +47447,162 @@
     "source": "auto_discovered",
     "created_at": "2026-07-20T22:58:00+00:00",
     "description": "mile_b222a5d7（選後賣波動率？六次期中選舉的紀錄說，你進場已經晚了三週）於 2026-07-21 06:07 班次以 status=draft 發佈（lazypack gate 要求 general+published 必須先有懶人包，該班 50min cap 已到）。trending_repost 慣例的 FB 雙發佈尚未執行。\n\n前置條件：release cron 把 mile_b222a5d7 flip 成 published（懶人包 job lazypack-mile_b222a5d7 render 完成後）。確認 published 後再做，否則第一則留言的連結會 404。\n\n執行：依 .claude/skills/fb-publishing/SKILL.md + trending-repost/references/fb-ivanlai-tone.md，主貼文改寫 200-400 字（不貼 feed 內文）、必附圖（事件路徑圖 + 懶人包）、主貼文不放連結、VolPred 連結放第一則留言且必須是 https://volpred.zeabur.app/v3/reports/mile_b222a5d7（先 curl -I 驗 200）。發文前跑 scripts/anti_ai_gate.py（FB mode 預設 ON）。\n\nparent_task_id: trending_repost_2026_07_21_美期中選舉"
+  },
+  {
+    "id": "K1746",
+    "title": "K1746: VaR/ES 預測的 bottom-up（成分加總）vs top-down（組合層直估）誰贏**（中高信心）— yfinance 多資產 basket（SPY/TLT/GLD/HYG/QQQ），比較「先預測各成分 VaR/ES 再加總」與「",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1587). Original: VaR/ES 預測的 bottom-up（成分加總）vs top-down（組合層直估）誰贏**（中高信心）— yfinance 多資產 basket（SPY/TLT/GLD/HYG/QQQ），比較「先預測各成分 VaR/ES 再加總」與「直接對組合報酬估 VaR/ES」的 Kupiec/Christoffersen/DQ/ES backtest 與 MCS；測 cross-sectional aggregation 是否改善尾部覆蓋。aggregation grep=0，與 line 1335（coherent estimator guardrail）、conformal 弧正交——這裡是 aggregation direction 本身（來源：Journal of Forecasting 2025 cross-sectional aggregation ES/VaR）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1746.py with signal.shift(1) + seed=42, (c) K1746_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1587,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-21T00:00:02Z"
+  },
+  {
+    "id": "K1747",
+    "title": "K1747: ML forecast comparison 的 estimation-risk inference audit** — 在相同 SPY/QQQ RV 任務重跑 Lasso/樹模型 vs HAR，比較傳統 DM 與納入 learner 收斂",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1605). Original: ML forecast comparison 的 estimation-risk inference audit** — 在相同 SPY/QQQ RV 任務重跑 Lasso/樹模型 vs HAR，比較傳統 DM 與納入 learner 收斂速度、loss-score 條件、sample split 的 predictive-ability inference；用 Monte Carlo 檢查 size，外層 holdout 防 selector/learner 自身 overfit。與 C+ ML-ceiling 賽馬正交：本題問「既有顯著性檢定是否有效」，不再疊新架構（來源：[JBES 2026, Extending Predictive-Ability Inference to Machine Learning](https://www.tandfonline.com/doi/abs/10.1080/07350015.2025.2562964)）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1747.py with signal.shift(1) + seed=42, (c) K1747_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1605,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-21T00:00:02Z"
+  },
+  {
+    "id": "K1748",
+    "title": "K1748: Primary-dealer settlement fails 作 Treasury market-plumbing 預警** — 用 FR2004 Treasury/MBS/agency fails-to-deliver/receive ",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1610). Original: Primary-dealer settlement fails 作 Treasury market-plumbing 預警** — 用 FR2004 Treasury/MBS/agency fails-to-deliver/receive 週資料，嚴格從週四發布後才讓 fails z-score 進模型，預測下一週 TLT/IEF/MBB RV、range 與股債相關；threshold local projection + HAR/HAR+fails expanding OOS，依 target H 設 HAC/embargo。與 equity T+1 settlement 制度斷點正交：這是 collateral daisy-chain 的實際壓力量（來源：[NY Fed fails primer](https://www.newyorkfed.org/markets/pridealers_failsprimer.html)；[NY Fed data hub](https://www.newyorkfed.org/markets/data-hub)）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1748.py with signal.shift(1) + seed=42, (c) K1748_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1610,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-21T00:00:02Z"
+  },
+  {
+    "id": "K1749",
+    "title": "K1749: 「盤整越久噴越兇」** 低波動盤整 regime 後是否真接大波動（契合波動率專長 low-vol→high-vol transition）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1620). Original: 「盤整越久噴越兇」** 低波動盤整 regime 後是否真接大波動（契合波動率專長 low-vol→high-vol transition）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1749.py with signal.shift(1) + seed=42, (c) K1749_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1620,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-21T00:00:03Z"
+  },
+  {
+    "id": "K1750",
+    "title": "K1750: IPO 市場熱度（Renaissance IPO ETF 相對 SPY）對 SPY 波動率的 OOS 預測增量** — 見上 §3；主檢定 = 控制 VIX 後的 delta-QLIKE 與 DM-HLN，raw 相關不算數。",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1636). Original: IPO 市場熱度（Renaissance IPO ETF 相對 SPY）對 SPY 波動率的 OOS 預測增量** — 見上 §3；主檢定 = 控制 VIX 後的 delta-QLIKE 與 DM-HLN，raw 相關不算數。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1750.py with signal.shift(1) + seed=42, (c) K1750_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1636,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-07-21T00:00:03Z"
+  },
+  {
+    "id": "telegram-1224",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-21T00:00:43.187174+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1224）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你確定我都不用動手，你都會修好？\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] Dreaming review 2026-07-20 — 3 new / 9 escalations\n\n📌 白話結論\n• findings=18（已自動接手 7、自清中 2、需要你決策 0（destructive / policy，應為 0）；new=3, resolved=2, escalations=9）；loop-health overall=warn\n\n📌 影響\n影響研究結論累積與論文推進。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n\n🚦 觸發條件\n• findings=18（已自動接手 7、自清中 2、需要你決策 0（destructive / policy，應為 0）；new=3, resolved=2, escalations=9）；loop-health overall=warn\n• [critical] repeated_tool_failure: repeated_tool_failure:release_settings_audit.log:exit1 (×3) → propose docs/error_log.md — 已自動開工單，hourly dispatch 接手\n• [critical] missing_retry_strategy: missing_retry_strategy:research_rp_4855ddb7a9 (×3) — 機器已派修復 task\n• [critical] missing_retry_strategy: missing_retry_strategy:research_spot_bitcoin_etf_flow_shock_btc_eth_vol (×3) — 機器已派修復 task\n• [critical] missing_retry_strateg\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T00:01:01.843000+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram_responder"
+      },
+      {
+        "ts": "2026-07-21T00:02:05.197320+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram_responder"
+      }
+    ],
+    "completed_at": "2026-07-21T00:02:05.197306+00:00"
+  },
+  {
+    "id": "assign_5200cea1",
+    "title": "修正 dreaming alert 措辭誤導 + p3 dreaming 工單 starvation",
+    "description": "老闆質疑「我都不用動手你都會修好？」，查證後發現兩個真問題：\n\n1) 措辭誤導：dreaming review alert 寫「已自動接手 7」，實際只是「已自動開了工單」，還沒修好。應改成「已自動開單 N（尚未執行）」與「已修復 N」兩個分開的計數，避免把排隊當成完成。\n\n2) starvation 實證：2026-07-21 08:00 快照，next_tasks.json pending=179（p1=37, p2=53, p3=87）。9 張 dreaming 自動工單全部是 p3。以 hourly dispatch 1 張/小時計，前面有 90 張 p1/p2，這 9 張實質輪不到 → critical finding 永遠不會被清掉，alert 會一直紅。需要：(a) 檢查既有 starvation lockout 是否有涵蓋 dreaming 工單；(b) 若沒有，讓 critical-derived 工單有保底配額或提高優先權。\n\n來源：telegram-1224（老闆 Telegram 提問）",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-21T00:01:48.110369+00:00",
+    "parent_task_id": "telegram-1224",
+    "created_by": "telegram_responder",
+    "status_history": [
+      {
+        "ts": "2026-07-21T00:02:58.182555+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-55f95759b62a438a96f00eda8fda93d6"
+      },
+      {
+        "ts": "2026-07-21T00:02:58.423955+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-55f95759b62a438a96f00eda8fda93d6"
+      },
+      {
+        "ts": "2026-07-21T00:11:11.426691+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-55f95759b62a438a96f00eda8fda93d6",
+        "note": "supervisor_kill_55f95759"
+      }
+    ],
+    "started_at": "2026-07-21T00:02:58.423940+00:00",
+    "last_released_at": "2026-07-21T00:11:11.426675+00:00",
+    "last_release_reason": "supervisor_kill_55f95759"
+  },
+  {
+    "id": "k1623_round3_codex_primary_review_gate",
+    "title": "K1623 round-3 送審 gate：Codex primary-path review k1623_rev3_armc_mc.py + 簽 review_verdict.json",
+    "description": "Arm C collection verdict=PASS（reproduction 5/5、A-B bitwise vs frozen rev2 5/5、results vs gate-fail snapshot 僅差 generated_utc/total_runtime_sec、preview 對帳 20/20 cell + 3 sd_factor range 全合）。README 6.4 finding 2 已從 cross-asset 斷言降級為 asset-dependent（asymptotic_formula 2 / mean_estimation 2 / break_location 1）；結論「published SE 被低估 1.21-1.33x」不變，只有 attribution 降級。\n\n剩餘 blocking items（皆非數值問題）：\n1. Codex primary-path review 尚未做 —— usage limit 至 2026-07-25。現有覆蓋只有 agy PASS + feature-dev:code-reviewer CONDITIONAL PASS，兩者皆 fallback path。依 K1259 教訓（subagent fallback PASS != primary-path PASS，Codex 事後仍找出 12 個殘留缺陷），primary-path 是放行前置條件。\n2. experiments/k1623/review_verdict.json 仍是未填模板（31 pins），fail-closed 擋 merge，需 reviewer 填 verdict/reviewer/reviewed_at/reviewed_commit/review_artifact 且 pinned sha256 與當前 bytes 仍相符。\n3. worktree .claude/worktrees/dispatch-slot-2-c5cafe39-k1623 在 round-3 PASS 前禁止 merge。\n\n另有一項 collector 主動記下、brief 未預期的發現：asymptotic_formula 主導的「5 取 2」本身脆弱 —— SPY f1=1.1264 vs f2=1.1229 僅差 0.31%，而 500 reps 的 crude MC SE 約 3.2%（差一個數量級），只有 VIX 是穩健的 asymptotic-formula-dominant。已記在 README，artifact 的 argmax 分類未改。round-3 措辭需吸收這點。\n\nParent compute job: agent-brief_k1623_armc_collection-f737f9；artifact: .claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_arm_c_collection_verdict.json",
+    "task_type": "experiment",
+    "priority": 1,
+    "status": "blocked",
+    "source": "auto_discovered",
+    "created_at": "2026-07-21T00:09:54.912281+00:00",
+    "parent_task_id": "k1623_mc_third_arm_mean_structure_share",
+    "created_by": "hourly-slot-2-6b5a26ab7b794badb7b4d45af5543358",
+    "blocked_until": "2026-07-25",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_at": "2026-07-21T00:09:58+00:00",
+    "blocked_note": "Codex usage limit resets 2026-07-25; primary-path review of k1623_rev3_armc_mc.py is a blocking precondition for round-3 release per K1259 lesson. Fallback subagent PASS does not substitute."
   }
 ]

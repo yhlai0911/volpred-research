@@ -227,6 +227,12 @@ class DreamFinding:
     # experiment needs a RESEARCH closure — Codex review + a knowledge.json entry —
     # so it routes as `experiment` and picks up that type's effort tier.
     task_type: str = "platform_ops"
+    # Status of the remediation task this finding owns, read back from the queue by
+    # `annotate_task_states()`. None = no task found. This is what lets the report
+    # distinguish 「開了單」 from 「修好了」: before 2026-07-21 the email counted both as
+    # `machine_handled` and printed 「已自動接手 N」, so seven tasks that had sat pending
+    # for four days read to the owner as seven solved problems (boss telegram-1224).
+    task_status: str | None = None
 
     def key(self) -> str:
         return self.signature
@@ -1364,6 +1370,22 @@ def build_report(
     dry_run: bool,
     auto_actions: list[dict[str, Any]],
 ) -> dict[str, Any]:
+    machine = [
+        f
+        for f in findings
+        if f.remediation in (REMEDIATION_AUTO_DISPATCH, REMEDIATION_PROPOSE_ONLY)
+        and not f.quiescent
+        and not needs_human_attention(f)
+    ]
+    machine_fixed = [f for f in machine if f.task_status in TASK_STATES_FIXED]
+    machine_stalled = [f for f in machine if f.task_status in TASK_STATES_STALLED]
+    # Unknown status (no task row found yet, or the queue was unreadable) counts as
+    # NOT DONE. Erring the other way would let a missing row read as a fix.
+    machine_queued = [
+        f
+        for f in machine
+        if f.task_status not in TASK_STATES_FIXED and f.task_status not in TASK_STATES_STALLED
+    ]
     return {
         "schema": SCHEMA,
         "generated_at": now.astimezone(timezone.utc).isoformat(),
@@ -1394,13 +1416,16 @@ def build_report(
             "quiescent": sum(1 for f in findings if f.quiescent),
             # 機器接手 = auto_dispatch 或 propose_only（後者自 2026-07-20 起也自動開單）。
             # 與 quiescent 互斥：停火中的東西沒有人也沒有機器在動它，兩個數字要能相加。
-            "machine_handled": sum(
-                1
-                for f in findings
-                if f.remediation in (REMEDIATION_AUTO_DISPATCH, REMEDIATION_PROPOSE_ONLY)
-                and not f.quiescent
-                and not needs_human_attention(f)
-            ),
+            #
+            # `machine_handled` 只說「機器擁有它」，不說「已經修好」—— 它從一開始就是
+            # 這個語意，但 email 把它印成「已自動接手 N」，讀起來像 N 個問題已解決，
+            # 實際上那 N 張單可能 pending 好幾天（boss telegram-1224）。所以下面把它
+            # 依實際 task status 拆成三個互斥的數，`machine_handled` 保留為三者之和，
+            # 舊報告重寄時仍讀得到。
+            "machine_handled": len(machine),
+            "machine_queued": len(machine_queued),
+            "machine_fixed": len(machine_fixed),
+            "machine_stalled": len(machine_stalled),
         },
     }
 
@@ -1538,11 +1563,23 @@ def send_dreaming_email(report: dict[str, Any], now: datetime, storage_dir: str)
     title = f"Dreaming review {date_str} — {c['new']} new / {c['escalations']} escalations"
 
     lines = ["## 觸發條件"]
+    # 「需要你決策」只認 human_only。critical escalation 雖然也會觸發寄信，但它
+    # 早就有 task 在跑 —— 把它算進「需要你決策」會讓一個應為 0 的健康指標長期不是 0，
+    # 指標一旦說謊就沒人再看它（這正是 7/19「需要你看 10」的翻版）。
+    #
+    # 「已自動開單」與「已修復」必須分開講。舊版只印一個 `machine_handled`，標題是
+    # 「已自動接手 N」—— 那個數字只代表 N 張單進了 next_tasks.json，不代表任何一個
+    # 問題被解決；2026-07-21 那 7 張已經 pending 四天，老闆卻讀成 7 個已解決
+    # (telegram-1224)。舊報告沒有新欄位時 fall back 到 machine_handled 並全部算作
+    # 「尚未執行」——不確定時只能往「還沒好」猜，不能往「已修好」猜。
+    machine_total = c.get("machine_handled", 0)
+    queued = c.get("machine_queued", machine_total)
+    fixed = c.get("machine_fixed", 0)
+    stalled = c.get("machine_stalled", 0)
+    stalled_txt = f"工單未成 {stalled}（failed / cancelled，需要重開）、" if stalled else ""
     lines.append(
-        # 「需要你決策」只認 human_only。critical escalation 雖然也會觸發寄信，但它
-        # 早就有 task 在跑 —— 把它算進「需要你決策」會讓一個應為 0 的健康指標長期不是 0，
-        # 指標一旦說謊就沒人再看它（這正是 7/19「需要你看 10」的翻版）。
-        f"- findings={c['findings']}（**已自動接手 {c.get('machine_handled', 0)}**、"
+        f"- findings={c['findings']}（**已自動開單 {queued}（尚未執行）**、"
+        f"已修復 {fixed}、{stalled_txt}"
         f"自清中 {c.get('quiescent', 0)}、"
         f"需要你決策 {c.get('human_only', 0)}（destructive / policy，應為 0）；"
         f"new={c['new']}, resolved={c['resolved']}, escalations={c['escalations']}）；"
@@ -1553,12 +1590,20 @@ def send_dreaming_email(report: dict[str, Any], now: datetime, storage_dir: str)
     ranked = sorted(report["findings"], key=lambda f: not needs_human_attention(f))
     for f in ranked[:8]:
         gov = f" → propose {f['governance_target']}" if f.get("governance_target") else ""
+        # 逐筆的 note 同樣不得把「開了單」寫成「已派修復」/「接手」—— 那正是表頭誤導的
+        # 逐行版本。單一事實來源是 task_status：沒有 status 就只能說「已開單，尚未執行」。
+        status = f.get("task_status")
         if f.get("quiescent"):
             note = " — 已停火、自清中"
-        elif f.get("remediation") == REMEDIATION_AUTO_DISPATCH:
-            note = " — 機器已派修復 task"
-        elif f.get("remediation") == REMEDIATION_PROPOSE_ONLY:
-            note = " — 已自動開工單，hourly dispatch 接手"
+        elif f.get("remediation") in (REMEDIATION_AUTO_DISPATCH, REMEDIATION_PROPOSE_ONLY):
+            if status in TASK_STATES_FIXED:
+                note = f" — 工單已完成（{status}）"
+            elif status in TASK_STATES_STALLED:
+                note = f" — 工單未成（{status}），需要重開"
+            elif status:
+                note = f" — 已開工單，尚未執行（status={status}）"
+            else:
+                note = " — 已開工單，尚未執行（排隊中）"
         else:
             note = " — **需要你決策**（destructive / policy）"
         lines.append(
@@ -1584,6 +1629,56 @@ def send_dreaming_email(report: dict[str, Any], now: datetime, storage_dir: str)
 def _dreaming_task_id(signature: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "_", signature.lower()).strip("_")[:60]
     return f"dreaming_{slug}"
+
+
+# severity → queue priority. Sole owner of this mapping: it is read once when a task
+# is first queued AND again on every later run to re-check an existing row (see
+# apply_auto_dispatch), so it must not be inlined twice.
+# info 級（memory 整併等月度治理）壓在 P4：propose_only 每晚都會開單，不分級就會把 P3
+# 淹掉，急件反而排在後面。
+_SEVERITY_PRIORITY = {"critical": 2, "warn": 3}
+_SEVERITY_PRIORITY_DEFAULT = 4
+
+
+def _dreaming_priority(severity: str) -> int:
+    return _SEVERITY_PRIORITY.get(severity, _SEVERITY_PRIORITY_DEFAULT)
+
+
+# Statuses that mean the remediation actually landed. Anything else is either still
+# queued or died — neither of which may be reported as fixed.
+TASK_STATES_FIXED = frozenset({"succeeded", "succeeded_null_result"})
+# Terminal but NOT a fix. Counted separately so a failed/cancelled remediation cannot
+# hide inside 「排隊中」 and look like progress that is merely slow.
+TASK_STATES_STALLED = frozenset(
+    {"failed", "cancelled", "superseded", "expired", "closed_no_action"}
+)
+
+
+def annotate_task_states(findings: list[DreamFinding], storage_dir: str) -> None:
+    """Stamp each finding with the status of the remediation task it owns.
+
+    The finding→task edge is `_dreaming_task_id(signature)`, which is deterministic,
+    so no extra mapping file is needed — but it was only ever materialised on the run
+    that FIRST queued the task (`remediation_ref` was set inside the loop the
+    `continue` skipped). Every later run therefore reported `remediation_ref=None` for
+    a task that plainly existed, which is why the report could not answer 「修好了嗎」.
+    Setting both here makes the edge survive re-runs.
+
+    Read-only, and reuses loop_health's `_load_next_tasks` rather than adding a second
+    queue parser.
+    """
+    try:
+        tasks = _load_next_tasks(storage_dir)
+    except Exception as exc:  # fail-open: status is a nicety, findings are the payload
+        warn("dreaming", "could not read queue for task states", err=str(exc))
+        return
+    by_id = {str(t.get("id")): t for t in tasks if t.get("id")}
+    for f in findings:
+        task = by_id.get(_dreaming_task_id(f.signature))
+        if task is None:
+            continue
+        f.task_status = str(task.get("status") or "").strip().lower() or None
+        f.remediation_ref = f"next_task:{_dreaming_task_id(f.signature)}"
 
 
 def apply_auto_dispatch(
@@ -1662,11 +1757,50 @@ def apply_auto_dispatch(
                 if not isinstance(tasks, list):
                     warn("dreaming", "next_tasks.json is not a list; refusing to queue")
                     return []
-                existing = {t.get("id") for t in tasks if isinstance(t, dict)}
+                existing = {
+                    str(t.get("id")): t for t in tasks if isinstance(t, dict) and t.get("id")
+                }
                 for f in eligible:
                     task_id = _dreaming_task_id(f.signature)
-                    if task_id in existing:
-                        continue  # dreaming re-derives the same signature nightly — queue once
+                    prior = existing.get(task_id)
+                    if prior is not None:
+                        # dreaming re-derives the same signature nightly — queue once.
+                        # But priority was frozen at the severity the finding had on the
+                        # night it was FIRST queued, and reconcile() escalates a signature
+                        # to `critical` on its third strike. So a finding that went
+                        # warn→critical kept its P3 row and its 72h starvation threshold
+                        # while the alert stayed red (2026-07-21: three critical-derived
+                        # rows sat at P3 — persistent_alert:8e08e46929dc07ef,
+                        # persistent_alert:e2f24397a43d4962 and
+                        # repeated_tool_failure:release_settings_audit.log:exit1).
+                        # Re-checking severity here keeps priority assignment in its one
+                        # owner instead of bolting a second escalation gate onto the
+                        # dispatcher, which already owns starvation via STARVATION_HOURS.
+                        f.remediation_ref = f"next_task:{task_id}"
+                        want = _dreaming_priority(f.severity)
+                        cur = prior.get("priority")
+                        cur_int = cur if isinstance(cur, int) else None
+                        open_row = str(prior.get("status") or "").strip().lower() not in (
+                            TASK_STATES_FIXED | TASK_STATES_STALLED
+                        )
+                        # Only ever tighten, and only while the row is still open —
+                        # re-queueing or demoting a finished task would resurrect it.
+                        if open_row and cur_int is not None and want < cur_int:
+                            prior["priority"] = want
+                            prior["priority_note"] = (
+                                f"dreaming: severity escalated to {f.severity} "
+                                f"on {now.date().isoformat()} (was P{cur_int})"
+                            )
+                            actions.append(
+                                {
+                                    "signature": f.signature,
+                                    "action": "reprioritized",
+                                    "task_id": task_id,
+                                    "from_priority": cur_int,
+                                    "to_priority": want,
+                                }
+                            )
+                        continue
                     task: dict[str, Any] = {
                         "id": task_id,
                         "title": f"[dreaming] {f.signature}",
@@ -1679,9 +1813,7 @@ def apply_auto_dispatch(
                             f"{dreaming_revalidate.REVALIDATION_INSTRUCTION}"
                         ),
                         "task_type": f.task_type,
-                        # info 級（memory 整併等月度治理）壓在 P4：propose_only 現在
-                        # 每晚都會開單，不分級就會把 P3 淹掉，急件反而排在後面。
-                        "priority": {"critical": 2, "warn": 3}.get(f.severity, 4),
+                        "priority": _dreaming_priority(f.severity),
                         "status": "pending",
                         "source": "dreaming",
                         "created_at": now.isoformat(),
@@ -1697,7 +1829,7 @@ def apply_auto_dispatch(
                         # see that this failure already has a fix queued.
                         task["follows_up_on"] = f.subject_task_id
                     tasks.append(task)
-                    existing.add(task_id)
+                    existing[task_id] = task
                     f.remediation_ref = f"next_task:{task_id}"
                     actions.append({"signature": f.signature, "action": "queued", "task_id": task_id})
                 if actions:
@@ -1741,6 +1873,11 @@ def main(
     auto_actions: list[dict[str, Any]] = []
     if apply_auto and not dry_run:
         auto_actions = apply_auto_dispatch(findings, storage_dir, current)
+
+    # Read the queue back AFTER dispatch so the report describes the queue as it now
+    # stands. Runs on dry runs too — it is read-only, and a dry run that cannot say
+    # whether last night's tasks landed is exactly the blind spot being closed here.
+    annotate_task_states(findings, storage_dir)
 
     report = build_report(
         snapshot, findings, new_findings, resolved, escalations, current,

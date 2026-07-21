@@ -47,6 +47,23 @@ Agent 完成後，主線程根據動機和結果做解讀，不是照搬 agent �
 - K847：隔夜 gap 61% 可交易
 - K687：正確 lag 後沒有 VT 策略打敗 BH 50/50
 
+## 審查型 brief 的範圍限制（READ ONLY）
+
+**只有當本 brief 是「審查實驗程式碼」而非「執行實驗」時才填寫此段——但那時必須逐字帶上：**
+
+> **READ ONLY —— 不得執行受審的實驗腳本。** 需要輸出佐證時引用既有 artifact；
+> 若審查結論取決於一個尚未存在的執行結果，回報「execution request」給主線程，
+> 由主線程走 compute queue 派工，不要自己跑。
+
+理由（2026-07-21 K1623 arm C 事件）：`feature-dev:code-reviewer` subagent 被派去審 `k1623_rev3_armc_mc.py`，
+自行執行了該腳本。跑程式在一般 code review 是勤勉；但**實驗程式碼的執行是受控動作**，
+必須經 compute queue、post-run gate 與 provenance 三道，才有可引用的來源。
+該次數字未受污染（產物已隔離到 `/tmp/k1623_quarantine/`、標記 `preview_numbers_not_citable`、
+事後對帳與正式 queue run 完全一致），受損的是**審查獨立性**，不是數字。
+
+根因是 brief 只說了「審查這段程式碼」，從沒說「不要執行它」。所以修在模板——
+約束必須在**派工當下**抵達 agent，而不是再加一層散文提醒。
+
 ## 必讀文件
 
 [列出 agent 必須讀取的檔案路徑]
