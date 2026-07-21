@@ -1256,6 +1256,89 @@ test_case_21_dryrun_no_contradiction() {
     fi
 }
 
+# ============================================================
+# Test Case 22 (K1262-v6): worktree tip 落後 main（0 自有 commit），main 期間刪掉/搬走檔案
+# → 舊版 file-presence diff 把「main 自己刪掉的舊檔」當成 worktree 成果 → 觸發 fallback
+#   → 用 `git log --all` 重建 commit list = **全 repo 其他分支**（其他 worktree 進行中的
+#   工作 + 測試 fixture commit）→ 非 dry-run 會把別人未完成的工作 cherry-pick 進 main。
+# → 修後：ancestor 判定使該訊號失效、fallback 永不用 --all，結論必須是「0 commits」，
+#   且輸出**不得**出現任何其他分支的 commit。
+# ============================================================
+test_case_22_stale_worktree_no_foreign_commits() {
+    echo "=== Case 22 (K1262-v6): 落後的 worktree 不得撈進其他分支的 commit ==="
+    local test_dir
+    test_dir=$(setup_test_env "case22")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase22"
+
+    # main 前進：搬走一個檔 + 刪掉一個 runtime 檔（= 本次誤判的兩類噪音）
+    mkdir -p scripts/_legacy storage/ops/event_ledger
+    echo "x" > scripts/weekly_quota_estimate.py
+    echo "{}" > storage/ops/event_ledger/abc123.json
+    git add scripts storage && git commit -qm "add files that main will later move/drop"
+    (cd "$wt" && git reset --hard main -q)   # worktree tip 與 main 同步後才落後
+    git mv scripts/weekly_quota_estimate.py scripts/_legacy/weekly_quota_estimate.py
+    git rm -q storage/ops/event_ledger/abc123.json
+    git commit -qm "main: move to _legacy, drop runtime file"
+
+    # 其他分支：模擬其他 worktree 進行中的工作 + 測試 fixture commit
+    local i
+    for i in 1 2; do
+        git checkout -q -b "other/k$i" main
+        echo "wip$i" > "experiments/other$i.txt"
+        git add experiments && git commit -qm "other-branch wip $i (K17$i rev7)"
+    done
+    git checkout -q -b bad/fixture main
+    echo f > f.txt && git add f.txt && git commit -qm "bad: new silent fallback"
+    git checkout -q main
+
+    local own
+    own=$(git rev-list --count "main..worktree-agent-testcase22" 2>/dev/null || echo ERR)
+    if [[ "$own" == "0" ]]; then
+        echo "  [SETUP-OK] worktree branch 自有 commit = 0（tip 落後 main）"
+    else
+        echo "  [SETUP-WARN] 預期 0 自有 commit，實得 $own"
+    fi
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir" --dry-run)
+
+    # 1. 絕不可出現其他分支的 commit
+    if echo "$output" | grep -qE "other-branch wip|bad: new silent fallback"; then
+        fail "22-1: 撈進其他分支的 commit（K1262-v6 誤合風險重現）"
+        echo "$output" | head -30
+    else
+        pass "22-1: 未撈進任何其他分支的 commit"
+    fi
+
+    # 2. 不可再宣稱從 --all 重建 commit list
+    if echo "$output" | grep -q "從 git log --all 重建"; then
+        fail "22-2: fallback 仍使用 git log --all（scope 未限縮）"
+    else
+        pass "22-2: fallback 未使用 git log --all"
+    fi
+
+    # 3. 不可宣告「會合併 N 個 commits」
+    if echo "$output" | grep -qE "會合併 [1-9][0-9]* 個 commits"; then
+        fail "22-3: 對 0 自有 commit 的 worktree 宣告要合併 commits"
+    else
+        pass "22-3: 未對 0 自有 commit 的 worktree 宣告合併"
+    fi
+
+    # 4. K1262 防線本體必須仍在：worktree 放真成果（untracked）時仍要被看見
+    mkdir -p "$wt/experiments/k9999"
+    echo "print('real result')" > "$wt/experiments/k9999/result.py"
+    local output2
+    output2=$(run_merge_in_test_dir "$test_dir" --dry-run)
+    if echo "$output2" | grep -q "k9999/result.py"; then
+        pass "22-4: 真成果仍被偵測到（K1262 防線未被弱化）"
+    else
+        fail "22-4: 真成果沒被偵測到 — K1262 silent-drop 的洞被打開了"
+        echo "$output2" | head -30
+    fi
+}
+
 
 test_case_a
 echo ""
@@ -1300,13 +1383,16 @@ test_case_20_storage_only_work_autocommit_failed
 echo ""
 test_case_21_dryrun_no_contradiction
 echo ""
+test_case_22_stale_worktree_no_foreign_commits
+echo ""
 
 echo "================================"
 echo "Assertions PASS: $PASS"
 echo "Assertions FAIL: $FAIL"
-# Test case-level summary（21 cases；17/18/19 pin multi-slot dirty-main/index contract；
-# 20/21 pin the 2026-07-19 scope fix: 安全網掃全樹、dry-run 不自相矛盾）
-TOTAL_CASES=21
+# Test case-level summary（22 cases；17/18/19 pin multi-slot dirty-main/index contract；
+# 20/21 pin the 2026-07-19 scope fix: 安全網掃全樹、dry-run 不自相矛盾；
+# 22 pins K1262-v6: 落後的 worktree 不得靠 --all fallback 撈進其他分支的 commit）
+TOTAL_CASES=22
 if [[ $FAIL -eq 0 ]]; then
     echo "Test cases: PASS $TOTAL_CASES/$TOTAL_CASES"
 else

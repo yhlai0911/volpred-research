@@ -36578,61 +36578,15 @@
   },
   {
     "id": "ci-red-29622117580",
+    "status": "succeeded",
     "task_type": "platform_ops",
+    "title": "CI 紅燈修復（run 29622117580, attempt 1）— main Test Suite",
     "priority": 1,
     "source": "auto_discovered",
-    "status": "succeeded",
-    "dispatch_lane": "agent",
-    "dispatch_preempt": true,
-    "ci_incident_id": "ci-red-29622117580",
-    "ci_run_key": "29622117580:1",
     "created_at": "2026-07-18T01:00:05.072728+00:00",
-    "title": "CI 紅燈修復（run 29622117580, attempt 1）— main Test Suite",
-    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29622117580\nattempt: 1\nhead_sha: d9d07c549\n偵測摘要（仍須讀完整 failed log）：2026-07-18T00:11:42.8841683Z E AssertionError: assert ['release_poo...cs_freshness'] == ['release_poo...st_cron_fail']\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29622117580 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "status_history": [
-      {
-        "ts": "2026-07-18T01:01:44.429047+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-350901e49c484eab9a3b7e32e0d1d688"
-      },
-      {
-        "ts": "2026-07-18T01:01:44.681198+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-350901e49c484eab9a3b7e32e0d1d688"
-      },
-      {
-        "ts": "2026-07-18T03:50:05.415823+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-slot-1-350901e49c484eab9a3b7e32e0d1d688",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-18T09:09:10.645647+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-2faa424299a24fca83dfcf7798900757"
-      },
-      {
-        "ts": "2026-07-18T09:09:10.875993+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-2faa424299a24fca83dfcf7798900757"
-      },
-      {
-        "ts": "2026-07-18T09:28:57.630810+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-2faa424299a24fca83dfcf7798900757"
-      }
-    ],
-    "started_at": "2026-07-18T09:09:10.875977+00:00",
-    "last_released_at": "2026-07-18T03:50:05.415812+00:00",
-    "last_release_reason": "auto_release_stale_2h",
     "completed_at": "2026-07-18T09:28:57.630796+00:00",
-    "result": "root_cause=test_asserts_over_whole_alert_registry_so_any_condition_reading_real_host_or_repo_state_leaks_an_extra_breach_into_a_list-equality_assertion; repair=tests/test_alerts.py+tests/test_health_checks.py 結構性隔離（scope conditions 到 fixture 自有 id + paper_root 注入）; 具名失敗在 HEAD 已由前一班 point-fix 035a8923b 轉綠，本班修 class 本身（同 pattern 第三次）; verify=77 passed 目標檔 / 2458 passed 全 tests/ / 狀態不敏感性以 stub 翻轉 + mtime 倒退 20 天雙實驗證明; commit 由 PHASE-Z 收"
+    "tombstone": true,
+    "archived_at": "2026-07-21T10:08:09.601059+00:00"
   },
   {
     "id": "fb_repost_mile_78899a5c",
@@ -37243,54 +37197,27 @@
   },
   {
     "id": "telegram-971",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 971）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-18T09:18:35.122591+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 971）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n原版網頁還是沒正常顯示修正後的瀏覽數\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔍 我去翻了 API，答案是：底層不是分開的，但你會這樣讀完全合理。\n\n同一張表、同一個 count：\n• 頂部：article-views.ts → article_impressions count=exact，再套種子公式\n• 底部：analytics/reaction route.ts:44-47 → 同一張 article_impressions，同一個 count，零加工\n\n所以 1314 和 7 是同一個東西的兩種算法，不是兩個指標。\n\n⚠️ 但「已追蹤瀏覽」這個文案本身就是錯的 — 它讓人以為那是另一套計數（你就是這樣讀的，那就代表讀者也會）。所以要修的是兩件事：數字套同一條公式，文案改成跟頂部一致的「N 次瀏覽」。\n\n📌 真正分開的是按讚/收藏/分享，那些走 article_reactions，不受影響。\n\n單子重開成 assign_998ad2be（含文案），舊那張 cee1e41a 標 deprecated 了。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-18T09:18:54.280200+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-18T09:20:58.504899+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-18T09:20:58.504885+00:00"
+    "completed_at": "2026-07-18T09:20:58.504885+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-21T10:08:09.601059+00:00"
   },
   {
     "id": "telegram-973",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 973）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-18T09:23:15.289695+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 973）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n以後回報是不是要列出近期已排定任務的時程和已完成的任務列表？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-18T09:23:33.942197+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-18T09:24:49.900304+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
     "completed_at": "2026-07-18T09:24:49.900287+00:00",
-    "result": "已回覆老闆（telegram msg 974）；回報格式擴充落地任務 assign_6349aa2c 已排入任務池，memory feedback_structured_stage_report_format 已更新"
+    "tombstone": true,
+    "archived_at": "2026-07-21T10:08:09.601059+00:00"
   },
   {
     "id": "assign_6349aa2c",
@@ -37328,28 +37255,15 @@
   },
   {
     "id": "telegram-976",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 976）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-18T09:40:54.375602+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 976）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n← 研究動態\n一般讀者\n2026/07/18 上午06:01\n22 次瀏覽\n同樣叫短債，USDC 出事時一檔波動放大 2.8 倍，另一檔幾乎沒變\n風險管理\nSHY\nBIL\n穩定幣\n短期公債\nUSDC\n讀者互動\n已追蹤瀏覽 3 次，登入會員可按讚與收藏。\n\n\n按讚\n0\n\n收藏\n0\n\n分享\n0\n分享到：\nLINE\nFacebook\nX / Twitter\n複製連結\n\n\n上面和下面的瀏覽數不一樣\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-18T09:41:14.957630+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-18T09:43:27.363154+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-18T09:43:27.363133+00:00"
+    "completed_at": "2026-07-18T09:43:27.363133+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-21T10:08:09.601059+00:00"
   },
   {
     "id": "assign_33a9151f",
@@ -37387,28 +37301,15 @@
   },
   {
     "id": "telegram-978",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 978）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-18T09:48:52.529958+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 978）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你要記得 前端頁面顯示的瀏覽數只能有唯一的版本\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔍 查到了，是 bug，不是你看錯。\n\n上面的 22 和下面的 3 其實查同一張表、同一個數，差別只在**上面有加種子偏移、下面沒有**。當初 backfill 幫舊文章補了一個展示基準值（seed），頂部走的是「seed + 新增的真實瀏覽」，下面那行「已追蹤瀏覽」直接吐原始筆數，繞過了統一計算的模組。所以這篇 = 19（seed）+ 3（真實）= 22。\n\n⚠️ 影響範圍：所有被 backfill 過的文章都會這樣，差額固定。\n\n🛠️ 修法：把 /api/analytics/reaction 改成呼叫同一個 getArticleDisplayedViews()，並全庫掃還有沒有別處也繞過。已排入任務池（assign_33a9151f，P1）交下一班處理 — responder 不動 repo 程式碼。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-18T09:49:12.544797+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-18T09:50:32.204653+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-18T09:50:32.204640+00:00"
+    "completed_at": "2026-07-18T09:50:32.204640+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-21T10:08:09.601059+00:00"
   },
   {
     "id": "telegram-980",
@@ -39688,7 +39589,7 @@
     "description": "K1731 rev7 為 audit_nested_dm_misuse.py 補上 coefficient-mask nesting AST channel 後，experiments/k1730/k1730_gevreg_midas_ssvs.py:142-143 由 PASS 翻 FAIL（test_role=review_required，已 frozen 進 nested_dm_misuse_baseline.json 為 exposed）。根因與 arm B 相同：restricted model 由 macro coefficient mask 歸零建立，兩條舊 AST channel 都看不到，scan_file 在 raw-DM classifier 前就 return None。影響面：arm A 的 t=+2.13 被 K1731 README 與 primary artifact 當作 cross-arm 論據引用；若該統計量同樣不具漸近常態極限，K1730 自身的宣稱層也需比照 K1731 做撤回或加註。要做：(1) 盤點 K1730 README/artifact 中所有依賴該 raw DM 的宣稱；(2) 決定撤回 vs 修正（與 K1731 一致性）；(3) 若 K1730 已有線上文章或論文引用，一併列出待更正清單。本 task 由 K1731 rev7 detector 修復衍生，owner 不是 K1731 — 不得塞回 K1731 scope。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "hourly_dispatch",
     "created_at": "2026-07-19T03:02:00+00:00",
     "created_by": "hourly-slot-1-4cb1880cf4cb4b6ead05b3565161b086",
@@ -39720,14 +39621,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3"
+      },
+      {
+        "ts": "2026-07-21T10:19:08.546881+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3"
       }
     ],
-    "claimed_by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
-    "claimed_at": "2026-07-21T09:09:43.212743+00:00",
-    "claim_session_id": "0473140ba5c9",
     "started_at": "2026-07-21T09:09:43.505582+00:00",
     "compute_job_id": "k1730_nested_dm_adjudication_20260721",
-    "result": "dispatched to compute job k1730_nested_dm_adjudication_20260721; awaiting PHASE A collection"
+    "result": "dispatched to compute job k1730_nested_dm_adjudication_20260721; awaiting PHASE A collection\n\n裁決書已產出並經收件複核：nested+pinball+expanding → raw DM 撤回為 diagnostic-only（與 arm B 先例一致），核心判定成立。收件時另查出裁決書八處事實錯誤（根因：closeout 產物只在 salvage ref edcb5b0d0、未進 canonical main）+ §3.2 引用了 K1730 v2 已撤回的 permutation。knowledge f932cb04 已由主線程經 revise_knowledge_entry.py 修訂；另開 4 張 followup（2×P2 根因與文件修訂、2×P3 randomization test 與 housekeeping）。",
+    "completed_at": "2026-07-21T10:19:08.546866+00:00"
   },
   {
     "id": "telegram-1023",
@@ -40206,11 +40111,34 @@
     "title": "merge_worktree.sh 的 K1262-v4 防護誤判 → 會把 47 個跨分支 commit 合進 main",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-19T13:54:38.850847+08:00",
     "source": "worktree_harvest_wave2_dirty_stale_20260719",
     "topology": "subagent",
-    "description": "2026-07-19 harvest wave 2 實測發現的工具危險行為（尚未造成事故，因為只跑了 --dry-run）。\n\n重現：bash scripts/merge_worktree.sh --dry-run dispatch-slot-1-f53bca44-k1692\n\n發生什麼：\n- rev-list 正確回報該 branch 有 0 個自有 commit\n- 但 K1262-v4 的 file-presence diff 看到 worktree 有 3 個 main 沒有的檔案：.claude/settings.local.json、scripts/_legacy/weekly_quota_estimate.py、storage/ops/event_ledger/<hash>.json —— 這三個是 gitignore 級/搬移級/runtime 級噪音，不是實驗成果\n- 於是判定 rev-list false negative，改從 `git log --all` 重建 commit list = **47 個 commits**\n- 那 47 個是**整個 repo 所有分支**的 commit，包含其他 worktree 進行中的 K1731 rev7、K528 NFP 重跑、snapshot audit，以及 `bad: new silent fallback` / `base: clean tree` 這類測試 fixture commit\n\n危害：對一個實際上零自有 commit 的 worktree 跑非 dry-run，會把別人未完成的工作和測試 fixture 一起 cherry-pick 進 main。\n\nK1262-v4 的防護意圖是對的（K1618 曾因信 rev-list false negative 而砍掉未合併成果），問題在 fallback 的**取代範圍**：偵測到可疑就整個換成 `git log --all`，等於用全 repo 換掉單 branch。合理修法方向（待評估，勿直接照抄）：\n- file-presence diff 忽略 gitignore/runtime/_legacy 類路徑，降低誤判率\n- fallback 的 commit 來源限縮在該 branch 的 reflog / merge-base 之後，不要用 --all\n- 或在 fallback 觸發時 fail-closed 要求人工確認，而不是自動擴大範圍\n\n動工前先讀 scripts/merge_worktree.sh 開頭那段 K1618/K1262 的歷史註解，別把舊防護改掉。"
+    "description": "2026-07-19 harvest wave 2 實測發現的工具危險行為（尚未造成事故，因為只跑了 --dry-run）。\n\n重現：bash scripts/merge_worktree.sh --dry-run dispatch-slot-1-f53bca44-k1692\n\n發生什麼：\n- rev-list 正確回報該 branch 有 0 個自有 commit\n- 但 K1262-v4 的 file-presence diff 看到 worktree 有 3 個 main 沒有的檔案：.claude/settings.local.json、scripts/_legacy/weekly_quota_estimate.py、storage/ops/event_ledger/<hash>.json —— 這三個是 gitignore 級/搬移級/runtime 級噪音，不是實驗成果\n- 於是判定 rev-list false negative，改從 `git log --all` 重建 commit list = **47 個 commits**\n- 那 47 個是**整個 repo 所有分支**的 commit，包含其他 worktree 進行中的 K1731 rev7、K528 NFP 重跑、snapshot audit，以及 `bad: new silent fallback` / `base: clean tree` 這類測試 fixture commit\n\n危害：對一個實際上零自有 commit 的 worktree 跑非 dry-run，會把別人未完成的工作和測試 fixture 一起 cherry-pick 進 main。\n\nK1262-v4 的防護意圖是對的（K1618 曾因信 rev-list false negative 而砍掉未合併成果），問題在 fallback 的**取代範圍**：偵測到可疑就整個換成 `git log --all`，等於用全 repo 換掉單 branch。合理修法方向（待評估，勿直接照抄）：\n- file-presence diff 忽略 gitignore/runtime/_legacy 類路徑，降低誤判率\n- fallback 的 commit 來源限縮在該 branch 的 reflog / merge-base 之後，不要用 --all\n- 或在 fallback 觸發時 fail-closed 要求人工確認，而不是自動擴大範圍\n\n動工前先讀 scripts/merge_worktree.sh 開頭那段 K1618/K1262 的歷史註解，別把舊防護改掉。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T10:19:52.301423+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+      },
+      {
+        "ts": "2026-07-21T10:19:52.573162+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+      },
+      {
+        "ts": "2026-07-21T10:36:00.260436+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+      }
+    ],
+    "started_at": "2026-07-21T10:19:52.573146+00:00",
+    "completed_at": "2026-07-21T10:36:00.260415+00:00",
+    "result": "K1262-v6：ancestor guard（治根因 — diff-tree 方向在 branch 落後時相反）+ fallback 限縮到 merge-base..branch/reflog（移除 git log --all）+ fail-closed 人工確認。新增 Case 22 四條全 PASS、pytest 12 passed、與 HEAD baseline 對照零 regression（in-tree 20 條紅為 baseline 30 條的真子集）。另開 P2 單處理該套件常駐 20 條紅（含 K1262/K1618 silent-drop 重現案例，agent 原誤述為 dirty-main contract）。"
   },
   {
     "id": "worktree_harvest_wave3_dirty_stale_20260719",
@@ -49506,5 +49434,60 @@
     "created_at": "2026-07-21T09:35:40.903195+00:00",
     "parent_task_id": "assign_feed_superseded_by_null_audit_20260719",
     "created_by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3"
+  },
+  {
+    "id": "k1730_salvage_ref_integrate_v2_closeout",
+    "title": "K1730 closeout 產物只存在 salvage ref edcb5b0d0，未進 canonical main — 整合或明確作廢",
+    "task_type": "experiment",
+    "priority": 2,
+    "description": "根因單。2026-07-21 收 K1730 nested-DM 裁決書時查出：K1730 arm A 的完整 closeout 產物（experiments/k1730/README.md 227 行、REMEDIATION_v2.md 261 行、codex_review_v1.md 6101 行、K1730_ARM_A_FULL_RUN_COLLECTION.md、以及 quick_mode=false 的 full-production results.json）**只存在於 salvage checkpoint commit edcb5b0d0**，未合併進 canonical main；原 worktree dispatch-slot-1-558d7893-k1730 已從 .claude/worktrees/ 消失。\n\n後果已經發生（不是假設）：2026-07-21 的 nested-DM 裁決 agent 在 K1731 worktree 作業，看不到這些檔，因而寫下四項與事實相反的宣稱 —— 『K1730 從未 closeout / 無 README』『無 agent brief』『knowledge.json 零命中』『production 尚未跑、numbers pending』。實際上 canonical 有 3 個 storage/ops/agent_briefs/*k1730* 檔、有 knowledge 條目 f932cb04（已於本次修訂）、production 早在 2026-07-18 就跑完（compute job compute-k1730-arm-a-production-quick-mode-1784358686，exit 0）。\n\n要做的：(1) 檢視 edcb5b0d0 的 15 個檔，判斷哪些該進 canonical main（至少 README.md / REMEDIATION_v2.md / full-production results.json 三個 claim surface）；(2) 走正式 merge 路徑，禁止 cherry-pick 後裸 commit；(3) 若 merge gate 仍卡 experiments/k1730/review_verdict.json（Codex 審凍結後的 claim-surface sha256 pin），在本單記錄卡點並判斷是要補審還是降級 gate — 不要再讓它無限期躺在 salvage ref；(4) 順帶處理 compute job k1730_armA_production_run_20260721（2026-07-21T10:11:26Z status=failed，followup 未派）：**先確認它要的 production 結果是否就是 edcb5b0d0 已有的那份**，是的話不要重跑，直接回收 + 標註，避免第三次重算同一個 21 分鐘 pipeline。\n\nparent: compute followup k1730_nested_dm_adjudication_20260721",
+    "status": "pending",
+    "source": "hourly_dispatch",
+    "created_at": "2026-07-21T10:30:00+00:00",
+    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+  },
+  {
+    "id": "k1730_adjudication_doc_amend_factual_errors",
+    "title": "K1730 裁決書 §1.0/§5/§6.1/§3.4/§6.6 事實錯誤 + §3.2 過度宣稱，需修訂",
+    "task_type": "experiment",
+    "priority": 2,
+    "description": "K1730_NESTED_DM_ADJUDICATION.md（worktree dispatch-slot-1-bd00f90a-k1731）核心裁決（nested + pinball + expanding → RETRACT 而非 repair）經逐條複核成立、與 K1731 arm B 先例一致，§1.1/§1.4/§2/§3.3/§6.1 md5 與 code 行號複核為真。但以下八點必須修訂 —— 錯的方向全是**低估待修債務**，正是 nested_dm_misuse_baseline.json 自己註記的『understating debt is the worse error direction』那一種：\n\n1. §5 + §0『zero outward exposure / correction list is empty』**不成立**：knowledge.json item f932cb04 引用該 raw DM 為關鍵數字、並稱 permutation『決定性』（該條已於 2026-07-21 由主線程經 revise_knowledge_entry.py 修訂，但裁決書本文仍寫零曝光）。\n2. §1.0『no agent brief was ever written』**錯**：canonical storage/ops/agent_briefs/ 有 agent-brief_k1730_gevreg_midas_ssvs-cdcac4.md、agent-brief_k1730_remediation-832ffa.md 兩個實檔。\n3. §1.0『K1730 never went through closeout / no README』**錯**：README.md 227 行存在於 salvage ref edcb5b0d0（見 task k1730_salvage_ref_integrate_v2_closeout）。\n4. §6.1『每個數字都是 quick-mode、production 尚待』**錯**：quick_mode=false 的 production artifact 存在於 edcb5b0d0，DM t=+2.1589、p=0.0311、mean_loss_differential=+0.002106、harvey_significant=false。方向與 quick-mode 同號同結論，**裁決不翻轉**，但 §1.1/§3.2 的數字要換成這組。\n5. **§3.2 pillar 2 引用的是已被撤回的證據**（最實質的一點）：裁決書把 v1 的 single-draw permutation 當成『存活的 null』三支柱之一，但 K1730 自己的 REMEDIATION_v2.md（2026-07-19）已因 leakage（全樣本 shuffle 把較晚 release 放到較早 origin 前）撤回它，改用 lag-shift placebo（one-sided p=0.833、5 shifts 下限 0.167、明載為粗解析度佐證）。裁決書等於用被撤回的證據重建 null。\n6. §3.2 三支柱不獨立：(1) loss ordering 與 (3) harvey_significant=false 是同一個 t 的兩種呈現。且標題宣稱『Macro adds no incremental value』超出證據 —— nested bias 與 null 同向的真正後果是**此設計對零訊號與弱訊號沒有辨別力**，可支持的最強說法是『偵測不到』。\n7. §3.4/§7 的 nested_dm_misuse_baseline.json 引用（count 196 / exposed 106 / k1730 in active.exposed）**只在 worktree 副本成立**；canonical 該檔 grep k1730 = 0、buckets 為 193/103/90。須標明是 worktree 狀態。\n8. §6.6 已過時：k1730_nested_dm_detector_exposure 現存於 storage/next_tasks.json（status=in_progress）；§1.2 A4 / §4.1 item 1 行號微調（verbatim 在 293-294，DM loop header 在 290，註解應加 288-289）；§1.0 docs 註記錯誤（真實命中是 docs/governance/2026-07/nested_dm_coefficient_mask_audit.md:25,32，不是『1730 篇』的 false positive）。\n\n**不需改的**：RETRACT 判定本身、§3.1 文獻不可修復論證、§4.2 randomization test 路線與成本計算（這是全文最紮實的一段）。",
+    "status": "pending",
+    "source": "hourly_dispatch",
+    "created_at": "2026-07-21T10:30:00+00:00",
+    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+  },
+  {
+    "id": "k1730_randomization_test_upgrade_null",
+    "title": "K1730 NULL 目前只是描述性 — 用 randomization test 把它升級成真的檢定",
+    "task_type": "experiment",
+    "priority": 3,
+    "description": "K1730 的 nested DM 已撤回為 diagnostic-only（無有效極限分佈），lag-shift placebo 只有 5 個 arm（p 值下限 0.167）。所以現在『macro 對週最大 Parkinson RV 區間預測沒有增量價值』**是描述性排序，不是被檢定過的結論**。\n\n唯一在此設計下合法的檢定 = full randomization test：置換 macro 塊 B 次、每次重新評分、把觀察到的 mean_pinball_real − mean_pinball_shuffled 定位在經驗分佈中。它有效是因為：隨機化檢定不呼叫漸近極限（nested 非常態不相干）、不假設損失可微（pinball 不可微不相干）、expanding window 在置換間固定而抵消。\n\n成本與可行變體（取自裁決書 §4.2，已複核）：run_production.log 顯示 61-79 s/refit × 19 refits ≈ 21 min/pipeline，B=999 → ~350 小時單執行緒，不可行。依序採用：(1) 只置換 macro 張量並重用 HAR/GEV-HAR 的快取擬合（no-macro 模型對 macro 置換不變），大幅降低每 draw 成本；(2) B=199（精度 0.005）而非 999；(3) **必走 compute_queue，禁止 inline**。\n\n報告時的但書（必寫）：這檢定的虛無是『macro 塊在時間置換下無增量預測內容』，與 DM 的等期望損失**不是同一個虛無**。要照實報告，不可改標成 DM 的替代品。\n\n前置：先做 k1730_salvage_ref_integrate_v2_closeout（否則會在錯誤的 quick-mode 基準上跑）。",
+    "status": "pending",
+    "source": "hourly_dispatch",
+    "created_at": "2026-07-21T10:30:00+00:00",
+    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+  },
+  {
+    "id": "k1730_baseline_bucket_and_kid_registry_housekeeping",
+    "title": "K1730 收尾雜項：auditor bucket 移動 + K-id 1730 撞號 + 陳舊 source_line",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "description": "K1730 裁決收件時留下的三件非推論層雜項：\n\n1. **auditor bucket**：K1730 的 nested pair 一旦依裁決書 §4.1 加上 `nested-dm: diagnostic-only` 註解（scripts/audit_nested_dm_misuse.py:143-150 的 DM_DIAGNOSTIC_RE channel 會認），experiments/k1730/k1730_gevreg_midas_ssvs.py 應從 active.exposed 移到 diagnostic_only，需 baseline re-freeze。注意 canonical storage/ops/nested_dm_misuse_baseline.json 目前 grep k1730 = 0（buckets 193/103/90），有 k1730 的是 worktree 副本（196/106/90）—— re-freeze 前先確認要凍的是哪個狀態。另外 K1731 README:911 自稱 rescan 把 baseline『從 193 移到 195 sites』，與 canonical 193、worktree 196 都對不上，順手釐清。\n\n2. **K-id 撞號**：storage/ops/k_id_registry.json 的 K1730 保留給另一主題（隔夜/日內波動率溢酬 clustering 與星期效應擇時，2026-07-18 由 research_backlog_auto claim，status=reserved）。GEVReg arm A 是 boss 指派 P1（221c7abb7）直接取號、沒過 registry。現在兩個實驗共用一個 K-id，須由 registry owner 決定改號哪一邊（改號會動到既有 artifact 檔名與引用，先評估影響面再動）。\n\n3. **陳舊 back-reference**：該 backlog 條目的 source_line: 596 指向 research_program.md，但該檔全文無 '1730' 字樣。\n\n4. **潛在系統性問題（值得單獨查）**：experiments/k1731/k1731_armB_rev8_remediation.json:174 把工作 hand off 給 task id k1730_nested_dm_detector_exposure，而該 id 當時不在佇列裡（靠人工撿起才跑到）。查一下還有多少 handoff 是用同樣方式寫的、是否有其他 silently dangling 的。",
+    "status": "pending",
+    "source": "hourly_dispatch",
+    "created_at": "2026-07-21T10:30:00+00:00",
+    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+  },
+  {
+    "id": "merge_worktree_test_suite_20_red_assertions",
+    "title": "merge_worktree 測試套件常駐 20 條紅 — 含 K1262/K1618 silent-drop 重現案例，不是只有 dirty-main contract",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "description": "2026-07-21 修 K1262-v4 誤判時量到的既有債務（**不是該次修改造成的** —— 已用 out-of-tree baseline 對照確認：修改版 20 條紅是 HEAD baseline 的真子集，零 regression）。\n\n`bash scripts/tests/test_merge_worktree.sh` 目前 Assertions PASS: 49 / **FAIL: 20**，且 runner 最後印 `Test cases: FAIL`。失敗清單：\nA-1, A-2（untracked experiments/ 無 commit → silent data loss）、C-1、5-1, 5-2, 6-1, 6-2（K1262 silent drop pattern + post-merge layer false negative）、7-1, 7-2, 7-3（lock 偵測）、8-1, 8-2（K1618 silent drop 重現）、9-1, 9-2（agent 修改遺失 / 無 auto-restore）、10-1（MAIN_DIR 被 cwd repo 綁架）、11-2（合併被誤 abort 擋掉）、17-1, 18-1, 18-4, 19-1（dirty-main / staged-index preflight contract）。\n\n**為什麼要單獨開單**：這次的修復 agent 把這 20 條描述成「cases 17/18/19 的 dirty-main/index contract」，實際清單裡**多數是 K1262 / K1618 的 silent-drop 重現案例**（A/5/6/8/9/10/11）—— 也就是這支腳本存在的理由本身。主線程逐條比對才發現這個誤述。兩種可能，必須查清楚是哪一種：\n  (a) 這些測試 assert 的是**舊版契約**，腳本後來演進（例如改成 fail-closed 要人工確認，      而測試還在期待「自動合併成功」）→ 那是**測試該更新**，且紅了這麼久沒人動代表沒人在看；\n  (b) 這些防線**真的失效了** → 那是 P1 級事故等級的問題，K1032/K1114/K1262/K1618 四次事故的防護是空的。\n\n在 (a)/(b) 判明之前，任何人看到這支套件「一直是紅的」都會學會忽略它 —— 這比單一 bug 更危險。\n\n要做的：(1) 逐條判定 (a) 或 (b)；(2) (a) 就更新測試到現行契約，(b) 就修腳本；(3) 讓套件回到全綠，之後任何紅都是真訊號；(4) 若某條短期修不了，明確標 skip + 理由 + 解除條件，不要讓它混在紅裡當背景噪音。\n\nparent: merge_worktree_k1262v4_overtrigger_20260719",
+    "status": "pending",
+    "source": "hourly_dispatch",
+    "created_at": "2026-07-21T10:48:00+00:00",
+    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
   }
 ]

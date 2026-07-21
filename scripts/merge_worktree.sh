@@ -105,6 +105,28 @@ ensure_cwd_outside_worktree() {
 #   「機器產生、不帶 agent 語意」的路徑（快取 / venv / build 產物 / log），其餘一律視為
 #   可能的成果。寧可偶爾多一次 fail-closed 的 ABORT，也不要少一次 silent 砍檔。
 #
+# ── K1262-v6 (2026-07-21)：辨識「main 自己刪掉／搬走的舊檔」，避免落後的 worktree 誤報 ──
+# 判準刻意開得極窄：**同一路徑**在 main 的歷史裡曾存在**位元組完全相同**的版本。
+# 滿足這條的檔案不可能是 agent 的新成果（新成果不會與 main 舊版本 byte-identical），
+# 但足以吃掉 stale worktree（tip 落後 main）必然產生的那類噪音：被搬進 scripts/_legacy/ 的
+# 腳本、被輪替刪掉的 runtime JSON、被移除的 local 設定 —— 這些正是本次誤判的三個檔。
+# 為什麼不用路徑 denylist：denylist 只能擋「這次剛好誤報的這幾個檔」，且一旦寫寬
+# （例如整個 storage/ 或所有 gitignored 檔）就會重新打開 K1262 silent-drop 的洞。
+# 內容比對是內容層判準，不需要預測未來的成果路徑。
+# 擋：把 main 自己刪掉的舊檔當成 worktree 未合併成果 → 假 ABORT／假 merge 觸發。
+is_stale_main_deleted_file() {
+    local wf="$1" rel="$2" blob c
+    blob=$(git -C "$MAIN_DIR" hash-object -- "$wf" 2>/dev/null) || return 1
+    [[ -z "$blob" ]] && return 1
+    while IFS= read -r c; do
+        [[ -z "$c" ]] && continue
+        if [[ "$(git -C "$MAIN_DIR" rev-parse -q --verify "$c:$rel" 2>/dev/null)" == "$blob" ]]; then
+            return 0
+        fi
+    done < <(git -C "$MAIN_DIR" log --format=%H -n 200 -- "$rel" 2>/dev/null)
+    return 1
+}
+
 # 輸出：worktree 內存在、但 MAIN_DIR 對應路徑不存在的檔案（相對路徑，一行一個）。
 worktree_only_paths() {
     local wt_path="$1"
@@ -119,6 +141,10 @@ worktree_only_paths() {
         local rel="${wf#$wt_path/}"
         [[ -z "$rel" ]] && continue
         if [[ ! -e "$MAIN_DIR/$rel" ]]; then
+            # K1262-v6：main 歷史裡有同路徑、同內容的版本 → 是 main 刪掉/搬走的舊檔，非成果
+            if is_stale_main_deleted_file "$wf" "$rel"; then
+                continue
+            fi
             printf '%s\n' "$rel"
         fi
     done
@@ -283,8 +309,34 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
     # 2026-07-19 scope fix：拿掉 `-- experiments/` pathspec，改比對**全樹**。
     # 這是 commit-to-commit 的 tree diff，只看已提交的 tracked 檔，沒有 untracked 噪音問題，
     # 所以全樹是純粹的擴大覆蓋——不必再追著每個新的成果路徑（storage/、docs/…）補 pathspec。
+    #
+    # K1262-v6 (2026-07-21): diff-tree 訊號在 branch 是 main 祖先時**方向相反**，先擋掉。
+    # `diff-tree A "$main_branch" "$branch"` 問的是「從 main 走到 branch 會新增哪些檔」。
+    # 當 branch 完全落後（tip 已被 main 包含、0 自有 commit）時，這個集合等於
+    # **main 後來刪掉／搬走的舊檔**（例：搬進 scripts/_legacy/、輪替掉的 runtime JSON、
+    # 被移除的 .claude/settings.local.json），不是 branch 的成果。舊版拿它當
+    # 「rev-list false negative」的證據 → 觸發 commit 來源 fallback → 誤判。
+    # 擋：把 0 自有 commit 的 worktree 誤判成有未合併成果、進而誤合他人工作。
+    # 為什麼安全（不弱化 K1262）：ancestor 成立 = branch tip 的整棵 tree 都已在 main 的
+    # 歷史裡，定義上不存在「只在 branch 有的已提交成果」。真正的 K1262 silent-drop 情境
+    # （有 commit 但 rev-list 誤報 0、或成果是 untracked/gitignored）都**不**滿足 ancestor：
+    # 前者 branch tip 不是 main 祖先，後者走下面 K1262-v5 的 filesystem 防線，兩條都不受影響。
+    local branch_is_ancestor=false
+    if git -C "$MAIN_DIR" merge-base --is-ancestor "$branch" "$main_branch" 2>/dev/null; then
+        branch_is_ancestor=true
+    fi
+
+    # K1262-v6: fallback 觸發但無法在 branch 範圍內解釋時的 fail-closed 旗標（見下方 gate）
+    local fallback_unresolved=false
+
     local file_presence_unique=""
-    file_presence_unique=$(git -C "$MAIN_DIR" diff-tree --diff-filter=A --name-only -r "$main_branch" "$branch" 2>/dev/null | grep -v '^$' || true)
+    if $branch_is_ancestor; then
+        echo "  [K1262-v6] $branch 是 $main_branch 的祖先（tree 已完全含於 main 歷史）→"
+        echo "             略過 commit-to-commit file-presence 訊號（該方向只會列出 main 自己刪掉的舊檔）。"
+        echo "             下面的 K1262-v5 filesystem 防線與 pre-remove 全樹掃描**照常**執行。"
+    else
+        file_presence_unique=$(git -C "$MAIN_DIR" diff-tree --diff-filter=A --name-only -r "$main_branch" "$branch" 2>/dev/null | grep -v '^$' || true)
+    fi
     # 過濾出真正只在 worktree branch 有的（main HEAD 不存在）
     local worktree_only_files=""
     if [[ -n "$file_presence_unique" ]]; then
@@ -314,15 +366,41 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
         echo "  [🚨 K1262-v4 PRIMARY] rev-list 報 0 commits 但 file-presence diff 顯示 worktree 含 main 沒有的檔案："
         echo "$worktree_only_files" | head -10 | sed 's/^/      /'
         echo "  [🚨 K1262-v4] 強制走 merge path（不信 rev-list false negative）"
-        # 重建 new_commits 與 commit_count_verify 從另一條路徑（git log --all 跨 worktree）
-        new_commits=$(git -C "$MAIN_DIR" log --oneline --all "^$main_branch" "$branch" 2>/dev/null | head -50 || true)
-        if [[ -z "$new_commits" ]]; then
-            # 仍找不到 — 可能 branch ref 對不上但檔案在 working tree（gitignored）
-            # 沿用既有 K1143-v2 abort path：file-presence layer fall through 到下面 if
-            :
+        # K1262-v6 (2026-07-21): 重建 commit list 的來源**限縮在這一個 branch**，永不用 `--all`。
+        # 舊版 `git log --all "^$main_branch" "$branch"` 把「全 repo 所有分支」當成
+        # 「這個 branch」的替身：其他 worktree 進行中的分支、測試 fixture commit 全會被撈進來
+        # cherry-pick 進 main。偵測層的方向沒錯，錯的是 fallback 的 **scope**。
+        # 擋：把別人未完成的工作與測試 fixture commit 誤合進 main（難回溯，比漏合更貴）。
+        # 兩個 branch-scoped 來源：
+        #   1) merge-base..branch —— 不受 main 前進影響，仍只看這條 branch 自己的 commit
+        #   2) branch 自己的 reflog —— 救「ref 被覆寫/rev-list 誤報 0 但 commit 還在」的
+        #      K1032/K1114 式 false negative（只取 main 尚未包含者），天然限定在本 branch
+        local merge_base="" rebuilt=""
+        merge_base=$(git -C "$MAIN_DIR" merge-base "$main_branch" "$branch" 2>/dev/null || true)
+        if [[ -n "$merge_base" ]]; then
+            rebuilt=$(git -C "$MAIN_DIR" log --oneline "$merge_base..$branch" 2>/dev/null | head -50 || true)
+        fi
+        if [[ -z "$rebuilt" ]]; then
+            rebuilt=$(git -C "$MAIN_DIR" reflog show "$branch" --format='%H' 2>/dev/null \
+                | while IFS= read -r sha; do
+                    [[ -z "$sha" ]] && continue
+                    if ! git -C "$MAIN_DIR" merge-base --is-ancestor "$sha" "$main_branch" 2>/dev/null; then
+                        git -C "$MAIN_DIR" log --oneline -1 "$sha" 2>/dev/null || true
+                    fi
+                  done | awk '!seen[$0]++' | head -50 || true)
+            [[ -n "$rebuilt" ]] && echo "  [K1262-v6] merge-base..$branch 為空，改用 $branch 自己的 reflog（仍限本 branch）"
+        fi
+        if [[ -z "$rebuilt" ]]; then
+            # K1262-v6 fail-closed：branch 歷史裡找不到對應 commit 時**不再自動擴大範圍**。
+            # 兩種錯誤方向不對稱：漏合 branch 還在、可救回；誤合污染 main、難回溯。
+            # 所以這裡標記待人工確認，讓流程走到下面的 pre-remove 掃描 / v6 fail-closed gate，
+            # 絕不因為「找不到就換更大的來源」而自動放行。
+            fallback_unresolved=true
+            echo "  [K1262-v6] branch-scoped 來源（merge-base / reflog）皆無 commit → 不擴大範圍，改要求人工確認"
         else
-            commit_count_verify=$(echo "$new_commits" | grep -c '^' || echo 0)
-            echo "  [K1262-v4] 從 git log --all 重建 commit list: $commit_count_verify commits"
+            new_commits="$rebuilt"
+            commit_count_verify=$(printf '%s\n' "$new_commits" | grep -c '^' || echo 0)
+            echo "  [K1262-v6] 從 branch-scoped 來源重建 commit list: $commit_count_verify commits"
         fi
     fi
 
@@ -370,6 +448,20 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
             echo "         2. 確認上列檔案是否為成果；是的話手動 copy 到主目錄對應路徑"
             echo "         3. 主目錄 git add + commit 後再跑 bash scripts/merge_worktree.sh $wt_name"
             echo "         4. 若確認全是可丟棄的產物，先在 worktree 內刪掉再重跑本腳本"
+            return 1
+        fi
+
+        # K1262-v6 (2026-07-21) FAIL-CLOSED GATE：file-presence/FS 防線曾示警，但 branch 自己的
+        # 歷史裡找不到對應 commit，且上面的全樹掃描也沒留下 orphan 檔 —— 狀態自相矛盾。
+        # 舊版此時會自動把來源換成 `--all` 放行；新版停下來要人看一眼，絕不自動擴大範圍。
+        # 擋：在證據不一致時仍走「可安全移除」或誤合他人 commit。
+        if $fallback_unresolved; then
+            echo "  [🛑 K1262-v6 ABORT] 偵測層示警（worktree 有 main 沒有的檔）但 $branch 的歷史"
+            echo "         （merge-base..$branch 與其 reflog）找不到任何對應 commit —— 證據不一致。"
+            echo "  [🛑 K1262-v6] 拒絕自動判定（既不移除、也不擴大 commit 來源），請人工確認："
+            echo "         1. cd $wt_path && git status --ignored && git log --oneline -10"
+            echo "         2. 確認成果後手動 copy 到主目錄對應路徑並 commit，再重跑本腳本"
+            echo "         3. 若確認全是可丟棄的產物，先在 worktree 內刪掉再重跑本腳本"
             return 1
         fi
 
