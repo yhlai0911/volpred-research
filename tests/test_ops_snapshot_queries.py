@@ -307,3 +307,37 @@ def test_queue_query_limit(queue_file: Path):
     assert out["matched"] == 6
     assert len(out["tasks"]) == 2
     _size_ok(out)
+
+
+def test_queue_urgent_and_main_thread_inbox_counters(tmp_path: Path):
+    """dispatch-lanes R4：boss 急件數與主線程收件匣必須在 queue 摘要看得見。
+
+    urgent_pending 重用 task_urgency（LANE_URGENT）；main_thread_inbox 兩種表徵
+    都算：dispatch_lane=main_thread 的 pending + status=pending_main_thread。
+    """
+    tasks = [
+        # boss 急件（LANE_URGENT）
+        {"id": "boss1", "status": "pending", "priority": 1, "source": "telegram-999",
+         "task_type": "platform_ops"},
+        # 機器 P1 —— 不是 urgent
+        {"id": "mach1", "status": "pending", "priority": 1, "source": "auto_discovered",
+         "task_type": "platform_ops"},
+        # 主線程 lane（status=pending）
+        {"id": "mt1", "status": "pending", "priority": 1, "source": "user",
+         "task_type": "platform_ops", "dispatch_lane": "main_thread"},
+        # handoff 轉出的主線程表徵
+        {"id": "mt2", "status": "pending_main_thread", "priority": 2, "source": "user",
+         "task_type": "paper_body"},
+        # 一般排程
+        {"id": "sched", "status": "pending", "priority": 3, "source": "auto_discovered",
+         "task_type": "daily_article"},
+    ]
+    p = tmp_path / "next_tasks.json"
+    p.write_text(json.dumps(tasks))
+
+    out = MOD.queue(p)
+
+    assert out["pending"] == 4
+    assert out["urgent_pending"] == 1, "boss 急件；main_thread lane 的不算（headless 派不到）"
+    assert out["main_thread_inbox"] == 2
+    _size_ok(out)
