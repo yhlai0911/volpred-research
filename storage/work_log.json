@@ -23767,5 +23767,35 @@
     "owner": "hourly-slot-1-b2058714eb53479e83e146c383e87c80",
     "commit": null,
     "summary": "trending_repost：地緣政治風險 → 改軸為「黃金/VIX/原油三避險工具的訊號分工」。\n\n3-layer 查重發現原題「油價 × VIX 尾部避險」的 arc 近一週已發三篇（mile_f9c70bd0、mile_9f5151dc 2026-07-16、mile_903fd2cf 2026-07-19），故換軸；黃金為主角（feed 先前無黃金主題文章）。時事錨點為 2026-07-21 收盤：美股三大指數止跌反彈、VIX 跌 8.58%、黃金跳 1.83%。\n\n交付：mile_63ec8636，4622 字 + 3 表 2 圖（已上傳 supabase）。anti_ai_gate exit 0（未用 --force）；check_arc_dedup verdict=clean、signature_thin=false，brief 點名的四個禁做變奏一個都沒碰。\n\n證據（primary source，可重跑）：yfinance 日收盤，2004-01-06 ~ 2026-07-21 共 5658 交易日；8 次可辨識地緣衝突事件窗。\n\n檢定結果，兩邊都誠實寫：\n- 過了：黃金在 8/8 次衝突的事件當日與第 4 日皆收漲，binomial p=0.0078。VIX 事件當日 7/8（p=0.070）未達 5%，原油第 9 日 4/8（p=1.00）。黃金是唯一給出統計顯著訊號的資產。\n- 沒過：「黃金漲 ≥1% 但 VIX 跌」的 473 個分歧日，後續 10 日 S&P 500 已實現波動率 raw Welch t 檢定 p=0.008 看似顯著；但以 HAC/Newey-West 控制前 20 日 RV 與當日報酬後，分歧虛擬變數 p=0.276 不顯著，三個波動率分位分開跑亦全不顯著（p=0.93/0.51/0.14）。根因是該「跨資產訊號」其實只是當日股價的代理。文中明寫檢定沒過。\n\nWriter 校正主線程 brief 的事實錯誤（已採納）：brief 寫「黃金創高」不成立 — GC=F 7/21 收 4083.60，距 2026-01-29 峰值 5318.40 尚有 -23.2%，2026 YTD -5.6%。改以「23% 回檔中的第 95.5 百分位反彈日」框架處理並在文中專節澄清。\n\ntopology_override: inline→subagent，原因同本班另一筆（A0 兩張 P1 time-critical，cap 內 inline 不可行）。\n\n殘留：同另一筆 — lazypack gate 擋立即發佈，入 status=draft，待 lazypack plan + async render 才 release。"
+  },
+  {
+    "timestamp": "2026-07-22T07:20:00+08:00",
+    "task_type": "experiment",
+    "task_id": "research_har_mcs_spy_0050_tw_tx_tsfm_timesfm_ttm_log_har",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db",
+    "owner": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db",
+    "commit": null,
+    "summary": "PHASE A 收 compute followup agent-brief_tsfm_har_mcs-6345e3（collect_completed）。\n\nworktree agent 判 already_covered：K1711 的研究問題與 brief 逐字相同，7 項交付物全部 covered 或 superset（三資產、log-HAR baseline、TimesFM+TTM zero-shot、EW/MZ 組合另加 GR、MCS 於 qlike+mse × alpha{0.01,0.05,0.10}、Harvey-corrected DM、nested inference contract）。\n\n主線程驗證（未採信 agent 自述）：experiments/k1711/review_verdict.json verdict=PASS blocking_defects=[]；四張圖 fig1-4 實際存在；storage/feed.json 對 k1711 命中 0 篇。\n\n不重跑的理由：K1711 的 headline 限制是 retrospective pseudo-OOS —— TimesFM/TTM 權重訓練期晚於評估樣本，這是『用今天的公開 zero-shot 權重評估歷史資料』的永久性質，不是跑法問題。重跑只會複製同一 caveat 並多燒一份 xhigh 預算。\n\n合併：worktree commit 4d51c8826（dedup_verdict_tsfm_har_mcs.json，77 行）已 merge 進 main。merge 首次 ABORT，因 main index 殘留一筆他人 staged 的 scripts/detect_price_split_breaks.py；查證該檔 `git diff HEAD` 為空（staged 是部分回退、工作區已改回 HEAD 內容），故在 git_writer_lock 下 restore --staged 清掉 index 殘影後重跑成功 —— 未動任何檔案內容。\n\n衍生 followup：K1711 已 PASS 且有四張可發表圖卻無讀者向覆蓋 → 建 k1711_general_article_from_tsfm_dedup。dedup gate 先跑過：general=clean 可寫；research=block_arc_dup 不寫。文章敘事已在 description 寫死不得寫成『TSFM 贏了』（raw TimesFM/TTM 三資產 primary superior set 全滅，活的是 MZ 校準與 HAR-bearing 組合）。"
+  },
+  {
+    "timestamp": "2026-07-22T07:26:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "dreaming_missing_retry_strategy_trending_repost_2026_07_17_ai",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db",
+    "owner": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db",
+    "commit": null,
+    "summary": "餓死 97.8h 的 dreaming 單：裁決 5 張『失敗的 trending_repost』該不該 retry。答案是全部不該 —— 沒有一張是執行失敗。\n\n五張都是 writer agent 正確拒寫：\n- 2026-07-17 ai變現 / 債市波動度 / ai支出：分別撞 mile_f5f4cb43(06-30) / mile_d12825bb(07-06) / mile_0fa841ed(07-05)，同資產同機制同結論類。\n- 2026-07-18 fed政策：FOMC-VIX × SKEW 的 NULL 結論 feed 已發約 15 篇，該週又無新 FOMC 錨點。\n- 2026-07-18 台股崩跌：seed 是 scanner 合成的假事件 —— 宣稱台股『歷史性崩跌 2953 點(-6.5%)』，但 ^TWII 7/16 收 45625（前日 -0.01%）、7/17 bar 為 NaN。寫下去就是造假。\n五張全部 mark_task_blocked --reason deprecated → closed_no_action，各帶具名理由；對應的 5 張 dreaming 單全數 succeeded 結案（含 07-14 那張本就已關）。\n\n根因（比本單問的更上游，且有實證）：生成端查重 **每一張都點名了正確的重複文章**。dedup_decisions.jsonl 2026-07-16T22:00 三筆逐一比對：ai變現 unjudged_thin_signature saturation=4 matched_ids 含 mile_f5f4cb43；債市 warn_arc_near_miss matched mile_d12825bb；ai支出 warn_arc_near_miss matched mile_0fa841ed —— 三個 id 與 22 小時後 writer agent 手動 3-layer 查重得出的重複文章完全相同。證據在生成當下就在手上，caller 只把它塞進 task 的 dedup_screen 欄位就照樣建 P1，於是每張各燒掉一個 P1 dispatch 才重新查出同一件事，再落地成 status=failed，被 dreaming 讀成『需要更清楚的 brief 重派』（恰恰相反）。\n\n修法 refill_reader_facing_pool.py refill_trending_candidates()：改兩段選擇 —— screen 有具名 match 的候選退為後備，優先取乾淨候選；全部都有 match 才回頭用後備，且降級到 P2 + 寫 dedup_followup_required 點名要查哪幾篇。刻意不改成硬 block：2026-06-23 publish 端 arc gate 正是因 false-positive 造成內容黑洞才降為 warn-only，而這裡的 loop 本來就有其他候選可取，用偏好排序就能拿到同樣效果而無黑洞風險。\ntests/test_reader_facing_refill.py 新增 2 個回歸測試（乾淨候選必須勝出、無乾淨候選時 fallback 不得無聲且不得留在 P1）；test_reader_facing_refill 15 passed，test_topic_dedup_at_generation / test_refill_task_pool / test_refill_cluster_budget 一併綠。\n\n另立 trending_scan_primary_source_verification (P2)：台股崩跌那張暴露的是不同的洞 —— scanner 會合成帶假數字的事件，目前唯一防線是 writer agent 的誠實自律（prose 級，不是閘門）。要求候選帶量化宣稱時進池前先對 primary source 核對，NaN bar 當『無資料』不得當通過。"
+  },
+  {
+    "timestamp": "2026-07-22T07:32:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_eb78aedc",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db",
+    "owner": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db",
+    "commit": null,
+    "summary": "餓死 51h：PHASE-Z incident 的關閉條件分不出「無主殘留」與「未提交的活躍碼」，對後者給出的指示是「保存後清除」—— 照做會刪掉正在運行的系統碼。2026-07-20 是靠人停下來查身分才沒鑄成大錯。\n\n本班先撞上同一形狀的活案例：巡 member_qa 任務時發現工作區有 855 行未提交改動（questions.py +348、test_member_qa_duplicate_gate.py +508，實跑 69 passed），是 03:17 commit 之後某一班寫完卻沒提交也沒記 work_log 的殘留 4。舊三訊號會把它讀成殘留。\n\n實作 src/volpred/ops/foreign_incident.py：classify_path_liveness() + referenced_by_tracked() + _has_passing_test_file()。\n\n訊號一，被已提交的碼引用 —— git grep 預設只搜 tracked，正是要的語意（untracked 檔互相引用不算活性，那可能只是同一坨殘留自己抱團）。pathspec 再限定碼與設定、排除 docs/ 與 storage/：doc 或舊任務描述提到一個檔名只代表有人寫過它，不代表有人在跑它 —— 不排除的話幾乎不會有東西判 dead，等於沒分類。\n\n訊號二，有對應測試檔（只看存在不實跑：關閉條件每班重跑，在裡面跑 pytest 是把一個判斷變成一次 CI）。\n\n訊號三，路徑自己是 tests/ 下的 test_*.py。測試檔不會被任何碼 import，訊號一對它永遠是空的 —— 2026-07-20 那 53 個路徑裡整組測試就是這樣被算成無主殘留。刻意不解析它測哪個模組（test_phase_z_foreign_incident 這種複合命名解不出來，解錯就退回誤判）；不對稱是刻意的：留著沒用的測試只是雜訊，安靜刪掉有用的測試才是這張單要防的錯。\n\n刻意不用 mtime：foreign_incident.py 自己就 untracked 活了 78 班，那時 mtime 早過任何寬限但它每小時在跑。既有 live_authoring 寬限問的是「有人剛動過嗎」，本分類器問的是「這東西活著嗎」，兩者互補，都保留。\n\n接線刻意最小：只改 blocker 的指示文字（live → 未提交的活躍碼，需要收養決策，不要清除，並附活性證據），closeable 仍 False —— 髒著就是沒收乾淨，而收養與否是決策，不是這個函式的權限。依單內要求沒有另開第二個 gate 或第二條通知管道（反 alert-stacking），是既有 incident 的欄位升級。\n\n驗收（任務指定 fixture 全中）：foreign_incident.py 判 live，證據就是被 dispatch_slot_budget.py 引用 —— 正是本單點名的那層關係；phase_z.py、測試組同為 live；tests/.!71268!* 與 work_log.json.bak_* 為 dead。scripts/tests/test_phase_z_foreign_incident.py 加 5 測試（含「docs/queue 提及不算活性」防過鬆、「live 改指示但不改判定」防過寬），28 passed；test_dispatch_slot_budget + test_phase_z_quarantine_checkpoint 18 passed。\n\n實跑當前 43 個 dirty 路徑：24 live / 19 dead，4.9s。過半是活的碼。"
   }
 ]

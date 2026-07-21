@@ -395,6 +395,9 @@ def refill_trending_candidates() -> dict[str, Any]:
     feed = _load_feed_for_dedup()
     added: list[str] = []
     skipped: list[dict[str, str]] = []
+    clean: list[dict[str, Any]] = []
+    near_miss: list[tuple[dict[str, Any], TopicScreen]] = []
+
     for candidate in _extract_trending_candidates(payload):
         task = _build_trending_task(candidate)
         screen = _screen_trending_topic(task["title"], task.get("description", ""), feed)
@@ -410,15 +413,53 @@ def refill_trending_candidates() -> dict[str, Any]:
                 "dup_of": ",".join(str(m.get("id")) for m in screen.matches[:3]),
             })
             continue
-        # Not blocked, but the screen still has something to say -> hand the near
-        # misses to the writer agent instead of dropping them on the floor.
         task["dedup_screen"] = screen.as_task_field()
+        # 2026-07-22: a non-blocking verdict that still NAMES matched articles is
+        # not the same as a clean one. On 2026-07-16 all three of ai變現 /
+        # 債市波動度 / ai支出 passed here as warn / unjudged_thin_signature, and
+        # each screen record named the exact article the writer agent later cited
+        # when it refused to write (mile_f5f4cb43 / mile_d12825bb / mile_0fa841ed).
+        # The evidence was present at generation time and thrown away; the refusal
+        # then cost a P1 dispatch each and landed as status=failed, which the
+        # dreaming retry detector read as "needs a clearer brief" (it does not —
+        # the arcs are permanently covered).
+        # Fix is preference, not a new block: named-match candidates go to the back
+        # of the queue and are only used when no clean candidate exists. The loop
+        # already had other candidates to reach for. Hard-blocking them instead
+        # would risk the content blackhole that got the publish-time arc gate
+        # downgraded to warn-only on 2026-06-23.
+        if screen.matches:
+            near_miss.append((task, screen))
+        else:
+            clean.append(task)
+
+    for task in clean:
         if _append_task(task):
             added.append(task["id"])
-            if len(added) >= 1:
+            break
+        skipped.append({"id": task["id"], "reason": "already_exists"})
+
+    if not added:
+        for task, screen in near_miss:
+            # Demoted: a writer agent must resolve the named arc before spending a
+            # slot on it, so it must not outrank genuinely clean work.
+            task["priority"] = max(int(task.get("priority", 1)), 2)
+            task["dedup_followup_required"] = (
+                "生成端查重點名了下列可能同 arc 的已發文章："
+                + ", ".join(str(m.get("id")) for m in screen.matches[:3])
+                + "。開寫前必做 3-layer 查重：確認撞 arc 就換軸或回報 arc-covered，不要硬寫。"
+            )
+            if _append_task(task):
+                added.append(task["id"])
+                skipped.append({
+                    "id": task["id"],
+                    "reason": "used_near_miss_fallback",
+                    "detail": screen.reason,
+                    "dup_of": ",".join(str(m.get("id")) for m in screen.matches[:3]),
+                })
                 break
-        else:
             skipped.append({"id": task["id"], "reason": "already_exists"})
+
     return {"ok": True, "added": added, "skipped": skipped}
 
 

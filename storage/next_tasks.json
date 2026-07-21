@@ -28121,7 +28121,7 @@
     "title": "研究 backlog fallback: 時序基礎模型 × HAR 的預測組合誠實檢定（問組合是否進 MCS，不是問誰贏）— 對 SPY/0050.TW/TX，把免費開源 TSFM（TimesFM/TTM 權重）與 Log-HAR 做 equal-weight 與 bias-corrected 組合，用 MCS + DM-HLN 檢定組合是否穩定進 superior set；免費開源模型 + yfinance/TAIFEX（來源：2025-26 TSFM vs 計量 benchmark + corrected forecast combinations 熱潮）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 時序基礎模型 × HAR 的預測組合誠實檢定（問組合是否進 MCS，不是問誰贏）— 對 SPY/0050.TW/TX，把免費開源 TSFM（TimesFM/TTM 權重）與 Log-HAR 做 equal-weight 與 bias-corrected 組合，用 MCS + DM-HLN 檢定組合是否穩定進 superior set；免費開源模型 + yfinance/TAIFEX（來源：2025-26 TSFM vs 計量 benchmark + corrected forecast combinations 熱潮）。差異化：庫內 ML ceiling 9 次確認 → 定位為 forecas | 來源 section: 期刊主題挖掘 batch（2026-07-07；research_backlog all-covered fallback → hourly-20 派 general-purpose agent 掃 jpm/faj/jfm/jfec/jbes/joe/aer 2025-26 趨勢層級補料。刻意鎖 forecast-eval 方法學護城河（fluctuation test / mincer-zarnowitz / realized-cov / harq-contrarian）+ 淨成本 vt + realized-dispersion / vrp 時段結構，避開兩個飽和 null 弧。）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -28218,11 +28218,29 @@
         "to": "pending",
         "by": "cleanup",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-21T23:11:53.437593+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:11:54.409544+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:12:22.061733+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
       }
     ],
-    "started_at": "2026-07-14T17:10:09.797457+00:00",
-    "completed_at": "2026-07-14T17:12:52.321465+00:00",
-    "result": "Created diagnostic experiment + HAR/EWMA/MCS harness for SPY, 0050.TW, TAIFEX_TX. Primary TimesFM/TTM evaluation blocked: TimesFM weights not cached after >150s smoke test; TTM dry-run would downgrade project scikit-learn. Results explicitly BLOCKED, no fake TSFM forecasts.\n\n已交 compute queue job k1711_tsfm_har_mcs（MCS 5000-boot × 數百 cell，實測超出 fire 50min cap → 依規則走 async worker）。salvaged pipeline 在 worktree dispatch-slot-1-eeb5a46e-tsfm-har，19/19 自帶測試通過。job 完成後由 PHASE A followup 接手（驗 primary cell → experiment_gates → review_verdict → merge → knowledge）。\n\ndispatched to compute job agent-brief_tsfm_har_mcs-6345e3; awaiting PHASE A collection",
+    "started_at": "2026-07-21T23:11:54.409531+00:00",
+    "completed_at": "2026-07-21T23:12:22.061713+00:00",
+    "result": "Created diagnostic experiment + HAR/EWMA/MCS harness for SPY, 0050.TW, TAIFEX_TX. Primary TimesFM/TTM evaluation blocked: TimesFM weights not cached after >150s smoke test; TTM dry-run would downgrade project scikit-learn. Results explicitly BLOCKED, no fake TSFM forecasts.\n\n已交 compute queue job k1711_tsfm_har_mcs（MCS 5000-boot × 數百 cell，實測超出 fire 50min cap → 依規則走 async worker）。salvaged pipeline 在 worktree dispatch-slot-1-eeb5a46e-tsfm-har，19/19 自帶測試通過。job 完成後由 PHASE A followup 接手（驗 primary cell → experiment_gates → review_verdict → merge → knowledge）。\n\ndispatched to compute job agent-brief_tsfm_har_mcs-6345e3; awaiting PHASE A collection\n\nalready_covered — K1711 是本任務的嚴格超集（研究問題逐字相同、7 項交付物全覆蓋或超集），Codex full-surface review PASS、11/11 檔 sha 校驗無漂移。不開新 kid、不重跑（headline caveat 是 retrospective pseudo-OOS，屬永久性質，重跑只複製同一限制）。裁決檔 dedup_verdict_tsfm_har_mcs.json 已由 worktree 合併進 main。衍生高價值 followup：K1711 線上無讀者向文章覆蓋 → 已建 k1711_general_article_from_tsfm_dedup（general 版 dedup gate=clean；research 版 block_arc_dup 不寫）。",
     "last_released_at": "2026-07-21T21:50:02.919024+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "adjudicated_at": "2026-07-18T15:14:21.054308+00:00",
@@ -35177,7 +35195,7 @@
   },
   {
     "id": "trending_repost_2026_07_17_ai變現",
-    "status": "failed",
+    "status": "closed_no_action",
     "task_type": "trending_repost",
     "title": "[trending_repost] 科技巨頭AI變現期延遲？期權市場定價的雙向尾部風險",
     "priority": 1,
@@ -35185,11 +35203,16 @@
     "created_at": "2026-07-16T22:00:14+00:00",
     "completed_at": "2026-07-16T22:10:10.956928+00:00",
     "tombstone": true,
-    "archived_at": "2026-07-19T23:01:03.986632+00:00"
+    "archived_at": "2026-07-19T23:01:03.986632+00:00",
+    "terminalized_at": "2026-07-21T23:17:30+00:00",
+    "terminalized_reason": "deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-21T23:17:30+00:00",
+    "blocked_note": "非執行失敗，是正確拒寫。撞 mile_f5f4cb43（2026-06-30 published；同 MSFT/GOOGL/META/AMZN × CapEx 變現缺口 → IV skew）。arc 覆蓋為永久性質，retry 只會再產生一次重複內容 → terminal retire，不重派。"
   },
   {
     "id": "trending_repost_2026_07_17_債市波動度",
-    "status": "failed",
+    "status": "closed_no_action",
     "task_type": "trending_repost",
     "title": "[trending_repost] 通膨降溫與降息角力，MOVE指數如何透露美債避險買盤？",
     "priority": 1,
@@ -35197,11 +35220,16 @@
     "created_at": "2026-07-16T22:00:18+00:00",
     "completed_at": "2026-07-16T22:10:23.611358+00:00",
     "tombstone": true,
-    "archived_at": "2026-07-19T23:01:03.986632+00:00"
+    "archived_at": "2026-07-19T23:01:03.986632+00:00",
+    "terminalized_at": "2026-07-21T23:17:31+00:00",
+    "terminalized_reason": "deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-21T23:17:31+00:00",
+    "blocked_note": "非執行失敗，是正確拒寫。撞 mile_d12825bb（2026-07-06 published；同 MOVE/美債 × 利率政策不確定性 → 債市 IV 不對稱定價）。terminal retire，不重派。"
   },
   {
     "id": "trending_repost_2026_07_17_ai支出",
-    "status": "failed",
+    "status": "closed_no_action",
     "task_type": "trending_repost",
     "title": "[trending_repost] 雲端四巨頭年燒六千億，AI波動率偏斜如何避險？",
     "priority": 1,
@@ -35209,7 +35237,12 @@
     "created_at": "2026-07-16T22:00:18+00:00",
     "completed_at": "2026-07-16T22:10:23.384105+00:00",
     "tombstone": true,
-    "archived_at": "2026-07-19T23:01:03.986632+00:00"
+    "archived_at": "2026-07-19T23:01:03.986632+00:00",
+    "terminalized_at": "2026-07-21T23:17:31+00:00",
+    "terminalized_reason": "deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-21T23:17:31+00:00",
+    "blocked_note": "非執行失敗，是正確拒寫。撞 mile_0fa841ed（2026-07-05 published；同四大巨頭 AI CapEx × IV skew），此 arc 30 日內另有 mile_f5f4cb43/mile_49616ac2/mile_622a2b73/mile_ed39c127 共 4 篇，主題已飽和。terminal retire，不重派。"
   },
   {
     "id": "assign_arcdedup_bigtech_vocab_20260717",
@@ -36485,7 +36518,7 @@
     "description": "Failed task trending_repost_2026_07_17_ai變現 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-17T21:25:01.224457+00:00）。\n證據：task trending_repost_2026_07_17_ai變現 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-17T21:25:01.224457+00:00",
     "dreaming": {
@@ -36495,7 +36528,30 @@
       "governance_target": null
     },
     "follows_up_on": "trending_repost_2026_07_17_ai變現",
-    "priority_note": "dreaming: severity escalated to critical on 2026-07-21 (was P3)"
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-21 (was P3)",
+    "status_history": [
+      {
+        "ts": "2026-07-21T23:14:27.091124+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:14:27.346778+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:17:50.160068+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      }
+    ],
+    "started_at": "2026-07-21T23:14:27.346764+00:00",
+    "completed_at": "2026-07-21T23:17:50.160053+00:00",
+    "result": "裁決：不 retry，terminal retire。三張 2026-07-17 trending_repost 都不是執行失敗，是 writer agent 正確拒寫（各自撞 mile_f5f4cb43 / mile_d12825bb / mile_0fa841ed）。已用 mark_task_blocked --reason deprecated 標成 closed_no_action + 具名 dup 理由，dreaming 不會再把它們當孤兒失敗。\n\n根因（比本單原本問的更上游）：這三張的生成端查重 **每一張都點名了正確的重複文章**（dedup_decisions.jsonl 2026-07-16T22:00 三筆：unjudged_thin_signature saturation=4 matched mile_f5f4cb43／warn_arc_near_miss matched mile_d12825bb／warn_arc_near_miss matched mile_0fa841ed），但 refill caller 只把 advisory 塞進 task 欄位就照樣建 P1。證據在生成當下就有，被丟掉，22 小時後才由 writer agent 花掉三個 P1 dispatch 重新查一次。\n\n修法（refill_reader_facing_pool.py refill_trending_candidates）：改成兩段選擇 —— 有具名 match 的候選退到後備，優先取乾淨候選；全部都有 match 時才回頭用後備，並降級到 P2 + 寫入 dedup_followup_required 點名要查的文章 id。不改成硬 block，是因為 2026-06-23 publish 端 arc gate 正是因 false-positive 造成內容黑洞才被降為 warn-only。tests/test_reader_facing_refill.py 加 2 個回歸測試（含 fallback 不得無聲），15 passed。"
   },
   {
     "id": "dreaming_missing_retry_strategy_trending_repost_2026_07_17",
@@ -36503,7 +36559,7 @@
     "description": "Failed task trending_repost_2026_07_17_債市波動度 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-17T21:25:01.224457+00:00）。\n證據：task trending_repost_2026_07_17_債市波動度 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-17T21:25:01.224457+00:00",
     "dreaming": {
@@ -36512,11 +36568,34 @@
       "occurrences": 1,
       "governance_target": null
     },
-    "follows_up_on": "trending_repost_2026_07_17_債市波動度"
+    "follows_up_on": "trending_repost_2026_07_17_債市波動度",
+    "status_history": [
+      {
+        "ts": "2026-07-21T23:17:50.398715+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:17:50.645059+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:17:50.891423+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      }
+    ],
+    "started_at": "2026-07-21T23:17:50.645045+00:00",
+    "completed_at": "2026-07-21T23:17:50.891409+00:00",
+    "result": "同批裁決（債市波動度）：見 dreaming_missing_retry_strategy_trending_repost_2026_07_17_ai。非執行失敗，是正確拒寫（撞 mile_d12825bb），已 terminal retire；上游 refill 具名 near-miss 照樣建 P1 的缺陷已修 + 回歸測試。"
   },
   {
     "id": "trending_repost_2026_07_18_fed政策",
-    "status": "failed",
+    "status": "closed_no_action",
     "task_type": "trending_repost",
     "title": "[trending_repost] 聯準會重塑升息預期，如何用 VIX 衡量政策轉向風險？",
     "priority": 1,
@@ -36524,11 +36603,16 @@
     "created_at": "2026-07-17T22:00:15+00:00",
     "completed_at": "2026-07-17T22:11:00.606667+00:00",
     "tombstone": true,
-    "archived_at": "2026-07-20T23:07:38.524087+00:00"
+    "archived_at": "2026-07-20T23:07:38.524087+00:00",
+    "terminalized_at": "2026-07-21T23:18:16+00:00",
+    "terminalized_reason": "deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-21T23:18:16+00:00",
+    "blocked_note": "非執行失敗，是正確拒寫：FOMC-VIX 事件窗 + CBOE SKEW 增量預測力（NULL）feed 已發 ~15 篇（mile_f46b6320/d6d27fbb/c5abaed7/64b710d3 等），且該週無新 FOMC 錨點，改寫只會重複既有 NULL 結論。terminal retire。"
   },
   {
     "id": "trending_repost_2026_07_18_台股崩跌",
-    "status": "failed",
+    "status": "closed_no_action",
     "task_type": "trending_repost",
     "title": "[trending_repost] 台股創單日最大跌幅，選擇權 Skew 透露何種超跌訊號？",
     "priority": 1,
@@ -36536,7 +36620,12 @@
     "created_at": "2026-07-17T22:00:23+00:00",
     "completed_at": "2026-07-17T22:11:01.141635+00:00",
     "tombstone": true,
-    "archived_at": "2026-07-20T23:07:38.524087+00:00"
+    "archived_at": "2026-07-20T23:07:38.524087+00:00",
+    "terminalized_at": "2026-07-21T23:18:16+00:00",
+    "terminalized_reason": "deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-21T23:18:16+00:00",
+    "blocked_note": "非執行失敗，是正確拒寫且是最嚴重的一種：seed 主題本身是 refill scanner 合成的假事件（宣稱『歷史性崩跌 2953 點 -6.5%』），與 primary source 直接矛盾 —— ^TWII 2026-07-17 bar = NaN，7/16 收 45625（前日 -0.01% 持平）。寫下去就是造假。題目不可救，terminal retire；scanner 端的 primary-source 驗證缺口另立 trending_scan_primary_source_verification 追。"
   },
   {
     "id": "trending_repost_2026_07_18_ai支出",
@@ -37744,7 +37833,7 @@
     "description": "Failed task trending_repost_2026_07_18_fed政策 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-18T21:25:00.535671+00:00）。\n證據：task trending_repost_2026_07_18_fed政策 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-18T21:25:00.535671+00:00",
     "dreaming": {
@@ -37753,7 +37842,30 @@
       "occurrences": 1,
       "governance_target": null
     },
-    "follows_up_on": "trending_repost_2026_07_18_fed政策"
+    "follows_up_on": "trending_repost_2026_07_18_fed政策",
+    "status_history": [
+      {
+        "ts": "2026-07-21T23:18:46.556038+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:18:46.806600+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:18:47.052147+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      }
+    ],
+    "started_at": "2026-07-21T23:18:46.806579+00:00",
+    "completed_at": "2026-07-21T23:18:47.052133+00:00",
+    "result": "同批裁決（見 dreaming_missing_retry_strategy_trending_repost_2026_07_17_ai）：不 retry，terminal retire。fed政策 = arc-saturated 正確拒寫（FOMC-VIX/SKEW NULL 已發 ~15 篇、該週無新錨點）；台股崩跌 = scanner 合成假事件（宣稱台股崩 2953 點，但 ^TWII 7/16 收 45625 幾乎持平、7/17 bar 為 NaN），寫下去即造假，題目不可救。兩張已標 closed_no_action + 具名理由。scanner 端 primary-source 驗證缺口已立案 trending_scan_primary_source_verification (P2)。"
   },
   {
     "id": "dreaming_missing_retry_strategy_trending_repost_2026_07_18",
@@ -37761,7 +37873,7 @@
     "description": "Failed task trending_repost_2026_07_18_台股崩跌 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-18T21:25:00.535671+00:00）。\n證據：task trending_repost_2026_07_18_台股崩跌 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-18T21:25:00.535671+00:00",
     "dreaming": {
@@ -37770,7 +37882,30 @@
       "occurrences": 1,
       "governance_target": null
     },
-    "follows_up_on": "trending_repost_2026_07_18_台股崩跌"
+    "follows_up_on": "trending_repost_2026_07_18_台股崩跌",
+    "status_history": [
+      {
+        "ts": "2026-07-21T23:18:47.300843+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:18:47.555576+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:18:47.863254+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      }
+    ],
+    "started_at": "2026-07-21T23:18:47.555558+00:00",
+    "completed_at": "2026-07-21T23:18:47.863241+00:00",
+    "result": "同批裁決（見 dreaming_missing_retry_strategy_trending_repost_2026_07_17_ai）：不 retry，terminal retire。fed政策 = arc-saturated 正確拒寫（FOMC-VIX/SKEW NULL 已發 ~15 篇、該週無新錨點）；台股崩跌 = scanner 合成假事件（宣稱台股崩 2953 點，但 ^TWII 7/16 收 45625 幾乎持平、7/17 bar 為 NaN），寫下去即造假，題目不可救。兩張已標 closed_no_action + 具名理由。scanner 端 primary-source 驗證缺口已立案 trending_scan_primary_source_verification (P2)。"
   },
   {
     "id": "ci-red-29660781857",
@@ -37786,145 +37921,27 @@
   },
   {
     "id": "trending_repost_2026_07_19_美債波動",
-    "title": "[trending_repost] Fed降息循環終點？美債隱含波動率與利差交易風險",
-    "description": "分析聯準會降息尾聲下，MOVE指數與長短天期美債利差的連動關係。可量化：以美債隱含波動率歷史分位數，評估日圓套利交易平倉對新興市場的二次衝擊。",
-    "task_type": "trending_repost",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-18T22:00:20+00:00",
+    "task_type": "trending_repost",
+    "title": "[trending_repost] Fed降息循環終點？美債隱含波動率與利差交易風險",
+    "priority": 1,
     "source": "reader_facing_refill",
-    "tags": [
-      "trending_repost",
-      "reader_facing",
-      "auto_refill"
-    ],
-    "dedup_screen": {
-      "verdict": "warn_arc_near_miss",
-      "blocked": false,
-      "reason": "fuzzy descriptive arc near-miss of mile_d12825bb, mile_35875d6f, mile_4901f7bc; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
-      "saturation": 3,
-      "theme_terms": [
-        "指數",
-        "交易",
-        "move",
-        "fed",
-        "分位",
-        "場的"
-      ],
-      "near_misses": [
-        {
-          "id": "mile_d12825bb",
-          "title": "同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感"
-        },
-        {
-          "id": "mile_35875d6f",
-          "title": "Fed 放鷹、VIX 卻破 16：這種平靜，先問它三個問題再決定信不信"
-        },
-        {
-          "id": "mile_4901f7bc",
-          "title": "AI 一季燒五百億，該擔心嗎？別看 VIX，看波動率市場真正在怕的三件事"
-        },
-        {
-          "id": "mile_68285aa0",
-          "title": "國防預算翻倍喊得這麼大聲，國防 ETF 卻沒按劇本震盪"
-        },
-        {
-          "id": "mile_44ab1acc",
-          "title": "指數安靜，不代表風險沒聲音"
-        }
-      ],
-      "screened_at": "2026-07-18T22:00:22+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-18T22:07:50.710016+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
-      },
-      {
-        "ts": "2026-07-18T22:07:50.943660+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
-      },
-      {
-        "ts": "2026-07-18T22:23:53.968471+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
-      }
-    ],
-    "started_at": "2026-07-18T22:07:50.943645+00:00",
+    "created_at": "2026-07-18T22:00:20+00:00",
     "completed_at": "2026-07-18T22:23:53.968456+00:00",
-    "result": "已寫成並發佈為 draft（lazypack async render 後由 release cron 上架）。美債題=mile_21e45133 日圓carry傳導鏈NULL；台股題=mile_47c4bc3e 融資領先性混合偏NULL。兩篇 anti_ai_gate exit 0。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T23:08:55.836739+00:00"
   },
   {
     "id": "trending_repost_2026_07_19_台股槓桿",
-    "title": "[trending_repost] 槓桿踩踏引發暴跌？台股歷史性回檔下的波動率避險策略",
-    "description": "分析 2026 年 7 月台股因 AI 概念股獲利了結與散戶融資斷頭導致的歷史性大跌。可量化角度：計算融資餘額變動率與台股波動率指數（TAIMEX VIX）的領先滯後關係，並評估在融資維持率跌破特定門檻時，買入價外 Put 的避險績效。",
-    "task_type": "trending_repost",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-18T22:00:33+00:00",
+    "task_type": "trending_repost",
+    "title": "[trending_repost] 槓桿踩踏引發暴跌？台股歷史性回檔下的波動率避險策略",
+    "priority": 1,
     "source": "reader_facing_refill",
-    "tags": [
-      "trending_repost",
-      "reader_facing",
-      "auto_refill"
-    ],
-    "dedup_screen": {
-      "verdict": "unjudged_thin_signature",
-      "blocked": false,
-      "reason": "arc gate had no anchor (no distinctive entity, no experiment ref) — it did not look; theme saturation 3 < 5 is the only signal that ran. Caller must do the 3-layer dedup check.",
-      "saturation": 3,
-      "theme_terms": [
-        "台股",
-        "指數",
-        "的波",
-        "避險",
-        "股波",
-        "槓桿"
-      ],
-      "near_misses": [
-        {
-          "id": "mile_e13e5485",
-          "title": "台股恐慌 37、美股只剩 16：一道 20 點的「恐慌溫差」，用三個問題就能讀懂"
-        },
-        {
-          "id": "mile_3e11060d",
-          "title": "台股恐慌居高不下，美股早就退燒了：台版 VIX 站上 37 在說什麼"
-        },
-        {
-          "id": "mile_c43717b0",
-          "title": "台股波動有辦法「預測尾巴」嗎？一個對退休族有用的風險量化方法"
-        }
-      ],
-      "screened_at": "2026-07-18T22:00:35+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-18T22:07:51.213934+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
-      },
-      {
-        "ts": "2026-07-18T22:07:51.447197+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
-      },
-      {
-        "ts": "2026-07-18T22:23:54.204968+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-2-1da62ba635874b0fa8f863a385292179"
-      }
-    ],
-    "started_at": "2026-07-18T22:07:51.447184+00:00",
+    "created_at": "2026-07-18T22:00:33+00:00",
     "completed_at": "2026-07-18T22:23:54.204948+00:00",
-    "result": "已寫成並發佈為 draft（lazypack async render 後由 release cron 上架）。美債題=mile_21e45133 日圓carry傳導鏈NULL；台股題=mile_47c4bc3e 融資領先性混合偏NULL。兩篇 anti_ai_gate exit 0。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T23:08:55.836739+00:00"
   },
   {
     "id": "trending_repost_2026_07_19_地緣避險",
@@ -42425,7 +42442,8 @@
         "note": "supervisor_kill_8157aca3"
       }
     ],
-    "last_release_reason": "supervisor_kill_8157aca3"
+    "last_release_reason": "supervisor_kill_8157aca3",
+    "workspace_finding": "2026-07-22 07:20（hourly-slot-1-746dc598a8e04ea6a7b2247d507653db 巡到）：接手前先看工作區 —— 殘留 4 疑似已被某一班寫完但從未提交也未記 work_log。src/volpred/ops/questions.py 有 +348 行未提交改動（member_qa_pair_key / load_member_qa_adjudications / get_member_qa_adjudication / _record_member_qa_adjudication / _agy_warn_band_adjudicator / adjudicate_member_qa_warn_pair，即殘留 4 要求的『warn 帶一次 LLM 語意裁決並持久化、永不重算』），tests/test_member_qa_duplicate_gate.py 有 +508 行未提交測試，實跑 69 passed。這些改動在 commit 7371367d7（03:17，落地殘留 2+3）之後才出現，且 work_log 無任何對應紀錄。接手者請先 git diff 確認這批是否可用，不要從頭重寫 855 行；本班依規則不代為 commit（不碰 git、且無法確認是否有互動 session 正在編輯）。仍未動的是殘留 1（question_id 回填後才可把 gate 升 fail-closed，順序不可顛倒）與殘留 5（release_pool 路徑）。"
   },
   {
     "id": "platform_ops_release_audit_fix_mile_21e45133_r2",
@@ -42910,11 +42928,34 @@
     "description": "## 發生什麼\n\n2026-07-20 04:xx（slot-1）處理 incident `assign_65b27c8b` / `assign_62a9afb6` 時發現：\n關閉條件叫人做的事，照字面執行會刪掉 incident 系統自己。\n\n清單裡的 53 個「無人認領的卡住檔案」其實是**正在運行卻從未提交**的核心系統碼：\n\n- `src/volpred/ops/foreign_incident.py`（untracked）= incident 模組本身\n- `scripts/dispatch_supervisor/phase_z.py` +348 行 = quarantine checkpoint 機制\n- `scripts/dispatch_slot_budget.py` +42 行 = incident → 降載的 enforcement owner\n- `scripts/tests/test_phase_z_*.py`、`test_scheduler_max_slots.py` 等整組測試（untracked）\n\n該班改採**收養**（commit `86d564690`，180 項測試綠 + 50/53 路徑 quarantine bytes 逐位元一致），\nincident 才以正當方式關閉、cap 由 2 恢復 6。\n\n## 問題在哪\n\n`incident_closeable()` 目前只問三件事：`quarantined` / `live_workspace` / `still_dirty_in_main`。\n這三個訊號**無法區分**兩種本質相反的狀態：\n\n| | 無主殘留（該清除） | 未提交的活躍碼（該收養） |\n|---|---|---|\n| still_dirty_in_main | true | true |\n| quarantined | true | true |\n| 正確動作 | 刪 | commit |\n\n於是關閉條件對後者給出的指示是錯的，而且錯得很安靜 —— 它會叫人刪掉系統賴以運作的東西。\n`foreign_incident.py` 的 docstring 說「刻意不做的事：不猜測這些 bytes 是誰的」（D1 停止猜測式收編），\n這個克制是對的；但「不猜擁有者」不該等於「不分辨死活」。**活性是可機械判定的，不需要猜。**\n\n## 該做什麼（設計方向，非硬性規格）\n\n在 `incident_closeable()` 之外加一層 **liveness classification**，可用的機械訊號例如：\n\n1. **被 import / 被執行**：路徑是否被 repo 內其他 tracked 檔 import 或呼叫\n   （`foreign_incident.py` 被 `dispatch_slot_budget.py` import，這關係在 tracked 檔裡看得到）。\n2. **有對應測試且測試綠**：`scripts/tests/test_<name>.py` 存在且通過。\n3. **untracked 但被 tracked 檔引用** = 最強的活性訊號，也是本次案例的特徵。\n\n分類結果應改變 incident 呈現給執行者的**指示**，而不是自動執行：\n- `dead` → 現行文字（保存後清除）\n- `live` → 「這是未提交的活躍碼，需要收養決策」，並附上活性證據\n\n## 驗收\n\n- 用本次 53 個路徑當 fixture，分類器要把 `foreign_incident.py` / `phase_z.py` / 測試組判為 `live`，\n  把 `tests/.!71268!*`、`work_log.json.bak_*` 判為 `dead`。\n- 新增測試放 `scripts/tests/`，比照既有 `test_phase_z_foreign_incident.py` 風格。\n- 不要為此再開第二個 gate 或第二條通知管道（反 alert-stacking）—— 這是既有 incident 的欄位升級。\n\n## 為什麼值得做\n\n這次是靠人工停下來查身分才沒鑄成大錯。下一班未必會查 —— 關閉條件寫得越像機械可驗，\n越容易被直接照做。把「別刪掉活的東西」變成機器判斷，才不用每次都指望執行者多想一步。\n",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-dispatch",
     "created_at": "2026-07-19T20:19:59.885191+00:00",
     "parent_task_id": "assign_65b27c8b",
-    "created_by": "hourly-slot-1-ced9d83efd504911be388eccdfe22d97"
+    "created_by": "hourly-slot-1-ced9d83efd504911be388eccdfe22d97",
+    "status_history": [
+      {
+        "ts": "2026-07-21T23:21:15.894004+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:21:16.122470+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      },
+      {
+        "ts": "2026-07-21T23:30:55.068191+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db"
+      }
+    ],
+    "started_at": "2026-07-21T23:21:16.122450+00:00",
+    "completed_at": "2026-07-21T23:30:55.068173+00:00",
+    "result": "在 incident_closeable() 之外加 liveness classification（src/volpred/ops/foreign_incident.py）：classify_path_liveness() + referenced_by_tracked() + _has_passing_test_file()，逐路徑判 live/dead 並附證據。\n\n訊號（全部機械可判、不猜擁有者）：(1) 被**已提交**的碼引用 —— git grep 預設只搜 tracked，pathspec 再限定碼與設定並排除 docs/ 與 storage/，因為 doc 或舊任務描述提到檔名不是使用（不排除的話幾乎不會有東西判 dead，等於沒分類）；(2) 有對應測試檔；(3) 路徑自己是 tests/ 下的 test_*.py —— 測試檔不會被任何碼 import，referenced_by 對它永遠是空的，2026-07-20 整組測試就是這樣被算成無主殘留。\n\n刻意不用 mtime：foreign_incident.py 自己就 untracked 活了 78 班，那時 mtime 早過任何寬限但它每小時在跑。既有的 live_authoring 寬限回答的是『有人剛動過嗎』，不是『這東西活著嗎』—— 兩者互補，都保留。\n\n分類只改**給執行者的指示**，不改 closeable：live 路徑的 blocker 文字改成『未提交的活躍碼，需要收養決策，不要清除』並附活性證據；closeable 仍 False（髒著就是沒收乾淨），收養與否是決策不是本函式的權限。\n\n驗收（任務指定 fixture）：foreign_incident.py（證據 = 被 dispatch_slot_budget.py 引用，正是本單點名的關係）/ phase_z.py / 測試組 → live；tests/.!71268!* 與 work_log.json.bak_* → dead。scripts/tests/test_phase_z_foreign_incident.py 加 5 個測試（含『docs/queue 提及不算活性』與『live 改指示但不改判定』），28 passed；test_dispatch_slot_budget + test_phase_z_quarantine_checkpoint 18 passed。\n\n實跑當前工作區 43 個 dirty 路徑：24 live / 19 dead，耗時 4.9s（每班一次，可接受）。過半是活的碼，印證本單前提。"
   },
   {
     "id": "k1698_rev3_remediation",
@@ -51257,5 +51298,101 @@
     "residual": "待 lazypack 圖組生成後才會 release（publish_draft lazypack gate）",
     "completed_at": "2026-07-21T22:26:45.911922+00:00",
     "result": "選題經 3-layer 查重後改軸（原「油價×VIX 尾部避險」arc 近一週已發 3 篇）→ 改為黃金/VIX/原油三避險工具的訊號分工。稿件 4622 字入庫 mile_63ec8636，anti_ai_gate exit 0、dedup verdict clean。證據：8 次地緣衝突事件窗（2004 起 5658 交易日，yfinance）。黃金 8/8 次事件當日與第 4 日收漲 binomial p=0.0078 顯著；VIX p=0.070、原油 p=1.00 不顯著。「黃金漲但 VIX 跌」分歧日 raw t 檢定 p=0.008 看似顯著，但控制前 20 日 RV 與當日報酬後 p=0.276 不顯著 → 文中誠實寫檢定沒過。Writer 另校正我 brief 的事實錯誤：黃金非創高，距 1/29 峰值 -23.2%、YTD -5.6%。2 圖已上傳。殘留：status=draft，待 lazypack 才 release。"
+  },
+  {
+    "id": "k1711_general_article_from_tsfm_dedup",
+    "task_type": "daily_article",
+    "priority": 3,
+    "status": "pending",
+    "source": "dispatch_followup",
+    "title": "K1711 讀者向文章（general）：把時序基礎模型丟進 HAR 池，MCS 超集會變嗎",
+    "description": "來源：compute followup agent-brief_tsfm_har_mcs-6345e3 判定 already_covered（K1711 是嚴格超集），裁決檔 dedup_verdict_tsfm_har_mcs.json 已合併進 main。\n\nK1711 是 Codex full-surface review PASS（blocking_defects=[]，11/11 檔 sha 校驗無漂移）、有四張可發表圖（experiments/k1711/figures/fig1-4），但**線上無任何讀者向文章覆蓋**。\n\n已跑 dedup gate：--audience general → verdict=clean（可寫）；--audience research → block_arc_dup（**research 版不要寫**）。\n\n核心敘事（不可寫成『TSFM 贏了』）：raw TimesFM / TTM 三個資產的 primary superior set 一個都沒進；活下來的是 MZ 重新校準後的組合與 HAR-bearing 組合。MCS 不拒絕 ≠ 贏，也 ≠ 有增量預測資訊。\n必寫 caveat：retrospective pseudo-OOS —— TimesFM/TTM 權重的訓練期晚於評估樣本。\n\n證據包在 experiments/k1711/k1711_results.json + k1711_series.json；圖直接取 figures/。",
+    "parent_compute_job_id": "agent-brief_tsfm_har_mcs-6345e3"
+  },
+  {
+    "id": "trending_scan_primary_source_verification",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch_adjudication",
+    "title": "[造假風險] trending scanner 會合成不存在的市場事件，寫作端才擋得住",
+    "description": "實例：task trending_repost_2026_07_18_台股崩跌。refill scanner 產出的 seed 宣稱台股「歷史性崩跌 2953 點（-6.5%）」，writer agent 查 primary source 發現 ^TWII 2026-07-17 bar = NaN、7/16 收 45625（前日 -0.01% 幾乎持平）—— 事件根本不存在。\n\n為什麼要修：目前唯一攔下它的是 writer agent 的研究誠實自律。這是 prose-level 防線，不是機械閘門；同一個 scanner 只要再合成一次數字更像真的假事件，就可能直接寫成文章發出去。這是平台最不能出的錯。\n\n要做的：trending 候選在**進任務池之前**，凡帶有可查證的量化宣稱（指數點數、漲跌幅、成交量）都必須對 primary source （yfinance / TAIFEX / FRED，視標的而定）核對；對不上就丟棄該候選並寫進 dedup/scan 的 audit log，不得靜默放行。注意 NaN bar 要當『無資料』處理，不可當成 0 或當成驗證通過（同 repo 既有的『沉默被讀成乾淨』bug class）。\n\n相關：2026-07-22 班次同時修了 refill 端『具名 near-miss 照樣建 P1』的缺陷（refill_reader_facing_pool.py 兩段選擇），那條治的是重複，本單治的是造假 —— 兩者都是 scanner 產出未經驗證就變成 P1 任務。"
+  },
+  {
+    "id": "assign_310bd205",
+    "title": "PHASE-Z 卡住檔案 incident（d49753c666db83cf）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n26 個未提交檔案不是任何一班 fire 產出的，最長已連續 20 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/refactor_commit_ownership_state_machine.md — 13 班\n- scripts/audit_silent_fallbacks.py — 12 班\n- scripts/dedupe_next_tasks.py — 13 班\n- scripts/dispatch_slot_budget.py — 16 班\n- scripts/dispatch_supervisor/phase_z.py — 16 班\n- scripts/reap_orphan_deliverables.py — 16 班\n- scripts/tests/test_fire_manifest.py — 13 班\n- scripts/tests/test_orphan_namespace_registry.py — 16 班\n- scripts/tests/test_phase_z_foreign_incident.py — 16 班\n- scripts/worktree_gc.py — 13 班\n- src/volpred/cli.py — 5 班\n- src/volpred/ops/content.py — 5 班\n- src/volpred/ops/fire_manifest.py — 13 班\n- src/volpred/ops/foreign_incident.py — 16 班\n- src/volpred/ops/next_tasks.py — 13 班\n- src/volpred/ops/task_signature.py — 13 班\n- src/volpred/publisher/publisher.py — 5 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png — 20 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png — 20 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png — 20 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py — 20 班\n- storage/reports/mile_e4002f4f.json — 5 班\n- tests/test_member_qa_duplicate_gate.py — 5 班\n- tests/test_task_signature.py — 13 班\n- tests/test_topic_cluster_gate.py — 5 班\n- tests/test_worktree_gc.py — 13 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T233800930862Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-21T23:38:03.070418+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "d49753c666db83cf",
+      "paths": [
+        "docs/refactor_commit_ownership_state_machine.md",
+        "scripts/audit_silent_fallbacks.py",
+        "scripts/dedupe_next_tasks.py",
+        "scripts/dispatch_slot_budget.py",
+        "scripts/dispatch_supervisor/phase_z.py",
+        "scripts/reap_orphan_deliverables.py",
+        "scripts/tests/test_fire_manifest.py",
+        "scripts/tests/test_orphan_namespace_registry.py",
+        "scripts/tests/test_phase_z_foreign_incident.py",
+        "scripts/worktree_gc.py",
+        "src/volpred/cli.py",
+        "src/volpred/ops/content.py",
+        "src/volpred/ops/fire_manifest.py",
+        "src/volpred/ops/foreign_incident.py",
+        "src/volpred/ops/next_tasks.py",
+        "src/volpred/ops/task_signature.py",
+        "src/volpred/publisher/publisher.py",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py",
+        "storage/reports/mile_e4002f4f.json",
+        "tests/test_member_qa_duplicate_gate.py",
+        "tests/test_task_signature.py",
+        "tests/test_topic_cluster_gate.py",
+        "tests/test_worktree_gc.py"
+      ],
+      "streaks": {
+        "docs/refactor_commit_ownership_state_machine.md": 13,
+        "scripts/audit_silent_fallbacks.py": 12,
+        "scripts/dedupe_next_tasks.py": 13,
+        "scripts/dispatch_slot_budget.py": 16,
+        "scripts/dispatch_supervisor/phase_z.py": 16,
+        "scripts/reap_orphan_deliverables.py": 16,
+        "scripts/tests/test_fire_manifest.py": 13,
+        "scripts/tests/test_orphan_namespace_registry.py": 16,
+        "scripts/tests/test_phase_z_foreign_incident.py": 16,
+        "scripts/worktree_gc.py": 13,
+        "src/volpred/cli.py": 5,
+        "src/volpred/ops/content.py": 5,
+        "src/volpred/ops/fire_manifest.py": 13,
+        "src/volpred/ops/foreign_incident.py": 16,
+        "src/volpred/ops/next_tasks.py": 13,
+        "src/volpred/ops/task_signature.py": 13,
+        "src/volpred/publisher/publisher.py": 5,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png": 20,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png": 20,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png": 20,
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py": 20,
+        "storage/reports/mile_e4002f4f.json": 5,
+        "tests/test_member_qa_duplicate_gate.py": 5,
+        "tests/test_task_signature.py": 13,
+        "tests/test_topic_cluster_gate.py": 5,
+        "tests/test_worktree_gc.py": 13
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260721T233800930862Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-21T23:38:03.055781+00:00",
+      "last_seen_at": "2026-07-21T23:38:03.055781+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]

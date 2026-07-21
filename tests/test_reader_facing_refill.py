@@ -177,6 +177,102 @@ def test_refill_trending_skips_arc_duplicate(tmp_path, monkeypatch):
     assert dup_ids == []
 
 
+def test_refill_prefers_clean_candidate_over_named_near_miss(tmp_path, monkeypatch):
+    """A non-blocking verdict that NAMES matched articles must not outrank a clean one.
+
+    2026-07-16 regression: ai變現 / 債市波動度 / ai支出 all passed the generation
+    screen as warn_arc_near_miss / unjudged_thin_signature, and each screen record
+    named the exact article the writer agent later cited when it refused to write.
+    The screen had the evidence; the caller dropped it and queued P1 anyway.
+    """
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setenv("VOLPRED_TRENDING_SCAN_CMD", "echo dummy")
+
+    # near-miss candidate comes FIRST, exactly as on 2026-07-16
+    candidates = [
+        {"id": "ai_capex", "title": "科技巨頭AI變現期延遲", "description": "..."},
+        {"id": "clean_one", "title": "novel arc on green hydrogen vol", "description": "..."},
+    ]
+
+    class _FakeProc:
+        returncode = 0
+        stdout = json.dumps(candidates)
+        stderr = ""
+
+    monkeypatch.setattr(MODULE.subprocess, "run", lambda *a, **kw: _FakeProc())
+    monkeypatch.setattr(MODULE, "_load_feed_for_dedup", lambda: [{"id": "mile_f5f4cb43"}])
+
+    from volpred.ops.topic_dedup import CLEAN, TopicScreen
+
+    def _fake_screen(title, desc, feed):
+        if "AI變現" in title:
+            return TopicScreen(
+                verdict="unjudged_thin_signature",
+                blocked=False,
+                reason="arc gate had no anchor; theme saturation 4 < 5",
+                matches=[{"id": "mile_f5f4cb43", "title": "AI 變現期的隱含波動率拐點"}],
+                saturation=4,
+            )
+        return TopicScreen(verdict=CLEAN, blocked=False, reason="clean")
+
+    monkeypatch.setattr(MODULE, "_screen_trending_topic", _fake_screen)
+
+    result = MODULE.refill_trending_candidates()
+
+    assert result["ok"] is True
+    added_titles = [t["title"] for t in json.loads(next_tasks.read_text(encoding="utf-8"))]
+    assert len(added_titles) == 1
+    assert "hydrogen" in added_titles[0], "clean candidate must win over a named near-miss"
+
+
+def test_refill_falls_back_to_near_miss_when_nothing_is_clean(tmp_path, monkeypatch):
+    """Preference, not a new block: no clean candidate must still yield work.
+
+    Hard-blocking named near-misses would risk the content blackhole that got the
+    publish-time arc gate downgraded to warn-only on 2026-06-23.
+    """
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setenv("VOLPRED_TRENDING_SCAN_CMD", "echo dummy")
+
+    class _FakeProc:
+        returncode = 0
+        stdout = json.dumps([{"id": "only_one", "title": "科技巨頭AI變現期延遲", "description": "..."}])
+        stderr = ""
+
+    monkeypatch.setattr(MODULE.subprocess, "run", lambda *a, **kw: _FakeProc())
+    monkeypatch.setattr(MODULE, "_load_feed_for_dedup", lambda: [{"id": "mile_f5f4cb43"}])
+
+    from volpred.ops.topic_dedup import TopicScreen
+
+    monkeypatch.setattr(
+        MODULE,
+        "_screen_trending_topic",
+        lambda title, desc, feed: TopicScreen(
+            verdict="warn_arc_near_miss",
+            blocked=False,
+            reason="fuzzy descriptive arc near-miss of mile_f5f4cb43",
+            matches=[{"id": "mile_f5f4cb43"}],
+            saturation=4,
+        ),
+    )
+
+    result = MODULE.refill_trending_candidates()
+
+    tasks = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert len(tasks) == 1, "no clean candidate must not mean no work at all"
+    assert tasks[0]["priority"] >= 2, "a task needing arc adjudication must not sit at P1"
+    assert "mile_f5f4cb43" in tasks[0]["dedup_followup_required"]
+    assert any(s.get("reason") == "used_near_miss_fallback" for s in result["skipped"]), (
+        "falling back to a named near-miss must be visible in the receipt, not silent"
+    )
+
+
 # --- Slot-aware event coverage (2026-07-03 NFP T+0 stale-duplicate fix) --------
 
 def test_slot_is_reaction_classification():
