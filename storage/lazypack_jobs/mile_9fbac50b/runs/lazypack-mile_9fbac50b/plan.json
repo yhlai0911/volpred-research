@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "title": "月配息現金流試算 懶人包",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1409/k1409_results.json",
+      "sha256": "9bf3ebbe29cd818d8fdaa216968be56fc28748794d305edb5ae31bd188707a65",
+      "label": "0056/00878/00919 月配息現金流重抽樣模擬結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_method",
+      "info": "method",
+      "style": "professional",
+      "title": "這份試算是怎麼算出來的",
+      "alt": "資料口徑與模擬方法：三檔月配息 ETF 的共同重疊期與區塊重抽樣",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "做法",
+          "body": [
+            "三檔高股息 ETF 按實際張數建倉，配息保留真實除息月曆，只對每股配息金額重抽樣。",
+            "三檔共用同一組抽樣起點以保留跨資產連動，模擬未來三年。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "投入本金",
+          "value": {
+            "source": "results",
+            "path": "results.principal_total",
+            "format": {
+              "kind": "number",
+              "prefix": "NT$ ",
+              "digits": 0,
+              "thousands": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "可用歷史長度",
+          "value": {
+            "source": "results",
+            "path": "data_meta.common_months",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個月"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "月領目標金額，達標的機率有多少",
+      "alt": "單月配息達標機率、平均月配息達標機率，以及單月配息中位數",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "有配息月份單月達目標金額的機率",
+          "value": {
+            "source": "results",
+            "path": "results.monthly_div_stats.all_months_P_ge_10000",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "平均月配息達目標金額的機率",
+          "value": {
+            "source": "results",
+            "path": "results.monthly_div_avg_stats.P_avg_ge_10000",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "單月配息中位數",
+          "value": {
+            "source": "results",
+            "path": "results.monthly_div_stats.all_months_median",
+            "format": {
+              "kind": "number",
+              "prefix": "NT$ ",
+              "digits": 0,
+              "thousands": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "宣傳殖利率與可實現殖利率的落差",
+      "alt": "試算表隱含殖利率、模擬可實現殖利率中位數，以及達到宣傳水準的機率",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "試算表隱含的現金殖利率",
+          "value": {
+            "source": "results",
+            "path": "results.yield_stats.implied_yield_from_chart",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "模擬可實現殖利率中位數",
+          "value": {
+            "source": "results",
+            "path": "results.yield_stats.realized_yield_median",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "可實現殖利率達到宣傳水準的機率",
+          "value": {
+            "source": "results",
+            "path": "results.yield_stats.P_realized_ge_implied",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "研究邊界",
+          "body": [
+            "共同重疊期偏短且嚴重偏多頭，重抽樣無法生出沒經歷過的長空頭。",
+            "非循環區塊重抽樣有標準邊界效應，末端月份被抽中次數略少。"
+          ]
+        }
+      ]
+    }
+  ]
+}

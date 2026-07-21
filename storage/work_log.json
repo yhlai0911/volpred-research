@@ -23369,5 +23369,99 @@
     "owner": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc",
     "commit": null,
     "summary": "0050 分割斷點偵測器被修好 —— 它先前會回報「假的全綠」。本班認領 paper_0050_snapshot_repoint_20260719 後，第一步就是跑它 description 裡逐字寫的驗證指令，結果指令本身不存在。\n\n**故障鏈（三層，每層都讓下一層更難察覺）**：\n1. `scripts/detect_price_split_breaks.py` 被 dead-code sweep（commit a15fba0d7）移進\n   `scripts/_legacy/`。但它是 3 張 open 任務指名的驗證儀器 ——\n   `docs/governance/2026-07/foreign_incident_path_adjudication.md` 早在 07-19 就逐字\n   警告過「若任何一層 cleanup 依『卡了 83 班 ⇒ 沒人要』把這批檔清掉，會直接摧毀一張\n   open P1 的工具與輸入」，並把它列為 D5 的第二個實證反例。仍然發生了 —— 這是第三個。\n   （「卡在工作區的班數」量的是沒人有權限提交它，不是沒人要它。）\n2. 該檔的 `REPO_ROOT = Path(__file__).resolve().parent.parent` 是**深度假設**。\n   在 `scripts/` 下正確；被移進 `scripts/_legacy/` 後解析成 `scripts/`。\n3. 於是所有 glob 匹配 0 個檔，`--csv-scan` 印出「掃描 pinned snapshot CSV：0 個檔 /\n   有斷點的檔案：0 / 0」並 **exit 0** —— 與「掃遍全 repo，一塵不染」在輸出與 exit code\n   上完全無法區分。\n\n**實際情況**：加 `--repo` 指對根目錄後，**19 / 1279 檔含斷點**，污染完全沒消失。\n換言之，任何人照任務描述跑驗證指令，都會得到「已修好」的錯誤結論。\n\n**修法（治本三層，對應上面三層）**：\n1. `git mv scripts/_legacy/detect_price_split_breaks.py scripts/` 復位，讓 3 張任務裡\n   逐字寫的指令重新成立。\n2. `REPO_ROOT` 改為 `_find_repo_root()` —— 向上尋找 `.git` marker，不再假設深度。\n   深度假設在任何搬移下都會**無聲**失效；marker 搜尋不會。\n3. **掃到 0 個檔改為 exit 2 + stderr 錯誤訊息**（`--json` 模式回 `{\"error\": ...}`）。\n   這層才是真正的根因：沉默不該被讀成乾淨。exit code 契約現為\n   **0=乾淨 / 1=有斷點 / 2=掃描本身壞了**。\n\n**驗證**：預設根目錄 → `19 / 1279`，exit 1；`--repo /tmp` → fail-loud，exit 2。\n\n**副產物：真實污染清單（19 檔）**已寫進母任務 annotation。其中\nK1677(px_MARA/px_PLUG) / k1360(kalshi ×2) / k1539 / k1556 / k1588 命中的是\n×2.0 @2018-02-06 —— 那是 Volmageddon 的**真實行情**或非 0050 標的，不是分割污染。\n下一班處理 `k_reruns_0050_snapshot_contaminated_20260719` 時必須先分流，\n別把真實極端行情當成 bug 修掉。\n\n**母任務已 release 回 pending，未硬推**：交付項 (a) 經本班驗證已完成（兩個論文資料檔\n跨 2014-01-02 已連續：adj_close 9.3531→9.3292、close 14.6750→14.6375，x0.2494 斷點消失）；\n(b)(c)(d) 未做。(c) 改論文方法段的正確措辭**取決於 (b) 重跑用哪條 pipeline** ——\n資料檔既已 repoint 成連續序列，body_v3.tex:33 的 \"exclude the split date\" 是否仍是實際\n流程尚未確定，憑推測改只是把一個不符事實的描述換成另一個。已在 annotation 寫明先後次序。"
+  },
+  {
+    "timestamp": "2026-07-21T20:19:52+08:00",
+    "task_type": "daily_article",
+    "task_id": "K492_article_general_v2",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "owner": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "commit": null,
+    "summary": "K492 general 文章：發佈為草稿 mile_16c9f784（標題「換一個樣本期，一半的策略當場死掉：我們公開自己 68 個實驗的成績單」）。\n\nWriter subagent（opus/medium per model_router）產草稿，數字全數回 experiments/k492/k492_research_efficiency_results.json 核對：68 個實驗、無效率 35.3%、有效率 22.1%、跨期驗證 17 個明確判定中 9 個陣亡（52.9%）、平均 8.5 個實驗換一個驗證發現。自產兩張圖（scripts/article_figures/k492_research_efficiency_20260721.py，直讀 JSON 不硬編）。\n\nGates：check_arc_dedup（--audience general）clean；anti_ai_gate exit 0；publish_draft 全 gate 過。\n\n主線程修正：原稿在正文列出 K 編號清單（K440/K453/...），會被 _infer_audience 的 K-id 規則改判 research，與 general 定位衝突。已把編號從讀者向正文移除、改指向原始結果檔（可追溯性由 frontmatter kid 欄位保留），Harvey 引用由 publisher sanitizer 自動翻譯。\n\n待辦（已開 assign_6aa850cd）：本篇無 lazypack plan，release_pool 不會放行，需補 plan 後 enqueue async render。"
+  },
+  {
+    "timestamp": "2026-07-21T20:19:52+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1409_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "owner": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "commit": null,
+    "summary": "K1409 general 文章：發佈為草稿 mile_9fbac50b（標題「存 160 萬月領 1 萬？把配息歷史重抽 5000 次，達標的月份只有三分之一」）。\n\nWriter subagent（opus/medium per model_router）產草稿，數字全數回 experiments/k1409/k1409_results.json 核對。核心對比：宣傳隱含現金殖利率 9.7% vs 模擬可實現中位數 7.04%（P(可實現≥9.7%)=0.0%）；「有配息月份單月達 1 萬」機率 33.9%、「平均月配息達 1 萬」僅 2.7%。誠實揭露 43 個月樣本嚴重偏多頭與非循環區塊重抽樣的邊界效應 caveat。\n\nWriter 抓到兩個 artifact 問題（值得後續修）：(1) README/brief 寫「本金約 161 萬」，JSON 實為 1,605,416 = 160.5 萬，文章採 JSON 口徑；(2) JSON verdict.summary 寫「12 個月中約 11 個有配息（4 月空窗）」與 calendar_months_with_any_dividend=12、all_months_P_zero=0.0 自相矛盾，README 已自我更正，文章採機器欄位口徑。\n\nGates：check_arc_dedup（--audience general）clean；anti_ai_gate exit 0。\n\n主線程兩次修正：(a) audience gate 把稿判成 research（K-id + bootstrap 兩個學術關鍵詞），已將 experiment_refs 改為 kid 欄位、正文 bootstrap 改口語「區塊重抽樣」，方法揭露不減；(b) publisher 的 content-vs-source audit 擋下 129.6%（p95 淨值相對本金的衍生值，非 JSON 欄位），已移除該衍生欄位，只留 source-backed 的淨值分位與 +3.6% 的 p5 對本金比較。這個 gate 攔得對。\n\n待辦（已開 assign_6aa850cd）：本篇無 lazypack plan，release_pool 不會放行；experiments/k1409/lazypack/ 已有三張現成圖可作 plan 素材。"
+  },
+  {
+    "timestamp": "2026-07-21T20:19:52+08:00",
+    "task_type": "daily_article",
+    "task_id": "K709_article_general_v2",
+    "outcome": "failed",
+    "actor": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "owner": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "commit": null,
+    "summary": "K709_article_general_v2 判定不可發表並 close 為 failed。K709 knowledge entry verdict=FAIL_PROVENANCE（Codex CLI 0.132.0 gpt-5.4，2026-05-29 覆核）、evidence=None，不得作為對外文章的結論基礎。此任務為 auto-discovery refill 產生的 [retry-v2]，已餓死 1052h；根因（refiller 不看 verdict）已開 assign_6e0b03ec 治本。"
+  },
+  {
+    "timestamp": "2026-07-21T20:22:49+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_6aa850cd",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "owner": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "commit": null,
+    "summary": "為本班發佈的兩篇 general 草稿補上 strict lazypack plan v1 並 enqueue async render，解除 release_pool 卡關。\n\n產出：\n- storage/lazypack_jobs/mile_16c9f784/plan.json（K492 研究效率回顧，3 panels：concept / results / takeaway）\n- storage/lazypack_jobs/mile_9fbac50b/plan.json（K1409 月配息現金流，3 panels：method / results / takeaway）\n\n兩份 plan 全部數值走 metric binding 綁 evidence JSON 欄位（k492_research_efficiency_results.json sha256 05b84187…、k1409_results.json sha256 9bf3ebbe…），無 literal 硬編。`lazypack_render.py --validate-only` 兩份皆回 {\"valid\": true, \"panels\": 3}（schema、evidence hash、每個 binding 都解析成功）。\n\n過程中被 renderer 的 _reject_unbound_numbers 擋兩次（plan.title 與 metric label 內的「1 萬」「160 萬」等 reader-visible 數字字面）。這條規則是對的：標題與 label 內的數字不會隨 evidence 更新，會變成第二個真相來源。已改寫為不含數字的措辭，實際數值一律由 binding 呈現。\n\n已 enqueue：lazypack-mile_16c9f784 / lazypack-mile_9fbac50b，*/15 compute worker 走 codex-primary 渲染鏈（失敗會自動 logged fallback 到 deterministic renderer）出圖、上傳、append `## 懶人包圖組` section、單篇 re-sync。主線程未手寫任何渲染腳本、未手改 feed。\n\n未竟：實際 PNG 尚未產出（async），下班次可用 `uv run python scripts/compute_queue.py show lazypack-<mile_id>` 驗收版面與 layout guard 結果。"
+  },
+  {
+    "timestamp": "2026-07-21T20:31:07+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_16c9f784",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_16c9f784:codex->agy",
+    "article_id": "mile_16c9f784",
+    "job_id": "lazypack-mile_16c9f784",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-21T20:32:35+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_9fbac50b",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_9fbac50b:codex->agy",
+    "article_id": "mile_9fbac50b",
+    "job_id": "lazypack-mile_9fbac50b",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-21T20:33:53+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1348_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "owner": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "commit": null,
+    "summary": "K1348 general 文章：發佈為草稿 mile_a73bb294（標題「季末 ETF 大調倉那幾天，成交量跳起來了，股價卻比平常安靜」），lazypack plan 同班補齊並已 enqueue。\n\nWriter subagent（opus/medium per model_router）產草稿，數字全數回 experiments/k1348/k1348_results.json 核對，無衍生值。核心：量能通道成立（panel 係數 +0.0417、統計強度 5.84；IVV 3.46 / VTI 3.24 顯著，SPY 0.43 / QQQ −0.34 不顯著），波動通道為空結果（range_vol 係數 +0.00009、強度 0.77、p=0.44），收盤波動方向相反（−4.34）。verdict = CONDITIONAL_PASS，文章明寫「有條件通過」未寫成定論。三張現成圖全用上，兩表三層量化分析。\n\n主線程本班的 brief 已預先寫入前兩篇踩到的兩個 gate（禁 K 編號與學術英文關鍵詞以免 audience gate 改判 research、禁衍生數字以免 content-vs-source audit 擋下），本篇因此 publish 一次過、零 retry —— 前兩篇各卡一到兩輪。這個 brief 樣板值得沿用。\n\nGates：check_arc_dedup（--audience general）clean；anti_ai_gate exit 0（首輪）；publish_draft 全 gate 過。\n\nlazypack：storage/lazypack_jobs/mile_a73bb294/plan.json，3 panels（concept / results / takeaway），全數值 metric-bound 綁 k1348_results.json（sha256 519967b0…），--validate-only 回 valid。過程被 renderer 的 digits 上限（0–3）擋一次：原本要顯示 4–5 位小數的係數改綁 IVV 的量差與 p 值，可讀性反而更好。已 enqueue lazypack-mile_a73bb294。\n\nWriter 自評最弱處：對「收盤波動反而下降」提出的方向互抵解釋在本實驗無直接證據（無委託簿資料），該段已用推測語氣降級，保留。"
+  },
+  {
+    "timestamp": "2026-07-21T20:34:34+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1253_article_general",
+    "outcome": "failed",
+    "actor": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "owner": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc",
+    "commit": null,
+    "summary": "K1253_article_general 判定不可發表並 close 為 failed。K1253 是環境還原後的 smoke test（needs_human=True、provenance UNVERIFIED、README 明寫不作研究結論引用），沒有可對外的研究結論。與 K709 同根因，治本單 assign_6e0b03ec。本班至此清掉 main-thread lane 兩張永遠做不完的幽靈 P1。"
   }
 ]

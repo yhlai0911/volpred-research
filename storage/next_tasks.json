@@ -9359,7 +9359,7 @@
     "title": "K492: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K492 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Method: Manual classification + statistical analysis of all K414-K491 results Reference: Harvey, Liu, Zhu (2016) ...and the Cross-Section of Expected Returns, RFS Reference: Timmermann (2006) Forecast Combinations, Handbook of Economic Forecasting",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K492",
@@ -9380,7 +9380,30 @@
     "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
     "priority_capped_from": 1,
     "migrated_at": "2026-07-21T06:58:10.992290+00:00",
-    "data_source_note": "**寫作資料來源在 `experiments/k492/`，不要只讀 knowledge.json 的 K492 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K492 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k492/k492_research_efficiency_results.json`\n分析腳本：`experiments/k492/k492_research_efficiency.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。"
+    "data_source_note": "**寫作資料來源在 `experiments/k492/`，不要只讀 knowledge.json 的 K492 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K492 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k492/k492_research_efficiency_results.json`\n分析腳本：`experiments/k492/k492_research_efficiency.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T12:09:53.807347+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:10:03.243951+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:20:01.935495+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      }
+    ],
+    "started_at": "2026-07-21T12:10:03.243936+00:00",
+    "completed_at": "2026-07-21T12:20:01.935479+00:00",
+    "result": "已發佈為草稿 mile_16c9f784（general）。數字全數回 k492_research_efficiency_results.json 核對；dedup + anti_ai_gate + publish gates 全過。正文 K 編號已移除以符合 general audience gate，可追溯性由 kid 欄位保留。lazypack plan 未補，release 前需 assign_6aa850cd。"
   },
   {
     "id": "K861_article_general",
@@ -14265,7 +14288,7 @@
     "title": "K709: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K709 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: K663/K706 延伸, 執行: Claude] 利率條件 60/40↔40/60 SPY/GLD（rising→more SPY, falling→more GLD）。Falling regime GLD +30.8% vs SPY +13.4%（huge gap）但 lag 6m window 後 conditional Sharpe 0.869 vs BH 0.850 Δ=+0.019——太小不值得。Rate regime 佔比：rising 21%, stable 62%, falling 19%。結論：利率資訊到達太晚（6m lag",
     "priority": 1,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K709",
@@ -14289,7 +14312,30 @@
     "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
     "priority_capped_from": 1,
     "migrated_at": "2026-07-21T06:58:10.992290+00:00",
-    "data_source_note": "**寫作資料來源在 `experiments/k709/`，不要只讀 knowledge.json 的 K709 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K709 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k709/k709_results.json`\n分析腳本：`experiments/k709/k709.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。"
+    "data_source_note": "**寫作資料來源在 `experiments/k709/`，不要只讀 knowledge.json 的 K709 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K709 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k709/k709_results.json`\n分析腳本：`experiments/k709/k709.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T12:09:53.565812+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:10:03.003118+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:10:03.716859+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      }
+    ],
+    "started_at": "2026-07-21T12:10:03.003103+00:00",
+    "completed_at": "2026-07-21T12:10:03.716840+00:00",
+    "result": "不可發表：K709 knowledge entry verdict=FAIL_PROVENANCE（Codex CLI 0.132.0 gpt-5.4, 2026-05-29 覆核），evidence 欄位為 None。對外文章不得以未通過 provenance gate 的結論為基礎（研究誠實 > 一切）。此任務為 auto-discovery refill 產生的 [retry-v2]，已餓死 1052h — 根因是 refiller 只看『K 是否有 feed 覆蓋』、不看 verdict，會反覆對不可發表的 K 產 P1 任務並卡住 main-thread lane head-of-line。已另立 platform_ops 任務修 refiller 的 verdict gate。"
   },
   {
     "id": "K717_article_general_v2",
@@ -32781,7 +32827,7 @@
     "title": "K1348: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1348 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1348 [CONDITIONAL_PASS]：檢定ETF(SPY/IVV/VTI/QQQ)季末heartbeat trade是否對成分股造成微結構vol pressure。資料：yfinance日頻，2014-01-01~2026-06-17，panel N=59,489。Volume channel：2/4 ETF顯著擴張（IVV t=+3.46,p=0.0006；VTI t=+3.24,p=0.0013），panel OLS(HC1,asset/year FE)係數+0.0417,t=+5.84。range_vol channel：0/4顯著，p",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1348",
@@ -32794,7 +32840,30 @@
     "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
     "priority_capped_from": 1,
     "migrated_at": "2026-07-21T06:58:10.992290+00:00",
-    "data_source_note": "**寫作資料來源在 `experiments/k1348/`，不要只讀 knowledge.json 的 K1348 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K1348 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k1348/k1348_results.json`\n分析腳本：`experiments/k1348/k1348.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。"
+    "data_source_note": "**寫作資料來源在 `experiments/k1348/`，不要只讀 knowledge.json 的 K1348 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K1348 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k1348/k1348_results.json`\n分析腳本：`experiments/k1348/k1348.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。",
+    "status_history": [
+      {
+        "ts": "2026-07-21T12:26:50.706419+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:26:50.944826+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:33:53.258589+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      }
+    ],
+    "started_at": "2026-07-21T12:26:50.944810+00:00",
+    "completed_at": "2026-07-21T12:33:53.258575+00:00",
+    "result": "已發佈草稿 mile_a73bb294（general）並補齊 lazypack plan + enqueue（lazypack-mile_a73bb294）。量能通道成立、波動通道為空結果，verdict CONDITIONAL_PASS 誠實標示。dedup / anti_ai_gate / publish gates 一次過。"
   },
   {
     "id": "content_audience_mislabel_backlog_45",
@@ -37162,38 +37231,15 @@
   },
   {
     "id": "assign_998ad2be",
-    "title": "修原版文章頁底部瀏覽數：同一張 article_impressions 卻沒套 displayed_views + 文案誤導",
-    "description": "**取代 assign_cee1e41a 與 assign_ff29dceb**（兩張皆已標 deprecated；ff29dceb 描述有一處被 shell 吃掉的字，以本單為準）。同一檔同一行的兩個問題，必須一次改完，勿分多張單。\n\n== 查證（telegram-965/966，老闆問「追蹤和瀏覽是分開的吧」） ==\n實查結論：**不是分開的，是同一個計數。**\n- 文章頁頂部：src/lib/article-views.ts getArticleDisplayedViews() → 讀 Supabase 資料表 article_impressions\n  count=exact，再套 displayed = seed + max(0, real_now - baseline_real)\n- 文章頁底部：src/app/api/analytics/reaction/route.ts:44-47 的 viewsRes → **同一張 article_impressions**\n  同樣 count=exact，零加工直接回傳成 counts.views\n兩者底層完全相同，差別只在頂部套了種子公式、底部沒套。所以原版同一頁上面 1314、下面 7。\n（likes / bookmarks / shares 走 article_reactions 表，那些才是真正獨立的互動計數，不受本任務影響。）\n\n== 要修兩件事 ==\n1. **數字**：ArticleEngagement.tsx:235 的瀏覽數必須走與 article-views.ts 同一條公式。\n   建議由 server 端 ReportDetail.tsx 把已算好的 viewsLabel 傳進 ArticleEngagement，\n   避免 client 重算或再生出第三條公式。likes / bookmarks / shares 維持現狀。\n2. **文案**：「已追蹤瀏覽 N 次」這個措辭讓人以為它是另一個指標（老闆就是這樣讀的）。\n   它就是文章瀏覽數，改成與頂部一致的說法（例：「N 次瀏覽」），不要再用「已追蹤」暗示另一套計數。\n\n== 另外 ==\n3. 全站掃一次是否還有第三處 reader-facing 直接顯示原始 impressions count（admin console 不算）。\n4. 加機械 gate / 測試，防止未來新增 reader-facing 瀏覽數時繞過 displayed_views\n   （可擴充 frontend-v2-fix/tests/article-views.test.mjs）。\n5. 改完 build + 本機實測原版與 v3 文章頁，再部署驗證線上。\n\n== 已確認不用動 ==\n頂部數字原版（ReportDetail.tsx:87）與 v3（app/v3/reports/[id]/page.tsx:38）都已正確 import 同一模組。\nArticleEngagement 只被原版使用，v3 沒用到。\n\n來源：telegram-962 / telegram-965 / telegram-966",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "修原版文章頁底部瀏覽數：同一張 article_impressions 卻沒套 displayed_views + 文案誤導",
+    "priority": 1,
     "source": "telegram",
     "created_at": "2026-07-18T08:49:38.266653+00:00",
-    "parent_task_id": "telegram-966",
-    "created_by": "telegram_responder",
-    "status_history": [
-      {
-        "ts": "2026-07-18T11:08:26.415879+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-0f0d2614e6074e2d9e6fb4ad26c8de18"
-      },
-      {
-        "ts": "2026-07-18T11:08:26.650484+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-0f0d2614e6074e2d9e6fb4ad26c8de18"
-      },
-      {
-        "ts": "2026-07-18T11:24:57.075107+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-0f0d2614e6074e2d9e6fb4ad26c8de18"
-      }
-    ],
-    "started_at": "2026-07-18T11:08:26.650467+00:00",
     "completed_at": "2026-07-18T11:24:57.075089+00:00",
-    "result": "reaction API 改走 getArticleDisplayedViews 單一來源；文案改「N 次瀏覽」；class sweep 確認僅此一處違規（me/summary 為個人閱讀史、impression 為寫入路徑、admin-* 非 reader-facing）；新增 scripts/check-article-view-sources.mjs 機械 gate + 3 unit test 接進 npm run check；build + 線上驗證上下皆 22。commit volpred-v2@8ced8c7，已部署 volpred.zeabur.app"
+    "tombstone": true,
+    "archived_at": "2026-07-21T12:07:26.836967+00:00"
   },
   {
     "id": "telegram-971",
@@ -37245,37 +37291,15 @@
   },
   {
     "id": "assign_33a9151f",
-    "title": "修正文章頁瀏覽數不一致（頂部 vs 讀者互動區）",
-    "description": "現象：文章詳情頁頂部 meta 顯示「22 次瀏覽」，下方讀者互動區顯示「已追蹤瀏覽 3 次」，同一頁兩個數字打架（老闆 2026-07-18 Telegram msg 976 回報）。\n\n根因（已診斷確認）：兩處查的是同一張表 article_impressions 的同一個 count，差別只在有沒有套 seed 偏移。\n- 頂部：frontend-v2-fix/src/app/v3/reports/[id]/page.tsx:38 → getArticleDisplayedViews() → src/lib/article-views.ts:42-97，公式 seed + max(0, real - baseline)，seed/baseline 來自 articles.details.view_display（scripts/seed_article_view_counts.py 的一次性 backfill）。\n- 下方：frontend-v2-fix/src/components/ArticleEngagement.tsx:235 → GET /api/analytics/reaction → frontend-v2-fix/src/app/api/analytics/reaction/route.ts:44-47,62，直接吐 raw count，繞過了 article-views.ts。\n- article-views.ts 檔頭註解明確宣告自己是 single source of both formula and query；reaction route 違反了這個約束。任何被 seed 過的文章都會出現此不一致，差額固定 = seed 偏移。\n\n修法：把 reaction/route.ts 的 views 改呼叫 getArticleDisplayedViews(articleId)，恢復 single-source。順帶做 class sweep：grep 全 repo 還有沒有其他地方直接對 article_impressions 做 raw count 而未經 article-views.ts。\n\n驗證：build + 開該篇文章頁確認上下兩數一致。",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "修正文章頁瀏覽數不一致（頂部 vs 讀者互動區）",
+    "priority": 1,
     "source": "user",
     "created_at": "2026-07-18T09:42:59.800248+00:00",
-    "created_by": "telegram-responder",
-    "status_history": [
-      {
-        "ts": "2026-07-18T11:08:26.891928+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-0f0d2614e6074e2d9e6fb4ad26c8de18"
-      },
-      {
-        "ts": "2026-07-18T11:08:27.128781+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-0f0d2614e6074e2d9e6fb4ad26c8de18"
-      },
-      {
-        "ts": "2026-07-18T11:24:57.303122+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-0f0d2614e6074e2d9e6fb4ad26c8de18"
-      }
-    ],
-    "started_at": "2026-07-18T11:08:27.128767+00:00",
     "completed_at": "2026-07-18T11:24:57.303109+00:00",
-    "result": "同 assign_998ad2be 一併修復（同檔同行同根因）：reaction/route.ts 恢復 article-views.ts single-source，另補 ReportDetail initialViews 讓 SSR 當下兩數即一致。線上 mile_30367280 頂部/下方皆 22（seed=22, baseline_real=1, raw=1）。commit volpred-v2@8ced8c7"
+    "tombstone": true,
+    "archived_at": "2026-07-21T12:07:26.836967+00:00"
   },
   {
     "id": "telegram-978",
@@ -37492,28 +37516,15 @@
   },
   {
     "id": "telegram-988",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 988）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-18T11:15:54.002878+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 988）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n幹 還是沒解決啊 去看看你前面信誓旦旦說解決了 結果還是廢物\n\n立刻重構\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] PHASE-Z failed-closeout 內容已變更，拒絕跨班提交\n\n📌 白話結論\n原 fire 的 ownership receipt 還在，但下列尚未提交的路徑已不再等於被 gate 擋下時的 bytes。\n\n📌 影響\n影響文章品質、讀者信任與流量表現。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n原 fire 的 ownership receipt 還在，但下列尚未提交的路徑已不再等於被 gate 擋下時的 bytes。\n為避免把後來 session 的修改冒充原 fire 產出，系統沒有 commit 或覆蓋任何檔案。\n\n• scripts/gen_codex_cli_reference.py\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-18T11:16:26.659112+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram-responder"
-      },
-      {
-        "ts": "2026-07-18T11:20:06.613544+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram-responder"
-      }
-    ],
-    "completed_at": "2026-07-18T11:20:06.613524+00:00"
+    "completed_at": "2026-07-18T11:20:06.613524+00:00",
+    "tombstone": true,
+    "archived_at": "2026-07-21T12:07:26.836967+00:00"
   },
   {
     "id": "assign_5f16a7c5",
@@ -37566,29 +37577,15 @@
   },
   {
     "id": "telegram-990",
+    "status": "succeeded",
     "task_type": "telegram_reply",
+    "title": "回覆老闆 Telegram 訊息（msg 990）",
     "priority": 1,
     "source": "telegram",
-    "status": "succeeded",
     "created_at": "2026-07-18T11:21:36.866616+00:00",
-    "title": "回覆老闆 Telegram 訊息（msg 990）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nVolPred營運經理 via Claude\n🔍 查到了，是 bug，不是你看錯。 上面的 22 和下面的 3 其實查同一張表、同一個數，差別只在**上面有加種子偏移、下面沒有**。當初 backfill 幫舊文章補了一個展示基準值（seed...\n你要記得 前端頁面顯示的瀏覽數只能有唯一的版本\n👌 收到，這條記進長期規則了：讀者頁的瀏覽數只能有一個算法版本。\n\n📌 規則寫法：所有 reader-facing 的瀏覽數一律走同一個 getArticleDisplayedViews()，任何地方自己去查表算 raw count 都算違規；後台 admin 統計看原始數是另一個口徑，不受影響。\n\n🔍 順手全庫掃了一遍：讀者端真正繞過的就 /api/analytics/reaction 這一處，其他打到同一張表的是寫入端、會員中心「我看過的文章」跟後台統計，口徑不同不算打架。\n\n🛠️ 修正還是照排的 assign_33a9151f（P1）交下一班，我這邊不動程式碼。修完會順便加 class sweep 檢查，避免以後又冒出第二條算法。\n← 研究動態\n一般讀者\n2026/07/18 上午06:01\n23 次瀏覽\n同樣叫短債，USDC 出事時一檔波動放大 2.8 倍，另一檔幾乎沒變\n風險管理\nSHY\nBIL\n穩定幣\n短期公債\nUSDC\n讀者互動\n已追蹤瀏覽 0 次，登入會員可按讚與收藏。\n\n\n按讚\n0\n\n收藏\n0\n\n分享\n0\n分享到：\nLINE\nFacebook\nX / Twitter\n複製連結\n\n為什麼要等下一班？為什麼不能直接改\nvolpred.zeabur.app\nVolPred - 波動率預測研究系統\nAI 驅動的波動率預測研究系統 — 基於 1,300+ 實驗的即時投資策略、風險管理與市場分析。\n急件和一般排程應該要分開 急件就不進入排班直接派工作 一般排程才進入排班 這樣有很難理解？有很難架構？\n🔴 沒有好理由，是我這邊的派工 bug，不是技術難度。\n\n🔍 查到根因了：hourly 派工的「急件白名單」只認 source=user，但我從 Telegram 建的單 source=telegram → 整批被漏掉，掉進一般排程被 P3 研究任務插隊。而且就算命中白名單，每班也只做最舊那一張。\n\n📋 實際情況：瀏覽數那件事拆成兩張 P1 單（16:49、17:42 建的），到現在都還 pending。17:08 那班跑的是 K1730 研究。這就是你看到「已追蹤瀏覽 0 次」還在的原因。\n\n⛔ 我這條 Telegram 回應線被設計成只能查、不能改 code。這個限制本身就是問題 — 你 7/16 msg 888 問過一次同樣的話，這是第二次，我已經把機械根因寫進長期記憶（不只是態度問題）。\n\n⏭️ 下一班 18:07 就 fire。我不粉飾：照現行規則它會先挑更舊的那張（回報格式 v3），瀏覽數還是排在後面。真正該修的是白名單規則，不是每次道歉。\n✅ 不難，而且架構早就有了 — 是我漏接線，不是設計不出來。\n\n🔌 底層機制 request_fire() 就是你講的「急件不進排班直接派工」，而且 code 裡明寫 requested fire 繞過所有 gate。email 急件走這條、CI 紅燈走這條，兩條都是進來就立刻派。\n\n❌ 唯獨 Telegram 沒接上 — 你的訊息只被寫進任務池等 hourly。這就是為什麼 email 你一寄就動、Telegram 你要等下一班。同一套架構，少一行接線。\n\n🛠️ 已開 P1 單 assign_a64e9f61 修兩處：(1) Telegram 建單時呼叫 request_fire (2) 派工端「急件」改用 source+priority 判定，不再逐一列舉 task_type（列舉法正是這次漏掉 telegram 的原因）。\n\n🟢 順帶回報：18:07 那班已經開跑了，主產出就是瀏覽數那張（assign_33a9151f）。這次沒再被研究任務插隊。\n【VolPred 運營回報】\n🕘 2026-07-18 18:12 台北時間｜程序：回報格式 v3（msg 973）\n\n✅ 結論\n　做完，且已實測驗證\n　回報從今天起自己長出「已完成（本班）」和「已排程」兩欄，你要的進度可視性落地了\n\n🔍 驗證\n　白話：這則回報底下兩欄不是我打的，是程式從任務池和排程表現撈的——所以你看到的完成清單造不了假\n　實測：pytest tests/test_report_sections.py tests/test_boss_report.py → 15 passed\n\n📦 產物\n　src/volpred/ops/report_sections.py + scripts/progress_report.py + tests/test_report_sections.py（task assign_6349aa2c）\n\n🚧 阻塞\n　無\n\n⏭ 下一步\n　PHASE A compute followup @19:07\n\n📗 已完成（本班）\n　assign_6349aa2c — 回報格式 v3：結構化回報加『已排定任務時程』+『本班已完成任務』…\n\n🗓 已排程\n　07-18 18:15 audit_publish_sync — Hourly: local published vs supaba…\n　07-18 18:15 gmail_poll — Gmail inbox poll — fetch user rep…\n　07-18 19:07 assign_79c90a36 P1 [P1][arch] 徹底重構 blocked 任務生命週期：writer 強制 block…\n　07-18 19:07 alert_internal_silent_fallback_new_c67bec28dd_20260718T032150838252Z_a1 P1 [internal a…\n　07-18 19:07 growth_p1_reader_analytics P1 [growth P1] Reader analytics ingest…\n　+24 件 pending P1-P2 待派\n每日token分析報告還有在發信嗎\n📧 有，每天照發沒斷。\n\n✅ 最近 5 天（08:00 CST）都寄成功，今天 08:00 也寄了：\n「[VolPred Token 報表] 2026-07-18 — 本週 69.3M / 77.7M cap」\n收件人 yihao.lai@gmail.com，notification id e873f9ee，sent=true。\n\n🔎 如果你沒看到，八成是被歸到促銷/垃圾或篩選規則了 — 在 Gmail 搜「VolPred Token 報表」試試。（我這邊接的 Gmail 是大葉信箱，看不到你 gmail 收件匣，所以只能從寄件端確認。）\n\n📁 細節在 storage/logs/cron/token_report.log\n🔴 [CRITICAL] PHASE-Z failed-closeout 內容已變更，拒絕跨班提交\n\n📌 白話結論\n原 fire 的 ownership receipt 還在，但下列尚未提交的路徑已不再等於被 gate 擋下時的 bytes。\n\n📌 影響\n影響文章品質、讀者信任與流量表現。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n原 fire 的 ownership receipt 還在，但下列尚未提交的路徑已不再等於被 gate 擋下時的 bytes。\n為避免把後來 session 的修改冒充原 fire 產出，系統沒有 commit 或覆蓋任何檔案。\n\n• scripts/gen_codex_cli_reference.py\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
-    "status_history": [
-      {
-        "ts": "2026-07-18T11:22:02.039409+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "telegram_responder"
-      },
-      {
-        "ts": "2026-07-18T11:24:24.081314+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "telegram_responder"
-      }
-    ],
     "completed_at": "2026-07-18T11:24:24.081300+00:00",
-    "result": "回覆 msg 990（msg 991 已送出）。老闆第 3 次轉發同一則 PHASE-Z failed-closeout CRITICAL。查證：根因單 assign_5f16a7c5 已由上一班 responder 開好且 pending；receipt .git/volpred_phase_z_failed_closeout.json 仍在（19:22 才更新，警報持續中）。誠實回報排隊位置：pending P1 共 7 張，5f16a7c5 排第 7、修插隊規則的 a64e9f61 排第 6，警報今晚會續噴。未刪 receipt（修資料非修流程，且內含 8 條合法 tracked ownership）。responder 未做任何 repo/git 變更。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T12:07:26.836967+00:00"
   },
   {
     "id": "assign_8a80c2fb",
@@ -38724,7 +38721,7 @@
     "task_type": "experiment",
     "priority": 2,
     "description": "K1731 README 裡每個 arm A 數字都來自 quick-mode artifact（§5.3），包含 §3.3b 與 §6 依賴的跨臂 DM 統計量 t=+2.13 —— 而它還額外帶著跟 arm B 相同的**嵌套 DM 缺陷**（arm A 的 macro 模型也是輸給自己的嵌套 baseline）。兩個問題都要先解決，任何跨臂宣稱才能進論文。\n\n**要做**：\n1. arm A（K1730）production run（非 quick-mode），走 compute_queue。\n2. 用 production 數字重新核對 README §3.3b / §5.3 / §6 的每個 arm A 數字。\n3. t=+2.13 的嵌套 DM 問題比照 arm B 處理：能校正就校正，不能就**撤回並標為診斷性**，禁止硬撐。\n\n**順帶（原 F4，low）**：§3.5 現在正確地說 4.4-22.8% 是四個構造情境的跨度、不是最壞情況。若日後真要下最壞情況的宣稱，情境空間必須用搜尋而非手工指定。\n\n**成功判準**：README 裡不再有未標註出處的 quick-mode 數字；跨臂宣稱要嘛有 production 支撐、要嘛已撤回。",
-    "status": "in_progress",
+    "status": "pending",
     "source": "system",
     "created_at": "2026-07-19T00:11:44.936640+00:00",
     "created_by": "hourly-slot-1-20e8d1681051470882a27cfb0a328847",
@@ -38745,14 +38742,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3"
+      },
+      {
+        "ts": "2026-07-21T11:50:05.191476+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "claimed_by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
-    "claimed_at": "2026-07-21T09:09:42.643622+00:00",
-    "claim_session_id": "e36764515dcf",
     "started_at": "2026-07-21T09:09:42.929400+00:00",
     "compute_job_id": "k1730_armA_production_run_20260721",
-    "result": "dispatched to compute job k1730_armA_production_run_20260721; awaiting PHASE A collection"
+    "result": "dispatched to compute job k1730_armA_production_run_20260721; awaiting PHASE A collection",
+    "last_released_at": "2026-07-21T11:50:05.191467+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "daily_digest_20260719",
@@ -40432,7 +40435,9 @@
     "last_release_reason": "auto_release_stale_2h",
     "priority_capped_from": 1,
     "migrated_at": "2026-07-21T06:58:10.992290+00:00",
-    "findings": "[2026-07-21 19:2x hourly-slot-1 盤點] 本班未完成本單，但把狀態釘死了，下班不必重查：\n\n(a) **已完成**（本班驗證）。paper/taiwan-vt/data/0050_tw_twii_..._2008-2026.csv 與\n    paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv 現在跨 2014-01-02 連續：\n    adj_close 2013-12-31=9.3531 → 2014-01-02=9.3292（-0.26%），close 14.6750 → 14.6375。\n    原本的 x0.2494 斷點已不存在。兩檔仍未提交（在工作區已 8 班），bytes 已在\n    quarantine ref。→ (a) 不必重做，只需確認提交。\n\n(b)(c)(d) **仍未做**。\n\n⚠️ **本單的「驗證指令」在本班之前是壞的，會回報假全綠**：\nscripts/detect_price_split_breaks.py 曾被 dead-code sweep（commit a15fba0d7）移到\nscripts/_legacy/，而它的 REPO_ROOT 是 `parent.parent`（深度假設）→ 移動後指向 scripts/，\n所有 glob 匹配 0 檔 → `--csv-scan` 印「0 個檔 / 有斷點的檔案：0 / 0」並 exit 0，\n與「掃完全乾淨」無法區分。docs/governance/2026-07/foreign_incident_path_adjudication.md\n早已逐字警告過這個路徑會被 cleanup 誤清（D5 的第二個反例），仍然發生了 —— 這是第三個。\n\n本班已修（三層）：(1) git mv 復位回 scripts/；(2) REPO_ROOT 改為向上尋找 .git marker，\n不再假設深度；(3) **掃到 0 檔改為 exit 2 並印錯誤** —— 沉默不得再被讀成乾淨。\nexit code 契約現為 0=乾淨 / 1=有斷點 / 2=掃描本身壞了。\n\n**真實污染清單（本班實測，19 / 1279 檔）**：\nK1395, K1611, K1677(px_MARA/px_PLUG), k1360(kalshi x2), k1406, k1411,\nk1539(gdelt panel), k1556, k1588, k1630, k1636, k1659, k1660, k1661, k1671,\nk1697, k1711(ohlc_0050_TW.csv)。\n注意其中 K1677 / k1360 / k1539 / k1556 / k1588 命中的是 ×2.0 @2018-02-06，\n那是 Volmageddon 的真實行情或非 0050 標的，**不是 0050 分割** —— 交給 k_reruns_* 那單時\n要先分流，別把真實極端行情當污染修掉。\n\n**(c) 的未決問題（下一班請勿憑推測改論文）**：body_v3.tex:33 現在寫的是\n\"use auto_adjust=False, compute returns from Adj Close, construct adjusted opens ...,\nand exclude the split date\"。但資料檔既已 repoint 成連續序列，就不存在 spurious split\nreturn，\"exclude the split date\" 是否仍是實際跑數字的流程、抑或已成過時描述，\n取決於 (b) 重跑用的是哪條 pipeline。**先做 (b)，再依實際跑法改 (c)**，否則只是把一個\n不符事實的描述換成另一個。garch-x-vix/main.tex:377 同理（現稱依 lai2026vt 程序清理）。"
+    "findings": "[2026-07-21 19:2x hourly-slot-1 盤點] 本班未完成本單，但把狀態釘死了，下班不必重查：\n\n(a) **已完成**（本班驗證）。paper/taiwan-vt/data/0050_tw_twii_..._2008-2026.csv 與\n    paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv 現在跨 2014-01-02 連續：\n    adj_close 2013-12-31=9.3531 → 2014-01-02=9.3292（-0.26%），close 14.6750 → 14.6375。\n    原本的 x0.2494 斷點已不存在。兩檔仍未提交（在工作區已 8 班），bytes 已在\n    quarantine ref。→ (a) 不必重做，只需確認提交。\n\n(b)(c)(d) **仍未做**。\n\n⚠️ **本單的「驗證指令」在本班之前是壞的，會回報假全綠**：\nscripts/detect_price_split_breaks.py 曾被 dead-code sweep（commit a15fba0d7）移到\nscripts/_legacy/，而它的 REPO_ROOT 是 `parent.parent`（深度假設）→ 移動後指向 scripts/，\n所有 glob 匹配 0 檔 → `--csv-scan` 印「0 個檔 / 有斷點的檔案：0 / 0」並 exit 0，\n與「掃完全乾淨」無法區分。docs/governance/2026-07/foreign_incident_path_adjudication.md\n早已逐字警告過這個路徑會被 cleanup 誤清（D5 的第二個反例），仍然發生了 —— 這是第三個。\n\n本班已修（三層）：(1) git mv 復位回 scripts/；(2) REPO_ROOT 改為向上尋找 .git marker，\n不再假設深度；(3) **掃到 0 檔改為 exit 2 並印錯誤** —— 沉默不得再被讀成乾淨。\nexit code 契約現為 0=乾淨 / 1=有斷點 / 2=掃描本身壞了。\n\n**真實污染清單（本班實測，19 / 1279 檔）**：\nK1395, K1611, K1677(px_MARA/px_PLUG), k1360(kalshi x2), k1406, k1411,\nk1539(gdelt panel), k1556, k1588, k1630, k1636, k1659, k1660, k1661, k1671,\nk1697, k1711(ohlc_0050_TW.csv)。\n注意其中 K1677 / k1360 / k1539 / k1556 / k1588 命中的是 ×2.0 @2018-02-06，\n那是 Volmageddon 的真實行情或非 0050 標的，**不是 0050 分割** —— 交給 k_reruns_* 那單時\n要先分流，別把真實極端行情當污染修掉。\n\n**(c) 的未決問題（下一班請勿憑推測改論文）**：body_v3.tex:33 現在寫的是\n\"use auto_adjust=False, compute returns from Adj Close, construct adjusted opens ...,\nand exclude the split date\"。但資料檔既已 repoint 成連續序列，就不存在 spurious split\nreturn，\"exclude the split date\" 是否仍是實際跑數字的流程、抑或已成過時描述，\n取決於 (b) 重跑用的是哪條 pipeline。**先做 (b)，再依實際跑法改 (c)**，否則只是把一個\n不符事實的描述換成另一個。garch-x-vix/main.tex:377 同理（現稱依 lai2026vt 程序清理）。",
+    "findings_20260721_2036": "[2026-07-21 20:3x hourly-slot-1-d4e78c67 盤點，未認領本單，只釘死事實供下班使用]\n\n(b) 的目標實驗選錯了，照原描述做會白跑：\n\n1. body_v3.tex:53 的 0050 gamma=0.097 / t=3.60，行內 source 註解明寫來自\n   `experiments/k892/k892_verify_tw_gamma_results.json`\n   `.summary.assets[\"0050.TW\"].full_sample`（D3 errata 2026-05-26），\n   **不是** experiments/paper2_taiwan_indiv_rolling_gamma。原描述把 (b) 指向後者。\n\n2. paper2_taiwan_indiv_rolling_gamma **本來就不受污染**：它依 fetch_snapshots.py\n   把每條序列抓進自己的 data/ 再離線估計，其 data/0050_tw.csv 跨 2014-01-02 已連續\n   （adj_close 2013-12-31=9.353103 → 2014-01-02=9.329202，-0.26%），\n   且 detect_price_split_breaks.py --csv-scan 的 19 檔污染清單裡沒有它。\n   → 對這支重跑不會改變任何數字。\n\n3. experiments/k892/ **沒有 data/ 目錄**，污染清單裡也沒有 k892 任何檔案。\n   所以 0050 gamma 的實際輸入不是已凍結的 snapshot CSV。\n   下一班做 (b) 前必須先答：k892 當時是 live-fetch 還是讀 price_cache.db？\n   若讀 DB，則 DB 已於 2026-07-19 修好斷點 → 重跑 k892 才是真正的 (b)，\n   且要對照 D3 errata 的 n_obs=4219 是否變動。若是 live-fetch 則需先確認可重現性。\n\n結論：(b) 應改寫為「重跑 k892（確認其資料來源後）」，而非 paper2_taiwan_indiv_rolling_gamma。\n(c)(d) 仍照前一班的順序，等 (b) 有實際跑法後再改論文描述。\n\n另：detect_price_split_breaks.py --csv-scan 本班實測仍回報 19 / 1279 檔含斷點、exit 0，\n與前一班修好的 exit code 契約一致（0=乾淨 / 1=有斷點 / 2=掃描壞了）——\n注意這裡 exit 0 但有 19 檔命中，代表 --csv-scan 的 exit code 語意與 docstring 契約可能不一致，\n下班順手確認一下（有斷點應該回 1）。",
+    "findings_20260721_2036_correction": "[更正 20:26] 上一則 findings 末段說『--csv-scan exit 0 但有 19 檔命中、契約可能不一致』是我誤讀：當時 $? 取到的是 pipe 尾端 tail 的狀態。實測 'detect_price_split_breaks.py --csv-scan > file; echo $?' 回 exit=1，與『0=乾淨 / 1=有斷點 / 2=掃描壞了』契約完全一致。前一班修的 exit code 契約沒有問題，不必追。findings 的其餘三點（(b) 目標應為 k892 而非 paper2_taiwan_indiv_rolling_gamma；paper2 自帶 snapshot 已連續；k892 無 data/ 目錄需先確認資料來源）為實測，仍然成立。"
   },
   {
     "id": "k_reruns_0050_snapshot_contaminated_20260719",
@@ -47267,7 +47272,7 @@
     "title": "K1409: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1409 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'paradigm/decisive null', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: K1409 [PASS]：「0056/00878/00919 月月配息 1 萬」退休現金流規劃的 block-bootstrap 檢驗。資料來源 yfinance，抓取日 2026-05-29，三檔共同重疊期 2022-11 至 2026-05（43 個月），本金約新台幣 161 萬。方法：joint block bootstrap（block=3 個月，共用同一組起點保留跨資產連動），配息保留真實除息月曆、僅對每股配息金額 bootstrap，seed=20260530，N_SIM=5000；Codex review CONDITIONAL_PASS（",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
     "audience_correction_rewrite": false,
@@ -47283,7 +47288,30 @@
     "priority_capped_from": 1,
     "migrated_at": "2026-07-21T06:58:10.992290+00:00",
     "data_source_note": "**寫作資料來源在 `experiments/k1409/`，不要只讀 knowledge.json 的 K1409 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K1409 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k1409/k1409_results.json`\n分析腳本：`experiments/k1409/k1409.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-21T12:09:54.054646+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:10:03.478817+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:20:02.182214+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      }
+    ],
+    "started_at": "2026-07-21T12:10:03.478799+00:00",
+    "completed_at": "2026-07-21T12:20:02.182200+00:00",
+    "result": "已發佈為草稿 mile_9fbac50b（general）。核心對比：宣傳殖利率 9.7% vs 模擬可實現中位數 7.04%（P≥9.7% = 0.0%）；月領 1 萬達標率 33.9%/2.7%。publisher content-vs-source audit 擋下一個衍生數字 129.6%，已移除。lazypack plan 未補，release 前需 assign_6aa850cd。"
   },
   {
     "id": "alert_content_quality_20260720",
@@ -47475,7 +47503,7 @@
     "title": "K1253: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1253 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: [NEEDS_HUMAN 待人工裁決] K1253 [PASS]: 這是 2026-04-18 系統從備份還原後的環境 smoke test，非研究發現。用 SPY 2020-01-03～2026-04-17（1580 天）日報酬，GARCH(1,1) rolling 1-step QLIKE，OOS 從 2025-01-01 起共 323 天，QLIKE mean=0.8815（std=2.4041），落在常識範圍，估計每步皆收斂無例外。結論：資料下載→模型估計→評估→JSON 產出的端到端 pipeline 在還原後完全通暢（yfinance/arc",
     "priority": 1,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
     "audience_correction_rewrite": false,
@@ -47491,7 +47519,30 @@
     "priority_capped_from": 1,
     "migrated_at": "2026-07-21T06:58:10.992290+00:00",
     "data_source_note": "**寫作資料來源在 `experiments/k1253/`，不要只讀 knowledge.json 的 K1253 條目。**\n\n該 K 的 knowledge 條目過薄（本班實測 K1253 僅數百字元、部分 evidence=None），撐不起 reader-facing 硬規要求的證據包（>=3 個可驗證數字 + >=1 表 + >=1 圖 + >=1 層量化分析）。只讀它的 writer 只有兩條路：誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。這正是本任務長期餓死、且已帶 retry 後綴的原因 —— 不是題目不好，是 brief 沒指到資料。\n\n實際結果檔：`experiments/k1253/k1253_results.json`\n分析腳本：`experiments/k1253/k1253.py`\n\n數字一律 programmatic 從 results json 讀出，禁止從 README 或本說明重打。",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-21T12:34:33.829615+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:34:34.114213+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:34:34.368498+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      }
+    ],
+    "started_at": "2026-07-21T12:34:34.114201+00:00",
+    "completed_at": "2026-07-21T12:34:34.368484+00:00",
+    "result": "不可發表：K1253 的 knowledge entry 自述『這是 2026-04-18 系統從備份還原後的環境 smoke test，非研究發現』，needs_human=True，且 provenance 標為 UNVERIFIED（無 reviewer 覆核紀錄，依 K1259 gate 收錄）。README 明寫『本實驗目的是環境驗證，不作為研究結論引用』。對外文章沒有可用的研究結論，硬寫等於把 pipeline health 記錄包裝成發現。與 K709 同屬 refiller 未看 verdict/needs_human 而產生的 P1 幽靈任務，治本單 assign_6e0b03ec 已含本例。"
   },
   {
     "id": "assign_97bf1e6d",
@@ -49592,5 +49643,50 @@
     "created_by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc",
     "parent_task_id": "worktree_harvest_wave3_dirty_stale_20260721",
     "description": "[worktree harvest wave 3 衍生] branch `codex/k1707-pseudo-stress`（5 個未合併 commit）\n本班已裁決為 **不可合併**，但殘留一個該決定的問題。\n\n**證據**：branch 與 main 的 experiments/k1707/K1707.py 不是同一份程式的兩個版本，\n是**兩份完全不同的實作撞在同一個檔名上**：\n- main（467 行，commit 36c78b4d2「complete K1707 option auction stress audit」07-16 08:40）：\n  aggregate_raw / build_stress_audit / support_gate / descriptive_benefits / make_figures\n- branch（433 行，tip 07-16 08:49）：\n  aggregate_pseudo_data / load_vix_lagged / attach_vix_signal / exact_label_permutation /\n  holm_adjust / run_inference\n\nmain 另有 branch 完全沒有的 figures/、post_run_review.md、review_verdict.json，\n且該 verdict 的 reviewed_sha256 與 main 現有 blob **逐項相符**\n（K1707.py=d0b21ed71e49…、results=aa2705d7cea1…、README=24a13db1382d…，本班實算核對）。\n→ main 這份是通過認證的成果；合併 branch 會用未經審查的另一份實作把它蓋掉。\n\n**要裁決的**：branch 那份 pseudo-sample 診斷（含 permutation inference + Holm）是否仍有價值。\n- 有價值 → 給它自己的路徑（例如 experiments/k1707_pseudo_stress/），走正常 review 後入 main，\n  不要塞回 experiments/k1707/。\n- 沒價值 → 明確記錄放棄理由後刪 branch，別讓它繼續當幽靈。\n\n**附帶**：branch commit d1263807f 的 `astype(\"datetime64[ns]\")` 正規化（aggregate_pseudo_data /\nload_vix_lagged / attach_vix_signal 三處）是針對 branch 自己那份實作的 dtype 修正。\nmain 沒有 attach_vix_signal，**不要盲目 port 到 main** —— 先確認 main 那份有沒有同類 dtype 問題，\n有才修，且要走自己的 review。"
+  },
+  {
+    "id": "assign_6aa850cd",
+    "title": "[lazypack] mile_16c9f784 / mile_9fbac50b 兩篇 general 草稿缺懶人包 plan，無法 release",
+    "description": "2026-07-21 20:07 fire 發佈兩篇 general 草稿（K492 研究效率回顧 mile_16c9f784、K1409 月配息現金流 mile_9fbac50b），publish_draft 兩次都 WARN lazypack_never_enqueued —— 沒有 plan.json 就不會排 async render，release_pool 會一直卡住不放行。工作：依 lazypack-infographic skill（primary path = codex exec 寫 data-bound poster 腳本）為兩篇各寫一份 strict plan JSON，數字綁 evidence（K492: experiments/k492/k492_research_efficiency_results.json；K1409: experiments/k1409/k1409_results.json，且該實驗已有現成 lazypack 三張圖 experiments/k1409/lazypack/*.png 可參考），再 uv run python scripts/lazypack_async_render.py enqueue --article-id <mile_id> --plan <plan.json>。完成前這兩篇不會出現在 feed。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-21T12:19:18.374371+00:00",
+    "created_by": "hourly-slot-1-d4e78c67",
+    "status_history": [
+      {
+        "ts": "2026-07-21T12:20:41.547351+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:20:41.776996+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      },
+      {
+        "ts": "2026-07-21T12:22:49.295127+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-d4e78c67bb584ba18e266110c85be3dc"
+      }
+    ],
+    "started_at": "2026-07-21T12:20:41.776979+00:00",
+    "completed_at": "2026-07-21T12:22:49.295113+00:00",
+    "result": "兩份 strict plan v1 已寫好並通過 --validate-only（各 3 panels，全部數值 metric-bound、evidence hash 驗過），已 enqueue lazypack-mile_16c9f784 / lazypack-mile_9fbac50b 給 */15 compute worker 走 codex-primary 渲染鏈。renderer 的 unbound-numeric-literal gate 擋下標題/label 內的數字字面，已改寫。PNG 由 async worker 產出，下班次可 compute_queue show 驗收。"
+  },
+  {
+    "id": "assign_6e0b03ec",
+    "title": "[refill 治本] 文章 auto-discovery refiller 沒看 K verdict，會對不可發表的 K 反覆產 P1 任務",
+    "description": "2026-07-21 fire 實例：K709_article_general_v2 已餓死 1052h 且是 [retry-v2]。根因 = K709 的 knowledge entry verdict=FAIL_PROVENANCE（Codex CLI 0.132.0 gpt-5.4，2026-05-29 覆核）、evidence=None，本來就不該產出對外文章；但 refiller 只判斷「這個 K 有沒有 feed 覆蓋」，於是每次都重新產 P1 任務，卡住 main-thread lane 的 head-of-line，且沒有任何路徑能讓它終結。工作：(1) 在 auto-discovery refiller 加 verdict gate —— verdict 屬 FAIL_* / evidence 為空 / needs_human=True 的 K 一律不產文章任務；(2) 掃現有 pending daily_article 佇列，把同類不可發表的 K 任務一次 close 掉（目前 main-thread 餓死 17 筆，需逐一驗 verdict 再決定，勿盲刪）；(3) 順手處理 K1253 —— 該 entry 自述為環境 smoke test、非研究結論、needs_human=True，同樣不該有 general 文章任務。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-21T12:19:18.423534+00:00",
+    "created_by": "hourly-slot-1-d4e78c67"
   }
 ]
