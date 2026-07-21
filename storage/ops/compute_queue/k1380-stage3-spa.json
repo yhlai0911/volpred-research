@@ -1,0 +1,41 @@
+{
+  "id": "k1380-stage3-spa",
+  "title": "K1380 stage 3/3: QLIKE + sanity gate + White RC + Hansen SPA",
+  "script_path": "experiments/k1380/k1380.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--stage=spa"
+  ],
+  "env": {},
+  "status": "cancelled",
+  "queue_priority": 5,
+  "queued_at": "2026-07-21T06:50:58Z",
+  "started_at": null,
+  "completed_at": "2026-07-21T06:56:09Z",
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1380-stage3-spa.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1380-stage3-spa.stderr",
+  "result_artifact": "experiments/k1380/k1380_results.json",
+  "output_paths": [
+    "experiments/k1380/k1380_results.json",
+    "experiments/k1380/k1380_qlike_matrix.npy"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1380 stage 3 has produced experiments/k1380/k1380_results.json. Write the Paper 9\n(garch-x-vix) \"Multiple Testing Considerations\" subsection from it.\n\nPREREQUISITE — check first, do not skip:\n  jq -r '.status, .sanity_gate.passed' experiments/k1380/k1380_results.json\nIf status != \"OK\" or sanity_gate.passed != true, STOP. Write nothing to the paper,\nopen a debug task quoting .diagnosis and .observed_mean_qlike, and report. Mean QLIKE\nmust be on the ~1.4 scale of K1379; the discarded 2026-07-16 run sat at 620-740\nbecause QLIKE was reversed, and its conclusion (SPA p=1.000, \"no spec beats GJR\")\nis withdrawn and must never be cited.\n\nWHAT TO WRITE\nTarget: paper/garch-x-vix/main.tex, existing \\subsection{Multiple Testing\nConsiderations} placeholder (~line 813, currently two Bonferroni sentences).\nExpand to: the SPA/RC results table, the excluded/flagged spec note, and the\neconomic reading. Report from the JSON:\n  - .white_rc_test           White (2000) RC = max studentised advantage over all\n                             16 candidates at the least-favourable configuration\n  - .hansen_spa_test         p_consistent is primary; p_lower/p_upper bracket it\n  - .individual_dm_stats     per-spec t-stats, explicitly NOT snooping-adjusted\n  - .holm_stepdown           Holm-adjusted one-sided p-values\n  - .block_length_sensitivity and .excluding_flagged_specs as robustness\n  - .a4f_focus.attains_spa_max  does A4f attain the maximum, or another spec?\n\nBOTH DIRECTIONS ARE PUBLISHABLE, and the wording differs:\n  - If A4f survives the correction, say so plainly and keep the existing claims.\n  - If it does NOT, say so plainly AND soften the MCS/DM wording elsewhere in the\n    body in the same edit, so the paper does not assert in one section what it\n    retracts in another. Do not bury an overturning result in a footnote.\n\nMUST ALSO DISCLOSE — read .candidate_set_integrity:\nA1/A3, A2/A2n and A4/A4n emit bit-identical forecasts; the code configures each\npair identically, so Table 1's tau-timing and sample-mean-normalisation\ndistinctions are not implemented. The p-value is unaffected (a duplicate cannot\nraise a maximum), but the paper must not describe the search as covering more\ndistinct models than were estimated. State the distinct count.\nAlso note C1 was absent entirely from the 2026-07-16 run (its fixed-span lag\nmatrix was built with Km+1 monthly rows and silently fell below a >=10 guard), so\nthat run's \"17-spec\" race actually ranked 13.\n\nCONSTRAINTS\n- Main thread writes the .tex; do NOT delegate paper body writing to a background\n  agent (.claude/rules/paper-workflow.md).\n- Every number must come from the results JSON. No recomputation by hand, no\n  rounding that changes a significance verdict.\n- Pass the finance-paper-quality claim-evidence gate before compiling.\n- Then: xelatex -> uv run volpred ops paper-update --paper-id <id>, per\n  .claude/skills/paper-update/SKILL.md.\n- knowledge.json is written by the MAIN THREAD only, never by an agent (K1259).\n  Reviewer provenance note: Codex was out of credits on 2026-07-21, so the code\n  review was a feature-dev:code-reviewer subagent fallback. Re-verify via\n  primary-path Codex before writing a PASS verdict to knowledge.json.",
+    "task_type": "paper_body",
+    "priority": 2
+  },
+  "followup_dispatched": true,
+  "source_task_id": null,
+  "timeout_seconds": 900,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "parent_timeout_job_id": "compute-k1380-paper-9-white-rc-hansen-spa-test-17-spec-multiple-test-1779189466",
+  "split_stage": "spa",
+  "cancelled_at": "2026-07-21T06:56:09Z",
+  "cancel_reason": "staged k1380.py lives on wt/dispatch-slot-1-375ba0e3-k1380 and is not yet merged; the compute worker runs with cwd=REPO_ROOT where experiments/k1380/k1380.py is still the pre-refactor monolith with no --stage flag, so all three stages would fail on argparse. Re-enqueue verbatim (same ids, priorities 3/4/5, timeouts 5400/1800/900, same --timeout-parent-job-id and --split-stage) once the branch merges to main. Enqueue commands and the stage-3 followup brief are recorded in experiments/k1380/k1380_stage_refactor_report.json."
+}

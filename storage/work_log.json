@@ -23125,5 +23125,25 @@
     "owner": "hourly-slot-1-375ba0e3c91046bdbcdf0d5b32dab5a1",
     "commit": null,
     "summary": "PHASE A 例行檢查時發現的系統性缺陷，已立 P1 task\n`compute_queue_failed_script_job_followup_blind_spot`。\n\n症狀：`compute_queue.py list --pending-followup` 回 `[]`，但佇列有 26 個\n`status=failed` + `followup_dispatched=false` 的 job，且全都設了 `claude_followup`。\n\n根因（已定位到行）：`_pending_followup_view()` line 1156-1161 的\n`if not workdir and not timed_out: return None`，而 `_agent_workdir()`（1043-1055）\n只認 agent job（`kind==\"agent\"` 或 `script_path==\"scripts/run_agent_job.py\"`）。\n→ 用 `enqueue` 派的 script job 若以非 timeout 方式失敗（exit_code=1），\nworkdir=None 且 timed_out=False → 直接吞掉，PHASE A 永遠看不到。\n\n實證：`compute_k1602` / `k1379-har-benchmark` 皆 kind=null、cwd=null、exit_code=1、\nclaude_followup 存在。最舊可回溯到 2026-05-27（`k562-lag-fix-rerun-20260527`）。\n\n排除誤判：line 1999-2002 那段「explicitly keeps it out of pending-followup」的註解是\n`cancel` 指令的（cancelled job 沒結果所以不必 triage），與本缺陷無關 —— failed 分支是\nagent-centric 寫成的，script job 是被漏掉不是被排除。\n\n本班未修（刻意，理由記錄）：修法本身小，但一修好 26 筆會同時湧進 PHASE A、每筆吃一個 fire，\nsurfacing 策略（排序 + 每班上限，或先批次分流）需要寫進 code/rule 而非留給 prompt 自律，\n再加防再犯測試 —— 這超過本班剩餘預算。依「scope 切小、不留 partial」原則立案而非半做。\ntask description 已寫明禁用「把 26 筆全標 followup_dispatched=true」當修法（那是刪證據）。"
+  },
+  {
+    "timestamp": "2026-07-21T15:20:55+08:00",
+    "task_type": "trending_repost",
+    "task_id": "fb_dual_publish_mile_b222a5d7",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-9e08c0f9a0c045eb82e75edd5bf531ba",
+    "owner": "hourly-slot-1-9e08c0f9a0c045eb82e75edd5bf531ba",
+    "commit": null,
+    "summary": "PHASE A0 time_critical lane：mile_b222a5d7（期中選舉 VIX 事件研究）的 Ivan Lai FB 雙發佈補發，已完成。\n\n前置條件本來沒滿足，且不是等就會好的：任務描述說「等 release cron 把它 flip 成 published」，\n但線上頁面內嵌 `\"status\":\"draft\"` —— 直連 URL 回 200 只是 Next.js catch-all shell，不能當已發佈的證據。\n\n根因不是 cron 壞掉（release_pool 每 4h 正常跑、audit_release_settings 全綠），是**時效內容被關進節奏池**：\ntrending_repost 依規範應直發 published、不進 draft pool，這篇是被 lazypack gate（general+published 必須先有懶人包）\n擋成 draft 的。懶人包 job `lazypack-mile_b222a5d7` 2026-07-20T22:31Z 就 completed 且 panels 已 commit，\n但**沒有任何機制在懶人包完成後把文章放回 published** —— 它於是落進 FIFO + 1篇/4h 的池子，\n排在 mile_9291c34c 後面，preview 顯示要等到 ~2026-07-21 22:00 CST 才會 release（距發稿 ~24h）。\n\n處置：`volpred ops release-pool --pub-id mile_b222a5d7 --include-drafts` 定點放行 →\nsupabase_synced=true / verified_live=true，線上覆驗內嵌 status=published。\n副作用據實記錄：CLI 這條路徑不吐 `update_last_released` 旋鈕，last_released_at 被更新成 07:12Z，\nmile_9291c34c 的下次 release 從 10:00Z 順延到 11:12Z（+72min，可接受，未再介入）。\n\nFB 發佈依 fb-publishing SKILL 逐 gate 走：\n- 查重（硬規則 1）：`--delete-matching 期中選舉` locate-only 捲 8 次無同主題貼文；feed 的 fb_post_status 為空 → 可發\n- 圖片（硬規則 2）：附 4 張 = 事件路徑結果圖 + 懶人包 3 panel。**刻意捨棄** midterm_vix_crush_distribution\n  結果圖 —— 懶人包 panel 2（隔日 VIX 變化平均/中位數/檢定）已完整涵蓋同一組數字，照 skill 的內容查重規則不硬塞重複視覺\n- anti_ai_gate：PASS（warn 0/3），主文 354 字落在 200-400\n- 4 張圖 URL + 留言連結 curl 皆 200；dry-run 截圖目視確認後才真發\n\n過程中修掉一個自己踩的坑：第一次 dry-run 回報「留言連結: (無)」。\n`fb_realchrome_post.py:261` 的 parser 是 `##\\s*第一則留言[^\\n]*\\n\\s*(https?://\\S+)`，\n要求 URL 是標題下一行的第一個非空白字元；我在連結前加了「完整版分析 …→」前綴 → 整個第一則留言會被靜默跳過。\n改成裸 URL 後 re-dry-run 確認解析成功才發。附圖數 4 = composer 縮圖偵測 4，無 2026-07-07 那種疊圖。\n\n結果：主文 + 第一則留言（連結）皆送出並驗證，canonical fb_post_status→success。\n`--recapture-permalink` 抓不到 fb_post_url（worker 自標非阻塞）—— 已用 locate-only 獨立確認貼文確實在時間軸上\n（截圖 delete_target_1784618408640.png：「Ivan Lai · 1 分鐘」+ 事件路徑圖正常渲染）。\npermalink locator 疑似被置頂貼文擋住（新貼文落在「其他貼文」區），屬 locator heuristic 的小缺口，未修。"
+  },
+  {
+    "timestamp": "2026-07-21T15:23:51+08:00",
+    "task_type": "experiment",
+    "task_id": "k1380_stage_refactor_collect",
+    "outcome": "filed",
+    "actor": "hourly-slot-1-9e08c0f9a0c045eb82e75edd5bf531ba",
+    "owner": "hourly-slot-1-9e08c0f9a0c045eb82e75edd5bf531ba",
+    "commit": null,
+    "summary": "PHASE A collect_completed 收件：job agent-brief_k1380_stage-68dea3（completed 07:13:50Z，兩筆 pending-followup 中較舊者）\n已建 followup task 並 mark-followup-dispatched。\n\n收件時讀了 agent 的 artifact（k1380_stage_refactor_report.json，16.8KB），**發現原 followup brief 有一半本輪無法執行**，\n這點必須寫下來否則下一班會照著跑出假數字：\nbrief 要求「SANITY GATE（mean QLIKE ~1.4 量級）判定結果」+「A5/C2/C3 重判理由」，\n但 agent 的 status 是 REFACTOR_COMPLETE_COMPUTE_HELD_PENDING_MERGE，scope_note 明說\nbrief 只要求重構成 stage 並 enqueue、不要求跑 heavy compute，因此 **SPA / RC 數字根本還不存在**，\nstage 3 沒跑就不可能有。agent 自己加了一句「Nothing here may reach Paper 9.」—— 這是誠實的拒絕，不是失敗。\n新 task description 已把「禁止寫 Paper 9 Multiple Testing 子節」「不要為交差生數字」寫死，\n並把本輪真正可驗的六項（σ̂² 而非 loss 的持久化、qlike 改 import 不手寫、13 個回歸測試實跑、\n三個 child stage 的 --timeout-parent-job-id/--split-stage、invalidating 等級缺陷逐條）列成清單。\n\n本班未直接做收件驗證 + worktree 合併（刻意）：A0 time_critical lane 清空後剩 ~25min，\ncanonical merge_worktree.sh 合併是不可半做的動作，依「scope 切小、不留 partial」建單。\n\n另記一個順手發現（未修）：用 next_tasks.append_task_record 建單時吐\n`[pool_pressure] WARN ... pending=173 cap=80 ... 此 caller 未經 pool_admits_new_work 閘門`。\nPHASE A followup 是必辦工作、建單本身正確，但 append_task_record 這條 writer path 確實繞過了池壓力閘門，\n而 pending 已是 cap 的兩倍以上。屬 writer-convergence 的缺口，本班只記錄不處理。\n\n另一筆 pending-followup（agent-brief_k1729_repair-986ef4，triage_failed）本班未處理，留待下班次。"
   }
 ]

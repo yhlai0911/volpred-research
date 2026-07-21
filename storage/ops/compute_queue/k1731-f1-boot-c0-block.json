@@ -1,0 +1,40 @@
+{
+  "id": "k1731-f1-boot-c0-block",
+  "title": "K1731 F1: nested null bootstrap, c=0 block-residual, B=100 (prod MCMC)",
+  "script_path": "experiments/k1731/run_nested_bootstrap_shard.py",
+  "interpreter": "uv run python",
+  "args": [
+    "0.0",
+    "100",
+    "20270721",
+    "6",
+    "block"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-21T07:15:14Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1731-f1-boot-c0-block.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1731-f1-boot-c0-block.stderr",
+  "result_artifact": "experiments/k1731/f1/bootstrap_c0p0_block_s20270721.json",
+  "output_paths": [
+    "experiments/k1731/f1/bootstrap_c0p0_block_s20270721.json"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1731 F1 Route 2 shard B landed (c=0, BLOCK-RESIDUAL, B=100). This shard exists because the parametric DGP draws targets conditionally independent given the regressors, while the null model's PIT residuals carry acf(1)=0.132 and the realised loss differential carries acf(1)=0.178 - so the parametric null distribution may be too narrow. This variant resamples observed PIT residuals in circular blocks of 20 (deliberately longer than the DM statistic's HAC bandwidth of 10). Assemble TOGETHER with shard A (k1731-f1-boot-c0-parametric) via --mode assemble; seed bases are disjoint (20260721 vs 20270721) and assemble hard-errors if they are not. Decision rule: if the block variant's spread is materially wider than the parametric one, the block variant is what the README quotes and the parametric becomes the diagnostic - say so explicitly rather than quoting whichever is more favourable. Do NOT write knowledge.json from a worktree agent.",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "timeout_seconds": 39600,
+  "brief_source": null,
+  "brief_snapshot": null
+}
