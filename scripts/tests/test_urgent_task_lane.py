@@ -117,6 +117,18 @@ def test_time_critical_types_still_recognised_no_regression() -> None:
         assert classify(task) == LANE_TIME_CRITICAL
 
 
+def test_time_critical_is_type_only_not_priority_gated() -> None:
+    """2026-07-21 R1：時效性來自 type 本身，priority 打錯不得讓它退回 scheduled。
+
+    手建 P2 event_article 若因不是 P1 而排進 scheduled lane，等排到時時效已歸零
+    —— dispatcher 的 lane rank 與 A0 lane 都必須把它當 time_critical。
+    """
+    for prio in (2, 3, "P2"):
+        task = _task("x", task_type="event_article", source="reader_facing_refill",
+                     priority=prio)
+        assert classify(task) == LANE_TIME_CRITICAL
+
+
 def test_non_p1_is_never_urgent() -> None:
     for prio in (2, 3, 4, None, "P1"):
         assert classify(_task("t", priority=prio)) == LANE_SCHEDULED

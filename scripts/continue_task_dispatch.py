@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Slot-aware continuation dispatcher (replaces stub-only continue_task host cron).
 
-讀 storage/next_tasks.json 的 pending queue，按 priority asc 排序，
+讀 storage/next_tasks.json 的 pending queue，候選排序最外層先按 lane rank
+（task_urgency：urgent boss 急件 → time_critical 時效任務 → 其餘；lane 內 FIFO），
+lane 之後才是既有 priority asc + 餓死保護 + 同 priority 多樣性輪替，
 count 當前 slot 占用（.claude/worktrees/ + storage/ops/agents/ active），
 若 slot < cap (4) 且有可派 agent 的 task → 列出 / 派出（依 mode）。
 
@@ -128,6 +130,7 @@ import sys as _sys
 from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
+from volpred.ops import task_urgency as _task_urgency  # noqa: E402  (2026-07-21 R1: lane rank 的唯一判定 owner)
 from volpred.ops.blocked_reasons import BLOCKED_REASONS  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
@@ -1135,36 +1138,70 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
     slot_cap = slot_budget["cap"]
     free_slots = max(0, slot_cap - slots["occupied"])
 
-    # Starvation lockout. When agentable work has aged past its threshold, the
-    # candidate menu collapses to starved tasks plus explicit incident preemption.
+    # 2026-07-21 dispatch-lanes R1: lane rank is the OUTERMOST ordering key.
+    # `task_urgency.classify()` has been the single urgency owner since
+    # 2026-07-18, but this dispatcher never consulted it — ordering was
+    # priority + starvation + rotation only, so the fire a boss P1 woke via
+    # `request_fire` still picked the longest-starved *machine* P1 (2026-07-21:
+    # 33 pending P1, only 8 boss-sourced; the boss item queued behind 25
+    # generator-self-assigned P1s). Urgent (boss-source P1) rides first,
+    # oldest-first; time-critical types second, same FIFO; everything else
+    # keeps the existing priority / starvation-lockout / rotation logic
+    # UNCHANGED, operating only on the slots that remain after the lane head
+    # is seated — so the starved tail-floor reserve can never evict urgent or
+    # time-critical work.
+    lane_by_id: dict = {}
+    urgent_lane: list[dict] = []
+    time_critical_lane: list[dict] = []
+    scheduled_pool: list[dict] = []
+    for task in cats["agentable"]:
+        lane = _task_urgency.classify(task)
+        lane_by_id[task.get("id")] = lane
+        if lane == _task_urgency.LANE_URGENT:
+            urgent_lane.append(task)
+        elif lane == _task_urgency.LANE_TIME_CRITICAL:
+            time_critical_lane.append(task)
+        else:
+            scheduled_pool.append(task)
+    urgent_lane.sort(key=lambda t: str(t.get("created_at") or ""))
+    time_critical_lane.sort(key=lambda t: str(t.get("created_at") or ""))
+    lane_head = (urgent_lane + time_critical_lane)[:free_slots]
+    scheduled_slots = max(0, free_slots - len(lane_head))
+
+    # Starvation lockout — over the scheduled lane only. A starved urgent /
+    # time-critical task does not need the lockout: its lane already puts it at
+    # the head of the queue. When agentable scheduled work has aged past its
+    # threshold, the scheduled portion of the menu collapses to starved tasks
+    # plus explicit incident preemption.
     # ``dispatch_preempt`` is reserved for already-materialized P1 response work
     # (currently CI red repair): request_fire only wakes this generic dispatcher,
     # so omitting a fresh incident under lockout would consume the wake-up on an
     # unrelated old task and leave CI red. Ordinary fresh work remains excluded.
-    starved = find_starved(cats["agentable"], now=now)
+    starved = find_starved(scheduled_pool, now=now)
     starved_ids = {s["task"].get("id") for s in starved}
     # Main-thread tasks starve too (a boss-assigned P1 sat 27h — see `_coerce_priority`),
     # but the fix there cannot be a lockout: nothing in the agent lane can claim them.
     # Surface them so the fire has to look at them, and let the alert bridge nag.
     starved_main_thread = find_starved(cats["main_thread"], now=now)
-    preemptive = [task for task in cats["agentable"] if task.get("dispatch_preempt") is True]
+    preemptive = [task for task in scheduled_pool if task.get("dispatch_preempt") is True]
     preempt_ids = {task.get("id") for task in preemptive}
     if starved:
-        candidates_to_dispatch = (
+        scheduled_candidates = (
             preemptive + [s["task"] for s in starved if s["task"].get("id") not in preempt_ids]
-        )[:free_slots]
-        _before_ids = [t.get("id") for t in candidates_to_dispatch]
-        candidates_to_dispatch = apply_starved_tail_floor(
-            starved, candidates_to_dispatch, free_slots, preempt_ids
+        )[:scheduled_slots]
+        _before_ids = [t.get("id") for t in scheduled_candidates]
+        scheduled_candidates = apply_starved_tail_floor(
+            starved, scheduled_candidates, scheduled_slots, preempt_ids
         )
         tail_floor_ids = [
-            t.get("id") for t in candidates_to_dispatch if t.get("id") not in _before_ids
+            t.get("id") for t in scheduled_candidates if t.get("id") not in _before_ids
         ]
     else:
-        candidates_to_dispatch = (
-            preemptive + [task for task in cats["agentable"] if task.get("id") not in preempt_ids]
-        )[:free_slots]
+        scheduled_candidates = (
+            preemptive + [task for task in scheduled_pool if task.get("id") not in preempt_ids]
+        )[:scheduled_slots]
         tail_floor_ids = []
+    candidates_to_dispatch = lane_head + scheduled_candidates
 
     pending_summary = {
         "agentable": len(cats["agentable"]),
@@ -1189,6 +1226,13 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
         "pending_main_thread": len(cats["main_thread"]),
         "pending_blocked": len(cats["blocked"]),
         "pending_summary": pending_summary,
+        # R1 lane visibility: how much of the agentable queue outranks the
+        # scheduled lane this fire, and which ids took lane-head seats.
+        "lanes": {
+            "urgent_pending": len(urgent_lane),
+            "time_critical_pending": len(time_critical_lane),
+            "lane_head_task_ids": [t.get("id") for t in lane_head],
+        },
         "starvation": {
             "locked": bool(starved),
             "incident_preempt_count": len(preemptive),
@@ -1199,7 +1243,8 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
             "thresholds_hours": {f"P{k}": v for k, v in STARVATION_HOURS.items()},
             "directive": (
                 "⛔ STARVATION LOCKOUT — 以下任務已超過其優先序的容忍時數。"
-                "本班 dispatch_candidates 只列 incident preempt 與這些餓死任務，"
+                "本班 dispatch_candidates 先列 urgent / time-critical lane（如有），"
+                "scheduled 部分只列 incident preempt 與這些餓死任務，"
                 "diversity rotation 暫停："
                 "先清光餓死的任務，才能回到一般輪替。"
                 if starved
@@ -1249,6 +1294,7 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
                 # 拓撲建議（task.topology 欄位優先，否則 task_type 預設）— orchestrator
                 # 依此選載具，僅明顯不合時 override 並在 work_log 記原因
                 "topology": pick_topology(t.get("task_type"), t)["topology"],
+                "lane": lane_by_id.get(t.get("id"), _task_urgency.LANE_SCHEDULED),
                 "starved": t.get("id") in starved_ids,
                 "dispatch_preempt": t.get("dispatch_preempt") is True,
                 "age_hours": (lambda a: round(a, 1) if a is not None else None)(task_age_hours(t)),
