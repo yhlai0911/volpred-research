@@ -1,21 +1,19 @@
 {
   "kid": "k1436",
-  "verdict": "FILL: PASS or FAIL — anything but PASS blocks the merge",
-  "reviewer": "FILL: model / effort",
-  "reviewed_at": "FILL: ISO8601",
-  "reviewed_commit": "FILL: the frozen SHA you read",
-  "review_artifact": "FILL: relpath of the written review",
-  "blocking_defects": [
-    "FILL: one entry per defect that makes this a FAIL; [] if PASS"
-  ],
+  "verdict": "PASS",
+  "reviewer": "feature-dev:code-reviewer subagent (fresh context, read-only) \u2014 FALLBACK path; Codex CLI primary unavailable (usage limit until 2026-07-25)",
+  "reviewed_at": "2026-07-21T03:44:36+00:00",
+  "reviewed_commit": "4458e73a0",
+  "review_artifact": "experiments/k1436/review_report.md",
+  "blocking_defects": [],
   "reviewed_sha256": {
-    "README.md": "cb845e40707ba3a1809e54b15cf145c3ed9743be40dce26ff2187b5ab4a04c3a",
+    "README.md": "2f99cd105518d4aaafe15ea1f0b37c7a7a2cdd034d9818fad92b4ba40628c119",
     "fetch_data.py": "ea77cde78c7666d9a700d671213c4f09113a2d440dfc8c6e6294174b78ff9828",
     "fig_oos_comparison.png": "4bbea5a18262feba686480b8b209ecc2722db6cd627068ced9b12372f2296bf1",
     "fig_rv_vs_funding.png": "dccb857380e560b44d6832fb46caf24449ed77eb335ef17d1ec4533637e6be49",
-    "k1436.py": "4d2d099a82e94df32d1533b08b29e6b92b9a2e16371e57cdecc267a59842fb02",
-    "k1436_results.json": "fb9b81205b80ba1591b72a0d1b36bb41f1709d25b4536f2c3aaade3162c16188",
-    "v1_feasibility_audit.py": "1bab25c20ca36fd90de29bad9ffa22f66d95d27a4b3a50ae4ea51cc6782a6bc3",
+    "k1436.py": "930c63fdbd39266c954f1a546316d349ec03547e63668f77db55bec722bc9f74",
+    "k1436_results.json": "ad191a23f3c3b731e945daed41c080aa55fe15f740031d9193d21824ae041f41",
+    "v1_feasibility_audit.py": "997cc053d2a6789eaa0ef37457208c6e7a13eb4b99a8ae391cf7cb8292067a9b",
     "v1_feasibility_audit_results.json": "b7ecb7a17c90787c412be888b7dff233c7279217d894fc57a73d4a14fca8b32e"
   }
 }
