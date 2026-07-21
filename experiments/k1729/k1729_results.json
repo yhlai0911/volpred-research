@@ -1,13 +1,13 @@
 {
   "experiment_id": "K1729",
   "title": "Self-owned TAIFEX tick (5-min RV) vs daily-only information for next-day TX day-session RV",
-  "timestamp_utc": "2026-07-21T06:30:40.652053+00:00",
+  "timestamp_utc": "2026-07-21T06:50:13.841586+00:00",
   "random_seed": 42,
   "verdict": "HAR_RV5_WINS_ROBUST_ACROSS_PROXIES",
   "hypothesis": {
     "H0": "E[QLIKE(HAR-DAILY)] - E[QLIKE(HAR-RV5)] = 0 (intraday RV adds nothing over daily-only info)",
     "H1": "HAR-RV5 attains strictly lower QLIKE on a common ledger",
-    "decision_rule": "Harvey (2016) |DM t| > 3.0 on BOTH proxy targets for a robust claim"
+    "decision_rule": "Harvey (2016) |DM t| > 3.0 on BOTH proxy targets, AND the ex-ante-contract ledger must reach the same call on each, for a robust claim. The primary ledger alone is not sufficient: it still contains the days whose contract choice was not fixable ex ante."
   },
   "data": {
     "source_csv": "data/intraday/taifex_5min_rv.csv",
@@ -437,7 +437,7 @@
   "target_contract_selection_audit": {
     "defect_repaired": "pick_active_contract() chooses day t's contract from day t's TOTAL volume, which includes the 08:45-13:45 day session being forecast. The identity of the contract y_t is measured on is therefore not fixable at the 08:45-on-t origin in general. Codex judged this blocking on 2026-07-17 (review_verdict.json); it was undisclosed, not scoped.",
     "exante_rule": "RULE E -- hold the front monthly contract through its published final settlement date (3rd Wednesday of the contract month, advanced to the next trading day if that Wednesday is a holiday), then roll. Inputs are the contract held at t-1 and the published settlement calendar, both in the 08:45-on-t information set.",
-    "rule_is_a_convention_not_a_fit": "The alternative natural convention (take the nearest contract whose settlement date has not yet passed) picks the same contract on every row of this sample, so no choice between conventions was made against the data.",
+    "rule_is_a_convention_not_a_fit": "The alternative natural formalisation (take the nearest contract whose settlement date has not yet passed) agrees with RULE E ITSELF -- not merely with the realized selection -- on every row of the OOS window. The two differ on exactly one row of the whole file, row 0 (2012-01-02), and only because the file has no history before it, so the December-2011 settlement cannot be located; that row is warmup and is never scored. No choice between conventions was made against the data. Independently reimplemented and confirmed by an external reviewer (agy_review_rev2.md), which also showed a third convention not tied to expiry (roll on the 1st of the calendar month) agrees with only 59.22% of OOS rows -- expiry-tied conventions are the natural family, and within that family the choice is immaterial.",
     "n_rows_total": 3550,
     "n_exante_determined_total": 3512,
     "n_ambiguous_total": 38,
@@ -467,5 +467,5 @@
     "TARGET-SIDE EX-POST SELECTION (disclosed, quantified, and bounded -- see target_contract_selection_audit): the same TOTAL-volume rule also picks the contract y_t is measured on, and that total includes day t's own day session. The contract identity is therefore not fixable ex ante in general. A pre-specified ex-ante calendar rule reproduces the realized selection on 99.80% of OOS rows; the headline is re-run with the remaining rows dropped and the verdict is unchanged. What is NOT claimed is that the primary full-ledger numbers are themselves free of the ex-post choice -- they are not; the ex-ante-restricted ledger is the lookahead-free one.",
     "The ex-ante-restricted ledger is a CONDITIONAL estimand: membership depends on whether day t's contract followed the calendar, which is not knowable at 08:45. The selection is model-agnostic and common to both models, so it cannot favour either, but it is not an unconditional statement."
   ],
-  "code_sha256": "5d15c4ff3a7cb61c2bfb250668f1c510a7a62a2d6f97c9d922d5f2b0ce5dfc7e"
+  "code_sha256": "74ddae0e123be5eee0784568d98617ee64c2e2fb1034776ddf0eda934d0631b7"
 }

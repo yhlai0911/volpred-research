@@ -70,9 +70,13 @@ selection carry NO target-side lookahead: an ex-ante desk would have measured
 y_t on exactly the same contract. Days where it does not are the ambiguity set,
 and are reported and dropped in a sensitivity ledger.
 
-Rule E is a convention, not a fit: the other natural convention (roll on the
-first day whose settlement date has not yet passed) selects the same contract on
-every row of this sample, so the headline does not depend on which one is used.
+Rule E is a convention, not a fit. The other natural formalisation of the same
+idea -- take the nearest contract whose settlement date has not yet passed --
+agrees with RULE E (not merely with the realized selection) on every row of the
+OOS window. The two differ on exactly one row of the whole file, row 0
+(2012-01-02), and only because the file has no history before it, so the
+December-2011 settlement cannot be located; that row is rolling-window warmup
+and is never scored. No choice between conventions was made against the data.
 """
 from __future__ import annotations
 
@@ -411,15 +415,26 @@ def main() -> None:
     zero_rv_oos = df.loc[(df["rv_5min"] <= 0) & oos_rows, "date"]
     zero_r2_oos = df.loc[(df["r2"] <= 0) & oos_rows, "date"]
 
-    agree = (results["rv_5min"]["full"]["verdict"] == results["daily_r2"]["full"]["verdict"])
-    both_null = (results["rv_5min"]["full"]["verdict"] == "NULL"
-                 and results["daily_r2"]["full"]["verdict"] == "NULL")
+    # The machine-readable verdict must not rest on the ledger that still carries
+    # the ex-post contract choice. Require BOTH proxy targets to agree AND the
+    # ex-ante-contract ledger to reach the same call on each; otherwise say so
+    # rather than inheriting the primary ledger's answer.
+    full_a = results["rv_5min"]["full"]["verdict"]
+    full_b = results["daily_r2"]["full"]["verdict"]
+    exante_a = results["rv_5min"]["sensitivity"]["exante_contract_ledger"]["verdict"]
+    exante_b = results["daily_r2"]["sensitivity"]["exante_contract_ledger"]["verdict"]
+
+    agree = full_a == full_b
+    exante_concurs = (exante_a == full_a) and (exante_b == full_b)
+    both_null = full_a == "NULL" and full_b == "NULL"
     if both_null:
         overall = "NULL"
-    elif agree:
-        overall = results["rv_5min"]["full"]["verdict"] + "_ROBUST_ACROSS_PROXIES"
-    else:
+    elif not agree:
         overall = "PROXY_DEPENDENT_INCONCLUSIVE"
+    elif not exante_concurs:
+        overall = full_a + "_EXANTE_LEDGER_DISAGREES"
+    else:
+        overall = full_a + "_ROBUST_ACROSS_PROXIES"
 
     payload = {
         "experiment_id": "K1729",
@@ -430,7 +445,12 @@ def main() -> None:
         "hypothesis": {
             "H0": "E[QLIKE(HAR-DAILY)] - E[QLIKE(HAR-RV5)] = 0 (intraday RV adds nothing over daily-only info)",
             "H1": "HAR-RV5 attains strictly lower QLIKE on a common ledger",
-            "decision_rule": "Harvey (2016) |DM t| > 3.0 on BOTH proxy targets for a robust claim",
+            "decision_rule": (
+                "Harvey (2016) |DM t| > 3.0 on BOTH proxy targets, AND the "
+                "ex-ante-contract ledger must reach the same call on each, for a robust "
+                "claim. The primary ledger alone is not sufficient: it still contains "
+                "the days whose contract choice was not fixable ex ante."
+            ),
         },
         "data": {
             "source_csv": str(DATA.relative_to(REPO)),
@@ -516,10 +536,18 @@ def main() -> None:
                 "the 08:45-on-t information set."
             ),
             "rule_is_a_convention_not_a_fit": (
-                "The alternative natural convention (take the nearest contract whose "
-                "settlement date has not yet passed) picks the same contract on every "
-                "row of this sample, so no choice between conventions was made against "
-                "the data."
+                "The alternative natural formalisation (take the nearest contract whose "
+                "settlement date has not yet passed) agrees with RULE E ITSELF -- not "
+                "merely with the realized selection -- on every row of the OOS window. "
+                "The two differ on exactly one row of the whole file, row 0 "
+                "(2012-01-02), and only because the file has no history before it, so "
+                "the December-2011 settlement cannot be located; that row is warmup and "
+                "is never scored. No choice between conventions was made against the "
+                "data. Independently reimplemented and confirmed by an external reviewer "
+                "(agy_review_rev2.md), which also showed a third convention not tied to "
+                "expiry (roll on the 1st of the calendar month) agrees with only 59.22% "
+                "of OOS rows -- expiry-tied conventions are the natural family, and "
+                "within that family the choice is immaterial."
             ),
             "n_rows_total": int(len(df)),
             "n_exante_determined_total": int(exante_ok.sum()),
