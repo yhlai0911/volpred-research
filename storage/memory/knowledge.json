@@ -42469,5 +42469,34 @@
   ],
   "confidence": 0.75,
   "created_at": "2026-07-21T16:11:47.134945"
+ },
+ {
+  "item_id": "bfbcd654",
+  "category": "experiment_result",
+  "content": "K1730 arm A (GEVReg-MIDAS-SSVS 波動率區間預測) production run 定案，取代先前的 quick-mode artifact。production artifact md5 d0d25fe2b49eeca9ac7d8ab5dc7d0419（quick_mode=false, n_starts=30, n_draws=40000, n_burnin=10000, thin=10, n_chains=2, n_pred_draws=500），估計設定與 K1731 arm B rev5 在所有共用欄位上完全一致，跨臂比較首次 like-for-like。\n\n數值結論（OOS n=967, 2008-01-07 → 2026-07-13）：macro 模型 GEVReg-MIDAS-SSVS 的 mean pinball 0.11406583 高於自身 nested benchmark GEV-HAR 的 0.11223856，loss differential +0.00182727 favours benchmark。permutation 診斷 shuffled 0.11208304 < real 0.11406583，shuffled_worse_than_real=false，即打亂 macro 排序並不會變差。harvey_significant=false。\n\n推論層裁決：該 DM 比較同時滿足 nested + pinball + expanding window 三條件，依 K1731 F1 的結論此組合沒有已發表的推論方法，DM 統計量在 H0 下沒有 asymptotic-normal 極限。因此 arm A 的 t 值（quick-mode 2.13 / production 1.998）與 p 值皆已**撤回為 inference**，改標 diagnostic-only；README 中殘留的 t=+2.13 僅存在於歷史 review round 的 superseded 註記內。方向性結論改以 loss ordering + permutation 診斷 + harvey_significant=false 支撐。另需注意 nesting bias 與觀察到的方向同向（大模型多餘係數在 H0 下增加預測噪音），故此觀察與「macro 貢獻為零」一致，但**不足以**支持更強的「macro 主動惡化預測」主張。\n\n兩個 in-sample 選擇數字因 production 而更正：2008 refit 的 VIX PIP 0.85 → 0.87275；IP PIP peak 0.354 → 0.224125。VIX 在 19/19 refits PIP>0.5（mean 0.86467），CPI 11/19（0.65279），UNRATE 7/19（0.42716），IP 與 TERM 皆 0/19。xi range [-0.13965, -0.09465] 與 quick mode 相同至 7 位有效數字（multistart MLE，不依賴 draw 數）。\n\nPRIMARY artifact 的 cross_arm_comparison 是改 generator k1731_finalize_report.py 後重新產生，非手改 JSON；leaf diff 對 HEAD 顯示 3,486 個數值 leaf 全數未動（0 changed / 0 added / 0 removed），只有 15 個敘述字串與 finalized_utc 變動、6 個 claim-layer key 新增。\n\n尚未關閉：(a) K1730_NESTED_DM_ADJUDICATION.md 的 §1.1/§3.2/§7 仍引 quick-mode 數值，待其 owner 更新；(b) 該文件 §4.1 要求的 5 處 source annotation 尚未套進 k1730_gevreg_midas_ssvs.py；(c) auditor bucket exposed → diagnostic_only 需 baseline re-freeze；(d) randomization test（adjudication §4.2）未跑，在它跑完之前兩臂的 null 都只是 descriptive 非 tested；(e) Codex round 8 尚欠（額度至 2026-07-25 13:30），worktree 因 experiment certification gate 未合併，已排 task k1731_k1730_merge_after_codex_round8_20260725。",
+  "evidence": [
+   ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/F3_armA_production_recheck.md",
+   "experiments/k1730/k1730_gevreg_midas_ssvs_results.json (md5 d0d25fe2b49eeca9ac7d8ab5dc7d0419)",
+   "experiments/k1730/K1730_NESTED_DM_ADJUDICATION.md",
+   "experiments/k1731/README.md",
+   "hourly slot-1 457427c2 獨立抽驗 10 項數字（mean_pinball / dm_tests / permutation_test / ssvs_summary / refits[0].ssvs.pip.VIX / max IP PIP / xi_range / n_common_oos / harvey_significant / md5）全數逐位吻合"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-22T00:12:03.903356"
+ },
+ {
+  "item_id": "f20b88e3",
+  "category": "methodology",
+  "content": "2026-05-18 快照重複列污染事件的裁決定案。9 個 canonical 資料 CSV 各含 10 個重複交易日；該事件被三個獨立 agent 各審一次（分母 44 / 64 / 51），結論互相矛盾，本次對帳裁決如下。\n\n**權威裁決集 = audit C**（branch wt/dispatch-slot-1-20b291d5-snapdup, experiments/audit_snapshot_dup_20260721/）：篩 70 個 Python 檔、裁決 51 個 consumer，確認污染 9 個（k1319 k1391 k1396 k1398 k1399 k1591 k1592 k1705 paper2_table1_summary_stats_provenance），另 4 個 AT_RISK_UNVERIFIED。\n\n**audit A 作廢**（branch wt/dispatch-slot-1-858545f9-snapaudit）：其頭條 conclusions_changed_by_the_contamination=0 是分母錯誤造成的偽陰性。A 的 44 個 consumer path 中不含 k1319，而 k1319 正是判定翻轉案例。Codex primary-path review 早已判 A FAIL(MAJOR-1)，理由與此一致。\n\n**兩個顯著性判定翻轉**（audit B 與 audit C 各自獨立重跑，數字吻合到小數第四位）：\n1. k1319：DM har_vs_ewma t 從 -2.9319 移到 -3.1085，跨過 Harvey |t|>3.0 門檻；p 0.0034 → 0.0019。\n2. k1592：dm_GammaRule_minus_GJR_p 從 0.038 移到 0.137，跨過 5%；panel mean_losses 因 10 筆偽造零報酬膨脹約 25-30%。**k1592 的列數是乾淨的**，所以純以列數為準的稽核看不見它 —— 這是本事件最重要的方法學教訓：count-only 稽核對「重複列被後續處理吸收成零報酬」的污染型態失效。\n\n**投稿風險**：paper/leverage-direction/body_v_ijf.tex 的 L332（K1592 表註與頭條結論「no asset and no panel meets this criterion」、SPY Holm p=0.104）與 L358（K1591 gamma_diff=-0.087、HAC t=-0.66、bootstrap CI [-0.71,+0.39]、69.8% negative draws）皆源自受污染面板。該論文是目前唯一接近 ready-for-submission 者，在更正任務關閉前不得推進 arXiv 或投稿。\n\n**vintage caveat（所有下游更正都適用）**：audit B 的成對重跑取自同一 git vintage (00b07f07f^ vs 00b07f07f) 並先驗證 dedup(A)==B byte-identical，故 delta 只能歸因於那 10 列；但該 A/B 落在 2026-07-19 vintage，與原始執行 vintage 不同。方向與量級可信，**寫進產物或論文的精確更正值必須在原 vintage 重跑取得**，不可直接抄 B 的 after 值。\n\n**已觸及讀者的產出**：已發佈文章 mile_02c71e74（k1308）、mile_34157161（k1399）、k1396 系列 4 篇 feed；feed.json 的 K1319 條目；paper/garch-x-vix/errata_pending.md §SF1-K1391；paper/taiwan-vt tab:summary_stats 的 provenance。\n\n**流程教訓**：同一 incident 被派了三次、三次都從零篩 consumer，成本是三份 agent 工時，風險是先完成的錯誤結論（A）差點定案。派工端在建 audit 類任務前應查同 incident 是否已有進行中的 audit —— 與 K-article 的 dedup gate 是同類問題，只是發生在 ops 側而非內容側。",
+  "evidence": [
+   "storage/ops/snapaudit_reconciliation_20260722.md（本次裁決對帳）",
+   "audit C: wt/dispatch-slot-1-20b291d5-snapdup :: experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
+   "audit B: snapaudit-dcc222db :: experiments/snapshot_dup_audit_20260720/audit_results.json（64 consumers, 10 paired reruns with before/after + diff.json artifact）",
+   "audit A (作廢): wt/dispatch-slot-1-858545f9-snapaudit :: experiments/audit_dup_snapshot_20260719/audit_results.json",
+   "storage/ops/codex_reviews/audit_dup_snapshot_20260719_verdict.md（Codex 判 A FAIL, MAJOR-1）",
+   "paper/leverage-direction/body_v_ijf.tex:332,358"
+  ],
+  "confidence": 0.9,
+  "created_at": "2026-07-22T00:19:39.079590"
  }
 ]

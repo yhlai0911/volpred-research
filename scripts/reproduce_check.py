@@ -58,6 +58,13 @@ SPEC_SCHEMA = "volpred.reproduce_spec.v1"
 INVENTORY_SCHEMA = "volpred.reproduce_inventory.v1"
 STATUS_SCHEMA = "volpred.reproduce_status.v1"
 PASS_REPORT_STATUSES = {"pass_exact", "pass_tolerated"}
+# 2026-07-22 — 上限自 3600 放寬到 86400。
+# 這個界的用途是攔「單位打錯」（把毫秒當秒填成 13448000），不是限制實驗能跑多久：
+# 真正的執行上界是 `effective_timeout = min(CLI --timeout, spec.timeout_seconds)`，
+# 呼叫端永遠可以再壓低。1 小時的天花板反而逼長跑實驗填一個**必然 timeout 的假值** ——
+# K1730 arm A 真實耗時 13448s，誠實填 18000 會被 validator 拒收，填 3600 則是寫謊。
+# 兩者都讓 reproduce gate 失去意義，所以放寬到 24h：仍能攔住量級錯誤，但不再獎勵造假。
+MAX_TIMEOUT_SECONDS = 86_400
 DEFAULT_RTOL = 1e-9
 DEFAULT_ATOL = 1e-12
 
@@ -330,8 +337,14 @@ def load_spec(exp_dir: Path) -> tuple[dict[str, Any] | None, str | None]:
             if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
                 raise ValueError(f"inputs[{index}].sha256 must be lowercase SHA-256")
         timeout = raw.get("timeout_seconds", 180)
-        if not isinstance(timeout, int) or isinstance(timeout, bool) or not 1 <= timeout <= 3600:
-            raise ValueError("timeout_seconds must be an integer in [1, 3600]")
+        if (
+            not isinstance(timeout, int)
+            or isinstance(timeout, bool)
+            or not 1 <= timeout <= MAX_TIMEOUT_SECONDS
+        ):
+            raise ValueError(
+                f"timeout_seconds must be an integer in [1, {MAX_TIMEOUT_SECONDS}]"
+            )
         if raw.get("network", "deny") not in {"deny", "allow"}:
             raise ValueError("network must be 'deny' or 'allow'")
         randomness = raw.get("randomness")
