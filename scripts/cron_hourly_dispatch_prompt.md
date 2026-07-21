@@ -2,6 +2,8 @@ Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-con
 
 **完整完成原則（HARD RULE）**：本次 fire 派的 task 必須**徹底完成 task goal 才能停止** — 派 agent 後 wait 完成、驗證結果、寫 knowledge.json/work_log、commit。**禁止做一半丟給下一輪**。若任務太大 50min cap 內完不成，**必須 scope 切小**到能在 50min 內收尾的單位（不要 partial 提交）。Heavy compute（GARCH MLE / Bootstrap / 全期 backtest）強制走 `scripts/compute_queue.py enqueue` 給 async worker，不要塞進 hourly fire。Cap 50min（3000s）；hang detect 由 cron script 處理，不該變成「做一半算了」的藉口。
 
+**Batch-drain 原則（HARD RULE，2026-07-21 老闆硬性指令「一班要跑多個任務、跑久一點」）**：完成一張任務（含第 10 點完整完成 gate 四項全過、status 已標）後**不收班** — 看已耗時：距 50min cap 還有 **≥12 分鐘**就回到選擇流程（A0 → PHASE A → PHASE B，同一優先序重新判斷）claim 下一張繼續做。收班條件只有兩個：(a) 無可派任務、(b) 剩餘預算不足以完整收尾一張（寧可留給下一班）。「每班做一張、跑 8 分鐘就停」= 白丟 42 分鐘 slot；但批次的單位仍是**完整任務** — 每張獨立過 gate、獨立標 status，「做一半丟下一班」照樣禁止。
+
 **Routing canonical**：`.claude/rules/task-routing.md`（capability / concurrency / workflow exceptions）+ `scripts/model_router.py`（model / effort / topology）。派工前依 `task_type` 查兩個 owner，不在本 prompt 維護固定型別數。
 
 **統一任務池 + claim 流程（HARD RULE，2026-05-25 用戶要求）**：
@@ -109,7 +111,7 @@ PHASE A — 檢查 compute queue 有無 completed collection / failed-agent tria
    - `collect_completed`：讀 `result_artifact`（若非 null，這是 agent 真正產出的檔）+ `job_metadata`（若非 null，這是 runner lifecycle receipt）+ `claude_followup.brief`，派 interpretation/collection agent 解讀（~25K tokens, light），不再做 compute。**禁止把 `job_metadata` 當研究結果**。
    - `split_required`：job 已 timeout；先盤點 partial outputs，禁止原樣重派。依 `split_contract` materialize 至少 2 個 bounded child stages；每段都要有 parent id、不同 stage、單一 artifact、success criterion，且 timeout 短於 parent。compute child 用 `--timeout-parent-job-id <parent>` + `--split-stage <name>` 留 receipt。
    - `triage_failed`：job **沒有成功**；派 platform_ops triage，照衍生的 `claude_followup.brief` 檢查 worktree/cwd 裡究竟有無可保留的腳本、partial result 或完整但未驗證的結果，再決定續跑 / fresh-worktree re-enqueue / 記錄無可救援。**不得把 failed job 或殘留 artifact 當成功結果，亦不得 force-remove worktree**。
-   三種 mode 都在成功建出 next task 後跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。本小時派工結束。
+   三種 mode 都在成功建出 next task 後跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。處理完本條 followup 後依 **Batch-drain 原則**：預算 ≥12 分鐘就回 A0 重新判斷、繼續下一張 — **不是本小時收工**。
 3. 若無待 followup → 進 PHASE B。
 
 PHASE B-PARALLEL — 草稿池低水位並行補寫（boss msg143 2026-07-04 硬性要求；2026-07-05 落地）:
@@ -230,7 +232,7 @@ PHASE B — 派新工:
 7. 派完 end summary 格式（per memory feedback_task_end_summary_format）: 結束時間 / 總時間 / 本次 token / 完成項目 / 本週 Max 20x quota % (`uv run python scripts/weekly_quota_estimate.py`) / 下次任務時間。
 8. 若 last-3 涵蓋所有 candidates 的 type → 派沒做過的 type，必要時主動生 brief / 文章 / compute job。沒事做永不可接受。
 9. 嚴禁: force push, --no-verify, 寫 knowledge.json from agent (K1259), 假數字。研究誠實 > 一切。
-10. **完整完成 gate**：本 fire 結束前驗證 — (a) agent 跑完 + 結果 verify、(b) knowledge.json 或 work_log 已寫，**且本 fire 寫入的每筆 work_log entry 的 `actor` 或 `owner` 必須逐字等於 `$VOLPRED_TASK_CLAIM_OWNER`；這個 supervisor-issued token 可精確歸因到 slot_id + job_id，缺少或自行改寫視同 (b) 未完成**、(c) commit 已 push 主線 OR worktree merged、(d) 派出的 task next_tasks status 已標 succeeded/failed（不留 in_progress 殘留）。任一未完成 = 本 fire 未真正結束，繼續做完。下一輪 4h 後才開始下個新任務。
+10. **完整完成 gate**：本 fire 結束前驗證 — (a) agent 跑完 + 結果 verify、(b) knowledge.json 或 work_log 已寫，**且本 fire 寫入的每筆 work_log entry 的 `actor` 或 `owner` 必須逐字等於 `$VOLPRED_TASK_CLAIM_OWNER`；這個 supervisor-issued token 可精確歸因到 slot_id + job_id，缺少或自行改寫視同 (b) 未完成**、(c) commit 已 push 主線 OR worktree merged、(d) 派出的 task next_tasks status 已標 succeeded/failed（不留 in_progress 殘留）。任一未完成 = 本 fire 未真正結束，繼續做完。全部過 gate 後依 **Batch-drain 原則**決定接下一張或收班。
 
 PHASE Z — **本班收尾：交代「為什麼」**（2026-07-13 3-strike 重構；取代舊的「自己 git add + commit」）:
 

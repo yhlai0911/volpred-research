@@ -251,9 +251,11 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 
 ## 自動化與控制面
 
-**核心 dispatch 規則（inline 保留）**：
-- 任務優先序：`user-assigned ≈ 時效性(event-driven) > scheduled > agent-discovered`；slot running < 4 可繼續 discovery（不必等 queue 清空）
-- **時效性 / 即時性的研究與發文一律 P1**（老闆 2026-07-12）：event_article / trending_repost / 事件驅動實驗與 user-assigned 同級，插隊所有 scheduled — 時效過了價值歸零。已機械化（event_jobs + trending refill 以 priority=1 建任務）；**手動建時效任務也必寫 `priority: 1`**。
+**核心 dispatch 規則（inline 保留；2026-07-21 lane 重構後）**：
+- **選擇順序機械化**（唯一 owner = `task_urgency` + `continue_task_dispatch` lane 排序）：老闆急件（boss 來源）FIFO 永遠第一 → 時效性任務（看 task_type 不看數字）→ 其餘 P2/P3 + 餓死保護 + 輪替。餓死保護只在剩餘 slots 運作，不可能逐出 lane head。
+- **系統來源禁自封 P1**：入池 gateway 機械夾到 P2（`clamp_machine_priority_inflation`）。P1 只屬於老闆急件與時效任務；手動建時效任務仍寫 `priority: 1`（時效性 / 即時性研究與發文一律 P1，老闆 2026-07-12）。
+- **一班 batch-drain 多任務**（老闆 2026-07-21 硬性指令）：完成一張後預算 ≥12 分鐘就接下一張，收班條件僅「無任務」或「不足以完整收尾一張」；批次單位是完整任務，做一半丟下一班照樣禁止。
+- **生成端水位閘**：池深超標自動停產（`pool_pressure`，老闆四類白名單免閘）；同根因補救單由 incident 生命週期管理，不重複開單（`docs/refactor_plan_incident_lifecycle.md`）。
 - 同一 K 編號禁止雙 agent — 派前 `ls experiments/` + `ls .claude/worktrees/` 檢查
 - **Cron skip 用 stub**（slot 滿 / agent 仍跑 → 回覆 ≤15 字）
 - 每次 idle / discovery pass 必須產生可驗證輸出，不可空轉
