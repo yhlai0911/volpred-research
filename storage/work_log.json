@@ -23717,5 +23717,15 @@
     "owner": "hourly-slot-2-0a156df1656e4355838979df5c2ea4db",
     "commit": null,
     "summary": "K741 NFP canonical 回溯更正 1/7：mile_eda69bfb 走 article_correction 就地更正 + errata。\n\nBlocker 查證：任務標「blocked on 論文數字定案」，但 k741-nfp-canonical 已於 dde428fab / 620b16755 通過 Codex PASS 並合併 main，解除條件其實已滿足 37 小時（該單 P1 餓死 37.1h）。\n\n更正內容（數字全由 experiments/k741/k741_nfp_event_study_canonical_results.json 讀出，未手打）：n 195→194、非 NFP 日 3909→3890、NFP 平均絕對報酬 0.816%→0.830%、四個 VIX regime 的樣本數/均值/上漲率全換（低波 62→63 次、0.498%→0.527%、69.4%→71.4% 等）、VIX 下跌比例 68.7%→66.0%、整體上漲率 59.5%→57.2%。\n\n**實質降級（不只換數字）**：原文依無母數 p=0.00369 寫「這個差異…確實存在，不只是碰巧」。認證終態 k741_cert_merge_summary.json 顯示 anything_clears_5pct_under_any_family=false —— 參數檢定 p=0.039(Welch)/0.051(Student)，Holm 校正兩個總體檢定後 p=0.072，regime 層級無一存活。已改寫為「方向站得住，顯著性站不住」。\n\n**Parts C/D 未重跑**：canonical scope 只涵蓋 Parts A/B，策略回測與 T±n 漂移數字沿用舊替代日曆，已在文中明文標註，不靜默保留。\n\n未完（已 release 回池 + 註記）：另 6 篇待同深度處理（d721672b / 630d0010 / 44fb4b90 / a1fd229a / ffb14405 / 76475146）；mile_d9129566 已 retracted 不需更正。重複單 assign_94fde28e 由同 cohort 另一 slot 同時判定關閉。\n\n新發現缺陷：article_correction 無 title 支援，mile_eda69bfb / mile_d721672b 標題仍寫「195 次」，內文已正確、標題仍舊 —— 已記入 docs/error_log.md。"
+  },
+  {
+    "timestamp": "2026-07-22T02:14:41+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_0e6a740b",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-3ab34f370c9e4c4ca748cc83ca45a2af",
+    "owner": "hourly-slot-1-3ab34f370c9e4c4ca748cc83ca45a2af",
+    "commit": null,
+    "summary": "[D5] K1380 8 個卡 78 班的檔逐檔裁決完成。裁決文件 docs/governance/2026-07/d5_k1380_file_adjudication.md。\n\n核心發現（時序還原）：2026-07-16 那次「從快取 loss matrix 收尾」不是 v4 之後的下一步，而是一次回歸 —— 它重跑了已被取代的 v1–v3 lineage 代碼（experiments/k1380/k1380.py），而正確答案早在六週前（v4 重構 2026-05-22，atomic 重跑 2026-07-05 commit 4eadfae10）就存在於 experiments/K1380_v4/。README 宣稱的「re-run is in the compute queue」從來不是真的：compute_queue 8 個 K1380 job 全部 failed/cancelled。這才是這批檔案卡 78 班的真因 —— 沒有人在等的東西永遠等不到。\n\nCanonical 結果 = K1380_v4/k1380_v4_results.json（knowledge K1583）：mean QLIKE≈1.40（與 paper K1379 的 ≈1.4 尺度一致，正是被作廢那次沒過的 sanity check）；Hansen SPA stat=4.205 p=0.289 無法拒絕；White RC on A4f t=4.133 p=0.000 拒絕；c3_verdict = MIXED。\n\n逐檔裁決：5 檔（README.md / k1380.py / 3 個 *_INVALID_20260716.*）全部留 main 存檔，不刪 —— 「archived, not deleted」是原作者已寫下的有論證決定，本裁決維持；三個 INVALID 檔合計 263KB 換一份可查的錯誤史。真正缺的不是刪檔，是指向 v4 的箭頭，本次已補：改寫 experiments/k1380/README.md STATUS 為 SUPERSEDED + canonical 指標 + 說明 re-run 從未存在。storage/work_log.json.bak_graphify_verdict_20260717 已不在工作區，結案。\n\nartifact exclusion 裁決 = 不加 entry，兩個理由：(1) experiments/k1380 被 sweep 列為 not_gated_no_results（改名後不符 *_results.json glob），語義上正確 —— 作廢的結果本就不該被當 finding 追；(2) K1380_v4 唯一 violation 是 missing reproduce_spec.json，而全 repo 1266 個 gated 目錄有 1256 個同缺（99.2%），是系統性缺口非個案。exclusions 檔自己的 _readme 明言 exclusion 不是便宜行事的出口。\n\n連帶：annotate 了兩張前提被推翻的 pending 任務（dreaming_missing_retry_strategy_paper9_c3_multiple_testing_subsection aged 92.7h、k1380_stage_refactor_collect），未代為結案。\n\n未做（明確界線）：沒重跑任何計算、沒改 K1380_v4 結果、沒寫 Paper 9 C3 subsection、沒處理 SPA/RC 方向不一致的統計爭議、沒清 stale worktree dispatch-slot-1-375ba0e3-k1380。"
   }
 ]

@@ -83,6 +83,15 @@ def claim_question_for_research(
     """
     now = _utc_now()
 
+    reason_text = (new_angle or "").strip()
+    if allow_duplicate and not reason_text:
+        raise MemberQaOverrideReasonRequired(
+            "overriding the member_qa duplicate gate requires a written reason "
+            "(--new-angle): what does this question ask that the existing article "
+            "does not already answer?"
+        )
+
+    verdict: dict[str, Any] | None = None
     if not allow_duplicate:
         current_rows = _select_rows(
             "questions", select="id,question,status,source", id=question_id
@@ -90,12 +99,13 @@ def claim_question_for_research(
         if not current_rows:
             return {"claimed": False, "question_id": question_id, "reason": "not_found"}
         row_source = str(current_rows[0].get("source") or source)
-        duplicate = find_duplicate_question(
+        verdict = member_qa_duplicate_verdict(
+            question_id,
             str(current_rows[0].get("question") or ""),
-            _fetch_question_history(row_source),
-            exclude_question_id=question_id,
+            source=row_source,
         )
-        if duplicate:
+        if verdict["verdict"] == "block":
+            duplicate = verdict["matched"]
             return {
                 "claimed": False,
                 "question_id": question_id,
@@ -105,6 +115,7 @@ def claim_question_for_research(
                     f"status={duplicate['status']}"
                 ),
                 "duplicate_of": duplicate,
+                "duplicate_verdict": verdict,
             }
     affected = _patch_where_returning(
         "questions",
@@ -490,6 +501,88 @@ def _fetch_question_history(source: str) -> list[dict[str, Any]]:
         }
         for row in rows
     ]
+
+
+def member_qa_duplicate_verdict(
+    question_id: str,
+    question_text: str,
+    *,
+    source: str = "user",
+    history_cache: dict[str, list[dict[str, Any]]] | None = None,
+) -> dict[str, Any]:
+    """THE member_qa duplicate adjudicator. Single owner, single history source.
+
+    2026-07-19 (anti-stacking): `question_id` is the system-wide identity key, and
+    before this function there were TWO adjudication paths — `claim_question_for_
+    research` (history via `_fetch_question_history`) and `ensure_member_qa_task`
+    (history via `summary["answered_history"]`). Same key, two owners, two corpora:
+    a guaranteed drift. Both consumers now delegate here and NEITHER fetches
+    history itself — this function is the only place history is loaded, so there is
+    exactly one corpus and exactly one verdict for a given question.
+
+    Verdicts (thresholds unchanged; calibration is a separate task):
+      block  similarity >= MEMBER_QA_DUP_BLOCK_THRESHOLD  → refuse the work
+      warn   similarity >= MEMBER_QA_DUP_WARN_THRESHOLD   → proceed, but annotated
+      clear  no prior question reaches the warn threshold
+
+    `history_cache` lets a caller that adjudicates many candidates in one pass
+    (`ensure_member_qa_task` walks the whole ranked table) reuse one fetch. It is
+    a cache, not a data source: the caller passes an empty dict and this function
+    is still the only thing that ever populates it.
+
+    No try/except around the history load, on purpose: a guard rail inside a
+    fail-open `try` is not a guard rail (docs/error_log.md 2026-07-14 05:45).
+    """
+    cache = history_cache if history_cache is not None else {}
+    if source not in cache:
+        cache[source] = _fetch_question_history(source)
+    history = cache[source]
+
+    match = find_duplicate_question(
+        question_text,
+        history,
+        exclude_question_id=question_id,
+        threshold=MEMBER_QA_DUP_WARN_THRESHOLD,
+    )
+
+    similarity = float(match["similarity"]) if match else 0.0
+    if match and similarity >= MEMBER_QA_DUP_BLOCK_THRESHOLD:
+        verdict = "block"
+    elif match:
+        verdict = "warn"
+    else:
+        verdict = "clear"
+        match = None
+
+    origin = f"supabase.questions(source={source}) rows={len(history)}"
+    if match:
+        basis = (
+            f"{verdict}: {origin}; matched question_id={match['question_id']} "
+            f"status={match['status']}; jaccard(digit-stripped)={similarity} "
+            f"warn>={MEMBER_QA_DUP_WARN_THRESHOLD} block>={MEMBER_QA_DUP_BLOCK_THRESHOLD}"
+        )
+    else:
+        basis = (
+            f"clear: {origin}; no prior question in statuses "
+            f"{sorted(MEMBER_QA_DUP_COMPARE_STATUSES)} reached "
+            f"warn>={MEMBER_QA_DUP_WARN_THRESHOLD}"
+        )
+
+    return {
+        "verdict": verdict,
+        "question_id": question_id,
+        "matched_question_id": match["question_id"] if match else None,
+        "matched_title": str(match["question"]) if match else None,
+        "matched_status": match["status"] if match else None,
+        "similarity": similarity,
+        "basis": basis,
+        "source": source,
+        "history_size": len(history),
+        "warn_threshold": MEMBER_QA_DUP_WARN_THRESHOLD,
+        "block_threshold": MEMBER_QA_DUP_BLOCK_THRESHOLD,
+        # Full matched row, for payloads that embed the prior question verbatim.
+        "matched": match,
+    }
 
 
 def _parse_time(value: Any) -> float:

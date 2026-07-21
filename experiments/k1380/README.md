@@ -1,6 +1,27 @@
 # K1380 — Paper 9 White RC / Hansen SPA Test for 17-Spec Horse Race
 
-## STATUS: 2026-07-16 run DISCARDED (loss function was reversed) — re-run queued 2026-07-17
+## STATUS: SUPERSEDED by `experiments/K1380_v4/` — this directory is archive only
+
+**Canonical result for Paper 9 C3 = `experiments/K1380_v4/k1380_v4_results.json`**
+(v4 refactor 2026-05-22, atomic re-run 2026-07-05, commit `4eadfae10`; knowledge entry
+`K1583`). It uses the correct Patton (2011) proxy-robust QLIKE, and its mean QLIKE ≈ 1.40
+matches the ≈ 1.4 scale of the paper's own K1379 run — the exact sanity check the discarded
+run failed. Its verdict: SPA $p=0.289$ (cannot reject H0), White RC on A4f $t=4.13$,
+$p=0.000$ (A4f beats GJR), recorded as `c3_verdict = "C3 MIXED: SPA/RC results require
+nuanced discussion of data snooping in paper body"`.
+
+**No re-run is pending or needed.** The 2026-07-16 run was not the next step after v4 — it
+re-ran this directory's superseded v1–v3 lineage code (`k1380.py`) *after* v4 had already
+answered C3 correctly, and did so with a reversed loss. Every K1380 compute job in
+`storage/ops/compute_queue/` is `failed` or `cancelled`; nothing is queued. The
+"re-run queued 2026-07-17" status this file previously carried was never true.
+
+Adjudicated 2026-07-22 (task `assign_0e6a740b`, external-review item D5) — see
+`docs/governance/2026-07/d5_k1380_file_adjudication.md` for the per-file disposition.
+
+---
+
+### Erratum record for the 2026-07-16 run (kept as provenance)
 
 The 2026-07-16 run reported that **no VIX-augmented spec beats GJR after multiple-testing
 correction** (SPA $p=1.000$, White RC on A4f $t=-0.272$, GJR lowest mean QLIKE 623.7). That
@@ -40,8 +61,10 @@ construction. Three corroborating symptoms, all consistent with this and with no
 **Artifacts from that run are archived, not deleted** (`*_INVALID_20260716.*`).
 `k1380_losses_all_INVALID_20260716.npy` caches the *wrong* loss and cannot be repaired
 arithmetically ($x - \log x - 1$ is not injective), so `k1380_spa_from_cache_INVALID_20260716.py`
-is dead — the OOS forecasts have to be re-fitted. `k1380.py:647` is fixed and the re-run is in
-the compute queue; the Paper 9 "Multiple Testing" subsection waits on its output.
+is dead — the OOS forecasts would have to be re-fitted. `k1380.py:647` is fixed, but that fix
+is moot: `K1380_v4/k1380_v4.py` supersedes this whole lineage (it also fixes the joint-mask and
+`np.roll` lag bugs that made v1–v3 return `n_valid=0`), and the Paper 9 "Multiple Testing"
+subsection should be written from `K1380_v4/k1380_v4_results.json`, not from any re-run here.
 
 Both possible outcomes are publishable: the multiple-testing correction either upholds the
 paper's A4f-over-GJR claim or overturns it. What is not acceptable is deciding it with a loss
