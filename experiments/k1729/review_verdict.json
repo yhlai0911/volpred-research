@@ -1,0 +1,24 @@
+{
+  "kid": "k1729",
+  "verdict": "PASS",
+  "reviewer": "FALLBACK PATH (primary-path Codex unavailable): two independent reviewers, both PASS. (1) fresh-context adversarial code-reviewer subagent, Claude Opus 4.8, read-only tools, hand-computed the settlement calendar against raw CSV incl. two control non-ambiguous settlement dates -> independent_review_rev2.md. (2) agy / Antigravity (Gemini), independently reimplemented both ex-ante roll conventions plus a third non-expiry-tied control convention, and ran a separate confirmation pass on these exact final bytes -> agy_review_rev2.md. Codex CLI returned a hard usage-limit error ('try again at Jul 25th, 2026') on 2026-07-21 14:33 Taipei, so the primary path could not run; this is the fallback sanctioned by .claude/rules/experiments.md. Per that same rule a fallback PASS is NOT equivalent to a primary-path Codex PASS: Codex re-verification of these bytes is REQUIRED once credits reset (>= 2026-07-25) before this K may be treated as closed. The knowledge.json entry must record reviewer_source as fallback.",
+  "reviewed_at": "2026-07-21T15:05:00+08:00",
+  "reviewed_commit": "ba3642da3fa4d5d56ae481dfcf1e71173beff51d",
+  "review_artifact": "independent_review_rev2.md; agy_review_rev2.md",
+  "blocking_defects": [],
+  "reviewed_sha256": {
+    "README.md": "9adaaaeb5906230590fa4aa8bde6ad680c562c5fb231953b201e2aabe21d397b",
+    "k1729.py": "74ddae0e123be5eee0784568d98617ee64c2e2fb1034776ddf0eda934d0631b7",
+    "k1729_results.json": "2f30de1989439d6c6e4b94b989bfa9b3960c47f3804ef4c3f2ac9d0f191886e8"
+  },
+  "rev1_defects_and_disposition": {
+    "rev1_verdict": "FAIL (Codex gpt-5.6-sol, 2026-07-17, commit e5232b6e4)",
+    "defect_1_target_side_ex_post_contract_selection": "REPAIRED AND DISCLOSED. The mechanism is now stated in the k1729.py docstring, README section 3, and results.json target_contract_selection_audit. The ambiguity set was quantified with a pre-specified ex-ante rule (RULE E: hold the front monthly contract through its published 3rd-Wednesday settlement, holiday-adjusted, then roll): 2545/2550 OOS rows (99.80%) are ex-ante determined; the 5 exceptions are all settlement days where volume migrated one day early. Re-running the comparison on the ex-ante-only ledger keeps both targets at HAR_RV5_WINS with |t|>3 (t=-3.671 / -3.370), as does dropping all 127 roll days (t=-3.584 / -3.665). The machine-readable verdict now REQUIRES the ex-ante ledger to concur. What is explicitly NOT claimed: that the primary full-ledger numbers are themselves free of the ex-post choice. Residual limitation disclosed: the ex-ante ledger is a conditional estimand (membership is not knowable at 08:45), though the selection is model-agnostic and common to both models.",
+    "defect_2_operational_claim_exceeded_evidence": "REPAIRED BY RETRACTION. README section 7 no longer concludes 'this data line is worth maintaining'. It now claims only that the predictive gain is non-zero, and states explicitly that 'worth maintaining' is a cost-benefit judgement requiring maintenance cost, alternative cost, and the economic value of the gain -- none of which this experiment measured. Statistical significance != worth paying for."
+  },
+  "nested_dm_gate_adjudication": "The nested-dm-misuse gate flagged k1729.py as primary_raw_dm. Adjudicated as a pattern-match false positive: HAR-RV5 and HAR-DAILY have DISJOINT regressor sets (5-min RV d/w/m vs daily open-to-close squared-return d/w/m), so neither is a parameter-restricted special case of the other and the degeneracy that invalidates raw DM under nesting cannot arise. Corroborated empirically in results.json nondegeneracy (forecast correlation 0.778/0.791, mean relative gap 20.6%/17.7%, loss-differential std 0.364/0.713, exact-zero fraction 0.0%). Both reviewers independently confirmed the adjudication. Recorded via the pre-existing official exit path storage/ops/nested_dm_misuse_baseline.json reviewed_nonnested (precedents K1049, k1100b), with reasoning in docs/governance/2026-07/nested_dm_fp_narrowing_audit.md appendix A.1. No new bypass mechanism was created.",
+  "reviewer_raised_nonblocking_items_fixed_before_freeze": [
+    "Convention-agreement wording was over-broad; now states precisely that the two ex-ante conventions agree with EACH OTHER on every OOS row, the sole whole-file difference being row 0 (2012-01-02), a dataset-boundary artifact in warmup.",
+    "Top-level machine verdict was derived from the primary ledger alone; it now requires the ex-ante ledger to concur on both targets."
+  ]
+}
