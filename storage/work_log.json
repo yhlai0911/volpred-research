@@ -22890,5 +22890,95 @@
     "owner": "hourly-slot-2-97fe73d83d964df4b1ed19c4fdde9152",
     "commit": null,
     "summary": "PHASE 0 email_reply — 老闆問「這樣正常嗎？」（2026-07-21 08:11 CRITICAL supervisor hang_killed）。\n\n**判定：誤報。那班 fire 到最後一秒都在正常工作。**\n\n鑑識（job 55f95759, slot-1, 08:02:27 起）：\n- supervisor log `worker attempt=1 exit=143 category=hang duration=516.2s` → 143 = SIGTERM，非 SIGKILL(137)、非 fatal_stall sentinel\n- health.py `MAX_JOB_AGE_S = 3000s`，本 job 僅 516s → 時間上排除巡檢強殺\n- debug sidecar (180KB) 證明健康：general-purpose subagent 跑滿 39 turns / 356s，00:10:36Z 仍在派 Bash tool，00:11:10Z 才 exitPath=cancelled + MCP 乾淨關閉（SIGTERM handler 簽名）\n\n根因：`worker.py:78 HANG_EXIT_CODES = {137,142,143}` 把 143 無條件當 hang。143 只有在我方發起 SIGTERM 時才代表卡住；外部 SIGTERM 走同一條路 → 誤寄 CRITICAL。\n\n無實質損失：claim assign_5200cea1 已退回 pending；同分鐘 slot-2 fire success(231.9s)；PHASE-Z 照常 commit 2b408f93e981。\n\n異常率對照（completions 近 100 筆）：07-19 43班/0異常、07-20 54班/13異常（6 真 DOA + 5 額度用盡 + 2 其他）、07-21 至 10:15 3班/1（即本件，誤報）。07-20 那波已由 sidecar DOA 偵測（commit 5e36d1720, 07-21 00:29）根治，本案非復發。\n\n未解：SIGTERM 來源無 log 可歸因（08:11 前後無 reload/drain/supersede 行；selfreload 明確 defer in-flight）。不猜，列入 followup 觀測項。\n\n產出：close email 已寄（notification ebdfccb0 + Telegram 1229）；建 P2 followup `assign_7f15f261`（修 classifier + 補 kill-initiator 可觀測性，驗收含雙向單元測試且不動 health 3000s 語意）。"
+  },
+  {
+    "timestamp": "2026-07-21T11:17:19+08:00",
+    "task_type": "governance",
+    "task_id": "governance_self_revise_operating_docs_20260721",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-20b291d5f7f842d6b0e0c11f2a42e0da",
+    "owner": "hourly-slot-1-20b291d5f7f842d6b0e0c11f2a42e0da",
+    "commit": null,
+    "summary": "PHASE B（starvation lockout）— 每週 doc-drift audit，aged 175.5h 的最老 starved 任務。\n\nsubagent（opus/low per model_router）稽核 CLAUDE.md / AGENTS.md / .claude/rules / .claude/skills\n與實際 hook、dispatcher、schedule 的 drift。\n\n**結果**：6 findings（high 0 / med 1 / low 5），無 critical。上週 2 項 residual 已由各自\nfollow-up 收斂，本班只驗證：`.agents/` 與 `agent-specs/` 已結構性消滅（`.claude/skills/` 26 個\n成為唯一 discovery surface）、models.json Fable availability/policy 矛盾已拆清、daily_checkup\nschedule 已 materialize（runtime_schedules.json:574）。13/13 rules frontmatter 無回歸。\n\n**直接修 2 檔 4 處**（主線程逐行驗過 diff：+9 / -3，純 additive pointer，未刪治理文字）：\n- `.claude/rules/context-hygiene.md` — 觸發條件由模糊的「觸及」改為精確的「內建 Read/open」，\n  並明寫該規則的自我矛盾：它指定的合法入口（jq / ops_snapshot）正是不會觸發它的路徑。\n- `AGENTS.md` — 三處已機械化的散文禁令補 L1 pointer（Token 紀律段、worktree force-remove、\n  共用 checkout 裸 git mutation），指向 pretooluse-bash-optimizer.sh 的實際攔截行號。\n\n**未新增任何 enforcement**（anti-stacking）。未動 `.claude/skills/*`，故不需寄 email 通知老闆。\n\n**誠實記錄**：維度 4（Codex discovery surface）查完是乾淨的，26 份 SKILL.md description 全數\n合格，agent 未為湊數捏造 finding；維度 3 只掃了 AGENTS.md 與 rules，SKILL.md 內部的機械化散文\n因時限未掃，已列下週。另發現 `read_context_budget.py` 對帶 explicit limit 的 Read 從不覆寫 →\n「禁止整檔 Read feed.json」在 Read 路徑上其實是 prose-only；**刻意未補**，補洞等於新增第二套\nenforcement，違反任務硬性限制，改列追蹤讓 gap 成為知情選擇而非疏漏。\n\n報告：`docs/governance/2026-07/doc_drift_audit_20260721.md`\nSuccessor：`governance_self_revise_operating_docs_20260728`（blocked until 2026-07-27T19:00Z，\n不重用 task id，description 已內嵌本輪追蹤清單）。"
+  },
+  {
+    "timestamp": "2026-07-21T11:17:19+08:00",
+    "task_type": "platform_ops",
+    "task_id": "stale_reaper_compute_queue_guard",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-20b291d5f7f842d6b0e0c11f2a42e0da",
+    "owner": "hourly-slot-1-20b291d5f7f842d6b0e0c11f2a42e0da",
+    "commit": null,
+    "summary": "本班派工中發現並當次修掉的真實缺陷（boss directive「當次問題當次解決」）。\n\n**症狀**：dispatcher 的 STARVATION LOCKOUT 名單把 `assign_5aa9d5f5` 列為「本班只能從這裡挑」，\n但 `ops_snapshot --task` 顯示它的工作 2026-07-19 就已 dispatch 到 compute queue 且正常執行中。\n差一步就開第二個 worktree + 第二個 agent job。\n\n**根因**：`task_pool_claim.py cleanup` 的 stale reaper 只用 `claimed_at` 年齡判 stale，\n**看不見 compute queue**。長研究 job 的 timeout 是 5400s，遠超 `--stale-hours 2` → 凡是\ndispatch 到 queue 的 task 每 2h 被 flip 回 `pending`，重新進 starvation lockout 等著被二度派工。\n`assign_5aa9d5f5` 的 status_history 留有連兩次 `auto_release_stale_2h`（07-19 06:50、07-20 03:12）\n的證據，其間 agent job 全程在 queue 上正常跑。這是 ops_snapshot 顯示 21 個孤兒 worktree 的一條來源。\n\n**修**：`cleanup` 增 `_compute_job_alive()` guard —— task 帶 `compute_job_id` 且該 job 狀態仍在\n`{pending,queued,running,claimed}` 就跳過回收，並在回傳值加 `skipped_compute_in_flight` 讓它可觀測。\n兩個 fail-open 方向刻意保留：job 進終態（completed/failed/timeout/cancelled）→ 照常回收（task 本來\n就該回池等收件）；job 檔讀不到 → 照常回收（不因 IO 錯誤把 task 永久釘死）。guard 只多讀一個 JSON，\n不改 reaper 的年齡邏輯，不新增第二套 enforcement。\n\n**驗證（break-then-verify）**：新增 `scripts/tests/test_stale_reaper_compute_guard.py` 10 個 case。\n把 `return status in _COMPUTE_JOB_LIVE` 改成 `return False` → 4 failed（正是四個 live-job case，\n確認測試真的咬得到 guard）；還原 → 22 passed（10 新 + 12 既有 task_pool/claim 測試）。\n\n本班 dispatch 的兩個 task（`assign_7f508612`、`K1436_btc_funding_rate_vol_covariate`）已用\n`annotate --set-json compute_job_id` 立 receipt，即刻受此 guard 保護。\n\n`docs/error_log.md` Class A 已加一行代表 incident。"
+  },
+  {
+    "timestamp": "2026-07-21T12:07:44+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260721T022528923770Z_a1",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-2283d690d0cb45df9675adce63d7d6c4",
+    "owner": "hourly-slot-1-2283d690d0cb45df9675adce63d7d6c4",
+    "commit": null,
+    "summary": "CI 紅燈修復（本班 fire_reason=requested:ci_red:ci-red-29797353050）。\n\n**症狀**：CI run 29797353050 兩條紅燈 —— test_lazypack_render_repair.py::test_synthetic_plan_fails_round_zero_with_overlap (DID NOT RAISE) 與 ::test_repair_rounds_recover_the_overlap_plan (assert 0 >= 1)。\nmacOS 本機症狀不同：只有第 2 條掛，且是 TEXTFIT 而非 OVERLAP。\n\n**根因（不是 regression，是測試寫反了）**：77c6eefc54d0 把 metric card 的 38px value-band floor 換成量測式分帶 —— 那正是 mile_fa098fc8 事故的真正 bug。修好之後，測試用來重現事故的合成 plan 就不再 overlap 了。舊測試把「round 0 必須失敗」寫成硬斷言，等於斷言「這個 bug 還在」，於是 fix 落地看起來就像 regression。\n第二層問題：該斷言錨在 host 字型的 advance width 上（macOS Heiti 較寬 → TEXTFIT；Ubuntu Noto 較窄 → 完全不失敗），同一份 code 在兩個 OS 上結果不同。\n\n**修**：把「缺陷已消失」與「自我修復迴圈可用」兩個性質拆開，各自錨到字型無關的不變量：\n1. test_metric_card_never_draws_its_value_through_its_note — 直接對 _draw_metric_card 掃 7 種卡片高度，斷言蘊含式「若有 render 則不得 OVERLAP，否則須 raise TextFitError」。這是 38px floor 修復的直接 pin，且蘊含式在任何字型下都成立。\n2. test_repair_rounds_recover_a_defective_baseline — 以 monkeypatch 注入 round-0 fault，不再指望 plan 幾何在本 host 剛好有缺陷；repair 契約（retune/recover/logged）與字型脫鉤。\n3. test_incident_plan_renders_and_never_reports_an_overlap — 真實事故 plan 仍跑端到端，但只斷言「必須產出且任何一輪都不得出現 OVERLAP」，修復輪數交給 host 決定。\n\n**驗證**：本機 10 passed（repair 檔）/ 55 passed（三個 lazypack 檔全組）。本機無 Noto 無法跑 CI 字型，改以加高 baseline tuning 機械模擬「round 0 乾淨」（即 CI 的失敗情境）→ 新 incident-plan 測試通過，證明容忍性不是靠推理。silent-fallback audit 對本檔 0 findings（與 pre-commit 同一 detector），不會擋 PHASE-Z。"
+  },
+  {
+    "timestamp": "2026-07-21T12:14:05+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_7f508612",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
+    "owner": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
+    "commit": null,
+    "summary": "PHASE A 收件：agent-brief_snapdup_audit-e2b5c2（snapshot 重複列污染稽核）。\n\n**稽核結論（逐條查證後採信）**：refresh_paper_snapshots.py 的並行 double-append 讓 6 篇 paper 共 9 個 live snapshot 在 2026-05-04..05-15 各多出 10 個重複交易日，污染窗 2026-05-15~07-17。篩 70 個 py 檔、裁決 51 個 consumer：9 個確認污染、4 個讀 canonical 檔但無法釘死 vintage、18 個有 dedup 保護、11 個 date window 未及污染期、8 個非 consumer。重跑 7 個，7 個全部有數字變動。\n\n**兩個顯著性翻轉（不是小數位問題）**：k1319 DM har_vs_ewma |t| 2.9319→3.1085 跨過 Harvey |t|>3.0；k1592 dm_GammaRule_minus_GJR_p 0.038→0.137 跨過 5%。\n\n**最值得記的一條**：k1592 是 :80 先 .diff() 再 :82 drop_duplicates(keep='last')。留下的是重複對的第二筆，其 diff=0，於是 10 個日期以捏造的 0.0 報酬存活、而列數完全正常 —— 純靠 row-count 的稽核抓不到這種污染。\n\n**驗證**：consumers[] 51 條逐條都有 evidence（行號 + 存檔計數 + 重跑差異），非「影響很小」式推測；k1399 的 IS 樣本數精確等於乾淨值（IS 截止 2018-12-31，在污染期之前）構成內部負控制；check_experiment_artifacts.py 對該實驗目錄 PASS（strict spec 模式）。\n\n**本班產出**：(a) 依 artifacts_needing_correction[] 建 9 張 snapdupfix_* 修正任務，severity→priority（HIGH k1319/k1592 = P1；MEDIUM k1705/k1399/paper2_t1 與未量化的 k1391/k1591 = P2；LOW k1398/k1396 = P3）；(b) worktree 合併被 experiment-certification gate 正確擋下（缺 Codex review_verdict.json），已將認證審查排入 compute queue（compute-codex-audit-snapshot-dup-20260721-1784607109），followup 負責寫 verdict、完成合併、並由主線程補 knowledge 條目（K1259）。\n\n**未完成且已追蹤**：k1497/k1498/k1585/k1380 讀 canonical 檔無保護但未重跑、k1308 因 VIXTWN 來源檔不在本機無法結案 —— 稽核自己列在 unresolved[]，沒有假裝結清。"
+  },
+  {
+    "timestamp": "2026-07-21T12:34:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_10927b4e",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-670daa95179e4221aaff95880cb1a511",
+    "owner": "hourly-slot-1-670daa95179e4221aaff95880cb1a511",
+    "commit": null,
+    "summary": "自動修復迴圈重新設計 — 交付設計文件 docs/refactor_plan_incident_lifecycle.md（老闆裁決：不要補丁要重架；交付順序=設計文件→過目→分Phase實作，本班不改碼）。\n\n**診斷（read-only 實證 + 架構盤點）**：\n1. 去重錨點錯了 — _route_internal_task 查的是「任務池有沒有活 row」，但偵測端一看到乾淨就 resolve_internal_remediable_alert 把 episode 標 resolved（phase_z.py:3149）。resolve→refire = 全新一張單且 attempt/consecutive 歸零。實證：alert_internal_silent_fallback_new_c67bec28dd 全時期 19 張，每張都是 a1、consecutive=0 — 系統每次都以為是第一次。\n2. incident 沒有一級身分 — 四套互不相認：sha256(level|title) transport ledger、alert_key+episode_id（寄生在 next_tasks.json task row）、ci_incident_id（唯一的真 incident 物件，也是唯一不重置的）、wsb_remed_<name> 固定 id。\n3. per-instance 開單 — active 205 張中 35 張(17%)是 worktree_salvage_* 19 + wsb_remed_* 16：逐張看沒 bug、if_exists=skip 都生效，但它們是同一根因的 35 個實例，現行模型無法表達「這是一件事」。\n4. 完全沒有量的上限 — grep cap/per_day/max_per_day 全域無命中；唯一量限是 ordinary 路 task id 內含日期。建單量 7/17=8 → 7/19=32 → 7/20=38 單調爆量。\n\n**設計要點**：獨立 incident store storage/ops/incidents.json（不寄生 next_tasks.json）；occurrence_count/episode_count 永不歸零、row 永不刪；fingerprint 只由不變性質組成且 worker_orphaned/worktree_unmerged 刻意不含實例名（35→2）；resolution 改為「連續 K 次乾淨 + 跨 24h」而非一次乾淨；3-strike 不收斂→escalated→開一張[根因重構]任務後永久 suppressed（承認修不好而非無限重試）；class=machine_self（PHASE-Z/dispatch/queue writer）不進自動修復迴圈、threshold 2 — 理由是修復動作要靠那台壞掉的機器執行，失敗會傳染給處置本身（實證此類 24 張無一收斂）。\n\n**7 條機械 gate**（G1 同 fingerprint 觸發 10 次只開 1 張 / G2 resolve 後 refire 不開新單且計數不歸零 / G3 同根因 5 實例只 1 incident / G4 升級後再觸發 10 次開 0 張 / G5 machine_self 不曾進 mitigating / G6 滾動 24h 上限 8 張 / G7 一次乾淨不足以 resolve）。\n\n**實作 5 Phase**，P2（24h 全域上限）刻意先行且與 P1 獨立 — 先止血再做正確的事。\n\n**附帶發現的 routing 矛盾**：assign_10927b4e 是 pending_main_thread（main_thread lane），但 supervisor 為它發 hourly fire（fire_reason=requested:user:assign_10927b4e），claim 被 main_thread_lane 拒。本班尊重 gate 未 claim、未改 task status，以主線程身分產出不改碼的設計文件。此矛盾會讓這類任務永遠沒有合法執行者（沒 interactive session 就卡死，卡死又被巡檢當異常再開單）— 是同一病灶在 dispatch 層的同構複製，已寫入文件建議納入 P4。"
+  },
+  {
+    "timestamp": "2026-07-21T12:34:20+08:00",
+    "task_type": "experiment",
+    "task_id": "compute-followup-agent-brief_k1436_v2-70286f",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-3-c090951b621142b6960534a8c9593ad5",
+    "owner": "hourly-slot-3-c090951b621142b6960534a8c9593ad5",
+    "commit": null,
+    "summary": "PHASE-A collection of compute-queue agent job agent-brief_k1436_v2-70286f (K1436 v2: does BTC perp funding beat HAR-RV?).\n\nVerified before accepting: data_status=materialized (not the v1 \"blocked\" scoping doc); lookahead guard checked 250 rows with 0 violations and k1436.py carries explicit .shift(1) in build_har_features/build_funding_features with an independent rebuild as the check; baseline and both alternatives share one OOS window (2024-01-01..2026-07-20, n_oos=932) and one lag convention; the models are nested so Clark-West carries inference and the DM blocks are correctly labelled diagnostic-only; review_verdict.json PASS with reviewed sha256 of k1436_results.json == the shipped file (bdcdc5a7...), so the reviewed artifact is the merged artifact.\n\nResult is a NULL and recorded as one: signed funding (pre-specified primary) CW t=1.4019 one-sided p=0.0805, QLIKE 0.285709 -> 0.283634 (-0.726%); |funding| (secondary) CW t=1.7404 p=0.0409 clears nominal 5% but not the Bonferroni bar 0.025 for 2 tests. Signal concentrates in the first OOS half (CW t=1.605) and is flat in the second (t=0.363) with QLIKE slightly worse.\n\nActions: main thread wrote knowledge item_id=b68047d0 programmatically from k1436_results.json (K1259 -- never from README or agent summary), then attached structured K-record fields via revise_knowledge_entry.py; merged worktree dispatch-slot-1-20b291d5-k1436 via merge_worktree.sh (integrity verify OK, branch removed); check_experiment_artifacts.py check --path experiments/k1436 now PASS in strict mode on main (was BLOCKED for missing reproduce_spec.json because main still held the v1 stub); marked the compute job followup_dispatched."
+  },
+  {
+    "timestamp": "2026-07-21T12:42:51+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_2d40d261",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-dc5211678f344f9b8d77033a9109f1a4",
+    "owner": "hourly-slot-2-dc5211678f344f9b8d77033a9109f1a4",
+    "commit": null,
+    "summary": "drain-first 水位閘落地（boss Telegram msg 1237「所以到底能不能把現有的任務先做完」）。\n\n## 根因\n派工端沒問題，**生成端沒煞車**。半套煞車早就存在但只蓋住一個 caller：\n`continue_task_dispatch._maybe_refill` 的 `REFILL_FLOOR=4`。`cron_research_backlog.sh` /\n`cron_reader_facing_refill.sh` 走自己的排程直呼同一批 generator，完全不看 pending，\n另有 10+ 個 appender 也不看。這就是池子單調膨脹（10 日 created 856 / succeeded 666，\n淨增 +19/日）的機制。\n\n## 做了什麼\n- 新增 `src/volpred/ops/pool_pressure.py` —— 自動任務生成的唯一 admission owner。\n  latch 語意：pending > cap(80) 進入；退出需 pending < cap **且**連續 3 個完整日\n  succeeded >= created（老闆訂的退出條件）。逐日統計刻意排除今天（部分資料會讓退出\n  條件永遠不滿足）。\n- 閘接在 4 個 generator entry point，**不在 writer 層**：`append_task_record` 同時承載\n  telegram / gmail / 老闆指派，閘那裡＝預設擋掉急件並要維護永遠追不完的 source 豁免\n  清單；且大宗生成器走 `write_tasks_locked` 根本繞得過去。\n- 白名單對應老闆列的四種：ingress 不呼叫本閘（天然豁免）；`reader_facing` 豁免\n  （time_critical，時效過了價值歸零）；dreaming 的 `critical` 豁免（壞了不是 backlog）。\n- 閾值進 `config/supervisor_rules.json::pending_caps`（runtime 讀，改檔即生效）。\n- 觀測（非第二 owner）：`daily_checkup::check_task_pool_pressure` 新維度 —— pending\n  超標 warn、淨增連續 3 日為正 critical；`append_task_record` 加\n  `[pool_pressure] WARN` route-around 偵測，讓未經閘門的新 caller 在 log 現形。\n- 登記進 Enforcement Layer Map 新列 L2d（CLAUDE.md：一個 concern 一個 owner）。\n\n## 驗證\n- `tests/test_pool_pressure.py` 18 passed（latch 邊界抖動、白名單、「連續 3 日」是\n  每日而非總和、config 壞掉時 fallback、persist=False 不污染 latch）。\n- 相關回歸 608 passed（dispatch / refill / diverse / backlog / dreaming / next_tasks /\n  checkup / supervisor / task_pool / urgency）。\n- 實地：三個 generator 對真實池子（pending=189/190）全部早退 added=0，佇列未被污染。\n  checkup 新維度對真實資料回報 warn + critical(連續 4 日淨增) + info(latch active)，\n  數字與老闆自己的診斷一致。\n- 修過一個真 bug：閘門原本讀 production 佇列，會讓 hermetic 測試被真實水位左右 ——\n  改為跟著各 generator 的 `NEXT_TASKS` 走。另修 token 化子集比對（字面清單比 token\n  永遠不中，`auto_discovered` 進 tokenizer 出來是 `{auto, discovered}`）。\n\n## 老闆項目 2（超齡任務逐筆裁決）\n5 張點名任務全部仍 pending。K492 / K709 跑 `check_arc_dedup --audience general`\n兩者 verdict=clean（無 K coverage、無 arc duplicate）→ **不是過期任務，是真工作**，\n不符 superseded / closed_no_action，不做假結案。其餘 3 張（BTC_GAS_tex_conversion /\nK1438 / k1095_v2）是待執行的實作與實驗，同樣不可裁掉。\n裁決結論：它們積到 40-51 天不是因為過時，而是池子長得比清得快，P1 article backlog\n從未被輪到 —— 正是本次閘門要治的病。實際清池是後續各班的常態派工，非本班單次交付。"
+  },
+  {
+    "timestamp": "2026-07-21T12:56:40+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_internal_silent_fallback_new_c67bec28dd_20260721T031902855969Z_a1",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-cee77b098f6a44cc8bb88f18a4599ae2",
+    "owner": "hourly-slot-1-cee77b098f6a44cc8bb88f18a4599ae2",
+    "commit": null,
+    "summary": "解除 pre-commit silent-fallback gate 對 PHASE-Z commit 的封鎖（P1 internal alert）。\n\n**症狀**：`alert_key=silent_fallback_new` 累計開過 19 張任務（全部 `a1`、consecutive=0），\nPHASE-Z candidate 反覆被 pre-commit 擋下，工作區產出進不了 main。\n\n**依 task description 規定**，先以原 detector `scripts/audit_silent_fallbacks.py` 重新驗證\n警報仍在 breached（確認 `next_tasks.py:748` 仍在 findings 中），未照舊快照執行。\n\n**根因**：三處新增的 except 分支確為 legit silent path，但缺少 `.claude/rules/no-silent-fallback.md`\n規定的 `# silent-ok: <reason>` 標記，於是 gate 判為違規：\n- `scripts/task_pool_claim.py:887` — compute-job 存活探測，缺檔/壞檔即無法證明 job 活著，回退原回收邏輯\n- `src/volpred/ops/next_tasks.py:748` — pool-cap 觀測，docstring 明訂 \"Never raises；observability\n  must not break ingress\"\n- `scripts/tests/test_lazypack_render_repair.py:193` — test code（rule 例外 3）；拒絕排版正是該測試的斷言\n\n**處置**：為三處加 inline `# silent-ok:` 標記。**純註解、零行為變更**，走的是 gate 訊息與 rule\n明文提供的正當出口，非 `--force` 繞過。\n\n**驗證**：重跑 detector — 三處已從 findings 消失（殘餘 63 筆全為既有 baseline，未動）；\n`pytest scripts/tests/test_lazypack_render_repair.py` 10 passed；\n`pytest tests/test_task_pool_claim.py tests/test_append_next_task.py tests/test_next_tasks_priority.py\ntests/test_sync_next_tasks_status.py` 54 passed。\n\n**須留給老闆裁決的事實**：這三個檔在本班 fire 基線之前就已是 unstaged modified，屬孤兒工作\n（內容完整自洽：compute-job 誤回收修復、pool-cap 觀測、測試強化）。依 PHASE-Z 的 ownership 基線\n規則，它不會 commit 非本班產出 —— 換言之這批改動仍需人工或後續機制裁決才能進 main。這正是\n`docs/refactor_plan_incident_lifecycle.md` §6 所述 machine_self 類 incident 的結構性矛盾：\n修復動作本身要靠那台壞掉的機器執行。"
+  },
+  {
+    "timestamp": "2026-07-21T12:57:01+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_10927b4e",
+    "outcome": "blocked_awaiting_owner",
+    "actor": "hourly-slot-1-cee77b098f6a44cc8bb88f18a4599ae2",
+    "owner": "hourly-slot-1-cee77b098f6a44cc8bb88f18a4599ae2",
+    "commit": null,
+    "summary": "急件 lane（`assign_10927b4e`，老闆 telegram-1231/1232「重新設計不要補丁」）收束為\n`blocked / awaiting_owner_decision`。\n\n**本班刻意不重做設計**。查證後確認設計文件已於 12:28 交付：\n`docs/refactor_plan_incident_lifecycle.md`（318 行，含實測證據、三個結構性根因、incident 狀態機、\nG1-G7 機械 gate、P1-P5 分階段計畫），並於 12:29 寄出審核通知給老闆\n（`alert_dedup.json` 記錄 notification `0881f11f`，send_count=1）。\n\ntask description 明訂交付順序為「設計文件 → 老闆過目 → 分 Phase 實作」，故核可前不得動工。\n\n**為何非收束不可**：任務交付後仍留在 `pending`，supervisor 因此為同一 task 連續發了兩次\n`request_fire`（12:40 與 12:50，本班即第二次）。**這正是本任務要根治的空轉，在本任務自身上的複製** ——\n一個已完成待審的工作項，因為狀態沒有「等人」這一格而被反覆重派。改用\n`mark_task_blocked.py --reason awaiting_owner_decision`（`blocked` 屬 BLOCKED_DISPATCH_LANES，\n不再進派工），until=2026-08-04：老闆兩週未裁決則自動重新浮現，不會永久沉沒。\n\n同時以 `annotate` 在 task 上留下 design_doc 路徑、交付與通知時間、awaiting_owner_review 旗標、\n以及 next_action（核可後依 §9 分 P1-P5；其中 P2「24h 全域上限止血」設計上可先行）。\n\n**未做且不該由本班做的事**：設計文件本身仍是 untracked，未進 main。"
   }
 ]

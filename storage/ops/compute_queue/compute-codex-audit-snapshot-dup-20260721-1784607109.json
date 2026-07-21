@@ -1,0 +1,41 @@
+{
+  "id": "compute-codex-audit-snapshot-dup-20260721-1784607109",
+  "title": "Codex 認證審查 — audit_snapshot_dup_20260721",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/audit_snapshot_dup_20260721_prompt.md",
+    "storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "failed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-21T04:11:49Z",
+  "started_at": "2026-07-21T04:15:01Z",
+  "completed_at": "2026-07-21T04:15:13Z",
+  "exit_code": 1,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-audit-snapshot-dup-20260721-1784607109.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-audit-snapshot-dup-20260721-1784607109.stderr",
+  "result_artifact": "storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "收件：(1) 讀 storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict.md；(2) PASS → 在 worktree dispatch-slot-1-20b291d5-snapdup 寫 experiments/audit_snapshot_dup_20260721/review_verdict.json（kid=audit_snapshot_dup_20260721, verdict=PASS, reviewer, reviewed_at, reviewed_commit=1c30466ae, review_artifact 指向 verdict.md, reviewed_sha256 用 shasum -a 256 實算列齊 *.py/README.md/*_results.json，禁手抄），再跑 uv run python scripts/git_writer_lock.py run --actor <owner> -- bash scripts/merge_worktree.sh dispatch-slot-1-20b291d5-snapdup 完成合併；(3) FAIL/CONDITIONAL → 逐條 blocking defect 建修正 task，不得手改 verdict 檔繞過 gate；(4) 合併成功後由主線程寫 knowledge 條目（K1259：agent 禁寫）— category=research_methodology，k_id=audit_snapshot_dup_20260721，evidence 指 experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json，內容須含：9/9 snapshot 同一批 10 個重複交易日、51 個 consumer 裁決分佈、7 個重跑全數變動、2 個顯著性翻轉（k1319 DM |t| 2.9319→3.1085 跨 Harvey 3.0；k1592 dm_GammaRule_minus_GJR_p 0.038→0.137 跨 5%）、以及 k1592 的 diff-before-dedup 教訓（先 diff 再 drop_duplicates 會留下捏造的 0.0 報酬且列數不變，count audit 抓不到）；(5) 9 張 snapdupfix_* 修正 task 已於 2026-07-21 12:2x 建入池（P1×2 / P2×4 / P3×2 + k1396 LOW），確認仍在。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "amended_at": "2026-07-21T04:13:24Z",
+  "claimed_by_pid": 22668,
+  "claimed_by_pid_start_wall": "Tue Jul 21 12:15:00 2026"
+}
