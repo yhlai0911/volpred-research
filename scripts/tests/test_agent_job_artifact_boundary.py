@@ -216,6 +216,12 @@ def test_enqueue_agent_resolves_result_from_worktree_and_separates_metadata(
     assert job["args"][metadata_index + 1] == str(expected_metadata)
     assert not (root / rel_artifact).exists()
 
+    # The frozen brief must land under the tmp root like every other write. It did
+    # not until 2026-07-15: AGENT_BRIEF_DIR was bound at import from the real ROOT,
+    # so this test wrote a brief into the live checkout on every run and only CI's
+    # repo-state assert noticed. Assert the destination, not just the queue record.
+    assert (root / "storage/ops/agent_briefs/agent-artifact-test.md").exists()
+
 
 def test_enqueue_agent_without_result_does_not_invent_a_fake_artifact(
     monkeypatch,
