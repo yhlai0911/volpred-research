@@ -292,6 +292,196 @@ def test_g6_internal_alert_path_is_capped_and_recorded_on_incident(tmp_path) -> 
     assert row["throttled"]["count"] == 1  # G6: 拒絕記在 incident row 上
 
 
+# ── G4 ───────────────────────────────────────────────────────────────────────
+
+
+def _fail_current_task(store: Path, queue: Path, kind: str, now: datetime) -> None:
+    row = _incident_row(store, kind)
+    _set_task_status(queue, row["current_task_id"], "failed", now)
+
+
+def test_g4_three_unconverged_episodes_escalate_exactly_once(store, queue) -> None:
+    """G4: 連續 episode 未收斂 → escalated；恰 1 張[根因重構]任務、恰 1 封信；
+    之後再觸發 10 次 → 0 張新任務。
+
+    門檻語意（§5「episode_count >= 3 且未達 resolution → escalated」）：第 3 個
+    episode 的處置**就是**升級本身，不再開第 3 張自動修復單。
+    """
+    kind = "synthetic_gate_red"
+    # episode 1 disposition fails, breach persists -> episode 2
+    _drive_breach(store, queue, kind=kind, now=T0)
+    _fail_current_task(store, queue, kind, T0 + timedelta(hours=1))
+    _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=2))
+    # episode 2 disposition fails, breach persists -> episode 3 => escalate
+    _fail_current_task(store, queue, kind, T0 + timedelta(hours=3))
+    out = _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=4))
+    assert out["action"] == "escalate"
+    assert out["episode_count"] == 3
+    assert out["state"] == incident.STATE_ESCALATED
+
+    mails: list[str] = []
+
+    def notify(level, title, body):
+        mails.append(title)
+        return {"sent": True, "notification_id": "esc-1"}
+
+    receipt = incident.actuate_escalation(
+        store, out["incident_id"], queue_path=queue,
+        now=T0 + timedelta(hours=4), notify=notify,
+    )
+    assert receipt["task_created"] is True
+    assert receipt["notified"] is True
+    assert len(mails) == 1
+
+    tasks = _load_tasks(queue)
+    root = [t for t in tasks if t.get("source") == "incident_escalation"]
+    assert len(root) == 1
+    assert root[0]["title"].startswith("[根因重構]")
+    assert root[0]["priority"] == 2  # 裁決：不偽裝 boss 來源、不搶 P1
+
+    # 之後再觸發 10 次 → 0 張新任務（suppressed），occurrence 續計。
+    before = len(tasks)
+    for i in range(10):
+        out = _drive_breach(
+            store, queue, kind=kind, now=T0 + timedelta(hours=5 + i)
+        )
+        assert out["action"] == "suppressed"
+    assert len(_load_tasks(queue)) == before
+    row = _incident_row(store, kind)
+    assert row["state"] == incident.STATE_ESCALATED
+    assert row["occurrence_count"] == 13
+
+
+def test_g4_root_cause_success_lifts_suppression(store, queue) -> None:
+    """§5 尾款：suppression 直到根因任務 succeeded 才解除（resolved）。"""
+    kind = "synthetic_gate_red"
+    _drive_breach(store, queue, kind=kind, now=T0)
+    _fail_current_task(store, queue, kind, T0 + timedelta(hours=1))
+    _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=2))
+    _fail_current_task(store, queue, kind, T0 + timedelta(hours=3))
+    out = _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=4))
+    receipt = incident.actuate_escalation(
+        store, out["incident_id"], queue_path=queue,
+        now=T0 + timedelta(hours=4), notify=lambda *a: {"sent": True},
+    )
+    _set_task_status(
+        queue, receipt["root_cause_task_id"], "succeeded", T0 + timedelta(hours=30)
+    )
+    after = _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=31))
+    # root cause fixed -> resolved -> the relapse is a NEW episode of the same
+    # row (counters keep history; being over threshold it escalates again).
+    row = _incident_row(store, kind)
+    assert row["episode_count"] == 4
+    assert after["action"] == "escalate"
+    resolutions = row["resolutions"]
+    assert any(r["criterion"] == "root_cause_task_succeeded" for r in resolutions)
+
+
+# ── G5 ───────────────────────────────────────────────────────────────────────
+
+
+def test_g5_machine_self_escalates_at_episode_two_without_ever_mitigating(
+    store, queue
+) -> None:
+    """G5: class=machine_self 且 episode_count==2 → 直接 escalated，
+    不曾進 mitigating、不曾開過自動修復單。"""
+    kind = "phase_z_test_gate_red"  # machine_self / task_mode none
+    out1 = _drive_breach(store, queue, kind=kind, now=T0)
+    assert out1["action"] == "notify"
+    assert _load_tasks(queue) == []
+
+    # sustained clean resolves episode 1
+    for hours in (2, 14, 27):
+        incident.observe_clean(store, kind=kind, now=T0 + timedelta(hours=hours))
+    assert _incident_row(store, kind)["state"] == incident.STATE_RESOLVED
+
+    out2 = _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=40))
+    assert out2["action"] == "escalate"
+    assert out2["episode_count"] == 2
+    row = _incident_row(store, kind)
+    assert row["state"] == incident.STATE_ESCALATED
+    assert row["task_history"] == []  # 從未開過自動修復單（不曾 mitigating）
+    assert _load_tasks(queue) == []
+
+    receipt = incident.actuate_escalation(
+        store, row["incident_id"], queue_path=queue,
+        now=T0 + timedelta(hours=40), notify=lambda *a: {"sent": True},
+    )
+    root = _load_tasks(queue)
+    assert len(root) == 1
+    assert root[0]["source"] == "incident_escalation"
+    # machine_self 根因 = 執行機器本身 → 主線程 lane（§6）。
+    assert root[0]["dispatch_lane"] == "main_thread"
+    assert receipt["root_cause_task_id"] == root[0]["id"]
+
+
+# ── G7 ───────────────────────────────────────────────────────────────────────
+
+
+def test_g7_one_clean_is_not_resolution(store, queue) -> None:
+    """G7: 單次乾淨後 state 仍為 mitigating；滿足 K 次 + 24h 才 resolved。"""
+    kind = "synthetic_gate_red"
+    _drive_breach(store, queue, kind=kind, now=T0)
+    out = incident.observe_clean(store, kind=kind, now=T0 + timedelta(hours=1))
+    assert out["resolved"] is False
+    assert _incident_row(store, kind)["state"] == incident.STATE_MITIGATING
+
+    # K=3 但跨度 < 24h → 仍不 resolve
+    incident.observe_clean(store, kind=kind, now=T0 + timedelta(hours=2))
+    out = incident.observe_clean(store, kind=kind, now=T0 + timedelta(hours=3))
+    assert out["resolved"] is False
+    assert _incident_row(store, kind)["state"] == incident.STATE_MITIGATING
+
+    # 第 4 次乾淨拉開 >=24h 跨度 → resolved
+    out = incident.observe_clean(store, kind=kind, now=T0 + timedelta(hours=26))
+    assert out["resolved"] is True
+    assert _incident_row(store, kind)["state"] == incident.STATE_RESOLVED
+
+
+def test_g7_breach_resets_the_clean_streak(store, queue) -> None:
+    kind = "synthetic_gate_red"
+    _drive_breach(store, queue, kind=kind, now=T0)
+    incident.observe_clean(store, kind=kind, now=T0 + timedelta(hours=1))
+    incident.observe_clean(store, kind=kind, now=T0 + timedelta(hours=13))
+    _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=14))  # streak 歸零
+    out = incident.observe_clean(store, kind=kind, now=T0 + timedelta(hours=26))
+    assert out["resolved"] is False  # 舊 streak 不得跨過 breach 累積
+
+
+# ── plan 附註: dispatch contradiction ────────────────────────────────────────
+
+
+def test_appendix_main_thread_reserved_task_never_requests_hourly_fire() -> None:
+    """plan 附註 regression: `request_fire` 不得對 main_thread lane 任務發
+    hourly fire —— 沒有 interactive session 就永遠沒有合法執行者。
+
+    Owner = next_tasks.is_main_thread_reserved（status pending_main_thread 與
+    dispatch_lane 兩個欄位收編成一個判定）；task_urgency 與 claim gate 共用。
+    """
+    from volpred.ops import task_urgency
+    from volpred.ops.next_tasks import _request_urgent_fire, is_main_thread_reserved
+
+    by_status = {
+        "id": "assign_10927b4e",
+        "title": "[refactor-master] incident lifecycle",
+        "priority": 1,
+        "source": "user",
+        "status": "pending_main_thread",
+        "task_type": "platform_ops",
+    }
+    by_lane = {**by_status, "status": "pending", "dispatch_lane": "main_thread"}
+    for task in (by_status, by_lane):
+        assert is_main_thread_reserved(task) is True
+        assert task_urgency.classify(task) == task_urgency.LANE_DEFERRED
+        assert task_urgency.is_urgent(task) is False
+        # is_urgent False short-circuits before any supervisor state is touched.
+        assert _request_urgent_fire(task, Path("storage/next_tasks.json")) is False
+
+    plain_urgent = {**by_status, "status": "pending"}
+    assert is_main_thread_reserved(plain_urgent) is False
+    assert task_urgency.is_urgent(plain_urgent) is True  # boss 急件不受影響
+
+
 # ── supporting invariants (P1) ───────────────────────────────────────────────
 
 

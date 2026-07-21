@@ -496,17 +496,19 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
             if dreaming_result is not None:
                 return dreaming_result
         from volpred.ops.next_tasks import (
-            MAIN_THREAD_DISPATCH_LANES,
+            is_main_thread_reserved,
             normalize_dispatch_lane,
         )
 
         lane = normalize_dispatch_lane(task)
         # 2026-07-20：原本只比對字面 "main_thread"，但 ctd 的候選過濾認得 4 種拼法
         # （main / main_thread / manual / interactive）。詞彙不一致 ⇒ lane="manual"
-        # 的任務進不了 PHASE B 候選、卻擋不住 burst 點名 claim。改用 canonical set。
-        if (
-            lane in MAIN_THREAD_DISPATCH_LANES or existing_status == "pending_main_thread"
-        ) and not getattr(args, "main_thread", False):
+        # 的任務進不了 PHASE B 候選、卻擋不住 burst 點名 claim。
+        # 2026-07-21 incident-lifecycle P4：判定收編進唯一 owner
+        # is_main_thread_reserved（status=pending_main_thread 亦算），與
+        # task_urgency 的 fire 判定共用同一套詞彙 —— 這裡與 request_fire 讀不同
+        # 欄位正是「無合法執行者卻被 hourly fire」矛盾的根因（plan 附註）。
+        if is_main_thread_reserved(task) and not getattr(args, "main_thread", False):
             # 2026-07-20 owner 糾正（refactor_plan_ops_master_2026_07 §5 獨立軌）：
             # lane 只擋候選排序不夠 —— burst/urgent fire 會點名 claim，隔離必須
             # enforce 在 claim 這個唯一入口。互動主線程用 --main-thread 明示越過。

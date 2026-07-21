@@ -222,16 +222,38 @@ def normalize_dispatch_lane(task: dict) -> str:
     return str(raw).strip().lower().replace("-", "_")
 
 
+def is_main_thread_reserved(task: dict) -> bool:
+    """One owner for "this task belongs to the interactive main thread".
+
+    The signal legitimately lives in TWO fields — ``dispatch_lane`` and the
+    ``pending_main_thread`` status — and before 2026-07-21 the readers each
+    picked one: the claim gate read both, the urgency classifier read only the
+    lane.  That split is the dispatch contradiction in
+    docs/refactor_plan_incident_lifecycle.md (附註): ``assign_10927b4e`` sat at
+    ``status=pending_main_thread`` with no lane field, ``is_urgent()`` saw a
+    claimable P1, ``request_fire`` woke an hourly supervisor whose claim was
+    then refused with ``main_thread_lane`` — a task with no legal executor
+    firing forever.  Every reader must derive from THIS predicate.
+    """
+    if not isinstance(task, dict):
+        return False
+    if str(task.get("status") or "").strip().lower() == "pending_main_thread":
+        return True
+    return normalize_dispatch_lane(task) in MAIN_THREAD_DISPATCH_LANES
+
+
 def is_agent_claimable_lane(task: dict) -> bool:
     """Return True iff a headless/hourly session may claim this task.
 
     An unset lane stays claimable — the vast majority of the queue predates the
     field, and defaulting those to "reserved" would freeze the whole pool.
     """
+    if is_main_thread_reserved(task):
+        return False
     lane = normalize_dispatch_lane(task)
     if not lane:
         return True
-    return lane not in MAIN_THREAD_DISPATCH_LANES and lane not in BLOCKED_DISPATCH_LANES
+    return lane not in BLOCKED_DISPATCH_LANES
 
 
 def is_valid_status(status: str | None) -> bool:

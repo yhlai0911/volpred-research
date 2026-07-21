@@ -333,10 +333,20 @@ def test_deferred_tasks_stay_observable() -> None:
 
 
 def test_claim_gate_and_urgency_share_one_vocabulary() -> None:
-    """兩邊各留一套字面值就是這次的根因，釘住「同一個 owner」。"""
+    """兩邊各留一套字面值就是這次的根因，釘住「同一個 owner」。
+
+    2026-07-21 incident-lifecycle P4 收編升級：owner 從「共用 canonical set」
+    進一步收成單一 predicate ``is_main_thread_reserved``（status
+    pending_main_thread 與 dispatch_lane 兩個欄位一起判）。claim gate 與
+    request_fire 讀不同欄位，正是 assign_10927b4e「永遠沒有合法執行者卻被
+    hourly fire」的根因（refactor_plan_incident_lifecycle.md 附註）。
+    """
     src = (ROOT / "scripts" / "task_pool_claim.py").read_text(encoding="utf-8")
-    assert "MAIN_THREAD_DISPATCH_LANES" in src, "claim gate 必須用 canonical set"
+    assert "is_main_thread_reserved" in src, "claim gate 必須用唯一 owner predicate"
     assert 'lane == "main_thread"' not in src, "不得回退成單一字面值比對"
+    assert 'existing_status == "pending_main_thread"' not in src, (
+        "status 判定不得在 claim gate 留第二份 —— owner 是 is_main_thread_reserved"
+    )
 
 
 # --- 7. admission 端：機器來源 P1 夾制（2026-07-21 dispatch-lanes R2） ---------
