@@ -38,7 +38,7 @@ def queue(tmp_path, monkeypatch):
     monkeypatch.setattr(compute_queue, "LOCK_FILE", qdir / ".worker.lock")
     monkeypatch.setattr(compute_queue, "LOG_DIR", tmp_path / "logs")
     monkeypatch.setattr(compute_queue, "AGENT_JOB_DIR", tmp_path / "agent_jobs")
-    monkeypatch.setattr(compute_queue, "AGENT_BRIEF_DIR", bdir)
+    monkeypatch.setattr(compute_queue, "AGENT_BRIEF_DIR", tmp_path / "agent_briefs")
     monkeypatch.setattr(compute_queue, "is_registered_linked_worktree", lambda *_: True)
     qdir.mkdir(parents=True)
     return qdir

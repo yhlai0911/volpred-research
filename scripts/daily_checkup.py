@@ -312,17 +312,21 @@ def _db_landing_probe(ss, table: str, date_col: str) -> tuple[str | None, int]:
 
 
 def _open_db_landing_repair_task(table: str, msg: str, recovery: str, local_latest: str) -> str:
-    """開/確認 P1 修復單（actuator：finding 不留死局）。失敗 raise，呼叫端 fail-loud。
+    """開/確認修復單（actuator：finding 不留死局）。失敗 raise，呼叫端 fail-loud。
 
     dedup：id 以 (table, canonical 最新日) 為 key —— 缺口未解時每天重跑 checkup
     不會重複開單；缺口日推進（= 新 episode）才開新單。
+
+    priority：這裡送 1，但 admission 會把機器來源的 P1 夾到 P2（dispatch-lanes R2，
+    見 `next_tasks.clamp_machine_priority_inflation`）。回傳訊息報**實際入池**的
+    priority，不報我們要的那個 —— 同 compute_queue lazypack repair producer。
     """
     from volpred.ops.next_tasks import append_task_record
 
     task_id = f"db_landing_repair_{table}_{local_latest}"
     record = {
         "id": task_id,
-        "title": f"【P1 自動補救】DB 入庫落後：{table}",
+        "title": f"【自動補救】DB 入庫落後：{table}",
         "description": (
             f"daily_checkup db_landing 偵測：{msg}\n\n"
             f"修復（正式 CLI，不手改 DB）：\n  {recovery}\n\n"
@@ -335,9 +339,11 @@ def _open_db_landing_repair_task(table: str, msg: str, recovery: str, local_late
         "created_at": _now.isoformat(),
         "trigger": "db_landing_mismatch",
     }
-    _rec, created = append_task_record(
+    rec, created = append_task_record(
         record, path=STORAGE / "next_tasks.json", if_exists="skip")
-    return f"已開修復單 {task_id}" if created else f"修復單已存在 {task_id}"
+    if created:
+        return f"已開修復單 {task_id}（P{rec.get('priority')}）"
+    return f"修復單已存在 {task_id}"
 
 
 def _db_landing_findings() -> list[dict]:

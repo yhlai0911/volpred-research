@@ -57,7 +57,7 @@ def _tasks(tmp_path: Path) -> list[dict]:
     return json.loads(p.read_text()) if p.exists() else []
 
 
-def test_db_lag_flags_critical_and_opens_p1_repair_task(monkeypatch, tmp_path):
+def test_db_lag_flags_critical_and_opens_repair_task(monkeypatch, tmp_path):
     _wire(monkeypatch, tmp_path, {
         "market_daily": ("2026-07-16", 1),   # 落後 3 個資料日（07-17/18/20）→ critical
         "paper_trades": ("2026-07-20", 2),   # 對齊
@@ -71,13 +71,16 @@ def test_db_lag_flags_critical_and_opens_p1_repair_task(monkeypatch, tmp_path):
     assert "db_landing/market_daily" in f["message"]
     assert "落後 3 個資料日" in f["message"]
     assert "supabase_sync.py market-daily" in f["recovery"]
-    assert "已開修復單 db_landing_repair_market_daily_2026-07-20" in f["message"]
+    assert "已開修復單 db_landing_repair_market_daily_2026-07-20（P2）" in f["message"]
 
     tasks = _tasks(tmp_path)
     assert len(tasks) == 1
     task = tasks[0]
     assert task["id"] == "db_landing_repair_market_daily_2026-07-20"
-    assert task["priority"] == 1
+    # 這個 producer 送 P1，但 admission 把機器來源的 P1 夾到 P2（dispatch-lanes R2）。
+    # 斷言夾後的值 + 稽核戳記，讓「誰夾的」在測試層面可見。
+    assert task["priority"] == 2
+    assert task["priority_capped_from"] == 1
     assert task["status"] == "pending"
     assert task["source"] == "daily_checkup_db_landing"
     assert "supabase_sync.py market-daily" in task["description"]

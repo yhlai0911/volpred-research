@@ -1,18 +1,29 @@
 {
-  "generated_at": "2026-07-21T07:02:21.089253+00:00",
+  "generated_at": "2026-07-21T08:01:22.892589+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 39,
-    "grace": 0,
+    "grace": 1,
     "inflight": 0
   },
   "orphan_count": 0,
   "adopted": [],
   "applied": true,
   "job_deliverable_candidates": [],
-  "job_deliverable_held": [],
+  "job_deliverable_held": [
+    {
+      "job_id": "compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674",
+      "reason": "no_existing_declared_files",
+      "rejected": [
+        {
+          "path": ".claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev3_armc_results.json",
+          "reason": "missing_or_not_regular_file"
+        }
+      ]
+    }
+  ],
   "job_deliveries": [],
   "namespaces": {
     "drafts": {

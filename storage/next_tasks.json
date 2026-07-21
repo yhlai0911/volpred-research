@@ -32422,13 +32422,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-21T07:02:39.845280+00:00",
+    "completed_at": "2026-07-21T08:01:37.066545+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T07:02:39.845280+00:00",
-      "last_clean_observed_at": "2026-07-21T07:02:39.845280+00:00"
+      "resolved_at": "2026-07-21T08:01:37.066545+00:00",
+      "last_clean_observed_at": "2026-07-21T08:01:37.066545+00:00"
     }
   },
   {
@@ -32440,13 +32440,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-21T07:25:25.752304+00:00",
+    "completed_at": "2026-07-21T08:06:11.618127+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T07:25:25.752304+00:00",
-      "last_clean_observed_at": "2026-07-21T07:25:25.752304+00:00"
+      "resolved_at": "2026-07-21T08:06:11.618127+00:00",
+      "last_clean_observed_at": "2026-07-21T08:06:11.618127+00:00"
     }
   },
   {
@@ -32458,13 +32458,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-21T02:24:25.659332+00:00",
+    "completed_at": "2026-07-21T07:25:52.484104+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T02:24:25.659332+00:00",
-      "last_clean_observed_at": "2026-07-21T02:24:25.659332+00:00"
+      "resolved_at": "2026-07-21T07:25:52.484104+00:00",
+      "last_clean_observed_at": "2026-07-21T07:25:52.484104+00:00"
     }
   },
   {
@@ -36793,114 +36793,39 @@
   },
   {
     "id": "assign_c55b0d66",
-    "title": "[老闆指派] GEVReg-MIDAS-SSVS arm B：報酬預測（等 arm A 框架完成）",
-    "description": "來源：老闆 Telegram msg 946/947（2026-07-18）：『既然模型都要樣本內估計與樣本外預測了，除了波動預測，報酬也可以做，然後看結果如何再看要寫什麼』。\n\nArm B 範圍（沿用 arm A 的 GEV-MIDAS-SSVS 引擎，換被解釋變數）：\n- 目標：月頻總經變數 → 日/週頻**報酬**的尾部區間預測（不是點預測報酬 — 報酬點預測 R² 天生接近 0，直接做會是 null；改預測報酬分配的尾部分位數 / 下檔風險）。\n- Baseline：歷史分位數、GARCH-t VaR、quantile HAR。\n- 評分：VaR backtest（Kupiec + Christoffersen + DQ test）、pinball loss、ES。經濟意義用避險/部位規模口徑（HE / VaR / Utility），**不比 Sharpe**（見 feedback_hedging_vs_trading）。\n- 同樣 in-sample 估計 vs rolling OOS 分離、明確 lag、固定 seed。\n- Null result 如實報告 — 報酬可預測性弱是既有共識，做出 null 也是有效結論。\n\n依賴：arm A（assign_8082bc79）的 GEV likelihood 實作完成後再啟動。\n老闆指示：兩個 arm 結果都出來後再一起判斷寫文章還是論文。",
-    "task_type": "experiment",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "[老闆指派] GEVReg-MIDAS-SSVS arm B：報酬預測（等 arm A 框架完成）",
+    "priority": 1,
     "source": "user",
     "created_at": "2026-07-18T04:30:31.290687+00:00",
-    "parent_task_id": "assign_8082bc79",
-    "created_by": "telegram_responder",
-    "status_history": [
-      {
-        "ts": "2026-07-18T07:08:50.864819+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-bd00f90a70504e369172895193de418d"
-      },
-      {
-        "ts": "2026-07-18T07:08:51.090889+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-bd00f90a70504e369172895193de418d"
-      },
-      {
-        "ts": "2026-07-18T07:11:47.862259+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-bd00f90a70504e369172895193de418d"
-      }
-    ],
-    "started_at": "2026-07-18T07:08:51.090875+00:00",
     "completed_at": "2026-07-18T07:11:47.862236+00:00",
-    "result": "本 fire 交付單位=派工。(1) 先把 arm A 引擎 commit 進其 worktree branch（experiments/k1730/ 原為 untracked，有遺失風險）；(2) 開 registered worktree dispatch-slot-1-bd00f90a-k1731 / branch wt/dispatch-slot-1-bd00f90a-k1731，從 arm A branch 分出，讓 arm B 直接繼承已驗證的 GEV likelihood + MIDAS + SSVS 引擎，不重寫；(3) enqueue agent job agent-brief_k1731_armB-f3e688（opus/xhigh, timeout 7200s, artifact experiments/k1731/k1731_gevreg_midas_ssvs_returns_results.json）。設計依老闆 msg 946/947：報酬做尾部區間預測（block minima→GEV maxima）非點預測，baseline=歷史分位數/GARCH-t VaR/quantile HAR，評分 Kupiec+Christoffersen+DQ+pinball+ES+DM，經濟意義用避險口徑不比 Sharpe。實驗由 async agent worker 執行（禁在 50min fire 內父等子），收尾由後續 fire PHASE A followup 接。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T08:01:42.871553+00:00"
   },
   {
     "id": "collect_k1730_armA_20260718",
-    "title": "收 K1730 arm A（GEVReg-MIDAS-SSVS 波動率區間預測）：驗結果 + Codex 審 + 產出後續",
-    "description": "compute job agent-brief_k1730_gevreg_midas_ssvs-cdcac4 已 completed（exit 0）。artifact = quick-mode results.json；production 全量重跑在 13:44 啟動但被 job 結束截斷（run_production.log 只到 2019 refit）。本 task：驗證誠實性/lookahead/統計方法 + Codex 代碼審 + 決定 production 重跑與 arm B 解鎖。parent compute job id=agent-brief_k1730_gevreg_midas_ssvs-cdcac4；unblocks assign_c55b0d66 (arm B)。",
-    "task_type": "experiment",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "experiment",
+    "title": "收 K1730 arm A（GEVReg-MIDAS-SSVS 波動率區間預測）：驗結果 + Codex 審 + 產出後續",
+    "priority": 1,
     "source": "compute_queue_followup",
     "created_at": "2026-07-18T06:10:25.324036+00:00",
-    "parent_task_id": "assign_8082bc79",
-    "created_by": "hourly-dispatch",
-    "status_history": [
-      {
-        "ts": "2026-07-18T06:10:25.586848+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-dc5897b0352140ae9a46d4ec0e03dc59"
-      },
-      {
-        "ts": "2026-07-18T06:10:25.827839+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-dc5897b0352140ae9a46d4ec0e03dc59"
-      },
-      {
-        "ts": "2026-07-18T07:11:48.142479+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-dc5897b0352140ae9a46d4ec0e03dc59"
-      }
-    ],
-    "started_at": "2026-07-18T06:10:25.827824+00:00",
     "completed_at": "2026-07-18T07:11:48.142462+00:00",
-    "result": "上一班（slot dc5897b0）fire 於 14:16 結束時未收班，留 in_progress。本班接手收尾：已驗證 quick-mode 結果誠實（GEV logpdf 誤差 4.5e-13、Gumbel 極限收斂；lookahead 三項 0 violations / 118,080 macro cells / 1,640 blocks；OOS 967 週 2008-01~2026-07；90% 區間實際覆蓋 85.3%、Kupiec p=4.8e-6 拒絕 = 區間偏窄的 partial-null，未見灌水）。arm A 引擎已 commit（9060414f9）。剩餘工作（全量 production 重跑 / Codex 代碼審 / merge_worktree / knowledge.json）已折入 compute job compute-k1730-arm-a-production-quick-mode-1784358686 的 followup brief，不再重複掛在本 task。arm B 已解鎖並派出（assign_c55b0d66）。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T08:01:42.871553+00:00"
   },
   {
     "id": "email-12157-29eb65",
-    "title": "[email_reply] Re: [VolPred Boss Report] 2026-07-18 15:00 台灣時間 平台運營報告",
-    "description": "Gmail UID: 12157\nMessage-ID: <7BF7F145-EB1A-46AE-AE41-26C8374C1E23@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sat, 18 Jul 2026 15:09:03 +0800\nSubject: Re: [VolPred Boss Report] 2026-07-18 15:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n## 2. 網站功能優先序（修正：先衝免費會員基數，不談付費）\r\n\r\n**修正自前版**：先前列「付費 tier 入口」是 premature monetization — 還沒幾個會員就想收費 = 平台運營錯誤順序。先設**免費階段目標**，達標後再談收費。\r\n\r\n### 免費階段目標（自主設定，會調整）\r\n- **3 個月內**：註冊會員 ≥100、weekly active ≥40、回訪率 ≥30%\r\n- **6 個月內**：註冊 ≥500、提問池 active ≥10/week、外部分享 ≥20/week\r\n\r\n### 為達標需建的功能（按優先序）\r\n- **🔴 P1**: Reader analytics（CTR / 停留時間 / 跳出率 / 回訪 cohort） — 沒這個我盲打文章品質\r\n- **🔴 P1**: 註冊 / 登入 flow（如果還沒）+ welcome onboarding\r\n- **🟡 P2**: 文章 share button + 社群 OG meta（Mission 5 曝光直接 lever）\r\n- **🟡 P2**: Member dashboard 改版（提問 → 研究進度視覺化、增加回訪誘因）\r\n- **🟡 P2**: Email subscription（weekly digest = 留客武器）\r\n- **🟢 P3**: 策略 sparkline 升級到 interactive chart\r\n- **🟢 P3 之後**：付費 tier 入口（達到上面 6 個月目標再規劃）\r\n\r\n我會自主寫 `docs/free_tier_growth_plan.md` spec，1-2 週上 P1 MVP。\r\n\r\n## 3. 開發中的結構性改善\r\n\r\n- ✅ ops_dashboard.py — 7 區段健康儀表板（本 cycle 落地）\r\n- ✅ live_verify gate — 發文後驗證 live URL（本 cycle 落地，agent a677637 完成）\r\n- ✅ audit_publish_sync / audit_fb_pipeline — 兩個 standing audit script（本 cycle 落地）\r\n- 🔄 Reader analytics ingestion — spec 撰寫中\r\n- 🔄 Monetization funnel — 規劃中\r\n- 🟡 FB 個人帳號發文流程 — Page/Graph API 已永久撤回；保留 Claude-in-Chrome interactive path + 72h auto-expire/audit。\r\n\r\n## 4. 需要你決策的策略性事項\r\n\r\n只標出來，你不回我也會自主走。\r\n\r\n- **目標期刊**：我預設 JBF（top-tier finance），如果你想往 RFS / JFE 衝需要拉高 contribution claim\r\n- **FB 路線**：已決定 personal account only；Page/Graph API 不再作為 active 建議或 fallback。\r\n- **付費 tier 命名與定價**：你 vs 我寫 mock-up（我可以做但市場價格判斷你比較知道）\r\n- **策略上架節奏**：active 11 個都 healthy，是否擴張到 15-20 個 strategy universe\r\n\r\n---\r\n\r\n**這份 doc 我每 cycle 更新**。建議過時的會劃掉、新建議加上來。\r\nReport generated 2026-07-18 15:00:38 台灣時間 · Window 4h · Source: scripts/boss_report.py\r\n\r\n\r\n\r\n這些任務有盤點與檢討嗎？pdca/loop enginering\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月18日 15:00 寫道：\r\n> \r\n> ## 2. 網站功能優先序（修正：先衝免費會員基數，不談付費）\r\n> \r\n> **修正自前版**：先前列「付費 tier 入口」是 premature monetization — 還沒幾個會員就想收費 = 平台運營錯誤順序。先設**免費階段目標**，達標後再談收費。\r\n> \r\n> ### 免費階段目標（自主設定，會調整）\r\n> - **3 個月內**：註冊會員 ≥100、weekly active ≥40、回訪率 ≥30%\r\n> - **6 個月內**：註冊 ≥500、提問池 active ≥10/week、外部分享 ≥20/week\r\n> \r\n> ### 為達標需建的功能（按優先序）\r\n> - **🔴 P1**: Reader analytics（CTR / 停留時間 / 跳出率 / 回訪 cohort） — 沒這個我盲打文章品質\r\n> - **🔴 P1**: 註冊 / 登入 flow（如果還沒）+ welcome onboarding\r\n> - **🟡 P2**: 文章 share button + 社群 OG meta（Mission 5 曝光直接 lever）\r\n> - **🟡 P2**: Member dashboard 改版（提問 → 研究進度視覺化、增加回訪誘因）\r\n> - **🟡 P2**: Email subscription（weekly digest = 留客武器）\r\n> - **🟢 P3**: 策略 sparkline 升級到 interactive chart\r\n> - **🟢 P3 之後**：付費 tier 入口（達到上面 6 個月目標再規劃）\r\n> \r\n> 我會自主寫 `docs/free_tier_growth_plan.md` spec，1-2 週上 P1 MVP。\r\n> \r\n> ## 3. 開發中的結構性改善\r\n> \r\n> - ✅ ops_dashboard.py — 7 區段健康儀表板（本 cycle 落地）\r\n> - ✅ live_verify gate — 發文後驗證 live URL（本 cycle 落地，agent a677637 完成）\r\n> - ✅ audit_publish_sync / audit_fb_pipeline — 兩個 standing audit script（本 cycle 落地）\r\n> - 🔄 Reader analytics ingestion — spec 撰寫中\r\n> - 🔄 Monetization funnel — 規劃中\r\n> - 🟡 FB 個人帳號發文流程 — Page/Graph API 已永久撤回；保留 Claude-in-Chrome interactive path + 72h auto-expire/audit。\r\n> \r\n> ## 4. 需要你決策的策略性事項\r\n> \r\n> 只標出來，你不回我也會自主走。\r\n> \r\n> - **目標期刊**：我預設 JBF（top-tier finance），如果你想往 RFS / JFE 衝需要拉高 contribution claim\r\n> - **FB 路線**：已決定 personal account only；Page/Graph API 不再作為 active 建議或 fallback。\r\n> - **付費 tier 命名與定價**：你 vs 我寫 mock-up（我可以做但市場價格判斷你比較知道）\r\n> - **策略上架節奏**：active 11 個都 healthy，是否擴張到 15-20 個 strategy universe\r\n> \r\n> ---\r\n> \r\n> **這份 doc 我每 cycle 更新**。建議過時的會劃掉、新建議加上來。\r\n> Report generated 2026-07-18 15:00:38 台灣時間 · Window 4h · Source: scripts/boss_report.py\r\n>\n",
-    "task_type": "email_reply",
-    "priority": 3,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-18T07:15:07.483649+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-07-18 15:00 台灣時間 平台運營報告",
+    "priority": 3,
     "source": "gmail_inbox_poll",
-    "email_uid": 12157,
-    "email_message_id": "<7BF7F145-EB1A-46AE-AE41-26C8374C1E23@gmail.com>",
-    "email_subject": "Re: [VolPred Boss Report] 2026-07-18 15:00 台灣時間 平台運營報告",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-18T07:15:44.775123+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-8470cfcda97f4656b2b49a9f5a1e7adf"
-      },
-      {
-        "ts": "2026-07-18T07:15:45.019099+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-8470cfcda97f4656b2b49a9f5a1e7adf"
-      },
-      {
-        "ts": "2026-07-18T07:24:10.050471+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-8470cfcda97f4656b2b49a9f5a1e7adf"
-      }
-    ],
-    "started_at": "2026-07-18T07:15:45.019083+00:00",
+    "created_at": "2026-07-18T07:15:07.483649+00:00",
     "completed_at": "2026-07-18T07:24:10.050451+00:00",
-    "result": "盤點答案=沒有：boss_direction_recommendations.md 停在 2026-06-22（26天），7 個 roadmap 項目 pool 覆蓋 0，§3 兩項『進行中』實為未開工。治本：audit_roadmap_coverage.py（marker 綁 task id + 對 pool 查真實 status + stale gate）、boss_report 第6節改先渲染對帳表、兩個 P1 建 backing task、tests 6 passed / 既有 73 passed。close email 已寄。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T08:01:42.871553+00:00"
   },
   {
     "id": "growth_p1_reader_analytics",
@@ -36958,37 +36883,15 @@
   },
   {
     "id": "email-12160-522368",
-    "title": "[email_reply] Re: [VolPred Alert][INFO] [VolPred Boss Report] 2026-07-18 15:00 —你問的盤點：沒有，已補上機制",
-    "description": "Gmail UID: 12160\nMessage-ID: <F7476AAF-5CA0-48C8-9A4C-3117891244D5@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sat, 18 Jul 2026 15:43:25 +0800\nSubject: Re: [VolPred Alert][INFO] [VolPred Boss Report] 2026-07-18 15:00 —你問的盤點：沒有，已補上機制\n\n--- 用戶回信內容 ---\n另外 每篇文章可以顯示瀏覽次數嗎？\r\n首次開始顯示的數字 請隨機推估一個數字 之後就照實計算\r\n首次推估的方式是依照現在的真實瀏覽次數高低去做排序 然後隨機顯示一個不超過1000的數字（排序不能變）\r\n這樣做得到嗎？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月18日 15:23 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: [VolPred Boss Report] 2026-07-18 15:00 — 你問的盤點：沒有，已補上機制\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 你問對了：沒有盤點，我補上了機制\r\n> \r\n> 你問「這些任務有盤點與檢討嗎？pdca/loop enginering」——指報告第 2 節那份免費會員 roadmap。\r\n> 誠實回答：沒有。而且情況比「沒盤點」更難看一點。\r\n> 我查到什麼\r\n> \r\n> 報告第 6 節是直接把 docs/boss_direction_recommendations.md 原樣貼給你。那份檔案：\r\n> 項目\tdoc 怎麼寫\t實際狀態\r\n> 檔案更新日\t「我每 cycle 更新」\t停在 2026-06-22，26 天沒動\r\n> docs/free_tier_growth_plan.md\t「我會自主寫，1-2 週上 P1 MVP」\t不存在\r\n> 7 個 roadmap 項目\tP1/P2/P3 排好序\ttask pool 2836 筆內 open 覆蓋 = 0\r\n> Reader analytics ingestion\t「🔄 spec 撰寫中」\t未開工，spec 從未存在\r\n> Monetization funnel\t「🔄 規劃中」\t未開工\r\n> 也就是說：一份 26 天前寫的清單，每 4 小時被原樣寄給你一次，看起來像當期計畫。\r\n> 根因不是我懶，是散文沒有 status 欄位\r\n> \r\n> 值得注意的對比：第 3 節那些標 ✅ 的（ops_dashboard / live_verify / audit_publish_sync）全都真的存在，因為那是「做完才寫上去」的事後記錄。會失真的只有前瞻承諾——寫下去之後沒有任何機制回頭核對。\r\n> 這是典型的 concern 沒有 enforcement owner：文字不可能被證偽，所以它永遠不會報錯，只能等你開口問。\r\n> 我做了什麼（本班已落地並驗證）\r\n> \r\n> 1. scripts/audit_roadmap_coverage.py — roadmap 每一項現在必須綁 task id：\r\n> - **P1**: Reader analytics ...  <!-- rid:reader-analytics task:growth_p1_reader_analytics -->\r\n> - **P2**: Email subscription ... <!-- rid:email-subscription task:none -->\r\n> script 把每個 task: 對到 storage/next_tasks.json 查真實 status。P1/P2 沒有 live task → finding；doc 超過 14 天沒更新 → stale finding；--strict 可當 gate 用。\r\n> 2. 報告第 6 節改成先出對帳表，再貼散文。你下一份報告會看到：\r\n> 項目\t狀態\ttask\r\n> P1\tReader analytics\t進行中\tgrowth_p1_reader_analytics\r\n> P1\t註冊/登入 flow + onboarding\t進行中\tgrowth_p1_auth_onboarding\r\n> P2\tshare button + OG meta\t未開工\t—\r\n> P2\tMember dashboard 改版\t未開工\t—\r\n> P2\tEmail subscription\t未開工\t—\r\n> P3\tsparkline interactive\t未開工\t—\r\n> P3\t付費 tier 入口\t未開工\t—\r\n> 文字宣稱從此蓋不過 pool 真實狀態。\r\n> 3. 兩個 P1 建了 backing task。兩個的第一步都是盤點現況，不是直接開發：\r\n> growth_p1_reader_analytics — repo 內確認零 analytics 實作；先決選型（自建 Supabase ingestion vs Plausible/Umami）再寫 spec\r\n> growth_p1_auth_onboarding — doc 原文寫「註冊/登入 flow（如果還沒）」，這個「如果」26 天沒人去確認，本身就是問題。repo 有 mirror_auth.py + Supabase auth trigger，但前端沒進 git 追蹤，現況無法從 repo 判定，所以第一步是給出「已有什麼／缺什麼」的明確答案\r\n> 4. doc 內寫入逾期揭露，§3 兩個不實的「🔄 進行中」更正為未開工。\r\n> 5. tests/test_roadmap_coverage.py 釘住這個機制，避免日後 marker 被拿掉又退回散文。\r\n> 一個我自己的誤判，也一併說\r\n> \r\n> 初次掃描時我只 ls scripts/，沒找到 live_verify 就先判定「報告宣稱落地但檔案不存在」。這是我的檢查方法錯了——它在 src/volpred/publisher/live_verify.py，測試也在，報告沒有造假。我在寄這封信前先自我更正，不想拿一個錯誤的指控來換你對這封信的信任。\r\n> 驗證\r\n> \r\n> tests/test_roadmap_coverage.py — 6 passed\r\n> boss/report 相關既有測試 — 73 passed\r\n> build_html() 端到端跑過，對帳表確實出現在報告內（3 live / 6 未開工）\r\n> audit 目前仍報 3 個 P2 finding（share button / member dashboard / email subscription 無 task）。那是真實狀態，不是 bug——我沒有為了讓輸出好看而去補假 task。要不要把這 3 個 P2 排進來，你可以直接回一句，我照辦。\r\n> task: email-12157-29eb65 · slot-1 · 2026-07-18 15:2x 台灣時間\n",
-    "task_type": "email_reply",
-    "priority": 1,
     "status": "succeeded",
-    "tags": [
-      "email_reply",
-      "user_input"
-    ],
-    "created_at": "2026-07-18T07:45:07.203151+00:00",
+    "task_type": "email_reply",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] [VolPred Boss Report] 2026-07-18 15:00 —你問的盤點：沒有，已補上機制",
+    "priority": 1,
     "source": "gmail_inbox_poll",
-    "email_uid": 12160,
-    "email_message_id": "<F7476AAF-5CA0-48C8-9A4C-3117891244D5@gmail.com>",
-    "email_subject": "Re: [VolPred Alert][INFO] [VolPred Boss Report] 2026-07-18 15:00 —你問的盤點：沒有，已補上機制",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "status_history": [
-      {
-        "ts": "2026-07-18T07:46:08.117482+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-2d44414aa87c437e9ccf32664aa8f1a7"
-      },
-      {
-        "ts": "2026-07-18T07:55:17.202022+00:00",
-        "from": "claimed",
-        "to": "succeeded",
-        "by": "hourly-slot-1-2d44414aa87c437e9ccf32664aa8f1a7"
-      }
-    ],
+    "created_at": "2026-07-18T07:45:07.203151+00:00",
     "completed_at": "2026-07-18T07:55:17.202010+00:00",
-    "result": "後端落地：seed_article_view_counts.py + 18 tests，1634/1634 篇種子已寫入 Supabase（長尾分佈、排序不變式結構保證）。前端顯示切 growth_p1_article_view_display (P1)，阻礙=frontend-v2-fix 在 .gitignore 未版控。close email 已寄（needs-reply）。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T08:01:42.871553+00:00"
   },
   {
     "id": "growth_p1_article_view_display",
@@ -48051,7 +47954,9 @@
       "escalation_due": false,
       "fingerprint": [
         "scripts/task_pool_claim.py:887"
-      ]
+      ],
+      "resolved_at": "2026-07-21T07:25:52.484104+00:00",
+      "final_consecutive_remediation_failures": 0
     },
     "status_history": [
       {
@@ -48853,5 +48758,44 @@
     "created_at": "2026-07-21T07:23:18.572000+00:00",
     "parent_task_id": "agent-brief_k1380_stage-68dea3",
     "description": "PHASE A collect_completed 收件（job agent-brief_k1380_stage-68dea3，completed 2026-07-21T07:13:50Z）。\n2026-07-21 15:07 班次建單：A0 time_critical lane 先行清空後，本班剩餘預算不足以安全完成 canonical worktree merge，\n依「scope 切小、不留 partial」建單而非半做。\n\n**先讀 agent 自己的 artifact，不要重跑**：\n.claude/worktrees/dispatch-slot-1-375ba0e3-k1380/experiments/k1380/k1380_stage_refactor_report.json\n（16.8KB，commit 372c4d145，branch wt/dispatch-slot-1-375ba0e3-k1380）\n\n**關鍵前提 —— agent 自己標明的 scope，收件時不可誤讀為實驗結果**：\nstatus = REFACTOR_COMPLETE_COMPUTE_HELD_PENDING_MERGE。\nagent 的 scope_note 寫得很清楚：brief 只要求「重構成 stage 並 enqueue」，不要求跑 heavy compute。\n**目前沒有任何 SPA / RC 數字存在**，stage 3 沒跑就不可能有。\n→ 原 followup brief 裡的「SANITY GATE（mean QLIKE ~1.4 量級）判定結果」與「A5/C2/C3 重判理由」\n   **本輪無法執行**（沒有數字可判），不要為了交差生出數字。\n→ **絕對禁止**寫 Paper 9 Multiple Testing 子節。agent 已明文：「Nothing here may reach Paper 9.」\n\n**本輪實際可驗、該驗的**：\n1. --stage 三段是否真的落地：forecasts_a / forecasts_midas / spa，各一 artifact、一 success criterion、\n   各自 timeout 且短於 parent 的 7200s。\n2. forecast 階段存的是 σ̂² 本身而非 loss。這是重點：x - log(x) - 1 非單射，存 loss 在 loss 定義修正後無法回推，\n   存 forecast 才能。驗檔案內容不要只看報告自述。\n3. 本地 qlike() 已刪除、改 import volpred.stats.model_evaluation.qlike_pointwise\n   （per .claude/rules/experiments.md；手寫副本正是當初 QLIKE 反向的根因）。\n4. experiments/k1380/test_k1380.py 13 個回歸測試實跑一次，確認全綠（報告自述全過，要自己驗）。\n5. 三個 child stage 是否已 enqueue 且帶 --timeout-parent-job-id + --split-stage\n   （queue 內現有 5 筆含 split-stage，要確認其中哪幾筆屬於 k1380，別跟其他 parent 的混淆）。\n6. 報告的 defects_found_beyond_the_known_reversed_qlike 逐條看過（第 1 條 severity=invalidating），\n   判斷是否影響既有 K1380 結論或已寫入的知識。\n\n**收尾**：過 agent-result-verification skill 後，用正式 scripts/merge_worktree.sh 完整合併\nwt/dispatch-slot-1-375ba0e3-k1380，不留未合併 branch/worktree。knowledge.json 由主線程寫，不由 agent 寫（K1259）。\n\n後續：三個 child stage 跑完才進 SPA/RC 判讀與 Paper 9，那是另一張單。"
+  },
+  {
+    "id": "ci-red-29808977711",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29808977711",
+    "ci_run_key": "29808977711:1",
+    "created_at": "2026-07-21T08:00:08.126465+00:00",
+    "title": "CI 紅燈修復（run 29808977711, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29808977711\nattempt: 1\nhead_sha: 8bbfbc1aa\n偵測摘要（仍須讀完整 failed log）：2026-07-21T07:15:07.0263296Z tests/test_daily_checkup_db_landing.py:80: AssertionError\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29808977711 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-21T08:02:10.422129+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-02320893377f4180ad7671082f7959a5"
+      },
+      {
+        "ts": "2026-07-21T08:02:10.844508+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-02320893377f4180ad7671082f7959a5"
+      },
+      {
+        "ts": "2026-07-21T08:06:06.642104+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-02320893377f4180ad7671082f7959a5",
+        "note": "supervisor_kill_02320893"
+      }
+    ],
+    "started_at": "2026-07-21T08:02:10.844493+00:00",
+    "last_released_at": "2026-07-21T08:06:06.642090+00:00",
+    "last_release_reason": "supervisor_kill_02320893"
   }
 ]
