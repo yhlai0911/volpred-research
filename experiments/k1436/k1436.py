@@ -630,6 +630,39 @@ def main() -> None:
             "Both outcomes are reported regardless of sign or significance."
         ),
         "figures": ["fig_rv_vs_funding.png", "fig_oos_comparison.png"],
+        # Mirrors README section 9. Kept in the artifact so a consumer reading
+        # only the JSON cannot pick up the numbers without the caveats.
+        "limitations": [
+            "Single exchange: Binance only. It is the largest BTC perp venue, but funding "
+            "on OKX/Bybit/dYdX can diverge; a cross-venue funding dispersion measure is untested here.",
+            "Single contract: BTCUSDT perpetual only - no quarterly-futures basis, no options "
+            "skew, no open interest, no liquidation data. A composite leverage measure may still "
+            "work where funding alone does not.",
+            "Short sample by volatility-research standards: 2,393 days (2020-2026), OOS n=932. "
+            "Regime-diverse (2021 bull, 2022 LUNA/FTX deleveraging, 2024-25 ETF era) but one "
+            "asset over six years, and DM/CW power at n=932 is limited for small effects.",
+            "Funding regime shift: Binance changed funding-interval and cap rules over the "
+            "sample; the series is treated as homogeneous, which it strictly is not.",
+            "Linear specification: funding enters linearly, but the K139 liquidation mechanism "
+            "is explicitly non-linear (cascades trigger at thresholds). A threshold/quantile "
+            "spec is a live untested alternative; |funding| is only a crude first step toward it.",
+            "Two covariates tested, and the SECONDARY is the one that scored better. |funding| "
+            "clearing nominal 5% while the pre-specified primary does not is exactly the "
+            "configuration where selective reporting does damage - hence the Bonferroni bar "
+            "(0.025) and a headline that follows the primary. A clean test of |funding| needs "
+            "fresh pre-registration and an OOS window this experiment has not already looked at.",
+            "Clark-West is one-sided and asymptotic; its normal reference is somewhat "
+            "conservative in finite samples. At n=932 with effects this small, this design "
+            "lacks the power to resolve an effect of this magnitude - which is not the same "
+            "as showing the effect is zero.",
+            "Row-position vs calendar-date lagging: one RV day and one funding day are dropped, "
+            "so at those boundaries shift(1) means 'last available prior row' rather than "
+            "literally 'yesterday'. Not a lookahead violation (assert_no_lookahead verifies "
+            "this), and it affects at most 2 of 2,393 days.",
+            "RV target: 5-min sampling with no sub-sampling/averaging and no microstructure-"
+            "noise correction (no realized kernel, no bipower variation). Standard for a liquid "
+            "perp, but not the most robust estimator available.",
+        ],
     }
 
     (HERE / "k1436_results.json").write_text(json.dumps(out, indent=2))
