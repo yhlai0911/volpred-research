@@ -470,3 +470,52 @@ claim-surface 與 trusted external receipt 驗證。上文的「fail closed」�
 protocol：一旦 direct declaration 被辨識，任何證據錯誤都禁止退回較鬆的 lexical marker。
 若未來要把 auditor 升級成惡意 Python 的語義分析器，必須另立 sandbox／data-flow threat
 model，不能把那個尚未承諾的能力冒充成本 ratchet 已有的保證。
+
+---
+
+## 附錄 A：後續單站點裁決（2026-07-21）
+
+本稽核的 `reviewed_nonnested` allowlist 是持續性的退場路徑，不是一次性名單。
+後續新增的每一筆都必須附與 §2 同等的裁決理由，並沿用相同判準：
+
+- **巢狀** = 一個模型是另一個的參數受限特例（係數設 0 或設相等即可還原）。
+- **非巢狀** = 跨族比較、DM 作用在策略/組合報酬、或兩個特徵集只是重疊而非包含。
+
+### A.1 `experiments/k1729/k1729.py` — 裁決：(a) 真 false positive
+
+| 項目 | 內容 |
+|---|---|
+| 受檢 DM 對 | HAR-RV5 vs HAR-DAILY |
+| 偵測器角色 | `primary_raw_dm`（DM 確實接進 verdict sink，非 diagnostic） |
+| 裁決 | **非巢套 → FP，登錄 `reviewed_nonnested`** |
+
+**理由**：兩個模型同為 HAR(d/w/m) level-space OLS，但 **regressor 集合完全互斥**——
+一邊是 5 分鐘 intraday RV 的 d/w/m，另一邊是日盤 open-to-close 報酬平方的 d/w/m。
+**沒有任何把係數設 0 或設相等的方式，能從其中一個還原出另一個**；兩者甚至不是
+「重疊而非包含」，是**連重疊都沒有**。這是教科書級的 non-nested regression 比較
+（Davidson & MacKinnon 1981），DM 正是為此設計；Clark-West (2007) 針對的是巢狀情形。
+
+**為何 gate 會命中**：偵測器刻意保守（見 §0 的取捨——寧可 FP 也不放過 109 筆真誤用），
+對「同一 HAR 家族的兩個 spec 互比 + DM 接 verdict」這個 pattern 一律 flag。
+本例的 flag 是 pattern-match，不是真缺陷。
+
+**實測佐證（非僅論證）**：巢狀下 raw DM 失效的機制是「虛無下兩個預測重合 →
+loss differential 恆為 0 → 變異數退化」。本設計不可能發生，且已把可驗證的量寫進
+`experiments/k1729/k1729_results.json` 的 `results.<target>.full.nondegeneracy`：
+
+| 指標 | target A (`rv_5min`) | target B (`daily_r2`) |
+|---|---|---|
+| 兩模型預測相關係數 | 0.778 | 0.791 |
+| 平均相對預測差距 | 20.6% | 17.7% |
+| loss differential 標準差 | 0.364 | 0.713 |
+| loss differential 恰為 0 的比例 | 0.0% | 0.0% |
+
+退化情形下這四個數會是 1.0 / 0% / 0 / 100%。實測全部遠離退化。
+
+**先例對照**：與 `experiments/K1049/K1049.py`（HAR-RV / GJR-GARCH / A4f-VIX² 跨族，
+無零約束關係）同類，且本例更乾淨——K1049 是不同模型族，K1729 是同族但 regressor 互斥。
+
+**ratchet 不變式**：k1729 不在 `active` baseline 內，故
+`test_reviewed_nonnested_cannot_silence_a_baseline_site` 不受影響；該站點仍被 auditor
+flag（allowlist 不是把偵測器關掉，只是把已裁決的 FP 移出 affected set），故
+`test_reviewed_nonnested_sites_are_still_flagged` 亦成立。

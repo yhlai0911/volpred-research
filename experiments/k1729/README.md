@@ -4,8 +4,11 @@
 - **Date**: 2026-07-17
 - **Runtime**: ~2 s（全樣本 rolling OLS）
 - **Random seed**: 42
-- **Verdict**: **`HAR_RV5_WINS_ROBUST_ACROSS_PROXIES`**（= PASS）
-- **Reviewer**: Codex（gpt-5.6-sol，pre-run review，1–5 項全 PASS + 3 項限制，已全數落地）
+- **Verdict**: **`HAR_RV5_WINS_ROBUST_ACROSS_PROXIES`**
+- **Data as-of**: `2026-07-16`（canonical CSV 每日增列，腳本內以 `DATA_AS_OF` 釘住；
+  復現對照 `data.analysis_slice_sha256`，不是會天天變的整檔 sha）
+- **Review 狀態**: rev1 於 2026-07-17 被 Codex 二審判 **FAIL**（target 端 ex-post 選約 lookahead
+  未揭露）。本版為 rev2 修復版，裁決檔以 `review_verdict.json` 為準——README 不自稱審查結果。
 
 ## 1. 研究問題與經濟動機
 
@@ -19,7 +22,7 @@
 維護成本無法由預測增益 justify，「不做 intraday」就是有依據的省錢決策。本實驗
 事前就接受任一方向的結果。
 
-**實際結果是 PASS（intraday 顯著有增益），所以結論是這條線值得維護。**
+**實際結果：intraday 顯著有增益**（射程見 §7 —— 修復後的營運結論比 rev1 窄）。
 
 ## 2. 與庫內既有 K 的差異化（派工前完成查重）
 
@@ -75,12 +78,40 @@ Patton (2011) 證明 QLIKE 在任何條件不偏 proxy 下給一致 ranking，�
 
 **origin = 第 t 日 08:45 開盤前**，預測當日 08:45–13:45 的 RV。
 
-為什麼必須明寫：上游 `pick_active_contract()` 用每個檔案的**總量（日盤＋夜盤）**
+**regressor 側（合法）**：上游 `pick_active_contract()` 用每個檔案的**總量（日盤＋夜盤）**
 選當日主力合約，而 TAIFEX 日檔的夜盤 tick 帶當晚日期 —— 所以第 t-1 日的選約
 嵌入了「到第 t 日 05:00 為止」的成交量。在 08:45 origin 下這些 tick 全部已 realized、
 可觀察，選約合法進入資訊集；**若把 origin 定在 t-1 日 13:45 收盤，它就會是
 economic-clock lookahead**。08:45 origin 也是實務上最自然的（開盤前做當日預測），
 且與既有慣例 `feedback_session_boundary_forecast_timing` 一致。
+
+### target 側的 ex-post 選約（rev1 的 blocking 缺陷，本版修復）
+
+上面那段只論證了 **regressor** 合法，**沒有論證 target**。同一條總量規則也決定了
+`y_t` 是在**哪一口合約**上測量的，而那個總量**包含第 t 日自己的日盤成交量** ——
+在 08:45 origin 下尚未發生。所以 `y_t` 的 estimand **一般而言無法事前固定**。
+Codex 2026-07-17 判此為 blocking（`review_verdict.json`），且屬**未揭露**而非已 scope 的限制。
+
+**修復方式（不重跑 35.9GB raw tick）**：問一個更銳利的問題 ——
+*realized 的選約有多少比例是 08:45 當下就叫得出名字的？*
+
+> **Rule E（事前規則）**：持有近月合約直到它**公告的最後結算日**（合約月第三個星期三；
+> 該日非交易日則順延至次一交易日）過了，才換月。
+>
+> 輸入只有「t-1 日持有的合約」與「公告結算行事曆」，兩者在 08:45 都已知。
+
+- Rule E 命中的日子 → **target 側沒有 lookahead**：事前操作的人會在**完全相同**的合約上測到同一個 `y_t`。
+- Rule E 不命中的日子 → 模糊集，**列出並在敏感度 ledger 中剔除**。
+
+**Rule E 不是配適出來的**：另一個同樣自然的慣例（取最近一個「結算日尚未過」的合約）
+在本樣本**每一列都選到相同合約**，所以沒有對著資料在兩個慣例間挑過。
+
+**實測**：OOS 2,550 列中 **2,545 列（99.80%）由 Rule E 事前決定**，模糊集僅
+**5 天**（2016-03-16、2016-05-18、2016-08-17、2017-01-18、2017-02-15）——
+全是結算日、且成交量已提前一天移往次月。
+
+**誠實界線**：這**不代表** §4 主表的全 ledger 數字本身沒有 ex-post 選約 —— 它有。
+**乾淨的是 §4.1 的 ex-ante ledger**；主表是「含 5 天模糊日」的版本，兩者都報。
 
 ### 防錯
 
@@ -109,6 +140,30 @@ DM 符號：負 t = HAR-RV5 的 QLIKE 較低 = intraday 有幫助。Harvey (2016
 **兩個方向相反偏袒的 proxy 上都贏、都過 Harvey 門檻 → `HAR_RV5_WINS_ROBUST_ACROSS_PROXIES`。**
 即使在偏袒對手（HAR-DAILY）的 target B 上，intraday 仍然贏。
 
+### 4.1 敏感度 —— 三條 ledger 全部同向且全部過 Harvey 門檻
+
+全部由 `k1729.py` 產出、數字落在 `k1729_results.json` 的 `results.<target>.sensitivity`，
+可從三件套自證（rev1 的 no-filter 宣稱只寫在 README、無法稽核，這是那條的修復）。
+
+| Ledger | 剔除什麼 | target A: n / 改善 / DM t | target B: n / 改善 / DM t |
+|---|---|---|---|
+| **主表（全 ledger）** | — | 2,548 / +14.70% / **−3.681** | 2,536 / +3.37% / **−3.367** |
+| **ex-ante 選約**（本版主修復） | 5 個 Rule E 未命中日 | 2,543 / +14.70% / **−3.671** | 2,531 / +3.39% / **−3.370** |
+| **剔除所有換月日**（更保守） | 127 個 `is_roll` 日 | 2,421 / +14.66% / **−3.584** | 2,410 / +3.48% / **−3.665** |
+| **關閉 insanity filter** | —（兩模型同時關） | 2,541 / +15.19% / **−3.867** | 2,524 / +3.48% / **−3.456** |
+
+**六格全部 `HAR_RV5_WINS` 且 |t| > 3。** 三件事因此成立：
+
+1. **選約缺陷不是結果的來源** —— 把模糊日全剔掉，t 值只從 −3.681 動到 −3.671。
+2. 連「剔掉全部 127 個換月日」這種遠比必要更狠的切法都不翻轉。
+3. filter 是**壓低**而非製造顯著性（關掉後 |t| 反而升到 3.867 / 3.456）。
+
+**ex-ante ledger 的殘餘限制（必須誠實記）**：以「該日選約是否合乎行事曆」篩樣本，
+本身用到 08:45 當下不知道的資訊，所以它的 estimand 是**條件式**的
+（「選約合乎行事曆的日子上的期望損失差」），不是無條件的。這個篩選
+**與模型無關**（不碰預測、不碰損失，兩模型共用同一組日子），因此不可能偏袒任一方，
+但它是條件式宣稱，就照條件式報。
+
 ### 子樣本（2017-05-16 起，對照 K1301/K1303 的 TX1 ledger）
 
 | Target | n | 改善 | DM t | p | 判定 |
@@ -128,11 +183,30 @@ QLIKE 改善幅度與全樣本完全相同（3.37%），下降的是 n（2,536�
 | HAR-RV5 | 2,550 | 7–12 (0.27–0.47%) | 972–1,000 |
 | HAR-DAILY | 2,550 | 0 (0.00%) | 972–1,000 |
 
-Filter 觸發率不對稱是**模型行為差異，不是程式偏袒**（規則同一份）。Codex 另做了
-不套 filter 的敏感度檢查：兩個 target 的方向與 DM 判讀都不翻轉 → 顯著性不是 filter 製造的。
+Filter 觸發率不對稱是**模型行為差異，不是程式偏袒**（規則同一份）。不套 filter 的
+敏感度已收進 `k1729.py`（見 §4.1 第四列），數字寫進 `results.json`，可從三件套自證。
 
 loss differential 的 acf(1) 僅 0.072 / −0.054 → 序列相關極弱，HAC bandwidth = 14
 的修正影響很小（但仍照用 canonical 實作）。
+
+### 非巢套（nested-DM gate 的裁決依據）
+
+兩個模型的 regressor 集合**互斥**（`RV5_{d,w,m}` vs `r2_{d,w,m}`），
+**任一方都不是另一方的參數受限特例** —— 沒有任何把係數設 0 或設相等的方式能從
+HAR-RV5 還原出 HAR-DAILY。DM 正是為非巢套比較設計的；Clark-West 是巢套用的。
+
+巢套下 raw DM 失效的機制是「虛無下兩個預測**重合** → loss differential 恆為 0 →
+變異數退化」。本設計不可能發生，並且**可從 results.json 直接驗證**：
+
+| | target A | target B |
+|---|---|---|
+| 兩模型預測相關係數 | 0.778 | 0.791 |
+| 平均相對預測差距 | 20.6% | 17.7% |
+| loss differential 標準差 | 0.364 | 0.713 |
+| loss differential 恰為 0 的比例 | 0.0% | 0.0% |
+
+裁決記於 `storage/ops/nested_dm_misuse_baseline.json` 的 `reviewed_nonnested`
+（與 K1049 / k1100b 同一條退場路徑，非自造後門）。
 
 ## 5. 為什麼這個結果「不是好得不像真的」
 
@@ -144,31 +218,59 @@ loss differential 的 acf(1) 僅 0.072 / −0.054 → 序列相關極弱，HAC b
    不同設計，量級對上。
 2. **符合文獻先驗**：Andersen & Bollerslev (1998) 以降，intraday RV 顯著優於
    daily squared return 是 realized volatility 文獻的基本結論。這裡沒有反直覺的宣稱。
-3. **Codex pre-run review 1–5 全 PASS**，且獨立做了 no-filter 敏感度檢查，方向不翻轉。
+3. **四條 ledger 都不翻轉**（§4.1）：剔除選約模糊日、剔除全部換月日、關閉 insanity
+   filter，六格全部維持 `HAR_RV5_WINS` 且 |t| > 3。
 4. **在偏袒對手的 target 上仍然贏**：若 14.70% 是同源測量誤差造成的假象，
    target B（偏袒 HAR-DAILY）應該翻轉或至少變 NULL。它沒有。
 
+**不算證據的東西（rev1 誤列，此處更正）**：rev1 把「Codex pre-run review 1–5 全 PASS」
+列為支持證據。那是**凍結前**的預審，不是 final audit —— 它沒看到凍結後的 claim surface，
+**不能拿來取代裁決**。實際的凍結後 final audit（2026-07-17）判的是 **FAIL**。
+最終審查結果一律以 `review_verdict.json` 為準。
+
 ## 6. 樣本（誠實記載）
 
-- 資料：`data/intraday/taifex_5min_rv.csv`（SHA-256 記於 results.json）
-- 合約：TX active monthly（`same_day_max_total_volume_monthly_TX`）
+- 資料：`data/intraday/taifex_5min_rv.csv`，**as-of `2026-07-16`**（腳本內 `DATA_AS_OF` 釘住）
+  - collector **每個交易日增列一列**，整檔 sha256 隔天就對不上 —— 所以復現對照的是
+    `data.analysis_slice_sha256`（截斷後切片的 hash，穩定），整檔 sha 只當 provenance 記錄
+- 合約：TX active monthly（`same_day_max_total_volume_monthly_TX`；**選約的 ex-post 性質見 §3**）
 - Session：**日盤 08:45–13:45 only**
 - 全檔期間：2012-01-02 → 2026-07-16，3,550 個交易日
 - **實際 OOS ledger：2016-01-20 → 2026-07-16**（前 1,000 列供 rolling window warmup，
   即 in-sample 2012–2016 / OOS 2016–2026）。**全檔 3,550 天不等於檢定樣本 2,548 天。**
-- **排除**：
-  - `rv_5min == 0` **2 天**（2025-04-07、2025-04-10）：open == close、292–481 ticks
+- **排除**（**全檔筆數 ≠ 真正扣掉 ledger 列的筆數** —— 第 1,000 列以前是 rolling window
+  warmup，從來沒進過任何 ledger。rev1 只報全檔數，這裡分開報）：
+
+  | 排除項 | 全檔 | **實際扣掉 OOS ledger 列** |
+  |---|---|---|
+  | `rv_5min == 0`（target A） | 2 | **2** |
+  | `day_return == 0`（target B） | 21 | **14** |
+
+  - `rv_5min == 0`（2025-04-07、2025-04-10）：open == close、292–481 ticks
     （常態約 30,000），隔日跳空 >2% —— 漲跌停鎖死特徵。**RV=0 是真實市場結果，
     不是資料洞**，但 QLIKE 在 actual=0 無定義，故剔除而非 clip。
-  - `day_return == 0` **21 天**（target B 的 ledger，r²=0 → QLIKE 無定義）
+  - `day_return == 0`：r²=0 → QLIKE 無定義。21 天中有 7 天落在 OOS 起點之前，
+    只有 **14 天**真的讓 target B 的 ledger 從 2,550 掉到 2,536。
   - 258 個日曆缺口 = 國定假日，**非資料洞**（manifest 已驗證，未當缺失處理）
 
 ## 7. 結論與對營運決策的意義
 
-**自有 TAIFEX tick 的 5 分鐘 RV，對 TX 隔日日盤波動率預測有統計顯著且跨 proxy 穩健的
-增益（QLIKE +14.70%，DM t=−3.681）。這條資料線值得維護。**
+**在 08:45 開盤前形成當日日盤變異數預測這個設定下，5 分鐘 RV 建的 HAR 顯著優於
+只用日頻 open-to-close 報酬平方建的同構 HAR：兩個方向相反偏袒的 proxy 上都贏，
+且在剔除選約模糊日的 ex-ante ledger 上仍然贏（+14.70% / t=−3.671；+3.39% / t=−3.370）。**
 
-同時，**這個結論有明確射程**（Codex review 指出，本 K 接受）：
+**這對營運決策的意義，以及它撐不起什麼**：
+
+- ✅ **撐得起**：在**預測增益**這一個維度上，5 分鐘 RV 對日頻壓縮資訊有可檢定的增量。
+  「這條線在預測上等於沒用、可以直接關掉」這個假說被資料**拒絕**了。
+- ⚠️ **撐不起「這條線值得維護」這個結論本身**（rev1 這樣寫，超出證據，此處收回）。
+  「值得維護」是**成本效益**判斷，需要維護成本、替代方案成本、以及增益的**經濟價值**
+  三個量 —— 本實驗**一個都沒有測**。QLIKE 改善 14.70% 沒有被換算成任何 P&L、
+  避險效率或風險管理績效。**統計顯著 ≠ 值得付錢。**
+- 📌 **正確的讀法**：本 K 把「預測增益是否為零」從成本討論中**移除**（答案：不為零），
+  讓後續的成本效益分析可以在一個已確立的事實上進行 —— 它**不是**那個分析本身。
+
+其餘射程限制：
 
 - 本 K 證明的是「5 分鐘 RV 是否比日頻壓縮資訊更有預測力」。HAR-DAILY 的
   `day_return` 在實作上仍由 collector 從 tick 算出 —— 它的**資訊集**確實是日頻可得的
@@ -178,6 +280,10 @@ loss differential 的 acf(1) 僅 0.072 / −0.054 → 序列相關極弱，HAC b
 - 兩個 target 都是 noisy proxy，都不是 latent integrated variance。無中立第三方 proxy
   （如 Parkinson range）：canonical 5 分鐘 RV 層未存 session high/low，
   TWII 現貨 OHLC 是不同資產（basis 問題），不乾淨。
+- **ex-ante ledger 是條件式 estimand**（§4.1 末段）：以「選約是否合乎行事曆」篩樣本
+  用到 08:45 當下未知的資訊。篩選與模型無關、兩模型共用同一組日子，故不偏袒任一方，
+  但它不是無條件宣稱。
+- 子樣本 target B 未過 Harvey 門檻（§4，|t|=2.92），主結論以全樣本為準、不升格。
 
 **對後續題組的意義**：既然 intraday 對日頻預測確有增益，`PLANNED_K_BRIEFS.md` 的
 K-C（選擇權 tick）就不是先驗上沒價值的方向 —— 但它的 blocker 是資料

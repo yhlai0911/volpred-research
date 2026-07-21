@@ -302,6 +302,13 @@
       "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
     },
     {
+      "site": "experiments/k1729/k1729.py",
+      "reason": "HAR-RV5 與 HAR-DAILY 同為 HAR(d/w/m) OLS，但 regressor 集合完全互斥（5 分鐘 RV 的 d/w/m vs 日盤 open-to-close 報酬平方的 d/w/m）；任一方都不是另一方的參數受限特例，沒有把係數設 0 或設相等能從其中一個還原另一個。此為教科書級 non-nested regression 比較（Davidson-MacKinnon 1981），DM 正是為此設計，Clark-West 適用的是巢狀情形。巢狀下 raw DM 失效的機制（虛無下兩預測重合 → loss differential 恆 0 → 變異數退化）在此不可能發生，並已在 results.json 的 nondegeneracy 區塊以實測佐證：兩模型預測相關 0.778/0.791（非 1）、平均相對預測差距 20.6%/17.7%、loss differential 標準差 0.364/0.713、恰為 0 的比例 0.0%。與 K1049（HAR-RV vs GJR-GARCH vs A4f 跨族）同類，且更乾淨——本例 regressor 集合連重疊都沒有。",
+      "dm_pairs": "HAR-RV5 vs HAR-DAILY（互斥 regressor 集合）",
+      "adjudicated_at": "2026-07-21",
+      "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
+    },
+    {
       "site": "experiments/k230/k230_optimal_vt_param.py",
       "reason": "DM 作用在 VT 策略報酬序列（不同參數配置），非預測模型",
       "dm_pairs": "策略報酬",
@@ -477,5 +484,5 @@
       "audit": "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md"
     }
   ],
-  "reviewed_nonnested_count": 35
+  "reviewed_nonnested_count": 36
 }
