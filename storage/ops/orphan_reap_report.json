@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-21T05:01:17.048334+00:00",
+  "generated_at": "2026-07-21T06:01:09.453101+00:00",
   "adoptable": [],
   "held": [],
   "skipped": {
@@ -13,14 +13,45 @@
   "applied": true,
   "job_deliverable_candidates": [
     {
-      "job_id": "compute-codex-audit-snapshot-dup-20260721-1784607109",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-codex-audit-snapshot-dup-20260721-1784607109.json",
-      "execution_status": "failed",
+      "job_id": "lazypack-mile_d9ff126f",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_d9ff126f.json",
+      "execution_status": "completed",
       "paths": [
-        "storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict.md"
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/plan.json",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/panel_winner.png",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/panel_complexity.png",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/panel_honesty.png",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/render_lazypack.py"
       ],
       "existing_paths": [
-        "storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict.md"
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/plan.json",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/panel_winner.png",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/panel_complexity.png",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/panel_honesty.png",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/render_lazypack.py"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    },
+    {
+      "job_id": "lazypack-mile_fa098fc8-r3",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_fa098fc8-r3.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/plan.json",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_signal.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_result.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_turnover.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_honesty.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/render_lazypack.py"
+      ],
+      "existing_paths": [
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/plan.json",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_signal.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_result.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_turnover.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_honesty.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/render_lazypack.py"
       ],
       "previously_delivered_paths": [],
       "rejected": []
@@ -29,13 +60,32 @@
   "job_deliverable_held": [],
   "job_deliveries": [
     {
-      "job_id": "compute-codex-audit-snapshot-dup-20260721-1784607109",
+      "job_id": "lazypack-mile_d9ff126f",
       "paths": [
-        "storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict.md"
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/plan.json",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/panel_winner.png",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/panel_complexity.png",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/panel_honesty.png",
+        "storage/lazypack_jobs/mile_d9ff126f/runs/lazypack-mile_d9ff126f/panels/render_lazypack.py"
       ],
       "delivered": true,
-      "delivery_status": "partial_delivered",
-      "delivery_commit": "cbd1636e93abe1ef45d353b79b135fb8db94b396",
+      "delivery_status": "delivered",
+      "delivery_commit": "c0994ddddce58da4dda3f2ceb33dac0283bcc44b",
+      "reason": "already_committed"
+    },
+    {
+      "job_id": "lazypack-mile_fa098fc8-r3",
+      "paths": [
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/plan.json",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_signal.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_result.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_turnover.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/panel_honesty.png",
+        "storage/lazypack_jobs/mile_fa098fc8/runs/lazypack-mile_fa098fc8-r3/panels/render_lazypack.py"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "c0994ddddce58da4dda3f2ceb33dac0283bcc44b",
       "reason": "already_committed"
     }
   ],

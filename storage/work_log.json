@@ -23085,5 +23085,45 @@
     "owner": "hourly-slot-2-d67174768057485d99423d97bccc25cb",
     "commit": null,
     "summary": "老闆產線解阻指示（本班份額）。已清：PHASE-Z incident acc9bba0eea5942f 關閉 → slot cap 2→6（吞吐直接翻倍以上，本班期間他班清路徑、本班驗證並補上缺失的解除端 actuator）；release 死鎖實質清空 → eligible 0→1。未清殘留（各有專屬 task，非本班能在 cap 內完整收尾）：ci-red-29797353050（slot-1 本班持有）、snapdupfix_k1319 / snapdupfix_k1592。另澄清：release pool 另 2 篇由 narrative-cluster 多樣性閘門擋住，屬品質閘門正常運作，依老闆指示不計入阻塞。"
+  },
+  {
+    "timestamp": "2026-07-21T14:15:01+08:00",
+    "task_type": "experiment",
+    "task_id": "k1380_rerun_staged_correct_qlike",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-375ba0e3c91046bdbcdf0d5b32dab5a1",
+    "owner": "hourly-slot-1-375ba0e3c91046bdbcdf0d5b32dab5a1",
+    "commit": null,
+    "summary": "STARVATION LOCKOUT 下的 agent lane 派工（餓死 90.9h，P2）。\n\nK1380 的 2026-07-16 結論是 `qlike()` 比值寫反（σ̂²/r² 應為 r²/σ̂²）的產物，已作廢。單體\n`k1380.py` 上次跑 2h54m timeout，compute_queue 依 split contract 拒絕原樣重派。\n\n本班動作：建 registered worktree `dispatch-slot-1-375ba0e3-k1380`（branch\n`wt/dispatch-slot-1-375ba0e3-k1380`，經 git_writer_lock），寫完整 brief 後\nenqueue-agent → job `agent-brief_k1380_stage-68dea3`（opus/xhigh per model_router）。\n\nBrief 要求：重構成 `--stage`（forecasts_a / forecasts_midas / spa）三段，forecast matrix\n存 σ̂² 本身而非 loss（未來換 loss 不必重 fit）；逐段帶 `--timeout-parent-job-id` +\n`--split-stage`；SANITY GATE = 新 mean QLIKE 必須落在 ~1.4 量級（對照 K1379），否則停手開\ndebug task；A5/C2/C3 的「數值發散」排除理由在正確 loss 下重判。\n\n未做（刻意）：不在 fire 內跑 agent —— xhigh 研究工作 20-60min，塞進 50min fire 會被 SIGKILL。\n成果由後續 fire 的 PHASE A 收。"
+  },
+  {
+    "timestamp": "2026-07-21T14:15:01+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_c441604e",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-375ba0e3c91046bdbcdf0d5b32dab5a1",
+    "owner": "hourly-slot-1-375ba0e3c91046bdbcdf0d5b32dab5a1",
+    "commit": null,
+    "summary": "STARVATION LOCKOUT 下的 agent lane 派工（餓死 89.4h，P2）。\n\nK1729 被 Codex 二審判 FAIL，有兩道獨立的 blocking wall：\n(1) target 端 ex-post 選約 lookahead —— `pick_active_contract()` 用整檔（含 day t 日盤）\n    volume 取 idxmax，但 forecast origin 宣稱是 08:45-on-t，故 y_t 的 estimand 無法事前固定；\n(2) `experiment_gates.py` 的 [nested-dm-misuse] —— 修好 (1) 仍會擋 merge。\n\n本班動作：enqueue-agent → job `agent-brief_k1729_repair-986ef4`（opus/xhigh），cwd 指既有\nworktree `dispatch-slot-1-30aeb902-taifexrv`。\n\nBrief 要求：不重跑 35.9GB raw tick（主線程已驗數字 bit-identical 重現、DM bandwidth=14 正確、\nbaseline 對稱）；改走便宜修法 —— caveat 揭露 + 用 canonical CSV 的 `is_roll` 欄剔除 OOS 期間\n約 127 個 roll 日重跑 DM（存活則宣稱由證據恢復，不存活則結論降級）+ 重 scope README §7。\nnested-DM 那道牆給了官方豁免路徑（`reviewed_nonnested` 名單 + K1049/k1100b 先例與 schema），\n但要求以同等嚴謹度自行審裁，主線程刻意不代為登錄（實驗仍 FAIL、code 還要改，先豁免等於搶跑）。\n改完 sha 漂移 → 重派 Codex 重產 verdict（禁手改裁決檔）→ PASS 才 merge。\n\n未做（刻意）：不在 fire 內跑 agent；不代為登錄 nested_dm 豁免。"
+  },
+  {
+    "timestamp": "2026-07-21T14:15:01+08:00",
+    "task_type": "experiment",
+    "task_id": "k1731_F1_nested_forecast_bootstrap",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-375ba0e3c91046bdbcdf0d5b32dab5a1",
+    "owner": "hourly-slot-1-375ba0e3c91046bdbcdf0d5b32dab5a1",
+    "commit": null,
+    "summary": "STARVATION LOCKOUT 下的 agent lane 派工（餓死 53.9h，P2）。\n\nK1731 arm B rev6 已撤回「bounded macro null」宣稱：SSVS vs GEV-HAR 是嵌套比較\n（`k1731_gevreg_midas_ssvs_returns.py:163` 用 coefficient mask 建 GEV-HAR）且用 expanding\nwindow（:129），關掉 Giacomini-White(2006) 例外門 → West(1996)/Clark-McCracken(2001) 適用，\nDM 統計量非漸近常態，現有 [-0.74%, +4.41%] 只是敘述性摘要而非母體界。\n\n本班動作：enqueue-agent → job `agent-brief_k1731_f1-29394c`（opus/xhigh），cwd 指既有\nworktree `dispatch-slot-1-bd00f90a-k1731`。\n\nBrief 要求：實作對 **pinball loss** 有效的 recursive-bootstrap / nested-forecast 校正\n（明確標註 Clark-West 是為二次損失推的、不可直接套），產出可回溯區間 + 文獻出處 + 與舊診斷\n區間的並列對照。要求把 estimation-noise bias 的兩個方向都納入討論（虛無下估 macro 係數會\n機械推向「macro 較差」vs SSVS spike-and-slab 收縮讓該懲罰衰減），不得只做單向修正就宣稱解決。\n全量 bootstrap（19 次年度 refit 的 Bayesian MCMC 上重抽）要求由 agent 再 enqueue 到\ncompute_queue，不得塞進 fire。Brief 明示：若正式界在現有樣本下撐不起任何結論，照實寫撤回，\n不要為交差硬湊區間。\n\n未做（刻意）：不在 fire 內跑 agent。"
+  },
+  {
+    "timestamp": "2026-07-21T14:15:01+08:00",
+    "task_type": "platform_ops",
+    "task_id": "compute_queue_failed_script_job_followup_blind_spot",
+    "outcome": "filed",
+    "actor": "hourly-slot-1-375ba0e3c91046bdbcdf0d5b32dab5a1",
+    "owner": "hourly-slot-1-375ba0e3c91046bdbcdf0d5b32dab5a1",
+    "commit": null,
+    "summary": "PHASE A 例行檢查時發現的系統性缺陷，已立 P1 task\n`compute_queue_failed_script_job_followup_blind_spot`。\n\n症狀：`compute_queue.py list --pending-followup` 回 `[]`，但佇列有 26 個\n`status=failed` + `followup_dispatched=false` 的 job，且全都設了 `claude_followup`。\n\n根因（已定位到行）：`_pending_followup_view()` line 1156-1161 的\n`if not workdir and not timed_out: return None`，而 `_agent_workdir()`（1043-1055）\n只認 agent job（`kind==\"agent\"` 或 `script_path==\"scripts/run_agent_job.py\"`）。\n→ 用 `enqueue` 派的 script job 若以非 timeout 方式失敗（exit_code=1），\nworkdir=None 且 timed_out=False → 直接吞掉，PHASE A 永遠看不到。\n\n實證：`compute_k1602` / `k1379-har-benchmark` 皆 kind=null、cwd=null、exit_code=1、\nclaude_followup 存在。最舊可回溯到 2026-05-27（`k562-lag-fix-rerun-20260527`）。\n\n排除誤判：line 1999-2002 那段「explicitly keeps it out of pending-followup」的註解是\n`cancel` 指令的（cancelled job 沒結果所以不必 triage），與本缺陷無關 —— failed 分支是\nagent-centric 寫成的，script job 是被漏掉不是被排除。\n\n本班未修（刻意，理由記錄）：修法本身小，但一修好 26 筆會同時湧進 PHASE A、每筆吃一個 fire，\nsurfacing 策略（排序 + 每班上限，或先批次分流）需要寫進 code/rule 而非留給 prompt 自律，\n再加防再犯測試 —— 這超過本班剩餘預算。依「scope 切小、不留 partial」原則立案而非半做。\ntask description 已寫明禁用「把 26 筆全標 followup_dispatched=true」當修法（那是刪證據）。"
   }
 ]
