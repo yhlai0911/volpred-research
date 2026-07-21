@@ -8,6 +8,8 @@ Schema additions to storage/next_tasks.json task entries:
   - completed_at      : ISO timestamp  (already exists)
   - result            : str  (already exists)
   - dispatch_lane     : agent | main_thread | blocked  (dispatcher ownership)
+  - compute_job_id    : str  (掛在 compute queue 上的 job id；job 仍活著時
+                              cleanup 的 stale reaper 不回收此 task)
 
 Status machine:
   pending  --claim-->  claimed  --start-->  in_progress  --complete-->  succeeded / failed / blocked
@@ -861,13 +863,45 @@ def cmd_normalize_priorities(args: argparse.Namespace) -> dict[str, Any]:
         return {"ok": True, "changed": changed}
 
 
+_COMPUTE_QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
+_COMPUTE_JOB_LIVE = {"pending", "queued", "running", "claimed"}
+
+
+def _compute_job_alive(job_id: str | None) -> bool:
+    """True 若 task 掛著的 compute-queue job 仍在飛。
+
+    stale reaper 只看 claimed_at 的年齡，看不見「工作其實在 compute worker 上跑」。
+    長研究 job timeout 動輒 5400s，遠超 --stale-hours 2 —— 於是 dispatch 到 compute
+    queue 的 task 會在 2h 後被放回 pending，重新進 starvation lockout 被第二次派工，
+    產生重複 agent job 與重複 worktree（實例：assign_5aa9d5f5 於 2026-07-19/07-20
+    連兩次 auto_release_stale_2h，工作全程在 queue 上正常執行）。
+
+    job 已進終態（completed / failed / timeout）則不擋 —— task 本來就該回池等收件。
+    """
+    if not job_id:
+        return False
+    path = _COMPUTE_QUEUE_DIR / f"{job_id}.json"
+    try:
+        with path.open(encoding="utf-8") as fh:
+            status = (json.load(fh).get("status") or "").lower()
+    except (OSError, ValueError):  # silent-ok: 缺檔/壞檔 = 無法證明 job 活著，回退到原回收邏輯
+        # 讀不到 job 檔 = 無法證明它活著，照原邏輯回收（不要因為 IO 錯誤把 task 永久釘住）
+        return False
+    return status in _COMPUTE_JOB_LIVE
+
+
 def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
     released = []
+    skipped_compute = []
     with _locked_load() as (_fh, tasks):
         now = datetime.now(timezone.utc)
         for t in tasks:
             status = (t.get("status") or "").lower()
             if status not in {"claimed", "in_progress"}:
+                continue
+            job_id = t.get("compute_job_id")
+            if _compute_job_alive(job_id):
+                skipped_compute.append({"id": _task_key(t), "compute_job_id": job_id})
                 continue
             claimed_at = t.get("claimed_at")
             claimed_dt = None
@@ -928,7 +962,12 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                     by=prev_owner or "cleanup",
                     note=f"auto_release_stale_{args.stale_hours}h",
                 )
-    return {"ok": True, "released": released, "count": len(released)}
+    return {
+        "ok": True,
+        "released": released,
+        "count": len(released),
+        "skipped_compute_in_flight": skipped_compute,
+    }
 
 
 def main() -> int:
