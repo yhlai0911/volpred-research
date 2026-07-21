@@ -42387,5 +42387,56 @@
     "VIX": 5282
    }
   }
+ },
+ {
+  "item_id": "b68047d0",
+  "category": "experiment_result",
+  "content": "[K1436 verdict=NULL reviewer=feature-dev:code-reviewer subagent (PASS, no blocking defects; Codex CLI unavailable until 2026-07-25) artifact=experiments/k1436 task=compute-queue-followup-agent-brief_k1436_v2-70286f] Does BTC perpetual funding rate carry incremental information for next-day realized volatility beyond a HAR-RV baseline? Target is daily RV built as the sum of squared 5-min log returns within a UTC calendar day (689225 bars, 2393 days kept of 2394, min 250 bars/day). Predictors are the three HAR lags plus yesterday's mean 8h funding rate; both models are estimated on log RV with a 1000-day rolling window refit daily, seed 42. Data: Binance USDS-M BTCUSDT perpetual, funding from https://fapi.binance.com/fapi/v1/fundingRate (7180 settlements, 8h cadence) and 5-min klines from https://fapi.binance.com/fapi/v1/klines (689225 bars), fetched 2026-07-21T03:17:51.868877+00:00. Sample 2020-01-01..2026-07-20 (n=2393 days); OOS 2024-01-01..2026-07-20 (n_oos=932). INFERENCE — the models are nested (baseline = alternative with beta_funding=0), so Clark-West (2007) MSPE-adjusted is the ONLY test wired into the verdict; the DM blocks are retained as diagnostics and are not valid inference under nesting. RESULT — signed funding (pre-specified PRIMARY): QLIKE 0.285709 -> 0.283634 (-0.726%), MSE 6.395651e-07 -> 6.369095e-07 (-0.415%), Clark-West t=1.4019, one-sided p=0.0805, HAC lag 10 — NOT significant at 5%. DM diagnostic t=-0.8292 (HLN-corrected -0.8288, p=0.4072), far below the Harvey (2016) strength threshold |t|>3.0. |funding| (SECONDARY): QLIKE 0.285709 -> 0.283144 (-0.898%), Clark-West t=1.7394, one-sided p=0.0410; DM diagnostic t=-0.9169. MULTIPLE TESTING — 2 covariates were tested, so the Bonferroni one-sided bar is 0.025. |funding| clears the NOMINAL 5% bar (p=0.0410) but NOT the adjusted one; signed funding clears neither. The headline verdict follows the pre-specified primary covariate, and the secondary is reported regardless. IN-SAMPLE CONTEXT — incremental R^2 on log RV is tiny: baseline 0.5305 -> 0.5342 (delta 0.0037) for signed funding and 0.5351 (delta 0.0046) for |funding|, n=2371. A 1-sd rise in yesterday's mean funding moves expected log RV by 0.0670, i.e. 6.93% in RV / 3.41% in volatility — economically small and in-sample only. STABILITY — the (already insignificant) signal is concentrated in the first OOS half: 2024-01-01..2025-04-10 n=466 CW t=1.6049 (p=0.0543), QLIKE 0.298009 -> 0.293759; 2025-04-11..2026-07-20 n=466 CW t=0.3627 (p=0.3584), QLIKE 0.273409 -> 0.273509 — i.e. the second half is flat and QLIKE actually deteriorates slightly. INTERPRETATION — this is a NULL: at daily frequency, once a HAR-RV baseline already conditions on BTC's own realized-volatility history, yesterday's Binance funding rate adds nothing that survives a nested-model test. It is NOT evidence that leverage/funding is irrelevant to BTC volatility — the K139 liquidation-cascade mechanism is explicitly non-linear, and this specification enters funding linearly. LOOKAHEAD — assert_no_lookahead checked 250 rows with 0 violations on all three HAR lags and on funding_lag1; the code carries explicit .shift(1) at k1436.py build_har_features/build_funding_features, and the guard is an independent rebuild rather than a reuse of the same shift logic. LIMITATIONS (from the artifact, not added here): (1) Single exchange: Binance only. It is the largest BTC perp venue, but funding on OKX/Bybit/dYdX can diverge; a cross-venue funding dispersion measure is untested here. (2) Single contract: BTCUSDT perpetual only - no quarterly-futures basis, no options skew, no open interest, no liquidation data. A composite leverage measure may still work where funding alone does not. (3) Short sample by volatility-research standards: 2,393 days (2020-2026), OOS n=932. Regime-diverse (2021 bull, 2022 LUNA/FTX deleveraging, 2024-25 ETF era) but one asset over six years, and DM/CW power at n=932 is limited for small effects. (4) Funding regime shift: Binance changed funding-interval and cap rules over the sample; the series is treated as homogeneous, which it strictly is not. (5) Linear specification: funding enters linearly, but the K139 liquidation mechanism is explicitly non-linear (cascades trigger at thresholds). A threshold/quantile spec is a live untested alternative; |funding| is only a crude first step toward it. (6) Two covariates tested, and the SECONDARY is the one that scored better. |funding| clearing nominal 5% while the pre-specified primary does not is exactly the configuration where selective reporting does damage - hence the Bonferroni bar (0.025) and a headline that follows the primary. A clean test of |funding| needs fresh pre-registration and an OOS window this experiment has not already looked at. (7) Clark-West is one-sided and asymptotic; its normal reference is somewhat conservative in finite samples. At n=932 with effects this small, this design lacks the power to resolve an effect of this magnitude - which is not the same as showing the effect is zero. (8) Row-position vs calendar-date lagging: one RV day and one funding day are dropped, so at those boundaries shift(1) means 'last available prior row' rather than literally 'yesterday'. Not a lookahead violation (assert_no_lookahead verifies this), and it affects at most 2 of 2,393 days. (9) RV target: 5-min sampling with no sub-sampling/averaging and no microstructure-noise correction (no realized kernel, no bipower variation). Standard for a liquid perp, but not the most robust estimator available. PROVENANCE — recorded by the main thread (never an agent, K1259) during the PHASE-A collection of compute-queue job agent-brief_k1436_v2-70286f; every figure above was read programmatically out of k1436_results.json. This v2 supersedes the v1 scoping/feasibility document that previously sat in experiments/k1436 with no computed results.",
+  "evidence": [
+   "experiments/k1436/k1436_results.json"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-21T12:33:18.904550",
+  "k_id": "k1436",
+  "experiment_id": "k1436",
+  "experiment_path": "experiments/k1436",
+  "verdict": "NULL",
+  "review_verdict": "PASS",
+  "reviewer": "experiments/k1436/review_report.md",
+  "reviewer_source": "feature-dev:code-reviewer subagent (fallback; Codex CLI usage-limited until 2026-07-25)",
+  "needs_human": false,
+  "provenance": "main-thread write from artifact JSON; compute-queue followup collection",
+  "results_sha256": "bdcdc5a7e7ca920bf62ba65f13a4ff4fd0367c266db8d98db042b953af9a4c70",
+  "revisions": [
+   {
+    "revised_at": "2026-07-21T12:33:33.257231+08:00",
+    "actor": "hourly-slot-3-c090951b621142b6960534a8c9593ad5",
+    "reason": "PHASE-A collection of compute job agent-brief_k1436_v2-70286f: attach structured K-record fields (k_id/verdict/review provenance/sha) that add_knowledge cannot set",
+    "fields": [
+     "experiment_id",
+     "experiment_path",
+     "k_id",
+     "needs_human",
+     "provenance",
+     "results_sha256",
+     "review_verdict",
+     "reviewer",
+     "reviewer_source",
+     "verdict"
+    ],
+    "before": {
+     "k_id": null,
+     "experiment_id": null,
+     "experiment_path": null,
+     "verdict": null,
+     "review_verdict": null,
+     "reviewer": null,
+     "reviewer_source": null,
+     "needs_human": null,
+     "provenance": null,
+     "results_sha256": null
+    }
+   }
+  ]
  }
 ]

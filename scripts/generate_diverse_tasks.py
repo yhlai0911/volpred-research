@@ -63,6 +63,7 @@ RESEARCH_PROGRAM = ROOT / "research_program.md"
 
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 from volpred.ops.next_tasks import write_tasks_locked  # noqa: E402
+from volpred.ops.pool_pressure import pool_admits_new_work  # noqa: E402
 
 
 def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list, list]:
@@ -664,6 +665,16 @@ def gen_experiment_tasks(existing: set[str], rng: random.Random) -> list[dict]:
 
 def generate(*, dry_run: bool = False, seed: int = 42) -> dict:
     """Programmatic entry — used by continue_task_dispatch._maybe_refill."""
+    # drain-first 水位閘（boss msg 1237）。
+    if not dry_run:
+        admission = pool_admits_new_work(
+            "diverse_tasks",
+            path=NEXT_TASKS,
+            state_path=NEXT_TASKS.parent / "ops" / "drain_first_state.json",
+        )
+        if not admission.admitted:
+            print(f"[diverse-gen] skip: {admission.reason}")
+            return admission.as_result({"by_type": {}, "added_ids": []})
     payload, tasks = _load_tasks()
     existing = _existing_ids(tasks)
     rng = random.Random(seed)

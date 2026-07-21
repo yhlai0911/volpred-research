@@ -8,7 +8,10 @@ paths:
 
 # Context Hygiene / Token 紀律
 
-當 Claude 觸及 `storage/memory/**`、`storage/reports/**` 或任何 `storage/**/*.json` 路徑時自動觸發。
+**觸發條件**：內建 Read/open 命中 `storage/memory/**`、`storage/reports/**` 或任何 `storage/**/*.json` 時 auto-load。
+Bash 的 `jq`/`grep`/`rg`/`cat` **不觸發**（機制見 `CLAUDE.md` §Rule path-trigger 時序原則）——
+而本規則指定的合法入口正是 `jq` / `ops_snapshot`，所以**照規則做事的路徑不會載入本規則**。
+需要它在 selection 前生效時，靠 `CLAUDE.md` Token 紀律段的 pointer 或顯式讀本檔，不要假設查詢會自動帶出。
 
 ## 硬規則
 

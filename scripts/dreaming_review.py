@@ -1735,6 +1735,29 @@ def apply_auto_dispatch(
     if not eligible:
         return actions
 
+    # drain-first 水位閘（boss msg 1237：抑制 platform_ops 自我改善提案）。
+    # critical 不受閘 —— 那是「現在有東西壞了」，不是 backlog；把它跟改善提案一起
+    # 壓住，池子是變淺了，但代價是壞掉的東西沒人修，那不是老闆要的。
+    from volpred.ops.pool_pressure import pool_admits_new_work
+
+    queue_path = Path(storage_dir) / "next_tasks.json"
+    admission = pool_admits_new_work(
+        "dreaming",
+        path=queue_path,
+        state_path=Path(storage_dir) / "ops" / "drain_first_state.json",
+    )
+    if not admission.admitted:
+        suppressed = [f for f in eligible if f.severity != "critical"]
+        eligible = [f for f in eligible if f.severity == "critical"]
+        if suppressed:
+            warn(
+                "dreaming",
+                f"drain_first: 抑制 {len(suppressed)} 筆非 critical 提案入池 "
+                f"({admission.reason})",
+            )
+        if not eligible:
+            return actions
+
     # The queue lives under `storage_dir`, not at a module-level constant. Reaching for
     # task_pool_claim._locked_load() here would have been the obvious reuse — and it
     # hardcodes the real repo's next_tasks.json, so every test that drove main() would

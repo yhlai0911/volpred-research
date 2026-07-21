@@ -893,6 +893,54 @@ def check_worktree_reconcile() -> list[dict]:
 #: on a dev box the worktrees exist and it stays quiet, on CI the clone has
 #: neither the checkouts nor the branches and it returns *critical* — so the test
 #: passed locally and failed only on CI, which is the worst place to find out.
+def check_task_pool_pressure() -> list[dict]:
+    """任務池水位 + 吞吐淨增（boss Telegram msg 1237, 2026-07-21）。
+
+    老闆是自己數了 10 天的 created/succeeded 才發現池子在單調膨脹的 —— 那是儀器
+    該做的事。淨增連續為正就 alert，下次不必等人親自察覺。
+    """
+    from volpred.ops.pool_pressure import evaluate_drain_first, load_policy, pool_snapshot
+
+    out: list[dict] = []
+    try:
+        snap = pool_snapshot()
+        policy = load_policy()
+        # persist=False：體檢是觀測者，不該順手改 latch 狀態（那是 generator 閘門的事）。
+        state = evaluate_drain_first(snapshot=snap, persist=False)
+    except Exception as exc:  # noqa: BLE001
+        return [_finding("task_pool_pressure", "warn", f"水位計算失敗: {type(exc).__name__}: {exc}")]
+
+    cap = int(policy["pending_cap"])
+    if snap.pending > cap:
+        out.append(_finding(
+            "task_pool_pressure", "warn",
+            f"pending={snap.pending} 超過 drain-first 閾值 {cap}"
+            f"（{snap.pending_by_priority}）—— 自動 refill/discovery 應已停止",
+            recovery="清既有 pending；超齡任務走 superseded / closed_no_action 正式裁決",
+        ))
+
+    streak = snap.net_positive_streak
+    if streak >= 3:
+        recent = "、".join(f"{r['date'][5:]} +{r['net']}" for r in snap.daily[:streak][:5])
+        out.append(_finding(
+            "task_pool_pressure", "critical",
+            f"連續 {streak} 個完整日 created > succeeded（{recent}）—— 池子單調膨脹，"
+            "生成端跑贏消化端",
+            recovery="檢查 drain-first 閘是否生效（storage/ops/drain_first_state.json）；"
+                     "若 active=true 仍淨增，代表有 generator 繞過閘門（看 stderr 的 "
+                     "[pool_pressure] WARN 找出是誰）",
+        ))
+
+    if state.get("active"):
+        out.append(_finding(
+            "task_pool_pressure", "info",
+            f"drain-first 生效中（entered_at={state.get('entered_at')}）；"
+            f"退出條件 pending<{cap} 且連續 {state['exit_streak_days']} 日 succeeded>=created "
+            f"（目前 {'已' if state['drain_streak_met'] else '未'}滿足吞吐條件）",
+        ))
+    return out
+
+
 CHECKUP_DIMENSIONS = (
     "data_freshness",
     "cron_completion",
@@ -905,6 +953,7 @@ CHECKUP_DIMENSIONS = (
     "dedup_calibration",
     "reproducibility",
     "worktree_reconcile",
+    "task_pool_pressure",
 )
 
 

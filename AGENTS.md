@@ -102,6 +102,9 @@
 
 - **禁止整檔讀取** `storage/reports/feed.json`；用 `grep`、`jq`、單篇 `storage/reports/<id>.json`。
 - `storage/memory/knowledge.json` 同理，禁止整檔讀取。
+- 〔L1 機械 deny：`cat/less/more` 這兩個檔已由 `.claude/hooks/pretooluse-bash-optimizer.sh` 攔截；
+  內建 Read 側由 `scripts/hooks/read_context_budget.py` 自動 bound（非 deny）。細則唯一 owner =
+  `.claude/rules/context-hygiene.md`，本節只留 pointer。〕
 - 重複性流程靠 skill，不要每次把長 SOP 貼進主對話。
 - **若新任務與當前上下文、已載入 skills、或目前正在處理的專案文件無直接關聯，必須另開一個乾淨的 sub-agent 處理。**
 - 用 sub-agent 的目的是隔離大搜尋、大量 logs、文件探索與無關 side task，減少 context 汙染與 token 損耗。
@@ -148,7 +151,7 @@
   - Supabase / Mirror sync 流程
 - Worktree agent 完成後要 commit。
 - 主線程再用 `bash scripts/merge_worktree.sh` 合併。
-- **絕對禁止** `git worktree remove --force`。
+- **絕對禁止** `git worktree remove --force`〔L1 機械 deny：`.claude/hooks/pretooluse-bash-optimizer.sh:141` 已攔截，含 `git -C <dir>` 與 `-ff` 等價寫法〕。
 
 ### 實驗 artifact gate（2026-07-19 起，merge 與 CI 兩處都擋）
 
@@ -316,7 +319,7 @@ complete/release 自動退回 pending**。所以 VSCode 關掉或 crash 不會�
 ### Commit 慣例
 
 - 改動 commit 訊息開頭加 `[codex]` 與 Claude 區分
-- 共用 main checkout 禁止裸跑 `git add` / `git commit`；完整交易一律走：
+- 共用 main checkout 禁止裸跑 `git add` / `git commit`〔L1 機械 deny：`.claude/hooks/pretooluse-bash-optimizer.sh:148-150`，涵蓋 stage/merge/checkout/ref 全 mutation；registered linked worktree 不受攔截〕；完整交易一律走：
   `uv run python scripts/git_writer_lock.py commit --actor <owner> --message '<ASCII message>' -- <exact paths>`
   （worktree 整合走 `bash scripts/merge_worktree.sh`，它會持有同一把 common-dir lock）
 - **不要 `git push`** — 由用戶或 Claude 主線程統一推

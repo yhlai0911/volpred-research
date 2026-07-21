@@ -46,6 +46,7 @@ CANDIDATES = ROOT / "storage" / "publication_candidates.json"
 sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 from volpred.ops.next_tasks import write_tasks_locked  # noqa: E402
+from volpred.ops.pool_pressure import pool_admits_new_work  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 
@@ -1376,6 +1377,19 @@ def refill(
     reader_facing_only: bool = False,
     emergency: bool = False,
 ) -> dict:
+    # drain-first 水位閘（boss msg 1237）。reader_facing / emergency 走豁免：前者產
+    # time_critical 內容，後者是斷稿急救 —— 兩種都是「不補就直接開天窗」，池深不該擋。
+    if not dry_run and not (reader_facing_only or emergency):
+        # 路徑跟著 NEXT_TASKS 走（測試會 monkeypatch 它）—— 閘門必須讀 generator
+        # 自己要寫的那份佇列，讀 production 那份會讓 hermetic 測試被真實水位左右。
+        admission = pool_admits_new_work(
+            "refill_task_pool",
+            path=NEXT_TASKS,
+            state_path=NEXT_TASKS.parent / "ops" / "drain_first_state.json",
+        )
+        if not admission.admitted:
+            print(f"  [refill] skip: {admission.reason}")
+            return admission.as_result()
     freshness = _ensure_candidates_fresh()
     if not CANDIDATES.exists():
         return {"ok": False, "reason": "publication_candidates.json missing", "added": 0}
