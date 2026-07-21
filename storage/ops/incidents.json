@@ -150,7 +150,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-21T19:08:24.697074+00:00"
+     "last_seen_at": "2026-07-21T22:08:28.658317+00:00"
     },
     {
      "cleared_at": null,
@@ -163,7 +163,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-21T19:08:25.048118+00:00"
+     "last_seen_at": "2026-07-21T22:08:29.156999+00:00"
     },
     {
      "cleared_at": null,
@@ -176,7 +176,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-21T19:08:25.879230+00:00"
+     "last_seen_at": "2026-07-21T22:08:31.674398+00:00"
     },
     {
      "cleared_at": null,
@@ -189,14 +189,40 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-21T19:08:25.389059+00:00"
+     "last_seen_at": "2026-07-21T22:08:29.834914+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "",
+      "branch": "wt/dispatch-slot-1-f5a22a5f-k1095v2",
+      "detail_tail": "fire ended with outcome=orphaned; dirty=False unique_commits=3",
+      "reason": "worker_orphaned",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-f5a22a5f-k1095v2"
+     },
+     "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
+     "key": "dispatch-slot-1-f5a22a5f-k1095v2",
+     "last_seen_at": "2026-07-21T22:08:32.388045+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "",
+      "branch": "wt/dispatch-slot-1-8157aca3-tsfmhar",
+      "detail_tail": "fire ended with outcome=orphaned; dirty=False unique_commits=1",
+      "reason": "worker_orphaned",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8157aca3-tsfmhar"
+     },
+     "first_seen_at": "2026-07-21T22:08:30.800662+00:00",
+     "key": "dispatch-slot-1-8157aca3-tsfmhar",
+     "last_seen_at": "2026-07-21T22:08:30.800662+00:00"
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-bd00f90a-k1731 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-21T19:08:25.879230+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-f5a22a5f-k1095v2 unmergeable (worker_orphaned)",
+   "last_seen_at": "2026-07-21T22:08:32.388045+00:00",
    "notified_at": null,
-   "occurrence_count": 49,
+   "occurrence_count": 65,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -204,8 +230,8 @@
    "task_history": [],
    "task_mode": "adjudication",
    "throttled": {
-    "count": 49,
-    "last_at": "2026-07-21T19:08:26.099445+00:00",
+    "count": 65,
+    "last_at": "2026-07-21T22:08:32.624999+00:00",
     "last_reason": "remediation_cap_24h"
    }
   },
@@ -294,14 +320,26 @@
      "first_seen_at": "2026-07-21T14:47:21.418321+00:00",
      "key": "src/volpred/ops/task_signature.py:488",
      "last_seen_at": "2026-07-21T15:07:37.367019+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-21T20:25:53.056382+00:00",
+     "key": "tests/test_topic_cluster_gate.py:49",
+     "last_seen_at": "2026-07-21T20:27:57.196359+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-21T21:19:14.630787+00:00",
+     "key": "src/volpred/ops/questions.py:740",
+     "last_seen_at": "2026-07-21T21:21:23.672412+00:00"
     }
    ],
    "kind": "silent_fallback_new",
-   "last_breach_detail": "PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-   "last_seen_at": "2026-07-21T15:07:37.367019+00:00",
+   "last_breach_detail": "PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
+   "last_seen_at": "2026-07-21T21:21:23.672412+00:00",
    "notification_id": "2a07caa0",
    "notified_at": "2026-07-21T14:10:28.040441+00:00",
-   "occurrence_count": 10,
+   "occurrence_count": 18,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -314,6 +352,6 @@
    }
   }
  },
- "updated_at": "2026-07-21T19:17:57.933333+00:00",
+ "updated_at": "2026-07-21T22:29:03.379011+00:00",
  "version": 1
 }

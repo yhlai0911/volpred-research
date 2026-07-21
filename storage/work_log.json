@@ -23727,5 +23727,45 @@
     "owner": "hourly-slot-1-3ab34f370c9e4c4ca748cc83ca45a2af",
     "commit": null,
     "summary": "[D5] K1380 8 個卡 78 班的檔逐檔裁決完成。裁決文件 docs/governance/2026-07/d5_k1380_file_adjudication.md。\n\n核心發現（時序還原）：2026-07-16 那次「從快取 loss matrix 收尾」不是 v4 之後的下一步，而是一次回歸 —— 它重跑了已被取代的 v1–v3 lineage 代碼（experiments/k1380/k1380.py），而正確答案早在六週前（v4 重構 2026-05-22，atomic 重跑 2026-07-05 commit 4eadfae10）就存在於 experiments/K1380_v4/。README 宣稱的「re-run is in the compute queue」從來不是真的：compute_queue 8 個 K1380 job 全部 failed/cancelled。這才是這批檔案卡 78 班的真因 —— 沒有人在等的東西永遠等不到。\n\nCanonical 結果 = K1380_v4/k1380_v4_results.json（knowledge K1583）：mean QLIKE≈1.40（與 paper K1379 的 ≈1.4 尺度一致，正是被作廢那次沒過的 sanity check）；Hansen SPA stat=4.205 p=0.289 無法拒絕；White RC on A4f t=4.133 p=0.000 拒絕；c3_verdict = MIXED。\n\n逐檔裁決：5 檔（README.md / k1380.py / 3 個 *_INVALID_20260716.*）全部留 main 存檔，不刪 —— 「archived, not deleted」是原作者已寫下的有論證決定，本裁決維持；三個 INVALID 檔合計 263KB 換一份可查的錯誤史。真正缺的不是刪檔，是指向 v4 的箭頭，本次已補：改寫 experiments/k1380/README.md STATUS 為 SUPERSEDED + canonical 指標 + 說明 re-run 從未存在。storage/work_log.json.bak_graphify_verdict_20260717 已不在工作區，結案。\n\nartifact exclusion 裁決 = 不加 entry，兩個理由：(1) experiments/k1380 被 sweep 列為 not_gated_no_results（改名後不符 *_results.json glob），語義上正確 —— 作廢的結果本就不該被當 finding 追；(2) K1380_v4 唯一 violation 是 missing reproduce_spec.json，而全 repo 1266 個 gated 目錄有 1256 個同缺（99.2%），是系統性缺口非個案。exclusions 檔自己的 _readme 明言 exclusion 不是便宜行事的出口。\n\n連帶：annotate 了兩張前提被推翻的 pending 任務（dreaming_missing_retry_strategy_paper9_c3_multiple_testing_subsection aged 92.7h、k1380_stage_refactor_collect），未代為結案。\n\n未做（明確界線）：沒重跑任何計算、沒改 K1380_v4 結果、沒寫 Paper 9 C3 subsection、沒處理 SPA/RC 方向不一致的統計爭議、沒清 stale worktree dispatch-slot-1-375ba0e3-k1380。"
+  },
+  {
+    "timestamp": "2026-07-22T04:26:00+08:00",
+    "task_type": "experiment",
+    "task_id": "k1095_v2_known_in_advance_schedule",
+    "outcome": "failed",
+    "actor": "hourly-slot-1-97a7a0f6d82c4903b64807088acd44e3",
+    "owner": "hourly-slot-1-97a7a0f6d82c4903b64807088acd44e3",
+    "commit": null,
+    "summary": "PHASE A collect_completed：收 K1095-v2 agent job (agent-brief_k1095v2-5c236f, exit 0) 並裁決。\n\nagent 已自行請 Codex 對 frozen commit 1c660b163 做對抗式審查，判 FAIL，4 個 blocking defect：\n(1) switch_weight() 對已經 lag 過的 w_vix_raw/w_a4f_raw 再 shift 一次、且 mask 也 shift → 主 cell 實際交易的是 T+2，與 v1 舊寫法代數等價，也就是這次實驗宣稱要修的 T+1 mapping 根本沒生效；\n(2) S1 不是忠實的法定行事曆：缺 pre-2013 上市合併報表 45 日制、缺 FY2022 起 ≥100 億資本額的 75 日年報制，金控 Q2 用 period_end+61d 算成 8/30（應 8/31），金融業 Q1/Q3 被記為『查無來源』但 FSC 令 GL000473 明訂 45 日 + 60 日更正；\n(3) estimand 錯配：HAC 檢定的是平均報酬差，不是 verdict 宣稱的 Sharpe 差；且『每個 cell 都顯著』未做多重檢定校正 — S2/t1 的 p=0.0111 經 12-test Bonferroni 後 0.133，不顯著；\n(4) capture 49.886% 是全樣本去重後的唯一交易日比率，不是 README 宣稱的公告事件比率（Codex 覆算 all-sample 57.89% / OOS 50.83% / OOS traded-mask 47.50%）。\n\n裁決：不合併。merge_worktree.sh dry-run 被 experiment-certification gate 依設計 ABORT（K1709 教訓：Codex 判 FAIL 仍 merge 害 CI 連紅 4 次）。主線程把過強宣稱降級到證據能撐的範圍 — README 加 review banner、Verdict 節加作廢標註，results.json verdict 由 NULL_CONFIRMED_TRADABLE 改為 NOT_ACCEPTED_PENDING_REMEDIATION 並存原判、4 條 defect 與唯一可辯護的宣稱；commit 於 worktree 分支 7983a1642（不進 main）。\n\nNULL 方向本身未被推翻（Codex 明言 corrected NULL 完全可接受），但『verified tradable result』『do not add an earnings overlay』作廢、數字不得引用、不得寫入 knowledge.json 當結論、不得發文。\n\n後續：建 k1095_v3_remediation（experiment, P3），把 4 個 defect 逐條寫成規格，要求重跑後由 Codex 對凍結 bytes 重審 + sha256 pin，PASS 才走 merge。compute queue followup 已 mark-followup-dispatched --next-task-id k1095_v3_remediation。"
+  },
+  {
+    "timestamp": "2026-07-22T05:16:47+08:00",
+    "task_type": "platform_ops",
+    "task_id": "fb_repost_mile_903fd2cf",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-8157aca3afdb421c9878a6ac83efa3ca",
+    "owner": "hourly-slot-1-8157aca3afdb421c9878a6ac83efa3ca",
+    "commit": null,
+    "summary": "FB 雙發佈補件完成：mile_903fd2cf（原油 vs 股市選擇權偏斜）已發到 Ivan Lai FB。\n\n- 主貼文 558 字 + 2 張圖（oil_skew_curve / oil_skew_crossasset），主文不含連結\n- 第一則留言 https://volpred.zeabur.app/v3/reports/mile_903fd2cf 已送出並通過腳本驗證\n- anti_ai_gate.py 對主文 PASS（warn 0/3）\n- canonical 回填：fb_post_status→success、fb_posted_at✓（feed=1 log=1）\n\n**順手修掉一個會靜默漏發連結的 parser 缺陷**（本班發不出去的直接原因）：\n`scripts/fb_realchrome_post.py::parse_draft` 的留言 regex 是\n`##\\s*第一則留言[^\\n]*\\n\\s*(https?://\\S+)`，要求 URL 緊接在標題之後。本稿在 URL 前寫了\n一句引言（人寫稿的自然寫法），regex 因此不匹配、`link` 靜默變空字串 → 主文照發、連結\n沒進留言，而且沒有任何警告。改成先抓「## 第一則留言」到下一個 `##` 之間的區塊、再取\n區塊內第一個 URL。留言送出端本來就是 `keyboard.type(link)` 只打 URL、引言不會被貼上，\n所以正解是放寬抽取，而不是要求寫稿人把 URL 頂在標題下。\n回歸驗證：對 storage/drafts/ 全部 fb_*.md 跑 parse_draft，舊格式 16 篇連結照抽、無一\n退化（另有 11 篇是完全不同的舊 draft 格式，本來就抽不到「## 主貼文」，非本次改動造成，\n屬既有 task fb_draft_missing_structural_fix 範圍）。\n\n**未完成**：fb_post_url 沒抓到。--recapture-permalink 六次重試都定位不到該貼文永久連結，\n但同一支腳本的 _add_first_comment 是靠 timeline anchor 定位到貼文才送得出留言 —— 貼文\n確實在牆上，是 recapture 的定位路徑本身壞了。此為既有已立案缺陷\nfb_permalink_recapture_broken_20260720，不重複開單。"
+  },
+  {
+    "timestamp": "2026-07-22T06:27:33+08:00",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_22_ai_資本支出",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-b2058714eb53479e83e146c383e87c80",
+    "owner": "hourly-slot-1-b2058714eb53479e83e146c383e87c80",
+    "commit": null,
+    "summary": "trending_repost：AI 資本支出 → 改軸為「債務融資轉向」。\n\n3-layer 查重發現原題「財報日隱含波動率的定價與避險」的 arc 近 3 天已發兩篇（mile_9d74fd06 2026-07-21、mile_b7e98682 2026-07-19），故換軸至融資結構 × 信用風險，時事錨點為 BlackRock 為 Meta 德州資料中心主導的 120 億美元債務融資。\n\n交付：mile_2d1d356b，3159 字 + 2 表 2 圖（已上傳 supabase）。anti_ai_gate exit 0（未用 --force）；check_arc_dedup verdict=warn_arc_near_miss，writer 讀 mile_66c3fc3b 全文後主動改軸避開（該篇是 QQQ/HYG 價格觀察，本篇改走資產負債表）。\n\n證據（primary source，可重跑）：四巨頭單季 capex 719→1298 億美元、佔營運現金流 62.9%→86.1%、總負債 +1772 億美元（yfinance 季報，2025-03-31 vs 2026-03-31）；Baa10Y 利差 1.61pp、2015 以來第 10.3 百分位（FRED BAA10Y）。\n\n誠實記錄：兩個 Fisher z 相關性差異檢定都不支持原假設 — 波動率 vs 利差 p=0.0996 未顯著；SMH vs HYG p=2.1e-5 顯著但方向與假設相反（連動下降而非收斂）。橫斷面 n=4 未跑檢定。文中如實寫出。\n\ntopology_override: inline→subagent 原因：router 對 trending_repost 預設 inline，但本班 A0 lane 有兩張 P1 time-critical，50min cap 內 inline 兩篇不可行，故照 PHASE B-PARALLEL 既有先例並行派兩個 opus writer（writer 只寫 draft + 圖，主線程串行發佈）。\n\n殘留：publish_draft lazypack gate 擋 status=published（general 立即發佈需懶人包圖組）。本班剩餘預算不足以完整跑兩篇 codex 海報鏈，故入 status=draft；需 lazypack plan + async render 後才會 release。"
+  },
+  {
+    "timestamp": "2026-07-22T06:27:33+08:00",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_22_地緣政治風險",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-b2058714eb53479e83e146c383e87c80",
+    "owner": "hourly-slot-1-b2058714eb53479e83e146c383e87c80",
+    "commit": null,
+    "summary": "trending_repost：地緣政治風險 → 改軸為「黃金/VIX/原油三避險工具的訊號分工」。\n\n3-layer 查重發現原題「油價 × VIX 尾部避險」的 arc 近一週已發三篇（mile_f9c70bd0、mile_9f5151dc 2026-07-16、mile_903fd2cf 2026-07-19），故換軸；黃金為主角（feed 先前無黃金主題文章）。時事錨點為 2026-07-21 收盤：美股三大指數止跌反彈、VIX 跌 8.58%、黃金跳 1.83%。\n\n交付：mile_63ec8636，4622 字 + 3 表 2 圖（已上傳 supabase）。anti_ai_gate exit 0（未用 --force）；check_arc_dedup verdict=clean、signature_thin=false，brief 點名的四個禁做變奏一個都沒碰。\n\n證據（primary source，可重跑）：yfinance 日收盤，2004-01-06 ~ 2026-07-21 共 5658 交易日；8 次可辨識地緣衝突事件窗。\n\n檢定結果，兩邊都誠實寫：\n- 過了：黃金在 8/8 次衝突的事件當日與第 4 日皆收漲，binomial p=0.0078。VIX 事件當日 7/8（p=0.070）未達 5%，原油第 9 日 4/8（p=1.00）。黃金是唯一給出統計顯著訊號的資產。\n- 沒過：「黃金漲 ≥1% 但 VIX 跌」的 473 個分歧日，後續 10 日 S&P 500 已實現波動率 raw Welch t 檢定 p=0.008 看似顯著；但以 HAC/Newey-West 控制前 20 日 RV 與當日報酬後，分歧虛擬變數 p=0.276 不顯著，三個波動率分位分開跑亦全不顯著（p=0.93/0.51/0.14）。根因是該「跨資產訊號」其實只是當日股價的代理。文中明寫檢定沒過。\n\nWriter 校正主線程 brief 的事實錯誤（已採納）：brief 寫「黃金創高」不成立 — GC=F 7/21 收 4083.60，距 2026-01-29 峰值 5318.40 尚有 -23.2%，2026 YTD -5.6%。改以「23% 回檔中的第 95.5 百分位反彈日」框架處理並在文中專節澄清。\n\ntopology_override: inline→subagent，原因同本班另一筆（A0 兩張 P1 time-critical，cap 內 inline 不可行）。\n\n殘留：同另一筆 — lazypack gate 擋立即發佈，入 status=draft，待 lazypack plan + async render 才 release。"
   }
 ]
