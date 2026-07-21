@@ -203,3 +203,118 @@ def test_ci_incident_preempts_normal_rotation_when_only_one_slot_is_free(
 
     assert report["starvation"]["locked"] is False
     assert [item["id"] for item in report["dispatch_candidates"]] == ["zzz-ci-red"]
+
+
+def _dispatch_env(monkeypatch, tmp_path, tasks, cap: int) -> None:
+    import continue_task_dispatch as ctd
+
+    monkeypatch.setattr(
+        ctd, "count_active_slots", lambda: {"occupied": 0, "worktrees": 0, "active_agents": 0}
+    )
+    monkeypatch.setattr(ctd._slot_budget, "budget", lambda: {"cap": cap})
+    monkeypatch.setattr(ctd, "NEXT_TASKS", tmp_path / "next_tasks.json")
+    monkeypatch.setattr(ctd, "_maybe_retire_covered_article_tasks", lambda **_kw: None)
+    monkeypatch.setattr(ctd, "load_pending_tasks", lambda: tasks)
+    monkeypatch.setattr(ctd, "load_recent_task_type_counts", lambda: None)
+    monkeypatch.setattr(ctd, "_maybe_refill", lambda *_a, **_kw: {})
+    monkeypatch.setattr(ctd, "_maybe_refill_draft_pool", lambda **_kw: {})
+
+
+def test_starved_tail_band_gets_one_reserved_slot(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The lowest starved band must reach the menu even when P1s outnumber the slots.
+
+    The 2026-07-21 shape (boss telegram-1224): 20 dreaming-derived P3 rows, the
+    oldest 84h past its 72h line, queued behind 37 pending P1. Priority-first
+    ordering plus the free_slots truncation meant the P3 band had no arrival rate
+    at which it could ever be dispatched: starved in the report, unreachable in
+    practice, so the critical findings those rows owned stayed red forever.
+    """
+    import continue_task_dispatch as ctd
+
+    p1s = [_task(f"p1_{i}", 1, STARVATION_HOURS[1] + 10 - i) for i in range(4)]
+    dreaming = _task("dreaming_persistent_alert", 3, STARVATION_HOURS[3] + 12)
+    dreaming_fresher = _task("dreaming_other", 3, STARVATION_HOURS[3] + 1)
+
+    _dispatch_env(monkeypatch, tmp_path, [*p1s, dreaming_fresher, dreaming], cap=4)
+    report = ctd.build_report(auto_refill=False, now=NOW)
+
+    ids = [c["id"] for c in report["dispatch_candidates"]]
+    assert len(ids) == 4
+    # One seat only, and it goes to the most-overdue row of the tail band.
+    assert ids[-1] == "dreaming_persistent_alert"
+    assert ids[:3] == ["p1_0", "p1_1", "p1_2"]
+    assert report["starvation"]["tail_floor_task_ids"] == ["dreaming_persistent_alert"]
+
+
+def test_tail_floor_never_takes_the_only_free_slot(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """With one slot the top band keeps it - the floor must not resurrect P1 starvation."""
+    import continue_task_dispatch as ctd
+
+    _dispatch_env(
+        monkeypatch,
+        tmp_path,
+        [
+            _task("p1_only", 1, STARVATION_HOURS[1] + 5),
+            _task("dreaming_p3", 3, STARVATION_HOURS[3] + 40),
+        ],
+        cap=1,
+    )
+    report = ctd.build_report(auto_refill=False, now=NOW)
+
+    assert [c["id"] for c in report["dispatch_candidates"]] == ["p1_only"]
+    assert report["starvation"]["tail_floor_task_ids"] == []
+
+
+def test_tail_floor_does_not_displace_an_incident_preempt(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The reserved seat comes out of ordinary starved work, never the preempt lane."""
+    import continue_task_dispatch as ctd
+
+    _dispatch_env(
+        monkeypatch,
+        tmp_path,
+        [
+            _task(
+                "ci_red",
+                1,
+                0.1,
+                task_type="platform_ops",
+                dispatch_lane="agent",
+                dispatch_preempt=True,
+            ),
+            _task("starving_p1", 1, STARVATION_HOURS[1] + 5),
+            _task("dreaming_p3", 3, STARVATION_HOURS[3] + 40),
+        ],
+        cap=2,
+    )
+    report = ctd.build_report(auto_refill=False, now=NOW)
+
+    ids = [c["id"] for c in report["dispatch_candidates"]]
+    assert ids[0] == "ci_red"
+    assert ids[1] == "dreaming_p3"
+    assert report["starvation"]["tail_floor_task_ids"] == ["dreaming_p3"]
+
+
+def test_no_floor_when_the_tail_band_is_already_represented(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import continue_task_dispatch as ctd
+
+    _dispatch_env(
+        monkeypatch,
+        tmp_path,
+        [
+            _task("p1_a", 1, STARVATION_HOURS[1] + 5),
+            _task("dreaming_p3", 3, STARVATION_HOURS[3] + 40),
+        ],
+        cap=4,
+    )
+    report = ctd.build_report(auto_refill=False, now=NOW)
+
+    assert [c["id"] for c in report["dispatch_candidates"]] == ["p1_a", "dreaming_p3"]
+    assert report["starvation"]["tail_floor_task_ids"] == []

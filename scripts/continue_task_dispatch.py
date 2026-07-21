@@ -372,6 +372,60 @@ def find_starved(tasks: list[dict], now: datetime | None = None) -> list[dict]:
     ]
 
 
+def apply_starved_tail_floor(
+    starved: list[dict],
+    candidates: list[dict],
+    free_slots: int,
+    preempt_ids: set,
+) -> list[dict]:
+    """Reserve one candidate slot for the lowest starved priority band.
+
+    `find_starved` orders the starved set priority-first, and that ordering is
+    right on its own terms (see its docstring). But the candidate list is then
+    truncated to `free_slots`, and when the starved set is *dominated* by higher
+    priorities the tail never appears in it — starved in the report, unreachable
+    in practice. 2026-07-21 (boss telegram-1224): 20 dreaming-derived rows, the
+    oldest 84h past its own 72h P3 line, sat behind 37 pending P1 and 53 P2. The
+    lockout said "先清光餓死的任務"; the P3 band had no arrival rate at which it
+    could ever be cleared, so the critical findings those rows owned stayed red
+    indefinitely and the review alert kept re-reporting them.
+
+    The floor is one slot, taken from the *last* non-preempt candidate: it drains
+    the tail at ≥1 task per fire while costing the top band at most one seat per
+    fire, and it never displaces an incident preempt (already-materialised P1
+    response work — displacing it is what the preempt lane exists to prevent).
+    Below 2 free slots there is no floor: a single slot must go to the top band,
+    otherwise the P1 starvation this whole mechanism exists to end comes back.
+    """
+    if free_slots < 2 or not starved or not candidates:
+        return candidates
+    tail_priority = max(_coerce_priority(s["task"].get("priority", 999)) for s in starved)
+    present = {_coerce_priority(t.get("priority", 999)) for t in candidates}
+    if tail_priority in present:
+        return candidates
+    chosen_ids = {t.get("id") for t in candidates}
+    tail_rows = [
+        s
+        for s in starved
+        if _coerce_priority(s["task"].get("priority", 999)) == tail_priority
+        and s["task"].get("id") not in chosen_ids
+        and s["task"].get("id") not in preempt_ids
+    ]
+    if not tail_rows:
+        return candidates
+    tail_task = max(tail_rows, key=lambda s: s["over_by_hours"])["task"]
+    kept = list(candidates)
+    if len(kept) < free_slots:
+        kept.append(tail_task)
+        return kept
+    # At capacity: evict the last candidate that is not an incident preempt.
+    for idx in range(len(kept) - 1, -1, -1):
+        if kept[idx].get("id") not in preempt_ids:
+            kept[idx] = tail_task
+            return kept
+    return candidates
+
+
 def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> dict:
     recent_type_counts = recent_type_counts or Counter()
     agentable = []
@@ -1099,10 +1153,18 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
         candidates_to_dispatch = (
             preemptive + [s["task"] for s in starved if s["task"].get("id") not in preempt_ids]
         )[:free_slots]
+        _before_ids = [t.get("id") for t in candidates_to_dispatch]
+        candidates_to_dispatch = apply_starved_tail_floor(
+            starved, candidates_to_dispatch, free_slots, preempt_ids
+        )
+        tail_floor_ids = [
+            t.get("id") for t in candidates_to_dispatch if t.get("id") not in _before_ids
+        ]
     else:
         candidates_to_dispatch = (
             preemptive + [task for task in cats["agentable"] if task.get("id") not in preempt_ids]
         )[:free_slots]
+        tail_floor_ids = []
 
     pending_summary = {
         "agentable": len(cats["agentable"]),
@@ -1131,6 +1193,9 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
             "locked": bool(starved),
             "incident_preempt_count": len(preemptive),
             "starved_count": len(starved),
+            # Which candidate (if any) is sitting in the reserved tail seat, so the
+            # trade this fire made is auditable rather than inferred from ordering.
+            "tail_floor_task_ids": tail_floor_ids,
             "thresholds_hours": {f"P{k}": v for k, v in STARVATION_HOURS.items()},
             "directive": (
                 "⛔ STARVATION LOCKOUT — 以下任務已超過其優先序的容忍時數。"
@@ -1265,8 +1330,10 @@ def print_report(report: dict) -> None:
     if report["dispatch_candidates"]:
         label = "STARVED — 本班只能從這裡挑" if starvation.get("locked") else "candidates to dispatch"
         print(f"[dispatch] {label} ({len(report['dispatch_candidates'])}):")
+        tail_floor = set(starvation.get("tail_floor_task_ids") or [])
         for c in report["dispatch_candidates"]:
-            print(f"  - P{c['priority']} [{c['topology']}] {c['id']} :: {c['title']}")
+            seat = " ⟵ 保底席（最低 starved 優先序，本班必挑）" if c["id"] in tail_floor else ""
+            print(f"  - P{c['priority']} [{c['topology']}] {c['id']} :: {c['title']}{seat}")
     else:
         print("[dispatch] NO agent dispatch candidates "
               "(slot full or all pending are main-thread-only)")

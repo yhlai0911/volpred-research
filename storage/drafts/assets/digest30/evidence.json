@@ -1,0 +1,71 @@
+{
+  "as_of": "2026-07-20",
+  "framework": "對房子四問",
+  "market_today": {
+    "spy_close_usd": 742.09,
+    "vix_close": 18.65,
+    "garch_annualized_vol_pct": 13.2,
+    "source": "mile_a15f433e 每日策略建議 2026-07-21（yfinance，as-of 2026-07-20 收盤）"
+  },
+  "q1_which_house": {
+    "smh_drawdown_pct": 16.8,
+    "spx_drawdown_pct": 1.55,
+    "vix_level": 18.8,
+    "smh_realized_vol_pct": 58.3,
+    "smh_implied_vol_pct": 50.3,
+    "spx_realized_vol_pct": 9.9,
+    "mag7_weighted_realized_vol_pct": 25.7,
+    "index_stock_gap_pp": 15.8,
+    "mag7_pairwise_corr": 0.38,
+    "mag7_corr_percentile": 29,
+    "source": "mile_78899a5c (as-of 2026-07-17), mile_1b0477a8 (as-of 2026-05-29)"
+  },
+  "q2_how_long": {
+    "day0_amplification_x": 3.82,
+    "day1_amplification_x": 1.53,
+    "day2_amplification_x": 1.18,
+    "day2_significance": 0.34,
+    "day0_avg_move_pct": 5.22,
+    "baseline_avg_move_pct": 1.6,
+    "n_earnings_events": 96,
+    "share_above_baseline_pct": 86,
+    "index_earnings_season_ratio_abs_ret": 0.981,
+    "index_sample_days": 5075,
+    "source": "mile_b7e98682 (96 次財報, 2023-07-20~2026-05-21), mile_e46449ca (K964, SPY 5,075 日)"
+  },
+  "q3_whose_name": {
+    "smh_vix_sensitivity": -0.01,
+    "vix_avg_rise_on_smh_down_days": 1.1,
+    "nvda_earnings_iv_pct": 53.0,
+    "vix_same_day": 18.06,
+    "iv_to_vix_ratio": 2.9,
+    "meta_amplification_x": 4.1,
+    "msft_amplification_x": 3.78,
+    "nvda_amplification_x": 1.97,
+    "calm_vs_amplification_rank_corr": -0.21,
+    "source": "mile_78899a5c, mile_7e3767a1 (as-of 2026-05-19), mile_b7e98682"
+  },
+  "q4_what_price": {
+    "vix_slope_share_of_theory_pct": 78.1,
+    "insurance_discount_pct": 21.9,
+    "naked_put_annual_cost_pct": 5.05,
+    "spread_put_annual_cost_pct": 3.01,
+    "spread_saving_pct": 40,
+    "top5_weight_pct": 27.8,
+    "top5_weight_2020_pct": 14.6,
+    "spy_rv20_pct": 12.59,
+    "top5_avg_stock_vol_pct": 36.12,
+    "vol_gap_pp": 23.5,
+    "source": "mile_206b2186 (SPY 5,349 筆, 2005-01~2026-04), mile_aff342df (選擇權鏈 as-of 2026-07-16)"
+  },
+  "q2_backtest": {
+    "baseline_12vix_cagr_pct": 5.6,
+    "baseline_12vix_mdd_pct": -29.5,
+    "baseline_12vix_riskadj": 0.38,
+    "earnings_enhanced_cagr_pct": 5.9,
+    "earnings_enhanced_mdd_pct": -32.3,
+    "earnings_enhanced_riskadj": 0.38,
+    "sample_days": 5342,
+    "source": "mile_9fb5d7f7 (K570, SPY+VIX 2004-12-31~2026-03-26)"
+  }
+}

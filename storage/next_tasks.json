@@ -32373,13 +32373,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-21T00:08:14.494924+00:00",
+    "completed_at": "2026-07-21T01:01:09.718588+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T00:08:14.494924+00:00",
-      "last_clean_observed_at": "2026-07-21T00:08:14.494924+00:00"
+      "resolved_at": "2026-07-21T01:01:09.718588+00:00",
+      "last_clean_observed_at": "2026-07-21T01:01:09.718588+00:00"
     }
   },
   {
@@ -32391,13 +32391,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-21T00:11:44.558958+00:00",
+    "completed_at": "2026-07-21T01:26:41.053345+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T00:11:44.558958+00:00",
-      "last_clean_observed_at": "2026-07-21T00:11:44.558958+00:00"
+      "resolved_at": "2026-07-21T01:26:41.053345+00:00",
+      "last_clean_observed_at": "2026-07-21T01:26:41.053345+00:00"
     }
   },
   {
@@ -32409,13 +32409,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-20T23:16:20.927786+00:00",
+    "completed_at": "2026-07-21T00:12:09.596136+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-20T23:16:20.927786+00:00",
-      "last_clean_observed_at": "2026-07-20T23:16:20.927786+00:00"
+      "resolved_at": "2026-07-21T00:12:09.596136+00:00",
+      "last_clean_observed_at": "2026-07-21T00:12:09.596136+00:00"
     }
   },
   {
@@ -36290,59 +36290,15 @@
   },
   {
     "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260717T231545117444Z_a1",
-    "title": "[internal alert] PHASE-Z auto-commit 測試紅燈（d9d07c54939b）",
-    "description": "由內部可自癒 alert_key `phase_z_test_gate_red` 自動建立（固定 P1）。\n這是系統自己的修復工作；首次與修復進行中都不通知老闆。只有同一 alert_key 的修復任務連續完成但警報仍存在 >=2 次才升級。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\nsafety-net 自動 commit 在隔離 clone 補跑受影響測試；HEAD^ 跑同一組測試為綠，HEAD 新增紅燈。\n- fire 時間: 07:14\n- commit: d9d07c54939b\n- 變更程式檔: src/volpred/ops/alerts.py, src/volpred/ops/health.py, tests/test_health_checks.py\n- 跑的測試: tests/test_alerts.py tests/test_health.py tests/test_health_checks.py\n- pytest 退出碼: 1（HEAD） / 0（HEAD^，baseline=green）\n\n## 影響\n隔離對照已排除 live daemon race、collection error 與既有紅燈；此失敗可歸因本 commit。\n\n## 修復線索（供接手任務）\n1. 隔離重現：\n   uv run --extra dev python -m pytest tests/test_alerts.py tests/test_health.py tests/test_health_checks.py -q\n2. 修掉紅燈或 revert 該 commit（gate 不自動 revert — revert 風險高於紅燈本身）。\n3. 失敗尾段：\n\n```\ndication_gap read failed | err=pipeline or next_tasks missing/malformed\n=========================== short test summary info ============================\nFAILED tests/test_alerts.py::test_check_alert_conditions_sends_each_breached_condition_once\n1 failed, 77 passed in 1.92s\nwarning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nUsing CPython 3.12.10\nCreating virtual environment at: .venv\n   Building volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-8fe0t6be/head\n      Built volpred @ file:///private/var/folders/f1/g41vrs0n20v7cx66qzcsd1nc0000gn/T/volpred-phase-z-test-8fe0t6be/head\nInstalled 125 packages in 608ms\n```",
-    "task_type": "platform_ops",
-    "dispatch_lane": "agent",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-17T23:15:45.117444+00:00",
+    "task_type": "platform_ops",
+    "title": "[internal alert] PHASE-Z auto-commit 測試紅燈（d9d07c54939b）",
+    "priority": 1,
     "source": "internal_alert_remediation_router",
-    "tags": [
-      "alert",
-      "internal-remediable",
-      "phase_z_test_gate_red"
-    ],
-    "alert_key": "phase_z_test_gate_red",
-    "internal_remediable": true,
-    "internal_alert_state": {
-      "episode_id": "20260717T231545117444Z",
-      "episode_started_at": "2026-07-17T23:15:45.117444+00:00",
-      "attempt_number": 1,
-      "last_seen_at": "2026-07-17T23:15:45.117444+00:00",
-      "consecutive_remediation_failures": 0,
-      "attempt_history": [],
-      "escalation_due": false,
-      "fingerprint": [
-        "tests/test_alerts.py::tests.test_alerts::test_check_alert_conditions_sends_each_breached_condition_once"
-      ],
-      "resolved_at": "2026-07-19T04:06:57.810739+00:00",
-      "final_consecutive_remediation_failures": 0,
-      "superseded_by_distinct_incident_at": "2026-07-19T04:06:57.810739+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-18T00:08:51.906733+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-232ed7eb51f842dd8ecb4aa6b2fb790c"
-      },
-      {
-        "ts": "2026-07-18T00:09:01.114574+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-232ed7eb51f842dd8ecb4aa6b2fb790c"
-      },
-      {
-        "ts": "2026-07-18T00:16:48.497956+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-232ed7eb51f842dd8ecb4aa6b2fb790c"
-      }
-    ],
-    "started_at": "2026-07-18T00:09:01.114560+00:00",
+    "created_at": "2026-07-17T23:15:45.117444+00:00",
     "completed_at": "2026-07-18T00:16:48.497943+00:00",
-    "result": "修復 fan-out 測試回歸：新 frontend_strategy_metrics_freshness 條件讀 gitignored 前端檔，在 PHASE-Z 隔離 clone 中缺失→breach→intruder 使 breached_ids 斷言紅。比照 4 個既有 host-dependent sibling 補 monkeypatch stub 隔離。78 passed 零回歸 + counterfactual 雙向驗證（無 stub FAIL / 含 stub PASS），前端檔 mtime 已還原。純測試檔改動。"
+    "tombstone": true,
+    "archived_at": "2026-07-21T01:07:58.243222+00:00"
   },
   {
     "id": "K1730",
@@ -47559,7 +47515,7 @@
     "description": "老闆質疑「我都不用動手你都會修好？」，查證後發現兩個真問題：\n\n1) 措辭誤導：dreaming review alert 寫「已自動接手 7」，實際只是「已自動開了工單」，還沒修好。應改成「已自動開單 N（尚未執行）」與「已修復 N」兩個分開的計數，避免把排隊當成完成。\n\n2) starvation 實證：2026-07-21 08:00 快照，next_tasks.json pending=179（p1=37, p2=53, p3=87）。9 張 dreaming 自動工單全部是 p3。以 hourly dispatch 1 張/小時計，前面有 90 張 p1/p2，這 9 張實質輪不到 → critical finding 永遠不會被清掉，alert 會一直紅。需要：(a) 檢查既有 starvation lockout 是否有涵蓋 dreaming 工單；(b) 若沒有，讓 critical-derived 工單有保底配額或提高優先權。\n\n來源：telegram-1224（老闆 Telegram 提問）",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-21T00:01:48.110369+00:00",
     "parent_task_id": "telegram-1224",
@@ -47583,11 +47539,31 @@
         "to": "pending",
         "by": "hourly-slot-1-55f95759b62a438a96f00eda8fda93d6",
         "note": "supervisor_kill_55f95759"
+      },
+      {
+        "ts": "2026-07-21T01:08:15.775000+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4d5c7bfe6ad54870b37417647749623b"
+      },
+      {
+        "ts": "2026-07-21T01:08:16.010026+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4d5c7bfe6ad54870b37417647749623b"
+      },
+      {
+        "ts": "2026-07-21T01:13:45.435980+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-4d5c7bfe6ad54870b37417647749623b"
       }
     ],
-    "started_at": "2026-07-21T00:02:58.423940+00:00",
+    "started_at": "2026-07-21T01:08:16.010010+00:00",
     "last_released_at": "2026-07-21T00:11:11.426675+00:00",
-    "last_release_reason": "supervisor_kill_55f95759"
+    "last_release_reason": "supervisor_kill_55f95759",
+    "completed_at": "2026-07-21T01:13:45.435965+00:00",
+    "result": "措辭部分經查已於 2b408f93e 落地且有測試覆蓋（machine_queued/fixed/stalled 三分＋『已自動開單 N（尚未執行）』）；本班補的是真正缺口 starvation：新增 apply_starved_tail_floor（lockout 時保留 1 slot 給最低 starved band 的最 overdue 任務，不擠 preempt，free_slots<2 不設保底）＋ report tail_floor_task_ids ＋ 4 個新測試，真實佇列驗證 P3 band 首度進入候選"
   },
   {
     "id": "k1623_round3_codex_primary_review_gate",
@@ -47604,5 +47580,44 @@
     "blocked_reason": "codex_quota_reset_pending",
     "blocked_at": "2026-07-21T00:09:58+00:00",
     "blocked_note": "Codex usage limit resets 2026-07-25; primary-path review of k1623_rev3_armc_mc.py is a blocking precondition for round-3 release per K1259 lesson. Fallback subagent PASS does not substitute."
+  },
+  {
+    "id": "daily_digest_20260721",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-21T09:00:00.617895+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-21T01:13:52.434464+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4d5c7bfe6ad54870b37417647749623b"
+      },
+      {
+        "ts": "2026-07-21T01:14:10.154527+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4d5c7bfe6ad54870b37417647749623b"
+      },
+      {
+        "ts": "2026-07-21T01:25:24.028331+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-4d5c7bfe6ad54870b37417647749623b"
+      }
+    ],
+    "started_at": "2026-07-21T01:14:10.154510+00:00",
+    "completed_at": "2026-07-21T01:25:24.028315+00:00",
+    "result": "第 30 期精選導讀 mile_9d74fd06 已 published：主題=財報週+費半熊市+VIX 18.65，具名框架「對房子四問」；來源 8 篇跨 2026-05-10~07-19（span 70 天，archive-span gate 過）；4708 漢字、11 圖、anti_ai_gate exit 0（未 --force）；線上 200。缺口：懶人包因 Codex 額度耗盡（7/25 恢復）走 deterministic fallback 模板版，已記 work_log"
   }
 ]

@@ -22839,5 +22839,26 @@
     "owner": "hourly-slot-2-6b5a26ab7b794badb7b4d45af5543358",
     "commit": null,
     "summary": "PHASE A collect_completed：K1623 arm C 收件審查 verdict=PASS，四道數值 gate 全過 —— reproduction 5/5 assets (rtol=1e-9)、A-B bitwise vs frozen rev2 5/5、results vs gate-fail snapshot 僅 generated_utc / total_runtime_sec 兩個 metadata key 相異（證實先前 exit=4 純為 dm-hac-lag site-key false positive，非計算問題）、quarantined preview 對帳 20/20 bias cell + 3 個 sd_factor range 全合。\n\n結論變動：README 6.4 finding 2 從「SE 低估主要來自 1/(2 sqrt m) asymptotic formula」的 cross-asset 斷言**降級**為 asset-dependent（asymptotic_formula 2 / mean_estimation 2 / break_location 1）。「published SE 確被低估 1.21-1.33x」不變，只有 attribution 降級。collector 另主動記下 brief 未預期的一點：SPY f1 vs f2 僅差 0.31%，而 500 reps crude MC SE 約 3.2%，差一個數量級 —— 只有 VIX 是穩健 asymptotic-formula-dominant，「5 取 2」本身脆弱。\n\n本 fire 主線程動作：\n1. 依 artifact 的 recommended_hardening（worktree scope 外、明確交回主線程）補 .claude/skills/autonomous-research/references/agent-brief-template.md 新增「審查型 brief 的範圍限制（READ ONLY）」段。根因是 review brief 只說「審查這段程式碼」、從沒說「不要執行它」，導致 feature-dev:code-reviewer subagent 自行執行了受審的 k1623_rev3_armc_mc.py。數字未受污染（產物隔離 /tmp/k1623_quarantine/、標記 not_citable、事後與正式 queue run 對帳完全一致），受損的是審查獨立性。依 anti-stacking 修在模板而非再加一層散文提醒 —— 約束必須在派工當下抵達 agent。\n2. 建 k1623_round3_codex_primary_review_gate（P1 experiment），並以 codex_quota_reset_pending 擋到 2026-07-25。\n3. mark-followup-dispatched 防重派。\n\n未放行原因（非數值）：Codex primary-path review 尚未做（usage limit 至 2026-07-25），現有覆蓋僅 agy PASS + code-reviewer CONDITIONAL PASS 兩條 fallback path；依 K1259 教訓不可替代。review_verdict.json 仍是未填模板（31 pins）fail-closed 擋 merge。worktree dispatch-slot-2-c5cafe39-k1623 本輪維持不 merge。"
+  },
+  {
+    "timestamp": "2026-07-21T09:13:37+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_5200cea1",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-4d5c7bfe6ad54870b37417647749623b",
+    "owner": "hourly-slot-1-4d5c7bfe6ad54870b37417647749623b",
+    "commit": null,
+    "summary": "PHASE A0 急件：dreaming alert 措辭誤導 + p3 dreaming 工單 starvation（boss telegram-1224）。\n\n查證後兩件事分開結案：\n(1) 措辭誤導 —— 已於 08:11 commit 2b408f93e 落地並有測試覆蓋（tests/test_dreaming_review.py 1537-1660）：counts 依實際 task_status 拆成 machine_queued / machine_fixed / machine_stalled，email 印「已自動開單 N（尚未執行）／已修復 N」，舊 schema 報告 fall back 時全算「尚未執行」（不確定只能往還沒好猜）。本班驗證通過，不重複改。\n(2) starvation —— 這才是本班真正的缺口。既有 lockout 形式上涵蓋 dreaming 工單（P3 threshold 72h，最舊的 7/17 那批已 84h、確實在 starved set 裡），但 candidates 依 priority-first 排序後被 free_slots 截斷，starved P1/P2 數量遠超過 slot 數 → P3 band 沒有任何到達率能被派到：報告上餓死、實務上不可達。\n\n修法：continue_task_dispatch.apply_starved_tail_floor() —— lockout 生效且 free_slots>=2 時，保留最後一個 slot 給「最低 starved 優先序 band」中 over_by 最大的一筆；席位從最後一個非 preempt 候選挪出，永不擠掉 incident preempt；free_slots<2 不設保底（單一 slot 必須給頂層 band，否則把這套機制當初要解的 P1 starvation 又叫回來）。report 新增 starvation.tail_floor_task_ids + CLI 標「保底席」，讓本班做的取捨可稽核而非靠排序推測。\n\n驗證：新增 4 個測試（保底席歸屬最 overdue 的 tail row／單 slot 不設保底／不擠掉 preempt／tail band 已在席時不動作），scripts/tests/test_dispatch_starvation.py 12 passed；tests/test_dreaming_review.py + dispatch/refill/reachability 相關共 204 passed。真實佇列跑 --report 確認保底席生效：K1436（P3）進入本班 4 個候選，先前該 band 從不出現。"
+  },
+  {
+    "timestamp": "2026-07-21T09:35:00+08:00",
+    "task_type": "daily_digest",
+    "task_id": "daily_digest_20260721",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-4d5c7bfe6ad54870b37417647749623b",
+    "owner": "hourly-slot-1-4d5c7bfe6ad54870b37417647749623b",
+    "commit": null,
+    "summary": "第 30 期精選導讀 mile_9d74fd06 已 published（主題：財報週開打 + 費半熊市 + VIX 18.65；具名框架「對房子四問」）。來源 8 篇跨 2026-05-10~2026-07-19（span 70 天，深庫 >30 天者 5 篇），archive_span gate 通過。anti_ai_gate exit 0（warn 2/3）。\n\nLAZYPACK FALLBACK 註記（禁止 silent fallback，故此處留痕）：codex-primary `gen_lazypack_codex.py` 因 ChatGPT Codex CLI 額度耗盡而失敗（ERROR: You've hit your usage limit ... try again at Jul 25th, 2026 1:30 PM），依 lazypack-infographic skill 順位自動改走 deterministic fallback `scripts/lazypack_render.py`，產出 3 張 panel（storage/drafts/assets/digest30/panels/）並上傳 article-images/lz30/。plan 與 evidence 存 storage/drafts/assets/digest30/。7/25 額度恢復後可用 codex 重生以取得 bespoke 外觀。\n\n（本筆由 digest writer subagent 產出，attribution 歸本班 fire owner；主線程獨立驗證：feed.json status=published / content_type=daily_digest / digest_articles 8 筆全對應真實已發佈文章、跨度 70 天 / 內文 11 張圖 / 線上 URL HTTP 200。）",
+    "agent": "claude-digest-writer"
   }
 ]
