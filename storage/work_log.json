@@ -22860,5 +22860,35 @@
     "commit": null,
     "summary": "第 30 期精選導讀 mile_9d74fd06 已 published（主題：財報週開打 + 費半熊市 + VIX 18.65；具名框架「對房子四問」）。來源 8 篇跨 2026-05-10~2026-07-19（span 70 天，深庫 >30 天者 5 篇），archive_span gate 通過。anti_ai_gate exit 0（warn 2/3）。\n\nLAZYPACK FALLBACK 註記（禁止 silent fallback，故此處留痕）：codex-primary `gen_lazypack_codex.py` 因 ChatGPT Codex CLI 額度耗盡而失敗（ERROR: You've hit your usage limit ... try again at Jul 25th, 2026 1:30 PM），依 lazypack-infographic skill 順位自動改走 deterministic fallback `scripts/lazypack_render.py`，產出 3 張 panel（storage/drafts/assets/digest30/panels/）並上傳 article-images/lz30/。plan 與 evidence 存 storage/drafts/assets/digest30/。7/25 額度恢復後可用 codex 重生以取得 bespoke 外觀。\n\n（本筆由 digest writer subagent 產出，attribution 歸本班 fire owner；主線程獨立驗證：feed.json status=published / content_type=daily_digest / digest_articles 8 筆全對應真實已發佈文章、跨度 70 天 / 內文 11 張圖 / 線上 URL HTTP 200。）",
     "agent": "claude-digest-writer"
+  },
+  {
+    "timestamp": "2026-07-21T10:17:32+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_24ebe308",
+    "outcome": "blocked",
+    "actor": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa",
+    "owner": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa",
+    "commit": null,
+    "summary": "K1731 arm B rev7 / rev8 兩張餓死 P1 收斂（餓死 47.9h / 19.2h，是 starvation lockout 的頭部）。兩張其實都已交付、只是沒人關單，才把 lockout 一直撐住。\n\n- rev7 (`k1731_armB_rev7_remediation`) → succeeded：已執行並經 Codex round 7 判 FAIL（verdict: storage/ops/codex_reviews/k1731_armB_rev7_verdict.md，B1a/B1b/Ready-justification FAIL，B5/detector/baseline-flip/provenance PASS），後續修補由 rev8 承接。\n- rev8 (`assign_24ebe308`) → blocked until 2026-07-25T14:00+08:00，reason=codex_quota_reset_pending。程式面已在 worktree dispatch-slot-1-bd00f90a-k1731（branch wt/dispatch-slot-1-bd00f90a-k1731, HEAD bb57bda98）完成三個 claim-layer blocker：DM interpretation 依 nested/non-nested 分流（GEV-HAR 兩列標 diagnostic-only）、三份 results JSON 由 canonical finalizer 重生（numeric_leaf_drift=0、非手改）、README opening 與 Honest conclusions 降級為 weak in-sample selection + uncorrected directional OOS diagnostic。\n\n驗證（不採信 agent 自述，主線程在 worktree 內獨立重跑）：k1731_armB_verification.py exit=0 / problems=0 / README claim scan 0 violations；tests/test_audit_nested_dm_misuse.py 全數 PASS。\n\n唯一缺口為 Codex round 8 外部審查被額度擋住（CLI 回 usage limit，2026-07-25 13:30 恢復），非程式或 gate 失敗 —— 故標 blocked 讓 unblock sweeper 到期自動回收，而非標 failed 被反覆重派。worktree 依原指示未合併。"
+  },
+  {
+    "timestamp": "2026-07-21T10:17:32+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_release_audit_fix_mile_fa098fc8",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa",
+    "owner": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa",
+    "commit": null,
+    "summary": "修好 Codex 斷線期唯一可用的懶人包 fallback renderer（scripts/lazypack_render.py）。\n\n起點是 `platform_ops_release_audit_fix_mile_fa098fc8`（release_pool 連續 8 次跳過草稿）。查證後該 task 是 stale —— 文章已於 2026-07-20T23:01:03Z 發佈（昨晚某班用 codex bespoke renderer 補上圖組）。但同一份失敗 log 揭露一條仍在流血的問題：Codex CLI 額度已耗盡（2026-07-25 13:30 才恢復），期間 deterministic fallback 是唯一可用的懶人包路徑，而它被 layout guard 擋死（OVERLAP：「0.5%」與 note「幾乎每兩天就要動一次」相撞 59%）。等於未來四天所有需要懶人包的 general 文章都會卡在草稿。\n\nRoot cause：`_draw_metric_card` 的 value band 用 `max(38, inner.y1 - value_y - note_height - 8)` —— 一條會撐破自己容器的 38px 硬底線。card 太矮時誠實餘裕只有 ~2px，底線硬撐 38px，value 直接壓進下方 note band。label/note band 另外用固定 22% card 高度，不看文字實際需要。\n\n修法（治本，未放寬 guard、未加 bypass）：\n- 新增 `_measured_height`（:711）量測文字在給定寬度/字級下的實際 ink 高度\n- 新增 `_band`（:851）依內容需求保留 band，上限為 card 佔比、下限為該文字在最小字級下的需求\n- 重寫 `_draw_metric_card`（:865）：label / value / note 排成三條互斥 sequential band，放不下改拋 TextFitError 交既有 self-repair 迴圈放大畫布 —— band 由構造上不可能相交\n- `_block_weight`（:826）帶 note 的 metric 佔 1.32x row weight；`_render_results`（:1024）補傳 weights 給 _row_rects（先前漏傳）\n\n驗證（主線程獨立重跑，非採信 agent 自述）：renderer rc=0、guard PASS；已 Read /tmp/lazypack_verify/panel_result.png 目視確認無重疊無溢出、0.5% card 已成 label/value/note 三行；pytest -k lazypack 59 passed；agent 另跑 25 份既有 plan 全數 rc=0 無回歸。repair rounds 由 2 降到 1。\n\n未覆蓋已上線的正式 panels（仍為 2026-07-20 22:46 原檔）。殘留（不在本次範圍，屬 plan 資料層）：plan.json 的 title 與 evidence label 讓內部代號「K698」與英文 label 出現在讀者可見的圖上。"
+  },
+  {
+    "timestamp": "2026-07-21T10:21:45+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12150-43d9d1",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-97fe73d83d964df4b1ed19c4fdde9152",
+    "owner": "hourly-slot-2-97fe73d83d964df4b1ed19c4fdde9152",
+    "commit": null,
+    "summary": "PHASE 0 email_reply — 老闆問「這樣正常嗎？」（2026-07-21 08:11 CRITICAL supervisor hang_killed）。\n\n**判定：誤報。那班 fire 到最後一秒都在正常工作。**\n\n鑑識（job 55f95759, slot-1, 08:02:27 起）：\n- supervisor log `worker attempt=1 exit=143 category=hang duration=516.2s` → 143 = SIGTERM，非 SIGKILL(137)、非 fatal_stall sentinel\n- health.py `MAX_JOB_AGE_S = 3000s`，本 job 僅 516s → 時間上排除巡檢強殺\n- debug sidecar (180KB) 證明健康：general-purpose subagent 跑滿 39 turns / 356s，00:10:36Z 仍在派 Bash tool，00:11:10Z 才 exitPath=cancelled + MCP 乾淨關閉（SIGTERM handler 簽名）\n\n根因：`worker.py:78 HANG_EXIT_CODES = {137,142,143}` 把 143 無條件當 hang。143 只有在我方發起 SIGTERM 時才代表卡住；外部 SIGTERM 走同一條路 → 誤寄 CRITICAL。\n\n無實質損失：claim assign_5200cea1 已退回 pending；同分鐘 slot-2 fire success(231.9s)；PHASE-Z 照常 commit 2b408f93e981。\n\n異常率對照（completions 近 100 筆）：07-19 43班/0異常、07-20 54班/13異常（6 真 DOA + 5 額度用盡 + 2 其他）、07-21 至 10:15 3班/1（即本件，誤報）。07-20 那波已由 sidecar DOA 偵測（commit 5e36d1720, 07-21 00:29）根治，本案非復發。\n\n未解：SIGTERM 來源無 log 可歸因（08:11 前後無 reload/drain/supersede 行；selfreload 明確 defer in-flight）。不猜，列入 followup 觀測項。\n\n產出：close email 已寄（notification ebdfccb0 + Telegram 1229）；建 P2 followup `assign_7f15f261`（修 classifier + 補 kill-initiator 可觀測性，驗收含雙向單元測試且不動 health 3000s 語意）。"
   }
 ]

@@ -32373,13 +32373,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:00:03+00:00",
-    "completed_at": "2026-07-21T01:01:09.718588+00:00",
+    "completed_at": "2026-07-21T02:01:41.372203+00:00",
     "alert_key": "git_push_backup_hold",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T01:01:09.718588+00:00",
-      "last_clean_observed_at": "2026-07-21T01:01:09.718588+00:00"
+      "resolved_at": "2026-07-21T02:01:41.372203+00:00",
+      "last_clean_observed_at": "2026-07-21T02:01:41.372203+00:00"
     }
   },
   {
@@ -32391,13 +32391,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:36.415828+00:00",
-    "completed_at": "2026-07-21T01:26:41.053345+00:00",
+    "completed_at": "2026-07-21T02:24:01.344171+00:00",
     "alert_key": "phase_z_baseline_missing",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T01:26:41.053345+00:00",
-      "last_clean_observed_at": "2026-07-21T01:26:41.053345+00:00"
+      "resolved_at": "2026-07-21T02:24:01.344171+00:00",
+      "last_clean_observed_at": "2026-07-21T02:24:01.344171+00:00"
     }
   },
   {
@@ -32409,13 +32409,13 @@
     "status": "succeeded",
     "source": "internal_alert_remediation_router",
     "created_at": "2026-07-14T14:23:43.126507+00:00",
-    "completed_at": "2026-07-21T00:12:09.596136+00:00",
+    "completed_at": "2026-07-21T01:27:06.720307+00:00",
     "alert_key": "silent_fallback_new",
     "internal_remediable": true,
     "internal_alert_watermark": true,
     "internal_alert_state": {
-      "resolved_at": "2026-07-21T00:12:09.596136+00:00",
-      "last_clean_observed_at": "2026-07-21T00:12:09.596136+00:00"
+      "resolved_at": "2026-07-21T01:27:06.720307+00:00",
+      "last_clean_observed_at": "2026-07-21T01:27:06.720307+00:00"
     }
   },
   {
@@ -36194,99 +36194,15 @@
   },
   {
     "id": "trending_repost_2026_07_18_ai支出",
-    "title": "[trending_repost] 科技巨頭單季燒數百億，半導體估值修正下的波動率策略",
-    "description": "探討科技巨頭 AI 資本支出逼近新高，但費半指數在 7 月中旬拉回，反映市場對回報率轉趨謹慎。可量化角度：計算 Big Tech 資本支出指引變動與費半成分股歷史波動率的相關性，並利用 VIX 進行風險對沖。",
-    "task_type": "trending_repost",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-17T22:00:29+00:00",
+    "task_type": "trending_repost",
+    "title": "[trending_repost] 科技巨頭單季燒數百億，半導體估值修正下的波動率策略",
+    "priority": 1,
     "source": "reader_facing_refill",
-    "tags": [
-      "trending_repost",
-      "reader_facing",
-      "auto_refill"
-    ],
-    "dedup_screen": {
-      "verdict": "warn_arc_near_miss",
-      "blocked": false,
-      "reason": "fuzzy descriptive arc near-miss of mile_28f844aa, mile_ee178213, mile_5dd7c135; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
-      "saturation": 1,
-      "theme_terms": [
-        "指數",
-        "的波",
-        "科技",
-        "修正",
-        "相關",
-        "半導"
-      ],
-      "near_misses": [
-        {
-          "id": "mile_28f844aa",
-          "title": "財報不是成績單，是換錨日：台積電每項都贏卻跌 4%，用四個問題重讀一場法說"
-        },
-        {
-          "id": "mile_ee178213",
-          "title": "紐約踩煞車、PJM 開備援：AI 電力股還能當防禦資產嗎？"
-        },
-        {
-          "id": "mile_5dd7c135",
-          "title": "油價跳漲，金價卻連摔兩天：用「避風港出勤表」四道點名，查你手上的保險有沒有來上班"
-        },
-        {
-          "id": "mile_ed21255d",
-          "title": "財報季開跑前，把你的「財報控制盤」盤一次：一個開關會亮，四個旋鈕有三個沒接線"
-        },
-        {
-          "id": "mile_66c3fc3b",
-          "title": "股市在怕，債市沒在怕：信用市場對這波科技股震盪的沉默"
-        }
-      ],
-      "screened_at": "2026-07-17T22:00:32+00:00"
-    },
-    "status_history": [
-      {
-        "ts": "2026-07-17T22:11:10.605766+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726"
-      },
-      {
-        "ts": "2026-07-17T22:11:10.848813+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726"
-      },
-      {
-        "ts": "2026-07-18T00:50:04.157380+00:00",
-        "from": "in_progress",
-        "to": "pending",
-        "by": "hourly-slot-1-15456300cf174cbd8f41a13a495f3726",
-        "note": "auto_release_stale_2h"
-      },
-      {
-        "ts": "2026-07-18T01:09:02.041094+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-2ce639b69cd6427895148ca8e0a4b7b7"
-      },
-      {
-        "ts": "2026-07-18T01:09:02.276788+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-2ce639b69cd6427895148ca8e0a4b7b7"
-      },
-      {
-        "ts": "2026-07-18T01:27:02.111624+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-2ce639b69cd6427895148ca8e0a4b7b7"
-      }
-    ],
-    "started_at": "2026-07-18T01:09:02.276772+00:00",
-    "last_released_at": "2026-07-18T00:50:04.157373+00:00",
-    "last_release_reason": "auto_release_stale_2h",
+    "created_at": "2026-07-17T22:00:29+00:00",
     "completed_at": "2026-07-18T01:27:02.111608+00:00",
-    "result": "發佈 mile_78899a5c (feed live, SSR 驗證 title+5圖+內文 200)；evidence-package 完整、18 數字對 evidence.json 核對、anti_ai_gate PASS、Gemini 潤飾；FB 雙發佈標 pending 並建 followup fb_repost_mile_78899a5c"
+    "tombstone": true,
+    "archived_at": "2026-07-21T02:07:53.939358+00:00"
   },
   {
     "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260717T231545117444Z_a1",
@@ -39397,7 +39313,7 @@
     "description": "Codex rev6 判 FAIL（freeze hash 全符，屬當前 bytes 裁決）。4 條 blocking issue 主線程已逐一 bytes 核對屬實：(1) README:188/195 仍稱 bounds 並把 nested 列標為有效 95% CI；(2) primary JSON cross_arm_comparison 仍有 demonstrably 與無 caveat 的雙臂 OOS 推論；(3) estimation py:4 docstring 仍稱 holds the entire engine fixed，與已揭露的三項差異衝突；(4) audit_nested_dm_misuse.py 缺 coefficient-mask nesting AST channel，導致 K1731 gate PASS 是 false negative、193-site baseline 至少少算一處。執行已委派給 compute agent job agent-brief_k1731_armB_rev7-7ece0f（xhigh, worktree dispatch-slot-1-bd00f90a-k1731, 產出 experiments/k1731/k1731_armB_rev7_remediation.json），完成後由 compute queue followup 接手驗收 + 送 Codex round 7。parent_compute_job=compute-codex-review-k1731-arm-b-rev6-b1-b7-remediation-round-1784419834",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch",
     "created_at": "2026-07-19T02:11:16+00:00",
     "created_by": "hourly-slot-1-1c9c92adf5b44f3b951a8c7e2444fb60",
@@ -39420,10 +39336,31 @@
         "to": "pending",
         "by": "cleanup",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-21T02:10:28.803848+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa"
+      },
+      {
+        "ts": "2026-07-21T02:10:29.037478+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa"
+      },
+      {
+        "ts": "2026-07-21T02:10:29.261716+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa"
       }
     ],
     "last_released_at": "2026-07-20T03:12:37.507775+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "started_at": "2026-07-21T02:10:29.037458+00:00",
+    "completed_at": "2026-07-21T02:10:29.261701+00:00",
+    "result": "rev7 bounded remediation 已執行完畢並送 Codex round 7 審查（verdict FAIL，見 storage/ops/codex_reviews/k1731_armB_rev7_verdict.md：B1a/B1b/Ready-justification FAIL，B5/detector/baseline-flip/provenance PASS）。後續修補已由 rev8 task assign_24ebe308 承接並完成，本 task 至此交付完成、不再重派。"
   },
   {
     "id": "telegram-1005",
@@ -45471,7 +45408,7 @@
     "description": "Codex round 7 verdict FAIL。只修三個 claim-layer blocker，不重跑估計：(1) k1731_gevreg_midas_ssvs_returns.py 的 DM interpretation 必須依 nested/non-nested 分流，GEV-HAR 兩列只能標 diagnostic-only、無 coverage/bound；(2) 從 canonical source/finalizer 重生三份 results JSON，禁止手改，numeric leaves 必須零漂移；(3) README opening 與 Honest conclusions 不得再用 in-sample PIP 支撐 OOS does-not-improve null，應降為 weak in-sample selection + uncorrected directional OOS diagnostic。修後跑 108-test nested-DM ratchet、69-check verification、3834-leaf regression，重建 freeze 並送 Codex round 8。完整裁決見 storage/ops/codex_reviews/k1731_armB_rev7_verdict.md。禁止合併 worktree、禁止寫 knowledge；assign_67f56b79 維持 blocked，round 8 PASS 才解除。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "source": "agent",
     "created_at": "2026-07-20T06:55:20.543246+00:00",
     "parent_task_id": "k1731_armB_rev7_codex_round7",
@@ -45495,11 +45432,35 @@
         "to": "pending",
         "by": "hourly-slot-1-a0db212c494e4532b7bc8870faac914e",
         "note": "supervisor_kill_a0db212c"
+      },
+      {
+        "ts": "2026-07-21T02:10:29.518682+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa"
+      },
+      {
+        "ts": "2026-07-21T02:10:30.034767+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa"
+      },
+      {
+        "ts": "2026-07-21T02:11:14.591357+00:00",
+        "from": "in_progress",
+        "to": "blocked",
+        "by": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa"
       }
     ],
-    "started_at": "2026-07-20T16:11:46.150556+00:00",
+    "started_at": "2026-07-21T02:10:30.034755+00:00",
     "last_released_at": "2026-07-20T16:18:56.732688+00:00",
-    "last_release_reason": "supervisor_kill_a0db212c"
+    "last_release_reason": "supervisor_kill_a0db212c",
+    "completed_at": "2026-07-21T02:11:14.591341+00:00",
+    "result": "rev8 claim-layer remediation 已在 worktree dispatch-slot-1-bd00f90a-k1731 完成（branch wt/dispatch-slot-1-bd00f90a-k1731, HEAD bb57bda98, 8 commits）。三個 blocker 皆已處理：(1) k1731_gevreg_midas_ssvs_returns.py DM interpretation 依 nested/non-nested 分流，GEV-HAR 兩列標 diagnostic-only；(2) 三份 results JSON 由 canonical finalizer 重生、numeric_leaf_drift=0、非手改；(3) README opening/Honest conclusions 降級為 weak in-sample selection + uncorrected directional OOS diagnostic。主線程本班獨立重跑驗證：k1731_armB_verification.py exit=0 / problems=0 / README claim scan 0 violations；tests/test_audit_nested_dm_misuse.py 全數 PASS。**唯一未完成項 = Codex round 8 審查，被外部 quota 擋住**（CLI 回 'You've hit your usage limit'，額度 2026-07-25 13:30 才恢復），非程式或 gate 失敗。故標 blocked 而非 succeeded；blocked_until 到期後由 unblock sweeper 自動回 pending，屆時只需送 round 8。worktree 依原指示未合併。",
+    "blocked_until": "2026-07-25T14:00:00+08:00",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_at": "2026-07-21T02:11:21+00:00",
+    "blocked_note": "rev8 程式面已完成並通過本地 gate（verification exit=0 / problems=0 / nested-DM ratchet PASS），僅缺 Codex round 8 外部審查；Codex 額度 2026-07-25 13:30 恢復"
   },
   {
     "id": "assign_f71399a3",
@@ -46703,7 +46664,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -46715,7 +46676,30 @@
     "release_audit_skipped_count": 8,
     "release_audit_issues": [
       "missing 懶人包圖組 section (render failed, job lazypack-mile_fa098fc8) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_fa098fc8 ; re-enqueue via scripts/lazypack_async_render.py enqueue"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-21T02:08:43.757011+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa"
+      },
+      {
+        "ts": "2026-07-21T02:08:43.992734+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa"
+      },
+      {
+        "ts": "2026-07-21T02:16:23.984394+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa"
+      }
+    ],
+    "started_at": "2026-07-21T02:08:43.992720+00:00",
+    "completed_at": "2026-07-21T02:16:23.984379+00:00",
+    "result": "查證後該草稿其實已於 2026-07-20T23:01:03Z 發佈（昨晚某班以 codex bespoke renderer 補上懶人包圖組），audit blocker 已自然解除，本 task 為 stale。但同一份失敗 log 揭露仍在流血的結構性問題：Codex 額度斷線期間唯一可用的 deterministic fallback renderer 被 layout guard 擋死（OVERLAP：0.5% 與其 note 相撞 59%），即 2026-07-25 13:30 額度恢復前所有需要懶人包的 general 文章都會卡草稿。本班已治本修好 scripts/lazypack_render.py：root cause 是 _draw_metric_card 的 value band 用 max(38, remainder) 硬底線，card 太矮時 38px 底線會撐破容器直接壓進 note band。改為以 _measured_height/_band 量測內容後排成 label/value/note 三條互斥 band（放不下改拋 TextFitError 交既有 self-repair 放大畫布），並讓帶 note 的 metric 佔 1.32x row weight。主線程獨立驗證：renderer rc=0 guard PASS、四張 PNG 目視無重疊無溢出（已 Read panel_result.png 確認）、pytest -k lazypack 59 passed、25 份既有 plan 全數 rc=0 無回歸。未覆蓋已上線的正式 panels（仍為 07-20 22:46 原檔）。殘留（不在本次範圍，屬 plan 資料層）：plan.json 的 title/evidence label 讓 'K698' 內部代號與英文 label 出現在讀者可見的圖上。"
   },
   {
     "id": "release_deadlock_repair_20260720_13",
@@ -47619,5 +47603,64 @@
     "started_at": "2026-07-21T01:14:10.154510+00:00",
     "completed_at": "2026-07-21T01:25:24.028315+00:00",
     "result": "第 30 期精選導讀 mile_9d74fd06 已 published：主題=財報週+費半熊市+VIX 18.65，具名框架「對房子四問」；來源 8 篇跨 2026-05-10~07-19（span 70 天，archive-span gate 過）；4708 漢字、11 圖、anti_ai_gate exit 0（未 --force）；線上 200。缺口：懶人包因 Codex 額度耗盡（7/25 恢復）走 deterministic fallback 模板版，已記 work_log"
+  },
+  {
+    "id": "email-12150-43d9d1",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] supervisor hang_killed",
+    "description": "Gmail UID: 12150\nMessage-ID: <62E68FE5-7901-4D08-9AB4-A03BF703652D@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 21 Jul 2026 10:05:21 +0800\nSubject: Re: [VolPred Alert][CRITICAL] supervisor hang_killed\n\n--- 用戶回信內容 ---\n這樣正常嗎？\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月21日 08:11 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> supervisor hang_killed\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 白話結論\r\n> \r\n> pid: 26858\r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> \r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> \r\n> Supervisor SIGKILL'd 一個 worker（卡住約 9 分鐘後回收）\r\n> \r\n> Job\r\n> \r\n> pid: 26858\r\n> pgid: 26858\r\n> started_at: 2026-07-21T00:02:27.575913+00:00\r\n> attempt: 1\r\n> model: claude-opus-4-8\r\n> log: /Users/yhlai0911/.volpred/logs/dispatch_supervisor_worker.slot-1.55f95759.log\r\n> 影響\r\n> \r\n> 本輪 hourly fire 沒派工成功；pool 沒消化\r\n> 該行程已確認消失；Supervisor 仍存活，下個整點會嘗試新 fire\r\n> 已把該 fire 持有的 task claim 退回 pending：assign_5200cea1\r\n> Worker log tail\r\n> \r\n> Execution error\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-21T02:15:07.115031+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12150,
+    "email_message_id": "<62E68FE5-7901-4D08-9AB4-A03BF703652D@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] supervisor hang_killed",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-21T02:16:06.924230+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-97fe73d83d964df4b1ed19c4fdde9152"
+      },
+      {
+        "ts": "2026-07-21T02:16:09.996377+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-97fe73d83d964df4b1ed19c4fdde9152"
+      },
+      {
+        "ts": "2026-07-21T02:21:25.732841+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-97fe73d83d964df4b1ed19c4fdde9152"
+      }
+    ],
+    "started_at": "2026-07-21T02:16:09.996363+00:00",
+    "plan": "鑑識 08:11 CRITICAL hang_killed 告警 → 判定為誤報（exit 143 外部 SIGTERM，非 hang）；建 followup assign_7f15f261 修 classifier；寄 close email 回答「這樣正常嗎」",
+    "linked_task_ids": [
+      "assign_7f15f261"
+    ],
+    "needs_close_reply": true,
+    "completed_at": "2026-07-21T02:21:25.732823+00:00",
+    "result": "鑑識 08:11 CRITICAL hang_killed：judged 誤報。job 55f95759 exit=143(SIGTERM)@516s，但 sidecar 顯示 subagent 跑滿 39 turns 且 MCP 乾淨關閉 → 健康 fire 被外部 SIGTERM 中止；health.py max-age=3000s 在時間上排除巡檢。根因 = worker.py:78 HANG_EXIT_CODES 把 143 無條件當 hang。已寄 close email（含 07-19/20/21 異常率對照 + 07-20 那波已由 5e36d1720 根治）+ 建 P2 followup assign_7f15f261。SIGTERM 來源仍未知，已列入 followup 觀測項。"
+  },
+  {
+    "id": "assign_7f15f261",
+    "title": "[dispatch] exit 143 不等於 hang — 外部 SIGTERM 被誤報成 CRITICAL hang_killed",
+    "description": "**來源**：老闆 email 回信 email-12150-43d9d1（「這樣正常嗎？」），針對 2026-07-21 08:11 的 CRITICAL supervisor hang_killed 告警。\n\n**已查證的事實**（本班 slot-2 完成的鑑識）：\n- job 55f95759 (slot-1, 起 08:02:27)，supervisor log: `worker attempt=1 exit=143 category=hang duration=516.2s`\n- exit 143 = 128+15 = SIGTERM。**不是 SIGKILL(137)，也不是 fatal_stall sentinel**。\n- health.py 的 max-age SIGKILL 門檻是 MAX_JOB_AGE_S=3000s；此 job 只跑 516s，**不可能是 health 監控殺的**。\n- debug sidecar (dispatch_supervisor_worker.slot-1.55f95759.attempt1.debug.log, 180KB) 顯示這班 fire **到最後一秒都在正常工作**：general-purpose subagent 跑了 39 turns / 356s，00:10:36Z 還在派 Bash tool；00:11:10Z 才 `exitPath=cancelled` + MCP servers 乾淨關閉（SIGTERM handler 的簽名）。\n- 也就是說：**一個健康、正在工作的 fire 被外部 SIGTERM 中止，然後被報成 CRITICAL「卡住」**。\n\n**缺陷 1（可直接修）**：worker.py:78 `HANG_EXIT_CODES = {137, 142, 143}` 把 143 無條件當 hang。但 143 只有在「**我們自己**發了 SIGTERM」（`_kill_pgid` 的 graceful 階段 / fatal_stall / timeout）時才代表 hang；外部送來的 SIGTERM 是別的事件。修法：worker 記錄自己是否發起了本次 kill（一個 bool），classify 時據此分流；非我方發起的 143 應歸為新 outcome（例如 `terminated_external`），**不得**寄 CRITICAL hang 告警。\n\n**缺陷 2（先觀測）**：這次 SIGTERM 的來源**沒有任何 log 記錄**。08:11 前後 supervisor log 無 reload / drain / supersede 行；selfreload.py 明確 defer in-flight（`_IN_FLIGHT_DEFER`）且當時無 reload 行。→ 需要在 worker 收到子程序非零 signal exit 時記錄可歸因資訊（例如 kill 發起旗標 + 當下 pgid 成員 + 最近一次 self-reload / cohort drain 時間戳），讓下一次重現可歸因。\n\n**驗收**：(a) 單元測試涵蓋「外部 SIGTERM 不報 CRITICAL hang」與「我方 SIGTERM 仍報 hang」兩條；(b) 現有 dispatch supervisor 測試全綠；(c) 不動 health.py 的 3000s max-age 語意。\n\n**背景數據**（同一鑑識）：completions 歷史 100 筆中 7/19 43 班 0 異常、7/20 54 班 13 異常（真 DOA + 額度用盡）、7/21 至 10:15 僅此 1 件且為誤報。7/20 那波的根治（sidecar DOA 偵測）已於 commit 5e36d1720 (07-21 00:29) 上線，本案不是那波的復發。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-21T02:20:28.398122+00:00",
+    "parent_task_id": "email-12150-43d9d1",
+    "created_by": "hourly-slot-2-97fe73d83d964df4b1ed19c4fdde9152",
+    "design_note": "【本班補查，動搖了 naive 修法】worker.py 已經是 sentinel 設計：所有「我方 worker 自己發起」的 kill 都回 sentinel（TIMEOUT_KILLED / FATAL_FASTFAIL / TIMEOUT_SURVIVED / OWNERSHIP_LOST），且 _classify 在觸及 HANG_EXIT_CODES 之前就攔下。→ 走到 line 186 `exit_code in HANG_EXIT_CODES` 的路徑只有一條：_wait_with_fatal_probe 回 \"exited\"，即子程序自己死於外部信號。\n\n**但不可以無條件把 143 移出 HANG_EXIT_CODES**：health.py 的 max-age 強殺（procutil.kill_pgid）也是先 SIGTERM 後 SIGKILL，若子程序在 graceful 階段乾淨退出，worker 就會從 \"exited\" 路徑看到 143 —— 那是「合法的 hang」。137/142 同理不可動。\n\n→ 正解不是改 signal 集合，而是**加一個「本系統是否對此 job 發起過 kill」的判別**（worker 自己 + health.py 兩個發起者都要算）。難點是 health.py 與 worker 有已知 ~1s 競態（見 worker.py:895-900 註解，現以 record_completion CAS 處理），新判別必須沿用同一個 CAS 事實來源，不要另開第二個狀態。\n\n**驗收據此改寫**：(1) 我方 worker 發起的 SIGTERM → 仍 hang；(2) health.py max-age 發起的 SIGTERM → 仍 hang；(3) 無人發起的外部 SIGTERM → 新 outcome，不寄 CRITICAL；(4) health/worker 競態下不得雙報或漏報。"
   }
 ]

@@ -708,6 +708,23 @@ def _wrap_text(
     return "\n".join(lines)
 
 
+def _measured_height(
+    draw: ImageDraw.ImageDraw, text: str, width: int, size: int,
+) -> int:
+    """Ink height ``text`` needs when wrapped to ``width`` at ``size``.
+
+    Lets a caller reserve a band that fits the content it will actually draw,
+    instead of guessing a fraction of the container and hoping.
+    """
+    if not text or width <= 0:
+        return 0
+    font = _font(size)
+    wrapped = _wrap_text(draw, text, font, width)
+    spacing = max(4, int(round(size * 0.30)))
+    box = draw.multiline_textbbox((0, 0), wrapped, font=font, spacing=spacing, anchor="la")
+    return int(math.ceil(box[3] - box[1]))
+
+
 def _fit_text(
     draw: ImageDraw.ImageDraw,
     text: str,
@@ -803,7 +820,10 @@ def _row_rects(area: Rect, n: int, columns: int, weights: list[float] | None = N
 
 def _block_weight(block: dict[str, Any]) -> float:
     if block["kind"] == "metric":
-        return 1.0
+        # A metric with a note needs three stacked rows (label / value / note)
+        # instead of two, so it must claim a taller row or the number and its
+        # note fight over the same band (mile_fa098fc8).
+        return 1.32 if block.get("note") else 1.0
     chars = len(block["heading"]) + sum(len(x) for x in block["body"])
     return max(1.0, min(2.8, 0.8 + chars / 85.0))
 
@@ -828,6 +848,20 @@ def _draw_text_card(
     _draw_fitted(draw, bullets, body_area, tuning.fs(27), tuning.fs(17), fill=theme["muted"])
 
 
+def _band(
+    draw: ImageDraw.ImageDraw, text: str, width: int, preferred: int, minimum: int,
+    avail: int, share: float,
+) -> int:
+    """Height to reserve for an annotation: what it needs, capped at ``share``.
+
+    The cap is itself floored at the height the text needs at ``minimum`` pt, so
+    capping can shrink the type but can never demand the impossible.
+    """
+    needed = _measured_height(draw, text, width, preferred)
+    floor = _measured_height(draw, text, width, minimum)
+    return max(1, min(needed, max(floor, int(avail * share))))
+
+
 def _draw_metric_card(
     draw: ImageDraw.ImageDraw, rect: Rect, block: dict[str, Any], theme: dict[str, str],
     tuning: RenderTuning,
@@ -838,22 +872,54 @@ def _draw_metric_card(
     )
     draw.rectangle((rect.x + 24, rect.y + 20, rect.x + 76, rect.y + 27), fill=theme["accent"])
     inner = rect.inset(24, 18)
-    label_area = Rect(inner.x, inner.y + 17, inner.w, max(30, int(inner.h * 0.22)))
+    note = block.get("note")
+
+    # Stack label / value / note as three disjoint bands whose heights come from
+    # the MEASURED wrapped text, not from fixed fractions of the card.
+    #
+    # The previous code sized the value band as
+    #   max(38, inner.y1 - value_y - note_height - 8)
+    # and that 38px floor was the whole bug (mile_fa098fc8): in a short card the
+    # honest remainder was 2px, the floor forced 38px, and the value band ran
+    # straight through the note band — the note ended up drawn *inside* the
+    # number's box (59% overlap). A floor that outgrows its container is not a
+    # layout, so there is no floor here. Bands are laid out sequentially and can
+    # never intersect; if the number genuinely has no room left, we raise
+    # TextFitError and the self-repair loop grows the canvas for the whole set.
+    gap = 8
+    top = inner.y + 17
+    avail = inner.y1 - top
+    if avail <= 0:
+        raise TextFitError(f"metric card has no vertical room: {rect}")
+
+    # The number is the point of the card, so annotations are capped at a share
+    # of it — but never squeezed below what they need at their own minimum font
+    # size, or the cap just trades an overlap for an unsatisfiable fit.
+    label_band = _band(draw, block["label"], inner.w, tuning.fs(24), tuning.fs(17),
+                       avail, 0.34)
+    note_band = (
+        _band(draw, note, inner.w, tuning.fs(20), tuning.fs(15), avail, 0.30) if note else 0
+    )
+
+    value_band = avail - label_band - note_band - (gap * 2 if note else gap)
+    if value_band < 1:
+        raise TextFitError(
+            f"metric card {rect.w}x{rect.h}px leaves no room for value "
+            f"{block['value']!r} beside its label/note"
+        )
+
+    label_area = Rect(inner.x, top, inner.w, label_band)
+    value_area = Rect(inner.x, top + label_band + gap, inner.w, value_band)
+
     _draw_fitted(draw, block["label"], label_area, tuning.fs(24), tuning.fs(17),
                  fill=theme["muted"])
-    value_y = label_area.y1 + 4
-    note_height = max(0, int(inner.h * 0.22)) if block.get("note") else 0
-    value_area = Rect(
-        inner.x, value_y, inner.w,
-        max(38, inner.y1 - value_y - note_height - (8 if note_height else 0)),
-    )
     _draw_fitted(
         draw, block["value"], value_area, tuning.fs(52), tuning.fs(27),
         fill=theme["value"], valign="middle",
     )
-    if block.get("note"):
-        note_area = Rect(inner.x, inner.y1 - note_height, inner.w, note_height)
-        _draw_fitted(draw, block["note"], note_area, tuning.fs(20), tuning.fs(15),
+    if note:
+        note_area = Rect(inner.x, inner.y1 - note_band, inner.w, note_band)
+        _draw_fitted(draw, note, note_area, tuning.fs(20), tuning.fs(15),
                      fill=theme["muted"])
 
 
@@ -955,7 +1021,10 @@ def _render_results(
         metric_height = full.h
     metric_area = Rect(full.x, full.y, full.w, metric_height)
     metric_columns = min(4, len(metrics)) if metric_rows == 1 else math.ceil(len(metrics) / 2)
-    for block, rect in zip(metrics, _row_rects(metric_area, len(metrics), metric_columns)):
+    metric_weights = [_block_weight(x) for x in metrics]
+    for block, rect in zip(
+        metrics, _row_rects(metric_area, len(metrics), metric_columns, metric_weights)
+    ):
         _draw_metric_card(draw, rect, block, theme, tuning)
     if texts:
         text_y = metric_area.y1 + 20
