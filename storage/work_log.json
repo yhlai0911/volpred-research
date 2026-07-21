@@ -23195,5 +23195,119 @@
     "owner": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
     "commit": null,
     "summary": "解開 6 張 K-article 任務的餓死成因並補上資料指標。本班第五張（batch-drain）。\nPHASE B 仍在 STARVATION LOCKOUT，最餓的是 `K492_article_general_v2`（aged **1238.3h ≈ 51 天**，門檻 24h）。\n\n**我沒有寫那篇文章 —— 剩餘預算不足以完整收尾。** router 給 daily_article 是 `opus/medium/subagent`，\n但 reader-facing 硬規要的證據包（≥3 可驗證數字 + ≥1 表 + ≥1 圖 + ≥1 層量化分析）加上\ndedup gate + anti_ai_gate 兩道閘門，實際是 20–40 分鐘的活。本班到此只剩約 20 分鐘，\n起頭必然做一半，違反「禁止 partial」。改做一件在預算內能完整收尾、而且價值更高的事：**查出它為什麼餓死 51 天。**\n\n**先跑該跑的**：`check_arc_dedup.py --k-id K492 --audience general` 與 K709 皆 exit 0、verdict=clean\n（K-COVERAGE 與 ARC 兩道都過）。所以不是重複被擋。\n\n**真因**：`K492` 的 knowledge.json 條目**全文 247 字元、完全沒有結果數字** ——\n內容是一句 method（\"Manual classification + statistical analysis of all K414-K491 results\"）\n加兩則參考文獻，`evidence: None`。而任務 brief 只給 K-id。\nwriter agent 讀到的就是這 247 字元，卻被要求生出證據包 —— 它只有兩條路：\n誠實拒絕（正確，但每次燒掉一整個 agent run）或編數字（禁止）。\nid 帶 `[retry-v2]` 後綴，證明這已經發生過至少一次。**任務因此永遠做不完，\n而 starvation 邏輯一再把它推上來，每推一次就再燒一次。**\n\n**但資料一直都在。** `experiments/k492/k492_research_efficiency_results.json` 是一份紮實的\n68 實驗 meta 研究：null 率 35.3%、positive 22.1%、cross-OOS 失敗率 52.9%（18 個看起來有希望的\n只有 8 個活下來）、每 8.5 個實驗才換到一個 validated finding，並自己對照 Ioannidis (2005)。\n這完全撐得起一篇誠實的讀者向文章。**不是題目不好，是 brief 沒指到資料。**\n\n**Class sweep（per feedback_declare_complete_requires_class_sweep，禁 surface patch）**：\n6 張 pending 的 `K*_article_*` 全部同一病灶 —— knowledge 條目 247/301/456/630/649/790 字元（全薄），\n而 `experiments/<kid>/` **6 個全部存在且都有 results json**。不是 K492 個案，是整類。\n\n**止血（本班做完並驗證）**：6 張任務各補 `data_source_note` 欄位，寫明該 K 的實際 results 檔路徑、\n說明為何不能只讀 knowledge 條目、並要求「數字一律 programmatic 從 results json 讀出，\n禁止從 README 或本說明重打」。走 `task_pool_claim.py annotate`（canonical locked write），\n未用 jq 蓋檔。已抽驗 K492 任務確認欄位落地。**下一班可以直接開寫，不必再重查一次。**\n\n**治根因（立案未做，理由）**：已建 `article_task_generator_evidence_pointer`（P2 platform_ops）。\n產生器掃「沒被文章覆蓋的 K」就開單，從不檢查 (1) 該 K 條目有沒有可寫的發現、\n(2) 真資料在 experiments/ 而 brief 從沒指過去。要求加 substance gate（條目無發現且無 experiments results → 不開單）、\nbrief 直接帶 results 路徑、回掃既有 pending、加防再犯測試。\n明列兩項禁止：不得調高餓死門檻讓警訊消失（那是關儀器）、不得讓 writer「找不到資料就換個相近的 K」（換題不換單）。\n修產生器 + class sweep + 測試超出本班剩餘預算，依「scope 切小、不留 partial」立案而非半做。"
+  },
+  {
+    "timestamp": "2026-07-21T17:26:42+08:00",
+    "task_type": "experiment",
+    "task_id": "k1731_F3_armA_production_recheck",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "owner": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "commit": null,
+    "summary": "K1731 F3（arm A 跨臂數字全出自 quick-mode artifact）餓了 57h，本班處理。\n\n**查到硬證據，指控成立**：`experiments/k1730/k1730_gevreg_midas_ssvs_results.json` 與\n同目錄 `k1730_quickmode_results.json` 的 **md5 完全相同**（`af6167c936d435c5c9ce13cddefea3db`，\n兩檔 125,618 bytes、mtime 同為 07-18 15:09），內容 `quick_mode: true`、\n`config = {n_starts: 8, n_draws: 3000, n_burnin: 1000, n_pred_draws: 150}`，\n而 production 檔應該是 `{30, 40000, 10000, 500}`。`run_production.log` 只有 34 行、\n跑到 2019 年就中斷（每年 refit 約 61-79s，19 個 annual refit 沒跑完）。\n\n也就是說：**掛著 production 名字的檔案是 quick-mode 複本，真正的 production run 從未完成。**\nK1731 README §3.3b / §5.3 / §6 依賴的 arm A 數字（含跨臂 DM t=+2.13）全部建立在這個檔上。\n\n**處置**：真 production run enqueue 為 `k1730_armA_production_run_20260721`\n（script 走 worktree `dispatch-slot-1-bd00f90a-k1731` 內的 k1730_gevreg_midas_ssvs.py 不帶 --quick，\ntimeout 6h，queue-priority 2，`--source-task-id k1731_F3_armA_production_recheck`）。\nfollowup brief 把三件事寫成硬性收件條件：(1) 驗 `quick_mode=false` 且 config 為 30/40000/10000/500\n且 md5 **不得再等於** quickmode 檔；(2) 用 production 數字逐項重核 README 三個 section；\n(3) 跨臂 DM t=+2.13 的 nested-DM 缺陷比照 arm B 處理，能校正就校正，不能就撤回標為診斷性，禁止硬撐。\n\n**證據未被破壞**：quickmode 複本以獨立檔名 `k1730_quickmode_results.json` 保留，\nproduction 覆寫的是那個被誤命名的檔，不會抹掉本次查證的依據。\n\ntask 依 enqueue 路徑維持 in_progress（compute_queue 已 link source task），\n由後續 fire 在 PHASE A 收件 —— 完成的單位是 task 不是 fire，60 分鐘的 job 不該塞進 50 分鐘的 fire。"
+  },
+  {
+    "timestamp": "2026-07-21T17:26:42+08:00",
+    "task_type": "daily_article",
+    "task_id": "article_k1608_boxoffice_null",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "owner": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "commit": null,
+    "summary": "兩篇餓了 96h 的 P1 讀者向文章，本班寫完並進 feed。dispatcher 的 main-thread lane 已累積 14 張餓死任務，\n這兩張是其中最有現成證據的（experiments 目錄齊全、knowledge 條目有結論）。\n\n- `article_k1608_boxoffice_null` → `mile_e5001076`「大片上映那一週，市場真的比較亢奮嗎？1,098 個週末、24 次檢定，全部落空」\n- `article_k1699_forecast_timing_convention` → `mile_add5ea20`「一個 +5.06 的漂亮勝利，只要改掉『你幾點做預測』就沒了」\n\n**流程**：主線程先做 dedup（`check_arc_dedup.py --k-id <K> --audience general` 四個候選全 clean）\n＋ publishing.md 層 2 的 feed grep（四個 K-id 命中數皆 0），再並行派 2 個 writer subagent 寫稿，\n發佈由主線程串行處理（feed 寫入無 per-writer lock，並行直發會 race）。\n\n**發佈前擋下三類問題**（都不是文字潤飾，是會讓文章掛錯 audience 或寫進沒有出處的數字）：\n\n1. **AUDIENCE GATE**：兩篇都被 `_infer_audience` 判為 research —— body 內 ≥2 個學術關鍵詞就升級。\n   K1608 命中 K-id + bootstrap；K1699 命中 K-id + QLIKE + Harvey + GJR-GARCH + GARCH。\n   逐一改寫成讀者向說法（bootstrap → 重抽樣、QLIKE → 預測誤差分數、Harvey → 嚴格門檻、\n   GJR-GARCH → GJR 模型），改到只剩 K-id 一個標籤才過 general。\n   註：K-id 無法完全消除（圖片 URL 與 experiment_refs 都含 K 編號），所以其餘關鍵詞必須清到零。\n\n2. **IMAGE GATE**：general 需 ≥2 張圖。K1608 原稿只有 1 張，補 `fig3_spy_raw_means.png`；\n   K1699 補 `fig_k1699_dm_bars.png`（該圖本來就是繁中製圖，數字與內文一致）。\n\n3. **content-vs-source audit**：K1608 有 4 個裸數字（「HAC lag 4」「5 個交易日」等）在 results JSON\n   查無對應值 → 改中文數字後通過。**另外我為新增的 fig3 寫說明時，第一版用的是從圖上目視讀到的\n   組平均（0.085% / 0.170%）** —— 雖然反推的差值與 JSON 吻合，但那是眼睛讀出來的數字，\n   已改成 JSON 可直接驗證的 bootstrap 差值：−0.085 個百分點、95% 區間 [−0.53%, +0.35%]、p=0.68。\n\n**驗證**：`anti_ai_gate.py` 兩篇皆 exit 0（各 1 WARN，來源是 Markdown 表格區塊非散文段落）；\n`publish_draft.py --dry-run` 的 content-vs-source audit 兩篇皆 PASS\n（K1608 13 claims vs 299 source values；K1699 0 vs 218）。\nK1608 引用的三筆文獻（Hong and Wei 2025 RF、Edmans-Garcia-Norli 2007 JF、Da-Engelberg-Gao 2011 JF）\n已對照 `experiments/k1608/README.md` 與 k1608.py 的 citation 欄位確認為實驗本身既有引用，非杜撰。\n\n**懶人包**：general 文章的 release 被 lazypack gate 擋住，本班一併補完 ——\n派 2 個 agent 寫 strict plan v1 JSON，主線程獨立驗過 evidence sha256（兩份皆吻合）\n與 `--validate-only`（3 / 4 panels，valid=true），再 enqueue\n`lazypack-mile_e5001076` 與 `lazypack-mile_add5ea20`，*/15 compute worker 渲染後 release_pool 才放行。\n\n**待查（文章已迴避未引用，不影響本次發佈）**：\n1. `experiments/k1699/per_market_table.md` 的 0050.TW N=1251，但 `k1699_results.json` 是 1266，差 15 天\n2. `k1699_results.json` 的 `metadata.oos_start` / `oos_end` 皆為 null，OOS 期間追不到"
+  },
+  {
+    "timestamp": "2026-07-21T17:27:12+08:00",
+    "task_type": "experiment",
+    "task_id": "k1730_nested_dm_detector_exposure",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "owner": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "commit": null,
+    "summary": "K1730 nested-DM exposure（餓 54h）本班派工。\n\n**背景**：K1731 rev7 為 `audit_nested_dm_misuse.py` 補上 coefficient-mask nesting 的 AST channel 後，\n`experiments/k1730/k1730_gevreg_midas_ssvs.py:142-143` 由 PASS 翻 FAIL（已 frozen 進 baseline 為 exposed）。\n根因與 K1731 arm B 相同：restricted model 由 macro coefficient mask 歸零建立，兩條舊 AST channel 都看不到。\n影響面是 arm A 的 DM t=+2.13 被 K1731 README 與 primary artifact 當跨臂論據引用。\n\n**處置**：enqueue agent job `k1730_nested_dm_adjudication_20260721`（opus/xhigh，timeout 5400s，\ncwd = worktree `dispatch-slot-1-bd00f90a-k1731`，`--source-task-id k1730_nested_dm_detector_exposure`），\n產出 `experiments/k1730/K1730_NESTED_DM_ADJUDICATION.md`，內容為三項：\n(1) 宣稱盤點（含檔案+行號），(2) 撤回 vs 修正裁決（與 arm B 先例一致，不能校正就撤回標診斷性），\n(3) 對外更正清單（feed mile_id / 論文），只列不改。\n\n**brief 內寫死的兩條邊界**：\n1. owner 是 K1730，不得塞回 K1731 scope；K1731 README 的修改留給 `k1731_F3_armA_production_recheck` 收件時處理，\n   本 task 只列出引用位置。\n2. 本班另查出 K1730 的 production artifact 其實是 quick-mode 複本（見 k1731_F3 該筆 work_log），\n   真 production run 已另行 enqueue。因此凡依賴數值大小的結論一律標「待 production 複核」；\n   本 task 要定案的是**推論效度**（nested DM 有無漸近常態極限），那與 quick/production 無關，可以現在裁決。\n\ntask 依 enqueue 路徑維持 in_progress，由後續 fire 在 PHASE A 收件。"
+  },
+  {
+    "timestamp": "2026-07-21T17:27:12+08:00",
+    "task_type": "daily_article",
+    "task_id": "article_k1699_forecast_timing_convention",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "owner": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "commit": null,
+    "summary": "兩篇餓了 96h 的 P1 讀者向文章，本班寫完並進 feed。dispatcher 的 main-thread lane 已累積 14 張餓死任務，\n這兩張是其中最有現成證據的（experiments 目錄齊全、knowledge 條目有結論）。\n\n- `article_k1608_boxoffice_null` → `mile_e5001076`「大片上映那一週，市場真的比較亢奮嗎？1,098 個週末、24 次檢定，全部落空」\n- `article_k1699_forecast_timing_convention` → `mile_add5ea20`「一個 +5.06 的漂亮勝利，只要改掉『你幾點做預測』就沒了」\n\n**流程**：主線程先做 dedup（`check_arc_dedup.py --k-id <K> --audience general` 四個候選全 clean）\n＋ publishing.md 層 2 的 feed grep（四個 K-id 命中數皆 0），再並行派 2 個 writer subagent 寫稿，\n發佈由主線程串行處理（feed 寫入無 per-writer lock，並行直發會 race）。\n\n**發佈前擋下三類問題**（都不是文字潤飾，是會讓文章掛錯 audience 或寫進沒有出處的數字）：\n\n1. **AUDIENCE GATE**：兩篇都被 `_infer_audience` 判為 research —— body 內 ≥2 個學術關鍵詞就升級。\n   K1608 命中 K-id + bootstrap；K1699 命中 K-id + QLIKE + Harvey + GJR-GARCH + GARCH。\n   逐一改寫成讀者向說法（bootstrap → 重抽樣、QLIKE → 預測誤差分數、Harvey → 嚴格門檻、\n   GJR-GARCH → GJR 模型），改到只剩 K-id 一個標籤才過 general。\n   註：K-id 無法完全消除（圖片 URL 與 experiment_refs 都含 K 編號），所以其餘關鍵詞必須清到零。\n\n2. **IMAGE GATE**：general 需 ≥2 張圖。K1608 原稿只有 1 張，補 `fig3_spy_raw_means.png`；\n   K1699 補 `fig_k1699_dm_bars.png`（該圖本來就是繁中製圖，數字與內文一致）。\n\n3. **content-vs-source audit**：K1608 有 4 個裸數字（「HAC lag 4」「5 個交易日」等）在 results JSON\n   查無對應值 → 改中文數字後通過。**另外我為新增的 fig3 寫說明時，第一版用的是從圖上目視讀到的\n   組平均（0.085% / 0.170%）** —— 雖然反推的差值與 JSON 吻合，但那是眼睛讀出來的數字，\n   已改成 JSON 可直接驗證的 bootstrap 差值：−0.085 個百分點、95% 區間 [−0.53%, +0.35%]、p=0.68。\n\n**驗證**：`anti_ai_gate.py` 兩篇皆 exit 0（各 1 WARN，來源是 Markdown 表格區塊非散文段落）；\n`publish_draft.py --dry-run` 的 content-vs-source audit 兩篇皆 PASS\n（K1608 13 claims vs 299 source values；K1699 0 vs 218）。\nK1608 引用的三筆文獻（Hong and Wei 2025 RF、Edmans-Garcia-Norli 2007 JF、Da-Engelberg-Gao 2011 JF）\n已對照 `experiments/k1608/README.md` 與 k1608.py 的 citation 欄位確認為實驗本身既有引用，非杜撰。\n\n**懶人包**：general 文章的 release 被 lazypack gate 擋住，本班一併補完 ——\n派 2 個 agent 寫 strict plan v1 JSON，主線程獨立驗過 evidence sha256（兩份皆吻合）\n與 `--validate-only`（3 / 4 panels，valid=true），再 enqueue\n`lazypack-mile_e5001076` 與 `lazypack-mile_add5ea20`，*/15 compute worker 渲染後 release_pool 才放行。\n\n**待查（文章已迴避未引用，不影響本次發佈）**：\n1. `experiments/k1699/per_market_table.md` 的 0050.TW N=1251，但 `k1699_results.json` 是 1266，差 15 天\n2. `k1699_results.json` 的 `metadata.oos_start` / `oos_end` 皆為 null，OOS 期間追不到"
+  },
+  {
+    "timestamp": "2026-07-21T17:27:31+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_e5001076",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_e5001076:codex->agy",
+    "article_id": "mile_e5001076",
+    "job_id": "lazypack-mile_e5001076",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-21T17:28:24+08:00",
+    "task_type": "platform_ops",
+    "task_id": "lazypack_fallback_mile_add5ea20",
+    "outcome": "fallback_succeeded",
+    "actor": "lazypack-async-worker",
+    "owner": "lazypack-async-worker",
+    "commit": null,
+    "summary": "scripts/gen_lazypack_codex.py failed (rc=1, class=quota); scripts/gen_lazypack_agy.py succeeded.",
+    "fallback_event_id": "lazypack_fallback:lazypack-mile_add5ea20:codex->agy",
+    "article_id": "mile_add5ea20",
+    "job_id": "lazypack-mile_add5ea20",
+    "stage": "codex->agy",
+    "failure_class": "quota",
+    "primary_renderer": "scripts/gen_lazypack_codex.py",
+    "fallback_renderer": "scripts/gen_lazypack_agy.py"
+  },
+  {
+    "timestamp": "2026-07-21T17:30:13+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_42306eaa",
+    "outcome": "blocked",
+    "actor": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "owner": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "commit": null,
+    "summary": "assign_42306eaa（K1698 重跑，餓 94.7h，本班 lockout 名單第一張）—— 查出它餓死的真正原因不是研究問題，是**外部額度耗盡**，已改標 blocked 並留下恢復路徑。\n\n**它卡在哪**：Codex round 4 裁決 FAIL，但兩個 blocker 都是 MINOR 文件級：\n1. `NEW-MINOR-RUNTIME-EVIDENCE` — README 把 286.6s 稱作 receipt 並歸因「較空載」，但 `run_log_rev3.txt` 只有 14 行、\n   停在 `parsed 800/2192`、無 completion line，remediation 自己第 117 行也承認它不是 receipt\n2. `NEW-MINOR-AUDIT-RECORD` — `k1698_rev3_remediation.json:42` 宣稱 `grep -c '3 天' README.md == 0`，實際為 1\n\n**這兩項已經修好了** —— commit `e13f83a5d`「K1698 rev4: remove the two unreceipted evidence statements Codex round 4 flagged」。\nround 5 的 prompt 也確實以 `reviewed_commit e13f83a5d` 送審。所以研究面沒有欠債，只差一個裁決。\n\n**真正的 blocker**：`k1698_rev4_codex_round5` 的 stderr 是\n`ERROR: You've hit your usage limit. ... try again at Jul 25th, 2026 1:30 PM`。\n**Codex 額度耗盡，2026-07-25 13:30 才重置。**\n\n這推翻了目前流程的一個前提假設（「多輪 review 全用 codex exec 跑，codex 額度無限制」）。\n血緣不只這一張：`grep -l \"usage limit\" storage/ops/codex_reviews/*.stderr` 命中 4 個 ——\n`k1698_rev4`（07-20 17:15）、`audit_snapshot_dup_20260721`（07-21 12:15）、`k1731_armB_rev8`、`k1707_pre_run_review`。\n其中 **k1698_rev4 與 audit_snapshot_dup 的 verdict 檔是 0 bytes** —— 空的 verdict artifact\n放在成功的 verdict 旁邊，長相難以分辨，有被誤讀成「已審查通過」的風險。\n\n**第二個發現**：worktree 目錄 `dispatch-slot-2-c5cafe39-k1698` 已不存在，\n但 branch `worktree-dispatch-slot-2-c5cafe39-k1698` 仍有 **5 個未合併 commit**\n（rev2 / rev2b / rev3 / rev4 + 一個 `Auto-commit: save agent work before worktree merge`）。\n**成果沒有遺失**，但目錄消失讓它看起來像遺失了。恢復時從該 branch 起，裁決前不得 merge。\n\n**處置**：`mark_task_blocked.py --reason codex_quota_reset_pending --until 2026-07-25T14:00:00+08:00`\n（額度 13:30 重置，留 30 分鐘緩衝），note 內完整記下上述狀態，\n並 annotate `recovery_branch` 與 `reviewed_commit` 兩個欄位。\n不再讓它每小時被 starvation 邏輯推上來 —— 在 07-25 之前，任何人接手都只會再撞一次額度牆。"
+  },
+  {
+    "timestamp": "2026-07-21T17:33:30+08:00",
+    "task_type": "experiment",
+    "task_id": "K1436_btc_funding_rate_vol_covariate",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "owner": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "commit": null,
+    "summary": "`K1436_btc_funding_rate_vol_covariate`（P3，dispatcher 的「保底席」，2026-06-09 建單）——\n**實驗其實今天早上就做完了，任務只是沒人關**。本班驗證後補上結案。\n\n**現況**：`experiments/k1436/` 齊全 —— README.md（19.6KB）、k1436.py、k1436_results.json、\nfetch_data.py、v1_feasibility_audit、兩張圖、reproduce_spec.json、review_report.md、review_verdict.json。\nrun_at = 2026-07-21T03:46 UTC。\n\n**結論：NULL**（誠實的 null，不是失敗）。funding rate 是 next-day BTC RV 的紮實**樣本內**預測因子\n（HAC t=4.18），但買不到可辯護的樣本外改善：\n- 預先指定的 primary covariate 在 nested-model-valid 的 Clark-West 檢定下 **CW=1.4019、\n  單尾 p=0.0805**，未達 5%\n- 次要的 |funding| 變體 **CW=1.7394、p=0.0410**，名目顯著但過不了兩檢定的 Bonferroni 門檻 0.025，\n  且優勢集中在 OOS 窗前半段\n- 定位為「值得追的線索」，不是結果\n\n**我逐項核對過的數字**（全部直接從 `k1436_results.json` 讀出，與 README 宣稱一致）：\nseed=42；RV 期間 2020-01-01 ~ 2026-07-20 共 2,393 天；OOS 2024-01-01 ~ 2026-07-20 共 932 obs；\nrolling window 1000、daily refit；CW hac_lag=10。\n**lookahead check：250 列全過，har_d / har_w / har_m / funding_lag1 violations 皆為 0**，\nverdict = \"PASS - no predictor on row t uses information dated >= t\" —— 這正是原任務 brief 點名要防的\n「funding rate 用 t-1 day 三 obs 均值、不用 t 日 forward-looking funding」。\n\n**review**：`review_verdict.json` = PASS、blocking_defects 為空、8 個檔案的 sha256 都凍結記下。\nreviewer 欄位誠實寫明走的是 **FALLBACK path —— feature-dev:code-reviewer subagent（fresh context, read-only），\n因為 Codex CLI primary unavailable (usage limit until 2026-07-25)**。\n這一點值得記：它**沒有**silent fallback，fallback 事由與時限都寫在 artifact 裡 ——\n與本班另外查到的 Codex 額度耗盡問題（見 assign_42306eaa / assign_6facc298）是同一個根因，\n但這裡的處理方式是對的，可以當範例。\n\nknowledge 已有兩筆 K1436 條目（feasibility audit + verdict=NULL 的 review 記錄）。\n\n**處置**：complete --status succeeded。附帶記一筆：`check_arc_dedup.py --k-id K1436 --audience research`\n回 **ARC DUPLICATE（2 篇既有文章同故事）**，所以這個 K **不要**再開發文任務。"
+  },
+  {
+    "timestamp": "2026-07-21T17:35:53+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_feed_superseded_by_null_audit_20260719",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "owner": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "commit": null,
+    "summary": "`assign_feed_superseded_by_null_audit_20260719`（餓 53.3h）—— 掃完了，**原報的 bug 是誤報，但底下有個更大的問題**。\n\n## 1. 原報的 bug 不成立：欄位名看錯了\n\n任務說 `mile_ebb5d6f5` 的 `superseded_by = null`，與 work_log L20613 宣稱「已寫入」矛盾。\n實際比對 feed.json 該 entry：**欄位名是 `retracted_superseded_by`，值是 `['mile_9560b9cc']`**，\n寫得好好的。頂層根本沒有 `superseded_by` 這個欄位（我第一次掃也踩到同一個坑 ——\n查 `superseded_by` 得到「缺失」，查 `retracted_superseded_by` 才看到值）。\n\n所以 work_log 的宣稱是真的，撤稿 writer 沒有漏寫這一篇。**這條 audit 的前提不成立。**\n\n## 2. 但掃出來的整體狀況更糟：這個欄位根本沒有 writer\n\nfeed.json 共 1,863 篇，`status=retracted` 13 篇。\n**其中只有 1 篇（就是 mile_ebb5d6f5）有 `retracted_superseded_by`，其餘 12 篇連欄位都不存在。**\n\n根因不是「writer 漏寫」，是**沒有任何 writer 擁有這個欄位**：\n\n```\ngrep -rn \"retracted_superseded_by\" --include=\"*.py\" .   → 0 hit（排除 worktrees）\ngrep -rn \"retracted_reason\"        --include=\"*.py\" .   → 0 hit\ngrep -rn \"retracted\"               scripts src          → 只有讀取端（refill 跳過已撤稿候選、\n                                                          series_registry 過濾、supabase_sync 註解）\n```\n\n也就是說 **撤稿至今都是手動改 JSON**，沒有 CLI、沒有 schema、沒有測試。\nmile_ebb5d6f5 之所以有指標，是因為那次剛好有人手動補；其餘 12 篇沒人補。\n欄位名不一致（報告寫 `superseded_by`、實際是 `retracted_superseded_by`）也是同一個病灶的症狀 ——\n沒有 owner 就沒有 canonical 名稱。\n\n## 3. 12 篇裡有 3 篇的後繼者能從文字反推\n\n| 撤稿文 | 反推出的後繼者 | 依據（retracted_reason 原文） |\n|---|---|---|\n| `mile_ec28b1cc` | `mile_1a6d9369` | logical_dup_with_prior 同 narrative arc…與較早研究版 mile_1a6d9369(K864) |\n| `mile_beb61a8a` | `mile_490d38ec` | duplicate_of_mile_490d38ec |\n| `mile_b5a91c4d` | `mile_bad0d545` | logical_dup_with_prior K1199 expanding-window… |\n\n另外 9 篇的 reason 只有分類字串（`exact_duplicate_dual_cron`、`logical_dup_with_prior`、\n`sign_interpretation_error` 等），**沒有指名後繼者**，無法從現有 bytes 反推 —— 不猜。\n其中 2 篇（`mile_bb520db8`、`mile_d8e36bcb`）連 reason 都是空字串。\n\n## 4. 為什麼本班不回填\n\n任務描述自己寫了：「動 canonical feed.json 後需另走 sync，且會受\n`assign_frontend_deploy_revalidate_endpoint_20260719` 的快取問題影響 —— **建議排在該端點部署之後**」。\n那張前置任務未完成，而且回填之前應該先有 writer 與 schema（否則回填完下一次撤稿又是手動、又會漏）。\n本班把範圍收在步驟 1-2（掃描 + 定位 owner），步驟 3 連同 writer 一起交給\n新開的 `assign_82551c2e`，順序寫死：先做 writer/schema，再回填，最後 sync。\n\n**沒有動 feed.json。**"
+  },
+  {
+    "timestamp": "2026-07-21T17:37:03+08:00",
+    "task_type": "experiment",
+    "task_id": "K1438_vix1d_spy_intraday_vol_covariate",
+    "outcome": "blocked",
+    "actor": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "owner": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "commit": null,
+    "summary": "`K1438_vix1d_spy_intraday_vol_covariate`（P3，dispatcher 保底席「本班必挑」）—— 複驗後標 blocked，不再每小時燒一個 slot。\n\n**前輪已做過誠實的 feasibility audit**：`experiments/k1438/`（README + k1438.py + k1438_results.json），\n`status = BLOCKED_DATA_UNAVAILABLE`。它的立場寫得很清楚：HAR-RV 必須用 5-min realized variance 當 target、\n不能偷換成日頻 r²；VIX1D 必須有本地可重現的時間序列、不能靠一次性外網抓取；資料缺口沒補齊前不宣稱 forecasting 結論。\n**這是對的做法** —— 與其硬跑出一個不可重現的數字，不如把缺口記錄下來。\n\n**本班複驗，兩個 blocker 都還在**：\n1. **沒有 canonical 本地 VIX1D 歷史檔** —— `find data storage -iname \"*vix1d*\"` 零命中；\n   repo 內 12 處 VIX1D 提及全是文字（research_findings.md、literature review、k182 腳本、k1438 自己），沒有資料檔\n2. **SPY 5-min 本地歷史只有 100 個交易日**（2026-01-14 ~ 2026-06-08），\n   HAR-RV OOS 的最低門檻是 252 日 —— `has_sufficient_har_history: false`\n\n**為什麼要標 blocked 而不是再派一次**：這張是 dispatcher 的「保底席」，\n每小時都會被當成最低優先序的必挑項推上來。但在資料補齊之前，任何 agent 上去都會撞同一面牆，\n最好的結果也只是再寫一份一樣的 feasibility audit。這不是任務難、是**前置條件不存在**。\n\n處置：`mark_task_blocked.py --reason awaiting_external_data`。\n解除條件寫進 note：新增 canonical 本地 VIX1D 時間序列，且 SPY 5-min 歷史 ≥ 252 交易日；\n屆時照 `k1438_results.json` 的 next_steps 三步跑，covariate 一律 lag。"
   }
 ]

@@ -1,0 +1,361 @@
+{
+  "schema_version": 1,
+  "title": "K1699 懶人包：把預測時點釘在收盤，那個漂亮勝利就不見了",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1699/k1699_results.json",
+      "sha256": "b258c40489bccc1146cf31b1a8bd40c857541f343253259db62102816de52c3a",
+      "label": "K1699 六市場嚴格收盤時點口徑重跑結果（PRG vs GJR vs HAR）"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_problem",
+      "info": "concept",
+      "style": "professional",
+      "title": "同一個模型同一批資料，只改「預測幾點發出」",
+      "alt": "說明研究只更動預測發出的時點，模型、資料與損失函數都沒有變動",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "只動了一件事",
+          "body": [
+            "沒有換模型、沒有換資料、也沒有換評分方式。",
+            "唯一的更動是：所有預測都必須在前一天收盤那一刻發出，不准回頭用當天早上才知道的跳空。",
+            "招牌成績單上那個壓倒性的勝利，就是在混合時點的口徑下拿到的。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "重跑的市場數",
+          "value": {
+            "source": "results",
+            "path": "headline.n_markets",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個市場"
+            }
+          },
+          "note": "美股、黃金、新興市場、台股與台指期"
+        },
+        {
+          "kind": "metric",
+          "label": "本文採用的嚴格顯著門檻",
+          "value": {
+            "source": "results",
+            "path": "method_summary.harvey_threshold",
+            "format": {
+              "kind": "text"
+            }
+          },
+          "note": "小樣本修正後的嚴格標準"
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "嚴格收盤口徑下，六個市場全部沒跨過門檻",
+      "alt": "六個市場的比較檢定統計量全部落在嚴格門檻之內，統計上分不出勝負",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "台指期 TAIFEX",
+          "value": {
+            "source": "results",
+            "path": "markets.TAIFEX.dm_tests.PRG_tminus1_exp_vs_GJR.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "黃金 GLD",
+          "value": {
+            "source": "results",
+            "path": "markets.GLD.dm_tests.PRG_tminus1_exp_vs_GJR.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "新興市場 EEM",
+          "value": {
+            "source": "results",
+            "path": "markets.EEM.dm_tests.PRG_tminus1_exp_vs_GJR.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台灣 0050.TW",
+          "value": {
+            "source": "results",
+            "path": "/markets/0050.TW/dm_tests/PRG_tminus1_exp_vs_GJR/t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "標普 SPY",
+          "value": {
+            "source": "results",
+            "path": "markets.SPY.dm_tests.PRG_tminus1_exp_vs_GJR.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "那斯達克 QQQ",
+          "value": {
+            "source": "results",
+            "path": "markets.QQQ.dm_tests.PRG_tminus1_exp_vs_GJR.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "六格中離門檻最近的一格，方向還偏向老模型"
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這六個數字",
+          "body": [
+            {
+              "template": "正負只代表哪一邊的預測誤差較低，絕對值要跨過門檻（{thr}）才算真的分出高下。",
+              "bindings": {
+                "thr": {
+                  "source": "results",
+                  "path": "method_summary.harvey_threshold",
+                  "format": {
+                    "kind": "text"
+                  }
+                }
+              }
+            },
+            "六格全部縮在門檻裡面，統計上就是分不出勝負。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_home_ground",
+      "info": "results",
+      "style": "scientific",
+      "title": "最該讓它發光的主場，也沒有發光",
+      "alt": "隔夜變異數佔比從最低到最高跨越一倍以上，比較檢定統計量並未隨之上升",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "可以直接檢驗的一句話",
+          "body": [
+            "這個模型的賣點是把隔夜跳空和盤中震盪分開建模。",
+            "照這個邏輯，隔夜佔全日波動越高的市場，好處應該越明顯。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "台指期 隔夜佔全日變異數",
+          "value": {
+            "source": "results",
+            "path": "markets.TAIFEX.metadata.overnight_variance_share_pct",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "scale": 1
+            }
+          },
+          "note": {
+            "template": "六市場最高，但檢定統計量只有 {t}",
+            "bindings": {
+              "t": {
+                "source": "results",
+                "path": "markets.TAIFEX.dm_tests.PRG_tminus1_exp_vs_GJR.t_stat",
+                "format": {
+                  "kind": "number",
+                  "digits": 2,
+                  "show_plus": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "黃金 隔夜佔全日變異數",
+          "value": {
+            "source": "results",
+            "path": "markets.GLD.metadata.overnight_variance_share_pct",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "scale": 1
+            }
+          },
+          "note": {
+            "template": "檢定統計量 {t}",
+            "bindings": {
+              "t": {
+                "source": "results",
+                "path": "markets.GLD.dm_tests.PRG_tminus1_exp_vs_GJR.t_stat",
+                "format": {
+                  "kind": "number",
+                  "digits": 2,
+                  "show_plus": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "新興市場 隔夜佔全日變異數",
+          "value": {
+            "source": "results",
+            "path": "markets.EEM.metadata.overnight_variance_share_pct",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "scale": 1
+            }
+          },
+          "note": {
+            "template": "檢定統計量 {t}",
+            "bindings": {
+              "t": {
+                "source": "results",
+                "path": "markets.EEM.dm_tests.PRG_tminus1_exp_vs_GJR.t_stat",
+                "format": {
+                  "kind": "number",
+                  "digits": 2,
+                  "show_plus": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "那斯達克 隔夜佔全日變異數",
+          "value": {
+            "source": "results",
+            "path": "markets.QQQ.metadata.overnight_variance_share_pct",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "scale": 1
+            }
+          },
+          "note": {
+            "template": "六市場最低，檢定統計量卻是最高的 {t}",
+            "bindings": {
+              "t": {
+                "source": "results",
+                "path": "markets.QQQ.dm_tests.PRG_tminus1_exp_vs_GJR.t_stat",
+                "format": {
+                  "kind": "number",
+                  "digits": 2,
+                  "show_plus": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "資料說了什麼",
+          "body": [
+            "隔夜佔比從最低排到最高，中間跨了一倍以上的差距。",
+            "檢定統計量沒有跟著爬，主場優勢在資料上看不到影子。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_power",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "是「真的沒差」，不是「量不準」",
+      "alt": "同一套檢定用在另一組模型比較上，給出遠超門檻的統計量，顯示檢定本身有辨識力",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "合理的懷疑",
+          "body": [
+            "滿桌不顯著，第一個該問的是：會不會這把尺根本量不出東西？"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "同一把尺量 GJR 對 HAR（標普 SPY）",
+          "value": {
+            "source": "results",
+            "path": "markets.SPY.dm_tests.GJR_vs_HAR.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "遠遠跨過嚴格門檻，差距非常明確"
+        },
+        {
+          "kind": "metric",
+          "label": "同一把尺量 GJR 對 HAR（那斯達克 QQQ）",
+          "value": {
+            "source": "results",
+            "path": "markets.QQQ.dm_tests.GJR_vs_HAR.t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "同樣遠遠跨過門檻"
+        },
+        {
+          "kind": "text",
+          "heading": "帶走一句話",
+          "body": [
+            "同一批資料、同一個檢定，量得出 HAR 那邊的差距，量不出新模型這邊的差距。",
+            "下次看到某個模型宣稱大勝，先問它的預測是幾點發出的。",
+            "本文為研究結果整理，不構成任何投資建議。"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "schema_version": 1,
+  "title": "K1608 懶人包：大片上映那一週，市場真的比較亢奮嗎",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1608/k1608_results.json",
+      "sha256": "50e43efb946fc1fbd5b5cf66d8e1b8c0838fd816641e991d7e6789bbc1857c4e",
+      "label": "K1608 票房注意力衝擊事件檢定結果（維基百科票房冠軍表 + yfinance，2005-2026）"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "想問的是：大片的熱度會流進下一週的市場嗎",
+      "alt": "研究概念：把週末票房異常高的週末標記成注意力衝擊，觀察後續一週的市場表現",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "這篇在測什麼",
+          "body": [
+            "文獻有個猜想：大家看完大片心情變好、注意力被娛樂拉走，下一週的股市可能因此變得不一樣。",
+            "我只用免費的公開資料試著把這條線索抓出來：維基百科的每週票房冠軍，加上日線收盤價。",
+            {
+              "template": "把票房異常高的週末標成一次「注意力衝擊」，全期間共出現 {shocks}，只佔全部週末的一小部分。",
+              "bindings": {
+                "shocks": {
+                  "source": "results",
+                  "path": "sample.n_blockbuster_shocks",
+                  "format": {
+                    "kind": "integer",
+                    "suffix": " 次"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "涵蓋週末數",
+          "value": {
+            "source": "results",
+            "path": "sample.n_weekends",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "樣本涵蓋的完整週末數"
+        },
+        {
+          "kind": "metric",
+          "label": "被檢定的資產",
+          "value": {
+            "source": "results",
+            "path": "sample.n_assets",
+            "format": {
+              "kind": "integer",
+              "suffix": " 檔"
+            }
+          },
+          "note": "大盤與消費類 ETF，加上娛樂類個股與等權籃子"
+        },
+        {
+          "kind": "metric",
+          "label": "算得出衝擊分數的週末",
+          "value": {
+            "source": "results",
+            "path": "sample.n_signal_available",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "要累積夠長的歷史才能判斷「異常高」"
+        },
+        {
+          "kind": "metric",
+          "label": "樣本起點",
+          "value": {
+            "source": "results",
+            "path": "sample.calendar_start",
+            "format": {
+              "kind": "date"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本終點",
+          "value": {
+            "source": "results",
+            "path": "sample.calendar_end",
+            "format": {
+              "kind": "date"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "每一組檢定都沒過關",
+      "alt": "所有資產與結果變數的檢定統計量都遠離顯著門檻，最大的一組也只到邊緣",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "SPY 次週報酬的檢定統計量",
+          "value": {
+            "source": "results",
+            "path": "asset_results.SPY.fwd5_return.ols_hac.t_hac_lag4",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "方向甚至跟「心情變好更敢冒險」相反"
+        },
+        {
+          "kind": "metric",
+          "label": "SPY 次週波動比的檢定統計量",
+          "value": {
+            "source": "results",
+            "path": "asset_results.SPY.log_fwd5_rv_ratio.ols_hac.t_hac_lag4",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "幾乎就是釘在零上"
+        },
+        {
+          "kind": "metric",
+          "label": "全表最大的一組（AMC 波動比）",
+          "value": {
+            "source": "results",
+            "path": "asset_results.AMC.log_fwd5_rv_ratio.ols_hac.t_hac_lag4",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "absolute": true
+            }
+          },
+          "note": "唯一稍微有點動靜的一格"
+        },
+        {
+          "kind": "metric",
+          "label": "它的 p 值",
+          "value": {
+            "source": "results",
+            "path": "asset_results.AMC.log_fwd5_rv_ratio.ols_hac.p_hac_lag4",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "仍高於常用的顯著水準，測不到關係"
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這張成績單",
+          "body": [
+            "每檔資產都測了接下來五個交易日的報酬、波動度相對前一段時間的變化，以及下跌方向的風險。",
+            "沒有任何一組跨過門檻。更值得注意的是，測這麼多次照理該撞出幾個假陽性，這次連假陽性都沒撈到。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_boundary",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "「測不到」不等於「不存在」",
+      "alt": "研究邊界：信賴區間仍容得下很大的效果，且訊號時點晚於週末，不是可交易訊號的檢定",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "SPY 次週報酬區間下緣",
+          "value": {
+            "source": "results",
+            "path": "asset_results.SPY.fwd5_return.ols_hac.ci95_low",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "這是五個交易日的量級，換算年化並不小"
+        },
+        {
+          "kind": "metric",
+          "label": "SPY 次週報酬區間上緣",
+          "value": {
+            "source": "results",
+            "path": "asset_results.SPY.fwd5_return.ols_hac.ci95_high",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "show_plus": true
+            }
+          },
+          "note": "區間兩端都離零很遠，資料還分不出勝負"
+        },
+        {
+          "kind": "metric",
+          "label": "這組估計的誤差幅度",
+          "value": {
+            "source": "results",
+            "path": "asset_results.SPY.fwd5_return.ols_hac.se_hac_lag4",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "誤差這麼大，小一點的效果本來就看不見"
+        },
+        {
+          "kind": "metric",
+          "label": "手上的事件次數",
+          "value": {
+            "source": "results",
+            "path": "asset_results.SPY.fwd5_return.ols_hac.n_shock",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          },
+          "note": "在週頻資料裡，這個量並不算多"
+        },
+        {
+          "kind": "text",
+          "heading": "三件不能省略的話",
+          "body": [
+            "正確的說法是「這份資料沒能力偵測到」，不是「電影對市場沒有影響」。區間裡還容得下經濟上很大的效果。",
+            "維基百科記的多半是週一才公布的實際票房，而觀察窗也從週一起算，所以這不是「週日晚上能不能靠票房下單」的檢定。",
+            "本文是資料診斷，不是策略驗證，也不構成任何投資建議。"
+          ]
+        }
+      ]
+    }
+  ]
+}
