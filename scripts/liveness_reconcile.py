@@ -53,6 +53,8 @@ import argparse
 import importlib.util
 import json
 import re
+import shlex
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -90,6 +92,11 @@ WORKTREE_REF_RE = re.compile(r"\.claude/worktrees/([A-Za-z0-9._-]+)")
 ALIVE = "alive"
 DEAD = "dead"
 UNKNOWN = "unknown"
+
+ADJUDICATION_RECLAIM_CANDIDATE = "reclaim_candidate_needs_gate"
+ADJUDICATION_MERGE_REQUIRED = "merge_required"
+ADJUDICATION_PRESERVE_UNCOMMITTED = "preserve_uncommitted"
+ADJUDICATION_BLOCKED_UNKNOWN = "blocked_unknown"
 
 
 def _now() -> datetime:
@@ -240,6 +247,139 @@ def disk_verdict(
     return bool(matches or referenced_present), evidence
 
 
+def _git_text(args: list[str], *, cwd: Path) -> str:
+    """Run a read-only git query or raise with its evidence.
+
+    Worktree adjudication is deliberately fail-closed: a timeout, unreadable
+    checkout, detached HEAD, or unparsable count is not permission to reclaim.
+    """
+    proc = subprocess.run(
+        ["git", "-C", str(cwd), *args],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=True,
+    )
+    return proc.stdout.strip()
+
+
+def adjudicate_worktrees(
+    disk_evidence: dict[str, Any],
+    *,
+    worktrees_dir: Path | None = None,
+    main_ref: str = "main",
+) -> list[dict[str, Any]]:
+    """Classify a dead fire's surviving worktrees without mutating anything.
+
+    A4 previously stopped at ``worktree_on_disk``. That veto prevents data
+    loss, but it also leaves the claim in flight forever with no next action.
+    This layer turns the veto into one of four mechanical exits:
+
+    * dirty checkout -> preserve/merge the uncommitted bytes;
+    * clean branch ahead of main -> merge through ``merge_worktree.sh``;
+    * clean branch with no commits ahead -> only a reclaim *candidate* (the
+      canonical merge tool must still pass its artifact and safety gates);
+    * unreadable evidence -> block, never infer that nothing is valuable.
+
+    The function is read-only. Reclamation and claim release remain separate
+    canonical transactions, so a classification bug cannot delete a tree.
+    """
+    wt_dir = WORKTREES_DIR if worktrees_dir is None else worktrees_dir
+    names = sorted(
+        {
+            str(name)
+            for key in ("pattern_matches", "referenced_present")
+            for name in (disk_evidence.get(key) or [])
+            if str(name)
+        }
+    )
+    rows: list[dict[str, Any]] = []
+    for name in names:
+        path = wt_dir / name
+        base = {"worktree": name, "path": str(path)}
+        try:
+            branch = _git_text(["rev-parse", "--abbrev-ref", "HEAD"], cwd=path)
+            if not branch or branch == "HEAD":
+                raise ValueError("detached or empty HEAD")
+            status = _git_text(
+                ["status", "--porcelain", "--untracked-files=all"], cwd=path
+            )
+            raw_count = _git_text(
+                ["rev-list", "--count", f"{main_ref}..{branch}"], cwd=ROOT
+            )
+            ahead = int(raw_count)
+            if ahead < 0:
+                raise ValueError(f"negative ahead count: {ahead}")
+        except (
+            OSError,
+            ValueError,
+            subprocess.SubprocessError,
+        ) as exc:
+            _warn(
+                f"worktree adjudication blocked name={name} "
+                f"error={type(exc).__name__}: {exc}"
+            )
+            rows.append(
+                {
+                    **base,
+                    "classification": ADJUDICATION_BLOCKED_UNKNOWN,
+                    "reason": f"cannot prove worktree state: {type(exc).__name__}: {exc}",
+                    "recommended_action": "inspect evidence; do not merge, remove, or release claim",
+                }
+            )
+            continue
+
+        dirty_lines = status.splitlines()
+        facts = {
+            **base,
+            "branch": branch,
+            "dirty": bool(dirty_lines),
+            "dirty_path_count": len(dirty_lines),
+            "ahead_of_main": ahead,
+        }
+        if dirty_lines:
+            rows.append(
+                {
+                    **facts,
+                    "classification": ADJUDICATION_PRESERVE_UNCOMMITTED,
+                    "reason": "checkout contains uncommitted or untracked bytes",
+                    "recommended_action": (
+                        f"bash scripts/merge_worktree.sh {shlex.quote(name)}"
+                    ),
+                }
+            )
+        elif ahead > 0:
+            rows.append(
+                {
+                    **facts,
+                    "classification": ADJUDICATION_MERGE_REQUIRED,
+                    "reason": f"branch has {ahead} commit(s) not in {main_ref}",
+                    "recommended_action": (
+                        f"bash scripts/merge_worktree.sh {shlex.quote(name)}"
+                    ),
+                }
+            )
+        else:
+            merge_command = (
+                f"bash scripts/merge_worktree.sh {shlex.quote(name)}"
+            )
+            rows.append(
+                {
+                    **facts,
+                    "classification": ADJUDICATION_RECLAIM_CANDIDATE,
+                    "reason": (
+                        "tracked checkout is clean and branch has no commits ahead; "
+                        "canonical merge/reclaim gates must still prove no hidden artifact"
+                    ),
+                    "recommended_action": (
+                        f"{merge_command} && "
+                        "uv run python scripts/liveness_reconcile.py --apply"
+                    ),
+                }
+            )
+    return rows
+
+
 def _claim_age_minutes(task: dict[str, Any], now: datetime) -> tuple[float, str | None]:
     """Age of a claim, and which field proved it.
 
@@ -334,7 +474,14 @@ def reconcile(
             retained.append({**common, "verdict": f"process_{proc}"})
             continue
         if worktree_present:
-            retained.append({**common, "verdict": "worktree_on_disk"})
+            retained.append({
+                **common,
+                "verdict": "worktree_on_disk",
+                "worktree_adjudication": adjudicate_worktrees(
+                    disk_evidence,
+                    worktrees_dir=worktrees_dir,
+                ),
+            })
             continue
 
         detached.append({

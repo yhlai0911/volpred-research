@@ -23907,5 +23907,65 @@
     "owner": "hourly-slot-1-341f277f48014eda996544994564039d",
     "commit": null,
     "summary": "修好 `artifacts_gate_worktree_relpath_abstain`：artifact gate 在 worktree 內用相對 `--path` 呼叫會靜默 PASS。\n\n**根因**（與 task 描述一致，已在代碼確認）：`cmd_check` 用 `REPO_ROOT / p` 解析相對 `--path`，而 REPO_ROOT 綁在**腳本檔案位置**＝ canonical checkout，不是呼叫端 cwd。worktree 內的 `experiments/kXXXX` 在 canonical 尚不存在 → `t.is_dir()` false → targets 空 → 落到「沒有目錄要檢查」分支印 PASS exit 0。`--changed-since` 同理：`cwd=str(REPO_ROOT)` 讓 git diff 跑在 canonical，其 main==HEAD 故永遠 0 檔。\n\n**修法（單一規則，非兩層 gate）**：「相對路徑 = 相對於呼叫端所站的 checkout」。\n- 新增 `caller_root()`：`git rev-parse --show-toplevel`（失敗則誠實退回 REPO_ROOT）\n- 相對 `--path` 先以 caller root 解析、再退回 REPO_ROOT\n- `--changed-since` 的 git diff 與結果 join 改用 caller root\n- **明確傳了 `--path` 卻解析不到任何目錄 → 印錯誤 + 列出找過的位置 + exit 2**（區分「沒東西要檢查」與「你指的東西我找不到」；找不到目標的 gate 不該假裝通過）\n\n**驗證（實跑，非推論）**：\n| 情境 | exit | 預期 |\n|---|---|---|\n| worktree 內相對路徑 `experiments/k1708` | 1（BLOCKED，缺 reproduce_spec.json） | ✅ 與絕對路徑結果一致 |\n| 不存在的 `--path` | 2 | ✅ |\n| 無參數 | 0（PASS） | ✅ |\n| canonical repo 相對路徑 `experiments/k1719` | 0（PASS） | ✅ |\n\n修前同一個 worktree 相對路徑呼叫回 PASS exit 0，修後回 BLOCKED exit 1 —— 缺陷確實被修掉。\n\n**新增 regression test** `tests/test_check_experiment_artifacts_relpath.py`（3 passed）：鎖住兩個性質 —— (1) 相對 `--path` 以 cwd 解析、gate 真的跑起來；(2) 解析不到的 `--path` exit 2 而非 0。第三個測試守住 blast radius（無參數仍是乾淨 PASS）。過程中發現 BLOCKED 報告走 **stderr**、stdout 為空，assertion 已據實改為檢查合併輸出。\n\n**既有呼叫端不受影響（實查）**：\n- `merge_worktree.sh:554-568` 用絕對路徑 `$wt_path/experiments/$kid` 且事先 `-d` 檢查 → 行為不變；仍是 stdlib-only `python3` 可跑（新代碼只用 subprocess/pathlib）\n- `.github/workflows/experiment-artifacts.yml:75` 用 `--changed-since`，CI 的 cwd 即 checkout，`caller_root()` 回傳同一個 root → 行為不變\n\n**未做**：未跑全庫 pytest（本班時間預算已到 cap，只跑了新增測試）。若 CI 有其他相依此腳本的測試，下一班應補跑。"
+  },
+  {
+    "timestamp": "2026-07-22T10:38:00+08:00",
+    "task_type": "experiment",
+    "task_id": "k1623_round3_codex_primary_review_gate",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-bd8d693b0e93425997fe29ccde8f8102",
+    "owner": "hourly-slot-2-bd8d693b0e93425997fe29ccde8f8102",
+    "commit": null,
+    "summary": "K1623 round-3 送審 gate：Codex primary-path review 判 **FAIL**（3 blocking defects），merge 維持封鎖。\n\n**前提修正**：任務單原以「Codex 額度耗盡至 2026-07-25」凍結約 3 天，該前提前一班已實測推翻。本班照真實可用狀態執行 —— 結果證明不是形式主義：primary path 抓到 fallback 兩輪（agy PASS / feature-dev:code-reviewer CONDITIONAL PASS）都沒抓到的 3 個 defect，其中一個是 arm 設計口徑錯誤，不是措辭問題（再次驗證 K1259）。\n\n**執行**：worktree `dispatch-slot-2-c5cafe39-k1623` 目錄已被 stale-reclaim 清掉，成果仍在 branch `worktree-dispatch-slot-2-c5cafe39-k1623`（2029296479e449fccb21804bba958570f346b218）。以 `git show` 逐檔導出至 /tmp 唯讀副本 → **31/31 pinned sha256 重算全數相符** → Codex CLI 0.144.6 `-s read-only` review（98K tokens，無修改、無重跑）。\n\n**Codex 確認成立**：headline「published SE 被低估 1.21-1.33x」五資產 sd_A/SE、表格、分解、四捨五入全對得上 frozen artifact；無 RNG / reordering / parallelism / lookahead 缺陷；arm B-C 的 incremental 口徑正確。\n\n**3 個 blocking defects**：\n1. 設計層 —— arm A 重跑 BIC 同時選斷點個數與位置（k1623_rev3_armc_mc.py:170），arm B 固定整個 partition → A-B 與 f3 混合 break-COUNT selection 與 break-LOCATION estimation，沒隔離它宣稱的通道。\n2. 過度宣稱 —— 2/2/1 dominant-channel attribution 在 500 reps 未識別（SPY 0.31% / N225 3.45% / TW0050 4.08% vs crude MC SE ~3.2%）。比 collector 自記的更嚴：asset-dependent 分類本身該拿掉，只有總量 1.21-1.33x 與噪音充分分離。\n3. 自相矛盾 —— README §1 line 77 仍寫「MC 只涵蓋斷點定位」，與 Arm C 及 §6.4 打架。\n\n**產出**：`experiments/k1623/review_round3_codex_20260722.md`（review artifact）+ `experiments/k1623/review_verdict_round3.json`（機讀 verdict，含 31 pins）。\n\n**為何不填 branch 上的 review_verdict.json 模板**：verdict=FAIL，remediation 會改動 bytes → 31 個 pin 必然全失效；現在簽等於製造「已審過」假象。round-3 的 verdict of record 就是上面兩個檔，branch 維持 fail-closed 擋 merge。\n\n**後續**：建 `k1623_rev4_remediation_after_codex_round3_fail`（machine-source P1 依 admission clamp 降為 P2），三項 defect 逐條寫入，收尾條件含整份重簽 pins + round-4 primary-path review。branch 在 round-4 PASS 前禁止 merge，本班未建任何新 worktree、未留未合併殘留。"
+  },
+  {
+    "timestamp": "2026-07-22T10:11:50+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_5aa9d5f5",
+    "outcome": "completed",
+    "actor": "hourly-slot-3-3896dcaa98a24e49b7d1fc3202335a22",
+    "owner": "hourly-slot-3-3896dcaa98a24e49b7d1fc3202335a22",
+    "commit": null,
+    "summary": "K1623 修復單（assign_5aa9d5f5，starved 111.7h）收單：逐條驗證 + 補上第 6 項（reviewer 可靠度記進 error_log）+ 為 main 的過期 README 加 quarantine 橫幅。\n\n**驗證（項 1-5，證據在 branch `worktree-dispatch-slot-2-c5cafe39-k1623`，HEAD 202929647）**：\n- 項 1-3（撤回識別宣稱 / 不可交易 / 多處顯著更差 + 補 MSE DM + 多重比較）→ rev2 README §0 撤回總表 8 條逐條對上；MSE 的 DM 已補（`dm_comparisons[40]`、`loss_function_sign_reversal[5]`）；BH FDR（primary，family `within_loss_20` 事前寫死在 code）+ Bonferroni（secondary）已補。20 個 focal 比較 0 個存活 BH。\n- 項 4（ELW / FD_MAXK / VIX cap binding / BreakRobustHAR 描述）→ rev2 撤回表 #5/#6/#7 逐條更正。\n- 項 5（再送 codex 二審）→ round 2 與 round 3 皆已跑；round 3 為 primary path，判 FAIL（3 項），merge 仍封鎖，出口任務 `k1623_rev4_remediation_after_codex_round3_fail`（P2 pending，已存在，未重複建單）。\n- 項 6（reviewer 可靠度記 error_log）→ **本班補做**，見下。\n\n**新增產出**：\n1. `docs/error_log.md` 新條目「K1623：同一份稿子連過 5 位審查者，每一位都放行了下一位才抓到的 blocking defect」。原任務只要求記「gpt-5.5 vs gpt-5.6-sol 衝突」這一個資料點，到今天已累積五輪，所以一次寫完整。兩條分開的教訓：(a) fallback PASS ≠ primary PASS（K1259 已知；round-3 兩位 fallback 審查者放行，primary 一跑抓到 3 項，第一項是 arm 設計口徑錯誤而非措辭）；(b) **新** — 同路徑同等級審查者之間變異一樣大（輪次 1 與 1' 都是 primary codex，一個 no CRITICAL/HIGH，一個 FAIL 7 項，其中「DM 只跑 QLIKE」是對著 artifact 讀一遍就會撞見的）。推論：放行條件應看**缺陷層級是否收斂到瑣碎**，不是看連過幾次 —— K1623 五輪的缺陷層級是宣稱層→宣稱層→**設計層**，不降反升。\n2. `experiments/k1623/README.md`（main 版）加 quarantine 橫幅。main 的這份是**未修復的第一輪版本**，仍寫著「純假象假說被拒絕」「不可交易」「多處顯著更差」；修復版在未合併的 branch 上。橫幅列出三條撤回宣稱 + 5 條方法描述更正，並指向 branch / round-3 review / error_log。防止 rev4 合併前有人（或 auto-discovery 產文任務 `K1623_article_general`）引用已撤回的結論。\n\n**未動**：不碰 rev4 的 3 項 blocking defect（arm A-B/f3 通道口徑、500-rep attribution 過度宣稱、README §1 line 77 自相矛盾）—— 那是 `k1623_rev4_remediation_after_codex_round3_fail` 的範圍，需重跑 MC，屬 compute-queue 尺寸，不塞進本班。"
+  },
+  {
+    "timestamp": "2026-07-22T10:15:18+08:00",
+    "task_type": "experiment",
+    "task_id": "K1714",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-3-3896dcaa98a24e49b7d1fc3202335a22",
+    "owner": "hourly-slot-3-3896dcaa98a24e49b7d1fc3202335a22",
+    "commit": null,
+    "summary": "K1714（realized covariance HAR → GMV 組合 OOS 檢定）派工：建 worktree + 寫 brief + enqueue agent job。dispatch 保底席（starvation lockout 下最低優先序，本班必挑）。\n\n**動作**：\n- 建 registered linked worktree `.claude/worktrees/dispatch-slot-3-3896dcaa-k1714`（branch `wt/dispatch-slot-3-3896dcaa-k1714`），走 `scripts/git_writer_lock.py run` 序列化。\n- brief `/tmp/brief_k1714.md`：SPY/QQQ/GLD/TLT 為 primary 資產集；Cholesky 或 log-matrix 參數化保證正定（並要求報正定失敗率）；對照組 sample cov / Ledoit-Wolf / EWMA(λ=0.94)；評估 GMV OOS 實現波動 + turnover + 權重集中度；**強制統計檢定 + 多重比較修正（family 事前寫死在 code）**；lookahead policy 事前寫死 + `signal.shift(1)` + seed=42。\n- enqueue `agent-brief_k1714-cd4315`（opus/xhigh，timeout 5400s，result-artifact `experiments/K1714/K1714_results.json`）。\n\n**brief 裡帶進的兩條本班教訓**：\n1. 從 K1623 五輪審查帶過來的宣稱紀律 —— 只報點估計而無檢定與多重比較修正，是 K1623 連續被打回的直接原因，寫進 brief 當硬要求。\n2. 要求 agent 在 README 正面回答「RCov proxy 會不會讓 HAR 的優勢變成套套邏輯」（日頻無 intraday RCov，proxy 若本身是滾動平均，HAR 對它建模可能只是對平滑後的東西再平滑）。這是本實驗最大的方法論風險，先寫死比事後被審出來便宜。\n3. 明文寫「NULL 結果完全可接受且同樣有價值」+ followup brief 註明「不得因為是 NULL 就退回重跑」，避免 reactive 調參。\n\n**流程觀察（值得治本，本班未動）**：K1714 派到 compute queue 後，任務池沒有能表達「已派給 async agent lane、在飛」的狀態 —— `mark_task_blocked.py` 的 reason vocabulary 沒有 `awaiting_agent_job`，所以只能照庫內既有慣例 annotate 後 release 回 pending。這正是本班另一張任務 `assign_5aa9d5f5` 餓死 111.7h 的成因：它 07-19 就 DISPATCHED→compute-queue，但在 dispatch report 眼中一直是「沒人做的 pending」。建議補一個 `awaiting_agent_job` reason（帶 job id + timeout 推導的 blocked_until），讓 in-flight 與 starved 在儀表上分得開。"
+  },
+  {
+    "timestamp": "2026-07-22T10:56:05+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_299c79b6",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-cb097ccd75ce42a3965de3f18e6bf512",
+    "owner": "hourly-slot-1-cb097ccd75ce42a3965de3f18e6bf512",
+    "commit": null,
+    "summary": "K1708 選項A stage 1/2 收件 + stage 2/2 派工。\n\n**收件（PHASE A, collect_completed）**：compute job compute-k1708-full-sample-rerun-a-own-restriction-1784685543\n於 02:00→02:41 完成（exit 0）。主線程驗三件事：\n1. verdict.label 仍為 NULL、qualified_markets=[] —— 未翻正，符合 README §15 的事前預期，\n   不觸發「停手回報」條款。\n2. code_trace[\"K1708.py\"].sha256=4a8236ff9b83…、size_bytes=126998，與 worktree 內現行\n   experiments/k1708/K1708.py 逐位元一致（shasum 比對）→ round-3 BLOCKER 3 的 code_trace\n   drift（舊 results 指向 sha 43bffdd/91,752 bytes）已消失。\n3. payload 首次含真實 own-restriction 欄位：TAIFEX_TX cw_vs_own_restriction t=1.2364\n   (p_one_sided=0.1082)、control_series=HAR_KF_DISC_AT_DELTA_ONE、\n   regime_qlike_vs_own_restriction high=-0.004445 / low=+0.002401。\n\n**派工（stage 2/2）**：enqueue-agent agent-brief_k1708_stage2-e9aa0b（opus/xhigh，\ncwd=.claude/worktrees/dispatch-slot-1-457427c2-k1708）。brief 三項：(a) 用真實數字填\ngate_transition_audit 的 cross-comparator 欄位、關掉 round-3 BLOCKER 1 的循環論證，且\ntest_gate_audit_reports_the_stored_payload_as_not_comparable 改為同時釘住舊 payload\npossible=false 與新 payload possible=true（保持鑑別力，round-2 BLOCKER 4 教訓）；\n(b) 寫 reproduce_spec.json 並過 experiment_gates；(c) Codex primary-path round-4 review\n（gpt-5.6-sol/high，禁用 fallback reviewer —— round-1/2/3 皆 primary-path FAIL，換\nreviewer 等於湮滅比較基準）。硬性邊界：禁合併 worktree、review PASS 前不得合併。\n\n**為何 enqueue 而非 fire 內跑**：stage 2 含 Codex round-4，估時遠超 fire 的 3000s cap；\n依 CLAUDE.md「60 分鐘工作不塞進 50 分鐘容器」走 compute queue，由後續 fire 於 PHASE A 收件。"
+  },
+  {
+    "timestamp": "2026-07-22T11:00:16+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_d7f183e1",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-cb097ccd75ce42a3965de3f18e6bf512",
+    "owner": "hourly-slot-1-cb097ccd75ce42a3965de3f18e6bf512",
+    "commit": null,
+    "summary": "ASIA 廣度 backlog 第 1 班：派出兩筆亞太新主題實驗（老闆 telegram 指令 assign_d7f183e1）。\n\n**背景**：老闆質疑新主題實驗停滯。查證屬實 —— 近一週 experiment 完成量不低\n（7/19 17 筆、7/21 15 筆）但幾乎全是 K1623/K1708/K1731/K1380 的 remediation 與稽核重跑，\nASIA 廣度任務長期 pending 被排擠。\n\n**本班修正原 brief 的一處事實**：原指令列的 4 筆待辦含 K1719 ASIA-5，但該筆已於 7/21 完成\n（見 24h 完成清單），不重派。實際派出 2 筆：\n- `asia3_tw_sector_spillover` 台股產業 DY spillover（電子/金融/航運/塑化/光學 9 檔）\n  → agent job `agent-brief_asia3-f72fed`，worktree `dispatch-slot-1-cb097ccd-asia3`\n- `K1724` 台股當沖佔比 → 次日 RV 預測力 + 雙向 Granger\n  → agent job `agent-brief_k1724-4ed6e2`，worktree `dispatch-slot-1-cb097ccd-k1724`\n\n兩份 brief 都寫死了本 repo 最容易出假結果的地方：ASIA-3 強制 generalized FEVD（禁 Cholesky\n排序假象）、樣本期須含空頭、跨市場假日 alignment；K1724 強制 DM 對 HAR 基準（非稻草人）、\nGranger 雙向皆報且不得寫成機制宣稱、當沖制度沿革變更點須做子樣本檢查。兩者皆\nseed=42 / signal.shift(1) / 禁寫 knowledge.json / 禁合併 worktree / Codex primary-path review。\n\n**為何走 compute queue 而非 fire 內跑**：experiment topology=worktree、effort=xhigh，\n估時遠超 fire 的 3000s cap。收件由後續 fire 於 PHASE A 做。\n\n**第 2 班**已建為 `asia_backlog_shift2_20260722`（P1）：K1723 颱風登陸 vol + 收件回報。"
+  },
+  {
+    "timestamp": "2026-07-22T11:16:11+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_d569f0c4",
+    "outcome": "root_cause_fixed_and_verified",
+    "actor": "codex-failover-slot-4-25360d105c7e494da571d790422c4165",
+    "owner": "codex-failover-slot-4-25360d105c7e494da571d790422c4165",
+    "commit": null,
+    "summary": "Added the single-owner enqueue-agent task/worktree collision gate, required source task IDs, blocked live unmerged duplicate branches, preserved merged-history behavior, and passed 58 targeted tests plus the pretool deny suite."
   }
 ]

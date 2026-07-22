@@ -191,15 +191,85 @@ def test_live_process_alone_protects_a_claim(env):
     assert report["retained"][0]["verdict"] == "process_alive"
 
 
-def test_surviving_worktree_alone_protects_a_claim(env):
+def test_surviving_worktree_alone_protects_a_claim(env, monkeypatch):
     """Dead pid but a checkout still on disk => bookkeeping problem, not a free
     slot. Re-pending would invite a second agent to redo unmerged work."""
     (env["worktrees"] / f"dispatch-slot-2-{DEAD_JOB[:8]}-k9999").mkdir()
+    monkeypatch.setattr(
+        liveness_reconcile,
+        "adjudicate_worktrees",
+        lambda evidence, **kwargs: [
+            {
+                "worktree": evidence["pattern_matches"][0],
+                "classification": "merge_required",
+            }
+        ],
+    )
     task = _task("worktree_task", owner=DEAD_OWNER, claimed_minutes_ago=90)
     report = _run(env, [task])
 
     assert report["detached_count"] == 0
     assert report["retained"][0]["verdict"] == "worktree_on_disk"
+    assert (
+        report["retained"][0]["worktree_adjudication"][0]["classification"]
+        == "merge_required"
+    )
+
+
+@pytest.mark.parametrize(
+    ("status", "ahead", "classification", "action_fragment"),
+    [
+        ("?? experiments/k9/results.json", "0", "preserve_uncommitted", "merge_worktree.sh"),
+        ("", "2", "merge_required", "merge_worktree.sh"),
+        ("", "0", "reclaim_candidate_needs_gate", "merge_worktree.sh"),
+    ],
+)
+def test_worktree_veto_has_mechanical_adjudication_exit(
+    tmp_path, monkeypatch, status, ahead, classification, action_fragment
+):
+    """A dead fire with disk residue must say what fact blocks release and
+    which canonical transaction can resolve it; A4 may not stop at a veto."""
+    worktrees = tmp_path / "worktrees"
+    worktrees.mkdir()
+    name = "dispatch-slot-2-deadbeef-k9"
+    (worktrees / name).mkdir()
+
+    def fake_git(args, *, cwd):
+        if args[:2] == ["rev-parse", "--abbrev-ref"]:
+            return "wt/dead-k9"
+        if args[:2] == ["status", "--porcelain"]:
+            return status
+        if args[:2] == ["rev-list", "--count"]:
+            return ahead
+        raise AssertionError(args)
+
+    monkeypatch.setattr(liveness_reconcile, "_git_text", fake_git)
+    rows = liveness_reconcile.adjudicate_worktrees(
+        {"pattern_matches": [name], "referenced_present": []},
+        worktrees_dir=worktrees,
+    )
+
+    assert rows[0]["classification"] == classification
+    assert action_fragment in rows[0]["recommended_action"]
+    if classification == "reclaim_candidate_needs_gate":
+        assert "&&" in rows[0]["recommended_action"]
+        assert "liveness_reconcile.py --apply" in rows[0]["recommended_action"]
+
+
+def test_worktree_adjudication_query_failure_blocks(env, monkeypatch):
+    name = f"dispatch-slot-2-{DEAD_JOB[:8]}-k9999"
+    (env["worktrees"] / name).mkdir()
+
+    def broken_git(args, *, cwd):
+        raise OSError("git unavailable")
+
+    monkeypatch.setattr(liveness_reconcile, "_git_text", broken_git)
+    task = _task("worktree_task", owner=DEAD_OWNER, claimed_minutes_ago=90)
+    report = _run(env, [task])
+
+    adjudication = report["retained"][0]["worktree_adjudication"][0]
+    assert adjudication["classification"] == "blocked_unknown"
+    assert "do not merge, remove, or release claim" in adjudication["recommended_action"]
 
 
 def test_unverifiable_pid_probe_is_not_death(env, monkeypatch):
