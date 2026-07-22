@@ -8,7 +8,8 @@ trending_repost 候選（不再靠主線程手掃 / 不再停擺）。
 trending_repost 寫作 agent 負責（refill_reader_facing_pool.py 註解所述）。
 所以用免費 agy 生候選即可，無付費 API 成本（用戶 2026-05-29 指定）。
 
-Output (stdout): JSON `{"candidates": [{"topic","title","description"}, ...]}`
+Output (stdout): JSON
+`{"candidates": [{"topic","title","description","quant_claims"}, ...]}`
 契約見 scripts/refill_reader_facing_pool.py::_extract_trending_candidates。
 
 Usage:
@@ -41,9 +42,14 @@ PROMPT = """你是 VolPred 波動率研究平台的選題助手。請列出「�
 - topic: 短主題標籤（英數或中文，≤6 字）
 - title: 一句話文章方向（VolPred 波動率/風險角度，繁中，≤30 字）
 - description: 2-3 句改寫切入點 brief（繁中，說明可量化/可驗證的角度）
+- quant_claims: title/description 內每一個具體百分比、指數點數、成交量或金額的結構化清單。
+  不確定或尚未由 primary source 核對的數字不要寫進 title/description。若有數字，每筆必填
+  kind（percent/points/volume/amount）、value（文字中的數值）、provider（yfinance/fred）、
+  date（YYYY-MM-DD）、metric；yfinance 另填 ticker，fred 另填 series_id。
+  yfinance metric 只可用 close_change_pct/close_change_points/volume；fred metric 用 observation。
 
 範例格式：
-[{"topic":"AI capex","title":"四大科技股單季燒 800 億，波動率市場怎麼定價？","description":"從 CapEx 年增 36% 切入，分析市場是否低估了 AI 基建投資的執行風險。可量化：科技股 implied vol vs CapEx 指引修正的相關性。"}]
+[{"topic":"台股","title":"台股單日跌 6.5%，波動率如何反應？","description":"核對當日收盤後，分析尾部風險。","quant_claims":[{"kind":"percent","value":-6.5,"provider":"yfinance","ticker":"^TWII","date":"2026-07-17","metric":"close_change_pct"}]}]
 
 不要解釋，不要額外文字，只回 JSON 陣列。"""
 
