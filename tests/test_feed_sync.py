@@ -274,6 +274,40 @@ def test_compute_diff_detects_details_change_outside_experiment_refs(tmp_path):
     assert diff["update"] == ["mile_ws_c3"]
 
 
+def test_compute_diff_projects_retraction_audit_metadata(tmp_path):
+    """A retraction is not synced if only its status reaches Supabase.
+
+    Successor, errata and explicit no-successor metadata live at feed top level
+    but must be projected into the remote details jsonb column.
+    """
+    feed_item, db_row = _clean_pair()
+    feed_item.update(
+        {
+            "status": "retracted",
+            "retracted_reason": "material factual error",
+            "retracted_superseded_by": ["mile_successor"],
+            "retracted_errata_ref": "task:correction-1",
+            "retracted_no_successor_reason": None,
+            "retraction_schema_version": 1,
+        }
+    )
+    db_row["status"] = "retracted"
+
+    diff = _diff_for(tmp_path, feed_item, db_row)
+    assert diff["update"] == ["mile_ws_c3"]
+
+    db_row["details"] = {
+        **db_row["details"],
+        "retracted_reason": "material factual error",
+        "retracted_superseded_by": ["mile_successor"],
+        "retracted_errata_ref": "task:correction-1",
+        "retracted_no_successor_reason": None,
+        "retraction_schema_version": 1,
+    }
+    diff = _diff_for(tmp_path, feed_item, db_row)
+    assert diff["update"] == []
+
+
 def test_compute_diff_still_detects_experiment_refs_change(tmp_path):
     """Regression for the 2026-04-26 K-id migration case, now covered via the
     full-details comparison instead of the deleted refs-only check."""

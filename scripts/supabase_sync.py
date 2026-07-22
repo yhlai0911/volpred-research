@@ -753,6 +753,14 @@ def projected_details(item: dict) -> dict:
         details = {} if details is None else {"_legacy": details}
     if item.get("last_updated_at"):
         details = {**details, "last_updated_at": item.get("last_updated_at")}
+    if item.get("status") == "retracted":
+        retraction = {
+            key: item.get(key)
+            for key in RETRACTION_DETAIL_FIELDS
+            if key in item
+        }
+        if retraction:
+            details = {**details, **retraction}
     return details
 
 
@@ -769,6 +777,19 @@ def projected_details(item: dict) -> dict:
 # details overwrite had no concept of server-resident keys (and had in fact
 # been silently clobbering seeds on every article re-sync since 2026-07-18).
 SERVER_RESIDENT_DETAILS_KEYS = ("view_display",)
+
+# Retraction metadata is canonical at the feed-item top level, while Supabase
+# has no dedicated columns for it.  Project it into ``details`` so remote audit
+# and frontend surfaces do not lose the successor/errata chain.  Keeping the
+# mapping beside projected_details() also makes compute_diff see the same row
+# that sync_article() writes.
+RETRACTION_DETAIL_FIELDS = (
+    "retracted_reason",
+    "retracted_superseded_by",
+    "retracted_errata_ref",
+    "retracted_no_successor_reason",
+    "retraction_schema_version",
+)
 
 
 def _fetch_server_resident_details(slug: str) -> dict | None:

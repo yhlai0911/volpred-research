@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://volpred.local/schema/article-retraction-v1.json",
+  "title": "VolPred retracted feed article",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "retracted_reason",
+    "retracted_superseded_by",
+    "retracted_errata_ref",
+    "retracted_no_successor_reason",
+    "retraction_schema_version"
+  ],
+  "properties": {
+    "id": {"type": "string", "pattern": "^mile_[A-Za-z0-9]+$"},
+    "status": {"const": "retracted"},
+    "retracted_reason": {"type": "string", "minLength": 1},
+    "retracted_superseded_by": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^mile_[A-Za-z0-9]+$"},
+      "uniqueItems": true
+    },
+    "retracted_errata_ref": {"type": ["string", "null"]},
+    "retracted_no_successor_reason": {"type": ["string", "null"]},
+    "retraction_schema_version": {"const": 1}
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "retracted_superseded_by": {"minItems": 1},
+        "retracted_no_successor_reason": {"type": "null"}
+      }
+    },
+    {
+      "properties": {
+        "retracted_superseded_by": {"maxItems": 0},
+        "retracted_no_successor_reason": {"type": "string", "minLength": 1}
+      }
+    }
+  ]
+}

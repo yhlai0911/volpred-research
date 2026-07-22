@@ -775,3 +775,28 @@ merge 仍由 round-3 的 3 項 blocking defect 封鎖，出口是
 `k1623_rev4_remediation_after_codex_round3_fail`。**main 的 `experiments/k1623/README.md`
 目前仍是未修復的第一輪版本**（仍寫著「純假象假說被拒絕」「不可交易」「多處顯著更差」），
 在 rev4 合併前不可引用。
+
+### 2026-07-22 23:21 — 撤稿只有手改 feed、同步又丟掉 successor metadata — root_cause_fixed_and_verified
+
+`storage/reports/feed.json` 原有 13 篇 `status=retracted`，但只有 `mile_ebb5d6f5` 帶
+`retracted_superseded_by`；repo 沒有任何撤稿 writer 或 schema。這不是 12 筆資料漏填，而是共享 canonical
+state 沒有 owner：欄位名已在任務間漂成 `superseded_by` / `retracted_superseded_by`，無後繼者時也沒有
+「未知」與「忘了填」的機械區分。
+
+**底層修復**：新增 `volpred.ops.retraction` + `scripts/retract_article.py`，所有撤稿走
+`publisher_feed` lock、guarded atomic replace、read-back 與 writer provenance；CLI 強制二選一：至少一個
+`--superseded-by`，或帶理由的 `--no-successor`。已存在的非空 metadata 若衝突會 fail closed，不容許把
+二次改寫偽裝成 idempotent rerun。`config/article_retraction.schema.json` v1 固定四個 audit 欄位與 successor
+/ no-successor XOR 契約，canonical-writer ratchet 同步登記新 owner。
+
+**下游 class sweep 找到第二個根因**：第一次跑 canonical incremental sync 回報 `articles: 0`。原因不是
+遠端已一致，而是 `projected_details()` 只投影原本的 `details`，把 feed top-level 的 retraction metadata
+全部丟掉；因此 differ 與 writer 都認為「status 已是 retracted」就沒有變更。現在五個 v1 欄位會映射進
+Supabase `details`，仍由同一 `projected_details()` 同時服務 differ 與 writer。
+
+**回填與回讀**：13 篇全數經新 CLI 正規化；4 篇有明確 successor（只採既有可證的
+`mile_ebb5d6f5`，以及任務核定的 `ec28b1cc→1a6d9369`、`beb61a8a→490d38ec`、
+`b5a91c4d→bad0d545`），其餘 9 篇明示 successor unknown，沒有猜測。逐篇 Supabase sync + cache purge
+成功後，fresh remote `compute_diff` 對這 13 篇回報 `insert=[] / update=[] / delete=[]`。相關 projection、
+cache、diff、writer 與 auditor regression 共 68 passed / 1 env-gated skip；canonical writer audit 為
+0 unguarded / 0 owner mismatch。

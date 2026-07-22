@@ -166,6 +166,9 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "src/volpred/ops/questions.py:ensure_member_qa_task": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
     },
+    "src/volpred/ops/retraction.py:_write_feed_atomic": {
+        "os.replace": 1, "unlink": 1, "write_text": 1,
+    },
     "src/volpred/publisher/lazypack_install.py:install_lazypack_section": {"write_text": 1},
     "src/volpred/publisher/publisher.py:Publisher._append_to_feed": {
         "open-write": 1, "replace": 1,
@@ -213,6 +216,7 @@ GENERIC_OWNER_TARGETS: Mapping[str, frozenset[str]] = {
     "src/volpred/ops/next_tasks.py:write_tasks_to_handle": frozenset(
         {"fh", "handle_name"}
     ),
+    "src/volpred/ops/retraction.py:_write_feed_atomic": frozenset({"path", "tmp"}),
 }
 
 HANDLE_ONLY_OWNERS = {"src/volpred/ops/next_tasks.py:write_tasks_to_handle"}

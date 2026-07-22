@@ -49897,14 +49897,11 @@
     "description": "撤稿（retraction）目前**沒有任何 writer 擁有它** —— 全靠手動改 storage/reports/feed.json。\n證據（2026-07-21 掃描）：\n\n- `grep -rn \"retracted_superseded_by\" --include=\"*.py\" .` → 0 hit（排除 worktrees）\n- `grep -rn \"retracted_reason\" --include=\"*.py\" .` → 0 hit\n- `grep -rn \"retracted\" scripts src` → 只有讀取端（refill_task_pool 跳過已撤稿候選、\n  series_registry 過濾、supabase_sync 註解），沒有寫入端\n\n**後果**：feed.json 1,863 篇中 `status=retracted` 有 13 篇，\n**只有 1 篇（mile_ebb5d6f5）有 `retracted_superseded_by`**，其餘 12 篇連欄位都沒有。\nsupersede 鏈整片斷掉，audit 端看不出撤稿文被誰取代。\n欄位命名也因此漂移 —— 上游任務報的是 `superseded_by`，實際欄位是 `retracted_superseded_by`，\n就是因為沒有 canonical owner 定名。\n\n**要做（順序不可調換）**：\n1. 建 retraction writer CLI（單一 owner，例如 scripts/retract_article.py）：\n   接 --id / --reason / --superseded-by / --errata-ref，寫入 canonical 欄位名，\n   走既有的 locked write 路徑，並在無 --superseded-by 時要求明示 --no-successor 理由，\n   避免又靜默留白。附 schema 與 regression test（斷言撤稿後四個欄位都在）。\n2. 回填既有 12 筆。**只有 3 筆的後繼者可從 retracted_reason 文字反推**，其餘 9 筆不得臆測：\n   - mile_ec28b1cc → mile_1a6d9369（reason 內指名 K864 研究版）\n   - mile_beb61a8a → mile_490d38ec（reason = duplicate_of_mile_490d38ec）\n   - mile_b5a91c4d → mile_bad0d545（reason 內指名）\n   另 mile_bb520db8 / mile_d8e36bcb 連 reason 都是空字串，需人工判定或標 unknown。\n3. 回填後才走 sync，且需排在 `assign_frontend_deploy_revalidate_endpoint_20260719`\n   的快取端點部署之後（前置任務的原始註記）。\n\n**不要做**：不要先回填再補 writer —— 那樣下一次撤稿又是手動、又會漏，等於白做。\n不要為了讓欄位齊全而猜後繼者；猜錯的 supersede 指標比沒有指標更糟。\n\n前身：assign_feed_superseded_by_null_audit_20260719（該張報的 mile_ebb5d6f5 漏寫是誤報 ——\n欄位名看錯，該篇實際寫了 ['mile_9560b9cc']）。發現者：hourly-slot-1 2026-07-21。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-21T09:35:40.903195+00:00",
     "parent_task_id": "assign_feed_superseded_by_null_audit_20260719",
     "created_by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
-    "claimed_by": "codex-failover-slot-2-3cf0ee9bdcd945c19c29b236f05cc2a0",
-    "claimed_at": "2026-07-22T15:08:17.309398+00:00",
-    "claim_session_id": "30fae1729748",
     "status_history": [
       {
         "ts": "2026-07-22T15:08:17.309413+00:00",
@@ -49917,9 +49914,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-2-3cf0ee9bdcd945c19c29b236f05cc2a0"
+      },
+      {
+        "ts": "2026-07-22T15:23:59.412493+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-3cf0ee9bdcd945c19c29b236f05cc2a0"
       }
     ],
-    "started_at": "2026-07-22T15:08:17.611634+00:00"
+    "started_at": "2026-07-22T15:08:17.611634+00:00",
+    "completed_at": "2026-07-22T15:23:59.412478+00:00",
+    "result": "root_cause_fixed_and_verified: added locked canonical retraction writer/CLI + v1 schema, fail-closed successor contract, Supabase details projection, and canonical-writer ratchet; normalized 13 retractions (4 verified successors, 9 explicit unknown), synced each with cache purge, remote compute_diff clean; 78 passed, 1 env-gated skip."
   },
   {
     "id": "k1730_salvage_ref_integrate_v2_closeout",
