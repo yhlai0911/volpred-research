@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T13:01:14.098312+00:00",
+  "generated_at": "2026-07-22T14:00:58.865290+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,22 +7,43 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 23.7
+      "age_hours": 24.7
+    },
+    {
+      "path": "storage/drafts/k1253_general_draft.md",
+      "title": "波動率模型擋得住黑天鵝嗎？我們拿一場關稅風暴實測給你看",
+      "audience": "general",
+      "status": "draft",
+      "body_chars": 2463,
+      "age_hours": 3.0
+    },
+    {
+      "path": "storage/drafts/k1711_general_draft.md",
+      "title": "AI 圈的「時序基礎模型」搬進波動率擂台：老公式 HAR 沒被打下來",
+      "audience": "general",
+      "status": "draft",
+      "body_chars": 4040,
+      "age_hours": 3.0
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 48,
-    "grace": 3,
+    "grace": 1,
     "inflight": 0
   },
-  "orphan_count": 1,
+  "orphan_count": 3,
   "adopted": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
       "adopted": false,
       "reason": "gate_rejected (rc=5):   Per .claude/rules/publishing.md, every published article needs 2+ real PNG charts. Generate the charts and embed them in a `## 圖表` section, then retry. Use `--no-image-gate` only for genuinely text-"
+    },
+    {
+      "path": "storage/drafts/k1253_general_draft.md",
+      "adopted": false,
+      "reason": "gate_rejected (rc=7):   Refusing to publish. Rewrite the draft in general-reader language (remove K-id / statistical jargon from title and body) or intentionally publish it as research."
     }
   ],
   "applied": true,
