@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T14:12:24.498692+00:00",
+  "generated_at": "2026-07-22T15:00:58.100897+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 24.8
+      "age_hours": 25.7
     },
     {
       "path": "storage/drafts/k1253_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2463,
-      "age_hours": 3.1
+      "age_hours": 4.0
     },
     {
       "path": "storage/drafts/k1711_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 4040,
-      "age_hours": 3.1
+      "age_hours": 4.0
     }
   ],
   "held": [],
@@ -34,10 +34,40 @@
     "inflight": 0
   },
   "orphan_count": 3,
-  "adopted": [],
+  "adopted": [
+    {
+      "path": "storage/drafts/K1597_general_draft.md",
+      "adopted": false,
+      "reason": "gate_rejected (rc=5):   Per .claude/rules/publishing.md, every published article needs 2+ real PNG charts. Generate the charts and embed them in a `## 圖表` section, then retry. Use `--no-image-gate` only for genuinely text-"
+    },
+    {
+      "path": "storage/drafts/k1253_general_draft.md",
+      "adopted": false,
+      "reason": "gate_rejected (rc=7):   Refusing to publish. Rewrite the draft in general-reader language (remove K-id / statistical jargon from title and body) or intentionally publish it as research."
+    }
+  ],
   "applied": true,
   "job_deliverable_candidates": [],
-  "job_deliverable_held": [],
+  "job_deliverable_held": [
+    {
+      "job_id": "compute-k1708-full-sample-rerun-a-own-restriction-1784685543",
+      "reason": "no_existing_declared_files",
+      "rejected": [
+        {
+          "path": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_results.json",
+          "reason": "git_ignored"
+        },
+        {
+          "path": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_forecast_ledger.csv",
+          "reason": "git_ignored"
+        },
+        {
+          "path": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_cumulative_loss.png",
+          "reason": "git_ignored"
+        }
+      ]
+    }
+  ],
   "job_deliveries": [],
   "namespaces": {
     "drafts": {
