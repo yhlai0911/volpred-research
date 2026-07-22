@@ -49826,10 +49826,33 @@
     "description": "根因：handoff_latest.md 53KB，其中自動產生的當前快照（第 1~112 行，§1-§9）只有 6.2KB，剩下 46.9KB（88%）全是「候補/手動補充」區的歷史殘留 — 10 條 FB awaiting interactive、5 條已標 RESOLVED、最舊到 2026-05-29、最新條目也是 2026-07-07（兩週前）。每個 session 開場依 AGENTS.md「開工前必讀」全文讀，143 次累計 132 萬 token。老闆本人沒讀過，全是 agent 讀的。\n\n要做三件事：\n1. 歸檔候補區：把「候補/手動補充」以下所有超過 14 天或已標 RESOLVED 的條目搬到 storage/ops/handoff_archive/YYYY-MM.md，主檔只留未解決且 14 天內的。預期主檔 53KB → ~10KB。\n2. regen 時自動歸檔：在產生 handoff_latest.md 的程式（每小時 :50 那支）加自動 rotation — 候補區條目超過 14 天或標 RESOLVED 即移到 archive，避免再次累積。\n3. 改讀法：AGENTS.md / 相關 skill 的「開工前必讀 handoff_latest.md」改成「讀 §1-§9 自動區（前 ~112 行）；候補區按需求 grep」，並在檔頭加一行導引註明分區與建議讀法。\n\n驗收：主檔 <15KB；archive 檔存在且內容完整無遺失；regen 跑一次後候補區不再回填舊條目；AGENTS.md 讀法已更新。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-21T10:58:06.390717+00:00",
-    "created_by": "telegram-responder"
+    "created_by": "telegram-responder",
+    "status_history": [
+      {
+        "ts": "2026-07-22T07:10:29.335345+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-1bbf5933af3b4b868f9e21963c7bb294"
+      },
+      {
+        "ts": "2026-07-22T07:10:31.205397+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-1bbf5933af3b4b868f9e21963c7bb294"
+      },
+      {
+        "ts": "2026-07-22T07:13:47.843379+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-1bbf5933af3b4b868f9e21963c7bb294"
+      }
+    ],
+    "started_at": "2026-07-22T07:10:31.205385+00:00",
+    "completed_at": "2026-07-22T07:13:47.843358+00:00",
+    "result": "root_cause=KEEP block was preserved wholesale with no retention policy; added 14-day/RESOLVED/undated monthly rotation with idempotent archives, bounded-read guidance, and 11 passing tests. Verified handoff_latest 52770B -> 6660B and stable archive hashes across consecutive regen runs."
   },
   {
     "id": "snapdup_cert_fallback_codex_usage_limit_20260721",
@@ -51226,25 +51249,25 @@
       "derates": false,
       "derates_updated_at": "2026-07-21T22:07:45.893152+00:00",
       "deferred": [
-        "docs/refactor_commit_ownership_state_machine.md: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dedupe_next_tasks.py: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dispatch_slot_budget.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dispatch_supervisor/phase_z.py: 已保存，且 0.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/reap_orphan_deliverables.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_fire_manifest.py: 已保存，且 15.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_orphan_namespace_registry.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_phase_z_foreign_incident.py: 已保存，且 6.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/worktree_gc.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/content.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/fire_manifest.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/foreign_incident.py: 已保存，且 6.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 15.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/task_signature.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/publisher/publisher.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/mile_e4002f4f.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_task_signature.py: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_topic_cluster_gate.py: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_worktree_gc.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/refactor_commit_ownership_state_machine.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dedupe_next_tasks.py: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_slot_budget.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_supervisor/phase_z.py: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/reap_orphan_deliverables.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_fire_manifest.py: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_orphan_namespace_registry.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_phase_z_foreign_incident.py: 已保存，且 7.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/worktree_gc.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/content.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/fire_manifest.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/foreign_incident.py: 已保存，且 7.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/task_signature.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/publisher/publisher.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/mile_e4002f4f.json: 已保存，且 10.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_task_signature.py: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_topic_cluster_gate.py: 已保存，且 10.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_worktree_gc.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51433,7 +51456,7 @@
     "description": "## 發生什麼\n26 個未提交檔案不是任何一班 fire 產出的，最長已連續 20 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/refactor_commit_ownership_state_machine.md — 13 班\n- scripts/audit_silent_fallbacks.py — 12 班\n- scripts/dedupe_next_tasks.py — 13 班\n- scripts/dispatch_slot_budget.py — 16 班\n- scripts/dispatch_supervisor/phase_z.py — 16 班\n- scripts/reap_orphan_deliverables.py — 16 班\n- scripts/tests/test_fire_manifest.py — 13 班\n- scripts/tests/test_orphan_namespace_registry.py — 16 班\n- scripts/tests/test_phase_z_foreign_incident.py — 16 班\n- scripts/worktree_gc.py — 13 班\n- src/volpred/cli.py — 5 班\n- src/volpred/ops/content.py — 5 班\n- src/volpred/ops/fire_manifest.py — 13 班\n- src/volpred/ops/foreign_incident.py — 16 班\n- src/volpred/ops/next_tasks.py — 13 班\n- src/volpred/ops/task_signature.py — 13 班\n- src/volpred/publisher/publisher.py — 5 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png — 20 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png — 20 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png — 20 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py — 20 班\n- storage/reports/mile_e4002f4f.json — 5 班\n- tests/test_member_qa_duplicate_gate.py — 5 班\n- tests/test_task_signature.py — 13 班\n- tests/test_topic_cluster_gate.py — 5 班\n- tests/test_worktree_gc.py — 13 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T233800930862Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "phase_z",
     "created_at": "2026-07-21T23:38:03.070418+00:00",
     "payload": {
@@ -51504,28 +51527,46 @@
       "derates": false,
       "derates_updated_at": "2026-07-22T00:07:52.636757+00:00",
       "deferred": [
-        "docs/refactor_commit_ownership_state_machine.md: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dedupe_next_tasks.py: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dispatch_slot_budget.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dispatch_supervisor/phase_z.py: 已保存，且 0.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/reap_orphan_deliverables.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_fire_manifest.py: 已保存，且 15.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_orphan_namespace_registry.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_phase_z_foreign_incident.py: 已保存，且 6.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/worktree_gc.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/content.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/fire_manifest.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/foreign_incident.py: 已保存，且 6.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 15.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/task_signature.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/publisher/publisher.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/mile_e4002f4f.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_task_signature.py: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_topic_cluster_gate.py: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_worktree_gc.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/refactor_commit_ownership_state_machine.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dedupe_next_tasks.py: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_slot_budget.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_supervisor/phase_z.py: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/reap_orphan_deliverables.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_fire_manifest.py: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_orphan_namespace_registry.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_phase_z_foreign_incident.py: 已保存，且 7.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/worktree_gc.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/content.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/fire_manifest.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/foreign_incident.py: 已保存，且 7.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/task_signature.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/publisher/publisher.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/mile_e4002f4f.json: 已保存，且 10.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_task_signature.py: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_topic_cluster_gate.py: 已保存，且 10.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_worktree_gc.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "claimed_by": "codex-failover-slot-3-43e3b43e7b45493195eb0577cab61c34",
+    "claimed_at": "2026-07-22T07:10:17.427809+00:00",
+    "claim_session_id": "d3f634308a6c",
+    "status_history": [
+      {
+        "ts": "2026-07-22T07:10:17.427825+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-3-43e3b43e7b45493195eb0577cab61c34"
+      },
+      {
+        "ts": "2026-07-22T07:10:17.853695+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-3-43e3b43e7b45493195eb0577cab61c34"
+      }
+    ],
+    "started_at": "2026-07-22T07:10:17.853669+00:00"
   },
   {
     "id": "event_article_fomc_2026-07-29_tminus7",
@@ -52245,34 +52286,27 @@
       "derates": false,
       "derates_updated_at": "2026-07-22T03:35:45.986032+00:00",
       "deferred": [
-        "AGENTS.md: 已保存，且 3.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "docs/error_log.md: 已保存，且 3.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "docs/refactor_commit_ownership_state_machine.md: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/check_experiment_artifacts.py: 已保存，且 0.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dedupe_next_tasks.py: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dispatch_slot_budget.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dispatch_supervisor/phase_z.py: 已保存，且 0.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/fb_realchrome_post.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/preserve_gate_blob.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/reap_orphan_deliverables.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_fire_manifest.py: 已保存，且 15.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_gate_blob_preservation.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_orphan_namespace_registry.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_phase_z_foreign_incident.py: 已保存，且 6.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_reproduce_spec_runtime_emitter.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/worktree_gc.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/content.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/fire_manifest.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/foreign_incident.py: 已保存，且 6.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 15.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/task_signature.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/publisher/publisher.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/research/__init__.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/research/reproduce_spec.py: 已保存，且 3.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/mile_e4002f4f.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_task_signature.py: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_topic_cluster_gate.py: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_worktree_gc.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 4.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "docs/refactor_commit_ownership_state_machine.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dedupe_next_tasks.py: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_slot_budget.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_supervisor/phase_z.py: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/fb_realchrome_post.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/reap_orphan_deliverables.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_fire_manifest.py: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_orphan_namespace_registry.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_phase_z_foreign_incident.py: 已保存，且 7.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/worktree_gc.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/content.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/fire_manifest.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/foreign_incident.py: 已保存，且 7.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/task_signature.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/publisher/publisher.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/mile_e4002f4f.json: 已保存，且 10.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_task_signature.py: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_topic_cluster_gate.py: 已保存，且 10.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_worktree_gc.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52291,7 +52325,30 @@
     "created_at": "2026-07-22T04:00:07.572912+00:00",
     "title": "CI 紅燈修復（run 29887298395, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29887298395\nattempt: 1\nhead_sha: 010919ba8\n偵測摘要（仍須讀完整 failed log）：2026-07-22T03:13:07.5342147Z E AssertionError: assert 'promoted' == 'member_qa_publish_blocked'\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29887298395 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-22T07:09:27.717727+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-1bbf5933af3b4b868f9e21963c7bb294"
+      },
+      {
+        "ts": "2026-07-22T07:09:28.067620+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-1bbf5933af3b4b868f9e21963c7bb294"
+      },
+      {
+        "ts": "2026-07-22T07:10:27.614873+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover-slot-2-1bbf5933af3b4b868f9e21963c7bb294",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-22T07:09:28.067611+00:00",
+    "last_released_at": "2026-07-22T07:10:27.614860+00:00"
   },
   {
     "id": "assign_0e77fe90",
@@ -52495,35 +52552,27 @@
       "derates": false,
       "derates_updated_at": "2026-07-22T06:00:39.145071+00:00",
       "deferred": [
-        "AGENTS.md: 已保存，且 3.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "docs/error_log.md: 已保存，且 3.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "docs/refactor_commit_ownership_state_machine.md: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/check_experiment_artifacts.py: 已保存，且 0.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dedupe_next_tasks.py: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dispatch_slot_budget.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/dispatch_supervisor/phase_z.py: 已保存，且 0.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/fb_realchrome_post.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/hooks/gate_edit_guard.py: 已保存，且 0.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/preserve_gate_blob.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/reap_orphan_deliverables.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_fire_manifest.py: 已保存，且 15.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_gate_blob_preservation.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_orphan_namespace_registry.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_phase_z_foreign_incident.py: 已保存，且 6.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/tests/test_reproduce_spec_runtime_emitter.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/worktree_gc.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/content.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/fire_manifest.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/foreign_incident.py: 已保存，且 6.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 15.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/task_signature.py: 已保存，且 14.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/publisher/publisher.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/research/__init__.py: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/research/reproduce_spec.py: 已保存，且 3.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/mile_e4002f4f.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_task_signature.py: 已保存，且 15.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_topic_cluster_gate.py: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_worktree_gc.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 4.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "docs/refactor_commit_ownership_state_machine.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dedupe_next_tasks.py: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_slot_budget.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_supervisor/phase_z.py: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/fb_realchrome_post.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/reap_orphan_deliverables.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_fire_manifest.py: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_orphan_namespace_registry.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_phase_z_foreign_incident.py: 已保存，且 7.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/worktree_gc.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/content.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/fire_manifest.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/foreign_incident.py: 已保存，且 7.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/task_signature.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/publisher/publisher.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/mile_e4002f4f.json: 已保存，且 10.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_task_signature.py: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_topic_cluster_gate.py: 已保存，且 10.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_worktree_gc.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52533,10 +52582,26 @@
     "task_type": "telegram_reply",
     "priority": 1,
     "source": "telegram",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-22T05:17:17.181168+00:00",
     "title": "回覆老闆 Telegram 訊息（msg 1312）",
-    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n不是說修好了嗎？\n怎麼還是一樣一堆東西？\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] PHASE-Z 有檔案不是這班產出的，已略過\n\n📌 白話結論\n這班 fire 的 2 個檔案已自動 commit。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n（fire 時間: 13:16；29 個檔案）\n\n📌 發生什麼\n這班 fire 的 2 個檔案已自動 commit。另外 29 個檔案在 fire 開始前就已經是未提交狀態 —— 那是別的 session 正在做的事，PHASE-Z 沒有動它們。\n\n📌 現在該做什麼\n通常不需要處理（該 session 會自己 commit）。若它已經結束，請人工確認後再 commit。\n\n📌 略過的檔案\n• AGENTS.md\n• docs/error_log.md\n• docs/refactor_commit_ownership_state_machine.md\n• scripts/check_experiment_artifacts.py\n• scripts/dedupe_next_tasks.py\n• scripts/dispatch_slot_budget.py\n• scripts/dispatch_supervisor/phase_z.py\n• scripts/fb_realchrome_post.py\n• scripts/hooks/gate_edit_guard.py\n• scripts/preserve_gate_blob.py\n• scripts/reap_orphan_deliverables.py\n• scripts/tests/test_fire_manifest.py\n• scripts/tests/test_gate_blob_preservation.py\n• scripts/tests/test_orphan\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n不是說修好了嗎？\n怎麼還是一樣一堆東西？\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] PHASE-Z 有檔案不是這班產出的，已略過\n\n📌 白話結論\n這班 fire 的 2 個檔案已自動 commit。\n\n📌 影響\n影響平台自動運作的穩定性。\n\n🛠️ 行動\n依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\n\n---\n（fire 時間: 13:16；29 個檔案）\n\n📌 發生什麼\n這班 fire 的 2 個檔案已自動 commit。另外 29 個檔案在 fire 開始前就已經是未提交狀態 —— 那是別的 session 正在做的事，PHASE-Z 沒有動它們。\n\n📌 現在該做什麼\n通常不需要處理（該 session 會自己 commit）。若它已經結束，請人工確認後再 commit。\n\n📌 略過的檔案\n• AGENTS.md\n• docs/error_log.md\n• docs/refactor_commit_ownership_state_machine.md\n• scripts/check_experiment_artifacts.py\n• scripts/dedupe_next_tasks.py\n• scripts/dispatch_slot_budget.py\n• scripts/dispatch_supervisor/phase_z.py\n• scripts/fb_realchrome_post.py\n• scripts/hooks/gate_edit_guard.py\n• scripts/preserve_gate_blob.py\n• scripts/reap_orphan_deliverables.py\n• scripts/tests/test_fire_manifest.py\n• scripts/tests/test_gate_blob_preservation.py\n• scripts/tests/test_orphan\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-22T07:07:44.321655+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder-65154"
+      },
+      {
+        "ts": "2026-07-22T07:09:21.092334+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder-65154"
+      }
+    ],
+    "completed_at": "2026-07-22T07:09:21.092319+00:00",
+    "result": "已核對 13:16 live evidence：本班 2 檔 commit 成功，但 29 個 active foreign paths 仍被同一 WARN 呈現；更正先前過度結案，只標 contained。已正式建立 P1 assign_ca208e68，並由 Telegram msg 1314 回覆老闆。"
   },
   {
     "id": "alert_telegram_reply_backlog_20260722",
@@ -52544,13 +52609,36 @@
     "description": "由 alert `telegram_reply_backlog` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n老闆經 Telegram 傳來的訊息有 1 則沒被回，最久一則已等 44.5 分鐘（狀態 pending）。\n- telegram-1312: pending, 已等 44.5 分鐘\n- 門檻: warn>30.0分 / critical>120.0分\n\n## 影響\n老闆以為訊息送出就會被處理，但實際上沒有任何回覆 —— 這個故障面從外部完全看不出來（訊息照收、任務照排），只有老闆本人會發現。\n\n## 診斷指引（此條無自動修復：根因分歧，盲目重啟不對症）\n1. tail -20 /Users/yhlai0911/.volpred/logs/telegram_responder.log\n   — 看是 FATAL（缺依賴 / 環境漂移）還是 exit=1（Claude 額度用盡）。\n2. 額度爆 → 等 reset 或改 TELEGRAM_RESPONDER_MODEL；缺依賴 → 修 scripts/telegram_responder.sh 的啟動關卡。\n3. hourly dispatch 是兜底（~1h）；critical 代表連兜底都沒接到。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-22T06:02:11.496648+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "telegram_reply_backlog"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-22T07:03:16.826710+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-fb612eb6d47c4437be3374e1f319bb62"
+      },
+      {
+        "ts": "2026-07-22T07:03:26.839585+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-fb612eb6d47c4437be3374e1f319bb62"
+      },
+      {
+        "ts": "2026-07-22T07:10:00.147729+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-fb612eb6d47c4437be3374e1f319bb62"
+      }
+    ],
+    "started_at": "2026-07-22T07:03:26.839570+00:00",
+    "completed_at": "2026-07-22T07:10:00.147712+00:00",
+    "result": "Fresh detector recheck cleared after root-cause fix: telegram_responder now fails over from Claude quota/auth failure to bounded Codex in isolated scratch, sharing one unique claim owner and preserving reply-right guard. Live E2E: Claude weekly-limit exit -> Codex claimed/completed telegram-1312, sent Telegram msg 1314, queued P1 follow-up assign_ca208e68; pending Telegram replies=0. Tests: 12 backlog/failover passed; canonical writer gate passed; bash -n passed."
   },
   {
     "id": "assign_a043cc45",
@@ -52615,8 +52703,50 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-22T06:12:48.402514+00:00",
-      "last_seen_at": "2026-07-22T06:12:48.402514+00:00"
+      "last_seen_at": "2026-07-22T06:12:48.402514+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-22T07:01:06.101753+00:00",
+      "deferred": [
+        "docs/error_log.md: 已保存，且 4.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "docs/refactor_commit_ownership_state_machine.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dedupe_next_tasks.py: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_slot_budget.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/dispatch_supervisor/phase_z.py: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/fb_realchrome_post.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/reap_orphan_deliverables.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_fire_manifest.py: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_orphan_namespace_registry.py: 已保存，且 17.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/tests/test_phase_z_foreign_incident.py: 已保存，且 7.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/worktree_gc.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/content.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/fire_manifest.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/foreign_incident.py: 已保存，且 7.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/task_signature.py: 已保存，且 15.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/publisher/publisher.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/mile_e4002f4f.json: 已保存，且 10.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_task_signature.py: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_topic_cluster_gate.py: 已保存，且 10.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_worktree_gc.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
     "priority_capped_from": 1
+  },
+  {
+    "id": "assign_ca208e68",
+    "title": "P1 重構 PHASE-Z 跨 session 檔案所有權與假 WARN",
+    "description": "Telegram msg 1312 驗證先前結案過度宣稱：assign_b802db4f 只修好 self-owned split-pair 被 pre-commit rollback；2026-07-22 13:16 fire 雖成功 commit 本班 2 檔，仍把 29 個其他 session 正在修改的檔案用同一個 WARN 通知老闆。需按五步 gate 重構 producer-scoped ownership／共享 main checkout 隔離：active-owned foreign paths 不得算風險或發 WARN；只有 stale/unowned 路徑才建 incident；同時修告警標題與 actionability。用 13:16 receipt 重現，補多 session regression，實跑下一個 fire 並回讀 alert/receipt，完成前狀態只能標 contained。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-22T07:08:56.656070+00:00",
+    "payload": {
+      "telegram_message_id": 1312,
+      "incident_class": "phase_z_foreign_active_paths_false_warn",
+      "required_closure": "root_cause_fixed_and_verified"
+    },
+    "parent_task_id": "telegram-1312",
+    "created_by": "telegram-responder-65154"
   }
 ]

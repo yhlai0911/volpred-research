@@ -16,15 +16,17 @@ Cron: HH:50 every hour (10 min before hourly-dispatch fires at :07 next hour).
 from __future__ import annotations
 
 import json
+import re
 import sys
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 HANDOFF = ROOT / "storage" / "ops" / "handoff_latest.md"
+HANDOFF_ARCHIVE = ROOT / "storage" / "ops" / "handoff_archive"
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 DASHBOARD = ROOT / "storage" / "ops" / "dashboard_latest.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
@@ -275,6 +277,7 @@ def build() -> str:
     lines.append("**角色**：VolPred 自主運營經理（用戶 = 老闆 / report-only / full autonomy）")
     lines.append("")
     lines.append("> 此檔由 `scripts/generate_handoff.py` 每小時 :50 自動產生。手寫補充請放本檔末段「## 候補 / 手動補充」並標時間戳。")
+    lines.append("> 建議讀法：開工只讀下方 §1–§9（到第一條 `---` 為止）；候補區按任務關鍵字搜尋，歷史內容見 `storage/ops/handoff_archive/`。")
     lines.append("")
 
     # 1. 任務池快照
@@ -414,7 +417,7 @@ def build() -> str:
     lines.append("")
     lines.append("## 候補 / 手動補充")
     lines.append("")
-    lines.append("（此區由人工 / 互動 session 編輯。只有放在 KEEP 註解標記區段內的手寫內容會被 auto-regen 保留，其餘自動章節每 :50 覆寫。標記語法見 generate_handoff.py `_extract_keep_block` 或 docs；標記本身不寫在此說明以免與 extractor 自我衝突。）")
+    lines.append("（此區由人工 / 互動 session 編輯。KEEP 內的 `###` 條目標題必須帶 `YYYY-MM-DD`；超過 14 天、標為 RESOLVED 或未標日期者會自動移至 `storage/ops/handoff_archive/YYYY-MM.md`。）")
     lines.append("")
 
     return "\n".join(lines)
@@ -444,9 +447,94 @@ def _extract_keep_block(path: Path) -> str:
     return txt[start:end + len("<!-- /KEEP -->")]
 
 
+_KEEP_START = "<!-- KEEP -->"
+_KEEP_END = "<!-- /KEEP -->"
+_MANUAL_ENTRY = re.compile(r"(?=^###\s+)", re.MULTILINE)
+_ENTRY_DATE = re.compile(r"\b(20\d{2}-\d{2}-\d{2})\b")
+
+
+def _split_keep_entries(keep: str) -> tuple[str, list[str]]:
+    """Return marker-adjacent preamble and ``###`` manual-entry chunks."""
+    body = keep.strip()
+    if body.startswith(_KEEP_START):
+        body = body[len(_KEEP_START):].lstrip("\n")
+    if body.endswith(_KEEP_END):
+        body = body[:-len(_KEEP_END)].rstrip()
+    first_entry = re.search(r"^###\s+", body, flags=re.MULTILINE)
+    if first_entry is None:
+        return body.strip(), []
+    preamble = body[:first_entry.start()].strip()
+    entries = [chunk.strip() for chunk in _MANUAL_ENTRY.split(body[first_entry.start():]) if chunk.strip()]
+    return preamble, entries
+
+
+def _archive_month_for_entry(entry: str, now: datetime) -> tuple[str | None, bool]:
+    """Return archive month and whether an entry has crossed rotation policy."""
+    heading = entry.splitlines()[0] if entry else ""
+    match = _ENTRY_DATE.search(heading)
+    entry_date = None
+    if match:
+        try:
+            entry_date = datetime.strptime(match.group(1), "%Y-%m-%d").date()
+        except ValueError:
+            entry_date = None
+    resolved = "resolved" in heading.casefold()
+    expired = entry_date is not None and entry_date < (now.date() - timedelta(days=14))
+    # Manual supplements are required to carry a heading timestamp. Undated
+    # entries cannot prove they are within the 14-day live window, so archive
+    # them rather than letting relative labels such as "tomorrow" live forever.
+    undated = entry_date is None
+    if not (resolved or expired or undated):
+        return None, False
+    month = entry_date.strftime("%Y-%m") if entry_date is not None else now.strftime("%Y-%m")
+    return month, True
+
+
+def _append_archive_entries(archive_dir: Path, grouped: dict[str, list[str]]) -> None:
+    """Append rotated entries once; exact-content dedupe makes crash retry safe."""
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    for month, entries in sorted(grouped.items()):
+        path = archive_dir / f"{month}.md"
+        existing = path.read_text(encoding="utf-8") if path.exists() else ""
+        if not existing:
+            existing = f"# Handoff manual supplement archive — {month}\n"
+        changed = False
+        for entry in entries:
+            if entry not in existing:
+                existing = existing.rstrip() + "\n\n" + entry.rstrip() + "\n"
+                changed = True
+        if changed or not path.exists():
+            path.write_text(existing, encoding="utf-8")
+
+
+def _rotate_keep_block(keep: str, archive_dir: Path, now: datetime) -> str:
+    """Archive stale/resolved manual entries and return the compact KEEP block."""
+    if not keep:
+        return ""
+    preamble, entries = _split_keep_entries(keep)
+    active: list[str] = []
+    archived: dict[str, list[str]] = {}
+    for entry in entries:
+        month, rotate = _archive_month_for_entry(entry, now)
+        if rotate and month is not None:
+            archived.setdefault(month, []).append(entry)
+        else:
+            active.append(entry)
+    if archived:
+        _append_archive_entries(archive_dir, archived)
+    parts = [_KEEP_START]
+    if preamble:
+        parts.append(preamble)
+    parts.extend(active)
+    parts.append(_KEEP_END)
+    return "\n\n".join(parts)
+
+
 def main() -> int:
     HANDOFF.parent.mkdir(parents=True, exist_ok=True)
-    keep = _extract_keep_block(HANDOFF)
+    keep = _rotate_keep_block(
+        _extract_keep_block(HANDOFF), HANDOFF_ARCHIVE, datetime.now(TAIPEI)
+    )
     content = build()
     if keep:
         content = content.rstrip() + "\n\n" + keep + "\n"

@@ -74,7 +74,7 @@
   - **`storage/next_tasks.json`** = **canonical pending queue**（priority sorted；dispatcher 從這挑下個任務派工）
   - **`storage/ops/`** TaskRecord / AgentSession / ExecutionReceipt = **execution receipts / audit trail**（已完成 history，不是 pending queue）
   - `config/runtime_schedules.json` + `event_jobs` + `storage/ops/event_ledger/` = canonical schedule spec
-- **`storage/ops/handoff_latest.md`** = 每小時 :50 自動產生的**統一任務池快照**（Codex / Claude / 互動 session 共用入口）— 開工前必讀
+- **`storage/ops/handoff_latest.md`** = 每小時 :50 自動產生的**統一任務池快照**（Codex / Claude / 互動 session 共用入口）— 開工先讀 §1–§9（第一條 `---` 以前）；候補區只按當前任務關鍵字搜尋，歷史見 `storage/ops/handoff_archive/`
 
 ### 永遠修流程，不修資料
 
@@ -306,9 +306,9 @@ hash 不上那個值、`gate_history/` 又沒有原件，`check_experiment_artif
 
 ### Step 0 — 開工必讀 handoff
 ```bash
-cat storage/ops/handoff_latest.md
+sed -n '1,/^---$/p' storage/ops/handoff_latest.md
 ```
-看 section 1 任務池快照 / section 3 email_reply 待處理 / section 4 pending top 8。
+看 section 1 任務池快照 / section 3 email_reply 待處理 / section 4 pending top 8；候補區不要全文載入，僅按任務 id / K-id / 關鍵字搜尋。
 
 ### Step 1 — claim 一個你能勝任的 pending task
 
