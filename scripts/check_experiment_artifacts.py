@@ -14,7 +14,12 @@ directory carrying archived ``*_results.json`` must, at the moment it is merged,
 already have
 
   1. an entry in ``storage/memory/knowledge.json`` mentioning its K-id, and
-  2. a ``reproduce_spec.json`` that parses and points at files that exist.
+  2. a ``reproduce_spec.json`` that parses and points at files that exist, and
+  3. -- if that spec was machine-generated at run time (it declares
+     ``entrypoint.sha256``) -- an entrypoint that still hashes to the declared value,
+     or the original bytes preserved under ``gate_history/``. See
+     ``_entrypoint_drift_violation`` for the K1708 incident this closes, and
+     ``src/volpred/research/reproduce_spec.py`` for the emitter that produces the sha.
 
 SCOPE, AND WHY IT IS DRAWN HERE
 -------------------------------
@@ -64,6 +69,7 @@ Run:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -197,6 +203,111 @@ def _spec_violation(exp_dir: Path) -> tuple[str | None, str]:
     return None, "structural"
 
 
+def _entrypoint_drift_violation(exp_dir: Path) -> tuple[str | None, str]:
+    """``(violation_or_None, status)`` for the entrypoint-drift / gate-history check.
+
+    THE BUG CLASS (K1708, 2026-07)
+    ------------------------------
+    ``K1708_results.json`` records ``code_trace`` sha ``43bffdd...`` at 91,752 bytes.
+    ``experiments/k1708/K1708.py`` on disk is 126,998 bytes. The spec describes a
+    program that did not produce the results it pins, and nobody noticed for weeks
+    because nothing compared the two. Separately, the pre-fix verdict gate was never
+    committed, so "does the new gate turn an old NULL into a positive finding?" could
+    only be answered against a RECONSTRUCTION -- circular, and review rejected it.
+
+    Both collapse into one observable: the entrypoint no longer hashes to what the
+    spec says produced the archived results. When that is true, the bytes that DID
+    produce them must still exist in the tree, under ``gate_history/``. Then a
+    reviewer can diff the original against the current gate instead of arguing about
+    a rebuild.
+
+    FORWARD RATCHET -- why the 1,256-experiment backlog stays green
+    --------------------------------------------------------------
+    The rule fires ONLY when ``entrypoint.sha256`` is present. That field is written
+    by ``volpred.research.reproduce_spec``, at run time, by the process that wrote the
+    results -- so its presence certifies "this spec was machine-generated and its sha
+    is trustworthy". Hand-written pre-convention specs have no such field and are
+    returned as ``skipped-no-sha``: silence, not a pass claim. Synthesising shas for
+    runs nobody can re-execute is the invented history this gate exists to prevent
+    (see the module docstring), and 2026-07-19 already showed what a batch of
+    retroactive red does to a dispatch day.
+    """
+    path = exp_dir / SPEC_NAME
+    try:
+        spec = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None, "skipped-unreadable"  # _spec_violation already reported this
+    if not isinstance(spec, dict):
+        return None, "skipped-unreadable"
+
+    entry = spec.get("entrypoint")
+    if not isinstance(entry, dict):
+        return None, "skipped-unreadable"
+    declared = entry.get("sha256")
+    if not isinstance(declared, str) or not re.fullmatch(r"[0-9a-f]{64}", declared):
+        return None, "skipped-no-sha"
+
+    rel = entry.get("path")
+    if not isinstance(rel, str):
+        return None, "skipped-unreadable"
+    target = exp_dir / rel
+    try:
+        actual = hashlib.sha256(target.read_bytes()).hexdigest()
+    except OSError:
+        return None, "skipped-unreadable"  # _spec_violation reports a missing entrypoint
+
+    if actual == declared:
+        return None, "clean"
+
+    try:
+        sys.path.insert(0, str(REPO_ROOT / "scripts"))
+        import preserve_gate_blob  # type: ignore
+        preserved = preserve_gate_blob.preserved_shas(exp_dir)
+    except Exception:  # noqa: BLE001 - stdlib-only merge context; verify inline instead
+        preserved = _preserved_shas_fallback(exp_dir)
+
+    if declared in preserved:
+        return None, "drifted-preserved"
+    return (
+        f"{rel} no longer matches the sha its {SPEC_NAME} pins "
+        f"(spec {declared[:12]}, on disk {actual[:12]}) and the original bytes are "
+        f"not preserved under gate_history/ — a reviewer cannot diff the gate that "
+        f"produced the archived results against the one on disk",
+        "drifted-unpreserved",
+    )
+
+
+def _preserved_shas_fallback(exp_dir: Path) -> set[str]:
+    """``preserve_gate_blob.preserved_shas`` inlined for the bare-python3 merge path.
+
+    Kept byte-verifying, not manifest-trusting: an entry whose blob is missing or
+    edited is a claim, not evidence, and passing on a claim is the failure mode.
+    """
+    manifest = exp_dir / "gate_history" / "manifest.json"
+    try:
+        raw = json.loads(manifest.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return set()
+    out: set[str] = set()
+    for item in raw.get("entries", []) if isinstance(raw, dict) else []:
+        if not isinstance(item, dict):
+            continue
+        digest, blob = item.get("sha256"), item.get("blob")
+        if not isinstance(digest, str) or not isinstance(blob, str):
+            continue
+        candidate = exp_dir / "gate_history" / Path(blob).name
+        try:
+            if hashlib.sha256(candidate.read_bytes()).hexdigest() == digest:
+                out.add(digest)
+        except OSError:  # silent-ok: missing/unreadable evidence is rejected below
+            # A missing or unreadable blob is precisely the "claim, not evidence"
+            # case this helper exists to reject (see docstring). Dropping the digest is the
+            # verdict, not a swallowed error — and this path runs under bare python3 during
+            # merge, where volpred.ops.diagnostics is deliberately not importable.
+            continue
+    return out
+
+
 def audit_experiment(
     exp_dir: Path,
     knowledge_ids: set[str] | None,
@@ -217,6 +328,7 @@ def audit_experiment(
         "exclusion_reason": None,
         "violations": [],
         "spec_check_mode": None,
+        "entrypoint_drift": None,
     }
 
     if kid and kid in exclusions:
@@ -260,6 +372,13 @@ def audit_experiment(
     record["spec_check_mode"] = mode
     if spec_violation:
         record["violations"].append(spec_violation)
+    else:
+        # Only meaningful once the spec itself is valid: drift is a statement about
+        # what the spec says, so a spec that does not parse has nothing to say.
+        drift_violation, drift_status = _entrypoint_drift_violation(exp_dir)
+        record["entrypoint_drift"] = drift_status
+        if drift_violation:
+            record["violations"].append(drift_violation)
 
     return record
 
@@ -287,6 +406,19 @@ def _remedy(record: dict[str, Any]) -> list[str]:
             f"  #    Copy the shape from experiments/k1719/{SPEC_NAME}; hash every input",
             "  #    with sha256 and declare the seeds the script actually sets.",
             f"  uv run python scripts/reproduce_check.py inventory  # confirms {name} -> runnable",
+        ]
+    if "gate_history/" in joined:
+        lines += [
+            f"  # 2b. experiments/{name}'s entrypoint drifted from the sha its spec pins.",
+            "  #     Recover the bytes that produced the archived results and preserve them:",
+            f"  git log --oneline -- experiments/{name}/    # find the commit at that sha",
+            f"  git show <sha>:experiments/{name}/<entrypoint> > /tmp/prefix_gate.py",
+            "  uv run python scripts/preserve_gate_blob.py preserve \\",
+            f"      --path /tmp/prefix_gate.py --exp-dir experiments/{name} \\",
+            '      --reason "pre-fix verdict gate, recovered from git"',
+            "  #     If instead the script legitimately changed AND was re-run, regenerate",
+            "  #     results + spec together via volpred.research.reproduce_spec.finalize_experiment",
+            "  #     so the pinned sha describes the run that actually produced them.",
         ]
     lines += [
         "  # 3. If this experiment is genuinely exempt (archived legacy work, no",
@@ -459,6 +591,19 @@ def cmd_sweep(args: argparse.Namespace) -> int:
                 if any("knowledge.json" in v for v in r["violations"])
                 and any(SPEC_NAME in v for v in r["violations"])
             ),
+            # Drift is reported separately from the artifact counts so the forward
+            # ratchet stays legible: specs_with_runtime_sha is how many experiments
+            # the drift rule can even see, and it should only ever grow.
+            "specs_with_runtime_sha": sum(
+                1 for r in records
+                if r["entrypoint_drift"] in {"clean", "drifted-preserved", "drifted-unpreserved"}
+            ),
+            "entrypoint_drift_unpreserved": sum(
+                1 for r in records if r["entrypoint_drift"] == "drifted-unpreserved"
+            ),
+            "entrypoint_drift_preserved": sum(
+                1 for r in records if r["entrypoint_drift"] == "drifted-preserved"
+            ),
         },
         "knowledge_base_readable": knowledge_ids is not None,
         "missing": missing,
@@ -490,6 +635,9 @@ def cmd_sweep(args: argparse.Namespace) -> int:
           f"(knowledge-only {c['missing_knowledge_only']}, spec-only {c['missing_spec_only']}, "
           f"both {c['missing_both']}); {c['not_gated_no_results']} not gated (no results); "
           f"{c['excluded']} excluded")
+    print(f"[sweep] runtime-generated specs (drift rule in scope): {c['specs_with_runtime_sha']}; "
+          f"drifted-preserved {c['entrypoint_drift_preserved']}; "
+          f"drifted-UNPRESERVED {c['entrypoint_drift_unpreserved']}")
     print(f"[sweep] wrote {out}")
     return 0
 

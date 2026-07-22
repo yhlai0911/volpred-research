@@ -179,6 +179,48 @@
 - 真的無法產生 artifact 才寫 `config/experiment_artifact_exclusions.json`，且必須說明**為什麼做不到**
   ——「之後再補」是 bug，不是理由。
 
+#### spec 要在 run-time 產生，不是事後補（2026-07-22 起，K1708 教訓）
+
+K1708 的 `K1708_results.json` 記 `code_trace` sha `43bffdd…` / 91,752 bytes，而 `K1708.py`
+在 disk 上是 126,998 bytes —— **spec 描述的不是跑出結果的那份程式**。根因是 spec 由人事後補寫，
+補的時候程式早已漂移。
+
+實驗腳本收尾**呼叫 canonical helper**，results 與 spec 由同一次 `trace_file()` 一起寫出：
+
+```python
+from volpred.research.reproduce_spec import finalize_experiment
+
+finalize_experiment(
+    results=payload, entrypoint=__file__,
+    canonical_result="K1750_results.json",
+    inputs=[...], seeds=[("numpy", 1750)], started_at=T0,
+)
+```
+
+`results["code_trace"]` 與 `spec["entrypoint"]` 的 sha／byte size 取自同一次 trace snapshot，
+兩者不可能出現 K1708 那種 identity 不一致；path 則分別使用 repo-relative 與 experiment-relative schema。
+
+#### 改 verdict gate 前先存原件（同上，K1708 三審 FAIL 的另一半）
+
+K1708 修 gate 假陽性時，**修正前的 gate 位元組從沒進 git**，事後只能用 `legacy_derive_verdict()`
+重建 —— 用重建物證明重建物正確是循環論證，review 直接判 FAIL。
+
+**動 gate 之前**先存原件（不是暫存、不是重建）：
+
+```bash
+uv run python scripts/preserve_gate_blob.py preserve \
+    --path experiments/<id>/<K>.py --reason "說明這次 gate 改什麼"
+```
+
+Claude 的 Edit/Write hook 會攔截「runtime spec 已 pin、原始 bytes 又尚未進 git」的唯一副本；
+已進 git 的 pre-image 可由 `git show` 回收，所以交由下游 artifact gate 在落地前強制補進
+`gate_history/`。shell／外部 editor 不經 hook，仍會在 merge/CI 被 drift gate 擋住。
+
+機械攔截：spec 若帶 `entrypoint.sha256`（= 由 helper 在 run-time 產生），而 entrypoint 現在
+hash 不上那個值、`gate_history/` 又沒有原件，`check_experiment_artifacts.py` 直接擋。
+**只對 run-time 產生的 spec 生效**，1,256 個舊實驗完全不受影響（forward ratchet）。
+已知缺口與後續步驟寫在 `scripts/preserve_gate_blob.py` 的 module docstring。
+
 ## 發佈、論文、策略
 
 ### 發佈
