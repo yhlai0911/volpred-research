@@ -23,6 +23,7 @@ from volpred.ops.alerts import (
 )
 
 NOW = datetime(2026, 7, 16, 12, 40, tzinfo=timezone.utc)
+RESPONDER = Path(__file__).resolve().parents[1] / "scripts" / "telegram_responder.sh"
 
 
 def _write_tasks(storage_dir: Path, tasks: list[dict]) -> None:
@@ -153,3 +154,31 @@ def test_missing_next_tasks_is_quiet_not_crash(tmp_path: Path) -> None:
 
     assert state["breached"] is False
     assert state["details"]["read_error"] == "missing_next_tasks"
+
+
+def test_codex_fallback_is_bounded_and_uses_isolated_scratch() -> None:
+    source = RESPONDER.read_text(encoding="utf-8")
+
+    assert 'CODEX_BOUNDED="${CODEX_BOUNDED:-$REPO_ROOT/scripts/codex_exec_bounded.sh}"' in source
+    assert 'bash "$CODEX_BOUNDED" --timeout "$CAP_SEC"' in source
+    assert '-C "$RESPONDER_WORKDIR" --add-dir "$REPO_ROOT"' in source
+    assert 'codex exec ' not in source
+
+
+def test_codex_only_runs_after_primary_failure_with_pending_work() -> None:
+    source = RESPONDER.read_text(encoding="utf-8")
+    guard = (
+        'if [ "$LEFT" != "0" ] && [ "$RC" -ne 0 ] '
+        '&& [ "$CODEX_FAILOVER_ENABLED" = "1" ]; then'
+    )
+
+    assert guard in source
+    assert source.index(guard) < source.index("run_codex_pass; RC=$?")
+    assert 'CLAUDE_UNAVAILABLE=1' in source
+
+
+def test_primary_and_fallback_share_a_unique_claim_owner() -> None:
+    source = RESPONDER.read_text(encoding="utf-8")
+
+    assert 'export VOLPRED_TASK_CLAIM_OWNER="telegram-responder-$$"' in source
+    assert 'claim 必須帶 `--owner "$VOLPRED_TASK_CLAIM_OWNER"`' in source
