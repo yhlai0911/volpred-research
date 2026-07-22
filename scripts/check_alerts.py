@@ -739,6 +739,69 @@ def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
     return created
 
 
+def _ci_incident_store_sync(
+    event: str,
+    incident: dict,
+    *,
+    run_key: str | None = None,
+    task_id: str | None = None,
+) -> None:
+    """Mirror CI incidents into the shared incident store (identity + counters).
+
+    CI watch is the ONE pre-existing path that already had a real incident
+    object (plan §2.2 — "做對的那條路已經在 repo 裡了"), so its repair/verify
+    flow stays untouched (task_mode=external).  The store contributes the
+    shared identity, never-resetting counters, and the G6 cap visibility.
+
+    Fingerprint deviation from plan §3.3 (documented design ruling): the plan
+    suggests ``kind + root_cause 分類``, but root cause is discovered
+    asynchronously and legitimately CHANGES across runs within one incident
+    (see the root_cause-rebinding comment in ``_reduce_ci_run``) — an identity
+    that mutates mid-incident is no identity.  CI's run-anchored
+    ``incident_id`` is stable from open to close, so it is the fingerprint
+    part; failing runs are the instances.
+
+    2026-07-22 restored: merge 883903a96 took the agent branch's rewritten
+    ``_append_next_task_locked`` above and deleted this immediately-adjacent
+    definition with it, while all three call sites survived.  check_alerts.py
+    then died with ``NameError`` at :2756 on every hourly run from
+    2026-07-21 17:00 CST — 16 consecutive failures — taking the whole alerting
+    + auto-remediation job down with it (the orphan reaper at :2802 is past the
+    crash point and never ran).  Restored verbatim from 3f35e4511; HEAD's newer
+    gateway ``_append_next_task_locked`` is deliberately kept.  K1032 class.
+    """
+    try:
+        from volpred.ops import incident as incident_store
+
+        store = PROJECT_ROOT / "storage" / "ops" / "incidents.json"
+        ci_id = str(incident.get("incident_id") or "")
+        if not ci_id:
+            return
+        parts = (ci_id,)
+        if event == "breach":
+            incident_store.route_breach(
+                store,
+                kind="ci_red",
+                fingerprint_parts=parts,
+                instance_key=run_key,
+                details=str(incident.get("root_cause") or "")[:200],
+            )
+        elif event == "bind" and task_id:
+            incident_store.bind_task(
+                store, incident_store.incident_id_for("ci_red", parts), task_id
+            )
+        elif event == "resolved":
+            incident_store.observe_clean(
+                store,
+                kind="ci_red",
+                fingerprint_parts=parts,
+                criterion="ci_verified_green",
+                by=ci_id,
+            )
+    except Exception as exc:  # noqa: BLE001 — the CI flow must never die on store bookkeeping
+        warn("ci_watch", "incident store sync failed", event=event, err=str(exc))
+
+
 def _ci_run_key(run: dict) -> str:
     return f"{run.get('databaseId')}:{int(run.get('attempt') or 1)}"
 

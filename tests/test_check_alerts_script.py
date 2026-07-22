@@ -237,3 +237,59 @@ def test_append_next_task_locked_keeps_time_critical_machine_p1(tmp_path: Path):
     persisted = json.loads(queue.read_text(encoding="utf-8"))
     assert persisted[0]["priority"] == 1
     assert "priority_capped_from" not in persisted[0]
+
+
+def test_every_module_level_call_target_actually_exists():
+    """Guard the merge-loss class: a call site outliving its definition.
+
+    2026-07-22: merge 883903a96 took the agent branch's rewritten
+    ``_append_next_task_locked`` and deleted the immediately-adjacent
+    ``_ci_incident_store_sync`` along with it, while all three call sites
+    survived.  Nothing failed at import time — the NameError only fired when
+    ``_reduce_ci_run`` reached line 1788 at runtime, which is inside the hourly
+    cron.  check_alerts.py then died on every run for 16 hours (alerting AND
+    auto-remediation both down, since the orphan reaper sits past the crash
+    point) and no test noticed.
+
+    Importing the module is not enough to catch this, so walk the AST and
+    assert every private ``_foo(...)`` call resolves to something defined in
+    the module.  This generalises: it catches the next deletion too, not just
+    this one.
+    """
+    import ast
+
+    check_alerts = _load_check_alerts_module()
+    root = Path(__file__).resolve().parents[1]
+    source = (root / "scripts" / "check_alerts.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    defined = {
+        node.name
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+    }
+    # Locally-bound names (imports, assignments, params) are legitimate targets too.
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            defined.add(node.id)
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in node.names:
+                defined.add((alias.asname or alias.name).split(".")[0])
+        elif isinstance(node, ast.arg):
+            defined.add(node.arg)
+
+    missing = sorted(
+        {
+            node.func.id
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id.startswith("_")
+            and node.func.id not in defined
+            and not hasattr(check_alerts, node.func.id)
+        }
+    )
+    assert not missing, f"call sites with no definition in check_alerts.py: {missing}"
+
+    # The specific casualty, pinned by name so a re-deletion names itself.
+    assert callable(getattr(check_alerts, "_ci_incident_store_sync", None))
