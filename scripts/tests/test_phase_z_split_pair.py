@@ -172,3 +172,32 @@ def test_non_test_paths_are_left_alone(repo: Path) -> None:
     )
 
     assert deferred == {}
+
+
+def test_real_phase_z_commits_other_output_without_splitting_pair(repo: Path) -> None:
+    """Full incident shape: the fire lands, while both refactor halves stay out."""
+    source = repo / "src" / "volpred" / "ops" / "task_signature.py"
+    source.write_text("def sign(): ...\n", encoding="utf-8")
+    pre_fire_dirty = {"src/volpred/ops/task_signature.py"}
+
+    test = repo / "tests" / "test_task_signature.py"
+    test.write_text("from volpred.ops.task_signature import sign\n", encoding="utf-8")
+    (repo / "fire_output.txt").write_text("useful output\n", encoding="utf-8")
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    hook.chmod(0o755)
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        pre_fire_dirty=pre_fire_dirty,
+        runner=subprocess.run,
+        test_runner=subprocess.run,
+        alert_fn=lambda **_kwargs: {"sent": False},
+    )
+
+    assert outcome["committed"] is True
+    assert outcome.get("rolled_back") is not True
+    committed = set(_git(repo, "show", "--name-only", "--pretty=format:", "HEAD").split())
+    assert "fire_output.txt" in committed
+    assert "tests/test_task_signature.py" not in committed
+    assert "src/volpred/ops/task_signature.py" not in committed
