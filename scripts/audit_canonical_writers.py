@@ -166,21 +166,12 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "src/volpred/ops/questions.py:ensure_member_qa_task": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
     },
-    # Errata/correction path: rewrites one already-published feed entry in place
-    # under the shared publisher_feed lock, then stamps an errata trail. It is a
-    # distinct owner rather than a caller of Publisher._rewrite_feed_entry
-    # because it must hold the lock across the Supabase sync (see the module's
-    # CorrectionNotSynced contract). mkstemp/fdopen/unlink in this scope target
-    # the tmp file, not storage, so os.replace is the only canonical mutation.
-    "src/volpred/publisher/article_correction.py:apply_article_correction": {
-        "os.replace": 1,
-    },
     "src/volpred/publisher/lazypack_install.py:install_lazypack_section": {"write_text": 1},
     "src/volpred/publisher/publisher.py:Publisher._append_to_feed": {
         "open-write": 1, "replace": 1,
     },
     "src/volpred/publisher/publisher.py:Publisher._rewrite_feed_entry": {
-        "open-write": 1, "replace": 1,
+        "open-write": 1, "replace": 1, "unlink": 1,
     },
     "src/volpred/publisher/publisher.py:Publisher.unpublish": {"open-write": 1},
 }

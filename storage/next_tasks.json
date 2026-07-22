@@ -45092,12 +45092,35 @@
     "description": "WS-C1 驗收時發現：src/volpred/publisher/article_correction.py:apply_article_correction 自行 atomic 寫 feed.json + 直呼 supabase_sync.sync_article，不推 Mirror、不記死信（改以 CorrectionNotSynced raise 收場），與 Publisher.rewrite_and_sync_article 形成第二/第三條 in-place 重寫路徑，違反 §2 anti-stacking「一 concern 一 owner」。全 repo grep 顯示零 production caller（僅 audit_canonical_writers.py 白名單登記 + 測試提及）。任務：判定它是 (a) 該收編為 rewrite_and_sync_article 的呼叫者，或 (b) 已被 C1 取代該退役移除白名單。二選一，不留第三態。依據 docs/refactor_plan_ops_master_2026_07.md §7 C1 列殘留(2)。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-20T03:40:12.665467+00:00",
     "created_by": "hourly-slot-2-7a8837cf2e004ef9bd36bc562fc73855",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-22T11:08:02.157502+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-4dd69eb61e194760bf000d70afbc4f79"
+      },
+      {
+        "ts": "2026-07-22T11:08:02.410199+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-4dd69eb61e194760bf000d70afbc4f79"
+      },
+      {
+        "ts": "2026-07-22T11:18:29.646172+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-4dd69eb61e194760bf000d70afbc4f79"
+      }
+    ],
+    "started_at": "2026-07-22T11:08:02.410185+00:00",
+    "completed_at": "2026-07-22T11:18:29.646156+00:00",
+    "result": "root_cause_fixed_and_verified: article_correction now delegates canonical feed mutation, Mirror, Supabase, and dead letters to Publisher.rewrite_and_sync_article; gateway CAS prevents concurrent overwrite and atomic failures clean temp files. 42 targeted tests passed; canonical-writer audit passed with zero violations or mismatches."
   },
   {
     "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260720T035520632647Z_a1",

@@ -2733,20 +2733,33 @@ class Publisher:
                 storage_dir=storage_dir,
             )
 
-    def _rewrite_feed_entry(self, pub_id: str, updated_item: dict) -> bool:
+    def _rewrite_feed_entry(
+        self,
+        pub_id: str,
+        updated_item: dict,
+        *,
+        expected_item: dict | None = None,
+    ) -> bool:
         """Replace a single feed entry by id, preserving lock + read-back.
 
         Used by post-publish gates (live_verify) that mutate an already-appended
-        item AFTER _append_to_feed has run. Returns True on success.
+        item AFTER _append_to_feed has run. ``expected_item`` provides an
+        optimistic compare-and-swap guard for callers that prepared a rewrite
+        from an earlier snapshot: a concurrent edit fails loudly instead of
+        being overwritten. Returns True on success.
         """
         from volpred.ops.shared_lock import shared_state_lock
 
         storage_dir = str(self.reports_dir.parent)
+        self._last_rewrite_conflict = False
         with shared_state_lock("publisher_feed", storage_dir=storage_dir):
             feed = self._load_feed()
             found = False
             for idx, entry in enumerate(feed):
                 if entry.get("id") == pub_id:
+                    if expected_item is not None and entry != expected_item:
+                        self._last_rewrite_conflict = True
+                        return False
                     feed[idx] = updated_item
                     found = True
                     break
@@ -2754,11 +2767,15 @@ class Publisher:
                 return False
             guard_canonical_write(self._feed_file)
             tmp_file = self._feed_file.with_name(f".{self._feed_file.name}.tmp")
-            with open(tmp_file, 'w') as f:
-                json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
-            with open(tmp_file) as f:
-                json.load(f)
-            tmp_file.replace(self._feed_file)
+            try:
+                with open(tmp_file, 'w') as f:
+                    json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
+                with open(tmp_file) as f:
+                    json.load(f)
+                tmp_file.replace(self._feed_file)
+            except BaseException:
+                tmp_file.unlink(missing_ok=True)
+                raise
             # Keep the mirror outcome observable to callers (rewrite_and_sync_article
             # dead-letters a failed PUT); the boolean return of this method stays
             # "was the entry found and rewritten", unchanged for existing callers.
@@ -2769,7 +2786,13 @@ class Publisher:
             )
             return True
 
-    def rewrite_and_sync_article(self, pub_id: str, updated_item: dict) -> dict:
+    def rewrite_and_sync_article(
+        self,
+        pub_id: str,
+        updated_item: dict,
+        *,
+        expected_item: dict | None = None,
+    ) -> dict:
         """Single exit for in-place rewrites of an already-published article.
 
         WS-C1 (refactor_plan_ops_master_2026_07 §3): before this existed, the
@@ -2783,19 +2806,32 @@ class Publisher:
           3. Supabase ``sync_article`` projection
           4. any projection failure → dead-letter queue (drained by cron)
 
+        When ``expected_item`` is supplied, the canonical rewrite is a
+        compare-and-swap. This lets read/transform/write callers keep their
+        validation outside the low-level writer without clobbering a newer
+        concurrent version of the same article.
+
         Returns a report dict; ``ok`` is False when the canonical write missed
         or a projection failed, so callers can propagate a non-zero exit code.
         """
         report: dict = {
             "id": pub_id,
             "feed_written": False,
+            "conflict": False,
             "mirror": "skipped",
             "supabase": "skipped",
             "dead_letters": [],
             "ok": False,
         }
         self._last_mirror_ok = False
-        report["feed_written"] = bool(self._rewrite_feed_entry(pub_id, updated_item))
+        report["feed_written"] = bool(
+            self._rewrite_feed_entry(
+                pub_id,
+                updated_item,
+                expected_item=expected_item,
+            )
+        )
+        report["conflict"] = bool(getattr(self, "_last_rewrite_conflict", False))
         if not report["feed_written"]:
             return report
 
