@@ -53470,7 +53470,7 @@
     "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `storage/drafts/K1697_general_draft.md` — no_title (namespace=drafts_intake, first_seen=2026-07-22T00:28:47.006818+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "reap_orphan_deliverables_held_ttl",
     "created_at": "2026-07-22T05:01:36.431777+00:00",
     "payload": {
@@ -53485,7 +53485,30 @@
         "held_escalation"
       ]
     },
-    "created_by": "reap_orphan_deliverables"
+    "created_by": "reap_orphan_deliverables",
+    "status_history": [
+      {
+        "ts": "2026-07-22T12:01:13.812653+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-f8f4b0a5fa114126a0c4f15d9b2adc5a"
+      },
+      {
+        "ts": "2026-07-22T12:01:21.990366+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-f8f4b0a5fa114126a0c4f15d9b2adc5a"
+      },
+      {
+        "ts": "2026-07-22T12:07:00.055955+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-f8f4b0a5fa114126a0c4f15d9b2adc5a"
+      }
+    ],
+    "started_at": "2026-07-22T12:01:21.990344+00:00",
+    "completed_at": "2026-07-22T12:07:00.055940+00:00",
+    "result": "K1697 orphan draft resolved through canonical intake. Added required frontmatter/provenance, made minimal audience-gate-safe terminology edits without changing findings, and published general draft mile_928eade8 (status=draft, phase=robustness, source_draft linked, K1697 linked). publish_draft content-vs-source audit PASS (9 claims/488 source values); anti_ai_gate PASS; reaper now classifies the path as registered with no held/adoptable entry. Lazypack was not queued because no evidence-bound plan existed; release remains mechanically blocked while draft intake is complete."
   },
   {
     "id": "alert_content_quality_20260722",
