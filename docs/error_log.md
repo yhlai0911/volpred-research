@@ -198,6 +198,7 @@
 **規則**：draft 池不可空、release 節奏不可斷；pool < 4 一次補滿（非一次一個），補池前查 `current_job`、寫入走 flock。pool-empty critical 反覆觸發 = 根因雙修（供給 + 消耗對齊），不是重試。
 **機械 owner**：`refill_reader_facing_pool` + release cadence + journal-discovery 冷卻對齊。
 **代表 incident**：
+- 2026-07-22 general lane 結構性餓死：auto-refill brief 只寫「general article」，卻沒有裁決全域「K 編號／統計方法要 visible」與 general「禁 K-id／裸術語」的優先級；K1597 忠實放入 K-id + QLIKE/DM/Harvey 後被 `_infer_audience` 升為 research，補池任務成功但 general coverage 仍為零。**root_cause_fixed_and_verified**：不放寬 audience gate；新增 `volpred.ops.article_brief.GENERAL_AUDIENCE_BRIEF_CONTRACT`，兩個 task generator 共用同一條 metadata/prose 邊界（精確數字、樣本、視窗、as-of 與統計強度保留；K-id/路徑只進 `details.experiment_refs` / `evidence_source_paths`；成功前回讀 inference 必為 general），並在 publishing rule + feed-publisher skill 補 research-only 適用範圍；generator/refill/audience regression 通過 — 全文：`docs/error_log_archive/2026-Q3-general-audience-brief.md`
 - 2026-07-22 `trending_repost_2026_07_18_台股崩跌` 的 scanner seed 虛構台股「崩跌 2953 點（-6.5%）」；writer 才發現 ^TWII 目標日 bar=NaN，證明生成端只有查重、沒有數字來源閘門。**root_cause_fixed_and_verified**：scanner 契約改為量化 prose 必附 `quant_claims`；`refill_reader_facing_pool.py` 在寫 `next_tasks.json` 前逐項回讀 yfinance/FRED，百分比／點數／成交量／金額若缺 spec、缺日、NaN、標的與 ticker 不符、來源不支援或超 tolerance 一律拒絕，並寫 `trending_primary_source_verification.jsonl`（不得把 NaN 當 0/通過）。事故文字回放正規化出 points=-2953、percent=-6.5；24 個直接相關 refiller/scanner 測試 exit 0，含 NaN、標的 identity 與成功 receipt 回讀 — Q3
 - 2026-06-14 **Three-Strike** pool-empty critical 反覆觸發 → 根因雙修 — Q2
 - 2026-06-14 pool warn 反覆復現 → journal-discovery 冷卻對齊消耗 — Q2

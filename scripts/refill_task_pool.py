@@ -45,6 +45,7 @@ CANDIDATES = ROOT / "storage" / "publication_candidates.json"
 KNOWLEDGE_PATH = ROOT / "storage" / "memory" / "knowledge.json"
 
 sys.path.insert(0, str(ROOT / "src"))
+from volpred.ops.article_brief import audience_brief_contract  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 from volpred.ops.next_tasks import append_task_record  # noqa: E402
 from volpred.ops.pool_pressure import pool_admits_new_work  # noqa: E402
@@ -990,6 +991,7 @@ def _make_article_task(
         if correction_rewrite
         else ""
     )
+    delivery_contract = audience_brief_contract(needed_audience)
     if correction_rewrite:
         source = "auto_audience_correction_rewrite"
     else:
@@ -1011,7 +1013,8 @@ def _make_article_task(
             f"{'Emergency reader-facing publish-drought remediation; dispatch immediately. ' if emergency else ''}"
             f"{'Prior task terminal but feed lacks coverage — retry.' if retry_suffix and not correction_rewrite else ''} "
             f"Verdict preview: {(cand.get('verdict_preview') or '')[:280]} "
-            f"{data_source_note}"
+            f"{data_source_note} "
+            f"{delivery_contract}"
         ),
         "priority": 1 if emergency else priority,
         "status": "pending",

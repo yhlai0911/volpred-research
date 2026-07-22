@@ -180,6 +180,9 @@ def test_refill_evidence_gate_skips_unsubstantiated_k_and_points_to_results(
     assert task["evidence_source_kind"] == "experiment_results"
     assert "experiments/k9002/k9002_results.json" in task["description"]
     assert "programmatically" in task["data_source_note"]
+    assert "Do not put K-ids" in task["description"]
+    assert "details.experiment_refs" in task["description"]
+    assert "success requires inferred audience=general" in task["description"]
 
 
 def test_pending_article_evidence_sweep_flags_only_unsubstantiated_pending(

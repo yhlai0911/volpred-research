@@ -45,6 +45,12 @@ Do **not** use this skill for：
 3. **資訊性**：真實圖表 ≥2 張（matplotlib PNG，禁 ASCII）；具體數字（不寫「顯著改善」空話）；標明資料來源 + 統計方法（Harvey/Kupiec/DM 等）+ 樣本數與期間
 4. **參考性**：cross-link ≥3 個相關 K/paper/experiment；延伸閱讀段落；reproduce method 簡述（script + results.json 路徑）；文末標 K 編號 + 資料來源
 
+**適用範圍補充（2026-07-22）**：上面第 3–4 點的 reader-visible 統計方法、reproduce
+path 與 K 編號是 `audience=research` 契約。`audience=general` 仍要引用完全相同的 canonical
+數字與統計強度，但以白話呈現；K-id 與實驗路徑只放 frontmatter /
+`details.experiment_refs` 等 provenance metadata，不得出現在讀者可見標題或正文。這個界線
+與下方 general 禁 K 編號及 publisher `_infer_audience` gate 一致。
+
 同一 K 已有文章但不符 4 維度 → 可視為「不符合標準」重派（不算 3-layer dedup 的 duplicate）。既有文章定期回審（top-viewed 優先）不達標考慮重寫。反面教材：K908 mile_3eb8657c（達標範例，可作 reference template）；只給數字翻譯 + 兩張圖但無 mechanism 解釋、academic 標題、無 cross-link 的文章（缺深度/可讀性/參考性）。
 
 ## thinking ≠ content

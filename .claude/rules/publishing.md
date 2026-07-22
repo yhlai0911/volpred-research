@@ -181,6 +181,14 @@ paths:
      - **PRIMARY = codex bespoke poster（`scripts/gen_lazypack_codex.py`）**：boss 2026-07-15 拍板（commit 38ad605f8），async 管線 2026-07-16 接線（commit c89a87021）。codex **寫**一支 data-bound 渲染腳本、本 process 本地執行，腳本存檔可重跑。**FALLBACK = deterministic renderer**（`uv run python scripts/lazypack_render.py --plan <plan.json> --out-dir <dir>`，模板級外觀）— codex 不可用（CLI 故障 / **額度耗盡** / 逾時 / 修復輪耗盡）時**順位自動生效**，但每次 fallback 必留紀錄（async 管線 `_record_fallback` 已機械化；禁止 silent fallback）。**NotebookLM AI-poster = 第三備援**：僅人工授權 + 覆核，不得自動 fallback。主線程 LLM 只可寫內容 plan，不可寫/修渲染 code。兩條路徑吃同一份 strict plan；完整 schema/format 看 `lazypack_render.py --help` 與 tests。
      - png → Supabase `article-images` upload → append 文末「## 懶人包」圖區。
      - **生圖時機**：draft 文章 = 寫作 agent 寫正文 + strict plan → publish draft → **`uv run python scripts/lazypack_async_render.py enqueue --article-id <mile_id> --plan <plan.json>`** → `*/15` compute worker 跑 codex-primary 渲染鏈（失敗 → logged deterministic fallback）、upload、append、re-sync。**Gate 邊界 = reader-visible**：draft/scheduled 建檔不需懶人包；release_pool 在 flip published 前 enforce；**立即發佈（event/trending status=published）先同步跑同一 codex-primary 渲染鏈（`gen_lazypack_codex.py`；失敗才 logged fallback 到 `lazypack_render.py`），上傳並 append 後才 publish**。單一來源：`publisher.lazypack_required_at()`。
+
+   **Audience-specific provenance boundary（2026-07-22）**：上面的「K 編號」是
+   research 文章的 reader-visible 標示方式；`audience=general` 不得把 K-id 放進標題或正文。
+   General 文章仍須逐字核對數字、樣本、視窗、as-of 與資料來源，但實驗身分只放在
+   frontmatter / `details.experiment_refs` 與任務的 `evidence_source_paths`，統計證據用白話保留
+   強度與數值。自動 brief 的 canonical clause 由
+   `volpred.ops.article_brief.GENERAL_AUDIENCE_BRIEF_CONTRACT` 產生；完成任務前必以最終
+   title/body/tags 回讀 `_infer_audience`，只有仍為 `general` 才算交付。
 5. **寫前必做主題查重**：
    - `grep -i "關鍵詞" storage/reports/feed.json | head` 或
    - LanceDB semantic search（dist < 0.45 視為 hard duplicate，需換角度或放棄）

@@ -48,6 +48,7 @@ DEFAULT_DISPATCH_LANES = {
     "event_article": "main_thread",
 }
 
+from volpred.ops.article_brief import audience_brief_contract  # noqa: E402
 from volpred.ops.next_tasks import normalize_task_priority  # noqa: E402
 from volpred.publication_gate import article_ineligibility_reason  # noqa: E402
 
@@ -756,7 +757,8 @@ def generate_daily_article_tasks(
             f"{kid} has a non-null verdict in experiments/{rpath.parent.name}/ "
             f"but no published feed article and no existing task. "
             f"Verdict: {verdict_str}. "
-            f"Write a general-audience article summarising key findings."
+            f"Write a general-audience article summarising key findings. "
+            f"{audience_brief_contract('general')}"
         )
 
         task = make_task(

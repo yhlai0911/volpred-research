@@ -296,6 +296,9 @@ def test_daily_article_generator_applies_knowledge_eligibility_gate(
     tasks = MODULE.generate_daily_article_tasks(existing=[])
 
     assert [task["k_id"] for task in tasks] == ["K9001"]
+    assert "Do not put K-ids" in tasks[0]["description"]
+    assert "details.experiment_refs" in tasks[0]["description"]
+    assert "success requires inferred audience=general" in tasks[0]["description"]
     output = capsys.readouterr().out
     assert "skip K709: knowledge verdict=FAIL_PROVENANCE" in output
     assert "skip K9002: knowledge evidence is empty" in output
