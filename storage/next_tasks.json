@@ -49828,11 +49828,34 @@
     "title": "compute_queue: --result-artifact 與 brief 檔名無一致性檢查，成功 job 被靜默判 failed",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T08:30:00+00:00",
     "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
-    "description": "**症狀（實例）**：job `agent-brief_k1729_repair-986ef4`（opus/xhigh，跑 48 分鐘）job_metadata 記錄 `exit_code: 0, timed_out: false, failure_class: null`，experiment_gates 4/4 PASS、certify PASS、103+38 測試綠燈、雙審皆 PASS —— 但 compute_queue 判它 `status=failed`，唯一理由是 `runner_exit_code: 1`，而那個 1 來自 run_agent_job 的後置條件檢查：\n`[run_agent_job] expected result artifact missing: .../experiments/k1729/results.json`\n\n**根因**：enqueue 時 `--result-artifact` 宣告了 `experiments/k1729/results.json`，但 brief 要求 agent 產出的（也是本 repo 既有慣例，k1719 / k1380 / k1731 皆同）是 `experiments/k1729/k1729_results.json`。兩者之間**沒有任何一致性檢查**：\n- enqueue 端不驗 `--result-artifact` 的檔名是否出現在 brief 裡\n- runner 端只做 exact-path 存在性檢查，不做同目錄 `*_results.json` 的 near-miss 提示\n- followup 分流因此把一個成功的 job 送進 `triage_failed` lane\n\n**為什麼要治**：triage_failed 的預設動作包含「fresh-worktree re-enqueue」。本次若照做就是白燒第二個 48 分鐘 xhigh agent，而且產出會與 main 上已合併的版本分岔。成本與模型額度都是實的（本週 Codex 已因額度用罄退到 fallback 審查路徑）。\n\n**要做什麼（擇一或並行，但要有防再犯測試）**：\n1. enqueue 端 gate：`enqueue-agent` 時讀 brief-file，若 `--result-artifact` 的 basename 未出現在 brief 文字中 → 拒絕入列（或至少 WARN 並記錄），理由是這個不一致 100% 會在 48 分鐘後才以 failed 的形式現形，越早擋越便宜\n2. runner 端 near-miss：artifact 缺失時，掃同目錄是否存在 `*_results.json` / `*results*.json`，有的話把候選路徑寫進 stderr 與 job_metadata，讓收件端一眼看出是路徑契約問題而非實驗失敗\n3. followup 分流：job_metadata 出現 `exit_code=0 且 timed_out=false 且 runner_exit_code!=0` 這個組合時，followup_mode 不應是 `triage_failed`（那語意是「agent 沒成功」），應另立一個 `artifact_contract_mismatch` mode，brief 直說「先查路徑契約，不要重派」\n\n**禁止的修法**：把後置條件檢查拿掉、或改成「目錄下有任何檔就算過」。那個檢查存在的理由是防止 agent 宣稱完成卻沒產出 —— 弱化它等於把 K1259 那類「假完成」放行。要修的是契約沒被驗證，不是契約本身。\n\n**相鄰缺陷（同家族、不同 bug，勿合併處理）**：`compute_queue_failed_script_job_followup_blind_spot`（2026-07-21 14:15 立案）—— 那筆是 `_pending_followup_view()` 把非 agent 的 script job followup 吞掉；本筆是 artifact 路徑契約無驗證。兩筆都屬 compute_queue followup 正確性。\n\n**證據**：\n- storage/ops/agent_jobs/agent-brief_k1729_repair-986ef4.json\n- storage/logs/compute/agent-brief_k1729_repair-986ef4.stderr\n- work_log 2026-07-21T16:2x 的 agent-brief_k1729_repair-986ef4 entry"
+    "description": "**症狀（實例）**：job `agent-brief_k1729_repair-986ef4`（opus/xhigh，跑 48 分鐘）job_metadata 記錄 `exit_code: 0, timed_out: false, failure_class: null`，experiment_gates 4/4 PASS、certify PASS、103+38 測試綠燈、雙審皆 PASS —— 但 compute_queue 判它 `status=failed`，唯一理由是 `runner_exit_code: 1`，而那個 1 來自 run_agent_job 的後置條件檢查：\n`[run_agent_job] expected result artifact missing: .../experiments/k1729/results.json`\n\n**根因**：enqueue 時 `--result-artifact` 宣告了 `experiments/k1729/results.json`，但 brief 要求 agent 產出的（也是本 repo 既有慣例，k1719 / k1380 / k1731 皆同）是 `experiments/k1729/k1729_results.json`。兩者之間**沒有任何一致性檢查**：\n- enqueue 端不驗 `--result-artifact` 的檔名是否出現在 brief 裡\n- runner 端只做 exact-path 存在性檢查，不做同目錄 `*_results.json` 的 near-miss 提示\n- followup 分流因此把一個成功的 job 送進 `triage_failed` lane\n\n**為什麼要治**：triage_failed 的預設動作包含「fresh-worktree re-enqueue」。本次若照做就是白燒第二個 48 分鐘 xhigh agent，而且產出會與 main 上已合併的版本分岔。成本與模型額度都是實的（本週 Codex 已因額度用罄退到 fallback 審查路徑）。\n\n**要做什麼（擇一或並行，但要有防再犯測試）**：\n1. enqueue 端 gate：`enqueue-agent` 時讀 brief-file，若 `--result-artifact` 的 basename 未出現在 brief 文字中 → 拒絕入列（或至少 WARN 並記錄），理由是這個不一致 100% 會在 48 分鐘後才以 failed 的形式現形，越早擋越便宜\n2. runner 端 near-miss：artifact 缺失時，掃同目錄是否存在 `*_results.json` / `*results*.json`，有的話把候選路徑寫進 stderr 與 job_metadata，讓收件端一眼看出是路徑契約問題而非實驗失敗\n3. followup 分流：job_metadata 出現 `exit_code=0 且 timed_out=false 且 runner_exit_code!=0` 這個組合時，followup_mode 不應是 `triage_failed`（那語意是「agent 沒成功」），應另立一個 `artifact_contract_mismatch` mode，brief 直說「先查路徑契約，不要重派」\n\n**禁止的修法**：把後置條件檢查拿掉、或改成「目錄下有任何檔就算過」。那個檢查存在的理由是防止 agent 宣稱完成卻沒產出 —— 弱化它等於把 K1259 那類「假完成」放行。要修的是契約沒被驗證，不是契約本身。\n\n**相鄰缺陷（同家族、不同 bug，勿合併處理）**：`compute_queue_failed_script_job_followup_blind_spot`（2026-07-21 14:15 立案）—— 那筆是 `_pending_followup_view()` 把非 agent 的 script job followup 吞掉；本筆是 artifact 路徑契約無驗證。兩筆都屬 compute_queue followup 正確性。\n\n**證據**：\n- storage/ops/agent_jobs/agent-brief_k1729_repair-986ef4.json\n- storage/logs/compute/agent-brief_k1729_repair-986ef4.stderr\n- work_log 2026-07-21T16:2x 的 agent-brief_k1729_repair-986ef4 entry",
+    "status_history": [
+      {
+        "ts": "2026-07-22T19:07:42.760280+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-76ca8bee6373486bb5f85466a25135ac"
+      },
+      {
+        "ts": "2026-07-22T19:07:47.836404+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-76ca8bee6373486bb5f85466a25135ac"
+      },
+      {
+        "ts": "2026-07-22T19:12:43.089238+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-76ca8bee6373486bb5f85466a25135ac"
+      }
+    ],
+    "started_at": "2026-07-22T19:07:47.836387+00:00",
+    "completed_at": "2026-07-22T19:12:43.089224+00:00",
+    "result": "Added exact basename admission gate for enqueue-agent, runner near-miss artifact evidence in stderr/job metadata, dedicated artifact_contract_mismatch followup routing that prohibits re-enqueue, collector prompt guidance, and regression coverage; 100 related tests pass."
   },
   {
     "id": "k1731_f1_bootstrap_merge_deadlock",

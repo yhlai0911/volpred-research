@@ -362,6 +362,15 @@ def main() -> int:
 
     finished = _utc_now()
     artifact_exists = result_artifact.exists() if result_artifact is not None else None
+    artifact_near_misses: list[str] = []
+    if result_artifact is not None and artifact_exists is False:
+        candidates = {
+            candidate.resolve(strict=False)
+            for pattern in ("*_results.json", "*results*.json")
+            for candidate in result_artifact.parent.glob(pattern)
+            if candidate.is_file()
+        }
+        artifact_near_misses = [str(candidate) for candidate in sorted(candidates)][:20]
     validation_ok = exit_code == 0 and artifact_exists is not False
     runner_exit_code = 0 if validation_ok else 1
     summary = {
@@ -381,6 +390,7 @@ def main() -> int:
         "attempts": attempts,
         "result_artifact": str(result_artifact) if result_artifact is not None else None,
         "result_artifact_exists": artifact_exists,
+        "result_artifact_near_misses": artifact_near_misses,
         "validation_ok": validation_ok,
         "runner_exit_code": runner_exit_code,
     }
@@ -397,6 +407,13 @@ def main() -> int:
             file=sys.stderr,
             flush=True,
         )
+        if artifact_near_misses:
+            print(
+                "[run_agent_job] near-miss result artifact candidates: "
+                + ", ".join(artifact_near_misses),
+                file=sys.stderr,
+                flush=True,
+            )
 
     print(
         f"[run_agent_job] done exit={exit_code} timed_out={timed_out} "

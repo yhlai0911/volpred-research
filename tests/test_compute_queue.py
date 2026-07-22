@@ -803,6 +803,44 @@ def test_pending_followup_detects_agent_inner_timeout_from_runner_metadata(
     assert view["split_contract"]["child_timeout_lt_seconds"] == 5400
 
 
+def test_pending_followup_routes_successful_agent_artifact_contract_mismatch(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    expected = tmp_path / "wt/experiments/k1729/results.json"
+    near_miss = tmp_path / "wt/experiments/k1729/k1729_results.json"
+    metadata = tmp_path / "agent-metadata.json"
+    metadata.write_text(json.dumps({
+        "exit_code": 0,
+        "timed_out": False,
+        "runner_exit_code": 1,
+        "result_artifact": str(expected),
+        "result_artifact_exists": False,
+        "result_artifact_near_misses": [str(near_miss)],
+    }), encoding="utf-8")
+    job = {
+        "id": "agent-k1729",
+        "status": "failed",
+        "kind": "agent",
+        "cwd": str(tmp_path / "wt"),
+        "job_metadata": str(metadata),
+        "result_artifact": str(expected),
+        "exit_code": 1,
+        "followup_dispatched": False,
+        "claude_followup": {"brief": "collect K1729", "priority": 1},
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None
+    assert view["followup_mode"] == "artifact_contract_mismatch"
+    brief = view["claude_followup"]["brief"]
+    assert str(near_miss) in brief
+    assert "Do NOT re-enqueue" in brief
+    assert "collect K1729" in brief
+
+
 def test_legacy_completed_only_filter_does_not_return_failed_agent(
     tmp_path: Path,
     monkeypatch,
@@ -837,6 +875,7 @@ def test_hourly_prompt_routes_both_followup_modes() -> None:
     assert "list --pending-followup --json" in prompt
     assert "collect_completed" in prompt
     assert "split_required" in prompt
+    assert "artifact_contract_mismatch" in prompt
     assert "triage_failed" in prompt
     assert "不得把 failed job 或殘留 artifact 當成功結果" in prompt
 

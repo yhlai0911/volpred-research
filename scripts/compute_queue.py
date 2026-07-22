@@ -581,6 +581,35 @@ def _runner_timed_out(job: dict[str, Any]) -> bool:
     return metadata.get("timed_out") is True
 
 
+def _artifact_contract_mismatch(job: dict[str, Any]) -> dict[str, Any] | None:
+    """Return evidence that the agent succeeded but its exact output is absent."""
+    meta_path = job.get("job_metadata")
+    if not meta_path:
+        return None
+    path = Path(str(meta_path))
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        metadata = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        warn(
+            "compute_queue",
+            "job_metadata unreadable while checking artifact contract",
+            job=job.get("id"),
+            path=str(path),
+            err=str(exc),
+        )
+        return None
+    if (
+        metadata.get("exit_code") == 0
+        and metadata.get("timed_out") is False
+        and metadata.get("runner_exit_code") not in (None, 0)
+        and metadata.get("result_artifact_exists") is False
+    ):
+        return metadata
+    return None
+
+
 def _job_timed_out(job: dict[str, Any]) -> bool:
     return (
         job.get("failure_reason") == "timeout"
@@ -900,6 +929,22 @@ def enqueue_agent(args) -> int:
 
     job_id = args.id or f"agent-{brief_path.stem}-{uuid.uuid4().hex[:6]}"
 
+    # The declared artifact and the instructions must describe the same output.
+    # Otherwise a typo is discovered only after an expensive agent has exited
+    # successfully, when the runner cannot find the exact path it must verify.
+    brief_text = brief_path.read_text(encoding="utf-8")
+    if args.result_artifact:
+        artifact_basename = Path(args.result_artifact).name
+        basename_pattern = rf"(?<![A-Za-z0-9_.-]){re.escape(artifact_basename)}(?![A-Za-z0-9_.-])"
+        if re.search(basename_pattern, brief_text) is None:
+            print(
+                "error: --result-artifact basename is absent from the agent brief; "
+                "refusing a job whose output contract cannot be satisfied: "
+                f"basename={artifact_basename!r} brief={brief_path}",
+                file=sys.stderr,
+            )
+            return 2
+
     # Freeze the brief HERE, at enqueue. The runner opens its brief when the worker
     # picks the job up (*/15) — not now — so "enqueue, then fix the brief" is not an
     # edit, it is a race against the worker, and the author does not find out who won.
@@ -913,7 +958,7 @@ def enqueue_agent(args) -> int:
     # sent this write into the real repo. Guard at the writer so the leak fails loudly.
     guard_canonical_write(frozen_brief)
     AGENT_BRIEF_DIR.mkdir(parents=True, exist_ok=True)
-    frozen_brief.write_text(brief_path.read_text(encoding="utf-8"), encoding="utf-8")
+    frozen_brief.write_text(brief_text, encoding="utf-8")
 
     # `result_artifact` is the AGENT'S output, never the runner's summary. Resolve
     # it on the same side of the worktree boundary as the agent itself. The runner
@@ -1328,6 +1373,7 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
     if job.get("status") != "failed":
         return None
     timed_out = _job_timed_out(job)
+    contract_mismatch = None if timed_out else _artifact_contract_mismatch(job)
     workdir = _agent_workdir(job)
     # "No worktree" is not the same as "nothing to act on". Only kind=agent jobs
     # ever carry a cwd, so this guard used to drop EVERY failed compute job on the
@@ -1363,6 +1409,21 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
             "shard, validation/review, merge), each with one explicit artifact and success criterion.",
             f"Every compute child must use a timeout shorter than {timeout_seconds}s and record "
             f"--timeout-parent-job-id {job.get('id')} plus a distinct --split-stage value.",
+        ]
+        if original_brief:
+            triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
+    elif contract_mismatch:
+        near_misses = contract_mismatch.get("result_artifact_near_misses") or []
+        triage_lines = [
+            "ARTIFACT CONTRACT MISMATCH — the agent exited successfully, but the exact declared output path is missing.",
+            f"Job: {job.get('id')} (agent_exit_code=0, runner_exit_code={contract_mismatch.get('runner_exit_code')})",
+            f"Declared result artifact: {contract_mismatch.get('result_artifact') or job.get('result_artifact')}",
+            f"Near-miss candidates: {near_misses or '(none found)'}",
+            f"Runner metadata: {job.get('job_metadata')}",
+            f"stdout/stderr: {job.get('stdout_file')} | {job.get('stderr_file')}",
+            f"Worktree/cwd: {workdir}",
+            "Inspect the declared path and candidates, validate the existing output, and repair the path contract or collect the valid artifact.",
+            "Do NOT re-enqueue the agent: the work itself succeeded, and a fresh run would only duplicate it.",
         ]
         if original_brief:
             triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
@@ -1425,7 +1486,12 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
             triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
 
     row = dict(job)
-    row["followup_mode"] = "split_required" if timed_out else "triage_failed"
+    if timed_out:
+        row["followup_mode"] = "split_required"
+    elif contract_mismatch:
+        row["followup_mode"] = "artifact_contract_mismatch"
+    else:
+        row["followup_mode"] = "triage_failed"
     if timed_out:
         row["split_contract"] = {
             "parent_timeout_job_id": job.get("id"),

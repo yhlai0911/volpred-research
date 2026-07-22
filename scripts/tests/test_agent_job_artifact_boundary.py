@@ -92,6 +92,7 @@ def test_runner_verifies_worktree_result_without_writing_main(monkeypatch, tmp_p
 def test_runner_fails_when_successful_agent_omits_declared_result(
     monkeypatch,
     tmp_path: Path,
+    capsys,
 ) -> None:
     main = tmp_path / "main"
     worktree = tmp_path / "worktree"
@@ -99,9 +100,14 @@ def test_runner_fails_when_successful_agent_omits_declared_result(
     worktree.mkdir()
     brief = main / "brief.md"
     brief.write_text("forget the result")
-    fake = _fake_agent(tmp_path / "fake-claude", "exit 0\n")
+    near_miss = worktree / "experiments/k-missing/k-missing_results.json"
+    fake = _fake_agent(
+        tmp_path / "fake-claude",
+        f'mkdir -p "{near_miss.parent}"\n'
+        f'printf \'{{"source":"agent"}}\' > "{near_miss}"\n',
+    )
     metadata = main / "storage/ops/agent_jobs/job-missing.json"
-    rel_artifact = "experiments/k-missing/k-missing_results.json"
+    rel_artifact = "experiments/k-missing/results.json"
 
     monkeypatch.setattr(run_agent_job, "ROOT", main)
     monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
@@ -120,6 +126,8 @@ def test_runner_fails_when_successful_agent_omits_declared_result(
     assert receipt["result_artifact_exists"] is False
     assert receipt["validation_ok"] is False
     assert receipt["runner_exit_code"] == 1
+    assert receipt["result_artifact_near_misses"] == [str(near_miss)]
+    assert str(near_miss) in capsys.readouterr().err
 
 
 def test_runner_never_overwrites_absolute_worktree_result(monkeypatch, tmp_path: Path) -> None:
@@ -190,7 +198,7 @@ def test_enqueue_agent_resolves_result_from_worktree_and_separates_metadata(
     worktree = root / ".claude/worktrees/k-test"
     worktree.mkdir(parents=True)
     brief = root / "brief.md"
-    brief.write_text("produce a canonical experiment result")
+    brief.write_text("produce experiments/k-test/k-test_results.json")
     _patch_queue_paths(monkeypatch, root)
 
     rel_artifact = "experiments/k-test/k-test_results.json"
@@ -224,6 +232,33 @@ def test_enqueue_agent_resolves_result_from_worktree_and_separates_metadata(
     # so this test wrote a brief into the live checkout on every run and only CI's
     # repo-state assert noticed. Assert the destination, not just the queue record.
     assert (root / "storage/ops/agent_briefs/agent-artifact-test.md").exists()
+
+
+def test_enqueue_agent_rejects_result_basename_absent_from_brief(
+    monkeypatch,
+    tmp_path: Path,
+    capsys,
+) -> None:
+    root = tmp_path / "main"
+    worktree = root / ".claude/worktrees/k-test"
+    worktree.mkdir(parents=True)
+    brief = root / "brief.md"
+    # A substring is not an exact basename mention: this is the k1729 shape
+    # that used to pass unnoticed until the successful agent was collected.
+    brief.write_text("produce experiments/k-test/k-test_results.json")
+    _patch_queue_paths(monkeypatch, root)
+
+    args = _enqueue_args(
+        brief=brief,
+        cwd=".claude/worktrees/k-test",
+        result_artifact="experiments/k-test/results.json",
+        job_id="agent-contract-mismatch",
+    )
+
+    assert compute_queue.enqueue_agent(args) == 2
+    assert "basename is absent" in capsys.readouterr().err
+    assert not (root / "storage/ops/agent_briefs/agent-contract-mismatch.md").exists()
+    assert not (root / "storage/ops/compute_queue/agent-contract-mismatch.json").exists()
 
 
 def test_enqueue_agent_without_result_does_not_invent_a_fake_artifact(
