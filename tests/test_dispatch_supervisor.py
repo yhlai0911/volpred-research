@@ -2849,6 +2849,64 @@ def test_multislot_health_closes_dead_job_without_touching_live_sibling(
     assert len(sent) == 1
 
 
+def test_multislot_health_timeout_kills_only_the_overdue_slot_in_same_cohort(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A timeout is per slot, never a cohort-wide kill sweep.
+
+    Regression for the 2026-07-20 incident: three workers returned within
+    1.5 seconds despite ages of 131s/612s/672s.  If one sibling really crosses
+    the watchdog ceiling, health must signal only that sibling's PGID and
+    leave younger jobs in the same cohort running.
+    """
+    state_path = _tmp_state(tmp_path)
+    cohort_id = "same-cohort"
+    handles = []
+    for slot, pid in enumerate((101, 202, 303), start=1):
+        handle = state.reserve_fire(
+            schedule_id="hourly_dispatch", attempt=1, model="opus",
+            log_path=f"/tmp/{pid}.log", max_slots=3, cohort_id=cohort_id,
+            path=state_path,
+        )
+        assert handle.slot_id == slot
+        state.attach_process(
+            job_id=handle.job_id, expected_attempt=1,
+            pid=pid, pgid=pid, started_wall=f"wall-{pid}", path=state_path,
+        )
+        handles.append(handle)
+
+    jobs = [
+        state.CurrentJob(
+            pid=pid, pgid=pid, schedule_id="hourly_dispatch",
+            started_at="2026-01-01T00:00:00+00:00", attempt=1,
+            model="opus", log_path=f"/tmp/{pid}.log",
+            job_id=handle.job_id, cohort_id=cohort_id, slot_id=handle.slot_id,
+            started_wall=f"wall-{pid}", age_seconds=age,
+        )
+        for handle, pid, age in zip(handles, (101, 202, 303), (3001, 672, 131))
+    ]
+    monkeypatch.setattr(state, "get_current_jobs", lambda _path=state_path: jobs)
+    monkeypatch.setattr(
+        health.procutil, "check_identity",
+        lambda _pid, _wall: procutil.IDENTITY_MATCH,
+    )
+    kills: list[int] = []
+    monkeypatch.setattr(
+        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True),
+    )
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda _pgid: [])
+    monkeypatch.setattr(health.alerts, "send_hang_alert", lambda **_kwargs: True)
+
+    assert health.check_once(state_path=state_path, max_age_s=3000) == "killed"
+    assert kills == [101]
+    survivors = state.read_state(state_path)["current_jobs"]
+    assert [job["job_id"] for job in survivors] == [
+        handles[1].job_id,
+        handles[2].job_id,
+    ]
+    assert [job["cohort_id"] for job in survivors] == [cohort_id, cohort_id]
+
+
 def test_health_keeps_quarantine_when_leader_dead_but_pgid_descendant_survives(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:

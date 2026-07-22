@@ -50162,14 +50162,11 @@
     "title": "[incident] cohort-wide kill sweep：同 cohort 3 個 slot 於 1.5s 內全數 killed_timeout，duration 全未達 3000s cap",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-21T13:14:14.434697+00:00",
     "source": "dispatch",
     "parent_task_id": "assign_f59976b6",
     "description": "驗收 assign_f59976b6 時發現的實質新風險（證據見 storage/ops/throughput_audit_max_slots_20260721.md 第 3 節）。\n\n現象（~/.volpred/logs/dispatch_supervisor.log）：\n  11:23:29 slot-2 killed_timeout duration=671.5s\n  11:23:30 slot-4 killed_timeout duration=131.2s\n  11:23:31 slot-3 killed_timeout duration=611.7s\n  11:44:59 slot-3 killed_timeout duration=450.4s\n  11:44:59 slot-1 killed_timeout duration=930.5s\n  11:45:00 slot-4 killed_timeout duration=270.5s\n\n同 cohort 多 slot 在 1.5 秒內同時返回，但各自 duration 差距極大（131s vs 671s），且全部遠低於 3000s hard cap ⇒ 不是 per-job timeout，是 supervisor 層整批 kill。剛跑 131s（剛起步）的 slot 被連坐殺掉。\n\n影響：max_slots 2→4 讓單次 sweep 的爆炸半徑加倍。10 次 killed_timeout 中 6 次來自這 2 個 sweep；killed_timeout 由變更前 1-2/日 升到 07-20 的 7/日。\n\n要做：(1) 定位觸發者 —— supervisor watchdog / cohort drain 逾時 / launchd 層，讀 scripts/dispatch_supervisor/scheduler.py 的 kill 路徑；(2) 若確為整批 kill，改成 per-slot 判定，勿連坐未逾時的 slot；(3) 補一條 regression test。",
-    "claimed_by": "codex-failover-slot-3-66419e3315214941b1d58a7fa620998d",
-    "claimed_at": "2026-07-22T16:10:28.380095+00:00",
-    "claim_session_id": "2806db38d41e",
     "status_history": [
       {
         "ts": "2026-07-22T16:10:28.380113+00:00",
@@ -50182,9 +50179,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-3-66419e3315214941b1d58a7fa620998d"
+      },
+      {
+        "ts": "2026-07-22T16:14:18.915258+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-3-66419e3315214941b1d58a7fa620998d"
       }
     ],
-    "started_at": "2026-07-22T16:10:37.790416+00:00"
+    "started_at": "2026-07-22T16:10:37.790416+00:00",
+    "completed_at": "2026-07-22T16:14:18.915238+00:00",
+    "result": "root_cause=2026-07-20 exits were not a supervisor cohort kill: scheduler/health expose only per-job PGID kill, and a sibling survived each observed batch; trigger class was outside supervisor / Claude execution plane, while exact sender is unrecoverable because no contemporaneous audit trail existed. Existing 23b8063de reclassified raw signal-like exits and released only that slot claim; d93ebbb42 added next-occurrence process snapshots. Added same-cohort 3-slot regression proving only the >3000s PGID is killed, corrected the throughput audit, focused 4/4 passed and dispatch-supervisor tests 120/120 passed (post-test CI-parity ratchet separately flags pre-existing live dispatch_state reads)."
   },
   {
     "id": "throughput_recheck_max_slots_20260725",

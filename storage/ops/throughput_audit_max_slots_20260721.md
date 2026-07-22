@@ -46,6 +46,20 @@
 
 ## 3. ⚠️ 新風險面已實際發生：cohort-wide kill sweep
 
+> **2026-07-23 follow-up 勘誤（`cohort_wide_kill_sweep_20260721`）**：下方將
+> `exit=143` 推論為「supervisor 層整批 kill」的結論不成立。逐路徑稽核
+> `scheduler.py` / `health.py` / `worker.py` 後，supervisor 只有逐 job/PGID 的
+> timeout kill，沒有 cohort-wide kill primitive。實際 log 也顯示第一批
+> slot-1 仍正常跑到 success（duration=1100.3s）；第二批 slot-2 先正常
+> success（640.3s），其餘三個 Claude CLI 才同秒結束。因此觸發類別是
+> **supervisor 外部 / Claude execution plane 的共同失敗**，不是 cohort drain
+> 連坐殺。當時沒有 signal-sender audit trail，無法事後誠實地指定精確 PID；
+> `23b8063de` 已將 raw signal-like exit 從 `killed_timeout` 改為
+> `external_signal`（不再發假 hang CRITICAL，並釋放該 slot claim），
+> `d93ebbb42` 已在下次發生時留 process-table snapshot 以追 killer。
+> 本 follow-up 另補三個 same-cohort slot 的 regression：只有單一 slot 超過
+> 3000s 時，只能 signal 該 slot PGID，兩個年輕 sibling 必須保留。
+
 `killed_timeout` 逐日：
 
 | 日期 | killed_timeout |
