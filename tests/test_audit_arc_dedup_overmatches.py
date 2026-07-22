@@ -78,3 +78,42 @@ def test_find_overmatches_ignores_same_axis_arc_skip():
     )
 
     assert hits == []
+
+
+def test_find_overmatches_ignores_historical_marker_after_status_transition():
+    """A skip marker survives release/unpublish but no longer means "blocked"."""
+    blocker = {
+        "id": "mile_old",
+        "title": "K1417 bootstrap methodology robustness check",
+        "description": "SPY VIX bootstrap result is not robust.",
+        "status": "published",
+    }
+    stale_details = {
+        "release_arc_dedup_of": "mile_old",
+        "release_dedup_skipped_at": "2026-06-24T08:00:00+00:00",
+    }
+    feed = [
+        blocker,
+        {
+            "id": "mile_released",
+            "title": "CTA ETF product myth",
+            "description": "DBMF and KMLM do not provide robust crisis alpha.",
+            "status": "published",
+            "details": stale_details,
+        },
+        {
+            "id": "mile_unpublished",
+            "title": "CTA ETF product myth follow-up",
+            "description": "DBMF and KMLM do not provide robust crisis alpha.",
+            "status": "unpublished",
+            "details": stale_details,
+        },
+    ]
+
+    hits = audit.find_overmatches(
+        feed,
+        days=30,
+        now=datetime(2026, 6, 24, 9, tzinfo=timezone.utc),
+    )
+
+    assert hits == []

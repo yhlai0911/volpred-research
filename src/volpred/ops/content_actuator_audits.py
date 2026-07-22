@@ -54,12 +54,20 @@ def _signature(item: dict) -> dict:
 def find_overmatches(
     feed: Iterable[dict], *, days: int = 30, now: datetime | None = None
 ) -> list[dict]:
-    """Return recent dedup skips whose candidate/blocker narrative axes differ."""
+    """Return actionable dedup skips whose candidate/blocker axes differ.
+
+    ``release_arc_dedup_of`` is an audit trail, not current state.  It remains
+    on an item after a later release succeeds (and after an operator unpublishes
+    that item), so treating every recent marker as a live block makes the alert
+    sticky forever.  Only drafts can still be blocked by the release gate.
+    """
     items = [item for item in feed if isinstance(item, dict)]
     by_id = {str(item.get("id") or ""): item for item in items}
     cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
     candidates: list[dict] = []
     for item in items:
+        if item.get("status") != "draft":
+            continue
         details = item.get("details")
         if not isinstance(details, dict):
             continue
