@@ -51995,7 +51995,7 @@
     "description": "老闆 2026-07-22 Telegram P1（阻塞立刻解決）。\n\n症狀：dispatch_supervisor 每次 fire 的 phase_z 都 commit_nonzero → rolled_back=True，成果全數退回，21 個 foreign path 已卡 >=3 個 fire；worker 卡 50 分被 SIGKILL（pid 45848）。\n\n已證據化的兩個 pre-commit blocker：\n1. audit-test-imports 3 BAD — tests/test_task_signature.py 匯入 volpred.ops.task_signature、tests/test_worktree_gc.py 參照 scripts/worktree_gc.py、scripts/tests/test_fire_manifest.py 從 volpred.ops 匯入 fire_manifest。實測這 6 個檔（3 test + 3 source）在 working tree 全部存在但都是 untracked(??)。\n2. silent-fallback-audit 2 NEW — scripts/check_experiment_artifacts.py:302 except OSError: continue、src/volpred/research/reproduce_spec.py:125 except Exception: return None；另有 baseline 60 筆 resolved 需另開 cleanup commit 降 baseline。\n\n根因假說（需驗證）：phase_z 把 test 檔納入 candidate index，但對應的 source 檔被歸類為 foreign/quarantine 而排除在同一 commit 之外 → import gate 必 BAD → commit 失敗 → rollback → 路徑維持 dirty → 下個 fire 重演，形成永久死鎖。這是 commit ownership 分割規則的缺陷，不是單純的髒檔案。\n\n要求（結案五步）：\n- 定位 phase_z 的 candidate index 組建邏輯，讓「同一 refactor 的 test 與 source」不可被拆到不同 commit（原子性），或在 import gate 前先偵測 split 並整組納入/整組排除。\n- 修掉上述 2 個 silent fallback（加 warn 或 silent-ok 標註），並在獨立 commit 降 silent-fallback baseline。\n- 回歸驗證：手動觸發一次 fire，確認 phase_z outcome committed=True、rolled_back=False，且 stuck foreign path 數量下降。\n- 制度化：加測試覆蓋「test/source 被拆開時 phase_z 不得產生必然失敗的 candidate index」，並讓連續 N 次 commit_nonzero 直接開 incident 而非靜默重試。\n\n參考 log：/Users/yhlai0911/.volpred/logs/dispatch_supervisor.log（搜 phase_z gave up after retries）",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-22T02:54:31.140316+00:00",
     "created_by": "telegram_responder",
@@ -52030,14 +52030,19 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-1-8ef2a47c8aca4df4921a00dc5a79e8ae"
+      },
+      {
+        "ts": "2026-07-22T05:14:10.820138+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-8ef2a47c8aca4df4921a00dc5a79e8ae"
       }
     ],
     "started_at": "2026-07-22T05:03:01.808080+00:00",
     "last_released_at": "2026-07-22T04:00:29.237765+00:00",
     "last_release_reason": "liveness_reconcile_detached_8eb259da",
-    "claimed_by": "codex-failover-slot-1-8ef2a47c8aca4df4921a00dc5a79e8ae",
-    "claimed_at": "2026-07-22T05:03:01.541427+00:00",
-    "claim_session_id": "b8c584314cd8"
+    "completed_at": "2026-07-22T05:14:10.820123+00:00",
+    "result": "root_cause_fixed_and_verified: phase_z now detects untracked test/source pairs split across ownership and excludes the whole pair instead of building a candidate guaranteed to fail. End-to-end run_phase_z regression committed=True without rollback and kept both halves out; 63 focused tests passed, audit-test-imports 0 bad, silent-fallback full sweep new=0 resolved=0. Partial audit false baseline-cleanup advice is now scope-aware. Commits 5b0b542d2, f7d9d1400, 275eb826c."
   },
   {
     "id": "asia_backlog_shift2_20260722",
@@ -52369,5 +52374,88 @@
       "alert",
       "content_quality"
     ]
+  },
+  {
+    "id": "assign_f28979dc",
+    "title": "PHASE-Z 卡住檔案 incident（68d7f523da5d62e9）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n29 個未提交檔案不是任何一班 fire 產出的，最長已連續 29 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- AGENTS.md — 7 班\n- docs/error_log.md — 7 班\n- docs/refactor_commit_ownership_state_machine.md — 26 班\n- scripts/check_experiment_artifacts.py — 7 班\n- scripts/dedupe_next_tasks.py — 26 班\n- scripts/dispatch_slot_budget.py — 29 班\n- scripts/dispatch_supervisor/phase_z.py — 29 班\n- scripts/fb_realchrome_post.py — 15 班\n- scripts/hooks/gate_edit_guard.py — 3 班\n- scripts/preserve_gate_blob.py — 7 班\n- scripts/reap_orphan_deliverables.py — 29 班\n- scripts/tests/test_fire_manifest.py — 26 班\n- scripts/tests/test_gate_blob_preservation.py — 7 班\n- scripts/tests/test_orphan_namespace_registry.py — 29 班\n- scripts/tests/test_phase_z_foreign_incident.py — 29 班\n- scripts/tests/test_reproduce_spec_runtime_emitter.py — 7 班\n- scripts/worktree_gc.py — 26 班\n- src/volpred/ops/content.py — 18 班\n- src/volpred/ops/fire_manifest.py — 26 班\n- src/volpred/ops/foreign_incident.py — 29 班\n- src/volpred/ops/next_tasks.py — 26 班\n- src/volpred/ops/task_signature.py — 26 班\n- src/volpred/publisher/publisher.py — 18 班\n- src/volpred/research/__init__.py — 7 班\n- src/volpred/research/reproduce_spec.py — 7 班\n- storage/reports/mile_e4002f4f.json — 18 班\n- tests/test_task_signature.py — 26 班\n- tests/test_topic_cluster_gate.py — 18 班\n- tests/test_worktree_gc.py — 26 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260722T051609892729Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-22T05:16:21.050624+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "68d7f523da5d62e9",
+      "paths": [
+        "AGENTS.md",
+        "docs/error_log.md",
+        "docs/refactor_commit_ownership_state_machine.md",
+        "scripts/check_experiment_artifacts.py",
+        "scripts/dedupe_next_tasks.py",
+        "scripts/dispatch_slot_budget.py",
+        "scripts/dispatch_supervisor/phase_z.py",
+        "scripts/fb_realchrome_post.py",
+        "scripts/hooks/gate_edit_guard.py",
+        "scripts/preserve_gate_blob.py",
+        "scripts/reap_orphan_deliverables.py",
+        "scripts/tests/test_fire_manifest.py",
+        "scripts/tests/test_gate_blob_preservation.py",
+        "scripts/tests/test_orphan_namespace_registry.py",
+        "scripts/tests/test_phase_z_foreign_incident.py",
+        "scripts/tests/test_reproduce_spec_runtime_emitter.py",
+        "scripts/worktree_gc.py",
+        "src/volpred/ops/content.py",
+        "src/volpred/ops/fire_manifest.py",
+        "src/volpred/ops/foreign_incident.py",
+        "src/volpred/ops/next_tasks.py",
+        "src/volpred/ops/task_signature.py",
+        "src/volpred/publisher/publisher.py",
+        "src/volpred/research/__init__.py",
+        "src/volpred/research/reproduce_spec.py",
+        "storage/reports/mile_e4002f4f.json",
+        "tests/test_task_signature.py",
+        "tests/test_topic_cluster_gate.py",
+        "tests/test_worktree_gc.py"
+      ],
+      "streaks": {
+        "AGENTS.md": 7,
+        "docs/error_log.md": 7,
+        "docs/refactor_commit_ownership_state_machine.md": 26,
+        "scripts/check_experiment_artifacts.py": 7,
+        "scripts/dedupe_next_tasks.py": 26,
+        "scripts/dispatch_slot_budget.py": 29,
+        "scripts/dispatch_supervisor/phase_z.py": 29,
+        "scripts/fb_realchrome_post.py": 15,
+        "scripts/hooks/gate_edit_guard.py": 3,
+        "scripts/preserve_gate_blob.py": 7,
+        "scripts/reap_orphan_deliverables.py": 29,
+        "scripts/tests/test_fire_manifest.py": 26,
+        "scripts/tests/test_gate_blob_preservation.py": 7,
+        "scripts/tests/test_orphan_namespace_registry.py": 29,
+        "scripts/tests/test_phase_z_foreign_incident.py": 29,
+        "scripts/tests/test_reproduce_spec_runtime_emitter.py": 7,
+        "scripts/worktree_gc.py": 26,
+        "src/volpred/ops/content.py": 18,
+        "src/volpred/ops/fire_manifest.py": 26,
+        "src/volpred/ops/foreign_incident.py": 29,
+        "src/volpred/ops/next_tasks.py": 26,
+        "src/volpred/ops/task_signature.py": 26,
+        "src/volpred/publisher/publisher.py": 18,
+        "src/volpred/research/__init__.py": 7,
+        "src/volpred/research/reproduce_spec.py": 7,
+        "storage/reports/mile_e4002f4f.json": 18,
+        "tests/test_task_signature.py": 26,
+        "tests/test_topic_cluster_gate.py": 18,
+        "tests/test_worktree_gc.py": 26
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260722T051609892729Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-22T05:16:21.035775+00:00",
+      "last_seen_at": "2026-07-22T05:16:21.035775+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]

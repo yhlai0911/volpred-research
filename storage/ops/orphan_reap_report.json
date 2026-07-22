@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T04:01:08.224755+00:00",
+  "generated_at": "2026-07-22T05:01:19.557149+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,12 +7,17 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 14.7
+      "age_hours": 15.7
     }
   ],
   "held": [
     {
-      "path": "storage/drafts/K1697_general_draft.md",
+      "path": "storage/drafts/k1253_general_draft.md",
+      "reason": "no_title",
+      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
+    },
+    {
+      "path": "storage/drafts/k1711_general_draft.md",
       "reason": "no_title",
       "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
     }
@@ -20,10 +25,10 @@
   "skipped": {
     "baseline": 519,
     "registered": 48,
-    "grace": 2,
+    "grace": 0,
     "inflight": 0
   },
-  "orphan_count": 2,
+  "orphan_count": 3,
   "adopted": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -76,27 +81,55 @@
       "collections": []
     },
     "experiments": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "experiments/k1623/README.md",
+          "kind": "md",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1623/review_round3_codex_20260722.md",
+          "kind": "md",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/k1623/review_verdict_round3.json",
+          "kind": "json",
+          "reason": "untracked"
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 3,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "experiments",
+          "paths": [
+            "experiments/k1623/README.md",
+            "experiments/k1623/review_round3_codex_20260722.md",
+            "experiments/k1623/review_verdict_round3.json"
+          ],
+          "committed": true,
+          "detail": "[main 1960c4bdb] chore(experiment-reap): collect orphaned experiment artifacts (3 files)\n 3 files changed, 142 insertions(+)\n create mode 100644 exper"
+        }
+      ]
     }
   },
   "held_escalations": [
     {
-      "task_id": "assign_0e77fe90",
+      "task_id": "assign_db64b82b",
       "paths": [
-        "job:compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674"
+        "storage/drafts/K1697_general_draft.md"
       ]
     }
   ],
   "held_escalated_paths": [
     "job:compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674",
     "job:compute-k1730-arm-a-production-quick-mode-1784358686",
-    "job:k1698_rev3_rerun"
+    "job:k1698_rev3_rerun",
+    "storage/drafts/K1697_general_draft.md"
   ]
 }
