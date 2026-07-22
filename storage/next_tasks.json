@@ -51175,7 +51175,7 @@
     "description": "## 發生什麼\n27 個未提交檔案不是任何一班 fire 產出的，最長已連續 21 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/refactor_commit_ownership_state_machine.md — 12 班\n- scripts/audit_silent_fallbacks.py — 11 班\n- scripts/dedupe_next_tasks.py — 12 班\n- scripts/detect_price_split_breaks.py — 21 班\n- scripts/dispatch_slot_budget.py — 15 班\n- scripts/dispatch_supervisor/phase_z.py — 15 班\n- scripts/reap_orphan_deliverables.py — 15 班\n- scripts/tests/test_fire_manifest.py — 12 班\n- scripts/tests/test_orphan_namespace_registry.py — 15 班\n- scripts/tests/test_phase_z_foreign_incident.py — 15 班\n- scripts/worktree_gc.py — 12 班\n- src/volpred/cli.py — 4 班\n- src/volpred/ops/content.py — 4 班\n- src/volpred/ops/fire_manifest.py — 12 班\n- src/volpred/ops/foreign_incident.py — 15 班\n- src/volpred/ops/next_tasks.py — 12 班\n- src/volpred/ops/task_signature.py — 12 班\n- src/volpred/publisher/publisher.py — 4 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png — 19 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png — 19 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png — 19 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py — 19 班\n- storage/reports/mile_e4002f4f.json — 4 班\n- tests/test_member_qa_duplicate_gate.py — 4 班\n- tests/test_task_signature.py — 12 班\n- tests/test_topic_cluster_gate.py — 4 班\n- tests/test_worktree_gc.py — 12 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T212111873252Z:<路徑>`\n- `git show refs/volpred/quarantine/20260721T222905585186Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-21T21:21:14.449153+00:00",
     "payload": {
@@ -51271,7 +51271,424 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-21T22:29:07.294223+00:00"
+    "updated_at": "2026-07-21T22:29:07.294223+00:00",
+    "completed_at": "2026-07-22T07:17:53.918329+00:00",
+    "result": "關閉條件機械滿足：27 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/refactor_commit_ownership_state_machine.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "scripts/audit_silent_fallbacks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用"
+          ]
+        },
+        "scripts/dedupe_next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": "tests/test_dedupe_next_tasks.py",
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用",
+            "有對應測試 tests/test_dedupe_next_tasks.py"
+          ]
+        },
+        "scripts/detect_price_split_breaks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/_legacy/repoint_snapshot_from_db.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/_legacy/repoint_snapshot_from_db.py 引用"
+          ]
+        },
+        "scripts/dispatch_slot_budget.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "config/runtime_schedules.json",
+          "test_file": "scripts/tests/test_dispatch_slot_budget.py",
+          "liveness_evidence": [
+            "被已提交的 config/runtime_schedules.json 引用",
+            "有對應測試 scripts/tests/test_dispatch_slot_budget.py"
+          ]
+        },
+        "scripts/dispatch_supervisor/phase_z.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/fire_receipt.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/fire_receipt.py 引用"
+          ]
+        },
+        "scripts/reap_orphan_deliverables.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/dispatch_supervisor/phase_z.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/dispatch_supervisor/phase_z.py 引用"
+          ]
+        },
+        "scripts/tests/test_fire_manifest.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "scripts/tests/test_fire_manifest.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_orphan_namespace_registry.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_orphan_namespace_registry.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_phase_z_foreign_incident.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "src/volpred/ops/foreign_incident.py",
+          "test_file": "scripts/tests/test_phase_z_foreign_incident.py",
+          "liveness_evidence": [
+            "被已提交的 src/volpred/ops/foreign_incident.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/worktree_gc.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_worktree_gc.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 tests/test_worktree_gc.py"
+          ]
+        },
+        "src/volpred/cli.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用"
+          ]
+        },
+        "src/volpred/ops/content.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "config/article_series.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 config/article_series.json 引用"
+          ]
+        },
+        "src/volpred/ops/fire_manifest.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "scripts/tests/test_fire_manifest.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 scripts/tests/test_fire_manifest.py"
+          ]
+        },
+        "src/volpred/ops/foreign_incident.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_foreign_incident.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_foreign_incident.py 引用"
+          ]
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "src/volpred/ops/task_signature.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_task_signature.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 tests/test_task_signature.py"
+          ]
+        },
+        "src/volpred/publisher/publisher.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用"
+          ]
+        },
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "experiments/event_article_nfp_2026_07_03_t1/render_lazypack.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 experiments/event_article_nfp_2026_07_03_t1/render_lazypack.py 引用"
+          ]
+        },
+        "storage/reports/mile_e4002f4f.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "tests/test_member_qa_duplicate_gate.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "tests/test_member_qa_duplicate_gate.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "tests/test_task_signature.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_task_signature.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "tests/test_topic_cluster_gate.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "tests/test_topic_cluster_gate.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "tests/test_worktree_gc.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_worktree_gc.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/refactor_commit_ownership_state_machine.md",
+        "scripts/audit_silent_fallbacks.py",
+        "scripts/dedupe_next_tasks.py",
+        "scripts/detect_price_split_breaks.py",
+        "scripts/dispatch_slot_budget.py",
+        "scripts/dispatch_supervisor/phase_z.py",
+        "scripts/reap_orphan_deliverables.py",
+        "scripts/tests/test_fire_manifest.py",
+        "scripts/tests/test_orphan_namespace_registry.py",
+        "scripts/tests/test_phase_z_foreign_incident.py",
+        "scripts/worktree_gc.py",
+        "src/volpred/cli.py",
+        "src/volpred/ops/content.py",
+        "src/volpred/ops/fire_manifest.py",
+        "src/volpred/ops/foreign_incident.py",
+        "src/volpred/ops/next_tasks.py",
+        "src/volpred/ops/task_signature.py",
+        "src/volpred/publisher/publisher.py",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png",
+        "storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py",
+        "storage/reports/mile_e4002f4f.json",
+        "tests/test_member_qa_duplicate_gate.py",
+        "tests/test_task_signature.py",
+        "tests/test_topic_cluster_gate.py",
+        "tests/test_worktree_gc.py"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "trending_repost_2026_07_22_ai_資本支出",
@@ -51456,7 +51873,7 @@
     "description": "## 發生什麼\n26 個未提交檔案不是任何一班 fire 產出的，最長已連續 20 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/refactor_commit_ownership_state_machine.md — 13 班\n- scripts/audit_silent_fallbacks.py — 12 班\n- scripts/dedupe_next_tasks.py — 13 班\n- scripts/dispatch_slot_budget.py — 16 班\n- scripts/dispatch_supervisor/phase_z.py — 16 班\n- scripts/reap_orphan_deliverables.py — 16 班\n- scripts/tests/test_fire_manifest.py — 13 班\n- scripts/tests/test_orphan_namespace_registry.py — 16 班\n- scripts/tests/test_phase_z_foreign_incident.py — 16 班\n- scripts/worktree_gc.py — 13 班\n- src/volpred/cli.py — 5 班\n- src/volpred/ops/content.py — 5 班\n- src/volpred/ops/fire_manifest.py — 13 班\n- src/volpred/ops/foreign_incident.py — 16 班\n- src/volpred/ops/next_tasks.py — 13 班\n- src/volpred/ops/task_signature.py — 13 班\n- src/volpred/publisher/publisher.py — 5 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/1_concept.png — 20 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/2_results.png — 20 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/3_takeaway.png — 20 班\n- storage/lazypack_jobs/mile_a73bb294/runs/lazypack-mile_a73bb294/panels/render_lazypack.py — 20 班\n- storage/reports/mile_e4002f4f.json — 5 班\n- tests/test_member_qa_duplicate_gate.py — 5 班\n- tests/test_task_signature.py — 13 班\n- tests/test_topic_cluster_gate.py — 5 班\n- tests/test_worktree_gc.py — 13 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260721T233800930862Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-21T23:38:03.070418+00:00",
     "payload": {
@@ -51549,9 +51966,6 @@
       ]
     },
     "priority_capped_from": 1,
-    "claimed_by": "codex-failover-slot-3-43e3b43e7b45493195eb0577cab61c34",
-    "claimed_at": "2026-07-22T07:10:17.427809+00:00",
-    "claim_session_id": "d3f634308a6c",
     "status_history": [
       {
         "ts": "2026-07-22T07:10:17.427825+00:00",
@@ -51564,9 +51978,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-3-43e3b43e7b45493195eb0577cab61c34"
+      },
+      {
+        "ts": "2026-07-22T07:17:53.694232+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-3-43e3b43e7b45493195eb0577cab61c34"
       }
     ],
-    "started_at": "2026-07-22T07:10:17.853669+00:00"
+    "started_at": "2026-07-22T07:10:17.853669+00:00",
+    "completed_at": "2026-07-22T07:17:53.694212+00:00",
+    "result": "Post-commit mechanical gate RC=0: all 26 incident paths are retrievable and clean in canonical main; 277 targeted regressions passed, compile/JSON/parser checks passed, and locked exact-path commit 5fc3378af adopted the validated active changes."
   },
   {
     "id": "event_article_fomc_2026-07-29_tminus7",
@@ -52201,7 +52623,7 @@
     "description": "## 發生什麼\n32 個未提交檔案不是任何一班 fire 產出的，最長已連續 27 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- AGENTS.md — 5 班\n- docs/error_log.md — 5 班\n- docs/refactor_commit_ownership_state_machine.md — 24 班\n- experiments/k1623/README.md — 5 班\n- experiments/k1623/review_round3_codex_20260722.md — 5 班\n- experiments/k1623/review_verdict_round3.json — 5 班\n- scripts/audit_silent_fallbacks.py — 23 班\n- scripts/check_experiment_artifacts.py — 5 班\n- scripts/dedupe_next_tasks.py — 24 班\n- scripts/dispatch_slot_budget.py — 27 班\n- scripts/dispatch_supervisor/phase_z.py — 27 班\n- scripts/fb_realchrome_post.py — 13 班\n- scripts/preserve_gate_blob.py — 5 班\n- scripts/reap_orphan_deliverables.py — 27 班\n- scripts/tests/test_fire_manifest.py — 24 班\n- scripts/tests/test_gate_blob_preservation.py — 5 班\n- scripts/tests/test_orphan_namespace_registry.py — 27 班\n- scripts/tests/test_phase_z_foreign_incident.py — 27 班\n- scripts/tests/test_reproduce_spec_runtime_emitter.py — 5 班\n- scripts/worktree_gc.py — 24 班\n- src/volpred/ops/content.py — 16 班\n- src/volpred/ops/fire_manifest.py — 24 班\n- src/volpred/ops/foreign_incident.py — 27 班\n- src/volpred/ops/next_tasks.py — 24 班\n- src/volpred/ops/task_signature.py — 24 班\n- src/volpred/publisher/publisher.py — 16 班\n- src/volpred/research/__init__.py — 5 班\n- src/volpred/research/reproduce_spec.py — 5 班\n- storage/reports/mile_e4002f4f.json — 16 班\n- tests/test_task_signature.py — 24 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260722T033357722686Z:<路徑>`\n- `git show refs/volpred/quarantine/20260722T033544718990Z:<路徑>`\n- `git show refs/volpred/quarantine/20260722T041422881203Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-22T03:34:11.014331+00:00",
     "payload": {
@@ -52310,7 +52732,494 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-22T04:14:40.673230+00:00"
+    "updated_at": "2026-07-22T04:14:40.673230+00:00",
+    "completed_at": "2026-07-22T07:17:53.918329+00:00",
+    "result": "關閉條件機械滿足：32 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "AGENTS.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/refactor_commit_ownership_state_machine.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1623/README.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1623/review_round3_codex_20260722.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1623/review_verdict_round3.json": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "scripts/audit_silent_fallbacks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用"
+          ]
+        },
+        "scripts/check_experiment_artifacts.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "config/experiment_artifact_exclusions.json",
+          "test_file": "scripts/tests/test_check_experiment_artifacts.py",
+          "liveness_evidence": [
+            "被已提交的 config/experiment_artifact_exclusions.json 引用",
+            "有對應測試 scripts/tests/test_check_experiment_artifacts.py"
+          ]
+        },
+        "scripts/dedupe_next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": "tests/test_dedupe_next_tasks.py",
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用",
+            "有對應測試 tests/test_dedupe_next_tasks.py"
+          ]
+        },
+        "scripts/dispatch_slot_budget.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "config/runtime_schedules.json",
+          "test_file": "scripts/tests/test_dispatch_slot_budget.py",
+          "liveness_evidence": [
+            "被已提交的 config/runtime_schedules.json 引用",
+            "有對應測試 scripts/tests/test_dispatch_slot_budget.py"
+          ]
+        },
+        "scripts/dispatch_supervisor/phase_z.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/fire_receipt.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/fire_receipt.py 引用"
+          ]
+        },
+        "scripts/fb_realchrome_post.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "scripts/preserve_gate_blob.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/check_experiment_artifacts.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/check_experiment_artifacts.py 引用"
+          ]
+        },
+        "scripts/reap_orphan_deliverables.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/dispatch_supervisor/phase_z.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/dispatch_supervisor/phase_z.py 引用"
+          ]
+        },
+        "scripts/tests/test_fire_manifest.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "scripts/tests/test_fire_manifest.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_gate_blob_preservation.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_gate_blob_preservation.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_orphan_namespace_registry.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_orphan_namespace_registry.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_phase_z_foreign_incident.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "src/volpred/ops/foreign_incident.py",
+          "test_file": "scripts/tests/test_phase_z_foreign_incident.py",
+          "liveness_evidence": [
+            "被已提交的 src/volpred/ops/foreign_incident.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_reproduce_spec_runtime_emitter.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_reproduce_spec_runtime_emitter.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/worktree_gc.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_worktree_gc.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 tests/test_worktree_gc.py"
+          ]
+        },
+        "src/volpred/ops/content.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "config/article_series.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 config/article_series.json 引用"
+          ]
+        },
+        "src/volpred/ops/fire_manifest.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "scripts/tests/test_fire_manifest.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 scripts/tests/test_fire_manifest.py"
+          ]
+        },
+        "src/volpred/ops/foreign_incident.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_foreign_incident.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_foreign_incident.py 引用"
+          ]
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "src/volpred/ops/task_signature.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_task_signature.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 tests/test_task_signature.py"
+          ]
+        },
+        "src/volpred/publisher/publisher.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用"
+          ]
+        },
+        "src/volpred/research/__init__.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用"
+          ]
+        },
+        "src/volpred/research/reproduce_spec.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/check_experiment_artifacts.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/check_experiment_artifacts.py 引用"
+          ]
+        },
+        "storage/reports/mile_e4002f4f.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "tests/test_task_signature.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_task_signature.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "tests/test_topic_cluster_gate.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "tests/test_topic_cluster_gate.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "tests/test_worktree_gc.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_worktree_gc.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "AGENTS.md",
+        "docs/error_log.md",
+        "docs/refactor_commit_ownership_state_machine.md",
+        "experiments/k1623/README.md",
+        "experiments/k1623/review_round3_codex_20260722.md",
+        "experiments/k1623/review_verdict_round3.json",
+        "scripts/audit_silent_fallbacks.py",
+        "scripts/check_experiment_artifacts.py",
+        "scripts/dedupe_next_tasks.py",
+        "scripts/dispatch_slot_budget.py",
+        "scripts/dispatch_supervisor/phase_z.py",
+        "scripts/fb_realchrome_post.py",
+        "scripts/preserve_gate_blob.py",
+        "scripts/reap_orphan_deliverables.py",
+        "scripts/tests/test_fire_manifest.py",
+        "scripts/tests/test_gate_blob_preservation.py",
+        "scripts/tests/test_orphan_namespace_registry.py",
+        "scripts/tests/test_phase_z_foreign_incident.py",
+        "scripts/tests/test_reproduce_spec_runtime_emitter.py",
+        "scripts/worktree_gc.py",
+        "src/volpred/ops/content.py",
+        "src/volpred/ops/fire_manifest.py",
+        "src/volpred/ops/foreign_incident.py",
+        "src/volpred/ops/next_tasks.py",
+        "src/volpred/ops/task_signature.py",
+        "src/volpred/publisher/publisher.py",
+        "src/volpred/research/__init__.py",
+        "src/volpred/research/reproduce_spec.py",
+        "storage/reports/mile_e4002f4f.json",
+        "tests/test_task_signature.py",
+        "tests/test_topic_cluster_gate.py",
+        "tests/test_worktree_gc.py"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "ci-red-29887298395",
@@ -52475,7 +53384,7 @@
     "description": "## 發生什麼\n29 個未提交檔案不是任何一班 fire 產出的，最長已連續 29 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- AGENTS.md — 7 班\n- docs/error_log.md — 7 班\n- docs/refactor_commit_ownership_state_machine.md — 26 班\n- scripts/check_experiment_artifacts.py — 7 班\n- scripts/dedupe_next_tasks.py — 26 班\n- scripts/dispatch_slot_budget.py — 29 班\n- scripts/dispatch_supervisor/phase_z.py — 29 班\n- scripts/fb_realchrome_post.py — 15 班\n- scripts/hooks/gate_edit_guard.py — 3 班\n- scripts/preserve_gate_blob.py — 7 班\n- scripts/reap_orphan_deliverables.py — 29 班\n- scripts/tests/test_fire_manifest.py — 26 班\n- scripts/tests/test_gate_blob_preservation.py — 7 班\n- scripts/tests/test_orphan_namespace_registry.py — 29 班\n- scripts/tests/test_phase_z_foreign_incident.py — 29 班\n- scripts/tests/test_reproduce_spec_runtime_emitter.py — 7 班\n- scripts/worktree_gc.py — 26 班\n- src/volpred/ops/content.py — 18 班\n- src/volpred/ops/fire_manifest.py — 26 班\n- src/volpred/ops/foreign_incident.py — 29 班\n- src/volpred/ops/next_tasks.py — 26 班\n- src/volpred/ops/task_signature.py — 26 班\n- src/volpred/publisher/publisher.py — 18 班\n- src/volpred/research/__init__.py — 7 班\n- src/volpred/research/reproduce_spec.py — 7 班\n- storage/reports/mile_e4002f4f.json — 18 班\n- tests/test_task_signature.py — 26 班\n- tests/test_topic_cluster_gate.py — 18 班\n- tests/test_worktree_gc.py — 26 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260722T051609892729Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-22T05:16:21.050624+00:00",
     "payload": {
@@ -52575,7 +53484,455 @@
         "tests/test_worktree_gc.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-22T07:17:53.918329+00:00",
+    "result": "關閉條件機械滿足：29 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "AGENTS.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/refactor_commit_ownership_state_machine.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "scripts/check_experiment_artifacts.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "config/experiment_artifact_exclusions.json",
+          "test_file": "scripts/tests/test_check_experiment_artifacts.py",
+          "liveness_evidence": [
+            "被已提交的 config/experiment_artifact_exclusions.json 引用",
+            "有對應測試 scripts/tests/test_check_experiment_artifacts.py"
+          ]
+        },
+        "scripts/dedupe_next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": "tests/test_dedupe_next_tasks.py",
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用",
+            "有對應測試 tests/test_dedupe_next_tasks.py"
+          ]
+        },
+        "scripts/dispatch_slot_budget.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "config/runtime_schedules.json",
+          "test_file": "scripts/tests/test_dispatch_slot_budget.py",
+          "liveness_evidence": [
+            "被已提交的 config/runtime_schedules.json 引用",
+            "有對應測試 scripts/tests/test_dispatch_slot_budget.py"
+          ]
+        },
+        "scripts/dispatch_supervisor/phase_z.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/fire_receipt.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/fire_receipt.py 引用"
+          ]
+        },
+        "scripts/fb_realchrome_post.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "scripts/hooks/gate_edit_guard.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": ".claude/settings.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 .claude/settings.json 引用"
+          ]
+        },
+        "scripts/preserve_gate_blob.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/check_experiment_artifacts.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/check_experiment_artifacts.py 引用"
+          ]
+        },
+        "scripts/reap_orphan_deliverables.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/dispatch_supervisor/phase_z.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/dispatch_supervisor/phase_z.py 引用"
+          ]
+        },
+        "scripts/tests/test_fire_manifest.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "scripts/tests/test_fire_manifest.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_gate_blob_preservation.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_gate_blob_preservation.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_orphan_namespace_registry.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_orphan_namespace_registry.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_phase_z_foreign_incident.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "src/volpred/ops/foreign_incident.py",
+          "test_file": "scripts/tests/test_phase_z_foreign_incident.py",
+          "liveness_evidence": [
+            "被已提交的 src/volpred/ops/foreign_incident.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_reproduce_spec_runtime_emitter.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_reproduce_spec_runtime_emitter.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/worktree_gc.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_worktree_gc.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 tests/test_worktree_gc.py"
+          ]
+        },
+        "src/volpred/ops/content.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "config/article_series.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 config/article_series.json 引用"
+          ]
+        },
+        "src/volpred/ops/fire_manifest.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "scripts/tests/test_fire_manifest.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 scripts/tests/test_fire_manifest.py"
+          ]
+        },
+        "src/volpred/ops/foreign_incident.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_foreign_incident.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_foreign_incident.py 引用"
+          ]
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "src/volpred/ops/task_signature.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_task_signature.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 tests/test_task_signature.py"
+          ]
+        },
+        "src/volpred/publisher/publisher.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用"
+          ]
+        },
+        "src/volpred/research/__init__.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用"
+          ]
+        },
+        "src/volpred/research/reproduce_spec.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/check_experiment_artifacts.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/check_experiment_artifacts.py 引用"
+          ]
+        },
+        "storage/reports/mile_e4002f4f.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "tests/test_task_signature.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_task_signature.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "tests/test_topic_cluster_gate.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "tests/test_topic_cluster_gate.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "tests/test_worktree_gc.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_worktree_gc.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "AGENTS.md",
+        "docs/error_log.md",
+        "docs/refactor_commit_ownership_state_machine.md",
+        "scripts/check_experiment_artifacts.py",
+        "scripts/dedupe_next_tasks.py",
+        "scripts/dispatch_slot_budget.py",
+        "scripts/dispatch_supervisor/phase_z.py",
+        "scripts/fb_realchrome_post.py",
+        "scripts/hooks/gate_edit_guard.py",
+        "scripts/preserve_gate_blob.py",
+        "scripts/reap_orphan_deliverables.py",
+        "scripts/tests/test_fire_manifest.py",
+        "scripts/tests/test_gate_blob_preservation.py",
+        "scripts/tests/test_orphan_namespace_registry.py",
+        "scripts/tests/test_phase_z_foreign_incident.py",
+        "scripts/tests/test_reproduce_spec_runtime_emitter.py",
+        "scripts/worktree_gc.py",
+        "src/volpred/ops/content.py",
+        "src/volpred/ops/fire_manifest.py",
+        "src/volpred/ops/foreign_incident.py",
+        "src/volpred/ops/next_tasks.py",
+        "src/volpred/ops/task_signature.py",
+        "src/volpred/publisher/publisher.py",
+        "src/volpred/research/__init__.py",
+        "src/volpred/research/reproduce_spec.py",
+        "storage/reports/mile_e4002f4f.json",
+        "tests/test_task_signature.py",
+        "tests/test_topic_cluster_gate.py",
+        "tests/test_worktree_gc.py"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "telegram-1312",
@@ -52646,7 +54003,7 @@
     "description": "## 發生什麼\n21 個未提交檔案不是任何一班 fire 產出的，最長已連續 30 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 8 班\n- docs/refactor_commit_ownership_state_machine.md — 27 班\n- scripts/dedupe_next_tasks.py — 27 班\n- scripts/dispatch_slot_budget.py — 30 班\n- scripts/dispatch_supervisor/phase_z.py — 30 班\n- scripts/fb_realchrome_post.py — 16 班\n- scripts/reap_orphan_deliverables.py — 30 班\n- scripts/tests/test_fire_manifest.py — 27 班\n- scripts/tests/test_orphan_namespace_registry.py — 30 班\n- scripts/tests/test_phase_z_foreign_incident.py — 30 班\n- scripts/worktree_gc.py — 27 班\n- src/volpred/ops/content.py — 19 班\n- src/volpred/ops/fire_manifest.py — 27 班\n- src/volpred/ops/foreign_incident.py — 30 班\n- src/volpred/ops/next_tasks.py — 27 班\n- src/volpred/ops/task_signature.py — 27 班\n- src/volpred/publisher/publisher.py — 19 班\n- storage/reports/mile_e4002f4f.json — 19 班\n- tests/test_task_signature.py — 27 班\n- tests/test_topic_cluster_gate.py — 19 班\n- tests/test_worktree_gc.py — 27 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260722T061230387593Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-22T06:12:48.417338+00:00",
     "payload": {
@@ -52730,7 +54087,336 @@
         "tests/test_worktree_gc.py: 已保存，且 16.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-22T07:17:53.918329+00:00",
+    "result": "關閉條件機械滿足：21 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/refactor_commit_ownership_state_machine.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "scripts/dedupe_next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": "tests/test_dedupe_next_tasks.py",
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用",
+            "有對應測試 tests/test_dedupe_next_tasks.py"
+          ]
+        },
+        "scripts/dispatch_slot_budget.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "config/runtime_schedules.json",
+          "test_file": "scripts/tests/test_dispatch_slot_budget.py",
+          "liveness_evidence": [
+            "被已提交的 config/runtime_schedules.json 引用",
+            "有對應測試 scripts/tests/test_dispatch_slot_budget.py"
+          ]
+        },
+        "scripts/dispatch_supervisor/phase_z.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/fire_receipt.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/fire_receipt.py 引用"
+          ]
+        },
+        "scripts/fb_realchrome_post.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "scripts/reap_orphan_deliverables.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/dispatch_supervisor/phase_z.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/dispatch_supervisor/phase_z.py 引用"
+          ]
+        },
+        "scripts/tests/test_fire_manifest.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "scripts/tests/test_fire_manifest.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_orphan_namespace_registry.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_orphan_namespace_registry.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/tests/test_phase_z_foreign_incident.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "src/volpred/ops/foreign_incident.py",
+          "test_file": "scripts/tests/test_phase_z_foreign_incident.py",
+          "liveness_evidence": [
+            "被已提交的 src/volpred/ops/foreign_incident.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "scripts/worktree_gc.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_worktree_gc.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 tests/test_worktree_gc.py"
+          ]
+        },
+        "src/volpred/ops/content.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "config/article_series.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 config/article_series.json 引用"
+          ]
+        },
+        "src/volpred/ops/fire_manifest.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "scripts/tests/test_fire_manifest.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 scripts/tests/test_fire_manifest.py"
+          ]
+        },
+        "src/volpred/ops/foreign_incident.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_foreign_incident.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_foreign_incident.py 引用"
+          ]
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "src/volpred/ops/task_signature.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_task_signature.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "有對應測試 tests/test_task_signature.py"
+          ]
+        },
+        "src/volpred/publisher/publisher.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "graphify-out/manifest.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 graphify-out/manifest.json 引用"
+          ]
+        },
+        "storage/reports/mile_e4002f4f.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "tests/test_task_signature.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_task_signature.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "tests/test_topic_cluster_gate.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "tests/test_topic_cluster_gate.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "tests/test_worktree_gc.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/tests/test_phase_z_split_pair.py",
+          "test_file": "tests/test_worktree_gc.py",
+          "liveness_evidence": [
+            "被已提交的 scripts/tests/test_phase_z_split_pair.py 引用",
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "docs/refactor_commit_ownership_state_machine.md",
+        "scripts/dedupe_next_tasks.py",
+        "scripts/dispatch_slot_budget.py",
+        "scripts/dispatch_supervisor/phase_z.py",
+        "scripts/fb_realchrome_post.py",
+        "scripts/reap_orphan_deliverables.py",
+        "scripts/tests/test_fire_manifest.py",
+        "scripts/tests/test_orphan_namespace_registry.py",
+        "scripts/tests/test_phase_z_foreign_incident.py",
+        "scripts/worktree_gc.py",
+        "src/volpred/ops/content.py",
+        "src/volpred/ops/fire_manifest.py",
+        "src/volpred/ops/foreign_incident.py",
+        "src/volpred/ops/next_tasks.py",
+        "src/volpred/ops/task_signature.py",
+        "src/volpred/publisher/publisher.py",
+        "storage/reports/mile_e4002f4f.json",
+        "tests/test_task_signature.py",
+        "tests/test_topic_cluster_gate.py",
+        "tests/test_worktree_gc.py"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "assign_ca208e68",
