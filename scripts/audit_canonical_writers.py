@@ -228,7 +228,10 @@ HANDLE_ONLY_OWNERS = {"src/volpred/ops/next_tasks.py:write_tasks_to_handle"}
 NEXT_TASKS_TARGET: tuple[str, ...] = ("storage", "next_tasks.json")
 NEXT_TASKS_MODULE = "src/volpred/ops/next_tasks.py"
 NEXT_TASKS_HELPERS = frozenset(
-    {"write_tasks_to_handle", "write_tasks_locked", "append_next_task", "append_task_record"}
+    {
+        "write_tasks_to_handle", "write_tasks_locked", "append_next_task",
+        "append_task_record", "backfill_ci_repair_commit",
+    }
 )
 NEXT_TASKS_BOOTSTRAP_LITERALS = frozenset({"[]", "[]\n"})
 # Frozen ratchet (may only SHRINK) mirroring test_work_log_writer_gate.py's

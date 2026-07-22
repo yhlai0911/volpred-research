@@ -73,6 +73,7 @@ from volpred.ops.foreign_incident import (
     upsert_incident,
 )
 from volpred.ops.machine_churn import classify_machine_churn
+from volpred.ops.next_tasks import backfill_ci_repair_commit
 from volpred.ops.git_writer_lock import (
     GitWriterLockError,
     git_writer_lock,
@@ -2686,6 +2687,7 @@ def run_phase_z(
     recovery_mode: bool = False,
     isolated_cohort: bool = False,
     gate_review_fn=None,
+    claim_owners: set[str] | list[str] | tuple[str, ...] | None = None,
 ) -> dict:
     """Deterministic post-fire commit. Returns an observability dict.
 
@@ -3475,6 +3477,16 @@ def run_phase_z(
             )
         _consume_pre_fire_snapshot(repo_root, runner)  # settled: the fire's work landed
         LOG.info("phase_z: committed — %s", out.splitlines()[-1] if out else "(no output)")
+        ci_repair_tasks_backfilled: list[str] = []
+        if claim_owners:
+            try:
+                ci_repair_tasks_backfilled = backfill_ci_repair_commit(
+                    path=repo_root / "storage" / "next_tasks.json",
+                    claim_owners=claim_owners,
+                    commit_sha=committed_sha,
+                )
+            except Exception as exc:  # noqa: BLE001 — commit already landed; receipt repair is retryable
+                LOG.warning("phase_z: CI repair commit receipt backfill failed: %s", exc)
         tests = _post_commit_test_gate(
             repo_root, commit_sha=committed_sha, hhmm=hhmm, runner=runner,
             test_runner=test_runner or subprocess.run,
@@ -3522,6 +3534,7 @@ def run_phase_z(
                 "orphan_halves": orphan_halves, "quarantine": quarantine,
                 "incident": incident,
                 "foreign_ownership": foreign_ownership,
+                "ci_repair_tasks_backfilled": ci_repair_tasks_backfilled,
                 **({"isolation_residue": isolation_residue} if isolation_residue else {}),
                 **gate_extra}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything

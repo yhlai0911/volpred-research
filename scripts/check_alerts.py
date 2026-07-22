@@ -850,10 +850,12 @@ def _build_ci_repair_task(
             "（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n"
             "3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，"
             "不等下一班（老闆指示：強模型直接嘗試）\n"
-            "4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; "
-            "repair_commit=<sha>`\n"
+            "4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; "
+            "repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）"
+            "在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n"
             "5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n"
-            "成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。"
+            "成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，"
+            "最終 GitHub success 由 CI watcher 獨立驗證。"
         ),
     }
 

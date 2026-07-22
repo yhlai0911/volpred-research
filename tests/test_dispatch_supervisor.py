@@ -470,6 +470,40 @@ def test_phase_z_dirty_tree_commits_with_correct_message(tmp_path: Path) -> None
     assert tracked == "experiments/k9999.py"
 
 
+def test_phase_z_binds_commit_to_explicit_ci_repair_receipt(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    _git_init_repo(tmp_path)
+    (tmp_path / "experiments").mkdir()
+    (tmp_path / "experiments" / "repair.py").write_text("FIXED = True\n", encoding="utf-8")
+    calls: list[dict] = []
+
+    def fake_backfill(**kwargs):
+        calls.append(kwargs)
+        return ["ci-red-123"]
+
+    monkeypatch.setattr(phase_z, "backfill_ci_repair_commit", fake_backfill)
+    owner = "hourly-slot-1-job-ci"
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path,
+        now_hhmm="16:08",
+        pre_fire_dirty=set(),
+        claim_owners={owner},
+        alert_fn=lambda **_kwargs: {},
+    )
+
+    assert out["committed"] is True
+    assert out["ci_repair_tasks_backfilled"] == ["ci-red-123"]
+    assert calls == [{
+        "path": tmp_path / "storage" / "next_tasks.json",
+        "claim_owners": {owner},
+        "commit_sha": subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=tmp_path,
+            capture_output=True, text=True, check=True,
+        ).stdout.strip(),
+    }]
+
+
 def test_phase_z_untracks_leaked_ignored_state_file(tmp_path: Path) -> None:
     _git_init_repo(tmp_path)
     # A gitignored runtime-state file that has drifted back into tracking

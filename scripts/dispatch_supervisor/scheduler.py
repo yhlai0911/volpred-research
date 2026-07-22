@@ -49,7 +49,7 @@ if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
-from . import alerts, decision, phase_z, state, worker, workspace as workspace_mod
+from . import alerts, decision, identity, phase_z, state, worker, workspace as workspace_mod
 
 LOG = logging.getLogger(__name__)
 
@@ -86,6 +86,19 @@ _PHASE_Z_TERMINAL_REASONS = {"committed", "clean", "nothing_owned", "nothing_to_
 # every ~64s tick forever. Three attempts ≈ 3 min of transient tolerance, then
 # one give-up alert and the token is released.
 _PHASE_Z_MAX_DRAIN_ATTEMPTS = 3
+
+
+def _phase_z_claim_owners(pending: list[dict[str, Any]]) -> set[str]:
+    """Return every executor identity that could have owned a drained fire."""
+    owners: set[str] = set()
+    for item in pending:
+        job_id = str(item.get("job_id") or "").strip()
+        raw_slot = str(item.get("slot_id") or "").strip()
+        if not job_id or not raw_slot:
+            continue
+        slot_id = raw_slot if raw_slot.startswith("slot-") else f"slot-{raw_slot}"
+        owners.update(identity.task_claim_owners_for_job(slot_id=slot_id, job_id=job_id))
+    return owners
 
 
 def _phase_z_drain_exhausted(*, cohort_id: str, outcome: dict[str, Any] | None,
@@ -457,6 +470,7 @@ async def _run_reserved_fire(
                     phase_z_outcome = await asyncio.to_thread(
                         phase_z.run_phase_z, repo_root=repo_root,
                         isolated_cohort=isolated_cohort,
+                        claim_owners=_phase_z_claim_owners(cohort_pending),
                     )
                     LOG.info("phase_z cohort drain job_id=%s outcome=%s", job_id, phase_z_outcome)
                 except Exception as exc:  # noqa: BLE001
@@ -708,6 +722,7 @@ async def _tick_once(
             outcome = await asyncio.to_thread(
                 phase_z.run_phase_z, repo_root=repo_root,
                 isolated_cohort=recovery_isolated,
+                claim_owners=_phase_z_claim_owners(pending_phase_z),
             )
             if _phase_z_terminal(outcome):
                 for cohort in {str(item.get("cohort_id")) for item in pending_phase_z}:

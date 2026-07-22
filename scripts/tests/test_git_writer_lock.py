@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import ast
+import json
 import os
 import signal
 import stat
@@ -97,6 +98,35 @@ def _cli(repo: Path, *args: str, check: bool = False) -> subprocess.CompletedPro
         text=True,
         check=check,
     )
+
+
+def test_exact_path_commit_backfills_owned_ci_repair_receipt(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    owner = "codex-failover-slot-2-job-ci"
+    queue = repo / "storage" / "next_tasks.json"
+    queue.parent.mkdir()
+    queue.write_text(json.dumps([{
+        "id": "ci-red-123",
+        "task_type": "platform_ops",
+        "priority": 2,
+        "status": "succeeded",
+        "result": "root_cause=fixture; repair_commit=pending_post_commit",
+        "status_history": [{"from": "in_progress", "to": "succeeded", "by": owner}],
+    }]), encoding="utf-8")
+    _run(repo, "git", "add", "storage/next_tasks.json")
+    _run(repo, "git", "commit", "-qm", "seed task receipt")
+    (repo / "repair.py").write_text("FIXED = True\n", encoding="utf-8")
+
+    completed = _cli(
+        repo, "commit", "--repo", str(repo), "--actor", owner,
+        "--message", "repair fixture", "--", "repair.py",
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    task = json.loads(queue.read_text(encoding="utf-8"))[0]
+    assert f"repair_commit={head}" in task["result"]
+    assert task["repair_commit_source"] == "post_commit_receipt"
 
 
 def test_main_and_linked_worktree_share_one_stable_lock_inode(tmp_path: Path) -> None:

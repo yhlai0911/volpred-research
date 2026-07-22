@@ -670,6 +670,89 @@ def write_tasks_locked(path: str | Path, tasks: list[Any]) -> None:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 
 
+_CI_REPAIR_PENDING_COMMIT_RE = re.compile(
+    r"\brepair_commit\s*[:=]\s*pending_post_commit\b",
+    re.IGNORECASE,
+)
+_GIT_COMMIT_RE = re.compile(r"^[0-9a-f]{7,40}$", re.IGNORECASE)
+
+
+def backfill_ci_repair_commit(
+    *,
+    path: str | Path,
+    claim_owners: list[str] | tuple[str, ...] | set[str],
+    commit_sha: str,
+) -> list[str]:
+    """Replace an explicit CI-repair post-commit marker with the real SHA.
+
+    A dispatcher task completes before its enclosing Git owner (PHASE-Z or the
+    Codex exact-path commit helper) creates a commit.  The task therefore writes
+    ``repair_commit=pending_post_commit`` as an intent receipt.  Once Git has a
+    real object id, this function binds only terminal ``ci-red-*`` tasks whose
+    successful transition was recorded under one of the supplied fire owners.
+
+    The marker and owner checks are both mandatory: time proximity is not
+    authorship, and a fire that merely happens to follow somebody else's CI
+    repair must never claim that repair.  The update shares the canonical queue
+    lock and hardened serializer used by every other task-pool writer.
+    """
+    owners = {str(owner).strip() for owner in claim_owners if str(owner).strip()}
+    sha = str(commit_sha or "").strip().lower()
+    if not owners or not _GIT_COMMIT_RE.fullmatch(sha):
+        return []
+
+    p = Path(path)
+    guard_canonical_write(p)
+    if not p.exists():
+        return []
+
+    updated: list[str] = []
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            raw = fh.read()
+            tasks = json.loads(raw) if raw.strip() else []
+            if not isinstance(tasks, list):
+                raise ValueError("next_tasks.json root is not a list")
+            for task in tasks:
+                if not isinstance(task, dict):
+                    continue
+                task_id = str(task.get("id") or "")
+                if not task_id.startswith("ci-red-"):
+                    continue
+                if str(task.get("status") or "").lower() not in {
+                    "succeeded", "succeeded_null_result",
+                }:
+                    continue
+                history = task.get("status_history")
+                terminal = next(
+                    (
+                        entry for entry in reversed(history)
+                        if isinstance(entry, dict)
+                        and str(entry.get("to") or "").lower() in {
+                            "succeeded", "succeeded_null_result",
+                        }
+                    ),
+                    None,
+                ) if isinstance(history, list) else None
+                if not terminal or str(terminal.get("by") or "") not in owners:
+                    continue
+                result = str(task.get("result") or "")
+                replaced, count = _CI_REPAIR_PENDING_COMMIT_RE.subn(
+                    f"repair_commit={sha}", result, count=1,
+                )
+                if count != 1:
+                    continue
+                task["result"] = replaced
+                task["repair_commit_source"] = "post_commit_receipt"
+                updated.append(task_id)
+            if updated:
+                write_tasks_to_handle(fh, tasks)
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    return updated
+
+
 # --- Single-gateway append (2026-07-16 refactor) -----------------------------
 # docs/refactor_plan_single_gateway_task_system.md: `volpred ops assign` used to
 # write storage/ops/tasks/*.json — a queue no dispatcher consumes. This is the

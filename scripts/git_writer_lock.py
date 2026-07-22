@@ -184,6 +184,33 @@ def cmd_commit(args: argparse.Namespace) -> int:
             commit_cmd += ["--", *paths]
             commit = subprocess.run(commit_cmd, cwd=repo, **popen)
             committed = commit.returncode == 0
+            if committed:
+                try:
+                    head = subprocess.run(
+                        _git("rev-parse", "HEAD"),
+                        cwd=repo,
+                        env=env,
+                        text=True,
+                        capture_output=True,
+                        check=False,
+                        pass_fds=lease.child_pass_fds(),
+                    )
+                    if head.returncode == 0:
+                        src = str(ROOT / "src")
+                        if src not in sys.path:
+                            sys.path.insert(0, src)
+                        from volpred.ops.next_tasks import backfill_ci_repair_commit
+
+                        backfill_ci_repair_commit(
+                            path=repo / "storage" / "next_tasks.json",
+                            claim_owners={args.actor},
+                            commit_sha=head.stdout.strip(),
+                        )
+                except Exception as exc:  # noqa: BLE001 — commit is durable; later PHASE-Z can retry receipt state
+                    print(
+                        f"[git-writer-lock] warning: CI repair receipt backfill failed: {exc}",
+                        file=sys.stderr,
+                    )
             return int(commit.returncode)
         finally:
             if index_touched and not committed:

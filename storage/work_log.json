@@ -23987,5 +23987,15 @@
     "owner": "codex-failover-slot-2-731316f2486a432da7aa83dce5f24e09",
     "commit": null,
     "summary": "Reaper now treats an inflight agent followup in the exact linked worktree as the owner of declared compute outputs; terminal or unrelated followups remain held. Regression suite: 97 passed; live K1708 scan: neither held nor candidate."
+  },
+  {
+    "timestamp": "2026-07-22T21:09:28+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_e7643d81",
+    "outcome": "completed",
+    "actor": "codex-failover-slot-1-fd769f23c7bf41dc8b78cac85d8c8393",
+    "owner": "codex-failover-slot-1-fd769f23c7bf41dc8b78cac85d8c8393",
+    "commit": null,
+    "summary": "Fixed CI repair post-commit evidence: explicit pending receipt is now owner-bound and backfilled with the actual commit SHA by PHASE-Z or Codex exact-path commit."
   }
 ]

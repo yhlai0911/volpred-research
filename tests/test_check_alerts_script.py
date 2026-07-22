@@ -200,6 +200,8 @@ def test_append_next_task_locked_routes_machine_p1_through_gateway_clamp(tmp_pat
         now_iso="2026-07-21T00:00:00+00:00",
     )
     assert task["priority"] == 1  # builder still declares P1 intent
+    assert "repair_commit=pending_post_commit" in task["description"]
+    assert "不自行 commit/push" in task["description"]
 
     created = check_alerts._append_next_task_locked(task, queue)
 
