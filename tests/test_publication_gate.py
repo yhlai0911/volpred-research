@@ -21,7 +21,12 @@ import pytest
 ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from volpred.publication_gate import is_publication_blocked, publication_block_reason
+from volpred.publication_gate import (
+    article_ineligibility_reason,
+    is_article_eligible,
+    is_publication_blocked,
+    publication_block_reason,
+)
 
 
 K1684_ENTRY = {
@@ -94,6 +99,26 @@ def test_mere_mention_of_publication_is_not_a_block():
         ),
     }
     assert not is_publication_blocked(entry)
+
+
+@pytest.mark.parametrize(
+    "entry,reason",
+    [
+        ({"verdict": "FAIL_PROVENANCE", "evidence": ["x"]}, "verdict=FAIL_PROVENANCE"),
+        ({"verdict": "PASS", "evidence": None}, "evidence is empty"),
+        ({"verdict": "PASS", "evidence": [], "needs_human": False}, "evidence is empty"),
+        ({"verdict": "PASS", "evidence": ["x"], "needs_human": True}, "needs_human=true"),
+    ],
+)
+def test_article_eligibility_hard_stops(entry, reason):
+    assert reason in article_ineligibility_reason(entry)
+    assert not is_article_eligible(entry)
+
+
+def test_article_eligibility_accepts_reviewed_evidence():
+    entry = {"verdict": "PASS", "evidence": ["experiments/k9998/results.json"]}
+    assert article_ineligibility_reason(entry) is None
+    assert is_article_eligible(entry)
 
 
 def test_live_knowledge_base_block_set_is_small():

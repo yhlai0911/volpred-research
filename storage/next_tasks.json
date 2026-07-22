@@ -49918,10 +49918,33 @@
     "description": "2026-07-21 fire 實例：K709_article_general_v2 已餓死 1052h 且是 [retry-v2]。根因 = K709 的 knowledge entry verdict=FAIL_PROVENANCE（Codex CLI 0.132.0 gpt-5.4，2026-05-29 覆核）、evidence=None，本來就不該產出對外文章；但 refiller 只判斷「這個 K 有沒有 feed 覆蓋」，於是每次都重新產 P1 任務，卡住 main-thread lane 的 head-of-line，且沒有任何路徑能讓它終結。工作：(1) 在 auto-discovery refiller 加 verdict gate —— verdict 屬 FAIL_* / evidence 為空 / needs_human=True 的 K 一律不產文章任務；(2) 掃現有 pending daily_article 佇列，把同類不可發表的 K 任務一次 close 掉（目前 main-thread 餓死 17 筆，需逐一驗 verdict 再決定，勿盲刪）；(3) 順手處理 K1253 —— 該 entry 自述為環境 smoke test、非研究結論、needs_human=True，同樣不該有 general 文章任務。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-21T12:19:18.423534+00:00",
-    "created_by": "hourly-slot-1-d4e78c67"
+    "created_by": "hourly-slot-1-d4e78c67",
+    "status_history": [
+      {
+        "ts": "2026-07-22T09:01:03.499467+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-775328070e2e4ec1aedffb85097d7202"
+      },
+      {
+        "ts": "2026-07-22T09:01:09.219929+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-775328070e2e4ec1aedffb85097d7202"
+      },
+      {
+        "ts": "2026-07-22T09:05:38.114792+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-775328070e2e4ec1aedffb85097d7202"
+      }
+    ],
+    "started_at": "2026-07-22T09:01:09.219904+00:00",
+    "completed_at": "2026-07-22T09:05:38.114777+00:00",
+    "result": "Added canonical knowledge eligibility gate for auto-discovered article tasks: block FAIL_* verdicts, empty evidence, needs_human=true, and explicit publication restrictions. Applied to refill_task_pool and task_generator_v2 with auditable skip reasons and fail-closed malformed knowledge handling. Production audit confirms K709/K1253 blocked; no live invalid daily_article tasks remained to close. 60 targeted tests passed."
   },
   {
     "id": "cohort_wide_kill_sweep_20260721",

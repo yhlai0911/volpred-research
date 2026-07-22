@@ -38,6 +38,7 @@ FEED_JSON = ROOT / "storage" / "reports" / "feed.json"
 EXPERIMENTS_DIR = ROOT / "experiments"
 PAPER_DIR = ROOT / "paper"
 RUNTIME_SCHEDULES = ROOT / "config" / "runtime_schedules.json"
+KNOWLEDGE_PATH = ROOT / "storage" / "memory" / "knowledge.json"
 GENERATOR_SOURCE_TAG = "task_generator_v2"
 DEFAULT_DISPATCH_LANES = {
     "experiment": "agent",
@@ -48,6 +49,7 @@ DEFAULT_DISPATCH_LANES = {
 }
 
 from volpred.ops.next_tasks import normalize_task_priority  # noqa: E402
+from volpred.publication_gate import article_ineligibility_reason  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -695,6 +697,27 @@ def generate_daily_article_tasks(
     ex_ids = existing_ids(existing)
     results: list[dict] = []
 
+    try:
+        knowledge = json.loads(KNOWLEDGE_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        _warn_task_generator("knowledge eligibility index read failed", KNOWLEDGE_PATH, exc)
+        return []
+    if not isinstance(knowledge, list):
+        _warn_task_generator(
+            "knowledge eligibility index is not a list",
+            KNOWLEDGE_PATH,
+            TypeError(type(knowledge).__name__),
+        )
+        return []
+    latest_knowledge: dict[str, dict] = {}
+    for entry in knowledge:
+        if not isinstance(entry, dict):
+            continue
+        raw_kid = entry.get("experiment_id") or entry.get("k_id")
+        match = re.match(r"^K(\d+)", str(raw_kid or ""), re.IGNORECASE)
+        if match:
+            latest_knowledge[f"K{match.group(1)}"] = entry
+
     # Glob all k*_results.json
     results_paths = sorted(EXPERIMENTS_DIR.glob("k*/k*_results.json"))
 
@@ -708,6 +731,10 @@ def generate_daily_article_tasks(
             continue
         # Only generate if verdict is non-null
         if verdict is None:
+            continue
+        reason = article_ineligibility_reason(latest_knowledge.get(kid, {}))
+        if reason:
+            print(f"[task_generator_v2] skip {kid}: {reason}")
             continue
 
         # Check: already in feed?

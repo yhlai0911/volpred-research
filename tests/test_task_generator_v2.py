@@ -266,3 +266,36 @@ def test_event_article_skips_existing_adjacent_event_task(tmp_path, monkeypatch)
     tasks = MODULE.generate_event_article_tasks(existing=existing, reference_date=date(2026, 6, 13))
 
     assert tasks == []
+
+
+def test_daily_article_generator_applies_knowledge_eligibility_gate(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    experiments = tmp_path / "experiments"
+    for kid in ("k709", "k9001", "k9002"):
+        exp_dir = experiments / kid
+        exp_dir.mkdir(parents=True)
+        (exp_dir / f"{kid}_results.json").write_text(
+            json.dumps({"experiment_id": kid.upper(), "verdict": "PASS"}),
+            encoding="utf-8",
+        )
+    knowledge = tmp_path / "knowledge.json"
+    knowledge.write_text(
+        json.dumps(
+            [
+                {"experiment_id": "K709", "verdict": "FAIL_PROVENANCE"},
+                {"experiment_id": "K9001", "verdict": "PASS", "evidence": ["results.json"]},
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(MODULE, "EXPERIMENTS_DIR", experiments)
+    monkeypatch.setattr(MODULE, "KNOWLEDGE_PATH", knowledge)
+    monkeypatch.setattr(MODULE, "k_ids_with_feed_articles", lambda: set())
+
+    tasks = MODULE.generate_daily_article_tasks(existing=[])
+
+    assert [task["k_id"] for task in tasks] == ["K9001"]
+    output = capsys.readouterr().out
+    assert "skip K709: knowledge verdict=FAIL_PROVENANCE" in output
+    assert "skip K9002: knowledge evidence is empty" in output

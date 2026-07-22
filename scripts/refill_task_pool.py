@@ -42,12 +42,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 CANDIDATES = ROOT / "storage" / "publication_candidates.json"
+KNOWLEDGE_PATH = ROOT / "storage" / "memory" / "knowledge.json"
 
 sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 from volpred.ops.next_tasks import append_task_record  # noqa: E402
 from volpred.ops.pool_pressure import pool_admits_new_work  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
+from volpred.publication_gate import article_ineligibility_reason  # noqa: E402
 
 
 def _warn_refill(message: str, exc: Exception | None = None) -> None:
@@ -436,6 +438,47 @@ _KNOWLEDGE_NUMERIC_CLAIM_RE = re.compile(
 )
 _KNOWLEDGE_CONTENT_CACHE_KEY: tuple[str, int, int] | None = None
 _KNOWLEDGE_CONTENT_BY_KID: dict[str, str] = {}
+
+
+def _knowledge_article_blocks() -> dict[str, str]:
+    """Index K-ids that canonical knowledge forbids auto-publishing.
+
+    Knowledge is append-only; the last entry for a normalized K-id is its
+    canonical current disposition.  A malformed knowledge file fails closed:
+    auto-discovery must not manufacture reader-facing work while provenance is
+    unavailable.
+    """
+    canonical_pool = ROOT / "storage" / "next_tasks.json"
+    if NEXT_TASKS.resolve() != canonical_pool.resolve():
+        # Hermetic callers redirect only the task pool. Judging their synthetic
+        # K-ids against production knowledge would leak live state into tests or
+        # one-off migrations; callers can explicitly stub this index instead.
+        return {}
+    knowledge_path = KNOWLEDGE_PATH
+    try:
+        payload = json.loads(knowledge_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        _warn_refill("knowledge eligibility index unreadable", exc)
+        return {"*": "knowledge eligibility index unreadable"}
+    if not isinstance(payload, list):
+        _warn_refill("knowledge eligibility index is not a list")
+        return {"*": "knowledge eligibility index is not a list"}
+
+    latest: dict[str, dict] = {}
+    for entry in payload:
+        if not isinstance(entry, dict):
+            continue
+        raw_kid = entry.get("experiment_id") or entry.get("k_id")
+        match = re.match(r"^K(\d+)", str(raw_kid or ""), re.IGNORECASE)
+        if match:
+            latest[f"K{match.group(1)}"] = entry
+
+    blocked: dict[str, str] = {}
+    for kid, entry in latest.items():
+        reason = article_ineligibility_reason(entry)
+        if reason:
+            blocked[kid] = reason
+    return blocked
 
 
 def _experiment_result_paths(k_id: str) -> list[str]:
@@ -1561,6 +1604,7 @@ def refill(
     any_feed_kids = _any_feed_coverage_kids()
     audit_pending_kids = terminal_article_kids & any_feed_kids
     failed_experiment_kids = _failed_experiment_kids(tasks)
+    knowledge_article_blocks = _knowledge_article_blocks()
 
     # Compose ranked candidate list: top_10_uncovered first (highest signal),
     # then missing_research_top5 (prefer research over general for novelty),
@@ -1686,6 +1730,11 @@ def refill(
         if reader_facing_only and needed_audience == "research":
             continue
         if _is_invalidated_artifact_candidate(cand):
+            continue
+        knowledge_block = knowledge_article_blocks.get(kid.upper())
+        if "*" in knowledge_article_blocks or knowledge_block:
+            reason = knowledge_article_blocks.get("*") or knowledge_block
+            print(f"  [refill] skip {kid}: {reason}")
             continue
         evidence = _article_evidence_package(kid)
         if not evidence.get("ready"):

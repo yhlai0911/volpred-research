@@ -436,6 +436,38 @@ def test_refill_skips_failed_source_experiment_k(tmp_path, monkeypatch, capsys):
     assert "skip K1327: source experiment task status=failed" in capsys.readouterr().out
 
 
+def test_knowledge_article_blocks_fail_empty_evidence_and_needs_human(
+    tmp_path, monkeypatch
+):
+    knowledge = tmp_path / "knowledge.json"
+    knowledge.write_text(
+        json.dumps(
+            [
+                {"experiment_id": "k709", "verdict": "PASS", "evidence": ["old.json"]},
+                {"experiment_id": "k709", "verdict": "FAIL_PROVENANCE"},
+                {
+                    "k_id": "K1253",
+                    "verdict": "PASS",
+                    "evidence": ["smoke.json"],
+                    "needs_human": True,
+                },
+                {"experiment_id": "K9000", "verdict": "PASS", "evidence": []},
+                {"experiment_id": "K9001", "verdict": "PASS", "evidence": ["results.json"]},
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(MODULE, "KNOWLEDGE_PATH", knowledge)
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", MODULE.ROOT / "storage" / "next_tasks.json")
+
+    blocked = MODULE._knowledge_article_blocks()
+
+    assert "verdict=FAIL_PROVENANCE" in blocked["K709"]
+    assert "needs_human=true" in blocked["K1253"]
+    assert "evidence is empty" in blocked["K9000"]
+    assert "K9001" not in blocked
+
+
 def test_archived_articles_count_as_feed_coverage(tmp_path, monkeypatch):
     """Regression: 2026-05-31 K274/K288/K319 dup refill.
 
