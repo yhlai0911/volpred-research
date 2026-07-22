@@ -55459,7 +55459,7 @@
     "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-22T15:01:12.190591+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "reap_orphan_deliverables_held_ttl",
     "created_at": "2026-07-22T20:01:03.789771+00:00",
     "payload": {
@@ -55474,6 +55474,29 @@
         "held_escalation"
       ]
     },
-    "created_by": "reap_orphan_deliverables"
+    "created_by": "reap_orphan_deliverables",
+    "status_history": [
+      {
+        "ts": "2026-07-22T21:08:02.364935+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-8a00212c0a6f43179e0e8d482fdfbf33"
+      },
+      {
+        "ts": "2026-07-22T21:08:10.401658+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-8a00212c0a6f43179e0e8d482fdfbf33"
+      },
+      {
+        "ts": "2026-07-22T21:10:04.705710+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-8a00212c0a6f43179e0e8d482fdfbf33"
+      }
+    ],
+    "started_at": "2026-07-22T21:08:10.401638+00:00",
+    "completed_at": "2026-07-22T21:10:04.705695+00:00",
+    "result": "K1708 rerun artifacts were valid but gated from main by pending round-4 review. Preserved all three exact outputs in worktree branch commit 904476cdc; no merge bypass. Reaper ownership tests: 3 passed. Production scan now reports this job in neither held nor candidates."
   }
 ]
