@@ -14,10 +14,20 @@
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev3_armc_results.json",
-  "output_paths": [
+  "output_paths": [],
+  "output_paths_updated_at": "2026-07-22T05:10:02Z",
+  "preserved_output_paths": [
     ".claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev3_armc_results.json"
   ],
-  "output_paths_updated_at": null,
+  "delivery_status": "preserved_on_review_branch",
+  "delivery_commit": "2029296479e449fccb21804bba958570f346b218",
+  "delivery_ref": "refs/heads/worktree-dispatch-slot-2-c5cafe39-k1623",
+  "delivery_path": "experiments/k1623/k1623_rev3_armc_results.json",
+  "delivery_sha256": "8a04ef8ef50f7ea190cd353f9f674d4756c51cffc52847ed444488affb12eaf9",
+  "delivery_disposition_at": "2026-07-22T05:10:02Z",
+  "delivery_disposition_by": "codex-failover-slot-2-4f261cd151f04176a4243ccf8c973d77",
+  "delivery_blocked_by_task": "k1623_rev4_remediation_after_codex_round3_fail",
+  "delivery_disposition_reason": "The output is already durable in Git on the reviewed K1623 branch. Codex round-3 review failed and explicitly forbids merging commit 202929647 before rev4 remediation and round-4 PASS, so main-checkout adoption would violate the research gate. The active output list is closed while the original declaration, exact ref, commit, path, and sha256 remain recorded here.",
   "job_metadata": null,
   "kind": "compute",
   "cwd": null,

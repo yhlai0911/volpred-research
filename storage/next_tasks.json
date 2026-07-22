@@ -33216,7 +33216,7 @@
     "title": "K1714: 已實現共變異數 HAR → 最小變異組合的樣本外檢定 — 對多資產（TW0050/TSMC/金融股 或 SPY/QQQ/GLD/TLT）用 HAR 直接建模 realized covariance 矩陣（Cholesky/log-matri",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 495). Original: 已實現共變異數 HAR → 最小變異組合的樣本外檢定 — 對多資產（TW0050/TSMC/金融股 或 SPY/QQQ/GLD/TLT）用 HAR 直接建模 realized covariance 矩陣（Cholesky/log-matrix 參數化），比對 shrinkage/EWMA 共變異數在 GMV 組合的 OOS 波動與換手；yfinance 日資料（來源：2024-26 HAR-type realized covariance forecasting）。差異化：庫內幾乎全單變量，realized-cov-matrix→組合是新面向，直接服務組合構建產品。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1714.py with signal.shift(1) + seed=42, (c) K1714_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "claimed",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -33289,16 +33289,21 @@
         "from": "pending",
         "to": "claimed",
         "by": "main_thread"
+      },
+      {
+        "ts": "2026-07-22T04:50:03.023288+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "main_thread",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-22T02:12:36.679727+00:00",
-    "last_released_at": "2026-07-22T02:14:54.424543+00:00",
+    "last_released_at": "2026-07-22T04:50:03.023277+00:00",
     "dispatch_job_id": "agent-brief_k1714-cd4315",
     "dispatch_worktree": ".claude/worktrees/dispatch-slot-3-3896dcaa-k1714",
     "dispatch_note": "DISPATCHED→compute-queue agent job agent-brief_k1714-cd4315 (opus/xhigh, timeout 5400s) @2026-07-22T10:3x by hourly-slot-3-3896dcaa; branch wt/dispatch-slot-3-3896dcaa-k1714。收件由 queue followup 負責，勿重複派工。",
-    "claimed_by": "main_thread",
-    "claimed_at": "2026-07-22T02:30:32.803464+00:00",
-    "claim_session_id": "2907aa604971"
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "K1715",
@@ -51990,7 +51995,7 @@
     "description": "老闆 2026-07-22 Telegram P1（阻塞立刻解決）。\n\n症狀：dispatch_supervisor 每次 fire 的 phase_z 都 commit_nonzero → rolled_back=True，成果全數退回，21 個 foreign path 已卡 >=3 個 fire；worker 卡 50 分被 SIGKILL（pid 45848）。\n\n已證據化的兩個 pre-commit blocker：\n1. audit-test-imports 3 BAD — tests/test_task_signature.py 匯入 volpred.ops.task_signature、tests/test_worktree_gc.py 參照 scripts/worktree_gc.py、scripts/tests/test_fire_manifest.py 從 volpred.ops 匯入 fire_manifest。實測這 6 個檔（3 test + 3 source）在 working tree 全部存在但都是 untracked(??)。\n2. silent-fallback-audit 2 NEW — scripts/check_experiment_artifacts.py:302 except OSError: continue、src/volpred/research/reproduce_spec.py:125 except Exception: return None；另有 baseline 60 筆 resolved 需另開 cleanup commit 降 baseline。\n\n根因假說（需驗證）：phase_z 把 test 檔納入 candidate index，但對應的 source 檔被歸類為 foreign/quarantine 而排除在同一 commit 之外 → import gate 必 BAD → commit 失敗 → rollback → 路徑維持 dirty → 下個 fire 重演，形成永久死鎖。這是 commit ownership 分割規則的缺陷，不是單純的髒檔案。\n\n要求（結案五步）：\n- 定位 phase_z 的 candidate index 組建邏輯，讓「同一 refactor 的 test 與 source」不可被拆到不同 commit（原子性），或在 import gate 前先偵測 split 並整組納入/整組排除。\n- 修掉上述 2 個 silent fallback（加 warn 或 silent-ok 標註），並在獨立 commit 降 silent-fallback baseline。\n- 回歸驗證：手動觸發一次 fire，確認 phase_z outcome committed=True、rolled_back=False，且 stuck foreign path 數量下降。\n- 制度化：加測試覆蓋「test/source 被拆開時 phase_z 不得產生必然失敗的 candidate index」，並讓連續 N 次 commit_nonzero 直接開 incident 而非靜默重試。\n\n參考 log：/Users/yhlai0911/.volpred/logs/dispatch_supervisor.log（搜 phase_z gave up after retries）",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-22T02:54:31.140316+00:00",
     "created_by": "telegram_responder",
@@ -52013,11 +52018,26 @@
         "to": "pending",
         "by": "hourly-slot-2-8eb259da1f5c4b5ab7a6f9d538b86759",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 64.4min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-22T05:03:01.541445+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-8ef2a47c8aca4df4921a00dc5a79e8ae"
+      },
+      {
+        "ts": "2026-07-22T05:03:01.808099+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-8ef2a47c8aca4df4921a00dc5a79e8ae"
       }
     ],
-    "started_at": "2026-07-22T02:56:06.820456+00:00",
+    "started_at": "2026-07-22T05:03:01.808080+00:00",
     "last_released_at": "2026-07-22T04:00:29.237765+00:00",
-    "last_release_reason": "liveness_reconcile_detached_8eb259da"
+    "last_release_reason": "liveness_reconcile_detached_8eb259da",
+    "claimed_by": "codex-failover-slot-1-8ef2a47c8aca4df4921a00dc5a79e8ae",
+    "claimed_at": "2026-07-22T05:03:01.541427+00:00",
+    "claim_session_id": "b8c584314cd8"
   },
   {
     "id": "asia_backlog_shift2_20260722",
@@ -52114,7 +52134,7 @@
   {
     "id": "assign_93f82bdb",
     "title": "PHASE-Z 卡住檔案 incident（2621abe539277782）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n32 個未提交檔案不是任何一班 fire 產出的，最長已連續 26 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- AGENTS.md — 4 班\n- docs/error_log.md — 4 班\n- docs/refactor_commit_ownership_state_machine.md — 23 班\n- experiments/k1623/README.md — 4 班\n- experiments/k1623/review_round3_codex_20260722.md — 4 班\n- experiments/k1623/review_verdict_round3.json — 4 班\n- scripts/audit_silent_fallbacks.py — 22 班\n- scripts/check_experiment_artifacts.py — 4 班\n- scripts/dedupe_next_tasks.py — 23 班\n- scripts/dispatch_slot_budget.py — 26 班\n- scripts/dispatch_supervisor/phase_z.py — 26 班\n- scripts/fb_realchrome_post.py — 12 班\n- scripts/preserve_gate_blob.py — 4 班\n- scripts/reap_orphan_deliverables.py — 26 班\n- scripts/tests/test_fire_manifest.py — 23 班\n- scripts/tests/test_gate_blob_preservation.py — 4 班\n- scripts/tests/test_orphan_namespace_registry.py — 26 班\n- scripts/tests/test_phase_z_foreign_incident.py — 26 班\n- scripts/tests/test_reproduce_spec_runtime_emitter.py — 4 班\n- scripts/worktree_gc.py — 23 班\n- src/volpred/ops/content.py — 15 班\n- src/volpred/ops/fire_manifest.py — 23 班\n- src/volpred/ops/foreign_incident.py — 26 班\n- src/volpred/ops/next_tasks.py — 23 班\n- src/volpred/ops/task_signature.py — 23 班\n- src/volpred/publisher/publisher.py — 15 班\n- src/volpred/research/__init__.py — 4 班\n- src/volpred/research/reproduce_spec.py — 4 班\n- storage/reports/mile_e4002f4f.json — 15 班\n- tests/test_task_signature.py — 23 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260722T033357722686Z:<路徑>`\n- `git show refs/volpred/quarantine/20260722T033544718990Z:<路徑>`",
+    "description": "## 發生什麼\n32 個未提交檔案不是任何一班 fire 產出的，最長已連續 27 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- AGENTS.md — 5 班\n- docs/error_log.md — 5 班\n- docs/refactor_commit_ownership_state_machine.md — 24 班\n- experiments/k1623/README.md — 5 班\n- experiments/k1623/review_round3_codex_20260722.md — 5 班\n- experiments/k1623/review_verdict_round3.json — 5 班\n- scripts/audit_silent_fallbacks.py — 23 班\n- scripts/check_experiment_artifacts.py — 5 班\n- scripts/dedupe_next_tasks.py — 24 班\n- scripts/dispatch_slot_budget.py — 27 班\n- scripts/dispatch_supervisor/phase_z.py — 27 班\n- scripts/fb_realchrome_post.py — 13 班\n- scripts/preserve_gate_blob.py — 5 班\n- scripts/reap_orphan_deliverables.py — 27 班\n- scripts/tests/test_fire_manifest.py — 24 班\n- scripts/tests/test_gate_blob_preservation.py — 5 班\n- scripts/tests/test_orphan_namespace_registry.py — 27 班\n- scripts/tests/test_phase_z_foreign_incident.py — 27 班\n- scripts/tests/test_reproduce_spec_runtime_emitter.py — 5 班\n- scripts/worktree_gc.py — 24 班\n- src/volpred/ops/content.py — 16 班\n- src/volpred/ops/fire_manifest.py — 24 班\n- src/volpred/ops/foreign_incident.py — 27 班\n- src/volpred/ops/next_tasks.py — 24 班\n- src/volpred/ops/task_signature.py — 24 班\n- src/volpred/publisher/publisher.py — 16 班\n- src/volpred/research/__init__.py — 5 班\n- src/volpred/research/reproduce_spec.py — 5 班\n- storage/reports/mile_e4002f4f.json — 16 班\n- tests/test_task_signature.py — 24 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260722T033357722686Z:<路徑>`\n- `git show refs/volpred/quarantine/20260722T033544718990Z:<路徑>`\n- `git show refs/volpred/quarantine/20260722T041422881203Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -52158,46 +52178,47 @@
         "tests/test_worktree_gc.py"
       ],
       "streaks": {
-        "AGENTS.md": 4,
-        "docs/error_log.md": 4,
-        "docs/refactor_commit_ownership_state_machine.md": 23,
-        "experiments/k1623/README.md": 4,
-        "experiments/k1623/review_round3_codex_20260722.md": 4,
-        "experiments/k1623/review_verdict_round3.json": 4,
-        "scripts/audit_silent_fallbacks.py": 22,
-        "scripts/check_experiment_artifacts.py": 4,
-        "scripts/dedupe_next_tasks.py": 23,
-        "scripts/dispatch_slot_budget.py": 26,
-        "scripts/dispatch_supervisor/phase_z.py": 26,
-        "scripts/fb_realchrome_post.py": 12,
-        "scripts/preserve_gate_blob.py": 4,
-        "scripts/reap_orphan_deliverables.py": 26,
-        "scripts/tests/test_fire_manifest.py": 23,
-        "scripts/tests/test_gate_blob_preservation.py": 4,
-        "scripts/tests/test_orphan_namespace_registry.py": 26,
-        "scripts/tests/test_phase_z_foreign_incident.py": 26,
-        "scripts/tests/test_reproduce_spec_runtime_emitter.py": 4,
-        "scripts/worktree_gc.py": 23,
-        "src/volpred/ops/content.py": 15,
-        "src/volpred/ops/fire_manifest.py": 23,
-        "src/volpred/ops/foreign_incident.py": 26,
-        "src/volpred/ops/next_tasks.py": 23,
-        "src/volpred/ops/task_signature.py": 23,
-        "src/volpred/publisher/publisher.py": 15,
-        "src/volpred/research/__init__.py": 4,
-        "src/volpred/research/reproduce_spec.py": 4,
-        "storage/reports/mile_e4002f4f.json": 15,
-        "tests/test_task_signature.py": 23,
-        "tests/test_topic_cluster_gate.py": 15,
-        "tests/test_worktree_gc.py": 23
+        "AGENTS.md": 5,
+        "docs/error_log.md": 5,
+        "docs/refactor_commit_ownership_state_machine.md": 24,
+        "experiments/k1623/README.md": 5,
+        "experiments/k1623/review_round3_codex_20260722.md": 5,
+        "experiments/k1623/review_verdict_round3.json": 5,
+        "scripts/audit_silent_fallbacks.py": 23,
+        "scripts/check_experiment_artifacts.py": 5,
+        "scripts/dedupe_next_tasks.py": 24,
+        "scripts/dispatch_slot_budget.py": 27,
+        "scripts/dispatch_supervisor/phase_z.py": 27,
+        "scripts/fb_realchrome_post.py": 13,
+        "scripts/preserve_gate_blob.py": 5,
+        "scripts/reap_orphan_deliverables.py": 27,
+        "scripts/tests/test_fire_manifest.py": 24,
+        "scripts/tests/test_gate_blob_preservation.py": 5,
+        "scripts/tests/test_orphan_namespace_registry.py": 27,
+        "scripts/tests/test_phase_z_foreign_incident.py": 27,
+        "scripts/tests/test_reproduce_spec_runtime_emitter.py": 5,
+        "scripts/worktree_gc.py": 24,
+        "src/volpred/ops/content.py": 16,
+        "src/volpred/ops/fire_manifest.py": 24,
+        "src/volpred/ops/foreign_incident.py": 27,
+        "src/volpred/ops/next_tasks.py": 24,
+        "src/volpred/ops/task_signature.py": 24,
+        "src/volpred/publisher/publisher.py": 16,
+        "src/volpred/research/__init__.py": 5,
+        "src/volpred/research/reproduce_spec.py": 5,
+        "storage/reports/mile_e4002f4f.json": 16,
+        "tests/test_task_signature.py": 24,
+        "tests/test_topic_cluster_gate.py": 16,
+        "tests/test_worktree_gc.py": 24
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260722T033357722686Z",
-        "refs/volpred/quarantine/20260722T033544718990Z"
+        "refs/volpred/quarantine/20260722T033544718990Z",
+        "refs/volpred/quarantine/20260722T041422881203Z"
       ],
-      "fires": 2,
+      "fires": 3,
       "first_seen_at": "2026-07-22T03:34:10.999476+00:00",
-      "last_seen_at": "2026-07-22T03:35:57.806788+00:00",
+      "last_seen_at": "2026-07-22T04:14:40.673230+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-22T03:35:45.986032+00:00",
       "deferred": [
@@ -52236,7 +52257,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-22T03:35:57.806788+00:00"
+    "updated_at": "2026-07-22T04:14:40.673230+00:00"
   },
   {
     "id": "ci-red-29887298395",
@@ -52259,7 +52280,7 @@
     "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-21T08:01:37.010706+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "reap_orphan_deliverables_held_ttl",
     "created_at": "2026-07-22T04:01:18.782675+00:00",
     "payload": {
@@ -52274,6 +52295,79 @@
         "held_escalation"
       ]
     },
+    "created_by": "reap_orphan_deliverables",
+    "status_history": [
+      {
+        "ts": "2026-07-22T05:08:19.478616+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-4f261cd151f04176a4243ccf8c973d77"
+      },
+      {
+        "ts": "2026-07-22T05:08:27.580718+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-4f261cd151f04176a4243ccf8c973d77"
+      },
+      {
+        "ts": "2026-07-22T05:10:58.047466+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-4f261cd151f04176a4243ccf8c973d77"
+      }
+    ],
+    "started_at": "2026-07-22T05:08:27.580701+00:00",
+    "completed_at": "2026-07-22T05:10:58.047448+00:00",
+    "result": "K1623 arm-C job 產物已確認永久保存在 refs/heads/worktree-dispatch-slot-2-c5cafe39-k1623 commit 202929647（artifact SHA-256 8a04ef8e...）；Codex round-3 FAIL 明令禁止合併，出口由 k1623_rev4_remediation_after_codex_round3_fail 接手。receipt 已保留原始路徑並記錄 ref/commit/path/hash，清空 active output_paths，reaper 掃描確認不再 candidate/held；orphan-reaper 18 tests passed。"
+  },
+  {
+    "id": "inc_776caf84f125_e1",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "incident_router",
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "incident_id": "inc_776caf84f125",
+    "created_at": "2026-07-22T05:00:33.410158+00:00",
+    "created_by": "reclaim_stale_worktrees",
+    "title": "worktree 產物批次裁決（worktree_unmerged，episode 1）",
+    "description": "一個或多個 stale worktree 持有未落地成果，reclaim 依 fail-closed 規則不動它們。全部未清實例見 `storage/ops/incidents.json` 的 `inc_776caf84f125` row（instances[] 中 cleared_at 為空者）。這單是批次裁決出口，逐實例三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh <name>`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result；worktree 消失後下次 reclaim 會自動 clear 對應 instance。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I / incident-lifecycle P3）。"
+  },
+  {
+    "id": "assign_db64b82b",
+    "title": "解決長期無主的產物 `storage/drafts/K1697_general_draft.md`（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `storage/drafts/K1697_general_draft.md` — no_title (namespace=drafts_intake, first_seen=2026-07-22T00:28:47.006818+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-22T05:01:36.431777+00:00",
+    "payload": {
+      "held_paths": [
+        "storage/drafts/K1697_general_draft.md"
+      ],
+      "held_reasons": {
+        "storage/drafts/K1697_general_draft.md": "no_title"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
     "created_by": "reap_orphan_deliverables"
+  },
+  {
+    "id": "alert_content_quality_20260722",
+    "title": "[alert] 內容品質巡檢：arc_dedup_overmatch",
+    "description": "由 alert `content_quality` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- arc_dedup_overmatch: 22 筆不同 narrative axis 仍被擋；examples: mile_0174a1e8, mile_8f14e28a, mile_3a7bd6f6, mile_af40e182, mile_4518e9d8\n\n## 影響\n內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\n\n## 建議行動（主線程 auto-remediation）\n1. 同一天出現超過一篇每日精選導讀 → 檢視 `storage/ops/content_quality_report.json` items，挑 1 篇 retract：`uv run volpred ops unpublish --mile-id <id>`；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\n2. 發文太密集 → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\n3. 發文間隔過久 → 立即 `release-pool-by-settings` 或派 fresh-arc 日常文章 補位；同時查 release deadlock (`docs/refactor_plan_release_layer_deadlock.md`)。\n4. 標題前綴重複 → 前端 header 與 title 擇一移除前綴；前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。\n5. 懶人包覆蓋不足 → 針對 missing_examples 走 `lazypack-infographic` skill 補圖：primary=確定性 renderer （`lazypack_render.py`，plan.json 綁 evidence、零 LLM）；需 LLM codegen 時用 `codex exec`（boss 2026-06-30/07-15 directive），NotebookLM 僅為 fallback，不得當首選。append `## 懶人包圖組` 後用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。\n6. `arc_dedup_overmatch` → 跑 `scripts/audit_arc_dedup_overmatches.py`，逐筆裁決 dup waiver 或 fresh-arc rewrite。\n7. `audience_classification` → 跑 `scripts/audit_audience_classification.py`，複核 HIGH 候選並以正式更新流程改 audience；不得直接改 feed JSON。",
+    "task_type": "governance",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-22T05:01:52.635349+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "content_quality"
+    ]
   }
 ]
