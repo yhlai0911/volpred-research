@@ -20,13 +20,19 @@
      "first_seen_at": "2026-07-22T00:26:09.143323+00:00",
      "key": "29812586079:1",
      "last_seen_at": "2026-07-22T00:26:09.143323+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-22T01:00:08.596564+00:00",
+     "key": "29880237874:1",
+     "last_seen_at": "2026-07-22T01:00:08.596564+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-21T08:13:02.3650965Z tests/test_daily_checkup_db_landing.py:80: AssertionError",
-   "last_seen_at": "2026-07-22T00:26:09.143323+00:00",
+   "last_breach_detail": "2026-07-22T00:39:15.0055387Z E AssertionError: assert 'promoted' == 'member_qa_publish_blocked'",
+   "last_seen_at": "2026-07-22T01:00:08.596564+00:00",
    "notified_at": null,
-   "occurrence_count": 1,
+   "occurrence_count": 2,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -237,7 +243,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-22T00:08:40.118728+00:00"
+     "last_seen_at": "2026-07-22T01:01:30.224319+00:00"
     },
     {
      "cleared_at": null,
@@ -250,7 +256,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-22T00:08:40.488679+00:00"
+     "last_seen_at": "2026-07-22T01:01:30.687583+00:00"
     },
     {
      "cleared_at": null,
@@ -263,20 +269,20 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-22T00:08:41.789065+00:00"
+     "last_seen_at": "2026-07-22T01:01:34.061089+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "base_sha": "",
       "branch": "wt/dispatch-slot-2-8dda242d-k1708",
-      "detail_tail": "fire ended with outcome=orphaned; dirty=False unique_commits=3",
+      "detail_tail": "fire ended with outcome=orphaned; dirty=False unique_commits=4",
       "reason": "worker_orphaned",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-457427c2-k1708"
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-22T00:08:40.917508+00:00"
+     "last_seen_at": "2026-07-22T01:01:32.239989+00:00"
     },
     {
      "cleared_at": null,
@@ -289,7 +295,7 @@
      },
      "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-22T00:08:43.288541+00:00"
+     "last_seen_at": "2026-07-22T01:01:35.079492+00:00"
     },
     {
      "cleared_at": null,
@@ -307,9 +313,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-f5a22a5f-k1095v2 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-22T00:08:43.288541+00:00",
+   "last_seen_at": "2026-07-22T01:01:35.079492+00:00",
    "notified_at": null,
-   "occurrence_count": 76,
+   "occurrence_count": 81,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -317,8 +323,8 @@
    "task_history": [],
    "task_mode": "adjudication",
    "throttled": {
-    "count": 76,
-    "last_at": "2026-07-22T00:08:43.567121+00:00",
+    "count": 81,
+    "last_at": "2026-07-22T01:01:35.176992+00:00",
     "last_reason": "remediation_cap_24h"
    }
   },
@@ -439,6 +445,6 @@
    }
   }
  },
- "updated_at": "2026-07-22T00:38:15.224530+00:00",
+ "updated_at": "2026-07-22T01:04:05.853908+00:00",
  "version": 1
 }
