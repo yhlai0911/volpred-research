@@ -67,3 +67,15 @@ k1711 可能根本不必重跑。
 2. 解答第 4 節的 k1711 來源問題
 3. 從已修好的 `price_cache.db` 重建各快照，逐一比對重跑前後統計量（年化波動 / 極端日報酬 /
    月度 RV persistence AR(1)），差異大者才是真受害 —— 這步是 heavy compute，走 `compute_queue.py enqueue`
+
+## 7. 偵測器修復收件（2026-07-23）
+
+`detect_price_split_breaks_false_negative_20260721` 已把 CSV 蒐集改為遞迴搜尋
+`experiments/**/data/*.csv` 與 `paper/**/data/*.csv`，不再硬編 experiment 到 `data/`
+之間只能有一或兩層。回歸測試同時釘住 k1406/k1411 等價 fixture、任意巢狀深度與空掃描
+必須 exit 2 的契約。
+
+修復後全掃共掃 1279 個 CSV，命中 19 個候選；其中 2013-12-31 → 2014-01-02
+ratio 約 0.25 的 0050 污染快照仍是第 2 節列出的 **12 個**，包含先前漏報的
+`k1406/data/0050.TW.csv` 與 `k1411/data/T0050.csv`。其餘 7 個是第 5 節已分流的
+非 0050 候選，不能納入 0050 重跑名單。

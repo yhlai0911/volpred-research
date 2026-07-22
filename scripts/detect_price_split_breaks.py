@@ -180,8 +180,7 @@ VOL_INDEX_HINTS = ("vix", "vvix", "ovx", "vxn", "move", "skew")
 NON_LEVEL_HINTS = ("count", "_n", "num", "std", "range", "_rv", "rv_",
                    "vol", "return", "_ret", "ret_", "chg", "change", "pct",
                    "min", "max", "mean", "median", "sum", "hours", "flag")
-CSV_GLOBS = ("experiments/*/data/*.csv", "paper/*/data/*.csv",
-             "experiments/*/*/data/*.csv")
+CSV_TREES = ("experiments", "paper")
 PERSIST_WINDOW = 20   # 斷點前後各取幾筆算中位數
 PERSIST_TOL = 0.10    # 水準位移比值需落在分割比 ±10% 內
 # 低於此價格的欄位跳過：tick size 造成的離散跳動（0.005 → 0.01 就是 ×2）
@@ -294,8 +293,17 @@ def scan_csv(path: Path) -> dict:
     return {"path": str(path), "n_rows": len(rows), "breaks": breaks}
 
 
+def collect_snapshot_csvs(repo: Path) -> list[Path]:
+    """Collect snapshot CSVs without assuming experiment-directory depth."""
+    return sorted({
+        path
+        for tree in CSV_TREES
+        for path in (repo / tree).glob("**/data/*.csv")
+    })
+
+
 def run_csv_scan(repo: Path, as_json: bool) -> int:
-    paths = sorted({p for g in CSV_GLOBS for p in repo.glob(g)})
+    paths = collect_snapshot_csvs(repo)
 
     # Scanning nothing is a broken scan, not a clean repo. Without this, a bad
     # --repo (or a moved script, see _find_repo_root) prints "0 / 0" and exits
@@ -303,7 +311,8 @@ def run_csv_scan(repo: Path, as_json: bool) -> int:
     # exactly how this detector spent time reporting all-clear on a repo with
     # 19 contaminated snapshots. Fail loudly instead.
     if not paths:
-        msg = (f"no CSV matched {list(CSV_GLOBS)} under {repo} — "
+        patterns = [f"{tree}/**/data/*.csv" for tree in CSV_TREES]
+        msg = (f"no CSV matched {patterns} under {repo} — "
                f"the scan found nothing to audit, which is a configuration "
                f"error, not a clean result. Check --repo.")
         if as_json:

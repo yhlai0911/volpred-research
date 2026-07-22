@@ -50954,10 +50954,33 @@
     "description": "`scripts/detect_price_split_breaks.py --csv-scan` **漏報**已污染的快照。這支腳本是 `k_reruns_0050_snapshot_contaminated_20260719` 指定的驗證工具，也是 CI gate（exit 1 = 有 split_break），漏報等於「掃過說乾淨」——比誤報貴得多。\n\n**證據（2026-07-21 23:3x，slot-1 bb18b5bd 實測）**：\n直接讀檔算 2013-12-31 → 2014-01-02 的 Close 比值：\n  - `experiments/k1406/data/0050.TW.csv`  37.4124 → 9.3292  ratio=**0.2494**\n  - `experiments/k1411/data/T0050.csv`    37.4124 → 9.3292  ratio=**0.2494**\n兩者都是教科書級的 4:1 分割斷點（與已被正確標出的 K1395 / k1660 / k1671 數值完全相同），但同一次 `--csv-scan` 的 🚫 清單（19/1279）裡**沒有這兩個檔**。\n\n已排除的解釋：顯示層的 `seen` 去重只作用在同一檔案內的 (prev_date, date, matched_split)，不會整檔消失；欄名/檔名也不是原因（k1697 的檔同樣叫 `0050.TW.csv`、同樣是 `Close` 欄，它有被抓到）。所以這兩個檔**根本沒進 `results`**，問題在檔案蒐集的 root/glob 那一段。腳本 line 68 的註解自陳 'Depth-based roots break ... a repo that in fact had 19 contaminated snapshots'，是同一處的已知痛點，值得從那裡查起。\n\n要做：(1) 找出 k1406/k1411 為何不在蒐集範圍；(2) 修成不依賴目錄深度的蒐集；(3) 補測試：把這兩個檔（或等價 fixture）釘成必須被偵測到；(4) 修好後**重跑全掃**並重新核對 `k_reruns_0050_snapshot_contaminated_20260719` 的受害清單——目前那張單的 14 個候選是用會漏報的工具盤出來的，數量只可能被低估。\n\n順帶（分開處理，不要混進本單）：同一次掃描的 🚫 清單含明顯誤報 —— `k1360` kalshi `total_open_interest`（未平倉口數翻倍，不是股價分割）、`k1556`/`k1588` 2018-02-05 `open` 18.44→37.32（Volmageddon 真實跳動）、`high_yield_tone`（情緒指數）。價格分割偵測器套在非價格欄位上，精確度會被稀釋。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-dispatch",
     "created_at": "2026-07-21T15:36:00+00:00",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-22T20:07:59.711825+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-a9e949bce7dc46289bfede7c994aaebc"
+      },
+      {
+        "ts": "2026-07-22T20:07:59.982648+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-a9e949bce7dc46289bfede7c994aaebc"
+      },
+      {
+        "ts": "2026-07-22T20:10:53.007188+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-a9e949bce7dc46289bfede7c994aaebc"
+      }
+    ],
+    "started_at": "2026-07-22T20:07:59.982631+00:00",
+    "completed_at": "2026-07-22T20:10:53.007171+00:00",
+    "result": "CSV collection now recursively scans experiments/**/data and paper/**/data independent of directory depth. Added integration regression tests pinning k1406/k1411-equivalent split fixtures, nested paths, and empty-scan exit 2. Full scan: 1279 CSVs, 19 candidates, 12 confirmed 0050 snapshots; both k1406 and k1411 detected at ratio 0.2494."
   },
   {
     "id": "phase_z_gate_review_2315c621e30a",
@@ -55429,5 +55452,28 @@
         "note": "condition_cleared_automatically"
       }
     ]
+  },
+  {
+    "id": "assign_0cfd61df",
+    "title": "解決長期無主的產物 `job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543`（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-22T15:01:12.190591+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-22T20:01:03.789771+00:00",
+    "payload": {
+      "held_paths": [
+        "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543"
+      ],
+      "held_reasons": {
+        "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543": "no_existing_declared_files"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
+    "created_by": "reap_orphan_deliverables"
   }
 ]
