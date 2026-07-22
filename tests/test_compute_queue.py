@@ -348,6 +348,7 @@ def test_enqueue_agent_forwards_source_task_id(tmp_path: Path, monkeypatch) -> N
     monkeypatch.setattr(module, "ROOT", tmp_path)
     monkeypatch.setattr(module, "AGENT_BRIEF_DIR", tmp_path / "briefs")
     monkeypatch.setattr(module, "is_registered_linked_worktree", lambda *_a, **_k: True)
+    monkeypatch.setattr(module, "_find_task_dispatch_collision", lambda **_k: None)
 
     brief = tmp_path / "brief.md"
     brief.write_text("do the thing")
@@ -375,6 +376,68 @@ def test_enqueue_agent_forwards_source_task_id(tmp_path: Path, monkeypatch) -> N
     )
     assert module.enqueue_agent(args) == 0
     assert captured["source_task_id"] == "assign_y"
+
+
+def test_enqueue_agent_blocks_task_id_on_another_unmerged_worktree(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """The K741 incident: a second worktree must not receive the same pool task."""
+    canonical = tmp_path / "canonical"
+    canonical.mkdir()
+    _git(canonical, "init", "-b", "main")
+    _git(canonical, "config", "user.email", "t@t")
+    _git(canonical, "config", "user.name", "t")
+    (canonical / "seed.txt").write_text("seed", encoding="utf-8")
+    _git(canonical, "add", "seed.txt")
+    _git(canonical, "commit", "-m", "seed")
+
+    existing = tmp_path / "existing-worktree"
+    target = tmp_path / "second-worktree"
+    _git(canonical, "worktree", "add", "-b", "first-task-branch", str(existing))
+    (existing / "result.txt").write_text("first implementation", encoding="utf-8")
+    _git(existing, "add", "result.txt")
+    _git(existing, "commit", "-m", "[agent] implement assign_1238781f")
+    _git(canonical, "worktree", "add", "-b", "duplicate-task-branch", str(target), "main")
+
+    queue_dir = _patch_queue_paths(canonical, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", canonical)
+    monkeypatch.setattr(module, "QUEUE_ROOT", canonical)
+    monkeypatch.setattr(module, "AGENT_BRIEF_DIR", canonical / "briefs")
+    monkeypatch.setattr(module, "AGENT_JOB_DIR", canonical / "agent_jobs")
+    brief = canonical / "brief.md"
+    brief.write_text("duplicate dispatch", encoding="utf-8")
+    args = SimpleNamespace(
+        id="duplicate-agent-job",
+        title=None,
+        brief_file=str(brief),
+        model="claude-opus-4-8",
+        effort="xhigh",
+        cwd=str(target),
+        result_artifact=None,
+        followup_brief=None,
+        followup_task_type=None,
+        followup_priority=None,
+        timeout=None,
+        timeout_parent_job_id=None,
+        split_stage=None,
+        source_task_id="assign_1238781f",
+    )
+
+    assert module.enqueue_agent(args) == 2
+    err = capsys.readouterr().err
+    assert "task-id collision" in err
+    assert str(existing) in err
+    assert "first-task-branch" in err
+    assert not (queue_dir / "duplicate-agent-job.json").exists()
+    assert not (canonical / "briefs/duplicate-agent-job.md").exists()
+
+    # Historical task commits on canonical HEAD are not live collisions.
+    _git(canonical, "merge", "--no-ff", "first-task-branch", "-m", "merge first task")
+    assert module._find_task_dispatch_collision(
+        repo_root=canonical,
+        task_id="assign_1238781f",
+        target_workdir=target,
+    ) is None
 
 
 def _queued_job(queue_dir: Path, log_dir: Path, *, artifact: Path | None) -> Path:

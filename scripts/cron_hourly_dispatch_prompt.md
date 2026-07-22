@@ -172,11 +172,14 @@ PHASE B — 派新工:
      uv run python scripts/compute_queue.py enqueue-agent \
        --brief-file /tmp/brief_kXXXX.md \
        --model claude-opus-4-8 --effort xhigh \
+       --source-task-id <task_id> \
        --cwd .claude/worktrees/<worktree> \
        --result-artifact experiments/kXXXX/kXXXX_results.json \
        --followup-brief '<收件時要做什麼：驗數字 / Codex 審 / 合併 worktree / 寫 knowledge>' \
        --followup-task-type experiment
      ```
+     `--source-task-id` 是唯一 task/worktree collision gate 的必要輸入；若另一個未合併
+     worktree branch 已帶同一 task id，enqueue 會直接回報既有路徑並拒派。
      `--result-artifact` 相對 `--cwd` 解析，runner 只驗存在、絕不寫入；runner 自己的摘要另存 `storage/ops/agent_jobs/<job_id>.json`。agent 由 ***/15 的 detached compute worker** 執行（不受 fire cap 限制、有 lock、有自己的 timeout），成果由**後續某一班 fire 在 PHASE A 收**。這正是 heavy compute 一直在走的路 —— agentic 長工作只是同一條路上的另一種 job。
    - **本班 fire 的職責到 enqueue 為止**：enqueue 完就往下走 / 收尾，**不要坐在那裡等 agent**。這不違反「完整完成原則」—— 完成的單位是 **task**，不是 fire。一個 60 分鐘的 agent 在 50 分鐘的 fire 裡「等到底」只有一種結局：被 SIGKILL、成果全毀，那才是真正的沒完成。
    - **短任務**（≤10min、`low`/`medium` effort：lookup / verify / classification / 短 review）→ 用 **Agent tool**（`run_in_background: false`，同步跑完）。這類本來就塞得進 fire，不必進 queue。

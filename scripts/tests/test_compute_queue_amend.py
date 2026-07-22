@@ -40,6 +40,8 @@ def queue(tmp_path, monkeypatch):
     monkeypatch.setattr(compute_queue, "AGENT_JOB_DIR", tmp_path / "agent_jobs")
     monkeypatch.setattr(compute_queue, "AGENT_BRIEF_DIR", tmp_path / "agent_briefs")
     monkeypatch.setattr(compute_queue, "is_registered_linked_worktree", lambda *_: True)
+    monkeypatch.setattr(compute_queue, "_find_task_dispatch_collision", lambda **_k: None)
+    monkeypatch.setattr(compute_queue, "_link_source_task", lambda *_a, **_k: None)
     qdir.mkdir(parents=True)
     return qdir
 
@@ -50,6 +52,7 @@ def _enqueue_agent(brief: Path, job_id: str = "j1", **over) -> int:
         effort="xhigh", cwd=str(brief.parent), result_artifact=None,
         followup_brief=over.get("followup_brief", "collect it"),
         followup_task_type="experiment", followup_priority=1, timeout=600,
+        source_task_id="assign_compute_queue_amend",
     )
     return compute_queue.enqueue_agent(args)
 

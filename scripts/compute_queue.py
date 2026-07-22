@@ -744,6 +744,93 @@ def _link_source_task(job_id: str, task_id: str | None) -> None:
         print(f"warning: could not link source task {task_id}: {exc}", file=sys.stderr)
 
 
+def _find_task_dispatch_collision(
+    *,
+    repo_root: Path,
+    task_id: str,
+    target_workdir: Path,
+    runner=subprocess.run,
+) -> dict[str, str] | None:
+    """Return an unmerged worktree branch already carrying ``task_id``.
+
+    ``enqueue-agent`` is the one dispatch boundary that knows both the canonical
+    pool task id and the worktree that is about to receive an expensive agent.
+    Keep the collision invariant here rather than duplicating best-effort prompt
+    checks in every hourly lane.
+
+    A matching commit already reachable from canonical HEAD is historical and
+    therefore harmless. A matching commit reachable from another registered
+    worktree branch but not HEAD is live, unmerged work for the same task and
+    must stop the second dispatch.
+    """
+
+    def git(*args: str) -> subprocess.CompletedProcess:
+        try:
+            return runner(
+                ["git", "-C", str(repo_root), *args],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise RuntimeError(f"git {' '.join(args[:2])} failed: {exc}") from exc
+
+    matches = git(
+        "log", "--all", "--fixed-strings", f"--grep={task_id}", "--format=%H"
+    )
+    if matches.returncode != 0:
+        raise RuntimeError(
+            f"git log collision scan failed rc={matches.returncode}: "
+            f"{(matches.stderr or '').strip()[-240:]}"
+        )
+    matching_shas = [line.strip() for line in matches.stdout.splitlines() if line.strip()]
+    if not matching_shas:
+        return None
+
+    worktrees = git("worktree", "list", "--porcelain")
+    if worktrees.returncode != 0:
+        raise RuntimeError(
+            f"git worktree collision scan failed rc={worktrees.returncode}: "
+            f"{(worktrees.stderr or '').strip()[-240:]}"
+        )
+
+    records: list[dict[str, str]] = []
+    current: dict[str, str] = {}
+    for line in [*(worktrees.stdout or "").splitlines(), ""]:
+        if not line:
+            if current:
+                records.append(current)
+                current = {}
+            continue
+        key, _, value = line.partition(" ")
+        if key in {"worktree", "branch"} and value:
+            current[key] = value.removeprefix("refs/heads/") if key == "branch" else value
+
+    target = target_workdir.resolve()
+    for record in records:
+        raw_path = record.get("worktree")
+        branch = record.get("branch")
+        if not raw_path or not branch or Path(raw_path).resolve() == target:
+            continue
+        for sha in matching_shas:
+            merged = git("merge-base", "--is-ancestor", sha, "HEAD")
+            if merged.returncode == 0:
+                continue
+            if merged.returncode != 1:
+                raise RuntimeError(
+                    f"cannot determine whether task commit {sha[:12]} is merged into HEAD"
+                )
+            on_branch = git("merge-base", "--is-ancestor", sha, branch)
+            if on_branch.returncode == 0:
+                return {"worktree": raw_path, "branch": branch, "commit": sha}
+            if on_branch.returncode != 1:
+                raise RuntimeError(
+                    f"cannot inspect task commit {sha[:12]} on branch {branch}"
+                )
+    return None
+
+
 def enqueue_agent(args) -> int:
     """Queue a long-lived `claude -p` agent instead of running it inside a fire.
 
@@ -784,6 +871,32 @@ def enqueue_agent(args) -> int:
         )
         return 2
     workdir = cwd_path.resolve()
+
+    source_task_id = str(getattr(args, "source_task_id", "") or "").strip()
+    if not source_task_id:
+        print(
+            "error: enqueue-agent requires --source-task-id so duplicate worktree "
+            "dispatches can be rejected mechanically",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        collision = _find_task_dispatch_collision(
+            repo_root=QUEUE_ROOT,
+            task_id=source_task_id,
+            target_workdir=workdir,
+        )
+    except RuntimeError as exc:
+        print(f"error: task-id collision scan failed closed: {exc}", file=sys.stderr)
+        return 2
+    if collision:
+        print(
+            "error: task-id collision; refusing duplicate agent dispatch: "
+            f"task={source_task_id} existing_worktree={collision['worktree']} "
+            f"branch={collision['branch']} commit={collision['commit'][:12]}",
+            file=sys.stderr,
+        )
+        return 2
 
     job_id = args.id or f"agent-{brief_path.stem}-{uuid.uuid4().hex[:6]}"
 
@@ -2193,7 +2306,11 @@ def main():
     ea.add_argument("--split-stage")
     ea.add_argument(
         "--source-task-id",
-        help="Pool task this job was dispatched for; marked in_progress so A0 stops re-surfacing it.",
+        required=True,
+        help=(
+            "Pool task this job was dispatched for; marks it in_progress and blocks "
+            "dispatch when another unmerged worktree branch already carries that task id."
+        ),
     )
     ea.set_defaults(func=enqueue_agent)
 

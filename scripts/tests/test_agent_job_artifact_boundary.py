@@ -21,6 +21,8 @@ from scripts import compute_queue, run_agent_job
 def _registered_worktree_fixture(monkeypatch):
     """These ownership tests use lightweight dirs; worktree validity is separate."""
     monkeypatch.setattr(compute_queue, "is_registered_linked_worktree", lambda *_: True)
+    monkeypatch.setattr(compute_queue, "_find_task_dispatch_collision", lambda **_k: None)
+    monkeypatch.setattr(compute_queue, "_link_source_task", lambda *_a, **_k: None)
     monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_: True)
 
 
@@ -165,6 +167,7 @@ def _enqueue_args(
         followup_task_type="experiment",
         followup_priority=1,
         timeout=5400,
+        source_task_id="assign_agent_artifact_boundary",
     )
 
 
