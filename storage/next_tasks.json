@@ -36273,7 +36273,7 @@
     "description": "K1698（experiments/k1698/，FTD E1 v2 — scale re-calibration gating，K1684 的 compliant rerun）於 2026-07-17 孤兒收尾時經 codex gpt-5.6-sol (reasoning=high) 獨立二審判 **FAIL**，依 K1259 規則不得寫入 knowledge.json。本 task 是它的 consumer 與修復出口。\n\n**先講公道話（這些 blocker 是真修的，別重做）**：數字全部可從 JSON 逐項對上、無 K1016 式反向宣稱 —— leg1 t=+1.4694/p=0.1424/n=436、own-target bridge −5.2522 vs primary −2.0642(p=0.0396)、校正因子 std(z)=1.20290 / MZ=1.21091 / HL=1.07465、placebo GJRf-a OOS=1.11910 / IS=0.99346、1% VaR trinity HAR+CF 14/450 (Kupiec p=0.000 FAIL) vs bridge 17/450、GJR+CF 2/450 PASS 但 c_emp=0.799 [0.63,1.02] 屬過度保守型 PASS、K854 bridge 11/14 格相符。K1684 的 n=377 縮樣已修（改 declared drop 3 cells，n=450）、atomic write（tmp→json.load→os.replace）、GATE_RULES 寫在 k1698.py:170 且 decide_gate_v2() 確實檢查 leg-2 —— 全部確認到位。\n\n**FAIL 理由（問題全在「數字 → 結論」與兩個號稱已解的 blocker）**：\n1. **lookahead 未解（致命）**：active contract 依整份日檔成交量選出（k1698.py:328 `v[dl==d].sum()`），含 13:30-13:45 的 tick，因此號稱「13:30 可得」的 RV predictor 用了視窗收盤後 15 分鐘的合約選擇資訊 —— 直接推翻 README「資訊集建構上不相交」的宣稱，並打在所有「新舊 RV 差 → divergence 是 artifact」結論的根上。\n2. **60 天邊界 audit 是空驗證**：rv_window_boundary_audit 取的是最早 60 個交易日（2017-01，夜盤上線前），JSON 內 12 筆 checks 的 night_pm_in_window / night_am_in_window 全是 None，而 None 不會令 ok=False；night_pm_stamped_before_file_date 更根本沒併進 all_ok。而 OOS(2023-24) 全在夜盤時代 → blocker 2 的機械證明並不存在。\n3. **accepting the null**：t=+1.469 (p=0.142) 只是「未證明 HAR 勝」，被寫成 H2_REJECTED +「divergence 是 construction artifact」。要立此論需 equivalence / noninferiority 檢定；−5.25→−2.06 是描述性比較，未對兩套 paired loss differential 之差做正式檢定。\n4. 「完全復現 K1684/K854 的世界」與 JSON 的 11/14 相矛盾（只有 HAR/RGL cells 逐格復現，差的 3 格全是 GJR 家族 10→9、3→2、9→7）。\n5. 「差全部來自 RV 重建」無分項 ablation —— 新 RV 同時改了 active contract／gap／alignment／連續 path 四件事，故「RV 建構吃掉最多」「殘餘 1.075 = composition/basis」皆未識別。\n6. JSON limitation #7 寫「>=100-start GJR/RGL」與 top-level rgl_multistart=40 自相矛盾（README 本身寫對）。\n7. k1698/ 目錄內無獨立 referee report/receipt，README §2 的「primary-path review PASS」無機械證據。\n\n**要做的（順序有依賴，別跳）**：\n1. 修 contract-selection lookahead：合約選擇只能用 13:30 前可得資訊（前一日 volume 或 rolling 規則），重跑 RV predictor。這一步不做，後面全部無意義。\n2. 修 rv_window_boundary_audit：抽樣必須涵蓋夜盤時代與 OOS 期（2023-24），None 應令 ok=False，night_pm_stamped_before_file_date 併進 all_ok。\n3. 無 lookahead 重跑後，做四層分項 ablation（active contract / gap / alignment / 連續 path）才能講「哪一項吃掉多少」。\n4. H2 若仍要主張「divergence 是 artifact」，改用 equivalence / noninferiority 檢定，不可拿 p=0.142 當證據。\n5. 修 limitation #7 與 rgl_multistart 的矛盾；把 review receipt 落成檔案。\n6. 重跑後再送 codex 二審；CONDITIONAL PASS 以上才可寫 knowledge.json。\n7. heavy compute 走 scripts/compute_queue.py enqueue，不要塞進 hourly fire。\n\n**可保留素材（修完才談短文）**：common-target vs own-target ranking 分歧、RV 建構敏感性、校正機器對 GJR placebo 同樣有效的否定結果、c_emp 作 ex-post calibration 診斷。\n\nparent_task_id=dreaming_orphaned_experiment_k1698",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "blocked",
     "source": "auto_discovered",
     "created_at": "2026-07-17T10:24:51.180552+00:00",
     "parent_task_id": "dreaming_orphaned_experiment_k1698",
@@ -36329,7 +36329,11 @@
     "claim_session_id": "4de53d4191b6",
     "recovery_branch": "worktree-dispatch-slot-2-c5cafe39-k1698",
     "reviewed_commit": "e13f83a5d",
-    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。"
+    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。",
+    "blocked_until": "2026-07-25T13:30+08:00",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_at": "2026-07-22T10:06:25+00:00",
+    "blocked_note": "Codex usage limit reported by storage/ops/codex_reviews/k1698_rev4_verdict.md.stderr; auto-recheck after reset."
   },
   {
     "id": "k1380_rerun_staged_correct_qlike",
@@ -45525,7 +45529,7 @@
     "description": "Codex round 7 verdict FAIL。只修三個 claim-layer blocker，不重跑估計：(1) k1731_gevreg_midas_ssvs_returns.py 的 DM interpretation 必須依 nested/non-nested 分流，GEV-HAR 兩列只能標 diagnostic-only、無 coverage/bound；(2) 從 canonical source/finalizer 重生三份 results JSON，禁止手改，numeric leaves 必須零漂移；(3) README opening 與 Honest conclusions 不得再用 in-sample PIP 支撐 OOS does-not-improve null，應降為 weak in-sample selection + uncorrected directional OOS diagnostic。修後跑 108-test nested-DM ratchet、69-check verification、3834-leaf regression，重建 freeze 並送 Codex round 8。完整裁決見 storage/ops/codex_reviews/k1731_armB_rev7_verdict.md。禁止合併 worktree、禁止寫 knowledge；assign_67f56b79 維持 blocked，round 8 PASS 才解除。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "created_at": "2026-07-20T06:55:20.543246+00:00",
     "parent_task_id": "k1731_armB_rev7_codex_round7",
@@ -45567,14 +45571,29 @@
         "from": "in_progress",
         "to": "blocked",
         "by": "hourly-slot-1-e32dc69a245e45d6bb8edfe83a5fb0aa"
+      },
+      {
+        "ts": "2026-07-22T10:09:42.172518+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-9e02458ba42b49668cb008bff360750d"
+      },
+      {
+        "ts": "2026-07-22T10:09:42.413125+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-9e02458ba42b49668cb008bff360750d"
       }
     ],
-    "started_at": "2026-07-21T02:10:30.034755+00:00",
+    "started_at": "2026-07-22T10:09:42.413110+00:00",
     "last_released_at": "2026-07-20T16:18:56.732688+00:00",
     "last_release_reason": "supervisor_kill_a0db212c",
     "completed_at": "2026-07-21T02:11:14.591341+00:00",
     "result": "rev8 claim-layer remediation 已在 worktree dispatch-slot-1-bd00f90a-k1731 完成（branch wt/dispatch-slot-1-bd00f90a-k1731, HEAD bb57bda98, 8 commits）。三個 blocker 皆已處理：(1) k1731_gevreg_midas_ssvs_returns.py DM interpretation 依 nested/non-nested 分流，GEV-HAR 兩列標 diagnostic-only；(2) 三份 results JSON 由 canonical finalizer 重生、numeric_leaf_drift=0、非手改；(3) README opening/Honest conclusions 降級為 weak in-sample selection + uncorrected directional OOS diagnostic。主線程本班獨立重跑驗證：k1731_armB_verification.py exit=0 / problems=0 / README claim scan 0 violations；tests/test_audit_nested_dm_misuse.py 全數 PASS。**唯一未完成項 = Codex round 8 審查，被外部 quota 擋住**（CLI 回 'You've hit your usage limit'，額度 2026-07-25 13:30 才恢復），非程式或 gate 失敗。故標 blocked 而非 succeeded；blocked_until 到期後由 unblock sweeper 自動回 pending，屆時只需送 round 8。worktree 依原指示未合併。",
-    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。"
+    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。",
+    "claimed_by": "codex-failover-slot-2-9e02458ba42b49668cb008bff360750d",
+    "claimed_at": "2026-07-22T10:09:42.172503+00:00",
+    "claim_session_id": "2a1b77930019"
   },
   {
     "id": "assign_f71399a3",
@@ -45634,10 +45653,14 @@
     "description": "compute job k1698_rev4_codex_round5 完成後收 verdict（storage/ops/codex_reviews/k1698_rev4_verdict.md）。PASS → 由審查者填 experiments/k1698/review_verdict.json 後合併 worktree dispatch-slot-2-c5cafe39-k1698；FAIL → 列 blocker 續 rev5。禁止自簽 verdict。Round 4 結果：8 PASS / 2 FAIL，兩個 FAIL 皆為文件證據陳述（README 無 receipt 的 286.6s 歸因、remediation.json 的 grep 宣稱），rev4 commit e13f83a5d 已修，數字未動。",
     "task_type": "paper_review",
     "priority": 3,
-    "status": "pending",
+    "status": "blocked",
     "source": "compute_queue_followup",
     "created_at": "2026-07-20T09:10:55.644408+00:00",
-    "parent_task_id": "k1698_rev3_remediation"
+    "parent_task_id": "k1698_rev3_remediation",
+    "blocked_until": "2026-07-25T13:30+08:00",
+    "blocked_reason": "codex_quota_reset_pending",
+    "blocked_at": "2026-07-22T10:06:26+00:00",
+    "blocked_note": "Codex usage limit reported by storage/ops/codex_reviews/k1698_rev4_verdict.md.stderr; auto-recheck after reset."
   },
   {
     "id": "guard_stale_base_worktree_merge_revert",
@@ -49697,11 +49720,34 @@
     "description": "Codex 額度在 2026-07-20 17:15 前後耗盡（重置時間 2026-07-25 13:30），\n但失敗方式是**靜默**的，而 codex exec 是本平台多輪審查閘門的唯一執行路徑。\n\n**證據**：`grep -l \"usage limit\" storage/ops/codex_reviews/*.stderr` 命中 4 個 job ——\nk1698_rev4（07-20 17:15）、audit_snapshot_dup_20260721（07-21 12:15）、k1731_armB_rev8、k1707_pre_run_review。\n其中 **k1698_rev4_verdict.md 與 audit_snapshot_dup_20260721_verdict.md 是 0 bytes**。\n\n**風險**：0-byte verdict 檔就放在正常 verdict 檔旁邊（k1698_rev2b_verdict.md 8432 bytes、\nk1698_rev3_verdict.md 5247 bytes），檔名格式相同。任何依「verdict 檔存在」判斷審查完成的流程，\n都會把空檔讀成通過。這是 silent-fallback 類的缺陷，CLAUDE.md 明令禁止。\n\n**要做**：\n1. codex runner 偵測 stderr 的 `You've hit your usage limit` → job 標成專屬狀態（非泛用 failed），\n   **不得留下 0-byte verdict artifact**（要嘛不建檔、要嘛寫入明確的 QUOTA_EXHAUSTED 標記）。\n2. 解析 `try again at <date>` 換算重置時點，自動把依賴 Codex 的 pending task 用\n   `mark_task_blocked.py --reason codex_quota_reset_pending --until <重置時點>` 標起來，\n   避免 starvation 邏輯每小時把結構性受阻的 task 推上來（assign_42306eaa 就是這樣餓了 94.7h）。\n3. 額度耗盡要進 alert（目前 24h alert 數為 0，這件事完全沒被看見）。\n4. 回掃既有的 0-byte verdict 檔，逐一標記或刪除。\n5. 加防再犯測試：模擬 usage-limit stderr，斷言不產生 0-byte artifact 且依賴任務被 block。\n\n**不要做**：不要把 Codex 換成 Claude 跑審查來繞過（那會讓「獨立第三方審查」變成自審，\n違反 review gate 的設計目的）。額度是外部限制，正確處理是**可見地等待**，不是偷偷換人審。\n\n發現者：hourly-slot-1 2026-07-21 17:30，處理 assign_42306eaa 時查出。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-21T09:31:04.614694+00:00",
     "parent_task_id": "assign_42306eaa",
-    "created_by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3"
+    "created_by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "status_history": [
+      {
+        "ts": "2026-07-22T10:01:26.220779+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-c795f9efa68f4a24ac33e9f1431149a7"
+      },
+      {
+        "ts": "2026-07-22T10:01:31.791855+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-c795f9efa68f4a24ac33e9f1431149a7"
+      },
+      {
+        "ts": "2026-07-22T10:08:35.449382+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-c795f9efa68f4a24ac33e9f1431149a7"
+      }
+    ],
+    "started_at": "2026-07-22T10:01:31.791840+00:00",
+    "completed_at": "2026-07-22T10:08:35.449362+00:00",
+    "result": "Fixed Codex review quota handling: atomic verdict publication, explicit quota/reset markers, compute receipt quota state with reset-aware wait, dependent pending-task blocking, critical alert, legacy zero-byte cleanup, and 27 passing regression tests."
   },
   {
     "id": "assign_82551c2e",
@@ -54539,6 +54585,46 @@
       ],
       "held_reasons": {
         "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543": "no_existing_declared_files"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
+    "created_by": "reap_orphan_deliverables"
+  },
+  {
+    "id": "ci-red-29906217577",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-29808977711",
+    "ci_run_key": "29906217577:1",
+    "created_at": "2026-07-22T10:00:08.344338+00:00",
+    "title": "CI 紅燈修復（run 29906217577, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29906217577\nattempt: 1\nhead_sha: 1629ae7b1\n偵測摘要（仍須讀完整 failed log）：2026-07-22T09:13:37.2849160Z E AssertionError: Enforcement Layer Map is out of sync with disk — update .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md in the same commit as the hook/CI change.\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29906217577 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "assign_0c7a209c",
+    "title": "解決 2 份長期無主的產物：`storage/drafts/k1253_general_draft.md` 等（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `storage/drafts/k1253_general_draft.md` — no_title (namespace=drafts_intake, first_seen=2026-07-22T05:01:36.431665+00:00, shifts=6)\n- `storage/drafts/k1711_general_draft.md` — no_title (namespace=drafts_intake, first_seen=2026-07-22T05:01:36.431665+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-22T10:01:10.248455+00:00",
+    "payload": {
+      "held_paths": [
+        "storage/drafts/k1253_general_draft.md",
+        "storage/drafts/k1711_general_draft.md"
+      ],
+      "held_reasons": {
+        "storage/drafts/k1253_general_draft.md": "no_title",
+        "storage/drafts/k1711_general_draft.md": "no_title"
       },
       "tags": [
         "orphan_reap",

@@ -988,6 +988,7 @@ _FAILURE_CLASS_MARKER_RE = re.compile(
     r"^\[FAILURE_CLASS\]\s+(auth|quota|transient|none)\s*$", re.MULTILINE
 )
 _STDERR_CLASS_TAIL_BYTES = 16_384
+_CODEX_QUOTA_RESET_RE = re.compile(r"^\[CODEX_QUOTA_RESET_AT\]\s+(\S+)\s*$", re.MULTILINE)
 
 
 def _stderr_failure_class(job: dict[str, Any]) -> str | None:
@@ -1047,6 +1048,29 @@ def _runner_failure_class(job: dict[str, Any]) -> str | None:
     return value if isinstance(value, str) else None
 
 
+def _codex_quota_reset_at(job: dict[str, Any]) -> datetime | None:
+    """Return a runner-published Codex reset clock, if present and valid."""
+    stderr_file = job.get("stderr_file")
+    if not stderr_file:
+        return None
+    path = Path(str(stderr_file))
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        tail = path.read_text(encoding="utf-8", errors="replace")[-_STDERR_CLASS_TAIL_BYTES:]
+    except OSError as exc:
+        warn("compute_queue", "Codex quota reset marker unreadable",
+             job=job.get("id"), path=str(path), err=str(exc))
+        return None
+    matches = _CODEX_QUOTA_RESET_RE.findall(tail)
+    if not matches:
+        return None
+    return parse_iso_warn(
+        matches[-1], tag="compute_queue", field_name="codex_quota_reset_at",
+        fallback=None, job_id=job.get("id"),
+    )
+
+
 def _sleeping_until(job: dict[str, Any]) -> datetime | None:
     """The job's `not_before`, if it is still in the future. Else None.
 
@@ -1086,15 +1110,25 @@ def _requeue_quota_blocked(job: dict[str, Any]) -> bool:
         return False
 
     job["quota_requeues"] = bounces + 1
+    reset_at = _codex_quota_reset_at(job)
     job.setdefault("requeue_history", []).append({
         "at": utc_now(),
         "reason": "quota",
         "exit_code": job.get("exit_code"),
         "started_at": job.get("started_at"),
+        "reset_at": reset_at.isoformat() if reset_at else None,
     })
-    job["not_before"] = (
-        datetime.now(timezone.utc) + timedelta(seconds=QUOTA_REQUEUE_BACKOFF_S)
-    ).isoformat()
+    now = datetime.now(timezone.utc)
+    wait_until = reset_at if reset_at and reset_at > now else (
+        now + timedelta(seconds=QUOTA_REQUEUE_BACKOFF_S)
+    )
+    job["not_before"] = wait_until.isoformat()
+    # Canonical queue status remains `queued` so the scheduler can resume it,
+    # while attempt_status is the dedicated operator-facing classification.
+    job["attempt_status"] = (
+        "codex_quota_exhausted" if reset_at else "quota_exhausted"
+    )
+    job["quota_reset_at"] = reset_at.isoformat() if reset_at else None
     # Back to a clean work order: the attempt that just bounced computed nothing,
     # so leaving its exit code or timestamps on the job would describe a run that
     # never happened. `queued_at` stays put — the job keeps its place in line.
