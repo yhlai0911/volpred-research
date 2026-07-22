@@ -55102,16 +55102,13 @@
     "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 3 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 3\n- eligible_before_dedup: 3\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 3\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: (none)\n  - `mile_2d1d356b` (general, 已連續被擋 4 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n  - `mile_63ec8636` (general, 已連續被擋 4 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n  - `mile_928eade8` (general, 已連續被擋 1 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_928eade8*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260722_15`，指定只補仍可放行的 cluster：vix。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-22T15:01:25.012211+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "release_pool_deadlock"
     ],
-    "claimed_by": "codex-failover-slot-1-3eab721a5999404f99beb24943dc0bea",
-    "claimed_at": "2026-07-22T16:01:19.245300+00:00",
-    "claim_session_id": "b7998b1f13db",
     "status_history": [
       {
         "ts": "2026-07-22T16:01:19.245315+00:00",
@@ -55124,9 +55121,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-1-3eab721a5999404f99beb24943dc0bea"
+      },
+      {
+        "ts": "2026-07-22T16:21:45.861014+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-3eab721a5999404f99beb24943dc0bea"
       }
     ],
-    "started_at": "2026-07-22T16:01:19.605211+00:00"
+    "started_at": "2026-07-22T16:01:19.605211+00:00",
+    "completed_at": "2026-07-22T16:21:45.860995+00:00",
+    "result": "root_cause=all three due drafts lacked lazypack plans/renders; repair=authored and validated 3 evidence-bound plans, queued and verified 3 completed render jobs (9 PNGs), appended/synced all lazypack sections; release=mile_2d1d356b published via official release pool with verified_live=true; postcheck=due_now=false content_gate_blocked=0"
   },
   {
     "id": "telegram-1324",
@@ -55285,5 +55290,27 @@
     },
     "parent_task_id": "telegram-1329",
     "created_by": "telegram-responder"
+  },
+  {
+    "id": "starved_draft_mile_63ec8636",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "auto_discovered",
+    "status": "pending",
+    "created_at": "2026-07-22T16:17:01.263693+00:00",
+    "created_by": "audit_release_settings",
+    "title": "release 連續跳過 6 次：mile_63ec8636 卡池裁決",
+    "description": "文章 mile_63ec8636（黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信）已被 release loop 跳過 6 次（門檻 5）。裁決出口三選一，不准繼續讓它空轉：\n1. 修 gate：查 feed 該篇 details.release_audit_* 的 skip 原因，若是 gate 誤攔（audience/dedup/quality 判錯）修 gate 後讓它自然釋出；\n2. 手動釋出：內容確實可發 → 走正式 release pool / feed-publisher 流程發佈；\n3. retire：內容不該發（過時/重複/品質不足，寫明理由）→ 正式下架該 draft。\n裁決寫進本 task 的 result。來源：scripts/audit_release_settings.py --fix（WS-I）。"
+  },
+  {
+    "id": "starved_draft_mile_2d1d356b",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "source": "auto_discovered",
+    "status": "pending",
+    "created_at": "2026-07-22T16:17:01.263693+00:00",
+    "created_by": "audit_release_settings",
+    "title": "release 連續跳過 6 次：mile_2d1d356b 卡池裁決",
+    "description": "文章 mile_2d1d356b（AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債）已被 release loop 跳過 6 次（門檻 5）。裁決出口三選一，不准繼續讓它空轉：\n1. 修 gate：查 feed 該篇 details.release_audit_* 的 skip 原因，若是 gate 誤攔（audience/dedup/quality 判錯）修 gate 後讓它自然釋出；\n2. 手動釋出：內容確實可發 → 走正式 release pool / feed-publisher 流程發佈；\n3. retire：內容不該發（過時/重複/品質不足，寫明理由）→ 正式下架該 draft。\n裁決寫進本 task 的 result。來源：scripts/audit_release_settings.py --fix（WS-I）。"
   }
 ]

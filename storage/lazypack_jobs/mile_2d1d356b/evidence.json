@@ -1,0 +1,26 @@
+{
+  "as_of": "2026-07-21",
+  "provenance": {
+    "builder": "scripts/analysis/trending_capex_credit_evidence.py",
+    "sources": "yfinance quarterly statements and prices; FRED credit-spread series"
+  },
+  "capex": {
+    "growth_pct": 80.45395121137102,
+    "share_of_ocf_start": 0.6294218059263799,
+    "share_of_ocf_end": 0.8608278543326676
+  },
+  "debt": {
+    "added_bn_usd": 177.211,
+    "growth_pct": 66.39727233556268
+  },
+  "credit_market": {
+    "baa_spread_latest_pct_points": 1.61,
+    "baa_spread_historical_median_pct_points": 2.06,
+    "smh_hyg_corr_early": 0.6375784323452498,
+    "smh_hyg_corr_recent": 0.5188351467223972,
+    "corr_change_p_value": 0.000021414704978611456
+  },
+  "amazon": {
+    "ttm_capex_over_ocf": 1.0166429903521824
+  }
+}

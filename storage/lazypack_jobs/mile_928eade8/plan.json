@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "title": "K1697 懶人包：模型沒變，窗口端點一換答案就漂移",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1697/k1697_results.json",
+      "sha256": "1dfdab2c2920b81968ac4545d4eac7bd0ac7769bfd088db1e3e877218b72cf3e",
+      "label": "K1697 canonical rolling-window rerun results"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_reproduction",
+      "info": "method",
+      "style": "scientific",
+      "title": "先用舊端點重現，再把資料推到共同新端點",
+      "alt": "舊端點重現值與新端點估計的比較方式",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "舊端點重現的槓桿參數",
+          "value": {
+            "source": "results",
+            "path": "/reconciliation_checks/^TWII_log_end_20250122_vs_predecessor/gamma",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "舊端點穩健統計值",
+          "value": {
+            "source": "results",
+            "path": "/reconciliation_checks/^TWII_log_end_20250122_vs_predecessor/gamma_t",
+            "format": {"kind": "number", "digits": 2}
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "先排除程式錯誤",
+          "body": [
+            "新資料截回舊端點後能重現前作，表示差異主要來自窗口位置，不是模型換了。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_endpoint_shift",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "端點只往後移一段，顯著結論就翻轉",
+      "alt": "春季端點與最新共同端點的槓桿參數比較",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "春季端點槓桿參數",
+          "value": {
+            "source": "results",
+            "path": "/reconciliation_checks/twii_log_end_20260405_isolation/gamma",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最新共同端點槓桿參數",
+          "value": {
+            "source": "results",
+            "path": "/variants/adjclose/per_security/^TWII/gamma",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最新共同端點穩健統計值",
+          "value": {
+            "source": "results",
+            "path": "/variants/adjclose/per_security/^TWII/gamma_t",
+            "format": {"kind": "number", "digits": 2}
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "不是小數點誤差",
+          "body": [
+            "同一模型與同一窗口長度，只換結束日，就從明顯跨過門檻變成沒有跨過。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_uncertainty",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "單一最新窗口，不適合扛起大標題",
+      "alt": "多起點收斂結果與端點敏感度的投資解讀",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "最佳化起點總數",
+          "value": {
+            "source": "results",
+            "path": "/variants/adjclose/per_security/^TWII/multistart/n_starts_total",
+            "format": {"kind": "integer", "suffix": " 個"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "收斂起點數",
+          "value": {
+            "source": "results",
+            "path": "/variants/adjclose/per_security/^TWII/multistart/n_converged",
+            "format": {"kind": "integer", "suffix": " 個"}
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "真正的不確定性",
+          "body": [
+            "計算能穩定落在同一個解，不代表結論對窗口端點穩定。報告時應揭露端點敏感度，而不是只秀最新一格。"
+          ]
+        }
+      ]
+    }
+  ]
+}

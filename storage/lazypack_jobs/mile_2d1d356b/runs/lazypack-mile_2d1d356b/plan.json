@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "title": "四巨頭的機房擴張，正在改寫資金來源",
+  "evidence": {
+    "analysis": {
+      "path": "storage/lazypack_jobs/mile_2d1d356b/evidence.json",
+      "sha256": "ffa05361dabd8e7a72b5e58aee7b7346ccbab8e6477c205853863fed61f73f8a",
+      "label": "AI capex and credit evidence snapshot"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_funding_shift",
+      "info": "concept",
+      "style": "professional",
+      "title": "支出跑得比現金流快，缺口改由負債承接",
+      "alt": "大型科技公司的資本支出增速與新增負債對照",
+      "sources": [
+        "analysis"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "單季資本支出年增",
+          "value": {
+            "source": "analysis",
+            "path": "/capex/growth_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "一年新增總負債",
+          "value": {
+            "source": "analysis",
+            "path": "/debt/added_bn_usd",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 十億美元"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀",
+          "body": [
+            "機房擴張仍在加速，但內部現金的增速沒有跟上；債權人因此站到了股東前面。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_cash_pressure",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "資本支出吃掉的營運現金，已逼近整體上限",
+      "alt": "資本支出占營運現金流的起點與終點比較",
+      "sources": [
+        "analysis"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "期初占比",
+          "value": {
+            "source": "analysis",
+            "path": "/capex/share_of_ocf_start",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "期末占比",
+          "value": {
+            "source": "analysis",
+            "path": "/capex/share_of_ocf_end",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "亞馬遜近四季占比",
+          "value": {
+            "source": "analysis",
+            "path": "/amazon/ttm_capex_over_ocf",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "壓力線",
+          "body": [
+            "占比跨過滿額後，股利、庫藏股與下一輪擴張就更依賴外部融資。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_market_gap",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "資產負債表先動了，信用價格還很平靜",
+      "alt": "公司債利差目前值與長期中位數的比較",
+      "sources": [
+        "analysis"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "公司債利差目前值",
+          "value": {
+            "source": "analysis",
+            "path": "/credit_market/baa_spread_latest_pct_points",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 個百分點"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "歷史中位數",
+          "value": {
+            "source": "analysis",
+            "path": "/credit_market/baa_spread_historical_median_pct_points",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 個百分點"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "投資人該盯什麼",
+          "body": [
+            "別只看營收成長。資本支出占營運現金流若繼續走高，再融資成本會愈來愈重要。"
+          ]
+        }
+      ]
+    }
+  ]
+}

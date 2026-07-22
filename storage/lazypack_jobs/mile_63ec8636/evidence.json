@@ -1,0 +1,25 @@
+{
+  "as_of": "2026-07-21",
+  "provenance": {
+    "source_document": "storage/drafts/trending_gold_hedge_general_draft.md",
+    "market_data": "yfinance daily closes for GC=F, CL=F, ^VIX, ^OVX, and ^GSPC",
+    "window": "2004-01-06 through 2026-07-21"
+  },
+  "event_study": {
+    "event_count": 8,
+    "gold_positive_event_day_count": 8,
+    "gold_day9_median_return": 0.0229,
+    "oil_day9_median_return": -0.0009,
+    "vix_positive_event_day_count": 7,
+    "vix_event_day_sign_p_value": 0.07
+  },
+  "cross_asset": {
+    "vix_sp500_daily_corr": -0.813,
+    "gold_sp500_daily_corr": 0.038,
+    "oil_sp500_daily_corr": 0.151
+  },
+  "divergence_test": {
+    "controlled_coefficient": -0.8,
+    "controlled_p_value": 0.276
+  }
+}
