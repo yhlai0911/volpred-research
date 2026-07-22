@@ -54625,7 +54625,7 @@
     "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `storage/drafts/k1253_general_draft.md` — no_title (namespace=drafts_intake, first_seen=2026-07-22T05:01:36.431665+00:00, shifts=6)\n- `storage/drafts/k1711_general_draft.md` — no_title (namespace=drafts_intake, first_seen=2026-07-22T05:01:36.431665+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "reap_orphan_deliverables_held_ttl",
     "created_at": "2026-07-22T10:01:10.248455+00:00",
     "payload": {
@@ -54642,7 +54642,30 @@
         "held_escalation"
       ]
     },
-    "created_by": "reap_orphan_deliverables"
+    "created_by": "reap_orphan_deliverables",
+    "status_history": [
+      {
+        "ts": "2026-07-22T11:02:01.173263+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-21efcecb5ac34fb3901fcf94892e3a14"
+      },
+      {
+        "ts": "2026-07-22T11:02:01.491845+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-21efcecb5ac34fb3901fcf94892e3a14"
+      },
+      {
+        "ts": "2026-07-22T11:05:20.124284+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-21efcecb5ac34fb3901fcf94892e3a14"
+      }
+    ],
+    "started_at": "2026-07-22T11:02:01.491826+00:00",
+    "completed_at": "2026-07-22T11:05:20.124263+00:00",
+    "result": "Resolved both no_title orphan holds: added canonical general/draft frontmatter and K references, corrected four publisher image paths to repo-relative exact paths, and verified both become adoptable with held=[] after the parent in-flight exemption ends. Publisher dry-run then exposed an editorial audience mismatch for both; routed that reader-facing decision to Claude-only follow-up assign_6e554fae (K1253 eligibility disposition, K1711 general rewrite/reclassification). Reaper regression suite: 16 passed."
   },
   {
     "id": "telegram-1318",
@@ -54720,5 +54743,67 @@
       "split_stage": "rev9_canonical_claim_surface"
     },
     "priority_capped_from": 1
+  },
+  {
+    "id": "platform_ops_release_audit_fix_mile_2d1d356b",
+    "title": "Fix release-pool audit blockers: AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債",
+    "description": "release_pool skipped draft `mile_2d1d356b` 3 times because the general-audience audit failed.\n\nTitle: AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_2d1d356b --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 2,
+    "status": "pending",
+    "source": "release_pool_audit_skip_materializer",
+    "tags": [
+      "release_pool",
+      "audit_skip",
+      "platform_ops"
+    ],
+    "created_at": "2026-07-22T11:00:57.650646+00:00",
+    "article_id": "mile_2d1d356b",
+    "release_audit_skipped_count": 3,
+    "release_audit_issues": [
+      "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_2d1d356b --plan <plan.json>"
+    ]
+  },
+  {
+    "id": "platform_ops_release_audit_fix_mile_63ec8636",
+    "title": "Fix release-pool audit blockers: 黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信",
+    "description": "release_pool skipped draft `mile_63ec8636` 3 times because the general-audience audit failed.\n\nTitle: 黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_63ec8636 --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 2,
+    "status": "pending",
+    "source": "release_pool_audit_skip_materializer",
+    "tags": [
+      "release_pool",
+      "audit_skip",
+      "platform_ops"
+    ],
+    "created_at": "2026-07-22T11:00:57.650646+00:00",
+    "article_id": "mile_63ec8636",
+    "release_audit_skipped_count": 3,
+    "release_audit_issues": [
+      "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_63ec8636 --plan <plan.json>"
+    ]
+  },
+  {
+    "id": "assign_6e554fae",
+    "title": "兩份 general drafts 的 audience gate 編輯裁決（K1253 / K1711）",
+    "description": "來源：orphan escalation assign_0c7a209c。兩份檔案已補 canonical YAML frontmatter、K-id 與 repo-relative 圖片路徑，因此不再是 no_title / broken-image orphan；但正式 publisher dry-run 對兩份都拒絕：draft declares audience=general but publisher would infer research。\n\n這是讀者向編輯工作，留給 Claude 主線：\n1. storage/drafts/k1253_general_draft.md：先依 canonical knowledge eligibility 重新裁決是否可發表。既有 K1253 任務紀錄明示 needs_human=True、環境 smoke test、非研究發現，禁止只為過 gate 就淡化 provenance；若不可發表，建立明確 exclusion/archive 出口，不得讓 reaper 反覆 intake。\n2. storage/drafts/k1711_general_draft.md：依 general-reader 規則重寫或明確改分 research，忠實保留 retrospective pseudo-OOS 與「MCS 未拒絕不等於贏」限制。\n3. 各自重跑：uv run python scripts/publish_draft.py <draft> --dry-run --lazypack-plan storage/lazypack_plans/<kid>_general_plan.json。只有 gate 全過才可走正式 publish。\n\nCodex failover 已驗證：reaper 模擬（排除 parent in-flight）兩檔皆 adoptable、held=[]；tests/test_reap_draft_artifacts.py 16 passed。不要回退已修正的 repo-relative 圖片路徑。",
+    "task_type": "daily_article",
+    "priority": 3,
+    "status": "pending",
+    "source": "codex_failover_followup",
+    "created_at": "2026-07-22T11:05:08.719109+00:00",
+    "payload": {
+      "drafts": [
+        "storage/drafts/k1253_general_draft.md",
+        "storage/drafts/k1711_general_draft.md"
+      ],
+      "gate": "audience_mismatch",
+      "codex_skip": true
+    },
+    "parent_task_id": "assign_0c7a209c",
+    "created_by": "codex-failover-slot-1-21efcecb5ac34fb3901fcf94892e3a14"
   }
 ]
