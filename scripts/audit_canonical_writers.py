@@ -98,6 +98,9 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "scripts/mark_fb_post_status.py:_write_json": {"write_text": 1},
     "scripts/merge_feed_files.py:<module>": {"open-write": 2},
     "scripts/migrate_fb_post_status_single_source.py:main": {"write_text": 1},
+    "scripts/reap_orphan_deliverables.py:_close_resolved_escalations": {
+        "open-write": 1,
+    },
     # scripts/publish_draft.py:apply_update was a canonical feed writer until
     # WS-C1 (2026-07-20): --update now routes through
     # Publisher.rewrite_and_sync_article, so the script owns no feed mutation.
@@ -114,6 +117,9 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     },
     "src/volpred/ops/alert_remediation.py:_enqueue": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
+    },
+    "src/volpred/ops/alert_remediation.py:_close_cleared_task": {
+        "open-write": 1,
     },
     "src/volpred/ops/alert_remediation.py:_sweep_cleared_ordinary_tasks": {
         "open-write": 1,
@@ -142,6 +148,7 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     },
     "src/volpred/ops/event_jobs.py:gc_event_ledger": {"unlink": 1},
     "src/volpred/ops/feed_sync.py:reconcile_content_from_singles": {"write_text": 1},
+    "src/volpred/ops/foreign_incident.py:reconcile_incidents": {"open-write": 1},
     "src/volpred/ops/local_control_plane.py:_atomic_write_json": {
         "mkdir": 1, "replace": 1, "write_text": 1,
     },

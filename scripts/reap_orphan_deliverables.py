@@ -73,6 +73,7 @@ from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.git_writer_lock import (  # noqa: E402
     GitWriterLockError,
@@ -1070,6 +1071,7 @@ def _close_resolved_escalations(previous: dict, current: dict) -> list[str]:
 
     from volpred.ops.next_tasks import write_tasks_to_handle
 
+    guard_canonical_write(TASKS_PATH)
     closed: list[str] = []
     with TASKS_PATH.open("r+", encoding="utf-8") as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)

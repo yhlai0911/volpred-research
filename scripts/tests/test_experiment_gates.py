@@ -372,9 +372,15 @@ def test_a_reviewer_is_not_charged_for_the_experiment_it_reviewed(tmp_path: Path
     review to be "completed" would have been to find nothing.
     """
     root = _portable_checkout(tmp_path)
-    _plant(root, "k1729", K1709_V1)
-    artifact = root / "experiments" / "k1729" / eg.CERT_FILENAME
-    artifact.write_text(json.dumps({"kid": "k1729", "verdict": "FAIL"}), encoding="utf-8")
+    # Do not reuse the real k1729 path: its non-nested comparison was later
+    # adjudicated and frozen in the baseline, which would legitimately suppress
+    # this planted violation and turn the regression fixture into a false green.
+    fixture_kid = "fixture_review_job"
+    _plant(root, fixture_kid, K1709_V1)
+    artifact = root / "experiments" / fixture_kid / eg.CERT_FILENAME
+    artifact.write_text(
+        json.dumps({"kid": fixture_kid, "verdict": "FAIL"}), encoding="utf-8"
+    )
     job = _agent_job(root, artifact)
 
     assert cq._experiment_gate_failure(job, artifact) is None, (
