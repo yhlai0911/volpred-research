@@ -726,3 +726,41 @@ T±n 漂移數字屬 Parts C/D，**沒有重跑**。這些數字留在文中但�
 **未完**：`scripts/unblock_expired_blocked_tasks.py` 目前只比對日期。對
 `reason=codex_quota_reset_pending` 這類「可實測」的 block reason，應加一條**主動探測**路徑：
 探測成功即解封，不必等到日期。沒有這條，同樣的凍結會再發生一次。
+
+### 2026-07-22 10:xx — K1623：同一份稿子連過 5 位審查者，每一位都放行了下一位才抓到的 blocking defect
+
+`assign_5aa9d5f5`（K1623 修復單）的第 6 項要求把「reviewer 可靠度」記進 error_log。當時只有
+兩個資料點；到今天已累積五輪，形狀比原本那條觀察更清楚，所以在收單時一次寫完。
+
+| 輪次 | 審查者 | 路徑 | 判定 | 下一輪在同一份稿子上找到什麼 |
+|---|---|---|---|---|
+| 1 | codex gpt-5.5 | primary | **no CRITICAL/HIGH** | ↓ |
+| 1' | codex gpt-5.6-sol（獨立二審） | primary | **FAIL**（7 項） | 識別宣稱不成立、DM 只跑 QLIKE 而 MSE 方向相反且未揭露、20 個比較無多重比較修正、ELW 方法描述與 code 不符…… |
+| 2 | codex | primary | **FAIL** | claim-alignment 仍未對齊 → rev3 |
+| 3a | agy | **fallback** | **PASS** | ↓ |
+| 3b | `feature-dev:code-reviewer` | **fallback** | **CONDITIONAL PASS** | ↓ |
+| 3c | codex 0.144.6 / gpt-5.x `-s read-only` | **primary** | **FAIL**（3 項） | arm A 重跑 BIC 同時選斷點**個數與位置**，故 A−B/`f3` 混合了 break-count selection 與 break-location estimation，並未隔離它宣稱的通道（`k1623_rev3_armc_mc.py:170`）；500 reps 下 2/2/1 dominant-channel attribution 不可識別（SPY gap 0.31% vs MC SE ≈3.2%）；README §1 line 77 與 Arm C／§6.4 直接自相矛盾 |
+
+**兩條不同的教訓，別混為一談。**
+
+其一（已知，K1259）：**fallback PASS ≠ primary-path PASS**。3a/3b 兩位 fallback 審查者都放行，
+primary path 一跑就是 3 個 blocking defect，其中第一個是 **arm 設計本身的口徑錯誤**，不是措辭問題。
+這正是把 primary path 訂為放行前置條件的理由，round-3 這一輪證明它不是形式主義。
+
+其二（新）：**同路徑、同等級的審查者之間，變異也一樣大**。輪次 1 與 1' 都是 primary path 的
+codex，一個說「no CRITICAL/HIGH」，另一個判 FAIL 並列出 7 項——其中「DM 只跑了 QLIKE、MSE
+方向相反」這種缺陷，是把 README 的宣稱對著 artifact 讀一遍就會撞見的，不需要任何領域直覺。
+所以差異不能全歸因於模型強弱；**一次 PASS 只是「這一位這一次沒看到」的證據，不是「沒有問題」的證據**。
+
+**可操作的推論**：單一 PASS 不足以放行，這在 K1259 之後已經是規則；但本案再加一條——
+**連續多輪 PASS 也不等於收斂**，只要每一輪找到的缺陷層級沒有下降。K1623 五輪的缺陷層級是
+宣稱層（rev1）→ 宣稱層（rev2）→ **設計層**（rev3），**不降反升**：越審越深，代表前幾輪的
+PASS 根本沒觸及那一層。放行條件應該看**缺陷層級是否收斂到瑣碎**，不是看**連過幾次**。
+
+**現況**：rev2 已把 `assign_5aa9d5f5` 要求的撤回／補做全部落在 branch
+`worktree-dispatch-slot-2-c5cafe39-k1623`（README §0 撤回總表 8 條、MSE 的 DM 補齊、
+BH FDR + Bonferroni、ELW／FD_MAXK／VIX cap binding／BreakRobustHAR 描述更正）。
+merge 仍由 round-3 的 3 項 blocking defect 封鎖，出口是
+`k1623_rev4_remediation_after_codex_round3_fail`。**main 的 `experiments/k1623/README.md`
+目前仍是未修復的第一輪版本**（仍寫著「純假象假說被拒絕」「不可交易」「多處顯著更差」），
+在 rev4 合併前不可引用。

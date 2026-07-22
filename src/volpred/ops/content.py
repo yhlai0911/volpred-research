@@ -500,11 +500,18 @@ class MemberQaDuplicatePublishError(ValueError):
 
 class MemberQaPublishGateIndeterminate(ValueError):
     """Raised when the gate cannot establish whether a prior published answer
-    exists (e.g. the local feed is unreadable).
+    exists — either because the local feed is unreadable, or because the
+    article carries no `details['question_id']` to check against.
 
     Fail-closed, but LOUD and distinguishable: 'we could not check' must never
     be silently rendered as 'clear'. Callers/operators see a different error
     class than a real duplicate so they can retry rather than assume a dup.
+
+    A missing question_id deliberately shares this class rather than getting
+    its own: the *semantics* are identical ("the gate cannot judge"), and a
+    missing binding key is emphatically NOT a duplicate. Splitting it into a
+    third type would give callers two error classes to catch for one meaning,
+    which is exactly the stacking this gate was consolidated to remove.
     """
 
 
@@ -636,6 +643,56 @@ def _normalize_supersedes(value) -> list[str]:
     return [p for p in parts if p]
 
 
+# --- the "cannot be bound" escape hatch ------------------------------------
+# A handful of historical articles are tagged member_qa but answer no member
+# question at all (mile_e4002f4f: commissioned as task K1466_article_general,
+# byline "[提出：Claude，執行：Claude]", no matching row in `questions`).
+# Fabricating a question_id for those would forge a member binding, so they get
+# a waiver instead — but a waiver that is EXPENSIVE to produce.
+#
+# Deliberately NOT a CLI flag and NOT a magic string: it is a three-field JSON
+# object that must be hand-written into --details-json, and the reason must be
+# a real written adjudication. Residual 3 was opened precisely because this gate
+# used to hand out its own bypass key; a `--skip-question-id` flag would be that
+# mistake again in a new costume. Naming what you concluded, and signing it, is
+# the whole mechanism.
+_WAIVER_MIN_REASON_CHARS = 40
+_WAIVER_REQUIRED_FIELDS = ("reason", "adjudicated_by", "adjudicated_at")
+
+
+def _validate_question_id_waiver(waiver: object) -> tuple[dict | None, str | None]:
+    """Return (normalized_waiver, error). Exactly one is non-None."""
+    if not isinstance(waiver, dict):
+        return None, (
+            f"details['question_id_waiver'] must be a JSON object with "
+            f"{list(_WAIVER_REQUIRED_FIELDS)}, got {type(waiver).__name__}"
+        )
+    out: dict[str, str] = {}
+    for field in _WAIVER_REQUIRED_FIELDS:
+        value = waiver.get(field)
+        if not isinstance(value, str) or not value.strip():
+            return None, (
+                f"details['question_id_waiver']['{field}'] is missing or empty — "
+                "a waiver without all three fields does not clear the gate"
+            )
+        out[field] = value.strip()
+    if len(out["reason"]) < _WAIVER_MIN_REASON_CHARS:
+        return None, (
+            f"details['question_id_waiver']['reason'] is {len(out['reason'])} chars; "
+            f"at least {_WAIVER_MIN_REASON_CHARS} are required. State WHY this article "
+            "provably answers no member question (what you searched, what you found) — "
+            "a placeholder is not an adjudication"
+        )
+    try:
+        datetime.fromisoformat(out["adjudicated_at"].replace("Z", "+00:00"))
+    except ValueError:
+        return None, (
+            "details['question_id_waiver']['adjudicated_at'] must be an ISO-8601 "
+            f"timestamp, got {out['adjudicated_at']!r}"
+        )
+    return out, None
+
+
 def assert_member_qa_publish_allowed(
     question_id: str | None,
     *,
@@ -644,29 +701,67 @@ def assert_member_qa_publish_allowed(
     title: str = "",
     storage_dir: str = "storage",
     exclude_article_id: str | None = None,
+    waiver: object = None,
 ) -> dict:
     """Raise unless this member_qa article may become a reader-visible answer.
 
     Blocks when the question already has ≥1 published/scheduled answer, unless
     `supersedes` explicitly names ALL of them (the deliberate-sequel channel).
     """
+    # Normalize BEFORE the emptiness test: a whitespace-only question_id is
+    # truthy, and would otherwise be accepted as a binding and then matched
+    # against nothing — i.e. a blank string would read as "clear".
+    question_id = str(question_id).strip() if question_id is not None else ""
     if not question_id:
-        # No binding key → the gate cannot judge. Loud, stamped, and allowed:
-        # blocking every legacy/unbound member_qa publish would stall the line
-        # for a condition the gate itself cannot resolve. Recorded so an
-        # unbound publish is auditable rather than invisible.
+        # No binding key → the gate CANNOT judge, so it must not clear.
+        # This branch used to warn and let the publish through ("unjudged"),
+        # which meant the one gate standing on the reader-visible artifact was
+        # a no-op for any article that simply omitted the key — the cheapest
+        # possible bypass. Now fail-closed. The pre-condition for flipping it
+        # was backfilling the two historical unbound articles (mile_530a28bc
+        # bound to df669347…, mile_e4002f4f waived as not-a-member-question);
+        # both are done, so no existing article is stalled by this.
+        checked, waiver_error = _validate_question_id_waiver(waiver) if waiver is not None else (None, None)
+        if checked is not None:
+            print(
+                "  ↪️ member_qa publish allowed WITHOUT a question_id under an explicit "
+                f"waiver by {checked['adjudicated_by']} ({checked['adjudicated_at']}): "
+                f"{checked['reason'][:120]}"
+            )
+            return {
+                "blocked": False,
+                "verdict": "unbound_waived",
+                "articles": [],
+                "waiver": checked,
+            }
+
         from .diagnostics import warn
 
         warn(
             "member_qa_publish_gate",
-            "member_qa publish carries no details.question_id — duplicate gate UNJUDGED",
+            "member_qa publish blocked: no details.question_id and no valid waiver",
             title=str(title)[:80],
+            waiver_error=waiver_error,
         )
-        print(
-            "  ⚠️ member_qa publish has no details['question_id'] — duplicate gate "
-            "could not judge this article. Set it so the publish-time gate can protect readers."
+        detail = f"\nThe waiver you supplied was rejected: {waiver_error}" if waiver_error else ""
+        raise MemberQaPublishGateIndeterminate(
+            "member_qa_publish_gate_indeterminate: this member_qa article carries no "
+            "details['question_id'], so the gate cannot check whether the member's "
+            "question already has a published answer. 'Cannot check' is not a clearance.\n"
+            "Fix it one of two ways:\n"
+            "  (1) BIND IT (do this unless it is provably impossible) — pass the question's "
+            "uuid from the Supabase `questions` table:\n"
+            "        volpred ops publish-milestone --question-id <uuid> ...\n"
+            "      or equivalently --details-json '{\"question_id\": \"<uuid>\"}'.\n"
+            "  (2) WAIVE IT (only when the article provably answers no member question, "
+            "e.g. a general/research piece mislabelled member_qa) — hand-write an "
+            "adjudication into --details-json; there is no CLI flag for this on purpose:\n"
+            "        --details-json '{\"question_id_waiver\": {\"reason\": \"<why no member "
+            "question exists: what you searched and what you found>\", \"adjudicated_by\": "
+            "\"<who>\", \"adjudicated_at\": \"<ISO-8601>\"}}'\n"
+            f"      All three fields are required and reason must be >= {_WAIVER_MIN_REASON_CHARS} chars."
+            f"{detail}"
         )
-        return {"blocked": False, "verdict": "unjudged_no_question_id", "articles": []}
 
     found = find_published_member_qa_articles(
         question_id,
@@ -716,6 +811,66 @@ def assert_member_qa_publish_allowed(
         "If this is a deliberate follow-up, re-run with "
         f"details['supersedes']={prior_ids!r} (CLI: --supersedes "
         f"{','.join(prior_ids)}); otherwise do not publish."
+    )
+
+
+_MEMBER_QA_GATE_EXEMPT_STATUSES = {"unpublished", "retracted"}
+
+
+def member_qa_publish_gate_applies(item: dict) -> bool:
+    """Does the G1 member_qa publish gate apply to this article?
+
+    2026-07-22 (residual 5, anti-stacking): this predicate used to live INLINE
+    inside `Publisher.publish_milestone`, so the release-pool status-rewrite
+    path (`_atomic_promote_release_item`) — the other way an article becomes
+    reader-visible — had no G1 at all. member_qa does not currently route
+    through release_pool, so it was not a live hole, but "the gate only exists
+    on one of the two publish paths" is precisely how STRIKE 2 happened. One
+    predicate + one adjudicator (`assert_member_qa_publish_allowed`), both
+    publish paths.
+
+    `unpublished` / `retracted` are exempt: those transitions REMOVE an article
+    from readers, and a gate that blocks retraction would be a gate that keeps
+    duplicates live.
+    """
+    if not isinstance(item, dict):
+        return False
+    if str(item.get("status") or "") in _MEMBER_QA_GATE_EXEMPT_STATUSES:
+        return False
+    details = item.get("details") if isinstance(item.get("details"), dict) else {}
+    return (
+        str(item.get("audience") or "").strip() == "member_qa"
+        or str(item.get("category") or "").strip() == "member_qa"
+        or str(details.get("content_type") or "").strip() == "member_qa"
+        or str(item.get("phase") or "").startswith("member_qa")
+    )
+
+
+def assert_member_qa_publish_allowed_for_item(
+    item: dict,
+    *,
+    feed: list[dict] | None = None,
+    storage_dir: str = "storage",
+) -> dict | None:
+    """Run G1 on a whole feed item; None when the gate does not apply.
+
+    A thin field extractor over `assert_member_qa_publish_allowed` — the
+    judgement itself is NOT reimplemented here. `exclude_article_id` is
+    mandatory on this path: a `scheduled` member_qa article being promoted is
+    already in the feed with a gate-visible status, so without the exclusion it
+    would be blocked as its own duplicate.
+    """
+    if not member_qa_publish_gate_applies(item):
+        return None
+    details = item.get("details") if isinstance(item.get("details"), dict) else {}
+    return assert_member_qa_publish_allowed(
+        details.get("question_id") or item.get("question_id"),
+        feed=feed,
+        supersedes=details.get("supersedes"),
+        title=str(item.get("title") or ""),
+        storage_dir=storage_dir,
+        exclude_article_id=str(item.get("id") or "") or None,
+        waiver=details.get("question_id_waiver"),
     )
 
 
@@ -1629,6 +1784,29 @@ def _atomic_promote_release_item(
         prospective = {**current, **item}
         prospective["status"] = "published"
         prospective["published_at"] = released_at
+
+        # G1 on the release path (2026-07-22, residual 5). This function is the
+        # ONLY place release_pool rewrites status to 'published', so hooking the
+        # gate here covers every release route (pool, explicit pub_id, drought
+        # override) with one call. Same judgement function as
+        # Publisher.publish_milestone — no second copy of the rule.
+        # A block is NOT raised: aborting here would kill the whole release run
+        # over one bad article. It is returned as a conflict outcome, which the
+        # caller already logs and skips, leaving the article as a draft.
+        try:
+            assert_member_qa_publish_allowed_for_item(
+                prospective, feed=fresh_feed, storage_dir=storage_dir
+            )
+        except (
+            MemberQaDuplicatePublishError,
+            MemberQaPublishGateIndeterminate,
+        ) as exc:
+            return {
+                "outcome": "member_qa_publish_blocked",
+                "id": item_id,
+                "reason": f"{type(exc).__name__}: {str(exc).splitlines()[0]}",
+            }
+
         throttle_block = _release_publish_throttle(
             prospective,
             fresh_feed,

@@ -229,8 +229,17 @@ def _open_incident_signal(tasks_path: Path) -> dict | None:
     Read-only, and `open_incidents` never raises: a queue this cannot parse must
     not take dispatch down. Oldest-first so the reason string names the incident
     that has been costing capacity longest, not whichever one sorted last.
+
+    An incident whose remaining paths are all *live authoring* is skipped: the
+    files are covered and somebody is still editing them, which is not the
+    "nobody is coming back for these" condition the de-rate exists to price. That
+    verdict is computed by `foreign_incident.reconcile_incidents` each fire and
+    stamped into the payload — this stays read-only and runs no git. Missing flag
+    means never reconciled, and the fail-safe there is to de-rate (an unknown
+    stuck set is exactly what the mechanism is for).
     """
-    incidents = open_incidents(tasks_path)
+    incidents = [t for t in open_incidents(tasks_path)
+                 if (t.get("payload") or {}).get("derates", True)]
     if not incidents:
         return None
     incidents.sort(key=lambda t: str(t.get("created_at") or ""))

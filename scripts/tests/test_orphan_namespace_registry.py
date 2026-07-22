@@ -259,6 +259,61 @@ def test_b_escalated_path_stops_re_alerting_and_is_not_re_escalated(env):
     assert len(_tasks(root)) == 1
 
 
+def test_b_a_task_closes_when_the_held_condition_that_spawned_it_disappears(env):
+    """反向對帳。`state` 每輪從當前 scan 重建，所以路徑不再 held 時記錄就消失了 ——
+    連同那個 task_id。沒有這一步就沒有任何人去關那張單，於是**任務活得比它的成因
+    更久**：experiments/k1380 早已不在 state，單子卻還躺在 pending。"""
+    mod, root = env
+    _install_registry(mod, root, {
+        "held_escalation_shifts": 1,
+        "namespaces": [{"id": "widgets", "path": "storage/widgets"}],
+    })
+    held = [{"path": "storage/widgets/mystery.tmp", "reason": "excluded_suffix:.tmp",
+             "namespace": "widgets"}]
+    assert len(mod.track_held(held)["escalations"]) == 1
+    task_id = _tasks(root)[0]["id"]
+
+    out = mod.track_held([])  # 路徑找到出口，不再 held
+
+    assert out["resolved_tasks"] == [task_id]
+    closed = _tasks(root)[0]
+    assert closed["status"] == "succeeded"
+    assert "不再被 reaper held" in closed["result"]
+
+
+def test_b_a_task_stays_open_while_any_of_its_paths_is_still_held(env):
+    """部分解決不是解決。一張單點名 N 個路徑，剩一個卡著就還沒完 —— 否則「大部分
+    處理完了」會變成關單理由，那正是這個 class 反覆栽的地方。"""
+    mod, root = env
+    _install_registry(mod, root, {
+        "held_escalation_shifts": 1,
+        "namespaces": [{"id": "widgets", "path": "storage/widgets"}],
+    })
+    both = [{"path": "storage/widgets/a.tmp", "reason": "r", "namespace": "widgets"},
+            {"path": "storage/widgets/b.tmp", "reason": "r", "namespace": "widgets"}]
+    assert len(mod.track_held(both)["escalations"]) == 1
+
+    out = mod.track_held(both[:1])  # b 有出口了，a 還卡著
+
+    assert out["resolved_tasks"] == []
+    assert _tasks(root)[0]["status"] == "pending"
+
+
+def test_b_a_single_path_escalation_names_it_in_the_title(env):
+    """只編碼份數的標題，讓每個單路徑逃逸都渲染成同一串字：7/19、7/20、7/20 三張
+    不同 held key 在池子裡長得一模一樣，看起來像同一張單開了三次。分不出來的標題
+    讓真重複與假重複都看不見。"""
+    mod, root = env
+    _install_registry(mod, root, {
+        "held_escalation_shifts": 1,
+        "namespaces": [{"id": "widgets", "path": "storage/widgets"}],
+    })
+    mod.track_held([{"path": "storage/widgets/mystery.tmp", "reason": "r",
+                     "namespace": "widgets"}])
+
+    assert "storage/widgets/mystery.tmp" in _tasks(root)[0]["title"]
+
+
 def test_b_dry_run_never_writes_state_or_tasks(env):
     """掃描是純讀。dry-run 不得開任務、不得推進班次計數。"""
     mod, root = env

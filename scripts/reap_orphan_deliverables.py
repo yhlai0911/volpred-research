@@ -1041,6 +1041,70 @@ def _write_json_atomic(path: Path, payload) -> None:
     tmp.replace(path)
 
 
+def _escalation_title(paths: list[str]) -> str:
+    """點名的標題：一份就寫出它是誰，多份才退回計數（並仍點名第一個）。"""
+    if len(paths) == 1:
+        return f"解決長期無主的產物 `{paths[0]}`（reaper held 超過 TTL）"
+    return (f"解決 {len(paths)} 份長期無主的產物："
+            f"`{paths[0]}` 等（reaper held 超過 TTL）")
+
+
+def _close_resolved_escalations(previous: dict, current: dict) -> list[str]:
+    """關掉「當初升級的 held key 已經不再 held」的那些任務。
+
+    這是缺掉的反向對帳。``state`` 每一輪都從當前 scan 重建，所以一個 key 不再 held
+    時，它的記錄就消失了 —— 連同那個 ``task_id``。任務本身沒有任何人去關，於是
+    **任務活得比它的成因更久**：``experiments/k1380`` 和其中一個 job key 早已不在
+    state 裡，兩張單卻還躺在 pending。任務描述裡寫的「判定完成後這張任務關閉，held
+    記錄會自然消失」把因果講反了 —— 記錄消失是自動的，關單不是。
+
+    只關「所有 held_paths 都不再 held」的單：還有任一路徑卡著，事情就沒完。
+    """
+    stale_tasks: dict[str, set[str]] = {}
+    for key, rec in previous.items():
+        task_id = isinstance(rec, dict) and rec.get("task_id")
+        if task_id and key not in current:
+            stale_tasks.setdefault(str(task_id), set()).add(key)
+    if not stale_tasks:
+        return []
+
+    from volpred.ops.next_tasks import write_tasks_to_handle
+
+    closed: list[str] = []
+    with TASKS_PATH.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            handle.seek(0)
+            raw = handle.read().strip()
+            tasks = json.loads(raw) if raw else []
+            if not isinstance(tasks, list):
+                return []
+            for task in tasks:
+                if not isinstance(task, dict):
+                    continue
+                tid = str(task.get("id") or "")
+                if tid not in stale_tasks:
+                    continue
+                if str(task.get("status") or "").lower() not in ("pending", "blocked"):
+                    continue
+                held = set((task.get("payload") or {}).get("held_paths") or [])
+                # 還有路徑卡著就留著 —— 部分解決不是解決。
+                if held - stale_tasks[tid]:
+                    continue
+                task["status"] = "succeeded"
+                task["completed_at"] = _now().isoformat()
+                task["result"] = (
+                    "held 條件已自行消失：當初升級的路徑都不再被 reaper held"
+                    f"（{', '.join(sorted(stale_tasks[tid]))}）。"
+                )
+                closed.append(tid)
+            if closed:
+                write_tasks_to_handle(handle, tasks)
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    return closed
+
+
 def _escalate_held(records: dict[str, dict]) -> dict:
     """Queue one task that names every path held past the TTL.
 
@@ -1058,7 +1122,11 @@ def _escalate_held(records: dict[str, dict]) -> dict:
              f"shifts={records[key].get('shifts')})"
              for key in paths]
     return append_next_task(
-        title=f"解決 {len(paths)} 份長期無主的產物（reaper held 超過 TTL）",
+        # 標題必須點名**是哪一份**。只編碼份數的話，每個單路徑逃逸都渲染成同一串字，
+        # 於是 7/19、7/20、7/20 三張不同 held key（experiments/k1380、兩個 job:…）
+        # 在任務池裡長得一模一樣 —— 老闆看到的是「同一張單開了三次」，而實際上是三件
+        # 不同的事，沒有任何 dedup 失效。分不出來的標題，讓真重複與假重複都看不見。
+        title=_escalation_title(paths),
         description=(
             "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是"
             "永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須"
@@ -1067,7 +1135,8 @@ def _escalate_held(records: dict[str, dict]) -> dict:
             + "\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定"
               "（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何"
               "這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與"
-              "其下游丟棄產物。判定完成後這張任務關閉，held 記錄會自然消失。"
+              "其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪"
+              "sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。"
         ),
         source="reap_orphan_deliverables_held_ttl",
         task_family="ops",
@@ -1110,6 +1179,10 @@ def track_held(held_entries: list[dict], *, shifts_to_escalate: int | None = Non
         record["namespace"] = entry.get("namespace")
         state[key] = record
 
+    # 反向對帳先於升級：一張成因已消失的單還開著，會讓下一次判斷「這件事有人管了嗎」
+    # 讀到錯的答案。
+    resolved = _close_resolved_escalations(previous, state) if persist else []
+
     pending = {key: rec for key, rec in state.items()
                if rec["shifts"] >= shifts_to_escalate and not rec.get("task_id")}
     escalations: list[dict] = []
@@ -1129,7 +1202,8 @@ def track_held(held_entries: list[dict], *, shifts_to_escalate: int | None = Non
             "shifts_to_escalate": shifts_to_escalate,
             "entries": state,
         })
-    return {"state": state, "escalations": escalations, "suppressed": suppressed}
+    return {"state": state, "escalations": escalations, "suppressed": suppressed,
+            "resolved_tasks": resolved}
 
 
 def scan(*, now_ts: float | None = None) -> dict:

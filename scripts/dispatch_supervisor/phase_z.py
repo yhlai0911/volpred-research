@@ -69,6 +69,7 @@ from pathlib import Path
 
 from volpred.ops.foreign_incident import (
     QUARANTINE_REF_PREFIX,
+    reconcile_incidents,
     upsert_incident,
 )
 from volpred.ops.machine_churn import classify_machine_churn
@@ -1312,6 +1313,29 @@ def _quarantine_stuck_foreign(
 
 # ── persistent incident (decision doc §4 D3) ─────────────────────────────────
 
+def _reconcile_open_incidents(repo_root: Path, tasks_path: Path) -> dict:
+    """重跑每張未關 incident 的判準：收乾淨的關掉，其餘更新降載旗標。Never fails a fire.
+
+    降載必須能自己解除。靠人來關，等於把 forcing function 的解除端交給正是「沒有人
+    會回來收」的那個人 —— 而這個 class 的全部教訓就是別再依賴那個人。
+    """
+    empty = {"closed": [], "deferred": []}
+    if not tasks_path.exists():
+        return empty
+    try:
+        outcome = reconcile_incidents(repo_root, tasks_path=tasks_path)
+    except Exception as exc:  # noqa: BLE001 — 收單失敗不值得讓一班 fire 掛掉
+        LOG.warning("phase_z: incident reconcile failed (%s) — 降載維持，下一班再試", exc)
+        return empty
+    for entry in outcome["closed"]:
+        LOG.info("phase_z: incident %s closed — 關閉條件全綠（%d 個路徑），降載解除",
+                 entry["task_id"], len(entry["verdict"]["checked"]))
+    for entry in outcome["deferred"]:
+        LOG.info("phase_z: incident %s 降載暫緩 — 剩餘 %d 個路徑都是活躍碼（作者仍在編輯）",
+                 entry["task_id"], len(entry["verdict"]["deferred"]))
+    return outcome
+
+
 def _open_stuck_incident(
     repo_root: Path,
     stuck: list[str],
@@ -1328,10 +1352,15 @@ def _open_stuck_incident(
     the case where the caller falls back to the legacy backed-off CRITICAL rather
     than going quiet.
     """
+    tasks_path = repo_root / "storage" / "next_tasks.json"
+    # 解除端跟建立端在同一個地方跑，而且**先跑**：一張關閉條件已滿足的 incident
+    # 若沒人關，降載就會活得比它要治的問題更久（2026-07-21：close condition 全綠、
+    # slot cap 仍是 DERATE_CAP，因為 incident_closeable 根本沒有 caller）。
+    # 放在 `if not stuck` 之前，是因為「這班沒有卡住的檔案」正是最該收單的一班。
+    _reconcile_open_incidents(repo_root, tasks_path)
     if not stuck:
         return {"fingerprint": None, "task_id": None, "created": False,
                 "updated": False, "reason": "no_stuck_paths"}
-    tasks_path = repo_root / "storage" / "next_tasks.json"
     if not tasks_path.exists():
         # A checkout with no task pool has no scheduler to de-rate, so there is
         # nothing for an incident to control. PHASE-Z does not conjure the
@@ -2576,6 +2605,27 @@ def _default_gate_review(*, repo_root: Path, gate_paths: list[str], hhmm: str) -
     return {"task_id": task_id, "created": created}
 
 
+def _observe_ownership_shadow(repo_root: Path, *, dirty_now: set[str], baseline: set[str] | None) -> None:
+    """Log what a DECLARED-ownership ledger would have said. Decides nothing.
+
+    Stage 1 of docs/refactor_commit_ownership_state_machine.md. `owned = dirty_now
+    - baseline` is an inference about a shared checkout, and every incident in
+    error_log §B is that inference being wrong in one of three ways. The
+    replacement is a write-time declaration (`volpred.ops.fire_manifest`), and
+    this call measures the gap between the two answers on live fires *before*
+    anything commits on the new one — a shadow, not a switch.
+
+    Totally guarded on purpose: the commit path below must be bit-identical
+    whether this succeeds, fails, or the module is missing entirely.
+    """
+    try:
+        from volpred.ops import fire_manifest
+
+        fire_manifest.observe_shadow(repo_root, dirty_now=dirty_now, baseline=baseline)
+    except Exception as exc:  # noqa: BLE001 — a shadow may never touch a decision
+        LOG.debug("phase_z: ownership shadow skipped (%s)", exc)
+
+
 def run_phase_z(
     *,
     repo_root: Path,
@@ -2682,6 +2732,7 @@ def run_phase_z(
 
     baseline_observed_at = datetime.now(timezone.utc)
     baseline = set(pre_fire_dirty) if pre_fire_dirty is not None else _read_pre_fire_snapshot(repo_root, runner)
+    _observe_ownership_shadow(repo_root, dirty_now=dirty_now, baseline=baseline)
     if baseline is None:
         # Ownership unknown. The old code committed anyway (`git add -A`), which
         # is how it swept an interactive session's half-finished edits into an

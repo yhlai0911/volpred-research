@@ -22,6 +22,7 @@ this could be implemented so it looks right in a log and still changes nothing:
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -94,6 +95,17 @@ def _write(root: Path, rel: str, text: str) -> None:
     dest = root / rel
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(text, encoding="utf-8")
+
+
+def _stale(root: Path, rel: str, age_s: float | None = None) -> None:
+    """Age a path past the live-authoring grace window.
+
+    Touches mtime only — content and git status are untouched, because the thing
+    being simulated is *nobody coming back to it*, not a different edit.
+    """
+    age_s = fi.LIVE_AUTHORING_GRACE_S * 2 if age_s is None else age_s
+    target = (root / rel).stat().st_mtime - age_s
+    os.utime(root / rel, (target, target))
 
 
 def _incidents(repo: Path) -> list[dict]:
@@ -275,16 +287,94 @@ def test_blocking_an_incident_does_not_lift_the_de_rate(tmp_path: Path, status: 
 
 def test_a_still_dirty_path_cannot_close_the_incident_even_though_it_is_quarantined(repo: Path):
     """This is exactly the 78-fire state: the bytes were preserved and NOTHING was
-    cleaned up. Preserved-but-not-tidied must not read as resolved."""
+    cleaned up. Preserved-but-not-tidied must not read as resolved.
+
+    The file is aged past the grace window on purpose — 78 fires is 78 hours of
+    nobody touching it, which is the thing that makes it an unowned leftover. The
+    fixture used to write it a millisecond earlier and still assert this, which
+    quietly conflated 'dirty' with 'abandoned'; those are different conditions and
+    `_stale` is where the difference now lives."""
     _write(repo, THEIRS, "stuck\n")
     _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL)
+    _stale(repo, THEIRS)
 
     verdict = fi.incident_closeable(repo, [THEIRS])
 
     assert verdict["paths"][THEIRS]["quarantined"] is True
     assert verdict["paths"][THEIRS]["still_dirty_in_main"] is True
+    assert verdict["paths"][THEIRS]["live_authoring"] is False
     assert verdict["closeable"] is False
     assert any("仍髒在 main checkout" in b for b in verdict["blockers"])
+
+
+# ── 5. the grace exit: live authoring is not an unowned leftover ─────────────
+
+def test_a_covered_path_someone_is_still_editing_stops_the_derate(repo: Path):
+    """2026-07-21: `scripts/detect_price_split_breaks.py` was quarantined, edited two
+    hours earlier, and was the ONLY blocker in the pool — so it pinned every fire at
+    DERATE_CAP. There was no way out: `commit` and `delete` both belong to the author,
+    `leave` records the decision but still blocks, and every save reset the clock.
+
+    A gate whose exit condition an active author keeps resetting is a deadlock, not a
+    forcing function. So the grace lifts the *de-rate* — the thing that was punishing
+    the wrong person — while the incident stays open, because the file genuinely is
+    still sitting in the checkout."""
+    _write(repo, THEIRS, "still working on it\n")
+    _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL)
+
+    verdict = fi.incident_closeable(repo, [THEIRS])
+
+    assert verdict["paths"][THEIRS]["live_authoring"] is True
+    assert verdict["derates"] is False
+    assert verdict["blockers"] == []
+    assert any("活躍碼" in d for d in verdict["deferred"])
+    # Not resolved — nothing was collected, so the incident must not close.
+    assert verdict["closeable"] is False
+
+
+def test_live_authoring_does_not_churn_the_incident_open_and_shut(repo: Path):
+    """Letting the grace mark the incident closeable would close it every fire and
+    re-open it the next, so one condition would mint a fresh row every hour — the
+    exact per-fire-ticket failure this module's fingerprint dedup exists to prevent.
+    The de-rate is what needs an exit; the incident row is what needs to persist."""
+    _write(repo, THEIRS, "still working on it\n")
+    _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL + 3)
+
+    assert len(_incidents(repo)) == 1
+    assert fi.open_incidents(repo / QUEUE) != []
+    # …and across all those fires the cap was never de-rated for live authoring.
+    assert sb.budget(tasks_path=repo / QUEUE,
+                     state_path=repo / "state.json")["cap"] != sb.DERATE_CAP
+
+
+def test_the_grace_expires_so_abandoned_work_derates_again(repo: Path):
+    """The exit must be self-expiring, or it is just a mute button. An author who
+    walks away stops resetting the clock, and the path goes back to being what it
+    now actually is: an unowned leftover that costs capacity."""
+    _write(repo, THEIRS, "started and abandoned\n")
+    _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL)
+    _stale(repo, THEIRS, age_s=fi.LIVE_AUTHORING_GRACE_S + 60)
+
+    verdict = fi.incident_closeable(repo, [THEIRS])
+
+    assert verdict["paths"][THEIRS]["live_authoring"] is False
+    assert verdict["derates"] is True
+    assert verdict["closeable"] is False
+    assert any("仍髒在 main checkout" in b for b in verdict["blockers"])
+
+
+def test_grace_never_applies_to_a_path_whose_bytes_are_not_retrievable(repo: Path):
+    """The safety premise of the whole exit is 'we can get these bytes back'. An
+    uncovered path fails that premise, so being freshly edited buys it nothing —
+    otherwise 'I am still working on it' would become a way to hold unbacked-up
+    work hostage while the incident closes underneath it."""
+    _write(repo, "scripts/never_quarantined.py", "brand new, nowhere else\n")
+
+    verdict = fi.incident_closeable(repo, ["scripts/never_quarantined.py"])
+
+    assert verdict["paths"]["scripts/never_quarantined.py"]["covered"] is False
+    assert verdict["paths"]["scripts/never_quarantined.py"]["live_authoring"] is False
+    assert verdict["closeable"] is False
 
 
 def test_a_quarantined_path_cleared_from_the_checkout_closes(repo: Path):
@@ -336,9 +426,13 @@ def test_a_live_workspace_covers_a_path_with_no_quarantine_ref(repo: Path):
 
 
 def test_check_open_incidents_reports_per_incident(repo: Path):
-    """The CLI-shaped entry point the incident body tells the reader to run."""
+    """The CLI-shaped entry point the incident body tells the reader to run.
+
+    Aged past grace so the assertion is about *reporting shape*, not about which
+    side of the live-authoring line this fixture happens to land on."""
     _write(repo, THEIRS, "stuck\n")
     _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL)
+    _stale(repo, THEIRS)
 
     results = fi.check_open_incidents(repo)
 
@@ -346,6 +440,54 @@ def test_check_open_incidents_reports_per_incident(repo: Path):
     assert results[0]["fingerprint"] == fi.fingerprint([THEIRS])
     assert results[0]["closeable"] is False
     assert results[0]["task_id"] == _incidents(repo)[0]["id"]
+
+
+# ── 6. the de-rate must be able to release itself ────────────────────────────
+
+def test_a_satisfied_close_condition_actually_closes_the_incident(repo: Path):
+    """`incident_closeable` had exactly zero callers outside tests and the CLI, so
+    a green close condition changed nothing: on 2026-07-21 the only open incident
+    was fully satisfied and every fire still ran at DERATE_CAP. A verdict nobody
+    acts on is the 78-fire CRITICAL wearing a different data structure."""
+    _write(repo, THEIRS, "stuck\n")
+    _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL)
+    (repo / THEIRS).unlink()  # collected — close condition now satisfied
+
+    closed = fi.reconcile_incidents(repo)["closed"]
+
+    assert [c["task_id"] for c in closed] == [_incidents(repo)[0]["id"]]
+    assert _incidents(repo)[0]["status"] == "succeeded"
+    assert fi.open_incidents(repo / QUEUE) == []
+    # and the de-rate is genuinely gone, not just the row
+    assert sb.budget(tasks_path=repo / QUEUE,
+                     state_path=repo / "state.json")["cap"] != sb.DERATE_CAP
+
+
+def test_an_unsatisfied_incident_is_left_open(repo: Path):
+    """The actuator must not become a way to clear the queue. Still-stuck means
+    still de-rated — that cost IS the mechanism."""
+    _write(repo, THEIRS, "stuck\n")
+    _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL)
+    _stale(repo, THEIRS)
+
+    assert fi.reconcile_incidents(repo)["closed"] == []
+    assert _incidents(repo)[0]["status"] != "succeeded"
+    assert _incidents(repo)[0]["payload"]["derates"] is True
+
+
+def test_closing_records_the_evidence_it_relied_on(repo: Path):
+    """'Why did this incident close?' must be answerable after the fact, or the
+    next investigation starts from a status field and a shrug."""
+    _write(repo, THEIRS, "stuck\n")
+    _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL)
+    (repo / THEIRS).unlink()
+
+    fi.reconcile_incidents(repo)
+
+    evidence = _incidents(repo)[0]["close_evidence"]
+    assert evidence["closeable"] is True
+    assert evidence["paths"][THEIRS]["quarantined"] is True
+    assert evidence["blockers"] == []
 
 
 # ── fingerprint ──────────────────────────────────────────────────────────────
@@ -356,3 +498,117 @@ def test_fingerprint_is_order_insensitive_and_content_addressed():
     assert fi.fingerprint(["b", "a"]) == fi.fingerprint(["a", "b", "a"])
     assert fi.fingerprint(["a", "b"]) != fi.fingerprint(["a", "b", "c"])
     assert fi.fingerprint([]) != fi.fingerprint(["a"])
+
+
+# --- liveness classification: 無主殘留 vs 未提交的活躍碼 (assign_eb78aedc) -----
+#
+# 2026-07-20: the closure checklist told the operator to preserve-then-delete 53
+# "unclaimed stuck files" that were in fact the running incident system itself
+# (foreign_incident.py, phase_z.py, the whole test group). quarantined /
+# live_workspace / still_dirty_in_main take IDENTICAL values for dead residue and
+# for uncommitted live code, so the instruction was wrong - and quietly so.
+
+def _live_repo(repo: Path) -> Path:
+    """A checkout shaped like the 2026-07-20 incident: live code + real junk."""
+    (repo / "src" / "volpred" / "ops").mkdir(parents=True)
+    (repo / "scripts" / "tests").mkdir(parents=True)
+    # Untracked module - but a COMMITTED script imports it. That relationship is
+    # visible without guessing anyone's intent; it is the strongest live signal.
+    (repo / "src/volpred/ops/foreign_incident.py").write_text("X = 1\n", encoding="utf-8")
+    (repo / "scripts/dispatch_slot_budget.py").write_text(
+        "from volpred.ops.foreign_incident import X\n", encoding="utf-8")
+    (repo / "scripts/tests/test_scheduler_max_slots.py").write_text(
+        "def test_x():\n    pass\n", encoding="utf-8")
+    # Real junk from the same incident list.
+    (repo / "storage").mkdir(exist_ok=True)
+    (repo / "storage/work_log.json.bak_20260701").write_text("{}", encoding="utf-8")
+    (repo / "tests").mkdir(exist_ok=True)
+    (repo / "tests/.!71268!test_junk.py").write_text("x\n", encoding="utf-8")
+    # Only the importer is committed; the module it imports stays untracked, which
+    # is exactly the shape that fooled the old checklist.
+    _git(repo, "add", "scripts/dispatch_slot_budget.py")
+    _git(repo, "commit", "-qm", "add importer")
+    return repo
+
+
+def test_untracked_module_imported_by_committed_code_is_live(repo: Path):
+    got = fi.classify_path_liveness(_live_repo(repo), [
+        "src/volpred/ops/foreign_incident.py",
+    ])["src/volpred/ops/foreign_incident.py"]
+    assert got["liveness"] == fi.LIVENESS_LIVE
+    assert got["referenced_by"] == "scripts/dispatch_slot_budget.py"
+    assert got["liveness_evidence"], "a live verdict with no evidence is a guess"
+
+
+def test_test_files_are_live_even_though_nothing_imports_them(repo: Path):
+    """The 53-path list swept up the whole test group; nothing imports a test."""
+    got = fi.classify_path_liveness(_live_repo(repo), [
+        "scripts/tests/test_scheduler_max_slots.py",
+    ])["scripts/tests/test_scheduler_max_slots.py"]
+    assert got["liveness"] == fi.LIVENESS_LIVE
+
+
+def test_backup_and_editor_junk_stay_dead(repo: Path):
+    got = fi.classify_path_liveness(_live_repo(repo), [
+        "storage/work_log.json.bak_20260701",
+        "tests/.!71268!test_junk.py",
+    ])
+    assert {v["liveness"] for v in got.values()} == {fi.LIVENESS_DEAD}, (
+        "if junk classifies as live the classifier is not classifying"
+    )
+
+
+def test_mention_in_docs_or_queue_is_not_liveness(repo: Path):
+    """A filename written into a doc or an old task description is not usage.
+
+    Without this the classifier would almost never say dead - every stuck file has
+    been named in some incident description by the time anyone looks at it.
+    """
+    root = _live_repo(repo)
+    (root / "docs").mkdir(exist_ok=True)
+    (root / "docs/plan.md").write_text("we should fix scripts/ghost.py\n", encoding="utf-8")
+    (root / QUEUE).write_text(
+        json.dumps([{"id": "t1", "description": "scripts/ghost.py stuck"}]), encoding="utf-8")
+    (root / "scripts/ghost.py").write_text("pass\n", encoding="utf-8")
+    _git(root, "add", "docs/plan.md", QUEUE)
+    _git(root, "commit", "-qm", "mention only")
+
+    got = fi.classify_path_liveness(root, ["scripts/ghost.py"])["scripts/ghost.py"]
+    assert got["liveness"] == fi.LIVENESS_DEAD
+
+
+def test_live_code_changes_the_instruction_but_not_the_verdict(repo: Path):
+    """Liveness must not make a dirty incident closeable - adoption is a decision.
+
+    The bytes are still sitting uncommitted in main, so the incident is not
+    resolved; what changes is that the operator is told to adopt rather than to
+    preserve-then-delete.
+    """
+    root = _live_repo(repo)
+    rel = "src/volpred/ops/foreign_incident.py"
+    # Age it well past the authoring grace. This is the whole point: the real
+    # foreign_incident.py survived untracked for 78 shifts, so its mtime was
+    # ancient while it ran every hour. mtime answers "did someone just touch
+    # this", never "is this alive".
+    _stale(root, rel)
+
+    def _runner(cmd, **kw):
+        # Pretend the path is quarantine-covered so `covered` is True and the only
+        # remaining question is what to tell the operator about the dirty path.
+        if cmd[3:5] == ["for-each-ref", "--format=%(refname)"]:
+            return subprocess.CompletedProcess(cmd, 0, "refs/quarantine/x\n", "")
+        if cmd[3] == "ls-tree":
+            return subprocess.CompletedProcess(cmd, 0, f"{rel}\n", "")
+        kw.pop("capture_output", None)
+        kw.pop("text", None)
+        kw.pop("check", None)
+        return subprocess.run(cmd, capture_output=True, text=True, check=False, **kw)
+
+    got = fi.incident_closeable(root, [rel], runner=_runner)
+
+    assert got["closeable"] is False, "dirty is dirty; liveness does not close it"
+    assert got["paths"][rel]["liveness"] == fi.LIVENESS_LIVE
+    blocker = "".join(got["blockers"])
+    assert "不要清除" in blocker and "收養" in blocker, (
+        "a live path must not be handed the preserve-then-delete instruction"
+    )

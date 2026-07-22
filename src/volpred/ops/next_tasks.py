@@ -825,6 +825,7 @@ def append_task_record(
     *,
     path: str | Path = "storage/next_tasks.json",
     if_exists: str = "skip",
+    semantic_dedupe: bool = True,
 ) -> tuple[dict[str, Any], bool]:
     """Append one caller-built task record to the queue under LOCK_EX.
 
@@ -838,6 +839,16 @@ def append_task_record(
 
     ``if_exists='skip'`` returns ``(existing_record, False)`` when the id is
     already queued (idempotent ingress replay); ``'raise'`` raises ValueError.
+
+    ``semantic_dedupe=True`` (default) additionally refuses records that are a
+    **semantic** duplicate of an already-open task — same file + symbol +
+    failure class, per ``volpred.ops.task_signature``. id-equality alone let the
+    same bug be filed twice 15 minutes apart (assign_614e70ee / assign_1d936f52),
+    and a post-hoc sweep only finds it after the queue is already polluted; the
+    boss requirement is to stop it **at the creation entry point**. Refused
+    records come back as ``(record, False)`` with ``duplicate_of`` /
+    ``duplicate_reason`` set so the caller can report instead of silently
+    growing the pool.
 
     After the lock is released an urgent record (``task_urgency.is_urgent``)
     requests an out-of-band supervisor fire; ``record['fire_requested']`` is a
@@ -862,6 +873,7 @@ def append_task_record(
     from volpred.ops import remediation_throttle
 
     throttle_denied = False
+    dup_verdict: dict[str, Any] | None = None
 
     p = Path(path)
     guard_canonical_write(p)
@@ -880,7 +892,17 @@ def append_task_record(
                     if if_exists == "raise":
                         raise ValueError(f"duplicate task id {task_id}")
                     return existing, False
-            if remediation_throttle.is_auto_remediation(record) and remediation_throttle.over_cap(
+            # 語意重複閘門（老闆 2026-07-21：「在建單入口擋，不是事後掃」）。
+            # 放在 id 檢查之後、append 之前 —— 同一個 LOCK_EX 之內，所以不會有
+            # 「兩個 caller 同時通過檢查再雙雙寫入」的 TOCTOU 窗口。
+            if semantic_dedupe:
+                from volpred.ops.task_signature import find_semantic_duplicate
+
+                dup_verdict = find_semantic_duplicate(record, tasks)
+
+            if dup_verdict is not None:
+                pass  # refused below, outside the lock
+            elif remediation_throttle.is_auto_remediation(record) and remediation_throttle.over_cap(
                 tasks
             ):
                 throttle_denied = True
@@ -890,10 +912,28 @@ def append_task_record(
             # 不擋，只記錄：閘門在 generator entry point（pool_pressure 模組 docstring
             # 說明為何不在此層 enforce），所以任何新的自動 caller 天然繞得過去。這行
             # 讓「繞過」在 log 現形，而不是靜默灌水。
-            if not throttle_denied:
+            if not throttle_denied and dup_verdict is None:
                 _warn_if_over_pending_cap(record, tasks)
         finally:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    if dup_verdict is not None:
+        record["duplicate_of"] = dup_verdict["existing_id"]
+        record["duplicate_reason"] = "; ".join(dup_verdict["reasons"])
+        record["duplicate_signature"] = dup_verdict["b_key"]
+        record["duplicate_score"] = dup_verdict["score"]
+        warn(
+            "task_admission",
+            "semantic duplicate refused at creation entry point",
+            task_id=task_id,
+            duplicate_of=dup_verdict["existing_id"],
+            score=str(dup_verdict["score"]),
+            anchor=",".join(dup_verdict["anchor"][:4]),
+        )
+        # 刻意不 raise（即使 if_exists='raise'）：`raise` 的語意是「id 撞了，
+        # uuid4 下實質不可達」，而語意重複是**常態**。把常態走例外路徑會把失敗
+        # 散進每個 caller 的錯誤處理。回傳 created=False + duplicate_of 標記，
+        # 讓 caller 回報而不是靜默多一張。
+        return record, False
     if throttle_denied:
         # 鎖已釋放才寫 ledger（ledger 快，但原則上 side effect 不佔 queue flock）。
         # 摘要信由 check_alerts 的 flush_denial_summary 每日彙整一封（G6）。

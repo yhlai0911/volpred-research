@@ -249,6 +249,7 @@ def parse_draft(path: Path) -> tuple[str, str, list[str]]:
       ## 主貼文（純文字，不含連結）
       <正文...>
       ## 第一則留言（貼連結）
+      <可有引言句>
       <url>
     """
     text = path.read_text(encoding="utf-8")
@@ -258,7 +259,12 @@ def parse_draft(path: Path) -> tuple[str, str, list[str]]:
         text,
         re.S,
     )
-    m_link = re.search(r"##\s*第一則留言[^\n]*\n\s*(https?://\S+)", text)
+    # 留言連結：取「## 第一則留言」區塊內的第一個 URL，而不是只認緊接標題的裸 URL。
+    # 2026-07-22：mile_903fd2cf 的稿在 URL 前寫了一句引言（人寫稿的自然寫法），舊 regex
+    # 因此靜默回空字串 → 主文照發、連結沒進留言。留言送出走 keyboard.type(link) 只打
+    # URL，引言本來就不會被貼上，所以正解是放寬抽取而非要求寫稿人把 URL 頂在標題下。
+    m_link_block = re.search(r"##\s*第一則留言[^\n]*\n(.*?)(?=\n##\s|\Z)", text, re.S)
+    m_link = re.search(r"https?://\S+", m_link_block.group(1)) if m_link_block else None
     if not m_body:
         raise ValueError(f"{path.name}: 找不到「## 主貼文」區塊")
     body = m_body.group(1).strip()
@@ -267,7 +273,7 @@ def parse_draft(path: Path) -> tuple[str, str, list[str]]:
         ln for ln in body.splitlines()
         if ln.strip() != "---" and not ln.lstrip().startswith("#")
     ).strip()
-    link = m_link.group(1).strip() if m_link else ""
+    link = m_link.group(0).strip() if m_link else ""
     # 附圖：## 圖片 區塊下的所有圖 URL（結果圖 + 懶人包）。主貼文必附圖（老闆規則）。
     images: list[str] = []
     m_img = re.search(r"##\s*圖片[^\n]*\n(.*)$", text, re.S)

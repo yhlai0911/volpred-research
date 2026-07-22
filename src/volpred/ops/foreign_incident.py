@@ -63,6 +63,20 @@ _CLOSED_STATUSES = TERMINAL_COMPACTABLE_STATUSES
 
 _GIT_TIMEOUT_S = 30
 
+#: 一個**已被覆蓋**的 dirty path 多久沒被動過，才算「沒有人會回來收」。
+#:
+#: 關閉條件原本只問「還髒不髒」，而髒有兩種完全不同的成因：沒人要的殘留，和作者
+#: 正在寫的活躍碼。對後者收緊只會兩頭落空 —— 作者每存一次檔，deadline 就重置一次，
+#: 於是 incident 永遠關不掉（沒有出口，違反本 class 自己的「有限班數內必達 terminal
+#: state」），而代價是每班 slot cap 減半，懲罰的正是**還在工作的人**。
+#: 2026-07-21：``scripts/detect_price_split_breaks.py`` 已 quarantine（bytes 取得回）、
+#: 2 小時前才改過、狀態 ``MM``，卻是全池唯一的 blocker，把整條排程壓在 DERATE_CAP。
+#:
+#: 用 mtime 而不是自我宣告：這一樣是機械判準，不是「有人覺得處理完了」。而且它會
+#: 自己過期 —— 作者收尾（檔案進 commit，不再 dirty）或放手（超過寬限，重新變成
+#: blocker），兩條路都通往 terminal state。
+LIVE_AUTHORING_GRACE_S = 24 * 3600
+
 
 # ── fingerprint ──────────────────────────────────────────────────────────────
 
@@ -359,11 +373,150 @@ def dirty_paths(repo_root: Path, *, runner=subprocess.run) -> set[str]:
     return out
 
 
+#: 活性分類的取值。``unknown`` 不存在是刻意的 —— 分類器只在有正面證據時說 live，
+#: 沒有證據就是 dead，因為「不確定」若進了指示文字，執行者仍得自己猜，而這張單存在
+#: 的理由正是不要再讓執行者猜。
+LIVENESS_LIVE = "live"
+LIVENESS_DEAD = "dead"
+
+#: 只有像碼的東西值得問「有沒有人在用」。備份檔、編輯器暫存檔沒有 importer 可言。
+_CODEISH_SUFFIXES = (".py", ".sh", ".js", ".ts", ".sql")
+
+
+def _reference_needles(rel: str) -> list[str]:
+    """一個路徑會以哪些字面形式出現在別的碼裡。
+
+    三種都要找，因為 repo 內三種寫法都真實存在：dotted import
+    （``from volpred.ops.foreign_incident import ...``）、裸模組名（``import
+    foreign_incident``、``monkeypatch.setattr(MODULE, ...)`` 前的 import），以及
+    直接寫死的相對路徑（``subprocess`` 呼叫 ``scripts/xxx.py`` 是本 repo 的常態）。
+    只找 dotted 會漏掉 ``scripts/`` 底下所有東西 —— 而 ``phase_z.py`` 正是那類。
+    """
+    p = Path(rel)
+    needles = [rel]
+    if p.suffix == ".py":
+        stem = p.stem
+        if stem != "__init__":
+            needles.append(stem)
+        parts = list(p.with_suffix("").parts)
+        if parts[:1] == ["src"]:
+            needles.append(".".join(parts[1:]))
+    return [n for n in needles if n]
+
+
+def referenced_by_tracked(repo_root: Path, paths: Iterable[str], *,
+                          runner=subprocess.run) -> dict[str, str]:
+    """``rel -> 引用它的 tracked 檔``，找不到就不在 dict 裡。
+
+    這是最強的活性訊號，也是 2026-07-20 那次的特徵：``foreign_incident.py`` 當時是
+    untracked，卻被 tracked 的 ``dispatch_slot_budget.py`` import —— 那層關係**寫在
+    已提交的碼裡**，不需要猜任何人的意圖就看得到。
+
+    ``git grep`` 預設只搜 tracked 檔，正是這裡要的語意：由**已提交**的碼背書，才算
+    數。untracked 檔互相引用不構成活性（那可能只是同一坨無主殘留自己抱團）。
+    """
+    found: dict[str, str] = {}
+    for rel in paths:
+        if rel in found or not rel.endswith(_CODEISH_SUFFIXES):
+            continue
+        for needle in _reference_needles(rel):
+            # pathspec 限定在碼與設定：doc 或 next_tasks.json 提到一個檔名，只代表有人
+            # 寫過它，不代表有人在跑它。把那種提及當活性證據，等於讓任何被寫進舊任務
+            # 描述的殘留檔永久免疫於清除 —— 分類器會很少說 dead，也就等於沒有分類。
+            hits = _git_lines(repo_root, "grep", "-l", "-F", needle, "--",
+                              "*.py", "*.sh", "*.js", "*.ts", "*.toml", "*.cfg",
+                              "*.json", ":(exclude)storage/**", ":(exclude)docs/**",
+                              runner=runner)
+            # 自己引用自己不算；一個 tracked 檔提到自己只表示它被提交了。
+            other = [h for h in hits if h != rel]
+            if other:
+                found[rel] = other[0]
+                break
+    return found
+
+
+def _has_passing_test_file(repo_root: Path, rel: str) -> str | None:
+    """對應的測試檔在不在。存在就回傳它的路徑。
+
+    只看**存在**、不實際跑：關閉條件會被逐班重跑，在裡面跑 pytest 會把一個判斷變成
+    一次 CI。存在本身已是夠強的次要訊號 —— 沒有人會為一坨要刪的殘留寫測試。
+    """
+    p = Path(rel)
+    if p.suffix != ".py":
+        return None
+    if p.stem.startswith("test_") and "tests" in p.parts:
+        # 反向：測試檔不會被任何碼 import，所以 referenced_by_tracked 對它永遠是空的
+        # —— 2026-07-20 那 53 個路徑裡，整組測試就是這樣被算成無主殘留的。
+        # 這裡刻意不去解析它到底測哪個模組（``test_phase_z_foreign_incident`` 這種
+        # 複合命名解不出來，而解錯就退回誤判）。不對稱是刻意的：把一個沒用的測試留著
+        # 只是雜訊，把一個有用的測試安靜刪掉是這張單要防的那種錯。
+        return str(p)
+    for base in ("scripts/tests", "tests"):
+        cand = f"{base}/test_{p.stem}.py"
+        if (repo_root / cand).exists():
+            return cand
+    return None
+
+
+def classify_path_liveness(repo_root: Path, paths: Iterable[str], *,
+                           runner=subprocess.run) -> dict[str, dict[str, Any]]:
+    """逐路徑判「這是無主殘留，還是未提交的活躍碼」。
+
+    ``incident_closeable`` 原本的三個訊號（quarantined / live_workspace /
+    still_dirty_in_main）在這兩種狀態下**取值完全相同**，於是關閉條件對後者給出的
+    指示是「保存後清除」—— 照做會刪掉正在運行的系統碼。2026-07-20 那次是靠人停下來
+    查身分才沒鑄成大錯。
+
+    這裡不猜擁有者（D1 停止猜測式收編仍然成立），只問活性，而活性是機械可判的：
+    有沒有已提交的碼在用它，有沒有人為它寫過測試。判斷結果**只改變給執行者的指示
+    文字**，不自動 commit 也不自動刪 —— 收養與否是決策，不是本函式的權限。
+
+    刻意不採 mtime：``foreign_incident.py`` 自己就曾經 untracked 存活 78 班，那時它的
+    mtime 早就過任何寬限，但它每小時都在跑。時間訊號回答的是「有人剛動過嗎」，不是
+    「這東西活著嗎」。
+    """
+    ordered = sorted({str(p) for p in paths if str(p)})
+    referenced = referenced_by_tracked(repo_root, ordered, runner=runner)
+    out: dict[str, dict[str, Any]] = {}
+    for rel in ordered:
+        evidence: list[str] = []
+        importer = referenced.get(rel)
+        if importer:
+            evidence.append(f"被已提交的 {importer} 引用")
+        test_file = _has_passing_test_file(repo_root, rel)
+        if test_file == rel:
+            evidence.append("本身是測試檔（tests/ 下的 test_*.py）")
+        elif test_file:
+            evidence.append(f"有對應測試 {test_file}")
+        out[rel] = {
+            "liveness": LIVENESS_LIVE if evidence else LIVENESS_DEAD,
+            "referenced_by": importer,
+            "test_file": test_file,
+            "liveness_evidence": evidence,
+        }
+    return out
+
+
+def _seconds_since_authored(repo_root: Path, rel: str, *, now: datetime) -> float | None:
+    """這個路徑在 main checkout 裡多久沒被動過；檔案不在就回 ``None``。
+
+    ``None`` 代表「沒有活躍跡象」而不是「剛動過」—— 一個 dirty 但工作區已無此檔的
+    路徑（例如已暫存的刪除）沒有作者活動可言，寬限不該套用在它身上。
+    """
+    try:
+        mtime = (repo_root / rel).stat().st_mtime
+    except OSError:  # silent-ok: 檔案不在 = 沒有作者活動可言，None 是設計上的答案（見 docstring）
+        return None
+    return max(0.0, now.timestamp() - mtime)
+
+
 def incident_closeable(
     repo_root: Path,
     paths: Sequence[str],
     *,
     runner=subprocess.run,
+    grace_s: float = LIVE_AUTHORING_GRACE_S,
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     """一張 incident 可否關閉 —— 機械判定，逐路徑給證據。
 
@@ -376,50 +529,169 @@ def incident_closeable(
     第二條是這張單真正的 forcing function。只有 quarantine 覆蓋、檔案卻還躺在工作
     區，是「保存了但沒收拾」—— 那正是 78 班期間的狀態，而它不該算解決。少一個路徑
     沒覆蓋就 False：關閉條件必須是全稱的，否則「大部分處理完了」會變成關單理由。
+
+    **但「還髒著」不等於「沒人要」。** 一個已覆蓋、且 ``grace_s`` 內還被改過的路徑
+    算 *live authoring*，進 ``deferred`` 而不是 ``blockers``（見 ``LIVE_AUTHORING_GRACE_S``）。
+
+    兩者的差別是**誰該付代價**，因此回傳兩個不同的判斷：
+
+    * ``closeable`` —— 路徑真的收乾淨了嗎（嚴格：全覆蓋且全不髒）。這決定 incident
+      關不關。live authoring **不會**讓它變 True：檔案還在工作區，事情就還沒完，
+      而每班關掉再重開會讓同一件事每小時換一張單，dedup 就白做了。
+    * ``derates`` —— 現在還值得壓 scheduler 嗎（只看 ``blockers``）。作者正在寫的檔案
+      不是「沒有人會回來收」，把整條排程壓在半速只會懲罰還在工作的人，而且沒有出口
+      （每存一次檔 deadline 就重置）。2026-07-21 ``detect_price_split_breaks.py`` 就是
+      這個形狀：quarantine 過、2 小時前才改過、全池唯一 blocker。
+
+    寬限不是放水：未覆蓋的路徑無論多新一律進 ``blockers``，因為寬限的安全前提正是
+    「bytes 已經有地方取回」。而寬限會自己過期 —— 作者收尾或放手，都通往 terminal state。
     """
+    now = now or datetime.now(timezone.utc)
     ordered = sorted({str(p) for p in paths if str(p)})
     quarantined = quarantine_covered_paths(repo_root, runner=runner)
     workspaces = live_workspace_paths(repo_root, ordered, runner=runner)
     still_dirty = dirty_paths(repo_root, runner=runner)
+    liveness = classify_path_liveness(repo_root, ordered, runner=runner)
 
     evidence: dict[str, dict[str, Any]] = {}
     blockers: list[str] = []
+    deferred: list[str] = []
     for rel in ordered:
         in_quarantine = rel in quarantined
         workspace = workspaces.get(rel)
         dirty = rel in still_dirty
         covered = bool(in_quarantine or workspace)
+        idle_s = _seconds_since_authored(repo_root, rel, now=now) if dirty else None
+        live_authoring = bool(covered and dirty
+                              and idle_s is not None and idle_s < grace_s)
+        live_code = liveness[rel]
         evidence[rel] = {
             "quarantined": in_quarantine,
             "live_workspace": workspace,
             "still_dirty_in_main": dirty,
             "covered": covered,
+            "live_authoring": live_authoring,
+            "idle_s": None if idle_s is None else round(idle_s, 1),
+            **live_code,
         }
         if not covered:
             blockers.append(f"{rel}: 沒有 live workspace，也沒有 quarantine ref 可取回")
+        elif dirty and live_authoring:
+            deferred.append(f"{rel}: 已保存，且 {idle_s / 3600:.1f} 小時內還在改 — 活躍碼，不算無主殘留")
+        elif dirty and live_code["liveness"] == LIVENESS_LIVE:
+            # 指示改了，判定沒改：路徑還髒著，incident 就還沒收乾淨（closeable 仍 False）。
+            # 改的是叫執行者做什麼 —— 「保存後清除」對一份正在運行的碼是錯的指令，
+            # 而它錯得很安靜。收養是決策，所以這裡只呈現證據，不自動 commit。
+            blockers.append(
+                f"{rel}: 已保存但仍髒在 main checkout —— 這是**未提交的活躍碼，需要收養決策，不要清除**"
+                f"（活性證據：{'；'.join(live_code['liveness_evidence'])}）"
+            )
         elif dirty:
             blockers.append(f"{rel}: 已保存但仍髒在 main checkout — 尚未收拾")
 
     return {
-        "closeable": bool(ordered) and not blockers,
+        # 嚴格：還有東西髒著就不算收乾淨，deferred 也算。
+        "closeable": bool(ordered) and not blockers and not deferred,
+        # 只有真正無主的殘留才值得壓 scheduler。
+        "derates": bool(blockers),
         "paths": evidence,
         "blockers": blockers,
+        "deferred": deferred,
         "checked": ordered,
+        "grace_s": grace_s,
     }
 
 
 def check_open_incidents(repo_root: Path, *, tasks_path: str | Path | None = None,
-                         runner=subprocess.run) -> list[dict[str, Any]]:
+                         runner=subprocess.run,
+                         grace_s: float = LIVE_AUTHORING_GRACE_S,
+                         now: datetime | None = None) -> list[dict[str, Any]]:
     """跑每一張未關 incident 的關閉條件，回傳逐張結果。"""
     tasks_path = tasks_path or (repo_root / "storage" / "next_tasks.json")
     out: list[dict[str, Any]] = []
     for task in open_incidents(tasks_path):
         payload = task.get("payload") or {}
-        result = incident_closeable(repo_root, payload.get("paths") or [], runner=runner)
+        result = incident_closeable(repo_root, payload.get("paths") or [],
+                                    runner=runner, grace_s=grace_s, now=now)
         result["task_id"] = task.get("id")
         result["fingerprint"] = payload.get("fingerprint")
         out.append(result)
     return out
+
+
+def reconcile_incidents(
+    repo_root: Path,
+    *,
+    tasks_path: str | Path | None = None,
+    runner=subprocess.run,
+    grace_s: float = LIVE_AUTHORING_GRACE_S,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """對每張未關 incident 重跑判準：收乾淨的關掉，其餘更新降載旗標。
+
+    沒有這一步，``incident_closeable`` 就是這個模組自己在批評的東西：一個沒有接上
+    控制流程的判準。2026-07-21 實測 —— 唯一那張 incident 的 close condition 全綠，
+    slot cap 仍卡在 ``DERATE_CAP``，因為**沒有任何呼叫者**會去關它（``incident_closeable``
+    除了測試與 CLI 零 caller）。降載於是從 forcing function 退化成常態背景，正是
+    78 班那封 CRITICAL 的失敗形狀，只是換了個資料結構。
+
+    ``derates`` 寫進 payload 而不是讓 scheduler 自己算：``dispatch_slot_budget`` 在
+    派工熱路徑上，且刻意只讀佇列、不碰 git（讀不懂佇列都不該讓派工掛掉，何況 subprocess）。
+    這裡每班本來就在做 git 檢查，順手把結論留下，讓那邊維持 read-only 且零 git。
+
+    關閉是**機械判定的結果**，不是自我宣告：只有 ``incident_closeable`` 全綠才動，
+    證據原封不動寫進 ``close_evidence``，讓「為什麼這張單關了」事後查得到。
+    """
+    now = now or datetime.now(timezone.utc)
+    path = Path(tasks_path or (repo_root / "storage" / "next_tasks.json"))
+    guard_canonical_write(path)
+    verdicts = {
+        str(t.get("id")): incident_closeable(
+            repo_root, (t.get("payload") or {}).get("paths") or [],
+            runner=runner, grace_s=grace_s, now=now,
+        )
+        for t in open_incidents(path)
+    }
+    if not verdicts:
+        return {"closed": [], "deferred": []}
+
+    closed: list[dict[str, Any]] = []
+    deferred: list[dict[str, Any]] = []
+    with path.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            tasks = _load_tasks(handle)
+            dirty = False
+            for task in tasks:
+                tid = str(task.get("id"))
+                # 重讀後再確認一次仍未關：鎖外算的判準，鎖內才可信。
+                if tid not in verdicts or not (_is_incident(task) and _is_open(task)):
+                    continue
+                verdict = verdicts[tid]
+                if verdict["closeable"]:
+                    task["status"] = "succeeded"
+                    task["completed_at"] = now.isoformat()
+                    task["result"] = (
+                        f"關閉條件機械滿足：{len(verdict['checked'])} 個路徑全部有覆蓋"
+                        "（quarantine ref 或 live workspace），且無未收拾的殘留。"
+                    )
+                    task["close_evidence"] = verdict
+                    closed.append({"task_id": tid, "verdict": verdict})
+                    dirty = True
+                    continue
+                payload = task.setdefault("payload", {})
+                if payload.get("derates") != verdict["derates"]:
+                    payload["derates"] = verdict["derates"]
+                    payload["derates_updated_at"] = now.isoformat()
+                    dirty = True
+                payload["deferred"] = verdict["deferred"]
+                if not verdict["derates"]:
+                    deferred.append({"task_id": tid, "verdict": verdict})
+            if dirty:
+                write_tasks_to_handle(handle, tasks)
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    return {"closed": closed, "deferred": deferred}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -429,10 +701,23 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--check", action="store_true",
                     help="對每張未關 incident 跑關閉條件；有任一張關不掉則 exit 1")
     ap.add_argument("--repo", default=str(Path(__file__).resolve().parents[3]))
+    ap.add_argument("--grace-hours", type=float,
+                    default=LIVE_AUTHORING_GRACE_S / 3600,
+                    help="已覆蓋的 dirty path 多久沒動過才算無主殘留（預設 24 小時）")
+    ap.add_argument("--reconcile", action="store_true",
+                    help="收乾淨的 incident 標 succeeded，其餘更新降載旗標")
     args = ap.parse_args(argv)
 
     repo_root = Path(args.repo)
-    results = check_open_incidents(repo_root)
+    grace_s = args.grace_hours * 3600
+    if args.reconcile:
+        outcome = reconcile_incidents(repo_root, grace_s=grace_s)
+        print(json.dumps(
+            {"closed": [c["task_id"] for c in outcome["closed"]],
+             "derate_lifted": [d["task_id"] for d in outcome["deferred"]]},
+            ensure_ascii=False, indent=2))
+        return 0
+    results = check_open_incidents(repo_root, grace_s=grace_s)
     print(json.dumps(results, ensure_ascii=False, indent=2))
     if not args.check:
         return 0

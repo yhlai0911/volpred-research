@@ -1577,20 +1577,28 @@ class Publisher:
         # naming the prior article(s) in details['supersedes'].
         # Implementation: volpred.ops.content.assert_member_qa_publish_allowed
         # (lazy import — ops.content imports this module at load time).
-        if str(status or '') not in ('unpublished', 'retracted') and (
-            str(audience or '').strip() == 'member_qa'
-            or str(category or '').strip() == 'member_qa'
-            or str((details or {}).get('content_type') or '').strip() == 'member_qa'
-            or str(phase or '').startswith('member_qa')
-        ):
-            from volpred.ops.content import assert_member_qa_publish_allowed
+        # 2026-07-22: the "does the gate apply here?" test is shared with the
+        # release-pool status-rewrite path via member_qa_publish_gate_applies,
+        # so the two publish paths cannot drift on WHICH articles are gated.
+        from volpred.ops.content import (
+            assert_member_qa_publish_allowed,
+            member_qa_publish_gate_applies,
+        )
 
+        if member_qa_publish_gate_applies({
+            'status': status,
+            'audience': audience,
+            'category': category,
+            'phase': phase,
+            'details': details or {},
+        }):
             assert_member_qa_publish_allowed(
                 (details or {}).get('question_id'),
                 feed=feed,
                 supersedes=(details or {}).get('supersedes'),
                 title=title,
                 storage_dir=str(self.reports_dir.parent),
+                waiver=(details or {}).get('question_id_waiver'),
             )
         from datetime import timedelta
         cutoff_exact = datetime.now(timezone.utc) - timedelta(hours=24)

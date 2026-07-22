@@ -6,6 +6,16 @@ Why this exists:
 - A duplicate pending row after a terminal row creates a zombie task:
   dispatcher sees pending, but claim/start resolves to the earlier terminal row.
 
+Two modes:
+- default: exact-id dedupe (below).
+- ``--semantic``: **report-only** semantic duplicate scan over open tasks, using
+  ``volpred.ops.task_signature`` (file + symbol + failure_class + rare ids, with a
+  title-anchor false-positive brake). Exact-id dedupe reported
+  ``before=3242 / after=3242 / dropped=0`` on a queue that had the same bug filed
+  twice under two ids; this mode is what finds those. The steady-state fix is the
+  admission gate in ``volpred.ops.next_tasks.append_task_record`` — this scan is
+  for the backlog that predates it.
+
 Policy:
 - Group by exact `id`.
 - Keep the "best" row per id by lifecycle depth:
@@ -139,11 +149,138 @@ def dedupe(tasks: list[Any]) -> tuple[list[Any], list[dict[str, Any]]]:
     return deduped, dropped
 
 
+def _render_groups(groups: list[dict], heading_prefix: str) -> list[str]:
+    lines: list[str] = []
+    for n, g in enumerate(groups, 1):
+        keep = g["keep"]
+        lines += [
+            f"### {heading_prefix} 第 {n} 組（{len(g['members'])} 張）",
+            "",
+            f"- **保留**：`{g['keep_id']}` — {keep.get('title', '')}",
+            f"  - created_at: {keep.get('created_at', '')} / status: {keep.get('status', '')}",
+        ]
+        for m in g["merge"]:
+            lines.append(
+                f"- **合併掉**：`{m.get('id', '')}` — {m.get('title', '')}"
+                f"（created_at: {m.get('created_at', '')} / status: {m.get('status', '')}）"
+            )
+        lines += ["", f"- signature: `{g['signature']}`", "- 判定理由："]
+        for p in g["pairs"]:
+            lines.append(
+                f"  - `{p['a_id']}` ≡ `{p['b_id']}` (score={p['score']}, "
+                f"anchor={p['anchor']}): {'; '.join(p['reasons'])}"
+            )
+        lines.append("")
+    return lines
+
+
+def _semantic_report(out_path: Path | None, since: str | None = None) -> int:
+    """Report-only semantic duplicate scan over open tasks.
+
+    Never writes next_tasks.json: merge adjudication is a human call, and the
+    main thread may hold the queue. Output is a markdown proposal list.
+    """
+    from volpred.ops.task_signature import OPEN_STATUSES, find_duplicate_groups
+
+    with NEXT_TASKS.open("r", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_SH)
+        try:
+            tasks = _load_tasks(fh)
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+    open_tasks = [
+        t
+        for t in tasks
+        if isinstance(t, dict) and str(t.get("status") or "").lower() in OPEN_STATUSES
+    ]
+    groups = find_duplicate_groups(open_tasks)
+
+    lines: list[str] = [
+        "# 任務池語意重複掃描報告",
+        "",
+        f"- 產生時間：{_utc_iso_z()}",
+        f"- 佇列總筆數：{len(tasks)}；掃描範圍（open = pending/in_progress/claimed）：{len(open_tasks)}",
+        f"- 判定為語意重複的組數：{len(groups)}"
+        f"；涉及單數：{sum(len(g['members']) for g in groups)}"
+        f"；建議合併掉：{sum(len(g['merge']) for g in groups)}",
+        "",
+        "> **本報告不動任何檔案。** 合併裁決需人工確認後再執行。",
+        "> signature = 檔案 + 符號 + failure_class + 稀有識別碼，並以「兩張單的**標題**",
+        "> 必須共享錨點」作為誤報煞車（寧可漏報不可誤報）。",
+        "",
+        "## A. 現有 open 任務的建議合併清單（可行動）",
+        "",
+    ]
+    lines += _render_groups(groups, "A") or ["（無）", ""]
+
+    calib_groups: list[dict] = []
+    if since:
+        window = [
+            t
+            for t in tasks
+            if isinstance(t, dict) and str(t.get("created_at") or "") >= since
+        ]
+        calib_groups = find_duplicate_groups(window)
+        lines += [
+            f"## B. 校準掃描：{since} 之後建立的所有任務（含已結案，僅供驗證，不可行動）",
+            "",
+            f"- 掃描 {len(window)} 張，判定 {len(calib_groups)} 組語意重複。",
+            "- 目的：證明偵測器在真實資料上抓得到東西 —— A 區為空時，區別",
+            "  「沒有重複」與「偵測器壞掉」的唯一方法。",
+            "",
+        ]
+        lines += _render_groups(calib_groups, "B") or ["（無）", ""]
+
+    text = "\n".join(lines)
+    if out_path is not None:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(text, encoding="utf-8")
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "mode": "semantic-report",
+                    "scanned": len(open_tasks),
+                    "groups": len(groups),
+                    "would_merge": sum(len(g["merge"]) for g in groups),
+                    "calibration_groups": len(calib_groups),
+                    "report": str(out_path),
+                    "applied": False,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+    else:
+        print(text)
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--apply", action="store_true", help="rewrite storage/next_tasks.json in-place")
     ap.add_argument("--json", action="store_true", help="print full JSON summary")
+    ap.add_argument(
+        "--semantic",
+        action="store_true",
+        help="report-only semantic duplicate scan over open tasks (never writes the queue)",
+    )
+    ap.add_argument("--report-out", help="write the --semantic markdown report to this path")
+    ap.add_argument(
+        "--calibrate-since",
+        help="also scan all tasks (any status) created on/after this ISO date, as a "
+        "detector-is-alive check appended to the report",
+    )
     args = ap.parse_args()
+
+    if args.semantic:
+        if args.apply:
+            raise SystemExit("--semantic is report-only; merge adjudication is manual")
+        return _semantic_report(
+            Path(args.report_out) if args.report_out else None,
+            since=args.calibrate_since,
+        )
 
     if args.apply:
         guard_canonical_write(NEXT_TASKS)
