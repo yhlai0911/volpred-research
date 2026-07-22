@@ -1,5 +1,21 @@
 # K1623 — RV 持續性是真 long memory 還是 level-shift 假象？識別 + break-robust OOS
 
+> ## ⛔ 本檔是**未修復的第一輪版本**，不可引用
+>
+> 下列三條宣稱已於 rev2 **撤回**，但撤回版尚未合併進 main：
+> **(1)**「純 level-shift 假象假說被拒絕／確有真 long-memory 成分」——無識別定理支撐（Diebold-Inoue
+> 的 DGP 是隨機／密集 shift，扣除決定性斷點檢定不到它），且 demeaned d̂ 的 SE 未計入斷點是估計出來的；
+> **(2)**「不可交易」——本實驗**沒有做過任何**交易／成本／效用測試；
+> **(3)**「多處反而顯著更差」——10 個 focal QLIKE 比較中僅 1 個名目顯著，**BH FDR 後 0 個存活**。
+> 另有 5 條方法描述與 code 不符（ELW 實為 sample-mean demeaning、FD_MAXK=2000 binding、
+> VIX permissive 斷點 15/15 cap binding 故 20.3% 不構成上界、BreakRobustHAR 窗口行為、
+> §4.5 暗示 MSE 也做了 DM 檢定但第一輪只跑 QLIKE）。
+>
+> **修復版**在 branch `worktree-dispatch-slot-2-c5cafe39-k1623`（README §0 有完整撤回總表 + 補做的
+> MSE DM / BH FDR / Bonferroni）。merge 由 Codex round-3 的 3 項 blocking defect 封鎖，出口任務
+> `k1623_rev4_remediation_after_codex_round3_fail`；經過見 `review_round3_codex_20260722.md`
+> 與 `docs/error_log.md` 2026-07-22 條目。
+
 **Verdict（一句話）**：波動率的「表觀長記憶」既非純真、也非純假，而是**混合**——所有資產在扣掉結構性 level shifts 後仍保有統計顯著的分數整合成分（拒絕 Diebold-Inoue 純假象假說），但 level shifts 貢獻了不可忽略且因資產而異的比例（VIX 約 11–20%、N225 高達 8–63%）；**然而這個真 long-memory 成分不可交易**——OOS 一步預測中，明確利用分數整合的 ARFIMA 與適應斷點的 break-robust HAR **都無法系統性勝過樸素 HAR-RV**（多處反而顯著更差）。
 
 ---

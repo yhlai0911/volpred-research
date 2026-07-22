@@ -1,0 +1,60 @@
+{
+  "kid": "k1623",
+  "round": 3,
+  "verdict": "FAIL",
+  "reviewer": "Codex CLI 0.144.6 / read-only sandbox (primary path)",
+  "reviewed_at": "2026-07-22T10:06:11+08:00",
+  "reviewed_commit": "2029296479e449fccb21804bba958570f346b218",
+  "reviewed_branch": "worktree-dispatch-slot-2-c5cafe39-k1623",
+  "review_artifact": "experiments/k1623/review_round3_codex_20260722.md",
+  "pins_reverified": {
+    "count": 31,
+    "mismatches": 0,
+    "note": "31/31 pinned sha256 recomputed from branch bytes at review time; all matched."
+  },
+  "blocking_defects": [
+    "arm design: A-B and f3 bundle break-COUNT selection (arm A re-runs BIC over k) with break-LOCATION estimation; the channel does not isolate what its name claims (k1623_rev3_armc_mc.py:170).",
+    "over-claim: the 2/2/1 dominant-channel attribution and 'all individual factors > 1' are not identified at 500 reps (SPY gap 0.31%, N225 3.45%, TW0050 4.08% vs ~3.2% crude MC SE); only the TOTAL 1.21-1.33x understatement separates from MC noise.",
+    "internal contradiction: README section 1 line 77 still states the MC covers only break location and not segment-mean estimation, which Arm C and section 6.4 directly contradict."
+  ],
+  "not_defects": [
+    "headline 1.21-1.33x SE understatement: all five sd_A/SE values, tables and decompositions match the frozen artifact.",
+    "no RNG / reordering / parallelism / lookahead defect found.",
+    "arm B-C correctly measures the INCREMENTAL cost of segment-mean estimation over ELW's single global demeaning."
+  ],
+  "merge_blocked": true,
+  "why_branch_template_not_filled": "Remediation will change the reviewed bytes, invalidating all 31 pins; signing the branch template now would create a false 'already reviewed' signal. This file is the round-3 verdict of record.",
+  "reviewed_sha256": {
+    "README.md": "b9954afb01bfefd6a403c6852d25fc18f21ce31883087656163de81f307912c0",
+    "k1623.py": "b7538d7b9996a9bca041b2ea131ae28d22db70c033a8f504271d4696b860afa7",
+    "k1623_results.json": "4c0195df6ef2052fd11378d2211aa3747efdd34ef7b12f3d32f0fd85023469d7",
+    "k1623_rev2.py": "0edfba3fa9c2e4d0c457d52f884faecef4e46b20ddd0677d8ea3853e94538453",
+    "k1623_rev2_mc.py": "b06ec9d042867d541810a58350ec1846c06d009b8c4381940115f12b7b3a9a0b",
+    "k1623_rev2_mc_results.json": "484601b002089f89dd40c90fbc99c8f34409eb9a28b07f2c123042f9529c4809",
+    "k1623_rev2_results.json": "eab6d7df8371e2bd0772cda48d8996e64112a04f12d27dc0ff5a5b80e836b6e2",
+    "k1623_rev3_armc_mc.py": "0e7ff1c950865d16ac7a7ee985f60ecd4da11f8c60900e914d331cf75ba81557",
+    "k1623_rev3_armc_results.json": "8a04ef8ef50f7ea190cd353f9f674d4756c51cffc52847ed444488affb12eaf9",
+    "k1623_rev3_patch_mc_artifact.py": "897736c82ca2d5530bfbc77155de03891cf4f35435e68d10ff3bc3f7355f3d40",
+    "k1623_rev3_selfcheck.py": "ad8a1140679e67d9c4af7fcb95591c40ffcb49994b272587108939a64cc85ef1",
+    "plots/N225_acf.png": "7e8bf88f16929c1ba1a261390d0c0a3cec64f434f15f4b661fb50fbf8b2cc5a5",
+    "plots/N225_levelbreaks.png": "8f0ef90adaaadeb04a799ccf2cbb79d2c94589965381dffa4b6246d8b8fed95f",
+    "plots/N225_oos_qlike.png": "2ccaee836679b70db9c39e9dc1563b5b669d4851d567be8cadb79ebdc3355db1",
+    "plots/N225_periodogram.png": "c38c1a6a7865a5bcd16b10e88e1ba344bffca19e48972dfae1e83e8b3b6797b9",
+    "plots/QQQ_acf.png": "d5331780ac482ae4e9bac87c0e5fc65b1176b33e9c4ffa47b645bfc86c27ab9d",
+    "plots/QQQ_levelbreaks.png": "facd83ab09993438b557053d77a10be698d9a20e52d607a6bbd79b99f68cc478",
+    "plots/QQQ_oos_qlike.png": "40e0ca1539581f1aab379f77b0dff60f813f2cbb77a4f31bd79d7182906b172a",
+    "plots/QQQ_periodogram.png": "862383af02b011bdb8dfc4080c8a4cd7b08d2fdcd80697a238fef44bf0c5240e",
+    "plots/SPY_acf.png": "a64b0db91ebcf7c8a475d9dd5fbdfcceb3928565b22065a070c01b4bcfde42f5",
+    "plots/SPY_levelbreaks.png": "a6680e3ef4bb85f489be3bb2af418d2f8c3e918dc0a0d5ac69eaa09830f71599",
+    "plots/SPY_oos_qlike.png": "ec6d2d06062dea0d9ea329b6fe844cffb40487f568e92e3a168d4a180b1dd581",
+    "plots/SPY_periodogram.png": "68607bc627c6a6384c4bf812e89fac6a8634b7202c25f127cd8740f046d622c0",
+    "plots/TW0050_acf.png": "be9dba0ac2401fff91a133f45651151a811b5676feb366982eb30b4e9b29b596",
+    "plots/TW0050_levelbreaks.png": "7418dbf09f6f26c7afca41001cb3bf263077bed363437d53776d9b20604e7085",
+    "plots/TW0050_oos_qlike.png": "e240aaf7a371adbfa2035159bff00f7fc1559d70b43d90118e8830e912ca54bf",
+    "plots/TW0050_periodogram.png": "8abbb6385b79dc0f6a8d1f2217d38f7acc6b37fad1742e35ae6d7ee421d66806",
+    "plots/VIX_acf.png": "b04b38f7112023ae0d0efff2056e13b6f8f5bedbaac02be2587b7bc59873226e",
+    "plots/VIX_levelbreaks.png": "9fa41b079bdc86989f1cfeb5353c300d790f936edf4136f3666b0ad810dfd75f",
+    "plots/VIX_oos_qlike.png": "288c26e318f5c090958eb42783f4c77e668b1e5a8f591f680f7eb16a7c7b874e",
+    "plots/VIX_periodogram.png": "48039598b4210a28b16f7fec7d441de561c114e3e006deec3dfd2c19b72884e7"
+  }
+}
