@@ -430,6 +430,145 @@ _EVIDENCE_TEST_KEY_RE = re.compile(
     re.IGNORECASE,
 )
 
+_KNOWLEDGE_NUMERIC_CLAIM_RE = re.compile(
+    r"(?<![A-Za-z])[-+]?\d+(?:\.\d+)?(?:e[-+]?\d+)?%?",
+    re.IGNORECASE,
+)
+_KNOWLEDGE_CONTENT_CACHE_KEY: tuple[str, int, int] | None = None
+_KNOWLEDGE_CONTENT_BY_KID: dict[str, str] = {}
+
+
+def _experiment_result_paths(k_id: str) -> list[str]:
+    """Return canonical, repo-relative result artifacts for an article brief."""
+    kid = str(k_id or "").strip().lower()
+    if not kid:
+        return []
+    kdir = ROOT / "experiments" / kid
+    if not kdir.is_dir():
+        return []
+    paths = {
+        path.relative_to(ROOT).as_posix()
+        for path in kdir.rglob("*.json")
+        if path.is_file()
+        and (path.name == "results.json" or path.name.endswith("_results.json"))
+    }
+    return sorted(paths)
+
+
+def _knowledge_numeric_claim_count(k_id: str) -> int:
+    """Count numeric claims in canonical knowledge content for one experiment.
+
+    Article briefs require at least three verifiable figures.  Metadata such as
+    dates, confidence, and the K-id itself is deliberately excluded: only the
+    human-authored ``content`` field can satisfy this fallback.
+    """
+    knowledge_path = ROOT / "storage" / "memory" / "knowledge.json"
+    if not knowledge_path.is_file():
+        return 0
+    global _KNOWLEDGE_CONTENT_CACHE_KEY, _KNOWLEDGE_CONTENT_BY_KID
+    try:
+        stat = knowledge_path.stat()
+        cache_key = (str(knowledge_path), stat.st_mtime_ns, stat.st_size)
+        if cache_key != _KNOWLEDGE_CONTENT_CACHE_KEY:
+            payload = json.loads(knowledge_path.read_text(encoding="utf-8"))
+            if not isinstance(payload, list):
+                _warn_refill("knowledge evidence index is not a list")
+                return 0
+            by_kid: dict[str, list[str]] = {}
+            for item in payload:
+                if not isinstance(item, dict):
+                    continue
+                item_kid = str(item.get("experiment_id") or "").strip().upper()
+                if item_kid:
+                    by_kid.setdefault(item_kid, []).append(str(item.get("content") or ""))
+            _KNOWLEDGE_CONTENT_BY_KID = {
+                item_kid: "\n".join(contents) for item_kid, contents in by_kid.items()
+            }
+            _KNOWLEDGE_CONTENT_CACHE_KEY = cache_key
+    except (OSError, json.JSONDecodeError) as exc:
+        _warn_refill("knowledge evidence index unreadable", exc)
+        return 0
+    kid_u = str(k_id or "").strip().upper()
+    return len(
+        _KNOWLEDGE_NUMERIC_CLAIM_RE.findall(_KNOWLEDGE_CONTENT_BY_KID.get(kid_u, ""))
+    )
+
+
+def _article_evidence_package(k_id: str) -> dict:
+    """Resolve whether a K can support a verifiable article evidence package.
+
+    Result JSON is the preferred source.  A knowledge-only candidate is allowed
+    only when its content already carries at least three numeric claims.
+    """
+    canonical_pool = ROOT / "storage" / "next_tasks.json"
+    if NEXT_TASKS.resolve() != canonical_pool.resolve():
+        # Alternate output pools used by hermetic callers do not share ROOT's
+        # evidence indexes.  Do not accidentally judge their synthetic K-ids
+        # against production knowledge; direct evidence tests align both paths.
+        return {
+            "ready": True,
+            "source": "alternate_pool_unjudged",
+            "paths": [],
+            "knowledge_numeric_claims": 0,
+        }
+    result_paths = _experiment_result_paths(k_id)
+    knowledge_path = ROOT / "storage" / "memory" / "knowledge.json"
+    if result_paths:
+        return {
+            "ready": True,
+            "source": "experiment_results",
+            "paths": result_paths,
+            "knowledge_numeric_claims": _knowledge_numeric_claim_count(k_id),
+        }
+    numeric_claims = _knowledge_numeric_claim_count(k_id)
+    if numeric_claims >= 3:
+        return {
+            "ready": True,
+            "source": "knowledge",
+            "paths": ["storage/memory/knowledge.json"],
+            "knowledge_selector": f"experiment_id={str(k_id).upper()}",
+            "knowledge_numeric_claims": numeric_claims,
+        }
+    return {
+        "ready": False,
+        "source": "insufficient_evidence",
+        "paths": [],
+        "knowledge_numeric_claims": numeric_claims,
+    }
+
+
+def _pending_article_tasks_without_evidence(tasks: list[dict]) -> list[dict]:
+    """Class-sweep existing auto-generated pending article tasks."""
+    bad: list[dict] = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        if str(task.get("task_type") or "") != "daily_article":
+            continue
+        if str(task.get("status") or "pending").lower() not in {
+            "pending",
+            "pending_main_thread",
+        }:
+            continue
+        source = str(task.get("source") or "")
+        title = str(task.get("title") or "")
+        if not (source.startswith("auto_") or "auto-discovered uncovered K" in title):
+            continue
+        kid = str(task.get("k_id") or "").strip()
+        if not kid:
+            match = re.match(r"^(K\d{2,5})_article_", str(task.get("id") or ""), re.I)
+            kid = match.group(1) if match else ""
+        evidence = _article_evidence_package(kid)
+        if kid and not evidence.get("ready"):
+            bad.append(
+                {
+                    "id": task.get("id"),
+                    "k_id": kid.upper(),
+                    "reason": "no_article_evidence_package",
+                }
+            )
+    return bad
+
 
 def _evidence_thickness_bonus(k_id: str) -> int:
     """Return a 0-3 score bonus from the K's evidence-package thickness.
@@ -778,6 +917,21 @@ def _make_article_task(
     emergency: bool = False,
 ) -> dict:
     k_id = cand["k_id"]
+    evidence = _article_evidence_package(k_id)
+    evidence_paths = list(evidence.get("paths") or [])
+    if evidence.get("source") == "knowledge":
+        evidence_pointer = (
+            f"storage/memory/knowledge.json "
+            f"({evidence.get('knowledge_selector')})"
+        )
+    elif evidence_paths:
+        evidence_pointer = ", ".join(evidence_paths)
+    else:
+        evidence_pointer = "evidence index unavailable; writer must resolve before drafting"
+    data_source_note = (
+        f"Canonical evidence: {evidence_pointer}. Read figures programmatically from "
+        "these sources; do not copy numeric claims from README or task prose."
+    )
     audiences_covered = cand.get("audiences_covered") or []
     needed_audience = "general" if "general" not in audiences_covered else "research"
     correction_rewrite = _is_general_correction_rewrite(cand)
@@ -813,7 +967,8 @@ def _make_article_task(
             f"{correction_note}"
             f"{'Emergency reader-facing publish-drought remediation; dispatch immediately. ' if emergency else ''}"
             f"{'Prior task terminal but feed lacks coverage — retry.' if retry_suffix and not correction_rewrite else ''} "
-            f"Verdict preview: {(cand.get('verdict_preview') or '')[:280]}"
+            f"Verdict preview: {(cand.get('verdict_preview') or '')[:280]} "
+            f"{data_source_note}"
         ),
         "priority": 1 if emergency else priority,
         "status": "pending",
@@ -821,6 +976,9 @@ def _make_article_task(
         "source": source,
         "audience_correction_rewrite": correction_rewrite,
         "k_id": k_id,
+        "evidence_source_paths": evidence_paths,
+        "evidence_source_kind": evidence.get("source"),
+        "data_source_note": data_source_note,
         "tags": tags,
         "topic_cluster": cand.get("topic_cluster"),
         "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -1529,6 +1687,14 @@ def refill(
             continue
         if _is_invalidated_artifact_candidate(cand):
             continue
+        evidence = _article_evidence_package(kid)
+        if not evidence.get("ready"):
+            print(
+                f"  [refill] skip {kid}: no article evidence package "
+                f"(results_json=0, knowledge_numeric_claims="
+                f"{evidence.get('knowledge_numeric_claims', 0)})"
+            )
+            continue
         # 2026-06-14 K1327 incident: publication_candidates can retain a stale
         # verdict signal after the source K experiment task is failed. Never
         # materialize a reader-facing article from a failed source experiment.
@@ -1794,11 +1960,36 @@ def main() -> int:
                         help="number of new tasks to attempt to add (default 4)")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument(
+        "--audit-pending-evidence",
+        action="store_true",
+        help="list existing auto-generated pending article tasks that now fail the evidence gate",
+    )
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
+    if args.audit_pending_evidence:
+        _, tasks = _load_tasks()
+        result = {
+            "ok": True,
+            "invalid_pending": _pending_article_tasks_without_evidence(tasks),
+        }
+        result["count"] = len(result["invalid_pending"])
+        if args.json:
+            print(json.dumps(result, ensure_ascii=False))
+        else:
+            print(
+                f"[refill] pending evidence audit: {result['count']} invalid tasks"
+            )
+            for item in result["invalid_pending"]:
+                print(f"  {item['id']}: {item['reason']}")
+        return 0
+
     if not (args.dry_run or args.apply):
-        print("error: must specify --dry-run or --apply", file=sys.stderr)
+        print(
+            "error: must specify --dry-run, --apply, or --audit-pending-evidence",
+            file=sys.stderr,
+        )
         return 2
 
     result = refill(args.target, dry_run=args.dry_run)

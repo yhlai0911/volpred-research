@@ -105,6 +105,134 @@ def test_refill_skips_blank_title_candidates(tmp_path, monkeypatch):
     assert data == []
 
 
+def test_refill_evidence_gate_skips_unsubstantiated_k_and_points_to_results(
+    tmp_path, monkeypatch
+):
+    """A thin knowledge row cannot open a task; real results must be linked."""
+    storage = tmp_path / "storage"
+    next_tasks = storage / "next_tasks.json"
+    candidates = storage / "publication_candidates.json"
+    knowledge = storage / "memory" / "knowledge.json"
+    knowledge.parent.mkdir(parents=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    knowledge.write_text(
+        json.dumps(
+            [
+                {
+                    "experiment_id": "K9001",
+                    "content": "Method-only note with no quantitative finding.",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    good_dir = tmp_path / "experiments" / "k9002"
+    good_dir.mkdir(parents=True)
+    result_path = good_dir / "k9002_results.json"
+    result_path.write_text('{"effect": 0.12, "p_value": 0.03}\n', encoding="utf-8")
+    candidates.write_text(
+        json.dumps(
+            {
+                "top_10_uncovered": [
+                    {
+                        "k_id": "K9001",
+                        "title": "method only",
+                        "score": 4,
+                        "reasons": ["candidate"],
+                        "verdict_preview": "method only",
+                        "audiences_covered": [],
+                        "covered_by": [],
+                    },
+                    {
+                        "k_id": "K9002",
+                        "title": "result-backed candidate",
+                        "score": 4,
+                        "reasons": ["PASS"],
+                        "verdict_preview": "measured result",
+                        "audiences_covered": [],
+                        "covered_by": [],
+                    },
+                ],
+                "missing_research_top5": [],
+                "missing_general_top5": [],
+                "candidates": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False})
+    monkeypatch.setattr(MODULE, "_kids_with_audience_article", lambda audience: set())
+    monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
+    monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+    monkeypatch.setattr(MODULE, "_is_arc_duplicate_candidate", lambda cand: False)
+    monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
+    monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
+
+    result = MODULE.refill(target=2, dry_run=False)
+
+    assert result["added_ids"] == ["K9002_article_general"]
+    task = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert task["evidence_source_paths"] == ["experiments/k9002/k9002_results.json"]
+    assert task["evidence_source_kind"] == "experiment_results"
+    assert "experiments/k9002/k9002_results.json" in task["description"]
+    assert "programmatically" in task["data_source_note"]
+
+
+def test_pending_article_evidence_sweep_flags_only_unsubstantiated_pending(
+    tmp_path, monkeypatch
+):
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    knowledge = tmp_path / "storage" / "memory" / "knowledge.json"
+    knowledge.parent.mkdir(parents=True)
+    knowledge.write_text("[]\n", encoding="utf-8")
+    good_dir = tmp_path / "experiments" / "k9102"
+    good_dir.mkdir(parents=True)
+    (good_dir / "k9102_results.json").write_text("{}\n", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+
+    bad = MODULE._pending_article_tasks_without_evidence(
+        [
+            {
+                "id": "K9101_article_general",
+                "k_id": "K9101",
+                "title": "K9101: write general-audience article (auto-discovered uncovered K)",
+                "task_type": "daily_article",
+                "source": "auto_discovered",
+                "status": "pending",
+            },
+            {
+                "id": "K9102_article_general",
+                "k_id": "K9102",
+                "title": "K9102: write general-audience article (auto-discovered uncovered K)",
+                "task_type": "daily_article",
+                "source": "auto_discovered",
+                "status": "pending",
+            },
+            {
+                "id": "K9103_article_general",
+                "k_id": "K9103",
+                "title": "already owned",
+                "task_type": "daily_article",
+                "source": "auto_discovered",
+                "status": "claimed",
+            },
+        ]
+    )
+
+    assert bad == [
+        {
+            "id": "K9101_article_general",
+            "k_id": "K9101",
+            "reason": "no_article_evidence_package",
+        }
+    ]
+
+
 def test_reader_facing_emergency_refill_only_adds_general_daily_article(tmp_path, monkeypatch):
     next_tasks = tmp_path / "storage" / "next_tasks.json"
     candidates = tmp_path / "storage" / "publication_candidates.json"
