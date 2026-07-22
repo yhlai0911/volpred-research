@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T05:01:19.557149+00:00",
+  "generated_at": "2026-07-22T06:01:28.902713+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 15.7
+      "age_hours": 16.7
     }
   ],
   "held": [
@@ -81,53 +81,18 @@
       "collections": []
     },
     "experiments": {
-      "collectable": [
-        {
-          "path": "experiments/k1623/README.md",
-          "kind": "md",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1623/review_round3_codex_20260722.md",
-          "kind": "md",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1623/review_verdict_round3.json",
-          "kind": "json",
-          "reason": "untracked"
-        }
-      ],
+      "collectable": [],
       "held": [],
       "skipped": {
         "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": [
-        {
-          "namespace": "experiments",
-          "paths": [
-            "experiments/k1623/README.md",
-            "experiments/k1623/review_round3_codex_20260722.md",
-            "experiments/k1623/review_verdict_round3.json"
-          ],
-          "committed": true,
-          "detail": "[main 1960c4bdb] chore(experiment-reap): collect orphaned experiment artifacts (3 files)\n 3 files changed, 142 insertions(+)\n create mode 100644 exper"
-        }
-      ]
+      "collections": []
     }
   },
-  "held_escalations": [
-    {
-      "task_id": "assign_db64b82b",
-      "paths": [
-        "storage/drafts/K1697_general_draft.md"
-      ]
-    }
-  ],
+  "held_escalations": [],
   "held_escalated_paths": [
-    "job:compute-k1623-arm-c-mc-dm-hac-lag-gate-false-positive-1784574674",
     "job:compute-k1730-arm-a-production-quick-mode-1784358686",
     "job:k1698_rev3_rerun",
     "storage/drafts/K1697_general_draft.md"
