@@ -51,6 +51,7 @@ Differences from legacy (deliberate, same behaviour):
 """
 from __future__ import annotations
 
+import ast
 import fcntl
 import hashlib
 import json
@@ -2020,6 +2021,105 @@ def _is_test_path(rel: str) -> bool:
     )
 
 
+# ---------------------------------------------------------------------------
+# Split-pair guard (task assign_b802db4f, 2026-07-22)
+#
+# A refactor lands as two halves: a new source module and the test that imports
+# it. PHASE-Z classifies paths by *when they went dirty*, never by what they mean
+# to each other, so the halves routinely land on opposite sides of the ownership
+# line -- the test went dirty during this fire (owned), the source was already
+# dirty at fire start (foreign, excluded). The candidate index then holds a test
+# whose import target is absent from it, audit-test-imports rejects it by design,
+# the commit rolls back, every path stays dirty, and the next fire rebuilds the
+# identical doomed candidate. Observed 2026-07-21/22: 21 foreign paths stuck for
+# >=3 fires and ~13 hours of fire output rolled back, because the receipt written
+# on failure pins only `owned` -- so recovery replays the same half-set forever.
+#
+# The exit is to spot the split before staging and defer the *test* half. We
+# never pull the foreign source in: that is stealing another session's in-flight
+# bytes, which is exactly what ownership classification exists to prevent.
+# Deferring is cheap and strictly bounded -- only an *untracked* test whose
+# missing half is itself untracked and present on disk qualifies, and a
+# brand-new test carries no regression signal that HEAD did not already lack. A
+# tracked test that breaks is a real break and still blocks the commit.
+# ---------------------------------------------------------------------------
+
+_AUDITED_IMPORT_ROOTS = {"volpred": "src", "scripts": "."}
+
+
+def _referenced_source_paths(repo_root: Path, rel: str) -> set[str]:
+    """Repo-relative source paths a test needs, by import and by path literal.
+
+    Mirrors what ``scripts/audit_test_imports.py`` resolves: dotted modules under
+    ``volpred``/``scripts`` (including ``from pkg import submodule``, where the
+    submodule is the half that goes missing) plus bare ``scripts/x.py`` literals.
+    A miss here costs nothing -- the guard only ever *drops* a path, so an
+    unresolved dependency just degrades to today's behaviour of letting the gate
+    reject the commit.
+    """
+    try:
+        source = (repo_root / rel).read_text(encoding="utf-8")
+        tree = ast.parse(source)
+    except (OSError, ValueError, SyntaxError):
+        return set()
+
+    dotted: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            dotted.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            dotted.add(node.module)
+            dotted.update(f"{node.module}.{alias.name}" for alias in node.names)
+
+    out: set[str] = set()
+    for name in dotted:
+        base = _AUDITED_IMPORT_ROOTS.get(name.split(".", 1)[0])
+        if base is None:
+            continue
+        stem = Path(base, *name.split("."))
+        for cand in (stem.with_suffix(".py"), stem / "__init__.py"):
+            if (repo_root / cand).is_file():
+                out.add(cand.as_posix())
+                break
+
+    for literal in re.findall(r"['\"](scripts/[\w./-]+\.py)['\"]", source):
+        if (repo_root / literal).is_file():
+            out.add(literal)
+    return out
+
+
+def _split_pair_deferrals(
+    repo_root: Path, to_stage: list[str], base_sha: str, *, runner
+) -> dict[str, list[str]]:
+    """Untracked tests in ``to_stage`` whose source half is absent from the candidate.
+
+    Returns ``{test_rel: [missing source rel, ...]}``; empty when nothing is split.
+    """
+    staged = set(to_stage)
+    tracked_cache: dict[str, bool] = {}
+
+    def _tracked(rel: str) -> bool:
+        if rel not in tracked_cache:
+            probe = _git(
+                repo_root, "cat-file", "-e", f"{base_sha}:{rel}",
+                timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+            )
+            tracked_cache[rel] = probe.returncode == 0
+        return tracked_cache[rel]
+
+    deferrals: dict[str, list[str]] = {}
+    for rel in to_stage:
+        if not _is_test_path(rel) or _tracked(rel):
+            continue
+        missing = sorted(
+            dep for dep in _referenced_source_paths(repo_root, rel)
+            if dep not in staged and not _tracked(dep)
+        )
+        if missing:
+            deferrals[rel] = missing
+    return deferrals
+
+
 def _orphan_half_candidates(repo_root: Path, foreign: list[str]) -> list[str]:
     """Foreign dirty paths eligible to be *proved* a missing half.
 
@@ -2980,6 +3080,20 @@ def run_phase_z(
                 untracked.append(path)
 
             to_stage = [p for p in (owned + churn + adopted_halves) if p not in set(untracked)]
+
+            # Defer test halves whose source half is not in this candidate; staging
+            # them guarantees an audit-test-imports rejection and a rollback that
+            # takes the rest of the fire's output down with it. See the split-pair
+            # guard block above.
+            split_deferred = _split_pair_deferrals(repo_root, to_stage, base_sha, runner=runner)
+            if split_deferred:
+                for test_rel, missing in sorted(split_deferred.items()):
+                    LOG.warning(
+                        "phase_z: deferring %s — source half not in candidate: %s",
+                        test_rel, ", ".join(missing),
+                    )
+                to_stage = [p for p in to_stage if p not in split_deferred]
+
             pathspec_file = tx_root / "paths.nul"
             try:
                 pathspec_file.write_bytes(b"\0".join(os.fsencode(path) for path in to_stage))
