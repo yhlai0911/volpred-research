@@ -80,13 +80,19 @@
      "first_seen_at": "2026-07-22T10:00:11.318999+00:00",
      "key": "29906217577:1",
      "last_seen_at": "2026-07-22T10:00:11.318999+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-22T11:00:10.585774+00:00",
+     "key": "29910221847:1",
+     "last_seen_at": "2026-07-22T11:00:10.585774+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-22T09:13:37.2849160Z E AssertionError: Enforcement Layer Map is out of sync with disk — update .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md in the same commit as ",
-   "last_seen_at": "2026-07-22T10:00:11.318999+00:00",
+   "last_breach_detail": "2026-07-22T10:13:42.8949075Z E AssertionError: Enforcement Layer Map is out of sync with disk — update .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md in the same commit as ",
+   "last_seen_at": "2026-07-22T11:00:10.585774+00:00",
    "notified_at": null,
-   "occurrence_count": 11,
+   "occurrence_count": 12,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -217,55 +223,91 @@
      "detail": {
       "branch": "wt/dispatch-slot-1-20b291d5-snapdup",
       "dirty": true,
-      "idle_hours": 14.9,
+      "idle_hours": 20.9,
       "unmerged_commits": 1
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-22T05:00:33.410158+00:00"
+     "last_seen_at": "2026-07-22T11:00:30.825875+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-375ba0e3-k1380",
       "dirty": true,
-      "idle_hours": 15.0,
+      "idle_hours": 21.0,
       "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-22T05:00:33.410158+00:00"
+     "last_seen_at": "2026-07-22T11:00:30.825875+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-bd00f90a-k1731",
       "dirty": false,
-      "idle_hours": 13.2,
+      "idle_hours": 19.2,
       "unmerged_commits": 21
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-22T05:00:33.410158+00:00"
+     "last_seen_at": "2026-07-22T11:00:30.825875+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-f5a22a5f-k1095v2",
       "dirty": false,
-      "idle_hours": 8.8,
+      "idle_hours": 14.8,
       "unmerged_commits": 3
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-22T05:00:33.410158+00:00"
+     "last_seen_at": "2026-07-22T11:00:30.825875+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "worktree-agent-a148e8a94105f7935",
+      "dirty": true,
+      "idle_hours": 8.2,
+      "unmerged_commits": 0
+     },
+     "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
+     "key": "agent-a148e8a94105f7935",
+     "last_seen_at": "2026-07-22T11:00:30.825875+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "wt/dispatch-slot-2-8dda242d-k1708",
+      "dirty": true,
+      "idle_hours": 8.3,
+      "unmerged_commits": 4
+     },
+     "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
+     "key": "dispatch-slot-1-457427c2-k1708",
+     "last_seen_at": "2026-07-22T11:00:30.825875+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "wt/dispatch-slot-3-3896dcaa-k1714",
+      "dirty": true,
+      "idle_hours": 7.9,
+      "unmerged_commits": 0
+     },
+     "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
+     "key": "dispatch-slot-3-3896dcaa-k1714",
+     "last_seen_at": "2026-07-22T11:00:30.825875+00:00"
     }
    ],
    "kind": "worktree_unmerged",
-   "last_breach_detail": "held worktree dispatch-slot-1-f5a22a5f-k1095v2",
-   "last_seen_at": "2026-07-22T05:00:33.410158+00:00",
+   "last_breach_detail": "held worktree dispatch-slot-3-3896dcaa-k1714",
+   "last_seen_at": "2026-07-22T11:00:30.825875+00:00",
    "notified_at": null,
-   "occurrence_count": 9,
+   "occurrence_count": 16,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -308,7 +350,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-22T10:07:55.734561+00:00"
+     "last_seen_at": "2026-07-22T11:01:04.385104+00:00"
     },
     {
      "cleared_at": null,
@@ -321,7 +363,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-22T10:07:56.051098+00:00"
+     "last_seen_at": "2026-07-22T11:01:04.700972+00:00"
     },
     {
      "cleared_at": null,
@@ -334,7 +376,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-22T10:07:56.876301+00:00"
+     "last_seen_at": "2026-07-22T11:01:05.511128+00:00"
     },
     {
      "cleared_at": null,
@@ -347,7 +389,7 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-22T10:07:56.354361+00:00"
+     "last_seen_at": "2026-07-22T11:01:05.020998+00:00"
     },
     {
      "cleared_at": null,
@@ -360,7 +402,7 @@
      },
      "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-22T10:07:57.282795+00:00"
+     "last_seen_at": "2026-07-22T11:01:05.971873+00:00"
     },
     {
      "cleared_at": null,
@@ -386,14 +428,14 @@
      },
      "first_seen_at": "2026-07-22T02:53:18.325364+00:00",
      "key": "dispatch-slot-3-3896dcaa-k1714",
-     "last_seen_at": "2026-07-22T10:07:57.645632+00:00"
+     "last_seen_at": "2026-07-22T11:01:06.343306+00:00"
     }
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-3-3896dcaa-k1714 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-22T10:07:57.645632+00:00",
+   "last_seen_at": "2026-07-22T11:01:06.343306+00:00",
    "notified_at": null,
-   "occurrence_count": 215,
+   "occurrence_count": 221,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -475,6 +517,9 @@
     },
     {
      "at": "2026-07-22T09:18:41.308157+00:00"
+    },
+    {
+     "at": "2026-07-22T10:18:57.219276+00:00"
     }
    ],
    "current_task_id": null,
@@ -590,6 +635,6 @@
    }
   }
  },
- "updated_at": "2026-07-22T10:18:49.478073+00:00",
+ "updated_at": "2026-07-22T11:06:07.601461+00:00",
  "version": 1
 }

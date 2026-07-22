@@ -44,9 +44,9 @@
   "timeout_seconds": 5400,
   "brief_source": "/tmp/brief_k1714.md",
   "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1714-cd4315.md",
-  "claimed_by_pid": 10646,
-  "claimed_by_pid_start_wall": "Wed Jul 22 17:45:03 2026",
-  "quota_requeues": 10,
+  "claimed_by_pid": 24019,
+  "claimed_by_pid_start_wall": "Wed Jul 22 18:30:03 2026",
+  "quota_requeues": 11,
   "requeue_history": [
     {
       "at": "2026-07-22T03:05:47Z",
@@ -107,7 +107,16 @@
       "reason": "quota",
       "exit_code": 1,
       "started_at": "2026-07-22T09:45:03Z"
+    },
+    {
+      "at": "2026-07-22T10:30:10Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-07-22T10:30:03Z",
+      "reset_at": null
     }
   ],
-  "not_before": "2026-07-22T10:15:10.600682+00:00"
+  "not_before": "2026-07-22T11:00:10.979055+00:00",
+  "attempt_status": "quota_exhausted",
+  "quota_reset_at": null
 }
