@@ -4,7 +4,9 @@
 三項職責（同一 owner、同一把鎖 — anti-stacking）：
 
 1. **Unblock expired**：blocked 且 blocked_until 已過期 → status="pending"，
-   清 blocked_* 欄位並寫 status_history audit。
+   清 blocked_* 欄位並寫 status_history audit。`codex_quota_reset_pending`
+   是例外：外部額度是可實測狀態，不以日期猜測；每次 apply 最多做一次
+   有界 reachability probe，成功即提早解封全部同類任務，失敗則維持 blocked。
    Why: dispatcher (continue_task_dispatch.py:102) 只把 status=="pending" 當
    candidates；categorize() 的 blocked_until check 只 gate runtime dispatch，
    永遠不會把 status 翻回來 → 過期 blocked task 永遠進不了 agentable pool。
@@ -56,9 +58,37 @@ BLOCKED_FIELDS = ("blocked_reason", "blocked_at", "blocked_until", "blocked_note
 # recently_completed（24h 窗口，只用 completed_at/title）；其餘 reader 全部
 # 只做 id 查重（tombstone 保留）。2026-07-14 實測 30 天窗口留下 1.96MB 殘量。
 COMPACT_AGE_DAYS = 3
+CODEX_QUOTA_REASON = "codex_quota_reset_pending"
 
 
-def _sweep_unblock(tasks: list, *, apply: bool) -> list[dict]:
+def _probe_codex_available() -> tuple[bool, str]:
+    """Return whether a bounded Codex round-trip succeeds right now.
+
+    Import lazily so ordinary queue maintenance (and every dry-run) does not load
+    the dispatch supervisor merely to inspect dates.  Reuse the failover probe:
+    it is already the single owner for binary resolution, PATH repair, prompt,
+    timeout, and reachability semantics.
+    """
+    from scripts.dispatch_supervisor import codex_failover
+
+    codex_bin = codex_failover.resolve_codex_bin()
+    if not codex_bin:
+        return False, "codex binary not found"
+    ok, rc, detail = codex_failover.preflight(codex_bin)
+    if not ok:
+        return False, f"preflight rc={rc}: {detail}"
+    reachable, rc, detail = codex_failover.check_reachable(codex_bin)
+    if not reachable:
+        return False, f"reachability rc={rc}: {detail}"
+    return True, detail
+
+
+def _sweep_unblock(
+    tasks: list,
+    *,
+    apply: bool,
+    codex_probe_ok: bool | None = None,
+) -> list[dict]:
     now = datetime.now(timezone.utc)
     swept: list[dict] = []
     for t in tasks:
@@ -66,29 +96,43 @@ def _sweep_unblock(tasks: list, *, apply: bool) -> list[dict]:
             continue
         if (t.get("status") or "").lower() != "blocked":
             continue
+        blocked_reason = t.get("blocked_reason")
+        if blocked_reason == CODEX_QUOTA_REASON:
+            # A reset timestamp is an observation made during an earlier
+            # failure, not a durable fact.  Success is the only valid unblock
+            # condition; failure keeps even an expired row parked instead of
+            # feeding a known-unavailable dependency back into dispatch.
+            if codex_probe_ok is not True:
+                continue
+            unblock_reason = "codex_reachability_probe_succeeded"
+        else:
+            unblock_reason = None
         until = t.get("blocked_until")
-        if not until:
+        if not until and unblock_reason is None:
             continue
         # Strict ISO parsing still accepts the plain `YYYY-MM-DD` form. Invalid
         # blocked_until values must stay blocked; a lexical fallback can unblock
         # malformed metadata by accident.
-        until_dt = parse_iso_warn(
-            until,
-            tag="unblock",
-            field_name="blocked_until",
-            fallback=None,
-            task_id=str(t.get("id") or ""),
-        )
-        if until_dt is None:
-            continue  # parse failed → WARN already emitted, keep blocked
-        if until_dt > now:
-            continue
+        if unblock_reason is None:
+            until_dt = parse_iso_warn(
+                until,
+                tag="unblock",
+                field_name="blocked_until",
+                fallback=None,
+                task_id=str(t.get("id") or ""),
+            )
+            if until_dt is None:
+                continue  # parse failed → WARN already emitted, keep blocked
+            if until_dt > now:
+                continue
+            unblock_reason = f"blocked_until_expired ({until})"
         swept.append(
             {
                 "id": t.get("id"),
                 "task_type": t.get("task_type"),
-                "blocked_reason": t.get("blocked_reason"),
+                "blocked_reason": blocked_reason,
                 "blocked_until": until,
+                "unblock_reason": unblock_reason,
             }
         )
         if apply:
@@ -98,7 +142,7 @@ def _sweep_unblock(tasks: list, *, apply: bool) -> list[dict]:
                     "at": datetime.now(timezone.utc).isoformat(),
                     "from": "blocked",
                     "to": "pending",
-                    "reason": f"blocked_until_expired ({until})",
+                    "reason": unblock_reason,
                 }
             )
             for k in BLOCKED_FIELDS:
@@ -191,7 +235,31 @@ def main(apply: bool) -> int:
             tasks = json.loads(fh.read() or "[]")
             if isinstance(tasks, dict):
                 tasks = tasks.get("tasks", [])
-            swept = _sweep_unblock(tasks, apply=apply)
+            quota_blocked = [
+                t
+                for t in tasks
+                if isinstance(t, dict)
+                and (t.get("status") or "").lower() == "blocked"
+                and t.get("blocked_reason") == CODEX_QUOTA_REASON
+            ]
+            codex_probe_ok: bool | None = None
+            if quota_blocked and apply:
+                codex_probe_ok, probe_detail = _probe_codex_available()
+                outcome = "available" if codex_probe_ok else "unavailable"
+                print(
+                    f"[queue-maint] codex quota probe: {outcome}; "
+                    f"blocked={len(quota_blocked)}; {probe_detail}"
+                )
+            elif quota_blocked:
+                print(
+                    f"[queue-maint] dry-run: would actively probe Codex for "
+                    f"{len(quota_blocked)} quota-blocked task(s); no probe sent"
+                )
+            swept = _sweep_unblock(
+                tasks,
+                apply=apply,
+                codex_probe_ok=codex_probe_ok,
+            )
             escalated = _sweep_missing_until(tasks, apply=apply)
             n_compact, archived = compact_terminal_tasks(tasks, age_days=COMPACT_AGE_DAYS)
             if apply:
