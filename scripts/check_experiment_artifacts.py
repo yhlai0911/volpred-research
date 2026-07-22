@@ -296,17 +296,68 @@ def _remedy(record: dict[str, Any]) -> list[str]:
     return lines
 
 
+def caller_root() -> Path:
+    """The checkout the *caller* is standing in, which is not always ours.
+
+    REPO_ROOT is derived from this file's location, so it always points at the
+    canonical checkout. When a worktree agent runs us from
+    `.claude/worktrees/<name>`, resolving its relative paths against REPO_ROOT
+    looks for `experiments/kXXXX` in a checkout where that directory does not
+    exist yet — targets comes back empty and we print PASS. That is the exact
+    failure this file's docstring warns about: a gate that cannot start is a
+    gate that abstains. So resolve against the caller's checkout instead.
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True, text=True, timeout=30, check=True,
+        )
+        top = Path(proc.stdout.strip())
+        if top.is_dir():
+            return top
+    except (OSError, subprocess.SubprocessError):
+        pass  # silent-ok: not in a git checkout; REPO_ROOT is the honest fallback
+    return REPO_ROOT
+
+
 def cmd_check(args: argparse.Namespace) -> int:
+    root = caller_root()
     targets: list[Path] = []
+    missing: list[str] = []
     if args.path:
         for raw in args.path:
             p = Path(raw)
-            targets.append(p if p.is_absolute() else REPO_ROOT / p)
+            if p.is_absolute():
+                targets.append(p)
+                if not p.is_dir():
+                    missing.append(raw)
+                continue
+            # Caller's checkout first, ours second — a relative path means
+            # "relative to where I am standing", not "relative to the script".
+            for candidate in (root / p, REPO_ROOT / p):
+                if candidate.is_dir():
+                    targets.append(candidate)
+                    break
+            else:
+                missing.append(raw)
+    if missing:
+        # An explicit --path that resolves to nothing is the caller asking us to
+        # check something specific. Answering PASS would be answering a question
+        # we never looked at. Fail loudly instead, and say where we looked.
+        print("[artifacts] ERROR — --path given but no such experiment directory:", file=sys.stderr)
+        for raw in missing:
+            print(f"    {raw}", file=sys.stderr)
+        print(f"[artifacts] looked in: {root}", file=sys.stderr)
+        if root != REPO_ROOT:
+            print(f"[artifacts]        and: {REPO_ROOT}", file=sys.stderr)
+        print("[artifacts] WHY exit 2 and not PASS: a gate that cannot find its target has not", file=sys.stderr)
+        print("  checked anything. Passing here is how a worktree experiment reaches main unaudited.", file=sys.stderr)
+        return 2
     if args.changed_since:
         try:
             proc = subprocess.run(
                 ["git", "diff", "--name-only", f"{args.changed_since}...HEAD", "--", "experiments/"],
-                cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=60, check=True,
+                cwd=str(root), capture_output=True, text=True, timeout=60, check=True,
             )
         except (OSError, subprocess.SubprocessError) as exc:
             print(f"[artifacts] error: git diff failed: {exc}", file=sys.stderr)
@@ -315,7 +366,7 @@ def cmd_check(args: argparse.Namespace) -> int:
             line.split("/")[1] for line in proc.stdout.splitlines()
             if line.startswith("experiments/") and len(line.split("/")) >= 2
         })
-        targets += [REPO_ROOT / "experiments" / n for n in names]
+        targets += [root / "experiments" / n for n in names]
 
     targets = [t for t in dict.fromkeys(targets) if t.is_dir()]
     if not targets:
