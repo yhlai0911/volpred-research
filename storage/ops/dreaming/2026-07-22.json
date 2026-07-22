@@ -1,0 +1,597 @@
+{
+  "schema": "dreaming_review.v1",
+  "generated_at": "2026-07-22T21:25:01.464713+00:00",
+  "window_days": 14,
+  "dry_run": false,
+  "loop_health": {
+    "generated_at": "2026-07-22T21:25:01.464713+00:00",
+    "window_days": 14,
+    "overall": "warn",
+    "first_pass_success": {
+      "status": "ok",
+      "signal": "derived",
+      "window_days": 14,
+      "total_succeeded": 930,
+      "traced": 612,
+      "coverage": 0.658,
+      "first_pass": 602,
+      "retried": 10,
+      "first_pass_rate": 0.984,
+      "retry_rate": 0.016
+    },
+    "task_outcome": {
+      "status": "ok",
+      "signal": "supported",
+      "window_days": 14,
+      "success": 930,
+      "fail": 16,
+      "blocked": 9,
+      "other": 157,
+      "success_rate": 0.974
+    },
+    "error_recurrence": {
+      "status": "warn",
+      "signal": "supported",
+      "window_days": 14,
+      "distinct_signatures": 3,
+      "recurring": 2,
+      "recurrence_rate": 0.667,
+      "distinct_signatures_all": 24,
+      "recurring_all": 9,
+      "recurrence_rate_all": 0.375,
+      "top_recurring": [
+        {
+          "signature": "dispatch_supervisor:codex_failover_recovered:exit0",
+          "count": 39,
+          "first_seen": "2026-07-22T03:09:48.628016+00:00",
+          "last_seen": "2026-07-22T21:10:29.988742+00:00",
+          "source": "dispatch_state.completions",
+          "span_days": 0.75,
+          "known": false,
+          "recovered": false
+        },
+        {
+          "signature": "release_settings_audit.log:exit1",
+          "count": 28,
+          "first_seen": "2026-07-19T16:17:01+00:00",
+          "last_seen": "2026-07-22T17:00:20+00:00",
+          "source": "cron_log",
+          "span_days": 3.03,
+          "known": false,
+          "recovered": false
+        },
+        {
+          "signature": "dispatch_supervisor:killed_timeout:exit137",
+          "count": 1,
+          "first_seen": "2026-07-22T02:47:16.152848+00:00",
+          "last_seen": "2026-07-22T02:47:16.152848+00:00",
+          "source": "dispatch_state.completions",
+          "span_days": 0.0,
+          "known": false,
+          "recovered": false
+        },
+        {
+          "signature": "check_alerts.log:exit1",
+          "count": 16,
+          "first_seen": "2026-07-21T09:00:08+00:00",
+          "last_seen": "2026-07-22T00:00:06+00:00",
+          "source": "cron_log",
+          "recovered": true,
+          "span_days": 0.62,
+          "known": false
+        },
+        {
+          "signature": "dispatch_supervisor:external_signal:exit143",
+          "count": 7,
+          "first_seen": "2026-07-21T08:06:06.681021+00:00",
+          "last_seen": "2026-07-22T01:04:01.741373+00:00",
+          "source": "dispatch_state.completions",
+          "recovered": true,
+          "span_days": 0.71,
+          "known": false
+        }
+      ]
+    },
+    "correction_trend": {
+      "status": "ok",
+      "signal": "supported",
+      "weeks": 4,
+      "weekly_counts_recent_first": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "slope_per_week": 0.0,
+      "trend": "flat",
+      "current_correction_report_high": null,
+      "current_correction_report_medium": null
+    }
+  },
+  "findings": [
+    {
+      "pattern_type": "repeated_tool_failure",
+      "signature": "repeated_tool_failure:dispatch_supervisor:codex_failover_recovered:exit0",
+      "severity": "warn",
+      "evidence": [
+        "dispatch_supervisor:codex_failover_recovered:exit0 ×39 over 0.75d (first 2026-07-22T03:09:48.628016+00:00 → last 2026-07-22T21:10:29.988742+00:00)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Cron job `dispatch_supervisor` returned a non-zero exit 39× in the window. Investigate the wrapper/script root cause (API death / auth / path). If sustained, open docs/refactor_plan_<job>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-22T21:25:01.464713+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "repeated_tool_failure",
+      "signature": "repeated_tool_failure:release_settings_audit.log:exit1",
+      "severity": "warn",
+      "evidence": [
+        "release_settings_audit.log:exit1 ×28 over 3.03d (first 2026-07-19T16:17:01+00:00 → last 2026-07-22T17:00:20+00:00) — clean for 4.4h since last occurrence (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_repeated_tool_failure_release_settings_audit_log_exit1",
+      "proposal": "Cron job `release_settings_audit.log` returned a non-zero exit 28× in the window. Investigate the wrapper/script root cause (API death / auth / path). If sustained, open docs/refactor_plan_<job>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-22T21:25:01.464713+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:K709",
+      "severity": "warn",
+      "evidence": [
+        "task K709_article_general_v2 (k_id=K709) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task K709_article_general_v2 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "K709_article_general_v2",
+      "governance_target": null,
+      "occurrences": 2,
+      "first_seen": "2026-07-21T21:25:00.758443+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:k1095_v2_known_in_advance_schedule",
+      "severity": "warn",
+      "evidence": [
+        "task k1095_v2_known_in_advance_schedule (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task k1095_v2_known_in_advance_schedule has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "k1095_v2_known_in_advance_schedule",
+      "governance_target": null,
+      "occurrences": 2,
+      "first_seen": "2026-07-21T21:25:00.758443+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:research_rp_4855ddb7a9",
+      "severity": "critical",
+      "evidence": [
+        "task research_rp_4855ddb7a9 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_research_rp_4855ddb7a9",
+      "proposal": "Failed task research_rp_4855ddb7a9 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "research_rp_4855ddb7a9",
+      "governance_target": null,
+      "occurrences": 5,
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "succeeded"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
+      "severity": "critical",
+      "evidence": [
+        "task research_spot_bitcoin_etf_flow_shock_btc_eth_vol (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_research_spot_bitcoin_etf_flow_shock_",
+      "proposal": "Failed task research_spot_bitcoin_etf_flow_shock_btc_eth_vol has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
+      "governance_target": null,
+      "occurrences": 5,
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "succeeded"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:research_private_market_rv_correlation_regime",
+      "severity": "critical",
+      "evidence": [
+        "task research_private_market_rv_correlation_regime (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_research_private_market_rv_correlatio",
+      "proposal": "Failed task research_private_market_rv_correlation_regime has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "research_private_market_rv_correlation_regime",
+      "governance_target": null,
+      "occurrences": 5,
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "succeeded"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:fable0711_ftd_e1_scale_gating",
+      "severity": "critical",
+      "evidence": [
+        "task fable0711_ftd_e1_scale_gating (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_fable0711_ftd_e1_scale_gating",
+      "proposal": "Failed task fable0711_ftd_e1_scale_gating has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "fable0711_ftd_e1_scale_gating",
+      "governance_target": null,
+      "occurrences": 6,
+      "first_seen": "2026-07-18T21:25:00.535671+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "succeeded"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:trending_repost_2026_07_14_ai資本",
+      "severity": "critical",
+      "evidence": [
+        "task trending_repost_2026_07_14_ai資本 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": "next_task:dreaming_missing_retry_strategy_trending_repost_2026_07_14_ai",
+      "proposal": "Failed task trending_repost_2026_07_14_ai資本 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "trending_repost_2026_07_14_ai資本",
+      "governance_target": null,
+      "occurrences": 5,
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "succeeded"
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:assign_24ebe308",
+      "severity": "warn",
+      "evidence": [
+        "task assign_24ebe308 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task assign_24ebe308 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "assign_24ebe308",
+      "governance_target": null,
+      "occurrences": 1,
+      "first_seen": "2026-07-22T21:25:01.464713+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:trending_repost_2026_07_21_ai變現",
+      "severity": "warn",
+      "evidence": [
+        "task trending_repost_2026_07_21_ai變現 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task trending_repost_2026_07_21_ai變現 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "trending_repost_2026_07_21_ai變現",
+      "governance_target": null,
+      "occurrences": 2,
+      "first_seen": "2026-07-21T21:25:00.758443+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "missing_retry_strategy",
+      "signature": "missing_retry_strategy:trending_repost_2026_07_21_晶片回檔",
+      "severity": "warn",
+      "evidence": [
+        "task trending_repost_2026_07_21_晶片回檔 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "Failed task trending_repost_2026_07_21_晶片回檔 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
+      "subject_task_id": "trending_repost_2026_07_21_晶片回檔",
+      "governance_target": null,
+      "occurrences": 2,
+      "first_seen": "2026-07-21T21:25:00.758443+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:e46b1923cd3787a9",
+      "severity": "critical",
+      "evidence": [
+        "alert_key=e46b1923cd3787a9 title='supervisor quota_blocked（額度恢復後自動復工）' send_count=13 span=15.7d (first 2026-07-06T11:08:02.667095+00:00 → last 2026-07-22T03:02:58.472056+00:00) — no fire in 18.4h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_persistent_alert_e46b1923cd3787a9",
+      "proposal": "Alert `supervisor quota_blocked（額度恢復後自動復工）` fired 13× over 15.7d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 3,
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": "2026-07-22T03:02:58.472056+00:00",
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:800782d7aa16a35c",
+      "severity": "critical",
+      "evidence": [
+        "alert_key=800782d7aa16a35c title='supervisor hang_killed' send_count=12 span=10.8d (first 2026-07-11T06:57:41.105045+00:00 → last 2026-07-22T02:47:16.606179+00:00) — no fire in 18.6h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_persistent_alert_800782d7aa16a35c",
+      "proposal": "Alert `supervisor hang_killed` fired 12× over 10.8d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 3,
+      "first_seen": "2026-07-20T21:25:01.081546+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": "2026-07-22T02:47:16.606179+00:00",
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:549da5e6cd0b4db8",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=549da5e6cd0b4db8 title='[ACK] Re: Re: [VolPred Alert][CRITICAL] supervisor hang_killed' send_count=3 span=9.4d (first 2026-07-11T17:30:07.182034+00:00 → last 2026-07-21T02:15:07.962216+00:00) — no fire in 43.2h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `[ACK] Re: Re: [VolPred Alert][CRITICAL] supervisor hang_killed` fired 3× over 9.4d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-21T21:25:00.758443+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": "2026-07-21T02:15:07.962216+00:00",
+      "quiescent": true,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:0ddc7a520cfd9d1e",
+      "severity": "critical",
+      "evidence": [
+        "alert_key=0ddc7a520cfd9d1e title='PHASE-Z 有檔案不是這班產出的，已略過' send_count=9 span=8.4d (first 2026-07-13T19:38:15.333090+00:00 → last 2026-07-22T05:16:33.269030+00:00) — no fire in 16.1h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_persistent_alert_0ddc7a520cfd9d1e",
+      "proposal": "Alert `PHASE-Z 有檔案不是這班產出的，已略過` fired 9× over 8.4d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 6,
+      "first_seen": "2026-07-16T21:25:01.228981+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": "2026-07-22T05:16:33.269030+00:00",
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "succeeded"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:e2f24397a43d4962",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=e2f24397a43d4962 title='PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積' send_count=8 span=7.3d (first 2026-07-14T07:20:33.562689+00:00 → last 2026-07-21T13:26:18.720955+00:00) — no fire in 32.0h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_persistent_alert_e2f24397a43d4962",
+      "proposal": "Alert `PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積` fired 8× over 7.3d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 5,
+      "first_seen": "2026-07-17T21:25:01.224457+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": "2026-07-21T13:26:18.720955+00:00",
+      "quiescent": true,
+      "task_type": "platform_ops",
+      "task_status": "succeeded"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:8e08e46929dc07ef",
+      "severity": "critical",
+      "evidence": [
+        "alert_key=8e08e46929dc07ef title='PHASE-Z 產出已 commit，但 agent 沒交代原因' send_count=8 span=7.9d (first 2026-07-14T11:18:12.227684+00:00 → last 2026-07-22T08:21:22.551942+00:00) — no fire in 13.1h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_persistent_alert_8e08e46929dc07ef",
+      "proposal": "Alert `PHASE-Z 產出已 commit，但 agent 沒交代原因` fired 8× over 7.9d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 5,
+      "first_seen": "2026-07-17T21:25:01.224457+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": "2026-07-22T08:21:22.551942+00:00",
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:bc677826dbc8b96b",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=bc677826dbc8b96b title='PHASE-Z candidate 被 pre-commit 擋下（未進 main）' send_count=3 span=6.6d (first 2026-07-14T22:46:10.407461+00:00 → last 2026-07-21T14:10:44.835743+00:00) — no fire in 31.2h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `PHASE-Z candidate 被 pre-commit 擋下（未進 main）` fired 3× over 6.6d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-07-21T21:25:00.758443+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": "2026-07-21T14:10:44.835743+00:00",
+      "quiescent": true,
+      "task_type": "platform_ops",
+      "task_status": null
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:31bfa7e7f9289f4c",
+      "severity": "critical",
+      "evidence": [
+        "alert_key=31bfa7e7f9289f4c title='Claude→Codex failover 已接手（Claude 端：quota）' send_count=10 span=7.1d (first 2026-07-15T18:20:01.436446+00:00 → last 2026-07-22T20:11:45.552288+00:00) — no fire in 1.2h (auto-clears at 48h if it stays clean)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": "next_task:dreaming_persistent_alert_31bfa7e7f9289f4c",
+      "proposal": "Alert `Claude→Codex failover 已接手（Claude 端：quota）` fired 10× over 7.1d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "subject_task_id": null,
+      "governance_target": "docs/error_log.md",
+      "occurrences": 3,
+      "first_seen": "2026-07-19T21:25:00.858706+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": "2026-07-22T20:11:45.552288+00:00",
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": "pending"
+    },
+    {
+      "pattern_type": "observation_ledger_breach",
+      "signature": "observation_ledger_breach:multi_slot_throughput_acceptance",
+      "severity": "warn",
+      "evidence": [
+        "observation item `multi_slot_throughput_acceptance`: deadline 2026-07-21T18:00:00+08:00 passed (1.5d overdue) — what: max_slots 2→4（assign_794c4bc2，2026-07-19）後的 24h 吞吐驗收；驗收任務 assign_f59976b6（blocked_until 2026-07-20T11:00+08:00）；改動前基線近 5 日 57/98/53/46/57 ≈ 62 任務/日"
+      ],
+      "remediation": "auto_dispatch",
+      "remediation_ref": null,
+      "proposal": "觀察項 `multi_slot_throughput_acceptance` 逾期未決策。到期動作：完成 assign_f59976b6 驗收：對照基線判定吞吐變化，決定維持 max_slots=4 或回退 2；回退判準 = PHASE-Z cohort 競態 / worktree 磁碟壓力 / quota 連發（de-rate guard 觸發史）。二選一，不准留在 limbo：(a) 執行到期動作並 `uv run volpred ops observation resolve --id multi_slot_throughput_acceptance --resolution <做了什麼>`；(b) 有充分理由才 `uv run volpred ops observation extend --id multi_slot_throughput_acceptance --deadline <ISO> --reason <為什麼>`（展期紀錄留在帳本上）。",
+      "subject_task_id": null,
+      "governance_target": null,
+      "occurrences": 2,
+      "first_seen": "2026-07-21T21:25:00.758443+00:00",
+      "last_seen": "2026-07-22T21:25:01.464713+00:00",
+      "activity_marker": null,
+      "quiescent": false,
+      "task_type": "platform_ops",
+      "task_status": null
+    }
+  ],
+  "new_findings": [
+    "repeated_tool_failure:dispatch_supervisor:codex_failover_recovered:exit0",
+    "repeated_tool_failure:release_settings_audit.log:exit1",
+    "missing_retry_strategy:assign_24ebe308"
+  ],
+  "resolved_findings": [
+    "missing_retry_strategy:trending_repost_2026_07_17_ai支出",
+    "persistent_alert:542378afb7b6a3b9",
+    "persistent_alert:2d99bdcd3277e3cc",
+    "persistent_alert:b74691d14763e77c",
+    "repeated_tool_failure:check_alerts.log:exit1",
+    "repeated_tool_failure:dispatch_supervisor:external_signal:exit143"
+  ],
+  "escalations": [
+    "missing_retry_strategy:research_rp_4855ddb7a9",
+    "missing_retry_strategy:research_spot_bitcoin_etf_flow_shock_btc_eth_vol",
+    "missing_retry_strategy:research_private_market_rv_correlation_regime",
+    "missing_retry_strategy:fable0711_ftd_e1_scale_gating",
+    "missing_retry_strategy:trending_repost_2026_07_14_ai資本",
+    "persistent_alert:e46b1923cd3787a9",
+    "persistent_alert:800782d7aa16a35c",
+    "persistent_alert:0ddc7a520cfd9d1e",
+    "persistent_alert:8e08e46929dc07ef",
+    "persistent_alert:31bfa7e7f9289f4c"
+  ],
+  "auto_remediation": [
+    {
+      "signature": "persistent_alert:e46b1923cd3787a9",
+      "action": "reprioritized",
+      "task_id": "dreaming_persistent_alert_e46b1923cd3787a9",
+      "from_priority": 3,
+      "to_priority": 2
+    },
+    {
+      "signature": "persistent_alert:800782d7aa16a35c",
+      "action": "reprioritized",
+      "task_id": "dreaming_persistent_alert_800782d7aa16a35c",
+      "from_priority": 3,
+      "to_priority": 2
+    },
+    {
+      "signature": "persistent_alert:31bfa7e7f9289f4c",
+      "action": "reprioritized",
+      "task_id": "dreaming_persistent_alert_31bfa7e7f9289f4c",
+      "from_priority": 3,
+      "to_priority": 2
+    }
+  ],
+  "counts": {
+    "findings": 21,
+    "new": 3,
+    "resolved": 6,
+    "escalations": 10,
+    "propose_only": 10,
+    "auto_dispatch_eligible": 11,
+    "human_only": 0,
+    "actionable": 10,
+    "actionable_new": 0,
+    "quiescent": 3,
+    "machine_handled": 8,
+    "machine_queued": 8,
+    "machine_fixed": 0,
+    "machine_stalled": 0
+  }
+}

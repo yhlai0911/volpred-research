@@ -89,6 +89,7 @@
 - [feedback_gates_smooth_no_deadlock.md](feedback_gates_smooth_no_deadlock.md) — gate 要流暢有出口，block 必附修復/寬限/裁決三選一，禁死局
 
 ## Feedback — 工程紀律
+- [feedback_five_step_closure_gate.md](feedback_five_step_closure_gate.md) — 結案五步鐵律；contained vs root_cause_fixed_and_verified 二態
 - [feedback_declare_complete_requires_class_sweep.md](feedback_declare_complete_requires_class_sweep.md) — 宣告完成前對 bug class 全量掃描 + 留機械 gate
 - 壞掉就當場修：[關卡壞了立刻徹底修，同關卡 2 次換模型](feedback_gates_fix_immediately_two_strikes_switch_model.md)｜[silent fallback 不丟下一班](feedback_fix_silent_fallback_immediately.md)
 - [feedback_refactor_over_patch_no_legacy.md](feedback_refactor_over_patch_no_legacy.md) — 重構優先於修補，不留遺留死碼；別把補丁說成治本

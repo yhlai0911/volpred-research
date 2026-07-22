@@ -44070,7 +44070,7 @@
     "title": "[dreaming] persistent_alert:e46b1923cd3787a9",
     "description": "Alert `supervisor quota_blocked（額度恢復後自動復工）` fired 10× over 12.8d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：alert_key=e46b1923cd3787a9 title='supervisor quota_blocked（額度恢復後自動復工）' send_count=10 span=12.8d (first 2026-07-06T11:08:02.667095+00:00 → last 2026-07-19T06:52:34.169530+00:00) — no fire in 18.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
-    "priority": 3,
+    "priority": 2,
     "status": "pending",
     "source": "dreaming",
     "created_at": "2026-07-20T01:18:48.350731+00:00",
@@ -44079,7 +44079,8 @@
       "pattern_type": "persistent_alert",
       "occurrences": 1,
       "governance_target": "docs/error_log.md"
-    }
+    },
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-22 (was P3)"
   },
   {
     "id": "dreaming_persistent_alert_8e08e46929dc07ef",
@@ -44103,7 +44104,7 @@
     "title": "[dreaming] persistent_alert:31bfa7e7f9289f4c",
     "description": "Alert `Claude→Codex failover 已接手（Claude 端：quota）` fired 4× over 3.5d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：alert_key=31bfa7e7f9289f4c title='Claude→Codex failover 已接手（Claude 端：quota）' send_count=4 span=3.5d (first 2026-07-15T18:20:01.436446+00:00 → last 2026-07-19T06:57:42.084971+00:00) — no fire in 18.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
-    "priority": 3,
+    "priority": 2,
     "status": "pending",
     "source": "dreaming",
     "created_at": "2026-07-20T01:18:48.350731+00:00",
@@ -44112,7 +44113,8 @@
       "pattern_type": "persistent_alert",
       "occurrences": 1,
       "governance_target": "docs/error_log.md"
-    }
+    },
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-22 (was P3)"
   },
   {
     "id": "email-12125-3afb3c",
@@ -48101,7 +48103,7 @@
     "title": "[dreaming] persistent_alert:800782d7aa16a35c",
     "description": "Alert `supervisor hang_killed` fired 9× over 9.4d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-20T21:25:01.081546+00:00）。\n證據：alert_key=800782d7aa16a35c title='supervisor hang_killed' send_count=9 span=9.4d (first 2026-07-11T06:57:41.105045+00:00 → last 2026-07-20T16:18:57.019986+00:00) — no fire in 5.1h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
-    "priority": 3,
+    "priority": 2,
     "status": "pending",
     "source": "dreaming",
     "created_at": "2026-07-20T21:25:01.081546+00:00",
@@ -48110,7 +48112,8 @@
       "pattern_type": "persistent_alert",
       "occurrences": 1,
       "governance_target": "docs/error_log.md"
-    }
+    },
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-22 (was P3)"
   },
   {
     "id": "trending_repost_2026_07_21_ai變現",
@@ -50757,11 +50760,36 @@
     "id": "commit_ownership_stage2_producer_declaration",
     "priority": 2,
     "task_type": "platform_ops",
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-dispatch",
     "created_at": "2026-07-21T22:36:01.605095+08:00",
     "title": "[commit-ownership 階段 2] producer 開始宣告：PostToolUse hook 強制 record() + fire_receipt seal()",
-    "description": "階段 1 shadow mode 已上線（src/volpred/ops/fire_manifest.py，真 repo 實測 dirty_total=26/declared=0/orphan=26）。階段 2 依 docs/refactor_commit_ownership_state_machine.md：worker/workspace 派工時 open_manifest、fire_id 進環境、PostToolUse hook 自動 record()、fire_receipt.py 同一步 seal()、scheduled writer 比照。宣告必須由 hook 強制而非 prompt 散文 —— fire receipt 那次已證明散文紀律 14 天漏 186/266。驗收：7 天 shadow 覆蓋率>=95%、inferred_not_declared 中位數<=2 檔/班、期間 PHASE-Z 仍以 baseline 為準（manifest 只觀察，不得因宣告缺漏而漏 commit）、hook 未裝要出 daily checkup finding。"
+    "description": "階段 1 shadow mode 已上線（src/volpred/ops/fire_manifest.py，真 repo 實測 dirty_total=26/declared=0/orphan=26）。階段 2 依 docs/refactor_commit_ownership_state_machine.md：worker/workspace 派工時 open_manifest、fire_id 進環境、PostToolUse hook 自動 record()、fire_receipt.py 同一步 seal()、scheduled writer 比照。宣告必須由 hook 強制而非 prompt 散文 —— fire receipt 那次已證明散文紀律 14 天漏 186/266。驗收：7 天 shadow 覆蓋率>=95%、inferred_not_declared 中位數<=2 檔/班、期間 PHASE-Z 仍以 baseline 為準（manifest 只觀察，不得因宣告缺漏而漏 commit）、hook 未裝要出 daily checkup finding。",
+    "status_history": [
+      {
+        "ts": "2026-07-22T22:09:03.665373+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-bbd282fbc268496eb621997314a94005"
+      },
+      {
+        "ts": "2026-07-22T22:09:09.165707+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-bbd282fbc268496eb621997314a94005"
+      },
+      {
+        "ts": "2026-07-22T22:17:55.134788+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-bbd282fbc268496eb621997314a94005"
+      }
+    ],
+    "started_at": "2026-07-22T22:09:09.165692+00:00",
+    "rollout_scope": "producer_manifest_posttool_receipt_seal_shadow_only",
+    "followup_task": "commit_ownership_stage2_shadow_validation_20260730",
+    "completed_at": "2026-07-22T22:17:55.134775+00:00",
+    "result": "Stage-2 rollout complete: dispatch worker opens a fire-scoped manifest and exports fire identity; PostToolUse mechanically records Edit/Write/MultiEdit/NotebookEdit paths; fire_receipt seals the set; scheduler seals clean successes or abandons failed producers; PHASE-Z shadow now compares the whole cohort while baseline remains the only commit owner; daily checkup warns if the hook is missing. Verification: 84 manifest/receipt/ownership tests + 15 supervisor/PHASE-Z tests passed; JSON/AST/diff checks passed. Seven-day live criteria are preserved in blocked followup commit_ownership_stage2_shadow_validation_20260730 (not evaluated early)."
   },
   {
     "id": "assign_111bed6e",
@@ -55498,5 +55526,132 @@
     "started_at": "2026-07-22T21:08:10.401638+00:00",
     "completed_at": "2026-07-22T21:10:04.705695+00:00",
     "result": "K1708 rerun artifacts were valid but gated from main by pending round-4 review. Preserved all three exact outputs in worktree branch commit 904476cdc; no merge bypass. Reaper ownership tests: 3 passed. Production scan now reports this job in neither held nor candidates."
+  },
+  {
+    "id": "trending_repost_2026_07_23_美聯儲降息",
+    "title": "[trending_repost] 降息路徑分歧加劇，利率波動率 MOVE 指數對美股的避險信號",
+    "description": "從聯準會利率決議前夕的短端國債隱含波動率出發，構建利率波動率與標普 500 相關性模型。驗證當總經數據波動放大時，VIX 與 MOVE 指數的背離現象。",
+    "task_type": "trending_repost",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-22T22:00:14+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "primary_source_verification": {
+      "decision": "pass",
+      "reason": "no_quantitative_claims",
+      "checks": []
+    },
+    "dedup_screen": {
+      "verdict": "warn_arc_near_miss",
+      "blocked": false,
+      "reason": "fuzzy descriptive arc near-miss of mile_21e45133, mile_e13e5485, mile_d12825bb; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
+      "saturation": 1,
+      "theme_terms": [
+        "數據",
+        "指數",
+        "驗證",
+        "避險",
+        "利率",
+        "相關"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_21e45133",
+          "title": "266 次美債波動跳升，日圓套利平倉的傳導鏈只在 2024 年 8 月接得起來"
+        },
+        {
+          "id": "mile_e13e5485",
+          "title": "台股恐慌 37、美股只剩 16：一道 20 點的「恐慌溫差」，用三個問題就能讀懂"
+        },
+        {
+          "id": "mile_d12825bb",
+          "title": "同樣動一碼，債市只怕利率往上：MOVE 指數藏了一個方向感"
+        },
+        {
+          "id": "mile_671d4c75",
+          "title": "債市和股市同時在怕，但怕的不是同一件事"
+        },
+        {
+          "id": "mile_53caca1a",
+          "title": "點陣圖分歧，MOVE 卻跌到 P34：債市選擇權在打折賣保險嗎？"
+        }
+      ],
+      "screened_at": "2026-07-22T22:00:17+00:00"
+    },
+    "dedup_followup_required": "生成端查重點名了下列可能同 arc 的已發文章：mile_21e45133, mile_e13e5485, mile_d12825bb。開寫前必做 3-layer 查重：確認撞 arc 就換軸或回報 arc-covered，不要硬寫。"
+  },
+  {
+    "id": "trending_repost_2026_07_23_台股波動",
+    "title": "[trending_repost] 台股高檔震盪加劇：隱含波動率與外資避險",
+    "description": "量化台股加權指數高檔震盪時台選擇權隱含波動率的結構變化。分析外資期現貨避險部位與台指波動率指數的同動性及套利空間。",
+    "task_type": "trending_repost",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-22T22:00:25+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "primary_source_verification": {
+      "decision": "pass",
+      "reason": "no_quantitative_claims",
+      "checks": []
+    },
+    "dedup_screen": {
+      "verdict": "unjudged_thin_signature",
+      "blocked": false,
+      "reason": "arc gate had no anchor (no distinctive entity, no experiment ref) — it did not look; theme saturation 4 < 5 is the only signal that ran. Caller must do the 3-layer dedup check.",
+      "saturation": 4,
+      "theme_terms": [
+        "台股",
+        "指數",
+        "結構",
+        "避險",
+        "台指",
+        "加權"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_e13e5485",
+          "title": "台股恐慌 37、美股只剩 16：一道 20 點的「恐慌溫差」，用三個問題就能讀懂"
+        },
+        {
+          "id": "mile_3e11060d",
+          "title": "台股恐慌居高不下，美股早就退燒了：台版 VIX 站上 37 在說什麼"
+        },
+        {
+          "id": "mile_e7b6e075",
+          "title": "🧪 迷思實驗室｜台積電打噴嚏,台股真的重感冒?16年數據攤開來看"
+        },
+        {
+          "id": "mile_c43717b0",
+          "title": "台股波動有辦法「預測尾巴」嗎？一個對退休族有用的風險量化方法"
+        }
+      ],
+      "screened_at": "2026-07-22T22:00:27+00:00"
+    },
+    "dedup_followup_required": "生成端查重點名了下列可能同 arc 的已發文章：mile_e13e5485, mile_3e11060d, mile_e7b6e075。開寫前必做 3-layer 查重：確認撞 arc 就換軸或回報 arc-covered，不要硬寫。"
+  },
+  {
+    "id": "commit_ownership_stage2_shadow_validation_20260730",
+    "title": "[commit-ownership stage 2] 7-day shadow coverage gate",
+    "description": "Stage 2 producer declaration rolled out by parent task. After a full 7-day observation window, read the git-common-dir volpred_phase_z_shadow.jsonl rows carrying fire_ids; verify declared coverage >=95% and median len(inferred_not_declared) <=2 paths/fire. Confirm PHASE-Z remained baseline-driven throughout. If criteria pass, record evidence for stage 3; if not, identify missing producer/hook lanes and remediate without switching commit ownership.",
+    "priority": 2,
+    "task_type": "platform_ops",
+    "status": "blocked",
+    "source": "hourly-dispatch",
+    "parent_task_id": "commit_ownership_stage2_producer_declaration",
+    "created_at": "2026-07-22T22:15:08.241949+00:00",
+    "blocked_reason": "awaiting_event_window",
+    "blocked_until": "2026-07-29T22:15:08+00:00",
+    "blocked_note": "Wait for a complete seven-day live shadow window after stage-2 rollout; then verify >=95% declaration coverage and median inferred_not_declared <=2.",
+    "blocked_at": "2026-07-22T22:15:34+00:00"
   }
 ]
