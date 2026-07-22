@@ -603,6 +603,31 @@ def a():
     assert audit_silent_fallbacks.main() == 1
 
 
+def test_partial_baseline_report_does_not_call_out_of_scope_entries_resolved(capsys) -> None:
+    """A staged-file audit cannot prove untouched baseline entries disappeared."""
+    finding = audit_silent_fallbacks.Finding(
+        path="scripts/other_writer.py",
+        line=7,
+        exception="OSError",
+        action="return None",
+        signature="v1:other-writer",
+    )
+
+    audit_silent_fallbacks._baseline_report(
+        baseline_path=Path("baseline.json"),
+        current_count=0,
+        baseline=[finding],
+        new_findings=[],
+        resolved_findings=[finding],
+        limit=20,
+        scope_is_full=False,
+    )
+
+    output = capsys.readouterr().out
+    assert "outside this run's scope" in output
+    assert "no longer present" not in output
+
+
 def test_iter_python_files_skips_test_directories_by_default(tmp_path: Path) -> None:
     scripts = tmp_path / "scripts"
     scripts.mkdir()

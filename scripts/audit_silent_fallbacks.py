@@ -809,6 +809,7 @@ def _baseline_report(
     new_findings: list[Finding],
     resolved_findings: list[Finding],
     limit: int | None,
+    scope_is_full: bool,
 ) -> None:
     print(
         "[silent-fallback-audit] "
@@ -820,11 +821,23 @@ def _baseline_report(
         print(f"NEW {item.path}:{item.line} except {item.exception}: {item.action}")
     if limit is not None and len(new_findings) > limit:
         print(f"... {len(new_findings) - limit} more new findings (rerun with --limit 0 for all)")
-    if resolved_findings:
+    # Only a full sweep can tell "resolved" from "not audited this run". The
+    # pre-commit hook passes just the staged files, so every baseline entry
+    # outside that subset looks resolved — advertising a baseline cleanup there
+    # is false advice, and on 2026-07-21 it sent a P1 incident chasing a
+    # non-existent "baseline reduction deadlock" while the real block (6 new
+    # findings) sat one line above it. Scope-aware silence beats a wrong note.
+    if resolved_findings and scope_is_full:
         print(
             "[silent-fallback-audit] "
             f"note: {len(resolved_findings)} baseline finding(s) no longer present; "
             "reduce the baseline in a separate cleanup commit."
+        )
+    elif resolved_findings:
+        print(
+            "[silent-fallback-audit] "
+            f"note: {len(resolved_findings)} baseline finding(s) outside this run's scope "
+            "(partial audit — not evidence they were resolved)."
         )
 
 
@@ -879,9 +892,11 @@ def main() -> int:
             root = Path(tmp)
             extract_rev(repo, args.rev, root)
             findings = audit_paths(list(default_targets(root)), root=root)
+        scope_is_full = True  # --rev always audits the whole extracted tree
     else:
         root = repo
         findings = audit_paths(args.paths or list(default_targets(root)), root=root)
+        scope_is_full = not args.paths
 
     if args.write_baseline:
         write_baseline(args.write_baseline, findings)
@@ -926,6 +941,7 @@ def main() -> int:
                 new_findings=new_findings,
                 resolved_findings=resolved_findings,
                 limit=None if args.limit == 0 else args.limit,
+                scope_is_full=scope_is_full,
             )
 
     if args.strict and baseline is not None:
