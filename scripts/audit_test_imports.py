@@ -30,6 +30,21 @@ IMPORT_ROOTS = {
     "scripts": Path("."),
 }
 
+# Attributes every imported Python module carries even when its source does not
+# bind them explicitly.  The dependency audit below is interested in application
+# symbols, not import machinery metadata.
+INTRINSIC_MODULE_ATTRIBUTES = {
+    "__builtins__",
+    "__cached__",
+    "__doc__",
+    "__file__",
+    "__loader__",
+    "__name__",
+    "__package__",
+    "__spec__",
+}
+
+
 def _module_path(root: Path, dotted: str) -> Path | None:
     """Resolve an auditable dotted module to a file or namespace directory."""
     top = dotted.split(".", 1)[0]
@@ -85,6 +100,14 @@ def _module_bindings(path: Path) -> tuple[set[str], bool]:
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             names.add(node.name)
+            if (
+                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and node.name == "__getattr__"
+            ):
+                # PEP 562 modules deliberately synthesize attributes.  Static
+                # enumeration cannot prove their public surface, so preserve the
+                # existing fail-open treatment used for other dynamic bindings.
+                opaque = True
         elif isinstance(node, (ast.Assign, ast.AnnAssign)):
             targets = node.targets if isinstance(node, ast.Assign) else [node.target]
             for target in targets:
@@ -109,6 +132,34 @@ def _submodule_exists(root: Path, pkg_dotted: str, name: str) -> bool:
 def _is_audited_module(dotted: str) -> bool:
     top = dotted.split(".", 1)[0]
     return top in IMPORT_ROOTS
+
+
+def _imported_submodule_aliases(root: Path, tree: ast.Module) -> dict[str, Path]:
+    """Return module-level aliases introduced by ``from package import module``.
+
+    Import closure used to stop at "the submodule exists".  That missed the
+    2026-07-21 partial commit where ``failure_class.py`` existed at HEAD but its
+    new ``is_terse_fatal_only`` symbol remained only in the working tree.  The
+    candidate test imported the old submodule successfully, then failed at
+    runtime on ``failure_class.is_terse_fatal_only``.
+
+    Restrict this to module-level imports: a nested import alias may be shadowed
+    by parameters or local assignments, and guessing Python scope here would
+    turn a safety gate into a false-positive source.
+    """
+    aliases: dict[str, Path] = {}
+    for node in tree.body:
+        if not isinstance(node, ast.ImportFrom) or node.level or not node.module:
+            continue
+        if not _is_audited_module(node.module):
+            continue
+        for alias in node.names:
+            if alias.name == "*":
+                continue
+            submodule = _module_path(root, f"{node.module}.{alias.name}")
+            if submodule is not None and submodule.is_file():
+                aliases[alias.asname or alias.name] = submodule
+    return aliases
 
 
 def _path_parts(node: ast.AST, names: dict[str, tuple[str, ...]]) -> tuple[str, ...] | None:
@@ -286,6 +337,39 @@ def audit(root: Path, worktree: Path | None = None) -> tuple[list[str], int, int
         importlib_names, import_module_names = _dynamic_import_aliases(tree)
         path_names = _known_paths(tree)
         bare_root = _inserts_scripts_on_path(tree, path_names)
+        submodule_aliases = _imported_submodule_aliases(root, tree)
+        submodule_surfaces: dict[Path, tuple[set[str], bool]] = {}
+
+        # ``from package import module`` is only complete when the candidate's
+        # module also carries every directly-read attribute the test requires.
+        # This is intentionally candidate-tree based: a newer working-tree copy
+        # must not make an older staged module look complete.
+        for node in ast.walk(tree):
+            if not (
+                isinstance(node, ast.Attribute)
+                and isinstance(node.ctx, ast.Load)
+                and isinstance(node.value, ast.Name)
+                and node.value.id in submodule_aliases
+            ):
+                continue
+            module_file = submodule_aliases[node.value.id]
+            if module_file not in submodule_surfaces:
+                try:
+                    submodule_surfaces[module_file] = _module_bindings(module_file)
+                except SyntaxError as exc:
+                    rel_source = module_file.relative_to(root)
+                    bad.append(
+                        f"BAD {rel_source}:{exc.lineno} — source module does not parse: {exc.msg}"
+                    )
+                    submodule_surfaces[module_file] = (set(), True)
+            bindings, opaque = submodule_surfaces[module_file]
+            if opaque or node.attr in bindings or node.attr in INTRINSIC_MODULE_ATTRIBUTES:
+                continue
+            checked += 1
+            bad.append(
+                f"BAD {rel_test}:{node.lineno} — '{node.value.id}.{node.attr}' is read, "
+                f"but {module_file.relative_to(root)} does not define '{node.attr}'"
+            )
 
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):

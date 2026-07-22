@@ -109,6 +109,55 @@ def test_submodule_import_is_not_a_false_positive(tmp_path: Path) -> None:
     assert res.returncode == 0, f"submodule flagged as missing:\n{res.stdout}"
 
 
+def test_catches_attribute_missing_from_imported_submodule(tmp_path: Path) -> None:
+    """The 5e36d1720 signature: old module landed, new attribute did not.
+
+    Merely proving that ``failure_class.py`` exists is insufficient.  The staged
+    test and worker both used a new attribute which only the omitted working-tree
+    version supplied, so the candidate was importable but not executable.
+    """
+    _tree(
+        tmp_path,
+        source="def classify_output(output):\n    return None\n",
+        test=(
+            "from volpred.publisher import arc_dedup as failure_class\n\n"
+            "def test_dead_shape():\n"
+            "    assert failure_class.is_terse_fatal_only('Execution error')\n"
+        ),
+    )
+    res = _run(tmp_path)
+    assert res.returncode == 1, f"partial module surface passed:\n{res.stdout}{res.stderr}"
+    assert "failure_class.is_terse_fatal_only" in res.stdout
+    assert "does not define 'is_terse_fatal_only'" in res.stdout
+
+
+def test_passes_attribute_present_on_imported_submodule(tmp_path: Path) -> None:
+    _tree(
+        tmp_path,
+        source=(
+            "def classify_output(output):\n    return None\n\n"
+            "def is_terse_fatal_only(output):\n    return output == 'Execution error'\n"
+        ),
+        test=(
+            "from volpred.publisher import arc_dedup as failure_class\n\n"
+            "def test_dead_shape():\n"
+            "    assert failure_class.is_terse_fatal_only('Execution error')\n"
+        ),
+    )
+    res = _run(tmp_path)
+    assert res.returncode == 0, f"complete module surface rejected:\n{res.stdout}{res.stderr}"
+
+
+def test_dynamic_module_getattr_remains_opaque(tmp_path: Path) -> None:
+    _tree(
+        tmp_path,
+        source="def __getattr__(name):\n    return 1\n",
+        test="from volpred.publisher import arc_dedup\nVALUE = arc_dedup.runtime_value\n",
+    )
+    res = _run(tmp_path)
+    assert res.returncode == 0, f"dynamic module produced a false BAD:\n{res.stdout}{res.stderr}"
+
+
 def test_star_reexport_module_is_treated_as_opaque(tmp_path: Path) -> None:
     """A module doing `from x import *` re-exports names we cannot enumerate; do not guess."""
     _tree(
@@ -213,6 +262,48 @@ def test_index_mode_ignores_working_tree_only_implementation(tmp_path: Path) -> 
     assert "worktree_only" in res.stdout
 
     subprocess.run(["git", "-C", str(tmp_path), "add", "scripts/worktree_only.py"], check=True)
+    complete = _run_index(tmp_path)
+    assert complete.returncode == 0, f"complete candidate rejected:\n{complete.stdout}{complete.stderr}"
+
+
+def test_index_mode_rejects_worktree_only_submodule_attribute(tmp_path: Path) -> None:
+    """The exact 5e36d1720 split cannot become a candidate commit."""
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    _tree(
+        tmp_path,
+        source="def classify_output(output):\n    return None\n",
+        test="from volpred.publisher import arc_dedup as failure_class\n",
+    )
+    (tmp_path / "scripts").mkdir()
+    shutil.copy2(AUDIT, tmp_path / AUDIT.relative_to(REPO))
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "add", "src", "tests", "scripts/audit_test_imports.py"],
+        check=True,
+    )
+
+    # The implementation grows the symbol in the working tree, but only its
+    # consumer is staged.  A filesystem-based check would pass; candidate-index
+    # closure must inspect the old staged module and reject the split.
+    (tmp_path / "src/volpred/publisher/arc_dedup.py").write_text(
+        "def classify_output(output):\n    return None\n\n"
+        "def is_terse_fatal_only(output):\n    return True\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tests/test_arc.py").write_text(
+        "from volpred.publisher import arc_dedup as failure_class\n"
+        "assert failure_class.is_terse_fatal_only('Execution error')\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "-C", str(tmp_path), "add", "tests/test_arc.py"], check=True)
+
+    split = _run_index(tmp_path)
+    assert split.returncode == 1, f"split candidate passed:\n{split.stdout}{split.stderr}"
+    assert "failure_class.is_terse_fatal_only" in split.stdout
+
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "add", "src/volpred/publisher/arc_dedup.py"],
+        check=True,
+    )
     complete = _run_index(tmp_path)
     assert complete.returncode == 0, f"complete candidate rejected:\n{complete.stdout}{complete.stderr}"
 

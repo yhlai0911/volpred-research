@@ -47934,12 +47934,35 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "title": "PHASE-Z commit 原子性：同一 fire 的變更集要嘛全進要嘛全不進",
     "description": "根因見 docs/error_log.md 2026-07-21 00:29 條目。\n\n事實：5e36d1720 commit 了 worker.py + alerts.py + tests/test_worker_fatal_marker_fastfail.py，\n獨漏三者都 import 的 failure_class.py。main 紅 32 分鐘（run 29761977060 實證 16 個 AttributeError），\n且 worker.py:314/324 是 production 判死路徑 —— 那段時間 DOA 偵測器本身是壞的。\n99aa30d7b 的 PHASE-Z hash-pinned recovery 補交收尾。\n\n問題：recovery 機制以「路徑」為恢復單位（逐檔 fingerprint 比對、逐檔補交），\n但正確性的單位是「變更集」。部分 commit 這個形狀本身沒有 enforcement owner。\n\n要做的：設計並落地一個 owner，使同一 fire 的產出無法被部分 commit。\n可能方向（需先評估，勿直接照抄）：\n(a) PHASE-Z commit 前對 staged tree 跑 import/collect smoke（pytest --collect-only），\n    未通過則整批不 commit 而非部分 commit；\n(b) 把 failed-closeout receipt 的恢復單位從 path 升級為 changeset，部分成功即整批 rollback；\n(c) pre-commit gate 偵測「staged 測試 import 了未 staged 的模組符號」。\n\n驗收：要有 regression test 釘住「部分 commit 不可能發生」，且不得讓 PHASE-Z 在\nmachine-churn-only 的班次變成必失敗（那會回歸到 agent 產出裸躺工作區的舊病）。",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-22T14:01:39.952471+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-a3f269ca5e4f488880b049ea04ccbdcb"
+      },
+      {
+        "ts": "2026-07-22T14:01:40.210494+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-a3f269ca5e4f488880b049ea04ccbdcb"
+      },
+      {
+        "ts": "2026-07-22T14:06:31.124638+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-a3f269ca5e4f488880b049ea04ccbdcb"
+      }
+    ],
+    "started_at": "2026-07-22T14:01:40.210477+00:00",
+    "completed_at": "2026-07-22T14:06:31.124622+00:00",
+    "result": "Closed the 5e36d1720 partial-commit class: Gate 0 now checks direct attributes read from imported submodules against the candidate index, so an old staged module plus a consumer of a working-tree-only symbol is rejected. Added exact index regression and documented the enforcement boundary. Verified 68 pytest cases, 7 hook integration cases, and live audit 364 files/833 dependencies/0 bad."
   },
   {
     "id": "k528_round6_collection_verify",

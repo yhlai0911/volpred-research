@@ -23997,5 +23997,15 @@
     "owner": "codex-failover-slot-1-fd769f23c7bf41dc8b78cac85d8c8393",
     "commit": null,
     "summary": "Fixed CI repair post-commit evidence: explicit pending receipt is now owner-bound and backfilled with the actual commit SHA by PHASE-Z or Codex exact-path commit."
+  },
+  {
+    "timestamp": "2026-07-22T22:06:31+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_commit_atomicity_gate",
+    "outcome": "completed",
+    "actor": "codex-failover-slot-1-a3f269ca5e4f488880b049ea04ccbdcb",
+    "owner": "codex-failover-slot-1-a3f269ca5e4f488880b049ea04ccbdcb",
+    "commit": null,
+    "summary": "Closed the PHASE-Z partial-commit dependency class by checking imported submodule attributes in the candidate index; exact incident regression and 68 targeted tests pass."
   }
 ]

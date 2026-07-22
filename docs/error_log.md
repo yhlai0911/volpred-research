@@ -667,7 +667,16 @@ AttributeError —— 也就是前一則條目剛修好的 DOA 偵測器，在�
 32 分鐘，但沒有消除「部分 commit」這個形狀本身。同 2026-07-20 22:17 條目的教訓形狀：安全網有效
 ≠ 缺陷已消除。
 
-**尚未修**：本次僅完成歸因與記錄；「同一 fire 的產出要嘛全進要嘛全不進」的原子性尚無 enforcement owner。
+**FIXED 2026-07-22（`assign_commit_atomicity_gate`）**：PHASE-Z 原本已有 alternate-index +
+`commit-tree` + `update-ref` CAS，candidate 內的路徑會整批落地或整批不落地；00:29 真正漏掉的是
+**candidate closure**：`failure_class.py` 在 HEAD 已存在，所以 Gate 0 接受
+`from scripts.dispatch_supervisor import failure_class`，卻沒驗證測試隨後讀取的新屬性
+`failure_class.is_terse_fatal_only` 是否也存在於 candidate 版模組。現在
+`scripts/audit_test_imports.py` 會在 candidate tree 靜態解析 module-level submodule alias 的直接屬性
+讀取；新符號只留在 working tree、consumer 單獨 staged 時 fail closed，source 與 consumer 一起 staged
+才通過。PEP 562 `__getattr__` 動態模組維持 opaque，避免把不可靜態列舉的 API 誤判為缺漏。
+Regression：`scripts/tests/test_audit_test_imports.py::test_index_mode_rejects_worktree_only_submodule_attribute`
+重建 5e36d1720 同形 index，釘住「舊模組 + 新 consumer」不可能成為 commit candidate。
 
 ### 2026-07-22 01:21 — K741 NFP canonical 重跑推翻既有文章結論：mile_eda69bfb 回溯更正（1/7，AGENTS.md 第 13 條）
 
