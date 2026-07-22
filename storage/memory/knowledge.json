@@ -40298,9 +40298,22 @@
   "experiment_id": "k1523_realized_kurtosis_vol",
   "experiment_path": "experiments/k1523_realized_kurtosis_vol/",
   "verdict": "NULL",
-  "needs_human": true,
+  "needs_human": false,
   "gap": "README 文字宣稱 TWII H1/H2 PASS（t=-3.14/-3.15），與 results.json 實際 DM t-stat（H1 t=-2.87, H2 t=-2.71）不符，且 JSON 頂層 verdict 與 per_asset_findings 的 supported 欄位皆為 false/NULL。需人工核對是否 README 沿用了 K1520 worktree salvage 前的舊跑法輸出、或 results.json 重跑後未同步更新 README，才能決定最終要記錄的 verdict。",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "revisions": [
+   {
+    "revised_at": "2026-07-22T08:35:44.808805+08:00",
+    "actor": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "reason": "K1523 needs_human 解除：README/results.json 矛盾已於 2026-07-14 由 README 自行更正並記載，非未決事項。本班獨立驗證 results.json 頂層 verdict=NULL、六假設 t_stat 逐一比對相符（SPY -2.27/-2.44/-1.06、TWII -2.87/-2.71/-1.29），條目記載的數字與裁決已正確；原矛盾版本宣稱的 TWII H1 t=-3.14 / H2 t=-3.15（兩數皆恰好越過 Harvey |t|>=3 門檻）在結果檔中不存在，README 已記為 K1520->K1523 worktree salvage 誤植並更正。條目 verdict 無需改動，僅解除 needs_human 旗標。",
+    "fields": [
+     "needs_human"
+    ],
+    "before": {
+     "needs_human": true
+    }
+   }
+  ]
  },
  {
   "item_id": "fba4c2d6",
@@ -41355,21 +41368,45 @@
  {
   "item_id": "11947489",
   "category": "vol_prediction",
-  "content": "[NEEDS_HUMAN 待人工裁決] K759：台股金融壓力指數 FSI（用 0050/2330 TSMC/2881 Fubon/2882 Cathay/^VIX 組成）是否對 TSMC 波動有領先預警力。yfinance 2010-01-04 至 2026-03-27。json 顯示 FSI p75=0.2461，987 個壓力日、395 嚴重壓力日；lead_1d 時 P(spike|stress)=15.82% vs P(spike|no stress)=1.15%（lift 13.77x，隨 horizon 拉長遞減至 lead_20d 僅 1.86x）。迴歸部分：VIX-only 模型 R²=0.1404，VIX+FSI 模型 R²=0.2493（ΔR²=0.1089，FSI 係數 t=15.14）；DM test：mean loss diff=0.000777, HAC t=2.237, p=0.0253。ROC：AUC(VIX-only)=0.8019 vs AUC(combo)=0.8608（ΔAUC=0.059），但 5000 次 bootstrap 的 AUC 差異 95% CI 為 [-0.0404, 0.0444]，跨零。策略部分：VT+FSI Override 策略 Sharpe=0.402，低於單純 VIX-based VT 策略 Sharpe=0.464（json summary 自己標註 override_improves_sharpe=false），5 個 OOS 期間 override 勝率僅 3/5。**研究誠實缺口**：README 全為「待補充」stub，無正式敘事、無 verdict 欄位、目錄下無 codex_review.md，未經 Codex 審查即留在 repo。DM t=2.237 雖傳統 p<0.05，但未達本專案 Harvey |t|>=3 discovery 門檻，而 summary 卻自行標記 `dm_test_significant: true`，與專案現行標準不一致，屬於潛在 overclaim。 〔gap：無正式 verdict 欄位、無 Codex review、README 未寫（stub）；json 內部宣稱的統計顯著性（DM t=2.237, p=0.0253）未達本專案現行 Harvey |t|>=3 discovery gate，需要人工依現行標準重新判定此實驗真實結論是 NULL 還是弱支持，並決定是否需要補做 Codex review 才能寫入 knowledge.json。〕",
+  "content": "K759 [NULL — 2026-07-22 人工重裁決，推翻 artifact 內建的 dm_test_significant=true]：台股金融壓力指數 FSI 對 TSMC 波動「無」通過本專案門檻的預警力。\n\n**FSI 實際構成（原 backfill 條目描述錯誤）**：`k759_financial_early_warning.py:142-146` 明確定義 `FSI = mean(Fubon_RV20, Cathay_RV20)`，只用 2881/2882 兩檔金融股的 20 日 RV。原條目寫成「用 0050/2330 TSMC/2881/2882/^VIX 組成」是錯的（0050/2330/VIX 只用於其他區塊）。好消息是 FSI 不含 TSMC 自身，無循環論證；壞消息是原條目的自述不可信。\n\n**裁決 NULL 的三個獨立理由**：\n\n1. **所謂 DM test 根本不是 DM test**。`k759_financial_early_warning.py:344-357` 取兩個「巢狀 OLS 在全樣本上的 in-sample 殘差」（e1=model_vix.resid、e2=model_both.resid）做 loss differential。Diebold-Mariano 檢定定義在 out-of-sample 預測誤差上；對 in-sample 巢狀模型，加一個解釋變數在代數上必然使 SSR 不增，d 的均值必然 >=0，該統計量無法拒絕任何東西。即使改成 OOS，巢狀模型也需 Clark-West/Giannini 修正而非裸 DM。所以 t=2.237 不只是「未達門檻」，是**測錯了東西**。\n\n2. **即使照原數字看也過不了門檻**：DM t=2.237（p=0.0253）< 本專案 Harvey (2016) |t|>=3 discovery gate。artifact summary 自行標記 `dm_test_significant: true` 屬 overclaim。\n\n3. **有做對照的檢定全部不顯著或反向**：\n   - ROC：ΔAUC = 0.8608−0.8019 = 0.0589，但 5000 次 bootstrap 的 95% CI = [−0.0404, +0.0444] **跨零**，AUC 增益不顯著。\n   - 策略層：VT+FSI Override Sharpe=0.402 < 純 VIX-based VT Sharpe=0.464，artifact 自己標 `override_improves_sharpe: false`，5 個 OOS 期間僅 3/5 勝。\n\n**看起來很強的數字為何不可採信**：迴歸 `fsi_t=15.14`（`:335` 用 cov_type='HC1'）與 `partial_corr_t=23.902`（`:318` 用 iid 公式 t = r*sqrt((n-3)/(1-r^2))）都建立在被解釋變數 `TSMC_RV_fwd5 = tsmc_rv.rolling(5).mean().shift(-5)`（`:275`，5 日重疊窗）與解釋變數 FSI（20 日 rolling RV）之上。重疊窗 + rolling 造成強烈序列相關，HC1 與 iid 標準誤在此設定下嚴重低估，t 值不可解讀。全篇唯一用了 HAC 的是那個無效的 DM（maxlags=10）。\n\n**唯一站得住的是描述性事實**：lead_1d 時 P(spike|stress)=15.82% vs P(spike|no stress)=1.15%（lift 13.77x），隨 horizon 遞減至 lead_20d 僅 1.86x。這是無檢定的條件機率，且兩邊都是波動度量，主要反映的是波動叢聚與跨資產同步，不構成「金融股領先預警 TSMC」的因果或預測發現。\n\n資料：yfinance 2010-01-04 至 2026-03-27，n_obs_returns=3965。README.md 全為「待補充」stub，無 codex_review.md。",
   "evidence": [
    "experiments/k759/README.md",
    "experiments/k759/k759_financial_early_warning_results.json"
   ],
-  "confidence": 0.35,
+  "confidence": 0.8,
   "created_at": "2026-03-31T00:00:00",
   "created_at_source": "artifact:k759_financial_early_warning_results.json",
   "k_id": "K759",
   "experiment_id": "k759",
   "experiment_path": "experiments/k759/",
-  "verdict": "UNVERIFIED",
-  "needs_human": true,
-  "gap": "無正式 verdict 欄位、無 Codex review、README 未寫（stub）；json 內部宣稱的統計顯著性（DM t=2.237, p=0.0253）未達本專案現行 Harvey |t|>=3 discovery gate，需要人工依現行標準重新判定此實驗真實結論是 NULL 還是弱支持，並決定是否需要補做 Codex review 才能寫入 knowledge.json。",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "verdict": "NULL",
+  "needs_human": false,
+  "gap": "README.md 仍為「待補充」stub，建議補寫或標記為 NULL 結案；本裁決基於原始碼審查，未重跑實驗。",
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "reviewer": "kb-adjudication-agent 2026-07-22 (原始碼重稽核 + artifact 逐項對照；未經 Codex 覆核)",
+  "revisions": [
+   {
+    "revised_at": "2026-07-22T08:22:54.169629+08:00",
+    "actor": "kb-adjudication-agent-20260722",
+    "reason": "人工重裁決：DM 用 in-sample 巢狀殘差(k759_financial_early_warning.py:344-357)非有效 DM 檢定；t=2.237 亦未達 Harvey |t|>=3；AUC bootstrap CI [-0.0404,0.0444] 跨零；策略 Sharpe 0.402<0.464 反向。推翻 artifact 的 dm_test_significant=true。並修正原條目對 FSI 構成的錯誤描述(實際為 mean(Fubon_RV20,Cathay_RV20), k759:142-146)",
+    "fields": [
+     "confidence",
+     "content",
+     "gap",
+     "needs_human",
+     "reviewer",
+     "verdict"
+    ],
+    "before": {
+     "verdict": "UNVERIFIED",
+     "needs_human": true,
+     "confidence": 0.35,
+     "reviewer": null,
+     "gap": "無正式 verdict 欄位、無 Codex review、README 未寫（stub）；json 內部宣稱的統計顯著性（DM t=2.237, p=0.0253）未達本專案現行 Harvey |t|>=3 discovery gate，需要人工依現行標準重新判定此實驗真實結論是 NULL 還是弱支持，並決定是否需要補做 Codex review 才能寫入 knowledge.json。",
+     "content": "[NEEDS_HUMAN 待人工裁決] K759：台股金融壓力指數 FSI（用 0050/2330 TSMC/2881 Fubon/2882 Cathay/^VIX 組成）是否對 TSMC 波動有領先預警力。yfinance 2010-01-04 至 2026-03-27。json 顯示 FSI p75=0.2461，987 個壓力日、395 嚴重壓力日；lead_1d 時 P(spike|stress)=15.82% vs P(spike|no stress)=1.15%（lift 13.77x，隨 horizon 拉長遞減至 lead_20d 僅 1.86x）。迴歸部分：VIX-only 模型 R²=0.1404，VIX+FSI 模型 R²=0.2493（ΔR²=0.1089，FSI 係數 t=15.14）；DM test：mean loss diff=0.000777, HAC t=2.237, p=0.0253。ROC：AUC(VIX-only)=0.8019 vs AUC(combo)=0.8608（ΔAUC=0.059），但 5000 次 bootstrap 的 AUC 差異 95% CI 為 [-0.0404, 0.0444]，跨零。策略部分：VT+FSI Override 策略 Sharpe=0.402，低於單純 VIX-based VT 策略 Sharpe=0.464（json summary 自己標註 override_improves_sharpe=false），5 個 OOS 期間 override 勝率僅 3/5。**研究誠實缺口**：README 全為「待補充」stub，無正式敘事、無 verdict 欄位、目錄下無 codex_review.md，未經 Codex 審查即留在 repo。DM t=2.237 雖傳統 p<0.05，但未達本專案 Harvey |t|>=3 discovery 門檻，而 summary 卻自行標記 `dm_test_significant: true`，與專案現行標準不一致，屬於潛在 overclaim。 〔gap：無正式 verdict 欄位、無 Codex review、README 未寫（stub）；json 內部宣稱的統計顯著性（DM t=2.237, p=0.0253）未達本專案現行 Harvey |t|>=3 discovery gate，需要人工依現行標準重新判定此實驗真實結論是 NULL 還是弱支持，並決定是否需要補做 Codex review 才能寫入 knowledge.json。〕"
+    }
+   }
+  ]
  },
  {
   "item_id": "63dab443",
@@ -41469,21 +41506,60 @@
  {
   "item_id": "212f0026",
   "category": "vt_strategy",
-  "content": "[NEEDS_HUMAN 待人工裁決] K833 [UNVERIFIED]: CBOE IV weekly short-straddle驗證(VRP proxy: straddle_pnl=IV_weekly-|weekly_return|)，SPY/QQQ/GLD三資產，yfinance 2010-01-15至2025-01-03(n_weekly=782)。三策略(S1 always-short/S2 VRP-timing/S3 GARCH-enhanced)均報極高Sharpe(SPY S1 Sharpe=3.686,AnnRet=36.47%,t=15.12；QQQ/GLD類似)，且無對照baseline的顯著性檢定(僅單樣本t-stat)、無gamma/delta避險。README為空白模板('待補充')，未見Codex review紀錄。CLAUDE.md研究誠實原則明訂'Sharpe遠高於baseline時先懷疑bug'，此結果未經該流程檢視即留在repo，數字本身雖逐字取自results.json，但可信度需人工複核。 〔gap：無對照baseline顯著性檢定、無Codex review紀錄、README為空白模板，且Sharpe數值(3.68等)遠高於平台常態基準——依CLAUDE.md規則『Sharpe遠高於baseline時先懷疑bug』，需要人工重新審視代碼是否有lookahead或成本低估等問題，才能決定是否可信。〕",
+  "content": "K833 [FAIL — 2026-07-22 人工重裁決 + 數值重現 + Codex 對抗性覆核，Sharpe 3.4–3.7 確認為 premium 設定錯誤造成的假象]\n\n**主 bug：`k833_iv_straddle.py:156` 把權利金誤設為 IV 全額。**\n```\ndf['straddle_pnl'] = df['iv_weekly'] - df['abs_weekly_return']\n```\nATM straddle 理論價（Brenner–Subrahmanyam 1988）約 `0.7979 * S * sigma * sqrt(T)`（ATM call ≈ 0.3989，straddle 為兩倍），程式收取 1.0 倍，**系統性高估權利金 25.3%**。SPY 實測：平均週 IV 2.52%、平均 |週報酬| 1.61%，被高估的權利金約 0.51%/週，而真實 edge 僅約 0.20%/週。\n\n**次 bug：`:119-124` 與 `:156` 的時序錯置（真 lookahead，但非主因）。**\n`weekly_return[t]`（`:120`）是 close[t-1]→close[t] 的已實現報酬；`weekly_iv[t]`（`:124`）是週 t **收盤**的 VIX。等於用到期時才知道的 IV 計算期初權利金。`:176-177`/`:207-208` 對 S2/S3 signal 做的 shift(1) 並未修正 payoff 內的這個 lookahead。因 VIX 高度持續，單修此項 SPY Sharpe 僅 3.93→3.74。\n\n**重現結果（2026-07-22，yfinance 2010-01-01至2025-01-05，n_weekly=782，TX=0.2%/週，auto_adjust=False）**\n\n分解（raw Sharpe，未扣 rf）：SPY 原版 3.934 / 只 lag IV 3.744 / 只乘 0.7979 **1.096** / 雙修 1.051 —— **premium scaling 是主因，lookahead 是較小但真實的第二因**。\n\n雙修後，依檔案自身 Sharpe 定義（`:237` 扣 rf=2%/年）與 `:255` 的 t（檢定 mean=0、不扣 rf）：\n\n| 資產 | 原版 Sharpe（檔案定義，results.json） | 雙修後 Sharpe（檔案定義） | 雙修後 raw Sharpe | t |\n|---|---|---|---|---|\n| SPY | 3.686 | **0.847** | 1.051 | 4.07（HAC(4) ≈ 3.87） |\n| QQQ | 3.185 | **0.394** | 0.574 | 2.23 |\n| GLD | 3.421 | **0.377** | 0.585 | 2.27 |\n\n雙修後 MDD −12.7%→−28.8%、skew −0.93→−1.68。原版尾部好看正是因為 lookahead 讓大跌那週的權利金被同週飆高的 VIX 灌水抵消虧損。S2_VRPTiming 雙修後 SPY 1.046 / QQQ 0.541 / GLD 0.267（raw），擇時版未優於 always-short。\n\n**裁決 FAIL**：原宣稱「三資產一致 Sharpe 3.4–3.7」不成立。修正後僅 SPY 跨過 |t|>=3（iid 4.07、HAC(4) 3.87），QQQ/GLD 皆不顯著。\n\n**SPY 那個 t 也不足以稱為發現，理由限定如下（經 Codex 覆核修正，不採用未經證實的理由）**：\n- **estimand 不對**：VIX/VXN/GVZ 是 30 日 variance-strip 指數，`:145` 直接乘 sqrt(1/52) 隱含「30日→7日期限結構平坦、strip variance = ATM IV、風險中性分佈近似 BS、index option IV 可直接套用於 ETF」四個未檢驗假設。**0.7979 只是最小 proxy 修補，不等於可交易 straddle premium**；正解須用 entry 日 7D ATM 的實際 call+put 報價。\n- **口徑不一致**：`:237` 的 Sharpe 扣 rf、`:255` 的 t 檢定 mean=0 不扣 rf，檔案自身兩個指標口徑不同。\n- **檢定太弱**：`:255` 為普通 iid one-sample t，無 HAC、無 block bootstrap、無跨策略/跨資產多重檢定調整。Harvey–Liu–Zhu 的 t>3 是針對大量挖掘下的新 factor discovery 門檻，非策略認證。\n- **notional ≠ margin**：報酬分母是名目 notional，36%/年不是資本報酬率；−28.8% 的 proxy MDD 未模擬保證金、盤中 mark-to-market 或強制平倉。\n- （明確**不**主張：20bps/週「太樂觀」無證據，對高流動性 SPY ATM straddle 甚至可能偏保守——檔案 `:474` 稱 conservative、`:513` 稱 real bid-ask wider，自相矛盾，需 quote-level 敏感度分析才能裁決。未做避險亦非 bug，本設計本就是 unhedged hold-to-expiry proxy；若目標是 delta-hedged VRP 才屬 estimand 錯置，且正確用語是 delta hedge 而非 gamma hedge。）\n\n**Codex 另外指出、本次未量化的問題**：`:185`/`:215` 對 0.5 倉與 1.0 倉都扣完整 20bps（不公平地壓低 timing 策略，不會製造高 Sharpe）；`:74` 未固定 `auto_adjust`（改變 payoff）；`W-FRI.last()` 會把週四/週一資料標成週五，且不完整週仍按完整 sqrt(1/52) 收權利金。\n\n**保留的正確結論僅為描述性**：`vrp_positive_frac` SPY 0.8031 / QQQ 0.7749、`mean_iv_rv_ratio` SPY 1.7654 —— VRP 為正是既有事實（Bollerslev-Tauchen-Zhou 2009），非本實驗新發現。\n\n**修復建議**：`:156` 至少改為 `0.79788456 * df['iv_weekly'].shift(1) - df['abs_weekly_return']`；根本解是改用真實 7D ATM 報價；並統一 Sharpe/t 的 rf 口徑、`:185`/`:215` 成本按倉位縮放、`:74` 固定 auto_adjust。",
   "evidence": [
    "experiments/k833/k833_iv_straddle_results.json",
    "experiments/k833/README.md"
   ],
-  "confidence": 0.25,
+  "confidence": 0.9,
   "created_at": "2026-04-03T00:00:00",
   "created_at_source": "artifact:k833_iv_straddle_results.json",
   "k_id": "K833",
   "experiment_id": "k833",
   "experiment_path": "experiments/k833/",
-  "verdict": "UNVERIFIED",
-  "needs_human": true,
-  "gap": "無對照baseline顯著性檢定、無Codex review紀錄、README為空白模板，且Sharpe數值(3.68等)遠高於平台常態基準——依CLAUDE.md規則『Sharpe遠高於baseline時先懷疑bug』，需要人工重新審視代碼是否有lookahead或成本低估等問題，才能決定是否可信。",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "verdict": "FAIL",
+  "needs_human": false,
+  "gap": "修正版數字為本次獨立重現，尚未回寫 experiments/k833/ 的程式與 results.json；根本解(改用真實 7D ATM 報價)需付費期權資料，目前無此資料源。",
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "reviewer": "kb-adjudication-agent 2026-07-22 (原始碼稽核 + 獨立數值重現三資產) + codex 對抗性覆核 (bug finding PASS，並修正本 agent 的口徑混用與三個未證實理由)",
+  "revisions": [
+   {
+    "revised_at": "2026-07-22T08:23:31.065909+08:00",
+    "actor": "kb-adjudication-agent-20260722",
+    "reason": "數值重現確認 bug：k833_iv_straddle.py:156 以 IV 全額當 ATM straddle 權利金(應乘 0.7979)，高估 25.3%；另 :119-124 IV 與同週已實現報酬同期對齊構成 lookahead。修正後 SPY Sharpe 3.93->1.05(t=4.07)、QQQ 3.40->0.58(t=2.23)、GLD 3.42->0.59(t=2.27)，MDD 由 -12.7% 惡化至 -28.8%。原宣稱三資產 Sharpe 3.4-3.7 為假象",
+    "fields": [
+     "confidence",
+     "content",
+     "gap",
+     "needs_human",
+     "reviewer",
+     "verdict"
+    ],
+    "before": {
+     "verdict": "UNVERIFIED",
+     "needs_human": true,
+     "confidence": 0.25,
+     "reviewer": null,
+     "gap": "無對照baseline顯著性檢定、無Codex review紀錄、README為空白模板，且Sharpe數值(3.68等)遠高於平台常態基準——依CLAUDE.md規則『Sharpe遠高於baseline時先懷疑bug』，需要人工重新審視代碼是否有lookahead或成本低估等問題，才能決定是否可信。",
+     "content": "[NEEDS_HUMAN 待人工裁決] K833 [UNVERIFIED]: CBOE IV weekly short-straddle驗證(VRP proxy: straddle_pnl=IV_weekly-|weekly_return|)，SPY/QQQ/GLD三資產，yfinance 2010-01-15至2025-01-03(n_weekly=782)。三策略(S1 always-short/S2 VRP-timing/S3 GARCH-enhanced)均報極高Sharpe(SPY S1 Sharpe=3.686,AnnRet=36.47%,t=15.12；QQQ/GLD類似)，且無對照baseline的顯著性檢定(僅單樣本t-stat)、無gamma/delta避險。README為空白模板('待補充')，未見Codex review紀錄。CLAUDE.md研究誠實原則明訂'Sharpe遠高於baseline時先懷疑bug'，此結果未經該流程檢視即留在repo，數字本身雖逐字取自results.json，但可信度需人工複核。 〔gap：無對照baseline顯著性檢定、無Codex review紀錄、README為空白模板，且Sharpe數值(3.68等)遠高於平台常態基準——依CLAUDE.md規則『Sharpe遠高於baseline時先懷疑bug』，需要人工重新審視代碼是否有lookahead或成本低估等問題，才能決定是否可信。〕"
+    }
+   },
+   {
+    "revised_at": "2026-07-22T08:33:29.605422+08:00",
+    "actor": "kb-adjudication-agent-20260722",
+    "reason": "Codex 對抗性覆核修正本 agent 自己的裁決：(1) 前版混用 raw Sharpe 與檔案定義 Sharpe(:237 扣 rf)，補正雙修後檔案定義值 SPY 0.847/QQQ 0.394/GLD 0.377；(2) 撤回三個未經證實的不可交易理由(20bps太樂觀無證據、未避險非 bug 且應稱 delta 非 gamma、左偏不必然使 Sharpe 高估)；(3) 補記 0.7979 僅為最小 proxy 修補，真正 estimand 問題是 VIX 30日 variance-strip 對 7日 ATM straddle 的 horizon/instrument mismatch；(4) 補記 Codex 指出的 :185/:215 半倉全額成本、:74 auto_adjust 未固定、W-FRI 標籤問題。bug finding 本身經 Codex 判定 PASS",
+    "fields": [
+     "content",
+     "gap",
+     "reviewer"
+    ],
+    "before": {
+     "reviewer": "kb-adjudication-agent 2026-07-22 (原始碼稽核 + 獨立數值重現三資產；未經 Codex 覆核)",
+     "gap": "修正版數字為本次獨立重現，尚未回寫 experiments/k833/ 的程式與 results.json；建議後續修 :156 並重跑後更新 artifact。",
+     "content": "K833 [FAIL — 2026-07-22 人工重裁決 + 數值重現，Sharpe 3.4–3.7 確認為 premium 設定錯誤造成的假象]：CBOE IV weekly short-straddle 的高 Sharpe 不成立。\n\n**主 bug：`k833_iv_straddle.py:156` 把權利金誤設為 IV 本身。**\n```\ndf['straddle_pnl'] = df['iv_weekly'] - df['abs_weekly_return']\n```\nATM straddle 的理論價（Brenner–Subrahmanyam）約為 `0.7979 * S * sigma * sqrt(T)`，不是 `S * sigma * sqrt(T)`。程式收取的是 1.0 倍，**系統性高估權利金 25.3%**。以 SPY 實測：平均週 IV = 2.52%，平均 |週報酬| = 1.61%，被高估的權利金約 0.51%/週 —— 而真實 edge 只有約 0.20%/週。也就是說**帳面收益中約 71% 是憑空生出來的**。\n\n**次 bug（真 lookahead，但非主因）：`:119-124` 與 `:156` 的時序錯置。**\n`weekly_return`（`:120` `weekly_close.pct_change()`）在索引 t 代表「週 t 內已實現」的報酬，而 `weekly_iv`（`:124` `iv_df['Close'].resample('W-FRI').last()`）在索引 t 是**週 t 收盤**的 VIX。也就是說：權利金用的是這個波動走完之後才觀測到的 IV。正確對齊應為 `iv_weekly.shift(1)`。因 VIX 高度持續（corr(ivw_t,|ret_t|)=0.578 vs 落後版 0.522），修正後 Sharpe 只從 3.93 掉到 3.74 —— lookahead 存在但不是高 Sharpe 的來源。\n\n**重現結果（2026-07-22，yfinance 2010-01-01至2025-01-05，n_weekly=782，TX=0.2%/週）**：\n\n| 資產 | S1 原版（已發表） | 僅修 lookahead | 修 lookahead + 0.7979 ATM 係數 |\n|---|---|---|---|\n| SPY | Sharpe 3.934, t=15.25, MDD −12.7%, skew −0.93 | 3.744, t=14.51, MDD −16.6% | **1.051, t=4.07, MDD −28.8%, skew −1.68** |\n| QQQ | 3.396, t=13.17 | 3.318, t=12.86 | **0.575, t=2.23, MDD −19.1%** |\n| GLD | 3.421, t=13.27 | 3.110, t=12.05 | **0.585, t=2.27, MDD −18.1%** |\n\n（S1 原版重現值 3.934 vs results.json 記載的 3.686，差異來自 auto_adjust 與 rv 索引對齊，機制完全一致。）\n\nS2_VRPTiming 修正後：SPY Sharpe 1.046 (t=4.05)、QQQ 0.541 (t=2.10)、GLD 0.267 (t=1.03) —— 擇時版並未優於 always-short。\n\n**裁決**：\n- 原宣稱「三資產一致 Sharpe 3.4–3.7」**FAIL**。修正後只有 SPY 通過 Harvey |t|>=3（t=4.07），QQQ/GLD 皆不顯著。\n- 修正後 MDD 從 −12.7% 惡化到 −28.8%，skewness 從 −0.93 惡化到 −1.68。原版之所以尾部好看，正是因為 lookahead 讓「大跌那週的權利金」被同週飆高的 VIX 灌水，剛好抵消虧損。\n- 即使 SPY 的 t=4.07，仍**不可解讀為可交易發現**：(a) 分母是名目 notional 而非保證金，36%/10% 的「報酬率」不是資本報酬率；(b) TX 0.2%/週對每週 roll 的 ATM straddle 過於樂觀；(c) 無 gamma/delta 避險；(d) 對強左偏序列用 Gaussian Sharpe × sqrt(52) 年化本身就會高估。\n- 保留的正確結論僅為描述性：`vrp_positive_frac` SPY 0.8031 / QQQ 0.7749、`mean_iv_rv_ratio` SPY 1.7654 —— 即 VRP 為正的既有事實（Bollerslev-Tauchen-Zhou 2009 已知），非本實驗新發現。\n\n**修復建議**：`:156` 改為 `0.7979 * df['iv_weekly'].shift(1) - df['abs_weekly_return']`，並在 README 標明 notional-based 而非 margin-based。"
+    }
+   }
+  ]
  },
  {
   "item_id": "6669201b",
@@ -41620,21 +41696,48 @@
  {
   "item_id": "a0f5af26",
   "category": "vt_strategy",
-  "content": "[NEEDS_HUMAN 待人工裁決] K841 [DOCUMENTED_NEGATIVE]：TAIFEX 夜盤即時 VT 避險可行性檢驗（TAIFEX TX tick + yfinance VIX/0050.TW，資料期 2017-05-16至2026-04-02，n_trading_days=2157）。比較 6 個策略：S0=Buy&Hold 0050.TW、S1=8.63/VIX 次日調整、S2=S1+TX夜盤避險(always)、S3=VIX spike guard、S4=條件式夜盤避險(VIX>20)、S5=Full VT(日+夜)。結果（Sharpe/MDD）：S0 Sharpe=1.001/MDD=-33.83%；S1 Sharpe=1.359/MDD=-12.32%（表現最佳）；S2 Sharpe=0.768/MDD=-35.80%；S3 Sharpe=0.913/MDD=-33.41%；S4 Sharpe=0.788/MDD=-35.91%；S5 Sharpe=0.744/MDD=-17.76%。DM檢定：S2 vs S1 t=10.82(p<0.0001，S1顯著較佳)；S5 vs S1 t=-0.76(p=0.448，不顯著)。main_finding：夜盤避險並未改善 S1，S1（純日盤 VIX 調整）仍是台股最佳 VT 策略；夜盤避險在平常時期產生正 drift 成本(~+0.046%/夜)侵蝕報酬。根本限制是時機延遲：夜盤 15:00 開盤時最新 VIX 已是 T-2（2個交易日前），使『即時』避險在日頻VIX下不可行。COVID子期間 S5 MDD最佳(-4.83% vs S1 -5.08%)但正常時期犧牲過多報酬，S5 vs S1 全期無顯著差異。結論：TAIFEX 夜盤非 VIX-based 策略的可行即時避險管道，根因是資訊延遲一天。 〔gap：README.md 亦為未填寫 stub（全『待補充』），內容完全依賴 JSON 的 conclusions/main_finding 欄位重建；未見 codex_review 或 seed 欄位記錄。此外多個策略間 ann_vol 差異達 2倍以上（例如 S1 8.61% vs S0 19.74%），MDD 直接比較未見 exposure-matched gap 分析（依 repo 現行 mdd_scale_artifact 規則），建議人工複核 MDD 相關結論（尤其 S5 COVID MDD 優於 S1 的宣稱）是否需要 exposure-matched 重新驗證才能正式寫入 knowledge.json。〕",
+  "content": "K841 [SUPERSEDED — 本條目的所有數字已於 2026-07-15 的方法學修正中被推翻，請改讀 item_id=k841_dm_hac_correction_20260715]：TAIFEX 夜盤即時 VT 避險可行性檢驗（TAIFEX TX tick + yfinance VIX/0050.TW，2017-05-16至2026-04-02，n_trading_days=2157）。\n\n本條目由 kb_backfill（2026-07-14）從 `k841_futures_realtime_vt_results.json` 反推而成，當時未察覺該 JSON 本身已於隔日被判定為方法學錯誤。**backfill 收錄的是一份已知有 bug 的 artifact。**\n\n**已被推翻的原宣稱**：\n- 「S1（純日盤 VIX 調整）是台股最佳 VT 策略，Sharpe=1.359/MDD=−12.32%」→ **錯**。修正後 S1 Sharpe=0.9628/MDD=−15.01%，**低於** S0 Buy&Hold 的 1.0006。原 h=1 helper 誤寫 `range(h)` 導致所有 DM 檢定用 gamma0-only iid 變異數；且原版把台股開盤後才知道的權重套用到前一夜的 overnight gap、未計夜盤避險與 S5 換股成本。\n- 「S5 在 COVID 子期間 MDD 最佳（−4.83% vs S1 −5.08%）」→ 該宣稱建立在同一份有 bug 的計算上，修正後 S5 全期 Sharpe 僅 0.0205、MDD −26.84%，原 S5 績效敘事整體失效。\n- 原條目 gap 欄位擔心的 exposure-matched MDD 問題（S1 ann_vol 8.61% vs S0 19.74%）在修正版中以更嚴格的方式處理：修正後明確限定結論為「always-on 與 high-VIX overlay 在此 proxy 下降低了相對 S0 的平方報酬風險」，並明說**未**建立更高的總報酬、Sharpe、效用或因果避險效力。\n\n**修正後仍成立的部分**：夜盤避險未改善風險調整後績效；根本限制是資訊延遲 —— 夜盤 15:00 開盤時可用的 VIX 訊號是嚴格早於夜盤開始的前一個美股收盤，至少落後一個美股交易日。日頻 VIX 下的「即時」夜盤避險不可行。此定性結論在修正前後一致。\n\n**處置**：本條目保留作為 provenance 紀錄（顯示 backfill 收了一份過期 artifact），但**不得被引用為實證證據**。所有數字以 k841_dm_hac_correction_20260715 為準。",
   "evidence": [
    "experiments/k841/k841_futures_realtime_vt_results.json",
    "experiments/k841/README.md"
   ],
-  "confidence": 0.6,
+  "confidence": 0.9,
   "created_at": "2026-04-03T00:00:00",
   "created_at_source": "artifact:k841_futures_realtime_vt_results.json",
   "k_id": "K841",
   "experiment_id": "k841",
   "experiment_path": "experiments/k841/",
-  "verdict": "DOCUMENTED_NEGATIVE",
-  "needs_human": true,
-  "gap": "README.md 亦為未填寫 stub（全『待補充』），內容完全依賴 JSON 的 conclusions/main_finding 欄位重建；未見 codex_review 或 seed 欄位記錄。此外多個策略間 ann_vol 差異達 2倍以上（例如 S1 8.61% vs S0 19.74%），MDD 直接比較未見 exposure-matched gap 分析（依 repo 現行 mdd_scale_artifact 規則），建議人工複核 MDD 相關結論（尤其 S5 COVID MDD 優於 S1 的宣稱）是否需要 exposure-matched 重新驗證才能正式寫入 knowledge.json。",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "verdict": "SUPERSEDED",
+  "needs_human": false,
+  "gap": "無 — 已由 k841_dm_hac_correction_20260715 取代；本條目僅存 provenance 價值。",
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "reviewer": "kb-adjudication-agent 2026-07-22 (對照 k841_dm_hac_correction_20260715 與 review_certification_20260715.md)",
+  "superseded_by": "k841_dm_hac_correction_20260715",
+  "revisions": [
+   {
+    "revised_at": "2026-07-22T08:24:02.205826+08:00",
+    "actor": "kb-adjudication-agent-20260722",
+    "reason": "本條目由 kb_backfill(2026-07-14) 從已知有 bug 的 artifact 反推，隔日(2026-07-15)的 k841_dm_hac_correction_20260715 已推翻其全部數字(S1 Sharpe 1.359->0.9628 且低於 S0 1.0006；S5 Sharpe 0.0205)。原 gap 提出的 exposure-matched MDD 疑慮已由修正版以限縮結論範圍處理。標記 SUPERSEDED，禁止引用為實證證據",
+    "fields": [
+     "confidence",
+     "content",
+     "gap",
+     "needs_human",
+     "reviewer",
+     "superseded_by",
+     "verdict"
+    ],
+    "before": {
+     "verdict": "DOCUMENTED_NEGATIVE",
+     "needs_human": true,
+     "confidence": 0.6,
+     "reviewer": null,
+     "gap": "README.md 亦為未填寫 stub（全『待補充』），內容完全依賴 JSON 的 conclusions/main_finding 欄位重建；未見 codex_review 或 seed 欄位記錄。此外多個策略間 ann_vol 差異達 2倍以上（例如 S1 8.61% vs S0 19.74%），MDD 直接比較未見 exposure-matched gap 分析（依 repo 現行 mdd_scale_artifact 規則），建議人工複核 MDD 相關結論（尤其 S5 COVID MDD 優於 S1 的宣稱）是否需要 exposure-matched 重新驗證才能正式寫入 knowledge.json。",
+     "superseded_by": null,
+     "content": "[NEEDS_HUMAN 待人工裁決] K841 [DOCUMENTED_NEGATIVE]：TAIFEX 夜盤即時 VT 避險可行性檢驗（TAIFEX TX tick + yfinance VIX/0050.TW，資料期 2017-05-16至2026-04-02，n_trading_days=2157）。比較 6 個策略：S0=Buy&Hold 0050.TW、S1=8.63/VIX 次日調整、S2=S1+TX夜盤避險(always)、S3=VIX spike guard、S4=條件式夜盤避險(VIX>20)、S5=Full VT(日+夜)。結果（Sharpe/MDD）：S0 Sharpe=1.001/MDD=-33.83%；S1 Sharpe=1.359/MDD=-12.32%（表現最佳）；S2 Sharpe=0.768/MDD=-35.80%；S3 Sharpe=0.913/MDD=-33.41%；S4 Sharpe=0.788/MDD=-35.91%；S5 Sharpe=0.744/MDD=-17.76%。DM檢定：S2 vs S1 t=10.82(p<0.0001，S1顯著較佳)；S5 vs S1 t=-0.76(p=0.448，不顯著)。main_finding：夜盤避險並未改善 S1，S1（純日盤 VIX 調整）仍是台股最佳 VT 策略；夜盤避險在平常時期產生正 drift 成本(~+0.046%/夜)侵蝕報酬。根本限制是時機延遲：夜盤 15:00 開盤時最新 VIX 已是 T-2（2個交易日前），使『即時』避險在日頻VIX下不可行。COVID子期間 S5 MDD最佳(-4.83% vs S1 -5.08%)但正常時期犧牲過多報酬，S5 vs S1 全期無顯著差異。結論：TAIFEX 夜盤非 VIX-based 策略的可行即時避險管道，根因是資訊延遲一天。 〔gap：README.md 亦為未填寫 stub（全『待補充』），內容完全依賴 JSON 的 conclusions/main_finding 欄位重建；未見 codex_review 或 seed 欄位記錄。此外多個策略間 ann_vol 差異達 2倍以上（例如 S1 8.61% vs S0 19.74%），MDD 直接比較未見 exposure-matched gap 分析（依 repo 現行 mdd_scale_artifact 規則），建議人工複核 MDD 相關結論（尤其 S5 COVID MDD 優於 S1 的宣稱）是否需要 exposure-matched 重新驗證才能正式寫入 knowledge.json。〕"
+    }
+   }
+  ]
  },
  {
   "item_id": "720c3717",

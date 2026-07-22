@@ -695,3 +695,34 @@ T±n 漂移數字屬 Parts C/D，**沒有重跑**。這些數字留在文中但�
 `mile_d9129566` 已 retracted，不需更正。`assign_759a28f3` 已 release 回池並帶 progress/finding 註記。
 另發現 `article_correction` 無法更正 title，而 `mile_eda69bfb` / `mile_d721672b` 標題都寫著「195 次」
 ——目前只能改內文，標題仍是舊數，需補 title 支援。
+
+### 2026-07-22 08:2x — 10 張任務（含 4 張 P1）被一個寫死的「額度重置日期」凍結 3 天 — FIXED
+
+查 K1708 為何餓死時的順帶發現。`experiments/K1708/REMEDIATION_rev2.md` 寫著「Codex 額度**實測**耗盡，
+重置 2026-07-25 13:30 台北」，於是 round-2 二審沒跑、`review_verdict.json` 沒產出、
+`merge_worktree.sh` 認證閘門正當 ABORT——實驗跑完了卻合不進去。
+
+本班用有界 wrapper 實測兩次：`codex_exec_bounded.sh --timeout 100 "reply with exactly: QUOTA_OK"`
+→ `QUOTA_OK` exit 0；再問一則實質問題 → 正常作答 11,486 tokens exit 0。usage limit 是全域擋所有
+呼叫的，**有呼叫成功就代表限制沒生效**。前提推翻，成本：約 90 秒。
+
+隨即掃 `next_tasks.json` 找同源凍結，命中 **10 張 `status=blocked` 且 `blocked_until` 全指向
+2026-07-25** 的任務（P1：`assign_67f56b79` / `assign_24ebe308` / `k1623_round3_codex_primary_review_gate`
+/ `assign_50256f5f`；另 6 張 P2 含 K528、K1729、K1730/K1731 合併）。全部走
+`scripts/mark_task_blocked.py --unblock` 解封並 annotate 推翻證據。blocked 23→13，pending P1 1→5。
+其中多數是「實驗早已跑完、只差一次審查與合併」的收尾工作。
+
+**根因不是額度，是流程。** 某一班撞到 usage limit，把 CLI 回報的重置日期當事實寫進 `blocked_note`
+與實驗文件，之後每一班**沿用那個日期而不重探**。`blocked_until` 是單向的：它只會等到日期，
+不會反問「現在還成立嗎」。額度提早恢復時，沒有任何機制會發現。
+
+**教訓**：外部資源可用性（額度 / 認證 / 配額）**不可以寫成日期常數當事實流傳**。它是一個
+一秒就能實測的**狀態**，探測成本遠低於誤判成本（本例 3 天 × 10 張，其中 4 張 P1）。凡是以
+「外部資源不可用」為由 block 的任務，解封條件應該是**重探成功**，不是**日期到期**。
+此條與上一則「任務描述是建單當下的認知快照，不是交付規格」同形——都是把某一刻的觀測凍結成
+事實往後傳；也與 §J「探針要架在 outcome 上，不是架在便宜的中間節點」同源，只是這次那個
+便宜的中間節點是一個寫死的日期字串。
+
+**未完**：`scripts/unblock_expired_blocked_tasks.py` 目前只比對日期。對
+`reason=codex_quota_reset_pending` 這類「可實測」的 block reason，應加一條**主動探測**路徑：
+探測成功即解封，不必等到日期。沒有這條，同樣的凍結會再發生一次。

@@ -1,12 +1,12 @@
 {
-  "last_seen_run_id": 29808977711,
+  "last_seen_run_id": 29812586079,
   "last_seen_conclusion": "failure",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-red-29808977711",
   "last_push_remediation": {
     "attempted": true,
-    "ahead": 9,
-    "head_sha": "eb8a9e220b5c09f4efb7544e41ac95c0f1f4b8a2",
+    "ahead": 36,
+    "head_sha": "cf205a5c9abd67cec52a929ad6fb8b112546d02f",
     "pushed": true,
     "rc": 0,
     "outcome": "pushed",
@@ -27,19 +27,19 @@
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "29808977711:1",
-    "run_id": 29808977711,
+    "key": "29812586079:1",
+    "run_id": 29812586079,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29808977711",
-    "head_sha": "8bbfbc1aaf899861d302979a25d14ba2ee880818",
-    "created_at": "2026-07-21T07:02:18Z",
-    "started_at": "2026-07-21T07:02:18Z",
-    "updated_at": "2026-07-21T07:15:15Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29812586079",
+    "head_sha": "eb8a9e220b5c09f4efb7544e41ac95c0f1f4b8a2",
+    "created_at": "2026-07-21T08:00:25Z",
+    "started_at": "2026-07-21T08:00:25Z",
+    "updated_at": "2026-07-21T08:13:09Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-07-21T09:00:07.272477+00:00",
+  "updated_at": "2026-07-22T00:26:09.140588+00:00",
   "processed_run_keys": [
     "29304886936:1",
     "29307406826:1",
@@ -219,7 +219,8 @@
     "29802765978:1",
     "29802814533:1",
     "29805658282:1",
-    "29808977711:1"
+    "29808977711:1",
+    "29812586079:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -416,7 +417,8 @@
     "root_cause": "2026-07-21T08:13:02.3650965Z tests/test_daily_checkup_db_landing.py:80: AssertionError",
     "root_cause_status": "complete",
     "failure_run_keys": [
-      "29808977711:1"
+      "29808977711:1",
+      "29812586079:1"
     ],
     "repair_task_ids": [
       "ci-red-29808977711"
@@ -441,46 +443,62 @@
     },
     "root_cause_run_key": "29812586079:1",
     "latest_failure": {
-      "key": "29808977711:1",
-      "run_id": 29808977711,
+      "key": "29812586079:1",
+      "run_id": 29812586079,
       "attempt": 1,
       "status": "completed",
       "conclusion": "failure",
-      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29808977711",
-      "head_sha": "8bbfbc1aaf899861d302979a25d14ba2ee880818",
-      "created_at": "2026-07-21T07:02:18Z",
-      "started_at": "2026-07-21T07:02:18Z",
-      "updated_at": "2026-07-21T07:15:15Z",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/29812586079",
+      "head_sha": "eb8a9e220b5c09f4efb7544e41ac95c0f1f4b8a2",
+      "created_at": "2026-07-21T08:00:25Z",
+      "started_at": "2026-07-21T08:00:25Z",
+      "updated_at": "2026-07-21T08:13:09Z",
       "attempt_history_complete": true
     },
     "failure_heads": [
-      "8bbfbc1aaf899861d302979a25d14ba2ee880818"
+      "8bbfbc1aaf899861d302979a25d14ba2ee880818",
+      "eb8a9e220b5c09f4efb7544e41ac95c0f1f4b8a2"
     ],
-    "failure_cycles": 1,
+    "failure_cycles": 2,
     "repair_task_statuses": {
-      "ci-red-29808977711": "pending"
+      "ci-red-29808977711": "succeeded"
     },
     "dispatch_request_count": 1,
     "last_dispatch_request_at": "2026-07-21T08:00:08.126465+00:00",
     "push_intent": {
-      "head_sha": "eb8a9e220b5c09f4efb7544e41ac95c0f1f4b8a2",
-      "run_key": "29808977711:1",
-      "recorded_at": "2026-07-21T08:00:08.126465+00:00"
+      "head_sha": "cf205a5c9abd67cec52a929ad6fb8b112546d02f",
+      "run_key": "29812586079:1",
+      "recorded_at": "2026-07-22T00:26:09.140588+00:00"
     },
     "last_push_remediation": {
       "attempted": true,
-      "ahead": 9,
-      "head_sha": "eb8a9e220b5c09f4efb7544e41ac95c0f1f4b8a2",
+      "ahead": 36,
+      "head_sha": "cf205a5c9abd67cec52a929ad6fb8b112546d02f",
       "pushed": true,
       "rc": 0,
       "outcome": "pushed",
       "ahead_after": 0
     },
-    "last_push_remediation_at": "2026-07-21T08:00:08.126465+00:00",
-    "last_verified_push_head": "eb8a9e220b5c09f4efb7544e41ac95c0f1f4b8a2",
+    "last_push_remediation_at": "2026-07-22T00:26:09.140588+00:00",
+    "last_verified_push_head": "cf205a5c9abd67cec52a929ad6fb8b112546d02f",
     "remediation_poll_keys": [
-      "2026-07-21T08"
+      "2026-07-21T08",
+      "2026-07-22T00"
     ],
-    "remediation_checks": 1
+    "remediation_checks": 2,
+    "repair_commit": "2990c2b5f",
+    "repair_commit_source": "task_result",
+    "confirmed_root_cause": "dispatch-lanes R2 admission clamp (clamp_machine_priority_inflation) caps machine-source P1 to P2, but test_db_lag_flags_critical_and_opens_p1_repair_task still asserted priority==1 (assert 2==1)",
+    "root_cause_source": "task_result",
+    "last_stale_failure": {
+      "repair_task_id": "ci-red-29808977711",
+      "repair_completed_at": "2026-07-21T08:26:40.003797+00:00",
+      "run_created_at": "2026-07-21T08:00:25Z",
+      "run_key": "29812586079:1",
+      "at": "2026-07-22T00:26:09.140588+00:00"
+    },
+    "stale_failure_run_keys": [
+      "29812586079:1"
+    ]
   }
 }

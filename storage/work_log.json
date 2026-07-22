@@ -23797,5 +23797,75 @@
     "owner": "hourly-slot-1-746dc598a8e04ea6a7b2247d507653db",
     "commit": null,
     "summary": "餓死 51h：PHASE-Z incident 的關閉條件分不出「無主殘留」與「未提交的活躍碼」，對後者給出的指示是「保存後清除」—— 照做會刪掉正在運行的系統碼。2026-07-20 是靠人停下來查身分才沒鑄成大錯。\n\n本班先撞上同一形狀的活案例：巡 member_qa 任務時發現工作區有 855 行未提交改動（questions.py +348、test_member_qa_duplicate_gate.py +508，實跑 69 passed），是 03:17 commit 之後某一班寫完卻沒提交也沒記 work_log 的殘留 4。舊三訊號會把它讀成殘留。\n\n實作 src/volpred/ops/foreign_incident.py：classify_path_liveness() + referenced_by_tracked() + _has_passing_test_file()。\n\n訊號一，被已提交的碼引用 —— git grep 預設只搜 tracked，正是要的語意（untracked 檔互相引用不算活性，那可能只是同一坨殘留自己抱團）。pathspec 再限定碼與設定、排除 docs/ 與 storage/：doc 或舊任務描述提到一個檔名只代表有人寫過它，不代表有人在跑它 —— 不排除的話幾乎不會有東西判 dead，等於沒分類。\n\n訊號二，有對應測試檔（只看存在不實跑：關閉條件每班重跑，在裡面跑 pytest 是把一個判斷變成一次 CI）。\n\n訊號三，路徑自己是 tests/ 下的 test_*.py。測試檔不會被任何碼 import，訊號一對它永遠是空的 —— 2026-07-20 那 53 個路徑裡整組測試就是這樣被算成無主殘留。刻意不解析它測哪個模組（test_phase_z_foreign_incident 這種複合命名解不出來，解錯就退回誤判）；不對稱是刻意的：留著沒用的測試只是雜訊，安靜刪掉有用的測試才是這張單要防的錯。\n\n刻意不用 mtime：foreign_incident.py 自己就 untracked 活了 78 班，那時 mtime 早過任何寬限但它每小時在跑。既有 live_authoring 寬限問的是「有人剛動過嗎」，本分類器問的是「這東西活著嗎」，兩者互補，都保留。\n\n接線刻意最小：只改 blocker 的指示文字（live → 未提交的活躍碼，需要收養決策，不要清除，並附活性證據），closeable 仍 False —— 髒著就是沒收乾淨，而收養與否是決策，不是這個函式的權限。依單內要求沒有另開第二個 gate 或第二條通知管道（反 alert-stacking），是既有 incident 的欄位升級。\n\n驗收（任務指定 fixture 全中）：foreign_incident.py 判 live，證據就是被 dispatch_slot_budget.py 引用 —— 正是本單點名的那層關係；phase_z.py、測試組同為 live；tests/.!71268!* 與 work_log.json.bak_* 為 dead。scripts/tests/test_phase_z_foreign_incident.py 加 5 測試（含「docs/queue 提及不算活性」防過鬆、「live 改指示但不改判定」防過寬），28 passed；test_dispatch_slot_budget + test_phase_z_quarantine_checkpoint 18 passed。\n\n實跑當前 43 個 dirty 路徑：24 live / 19 dead，4.9s。過半是活的碼。"
+  },
+  {
+    "timestamp": "2026-07-22T08:17:15+08:00",
+    "task_type": "platform_ops",
+    "task_id": "member_qa_dedup_owner_convergence_20260719",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "owner": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "commit": "cf205a5c9",
+    "summary": "member_qa 去重殘留收斂（殘留 2 + 3）——**驗證並搶救既有成果，非重新實作**。\n\n派 subagent 後第一個發現：殘留 2/3 早已完成，躺在 shared checkout 裡**未 commit**（前一班 03:17 做完就走）。Agent 正確地改成逐條對規格驗收而非重做。\n\n驗收 PASS：\n- `member_qa_duplicate_verdict()`（questions.py:883-996）成為單一裁決 owner；history 取得收進函式內成單一資料來源。\n- 兩個消費端（claim_question_for_research:158、ensure_member_qa_task:1297）確實只委派，**舊雙路徑真的移除**（不是包一層）。`summary[\"answered_history\"]` 已從 ensure_member_qa_task 完全消失，並有 test_neither_consumer_adjudicates_on_its_own 用 source 檢查釘住。\n- 殘留 3：_build_member_qa_task_description 不再吐出可複製的 --allow-duplicate；CLI 缺 --new-angle 時 exit 2。\n- 148 passed in 1.84s（6 個相關測試檔）。\n\n本班實際動手部分：\n1. commit 時 silent-fallback-audit 擋下 questions.py:740 新增的靜默 except（清理已消失 pgid）。判定為合法靜默路徑（timeout 本身仍照常 raise WarnBandAdjudicatorUnavailable），依 .claude/rules/no-silent-fallback.md 加 inline `# silent-ok:` 標記——標記必須在 audit 回報的**該行本身**，寫成上方註解區塊無效。\n2. 用 git_writer_lock.py commit 指定確切檔案落地 → cf205a5c9。**這批檔案不是本班產出，PHASE-Z 會依設計略過**，不主動撈就會繼續孤兒化（正是同班另一張任務在查的 alert）。\n\n**Scope drift 需留意**：殘留 4（warn band LLM 裁決 + 持久化）明列不在本班範圍，但已被實作於 questions.py:574-880 且測試通過。然而它該等的門檻校準**沒有發生**——warn band [0.35, 0.70) 仍建立在 19 列 / 171 對語料上，下緣被單一樣本鎖住。校準仍是 open item，不要因為程式碼在就當它完成。\n\n殘留 1（question_id 回填 + gate 升 fail-closed）與殘留 5（release_pool 加 G1）依指示未動。"
+  },
+  {
+    "timestamp": "2026-07-22T08:17:15+08:00",
+    "task_type": "platform_ops",
+    "task_id": "dreaming_persistent_alert_0ddc7a520cfd9d1e",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "owner": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "commit": null,
+    "summary": "[dreaming] persistent_alert 0ddc7a520cfd9d1e（\"PHASE-Z 有檔案不是這班產出的，已略過\"）triage。\n\n**verdict: STILL_FIRING —— 刻意不改任何程式碼。**\n\n用原 detector（phase_z.py:2723 / :3377-3395）read-only 重跑，條件仍成立：dirty=37、baseline=37、owned=5、**foreign=28**。\n\n**推翻任務描述裡的「no fire in 23.0h」**：alert 實際最後一次 raise 是 2026-07-21T23:38:51Z（本班前 35 分鐘），累計 raise 171 次、寄出 8 次、被 dedup 吸收 163 次。\n\n→ **附帶挖出 detector bug**：scripts/dreaming_review.py:788-792 算 recency 只看 last_sent_at、忽略 last_skipped_at。任何高頻但被 dedup 壓住的 alert，即使每班都在燒，也會被自動判成「已恢復」而從 dreaming 消失。這條已 163 skips 深，再一天安靜就會整個蒸發。**本次 triage 最有價值的產出**，已另立 followup。\n\n8 次 send 同源嗎？**同一機制、滾動成員**。streak 檔顯示 foreign 分多個 cohort（streak 20/16/13/12/5/2），到達時間不同但卡在同一機制：docs/refactor_commit_ownership_state_machine.md §1 已指名 FOREIGN 是**吸收態**，唯一自動出口（orphan-half adoption）被 len(candidates) <= 8 卡住，而 candidate 數由「別人有多髒」決定 → 光是並行就會把出口楔死。該文件 **T14** 註記「alert 沒有 actuator」講的就是這條 alert。\n\n**不開新 refactor plan** 的三個理由（各自充分）：\n1. Three-Strike 交付物已存在（老闆 2026-07-21 telegram-1270「不要再補丁」觸發），再開一份是重複。\n2. 該重構**正在進行中**：phase_z.py 有 52 行未 commit 改動（Stage 1 shadow ownership），fire_manifest.py 是新增未追蹤檔。此時編輯 phase_z.py 會把 bytes 混進別的 session 未宣告的 diff。\n3. 「alert 降級成 log」方向正確（stuck 子集已由 _FOREIGN_STREAK_CRITICAL=3 quarantine lane 處理，per-fire warn 與之重複），但應收進狀態機重構內，而非往正在重寫的檔案再貼補丁——那正是老闆否決的作法。\n\n分離出的雜訊：4 個 streak-20 路徑在 storage/lazypack_jobs/.../panels/ 下，是沒有 session 會認領的 render 產物，純粹永久灌水 foreign，應 gitignore 或納入 _is_machine_state。"
+  },
+  {
+    "timestamp": "2026-07-22T08:17:15+08:00",
+    "task_type": "experiment",
+    "task_id": "K1708",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "owner": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "commit": null,
+    "summary": "K1708（時變狀態空間 HAR vs 固定／滾動 HAR）——**推翻一個錯誤前提，解除卡了 3 天的死結**。\n\ndispatcher 把 K1708 列為本班保底席。但它**不是新實驗**：stalled worktree dispatch-slot-1-457427c2-k1708 裡實驗與 round-2 BLOCKER remediation 都已完成（54 passed、experiment_gates PASS），3 個 commit 已在 branch wt/dispatch-slot-2-8dda242d-k1708 上、dirty=0。直接重派會砍掉這批成果。\n\n真正卡點：merge_worktree.sh 的認證閘門要求 experiments/K1708/review_verdict.json（PASS 裁決 + pin 住 claim surface sha256），而該檔不存在 → dry-run ABORT。閘門判斷正確（K1709 前例：Codex 判 FAIL 仍 merge，害 CI 連紅 4 次）。\n\n**關鍵發現**：REMEDIATION_rev2.md 寫著「Codex 額度實測耗盡，重置 2026-07-25 13:30 台北，本輪未執行二審」。本班實測**推翻此宣稱**——`bash scripts/codex_exec_bounded.sh --timeout 100 \"reply with exactly: QUOTA_OK\"` 回 QUOTA_OK、exit 0。也就是說 primary path 早已可用，K1708 白等了 3 天。這類「寫死在文件裡的過期前提」會靜靜餓死任務，值得警惕：**額度類宣稱要當場實測，不要信文件**。\n\n處置：enqueue round-3 primary-path review agent（job agent-brief_k1708_codex_round3-362471，opus/xhigh，timeout 3000，cwd=該 worktree，result-artifact=review_verdict.json）。brief 明列：不重跑實驗、必須用有界 wrapper 跑 codex、先凍結 bytes 再算 sha256、禁手改裁決檔讓 hash 對上、FAIL 是合格產出且屬第 3 次 FAIL 需走 3-strike 而非第 4 次同法重試。合併由 followup 承接。\n\n本班職責到 enqueue 為止（長 agent 不得在 50min fire 內等待——會撞 hard cap 被 SIGKILL、成果全毀）。任務已 annotate compute_job_id 與 dispatch_note 留下追蹤線。"
+  },
+  {
+    "timestamp": "2026-07-22T08:21:46+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex_quota_stale_premise_unblock_20260722",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "owner": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "commit": null,
+    "summary": "**系統性發現：10 張任務（含 3 張 P1）被同一個過期前提凍結 3 天。**\n\n起因是 K1708 的順帶查證。`REMEDIATION_rev2.md` 寫著「Codex 額度實測耗盡，重置 2026-07-25 13:30 台北」。本班以有界 wrapper 實測兩次：\n- `bash scripts/codex_exec_bounded.sh --timeout 100 \"reply with exactly: QUOTA_OK\"` → `QUOTA_OK`，exit 0\n- 一則實質問答（Harvey-Leybourne-Newbold 修正）→ 正常作答，11,486 tokens，exit 0\n\nusage limit 是全域擋所有呼叫的；有呼叫成功即代表限制未生效。**前提推翻。**\n\n隨即掃 `next_tasks.json` 找同源凍結，命中 **10 張 `status=blocked`、`blocked_until` 全指向 2026-07-25** 的任務：\n\n| id | P | 內容 |\n|---|---|---|\n| assign_67f56b79 | 1 | K1731 arm B 拆段 2/2：合併 worktree + knowledge |\n| assign_24ebe308 | 1 | K1731 arm B rev8 claim-layer remediation |\n| k1623_round3_codex_primary_review_gate | 1 | K1623 round-3 送審 gate |\n| assign_50256f5f | 1 | K1708 rev2 Codex 二審 + 合併裁決 |\n| assign_5aa9d5f5 | 2 | K1623 修復：撤回 long-memory 宣稱 |\n| assign_42306eaa | 2 | K1698 重跑：contract-selection lookahead |\n| assign_580c1b3e | 2 | K1730 v2 收件 stage 2 |\n| k528_primary_codex_certify_merge | 2 | K528 primary-path 認證 + merge |\n| k1729_codex_primary_reverify | 2 | K1729 Codex 二審 |\n| k1731_k1730_merge_after_codex_round8_20260725 | 2 | K1730/K1731 worktree 合併 |\n\n全部走 `scripts/mark_task_blocked.py --unblock`（**專屬 owner**——`task_pool_claim.py annotate` 正確拒絕了 lifecycle 欄位 `blocked_until`，閘門運作正常），並 annotate 上推翻證據。結果：blocked 23→13、pending P1 1→5。\n\n**根因不是額度，是流程**：某一班撞到 usage limit，把「重置日期」當事實寫進 blocked_note / 文件，之後每一班都**沿用那個日期而不重探**。額度提早恢復時沒有任何機制會發現——`blocked_until` 是單向的，只會等到日期，不會反問「現在還成立嗎」。10 張任務因此靜靜躺了 3 天，其中 4 張是 P1，且多數是「實驗早已跑完、只差一次審查與合併」的收尾工作。\n\n**制度性教訓**：外部資源可用性（額度 / 認證 / 配額）**不可以寫成日期常數當事實流傳**。它是一個**一秒就能實測的狀態**，探測成本遠低於誤判成本（本例：3 天 × 10 張）。凡是以「外部資源不可用」為由 block 的任務，解封條件應該是**重探成功**，而非**日期到期**。這與 error_log §「探針要架在 outcome 上，不是架在便宜的中間節點」同源——只是這次便宜的中間節點是一個寫死的日期字串。\n\n建議後續：`unblock_expired_blocked_tasks.py` 目前只比對日期。對 `reason=codex_quota_reset_pending` 這類，應該加一條**主動探測**路徑：探測成功即解封，不必等日期。"
+  },
+  {
+    "timestamp": "2026-07-22T08:25:22+08:00",
+    "task_type": "platform_ops",
+    "task_id": "dreaming_persistent_alert_e2f24397a43d4962",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "owner": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "commit": null,
+    "summary": "verdict=DUPLICATE_OF_SIBLING（仍在 firing），code no-op。本條 predicate 是 phase_z.py:2809-2816，對 foreign 再加 streak>=_FOREIGN_STREAK_CRITICAL(3) 過濾，與 0ddc7a52 同一份 foreign list —— 直接證據：兩條 alert 在 23:38:03 / 23:38:51 同一 fire 內相隔 48 秒被 skip，順序符合程式碼順序。重驗 stuck=26/28，條件成立。真實 fire 頻率再次與描述不符（描述說 12h 未 fire，實際 45 分鐘前，累計 187 次）—— dreaming_review.py:788-792 recency bug 第二個確認實例。8 次 send 非 8 個新問題，而是 foreign_incident.py:83 的 fingerprint 定義在 stuck 集合上，成員一變就換 fingerprint→新 incident→新 CRITICAL。收斂建議掛到既有 refactor doc 的 T14/T15，不開新 plan。lazypack panels 的正確 owner 既不是 gitignore（同類 342 檔都有追蹤，是已發佈文章資產）也不是 _is_machine_state（有正常 commit step，歸類進去會讓 PHASE-Z 自動 commit 文章資產），而是 reap_orphan_deliverables.py —— 它本來就正確擁有且是乾淨候選，只差 --apply。**連帶挖出 P0 活故障**：check_alerts.py 自 2026-07-21 17:00 起連續 16 次 crash（NameError: _ci_incident_store_sync），整條 hourly 警報+自動修復停擺；根因是 merge 883903a96 吃掉函式定義但留下 3 個呼叫點（K1032 類 worktree merge loss）。已另行處理。"
+  },
+  {
+    "timestamp": "2026-07-22T08:30:06+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_1d936f52",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "owner": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "commit": "6c325e588",
+    "summary": "check_alerts.py 自 2026-07-21 17:00 起連續 16 次 crash（NameError: _ci_incident_store_sync），hourly 警報 + 自動修復整條停擺 16 小時。由 PHASE-Z alert triage agent 順帶挖出——它追查 lazypack panels 為何卡 20 班沒被回收時，發現負責回收的 reaper 在 check_alerts.py:2802，而 crash 在 :2756，根本走不到。根因是 merge 883903a96 吃掉函式定義卻留下 3 個呼叫點（K1032 類）。已原位還原（保留 HEAD 較新的 gateway 版鄰居函式）+ 補 AST 迴歸測試擋整個 bug class，負向控制確認測試對壞版本會 FAIL。10 passed，commit 6c325e588。連帶問題：assign_614e70ee 宣稱修好此 bug 並標 succeeded，但 bug 一直活著——false close，且其修復很可能正是被這次 merge 吃掉的工作，建議重開查證。"
+  },
+  {
+    "timestamp": "2026-07-22T08:36:42+08:00",
+    "task_type": "platform_ops",
+    "task_id": "kb_backfill_needs_human_adjudication",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "owner": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "commit": null,
+    "summary": "KB backfill needs_human 逐筆裁決：**4 / 29 完成**（29 → 25）。三筆點名 overclaim 全部落地，另主線程清掉第四筆。\n\n### K759（item_id 11947489）UNVERIFIED → **NULL**\n比預期更嚴重：**那根本不是 DM 檢定**。`k759_financial_early_warning.py:344-357` 取兩個巢狀 OLS 在**全樣本 in-sample 殘差**做 loss differential；DM 定義在 OOS 誤差上，in-sample 巢狀模型加變數在代數上必然使 SSR 不增，該統計量無法拒絕任何東西。t=2.237 不只是未達 |t|>=3，是測錯對象。有對照的檢定全敗：AUC bootstrap 95% CI [-0.0404,+0.0444] 跨零、策略 Sharpe 0.402 < baseline 0.464。看似強的 fsi_t=15.14 / partial_corr_t=23.902 建立在 5 日重疊窗 + 20 日 rolling FSI 上，標準誤嚴重低估。**附帶**：條目自述 FSI 為「0050/2330/2881/2882/^VIX 組成」，代碼 :142-146 實為 mean(Fubon_RV20, Cathay_RV20) —— 自述本身不可信。\n\n### K833（item_id 212f0026）UNVERIFIED → **FAIL**\n**bug 在 `k833_iv_straddle.py:156`**：`straddle_pnl = iv_weekly - abs_weekly_return`。ATM straddle 值約 0.7979*S*σ√T，程式收 1.0 倍，高估權利金 25.3%；SPY 平均週 IV 2.52% vs 平均 |週報酬| 1.61%，灌水約 0.51%/週，真實 edge 僅約 0.20%/週。`:119-124` 另有真 lookahead（用到期才知道的收盤 VIX 算期初權利金）。分解 raw Sharpe：原 3.934 / 只 lag 3.744 / **只乘 0.7979 → 1.096** / 雙修 1.051 —— premium scaling 是主因。雙修後依檔案自身定義 SPY 0.847 / QQQ 0.394 / GLD 0.377（原 3.686/3.185/3.421），僅 SPY 跨 |t|>=3。\n\n**值得記的是過程**：agent 第一版裁決被 Codex 對抗性覆核推翻，主動撤回三個未經證實的理由（「20bps 太樂觀」無證據、「無 gamma hedge」用語錯且未避險本非 bug、「左偏使 Gaussian Sharpe 高估」不成立），並修正混用 raw / 檔案定義 Sharpe 的錯誤。Codex 判 bug finding 本身 PASS，並指出更根本的 estimand 問題：VIX 是 30 日 variance-strip，:145 直接乘 √(1/52) 隱含四個未檢驗假設，0.7979 只是最小 proxy 修補、非可交易 premium。\n\n### K841（item_id a0f5af26）DOCUMENTED_NEGATIVE → **SUPERSEDED**\n不需重跑：`k841_dm_hac_correction_20260715` 已在 backfill **隔日**推翻其全部數字（S1 Sharpe 1.359→0.9628，**低於** S0 的 1.0006）。已設 superseded_by 並註明不得引用為實證證據。定性結論修正前後一致。\n\n### K1523（item_id 1868b578）主線程清帳，解除 needs_human\nagent 把它列為「研究誠實紅線、建議最先處理」（README 宣稱 PASS t=-3.14/-3.15，results.json 實為 -2.87/-2.71 且 verdict=NULL，兩數皆恰好越過門檻）。**主線程查證後發現此描述已過期**：README 第 15-23 行早在 2026-07-14 就自行更正並明文記載該矛盾與推測成因（K1520→K1523 worktree salvage 誤植）。條目 verdict 本就是 NULL、六個 t_stat 與 results.json 逐一比對相符。矛盾已解，僅解除 needs_human，verdict 未動。**教訓：agent 報告裡的「紅線」也要查證，它讀的可能是舊快照。**\n\n### Agent 回報的系統性問題（比這幾筆更重要）\n1. **kb-backfill 會收錄已知有 bug 的 artifact** —— K841 的修正 07-15 就存在，backfill 寫入時完全沒交叉比對 methodology_correction 類條目。建議加機械檢查：寫入前掃同 k_id 是否已有 correction/superseding entry。\n2. **backfill 條目自述不可信**（K759 FSI 構成與代碼不符）。下游若引用條目而未回查 artifact，會繼承錯誤。\n3. **判準偏差方向是「信 artifact 的 summary 欄位」** —— K759 的 dm_test_significant=true 能存活，是因為沒人去看那個 DM 怎麼算的。三筆裡有兩筆的真問題比 README 標記的更深一層。\n4. **agent 自證**：第一版 K833 裁決自己犯了「為了判嚴而放寬證據標準」。寧嚴勿鬆不等於可主張沒證據的理由 —— 值得寫進裁決紀律。\n\n### 剩餘 25 筆，下一班建議順序\nP1（8 筆掛 PASS/CONDITIONAL_PASS 但無 reviewer，假陽性風險最高會被引用）：K1496 / K1526 / K829 / K836 / K1253 / K1433 / K1413（K1523 已於本班清掉）。Codex 路徑現在是通的。\nP2（6 筆 BLOCKED_ON_DATA 可批次）：K1438 / K1480 / K1483 / K1486 / K1489 / K1311 —— 零統計量純資料 gap，改標為非 citable 記錄即可。\nP3（低風險）：K1268b / K1291（scaffold only）、K1254 / K1535（僅 smoke test）、K1350 / K1352 / K1353 / K1697（治理紀錄非研究發現；K1353 需先確認 K1344 是否已有條目以免重複）、K825 / K830 / K842 / K1607。\n**另開一條清查**：K1208 / K1407 / K1409 / K1446 / K1524 / K847 已是 needs_human=False 但 verdict=UNVERIFIED 且 reviewer=None —— 不在 needs_human 佇列裡，上述排序會漏掉。\n\n所有寫入經 `revise_knowledge_entry.py` canonical path，無 git mutation、無 add_knowledge 重複寫入。"
   }
 ]

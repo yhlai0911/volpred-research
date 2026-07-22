@@ -1,5 +1,43 @@
 {
  "incidents": {
+  "inc_1b45ed55e555": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "current_task_id": null,
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-22T00:26:09.143323+00:00",
+   "escalation": null,
+   "fingerprint": "1b45ed55e55554e3a225fcc0e79e2efa8174e2263b27975ddd065dea00015b1d",
+   "fingerprint_parts": [
+    "ci-red-29808977711"
+   ],
+   "first_seen_at": "2026-07-22T00:26:09.143323+00:00",
+   "incident_id": "inc_1b45ed55e555",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-22T00:26:09.143323+00:00",
+     "key": "29812586079:1",
+     "last_seen_at": "2026-07-22T00:26:09.143323+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-21T08:13:02.3650965Z tests/test_daily_checkup_db_landing.py:80: AssertionError",
+   "last_seen_at": "2026-07-22T00:26:09.143323+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_776caf84f125": {
    "class": "machine_self",
    "clean_observations": [],
@@ -14,101 +52,149 @@
    "incident_id": "inc_776caf84f125",
    "instances": [
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "worktree-agent-a23b02df50bfa4a57",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "worktree-agent-a6325a478bff05509",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "worktree-agent-a6c24bd9ce9c2924a",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "codex-desktop-k1707",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "wt/dispatch-slot-1-79726798-credit-firm",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "wt/dispatch-slot-1-858545f9-snapaudit",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "wt/dispatch-slot-1-f53bca44-k1692",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "wt/dispatch-slot-2-8dda242d-k1708",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "k1623",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "wt/dispatch-slot-2-c5cafe39-k1698",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "wt/dispatch-slot-2-dcc222db-snapaudit",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "k528-nfp-official-dates",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "wt/dispatch-slot-3-b5fbc1f4-nfpcal",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "ref:salvage-agent-a0ef53c7c992ec1df",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-22T00:26:54.543032+00:00",
      "first_seen_at": "2026-07-21T08:18:15.277371+00:00",
      "key": "ref:salvage-dispatch-slot-1-558d7893-k1730",
      "last_seen_at": "2026-07-21T08:18:15.277371+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "wt/dispatch-slot-1-20b291d5-snapdup",
+      "dirty": true,
+      "idle_hours": 10.3,
+      "unmerged_commits": 1
+     },
+     "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
+     "key": "dispatch-slot-1-20b291d5-snapdup",
+     "last_seen_at": "2026-07-22T00:26:54.543032+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "wt/dispatch-slot-1-375ba0e3-k1380",
+      "dirty": true,
+      "idle_hours": 10.4,
+      "unmerged_commits": 4
+     },
+     "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
+     "key": "dispatch-slot-1-375ba0e3-k1380",
+     "last_seen_at": "2026-07-22T00:26:54.543032+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "wt/dispatch-slot-1-bd00f90a-k1731",
+      "dirty": false,
+      "idle_hours": 8.7,
+      "unmerged_commits": 21
+     },
+     "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
+     "key": "dispatch-slot-1-bd00f90a-k1731",
+     "last_seen_at": "2026-07-22T00:26:54.543032+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "wt/dispatch-slot-1-f5a22a5f-k1095v2",
+      "dirty": false,
+      "idle_hours": 4.3,
+      "unmerged_commits": 3
+     },
+     "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
+     "key": "dispatch-slot-1-f5a22a5f-k1095v2",
+     "last_seen_at": "2026-07-22T00:26:54.543032+00:00"
     }
    ],
    "kind": "worktree_unmerged",
-   "last_breach_detail": "2026-07-21 boss no-residue 清運：17 worktree 全移除；此 15 個 instance 是 bytes 仍保存在 branch/quarantine-ref、未經 review 收割進 main 的殘餘。裁決出口：有價值者走 experiment_gates certify 正規收割，無價值者刪 branch。",
-   "last_seen_at": "2026-07-21T08:18:15.277371+00:00",
+   "last_breach_detail": "held worktree dispatch-slot-1-f5a22a5f-k1095v2",
+   "last_seen_at": "2026-07-22T00:26:54.543032+00:00",
    "notified_at": null,
-   "occurrence_count": 1,
+   "occurrence_count": 5,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -122,8 +208,9 @@
    ],
    "task_mode": "adjudication",
    "throttled": {
-    "count": 0,
-    "last_at": null
+    "count": 4,
+    "last_at": "2026-07-22T00:26:54.543032+00:00",
+    "last_reason": "remediation_cap_24h"
    }
   },
   "inc_792a94b0ecf4": {
@@ -150,7 +237,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-21T23:08:33.292646+00:00"
+     "last_seen_at": "2026-07-22T00:08:40.118728+00:00"
     },
     {
      "cleared_at": null,
@@ -163,7 +250,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-21T23:08:33.648612+00:00"
+     "last_seen_at": "2026-07-22T00:08:40.488679+00:00"
     },
     {
      "cleared_at": null,
@@ -176,7 +263,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-21T23:08:35.575057+00:00"
+     "last_seen_at": "2026-07-22T00:08:41.789065+00:00"
     },
     {
      "cleared_at": null,
@@ -189,7 +276,7 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-21T23:08:34.000625+00:00"
+     "last_seen_at": "2026-07-22T00:08:40.917508+00:00"
     },
     {
      "cleared_at": null,
@@ -202,7 +289,7 @@
      },
      "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-21T23:08:36.368094+00:00"
+     "last_seen_at": "2026-07-22T00:08:43.288541+00:00"
     },
     {
      "cleared_at": null,
@@ -220,9 +307,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-f5a22a5f-k1095v2 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-21T23:08:36.368094+00:00",
+   "last_seen_at": "2026-07-22T00:08:43.288541+00:00",
    "notified_at": null,
-   "occurrence_count": 71,
+   "occurrence_count": 76,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -230,8 +317,8 @@
    "task_history": [],
    "task_mode": "adjudication",
    "throttled": {
-    "count": 71,
-    "last_at": "2026-07-21T23:08:36.522263+00:00",
+    "count": 76,
+    "last_at": "2026-07-22T00:08:43.567121+00:00",
     "last_reason": "remediation_cap_24h"
    }
   },
@@ -352,6 +439,6 @@
    }
   }
  },
- "updated_at": "2026-07-21T23:37:59.703442+00:00",
+ "updated_at": "2026-07-22T00:38:15.224530+00:00",
  "version": 1
 }
