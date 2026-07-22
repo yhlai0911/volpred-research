@@ -51885,10 +51885,33 @@
     "id": "trending_scan_primary_source_verification",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dispatch_adjudication",
     "title": "[造假風險] trending scanner 會合成不存在的市場事件，寫作端才擋得住",
-    "description": "實例：task trending_repost_2026_07_18_台股崩跌。refill scanner 產出的 seed 宣稱台股「歷史性崩跌 2953 點（-6.5%）」，writer agent 查 primary source 發現 ^TWII 2026-07-17 bar = NaN、7/16 收 45625（前日 -0.01% 幾乎持平）—— 事件根本不存在。\n\n為什麼要修：目前唯一攔下它的是 writer agent 的研究誠實自律。這是 prose-level 防線，不是機械閘門；同一個 scanner 只要再合成一次數字更像真的假事件，就可能直接寫成文章發出去。這是平台最不能出的錯。\n\n要做的：trending 候選在**進任務池之前**，凡帶有可查證的量化宣稱（指數點數、漲跌幅、成交量）都必須對 primary source （yfinance / TAIFEX / FRED，視標的而定）核對；對不上就丟棄該候選並寫進 dedup/scan 的 audit log，不得靜默放行。注意 NaN bar 要當『無資料』處理，不可當成 0 或當成驗證通過（同 repo 既有的『沉默被讀成乾淨』bug class）。\n\n相關：2026-07-22 班次同時修了 refill 端『具名 near-miss 照樣建 P1』的缺陷（refill_reader_facing_pool.py 兩段選擇），那條治的是重複，本單治的是造假 —— 兩者都是 scanner 產出未經驗證就變成 P1 任務。"
+    "description": "實例：task trending_repost_2026_07_18_台股崩跌。refill scanner 產出的 seed 宣稱台股「歷史性崩跌 2953 點（-6.5%）」，writer agent 查 primary source 發現 ^TWII 2026-07-17 bar = NaN、7/16 收 45625（前日 -0.01% 幾乎持平）—— 事件根本不存在。\n\n為什麼要修：目前唯一攔下它的是 writer agent 的研究誠實自律。這是 prose-level 防線，不是機械閘門；同一個 scanner 只要再合成一次數字更像真的假事件，就可能直接寫成文章發出去。這是平台最不能出的錯。\n\n要做的：trending 候選在**進任務池之前**，凡帶有可查證的量化宣稱（指數點數、漲跌幅、成交量）都必須對 primary source （yfinance / TAIFEX / FRED，視標的而定）核對；對不上就丟棄該候選並寫進 dedup/scan 的 audit log，不得靜默放行。注意 NaN bar 要當『無資料』處理，不可當成 0 或當成驗證通過（同 repo 既有的『沉默被讀成乾淨』bug class）。\n\n相關：2026-07-22 班次同時修了 refill 端『具名 near-miss 照樣建 P1』的缺陷（refill_reader_facing_pool.py 兩段選擇），那條治的是重複，本單治的是造假 —— 兩者都是 scanner 產出未經驗證就變成 P1 任務。",
+    "status_history": [
+      {
+        "ts": "2026-07-22T09:08:56.554316+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-21543514841e4a2d82eebf094963ca8b"
+      },
+      {
+        "ts": "2026-07-22T09:08:56.800451+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-21543514841e4a2d82eebf094963ca8b"
+      },
+      {
+        "ts": "2026-07-22T09:17:54.431154+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-21543514841e4a2d82eebf094963ca8b"
+      }
+    ],
+    "started_at": "2026-07-22T09:08:56.800431+00:00",
+    "completed_at": "2026-07-22T09:17:54.431138+00:00",
+    "result": "root_cause_fixed_and_verified: added pre-pool quantitative claim contract and yfinance/FRED primary-source verification; missing specs, NaN/missing bars, series mismatch, unsupported source, and numeric mismatch now reject with JSONL audit. Incident replay extracted -2953 points/-6.5%; 24 targeted tests passed."
   },
   {
     "id": "assign_310bd205",
