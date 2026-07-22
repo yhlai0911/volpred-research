@@ -50162,11 +50162,29 @@
     "title": "[incident] cohort-wide kill sweep：同 cohort 3 個 slot 於 1.5s 內全數 killed_timeout，duration 全未達 3000s cap",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-21T13:14:14.434697+00:00",
     "source": "dispatch",
     "parent_task_id": "assign_f59976b6",
-    "description": "驗收 assign_f59976b6 時發現的實質新風險（證據見 storage/ops/throughput_audit_max_slots_20260721.md 第 3 節）。\n\n現象（~/.volpred/logs/dispatch_supervisor.log）：\n  11:23:29 slot-2 killed_timeout duration=671.5s\n  11:23:30 slot-4 killed_timeout duration=131.2s\n  11:23:31 slot-3 killed_timeout duration=611.7s\n  11:44:59 slot-3 killed_timeout duration=450.4s\n  11:44:59 slot-1 killed_timeout duration=930.5s\n  11:45:00 slot-4 killed_timeout duration=270.5s\n\n同 cohort 多 slot 在 1.5 秒內同時返回，但各自 duration 差距極大（131s vs 671s），且全部遠低於 3000s hard cap ⇒ 不是 per-job timeout，是 supervisor 層整批 kill。剛跑 131s（剛起步）的 slot 被連坐殺掉。\n\n影響：max_slots 2→4 讓單次 sweep 的爆炸半徑加倍。10 次 killed_timeout 中 6 次來自這 2 個 sweep；killed_timeout 由變更前 1-2/日 升到 07-20 的 7/日。\n\n要做：(1) 定位觸發者 —— supervisor watchdog / cohort drain 逾時 / launchd 層，讀 scripts/dispatch_supervisor/scheduler.py 的 kill 路徑；(2) 若確為整批 kill，改成 per-slot 判定，勿連坐未逾時的 slot；(3) 補一條 regression test。"
+    "description": "驗收 assign_f59976b6 時發現的實質新風險（證據見 storage/ops/throughput_audit_max_slots_20260721.md 第 3 節）。\n\n現象（~/.volpred/logs/dispatch_supervisor.log）：\n  11:23:29 slot-2 killed_timeout duration=671.5s\n  11:23:30 slot-4 killed_timeout duration=131.2s\n  11:23:31 slot-3 killed_timeout duration=611.7s\n  11:44:59 slot-3 killed_timeout duration=450.4s\n  11:44:59 slot-1 killed_timeout duration=930.5s\n  11:45:00 slot-4 killed_timeout duration=270.5s\n\n同 cohort 多 slot 在 1.5 秒內同時返回，但各自 duration 差距極大（131s vs 671s），且全部遠低於 3000s hard cap ⇒ 不是 per-job timeout，是 supervisor 層整批 kill。剛跑 131s（剛起步）的 slot 被連坐殺掉。\n\n影響：max_slots 2→4 讓單次 sweep 的爆炸半徑加倍。10 次 killed_timeout 中 6 次來自這 2 個 sweep；killed_timeout 由變更前 1-2/日 升到 07-20 的 7/日。\n\n要做：(1) 定位觸發者 —— supervisor watchdog / cohort drain 逾時 / launchd 層，讀 scripts/dispatch_supervisor/scheduler.py 的 kill 路徑；(2) 若確為整批 kill，改成 per-slot 判定，勿連坐未逾時的 slot；(3) 補一條 regression test。",
+    "claimed_by": "codex-failover-slot-3-66419e3315214941b1d58a7fa620998d",
+    "claimed_at": "2026-07-22T16:10:28.380095+00:00",
+    "claim_session_id": "2806db38d41e",
+    "status_history": [
+      {
+        "ts": "2026-07-22T16:10:28.380113+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-3-66419e3315214941b1d58a7fa620998d"
+      },
+      {
+        "ts": "2026-07-22T16:10:37.790434+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-3-66419e3315214941b1d58a7fa620998d"
+      }
+    ],
+    "started_at": "2026-07-22T16:10:37.790416+00:00"
   },
   {
     "id": "throughput_recheck_max_slots_20260725",
@@ -54836,7 +54854,7 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29808977711",
@@ -54844,7 +54862,30 @@
     "created_at": "2026-07-22T10:00:08.344338+00:00",
     "title": "CI 紅燈修復（run 29906217577, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/29906217577\nattempt: 1\nhead_sha: 1629ae7b1\n偵測摘要（仍須讀完整 failed log）：2026-07-22T09:13:37.2849160Z E AssertionError: Enforcement Layer Map is out of sync with disk — update .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md in the same commit as the hook/CI change.\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 29906217577 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=<sha>`\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-22T16:08:19.226282+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-bc3c5fa6dd9640fbae00e7da457ce653"
+      },
+      {
+        "ts": "2026-07-22T16:08:23.650002+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-bc3c5fa6dd9640fbae00e7da457ce653"
+      },
+      {
+        "ts": "2026-07-22T16:12:32.991383+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-bc3c5fa6dd9640fbae00e7da457ce653"
+      }
+    ],
+    "started_at": "2026-07-22T16:08:23.649985+00:00",
+    "completed_at": "2026-07-22T16:12:32.991365+00:00",
+    "result": "root_cause=CI incident mirror tests used canonical storage/ops/incidents.json and the enforcement map omitted the new compound edit hook; repair_commit=c035dd287"
   },
   {
     "id": "assign_0c7a209c",
@@ -54974,10 +55015,10 @@
   {
     "id": "platform_ops_release_audit_fix_mile_2d1d356b",
     "title": "Fix release-pool audit blockers: AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債",
-    "description": "release_pool skipped draft `mile_2d1d356b` 4 times because the general-audience audit failed.\n\nTitle: AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_2d1d356b --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "description": "release_pool skipped draft `mile_2d1d356b` 6 times because the general-audience audit failed.\n\nTitle: AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債\n\nIssues:\n- missing 懶人包圖組 section (render queued, job lazypack-mile_2d1d356b) — waiting on the */15 compute worker, no action needed\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
@@ -54987,18 +55028,18 @@
     ],
     "created_at": "2026-07-22T11:00:57.650646+00:00",
     "article_id": "mile_2d1d356b",
-    "release_audit_skipped_count": 4,
+    "release_audit_skipped_count": 6,
     "release_audit_issues": [
-      "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_2d1d356b --plan <plan.json>"
+      "missing 懶人包圖組 section (render queued, job lazypack-mile_2d1d356b) — waiting on the */15 compute worker, no action needed"
     ]
   },
   {
     "id": "platform_ops_release_audit_fix_mile_63ec8636",
     "title": "Fix release-pool audit blockers: 黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信",
-    "description": "release_pool skipped draft `mile_63ec8636` 4 times because the general-audience audit failed.\n\nTitle: 黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_63ec8636 --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "description": "release_pool skipped draft `mile_63ec8636` 6 times because the general-audience audit failed.\n\nTitle: 黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信\n\nIssues:\n- missing 懶人包圖組 section (render queued, job lazypack-mile_63ec8636) — waiting on the */15 compute worker, no action needed\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
@@ -55008,9 +55049,9 @@
     ],
     "created_at": "2026-07-22T11:00:57.650646+00:00",
     "article_id": "mile_63ec8636",
-    "release_audit_skipped_count": 4,
+    "release_audit_skipped_count": 6,
     "release_audit_issues": [
-      "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_63ec8636 --plan <plan.json>"
+      "missing 懶人包圖組 section (render queued, job lazypack-mile_63ec8636) — waiting on the */15 compute worker, no action needed"
     ]
   },
   {
@@ -55056,13 +55097,31 @@
     "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 3 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 3\n- eligible_before_dedup: 3\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 3\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: (none)\n  - `mile_2d1d356b` (general, 已連續被擋 4 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n  - `mile_63ec8636` (general, 已連續被擋 4 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n  - `mile_928eade8` (general, 已連續被擋 1 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_928eade8*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260722_15`，指定只補仍可放行的 cluster：vix。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-22T15:01:25.012211+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "release_pool_deadlock"
-    ]
+    ],
+    "claimed_by": "codex-failover-slot-1-3eab721a5999404f99beb24943dc0bea",
+    "claimed_at": "2026-07-22T16:01:19.245300+00:00",
+    "claim_session_id": "b7998b1f13db",
+    "status_history": [
+      {
+        "ts": "2026-07-22T16:01:19.245315+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-3eab721a5999404f99beb24943dc0bea"
+      },
+      {
+        "ts": "2026-07-22T16:01:19.605235+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-3eab721a5999404f99beb24943dc0bea"
+      }
+    ],
+    "started_at": "2026-07-22T16:01:19.605211+00:00"
   },
   {
     "id": "telegram-1324",
@@ -55096,10 +55155,130 @@
     "description": "Telegram msg 1324：老闆指出平台又壞掉且沒有持續出新文章。現場證據（2026-07-22 23:13 Asia/Taipei）：release_pool_deadlock task alert_release_pool_deadlock_20260722 仍 pending；feed 最新發布為 mile_a73bb294，published_at=2026-07-22T11:00:57Z（台北 19:00）；mile_928eade8 於台北 20:05 建立但仍 draft。請立即完成實事：1) 先讓至少一篇符合品質與證據 gate 的新文章真正 published，回讀 feed/API 驗證；2) 釐清 3 drafts/0 eligible 的 live 根因，依五步結案 gate 重構底層，不能只手動補圖或重跑；3) 檢查 alert task 是否可合併，避免重工；4) 回報 contained 或 root_cause_fixed_and_verified，不可把 exit 0 當完成。",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "pending",
+    "status": "pending_main_thread",
     "source": "user",
     "created_at": "2026-07-22T15:13:35.565944+00:00",
     "parent_task_id": "telegram-1324",
+    "created_by": "telegram-responder",
+    "handoff_note": "【主線專屬交接｜Telegram msg 1327｜2026-07-22 23:38 Asia/Taipei】先用 task_pool_claim.py claim --id assign_f13a5d5f --owner <interactive-owner> --main-thread 接手。已核實：23:14 request_fire(reason=user:assign_f13a5d5f) 啟動 job c4191cb4，但 fire 沒綁指定 task；該班改做其他 P2，23:35 本 P1 仍未 claim。live feed 最新 published 仍是 mile_a73bb294（19:00 台北），不是已修。執行順序：1) contained：從 3 drafts 找一篇通過證據/品質 gate 的新稿，用正式 publisher 發佈並回讀 feed + live API；2) root cause：重現 request_fire 帶 task id 卻可 claim 無關任務的 selector/claim 契約缺口，納入 c4191cb4 supervisor/worker receipt；3) 底層重構：urgent targeted fire 必須原子保留/claim exact task，或明確失敗並持續重試，禁止用別張任務的 exit 0 當接手成功；4) 補 regression、API/下游回讀、機械 alert；5) 合併 alert_release_pool_deadlock_20260722 與 release_deadlock_repair_20260722_15，按 contained 或 root_cause_fixed_and_verified 回報。禁止只手動補圖、重跑或只更新文字。",
+    "handoff_at": "2026-07-22T15:37:32.750398+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-22T15:37:32.750414+00:00",
+        "from": "pending",
+        "to": "pending_main_thread",
+        "by": "handoff",
+        "note": "【主線專屬交接｜Telegram msg 1327｜2026-07-22 23:38 Asia/Taipei】先用 task_pool_claim.py claim --id assign_f13a5d5f --owner <interactive-owner> --main-thread 接手。已核實：23:14 request_fire(reason=user:assign_f13a5d5f) 啟動 job c4191cb4，但 fire 沒綁指定 task；該班改做其他 P2，23:35 本 P1 仍未 claim。live feed 最新 published 仍是 mile_a73bb294（19:00 台北），不是已修。執行順序：1) contained：從 3 drafts 找一篇通過證據/品質 gate 的新稿，用正式 publisher 發佈並回讀 feed + live API；2) root cause：重現 request_fire 帶 task id 卻可 claim 無關任務的 selector/claim 契約缺口，納入 c4191cb4 supervisor/worker receipt；3) 底層重構：urgent targeted fire 必須原子保留/claim exact task，或明確失敗並持續重試，禁止用別張任務的 exit 0 當接手成功；4) 補 regression、API/下游回讀、機械 alert；5) 合併 alert_release_pool_deadlock_20260722 與 release_deadlock_repair_20260722_15，按 contained 或 root_cause_fixed_and_verified 回報。禁止只手動補圖、重跑或只更新文字。"
+      }
+    ]
+  },
+  {
+    "id": "telegram-1327",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-22T15:34:23.675153+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1327）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n我知道我不用做什麼但你什麼都不做嗎？叫你從底層重構你也做不出來叫你從主線去執行你也沒做出什麼樣的交接文件讓我去主線執行\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n你不用怎麼辦，是我這邊壞了。\n\n我剛真查：最後一篇今晚 19:00 有發，但 20:05 的新稿卡在 draft，現在是 3 篇草稿、0 篇可發。已排入任務池 assign_f13a5d5f（P1，已要求立即 fire）：先真正發布一篇，再把死鎖根因治掉，不把責任丟給你。\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-22T15:35:03.091382+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder-75557"
+      },
+      {
+        "ts": "2026-07-22T15:38:08.583455+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder-75557"
+      }
+    ],
+    "completed_at": "2026-07-22T15:38:08.583440+00:00",
+    "result": "已核實 23:14 requested fire job c4191cb4 未綁 exact task，轉而完成其他 P2，assign_f13a5d5f 與 live 發佈均未完成。已用 canonical handoff-main-thread writer 將 assign_f13a5d5f 轉為 pending_main_thread，handoff_note 含止血發文、targeted-fire 原子 claim 重構、回歸與 live 回讀；Telegram reply message_id=1328 已送達。"
+  },
+  {
+    "id": "release_deadlock_repair_20260722_16",
+    "title": "【P1 自動補救】release 死鎖：修好被內容閘門擋住的草稿",
+    "description": "release_pool 死鎖：草稿池有 3 篇、eligible=0（due_now=true），其中 3 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_2d1d356b` (general, 已被擋 5 次) [lazypack_missing] AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_2d1d356b --plan <plan.json>\n- `mile_63ec8636` (general, 已被擋 5 次) [lazypack_missing] 黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_63ec8636 --plan <plan.json>\n- `mile_928eade8` (general, 已被擋 2 次) [lazypack_missing] 同一個模型跑三次，答案在三個月裡移動了 0.07：談「最新一段窗口」的統計數字\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_928eade8*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_928eade8 --plan <plan.json>\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "auto_remediation",
+    "created_at": "2026-07-22T16:00:53.401208+00:00",
+    "blocked_article_ids": [
+      "mile_2d1d356b",
+      "mile_63ec8636",
+      "mile_928eade8"
+    ],
+    "trigger": "release_pool_content_gate_deadlock",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "platform_ops_release_audit_fix_mile_928eade8",
+    "title": "Fix release-pool audit blockers: 同一個模型跑三次，答案在三個月裡移動了 0.07：談「最新一段窗口」的統計數字",
+    "description": "release_pool skipped draft `mile_928eade8` 3 times because the general-audience audit failed.\n\nTitle: 同一個模型跑三次，答案在三個月裡移動了 0.07：談「最新一段窗口」的統計數字\n\nIssues:\n- missing 懶人包圖組 section (render queued, job lazypack-mile_928eade8) — waiting on the */15 compute worker, no action needed\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 2,
+    "status": "pending",
+    "source": "release_pool_audit_skip_materializer",
+    "tags": [
+      "release_pool",
+      "audit_skip",
+      "platform_ops"
+    ],
+    "created_at": "2026-07-22T16:07:02.936982+00:00",
+    "article_id": "mile_928eade8",
+    "release_audit_skipped_count": 3,
+    "release_audit_issues": [
+      "missing 懶人包圖組 section (render queued, job lazypack-mile_928eade8) — waiting on the */15 compute worker, no action needed"
+    ]
+  },
+  {
+    "id": "telegram-1329",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-22T16:07:17.441134+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1329）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你先把任務池備份之後清空 所有的任務都暫時直接執行 不要進任務池\n第一個任務就是把整個流程底層重構 把你所看到的所有問題全部重構\n我不要再看到有什麼遺留的東西沒有人認領 不要看到有什麼東西沒有辦法commit 不要看到任務池會塞住\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-22T16:08:12.117173+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder-44409"
+      },
+      {
+        "ts": "2026-07-22T16:09:18.588178+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder-44409"
+      }
+    ],
+    "completed_at": "2026-07-22T16:09:18.588165+00:00",
+    "result": "已用正式 writer 建立急件 assign_f3f36d75（fire_requested=true），並於 Telegram msg 1330 回覆老闆。"
+  },
+  {
+    "id": "assign_f3f36d75",
+    "title": "【老闆急件】先備份並清空既有任務池，改為直接執行；全面重構派工底層",
+    "description": "老闆於 Telegram msg 1329 明確指示：第一步先對 storage/next_tasks.json 做可回復備份，之後清空既有任務；暫停把工作送進任務池，所有工作改為直接執行。接著第一個直接執行的工作是全面盤點並重構整個派工／認領／commit／殘留收斂底層，消除無人認領、無法 commit、任務池堵塞與舊機制殘留。這是 user-assigned P1 急件；須直接開工，不可只寫計畫或再拆成一般排隊單。依五步結案 gate：live 證據、根因層級、底層重構、回歸與下游回讀、制度化寫回；未全過只能標 contained。操作含清空任務池，務必先建立可驗證備份並保留回復路徑。完成後以 Telegram 回報短結論與可查證證據。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-22T16:08:48.608987+00:00",
+    "payload": {
+      "owner_instruction": "direct_execution_no_pool_temporarily",
+      "telegram_message_id": 1329,
+      "required_first_action": "backup_then_clear_existing_task_pool",
+      "closure_gate": "five_step_root_cause_fixed_and_verified",
+      "do_not_just_plan": true
+    },
+    "parent_task_id": "telegram-1329",
     "created_by": "telegram-responder"
   }
 ]
