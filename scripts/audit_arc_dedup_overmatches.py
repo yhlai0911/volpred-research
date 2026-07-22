@@ -5,6 +5,10 @@ This is a read-only helper for the 2026-06-24 arc-dedup incident. It scans
 drafts that release_pool skipped as arc duplicates and reports cases where the
 candidate and the blocker have different known narrative axes. Those are
 dup-waiver / rewrite candidates for an interactive session to review.
+
+This CLI is a report adapter. The same verdict is consumed automatically by
+``volpred.ops.content_quality`` and therefore reaches the hourly alert/task
+actuator; it is no longer a terminal-only audit.
 """
 
 from __future__ import annotations
@@ -12,101 +16,18 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 sys.path.insert(0, str(ROOT / "src"))
 
-from volpred.publisher.arc_dedup import (  # noqa: E402
-    ARC_SIGNATURE_SCHEMA_VERSION,
-    arc_signature,
+from volpred.ops.content_actuator_audits import (  # noqa: E402
+    find_overmatches as _actuated_find_overmatches,
 )
-from volpred.ops.diagnostics import warn  # noqa: E402
 
-
-def _article_text(item: dict) -> str:
-    return str(item.get("content") or item.get("description") or "")
-
-
-def _parse_dt(raw: object) -> datetime | None:
-    if not raw:
-        return None
-    try:
-        from dateutil.parser import parse as dtparse
-
-        parsed = dtparse(str(raw))
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=timezone.utc)
-        return parsed.astimezone(timezone.utc)
-    except Exception as exc:
-        warn("arc_overmatch_parse_dt", "timestamp parse failed", err=str(exc), raw=str(raw)[:60])
-        return None
-
-
-def _signature(item: dict) -> dict:
-    details = item.get("details") if isinstance(item.get("details"), dict) else {}
-    stored = details.get("arc_signature") if isinstance(details, dict) else None
-    if (
-        isinstance(stored, dict)
-        and stored.get("schema_version") == ARC_SIGNATURE_SCHEMA_VERSION
-    ):
-        return stored
-    return arc_signature(str(item.get("title") or ""), _article_text(item))
-
-
-def find_overmatches(
-    feed: Iterable[dict],
-    *,
-    days: int = 30,
-    now: datetime | None = None,
-) -> list[dict]:
-    items = [item for item in feed if isinstance(item, dict)]
-    by_id = {str(item.get("id") or ""): item for item in items}
-    cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
-    candidates: list[dict] = []
-
-    for item in items:
-        details = item.get("details")
-        if not isinstance(details, dict):
-            continue
-        blocker_id = str(details.get("release_arc_dedup_of") or "")
-        skipped_at = _parse_dt(details.get("release_dedup_skipped_at"))
-        if not blocker_id or not skipped_at or skipped_at < cutoff:
-            continue
-        blocker = by_id.get(blocker_id)
-        if not blocker:
-            continue
-
-        cand_sig = _signature(item)
-        block_sig = _signature(blocker)
-        cand_axis = str(cand_sig.get("narrative_axis") or "unspecified")
-        block_axis = str(block_sig.get("narrative_axis") or "unspecified")
-        if "unspecified" in {cand_axis, block_axis} or cand_axis == block_axis:
-            continue
-
-        cand_entities = set(cand_sig.get("entities") or [])
-        block_entities = set(block_sig.get("entities") or [])
-        candidates.append(
-            {
-                "candidate_id": item.get("id"),
-                "candidate_title": item.get("title"),
-                "blocked_by_id": blocker.get("id"),
-                "blocked_by_title": blocker.get("title"),
-                "release_dedup_skipped_at": skipped_at.isoformat(),
-                "candidate_narrative_axis": cand_axis,
-                "blocked_by_narrative_axis": block_axis,
-                "shared_entities": sorted(cand_entities & block_entities),
-                "candidate_entities": sorted(cand_entities),
-                "blocked_by_entities": sorted(block_entities),
-                "candidate_mechanisms": cand_sig.get("mechanisms") or [],
-                "blocked_by_mechanisms": block_sig.get("mechanisms") or [],
-                "recommendation": "review_dup_waiver_or_fresh_arc_rewrite",
-            }
-        )
-    return candidates
+# One decision owner: CLI/tests and the hourly actuator consume the same code.
+find_overmatches = _actuated_find_overmatches
 
 
 def main() -> int:

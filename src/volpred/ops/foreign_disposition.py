@@ -19,6 +19,10 @@ scheduler slot cap 的 incident。那半邊是對的：懲罰端接上了控制�
 輸入是一份**逐路徑的明文裁決**（disposition），由知道該檔案的人或任務產生；本模組
 只負責把已經做成的決定**安全地、序列化地**落地。沒有 disposition 就沒有動作。
 
+這是刻意的 operator gate，不是漏接自動 caller：CLI shim
+``scripts/foreign_disposition.py`` 就是 actuator。自動呼叫必須猜 ownership/disposition，
+會直接違反上面的 zero-inference contract。
+
 ## 三個不變式（少一個就是這個 class 的第 7 次補丁）
 
 1. **只動清單內的路徑。** 全程使用明確 pathspec，永不 ``git add -A``；並在事後比對

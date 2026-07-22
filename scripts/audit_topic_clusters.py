@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""Legacy operator drill-down for 90-day cluster counts.
+
+This is not a second enforcement owner. Automated concentration enforcement
+is ``content_quality.check_arc_diversity`` -> ``alerts._parse_content_quality_state``;
+this CLI only prints longer-window samples for diagnosis.
+"""
+
 from __future__ import annotations
 
 import json

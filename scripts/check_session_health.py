@@ -11,9 +11,12 @@ Session Health Check — 檢查當前 active sessions 是否需要 /clear
 用法：
   uv run python scripts/check_session_health.py             # 純文字輸出
   uv run python scripts/check_session_health.py --json      # JSON 輸出
-  uv run python scripts/check_session_health.py --quiet     # 只在有警告時輸出（適合掛 cron）
+  uv run python scripts/check_session_health.py --quiet     # 只在有警告時輸出
 
-可掛 cron 每小時跑一次，當有警告時會輸出非空，配合 mail/notify 即可。
+Operator diagnostic only: ``/clear`` is an interactive conversation action;
+an unattended process cannot safely clear or rotate a human's active session.
+Do not schedule this as an autonomous actuator. Token-policy reporting owns
+the standing automation; this command helps the operator choose a session.
 
 Thresholds load from `config/token_policy.json > session_health`.
 """

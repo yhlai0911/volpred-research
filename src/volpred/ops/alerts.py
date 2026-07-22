@@ -4134,6 +4134,8 @@ def _parse_content_quality_state(
     rhythm = snapshot["publish_rhythm"]
     title = snapshot["title_format"]
     arc = snapshot.get("arc_diversity", {})
+    arc_overmatch = snapshot.get("arc_dedup_overmatches", {})
+    audience = snapshot.get("audience_classification", {})
     release = snapshot.get("release_deadlock", {})
     frontend = snapshot.get("frontend_render", {})
     completeness = snapshot.get("content_completeness", {})
@@ -4159,6 +4161,10 @@ def _parse_content_quality_state(
         critical_subchecks.append("frontend_render")
     if arc.get("status") == "concentrated":
         breached_subchecks.append("arc_diversity")
+    if arc_overmatch.get("status") == "overmatch":
+        breached_subchecks.append("arc_dedup_overmatch")
+    if audience.get("status") == "misclassified":
+        breached_subchecks.append("audience_classification")
     if lazypack_gap:
         breached_subchecks.append("content_completeness:lazypack_gap")
     # Missing-chart/source content_completeness is a heuristic (frontend-rendered
@@ -4216,6 +4222,25 @@ def _parse_content_quality_state(
             f"- arc_diversity: 近 {arc.get('sample')} 篇最高 arc `{arc.get('top_axis')}` "
             f"佔 {arc.get('top_share')} > {arc.get('threshold')} 門檻（主題過度集中）"
         )
+    if arc_overmatch.get("status") == "overmatch":
+        examples = ", ".join(
+            str(x.get("candidate_id") or "?")
+            for x in arc_overmatch.get("candidates", [])[:5]
+        )
+        lines.append(
+            f"- arc_dedup_overmatch: {arc_overmatch.get('count')} 筆不同 narrative axis "
+            f"仍被擋；examples: {examples or 'n/a'}"
+        )
+    if audience.get("status") == "misclassified":
+        summary = audience.get("summary", {})
+        examples = ", ".join(
+            str(x.get("id") or "?")
+            for x in audience.get("tiers", {}).get("HIGH", [])[:5]
+        )
+        lines.append(
+            f"- audience_classification: {summary.get('high_confidence')} 篇 HIGH-confidence "
+            f"general→research 候選；examples: {examples or 'n/a'}"
+        )
     if completeness.get("status") == "incomplete":
         miss = completeness.get("findings", [])
         lines.append(
@@ -4260,6 +4285,10 @@ def _parse_content_quality_state(
             "時用 `codex exec`（boss 2026-06-30/07-15 directive），NotebookLM 僅為 "
             "fallback，不得當首選。append `## 懶人包圖組` 後用正式 publish/update "
             "流程同步；新 general 文會被 publish gate 阻擋。",
+            "6. `arc_dedup_overmatch` → 跑 `scripts/audit_arc_dedup_overmatches.py`，"
+            "逐筆裁決 dup waiver 或 fresh-arc rewrite。",
+            "7. `audience_classification` → 跑 `scripts/audit_audience_classification.py`，"
+            "複核 HIGH 候選並以正式更新流程改 audience；不得直接改 feed JSON。",
         ]
     )
 
