@@ -6,12 +6,24 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 for extra in (PROJECT_ROOT / "scripts", PROJECT_ROOT / "src"):
     if str(extra) not in sys.path:
         sys.path.insert(0, str(extra))
 
 import check_alerts  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _isolate_ci_incident_store(tmp_path, monkeypatch):
+    """Keep the incident mirror on the same per-test boundary as watch state."""
+    monkeypatch.setattr(
+        check_alerts,
+        "CI_INCIDENT_STORE",
+        tmp_path / "incidents.json",
+    )
 
 BASE_URL = "https://github.com/yhlai0911/volpred-research/actions/runs"
 RED1 = {
@@ -773,8 +785,6 @@ def test_cleanup_then_process_crash_is_idempotent_on_dedup_retry(tmp_path):
     run(RED1)
     _complete_repair_task(tmp_path)
     run(RED2)  # creates a fresh pending retry task inside the same incident
-
-    import pytest
 
     with pytest.raises(SystemExit):
         run(GREEN)

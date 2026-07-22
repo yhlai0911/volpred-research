@@ -36,6 +36,7 @@ Baseline Gates), which already owns "a canonical file claims X, verify X".
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import re
 import sys
@@ -88,7 +89,10 @@ def _parse_map_table(text: str, marker: str) -> list[tuple[str, ...]]:
             if rows or seen_header:
                 break
             continue
-        cells = [c.strip().strip("`").strip() for c in stripped.strip("|").split("|")]
+        cells = [
+            html.unescape(c.strip().strip("`").strip())
+            for c in stripped.strip("|").split("|")
+        ]
         if not seen_header:
             seen_header = True
             continue

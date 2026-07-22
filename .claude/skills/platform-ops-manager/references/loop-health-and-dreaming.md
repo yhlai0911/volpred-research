@@ -149,6 +149,7 @@ boss 定期信曾 boss_report（4h 六班）+ work_summary（6h 四班）日收 
 | `PreToolUse` | `Bash` | `.claude/hooks/pretooluse-bash-optimizer.sh` | **L1 deny 清單唯一 owner**（7 條，見 L1-b）+ 非 deny 的指令改寫／提示 | 每次 Bash tool call |
 | `PreToolUse` | `ScheduleWakeup` | `scripts/hooks/deny_wakeup_interactive.py` | 互動 turn（非 autonomous fire）禁用 ScheduleWakeup；fail-open | 每次 ScheduleWakeup tool call |
 | `PreToolUse` | `Read` | `scripts/hooks/read_context_budget.py` | 無 limit/offset 的整檔 Read 補預設行數上限（token 紀律，非安全 gate） | 每次 Read tool call |
+| `PreToolUse` | `Edit&#124;Write&#124;MultiEdit&#124;NotebookEdit` | `scripts/hooks/gate_edit_guard.py` | 編輯前保全尚未進 Git、但已產出研究結果的 verdict/gate 原始 bytes；可復原或非 gate 檔案不攔 | 每次檔案編輯 tool call |
 
 盤點註記：`.claude/settings.json` 與 `.claude/settings.local.json` 的 `permissions` 皆**只有 `allow`（5 / 91 條）、`deny` 為空陣列**。真正的 deny 全在 L1-b 的 hook 層，不在 `permissions.deny`——查 deny 時不要只看 settings。`scripts/hooks/` 另有 `commit_message_guard.py`、`git_mutation_guard.py` 兩支**未直接註冊為 hook** 的模組（由 bash optimizer 呼用）；`.claude/hooks/run-compact-bash.sh` 同樣未註冊。
 

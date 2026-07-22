@@ -523,6 +523,7 @@ def _auto_reap_orphan_deliverables() -> dict:
 # ---------------------------------------------------------------------------
 CI_WATCH_STATE = PROJECT_ROOT / "storage" / "ops" / "ci_watch_state.json"
 CI_NEXT_TASKS = PROJECT_ROOT / "storage" / "next_tasks.json"
+CI_INCIDENT_STORE = PROJECT_ROOT / "storage" / "ops" / "incidents.json"
 CI_WORKFLOW = "Test Suite"
 CI_RUN_HISTORY_LIMIT = 20
 CI_ATTEMPT_FETCH_LIMIT = 40
@@ -773,7 +774,7 @@ def _ci_incident_store_sync(
     try:
         from volpred.ops import incident as incident_store
 
-        store = PROJECT_ROOT / "storage" / "ops" / "incidents.json"
+        store = CI_INCIDENT_STORE
         ci_id = str(incident.get("incident_id") or "")
         if not ci_id:
             return
