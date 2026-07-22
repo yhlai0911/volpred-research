@@ -14,6 +14,7 @@ this pair through fails CI.
 
 from __future__ import annotations
 
+import contextlib
 import json
 from pathlib import Path
 
@@ -740,6 +741,185 @@ def test_publish_milestone_refuses_the_real_incident_pair(monkeypatch, tmp_path)
         )
 
 
+# --- G1b: missing question_id is FAIL-CLOSED (2026-07-22 residual 1) --------
+# Until this change a member_qa publish with no details['question_id'] was let
+# through with a warning ("unjudged"). That made the only reader-facing gate a
+# no-op for anyone who simply omitted the key. Flipping it to fail-closed was
+# gated on first backfilling the two historical unbound articles:
+#   mile_530a28bc -> bound to df669347… (retracted 1st attempt; live answer is
+#                    mile_42ee876c, so a re-publish now correctly needs supersedes)
+#   mile_e4002f4f -> waived: commissioned as task K1466_article_general, byline
+#                    "[提出：Claude，執行：Claude]", no matching row in `questions`
+
+VALID_WAIVER = {
+    "reason": (
+        "Commissioned as task K1466_article_general (audience=general, auto-discovered "
+        "uncovered K); byline names no member and a sweep of all 89 `questions` rows "
+        "returns no match. Answers no member question, so nothing can be bound."
+    ),
+    "adjudicated_by": "dispatch:member_qa_dedup_owner_convergence_20260719",
+    "adjudicated_at": "2026-07-22T04:00:00+00:00",
+}
+
+
+def test_missing_question_id_now_fails_closed(monkeypatch):
+    """The cheapest bypass (just omit the key) must no longer clear the gate."""
+    _no_remote(monkeypatch)
+    with pytest.raises(content.MemberQaPublishGateIndeterminate) as exc:
+        content.assert_member_qa_publish_allowed(None, feed=[], title="會員提問｜x")
+    msg = str(exc.value)
+    # The error must be ACTIONABLE: name the key, the CLI flag, and the waiver.
+    assert "question_id" in msg
+    assert "--question-id" in msg
+    assert "question_id_waiver" in msg
+
+
+def test_missing_question_id_is_indeterminate_not_a_duplicate(monkeypatch):
+    """'Cannot judge' must not be reported as 'this is a duplicate'."""
+    _no_remote(monkeypatch)
+    with pytest.raises(content.MemberQaPublishGateIndeterminate):
+        content.assert_member_qa_publish_allowed(None, feed=[])
+    # MemberQaDuplicatePublishError and MemberQaPublishGateIndeterminate are
+    # siblings, not parent/child: catching one must never catch the other.
+    assert not issubclass(
+        content.MemberQaPublishGateIndeterminate, content.MemberQaDuplicatePublishError
+    )
+    assert not issubclass(
+        content.MemberQaDuplicatePublishError, content.MemberQaPublishGateIndeterminate
+    )
+
+
+def test_empty_string_question_id_also_fails_closed(monkeypatch):
+    """Falsy-but-present must not sneak past as 'set'."""
+    _no_remote(monkeypatch)
+    for empty in ("", "   ", None):
+        with pytest.raises(content.MemberQaPublishGateIndeterminate):
+            content.assert_member_qa_publish_allowed(empty, feed=[])
+
+
+def test_valid_waiver_clears_with_an_explicit_verdict(monkeypatch, capsys):
+    _no_remote(monkeypatch)
+    result = content.assert_member_qa_publish_allowed(
+        None, feed=[], waiver=dict(VALID_WAIVER)
+    )
+    assert result["blocked"] is False
+    assert result["verdict"] == "unbound_waived"
+    assert result["waiver"]["adjudicated_by"] == VALID_WAIVER["adjudicated_by"]
+    # A waiver being used is not a silent event.
+    assert "waiver" in capsys.readouterr().out.lower()
+
+
+@pytest.mark.parametrize(
+    "bad, why",
+    [
+        ({k: v for k, v in VALID_WAIVER.items() if k != "reason"}, "no reason"),
+        ({k: v for k, v in VALID_WAIVER.items() if k != "adjudicated_by"}, "unsigned"),
+        ({k: v for k, v in VALID_WAIVER.items() if k != "adjudicated_at"}, "undated"),
+        ({**VALID_WAIVER, "reason": "legacy"}, "placeholder reason"),
+        ({**VALID_WAIVER, "reason": "   "}, "blank reason"),
+        ({**VALID_WAIVER, "adjudicated_by": ""}, "blank signer"),
+        ({**VALID_WAIVER, "adjudicated_at": "whenever"}, "non-ISO date"),
+        ("waived", "bare string, not an object"),
+        (True, "truthy scalar"),
+        ({}, "empty object"),
+    ],
+)
+def test_malformed_waiver_still_fails_closed(monkeypatch, bad, why):
+    """The waiver must not degrade into a copy-pasteable bypass token."""
+    _no_remote(monkeypatch)
+    with pytest.raises(content.MemberQaPublishGateIndeterminate, match="waiver|question_id"):
+        content.assert_member_qa_publish_allowed(None, feed=[], waiver=bad)
+
+
+def test_rejected_waiver_says_what_was_wrong(monkeypatch):
+    _no_remote(monkeypatch)
+    with pytest.raises(content.MemberQaPublishGateIndeterminate) as exc:
+        content.assert_member_qa_publish_allowed(
+            None, feed=[], waiver={**VALID_WAIVER, "reason": "legacy"}
+        )
+    assert "reason" in str(exc.value)
+
+
+def test_waiver_does_not_bypass_the_duplicate_check(monkeypatch):
+    """A waiver excuses a MISSING binding; it must not excuse a real duplicate."""
+    _no_remote(monkeypatch)
+    feed = [_published_answer(ART_15PCT, ID_15PCT)]
+    with pytest.raises(content.MemberQaDuplicatePublishError):
+        content.assert_member_qa_publish_allowed(
+            ID_15PCT, feed=feed, waiver=dict(VALID_WAIVER)
+        )
+
+
+def test_publish_milestone_fails_closed_without_a_question_id(monkeypatch, tmp_path):
+    """End-to-end: the publisher call site must forward the waiver, and must
+    refuse an unbound member_qa publish."""
+    from volpred.publisher.publisher import Publisher
+
+    _no_remote(monkeypatch)
+    pub = Publisher(storage_dir=str(tmp_path))
+    monkeypatch.setattr(Publisher, "_load_feed", lambda self: [])
+    kwargs = dict(
+        title="會員提問｜未綁定的提問",
+        description="body",
+        phase="member_qa",
+        audience="member_qa",
+        category="member_qa",
+    )
+    with pytest.raises(content.MemberQaPublishGateIndeterminate):
+        pub.publish_milestone(details={"content_type": "member_qa"}, **kwargs)
+
+    # …and details['question_id_waiver'] must actually REACH the gate. Pinned
+    # with a spy rather than by asserting the publish succeeds, so the test does
+    # not depend on the unrelated publishing steps that run after the gate.
+    gate_saw: dict = {}
+    real = content.assert_member_qa_publish_allowed
+
+    def _spy(question_id, **kw):
+        gate_saw.update(kw)
+        return real(question_id, **kw)
+
+    monkeypatch.setattr(content, "assert_member_qa_publish_allowed", _spy)
+    with contextlib.suppress(Exception):
+        pub.publish_milestone(
+            details={"content_type": "member_qa", "question_id_waiver": dict(VALID_WAIVER)},
+            **kwargs,
+        )
+    assert gate_saw.get("waiver") == VALID_WAIVER, "publisher did not forward the waiver"
+
+
+def test_every_live_member_qa_article_still_passes_the_gate(monkeypatch):
+    """Regression: the fail-closed flip must not strand any EXISTING article.
+
+    Reads the canonical feed. Every member_qa article must now either carry a
+    question_id or a valid waiver — this is the check that the A-before-B
+    ordering (backfill first, tighten second) actually held.
+    """
+    _no_remote(monkeypatch)
+    feed_path = Path(__file__).resolve().parents[1] / "storage" / "reports" / "feed.json"
+    if not feed_path.exists():  # pragma: no cover - canonical feed absent in CI
+        pytest.skip("canonical feed.json not available")
+    feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    qa = [
+        a
+        for a in feed
+        if isinstance(a, dict)
+        and (a.get("audience") == "member_qa" or a.get("category") == "member_qa")
+    ]
+    assert len(qa) >= 15, f"expected the known member_qa corpus, got {len(qa)}"
+
+    unbound = []
+    for art in qa:
+        details = art.get("details") or {}
+        if details.get("question_id"):
+            continue
+        checked, err = content._validate_question_id_waiver(
+            details.get("question_id_waiver")
+        )
+        if checked is None:
+            unbound.append((art.get("id"), err))
+    assert not unbound, f"member_qa articles that the tightened gate would strand: {unbound}"
+
+
 # --- G2: answer_internal_question idempotency ------------------------------
 
 
@@ -795,3 +975,331 @@ def test_answered_at_is_a_first_answer_stamp(monkeypatch, tmp_path):
     )
     assert patches and "answered_at" not in patches[0]
     assert patches[0]["status"] == "answered"
+
+
+# --- residual 4: warn-band adjudication is persisted and computed ONCE ------
+
+
+def _warn_history():
+    return [{"question_id": ID_15PCT, "question": Q_GAP_BASE, "status": "answered"}]
+
+
+def test_warn_band_triggers_one_semantic_adjudication(monkeypatch, tmp_path):
+    """A warn-band pair is handed to the adjudicator; its answer moves the verdict."""
+    _patch_project_path(monkeypatch, tmp_path)
+    _patch_history(monkeypatch, _warn_history())
+    calls: list[tuple[str, str, float]] = []
+
+    def _adjudicator(a: str, b: str, similarity: float):
+        calls.append((a, b, similarity))
+        return "duplicate", "同一份研究即可回答"
+
+    verdict = questions.member_qa_duplicate_verdict(
+        ID_7PCT, Q_GAP_FOLLOWUP, adjudicator=_adjudicator
+    )
+    assert len(calls) == 1
+    assert (
+        questions.MEMBER_QA_DUP_WARN_THRESHOLD
+        <= calls[0][2]
+        < questions.MEMBER_QA_DUP_BLOCK_THRESHOLD
+    )
+    # `duplicate` escalates the mechanical warn to a refusal.
+    assert verdict["verdict"] == "block"
+    assert verdict["adjudication"]["adjudication"] == "duplicate"
+    assert verdict["adjudication"]["cached"] is False
+    assert "adjudication=duplicate" in verdict["basis"]
+
+
+def test_distinct_adjudication_downgrades_the_warn_to_clear(monkeypatch, tmp_path):
+    _patch_project_path(monkeypatch, tmp_path)
+    _patch_history(monkeypatch, _warn_history())
+    verdict = questions.member_qa_duplicate_verdict(
+        ID_7PCT,
+        Q_GAP_FOLLOWUP,
+        adjudicator=lambda a, b, s: ("distinct", "需要新的預測變數"),
+    )
+    assert verdict["verdict"] == "clear"
+    assert verdict["adjudication"]["adjudication"] == "distinct"
+
+
+def test_adjudication_is_persisted_with_an_auditable_record(monkeypatch, tmp_path):
+    _patch_project_path(monkeypatch, tmp_path)
+    _patch_history(monkeypatch, _warn_history())
+    questions.member_qa_duplicate_verdict(
+        ID_7PCT, Q_GAP_FOLLOWUP, adjudicator=lambda a, b, s: ("distinct", "理由")
+    )
+    store = json.loads(
+        (
+            tmp_path / "storage" / "ops" / "member_qa_duplicate_adjudications.json"
+        ).read_text(encoding="utf-8")
+    )
+    entry = store["pairs"][questions.member_qa_pair_key(ID_7PCT, ID_15PCT)]
+    assert entry["adjudication"] == "distinct"
+    assert entry["reason"] == "理由"
+    assert entry["adjudicated_at"]
+    assert (
+        questions.MEMBER_QA_DUP_WARN_THRESHOLD
+        <= entry["similarity"]
+        < questions.MEMBER_QA_DUP_BLOCK_THRESHOLD
+    )
+    assert entry["pair"] == sorted([ID_7PCT, ID_15PCT])
+
+
+def test_second_call_for_the_same_pair_reads_the_cache(monkeypatch, tmp_path):
+    """The whole point of the store: adjudicate once, never re-litigate.
+
+    The counter is the proof — a second verdict for the same pair must not
+    reach the adjudicator at all, otherwise the same two questions could get
+    two different answers on two different shifts.
+    """
+    _patch_project_path(monkeypatch, tmp_path)
+    _patch_history(monkeypatch, _warn_history())
+    calls = {"n": 0}
+
+    def _adjudicator(a, b, s):
+        calls["n"] += 1
+        return "duplicate", "同一份研究"
+
+    first = questions.member_qa_duplicate_verdict(
+        ID_7PCT, Q_GAP_FOLLOWUP, adjudicator=_adjudicator
+    )
+    second = questions.member_qa_duplicate_verdict(
+        ID_7PCT, Q_GAP_FOLLOWUP, adjudicator=_adjudicator
+    )
+    assert calls["n"] == 1
+    assert first["verdict"] == second["verdict"] == "block"
+    assert first["adjudication"]["cached"] is False
+    assert second["adjudication"]["cached"] is True
+
+
+def test_pair_key_is_order_independent(monkeypatch, tmp_path):
+    """(a,b) and (b,a) are ONE entry — two entries would allow two verdicts."""
+    _patch_project_path(monkeypatch, tmp_path)
+    assert questions.member_qa_pair_key(
+        ID_7PCT, ID_15PCT
+    ) == questions.member_qa_pair_key(ID_15PCT, ID_7PCT)
+    calls = {"n": 0}
+
+    def _adjudicator(a, b, s):
+        calls["n"] += 1
+        return "distinct", "r"
+
+    # Adjudicate A→B, then ask B→A: the reversed pair must hit the same entry.
+    _patch_history(monkeypatch, _warn_history())
+    questions.member_qa_duplicate_verdict(
+        ID_7PCT, Q_GAP_FOLLOWUP, adjudicator=_adjudicator
+    )
+    _patch_history(
+        monkeypatch,
+        [{"question_id": ID_7PCT, "question": Q_GAP_FOLLOWUP, "status": "answered"}],
+    )
+    reversed_call = questions.member_qa_duplicate_verdict(
+        ID_15PCT, Q_GAP_BASE, adjudicator=_adjudicator
+    )
+    assert calls["n"] == 1
+    assert reversed_call["adjudication"]["cached"] is True
+
+
+def test_unavailable_adjudicator_falls_back_to_warn_and_is_not_cached(
+    monkeypatch, tmp_path
+):
+    """Fallback = the identity operation, and it must leave no fossil.
+
+    Caching "the LLM was down" would freeze one outage into a permanent verdict
+    for this pair, because the store is read first and unconditionally.
+    """
+    _patch_project_path(monkeypatch, tmp_path)
+    _patch_history(monkeypatch, _warn_history())
+
+    def _unavailable(a, b, s):
+        raise questions.WarnBandAdjudicatorUnavailable("agy not on PATH")
+
+    verdict = questions.member_qa_duplicate_verdict(
+        ID_7PCT, Q_GAP_FOLLOWUP, adjudicator=_unavailable
+    )
+    assert verdict["verdict"] == "warn"  # neither cleared nor blocked
+    assert verdict["adjudication"]["adjudication"] == "unavailable"
+    assert verdict["adjudication"]["persisted"] is False
+    assert not (
+        tmp_path / "storage" / "ops" / "member_qa_duplicate_adjudications.json"
+    ).exists()
+
+    # ...and the next shift re-asks rather than reading a fossilised verdict.
+    calls = {"n": 0}
+
+    def _adjudicator(a, b, s):
+        calls["n"] += 1
+        return "distinct", "r"
+
+    again = questions.member_qa_duplicate_verdict(
+        ID_7PCT, Q_GAP_FOLLOWUP, adjudicator=_adjudicator
+    )
+    assert calls["n"] == 1
+    assert again["verdict"] == "clear"
+
+
+def test_no_adjudicator_at_all_is_the_same_conservative_fallback(monkeypatch, tmp_path):
+    """No LLM resolvable in this process (the default under pytest)."""
+    _patch_project_path(monkeypatch, tmp_path)
+    _patch_history(monkeypatch, _warn_history())
+    monkeypatch.setattr(questions, "_default_warn_band_adjudicator", lambda: None)
+    verdict = questions.member_qa_duplicate_verdict(ID_7PCT, Q_GAP_FOLLOWUP)
+    assert verdict["verdict"] == "warn"
+    assert verdict["adjudication"]["adjudication"] == "unavailable"
+    assert verdict["adjudication"]["persisted"] is False
+
+
+def test_malformed_adjudicator_answer_is_treated_as_unavailable(monkeypatch, tmp_path):
+    _patch_project_path(monkeypatch, tmp_path)
+    _patch_history(monkeypatch, _warn_history())
+    verdict = questions.member_qa_duplicate_verdict(
+        ID_7PCT, Q_GAP_FOLLOWUP, adjudicator=lambda a, b, s: ("maybe", "shrug")
+    )
+    assert verdict["verdict"] == "warn"
+    assert verdict["adjudication"]["adjudication"] == "unavailable"
+    assert verdict["adjudication"]["persisted"] is False
+
+
+def test_block_and_clear_bands_never_consult_the_adjudicator(monkeypatch, tmp_path):
+    """Adjudication is a warn-band tool only — the mechanical bands are decided."""
+    _patch_project_path(monkeypatch, tmp_path)
+
+    def _explode(*args, **kwargs):  # pragma: no cover - must never run
+        raise AssertionError("outside the warn band nothing may be adjudicated")
+
+    _patch_history(monkeypatch, _history_rows())
+    assert (
+        questions.member_qa_duplicate_verdict(ID_7PCT, Q_7PCT, adjudicator=_explode)[
+            "verdict"
+        ]
+        == "block"
+    )
+    assert (
+        questions.member_qa_duplicate_verdict(
+            ID_7PCT, "BTC 波動率能不能用 GARCH 預測？", adjudicator=_explode
+        )["verdict"]
+        == "clear"
+    )
+
+
+def test_the_test_suite_never_reaches_a_live_model():
+    """PYTEST_CURRENT_TEST is set → the default adjudicator refuses to shell out."""
+    assert questions._default_warn_band_adjudicator() is None
+
+
+# --- residual 5: the release path runs the SAME G1 gate --------------------
+
+
+def _member_qa_feed(tmp_path: Path, items: list[dict]) -> Path:
+    feed_path = tmp_path / "storage" / "reports" / "feed.json"
+    feed_path.parent.mkdir(parents=True, exist_ok=True)
+    feed_path.write_text(json.dumps(items, ensure_ascii=False), encoding="utf-8")
+    return feed_path
+
+
+def _promote(item: dict, storage_dir: Path) -> dict:
+    from datetime import datetime, timezone
+
+    return content._atomic_promote_release_item(
+        dict(item),
+        now=datetime(2026, 7, 19, tzinfo=timezone.utc),
+        released_at="2026-07-19T00:00:00+00:00",
+        storage_dir=str(storage_dir),
+        route="release_pool",
+        expected_item=item,
+    )
+
+
+def test_release_promotion_blocks_a_duplicate_member_qa_answer(tmp_path, monkeypatch):
+    """release_pool's status rewrite must hit G1, not bypass it."""
+    prior = {
+        "id": ART_15PCT,
+        "title": "會員提問｜已回答",
+        "status": "published",
+        "audience": "member_qa",
+        "published_at": "2026-07-12T00:00:00+00:00",
+        "details": {"question_id": ID_15PCT},
+    }
+    draft = {
+        "id": ART_7PCT,
+        "title": "會員提問｜再問一次",
+        "status": "scheduled",
+        "audience": "member_qa",
+        "created_at": "2026-07-19T00:00:00+00:00",
+        "details": {"question_id": ID_15PCT},
+    }
+    feed_path = _member_qa_feed(tmp_path, [prior, draft])
+    monkeypatch.setattr(
+        content, "_member_qa_remote_prior_answers", lambda qid: ([], None)
+    )
+
+    outcome = _promote(draft, tmp_path / "storage")
+    assert outcome["outcome"] == "member_qa_publish_blocked"
+    assert "member_qa_duplicate_publish_blocked" in outcome["reason"]
+    # Fail-closed means the draft stays a draft, not that the whole run dies.
+    assert json.loads(feed_path.read_text(encoding="utf-8"))[1]["status"] == "scheduled"
+
+
+def test_release_promotion_blocks_member_qa_without_a_question_id(tmp_path):
+    """The fail-closed unbound branch reaches the release path too."""
+    draft = {
+        "id": ART_7PCT,
+        "title": "會員提問｜沒綁 question_id",
+        "status": "scheduled",
+        "audience": "member_qa",
+        "created_at": "2026-07-19T00:00:00+00:00",
+        "details": {},
+    }
+    _member_qa_feed(tmp_path, [draft])
+    outcome = _promote(draft, tmp_path / "storage")
+    assert outcome["outcome"] == "member_qa_publish_blocked"
+    assert "member_qa_publish_gate_indeterminate" in outcome["reason"]
+
+
+def test_release_promotion_allows_a_first_member_qa_answer(tmp_path, monkeypatch):
+    """The gate must not deadlock the lane: a `scheduled` article is not its own
+    duplicate (exclude_article_id), so a first answer still releases."""
+    draft = {
+        "id": ART_7PCT,
+        "title": "會員提問｜第一次回答",
+        "status": "scheduled",
+        "audience": "member_qa",
+        "created_at": "2026-07-19T00:00:00+00:00",
+        "details": {"question_id": ID_7PCT},
+    }
+    _member_qa_feed(tmp_path, [draft])
+    monkeypatch.setattr(
+        content, "_member_qa_remote_prior_answers", lambda qid: ([], None)
+    )
+    assert _promote(draft, tmp_path / "storage")["outcome"] == "promoted"
+
+
+def test_gate_applicability_predicate_covers_every_member_qa_marker():
+    assert content.member_qa_publish_gate_applies({"audience": "general"}) is False
+    assert (
+        content.member_qa_publish_gate_applies(
+            {"audience": "member_qa", "status": "retracted"}
+        )
+        is False
+    )
+    assert content.member_qa_publish_gate_applies({"audience": "member_qa"}) is True
+    assert content.member_qa_publish_gate_applies({"category": "member_qa"}) is True
+    assert (
+        content.member_qa_publish_gate_applies(
+            {"details": {"content_type": "member_qa"}}
+        )
+        is True
+    )
+    assert content.member_qa_publish_gate_applies({"phase": "member_qa_answer"}) is True
+
+
+def test_both_publish_paths_share_one_applicability_predicate():
+    """Anti-stacking pin: publish_milestone must not re-implement the test."""
+    import inspect
+
+    from volpred.publisher import publisher as publisher_mod
+
+    src = inspect.getsource(publisher_mod.Publisher.publish_milestone)
+    assert "member_qa_publish_gate_applies" in src
+    # The inline copy of the predicate must be gone.
+    assert "str(audience or '').strip() == 'member_qa'" not in src

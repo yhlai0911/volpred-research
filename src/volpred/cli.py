@@ -2384,6 +2384,17 @@ def ops_recalc_metrics() -> None:
         "(must name every already-published answer)."
     ),
 )
+@click.option(
+    "--question-id",
+    default=None,
+    help=(
+        "Supabase `questions` uuid this member_qa article answers. REQUIRED for "
+        "member_qa publishes: without it the duplicate gate cannot tell whether the "
+        "member's question was already answered, and fails closed. (The rare article "
+        "that provably answers no member question is waived via "
+        "--details-json question_id_waiver, not via a flag.)"
+    ),
+)
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_publish_milestone(
     title: str,
@@ -2396,6 +2407,7 @@ def ops_publish_milestone(
     audience: str | None,
     proposer: str | None,
     supersedes: str | None,
+    question_id: str | None,
     storage_dir: str,
 ) -> None:
     """Publish a milestone article through the unified publisher path."""
@@ -2404,6 +2416,16 @@ def ops_publish_milestone(
     details = _parse_json_input(details_json, default={})
     if not isinstance(details, dict):
         raise click.ClickException("--details-json must decode to an object")
+    if question_id:
+        existing = details.get("question_id")
+        if existing and str(existing).strip() != question_id.strip():
+            # Two different bindings for one article is not a preference to
+            # resolve silently — the caller does not know what they are publishing.
+            raise click.ClickException(
+                f"--question-id={question_id!r} conflicts with "
+                f"details['question_id']={existing!r}; pass only one."
+            )
+        details["question_id"] = question_id.strip()
     if supersedes:
         details["supersedes"] = [
             part.strip() for part in supersedes.replace(",", " ").split() if part.strip()

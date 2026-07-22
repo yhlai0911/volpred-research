@@ -3,9 +3,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import fcntl
 import json
+import os
 import re
+import shutil
+import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from scripts.supabase_sync import (
     _patch_where,
@@ -568,12 +571,323 @@ def _fetch_question_history(source: str) -> list[dict[str, Any]]:
     ]
 
 
+# --- residual 4: warn-band semantic adjudication, adjudicated ONCE ----------
+# WHY THIS EXISTS. The mechanical thresholds are calibrated on a 19-row corpus
+# (171 pairs). The whole margin between the highest legitimate pair (0.386 —
+# congressional trades, follow vs fade) and the block threshold (0.70) is 0.31,
+# and the lower edge of it is pinned by a SINGLE sample. Anything landing in
+# [0.35, 0.70) is therefore a coin the tokenizer cannot call: it is either a
+# genuine follow-up (proceed) or the same study re-asked (refuse). One LLM
+# semantic adjudication resolves it.
+#
+# WHY THE RESULT IS PERSISTED, AND WHY IT IS NEVER RE-COMPUTED. `question_id`
+# is the system-wide identity key for a member question (2026-07-19 residual 2).
+# If the same pair were re-adjudicated on every shift, the same two questions
+# could be "the same study" on Monday and "different studies" on Tuesday —
+# exactly the unstable-identity failure this whole task exists to kill. So: a
+# pair is adjudicated at most once, ever; every later look-up reads the store.
+# The store key is the pair sorted, so (a,b) and (b,a) are one entry.
+MEMBER_QA_ADJUDICATION_STORE = ("ops", "member_qa_duplicate_adjudications.json")
+MEMBER_QA_ADJUDICATION_STORE_VERSION = 1
+MEMBER_QA_ADJUDICATOR_TIMEOUT_SECONDS = 120
+MEMBER_QA_ADJUDICATOR_ENV = "VOLPRED_MEMBER_QA_WARN_ADJUDICATOR"
+
+# Only these two are real adjudications. "unavailable" is the fallback and is
+# deliberately NOT a member of this set — see `adjudicate_member_qa_warn_pair`.
+MEMBER_QA_ADJUDICATION_VERDICTS = {"duplicate", "distinct"}
+
+
+class WarnBandAdjudicatorUnavailable(RuntimeError):
+    """No LLM adjudicator could be reached for this warn-band pair."""
+
+
+def member_qa_pair_key(question_id_a: str, question_id_b: str) -> str:
+    """Order-independent identity for a question pair.
+
+    Sorted before joining so `(a, b)` and `(b, a)` cannot each get their own
+    cache entry — two entries for one pair would let the same two questions
+    hold two different verdicts, which is the drift this store prevents.
+    """
+    left, right = sorted(
+        [str(question_id_a or "").strip(), str(question_id_b or "").strip()]
+    )
+    return f"{left}|{right}"
+
+
+def _adjudication_store_path(storage_dir: str = "storage") -> Path:
+    return project_path(storage_dir, *MEMBER_QA_ADJUDICATION_STORE)
+
+
+def load_member_qa_adjudications(storage_dir: str = "storage") -> dict[str, Any]:
+    """Return the full adjudication store (empty skeleton when absent)."""
+    raw = load_json(_adjudication_store_path(storage_dir), {})
+    if not isinstance(raw, dict) or not isinstance(raw.get("pairs"), dict):
+        return {"version": MEMBER_QA_ADJUDICATION_STORE_VERSION, "pairs": {}}
+    return raw
+
+
+def get_member_qa_adjudication(
+    question_id_a: str,
+    question_id_b: str,
+    *,
+    storage_dir: str = "storage",
+) -> dict[str, Any] | None:
+    """Return the stored adjudication for this pair, or None.
+
+    No try/except: an unreadable store must surface, not silently degrade into
+    "never adjudicated" (which would re-run the LLM and could produce a second,
+    different verdict for a pair that already has one).
+    """
+    entry = load_member_qa_adjudications(storage_dir)["pairs"].get(
+        member_qa_pair_key(question_id_a, question_id_b)
+    )
+    return entry if isinstance(entry, dict) else None
+
+
+def _record_member_qa_adjudication(
+    entry: dict[str, Any],
+    *,
+    storage_dir: str = "storage",
+) -> dict[str, Any]:
+    """Persist one adjudication under an exclusive lock; first writer wins.
+
+    Re-read inside the lock so a concurrent shift that adjudicated the same
+    pair first keeps its verdict — "adjudicated once" must survive races too.
+    """
+    path = _adjudication_store_path(storage_dir)
+    guard_canonical_write(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not path.exists():
+        path.write_text(
+            json.dumps(
+                {"version": MEMBER_QA_ADJUDICATION_STORE_VERSION, "pairs": {}},
+                indent=2,
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+    with path.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            store = json.load(fh)
+            if not isinstance(store, dict) or not isinstance(store.get("pairs"), dict):
+                store = {"version": MEMBER_QA_ADJUDICATION_STORE_VERSION, "pairs": {}}
+            existing = store["pairs"].get(entry["pair_key"])
+            if isinstance(existing, dict):
+                return existing
+            store["pairs"][entry["pair_key"]] = entry
+            fh.seek(0)
+            fh.truncate()
+            json.dump(store, fh, indent=2, ensure_ascii=False)
+            fh.write("\n")
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    return entry
+
+
+_ADJUDICATOR_PROMPT = """你是研究排程的重複題判官。以下是兩則會員提問。
+
+A: {question_a}
+
+B: {question_b}
+
+它們的機械相似度為 {similarity}（落在需要人為判斷的灰色地帶）。
+請判斷：若已經為 A 做過一份完整研究並發表文章，B 是否會得到實質相同的研究與結論？
+
+只輸出一個 JSON 物件，不要任何其他文字：
+{{"verdict": "duplicate" 或 "distinct", "reason": "一句話理由（繁中，<=60 字）"}}
+
+duplicate = 同一份研究可以回答兩者，重做等於重複勞動。
+distinct = B 需要新的資料、新的檢定或新的結論，不是重問。"""
+
+
+def _agy_warn_band_adjudicator(
+    question_a: str,
+    question_b: str,
+    similarity: float,
+) -> tuple[str, str]:
+    """Adjudicate via the headless `agy -p` CLI. Raise when unusable.
+
+    `agy` is an agentic CLI that spawns its own workers, so it runs in its own
+    session and the whole process group is killed on timeout (same concern and
+    same owner as scripts/scan_trending_agy.py).
+    """
+    binary = shutil.which("agy")
+    if not binary:
+        raise WarnBandAdjudicatorUnavailable("agy not on PATH")
+    prompt = _ADJUDICATOR_PROMPT.format(
+        question_a=question_a, question_b=question_b, similarity=round(similarity, 4)
+    )
+    try:
+        proc = subprocess.Popen(
+            [binary, "-p", prompt],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            start_new_session=True,
+        )
+    except OSError as exc:
+        raise WarnBandAdjudicatorUnavailable(f"agy spawn failed: {exc}") from exc
+    try:
+        stdout, stderr = proc.communicate(
+            timeout=MEMBER_QA_ADJUDICATOR_TIMEOUT_SECONDS
+        )
+    except subprocess.TimeoutExpired as exc:
+        from scripts.dispatch_supervisor import procutil
+
+        try:
+            procutil.kill_pgid(os.getpgid(proc.pid))
+        except (ProcessLookupError, PermissionError):  # silent-ok: cleanup race-safe; the timeout still raises below
+            pass
+        proc.wait()
+        raise WarnBandAdjudicatorUnavailable("agy timed out") from exc
+    if proc.returncode != 0:
+        raise WarnBandAdjudicatorUnavailable(
+            f"agy exited {proc.returncode}: {(stderr or '')[-200:]}"
+        )
+    text = stdout or ""
+    fenced = re.search(r"```(?:json)?\s*(.+?)```", text, re.DOTALL)
+    if fenced:
+        text = fenced.group(1)
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end <= start:
+        raise WarnBandAdjudicatorUnavailable("agy returned no JSON object")
+    try:
+        parsed = json.loads(text[start : end + 1])
+    except json.JSONDecodeError as exc:
+        raise WarnBandAdjudicatorUnavailable(f"agy JSON unparseable: {exc}") from exc
+    verdict = str((parsed or {}).get("verdict") or "").strip().lower()
+    if verdict not in MEMBER_QA_ADJUDICATION_VERDICTS:
+        raise WarnBandAdjudicatorUnavailable(
+            f"agy returned an unusable verdict {verdict!r}"
+        )
+    return verdict, str((parsed or {}).get("reason") or "").strip()[:300]
+
+
+def _default_warn_band_adjudicator() -> Callable[[str, str, float], tuple[str, str]] | None:
+    """Resolve the adjudicator for this process, or None when there is none.
+
+    None here is not an error — it is the documented "no LLM available" state
+    that drives the conservative fallback.
+    """
+    setting = os.environ.get(MEMBER_QA_ADJUDICATOR_ENV, "").strip().lower()
+    if setting in {"off", "none", "0", "disabled"}:
+        return None
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        # Never shell out to a live model from the test suite: a regression pin
+        # whose expected value depends on a model's mood is not a pin, and a
+        # test run must not write real adjudications into the store. Tests that
+        # exercise adjudication inject their own callable instead.
+        return None
+    if not shutil.which("agy"):
+        return None
+    return _agy_warn_band_adjudicator
+
+
+def adjudicate_member_qa_warn_pair(
+    question_id: str,
+    question_text: str,
+    *,
+    matched_question_id: str,
+    matched_question: str,
+    similarity: float,
+    storage_dir: str = "storage",
+    adjudicator: Callable[[str, str, float], tuple[str, str]] | None = None,
+) -> dict[str, Any]:
+    """Return the (cached-or-fresh) semantic adjudication for one warn-band pair.
+
+    Contract:
+      * a pair already in the store is NEVER re-adjudicated — `adjudicator` is
+        not called at all on a cache hit;
+      * a fresh `duplicate`/`distinct` verdict is written to the store;
+      * `unavailable` (no adjudicator, or the adjudicator failed) is returned
+        but NOT written.
+
+    WHY THE FALLBACK IS NOT CACHED (this is the point of the whole store):
+    "we could not reach an LLM at 03:00 on a Tuesday" is a fact about the
+    infrastructure, not about the two questions. Because the store is read
+    first and unconditionally, writing it would freeze one transient outage
+    into a permanent verdict for that pair, and the LLM would never be asked
+    again. Not caching costs one retry next shift; caching costs correctness
+    forever.
+
+    WHY THE FALLBACK IS "STAY AT WARN" RATHER THAN BLOCK-OR-CLEAR:
+    clearing would make the gate trivially defeatable (unset an env var and
+    every warn-band pair passes). Blocking would convert an LLM outage into a
+    member_qa work stoppage — and with the legitimate congressional pair
+    sitting at 0.386, inside the band, a blocking fallback refuses real work by
+    design, which is how this very task ended up starved for 54h. Falling back
+    to the mechanical verdict is the identity operation: with no LLM the gate
+    is exactly as strong as it was before adjudication existed, never weaker.
+    """
+    pair_key = member_qa_pair_key(question_id, matched_question_id)
+    cached = get_member_qa_adjudication(
+        question_id, matched_question_id, storage_dir=storage_dir
+    )
+    if cached is not None:
+        return {**cached, "cached": True, "persisted": True}
+
+    resolver = adjudicator if adjudicator is not None else _default_warn_band_adjudicator()
+    if resolver is None:
+        return {
+            "pair_key": pair_key,
+            "adjudication": "unavailable",
+            "cached": False,
+            "persisted": False,
+            "similarity": round(float(similarity), 4),
+            "reason": "no LLM adjudicator available in this process",
+        }
+
+    try:
+        verdict, reason = resolver(question_text, matched_question, float(similarity))
+    except WarnBandAdjudicatorUnavailable as exc:
+        return {
+            "pair_key": pair_key,
+            "adjudication": "unavailable",
+            "cached": False,
+            "persisted": False,
+            "similarity": round(float(similarity), 4),
+            "reason": f"adjudicator unavailable: {exc}",
+        }
+    if verdict not in MEMBER_QA_ADJUDICATION_VERDICTS:
+        # A malformed answer is an unavailable adjudicator, not a verdict.
+        return {
+            "pair_key": pair_key,
+            "adjudication": "unavailable",
+            "cached": False,
+            "persisted": False,
+            "similarity": round(float(similarity), 4),
+            "reason": f"adjudicator returned unusable verdict {verdict!r}",
+        }
+
+    entry = {
+        "pair_key": pair_key,
+        "pair": sorted([str(question_id), str(matched_question_id)]),
+        "adjudication": verdict,
+        "similarity": round(float(similarity), 4),
+        "adjudicated_at": _utc_now(),
+        "adjudicator": getattr(resolver, "__name__", str(resolver)),
+        "reason": reason,
+        "warn_threshold": MEMBER_QA_DUP_WARN_THRESHOLD,
+        "block_threshold": MEMBER_QA_DUP_BLOCK_THRESHOLD,
+        "question_texts": {
+            str(question_id): str(question_text)[:500],
+            str(matched_question_id): str(matched_question)[:500],
+        },
+    }
+    stored = _record_member_qa_adjudication(entry, storage_dir=storage_dir)
+    return {**stored, "cached": False, "persisted": True}
+
+
 def member_qa_duplicate_verdict(
     question_id: str,
     question_text: str,
     *,
     source: str = "user",
     history_cache: dict[str, list[dict[str, Any]]] | None = None,
+    storage_dir: str = "storage",
+    adjudicator: Callable[[str, str, float], tuple[str, str]] | None = None,
 ) -> dict[str, Any]:
     """THE member_qa duplicate adjudicator. Single owner, single history source.
 
@@ -589,6 +903,12 @@ def member_qa_duplicate_verdict(
       block  similarity >= MEMBER_QA_DUP_BLOCK_THRESHOLD  → refuse the work
       warn   similarity >= MEMBER_QA_DUP_WARN_THRESHOLD   → proceed, but annotated
       clear  no prior question reaches the warn threshold
+
+    A warn-band hit additionally gets ONE persisted semantic adjudication
+    (residual 4): `duplicate` escalates the verdict to block, `distinct`
+    downgrades it to clear, and an unavailable adjudicator leaves the
+    mechanical `warn` untouched. The adjudication is computed at most once per
+    (question_id_a, question_id_b) pair — see `adjudicate_member_qa_warn_pair`.
 
     `history_cache` lets a caller that adjudicates many candidates in one pass
     (`ensure_member_qa_task` walks the whole ranked table) reuse one fetch. It is
@@ -611,20 +931,44 @@ def member_qa_duplicate_verdict(
     )
 
     similarity = float(match["similarity"]) if match else 0.0
+    adjudication: dict[str, Any] | None = None
     if match and similarity >= MEMBER_QA_DUP_BLOCK_THRESHOLD:
         verdict = "block"
     elif match:
         verdict = "warn"
+        # Warn band → one semantic adjudication per pair, forever (residual 4).
+        adjudication = adjudicate_member_qa_warn_pair(
+            question_id,
+            question_text,
+            matched_question_id=str(match["question_id"]),
+            matched_question=str(match["question"]),
+            similarity=similarity,
+            storage_dir=storage_dir,
+            adjudicator=adjudicator,
+        )
+        if adjudication["adjudication"] == "duplicate":
+            verdict = "block"
+        elif adjudication["adjudication"] == "distinct":
+            verdict = "clear"
+        # "unavailable" → stay at the mechanical `warn`; see the docstring of
+        # adjudicate_member_qa_warn_pair for why the fallback is the identity.
     else:
         verdict = "clear"
         match = None
 
     origin = f"supabase.questions(source={source}) rows={len(history)}"
     if match:
+        adjudication_note = (
+            f"; adjudication={adjudication['adjudication']}"
+            f" (cached={adjudication['cached']})"
+            if adjudication
+            else ""
+        )
         basis = (
             f"{verdict}: {origin}; matched question_id={match['question_id']} "
             f"status={match['status']}; jaccard(digit-stripped)={similarity} "
             f"warn>={MEMBER_QA_DUP_WARN_THRESHOLD} block>={MEMBER_QA_DUP_BLOCK_THRESHOLD}"
+            f"{adjudication_note}"
         )
     else:
         basis = (
@@ -645,6 +989,8 @@ def member_qa_duplicate_verdict(
         "history_size": len(history),
         "warn_threshold": MEMBER_QA_DUP_WARN_THRESHOLD,
         "block_threshold": MEMBER_QA_DUP_BLOCK_THRESHOLD,
+        # None unless the pair landed in the warn band and was adjudicated.
+        "adjudication": adjudication,
         # Full matched row, for payloads that embed the prior question verbatim.
         "matched": match,
     }
