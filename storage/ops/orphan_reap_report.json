@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T19:00:51.686321+00:00",
+  "generated_at": "2026-07-22T20:00:51.715671+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 29.6
+      "age_hours": 30.6
     },
     {
       "path": "storage/drafts/k1253_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2463,
-      "age_hours": 8.0
+      "age_hours": 9.0
     },
     {
       "path": "storage/drafts/k1711_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 4040,
-      "age_hours": 8.0
+      "age_hours": 9.0
     }
   ],
   "held": [],
@@ -48,26 +48,7 @@
   ],
   "applied": true,
   "job_deliverable_candidates": [],
-  "job_deliverable_held": [
-    {
-      "job_id": "compute-k1708-full-sample-rerun-a-own-restriction-1784685543",
-      "reason": "no_existing_declared_files",
-      "rejected": [
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_results.json",
-          "reason": "git_ignored"
-        },
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_forecast_ledger.csv",
-          "reason": "git_ignored"
-        },
-        {
-          "path": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_cumulative_loss.png",
-          "reason": "git_ignored"
-        }
-      ]
-    }
-  ],
+  "job_deliverable_held": [],
   "job_deliveries": [],
   "namespaces": {
     "drafts": {
@@ -101,6 +82,15 @@
       "collections": []
     }
   },
-  "held_escalations": [],
-  "held_escalated_paths": []
+  "held_escalations": [
+    {
+      "task_id": "assign_0cfd61df",
+      "paths": [
+        "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543"
+      ]
+    }
+  ],
+  "held_escalated_paths": [
+    "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543"
+  ]
 }
