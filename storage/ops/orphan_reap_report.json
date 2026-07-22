@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T09:00:58.092602+00:00",
+  "generated_at": "2026-07-22T10:00:59.387424+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,28 +7,17 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 19.7
+      "age_hours": 20.7
     }
   ],
-  "held": [
-    {
-      "path": "storage/drafts/k1253_general_draft.md",
-      "reason": "no_title",
-      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
-    },
-    {
-      "path": "storage/drafts/k1711_general_draft.md",
-      "reason": "no_title",
-      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
-    }
-  ],
+  "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 48,
     "grace": 0,
     "inflight": 0
   },
-  "orphan_count": 3,
+  "orphan_count": 1,
   "adopted": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -72,11 +61,21 @@
       "collections": []
     }
   },
-  "held_escalations": [],
+  "held_escalations": [
+    {
+      "task_id": "assign_0c7a209c",
+      "paths": [
+        "storage/drafts/k1253_general_draft.md",
+        "storage/drafts/k1711_general_draft.md"
+      ]
+    }
+  ],
   "held_escalated_paths": [
     "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543",
     "job:compute-k1730-arm-a-production-quick-mode-1784358686",
     "job:k1698_rev3_rerun",
-    "storage/drafts/K1697_general_draft.md"
+    "storage/drafts/K1697_general_draft.md",
+    "storage/drafts/k1253_general_draft.md",
+    "storage/drafts/k1711_general_draft.md"
   ]
 }
