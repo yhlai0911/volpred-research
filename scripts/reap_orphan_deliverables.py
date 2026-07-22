@@ -285,6 +285,11 @@ def _path_is_dirty(rel: str) -> bool:
 
 
 _WORKTREE_PREFIX_RE = re.compile(r"^\.claude/worktrees/[^/]+/")
+_MANAGED_WORKTREE_OUTPUT_RE = re.compile(
+    r"^\.claude/worktrees/"
+    r"(?P<worktree>[A-Za-z0-9][A-Za-z0-9._-]*)/"
+    r"(?P<path>[^\x00]+)$"
+)
 
 
 def _tracked_clean_in_worktree(raw: object) -> bool:
@@ -335,6 +340,55 @@ def _tracked_clean_in_worktree(raw: object) -> bool:
         **kwargs,
     )
     return status.returncode == 0 and not status.stdout.strip()
+
+
+def _checkpointed_on_retained_worktree_branch(raw: object) -> bool:
+    """Whether cleanup preserved a removed worktree output on its branch.
+
+    The no-residue worktree cleanup checkpoints bytes, removes the linked
+    worktree, and deliberately retains its branch when an experiment gate
+    blocks merge.  At that point the compute receipt's original path no longer
+    exists, but adopting the result into main would bypass the pending review.
+    Recognize only the two canonical branch names and only an exact Git blob.
+
+    An existing worktree never qualifies here: its clean/dirty state belongs
+    to :func:`_tracked_clean_in_worktree`, so an old branch commit cannot hide
+    a newer uncommitted edit.
+    """
+    if not isinstance(raw, str) or not raw.strip():
+        return False
+    candidate = Path(raw.strip())
+    if candidate.is_absolute():
+        try:
+            original = candidate.resolve(strict=False).relative_to(
+                ROOT.resolve(strict=False)
+            ).as_posix()
+        except ValueError:  # silent-ok: paths outside ROOT cannot name its branch blobs
+            return False
+    else:
+        original = raw.strip().removeprefix("./")
+    match = _MANAGED_WORKTREE_OUTPUT_RE.fullmatch(original)
+    if match is None:
+        return False
+    rel = PurePosixPath(match.group("path"))
+    if not rel.parts or any(part in {"", ".", ".."} for part in rel.parts):
+        return False
+    worktree_name = match.group("worktree")
+    if (ROOT / ".claude" / "worktrees" / worktree_name).exists():
+        return False
+
+    refs = (
+        f"refs/heads/worktree-{worktree_name}",
+        f"refs/heads/wt/{worktree_name}",
+    )
+    for ref in refs:
+        verified = _git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}")
+        if verified.returncode != 0:
+            continue
+        blob_type = _git("cat-file", "-t", f"{ref}:{rel.as_posix()}")
+        if blob_type.returncode == 0 and blob_type.stdout.strip() == "blob":
+            return True
+    return False
 
 
 def _managed_worktree_output_root(raw: object) -> Path | None:
@@ -462,12 +516,15 @@ def scan_job_deliverables() -> dict:
         exact: list[str] = []
         rejected: list[dict] = []
         worktree_owned = 0
+        checkpoint_owned = 0
         for raw in declared:
             rel, reason = _exact_repo_file(raw)
             if rel is not None:
                 exact.append(rel)
             elif _tracked_clean_in_worktree(raw):
                 worktree_owned += 1
+            elif _checkpointed_on_retained_worktree_branch(raw):
+                checkpoint_owned += 1
             else:
                 rejected.append({"path": raw, "reason": reason})
         exact = list(dict.fromkeys(exact))
@@ -475,6 +532,11 @@ def scan_job_deliverables() -> dict:
             if worktree_owned == len(declared):
                 # Already committed on the job's worktree branch. Its only
                 # legitimate exit is the normal review + merge workflow.
+                continue
+            if checkpoint_owned == len(declared):
+                # Worktree cleanup preserved the exact bytes while a review or
+                # experiment gate kept them out of main.  The retained branch,
+                # not orphan adoption, is their canonical exit.
                 continue
             landed = [rel for rel in (_landed_in_main(raw) for raw in declared)
                       if rel is not None]

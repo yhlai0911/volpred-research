@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T14:00:58.865290+00:00",
+  "generated_at": "2026-07-22T14:12:24.498692+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 24.7
+      "age_hours": 24.8
     },
     {
       "path": "storage/drafts/k1253_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2463,
-      "age_hours": 3.0
+      "age_hours": 3.1
     },
     {
       "path": "storage/drafts/k1711_general_draft.md",
@@ -23,29 +23,18 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 4040,
-      "age_hours": 3.0
+      "age_hours": 3.1
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 48,
-    "grace": 1,
+    "registered": 49,
+    "grace": 0,
     "inflight": 0
   },
   "orphan_count": 3,
-  "adopted": [
-    {
-      "path": "storage/drafts/K1597_general_draft.md",
-      "adopted": false,
-      "reason": "gate_rejected (rc=5):   Per .claude/rules/publishing.md, every published article needs 2+ real PNG charts. Generate the charts and embed them in a `## 圖表` section, then retry. Use `--no-image-gate` only for genuinely text-"
-    },
-    {
-      "path": "storage/drafts/k1253_general_draft.md",
-      "adopted": false,
-      "reason": "gate_rejected (rc=7):   Refusing to publish. Rewrite the draft in general-reader language (remove K-id / statistical jargon from title and body) or intentionally publish it as research."
-    }
-  ],
+  "adopted": [],
   "applied": true,
   "job_deliverable_candidates": [],
   "job_deliverable_held": [],
@@ -83,8 +72,5 @@
     }
   },
   "held_escalations": [],
-  "held_escalated_paths": [
-    "job:compute-k1730-arm-a-production-quick-mode-1784358686",
-    "job:k1698_rev3_rerun"
-  ]
+  "held_escalated_paths": []
 }

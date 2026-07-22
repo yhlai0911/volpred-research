@@ -412,6 +412,54 @@ def test_job_reaper_leaves_clean_tracked_worktree_output_for_merge(
     assert scan["held"][0]["reason"] == "no_existing_declared_files"
 
 
+def test_job_reaper_accepts_removed_worktree_output_checkpointed_on_branch(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """No-residue cleanup may retain a branch when review blocks the merge."""
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    (root / ".gitignore").write_text(".claude/worktrees/\n", encoding="utf-8")
+    _repo_git(root, "add", ".gitignore")
+    _repo_git(root, "commit", "-qm", "ignore managed worktrees")
+
+    worktree_name = "experiment-wt"
+    branch = f"worktree-{worktree_name}"
+    worktree = root / ".claude" / "worktrees" / worktree_name
+    worktree.parent.mkdir(parents=True)
+    _repo_git(root, "worktree", "add", "-q", "-b", branch, str(worktree))
+    result = worktree / "experiments" / "k1" / "results.json"
+    result.parent.mkdir(parents=True)
+    result.write_text('{"verdict": "pending_review"}\n', encoding="utf-8")
+    _repo_git(worktree, "add", "experiments/k1/results.json")
+    _repo_git(worktree, "commit", "-qm", "checkpoint blocked experiment")
+
+    # Queue receipts also accept canonical absolute paths; cleanup must still
+    # map that missing worktree path back to its retained branch blob.
+    declared = str(result)
+    queue = root / "storage" / "ops" / "compute_queue"
+    queue.mkdir(parents=True)
+    (queue / "compute-k1.json").write_text(json.dumps({
+        "id": "compute-k1",
+        "kind": "compute",
+        "status": "completed",
+        "output_paths": [declared],
+    }), encoding="utf-8")
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+
+    _repo_git(root, "worktree", "remove", str(worktree))
+    assert not result.exists()
+    assert reaper.scan_job_deliverables() == {"candidates": [], "held": []}
+
+    # A branch name alone is not ownership; the exact declared blob must remain.
+    _repo_git(root, "branch", "-D", branch)
+    scan = reaper.scan_job_deliverables()
+    assert scan["candidates"] == []
+    assert scan["held"][0]["job_id"] == "compute-k1"
+    assert scan["held"][0]["reason"] == "no_existing_declared_files"
+
+
 def test_job_reaper_source_has_no_broad_git_add() -> None:
     src = (REPO_ROOT / "scripts" / "reap_orphan_deliverables.py").read_text(
         encoding="utf-8"
