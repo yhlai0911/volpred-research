@@ -1,0 +1,65 @@
+{
+  "id": "agent-brief_k1708_stage2-e9aa0b",
+  "title": "agent: brief_k1708_stage2",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1708_stage2-e9aa0b.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-457427c2-k1708",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_stage2_summary.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1708_stage2-e9aa0b.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-22T02:55:18Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1708_stage2-e9aa0b.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1708_stage2-e9aa0b.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_stage2_summary.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1708_stage2-e9aa0b.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-457427c2-k1708",
+  "claude_followup": {
+    "brief": "K1708 stage2 收件：讀 K1708_stage2_summary.json。merge_ready=true 且 codex_round4_verdict=PASS → 走 worktree-merge-verification skill 合併 dispatch-slot-1-457427c2-k1708 + 寫 knowledge K1708（NULL 結論）+ 判斷是否值得寫文章。FAIL → 讀 storage/ops/k1708_codex_review_round4_20260722.md 的 BLOCKER，依 effort ladder 升級重派，禁止換 reviewer、禁止合併。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1708_stage2.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1708_stage2-e9aa0b.md",
+  "claimed_by_pid": 33312,
+  "claimed_by_pid_start_wall": "Wed Jul 22 11:45:05 2026",
+  "quota_requeues": 2,
+  "requeue_history": [
+    {
+      "at": "2026-07-22T03:05:53Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-07-22T03:05:48Z"
+    },
+    {
+      "at": "2026-07-22T03:45:12Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-07-22T03:45:05Z"
+    }
+  ],
+  "not_before": "2026-07-22T04:15:12.609743+00:00"
+}

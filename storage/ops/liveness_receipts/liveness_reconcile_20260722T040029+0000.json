@@ -1,0 +1,104 @@
+{
+  "generated_at": "2026-07-22T04:00:29+00:00",
+  "mode": "apply",
+  "grace_minutes": 20,
+  "detached": [
+    {
+      "owner": "hourly-slot-1-cb097ccd75ce42a3965de3f18e6bf512",
+      "slot": "slot-1",
+      "job_id": "cb097ccd75ce42a3965de3f18e6bf512",
+      "task_ids": [
+        "asia3_tw_sector_spillover",
+        "K1724",
+        "assign_a0b3efa7"
+      ],
+      "youngest_claim_age_min": 62.3,
+      "age_source": "claimed_at",
+      "process": "dead",
+      "process_evidence": {
+        "source": "dispatch_state.completions",
+        "completed_at": "2026-07-22T03:10:52.517715+00:00",
+        "outcome": "codex_failover_recovered",
+        "exit_code": 0
+      },
+      "worktree_present": false,
+      "disk_evidence": {
+        "pattern": "dispatch-slot-1-cb097ccd*",
+        "pattern_matches": [],
+        "referenced": [],
+        "referenced_present": []
+      },
+      "verdict": "detached",
+      "rationale": "process dead (dispatch_state.completions) AND no worktree on disk AND claim age 62.3min >= grace 20min",
+      "released": true,
+      "released_ids": [
+        "asia3_tw_sector_spillover",
+        "K1724",
+        "assign_a0b3efa7"
+      ],
+      "released_at": "2026-07-22T04:00:29+00:00"
+    },
+    {
+      "owner": "hourly-slot-2-8eb259da1f5c4b5ab7a6f9d538b86759",
+      "slot": "slot-2",
+      "job_id": "8eb259da1f5c4b5ab7a6f9d538b86759",
+      "task_ids": [
+        "assign_b802db4f"
+      ],
+      "youngest_claim_age_min": 64.4,
+      "age_source": "claimed_at",
+      "process": "dead",
+      "process_evidence": {
+        "source": "dispatch_state.completions",
+        "completed_at": "2026-07-22T03:09:48.628016+00:00",
+        "outcome": "codex_failover_recovered",
+        "exit_code": 0
+      },
+      "worktree_present": false,
+      "disk_evidence": {
+        "pattern": "dispatch-slot-2-8eb259da*",
+        "pattern_matches": [],
+        "referenced": [],
+        "referenced_present": []
+      },
+      "verdict": "detached",
+      "rationale": "process dead (dispatch_state.completions) AND no worktree on disk AND claim age 64.4min >= grace 20min",
+      "released": true,
+      "released_ids": [
+        "assign_b802db4f"
+      ],
+      "released_at": "2026-07-22T04:00:29+00:00"
+    },
+    {
+      "owner": "hourly-slot-3-3e0d71218cbb4cf8b8683c045d8b046d",
+      "slot": "slot-3",
+      "job_id": "3e0d71218cbb4cf8b8683c045d8b046d",
+      "task_ids": [
+        "asia_backlog_shift2_20260722"
+      ],
+      "youngest_claim_age_min": 58.9,
+      "age_source": "claimed_at",
+      "process": "dead",
+      "process_evidence": {
+        "source": "dispatch_state.completions",
+        "completed_at": "2026-07-22T03:30:58.515058+00:00",
+        "outcome": "codex_failover_recovered",
+        "exit_code": 0
+      },
+      "worktree_present": false,
+      "disk_evidence": {
+        "pattern": "dispatch-slot-3-3e0d7121*",
+        "pattern_matches": [],
+        "referenced": [],
+        "referenced_present": []
+      },
+      "verdict": "detached",
+      "rationale": "process dead (dispatch_state.completions) AND no worktree on disk AND claim age 58.9min >= grace 20min",
+      "released": true,
+      "released_ids": [
+        "asia_backlog_shift2_20260722"
+      ],
+      "released_at": "2026-07-22T04:00:29+00:00"
+    }
+  ]
+}

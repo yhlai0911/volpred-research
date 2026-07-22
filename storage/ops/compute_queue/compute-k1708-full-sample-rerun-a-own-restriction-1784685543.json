@@ -1,0 +1,44 @@
+{
+  "id": "compute-k1708-full-sample-rerun-a-own-restriction-1784685543",
+  "title": "K1708 full-sample rerun（選項A：產生真實 own-restriction 數字）",
+  "script_path": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 1,
+  "queued_at": "2026-07-22T01:59:03Z",
+  "started_at": "2026-07-22T02:00:06Z",
+  "completed_at": "2026-07-22T02:41:23Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1708-full-sample-rerun-a-own-restriction-1784685543.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1708-full-sample-rerun-a-own-restriction-1784685543.stderr",
+  "result_artifact": ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_results.json",
+  "output_paths": [
+    ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_results.json",
+    ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_forecast_ledger.csv",
+    ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_cumulative_loss.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1708 選項A stage 2/2（老闆裁決 telegram-1298）。rerun 已完成，現在做三件事，全部在 worktree .claude/worktrees/dispatch-slot-1-457427c2-k1708 內，禁止合併。\n(1) 驗數字：比對 rerun 後的 K1708_results.json 與 git show HEAD:experiments/k1708/K1708_results.json（pre-rerun 原件仍在 commit 801f7f552）。確認 verdict.label 仍為 NULL（時變狀態空間 HAR 未勝過 HAR）。若 verdict 翻正，這是重大訊號，停手先回報，不得逕自送審。\n(2) 用真實數字（非 legacy_derive_verdict 重建物）填 gate_transition_audit 的 cross-comparator 欄位，處理 round-3 BLOCKER 1/4 的循環論證問題。同時確認新 rerun 的 code_trace sha 與現行 K1708.py 一致（舊 results 的 code_trace 指向 sha 43bffdd/91,752 bytes，現行檔 126,998 bytes —— 這個 drift 正是 BLOCKER 3 的根）。\n(3) 送 Codex primary-path round-4 review（k1708 gate 修正）。**禁用 fallback reviewer** —— round-1/2/3 皆為 primary-path FAIL，換 reviewer 等於湮滅比較基準。審查報告存 storage/ops/k1708_codex_review_round4_<date>.md。\n合併前另有獨立 blocker：experiments/k1708/ 缺 reproduce_spec.json（check_experiment_artifacts.py 會擋）。rerun 後 code_trace 與現行 K1708.py 一致時，才寫得出誠實的 reproduce_spec。\nreview PASS 前**不得合併 worktree**。round-3 完整報告：storage/ops/k1708_codex_review_round3_20260722.md",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": true,
+  "source_task_id": "assign_299c79b6",
+  "timeout_seconds": 3600,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 69309,
+  "claimed_by_pid_start_wall": "Wed Jul 22 10:00:05 2026",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708"
+  },
+  "followup_dispatched_at": "2026-07-22T02:55:36Z",
+  "followup_next_task_id": "agent-brief_k1708_stage2-e9aa0b"
+}
