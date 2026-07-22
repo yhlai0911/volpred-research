@@ -131,6 +131,18 @@
 - 不要繞過正式 CLI / sync / publish 流程。
 - 任何資料錯誤都要追到產生它的程式與流程。
 
+### 問題結案五步 Gate（2026-07-22 owner 指令，不可妥協）
+
+固定結案順序：**證據化症狀 → 判定根因層級 → 重構底層邏輯/流程/架構 → 重跑與回讀驗證 → 制度化寫回**。
+
+1. 症狀與證據：讀 live source / log / receipt / 時間戳 / 上下游交接，不憑印象
+2. 根因判定：定位到邏輯、流程契約、排程、狀態機、API、權限、checker 或架構；**根因不明只能標 blocked**
+3. 底層修正：重構可重複執行的程式/流程/防呆；重跑、補檔、改文字、手動清 blocker 都只算止血
+4. 回歸驗證：重跑案例 + 測試 + 用 API/DB/雜湊/下游 acknowledgement **回讀**
+5. 制度化寫回：落入 script / contract / automation / skill / dashboard / 操作紀錄，同類錯誤不得再靜默發生
+
+回報二態必分：**`contained`**（止血，不可宣稱完成）vs **`root_cause_fixed_and_verified`**（五步全過才是結案）。機械 owner = incident sustained-clean resolution（`src/volpred/ops/incident.py`）+ 3-Strike Rule；本段為上位口徑，progress_report 與 error_log 一律採此二態。
+
 ### Three-Strike Rule — 同類錯誤 / 同處 hang 三次就整體重構
 
 **Trigger**：同一類錯誤（同根因、同症狀、同類 bug 模式）連續發生 **3 次** OR 同一處（同一 script / function / pipeline 節點）連續 hang 住 **3 次**。

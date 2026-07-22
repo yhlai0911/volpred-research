@@ -83,6 +83,18 @@
 - 不要繞過正式 CLI / sync / publish 流程。
 - 任何資料錯誤都要追到產生它的程式與流程。
 
+### 問題結案五步 Gate（2026-07-22 owner 指令，不可妥協）
+
+任何問題宣稱「解決」前必須依序走完五步，缺任一步只能標 **`contained`（止血）**，不得稱完成：
+
+1. **證據化症狀**：讀 live source / log / receipt / 時間戳 / 上下游交接 — 不憑印象、不憑上一輪的記憶。
+2. **判定根因層級**：定位到邏輯、流程契約、排程、狀態機、API、權限、checker 或架構之一；**根因不明 = 只能標 blocked**，不准用貌似合理的故事收尾。
+3. **重構底層**：修可重複執行的程式／流程／防呆。重跑、補檔、改文字、手動清 blocker 全部只算止血（contained）。
+4. **回歸驗證**：重跑案例 + 測試，並用 API／資料庫／雜湊／下游 acknowledgement **回讀**確認 — 「跑完沒報錯」不等於「下游真的收到對的東西」。
+5. **制度化寫回**：落入 script / contract / automation / skill / dashboard / 操作紀錄，使同類錯誤**無法再靜默發生**。
+
+回報時兩種狀態必分：**`contained`**（暫時止血，不可宣稱完成）vs **`root_cause_fixed_and_verified`**（五步全過，唯一真結案）。機械實作面：incident 生命週期的 sustained-clean resolution（`src/volpred/ops/incident.py`，一次乾淨不算 resolved）與 3-Strike Rule 是本 gate 的既有 enforcement；本段是其上位口徑，回報與 error_log 條目一律採用此二態詞彙。
+
 ### CLI / Workflow 優先順序
 
 - **CLI 首選入口**：`uv run volpred ops ...`
