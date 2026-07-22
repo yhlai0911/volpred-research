@@ -2606,7 +2606,13 @@ def _default_gate_review(*, repo_root: Path, gate_paths: list[str], hhmm: str) -
     return {"task_id": task_id, "created": created}
 
 
-def _observe_ownership_shadow(repo_root: Path, *, dirty_now: set[str], baseline: set[str] | None) -> None:
+def _observe_ownership_shadow(
+    repo_root: Path,
+    *,
+    dirty_now: set[str],
+    baseline: set[str] | None,
+    fire_ids: set[str] | list[str] | tuple[str, ...] | None = None,
+) -> None:
     """Log what a DECLARED-ownership ledger would have said. Decides nothing.
 
     Stage 1 of docs/refactor_commit_ownership_state_machine.md. `owned = dirty_now
@@ -2622,7 +2628,9 @@ def _observe_ownership_shadow(repo_root: Path, *, dirty_now: set[str], baseline:
     try:
         from volpred.ops import fire_manifest
 
-        fire_manifest.observe_shadow(repo_root, dirty_now=dirty_now, baseline=baseline)
+        fire_manifest.observe_shadow(
+            repo_root, dirty_now=dirty_now, baseline=baseline, fire_ids=fire_ids,
+        )
     except Exception as exc:  # noqa: BLE001 — a shadow may never touch a decision
         LOG.debug("phase_z: ownership shadow skipped (%s)", exc)
 
@@ -2688,6 +2696,7 @@ def run_phase_z(
     isolated_cohort: bool = False,
     gate_review_fn=None,
     claim_owners: set[str] | list[str] | tuple[str, ...] | None = None,
+    fire_ids: set[str] | list[str] | tuple[str, ...] | None = None,
 ) -> dict:
     """Deterministic post-fire commit. Returns an observability dict.
 
@@ -2780,7 +2789,9 @@ def run_phase_z(
 
     baseline_observed_at = datetime.now(timezone.utc)
     baseline = set(pre_fire_dirty) if pre_fire_dirty is not None else _read_pre_fire_snapshot(repo_root, runner)
-    _observe_ownership_shadow(repo_root, dirty_now=dirty_now, baseline=baseline)
+    _observe_ownership_shadow(
+        repo_root, dirty_now=dirty_now, baseline=baseline, fire_ids=fire_ids,
+    )
     if baseline is None:
         # Ownership unknown. The old code committed anyway (`git add -A`), which
         # is how it swept an interactive session's half-finished edits into an

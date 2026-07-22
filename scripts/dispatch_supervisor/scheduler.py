@@ -417,6 +417,26 @@ async def _run_reserved_fire(
                 path=state_path,
             )
     finally:
+        # Close the producer-side state machine before any workspace/PHASE-Z
+        # consumer reads it. fire_receipt normally seals successful output;
+        # this also seals a genuinely no-output success and gives failed/dead
+        # producers the named ABANDONED exit instead of a six-hour anonymous
+        # open claim. The ledger remains shadow-only here.
+        try:
+            from volpred.ops import fire_manifest
+
+            manifest = fire_manifest.read(repo_root, job_id)
+            if manifest and manifest.get("state") == fire_manifest.STATE_OPEN:
+                worker_outcome = result.outcome if result is not None else "failure"
+                if worker_outcome in {"success", "codex_failover_recovered"}:
+                    fire_manifest.seal(repo_root, job_id)
+                else:
+                    fire_manifest.close(
+                        repo_root, job_id, state=fire_manifest.STATE_ABANDONED,
+                        reason=f"worker_outcome={worker_outcome}",
+                    )
+        except Exception as exc:  # noqa: BLE001 — attribution must never skip closeout
+            LOG.warning("fire manifest closeout failed job_id=%s: %s", job_id, exc)
         # ── WS-B workspace finalize (before the PHASE-Z drain) ──────────────
         # The isolated lane's output lands (or goes to remediation) through its
         # OWN gate here, so PHASE-Z only ever sees canonical-root residue.
@@ -471,6 +491,11 @@ async def _run_reserved_fire(
                         phase_z.run_phase_z, repo_root=repo_root,
                         isolated_cohort=isolated_cohort,
                         claim_owners=_phase_z_claim_owners(cohort_pending),
+                        fire_ids={
+                            str(item["job_id"])
+                            for item in cohort_pending
+                            if item.get("job_id")
+                        },
                     )
                     LOG.info("phase_z cohort drain job_id=%s outcome=%s", job_id, phase_z_outcome)
                 except Exception as exc:  # noqa: BLE001
@@ -723,6 +748,11 @@ async def _tick_once(
                 phase_z.run_phase_z, repo_root=repo_root,
                 isolated_cohort=recovery_isolated,
                 claim_owners=_phase_z_claim_owners(pending_phase_z),
+                fire_ids={
+                    str(item["job_id"])
+                    for item in pending_phase_z
+                    if item.get("job_id")
+                },
             )
             if _phase_z_terminal(outcome):
                 for cohort in {str(item.get("cohort_id")) for item in pending_phase_z}:

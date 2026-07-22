@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from scripts import daily_checkup, reproduce_check
 
 
@@ -90,3 +92,19 @@ def test_every_declared_dimension_has_a_checker() -> None:
         if not callable(getattr(daily_checkup, f"check_{name}", None))
     ]
     assert missing == []
+
+
+def test_fire_manifest_hook_check_warns_when_registration_is_missing(
+    tmp_path, monkeypatch,
+) -> None:
+    (tmp_path / ".claude").mkdir()
+    (tmp_path / ".claude" / "settings.json").write_text(
+        json.dumps({"hooks": {"PostToolUse": []}}), encoding="utf-8"
+    )
+    monkeypatch.setattr(daily_checkup, "ROOT", tmp_path)
+
+    findings = daily_checkup.check_fire_manifest_hook()
+
+    assert len(findings) == 1
+    assert findings[0]["dimension"] == "fire_manifest_hook"
+    assert findings[0]["severity"] == "warn"

@@ -36,12 +36,15 @@ mode remains a worse commit message, never a dirty tree
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from dispatch_supervisor.phase_z import write_fire_receipt  # noqa: E402
+from volpred.ops import fire_manifest  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -94,6 +97,13 @@ def main(argv: list[str] | None = None) -> int:
         print("[fire_receipt] 無法寫入 receipt — PHASE-Z 仍會 commit，但訊息是自動生成的",
               file=sys.stderr)
         return 1
+    fire_id = os.environ.get("VOLPRED_FIRE_ID", "").strip()
+    if fire_id:
+        try:
+            fire_manifest.seal(Path(args.repo_root), fire_id)
+        except Exception as exc:  # noqa: BLE001 — receipt/commit remains fail-open
+            print(f"[fire_receipt] manifest seal 失敗（仍保留 receipt）：{exc}", file=sys.stderr)
+            return 1
     print(f"[fire_receipt] 已記錄：{args.subject}")
     return 0
 

@@ -525,6 +525,7 @@ def shadow_compare(
     dirty_now: set[str] | list[str],
     baseline: set[str] | list[str] | None,
     fire_id: str | None = None,
+    fire_ids: set[str] | list[str] | tuple[str, ...] | None = None,
     now: float | None = None,
 ) -> dict[str, Any]:
     """Both answers, side by side: what PHASE-Z *infers* vs what was *declared*.
@@ -546,11 +547,26 @@ def shadow_compare(
     base = None if baseline is None else set(baseline)
     inferred = sorted(dirty_set - base) if base is not None else []
     ownership = resolve_ownership(repo_root, dirty_set, fire_id=fire_id, now=now)
-    declared = set(ownership["owned"])
+    wanted = {str(item) for item in (fire_ids or []) if str(item)}
+    if fire_id:
+        wanted.add(fire_id)
+    if wanted:
+        declared = {
+            rel
+            for manifest in iter_manifests(repo_root)
+            if manifest.get("fire_id") in wanted
+            and manifest.get("state") in _LIVE_STATES
+            and not is_stale(manifest, now=now)
+            for rel in declared_paths(manifest)
+            if rel in dirty_set
+        }
+    else:
+        declared = set(ownership["owned"])
     inferred_set = set(inferred)
     return {
         "at": _now_iso(now),
         "fire_id": fire_id,
+        "fire_ids": sorted(wanted),
         "dirty_total": len(dirty_set),
         "baseline_available": base is not None,
         "inferred": inferred,
@@ -592,6 +608,7 @@ def observe_shadow(
     dirty_now: set[str] | list[str],
     baseline: set[str] | list[str] | None,
     fire_id: str | None = None,
+    fire_ids: set[str] | list[str] | tuple[str, ...] | None = None,
     now: float | None = None,
 ) -> dict[str, Any] | None:
     """``shadow_compare`` + log it, swallowing every error.
@@ -601,7 +618,7 @@ def observe_shadow(
     """
     try:
         payload = shadow_compare(repo_root, dirty_now=dirty_now, baseline=baseline,
-                                 fire_id=fire_id, now=now)
+                                 fire_id=fire_id, fire_ids=fire_ids, now=now)
     except Exception as exc:  # noqa: BLE001 — shadow must never propagate
         LOG.warning("fire_manifest: shadow compare failed (%s)", exc)
         return None

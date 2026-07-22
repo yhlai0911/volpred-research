@@ -318,3 +318,23 @@ def test_shadow_marks_a_missing_baseline_instead_of_pretending_to_agree(repo: Pa
     got = fm.shadow_compare(repo, dirty_now={"a.py"}, baseline=None, fire_id="A")
     assert got["baseline_available"] is False
     assert got["declared"] == ["a.py"]
+
+
+def test_shadow_cohort_counts_declarations_from_every_fire(repo: Path) -> None:
+    fm.open_manifest(repo, fire_id="A", actor="slot-1")
+    fm.open_manifest(repo, fire_id="B", actor="slot-2")
+    _write(repo, "a.py")
+    _write(repo, "b.py")
+    fm.record(repo, "A", "a.py")
+    fm.record(repo, "B", "b.py")
+
+    got = fm.shadow_compare(
+        repo,
+        dirty_now={"a.py", "b.py"},
+        baseline=set(),
+        fire_ids={"A", "B"},
+    )
+
+    assert got["fire_ids"] == ["A", "B"]
+    assert got["declared"] == ["a.py", "b.py"]
+    assert got["inferred_not_declared"] == []

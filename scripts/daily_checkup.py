@@ -947,6 +947,30 @@ def check_task_pool_pressure() -> list[dict]:
     return out
 
 
+def check_fire_manifest_hook() -> list[dict]:
+    """The write-time ownership declaration is mechanical only while wired."""
+    settings_path = ROOT / ".claude" / "settings.json"
+    hook_path = ROOT / "scripts" / "hooks" / "record_fire_manifest.py"
+    try:
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+        groups = settings.get("hooks", {}).get("PostToolUse", [])
+        installed = any(
+            "record_fire_manifest.py" in str(hook.get("command", ""))
+            for group in groups
+            if group.get("matcher") == "Edit|Write|MultiEdit|NotebookEdit"
+            for hook in group.get("hooks", [])
+        )
+    except (OSError, ValueError, AttributeError):
+        installed = False
+    if hook_path.is_file() and installed:
+        return []
+    return [_finding(
+        "fire_manifest_hook", "warn",
+        "commit ownership 的 PostToolUse 宣告 hook 未安裝；shadow 覆蓋率會退化為 0",
+        recovery="確認 scripts/hooks/record_fire_manifest.py 存在且註冊於 .claude/settings.json PostToolUse",
+    )]
+
+
 CHECKUP_DIMENSIONS = (
     "data_freshness",
     "cron_completion",
@@ -960,6 +984,7 @@ CHECKUP_DIMENSIONS = (
     "reproducibility",
     "worktree_reconcile",
     "task_pool_pressure",
+    "fire_manifest_hook",
 )
 
 

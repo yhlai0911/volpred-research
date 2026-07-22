@@ -37,6 +37,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
+from volpred.ops import fire_manifest
+
 from . import (
     alerts, claim_release, codex_failover, failure_class, identity, procutil, state,
 )
@@ -467,6 +469,7 @@ def _run_one_attempt(
         prompt_text,
     ]
     managed_state = True
+    declare_manifest = job_id is not None
     if job_id is None:
         # Compatibility for direct one-attempt smoke/tests. Production reserves
         # the logical fire in scheduler/run_worker and always supplies job_id.
@@ -509,10 +512,26 @@ def _run_one_attempt(
         ),
         "VOLPRED_DISPATCH_SLOT": slot_id,
         "VOLPRED_DISPATCH_JOB_ID": job_id,
+        "VOLPRED_FIRE_ID": job_id,
+        "VOLPRED_FIRE_REPO_ROOT": str(PROJECT_ROOT),
         "VOLPRED_TASK_CLAIM_OWNER": identity.task_claim_owner(
             role="hourly", slot_id=slot_id, job_id=job_id,
         ),
     }
+    # Stage 2 of declared commit ownership: create the change-set before the
+    # producer can write.  This remains observability-only; PHASE-Z still uses
+    # its fire-start baseline until the seven-day shadow gate passes.
+    if declare_manifest:
+        try:
+            fire_manifest.open_manifest(
+                PROJECT_ROOT,
+                fire_id=job_id,
+                actor=child_env["VOLPRED_ACTOR"],
+                job_id=job_id,
+                slot_id=slot_id,
+            )
+        except Exception as exc:  # noqa: BLE001 — attribution must never veto a fire
+            LOG.warning("fire manifest open failed for job_id=%s: %s", job_id, exc)
     try:
         proc = _spawn(argv=argv, log_path=log_path, env=child_env, cwd=workdir)
     except OSError:
