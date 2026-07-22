@@ -23977,5 +23977,15 @@
     "owner": "codex-failover-slot-1-77558db398af482cb1e8a7f38bfa7980",
     "commit": null,
     "summary": "PHASE-Z now excludes live declared owners from foreign risk, streaks, incidents, and routine WARNs; only stale, unowned, or contested residue reaches the actionable incident lane. Reproduced the exact 13:16 29-path receipt and passed 217 related tests."
+  },
+  {
+    "timestamp": "2026-07-22T20:12:26+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_74dd08c0",
+    "outcome": "root_cause_fixed_and_verified",
+    "actor": "codex-failover-slot-2-731316f2486a432da7aa83dce5f24e09",
+    "owner": "codex-failover-slot-2-731316f2486a432da7aa83dce5f24e09",
+    "commit": null,
+    "summary": "Reaper now treats an inflight agent followup in the exact linked worktree as the owner of declared compute outputs; terminal or unrelated followups remain held. Regression suite: 97 passed; live K1708 scan: neither held nor candidate."
   }
 ]

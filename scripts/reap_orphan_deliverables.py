@@ -164,6 +164,7 @@ def load_baseline() -> set[str]:
 # ── queue-owned deliverables ─────────────────────────────────────────────────
 
 _TERMINAL_JOB_STATES = {"completed", "failed"}
+_INFLIGHT_JOB_STATES = {"queued", "running"}
 _GIT_ENV_KEYS = {
     "GIT_DIR",
     "GIT_WORK_TREE",
@@ -336,6 +337,74 @@ def _tracked_clean_in_worktree(raw: object) -> bool:
     return status.returncode == 0 and not status.stdout.strip()
 
 
+def _managed_worktree_output_root(raw: object) -> Path | None:
+    """Return the registered-worktree-shaped root for an existing output."""
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    candidate = Path(raw.strip())
+    candidate = candidate if candidate.is_absolute() else ROOT / candidate
+    if candidate.is_symlink() or not candidate.is_file():
+        return None
+    resolved = candidate.resolve(strict=False)
+    worktrees_root = (ROOT / ".claude" / "worktrees").resolve(strict=False)
+    try:
+        within = resolved.relative_to(worktrees_root)
+    except ValueError:  # silent-ok: declaration is outside managed worktrees
+        return None
+    if len(within.parts) < 2:
+        return None
+    worktree = worktrees_root / within.parts[0]
+    # A linked worktree has a `.git` file pointing at the common repository.
+    # Requiring it keeps an arbitrary ignored directory from impersonating a
+    # review/merge owner.
+    if not (worktree / ".git").is_file():
+        return None
+    return worktree
+
+
+def _active_followup_owns_worktree(job: dict, declared: list[object]) -> bool:
+    """Whether a live agent follow-up owns every declared worktree output.
+
+    Compute results are intentionally left modified/untracked until their
+    review stage commits the worktree.  The main-checkout reaper must not call
+    those files ownerless while that exact downstream job remains queued or
+    running; conversely, a missing/terminal/unrelated follow-up must not silence
+    the hold.
+    """
+    if job.get("followup_dispatched") is not True:
+        return False
+    followup_id = job.get("followup_next_task_id")
+    if not isinstance(followup_id, str) or not re.fullmatch(
+            r"[A-Za-z0-9][A-Za-z0-9._-]*", followup_id):
+        return False
+
+    roots = [_managed_worktree_output_root(raw) for raw in declared]
+    if not roots or any(root is None for root in roots):
+        return False
+    worktree = roots[0]
+    if any(root != worktree for root in roots[1:]):
+        return False
+
+    followup_path = QUEUE_DIR / f"{followup_id}.json"
+    # Some follow-up ids name task-pool rows rather than compute receipts.
+    # Absence here is therefore a normal non-match, not an unreadable-input
+    # warning for every reaper sweep.
+    if not followup_path.is_file():
+        return False
+    followup = _load_json(followup_path, {})
+    if not isinstance(followup, dict):
+        return False
+    if (
+        followup.get("kind") != "agent"
+        or followup.get("status") not in _INFLIGHT_JOB_STATES
+    ):
+        return False
+    cwd = followup.get("cwd")
+    if not isinstance(cwd, str) or not cwd.strip():
+        return False
+    return Path(cwd).resolve(strict=False) == worktree.resolve(strict=False)
+
+
 def _landed_in_main(raw: object) -> str | None:
     """Worktree-declared output that has since been merged into the checkout.
 
@@ -382,6 +451,12 @@ def scan_job_deliverables() -> dict:
             continue
         declared = job.get("output_paths")
         if not isinstance(declared, list) or not declared:
+            continue
+        if _active_followup_owns_worktree(job, declared):
+            # The exact worktree and files have a live review/merge owner.  Its
+            # queue receipt owns escalation if that job stalls; opening an
+            # orphan-delivery task here duplicates ownership and pressures the
+            # main reaper to bypass the experiment gate.
             continue
 
         exact: list[str] = []

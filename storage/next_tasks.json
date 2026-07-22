@@ -54633,7 +54633,7 @@
     "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-22T03:01:46.278073+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "reap_orphan_deliverables_held_ttl",
     "created_at": "2026-07-22T08:01:11.474663+00:00",
     "payload": {
@@ -54648,7 +54648,30 @@
         "held_escalation"
       ]
     },
-    "created_by": "reap_orphan_deliverables"
+    "created_by": "reap_orphan_deliverables",
+    "status_history": [
+      {
+        "ts": "2026-07-22T12:08:03.848070+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-731316f2486a432da7aa83dce5f24e09"
+      },
+      {
+        "ts": "2026-07-22T12:08:16.839454+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-731316f2486a432da7aa83dce5f24e09"
+      },
+      {
+        "ts": "2026-07-22T12:12:27.239900+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-731316f2486a432da7aa83dce5f24e09"
+      }
+    ],
+    "started_at": "2026-07-22T12:08:16.839438+00:00",
+    "completed_at": "2026-07-22T12:12:27.239879+00:00",
+    "result": "root_cause_fixed_and_verified: live receipt showed all three K1708 outputs in the exact linked worktree and agent-brief_k1708_stage2-e9aa0b queued against that cwd. Reaper now recognizes only an inflight agent receipt in the exact worktree as owner; terminal/unrelated followups remain held. Verified 97 orphan/reaper tests passed and live scan reports target neither held nor candidate."
   },
   {
     "id": "ci-red-29906217577",

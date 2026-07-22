@@ -289,6 +289,65 @@ def test_worktree_output_still_missing_is_held(repo, monkeypatch):
     assert [h["reason"] for h in out["held"]] == ["no_existing_declared_files"]
 
 
+def test_live_followup_owns_modified_worktree_outputs(repo, monkeypatch):
+    """K1708 shape: rerun bytes wait in a worktree while review is queued.
+
+    They are not ownerless, even though Git still reports them modified.  The
+    child receipt is the escalation owner until it commits or terminates.
+    """
+    mod, root = repo
+    queue = root / "storage" / "ops" / "compute_queue"
+    monkeypatch.setattr(mod, "QUEUE_DIR", queue)
+    _write(root / ".gitignore", ".claude/worktrees/\n")
+    worktree = root / ".claude" / "worktrees" / "dispatch-k1708"
+    _write(worktree / ".git", "gitdir: /tmp/common/worktrees/dispatch-k1708\n")
+    output = worktree / "experiments" / "k1708" / "K1708_results.json"
+    _write(output, "{}")
+    _job(root, "k1708-stage2", status="queued", kind="agent", cwd=str(worktree))
+    _job(
+        root,
+        "compute-k1708",
+        status="completed",
+        output_paths=[str(output)],
+        followup_dispatched=True,
+        followup_next_task_id="k1708-stage2",
+    )
+
+    out = mod.scan_job_deliverables()
+    assert out["held"] == []
+    assert out["candidates"] == []
+
+
+@pytest.mark.parametrize(
+    ("followup_status", "followup_cwd"),
+    [("failed", None), ("queued", "different-worktree")],
+)
+def test_terminal_or_unrelated_followup_does_not_hide_worktree_hold(
+        repo, monkeypatch, followup_status, followup_cwd):
+    """Only a live child operating in the exact worktree can suppress a hold."""
+    mod, root = repo
+    queue = root / "storage" / "ops" / "compute_queue"
+    monkeypatch.setattr(mod, "QUEUE_DIR", queue)
+    _write(root / ".gitignore", ".claude/worktrees/\n")
+    worktree = root / ".claude" / "worktrees" / "dispatch-k1708"
+    _write(worktree / ".git", "gitdir: /tmp/common/worktrees/dispatch-k1708\n")
+    output = worktree / "experiments" / "k1708" / "K1708_results.json"
+    _write(output, "{}")
+    cwd = worktree if followup_cwd is None else worktree.parent / followup_cwd
+    _job(root, "k1708-stage2", status=followup_status, kind="agent", cwd=str(cwd))
+    _job(
+        root,
+        "compute-k1708",
+        status="completed",
+        output_paths=[str(output)],
+        followup_dispatched=True,
+        followup_next_task_id="k1708-stage2",
+    )
+
+    out = mod.scan_job_deliverables()
+    assert [h["reason"] for h in out["held"]] == ["no_existing_declared_files"]
+
+
 def test_failed_job_with_no_output_is_not_held(repo, monkeypatch):
     """A job that exited non-zero produced nothing to preserve. Asking a human
     to find an exit for a file that never existed is pure noise."""
