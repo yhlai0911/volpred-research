@@ -55068,7 +55068,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -55080,7 +55080,30 @@
     "release_audit_skipped_count": 6,
     "release_audit_issues": [
       "missing 懶人包圖組 section (render queued, job lazypack-mile_63ec8636) — waiting on the */15 compute worker, no action needed"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-22T17:08:27.439537+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-1551fd99dab841f5bc5cd4791b2d01f0"
+      },
+      {
+        "ts": "2026-07-22T17:08:31.581326+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-1551fd99dab841f5bc5cd4791b2d01f0"
+      },
+      {
+        "ts": "2026-07-22T17:10:26.782638+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-1551fd99dab841f5bc5cd4791b2d01f0"
+      }
+    ],
+    "started_at": "2026-07-22T17:08:31.581309+00:00",
+    "completed_at": "2026-07-22T17:10:26.782624+00:00",
+    "result": "Detached render completed exit 0 and installed three lazypack panels. Fresh release preview showed content_gate_blocked=0; formal single-article release published mile_63ec8636, synced Supabase, resolved the stored release-audit issue, and stamped verified_live_at=2026-07-22T17:09:28.439943+00:00. Canonical public URL returned HTTP 200. Targeted lazypack/live-verify tests: 48 passed; repository CI-parity hook separately flags existing untracked .env reads."
   },
   {
     "id": "assign_6e554fae",
