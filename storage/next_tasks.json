@@ -44105,7 +44105,7 @@
     "description": "Alert `Claude→Codex failover 已接手（Claude 端：quota）` fired 4× over 3.5d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：alert_key=31bfa7e7f9289f4c title='Claude→Codex failover 已接手（Claude 端：quota）' send_count=4 span=3.5d (first 2026-07-15T18:20:01.436446+00:00 → last 2026-07-19T06:57:42.084971+00:00) — no fire in 18.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-20T01:18:48.350731+00:00",
     "dreaming": {
@@ -44114,7 +44114,30 @@
       "occurrences": 1,
       "governance_target": "docs/error_log.md"
     },
-    "priority_note": "dreaming: severity escalated to critical on 2026-07-22 (was P3)"
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-22 (was P3)",
+    "status_history": [
+      {
+        "ts": "2026-07-22T23:08:44.695422+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-721a80cdbd7b41788877d92aa9be277f"
+      },
+      {
+        "ts": "2026-07-22T23:08:49.112681+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-721a80cdbd7b41788877d92aa9be277f"
+      },
+      {
+        "ts": "2026-07-22T23:15:14.320272+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-721a80cdbd7b41788877d92aa9be277f"
+      }
+    ],
+    "started_at": "2026-07-22T23:08:49.112666+00:00",
+    "completed_at": "2026-07-22T23:15:14.320251+00:00",
+    "result": "root_cause_fixed_and_verified: quota-success failover telemetry now delegates to quota_blocked owner in both persistent and unfiled detectors; auth/failure paths remain detectable. Added non-UTF8 archive fail-open. 97 dreaming tests pass; live ledgers replay with 31bfa absent from both detectors."
   },
   {
     "id": "email-12125-3afb3c",

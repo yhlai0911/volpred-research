@@ -120,14 +120,18 @@ UNFILED_INCIDENT_MIN_OCCURRENCES = 2
 UNFILED_INCIDENT_WINDOW_DAYS = 30
 UNFILED_INCIDENT_MAX_FINDINGS = 8
 
-# Anti-stacking ownership: these umbrella alert titles intentionally aggregate
-# heterogeneous incidents, while a more granular detector already owns their
-# recurrence. `Host cron failure detected` stores the actual job only in
-# details.failing_logs; loop_health.error_recurrence tracks it canonically as
-# <log>.log:exit<code>. Feeding the umbrella key through this detector as well
-# merges unrelated jobs into one false Three-Strike finding.
+# Anti-stacking ownership: these alert titles already have a more granular
+# owner for the condition behind the notification. `Host cron failure detected`
+# stores the actual job only in details.failing_logs; loop_health.error_recurrence
+# tracks it canonically as <log>.log:exit<code>. A successful quota failover is
+# recovery telemetry, while `supervisor quota_blocked` owns the provider outage.
+# Feeding either notification through the generic incident detectors creates a
+# duplicate/false Three-Strike instead of identifying a new failure class.
 PERSISTENT_ALERT_DELEGATED_OWNERS = {
     "Host cron failure detected": "loop_health.error_recurrence",
+    "Claude→Codex failover 已接手（Claude 端：quota）": (
+        "dispatch_supervisor.quota_blocked"
+    ),
 }
 
 # 2026-07-01 fix (boss email-12419: CRITICAL email for something already fixed):
@@ -850,14 +854,14 @@ def _error_log_blob(storage_dir: str) -> str:
     if main_log.is_file():
         try:
             parts.append(main_log.read_text(encoding="utf-8"))
-        except OSError as exc:
+        except (OSError, UnicodeError) as exc:
             warn("dreaming", "error_log read failed", err=str(exc))
     archive_dir = root / "docs" / "error_log_archive"
     if archive_dir.is_dir():
         for f in sorted(archive_dir.glob("*.md")):
             try:
                 parts.append(f.read_text(encoding="utf-8"))
-            except OSError as exc:
+            except (OSError, UnicodeError) as exc:
                 warn("dreaming", "error_log archive read failed", path=str(f), err=str(exc))
     return "\n".join(parts).lower()
 
@@ -926,6 +930,7 @@ def detect_unfiled_incident_class(
     candidates = [
         (key, g) for key, g in groups.items()
         if g["count"] >= UNFILED_INCIDENT_MIN_OCCURRENCES and g["title"].strip()
+        and g["title"].strip() not in PERSISTENT_ALERT_DELEGATED_OWNERS
     ]
     if not candidates:
         return []

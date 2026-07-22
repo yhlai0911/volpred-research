@@ -324,6 +324,33 @@ def test_detect_persistent_alerts_skips_host_cron_umbrella_owned_by_error_recurr
     assert signature not in baseline
 
 
+def test_detect_persistent_alerts_skips_successful_quota_failover_telemetry(tmp_path):
+    """Quota is owned upstream; a successful fallback is not another incident."""
+    storage = _storage(tmp_path)
+    _write_alert_dedup(
+        storage,
+        {
+            "31bfa7e7f9289f4c" + "0" * 48: {
+                "title": "Claude→Codex failover 已接手（Claude 端：quota）",
+                "send_count": 10,
+                "first_sent_at": _iso(7),
+                "last_sent_at": _iso(0.1),
+            },
+            "b74691d14763e77c" + "0" * 48: {
+                "title": "Claude→Codex failover 接手失敗（Claude 端：quota）",
+                "send_count": 10,
+                "first_sent_at": _iso(7),
+                "last_sent_at": _iso(0.1),
+            },
+        },
+    )
+
+    findings = dr.detect_persistent_alerts(str(storage), {}, NOW)
+    assert [f.signature for f in findings] == [
+        "persistent_alert:b74691d14763e77c"
+    ]
+
+
 def test_host_cron_recurrence_remains_job_scoped(tmp_path):
     """The delegated owner keeps distinct cron jobs in distinct signatures."""
     snapshot = {
@@ -1364,6 +1391,23 @@ def test_unfiled_incident_class_flagged_after_two_occurrences(tmp_path):
     assert f.activity_marker is not None
 
 
+def test_unfiled_incident_skips_successful_quota_failover_telemetry(tmp_path):
+    """The provider-outage owner prevents a second task for recovery telemetry."""
+    storage = _storage(tmp_path)
+    _incident_stream(
+        storage,
+        "31bfa7e7f9289f4c" + "0" * 48,
+        "Claude→Codex failover 已接手（Claude 端：quota）",
+        10,
+    )
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text(
+        "# empty\n", encoding="utf-8"
+    )
+
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
 def test_filed_incident_class_is_not_reproposed(tmp_path):
     """已立案（title 出現在 error_log）→ 不重複提（F3 驗收下半）。"""
     storage = _storage(tmp_path)
@@ -1397,6 +1441,23 @@ def test_incident_class_filed_in_archive_counts_as_filed(tmp_path):
         "## archived class incident\n", encoding="utf-8"
     )
     assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_unfiled_incident_detector_skips_non_utf8_archive(tmp_path):
+    """One damaged historical archive must not disable the live detector."""
+    storage = _storage(tmp_path)
+    _incident_stream(storage, "e" * 64, "current unfiled alert", 2)
+    archive = tmp_path / "docs" / "error_log_archive"
+    archive.mkdir(parents=True)
+    (tmp_path / "docs" / "error_log.md").write_text(
+        "# current log\n", encoding="utf-8"
+    )
+    (archive / "damaged.md").write_bytes(b"valid prefix\n\x80broken utf-8")
+
+    findings = dr.detect_unfiled_incident_class(str(storage), {}, NOW)
+    assert [f.signature for f in findings] == [
+        "unfiled_incident_class:" + "e" * 16
+    ]
 
 
 def test_single_occurrence_is_not_an_unfiled_class(tmp_path):
