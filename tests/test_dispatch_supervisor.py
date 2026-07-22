@@ -3521,7 +3521,10 @@ def test_phase_z_isolated_cohort_demotes_non_machine_owned(tmp_path: Path) -> No
     ).stdout.strip()
     assert tracked == ""  # never entered history
     assert (tmp_path / "docs" / "note.md").exists()  # and never deleted
-    assert any("不代收" in a.get("title", "") for a in alerts_seen)
+    assert not any("canonical checkout 殘留" in a.get("title", "") for a in alerts_seen), (
+        "canonical residue is tracked, not warned before it is actionable"
+    )
+    assert out["foreign_ownership"]["risk"] == ["docs/note.md"]
 
 
 def test_phase_z_isolated_cohort_all_residue_is_terminal(tmp_path: Path) -> None:

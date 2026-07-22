@@ -42617,5 +42617,18 @@
   ],
   "confidence": 0.85,
   "created_at": "2026-07-22T01:15:11.303738"
+ },
+ {
+  "item_id": "9b1dd6d8",
+  "category": "operations",
+  "content": "PHASE-Z ownership rule: a fire-start baseline only proves a path is not this fire output; it does not prove abandonment. Live write-time declarations must be excluded from risk, streak, quarantine, incident, and owner notifications. Only stale, unowned, or contested residue is actionable, and routine skipped-path WARNs are noise.",
+  "evidence": [
+   "Telegram msg 1312 / 2026-07-22 13:16 receipt (29 concurrent paths)",
+   "scripts/dispatch_supervisor/phase_z.py::_partition_foreign_ownership",
+   "tests/test_phase_z_ownership.py::test_1316_receipt_active_sessions_are_skipped_without_warn_or_risk",
+   "217 related tests passed"
+  ],
+  "confidence": 0.95,
+  "created_at": "2026-07-22T16:13:43.093967"
  }
 ]

@@ -181,7 +181,7 @@ def test_the_critical_is_sent_once_and_not_re_sent_while_the_incident_is_open(re
     _fires(repo, 30, alerts=alerts)  # well past 3, 6, 12 and 24
 
     stuck_pages = [a for a in alerts
-                   if a[0] == "critical" and "連續多班沒人收" in a[1]]
+                   if a[0] == "critical" and "達處置門檻" in a[1]]
     assert len(stuck_pages) == 1, [a[1] for a in stuck_pages]
     body = stuck_pages[0][2]
     incident = _incidents(repo)[0]
@@ -201,7 +201,7 @@ def test_a_page_still_goes_out_when_the_incident_cannot_be_opened(repo: Path):
     outcome = _fires(repo, phase_z._FOREIGN_STREAK_CRITICAL, alerts=alerts)
 
     assert outcome["incident"]["reason"] == "no_queue"
-    assert [a for a in alerts if a[0] == "critical" and "連續多班沒人收" in a[1]]
+    assert [a for a in alerts if a[0] == "critical" and "達處置門檻" in a[1]]
 
 
 # ── 3. admission control: the incident changes the cap ───────────────────────

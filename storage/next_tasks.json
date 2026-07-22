@@ -53226,7 +53226,7 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-29808977711",
@@ -53254,10 +53254,25 @@
         "to": "pending",
         "by": "codex-failover-slot-2-1bbf5933af3b4b868f9e21963c7bb294",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-22T08:09:21.324801+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-ad3706bf5f364c778214fbcb6c27df89"
+      },
+      {
+        "ts": "2026-07-22T08:09:28.150793+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-ad3706bf5f364c778214fbcb6c27df89"
       }
     ],
-    "started_at": "2026-07-22T07:09:28.067611+00:00",
-    "last_released_at": "2026-07-22T07:10:27.614860+00:00"
+    "started_at": "2026-07-22T08:09:28.150774+00:00",
+    "last_released_at": "2026-07-22T07:10:27.614860+00:00",
+    "claimed_by": "codex-failover-slot-2-ad3706bf5f364c778214fbcb6c27df89",
+    "claimed_at": "2026-07-22T08:09:21.324786+00:00",
+    "claim_session_id": "835df11ded5e"
   },
   {
     "id": "assign_0e77fe90",
@@ -54424,7 +54439,7 @@
     "description": "Telegram msg 1312 驗證先前結案過度宣稱：assign_b802db4f 只修好 self-owned split-pair 被 pre-commit rollback；2026-07-22 13:16 fire 雖成功 commit 本班 2 檔，仍把 29 個其他 session 正在修改的檔案用同一個 WARN 通知老闆。需按五步 gate 重構 producer-scoped ownership／共享 main checkout 隔離：active-owned foreign paths 不得算風險或發 WARN；只有 stale/unowned 路徑才建 incident；同時修告警標題與 actionability。用 13:16 receipt 重現，補多 session regression，實跑下一個 fire 並回讀 alert/receipt，完成前狀態只能標 contained。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-22T07:08:56.656070+00:00",
     "payload": {
@@ -54433,6 +54448,52 @@
       "required_closure": "root_cause_fixed_and_verified"
     },
     "parent_task_id": "telegram-1312",
-    "created_by": "telegram-responder-65154"
+    "created_by": "telegram-responder-65154",
+    "status_history": [
+      {
+        "ts": "2026-07-22T08:01:34.915563+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-77558db398af482cb1e8a7f38bfa7980"
+      },
+      {
+        "ts": "2026-07-22T08:01:35.152623+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-77558db398af482cb1e8a7f38bfa7980"
+      },
+      {
+        "ts": "2026-07-22T08:13:52.671472+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-77558db398af482cb1e8a7f38bfa7980"
+      }
+    ],
+    "started_at": "2026-07-22T08:01:35.152608+00:00",
+    "completed_at": "2026-07-22T08:13:52.671458+00:00",
+    "result": "Root cause fixed: PHASE-Z partitions skipped paths by declared producer ownership. Live-attributed paths stay visible in receipts but are excluded from orphan-half probes, streaks, quarantine, incidents, and routine WARNs; only stale/unowned/contested residue reaches the single actionable incident alert. Exact 2026-07-22 13:16 29-path receipt reproduced with three concurrent sessions and zero false alerts/risk; isolated-cohort path covered. Verification: 217 related tests passed, py_compile and git diff --check passed (ruff unavailable). Knowledge 9b1dd6d8 and work_log recorded."
+  },
+  {
+    "id": "assign_74dd08c0",
+    "title": "解決長期無主的產物 `job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543`（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543` — no_existing_declared_files (namespace=compute_queue, first_seen=2026-07-22T03:01:46.278073+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-22T08:01:11.474663+00:00",
+    "payload": {
+      "held_paths": [
+        "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543"
+      ],
+      "held_reasons": {
+        "job:compute-k1708-full-sample-rerun-a-own-restriction-1784685543": "no_existing_declared_files"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
+    "created_by": "reap_orphan_deliverables"
   }
 ]

@@ -2626,6 +2626,52 @@ def _observe_ownership_shadow(repo_root: Path, *, dirty_now: set[str], baseline:
         LOG.debug("phase_z: ownership shadow skipped (%s)", exc)
 
 
+def _partition_foreign_ownership(repo_root: Path, paths: list[str]) -> dict:
+    """Separate somebody's live, declared work from residue that needs an exit.
+
+    A fire-start baseline proves only that a path is not this fire's output.  It
+    does *not* prove that the path is abandoned or risky.  The 2026-07-22 13:16
+    receipt demonstrated the distinction: 29 paths owned by concurrent sessions
+    were correctly skipped, then incorrectly presented to the owner as one WARN.
+
+    Declared live ownership is write-time evidence, not another cleanup-layer
+    recognizer.  Those paths remain visible in the PHASE-Z receipt, but they do
+    not enter the foreign streak, orphan-half probe, quarantine, incident, or
+    owner notification lanes.  Only unowned, stale, or contested residue does.
+
+    Fail closed: an unreadable/missing ledger leaves every path in ``unowned``.
+    That preserves the existing no-commit safety boundary and merely delays any
+    notification until the persistent-incident threshold is reached.
+    """
+    ordered = sorted(set(paths))
+    empty = {
+        "active": {}, "stale": {}, "contested": {}, "unowned": ordered,
+        "risk": ordered,
+    }
+    if not ordered:
+        return empty
+    try:
+        from volpred.ops import fire_manifest
+
+        ownership = fire_manifest.resolve_ownership(repo_root, ordered)
+    except Exception as exc:  # noqa: BLE001 — attribution failure must not claim bytes
+        LOG.warning("phase_z: declared foreign ownership unavailable (%s)", exc)
+        return empty
+
+    active = dict(ownership.get("foreign") or {})
+    stale = dict(ownership.get("stale") or {})
+    contested = dict(ownership.get("contested") or {})
+    unowned = sorted(ownership.get("orphan") or [])
+    risk = sorted(set(unowned) | set(stale) | set(contested))
+    return {
+        "active": {p: active[p] for p in sorted(active)},
+        "stale": {p: stale[p] for p in sorted(stale)},
+        "contested": {p: contested[p] for p in sorted(contested)},
+        "unowned": unowned,
+        "risk": risk,
+    }
+
+
 def run_phase_z(
     *,
     repo_root: Path,
@@ -2784,30 +2830,10 @@ def run_phase_z(
         isolation_residue = [p for p in owned if not _is_machine_state(p)]
         owned = [p for p in owned if _is_machine_state(p)]
         if isolation_residue:
-            LOG.warning(
-                "phase_z: isolated cohort — declining to claim %d non-machine "
-                "path(s) by timing: %s", len(isolation_residue), isolation_residue[:10],
-            )
-            alert_fn(
-                level="warn",
-                title="PHASE-Z 隔離班次出現 canonical checkout 殘留 — 不代收",
-                body="\n".join([
-                    f"（fire 時間: {hhmm}；{len(isolation_residue)} 個檔案）",
-                    "",
-                    "## 發生什麼",
-                    "這班 fire 全程有自己的 producer-scoped workspace（WS-B），repo 產出",
-                    "應該走 worktree merge gate 落地。但 canonical checkout 在本班期間",
-                    "出現了新的非機器狀態 dirty 檔 —— 可能是別的 session 正在編輯，",
-                    "也可能是 agent 違規直寫。時間差推理無法分辨作者，PHASE-Z 不再代收。",
-                    "",
-                    "## 現在該做什麼",
-                    "檔案留在工作區、沒有遺失。若是你的 session 在編輯，照常 commit；",
-                    "若連續多班無人認領，foreign-streak 機制會開 incident。",
-                    "",
-                    "## 檔案",
-                    *[f"- {p}" for p in isolation_residue[:30]],
-                    *(["- …"] if len(isolation_residue) > 30 else []),
-                ]),
+            LOG.info(
+                "phase_z: isolated cohort — leaving %d canonical non-machine "
+                "path(s) for declared-ownership classification: %s",
+                len(isolation_residue), isolation_residue[:10],
             )
     # The snapshot is consumed only on a SETTLED outcome (committed / clean /
     # nothing_owned / nothing_to_commit — the scheduler's terminal set). A failed
@@ -2820,7 +2846,19 @@ def run_phase_z(
     # an owner (this module); only the rest is "another session is still typing it".
     churn, churn_deferred, churn_corrupt = _classify_machine_churn(
         repo_root, [p for p in dirty_before if _is_machine_state(p)])
-    foreign = [p for p in dirty_before if not _is_machine_state(p)]
+    foreign = sorted(
+        set(p for p in dirty_before if not _is_machine_state(p))
+        | set(isolation_residue)
+    )
+    foreign_ownership = _partition_foreign_ownership(repo_root, foreign)
+    active_foreign = foreign_ownership["active"]
+    risk_foreign = foreign_ownership["risk"]
+    if active_foreign:
+        LOG.info(
+            "phase_z: %d skipped path(s) have live declared owner(s); "
+            "excluded from risk/notification lanes: %s",
+            len(active_foreign), list(active_foreign.items())[:10],
+        )
 
     if churn_corrupt:
         alert_fn(
@@ -2854,7 +2892,7 @@ def run_phase_z(
         {"adopted": [], "reason": "recovery_mode", "considered": [], "evidence": {}}
         if recovery_mode
         else _adopt_orphan_halves(
-            repo_root, foreign, runner=runner, test_runner=test_runner or subprocess.run,
+            repo_root, risk_foreign, runner=runner, test_runner=test_runner or subprocess.run,
         )
     )
     adopted_halves = list(orphan_halves["adopted"])
@@ -2867,12 +2905,17 @@ def run_phase_z(
                 rel, ", ".join(orphan_halves["evidence"][rel]["turned_green"]),
             )
         foreign = [p for p in foreign if p not in set(adopted_halves)]
+        risk_foreign = [p for p in risk_foreign if p not in set(adopted_halves)]
+        foreign_ownership["risk"] = list(risk_foreign)
+        foreign_ownership["unowned"] = [
+            p for p in foreign_ownership["unowned"] if p not in set(adopted_halves)
+        ]
     elif orphan_halves["reason"] not in {"no_candidates", "no_proof"}:
         LOG.info("phase_z: orphan-half probe adopted nothing (%s)", orphan_halves["reason"])
 
     # A recovery pass runs immediately before the real pre-fire snapshot. It
     # must not count the same unrelated dirty paths as another hourly shift.
-    streaks = {} if recovery_mode else _bump_foreign_streaks(repo_root, runner, foreign)
+    streaks = {} if recovery_mode else _bump_foreign_streaks(repo_root, runner, risk_foreign)
     stuck = sorted((p for p, n in streaks.items() if n >= _FOREIGN_STREAK_CRITICAL),
                    key=lambda p: (-streaks[p], p))
     worst_streak = max(streaks.values(), default=0)
@@ -2913,14 +2956,16 @@ def run_phase_z(
             level="critical",
             # streak 每班 +1、count 會浮動 — 進 title 就等於每班一個新 dedup key，
             # 同一批卡住檔案會變成連環 critical。細節全放 body。
-            title="PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積",
+            title="PHASE-Z 無主或過期檔案達處置門檻",
             body="\n".join([
                 f"（fire 時間: {hhmm}；{len(stuck)} 個檔案，最長已連續 {worst_streak} 班）",
                 "",
                 "## 發生什麼",
-                f"這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 {worst_streak} 班都還在工作區。"
-                "單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— "
-                "它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。",
+                f"這些未提交檔案沒有 live producer declaration，且已連續 {worst_streak} 班仍在工作區。"
+                f"其中 unowned={len(foreign_ownership['unowned'])}、"
+                f"stale={len(foreign_ownership['stale'])}、"
+                f"contested={len(foreign_ownership['contested'])}；"
+                "仍有 live owner 的路徑已在分類前排除，不在這張 incident 裡。",
                 "",
                 *([
                     "",
@@ -3036,7 +3081,7 @@ def run_phase_z(
         _consume_pre_fire_snapshot(repo_root, runner)
         return {"committed": False, "reason": "gate_deferred_only", "foreign": foreign,
                 "orphan_halves": orphan_halves, "quarantine": quarantine,
-                "incident": incident, **gate_extra}
+                "incident": incident, "foreign_ownership": foreign_ownership, **gate_extra}
 
     if not owned and not churn and not adopted_halves:
         _consume_pre_fire_snapshot(repo_root, runner)  # settled: nothing of ours to commit
@@ -3045,6 +3090,7 @@ def run_phase_z(
             return {"committed": False, "reason": "nothing_owned", "foreign": [],
                     "orphan_halves": orphan_halves, "quarantine": quarantine,
                     "incident": incident,
+                    "foreign_ownership": foreign_ownership,
                     **({"isolation_residue": isolation_residue} if isolation_residue else {})}
         if stuck:
             # the critical alert above already said everything this one would, louder.
@@ -3052,30 +3098,12 @@ def run_phase_z(
                     "foreign": foreign, "stuck": stuck, "orphan_halves": orphan_halves,
                     "quarantine": quarantine,
                     "incident": incident,
+                    "foreign_ownership": foreign_ownership,
                     **({"isolation_residue": isolation_residue} if isolation_residue else {})}
-        alert_fn(
-            level="warn",
-            title="PHASE-Z 有檔案未提交，但不是這班產出的",
-            body="\n".join([
-                f"（fire 時間: {hhmm}；{len(foreign)} 個檔案）",
-                "",
-                "## 發生什麼",
-                "這班 fire 沒有留下任何自己的未提交變更，但工作區裡有別人的未提交檔案"
-                "（fire 開始前就髒了）。PHASE-Z 不碰它們。",
-                "",
-                "## 現在該做什麼",
-                "多半不用做什麼：成品（草稿 / 實驗產出）由 `reap_orphan_deliverables` 每小時自動收編入池；"
-                "其餘檔案留在工作區等作者 commit。PHASE-Z 不自動收養（那是三次事故的成因），"
-                "但**不收養不等於丟棄** —— 沒有任何流程會刪掉它們。",
-                "",
-                "## 檔案",
-                *[f"- {p}" for p in foreign[:30]],
-                *(["- …"] if len(foreign) > 30 else []),
-            ]),
-        )
         return {"committed": False, "reason": "nothing_owned", "foreign": foreign,
                 "orphan_halves": orphan_halves, "quarantine": quarantine,
                 "incident": incident,
+                "foreign_ownership": foreign_ownership,
                 **({"isolation_residue": isolation_residue} if isolation_residue else {})}
 
     LOG.info("phase_z: auto-committing %d path(s) from this fire + %d machine-churn path(s)"
@@ -3488,30 +3516,12 @@ def run_phase_z(
                     "`uv run python scripts/fire_receipt.py --task-id <id> --subject '<一句話 what | why>'`",
                 ]),
             )
-        if foreign and not recovery_mode:
-            alert_fn(
-                level="warn",
-                title="PHASE-Z 有檔案不是這班產出的，已略過",
-                body="\n".join([
-                    f"（fire 時間: {hhmm}；{len(foreign)} 個檔案）",
-                    "",
-                    "## 發生什麼",
-                    f"這班 fire 的 {len(owned)} 個檔案已自動 commit。另外 {len(foreign)} 個檔案"
-                    "在 fire 開始前就已經是未提交狀態 —— 那是別的 session 正在做的事，PHASE-Z 沒有動它們。",
-                    "",
-                    "## 現在該做什麼",
-                    "通常不需要處理（該 session 會自己 commit）。若它已經結束，請人工確認後再 commit。",
-                    "",
-                    "## 略過的檔案",
-                    *[f"- {p}" for p in foreign[:30]],
-                    *(["- …"] if len(foreign) > 30 else []),
-                ]),
-            )
         return {"committed": True, "reason": "committed", "untracked": untracked,
                 "owned": owned, "foreign": foreign, "churn": churn,
                 "commit_head": out[-500:], "tests": tests, "index_refresh": refresh,
                 "orphan_halves": orphan_halves, "quarantine": quarantine,
                 "incident": incident,
+                "foreign_ownership": foreign_ownership,
                 **({"isolation_residue": isolation_residue} if isolation_residue else {}),
                 **gate_extra}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything

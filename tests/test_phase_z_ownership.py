@@ -20,6 +20,7 @@ from pathlib import Path
 import pytest
 
 from scripts.dispatch_supervisor import phase_z
+from volpred.ops import fire_manifest
 
 def _snapshot(root: Path) -> Path:
     """Where PHASE-Z parks its fire-start baseline: inside the git dir, so no
@@ -152,7 +153,7 @@ def test_nothing_owned_commits_nothing_and_alerts(repo: Path) -> None:
     assert outcome["reason"] == "nothing_owned"
     assert outcome["committed"] is False
     assert _git(repo, "rev-parse", "HEAD").stdout == before, "no commit may be created"
-    assert alerts and alerts[0][0] == "warn"
+    assert alerts == [], "a skipped path is not actionable until it becomes stale/unowned residue"
 
 
 def test_foreign_path_stuck_across_fires_escalates_to_critical(repo: Path) -> None:
@@ -161,18 +162,110 @@ def test_foreign_path_stuck_across_fires_escalates_to_critical(repo: Path) -> No
     noise (owner directive, 2026-07-11)."""
     _write(repo, "theirs.txt", "abandoned by a dead session\n")
 
-    levels: list[str] = []
+    levels: list[str | None] = []
     for _ in range(phase_z._FOREIGN_STREAK_CRITICAL):
         alerts: list = []
         phase_z.run_pre_fire_guard(repo_root=repo)
         outcome = _fire(repo, alerts=alerts)
         assert outcome["committed"] is False
-        levels.append(alerts[0][0])
+        levels.append(alerts[0][0] if alerts else None)
 
-    assert levels[:-1] == ["warn"] * (phase_z._FOREIGN_STREAK_CRITICAL - 1)
+    assert levels[:-1] == [None] * (phase_z._FOREIGN_STREAK_CRITICAL - 1)
     assert levels[-1] == "critical", "persistence across fires must escalate"
     assert outcome["stuck"] == ["theirs.txt"]
     assert "theirs.txt" in _dirty(repo), "escalating must not mean auto-adopting"
+
+
+def test_1316_receipt_active_sessions_are_skipped_without_warn_or_risk(repo: Path) -> None:
+    """Exact regression shape from Telegram msg 1312: one fire landed its output
+    while 29 paths belonging to concurrent sessions were already dirty.  Skipping
+    those bytes was correct; presenting normal concurrent work as an owner WARN
+    was not.  Live write-time declarations make the distinction mechanical."""
+    receipt_paths = [
+        "AGENTS.md", "docs/error_log.md",
+        "docs/refactor_commit_ownership_state_machine.md",
+        "scripts/check_experiment_artifacts.py", "scripts/dedupe_next_tasks.py",
+        "scripts/dispatch_slot_budget.py", "scripts/dispatch_supervisor/phase_z.py",
+        "scripts/fb_realchrome_post.py", "scripts/hooks/gate_edit_guard.py",
+        "scripts/preserve_gate_blob.py", "scripts/reap_orphan_deliverables.py",
+        "scripts/tests/test_fire_manifest.py",
+        "scripts/tests/test_gate_blob_preservation.py",
+        "scripts/tests/test_orphan_namespace_registry.py",
+        "scripts/tests/test_phase_z_foreign_incident.py",
+        "scripts/tests/test_reproduce_spec_runtime_emitter.py",
+        "scripts/worktree_gc.py", "src/volpred/ops/content.py",
+        "src/volpred/ops/fire_manifest.py", "src/volpred/ops/foreign_incident.py",
+        "src/volpred/ops/next_tasks.py", "src/volpred/ops/task_signature.py",
+        "src/volpred/publisher/publisher.py", "src/volpred/research/init.py",
+        "src/volpred/research/reproduce_spec.py",
+        "storage/reports/mile_e4002f4f.json", "tests/test_task_signature.py",
+        "tests/test_topic_cluster_gate.py", "tests/test_worktree_gc.py",
+    ]
+    assert len(receipt_paths) == 29
+    for slot, paths in enumerate((receipt_paths[:10], receipt_paths[10:20], receipt_paths[20:]), 1):
+        fire_id = f"concurrent-slot-{slot}"
+        fire_manifest.open_manifest(repo, fire_id=fire_id, actor=f"slot-{slot}")
+        for rel in paths:
+            _write(repo, rel, f"active output from {fire_id}\n")
+            fire_manifest.record(repo, fire_id, rel)
+
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    _write(repo, "experiments/k1/result.json", "{}\n")
+    alerts: list = []
+    outcome = _fire(
+        repo, alerts=alerts,
+        commit_receipt_override={"task_id": "receipt-1316", "subject": "repro", "body": ""},
+    )
+
+    assert outcome["committed"] is True
+    assert set(outcome["foreign_ownership"]["active"]) == set(receipt_paths)
+    assert outcome["foreign_ownership"]["risk"] == []
+    assert alerts == []
+    assert set(receipt_paths) <= _dirty(repo), "concurrent sessions keep every byte"
+
+
+def test_live_declared_owner_never_accumulates_foreign_incident(repo: Path) -> None:
+    rel = "scripts/live_session.py"
+    fire_manifest.open_manifest(repo, fire_id="live-session", actor="interactive-2")
+    _write(repo, rel, "still being edited\n")
+    fire_manifest.record(repo, "live-session", rel)
+
+    alerts: list = []
+    for _ in range(phase_z._FOREIGN_STREAK_CRITICAL + 2):
+        phase_z.run_pre_fire_guard(repo_root=repo)
+        outcome = _fire(repo, alerts=alerts)
+
+    assert outcome["foreign_ownership"]["active"] == {rel: "live-session"}
+    assert outcome["foreign_ownership"]["risk"] == []
+    assert alerts == []
+    streak_path = repo / ".git" / phase_z._FOREIGN_STREAK_BASENAME
+    streaks = json.loads(streak_path.read_text(encoding="utf-8")) if streak_path.exists() else {}
+    assert rel not in streaks
+
+
+def test_stale_and_unowned_paths_are_the_only_foreign_risk(repo: Path) -> None:
+    now = 1_700_000_000.0
+    stale = "scripts/stale_session.py"
+    orphan = "scripts/no_owner.py"
+    fire_manifest.open_manifest(
+        repo, fire_id="dead-session", actor="slot-dead",
+        now=now - fire_manifest.MAX_AGE_S - 1,
+    )
+    _write(repo, stale, "abandoned\n")
+    fire_manifest.record(
+        repo, "dead-session", stale,
+        now=now - fire_manifest.MAX_AGE_S - 1,
+    )
+    _write(repo, orphan, "anonymous residue\n")
+
+    # Exercise the partition directly so the clock is deterministic.
+    ownership = fire_manifest.resolve_ownership(repo, {stale, orphan}, now=now)
+    assert ownership["stale"] == {stale: "dead-session"}
+    assert ownership["orphan"] == [orphan]
+    partition = phase_z._partition_foreign_ownership(repo, [stale, orphan])
+    # Production time is later than the synthetic timestamp, so both remain risk.
+    assert set(partition["risk"]) == {stale, orphan}
+    assert partition["active"] == {}
 
 
 def test_foreign_streak_resets_once_the_path_is_cleaned_up(repo: Path) -> None:
@@ -190,7 +283,9 @@ def test_foreign_streak_resets_once_the_path_is_cleaned_up(repo: Path) -> None:
     alerts: list = []
     phase_z.run_pre_fire_guard(repo_root=repo)
     _fire(repo, alerts=alerts)
-    assert alerts[0][0] == "warn", "the streak must start over, not resume at 3"
+    assert alerts == [], "the restarted streak must not jump straight to an incident"
+    streak_path = repo / ".git" / phase_z._FOREIGN_STREAK_BASENAME
+    assert json.loads(streak_path.read_text(encoding="utf-8"))["theirs.txt"] == 1
 
 
 # ── the fire's own work still lands ──────────────────────────────────────────
@@ -480,9 +575,8 @@ def test_candidate_gate_blocks_test_without_its_foreign_script(repo: Path) -> No
     outcome = _fire(repo)
 
     assert outcome["committed"] is False
-    assert outcome["reason"] == "commit_nonzero"
-    assert outcome["rolled_back"] is True
-    assert "reproduce_check" in outcome["commit_tail"]
+    assert outcome["reason"] == "nothing_to_commit"
+    assert "rolled_back" not in outcome
     assert _git(repo, "rev-parse", "HEAD").stdout.strip() == before_head
     assert _git(repo, "write-tree").stdout.strip() == before_index
     assert (repo / "scripts/reproduce_check.py").exists()
@@ -513,8 +607,8 @@ def test_foreign_worktree_hook_cannot_weaken_pinned_base_gate(repo: Path) -> Non
     outcome = _fire(repo)
 
     assert outcome["committed"] is False
-    assert outcome["reason"] == "commit_nonzero"
-    assert "reproduce_check" in outcome["commit_tail"]
+    assert outcome["reason"] == "nothing_to_commit"
+    assert "rolled_back" not in outcome
 
 
 def test_lazypack_outputs_are_not_broad_machine_churn() -> None:
