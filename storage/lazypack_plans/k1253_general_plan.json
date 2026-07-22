@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "title": "波動率模型擋得住黑天鵝嗎？一場關稅風暴的實測",
+  "subtitle": "波動率模型的極限與強項，用一場真實股災說清楚",
+  "evidence": {
+    "d": {
+      "path": "experiments/k1253/k1253_lazypack_derived.json",
+      "sha256": "a1f3ce9e304a99e7781989dd5628051e510a69a3e4ed2e5b0ff7df63f6b6cd24",
+      "label": "K1253 衍生指標（SPY GARCH(1,1) rolling 預測 vs 實際，2025 關稅風暴視窗，忠實由 k1253_results.json 開根號換算）"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "先分清楚：預測「會不會跌」和預測「會震多大」是兩回事",
+      "alt": "說明波動率模型只預測波動幅度、不預測漲跌方向，這是兩種不同的問題",
+      "sources": ["d"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩個常被混為一談的問題",
+          "body": [
+            "波動率模型不猜方向，只猜幅度。它不告訴你明天漲還是跌，只告訴你明天可能晃多大。",
+            "所以「模型沒躲過大跌」和「模型沒說會跌」是兩種不同的失敗，多數人把它們混在一起。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "這次實測涵蓋的交易日",
+          "value": {
+            "source": "d",
+            "path": "n_oos_days",
+            "format": { "kind": "integer", "suffix": " 天" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "模型怎麼運作，又怎麼保證沒偷看未來",
+      "alt": "說明 GARCH 把最近的波動外推到明天，且每天的預測只用當天以前的資料",
+      "sources": ["d"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "它其實只做一件事",
+          "body": [
+            "這個模型把「最近有多亂」外推到明天：昨天晃得大，今天的警戒線就抬高；市場一平靜，警戒線就慢慢降回來。",
+            "為了不作弊，每一天的預測只准用當天以前的資料算，絕不讓模型偷看它要預測的那一天。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "整段測試裡最平靜那天，模型預警的單日波動",
+          "value": {
+            "source": "d",
+            "path": "calm_predicted_daily_vol",
+            "format": { "kind": "percent", "digits": 2 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "去年春天那場關稅風暴，模型的真實表現",
+      "alt": "四個數字對照第一擊那天與幾天後，模型預警的單日波動與市場實際的單日波動",
+      "sources": ["d"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "股災第一擊那天，模型預警的單日波動",
+          "value": {
+            "source": "d",
+            "path": "shock_onset_predicted_daily_vol",
+            "format": { "kind": "percent", "digits": 2 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "同一天，市場實際的單日波動",
+          "value": {
+            "source": "d",
+            "path": "shock_onset_realized_daily_vol",
+            "format": { "kind": "percent", "digits": 2 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "幾天後，模型預警的單日波動",
+          "value": {
+            "source": "d",
+            "path": "adapt_predicted_daily_vol",
+            "format": { "kind": "percent", "digits": 2 }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "同一天，市場實際的單日波動",
+          "value": {
+            "source": "d",
+            "path": "adapt_realized_daily_vol",
+            "format": { "kind": "percent", "digits": 2 }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀這四個數字",
+          "body": [
+            "第一擊那天，模型的警戒線還停在平時高度，遠低於市場實際的跌幅，等於被打個措手不及。",
+            "市場連續劇烈甩動之後，模型把警戒線一路調高；到後面那天，它的預期已經和實際幾乎貼合。",
+            "擋不掉第一下，但只要亂流延續，它一兩天內就把警戒線校準到對的高度。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "所以，該怎麼看待波動率預測",
+      "alt": "帶走三句話，說明波動率模型擋不掉突發第一擊、但適應快，尾端風險要靠部位大小管理",
+      "sources": ["d"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "那段期間市場最大的單日震盪，遠超模型的事前預警",
+          "value": {
+            "source": "d",
+            "path": "peak_move_realized_daily_vol",
+            "format": { "kind": "percent", "digits": 2 }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "帶走三句話",
+          "body": [
+            "別指望這類模型幫你躲開突發災難的第一擊，它的本事是災難發生後快速把風險看清楚。",
+            "它量的是「最近的亂」會不會延續，不是「下一顆黑天鵝」什麼時候飛來。",
+            "真要壓低這種尾端風險，得從部位大小和資產配置下手，不是換一個更靈的波動率模型。"
+          ]
+        }
+      ]
+    }
+  ]
+}
