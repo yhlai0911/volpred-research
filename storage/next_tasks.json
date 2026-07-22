@@ -37508,7 +37508,7 @@
     "description": "K1731 arm B 拆段 2／2（parent timeout job: agent-brief_k1731_armB-f3e688）。\n\n**前置**：拆段 1 = compute job `k1731-armB-split-verification`，產出\n`.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_armB_verification.json`。\n**開工前先讀那份 artifact**；不存在或 `verdict != ready_to_merge` → 不要合併，改依 blocking_issues\n開 bounded 修正 job（timeout<3600，禁整份重跑），並把本任務再 block 一輪。\n\n**verdict=ready_to_merge 才做這四件事**：\n1. `merge_worktree.sh` 正式合併 `dispatch-slot-1-bd00f90a-k1731`（禁裸 git merge / 禁 force-remove）。\n2. 主線程寫 knowledge.json —— **只引 verification artifact 指定的 canonical_artifact 那一份 results\n   JSON**。工作區同時有 `_results.json` 與 `_results_corrected.json`，引錯就是把已知有錯的數字寫進\n   長期記憶。\n3. arm A(K1730) + arm B(K1731) 結果都齊了 → 依老闆 msg 946/947 判斷寫文章還是論文。\n4. 回報老闆（`scripts/progress_report.py`，--actor 傳 $VOLPRED_TASK_CLAIM_OWNER）。\n\n**產出**：merge receipt + knowledge id + 一句話的文章/論文判斷。\n**成功判準**：worktree 已合併且無殘留 branch；knowledge entry 的數字出處可回溯到 canonical artifact。\n\nblocked_until=2026-07-18T20:15:06+08:00（給拆段 1 的 3600s 跑完 + reaper 收件的時間）。 [2026-07-19 10:xx] Codex rev6 判 FAIL（4 條 blocking issue 已核對屬實），rev7 remediation 委派給 agent job agent-brief_k1731_armB_rev7-7ece0f，之後仍需 Codex round 7；blocked_until 由 07-19T18:00 延到 07-20T12:00，避免在驗收未過時被 unblock sweep 放行成合併任務。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "source": "system",
     "created_at": "2026-07-18T10:15:06.957501+00:00",
     "payload": {
@@ -37607,7 +37607,11 @@
     "claim_session_id": "e9cd53712eba",
     "result": "拆段 2a 完成（hourly-slot-2-f59ba8cd）：讀 k1731_armB_esfix.json → verdict=ready_for_codex_review、blocking_issues=[]、regression PASS(3834 leaves / 0 out-of-allowlist)、README traceability 50/50。依 scripts/codex_review_job.sh 規範（整份 experiment 一審 10-40min，禁 in-fire spawn）已 enqueue Codex 一審 job compute-codex-review-k1731-arm-b-rev5-es-estimator-fix-1784409008，prompt=storage/ops/codex_reviews/k1731_armB_rev5_prompt.md，verdict 出口=storage/ops/codex_reviews/k1731_armB_rev5_verdict.md。受審 bytes 已凍結於 storage/ops/codex_reviews/k1731_armB_rev5_freeze.sha256（20 檔 sha256）—— 合併前須比對一致。拆段 2b（verdict-template → merge_worktree.sh → knowledge.json 只引 rev5 → 文章/論文判斷 → progress_report）由該 job 的 compute-queue followup 接手。",
     "gate_verification_receipt": "storage/ops/codex_reviews/k1731_armB_rev8_independent_gate_verification.md",
-    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。"
+    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。",
+    "blocked_until": "2026-08-05T00:00:00+08:00",
+    "blocked_reason": "awaiting_codex_review",
+    "blocked_at": "2026-07-22T10:18:15+00:00",
+    "blocked_note": "Codex round 8 FAIL: canonical finalizer still emits unsupported OOS-null prose; blocked until assign_k1731_rev9 reaches PASS."
   },
   {
     "id": "telegram-985",
@@ -45529,7 +45533,7 @@
     "description": "Codex round 7 verdict FAIL。只修三個 claim-layer blocker，不重跑估計：(1) k1731_gevreg_midas_ssvs_returns.py 的 DM interpretation 必須依 nested/non-nested 分流，GEV-HAR 兩列只能標 diagnostic-only、無 coverage/bound；(2) 從 canonical source/finalizer 重生三份 results JSON，禁止手改，numeric leaves 必須零漂移；(3) README opening 與 Honest conclusions 不得再用 in-sample PIP 支撐 OOS does-not-improve null，應降為 weak in-sample selection + uncorrected directional OOS diagnostic。修後跑 108-test nested-DM ratchet、69-check verification、3834-leaf regression，重建 freeze 並送 Codex round 8。完整裁決見 storage/ops/codex_reviews/k1731_armB_rev7_verdict.md。禁止合併 worktree、禁止寫 knowledge；assign_67f56b79 維持 blocked，round 8 PASS 才解除。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "in_progress",
+    "status": "failed",
     "source": "agent",
     "created_at": "2026-07-20T06:55:20.543246+00:00",
     "parent_task_id": "k1731_armB_rev7_codex_round7",
@@ -45583,17 +45587,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-2-9e02458ba42b49668cb008bff360750d"
+      },
+      {
+        "ts": "2026-07-22T10:18:15.646132+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "codex-failover-slot-2-9e02458ba42b49668cb008bff360750d"
       }
     ],
     "started_at": "2026-07-22T10:09:42.413110+00:00",
     "last_released_at": "2026-07-20T16:18:56.732688+00:00",
     "last_release_reason": "supervisor_kill_a0db212c",
-    "completed_at": "2026-07-21T02:11:14.591341+00:00",
-    "result": "rev8 claim-layer remediation 已在 worktree dispatch-slot-1-bd00f90a-k1731 完成（branch wt/dispatch-slot-1-bd00f90a-k1731, HEAD bb57bda98, 8 commits）。三個 blocker 皆已處理：(1) k1731_gevreg_midas_ssvs_returns.py DM interpretation 依 nested/non-nested 分流，GEV-HAR 兩列標 diagnostic-only；(2) 三份 results JSON 由 canonical finalizer 重生、numeric_leaf_drift=0、非手改；(3) README opening/Honest conclusions 降級為 weak in-sample selection + uncorrected directional OOS diagnostic。主線程本班獨立重跑驗證：k1731_armB_verification.py exit=0 / problems=0 / README claim scan 0 violations；tests/test_audit_nested_dm_misuse.py 全數 PASS。**唯一未完成項 = Codex round 8 審查，被外部 quota 擋住**（CLI 回 'You've hit your usage limit'，額度 2026-07-25 13:30 才恢復），非程式或 gate 失敗。故標 blocked 而非 succeeded；blocked_until 到期後由 unblock sweeper 自動回 pending，屆時只需送 round 8。worktree 依原指示未合併。",
-    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。",
-    "claimed_by": "codex-failover-slot-2-9e02458ba42b49668cb008bff360750d",
-    "claimed_at": "2026-07-22T10:09:42.172503+00:00",
-    "claim_session_id": "2a1b77930019"
+    "completed_at": "2026-07-22T10:18:15.646116+00:00",
+    "result": "rev8 claim-layer remediation 已在 worktree dispatch-slot-1-bd00f90a-k1731 完成（branch wt/dispatch-slot-1-bd00f90a-k1731, HEAD bb57bda98, 8 commits）。三個 blocker 皆已處理：(1) k1731_gevreg_midas_ssvs_returns.py DM interpretation 依 nested/non-nested 分流，GEV-HAR 兩列標 diagnostic-only；(2) 三份 results JSON 由 canonical finalizer 重生、numeric_leaf_drift=0、非手改；(3) README opening/Honest conclusions 降級為 weak in-sample selection + uncorrected directional OOS diagnostic。主線程本班獨立重跑驗證：k1731_armB_verification.py exit=0 / problems=0 / README claim scan 0 violations；tests/test_audit_nested_dm_misuse.py 全數 PASS。**唯一未完成項 = Codex round 8 審查，被外部 quota 擋住**（CLI 回 'You've hit your usage limit'，額度 2026-07-25 13:30 才恢復），非程式或 gate 失敗。故標 blocked 而非 succeeded；blocked_until 到期後由 unblock sweeper 自動回 pending，屆時只需送 round 8。worktree 依原指示未合併。\n\nCodex round 8 completed against frozen bb57bda98: FAIL. Nested/non-nested branching and zero numeric drift passed, but canonical finalizer still emits unsupported OOS-null prose in armA_engine_issues across all 3 result artifacts; 107-check gate misses that surface. Verdict saved to storage/ops/codex_reviews/k1731_armB_rev8_verdict.md. Created bounded follow-up assign_k1731_rev9 and blocked both merge tasks pending PASS.",
+    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。"
   },
   {
     "id": "assign_f71399a3",
@@ -50720,7 +50727,7 @@
     "title": "K1730/K1731 worktree 合併 — 等 Codex round 8 裁決（experiment certification gate）",
     "priority": 2,
     "task_type": "experiment",
-    "status": "pending",
+    "status": "blocked",
     "source": "hourly_dispatch_phase_a",
     "tags": [
       "experiment",
@@ -50729,7 +50736,11 @@
     ],
     "created_at": "2026-07-21T16:15:00Z",
     "description": "worktree `.claude/worktrees/dispatch-slot-1-bd00f90a-k1731`（branch wt/dispatch-slot-1-bd00f90a-k1731）有 21 個 commits、working tree 乾淨，但 merge_worktree.sh 被 experiment certification gate 正當擋下：experiments/k1730 與 experiments/k1731 都沒有 review_verdict.json。\n\n為什麼不繞過：K1709 正是「Codex 判 FAIL 仍 merge」害 CI 連紅 4 次，這個 gate 就是那次的產物。F3 這一輪是 claim-layer 修正 + 機器驗證的零數值漂移證明（k1731_rev8_drift_check / k1731_regression_check / k1731_armB_verification / experiment_gates k1730+k1731 全 PASS），但那是證據不是 review。repo 規則：fallback reviewer 不能替代 primary path。\n\n解封後要做：\n1. 用 scripts/codex_exec_bounded.sh 跑 K1731 Codex round 8（含 K1730 arm A 的 production run 與 nested-DM 撤回）。\n2. 對**凍結後**的 bytes 寫 experiments/k1730/review_verdict.json 與 experiments/k1731/review_verdict.json，claim surface（*.py / README.md / *_results.json / reader-facing 圖）每個檔都要列 sha256。裁決檔禁手改。\n3. bash scripts/merge_worktree.sh dispatch-slot-1-bd00f90a-k1731。\n\n前序：k1731_F3_armA_production_recheck（已 succeeded，數字已由 hourly slot-1 抽驗 10 項全對，見 experiments/k1731/F3_armA_production_recheck.md）。",
-    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。"
+    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。",
+    "blocked_until": "2026-08-05T00:00:00+08:00",
+    "blocked_reason": "awaiting_codex_review",
+    "blocked_at": "2026-07-22T10:18:15+00:00",
+    "blocked_note": "Codex round 8 FAIL: no merge/certification until assign_k1731_rev9 reaches PASS."
   },
   {
     "id": "snapaudit_correct_k1319_k1592_original_vintage",
@@ -54632,5 +54643,82 @@
       ]
     },
     "created_by": "reap_orphan_deliverables"
+  },
+  {
+    "id": "telegram-1318",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-22T10:10:21.643127+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1318）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n所以就是沒解決\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-22T10:10:56.869559+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder-79907"
+      },
+      {
+        "ts": "2026-07-22T10:13:17.864911+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder-79907"
+      }
+    ],
+    "completed_at": "2026-07-22T10:13:17.864890+00:00",
+    "result": "已查證 18:06 CRITICAL 指向 Codex review quota 單點停擺：額度 reset_at=2026-07-25 13:30 Asia/Taipei，assign_42306eaa 與 k1698_rev4_round5_collect 仍 blocked。已用正式 writer 建立 P1 assign_ce4c41e2，Telegram msg 1319 已回覆老闆；未 live 驗證前只標 contained。"
+  },
+  {
+    "id": "telegram-1320",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-22T10:14:40.027719+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1320）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\nCodex額度回來了\n了\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-22T10:15:25.677260+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder-92330"
+      },
+      {
+        "ts": "2026-07-22T10:15:46.566252+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder-92330"
+      }
+    ],
+    "completed_at": "2026-07-22T10:15:46.566233+00:00",
+    "result": "已確認 Codex 額度恢復，並透過 Telegram 回覆老闆。"
+  },
+  {
+    "id": "assign_k1731_rev9",
+    "title": "K1731 arm B rev9 bounded canonical claim-surface remediation",
+    "description": "Codex round 8 對 frozen target bb57bda98 裁決 FAIL；完整裁決：storage/ops/codex_reviews/k1731_armB_rev8_verdict.md。只修一個 blocking claim-surface defect與一個非 blocking gate hole，不重跑估計。\n\n1. 修 experiments/k1731/k1731_finalize_report.py 的 ARM_A_ENGINE_ISSUES[0].why_it_matters：不得再稱 low PIP 是「evidence of no effect」，不得稱「arm B null rests ...」。改成只支持 under-this-prior 的 weak in-sample selection，且明說不建立 OOS null。\n2. 由 canonical finalizer 重生三份 results JSON；禁止手改。獨立 leaf diff 必須維持 numeric change/add/remove = 0，rename values exact。\n3. 擴 k1731_armB_verification.py：artifact claim scan 必須涵蓋 armA_engine_issues（全部三份 artifact），加 negative control 證明殘留 null phrase 會 exit 1。\n4. 補 k1731_rev8_drift_check.py：numeric additions/removals 也必須讓 gate FAIL；加 regression test/negative control。\n5. 目前 worktree HEAD 已含 bb57bda98 後的 F1/F3 commits；不得回退或覆蓋後續成果。修正要套在現行 branch 上並重新建立完整 current claim-surface freeze。\n6. 跑 108-test nested-DM ratchet、arm-B verification、3834-leaf regression/drift gates；全部 PASS 後送 Codex round 9。PASS 才能解除 assign_67f56b79 與 k1731_k1730_merge_after_codex_round8_20260725；FAIL 再建下一個 bounded remediation。\n\n禁止 merge worktree、禁止寫 knowledge.json、禁止重跑估計。",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "codex_review_followup",
+    "parent_task_id": "assign_24ebe308",
+    "created_by": "codex-failover-slot-2-9e02458ba42b49668cb008bff360750d",
+    "created_at": "2026-07-22T10:18:14.892752+00:00",
+    "tags": [
+      "experiment",
+      "codex-review",
+      "bounded-remediation",
+      "k1731"
+    ],
+    "payload": {
+      "worktree": ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+      "review_target": "bb57bda984475a4732051b8f96a09697bb9f7236",
+      "verdict_path": "storage/ops/codex_reviews/k1731_armB_rev8_verdict.md",
+      "split_stage": "rev9_canonical_claim_surface"
+    },
+    "priority_capped_from": 1
   }
 ]
