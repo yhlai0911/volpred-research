@@ -747,6 +747,36 @@ def test_pending_followup_surfaces_gate_failed_compute_job_with_source_task(
     assert "recheck arm A numbers" in brief, "the enqueuer's original followup must survive"
 
 
+def test_pending_followup_surfaces_legacy_script_job_without_kind_or_cwd() -> None:
+    """Pre-kind script receipts must not disappear because they lack a worktree."""
+    job = {
+        "id": "compute_k1602",
+        "status": "failed",
+        "script_path": "experiments/k1602/k1602.py",
+        "exit_code": 1,
+        "stdout_file": "storage/logs/compute/compute_k1602.stdout",
+        "stderr_file": "storage/logs/compute/compute_k1602.stderr",
+        "result_artifact": "experiments/k1602/k1602_results.json",
+        "followup_dispatched": False,
+        "claude_followup": {
+            "brief": "Interpret K1602 after validating the result artifact.",
+            "task_type": "experiment",
+            "priority": 3,
+        },
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None
+    assert view["followup_mode"] == "triage_failed"
+    assert view["claude_followup"]["task_type"] == "platform_ops"
+    brief = view["claude_followup"]["brief"]
+    assert job["stdout_file"] in brief
+    assert job["stderr_file"] in brief
+    assert job["result_artifact"] in brief
+    assert "Interpret K1602" in brief
+
+
 def test_pending_followup_detects_agent_inner_timeout_from_runner_metadata(
     tmp_path: Path,
     monkeypatch,

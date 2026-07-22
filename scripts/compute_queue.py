@@ -42,7 +42,7 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
 Usage:
     enqueue:   uv run python scripts/compute_queue.py enqueue --script X --title Y ...
     list:      uv run python scripts/compute_queue.py list
-    list --pending-followup: completed collection + failed-agent triage
+    list --pending-followup: completed collection + failed-job triage
     list --completed-pending-followup: legacy completed-only view
     run-next:  uv run python scripts/compute_queue.py run-next
     run-loop:  uv run python scripts/compute_queue.py run-loop  (drain until empty)

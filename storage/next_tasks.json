@@ -49626,12 +49626,35 @@
     "description": "**發現於** 2026-07-21 hourly fire slot-1（PHASE A 例行檢查時發現）。\n\n## 症狀\n\n`scripts/compute_queue.py list --pending-followup --json` 回傳 `[]`，\n但佇列裡有 **26 個 `status=failed` 且 `followup_dispatched=false`** 的 job。\n這些 job 全都設了 `claude_followup`（`has_followup: true`）—— 也就是說 enqueue 的人\n明確要求了失敗時的 triage，但那個 triage **從來沒有被派出去過**。\n\n## 根因（已定位到行）\n\n`scripts/compute_queue.py` `_pending_followup_view()` line 1156-1161：\n\n```python\nif job.get(\"status\") != \"failed\":\n    return None\ntimed_out = _job_timed_out(job)\nworkdir = _agent_workdir(job)\nif not workdir and not timed_out:\n    return None          # <-- 這裡把所有 script job 的失敗吞掉\n```\n\n而 `_agent_workdir()`（line 1043-1055）**只認 agent job**：\n\n```python\nif job.get(\"kind\") == \"agent\" and job.get(\"cwd\"):\n    raw = str(job[\"cwd\"])\nelif job.get(\"script_path\") == \"scripts/run_agent_job.py\":\n    raw = _arg_value(job.get(\"args\") or [], \"--cwd\")\nif not raw:\n    return None\n```\n\n→ 用 `enqueue`（script job，`kind=null`）派出去的 job，若以 `exit_code=1` 之類的\n**非 timeout 方式失敗**，`workdir=None` 且 `timed_out=False` → 直接 `return None`\n→ 永遠不進 `--pending-followup` → PHASE A 永遠看不到。\n\n實證兩例（`kind: null`、`cwd: null`、`exit_code: 1`、`claude_followup` 存在）：\n- `compute_k1602`（timeout_seconds=1800, exit_code=1）\n- `k1379-har-benchmark`（timeout_seconds=2400, exit_code=1）\n\n## 這不是刻意抑制\n\nline 1999-2002 確實有一段「explicitly keeps it out of `list --pending-followup`」的註解，\n但那是 **`cancel` 指令**的（cancelled job 沒有結果所以不必 triage），與本缺陷無關。\n`_pending_followup_view` 的 failed 分支是 agent-centric 寫成的，script job 是被漏掉不是被排除。\n\n## 為什麼要緊\n\n`--followup-brief` 在 `enqueue` 上的**唯一用途**就是讓失敗/完成有人接。completed 路徑正常，\nfailed 路徑靜默掉 → 這正是 ops 規則一直在防的「做一半」類缺陷，而且是**系統性**的：\n每一個失敗的 heavy compute 都沒有人去看它為什麼失敗。26 筆最舊可回溯到 2026-05-27\n（`k562-lag-fix-rerun-20260527`）。\n\n## 要做的\n\n1. 修 `_pending_followup_view`：failed 的 **script job**（有 `claude_followup`）也要產出\n   `followup_mode=triage_failed` 的 view，triage brief 要能指向 `stdout_file` / `stderr_file`\n   / `result_artifact`（script job 沒有 worktree，triage 的素材是 log 不是工作區）。\n2. **注意 blast radius**：一修好，26 筆會同時湧進 PHASE A，每筆吃掉一個 fire。要決定\n   surfacing 策略（例如依 `created_at` 排序 + 每班上限 N，或先做一次批次分流把明顯過期的\n   標掉）。這個決定要寫進 code 或 rule，不要留給 prompt 自律。\n3. 補測試（`scripts/tests/`）：至少涵蓋「failed script job with claude_followup 會出現在\n   pending-followup」與「cancelled job 不會出現」兩個 case，防再犯。\n4. 26 筆 backlog 的處置要有明確結論（逐筆 triage / 批次標記過期 / 部分重派），不要只修 code\n   就宣告完成。\n\n## 不要做\n\n不要用「把 26 筆全部 `followup_dispatched=true` 掃掉」當修法 —— 那是把證據刪掉，不是修好。\n",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T06:13:47.585372+00:00",
     "discovered_by": "hourly-slot-1-375ba0e3c91046bdbcdf0d5b32dab5a1",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-22T18:09:01.578979+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-a32f3d07a0a8483c8dff90c25db79cb4"
+      },
+      {
+        "ts": "2026-07-22T18:09:01.846508+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-a32f3d07a0a8483c8dff90c25db79cb4"
+      },
+      {
+        "ts": "2026-07-22T18:11:14.588152+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-a32f3d07a0a8483c8dff90c25db79cb4"
+      }
+    ],
+    "started_at": "2026-07-22T18:09:01.846489+00:00",
+    "completed_at": "2026-07-22T18:11:14.588136+00:00",
+    "result": "root_cause_fixed_and_verified: failed script followups now surface via triage_failed (repair bdd7c3f60); 19 historical receipts were consolidated into compute_followup_backlog_adjudication_20260721 instead of dropped, one was handled separately, and live verification shows 0 undispatched failed script jobs. Added exact legacy no-kind/no-cwd regression plus retained cancelled-job exclusion; 52 tests passed."
   },
   {
     "id": "assign_cc32a7b4",
@@ -55365,12 +55388,23 @@
     "description": "由 alert `host_cron_fail` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=critical（max_consecutive_failures=3；non_hang_failure=True）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- failing_logs:\n  - storage/logs/cron/release_settings_audit.log exit=1 at 2026-07-22T17:00:21.000014+00:00 recency=fresh_or_unscheduled\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-22T17:01:31.125250+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "host_cron_fail"
+    ],
+    "completed_at": "2026-07-22T18:01:21.023032+00:00",
+    "result": "ordinary alert cleared before dispatch",
+    "status_history": [
+      {
+        "ts": "2026-07-22T18:01:21.023032+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "alert_remediation_router",
+        "note": "condition_cleared_automatically"
+      }
     ]
   }
 ]
