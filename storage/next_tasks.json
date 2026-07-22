@@ -43469,7 +43469,7 @@
     "title": "CI flake：test_every_shipped_alert_id_is_covered_by_some_disposition 只在全套跑時紅",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "ci_red_triage",
     "created_at": "2026-07-19T22:38:19.531675+00:00",
     "description": "全套 pytest（3730 passed）中此測試失敗，單獨跑 pass → test-order-dependent。發現於 ci-red-29703582195 修復時；與該次修復（dispatcher sweep guard / supabase egress chokepoint / codex spawn killpg / audit ratchet）無關，四者皆不產生新 alert id。查法：pytest -p no:randomly 二分先前測試，找出污染 alert disposition 狀態的那支。",
@@ -43492,11 +43492,31 @@
         "to": "pending",
         "by": "hourly-slot-1-3746dee053a64935a354de2b172b23de",
         "note": "supervisor_kill_3746dee0"
+      },
+      {
+        "ts": "2026-07-22T15:02:00.778753+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-1553de923bf14de49d19745c59276250"
+      },
+      {
+        "ts": "2026-07-22T15:02:01.047288+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-1553de923bf14de49d19745c59276250"
+      },
+      {
+        "ts": "2026-07-22T15:18:13.734864+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-1553de923bf14de49d19745c59276250"
       }
     ],
-    "started_at": "2026-07-21T17:23:29.001086+00:00",
+    "started_at": "2026-07-22T15:02:01.047274+00:00",
     "last_released_at": "2026-07-21T17:25:57.023726+00:00",
-    "last_release_reason": "supervisor_kill_3746dee0"
+    "last_release_reason": "supervisor_kill_3746dee0",
+    "completed_at": "2026-07-22T15:18:13.734847+00:00",
+    "result": "root_cause=test enumerated code-defined alert IDs through live storage and paper trees, so untracked operational files and prior test state made the population gate order/checkout dependent; fix=redirected both storage_dir and paper_root to pytest tmp_path while retaining production build_alert_condition_report enumeration; verification=target 1 passed and tests/test_alert_remediation.py 20 passed with CI-parity enabled, git diff --check clean; full suite additionally ran to completion with this gate green (49 unrelated failures in existing enforcement-map/CI-watcher work)."
   },
   {
     "id": "ci-red-29705358452",
@@ -49877,11 +49897,29 @@
     "description": "撤稿（retraction）目前**沒有任何 writer 擁有它** —— 全靠手動改 storage/reports/feed.json。\n證據（2026-07-21 掃描）：\n\n- `grep -rn \"retracted_superseded_by\" --include=\"*.py\" .` → 0 hit（排除 worktrees）\n- `grep -rn \"retracted_reason\" --include=\"*.py\" .` → 0 hit\n- `grep -rn \"retracted\" scripts src` → 只有讀取端（refill_task_pool 跳過已撤稿候選、\n  series_registry 過濾、supabase_sync 註解），沒有寫入端\n\n**後果**：feed.json 1,863 篇中 `status=retracted` 有 13 篇，\n**只有 1 篇（mile_ebb5d6f5）有 `retracted_superseded_by`**，其餘 12 篇連欄位都沒有。\nsupersede 鏈整片斷掉，audit 端看不出撤稿文被誰取代。\n欄位命名也因此漂移 —— 上游任務報的是 `superseded_by`，實際欄位是 `retracted_superseded_by`，\n就是因為沒有 canonical owner 定名。\n\n**要做（順序不可調換）**：\n1. 建 retraction writer CLI（單一 owner，例如 scripts/retract_article.py）：\n   接 --id / --reason / --superseded-by / --errata-ref，寫入 canonical 欄位名，\n   走既有的 locked write 路徑，並在無 --superseded-by 時要求明示 --no-successor 理由，\n   避免又靜默留白。附 schema 與 regression test（斷言撤稿後四個欄位都在）。\n2. 回填既有 12 筆。**只有 3 筆的後繼者可從 retracted_reason 文字反推**，其餘 9 筆不得臆測：\n   - mile_ec28b1cc → mile_1a6d9369（reason 內指名 K864 研究版）\n   - mile_beb61a8a → mile_490d38ec（reason = duplicate_of_mile_490d38ec）\n   - mile_b5a91c4d → mile_bad0d545（reason 內指名）\n   另 mile_bb520db8 / mile_d8e36bcb 連 reason 都是空字串，需人工判定或標 unknown。\n3. 回填後才走 sync，且需排在 `assign_frontend_deploy_revalidate_endpoint_20260719`\n   的快取端點部署之後（前置任務的原始註記）。\n\n**不要做**：不要先回填再補 writer —— 那樣下一次撤稿又是手動、又會漏，等於白做。\n不要為了讓欄位齊全而猜後繼者；猜錯的 supersede 指標比沒有指標更糟。\n\n前身：assign_feed_superseded_by_null_audit_20260719（該張報的 mile_ebb5d6f5 漏寫是誤報 ——\n欄位名看錯，該篇實際寫了 ['mile_9560b9cc']）。發現者：hourly-slot-1 2026-07-21。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "created_at": "2026-07-21T09:35:40.903195+00:00",
     "parent_task_id": "assign_feed_superseded_by_null_audit_20260719",
-    "created_by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3"
+    "created_by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "claimed_by": "codex-failover-slot-2-3cf0ee9bdcd945c19c29b236f05cc2a0",
+    "claimed_at": "2026-07-22T15:08:17.309398+00:00",
+    "claim_session_id": "30fae1729748",
+    "status_history": [
+      {
+        "ts": "2026-07-22T15:08:17.309413+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-3cf0ee9bdcd945c19c29b236f05cc2a0"
+      },
+      {
+        "ts": "2026-07-22T15:08:17.611648+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-3cf0ee9bdcd945c19c29b236f05cc2a0"
+      }
+    ],
+    "started_at": "2026-07-22T15:08:17.611634+00:00"
   },
   {
     "id": "k1730_salvage_ref_integrate_v2_closeout",
@@ -50163,11 +50201,29 @@
     "title": "[設計張力] reader-facing K 文章無法引用自己的證據而不被 reclassify 成 research —— general lane 結構性餓死",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-21T13:23:57.284792+00:00",
     "source": "dispatch",
     "parent_task_id": "K1597_article_general",
-    "description": "由 K1597_article_general 交付時的裁決點衍生（agent 主動升報，主線程已用 _infer_audience 實測確認）。\n\n**張力**：K1597_article_general 這張任務的存在理由，description 寫得很清楚 —— 'no general article in feed.json. Emergency reader-facing publish-drought remediation'。也就是說它要補的是 **general** 池。\n\n但同一份 .claude/rules/publishing.md 另外要求文章『數字必對齊實驗檔 + 標 K 編號』。照做的結果是文中必然出現 K-id 與 QLIKE / Diebold-Mariano / Harvey 等詞，而 src/volpred/publisher/publisher.py:829 的 _infer_audience 規則 5（title 含 K\\d+）與規則 6（title+content+tags 命中 ≥2 個學術關鍵詞）會在 publish 時把 audience 覆寫成 research。\n\n實測（主線程於 2026-07-21 對交付稿 storage/drafts/K1597_general_draft.md 直接呼叫 _infer_audience）：回傳 **research**。稿件本身已過 anti_ai_gate（exit 0）、38 個數字機械核對 0 fail，內容沒有問題。\n\n**後果**：任何忠實引用證據的 K 文章都會被判成 research ⇒ general 池**在設計上就補不進去** ⇒ drought remediation 任務即使完美執行也達不成它自己的目的。這不是某個 agent 寫壞了，是兩條 rule 相衝。\n\n**注意 _infer_audience 的 docstring 立場**：它明說此機制是為了防止 agent 把 research-grade 內容隨手標成 general（mile_d0d66405 事故）。所以不能簡單放寬 —— 要區分的是『research 內容偽裝成 general』與『general 文章誠實引用數字』。\n\n可能方向（需裁決，勿逕自實作）：\n  (a) 讓 K-id 走 tags/metadata 而非正文與標題，正文只留白話數字 → 規則 5 不觸發，規則 6 仍可能觸發；\n  (b) 為 daily_article 加 type-locked exemption（publisher.py:1819 已有 TYPE-LOCKED EXEMPTIONS 先例）；\n  (c) 承認 general 版必須是另一種寫法（術語全部白話化、數字保留但不點 K 編號），     並把這個要求寫進 daily_article 的 brief 模板，讓 writer 一開始就知道；\n  (d) 接受 reclassify，改由別的 task type 補 general 池。\n\n本次處置：K1597 稿件**照原樣進草稿池**（內容合格，數字不可為了過 gate 而拿掉）；general drought 則仍未解，由本 task 追。"
+    "description": "由 K1597_article_general 交付時的裁決點衍生（agent 主動升報，主線程已用 _infer_audience 實測確認）。\n\n**張力**：K1597_article_general 這張任務的存在理由，description 寫得很清楚 —— 'no general article in feed.json. Emergency reader-facing publish-drought remediation'。也就是說它要補的是 **general** 池。\n\n但同一份 .claude/rules/publishing.md 另外要求文章『數字必對齊實驗檔 + 標 K 編號』。照做的結果是文中必然出現 K-id 與 QLIKE / Diebold-Mariano / Harvey 等詞，而 src/volpred/publisher/publisher.py:829 的 _infer_audience 規則 5（title 含 K\\d+）與規則 6（title+content+tags 命中 ≥2 個學術關鍵詞）會在 publish 時把 audience 覆寫成 research。\n\n實測（主線程於 2026-07-21 對交付稿 storage/drafts/K1597_general_draft.md 直接呼叫 _infer_audience）：回傳 **research**。稿件本身已過 anti_ai_gate（exit 0）、38 個數字機械核對 0 fail，內容沒有問題。\n\n**後果**：任何忠實引用證據的 K 文章都會被判成 research ⇒ general 池**在設計上就補不進去** ⇒ drought remediation 任務即使完美執行也達不成它自己的目的。這不是某個 agent 寫壞了，是兩條 rule 相衝。\n\n**注意 _infer_audience 的 docstring 立場**：它明說此機制是為了防止 agent 把 research-grade 內容隨手標成 general（mile_d0d66405 事故）。所以不能簡單放寬 —— 要區分的是『research 內容偽裝成 general』與『general 文章誠實引用數字』。\n\n可能方向（需裁決，勿逕自實作）：\n  (a) 讓 K-id 走 tags/metadata 而非正文與標題，正文只留白話數字 → 規則 5 不觸發，規則 6 仍可能觸發；\n  (b) 為 daily_article 加 type-locked exemption（publisher.py:1819 已有 TYPE-LOCKED EXEMPTIONS 先例）；\n  (c) 承認 general 版必須是另一種寫法（術語全部白話化、數字保留但不點 K 編號），     並把這個要求寫進 daily_article 的 brief 模板，讓 writer 一開始就知道；\n  (d) 接受 reclassify，改由別的 task type 補 general 池。\n\n本次處置：K1597 稿件**照原樣進草稿池**（內容合格，數字不可為了過 gate 而拿掉）；general drought 則仍未解，由本 task 追。",
+    "claimed_by": "codex-failover-slot-3-c4191cb420164cb4808303f07f3eace0",
+    "claimed_at": "2026-07-22T15:15:27.198175+00:00",
+    "claim_session_id": "1cf00c5bce93",
+    "status_history": [
+      {
+        "ts": "2026-07-22T15:15:27.198190+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-3-c4191cb420164cb4808303f07f3eace0"
+      },
+      {
+        "ts": "2026-07-22T15:15:27.458904+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-3-c4191cb420164cb4808303f07f3eace0"
+      }
+    ],
+    "started_at": "2026-07-22T15:15:27.458890+00:00"
   },
   {
     "id": "assign_9f2e66c0",
@@ -54908,7 +54964,7 @@
   {
     "id": "platform_ops_release_audit_fix_mile_2d1d356b",
     "title": "Fix release-pool audit blockers: AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債",
-    "description": "release_pool skipped draft `mile_2d1d356b` 3 times because the general-audience audit failed.\n\nTitle: AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_2d1d356b --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "description": "release_pool skipped draft `mile_2d1d356b` 4 times because the general-audience audit failed.\n\nTitle: AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_2d1d356b --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 2,
@@ -54921,7 +54977,7 @@
     ],
     "created_at": "2026-07-22T11:00:57.650646+00:00",
     "article_id": "mile_2d1d356b",
-    "release_audit_skipped_count": 3,
+    "release_audit_skipped_count": 4,
     "release_audit_issues": [
       "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_2d1d356b --plan <plan.json>"
     ]
@@ -54929,7 +54985,7 @@
   {
     "id": "platform_ops_release_audit_fix_mile_63ec8636",
     "title": "Fix release-pool audit blockers: 黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信",
-    "description": "release_pool skipped draft `mile_63ec8636` 3 times because the general-audience audit failed.\n\nTitle: 黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_63ec8636 --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "description": "release_pool skipped draft `mile_63ec8636` 4 times because the general-audience audit failed.\n\nTitle: 黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信\n\nIssues:\n- missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_63ec8636 --plan <plan.json>\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 2,
@@ -54942,7 +54998,7 @@
     ],
     "created_at": "2026-07-22T11:00:57.650646+00:00",
     "article_id": "mile_63ec8636",
-    "release_audit_skipped_count": 3,
+    "release_audit_skipped_count": 4,
     "release_audit_issues": [
       "missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_63ec8636 --plan <plan.json>"
     ]
@@ -54966,5 +55022,74 @@
     },
     "parent_task_id": "assign_0c7a209c",
     "created_by": "codex-failover-slot-1-21efcecb5ac34fb3901fcf94892e3a14"
+  },
+  {
+    "id": "release_deadlock_repair_20260722_15",
+    "title": "【P1 自動補救】release 死鎖：修好被內容閘門擋住的草稿",
+    "description": "release_pool 死鎖：草稿池有 3 篇、eligible=0（due_now=true），其中 3 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_2d1d356b` (general, 已被擋 4 次) [lazypack_missing] AI 資料中心改用借的蓋：四巨頭一年多背了 1772 億美元債\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_2d1d356b --plan <plan.json>\n- `mile_63ec8636` (general, 已被擋 4 次) [lazypack_missing] 黃金、VIX、原油同一天講三種故事：8 次地緣衝突查下來，只有一個能信\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_63ec8636 --plan <plan.json>\n- `mile_928eade8` (general, 已被擋 1 次) [lazypack_missing] 同一個模型跑三次，答案在三個月裡移動了 0.07：談「最新一段窗口」的統計數字\n    missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_928eade8*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv run python scripts/lazypack_async_render.py enqueue --article-id mile_928eade8 --plan <plan.json>\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "auto_remediation",
+    "created_at": "2026-07-22T15:00:56.280936+00:00",
+    "blocked_article_ids": [
+      "mile_2d1d356b",
+      "mile_63ec8636",
+      "mile_928eade8"
+    ],
+    "trigger": "release_pool_content_gate_deadlock",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "alert_release_pool_deadlock_20260722",
+    "title": "[alert] Release pool deadlocked — 3 drafts, 0 eligible (due now)",
+    "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 3 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 3\n- eligible_before_dedup: 3\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 3\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: (none)\n  - `mile_2d1d356b` (general, 已連續被擋 4 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n  - `mile_63ec8636` (general, 已連續被擋 4 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_63ec8636*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n  - `mile_928eade8` (general, 已連續被擋 1 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_928eade8*.json) — no evidence-bound plan on disk either; author one via the lazypack-infographic skill, then: uv ru\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260722_15`，指定只補仍可放行的 cluster：vix。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-22T15:01:25.012211+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "release_pool_deadlock"
+    ]
+  },
+  {
+    "id": "telegram-1324",
+    "task_type": "telegram_reply",
+    "priority": 1,
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-22T15:11:48.569158+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 1324）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你就已經壞掉了 又不寫新文章 我能怎麼辦？\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] Release pool deadlocked — 3 drafts, 0 eligible (due now)\n\n📌 白話結論\n一般讀者文章缺少快速理解圖組，會降低閱讀與分享效果。\n\n📌 影響\n影響文章品質、讀者信任與流量表現。\n\n🛠️ 行動\n先替缺圖的文章補懶人包，再確認新文章的發佈 gate 會擋住同類問題。\n\n---\n\n🛠️ 已自動處理\n已建立任務 alert_release_pool_deadlock_20260722（平台維運, P1），下一班 dispatch 會認領執行。任務逾時未被認領時，dispatcher 的 starvation lockout 會強制把它推上候選清單。老闆無需動作。\n\n🚦 觸發條件\n釋出已到期（due_now），草稿池有 3 篇，但通過所有 gate 的只有 0 篇。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n• draft: 3\n• eligible_before_dedup: 3\n• dedup_flagged: 0\n• narrative_cluster_filtered: 0\n• content_gate_blocked: 3\n• eligible_after_all_gates: 0\n• 被 narrative_cluster gate 擋住的 cluster: (none)\n• mile_2d1d356b (general, 已連續被擋 4 次): missing 懶人包圖組 section and NO render job was ever queued (checked storage/ops/compute_queue/lazypack-mile_2d1d356b*.json) — no evidence-bound plan\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "status_history": [
+      {
+        "ts": "2026-07-22T15:12:31.921995+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder-63985"
+      },
+      {
+        "ts": "2026-07-22T15:13:53.596617+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder-63985"
+      }
+    ],
+    "completed_at": "2026-07-22T15:13:53.596601+00:00",
+    "result": "已核對 live feed 與 canonical task pool：最後發布 mile_a73bb294=2026-07-22 19:00 Asia/Taipei；mile_928eade8=20:05 建稿仍 draft；release deadlock alert 仍 pending。已用正式 writer 建立 user P1 daily_article assign_f13a5d5f（fire_requested=true），要求先真正發布一篇並依五步 gate 治本；Telegram reply message_id=1325 已送達。"
+  },
+  {
+    "id": "assign_f13a5d5f",
+    "title": "老闆指定 P1：解除釋出死鎖並發布一篇新文章",
+    "description": "Telegram msg 1324：老闆指出平台又壞掉且沒有持續出新文章。現場證據（2026-07-22 23:13 Asia/Taipei）：release_pool_deadlock task alert_release_pool_deadlock_20260722 仍 pending；feed 最新發布為 mile_a73bb294，published_at=2026-07-22T11:00:57Z（台北 19:00）；mile_928eade8 於台北 20:05 建立但仍 draft。請立即完成實事：1) 先讓至少一篇符合品質與證據 gate 的新文章真正 published，回讀 feed/API 驗證；2) 釐清 3 drafts/0 eligible 的 live 根因，依五步結案 gate 重構底層，不能只手動補圖或重跑；3) 檢查 alert task 是否可合併，避免重工；4) 回報 contained 或 root_cause_fixed_and_verified，不可把 exit 0 當完成。",
+    "task_type": "daily_article",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-22T15:13:35.565944+00:00",
+    "parent_task_id": "telegram-1324",
+    "created_by": "telegram-responder"
   }
 ]

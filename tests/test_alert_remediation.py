@@ -234,7 +234,7 @@ def test_enqueue_failure_is_surfaced_in_the_email_not_swallowed(pool) -> None:
     assert cond["body"].startswith("## ⚠️ 自動建任務失敗")
 
 
-def test_every_shipped_alert_id_is_covered_by_some_disposition() -> None:
+def test_every_shipped_alert_id_is_covered_by_some_disposition(tmp_path) -> None:
     """Full-population gate: enumerate the real alert registry, not a sample.
 
     `remediate_condition` cannot leave an alert unhandled by construction (the
@@ -245,7 +245,14 @@ def test_every_shipped_alert_id_is_covered_by_some_disposition() -> None:
     """
     from volpred.ops.alerts import build_alert_condition_report
 
-    report = build_alert_condition_report(storage_dir="storage")
+    # The registry is code-defined; live operational state only changes whether
+    # each condition is breached.  Point every detector at an empty, isolated
+    # storage tree so this population gate cannot inherit state from an earlier
+    # test or from untracked files in a developer checkout.
+    report = build_alert_condition_report(
+        storage_dir=str(tmp_path),
+        paper_root=tmp_path / "paper",
+    )
     shipped = {str(c.get("id")) for c in report["conditions"]}
 
     assert shipped, "alert registry came back empty — the gate would vacuously pass"
