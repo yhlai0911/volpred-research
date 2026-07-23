@@ -3,6 +3,9 @@ from __future__ import annotations
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
 
 import volpred.ops.alerts as alerts_module
 from volpred.ops.alerts import (
@@ -418,7 +421,15 @@ def test_send_alert_persists_dedup_and_skips_within_24h(tmp_path: Path, monkeypa
     storage_dir = tmp_path / "storage"
     calls: list[tuple[str, str, str, str, str]] = []
 
-    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+    def fake_dispatch(
+        *,
+        level: str,
+        title: str,
+        body: str,
+        recipient: str,
+        storage_dir: str,
+        delivery_key: str,
+    ):
         calls.append((level, title, body, recipient, storage_dir))
         return {
             "notification_id": f"notif-{len(calls)}",
@@ -452,6 +463,195 @@ def test_send_alert_persists_dedup_and_skips_within_24h(tmp_path: Path, monkeypa
     dedup_path = storage_dir / "ops" / "alert_dedup.json"
     dedup = json.loads(dedup_path.read_text(encoding="utf-8"))
     assert dedup["alerts"][first["alert_key"]]["last_notification_id"] == "notif-1"
+
+
+def test_dispatch_alert_email_routes_operations_core_owner_through_transaction(
+    tmp_path: Path,
+    monkeypatch,
+):
+    storage_dir = tmp_path / "storage"
+    fake_store = SimpleNamespace(
+        read_owner=lambda: SimpleNamespace(
+            effect_family="email.ops_alert",
+            owner="operations_core",
+            generation=4,
+        )
+    )
+    captured: dict[str, object] = {}
+
+    class FakeNotifier:
+        def __init__(self, *, storage_dir: str) -> None:
+            captured["notifier_storage_dir"] = storage_dir
+
+        def notify(self, **kwargs: object) -> str:
+            raise AssertionError("operations_core route used legacy notifier")
+
+    class FakeOwnedDelivery:
+        def __init__(self, *, store: object, provider: object) -> None:
+            captured["store"] = store
+            captured["provider"] = provider
+
+        def deliver(self, command: object) -> object:
+            captured["command"] = command
+            return SimpleNamespace(
+                effect_id="effect-owned-email-test",
+                delivered=True,
+                disposition="delivered",
+                work_id="work-owned-email-test",
+                effect_status="delivered",
+                attempt_count=1,
+                evidence_ref="imap-sent:test",
+                evidence_sha256="a" * 64,
+            )
+
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        FakeNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: fake_store),
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.OwnedEmailNotification",
+        FakeOwnedDelivery,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery._email_notification."
+        "ImapSentMailReader.from_environment",
+        classmethod(lambda cls: object()),
+    )
+
+    result = alerts_module._dispatch_alert_email(
+        level="warn",
+        title="ownership smoke",
+        body="body",
+        recipient="owner@example.com",
+        storage_dir=str(storage_dir),
+        delivery_key="ops-alert:ownership-smoke:2026-07-24",
+    )
+
+    command = captured["command"]
+    assert getattr(command, "idempotency_key") == (
+        "ops-alert:ownership-smoke:2026-07-24"
+    )
+    assert getattr(command, "recipient") == "owner@example.com"
+    assert captured["store"] is fake_store
+    assert result == {
+        "notification_id": "effect-owned-email-test",
+        "subject": "[VolPred Alert][WARN] ownership smoke",
+        "sent": True,
+        "configured": True,
+        "send_error": None,
+        "delivery_owner": "operations_core",
+        "owner_generation": 4,
+        "work_id": "work-owned-email-test",
+        "effect_status": "delivered",
+        "attempt_count": 1,
+        "evidence_ref": "imap-sent:test",
+        "evidence_sha256": "a" * 64,
+    }
+
+
+def test_dispatch_alert_email_routes_legacy_only_when_database_owner_says_legacy(
+    tmp_path: Path,
+    monkeypatch,
+):
+    storage_dir = tmp_path / "storage"
+    notify_calls: list[dict[str, object]] = []
+    fake_store = SimpleNamespace(
+        read_owner=lambda: SimpleNamespace(
+            effect_family="email.ops_alert",
+            owner="legacy",
+            generation=1,
+        )
+    )
+
+    class FakeNotifier:
+        def __init__(self, *, storage_dir: str) -> None:
+            self.storage_dir = Path(storage_dir)
+
+        def notify(self, **kwargs: object) -> str:
+            notify_calls.append(kwargs)
+            notification_id = "legacy-notification-test"
+            _write_json(
+                self.storage_dir
+                / "notifications"
+                / f"{notification_id}.json",
+                {
+                    "id": notification_id,
+                    "sent": True,
+                    "configured": True,
+                    "send_error": None,
+                },
+            )
+            return notification_id
+
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        FakeNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: fake_store),
+    )
+
+    result = alerts_module._dispatch_alert_email(
+        level="info",
+        title="legacy gate",
+        body="body",
+        recipient="owner@example.com",
+        storage_dir=str(storage_dir),
+        delivery_key="ops-alert:legacy-gate:2026-07-24",
+    )
+
+    assert len(notify_calls) == 1
+    assert result["sent"] is True
+    assert result["delivery_owner"] == "legacy"
+    assert result["owner_generation"] == 1
+
+
+def test_dispatch_alert_email_fails_closed_when_owner_read_is_unavailable(
+    tmp_path: Path,
+    monkeypatch,
+):
+    notifier_constructed = False
+
+    class FailingStore:
+        def read_owner(self) -> object:
+            raise RuntimeError("ownership database unavailable")
+
+    class FakeNotifier:
+        def __init__(self, *, storage_dir: str) -> None:
+            nonlocal notifier_constructed
+            notifier_constructed = True
+
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        FakeNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: FailingStore()),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="ownership database unavailable",
+    ):
+        alerts_module._dispatch_alert_email(
+            level="critical",
+            title="must not split brain",
+            body="body",
+            recipient="owner@example.com",
+            storage_dir=str(tmp_path / "storage"),
+            delivery_key="ops-alert:must-not-split-brain:2026-07-24",
+        )
+
+    assert notifier_constructed is False
 
 
 def test_send_alert_save_prunes_dedup_entries_idle_beyond_retention(tmp_path: Path, monkeypatch):
@@ -495,7 +695,15 @@ def test_send_alert_save_prunes_dedup_entries_idle_beyond_retention(tmp_path: Pa
         encoding="utf-8",
     )
 
-    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+    def fake_dispatch(
+        *,
+        level: str,
+        title: str,
+        body: str,
+        recipient: str,
+        storage_dir: str,
+        delivery_key: str,
+    ):
         return {
             "notification_id": "notif-1",
             "subject": f"[VolPred Alert][{level.upper()}] {title}",
@@ -530,7 +738,15 @@ def test_send_alert_appends_incident_candidates_for_sent_and_dedup_skipped(
     the incident; the filing radar must count both."""
     storage_dir = tmp_path / "storage"
 
-    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+    def fake_dispatch(
+        *,
+        level: str,
+        title: str,
+        body: str,
+        recipient: str,
+        storage_dir: str,
+        delivery_key: str,
+    ):
         return {
             "notification_id": "notif-1",
             "subject": f"[VolPred Alert][{level.upper()}] {title}",
@@ -564,7 +780,15 @@ def test_send_alert_records_incident_candidate_even_when_transport_fails(
     radar must not go blind together with the mail."""
     storage_dir = tmp_path / "storage"
 
-    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+    def fake_dispatch(
+        *,
+        level: str,
+        title: str,
+        body: str,
+        recipient: str,
+        storage_dir: str,
+        delivery_key: str,
+    ):
         return {
             "notification_id": "notif-x",
             "subject": "s",
@@ -598,7 +822,15 @@ def test_send_alert_telegram_mirror_formats_markdown_without_mutating_email_body
         "| emoji | ok |\n"
     )
 
-    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+    def fake_dispatch(
+        *,
+        level: str,
+        title: str,
+        body: str,
+        recipient: str,
+        storage_dir: str,
+        delivery_key: str,
+    ):
         email_bodies.append(body)
         return {
             "notification_id": "notif-tg-format",

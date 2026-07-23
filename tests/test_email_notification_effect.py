@@ -5,7 +5,7 @@ import json
 from dataclasses import replace
 from email.message import EmailMessage
 from email.parser import BytesParser
-from email.policy import default
+from email.policy import SMTP, default
 
 import pytest
 
@@ -97,7 +97,9 @@ class _Notifier:
             html_body = kwargs.get("html_body")
             if html_body is not None:
                 message.add_alternative(str(html_body), subtype="html")
-            self.mailbox.messages[message_id] = message.as_bytes()
+            # SMTP and Gmail Sent copies use CRLF on the wire. This catches
+            # false drift when a canonical payload was authored with LF.
+            self.mailbox.messages[message_id] = message.as_bytes(policy=SMTP)
         return "notification-1"
 
 

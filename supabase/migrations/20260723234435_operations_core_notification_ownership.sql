@@ -1,0 +1,7 @@
+-- Remote receipt counterpart for the notification-ownership migration applied
+-- through the Supabase migration API as version 20260723234435.
+--
+-- Its remote timestamp precedes the local effect-delivery dependencies.  The
+-- idempotent canonical migration therefore remains at
+-- 20260724070000_operations_core_notification_ownership.sql so clean replay
+-- applies the schema only after the Operations Core tables and functions.

@@ -181,6 +181,27 @@ read-back 證實五表、privileges、function ownership／search path 與兩個
 unique-owner acknowledgement 與 rollback rehearsal 尚缺，program commit 13 整體仍是
 `contained`。
 
+同日 production ownership follow-up 已把 `send_alert` email branch 接到正式
+Work Coordinator／Effect Delivery transaction。PostgreSQL 以單一
+`email.ops_alert` owner row + monotonic generation CAS 控制 legacy 與
+operations_core 唯一路由；DB unavailable、stale generation、active attempt transfer
+或 request drift 都 fail closed。Service-role-only RPC 內原子完成 WorkItem、immutable
+payload、EffectRequest／outbox、Primary Authority、provider settlement 與 receipts，
+private tables FORCE RLS，public RPC 固定空 search path 並撤銷 PUBLIC／anon／
+authenticated。
+
+PG17 transaction regressions 與 267 個相關 tests 通過。Live
+`legacy/1 → operations_core/2` 後，第一封暴露 SMTP CRLF 對 LF 的 read-back 假
+mismatch；修成 canonical newline comparison 並用 SMTP policy 回歸後，第二封真 alert
+的 Work／effect／outbox／attempt、payload hash、Primary Authority release 與 Gmail
+Sent exact-byte evidence 全部一致。接著完成
+`operations_core/2 → legacy/3 → operations_core/4` rollback rehearsal，stale
+generation request 零落地，final live read-back 為唯一 owner `operations_core/4`、
+零 active attempts。Remote migration receipts `20260723234435`／`20260723235106`
+均有同名 local stub，ownership FK advisor gap 已補；本 scope security lint 為零。
+因此 program commit 13 的 `email.ops_alert` production ownership 為
+`root_cause_fixed_and_verified`；其他 effect family 不在本次完成宣告內。
+
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
 Phase 1 現行修復的 canonical implementation ledger。原版、v3 與全部既有 skills 在

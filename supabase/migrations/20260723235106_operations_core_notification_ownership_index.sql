@@ -1,0 +1,5 @@
+-- Remote receipt counterpart for the ownership FK index migration applied
+-- through the Supabase migration API as version 20260723235106.
+--
+-- The idempotent canonical migration remains after its table dependency at
+-- 20260724071000_operations_core_notification_ownership_index.sql.

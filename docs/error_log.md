@@ -1266,3 +1266,50 @@ integrity check 與 FORCE RLS row-lock 四個具體根因均完成五步 gate，
 **root_cause_fixed_and_verified**。但 program commit 13 尚未有正式 Work Coordinator
 caller、production ownership transaction、unique-owner downstream acknowledgement
 與 rollback rehearsal，因此整體 notification ownership 仍為 **contained**。
+
+### 2026-07-24 — 正式 alert caller 首次 live read-back 被 SMTP CRLF 假漂移擋下
+
+**症狀與物證**：`email.ops_alert` 已由 CAS 從 `legacy/1` 切到
+`operations_core/2`；第一個正式 `volpred ops send-alert` 確實建立 durable
+WorkItem、payload、EffectRequest／outbox、Primary Authority grant 並寄出郵件，但
+settlement 終態為 `email_sent_mail_readback_mismatch`。DB 即時計算 payload SHA-256
+與 EffectRequest 的 `f2e7e0a7…ecc8d37` 完全一致，Message-ID／subject／recipient
+也相同。獨立 IMAP 診斷顯示 plain body 比 expected 多 3 bytes、HTML 多 57 bytes，
+每個差異都來自 Gmail raw MIME 使用 CRLF，而 canonical payload 使用 LF。
+
+**根因層級**：這是 downstream acknowledgement verifier 的 transport-normalization
+契約缺口。`_transport_text()` 只 `rstrip(\"\\r\\n\")`，沒有把 SMTP wire format 的
+CRLF／CR canonicalize；fake mailbox 又用預設 LF policy 產 raw bytes，因此既有測試
+從未走過 production newline 形狀。這不是資料漂移，也不能靠手改 receipt 或放寬
+exact-body gate 收尾。
+
+**底層修復與回歸**：read-back comparison 現在先將 CRLF／CR 正規化為 LF，再只移除
+transport 尾端 newline；subject、recipient、Message-ID、plain／HTML 內容與 raw
+evidence hash 的其他 exact checks 不變。Fake Sent mailbox 改用 `email.policy.SMTP`
+產生 CRLF raw bytes，讓同一 class 未來必須通過 production wire format。PG17 suite
+另覆蓋 CAS cutover、request replay、active-attempt transfer rejection、Work／outbox／
+Primary Authority、settlement、rollback replay、stale generation rejection 與
+recutover；相關 suite 共 267 tests 通過。
+
+**Production 回讀與 rollback rehearsal**：修後使用新唯一 key 寄出的
+`effect_owned_email_1408c5e8812e08612817e355601b1561` 回讀 Work=`succeeded`、
+effect／outbox／owned attempt=`delivered`。Durable payload SHA-256
+`82c8a16c43f76f2afcec1ef9c34a102811b27ca201bb7e5578114ed901aa0155`
+與 DB 重算一致；Gmail Sent 原始 bytes SHA-256
+`da61bcddd154387d44aaa5b1b57370c5710d6aaf24d2e2bdce712cf0dc7a0846`
+與 effect evidence 一致，Message-ID hash 也精確對應 evidence ref。之後成功執行
+`operations_core/2 → legacy/3`，舊 generation request 被拒且 DB 零 row，再執行
+`legacy/3 → operations_core/4`；final live read-back 是單一 owner row、零 active
+attempts、四代 immutable ownership receipts。
+
+**制度化與狀態**：formal caller 每次先讀 DB owner；owner DB 不可用即 fail closed，
+不 fallback。Ownership tables FORCE RLS，五個 PostgREST RPC 只授權 service role，
+function owner／fixed empty search path／definer CREATE revoke 均由 PG17 與 live
+read-back 驗證。Remote receipts
+`20260723234435 operations_core_notification_ownership` 與
+`20260723235106 operations_core_notification_ownership_index` 有同名 local stubs，
+較晚 canonical migrations 可 clean replay。Security advisor 沒有本 scope lint；
+performance advisor 發現的 owner-generation FK covering index 缺口已修，複驗只剩
+新 index 尚未累積使用統計的 INFO。`email.ops_alert` 的正式 caller、ownership
+transaction、unique-owner acknowledgement 與 rollback rehearsal 五步全過，狀態為
+**root_cause_fixed_and_verified**；其他 effect family 不在本結案範圍。

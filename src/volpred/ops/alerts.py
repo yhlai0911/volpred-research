@@ -547,13 +547,13 @@ def _dispatch_alert_email(
     body: str,
     recipient: str,
     storage_dir: str,
+    delivery_key: str,
 ) -> dict[str, Any]:
     # Lazy import：email_notifier 反向 import volpred.ops（canonical_write），
     # top-level import 形成 alerts ↔ email_notifier 環，token_report 路徑每日撞
     # ImportError（refactor_plan_token_ops_waste WS4d）。函式內 import 解環。
     from volpred.publisher.email_notifier import EmailNotifier
 
-    notifier = EmailNotifier(storage_dir=storage_dir)
     display_title, display_body = boss_facing_alert(title, body, level)
     subject = f"[VolPred Alert][{level.upper()}] {display_title}"
     text_body = "\n".join(
@@ -600,6 +600,58 @@ def _dispatch_alert_email(
         print(f"[alerts] html_render_failed level={level} err={exc}", file=_sys.stderr)
         html_body = None
 
+    from volpred.ops.delivery._email_notification import (
+        EmailNotificationEffectAdapter,
+        ImapSentMailReader,
+    )
+    from volpred.ops.delivery.owned_email import (
+        OwnedEmailCommand,
+        OwnedEmailNotification,
+        SupabaseOwnedEmailStore,
+    )
+
+    ownership_store = SupabaseOwnedEmailStore.from_environment()
+    owner = ownership_store.read_owner()
+    if owner.effect_family != "email.ops_alert":
+        raise RuntimeError(
+            "notification owner read returned the wrong effect family"
+        )
+    notifier = EmailNotifier(storage_dir=storage_dir)
+    if owner.owner == "operations_core":
+        receipt = OwnedEmailNotification(
+            store=ownership_store,
+            provider=EmailNotificationEffectAdapter(
+                notifier=notifier,
+                sent_mail_reader=ImapSentMailReader.from_environment(),
+            ),
+        ).deliver(
+            OwnedEmailCommand(
+                idempotency_key=delivery_key,
+                level=level,
+                title=subject,
+                recipient=recipient,
+                text_body=text_body,
+                html_body=html_body,
+                actor_ref=f"ops-alert:{_alert_key(level, title)}",
+            )
+        )
+        return {
+            "notification_id": receipt.effect_id,
+            "subject": subject,
+            "sent": receipt.delivered,
+            "configured": True,
+            "send_error": (
+                None if receipt.delivered else receipt.disposition
+            ),
+            "delivery_owner": owner.owner,
+            "owner_generation": owner.generation,
+            "work_id": receipt.work_id,
+            "effect_status": receipt.effect_status,
+            "attempt_count": receipt.attempt_count,
+            "evidence_ref": receipt.evidence_ref,
+            "evidence_sha256": receipt.evidence_sha256,
+        }
+
     notification_id = notifier.notify(
         subject=subject,
         body=text_body,
@@ -629,6 +681,8 @@ def _dispatch_alert_email(
         "sent": bool(notification.get("sent")),
         "configured": bool(notification.get("configured")),
         "send_error": notification.get("send_error"),
+        "delivery_owner": owner.owner,
+        "owner_generation": owner.generation,
     }
 
 
@@ -696,12 +750,18 @@ def send_alert(
             "last_sent_at": existing.get("last_sent_at"),
         }
 
+    delivery_key = (
+        f"ops-alert:{dedup_key}:force:{now.isoformat()}"
+        if force_send
+        else f"ops-alert:{dedup_key}:{now.date().isoformat()}"
+    )
     delivery = _dispatch_alert_email(
         level=normalized_level,
         title=normalized_title,
         body=body,
         recipient=normalized_recipient,
         storage_dir=storage_dir,
+        delivery_key=delivery_key,
     )
     # 2026-07-02 (boss): mirror every alert to Telegram when the transport is
     # configured (bot token + captured chat_id). Fail-open: a TG hiccup must
@@ -734,6 +794,13 @@ def send_alert(
         "subject": delivery["subject"],
         "configured": delivery["configured"],
         "send_error": delivery.get("send_error"),
+        "delivery_owner": delivery.get("delivery_owner"),
+        "owner_generation": delivery.get("owner_generation"),
+        "work_id": delivery.get("work_id"),
+        "effect_status": delivery.get("effect_status"),
+        "attempt_count": delivery.get("attempt_count"),
+        "evidence_ref": delivery.get("evidence_ref"),
+        "evidence_sha256": delivery.get("evidence_sha256"),
         "telegram": telegram_result,
         "dedup_path": str(_alert_dedup_path(storage_dir)),
         "timestamp": now.isoformat(),

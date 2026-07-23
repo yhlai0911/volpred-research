@@ -152,6 +152,30 @@
 > 不屬於本切片。仍未完成正式 Work Coordinator caller、production ownership
 > transaction、unique-owner read-back 與 rollback rehearsal，所以整體仍是
 > `contained`。
+>
+> 後續 production ownership checkpoint 已完成上述四個缺口。正式
+> `volpred ops send-alert` caller 每次先從 PostgreSQL 讀取
+> `email.ops_alert` 的唯一 owner／generation；owner 是 `legacy` 才可走原路徑，
+> owner 是 `operations_core` 則由 `OwnedEmailNotification.deliver()` 收斂：
+> 原子建立 WorkItem、immutable payload、EffectRequest／outbox 與 ownership
+> receipt，原子取得 Work lease／outbox claim／Primary Authority grant，完成 provider
+> write 後再以 IMAP exact-byte evidence settlement。Owner RPC 只授權
+> `service_role`，五個 public entrypoints 都是 no-login definer owner、固定空
+> `search_path`；private ownership tables FORCE RLS，service role 不可直接讀表。
+>
+> Live migration receipts
+> `20260723234435 operations_core_notification_ownership` 與
+> `20260723235106 operations_core_notification_ownership_index` 已各以同名 local
+> stub 對齊，較晚 canonical migrations 供 clean replay。Production 實測先做
+> `legacy/1 → operations_core/2` CAS cutover；成功 alert
+> `effect_owned_email_1408c5e8812e08612817e355601b1561` 回讀 Work
+> `succeeded`、effect／outbox／attempt `delivered`，durable payload SHA-256
+> `82c8a16c…01aa0155` 與 DB 重算相同，Gmail Sent 原始 bytes SHA-256
+> `da61bcdd…dc7a0846` 與 settlement evidence 相同。其後 rehearsal
+> `operations_core/2 → legacy/3`，舊 generation request 被拒且零 row，再
+> `legacy/3 → operations_core/4`；final live state 只有一個 owner row、零 active
+> attempts。故 `email.ops_alert` production ownership 四個缺口現為
+> `root_cause_fixed_and_verified`；這不表示其他 effect family 已自動切換。
 
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。

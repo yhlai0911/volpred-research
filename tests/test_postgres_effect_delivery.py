@@ -12,6 +12,7 @@ from pathlib import Path
 import psycopg
 import pytest
 from psycopg.conninfo import conninfo_to_dict
+from psycopg.types.json import Jsonb
 
 from volpred.ops.authority import AuthorityRequest, PrimaryAuthority, WriteIntent
 from volpred.ops.authority.postgres import PostgresAuthorityStore
@@ -53,6 +54,14 @@ MIGRATIONS = (
     REPO_ROOT
     / "supabase"
     / "migrations"
+    / "20260723234435_operations_core_notification_ownership.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260723235106_operations_core_notification_ownership_index.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
     / "20260724020500_operations_core_effect_outbox.sql",
     REPO_ROOT
     / "supabase"
@@ -70,6 +79,14 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724060000_operations_core_effect_payload_primary_authority.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724070000_operations_core_notification_ownership.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724071000_operations_core_notification_ownership_index.sql",
 )
 
 
@@ -117,6 +134,28 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
     manager = "volpred_ops_migration_test_manager"
     with psycopg.connect(dsn, autocommit=True) as connection:
         connection.execute(
+            """
+            DO $$
+            BEGIN
+              CREATE ROLE service_role NOLOGIN;
+            EXCEPTION WHEN duplicate_object THEN NULL;
+            END;
+            $$;
+            DO $$
+            BEGIN
+              CREATE ROLE anon NOLOGIN;
+            EXCEPTION WHEN duplicate_object THEN NULL;
+            END;
+            $$;
+            DO $$
+            BEGIN
+              CREATE ROLE authenticated NOLOGIN;
+            EXCEPTION WHEN duplicate_object THEN NULL;
+            END;
+            $$;
+            """
+        )
+        connection.execute(
             f"""
             CREATE ROLE {manager}
               LOGIN CREATEROLE NOSUPERUSER NOCREATEDB
@@ -125,6 +164,10 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
         )
         connection.execute(
             f"GRANT CREATE ON DATABASE {connection.info.dbname} TO {manager}"
+        )
+        connection.execute(
+            f"GRANT USAGE, CREATE ON SCHEMA public TO {manager} "
+            "WITH GRANT OPTION"
         )
     try:
         with psycopg.connect(
@@ -151,6 +194,16 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                 definer_function_owners,
                 fixed_function_search_paths,
                 unsafe_memberships,
+                owned_service_execute,
+                owned_anon_execute,
+                owned_authenticated_execute,
+                owned_public_execute,
+                owned_tables_force_rls,
+                service_owned_table_select,
+                public_rpc_definer_owners,
+                public_rpc_fixed_search_paths,
+                definer_public_create,
+                owned_indexes,
             ) = connection.execute(
                     """
                     SELECT
@@ -285,6 +338,165 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                             AND NOT memberships.set_option
                             AND NOT memberships.inherit_option
                           )
+                      ),
+                      (
+                        SELECT bool_and(
+                          has_function_privilege(
+                            'service_role', procedure.oid, 'EXECUTE'
+                          )
+                        )
+                        FROM pg_proc AS procedure
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = procedure.pronamespace
+                        WHERE namespace.nspname = 'public'
+                          AND procedure.proname IN (
+                            'volpred_read_notification_owner',
+                            'volpred_transfer_notification_owner',
+                            'volpred_request_owned_email_notification',
+                            'volpred_begin_owned_email_notification',
+                            'volpred_settle_owned_email_notification'
+                          )
+                      ),
+                      (
+                        SELECT bool_and(
+                          has_function_privilege(
+                            'anon', procedure.oid, 'EXECUTE'
+                          )
+                        )
+                        FROM pg_proc AS procedure
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = procedure.pronamespace
+                        WHERE namespace.nspname = 'public'
+                          AND procedure.proname IN (
+                            'volpred_read_notification_owner',
+                            'volpred_transfer_notification_owner',
+                            'volpred_request_owned_email_notification',
+                            'volpred_begin_owned_email_notification',
+                            'volpred_settle_owned_email_notification'
+                          )
+                      ),
+                      (
+                        SELECT bool_and(
+                          has_function_privilege(
+                            'authenticated', procedure.oid, 'EXECUTE'
+                          )
+                        )
+                        FROM pg_proc AS procedure
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = procedure.pronamespace
+                        WHERE namespace.nspname = 'public'
+                          AND procedure.proname IN (
+                            'volpred_read_notification_owner',
+                            'volpred_transfer_notification_owner',
+                            'volpred_request_owned_email_notification',
+                            'volpred_begin_owned_email_notification',
+                            'volpred_settle_owned_email_notification'
+                          )
+                      ),
+                      (
+                        SELECT bool_and(
+                          has_function_privilege(
+                            'public', procedure.oid, 'EXECUTE'
+                          )
+                        )
+                        FROM pg_proc AS procedure
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = procedure.pronamespace
+                        WHERE namespace.nspname = 'public'
+                          AND procedure.proname IN (
+                            'volpred_read_notification_owner',
+                            'volpred_transfer_notification_owner',
+                            'volpred_request_owned_email_notification',
+                            'volpred_begin_owned_email_notification',
+                            'volpred_settle_owned_email_notification'
+                          )
+                      ),
+                      (
+                        SELECT count(*) = 4
+                          AND bool_and(
+                            relation.relrowsecurity
+                            AND relation.relforcerowsecurity
+                          )
+                        FROM pg_class AS relation
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = relation.relnamespace
+                        WHERE namespace.nspname = 'volpred_ops'
+                          AND relation.relname IN (
+                            'notification_owners',
+                            'notification_owner_receipts',
+                            'owned_notification_requests',
+                            'owned_notification_attempts'
+                          )
+                      ),
+                      (
+                        SELECT bool_or(
+                          has_table_privilege(
+                            'service_role', relation.oid, 'SELECT'
+                          )
+                        )
+                        FROM pg_class AS relation
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = relation.relnamespace
+                        WHERE namespace.nspname = 'volpred_ops'
+                          AND relation.relname IN (
+                            'notification_owners',
+                            'notification_owner_receipts',
+                            'owned_notification_requests',
+                            'owned_notification_attempts'
+                          )
+                      ),
+                      (
+                        SELECT count(*) = 5
+                          AND bool_and(
+                            procedure.proowner = (
+                              SELECT oid FROM pg_roles
+                              WHERE rolname = 'volpred_ops_definer'
+                            )
+                            AND procedure.prosecdef
+                          )
+                        FROM pg_proc AS procedure
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = procedure.pronamespace
+                        WHERE namespace.nspname = 'public'
+                          AND procedure.proname IN (
+                            'volpred_read_notification_owner',
+                            'volpred_transfer_notification_owner',
+                            'volpred_request_owned_email_notification',
+                            'volpred_begin_owned_email_notification',
+                            'volpred_settle_owned_email_notification'
+                          )
+                      ),
+                      (
+                        SELECT count(*) = 5
+                          AND bool_and(
+                            procedure.proconfig = ARRAY['search_path=""']
+                          )
+                        FROM pg_proc AS procedure
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = procedure.pronamespace
+                        WHERE namespace.nspname = 'public'
+                          AND procedure.proname IN (
+                            'volpred_read_notification_owner',
+                            'volpred_transfer_notification_owner',
+                            'volpred_request_owned_email_notification',
+                            'volpred_begin_owned_email_notification',
+                            'volpred_settle_owned_email_notification'
+                          )
+                      ),
+                      has_schema_privilege(
+                        'volpred_ops_definer', 'public', 'CREATE'
+                      ),
+                      (
+                        SELECT count(*) = 5
+                        FROM pg_indexes
+                        WHERE schemaname = 'volpred_ops'
+                          AND indexname IN (
+                            'notification_owner_receipts_family_changed_idx',
+                            'owned_notification_requests_owner_generation_idx',
+                            'owned_notification_attempts_work_idx',
+                            'owned_notification_attempts_outbox_idx',
+                            'owned_notification_attempts_active_idx'
+                          )
                       )
                     """,
                     (manager,),
@@ -302,8 +514,38 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
         assert definer_function_owners is True
         assert fixed_function_search_paths is True
         assert unsafe_memberships == 0
+        assert owned_service_execute is True
+        assert owned_anon_execute is False
+        assert owned_authenticated_execute is False
+        assert owned_public_execute is False
+        assert owned_tables_force_rls is True
+        assert service_owned_table_select is False
+        assert public_rpc_definer_owners is True
+        assert public_rpc_fixed_search_paths is True
+        assert definer_public_create is False
+        assert owned_indexes is True
     finally:
         with psycopg.connect(dsn, autocommit=True) as connection:
+            connection.execute(
+                """
+                DROP FUNCTION IF EXISTS
+                  public.volpred_read_notification_owner(),
+                  public.volpred_transfer_notification_owner(
+                    text, bigint, text, text, text, bigint
+                  ),
+                  public.volpred_request_owned_email_notification(
+                    bigint, text, text, text, text, jsonb, text
+                  ),
+                  public.volpred_begin_owned_email_notification(
+                    bigint, text, text, integer, text, text, text
+                  ),
+                  public.volpred_settle_owned_email_notification(
+                    bigint, text, integer, text, text, bigint, integer,
+                    text, text, text, text, bigint, text, text, text,
+                    text, text, text, text, text, text, text
+                  )
+                """
+            )
             connection.execute("DROP SCHEMA IF EXISTS volpred_ops CASCADE")
             connection.execute(
                 """
@@ -316,6 +558,9 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
             connection.execute(
                 f"REVOKE CREATE ON DATABASE {connection.info.dbname} "
                 f"FROM {manager}"
+            )
+            connection.execute(
+                f"REVOKE USAGE, CREATE ON SCHEMA public FROM {manager}"
             )
             connection.execute(f"DROP ROLE IF EXISTS {manager}")
 
@@ -407,6 +652,10 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
         connection.execute(
             """
             TRUNCATE TABLE
+              volpred_ops.owned_notification_attempts,
+              volpred_ops.owned_notification_requests,
+              volpred_ops.notification_owner_receipts,
+              volpred_ops.notification_owners,
               volpred_ops.effect_attempt_receipts,
               volpred_ops.effect_authority_grants,
               volpred_ops.primary_authority_grants,
@@ -420,6 +669,31 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               volpred_ops.work_events,
               volpred_ops.work_items
             RESTART IDENTITY
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO volpred_ops.notification_owners (
+              effect_family, owner, generation, changed_at, changed_by,
+              change_reason
+            )
+            VALUES (
+              'email.ops_alert',
+              'legacy',
+              1,
+              clock_timestamp(),
+              'test-reset',
+              'restore canonical legacy fixture owner'
+            );
+            INSERT INTO volpred_ops.notification_owner_receipts (
+              effect_family, generation, previous_owner, owner, actor_ref,
+              reason, rollback_of_generation, changed_at
+            )
+            SELECT
+              effect_family, generation, NULL, owner, changed_by,
+              change_reason, NULL, changed_at
+            FROM volpred_ops.notification_owners
+            WHERE effect_family = 'email.ops_alert';
             """
         )
 
@@ -1449,3 +1723,294 @@ def test_unfenced_settlement_function_is_removed(
 
     assert len(signatures) == 1
     assert signatures[0][0].count(",") + 1 == 14
+
+
+def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
+    postgres_effect_dsn: str,
+) -> None:
+    payload = {
+        "schema_version": "email-notification.v1",
+        "subject": "[VolPred Alert][INFO] PG17 ownership transaction",
+        "text_body": "PG17 owned email transaction fixture.",
+        "html_body": "<p>PG17 owned email transaction fixture.</p>",
+    }
+    work_token = "work-owned-email-token"
+    outbox_token = "outbox-owned-email-token"
+    primary_token = "primary-owned-email-token"
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        initial = connection.execute(
+            "SELECT public.volpred_read_notification_owner()"
+        ).fetchone()[0]
+        assert initial["owner"] == "legacy"
+        assert initial["generation"] == 1
+
+        cutover = connection.execute(
+            """
+            SELECT public.volpred_transfer_notification_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "legacy",
+                1,
+                "operations_core",
+                "test:pg17",
+                "exercise production ownership transaction",
+                None,
+            ),
+        ).fetchone()[0]
+        assert cutover["owner"] == "operations_core"
+        assert cutover["generation"] == 2
+
+        owned_request = connection.execute(
+            """
+            SELECT public.volpred_request_owned_email_notification(
+              %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                "ops-alert:pg17-transaction:2026-07-24",
+                "info",
+                payload["subject"],
+                "owner@example.com",
+                Jsonb(payload),
+                "test:pg17",
+            ),
+        ).fetchone()[0]
+        replayed_request = connection.execute(
+            """
+            SELECT public.volpred_request_owned_email_notification(
+              %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                "ops-alert:pg17-transaction:2026-07-24",
+                "info",
+                payload["subject"],
+                "owner@example.com",
+                Jsonb(payload),
+                "test:pg17",
+            ),
+        ).fetchone()[0]
+        assert replayed_request == owned_request
+
+        attempt = connection.execute(
+            """
+            SELECT public.volpred_begin_owned_email_notification(
+              %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                owned_request["effect_id"],
+                "effect-worker:pg17",
+                300,
+                work_token,
+                outbox_token,
+                primary_token,
+            ),
+        ).fetchone()[0]
+        assert attempt["owner_generation"] == 2
+        assert attempt["effect"]["status"] == "requested"
+
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="requires zero active attempts",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_transfer_notification_owner(
+                  %s, %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    "operations_core",
+                    2,
+                    "legacy",
+                    "test:pg17",
+                    "must reject transfer during active delivery",
+                    2,
+                ),
+            )
+
+        receipt = connection.execute(
+            """
+            SELECT public.volpred_settle_owned_email_notification(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                attempt["work_id"],
+                attempt["work_version"],
+                work_token,
+                attempt["effect"]["id"],
+                attempt["outbox_sequence"],
+                attempt["attempt_count"],
+                attempt["worker_id"],
+                outbox_token,
+                attempt["primary_authority_key"],
+                attempt["primary_authority_holder_ref"],
+                attempt["primary_authority_epoch"],
+                primary_token,
+                attempt["authority_request_sha256"],
+                attempt["outbox_claim_ref"],
+                attempt["primary_authority_ref"],
+                "acknowledged",
+                attempt["effect"]["acknowledgement"]["kind"],
+                attempt["effect"]["acknowledgement"]["target_ref"],
+                None,
+                "imap-sent:pg17-owned-email",
+                "e" * 64,
+            ),
+        ).fetchone()[0]
+        assert receipt["work_status"] == "succeeded"
+        assert receipt["effect_status"] == "delivered"
+        assert receipt["disposition"] == "delivered"
+
+        rollback = connection.execute(
+            """
+            SELECT public.volpred_transfer_notification_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "operations_core",
+                2,
+                "legacy",
+                "test:pg17",
+                "rehearse exact ownership rollback",
+                2,
+            ),
+        ).fetchone()[0]
+        assert rollback["owner"] == "legacy"
+        assert rollback["generation"] == 3
+
+        replayed_rollback = connection.execute(
+            """
+            SELECT public.volpred_transfer_notification_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "operations_core",
+                2,
+                "legacy",
+                "test:pg17",
+                "rehearse exact ownership rollback",
+                2,
+            ),
+        ).fetchone()[0]
+        assert replayed_rollback == rollback
+
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="does not own email.ops_alert generation 2",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_request_owned_email_notification(
+                  %s, %s, %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    2,
+                    "ops-alert:pg17-stale-owner:2026-07-24",
+                    "info",
+                    payload["subject"],
+                    "owner@example.com",
+                    Jsonb(payload),
+                    "test:pg17",
+                ),
+            )
+
+        recutover = connection.execute(
+            """
+            SELECT public.volpred_transfer_notification_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "legacy",
+                3,
+                "operations_core",
+                "test:pg17",
+                "restore operations core after rollback rehearsal",
+                None,
+            ),
+        ).fetchone()[0]
+        assert recutover["owner"] == "operations_core"
+        assert recutover["generation"] == 4
+
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="compare-and-set failed",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_transfer_notification_owner(
+                  %s, %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    "legacy",
+                    3,
+                    "operations_core",
+                    "test:other-actor",
+                    "stale competing cutover",
+                    None,
+                ),
+            )
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        durable_state = connection.execute(
+            """
+            SELECT
+              (SELECT status
+               FROM volpred_ops.work_items
+               WHERE id = %s),
+              (SELECT status
+               FROM volpred_ops.effect_requests
+               WHERE id = %s),
+              (SELECT status
+               FROM volpred_ops.effect_outbox
+               WHERE effect_id = %s),
+              (SELECT status
+               FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s),
+              (SELECT count(*)
+               FROM volpred_ops.effect_attempt_receipts
+               WHERE effect_id = %s),
+              (SELECT count(*)
+               FROM volpred_ops.primary_authority_receipts
+               WHERE authority_key = 'notification:email.ops_alert'),
+              (SELECT array_agg(owner ORDER BY generation)
+               FROM volpred_ops.notification_owner_receipts
+               WHERE effect_family = 'email.ops_alert')
+            """,
+            (
+                owned_request["work_id"],
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+            ),
+        ).fetchone()
+
+    assert durable_state == (
+        "succeeded",
+        "delivered",
+        "delivered",
+        "delivered",
+        1,
+        1,
+        ["legacy", "operations_core", "legacy", "operations_core"],
+    )

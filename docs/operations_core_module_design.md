@@ -350,6 +350,44 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   unique-owner acknowledgement read-back 或 rollback rehearsal，所以 program commit
   13／notification ownership 仍是 `contained`。
 
+### 2026-07-24 production ops-alert ownership checkpoint
+
+- 正式 caller 是 `volpred.ops.alerts.send_alert` 的 email branch。它先透過
+  `SupabaseOwnedEmailStore.read_owner()` 讀取 PostgreSQL 的唯一 owner generation；
+  DB 不可用或 effect family 漂移即 fail closed，不會為了「先寄出去」偷偷 fallback。
+  `legacy` generation 才可呼叫既有 notifier；`operations_core` generation 只能進
+  `OwnedEmailNotification.deliver()`。
+- `OwnedEmailNotification` 是單一 deep interface：caller 只給 idempotency key、
+  severity、subject/body、recipient 與 actor。其 store 的 request RPC 在一個
+  transaction 建立 WorkItem、immutable payload、EffectRequest／outbox 與 owned
+  request receipt；begin RPC 同時取得 Work lease、outbox claim、Primary Authority
+  與 effect grant；settle RPC 原子寫 effect／Work receipts、釋放 authority 並完成
+  owned attempt。Caller 不持有 table mutation 能力，也不組裝半套 transaction。
+- Ownership transfer 使用 owner + monotonic generation 的 CAS。轉移前必須零 active
+  attempts；等價 retry 回傳原 receipt，競爭或漂移欄位 fail closed。Rollback 到
+  `legacy` 必須精確帶當前 generation 作 `rollback_of_generation`，因此 rollback
+  本身也是 durable、可稽核的 ownership event。
+- 四張 ownership tables 位於 private `volpred_ops` 且 FORCE RLS。五個 PostgREST
+  RPC 只授權 `service_role`，PUBLIC／anon／authenticated 全撤銷；function owner 是
+  no-login definer、`search_path=''`，definer 的 public CREATE 在 migration 結束前
+  撤銷。PG17 non-superuser fixture 覆蓋 migration replay、privilege shape 與完整
+  cutover→delivery→rollback→recutover transaction。
+- 第一次 live caller 已正確 fail closed 為
+  `email_sent_mail_readback_mismatch`。Durable payload hash 沒有漂移；獨立比對 Gmail
+  raw MIME 證明唯一差異是 SMTP 把 LF 正規化成 CRLF，而 read-back verifier 只移除尾端
+  newline。底層修成比較前將 CRLF／CR canonicalize 為 LF，測試 mailbox 改用 SMTP
+  policy，避免測試環境再次遮住 wire-format 差異。
+- 第二個唯一 idempotency key 的 live alert 完整 delivered，DB payload hash、Work／
+  effect／outbox／attempt receipt、Primary Authority release receipt 與 Gmail Sent
+  exact-byte SHA-256 全部回讀一致。接著完成
+  `operations_core/2 → legacy/3 → operations_core/4` rehearsal；舊 generation
+  request 被拒且未落 row，final state 為唯一 owner `operations_core/4`、零 active
+  attempts。Security advisor 沒有本 scope lint；performance advisor 的 ownership
+  FK 缺 index 已補，剩餘只有新 index 尚未累積使用統計的 INFO。
+- 因而 `email.ops_alert` 的正式 caller、production ownership transaction、
+  unique-owner live acknowledgement 與 rollback rehearsal 四項 gate 均為
+  `root_cause_fixed_and_verified`。其他 notification family 不在這次 cutover scope。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

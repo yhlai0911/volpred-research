@@ -394,7 +394,9 @@ def _message_body(message: Message, content_type: str) -> str | None:
 
 
 def _transport_text(value: str | None) -> str | None:
-    return value.rstrip("\r\n") if value is not None else None
+    if value is None:
+        return None
+    return value.replace("\r\n", "\n").replace("\r", "\n").rstrip("\n")
 
 
 def _readback_outcome(
