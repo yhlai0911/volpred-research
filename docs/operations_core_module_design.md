@@ -309,6 +309,31 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
 - read-only 解析三套來源，輸出 canonical candidate 與 reconciliation report。
 - 對未知狀態、重複 ID、丟失 parent、同時 claim、無法映射的 public effect 一律 fail closed。
 - `--dry-run` 是唯一模式；不修改 Supabase、JSON 或 task status。
+- **2026-07-23 shadow implementation candidate（contained，尚未提交）**：
+  `LegacySnapshotImporter` 只接收 caller
+  明確提供的 `next_tasks`、TaskRecord 與 exported `ops_jobs` snapshots，不自行連線
+  Supabase 或讀 live source；輸出含 canonical candidate、原狀態、claim／terminal trace、
+  source counts 與 structured issues 的 deterministic JSON report。公開 caller 只透過
+  `volpred.ops.work_migration.preview_legacy_snapshots`，adapter class 保持 implementation
+  detail。跨來源 duplicate ID、canonical idempotency collision、missing parent、
+  simultaneous active claim、invalid lifecycle、unknown status／kind／policy／source、
+  無時區 timestamp 與尚未有 Effect Delivery 契約的 public effect 都使 `ready=false`；
+  payload reference 以 record SHA-256 綁定 supplied snapshot 內容。`next_tasks.source`
+  採逐值核可的 exact provenance registry；原始值與分類依據都出現在 report，未登錄值
+  fail closed，不使用 prefix 或 fallback 猜測 canonical source。
+- CLI `uv run volpred ops work-import-legacy --dry-run` 強制同時提供三份 JSON array snapshot；
+  沒有 apply／write 模式，對帳不通過以 exit code 2 結束。測試逐 byte 驗證三份輸入未變，
+  且命令沒有產生旁路輸出檔。
+- 對 2026-07-23 16:14:48 CST 的 `storage/next_tasks.json` 唯讀 smoke（snapshot
+  SHA-256 `18281269d61832d97dc38177f8d26ec8b53b91e525e5198a99e9414a1f47c703`）：
+  3,337 筆中 2,569 筆形成 candidate；structured issues 為 320 `invalid_record`、6
+  `unknown_kind`、442 `unknown_source`、9 `missing_parent`、123
+  `invalid_lifecycle`，因此正確 `ready=false`。此數字只描述該 hash 的
+  `next_tasks` snapshot；TaskRecord／exported `ops_jobs` 由固定 fixtures 驗證，不與
+  live queue 數字混加。未登錄 provenance 與其他差異是 Submit D 前要分類的 legacy
+  debt，不以 importer 猜測修補。
+- 本提交仍沒有 submit candidate、更新舊 JSON、查詢／修改 live `ops_jobs`、部署 migration
+  或改變 canonical queue owner；它只建立 cutover 前的可稽核 migration boundary。
 
 ### 提交 D — Shadow replay
 

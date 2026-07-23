@@ -1,5 +1,9 @@
 # Refactor Plan — Ops Master Consolidation（運營程式全面重構總計畫）
 
+- **2026-07-23 關係說明**：本檔仍是交易式 operations core 接管前，Phase 1 現行 ops
+  修復的 canonical implementation ledger；跨主機、provider、frontend、Admin、analytics
+  與 growth 的 umbrella charter 見 `docs/platform_optimization_program_2026_07.md`。
+  新 charter 吸收本檔成果，不重置 §7，也不得用尚未落地的目標架構改寫 live 狀態。
 - **建立**：2026-07-20（owner 指令：「重構目前所有運營的程式碼，從底層邏輯、流程、架構分析，不符合的徹底改過；流程要有效率、不要重複功能、滿足 PDCA / loop engineering」）
 - **Status**：ACTIVE — §7 狀態表為唯一進度真相（canonical）
 - **性質**：**收編型 master plan**（anti-stacking）— 吸收既有 11 份 refactor plan 的全部殘留項（§4 對照表），此後所有 ops 重構工作以本檔為單一入口；舊 plan 不再各自推進。

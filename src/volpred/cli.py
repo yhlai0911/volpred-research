@@ -4,6 +4,7 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import NoReturn
 
 import click
 import yaml
@@ -550,6 +551,115 @@ def notify(subject: str, body: str, level: str) -> None:
 def ops() -> None:
     """Agent-first operations for publishing, sync, strategy, and health."""
     pass
+
+
+@ops.command("work-import-legacy")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    required=True,
+    help="Required safety flag; this command never writes imported data.",
+)
+@click.option(
+    "--next-tasks-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option(
+    "--task-records-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option(
+    "--ops-jobs-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+def ops_work_import_legacy(
+    dry_run: bool,
+    next_tasks_snapshot: Path,
+    task_records_snapshot: Path,
+    ops_jobs_snapshot: Path,
+) -> None:
+    """Preview legacy work mappings from three supplied JSON snapshots."""
+    from volpred.ops.work_migration import (
+        LegacySnapshots,
+        preview_legacy_snapshots,
+    )
+
+    def fail_snapshot(source_system: str, detail: str) -> NoReturn:
+        click.echo(
+            json.dumps(
+                {
+                    "mode": "dry_run",
+                    "ready": False,
+                    "candidate_count": 0,
+                    "issue_count": 1,
+                    "source_counts": {
+                        source: {"seen": 0, "mapped": 0}
+                        for source in (
+                            "next_tasks",
+                            "task_records",
+                            "ops_jobs",
+                        )
+                    },
+                    "candidates": [],
+                    "issues": [
+                        {
+                            "code": "invalid_snapshot",
+                            "source_system": source_system,
+                            "record_id": None,
+                            "detail": detail,
+                        }
+                    ],
+                },
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+        )
+        raise click.exceptions.Exit(2)
+
+    def load_records(path: Path, *, source_system: str) -> tuple[dict, ...]:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except UnicodeDecodeError:
+            fail_snapshot(
+                source_system,
+                "snapshot is not readable UTF-8 JSON",
+            )
+        except (OSError, json.JSONDecodeError) as exc:
+            fail_snapshot(
+                source_system,
+                f"snapshot is not readable JSON: {exc}",
+            )
+        if not isinstance(payload, list) or not all(
+            isinstance(record, dict) for record in payload
+        ):
+            fail_snapshot(
+                source_system,
+                "snapshot must be a JSON array of objects",
+            )
+        return tuple(payload)
+
+    if not dry_run:  # Defensive even though Click requires the flag.
+        raise click.UsageError("--dry-run is the only supported mode")
+    report = preview_legacy_snapshots(
+        LegacySnapshots(
+            next_tasks=load_records(
+                next_tasks_snapshot, source_system="next_tasks"
+            ),
+            task_records=load_records(
+                task_records_snapshot, source_system="task_records"
+            ),
+            ops_jobs=load_records(
+                ops_jobs_snapshot, source_system="ops_jobs"
+            ),
+        )
+    )
+    payload = {"mode": "dry_run", **report.as_dict()}
+    click.echo(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    if not report.ready:
+        raise click.exceptions.Exit(2)
 
 
 @ops.group("rollback")

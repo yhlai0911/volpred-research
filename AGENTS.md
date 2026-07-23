@@ -286,6 +286,29 @@ hash 不上那個值、`gate_history/` 又沒有原件，`check_experiment_artif
   - brief：`.claude/skills/autonomous-research/references/agent-brief-template.md`
   - result：`.claude/skills/autonomous-research/references/agent-result-template.md`
 
+## Agent skills
+
+### Matt Pocock flow
+
+全域 Matt Pocock skills 已安裝。使用者明確要求依 Matt skills 選流程時，先讀
+`ask-matt` router，依其 main flow／on-ramp 選擇 user-invoked skill，不可自行拼湊替代順序。
+標示 `disable-model-invocation: true` 的 skill 只在使用者明確呼叫時啟動；其餘
+model-invoked skills 可按任務描述自動採用。建立或修改 skill 時以
+`writing-great-skills` 的 predictability、information hierarchy、completion criterion
+與 single source of truth 為準。
+
+### Issue tracker
+
+本專案使用 GitHub Issues 追蹤工程工作。見 `docs/agents/issue-tracker.md`。
+
+### Triage labels
+
+使用五個預設 triage roles 與同名 GitHub labels。見 `docs/agents/triage-labels.md`。
+
+### Domain docs
+
+本專案採 single-context domain documentation layout。見 `docs/agents/domain.md`。
+
 ## 活文件原則
 
 以下內容變了，就應該更新對應母本：

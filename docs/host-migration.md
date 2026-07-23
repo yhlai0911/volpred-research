@@ -1,5 +1,12 @@
 # 換機安裝手冊（新主機從零重建 VolPred）
 
+> **狀態說明（2026-07-23）**：本手冊仍是目前可用的人工 bootstrap，但只能視為
+> `contained` 的換機方式，尚未達成功能等價、RPO=0、warm standby、租約防雙主與
+> zero-paid provider continuity。正式目標與接管 gate 見
+> `docs/adr/0002-zero-paid-provider-continuity-and-host-failover.md` 與
+> `docs/platform_optimization_program_2026_07.md`。在新版 guided migration 通過演練前，
+> 不得移除本手冊或現行 bootstrap。
+>
 > 目標：新 Mac 上 **clone → 填環境變數 → 跑 bootstrap → 平台運作**。
 > 照本手冊由上到下做即可。每步附確切指令 + 預期結果。
 > 2026-06-30 建立（boss 要求）。預設新機是 **macOS、同使用者名稱 `yhlai0911`**；不同 user 名見 §9。

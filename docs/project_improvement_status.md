@@ -7,6 +7,10 @@ Last updated: **2026-07-23（平台運營優化總計畫已核可）**
 跨基礎架構、程式、零付費 AI 續跑、換機／暖備、Admin、原版／v3／vNext、analytics、
 自然成長與受控自我優化的總體決策，見
 `docs/platform_optimization_program_2026_07.md` 與 `docs/adr/` 下四份 accepted ADR。
+GitHub planning parent 為
+`https://github.com/yhlai0911/volpred-research/issues/3`，33 張驗收票為 #4–#36；
+GitHub 只負責規劃／驗收，`storage/next_tasks.json` 仍是唯一 runtime pending queue，
+materialized runtime task 必須引用對應 planning issue。
 Phase 0／ADR-0001 的 module seam、interface、adapter 與第一個 TDD 切片，見
 `docs/operations_core_module_design.md`。
 2026-07-23 已完成 in-memory tracer（24 cases）及 private PostgreSQL 17 shadow adapter
@@ -19,7 +23,17 @@ FORCE RLS、專用低權限 function definer、具名 mutation functions、worke
 parent／deadline、requester、created／updated 與 blocked reason。外部測試 DSN 有
 localhost／hostaddr／專用 DB／opt-in 防線；CI 固定使用 PostgreSQL 17 且缺少
 integration backend 時 fail closed。
-尚無 legacy importer／shadow replay／live caller，migration 未部署，因此不構成接管或上線。
+Submit C legacy snapshot importer 目前為 **contained（尚未提交，不宣稱結案）**：
+三套來源只讀映射、公開 migration façade、
+內容雜湊綁定的 payload reference、structured reconciliation、duplicate ID／idempotency、
+missing parent／simultaneous claim／invalid lifecycle／unknown schema／policy／public effect
+fail-closed、逐值核可 provenance registry，以及強制三份 snapshot、只允許
+`--dry-run`、malformed encoding／shape machine-readable、輸入逐 byte 不變的 CLI。
+2026-07-23 16:14:48 CST 的 next_tasks-only smoke（snapshot SHA-256
+`18281269d61832d97dc38177f8d26ec8b53b91e525e5198a99e9414a1f47c703`）為
+3,337 seen／2,569 mapped／900 issues，因未分類 provenance 與歷史 schema debt 正確
+回報 `ready=false`；尚無
+shadow replay／live caller，migration 未部署，因此不構成接管或上線。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
