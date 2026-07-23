@@ -164,7 +164,7 @@
   "inc_45ad0c767d6f": {
    "class": "ordinary",
    "clean_observations": [],
-   "current_task_id": "ci-red-30001512040",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-07-23T12:00:05.186614+00:00",
@@ -212,9 +212,19 @@
    "last_seen_at": "2026-07-23T16:00:05.744904+00:00",
    "notified_at": null,
    "occurrence_count": 5,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-07-23T18:00:07.820256+00:00",
+    "by": "ci-red-30001512040",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-23T18:00:07.820256+00:00",
+     "by": "ci-red-30001512040",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
@@ -518,7 +528,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-23T17:07:12.359675+00:00"
+     "last_seen_at": "2026-07-23T18:07:45.898324+00:00"
     },
     {
      "cleared_at": null,
@@ -531,7 +541,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-23T17:07:12.590230+00:00"
+     "last_seen_at": "2026-07-23T18:07:46.133884+00:00"
     },
     {
      "cleared_at": null,
@@ -544,7 +554,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-23T17:07:13.029882+00:00"
+     "last_seen_at": "2026-07-23T18:07:46.589068+00:00"
     },
     {
      "cleared_at": null,
@@ -557,7 +567,7 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-23T17:07:12.807050+00:00"
+     "last_seen_at": "2026-07-23T18:07:46.364272+00:00"
     },
     {
      "cleared_at": null,
@@ -570,7 +580,7 @@
      },
      "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-23T17:07:13.260361+00:00"
+     "last_seen_at": "2026-07-23T18:07:46.813789+00:00"
     },
     {
      "cleared_at": null,
@@ -596,7 +606,7 @@
      },
      "first_seen_at": "2026-07-22T02:53:18.325364+00:00",
      "key": "dispatch-slot-3-3896dcaa-k1714",
-     "last_seen_at": "2026-07-23T17:07:13.510891+00:00"
+     "last_seen_at": "2026-07-23T18:07:47.066410+00:00"
     },
     {
      "cleared_at": null,
@@ -614,9 +624,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-3-3896dcaa-k1714 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-23T17:07:13.510891+00:00",
+   "last_seen_at": "2026-07-23T18:07:47.066410+00:00",
    "notified_at": null,
-   "occurrence_count": 498,
+   "occurrence_count": 504,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -688,9 +698,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-22T23:16:01.036763+00:00"
-    },
-    {
      "at": "2026-07-23T00:13:53.017841+00:00"
     },
     {
@@ -722,6 +729,9 @@
     },
     {
      "at": "2026-07-23T16:16:29.723309+00:00"
+    },
+    {
+     "at": "2026-07-23T17:16:31.670374+00:00"
     }
    ],
    "current_task_id": null,
@@ -837,6 +847,6 @@
    }
   }
  },
- "updated_at": "2026-07-23T17:16:25.936119+00:00",
+ "updated_at": "2026-07-23T18:24:13.711341+00:00",
  "version": 1
 }
