@@ -24635,5 +24635,60 @@
     "owner": "codex-failover-slot-1-ea8d0f5643534dfeab479bfd86082d16",
     "commit": null,
     "summary": "Added fail-closed dual-publish completion gate requiring canonical FB drafts; widened audit regression; live readback: 0 missing drafts, 0 nonterminal fb_repost followups; 43 targeted tests passed."
+  },
+  {
+    "timestamp": "2026-07-23T11:12:15+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-d8565b893",
+    "outcome": "succeeded",
+    "summary": "queue k1731 rev9 remediation",
+    "commit": "d8565b893f3e3b1468a964544a8d4239ef6e7ac5",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T05:24:20.016396+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T12:10:35+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-edfadcbb6",
+    "outcome": "succeeded",
+    "summary": "close stale experiment gate regression",
+    "commit": "edfadcbb6383e927017325e67a943b58d7aa5bb3",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T05:24:20.016391+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T13:12:01+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-0bb22e91d",
+    "outcome": "succeeded",
+    "summary": "document operations domain model",
+    "commit": "0bb22e91d19c6ed1ca868d8efa65c4feba6ebb31",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T05:24:20.016385+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T13:14:52+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-2bbdab579",
+    "outcome": "succeeded",
+    "summary": "enforce FB draft completion gate",
+    "commit": "2bbdab5795691e4ab4a06b861291bb760b284ebe",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T05:24:20.016379+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T13:23:55+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-503786ece",
+    "outcome": "succeeded",
+    "summary": "guard stale worktree merge overlaps",
+    "commit": "503786ece0b5c0faa6f58559d352decffac6288a",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T05:24:20.016126+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
