@@ -207,6 +207,14 @@ def pattern_type_of(task: dict[str, Any]) -> str | None:
     return pattern or None
 
 
+def requires_live_revalidation(task: dict[str, Any]) -> bool:
+    """Whether claiming this open task must run a registered live detector."""
+
+    pattern = pattern_type_of(task)
+    status = str(task.get("status") or "").strip().lower()
+    return pattern in _REVALIDATORS and status in _OPEN_STATUSES
+
+
 def revalidate(task: dict[str, Any], *, storage_dir: str | None = None) -> Revalidation | None:
     """Re-run this dreaming task's own detector. None = no opinion, leave it alone.
 
