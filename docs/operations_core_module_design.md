@@ -148,6 +148,21 @@ class ChangeDelivery:
 
 Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge、path scope、test execution、HEAD compare-and-set、commit message、rollback point 與 receipt。成功定義為 commit object／HEAD read-back 與 exact-path diff 相符；process exit 0 不足以完成。
 
+### 2026-07-23 ChangeSet proposal checkpoint
+
+- 已建立 shadow `volpred.ops.delivery` 的 `propose`／`inspect` external interface；它不接
+  live Git writer、不 staging、不 commit，也不改 ref。
+- `propose` 從 linked worktree read-back 驗證 HEAD／base identity、index 為空、完整
+  dirty-path set 與 caller 的 exact paths 相等、每個 regular file 的 SHA-256 相符，
+  並拒絕 canonical checkout、symlink、path escape、rename／copy／delete。
+- WorkItem id／version、作者 execution evidence、全部 required checks 與 normalized
+  proposal payload 綁入 SHA-256；同一 idempotency key 的等價 replay 回傳同一
+  ChangeSet，不同 payload fail closed。
+- 這只完成 program commit 08 的 proposal policy／path-scope 垂直切片。Postgres
+  persistence、WorkLease read-back、Primary Authority fencing、commit actuator、
+  DeliveryReceipt 與 live caller 均未完成，因此不構成 Change Delivery ownership
+  cutover。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam
