@@ -24,6 +24,8 @@ def storage(tmp_path):
     feed = [
         {
             "id": "mile_test",
+            "title": "old title",
+            "description": "old description",
             "status": "published",
             "published_at": "2026-07-01T17:24:08+00:00",
             "content": "近 20 日波動 18.1%，近 5 日 14.0%。事件在 7/2。",
@@ -61,6 +63,60 @@ def test_corrects_body_and_details_and_stamps_errata(storage):
     assert art["errata"]["update_summary"] == "official calendar correction"
     assert len(art["errata"]["update_history"]) == 1
     assert report["details_changes"]["event"]["from"] == "NFP_US_2026_07_03"
+
+
+def test_corrects_exact_title_and_records_change(storage):
+    report = apply_article_correction(
+        "mile_test",
+        title_replacement=("old title", "new title"),
+        summary="headline number correction",
+        storage_dir=storage,
+    )
+
+    art = _article(storage)
+    assert art["title"] == "new title"
+    expected = {"from": "old title", "to": "new title"}
+    assert art["errata"]["update_history"][-1]["title_change"] == expected
+    assert report["title_change"] == expected
+
+
+def test_title_mismatch_fails_before_writing(storage):
+    original = _feed(storage)
+    with pytest.raises(CorrectionNotApplied, match="title did not exactly match"):
+        apply_article_correction(
+            "mile_test",
+            title_replacement=("stale title", "new title"),
+            summary="headline number correction",
+            storage_dir=storage,
+        )
+    assert _feed(storage) == original
+
+
+def test_corrects_exact_description_and_records_change(storage):
+    report = apply_article_correction(
+        "mile_test",
+        description_replacement=("old description", "new description"),
+        summary="card excerpt correction",
+        storage_dir=storage,
+    )
+
+    art = _article(storage)
+    assert art["description"] == "new description"
+    expected = {"from": "old description", "to": "new description"}
+    assert art["errata"]["update_history"][-1]["description_change"] == expected
+    assert report["description_change"] == expected
+
+
+def test_description_mismatch_fails_before_writing(storage):
+    original = _feed(storage)
+    with pytest.raises(CorrectionNotApplied, match="description did not exactly match"):
+        apply_article_correction(
+            "mile_test",
+            description_replacement=("stale description", "new description"),
+            summary="card excerpt correction",
+            storage_dir=storage,
+        )
+    assert _feed(storage) == original
 
 
 def test_published_at_is_not_touched(storage):

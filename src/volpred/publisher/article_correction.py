@@ -76,6 +76,8 @@ def apply_article_correction(
     article_id: str,
     *,
     content_replacements: list[tuple[str, str]] | None = None,
+    title_replacement: tuple[str, str] | None = None,
+    description_replacement: tuple[str, str] | None = None,
     details_patch: dict | None = None,
     summary: str,
     action: str = "content_correction",
@@ -87,6 +89,11 @@ def apply_article_correction(
         exactly once in the article body, otherwise nothing is written and
         CorrectionNotApplied is raised. Pass a long enough substring to be
         unique -- that requirement is the safety property, not an annoyance.
+    title_replacement: (old, new) exact full-title replacement. The current
+        title must equal `old`, otherwise nothing is written.
+    description_replacement: (old, new) exact full-description replacement.
+        The current card/SEO description must equal `old`, otherwise nothing
+        is written.
     details_patch: shallow merge into `details`. A None value deletes the key.
     summary: human-readable reason, recorded in the errata trail.
 
@@ -113,6 +120,36 @@ def apply_article_correction(
         raise CorrectionNotApplied(f"{article_id}: {exc}") from None
 
     applied = [{"from": s["from"], "to": s["to"]} for s in spans]
+    title_change: dict | None = None
+    if title_replacement is not None:
+        old_title, new_title = title_replacement
+        current_title = str(art.get("title") or "")
+        if current_title != old_title:
+            raise CorrectionNotApplied(
+                f"{article_id}: title did not exactly match {old_title!r}; "
+                "nothing was written. Re-read the current article."
+            )
+        if old_title != new_title:
+            title_change = {"from": old_title, "to": new_title}
+            art["title"] = new_title
+
+    description_change: dict | None = None
+    if description_replacement is not None:
+        old_description, new_description = description_replacement
+        current_description = str(art.get("description") or "")
+        if current_description != old_description:
+            raise CorrectionNotApplied(
+                f"{article_id}: description did not exactly match "
+                f"{old_description!r}; nothing was written. Re-read the "
+                "current article."
+            )
+        if old_description != new_description:
+            description_change = {
+                "from": old_description,
+                "to": new_description,
+            }
+            art["description"] = new_description
+
     if spans:
         out: list[str] = []
         pos = 0
@@ -138,7 +175,12 @@ def apply_article_correction(
                 details_changes[key] = {"from": before, "to": value}
         art["details"] = details
 
-    if not applied and not details_changes:
+    if (
+        not applied
+        and title_change is None
+        and description_change is None
+        and not details_changes
+    ):
         raise CorrectionNotApplied(
             f"{article_id}: correction was a no-op (body and details already "
             "match the requested state). Refusing to stamp an empty errata."
@@ -164,6 +206,8 @@ def apply_article_correction(
             "action": action,
             "summary": summary,
             "content_replacements": applied,
+            "title_change": title_change,
+            "description_change": description_change,
             "details_changes": details_changes,
         }
     )
@@ -192,6 +236,8 @@ def apply_article_correction(
     return {
         "article_id": article_id,
         "content_replacements": applied,
+        "title_change": title_change,
+        "description_change": description_change,
         "details_changes": details_changes,
         "status": art.get("status"),
         "last_updated_at": art["last_updated_at"],

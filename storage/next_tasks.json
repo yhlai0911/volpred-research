@@ -45435,7 +45435,7 @@
     "description": "volatility-absorption 論文 NFP 數字更正後，8 篇既有 feed 文章引用的是**修正前**的 NFP\n統計（舊：n_nfp=195, ratio 1.145, p=0.081）。canonical 重跑後為 n_nfp=194, ratio 1.163,\np=0.051(Student)/0.039(Welch)，且 Low-VIX regime 從 p=0.069 變 p=0.009。sign 未翻轉，\n但數字與顯著性敘述需更正。\n\n**blocked_until 解除條件**：compute job `agent-brief_k741_cert_merge-1b4755` 完成、\n`k741-nfp-canonical` 通過 Codex 認證並經 merge_worktree.sh 合併 main（避免論文數字未定案就更正兩次）。\n\n更正順序（依 slot-3 收件摘要 feed_correction_priority）：\n- P1: mile_eda69bfb, mile_d721672b\n- P2: mile_630d0010, mile_44fb4b90, mile_a1fd229a, mile_d9129566, mile_ffb14405\n- P3: mile_76475146\n\n每篇走既有 article_correction 路徑，更正需誠實標註（不得靜默改數字）。\n\nparent: assign_1238781f\nsource artifact: .claude/worktrees/dispatch-slot-3-b5fbc1f4-nfpcal/experiments/k741/nfp_calendar_fix_summary.json\n",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-20T04:09:49.469746+00:00",
     "parent_task_id": "assign_1238781f",
@@ -45464,13 +45464,33 @@
         "to": "pending",
         "by": "hourly-slot-2-0a156df1656e4355838979df5c2ea4db",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-23T10:19:48.946277+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-23T10:19:49.185359+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-23T10:38:44.593041+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-21T17:17:16.053617+00:00",
+    "started_at": "2026-07-23T10:19:49.185340+00:00",
     "canonical_numbers_verified": "[2026-07-22 01:3x 由 hourly slot-1 驗證後補入 — 執行更正前務必先讀]\n\n**blocker 已解除**：k741 canonical 已合併 main（`experiments/k741/k741_nfp_event_study_canonical_results.json` + `k741_cert_merge_summary.json` 都在 main）。Welch vs Student 已定案：`test_variant_chosen = \"welch\"`（理由：Zimmerman 2004 / Ruxton 2006 / Delacre et al. 2017 的 unconditional Welch；且 summary 誠實記載此選擇 **非 a priori**，是在兩個 p 值已知後才做，先前宣稱 a priori 的說法已於 Codex review 2026-07-20 撤回）。\n\n**⚠️ 兩張 P1 任務描述裡的目標數字有誤，照抄會寫錯**：\n- 描述寫「Low-VIX regime 從 p=0.069 變 p=0.009」—— `0.009` 是 **Student** 值（p_student=0.008904），但 canonical 選的是 **Welch**：p_welch = **0.0260**。\n- 更關鍵：canonical 有做 **Holm 多重比較校正**，校正後 **四個 VIX regime 全部不顯著**（p_welch_holm 最小值 = 0.1039）。原文章「VIX 體制決定一切」「低 VIX 時差距 3 倍」這類敘述若只換數字不改敘述，會變成**未校正的顯著性宣稱**，違反 AGENTS.md 第 10 條（結論強度不得超過證據）。\n\n**canonical 權威數字（part_a_historical，全部取自 canonical results.json）**：\n- n_nfp = **194**（舊 195）、n_non_nfp = **3890**（舊 3909）\n- NFP 日 SPY 平均絕對報酬 = **0.8299%**；非 NFP 日 = **0.7135%**；普通週五 = **0.6991%**\n- ratio_vs_all = **1.1631**（舊 1.1448）、ratio_vs_friday = **1.1871**\n- 選定檢定 Welch：t = **2.0731**, p = **0.0394**（Student 對照：t=1.9558, p=0.0506 — 恰在 5% 邊緣，故變異數選擇會改變「是否顯著」的敘述，必須明講用哪個）\n- vs 週五：t_welch = 2.1047, p = 0.0361\n- Wilcoxon p = **0.000639**（注意：`mile_eda69bfb` 現寫「p 達 0.00369」= 舊值，需一併更正）\n- pct_positive = 57.22%、mean_return_pct = 0.0567%、vix_drops_pct = 65.98%\n\n**part_b_vix_regimes（ratio / p_welch / p_welch_holm）**：\n- Low (VIX<15): 1.3052 / 0.0260 / **0.1039**\n- Medium (15-20): 1.2305 / 0.0285 / **0.1039**\n- Elevated (20-25): 1.1862 / 0.2665 / **0.5329**\n- High (VIX>=25): 0.9361 / 0.7067 / **0.7067**\n\n**執行路徑**：唯一合法更正入口 = `src/volpred/publisher/article_correction.py:apply_article_correction`（含 publisher_feed 寫鎖 + errata trail + Supabase 投影同步）。**禁止手改 feed.json 或直接 PATCH Supabase**（模組 docstring 明載，兩者都會跳過 errata 與鎖並讓 feed.json 與 Supabase 漂移）。每個 replacement 的 old 字串必須在 body 中**恰好出現一次**，否則整批不寫入並丟 `CorrectionNotApplied` —— 這是安全性質不是麻煩。\n\n**額外注意**：`mile_eda69bfb` 與 `mile_d721672b` 的**標題裡就有「195 次」**，而 `apply_article_correction` 只改 content 與 details，不改 title —— 標題更正需另找路徑或擴充該模組，不可漏掉（讀者第一眼看到的就是標題）。`mile_d9129566` 目前 status=retracted，需先判斷是否仍需更正。",
     "progress": "1/8 done (2026-07-22 fire slot-2): mile_eda69bfb corrected in place via volpred.publisher.article_correction (errata numbers_correction). Canonical source: experiments/k741/k741_nfp_event_study_canonical_results.json + k741_cert_merge_summary.json. Remaining: mile_d721672b (P1), mile_630d0010 / mile_44fb4b90 / mile_a1fd229a / mile_ffb14405 (P2), mile_76475146 (P3). mile_d9129566 is status=retracted -> no correction needed, drop from list.",
     "finding": "Blocker IS resolved (k741-nfp-canonical merged at dde428fab/620b16755). Correction is LARGER than this task description says: the description claims only n/ratio/p change and Low-VIX becomes p=0.009, but the final certified state withdraws significance entirely - Holm over the overall pair gives p=0.0722 and no regime survives Holm under any family (anything_clears_5pct_under_any_family=false). Articles claiming significance must be downgraded, not just renumbered. Also canonical scope is Parts A/B only: strategy backtest and T+-n drift were NOT rerun and must be labelled as old-calendar rather than silently kept.",
-    "last_released_at": "2026-07-21T17:22:06.408568+00:00"
+    "last_released_at": "2026-07-21T17:22:06.408568+00:00",
+    "completed_at": "2026-07-23T10:38:44.593024+00:00",
+    "result": "root_cause_fixed_and_verified: 7 篇 published K741 引用已依官方 BLS canonical 結果更正 title/description/content/details，1 篇 retracted 保持不動。Mirror/Supabase 回讀無 drift、7 個 public URL=200、28 tests passed、silent-fallback new=0、舊 claim 與 anti-AI 掃描皆清空。"
   },
   {
     "id": "assign_d569f0c4",
