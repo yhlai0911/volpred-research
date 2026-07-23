@@ -51246,12 +51246,35 @@
     "description": "PHASE-Z（fire 23:27）已把這班其餘變更正常提交，但**保留**下列 trusted-gate 路徑不提交：\n\n- `scripts/audit_silent_fallbacks.py`\n\n## 為什麼保留\n這些檔案就是 PHASE-Z 用來審判 commit 的 gate 本身。若讓它們自動落地，下一班就會被『這班剛改過的 gate』審判 —— commit N 弱化 gate、commit N+1 被弱化的 gate 放行。candidate worktree 用 pinned base_sha 執行 hook，擋得住同一批的自我審判，擋不住這條跨 commit 的時序威脅。\n\n## 下一步（擇一，做完這張單就結案）\n1. 看 diff，確認變更沒有弱化檢查強度：\n\n```\ngit diff -- scripts/audit_silent_fallbacks.py\n```\n\n2. 認可 → 由審查者自行提交（PHASE-Z 不會代勞）：\n\n```\ngit add scripts/audit_silent_fallbacks.py\ngit commit -m 'chore(gate): <說明這次 gate 變更做了什麼>'\n```\n\n3. 不認可 → 還原：\n\n```\ngit checkout -- scripts/audit_silent_fallbacks.py\n```\n\n檔案留在工作區、沒有遺失；在本單結案前，每班 PHASE-Z 都會照常提交其餘變更。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z_gate_review",
     "created_at": "2026-07-21T15:27:25.920835+00:00",
     "gate_paths": [
       "scripts/audit_silent_fallbacks.py"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-23T07:10:20.968843+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-c4680218ccfd4a3ebb77e53b8da1a575"
+      },
+      {
+        "ts": "2026-07-23T07:10:21.191565+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-c4680218ccfd4a3ebb77e53b8da1a575"
+      },
+      {
+        "ts": "2026-07-23T07:11:12.767234+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-c4680218ccfd4a3ebb77e53b8da1a575"
+      }
+    ],
+    "started_at": "2026-07-23T07:10:21.191552+00:00",
+    "completed_at": "2026-07-23T07:11:12.767219+00:00",
+    "result": "Reviewed the trusted-gate change already landed in f7d9d1400: it only makes baseline reporting scope-aware and does not weaken finding detection or strict blocking. Verified 25 relevant pytest cases pass and full strict audit reports 60/60 baseline findings with new=0, resolved=0."
   },
   {
     "id": "k1731_k1730_merge_after_codex_round8_20260725",
@@ -56002,7 +56025,30 @@
     "tags": [
       "alert",
       "release_pool_gap"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-23T07:09:33.860848+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-c4680218ccfd4a3ebb77e53b8da1a575"
+      },
+      {
+        "ts": "2026-07-23T07:09:34.095264+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-c4680218ccfd4a3ebb77e53b8da1a575"
+      },
+      {
+        "ts": "2026-07-23T07:09:50.737369+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover-slot-1-c4680218ccfd4a3ebb77e53b8da1a575",
+        "note": "manual_release"
+      }
+    ],
+    "started_at": "2026-07-23T07:09:34.095249+00:00",
+    "last_released_at": "2026-07-23T07:09:50.737356+00:00"
   },
   {
     "id": "alert_content_quality_20260723",
@@ -56017,5 +56063,65 @@
       "alert",
       "content_quality"
     ]
+  },
+  {
+    "id": "assign_2e6e760c",
+    "title": "PHASE-Z 卡住檔案 incident（785413a1dbd4d6c0）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n5 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- CLAUDE.md — 3 班\n- CONTEXT.md — 3 班\n- docs/agents/domain.md — 3 班\n- docs/agents/issue-tracker.md — 3 班\n- docs/agents/triage-labels.md — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260723T061513387269Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-23T06:15:13.480646+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "785413a1dbd4d6c0",
+      "paths": [
+        "CLAUDE.md",
+        "CONTEXT.md",
+        "docs/agents/domain.md",
+        "docs/agents/issue-tracker.md",
+        "docs/agents/triage-labels.md"
+      ],
+      "streaks": {
+        "CLAUDE.md": 3,
+        "CONTEXT.md": 3,
+        "docs/agents/domain.md": 3,
+        "docs/agents/issue-tracker.md": 3,
+        "docs/agents/triage-labels.md": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260723T061513387269Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-23T06:15:13.465386+00:00",
+      "last_seen_at": "2026-07-23T06:15:13.465386+00:00"
+    },
+    "priority_capped_from": 1
+  },
+  {
+    "id": "K1686_article_general",
+    "title": "K1686: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1686 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: [提出: dreaming orphan-closure, 執行: hourly-21 主線程收尾, 二審: Codex primary-path (codex-vscode) R2 PASS 2026-07-12] K1686 關閉 Paper 8（volatility-absorption）的核心識別缺陷 P0-1。前身 K897 的 GJR-GARCH null 用 h[t]（F_{t-1}-可測、不對當日 r_t 反應）當 vol proxy，於是模擬把 shock 標在大跌『隔天』；但實證的 ΔVIX_t=VIX_t-VIX_{t-1} 中 V Canonical evidence: experiments/k1686/k1686_contemporaneous_null_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_publish_drought_emergency",
+    "audience_correction_rewrite": false,
+    "k_id": "K1686",
+    "evidence_source_paths": [
+      "experiments/k1686/k1686_contemporaneous_null_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1686/k1686_contemporaneous_null_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "publish-drought-emergency",
+      "reader-facing"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-23T07:01:51+00:00",
+    "priority_capped_from": 1
   }
 ]
