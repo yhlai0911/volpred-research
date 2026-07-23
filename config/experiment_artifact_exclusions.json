@@ -18,5 +18,10 @@
     "Match is on the leading K-id (e.g. 'k1538' also covers 'k1538_bond_fund_flows') or on",
     "the full directory name, case-insensitive."
   ],
-  "exclusions": []
+  "exclusions": [
+    {
+      "experiment": "k1623",
+      "reason": "Legacy pre-spec run used the gitignored mutable data/cache/price_cache.db without a frozen source snapshot. The exact input vintage no longer exists: the documented TW0050 history revision changed n from 4,263 to 4,264 and prevents exact reconstruction of the archived k1623_results.json. A retroactive reproduce_spec would therefore describe today's database, not the bytes that produced the archived result."
+    }
+  ]
 }
