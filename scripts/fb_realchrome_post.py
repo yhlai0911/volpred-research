@@ -393,38 +393,66 @@ def _post_anchor(body: str) -> str:
 
 
 def _capture_permalink(page, anchor: str) -> str | None:
-    """在 profile timeline 抓「含 anchor 文字之貼文」的永久連結。策略：掃所有
-    permalink-shaped <a>，往上找 ≤8 層祖先其 innerText 含 anchor（= 確定是該貼文）
-    才回該連結；**anchor 完全沒匹配任何連結祖先 → 回 None**（誠實：不猜、不用 DOM
-    第一個連結頂替，避免把別篇貼文的 permalink 誤寫進 canonical，2026-07-09 review
-    finding 1）。回傳去掉 query string 的乾淨 URL。抓不到只回 None（非阻塞，主文已發）。"""
+    """從含 ``anchor`` 的貼文正文，幾何綁定其 header 時間戳並抓永久連結。
+
+    Facebook timeline 的時間戳 ``<a>`` 在 hover 前，``href`` 只是個人頁；hover 後才
+    materialize 成 ``/posts/...``。因此不能先用 permalink URL pattern 掃 DOM。先找
+    anchor 正文，再取它正上方、同欄且最近的短 link（時間戳），hover 後只讀**同一個
+    元素**的 href。這保留 2026-07-09 的誠實邊界：找不到精確綁定就回 None，絕不拿
+    timeline 第一個 permalink 猜測。回傳值會移除 volatile query string。
+    """
     if not anchor:
         return None
-    js = r"""
+    tag_timestamp_js = r"""
     (anchor) => {
-      const links = Array.from(document.querySelectorAll('a[href]')).filter(a => {
-        const h = a.href || '';
-        return h.includes('/posts/') || h.includes('story_fbid') ||
-               h.includes('/permalink/') || h.includes('/pfbid');
-      });
-      for (const a of links) {
-        let node = a;
-        for (let i = 0; i < 8 && node; i++) {
-          if ((node.innerText || '').includes(anchor)) return a.href.split('?')[0];
-          node = node.parentElement;
+      document.querySelectorAll('[data-vp-permalink-trigger]').forEach(
+        e => e.removeAttribute('data-vp-permalink-trigger')
+      );
+      const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let node, body = null;
+      while (node = walk.nextNode()) {
+        if ((node.nodeValue || '').includes(anchor)) {
+          body = node.parentElement;
+          break;
         }
       }
-      return null;  // anchor 沒匹配任何 permalink 連結的祖先 → 不猜（誠實 fail）
+      if (!body) return null;
+      body.scrollIntoView({block: 'center'});
+      const br = body.getBoundingClientRect();
+      const links = Array.from(document.querySelectorAll('a[href]')).filter(a => {
+        const r = a.getBoundingClientRect();
+        return r.width > 0 && r.height > 0 && r.height <= 32 &&
+               r.x >= br.x - 20 && r.x < br.x + 250 &&
+               r.bottom <= br.top && br.top - r.bottom < 100;
+      });
+      links.sort((a, b) =>
+        (br.top - a.getBoundingClientRect().bottom) -
+        (br.top - b.getBoundingClientRect().bottom)
+      );
+      if (!links.length) return null;
+      links[0].setAttribute('data-vp-permalink-trigger', '1');
+      return links[0].href;
     }
     """
     try:
-        url = page.evaluate(js, anchor)
-        if url:
-            print(f"[OK] 抓到貼文永久連結（anchor 比對命中）：{url}")
-        else:
-            print(f"[WARN] 抓 permalink：timeline 找不到含「{anchor}」的貼文永久連結"
+        initial_href = page.evaluate(tag_timestamp_js, anchor)
+        if not initial_href:
+            print(f"[WARN] 抓 permalink：timeline 找不到含「{anchor}」的貼文時間戳"
                   "（可能已捲太下 / 已刪 / anchor 不符）→ 不寫 URL（非阻塞）", file=sys.stderr)
-        return url or None
+            return None
+        timestamp = page.locator("[data-vp-permalink-trigger='1']")
+        timestamp.hover(timeout=5_000)
+        page.wait_for_timeout(1_200)
+        url = timestamp.evaluate("a => a.href")
+        if not url or not any(
+            marker in url for marker in ("/posts/", "story_fbid", "/permalink/", "/pfbid")
+        ):
+            print(f"[WARN] 抓 permalink：目標時間戳 hover 後仍未產生永久連結"
+                  f"（href={url or initial_href}）→ 不寫 URL（非阻塞）", file=sys.stderr)
+            return None
+        clean_url = url.split("?", 1)[0]
+        print(f"[OK] 抓到貼文永久連結（anchor 綁定時間戳 + hover）：{clean_url}")
+        return clean_url
     except Exception as e:  # noqa: BLE001
         print(f"[WARN] 抓 permalink 失敗（非阻塞）: {e}", file=sys.stderr)
         return None

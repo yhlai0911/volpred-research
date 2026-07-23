@@ -44374,10 +44374,33 @@
     "title": "fb_realchrome_post --recapture-permalink 連兩篇抓不到永久連結 → fb_post_url 永遠 null",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-dispatch",
     "created_at": "2026-07-20T10:30:00+08:00",
-    "description": "重現 2/2：mile_78899a5c（slot-1, 09:50）與 mile_b7e98682（slot-2, 10:12）發文都成功、第一則留言都送出並回讀驗證，但 permalink 抓取都 FAIL（後者連跑 6 次），feed.json / trending_repost_log 的 fb_post_url 因此永遠是 null。\n\n影響：audit 只能靠 fb_post_status 判斷，沒有可點的貼文 URL 去人工核，也無法偵測貼文事後被刪。\n\n線索：抓 permalink 與貼第一則留言用的是同一個 anchor（主文首 12 字），而留言路徑成功定位到貼文、permalink 路徑失敗 → 問題不在 anchor 比對，而在取『該貼文時間戳 permalink 元素』那段（FB timeline 的時間戳連結需 hover 才 render，且 aria/role 常變）。建議：改由留言成功後、仍停在該貼文 DOM 時就地取 permalink，而不是事後重掃 timeline。\n\n驗收：任一新貼文發完後 feed.json 該 entry 有非 null fb_post_url，且 curl 該 URL 非 404。"
+    "description": "重現 2/2：mile_78899a5c（slot-1, 09:50）與 mile_b7e98682（slot-2, 10:12）發文都成功、第一則留言都送出並回讀驗證，但 permalink 抓取都 FAIL（後者連跑 6 次），feed.json / trending_repost_log 的 fb_post_url 因此永遠是 null。\n\n影響：audit 只能靠 fb_post_status 判斷，沒有可點的貼文 URL 去人工核，也無法偵測貼文事後被刪。\n\n線索：抓 permalink 與貼第一則留言用的是同一個 anchor（主文首 12 字），而留言路徑成功定位到貼文、permalink 路徑失敗 → 問題不在 anchor 比對，而在取『該貼文時間戳 permalink 元素』那段（FB timeline 的時間戳連結需 hover 才 render，且 aria/role 常變）。建議：改由留言成功後、仍停在該貼文 DOM 時就地取 permalink，而不是事後重掃 timeline。\n\n驗收：任一新貼文發完後 feed.json 該 entry 有非 null fb_post_url，且 curl 該 URL 非 404。",
+    "status_history": [
+      {
+        "ts": "2026-07-23T06:08:49.231846+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-6fc0f56d0f5a4ab592cf2f12c63d6b9b"
+      },
+      {
+        "ts": "2026-07-23T06:08:49.481290+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-6fc0f56d0f5a4ab592cf2f12c63d6b9b"
+      },
+      {
+        "ts": "2026-07-23T06:14:01.315946+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-6fc0f56d0f5a4ab592cf2f12c63d6b9b"
+      }
+    ],
+    "started_at": "2026-07-23T06:08:49.481278+00:00",
+    "completed_at": "2026-07-23T06:14:01.315929+00:00",
+    "result": "root_cause_fixed_and_verified: timestamp href only materializes after hover; anchor-bound geometric timestamp hover now captures exact permalink without fallback guessing. Regression 10 passed; mile_b7e98682 canonical fb_post_url backfilled and live URL returned HTTP 200."
   },
   {
     "id": "telegram-1149",
@@ -45879,16 +45902,13 @@
     "id": "guard_stale_base_worktree_merge_revert",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-20T09:16:58.029971+00:00",
     "title": "merge-time guard：stale-base worktree merge 靜默 revert 活碼（第二起，K1032 為第一起）",
     "description": "2026-07-20 CI 紅燈 ci-red-29715899562 根因之一：merge 86e142305 (Merge agent worktree agent-a004aa279dc1a58fc) 以 stale worktree base 合併，對 scripts/compute_queue.py 造成 +0/-192 的純刪除，靜默 revert 掉 D6b stale-running reaper (WORKER_KILLED_EXIT_CODE / _own_start_wall / _stale_running_verdict / _reap_stale_running 及其在 run_next/run_loop 的兩個呼叫點)。後果是真生產 bug：dead-pid job 永遠卡在 running。\n\nCI 之所以抓到，只因測試在 revert 中倖存而實作沒有 —— 若測試也一併被 revert 就會完全靜默。這是同一 bug class 的第二起（K1032 為第一起）。\n\n要求：在 merge_worktree.sh / git_writer_lock 合併路徑加 merge-time guard，比對 worktree 的 base 與當前 main，base 落後即拒絕或強制 rebase；並對『合併結果相對某個祖先為純刪除』的 diff shape 告警。把偵測點從 CI 前移到 merge。參考：docs/error_log.md、K1032。",
     "priority_capped_from": 1,
     "migrated_at": "2026-07-21T06:58:10.992290+00:00",
-    "claimed_by": "codex-hourly",
-    "claimed_at": "2026-07-23T05:12:36.211507+00:00",
-    "claim_session_id": "2a186c908b83",
     "status_history": [
       {
         "ts": "2026-07-23T05:12:36.211520+00:00",
@@ -45901,9 +45921,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-hourly"
+      },
+      {
+        "ts": "2026-07-23T05:23:48.082491+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-hourly"
       }
     ],
-    "started_at": "2026-07-23T05:12:36.421121+00:00"
+    "started_at": "2026-07-23T05:12:36.421121+00:00",
+    "completed_at": "2026-07-23T05:23:48.082478+00:00",
+    "result": "root_cause_fixed_and_verified：merge 前比較 main/worktree 自 merge-base 起的變更路徑；stale 同路徑重疊 fail-closed，pure deletion 顯式告警，不相交 stale merge 保持可用。完整 merge_worktree 回歸 23/23 cases、74/74 assertions PASS；制度契約與 error_log 已寫回。"
   },
   {
     "id": "alert_internal_git_push_backup_hold_3f4834ce7a_20260720T100013000000Z_a1",
@@ -55960,6 +55988,34 @@
       "daily_digest",
       "reader_facing",
       "精選導讀"
+    ]
+  },
+  {
+    "id": "alert_release_pool_gap_20260723",
+    "title": "[alert] Release pool starved > 8.0h (cron healthy)",
+    "description": "由 alert `release_pool_gap` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出機器 cron 正常 fire（machinery_gap=0.0h），但已超過 8.0h 沒有任何文章成功釋出。\n- last_released_at: 2026-07-22T22:00:56.715858+00:00\n- release_gap_hours: 8.0\n- machinery_last_at: 2026-07-23T06:00:49+00:00\n\n## release preview\n- draft: 0\n- scheduled: 0\n- eligible_before_dedup: 0\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 0\n- eligible_after_all_gates: 0\n\n## 影響\n通常是 due 草稿全落在已飽和主題、dedup 正確 skip 但釋出算法未 fall-through 到 fresh-theme 草稿；\n讀者端看不到新內容（Mission 第 1/5 條），但這不是 cron 停擺，是內容釋出層問題。\n\n## 建議行動\n1. 若 eligible_after_dedup=0：不要強行釋出已被 dedup TTL 排除的草稿，先補 fresh-theme draft 或等 TTL 到期。\n2. 若還有 eligible_after_dedup>0：定向釋出一篇 fresh-theme 草稿（避開 model_complexity / vt_strategy / spy / vix / garch）：\n   jq '[.[]|select(.status==\"draft\")]|.[].title' storage/reports/feed.json 挑非飽和主題\n   VOLPRED_ACTOR=claude uv run volpred ops release-pool --pub-id <id> --include-drafts\n3. 若 draft 池主題全飽和：派 daily_article 補 fresh-theme 草稿（publication-candidates skill）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-23T06:01:09.703411+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "release_pool_gap"
+    ]
+  },
+  {
+    "id": "alert_content_quality_20260723",
+    "title": "[alert] 內容品質巡檢：發文間隔過久",
+    "description": "由 alert `content_quality` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- 發文節奏: 發文空窗 — 距最新發文 361.18min > 6.0h 門檻（作用窗 TPE hour=14）\n\n## 影響\n內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\n\n## 建議行動（主線程 auto-remediation）\n1. 同一天出現超過一篇每日精選導讀 → 檢視 `storage/ops/content_quality_report.json` items，挑 1 篇 retract：`uv run volpred ops unpublish --mile-id <id>`；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\n2. 發文太密集 → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\n3. 發文間隔過久 → 立即 `release-pool-by-settings` 或派 fresh-arc 日常文章 補位；同時查 release deadlock (`docs/refactor_plan_release_layer_deadlock.md`)。\n4. 標題前綴重複 → 前端 header 與 title 擇一移除前綴；前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。\n5. 懶人包覆蓋不足 → 針對 missing_examples 走 `lazypack-infographic` skill 補圖：primary=確定性 renderer （`lazypack_render.py`，plan.json 綁 evidence、零 LLM）；需 LLM codegen 時用 `codex exec`（boss 2026-06-30/07-15 directive），NotebookLM 僅為 fallback，不得當首選。append `## 懶人包圖組` 後用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。\n6. `arc_dedup_overmatch` → 跑 `scripts/audit_arc_dedup_overmatches.py`，逐筆裁決 dup waiver 或 fresh-arc rewrite。\n7. `audience_classification` → 跑 `scripts/audit_audience_classification.py`，複核 HIGH 候選並以正式更新流程改 audience；不得直接改 feed JSON。",
+    "task_type": "governance",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-23T06:04:41.335092+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "content_quality"
     ]
   }
 ]
