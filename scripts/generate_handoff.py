@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HANDOFF = ROOT / "storage" / "ops" / "handoff_latest.md"
 HANDOFF_ARCHIVE = ROOT / "storage" / "ops" / "handoff_archive"
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
+TASK_POOL_MODE = ROOT / "storage" / "ops" / "task_pool_mode.json"
 DASHBOARD = ROOT / "storage" / "ops" / "dashboard_latest.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
 WORKTREES = ROOT / ".claude" / "worktrees"
@@ -262,6 +263,12 @@ def _format_task_line(t: dict[str, Any]) -> str:
 
 def build() -> str:
     tasks = _load_json(NEXT_TASKS, [])
+    task_pool_mode = _load_json(TASK_POOL_MODE, {})
+    direct_mode = bool(
+        isinstance(task_pool_mode, dict)
+        and task_pool_mode.get("enabled") is True
+        and task_pool_mode.get("mode") == "direct_execution"
+    )
     dashboard = _load_json(DASHBOARD, {})
     work_log = _load_json(WORK_LOG, [])
     gmail = _load_json(GMAIL_STATE, {})
@@ -283,6 +290,17 @@ def build() -> str:
     # 1. 任務池快照
     lines.append("## 1. 任務池快照（`storage/next_tasks.json`）")
     lines.append("")
+    if direct_mode:
+        lines.append(
+            "- **DIRECT EXECUTION MODE：ACTIVE** — 新任務入池與 claim 已機械封鎖；"
+            "只允許既有控制任務收尾。"
+        )
+        lines.append(
+            f"  - activated_at: {task_pool_mode.get('activated_at') or '(unknown)'}"
+        )
+        lines.append(
+            f"  - backup_sha256: {task_pool_mode.get('backup_sha256') or '(unknown)'}"
+        )
     sc = snap["status_counts"]
     lines.append(f"- **總數**：{sum(sc.values())}")
     for s in ("pending", "pending_main_thread", "claimed", "in_progress", "succeeded", "failed", "blocked", "blocked_on_user"):
@@ -345,6 +363,8 @@ def build() -> str:
     if snap["pending_top"]:
         for t in snap["pending_top"]:
             lines.append(_format_task_line(t))
+    elif direct_mode:
+        lines.append("- (direct execution mode — 任務池保持清空，不得自行補池)")
     else:
         lines.append("- (任務池空 — hourly dispatch 必須自主生新題)")
     lines.append("")
@@ -395,20 +415,33 @@ def build() -> str:
     lines.append("## 9. 接續提示詞（hourly dispatch / 互動 session 共用）")
     lines.append("")
     lines.append("```")
-    lines.append("讀 storage/ops/handoff_latest.md 後依以下優先序選工：")
-    lines.append("")
-    lines.append("優先序 (HARD)：")
-    lines.append("  1. Section 3 Email reply 任務（task_type=email_reply）— 若有 pending，立即 claim + 處理（讀 description 的「用戶回信內容」+「原始助理寄出內容」，依用戶指示回應 / 修正 / 派工 / 寄回信）")
-    lines.append("  2. Section 7 Dashboard CRITICAL — 立即 triage")
-    lines.append("  3. Section 4 Pending 任務 top 8 — 依 priority asc + work_log diversity（last-3 task_type rotate）")
-    lines.append("")
-    lines.append("Claim 流程（避免雙 session 撞題）：")
-    lines.append("  uv run python scripts/task_pool_claim.py claim --id <task_id> --owner <hourly|interactive|agent-name>")
-    lines.append("  uv run python scripts/task_pool_claim.py start --id <task_id>")
-    lines.append("  ... 執行 ...")
-    lines.append("  uv run python scripts/task_pool_claim.py complete --id <task_id> --status succeeded --result '...摘要...'")
-    lines.append("")
-    lines.append("完整完成原則：派 agent 後 wait 完成、驗證、寫 knowledge.json / work_log、commit。50min cap。Heavy compute 走 compute_queue。")
+    if direct_mode:
+        lines.append("DIRECT EXECUTION MODE 已啟用：")
+        lines.append("  1. 禁止 claim、refill、建立或恢復 legacy task-pool 任務。")
+        lines.append("  2. 只直接續做老闆已指定的 operations-core 重構與 live 驗證。")
+        lines.append(
+            "  3. 先用 `uv run python scripts/task_pool_control.py status` 回讀 gate；"
+            "不得因池空走 error_log fallback。"
+        )
+        lines.append(
+            "  4. 回復舊池只准用 receipt 綁定的 `task_pool_control.py restore`，"
+            "且 live pool 必須為空。"
+        )
+    else:
+        lines.append("讀 storage/ops/handoff_latest.md 後依以下優先序選工：")
+        lines.append("")
+        lines.append("優先序 (HARD)：")
+        lines.append("  1. Section 3 Email reply 任務（task_type=email_reply）— 若有 pending，立即 claim + 處理（讀 description 的「用戶回信內容」+「原始助理寄出內容」，依用戶指示回應 / 修正 / 派工 / 寄回信）")
+        lines.append("  2. Section 7 Dashboard CRITICAL — 立即 triage")
+        lines.append("  3. Section 4 Pending 任務 top 8 — 依 priority asc + work_log diversity（last-3 task_type rotate）")
+        lines.append("")
+        lines.append("Claim 流程（避免雙 session 撞題）：")
+        lines.append("  uv run python scripts/task_pool_claim.py claim --id <task_id> --owner <hourly|interactive|agent-name>")
+        lines.append("  uv run python scripts/task_pool_claim.py start --id <task_id>")
+        lines.append("  ... 執行 ...")
+        lines.append("  uv run python scripts/task_pool_claim.py complete --id <task_id> --status succeeded --result '...摘要...'")
+        lines.append("")
+        lines.append("完整完成原則：派 agent 後 wait 完成、驗證、寫 knowledge.json / work_log、commit。50min cap。Heavy compute 走 compute_queue。")
     lines.append("```")
     lines.append("")
 

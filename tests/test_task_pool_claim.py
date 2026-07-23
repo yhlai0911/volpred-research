@@ -48,6 +48,39 @@ def burst_fire_requests(monkeypatch) -> list[str]:
     return reasons
 
 
+def test_claim_is_rejected_while_direct_execution_mode_is_active(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [{"id": "queued", "status": "pending", "task_type": "platform_ops"}]
+        ),
+        encoding="utf-8",
+    )
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    state.parent.mkdir(parents=True)
+    state.write_text(
+        json.dumps({"enabled": True, "mode": "direct_execution"}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result = task_pool_claim.cmd_claim(
+        argparse.Namespace(
+            id="queued",
+            owner="test-worker",
+            session=None,
+            main_thread=False,
+        )
+    )
+
+    assert result["ok"] is False
+    assert result["reason"] == "direct_execution_mode"
+    assert json.loads(next_tasks.read_text())[0]["status"] == "pending"
+
+
 def test_complete_accepts_blocked_status(tmp_path, monkeypatch) -> None:
     next_tasks = tmp_path / "next_tasks.json"
     next_tasks.write_text(

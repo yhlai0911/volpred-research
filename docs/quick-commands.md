@@ -54,6 +54,9 @@ uv run volpred ops job-show <job_id>                 # 查看任務詳情及日�
 uv run volpred ops enqueue --action daily_update     # 手動入隊任務
 uv run volpred ops worker --poll-interval 10         # 啟動本地 worker
 uv run volpred ops work-shadow-replay --next-tasks-snapshot <next_tasks.json> --task-records-snapshot <task_records.json> --ops-jobs-snapshot <ops_jobs.json> --observation-dir <receipts_dir> --worker-id <worker> --capability code  # 純 snapshot 新舊 selection 對帳；只追加 observation receipt
+uv run python scripts/task_pool_control.py status           # 回讀 legacy pool 是否處於 direct-execution mode
+uv run python scripts/task_pool_control.py enter-direct --actor <actor> --reason '<reason>' [--preserve-task-id <id>]  # 鎖內逐位元備份 → 關閉 admission → 清池
+uv run python scripts/task_pool_control.py restore --backup <receipt綁定路徑> --actor <actor> --reason '<reason>'       # 只在 live pool 為空時回復並重新開 admission
 
 # experiments/ 結構整理（新規先行 + touched-file migration）
 uv run volpred ops experiments report                # 查看 experiments/ 根層散檔與遷移候選

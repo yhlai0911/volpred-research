@@ -30,6 +30,7 @@ def _write_fixture_files(tmp_path: Path, tasks: list[dict]) -> None:
 
 def _patch_paths(monkeypatch, module, tmp_path: Path) -> None:
     monkeypatch.setattr(module, "NEXT_TASKS", tmp_path / "next_tasks.json")
+    monkeypatch.setattr(module, "TASK_POOL_MODE", tmp_path / "task_pool_mode.json")
     monkeypatch.setattr(module, "DASHBOARD", tmp_path / "dashboard_latest.json")
     monkeypatch.setattr(module, "WORK_LOG", tmp_path / "work_log.json")
     monkeypatch.setattr(module, "GMAIL_STATE", tmp_path / "gmail_inbox_state.json")
@@ -75,6 +76,31 @@ def test_handoff_warns_codex_when_only_skip_pending_exists(tmp_path, monkeypatch
     assert "Codex-skip pending: 2" in handoff
     assert "沒有可 claim 的 pending" in handoff
     assert "task_pool_claim.py list --codex-eligible" in handoff
+
+
+def test_handoff_switches_to_direct_execution_contract(tmp_path, monkeypatch) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    (tmp_path / "task_pool_mode.json").write_text(
+        json.dumps(
+            {
+                "enabled": True,
+                "mode": "direct_execution",
+                "activated_at": "2026-07-23T12:49:35+00:00",
+                "backup_sha256": "abc123",
+            }
+        ),
+        encoding="utf-8",
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "DIRECT EXECUTION MODE：ACTIVE" in handoff
+    assert "不得自行補池" in handoff
+    assert "禁止 claim、refill" in handoff
+    assert "不得因池空走 error_log fallback" in handoff
+    assert "Claim 流程（避免雙 session 撞題）" not in handoff
 
 
 def test_handoff_warns_on_invalid_json_source(tmp_path, monkeypatch, capsys) -> None:

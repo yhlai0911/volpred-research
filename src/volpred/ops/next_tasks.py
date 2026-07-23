@@ -631,6 +631,40 @@ def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
     handle_name = getattr(fh, "name", None)
     if isinstance(handle_name, (str, Path)):
         guard_canonical_write(handle_name)
+        try:
+            is_canonical_queue = (
+                Path(handle_name).resolve() == CANONICAL_NEXT_TASKS.resolve()
+            )
+        except OSError:
+            is_canonical_queue = False
+        if is_canonical_queue:
+            position = fh.tell()
+            fh.seek(0)
+            raw_existing = fh.read()
+            fh.seek(position)
+            try:
+                existing_tasks = (
+                    json.loads(raw_existing) if raw_existing.strip() else []
+                )
+            except json.JSONDecodeError as exc:
+                from volpred.ops.task_pool_mode import TaskPoolAdmissionClosed
+
+                raise TaskPoolAdmissionClosed(
+                    f"canonical next_tasks queue is unreadable: {exc}"
+                ) from exc
+            if not isinstance(existing_tasks, list):
+                from volpred.ops.task_pool_mode import TaskPoolAdmissionClosed
+
+                raise TaskPoolAdmissionClosed(
+                    "canonical next_tasks queue root is not a list"
+                )
+            from volpred.ops.task_pool_mode import enforce_task_pool_write
+
+            enforce_task_pool_write(
+                state_path=TASK_POOL_MODE_PATH,
+                existing_tasks=existing_tasks,
+                proposed_tasks=tasks,
+            )
 
     _normalize_priorities_tolerant(tasks)
     _audit_task_statuses(tasks)
@@ -781,6 +815,9 @@ def _legacy_priority_to_p(legacy: int) -> int:
 
 #: 只有寫進**正牌**佇列才准叫醒 supervisor（測試/暫存佇列不得觸發真實派工）。
 CANONICAL_NEXT_TASKS = Path(__file__).resolve().parents[3] / "storage" / "next_tasks.json"
+TASK_POOL_MODE_PATH = (
+    Path(__file__).resolve().parents[3] / "storage" / "ops" / "task_pool_mode.json"
+)
 
 
 def _warn_if_over_pending_cap(record: dict[str, Any], tasks: list[Any]) -> None:

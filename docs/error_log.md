@@ -835,3 +835,39 @@ Supabase `details`，仍由同一 `projected_details()` 同時服務 differ 與 
 成功後，fresh remote `compute_diff` 對這 13 篇回報 `insert=[] / update=[] / delete=[]`。相關 projection、
 cache、diff、writer 與 auditor regression 共 68 passed / 1 env-gated skip；canonical writer audit 為
 0 unguarded / 0 owner mismatch。
+
+### 2026-07-23 20:49 — 老闆要求清空任務池後，既有 gateway 沒有全域停寫模式 — contained
+
+**症狀與 live 物證**：Telegram msg 1329 要求先備份、清空
+`storage/next_tasks.json`，並暫停所有新工作入池。切換前 deterministic probe 為
+`pool_count=3338 claimed_pending=1 direct_mode=false`；現有 `pool_pressure` 只管
+部分自動 generator，`append_task_record`、低階 whole-file writer、claim 與 handoff
+都不知道「池已暫停」。直接把 JSON 寫成 `[]` 會讓下個 producer／:50 handoff 立刻
+補回或重新 claim，清池本身不是可持續狀態。
+
+**根因層級**：task writer 雖已在 A1b 收斂到
+`next_tasks.write_tasks_to_handle()`，但 admission policy 仍散在 generator、append
+gateway、claim CLI 與 prompt。最低共同 seam 只保證 serialize／lock，不擁有
+runtime mode；因此沒有一個 transaction 能同時證明「備份已落地、後續新 id 已封鎖、
+queue 已清空」。
+
+**底層 containment**：新增 deep module `volpred.ops.task_pool_mode` 與
+`scripts/task_pool_control.py`。`enter-direct` 在 queue `LOCK_EX` 內依序做 exact-byte
+backup + fsync/read-back、寫入 enabled mode receipt、只保留明示的控制 task；最低
+write seam 比對 write 前後 task identities，direct mode 只准既有 row lifecycle
+更新或刪除，任何新 id／匿名 row fail closed。`task_pool_claim.py claim` 另在 claim
+seam 封鎖；`generate_handoff.py` 看到 mode 後停止輸出 claim/refill/error-log fallback
+指令。回復路徑只接受 active receipt 綁定且 SHA 相符的 backup，live pool 非空即拒絕。
+
+**回歸與下游回讀**：切換備份
+`sha256=89863b056e1dc4fb8a661a9ccf5caf1eeb058b063b42c528a25ce602f186d8f3`、
+3,041,206 bytes、3,338 rows，清除 3,337 rows並暫留本控制 task。68 個
+claim／mode／handoff tests 通過，canonical writer audit 為 0 unguarded / 0 routing
+violation；live `direct-mode-canary-must-not-land` 被拒絕且前後 pool count 不變，
+supervisor 回讀 `current_job=null`、health-check ok。測試另實際演練 SHA 綁定 restore。
+
+**結案界線**：這只把老闆要求的「可回復清池＋暫停入池」做成不可靜默繞過的
+containment。ADR-0001 的正式 Work Coordinator ownership cutover、Change Delivery、
+commit fencing 與 manifest-based residue convergence 尚未完成七天 shadow／live
+read-back，所以整體「派工／claim／commit／殘留」問題維持 **contained**，不得標
+`root_cause_fixed_and_verified`。

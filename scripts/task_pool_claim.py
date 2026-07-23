@@ -484,6 +484,23 @@ def _apply_codex_review_followup_fail(
 
 
 def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
+    from volpred.ops.task_pool_mode import load_task_pool_mode, task_pool_mode_path
+
+    try:
+        mode = load_task_pool_mode(task_pool_mode_path(NEXT_TASKS))
+    except ValueError as exc:
+        return {
+            "ok": False,
+            "reason": "task_pool_mode_unreadable",
+            "error": str(exc),
+        }
+    if mode.enabled:
+        return {
+            "ok": False,
+            "reason": "direct_execution_mode",
+            "mode": mode.mode,
+            "hint": "execute owner-directed work directly; task-pool claims are suspended",
+        }
     session = args.session or os.environ.get("CLAUDE_SESSION_ID") or uuid.uuid4().hex[:12]
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)

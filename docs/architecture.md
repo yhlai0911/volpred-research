@@ -5,6 +5,17 @@
 > 本檔以下仍描述 live/current architecture；只有某項能力完成 shadow、cutover、read-back
 > 與 rollback gate 後，才能把現況段落改寫成新架構。不得從目標文件推定 live owner 已切換。
 
+> **臨時 direct-execution cutover（2026-07-23 20:49 台灣時間）**
+> 老闆指示暫停 legacy task pool；live mode receipt 在
+> `storage/ops/task_pool_mode.json`。`volpred.ops.task_pool_mode` 於 canonical
+> `next_tasks` 最低寫入 seam 禁止新增 task id，`task_pool_claim.py claim` 同步
+> fail closed；既有 task 仍可 complete／移除。進入模式必先在同一把 queue lock
+> 內產生逐位元備份並 read-back，回復只能用 receipt 綁定的
+> `scripts/task_pool_control.py restore`，且 live pool 必須為空。這是 legacy pool
+> 的可回復 containment，不代表 Work Coordinator／Change Delivery／殘留收斂已
+> 完成正式 ownership cutover；整體 Phase 1 仍依
+> `docs/platform_optimization_program_2026_07.md` 的 shadow 與七天 gate 推進。
+
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。
 > **實際控制面 = 5 層並存**（非單純 v12 單線程）：
