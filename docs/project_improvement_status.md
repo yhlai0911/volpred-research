@@ -77,12 +77,15 @@ approval 與 terminal disposition。duplicate identity、缺失／模糊 lifecyc
 所以 Issue #9 仍維持 `contained`，不可由 interface complete 推論 live owner 已切換。
 同日新增 Issue #9 cutover preflight manifest：seam 直接從 immutable receipts 用
 trusted wall clock 重跑 canonical 七日 assessment，並從同一 owner-state bytes 取得
-unique-owner mode 與 CAS SHA；raw legacy bytes 由 seam 自行 hash、decode 與 import，
+unique-owner mode 與 CAS SHA；queue path 固定為 repo canonical，paired state 由 queue
+唯一衍生並在 shared lock 內取樣。Raw legacy bytes 由 seam 自行 hash、decode 與 import，
 projection metadata 則從 payload 重算。Legacy import 與 staged Coordinator projection
 逐 identity 比對 row count、priority、claim ownership／started timestamp、parent、
 deadline、policy、row created／updated timestamp 與 terminal disposition。通過後的
 immutable manifest 綁定
 raw legacy snapshot、assessment、import report、projection 與 owner state SHA-256。
+Assessment 另帶 receipt-set digest 與最後 snapshot identity，必須與本次完整 cutover
+snapshot 一致；Coordinator 無法表示的 dispatch policy 會 fail closed。
 此能力無 apply／writer seam，live 仍是 `direct_execution`、observation count 仍為 0，
 所以只是正式 transaction 前的 fail-closed evidence capsule，不構成 ownership cutover。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：

@@ -547,7 +547,9 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
 
 - `prepare_work_ownership_cutover()` 是 step 20 transaction 前的唯一 evidence-binding
   seam。它直接讀 immutable receipt directory，以不可由 API caller 覆寫的 wall clock
-  呼叫 canonical assessor，並從同一次 owner-state byte snapshot 取得 mode 與 CAS SHA；
+  呼叫 canonical assessor。Canonical queue path 由 repo root 固定推導，不接受 caller
+  path；paired owner state 由 queue path 唯一衍生，queue bytes／owner state 在同一
+  shared lock 內取樣並取得 mode 與 CAS SHA；
   caller 不再能傳入或重建 `ready_for_cutover=True` summary 來放行。
 - Raw legacy bytes 由 seam 自行 decode、計算 SHA 並產生 importer report；staged
   Work Coordinator projection 會再走既有
@@ -557,7 +559,11 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   claim 的 `started_at`）。
   Projection row count／SHA 由 payload 重算。Manifest 以 canonical JSON 綁定 raw
   legacy snapshot、canonical assessment、derived import report、validated projection
-  與 owner-state 五個 SHA-256 identity。
+  與 owner-state 五個 SHA-256 identity；assessment 額外綁定 canonical receipt-set
+  digest 與最後 snapshot identity，最後一筆必須 exact-match 本次三來源 cutover
+  snapshot。Importer 已保存但 Coordinator projection 無法表示的 dispatch lane、
+  preferred／target agent、fallback policy、dreaming 或 timestamp 會造成 parity fail，
+  不會靜默降級。
 - 這是 **read-only preflight capability**，沒有 filesystem／database mutation、
   materialize 或 apply interface。Live `direct_execution` mode 與零 observation
   evidence 均未變；正式 CAS transaction、唯一 owner 下游回讀及 live rollback

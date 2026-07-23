@@ -272,6 +272,58 @@ def test_preflight_rejects_cross_wired_raw_snapshot_bytes(
         )
 
 
+def test_preflight_rejects_a_ledger_for_a_different_snapshot(
+    tmp_path: Path,
+) -> None:
+    observed = LegacySnapshots(next_tasks=(_legacy_row(),))
+    observations = tmp_path / "observations"
+    _write_observations(observations, snapshots=observed)
+    replacement = _legacy_row()
+    replacement["id"] = "task-2"
+    replacement_snapshot = LegacySnapshots(next_tasks=(replacement,))
+    _write_canonical_queue(tmp_path, _legacy_bytes(replacement))
+    staged = replace(
+        _staged_snapshot().items[0],
+        id="task-2",
+        idempotency_key="legacy:next_tasks:task-2",
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="shadow ledger does not end at the cutover snapshot",
+    ):
+        prepare_work_ownership_cutover(
+            observation_directory=observations,
+            legacy_snapshots=replacement_snapshot,
+            projection=project_legacy_next_tasks(
+                WorkSnapshot(items=(staged,))
+            ),
+        )
+
+
+def test_preflight_reads_the_canonical_owner_gate(
+    tmp_path: Path,
+) -> None:
+    snapshots = LegacySnapshots(next_tasks=(_legacy_row(),))
+    _write_canonical_queue(
+        tmp_path,
+        _legacy_bytes(_legacy_row()),
+        enabled=True,
+    )
+    observations = tmp_path / "observations"
+    _write_observations(observations, snapshots=snapshots)
+
+    with pytest.raises(
+        ValueError,
+        match="shadow assessment is not ready for cutover",
+    ):
+        prepare_work_ownership_cutover(
+            observation_directory=observations,
+            legacy_snapshots=snapshots,
+            projection=project_legacy_next_tasks(_staged_snapshot()),
+        )
+
+
 def test_preflight_rejects_forged_projection_metadata(
     tmp_path: Path,
 ) -> None:
@@ -305,6 +357,26 @@ def test_preflight_rejects_projection_dimension_drift(
             tmp_path,
             projection=project_legacy_next_tasks(staged),
         )
+
+
+def test_preflight_rejects_unrepresentable_dispatch_policy(
+    tmp_path: Path,
+) -> None:
+    legacy = _legacy_row()
+    legacy.update(
+        {
+            "dispatch_lane": "main_thread",
+            "preferred_agent": "claude",
+            "target_agent": "claude",
+            "fallback_allowed": False,
+        }
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="coordinator projection does not match legacy import",
+    ):
+        _prepare(tmp_path, legacy_rows=(legacy,))
 
 
 @pytest.mark.parametrize(

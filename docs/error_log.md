@@ -1082,16 +1082,22 @@ live queue 資料錯誤。
 `prepare_work_ownership_cutover()`。最終 seam 不接受 caller 建好的 assessment、
 import report 或 SHA：它從 immutable receipt directory 用 trusted wall clock 重跑
 canonical assessor，從同一次 owner-state bytes 取得 mode／CAS SHA，並從 raw legacy
-bytes 自行計算 SHA、decode 與重建 import report。Projection payload 再自行
+bytes 自行計算 SHA、decode 與重建 import report。最終 seam 不再接收 queue／state
+path：它固定解析 repo canonical queue，由 queue 唯一衍生 paired state，並在 shared
+queue lock 內取樣，避免 detached fake owner。Canonical assessor 同時產生 receipt-set
+digest 與最後 snapshot identity；最後一筆必須 exact-match 本次三來源 cutover
+snapshot，不能拿 task-1 的七日 ledger 切 task-2。Projection payload 再自行
 canonicalize，row count／SHA 不信任 public dataclass metadata；既有 importer
 round-trip 逐 identity 比對 priority、claim ownership／started timestamp、parent、
-deadline、policy、row created／updated timestamp 與 terminal disposition。公開
+deadline、dispatch／fallback policy、row created／updated timestamp 與 terminal
+disposition；無法由 Coordinator 表示的 policy 直接阻擋。公開
 regression 證明 staged projection 只漂移 `created_at`／`updated_at` 也會 fail closed，
 不能取得 manifest。通過後 manifest 以 canonical SHA-256
 綁定五份 derived evidence。public regressions 覆蓋短／過期 receipt ledger、
-cross-wired raw snapshot、forged projection metadata、projection drift 與 running
+cross-wired raw snapshot、ledger/cutover mismatch、detached owner spoof、
+forged projection metadata、dispatch/timestamp drift 與 running
 `started_at` drift；preflight／assessment／projection／replay／direct-mode／claim／
-handoff 相鄰 suite 191 passed。
+handoff／claim 相鄰 suite 228 passed。
 
 **狀態**：此 preflight 缺口已制度化止血，但尚無正式 DB/filesystem CAS ownership
 transaction、七日 live receipts、unique-owner 下游回讀或 live rollback rehearsal。
