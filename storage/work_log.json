@@ -24789,5 +24789,72 @@
     "owner": "codex-failover-slot-1-0b3d3fe779a0448eb6403771c28395ad",
     "commit": null,
     "summary": "Verified the weekly Codex upgrade and fixed its host-cron plus piggy-back double-fire by assigning one scheduler owner; 30 related tests pass and live crontab was reconciled."
+  },
+  {
+    "timestamp": "2026-07-23T17:01:50+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-c70b4e7ae",
+    "outcome": "succeeded",
+    "summary": "verify and close legacy reconciliation ticket #4",
+    "commit": "c70b4e7ae1802628b42dcee2b90d869100849023",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T10:40:08.091204+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T17:12:50+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-56c436aec",
+    "outcome": "succeeded",
+    "summary": "make codex update scheduler single-owner",
+    "commit": "56c436aeca197819f85cd1f3f53a42b8f41e96b3",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T10:40:08.091198+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T17:18:17+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-5b9f78adf",
+    "outcome": "succeeded",
+    "summary": "complete Work Coordinator shadow replay",
+    "commit": "5b9f78adfaffc609ec0338a04f96ce3457c2ca58",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T10:40:08.091193+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T18:14:25+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-40986c708",
+    "outcome": "succeeded",
+    "summary": "add orphan reaper flake harness",
+    "commit": "40986c708969474ec6c9f5263d8ec5c2b9a14896",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T10:40:08.091187+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T18:18:19+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-4340536a9",
+    "outcome": "succeeded",
+    "summary": "reimplement issue 7 shadow replay",
+    "commit": "4340536a9ee4eace3a8e78a78da4523524a291ea",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T10:40:08.091181+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T18:38:53+08:00",
+    "task_type": "daily_article",
+    "task_id": "codex-commit-bf0bbbce9",
+    "outcome": "succeeded",
+    "summary": "correct K741 feed citations",
+    "commit": "bf0bbbce997a713dc752d7c57121affb5b704ad1",
+    "owner": "codex",
+    "backfilled_at": "2026-07-23T10:40:08.090911+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py",
+    "k_id": "K741"
   }
 ]
