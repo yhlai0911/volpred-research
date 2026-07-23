@@ -120,6 +120,12 @@ def test_projection_preserves_claim_parent_deadline_and_terminal_disposition() -
         claim_expires_at="2026-07-23T16:20:00+00:00",
         updated_at="2026-07-23T16:05:00+00:00",
     )
+    parent = _work_item(
+        id="work_parent",
+        idempotency_key="owner:projection:parent",
+        title="Parent work",
+        priority=2,
+    )
     running = _work_item(
         id="work_running",
         idempotency_key="owner:projection:running",
@@ -142,7 +148,7 @@ def test_projection_preserves_claim_parent_deadline_and_terminal_disposition() -
         updated_at="2026-07-23T16:10:00+00:00",
     )
     snapshot = WorkSnapshot(
-        items=(awaiting, claimed, running, succeeded),
+        items=(awaiting, claimed, running, succeeded, parent),
         events=(
             WorkEventView(
                 work_id=claimed.id,
@@ -295,3 +301,144 @@ def test_owner_approved_work_round_trips_through_the_legacy_import_contract() ->
     assert report.candidates[0].status == "pending"
     assert projection.read()[0]["approval"] == "required"
     assert projection.read()[0]["approval_state"] == "approved"
+
+
+def test_projection_rejects_rows_the_legacy_contract_cannot_read() -> None:
+    item = _work_item(source="unregistered-producer")
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "legacy compatibility projection rejected work_pending: "
+            "unknown_source"
+        ),
+    ):
+        project_legacy_next_tasks(WorkSnapshot(items=(item,)))
+
+
+def test_projection_fails_closed_on_ambiguous_claim_event_identity() -> None:
+    claimed = _work_item(
+        status="claimed",
+        version=2,
+        claimed_by="worker-a",
+        claim_expires_at="2026-07-23T16:20:00+00:00",
+        updated_at="2026-07-23T16:05:00+00:00",
+    )
+    events = (
+        WorkEventView(
+            work_id=claimed.id,
+            kind="acquired",
+            version=2,
+            created_at="2026-07-23T16:04:00+00:00",
+        ),
+        WorkEventView(
+            work_id=claimed.id,
+            kind="acquired",
+            version=2,
+            created_at="2026-07-23T16:05:00+00:00",
+        ),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="ambiguous acquired event for WorkItem version 2",
+    ):
+        project_legacy_next_tasks(
+            WorkSnapshot(items=(claimed,), events=events)
+        )
+
+
+def test_running_projection_rejects_a_started_event_from_an_old_claim() -> None:
+    running = _work_item(
+        status="running",
+        version=5,
+        claimed_by="worker-b",
+        claim_expires_at="2026-07-23T16:25:00+00:00",
+        updated_at="2026-07-23T16:06:00+00:00",
+    )
+    events = (
+        WorkEventView(
+            work_id=running.id,
+            kind="started",
+            version=3,
+            created_at="2026-07-23T16:03:00+00:00",
+        ),
+        WorkEventView(
+            work_id=running.id,
+            kind="released",
+            version=4,
+            created_at="2026-07-23T16:04:00+00:00",
+        ),
+        WorkEventView(
+            work_id=running.id,
+            kind="acquired",
+            version=5,
+            created_at="2026-07-23T16:05:00+00:00",
+        ),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "running WorkItem work_pending has no started event "
+            "for its current claim"
+        ),
+    ):
+        project_legacy_next_tasks(
+            WorkSnapshot(items=(running,), events=events)
+        )
+
+
+def test_projection_preserves_blocked_failed_and_cancelled_dispositions() -> None:
+    blocked = _work_item(
+        id="work_blocked",
+        idempotency_key="owner:projection:blocked",
+        status="blocked",
+        version=2,
+        blocked_reason="provider attestation unavailable",
+        updated_at="2026-07-23T16:05:00+00:00",
+    )
+    failed = _work_item(
+        id="work_failed",
+        idempotency_key="owner:projection:failed",
+        status="failed",
+        version=3,
+        result_ref="receipt:work_failed",
+        result_summary="verification failed",
+        finished_at="2026-07-23T16:10:00+00:00",
+        updated_at="2026-07-23T16:10:00+00:00",
+    )
+    cancelled = _work_item(
+        id="work_cancelled",
+        idempotency_key="owner:projection:cancelled",
+        status="cancelled",
+        version=2,
+        result_ref="receipt:work_cancelled",
+        result_summary="superseded by owner",
+        finished_at="2026-07-23T16:11:00+00:00",
+        updated_at="2026-07-23T16:11:00+00:00",
+    )
+
+    rows = {
+        row["id"]: row
+        for row in project_legacy_next_tasks(
+            WorkSnapshot(items=(blocked, failed, cancelled))
+        ).read()
+    }
+
+    _assert_contains(rows["work_blocked"], {
+        "status": "blocked",
+        "blocked_reason": "provider attestation unavailable",
+    })
+    _assert_contains(rows["work_failed"], {
+        "status": "failed",
+        "completed_at": "2026-07-23T16:10:00+00:00",
+        "result": "verification failed",
+        "result_ref": "receipt:work_failed",
+    })
+    _assert_contains(rows["work_cancelled"], {
+        "status": "cancelled",
+        "completed_at": "2026-07-23T16:11:00+00:00",
+        "result": "superseded by owner",
+        "result_ref": "receipt:work_cancelled",
+    })

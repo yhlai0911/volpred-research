@@ -447,6 +447,29 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   135 passed，live read-back 仍為 `ready_for_cutover=false`（mode=`direct_execution`、
   observation_count=0）。這只核可 gate implementation，不核可 Issue #9 cutover。
 
+### Issue #9 — Pre-cutover legacy read projection
+
+- **2026-07-24 projection interface implemented and isolated**：
+  `volpred.ops.work_projection.project_legacy_next_tasks(WorkSnapshot)` 是唯一 public
+  projection seam；輸入由 caller 注入，implementation 不讀 filesystem、Supabase、
+  `ops_jobs` 或 live queue，也沒有 publish／apply／writer interface。
+- projection 把 Work Coordinator 的 pending、awaiting approval、claimed、running、
+  blocked、succeeded、failed 與 cancelled lifecycle 映回 legacy status，保留
+  row count、priority、capability、
+  attestation、claim owner／expiry、由 event ledger 回推的 claim/start timestamp、
+  parent、deadline、approval evidence state 與 terminal result。輸出先依
+  priority／work id deterministic 排序，再以 canonical JSON bytes 產生 SHA-256；
+  `read()` 每次 decode 新 copy，因此 compatibility caller 無法改到 canonical snapshot。
+- duplicate WorkItem id、active lifecycle 缺 claim event／owner／expiry、同一版本有模糊
+  event、unsupported Coordinator status，或 existing `LegacySnapshotImporter` 無法
+  round-trip 的 source／kind／policy／parent／lifecycle 一律在產生 projection 前
+  fail closed。相容測試直接把輸出交給 production legacy read selector 與 importer，
+  不建立 projection 專用 policy copy。
+- 這只完成 step 18 的 **read interface contract**，沒有 materialize
+  `storage/next_tasks.json`、沒有讓 legacy claim path 寫 projection、沒有 transaction
+  cutover 或 rollback rehearsal。Issue #9 仍為 `contained`；七日 receipts、正式
+  Coordinator ownership transaction 與 live unique-owner read-back 仍是 blocker。
+
 這四個提交就是下一輪 `tdd` skill 的範圍；完成並取得七天 shadow 證據後，才規劃第一個
 正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與 Work Coordinator
 第一批同時實作。

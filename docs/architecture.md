@@ -48,6 +48,19 @@
 > Restore 的 mutation、fsync 與 exact-byte read-back 使用同一 locked binary fd，
 > alias 在 transaction 中途 retarget 也不能把驗證或寫入導向另一個 inode。
 
+> **Work Coordinator legacy projection contract（2026-07-24，pre-cutover）**
+> `volpred.ops.work_projection.project_legacy_next_tasks()` 已能把 caller 提供的完整
+> `WorkSnapshot` 轉成 deterministic、hash-addressed、detached 的 legacy
+> `next_tasks` read model；它保留 row count、priority、claim owner／lease、
+> parent、deadline、approval 與 terminal disposition，並以既有
+> `LegacySnapshotImporter` 對輸出做相容性回讀，任何 legacy consumer 無法表示的
+> provenance／lifecycle／identity 都 fail closed。此 module 沒有 filesystem／database
+> lookup、canonical writer 或 apply 模式；`read()` 每次回傳 detached copy，caller
+> mutation 不會改變 Work Coordinator snapshot。它只是正式 cutover 前的 projection
+> interface capability，尚未把 `storage/next_tasks.json` 接到新 owner，也未放行 enqueue、
+> claim、complete caller 或完成 live rollback rehearsal；因此 current owner 與上方
+> direct-execution containment 不變。
+
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。
 > **實際控制面 = 5 層並存**（非單純 v12 單線程）：

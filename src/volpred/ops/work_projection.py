@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass
 import hashlib
 import json
 from typing import Any
 
 from .work import WorkEventView, WorkItemView, WorkSnapshot
+from .work.legacy import LegacySnapshotImporter, LegacySnapshots
 
 
 _SCHEMA_VERSION = "next-tasks-read-projection.v1"
@@ -31,16 +33,19 @@ _LEGACY_STATUS = {
     "awaiting_approval": "blocked_on_user",
     "claimed": "claimed",
     "running": "in_progress",
+    "blocked": "blocked",
     "succeeded": "succeeded",
+    "failed": "failed",
+    "cancelled": "cancelled",
 }
 
 
-def _latest_event_at(
+def _latest_event(
     events: tuple[WorkEventView, ...],
     *,
     kind: str,
     maximum_version: int,
-) -> str | None:
+) -> WorkEventView | None:
     matching = [
         event
         for event in events
@@ -48,7 +53,15 @@ def _latest_event_at(
     ]
     if not matching:
         return None
-    return max(matching, key=lambda event: event.version).created_at
+    latest_version = max(event.version for event in matching)
+    latest = [
+        event for event in matching if event.version == latest_version
+    ]
+    if len(latest) != 1:
+        raise ValueError(
+            f"ambiguous {kind} event for WorkItem version {latest_version}"
+        )
+    return latest[0]
 
 
 def _project_item(
@@ -82,39 +95,53 @@ def _project_item(
         row["parent_task_id"] = item.parent_id
     if item.deadline is not None:
         row["deadline"] = item.deadline
-    if item.status == "awaiting_approval":
+    if item.status in {"awaiting_approval", "blocked"}:
         row["blocked_reason"] = (
-            item.blocked_reason or "awaiting_owner_approval"
+            item.blocked_reason
+            or (
+                "awaiting_owner_approval"
+                if item.status == "awaiting_approval"
+                else None
+            )
         )
+    claimed_event: WorkEventView | None = None
     if item.status in {"claimed", "running"}:
         if item.claimed_by is None or item.claim_expires_at is None:
             raise ValueError(
                 f"{item.status} WorkItem {item.id} has incomplete claim identity"
             )
-        claimed_at = _latest_event_at(
+        claimed_event = _latest_event(
             events,
             kind="acquired",
             maximum_version=item.version,
         )
-        if claimed_at is None:
+        if claimed_event is None:
             raise ValueError(
                 f"{item.status} WorkItem {item.id} has no acquired event"
             )
         row["claimed_by"] = item.claimed_by
         row["claim_expires_at"] = item.claim_expires_at
-        row["claimed_at"] = claimed_at
+        row["claimed_at"] = claimed_event.created_at
     if item.status == "running":
-        started_at = _latest_event_at(
+        if claimed_event is None:
+            raise ValueError(
+                f"running WorkItem {item.id} has no acquired event"
+            )
+        started_event = _latest_event(
             events,
             kind="started",
             maximum_version=item.version,
         )
-        if started_at is None:
+        if (
+            started_event is None
+            or started_event.version <= claimed_event.version
+        ):
             raise ValueError(
-                f"running WorkItem {item.id} has no started event"
+                f"running WorkItem {item.id} has no started event "
+                "for its current claim"
             )
-        row["started_at"] = started_at
-    if item.status == "succeeded":
+        row["started_at"] = started_event.created_at
+    if item.status in {"succeeded", "failed", "cancelled"}:
         row["completed_at"] = item.finished_at
         row["result"] = item.result_summary
         row["result_ref"] = item.result_ref
@@ -134,24 +161,28 @@ def project_legacy_next_tasks(
             if item_id in item_ids[:index]
         )
         raise ValueError(f"duplicate WorkItem id: {duplicate_id}")
-    events_by_work_id = {
-        item.id: tuple(
-            event
-            for event in snapshot.events
-            if event.work_id == item.id
-        )
-        for item in snapshot.items
-    }
+    indexed_events: defaultdict[str, list[WorkEventView]] = defaultdict(list)
+    for event in snapshot.events:
+        indexed_events[event.work_id].append(event)
     rows = [
         _project_item(
             item,
-            events=events_by_work_id[item.id],
+            events=tuple(indexed_events[item.id]),
         )
         for item in sorted(
             snapshot.items,
             key=lambda candidate: (candidate.priority, candidate.id),
         )
     ]
+    compatibility = LegacySnapshotImporter().import_snapshot(
+        LegacySnapshots(next_tasks=tuple(rows))
+    )
+    if not compatibility.ready:
+        issue = compatibility.issues[0]
+        raise ValueError(
+            "legacy compatibility projection rejected "
+            f"{issue.record_id or '<unknown>'}: {issue.code}: {issue.detail}"
+        )
     payload = json.dumps(
         rows,
         ensure_ascii=False,

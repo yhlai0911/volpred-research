@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-23（平台運營優化總計畫已核可）**
+Last updated: **2026-07-24（Issue #9 pre-cutover projection contract）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -67,6 +67,14 @@ dreaming／stale-reclaim／refill regressions 與 34 個隔離 PostgreSQL contra
 CLI 仍只讀 caller 提供的三份 snapshot，僅在指定目錄追加不可覆寫的 observation receipt。
 尚未建立 canonical schedule 或累積七天 observation window，migration 也未部署，
 因此仍不構成接管或上線。
+2026-07-24 已完成 Issue #9 的 pre-cutover legacy read projection interface：
+`project_legacy_next_tasks(WorkSnapshot)` 產生 detached、deterministic、SHA-256 綁定的
+`next_tasks` compatibility rows；production legacy selector 與既有 importer 的
+interface tests 覆蓋 row count、priority、claim ownership、parent、deadline、
+approval 與 terminal disposition。duplicate identity、缺失／模糊 lifecycle event
+及不相容 provenance 都 fail closed。此 module 沒有 canonical writer 或 apply 模式，
+尚未接管 live enqueue／claim／complete，也沒有七日 receipts 或正式 rollback rehearsal；
+所以 Issue #9 仍維持 `contained`，不可由 interface complete 推論 live owner 已切換。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
