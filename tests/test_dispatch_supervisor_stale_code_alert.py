@@ -80,6 +80,32 @@ def test_todays_incident_reproduces_as_critical(tmp_path: Path) -> None:
     assert [s["file"] for s in out["details"]["unsettled_files"]] == ["alerts.py"]
 
 
+def test_operations_core_dependency_edit_is_also_a_breach(tmp_path: Path) -> None:
+    """A loaded ops dependency is part of the daemon image, not hot-reloaded."""
+    storage, src = _setup(
+        tmp_path,
+        boot_minutes_ago=90,
+        edits={"workspace.py": 120.0},
+    )
+    ops_src = tmp_path / "src" / "volpred" / "ops"
+    ops_src.mkdir(parents=True)
+    dependency = ops_src / "next_tasks.py"
+    dependency.write_text("# direct-mode admission guard\n", encoding="utf-8")
+    edited_at = NOW - timedelta(minutes=30)
+    os.utime(dependency, (edited_at.timestamp(), edited_at.timestamp()))
+
+    out = _parse_dispatch_supervisor_stale_code_state(
+        storage,
+        NOW,
+        supervisor_roots=(src, ops_src),
+    )
+
+    assert out["breached"] is True
+    assert [row["file"] for row in out["details"]["stale_files"]] == [
+        "next_tasks.py"
+    ]
+
+
 def test_a_settled_edit_beyond_warn_is_warn(tmp_path: Path) -> None:
     storage, src = _setup(
         tmp_path, boot_minutes_ago=60,

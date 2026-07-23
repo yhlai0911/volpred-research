@@ -27,6 +27,13 @@ failure it was built to catch, twice in one evening:
 This module removes the human from the loop. Detection and reload were both
 already correct; they just were not connected to each other.
 
+The monitored image includes both the daemon package and ``src/volpred/ops``.
+That second root is load-bearing: ``workspace.py`` imports the legacy queue
+writer at boot. On 2026-07-23 the direct-execution admission guard shipped in
+``volpred.ops.next_tasks`` while the daemon package itself was unchanged, so
+the original single-directory scanner left the live daemon able to append one
+new remediation task through its old in-memory writer.
+
 ## The rule
 
 A source file whose mtime is newer than `supervisor_started_at` is, by
@@ -49,12 +56,15 @@ import os
 import signal
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Iterable
 
 from . import state
 
 LOG = logging.getLogger(__name__)
 
 SRC_DIR = Path(__file__).resolve().parent
+OPS_CORE_SRC_DIR = SRC_DIR.parents[1] / "src" / "volpred" / "ops"
+SOURCE_ROOTS = (SRC_DIR, OPS_CORE_SRC_DIR)
 
 # An agent editing several modules writes them seconds apart. Reloading on the
 # first save would boot us onto a half-applied change set, so the NEWEST edit
@@ -77,6 +87,7 @@ _ARMED = True
 def stale_sources(
     *,
     src_dir: Path = SRC_DIR,
+    source_roots: Iterable[Path] | None = None,
     boot: datetime,
     now: datetime,
 ) -> list[tuple[str, datetime]]:
@@ -88,9 +99,24 @@ def stale_sources(
     that vanished mid-scan is worth a word, not a shrug).
     """
     out: list[tuple[str, datetime]] = []
-    if not src_dir.is_dir():
-        return out
-    for src in sorted(src_dir.glob("*.py")):
+    roots = _source_roots(src_dir=src_dir, source_roots=source_roots)
+    sources: list[Path] = []
+    seen: set[Path] = set()
+    for root in roots:
+        if root.is_dir():
+            candidates = root.rglob("*.py")
+        elif root.suffix == ".py":
+            candidates = (root,)
+        else:
+            continue
+        for candidate in candidates:
+            resolved = candidate.resolve()
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            sources.append(candidate)
+
+    for src in sorted(sources):
         try:
             mtime = datetime.fromtimestamp(src.stat().st_mtime, tz=timezone.utc)
         except OSError as exc:
@@ -99,6 +125,20 @@ def stale_sources(
         if boot < mtime <= now:
             out.append((src.name, mtime))
     return out
+
+
+def _source_roots(
+    *,
+    src_dir: Path,
+    source_roots: Iterable[Path] | None,
+) -> tuple[Path, ...]:
+    """Resolve production roots while keeping explicit test roots hermetic."""
+
+    if source_roots is not None:
+        return tuple(Path(root) for root in source_roots)
+    if Path(src_dir) == SRC_DIR:
+        return SOURCE_ROOTS
+    return (Path(src_dir),)
 
 
 def decide(
@@ -134,6 +174,7 @@ def maybe_self_reload(
     *,
     state_path: Path = state.STATE_PATH,
     src_dir: Path = SRC_DIR,
+    source_roots: Iterable[Path] | None = None,
     now: datetime | None = None,
     quiesce_s: float = QUIESCE_S,
     marker_path: Path | None = None,
@@ -157,7 +198,12 @@ def maybe_self_reload(
                     state_path)
         return _NO_STALE
 
-    stale = stale_sources(src_dir=src_dir, boot=boot, now=now)
+    stale = stale_sources(
+        src_dir=src_dir,
+        source_roots=source_roots,
+        boot=boot,
+        now=now,
+    )
     in_flight = len(state.get_current_jobs(state_path))
     action, reason = decide(stale=stale, in_flight=in_flight, now=now, quiesce_s=quiesce_s)
 

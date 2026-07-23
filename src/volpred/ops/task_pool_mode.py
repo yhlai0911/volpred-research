@@ -53,6 +53,17 @@ class DirectModeReceipt:
 
 
 @dataclass(frozen=True)
+class DirectModeReconcileReceipt:
+    queue_path: str
+    state_path: str
+    removed_task_ids: tuple[str, ...]
+    retained_task_ids: tuple[str, ...]
+    reconciled_at: str
+    reconciled_by: str
+    reason: str
+
+
+@dataclass(frozen=True)
 class RestoreReceipt:
     queue_path: str
     state_path: str
@@ -321,6 +332,81 @@ def enter_direct_execution_mode(
         preserved_task_ids=preserve,
         cleared_task_count=len(tasks) - len(retained),
         activated_at=now,
+    )
+
+
+def reconcile_direct_execution_pool(
+    *,
+    queue_path: str | Path,
+    state_path: str | Path,
+    reconciled_by: str,
+    reason: str,
+    now: str,
+) -> DirectModeReconcileReceipt:
+    """Remove rows outside the active direct-mode receipt's preserve set.
+
+    This is the recovery path for a writer process that was already running
+    before the admission guard shipped and therefore retained an old append
+    function in memory. It deliberately does not replace the activation state
+    or its verified backup pointer.
+    """
+
+    queue = Path(queue_path)
+    state = Path(state_path)
+    actor = _validate_identity(reconciled_by, field="reconciled_by")
+    rationale = _validate_identity(reason, field="reason")
+    mode = load_task_pool_mode(state)
+    if not mode.enabled or mode.mode != "direct_execution":
+        raise ValueError("task pool is not in direct-execution mode")
+
+    guard_canonical_write(queue)
+    if not queue.exists():
+        raise ValueError("next_tasks queue does not exist")
+
+    retained: list[Any] = []
+    removed_ids: list[str] = []
+    preserve = set(mode.preserve_task_ids)
+    with queue.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            raw = handle.read()
+            try:
+                tasks = json.loads(raw) if raw.strip() else []
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"next_tasks queue is unreadable: {exc}") from exc
+            if not isinstance(tasks, list):
+                raise ValueError("next_tasks queue root must be a list")
+            _, anonymous = _task_ids(tasks)
+            if anonymous:
+                raise ValueError(
+                    f"next_tasks queue has {anonymous} row(s) without a valid id"
+                )
+            for task in tasks:
+                task_id = str(task["id"])
+                if task_id in preserve:
+                    retained.append(task)
+                else:
+                    removed_ids.append(task_id)
+            if removed_ids:
+                from volpred.ops.next_tasks import write_tasks_to_handle
+
+                write_tasks_to_handle(handle, retained)
+                handle.flush()
+                os.fsync(handle.fileno())
+                handle.seek(0)
+                if json.load(handle) != retained:
+                    raise RuntimeError("task-pool reconcile read-back verification failed")
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+    return DirectModeReconcileReceipt(
+        queue_path=str(queue.resolve()),
+        state_path=str(state.resolve()),
+        removed_task_ids=tuple(removed_ids),
+        retained_task_ids=tuple(str(task["id"]) for task in retained),
+        reconciled_at=now,
+        reconciled_by=actor,
+        reason=rationale,
     )
 
 

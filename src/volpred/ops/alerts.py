@@ -29,7 +29,7 @@ import shutil
 import subprocess
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 from zoneinfo import ZoneInfo
 
 from croniter import croniter
@@ -3310,6 +3310,11 @@ DISPATCH_SUPERVISOR_HEARTBEAT_CRITICAL_MINUTES = 30.0
 DISPATCH_SUPERVISOR_STALE_CODE_WARN_MINUTES = 20.0
 DISPATCH_SUPERVISOR_STALE_CODE_CRITICAL_MINUTES = 120.0
 DISPATCH_SUPERVISOR_SRC_DIR = Path(__file__).resolve().parents[3] / "scripts" / "dispatch_supervisor"
+DISPATCH_SUPERVISOR_OPS_SRC_DIR = Path(__file__).resolve().parent
+DISPATCH_SUPERVISOR_SOURCE_ROOTS = (
+    DISPATCH_SUPERVISOR_SRC_DIR,
+    DISPATCH_SUPERVISOR_OPS_SRC_DIR,
+)
 
 
 def _parse_dispatch_supervisor_stale_code_state(
@@ -3317,6 +3322,7 @@ def _parse_dispatch_supervisor_stale_code_state(
     now: datetime,
     *,
     supervisor_dir: Path | None = None,
+    supervisor_roots: Iterable[Path] | None = None,
 ) -> dict[str, Any]:
     """Dead-man switch for "the fix was written but never went live" (2026-07-10).
 
@@ -3338,7 +3344,12 @@ def _parse_dispatch_supervisor_stale_code_state(
     Compares each source file's mtime against `supervisor_started_at`. Anything
     newer than the boot is, by definition, not the code that is running.
     """
-    src_dir = supervisor_dir or DISPATCH_SUPERVISOR_SRC_DIR
+    if supervisor_roots is not None:
+        source_roots = tuple(Path(root) for root in supervisor_roots)
+    elif supervisor_dir is not None:
+        source_roots = (Path(supervisor_dir),)
+    else:
+        source_roots = DISPATCH_SUPERVISOR_SOURCE_ROOTS
     state_path = Path(storage_dir) / "ops" / "dispatch_state.json"
 
     snapshot: dict[str, Any] | None = None
@@ -3352,8 +3363,23 @@ def _parse_dispatch_supervisor_stale_code_state(
     boot = _parse_iso_datetime(snapshot.get("supervisor_started_at")) if snapshot else None
 
     stale: list[dict[str, Any]] = []
-    if boot is not None and src_dir.is_dir():
-        for src in sorted(src_dir.glob("*.py")):
+    if boot is not None:
+        sources: list[Path] = []
+        seen: set[Path] = set()
+        for root in source_roots:
+            if root.is_dir():
+                candidates = root.rglob("*.py")
+            elif root.suffix == ".py":
+                candidates = (root,)
+            else:
+                continue
+            for candidate in candidates:
+                resolved = candidate.resolve()
+                if resolved in seen:
+                    continue
+                seen.add(resolved)
+                sources.append(candidate)
+        for src in sorted(sources):
             try:
                 mtime = datetime.fromtimestamp(src.stat().st_mtime, tz=timezone.utc)
             except OSError as exc:

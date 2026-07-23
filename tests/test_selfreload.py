@@ -100,6 +100,42 @@ def test_reloads_when_code_is_newer_than_boot_and_daemon_is_idle(tmp_path, monke
     assert "self-reload" in marker.read_text()
 
 
+def test_reloads_when_operations_core_dependency_is_newer_than_boot(
+    tmp_path, monkeypatch
+):
+    """The direct-mode incident: next_tasks changed but the live daemon did not.
+
+    ``workspace.py`` imports ``volpred.ops.next_tasks`` at boot.  Monitoring
+    only the dispatch package therefore left the daemon executing the old
+    append function after the on-disk admission guard had shipped.
+    """
+    supervisor_src = _src_dir(
+        tmp_path,
+        mtimes={"workspace.py": BOOT - timedelta(hours=1)},
+    )
+    ops_src = tmp_path / "volpred" / "ops"
+    ops_src.mkdir(parents=True)
+    dependency = ops_src / "next_tasks.py"
+    dependency.write_text("# direct-mode admission guard\n")
+    dependency_mtime = NOW - timedelta(minutes=30)
+    os.utime(dependency, (dependency_mtime.timestamp(), dependency_mtime.timestamp()))
+    st = _state_file(tmp_path, boot=BOOT, jobs=[])
+    marker = tmp_path / "restart_marker.json"
+    monkeypatch.setattr(state, "RESTART_MARKER_PATH", marker)
+    exit_fn = _Exit()
+
+    action = selfreload.maybe_self_reload(
+        state_path=st,
+        source_roots=(supervisor_src, ops_src),
+        now=NOW,
+        exit_fn=exit_fn,
+    )
+
+    assert action == "reload"
+    assert exit_fn.called == 1
+    assert marker.exists()
+
+
 def test_defers_while_a_job_is_in_flight(tmp_path, monkeypatch):
     """THE dangerous case. Reloading mid-fire SIGTERMs the daemon and takes the
     worker's process group with it — an agent's uncommitted work, destroyed."""

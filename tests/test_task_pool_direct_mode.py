@@ -11,6 +11,7 @@ from volpred.ops.task_pool_mode import (
     TaskPoolAdmissionClosed,
     enter_direct_execution_mode,
     load_task_pool_mode,
+    reconcile_direct_execution_pool,
     restore_task_pool_backup,
 )
 
@@ -120,6 +121,49 @@ def test_direct_mode_allows_existing_task_lifecycle_and_removal(
         next_tasks.write_tasks_to_handle(handle, [])
 
     assert json.loads(queue.read_text()) == []
+
+
+def test_reconcile_direct_mode_removes_only_ids_outside_the_receipt(
+    tmp_path: Path,
+) -> None:
+    queue = tmp_path / "storage" / "next_tasks.json"
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    control = {"id": "control-task", "status": "in_progress", "priority": 3}
+    _write_pool(queue, [control])
+    entered = enter_direct_execution_mode(
+        queue_path=queue,
+        state_path=state,
+        backup_dir=tmp_path / "backups",
+        activated_by="test",
+        reason="test",
+        preserve_task_ids=("control-task",),
+        now="2026-07-23T12:00:00+00:00",
+    )
+    # Model a pre-cutover process that retained the old append function in
+    # memory and wrote after the admission guard was activated.
+    _write_pool(
+        queue,
+        [
+            control,
+            {"id": "leaked-task", "status": "pending", "priority": 2},
+        ],
+    )
+
+    receipt = reconcile_direct_execution_pool(
+        queue_path=queue,
+        state_path=state,
+        reconciled_by="test",
+        reason="remove stale-writer leak",
+        now="2026-07-23T12:05:00+00:00",
+    )
+
+    assert receipt.removed_task_ids == ("leaked-task",)
+    assert receipt.retained_task_ids == ("control-task",)
+    assert json.loads(queue.read_text()) == [control]
+    mode = load_task_pool_mode(state)
+    assert mode.enabled is True
+    assert mode.backup_path == entered.backup_path
+    assert mode.backup_sha256 == entered.backup_sha256
 
 
 def test_malformed_direct_mode_state_fails_closed(

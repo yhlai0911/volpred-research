@@ -18,6 +18,7 @@ if str(ROOT / "src") not in sys.path:
 from volpred.ops.task_pool_mode import (  # noqa: E402
     enter_direct_execution_mode,
     load_task_pool_mode,
+    reconcile_direct_execution_pool,
     restore_task_pool_backup,
 )
 
@@ -53,6 +54,15 @@ def _parser() -> argparse.ArgumentParser:
 
     status = commands.add_parser("status", help="read back mode and queue counts")
     _paths(status)
+
+    reconcile = commands.add_parser(
+        "reconcile-direct",
+        help="remove rows outside the active direct-mode preserve receipt",
+    )
+    _paths(reconcile)
+    reconcile.add_argument("--actor", required=True)
+    reconcile.add_argument("--reason", required=True)
+    reconcile.add_argument("--now", default=None, help=argparse.SUPPRESS)
 
     restore = commands.add_parser(
         "restore",
@@ -100,6 +110,16 @@ def main(argv: list[str] | None = None) -> int:
             activated_by=args.actor,
             reason=args.reason,
             preserve_task_ids=args.preserve_task_id,
+            now=args.now or _now(),
+        )
+        print(json.dumps({"ok": True, **asdict(receipt)}, ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "reconcile-direct":
+        receipt = reconcile_direct_execution_pool(
+            queue_path=args.queue,
+            state_path=args.state,
+            reconciled_by=args.actor,
+            reason=args.reason,
             now=args.now or _now(),
         )
         print(json.dumps({"ok": True, **asdict(receipt)}, ensure_ascii=False, indent=2))
