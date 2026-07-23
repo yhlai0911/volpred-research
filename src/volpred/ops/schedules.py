@@ -331,7 +331,12 @@ CRON_MARKER_SCOPE = "piggyback-and-cron_lib-self-report-only"
 # Exit banner emitted by scripts/cron_lib.sh::cron_emit_exit and by bespoke
 # wrappers (e.g. cron_daily_update.sh):  === [job] exit 0 at <ts> (duration=…) ===
 _EXIT_BANNER_RE = re.compile(
-    r"===\s*\[[^\]]+\]\s+exit\s+(?P<code>-?\d+)\s+at\s+(?P<ts>\S+)"
+    r"===\s*\[[^\]]+\]\s+exit\s+(?P<code>-?\d+)\s+at\s+"
+    r"(?P<ts>"
+    r"\d{4}-\d{2}-\d{2}T\S+"
+    r"|"
+    r"\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}(?:\s+CST)?"
+    r")"
 )
 _LOG_TAIL_BYTES = 65536
 
@@ -417,8 +422,16 @@ def _parse_marker_ts(raw: Any) -> datetime | None:
 
 def _parse_banner_ts(raw: str) -> datetime | None:
     """Parse a wrapper banner timestamp (`2026-07-20T08:08:09+0800`, UTC ISO,
-    or naive local) → aware UTC datetime."""
+    bespoke ``2026-07-20 08:08:09 CST``, or naive local) → aware UTC.
+
+    The host's ``date %Z`` renders Asia/Taipei as the ambiguous abbreviation
+    ``CST``.  Wrapper receipts are explicitly host-local, so strip that display
+    suffix and apply the canonical host timezone rather than interpreting it as
+    North American Central time.
+    """
     candidate = raw.strip().rstrip(",;")
+    if candidate.endswith(" CST"):
+        candidate = candidate.removesuffix(" CST")
     m = re.match(r"(.*[+-]\d{2})(\d{2})$", candidate)
     if m:  # +0800 → +08:00 (fromisoformat on older interpreters)
         candidate = f"{m.group(1)}:{m.group(2)}"

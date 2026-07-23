@@ -178,6 +178,17 @@
 
 ## J. Alert / dreaming / detector false-positive / 轟炸
 
+**2026-07-24 root_cause_fixed_and_verified**：B3.7 piggy-back drift assertion
+已在 `check_alerts.py` 執行，ledger 卻仍標未完成；live 回讀更固定把健康的
+`gmail_poll`／`handoff_regen` 報成 `never_ran`。根因有兩層：schedule 的
+`log_path` 指向 domain log／不存在的 storage log，而非 LaunchAgent wrapper 真正含
+exit receipt 的 `~/.volpred/logs/*`；共用 banner parser 又只擷取空白前的日期，
+把 `2026-07-23 23:50:02 CST` 解成台北午夜，造成 1,445 分鐘假 stale。canonical
+schedule 現綁回 wrapper execution log；單一 `job_liveness` owner 同時支援 ISO 與
+既有 host-local CST receipt。兩個 RED→GREEN regression 固定 log identity 與 timestamp
+語義，48 個 liveness／check-alerts／schedule／wrapper 相鄰測試通過，live
+`_check_piggy_back_drift` 回讀由 2 個假 finding 收斂為 `drift_count=0`。
+
 **2026-07-23 root_cause_fixed_and_verified**：dreaming 把 `Claude→Codex failover 已接手（Claude 端：quota）`（dedupe key `31bfa7e7f9289f4c`）的成功降級 telemetry 當成持續故障；七天 10 次的真實 fire 證明 generic persistent/unfiled detector 會為「已成功接手」另開治理工單，與已負責 provider outage 的 `supervisor quota_blocked` 雙 owner。anti-stacking registry 現新增該精確 quota-success title，persistent 與 unfiled 兩個 detector 共用同一 registry；`auth` 與「接手失敗」title 不排除。真實 ledger 回放後 `31bfa7e7f9289f4c` 不再產生 finding，而 `b74691d14763e77c` 失敗路徑仍會被偵測；兩條負向回歸測試鎖住分流。production 回讀另揭露歷史 archive 的非 UTF-8 bytes 會讓 unfiled detector 整體 crash，已改成逐檔 fail-open + warning，並以 malformed-archive 回歸鎖住。
 
 **2026-07-23 root_cause_fixed_and_verified**：`supervisor quota_blocked（額度恢復後自動復工）`（dedupe key `e46b1923cd3787a9`）13 次／15.7 天、跨過三輪 dreaming 後仍被 generic persistent/unfiled detector 重複立案；fresh detector 修前回放仍命中，但 7/22 之後 production receipts 是連續 `codex_failover_recovered`，證明 supervisor 的 outage-scoped dedup、探測與 failover 已是 canonical owner，真正的 outcome loss 另由「接手失敗」title 表達。根因是 anti-stacking registry 只排除成功 failover telemetry，漏掉它所屬的 quota outage notice。現以 exact title 補入同一 registry；真實 ledger 修後回放不再產生 `persistent_alert:e46b1923cd3787a9`，而 persistent/unfiled 兩條負向測試都確認 `Claude→Codex failover 接手失敗（Claude 端：quota）` 仍可見。三振計畫與五步證據見 `docs/refactor_plan_quota_alert_ownership.md`。

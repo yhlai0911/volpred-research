@@ -68,6 +68,49 @@ def test_launchd_direct_job_with_frozen_marker_but_fresh_banner_is_alive(tmp_pat
     assert abs((live.last_success - fresh).total_seconds()) < 120
 
 
+def test_launchd_jobs_bind_liveness_to_wrapper_execution_logs() -> None:
+    """The schedule must point at the log that contains the exit-0 receipt.
+
+    The Gmail poller also writes a domain log under ``storage/``, but that file
+    contains no wrapper exit banner.  Handoff regeneration has no such storage
+    log at all.  Binding either job to those paths makes the public liveness
+    observer report ``never_ran`` while both LaunchAgents are healthy.
+    """
+    config = json.loads(
+        (ROOT / "config" / "runtime_schedules.json").read_text(encoding="utf-8")
+    )
+    items = {
+        item["id"]: item
+        for item in config["system_crontab"]["items"]
+        if item.get("id") in {"gmail_poll", "handoff_regen"}
+    }
+
+    assert items["gmail_poll"]["log_path"] == "~/.volpred/logs/gmail_poll.log"
+    assert items["handoff_regen"]["log_path"] == "~/.volpred/logs/handoff_regen.log"
+
+
+def test_bespoke_wrapper_local_timestamp_is_success_evidence(tmp_path) -> None:
+    """Existing LaunchAgent receipts use a space-separated Taipei timestamp."""
+    log = tmp_path / "handoff_regen.log"
+    log.write_text(
+        "=== [handoff_regen] exit 0 at 2026-07-23 23:50:02 CST ===\n",
+        encoding="utf-8",
+    )
+
+    live = job_liveness(
+        {
+            "id": "handoff_regen",
+            "host_crontab_managed": False,
+            "log_path": str(log),
+        },
+        marker_state={},
+        repo_root=tmp_path,
+    )
+
+    assert live.last_success == datetime(2026, 7, 23, 15, 50, 2, tzinfo=UTC)
+    assert live.success_source == "log_banner"
+
+
 def test_check_alerts_no_longer_blanket_skips_managed_false_jobs(tmp_path) -> None:
     """The old `unmanaged` verdict hid dead-or-alive launchd jobs entirely."""
     now = datetime.now(UTC)

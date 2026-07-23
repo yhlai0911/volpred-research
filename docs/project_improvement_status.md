@@ -164,7 +164,11 @@ attribution、error_log 壓縮、治理疊層收斂、K1709 合併）已進 next
 - [x] B3.4: `content.py` L362+L693 兩個 unlocked feed.json write 統一加 `shared_state_lock("publisher_feed")`（解 #17）— commit `450d26a7`
 - [x] B3.5: `scripts/audit_release_settings.py` + 6h piggy-back schedule + `auto`→`scheduled` 線上 mapping 修 silent PATCH 400 history（解 #11）— commit `db2f6ece`
 - [x] B3.6: `frontend-v2-fix/scripts/deploy-zeabur-safe.sh` 從 `config/project_targets.json` 讀 PROJECT_ID/SERVICE_ID（解 #12）— frontend-v2-fix commit `4740e34`
-- [ ] B3.7: piggy-back drift assertion 加進 `check_alerts.py`（解 #18）
+- [x] B3.7: piggy-back drift assertion 加進 `check_alerts.py`（解 #18）—
+  原 assertion 已由 `2e42993ed` 落地；2026-07-24 收尾修正兩個 live false-positive：
+  `gmail_poll`／`handoff_regen` 改讀 wrapper execution receipt，並讓 canonical
+  liveness parser 正確解析既有 host-local CST timestamp。48 個相鄰測試通過，
+  live drift read-back=`0`。
 - [x] B3.8: CLAUDE.md L107 + control-plane.md 統一 task source-of-truth（已於 B2 commit 寫入；session_startup.md 已是 read-only doc，無需動）
 
 #### Phase 4（host install，需用戶授權）
