@@ -187,13 +187,19 @@
      "first_seen_at": "2026-07-23T13:00:07.559447+00:00",
      "key": "30005256105:1",
      "last_seen_at": "2026-07-23T13:00:07.559447+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-23T14:00:10.316982+00:00",
+     "key": "30009327178:1",
+     "last_seen_at": "2026-07-23T14:00:10.316982+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "failed log 未提供可解析的一行根因；請見 GitHub run",
-   "last_seen_at": "2026-07-23T13:00:07.559447+00:00",
+   "last_breach_detail": "2026-07-23T13:13:47.2883916Z E AssertionError: P1 roadmap items with no live task: [{'kind': 'p1_dangling', 'rid': 'reader-analytics', 'detail': \"P1 'P1: Reader analytics（CTR / 停留時間 / 跳出率 / 回訪 cohort）",
+   "last_seen_at": "2026-07-23T14:00:10.316982+00:00",
    "notified_at": null,
-   "occurrence_count": 2,
+   "occurrence_count": 3,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -500,7 +506,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-23T13:07:33.249293+00:00"
+     "last_seen_at": "2026-07-23T14:07:07.473246+00:00"
     },
     {
      "cleared_at": null,
@@ -513,7 +519,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-23T13:07:33.517249+00:00"
+     "last_seen_at": "2026-07-23T14:07:07.746532+00:00"
     },
     {
      "cleared_at": null,
@@ -526,7 +532,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-23T13:07:34.066288+00:00"
+     "last_seen_at": "2026-07-23T14:07:08.324491+00:00"
     },
     {
      "cleared_at": null,
@@ -539,7 +545,7 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-23T13:07:33.792190+00:00"
+     "last_seen_at": "2026-07-23T14:07:08.022215+00:00"
     },
     {
      "cleared_at": null,
@@ -552,7 +558,7 @@
      },
      "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-23T13:07:34.365937+00:00"
+     "last_seen_at": "2026-07-23T14:07:08.635687+00:00"
     },
     {
      "cleared_at": null,
@@ -578,7 +584,7 @@
      },
      "first_seen_at": "2026-07-22T02:53:18.325364+00:00",
      "key": "dispatch-slot-3-3896dcaa-k1714",
-     "last_seen_at": "2026-07-23T13:07:34.633791+00:00"
+     "last_seen_at": "2026-07-23T14:07:08.912104+00:00"
     },
     {
      "cleared_at": null,
@@ -596,9 +602,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-3-3896dcaa-k1714 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-23T13:07:34.633791+00:00",
+   "last_seen_at": "2026-07-23T14:07:08.912104+00:00",
    "notified_at": null,
-   "occurrence_count": 456,
+   "occurrence_count": 468,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -670,9 +676,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-22T21:10:39.785468+00:00"
-    },
-    {
      "at": "2026-07-22T22:19:36.643084+00:00"
     },
     {
@@ -704,6 +707,9 @@
     },
     {
      "at": "2026-07-23T12:32:53.147081+00:00"
+    },
+    {
+     "at": "2026-07-23T13:12:41.598463+00:00"
     }
    ],
    "current_task_id": null,
@@ -819,6 +825,6 @@
    }
   }
  },
- "updated_at": "2026-07-23T13:12:35.029764+00:00",
+ "updated_at": "2026-07-23T14:13:01.290013+00:00",
  "version": 1
 }

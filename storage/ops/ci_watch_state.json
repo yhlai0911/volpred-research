@@ -1,12 +1,12 @@
 {
-  "last_seen_run_id": 30005256105,
+  "last_seen_run_id": 30009327178,
   "last_seen_conclusion": "failure",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-red-30001512040",
   "last_push_remediation": {
     "attempted": true,
-    "ahead": 21,
-    "head_sha": "f498e4fce3681440fcd09c1fe160b171777a8dc0",
+    "ahead": 8,
+    "head_sha": "84fe2fc5fa4b497d85a64519b36c426153bba13d",
     "pushed": true,
     "rc": 0,
     "outcome": "pushed",
@@ -14,32 +14,32 @@
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "30005256105:1",
-    "run_id": 30005256105,
+    "key": "30009327178:1",
+    "run_id": 30009327178,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30005256105",
-    "head_sha": "dc46b62aa5d9493324c781dc4fb7e860d5f9a9cb",
-    "created_at": "2026-07-23T12:00:13Z",
-    "started_at": "2026-07-23T12:00:13Z",
-    "updated_at": "2026-07-23T12:03:51Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30009327178",
+    "head_sha": "f498e4fce3681440fcd09c1fe160b171777a8dc0",
+    "created_at": "2026-07-23T13:00:19Z",
+    "started_at": "2026-07-23T13:00:19Z",
+    "updated_at": "2026-07-23T13:13:55Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "30005256105:1",
-    "run_id": 30005256105,
+    "key": "30009327178:1",
+    "run_id": 30009327178,
     "attempt": 1,
     "status": "completed",
     "conclusion": "failure",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30005256105",
-    "head_sha": "dc46b62aa5d9493324c781dc4fb7e860d5f9a9cb",
-    "created_at": "2026-07-23T12:00:13Z",
-    "started_at": "2026-07-23T12:00:13Z",
-    "updated_at": "2026-07-23T12:03:51Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30009327178",
+    "head_sha": "f498e4fce3681440fcd09c1fe160b171777a8dc0",
+    "created_at": "2026-07-23T13:00:19Z",
+    "started_at": "2026-07-23T13:00:19Z",
+    "updated_at": "2026-07-23T13:13:55Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-07-23T13:00:04.491063+00:00",
+  "updated_at": "2026-07-23T14:00:06.694480+00:00",
   "processed_run_keys": [
     "29304886936:1",
     "29307406826:1",
@@ -256,7 +256,8 @@
     "29993506513:1",
     "29997721158:1",
     "30001512040:1",
-    "30005256105:1"
+    "30005256105:1",
+    "30009327178:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -423,11 +424,12 @@
       "updated_at": "2026-07-23T11:04:30Z",
       "attempt_history_complete": true
     },
-    "root_cause": "failed log 未提供可解析的一行根因；請見 GitHub run",
+    "root_cause": "2026-07-23T13:13:47.2883916Z E AssertionError: P1 roadmap items with no live task: [{'kind': 'p1_dangling', 'rid': 'reader-analytics', 'detail': \"P1 'P1: Reader analytics（CTR / 停留時間 / 跳出率 / 回訪 cohort） — 沒這個我盲打文章品質' has no live task\"}, {'kind': 'p1_dangling', 'rid': 'auth-onboardi",
     "root_cause_status": "complete",
     "failure_run_keys": [
       "30001512040:1",
-      "30005256105:1"
+      "30005256105:1",
+      "30009327178:1"
     ],
     "repair_task_ids": [
       "ci-red-30001512040"
@@ -464,49 +466,51 @@
         "sent_at": "2026-07-23T13:00:04.491063+00:00"
       }
     },
-    "root_cause_run_key": "30005256105:1",
+    "root_cause_run_key": "30009327178:1",
     "latest_failure": {
-      "key": "30005256105:1",
-      "run_id": 30005256105,
+      "key": "30009327178:1",
+      "run_id": 30009327178,
       "attempt": 1,
       "status": "completed",
       "conclusion": "failure",
-      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30005256105",
-      "head_sha": "dc46b62aa5d9493324c781dc4fb7e860d5f9a9cb",
-      "created_at": "2026-07-23T12:00:13Z",
-      "started_at": "2026-07-23T12:00:13Z",
-      "updated_at": "2026-07-23T12:03:51Z",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30009327178",
+      "head_sha": "f498e4fce3681440fcd09c1fe160b171777a8dc0",
+      "created_at": "2026-07-23T13:00:19Z",
+      "started_at": "2026-07-23T13:00:19Z",
+      "updated_at": "2026-07-23T13:13:55Z",
       "attempt_history_complete": true
     },
     "failure_heads": [
       "7b874394ca0dc86434b01b8baa29ca9993a72bfd",
-      "dc46b62aa5d9493324c781dc4fb7e860d5f9a9cb"
+      "dc46b62aa5d9493324c781dc4fb7e860d5f9a9cb",
+      "f498e4fce3681440fcd09c1fe160b171777a8dc0"
     ],
-    "failure_cycles": 2,
+    "failure_cycles": 3,
     "repair_task_statuses": {},
-    "dispatch_request_count": 2,
-    "last_dispatch_request_at": "2026-07-23T13:00:04.491063+00:00",
+    "dispatch_request_count": 3,
+    "last_dispatch_request_at": "2026-07-23T14:00:06.694480+00:00",
     "push_intent": {
-      "head_sha": "f498e4fce3681440fcd09c1fe160b171777a8dc0",
-      "run_key": "30005256105:1",
-      "recorded_at": "2026-07-23T13:00:04.491063+00:00"
+      "head_sha": "84fe2fc5fa4b497d85a64519b36c426153bba13d",
+      "run_key": "30009327178:1",
+      "recorded_at": "2026-07-23T14:00:06.694480+00:00"
     },
     "last_push_remediation": {
       "attempted": true,
-      "ahead": 21,
-      "head_sha": "f498e4fce3681440fcd09c1fe160b171777a8dc0",
+      "ahead": 8,
+      "head_sha": "84fe2fc5fa4b497d85a64519b36c426153bba13d",
       "pushed": true,
       "rc": 0,
       "outcome": "pushed",
       "ahead_after": 0
     },
-    "last_push_remediation_at": "2026-07-23T13:00:04.491063+00:00",
-    "last_verified_push_head": "f498e4fce3681440fcd09c1fe160b171777a8dc0",
+    "last_push_remediation_at": "2026-07-23T14:00:06.694480+00:00",
+    "last_verified_push_head": "84fe2fc5fa4b497d85a64519b36c426153bba13d",
     "remediation_poll_keys": [
       "2026-07-23T12",
-      "2026-07-23T13"
+      "2026-07-23T13",
+      "2026-07-23T14"
     ],
-    "remediation_checks": 2,
-    "escalation_reason": "append_failed: TaskPoolAdmissionClosed: legacy task-pool admission is closed for direct execution; new task id(s): ci-red-30005256105"
+    "remediation_checks": 3,
+    "escalation_reason": "ci_failed_more_than_two_cycles: 3"
   }
 }
