@@ -24,7 +24,6 @@ from ._effect import (
     _request_sha256,
 )
 
-
 ConnectionFactory = Callable[[], Connection[Any]]
 
 
@@ -87,8 +86,20 @@ class EffectAttemptReceipt:
     reason_code: str | None
     evidence_ref: str
     evidence_sha256: str
+    authority_request_sha256: str | None
+    outbox_claim_ref: str | None
+    primary_authority_ref: str | None
     retry_at: str | None
     recorded_at: str
+
+
+@dataclass(frozen=True)
+class EffectSettlementAuthority:
+    """Token-redacted authority evidence persisted with one attempt."""
+
+    request_sha256: str
+    outbox_claim_ref: str
+    primary_authority_ref: str
 
 
 def _attempt_receipt_from_row(row: dict[str, Any]) -> EffectAttemptReceipt:
@@ -114,6 +125,9 @@ def _attempt_receipt_from_row(row: dict[str, Any]) -> EffectAttemptReceipt:
         reason_code=row["reason_code"],
         evidence_ref=row["evidence_ref"],
         evidence_sha256=row["evidence_sha256"],
+        authority_request_sha256=row.get("authority_request_sha256"),
+        outbox_claim_ref=row.get("outbox_claim_ref"),
+        primary_authority_ref=row.get("primary_authority_ref"),
         retry_at=retry_at,
         recorded_at=recorded_at,
     )
@@ -153,6 +167,7 @@ class PostgresEffectDelivery:
                 "effect outbox worker and token are required",
                 "effect outbox lease_seconds must be positive",
                 "effect outbox settlement fields are required",
+                "effect outbox settlement authority is required",
                 "effect outbox attempt_count must be positive",
                 "effect outbox sequence must be positive",
                 "effect outbox settlement hash must be lowercase SHA-256",
@@ -280,6 +295,7 @@ class PostgresEffectDelivery:
         *,
         lease: EffectOutboxLease,
         outcome: EffectAttemptOutcome,
+        authority: EffectSettlementAuthority,
     ) -> EffectAttemptReceipt:
         """Atomically record one attempt and transition retry/terminal state.
 
@@ -289,7 +305,27 @@ class PostgresEffectDelivery:
         """
 
         if not isinstance(lease, EffectOutboxLease):
-            raise ValueError("effect outbox lease is required")
+            raise TypeError("effect outbox lease is required")
+        if not isinstance(authority, EffectSettlementAuthority):
+            raise TypeError("effect settlement authority is required")
+        authority_request_sha256 = authority.request_sha256
+        if (
+            not isinstance(authority_request_sha256, str)
+            or len(authority_request_sha256) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in authority_request_sha256
+            )
+        ):
+            raise ValueError(
+                "effect settlement authority request must be lowercase SHA-256"
+            )
+        outbox_claim_ref = authority.outbox_claim_ref.strip()
+        primary_authority_ref = authority.primary_authority_ref.strip()
+        if not outbox_claim_ref or not primary_authority_ref:
+            raise ValueError(
+                "effect settlement authority references are required"
+            )
         normalized = _normalize_attempt_outcome(outcome)
         if isinstance(normalized, AcknowledgedEffect):
             outcome_kind = "acknowledged"
@@ -316,7 +352,7 @@ class PostgresEffectDelivery:
                     SELECT *
                     FROM volpred_ops.settle_effect_outbox(
                       %s, %s, %s, %s, %s, %s,
-                      %s, %s, %s, %s, %s
+                      %s, %s, %s, %s, %s, %s, %s, %s
                     )
                     """,
                     (
@@ -325,6 +361,9 @@ class PostgresEffectDelivery:
                         lease.attempt_count,
                         lease.claimed_by,
                         lease.token,
+                        authority_request_sha256,
+                        outbox_claim_ref,
+                        primary_authority_ref,
                         outcome_kind,
                         acknowledgement_kind,
                         acknowledgement_target_ref,
@@ -346,5 +385,6 @@ class PostgresEffectDelivery:
 __all__ = [
     "EffectAttemptReceipt",
     "EffectOutboxLease",
+    "EffectSettlementAuthority",
     "PostgresEffectDelivery",
 ]

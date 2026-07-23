@@ -1,9 +1,7 @@
--- Durable settlement, retry, and dead-letter lifecycle for Effect Delivery.
---
--- The worker reports typed evidence for one fenced claim. This module owns
--- bounded exponential backoff (30s base, one hour cap, five attempts), token
--- fencing, immutable attempt receipts, and terminal request/outbox state.
--- No provider is invoked by this migration.
+-- Bind every new effect settlement to a verified outbox claim and Primary
+-- Authority grant. Existing shadow receipts remain readable with NULL
+-- authority fields; the old unfenced settlement function is removed so all
+-- new attempts must provide token-redacted authority evidence.
 
 DO $$
 BEGIN
@@ -11,119 +9,37 @@ BEGIN
 END;
 $$;
 
-ALTER TABLE volpred_ops.effect_requests
-  DROP CONSTRAINT effect_requests_status_check;
-ALTER TABLE volpred_ops.effect_requests
-  ADD CONSTRAINT effect_requests_status_check
-  CHECK (status IN ('requested', 'delivered', 'dead_lettered'));
+ALTER TABLE volpred_ops.effect_attempt_receipts
+  ADD COLUMN authority_request_sha256 text,
+  ADD COLUMN outbox_claim_ref text,
+  ADD COLUMN primary_authority_ref text;
 
-ALTER TABLE volpred_ops.effect_outbox
-  DROP CONSTRAINT effect_outbox_status_check;
-ALTER TABLE volpred_ops.effect_outbox
-  DROP CONSTRAINT effect_outbox_check;
-ALTER TABLE volpred_ops.effect_outbox
-  ADD CONSTRAINT effect_outbox_status_check
-  CHECK (status IN ('pending', 'claimed', 'delivered', 'dead_lettered'));
-ALTER TABLE volpred_ops.effect_outbox
-  ADD CONSTRAINT effect_outbox_state_check
+ALTER TABLE volpred_ops.effect_attempt_receipts
+  ADD CONSTRAINT effect_attempt_receipts_authority_check
   CHECK (
-    (status = 'pending'
-      AND claimed_by IS NULL
-      AND claim_token IS NULL
-      AND claim_expires_at IS NULL)
+    (
+      authority_request_sha256 IS NULL
+      AND outbox_claim_ref IS NULL
+      AND primary_authority_ref IS NULL
+    )
     OR
-    (status = 'claimed'
-      AND claimed_by IS NOT NULL
-      AND claim_token IS NOT NULL
-      AND claim_expires_at IS NOT NULL)
-    OR
-    (status IN ('delivered', 'dead_lettered')
-      AND claimed_by IS NULL
-      AND claim_token IS NULL
-      AND claim_expires_at IS NULL)
-  );
+    (
+      authority_request_sha256 ~ '^[0-9a-f]{64}$'
+      AND btrim(outbox_claim_ref) <> ''
+      AND btrim(primary_authority_ref) <> ''
+    )
+  ) NOT VALID;
 
-CREATE TABLE volpred_ops.effect_attempt_receipts (
-  effect_id text NOT NULL
-    REFERENCES volpred_ops.effect_requests(id) ON DELETE RESTRICT,
-  outbox_sequence bigint NOT NULL
-    REFERENCES volpred_ops.effect_outbox(sequence) ON DELETE RESTRICT,
-  attempt_count integer NOT NULL CHECK (attempt_count > 0),
-  worker_id text NOT NULL,
-  claim_token_sha256 text NOT NULL
-    CHECK (claim_token_sha256 ~ '^[0-9a-f]{64}$'),
-  reported_outcome text NOT NULL
-    CHECK (
-      reported_outcome IN (
-        'acknowledged', 'retryable_failure', 'terminal_failure'
-      )
-    ),
-  disposition text NOT NULL
-    CHECK (
-      disposition IN ('delivered', 'retry_scheduled', 'dead_lettered')
-    ),
-  acknowledgement_kind text,
-  acknowledgement_target_ref text,
-  reason_code text,
-  evidence_ref text NOT NULL,
-  evidence_sha256 text NOT NULL
-    CHECK (evidence_sha256 ~ '^[0-9a-f]{64}$'),
-  retry_at timestamptz,
-  recorded_at timestamptz NOT NULL,
-  PRIMARY KEY (effect_id, attempt_count),
-  CHECK (
-    (reported_outcome = 'acknowledged'
-      AND disposition = 'delivered'
-      AND acknowledgement_kind IS NOT NULL
-      AND acknowledgement_target_ref IS NOT NULL
-      AND reason_code IS NULL
-      AND retry_at IS NULL)
-    OR
-    (reported_outcome = 'retryable_failure'
-      AND disposition = 'retry_scheduled'
-      AND acknowledgement_kind IS NULL
-      AND acknowledgement_target_ref IS NULL
-      AND reason_code IS NOT NULL
-      AND retry_at IS NOT NULL)
-    OR
-    (reported_outcome IN ('retryable_failure', 'terminal_failure')
-      AND disposition = 'dead_lettered'
-      AND acknowledgement_kind IS NULL
-      AND acknowledgement_target_ref IS NULL
-      AND reason_code IS NOT NULL
-      AND retry_at IS NULL)
-  )
-);
+ALTER TABLE volpred_ops.effect_attempt_receipts
+  VALIDATE CONSTRAINT effect_attempt_receipts_authority_check;
 
-CREATE VIEW volpred_ops.effect_attempt_receipt_reads AS
+CREATE OR REPLACE VIEW volpred_ops.effect_attempt_receipt_reads AS
 SELECT
   effect_id, outbox_sequence, attempt_count, worker_id, reported_outcome,
   disposition, acknowledgement_kind, acknowledgement_target_ref, reason_code,
-  evidence_ref, evidence_sha256, retry_at, recorded_at
+  evidence_ref, evidence_sha256, retry_at, recorded_at,
+  authority_request_sha256, outbox_claim_ref, primary_authority_ref
 FROM volpred_ops.effect_attempt_receipts;
-
-ALTER TABLE volpred_ops.effect_attempt_receipts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE volpred_ops.effect_attempt_receipts FORCE ROW LEVEL SECURITY;
-
-REVOKE ALL ON volpred_ops.effect_attempt_receipts FROM PUBLIC;
-REVOKE ALL ON volpred_ops.effect_attempt_receipt_reads FROM PUBLIC;
-GRANT SELECT ON volpred_ops.effect_attempt_receipt_reads TO volpred_ops_worker;
-GRANT SELECT, INSERT ON volpred_ops.effect_attempt_receipts
-  TO volpred_ops_definer;
-GRANT UPDATE ON volpred_ops.effect_requests TO volpred_ops_definer;
-
-CREATE POLICY effect_attempt_receipts_worker_select
-  ON volpred_ops.effect_attempt_receipts
-  FOR SELECT TO volpred_ops_worker USING (true);
-CREATE POLICY effect_attempt_receipts_definer_select
-  ON volpred_ops.effect_attempt_receipts
-  FOR SELECT TO volpred_ops_definer USING (true);
-CREATE POLICY effect_attempt_receipts_definer_insert
-  ON volpred_ops.effect_attempt_receipts
-  FOR INSERT TO volpred_ops_definer WITH CHECK (true);
-CREATE POLICY effect_requests_definer_update
-  ON volpred_ops.effect_requests
-  FOR UPDATE TO volpred_ops_definer USING (true) WITH CHECK (true);
 
 CREATE FUNCTION volpred_ops.settle_effect_outbox(
   p_outbox_sequence bigint,
@@ -131,6 +47,9 @@ CREATE FUNCTION volpred_ops.settle_effect_outbox(
   p_attempt_count integer,
   p_worker_id text,
   p_token text,
+  p_authority_request_sha256 text,
+  p_outbox_claim_ref text,
+  p_primary_authority_ref text,
   p_outcome text,
   p_acknowledgement_kind text,
   p_acknowledgement_target_ref text,
@@ -158,6 +77,13 @@ BEGIN
       OR p_token IS NULL OR btrim(p_token) = ''
       OR p_evidence_ref IS NULL OR btrim(p_evidence_ref) = '' THEN
     RAISE EXCEPTION 'effect outbox settlement fields are required';
+  ELSIF p_authority_request_sha256 IS NULL
+      OR p_authority_request_sha256 !~ '^[0-9a-f]{64}$'
+      OR p_outbox_claim_ref IS NULL
+      OR btrim(p_outbox_claim_ref) = ''
+      OR p_primary_authority_ref IS NULL
+      OR btrim(p_primary_authority_ref) = '' THEN
+    RAISE EXCEPTION 'effect outbox settlement authority is required';
   ELSIF p_outbox_sequence IS NULL OR p_outbox_sequence <= 0 THEN
     RAISE EXCEPTION 'effect outbox sequence must be positive';
   ELSIF p_attempt_count IS NULL OR p_attempt_count <= 0 THEN
@@ -189,10 +115,6 @@ BEGIN
   token_sha256 :=
     encode(sha256(convert_to(p_token, 'UTF8')), 'hex');
 
-  -- Serialize equivalent client retries before checking the immutable
-  -- receipt. Without this identity lock, two transactions can both observe
-  -- "no receipt"; the loser then wakes after the outbox is terminal and
-  -- incorrectly reports a stale claim instead of replaying success.
   PERFORM pg_advisory_xact_lock(
     hashtextextended(
       btrim(p_effect_id) || ':' || p_attempt_count::text,
@@ -208,6 +130,12 @@ BEGIN
     IF existing.outbox_sequence <> p_outbox_sequence
         OR existing.worker_id <> btrim(p_worker_id)
         OR existing.claim_token_sha256 <> token_sha256
+        OR existing.authority_request_sha256
+          IS DISTINCT FROM p_authority_request_sha256
+        OR existing.outbox_claim_ref
+          IS DISTINCT FROM btrim(p_outbox_claim_ref)
+        OR existing.primary_authority_ref
+          IS DISTINCT FROM btrim(p_primary_authority_ref)
         OR existing.reported_outcome <> p_outcome
         OR existing.acknowledgement_kind
           IS DISTINCT FROM btrim(p_acknowledgement_kind)
@@ -286,14 +214,16 @@ BEGIN
 
   INSERT INTO volpred_ops.effect_attempt_receipts (
     effect_id, outbox_sequence, attempt_count, worker_id,
-    claim_token_sha256, reported_outcome, disposition,
+    claim_token_sha256, authority_request_sha256, outbox_claim_ref,
+    primary_authority_ref, reported_outcome, disposition,
     acknowledgement_kind, acknowledgement_target_ref, reason_code,
     evidence_ref, evidence_sha256, retry_at, recorded_at
   )
   VALUES (
     message.effect_id, message.sequence, message.attempt_count,
-    btrim(p_worker_id), token_sha256, p_outcome, disposition,
-    btrim(p_acknowledgement_kind),
+    btrim(p_worker_id), token_sha256, p_authority_request_sha256,
+    btrim(p_outbox_claim_ref), btrim(p_primary_authority_ref),
+    p_outcome, disposition, btrim(p_acknowledgement_kind),
     btrim(p_acknowledgement_target_ref), btrim(p_reason_code),
     btrim(p_evidence_ref), p_evidence_sha256, retry_at, event_at
   )
@@ -328,22 +258,28 @@ $$;
 
 GRANT CREATE ON SCHEMA volpred_ops TO volpred_ops_definer;
 
-ALTER TABLE volpred_ops.effect_attempt_receipts
-  OWNER TO volpred_ops_definer;
-ALTER VIEW volpred_ops.effect_attempt_receipt_reads
-  OWNER TO volpred_ops_definer;
 ALTER FUNCTION volpred_ops.settle_effect_outbox(
-  bigint, text, integer, text, text, text, text, text, text, text, text
+  bigint, text, integer, text, text, text, text, text,
+  text, text, text, text, text, text
 ) OWNER TO volpred_ops_definer;
 
 REVOKE CREATE ON SCHEMA volpred_ops FROM volpred_ops_definer;
 
 REVOKE ALL ON FUNCTION volpred_ops.settle_effect_outbox(
-  bigint, text, integer, text, text, text, text, text, text, text, text
+  bigint, text, integer, text, text, text, text, text,
+  text, text, text, text, text, text
 ) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION volpred_ops.settle_effect_outbox(
-  bigint, text, integer, text, text, text, text, text, text, text, text
+  bigint, text, integer, text, text, text, text, text,
+  text, text, text, text, text, text
 ) TO volpred_ops_worker;
+
+REVOKE ALL ON FUNCTION volpred_ops.settle_effect_outbox(
+  bigint, text, integer, text, text, text, text, text, text, text, text
+) FROM PUBLIC;
+DROP FUNCTION volpred_ops.settle_effect_outbox(
+  bigint, text, integer, text, text, text, text, text, text, text, text
+);
 
 DO $$
 BEGIN

@@ -59,8 +59,26 @@ BEGIN
         AND NOT EXISTS (
           SELECT 1
           FROM pg_auth_members AS memberships
-          WHERE memberships.member = pg_roles.oid
-             OR memberships.roleid = pg_roles.oid
+          WHERE (
+              memberships.member = pg_roles.oid
+              OR memberships.roleid = pg_roles.oid
+            )
+            AND NOT (
+              -- PostgreSQL 16+ automatically grants a role created by a
+              -- non-superuser CREATEROLE principal back to that creator with
+              -- ADMIN TRUE / SET FALSE / INHERIT FALSE. The creator cannot
+              -- remove that bootstrap-superuser grant. It conveys no runtime
+              -- privilege and is the only membership shape allowed here.
+              memberships.roleid = pg_roles.oid
+              AND memberships.member = (
+                SELECT creator.oid
+                FROM pg_roles AS creator
+                WHERE creator.rolname = current_user
+              )
+              AND memberships.admin_option
+              AND NOT memberships.set_option
+              AND NOT memberships.inherit_option
+            )
         )
     ) THEN
       RAISE EXCEPTION 'existing % role has unsafe attributes', checked_role;
@@ -653,6 +671,11 @@ BEGIN
 END;
 $$;
 
+-- A non-superuser migration executor may transfer object ownership only when
+-- the target owner has CREATE on the containing schema. Keep that privilege
+-- strictly inside this ownership-transfer window.
+GRANT CREATE ON SCHEMA volpred_ops TO volpred_ops_definer;
+
 ALTER FUNCTION volpred_ops.submit_work(
   text, text, text, text, text, integer, text[], text[], text, text,
   text, text, timestamptz, text, text, integer, timestamptz, timestamptz
@@ -677,14 +700,7 @@ ALTER FUNCTION volpred_ops.complete_work(
 ) OWNER TO volpred_ops_definer;
 ALTER VIEW volpred_ops.work_item_reads OWNER TO volpred_ops_definer;
 
-DO $$
-BEGIN
-  EXECUTE format(
-    'REVOKE volpred_ops_definer FROM %I',
-    current_user
-  );
-END;
-$$;
+REVOKE CREATE ON SCHEMA volpred_ops FROM volpred_ops_definer;
 
 REVOKE ALL ON FUNCTION
   volpred_ops.submit_work(

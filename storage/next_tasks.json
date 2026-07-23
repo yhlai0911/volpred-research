@@ -40,10 +40,10 @@
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
-    "containment_evidence": "backup sha256 89863b056e1dc4fb8a661a9ccf5caf1eeb058b063b42c528a25ce602f186d8f3; 3338 rows; admission and claim canaries blocked; 68 tests; canonical writer audit clean",
-    "next_direct_step": "Program commit 13 follow-up: connect the adapter to the fenced durable outbox worker behind Primary Authority, then run a controlled live shadow send/read-back before any ownership cutover",
+    "containment_evidence": "direct-mode backup/admission gates retained; Supabase effect/outbox/receipt read-back delivered attempt 2 with authority evidence; security advisor no new volpred_ops lint; receipt FK advisor cleared; 143 scoped tests and PG17 migration replay passed",
+    "next_direct_step": "Program commit 13 follow-up: add durable effect payload writer and live Primary Authority adapter, then route one formal Work Coordinator caller through the ownership transaction before any notification cutover",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Program commit 13 shadow email notification adapter: stable Message-ID, pre-send replay read-back, post-SMTP IMAP exact read-back; 133 scoped tests passed; no live send or ownership cutover"
+    "latest_checkpoint": "Program commit 13 authority-fenced EffectOutboxWorker live shadow: five private migrations applied; PG17 non-superuser path fixed; Gmail Sent exact read-back settled attempt 2 as delivered/acknowledged; 143 scoped tests; no ownership cutover"
   }
 ]

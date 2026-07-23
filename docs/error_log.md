@@ -1162,7 +1162,7 @@ Sent mailbox；存在且 recipient／subject／plain／HTML body 精確相符便
 已存在但內容漂移則 terminal fail closed。`EmailNotifier` 只新增可選 Message-ID
 threading，未複製第二套 SMTP implementation。
 
-**回歸、回讀與結案界線**：fake Sent mailbox 與 production IMAP adapter contract
+**初始回歸與結案界線**：fake Sent mailbox 與 production IMAP adapter contract
 覆蓋成功 read-back、可驗證 replay 不重寄、SMTP 成功但 Sent 缺失、transport timeout、
 raw payload drift、header injection、recipient／subject／body drift 與 exact evidence
 hash；連同 Effect Delivery PostgreSQL settlement 及既有 EmailNotifier 共 133 tests
@@ -1170,3 +1170,29 @@ hash；連同 Effect Delivery PostgreSQL settlement 及既有 EmailNotifier 共 
 制度化，但尚未接 durable outbox worker／settlement、Primary Authority 或正式 caller，
 也沒有 live send/read-back receipt；因此 program commit 13 與 notification ownership
 仍是 **contained**，不得宣稱 live delivery 已完成。
+
+**live shadow 追查出的真實根因**：第一個 controlled attempt 在 provider write 前即回報
+`email_provider_error`。Gmail 對未 quote 的 `[Gmail]/Sent Mail` 回覆 command parse
+failure；quote 後又證明此帳號的 Sent special-use mailbox 是在地化名稱，硬編英文名稱
+仍無法選取。另一條 live migration 路徑也揭露本機 superuser 測試遮住的 PG17 差異：
+非 superuser `CREATEROLE` executor 的自動 membership 形狀，以及 object ownership
+transfer 前後 schema CREATE／role membership 的必要順序。這些都是 adapter／migration
+contract 根因，不是 Gmail 或 Supabase 資料要手補。
+
+**底層修復與正式驗證**：IMAP adapter 現在對 explicit mailbox 做 quoted-string encoding，
+未設定時以 RFC 6154 `LIST` 的 `\Sent` special-use 自動發現在地化 mailbox。Migration
+在 object owner transfer 期間才暫授 schema CREATE，並保留 definer membership 到所有
+function privilege mutation 完成；PG17 fixture 以 non-superuser executor 重播全部
+migrations。`EffectOutboxWorker.run_once` 將 claim、authority、payload、provider、
+settlement 與 receipt 回讀收進同一 deep module；settlement 強制保存 token-redacted
+authority evidence 並移除舊 unfenced overload。Supabase advisor 另發現 receipt outbox
+foreign key 缺 covering index，已由 forward migration 補上。
+
+Controlled live shadow attempt 2 已成功寄送 stable Message-ID email、從 Gmail Sent Mail
+回讀 exact RFC822 bytes，將 evidence SHA-256 原子 settlement，並回讀 EffectRequest／
+outbox `delivered` 與 attempt receipt `acknowledged`；143 個 scoped regressions、
+PG17 migration replay、security／performance advisor 複驗均通過。IMAP mailbox、
+PG17 migration 與 receipt index 三個具體根因為
+**root_cause_fixed_and_verified**；但現行 production caller 仍未由 live Primary
+Authority adapter、durable payload writer 及 ownership transaction 接管，因此原本的
+notification success-semantics／program commit 13 整體仍是 **contained**。

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import replace
-from email.message import EmailMessage
-from email.policy import default
-from email.parser import BytesParser
 import hashlib
 import json
+from dataclasses import replace
+from email.message import EmailMessage
+from email.parser import BytesParser
+from email.policy import default
 
 import pytest
 
@@ -14,8 +14,8 @@ from volpred.ops.delivery import (
     AcknowledgementExpectation,
     EffectView,
     FailedEffect,
+    _email_notification,
 )
-from volpred.ops.delivery import _email_notification
 from volpred.ops.delivery._email_notification import (
     EmailNotificationEffectAdapter,
     ImapSentMailReader,
@@ -438,13 +438,14 @@ def test_imap_reader_fetches_exact_message_id_without_network(
         port=993,
         username="ops@example.com",
         password="secret",
-        mailbox="Sent",
+        mailbox="Sent Messages",
         timeout_seconds=12,
     )
 
     assert reader.read(message_id) == raw_bytes
     assert instances
     calls = instances[0].calls
+    assert ("select", '"Sent Messages"', True) in calls
     assert (
         "uid",
         "search",
@@ -455,3 +456,68 @@ def test_imap_reader_fetches_exact_message_id_without_network(
     ) in calls
     assert ("uid", "fetch", b"42", "(RFC822)") in calls
     assert calls[-1] == ("logout",)
+
+
+def test_imap_reader_discovers_localized_special_use_sent_mailbox(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    message_id = "<volpred-effect.localized@operations.volpred.local>"
+    raw = EmailMessage()
+    raw["Message-ID"] = message_id
+    raw["Subject"] = "Localized Sent"
+    raw["To"] = "owner@example.com"
+    raw.set_content("Verified")
+    raw_bytes = raw.as_bytes()
+    instances = []
+
+    class FakeImap:
+        def __init__(
+            self,
+            host: str,
+            port: int,
+            *,
+            timeout: float,
+        ) -> None:
+            self.calls: list[tuple[object, ...]] = []
+            instances.append(self)
+
+        def login(self, username: str, password: str):
+            return "OK", [b""]
+
+        def list(self):
+            self.calls.append(("list",))
+            return "OK", [
+                b'(\\HasNoChildren) \"/\" \"Sent Messages\"',
+                b'(\\HasNoChildren \\Sent) \"/\" \"[Gmail]/&W8RO9lCZTv0-\"',
+            ]
+
+        def select(self, mailbox: str, readonly: bool):
+            self.calls.append(("select", mailbox, readonly))
+            return "OK", [b"1"]
+
+        def uid(self, command: str, *args: object):
+            if command == "search":
+                return "OK", [b"42"]
+            return "OK", [(b"42 (RFC822 {123})", raw_bytes), b")"]
+
+        def logout(self):
+            self.calls.append(("logout",))
+            return "BYE", [b""]
+
+    monkeypatch.setattr(_email_notification.imaplib, "IMAP4_SSL", FakeImap)
+    reader = ImapSentMailReader(
+        host="imap.example.com",
+        port=993,
+        username="ops@example.com",
+        password="secret",
+        mailbox=None,
+        timeout_seconds=12,
+    )
+
+    assert reader.read(message_id) == raw_bytes
+    assert ("list",) in instances[0].calls
+    assert (
+        "select",
+        '"[Gmail]/&W8RO9lCZTv0-"',
+        True,
+    ) in instances[0].calls

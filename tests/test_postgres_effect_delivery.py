@@ -1,13 +1,13 @@
+import os
+import shutil
+import socket
+import subprocess
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import datetime, timezone
 from ipaddress import ip_address
-import os
 from pathlib import Path
-import shutil
-import socket
-import subprocess
 
 import psycopg
 import pytest
@@ -22,11 +22,11 @@ from volpred.ops.delivery import (
 )
 from volpred.ops.delivery.postgres import (
     EffectOutboxLease,
+    EffectSettlementAuthority,
     PostgresEffectDelivery,
 )
 from volpred.ops.work import WorkCoordinator, WorkRequest
 from volpred.ops.work.postgres import PostgresCoordinationStore
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = (
@@ -42,6 +42,14 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724030000_operations_core_effect_outbox_settlement.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724040000_operations_core_effect_worker_authority.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724050000_operations_core_effect_receipt_index.sql",
 )
 
 
@@ -81,6 +89,119 @@ def _validate_external_test_dsn(dsn: str) -> None:
             "'volpred_ops_effect_test', and "
             "VOLPRED_ALLOW_DESTRUCTIVE_POSTGRES_TEST=1"
         )
+
+
+def _verify_non_superuser_migration_executor(dsn: str) -> None:
+    """Exercise the production PG17 CREATEROLE ownership/privilege path."""
+
+    manager = "volpred_ops_migration_test_manager"
+    with psycopg.connect(dsn, autocommit=True) as connection:
+        connection.execute(
+            f"""
+            CREATE ROLE {manager}
+              LOGIN CREATEROLE NOSUPERUSER NOCREATEDB
+              NOREPLICATION NOBYPASSRLS
+            """
+        )
+        connection.execute(
+            f"GRANT CREATE ON DATABASE {connection.info.dbname} TO {manager}"
+        )
+    try:
+        with psycopg.connect(
+            dsn,
+            user=manager,
+            autocommit=True,
+        ) as connection:
+            for migration in MIGRATIONS:
+                connection.execute(migration.read_text(encoding="utf-8"))
+
+        with psycopg.connect(dsn, autocommit=True) as connection:
+            (
+                worker_execute,
+                public_execute,
+                worker_settle,
+                public_settle,
+                definer_create,
+                receipt_outbox_index,
+                unsafe_memberships,
+            ) = connection.execute(
+                    """
+                    SELECT
+                      has_function_privilege(
+                        'volpred_ops_worker',
+                        'volpred_ops.start_work(text,text,integer)',
+                        'EXECUTE'
+                      ),
+                      has_function_privilege(
+                        'public',
+                        'volpred_ops.start_work(text,text,integer)',
+                        'EXECUTE'
+                      ),
+                      has_function_privilege(
+                        'volpred_ops_worker',
+                        'volpred_ops.settle_effect_outbox('
+                          'bigint,text,integer,text,text,text,text,text,'
+                          'text,text,text,text,text,text)',
+                        'EXECUTE'
+                      ),
+                      has_function_privilege(
+                        'public',
+                        'volpred_ops.settle_effect_outbox('
+                          'bigint,text,integer,text,text,text,text,text,'
+                          'text,text,text,text,text,text)',
+                        'EXECUTE'
+                      ),
+                      has_schema_privilege(
+                        'volpred_ops_definer',
+                        'volpred_ops',
+                        'CREATE'
+                      ),
+                      to_regclass(
+                        'volpred_ops.'
+                        'effect_attempt_receipts_outbox_sequence_idx'
+                      ) IS NOT NULL,
+                      (
+                        SELECT count(*)
+                        FROM pg_auth_members AS memberships
+                        JOIN pg_roles AS granted
+                          ON granted.oid = memberships.roleid
+                        WHERE granted.rolname LIKE 'volpred_ops_%%'
+                          AND NOT (
+                            memberships.member = (
+                              SELECT oid FROM pg_roles
+                              WHERE rolname = %s
+                            )
+                            AND memberships.admin_option
+                            AND NOT memberships.set_option
+                            AND NOT memberships.inherit_option
+                          )
+                      )
+                    """,
+                    (manager,),
+                ).fetchone()
+        assert worker_execute is True
+        assert public_execute is False
+        assert worker_settle is True
+        assert public_settle is False
+        assert definer_create is False
+        assert receipt_outbox_index is True
+        assert unsafe_memberships == 0
+    finally:
+        with psycopg.connect(dsn, autocommit=True) as connection:
+            connection.execute("DROP SCHEMA IF EXISTS volpred_ops CASCADE")
+            connection.execute(
+                """
+                DROP ROLE IF EXISTS
+                  volpred_ops_worker,
+                  volpred_ops_approver,
+                  volpred_ops_definer
+                """
+            )
+            connection.execute(
+                f"REVOKE CREATE ON DATABASE {connection.info.dbname} "
+                f"FROM {manager}"
+            )
+            connection.execute(f"DROP ROLE IF EXISTS {manager}")
 
 
 @pytest.fixture(scope="session")
@@ -142,6 +263,7 @@ def postgres_effect_dsn(
     )
     dsn = f"postgresql://127.0.0.1:{port}/postgres"
     try:
+        _verify_non_superuser_migration_executor(dsn)
         with psycopg.connect(dsn, autocommit=True) as connection:
             for migration in MIGRATIONS:
                 connection.execute(migration.read_text(encoding="utf-8"))
@@ -511,6 +633,29 @@ def _failed(**overrides: object) -> FailedEffect:
     return replace(outcome, **overrides)
 
 
+def _authority(**overrides: object) -> EffectSettlementAuthority:
+    authority = EffectSettlementAuthority(
+        request_sha256="d" * 64,
+        outbox_claim_ref="effect-outbox:effect-postgres-1:attempt",
+        primary_authority_ref="primary-authority:epoch-42",
+    )
+    return replace(authority, **overrides)
+
+
+def _settle(
+    delivery: PostgresEffectDelivery,
+    *,
+    lease: EffectOutboxLease,
+    outcome: AcknowledgedEffect | FailedEffect,
+    authority: EffectSettlementAuthority | None = None,
+):
+    return delivery.settle_outbox(
+        lease=lease,
+        outcome=outcome,
+        authority=authority or _authority(),
+    )
+
+
 def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
     postgres_effect_dsn: str,
 ) -> None:
@@ -520,14 +665,17 @@ def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
     lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
     assert lease is not None
 
-    receipt = delivery.settle_outbox(
+    receipt = _settle(
+        delivery,
         lease=lease,
         outcome=_acknowledged(),
     )
-    replay = _delivery(
+    replay_delivery = _delivery(
         postgres_effect_dsn,
         token="unused-replay-token",
-    ).settle_outbox(
+    )
+    replay = _settle(
+        replay_delivery,
         lease=lease,
         outcome=_acknowledged(),
     )
@@ -548,6 +696,11 @@ def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
     assert replay == receipt
     assert receipt.disposition == "delivered"
     assert receipt.acknowledgement == _acknowledged().acknowledgement
+    assert receipt.authority_request_sha256 == "d" * 64
+    assert receipt.outbox_claim_ref == (
+        "effect-outbox:effect-postgres-1:attempt"
+    )
+    assert receipt.primary_authority_ref == "primary-authority:epoch-42"
     assert receipt.retry_at is None
     assert delivery.inspect(effect.id).status == "delivered"
     assert delivery.claim_outbox(
@@ -574,7 +727,8 @@ def test_concurrent_equivalent_settlement_returns_one_immutable_receipt(
     with ThreadPoolExecutor(max_workers=2) as executor:
         receipts = tuple(
             executor.map(
-                lambda item: item.settle_outbox(
+                lambda item: _settle(
+                    item,
                     lease=lease,
                     outcome=_acknowledged(),
                 ),
@@ -600,7 +754,8 @@ def test_acknowledgement_mismatch_rolls_back_before_terminal_state(
     assert lease is not None
 
     with pytest.raises(ValueError, match="acknowledgement mismatch"):
-        delivery.settle_outbox(
+        _settle(
+            delivery,
             lease=lease,
             outcome=_acknowledged(
                 acknowledgement=AcknowledgementExpectation(
@@ -635,7 +790,8 @@ def test_retryable_failure_uses_database_backoff_and_fences_stale_claim(
     )
     assert first_lease is not None
 
-    first_receipt = delivery.settle_outbox(
+    first_receipt = _settle(
+        delivery,
         lease=first_lease,
         outcome=_failed(),
     )
@@ -665,20 +821,30 @@ def test_retryable_failure_uses_database_backoff_and_fences_stale_claim(
     assert second_lease is not None
     assert second_lease.attempt_count == 2
 
-    replay = delivery.settle_outbox(
+    replay = _settle(
+        delivery,
         lease=first_lease,
         outcome=_failed(),
     )
     assert replay == first_receipt
     with pytest.raises(ValueError, match="original outcome"):
-        delivery.settle_outbox(
+        _settle(
+            delivery,
+            lease=first_lease,
+            outcome=_failed(),
+            authority=_authority(primary_authority_ref="primary-authority:wrong"),
+        )
+    with pytest.raises(ValueError, match="original outcome"):
+        _settle(
+            delivery,
             lease=first_lease,
             outcome=_failed(evidence_sha256="d" * 64),
         )
 
     stale_second = replace(second_lease, token=first_lease.token)
     with pytest.raises(ValueError, match="token mismatch"):
-        second_delivery.settle_outbox(
+        _settle(
+            second_delivery,
             lease=stale_second,
             outcome=_failed(),
         )
@@ -701,7 +867,7 @@ def test_expired_claim_cannot_settle_before_recovery(
         )
 
     with pytest.raises(ValueError, match="lease expired"):
-        delivery.settle_outbox(lease=lease, outcome=_acknowledged())
+        _settle(delivery, lease=lease, outcome=_acknowledged())
 
     recovered = _delivery(
         postgres_effect_dsn,
@@ -720,7 +886,8 @@ def test_terminal_failure_dead_letters_without_another_claim(
     lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
     assert lease is not None
 
-    receipt = delivery.settle_outbox(
+    receipt = _settle(
+        delivery,
         lease=lease,
         outcome=_failed(
             retryable=False,
@@ -754,7 +921,8 @@ def test_retry_exhaustion_dead_letters_on_fifth_attempt(
         )
         assert lease is not None
         assert lease.attempt_count == attempt
-        final_receipt = delivery.settle_outbox(
+        final_receipt = _settle(
+            delivery,
             lease=lease,
             outcome=_failed(
                 evidence_ref=f"attempt-log:effect-postgres-1:{attempt}",
@@ -823,7 +991,8 @@ def test_settlement_failure_rolls_back_attempt_receipt_and_state(
             psycopg.errors.RaiseException,
             match="terminal update failure",
         ):
-            delivery.settle_outbox(
+            _settle(
+                delivery,
                 lease=lease,
                 outcome=_acknowledged(),
             )
@@ -860,7 +1029,7 @@ def test_worker_cannot_mutate_attempt_receipts_or_read_token_digest(
     delivery.request(_request())
     lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
     assert lease is not None
-    delivery.settle_outbox(lease=lease, outcome=_acknowledged())
+    _settle(delivery, lease=lease, outcome=_acknowledged())
 
     with _worker_connection(postgres_effect_dsn) as connection:
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
@@ -877,3 +1046,22 @@ def test_worker_cannot_mutate_attempt_receipts_or_read_token_digest(
             ).description
         }
     assert "claim_token_sha256" not in columns
+
+
+def test_unfenced_settlement_function_is_removed(
+    postgres_effect_dsn: str,
+) -> None:
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        signatures = connection.execute(
+            """
+            SELECT pg_get_function_identity_arguments(procedure.oid)
+            FROM pg_proc AS procedure
+            JOIN pg_namespace AS namespace
+              ON namespace.oid = procedure.pronamespace
+            WHERE namespace.nspname = 'volpred_ops'
+              AND procedure.proname = 'settle_effect_outbox'
+            """
+        ).fetchall()
+
+    assert len(signatures) == 1
+    assert signatures[0][0].count(",") + 1 == 14

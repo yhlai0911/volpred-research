@@ -109,10 +109,24 @@
 > typed contract；穩定 Message-ID 在 SMTP 前先查 Sent mailbox，重播若已存在且收件人、
 > subject、plain／HTML body 全相符就不重寄。SMTP 返回後仍須經獨立 IMAP read-back
 > 取得 exact message bytes 才能回傳 `AcknowledgedEffect`；查無訊息為 retryable
-> failure，內容漂移則 terminal fail closed。這仍是 shadow provider capability：
-> 尚未把 adapter 接到 durable claim／settlement worker、Primary Authority 或正式
-> caller，也未執行 live send/read-back 或 migration，因此不改變現行
-> publisher／notification ownership。
+> failure，內容漂移則 terminal fail closed。
+>
+> program commit 13 follow-up 已把 durable claim、authority request、immutable payload
+> read、provider write、fenced settlement 與 receipt read-back 收進單一 private
+> `EffectOutboxWorker.run_once` deep module。每次 settlement 現在必須保存
+> token-redacted authority request hash、outbox claim ref 與 Primary Authority ref；
+> 舊的 unfenced SQL overload 已移除。PostgreSQL 17 非 superuser migration executor、
+> private schema privileges、receipt FK covering index、SMTP／IMAP contract 都有回歸。
+> production IMAP adapter 會 quote mailbox argument，未明示 mailbox 時依 RFC 6154
+> `\Sent` special-use 自動發現在地化 Sent folder。
+>
+> 2026-07-24 controlled live shadow 已把五個 private migrations 套用到 Supabase，
+> 以 attempt 2 寄送一封 stable-Message-ID email，從 Gmail Sent Mail 回讀 exact bytes，
+> 再把 EffectRequest／outbox／attempt receipt 回讀為 `delivered`／`acknowledged`；
+> security advisor 沒有新增 `volpred_ops` lint，performance advisor 新發現的 receipt
+> foreign-key index 缺口也已 migration 修正並複驗消失。這是 live shadow evidence，
+> 不是 ownership cutover：live Primary Authority adapter、durable payload writer、
+> Work Coordinator 正式 caller 與既有 notification／publisher owner 移交仍未完成。
 
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。

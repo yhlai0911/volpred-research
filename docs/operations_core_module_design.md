@@ -291,6 +291,34 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   caller 或 live migration，也未執行真實 downstream smoke；因此 program commit 13
   只達 shadow provider capability，不構成 notification ownership cutover。
 
+### 2026-07-24 authority-fenced worker／live shadow checkpoint
+
+- private `EffectOutboxWorker.run_once` 現在擁有 claim → inspect → Primary Authority
+  authorize → immutable payload read → typed provider → fenced settlement → receipt
+  read-back 的完整嘗試生命週期。caller 只提供 worker identity、primary fencing token
+  與 lease duration；raw outbox／primary token 不進回傳 receipt。
+- authority request canonical hash 綁定 EffectRequest digest、WorkItem id／version、
+  outbox sequence／attempt／claim／expiry、worker、primary fencing token、effect kind、
+  target、payload 及 acknowledgement。SQL settlement 強制保存該 hash、token-redacted
+  outbox claim ref 與 Primary Authority ref；11-argument unfenced overload 已移除。
+- `FileEffectPayloadReader` 只接受設定 root 內 normalized `file:` relative path，拒絕
+  absolute path、traversal、symlink escape 與 non-file。payload read／provider exception
+  會變成 typed retry evidence，仍經同一 durable settlement path。
+- production IMAP read-back 不再硬編英文 `[Gmail]/Sent Mail`：explicit mailbox 會轉成
+  IMAP quoted-string，未設定時以 `LIST` 的 RFC 6154 `\Sent` special-use 找出在地化
+  mailbox。這兩個修正都來自真實 Gmail `EXAMINE`／mailbox discovery failure。
+- 五個 Operations Core migrations 已套用 live Supabase。PG17 非 superuser
+  `CREATEROLE` migration path 的 membership／schema ownership privilege 順序已由
+  真實失敗修正，並以本機 PG17 fixture 重播；Supabase performance advisor 指出的
+  attempt-receipt outbox FK 缺 index 另由 forward migration 修正，複驗後不再出現。
+- controlled live shadow attempt 2 已取得 stable Message-ID 的 Gmail Sent exact bytes，
+  以 evidence SHA-256 settlement，並從 token-redacted views 回讀 EffectRequest／outbox
+  為 `delivered`、receipt 為 `acknowledged`。143 個 Effect Delivery／EmailNotifier
+  scoped regressions 通過。
+- 這個 checkpoint 仍沒有 live Primary Authority adapter、durable payload writer、
+  Work Coordinator 正式 caller 或 production ownership transaction；shadow 使用顯式
+  authority grant 驗證 worker-side contract，不得宣稱 notification ownership 已切換。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

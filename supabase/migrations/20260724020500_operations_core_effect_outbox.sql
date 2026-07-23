@@ -5,6 +5,12 @@
 -- infrastructure: no Data API role receives schema access and no provider is
 -- called by these functions.
 
+DO $$
+BEGIN
+  EXECUTE format('GRANT volpred_ops_definer TO %I', current_user);
+END;
+$$;
+
 CREATE TABLE volpred_ops.effect_requests (
   id text PRIMARY KEY,
   idempotency_key text NOT NULL UNIQUE,
@@ -264,11 +270,7 @@ BEGIN
 END;
 $$;
 
-DO $$
-BEGIN
-  EXECUTE format('GRANT volpred_ops_definer TO %I', current_user);
-END;
-$$;
+GRANT CREATE ON SCHEMA volpred_ops TO volpred_ops_definer;
 
 ALTER TABLE volpred_ops.effect_requests OWNER TO volpred_ops_definer;
 ALTER TABLE volpred_ops.effect_outbox OWNER TO volpred_ops_definer;
@@ -282,11 +284,7 @@ ALTER FUNCTION volpred_ops.request_effect(
 ALTER FUNCTION volpred_ops.claim_effect_outbox(text, integer, text)
   OWNER TO volpred_ops_definer;
 
-DO $$
-BEGIN
-  EXECUTE format('REVOKE volpred_ops_definer FROM %I', current_user);
-END;
-$$;
+REVOKE CREATE ON SCHEMA volpred_ops FROM volpred_ops_definer;
 
 REVOKE ALL ON FUNCTION volpred_ops.request_effect(
   text, text, text, integer, text, text, text, text, text, text, text, text, text
@@ -297,3 +295,9 @@ GRANT EXECUTE ON FUNCTION volpred_ops.request_effect(
   text, text, text, integer, text, text, text, text, text, text, text, text, text
 ), volpred_ops.claim_effect_outbox(text, integer, text)
 TO volpred_ops_worker;
+
+DO $$
+BEGIN
+  EXECUTE format('REVOKE volpred_ops_definer FROM %I', current_user);
+END;
+$$;

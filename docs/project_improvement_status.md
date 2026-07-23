@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（safe email notification adapter checkpoint）**
+Last updated: **2026-07-24（authority-fenced effect worker live shadow checkpoint）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -147,6 +147,20 @@ message bytes；Message-ID、recipient、subject、plain／HTML body 全相符�
 durable outbox claim／settlement worker、Primary Authority、正式 Work Coordinator
 caller、live migration 或真實 downstream smoke，因此仍不構成 notification ownership
 cutover。
+同日續做 program commit 13 的 authority-fenced worker／live shadow checkpoint：
+private `EffectOutboxWorker.run_once` 收斂 claim、inspect、Primary Authority authorize、
+immutable payload read、typed email provider、fenced settlement 與 receipt 回讀；
+authority request hash 綁定 effect／work／outbox／worker／primary token 全部 identity，
+receipt 只保存 token-redacted outbox claim ref 與 Primary Authority ref，舊 unfenced
+settlement overload 已移除。Production IMAP adapter 改用 quoted mailbox argument 與
+RFC 6154 `\Sent` special-use discovery，修正真實 Gmail command parse 與在地化 mailbox
+問題。五個 private migrations 已套用 live Supabase；PG17 非 superuser migration
+ownership／membership 路徑由真實失敗修正，performance advisor 發現的 receipt FK index
+亦以 forward migration 補齊並複驗消失。Controlled shadow attempt 2 已寄送 stable
+Message-ID email、由 Gmail Sent Mail 回讀 exact bytes、settlement 並從 private views
+回讀為 `delivered`／`acknowledged`；143 個 scoped tests 通過。仍缺 live Primary
+Authority adapter、durable payload writer、正式 Work Coordinator caller 與 ownership
+transaction，故 program commit 13／notification ownership 整體仍是 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

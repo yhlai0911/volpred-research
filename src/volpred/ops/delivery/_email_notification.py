@@ -9,17 +9,17 @@ mailbox before an ``AcknowledgedEffect`` can be returned.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from dataclasses import dataclass
-from email.message import Message
-from email.policy import default
-from email.parser import BytesParser
-from email.utils import getaddresses, parseaddr
 import hashlib
 import imaplib
 import json
 import os
 import re
+from collections.abc import Mapping
+from dataclasses import dataclass
+from email.message import Message
+from email.parser import BytesParser
+from email.policy import default
+from email.utils import getaddresses, parseaddr
 from typing import Any, Protocol
 
 from volpred.ops.diagnostics import warn
@@ -32,12 +32,16 @@ from ._effect import (
     FailedEffect,
 )
 
-
 _PAYLOAD_SCHEMA = "email-notification.v1"
 _EFFECT_KIND = "email.notification.send"
 _ACKNOWLEDGEMENT_KIND = "email.sent-mail.readback"
 _TARGET_PREFIX = "email:"
 _MESSAGE_ID = re.compile(r"<[^<>\s@]+@[^<>\s@]+>")
+_IMAP_LIST = re.compile(
+    rb'^\((?P<flags>[^)]*)\)\s+(?:NIL|"(?:\\.|[^"])*")\s+'
+    rb"(?P<mailbox>.+)$",
+    re.IGNORECASE,
+)
 _PAYLOAD_FIELDS = frozenset(
     {"schema_version", "subject", "text_body", "html_body"}
 )
@@ -80,22 +84,20 @@ class ImapSentMailReader:
         port: int,
         username: str,
         password: str,
-        mailbox: str,
+        mailbox: str | None,
         timeout_seconds: float,
     ) -> None:
         if not host.strip() or not username.strip() or not password:
             raise ValueError("IMAP sent-mail credentials are required")
         if isinstance(port, bool) or port <= 0:
             raise ValueError("IMAP port must be positive")
-        if not mailbox.strip():
-            raise ValueError("IMAP sent mailbox is required")
         if timeout_seconds <= 0:
             raise ValueError("IMAP timeout must be positive")
         self._host = host.strip()
         self._port = port
         self._username = username.strip()
         self._password = password
-        self._mailbox = mailbox.strip()
+        self._mailbox = mailbox.strip() if mailbox else None
         self._timeout_seconds = timeout_seconds
 
     @classmethod
@@ -109,10 +111,7 @@ class ImapSentMailReader:
             port=int(os.environ.get("IMAP_PORT", "993")),
             username=username,
             password=password,
-            mailbox=os.environ.get(
-                "IMAP_SENT_MAILBOX",
-                "[Gmail]/Sent Mail",
-            ),
+            mailbox=os.environ.get("IMAP_SENT_MAILBOX") or None,
             timeout_seconds=float(
                 os.environ.get("GMAIL_POLL_IMAP_TIMEOUT_SEC", "45")
             ),
@@ -130,7 +129,12 @@ class ImapSentMailReader:
             status, _ = connection.login(self._username, self._password)
             if status != "OK":
                 raise RuntimeError("IMAP login failed")
-            status, _ = connection.select(self._mailbox, readonly=True)
+            mailbox = (
+                _imap_mailbox(self._mailbox)
+                if self._mailbox is not None
+                else _discover_sent_mailbox(connection)
+            )
+            status, _ = connection.select(mailbox, readonly=True)
             if status != "OK":
                 raise RuntimeError("IMAP sent mailbox selection failed")
             status, search_data = connection.uid(
@@ -178,6 +182,36 @@ class ImapSentMailReader:
                 )
 
 
+def _imap_mailbox(value: str) -> str:
+    """Encode one configured mailbox as an IMAP quoted-string."""
+
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def _discover_sent_mailbox(connection: imaplib.IMAP4_SSL) -> str:
+    """Return the server-advertised RFC 6154 ``\\Sent`` mailbox argument."""
+
+    status, entries = connection.list()
+    if status != "OK":
+        raise RuntimeError("IMAP mailbox discovery failed")
+    for raw in entries or ():
+        if not isinstance(raw, bytes):
+            continue
+        matched = _IMAP_LIST.fullmatch(raw)
+        if matched is None:
+            continue
+        flags = {flag.lower() for flag in matched.group("flags").split()}
+        if b"\\sent" not in flags:
+            continue
+        mailbox = matched.group("mailbox").decode("ascii")
+        return (
+            mailbox
+            if mailbox.startswith('"')
+            else _imap_mailbox(mailbox)
+        )
+    raise RuntimeError("IMAP server did not advertise a Sent mailbox")
+
+
 class EmailNotificationEffectAdapter:
     """Deliver one safe email effect and require independent Sent read-back."""
 
@@ -196,7 +230,7 @@ class EmailNotificationEffectAdapter:
             (
                 f"{effect.id}\0{effect.request_sha256}\0"
                 f"{effect.payload_sha256}"
-            ).encode("utf-8")
+            ).encode()
         ).hexdigest()
         return f"<volpred-effect.{identity}@operations.volpred.local>"
 
