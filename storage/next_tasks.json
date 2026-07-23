@@ -41323,7 +41323,7 @@
     "description": "rev2 agent job (agent-brief_k1623_rev2-e343cd) 已完成並凍結於 worktree dispatch-slot-2-c5cafe39-k1623（commit f1e7ef686）。主線程已核對：retracted_claims[] 8 條（3 RETRACTED / 5 CORRECTED）與 README §0 撤回總表逐項對上；loss_function_sign_reversal[] 顯示 3/5 資產排序隨 loss 反轉（SPY/TW0050/QQQ），且 ARFIMA-vs-HAR 在 QLIKE 與 MSE 下經 BH 後皆不顯著；reproduction_guard 4 資產 exact 1e-9、TW0050 誠實揭露為 near-replication (n 4263→4264)。merge_worktree.sh 被 review-certification gate 正確擋下（缺 review_verdict.json）。verdict 骨架已生成（27 檔 sha256）。本 task = 收 Codex round-2 裁決並依 followup brief 分流。禁止 agent 寫 knowledge.json（K1259）。",
     "task_type": "paper_review",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch",
     "created_at": "2026-07-19T10:12:10+00:00",
     "created_by": "hourly-slot-2-6509cdb38cde4526b89fc04eed4f7500",
@@ -41342,8 +41342,29 @@
         "at": "2026-07-19T10:12:10+00:00",
         "by": "hourly-slot-2-6509cdb38cde4526b89fc04eed4f7500",
         "note": "codex round 2 enqueued to compute queue by dispatch main thread"
+      },
+      {
+        "ts": "2026-07-23T08:09:27.806210+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-b9c61e13142249679d4ecfc50779b844"
+      },
+      {
+        "ts": "2026-07-23T08:09:28.049701+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-b9c61e13142249679d4ecfc50779b844"
+      },
+      {
+        "ts": "2026-07-23T08:09:45.226522+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-b9c61e13142249679d4ecfc50779b844"
       }
-    ]
+    ],
+    "started_at": "2026-07-23T08:09:28.049684+00:00",
+    "completed_at": "2026-07-23T08:09:45.226506+00:00",
+    "result": "Fresh evidence reconciliation: round-2 primary Codex verdict exists and is FAIL (storage/ops/codex_reviews/k1623_rev2_verdict.md); review compute job is completed; bounded rev3 and round-3 primary review ran, with round-3 FAIL recorded in k1623_round3_codex_primary_review_gate; merge remained forbidden; branch worktree-dispatch-slot-2-c5cafe39-k1623 is preserved after no-residue worktree cleanup; existing pending k1623_rev4_remediation_after_codex_round3_fail is the sole repair exit. Closed stale collector without rerun, merge, or duplicate follow-up."
   },
   {
     "id": "assign_65b27c8b",
@@ -56045,10 +56066,29 @@
         "to": "pending",
         "by": "codex-failover-slot-1-c4680218ccfd4a3ebb77e53b8da1a575",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-23T08:08:00.628861+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-b9c61e13142249679d4ecfc50779b844"
+      },
+      {
+        "ts": "2026-07-23T08:08:09.459529+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-b9c61e13142249679d4ecfc50779b844"
+      },
+      {
+        "ts": "2026-07-23T08:08:50.741464+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-failover-slot-1-b9c61e13142249679d4ecfc50779b844",
+        "note": "manual_release"
       }
     ],
-    "started_at": "2026-07-23T07:09:34.095249+00:00",
-    "last_released_at": "2026-07-23T07:09:50.737356+00:00"
+    "started_at": "2026-07-23T08:08:09.459512+00:00",
+    "last_released_at": "2026-07-23T08:08:50.741452+00:00"
   },
   {
     "id": "alert_content_quality_20260723",
@@ -56067,10 +56107,10 @@
   {
     "id": "assign_2e6e760c",
     "title": "PHASE-Z 卡住檔案 incident（785413a1dbd4d6c0）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n5 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- CLAUDE.md — 3 班\n- CONTEXT.md — 3 班\n- docs/agents/domain.md — 3 班\n- docs/agents/issue-tracker.md — 3 班\n- docs/agents/triage-labels.md — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260723T061513387269Z:<路徑>`",
+    "description": "## 發生什麼\n5 個未提交檔案不是任何一班 fire 產出的，最長已連續 4 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- CLAUDE.md — 4 班\n- CONTEXT.md — 4 班\n- docs/agents/domain.md — 4 班\n- docs/agents/issue-tracker.md — 4 班\n- docs/agents/triage-labels.md — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260723T061513387269Z:<路徑>`\n- `git show refs/volpred/quarantine/20260723T071158621657Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-23T06:15:13.480646+00:00",
     "payload": {
@@ -56084,20 +56124,54 @@
         "docs/agents/triage-labels.md"
       ],
       "streaks": {
-        "CLAUDE.md": 3,
-        "CONTEXT.md": 3,
-        "docs/agents/domain.md": 3,
-        "docs/agents/issue-tracker.md": 3,
-        "docs/agents/triage-labels.md": 3
+        "CLAUDE.md": 4,
+        "CONTEXT.md": 4,
+        "docs/agents/domain.md": 4,
+        "docs/agents/issue-tracker.md": 4,
+        "docs/agents/triage-labels.md": 4
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260723T061513387269Z"
+        "refs/volpred/quarantine/20260723T061513387269Z",
+        "refs/volpred/quarantine/20260723T071158621657Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-23T06:15:13.465386+00:00",
-      "last_seen_at": "2026-07-23T06:15:13.465386+00:00"
+      "last_seen_at": "2026-07-23T07:11:59.832071+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-23T07:11:58.684769+00:00",
+      "deferred": [
+        "CLAUDE.md: 已保存，且 3.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "CONTEXT.md: 已保存，且 1.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "docs/agents/domain.md: 已保存，且 3.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "docs/agents/issue-tracker.md: 已保存，且 3.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "docs/agents/triage-labels.md: 已保存，且 3.4 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-23T07:11:59.832071+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-23T07:16:29.362639+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-23T07:16:29.608708+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-23T07:20:15.449264+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-23T07:16:29.608690+00:00",
+    "completed_at": "2026-07-23T07:20:15.449249+00:00",
+    "result": "contained: 5-path quarantined governance ChangeSet was byte-identical across both immutable refs, coherent with accepted ADRs, and had no live author. Adopted in aa20cd9fa; foreign_incident closeable=true, all paths clean, deferred=[], 106 Phase-Z/slot-budget regressions passed. Class-level atomic ownership remains gated on Operations Core cutover."
   },
   {
     "id": "K1686_article_general",
@@ -56122,6 +56196,31 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-23T07:01:51+00:00",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "K1719_article_general",
+    "title": "K1719: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1719 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'mixed/non-novel']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: [K1719 verdict=MIXED reviewer=Codex GPT-5 primary-path (PASS, no blocking defects) artifact=experiments/k1719 task=ci-red-k1719-unrecorded-knowledge] ASIA-5 conservative daily volatility spillover ladder: does the previous local trading day's upstream information improve a target Canonical evidence: experiments/k1719/k1719_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_publish_drought_emergency",
+    "audience_correction_rewrite": false,
+    "k_id": "K1719",
+    "evidence_source_paths": [
+      "experiments/k1719/k1719_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1719/k1719_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "publish-drought-emergency",
+      "reader-facing"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-23T08:01:29+00:00",
     "priority_capped_from": 1
   }
 ]
