@@ -1,6 +1,30 @@
 # Project Improvement Status
 
-Last updated: **2026-07-20 (ops master 全面重構計畫)**
+Last updated: **2026-07-23（平台運營優化總計畫已核可）**
+
+## 2026-07-23 平台運營優化總計畫（accepted charter）
+
+跨基礎架構、程式、零付費 AI 續跑、換機／暖備、Admin、原版／v3／vNext、analytics、
+自然成長與受控自我優化的總體決策，見
+`docs/platform_optimization_program_2026_07.md` 與 `docs/adr/` 下四份 accepted ADR。
+Phase 0／ADR-0001 的 module seam、interface、adapter 與第一個 TDD 切片，見
+`docs/operations_core_module_design.md`。
+2026-07-23 已完成 in-memory tracer（24 cases）及 private PostgreSQL 17 shadow adapter
+（34 cases）；含 database-clock lease fencing、approval／risk fail-closed、parent／deadline
+readiness、atomic acquire、idempotent checkpoint/resume、concurrent terminal replay、
+event/receipt、
+FORCE RLS、專用低權限 function definer、具名 mutation functions、worker／approver
+分權、token-redacted read projection 與 transaction failure rollback，連同相鄰回歸共
+71 passed。canonical row 已包含
+parent／deadline、requester、created／updated 與 blocked reason。外部測試 DSN 有
+localhost／hostaddr／專用 DB／opt-in 防線；CI 固定使用 PostgreSQL 17 且缺少
+integration backend 時 fail closed。
+尚無 legacy importer／shadow replay／live caller，migration 未部署，因此不構成接管或上線。
+
+這是 umbrella program，不另建 ops 進度帳；下方
+`docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
+Phase 1 現行修復的 canonical implementation ledger。原版、v3 與全部既有 skills 在
+各自 gate 與 owner 獨立核可前不得刪除。
 
 ## 2026-07-20 Ops Master Consolidation（active — 最高優先）
 

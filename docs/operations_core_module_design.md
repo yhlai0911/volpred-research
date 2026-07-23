@@ -1,0 +1,361 @@
+# Operations Core Module Design
+
+- **Status**：ACCEPTED DESIGN — 尚未切換任何 live owner
+- **Date**：2026-07-23
+- **Parent decisions**：ADR-0001、ADR-0002、`docs/platform_optimization_program_2026_07.md`
+- **Design vocabulary**：module、interface、implementation、depth、seam、adapter、leverage、locality
+
+## 1. 設計結論
+
+不建立一個包住舊函式的 `OperationsCore` facade。那會保留三套生命週期與所有 caller knowledge，只多一層 shallow module。
+
+Phase 1 建立六個各自有小 interface 的 deep modules：
+
+1. **Work Coordinator**：durable WorkItem、claim、checkpoint、狀態機與 receipt。
+2. **Change Delivery**：ChangeSet 驗證與唯一 commit 落地。
+3. **Effect Delivery**：EffectRequest、transactional outbox、idempotency 與下游 read-back。
+4. **Provider Execution**：能力匹配、零付費政策、執行、搶占與 checkpoint resume。
+5. **Schedule Materializer**：把 canonical schedule spec 的到期項轉為 WorkItem。
+6. **Primary Authority**：跨主機 lease 與 fencing token。
+
+既有 Incident Lifecycle 是第七個已存在的 module；本期先更換 storage adapter 並接入 WorkItem，不在同一批重寫其政策。
+
+## 2. 現況證據與重複知識
+
+### 2.1 三套工作生命週期
+
+| 現有 implementation | 現行角色 | Caller 必須知道的知識 | 問題 |
+|---|---|---|---|
+| `storage/next_tasks.json` + `next_tasks.py` + `task_pool_claim.py` | 正式 pending queue | P1–P4、pending／claimed／in_progress、dispatch lane、Codex eligibility、stale cleanup、burst fire | JSON 單機鎖；政策散在 library、CLI 與 supervisor |
+| `local_control_plane.py` + `storage/ops/tasks` | TaskRecord／AgentSession／ExecutionReceipt | queued／claimed／running、approval、fallback、session identity、curation | 已標示為 audit/control-plane receipts，卻仍有可 claim queue 與另一套狀態機 |
+| `jobs.py` + Supabase `ops_jobs` | Admin／手動 job queue | queued／running、scope local／remote、dedupe、20+ action dispatch | Python 與 Next.js 各自 enqueue／claim／execute；remote Admin 路徑可直接產生效果 |
+
+這三者不是三個 adapter，因為它們各自擁有不同的狀態機與政策。新設計必須把政策移進一個 Work Coordinator implementation；舊路徑只在遷移期作 importer、projection 或 compatibility adapter。
+
+### 2.2 已有可保留的深度
+
+| 現有 module | 判定 | 處置 |
+|---|---|---|
+| `git_writer_lock.py` | 深；隱藏 Git common-dir lock、fork inheritance、process group 與 canonical checkout 規則 | 保留為 Change Delivery 內部 implementation |
+| `scheduled_writer_commit.py` | 有價值但 interface 偏向「scheduled file」 | 保留 ownership／dirty-tree implementation，改由 ChangeSet validator 提供完整輸入 |
+| dispatch workspace | 有真正的 worktree／shared checkout 兩種 adapter 情境 | 保留隔離、changed-path 與 merge gate implementation |
+| incident lifecycle | 身分、episode、3-Strike、sustained-clean 已集中 | 保留政策；把 JSON store 換成 coordination store adapter |
+| schedule parser／liveness helpers | 純計算與讀取可重用 | 移入 Schedule Materializer implementation，不暴露 parser 細節 |
+| publisher／sync／notification | 各領域行為有價值 | 作 Effect Delivery 的 effect adapters，不再各自擁有 retry／dedupe lifecycle |
+
+### 2.3 必須停止擴張的路徑
+
+- 不再往 `task_pool_claim.py` 加新狀態或新 side effect。
+- 不再往 `local_control_plane.py` 加第四種 task policy。
+- 不再往 `jobs.py::_run_action` 加新 action switch。
+- Admin 不再新增直接寫 `ops_jobs` 後立即執行 remote action 的路徑。
+- dispatch supervisor 不再自行推理 provider 等價性、quota 恢復或 durable completion。
+
+以上是 freeze direction，不是立即刪除；只有新 module 接管並通過 gate 後才移除舊 writer。
+
+## 3. Dependency categories 與 seam
+
+| 依賴 | 類型 | Seam 決策 | 測試 adapter |
+|---|---|---|---|
+| 狀態轉移、priority、capability match、idempotency key | In-process | 無 port；放在 deep module implementation | 直接經 module interface 測試 |
+| Supabase PostgreSQL coordination state | Remote but owned | 定義 coordination-store port | transaction-safe in-memory adapter + Postgres adapter |
+| 本機 filesystem／Git repo | Local-substitutable | 不放進 module external interface；以真實暫存 Git repo 測試 | temp directory + real Git |
+| Claude／Codex／其他訂閱 CLI | True external | 定義 provider-executor port | scripted fake adapters；production subprocess adapters |
+| Supabase REST、Mirror、SMTP、Telegram、Zeabur | True external | 每個 effect family 定義窄 port | fake effect adapter + production adapter |
+| `config/runtime_schedules.json` | Local-substitutable | Schedule Materializer 內部 config-source seam | fixture file adapter + repo file adapter |
+| 時鐘、ID、hash | In-process internal seam | 可注入但不暴露在 external interface | fixed clock／deterministic ID |
+| `next_tasks.json`／legacy TaskRecord／`ops_jobs` | Migration only | importer／projection seam，有到期日 | fixture adapters；不得成為 steady-state writer |
+
+Production 與測試 adapter 同時存在時，port 才成立。只有單一 implementation 的純邏輯，不為了 mock 而建立 hypothetical seam。
+
+## 4. Work Coordinator
+
+### 4.1 Seam
+
+所有工作來源——使用者、Admin、scheduler、incident、email／Telegram、agent discovery——在建立 durable work 時跨越同一 seam。所有 worker 在取得 ownership、保存 checkpoint 或結束工作時也跨越這個 seam。
+
+### 4.2 External interface
+
+```python
+class WorkCoordinator:
+    def submit(self, request: WorkRequest) -> WorkItemView: ...
+    def acquire(self, offer: WorkerOffer) -> WorkLease | None: ...
+    def record(self, report: WorkReport) -> WorkItemView: ...
+    def inspect(self, query: WorkQuery) -> WorkSnapshot: ...
+```
+
+Caller 只需知道：
+
+- `submit` 必須帶 `idempotency_key`、source、kind、priority、capability requirements、risk／approval 與 payload reference；重播回傳同一 WorkItem。
+- `acquire` 是 atomic claim；能力不符或沒有 ready work 回傳 `None`，不是例外。
+- `record` 接受受控的 report variant：`ApprovalGranted`、`Started`、`Checkpointed`、`Released`、`Blocked`、`Completed`、`Failed`、`Cancelled`。
+- Worker mutation 都必須帶仍有效的 WorkLease token 與 expected version；過期 ownership 回傳 `ClaimLost`。`ApprovalGranted` 是唯一非 worker mutation，必須帶 expected version、owner identity 與 approval evidence reference。
+- `inspect` 是 read model，不回傳可讓 caller 旁路狀態機的 mutable row。
+
+Implementation 隱藏：
+
+- priority／deadline／parent readiness 排序；
+- approval 與 risk gate；
+- capability／provider eligibility；
+- claim TTL、cooperative preemption 與 stale recovery；
+- experiment identity conflict；
+- checkpoint hash、artifact references 與 resume pointer；
+- event、receipt 與 optimistic version；
+- transaction、row lock 與 host fencing。
+
+### 4.3 Canonical state
+
+WorkItem 的最小 canonical 欄位：
+
+- identity：`id`、`idempotency_key`、`source`、`kind`、`parent_id`
+- intent：`title`、`payload_ref`、`priority`、`deadline`
+- policy：`required_capabilities`、`required_attestations`、`risk`、`approval`
+- lifecycle：`status`、`version`、`claimed_by`、`claim_token`、`claim_expires_at`
+- recovery：`latest_verified_checkpoint_id`、`blocked_reason`
+- audit：created／updated／terminal timestamps、requester identity
+
+Canonical statuses：
+
+```text
+awaiting_approval -> pending -> claimed -> running -> succeeded
+                              \-> pending     \-> failed
+                               \-> cancelled  \-> blocked -> pending
+running --checkpoint + cooperative release--> pending
+```
+
+每次 transition 與 checkpoint 都 append event／receipt。`blocked` 必須有 typed reason；provider quota 恢復只解除相符 blocker。
+
+### 4.4 Deletion test
+
+如果刪掉 Work Coordinator，idempotency、狀態轉移、能力比對、claim race、checkpoint、approval、parent readiness、stale recovery 與 receipts 會重新散回 task CLI、Admin route、scheduler、incident、provider worker 與 migration scripts，因此這個 module 有足夠 depth。
+
+## 5. Change Delivery
+
+### 5.1 Seam
+
+Agent 完成 repo 修改後提交 ChangeSet；只有 commit worker 能要求落地。Agent 不接觸 Git index／ref，也不把整個 dirty tree 當成果。
+
+### 5.2 External interface
+
+```python
+class ChangeDelivery:
+    def propose(self, proposal: ChangeSetProposal) -> ChangeSetView: ...
+    def land(self, command: LandChangeSet) -> DeliveryReceipt: ...
+    def inspect(self, change_set_id: str) -> ChangeSetView: ...
+```
+
+`ChangeSetProposal` 必須包含 WorkItem、base commit、隔離 workspace、exact paths、content hashes、required checks 與作者執行證據。`land` 只接受 commit-worker identity、有效 WorkLease 與 Primary Authority fencing token。
+
+Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge、path scope、test execution、HEAD compare-and-set、commit message、rollback point 與 receipt。成功定義為 commit object／HEAD read-back 與 exact-path diff 相符；process exit 0 不足以完成。
+
+## 6. Effect Delivery
+
+### 6.1 Seam
+
+任何 Email、Telegram、文章同步、Mirror、Supabase projection、部署或其他外部寫入，都先跨越 Effect Delivery seam；domain caller 不自行 retry 或判定成功。
+
+### 6.2 External interface
+
+```python
+class EffectDelivery:
+    def request(self, request: EffectRequest) -> EffectView: ...
+    def deliver(self, command: DeliverEffect) -> DeliveryReceipt: ...
+    def inspect(self, effect_id: str) -> EffectView: ...
+```
+
+`request` 與 WorkItem 在同一 transaction 寫入 outbox，並要求 idempotency key、effect kind、target reference、payload reference、risk class 與期望 acknowledgement。`deliver` 只允許 effect-worker identity + fencing token。
+
+Implementation 隱藏 retry、backoff、dead letter、provider-specific request、下游 read-back 與 reconcile。每個 true external system有 production adapter 與 fake adapter；不存在一個無型別的 `execute(action, payload)`。
+
+## 7. Provider Execution
+
+### 7.1 Seam
+
+Worker 拿到 WorkLease 後，把 capability requirements 與最近 checkpoint 交給 Provider Execution；caller 不指定「Claude 失敗就 Codex」，也不自行解析 quota 字串。
+
+### 7.2 External interface
+
+```python
+class ProviderExecution:
+    def execute(self, request: ExecutionRequest) -> ExecutionOutcome: ...
+    def observe(self, observation: ProviderObservation) -> ProviderStateView: ...
+```
+
+Implementation 隱藏 capability matching、attestation requirements、subscription/OAuth allowlist、bounded probe、quota/auth state、retry、preemption 與 resume。`ExecutionOutcome` 只能是 verified checkpoint、blocked reason、candidate ChangeSet／EffectRequest，或 terminal failure；provider adapter 不具正式 commit／effect 權限。
+
+`observe` 不接受「下次重置日期」作真相，只接受實際 probe／execution evidence。零付費 deny policy 在 config validation、startup 與每次 selection 都執行。
+
+## 8. Schedule Materializer 與 Primary Authority
+
+### Schedule Materializer
+
+```python
+class ScheduleMaterializer:
+    def materialize(self, tick: ScheduleTick) -> MaterializationReceipt: ...
+```
+
+它讀 canonical schedule spec，以 schedule id + due instant 作 idempotency key，將所有到期工作提交給 Work Coordinator。cron parsing、timezone、DST、missed-fire policy 與 event deadline 都藏在 implementation；OS 不直接執行 business action。
+
+### Primary Authority
+
+```python
+class PrimaryAuthority:
+    def acquire(self, request: AuthorityRequest) -> PrimaryLease: ...
+    def renew(self, lease: PrimaryLease) -> PrimaryLease: ...
+    def authorize(self, intent: WriteIntent) -> FencingToken: ...
+    def release(self, lease: PrimaryLease) -> AuthorityReceipt: ...
+```
+
+只有 Change Delivery 與 Effect Delivery 需要 `authorize`。一般 WorkItem 純計算、讀取與 checkpoint 不要求 primary lease，因此 standby 或 provider failover 仍可做安全工作。
+
+## 9. Package 與 visibility
+
+建議在 `src/volpred/ops/` 下形成以下 public imports；每個 package 的 `__init__.py` 只 export external interface 與資料型別：
+
+```text
+volpred.ops.work         WorkCoordinator
+volpred.ops.delivery     ChangeDelivery, EffectDelivery
+volpred.ops.execution    ProviderExecution
+volpred.ops.scheduling   ScheduleMaterializer
+volpred.ops.authority    PrimaryAuthority
+volpred.ops.incidents    IncidentLifecycle（由現有 incident implementation 漸進遷入）
+```
+
+Postgres repository、SQL、filesystem、subprocess、provider parsers、effect adapters、legacy importers 與 projections 都是 implementation，不從 package root export。Admin、CLI、scheduler 與 tests 只能跨 external seam，不能 import internal repository function。
+
+## 10. Legacy 接管順序
+
+### 10.1 Work lifecycle
+
+1. 建立 Work Coordinator 與兩個 coordination-store adapters。
+2. 以 fixture 重播 `next_tasks`、TaskRecord 與 `ops_jobs`，產生 mapping／collision／unrepresentable report。
+3. shadow 讀 live sources，但不寫回、不 claim、不觸發 supervisor。
+4. 匯入 `next_tasks` pending lifecycle；對帳 count、priority、claim ownership、parent、deadline 與 terminal history。
+5. 原子切換 enqueue／claim／complete caller。
+6. `next_tasks` 改為唯讀 projection；TaskRecord／ops_jobs 只保留歷史相容讀取。
+7. 觀察期證明舊 writer 為零後，才移除舊 execution path。
+
+### 10.2 Admin jobs
+
+- 現有 Admin GET 先改讀 Work Coordinator read model。
+- POST／PATCH 改提交 typed WorkRequest／WorkReport，不再直接 insert／update `ops_jobs`。
+- `maybeExecuteRemoteJob` 必須在 Effect Delivery 接管後退役；不得讓網站程序持有正式外部效果 ownership。
+
+### 10.3 Dispatch
+
+- Supervisor 先保留 slot、process health 與 workspace allocation。
+- Task selection、provider selection、quota blocker 與 completion 逐一改由新 modules 回傳決策。
+- 等 Schedule Materializer 接管後，supervisor 只執行已取得的 WorkLease，不再擁有 business clock。
+
+## 11. 第一個 TDD 垂直切片
+
+第一個切片是 **Shadow Work Coordinator：submit → acquire → checkpoint → release/resume → complete**。它必須同時經過 external interface、transaction store port 與 event／receipt，不只建立 dataclass 或 CRUD repository。
+
+### 2026-07-23 tracer checkpoint
+
+- 已建立 `volpred.ops.work` external interface 與 transaction-safe in-memory adapter。
+- 二十四個 in-memory interface test cases 已涵蓋 idempotent submit／inspect、approval／risk gate、
+  unknown-policy 與 request self-approval fail-closed、可稽核的 owner approval transition、
+  two-worker atomic acquire、capability-aware acquire、claimed→running、可冪等重播且
+  衝突 payload fail-closed 的 verified checkpoint、
+  cooperative release／resume、完整 lifecycle event audit、idempotent terminal receipt，
+  parent／deadline readiness，以及 invalid transition／version／token、lease expiry／
+  re-acquire／stale lease rejection。
+- 已建立 private `volpred_ops` PostgreSQL 17 schema 與 production-shaped adapter；34 個
+  Postgres cases 覆蓋相同 external seam、atomic claim、database-clock lease fencing、
+  concurrent completion replay、由專用低權限 definer 擁有的具名
+  `SECURITY DEFINER` mutation functions、worker／approver 分權、token-redacted read
+  projection、RLS、NULL token/TTL fail-closed 與 transaction failure rollback；
+  canonical row 已包含 parent／deadline、requester、created／updated、blocked reason。
+- in-memory、Postgres 與相鄰 control-plane regression 共 71 tests 通過，Python compile
+  與 whitespace check 通過。
+- 這仍是 shadow implementation：沒有 CLI／Admin／supervisor caller，沒有讀寫
+  `next_tasks`、live Supabase、schedule 或 live state；legacy importer 與 shadow replay
+  尚未實作，migration 也尚未部署。
+- Shadow `ApprovalGranted` 已保存 owner identity 與 evidence reference；正式 caller 的
+  身分驗證、授權簽章與 replay protection 仍是 live cutover 前的必要 gate。
+- 因尚未完成 Submit A–D 與七天 shadow，本 checkpoint 不構成 capability cutover，
+  也不得將現行 queue owner 改為 Work Coordinator。
+
+### 提交 A — Interface behaviour tests
+
+- 以 transaction-safe in-memory adapter 測 external interface。
+- 覆蓋 idempotent submit、atomic acquire、capability mismatch、invalid transition、stale lease、checkpoint hash、cooperative release、resume pointer、terminal replay。
+- 測試只斷言 interface observable outcomes，不讀 internal dict／table。
+
+### 提交 B — Postgres schema 與 adapter
+
+- 建立 WorkItem、work event、checkpoint 與 claim transaction／RPC migration。
+- Postgres adapter 通過與 in-memory adapter 相同的 external seam／behaviour matrix；
+  目前兩套案例仍分檔鏡像，抽成單一 parameterized backend contract 是 live caller 前的
+  維護性工作，不影響本輪 shadow transaction/security gate。
+- 不部署、不讀 live queue；migration 可在隔離資料庫完整 rollback。
+- **2026-07-23 shadow implementation complete**：migration 由 Supabase CLI 2.109.1
+  產生，使用 private schema、FORCE RLS、無直接 DML 的 `volpred_ops_worker`、
+  獨立 `volpred_ops_approver`、無登入／無繼承／無 membership 且僅具必要 DML 的
+  `volpred_ops_definer`、PUBLIC privilege revoke、具名 mutation functions、
+  `FOR UPDATE SKIP LOCKED` 與 transaction-scoped event／checkpoint／receipt。
+  外部測試 DSN 必須同時為 localhost、無 remote `hostaddr`、專用
+  `volpred_ops_test` database 且有明確 destructive-test opt-in；CI 固定啟動
+  `postgres:17-alpine`，缺少 Postgres 時 fail
+  而非整批 skip。已在短命
+  PostgreSQL 17.10 cluster
+  套用並驗證 rollback；未執行 linked migration 或 live query。CLI `db lint` 因純
+  PostgreSQL image 缺少 Supabase `plpgsql_check` extension 無法執行，schema catalog
+  security tests 與 31 個真實 adapter cases 作為本輪替代證據。
+
+### 提交 C — Legacy snapshot importer
+
+- read-only 解析三套來源，輸出 canonical candidate 與 reconciliation report。
+- 對未知狀態、重複 ID、丟失 parent、同時 claim、無法映射的 public effect 一律 fail closed。
+- `--dry-run` 是唯一模式；不修改 Supabase、JSON 或 task status。
+
+### 提交 D — Shadow replay
+
+- 對相同 snapshot 執行舊 selection 與 Work Coordinator selection，記錄差異。
+- 差異分類為預期政策變更、legacy corruption 或新 implementation bug。
+- 沒有七天穩定 shadow 證據前，不進 live cutover。
+
+這四個提交就是下一輪 `tdd` skill 的範圍；完成並取得七天 shadow 證據後，才規劃第一個
+正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與 Work Coordinator
+第一批同時實作。
+
+## 12. Interface-level 測試矩陣
+
+| 行為 | In-memory | Postgres | Failure injection |
+|---|---:|---:|---:|
+| idempotent submit | ✓ | ✓ | transaction rollback |
+| two-worker atomic acquire | ✓ | ✓ | `SKIP LOCKED` race |
+| expected-version transition | ✓ | ✓ | stale writer |
+| capability／attestation match | ✓ | ✓ | provider state changes after claim |
+| checkpoint verify／resume | ✓ | ✓ | corrupt hash／event failure rollback |
+| cooperative preemption | ✓ | ✓ | kill before／after checkpoint |
+| parent／deadline readiness | ✓ | ✓ | database clock／expired lease |
+| terminal receipt replay | ✓ | ✓ | concurrent duplicate completion |
+| host fencing on delivery link | — | — | Submit D shadow replay 前實作 |
+
+舊 shallow module tests 先保留作 regression。只有 caller 已切到新 seam、且相同行為已在 external interface contract suite 覆蓋後，才刪除被取代的舊 unit tests；不能提前用新測試掩蓋舊路徑。
+
+## 13. Rejected designs
+
+- **單一 `OperationsCore` God module**：interface 會包含 task、provider、Git、effect、schedule、incident 與 Admin 所有知識，沒有 locality。
+- **Generic CRUD repository 作 external interface**：把狀態機、交易順序與權限推回 caller，是 shallow module。
+- **Generic `execute(action, payload)`**：延續 `jobs.py::_run_action` 的無型別 switch，無法局部推理 effect 契約。
+- **每張 table 一個 module**：資料儲存形狀不是業務 seam，會產生大量 pass-through。
+- **永久 dual write**：新舊狀態不同步時沒有唯一裁決者。
+- **只用 mocks 測 Git／filesystem**：本機依賴有可替代環境，應用真實 temporary Git repo。
+- **一次重寫 task、provider、scheduler、delivery**：無法判定回歸屬於哪個 interface，違反逐能力接管。
+
+## 14. Phase 0 尚需機械盤點
+
+在 TDD 實作前，先由可重跑 inventory 固定：
+
+- 所有 `next_tasks` writers／readers 與 task state mutation；
+- `local_control_plane` callers 與仍會 claim 的路徑；
+- Python／Next.js `ops_jobs` writers、remote executors 與 Admin routes；
+- Git index／ref writers與外部 effects；
+- schedule materializers、provider spawners、quota/auth parsers；
+- secrets／identity／host-specific paths；
+- frontend 與 Admin 對舊 task shapes 的讀取依賴。
+
+Inventory 只讀並輸出 versioned report。任何未知 writer、無法重播的 migration 或無 owner side effect，都會阻擋接管，不以猜測補齊。
