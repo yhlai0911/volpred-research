@@ -911,5 +911,8 @@ unrelated-candidate borrowed reason 與 eligibility-view contradiction cases；
 shadow assessment／
 replay、direct-mode、claim 與 handoff targeted suites 通過。live mode 仍是
 `direct_execution`，沒有七日 soak、CAS cutover、唯讀 legacy projection 或 rollback
-rehearsal，所以 Issue #9 仍為 **contained**；待七日真實 receipts 與最終 Matt review
-完成前不得標 `root_cause_fixed_and_verified`。
+rehearsal，所以 Issue #9 仍為 **contained**；七日真實 receipts 完成前不得標
+`root_cause_fixed_and_verified`。assessment slice 最終 Matt
+Standards／Spec 雙軸均 PASS（0 findings），135 個 targeted regressions 通過；但
+live read-back 仍是 `mode=direct_execution`、`observation_count=0`、
+`ready_for_cutover=false`，所以七日證據與正式 cutover gate 尚未達成。

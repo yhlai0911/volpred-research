@@ -411,6 +411,11 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   **不能沿用或補算**，assessment 正確回報 mode conflict。尚無七日 receipt、canonical
   replay schedule、CAS cutover、legacy read-only projection 或 rollback rehearsal，
   Issue #9 保持 open，狀態不得高於 `contained`。
+- assessment slice commits：`d53a705a6`、`fcb8d8d21`、`da4e43277`、
+  `54a9d6a28`、`28b6d193b`。最終 Matt Standards／Spec 雙軸 review 均 PASS
+  （0 findings）；assessment／replay／direct-mode／claim／handoff targeted suite
+  135 passed，live read-back 仍為 `ready_for_cutover=false`（mode=`direct_execution`、
+  observation_count=0）。這只核可 gate implementation，不核可 Issue #9 cutover。
 
 這四個提交就是下一輪 `tdd` skill 的範圍；完成並取得七天 shadow 證據後，才規劃第一個
 正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與 Work Coordinator
