@@ -1,11 +1,11 @@
 # Feed Index
 
-_Last built: 2026-07-23 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-23 06:01 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
 - Total articles: **1874**  (with thumbnail: 85)
-- Last 30 days: **254**
+- Last 30 days: **242**
 - Total chars (content): 5,810,499
 
 **Status**: published=1670, archived=124, unpublished=66, retracted=13, wont_fix=1
@@ -14,7 +14,7 @@ _Last built: 2026-07-23 00:04 UTC — source: `storage/reports/feed.json` (do NO
 
 **Category**: milestone=911, general=841, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
 
-## 最近 30 天 (254)
+## 最近 30 天 (242)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
@@ -260,6 +260,11 @@ _Last built: 2026-07-23 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-23 | `mile_dc516a52` | 氣候新聞延燒越久，綠棕 ETF 的尾端風險：用免費資料未找到可靠證據 | research | milestone | published | 4137 |  | 研究, 氣候風險, ETF, 尾端風險, GDELT, NULL結果 |
 | 2026-06-23 | `mile_057f178b` | 為什麼 NVDA 每天都讓人心跳加速？不是業績，是它定價不了的事 | general | general | published | 1653 |  | 一般讀者, AI, NVDA, 波動率, 科技股, 推理成本 |
 | 2026-06-23 | `mile_10a52949` | 一根 16% 的黑K，對 Google 是八個標準差，對 SpaceX 只是普通的一天 | general | general | published | 4146 |  | 一般讀者, trending, SpaceX, 波動率, 升息, 科技股 |
+
+<details><summary>## 2026-Q2 (960)</summary>
+
+| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
+|---|---|---|---|---|---|---|---|---|
 | 2026-06-23 | `mile_d28231b6` | 一個在 5 天很有用的訊號，搬到明天反而完全失靈 | general | general | published | 1956 |  | 一般讀者, VIX, 波動率預測, SPY, 期限結構, 研究誠實 |
 | 2026-06-23 | `mile_246e4d3d` | 每日策略建議：VIX 17.28（正常）— 2026-06-23 | daily | general | published | 1340 | Y | 每日建議, VIX, 策略配置 |
 | 2026-06-23 | `mile_0f134a08` | 2026-06-23 本日持倉比率建議（依據 2026-06-22 收盤數據） | daily | milestone | published | 724 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
@@ -272,11 +277,6 @@ _Last built: 2026-07-23 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-23 | `mile_a0eb0ddc` | 越聰明越難贏：波動率模型的複雜度天花板 | general | milestone | published | 4120 |  | 一般讀者, 精選導讀, 波動率預測, GARCH, 研究方法, 模型選擇 |
 | 2026-06-23 | `mile_0a7041f4` | 美股收盤後的 16 小時：SPY 隔夜波動貢獻了全天波動的 36.8% | research | milestone | published | 3438 |  | 研究, SPY, 隔夜波動, 波動率分解, AMEM, GJR-GARCH |
 | 2026-06-23 | `mile_d3993bd1` | 把老模型塞進 LSTM，為什麼預測反而更差？ | general | general | published | 2286 |  | 一般讀者, 波動率, 神經網路, SPY, QQQ, 模型比較 |
-
-<details><summary>## 2026-Q2 (948)</summary>
-
-| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
-|---|---|---|---|---|---|---|---|---|
 | 2026-06-22 | `mile_30c640e2` | 債市喊了一個月，股市才剛聽懂半句：MOVE 與 VIX 這場分裂的來龍去脈 | general | general | published | 3709 |  | 一般讀者, 精選導讀, daily_digest, MOVE, VIX, OVX |
 | 2026-06-22 | `mile_d9129566` | 今天先看訊號強度，再看行情方向 | general | general | retracted | 2705 |  | 一般讀者, 精選導讀, daily_digest, VIX, MOVE, factor-etf |
 | 2026-06-22 | `mile_671d4c75` | 債市和股市同時在怕，但怕的不是同一件事 | general | general | published | 2862 |  | 一般讀者, MOVE, VIX, 美債, 跨資產, 波動率 |
