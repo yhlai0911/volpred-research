@@ -342,6 +342,20 @@ Context compaction 時，**優先保留**：
 
 **格式要求**：compact 輸出用條列、不用段落敘述；每則 ≤ 30 字；分「當前狀態」/「未竟任務」/「最近規則」三區。
 
+## Agent skills
+
+### Issue tracker
+
+本專案使用 GitHub Issues 追蹤工程工作。See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+使用五個預設 triage roles 與同名 GitHub labels。See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+本專案採 single-context domain documentation layout。See `docs/agents/domain.md`.
+
 ## 一句話版本
 
 - 系統由 AI 完全運營，執行階段不問用戶 — 遇問題自行修流程、優化邏輯。
