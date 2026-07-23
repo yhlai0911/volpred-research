@@ -728,48 +728,44 @@ def ops_work_shadow_replay(
     required=True,
     help="Directory containing append-only work shadow receipts.",
 )
-@click.option(
-    "--assessed-at",
-    default=None,
-    help="ISO-8601 assessment time; defaults to the current UTC time.",
-)
-@click.option("--queue-owner-mode", required=True)
-@click.option(
-    "--required-days",
-    type=click.FloatRange(min=0.0, min_open=True),
-    default=7.0,
-    show_default=True,
-)
-@click.option(
-    "--max-gap-hours",
-    type=click.FloatRange(min=0.0, min_open=True),
-    default=26.0,
-    show_default=True,
-)
 def ops_work_shadow_assess(
     observation_dir: Path,
-    assessed_at: str | None,
-    queue_owner_mode: str,
-    required_days: float,
-    max_gap_hours: float,
 ) -> None:
     """Fail closed unless explicit shadow receipts satisfy the soak gate."""
-    from datetime import timedelta
+    import hashlib
 
     from volpred.ops.work_shadow_assessment import (
+        MAX_OBSERVATION_GAP,
+        REQUIRED_OBSERVATION_WINDOW,
         assess_shadow_observation_directory,
     )
-
-    assessment_time = (
-        _parse_observed_at(assessed_at)
-        or datetime.now(timezone.utc)
+    from volpred.ops.common import project_path
+    from volpred.ops.task_pool_mode import (
+        load_task_pool_mode,
+        task_pool_mode_path,
     )
+
+    mode_state_path = task_pool_mode_path(
+        project_path("storage", "next_tasks.json")
+    )
+    try:
+        mode_state_bytes = mode_state_path.read_bytes()
+        mode = load_task_pool_mode(mode_state_path)
+    except (OSError, ValueError) as exc:
+        raise click.ClickException(
+            f"canonical task-pool mode evidence unavailable: {exc}"
+        ) from exc
     report = assess_shadow_observation_directory(
         observation_dir,
-        assessed_at=assessment_time,
-        queue_owner_mode=queue_owner_mode,
-        required_window=timedelta(days=required_days),
-        max_gap=timedelta(hours=max_gap_hours),
+        assessed_at=_work_shadow_assessment_time(),
+        queue_owner_mode=mode.mode,
+        queue_owner_gate_enabled=mode.enabled,
+        queue_owner_state_path=str(mode_state_path),
+        queue_owner_state_sha256=hashlib.sha256(
+            mode_state_bytes
+        ).hexdigest(),
+        required_window=REQUIRED_OBSERVATION_WINDOW,
+        max_gap=MAX_OBSERVATION_GAP,
     )
     click.echo(
         json.dumps(
@@ -780,6 +776,11 @@ def ops_work_shadow_assess(
     )
     if not report.ready_for_cutover:
         raise click.exceptions.Exit(2)
+
+
+def _work_shadow_assessment_time() -> datetime:
+    """Return the production assessment clock (injectable only in tests)."""
+    return datetime.now(timezone.utc)
 
 
 @ops.group("rollback")

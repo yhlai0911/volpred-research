@@ -98,7 +98,7 @@ def test_seven_continuous_clean_days_are_ready_for_cutover(tmp_path: Path) -> No
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="legacy_queue_shadow",
+        queue_owner_mode="queued_execution",
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -117,7 +117,7 @@ def test_malformed_receipt_fails_closed_instead_of_crashing(tmp_path: Path) -> N
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START,
-        queue_owner_mode="legacy_queue_shadow",
+        queue_owner_mode="queued_execution",
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -149,7 +149,7 @@ def test_unexplained_selector_drift_blocks_cutover(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="legacy_queue_shadow",
+        queue_owner_mode="queued_execution",
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -185,7 +185,7 @@ def test_simultaneous_queue_owner_evidence_blocks_cutover(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="legacy_queue_shadow",
+        queue_owner_mode="queued_execution",
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -215,7 +215,7 @@ def test_blocking_dimension_difference_is_not_hidden_by_same_winner(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="legacy_queue_shadow",
+        queue_owner_mode="queued_execution",
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -246,7 +246,7 @@ def test_duplicate_observation_identity_blocks_cutover(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="legacy_queue_shadow",
+        queue_owner_mode="queued_execution",
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -255,7 +255,10 @@ def test_duplicate_observation_identity_blocks_cutover(tmp_path: Path) -> None:
     assert report.reason_codes == ("duplicate_observation_id",)
 
 
-def test_work_shadow_assess_cli_emits_machine_verdict(tmp_path: Path) -> None:
+def test_work_shadow_assess_cli_emits_machine_verdict(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
     observations = tmp_path / "observations"
     for index in range(8):
         _write_receipt(
@@ -263,6 +266,19 @@ def test_work_shadow_assess_cli_emits_machine_verdict(tmp_path: Path) -> None:
             index=index,
             observed_at=START + timedelta(days=index),
         )
+    mode_state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    mode_state.parent.mkdir(parents=True)
+    mode_state.write_text(
+        json.dumps({"enabled": False, "mode": "queued_execution"}),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("volpred.ops.common.PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        "volpred.cli._work_shadow_assessment_time",
+        lambda: START + timedelta(days=7, hours=1),
+        raising=False,
+    )
 
     result = CliRunner().invoke(
         cli,
@@ -271,14 +287,6 @@ def test_work_shadow_assess_cli_emits_machine_verdict(tmp_path: Path) -> None:
             "work-shadow-assess",
             "--observation-dir",
             str(observations),
-            "--assessed-at",
-            (START + timedelta(days=7, hours=1)).isoformat(),
-            "--queue-owner-mode",
-            "legacy_queue_shadow",
-            "--required-days",
-            "7",
-            "--max-gap-hours",
-            "26",
         ],
     )
 
@@ -288,6 +296,18 @@ def test_work_shadow_assess_cli_emits_machine_verdict(tmp_path: Path) -> None:
     assert payload["ready_for_cutover"] is True
     assert payload["reason_codes"] == []
     assert payload["observation_count"] == 8
+    assert payload["queue_owner_mode"] == "queued_execution"
+    assert payload["queue_owner_state_sha256"]
+
+    help_result = CliRunner().invoke(
+        cli,
+        ["ops", "work-shadow-assess", "--help"],
+    )
+    assert help_result.exit_code == 0
+    assert "--assessed-at" not in help_result.output
+    assert "--required-days" not in help_result.output
+    assert "--max-gap-hours" not in help_result.output
+    assert "--queue-owner-mode" not in help_result.output
 
 
 def test_duplicate_observation_timestamp_blocks_cutover(tmp_path: Path) -> None:
@@ -313,7 +333,7 @@ def test_duplicate_observation_timestamp_blocks_cutover(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="legacy_queue_shadow",
+        queue_owner_mode="queued_execution",
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -340,7 +360,7 @@ def test_snapshot_identity_mismatch_blocks_tampered_receipt(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="legacy_queue_shadow",
+        queue_owner_mode="queued_execution",
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -365,7 +385,7 @@ def test_missing_source_count_evidence_is_invalid(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="legacy_queue_shadow",
+        queue_owner_mode="queued_execution",
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -376,6 +396,7 @@ def test_missing_source_count_evidence_is_invalid(tmp_path: Path) -> None:
 
 def test_direct_execution_mode_cannot_reuse_queue_shadow_evidence(
     tmp_path: Path,
+    monkeypatch,
 ) -> None:
     observations = tmp_path / "observations"
     for index in range(8):
@@ -384,6 +405,19 @@ def test_direct_execution_mode_cannot_reuse_queue_shadow_evidence(
             index=index,
             observed_at=START + timedelta(days=index),
         )
+    mode_state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    mode_state.parent.mkdir(parents=True)
+    mode_state.write_text(
+        json.dumps({"enabled": True, "mode": "direct_execution"}),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("volpred.ops.common.PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        "volpred.cli._work_shadow_assessment_time",
+        lambda: START + timedelta(days=7, hours=1),
+        raising=False,
+    )
 
     result = CliRunner().invoke(
         cli,
@@ -392,10 +426,6 @@ def test_direct_execution_mode_cannot_reuse_queue_shadow_evidence(
             "work-shadow-assess",
             "--observation-dir",
             str(observations),
-            "--assessed-at",
-            (START + timedelta(days=7, hours=1)).isoformat(),
-            "--queue-owner-mode",
-            "direct_execution",
         ],
     )
 
@@ -403,7 +433,7 @@ def test_direct_execution_mode_cannot_reuse_queue_shadow_evidence(
     payload = json.loads(result.output)
     assert payload["ready_for_cutover"] is False
     assert payload["reason_codes"] == [
-        "queue_owner_mode_not_legacy_shadow"
+        "queue_owner_mode_not_queued_execution"
     ]
 
 
@@ -419,7 +449,7 @@ def test_short_or_gapped_window_is_not_continuous(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="legacy_queue_shadow",
+        queue_owner_mode="queued_execution",
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -427,3 +457,172 @@ def test_short_or_gapped_window_is_not_continuous(tmp_path: Path) -> None:
     assert report.ready_for_cutover is False
     assert report.reason_codes == ("observation_gap_exceeded",)
     assert report.max_observed_gap_seconds == 3 * 24 * 60 * 60
+
+
+def test_future_observations_fail_closed(tmp_path: Path) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START - timedelta(seconds=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("observation_in_future",)
+
+
+def test_each_receipt_must_reconcile_its_own_queue_row_count(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    incomplete_path = observations / "scheduled_03.json"
+    incomplete = json.loads(incomplete_path.read_text(encoding="utf-8"))
+    incomplete["comparisons"] = []
+    incomplete_path.write_text(json.dumps(incomplete), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("receipt_row_count_mismatch",)
+
+
+def test_each_candidate_must_carry_every_required_dimension(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    incomplete_path = observations / "scheduled_03.json"
+    incomplete = json.loads(incomplete_path.read_text(encoding="utf-8"))
+    incomplete["comparisons"][0]["dimensions"].pop()
+    incomplete_path.write_text(json.dumps(incomplete), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("candidate_dimension_incomplete",)
+
+
+def test_unregistered_policy_change_cannot_whitelist_a_difference(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    forged_path = observations / "scheduled_04.json"
+    forged = json.loads(forged_path.read_text(encoding="utf-8"))
+    claim_dimension = forged["comparisons"][0]["dimensions"][1]
+    claim_dimension["matches"] = False
+    claim_dimension["classification"] = "policy_change"
+    claim_dimension["classification_reason_code"] = "invented_policy"
+    claim_dimension["evidence_refs"] = ["contract://invented"]
+    forged_path.write_text(json.dumps(forged), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("unregistered_policy_change",)
+
+
+def test_registered_policy_change_with_evidence_is_explained(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    explained_path = observations / "scheduled_04.json"
+    explained = json.loads(explained_path.read_text(encoding="utf-8"))
+    claim_dimension = explained["comparisons"][0]["dimensions"][1]
+    claim_dimension["matches"] = False
+    claim_dimension["classification"] = "policy_change"
+    claim_dimension["classification_reason_code"] = (
+        "coordinator_inline_lease_contract"
+    )
+    claim_dimension["evidence_refs"] = [
+        "contract://work-selection/claim-ownership"
+    ]
+    explained_path.write_text(json.dumps(explained), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is True
+    assert report.reason_codes == ()
+
+
+def test_duplicate_candidate_identity_blocks_row_reconciliation(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    duplicate_path = observations / "scheduled_05.json"
+    duplicate = json.loads(duplicate_path.read_text(encoding="utf-8"))
+    duplicate["snapshot"]["source_counts"]["next_tasks"] = 2
+    duplicate["comparisons"].append(duplicate["comparisons"][0])
+    duplicate_path.write_text(json.dumps(duplicate), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("duplicate_candidate_identity",)

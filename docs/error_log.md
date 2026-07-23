@@ -871,3 +871,33 @@ containment。ADR-0001 的正式 Work Coordinator ownership cutover、Change Del
 commit fencing 與 manifest-based residue convergence 尚未完成七天 shadow／live
 read-back，所以整體「派工／claim／commit／殘留」問題維持 **contained**，不得標
 `root_cause_fixed_and_verified`。
+
+### 2026-07-23 21:24 — 七日 cutover gate 信任 caller mode／時間並以跨日 union 對帳 — contained
+
+**症狀與物證**：Issue #9 初版 assessment `d53a705a6` 的 CLI 允許 caller 傳
+`--queue-owner-mode`、`--assessed-at`、`--required-days` 與 `--max-gap-hours`。
+Matt Standards／Spec review 實證：live canonical mode 已是 `direct_execution` 時，
+只要宣告 `legacy_queue_shadow` 即可得到綠燈；八筆全部晚於 assessment clock
+30–37 天的 receipt 也能 `ready_for_cutover=true`。另有單日
+`source_counts.next_tasks=1`、`comparisons=[]`，卻被其他日期的 dimension union
+掩蓋；任意填 `classification=policy_change` 亦可繞過 blocking difference。
+
+**根因層級**：這是 evidence-boundary 與 gate contract 缺陷。production verdict
+把 owner mode、clock 與 acceptance window 當成 caller assertion，而不是 canonical
+read-back；reconciliation 只證明整段期間「曾看過某欄」，沒有逐 observation／逐
+candidate 證明完整；policy classification 沒綁回 Issue #7 的顯式 oracle。
+
+**底層修復**：production `work-shadow-assess` 不再暴露上述 overrides，固定七日 window
+與 26 小時 gap，並從 project-root canonical `storage/ops/task_pool_mode.json`
+讀取 mode／enabled state、把 state path 與 SHA-256 寫入 verdict。assessment 拒絕未來
+receipt，逐份核對 queue row count、candidate identity 與五個必要 dimensions；
+`policy_change` 必須帶非空 evidence refs，且 reason code 必須由
+`work_shadow_replay.is_registered_policy_change()` 對同一 policy oracle 核准。
+所有 early failure 統一走單一 report constructor，避免欄位漂移。
+
+**回歸與結案界線**：新增 caller spoof、future time、單日 row/dimension 缺口、
+duplicate candidate 與 forged/registered policy-change cases；shadow assessment／
+replay、direct-mode、claim 與 handoff targeted suites 通過。live mode 仍是
+`direct_execution`，沒有七日 soak、CAS cutover、唯讀 legacy projection 或 rollback
+rehearsal，所以 Issue #9 仍為 **contained**；待七日真實 receipts 與第二輪 Matt review
+完成前不得標 `root_cause_fixed_and_verified`。

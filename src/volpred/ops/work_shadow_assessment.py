@@ -13,7 +13,11 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from .work_shadow_replay import is_registered_policy_change
+
 _REQUIRED_SCHEMA = "work-shadow-replay.v2"
+REQUIRED_OBSERVATION_WINDOW = timedelta(days=7)
+MAX_OBSERVATION_GAP = timedelta(hours=26)
 _REQUIRED_SOURCE_COUNTS = frozenset(
     {"next_tasks", "task_records", "ops_jobs"}
 )
@@ -24,6 +28,7 @@ _REQUIRED_DIMENSIONS = (
     "deadline",
     "terminal_disposition",
 )
+_REQUIRED_DIMENSION_SET = frozenset(_REQUIRED_DIMENSIONS)
 
 
 @dataclass(frozen=True)
@@ -34,6 +39,9 @@ class ShadowObservationAssessment:
     covered_dimensions: tuple[str, ...]
     assessed_at: str | None = None
     queue_owner_mode: str | None = None
+    queue_owner_gate_enabled: bool | None = None
+    queue_owner_state_path: str | None = None
+    queue_owner_state_sha256: str | None = None
     observed_from: str | None = None
     observed_through: str | None = None
     required_window_seconds: int = 0
@@ -49,6 +57,9 @@ class ShadowObservationAssessment:
             "covered_dimensions": list(self.covered_dimensions),
             "assessed_at": self.assessed_at,
             "queue_owner_mode": self.queue_owner_mode,
+            "queue_owner_gate_enabled": self.queue_owner_gate_enabled,
+            "queue_owner_state_path": self.queue_owner_state_path,
+            "queue_owner_state_sha256": self.queue_owner_state_sha256,
             "observed_from": self.observed_from,
             "observed_through": self.observed_through,
             "required_window_seconds": self.required_window_seconds,
@@ -57,16 +68,61 @@ class ShadowObservationAssessment:
         }
 
 
+@dataclass(frozen=True)
+class _AssessmentContext:
+    assessed_at: datetime
+    queue_owner_mode: str
+    queue_owner_gate_enabled: bool | None
+    queue_owner_state_path: str | None
+    queue_owner_state_sha256: str | None
+    required_window: timedelta
+    max_gap: timedelta
+
+
+def _failed_assessment(
+    context: _AssessmentContext,
+    *,
+    reason_code: str,
+    observation_count: int,
+) -> ShadowObservationAssessment:
+    return ShadowObservationAssessment(
+        ready_for_cutover=False,
+        reason_codes=(reason_code,),
+        observation_count=observation_count,
+        covered_dimensions=(),
+        assessed_at=context.assessed_at.isoformat(),
+        queue_owner_mode=context.queue_owner_mode,
+        queue_owner_gate_enabled=context.queue_owner_gate_enabled,
+        queue_owner_state_path=context.queue_owner_state_path,
+        queue_owner_state_sha256=context.queue_owner_state_sha256,
+        required_window_seconds=int(
+            context.required_window.total_seconds()
+        ),
+        max_gap_seconds=int(context.max_gap.total_seconds()),
+    )
+
+
 def assess_shadow_observation_directory(
     directory: Path,
     *,
     assessed_at: datetime,
     queue_owner_mode: str,
+    queue_owner_gate_enabled: bool | None = None,
+    queue_owner_state_path: str | None = None,
+    queue_owner_state_sha256: str | None = None,
     required_window: timedelta,
     max_gap: timedelta,
 ) -> ShadowObservationAssessment:
     """Assess explicit replay receipts without consulting live state."""
-    assessed_at = _aware_utc(assessed_at)
+    context = _AssessmentContext(
+        assessed_at=_aware_utc(assessed_at),
+        queue_owner_mode=queue_owner_mode,
+        queue_owner_gate_enabled=queue_owner_gate_enabled,
+        queue_owner_state_path=queue_owner_state_path,
+        queue_owner_state_sha256=queue_owner_state_sha256,
+        required_window=required_window,
+        max_gap=max_gap,
+    )
     receipt_paths = tuple(sorted(directory.glob("*.json")))
     receipts: list[dict[str, Any]] = []
     try:
@@ -80,65 +136,32 @@ def assess_shadow_observation_directory(
                 raise ValueError("unsupported shadow receipt")
             receipts.append(receipt)
     except (OSError, ValueError, json.JSONDecodeError, TypeError):
-        return ShadowObservationAssessment(
-            ready_for_cutover=False,
-            reason_codes=("invalid_receipt",),
+        return _failed_assessment(
+            context,
+            reason_code="invalid_receipt",
             observation_count=len(receipt_paths),
-            covered_dimensions=(),
-            assessed_at=assessed_at.isoformat(),
-            queue_owner_mode=queue_owner_mode,
-            required_window_seconds=int(required_window.total_seconds()),
-            max_gap_seconds=int(max_gap.total_seconds()),
         )
-    try:
-        snapshot_identity_mismatch = any(
-            receipt["legacy_selection"]["snapshot_sha256"]
-            != receipt["snapshot"]["sha256"]
-            or receipt["coordinator_selection"]["snapshot_sha256"]
-            != receipt["snapshot"]["sha256"]
-            for receipt in receipts
-        )
-    except (KeyError, TypeError):
-        return ShadowObservationAssessment(
-            ready_for_cutover=False,
-            reason_codes=("invalid_receipt",),
-            observation_count=len(receipt_paths),
-            covered_dimensions=(),
-            assessed_at=assessed_at.isoformat(),
-            queue_owner_mode=queue_owner_mode,
-            required_window_seconds=int(required_window.total_seconds()),
-            max_gap_seconds=int(max_gap.total_seconds()),
-        )
+    snapshot_identity_mismatch = any(
+        receipt["legacy_selection"]["snapshot_sha256"]
+        != receipt["snapshot"]["sha256"]
+        or receipt["coordinator_selection"]["snapshot_sha256"]
+        != receipt["snapshot"]["sha256"]
+        for receipt in receipts
+    )
     if snapshot_identity_mismatch:
-        return ShadowObservationAssessment(
-            ready_for_cutover=False,
-            reason_codes=("snapshot_identity_mismatch",),
+        return _failed_assessment(
+            context,
+            reason_code="snapshot_identity_mismatch",
             observation_count=len(receipt_paths),
-            covered_dimensions=(),
-            assessed_at=assessed_at.isoformat(),
-            queue_owner_mode=queue_owner_mode,
-            required_window_seconds=int(required_window.total_seconds()),
-            max_gap_seconds=int(max_gap.total_seconds()),
         )
     observation_ids = tuple(
-        receipt.get("observation_id") for receipt in receipts
+        receipt["observation_id"] for receipt in receipts
     )
-    if (
-        any(
-            not isinstance(observation_id, str) or not observation_id
-            for observation_id in observation_ids
-        )
-        or len(set(observation_ids)) != len(observation_ids)
-    ):
-        return ShadowObservationAssessment(
-            ready_for_cutover=False,
-            reason_codes=("duplicate_observation_id",),
+    if len(set(observation_ids)) != len(observation_ids):
+        return _failed_assessment(
+            context,
+            reason_code="duplicate_observation_id",
             observation_count=len(receipt_paths),
-            covered_dimensions=(),
-            assessed_at=assessed_at.isoformat(),
-            queue_owner_mode=queue_owner_mode,
-            required_window_seconds=int(required_window.total_seconds()),
-            max_gap_seconds=int(max_gap.total_seconds()),
         )
     try:
         parsed_observed_at = tuple(
@@ -146,26 +169,16 @@ def assess_shadow_observation_directory(
             for receipt in receipts
         )
     except (KeyError, TypeError, ValueError):
-        return ShadowObservationAssessment(
-            ready_for_cutover=False,
-            reason_codes=("invalid_receipt",),
+        return _failed_assessment(
+            context,
+            reason_code="invalid_receipt",
             observation_count=len(receipt_paths),
-            covered_dimensions=(),
-            assessed_at=assessed_at.isoformat(),
-            queue_owner_mode=queue_owner_mode,
-            required_window_seconds=int(required_window.total_seconds()),
-            max_gap_seconds=int(max_gap.total_seconds()),
         )
     if len(set(parsed_observed_at)) != len(parsed_observed_at):
-        return ShadowObservationAssessment(
-            ready_for_cutover=False,
-            reason_codes=("duplicate_observed_at",),
+        return _failed_assessment(
+            context,
+            reason_code="duplicate_observed_at",
             observation_count=len(receipt_paths),
-            covered_dimensions=(),
-            assessed_at=assessed_at.isoformat(),
-            queue_owner_mode=queue_owner_mode,
-            required_window_seconds=int(required_window.total_seconds()),
-            max_gap_seconds=int(max_gap.total_seconds()),
         )
     timed_receipts = tuple(
         sorted(
@@ -182,8 +195,11 @@ def assess_shadow_observation_directory(
         for dimension in comparison["dimensions"]
     }
     reasons: list[str] = []
-    if queue_owner_mode != "legacy_queue_shadow":
-        reasons.append("queue_owner_mode_not_legacy_shadow")
+    if queue_owner_mode != "queued_execution" or (
+        queue_owner_gate_enabled is not None
+        and queue_owner_gate_enabled is not False
+    ):
+        reasons.append("queue_owner_mode_not_queued_execution")
     if not receipts:
         reasons.append("no_observations")
     elif observed_at[-1] - observed_at[0] < required_window:
@@ -193,15 +209,50 @@ def assess_shadow_observation_directory(
         for earlier, later in zip(observed_at, observed_at[1:])
     )
     if observed_at:
+        if observed_at[-1] > context.assessed_at:
+            reasons.append("observation_in_future")
         if any(gap > max_gap for gap in gaps):
             reasons.append("observation_gap_exceeded")
-        if assessed_at - observed_at[-1] > max_gap:
+        if context.assessed_at - observed_at[-1] > max_gap:
             reasons.append("observation_stale")
     missing_dimensions = tuple(
         name for name in _REQUIRED_DIMENSIONS if name not in covered
     )
     if missing_dimensions:
         reasons.append("missing_reconciliation_dimension")
+    if any(
+        len(receipt["comparisons"])
+        != receipt["snapshot"]["source_counts"]["next_tasks"]
+        for receipt in receipts
+    ):
+        reasons.append("receipt_row_count_mismatch")
+    if any(
+        len(
+            [
+                comparison["candidate_ref"]
+                for comparison in receipt["comparisons"]
+            ]
+        )
+        != len(
+            {
+                comparison["candidate_ref"]
+                for comparison in receipt["comparisons"]
+            }
+        )
+        for receipt in receipts
+    ):
+        reasons.append("duplicate_candidate_identity")
+    if any(
+        not _REQUIRED_DIMENSION_SET.issubset(
+            {
+                dimension["name"]
+                for dimension in comparison["dimensions"]
+            }
+        )
+        for receipt in receipts
+        for comparison in receipt["comparisons"]
+    ):
+        reasons.append("candidate_dimension_incomplete")
     if any(
         isinstance(receipt.get("selection_difference"), dict)
         and receipt["selection_difference"].get("classification")
@@ -214,6 +265,27 @@ def assess_shadow_observation_directory(
         for receipt in receipts
     ):
         reasons.append("reconciliation_issue_present")
+    if any(
+        not _policy_change_evidence_is_registered(
+            receipt["selection_difference"],
+            dimension=None,
+        )
+        for receipt in receipts
+        if isinstance(receipt.get("selection_difference"), dict)
+        and receipt["selection_difference"].get("classification")
+        == "policy_change"
+    ) or any(
+        not _policy_change_evidence_is_registered(
+            dimension,
+            dimension=dimension["name"],
+        )
+        for receipt in receipts
+        for comparison in receipt["comparisons"]
+        for dimension in comparison["dimensions"]
+        if dimension.get("matches") is False
+        and dimension.get("classification") == "policy_change"
+    ):
+        reasons.append("unregistered_policy_change")
     if any(
         dimension.get("matches") is False
         and dimension.get("classification") != "policy_change"
@@ -229,8 +301,11 @@ def assess_shadow_observation_directory(
         covered_dimensions=tuple(
             name for name in _REQUIRED_DIMENSIONS if name in covered
         ),
-        assessed_at=assessed_at.isoformat(),
+        assessed_at=context.assessed_at.isoformat(),
         queue_owner_mode=queue_owner_mode,
+        queue_owner_gate_enabled=queue_owner_gate_enabled,
+        queue_owner_state_path=queue_owner_state_path,
+        queue_owner_state_sha256=queue_owner_state_sha256,
         observed_from=(
             observed_at[0].isoformat() if observed_at else None
         ),
@@ -259,6 +334,13 @@ def _parse_observed_at(raw: Any) -> datetime:
 
 
 def _receipt_shape_is_valid(receipt: dict[str, Any]) -> bool:
+    if (
+        not isinstance(receipt.get("observation_id"), str)
+        or not receipt["observation_id"]
+        or not isinstance(receipt.get("observed_at"), str)
+        or not receipt["observed_at"]
+    ):
+        return False
     if receipt.get("selection_scope") != "next_tasks":
         return False
     snapshot = receipt.get("snapshot")
@@ -301,7 +383,11 @@ def _receipt_shape_is_valid(receipt: dict[str, Any]) -> bool:
     if not isinstance(comparisons, list):
         return False
     for comparison in comparisons:
-        if not isinstance(comparison, dict):
+        if (
+            not isinstance(comparison, dict)
+            or not isinstance(comparison.get("candidate_ref"), str)
+            or not comparison["candidate_ref"]
+        ):
             return False
         dimensions = comparison.get("dimensions")
         if not isinstance(dimensions, list):
@@ -322,7 +408,32 @@ def _receipt_shape_is_valid(receipt: dict[str, Any]) -> bool:
     )
 
 
+def _policy_change_evidence_is_registered(
+    payload: dict[str, Any],
+    *,
+    dimension: str | None,
+) -> bool:
+    reason_code = payload.get("classification_reason_code")
+    evidence_refs = payload.get("evidence_refs")
+    return (
+        isinstance(reason_code, str)
+        and bool(reason_code)
+        and isinstance(evidence_refs, list)
+        and bool(evidence_refs)
+        and all(
+            isinstance(reference, str) and bool(reference)
+            for reference in evidence_refs
+        )
+        and is_registered_policy_change(
+            dimension=dimension,
+            reason_code=reason_code,
+        )
+    )
+
+
 __all__ = [
+    "MAX_OBSERVATION_GAP",
+    "REQUIRED_OBSERVATION_WINDOW",
     "ShadowObservationAssessment",
     "assess_shadow_observation_directory",
 ]

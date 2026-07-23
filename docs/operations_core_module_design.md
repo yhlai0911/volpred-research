@@ -384,6 +384,22 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   通過，含輸入逐 byte 不變與測試期 remote/canonical I/O deny。
 - 這只完成 replay 與 receipt 機械能力；尚未把 replay 加入 canonical schedule，也尚未
   累積七天 observation window，因此不構成 queue ownership cutover。
+- **2026-07-23 Issue #9 assessment gate = `contained`**：新增
+  `uv run volpred ops work-shadow-assess --observation-dir <dir>`，production CLI 固定七日
+  window／26 小時最大 observation gap，clock 不可由 caller 覆寫；queue ownership
+  直接回讀 canonical `storage/ops/task_pool_mode.json`，並把 state path／SHA-256 綁入
+  verdict。每份 receipt 逐日核對 `next_tasks` row count、candidate identity 與
+  priority／claim ownership／parent／deadline／terminal disposition，未來時間、
+  snapshot identity drift、重複 observation、未註冊 policy oracle reason、
+  reconciliation issue 或 blocking selector difference 全部 fail closed。
+  初版 `d53a705a6` 經 Matt 雙軸 review 發現 caller-declared mode、future receipt、
+  cross-day dimension union 與 policy-change 字串豁免四個 gate 漏洞；以上 remediation
+  均以 public-interface regression 重現後修復。
+- live canonical mode 已由 owner-directed P1 切成 `direct_execution`，舊 queue 3,338
+  rows 已有 exact-byte backup 後清空；因此原 Issue #9 的 legacy-queue 七日 soak
+  **不能沿用或補算**，assessment 正確回報 mode conflict。尚無七日 receipt、canonical
+  replay schedule、CAS cutover、legacy read-only projection 或 rollback rehearsal，
+  Issue #9 保持 open，狀態不得高於 `contained`。
 
 這四個提交就是下一輪 `tdd` skill 的範圍；完成並取得七天 shadow 證據後，才規劃第一個
 正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與 Work Coordinator

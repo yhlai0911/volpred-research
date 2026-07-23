@@ -683,6 +683,22 @@ _POLICY_ORACLE = (
 )
 
 
+def is_registered_policy_change(
+    *,
+    dimension: str | None,
+    reason_code: str,
+) -> bool:
+    """Return whether a receipt's policy-change reason exists in the oracle."""
+    if dimension is None and reason_code == "coordinator_ranking_contract":
+        return True
+    return any(
+        rule.classification == "policy_change"
+        and rule.reason_code == reason_code
+        and (dimension is None or rule.dimension == dimension)
+        for rule in _POLICY_ORACLE
+    )
+
+
 def _compare_candidate(
     candidate: LegacyWorkCandidate,
     *,
@@ -1657,6 +1673,7 @@ def _aware_utc(value: datetime) -> datetime:
 
 __all__ = [
     "append_shadow_observation",
+    "is_registered_policy_change",
     "ShadowCandidateComparison",
     "ShadowDimensionComparison",
     "ShadowReplayLedger",
