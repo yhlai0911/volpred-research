@@ -1079,14 +1079,16 @@ projection，但三者仍是分開的回傳值。若未來 ownership transaction
 live queue 資料錯誤。
 
 **底層修復與回歸**：新增 read-only
-`prepare_work_ownership_cutover()`。它在任何 mutation 前重新核對固定七日 window、
-26 小時 gap、freshness、完整 dimensions、queued-execution unique-owner gate 與
-assessment/CAS owner-state SHA；import report 必須零 issue，projection 再經既有
-importer round-trip，逐 identity 比對 row count、priority、claim ownership、parent、
-deadline、policy 與 terminal disposition。通過後 manifest 以 canonical SHA-256 綁定
-raw legacy snapshot、assessment、import report、projection 與 owner state。
-public regressions 覆蓋未通過 assessment、stale owner SHA、reconciliation issue、
-projection drift、偽造短 window 與 timezone-naive timestamp；相鄰 suite 173 passed。
+`prepare_work_ownership_cutover()`。最終 seam 不接受 caller 建好的 assessment、
+import report 或 SHA：它從 immutable receipt directory 用 trusted wall clock 重跑
+canonical assessor，從同一次 owner-state bytes 取得 mode／CAS SHA，並從 raw legacy
+bytes 自行計算 SHA、decode 與重建 import report。Projection payload 再自行
+canonicalize，row count／SHA 不信任 public dataclass metadata；既有 importer
+round-trip 逐 identity 比對 priority、claim ownership／started timestamp、parent、
+deadline、policy 與 terminal disposition。通過後 manifest 以 canonical SHA-256
+綁定五份 derived evidence。public regressions 覆蓋短／過期 receipt ledger、
+cross-wired raw snapshot、forged projection metadata、projection drift 與 running
+`started_at` drift；相鄰 suite待最終重跑。
 
 **狀態**：此 preflight 缺口已制度化止血，但尚無正式 DB/filesystem CAS ownership
 transaction、七日 live receipts、unique-owner 下游回讀或 live rollback rehearsal。

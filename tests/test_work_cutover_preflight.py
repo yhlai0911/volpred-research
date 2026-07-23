@@ -1,44 +1,34 @@
+from __future__ import annotations
+
 from dataclasses import replace
+from datetime import datetime, timedelta, timezone
+import hashlib
+import json
+from pathlib import Path
 
 import pytest
 
-from volpred.ops.work import WorkItemView, WorkSnapshot
+from volpred.ops import work_cutover
+from volpred.ops.work import WorkEventView, WorkItemView, WorkSnapshot
 from volpred.ops.work.legacy import LegacySnapshots
 from volpred.ops.work_cutover import prepare_work_ownership_cutover
-from volpred.ops.work_migration import preview_legacy_snapshots
 from volpred.ops.work_projection import project_legacy_next_tasks
-from volpred.ops.work_shadow_assessment import ShadowObservationAssessment
 
 
-OWNER_STATE_SHA256 = "a" * 64
-LEGACY_SNAPSHOT_SHA256 = "c" * 64
+START = datetime(2026, 7, 16, 12, 0, tzinfo=timezone.utc)
+FIXED_NOW = START + timedelta(days=7, hours=1)
+REQUIRED_DIMENSIONS = (
+    "priority",
+    "claim_ownership",
+    "parent",
+    "deadline",
+    "terminal_disposition",
+)
 
 
-def _ready_assessment() -> ShadowObservationAssessment:
-    return ShadowObservationAssessment(
-        ready_for_cutover=True,
-        reason_codes=(),
-        observation_count=8,
-        covered_dimensions=(
-            "priority",
-            "claim_ownership",
-            "parent",
-            "deadline",
-            "terminal_disposition",
-        ),
-        assessed_at="2026-07-23T13:00:00+00:00",
-        queue_owner_mode="queued_execution",
-        queue_owner_gate_enabled=False,
-        queue_owner_state_path="/repo/storage/ops/task_pool_mode.json",
-        queue_owner_state_sha256=OWNER_STATE_SHA256,
-        observed_from="2026-07-16T12:00:00+00:00",
-        observed_through="2026-07-23T12:00:00+00:00",
-        recorded_from="2026-07-16T12:00:00+00:00",
-        recorded_through="2026-07-23T12:00:00+00:00",
-        required_window_seconds=7 * 24 * 60 * 60,
-        max_gap_seconds=26 * 60 * 60,
-        max_observed_gap_seconds=24 * 60 * 60,
-    )
+@pytest.fixture(autouse=True)
+def fixed_preflight_clock(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(work_cutover, "_cutover_time", lambda: FIXED_NOW)
 
 
 def _legacy_row() -> dict[str, object]:
@@ -49,13 +39,22 @@ def _legacy_row() -> dict[str, object]:
         "title": "Cut over the queue owner",
         "priority": 1,
         "source": "user",
-        "created_at": "2026-07-16T12:00:00+00:00",
-        "updated_at": "2026-07-16T12:00:00+00:00",
+        "created_at": START.isoformat(),
+        "updated_at": START.isoformat(),
         "required_capabilities": ["code"],
         "required_attestations": [],
         "risk": "safe",
         "approval": "auto",
     }
+
+
+def _legacy_bytes(*rows: dict[str, object]) -> bytes:
+    return json.dumps(
+        list(rows),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
 
 
 def _staged_snapshot() -> WorkSnapshot:
@@ -75,41 +74,158 @@ def _staged_snapshot() -> WorkSnapshot:
                 payload_ref="legacy:next_tasks:task-1",
                 status="pending",
                 version=1,
-                created_at="2026-07-16T12:00:00+00:00",
-                updated_at="2026-07-16T12:00:00+00:00",
+                created_at=START.isoformat(),
+                updated_at=START.isoformat(),
             ),
         )
     )
 
 
-def test_preflight_binds_clean_soak_owner_cas_and_projection_identity() -> None:
-    import_report = preview_legacy_snapshots(
-        LegacySnapshots(next_tasks=(_legacy_row(),))
-    )
-    projection = project_legacy_next_tasks(_staged_snapshot())
+def _write_observations(
+    directory: Path,
+    *,
+    count: int = 8,
+    start: datetime = START,
+) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
+    for index in range(count):
+        observed_at = start + timedelta(days=index)
+        snapshot_sha = f"{index + 1:064x}"
+        receipt = {
+            "schema_version": "work-shadow-replay.v3",
+            "observation_id": f"scheduled_{index:02d}",
+            "observed_at": observed_at.isoformat(),
+            "recorded_at": observed_at.isoformat(),
+            "selection_scope": "next_tasks",
+            "snapshot": {
+                "sha256": snapshot_sha,
+                "byte_count": 100 + index,
+                "source_counts": {
+                    "next_tasks": 1,
+                    "task_records": 0,
+                    "ops_jobs": 0,
+                },
+            },
+            "legacy_selection": {
+                "policy": "legacy",
+                "snapshot_sha256": snapshot_sha,
+                "selected_candidate_ref": "next_tasks:task-1",
+                "eligible_candidate_refs": ["next_tasks:task-1"],
+            },
+            "coordinator_selection": {
+                "policy": "work_coordinator",
+                "snapshot_sha256": snapshot_sha,
+                "selected_candidate_ref": "next_tasks:task-1",
+                "eligible_candidate_refs": ["next_tasks:task-1"],
+            },
+            "selection_difference": None,
+            "comparisons": [
+                {
+                    "candidate_ref": "next_tasks:task-1",
+                    "legacy_eligible": True,
+                    "coordinator_eligible": True,
+                    "dimensions": [
+                        {
+                            "name": name,
+                            "legacy": {"value": "same"},
+                            "coordinator": {"value": "same"},
+                            "matches": True,
+                            "classification": None,
+                            "classification_reason_code": None,
+                            "legacy_reason_codes": [],
+                            "coordinator_reason_codes": [],
+                            "evidence_refs": [f"contract://{name}"],
+                        }
+                        for name in REQUIRED_DIMENSIONS
+                    ],
+                }
+            ],
+            "reconciliation_issues": [],
+        }
+        (directory / f"scheduled_{index:02d}.json").write_text(
+            json.dumps(receipt),
+            encoding="utf-8",
+        )
 
-    manifest = prepare_work_ownership_cutover(
-        assessment=_ready_assessment(),
-        import_report=import_report,
-        projection=projection,
-        expected_queue_owner_state_sha256=OWNER_STATE_SHA256,
-        legacy_snapshot_sha256=LEGACY_SNAPSHOT_SHA256,
+
+def _state_path(tmp_path: Path, *, enabled: bool = False) -> Path:
+    path = tmp_path / "task_pool_mode.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "enabled": enabled,
+                "mode": (
+                    "direct_execution" if enabled else "queued_execution"
+                ),
+            }
+        ),
+        encoding="utf-8",
     )
+    return path
+
+
+def _prepare(
+    tmp_path: Path,
+    *,
+    legacy_rows: tuple[dict[str, object], ...] | None = None,
+    legacy_bytes: bytes | None = None,
+    projection=None,
+):
+    rows = legacy_rows or (_legacy_row(),)
+    observations = tmp_path / "observations"
+    _write_observations(observations)
+    return prepare_work_ownership_cutover(
+        observation_directory=observations,
+        queue_owner_state_path=_state_path(tmp_path),
+        legacy_next_tasks_bytes=(
+            legacy_bytes if legacy_bytes is not None else _legacy_bytes(*rows)
+        ),
+        legacy_snapshots=LegacySnapshots(next_tasks=rows),
+        projection=projection or project_legacy_next_tasks(_staged_snapshot()),
+    )
+
+
+def test_preflight_derives_manifest_from_raw_evidence(
+    tmp_path: Path,
+) -> None:
+    raw = _legacy_bytes(_legacy_row())
+
+    manifest = _prepare(tmp_path, legacy_bytes=raw)
 
     assert manifest.schema_version == "work-owner-cutover-manifest.v1"
     assert manifest.legacy_row_count == 1
     assert manifest.coordinator_row_count == 1
-    assert manifest.queue_owner_state_sha256 == OWNER_STATE_SHA256
-    assert manifest.legacy_snapshot_sha256 == LEGACY_SNAPSHOT_SHA256
-    assert manifest.projection_sha256 == projection.sha256
+    assert manifest.legacy_snapshot_sha256 == hashlib.sha256(raw).hexdigest()
     assert len(manifest.sha256) == 64
 
 
-def test_preflight_rejects_an_assessment_that_is_not_ready() -> None:
-    assessment = replace(
-        _ready_assessment(),
-        ready_for_cutover=False,
-        reason_codes=("observation_window_too_short",),
+def test_preflight_rejects_incomplete_raw_observation_ledger(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    _write_observations(observations, count=1)
+
+    with pytest.raises(
+        ValueError,
+        match="shadow assessment is not ready for cutover",
+    ):
+        prepare_work_ownership_cutover(
+            observation_directory=observations,
+            queue_owner_state_path=_state_path(tmp_path),
+            legacy_next_tasks_bytes=_legacy_bytes(_legacy_row()),
+            legacy_snapshots=LegacySnapshots(next_tasks=(_legacy_row(),)),
+            projection=project_legacy_next_tasks(_staged_snapshot()),
+        )
+
+
+def test_preflight_uses_current_time_to_reject_a_stale_ledger(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    _write_observations(
+        observations,
+        start=datetime(2020, 1, 1, tzinfo=timezone.utc),
     )
 
     with pytest.raises(
@@ -117,52 +233,51 @@ def test_preflight_rejects_an_assessment_that_is_not_ready() -> None:
         match="shadow assessment is not ready for cutover",
     ):
         prepare_work_ownership_cutover(
-            assessment=assessment,
-            import_report=preview_legacy_snapshots(
-                LegacySnapshots(next_tasks=(_legacy_row(),))
-            ),
+            observation_directory=observations,
+            queue_owner_state_path=_state_path(tmp_path),
+            legacy_next_tasks_bytes=_legacy_bytes(_legacy_row()),
+            legacy_snapshots=LegacySnapshots(next_tasks=(_legacy_row(),)),
             projection=project_legacy_next_tasks(_staged_snapshot()),
-            expected_queue_owner_state_sha256=OWNER_STATE_SHA256,
-            legacy_snapshot_sha256=LEGACY_SNAPSHOT_SHA256,
         )
 
 
-def test_preflight_rejects_owner_state_that_changed_after_assessment() -> None:
-    with pytest.raises(
-        ValueError,
-        match="queue owner state changed after shadow assessment",
-    ):
-        prepare_work_ownership_cutover(
-            assessment=_ready_assessment(),
-            import_report=preview_legacy_snapshots(
-                LegacySnapshots(next_tasks=(_legacy_row(),))
-            ),
-            projection=project_legacy_next_tasks(_staged_snapshot()),
-            expected_queue_owner_state_sha256="b" * 64,
-            legacy_snapshot_sha256=LEGACY_SNAPSHOT_SHA256,
-        )
-
-
-def test_preflight_rejects_an_import_report_with_reconciliation_issues() -> None:
-    malformed = _legacy_row()
-    malformed["source"] = "unknown-producer"
+def test_preflight_rejects_cross_wired_raw_snapshot_bytes(
+    tmp_path: Path,
+) -> None:
+    other = _legacy_row()
+    other["priority"] = 2
 
     with pytest.raises(
         ValueError,
-        match="legacy import is not ready for cutover",
+        match="raw legacy snapshot does not match supplied snapshots",
     ):
-        prepare_work_ownership_cutover(
-            assessment=_ready_assessment(),
-            import_report=preview_legacy_snapshots(
-                LegacySnapshots(next_tasks=(malformed,))
-            ),
-            projection=project_legacy_next_tasks(_staged_snapshot()),
-            expected_queue_owner_state_sha256=OWNER_STATE_SHA256,
-            legacy_snapshot_sha256=LEGACY_SNAPSHOT_SHA256,
+        _prepare(
+            tmp_path,
+            legacy_rows=(_legacy_row(),),
+            legacy_bytes=_legacy_bytes(other),
         )
 
 
-def test_preflight_rejects_projection_dimension_drift() -> None:
+def test_preflight_rejects_forged_projection_metadata(
+    tmp_path: Path,
+) -> None:
+    projection = project_legacy_next_tasks(_staged_snapshot())
+    forged = replace(
+        projection,
+        row_count=999,
+        sha256="d" * 64,
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="coordinator projection metadata does not match payload",
+    ):
+        _prepare(tmp_path, projection=forged)
+
+
+def test_preflight_rejects_projection_dimension_drift(
+    tmp_path: Path,
+) -> None:
     staged = _staged_snapshot()
     staged = WorkSnapshot(
         items=(replace(staged.items[0], priority=2),),
@@ -172,58 +287,60 @@ def test_preflight_rejects_projection_dimension_drift() -> None:
         ValueError,
         match="coordinator projection does not match legacy import",
     ):
-        prepare_work_ownership_cutover(
-            assessment=_ready_assessment(),
-            import_report=preview_legacy_snapshots(
-                LegacySnapshots(next_tasks=(_legacy_row(),))
-            ),
+        _prepare(
+            tmp_path,
             projection=project_legacy_next_tasks(staged),
-            expected_queue_owner_state_sha256=OWNER_STATE_SHA256,
-            legacy_snapshot_sha256=LEGACY_SNAPSHOT_SHA256,
         )
 
 
-def test_preflight_revalidates_the_fixed_seven_day_evidence_contract() -> None:
-    forged = replace(
-        _ready_assessment(),
-        observation_count=1,
-        recorded_through="2026-07-16T13:00:00+00:00",
-        required_window_seconds=60 * 60,
+def test_preflight_reconciles_running_started_at(
+    tmp_path: Path,
+) -> None:
+    legacy = _legacy_row()
+    legacy.update(
+        {
+            "status": "in_progress",
+            "claimed_by": "worker-a",
+            "claimed_at": "2026-07-16T12:01:00+00:00",
+            "started_at": "2026-07-16T12:02:00+00:00",
+            "claim_expires_at": "2026-07-16T13:00:00+00:00",
+            "updated_at": "2026-07-16T12:03:00+00:00",
+        }
+    )
+    running = replace(
+        _staged_snapshot().items[0],
+        status="running",
+        version=3,
+        claimed_by="worker-a",
+        claim_expires_at="2026-07-16T13:00:00+00:00",
+        updated_at="2026-07-16T12:03:00+00:00",
+    )
+    projection = project_legacy_next_tasks(
+        WorkSnapshot(
+            items=(running,),
+            events=(
+                WorkEventView(
+                    work_id="task-1",
+                    kind="acquired",
+                    version=2,
+                    created_at="2026-07-16T12:01:00+00:00",
+                ),
+                WorkEventView(
+                    work_id="task-1",
+                    kind="started",
+                    version=3,
+                    created_at="2026-07-16T12:02:30+00:00",
+                ),
+            ),
+        )
     )
 
     with pytest.raises(
         ValueError,
-        match="shadow assessment evidence is incomplete",
+        match="coordinator projection does not match legacy import",
     ):
-        prepare_work_ownership_cutover(
-            assessment=forged,
-            import_report=preview_legacy_snapshots(
-                LegacySnapshots(next_tasks=(_legacy_row(),))
-            ),
-            projection=project_legacy_next_tasks(_staged_snapshot()),
-            expected_queue_owner_state_sha256=OWNER_STATE_SHA256,
-            legacy_snapshot_sha256=LEGACY_SNAPSHOT_SHA256,
-        )
-
-
-def test_preflight_rejects_timezone_naive_assessment_timestamps() -> None:
-    naive = replace(
-        _ready_assessment(),
-        assessed_at="2026-07-23T13:00:00",
-        recorded_from="2026-07-16T12:00:00",
-        recorded_through="2026-07-23T12:00:00",
-    )
-
-    with pytest.raises(
-        ValueError,
-        match="shadow assessment evidence is incomplete",
-    ):
-        prepare_work_ownership_cutover(
-            assessment=naive,
-            import_report=preview_legacy_snapshots(
-                LegacySnapshots(next_tasks=(_legacy_row(),))
-            ),
-            projection=project_legacy_next_tasks(_staged_snapshot()),
-            expected_queue_owner_state_sha256=OWNER_STATE_SHA256,
-            legacy_snapshot_sha256=LEGACY_SNAPSHOT_SHA256,
+        _prepare(
+            tmp_path,
+            legacy_rows=(legacy,),
+            projection=projection,
         )

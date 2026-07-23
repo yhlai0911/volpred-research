@@ -546,15 +546,17 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
 ### Issue #9 — Cutover manifest preflight
 
 - `prepare_work_ownership_cutover()` 是 step 20 transaction 前的唯一 evidence-binding
-  seam。它重新驗證固定七日 window、26 小時最大 gap、freshness、完整 reconciliation
-  dimensions、queued-execution unique-owner gate，以及 assessment 所記 owner-state
-  SHA 與 transaction 預期 CAS SHA 相同；caller 不能只把
-  `ready_for_cutover=True` 塞進 dataclass 來放行。
-- Legacy importer report 必須零 issue；staged Work Coordinator projection 會再走既有
+  seam。它直接讀 immutable receipt directory，以不可由 API caller 覆寫的 wall clock
+  呼叫 canonical assessor，並從同一次 owner-state byte snapshot 取得 mode 與 CAS SHA；
+  caller 不再能傳入或重建 `ready_for_cutover=True` summary 來放行。
+- Raw legacy bytes 由 seam 自行 decode、計算 SHA 並產生 importer report；staged
+  Work Coordinator projection 會再走既有
   importer，逐 work identity 比對 row count、status、priority、source／policy、
   capability／attestation、claim owner／timestamps／expiry、parent、deadline、
-  blocked reason 與 terminal disposition。Manifest 以 canonical JSON 綁定 raw legacy
-  snapshot、assessment、import report、projection 與 owner-state 五個 SHA-256 identity。
+  blocked reason 與 terminal disposition（含 current claim 的 `started_at`）。
+  Projection row count／SHA 由 payload 重算。Manifest 以 canonical JSON 綁定 raw
+  legacy snapshot、canonical assessment、derived import report、validated projection
+  與 owner-state 五個 SHA-256 identity。
 - 這是 **read-only preflight capability**，沒有 filesystem／database mutation、
   materialize 或 apply interface。Live `direct_execution` mode 與零 observation
   evidence 均未變；正式 CAS transaction、唯一 owner 下游回讀及 live rollback

@@ -62,15 +62,17 @@
 > direct-execution containment 不變。
 
 > **Work Coordinator cutover preflight contract（2026-07-24，pre-cutover）**
-> `volpred.ops.work_cutover.prepare_work_ownership_cutover()` 只在七日 assessment
-> 已通過、assessment 綁定的 queue-owner state SHA 與 caller CAS identity 相同、
-> legacy import 無 reconciliation issue，且 staged Coordinator projection 的 row
+> `volpred.ops.work_cutover.prepare_work_ownership_cutover()` 直接從 immutable replay
+> receipts 用 trusted wall clock 重跑七日 assessment，並從同一次 owner-state byte
+> snapshot 取得 mode 與 CAS SHA；raw legacy bytes 由 seam 自行 decode、計算 SHA
+> 並重建 importer report。只有 import 無 reconciliation issue，且 staged projection 的 row
 > identity／priority／claim ownership／parent／deadline／terminal disposition 與
-> import 完全一致時，產生 immutable、hash-addressed cutover manifest。Manifest
+> import 完全一致時才產生 immutable、hash-addressed cutover manifest。Projection
+> row count／SHA 也由 decoded payload 重算，不信任 caller metadata。Manifest
 > 同時綁定 raw legacy snapshot SHA、assessment SHA、import report SHA、projection
 > SHA 與兩側 row count；任何 drift 都在 ownership mutation 前 fail closed。此 seam
 > 沒有 apply／writer 能力，live 仍為 `direct_execution` 且 observation count 為 0；
-> 它不等於 cutover 核可，也不會繞過七日真實證據。
+> 它不等於 cutover 核可，也無法用手造 assessment／hash 繞過七日真實證據。
 
 > **Change Delivery commit-authority contract（2026-07-24，shadow）**
 > private `GitCommitActuator` 在呼叫 canonical Git writer 前，必須以完整 write-intent
