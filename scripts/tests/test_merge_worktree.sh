@@ -1339,6 +1339,89 @@ test_case_22_stale_worktree_no_foreign_commits() {
     fi
 }
 
+# ============================================================
+# Test Case 23 (2026-07-23): stale-base 同路徑雙邊修改不得交給 -X ours
+#
+# 真實事故 86e142305：merge result 相對 main parent 看似 +38/-7，但相對
+# worktree parent 是 +0/-192；`git merge -X ours` 把 worktree 上已驗證的
+# D6b reaper 靜默丟掉。既有 post-merge detector 只看 experiments/，因此
+# scripts/compute_queue.py 完全不在保護範圍。
+#
+# 最小重現：branch 與 main 從同一 base 修改同一支程式的同一行。
+# 正確行為是在 merge 前 fail-closed，保留 main bytes + worktree + branch，
+# 要求先 rebase/人工整合；不能讓 -X ours 代替語意裁決。
+# ============================================================
+test_case_23_stale_overlap_aborts_before_merge() {
+    echo "=== Case 23: stale-base 同路徑雙邊修改 → merge 前 ABORT ==="
+    local test_dir
+    test_dir=$(setup_test_env "case23")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase23"
+    local branch="worktree-agent-testcase23"
+
+    mkdir -p src
+    printf '%s\n' "def verdict():" "    return 'base'" > src/live_worker.py
+    git add src/live_worker.py && git commit -qm "seed shared live worker"
+    (cd "$wt" && git merge main --no-edit -q)
+
+    # Worktree 的有效實作。
+    printf '%s\n' "def verdict():" "    return 'agent-live-reaper'" \
+        > "$wt/src/live_worker.py"
+    (cd "$wt" && git add src/live_worker.py && git commit -qm "agent: add live reaper")
+
+    # Worktree 分出後 main 也改同一路徑；-X ours 會偏向這份 bytes。
+    printf '%s\n' "def verdict():" "    return 'main-concurrent-change'" \
+        > src/live_worker.py
+    git add src/live_worker.py && git commit -qm "main: concurrent live worker change"
+
+    local output rc
+    output=$(run_merge_capture_rc "$test_dir")
+    rc=$(last_merge_rc)
+
+    if [[ "$rc" != "0" ]] && [[ "$rc" != "NORC" ]] && \
+       echo "$output" | grep -q "STALE-BASE.*ABORT"; then
+        pass "23-1: stale overlap 在 merge 前 fail-closed"
+    else
+        fail "23-1: stale overlap 未被擋下（rc=${rc}；-X ours 可靜默丟 worktree 活碼）"
+        echo "$output" | tail -40
+    fi
+
+    if [[ "$(cat src/live_worker.py)" == *"main-concurrent-change"* ]] && \
+       ! git -C "$test_dir" merge-base --is-ancestor "$branch" main 2>/dev/null; then
+        pass "23-2: main bytes 未被改寫，branch 未假裝 merged"
+    else
+        fail "23-2: main 或 branch ancestry 已被 merge 污染"
+    fi
+
+    if [[ -d "$wt" ]] && \
+       [[ "$(cat "$wt/src/live_worker.py")" == *"agent-live-reaper"* ]]; then
+        pass "23-3: worktree 與 agent 活碼完整保留"
+    else
+        fail "23-3: worktree/agent 活碼被移除或改寫"
+    fi
+
+    if echo "$output" | grep -q "src/live_worker.py"; then
+        pass "23-4: ABORT 證據列出重疊路徑"
+    else
+        fail "23-4: 訊息沒有列出需人工整合的路徑"
+    fi
+}
+
+# Targeted feedback loop for the stale-base regression.  The full historical
+# suite intentionally remains the default; this selector keeps Case 23 usable
+# while unrelated baseline debt is being repaired under a separate task.
+if [[ "${MERGE_TEST_ONLY:-}" == "23" ]]; then
+    test_case_23_stale_overlap_aborts_before_merge
+    echo "================================"
+    echo "Assertions PASS: $PASS"
+    echo "Assertions FAIL: $FAIL"
+    echo "Test cases: $([[ $FAIL -eq 0 ]] && echo 'PASS 1/1' || echo 'FAIL — see assertion failures above')"
+    echo "================================"
+    [[ $FAIL -eq 0 ]]
+    exit $?
+fi
+
 
 test_case_a
 echo ""
@@ -1385,14 +1468,17 @@ test_case_21_dryrun_no_contradiction
 echo ""
 test_case_22_stale_worktree_no_foreign_commits
 echo ""
+test_case_23_stale_overlap_aborts_before_merge
+echo ""
 
 echo "================================"
 echo "Assertions PASS: $PASS"
 echo "Assertions FAIL: $FAIL"
-# Test case-level summary（22 cases；17/18/19 pin multi-slot dirty-main/index contract；
+# Test case-level summary（23 cases；17/18/19 pin multi-slot dirty-main/index contract；
 # 20/21 pin the 2026-07-19 scope fix: 安全網掃全樹、dry-run 不自相矛盾；
-# 22 pins K1262-v6: 落後的 worktree 不得靠 --all fallback 撈進其他分支的 commit）
-TOTAL_CASES=22
+# 22 pins K1262-v6: 落後的 worktree 不得靠 --all fallback 撈進其他分支的 commit；
+# 23 pins stale-base 同路徑雙邊修改不得交給 -X ours 語意裁決）
+TOTAL_CASES=23
 if [[ $FAIL -eq 0 ]]; then
     echo "Test cases: PASS $TOTAL_CASES/$TOTAL_CASES"
 else
