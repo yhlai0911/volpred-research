@@ -132,6 +132,12 @@ class _Authority:
         request: EffectAuthorityRequest,
     ) -> EffectAuthorityGrant:
         self.requests.append(request)
+        if (
+            request.primary_authority_key != "operations-core-effects"
+            or request.primary_authority_holder_ref != "host:shadow-primary"
+            or request.primary_authority_epoch != 42
+        ):
+            raise EffectWorkerBlocked("stale Primary Authority lease identity")
         if request.primary_fencing_token != self.primary_fencing_token:
             raise EffectWorkerBlocked("stale Primary Authority fencing token")
         if request.outbox_claim_token != "outbox-claim-secret":
@@ -267,6 +273,9 @@ def _worker(
 def _command(**overrides: object) -> EffectWorkerCommand:
     command = EffectWorkerCommand(
         worker_id="effect-worker:shadow-email",
+        primary_authority_key="operations-core-effects",
+        primary_authority_holder_ref="host:shadow-primary",
+        primary_authority_epoch=42,
         primary_fencing_token="primary-fence-current",
         lease_seconds=300,
     )
@@ -351,6 +360,20 @@ def test_payload_failure_is_authorized_and_settled_as_retryable() -> None:
     assert isinstance(store.outcomes[0], FailedEffect)
     assert store.outcomes[0].reason_code == "effect_payload_unavailable"
     assert store.outcomes[0].retryable is True
+    assert notifier.calls == []
+
+
+def test_payload_hash_drift_is_terminal_and_never_reaches_provider() -> None:
+    reader = _PayloadReader(b'{"drifted":true}')
+    worker, store, notifier, _reader = _worker(payload_reader=reader)
+
+    receipt = worker.run_once(_command())
+
+    assert receipt is not None
+    assert receipt.disposition == "dead_lettered"
+    assert isinstance(store.outcomes[0], FailedEffect)
+    assert store.outcomes[0].reason_code == "effect_payload_integrity_mismatch"
+    assert store.outcomes[0].retryable is False
     assert notifier.calls == []
 
 

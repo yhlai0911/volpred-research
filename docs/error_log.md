@@ -1220,3 +1220,49 @@ PG17 migration 與 receipt index 三個具體根因為
 **root_cause_fixed_and_verified**；但現行 production caller 仍未由 live Primary
 Authority adapter、durable payload writer 及 ownership transaction 接管，因此原本的
 notification success-semantics／program commit 13 整體仍是 **contained**。
+
+### 2026-07-24 — Effect settlement 可偽造 authority，payload 也沒有 durable owner
+
+**症狀與物證**：authority-fenced worker checkpoint 的 production shape 仍使用 Python
+fake authority 與 file payload reader；SQL settlement 只檢查三個 authority 欄位非空，
+未證明它們由 Primary Authority 簽發，也未綁定當下 outbox claim。Payload reference
+同樣沒有 durable writer 或 immutable storage owner。新增 live-shaped path 後，PG17
+fixture 首次插入 EffectRequest 又暴露第二個具體症狀：
+`verify_durable_effect_payload` 明明以 definer SELECT policy 讀已存在 payload，卻回報
+`unknown effect payload`。
+
+**根因層級**：第一層是 authorization evidence 契約缺口：worker 自述的非空 references
+不是 database-issued capability，settlement 無法辨識 stale lease、另一個 attempt 或
+漂移 identity。第二層是 payload ownership 缺口：hash 只存在 request metadata，
+provider 前沒有 durable bytes 與獨立 integrity check。PG17 假 unknown 則是 RLS
+contract 錯誤：trigger 的 `SELECT ... FOR KEY SHARE` 在 FORCE RLS 下需要 UPDATE policy，
+但 immutable payload 的 definer 刻意只有 SELECT，row 因而不可見。
+
+**底層修復**：新增 private immutable payload store、Primary Authority lease／grant／
+receipt store 與 effect authority grant store。`PostgresEffectPayloadStore` 透過 named
+functions 寫入 bytes，資料庫重算 SHA-256，ref 只能等價 replay；worker 在 provider
+之前重新驗證 hash，漂移時 terminal fail closed 且不呼叫 provider。
+`PostgresAuthorityStore` 使用 database clock、單調 epoch 與 hashed fencing token；
+`PostgresEffectAuthority` 原子驗證 exact lease、outbox claim、EffectRequest、WorkItem、
+payload 與 acknowledgement identity。Settlement trigger 只接受 matching
+database-issued grant。Payload verification 移除不必要的 row lock；immutable table
+無更新路徑，因此維持 SELECT-only policy 才符合最小權限。
+
+**回歸、回讀與制度化**：9 個 worker tests 與 23 個 PostgreSQL delivery tests 通過；
+後者使用 PostgreSQL 17 non-superuser／CREATEROLE executor，重播所有 migrations，
+並把 canonical migration 再執行一次驗證冪等。測試覆蓋 payload privacy／replay／hash
+binding、lease replay／takeover／stale fencing／release replay、DB-issued grant
+settlement、無 grant fail closed、FORCE RLS、function owner／fixed search path／grants
+與 indexes。Supabase migration API 已套用 exact canonical bytes，remote receipt
+`20260723230547 operations_core_effect_payload_primary_authority` 以同名 local no-op
+receipt stub 對齊，較晚 canonical migration 保留給 clean replay。Live PostgreSQL
+17 回讀為五表全 FORCE RLS、anon／authenticated 無 payload 或 authorize 權限、worker
+只有必要 function 權限、兩個預期 index 存在；`volpred_ops` security advisor 為
+0 lint，performance advisor 只有 10 個 shadow-table unused-index INFO。專案原有八筆
+remote／local migration-history drift 未做 repair，未把歷史問題冒充本切片變更。
+
+**狀態**：durable payload、database-issued Primary Authority grant、worker pre-provider
+integrity check 與 FORCE RLS row-lock 四個具體根因均完成五步 gate，為
+**root_cause_fixed_and_verified**。但 program commit 13 尚未有正式 Work Coordinator
+caller、production ownership transaction、unique-owner downstream acknowledgement
+與 rollback rehearsal，因此整體 notification ownership 仍為 **contained**。

@@ -163,6 +163,8 @@ class PostgresEffectDelivery:
                 "effect request fields are required",
                 "effect work item version must be positive",
                 "effect request hashes must be lowercase SHA-256",
+                "unknown effect payload:",
+                "effect payload hash does not match its durable bytes",
                 "unsupported effect risk:",
                 "effect outbox worker and token are required",
                 "effect outbox lease_seconds must be positive",
@@ -182,6 +184,7 @@ class PostgresEffectDelivery:
                 "effect outbox attempt lease expired:",
                 "effect outbox acknowledgement mismatch:",
                 "effect outbox settlement conflicts with its original outcome",
+                "effect authority grant is missing or does not match settlement",
             )
         ):
             raise ValueError(message) from None

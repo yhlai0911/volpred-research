@@ -13,6 +13,8 @@ import psycopg
 import pytest
 from psycopg.conninfo import conninfo_to_dict
 
+from volpred.ops.authority import AuthorityRequest, PrimaryAuthority, WriteIntent
+from volpred.ops.authority.postgres import PostgresAuthorityStore
 from volpred.ops.delivery import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
@@ -20,10 +22,20 @@ from volpred.ops.delivery import (
     EffectRequestConflict,
     FailedEffect,
 )
+from volpred.ops.delivery._effect_worker import (
+    EffectWorkerCommand,
+    EffectWorkerBlocked,
+    _authority_request,
+)
 from volpred.ops.delivery.postgres import (
     EffectOutboxLease,
     EffectSettlementAuthority,
     PostgresEffectDelivery,
+)
+from volpred.ops.delivery.postgres_authority import PostgresEffectAuthority
+from volpred.ops.delivery.postgres_payload import (
+    EffectPayloadConflict,
+    PostgresEffectPayloadStore,
 )
 from volpred.ops.work import WorkCoordinator, WorkRequest
 from volpred.ops.work.postgres import PostgresCoordinationStore
@@ -34,6 +46,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260723062144_operations_core_work_coordinator.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260723230547_operations_core_effect_payload_primary_authority_receipt.sql",
     REPO_ROOT
     / "supabase"
     / "migrations"
@@ -50,6 +66,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724050000_operations_core_effect_receipt_index.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724060000_operations_core_effect_payload_primary_authority.sql",
 )
 
 
@@ -114,6 +134,7 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
         ) as connection:
             for migration in MIGRATIONS:
                 connection.execute(migration.read_text(encoding="utf-8"))
+            connection.execute(MIGRATIONS[-1].read_text(encoding="utf-8"))
 
         with psycopg.connect(dsn, autocommit=True) as connection:
             (
@@ -123,6 +144,12 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                 public_settle,
                 definer_create,
                 receipt_outbox_index,
+                worker_authorize_effect,
+                public_authorize_effect,
+                public_payload_select,
+                new_tables_force_rls,
+                definer_function_owners,
+                fixed_function_search_paths,
                 unsafe_memberships,
             ) = connection.execute(
                     """
@@ -160,6 +187,89 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                         'volpred_ops.'
                         'effect_attempt_receipts_outbox_sequence_idx'
                       ) IS NOT NULL,
+                      has_function_privilege(
+                        'volpred_ops_worker',
+                        'volpred_ops.authorize_effect_write('
+                          'text,text,bigint,text,text,text,text,text,integer,'
+                          'bigint,integer,text,timestamptz,text,text,text,text,'
+                          'text,text,text)',
+                        'EXECUTE'
+                      ),
+                      has_function_privilege(
+                        'public',
+                        'volpred_ops.authorize_effect_write('
+                          'text,text,bigint,text,text,text,text,text,integer,'
+                          'bigint,integer,text,timestamptz,text,text,text,text,'
+                          'text,text,text)',
+                        'EXECUTE'
+                      ),
+                      has_table_privilege(
+                        'public',
+                        'volpred_ops.effect_payloads',
+                        'SELECT'
+                      ),
+                      (
+                        SELECT bool_and(
+                          relation.relrowsecurity
+                          AND relation.relforcerowsecurity
+                        )
+                        FROM pg_class AS relation
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = relation.relnamespace
+                        WHERE namespace.nspname = 'volpred_ops'
+                          AND relation.relname IN (
+                            'effect_payloads',
+                            'primary_authority_leases',
+                            'primary_authority_grants',
+                            'primary_authority_receipts',
+                            'effect_authority_grants'
+                          )
+                      ),
+                      (
+                        SELECT bool_and(
+                          procedure.proowner = (
+                            SELECT oid FROM pg_roles
+                            WHERE rolname = 'volpred_ops_definer'
+                          )
+                        )
+                        FROM pg_proc AS procedure
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = procedure.pronamespace
+                        WHERE namespace.nspname = 'volpred_ops'
+                          AND procedure.proname IN (
+                            'put_effect_payload',
+                            'read_effect_payload',
+                            'verify_durable_effect_payload',
+                            'acquire_primary_authority',
+                            'renew_primary_authority',
+                            'authorize_primary_write',
+                            'release_primary_authority',
+                            'authorize_effect_write',
+                            'require_effect_authority_grant'
+                          )
+                      ),
+                      (
+                        SELECT bool_and(
+                          procedure.prosecdef
+                          AND procedure.proconfig @>
+                            ARRAY['search_path=pg_catalog, volpred_ops']
+                        )
+                        FROM pg_proc AS procedure
+                        JOIN pg_namespace AS namespace
+                          ON namespace.oid = procedure.pronamespace
+                        WHERE namespace.nspname = 'volpred_ops'
+                          AND procedure.proname IN (
+                            'put_effect_payload',
+                            'read_effect_payload',
+                            'verify_durable_effect_payload',
+                            'acquire_primary_authority',
+                            'renew_primary_authority',
+                            'authorize_primary_write',
+                            'release_primary_authority',
+                            'authorize_effect_write',
+                            'require_effect_authority_grant'
+                          )
+                      ),
                       (
                         SELECT count(*)
                         FROM pg_auth_members AS memberships
@@ -185,6 +295,12 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
         assert public_settle is False
         assert definer_create is False
         assert receipt_outbox_index is True
+        assert worker_authorize_effect is True
+        assert public_authorize_effect is False
+        assert public_payload_select is False
+        assert new_tables_force_rls is True
+        assert definer_function_owners is True
+        assert fixed_function_search_paths is True
         assert unsafe_memberships == 0
     finally:
         with psycopg.connect(dsn, autocommit=True) as connection:
@@ -292,8 +408,13 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
             """
             TRUNCATE TABLE
               volpred_ops.effect_attempt_receipts,
+              volpred_ops.effect_authority_grants,
+              volpred_ops.primary_authority_grants,
+              volpred_ops.primary_authority_receipts,
+              volpred_ops.primary_authority_leases,
               volpred_ops.effect_outbox,
               volpred_ops.effect_requests,
+              volpred_ops.effect_payloads,
               volpred_ops.work_receipts,
               volpred_ops.work_checkpoints,
               volpred_ops.work_events,
@@ -633,27 +754,233 @@ def _failed(**overrides: object) -> FailedEffect:
     return replace(outcome, **overrides)
 
 
-def _authority(**overrides: object) -> EffectSettlementAuthority:
-    authority = EffectSettlementAuthority(
-        request_sha256="d" * 64,
-        outbox_claim_ref="effect-outbox:effect-postgres-1:attempt",
-        primary_authority_ref="primary-authority:epoch-42",
+def _grant_authority(
+    dsn: str,
+    delivery: PostgresEffectDelivery,
+    lease: EffectOutboxLease,
+) -> EffectSettlementAuthority:
+    with _worker_connection(dsn) as connection:
+        existing = connection.execute(
+            """
+            SELECT request_sha256, outbox_claim_ref, primary_authority_ref
+            FROM volpred_ops.effect_authority_grant_reads
+            WHERE outbox_sequence = %s AND attempt_count = %s
+            """,
+            (lease.sequence, lease.attempt_count),
+        ).fetchone()
+    if existing is not None:
+        return EffectSettlementAuthority(
+            request_sha256=existing[0],
+            outbox_claim_ref=existing[1],
+            primary_authority_ref=existing[2],
+        )
+
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(dsn),
+        ),
+        token_factory=lambda: "primary-fence-effect-test",
     )
-    return replace(authority, **overrides)
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-effects",
+            holder_ref="host:effect-test-primary",
+            lease_seconds=300,
+        )
+    )
+    request = _authority_request(
+        command=EffectWorkerCommand(
+            worker_id=lease.claimed_by,
+            primary_authority_key=primary_lease.authority_key,
+            primary_authority_holder_ref=primary_lease.holder_ref,
+            primary_authority_epoch=primary_lease.epoch,
+            primary_fencing_token=primary_lease.fencing_token,
+            lease_seconds=300,
+        ),
+        lease=lease,
+        effect=delivery.inspect(lease.effect_id),
+    )
+    grant = PostgresEffectAuthority(
+        connection_factory=lambda: _worker_connection(dsn),
+    ).authorize(request)
+    return EffectSettlementAuthority(
+        request_sha256=grant.request_sha256,
+        outbox_claim_ref=grant.outbox_claim_ref,
+        primary_authority_ref=grant.primary_authority_ref,
+    )
 
 
 def _settle(
+    dsn: str,
     delivery: PostgresEffectDelivery,
     *,
     lease: EffectOutboxLease,
     outcome: AcknowledgedEffect | FailedEffect,
     authority: EffectSettlementAuthority | None = None,
 ):
+    granted = _grant_authority(dsn, delivery, lease)
     return delivery.settle_outbox(
         lease=lease,
         outcome=outcome,
-        authority=authority or _authority(),
+        authority=authority or granted,
     )
+
+
+def test_durable_payload_write_is_hash_bound_replay_safe_and_private(
+    postgres_effect_dsn: str,
+) -> None:
+    store = PostgresEffectPayloadStore(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+    )
+    payload = b'{"schema_version":"email-notification.v1","subject":"hello"}'
+    first = store.write(
+        payload_ref="effect-payload:work-effect-1:email",
+        payload=payload,
+        writer_ref="work-coordinator:effect-test",
+    )
+    replay = store.write(
+        payload_ref=first.payload_ref,
+        payload=payload,
+        writer_ref="work-coordinator:effect-test",
+    )
+
+    assert replay == first
+    assert first.byte_size == len(payload)
+    assert store.read(first.payload_ref) == payload
+    with pytest.raises(EffectPayloadConflict, match="original bytes"):
+        store.write(
+            payload_ref=first.payload_ref,
+            payload=b"different",
+            writer_ref="work-coordinator:effect-test",
+        )
+
+    with _worker_connection(postgres_effect_dsn) as connection:
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                "SELECT payload_bytes FROM volpred_ops.effect_payloads"
+            ).fetchall()
+        connection.rollback()
+        connection.execute("SET ROLE volpred_ops_worker")
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                "SELECT * FROM volpred_ops.effect_payload_reads"
+            ).fetchall()
+
+
+def test_effect_request_requires_matching_durable_payload(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    payload = b"durable effect body"
+    payload_store = PostgresEffectPayloadStore(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+    )
+    view = payload_store.write(
+        payload_ref="effect-payload:work-effect-1:telegram",
+        payload=payload,
+        writer_ref="work-coordinator:effect-test",
+    )
+    request = _request(
+        payload_ref=view.payload_ref,
+        payload_sha256=view.payload_sha256,
+    )
+
+    assert _delivery(postgres_effect_dsn).request(request).payload_ref == (
+        view.payload_ref
+    )
+
+    _seed_work(postgres_effect_dsn, work_id="work-effect-2")
+    with pytest.raises(ValueError, match="durable bytes"):
+        _delivery(
+            postgres_effect_dsn,
+            effect_id="effect-postgres-2",
+        ).request(
+            replace(
+                request,
+                idempotency_key="effect:work-effect-2:telegram",
+                work_item_id="work-effect-2",
+                payload_sha256="0" * 64,
+            )
+        )
+
+
+def test_primary_authority_fences_concurrent_and_stale_holders(
+    postgres_effect_dsn: str,
+) -> None:
+    first = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-token-a",
+    )
+    second = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-token-b",
+    )
+    request = AuthorityRequest(
+        authority_key="operations-core-effects",
+        holder_ref="host:primary-a",
+        lease_seconds=300,
+    )
+    lease = first.acquire(request)
+    replay = first.acquire(request)
+    assert replay == lease
+    assert lease.epoch == 1
+    assert "primary-token-a" not in repr(
+        first.authorize(
+            WriteIntent(
+                authority_key=lease.authority_key,
+                holder_ref=lease.holder_ref,
+                epoch=lease.epoch,
+                fencing_token=lease.fencing_token,
+                request_sha256="e" * 64,
+                resource_ref="changeset:shadow-1",
+            )
+        )
+    )
+
+    with pytest.raises(ValueError, match="already held"):
+        second.acquire(replace(request, holder_ref="host:primary-b"))
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute(
+            """
+            UPDATE volpred_ops.primary_authority_leases
+            SET acquired_at = clock_timestamp() - interval '2 seconds',
+                lease_expires_at =
+                  clock_timestamp() - interval '1 second'
+            WHERE authority_key = %s
+            """,
+            (lease.authority_key,),
+        )
+    replacement = second.acquire(
+        replace(request, holder_ref="host:primary-b")
+    )
+    assert replacement.epoch == 2
+    with pytest.raises(ValueError, match="lease lost|epoch mismatch"):
+        first.authorize(
+            WriteIntent(
+                authority_key=lease.authority_key,
+                holder_ref=lease.holder_ref,
+                epoch=lease.epoch,
+                fencing_token=lease.fencing_token,
+                request_sha256="f" * 64,
+                resource_ref="changeset:stale",
+            )
+        )
+
+    receipt = second.release(replacement)
+    assert receipt.epoch == 2
+    assert second.release(replacement) == receipt
 
 
 def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
@@ -666,6 +993,7 @@ def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
     assert lease is not None
 
     receipt = _settle(
+        postgres_effect_dsn,
         delivery,
         lease=lease,
         outcome=_acknowledged(),
@@ -675,6 +1003,7 @@ def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
         token="unused-replay-token",
     )
     replay = _settle(
+        postgres_effect_dsn,
         replay_delivery,
         lease=lease,
         outcome=_acknowledged(),
@@ -696,11 +1025,13 @@ def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
     assert replay == receipt
     assert receipt.disposition == "delivered"
     assert receipt.acknowledgement == _acknowledged().acknowledgement
-    assert receipt.authority_request_sha256 == "d" * 64
+    assert receipt.authority_request_sha256 is not None
     assert receipt.outbox_claim_ref == (
-        "effect-outbox:effect-postgres-1:attempt"
+        "effect-outbox:1:attempt-1"
     )
-    assert receipt.primary_authority_ref == "primary-authority:epoch-42"
+    assert receipt.primary_authority_ref == (
+        "primary-authority:operations-core-effects:epoch-1"
+    )
     assert receipt.retry_at is None
     assert delivery.inspect(effect.id).status == "delivered"
     assert delivery.claim_outbox(
@@ -709,6 +1040,32 @@ def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
     ) is None
     assert outbox == ("delivered", None, None, None)
     assert receipt_count == 1
+
+
+def test_settlement_without_durable_authority_grant_is_rejected(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    delivery = _delivery(postgres_effect_dsn)
+    delivery.request(_request())
+    lease = delivery.claim_outbox(
+        worker_id="effect-worker",
+        lease_seconds=300,
+    )
+    assert lease is not None
+
+    with pytest.raises(ValueError, match="authority grant is missing"):
+        delivery.settle_outbox(
+            lease=lease,
+            outcome=_acknowledged(),
+            authority=EffectSettlementAuthority(
+                request_sha256="d" * 64,
+                outbox_claim_ref="effect-outbox:1:attempt-1",
+                primary_authority_ref=(
+                    "primary-authority:operations-core-effects:epoch-1"
+                ),
+            ),
+        )
 
 
 def test_concurrent_equivalent_settlement_returns_one_immutable_receipt(
@@ -728,6 +1085,7 @@ def test_concurrent_equivalent_settlement_returns_one_immutable_receipt(
         receipts = tuple(
             executor.map(
                 lambda item: _settle(
+                    postgres_effect_dsn,
                     item,
                     lease=lease,
                     outcome=_acknowledged(),
@@ -755,6 +1113,7 @@ def test_acknowledgement_mismatch_rolls_back_before_terminal_state(
 
     with pytest.raises(ValueError, match="acknowledgement mismatch"):
         _settle(
+            postgres_effect_dsn,
             delivery,
             lease=lease,
             outcome=_acknowledged(
@@ -791,6 +1150,7 @@ def test_retryable_failure_uses_database_backoff_and_fences_stale_claim(
     assert first_lease is not None
 
     first_receipt = _settle(
+        postgres_effect_dsn,
         delivery,
         lease=first_lease,
         outcome=_failed(),
@@ -822,6 +1182,7 @@ def test_retryable_failure_uses_database_backoff_and_fences_stale_claim(
     assert second_lease.attempt_count == 2
 
     replay = _settle(
+        postgres_effect_dsn,
         delivery,
         lease=first_lease,
         outcome=_failed(),
@@ -829,21 +1190,31 @@ def test_retryable_failure_uses_database_backoff_and_fences_stale_claim(
     assert replay == first_receipt
     with pytest.raises(ValueError, match="original outcome"):
         _settle(
+            postgres_effect_dsn,
             delivery,
             lease=first_lease,
             outcome=_failed(),
-            authority=_authority(primary_authority_ref="primary-authority:wrong"),
+            authority=replace(
+                _grant_authority(
+                    postgres_effect_dsn,
+                    delivery,
+                    first_lease,
+                ),
+                primary_authority_ref="primary-authority:wrong",
+            ),
         )
     with pytest.raises(ValueError, match="original outcome"):
         _settle(
+            postgres_effect_dsn,
             delivery,
             lease=first_lease,
             outcome=_failed(evidence_sha256="d" * 64),
         )
 
     stale_second = replace(second_lease, token=first_lease.token)
-    with pytest.raises(ValueError, match="token mismatch"):
+    with pytest.raises(EffectWorkerBlocked, match="outbox claim is stale"):
         _settle(
+            postgres_effect_dsn,
             second_delivery,
             lease=stale_second,
             outcome=_failed(),
@@ -866,8 +1237,13 @@ def test_expired_claim_cannot_settle_before_recovery(
             """
         )
 
-    with pytest.raises(ValueError, match="lease expired"):
-        _settle(delivery, lease=lease, outcome=_acknowledged())
+    with pytest.raises(EffectWorkerBlocked, match="outbox claim is stale"):
+        _settle(
+            postgres_effect_dsn,
+            delivery,
+            lease=lease,
+            outcome=_acknowledged(),
+        )
 
     recovered = _delivery(
         postgres_effect_dsn,
@@ -887,6 +1263,7 @@ def test_terminal_failure_dead_letters_without_another_claim(
     assert lease is not None
 
     receipt = _settle(
+        postgres_effect_dsn,
         delivery,
         lease=lease,
         outcome=_failed(
@@ -922,6 +1299,7 @@ def test_retry_exhaustion_dead_letters_on_fifth_attempt(
         assert lease is not None
         assert lease.attempt_count == attempt
         final_receipt = _settle(
+            postgres_effect_dsn,
             delivery,
             lease=lease,
             outcome=_failed(
@@ -992,6 +1370,7 @@ def test_settlement_failure_rolls_back_attempt_receipt_and_state(
             match="terminal update failure",
         ):
             _settle(
+                postgres_effect_dsn,
                 delivery,
                 lease=lease,
                 outcome=_acknowledged(),
@@ -1029,7 +1408,12 @@ def test_worker_cannot_mutate_attempt_receipts_or_read_token_digest(
     delivery.request(_request())
     lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
     assert lease is not None
-    _settle(delivery, lease=lease, outcome=_acknowledged())
+    _settle(
+        postgres_effect_dsn,
+        delivery,
+        lease=lease,
+        outcome=_acknowledged(),
+    )
 
     with _worker_connection(postgres_effect_dsn) as connection:
         with pytest.raises(psycopg.errors.InsufficientPrivilege):

@@ -319,6 +319,37 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   Work Coordinator 正式 caller 或 production ownership transaction；shadow 使用顯式
   authority grant 驗證 worker-side contract，不得宣稱 notification ownership 已切換。
 
+### 2026-07-24 durable payload／Primary Authority checkpoint
+
+- `PostgresEffectPayloadStore` 透過 private named functions 寫入 immutable payload
+  bytes；資料庫重算 SHA-256，既有 ref 只能等價 replay。worker 在 provider 前再次
+  重算 hash，任何 storage drift 都以 terminal
+  `effect_payload_integrity_mismatch` settlement，provider 不會被呼叫。
+- `PostgresAuthorityStore` 以 database clock 取得／續租／釋放 Primary Authority
+  lease，epoch 單調遞增，raw fencing token 只以 SHA-256 保存。
+  `PostgresEffectAuthority.authorize` 在單一 database function 內同時鎖定並核對
+  Primary Authority lease 與 exact outbox claim，綁定 EffectRequest、WorkItem、
+  payload、provider contract 與 acknowledgement identity。
+- Database-issued effect grant 是 settlement 的必要前置證據；trigger 會拒絕不存在、
+  已漂移或屬於另一個 attempt 的 authority refs。這取代先前「任意非空 reference」
+  就能 settlement 的假 authority seam。
+- 新 private tables 全部 FORCE RLS；SECURITY DEFINER functions 固定 `search_path`、
+  revoke PUBLIC、由 no-login definer 擁有，worker 只取得所需 named functions。
+  Immutable payload trigger 不再使用 `FOR KEY SHARE`：在 FORCE RLS 下那會額外要求
+  UPDATE policy，使 SELECT-only definer 產生假 `unknown payload`；payload 不可更新，
+  因此移除 row lock 才是正確 contract。
+- Canonical migration 在本機 PostgreSQL 17 non-superuser fixture 重播兩次；
+  Supabase migration API 的 remote receipt
+  `20260723230547 operations_core_effect_payload_primary_authority` 由同名 no-op local
+  receipt stub 對齊，較晚的 canonical migration 保持完整且冪等供乾淨環境使用。
+  Live read-back 確認五表 FORCE RLS、最小 grants、definer owner／fixed search path
+  與兩個 index；`volpred_ops` security advisor 0 lint，performance advisor 只有
+  10 個 unused-index INFO。既有八筆舊 migration-history drift 未做 repair。
+- Payload／authority 具體 seam 已完成底層修復、PG17 回歸、live read-back 與制度化；
+  但尚無正式 Work Coordinator caller、production ownership transaction、
+  unique-owner acknowledgement read-back 或 rollback rehearsal，所以 program commit
+  13／notification ownership 仍是 `contained`。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

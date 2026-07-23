@@ -64,6 +64,9 @@ class EffectProvider(Protocol):
 @dataclass(frozen=True)
 class EffectWorkerCommand:
     worker_id: str
+    primary_authority_key: str
+    primary_authority_holder_ref: str
+    primary_authority_epoch: int
     primary_fencing_token: str
     lease_seconds: int
 
@@ -80,6 +83,9 @@ class EffectAuthorityRequest:
     outbox_claim_token: str
     outbox_claim_expires_at: str
     worker_id: str
+    primary_authority_key: str
+    primary_authority_holder_ref: str
+    primary_authority_epoch: int
     primary_fencing_token: str
     effect_kind: str
     target_ref: str
@@ -187,14 +193,21 @@ class EffectOutboxWorker:
                 retryable=True,
             )
         else:
-            try:
-                outcome = self._provider.deliver(effect, payload)
-            except Exception:  # noqa: BLE001 - provider errors become retry evidence.
+            if hashlib.sha256(payload).hexdigest() != effect.payload_sha256:
                 outcome = _worker_failure(
                     effect,
-                    reason_code="effect_provider_error",
-                    retryable=True,
+                    reason_code="effect_payload_integrity_mismatch",
+                    retryable=False,
                 )
+            else:
+                try:
+                    outcome = self._provider.deliver(effect, payload)
+                except Exception:  # noqa: BLE001 - adapter errors become evidence.
+                    outcome = _worker_failure(
+                        effect,
+                        reason_code="effect_provider_error",
+                        retryable=True,
+                    )
 
         authority_evidence = EffectSettlementAuthority(
             request_sha256=authority_grant.request_sha256,
@@ -244,6 +257,20 @@ def _normalize_command(command: EffectWorkerCommand) -> EffectWorkerCommand:
     if not isinstance(command, EffectWorkerCommand):
         raise TypeError("effect worker command is required")
     worker_id = _required_text(command.worker_id, field="effect worker_id")
+    primary_authority_key = _required_text(
+        command.primary_authority_key,
+        field="Primary Authority key",
+    )
+    primary_authority_holder_ref = _required_text(
+        command.primary_authority_holder_ref,
+        field="Primary Authority holder_ref",
+    )
+    if (
+        isinstance(command.primary_authority_epoch, bool)
+        or not isinstance(command.primary_authority_epoch, int)
+        or command.primary_authority_epoch <= 0
+    ):
+        raise ValueError("Primary Authority epoch must be positive")
     primary_fencing_token = _required_text(
         command.primary_fencing_token,
         field="Primary Authority fencing token",
@@ -256,6 +283,9 @@ def _normalize_command(command: EffectWorkerCommand) -> EffectWorkerCommand:
         raise ValueError("effect worker lease_seconds must be positive")
     return EffectWorkerCommand(
         worker_id=worker_id,
+        primary_authority_key=primary_authority_key,
+        primary_authority_holder_ref=primary_authority_holder_ref,
+        primary_authority_epoch=command.primary_authority_epoch,
         primary_fencing_token=primary_fencing_token,
         lease_seconds=command.lease_seconds,
     )
@@ -278,6 +308,9 @@ def _authority_request(
         "outbox_claim_token": lease.token,
         "outbox_claim_expires_at": lease.expires_at,
         "worker_id": command.worker_id,
+        "primary_authority_key": command.primary_authority_key,
+        "primary_authority_holder_ref": command.primary_authority_holder_ref,
+        "primary_authority_epoch": command.primary_authority_epoch,
         "primary_fencing_token": command.primary_fencing_token,
         "effect_kind": effect.effect_kind,
         "target_ref": effect.target_ref,
@@ -303,6 +336,9 @@ def _authority_request(
         outbox_claim_token=lease.token,
         outbox_claim_expires_at=lease.expires_at,
         worker_id=command.worker_id,
+        primary_authority_key=command.primary_authority_key,
+        primary_authority_holder_ref=command.primary_authority_holder_ref,
+        primary_authority_epoch=command.primary_authority_epoch,
         primary_fencing_token=command.primary_fencing_token,
         effect_kind=effect.effect_kind,
         target_ref=effect.target_ref,

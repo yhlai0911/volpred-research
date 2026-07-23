@@ -164,6 +164,23 @@ Message-ID email、由 Gmail Sent Mail 回讀 exact bytes、settlement 並從 pr
 Authority adapter、durable payload writer、正式 Work Coordinator caller 與 ownership
 transaction，故 program commit 13／notification ownership 整體仍是 `contained`。
 
+同日 follow-up 已加入 live-shaped `PostgresEffectPayloadStore`、
+`PostgresAuthorityStore` 與 `PostgresEffectAuthority`。Payload bytes 由 private
+named functions immutable 保存並由資料庫綁 SHA-256，worker 在 provider 前再次驗證；
+Primary Authority 以 database clock、epoch 與 hashed fencing token 管 lease，effect
+grant 則原子核對 exact outbox claim／EffectRequest／WorkItem／payload／ack identity。
+Settlement trigger 只接受資料庫已簽發的 matching grant。五張新表全數 FORCE RLS，
+definer functions 固定 `search_path`、revoke PUBLIC 並以 no-login owner 與最小 worker
+grants 隔離。Supabase migration receipt
+`20260723230547 operations_core_effect_payload_primary_authority` 已用同名 local receipt
+stub 對齊；較晚 canonical migration 可在乾淨 PostgreSQL 17 環境重播兩次。Live
+read-back 證實五表、privileges、function ownership／search path 與兩個 index 正確，
+`volpred_ops` security advisor 0 lint，performance advisor 只有 10 個 INFO。既有八筆
+舊 migration-history drift 未被 repair。Payload／authority seam 的具體缺口已完成
+五步 gate；但正式 Work Coordinator caller、production ownership transaction、
+unique-owner acknowledgement 與 rollback rehearsal 尚缺，program commit 13 整體仍是
+`contained`。
+
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
 Phase 1 現行修復的 canonical implementation ledger。原版、v3 與全部既有 skills 在

@@ -1,0 +1,8 @@
+-- Remote receipt counterpart for the migration applied through the Supabase
+-- migration API as version 20260723230547.
+--
+-- This file is intentionally a no-op because its remote timestamp precedes
+-- the local filenames of the operations-core migrations it depends on. The
+-- idempotent canonical forward migration remains at
+-- 20260724060000_operations_core_effect_payload_primary_authority.sql so a
+-- clean local replay applies the schema only after those dependencies exist.

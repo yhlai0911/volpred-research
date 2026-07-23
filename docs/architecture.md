@@ -129,6 +129,29 @@
 > foreign-key index 缺口也已 migration 修正並複驗消失。這是 live shadow evidence，
 > 不是 ownership cutover：live Primary Authority adapter、durable payload writer、
 > Work Coordinator 正式 caller 與既有 notification／publisher owner 移交仍未完成。
+>
+> program commit 13 的下一個 follow-up 已把前兩個缺口落成 private PostgreSQL
+> adapters。`PostgresEffectPayloadStore` 透過 named function 寫入 immutable bytes，
+> 由資料庫重算並綁定 SHA-256；worker 在 provider 呼叫前會獨立重算 hash，payload
+> 漂移即 terminal fail closed。`PostgresAuthorityStore` 以 database clock 管理
+> Primary Authority lease／epoch／token hash，`PostgresEffectAuthority` 則在同一個
+> database function 內核對 exact outbox claim、EffectRequest、WorkItem、payload、
+> acknowledgement 與 Primary Authority lease，發出只含 token-redacted references
+> 的 durable grant。Settlement trigger 只接受資料庫已簽發且 identity 完全相符的
+> grant，不能再靠任意非空字串偽造 authority evidence。
+>
+> 新 private tables 全部 FORCE RLS；SECURITY DEFINER functions 固定 `search_path`、
+> revoke PUBLIC 並採 no-login definer ownership／最小 worker grants。對應 migration
+> 已由 Supabase migration API 套用，remote receipt
+> `20260723230547 operations_core_effect_payload_primary_authority` 以同名 local
+> receipt stub 對齊；乾淨環境由較晚、可重播且冪等的 canonical migration 建立 schema。
+> Live PostgreSQL 17 回讀確認五表 FORCE RLS、匿名／authenticated 無 payload 或
+> authorize 權限、worker 僅有必要 named-function 權限、兩個預期 index 存在；
+> `volpred_ops` security advisor 為 0 lint，performance advisor 只有 10 個
+> shadow-table unused-index INFO。既有八筆舊 migration-history drift 未做 repair，
+> 不屬於本切片。仍未完成正式 Work Coordinator caller、production ownership
+> transaction、unique-owner read-back 與 rollback rehearsal，所以整體仍是
+> `contained`。
 
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。
