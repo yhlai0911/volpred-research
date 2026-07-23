@@ -18,6 +18,7 @@ if str(ROOT / "src") not in sys.path:
 from volpred.ops.task_pool_mode import (  # noqa: E402
     enter_direct_execution_mode,
     load_task_pool_mode,
+    load_task_pool_mode_evidence,
     reconcile_direct_execution_pool,
     restore_task_pool_backup,
 )
@@ -37,6 +38,25 @@ def _paths(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--state", type=Path, default=DEFAULT_STATE)
 
 
+def _expected_state_sha256(value: str) -> str | None:
+    if value == "absent":
+        return None
+    if len(value) != 64 or any(ch not in "0123456789abcdef" for ch in value):
+        raise argparse.ArgumentTypeError(
+            "expected state identity must be 'absent' or 64 lowercase hex characters"
+        )
+    return value
+
+
+def _cas_argument(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--expected-state-sha256",
+        required=True,
+        type=_expected_state_sha256,
+        help="state SHA from status, or 'absent' when no state file exists",
+    )
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -46,6 +66,7 @@ def _parser() -> argparse.ArgumentParser:
         help="verify an exact backup, close admission, and clear the queue",
     )
     _paths(enter)
+    _cas_argument(enter)
     enter.add_argument("--backup-dir", type=Path, default=DEFAULT_BACKUP_DIR)
     enter.add_argument("--actor", required=True)
     enter.add_argument("--reason", required=True)
@@ -60,6 +81,7 @@ def _parser() -> argparse.ArgumentParser:
         help="remove rows outside the active direct-mode preserve receipt",
     )
     _paths(reconcile)
+    _cas_argument(reconcile)
     reconcile.add_argument("--actor", required=True)
     reconcile.add_argument("--reason", required=True)
     reconcile.add_argument("--now", default=None, help=argparse.SUPPRESS)
@@ -69,6 +91,7 @@ def _parser() -> argparse.ArgumentParser:
         help="restore the active verified backup when the live queue is empty",
     )
     _paths(restore)
+    _cas_argument(restore)
     restore.add_argument("--backup", type=Path, required=True)
     restore.add_argument("--actor", required=True)
     restore.add_argument("--reason", required=True)
@@ -110,6 +133,7 @@ def main(argv: list[str] | None = None) -> int:
             activated_by=args.actor,
             reason=args.reason,
             preserve_task_ids=args.preserve_task_id,
+            expected_state_sha256=args.expected_state_sha256,
             now=args.now or _now(),
         )
         print(json.dumps({"ok": True, **asdict(receipt)}, ensure_ascii=False, indent=2))
@@ -120,6 +144,7 @@ def main(argv: list[str] | None = None) -> int:
             state_path=args.state,
             reconciled_by=args.actor,
             reason=args.reason,
+            expected_state_sha256=args.expected_state_sha256,
             now=args.now or _now(),
         )
         print(json.dumps({"ok": True, **asdict(receipt)}, ensure_ascii=False, indent=2))
@@ -131,16 +156,31 @@ def main(argv: list[str] | None = None) -> int:
             backup_path=args.backup,
             restored_by=args.actor,
             reason=args.reason,
+            expected_state_sha256=args.expected_state_sha256,
             now=args.now or _now(),
         )
         print(json.dumps({"ok": True, **asdict(receipt)}, ensure_ascii=False, indent=2))
         return 0
 
-    mode = load_task_pool_mode(args.state)
+    if args.state.exists():
+        evidence = load_task_pool_mode_evidence(args.state)
+        mode = evidence.mode
+        state_sha256: str | None = evidence.sha256
+        state_bytes = evidence.byte_count
+    else:
+        mode = load_task_pool_mode(args.state)
+        state_sha256 = None
+        state_bytes = 0
     snapshot = _queue_snapshot(args.queue)
     print(
         json.dumps(
-            {"ok": True, **snapshot, "mode": asdict(mode)},
+            {
+                "ok": True,
+                **snapshot,
+                "state_sha256": state_sha256,
+                "state_bytes": state_bytes,
+                "mode": asdict(mode),
+            },
             ensure_ascii=False,
             indent=2,
         )

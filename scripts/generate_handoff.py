@@ -448,7 +448,9 @@ def build() -> str:
     if direct_mode and snap["pending_top"]:
         lines.append(
             "> 以下 row 只供 drift 對帳；禁止 claim。先執行 "
-            "`task_pool_control.py reconcile-direct`，再回讀 status。"
+            "`task_pool_control.py status` 取得 state_sha256，再以 "
+            "`task_pool_control.py reconcile-direct --expected-state-sha256 <SHA>` "
+            "收斂並回讀 status。"
         )
         for t in snap["pending_top"]:
             lines.append(_format_task_line(t))
@@ -518,10 +520,13 @@ def build() -> str:
         if direct_mode_drift and direct_mode_drift["breached"]:
             lines.append(
                 "     §1 若標示 RECEIPT BREACHED：禁止 claim；以 "
-                "`task_pool_control.py reconcile-direct` 收斂後再次回讀 status。"
+                "`task_pool_control.py reconcile-direct "
+                "--expected-state-sha256 <status.state_sha256>` "
+                "收斂後再次回讀 status。"
             )
         lines.append(
             "  4. 回復舊池只准用 receipt 綁定的 `task_pool_control.py restore`，"
+            "必須傳 `--expected-state-sha256 <status.state_sha256>`，"
             "且 live pool 必須為空。"
         )
     else:

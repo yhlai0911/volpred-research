@@ -916,3 +916,46 @@ rehearsal，所以 Issue #9 仍為 **contained**；七日真實 receipts 完成�
 Standards／Spec 雙軸均 PASS（0 findings），135 個 targeted regressions 通過；但
 live read-back 仍是 `mode=direct_execution`、`observation_count=0`、
 `ready_for_cutover=false`，所以七日證據與正式 cutover gate 尚未達成。
+
+### 2026-07-23 22:05 — task-pool owner mutation 在鎖外讀 state，過期程序可覆寫較新 transition — root_cause_fixed_and_verified
+
+**症狀與證據**：`restore_task_pool_backup()` 與
+`reconcile_direct_execution_pool()` 先在 queue lock 外讀
+`task_pool_mode.json`，之後才取得 `next_tasks.json` 的 `LOCK_EX`；`enter-direct`
+也沒有 expected owner identity。若另一個 operator／process 在兩者之間完成 owner
+transition，舊程序仍可依過期 preserve set 清 row，或把較新的 owner state 改回
+`queued_execution`。既有 backup SHA 只驗 backup 內容，沒有證明 mutation 仍針對
+caller 最初讀到的 owner generation。Matt 首輪 review 另實證兩個同層缺口：
+使用 active direct-mode 的**最新** SHA 重跑 `enter-direct` 仍會用已清空 queue
+替換原始 rollback receipt；missing queue 的 enter／restore 則會在 CAS 前建立 `[]`，
+把「canonical 遺失」靜默改寫成「合法空池」。
+
+**根因層級與底層修復**：owner state 缺少 compare-and-set contract。現在
+`task_pool_control.py status` 從同一份 state bytes 回傳 `state_sha256` 與 byte count；
+`enter-direct`、`reconcile-direct`、`restore` 都強制要求
+`--expected-state-sha256`（首次無 state 必須顯式傳 `absent`）。三個 mutation 在
+queue `LOCK_EX` 內、任何 backup／clear／restore side effect 前重新讀同一份 state
+bytes 並比對 SHA；不一致拋出 typed `TaskPoolModeConflict`，queue、backup 與 owner
+state 保持不變。`enter-direct` 的合法 source transition 另固定為 state absent，或
+`enabled=false, mode=queued_execution`；active direct／未知或不一致 mode 即使 SHA
+最新也拒絕。enter／restore 遇 missing queue 會先核對 CAS identity，再 fail closed，
+不建立 parent directory 或 queue。
+
+**回歸、回讀與制度化**：public function／operator CLI tests 覆蓋 stale restore、
+stale reconcile、stale enter、missing-queue no-materialization、fresh-SHA direct
+reentry 不可替換 receipt且原 backup 仍可 restore，以及 status CAS identity；既有 exact-byte backup、
+admission deny、lifecycle、reconcile 與 restore regression 同時通過。live read-only
+`status` 回讀目前 owner state SHA-256
+`45aa8ca239f8b33fd6790e6a022d2277e44491e01c1581101082119e71d630b4`、
+mode=`direct_execution`、pool_count=1。canonical `docs/architecture.md`、
+`docs/quick-commands.md` 與自動 handoff 已改成先讀 SHA、再 mutation，舊的無 CAS
+命令不再被產生。
+
+**Issue #9 界線**：這個 stale-owner race 已完成五步 gate；但跨 JSON/state 的
+crash-atomic restore、七日 receipts、Work Coordinator 正式 ownership transaction、
+legacy read-only projection 與 rollback rehearsal 仍未完成，所以 Issue #9 整體
+維持 **contained**。最終 Matt Standards／Spec 雙軸 review 均 PASS（0 P1／P2）；
+direct-mode／claim／handoff／shadow assessment／replay targeted suite 142 passed。
+完整 suite 為 4,630 passed、1 skipped、3 failed；三項均為 direct-mode 清池後已知的
+相鄰狀態（兩個 urgent-task fixture 洩漏 live mode、兩個 roadmap P1 缺 backing task），
+未以本修正掩蓋。

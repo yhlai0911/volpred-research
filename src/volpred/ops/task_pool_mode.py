@@ -25,6 +25,10 @@ class TaskPoolAdmissionClosed(RuntimeError):
     """A write tried to admit new work while the legacy pool is suspended."""
 
 
+class TaskPoolModeConflict(RuntimeError):
+    """The queue owner state changed before a requested transition committed."""
+
+
 @dataclass(frozen=True)
 class TaskPoolMode:
     enabled: bool
@@ -164,6 +168,26 @@ def load_task_pool_mode_evidence(
     )
 
 
+def _load_expected_mode_evidence(
+    state_path: Path,
+    *,
+    expected_state_sha256: str,
+) -> TaskPoolModeEvidence:
+    if not isinstance(expected_state_sha256, str) or not all(
+        ch in "0123456789abcdef" for ch in expected_state_sha256
+    ) or len(expected_state_sha256) != 64:
+        raise ValueError(
+            "expected_state_sha256 must be 64 lowercase hexadecimal characters"
+        )
+    evidence = load_task_pool_mode_evidence(state_path)
+    if evidence.sha256 != expected_state_sha256:
+        raise TaskPoolModeConflict(
+            "task-pool owner compare-and-set failed: "
+            f"expected {expected_state_sha256}, observed {evidence.sha256}"
+        )
+    return evidence
+
+
 def _task_ids(rows: Iterable[Any]) -> tuple[set[str], int]:
     ids: set[str] = set()
     anonymous = 0
@@ -254,6 +278,7 @@ def enter_direct_execution_mode(
     activated_by: str,
     reason: str,
     preserve_task_ids: Iterable[str] = (),
+    expected_state_sha256: str | None,
     now: str,
 ) -> DirectModeReceipt:
     """Back up exact queue bytes, enable admission denial, then clear the pool.
@@ -278,13 +303,43 @@ def enter_direct_execution_mode(
     guard_canonical_write(queue)
     guard_canonical_write(state)
     guard_canonical_write(backups)
-    queue.parent.mkdir(parents=True, exist_ok=True)
     if not queue.exists():
-        queue.write_text("[]\n", encoding="utf-8")
+        if expected_state_sha256 is None:
+            if state.exists():
+                observed = load_task_pool_mode_evidence(state).sha256
+                raise TaskPoolModeConflict(
+                    "task-pool owner compare-and-set failed: "
+                    f"expected absent state, observed {observed}"
+                )
+        else:
+            _load_expected_mode_evidence(
+                state,
+                expected_state_sha256=expected_state_sha256,
+            )
+        raise ValueError("next_tasks queue does not exist")
 
     with queue.open("r+", encoding="utf-8") as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         try:
+            if expected_state_sha256 is None:
+                if state.exists():
+                    observed = load_task_pool_mode_evidence(state).sha256
+                    raise TaskPoolModeConflict(
+                        "task-pool owner compare-and-set failed: "
+                        f"expected absent state, observed {observed}"
+                    )
+            else:
+                evidence = _load_expected_mode_evidence(
+                    state,
+                    expected_state_sha256=expected_state_sha256,
+                )
+                source_mode = evidence.mode
+                if source_mode.enabled and source_mode.mode == "direct_execution":
+                    raise ValueError("task pool is already in direct-execution mode")
+                if source_mode.enabled or source_mode.mode != "queued_execution":
+                    raise ValueError(
+                        "enter-direct requires disabled queued-execution owner state"
+                    )
             original = queue.read_bytes()
             try:
                 tasks = json.loads(original.decode("utf-8"))
@@ -367,6 +422,7 @@ def reconcile_direct_execution_pool(
     state_path: str | Path,
     reconciled_by: str,
     reason: str,
+    expected_state_sha256: str,
     now: str,
 ) -> DirectModeReconcileReceipt:
     """Remove rows outside the active direct-mode receipt's preserve set.
@@ -381,9 +437,6 @@ def reconcile_direct_execution_pool(
     state = Path(state_path)
     actor = _validate_identity(reconciled_by, field="reconciled_by")
     rationale = _validate_identity(reason, field="reason")
-    mode = load_task_pool_mode(state)
-    if not mode.enabled or mode.mode != "direct_execution":
-        raise ValueError("task pool is not in direct-execution mode")
 
     guard_canonical_write(queue)
     if not queue.exists():
@@ -391,10 +444,17 @@ def reconcile_direct_execution_pool(
 
     retained: list[Any] = []
     removed_ids: list[str] = []
-    preserve = set(mode.preserve_task_ids)
     with queue.open("r+", encoding="utf-8") as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         try:
+            evidence = _load_expected_mode_evidence(
+                state,
+                expected_state_sha256=expected_state_sha256,
+            )
+            mode = evidence.mode
+            if not mode.enabled or mode.mode != "direct_execution":
+                raise ValueError("task pool is not in direct-execution mode")
+            preserve = set(mode.preserve_task_ids)
             raw = handle.read()
             try:
                 tasks = json.loads(raw) if raw.strip() else []
@@ -443,6 +503,7 @@ def restore_task_pool_backup(
     backup_path: str | Path,
     restored_by: str,
     reason: str,
+    expected_state_sha256: str,
     now: str,
 ) -> RestoreReceipt:
     """Restore the verified cutover backup when the live pool is empty."""
@@ -452,29 +513,43 @@ def restore_task_pool_backup(
     backup = Path(backup_path)
     actor = _validate_identity(restored_by, field="restored_by")
     rationale = _validate_identity(reason, field="reason")
-    mode = load_task_pool_mode(state)
-    if not mode.enabled or mode.mode != "direct_execution":
-        raise ValueError("task pool is not in direct-execution mode")
-    if mode.backup_path is None or backup.resolve() != Path(mode.backup_path).resolve():
-        raise ValueError("backup path does not match the active direct-mode receipt")
-    payload = backup.read_bytes()
-    digest = hashlib.sha256(payload).hexdigest()
-    if digest != mode.backup_sha256:
-        raise ValueError("backup sha256 does not match the active direct-mode receipt")
-    try:
-        restored = json.loads(payload.decode("utf-8"))
-    except (UnicodeError, json.JSONDecodeError) as exc:
-        raise ValueError(f"backup is unreadable: {exc}") from exc
-    if not isinstance(restored, list):
-        raise ValueError("backup root must be a list")
 
     guard_canonical_write(queue)
-    queue.parent.mkdir(parents=True, exist_ok=True)
     if not queue.exists():
-        queue.write_text("[]\n", encoding="utf-8")
+        _load_expected_mode_evidence(
+            state,
+            expected_state_sha256=expected_state_sha256,
+        )
+        raise ValueError("next_tasks queue does not exist")
     with queue.open("r+", encoding="utf-8") as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         try:
+            evidence = _load_expected_mode_evidence(
+                state,
+                expected_state_sha256=expected_state_sha256,
+            )
+            mode = evidence.mode
+            if not mode.enabled or mode.mode != "direct_execution":
+                raise ValueError("task pool is not in direct-execution mode")
+            if (
+                mode.backup_path is None
+                or backup.resolve() != Path(mode.backup_path).resolve()
+            ):
+                raise ValueError(
+                    "backup path does not match the active direct-mode receipt"
+                )
+            payload = backup.read_bytes()
+            digest = hashlib.sha256(payload).hexdigest()
+            if digest != mode.backup_sha256:
+                raise ValueError(
+                    "backup sha256 does not match the active direct-mode receipt"
+                )
+            try:
+                restored = json.loads(payload.decode("utf-8"))
+            except (UnicodeError, json.JSONDecodeError) as exc:
+                raise ValueError(f"backup is unreadable: {exc}") from exc
+            if not isinstance(restored, list):
+                raise ValueError("backup root must be a list")
             current = json.load(handle)
             if not isinstance(current, list):
                 raise ValueError("next_tasks queue root must be a list")

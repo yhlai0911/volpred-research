@@ -11,7 +11,12 @@
 > `next_tasks` 最低寫入 seam 禁止新增 task id，`task_pool_claim.py claim` 同步
 > fail closed；既有 task 仍可 complete／移除。進入模式必先在同一把 queue lock
 > 內產生逐位元備份並 read-back，回復只能用 receipt 綁定的
-> `scripts/task_pool_control.py restore`，且 live pool 必須為空。這是 legacy pool
+> `scripts/task_pool_control.py restore`，且 live pool 必須為空。所有 owner mutation
+> 都必須先由 `status` 取得 `state_sha256`，再以 `--expected-state-sha256` 傳回；
+> transition 在 queue `LOCK_EX` 內對同一份 state bytes 做 compare-and-set，過期
+> operator／process 一律 fail closed；`enter-direct` 只接受 absent 或 disabled
+> `queued_execution` source state，不能用最新 SHA 重入並替換 rollback receipt。
+> canonical queue 缺失時也不會由 transition 自動 materialize 成合法空池。這是 legacy pool
 > 的可回復 containment，不代表 Work Coordinator／Change Delivery／殘留收斂已
 > 完成正式 ownership cutover；整體 Phase 1 仍依
 > `docs/platform_optimization_program_2026_07.md` 的 shadow 與七天 gate 推進。
