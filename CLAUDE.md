@@ -348,6 +348,11 @@ Context compaction 時，**優先保留**：
 
 本專案使用 GitHub Issues 追蹤工程工作。See `docs/agents/issue-tracker.md`.
 
+GitHub CLI 已安裝於 `/opt/homebrew/bin/gh`。非互動 shell 可能沒有
+`/opt/homebrew/bin`，因此 `gh: command not found` **不代表未安裝**：先跑
+`zsh -lic 'command -v gh'` 或直接使用 `/opt/homebrew/bin/gh`。只有固定路徑與 login
+shell 都確認不存在後才可討論安裝；禁止因 PATH 漏載而重裝或回報 CLI 不存在。
+
 ### Triage labels
 
 使用五個預設 triage roles 與同名 GitHub labels。See `docs/agents/triage-labels.md`.
