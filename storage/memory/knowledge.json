@@ -40897,21 +40897,49 @@
  {
   "item_id": "dc420984",
   "category": "research_methodology",
-  "content": "k1623 [CONDITIONAL_PASS]：識別 RV 表觀長記憶是真分數整合(ARFIMA, d∈(0,0.5))還是 level-shift 假象（Diebold-Inoue 2001），並測其 OOS 可交易性。資料：VIX/SPY/TW0050/QQQ/N225 daily Parkinson RV（VIX用(VIX/100)^2），樣本涵蓋2008-2026(依資產不同)。ELW估計 raw d̂ 全部顯著>0（0.50-0.72）；break-demean 後（Bai-Perron多斷點）仍顯著>0（BIC下界0.46-0.65），level-shift貢獻依資產夾擠[7%,63%]（VIX最低[11%,20%]、N225最高達63%）——純假象假說被拒絕，確有真long-memory成分。但OOS一步預測（最後750 obs）中，ARFIMA(0,d,0)與BreakRobustHAR皆未顯著勝樸素HAR（QQQ甚至ARFIMA顯著更差，t_HLN=2.47,p=0.014）。Codex review：無CRITICAL/HIGH finding。長記憶真實存在但不可交易，訊號已被HAR的multi-scale結構吸收。",
+  "content": "K1623 [PASS，主張已校正]：rev2/rev4 撤回「break-demean 後 d̂>0 即拒絕 Diebold–Inoue 隨機／密集 level-shift DGP」與「不可交易」兩項結論；現有結果只支持描述性的 residual persistence，且未做策略、成本或效用檢定。OOS 共 40 個 HAC-DM 比較；ARFIMA 對 HAR 的 QLIKE/MSE 點估排名在 3/5 資產反轉，但兩種 loss 下皆無顯著勝負；QQQ/QLIKE 僅一個名目顯著比較（p=0.0332），多重比較校正後不存活。500-rep、seed=42 的三臂 Monte Carlo 僅在「ARFIMA + 決定性斷點」DGP 下顯示 Arm-A 抽樣 sd 為已發表漸近 SE 的 1.21–1.33 倍；A−B 是 BIC 選整個斷點 partition（數量＋位置）的成本，B−C 是估分段均值相對 ELW 單一總均值 demeaning 的增量成本。f1/f2/f3 的描述性點估範圍分別為 1.043–1.195、1.058–1.188、1.010–1.101，但 500 reps 不足以識別逐資產主導通道（dominance_identified_at_500_reps=false）。此模擬不能檢定 Diebold–Inoue DGP；TW0050 因上游歷史修訂只能 near-replicate，非 exact replication。",
   "evidence": [
-   "experiments/k1623/k1623_results.json",
-   "experiments/k1623/README.md"
+   "experiments/k1623/k1623_rev2_results.json",
+   "experiments/k1623/k1623_rev3_armc_results.json",
+   "experiments/k1623/review_round5_codex_20260723.md"
   ],
-  "confidence": 0.85,
+  "confidence": 0.9,
   "created_at": "2026-07-04T00:00:00",
   "created_at_source": "file_mtime",
   "k_id": "K1623",
   "experiment_id": "k1623",
   "experiment_path": "experiments/k1623/",
-  "verdict": "CONDITIONAL_PASS",
+  "verdict": "PASS",
   "needs_human": false,
-  "gap": "",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "gap": "Identification against random/dense shift DGP remains untested; no tradability test was run.",
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "reviewer": "Codex CLI 0.144.6 / gpt-5.6-sol / xhigh / read-only (primary path), PASS, 2026-07-23",
+  "revisions": [
+   {
+    "revised_at": "2026-07-23T20:31:49.185496+08:00",
+    "actor": "codex-failover-slot-1-f990a22744a44d938ffd408b40b04487",
+    "reason": "K1623 rev4 primary Codex PASS: retract identification and tradability overclaims; align Monte Carlo attribution and 500-rep dominance limits with pinned results",
+    "fields": [
+     "confidence",
+     "content",
+     "evidence",
+     "gap",
+     "reviewer",
+     "verdict"
+    ],
+    "before": {
+     "verdict": "CONDITIONAL_PASS",
+     "confidence": 0.85,
+     "reviewer": null,
+     "evidence": [
+      "experiments/k1623/k1623_results.json",
+      "experiments/k1623/README.md"
+     ],
+     "gap": "",
+     "content": "k1623 [CONDITIONAL_PASS]：識別 RV 表觀長記憶是真分數整合(ARFIMA, d∈(0,0.5))還是 level-shift 假象（Diebold-Inoue 2001），並測其 OOS 可交易性。資料：VIX/SPY/TW0050/QQQ/N225 daily Parkinson RV（VIX用(VIX/100)^2），樣本涵蓋2008-2026(依資產不同)。ELW估計 raw d̂ 全部顯著>0（0.50-0.72）；break-demean 後（Bai-Perron多斷點）仍顯著>0（BIC下界0.46-0.65），level-shift貢獻依資產夾擠[7%,63%]（VIX最低[11%,20%]、N225最高達63%）——純假象假說被拒絕，確有真long-memory成分。但OOS一步預測（最後750 obs）中，ARFIMA(0,d,0)與BreakRobustHAR皆未顯著勝樸素HAR（QQQ甚至ARFIMA顯著更差，t_HLN=2.47,p=0.014）。Codex review：無CRITICAL/HIGH finding。長記憶真實存在但不可交易，訊號已被HAR的multi-scale結構吸收。"
+    }
+   }
+  ]
  },
  {
   "item_id": "ecb0885a",

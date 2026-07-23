@@ -53131,14 +53131,11 @@
     "description": "Codex primary-path review（round 3, 2026-07-22）判 FAIL — 3 個 blocking defects。\n完整 review: experiments/k1623/review_round3_codex_20260722.md\n機讀 verdict: experiments/k1623/review_verdict_round3.json\nReviewed commit: 2029296479e449fccb21804bba958570f346b218（branch worktree-dispatch-slot-2-c5cafe39-k1623，31/31 pin 已重驗相符）\n\nCodex 確認「沒問題」的部分（不要重做）：headline 1.21-1.33x SE 低估數字與 artifact 全對得上；無 RNG / reordering / parallelism / lookahead 缺陷；arm B-C 的 incremental 口徑正確。\n\n要修的 3 項：\n1. [設計層] arm A 重跑 BIC 同時選斷點「個數與位置」（k1623_rev3_armc_mc.py:170），arm B 固定整個 partition → A-B 與 f3 混合了 break-COUNT selection 與 break-LOCATION estimation，沒有隔離它宣稱的 break_location 通道。改名（連同 README + artifact 通道命名）或重新設計 arm A 讓兩者分開。\n2. [過度宣稱] 2/2/1 dominant-channel attribution 在 500 reps 下未識別：SPY 差 0.31%、N225 3.45%、TW0050 4.08%，而 crude MC SE 約 3.2%。「每個 individual factor 都 > 1」對接近 1.01 的 factor 同樣無支撐。降級為 descriptive point estimates + 明寫 dominance not identified at 500 reps。（比 collector 自記的更嚴：asset-dependent 分類本身要拿掉。）僅總量 1.21-1.33x 與噪音充分分離。\n3. [自相矛盾] README §1 line 77 仍寫「MC 只涵蓋斷點定位、不涵蓋段均值估計」，與 Arm C 及 §6.4 直接打架。\n\n收尾條件：修完後 bytes 改變 → experiments/k1623/review_verdict.json 的 31 個 pin 必須整份重簽，再送一次 Codex primary-path review（round 4）。round-3 未在 branch 上填模板即為此故（填了會立刻失效並製造已審假象）。branch 在 round-4 PASS 前禁止 merge。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "auto_discovered",
     "parent_task_id": "k1623_round3_codex_primary_review_gate",
     "created_by": "hourly-slot-2-bd8d693b0e93425997fe29ccde8f8102",
     "priority_capped_from": 1,
-    "claimed_by": "codex-failover-slot-1-f990a22744a44d938ffd408b40b04487",
-    "claimed_at": "2026-07-23T12:02:11.089769+00:00",
-    "claim_session_id": "9fffc40ac1d4",
     "status_history": [
       {
         "ts": "2026-07-23T12:02:11.089777+00:00",
@@ -53151,9 +53148,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-1-f990a22744a44d938ffd408b40b04487"
+      },
+      {
+        "ts": "2026-07-23T12:32:05.474039+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-f990a22744a44d938ffd408b40b04487"
       }
     ],
-    "started_at": "2026-07-23T12:02:14.473552+00:00"
+    "started_at": "2026-07-23T12:02:14.473552+00:00",
+    "completed_at": "2026-07-23T12:32:05.474026+00:00",
+    "result": "Round-5 primary Codex review PASS at frozen eb1a1fb71: 31/31 pins match; A-B/f3 now break-partition selection and 500-rep dominance is explicitly unidentified. Formal worktree merge completed; gates/cert/selfcheck passed and canonical K1623 knowledge entry was corrected."
   },
   {
     "id": "task_pool_awaiting_agent_job_state_gap",
