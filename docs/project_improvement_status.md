@@ -80,7 +80,8 @@ trusted wall clock 重跑 canonical 七日 assessment，並從同一 owner-state
 unique-owner mode 與 CAS SHA；raw legacy bytes 由 seam 自行 hash、decode 與 import，
 projection metadata 則從 payload 重算。Legacy import 與 staged Coordinator projection
 逐 identity 比對 row count、priority、claim ownership／started timestamp、parent、
-deadline、policy 與 terminal disposition。通過後的 immutable manifest 綁定
+deadline、policy、row created／updated timestamp 與 terminal disposition。通過後的
+immutable manifest 綁定
 raw legacy snapshot、assessment、import report、projection 與 owner state SHA-256。
 此能力無 apply／writer seam，live 仍是 `direct_execution`、observation count 仍為 0，
 所以只是正式 transaction 前的 fail-closed evidence capsule，不構成 ownership cutover。

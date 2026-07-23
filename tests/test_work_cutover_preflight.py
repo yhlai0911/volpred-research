@@ -293,6 +293,38 @@ def test_preflight_rejects_projection_dimension_drift(
         )
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("created_at", "2026-07-16T11:59:59+00:00"),
+        ("updated_at", "2026-07-16T12:00:02+00:00"),
+    ),
+)
+def test_preflight_rejects_projection_timestamp_drift(
+    tmp_path: Path,
+    field: str,
+    value: str,
+) -> None:
+    staged = _staged_snapshot()
+    staged = WorkSnapshot(
+        items=(
+            replace(
+                staged.items[0],
+                **{field: value},
+            ),
+        ),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="coordinator projection does not match legacy import",
+    ):
+        _prepare(
+            tmp_path,
+            projection=project_legacy_next_tasks(staged),
+        )
+
+
 def test_preflight_reconciles_running_started_at(
     tmp_path: Path,
 ) -> None:

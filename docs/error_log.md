@@ -1085,10 +1085,13 @@ canonical assessor，從同一次 owner-state bytes 取得 mode／CAS SHA，並�
 bytes 自行計算 SHA、decode 與重建 import report。Projection payload 再自行
 canonicalize，row count／SHA 不信任 public dataclass metadata；既有 importer
 round-trip 逐 identity 比對 priority、claim ownership／started timestamp、parent、
-deadline、policy 與 terminal disposition。通過後 manifest 以 canonical SHA-256
+deadline、policy、row created／updated timestamp 與 terminal disposition。公開
+regression 證明 staged projection 只漂移 `created_at`／`updated_at` 也會 fail closed，
+不能取得 manifest。通過後 manifest 以 canonical SHA-256
 綁定五份 derived evidence。public regressions 覆蓋短／過期 receipt ledger、
 cross-wired raw snapshot、forged projection metadata、projection drift 與 running
-`started_at` drift；相鄰 suite待最終重跑。
+`started_at` drift；preflight／assessment／projection／replay／direct-mode／claim／
+handoff 相鄰 suite 191 passed。
 
 **狀態**：此 preflight 缺口已制度化止血，但尚無正式 DB/filesystem CAS ownership
 transaction、七日 live receipts、unique-owner 下游回讀或 live rollback rehearsal。

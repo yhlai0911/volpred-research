@@ -553,7 +553,8 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   Work Coordinator projection 會再走既有
   importer，逐 work identity 比對 row count、status、priority、source／policy、
   capability／attestation、claim owner／timestamps／expiry、parent、deadline、
-  blocked reason 與 terminal disposition（含 current claim 的 `started_at`）。
+  blocked reason 與 terminal disposition（含 row `created_at`／`updated_at` 及 current
+  claim 的 `started_at`）。
   Projection row count／SHA 由 payload 重算。Manifest 以 canonical JSON 綁定 raw
   legacy snapshot、canonical assessment、derived import report、validated projection
   與 owner-state 五個 SHA-256 identity。

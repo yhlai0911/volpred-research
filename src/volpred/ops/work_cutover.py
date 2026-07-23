@@ -47,6 +47,8 @@ def _candidate_identity(
     return {
         "id": candidate.legacy_id,
         "status": candidate.status,
+        "created_at": candidate.created_at,
+        "updated_at": candidate.updated_at,
         "kind": request.kind,
         "title": request.title,
         "priority": request.priority,
