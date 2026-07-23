@@ -88,7 +88,10 @@ def _parser() -> argparse.ArgumentParser:
 
     restore = commands.add_parser(
         "restore",
-        help="restore the active verified backup when the live queue is empty",
+        help=(
+            "restore the active verified backup, or resume a durable "
+            "restore-in-progress transaction"
+        ),
     )
     _paths(restore)
     _cas_argument(restore)

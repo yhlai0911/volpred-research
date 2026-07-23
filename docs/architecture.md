@@ -20,6 +20,14 @@
 > 的可回復 containment，不代表 Work Coordinator／Change Delivery／殘留收斂已
 > 完成正式 ownership cutover；整體 Phase 1 仍依
 > `docs/platform_optimization_program_2026_07.md` 的 shadow 與七天 gate 推進。
+>
+> Restore 採 durable two-phase transaction：先在同一把 queue lock 內把 owner state
+> 寫成 `enabled=true, mode=restore_in_progress`，再把 receipt 綁定的 backup exact
+> bytes 寫回並 fsync/read-back，最後才切成 disabled `queued_execution`。因此 process
+> 在 queue write 前、寫到一半或 write 後 crash，admission／claim 都仍保持關閉；
+> operator 由 `status` 取得新的 `state_sha256` 後，以原 backup 參數重跑 `restore`
+> 即可冪等續作。自動 handoff 會把此狀態標為 `RESTORE TRANSACTION：IN PROGRESS`，
+> 不會輸出 claim、refill 或 reconcile-direct 指示。
 
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。

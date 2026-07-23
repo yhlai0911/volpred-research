@@ -964,3 +964,35 @@ direct-mode／claim／handoff／shadow assessment／replay targeted suite 142 pa
 完整 suite 為 4,630 passed、1 skipped、3 failed；三項均為 direct-mode 清池後已知的
 相鄰狀態（兩個 urgent-task fixture 洩漏 live mode、兩個 roadmap P1 缺 backing task），
 未以本修正掩蓋。
+
+### 2026-07-23 22:58 — task-pool restore 在跨檔 commit 中途先重開 admission — root_cause_fixed_and_verified
+
+**症狀與證據**：原 `restore_task_pool_backup()` 先把
+`task_pool_mode.json` 寫成 disabled `queued_execution`，才透過 canonical writer
+把 backup rows 寫回 `next_tasks.json`。一般 Python exception 雖會嘗試把 direct-mode
+receipt 寫回，但 process death／machine crash 不會執行補償；crash window 內的 durable
+狀態會是「admission 已開、queue 仍空白或只寫一部分」。另一個 automation 可在此時
+合法 claim／refill，破壞 rollback 的唯一 owner 與 backup identity。
+
+**根因層級與底層修復**：這是跨兩個 JSON owner surfaces 的 transaction ordering
+缺陷，不是資料內容錯誤。Restore 現在先在 queue `LOCK_EX` 內以 atomic replace 寫入
+schema v2 `enabled=true, mode=restore_in_progress` receipt，綁定原 direct-mode state
+SHA、backup SHA／bytes／row count、request actor／reason；接著才把 backup exact bytes
+寫回 queue、fsync 並逐位元 read-back，最後才 commit disabled `queued_execution`。
+若 crash 發生在 queue write 前、途中或後，普通 writer、claim 與 handoff 全部仍 fail
+closed；使用 `status` 取得 prepared state 的最新 SHA，沿用同一 backup 重跑 public
+`restore` seam，會覆寫空白／部分／已完整 recovery bytes，驗證後冪等 finalise。缺欄、
+非 64 位 lowercase hex 的 source／target SHA、或與 active backup identity 不符的
+prepared receipt，都在碰 queue 前拒絕。
+
+**回歸、回讀與制度化**：public regression 分別重建「prepared、queue 尚空」與
+「queue 已是 exact backup、final state 尚未寫」兩種 durable crash snapshot，兩者都
+恢復 exact bytes、保留原 rollback actor／source state identity，並落地 transaction
+state SHA；prepared／final owner state 也逐位元 read-back，storage 回讀不符時不會
+誤回報成功。malformed receipt 測試證明 queue 與 state bytes 完全不動。handoff regression
+證明 `restore_in_progress` 不再被當成一般空池，而是明示 retry `restore` 並禁止
+claim/refill；CLI help、`docs/architecture.md` 與 `docs/quick-commands.md` 同步成同一
+recovery 契約。此「先開 admission 的 crash window」完成五步 gate，狀態為
+**root_cause_fixed_and_verified**；Issue #9 的七日 receipts、正式 Coordinator
+ownership cutover、legacy read-only projection 與 live rollback rehearsal 仍未完成，
+所以 Issue #9 整體仍為 **contained**。

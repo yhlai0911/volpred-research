@@ -41,6 +41,13 @@ class TaskPoolMode:
     backup_bytes: int | None = None
     backup_task_count: int | None = None
     preserve_task_ids: tuple[str, ...] = ()
+    restore_started_at: str | None = None
+    restore_requested_by: str | None = None
+    restore_reason: str | None = None
+    restore_source_state_sha256: str | None = None
+    restore_target_sha256: str | None = None
+    restore_target_bytes: int | None = None
+    restore_target_task_count: int | None = None
 
 
 @dataclass(frozen=True)
@@ -116,6 +123,17 @@ def _mode_from_payload(payload: Any) -> TaskPoolMode:
         backup_bytes=_optional_int(payload, "backup_bytes"),
         backup_task_count=_optional_int(payload, "backup_task_count"),
         preserve_task_ids=tuple(preserve),
+        restore_started_at=_optional_string(payload, "restore_started_at"),
+        restore_requested_by=_optional_string(payload, "restore_requested_by"),
+        restore_reason=_optional_string(payload, "restore_reason"),
+        restore_source_state_sha256=_optional_string(
+            payload, "restore_source_state_sha256"
+        ),
+        restore_target_sha256=_optional_string(payload, "restore_target_sha256"),
+        restore_target_bytes=_optional_int(payload, "restore_target_bytes"),
+        restore_target_task_count=_optional_int(
+            payload, "restore_target_task_count"
+        ),
     )
 
 
@@ -173,12 +191,7 @@ def _load_expected_mode_evidence(
     *,
     expected_state_sha256: str,
 ) -> TaskPoolModeEvidence:
-    if not isinstance(expected_state_sha256, str) or not all(
-        ch in "0123456789abcdef" for ch in expected_state_sha256
-    ) or len(expected_state_sha256) != 64:
-        raise ValueError(
-            "expected_state_sha256 must be 64 lowercase hexadecimal characters"
-        )
+    _validate_sha256(expected_state_sha256, field="expected_state_sha256")
     evidence = load_task_pool_mode_evidence(state_path)
     if evidence.sha256 != expected_state_sha256:
         raise TaskPoolModeConflict(
@@ -186,6 +199,18 @@ def _load_expected_mode_evidence(
             f"expected {expected_state_sha256}, observed {evidence.sha256}"
         )
     return evidence
+
+
+def _validate_sha256(value: str, *, field: str) -> str:
+    if (
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(ch not in "0123456789abcdef" for ch in value)
+    ):
+        raise ValueError(
+            f"{field} must be 64 lowercase hexadecimal characters"
+        )
+    return value
 
 
 def _task_ids(rows: Iterable[Any]) -> tuple[set[str], int]:
@@ -240,7 +265,7 @@ def enforce_task_pool_write(
 def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     guard_canonical_write(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    encoded = (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode()
+    encoded = _json_bytes(payload)
     descriptor, temporary = tempfile.mkstemp(
         prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
     )
@@ -254,6 +279,10 @@ def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     finally:
         if temp_path.exists():
             temp_path.unlink()
+
+
+def _json_bytes(payload: dict[str, Any]) -> bytes:
+    return (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode()
 
 
 def _validate_identity(value: str, *, field: str) -> str:
@@ -529,8 +558,13 @@ def restore_task_pool_backup(
                 expected_state_sha256=expected_state_sha256,
             )
             mode = evidence.mode
-            if not mode.enabled or mode.mode != "direct_execution":
-                raise ValueError("task pool is not in direct-execution mode")
+            if not mode.enabled or mode.mode not in {
+                "direct_execution",
+                "restore_in_progress",
+            }:
+                raise ValueError(
+                    "task pool is not in direct-execution or restore-in-progress mode"
+                )
             if (
                 mode.backup_path is None
                 or backup.resolve() != Path(mode.backup_path).resolve()
@@ -550,47 +584,115 @@ def restore_task_pool_backup(
                 raise ValueError(f"backup is unreadable: {exc}") from exc
             if not isinstance(restored, list):
                 raise ValueError("backup root must be a list")
-            current = json.load(handle)
-            if not isinstance(current, list):
-                raise ValueError("next_tasks queue root must be a list")
-            if current:
-                raise ValueError("refusing restore while the live task pool is non-empty")
+
+            if mode.mode == "direct_execution":
+                current = json.load(handle)
+                if not isinstance(current, list):
+                    raise ValueError("next_tasks queue root must be a list")
+                if current:
+                    raise ValueError(
+                        "refusing restore while the live task pool is non-empty"
+                    )
+                restore_source_state_sha256 = evidence.sha256
+                restore_requested_by = actor
+                restore_reason = rationale
+                prepared_payload = {
+                    "schema": 2,
+                    "enabled": True,
+                    "mode": "restore_in_progress",
+                    "activated_at": mode.activated_at,
+                    "activated_by": mode.activated_by,
+                    "reason": mode.reason,
+                    "queue_path": str(queue.resolve()),
+                    "backup_path": str(backup.resolve()),
+                    "backup_sha256": digest,
+                    "backup_bytes": len(payload),
+                    "backup_task_count": len(restored),
+                    "preserve_task_ids": list(mode.preserve_task_ids),
+                    "restore_started_at": now,
+                    "restore_requested_by": restore_requested_by,
+                    "restore_reason": restore_reason,
+                    "restore_source_state_sha256": restore_source_state_sha256,
+                    "restore_target_sha256": digest,
+                    "restore_target_bytes": len(payload),
+                    "restore_target_task_count": len(restored),
+                }
+                _atomic_write_json(state, prepared_payload)
+                if state.read_bytes() != _json_bytes(prepared_payload):
+                    raise RuntimeError(
+                        "prepared owner-state read-back verification failed"
+                    )
+                prepared_evidence = load_task_pool_mode_evidence(state)
+            else:
+                required_transaction_strings = {
+                    "restore_started_at": mode.restore_started_at,
+                    "restore_requested_by": mode.restore_requested_by,
+                    "restore_reason": mode.restore_reason,
+                    "restore_source_state_sha256": (
+                        mode.restore_source_state_sha256
+                    ),
+                    "restore_target_sha256": mode.restore_target_sha256,
+                }
+                missing = sorted(
+                    key
+                    for key, value in required_transaction_strings.items()
+                    if value is None
+                )
+                if missing:
+                    raise ValueError(
+                        "restore transaction receipt is incomplete: "
+                        + ", ".join(missing)
+                    )
+                _validate_sha256(
+                    mode.restore_source_state_sha256,
+                    field="restore_source_state_sha256",
+                )
+                _validate_sha256(
+                    mode.restore_target_sha256,
+                    field="restore_target_sha256",
+                )
+                if (
+                    mode.restore_target_sha256 != digest
+                    or mode.restore_target_bytes != len(payload)
+                    or mode.restore_target_task_count != len(restored)
+                ):
+                    raise ValueError(
+                        "restore transaction target does not match the active backup"
+                    )
+                restore_source_state_sha256 = (
+                    mode.restore_source_state_sha256
+                )
+                restore_requested_by = mode.restore_requested_by
+                restore_reason = mode.restore_reason
+                prepared_evidence = evidence
+
+            if queue.read_bytes() != payload:
+                handle.seek(0)
+                handle.truncate()
+                handle.write(payload.decode("utf-8"))
+                handle.flush()
+                os.fsync(handle.fileno())
+            if queue.read_bytes() != payload:
+                raise RuntimeError("task-pool restore read-back verification failed")
+
             disabled_payload = {
-                "schema": 1,
+                "schema": 2,
                 "enabled": False,
                 "mode": "queued_execution",
                 "restored_at": now,
-                "restored_by": actor,
-                "reason": rationale,
+                "restored_by": restore_requested_by,
+                "reason": restore_reason,
                 "restored_backup_path": str(backup.resolve()),
                 "restored_backup_sha256": digest,
                 "restored_task_count": len(restored),
+                "restored_source_state_sha256": restore_source_state_sha256,
+                "restored_transaction_state_sha256": prepared_evidence.sha256,
             }
             _atomic_write_json(state, disabled_payload)
-            try:
-                from volpred.ops.next_tasks import write_tasks_to_handle
-
-                write_tasks_to_handle(handle, restored)
-                handle.flush()
-                os.fsync(handle.fileno())
-            except Exception:
-                _atomic_write_json(
-                    state,
-                    {
-                        "schema": 1,
-                        "enabled": True,
-                        "mode": "direct_execution",
-                        "activated_at": mode.activated_at,
-                        "activated_by": mode.activated_by,
-                        "reason": mode.reason,
-                        "backup_path": mode.backup_path,
-                        "backup_sha256": mode.backup_sha256,
-                        "backup_bytes": mode.backup_bytes,
-                        "backup_task_count": mode.backup_task_count,
-                        "preserve_task_ids": list(mode.preserve_task_ids),
-                    },
+            if state.read_bytes() != _json_bytes(disabled_payload):
+                raise RuntimeError(
+                    "final owner-state read-back verification failed"
                 )
-                raise
         finally:
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 

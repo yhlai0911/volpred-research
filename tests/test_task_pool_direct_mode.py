@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from volpred.ops import next_tasks
+from volpred.ops import next_tasks, task_pool_mode
 from volpred.ops.task_pool_mode import (
     TaskPoolAdmissionClosed,
     TaskPoolModeConflict,
@@ -270,7 +270,7 @@ def test_verified_backup_is_a_working_restore_path(
     queue = tmp_path / "storage" / "next_tasks.json"
     state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
     original_rows = [{"id": "old-pending", "status": "pending", "priority": 2}]
-    _write_pool(queue, original_rows)
+    original_bytes = _write_pool(queue, original_rows)
     monkeypatch.setattr(next_tasks, "CANONICAL_NEXT_TASKS", queue)
     monkeypatch.setattr(next_tasks, "TASK_POOL_MODE_PATH", state)
     entered = enter_direct_execution_mode(
@@ -294,8 +294,183 @@ def test_verified_backup_is_a_working_restore_path(
     )
 
     assert restored.restored_task_count == 1
-    assert json.loads(queue.read_text()) == original_rows
+    assert queue.read_bytes() == original_bytes
     assert load_task_pool_mode(state).enabled is False
+
+
+@pytest.mark.parametrize("queue_already_restored", [False, True])
+def test_restore_resumes_a_prepared_transaction_across_queue_write(
+    tmp_path: Path,
+    queue_already_restored: bool,
+) -> None:
+    queue = tmp_path / "storage" / "next_tasks.json"
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    backup = tmp_path / "backups" / "next_tasks.json"
+    original_rows = [{"id": "old-pending", "status": "pending", "priority": 2}]
+    backup_bytes = _write_pool(backup, original_rows)
+    _write_pool(queue, original_rows if queue_already_restored else [])
+    digest = hashlib.sha256(backup_bytes).hexdigest()
+    state.parent.mkdir(parents=True)
+    state.write_text(
+        json.dumps(
+            {
+                "schema": 2,
+                "enabled": True,
+                "mode": "restore_in_progress",
+                "activated_at": "2026-07-23T12:00:00+00:00",
+                "activated_by": "cutover-owner",
+                "reason": "direct mode",
+                "queue_path": str(queue.resolve()),
+                "backup_path": str(backup.resolve()),
+                "backup_sha256": digest,
+                "backup_bytes": len(backup_bytes),
+                "backup_task_count": 1,
+                "preserve_task_ids": [],
+                "restore_started_at": "2026-07-23T12:05:00+00:00",
+                "restore_requested_by": "rollback-owner",
+                "restore_reason": "rollback rehearsal",
+                "restore_source_state_sha256": "a" * 64,
+                "restore_target_sha256": digest,
+                "restore_target_bytes": len(backup_bytes),
+                "restore_target_task_count": 1,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    prepared_sha256 = load_task_pool_mode_evidence(state).sha256
+
+    restored = restore_task_pool_backup(
+        queue_path=queue,
+        state_path=state,
+        backup_path=backup,
+        restored_by="retry-worker",
+        reason="resume prepared restore",
+        expected_state_sha256=prepared_sha256,
+        now="2026-07-23T12:10:00+00:00",
+    )
+
+    assert restored.restored_task_count == 1
+    assert queue.read_bytes() == backup_bytes
+    final_state = json.loads(state.read_text())
+    assert final_state["enabled"] is False
+    assert final_state["mode"] == "queued_execution"
+    assert final_state["restored_by"] == "rollback-owner"
+    assert final_state["restored_transaction_state_sha256"] == prepared_sha256
+    assert final_state["restored_source_state_sha256"] == "a" * 64
+
+
+def test_restore_rejects_malformed_prepared_receipt_without_touching_queue(
+    tmp_path: Path,
+) -> None:
+    queue = tmp_path / "storage" / "next_tasks.json"
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    backup = tmp_path / "backups" / "next_tasks.json"
+    backup_bytes = _write_pool(
+        backup,
+        [{"id": "old-pending", "status": "pending", "priority": 2}],
+    )
+    queue_bytes = _write_pool(queue, [])
+    digest = hashlib.sha256(backup_bytes).hexdigest()
+    state.parent.mkdir(parents=True)
+    state.write_text(
+        json.dumps(
+            {
+                "schema": 2,
+                "enabled": True,
+                "mode": "restore_in_progress",
+                "backup_path": str(backup.resolve()),
+                "backup_sha256": digest,
+                "backup_bytes": len(backup_bytes),
+                "backup_task_count": 1,
+                "preserve_task_ids": [],
+                "restore_started_at": "2026-07-23T12:05:00+00:00",
+                "restore_requested_by": "rollback-owner",
+                "restore_reason": "rollback rehearsal",
+                "restore_source_state_sha256": "not-a-sha",
+                "restore_target_sha256": digest,
+                "restore_target_bytes": len(backup_bytes),
+                "restore_target_task_count": 1,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    prepared_bytes = state.read_bytes()
+
+    with pytest.raises(
+        ValueError,
+        match="restore_source_state_sha256 must be 64 lowercase hexadecimal",
+    ):
+        restore_task_pool_backup(
+            queue_path=queue,
+            state_path=state,
+            backup_path=backup,
+            restored_by="retry-worker",
+            reason="resume prepared restore",
+            expected_state_sha256=hashlib.sha256(prepared_bytes).hexdigest(),
+            now="2026-07-23T12:10:00+00:00",
+        )
+
+    assert queue.read_bytes() == queue_bytes
+    assert state.read_bytes() == prepared_bytes
+
+
+def test_restore_fails_if_final_owner_state_does_not_read_back(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    queue = tmp_path / "storage" / "next_tasks.json"
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    original_rows = [{"id": "old-pending", "status": "pending", "priority": 2}]
+    original_bytes = _write_pool(queue, original_rows)
+    monkeypatch.setattr(next_tasks, "CANONICAL_NEXT_TASKS", queue)
+    monkeypatch.setattr(next_tasks, "TASK_POOL_MODE_PATH", state)
+    entered = enter_direct_execution_mode(
+        queue_path=queue,
+        state_path=state,
+        backup_dir=tmp_path / "backups",
+        activated_by="cutover-owner",
+        reason="direct mode",
+        expected_state_sha256=None,
+        now="2026-07-23T12:00:00+00:00",
+    )
+    active_sha256 = load_task_pool_mode_evidence(state).sha256
+    original_atomic_write = task_pool_mode._atomic_write_json
+    writes = 0
+
+    def corrupt_final_state(path: Path, payload: dict[str, object]) -> None:
+        nonlocal writes
+        writes += 1
+        original_atomic_write(path, payload)
+        if writes == 2:
+            corrupted = dict(payload)
+            corrupted["enabled"] = True
+            corrupted["mode"] = "restore_in_progress"
+            original_atomic_write(path, corrupted)
+
+    monkeypatch.setattr(task_pool_mode, "_atomic_write_json", corrupt_final_state)
+
+    with pytest.raises(
+        RuntimeError,
+        match="final owner-state read-back verification failed",
+    ):
+        restore_task_pool_backup(
+            queue_path=queue,
+            state_path=state,
+            backup_path=entered.backup_path,
+            restored_by="rollback-owner",
+            reason="rollback rehearsal",
+            expected_state_sha256=active_sha256,
+            now="2026-07-23T12:05:00+00:00",
+        )
+
+    assert queue.read_bytes() == original_bytes
+    assert load_task_pool_mode(state).enabled is True
 
 
 def test_restore_rejects_a_stale_owner_state_without_touching_the_queue(

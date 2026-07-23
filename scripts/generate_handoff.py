@@ -303,14 +303,18 @@ def build() -> str:
     direct_mode = bool(
         isinstance(task_pool_mode, dict)
         and task_pool_mode.get("enabled") is True
-        and task_pool_mode.get("mode") == "direct_execution"
+        and task_pool_mode.get("mode")
+        in {"direct_execution", "restore_in_progress"}
+    )
+    restore_in_progress = bool(
+        direct_mode and task_pool_mode.get("mode") == "restore_in_progress"
     )
     direct_mode_drift = (
         _direct_mode_receipt_drift(
             tasks if isinstance(tasks, list) else [],
             task_pool_mode,
         )
-        if direct_mode
+        if direct_mode and not restore_in_progress
         else None
     )
     dashboard = _load_json(DASHBOARD, {})
@@ -335,10 +339,20 @@ def build() -> str:
     lines.append("## 1. 任務池快照（`storage/next_tasks.json`）")
     lines.append("")
     if direct_mode:
-        lines.append(
-            "- **DIRECT EXECUTION MODE：ACTIVE** — 新任務入池與 claim 已機械封鎖；"
-            "只允許既有控制任務收尾。"
-        )
+        if restore_in_progress:
+            lines.append(
+                "- **RESTORE TRANSACTION：IN PROGRESS** — admission 與 claim 維持封鎖；"
+                "必須完成 receipt 綁定的 restore 後才可恢復 queued execution。"
+            )
+            lines.append(
+                "  - restore_started_at: "
+                f"{task_pool_mode.get('restore_started_at') or '(unknown)'}"
+            )
+        else:
+            lines.append(
+                "- **DIRECT EXECUTION MODE：ACTIVE** — 新任務入池與 claim 已機械封鎖；"
+                "只允許既有控制任務收尾。"
+            )
         lines.append(
             f"  - activated_at: {task_pool_mode.get('activated_at') or '(unknown)'}"
         )
@@ -377,7 +391,12 @@ def build() -> str:
         pending_rows = (
             snap["codex_eligible_pending_count"] + snap["codex_skip_pending_count"]
         )
-        lines.append(f"  - direct-mode pending rows (claimable=0): {pending_rows}")
+        row_context = (
+            "restore-transaction rows"
+            if restore_in_progress
+            else "direct-mode pending rows"
+        )
+        lines.append(f"  - {row_context} (claimable=0): {pending_rows}")
     else:
         lines.append(f"  - Codex-eligible pending: {snap['codex_eligible_pending_count']}")
         lines.append(f"  - Codex-skip pending: {snap['codex_skip_pending_count']}")
@@ -424,9 +443,15 @@ def build() -> str:
         pending_rows = (
             snap["codex_eligible_pending_count"] + snap["codex_skip_pending_count"]
         )
-        lines.append(
-            f"- **Direct-mode pending drift rows**：{pending_rows}；**claimable**：0"
-        )
+        if restore_in_progress:
+            lines.append(
+                f"- **Restore recovery rows**：{pending_rows}；**claimable**：0"
+            )
+        else:
+            lines.append(
+                f"- **Direct-mode pending drift rows**：{pending_rows}；"
+                "**claimable**：0"
+            )
     else:
         lines.append(
             f"- **Codex-eligible pending**：{snap['codex_eligible_pending_count']}；"
@@ -446,19 +471,31 @@ def build() -> str:
         lines.append("")
         lines.append("**All pending top 8**：")
     if direct_mode and snap["pending_top"]:
-        lines.append(
-            "> 以下 row 只供 drift 對帳；禁止 claim。先執行 "
-            "`task_pool_control.py status` 取得 state_sha256，再以 "
-            "`task_pool_control.py reconcile-direct --expected-state-sha256 <SHA>` "
-            "收斂並回讀 status。"
-        )
+        if restore_in_progress:
+            lines.append(
+                "> 以下 row 是尚未 finalise 的 restore recovery data；禁止 claim。"
+                "先執行 `task_pool_control.py status` 取得 state_sha256，再以同一 "
+                "receipt 綁定參數重跑 `task_pool_control.py restore`。"
+            )
+        else:
+            lines.append(
+                "> 以下 row 只供 drift 對帳；禁止 claim。先執行 "
+                "`task_pool_control.py status` 取得 state_sha256，再以 "
+                "`task_pool_control.py reconcile-direct --expected-state-sha256 <SHA>` "
+                "收斂並回讀 status。"
+            )
         for t in snap["pending_top"]:
             lines.append(_format_task_line(t))
     elif snap["pending_top"]:
         for t in snap["pending_top"]:
             lines.append(_format_task_line(t))
     elif direct_mode:
-        lines.append("- (direct execution mode — 任務池保持清空，不得自行補池)")
+        if restore_in_progress:
+            lines.append(
+                "- (restore 尚未完成 — queue 可暫時為空，不得自行補池或 claim)"
+            )
+        else:
+            lines.append("- (direct execution mode — 任務池保持清空，不得自行補池)")
     else:
         lines.append("- (任務池空 — hourly dispatch 必須自主生新題)")
     lines.append("")
@@ -510,9 +547,18 @@ def build() -> str:
     lines.append("")
     lines.append("```")
     if direct_mode:
-        lines.append("DIRECT EXECUTION MODE 已啟用：")
+        if restore_in_progress:
+            lines.append("RESTORE TRANSACTION 尚未完成：")
+        else:
+            lines.append("DIRECT EXECUTION MODE 已啟用：")
         lines.append("  1. 禁止 claim、refill、建立或恢復 legacy task-pool 任務。")
-        lines.append("  2. 只直接續做老闆已指定的 operations-core 重構與 live 驗證。")
+        if restore_in_progress:
+            lines.append(
+                "  2. 先以 `task_pool_control.py status` 取得最新 state_sha256，"
+                "再用原 backup／actor／reason 重跑 `task_pool_control.py restore`。"
+            )
+        else:
+            lines.append("  2. 只直接續做老闆已指定的 operations-core 重構與 live 驗證。")
         lines.append(
             "  3. 先用 `uv run python scripts/task_pool_control.py status` 回讀 gate；"
             "不得因池空走 error_log fallback。"
@@ -524,11 +570,17 @@ def build() -> str:
                 "--expected-state-sha256 <status.state_sha256>` "
                 "收斂後再次回讀 status。"
             )
-        lines.append(
-            "  4. 回復舊池只准用 receipt 綁定的 `task_pool_control.py restore`，"
-            "必須傳 `--expected-state-sha256 <status.state_sha256>`，"
-            "且 live pool 必須為空。"
-        )
+        if restore_in_progress:
+            lines.append(
+                "  4. 重試會依 transaction receipt 覆寫空白／部分／已完整還原的 "
+                "queue，read-back 後才重開 admission；期間不得碰 queue。"
+            )
+        else:
+            lines.append(
+                "  4. 回復舊池只准用 receipt 綁定的 `task_pool_control.py restore`，"
+                "必須傳 `--expected-state-sha256 <status.state_sha256>`，"
+                "且 live pool 必須為空。"
+            )
     else:
         lines.append("讀 storage/ops/handoff_latest.md 後依以下優先序選工：")
         lines.append("")

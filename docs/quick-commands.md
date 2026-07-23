@@ -57,7 +57,7 @@ uv run volpred ops work-shadow-replay --next-tasks-snapshot <next_tasks.json> --
 uv run python scripts/task_pool_control.py status  # 回讀 mode 與 owner-state CAS identity（state_sha256）
 uv run python scripts/task_pool_control.py enter-direct --expected-state-sha256 <status的SHA或absent> --actor <actor> --reason '<reason>' [--preserve-task-id <id>]  # CAS 通過後才逐位元備份 → 關閉 admission → 清池
 uv run python scripts/task_pool_control.py reconcile-direct --expected-state-sha256 <status的SHA> --actor <actor> --reason '<reason>'  # 只依同一 owner receipt 收斂 stale-writer drift
-uv run python scripts/task_pool_control.py restore --expected-state-sha256 <status的SHA> --backup <receipt綁定路徑> --actor <actor> --reason '<reason>'  # CAS 通過且 live pool 為空才回復
+uv run python scripts/task_pool_control.py restore --expected-state-sha256 <status的SHA> --backup <receipt綁定路徑> --actor <actor> --reason '<reason>'  # 初次呼叫要求 live pool 為空；若 status.mode=restore_in_progress，沿用原 backup 參數與最新 SHA 重跑即可冪等續作
 
 # experiments/ 結構整理（新規先行 + touched-file migration）
 uv run volpred ops experiments report                # 查看 experiments/ 根層散檔與遷移候選

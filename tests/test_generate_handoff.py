@@ -103,6 +103,35 @@ def test_handoff_switches_to_direct_execution_contract(tmp_path, monkeypatch) ->
     assert "Claim 流程（避免雙 session 撞題）" not in handoff
 
 
+def test_handoff_keeps_admission_closed_during_restore_transaction(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    (tmp_path / "task_pool_mode.json").write_text(
+        json.dumps(
+            {
+                "enabled": True,
+                "mode": "restore_in_progress",
+                "activated_at": "2026-07-23T12:49:35+00:00",
+                "backup_sha256": "abc123",
+                "restore_started_at": "2026-07-23T12:55:00+00:00",
+            }
+        ),
+        encoding="utf-8",
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "RESTORE TRANSACTION：IN PROGRESS" in handoff
+    assert "不得自行補池" in handoff
+    assert "禁止 claim、refill" in handoff
+    assert "task_pool_control.py restore" in handoff
+    assert "Claim 流程（避免雙 session 撞題）" not in handoff
+
+
 def test_handoff_treats_direct_mode_receipt_drift_as_unclaimable(
     tmp_path,
     monkeypatch,
