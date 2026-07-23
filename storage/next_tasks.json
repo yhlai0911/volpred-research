@@ -36616,7 +36616,7 @@
     "title": "驗證 07-20 週度 codex cron 有升到 0.144.5 且自動重生參考文件",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-slot-2",
     "created_at": "2026-07-17T13:23:17.477859+00:00",
     "tags": [
@@ -36630,8 +36630,29 @@
         "from": "blocked",
         "to": "pending",
         "reason": "blocked_until_expired (2026-07-20T09:30:00+08:00)"
+      },
+      {
+        "ts": "2026-07-23T09:08:35.596707+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-0b3d3fe779a0448eb6403771c28395ad"
+      },
+      {
+        "ts": "2026-07-23T09:08:35.843479+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-0b3d3fe779a0448eb6403771c28395ad"
+      },
+      {
+        "ts": "2026-07-23T09:12:11.213008+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-0b3d3fe779a0448eb6403771c28395ad"
       }
-    ]
+    ],
+    "started_at": "2026-07-23T09:08:35.843463+00:00",
+    "completed_at": "2026-07-23T09:12:11.212995+00:00",
+    "result": "Verified 2026-07-20 upgrade 0.144.1->0.144.6, reference regen, smoke rc=0, and send-alert receipt 171f8282. Found host-cron plus piggy-back race corrupting the before-version receipt; made codex_update piggy-back-only, removed the live host crontab leg, and added two regression tests. Current 0.145.0 drift is next-cycle expected; no manual upgrade."
   },
   {
     "id": "k1684_e2_cert_merge_knowledge",
@@ -56040,7 +56061,7 @@
     "description": "由 alert `release_pool_gap` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出機器 cron 正常 fire（machinery_gap=0.0h），但已超過 8.0h 沒有任何文章成功釋出。\n- last_released_at: 2026-07-22T22:00:56.715858+00:00\n- release_gap_hours: 8.0\n- machinery_last_at: 2026-07-23T06:00:49+00:00\n\n## release preview\n- draft: 0\n- scheduled: 0\n- eligible_before_dedup: 0\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 0\n- eligible_after_all_gates: 0\n\n## 影響\n通常是 due 草稿全落在已飽和主題、dedup 正確 skip 但釋出算法未 fall-through 到 fresh-theme 草稿；\n讀者端看不到新內容（Mission 第 1/5 條），但這不是 cron 停擺，是內容釋出層問題。\n\n## 建議行動\n1. 若 eligible_after_dedup=0：不要強行釋出已被 dedup TTL 排除的草稿，先補 fresh-theme draft 或等 TTL 到期。\n2. 若還有 eligible_after_dedup>0：定向釋出一篇 fresh-theme 草稿（避開 model_complexity / vt_strategy / spy / vix / garch）：\n   jq '[.[]|select(.status==\"draft\")]|.[].title' storage/reports/feed.json 挑非飽和主題\n   VOLPRED_ACTOR=claude uv run volpred ops release-pool --pub-id <id> --include-drafts\n3. 若 draft 池主題全飽和：派 daily_article 補 fresh-theme 草稿（publication-candidates skill）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-23T06:01:09.703411+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
@@ -56085,10 +56106,30 @@
         "to": "pending",
         "by": "codex-failover-slot-1-b9c61e13142249679d4ecfc50779b844",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-23T08:23:59.808156+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode-release-pool-gap"
+      },
+      {
+        "ts": "2026-07-23T08:24:05.225694+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode-release-pool-gap"
+      },
+      {
+        "ts": "2026-07-23T08:40:50.503050+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode-release-pool-gap"
       }
     ],
-    "started_at": "2026-07-23T08:08:09.459512+00:00",
-    "last_released_at": "2026-07-23T08:08:50.741452+00:00"
+    "started_at": "2026-07-23T08:24:05.225675+00:00",
+    "last_released_at": "2026-07-23T08:08:50.741452+00:00",
+    "completed_at": "2026-07-23T08:40:50.503037+00:00",
+    "result": "contained：原 detector 回讀 release_gap=10.39h、machinery_gap=0.40h，根因層為 eligible draft=0 的內容供給缺口，非 cron 故障。依 publication-candidates/feed-publisher/admin-ops 正式流程重建候選索引、Codex primary 重審 K1436、發布並 verified_live mile_5193647b；回讀 release_pool_gap breached=false、gap=0.02h，K1436 已由 uncovered 轉 covered。"
   },
   {
     "id": "alert_content_quality_20260723",
@@ -56096,12 +56137,23 @@
     "description": "由 alert `content_quality` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- 發文節奏: 發文空窗 — 距最新發文 361.18min > 6.0h 門檻（作用窗 TPE hour=14）\n\n## 影響\n內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\n\n## 建議行動（主線程 auto-remediation）\n1. 同一天出現超過一篇每日精選導讀 → 檢視 `storage/ops/content_quality_report.json` items，挑 1 篇 retract：`uv run volpred ops unpublish --mile-id <id>`；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\n2. 發文太密集 → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\n3. 發文間隔過久 → 立即 `release-pool-by-settings` 或派 fresh-arc 日常文章 補位；同時查 release deadlock (`docs/refactor_plan_release_layer_deadlock.md`)。\n4. 標題前綴重複 → 前端 header 與 title 擇一移除前綴；前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。\n5. 懶人包覆蓋不足 → 針對 missing_examples 走 `lazypack-infographic` skill 補圖：primary=確定性 renderer （`lazypack_render.py`，plan.json 綁 evidence、零 LLM）；需 LLM codegen 時用 `codex exec`（boss 2026-06-30/07-15 directive），NotebookLM 僅為 fallback，不得當首選。append `## 懶人包圖組` 後用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。\n6. `arc_dedup_overmatch` → 跑 `scripts/audit_arc_dedup_overmatches.py`，逐筆裁決 dup waiver 或 fresh-arc rewrite。\n7. `audience_classification` → 跑 `scripts/audit_audience_classification.py`，複核 HIGH 候選並以正式更新流程改 audience；不得直接改 feed JSON。",
     "task_type": "governance",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-23T06:04:41.335092+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "content_quality"
+    ],
+    "completed_at": "2026-07-23T09:01:14.649305+00:00",
+    "result": "ordinary alert cleared before dispatch",
+    "status_history": [
+      {
+        "ts": "2026-07-23T09:01:14.649305+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "alert_remediation_router",
+        "note": "condition_cleared_automatically"
+      }
     ]
   },
   {
@@ -56222,5 +56274,208 @@
     "topic_cluster": null,
     "created_at": "2026-07-23T08:01:29+00:00",
     "priority_capped_from": 1
+  },
+  {
+    "id": "assign_d8bfe910",
+    "title": "PHASE-Z 卡住檔案 incident（42d70808c808081f）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n11 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/adr/0001-transactional-operations-core.md — 3 班\n- docs/adr/0002-zero-paid-provider-continuity-and-host-failover.md — 3 班\n- docs/adr/0003-hybrid-frontend-and-three-stage-cutover.md — 3 班\n- docs/adr/0004-research-truth-growth-and-privacy-boundary.md — 3 班\n- docs/architecture.md — 3 班\n- docs/host-migration.md — 3 班\n- docs/master_plan.md — 3 班\n- docs/operations_core_module_design.md — 3 班\n- docs/platform_optimization_program_2026_07.md — 3 班\n- docs/project_improvement_status.md — 3 班\n- docs/refactor_plan_ops_master_2026_07.md — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260723T081416746171Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "succeeded",
+    "source": "phase_z",
+    "created_at": "2026-07-23T08:14:16.843232+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "42d70808c808081f",
+      "paths": [
+        "docs/adr/0001-transactional-operations-core.md",
+        "docs/adr/0002-zero-paid-provider-continuity-and-host-failover.md",
+        "docs/adr/0003-hybrid-frontend-and-three-stage-cutover.md",
+        "docs/adr/0004-research-truth-growth-and-privacy-boundary.md",
+        "docs/architecture.md",
+        "docs/host-migration.md",
+        "docs/master_plan.md",
+        "docs/operations_core_module_design.md",
+        "docs/platform_optimization_program_2026_07.md",
+        "docs/project_improvement_status.md",
+        "docs/refactor_plan_ops_master_2026_07.md"
+      ],
+      "streaks": {
+        "docs/adr/0001-transactional-operations-core.md": 3,
+        "docs/adr/0002-zero-paid-provider-continuity-and-host-failover.md": 3,
+        "docs/adr/0003-hybrid-frontend-and-three-stage-cutover.md": 3,
+        "docs/adr/0004-research-truth-growth-and-privacy-boundary.md": 3,
+        "docs/architecture.md": 3,
+        "docs/host-migration.md": 3,
+        "docs/master_plan.md": 3,
+        "docs/operations_core_module_design.md": 3,
+        "docs/platform_optimization_program_2026_07.md": 3,
+        "docs/project_improvement_status.md": 3,
+        "docs/refactor_plan_ops_master_2026_07.md": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260723T081416746171Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-23T08:14:16.827434+00:00",
+      "last_seen_at": "2026-07-23T08:14:16.827434+00:00"
+    },
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-23T09:13:33.713623+00:00",
+    "result": "關閉條件機械滿足：11 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/adr/0001-transactional-operations-core.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/adr/0002-zero-paid-provider-continuity-and-host-failover.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/adr/0003-hybrid-frontend-and-three-stage-cutover.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/adr/0004-research-truth-growth-and-privacy-boundary.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/architecture.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/host-migration.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/master_plan.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/operations_core_module_design.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/platform_optimization_program_2026_07.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/project_improvement_status.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "docs/refactor_plan_ops_master_2026_07.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/adr/0001-transactional-operations-core.md",
+        "docs/adr/0002-zero-paid-provider-continuity-and-host-failover.md",
+        "docs/adr/0003-hybrid-frontend-and-three-stage-cutover.md",
+        "docs/adr/0004-research-truth-growth-and-privacy-boundary.md",
+        "docs/architecture.md",
+        "docs/host-migration.md",
+        "docs/master_plan.md",
+        "docs/operations_core_module_design.md",
+        "docs/platform_optimization_program_2026_07.md",
+        "docs/project_improvement_status.md",
+        "docs/refactor_plan_ops_master_2026_07.md"
+      ],
+      "grace_s": 86400
+    }
   }
 ]
