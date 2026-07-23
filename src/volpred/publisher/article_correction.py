@@ -26,7 +26,12 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-from volpred.publisher.publisher import Publisher
+from volpred.publisher.publisher import (
+    Publisher,
+    _academic_keyword_hits,
+    _audit_general_content,
+    _infer_audience,
+)
 
 
 class CorrectionNotApplied(RuntimeError):
@@ -35,6 +40,55 @@ class CorrectionNotApplied(RuntimeError):
 
 class CorrectionNotSynced(RuntimeError):
     """feed.json was corrected but one or more projections were not updated."""
+
+
+def _validate_general_audience(article_id: str, article: dict) -> None:
+    """Replay publish-time audience gates before an in-place rewrite.
+
+    Corrections intentionally bypass ``publish_milestone`` because they update
+    an existing row.  They must not bypass its reader-audience contract: doing
+    so let a numbers correction reintroduce bare K-ids/statistical jargon into
+    a published general article, while its stored badge remained ``general``.
+    """
+    audience = str(article.get("audience") or "").strip().lower()
+    if audience != "general":
+        return
+
+    title = str(article.get("title") or "")
+    content = str(article.get("content") or article.get("description") or "")
+    raw_tags = article.get("tags")
+    tags = (
+        [str(tag) for tag in raw_tags if tag is not None]
+        if isinstance(raw_tags, list)
+        else []
+    )
+    details = article.get("details")
+    details_type = details.get("content_type") if isinstance(details, dict) else None
+    content_type = (
+        details_type
+        or article.get("content_type")
+        or article.get("category")
+        or None
+    )
+
+    audit_issues = _audit_general_content(audience, tags, content)
+    inferred = _infer_audience(
+        title,
+        content,
+        tags,
+        content_type=str(content_type).strip() or None,
+    )
+    if not audit_issues and inferred == audience:
+        return
+
+    academic_signals = _academic_keyword_hits(title, content, tags)
+    raise CorrectionNotApplied(
+        f"{article_id}: correction violates the declared general-audience "
+        f"contract (inferred={inferred!r}, signals={academic_signals!r}, "
+        f"audit_issues={audit_issues!r}). Nothing was written. Rephrase "
+        "reader-visible jargon and move experiment ids to "
+        "details.experiment_refs."
+    )
 
 
 def _splice(content: str, replacements: list[tuple[str, str]]) -> list[dict]:
@@ -188,6 +242,8 @@ def apply_article_correction(
 
     if applied:
         art["content"] = content
+
+    _validate_general_audience(article_id, art)
 
     now_iso = datetime.now(timezone.utc).isoformat()
     art["last_updated_at"] = now_iso
