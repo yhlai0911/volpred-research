@@ -41234,11 +41234,34 @@
     "description": "`scripts/tests/test_orphan_reaper.py::test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths`\n在 07-19 14:42 的 PHASE-Z 隔離測試中紅（`StopIteration`，line 341 —— `result[\"held\"]` 裡找不到\n`compute-invalid`），但**沒有任何人修過它就自己綠了**：`git log f0350b91294c..HEAD --\nscripts/reap_orphan_deliverables.py scripts/tests/test_orphan_reaper.py` 零 commit，現在同一組\n5 個檔跑起來 66 passed。⇒ 環境相依 flaky。\n\n## 硬規則：先重現，不准先猜修法\n猜修法正是外部意見批評的「用結果特徵反推」（見 docs/governance/2026-07/phase_z_ownership_external_review.md §4）。要求先建 harness，在下列維度變動下\n各跑 N 次直到穩定重現：`TMPDIR`（macOS `/var` ↔ `/private/var` symlink，測試裡有\n`outside`/`symlink` 的 relative 計算）、git 版本、global `core.excludesFile`（測試依賴\n`.gitignore` 的 `*.tmp`）、並行度。重現不了就記錄「已知間歇、尚無重現」並保持觀察，**不要交出\n一個沒有證據的修法**。\n\nparent: assign_a006f8ed",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "system",
     "created_at": "2026-07-19T09:41:46.901717+00:00",
     "parent_task_id": "assign_a006f8ed",
-    "created_by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff"
+    "created_by": "hourly-slot-1-4684d8b70a50494d8fefa274d1c272ff",
+    "status_history": [
+      {
+        "ts": "2026-07-23T10:08:40.147455+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-bad743ab8c7e48b0ae39aadbeec79a5c"
+      },
+      {
+        "ts": "2026-07-23T10:08:40.412069+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-bad743ab8c7e48b0ae39aadbeec79a5c"
+      },
+      {
+        "ts": "2026-07-23T10:14:18.757917+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-bad743ab8c7e48b0ae39aadbeec79a5c"
+      }
+    ],
+    "started_at": "2026-07-23T10:08:40.412058+00:00",
+    "completed_at": "2026-07-23T10:14:18.757904+00:00",
+    "result": "Built reusable exact-symptom flake harness; 16 environment variants across TMPDIR aliases, Apple/Homebrew Git, global excludes on/off, and serial/4-way pressure passed 80/80. Related 5-file gate passed 77/77. Recorded known intermittent/not reproduced verdict; no evidence-free production fix."
   },
   {
     "id": "assign_1fd87db1",
