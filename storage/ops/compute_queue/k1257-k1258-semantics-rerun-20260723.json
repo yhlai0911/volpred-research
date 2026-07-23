@@ -5,12 +5,12 @@
   "interpreter": "bash",
   "args": [],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 2,
   "queued_at": "2026-07-23T11:15:39Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-23T11:30:01Z",
+  "completed_at": "2026-07-23T11:36:20Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1257-k1258-semantics-rerun-20260723.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1257-k1258-semantics-rerun-20260723.stderr",
   "result_artifact": "experiments/k1258/k1258_results.json",
@@ -35,5 +35,11 @@
   "source_task_id": "k1257_k1258_semantics_and_certification",
   "timeout_seconds": 3600,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 21911,
+  "claimed_by_pid_start_wall": "Thu Jul 23 19:30:01 2026",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/experiments/k1258"
+  }
 }
