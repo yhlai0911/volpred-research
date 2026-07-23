@@ -1,6 +1,6 @@
 """
-K1623 rev3 — full-text consistency self-check over the claim surface
-====================================================================
+K1623 rev3/rev4 — full-text consistency self-check over the claim surface
+=========================================================================
 
 Codex round 2 failed rev2 partly because a retraction was applied in one place
 and left standing in another. So rev3 does not get to assert "I fixed it
@@ -42,6 +42,8 @@ CLAIM_SURFACE = [
     "k1623_rev2_results.json",
     "k1623_rev2_mc_results.json",
     "k1623_rev3_patch_mc_artifact.py",
+    "k1623_rev3_armc_mc.py",
+    "k1623_rev3_armc_results.json",
     "k1623_rev3_selfcheck.py",
 ]
 
@@ -57,7 +59,7 @@ CLAIM_SURFACE = [
 # never a word that shows up in ordinary prose. Anything that survives this
 # narrow list and is still legitimate belongs in ALLOWLIST with a written reason.
 RETRACTION_MARKERS = (
-    r"rev3", r"撤回", r"更正", r"原本寫", r"原文宣稱", r"不再宣稱", r"為假", r"是錯的",
+    r"rev3", r"rev4", r"撤回", r"更正", r"原本寫", r"原文宣稱", r"不再宣稱", r"為假", r"是錯的",
     r"不支撐", r"並不精確", r"高估", r"不適用", r"沒被 assert", r"這句無限定",
     r"RETRACTED", r"SUPERSED", r"superseded", r"was wrong", r"imprecise",
     r"why_it_is_wrong", r"must not be made", r"never stored", r"never stores",
@@ -115,11 +117,11 @@ RULES = [
      # rescue finding_4's "ARE estimated with substantial uncertainty", which is
      # the quantified claim being retracted.
      (r"植入", r"knows the break", r"估計出的斷點日期", r"數量", r"COUNT",
-      r"implanted", r"true simulated", r"were estimated", r"LOCATION-oracle"),
+      r"implanted", r"true simulated", r"were estimated", r"PARTITION-oracle"),
      "Break-date UNCERTAINTY claims are retracted; describing where breaks were implanted, "
      "or stating that only counts are stored, is legitimate."),
     ("B4-arm-b-elw-only", "B4", "qualified",
-     r"ELW alone|elw_own|ELW-only|ELW 而已", (),
+     r"ELW alone|ELW-only|ELW 而已", (r"warned arm B was NOT",),
      "Arm B must never be described as an ELW-only baseline except to deny it."),
     ("B5-uniqueness", "B5", "qualified",
      r"獨有的貢獻|unique contribution|仍然獨有", (r"否定",),
@@ -131,6 +133,20 @@ RULES = [
      r"每一個 README 數字都可在 JSON 逐項對上|每一個 README 數字都可在 rev2 JSON",
      (r"為假", r"三份"),
      "README numbers live across three artifacts, not one."),
+    ("R4-partition-channel-name", "R4-B1", "forbidden",
+     r"break_location_(?:estimation_)?effect|f3_break_location|"
+     r"sd_factor_3_break_location|斷點定位\s*\(A[−-]B\)|f3\s+斷點定位",
+     (),
+     "A-B mixes BIC break-count selection and break-location estimation; active channel names "
+     "must say break-partition selection."),
+    ("R4-no-dominant-classification", "R4-B2", "forbidden",
+     r"dominant_sd_factor_per_asset|逐資產主導因子|主導因子\s*\|",
+     (),
+     "At 500 reps, per-asset dominant-channel classifications are not identified."),
+    ("R4-dominance-false", "R4-B2", "required",
+     r'"dominance_identified_at_500_reps"\s*:\s*false',
+     (),
+     "The machine-readable artifact must explicitly record that dominance is not identified."),
 ]
 
 

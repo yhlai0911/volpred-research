@@ -1,7 +1,7 @@
 {
   "experiment_id": "k1623_rev3_armc",
   "title": "Arm C (full oracle): the mean-estimation share of the generated-regressor problem in the break-demeaned ELW d-hat",
-  "generated_utc": "2026-07-20T19:20:14.275971+00:00",
+  "generated_utc": "2026-07-23T12:13:22.210023+00:00",
   "supersedes_nothing": "This artifact ADDS an arm. It does not modify, reinterpret or supersede any field of k1623_rev2_mc_results.json, which it opens read-only. Arm A and arm B values here are a REPRODUCTION of the frozen ones and agree with them to rtol=1e-9.",
   "closes_blocked_item": "mean_structure_generated_regressor_share_unmeasured",
   "seed": 42,
@@ -9,7 +9,7 @@
   "burn_in": 2000,
   "design": {
     "arm_a": "simulate -> Bai-Perron re-estimates breaks -> demean -> ELW (realistic)",
-    "arm_b": "simulate -> demean at the TRUE break LOCATIONS, segment means still ESTIMATED from the simulated data -> ELW (location-oracle only)",
+    "arm_b": "simulate -> demean at the TRUE break PARTITION (count plus locations), segment means still ESTIMATED from the simulated data -> ELW (partition-oracle)",
     "arm_c": "simulate -> subtract the KNOWN implanted level vector -> ELW (full oracle: neither break locations nor segment levels are estimated; numerically this is ELW on the raw ARFIMA path)",
     "dgp": "ARFIMA(0, d_hat, 0) Gaussian innovations + the fitted piecewise-constant level implanted at the estimated break dates",
     "shared_paths": "All three arms are evaluated on the SAME simulated series within each replication. Arm C consumes no random numbers, so the eps stream is identical to the frozen rev2 run; this is verified, not assumed, by the reproduction gate on arms A and B."
@@ -27,7 +27,7 @@
         "sd": 0.051776804285963506,
         "bias_vs_fitted": -0.02733899992938449
       },
-      "arm_b_location_oracle_means_estimated": {
+      "arm_b_partition_oracle_means_estimated": {
         "mean": 0.6378246199636172,
         "sd": 0.05096568141549462,
         "bias_vs_fitted": -0.0073769983102106584
@@ -42,22 +42,22 @@
         "one_caveat_do_not_overread": "Arm C is NOT a zero-mean oracle. local_whittle(exact=True) still subtracts a single sample GRAND mean internally, as Shimotsu-Phillips ELW requires. So arm C estimates one grand mean where arm B estimates n_breaks+1 segment means. B - C is therefore the INCREMENTAL cost of estimating the segment means over ELW's own standard single demeaning -- which is the right comparison, because some demeaning is unavoidable on real data, but it is NOT 'the total cost of estimating any mean at all' and must not be quoted as such."
       },
       "bias_decomposition": {
-        "definition": "A-B = locating breaks; B-C = estimating the n_breaks+1 segment means at known locations, INCREMENTAL over ELW's own single grand-mean demeaning (arm C is not a zero-mean oracle -- see arm C's 'one_caveat_do_not_overread'); A-C = total generated-regressor bias = (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, single-demeaning included.",
-        "break_location_effect_a_minus_b": -0.01996200161917383,
+        "definition": "A-B = selecting the break partition (count plus locations); B-C = estimating the n_breaks+1 segment means at the known partition, INCREMENTAL over ELW's own single grand-mean demeaning (arm C is not a zero-mean oracle -- see arm C's 'one_caveat_do_not_overread'); A-C = total generated-regressor bias = (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, single-demeaning included.",
+        "break_partition_selection_effect_a_minus_b": -0.01996200161917383,
         "mean_estimation_effect_b_minus_c": -0.025690793923299537,
         "total_generated_regressor_a_minus_c": -0.04565279554247337,
         "elw_own_finite_sample_bias_c_minus_fitted": 0.01831379561308888,
         "additivity_residual": 0.0,
         "mean_estimation_share_of_generated_regressor": 0.5627430613618819,
-        "break_location_share_of_generated_regressor": 0.43725693863811815,
+        "break_partition_selection_share_of_generated_regressor": 0.43725693863811815,
         "shares_are_interpretable": true,
         "shares_caveat": null
       },
       "sd_decomposition": {
-        "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x (sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own optimism, factor 2 is mean estimation, factor 3 is break location.",
+        "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x (sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own optimism, factor 2 is mean estimation, factor 3 is break-partition selection (count plus locations).",
         "f1_asymptotic_formula_sd_c_over_se": 1.1952008436689259,
         "f2_mean_estimation_sd_b_over_sd_c": 1.072001722662878,
-        "f3_break_location_sd_a_over_sd_b": 1.0159150794797829,
+        "f3_break_partition_selection_sd_a_over_sd_b": 1.0159150794797829,
         "total_sd_a_over_se": 1.301648676112846,
         "product_check": 1.301648676112846,
         "total_generated_regressor_sd_a_over_sd_c": 1.0890627152815218
@@ -152,7 +152,7 @@
         "sd": 0.0629120089576339,
         "bias_vs_fitted": -0.08463420351585227
       },
-      "arm_b_location_oracle_means_estimated": {
+      "arm_b_partition_oracle_means_estimated": {
         "mean": 0.43555877897490963,
         "sd": 0.05975524367701467,
         "bias_vs_fitted": -0.03947472102871585
@@ -167,22 +167,22 @@
         "one_caveat_do_not_overread": "Arm C is NOT a zero-mean oracle. local_whittle(exact=True) still subtracts a single sample GRAND mean internally, as Shimotsu-Phillips ELW requires. So arm C estimates one grand mean where arm B estimates n_breaks+1 segment means. B - C is therefore the INCREMENTAL cost of estimating the segment means over ELW's own standard single demeaning -- which is the right comparison, because some demeaning is unavoidable on real data, but it is NOT 'the total cost of estimating any mean at all' and must not be quoted as such."
       },
       "bias_decomposition": {
-        "definition": "A-B = locating breaks; B-C = estimating the n_breaks+1 segment means at known locations, INCREMENTAL over ELW's own single grand-mean demeaning (arm C is not a zero-mean oracle -- see arm C's 'one_caveat_do_not_overread'); A-C = total generated-regressor bias = (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, single-demeaning included.",
-        "break_location_effect_a_minus_b": -0.045159482487136415,
+        "definition": "A-B = selecting the break partition (count plus locations); B-C = estimating the n_breaks+1 segment means at the known partition, INCREMENTAL over ELW's own single grand-mean demeaning (arm C is not a zero-mean oracle -- see arm C's 'one_caveat_do_not_overread'); A-C = total generated-regressor bias = (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, single-demeaning included.",
+        "break_partition_selection_effect_a_minus_b": -0.045159482487136415,
         "mean_estimation_effect_b_minus_c": -0.04026984582204063,
         "total_generated_regressor_a_minus_c": -0.08542932830917704,
         "elw_own_finite_sample_bias_c_minus_fitted": 0.0007951247933247751,
         "additivity_residual": 0.0,
         "mean_estimation_share_of_generated_regressor": 0.47138197875441723,
-        "break_location_share_of_generated_regressor": 0.5286180212455828,
+        "break_partition_selection_share_of_generated_regressor": 0.5286180212455828,
         "shares_are_interpretable": true,
         "shares_caveat": null
       },
       "sd_decomposition": {
-        "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x (sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own optimism, factor 2 is mean estimation, factor 3 is break location.",
+        "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x (sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own optimism, factor 2 is mean estimation, factor 3 is break-partition selection (count plus locations).",
         "f1_asymptotic_formula_sd_c_over_se": 1.1263840382221713,
         "f2_mean_estimation_sd_b_over_sd_c": 1.1228675757939819,
-        "f3_break_location_sd_a_over_sd_b": 1.052828255503098,
+        "f3_break_partition_selection_sd_a_over_sd_b": 1.052828255503098,
         "total_sd_a_over_se": 1.3315962414509372,
         "product_check": 1.3315962414509372,
         "total_generated_regressor_sd_a_over_sd_c": 1.1821867109841708
@@ -277,7 +277,7 @@
         "sd": 0.049552929412157457,
         "bias_vs_fitted": -0.0646861923816674
       },
-      "arm_b_location_oracle_means_estimated": {
+      "arm_b_partition_oracle_means_estimated": {
         "mean": 0.5540295977499768,
         "sd": 0.04502337769105379,
         "bias_vs_fitted": -0.009066050678697368
@@ -292,22 +292,22 @@
         "one_caveat_do_not_overread": "Arm C is NOT a zero-mean oracle. local_whittle(exact=True) still subtracts a single sample GRAND mean internally, as Shimotsu-Phillips ELW requires. So arm C estimates one grand mean where arm B estimates n_breaks+1 segment means. B - C is therefore the INCREMENTAL cost of estimating the segment means over ELW's own standard single demeaning -- which is the right comparison, because some demeaning is unavoidable on real data, but it is NOT 'the total cost of estimating any mean at all' and must not be quoted as such."
       },
       "bias_decomposition": {
-        "definition": "A-B = locating breaks; B-C = estimating the n_breaks+1 segment means at known locations, INCREMENTAL over ELW's own single grand-mean demeaning (arm C is not a zero-mean oracle -- see arm C's 'one_caveat_do_not_overread'); A-C = total generated-regressor bias = (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, single-demeaning included.",
-        "break_location_effect_a_minus_b": -0.05562014170297003,
+        "definition": "A-B = selecting the break partition (count plus locations); B-C = estimating the n_breaks+1 segment means at the known partition, INCREMENTAL over ELW's own single grand-mean demeaning (arm C is not a zero-mean oracle -- see arm C's 'one_caveat_do_not_overread'); A-C = total generated-regressor bias = (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, single-demeaning included.",
+        "break_partition_selection_effect_a_minus_b": -0.05562014170297003,
         "mean_estimation_effect_b_minus_c": -0.022461947018436068,
         "total_generated_regressor_a_minus_c": -0.0780820887214061,
         "elw_own_finite_sample_bias_c_minus_fitted": 0.0133958963397387,
         "additivity_residual": 0.0,
         "mean_estimation_share_of_generated_regressor": 0.2876709292265405,
-        "break_location_share_of_generated_regressor": 0.7123290707734595,
+        "break_partition_selection_share_of_generated_regressor": 0.7123290707734595,
         "shares_are_interpretable": true,
         "shares_caveat": null
       },
       "sd_decomposition": {
-        "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x (sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own optimism, factor 2 is mean estimation, factor 3 is break location.",
+        "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x (sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own optimism, factor 2 is mean estimation, factor 3 is break-partition selection (count plus locations).",
         "f1_asymptotic_formula_sd_c_over_se": 1.0428692718080999,
         "f2_mean_estimation_sd_b_over_sd_c": 1.0575084032199082,
-        "f3_break_location_sd_a_over_sd_b": 1.1006044404794555,
+        "f3_break_partition_selection_sd_a_over_sd_b": 1.1006044404794555,
         "total_sd_a_over_se": 1.2137939231993855,
         "product_check": 1.2137939231993855,
         "total_generated_regressor_sd_a_over_sd_c": 1.1638984444281695
@@ -402,7 +402,7 @@
         "sd": 0.06190586520605872,
         "bias_vs_fitted": -0.07718970643430517
       },
-      "arm_b_location_oracle_means_estimated": {
+      "arm_b_partition_oracle_means_estimated": {
         "mean": 0.4212227111808416,
         "sd": 0.0598976321951364,
         "bias_vs_fitted": -0.03608666279032019
@@ -417,22 +417,22 @@
         "one_caveat_do_not_overread": "Arm C is NOT a zero-mean oracle. local_whittle(exact=True) still subtracts a single sample GRAND mean internally, as Shimotsu-Phillips ELW requires. So arm C estimates one grand mean where arm B estimates n_breaks+1 segment means. B - C is therefore the INCREMENTAL cost of estimating the segment means over ELW's own standard single demeaning -- which is the right comparison, because some demeaning is unavoidable on real data, but it is NOT 'the total cost of estimating any mean at all' and must not be quoted as such."
       },
       "bias_decomposition": {
-        "definition": "A-B = locating breaks; B-C = estimating the n_breaks+1 segment means at known locations, INCREMENTAL over ELW's own single grand-mean demeaning (arm C is not a zero-mean oracle -- see arm C's 'one_caveat_do_not_overread'); A-C = total generated-regressor bias = (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, single-demeaning included.",
-        "break_location_effect_a_minus_b": -0.04110304364398498,
+        "definition": "A-B = selecting the break partition (count plus locations); B-C = estimating the n_breaks+1 segment means at the known partition, INCREMENTAL over ELW's own single grand-mean demeaning (arm C is not a zero-mean oracle -- see arm C's 'one_caveat_do_not_overread'); A-C = total generated-regressor bias = (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, single-demeaning included.",
+        "break_partition_selection_effect_a_minus_b": -0.04110304364398498,
         "mean_estimation_effect_b_minus_c": -0.04298839769786489,
         "total_generated_regressor_a_minus_c": -0.08409144134184987,
         "elw_own_finite_sample_bias_c_minus_fitted": 0.006901734907544699,
         "additivity_residual": 0.0,
         "mean_estimation_share_of_generated_regressor": 0.5112101423390731,
-        "break_location_share_of_generated_regressor": 0.4887898576609269,
+        "break_partition_selection_share_of_generated_regressor": 0.4887898576609269,
         "shares_are_interpretable": true,
         "shares_caveat": null
       },
       "sd_decomposition": {
-        "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x (sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own optimism, factor 2 is mean estimation, factor 3 is break location.",
+        "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x (sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own optimism, factor 2 is mean estimation, factor 3 is break-partition selection (count plus locations).",
         "f1_asymptotic_formula_sd_c_over_se": 1.0667988588261783,
         "f2_mean_estimation_sd_b_over_sd_c": 1.1884095120560543,
-        "f3_break_location_sd_a_over_sd_b": 1.0335277528897944,
+        "f3_break_partition_selection_sd_a_over_sd_b": 1.0335277528897944,
         "total_sd_a_over_se": 1.3103001922521416,
         "product_check": 1.3103001922521416,
         "total_generated_regressor_sd_a_over_sd_c": 1.2282542125081508
@@ -527,7 +527,7 @@
         "sd": 0.06021076681209827,
         "bias_vs_fitted": -0.08426510648779084
       },
-      "arm_b_location_oracle_means_estimated": {
+      "arm_b_partition_oracle_means_estimated": {
         "mean": 0.4216054744262296,
         "sd": 0.059585690412935696,
         "bias_vs_fitted": -0.03871831275382637
@@ -542,22 +542,22 @@
         "one_caveat_do_not_overread": "Arm C is NOT a zero-mean oracle. local_whittle(exact=True) still subtracts a single sample GRAND mean internally, as Shimotsu-Phillips ELW requires. So arm C estimates one grand mean where arm B estimates n_breaks+1 segment means. B - C is therefore the INCREMENTAL cost of estimating the segment means over ELW's own standard single demeaning -- which is the right comparison, because some demeaning is unavoidable on real data, but it is NOT 'the total cost of estimating any mean at all' and must not be quoted as such."
       },
       "bias_decomposition": {
-        "definition": "A-B = locating breaks; B-C = estimating the n_breaks+1 segment means at known locations, INCREMENTAL over ELW's own single grand-mean demeaning (arm C is not a zero-mean oracle -- see arm C's 'one_caveat_do_not_overread'); A-C = total generated-regressor bias = (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, single-demeaning included.",
-        "break_location_effect_a_minus_b": -0.045546793733964475,
+        "definition": "A-B = selecting the break partition (count plus locations); B-C = estimating the n_breaks+1 segment means at the known partition, INCREMENTAL over ELW's own single grand-mean demeaning (arm C is not a zero-mean oracle -- see arm C's 'one_caveat_do_not_overread'); A-C = total generated-regressor bias = (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, single-demeaning included.",
+        "break_partition_selection_effect_a_minus_b": -0.045546793733964475,
         "mean_estimation_effect_b_minus_c": -0.043086587173233215,
         "total_generated_regressor_a_minus_c": -0.08863338090719769,
         "elw_own_finite_sample_bias_c_minus_fitted": 0.004368274419406848,
         "additivity_residual": 0.0,
         "mean_estimation_share_of_generated_regressor": 0.4861214446772194,
-        "break_location_share_of_generated_regressor": 0.5138785553227806,
+        "break_partition_selection_share_of_generated_regressor": 0.5138785553227806,
         "shares_are_interpretable": true,
         "shares_caveat": null
       },
       "sd_decomposition": {
-        "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x (sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own optimism, factor 2 is mean estimation, factor 3 is break location.",
+        "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x (sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own optimism, factor 2 is mean estimation, factor 3 is break-partition selection (count plus locations).",
         "f1_asymptotic_formula_sd_c_over_se": 1.1016744910340126,
         "f2_mean_estimation_sd_b_over_sd_c": 1.1396727580143013,
-        "f3_break_location_sd_a_over_sd_b": 1.010490377720401,
+        "f3_break_partition_selection_sd_a_over_sd_b": 1.010490377720401,
         "total_sd_a_over_se": 1.2687195826520485,
         "product_check": 1.2687195826520485,
         "total_generated_regressor_sd_a_over_sd_c": 1.1516283557235225
@@ -642,7 +642,7 @@
     }
   },
   "summary": {
-    "break_location_effect_range_a_minus_b": [
+    "break_partition_selection_effect_range_a_minus_b": [
       -0.05562014170297003,
       -0.01996200161917383
     ],
@@ -666,17 +666,12 @@
       1.0575084032199082,
       1.1884095120560543
     ],
-    "sd_factor_3_break_location_range": [
+    "sd_factor_3_break_partition_selection_range": [
       1.010490377720401,
       1.1006044404794555
     ],
-    "dominant_sd_factor_per_asset": {
-      "VIX": "asymptotic_formula",
-      "SPY": "asymptotic_formula",
-      "TW0050": "break_location",
-      "QQQ": "mean_estimation",
-      "N225": "mean_estimation"
-    },
+    "dominance_identified_at_500_reps": false,
+    "dominance_assessment": "The three channel factors are descriptive point estimates only. With 500 replications, a single sd estimate has rough relative Monte Carlo SE near 3.2%; replication-level draws were not retained, so paired covariance and a ranking test cannot be computed. No per-asset dominant-channel classification is emitted. Only the total sd_A/SE range (1.21-1.33x) is well separated from this noise scale.",
     "bias_shares_interpretable_per_asset": {
       "VIX": true,
       "SPY": true,
@@ -684,9 +679,9 @@
       "QQQ": true,
       "N225": true
     },
-    "finding_1_what_arm_c_measures": "The mean-estimation contribution to the d-hat bias, which rev2 could not see because it cancelled in A-B, is B-C = -0.0431 to -0.0225 (INCREMENTAL over ELW's own single grand-mean demeaning -- arm C is not a zero-mean oracle). The break-location contribution is A-B = -0.0556 to -0.0200 (reproduces the frozen rev2 range). Total generated-regressor bias is A-C = -0.0886 to -0.0457.",
+    "finding_1_what_arm_c_measures": "The mean-estimation contribution to the d-hat bias, which rev2 could not see because it cancelled in A-B, is B-C = -0.0431 to -0.0225 (INCREMENTAL over ELW's own single grand-mean demeaning -- arm C is not a zero-mean oracle). The break-partition-selection contribution (count plus locations) is A-B = -0.0556 to -0.0200 (reproduces the frozen rev2 range). Total generated-regressor bias is A-C = -0.0886 to -0.0457.",
     "finding_2_elw_own_bias_is_now_separated": "With BOTH break locations and segment levels known, ELW is still biased by +0.0008 to +0.0183 against the fitted d-hat. That part is ELW's own finite-sample behaviour at this n and bandwidth and has nothing to do with the BREAK-DRIVEN (segment-level) mean structure being estimated. It does still include ELW's own internal single global-mean demeaning step, applied identically in arms A, B and C, plus the FD_MAXK truncation effect -- so it is not a literal zero-generated-regressor quantity. rev2's arm-B bias mixed this together with segment-mean estimation; the two are now separated.",
-    "finding_3_which_factor_drives_the_se_understatement": "Multiplicatively, sd_A/SE_published = (asymptotic formula) x (mean estimation) x (break location) = 1.043-1.195 x 1.058-1.188 x 1.010-1.101. The dominant factor per asset is computed in 'dominant_sd_factor_per_asset'. rev2's finding_2 asserted the asymptotic formula itself was the main driver while being unable to see the mean-estimation factor at all; this artifact is the first evidence that can confirm or refute that assertion, and it must be read whichever way it came out."
+    "finding_3_channel_point_estimates_not_dominance": "Multiplicatively, sd_A/SE_published = (asymptotic formula) x (mean estimation) x (break-partition selection) = 1.043-1.195 x 1.058-1.188 x 1.010-1.101. These are descriptive point estimates, not identified dominant channels: 500 reps imply rough relative MC SE near 3.2% for a single sd estimate, and replication-level draws needed for paired ranking inference were not retained. Only total sd_A/SE_published = 1.21-1.33x is well separated from that noise scale."
   },
   "scope_limits": [
     "MODEL-CONDITIONAL, exactly as in rev2: assumes the DGP really is ARFIMA + deterministic breaks at the estimated dates. Adding an arm refines the ATTRIBUTION of sampling uncertainty under that model; it is not a test of the model.",
@@ -696,5 +691,5 @@
     "Arm C is oracle in the LEVEL VECTOR, which is available only because the level was implanted by the simulation. It is a decomposition device, not an estimator anyone could use on real data.",
     "Arm C is NOT zero-mean. local_whittle(exact=True) always subtracts one global sample mean internally, in ALL THREE arms. Arm C is therefore ELW as CONVENTIONALLY DEFINED (built-in demeaning included), not a hypothetical ELW variant that knows the mean is exactly zero. Two consequences, and they point in different directions: (i) it does NOT contaminate the B-C or A-C contrasts, because the step is identical across arms and differences out; (ii) but it does mean B-C is the INCREMENTAL cost of estimating n_breaks+1 segment means OVER that single demeaning -- not the cost of estimating any mean at all -- and that 'elw_own_finite_sample_bias' is not a literal zero-generated-regressor quantity. Quoting either as the stronger thing would repeat, for arm C, the exact overclaim rev2 had to retract for arm B."
   ],
-  "total_runtime_sec": 308.02
+  "total_runtime_sec": 283.52
 }

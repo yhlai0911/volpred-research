@@ -6,10 +6,12 @@
     "k1623_rev2_results.json",
     "k1623_rev2_mc_results.json",
     "k1623_rev3_patch_mc_artifact.py",
+    "k1623_rev3_armc_mc.py",
+    "k1623_rev3_armc_results.json",
     "k1623_rev3_selfcheck.py"
   ],
-  "positive_control_hits": 110,
-  "rules_total": 11,
+  "positive_control_hits": 158,
+  "rules_total": 14,
   "rules_failed": 0,
   "all_pass": true,
   "rules": [
@@ -19,7 +21,7 @@
       "kind": "qualified",
       "pattern": "2\\.51e-3|0\\.00251|2\\.5e-3",
       "hits": [
-        "README.md:133",
+        "README.md:142",
         "k1623_rev2.py:535",
         "k1623_rev2.py:690",
         "k1623_rev2_results.json:54",
@@ -36,12 +38,12 @@
       "kind": "required",
       "pattern": "5\\.26e-3",
       "hits": [
-        "README.md:117",
-        "README.md:128",
-        "README.md:135",
-        "README.md:171",
-        "README.md:392",
-        "README.md:479",
+        "README.md:126",
+        "README.md:137",
+        "README.md:144",
+        "README.md:180",
+        "README.md:455",
+        "README.md:549",
         "k1623_rev2.py:533",
         "k1623_rev2.py:687",
         "k1623_rev2_results.json:54",
@@ -61,8 +63,8 @@
         "README.md:39",
         "README.md:41",
         "README.md:42",
-        "README.md:275",
-        "README.md:476"
+        "README.md:284",
+        "README.md:546"
       ],
       "unqualified_hits": [],
       "allowlisted": [],
@@ -75,8 +77,8 @@
       "kind": "qualified",
       "pattern": "所有數字不變|所有預測值不變|forecasts unchanged",
       "hits": [
-        "README.md:167",
-        "README.md:442"
+        "README.md:176",
+        "README.md:512"
       ],
       "unqualified_hits": [],
       "allowlisted": [],
@@ -89,10 +91,10 @@
       "kind": "qualified",
       "pattern": "same forecasts|同一個樣本",
       "hits": [
-        "README.md:225",
-        "README.md:259",
-        "README.md:442",
-        "README.md:478",
+        "README.md:234",
+        "README.md:268",
+        "README.md:512",
+        "README.md:548",
         "k1623_rev2.py:537",
         "k1623_rev2.py:598",
         "k1623_rev2.py:691",
@@ -111,8 +113,8 @@
       "kind": "qualified",
       "pattern": "-0\\.085 to -0\\.027|−0\\.085 到 −0\\.027|0\\.085 至 .?0\\.027",
       "hits": [
-        "README.md:347",
-        "README.md:444",
+        "README.md:392",
+        "README.md:514",
         "k1623_rev2_mc_results.json:180",
         "k1623_rev2_mc_results.json:202",
         "k1623_rev3_patch_mc_artifact.py:103"
@@ -133,17 +135,15 @@
       "kind": "qualified",
       "pattern": "break DATES|斷點.{0,4}日期",
       "hits": [
-        "README.md:311",
-        "README.md:356",
-        "README.md:358",
-        "README.md:370",
+        "README.md:320",
+        "README.md:407",
+        "README.md:409",
+        "README.md:433",
         "k1623_rev2.py:645",
         "k1623_rev2.py:736",
-        "k1623_rev2_mc.py:132",
-        "k1623_rev2_mc.py:221",
-        "k1623_rev2_mc.py:270",
-        "k1623_rev2_mc.py:292",
-        "k1623_rev2_mc.py:296",
+        "k1623_rev2_mc.py:278",
+        "k1623_rev2_mc.py:329",
+        "k1623_rev2_mc.py:355",
         "k1623_rev2_results.json:2139",
         "k1623_rev2_results.json:2206",
         "k1623_rev2_mc_results.json:11",
@@ -151,9 +151,14 @@
         "k1623_rev2_mc_results.json:191",
         "k1623_rev2_mc_results.json:217",
         "k1623_rev2_mc_results.json:218",
-        "k1623_rev3_patch_mc_artifact.py:130",
-        "k1623_rev3_patch_mc_artifact.py:134",
-        "k1623_rev3_patch_mc_artifact.py:203"
+        "k1623_rev3_patch_mc_artifact.py:131",
+        "k1623_rev3_patch_mc_artifact.py:135",
+        "k1623_rev3_patch_mc_artifact.py:209",
+        "k1623_rev3_armc_mc.py:79",
+        "k1623_rev3_armc_mc.py:368",
+        "k1623_rev3_armc_mc.py:424",
+        "k1623_rev3_armc_results.json:14",
+        "k1623_rev3_armc_results.json:689"
       ],
       "unqualified_hits": [],
       "allowlisted": [
@@ -169,23 +174,29 @@
       "rule_id": "B4-arm-b-elw-only",
       "blocker": "B4",
       "kind": "qualified",
-      "pattern": "ELW alone|elw_own|ELW-only|ELW 而已",
+      "pattern": "ELW alone|ELW-only|ELW 而已",
       "hits": [
         "k1623_rev2_mc.py:31",
-        "k1623_rev2_mc.py:134",
-        "k1623_rev2_mc.py:167",
-        "k1623_rev2_mc.py:219",
-        "k1623_rev2_mc.py:292",
+        "k1623_rev2_mc.py:147",
+        "k1623_rev2_mc.py:180",
+        "k1623_rev2_mc.py:276",
+        "k1623_rev2_mc.py:351",
         "k1623_rev2_mc_results.json:12",
         "k1623_rev2_mc_results.json:191",
         "k1623_rev2_mc_results.json:223",
         "k1623_rev2_mc_results.json:224",
         "k1623_rev2_mc_results.json:273",
-        "k1623_rev3_patch_mc_artifact.py:149",
-        "k1623_rev3_patch_mc_artifact.py:175",
-        "k1623_rev3_patch_mc_artifact.py:199",
-        "k1623_rev3_patch_mc_artifact.py:203",
-        "k1623_rev3_patch_mc_artifact.py:208"
+        "k1623_rev3_patch_mc_artifact.py:151",
+        "k1623_rev3_patch_mc_artifact.py:180",
+        "k1623_rev3_patch_mc_artifact.py:205",
+        "k1623_rev3_patch_mc_artifact.py:209",
+        "k1623_rev3_patch_mc_artifact.py:214",
+        "k1623_rev3_armc_mc.py:239",
+        "k1623_rev3_armc_results.json:41",
+        "k1623_rev3_armc_results.json:166",
+        "k1623_rev3_armc_results.json:291",
+        "k1623_rev3_armc_results.json:416",
+        "k1623_rev3_armc_results.json:541"
       ],
       "unqualified_hits": [],
       "allowlisted": [],
@@ -198,7 +209,7 @@
       "kind": "qualified",
       "pattern": "獨有的貢獻|unique contribution|仍然獨有",
       "hits": [
-        "README.md:72"
+        "README.md:81"
       ],
       "unqualified_hits": [],
       "allowlisted": [],
@@ -211,7 +222,7 @@
       "kind": "qualified",
       "pattern": "五個巢狀集合|FIVE nested",
       "hits": [
-        "README.md:188"
+        "README.md:197"
       ],
       "unqualified_hits": [],
       "allowlisted": [],
@@ -224,12 +235,48 @@
       "kind": "qualified",
       "pattern": "每一個 README 數字都可在 JSON 逐項對上|每一個 README 數字都可在 rev2 JSON",
       "hits": [
-        "README.md:412"
+        "README.md:481"
       ],
       "unqualified_hits": [],
       "allowlisted": [],
       "status": "PASS",
       "note": "README numbers live across three artifacts, not one."
+    },
+    {
+      "rule_id": "R4-partition-channel-name",
+      "blocker": "R4-B1",
+      "kind": "forbidden",
+      "pattern": "break_location_(?:estimation_)?effect|f3_break_location|sd_factor_3_break_location|斷點定位\\s*\\(A[−-]B\\)|f3\\s+斷點定位",
+      "hits": [],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "A-B mixes BIC break-count selection and break-location estimation; active channel names must say break-partition selection."
+    },
+    {
+      "rule_id": "R4-no-dominant-classification",
+      "blocker": "R4-B2",
+      "kind": "forbidden",
+      "pattern": "dominant_sd_factor_per_asset|逐資產主導因子|主導因子\\s*\\|",
+      "hits": [],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "At 500 reps, per-asset dominant-channel classifications are not identified."
+    },
+    {
+      "rule_id": "R4-dominance-false",
+      "blocker": "R4-B2",
+      "kind": "required",
+      "pattern": "\"dominance_identified_at_500_reps\"\\s*:\\s*false",
+      "hits": [
+        "k1623_rev3_armc_mc.py:383",
+        "k1623_rev3_armc_results.json:673"
+      ],
+      "unqualified_hits": [],
+      "allowlisted": [],
+      "status": "PASS",
+      "note": "The machine-readable artifact must explicitly record that dominance is not identified."
     }
   ]
 }

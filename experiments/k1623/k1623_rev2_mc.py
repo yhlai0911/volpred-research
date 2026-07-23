@@ -20,19 +20,20 @@ Design
 For each asset, condition on the fitted model (BIC breaks + segment means +
 demeaned d-hat), simulate from it, and re-run the whole estimation chain:
 
-  Arm A (realistic)      simulate -> Bai-Perron re-estimates breaks -> demean -> ELW
-  Arm B (location-oracle) simulate -> demean at the TRUE simulated break LOCATIONS -> ELW
+  Arm A (realistic)        simulate -> Bai-Perron selects break COUNT + LOCATIONS -> demean -> ELW
+  Arm B (partition-oracle) simulate -> demean at the TRUE simulated break PARTITION -> ELW
 
 WHAT ARM B IS, PRECISELY (corrected in rev3 after Codex round 2 §7)
 ------------------------------------------------------------------
-Arm B is an oracle in break LOCATION only. It calls piecewise_demean on the
+Arm B is an oracle in the full break PARTITION (count plus locations). It calls piecewise_demean on the
 SIMULATED series, so it still ESTIMATES each segment's mean from that data
 rather than using the known implanted level vector. An earlier draft of this
 docstring called it "ELW alone"; that was wrong, and the error matters for how
 the contrast is read:
 
   sd(A)/sd(B) and the paired A-minus-B bias contrast measure the cost of having
-  to LOCATE the breaks, holding fixed that BOTH arms re-estimate segment means.
+  to select the break partition (count plus locations), holding fixed that BOTH
+  arms re-estimate segment means.
   The generated-regressor uncertainty contributed by estimating the mean
   structure is present in both arms and is therefore DIFFERENCED OUT -- this
   design does not measure it and does not bound it.
@@ -141,7 +142,7 @@ def analyse(label: str, y: np.ndarray, rng: np.random.Generator) -> dict:
         d_arm_a.append(float(K.local_whittle(
             K.piecewise_demean(x, bp_s["breaks"]), m, exact=True)["d"]))
 
-        # Arm B: LOCATION-oracle -- the break dates are the true simulated ones,
+        # Arm B: PARTITION-oracle -- the break count and dates are the true ones,
         # but piecewise_demean still estimates each segment mean from x. This is
         # NOT "ELW alone"; see the docstring.
         d_arm_b.append(float(K.local_whittle(
@@ -168,8 +169,8 @@ def analyse(label: str, y: np.ndarray, rng: np.random.Generator) -> dict:
         },
         # ATTRIBUTION (corrected after review): arm A's bias_vs_fitted is NOT the
         # effect of estimating breaks. It is the SUM of (i) the bias arm B already
-        # shows even with the true break locations, and (ii) the extra attenuation
-        # from having to LOCATE the breaks. Only the paired A-minus-B contrast
+        # shows even with the true break partition, and (ii) the extra attenuation
+        # from having to select the break count and locations. Only the paired A-minus-B contrast
         # isolates (ii). Reporting A's total as "the break estimation effect"
         # overstates it roughly two-fold.
         #
@@ -177,8 +178,8 @@ def analyse(label: str, y: np.ndarray, rng: np.random.Generator) -> dict:
         # bias". Arm B re-estimates the segment means, so its bias mixes ELW's
         # finite-sample behaviour with mean-estimation error at known locations.
         # Calling it ELW-only was the wording Codex round 2 §7 flagged.
-        "break_estimation_attenuation_a_minus_b": float(a.mean() - b.mean()),
-        "arm_b_oracle_location_bias": float(b.mean() - d_hat),
+        "break_partition_selection_attenuation_a_minus_b": float(a.mean() - b.mean()),
+        "arm_b_oracle_partition_bias": float(b.mean() - d_hat),
         "generated_regressor_inflation_sd_a_over_sd_b": float(sd_a / sd_b) if sd_b else None,
         "understatement_sd_a_over_published_se": float(sd_a / se_asym) if se_asym else None,
         "break_count_recovery": {
@@ -252,11 +253,12 @@ def main() -> None:
     infl = [v["generated_regressor_inflation_sd_a_over_sd_b"] for v in per_asset.values()]
     under = [v["understatement_sd_a_over_published_se"] for v in per_asset.values()]
     bias = [v["arm_a_breaks_reestimated"]["bias_vs_fitted"] for v in per_asset.values()]
-    # Isolated break-LOCATION effect = paired A-minus-B contrast (see the note on
+    # Combined break-PARTITION-selection effect (count plus locations) =
+    # paired A-minus-B contrast (see the note on
     # the per-asset dict). `bias` above is the TOTAL, which also contains whatever
     # arm B is already biased by at known break locations.
-    brk_bias = [v["break_estimation_attenuation_a_minus_b"] for v in per_asset.values()]
-    armb_bias = [v["arm_b_oracle_location_bias"] for v in per_asset.values()]
+    brk_bias = [v["break_partition_selection_attenuation_a_minus_b"] for v in per_asset.values()]
+    armb_bias = [v["arm_b_oracle_partition_bias"] for v in per_asset.values()]
     tstats = {k: v["d_demeaned_fitted"] / v["arm_a_breaks_reestimated"]["sd"]
               for k, v in per_asset.items()}
     recov = {k: v["break_count_recovery"]["pct_recovered_exactly"]
@@ -268,8 +270,9 @@ def main() -> None:
         "seed": SEED, "n_reps": N_REPS, "burn_in": BURN,
         "design": {
             "arm_a": "simulate -> Bai-Perron re-estimates breaks -> demean -> ELW (realistic)",
-            "arm_b": "simulate -> demean at the TRUE simulated break LOCATIONS -> ELW "
-                     "(location-oracle only: segment MEANS are still estimated from the "
+            "arm_b": "simulate -> demean at the TRUE simulated break PARTITION "
+                     "(count plus locations) -> ELW (partition-oracle: segment MEANS are "
+                     "still estimated from the "
                      "simulated data, so this is NOT an 'ELW alone' baseline)",
             "dgp": "ARFIMA(0, d_hat, 0) Gaussian innovations + the fitted piecewise-constant "
                    "level implanted at the estimated break dates",
@@ -279,8 +282,8 @@ def main() -> None:
             "generated_regressor_inflation_range": [min(infl), max(infl)],
             "published_se_understatement_range": [min(under), max(under)],
             "total_attenuation_bias_range_arm_a": [min(bias), max(bias)],
-            "break_estimation_attenuation_range_a_minus_b": [min(brk_bias), max(brk_bias)],
-            "arm_b_oracle_location_bias_range": [min(armb_bias), max(armb_bias)],
+            "break_partition_selection_attenuation_range_a_minus_b": [min(brk_bias), max(brk_bias)],
+            "arm_b_oracle_partition_bias_range": [min(armb_bias), max(armb_bias)],
             "d_over_mc_sd": tstats,
             "break_count_exact_recovery_rate": recov,
             "finding_1_se_is_understated": (
@@ -289,14 +292,15 @@ def main() -> None:
                 f"intervals are too narrow."
             ),
             "finding_2_but_not_mainly_because_of_the_breaks": (
-                f"Contrary to what the reviewer critique might suggest, having to LOCATE the "
-                f"breaks contributes only {min(infl):.2f}-{max(infl):.2f}x on top of the "
-                f"location-oracle sd -- i.e. that part of the generated-regressor effect on the "
+                f"BIC selecting the break partition (count plus locations) contributes "
+                f"{min(infl):.2f}-{max(infl):.2f}x on top of the partition-oracle sd -- i.e. "
+                f"that part of the generated-regressor effect on the "
                 f"SE is SMALL. Most of the understatement comes from the asymptotic "
                 f"1/(2 sqrt(m)) formula itself being optimistic at this sample size and "
                 f"bandwidth. Reported this way round because it is what the simulation shows, "
                 f"not what would best support the critique. SCOPE (rev3): both arms re-estimate "
-                f"the segment MEANS, so this ratio bounds the break-LOCATION cost only; the "
+                f"the segment MEANS, so this ratio measures the combined partition-selection "
+                f"channel only; the "
                 f"mean-estimation share of the generated-regressor problem cancels in the "
                 f"contrast and is NOT measured here."
             ),
@@ -305,10 +309,11 @@ def main() -> None:
                 f"simulated DGP contains EXACTLY the level shifts being removed and no others. "
                 f"ATTRIBUTION (corrected after review -- an earlier draft credited the whole "
                 f"total to break estimation, overstating it about two-fold): the TOTAL arm-A "
-                f"bias is {min(bias):.3f} to {max(bias):.3f}, but the location-oracle arm B is "
+                f"bias is {min(bias):.3f} to {max(bias):.3f}, but the partition-oracle arm B is "
                 f"already biased by {min(armb_bias):.3f} to {max(armb_bias):.3f} from ELW's own "
                 f"finite-sample behaviour COMBINED WITH estimating the segment means at known "
-                f"locations. The part actually attributable to LOCATING the breaks is the "
+                f"locations. The part attributable to selecting the break partition "
+                f"(count plus locations) is the "
                 f"paired A-minus-B contrast, "
                 f"{min(brk_bias):.3f} to {max(brk_bias):.3f}. That smaller number is the one "
                 f"that should be quoted. The qualitative point stands: part of the raw -> "
@@ -343,9 +348,9 @@ def main() -> None:
             "identification question this experiment RETRACTS rather than answers.",
             "Gaussian innovations; log-RV is closer to Gaussian than RV but not exactly so.",
             "The same FD_MAXK = 2000 truncation binds here as in the main round.",
-            "ARM B IS NOT ELW-ONLY: the oracle arm knows the break DATES but still estimates "
+            "ARM B IS NOT ELW-ONLY: the oracle arm knows the break COUNT and DATES but still estimates "
             "the segment MEANS from simulated data. The A-minus-B contrast therefore isolates "
-            "the cost of locating breaks and differences out the mean-estimation "
+            "the combined cost of selecting the break partition and differences out the mean-estimation "
             "generated-regressor uncertainty, which this design does not measure.",
             "Break DATES are never stored or compared -- only the selected break COUNT. This "
             "artifact cannot quantify break-date location error, and no claim about it is made.",

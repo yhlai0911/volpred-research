@@ -7,8 +7,8 @@ WHY THIS SCRIPT EXISTS
 `k1623_rev2_mc.py` runs two arms and README §6.4 carries the resulting scope
 limit as DISCLOSED, NOT FIXED:
 
-  Arm A (realistic)       simulate -> Bai-Perron RE-ESTIMATES breaks -> demean -> ELW
-  Arm B (location-oracle) simulate -> demean at the TRUE break LOCATIONS -> ELW
+  Arm A (realistic)        simulate -> Bai-Perron selects break COUNT + LOCATIONS -> demean -> ELW
+  Arm B (partition-oracle) simulate -> demean at the TRUE break PARTITION -> ELW
 
 Both arms re-ESTIMATE each segment's mean from the simulated data. The
 uncertainty contributed by estimating the mean structure is therefore present in
@@ -21,10 +21,10 @@ Arm C makes the level oracle too:
 
 The three arms then decompose cleanly, on SHARED simulated paths:
 
-  A - B  = cost of having to LOCATE the breaks      (frozen in rev2)
+  A - B  = cost of selecting the break PARTITION (count + locations; frozen in rev2)
   B - C  = cost of having to ESTIMATE the segment MEANS at known locations  <-- NEW
   A - C  = total generated-regressor cost = (A-B) + (B-C)
-  C - d  = ELW's OWN finite-sample bias, with no generated regressor at all
+  C - d  = ELW's OWN finite-sample bias, with no break-driven segmented-mean regressor
 
 Note what arm C is, numerically. The simulated series is x = fracint(eps) + level,
 so x - level is the raw ARFIMA path. Arm C is therefore the break-free baseline
@@ -173,8 +173,8 @@ def analyse_three_arms(label: str, y: np.ndarray, rng: np.random.Generator,
         d_a.append(float(K.local_whittle(
             K.piecewise_demean(x, bp_s["breaks"]), m, exact=True)["d"]))
 
-        # Arm B: LOCATION-oracle. Break dates are the true ones, but each
-        # segment mean is still ESTIMATED from x by piecewise_demean.
+        # Arm B: PARTITION-oracle. Break count and locations are the true ones,
+        # but each segment mean is still ESTIMATED from x by piecewise_demean.
         d_b.append(float(K.local_whittle(
             K.piecewise_demean(x, breaks_true), m, exact=True)["d"]))
 
@@ -204,19 +204,19 @@ def analyse_three_arms(label: str, y: np.ndarray, rng: np.random.Generator,
         )
 
     # ---- the decomposition this experiment was blocked on --------------------
-    loc = mean_a - mean_b            # locating the breaks       (frozen in rev2)
+    partition = mean_a - mean_b      # select count + locations  (frozen in rev2)
     meanest = mean_b - mean_c        # estimating segment means  (NEW)
-    total_gr = mean_a - mean_c       # = loc + meanest
+    total_gr = mean_a - mean_c       # = partition + meanest
     elw_own = mean_c - d_hat         # ELW with no BREAK-driven generated regressor.
     # Not "no generated regressor at all": ELW still demeans by one global sample
     # mean internally, in every arm. See arm C's one_caveat_do_not_overread.
 
     # Shares are only meaningful when the total is not ~0, and only honest when
     # the two parts have the SAME sign (otherwise "share" hides cancellation).
-    same_sign = bool(loc * meanest > 0)
+    same_sign = bool(partition * meanest > 0)
     denom_ok = bool(abs(total_gr) > 1e-6)
     share_mean = float(meanest / total_gr) if denom_ok else None
-    share_loc = float(loc / total_gr) if denom_ok else None
+    share_partition = float(partition / total_gr) if denom_ok else None
 
     return {
         "n": n, "bandwidth_m": m,
@@ -226,7 +226,7 @@ def analyse_three_arms(label: str, y: np.ndarray, rng: np.random.Generator,
         "innovation_sigma": sigma,
         "arm_a_breaks_reestimated": {
             "mean": mean_a, "sd": sd_a, "bias_vs_fitted": mean_a - d_hat},
-        "arm_b_location_oracle_means_estimated": {
+        "arm_b_partition_oracle_means_estimated": {
             "mean": mean_b, "sd": sd_b, "bias_vs_fitted": mean_b - d_hat},
         "arm_c_full_oracle_known_level": {
             "mean": mean_c, "sd": sd_c, "bias_vs_fitted": elw_own,
@@ -247,19 +247,20 @@ def analyse_three_arms(label: str, y: np.ndarray, rng: np.random.Generator,
                 "estimating any mean at all' and must not be quoted as such."),
         },
         "bias_decomposition": {
-            "definition": "A-B = locating breaks; B-C = estimating the n_breaks+1 segment means "
-                          "at known locations, INCREMENTAL over ELW's own single grand-mean "
+            "definition": "A-B = selecting the break partition (count plus locations); "
+                          "B-C = estimating the n_breaks+1 segment means at the known partition, "
+                          "INCREMENTAL over ELW's own single grand-mean "
                           "demeaning (arm C is not a zero-mean oracle -- see arm C's "
                           "'one_caveat_do_not_overread'); A-C = total generated-regressor bias "
                           "= (A-B) + (B-C); C - d_fitted = ELW's own finite-sample bias, "
                           "single-demeaning included.",
-            "break_location_effect_a_minus_b": loc,
+            "break_partition_selection_effect_a_minus_b": partition,
             "mean_estimation_effect_b_minus_c": meanest,
             "total_generated_regressor_a_minus_c": total_gr,
             "elw_own_finite_sample_bias_c_minus_fitted": elw_own,
-            "additivity_residual": float((loc + meanest) - total_gr),
+            "additivity_residual": float((partition + meanest) - total_gr),
             "mean_estimation_share_of_generated_regressor": share_mean,
-            "break_location_share_of_generated_regressor": share_loc,
+            "break_partition_selection_share_of_generated_regressor": share_partition,
             "shares_are_interpretable": bool(same_sign and denom_ok),
             "shares_caveat": None if (same_sign and denom_ok) else (
                 "The two components have OPPOSITE signs (or the total is ~0), so they partially "
@@ -269,10 +270,11 @@ def analyse_three_arms(label: str, y: np.ndarray, rng: np.random.Generator,
         "sd_decomposition": {
             "definition": "Multiplicative: sd_A/SE_published = (sd_C/SE_published) x "
                           "(sd_B/sd_C) x (sd_A/sd_B). Factor 1 is the asymptotic formula's own "
-                          "optimism, factor 2 is mean estimation, factor 3 is break location.",
+                          "optimism, factor 2 is mean estimation, factor 3 is break-partition "
+                          "selection (count plus locations).",
             "f1_asymptotic_formula_sd_c_over_se": float(sd_c / se_asym),
             "f2_mean_estimation_sd_b_over_sd_c": float(sd_b / sd_c),
-            "f3_break_location_sd_a_over_sd_b": float(sd_a / sd_b),
+            "f3_break_partition_selection_sd_a_over_sd_b": float(sd_a / sd_b),
             "total_sd_a_over_se": float(sd_a / se_asym),
             "product_check": float((sd_c / se_asym) * (sd_b / sd_c) * (sd_a / sd_b)),
             "total_generated_regressor_sd_a_over_sd_c": float(sd_a / sd_c),
@@ -292,16 +294,6 @@ def analyse_three_arms(label: str, y: np.ndarray, rng: np.random.Generator,
                      "simulated paths and that B-C is a clean paired contrast.",
         },
     }
-
-
-def _dominant_factor(sd: dict) -> str:
-    """Which multiplicative factor dominates the SE understatement. Computed, not asserted."""
-    factors = {
-        "asymptotic_formula": sd["f1_asymptotic_formula_sd_c_over_se"],
-        "mean_estimation": sd["f2_mean_estimation_sd_b_over_sd_c"],
-        "break_location": sd["f3_break_location_sd_a_over_sd_b"],
-    }
-    return max(factors, key=lambda k: abs(np.log(factors[k])))
 
 
 def main() -> None:
@@ -328,27 +320,28 @@ def main() -> None:
         per_asset[label] = analyse_three_arms(label, y, rng, frozen_mc["per_asset"][label])
         r = per_asset[label]
         bd, sd = r["bias_decomposition"], r["sd_decomposition"]
-        print(f"[{label}] A-B(locate)={bd['break_location_effect_a_minus_b']:+.4f}  "
+        print(f"[{label}] A-B(partition)={bd['break_partition_selection_effect_a_minus_b']:+.4f}  "
               f"B-C(mean est)={bd['mean_estimation_effect_b_minus_c']:+.4f}  "
               f"A-C(total GR)={bd['total_generated_regressor_a_minus_c']:+.4f}  "
               f"C-d(ELW own)={bd['elw_own_finite_sample_bias_c_minus_fitted']:+.4f}  |  "
               f"sd_C/SE={sd['f1_asymptotic_formula_sd_c_over_se']:.3f}  "
               f"sd_B/sd_C={sd['f2_mean_estimation_sd_b_over_sd_c']:.3f}  "
-              f"sd_A/sd_B={sd['f3_break_location_sd_a_over_sd_b']:.3f}")
+              f"sd_A/sd_B={sd['f3_break_partition_selection_sd_a_over_sd_b']:.3f}")
 
     def rng_of(fn):
         vals = [fn(v) for v in per_asset.values()]
         return [min(vals), max(vals)]
 
-    loc_r = rng_of(lambda v: v["bias_decomposition"]["break_location_effect_a_minus_b"])
+    partition_r = rng_of(
+        lambda v: v["bias_decomposition"]["break_partition_selection_effect_a_minus_b"])
     mean_r = rng_of(lambda v: v["bias_decomposition"]["mean_estimation_effect_b_minus_c"])
     gr_r = rng_of(lambda v: v["bias_decomposition"]["total_generated_regressor_a_minus_c"])
     elw_r = rng_of(lambda v: v["bias_decomposition"]["elw_own_finite_sample_bias_c_minus_fitted"])
     f1_r = rng_of(lambda v: v["sd_decomposition"]["f1_asymptotic_formula_sd_c_over_se"])
     f2_r = rng_of(lambda v: v["sd_decomposition"]["f2_mean_estimation_sd_b_over_sd_c"])
-    f3_r = rng_of(lambda v: v["sd_decomposition"]["f3_break_location_sd_a_over_sd_b"])
+    f3_r = rng_of(
+        lambda v: v["sd_decomposition"]["f3_break_partition_selection_sd_a_over_sd_b"])
 
-    dominant = {k: _dominant_factor(v["sd_decomposition"]) for k, v in per_asset.items()}
     shares_ok = {k: v["bias_decomposition"]["shares_are_interpretable"]
                  for k, v in per_asset.items()}
 
@@ -365,8 +358,9 @@ def main() -> None:
         "seed": SEED, "n_reps": N_REPS, "burn_in": BURN,
         "design": {
             "arm_a": "simulate -> Bai-Perron re-estimates breaks -> demean -> ELW (realistic)",
-            "arm_b": "simulate -> demean at the TRUE break LOCATIONS, segment means still "
-                     "ESTIMATED from the simulated data -> ELW (location-oracle only)",
+            "arm_b": "simulate -> demean at the TRUE break PARTITION (count plus locations), "
+                     "segment means still ESTIMATED from the simulated data -> ELW "
+                     "(partition-oracle)",
             "arm_c": "simulate -> subtract the KNOWN implanted level vector -> ELW "
                      "(full oracle: neither break locations nor segment levels are estimated; "
                      "numerically this is ELW on the raw ARFIMA path)",
@@ -379,21 +373,28 @@ def main() -> None:
         },
         "per_asset": per_asset,
         "summary": {
-            "break_location_effect_range_a_minus_b": loc_r,
+            "break_partition_selection_effect_range_a_minus_b": partition_r,
             "mean_estimation_effect_range_b_minus_c": mean_r,
             "total_generated_regressor_range_a_minus_c": gr_r,
             "elw_own_finite_sample_bias_range_c_minus_fitted": elw_r,
             "sd_factor_1_asymptotic_formula_range": f1_r,
             "sd_factor_2_mean_estimation_range": f2_r,
-            "sd_factor_3_break_location_range": f3_r,
-            "dominant_sd_factor_per_asset": dominant,
+            "sd_factor_3_break_partition_selection_range": f3_r,
+            "dominance_identified_at_500_reps": False,
+            "dominance_assessment": (
+                "The three channel factors are descriptive point estimates only. With 500 "
+                "replications, a single sd estimate has rough relative Monte Carlo SE near 3.2%; "
+                "replication-level draws were not retained, so paired covariance and a ranking "
+                "test cannot be computed. No per-asset dominant-channel classification is emitted. "
+                "Only the total sd_A/SE range (1.21-1.33x) is well separated from this noise scale."),
             "bias_shares_interpretable_per_asset": shares_ok,
             "finding_1_what_arm_c_measures": (
                 f"The mean-estimation contribution to the d-hat bias, which rev2 could not see "
                 f"because it cancelled in A-B, is B-C = {mean_r[0]:+.4f} to {mean_r[1]:+.4f} "
                 f"(INCREMENTAL over ELW's own single grand-mean demeaning -- arm C is not a "
                 f"zero-mean oracle). "
-                f"The break-location contribution is A-B = {loc_r[0]:+.4f} to {loc_r[1]:+.4f} "
+                f"The break-partition-selection contribution (count plus locations) is A-B = "
+                f"{partition_r[0]:+.4f} to {partition_r[1]:+.4f} "
                 f"(reproduces the frozen rev2 range). Total generated-regressor bias is "
                 f"A-C = {gr_r[0]:+.4f} to {gr_r[1]:+.4f}."),
             "finding_2_elw_own_bias_is_now_separated": (
@@ -405,15 +406,14 @@ def main() -> None:
                 f"applied identically in arms A, B and C, plus the FD_MAXK truncation effect -- "
                 f"so it is not a literal zero-generated-regressor quantity. rev2's arm-B bias "
                 f"mixed this together with segment-mean estimation; the two are now separated."),
-            "finding_3_which_factor_drives_the_se_understatement": (
+            "finding_3_channel_point_estimates_not_dominance": (
                 f"Multiplicatively, sd_A/SE_published = (asymptotic formula) x (mean estimation) "
-                f"x (break location) = {f1_r[0]:.3f}-{f1_r[1]:.3f} x {f2_r[0]:.3f}-{f2_r[1]:.3f} "
-                f"x {f3_r[0]:.3f}-{f3_r[1]:.3f}. The dominant factor per asset is computed in "
-                f"'dominant_sd_factor_per_asset'. rev2's finding_2 asserted the asymptotic "
-                f"formula itself was the main driver while being unable to see the "
-                f"mean-estimation factor at all; this artifact is the first evidence that can "
-                f"confirm or refute that assertion, and it must be read whichever way it came "
-                f"out."),
+                f"x (break-partition selection) = {f1_r[0]:.3f}-{f1_r[1]:.3f} x "
+                f"{f2_r[0]:.3f}-{f2_r[1]:.3f} x {f3_r[0]:.3f}-{f3_r[1]:.3f}. These are "
+                f"descriptive point estimates, not identified dominant channels: 500 reps imply "
+                f"rough relative MC SE near 3.2% for a single sd estimate, and replication-level "
+                f"draws needed for paired ranking inference were not retained. Only total "
+                f"sd_A/SE_published = 1.21-1.33x is well separated from that noise scale."),
         },
         "scope_limits": [
             "MODEL-CONDITIONAL, exactly as in rev2: assumes the DGP really is ARFIMA + "
@@ -445,7 +445,7 @@ def main() -> None:
     atomic_write_json(OUT, payload)
     print(f"\nwrote {OUT.name} ({payload['total_runtime_sec']}s)")
     print("mean-estimation effect (B-C) range:", [round(v, 4) for v in mean_r])
-    print("dominant sd factor:", dominant)
+    print("dominance identified at 500 reps: False")
 
 
 if __name__ == "__main__":
