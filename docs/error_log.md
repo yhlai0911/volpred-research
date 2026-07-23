@@ -1068,3 +1068,27 @@ process exit code 仍為 1，唯一原因是 CI-parity session auditor 偵測既
 `.claude/worktrees`／ops receipts 被部分 tests 讀取。這個 repo-wide fixture hygiene
 問題與本 slice 無因果關係，未把路徑加入永久 parity baseline、未 skip、未掩蓋；
 follow-up focused suite 66 passed，exact-path diff check 與 compile check 均通過。
+
+### 2026-07-24 — Cutover 若只信 `ready_for_cutover` boolean，證據與 mutation 仍可脫鉤
+
+**症狀與根因層級**：Issue #9 已有 shadow assessment、legacy importer 與唯讀
+projection，但三者仍是分開的回傳值。若未來 ownership transaction 只檢查
+`assessment.ready_for_cutover`，caller 可重建 dataclass、沿用 stale owner-state SHA，
+或把一份通過的 assessment 配到另一份 legacy snapshot／Coordinator projection。
+這是 cutover evidence identity 與 CAS transaction 尚未綁定的流程契約缺口；不是
+live queue 資料錯誤。
+
+**底層修復與回歸**：新增 read-only
+`prepare_work_ownership_cutover()`。它在任何 mutation 前重新核對固定七日 window、
+26 小時 gap、freshness、完整 dimensions、queued-execution unique-owner gate 與
+assessment/CAS owner-state SHA；import report 必須零 issue，projection 再經既有
+importer round-trip，逐 identity 比對 row count、priority、claim ownership、parent、
+deadline、policy 與 terminal disposition。通過後 manifest 以 canonical SHA-256 綁定
+raw legacy snapshot、assessment、import report、projection 與 owner state。
+public regressions 覆蓋未通過 assessment、stale owner SHA、reconciliation issue、
+projection drift、偽造短 window 與 timezone-naive timestamp；相鄰 suite 173 passed。
+
+**狀態**：此 preflight 缺口已制度化止血，但尚無正式 DB/filesystem CAS ownership
+transaction、七日 live receipts、unique-owner 下游回讀或 live rollback rehearsal。
+因此本切片與 Issue #9 整體都仍是 **contained**，不得宣稱
+`root_cause_fixed_and_verified`。

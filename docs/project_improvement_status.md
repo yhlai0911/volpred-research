@@ -75,6 +75,14 @@ approval 與 terminal disposition。duplicate identity、缺失／模糊 lifecyc
 及不相容 provenance 都 fail closed。此 module 沒有 canonical writer 或 apply 模式，
 尚未接管 live enqueue／claim／complete，也沒有七日 receipts 或正式 rollback rehearsal；
 所以 Issue #9 仍維持 `contained`，不可由 interface complete 推論 live owner 已切換。
+同日新增 Issue #9 cutover preflight manifest：固定七日 assessment 不只看
+`ready_for_cutover` boolean，還重新核對 window／gap／freshness／dimension、
+queued-execution unique owner 與 owner-state CAS SHA；legacy import 與 staged
+Coordinator projection 逐 identity 比對 row count、priority、claim ownership、
+parent、deadline、policy 與 terminal disposition。通過後的 immutable manifest 綁定
+raw legacy snapshot、assessment、import report、projection 與 owner state SHA-256。
+此能力無 apply／writer seam，live 仍是 `direct_execution`、observation count 仍為 0，
+所以只是正式 transaction 前的 fail-closed evidence capsule，不構成 ownership cutover。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：
 `CommitActuation` 強制綁定 WorkItem id／version、WorkLease token、Primary Authority
 fencing token 與 commit-worker identity；完整 write intent 以 canonical SHA-256 交由
