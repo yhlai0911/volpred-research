@@ -1,9 +1,15 @@
 import json
 from datetime import datetime, timezone
+from pathlib import Path
+
+import pytest
 
 from volpred.ops.work import WorkerOffer
 from volpred.ops.work_migration import LegacySnapshots
-from volpred.ops.work_shadow_replay import replay_legacy_selection
+from volpred.ops.work_shadow_replay import (
+    append_shadow_observation,
+    replay_legacy_selection,
+)
 
 
 FIXED_NOW = datetime(2026, 7, 23, 9, 30, tzinfo=timezone.utc)
@@ -252,3 +258,41 @@ def test_selection_winner_difference_is_classified_with_evidence() -> None:
     assert ledger.selection_difference is not None
     assert ledger.selection_difference.classification == "policy_change"
     assert ledger.selection_difference.evidence_refs
+
+
+def test_observation_receipts_accumulate_without_overwrite(
+    tmp_path: Path,
+) -> None:
+    snapshots = LegacySnapshots(
+        next_tasks=(_pending_task("scheduled_replay"),)
+    )
+    first = replay_legacy_selection(
+        snapshots,
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_append_1",
+    )
+    first_path = append_shadow_observation(first, directory=tmp_path)
+    first_bytes = first_path.read_bytes()
+
+    with pytest.raises(FileExistsError):
+        append_shadow_observation(first, directory=tmp_path)
+
+    second = replay_legacy_selection(
+        snapshots,
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_append_2",
+    )
+    second_path = append_shadow_observation(second, directory=tmp_path)
+
+    assert first_path.name == "obs_append_1.json"
+    assert second_path.name == "obs_append_2.json"
+    assert first_path.read_bytes() == first_bytes
+    assert sorted(path.name for path in tmp_path.iterdir()) == [
+        "obs_append_1.json",
+        "obs_append_2.json",
+    ]
+    assert json.loads(first_bytes)["snapshot"]["sha256"] == (
+        first.snapshot.sha256
+    )

@@ -34,8 +34,14 @@ fail-closed、逐值核可 provenance registry，以及強制三份 snapshot、�
 2026-07-23 16:14:48 CST 的 next_tasks-only smoke（snapshot SHA-256
 `18281269d61832d97dc38177f8d26ec8b53b91e525e5198a99e9414a1f47c703`）為
 3,337 seen／2,569 mapped／900 issues，因未分類 provenance 與歷史 schema debt 正確
-回報 `ready=false`；尚無
-shadow replay／live caller，migration 未部署，因此不構成接管或上線。
+回報 `ready=false`。
+Submit D shadow replay 亦已完成：同一 canonical snapshot SHA-256 的 immutable copy
+同時供 legacy／Work Coordinator selector 使用，逐 candidate 比較 priority、readiness、
+capability、claim ownership、parent、deadline 與 terminal disposition；差異與 winner
+變動固定分類並附 evidence reference。CLI 只讀 caller 提供的三份 snapshot，僅在指定
+目錄追加不可覆寫的 observation receipt；54 個相鄰 scoped regressions 通過。
+尚未建立 canonical schedule 或累積七天 observation window，migration 也未部署，
+因此仍不構成接管或上線。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

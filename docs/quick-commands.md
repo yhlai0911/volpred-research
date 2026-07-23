@@ -53,6 +53,7 @@ uv run volpred ops jobs --status queued              # 查看待處理任務
 uv run volpred ops job-show <job_id>                 # 查看任務詳情及日誌
 uv run volpred ops enqueue --action daily_update     # 手動入隊任務
 uv run volpred ops worker --poll-interval 10         # 啟動本地 worker
+uv run volpred ops work-shadow-replay --next-tasks-snapshot <next_tasks.json> --task-records-snapshot <task_records.json> --ops-jobs-snapshot <ops_jobs.json> --observation-dir <receipts_dir> --worker-id <worker> --capability code  # 純 snapshot 新舊 selection 對帳；只追加 observation receipt
 
 # experiments/ 結構整理（新規先行 + touched-file migration）
 uv run volpred ops experiments report                # 查看 experiments/ 根層散檔與遷移候選

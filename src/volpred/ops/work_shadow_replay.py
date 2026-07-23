@@ -10,6 +10,10 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
+from pathlib import Path
+import re
+import tempfile
 from typing import Any
 from urllib.parse import quote
 
@@ -32,6 +36,7 @@ _DIMENSIONS = (
     "terminal_disposition",
 )
 _TERMINAL_STATUSES = frozenset({"succeeded", "failed", "cancelled"})
+_OBSERVATION_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
 
 
 @dataclass(frozen=True)
@@ -157,7 +162,8 @@ def replay_legacy_selection(
             "ops_jobs": len(snapshots.ops_jobs),
         },
     )
-    report = preview_legacy_snapshots(snapshots)
+    immutable_snapshots = _snapshots_from_canonical_bytes(snapshot_bytes)
+    report = preview_legacy_snapshots(immutable_snapshots)
     comparisons = tuple(
         _compare_candidate(
             candidate,
@@ -229,6 +235,56 @@ def replay_legacy_selection(
     )
 
 
+def append_shadow_observation(
+    ledger: ShadowReplayLedger,
+    *,
+    directory: Path,
+) -> Path:
+    """Atomically append one immutable observation receipt.
+
+    The final link uses create-if-absent semantics.  Replaying an observation ID
+    therefore fails instead of replacing its existing evidence.
+    """
+    if _OBSERVATION_ID.fullmatch(ledger.observation_id) is None:
+        raise ValueError(
+            "observation_id must be 1-128 safe filename characters"
+        )
+    payload = (
+        json.dumps(
+            ledger.as_dict(),
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n"
+    ).encode("utf-8")
+    directory.mkdir(parents=True, exist_ok=True)
+    target = directory / f"{ledger.observation_id}.json"
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=directory,
+            prefix=".work-shadow-",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temp_path = Path(handle.name)
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.link(temp_path, target)
+        directory_fd = os.open(directory, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    finally:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
+    return target
+
+
 def _compare_candidate(
     candidate: LegacyWorkCandidate,
     *,
@@ -253,10 +309,15 @@ def _compare_candidate(
         "parent": {
             "id": candidate.request.parent_id,
             "gates_readiness": False,
+            "satisfied": None,
         },
         "deadline": {
             "value": candidate.request.deadline,
-            "ordering": "not_used",
+            "ordering": (
+                "not_applicable"
+                if candidate.request.deadline is None
+                else "not_used"
+            ),
         },
         "terminal_disposition": {
             "terminal": candidate.legacy_status
@@ -292,7 +353,11 @@ def _compare_candidate(
         },
         "deadline": {
             "value": candidate.request.deadline,
-            "ordering": "ascending_within_priority",
+            "ordering": (
+                "not_applicable"
+                if candidate.request.deadline is None
+                else "ascending_within_priority"
+            ),
         },
         "terminal_disposition": {
             "terminal": candidate.status in _TERMINAL_STATUSES,
@@ -589,6 +654,16 @@ def _canonical_snapshot_bytes(snapshots: LegacySnapshots) -> bytes:
     ).encode("utf-8")
 
 
+def _snapshots_from_canonical_bytes(payload: bytes) -> LegacySnapshots:
+    """Materialize both selectors' private immutable content snapshot."""
+    decoded = json.loads(payload)
+    return LegacySnapshots(
+        next_tasks=tuple(decoded["next_tasks"]),
+        task_records=tuple(decoded["task_records"]),
+        ops_jobs=tuple(decoded["ops_jobs"]),
+    )
+
+
 def _aware_utc(value: datetime) -> datetime:
     if value.tzinfo is None:
         raise ValueError("observed_at must include a timezone")
@@ -596,6 +671,7 @@ def _aware_utc(value: datetime) -> datetime:
 
 
 __all__ = [
+    "append_shadow_observation",
     "ShadowCandidateComparison",
     "ShadowDimensionComparison",
     "ShadowReplayLedger",

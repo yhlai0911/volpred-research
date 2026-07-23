@@ -662,6 +662,121 @@ def ops_work_import_legacy(
         raise click.exceptions.Exit(2)
 
 
+@ops.command("work-shadow-replay")
+@click.option(
+    "--next-tasks-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option(
+    "--task-records-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option(
+    "--ops-jobs-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option(
+    "--observation-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    required=True,
+    help="Append-only destination for shadow observation receipts.",
+)
+@click.option(
+    "--observation-id",
+    default=None,
+    help="Unique receipt id; generated when omitted.",
+)
+@click.option(
+    "--observed-at",
+    default=None,
+    help="ISO-8601 replay time; defaults to the current UTC time.",
+)
+@click.option("--worker-id", required=True)
+@click.option("--capability", "capabilities", multiple=True)
+@click.option("--attestation", "attestations", multiple=True)
+def ops_work_shadow_replay(
+    next_tasks_snapshot: Path,
+    task_records_snapshot: Path,
+    ops_jobs_snapshot: Path,
+    observation_dir: Path,
+    observation_id: str | None,
+    observed_at: str | None,
+    worker_id: str,
+    capabilities: tuple[str, ...],
+    attestations: tuple[str, ...],
+) -> None:
+    """Replay legacy and Work Coordinator selection without live state access."""
+    from uuid import uuid4
+
+    from volpred.ops.work import WorkerOffer
+    from volpred.ops.work_migration import LegacySnapshots
+    from volpred.ops.work_shadow_replay import (
+        append_shadow_observation,
+        replay_legacy_selection,
+    )
+
+    def load_records(path: Path, *, source_system: str) -> tuple[dict, ...]:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except UnicodeDecodeError as exc:
+            raise click.ClickException(
+                f"{source_system} snapshot is not UTF-8 JSON"
+            ) from exc
+        except (OSError, json.JSONDecodeError) as exc:
+            raise click.ClickException(
+                f"{source_system} snapshot is not readable JSON: {exc}"
+            ) from exc
+        if not isinstance(payload, list) or not all(
+            isinstance(record, dict) for record in payload
+        ):
+            raise click.ClickException(
+                f"{source_system} snapshot must be a JSON array of objects"
+            )
+        return tuple(payload)
+
+    replay_time = _parse_observed_at(observed_at) or datetime.now(timezone.utc)
+    receipt_id = observation_id or (
+        f"shadow_{replay_time.strftime('%Y%m%dT%H%M%S%fZ')}_"
+        f"{uuid4().hex[:12]}"
+    )
+    try:
+        ledger = replay_legacy_selection(
+            LegacySnapshots(
+                next_tasks=load_records(
+                    next_tasks_snapshot,
+                    source_system="next_tasks",
+                ),
+                task_records=load_records(
+                    task_records_snapshot,
+                    source_system="task_records",
+                ),
+                ops_jobs=load_records(
+                    ops_jobs_snapshot,
+                    source_system="ops_jobs",
+                ),
+            ),
+            offer=WorkerOffer(
+                worker_id=worker_id,
+                capabilities=frozenset(capabilities),
+                attestations=frozenset(attestations),
+                lease_seconds=300,
+            ),
+            observed_at=replay_time,
+            observation_id=receipt_id,
+        )
+        receipt_path = append_shadow_observation(
+            ledger,
+            directory=observation_dir,
+        )
+    except (FileExistsError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    payload = {**ledger.as_dict(), "receipt_path": str(receipt_path)}
+    click.echo(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+
+
 @ops.group("rollback")
 def ops_rollback() -> None:
     """Rollback points for local repo + storage + config recovery."""

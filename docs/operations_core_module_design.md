@@ -341,6 +341,20 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
 - 對相同 snapshot 執行舊 selection 與 Work Coordinator selection，記錄差異。
 - 差異分類為預期政策變更、legacy corruption 或新 implementation bug。
 - 沒有七天穩定 shadow 證據前，不進 live cutover。
+- **2026-07-23 implementation complete（GitHub #7）**：公開
+  `replay_legacy_selection` 先把 caller 提供的三份 snapshot canonicalize 成單一
+  SHA-256 identity，再從該 bytes 建立私有 immutable copy，舊／新 selector 都只讀這份
+  copy。ledger 對每個 candidate 比較 priority、readiness、capability、claim ownership、
+  parent、deadline 與 terminal disposition；所有不一致與 winner 差異都固定分類為
+  `policy_change`、`legacy_corruption` 或 `implementation_bug`，並帶 candidate field、
+  reconciliation issue、policy contract 與 snapshot hash evidence reference。
+- `uv run volpred ops work-shadow-replay` 只接受三份顯式 snapshot 路徑，沒有 live queue、
+  Supabase 或 `ops_jobs` lookup，也不呼叫 Work Coordinator `submit`。它只在 caller
+  指定目錄以 create-if-absent hard link 追加 observation receipt；相同 observation id
+  會 fail closed，不覆寫舊證據。54 個 Work Coordinator／legacy importer／shadow replay
+  scoped regressions 通過，含輸入逐 byte 不變與測試期 remote/canonical I/O deny。
+- 這只完成 replay 與 receipt 機械能力；尚未把 replay 加入 canonical schedule，也尚未
+  累積七天 observation window，因此不構成 queue ownership cutover。
 
 這四個提交就是下一輪 `tdd` skill 的範圍；完成並取得七天 shadow 證據後，才規劃第一個
 正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與 Work Coordinator
