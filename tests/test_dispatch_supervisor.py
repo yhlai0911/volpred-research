@@ -3605,7 +3605,8 @@ def test_phase_z_isolated_cohort_demotes_non_machine_owned(tmp_path: Path) -> No
     )
     # machine state still adopted; the doc path is demoted, not committed
     assert out["committed"] is True
-    assert out["owned"] == ["storage/ops/some_state.json"]
+    assert out["owned"] == []
+    assert out["churn"] == ["storage/ops/some_state.json"]
     assert out["isolation_residue"] == ["docs/note.md"]
     assert _git_head_count(tmp_path) == before + 1
     tracked = subprocess.run(

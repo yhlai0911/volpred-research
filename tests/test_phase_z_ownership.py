@@ -824,6 +824,31 @@ def test_machine_churn_commits_even_when_the_fire_produced_nothing(repo: Path) -
     assert alerts == []
 
 
+def test_machine_state_created_during_fire_is_not_agent_output(repo: Path) -> None:
+    """Regression for persistent alert 8e08e46929dc07ef (2026-07-14..23).
+
+    Supervisor/worker state commonly changes after the agent exits, so the Stop
+    hook cannot possibly caption it.  Timing once put these files in ``owned``
+    and PHASE-Z then emitted "agent omitted receipt" every fire even though the
+    explicit namespace says the supervisor owns them.
+    """
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    state = "storage/ops/compute_queue/job-after-agent.json"
+    _write(repo, state, '{"status": "completed"}\n')
+
+    alerts: list = []
+    outcome = _fire(repo, alerts=alerts)
+
+    assert outcome["committed"] is True
+    assert outcome["owned"] == []
+    assert outcome["churn"] == [state]
+    assert alerts == []
+    assert _git(repo, "log", "-1", "--pretty=%s").stdout.strip() == (
+        "ops(dispatch-supervisor 03:00): PHASE-Z state churn "
+        "(no agent output this fire)"
+    )
+
+
 def test_half_written_churn_is_never_committed(repo: Path) -> None:
     """Incident #1: a next_tasks.json truncated mid-write was committed as valid
     history. A file that does not parse is escalated, not adopted."""

@@ -24504,5 +24504,15 @@
     "owner": "codex",
     "backfilled_at": "2026-07-22T20:35:00.629364+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T10:13:18+08:00",
+    "task_type": "platform_ops",
+    "task_id": "dreaming_persistent_alert_8e08e46929dc07ef",
+    "outcome": "completed",
+    "actor": "codex-failover-slot-1-556a5a50f1864825b5cfdb22a0178229",
+    "owner": "codex-failover-slot-1-556a5a50f1864825b5cfdb22a0178229",
+    "commit": null,
+    "summary": "Fixed PHASE-Z receipt attribution: during-fire machine state now uses the validated churn lane, preventing false agent-missing-receipt alerts; live 2026-07-22 commit replay classified 12 machine paths and 0 agent paths."
   }
 ]

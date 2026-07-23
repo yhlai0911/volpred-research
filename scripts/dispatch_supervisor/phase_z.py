@@ -2827,7 +2827,15 @@ def run_phase_z(
         storage_dir=str(repo_root / "storage"),
         observed_at=datetime.now(timezone.utc),
     )
-    owned = sorted(dirty_now - baseline)
+    # A path becoming dirty during the fire proves only WHEN PHASE-Z first saw
+    # it, not WHO wrote it.  For agent-authored paths the unisolated fallback
+    # still uses that timing signal, but machine-state namespaces already have
+    # an explicit owner: the supervisor.  Keep those paths out of ``owned`` so
+    # they cannot generate an "agent omitted receipt" subject/alert merely
+    # because a worker updated queue state after the agent's Stop hook ran.
+    newly_dirty = sorted(dirty_now - baseline)
+    owned = [p for p in newly_dirty if not _is_machine_state(p)]
+    newly_dirty_machine = [p for p in newly_dirty if _is_machine_state(p)]
     dirty_before = sorted(dirty_now & baseline)
     # ── WS-B demotion: isolated cohorts get NO baseline authorship guessing ──
     # for repo bytes. Every fire in this cohort had its own workspace, so its
@@ -2855,10 +2863,17 @@ def run_phase_z(
     # degrading to ownership_unknown. "One snapshot, one fire" still holds: the
     # next fire's pre-fire guard overwrites it unconditionally.
 
-    # Dirty-at-fire-start splits two ways, not one. A daemon-written churn path has
-    # an owner (this module); only the rest is "another session is still typing it".
+    # Machine state has the same owner whether it became dirty before or during
+    # this fire.  Classify both sets through the lock+parse gate.  Previously the
+    # during-fire half bypassed this classifier as ``owned``; besides inventing
+    # an agent attribution, that also skipped the corruption/live-writer checks.
     churn, churn_deferred, churn_corrupt = _classify_machine_churn(
-        repo_root, [p for p in dirty_before if _is_machine_state(p)])
+        repo_root,
+        sorted(
+            set(newly_dirty_machine)
+            | {p for p in dirty_before if _is_machine_state(p)}
+        ),
+    )
     foreign = sorted(
         set(p for p in dirty_before if not _is_machine_state(p))
         | set(isolation_residue)
