@@ -51072,9 +51072,32 @@
     "description": "`scripts/tests/test_experiment_gates.py::test_a_reviewer_is_not_charged_for_the_experiment_it_reviewed` 紅燈：planted 的 K1709_V1 違規下，`cq._experiment_gate_failure` 後 `job['experiment_gate']['status']` 是 **'passed'**，測試期望 'failed'。\n\n為什麼要當回事：這條測試的斷言訊息就是「the finding itself must not be swallowed」。它現在紅的意思不是「測試過時」，而是**閘門對一個確實種下去的違規沒有開火**。gate 靜默 PASS 是最貴的一種壞法 —— 它不會吵，只會讓沒認證的數字一路走到 README 和論文。同類已在池中：`artifacts_gate_worktree_relpath_abstain`（worktree 內相對路徑呼叫靜默 PASS），建議一起看，可能是同一個 scan-root/site-key 正規化的根。\n\n**與發現者的改動無關（已驗）**：本班（slot-1 bb18b5bd）改的是 `compute_queue._pending_followup_view`，`git diff -U0` 顯示全部 hunk 都落在該函式內；這條測試走的是 `_experiment_gate_failure`，未被觸及。同批 87 passed / 1 failed，此筆為既有紅燈。嫌疑提交：`5c0e9099d fix(gates): dm-hac-lag/fevd site key 依掃描根正規化｜worktree 前綴讓已凍結站點被判新違規` —— 那次是為了止住誤報，要查的是**止過頭**、把真違規也一併正規化掉了。\n\n要做：(1) 從 5c0e9099d 前後 bisect 確認是否該提交造成；(2) 找出 site-key 正規化把 planted 違規判成已凍結/同站點的確切路徑；(3) 修成「誤報止住、真違規仍開火」，不是把測試改綠；(4) 補一條測試釘住『凍結站點不誤報』與『新違規仍 FAIL』兩邊同時成立。\n\n禁止：改測試期望值讓它變綠、弱化 gate、用 skip/xfail 繞過。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-dispatch",
-    "created_at": "2026-07-21T15:20:00+00:00"
+    "created_at": "2026-07-21T15:20:00+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-23T04:08:28.154147+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-0d311e1f8b6c4a73b9c9ce83fdac9e21"
+      },
+      {
+        "ts": "2026-07-23T04:08:28.382611+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-0d311e1f8b6c4a73b9c9ce83fdac9e21"
+      },
+      {
+        "ts": "2026-07-23T04:10:30.801218+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-0d311e1f8b6c4a73b9c9ce83fdac9e21"
+      }
+    ],
+    "started_at": "2026-07-23T04:08:28.382592+00:00",
+    "completed_at": "2026-07-23T04:10:30.801205+00:00",
+    "result": "Audited and closed as already fixed by b2eab3c04c: historical parent reproduces status=passed false green; unique fixture site preserves frozen-debt suppression and makes planted new violations fail. Verified 14/14 gate tests plus focused 5/5 frozen/new/reviewer/author contracts."
   },
   {
     "id": "telegram-1277",
