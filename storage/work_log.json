@@ -24779,5 +24779,15 @@
     "backfilled_at": "2026-07-23T08:41:58.643312+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py",
     "k_id": "K1436"
+  },
+  {
+    "timestamp": "2026-07-23T17:12:11+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_codex_cli_upgrade_0144_5",
+    "outcome": "completed",
+    "actor": "codex-failover-slot-1-0b3d3fe779a0448eb6403771c28395ad",
+    "owner": "codex-failover-slot-1-0b3d3fe779a0448eb6403771c28395ad",
+    "commit": null,
+    "summary": "Verified the weekly Codex upgrade and fixed its host-cron plus piggy-back double-fire by assigning one scheduler owner; 30 related tests pass and live crontab was reconciled."
   }
 ]

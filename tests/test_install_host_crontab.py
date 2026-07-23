@@ -10,6 +10,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_codex_update_has_one_canonical_schedule_owner() -> None:
+    """The 2026-07-20 host + piggy-back race corrupted the version receipt."""
+    config = json.loads((ROOT / "config" / "runtime_schedules.json").read_text(encoding="utf-8"))
+    item = next(
+        entry
+        for entry in config["system_crontab"]["items"]
+        if entry["id"] == "codex_update"
+    )
+
+    assert item["host_crontab_managed"] is False
+    assert item["piggy_back_enabled"] is True
+
+
 def test_git_push_backup_has_one_canonical_schedule_owner() -> None:
     config = json.loads((ROOT / "config" / "runtime_schedules.json").read_text(encoding="utf-8"))
     item = next(
@@ -59,6 +72,34 @@ def test_targeted_reconcile_removes_git_push_host_leg(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     installed = state.read_text(encoding="utf-8")
     assert "# volpred-git-push-backup" not in installed
+    assert "15 1 * * * /usr/bin/true # personal" in installed
+    assert "# volpred-boss-report-4h" in installed
+
+
+def test_targeted_reconcile_removes_codex_update_host_leg(tmp_path: Path) -> None:
+    state = tmp_path / "crontab.txt"
+    state.write_text(
+        "15 1 * * * /usr/bin/true # personal\n"
+        "0 9 * * 1 /Users/yhlai0911/.volpred/bin/cron_codex_update.sh "
+        ">> /tmp/codex_update.log 2>&1 # volpred-codex-update\n"
+        "10 8,14,20 * * * /tmp/boss >> /tmp/boss.log 2>&1 "
+        "# volpred-boss-report-4h\n",
+        encoding="utf-8",
+    )
+    env = _fake_crontab_env(tmp_path, state)
+
+    result = subprocess.run(
+        ["bash", "scripts/install_host_crontab.sh", "--id", "codex_update"],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    installed = state.read_text(encoding="utf-8")
+    assert "# volpred-codex-update" not in installed
     assert "15 1 * * * /usr/bin/true # personal" in installed
     assert "# volpred-boss-report-4h" in installed
 
