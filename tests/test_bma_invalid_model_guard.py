@@ -8,6 +8,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from volpred.research.posterior_semantics import summarize_posterior_support
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -73,3 +75,55 @@ def test_ffbma_invalid_models_receive_zero_weight_on_that_day():
     assert weights[0, 1] == 0.0
     assert weights[1, 0] == 0.0
     assert np.isfinite(weights).all()
+
+
+def test_posterior_support_distinguishes_drop_events_from_excluded_days():
+    summary = summarize_posterior_support(
+        model_names=["STABLE", "DROPPED"],
+        invalid_forecasts=np.array(
+            [
+                [False, False],
+                [False, True],
+                [False, True],
+                [False, False],
+            ]
+        ),
+        posterior_excluded=np.array(
+            [
+                [False, False],
+                [False, True],
+                [False, True],
+                [False, True],
+            ]
+        ),
+        final_weights=[1.0, 0.0],
+        revival_policy="absorbing",
+    )
+
+    dropped = summary["support_diagnostics"]["DROPPED"]
+    assert dropped == {
+        "invalid_forecast_days": 2,
+        "drop_events": 1,
+        "posterior_excluded_days": 3,
+    }
+    assert summary["ever_invalid_models"] == ["DROPPED"]
+    assert summary["absorbing_dropped_models"] == ["DROPPED"]
+    assert summary["final_weight_status"]["DROPPED"] == "absorbing_dropped"
+
+
+def test_floor_revival_status_is_not_mislabeled_absorbing():
+    summary = summarize_posterior_support(
+        model_names=["REVIVED"],
+        invalid_forecasts=np.array([[True], [False], [False]]),
+        posterior_excluded=np.array([[True], [True], [False]]),
+        final_weights=[1e-305],
+        revival_policy="floor_revival",
+    )
+
+    assert summary["absorbing_dropped_models"] == []
+    assert summary["final_weight_status"]["REVIVED"] == "revived_after_floor"
+    assert summary["support_diagnostics"]["REVIVED"] == {
+        "invalid_forecast_days": 1,
+        "drop_events": 1,
+        "posterior_excluded_days": 2,
+    }

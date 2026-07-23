@@ -48,6 +48,7 @@ from scipy.optimize import minimize
 from scipy.stats import norm, t as t_dist
 from scipy.special import logsumexp
 from volpred.ops.diagnostics import warn
+from volpred.research.posterior_semantics import summarize_posterior_support
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -430,6 +431,7 @@ def run_asset(asset, df):
     bma_forecasts = np.full(T, np.nan)
     eq_forecasts = np.full(T, np.nan)
     weight_history = np.full((T, len(MODEL_NAMES)), np.nan)
+    posterior_excluded = np.zeros((T, len(MODEL_NAMES)), dtype=bool)
 
     state = {"last_fit": -1}
     state_to_model = {
@@ -441,8 +443,6 @@ def run_asset(asset, df):
             "fit_attempts": 0,
             "fit_exceptions": 0,
             "nonconverged_fits": 0,
-            "invalid_forecast_days": 0,
-            "dropped_model_days": 0,
         }
         for model in MODEL_NAMES
     }
@@ -574,10 +574,7 @@ def run_asset(asset, df):
         # --- BMA forecast = sum_i w_i * h_i (weight-sum variance) ---
         h_vec = np.array([forecasts[m][t] for m in MODEL_NAMES])
         valid = np.isfinite(h_vec) & (h_vec > 0)
-        for mi, model in enumerate(MODEL_NAMES):
-            if not valid[mi]:
-                diagnostics[model]["invalid_forecast_days"] += 1
-                diagnostics[model]["dropped_model_days"] += 1
+        posterior_excluded[t] = ~valid | ~np.isfinite(log_weights)
         if valid.any():
             valid_log_weights = log_weights[valid]
             if not np.any(np.isfinite(valid_log_weights)):
@@ -719,6 +716,25 @@ def run_asset(asset, df):
             "equal_qlike": float(np.mean(qlike_eq_pw[rmask])) if rmask.any() else float("nan"),
         }
 
+    final_weight_values = np.exp(log_weights)
+    support_summary = summarize_posterior_support(
+        model_names=MODEL_NAMES,
+        invalid_forecasts=np.column_stack(
+            [
+                ~np.isfinite(forecasts[model][oos_idx])
+                | (forecasts[model][oos_idx] <= 0)
+                for model in MODEL_NAMES
+            ]
+        ),
+        posterior_excluded=posterior_excluded[oos_idx],
+        final_weights=final_weight_values,
+        revival_policy="absorbing",
+    )
+    for model in MODEL_NAMES:
+        diagnostics[model].update(
+            support_summary["support_diagnostics"][model]
+        )
+
     result = {
         "n_oos": int(n_oos),
         "n_common_sample": n_common,
@@ -745,6 +761,13 @@ def run_asset(asset, df):
         # (vs ~1e-30 for models that merely lost on likelihood).
         "posterior_semantics": {
             "invalid_day_handling": "excluded_from_posterior_absorbing",
+            "revival_policy": "absorbing",
+            "drop_event_definition": (
+                "first day of each consecutive invalid-forecast spell"
+            ),
+            "posterior_excluded_day_definition": (
+                "day the model is absent from the posterior used to forecast"
+            ),
             "note": ("-inf log-weight after an invalid day is never "
                      "recovered; final_weights==0.0 means 'dropped', "
                      "tiny-but-nonzero means 'lost on likelihood'."),
@@ -759,8 +782,13 @@ def run_asset(asset, df):
         },
         "regime_weights": regime_weights,
         "regime_qlike": regime_qlike,
-        "final_weights": {m: float(np.exp(log_weights[i]))
+        "final_weights": {m: float(final_weight_values[i])
                           for i, m in enumerate(MODEL_NAMES)},
+        "absorbing_dropped_models": support_summary[
+            "absorbing_dropped_models"
+        ],
+        "ever_invalid_models": support_summary["ever_invalid_models"],
+        "final_weight_status": support_summary["final_weight_status"],
         "forecast_diagnostics": diagnostics,
     }
 

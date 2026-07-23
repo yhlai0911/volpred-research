@@ -74,6 +74,7 @@ from scipy.optimize import minimize
 from scipy.stats import norm, t as t_dist
 from scipy.special import logsumexp
 from volpred.ops.diagnostics import warn
+from volpred.research.posterior_semantics import summarize_posterior_support
 import matplotlib
 
 matplotlib.use("Agg")
@@ -427,6 +428,34 @@ def build_forecasts(asset: str, df: pd.DataFrame) -> pd.DataFrame:
             cached = pd.read_parquet(cache_path)
             if (cached.attrs.get("posterior_semantics_version") == 2
                     and isinstance(cached.attrs.get("forecast_diagnostics"), dict)):
+                oos = cached.index >= pd.Timestamp(OOS_START)
+                invalid = np.column_stack(
+                    [
+                        ~np.isfinite(cached.loc[oos, f"sigma2_{model}"].values)
+                        | (cached.loc[oos, f"sigma2_{model}"].values <= 0)
+                        for model in MODEL_NAMES
+                    ]
+                )
+                support = summarize_posterior_support(
+                    model_names=MODEL_NAMES,
+                    invalid_forecasts=invalid,
+                    posterior_excluded=invalid,
+                    final_weights=np.ones(len(MODEL_NAMES)),
+                    revival_policy="floor_revival",
+                )
+                diagnostics = cached.attrs["forecast_diagnostics"]
+                for model in MODEL_NAMES:
+                    diagnostics[model].pop("dropped_model_days", None)
+                    diagnostics[model].update(
+                        {
+                            key: value
+                            for key, value in support[
+                                "support_diagnostics"
+                            ][model].items()
+                            if key != "posterior_excluded_days"
+                        }
+                    )
+                cached.attrs["forecast_diagnostics"] = diagnostics
                 print(f"  [cache] loaded {cache_path.name} rows={len(cached)}",
                       flush=True)
                 cached.attrs["cache_reused"] = True
@@ -460,8 +489,6 @@ def build_forecasts(asset: str, df: pd.DataFrame) -> pd.DataFrame:
             "fit_attempts": 0,
             "fit_exceptions": 0,
             "nonconverged_fits": 0,
-            "invalid_forecast_days": 0,
-            "dropped_model_days": 0,
         }
         for model in MODEL_NAMES
     }
@@ -567,12 +594,6 @@ def build_forecasts(asset: str, df: pd.DataFrame) -> pd.DataFrame:
             forecasts["A4f_IV2"][t] = h_t
             state["g_a4f"] = g_t
 
-        for model in MODEL_NAMES:
-            h_pred = forecasts[model][t]
-            if not np.isfinite(h_pred) or h_pred <= 0:
-                diagnostics[model]["invalid_forecast_days"] += 1
-                diagnostics[model]["dropped_model_days"] += 1
-
         # --- log predictive density p(y_t | M_i, F_{t-1}) ---
         y_t = returns[t]
         for m in MODEL_NAMES:
@@ -594,6 +615,28 @@ def build_forecasts(asset: str, df: pd.DataFrame) -> pd.DataFrame:
     for m in MODEL_NAMES:
         out[f"sigma2_{m}"] = forecasts[m]
         out[f"loglik_{m}"] = log_preds[m]
+    invalid = np.column_stack(
+        [
+            ~np.isfinite(forecasts[model][oos_start_idx:])
+            | (forecasts[model][oos_start_idx:] <= 0)
+            for model in MODEL_NAMES
+        ]
+    )
+    support = summarize_posterior_support(
+        model_names=MODEL_NAMES,
+        invalid_forecasts=invalid,
+        posterior_excluded=invalid,
+        final_weights=np.ones(len(MODEL_NAMES)),
+        revival_policy="floor_revival",
+    )
+    for model in MODEL_NAMES:
+        diagnostics[model].update(
+            {
+                key: value
+                for key, value in support["support_diagnostics"][model].items()
+                if key != "posterior_excluded_days"
+            }
+        )
     out.attrs["posterior_semantics_version"] = 2
     out.attrs["forecast_diagnostics"] = diagnostics
     out.attrs["cache_reused"] = False
@@ -611,7 +654,8 @@ def build_forecasts(asset: str, df: pd.DataFrame) -> pd.DataFrame:
 # Forgetting-factor BMA posterior recursion (O(T) on cached forecasts)
 # ---------------------------------------------------------------------------
 def ffbma_posterior(log_lik_matrix: np.ndarray, lambda_: float,
-                    log_floor: float = -700.0) -> np.ndarray:
+                    log_floor: float = -700.0,
+                    return_excluded: bool = False):
     """
     log_lik_matrix: shape (T, M) — NaN where model missing that day.
     lambda_      : forgetting factor in (0, 1].
@@ -621,11 +665,13 @@ def ffbma_posterior(log_lik_matrix: np.ndarray, lambda_: float,
     T, M = log_lik_matrix.shape
     log_w = np.full(M, -np.log(M))          # uniform prior
     weight_hist = np.full((T, M), np.nan)
+    posterior_excluded = np.zeros((T, M), dtype=bool)
 
     for t in range(T):
         ll_row = log_lik_matrix[t]
         valid = np.isfinite(ll_row)
         any_valid = np.any(valid)
+        posterior_excluded[t] = ~valid | ~np.isfinite(log_w)
         if any_valid:
             valid_prior = log_w[valid]
             if not np.any(np.isfinite(valid_prior)):
@@ -647,6 +693,8 @@ def ffbma_posterior(log_lik_matrix: np.ndarray, lambda_: float,
                 next_log_w[finite_next] -= logsumexp(next_log_w[finite_next])
                 log_w = next_log_w
 
+    if return_excluded:
+        return weight_hist, posterior_excluded
     return weight_hist
 
 
@@ -722,7 +770,11 @@ def evaluate_lambda(fc: pd.DataFrame, lambda_: float) -> Dict:
     sigma2_mat = np.column_stack([fc[f"sigma2_{m}"].values for m in MODEL_NAMES])
     ll_mat = np.column_stack([fc[f"loglik_{m}"].values for m in MODEL_NAMES])
 
-    weight_hist = ffbma_posterior(ll_mat, lambda_)
+    weight_hist, posterior_excluded = ffbma_posterior(
+        ll_mat,
+        lambda_,
+        return_excluded=True,
+    )
 
     # BMA point forecast (variance-weighted)
     bma_sigma2 = np.full(T, np.nan)
@@ -792,6 +844,13 @@ def evaluate_lambda(fc: pd.DataFrame, lambda_: float) -> Dict:
     final_w = wh_oos[-1] if len(oos_idx) > 0 else np.full(len(MODEL_NAMES), np.nan)
     final_weights = {m: float(final_w[i]) if np.isfinite(final_w[i]) else 0.0
                      for i, m in enumerate(MODEL_NAMES)}
+    support_summary = summarize_posterior_support(
+        model_names=MODEL_NAMES,
+        invalid_forecasts=~np.isfinite(ll_mat[oos_idx]),
+        posterior_excluded=posterior_excluded[oos_idx],
+        final_weights=[final_weights[model] for model in MODEL_NAMES],
+        revival_policy="floor_revival",
+    )
 
     return {
         "qlike": qlike_mean,
@@ -802,6 +861,19 @@ def evaluate_lambda(fc: pd.DataFrame, lambda_: float) -> Dict:
         "weight_switch_freq": float(switch_freq),
         "posterior_avg_max_weight": avg_max_weight,
         "final_weights": final_weights,
+        "absorbing_dropped_models": support_summary[
+            "absorbing_dropped_models"
+        ],
+        "ever_invalid_models": support_summary["ever_invalid_models"],
+        "final_weight_status": support_summary["final_weight_status"],
+        "posterior_diagnostics": {
+            model: {
+                "posterior_excluded_days": support_summary[
+                    "support_diagnostics"
+                ][model]["posterior_excluded_days"]
+            }
+            for model in MODEL_NAMES
+        },
         "_qlike_pw": qlike_oos_pw,  # pop before JSON serialization
     }
 
@@ -1014,6 +1086,23 @@ def main():
         "assets": ASSETS,
         "results": per_asset,
         "forecast_diagnostics": forecast_diagnostics,
+        "posterior_semantics": {
+            "invalid_day_handling": "excluded_then_floor_revival",
+            "revival_policy": "floor_revival",
+            "log_floor": -700.0,
+            "absorbing": False,
+            "drop_event_definition": (
+                "first day of each consecutive invalid-forecast spell"
+            ),
+            "posterior_excluded_day_definition": (
+                "day the model is absent from the posterior used to forecast"
+            ),
+            "note": (
+                "An invalid model receives zero weight that day. On a later "
+                "valid day, max(lambda*log_w, -700) revives its -inf state "
+                "to a tiny finite weight before the likelihood update."
+            ),
+        },
         "hypotheses": {"H1": h1, "H2": h2, "H3": h3, "H4": h4},
         # Flat mirrors so this artifact reads like its sibling K1257 and so
         # collectors do not have to walk into hypotheses[*] to get a verdict.
