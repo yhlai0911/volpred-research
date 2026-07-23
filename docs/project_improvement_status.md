@@ -35,11 +35,29 @@ fail-closed、逐值核可 provenance registry，以及強制三份 snapshot、�
 `18281269d61832d97dc38177f8d26ec8b53b91e525e5198a99e9414a1f47c703`）為
 3,337 seen／2,569 mapped／900 issues，因未分類 provenance 與歷史 schema debt 正確
 回報 `ready=false`。
-Submit D shadow replay 亦已完成：同一 canonical snapshot SHA-256 的 immutable copy
-同時供 legacy／Work Coordinator selector 使用，逐 candidate 比較 priority、readiness、
-capability、claim ownership、parent、deadline 與 terminal disposition；差異與 winner
-變動固定分類並附 evidence reference。CLI 只讀 caller 提供的三份 snapshot，僅在指定
-目錄追加不可覆寫的 observation receipt；54 個相鄰 scoped regressions 通過。
+Submit D shadow replay 的原始 `232ffc994`／`5b9f78adf` checkpoint 只達
+**`contained`**：immutable snapshot 與 append-only receipt 安全性成立，但 Matt 雙軸複審
+確認 selector 是 replay 專用副本，未涵蓋真實 routing／lease semantics，故當時不得稱完成。
+2026-07-23 Issue #7 reimplementation 已達
+**`root_cause_fixed_and_verified`**：
+legacy direct-claim gate 與 production pending-list filter／priority-id ranking 抽成
+`volpred.ops.task_pool_selection`，Work Coordinator acquisition 抽成
+`volpred.ops.work.selection`，production claim／in-memory acquire 與 replay 共用相同 pure
+policy seam；PostgreSQL `acquire_work` 則由 34-case integration contract 回讀 parity。
+legacy winner 先套用 production `list --status pending` 的 exact status／worker filter，
+再執行 direct-claim admission；blocked 與 claimed records 只保留比較證據，不會被虛構成
+hourly winner。需 live detector 的 registered dreaming candidate 若 snapshot 沒有
+revalidation evidence，會以 `live_revalidation_required` fail closed，不查 live source，
+production claim 則在同一 transaction 完成 detector check 後才重新進 admission。
+replay 的 selection scope 明定為 `next_tasks`，另外兩份 snapshot 仍參與同一 hash identity
+與 reconciliation evidence，不虛構跨三套 legacy store 的全域 winner。
+逐 candidate 比較 priority、status readiness、capability、attestation、claim ownership、
+lease expiry、dispatch lane、preferred agent、parent readiness、deadline 與 terminal
+disposition；差異由 selector／reconciliation reason codes 經顯式 policy oracle 分類並附
+evidence reference。兩支 CLI 共用同一 snapshot loader；128 個核心非 Postgres scoped
+regressions、144 個相鄰 dreaming／stale-reclaim／refill regressions與 34 個隔離
+PostgreSQL contracts 通過。
+CLI 仍只讀 caller 提供的三份 snapshot，僅在指定目錄追加不可覆寫的 observation receipt。
 尚未建立 canonical schedule 或累積七天 observation window，migration 也未部署，
 因此仍不構成接管或上線。
 

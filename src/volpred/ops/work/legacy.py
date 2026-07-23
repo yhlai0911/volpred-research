@@ -10,11 +10,13 @@ from typing import Any, Mapping
 from urllib.parse import quote
 
 from . import WorkRequest
+from ..next_tasks import normalize_dispatch_lane
 
 
 _NEXT_TASK_STATUS = {
     "pending": "pending",
     "pending_main_thread": "pending",
+    "claimed": "claimed",
     "in_progress": "running",
     "blocked": "blocked",
     "blocked_on_user": "blocked",
@@ -70,6 +72,7 @@ _NEXT_TASK_SOURCE = {
     "task_generator_v2_paper_body": "schedule",
     "task_generator_v2_paper_decision": "schedule",
     "task_generator_v2_event_article": "schedule",
+    "event_expander": "schedule",
     "internal_alert_remediation_router": "schedule",
     "alert_remediation_bridge": "schedule",
     "release_pool_audit_skip_materializer": "schedule",
@@ -208,6 +211,13 @@ class LegacyWorkCandidate:
     started_at: str | None = None
     result_summary: str | None = None
     blocked_reason: str | None = None
+    dispatch_lane: str | None = None
+    preferred_agent: str | None = None
+    target_agent: str | None = None
+    fallback_allowed: bool | None = None
+    claim_expires_at: str | None = None
+    ref_event_job_id: str | None = None
+    dreaming: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -256,6 +266,13 @@ class ReconciliationReport:
                     "started_at": candidate.started_at,
                     "result_summary": candidate.result_summary,
                     "blocked_reason": candidate.blocked_reason,
+                    "dispatch_lane": candidate.dispatch_lane,
+                    "preferred_agent": candidate.preferred_agent,
+                    "target_agent": candidate.target_agent,
+                    "fallback_allowed": candidate.fallback_allowed,
+                    "claim_expires_at": candidate.claim_expires_at,
+                    "ref_event_job_id": candidate.ref_event_job_id,
+                    "dreaming": candidate.dreaming,
                     "request": {
                         "idempotency_key": candidate.request.idempotency_key,
                         "source": candidate.request.source,
@@ -626,6 +643,17 @@ class LegacySnapshotImporter:
             blocked_reason=_optional_string(
                 record.get("blocked_reason") or record.get("blocked_note")
             ),
+            dispatch_lane=normalize_dispatch_lane(dict(record)) or None,
+            preferred_agent=_optional_string(record.get("preferred_agent")),
+            target_agent=_optional_string(record.get("target_agent")),
+            fallback_allowed=_optional_bool(record.get("fallback_allowed")),
+            claim_expires_at=_optional_timestamp(
+                record.get("claim_expires_at")
+            ),
+            ref_event_job_id=_optional_string(
+                record.get("ref_event_job_id")
+            ),
+            dreaming=_optional_mapping(record.get("dreaming")),
         )
 
     @staticmethod
@@ -712,6 +740,8 @@ class LegacySnapshotImporter:
             blocked_reason=_optional_string(
                 record.get("last_error") if legacy_status == "blocked" else None
             ),
+            preferred_agent=_optional_string(record.get("preferred_agent")),
+            fallback_allowed=_optional_bool(record.get("fallback_allowed")),
         )
 
     @staticmethod
@@ -840,6 +870,22 @@ def _optional_string(value: Any) -> str | None:
     if value in (None, ""):
         return None
     return str(value)
+
+
+def _optional_bool(value: Any) -> bool | None:
+    if value is None:
+        return None
+    if not isinstance(value, bool):
+        raise ValueError("optional boolean field must be a bool")
+    return value
+
+
+def _optional_mapping(value: Any) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    if not isinstance(value, Mapping):
+        raise ValueError("optional mapping field must be an object")
+    return dict(value)
 
 
 def _optional_identity(value: Any, *, field: str) -> str | None:

@@ -341,18 +341,38 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
 - 對相同 snapshot 執行舊 selection 與 Work Coordinator selection，記錄差異。
 - 差異分類為預期政策變更、legacy corruption 或新 implementation bug。
 - 沒有七天穩定 shadow 證據前，不進 live cutover。
-- **2026-07-23 implementation complete（GitHub #7）**：公開
-  `replay_legacy_selection` 先把 caller 提供的三份 snapshot canonicalize 成單一
-  SHA-256 identity，再從該 bytes 建立私有 immutable copy，舊／新 selector 都只讀這份
-  copy。ledger 對每個 candidate 比較 priority、readiness、capability、claim ownership、
-  parent、deadline 與 terminal disposition；所有不一致與 winner 差異都固定分類為
-  `policy_change`、`legacy_corruption` 或 `implementation_bug`，並帶 candidate field、
-  reconciliation issue、policy contract 與 snapshot hash evidence reference。
+- **2026-07-23 原始 checkpoint = `contained`（GitHub #7）**：
+  `232ffc994`／`5b9f78adf` 已證明 immutable snapshot、no-live-lookup 與 append-only receipt，
+  但 Matt 雙軸複審發現 replay 自行重寫 legacy／Coordinator readiness 與 ranking；54 個測試
+  只能證明影子模型內部自洽，不能證明 production selector parity。該 checkpoint 不得再標
+  implementation complete。
+- **2026-07-23 reimplementation = `root_cause_fixed_and_verified`（GitHub #7）**：
+  legacy `cmd_claim` gate 與 `cmd_list --status pending` candidate filter／priority-id rank 共用
+  `volpred.ops.task_pool_selection`；in-memory Work Coordinator `acquire` 與 replay 共用
+  `volpred.ops.work.selection`。PostgreSQL adapter 的 SQL acquire contract 另以 34 個隔離
+  integration cases 回讀 capability／attestation、parent／deadline、atomic claim 與
+  expired-lease reclaim parity。公開 `replay_legacy_selection` 仍先把 caller 提供的三份
+  snapshot canonicalize 成單一 SHA-256 identity，再從該 bytes 建立私有 immutable copy；
+  selection 只對真正由 production `list --status pending` 暴露、且 direct-claim gate
+  接受的 `next_tasks` candidates 決定 winner；blocked／claimed records 仍保留逐維度
+  evidence，但不參與 hourly winner。registered dreaming task 若需要 live detector，
+  supplied snapshot 無法證明 revalidation 結果時以 `live_revalidation_required` fail
+  closed；production claim 在同一 transaction 跑完 detector 後才重新進 admission，
+  replay 本身不查 knowledge／feed／paper／live queue。另兩套
+  snapshot 只參與相同 identity 與 reconciliation evidence，不虛構跨 store selector。
+  ledger 的 single dimension registry 比較 priority、status readiness、capability、
+  attestation、claim ownership、lease expiry、dispatch lane、preferred agent、parent
+  readiness、deadline 與 terminal disposition。每個不一致與 winner 差異都由實際 selector
+  reason code 或 reconciliation issue 經顯式 policy oracle 分為 `policy_change`、
+  `legacy_corruption` 或 `implementation_bug`，並附 candidate field、selector decision、
+  policy contract、reconciliation issue 與 snapshot hash evidence reference。
 - `uv run volpred ops work-shadow-replay` 只接受三份顯式 snapshot 路徑，沒有 live queue、
   Supabase 或 `ops_jobs` lookup，也不呼叫 Work Coordinator `submit`。它只在 caller
   指定目錄以 create-if-absent hard link 追加 observation receipt；相同 observation id
-  會 fail closed，不覆寫舊證據。54 個 Work Coordinator／legacy importer／shadow replay
-  scoped regressions 通過，含輸入逐 byte 不變與測試期 remote/canonical I/O deny。
+  會 fail closed，不覆寫舊證據。import 與 replay CLI 共用
+  `load_legacy_snapshots`，避免 loader schema 漂移。128 個核心非 Postgres scoped
+  regressions、144 個相鄰 dreaming／stale-reclaim／refill regressions 與 34 個 PostgreSQL
+  integration contracts 通過，含輸入逐 byte 不變與測試期 remote/canonical I/O deny。
 - 這只完成 replay 與 receipt 機械能力；尚未把 replay 加入 canonical schedule，也尚未
   累積七天 observation window，因此不構成 queue ownership cutover。
 

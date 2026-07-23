@@ -20,6 +20,7 @@ from . import (
     WorkReceiptView,
     WorkerOffer,
 )
+from .selection import select_acquirable_work
 
 
 class InMemoryCoordinationStore:
@@ -145,40 +146,14 @@ class InMemoryCoordinationStore:
         expires_at: str,
     ) -> WorkLease | None:
         with self._lock:
-            candidates = sorted(
-                (
-                    item
-                    for item in self._by_id.values()
-                    if (
-                        item.status == "pending"
-                        or (
-                            item.status in {"claimed", "running"}
-                            and item.claim_expires_at is not None
-                            and datetime.fromisoformat(item.claim_expires_at)
-                            <= datetime.fromisoformat(claimed_at)
-                        )
-                    )
-                    and item.required_capabilities <= offer.capabilities
-                    and item.required_attestations <= offer.attestations
-                    and (
-                        item.parent_id is None
-                        or (
-                            item.parent_id in self._by_id
-                            and self._by_id[item.parent_id].status == "succeeded"
-                        )
-                    )
-                ),
-                key=lambda item: (
-                    item.priority,
-                    item.deadline is None,
-                    item.deadline or "",
-                    item.created_at,
-                    item.id,
-                ),
+            selection = select_acquirable_work(
+                self._by_id.values(),
+                offer=offer,
+                observed_at=claimed_at,
             )
-            if not candidates:
+            if selection.selected_id is None:
                 return None
-            current = candidates[0]
+            current = self._by_id[selection.selected_id]
             claimed = replace(
                 current,
                 status="claimed",

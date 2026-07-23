@@ -63,7 +63,8 @@ def test_shadow_replay_cli_writes_only_an_append_only_observation(
 
     assert result.exit_code == 0, result.output
     payload = json.loads(result.output)
-    assert payload["schema_version"] == "work-shadow-replay.v1"
+    assert payload["schema_version"] == "work-shadow-replay.v2"
+    assert payload["selection_scope"] == "next_tasks"
     assert payload["observation_id"] == "scheduled_20260723T093000Z"
     assert payload["legacy_selection"]["snapshot_sha256"] == (
         payload["coordinator_selection"]["snapshot_sha256"]

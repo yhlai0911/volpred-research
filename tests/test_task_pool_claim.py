@@ -9,6 +9,11 @@ from pathlib import Path
 
 import pytest
 
+from volpred.ops.task_pool_selection import (
+    evaluate_task_claim,
+    select_task_for_claim,
+)
+
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "task_pool_claim.py"
 SPEC = importlib.util.spec_from_file_location("task_pool_claim", MODULE_PATH)
@@ -1190,6 +1195,225 @@ def test_claim_main_thread_flag_allows_interactive_claim(tmp_path, monkeypatch, 
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "claimed"
     assert saved[0]["claimed_by"] == "claude-main"
+
+
+SELECTION_OBSERVED_AT = datetime(2026, 7, 23, 10, 0, tzinfo=timezone.utc)
+
+
+def _selection_task(task_id: str, **overrides: object) -> dict[str, object]:
+    task: dict[str, object] = {
+        "id": task_id,
+        "status": "pending",
+        "task_type": "platform_ops",
+        "title": task_id,
+        "priority": 2,
+        "source": "user",
+        "created_at": "2026-07-23T09:00:00+00:00",
+    }
+    task.update(overrides)
+    return task
+
+
+@pytest.mark.parametrize(
+    ("task", "owner", "main_thread", "eligible", "primary_reason"),
+    (
+        (
+            _selection_task("manual", dispatch_lane="manual"),
+            "hourly-slot-1",
+            False,
+            False,
+            "main_thread_lane",
+        ),
+        (
+            _selection_task(
+                "preferred_codex",
+                task_type="paper_body",
+                preferred_agent="codex",
+            ),
+            "codex-vscode",
+            False,
+            True,
+            "eligible",
+        ),
+        (
+            _selection_task(
+                "owned",
+                status="claimed",
+                claimed_by="other-worker",
+                claimed_at="2026-07-23T09:30:00+00:00",
+            ),
+            "codex-vscode",
+            False,
+            False,
+            "already_claimed",
+        ),
+        (
+            _selection_task("terminal", status="succeeded"),
+            "codex-vscode",
+            False,
+            False,
+            "wrong_status",
+        ),
+    ),
+)
+def test_legacy_claim_policy_exposes_production_reason_codes(
+    task: dict[str, object],
+    owner: str,
+    main_thread: bool,
+    eligible: bool,
+    primary_reason: str,
+) -> None:
+    decision = evaluate_task_claim(
+        task,
+        owner=owner,
+        main_thread=main_thread,
+        observed_at=SELECTION_OBSERVED_AT,
+    )
+
+    assert (decision.eligible, decision.primary_reason) == (
+        eligible,
+        primary_reason,
+    )
+
+
+def test_legacy_selection_uses_normalized_priority_then_task_id() -> None:
+    selection = select_task_for_claim(
+        (
+            _selection_task("z_second", priority="P1"),
+            _selection_task("a_first", priority=1),
+            _selection_task("p2", priority=2),
+        ),
+        owner="hourly-slot-1",
+        main_thread=False,
+        observed_at=SELECTION_OBSERVED_AT,
+    )
+
+    assert selection.selected_task_id == "a_first"
+    assert selection.eligible_task_ids == ("a_first", "z_second", "p2")
+
+
+def test_production_list_and_replay_selection_share_the_same_rank(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    tasks = [
+        _selection_task("z_second", priority="P1"),
+        _selection_task("a_first", priority=1),
+        _selection_task("p2", priority=2),
+    ]
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(json.dumps(tasks), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    listed = task_pool_claim.cmd_list(
+        argparse.Namespace(
+            status="pending",
+            owner=None,
+            codex_eligible=False,
+            stale_hours=6,
+            limit=None,
+        )
+    )
+    replay_selection = select_task_for_claim(
+        tasks,
+        owner="hourly-slot-1",
+        main_thread=False,
+        observed_at=SELECTION_OBSERVED_AT,
+    )
+
+    assert tuple(task["id"] for task in listed["tasks"]) == (
+        replay_selection.eligible_task_ids
+    )
+
+
+def test_legacy_selection_uses_the_production_pending_list_before_claim() -> None:
+    selection = select_task_for_claim(
+        (
+            _selection_task("blocked_p1", status="blocked", priority=1),
+            _selection_task(
+                "same_owner_claimed_p1",
+                status="claimed",
+                claimed_by="codex-vscode",
+                priority=1,
+            ),
+            _selection_task("pending_p2", priority=2),
+        ),
+        owner="codex-vscode",
+        main_thread=False,
+        observed_at=SELECTION_OBSERVED_AT,
+    )
+
+    assert selection.selected_task_id == "pending_p2"
+    assert selection.eligible_task_ids == ("pending_p2",)
+    assert selection.decision_for("blocked_p1").eligible is True
+    assert selection.decision_for("same_owner_claimed_p1").eligible is True
+
+
+def test_registered_dreaming_claim_requires_live_revalidation() -> None:
+    task = _selection_task(
+        "dreaming_orphan",
+        task_type="experiment",
+        source="dreaming",
+        dreaming={
+            "signature": "orphaned_experiment:k1800",
+            "pattern_type": "orphaned_experiment",
+        },
+    )
+
+    unchecked = evaluate_task_claim(
+        task,
+        owner="codex-vscode",
+        main_thread=False,
+        observed_at=SELECTION_OBSERVED_AT,
+    )
+    checked = evaluate_task_claim(
+        task,
+        owner="codex-vscode",
+        main_thread=False,
+        observed_at=SELECTION_OBSERVED_AT,
+        revalidation_checked=True,
+    )
+
+    assert unchecked.eligible is False
+    assert unchecked.primary_reason == "live_revalidation_required"
+    assert checked.eligible is True
+    assert checked.primary_reason == "eligible"
+    assert "legacy_dreaming_revalidation_gate" in unchecked.policy_codes
+
+
+@pytest.mark.parametrize(
+    ("deadline", "primary_reason"),
+    (
+        (None, "missing_deadline"),
+        ("not-an-iso-date", "invalid_deadline"),
+        ("2026-07-23T09:59:59+00:00", "deadline_expired"),
+        ("2026-07-23T10:00:00+00:00", "eligible"),
+        ("2026-07-23T10:00:01+00:00", "eligible"),
+    ),
+)
+def test_legacy_claim_policy_owns_managed_event_deadline_admission(
+    deadline: str | None,
+    primary_reason: str,
+) -> None:
+    task = _selection_task(
+        "managed_event",
+        task_type="event_article",
+        source="event_expander",
+        ref_event_job_id="event-1",
+    )
+    if deadline is not None:
+        task["deadline"] = deadline
+
+    decision = evaluate_task_claim(
+        task,
+        owner="hourly-slot-1",
+        main_thread=False,
+        observed_at=SELECTION_OBSERVED_AT,
+    )
+
+    assert decision.primary_reason == primary_reason
+    assert decision.eligible is (primary_reason == "eligible")
+    assert "legacy_managed_event_deadline_gate" in decision.policy_codes
 
 
 # --- annotate (WS-A1b: replaces the cron-prompt jq-rewrite instruction) ------

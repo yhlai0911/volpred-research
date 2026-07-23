@@ -4,7 +4,6 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import NoReturn
 
 import click
 import yaml
@@ -583,11 +582,20 @@ def ops_work_import_legacy(
 ) -> None:
     """Preview legacy work mappings from three supplied JSON snapshots."""
     from volpred.ops.work_migration import (
-        LegacySnapshots,
+        LegacySnapshotLoadError,
+        load_legacy_snapshots,
         preview_legacy_snapshots,
     )
 
-    def fail_snapshot(source_system: str, detail: str) -> NoReturn:
+    if not dry_run:  # Defensive even though Click requires the flag.
+        raise click.UsageError("--dry-run is the only supported mode")
+    try:
+        snapshots = load_legacy_snapshots(
+            next_tasks_path=next_tasks_snapshot,
+            task_records_path=task_records_snapshot,
+            ops_jobs_path=ops_jobs_snapshot,
+        )
+    except LegacySnapshotLoadError as exc:
         click.echo(
             json.dumps(
                 {
@@ -604,58 +612,14 @@ def ops_work_import_legacy(
                         )
                     },
                     "candidates": [],
-                    "issues": [
-                        {
-                            "code": "invalid_snapshot",
-                            "source_system": source_system,
-                            "record_id": None,
-                            "detail": detail,
-                        }
-                    ],
+                    "issues": [exc.as_issue()],
                 },
                 ensure_ascii=False,
                 separators=(",", ":"),
             )
         )
         raise click.exceptions.Exit(2)
-
-    def load_records(path: Path, *, source_system: str) -> tuple[dict, ...]:
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except UnicodeDecodeError:
-            fail_snapshot(
-                source_system,
-                "snapshot is not readable UTF-8 JSON",
-            )
-        except (OSError, json.JSONDecodeError) as exc:
-            fail_snapshot(
-                source_system,
-                f"snapshot is not readable JSON: {exc}",
-            )
-        if not isinstance(payload, list) or not all(
-            isinstance(record, dict) for record in payload
-        ):
-            fail_snapshot(
-                source_system,
-                "snapshot must be a JSON array of objects",
-            )
-        return tuple(payload)
-
-    if not dry_run:  # Defensive even though Click requires the flag.
-        raise click.UsageError("--dry-run is the only supported mode")
-    report = preview_legacy_snapshots(
-        LegacySnapshots(
-            next_tasks=load_records(
-                next_tasks_snapshot, source_system="next_tasks"
-            ),
-            task_records=load_records(
-                task_records_snapshot, source_system="task_records"
-            ),
-            ops_jobs=load_records(
-                ops_jobs_snapshot, source_system="ops_jobs"
-            ),
-        )
-    )
+    report = preview_legacy_snapshots(snapshots)
     payload = {"mode": "dry_run", **report.as_dict()}
     click.echo(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     if not report.ready:
@@ -712,30 +676,23 @@ def ops_work_shadow_replay(
     from uuid import uuid4
 
     from volpred.ops.work import WorkerOffer
-    from volpred.ops.work_migration import LegacySnapshots
+    from volpred.ops.work_migration import (
+        LegacySnapshotLoadError,
+        load_legacy_snapshots,
+    )
     from volpred.ops.work_shadow_replay import (
         append_shadow_observation,
         replay_legacy_selection,
     )
 
-    def load_records(path: Path, *, source_system: str) -> tuple[dict, ...]:
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except UnicodeDecodeError as exc:
-            raise click.ClickException(
-                f"{source_system} snapshot is not UTF-8 JSON"
-            ) from exc
-        except (OSError, json.JSONDecodeError) as exc:
-            raise click.ClickException(
-                f"{source_system} snapshot is not readable JSON: {exc}"
-            ) from exc
-        if not isinstance(payload, list) or not all(
-            isinstance(record, dict) for record in payload
-        ):
-            raise click.ClickException(
-                f"{source_system} snapshot must be a JSON array of objects"
-            )
-        return tuple(payload)
+    try:
+        snapshots = load_legacy_snapshots(
+            next_tasks_path=next_tasks_snapshot,
+            task_records_path=task_records_snapshot,
+            ops_jobs_path=ops_jobs_snapshot,
+        )
+    except LegacySnapshotLoadError as exc:
+        raise click.ClickException(str(exc)) from exc
 
     replay_time = _parse_observed_at(observed_at) or datetime.now(timezone.utc)
     receipt_id = observation_id or (
@@ -744,20 +701,7 @@ def ops_work_shadow_replay(
     )
     try:
         ledger = replay_legacy_selection(
-            LegacySnapshots(
-                next_tasks=load_records(
-                    next_tasks_snapshot,
-                    source_system="next_tasks",
-                ),
-                task_records=load_records(
-                    task_records_snapshot,
-                    source_system="task_records",
-                ),
-                ops_jobs=load_records(
-                    ops_jobs_snapshot,
-                    source_system="ops_jobs",
-                ),
-            ),
+            snapshots,
             offer=WorkerOffer(
                 worker_id=worker_id,
                 capabilities=frozenset(capabilities),

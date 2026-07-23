@@ -56,11 +56,17 @@ from volpred.ops.next_tasks import (  # noqa: E402
     normalize_priority,
     normalize_task_priority,
     normalize_task_priorities,
-    priority_sort_key,
     write_tasks_to_handle,
 )
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 from volpred.ops import dreaming_revalidate  # noqa: E402
+from volpred.ops.task_pool_selection import (  # noqa: E402
+    evaluate_task_claim,
+    is_codex_eligible_task as _is_codex_eligible_task,
+    is_pending_list_candidate,
+    normalized_task_type as _normalized_task_type,
+    task_rank_key,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
@@ -74,17 +80,6 @@ _PUBLISH_EVIDENCE_RE = re.compile(
     r"(?:發佈|發布|已發|publish(?:ed)?|feed\s+live|volpred\s+feed)",
     re.IGNORECASE,
 )
-CODEX_ELIGIBLE_TASK_TYPES = {
-    "platform_ops",
-    "experiment",
-    "governance",
-    "code_review",
-    "paper_review",
-    "daily_article",
-    "daily_digest",
-}
-
-
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -174,34 +169,6 @@ def _find(tasks: list[dict[str, Any]], task_id: str) -> dict[str, Any]:
     return matches[0]
 
 
-def _normalized_task_type(task: dict[str, Any]) -> str:
-    return (
-        str(task.get("task_type") or "")
-        .strip()
-        .lower()
-        .replace("-", "_")
-        .replace(" ", "_")
-    )
-
-
-def _is_codex_eligible_task(task: dict[str, Any]) -> bool:
-    status = str(task.get("status") or "").strip().lower()
-    if status == "pending_main_thread":
-        return False
-    lane = str(task.get("dispatch_lane") or "").strip().lower()
-    if lane in {"main_thread", "blocked"}:
-        return False
-    task_type = _normalized_task_type(task)
-    if task_type in CODEX_ELIGIBLE_TASK_TYPES:
-        return True
-    preferred_agent = (
-        str(task.get("preferred_agent") or task.get("target_agent") or "")
-        .strip()
-        .lower()
-    )
-    return preferred_agent == "codex"
-
-
 def _published_mile_ids(task: dict[str, Any], result: str) -> set[str]:
     """Extract dual-publish article ids only when completion claims publication.
 
@@ -289,34 +256,25 @@ def _revalidate_dreaming_before_claim(
 
 
 def _expire_managed_event_before_claim(
-    task: dict[str, Any], *, owner: str
+    task: dict[str, Any],
+    *,
+    owner: str,
+    decision: Any,
+    observed_at: datetime,
 ) -> dict[str, Any] | None:
-    """Reject a canonical event claim that lost the race with its deadline."""
+    """Apply the terminal mutation selected by the pure claim policy."""
 
-    managed = _normalized_task_type(task) == "event_article" and (
-        str(task.get("source") or "").strip().lower() == "event_expander"
-        or bool(task.get("ref_event_job_id"))
-    )
-    if not managed:
+    if decision.primary_reason not in {
+        "missing_deadline",
+        "invalid_deadline",
+        "deadline_expired",
+    }:
         return None
 
     task_id = _task_key(task)
-    raw_deadline = task.get("deadline")
-    if not raw_deadline:
-        schema_error = "missing_deadline"
-        deadline = None
-    else:
-        deadline = parse_iso_warn(
-            raw_deadline,
-            tag="claim",
-            field_name="deadline",
-            fallback=None,
-            site="event_deadline_guard",
-            task_id=task_id,
-        )
-        schema_error = "invalid_deadline" if deadline is None else None
-    if schema_error:
-        now_text = _now()
+    now_text = observed_at.astimezone(timezone.utc).isoformat()
+    if decision.primary_reason in {"missing_deadline", "invalid_deadline"}:
+        schema_error = decision.primary_reason
         previous = str(task.get("status") or "").strip().lower() or "pending"
         task["status"] = "failed"
         task["completed_at"] = now_text
@@ -337,18 +295,6 @@ def _expire_managed_event_before_claim(
             "status": "failed",
         }
 
-    now_text = _now()
-    now = parse_iso_warn(
-        now_text,
-        tag="claim",
-        field_name="claim_now",
-        fallback=None,
-        site="event_deadline_guard",
-        task_id=task_id,
-    )
-    if now is None or now <= deadline:
-        return None
-
     previous = str(task.get("status") or "").strip().lower() or "pending"
     task["status"] = "expired"
     task["expired_at"] = now_text
@@ -367,13 +313,8 @@ def _expire_managed_event_before_claim(
         "reason": "deadline_expired",
         "task_id": task_id,
         "status": "expired",
-        "deadline": deadline.isoformat(),
+        "deadline": decision.deadline_at,
     }
-
-
-def _is_codex_owner(owner: str) -> bool:
-    normalized = str(owner or "").strip().lower()
-    return normalized == "codex" or normalized.startswith("codex-") or normalized.startswith("codex_")
 
 
 _K_ID_RE = re.compile(r"^K\d{2,5}[A-Z]?$", re.IGNORECASE)
@@ -541,31 +482,45 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
     session = args.session or os.environ.get("CLAUDE_SESSION_ID") or uuid.uuid4().hex[:12]
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
-        existing_owner = task.get("claimed_by")
         existing_status = (task.get("status") or "").lower()
-        # Idempotent: same owner re-claiming is OK
-        if existing_owner and existing_owner != args.owner and existing_status in {"claimed", "in_progress"}:
+        observed_at = datetime.now(timezone.utc)
+        decision = evaluate_task_claim(
+            task,
+            owner=args.owner,
+            main_thread=bool(getattr(args, "main_thread", False)),
+            observed_at=observed_at,
+        )
+        if decision.primary_reason == "already_claimed":
             return {
                 "ok": False,
                 "reason": "already_claimed",
-                "claimed_by": existing_owner,
+                "claimed_by": decision.claimed_by,
                 "claimed_at": task.get("claimed_at"),
             }
-        if existing_status not in {"pending", "pending_main_thread", "claimed", "blocked", ""}:
+        if decision.primary_reason == "wrong_status":
             return {"ok": False, "reason": "wrong_status", "status": existing_status}
         if existing_status != "claimed":
-            deadline_result = _expire_managed_event_before_claim(task, owner=args.owner)
+            deadline_result = _expire_managed_event_before_claim(
+                task,
+                owner=args.owner,
+                decision=decision,
+                observed_at=observed_at,
+            )
             if deadline_result is not None:
                 return deadline_result
             dreaming_result = _revalidate_dreaming_before_claim(task, owner=args.owner)
             if dreaming_result is not None:
                 return dreaming_result
-        from volpred.ops.next_tasks import (
-            is_main_thread_reserved,
-            normalize_dispatch_lane,
-        )
-
-        lane = normalize_dispatch_lane(task)
+            if decision.primary_reason == "live_revalidation_required":
+                decision = evaluate_task_claim(
+                    task,
+                    owner=args.owner,
+                    main_thread=bool(
+                        getattr(args, "main_thread", False)
+                    ),
+                    observed_at=observed_at,
+                    revalidation_checked=True,
+                )
         # 2026-07-20：原本只比對字面 "main_thread"，但 ctd 的候選過濾認得 4 種拼法
         # （main / main_thread / manual / interactive）。詞彙不一致 ⇒ lane="manual"
         # 的任務進不了 PHASE B 候選、卻擋不住 burst 點名 claim。
@@ -573,18 +528,18 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
         # is_main_thread_reserved（status=pending_main_thread 亦算），與
         # task_urgency 的 fire 判定共用同一套詞彙 —— 這裡與 request_fire 讀不同
         # 欄位正是「無合法執行者卻被 hourly fire」矛盾的根因（plan 附註）。
-        if is_main_thread_reserved(task) and not getattr(args, "main_thread", False):
+        if decision.primary_reason == "main_thread_lane":
             # 2026-07-20 owner 糾正（refactor_plan_ops_master_2026_07 §5 獨立軌）：
             # lane 只擋候選排序不夠 —— burst/urgent fire 會點名 claim，隔離必須
             # enforce 在 claim 這個唯一入口。互動主線程用 --main-thread 明示越過。
             return {
                 "ok": False,
                 "reason": "main_thread_lane",
-                "dispatch_lane": lane or None,
+                "dispatch_lane": decision.dispatch_lane or None,
                 "status": existing_status,
                 "hint": "reserved for main thread; pass --main-thread from an interactive session",
             }
-        if _is_codex_owner(args.owner) and not _is_codex_eligible_task(task):
+        if decision.primary_reason == "not_codex_eligible":
             return {
                 "ok": False,
                 "reason": "not_codex_eligible",
@@ -904,11 +859,21 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
                 age_h = (datetime.now(timezone.utc) - claimed_dt).total_seconds() / 3600
                 if age_h < args.stale_hours:
                     continue
+            elif args.status == "pending":
+                if not is_pending_list_candidate(
+                    t,
+                    codex_eligible=bool(args.codex_eligible),
+                ):
+                    continue
             elif args.status and status != args.status:
                 continue
             if args.owner and t.get("claimed_by") != args.owner:
                 continue
-            if args.codex_eligible and not _is_codex_eligible_task(t):
+            if (
+                args.codex_eligible
+                and args.status != "pending"
+                and not _is_codex_eligible_task(t)
+            ):
                 continue
             out.append({
                 "id": _task_key(t),
@@ -920,7 +885,7 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
                 "claimed_at": t.get("claimed_at"),
                 "dispatch_lane": t.get("dispatch_lane"),
             })
-        out.sort(key=lambda x: (priority_sort_key(x.get("priority"), default=999), x.get("id") or ""))
+        out.sort(key=task_rank_key)
         if args.limit:
             out = out[: args.limit]
         return {"ok": True, "count": len(out), "tasks": out}

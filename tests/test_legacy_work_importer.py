@@ -80,12 +80,25 @@ def test_next_tasks_source_provenance_is_classified_and_auditable() -> None:
                     "source": "diverse_gen",
                     "created_at": "2026-07-23T07:00:00+00:00",
                 },
+                {
+                    "id": "event_candidate",
+                    "status": "pending",
+                    "task_type": "event_article",
+                    "title": "Canonical event materializer output",
+                    "priority": 1,
+                    "source": "event_expander",
+                    "created_at": "2026-07-23T07:00:00+00:00",
+                    "deadline": "2026-07-23T08:00:00+00:00",
+                    "ref_event_job_id": "event-job-1",
+                },
             ),
         )
     )
 
     assert report.ready is True
-    agent_candidate, user_candidate, legacy_producer = report.candidates
+    agent_candidate, user_candidate, legacy_producer, event_candidate = (
+        report.candidates
+    )
     assert agent_candidate.request.source == "agent"
     assert agent_candidate.legacy_source == "auto_discovered"
     assert agent_candidate.source_classification == "exact:auto_discovered"
@@ -95,6 +108,10 @@ def test_next_tasks_source_provenance_is_classified_and_auditable() -> None:
     assert legacy_producer.request.source == "agent"
     assert legacy_producer.legacy_source == "diverse_gen"
     assert legacy_producer.source_classification == "exact:diverse_gen"
+    assert event_candidate.request.source == "schedule"
+    assert event_candidate.legacy_source == "event_expander"
+    assert event_candidate.source_classification == "exact:event_expander"
+    assert event_candidate.ref_event_job_id == "event-job-1"
     assert report.as_dict()["candidates"][0]["source_provenance"] == {
         "legacy": "auto_discovered",
         "canonical": "agent",
@@ -161,6 +178,45 @@ def test_next_tasks_snapshot_preserves_parent_deadline_claim_and_terminal_histor
     assert child.updated_at == "2026-07-23T00:10:00+00:00"
 
 
+def test_next_tasks_snapshot_preserves_real_claim_selector_metadata() -> None:
+    report = preview_legacy_snapshots(
+        LegacySnapshots(
+            next_tasks=(
+                {
+                    "id": "selector_metadata",
+                    "status": "claimed",
+                    "task_type": "paper_body",
+                    "title": "Keep routing and lease evidence",
+                    "priority": 1,
+                    "source": "user",
+                    "created_at": "2026-07-23T08:00:00+08:00",
+                    "claimed_at": "2026-07-23T08:05:00+08:00",
+                    "claimed_by": "codex-worker",
+                    "dispatch_lane": "manual",
+                    "preferred_agent": "codex",
+                    "target_agent": "claude",
+                    "claim_expires_at": "2026-07-23T08:10:00+08:00",
+                    "dreaming": {
+                        "signature": "orphaned_experiment:k1800",
+                        "pattern_type": "orphaned_experiment",
+                    },
+                },
+            ),
+        )
+    )
+
+    assert report.ready is True
+    candidate = report.candidates[0]
+    assert candidate.dispatch_lane == "manual"
+    assert candidate.preferred_agent == "codex"
+    assert candidate.target_agent == "claude"
+    assert candidate.claim_expires_at == "2026-07-23T00:10:00+00:00"
+    assert candidate.dreaming == {
+        "signature": "orphaned_experiment:k1800",
+        "pattern_type": "orphaned_experiment",
+    }
+
+
 def test_task_record_snapshot_maps_legacy_policy_and_running_owner() -> None:
     report = preview_legacy_snapshots(
         LegacySnapshots(
@@ -216,6 +272,8 @@ def test_task_record_snapshot_maps_legacy_policy_and_running_owner() -> None:
     assert candidate.request.risk == "sensitive"
     assert candidate.request.approval == "required"
     assert candidate.request.requester_ref == "owner"
+    assert candidate.preferred_agent == "codex"
+    assert candidate.fallback_allowed is False
     assert report.source_counts["task_records"] == {"seen": 2, "mapped": 2}
 
 
