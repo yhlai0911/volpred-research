@@ -26,6 +26,8 @@ def storage(tmp_path):
             "id": "mile_test",
             "title": "old title",
             "description": "old description",
+            "audience": "general",
+            "tags": ["一般讀者"],
             "status": "published",
             "published_at": "2026-07-01T17:24:08+00:00",
             "content": "近 20 日波動 18.1%，近 5 日 14.0%。事件在 7/2。",
@@ -114,6 +116,39 @@ def test_description_mismatch_fails_before_writing(storage):
             "mile_test",
             description_replacement=("stale description", "new description"),
             summary="card excerpt correction",
+            storage_dir=storage,
+        )
+    assert _feed(storage) == original
+
+
+def test_research_upcast_fails_before_writing(storage):
+    original = _feed(storage)
+    with pytest.raises(
+        CorrectionNotApplied,
+        match="violates the declared general-audience contract",
+    ):
+        apply_article_correction(
+            "mile_test",
+            content_replacements=[
+                ("18.1%", "K741"),
+                ("14.0%", "bootstrap"),
+            ],
+            summary="must remain reader-facing",
+            storage_dir=storage,
+        )
+    assert _feed(storage) == original
+
+
+def test_bare_statistical_notation_fails_before_writing(storage):
+    original = _feed(storage)
+    with pytest.raises(
+        CorrectionNotApplied,
+        match="violates the declared general-audience contract",
+    ):
+        apply_article_correction(
+            "mile_test",
+            content_replacements=[("18.1%", "p=0.03")],
+            summary="must remain plain language",
             storage_dir=storage,
         )
     assert _feed(storage) == original
