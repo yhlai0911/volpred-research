@@ -5,7 +5,7 @@
     "description": "老闆於 Telegram msg 1329 明確指示：第一步先對 storage/next_tasks.json 做可回復備份，之後清空既有任務；暫停把工作送進任務池，所有工作改為直接執行。接著第一個直接執行的工作是全面盤點並重構整個派工／認領／commit／殘留收斂底層，消除無人認領、無法 commit、任務池堵塞與舊機制殘留。這是 user-assigned P1 急件；須直接開工，不可只寫計畫或再拆成一般排隊單。依五步結案 gate：live 證據、根因層級、底層重構、回歸與下游回讀、制度化寫回；未全過只能標 contained。操作含清空任務池，務必先建立可驗證備份並保留回復路徑。完成後以 Telegram 回報短結論與可查證證據。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "source": "user",
     "created_at": "2026-07-22T16:08:48.608987+00:00",
     "payload": {
@@ -17,9 +17,6 @@
     },
     "parent_task_id": "telegram-1329",
     "created_by": "telegram-responder",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-23T12:40:36.377432+00:00",
-    "claim_session_id": "938bcb91f363",
     "status_history": [
       {
         "ts": "2026-07-23T12:40:36.377439+00:00",
@@ -32,11 +29,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-23T14:50:05.946123+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
     "containment_evidence": "backup sha256 89863b056e1dc4fb8a661a9ccf5caf1eeb058b063b42c528a25ce602f186d8f3; 3338 rows; admission and claim canaries blocked; 68 tests; canonical writer audit clean",
-    "next_direct_step": "Continue ADR-0001 live ownership cutover: Work Coordinator, Change Delivery, commit fencing, manifest residue convergence, then sustained-clean read-back"
+    "next_direct_step": "Continue ADR-0001 live ownership cutover: Work Coordinator, Change Delivery, commit fencing, manifest residue convergence, then sustained-clean read-back",
+    "last_released_at": "2026-07-23T14:50:05.946118+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   }
 ]

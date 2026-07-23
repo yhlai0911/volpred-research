@@ -20,12 +20,12 @@
     "4080"
   ],
   "env": {},
-  "status": "queued",
+  "status": "failed",
   "queue_priority": 2,
   "queued_at": "2026-07-23T03:11:11Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-23T15:15:01Z",
+  "completed_at": "2026-07-23T15:15:06Z",
+  "exit_code": 1,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1731-armb-rev9-remediation.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-k1731-armb-rev9-remediation.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_armB_rev9_remediation.json",
@@ -44,9 +44,9 @@
   "timeout_seconds": 4200,
   "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/k1731_armB_rev9_claim_surface.md",
   "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1731-armb-rev9-remediation.md",
-  "claimed_by_pid": 50394,
-  "claimed_by_pid_start_wall": "Thu Jul 23 21:45:02 2026",
-  "quota_requeues": 15,
+  "claimed_by_pid": 13139,
+  "claimed_by_pid_start_wall": "Thu Jul 23 23:15:01 2026",
+  "quota_requeues": 16,
   "requeue_history": [
     {
       "at": "2026-07-23T03:15:05Z",
@@ -152,9 +152,16 @@
       "exit_code": 1,
       "started_at": "2026-07-23T13:45:02Z",
       "reset_at": null
+    },
+    {
+      "at": "2026-07-23T14:30:11Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-07-23T14:30:05Z",
+      "reset_at": null
     }
   ],
-  "not_before": "2026-07-23T14:15:08.220540+00:00",
+  "not_before": "2026-07-23T15:00:11.770055+00:00",
   "attempt_status": "quota_exhausted",
   "quota_reset_at": null
 }
