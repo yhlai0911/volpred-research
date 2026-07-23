@@ -12,6 +12,7 @@ Examples:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import os
 import re
@@ -112,6 +113,35 @@ def _expected_head(raw: str | None) -> str | None:
     return raw
 
 
+def _expected_content_hashes(
+    repo: Path,
+    raw_values: list[str],
+) -> dict[str, str]:
+    """Normalize optional ``PATH=SHA256`` assertions for an exact-path commit."""
+    expected: dict[str, str] = {}
+    for raw in raw_values:
+        if "=" not in raw:
+            raise ValueError(
+                "expected-content-hash must use PATH=SHA256 syntax"
+            )
+        raw_path, sha256 = raw.rsplit("=", 1)
+        paths = _normalize_paths(repo, [raw_path])
+        if len(paths) != 1:
+            raise ValueError(
+                "expected-content-hash must name exactly one file"
+            )
+        path = paths[0]
+        if path in expected:
+            raise ValueError(f"duplicate expected content hash path: {path}")
+        if re.fullmatch(r"[0-9a-f]{64}", sha256) is None:
+            raise ValueError(
+                f"expected content hash for {path} must be 64 lowercase "
+                "hexadecimal characters"
+            )
+        expected[path] = sha256
+    return expected
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     command = _strip_separator(args.command)
     if not command:
@@ -131,9 +161,17 @@ def cmd_commit(args: argparse.Namespace) -> int:
     repo = _repo(args.repo)
     expected_head = _expected_head(args.expected_head)
     paths = _normalize_paths(repo, _strip_separator(args.paths))
+    expected_content_hashes = _expected_content_hashes(
+        repo,
+        args.expected_content_hash,
+    )
     if not paths:
         print("[git-writer-lock] commit needs explicit file paths", file=sys.stderr)
         return 2
+    if expected_content_hashes and set(expected_content_hashes) != set(paths):
+        raise ValueError(
+            "expected-content-hash paths must exactly match commit paths"
+        )
 
     with git_writer_lock(repo, actor=args.actor, timeout_s=args.timeout) as lease:
         require_canonical_main_checkout(repo)
@@ -212,6 +250,32 @@ def cmd_commit(args: argparse.Namespace) -> int:
                 return 0
             if staged.returncode != 1:
                 return int(staged.returncode)
+
+            for path, expected_sha256 in expected_content_hashes.items():
+                staged_blob = subprocess.run(
+                    _git("show", f":{path}"),
+                    cwd=repo,
+                    capture_output=True,
+                    env=env,
+                    check=False,
+                    pass_fds=lease.child_pass_fds(),
+                )
+                if staged_blob.returncode != 0:
+                    print(
+                        "[git-writer-lock] BLOCKED: cannot read staged content "
+                        f"for expected hash: {path}",
+                        file=sys.stderr,
+                    )
+                    return 2
+                observed_sha256 = hashlib.sha256(staged_blob.stdout).hexdigest()
+                if observed_sha256 != expected_sha256:
+                    print(
+                        "[git-writer-lock] BLOCKED: expected content hash failed "
+                        f"for {path}: expected {expected_sha256}, observed "
+                        f"{observed_sha256}",
+                        file=sys.stderr,
+                    )
+                    return 2
 
             commit_cmd = _git("commit", "--only")
             if args.message_file:
@@ -297,6 +361,16 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "full object ID observed by the caller; fail inside the writer "
             "lease before staging if canonical HEAD has advanced"
+        ),
+    )
+    commit.add_argument(
+        "--expected-content-hash",
+        action="append",
+        default=[],
+        metavar="PATH=SHA256",
+        help=(
+            "optional staged-blob assertion; when present, one value is "
+            "required for every exact commit path"
         ),
     )
     message = commit.add_mutually_exclusive_group(required=True)

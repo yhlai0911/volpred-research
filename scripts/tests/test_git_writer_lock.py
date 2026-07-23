@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 import os
 import signal
@@ -483,6 +484,100 @@ def test_exact_path_commit_expected_head_lands_direct_child(
         _run(repo, "git", "show", "--format=", "--name-only", "HEAD").stdout.strip()
         == "owned.txt"
     )
+
+
+def test_exact_path_commit_expected_content_hash_lands_verified_blob(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    payload = b"verified content\n"
+    (repo / "owned.txt").write_bytes(payload)
+    sha256 = hashlib.sha256(payload).hexdigest()
+
+    committed = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "hash-fenced-proposal",
+        "--expected-head",
+        expected_head,
+        "--expected-content-hash",
+        f"owned.txt={sha256}",
+        "--message",
+        "land hash-fenced proposal",
+        "--",
+        "owned.txt",
+    )
+
+    assert committed.returncode == 0, committed.stderr
+    committed_blob = _run(repo, "git", "show", "HEAD:owned.txt").stdout.encode()
+    assert hashlib.sha256(committed_blob).hexdigest() == sha256
+
+
+def test_exact_path_commit_content_hash_drift_fails_and_restores_index(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    (repo / "owned.txt").write_text("drifted\n")
+    before_status = _run(
+        repo, "git", "status", "--porcelain=v1", "-uall"
+    ).stdout
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "hash-drifted-proposal",
+        "--expected-head",
+        expected_head,
+        "--expected-content-hash",
+        f"owned.txt={'0' * 64}",
+        "--message",
+        "must not land",
+        "--",
+        "owned.txt",
+    )
+
+    assert blocked.returncode == 2
+    assert "expected content hash failed" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert _run(repo, "git", "diff", "--cached", "--name-only").stdout == ""
+    assert _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout == before_status
+
+
+def test_exact_path_commit_requires_hashes_for_the_complete_path_scope(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    (repo / "one.txt").write_text("one\n")
+    (repo / "two.txt").write_text("two\n")
+    one_hash = hashlib.sha256((repo / "one.txt").read_bytes()).hexdigest()
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "partial-hash-scope",
+        "--expected-content-hash",
+        f"one.txt={one_hash}",
+        "--message",
+        "must not land",
+        "--",
+        "one.txt",
+        "two.txt",
+    )
+
+    assert blocked.returncode == 2
+    assert "must exactly match commit paths" in blocked.stderr
+    assert _run(repo, "git", "diff", "--cached", "--name-only").stdout == ""
 
 
 @pytest.mark.parametrize("expected_head", ["HEAD", "abc123", "A" * 40, "0" * 41])

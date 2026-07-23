@@ -163,6 +163,21 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   DeliveryReceipt 與 live caller 均未完成，因此不構成 Change Delivery ownership
   cutover。
 
+### 2026-07-24 Git commit actuator checkpoint
+
+- 已完成 program commit 09 的 private `GitCommitActuator` adapter：它只把已授權且已
+  materialize 到 canonical checkout 的 exact-path request 轉交既有
+  `git_writer_lock.py commit` transaction，不另外實作第二套 index／ref writer。
+- 現行 writer 新增可選的 staged-blob SHA-256 fence；hash scope 必須與 exact paths
+  完全相等，且在 writer lease 內、commit 前驗證 index blob。hash／HEAD 任一漂移都在
+  不產生 commit 的情況下 fail closed，並把本次觸碰的 index path reset 回原狀。
+- adapter 只把 process exit 0 視為候選成功；其後回讀 commit object，驗證 direct
+  parent、exact-path diff 與每個 committed blob hash，再產生 immutable
+  `commit-actuation.v1` receipt。既有 unrelated index／working-tree 狀態維持不變。
+- 這仍是 shadow implementation：尚未接到 `ChangeDelivery.land`，也尚未實作 program
+  commit 10 的 WorkLease／Primary Authority fencing、持久化 receipt 或 live caller，
+  因此不取得正式 commit ownership。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam
