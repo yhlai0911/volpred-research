@@ -44094,7 +44094,7 @@
     "description": "Alert `supervisor quota_blocked（額度恢復後自動復工）` fired 10× over 12.8d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-19T21:25:00.858706+00:00）。\n證據：alert_key=e46b1923cd3787a9 title='supervisor quota_blocked（額度恢復後自動復工）' send_count=10 span=12.8d (first 2026-07-06T11:08:02.667095+00:00 → last 2026-07-19T06:52:34.169530+00:00) — no fire in 18.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-20T01:18:48.350731+00:00",
     "dreaming": {
@@ -44103,7 +44103,30 @@
       "occurrences": 1,
       "governance_target": "docs/error_log.md"
     },
-    "priority_note": "dreaming: severity escalated to critical on 2026-07-22 (was P3)"
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-22 (was P3)",
+    "status_history": [
+      {
+        "ts": "2026-07-23T03:06:19.913459+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-23T03:06:23.314527+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-23T03:10:48.139358+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-23T03:06:23.314509+00:00",
+    "completed_at": "2026-07-23T03:10:48.139348+00:00",
+    "result": "root_cause_fixed_and_verified: quota outage notice now delegates to dispatch_supervisor.quota_failover; generic persistent/unfiled detectors retain failover-failed visibility. Production replay target absent; tests/test_dreaming_review.py 99 passed. commit 32cff0ec8."
   },
   {
     "id": "dreaming_persistent_alert_8e08e46929dc07ef",
@@ -55230,7 +55253,7 @@
     "description": "Codex round 8 對 frozen target bb57bda98 裁決 FAIL；完整裁決：storage/ops/codex_reviews/k1731_armB_rev8_verdict.md。只修一個 blocking claim-surface defect與一個非 blocking gate hole，不重跑估計。\n\n1. 修 experiments/k1731/k1731_finalize_report.py 的 ARM_A_ENGINE_ISSUES[0].why_it_matters：不得再稱 low PIP 是「evidence of no effect」，不得稱「arm B null rests ...」。改成只支持 under-this-prior 的 weak in-sample selection，且明說不建立 OOS null。\n2. 由 canonical finalizer 重生三份 results JSON；禁止手改。獨立 leaf diff 必須維持 numeric change/add/remove = 0，rename values exact。\n3. 擴 k1731_armB_verification.py：artifact claim scan 必須涵蓋 armA_engine_issues（全部三份 artifact），加 negative control 證明殘留 null phrase 會 exit 1。\n4. 補 k1731_rev8_drift_check.py：numeric additions/removals 也必須讓 gate FAIL；加 regression test/negative control。\n5. 目前 worktree HEAD 已含 bb57bda98 後的 F1/F3 commits；不得回退或覆蓋後續成果。修正要套在現行 branch 上並重新建立完整 current claim-surface freeze。\n6. 跑 108-test nested-DM ratchet、arm-B verification、3834-leaf regression/drift gates；全部 PASS 後送 Codex round 9。PASS 才能解除 assign_67f56b79 與 k1731_k1730_merge_after_codex_round8_20260725；FAIL 再建下一個 bounded remediation。\n\n禁止 merge worktree、禁止寫 knowledge.json、禁止重跑估計。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "codex_review_followup",
     "parent_task_id": "assign_24ebe308",
     "created_by": "codex-failover-slot-2-9e02458ba42b49668cb008bff360750d",
@@ -55247,7 +55270,27 @@
       "verdict_path": "storage/ops/codex_reviews/k1731_armB_rev8_verdict.md",
       "split_stage": "rev9_canonical_claim_surface"
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "claimed_by": "codex-failover-slot-1-72b8a83ad6834037a2884c1b93b58cb3",
+    "claimed_at": "2026-07-23T03:09:11.801013+00:00",
+    "claim_session_id": "24f69db343f2",
+    "status_history": [
+      {
+        "ts": "2026-07-23T03:09:11.801027+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-72b8a83ad6834037a2884c1b93b58cb3"
+      },
+      {
+        "ts": "2026-07-23T03:09:12.050398+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-72b8a83ad6834037a2884c1b93b58cb3"
+      }
+    ],
+    "started_at": "2026-07-23T03:09:12.050385+00:00",
+    "compute_job_id": "agent-k1731-armb-rev9-remediation",
+    "result": "dispatched to compute job agent-k1731-armb-rev9-remediation; awaiting PHASE A collection"
   },
   {
     "id": "platform_ops_release_audit_fix_mile_2d1d356b",
