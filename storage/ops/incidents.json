@@ -161,6 +161,44 @@
     "last_at": null
    }
   },
+  "inc_6f18a4d3d66a": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "current_task_id": null,
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-23T00:00:09.751956+00:00",
+   "escalation": null,
+   "fingerprint": "6f18a4d3d66aa48cac3dfc73747fac93ce16831ef4a8d43576f3fac3958d9bcc",
+   "fingerprint_parts": [
+    "ci-red-29964788273"
+   ],
+   "first_seen_at": "2026-07-23T00:00:09.751956+00:00",
+   "incident_id": "inc_6f18a4d3d66a",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-23T00:00:09.751956+00:00",
+     "key": "29964788273:1",
+     "last_seen_at": "2026-07-23T00:00:09.751956+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-22T23:13:49.2013290Z E AssertionError: Enforcement Layer Map is out of sync with disk — update .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md in the same commit as ",
+   "last_seen_at": "2026-07-23T00:00:09.751956+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_776caf84f125": {
    "class": "machine_self",
    "clean_observations": [],
@@ -396,7 +434,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-22T23:08:02.432304+00:00"
+     "last_seen_at": "2026-07-23T00:07:16.013921+00:00"
     },
     {
      "cleared_at": null,
@@ -409,7 +447,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-22T23:08:02.710633+00:00"
+     "last_seen_at": "2026-07-23T00:07:16.319165+00:00"
     },
     {
      "cleared_at": null,
@@ -422,7 +460,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-22T23:08:03.301038+00:00"
+     "last_seen_at": "2026-07-23T00:07:17.061647+00:00"
     },
     {
      "cleared_at": null,
@@ -435,7 +473,7 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-22T23:08:02.983373+00:00"
+     "last_seen_at": "2026-07-23T00:07:16.607823+00:00"
     },
     {
      "cleared_at": null,
@@ -448,7 +486,7 @@
      },
      "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-22T23:08:03.879603+00:00"
+     "last_seen_at": "2026-07-23T00:07:18.161295+00:00"
     },
     {
      "cleared_at": null,
@@ -474,14 +512,14 @@
      },
      "first_seen_at": "2026-07-22T02:53:18.325364+00:00",
      "key": "dispatch-slot-3-3896dcaa-k1714",
-     "last_seen_at": "2026-07-22T23:08:04.199514+00:00"
+     "last_seen_at": "2026-07-23T00:07:19.384013+00:00"
     }
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-3-3896dcaa-k1714 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-22T23:08:04.199514+00:00",
+   "last_seen_at": "2026-07-23T00:07:19.384013+00:00",
    "notified_at": null,
-   "occurrence_count": 347,
+   "occurrence_count": 359,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -553,9 +591,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-22T13:10:37.062457+00:00"
-    },
-    {
      "at": "2026-07-22T14:07:41.609042+00:00"
     },
     {
@@ -587,6 +622,9 @@
     },
     {
      "at": "2026-07-22T22:19:36.643084+00:00"
+    },
+    {
+     "at": "2026-07-22T23:16:01.036763+00:00"
     }
    ],
    "current_task_id": null,
@@ -702,6 +740,6 @@
    }
   }
  },
- "updated_at": "2026-07-22T23:15:52.704906+00:00",
+ "updated_at": "2026-07-23T00:13:40.297390+00:00",
  "version": 1
 }
