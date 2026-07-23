@@ -783,6 +783,28 @@ merge 仍由 round-3 的 3 項 blocking defect 封鎖，出口是
 目前仍是未修復的第一輪版本**（仍寫著「純假象假說被拒絕」「不可交易」「多處顯著更差」），
 在 rev4 合併前不可引用。
 
+### 2026-07-23 — stale-base worktree merge 讓 `-X ours` 靜默刪掉 192 行活碼 — root_cause_fixed_and_verified
+
+**症狀與物證**：merge commit `86e142305` 對第一父系 main 的
+`scripts/compute_queue.py` 是 `+38/-7`，但對第二父系 worktree 是 `+0/-192`；worktree
+上已驗證的 D6b stale-running reaper 沒有進入 merge 結果。既有 post-merge drop detector
+只檢查 `experiments/`，所以 `scripts/` 下的活碼可消失而 merge 仍成功。
+
+**根因層級**：這是 merge contract 缺口，不是單次衝突。worktree base 落後 main 時，
+main 與 worktree 可能從共同 merge-base 起修改同一路徑；`git merge -X ours` 會替無人審核的
+語意衝突選 main 版本，且「merge exit 0」不證明 worktree 變更仍在。
+
+**底層修復**：`scripts/merge_worktree.sh` 在 merge 前解析 merge-base，分別建立 main /
+worktree 的 changed-path set。main 已前進且 set 有交集時 fail closed，列出重疊路徑並保留
+worktree / branch，要求明確 rebase 或人工整合後再跑；路徑不相交才允許 stale merge。
+worktree 相對 merge-base 呈現 `+0/-N` 的 pure-deletion path 另行告警，避免把活碼覆成舊版。
+
+**回歸與回讀**：Case 23 先在舊版重現 merge exit 0、worktree 被移除，再於修後確認
+pre-merge ABORT、main bytes 不變、worktree/branch 仍存在、重疊路徑與 pure-deletion 路徑
+均出現在輸出。Case 9 確認舊的「merge 後自動覆回 agent」契約改為兩側 bytes 都保留；
+Case 11 確認 cron 只改 `feed.json`、agent 只加實驗時仍可合併，避免把所有 stale base
+誤封鎖。制度契約同步寫入 `.claude/rules/worktree.md`。
+
 ### 2026-07-22 23:21 — 撤稿只有手改 feed、同步又丟掉 successor metadata — root_cause_fixed_and_verified
 
 `storage/reports/feed.json` 原有 13 篇 `status=retracted`，但只有 `mile_ebb5d6f5` 帶

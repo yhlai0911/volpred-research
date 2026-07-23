@@ -63,6 +63,14 @@ certify_all_experiments() {
 import hashlib, json, sys
 from pathlib import Path
 exp = Path(sys.argv[1])
+result_files = sorted(exp.glob("*_results.json"))
+entrypoints = sorted(exp.glob("*.py"))
+if result_files and entrypoints:
+    (exp / "reproduce_spec.json").write_text(json.dumps({
+        "schema_version": "volpred.reproduce_spec.v1",
+        "entrypoint": {"path": entrypoints[0].name},
+        "canonical_result": result_files[0].name,
+    }, indent=2), encoding="utf-8")
 surface = [
     p for p in sorted(exp.rglob("*"))
     if p.is_file() and "__pycache__" not in p.parts and p.name != "review_verdict.json"
@@ -107,6 +115,7 @@ setup_test_env() {
     cp "$real_scripts/audit_dm_hac_lag.py" "$test_dir/scripts/"
     cp "$real_scripts/audit_mdd_scale_artifact.py" "$test_dir/scripts/"
     cp "$real_scripts/audit_fevd_ordering.py" "$test_dir/scripts/"
+    cp "$real_scripts/check_experiment_artifacts.py" "$test_dir/scripts/"
     cp "$PROJECT_ROOT/storage/ops/mdd_scale_artifact_baseline.json" \
         "$test_dir/storage/ops/"
 
@@ -116,8 +125,13 @@ setup_test_env() {
     git init -b main -q
     git config user.email "test@test"
     git config user.name "test"
-    mkdir -p experiments .claude/worktrees
+    mkdir -p experiments .claude/worktrees storage/memory
     echo "seed" > experiments/.gitkeep
+    # Result-bearing fixtures must satisfy the live artifact gate before their
+    # actual merge behavior can be exercised.  These are fixture identities,
+    # not research findings.
+    printf '%s\n' '[{"item_id":"K1262 K1617 K1618 K1619 test fixtures"}]' \
+        > storage/memory/knowledge.json
     git add -A && git commit -qm "seed"
 
     # 建立 worktree
@@ -609,12 +623,13 @@ test_case_8_cwd_inside_worktree() {
 }
 
 # ============================================================
-# Test Case 9 (K1618 review Finding 2): -X ours drop 了 agent 對既有檔的修改
-#   → 舊版只警告仍移除 worktree+branch -D → agent 修改遺失。
-#   修後必 AUTO-RESTORE agent 版本並 commit，main HEAD 保留 agent 修改。
+# Test Case 9 (K1618 review Finding 2; 2026-07-23 contract upgrade):
+#   main 與 agent 都改同一既有檔時，-X ours 或事後 AUTO-RESTORE 都是在
+#   未經語意裁決下偏向其中一方。正確行為是 merge 前 fail-closed，
+#   保留 main bytes、worktree bytes 與 branch，要求 rebase/人工整合。
 # ============================================================
 test_case_9_ours_dropped_auto_restore() {
-    echo "=== Case 9 (Finding 2): -X ours drop modified 檔 → 自動還原不遺失 ==="
+    echo "=== Case 9 (Finding 2): 同路徑雙邊修改 → merge 前 fail-closed ==="
     local test_dir
     test_dir=$(setup_test_env "case9")
     cd "$test_dir"
@@ -641,21 +656,23 @@ test_case_9_ours_dropped_auto_restore() {
     certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
-    # 9-1: main HEAD 的 km9.py 必是 agent 版本（auto-restore 生效）
+    # 9-1: main HEAD 保留 main 的有效版本；不得先 merge 再覆成 agent。
     local final_content
     final_content=$(git -C "$test_dir" show "main:experiments/km9/km9.py" 2>/dev/null || echo "MISSING")
-    if [[ "$final_content" == "agent v1" ]]; then
-        pass "9-1: main HEAD km9.py = agent 版本（-X ours drop 已自動還原，無資料遺失）"
+    if [[ "$final_content" == "main v1" ]] && \
+       echo "$output" | grep -q "STALE-BASE.*ABORT"; then
+        pass "9-1: stale overlap 在 merge 前被擋，main bytes 保留"
     else
-        fail "9-1: km9.py = '$final_content'（agent 修改遺失！Finding 2 重現）"
-        echo "$output" | grep -E "DROPPED|RESTORE|還原" | head -10
+        fail "9-1: km9.py = '$final_content'（未在 merge 前 fail-closed）"
+        echo "$output" | grep -E "STALE-BASE|ABORT|DROPPED|RESTORE" | head -10
     fi
 
-    # 9-2: script 必印 AUTO-RESTORE 訊息
-    if echo "$output" | grep -q "AUTO-RESTORE"; then
-        pass "9-2: script 執行 auto-restore（非只警告）"
+    # 9-2: agent 版本仍由 durable worktree + branch 保存。
+    if [[ -d "$wt" ]] && [[ "$(cat "$wt/experiments/km9/km9.py")" == "agent v1" ]] && \
+       git -C "$test_dir" show-ref --verify --quiet "refs/heads/$branch"; then
+        pass "9-2: worktree/branch 保留 agent bytes，等待明確整合"
     else
-        fail "9-2: script 沒 auto-restore"
+        fail "9-2: agent bytes 或 durable branch 遺失"
     fi
 }
 
@@ -719,9 +736,11 @@ test_case_11_stale_base_no_false_abort() {
     local wt=".claude/worktrees/agent-testcase11"
 
     # agent 只碰自己的 experiments/（完全合規）
-    mkdir -p "$wt/experiments/k9911"
-    echo "print('k9911')" > "$wt/experiments/k9911/k9911.py"
-    (cd "$wt" && git add -A && git commit -qm "k9911: agent 只動 experiments/")
+    # 使用 registry enforcement 門檻前的 fixture K-id；此 case 驗的是
+    # stale-base path 集合，不應被 K-id allocation gate 混淆。
+    mkdir -p "$wt/experiments/k1611"
+    echo "print('k1611')" > "$wt/experiments/k1611/k1611.py"
+    (cd "$wt" && git add -A && git commit -qm "k1611: agent 只動 experiments/")
 
     # main 在 branch 分出去「之後」改共享 JSON —— 這是 cron 的日常，不是違規
     mkdir -p storage/reports
@@ -741,10 +760,11 @@ test_case_11_stale_base_no_false_abort() {
     fi
 
     # 11-2: 合併真的發生 —— agent 的檔案要進 main 的 git tree（不只 working tree）
-    if git -C "$test_dir" cat-file -e "main:experiments/k9911/k9911.py" 2>/dev/null; then
-        pass "11-2: k9911.py 已在 main HEAD 的 git tree"
+    if git -C "$test_dir" cat-file -e "main:experiments/k1611/k1611.py" 2>/dev/null; then
+        pass "11-2: k1611.py 已在 main HEAD 的 git tree"
     else
-        fail "11-2: k9911.py 不在 main HEAD（合併被誤 abort 擋掉）"
+        fail "11-2: k1611.py 不在 main HEAD（合併被誤 abort 擋掉）"
+        echo "$output" | tail -40
     fi
 
     # 11-3: main 自己的 feed.json 不可被 agent 版本蓋掉
@@ -1007,20 +1027,20 @@ test_case_17_overlapping_dirty_main_aborts_without_stash() {
     local wt=".claude/worktrees/agent-testcase17"
     local branch="worktree-agent-testcase17"
 
-    mkdir -p experiments/k17overlap
-    echo "print('base')" > experiments/k17overlap/k17overlap.py
-    echo "# K17 overlap" > experiments/k17overlap/README.md
-    echo "{}" > experiments/k17overlap/k17overlap_results.json
-    git add experiments/k17overlap
+    mkdir -p experiments/k1617overlap
+    echo "print('base')" > experiments/k1617overlap/k1617overlap.py
+    echo "# K1617 overlap" > experiments/k1617overlap/README.md
+    echo "{}" > experiments/k1617overlap/k1617overlap_results.json
+    git add experiments/k1617overlap
     git commit -qm "seed shared experiment file"
     (cd "$wt" && git merge main --no-edit -q)
 
-    echo "print('agent version')" > "$wt/experiments/k17overlap/k17overlap.py"
-    (cd "$wt" && git add experiments/k17overlap && git commit -qm "agent edits shared file")
+    echo "print('agent version')" > "$wt/experiments/k1617overlap/k1617overlap.py"
+    (cd "$wt" && git add experiments/k1617overlap && git commit -qm "agent edits shared file")
     certify_all_experiments "$wt"
 
     # 另一個 slot 在 main 同一路徑有未提交內容。
-    echo "print('interactive WIP')" > experiments/k17overlap/k17overlap.py
+    echo "print('interactive WIP')" > experiments/k1617overlap/k1617overlap.py
 
     local output
     output=$(run_merge_in_test_dir "$test_dir")
@@ -1030,7 +1050,7 @@ test_case_17_overlapping_dirty_main_aborts_without_stash() {
     else
         fail "17-1: 沒有明確偵測同一路徑 overlap"
     fi
-    if [[ "$(cat experiments/k17overlap/k17overlap.py)" == "print('interactive WIP')" ]]; then
+    if [[ "$(cat experiments/k1617overlap/k1617overlap.py)" == "print('interactive WIP')" ]]; then
         pass "17-2: main 上其他 slot 的 bytes 原封不動"
     else
         fail "17-2: main WIP 被 merge/stash 流程改寫"
@@ -1060,10 +1080,10 @@ test_case_18_unrelated_dirty_main_merges_in_place() {
     git commit -qm "seed unrelated tracked file"
     (cd "$wt" && git merge main --no-edit -q)
 
-    mkdir -p "$wt/experiments/k18clean"
-    echo "print('agent experiment')" > "$wt/experiments/k18clean/k18clean.py"
-    echo "# K18 clean" > "$wt/experiments/k18clean/README.md"
-    echo "{}" > "$wt/experiments/k18clean/k18clean_results.json"
+    mkdir -p "$wt/experiments/k1618clean"
+    echo "print('agent experiment')" > "$wt/experiments/k1618clean/k1618clean.py"
+    echo "# K1618 clean" > "$wt/experiments/k1618clean/README.md"
+    echo "{}" > "$wt/experiments/k1618clean/k1618clean_results.json"
     certify_all_experiments "$wt"
 
     echo "operator WIP" > operator_notes.txt
@@ -1071,7 +1091,7 @@ test_case_18_unrelated_dirty_main_merges_in_place() {
     local output
     output=$(run_merge_in_test_dir "$test_dir")
 
-    if git -C "$test_dir" cat-file -e "main:experiments/k18clean/k18clean.py" 2>/dev/null; then
+    if git -C "$test_dir" cat-file -e "main:experiments/k1618clean/k1618clean.py" 2>/dev/null; then
         pass "18-1: 不相交 dirty main 仍完成 agent integration"
     else
         fail "18-1: 不相交 WIP 不必要地阻塞 merge"
@@ -1101,10 +1121,10 @@ test_case_19_foreign_staged_index_aborts_unchanged() {
     cd "$test_dir"
 
     local wt=".claude/worktrees/agent-testcase19"
-    mkdir -p "$wt/experiments/k19staged"
-    echo "print('agent experiment')" > "$wt/experiments/k19staged/k19staged.py"
-    echo "# K19 staged" > "$wt/experiments/k19staged/README.md"
-    echo "{}" > "$wt/experiments/k19staged/k19staged_results.json"
+    mkdir -p "$wt/experiments/k1619staged"
+    echo "print('agent experiment')" > "$wt/experiments/k1619staged/k1619staged.py"
+    echo "# K1619 staged" > "$wt/experiments/k1619staged/README.md"
+    echo "{}" > "$wt/experiments/k1619staged/k1619staged_results.json"
     certify_all_experiments "$wt"
 
     echo "foreign staged bytes" > foreign_owner.txt
@@ -1124,7 +1144,7 @@ test_case_19_foreign_staged_index_aborts_unchanged() {
     else
         fail "19-2: merge 流程改寫/unstage 了 foreign owner 內容"
     fi
-    if ! git -C "$test_dir" cat-file -e "main:experiments/k19staged/k19staged.py" 2>/dev/null && \
+    if ! git -C "$test_dir" cat-file -e "main:experiments/k1619staged/k1619staged.py" 2>/dev/null && \
        [[ -d "$wt" ]]; then
         pass "19-3: agent branch 未假裝 merged，worktree 保留"
     else
@@ -1362,13 +1382,15 @@ test_case_23_stale_overlap_aborts_before_merge() {
 
     mkdir -p src
     printf '%s\n' "def verdict():" "    return 'base'" > src/live_worker.py
-    git add src/live_worker.py && git commit -qm "seed shared live worker"
+    printf '%s\n' "line one" "line two" "line three" > src/legacy_worker.py
+    git add src/live_worker.py src/legacy_worker.py && git commit -qm "seed shared live worker"
     (cd "$wt" && git merge main --no-edit -q)
 
     # Worktree 的有效實作。
     printf '%s\n' "def verdict():" "    return 'agent-live-reaper'" \
         > "$wt/src/live_worker.py"
-    (cd "$wt" && git add src/live_worker.py && git commit -qm "agent: add live reaper")
+    : > "$wt/src/legacy_worker.py"
+    (cd "$wt" && git add src/live_worker.py src/legacy_worker.py && git commit -qm "agent: add live reaper")
 
     # Worktree 分出後 main 也改同一路徑；-X ours 會偏向這份 bytes。
     printf '%s\n' "def verdict():" "    return 'main-concurrent-change'" \
@@ -1388,6 +1410,7 @@ test_case_23_stale_overlap_aborts_before_merge() {
     fi
 
     if [[ "$(cat src/live_worker.py)" == *"main-concurrent-change"* ]] && \
+       git -C "$test_dir" show-ref --verify --quiet "refs/heads/$branch" && \
        ! git -C "$test_dir" merge-base --is-ancestor "$branch" main 2>/dev/null; then
         pass "23-2: main bytes 未被改寫，branch 未假裝 merged"
     else
@@ -1406,13 +1429,28 @@ test_case_23_stale_overlap_aborts_before_merge() {
     else
         fail "23-4: 訊息沒有列出需人工整合的路徑"
     fi
+
+    if echo "$output" | grep -q "PURE-DELETION WARN" && \
+       echo "$output" | grep -q "src/legacy_worker.py"; then
+        pass "23-5: pure-deletion shape 會顯式告警並指出路徑"
+    else
+        fail "23-5: pure-deletion shape 未被告警"
+    fi
 }
 
 # Targeted feedback loop for the stale-base regression.  The full historical
-# suite intentionally remains the default; this selector keeps Case 23 usable
-# while unrelated baseline debt is being repaired under a separate task.
-if [[ "${MERGE_TEST_ONLY:-}" == "23" ]]; then
-    test_case_23_stale_overlap_aborts_before_merge
+# suite remains the default; this selector gives Cases 9/11/23 a tight red/green
+# loop while changing the overlap contract.
+if [[ -n "${MERGE_TEST_ONLY:-}" ]]; then
+    case "$MERGE_TEST_ONLY" in
+        9) test_case_9_ours_dropped_auto_restore ;;
+        11) test_case_11_stale_base_no_false_abort ;;
+        23) test_case_23_stale_overlap_aborts_before_merge ;;
+        *)
+            echo "Unknown MERGE_TEST_ONLY=$MERGE_TEST_ONLY (supported: 9, 11, 23)"
+            exit 2
+            ;;
+    esac
     echo "================================"
     echo "Assertions PASS: $PASS"
     echo "Assertions FAIL: $FAIL"

@@ -302,6 +302,80 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
         return 1
     fi
 
+    # 2026-07-23 stale-base overlap guard (86e142305 / D6b reaper incident).
+    #
+    # `git merge -X ours` only chooses our side for conflicting hunks; it does
+    # not prove that the agent's semantic change survived.  In 86e142305 both
+    # main and the worktree changed scripts/compute_queue.py after their common
+    # base.  The merge looked small relative to main (+38/-7), but relative to
+    # the worktree parent it was +0/-192: the verified D6b reaper disappeared.
+    # The old post-merge detector only inspected experiments/, so code under
+    # scripts/ had no protection.
+    #
+    # A worktree being behind main is normal in a busy repo.  The dangerous
+    # state is narrower and deterministic: main advanced *and* both sides
+    # touched the same path.  Disjoint stale worktrees remain mergeable (Case
+    # 11: cron updates feed.json while an agent only adds its experiment).
+    # Overlap requires an explicit rebase/manual integration before this
+    # script may merge; `-X ours` must never make that semantic decision.
+    local stale_merge_base=""
+    local main_ahead_count=0
+    local main_since_base_paths=""
+    local branch_since_base_paths=""
+    local stale_overlap_paths=""
+    local branch_pure_deletion_paths=""
+
+    if ! stale_merge_base=$(git -C "$MAIN_DIR" merge-base "$main_branch" "$branch" 2>/dev/null) \
+        || [[ -z "$stale_merge_base" ]]; then
+        echo "  [STALE-BASE ABORT] 無法解析 $main_branch 與 $branch 的 merge-base；拒絕盲目合併"
+        return 1
+    fi
+    if ! main_ahead_count=$(git -C "$MAIN_DIR" rev-list --count "$stale_merge_base..$main_branch" 2>/dev/null); then
+        echo "  [STALE-BASE ABORT] 無法計算 main 相對 worktree base 的前進量"
+        return 1
+    fi
+
+    if [[ "$commit_count_verify" -gt 0 ]]; then
+        branch_pure_deletion_paths=$(
+            git -C "$MAIN_DIR" diff --numstat "$stale_merge_base" "$branch" 2>/dev/null \
+                | awk -F '\t' '$1 == "0" && $2 ~ /^[0-9]+$/ && $2 > 0 {print $3}' \
+                | sort -u || true
+        )
+        if [[ -n "$branch_pure_deletion_paths" ]]; then
+            echo "  [PURE-DELETION WARN] worktree 相對 merge-base 有只刪不增的路徑："
+            printf '%s\n' "$branch_pure_deletion_paths" | sed -n '1,20{s/^/      /;p;}'
+            echo "  [PURE-DELETION WARN] 若非明確刪除任務，rebase 前先核對是否把活碼覆成舊版。"
+        fi
+    fi
+
+    if [[ "$main_ahead_count" -gt 0 ]] && [[ "$commit_count_verify" -gt 0 ]]; then
+        if ! main_since_base_paths=$(git -C "$MAIN_DIR" diff --name-only \
+            "$stale_merge_base" "$main_branch"); then
+            echo "  [STALE-BASE ABORT] 無法列出 main 自 merge-base 後的變更路徑"
+            return 1
+        fi
+        if ! branch_since_base_paths=$(git -C "$MAIN_DIR" diff --name-only \
+            "$stale_merge_base" "$branch"); then
+            echo "  [STALE-BASE ABORT] 無法列出 worktree 自 merge-base 後的變更路徑"
+            return 1
+        fi
+        stale_overlap_paths=$(comm -12 \
+            <(printf '%s\n' "$main_since_base_paths" | sed '/^$/d' | sort -u) \
+            <(printf '%s\n' "$branch_since_base_paths" | sed '/^$/d' | sort -u))
+
+        if [[ -n "$stale_overlap_paths" ]]; then
+            echo "  [STALE-BASE ABORT] worktree base 落後 main $main_ahead_count commits，且雙方修改同一路徑："
+            printf '%s\n' "$stale_overlap_paths" | sed -n '1,20{s/^/      /;p;}'
+            echo "  [WHY] 禁止交給 -X ours 靜默裁決；86e142305 曾因此相對 worktree parent 產生 +0/-192。"
+            echo "  [HINT] 在 worktree 明確整合 main、解衝突並重跑驗證後再合併："
+            echo "         git -C \"$wt_path\" rebase \"$main_branch\""
+            echo "         # 解衝突、重跑該任務測試並 commit，再執行："
+            echo "         bash scripts/merge_worktree.sh $wt_name"
+            return 1
+        fi
+        echo "  [STALE-BASE SAFE] worktree base 落後 main $main_ahead_count commits，但變更路徑不相交，允許繼續。"
+    fi
+
     # K1262-v4 (2026-04-27): **PRIMARY 防線** — file-presence diff 不依賴 rev-list count。
     # 即使 rev-list 報 0（false negative，K1032/K1114/K1262 same root cause），
     # 只要 worktree branch tip 含 main 沒有的檔，就強制走 merge path。
