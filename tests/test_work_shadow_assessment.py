@@ -859,3 +859,37 @@ def test_winner_change_cannot_borrow_unrelated_candidate_policy(
 
     assert report.ready_for_cutover is False
     assert report.reason_codes == ("unregistered_policy_change",)
+
+
+def test_selection_views_must_match_comparison_eligibility(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    inconsistent_path = observations / "scheduled_04.json"
+    inconsistent = json.loads(
+        inconsistent_path.read_text(encoding="utf-8")
+    )
+    comparison = inconsistent["comparisons"][0]
+    comparison["legacy_eligible"] = False
+    comparison["coordinator_eligible"] = False
+    inconsistent_path.write_text(
+        json.dumps(inconsistent),
+        encoding="utf-8",
+    )
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("selection_evidence_mismatch",)

@@ -430,6 +430,11 @@ def _receipt_shape_is_valid(receipt: dict[str, Any]) -> bool:
             not isinstance(comparison, dict)
             or not isinstance(comparison.get("candidate_ref"), str)
             or not comparison["candidate_ref"]
+            or not isinstance(comparison.get("legacy_eligible"), bool)
+            or not isinstance(
+                comparison.get("coordinator_eligible"),
+                bool,
+            )
         ):
             return False
         dimensions = comparison.get("dimensions")
@@ -583,13 +588,37 @@ def _selection_evidence_is_consistent(
     }
     legacy = receipt["legacy_selection"]
     coordinator = receipt["coordinator_selection"]
-    for selection in (legacy, coordinator):
-        eligible = set(selection["eligible_candidate_refs"])
+    expected_eligible = (
+        {
+            comparison["candidate_ref"]
+            for comparison in receipt["comparisons"]
+            if comparison["legacy_eligible"]
+        },
+        {
+            comparison["candidate_ref"]
+            for comparison in receipt["comparisons"]
+            if comparison["coordinator_eligible"]
+        },
+    )
+    for selection, expected in zip(
+        (legacy, coordinator),
+        expected_eligible,
+        strict=True,
+    ):
+        eligible_refs = selection["eligible_candidate_refs"]
+        eligible = set(eligible_refs)
         selected = selection["selected_candidate_ref"]
-        if not eligible.issubset(candidate_refs):
+        if (
+            len(eligible_refs) != len(eligible)
+            or eligible != expected
+            or not eligible.issubset(candidate_refs)
+        ):
+            return False
+        if (selected is None) != (not eligible):
             return False
         if selected is not None and (
-            selected not in candidate_refs or selected not in eligible
+            selected not in candidate_refs
+            or selected not in eligible
         ):
             return False
     legacy_selected = legacy["selected_candidate_ref"]
