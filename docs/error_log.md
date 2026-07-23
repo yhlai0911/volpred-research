@@ -949,7 +949,12 @@ admission deny、lifecycle、reconcile 與 restore regression 同時通過。liv
 `45aa8ca239f8b33fd6790e6a022d2277e44491e01c1581101082119e71d630b4`、
 mode=`direct_execution`、pool_count=1。canonical `docs/architecture.md`、
 `docs/quick-commands.md` 與自動 handoff 已改成先讀 SHA、再 mutation，舊的無 CAS
-命令不再被產生。
+命令不再被產生。Matt 首輪 Standards／Spec 各找出一個 P1（fresh-SHA reentry 與
+missing-queue restore side effect），兩項均以 public regression 修復後複審 PASS，
+0 個剩餘 P1/P2；Issue #9 相鄰套件 142 passed。最終 full suite 為
+4,630 passed／1 skipped／3 failed；三項仍是 direct-mode containment 的已知相鄰
+失敗（urgent-lane fixture 洩漏 live mode，以及 queue clear 後兩個 roadmap P1
+缺 backing task），沒有新增 CAS failure，也沒有用本切片掩蓋。
 
 **Issue #9 界線**：這個 stale-owner race 已完成五步 gate；但跨 JSON/state 的
 crash-atomic restore、七日 receipts、Work Coordinator 正式 ownership transaction、
