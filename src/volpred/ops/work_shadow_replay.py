@@ -6,6 +6,7 @@ WorkItem, reads the live queue or connects to ``ops_jobs``.
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import hashlib
@@ -14,16 +15,21 @@ import os
 from pathlib import Path
 import re
 import tempfile
-from typing import Any
+from typing import Any, Mapping
 from urllib.parse import quote
 
-from .next_tasks import is_main_thread_reserved
+from .next_tasks import (
+    is_main_thread_reserved,
+    normalize_dispatch_lane,
+    priority_sort_key,
+)
 from .task_pool_selection import (
     CODEX_ELIGIBLE_TASK_TYPES,
     LegacyClaimDecision,
     is_codex_owner,
     normalized_task_type,
     select_task_for_claim,
+    task_identity,
 )
 from .work import WorkItemView, WorkerOffer
 from .work.legacy import (
@@ -42,6 +48,14 @@ from .work_migration import preview_legacy_snapshots
 class _DimensionSpec:
     name: str
     evidence_ref: str
+
+
+@dataclass(frozen=True)
+class _RawNextTaskRecord:
+    index: int
+    task: dict[str, Any]
+    task_id: str
+    candidate_ref: str
 
 
 _DIMENSION_SPECS = (
@@ -81,6 +95,7 @@ _DIMENSION_SPECS = (
 _ALL_DIMENSIONS = frozenset(spec.name for spec in _DIMENSION_SPECS)
 _RECONCILIATION_AFFECTED_DIMENSIONS = {
     "missing_parent": frozenset({"readiness", "parent"}),
+    "unrepresentable_parent": frozenset({"readiness", "parent"}),
     "simultaneous_claim": frozenset(
         {"readiness", "claim_ownership", "lease_expiry"}
     ),
@@ -118,6 +133,18 @@ _COORDINATOR_STATUS_REASONS = frozenset(
         "live_claim",
         "claim_expiry_missing",
         "status_not_acquirable",
+    }
+)
+_PARENT_UNREPRESENTABLE_ISSUES = frozenset(
+    {
+        "duplicate_id",
+        "duplicate_idempotency_key",
+        "invalid_record",
+        "unknown_kind",
+        "unknown_policy",
+        "unknown_source",
+        "unknown_status",
+        "unrepresentable_public_effect",
     }
 )
 _OBSERVATION_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
@@ -270,63 +297,120 @@ def replay_legacy_selection(
     )
     immutable_snapshots = _snapshots_from_canonical_bytes(snapshot_bytes)
     report = preview_legacy_snapshots(immutable_snapshots)
-    selection_candidates = tuple(
+    raw_next_tasks = tuple(
+        dict(task) for task in immutable_snapshots.next_tasks
+    )
+    raw_records = _raw_next_task_records(raw_next_tasks)
+    mapped_candidates = tuple(
         candidate
         for candidate in report.candidates
         if candidate.source_system == "next_tasks"
     )
-    legacy_inputs = tuple(
-        _legacy_task_record(candidate)
-        for candidate in selection_candidates
-    )
     legacy_result = select_task_for_claim(
-        legacy_inputs,
+        raw_next_tasks,
         owner=offer.worker_id,
         main_thread=False,
         observed_at=observed_at,
     )
-    legacy_decisions = {
-        decision.task_id: decision
-        for decision in legacy_result.decisions
-    }
-    legacy_eligible_ids = frozenset(legacy_result.eligible_task_ids)
+    legacy_eligible_indexes = frozenset(
+        legacy_result.eligible_indexes
+    )
+    coordinator_candidates = tuple(
+        candidate
+        for candidate in mapped_candidates
+        if not _candidate_identity_is_unrepresentable(
+            candidate,
+            report.issues,
+        )
+    )
+    dependency_candidates = tuple(
+        candidate
+        for candidate in report.candidates
+        if candidate.source_system != "next_tasks"
+        and not _candidate_identity_is_unrepresentable(
+            candidate,
+            report.issues,
+        )
+    )
+    coordinator_context = (
+        *coordinator_candidates,
+        *dependency_candidates,
+    )
     coordinator_result = select_acquirable_work(
         tuple(
             _coordinator_item(candidate)
-            for candidate in selection_candidates
+            for candidate in coordinator_candidates
         ),
         offer=offer,
         observed_at=observed_at,
+        dependency_items=tuple(
+            _coordinator_item(candidate)
+            for candidate in dependency_candidates
+        ),
     )
     coordinator_decisions = {
         decision.work_id: decision
         for decision in coordinator_result.decisions
     }
+    coordinator_candidates_by_id = {
+        candidate.legacy_id: candidate
+        for candidate in coordinator_candidates
+    }
+    comparisons_buffer: list[ShadowCandidateComparison] = []
+    for raw_record, legacy_decision in zip(
+        raw_records,
+        legacy_result.decisions,
+        strict=True,
+    ):
+        candidate = coordinator_candidates_by_id.get(raw_record.task_id)
+        if candidate is None:
+            comparison = _compare_unavailable_next_task(
+                raw_record,
+                legacy_decision=legacy_decision,
+                legacy_selection_eligible=(
+                    raw_record.index in legacy_eligible_indexes
+                ),
+                snapshot_sha256=snapshot.sha256,
+                reconciliation_issues=report.issues,
+            )
+        else:
+            comparison = _compare_candidate(
+                candidate,
+                candidates=coordinator_context,
+                raw_task=raw_record.task,
+                legacy_decision=legacy_decision,
+                legacy_selection_eligible=(
+                    raw_record.index in legacy_eligible_indexes
+                ),
+                coordinator_decision=coordinator_decisions[
+                    candidate.legacy_id
+                ],
+                snapshot_sha256=snapshot.sha256,
+                reconciliation_issues=report.issues,
+            )
+        comparisons_buffer.append(comparison)
     comparisons = tuple(
-        _compare_candidate(
-            candidate,
-            candidates=selection_candidates,
-            legacy_decision=legacy_decisions[candidate.legacy_id],
-            legacy_selection_eligible=(
-                candidate.legacy_id in legacy_eligible_ids
-            ),
-            coordinator_decision=coordinator_decisions[
-                candidate.legacy_id
-            ],
-            snapshot_sha256=snapshot.sha256,
-            reconciliation_issues=report.issues,
-        )
-        for candidate in sorted(
-            selection_candidates, key=lambda item: _candidate_ref(item)
+        sorted(
+            comparisons_buffer,
+            key=lambda comparison: comparison.candidate_ref,
         )
     )
     if _canonical_snapshot_bytes(snapshots) != snapshot_bytes:
         raise RuntimeError("shadow replay mutated its supplied snapshots")
-    legacy_selection = _selection_view(
-        "legacy",
-        snapshot.sha256,
-        selected_id=legacy_result.selected_task_id,
-        eligible_ids=legacy_result.eligible_task_ids,
+    legacy_selection = ShadowSelectionView(
+        policy="legacy",
+        snapshot_sha256=snapshot.sha256,
+        selected_candidate_ref=(
+            None
+            if legacy_result.selected_index is None
+            else raw_records[
+                legacy_result.selected_index
+            ].candidate_ref
+        ),
+        eligible_candidate_refs=tuple(
+            raw_records[index].candidate_ref
+            for index in legacy_result.eligible_indexes
+        ),
     )
     coordinator_selection = _selection_view(
         "work_coordinator",
@@ -359,11 +443,21 @@ def replay_legacy_selection(
                 "source_system": issue.source_system,
                 "record_id": issue.record_id,
                 "detail": issue.detail,
-                "evidence_ref": _issue_evidence_ref(
-                    issue.source_system,
-                    issue.record_id,
-                    issue.code,
+                **(
+                    {"record_index": issue.record_index}
+                    if issue.record_index is not None
+                    else {}
                 ),
+                **(
+                    {
+                        "affected_record_ids": list(
+                            issue.affected_record_ids
+                        )
+                    }
+                    if issue.affected_record_ids
+                    else {}
+                ),
+                "evidence_ref": _issue_evidence_ref(issue),
             }
             for issue in report.issues
         ),
@@ -593,6 +687,7 @@ def _compare_candidate(
     candidate: LegacyWorkCandidate,
     *,
     candidates: tuple[LegacyWorkCandidate, ...],
+    raw_task: Mapping[str, Any],
     legacy_decision: LegacyClaimDecision,
     legacy_selection_eligible: bool,
     coordinator_decision: AcquisitionCandidateDecision,
@@ -604,28 +699,25 @@ def _compare_candidate(
         candidate,
         reconciliation_issues,
     )
-    raw_task = _legacy_task_record(candidate)
+    raw_task_dict = dict(raw_task)
     parent = _parent_candidate(candidate, candidates)
+    parent_topology_issues = _parent_topology_issues(
+        candidate,
+        reconciliation_issues,
+    )
+    legacy_values, legacy_reason_map = _legacy_dimension_projection(
+        raw_task_dict,
+        legacy_decision,
+        candidate=candidate,
+    )
     coordinator_status_codes = tuple(
         code
         for code in coordinator_decision.reason_codes
         if code in _COORDINATOR_STATUS_REASONS
     )
-    legacy_status_ready = legacy_decision.primary_reason not in {
-        "wrong_status",
-        "missing_deadline",
-        "invalid_deadline",
-        "deadline_expired",
-        "live_revalidation_required",
-    }
     coordinator_status_ready = any(
         code in {"ready_pending", "ready_expired_claim"}
         for code in coordinator_status_codes
-    )
-    # ``task_pool_claim`` has a task-family routing allowlist for Codex, but it
-    # does not enforce Work Coordinator's declared capability set.
-    legacy_capability_match = (
-        legacy_decision.primary_reason != "not_codex_eligible"
     )
     coordinator_capability_match = (
         not coordinator_decision.missing_capabilities
@@ -633,63 +725,9 @@ def _compare_candidate(
     coordinator_attestation_match = (
         not coordinator_decision.missing_attestations
     )
-    lane_reserved = is_main_thread_reserved(raw_task)
     preferred_agent = (
         candidate.preferred_agent or candidate.target_agent
     )
-    legacy_preferred_agent_effect = (
-        preferred_agent is not None
-        and is_codex_owner(legacy_decision.owner)
-        and normalized_task_type(raw_task) not in CODEX_ELIGIBLE_TASK_TYPES
-        and str(preferred_agent).strip().lower() == "codex"
-    )
-
-    legacy_values: dict[str, Any] = {
-        "priority": {"value": candidate.request.priority},
-        "readiness": legacy_status_ready,
-        "capability": {"matched": legacy_capability_match},
-        "attestation": {"matched": True},
-        "claim_ownership": {
-            "claimed_by": candidate.claimed_by,
-            "blocks_claim": (
-                legacy_decision.primary_reason == "already_claimed"
-            ),
-        },
-        "lease_expiry": _legacy_lease_value(candidate),
-        "dispatch_lane": {
-            "value": candidate.dispatch_lane,
-            "claimable": not lane_reserved,
-        },
-        "preferred_agent": (
-            {"value": None}
-            if preferred_agent is None
-            else {
-                "value": preferred_agent,
-                "routing_effect": legacy_preferred_agent_effect,
-            }
-        ),
-        "parent": {
-            "id": candidate.request.parent_id,
-            "gates_readiness": False,
-            "satisfied": None,
-        },
-        "deadline": {
-            "value": candidate.request.deadline,
-            "ordering": (
-                "not_applicable"
-                if candidate.request.deadline is None
-                else "not_used"
-            ),
-        },
-        "terminal_disposition": (
-            {
-                "terminal": True,
-                "outcome": candidate.legacy_status,
-            }
-            if candidate.legacy_status in _LEGACY_TERMINAL_STATUSES
-            else {"terminal": False}
-        ),
-    }
     coordinator_values: dict[str, Any] = {
         "priority": {"value": candidate.request.priority},
         "readiness": coordinator_status_ready,
@@ -741,10 +779,8 @@ def _compare_candidate(
             else {"terminal": False}
         ),
     }
-    reasons = _dimension_reason_codes(
+    coordinator_reason_map = _coordinator_dimension_reason_codes(
         candidate,
-        raw_task=raw_task,
-        legacy_decision=legacy_decision,
         coordinator_decision=coordinator_decision,
         coordinator_status_codes=coordinator_status_codes,
     )
@@ -752,7 +788,8 @@ def _compare_candidate(
     for spec in _DIMENSION_SPECS:
         legacy_value = legacy_values[spec.name]
         coordinator_value = coordinator_values[spec.name]
-        legacy_reasons, coordinator_reasons = reasons[spec.name]
+        legacy_reasons = legacy_reason_map[spec.name]
+        coordinator_reasons = coordinator_reason_map[spec.name]
         matches = legacy_value == coordinator_value
         classification: str | None = None
         classification_reason: str | None = None
@@ -760,6 +797,12 @@ def _compare_candidate(
             spec.name,
             candidate_issues,
         )
+        if spec.name == "parent":
+            dimension_issues = tuple(
+                dict.fromkeys(
+                    (*dimension_issues, *parent_topology_issues)
+                )
+            )
         if not matches:
             classification, classification_reason = _classify_difference(
                 spec.name,
@@ -803,11 +846,7 @@ def _compare_candidate(
                                     f"{classification_reason}"
                                 ),
                                 *(
-                                    _issue_evidence_ref(
-                                        issue.source_system,
-                                        issue.record_id,
-                                        issue.code,
-                                    )
+                                    _issue_evidence_ref(issue)
                                     for issue in dimension_issues
                                 ),
                             )
@@ -822,6 +861,304 @@ def _compare_candidate(
         coordinator_eligible=coordinator_decision.eligible,
         dimensions=tuple(dimensions),
     )
+
+
+def _compare_unavailable_next_task(
+    raw_record: _RawNextTaskRecord,
+    *,
+    legacy_decision: LegacyClaimDecision,
+    legacy_selection_eligible: bool,
+    snapshot_sha256: str,
+    reconciliation_issues: tuple[ReconciliationIssue, ...],
+) -> ShadowCandidateComparison:
+    """Record a production-visible task that migration cannot represent."""
+
+    raw_task = raw_record.task
+    task_id = raw_record.task_id
+    candidate_ref = raw_record.candidate_ref
+    candidate_issues = _issues_for_raw_next_task(
+        raw_record,
+        reconciliation_issues,
+    )
+    issue_codes = tuple(
+        sorted({issue.code for issue in candidate_issues})
+    )
+    classification_reason = (
+        f"reconciliation:{','.join(issue_codes)}"
+        if issue_codes
+        else "migration_candidate_missing_without_reconciliation_issue"
+    )
+    legacy_values, legacy_reasons = _legacy_dimension_projection(
+        raw_task,
+        legacy_decision,
+        candidate=None,
+    )
+    unavailable = {
+        "unavailable": True,
+        "availability": "not_evaluated",
+        "reconciliation_codes": issue_codes,
+    }
+    dimensions: list[ShadowDimensionComparison] = []
+    for spec in _DIMENSION_SPECS:
+        classification, reason_code = (
+            _classify_difference(
+                spec.name,
+                legacy_reason_codes=legacy_reasons[spec.name],
+                coordinator_reason_codes=(),
+                reconciliation_issues=candidate_issues,
+            )
+            if candidate_issues
+            else (
+                "implementation_bug",
+                classification_reason,
+            )
+        )
+        dimensions.append(
+            ShadowDimensionComparison(
+                name=spec.name,
+                legacy=legacy_values[spec.name],
+                coordinator=unavailable,
+                matches=False,
+                classification=classification,
+                classification_reason_code=reason_code,
+                legacy_reason_codes=legacy_reasons[spec.name],
+                coordinator_reason_codes=(),
+                evidence_refs=tuple(
+                    dict.fromkeys(
+                        (
+                            f"{candidate_ref}#{spec.name}",
+                            spec.evidence_ref,
+                            f"snapshot://sha256/{snapshot_sha256}",
+                            *(
+                                "selector://legacy/"
+                                f"{quote(task_id, safe='')}/"
+                                f"{quote(code, safe='')}"
+                                for code in legacy_reasons[spec.name]
+                            ),
+                            _migration_unavailable_evidence_ref(
+                                raw_record
+                            ),
+                            (
+                                "oracle://work-selection/"
+                                f"{reason_code}"
+                            ),
+                            *(
+                                _issue_evidence_ref(issue)
+                                for issue in candidate_issues
+                            ),
+                        )
+                    )
+                ),
+            )
+        )
+    return ShadowCandidateComparison(
+        candidate_ref=candidate_ref,
+        legacy_eligible=legacy_selection_eligible,
+        coordinator_eligible=False,
+        dimensions=tuple(dimensions),
+    )
+
+
+def _legacy_dimension_projection(
+    raw_task: Mapping[str, Any],
+    legacy_decision: LegacyClaimDecision,
+    *,
+    candidate: LegacyWorkCandidate | None,
+) -> tuple[
+    dict[str, Any],
+    dict[str, tuple[str, ...]],
+]:
+    """Project legacy values and reasons once for every comparison path."""
+
+    raw_status = str(raw_task.get("status") or "").strip().lower()
+    legacy_status = (
+        candidate.legacy_status if candidate is not None else raw_status
+    )
+    active_claim = legacy_status in {"claimed", "in_progress"} or (
+        candidate is not None and candidate.status in {"claimed", "running"}
+    )
+    claimed_by = (
+        candidate.claimed_by
+        if candidate is not None
+        else raw_task.get("claimed_by")
+    )
+    claim_expires_at = (
+        candidate.claim_expires_at
+        if candidate is not None
+        else raw_task.get("claim_expires_at")
+    )
+    dispatch_lane = (
+        candidate.dispatch_lane
+        if candidate is not None
+        else normalize_dispatch_lane(dict(raw_task))
+    )
+    preferred_agent = (
+        candidate.preferred_agent or candidate.target_agent
+        if candidate is not None
+        else raw_task.get("preferred_agent")
+        or raw_task.get("target_agent")
+    )
+    parent_id = (
+        candidate.request.parent_id
+        if candidate is not None
+        else raw_task.get("parent_task_id") or raw_task.get("parent_id")
+    )
+    deadline = (
+        candidate.request.deadline
+        if candidate is not None
+        else raw_task.get("deadline")
+    )
+    priority = (
+        candidate.request.priority
+        if candidate is not None
+        else priority_sort_key(raw_task.get("priority"), default=999)
+    )
+    lane_reserved = is_main_thread_reserved(dict(raw_task))
+    legacy_status_ready = legacy_decision.primary_reason not in {
+        "wrong_status",
+        "missing_deadline",
+        "invalid_deadline",
+        "deadline_expired",
+        "live_revalidation_required",
+        "duplicate_task_id",
+        "missing_task_id",
+    }
+    preferred_agent_effect = (
+        preferred_agent is not None
+        and is_codex_owner(legacy_decision.owner)
+        and normalized_task_type(raw_task) not in CODEX_ELIGIBLE_TASK_TYPES
+        and str(preferred_agent).strip().lower() == "codex"
+    )
+    values: dict[str, Any] = {
+        "priority": {"value": priority},
+        "readiness": legacy_status_ready,
+        "capability": {
+            "matched": legacy_decision.primary_reason
+            != "not_codex_eligible"
+        },
+        "attestation": {"matched": True},
+        "claim_ownership": {
+            "claimed_by": claimed_by,
+            "blocks_claim": (
+                legacy_decision.primary_reason == "already_claimed"
+            ),
+        },
+        "lease_expiry": (
+            {
+                "claim_expires_at": claim_expires_at,
+                "reclaim": "cleanup_pass_only",
+            }
+            if active_claim
+            else {"state": "none"}
+        ),
+        "dispatch_lane": {
+            "value": dispatch_lane,
+            "claimable": not lane_reserved,
+        },
+        "preferred_agent": (
+            {"value": None}
+            if preferred_agent is None
+            else {
+                "value": preferred_agent,
+                "routing_effect": preferred_agent_effect,
+            }
+        ),
+        "parent": {
+            "id": parent_id,
+            "gates_readiness": False,
+            "satisfied": None,
+        },
+        "deadline": {
+            "value": deadline,
+            "ordering": (
+                "not_applicable" if deadline is None else "not_used"
+            ),
+        },
+        "terminal_disposition": (
+            {"terminal": True, "outcome": legacy_status}
+            if legacy_status in _LEGACY_TERMINAL_STATUSES
+            else {"terminal": False}
+        ),
+    }
+    readiness_reasons = (
+        ("legacy_blocked_status_claimable", legacy_decision.primary_reason)
+        if legacy_status == "blocked"
+        else (
+            legacy_decision.primary_reason,
+            *(
+                ("legacy_managed_event_deadline_gate",)
+                if "legacy_managed_event_deadline_gate"
+                in legacy_decision.policy_codes
+                else ()
+            ),
+        )
+    )
+    reasons: dict[str, tuple[str, ...]] = {
+        "priority": ("legacy_priority_then_id_rank",),
+        "readiness": readiness_reasons,
+        "capability": (
+            ("legacy_capability_not_enforced",)
+            if "legacy_capability_not_enforced"
+            in legacy_decision.policy_codes
+            else ("legacy_no_capability_requirement",)
+        ),
+        "attestation": (
+            ("legacy_attestation_not_enforced",)
+            if "legacy_attestation_not_enforced"
+            in legacy_decision.policy_codes
+            else ("legacy_no_attestation_requirement",)
+        ),
+        "claim_ownership": (legacy_decision.primary_reason,),
+        "lease_expiry": (
+            ("legacy_cleanup_only_reclaim", legacy_decision.primary_reason)
+            if active_claim
+            else ("legacy_no_active_claim",)
+        ),
+        "dispatch_lane": (
+            ("main_thread_lane",)
+            if lane_reserved
+            else ("legacy_dispatch_lane_allowed",)
+        ),
+        "preferred_agent": (
+            ("legacy_no_preferred_agent",)
+            if preferred_agent is None
+            else ("legacy_preferred_agent_routing",)
+        ),
+        "parent": (
+            ("legacy_no_parent",)
+            if parent_id is None
+            else ("legacy_parent_not_enforced",)
+        ),
+        "deadline": (
+            ("legacy_no_deadline",)
+            if deadline is None
+            else (
+                "legacy_deadline_not_ranked",
+                *(
+                    (legacy_decision.primary_reason,)
+                    if legacy_decision.primary_reason
+                    in {
+                        "missing_deadline",
+                        "invalid_deadline",
+                        "deadline_expired",
+                    }
+                    else ()
+                ),
+                *(
+                    ("legacy_managed_event_deadline_gate",)
+                    if "legacy_managed_event_deadline_gate"
+                    in legacy_decision.policy_codes
+                    else ()
+                ),
+            )
+        ),
+        "terminal_disposition": (
+            ("legacy_terminal_mapping",)
+            if legacy_status in _LEGACY_TERMINAL_STATUSES
+            else ("legacy_non_terminal",)
+        ),
+    }
+    return values, reasons
 
 
 def _classify_difference(
@@ -846,37 +1183,6 @@ def _classify_difference(
         ):
             return rule.classification, rule.reason_code
     return "implementation_bug", "unregistered_selector_reason_pair"
-
-
-def _legacy_task_record(
-    candidate: LegacyWorkCandidate,
-) -> dict[str, Any]:
-    return {
-        "id": candidate.legacy_id,
-        "status": candidate.legacy_status,
-        "task_type": candidate.request.kind,
-        "title": candidate.request.title,
-        "priority": candidate.request.priority,
-        "source": candidate.legacy_source,
-        "created_at": candidate.created_at,
-        "claimed_by": candidate.claimed_by,
-        "claimed_at": candidate.claimed_at,
-        "claim_expires_at": candidate.claim_expires_at,
-        "dispatch_lane": candidate.dispatch_lane,
-        "preferred_agent": candidate.preferred_agent,
-        "target_agent": candidate.target_agent,
-        "fallback_allowed": candidate.fallback_allowed,
-        "ref_event_job_id": candidate.ref_event_job_id,
-        "dreaming": candidate.dreaming,
-        "parent_task_id": candidate.request.parent_id,
-        "deadline": candidate.request.deadline,
-        "required_capabilities": sorted(
-            candidate.request.required_capabilities
-        ),
-        "required_attestations": sorted(
-            candidate.request.required_attestations
-        ),
-    }
 
 
 def _coordinator_item(candidate: LegacyWorkCandidate) -> WorkItemView:
@@ -907,17 +1213,6 @@ def _coordinator_item(candidate: LegacyWorkCandidate) -> WorkItemView:
     )
 
 
-def _legacy_lease_value(
-    candidate: LegacyWorkCandidate,
-) -> dict[str, Any]:
-    if candidate.status not in {"claimed", "running"}:
-        return {"state": "none"}
-    return {
-        "claim_expires_at": candidate.claim_expires_at,
-        "reclaim": "cleanup_pass_only",
-    }
-
-
 def _coordinator_lease_value(
     candidate: LegacyWorkCandidate,
     coordinator_status_codes: tuple[str, ...],
@@ -944,160 +1239,62 @@ def _coordinator_lease_value(
     }
 
 
-def _dimension_reason_codes(
+def _coordinator_dimension_reason_codes(
     candidate: LegacyWorkCandidate,
     *,
-    raw_task: dict[str, Any],
-    legacy_decision: LegacyClaimDecision,
     coordinator_decision: AcquisitionCandidateDecision,
     coordinator_status_codes: tuple[str, ...],
-) -> dict[str, tuple[tuple[str, ...], tuple[str, ...]]]:
-    legacy_capability_reasons = (
-        ("legacy_capability_not_enforced",)
-        if "legacy_capability_not_enforced" in legacy_decision.policy_codes
-        else ("legacy_no_capability_requirement",)
-    )
+) -> dict[str, tuple[str, ...]]:
     preferred_agent = (
         candidate.preferred_agent or candidate.target_agent
     )
-    legacy_readiness_reasons = (
-        ("legacy_blocked_status_claimable", legacy_decision.primary_reason)
-        if candidate.legacy_status == "blocked"
-        else (
-            legacy_decision.primary_reason,
-            *(
-                ("legacy_managed_event_deadline_gate",)
-                if "legacy_managed_event_deadline_gate"
-                in legacy_decision.policy_codes
-                else ()
-            ),
-        )
-    )
-    lease_legacy_reasons = (
-        ("legacy_cleanup_only_reclaim", legacy_decision.primary_reason)
-        if candidate.status in {"claimed", "running"}
-        else ("legacy_no_active_claim",)
-    )
     return {
-        "priority": (
-            ("legacy_priority_then_id_rank",),
-            ("coordinator_priority_deadline_created_id_rank",),
-        ),
-        "readiness": (
-            legacy_readiness_reasons,
-            coordinator_status_codes,
-        ),
+        "priority": ("coordinator_priority_deadline_created_id_rank",),
+        "readiness": coordinator_status_codes,
         "capability": (
-            legacy_capability_reasons,
-            (
-                ("coordinator_capability_enforced", "capability_mismatch")
-                if coordinator_decision.missing_capabilities
-                else ("coordinator_capability_enforced", "capability_match")
-            ),
+            ("coordinator_capability_enforced", "capability_mismatch")
+            if coordinator_decision.missing_capabilities
+            else ("coordinator_capability_enforced", "capability_match")
         ),
         "attestation": (
-            (
-                ("legacy_attestation_not_enforced",)
-                if "legacy_attestation_not_enforced"
-                in legacy_decision.policy_codes
-                else ("legacy_no_attestation_requirement",)
-            ),
-            (
-                ("coordinator_attestation_enforced", "attestation_mismatch")
-                if coordinator_decision.missing_attestations
-                else ("coordinator_attestation_enforced", "attestation_match")
-            ),
+            ("coordinator_attestation_enforced", "attestation_mismatch")
+            if coordinator_decision.missing_attestations
+            else ("coordinator_attestation_enforced", "attestation_match")
         ),
-        "claim_ownership": (
-            (legacy_decision.primary_reason,),
-            coordinator_status_codes,
-        ),
-        "lease_expiry": (
-            lease_legacy_reasons,
-            coordinator_status_codes,
-        ),
+        "claim_ownership": coordinator_status_codes,
+        "lease_expiry": coordinator_status_codes,
         "dispatch_lane": (
-            (
-                ("main_thread_lane",)
-                if is_main_thread_reserved(raw_task)
-                else ("legacy_dispatch_lane_allowed",)
-            ),
-            (
-                "coordinator_dispatch_lane_unrepresented",
-                *coordinator_status_codes,
-            ),
+            "coordinator_dispatch_lane_unrepresented",
+            *coordinator_status_codes,
         ),
         "preferred_agent": (
-            (
-                ("legacy_no_preferred_agent",)
-                if preferred_agent is None
-                else ("legacy_preferred_agent_routing",)
-            ),
-            (
-                ("coordinator_no_preferred_agent",)
-                if preferred_agent is None
-                else ("coordinator_preferred_agent_unrepresented",)
-            ),
+            ("coordinator_no_preferred_agent",)
+            if preferred_agent is None
+            else ("coordinator_preferred_agent_unrepresented",)
         ),
         "parent": (
-            (
-                ("legacy_no_parent",)
-                if candidate.request.parent_id is None
-                else ("legacy_parent_not_enforced",)
-            ),
-            (
-                ("coordinator_no_parent",)
-                if candidate.request.parent_id is None
-                else tuple(
-                    code
-                    for code in coordinator_decision.reason_codes
-                    if code in {"parent_missing", "parent_not_succeeded"}
-                )
-                or ("parent_succeeded",)
-            ),
+            ("coordinator_no_parent",)
+            if candidate.request.parent_id is None
+            else tuple(
+                code
+                for code in coordinator_decision.reason_codes
+                if code
+                in {
+                    "parent_missing",
+                    "parent_not_succeeded",
+                    "parent_succeeded",
+                }
+            )
         ),
         "deadline": (
-            (
-                ("legacy_no_deadline",)
-                if candidate.request.deadline is None
-                else (
-                    "legacy_deadline_not_ranked",
-                    *(
-                        (legacy_decision.primary_reason,)
-                        if legacy_decision.primary_reason
-                        in {
-                            "missing_deadline",
-                            "invalid_deadline",
-                            "deadline_expired",
-                        }
-                        else ()
-                    ),
-                    *(
-                        ("legacy_managed_event_deadline_gate",)
-                        if "legacy_managed_event_deadline_gate"
-                        in legacy_decision.policy_codes
-                        else ()
-                    ),
-                )
-            ),
-            (
-                ("coordinator_no_deadline",)
-                if candidate.request.deadline is None
-                else ("coordinator_deadline_ranked",)
-            ),
+            ("coordinator_no_deadline",)
+            if candidate.request.deadline is None
+            else ("coordinator_deadline_ranked",)
         ),
         "terminal_disposition": (
-            (
-                ("legacy_non_terminal",)
-                if candidate.legacy_status
-                not in _LEGACY_TERMINAL_STATUSES
-                else ("legacy_terminal_mapping",)
-            ),
-            (
-                ("coordinator_non_terminal",)
-                if candidate.status not in _CANONICAL_TERMINAL_STATUSES
-                else ("coordinator_terminal_mapping",)
-            ),
+            ("coordinator_non_terminal",)
+            if candidate.status not in _CANONICAL_TERMINAL_STATUSES
+            else ("coordinator_terminal_mapping",)
         ),
     }
 
@@ -1122,12 +1319,68 @@ def _issues_for_candidate(
     return tuple(
         issue
         for issue in issues
-        if issue.record_id is not None
-        and (
-            issue.record_id == candidate.legacy_id
-            or candidate.legacy_id in issue.record_id.split(",")
-        )
+        if _issue_affects_record(issue, candidate.legacy_id)
         and issue.source_system in {candidate.source_system, "cross_source"}
+    )
+
+
+def _issues_for_raw_next_task(
+    record: _RawNextTaskRecord,
+    issues: tuple[ReconciliationIssue, ...],
+) -> tuple[ReconciliationIssue, ...]:
+    return tuple(
+        issue
+        for issue in issues
+        if issue.source_system in {"next_tasks", "cross_source"}
+        and (
+            (
+                issue.source_system == "next_tasks"
+                and issue.record_index is not None
+                and issue.record_index == record.index
+            )
+            or (
+                (
+                    issue.source_system != "next_tasks"
+                    or issue.record_index is None
+                )
+                and bool(record.task_id)
+                and _issue_affects_record(issue, record.task_id)
+            )
+        )
+    )
+
+
+def _parent_topology_issues(
+    candidate: LegacyWorkCandidate,
+    issues: tuple[ReconciliationIssue, ...],
+) -> tuple[ReconciliationIssue, ...]:
+    parent_id = candidate.request.parent_id
+    if parent_id is None:
+        return ()
+    return tuple(
+        issue
+        for issue in issues
+        if issue.code in _PARENT_UNREPRESENTABLE_ISSUES
+        and _issue_affects_record(issue, parent_id)
+    )
+
+
+def _issue_affects_record(
+    issue: ReconciliationIssue,
+    record_id: str,
+) -> bool:
+    if issue.affected_record_ids:
+        return record_id in issue.affected_record_ids
+    return issue.record_id == record_id
+
+
+def _candidate_identity_is_unrepresentable(
+    candidate: LegacyWorkCandidate,
+    issues: tuple[ReconciliationIssue, ...],
+) -> bool:
+    return any(
+        issue.code in {"duplicate_id", "duplicate_idempotency_key"}
+        for issue in _issues_for_candidate(candidate, issues)
     )
 
 
@@ -1286,6 +1539,52 @@ def _next_task_candidate_ref(task_id: str) -> str:
     return f"legacy://next_tasks/{quote(task_id, safe='')}"
 
 
+def _raw_next_task_records(
+    tasks: tuple[dict[str, Any], ...],
+) -> tuple[_RawNextTaskRecord, ...]:
+    identities = tuple(task_identity(task) for task in tasks)
+    counts = Counter(identities)
+    records: list[_RawNextTaskRecord] = []
+    for index, (task, task_id) in enumerate(
+        zip(tasks, identities, strict=True)
+    ):
+        if task_id and counts[task_id] == 1:
+            candidate_ref = _next_task_candidate_ref(task_id)
+        else:
+            digest = hashlib.sha256(
+                json.dumps(
+                    task,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest()
+            identity_segment = quote(task_id or "_missing-id", safe="")
+            candidate_ref = (
+                f"legacy://next_tasks/{identity_segment}"
+                f"?record_index={index}&sha256={digest}"
+            )
+        records.append(
+            _RawNextTaskRecord(
+                index=index,
+                task=task,
+                task_id=task_id,
+                candidate_ref=candidate_ref,
+            )
+        )
+    return tuple(records)
+
+
+def _migration_unavailable_evidence_ref(
+    record: _RawNextTaskRecord,
+) -> str:
+    identity_segment = quote(record.task_id or "_missing-id", safe="")
+    return (
+        f"migration://next_tasks/{identity_segment}/"
+        f"record-{record.index}/candidate-not-emitted"
+    )
+
+
 def _candidate_ref(candidate: LegacyWorkCandidate) -> str:
     return (
         f"legacy://{candidate.source_system}/"
@@ -1293,14 +1592,27 @@ def _candidate_ref(candidate: LegacyWorkCandidate) -> str:
     )
 
 
-def _issue_evidence_ref(
-    source_system: str,
-    record_id: str | None,
-    code: str,
-) -> str:
+def _issue_evidence_ref(issue: ReconciliationIssue) -> str:
+    if issue.affected_record_ids:
+        query = "&".join(
+            f"record_id={quote(record_id, safe='')}"
+            for record_id in issue.affected_record_ids
+        )
+        return (
+            f"reconciliation://{issue.source_system}/_records/"
+            f"{quote(issue.code, safe='')}?{query}"
+        )
+    if issue.record_index is not None and issue.record_id is not None:
+        record_path = (
+            f"{quote(issue.record_id, safe='')}/record-{issue.record_index}"
+        )
+    elif issue.record_index is not None:
+        record_path = f"_record_{issue.record_index}"
+    else:
+        record_path = quote(issue.record_id or "_snapshot", safe="")
     return (
-        f"reconciliation://{source_system}/"
-        f"{quote(record_id or '_snapshot', safe='')}/{quote(code, safe='')}"
+        f"reconciliation://{issue.source_system}/"
+        f"{record_path}/{quote(issue.code, safe='')}"
     )
 
 

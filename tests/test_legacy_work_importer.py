@@ -49,6 +49,67 @@ def test_next_tasks_snapshot_maps_pending_work_to_canonical_candidate() -> None:
     assert candidate.created_at == "2026-07-23T07:00:00+00:00"
 
 
+def test_next_tasks_snapshot_accepts_production_identity_and_priority_aliases() -> None:
+    report = preview_legacy_snapshots(
+        LegacySnapshots(
+            next_tasks=(
+                {
+                    "task_id": "legacy_alias",
+                    "status": "pending",
+                    "task_type": "platform_ops",
+                    "title": "Preserve production read semantics",
+                    "priority": "P1",
+                    "source": "user",
+                    "created_at": "2026-07-23T07:00:00+00:00",
+                },
+                {
+                    "id": 0,
+                    "task_id": "falsy_id_alias",
+                    "status": "pending",
+                    "task_type": "platform_ops",
+                    "title": "Match production id-or-task-id precedence",
+                    "priority": "P2",
+                    "source": "user",
+                    "created_at": "2026-07-23T07:00:00+00:00",
+                },
+            ),
+        )
+    )
+
+    assert report.issues == ()
+    assert report.source_counts["next_tasks"] == {"seen": 2, "mapped": 2}
+    assert tuple(candidate.legacy_id for candidate in report.candidates) == (
+        "legacy_alias",
+        "falsy_id_alias",
+    )
+    assert tuple(
+        candidate.request.priority for candidate in report.candidates
+    ) == (1, 2)
+
+
+def test_unmapped_task_id_alias_keeps_record_level_reconciliation_evidence() -> None:
+    report = preview_legacy_snapshots(
+        LegacySnapshots(
+            next_tasks=(
+                {
+                    "task_id": "unmapped_alias",
+                    "status": "pending",
+                    "task_type": "platform_ops",
+                    "title": "Keep evidence attached to this record",
+                    "priority": "P1",
+                    "source": "unreviewed_legacy_producer",
+                    "created_at": "2026-07-23T07:00:00+00:00",
+                },
+            ),
+        )
+    )
+
+    assert report.candidates == ()
+    assert len(report.issues) == 1
+    assert report.issues[0].code == "unknown_source"
+    assert report.issues[0].record_id == "unmapped_alias"
+
+
 def test_next_tasks_source_provenance_is_classified_and_auditable() -> None:
     report = preview_legacy_snapshots(
         LegacySnapshots(
@@ -425,6 +486,147 @@ def test_duplicate_legacy_id_across_sources_is_reported() -> None:
     assert "task_records" in duplicate.detail
 
 
+def test_cross_source_duplicate_survives_unmapped_record_filtering() -> None:
+    report = preview_legacy_snapshots(
+        LegacySnapshots(
+            next_tasks=(
+                {
+                    "id": "mixed_mapping_duplicate",
+                    "status": "pending",
+                    "task_type": "platform_ops",
+                    "title": "Canonical queue copy",
+                    "priority": 1,
+                    "source": "agent",
+                    "created_at": "2026-07-23T09:00:00+00:00",
+                },
+            ),
+            task_records=(
+                {
+                    "id": "mixed_mapping_duplicate",
+                    "title": "Unmappable audit-trail copy",
+                    "source": "agent",
+                    "task_family": "unknown_family",
+                    "priority": 1,
+                    "approval_mode": "auto",
+                    "risk_level": "safe",
+                    "status": "queued",
+                    "public_effect": "none",
+                    "created_at": "2026-07-23T09:00:00+00:00",
+                },
+            ),
+        )
+    )
+
+    assert report.ready is False
+    assert tuple(candidate.legacy_id for candidate in report.candidates) == (
+        "mixed_mapping_duplicate",
+    )
+    duplicate = next(
+        issue for issue in report.issues if issue.code == "duplicate_id"
+    )
+    assert duplicate.source_system == "cross_source"
+    assert duplicate.record_id == "mixed_mapping_duplicate"
+    assert "next_tasks" in duplicate.detail
+    assert "task_records" in duplicate.detail
+    mapping_issue = next(
+        issue for issue in report.issues if issue.code == "unknown_kind"
+    )
+    assert mapping_issue.source_system == "task_records"
+    assert mapping_issue.record_id == "mixed_mapping_duplicate"
+    assert mapping_issue.record_index == 0
+
+
+def test_raw_identity_inventory_is_the_single_duplicate_issue_owner() -> None:
+    shared_id = "three_copy_duplicate"
+    report = preview_legacy_snapshots(
+        LegacySnapshots(
+            next_tasks=(
+                {
+                    "id": shared_id,
+                    "status": "pending",
+                    "task_type": "platform_ops",
+                    "title": "Canonical queue copy",
+                    "priority": 1,
+                    "source": "agent",
+                    "created_at": "2026-07-23T09:00:00+00:00",
+                },
+            ),
+            task_records=(
+                {
+                    "id": shared_id,
+                    "title": "Mapped audit-trail copy",
+                    "source": "agent",
+                    "task_family": "ops",
+                    "priority": 1,
+                    "approval_mode": "auto",
+                    "risk_level": "safe",
+                    "status": "queued",
+                    "public_effect": "none",
+                    "created_at": "2026-07-23T09:00:00+00:00",
+                },
+                {
+                    "id": shared_id,
+                    "title": "Unmappable audit-trail copy",
+                    "source": "agent",
+                    "task_family": "unknown_family",
+                    "priority": 1,
+                    "approval_mode": "auto",
+                    "risk_level": "safe",
+                    "status": "queued",
+                    "public_effect": "none",
+                    "created_at": "2026-07-23T09:00:00+00:00",
+                },
+            ),
+        )
+    )
+
+    duplicate_issues = tuple(
+        issue for issue in report.issues if issue.code == "duplicate_id"
+    )
+    assert len(duplicate_issues) == 1
+    assert duplicate_issues[0].source_system == "cross_source"
+    assert duplicate_issues[0].record_id == shared_id
+    assert "appears 3 times" in duplicate_issues[0].detail
+
+
+def test_same_source_duplicate_survives_unmapped_record_filtering() -> None:
+    shared_id = "same_source_duplicate"
+    base = {
+        "id": shared_id,
+        "source": "agent",
+        "priority": 1,
+        "approval_mode": "auto",
+        "risk_level": "safe",
+        "status": "queued",
+        "public_effect": "none",
+        "created_at": "2026-07-23T09:00:00+00:00",
+    }
+    report = preview_legacy_snapshots(
+        LegacySnapshots(
+            task_records=(
+                {
+                    **base,
+                    "title": "Mapped audit-trail copy",
+                    "task_family": "ops",
+                },
+                {
+                    **base,
+                    "title": "Unmappable audit-trail copy",
+                    "task_family": "unknown_family",
+                },
+            ),
+        )
+    )
+
+    duplicate = next(
+        issue for issue in report.issues if issue.code == "duplicate_id"
+    )
+    assert duplicate.source_system == "task_records"
+    assert duplicate.record_id == shared_id
+    assert "appears 2 times in task_records" in duplicate.detail
+    assert len(report.candidates) == 1
+
+
 def test_missing_parent_is_reported_without_guessing_a_replacement() -> None:
     report = preview_legacy_snapshots(
         LegacySnapshots(
@@ -452,6 +654,106 @@ def test_missing_parent_is_reported_without_guessing_a_replacement() -> None:
     assert missing_parent.record_id == "orphan_child"
     assert missing_parent.source_system == "next_tasks"
     assert "missing_parent" in missing_parent.detail
+
+
+def test_invalid_but_present_parent_is_unrepresentable_not_missing() -> None:
+    report = preview_legacy_snapshots(
+        LegacySnapshots(
+            next_tasks=(
+                {
+                    "id": "child_of_invalid_parent",
+                    "status": "pending",
+                    "task_type": "platform_ops",
+                    "title": "Child with a present corrupt parent",
+                    "priority": 1,
+                    "source": "agent",
+                    "parent_task_id": "123",
+                    "created_at": "2026-07-23T09:00:00+00:00",
+                },
+            ),
+            task_records=(
+                {
+                    "id": 123,
+                    "title": "Parent with invalid identity type",
+                    "source": "agent",
+                    "task_family": "ops",
+                    "priority": 9,
+                    "approval_mode": "auto",
+                    "risk_level": "safe",
+                    "status": "succeeded",
+                    "public_effect": "none",
+                    "created_at": "2026-07-23T08:00:00+00:00",
+                    "finished_at": "2026-07-23T08:30:00+00:00",
+                },
+            ),
+        )
+    )
+
+    issue_codes = {
+        (issue.source_system, issue.record_id, issue.code)
+        for issue in report.issues
+    }
+    assert ("task_records", "123", "invalid_record") in issue_codes
+    assert (
+        "next_tasks",
+        "child_of_invalid_parent",
+        "unrepresentable_parent",
+    ) in issue_codes
+    assert all(issue.code != "missing_parent" for issue in report.issues)
+    child_issue = next(
+        issue
+        for issue in report.issues
+        if issue.code == "unrepresentable_parent"
+    )
+    assert "present in supplied snapshots" in child_issue.detail
+
+
+def test_invalid_ops_job_parent_is_unrepresentable_not_missing() -> None:
+    report = preview_legacy_snapshots(
+        LegacySnapshots(
+            next_tasks=(
+                {
+                    "id": "child_of_invalid_ops_parent",
+                    "status": "pending",
+                    "task_type": "platform_ops",
+                    "title": "Child with a present corrupt ops parent",
+                    "priority": 1,
+                    "source": "agent",
+                    "parent_task_id": "456",
+                    "created_at": "2026-07-23T09:00:00+00:00",
+                },
+            ),
+            ops_jobs=(
+                {
+                    "id": 456,
+                    "action": "recalc_metrics",
+                    "source": "system",
+                    "requested_by": "owner",
+                    "dry_run": True,
+                    "priority": 9,
+                    "status": "succeeded",
+                    "created_at": "2026-07-23T08:00:00+00:00",
+                    "finished_at": "2026-07-23T08:30:00+00:00",
+                },
+            ),
+        )
+    )
+
+    issue_codes = {
+        (issue.source_system, issue.record_id, issue.code)
+        for issue in report.issues
+    }
+    assert ("ops_jobs", "456", "invalid_record") in issue_codes
+    assert (
+        "next_tasks",
+        "child_of_invalid_ops_parent",
+        "unrepresentable_parent",
+    ) in issue_codes
+    assert all(issue.code != "missing_parent" for issue in report.issues)
+    assert all(
+        "absent from supplied snapshots" not in issue.detail
+        for issue in report.issues
+    )
 
 
 def test_simultaneous_claims_across_sources_are_reported() -> None:
@@ -702,6 +1004,11 @@ def test_canonical_idempotency_collision_and_payload_identity_are_reported() -> 
         "duplicate_idempotency_key",
     )
     assert report.issues[0].record_id == "job_a,job_b"
+    assert report.issues[0].affected_record_ids == ("job_a", "job_b")
+    assert report.as_dict()["issues"][0]["affected_record_ids"] == [
+        "job_a",
+        "job_b",
+    ]
     first, second = report.candidates
     assert first.request.idempotency_key == second.request.idempotency_key
     assert first.request.payload_ref.startswith(

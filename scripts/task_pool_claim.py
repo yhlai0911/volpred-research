@@ -61,10 +61,13 @@ from volpred.ops.next_tasks import (  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 from volpred.ops import dreaming_revalidate  # noqa: E402
 from volpred.ops.task_pool_selection import (  # noqa: E402
+    CODEX_ELIGIBLE_TASK_TYPES,
     evaluate_task_claim,
     is_codex_eligible_task as _is_codex_eligible_task,
     is_pending_list_candidate,
     normalized_task_type as _normalized_task_type,
+    resolve_task_identity,
+    task_identity,
     task_rank_key,
 )
 
@@ -125,7 +128,7 @@ def _locked_readonly() -> Iterator[list[dict[str, Any]]]:
 
 
 def _task_key(task: dict[str, Any]) -> str:
-    return str(task.get("id") or task.get("task_id") or "")
+    return task_identity(task)
 
 
 def _record_status_history(
@@ -152,21 +155,23 @@ def _record_status_history(
     task["status_history"].append(entry)
 
 
-def _matches(tasks: list[dict[str, Any]], task_id: str) -> list[dict[str, Any]]:
-    return [t for t in tasks if _task_key(t) == task_id]
-
-
 def _find(tasks: list[dict[str, Any]], task_id: str) -> dict[str, Any]:
-    matches = _matches(tasks, task_id)
-    if not matches:
+    resolution = resolve_task_identity(tasks, task_id)
+    if resolution.reason_code == "missing_task_id":
+        raise SystemExit("task id is missing")
+    if resolution.reason_code == "task_not_found":
         raise SystemExit(f"task id not found: {task_id}")
-    if len(matches) > 1:
-        statuses = [str(t.get("status") or "") for t in matches]
+    if resolution.reason_code == "duplicate_task_id":
+        statuses = [
+            str(tasks[index].get("status") or "")
+            for index in resolution.matching_indexes
+        ]
         raise SystemExit(
-            f"duplicate task id detected: {task_id} count={len(matches)} statuses={statuses}. "
+            f"duplicate task id detected: {task_id} "
+            f"count={len(resolution.matching_indexes)} statuses={statuses}. "
             "Run scripts/dedupe_next_tasks.py first."
         )
-    return matches[0]
+    return tasks[resolution.matching_indexes[0]]
 
 
 def _published_mile_ids(task: dict[str, Any], result: str) -> set[str]:

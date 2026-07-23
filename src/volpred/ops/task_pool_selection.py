@@ -7,7 +7,8 @@ without touching the live queue.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections import Counter
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from typing import Any, Iterable, Mapping
 
@@ -58,13 +59,61 @@ class LegacyClaimSelection:
     selected_task_id: str | None
     eligible_task_ids: tuple[str, ...]
     decisions: tuple[LegacyClaimDecision, ...]
+    selected_index: int | None
+    eligible_indexes: tuple[int, ...]
 
     def decision_for(self, task_id: str) -> LegacyClaimDecision:
-        return next(
+        matches = tuple(
             decision
             for decision in self.decisions
             if decision.task_id == task_id
         )
+        if not matches:
+            raise LookupError(f"decision identity not found: {task_id}")
+        if len(matches) > 1:
+            raise ValueError(f"ambiguous decision identity: {task_id}")
+        return matches[0]
+
+
+@dataclass(frozen=True)
+class TaskIdentityResolution:
+    task_id: str
+    matching_indexes: tuple[int, ...]
+    reason_code: str
+
+
+def task_identity(task: Mapping[str, Any]) -> str:
+    """Return the exact identity used by the file-backed production CLI."""
+
+    return str(task.get("id") or task.get("task_id") or "")
+
+
+def resolve_task_identity(
+    tasks: Iterable[Mapping[str, Any]],
+    task_id: str,
+) -> TaskIdentityResolution:
+    """Resolve the production direct-claim uniqueness gate without mutation."""
+
+    candidates = tuple(tasks)
+    normalized = str(task_id or "")
+    matching_indexes = tuple(
+        index
+        for index, task in enumerate(candidates)
+        if task_identity(task) == normalized
+    )
+    if not normalized:
+        reason_code = "missing_task_id"
+    elif not matching_indexes:
+        reason_code = "task_not_found"
+    elif len(matching_indexes) > 1:
+        reason_code = "duplicate_task_id"
+    else:
+        reason_code = "unique_task_id"
+    return TaskIdentityResolution(
+        task_id=normalized,
+        matching_indexes=matching_indexes,
+        reason_code=reason_code,
+    )
 
 
 def normalized_task_type(task: Mapping[str, Any]) -> str:
@@ -106,7 +155,7 @@ def is_codex_eligible_task(task: Mapping[str, Any]) -> bool:
 def task_rank_key(task: Mapping[str, Any]) -> tuple[int, str]:
     """Return the production ``next_tasks list`` priority/id ordering key."""
 
-    task_id = str(task.get("id") or task.get("task_id") or "")
+    task_id = task_identity(task)
     return (
         priority_sort_key(task.get("priority"), default=999),
         task_id,
@@ -157,7 +206,7 @@ def evaluate_task_claim(
     if observed_at.tzinfo is None:
         raise ValueError("observed_at must include a timezone")
     observed_at = observed_at.astimezone(timezone.utc)
-    task_id = str(task.get("id") or task.get("task_id") or "")
+    task_id = task_identity(task)
     status = str(task.get("status") or "").strip().lower()
     claimed_by_value = task.get("claimed_by")
     claimed_by = (
@@ -268,7 +317,8 @@ def select_task_for_claim(
     observed_at: datetime,
 ) -> LegacyClaimSelection:
     candidates = tuple(tasks)
-    decisions = tuple(
+    identity_counts = Counter(task_identity(task) for task in candidates)
+    base_decisions = tuple(
         evaluate_task_claim(
             task,
             owner=owner,
@@ -277,14 +327,51 @@ def select_task_for_claim(
         )
         for task in candidates
     )
+    decisions = tuple(
+        (
+            replace(
+                decision,
+                eligible=False,
+                primary_reason=(
+                    "missing_task_id"
+                    if not decision.task_id
+                    else "duplicate_task_id"
+                ),
+                reason_codes=(
+                    (
+                        "missing_task_id"
+                        if not decision.task_id
+                        else "duplicate_task_id"
+                    ),
+                ),
+                policy_codes=tuple(
+                    dict.fromkeys(
+                        (
+                            *decision.policy_codes,
+                            "legacy_unique_identity_required",
+                        )
+                    )
+                ),
+                rank_key=None,
+            )
+            if (
+                not decision.task_id
+                or identity_counts[decision.task_id] > 1
+            )
+            else decision
+        )
+        for decision in base_decisions
+    )
     eligible = tuple(
         sorted(
             (
-                decision
-                for task, decision in zip(
-                    candidates,
-                    decisions,
-                    strict=True,
+                (index, decision)
+                for index, (task, decision) in enumerate(
+                    zip(
+                        candidates,
+                        decisions,
+                        strict=True,
+                    )
                 )
                 if decision.eligible
                 and is_pending_list_candidate(
@@ -292,13 +379,20 @@ def select_task_for_claim(
                     codex_eligible=is_codex_owner(owner),
                 )
             ),
-            key=lambda decision: decision.rank_key or (999, decision.task_id),
+            key=lambda item: (
+                item[1].rank_key or (999, item[1].task_id),
+                item[0],
+            ),
         )
     )
     return LegacyClaimSelection(
-        selected_task_id=eligible[0].task_id if eligible else None,
-        eligible_task_ids=tuple(decision.task_id for decision in eligible),
+        selected_task_id=eligible[0][1].task_id if eligible else None,
+        eligible_task_ids=tuple(
+            decision.task_id for _, decision in eligible
+        ),
         decisions=decisions,
+        selected_index=eligible[0][0] if eligible else None,
+        eligible_indexes=tuple(index for index, _ in eligible),
     )
 
 
@@ -306,11 +400,14 @@ __all__ = [
     "CODEX_ELIGIBLE_TASK_TYPES",
     "LegacyClaimDecision",
     "LegacyClaimSelection",
+    "TaskIdentityResolution",
     "evaluate_task_claim",
     "is_codex_eligible_task",
     "is_codex_owner",
     "is_pending_list_candidate",
     "normalized_task_type",
+    "resolve_task_identity",
     "select_task_for_claim",
+    "task_identity",
     "task_rank_key",
 ]

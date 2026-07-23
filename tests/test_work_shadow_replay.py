@@ -147,6 +147,650 @@ def test_replay_uses_one_immutable_snapshot_for_both_selection_policies() -> Non
     ) == before
 
 
+def test_replay_runs_legacy_selection_before_importer_filtering() -> None:
+    raw_legacy_winner = _pending_task("raw_legacy_winner", priority=1)
+    raw_legacy_winner["source"] = "unreviewed_legacy_producer"
+    mapped_coordinator_winner = _pending_task(
+        "mapped_coordinator_winner",
+        priority=2,
+    )
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(
+            next_tasks=(
+                raw_legacy_winner,
+                mapped_coordinator_winner,
+            )
+        ),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_raw_legacy_selection",
+    )
+
+    assert ledger.legacy_selection.selected_candidate_ref == (
+        "legacy://next_tasks/raw_legacy_winner"
+    )
+    assert ledger.coordinator_selection.selected_candidate_ref == (
+        "legacy://next_tasks/mapped_coordinator_winner"
+    )
+    assert {
+        comparison.candidate_ref for comparison in ledger.comparisons
+    } == {
+        "legacy://next_tasks/raw_legacy_winner",
+        "legacy://next_tasks/mapped_coordinator_winner",
+    }
+    raw_comparison = next(
+        comparison
+        for comparison in ledger.comparisons
+        if comparison.candidate_ref
+        == "legacy://next_tasks/raw_legacy_winner"
+    )
+    assert raw_comparison.legacy_eligible is True
+    assert raw_comparison.coordinator_eligible is False
+    assert all(
+        dimension.coordinator_reason_codes == ()
+        and any(
+            evidence_ref.startswith("migration://")
+            for evidence_ref in dimension.evidence_refs
+        )
+        and all(
+            not evidence_ref.startswith(
+                "selector://work-coordinator/"
+            )
+            for evidence_ref in dimension.evidence_refs
+        )
+        for dimension in raw_comparison.dimensions
+    )
+    assert ledger.selection_difference is not None
+    assert ledger.selection_difference.classification == "legacy_corruption"
+    assert (
+        ledger.selection_difference.classification_reason_code
+        == "reconciliation:unknown_source"
+    )
+    assert (
+        "reconciliation://next_tasks/raw_legacy_winner/record-0/unknown_source"
+        in ledger.selection_difference.evidence_refs
+    )
+
+
+def test_unmapped_non_winner_is_a_stable_comparison_not_a_winner_change() -> None:
+    mapped_winner = _pending_task("mapped_winner", priority=1)
+    unmapped_non_winner = _pending_task("unmapped_non_winner", priority=2)
+    unmapped_non_winner["source"] = "unreviewed_legacy_producer"
+    snapshots = LegacySnapshots(
+        next_tasks=(mapped_winner, unmapped_non_winner)
+    )
+
+    first = replay_legacy_selection(
+        snapshots,
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_unmapped_non_winner_1",
+    )
+    second = replay_legacy_selection(
+        snapshots,
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_unmapped_non_winner_2",
+    )
+
+    assert first.legacy_selection.selected_candidate_ref == (
+        "legacy://next_tasks/mapped_winner"
+    )
+    assert first.coordinator_selection.selected_candidate_ref == (
+        "legacy://next_tasks/mapped_winner"
+    )
+    assert first.selection_difference is None
+    first_unmapped = next(
+        comparison
+        for comparison in first.comparisons
+        if comparison.candidate_ref
+        == "legacy://next_tasks/unmapped_non_winner"
+    )
+    second_unmapped = next(
+        comparison
+        for comparison in second.comparisons
+        if comparison.candidate_ref
+        == "legacy://next_tasks/unmapped_non_winner"
+    )
+    assert first_unmapped == second_unmapped
+    assert first_unmapped.legacy_eligible is True
+    assert first_unmapped.coordinator_eligible is False
+    assert all(
+        dimension.classification == "legacy_corruption"
+        and dimension.classification_reason_code
+        == "reconciliation:unknown_source"
+        for dimension in first_unmapped.dimensions
+    )
+
+
+def test_replay_preserves_task_id_and_p_label_selection_semantics() -> None:
+    alias = _pending_task("placeholder", priority=1)
+    alias.pop("id")
+    alias["task_id"] = "a_alias"
+    alias["priority"] = "P1"
+    ordinary = _pending_task("z_ordinary", priority=1)
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(alias, ordinary)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_alias_semantics",
+    )
+
+    assert ledger.reconciliation_issues == ()
+    assert ledger.legacy_selection.selected_candidate_ref == (
+        "legacy://next_tasks/a_alias"
+    )
+    assert ledger.coordinator_selection.selected_candidate_ref == (
+        "legacy://next_tasks/a_alias"
+    )
+    assert {
+        comparison.candidate_ref for comparison in ledger.comparisons
+    } == {
+        "legacy://next_tasks/a_alias",
+        "legacy://next_tasks/z_ordinary",
+    }
+
+
+def test_duplicate_identity_fails_closed_without_cross_record_evidence() -> None:
+    first = _pending_task("duplicate", priority=1)
+    second = _pending_task("duplicate", priority=1)
+    second.update(
+        {
+            "status": "claimed",
+            "claimed_by": "other-worker",
+            "claimed_at": "2026-07-23T09:00:00+00:00",
+        }
+    )
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(first, second)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_duplicate_identity",
+    )
+
+    assert ledger.legacy_selection.selected_candidate_ref is None
+    assert ledger.legacy_selection.eligible_candidate_refs == ()
+    assert ledger.coordinator_selection.selected_candidate_ref is None
+    assert ledger.coordinator_selection.eligible_candidate_refs == ()
+    assert len(ledger.comparisons) == 2
+    assert len(
+        {
+            comparison.candidate_ref
+            for comparison in ledger.comparisons
+        }
+    ) == 2
+    assert all(
+        comparison.legacy_eligible is False
+        and comparison.coordinator_eligible is False
+        for comparison in ledger.comparisons
+    )
+    ownership = [
+        next(
+            dimension
+            for dimension in comparison.dimensions
+            if dimension.name == "claim_ownership"
+        )
+        for comparison in ledger.comparisons
+    ]
+    assert {dimension.legacy["claimed_by"] for dimension in ownership} == {
+        None,
+        "other-worker",
+    }
+    assert all(
+        dimension.classification == "legacy_corruption"
+        and dimension.classification_reason_code
+        == "reconciliation:duplicate_id,duplicate_idempotency_key"
+        for dimension in ownership
+    )
+
+
+def test_indexed_mapping_issue_stays_on_its_duplicate_record() -> None:
+    mapped = _pending_task("mixed_duplicate", priority=1)
+    unmapped = _pending_task("mixed_duplicate", priority=1)
+    unmapped["source"] = "unreviewed_legacy_producer"
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(mapped, unmapped)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_mixed_duplicate",
+    )
+
+    by_record_index = {
+        int(comparison.candidate_ref.split("record_index=", 1)[1].split("&", 1)[0]):
+        comparison
+        for comparison in ledger.comparisons
+    }
+    first_reasons = {
+        dimension.classification_reason_code
+        for dimension in by_record_index[0].dimensions
+    }
+    second_reasons = {
+        dimension.classification_reason_code
+        for dimension in by_record_index[1].dimensions
+    }
+    assert first_reasons == {"reconciliation:duplicate_id"}
+    assert second_reasons == {
+        "reconciliation:duplicate_id,unknown_source"
+    }
+    assert all(
+        "reconciliation://next_tasks/mixed_duplicate/record-1/unknown_source"
+        not in dimension.evidence_refs
+        for dimension in by_record_index[0].dimensions
+    )
+    assert all(
+        "reconciliation://next_tasks/mixed_duplicate/record-1/unknown_source"
+        in dimension.evidence_refs
+        for dimension in by_record_index[1].dimensions
+    )
+
+
+def test_cross_source_duplicate_with_unmapped_copy_fails_closed() -> None:
+    task = _pending_task("mixed_source_duplicate")
+    mapped_copy = {
+        "id": "mixed_source_duplicate",
+        "title": "Mapped audit-trail copy",
+        "source": "agent",
+        "task_family": "ops",
+        "priority": 1,
+        "approval_mode": "auto",
+        "risk_level": "safe",
+        "status": "queued",
+        "public_effect": "none",
+        "created_at": "2026-07-23T09:00:00+00:00",
+    }
+    unmapped_copy = {
+        "id": "mixed_source_duplicate",
+        "title": "Unmappable audit-trail copy",
+        "source": "agent",
+        "task_family": "unknown_family",
+        "priority": 1,
+        "approval_mode": "auto",
+        "risk_level": "safe",
+        "status": "queued",
+        "public_effect": "none",
+        "created_at": "2026-07-23T09:00:00+00:00",
+    }
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(
+            next_tasks=(task,),
+            task_records=(mapped_copy, unmapped_copy),
+        ),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_mixed_source_duplicate",
+    )
+
+    assert [
+        (issue["source_system"], issue["record_id"], issue["code"])
+        for issue in ledger.reconciliation_issues
+    ] == [
+        ("task_records", "mixed_source_duplicate", "unknown_kind"),
+        ("cross_source", "mixed_source_duplicate", "duplicate_id"),
+    ]
+    assert ledger.legacy_selection.selected_candidate_ref == (
+        "legacy://next_tasks/mixed_source_duplicate"
+    )
+    assert ledger.coordinator_selection.selected_candidate_ref is None
+    comparison = ledger.comparisons[0]
+    assert comparison.coordinator_eligible is False
+    assert all(
+        dimension.classification == "legacy_corruption"
+        and dimension.classification_reason_code
+        == "reconciliation:duplicate_id"
+        and dimension.coordinator_reason_codes == ()
+        and (
+            "reconciliation://cross_source/mixed_source_duplicate/duplicate_id"
+            in dimension.evidence_refs
+        )
+        for dimension in comparison.dimensions
+    )
+    assert ledger.selection_difference is not None
+    assert ledger.selection_difference.classification == "legacy_corruption"
+    assert ledger.selection_difference.classification_reason_code == (
+        "reconciliation:duplicate_id"
+    )
+
+
+def test_missing_identity_produces_record_bound_corruption_evidence() -> None:
+    missing_identity = _pending_task("placeholder")
+    missing_identity.pop("id")
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(missing_identity,)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_missing_identity",
+    )
+
+    assert ledger.legacy_selection.selected_candidate_ref is None
+    assert ledger.coordinator_selection.selected_candidate_ref is None
+    assert len(ledger.comparisons) == 1
+    comparison = ledger.comparisons[0]
+    assert comparison.candidate_ref.startswith(
+        "legacy://next_tasks/_missing-id?record_index=0&sha256="
+    )
+    assert comparison.legacy_eligible is False
+    assert comparison.coordinator_eligible is False
+    assert all(
+        dimension.classification == "legacy_corruption"
+        and dimension.classification_reason_code
+        == "reconciliation:invalid_record"
+        and (
+            "reconciliation://next_tasks/_record_0/invalid_record"
+            in dimension.evidence_refs
+        )
+        for dimension in comparison.dimensions
+    )
+    assert ledger.reconciliation_issues[0]["record_index"] == 0
+    assert ledger.reconciliation_issues[0]["evidence_ref"] == (
+        "reconciliation://next_tasks/_record_0/invalid_record"
+    )
+
+
+def test_unrepresentable_parent_corruption_propagates_to_child_readiness() -> None:
+    first_parent = _pending_task("duplicate_parent", priority=9)
+    first_parent.update(
+        {
+            "status": "succeeded",
+            "completed_at": "2026-07-23T09:05:00+00:00",
+        }
+    )
+    second_parent = dict(first_parent)
+    child = _pending_task(
+        "child",
+        priority=1,
+        parent_task_id="duplicate_parent",
+    )
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(
+            next_tasks=(first_parent, second_parent, child)
+        ),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_duplicate_parent",
+    )
+
+    assert ledger.legacy_selection.selected_candidate_ref == (
+        "legacy://next_tasks/child"
+    )
+    assert ledger.coordinator_selection.selected_candidate_ref is None
+    child_comparison = next(
+        comparison
+        for comparison in ledger.comparisons
+        if comparison.candidate_ref == "legacy://next_tasks/child"
+    )
+    child_dimensions = {
+        dimension.name: dimension
+        for dimension in child_comparison.dimensions
+    }
+    assert child_dimensions["readiness"].matches is True
+    assert child_dimensions["readiness"].classification is None
+    parent_dimension = child_dimensions["parent"]
+    assert parent_dimension.classification == "legacy_corruption"
+    assert parent_dimension.classification_reason_code == (
+        "reconciliation:duplicate_id,duplicate_idempotency_key"
+    )
+    assert (
+        "reconciliation://next_tasks/duplicate_parent/duplicate_id"
+        in parent_dimension.evidence_refs
+    )
+    assert ledger.selection_difference is not None
+    assert ledger.selection_difference.classification == "legacy_corruption"
+    assert ledger.selection_difference.classification_reason_code == (
+        "reconciliation:duplicate_id,duplicate_idempotency_key"
+    )
+
+
+def test_present_but_unmapped_parent_is_not_reported_as_absent() -> None:
+    parent = _pending_task("unmapped_parent", priority=9)
+    parent.update(
+        {
+            "status": "succeeded",
+            "completed_at": "2026-07-23T09:05:00+00:00",
+            "source": "unreviewed_legacy_producer",
+        }
+    )
+    child = _pending_task(
+        "child_of_unmapped",
+        priority=1,
+        parent_task_id="unmapped_parent",
+    )
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(parent, child)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_unmapped_parent",
+    )
+
+    issue_codes = {
+        (issue["record_id"], issue["code"])
+        for issue in ledger.reconciliation_issues
+    }
+    assert ("unmapped_parent", "unknown_source") in issue_codes
+    assert ("child_of_unmapped", "unrepresentable_parent") in issue_codes
+    assert ("child_of_unmapped", "missing_parent") not in issue_codes
+    assert all(
+        "absent from supplied snapshots" not in issue["detail"]
+        for issue in ledger.reconciliation_issues
+    )
+    child_comparison = next(
+        comparison
+        for comparison in ledger.comparisons
+        if comparison.candidate_ref
+        == "legacy://next_tasks/child_of_unmapped"
+    )
+    parent_dimension = next(
+        dimension
+        for dimension in child_comparison.dimensions
+        if dimension.name == "parent"
+    )
+    assert parent_dimension.classification == "legacy_corruption"
+    assert parent_dimension.classification_reason_code == (
+        "reconciliation:unknown_source,unrepresentable_parent"
+    )
+    assert (
+        "reconciliation://next_tasks/unmapped_parent/record-0/unknown_source"
+        in parent_dimension.evidence_refs
+    )
+    assert (
+        "reconciliation://next_tasks/child_of_unmapped/unrepresentable_parent"
+        in parent_dimension.evidence_refs
+    )
+    assert ledger.selection_difference is not None
+    assert ledger.selection_difference.classification == "legacy_corruption"
+    assert ledger.selection_difference.classification_reason_code == (
+        "reconciliation:unknown_source,unrepresentable_parent"
+    )
+
+
+def test_task_record_parent_is_dependency_context_not_selection_candidate() -> None:
+    child = _pending_task(
+        "child_of_task_record",
+        priority=1,
+        parent_task_id="completed_task_record",
+    )
+    completed_parent = {
+        "id": "completed_task_record",
+        "title": "Completed dependency outside next_tasks selection scope",
+        "source": "agent",
+        "task_family": "ops",
+        "priority": 9,
+        "approval_mode": "auto",
+        "risk_level": "safe",
+        "status": "succeeded",
+        "public_effect": "none",
+        "created_at": "2026-07-23T08:00:00+00:00",
+        "finished_at": "2026-07-23T09:00:00+00:00",
+    }
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(
+            next_tasks=(child,),
+            task_records=(completed_parent,),
+        ),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_task_record_parent",
+    )
+
+    assert ledger.reconciliation_issues == ()
+    assert ledger.legacy_selection.selected_candidate_ref == (
+        "legacy://next_tasks/child_of_task_record"
+    )
+    assert ledger.coordinator_selection.selected_candidate_ref == (
+        "legacy://next_tasks/child_of_task_record"
+    )
+    assert ledger.selection_difference is None
+    assert {
+        comparison.candidate_ref for comparison in ledger.comparisons
+    } == {"legacy://next_tasks/child_of_task_record"}
+    parent_dimension = next(
+        dimension
+        for dimension in ledger.comparisons[0].dimensions
+        if dimension.name == "parent"
+    )
+    assert parent_dimension.coordinator["satisfied"] is True
+    assert parent_dimension.coordinator_reason_codes == ("parent_succeeded",)
+    assert parent_dimension.matches is False
+    assert parent_dimension.classification == "policy_change"
+    assert (
+        parent_dimension.classification_reason_code
+        == "coordinator_parent_readiness"
+    )
+
+
+def test_parent_lifecycle_issue_does_not_replace_selector_causality() -> None:
+    child = _pending_task(
+        "child_of_lifecycle_issue",
+        parent_task_id="unfinished_parent",
+    )
+    unfinished_parent = {
+        "id": "unfinished_parent",
+        "title": "Succeeded status with incomplete audit trace",
+        "source": "agent",
+        "task_family": "ops",
+        "priority": 9,
+        "approval_mode": "auto",
+        "risk_level": "safe",
+        "status": "succeeded",
+        "public_effect": "none",
+        "created_at": "2026-07-23T08:00:00+00:00",
+    }
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(
+            next_tasks=(child,),
+            task_records=(unfinished_parent,),
+        ),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_parent_lifecycle_issue",
+    )
+
+    assert any(
+        issue["code"] == "invalid_lifecycle"
+        and issue["record_id"] == "unfinished_parent"
+        for issue in ledger.reconciliation_issues
+    )
+    assert ledger.coordinator_selection.selected_candidate_ref == (
+        "legacy://next_tasks/child_of_lifecycle_issue"
+    )
+    parent_dimension = next(
+        dimension
+        for dimension in ledger.comparisons[0].dimensions
+        if dimension.name == "parent"
+    )
+    assert parent_dimension.classification == "policy_change"
+    assert parent_dimension.classification_reason_code == (
+        "coordinator_parent_readiness"
+    )
+    assert all(
+        "invalid_lifecycle" not in evidence_ref
+        for evidence_ref in parent_dimension.evidence_refs
+    )
+
+
+def test_comma_in_parent_id_does_not_hide_idempotency_corruption() -> None:
+    child = _pending_task(
+        "child_of_ambiguous_dependencies",
+        parent_task_id="job,a",
+    )
+    base_job = {
+        "action": "recalc_metrics",
+        "source": "system",
+        "requested_by": "owner",
+        "dry_run": True,
+        "priority": 9,
+        "status": "succeeded",
+        "dedupe_key": "shared-dedupe-key",
+        "created_at": "2026-07-23T08:00:00+00:00",
+        "finished_at": "2026-07-23T09:00:00+00:00",
+    }
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(
+            next_tasks=(child,),
+            ops_jobs=(
+                {**base_job, "id": "job,a"},
+                {**base_job, "id": "job-b"},
+            ),
+        ),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_comma_parent_id",
+    )
+
+    collision = next(
+        issue
+        for issue in ledger.reconciliation_issues
+        if issue["code"] == "duplicate_idempotency_key"
+    )
+    assert collision["affected_record_ids"] == ["job,a", "job-b"]
+    assert collision["evidence_ref"] == (
+        "reconciliation://ops_jobs/_records/duplicate_idempotency_key"
+        "?record_id=job%2Ca&record_id=job-b"
+    )
+    assert ledger.legacy_selection.selected_candidate_ref == (
+        "legacy://next_tasks/child_of_ambiguous_dependencies"
+    )
+    assert ledger.coordinator_selection.selected_candidate_ref is None
+    parent_dimension = next(
+        dimension
+        for dimension in ledger.comparisons[0].dimensions
+        if dimension.name == "parent"
+    )
+    assert parent_dimension.classification == "legacy_corruption"
+    assert parent_dimension.classification_reason_code == (
+        "reconciliation:duplicate_idempotency_key"
+    )
+    assert collision["evidence_ref"] in parent_dimension.evidence_refs
+
+
+def test_no_parent_projection_remains_an_exact_match() -> None:
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(_pending_task("standalone"),)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_no_parent",
+    )
+
+    parent_dimension = next(
+        dimension
+        for dimension in ledger.comparisons[0].dimensions
+        if dimension.name == "parent"
+    )
+    assert parent_dimension.matches is True
+    assert parent_dimension.classification is None
+    assert parent_dimension.classification_reason_code is None
+
+
 def test_every_difference_has_a_stable_classification_and_evidence() -> None:
     parent = _pending_task("parent", priority=9)
     child = _pending_task(

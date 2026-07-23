@@ -353,26 +353,35 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   integration cases 回讀 capability／attestation、parent／deadline、atomic claim 與
   expired-lease reclaim parity。公開 `replay_legacy_selection` 仍先把 caller 提供的三份
   snapshot canonicalize 成單一 SHA-256 identity，再從該 bytes 建立私有 immutable copy；
-  selection 只對真正由 production `list --status pending` 暴露、且 direct-claim gate
-  接受的 `next_tasks` candidates 決定 winner；blocked／claimed records 仍保留逐維度
-  evidence，但不參與 hourly winner。registered dreaming task 若需要 live detector，
+  legacy selector 直接接收該 copy 的原始 `next_tasks`，不先經 migration importer 篩選；
+  selection 只對真正由 production `list --status pending` 暴露、且包含 identity uniqueness
+  在內的 direct-claim gate 接受者決定 winner。三份 supplied snapshot 的 raw identity
+  inventory 會先於 mapping 掃描完整母體，因此跨來源 duplicate 不會因其中一筆無法映射而
+  消失。Importer 無法表示的 record 仍留在 ledger，
+  由 reconciliation evidence 分類；duplicate／missing identity 以 record ordinal + content
+  hash 分開綁定並 fail closed，不會以 task id dict 覆蓋另一筆證據。blocked／claimed
+  records 仍保留逐維度 evidence，但不參與 hourly winner。registered dreaming task 若需要 live detector，
   supplied snapshot 無法證明 revalidation 結果時以 `live_revalidation_required` fail
   closed；production claim 在同一 transaction 跑完 detector 後才重新進 admission，
   replay 本身不查 knowledge／feed／paper／live queue。另兩套
-  snapshot 只參與相同 identity 與 reconciliation evidence，不虛構跨 store selector。
+  snapshot 只參與相同 identity、reconciliation evidence，以及 next-task parent 的
+  non-selectable dependency context；共用 selector 的 `dependency_items` 只提供 parent
+  status、永遠不會成為 winner，因此不虛構跨 store selector。
   ledger 的 single dimension registry 比較 priority、status readiness、capability、
   attestation、claim ownership、lease expiry、dispatch lane、preferred agent、parent
   readiness、deadline 與 terminal disposition。每個不一致與 winner 差異都由實際 selector
   reason code 或 reconciliation issue 經顯式 policy oracle 分為 `policy_change`、
   `legacy_corruption` 或 `implementation_bug`，並附 candidate field、selector decision、
-  policy contract、reconciliation issue 與 snapshot hash evidence reference。
+  policy contract、reconciliation issue 與 snapshot hash evidence reference；未送進
+  Coordinator 的 record 明示 migration `not_evaluated`，不冒稱 selector reason。
 - `uv run volpred ops work-shadow-replay` 只接受三份顯式 snapshot 路徑，沒有 live queue、
   Supabase 或 `ops_jobs` lookup，也不呼叫 Work Coordinator `submit`。它只在 caller
   指定目錄以 create-if-absent hard link 追加 observation receipt；相同 observation id
   會 fail closed，不覆寫舊證據。import 與 replay CLI 共用
-  `load_legacy_snapshots`，避免 loader schema 漂移。128 個核心非 Postgres scoped
-  regressions、144 個相鄰 dreaming／stale-reclaim／refill regressions 與 34 個 PostgreSQL
-  integration contracts 通過，含輸入逐 byte 不變與測試期 remote/canonical I/O deny。
+  `load_legacy_snapshots`，避免 loader schema 漂移。152 個 selector／replay 核心 cases、
+  另行重跑的 10 個 model-router topology regressions、144 個相鄰
+  dreaming／stale-reclaim／refill regressions 與 34 個 PostgreSQL integration contracts
+  通過，含輸入逐 byte 不變與測試期 remote/canonical I/O deny。
 - 這只完成 replay 與 receipt 機械能力；尚未把 replay 加入 canonical schedule，也尚未
   累積七天 observation window，因此不構成 queue ownership cutover。
 

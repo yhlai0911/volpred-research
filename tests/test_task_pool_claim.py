@@ -1292,6 +1292,45 @@ def test_legacy_selection_uses_normalized_priority_then_task_id() -> None:
     assert selection.eligible_task_ids == ("a_first", "z_second", "p2")
 
 
+def test_duplicate_identity_is_rejected_by_shared_selection_and_direct_find() -> None:
+    tasks = [
+        _selection_task("duplicate", priority=1),
+        _selection_task("duplicate", priority=1),
+    ]
+
+    selection = select_task_for_claim(
+        tasks,
+        owner="hourly-slot-1",
+        main_thread=False,
+        observed_at=SELECTION_OBSERVED_AT,
+    )
+
+    assert selection.selected_task_id is None
+    assert selection.eligible_task_ids == ()
+    assert {
+        decision.primary_reason for decision in selection.decisions
+    } == {"duplicate_task_id"}
+    with pytest.raises(SystemExit, match="duplicate task id detected"):
+        task_pool_claim._find(tasks, "duplicate")
+
+
+def test_decision_lookup_requires_one_exact_identity() -> None:
+    selection = select_task_for_claim(
+        (
+            _selection_task("duplicate"),
+            _selection_task("duplicate"),
+        ),
+        owner="hourly-slot-1",
+        main_thread=False,
+        observed_at=SELECTION_OBSERVED_AT,
+    )
+
+    with pytest.raises(ValueError, match="ambiguous decision identity"):
+        selection.decision_for("duplicate")
+    with pytest.raises(LookupError, match="decision identity not found"):
+        selection.decision_for("missing")
+
+
 def test_production_list_and_replay_selection_share_the_same_rank(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

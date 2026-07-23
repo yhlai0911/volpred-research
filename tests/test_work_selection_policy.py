@@ -83,6 +83,45 @@ def test_selector_requires_attestations_and_explains_the_winner() -> None:
         decisions["winner"].eligible = False  # type: ignore[misc]
 
 
+def test_selector_uses_non_selectable_dependency_context_for_parent_readiness() -> None:
+    parent = _item("parent", priority=1, status="succeeded")
+    child = _item("child", priority=2, parent_id="parent")
+
+    selection = select_acquirable_work(
+        (child,),
+        dependency_items=(parent,),
+        offer=OFFER,
+        observed_at=OBSERVED_AT,
+    )
+
+    assert selection.selected_id == "child"
+    assert tuple(decision.work_id for decision in selection.decisions) == (
+        "child",
+    )
+    assert selection.decisions[0].parent_status == "succeeded"
+    assert selection.decisions[0].reason_codes == (
+        "ready_pending",
+        "parent_succeeded",
+        "selected",
+    )
+
+
+def test_selector_rejects_duplicate_ids_across_selection_context() -> None:
+    candidate = _item("ambiguous")
+    dependency = _item("ambiguous", status="succeeded")
+
+    with pytest.raises(
+        ValueError,
+        match="work selection context contains duplicate work ids",
+    ):
+        select_acquirable_work(
+            (candidate,),
+            dependency_items=(dependency,),
+            offer=OFFER,
+            observed_at=OBSERVED_AT,
+        )
+
+
 def test_selector_distinguishes_live_expired_and_missing_claim_expiry() -> None:
     live = _item(
         "live",
@@ -183,6 +222,11 @@ def test_selector_reports_capability_and_parent_gates() -> None:
         "parent_not_succeeded",
     )
     assert decisions["child-of-succeeded"].parent_status == "succeeded"
+    assert decisions["child-of-succeeded"].reason_codes == (
+        "ready_pending",
+        "parent_succeeded",
+        "selected",
+    )
 
 
 def test_selector_ranks_real_instants_then_null_deadlines_created_at_and_id() -> None:

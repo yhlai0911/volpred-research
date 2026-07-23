@@ -10,7 +10,8 @@ from typing import Any, Mapping
 from urllib.parse import quote
 
 from . import WorkRequest
-from ..next_tasks import normalize_dispatch_lane
+from ..next_tasks import normalize_dispatch_lane, normalize_priority
+from ..task_pool_selection import task_identity
 
 
 _NEXT_TASK_STATUS = {
@@ -226,6 +227,8 @@ class ReconciliationIssue:
     source_system: str
     record_id: str | None
     detail: str
+    record_index: int | None = None
+    affected_record_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -301,6 +304,20 @@ class ReconciliationReport:
                     "source_system": issue.source_system,
                     "record_id": issue.record_id,
                     "detail": issue.detail,
+                    **(
+                        {"record_index": issue.record_index}
+                        if issue.record_index is not None
+                        else {}
+                    ),
+                    **(
+                        {
+                            "affected_record_ids": list(
+                                issue.affected_record_ids
+                            )
+                        }
+                        if issue.affected_record_ids
+                        else {}
+                    ),
                 }
                 for issue in self.issues
             ],
@@ -320,14 +337,21 @@ class LegacySnapshotImporter:
         candidates: list[LegacyWorkCandidate] = []
         issues: list[ReconciliationIssue] = []
         mapped_counts: dict[str, int] = {}
+        identity_inventory = self._supplied_identity_inventory(snapshots)
         for source_system, records, mapper in (
             ("next_tasks", snapshots.next_tasks, self._map_next_task),
             ("task_records", snapshots.task_records, self._map_task_record),
             ("ops_jobs", snapshots.ops_jobs, self._map_ops_job),
         ):
             mapped = 0
-            for record in records:
-                record_id = _optional_string(record.get("id"))
+            for record_index, record in enumerate(records):
+                record_id = _optional_string(
+                    (
+                        task_identity(record)
+                        if source_system == "next_tasks"
+                        else record.get("id")
+                    )
+                )
                 try:
                     candidates.append(mapper(record))
                     mapped += 1
@@ -338,6 +362,7 @@ class LegacySnapshotImporter:
                             source_system=source_system,
                             record_id=record_id,
                             detail=str(error),
+                            record_index=record_index,
                         )
                     )
                 except (KeyError, TypeError, ValueError) as error:
@@ -347,13 +372,21 @@ class LegacySnapshotImporter:
                             source_system=source_system,
                             record_id=record_id,
                             detail=str(error),
+                            record_index=record_index,
                         )
                     )
             mapped_counts[source_system] = mapped
-        issues.extend(self._reconcile(candidates))
+        issues.extend(self._reconcile_supplied_identities(identity_inventory))
+        issues.extend(
+            self._reconcile(
+                candidates,
+                supplied_ids=self._supplied_record_ids(snapshots),
+            )
+        )
+        deduplicated_issues = tuple(dict.fromkeys(issues))
         return ReconciliationReport(
             candidates=tuple(candidates),
-            issues=tuple(issues),
+            issues=deduplicated_issues,
             source_counts={
                 "next_tasks": {
                     "seen": len(snapshots.next_tasks),
@@ -371,8 +404,79 @@ class LegacySnapshotImporter:
         )
 
     @staticmethod
+    def _supplied_identity_inventory(
+        snapshots: LegacySnapshots,
+    ) -> dict[str, tuple[str, ...]]:
+        inventory: dict[str, list[str]] = {}
+        for source_system, records, identity_reader in (
+            ("next_tasks", snapshots.next_tasks, task_identity),
+            (
+                "task_records",
+                snapshots.task_records,
+                lambda record: record.get("id"),
+            ),
+            ("ops_jobs", snapshots.ops_jobs, lambda record: record.get("id")),
+        ):
+            for record in records:
+                legacy_id = _valid_identity(identity_reader(record))
+                if legacy_id is None:
+                    # Mapping emits the structured invalid_record issue.
+                    continue
+                inventory.setdefault(legacy_id, []).append(source_system)
+        return {
+            legacy_id: tuple(source_systems)
+            for legacy_id, source_systems in inventory.items()
+        }
+
+    @staticmethod
+    def _reconcile_supplied_identities(
+        inventory: Mapping[str, tuple[str, ...]],
+    ) -> tuple[ReconciliationIssue, ...]:
+        issues: list[ReconciliationIssue] = []
+        for legacy_id, occurrences in sorted(inventory.items()):
+            if len(occurrences) < 2:
+                continue
+            sources = sorted(set(occurrences))
+            issues.append(
+                ReconciliationIssue(
+                    code="duplicate_id",
+                    source_system=(
+                        "cross_source" if len(sources) > 1 else sources[0]
+                    ),
+                    record_id=legacy_id,
+                    detail=(
+                        f"legacy id appears {len(occurrences)} times in "
+                        f"{', '.join(sources)}"
+                    ),
+                )
+            )
+        return tuple(issues)
+
+    @staticmethod
+    def _supplied_record_ids(
+        snapshots: LegacySnapshots,
+    ) -> frozenset[str]:
+        """Project raw record presence separately from valid identity census."""
+
+        identities = {
+            task_identity(record)
+            for record in snapshots.next_tasks
+            if task_identity(record)
+        }
+        for records in (snapshots.task_records, snapshots.ops_jobs):
+            identities.update(
+                record_id
+                for record in records
+                if (record_id := _optional_string(record.get("id")))
+                is not None
+            )
+        return frozenset(identities)
+
+    @staticmethod
     def _reconcile(
         candidates: list[LegacyWorkCandidate],
+        *,
+        supplied_ids: frozenset[str],
     ) -> tuple[ReconciliationIssue, ...]:
         by_id: dict[str, list[LegacyWorkCandidate]] = {}
         for candidate in candidates:
@@ -384,19 +488,6 @@ class LegacySnapshotImporter:
             if len(copies) < 2:
                 continue
             sources = sorted({candidate.source_system for candidate in copies})
-            issues.append(
-                ReconciliationIssue(
-                    code="duplicate_id",
-                    source_system=(
-                        "cross_source" if len(sources) > 1 else sources[0]
-                    ),
-                    record_id=legacy_id,
-                    detail=(
-                        f"legacy id appears {len(copies)} times in "
-                        f"{', '.join(sources)}"
-                    ),
-                )
-            )
             active_claims = [
                 candidate
                 for candidate in copies
@@ -429,7 +520,9 @@ class LegacySnapshotImporter:
             copies = by_idempotency_key[idempotency_key]
             if len(copies) < 2:
                 continue
-            record_ids = sorted(candidate.legacy_id for candidate in copies)
+            record_ids = tuple(
+                sorted({candidate.legacy_id for candidate in copies})
+            )
             sources = sorted({candidate.source_system for candidate in copies})
             issues.append(
                 ReconciliationIssue(
@@ -438,6 +531,7 @@ class LegacySnapshotImporter:
                         "cross_source" if len(sources) > 1 else sources[0]
                     ),
                     record_id=",".join(record_ids),
+                    affected_record_ids=record_ids,
                     detail=(
                         "canonical idempotency key is shared by distinct "
                         f"legacy records: {idempotency_key}"
@@ -449,12 +543,25 @@ class LegacySnapshotImporter:
             parent_id = candidate.request.parent_id
             if parent_id is None or parent_id in known_ids:
                 continue
+            parent_is_supplied = parent_id in supplied_ids
             issues.append(
                 ReconciliationIssue(
-                    code="missing_parent",
+                    code=(
+                        "unrepresentable_parent"
+                        if parent_is_supplied
+                        else "missing_parent"
+                    ),
                     source_system=candidate.source_system,
                     record_id=candidate.legacy_id,
-                    detail=f"parent id is absent from supplied snapshots: {parent_id}",
+                    detail=(
+                        "parent id is present in supplied snapshots but "
+                        f"could not be represented: {parent_id}"
+                        if parent_is_supplied
+                        else (
+                            "parent id is absent from supplied snapshots: "
+                            f"{parent_id}"
+                        )
+                    ),
                 )
             )
         for candidate in candidates:
@@ -529,7 +636,7 @@ class LegacySnapshotImporter:
 
     @staticmethod
     def _map_next_task(record: Mapping[str, Any]) -> LegacyWorkCandidate:
-        legacy_id = _legacy_id(record)
+        legacy_id = _next_task_id(record)
         legacy_status = str(record["status"])
         if legacy_status not in _NEXT_TASK_STATUS:
             raise _LegacyMappingError(
@@ -596,7 +703,7 @@ class LegacySnapshotImporter:
                 source=source,
                 kind=kind,
                 title=str(record["title"]),
-                priority=int(record["priority"]),
+                priority=normalize_priority(record["priority"]),
                 required_capabilities=(
                     _CAPABILITY_BY_KIND[kind]
                     | _string_set(
@@ -837,10 +944,23 @@ def _classify_next_task_source(value: Any) -> tuple[str, str, str]:
     )
 
 
-def _legacy_id(record: Mapping[str, Any]) -> str:
-    value = record["id"]
-    if not isinstance(value, str) or not value or value != value.strip():
+def _next_task_id(record: Mapping[str, Any]) -> str:
+    value = _valid_identity(task_identity(record))
+    if value is None:
         raise ValueError("legacy id must be a non-empty, trimmed string")
+    return value
+
+
+def _legacy_id(record: Mapping[str, Any]) -> str:
+    value = _valid_identity(record.get("id"))
+    if value is None:
+        raise ValueError("legacy id must be a non-empty, trimmed string")
+    return value
+
+
+def _valid_identity(value: Any) -> str | None:
+    if not isinstance(value, str) or not value or value != value.strip():
+        return None
     return value
 
 

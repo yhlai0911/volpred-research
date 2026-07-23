@@ -45,18 +45,25 @@ legacy direct-claim gate 與 production pending-list filter／priority-id rankin
 `volpred.ops.work.selection`，production claim／in-memory acquire 與 replay 共用相同 pure
 policy seam；PostgreSQL `acquire_work` 則由 34-case integration contract 回讀 parity。
 legacy winner 先套用 production `list --status pending` 的 exact status／worker filter，
-再執行 direct-claim admission；blocked 與 claimed records 只保留比較證據，不會被虛構成
+再對原始 immutable `next_tasks` 執行含 identity uniqueness 的 direct-claim admission；
+migration importer 不可表示的 record 仍保留 reconciliation comparison。duplicate／missing
+identity 以 ordinal + content hash 分開綁定並 fail closed；三來源 raw identity inventory
+在 mapping 前掃描完整母體，故跨來源 duplicate 不會因一份 record 無法映射而消失，也不會
+因 task-id dict 覆蓋而錯接 selector evidence；未送進 Coordinator 的 record 明示 migration `not_evaluated`，
+不虛構 Coordinator reason。blocked 與 claimed records 只保留比較證據，不會被虛構成
 hourly winner。需 live detector 的 registered dreaming candidate 若 snapshot 沒有
 revalidation evidence，會以 `live_revalidation_required` fail closed，不查 live source，
 production claim 則在同一 transaction 完成 detector check 後才重新進 admission。
 replay 的 selection scope 明定為 `next_tasks`，另外兩份 snapshot 仍參與同一 hash identity
-與 reconciliation evidence，不虛構跨三套 legacy store 的全域 winner。
+與 reconciliation evidence；若 next-task 的 parent 位於其他 snapshot，則透過 production
+selector 的 non-selectable `dependency_items` 提供 readiness context，但 parent 永不進入
+winner pool，因此不虛構跨三套 legacy store 的全域 winner。
 逐 candidate 比較 priority、status readiness、capability、attestation、claim ownership、
 lease expiry、dispatch lane、preferred agent、parent readiness、deadline 與 terminal
 disposition；差異由 selector／reconciliation reason codes 經顯式 policy oracle 分類並附
-evidence reference。兩支 CLI 共用同一 snapshot loader；128 個核心非 Postgres scoped
-regressions、144 個相鄰 dreaming／stale-reclaim／refill regressions與 34 個隔離
-PostgreSQL contracts 通過。
+evidence reference。兩支 CLI 共用同一 snapshot loader；152 個 selector／replay 核心
+cases、另行重跑的 10 個 model-router topology regressions、144 個相鄰
+dreaming／stale-reclaim／refill regressions 與 34 個隔離 PostgreSQL contracts 通過。
 CLI 仍只讀 caller 提供的三份 snapshot，僅在指定目錄追加不可覆寫的 observation receipt。
 尚未建立 canonical schedule 或累積七天 observation window，migration 也未部署，
 因此仍不構成接管或上線。

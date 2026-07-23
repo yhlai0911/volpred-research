@@ -61,15 +61,24 @@ def select_acquirable_work(
     *,
     offer: WorkerOffer,
     observed_at: str | datetime,
+    dependency_items: Iterable[WorkItemView] = (),
 ) -> AcquisitionSelection:
     """Select one item using the production acquisition policy.
 
     The function has no side effects so adapters and diagnostics can share the
     same eligibility and ranking rules without reimplementing them.
+    ``dependency_items`` contribute parent state but are never eligible to win;
+    this lets a scoped adapter preserve the production parent-readiness policy
+    without widening its selection scope.
     """
 
     candidates = tuple(items)
-    by_id = {item.id: item for item in candidates}
+    dependencies = tuple(dependency_items)
+    context = (*candidates, *dependencies)
+    context_ids = tuple(item.id for item in context)
+    if len(context_ids) != len(set(context_ids)):
+        raise ValueError("work selection context contains duplicate work ids")
+    by_id = {item.id: item for item in context}
     observed = _instant(observed_at)
     evaluated: list[
         tuple[
@@ -127,6 +136,8 @@ def select_acquirable_work(
                 if parent.status != "succeeded":
                     parent_eligible = False
                     reasons.append("parent_not_succeeded")
+                else:
+                    reasons.append("parent_succeeded")
 
         eligible = (
             status_eligible
