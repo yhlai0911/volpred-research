@@ -497,3 +497,86 @@ def test_preflight_reconciles_running_started_at(
             legacy_rows=(legacy,),
             projection=projection,
         )
+
+
+@pytest.mark.parametrize(
+    ("legacy_status", "coordinator_status", "version", "events"),
+    (
+        (
+            "claimed",
+            "claimed",
+            2,
+            (
+                WorkEventView(
+                    work_id="task-1",
+                    kind="acquired",
+                    version=2,
+                    created_at="2026-07-16T12:01:00+00:00",
+                ),
+            ),
+        ),
+        (
+            "in_progress",
+            "running",
+            3,
+            (
+                WorkEventView(
+                    work_id="task-1",
+                    kind="acquired",
+                    version=2,
+                    created_at="2026-07-16T12:01:00+00:00",
+                ),
+                WorkEventView(
+                    work_id="task-1",
+                    kind="started",
+                    version=3,
+                    created_at="2026-07-16T12:02:00+00:00",
+                ),
+            ),
+        ),
+    ),
+)
+def test_preflight_rejects_active_legacy_leases_even_when_parity_matches(
+    tmp_path: Path,
+    legacy_status: str,
+    coordinator_status: str,
+    version: int,
+    events: tuple[WorkEventView, ...],
+) -> None:
+    legacy = _legacy_row()
+    legacy.update(
+        {
+            "status": legacy_status,
+            "claimed_by": "worker-a",
+            "claimed_at": "2026-07-16T12:01:00+00:00",
+            "claim_expires_at": "2026-07-16T13:00:00+00:00",
+            "updated_at": (
+                "2026-07-16T12:02:00+00:00"
+                if coordinator_status == "running"
+                else "2026-07-16T12:01:00+00:00"
+            ),
+        }
+    )
+    if coordinator_status == "running":
+        legacy["started_at"] = "2026-07-16T12:02:00+00:00"
+    staged = replace(
+        _staged_snapshot().items[0],
+        status=coordinator_status,
+        version=version,
+        claimed_by="worker-a",
+        claim_expires_at="2026-07-16T13:00:00+00:00",
+        updated_at=legacy["updated_at"],
+    )
+    projection = project_legacy_next_tasks(
+        WorkSnapshot(items=(staged,), events=events)
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="cutover requires a quiescent legacy queue.*task-1",
+    ):
+        _prepare(
+            tmp_path,
+            legacy_rows=(legacy,),
+            projection=projection,
+        )

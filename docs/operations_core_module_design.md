@@ -571,6 +571,10 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   snapshot。Importer 已保存但 Coordinator projection 無法表示的 dispatch lane、
   preferred／target agent、fallback policy、dreaming 或 timestamp 會造成 parity fail，
   不會靜默降級。
+- Parity 相符不代表 active lease 可移交。Legacy `claimed`／`running` worker 手上的
+  mutation token 不存在於唯讀 projection，硬切 owner 會讓舊 worker 失去續寫能力，
+  或迫使新 owner 接受無法驗證的 claim。Preflight 因此要求 next_tasks 為
+  quiescent（零 active lease）；active work id 會在 manifest 產生前明確 fail closed。
 - 這是 **read-only preflight capability**，沒有 filesystem／database mutation、
   materialize 或 apply interface。Live `direct_execution` mode 與零 observation
   evidence 均未變；正式 CAS transaction、唯一 owner 下游回讀及 live rollback

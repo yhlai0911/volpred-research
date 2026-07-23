@@ -103,6 +103,19 @@ def _next_tasks_identity(
     )
 
 
+def _active_next_task_leases(
+    report: ReconciliationReport,
+) -> tuple[str, ...]:
+    return tuple(
+        sorted(
+            candidate.legacy_id
+            for candidate in report.candidates
+            if candidate.source_system == "next_tasks"
+            and candidate.status in {"claimed", "running"}
+        )
+    )
+
+
 def _decode_next_tasks(payload: bytes) -> tuple[dict[str, Any], ...]:
     try:
         decoded = json.loads(payload)
@@ -222,6 +235,12 @@ def prepare_work_ownership_cutover(
     ):
         raise ValueError(
             "coordinator projection does not match legacy import"
+        )
+    active_leases = _active_next_task_leases(import_report)
+    if active_leases:
+        raise ValueError(
+            "cutover requires a quiescent legacy queue; active work: "
+            + ", ".join(active_leases)
         )
     assessment_sha256 = _sha256(_canonical_bytes(assessment.as_dict()))
     import_report_sha256 = _sha256(

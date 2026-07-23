@@ -1115,3 +1115,31 @@ snapshot hash 配到第一次 A 的 selector/comparison，結尾 equality 又因
 transaction、七日 live receipts、unique-owner 下游回讀或 live rollback rehearsal。
 因此本切片與 Issue #9 整體都仍是 **contained**，不得宣稱
 `root_cause_fixed_and_verified`。
+
+### 2026-07-24 — Active claim 欄位 parity 不等於 lease continuity
+
+**症狀與物證**：`prepare_work_ownership_cutover()` 原本只要 legacy row 與 staged
+projection 的 `claimed_by`、`claimed_at`、`started_at`、expiry 等欄位相同，就能為
+`claimed`／`running` work 產生 manifest。Public RED regression 實際建立兩側完全相符的
+active claim，舊實作兩例都未拒絕。可是 legacy worker 持有的 mutation token 不存在於
+read projection，也沒有可由 ownership transaction 驗證或移交的 durable token identity；
+欄位相同只能證明 read model parity，不能證明舊 worker 在切換後仍有合法寫入權。
+
+**根因層級與底層修復**：這是 ownership transaction 前置契約缺少 quiescence gate，
+不是 queue 資料錯誤。Preflight 現在仍先完成完整 projection parity，確保 timestamp／
+policy drift 保留原本的精確錯誤；其後才要求 canonical `next_tasks` 的 imported status
+不存在 `claimed`／`running`。任一 active lease 會列出排序後 work id 並在 manifest
+hash 產生前 fail closed，不用無法證明的欄位一致冒充 lease continuity。
+
+**回歸、回讀與制度化**：兩個 public cases 覆蓋 claimed 與 running（含 acquired／
+started event）且先 RED 後 GREEN；Issue #9 preflight／projection／assessment／replay／
+import／direct-mode／handoff／claim 相鄰 suite 為 232 passed。Live read-only status
+仍是 `direct_execution`、pool_count=1、claimed_pending_count=0、owner state SHA-256
+`45aa8ca239f8b33fd6790e6a022d2277e44491e01c1581101082119e71d630b4`，沒有執行 live
+cutover。契約同步寫入 architecture、operations-core module design 與 improvement
+status。
+
+**狀態**：此 active-lease preflight 漏洞已完成五步 gate，為
+**root_cause_fixed_and_verified**；Issue #9 仍缺七日 live receipts、正式
+DB/filesystem CAS ownership transaction、unique-owner 下游回讀與 rollback rehearsal，
+所以 Issue 整體仍為 **contained**。

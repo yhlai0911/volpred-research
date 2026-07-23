@@ -89,6 +89,10 @@ Assessment 另帶 receipt-set digest 與最後 snapshot identity，必須與本�
 snapshot 一致；Coordinator 無法表示的 dispatch policy 會 fail closed。
 上游 shadow replay producer 同步改為入口單次 freeze；ledger hash、兩側 selector 與
 comparisons 不再分次讀 caller mappings，A→B→A mutation 無法生成自洽外觀的錯綁 ledger。
+Preflight 另要求切換瞬間為零 active lease：即使 `claimed`／`running` 的 owner、
+timestamp 與 expiry parity 完全相符，legacy worker 的 mutation token 也不在 read
+projection 中，無法由 ownership transaction 無損移交；因此 active work 會在 manifest
+前 fail closed，不以「欄位相同」冒充 lease continuity。
 此能力無 apply／writer seam，live 仍是 `direct_execution`、observation count 仍為 0，
 所以只是正式 transaction 前的 fail-closed evidence capsule，不構成 ownership cutover。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：

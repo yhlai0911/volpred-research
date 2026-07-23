@@ -75,7 +75,11 @@
 > row count／SHA 也由 decoded payload 重算，不信任 caller metadata。Manifest
 > 同時綁定 raw legacy snapshot SHA、assessment SHA、import report SHA、projection
 > SHA 與兩側 row count；assessment 的 receipt-set digest 與最後 snapshot identity
-> 必須等於本次完整三來源 cutover snapshot。任何 drift 都在 mutation 前 fail closed。此 seam
+> 必須等於本次完整三來源 cutover snapshot。即使兩側 active claim 欄位完全一致，
+> `claimed`／`running` legacy row 仍不能產生 manifest：legacy worker 持有的 lease
+> token 不在 compatibility projection 中，ownership transaction 無法無損移交該寫入權，
+> 所以正式切換必須在零 active lease 的 quiescent queue 執行。任何 drift 或未排空 lease
+> 都在 mutation 前 fail closed。此 seam
 > 沒有 apply／writer 能力，live 仍為 `direct_execution` 且 observation count 為 0；
 > 它不等於 cutover 核可，也無法用手造 assessment／hash 繞過七日真實證據。
 
