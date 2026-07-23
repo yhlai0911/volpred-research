@@ -251,8 +251,8 @@ def main():
         newer_or_equal_iso=stale_cutoff_iso,
     )
 
-    # 3) Invariant: awaiting_interactive_session 但 canonical 完稿檔缺 → 稿遺失風險
-    #    （docs/error_log.md 2026-07-07 FB 完稿未持久化）。與年齡無關，只要缺就 warn。
+    # 3) Invariant: any non-terminal FB status without a canonical draft cannot
+    #    ever be delivered. Surface immediately, independent of age/status.
     missing_drafts = _scan_missing_drafts(data)
 
     report = {
@@ -297,9 +297,9 @@ def main():
             )
         if missing_drafts:
             sections.append(
-                f"## ⚠️ Handoff 缺 canonical 完稿檔 {len(missing_drafts)} 篇\n"
-                "awaiting_interactive_session 但 storage/drafts/fb_<mile_id>.md 不存在 —— "
-                "互動 session 找不到稿。稿寫手應在 mark_fb_post_status 傳 --draft-file 持久化。\n"
+                f"## ⚠️ FB pending 缺 canonical 完稿檔 {len(missing_drafts)} 篇\n"
+                "非終態 FB 工作但 storage/drafts/fb_<mile_id>.md 不存在 —— "
+                "排程 worker 沒有可發內容。feed 發佈班必須在標完成前產出 canonical FB 稿。\n"
                 + "\n".join(
                     f"- {p['mile_id']} status={p['fb_post_status']} 缺檔={p['expected_draft']}"
                     for p in missing_drafts

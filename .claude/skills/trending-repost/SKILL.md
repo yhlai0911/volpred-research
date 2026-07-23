@@ -265,6 +265,11 @@ Log to `storage/reports/trending_repost_log.json`:
 
 ### Step 7 — Facebook post (Ivan Lai)
 
+> **完成契約**：feed 發佈後、嘗試 FB 發文前，先完成 FB-native 文案並寫入
+> `storage/drafts/fb_mile_<id>.md`。Chrome 暫不可用可以讓 delivery pending，
+> 但來源 task 不得在缺稿時標 succeeded，也不得只建 `fb_repost_*` follow-up
+> 代替完稿；`task_pool_claim.py complete` 會機械擋下這種假完成。
+
 > **⚠️ FB 發文實戰教訓（2026-05-20 多次踩雷後寫入，違反任一條就重蹈覆轍）**
 >
 > 1. **發文前必先 `get_page_text` 查 Ivan Lai 牆**確認該篇沒發過。pfbid scan

@@ -24625,5 +24625,15 @@
     "owner": "codex",
     "backfilled_at": "2026-07-23T03:11:04.296195+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-23T13:14:26+08:00",
+    "task_type": "platform_ops",
+    "task_id": "fb_draft_missing_structural_fix",
+    "outcome": "root_cause_fixed_and_verified",
+    "actor": "codex-failover-slot-1-ea8d0f5643534dfeab479bfd86082d16",
+    "owner": "codex-failover-slot-1-ea8d0f5643534dfeab479bfd86082d16",
+    "commit": null,
+    "summary": "Added fail-closed dual-publish completion gate requiring canonical FB drafts; widened audit regression; live readback: 0 missing drafts, 0 nonterminal fb_repost followups; 43 targeted tests passed."
   }
 ]

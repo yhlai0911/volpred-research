@@ -64,9 +64,16 @@ from volpred.ops import dreaming_revalidate  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
+FB_DRAFTS_DIR = ROOT / "storage" / "drafts"
 
 DEFAULT_STALE_HOURS = 6  # Claim older than this with no completion -> auto-release
 TERMINAL_STATUSES = {"succeeded", "failed", "blocked"}
+FB_DUAL_PUBLISH_TASK_TYPES = {"trending_repost", "event_article"}
+_MILE_ID_RE = re.compile(r"\bmile_[A-Za-z0-9_-]+\b")
+_PUBLISH_EVIDENCE_RE = re.compile(
+    r"(?:發佈|發布|已發|publish(?:ed)?|feed\s+live|volpred\s+feed)",
+    re.IGNORECASE,
+)
 CODEX_ELIGIBLE_TASK_TYPES = {
     "platform_ops",
     "experiment",
@@ -193,6 +200,64 @@ def _is_codex_eligible_task(task: dict[str, Any]) -> bool:
         .lower()
     )
     return preferred_agent == "codex"
+
+
+def _published_mile_ids(task: dict[str, Any], result: str) -> set[str]:
+    """Extract dual-publish article ids only when completion claims publication.
+
+    A result can mention older ``mile_*`` articles during dedup/research, so an
+    id alone is not publication evidence. Limit inference to a local window
+    carrying an explicit publish/feed-live marker. Callers may also set
+    ``published_mile_id`` on the task as a machine-readable receipt.
+    """
+    published: set[str] = set()
+    explicit = task.get("published_mile_id")
+    if isinstance(explicit, str) and _MILE_ID_RE.fullmatch(explicit.strip()):
+        published.add(explicit.strip())
+    elif isinstance(explicit, list):
+        published.update(
+            value.strip()
+            for value in explicit
+            if isinstance(value, str) and _MILE_ID_RE.fullmatch(value.strip())
+        )
+
+    for match in _MILE_ID_RE.finditer(result or ""):
+        start = max(0, match.start() - 80)
+        end = min(len(result), match.end() + 80)
+        if _PUBLISH_EVIDENCE_RE.search(result[start:end]):
+            published.add(match.group(0))
+    return published
+
+
+def _require_fb_drafts_for_dual_publish(task: dict[str, Any], result: str) -> None:
+    """Refuse fake completion when a feed-published article has no FB copy.
+
+    Root cause (2026-07-20): a trending/event article could publish its feed
+    entry, file an ``fb_repost_*`` follow-up, and still be marked succeeded
+    without writing the copy the FB worker needs. Feed publication remains
+    independent of FB delivery, but preparing the canonical draft is part of
+    the same task's completion contract.
+    """
+    if _normalized_task_type(task) not in FB_DUAL_PUBLISH_TASK_TYPES:
+        return
+    published = _published_mile_ids(task, result)
+    if not published:
+        return
+    missing = sorted(
+        mile_id
+        for mile_id in published
+        if not (FB_DRAFTS_DIR / f"fb_{mile_id}.md").is_file()
+    )
+    if missing:
+        expected = ", ".join(
+            f"storage/drafts/fb_{mile_id}.md" for mile_id in missing
+        )
+        raise SystemExit(
+            "dual-publish completion refused: feed publication was reported "
+            f"for {', '.join(missing)}, but canonical FB draft(s) are missing: "
+            f"{expected}. Write the FB-native copy now; an fb_repost follow-up "
+            "is not a substitute for the publish task's completion contract."
+        )
 
 
 def _revalidate_dreaming_before_claim(
@@ -732,6 +797,14 @@ def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str
                 "status": prev_status,
                 "already_completed": True,
             }, None
+        existing_result = str(task.get("result") or "")
+        result_text = (
+            (existing_result + "\n\n" + args.result).strip()
+            if existing_result and args.result
+            else (args.result or existing_result)
+        )
+        if args.status == "succeeded":
+            _require_fb_drafts_for_dual_publish(task, result_text)
         task["status"] = args.status
         task["completed_at"] = _now()
         _record_status_history(
@@ -743,10 +816,8 @@ def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str
         task.pop("claimed_by", None)
         task.pop("claimed_at", None)
         task.pop("claim_session_id", None)
-        result_text = args.result or ""
         if args.result:
-            existing = task.get("result") or ""
-            task["result"] = (existing + "\n\n" + args.result).strip() if existing else args.result
+            task["result"] = result_text
             result_text = task["result"]
         effect = None
         if args.status == "succeeded":

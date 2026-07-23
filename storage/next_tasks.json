@@ -44253,13 +44253,36 @@
     "id": "fb_draft_missing_structural_fix",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-dispatch",
     "created_at": "2026-07-20T09:50:00+08:00",
     "title": "FB 雙發佈結構缺陷：23/31 篇 expired_skip 的根因是「FB 稿從未產出」",
     "description": "本班（email-12125-3afb3c）處理 mile_78899a5c 補發時發現：FB 端發不出去的主因不是 Chrome/互動-session 限制（fb_realchrome_post.py --check 當場 PASS），而是**稿子從來沒被寫出來**。\n\n掃描證據：feed.json 中 fb_post_status=expired_skip 共 31 篇，其中 **23 篇**的 canonical 稿 storage/drafts/fb_mile_<id>.md 不存在（2026-05-21 ~ 2026-07-16）。發文流程對這 23 篇根本無事可做，每小時巡檢跳過 → 48h TTL → auto-expire。這是流程缺陷，不是 23 次個別疏忽。\n\n根因假說：trending_repost / event_article 發完 VolPred feed 後，只建一張 fb_repost_* followup 就收工，FB 稿留給「之後的 interactive session」；而那張 followup 的 description 寫死「請在 interactive session」，在 realchrome CDP 路徑上線後已過期，導致排程班次持續跳過。\n\n要做的（結構性，非補發舊文 — 這 23 篇時效已過，不補）：\n1. 發佈流程把「產出 FB 稿」納入 publish 的完成定義：feed 發佈當下就寫 storage/drafts/fb_mile_<id>.md，   而不是丟 followup。缺稿即視為該篇未完成。\n2. audit_fb_pipeline.py 增一類 finding：pending/awaiting 但 canonical 稿不存在 → 這是「永遠不會成功」的項目，   應立即 surface 而非等 48h 靜默過期（現行 missing_draft_count 欄位存在但本次掃描回 0，需查為何沒抓到這 23 篇）。\n3. 清掉殘存 fb_repost_* followup 裡「請在 interactive session」的過期指示，改指向 fb_realchrome_post.py。\n\n已在本班順手修好的（不必重做）：fb_realchrome_post.py 附圖 multiple-input bug + composer dialog 誤選（會把主文貼進舊貼文留言框）。",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-23T05:08:44.118396+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-ea8d0f5643534dfeab479bfd86082d16"
+      },
+      {
+        "ts": "2026-07-23T05:08:44.367981+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-ea8d0f5643534dfeab479bfd86082d16"
+      },
+      {
+        "ts": "2026-07-23T05:14:26.437829+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-ea8d0f5643534dfeab479bfd86082d16"
+      }
+    ],
+    "started_at": "2026-07-23T05:08:44.367965+00:00",
+    "completed_at": "2026-07-23T05:14:26.437814+00:00",
+    "result": "root_cause_fixed_and_verified: dual-publish completion now rejects feed-published trending/event tasks without storage/drafts/fb_mile_<id>.md; audit surfaces every non-terminal missing draft immediately. Regression 43 passed; planted failure rejected without state mutation; live readback missing_draft=0 and non-terminal fb_repost_*=0. Historical 31 expired_skip / 23 missing-draft evidence reproduced."
   },
   {
     "id": "fb_repost_mile_b7e98682",
@@ -45856,13 +45879,31 @@
     "id": "guard_stale_base_worktree_merge_revert",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "created_at": "2026-07-20T09:16:58.029971+00:00",
     "title": "merge-time guard：stale-base worktree merge 靜默 revert 活碼（第二起，K1032 為第一起）",
     "description": "2026-07-20 CI 紅燈 ci-red-29715899562 根因之一：merge 86e142305 (Merge agent worktree agent-a004aa279dc1a58fc) 以 stale worktree base 合併，對 scripts/compute_queue.py 造成 +0/-192 的純刪除，靜默 revert 掉 D6b stale-running reaper (WORKER_KILLED_EXIT_CODE / _own_start_wall / _stale_running_verdict / _reap_stale_running 及其在 run_next/run_loop 的兩個呼叫點)。後果是真生產 bug：dead-pid job 永遠卡在 running。\n\nCI 之所以抓到，只因測試在 revert 中倖存而實作沒有 —— 若測試也一併被 revert 就會完全靜默。這是同一 bug class 的第二起（K1032 為第一起）。\n\n要求：在 merge_worktree.sh / git_writer_lock 合併路徑加 merge-time guard，比對 worktree 的 base 與當前 main，base 落後即拒絕或強制 rebase；並對『合併結果相對某個祖先為純刪除』的 diff shape 告警。把偵測點從 CI 前移到 merge。參考：docs/error_log.md、K1032。",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "claimed_by": "codex-hourly",
+    "claimed_at": "2026-07-23T05:12:36.211507+00:00",
+    "claim_session_id": "2a186c908b83",
+    "status_history": [
+      {
+        "ts": "2026-07-23T05:12:36.211520+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-hourly"
+      },
+      {
+        "ts": "2026-07-23T05:12:36.421132+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-hourly"
+      }
+    ],
+    "started_at": "2026-07-23T05:12:36.421121+00:00"
   },
   {
     "id": "alert_internal_git_push_backup_hold_3f4834ce7a_20260720T100013000000Z_a1",

@@ -168,6 +168,80 @@ def test_handoff_main_thread_clears_claim_and_sets_note(tmp_path, monkeypatch) -
     assert "claim_session_id" not in saved[0]
 
 
+@pytest.mark.parametrize("task_type", ["trending_repost", "event_article"])
+def test_complete_refuses_published_dual_publish_without_fb_draft(
+    task_type, tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    drafts = tmp_path / "drafts"
+    drafts.mkdir()
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "publish_example",
+                    "task_type": task_type,
+                    "status": "in_progress",
+                    "claimed_by": "hourly-slot-1",
+                    "result": "發佈 mile_deadbeef（feed live）",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(task_pool_claim, "FB_DRAFTS_DIR", drafts)
+
+    with pytest.raises(SystemExit, match="dual-publish completion refused"):
+        task_pool_claim.cmd_complete(
+            argparse.Namespace(
+                id="publish_example",
+                status="succeeded",
+                result="FB pending",
+            )
+        )
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "in_progress"
+    assert saved["claimed_by"] == "hourly-slot-1"
+
+
+def test_complete_accepts_published_dual_publish_with_fb_draft(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    drafts = tmp_path / "drafts"
+    drafts.mkdir()
+    (drafts / "fb_mile_deadbeef.md").write_text("## 主貼文\n完成\n", encoding="utf-8")
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "publish_example",
+                    "task_type": "trending_repost",
+                    "status": "in_progress",
+                    "claimed_by": "hourly-slot-1",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(task_pool_claim, "FB_DRAFTS_DIR", drafts)
+
+    out, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="publish_example",
+            status="succeeded",
+            result="mile_deadbeef 已發 VolPred feed；FB 稿已備妥",
+        )
+    )
+
+    assert out["status"] == "succeeded"
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "succeeded"
+
+
 def test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task(
     tmp_path, monkeypatch, burst_fire_requests
 ) -> None:

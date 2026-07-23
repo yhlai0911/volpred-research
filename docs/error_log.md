@@ -243,12 +243,13 @@
 ## N. FB / social publishing 冪等與附圖
 
 **規則**：outward-facing 動作必須有冪等 guard；發 FB 前查老闆是否已手動發過。主貼文必附圖（結果圖 + 懶人包）；連結放第一則留言（壓觸及）。FB 完稿要持久化到 canonical draft 位置（非只 /tmp）。
-**機械 owner**：FB idempotency guard + `fb-publishing` skill（CDP-attach 持久 profile Chrome）。
+**機械 owner**：FB idempotency guard + `fb-publishing` skill（CDP-attach 持久 profile Chrome）；`task_pool_claim.py complete` 對 `trending_repost` / `event_article` 的 feed-published receipt 回讀 `storage/drafts/fb_mile_<id>.md`，缺稿拒絕標 succeeded；`audit_fb_pipeline.py` 對所有非終態 FB 狀態做同一 invariant 的 backstop（不等 TTL）。
 **代表 incident**：
 - 2026-07-16 MCP Chrome 剪貼簿跨機器：本機 pbcopy ≠ 老闆主力機剪貼簿，Cmd+V 貼出老闆私人研究文字進 FB 留言框（送出前截圖驗證抓到、當場清除）。規則：MCP extension Chrome 上貼上後**必截圖驗證再送出**；ASCII URL 用 `type` 不走剪貼簿；中文長文只走本機 CDP Chrome（pbcopy 同機 + 雙驗證）。memory `reference_fb_chrome_browser_autoselect` 已更新 — Q3
 - 2026-07-08 fb_realchrome_post 附圖偵測器連 4 次假 ABORT（縮圖 count mismatch + 跨 dialog 洩漏）— Q3
 - 2026-07-07 FB real-Chrome CDP-attach 接的其實是假 profile — Q3
 - 2026-07-07 FB 完稿未持久化到 canonical draft 位置（text-only-in-tmp）— Q3
+- 2026-07-20 **root_cause_fixed_and_verified** 31 篇 expired_skip 中 23 篇從未產生 FB 稿：發佈班只建 `fb_repost_*` follow-up 仍可標 succeeded；完成邊界現 fail-closed 要求 canonical 稿，audit 同步擴到所有非終態狀態，live pool 已無非終態 `fb_repost_*` 殘留 — Q3
 - 2026-06-03 FB pipeline 4 天 100% 失敗根因 — Q2
 
 ## O. Data freshness / 交易日曆 / RV 隔夜跳空 / 交易成本
