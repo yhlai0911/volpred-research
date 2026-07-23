@@ -11,6 +11,7 @@ from volpred.ops.task_pool_mode import (
     TaskPoolAdmissionClosed,
     enter_direct_execution_mode,
     load_task_pool_mode,
+    load_task_pool_mode_evidence,
     reconcile_direct_execution_pool,
     restore_task_pool_backup,
 )
@@ -21,6 +22,40 @@ def _write_pool(path: Path, rows: list[dict[str, object]]) -> bytes:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(payload)
     return payload
+
+
+def test_mode_evidence_parses_and_hashes_one_identical_read(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    state.parent.mkdir(parents=True)
+    queued_bytes = json.dumps(
+        {"enabled": False, "mode": "queued_execution"}
+    ).encode()
+    direct_bytes = json.dumps(
+        {"enabled": True, "mode": "direct_execution"}
+    ).encode()
+    state.write_bytes(queued_bytes)
+    original_read_bytes = Path.read_bytes
+    reads = 0
+
+    def racing_read_bytes(path: Path) -> bytes:
+        nonlocal reads
+        if path != state:
+            return original_read_bytes(path)
+        reads += 1
+        return queued_bytes if reads == 1 else direct_bytes
+
+    monkeypatch.setattr(Path, "read_bytes", racing_read_bytes)
+
+    evidence = load_task_pool_mode_evidence(state)
+
+    assert reads == 1
+    assert evidence.mode.mode == "queued_execution"
+    assert evidence.mode.enabled is False
+    assert evidence.sha256 == hashlib.sha256(queued_bytes).hexdigest()
+    assert evidence.byte_count == len(queued_bytes)
 
 
 def test_enter_direct_mode_backs_up_exact_bytes_then_clears_atomically(tmp_path: Path) -> None:

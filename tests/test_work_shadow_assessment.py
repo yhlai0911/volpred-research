@@ -31,9 +31,10 @@ def _write_receipt(
     directory.mkdir(parents=True, exist_ok=True)
     snapshot_sha = f"{index + 1:064x}"
     receipt = {
-        "schema_version": "work-shadow-replay.v2",
+        "schema_version": "work-shadow-replay.v3",
         "observation_id": f"scheduled_{index:02d}",
         "observed_at": observed_at.isoformat(),
+        "recorded_at": observed_at.isoformat(),
         "selection_scope": "next_tasks",
         "snapshot": {
             "sha256": snapshot_sha,
@@ -583,8 +584,19 @@ def test_registered_policy_change_with_evidence_is_explained(
     claim_dimension["classification_reason_code"] = (
         "coordinator_inline_lease_contract"
     )
+    claim_dimension["legacy_reason_codes"] = ["eligible"]
+    claim_dimension["coordinator_reason_codes"] = ["live_claim"]
     claim_dimension["evidence_refs"] = [
-        "contract://work-selection/claim-ownership"
+        "next_tasks:task-1#claim_ownership",
+        "contract://work-selection/claim-ownership",
+        (
+            "snapshot://sha256/"
+            f"{explained['snapshot']['sha256']}"
+        ),
+        (
+            "oracle://work-selection/"
+            "coordinator_inline_lease_contract"
+        ),
     ]
     explained_path.write_text(json.dumps(explained), encoding="utf-8")
 
@@ -598,6 +610,41 @@ def test_registered_policy_change_with_evidence_is_explained(
 
     assert report.ready_for_cutover is True
     assert report.reason_codes == ()
+
+
+def test_registered_label_without_oracle_prerequisites_is_not_explained(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    mislabeled_path = observations / "scheduled_04.json"
+    mislabeled = json.loads(mislabeled_path.read_text(encoding="utf-8"))
+    claim_dimension = mislabeled["comparisons"][0]["dimensions"][1]
+    claim_dimension["matches"] = False
+    claim_dimension["classification"] = "policy_change"
+    claim_dimension["classification_reason_code"] = (
+        "coordinator_inline_lease_contract"
+    )
+    claim_dimension["evidence_refs"] = [
+        "contract://work-selection/claim-ownership"
+    ]
+    mislabeled_path.write_text(json.dumps(mislabeled), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("unregistered_policy_change",)
 
 
 def test_duplicate_candidate_identity_blocks_row_reconciliation(
@@ -626,3 +673,37 @@ def test_duplicate_candidate_identity_blocks_row_reconciliation(
 
     assert report.ready_for_cutover is False
     assert report.reason_codes == ("duplicate_candidate_identity",)
+
+
+def test_backdated_replay_clock_cannot_fake_seven_recorded_days(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    recorded_start = START + timedelta(days=7)
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+        path = observations / f"scheduled_{index:02d}.json"
+        receipt = json.loads(path.read_text(encoding="utf-8"))
+        receipt["schema_version"] = "work-shadow-replay.v3"
+        receipt["recorded_at"] = (
+            recorded_start + timedelta(seconds=index)
+        ).isoformat()
+        path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=recorded_start + timedelta(minutes=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == (
+        "observation_window_too_short",
+        "replay_clock_not_live",
+    )

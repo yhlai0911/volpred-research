@@ -478,9 +478,14 @@ def append_shadow_observation(
         raise ValueError(
             "observation_id must be 1-128 safe filename characters"
         )
+    receipt = {
+        **ledger.as_dict(),
+        "schema_version": "work-shadow-replay.v3",
+        "recorded_at": datetime.now(timezone.utc).isoformat(),
+    }
     payload = (
         json.dumps(
-            ledger.as_dict(),
+            receipt,
             ensure_ascii=False,
             sort_keys=True,
             separators=(",", ":"),
@@ -687,16 +692,48 @@ def is_registered_policy_change(
     *,
     dimension: str | None,
     reason_code: str,
+    legacy_reason_codes: tuple[str, ...],
+    coordinator_reason_codes: tuple[str, ...],
+    evidence_refs: tuple[str, ...],
+    candidate_ref: str | None,
+    snapshot_sha256: str,
 ) -> bool:
-    """Return whether a receipt's policy-change reason exists in the oracle."""
-    if dimension is None and reason_code == "coordinator_ranking_contract":
-        return True
-    return any(
+    """Validate a policy-change label against oracle inputs and evidence."""
+    evidence = frozenset(evidence_refs)
+    snapshot_ref = f"snapshot://sha256/{snapshot_sha256}"
+    oracle_ref = f"oracle://work-selection/{reason_code}"
+    if dimension is None:
+        return (
+            reason_code == "coordinator_ranking_contract"
+            and {
+                "contract://work-selection/selection-outcome",
+                "contract://work-selection/priority",
+                snapshot_ref,
+                oracle_ref,
+            }.issubset(evidence)
+        )
+    spec = next(
+        (item for item in _DIMENSION_SPECS if item.name == dimension),
+        None,
+    )
+    if spec is None or candidate_ref is None:
+        return False
+    rule_matches = any(
         rule.classification == "policy_change"
         and rule.reason_code == reason_code
-        and (dimension is None or rule.dimension == dimension)
+        and rule.dimension == dimension
+        and rule.legacy_requires.issubset(legacy_reason_codes)
+        and rule.coordinator_requires.issubset(
+            coordinator_reason_codes
+        )
         for rule in _POLICY_ORACLE
     )
+    return rule_matches and {
+        f"{candidate_ref}#{dimension}",
+        spec.evidence_ref,
+        snapshot_ref,
+        oracle_ref,
+    }.issubset(evidence)
 
 
 def _compare_candidate(
@@ -1478,6 +1515,11 @@ def _selection_difference(
             evidence_refs=(
                 "contract://work-selection/selection-outcome",
                 "contract://work-selection/priority",
+                f"snapshot://sha256/{legacy.snapshot_sha256}",
+                (
+                    "oracle://work-selection/"
+                    "coordinator_ranking_contract"
+                ),
                 "selector://legacy/legacy_priority_then_id_rank",
                 (
                     "selector://work-coordinator/"

@@ -717,7 +717,10 @@ def ops_work_shadow_replay(
         )
     except (FileExistsError, ValueError) as exc:
         raise click.ClickException(str(exc)) from exc
-    payload = {**ledger.as_dict(), "receipt_path": str(receipt_path)}
+    payload = {
+        **json.loads(receipt_path.read_text(encoding="utf-8")),
+        "receipt_path": str(receipt_path),
+    }
     click.echo(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
 
 
@@ -732,8 +735,6 @@ def ops_work_shadow_assess(
     observation_dir: Path,
 ) -> None:
     """Fail closed unless explicit shadow receipts satisfy the soak gate."""
-    import hashlib
-
     from volpred.ops.work_shadow_assessment import (
         MAX_OBSERVATION_GAP,
         REQUIRED_OBSERVATION_WINDOW,
@@ -741,7 +742,7 @@ def ops_work_shadow_assess(
     )
     from volpred.ops.common import project_path
     from volpred.ops.task_pool_mode import (
-        load_task_pool_mode,
+        load_task_pool_mode_evidence,
         task_pool_mode_path,
     )
 
@@ -749,21 +750,18 @@ def ops_work_shadow_assess(
         project_path("storage", "next_tasks.json")
     )
     try:
-        mode_state_bytes = mode_state_path.read_bytes()
-        mode = load_task_pool_mode(mode_state_path)
-    except (OSError, ValueError) as exc:
+        owner_evidence = load_task_pool_mode_evidence(mode_state_path)
+    except ValueError as exc:
         raise click.ClickException(
             f"canonical task-pool mode evidence unavailable: {exc}"
         ) from exc
     report = assess_shadow_observation_directory(
         observation_dir,
         assessed_at=_work_shadow_assessment_time(),
-        queue_owner_mode=mode.mode,
-        queue_owner_gate_enabled=mode.enabled,
-        queue_owner_state_path=str(mode_state_path),
-        queue_owner_state_sha256=hashlib.sha256(
-            mode_state_bytes
-        ).hexdigest(),
+        queue_owner_mode=owner_evidence.mode.mode,
+        queue_owner_gate_enabled=owner_evidence.mode.enabled,
+        queue_owner_state_path=owner_evidence.state_path,
+        queue_owner_state_sha256=owner_evidence.sha256,
         required_window=REQUIRED_OBSERVATION_WINDOW,
         max_gap=MAX_OBSERVATION_GAP,
     )

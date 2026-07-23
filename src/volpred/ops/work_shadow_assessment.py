@@ -15,9 +15,10 @@ from typing import Any
 
 from .work_shadow_replay import is_registered_policy_change
 
-_REQUIRED_SCHEMA = "work-shadow-replay.v2"
+_REQUIRED_SCHEMA = "work-shadow-replay.v3"
 REQUIRED_OBSERVATION_WINDOW = timedelta(days=7)
 MAX_OBSERVATION_GAP = timedelta(hours=26)
+MAX_REPLAY_CLOCK_SKEW = timedelta(minutes=5)
 _REQUIRED_SOURCE_COUNTS = frozenset(
     {"next_tasks", "task_records", "ops_jobs"}
 )
@@ -44,6 +45,8 @@ class ShadowObservationAssessment:
     queue_owner_state_sha256: str | None = None
     observed_from: str | None = None
     observed_through: str | None = None
+    recorded_from: str | None = None
+    recorded_through: str | None = None
     required_window_seconds: int = 0
     max_gap_seconds: int = 0
     max_observed_gap_seconds: int | None = None
@@ -62,6 +65,8 @@ class ShadowObservationAssessment:
             "queue_owner_state_sha256": self.queue_owner_state_sha256,
             "observed_from": self.observed_from,
             "observed_through": self.observed_through,
+            "recorded_from": self.recorded_from,
+            "recorded_through": self.recorded_through,
             "required_window_seconds": self.required_window_seconds,
             "max_gap_seconds": self.max_gap_seconds,
             "max_observed_gap_seconds": self.max_observed_gap_seconds,
@@ -168,6 +173,10 @@ def assess_shadow_observation_directory(
             _parse_observed_at(receipt["observed_at"])
             for receipt in receipts
         )
+        parsed_recorded_at = tuple(
+            _parse_observed_at(receipt["recorded_at"])
+            for receipt in receipts
+        )
     except (KeyError, TypeError, ValueError):
         return _failed_assessment(
             context,
@@ -180,14 +189,26 @@ def assess_shadow_observation_directory(
             reason_code="duplicate_observed_at",
             observation_count=len(receipt_paths),
         )
+    if len(set(parsed_recorded_at)) != len(parsed_recorded_at):
+        return _failed_assessment(
+            context,
+            reason_code="duplicate_recorded_at",
+            observation_count=len(receipt_paths),
+        )
     timed_receipts = tuple(
         sorted(
-            zip(parsed_observed_at, receipts, strict=True),
+            zip(
+                parsed_recorded_at,
+                parsed_observed_at,
+                receipts,
+                strict=True,
+            ),
             key=lambda item: item[0],
         )
     )
-    observed_at = tuple(item[0] for item in timed_receipts)
-    receipts = [item[1] for item in timed_receipts]
+    recorded_at = tuple(item[0] for item in timed_receipts)
+    observed_at = tuple(item[1] for item in timed_receipts)
+    receipts = [item[2] for item in timed_receipts]
     covered = {
         dimension["name"]
         for receipt in receipts
@@ -202,19 +223,29 @@ def assess_shadow_observation_directory(
         reasons.append("queue_owner_mode_not_queued_execution")
     if not receipts:
         reasons.append("no_observations")
-    elif observed_at[-1] - observed_at[0] < required_window:
+    elif recorded_at[-1] - recorded_at[0] < required_window:
         reasons.append("observation_window_too_short")
     gaps = tuple(
         later - earlier
-        for earlier, later in zip(observed_at, observed_at[1:])
+        for earlier, later in zip(recorded_at, recorded_at[1:])
     )
-    if observed_at:
-        if observed_at[-1] > context.assessed_at:
+    if recorded_at:
+        if recorded_at[-1] > context.assessed_at:
             reasons.append("observation_in_future")
         if any(gap > max_gap for gap in gaps):
             reasons.append("observation_gap_exceeded")
-        if context.assessed_at - observed_at[-1] > max_gap:
+        if context.assessed_at - recorded_at[-1] > max_gap:
             reasons.append("observation_stale")
+    if any(
+        recorded < observed
+        or recorded - observed > MAX_REPLAY_CLOCK_SKEW
+        for recorded, observed in zip(
+            recorded_at,
+            observed_at,
+            strict=True,
+        )
+    ):
+        reasons.append("replay_clock_not_live")
     missing_dimensions = tuple(
         name for name in _REQUIRED_DIMENSIONS if name not in covered
     )
@@ -265,26 +296,7 @@ def assess_shadow_observation_directory(
         for receipt in receipts
     ):
         reasons.append("reconciliation_issue_present")
-    if any(
-        not _policy_change_evidence_is_registered(
-            receipt["selection_difference"],
-            dimension=None,
-        )
-        for receipt in receipts
-        if isinstance(receipt.get("selection_difference"), dict)
-        and receipt["selection_difference"].get("classification")
-        == "policy_change"
-    ) or any(
-        not _policy_change_evidence_is_registered(
-            dimension,
-            dimension=dimension["name"],
-        )
-        for receipt in receipts
-        for comparison in receipt["comparisons"]
-        for dimension in comparison["dimensions"]
-        if dimension.get("matches") is False
-        and dimension.get("classification") == "policy_change"
-    ):
+    if _has_unregistered_policy_change(receipts):
         reasons.append("unregistered_policy_change")
     if any(
         dimension.get("matches") is False
@@ -311,6 +323,12 @@ def assess_shadow_observation_directory(
         ),
         observed_through=(
             observed_at[-1].isoformat() if observed_at else None
+        ),
+        recorded_from=(
+            recorded_at[0].isoformat() if recorded_at else None
+        ),
+        recorded_through=(
+            recorded_at[-1].isoformat() if recorded_at else None
         ),
         required_window_seconds=int(required_window.total_seconds()),
         max_gap_seconds=int(max_gap.total_seconds()),
@@ -339,6 +357,8 @@ def _receipt_shape_is_valid(receipt: dict[str, Any]) -> bool:
         or not receipt["observation_id"]
         or not isinstance(receipt.get("observed_at"), str)
         or not receipt["observed_at"]
+        or not isinstance(receipt.get("recorded_at"), str)
+        or not receipt["recorded_at"]
     ):
         return False
     if receipt.get("selection_scope") != "next_tasks":
@@ -408,31 +428,116 @@ def _receipt_shape_is_valid(receipt: dict[str, Any]) -> bool:
     )
 
 
-def _policy_change_evidence_is_registered(
+def _dimension_policy_change_is_registered(
     payload: dict[str, Any],
     *,
-    dimension: str | None,
+    candidate_ref: str,
+    snapshot_sha256: str,
 ) -> bool:
     reason_code = payload.get("classification_reason_code")
     evidence_refs = payload.get("evidence_refs")
+    legacy_reason_codes = payload.get("legacy_reason_codes")
+    coordinator_reason_codes = payload.get(
+        "coordinator_reason_codes"
+    )
     return (
         isinstance(reason_code, str)
         and bool(reason_code)
         and isinstance(evidence_refs, list)
         and bool(evidence_refs)
+        and isinstance(legacy_reason_codes, list)
+        and isinstance(coordinator_reason_codes, list)
         and all(
             isinstance(reference, str) and bool(reference)
             for reference in evidence_refs
         )
+        and all(
+            isinstance(code, str) and bool(code)
+            for code in (
+                *legacy_reason_codes,
+                *coordinator_reason_codes,
+            )
+        )
         and is_registered_policy_change(
-            dimension=dimension,
+            dimension=payload["name"],
             reason_code=reason_code,
+            legacy_reason_codes=tuple(legacy_reason_codes),
+            coordinator_reason_codes=tuple(
+                coordinator_reason_codes
+            ),
+            evidence_refs=tuple(evidence_refs),
+            candidate_ref=candidate_ref,
+            snapshot_sha256=snapshot_sha256,
         )
     )
 
 
+def _has_unregistered_policy_change(
+    receipts: list[dict[str, Any]],
+) -> bool:
+    for receipt in receipts:
+        snapshot_sha256 = receipt["snapshot"]["sha256"]
+        valid_dimension_reasons: set[str] = set()
+        for comparison in receipt["comparisons"]:
+            for dimension in comparison["dimensions"]:
+                if (
+                    dimension.get("matches") is not False
+                    or dimension.get("classification") != "policy_change"
+                ):
+                    continue
+                if not _dimension_policy_change_is_registered(
+                    dimension,
+                    candidate_ref=comparison["candidate_ref"],
+                    snapshot_sha256=snapshot_sha256,
+                ):
+                    return True
+                valid_dimension_reasons.add(
+                    dimension["classification_reason_code"]
+                )
+        selection = receipt.get("selection_difference")
+        if (
+            not isinstance(selection, dict)
+            or selection.get("classification") != "policy_change"
+        ):
+            continue
+        reason_code = selection.get("classification_reason_code")
+        evidence_refs = selection.get("evidence_refs")
+        if (
+            selection.get("legacy_selected_candidate_ref")
+            == selection.get("coordinator_selected_candidate_ref")
+            or not isinstance(reason_code, str)
+            or not isinstance(evidence_refs, list)
+            or not all(
+                isinstance(reference, str) and reference
+                for reference in evidence_refs
+            )
+        ):
+            return True
+        if reason_code == "coordinator_ranking_contract":
+            if not is_registered_policy_change(
+                dimension=None,
+                reason_code=reason_code,
+                legacy_reason_codes=(),
+                coordinator_reason_codes=(),
+                evidence_refs=tuple(evidence_refs),
+                candidate_ref=None,
+                snapshot_sha256=snapshot_sha256,
+            ):
+                return True
+            continue
+        if reason_code not in valid_dimension_reasons:
+            return True
+        if {
+            f"snapshot://sha256/{snapshot_sha256}",
+            f"oracle://work-selection/{reason_code}",
+        } - set(evidence_refs):
+            return True
+    return False
+
+
 __all__ = [
     "MAX_OBSERVATION_GAP",
+    "MAX_REPLAY_CLOCK_SKEW",
     "REQUIRED_OBSERVATION_WINDOW",
     "ShadowObservationAssessment",
     "assess_shadow_observation_directory",

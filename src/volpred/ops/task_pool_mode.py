@@ -40,6 +40,14 @@ class TaskPoolMode:
 
 
 @dataclass(frozen=True)
+class TaskPoolModeEvidence:
+    mode: TaskPoolMode
+    state_path: str
+    sha256: str
+    byte_count: int
+
+
+@dataclass(frozen=True)
 class DirectModeReceipt:
     queue_path: str
     state_path: str
@@ -136,6 +144,24 @@ def load_task_pool_mode(state_path: str | Path) -> TaskPoolMode:
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise ValueError(f"task-pool mode state unreadable: {exc}") from exc
     return _mode_from_payload(payload)
+
+
+def load_task_pool_mode_evidence(
+    state_path: str | Path,
+) -> TaskPoolModeEvidence:
+    """Parse mode and evidence identity from one immutable byte snapshot."""
+    path = Path(state_path)
+    try:
+        payload = path.read_bytes()
+        decoded = json.loads(payload)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"task-pool mode evidence unreadable: {exc}") from exc
+    return TaskPoolModeEvidence(
+        mode=_mode_from_payload(decoded),
+        state_path=str(path.resolve()),
+        sha256=hashlib.sha256(payload).hexdigest(),
+        byte_count=len(payload),
+    )
 
 
 def _task_ids(rows: Iterable[Any]) -> tuple[set[str], int]:

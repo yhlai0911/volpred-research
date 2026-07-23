@@ -889,14 +889,19 @@ candidate 證明完整；policy classification 沒綁回 Issue #7 的顯式 orac
 
 **底層修復**：production `work-shadow-assess` 不再暴露上述 overrides，固定七日 window
 與 26 小時 gap，並從 project-root canonical `storage/ops/task_pool_mode.json`
-讀取 mode／enabled state、把 state path 與 SHA-256 寫入 verdict。assessment 拒絕未來
-receipt，逐份核對 queue row count、candidate identity 與五個必要 dimensions；
-`policy_change` 必須帶非空 evidence refs，且 reason code 必須由
-`work_shadow_replay.is_registered_policy_change()` 對同一 policy oracle 核准。
+以**同一次 byte read**解析 mode／enabled 並產生 state SHA-256，避免 atomic replace
+期間 mode B 配到 SHA A。append seam 把 receipt 升為 `work-shadow-replay.v3` 並自行寫入
+`recorded_at`；七日 soak 用 append wall-clock，不再用可由 replay CLI 指定的
+`observed_at`，兩者超過五分鐘即 fail closed。assessment 拒絕未來 receipt，逐份核對
+queue row count、candidate identity 與五個必要 dimensions；`policy_change` 必須帶
+candidate／dimension、snapshot、contract 與 oracle evidence refs，且完整 legacy /
+Coordinator reason sets 必須符合 `work_shadow_replay.is_registered_policy_change()`
+同一條 oracle rule 的 prerequisites，不能只借用已登錄的 reason-code 名稱。
 所有 early failure 統一走單一 report constructor，避免欄位漂移。
 
 **回歸與結案界線**：新增 caller spoof、future time、單日 row/dimension 缺口、
-duplicate candidate 與 forged/registered policy-change cases；shadow assessment／
+duplicate candidate、backdated replay clock、mode/SHA 單讀競態與
+forged/registered policy-change prerequisites cases；shadow assessment／
 replay、direct-mode、claim 與 handoff targeted suites 通過。live mode 仍是
 `direct_execution`，沒有七日 soak、CAS cutover、唯讀 legacy projection 或 rollback
 rehearsal，所以 Issue #9 仍為 **contained**；待七日真實 receipts 與第二輪 Matt review

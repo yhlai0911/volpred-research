@@ -387,14 +387,20 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
 - **2026-07-23 Issue #9 assessment gate = `contained`**：新增
   `uv run volpred ops work-shadow-assess --observation-dir <dir>`，production CLI 固定七日
   window／26 小時最大 observation gap，clock 不可由 caller 覆寫；queue ownership
-  直接回讀 canonical `storage/ops/task_pool_mode.json`，並把 state path／SHA-256 綁入
-  verdict。每份 receipt 逐日核對 `next_tasks` row count、candidate identity 與
+  直接回讀 canonical `storage/ops/task_pool_mode.json`；mode／enabled 與 SHA-256 由
+  同一份 byte snapshot 解析，避免 atomic replace 期間出現 mode B 配 SHA A。
+  append-only receipt 升為 `work-shadow-replay.v3`，由 append seam 寫入不可由 replay
+  caller 回填的 `recorded_at`；七日 window／gap／freshness 一律用 `recorded_at`，
+  `observed_at` 只作 selector clock 且與 append wall-clock 最多差五分鐘。每份 receipt
+  逐日核對 `next_tasks` row count、candidate identity 與
   priority／claim ownership／parent／deadline／terminal disposition，未來時間、
   snapshot identity drift、重複 observation、未註冊 policy oracle reason、
   reconciliation issue 或 blocking selector difference 全部 fail closed。
   初版 `d53a705a6` 經 Matt 雙軸 review 發現 caller-declared mode、future receipt、
-  cross-day dimension union 與 policy-change 字串豁免四個 gate 漏洞；以上 remediation
-  均以 public-interface regression 重現後修復。
+  cross-day dimension union 與 policy-change 字串豁免四個 gate 漏洞；第二輪又發現
+  mode/SHA 雙讀競態、`observed_at` 可回填七日，以及只驗 oracle reason 名稱而未驗
+  兩側 selector prerequisites／evidence binding。以上 remediation 均以
+  public-interface regression 重現後修復。
 - live canonical mode 已由 owner-directed P1 切成 `direct_execution`，舊 queue 3,338
   rows 已有 exact-byte backup 後清空；因此原 Issue #9 的 legacy-queue 七日 soak
   **不能沿用或補算**，assessment 正確回報 mode conflict。尚無七日 receipt、canonical
