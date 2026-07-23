@@ -30,17 +30,30 @@ case "$MODE" in
     # positive proof of passing; never report green on ambiguity.
     HAS_FAIL=0
     HAS_PASS=0
+    HAS_NO_TESTS=0
     # Failure markers: the summary banner "N failed"/"N error(s)" (count-prefixed,
     # so it won't match captured stdout noise like "sync FAILED") and the
     # per-test "FAILED ..."/"ERROR ..." short-summary lines.
-    if grep -qE '(^FAILED |^ERROR )|((^|[[:space:]])[0-9]+ (failed|error|errors)([[:space:]]|,|$))' "$LOG_FILE"; then
+    if grep -qE '(^FAILED([[:space:]]|:)|^ERROR([[:space:]]|:))|((^|[[:space:]])[0-9]+ (failed|error|errors)([[:space:]]|,|$))' "$LOG_FILE"; then
       HAS_FAIL=1
     fi
-    if grep -qE '((^|[[:space:]])[0-9]+ passed([[:space:]]|,|$))|(no tests ran)' "$LOG_FILE"; then
+    if grep -qE '(^|[[:space:]])no tests ran([[:space:]]|$)|^[[:space:]]*[0-9]+ deselected in [0-9]' "$LOG_FILE"; then
+      HAS_NO_TESTS=1
+    fi
+    if grep -qE '((^|[[:space:]])[0-9]+ passed([[:space:]]|,|$))' "$LOG_FILE"; then
       HAS_PASS=1
     fi
 
-    if [[ "$HAS_FAIL" -eq 0 && "$HAS_PASS" -eq 1 ]]; then
+    if [[ "$HAS_NO_TESTS" -eq 1 ]]; then
+      # Pytest exits 4 for a usage error and 5 when it collects no tests, but a
+      # caller-supplied pipeline can mask either status.  The summary is the
+      # durable evidence: zero tests is never verification success.
+      echo "Tests FAILED — pytest collected no tests. Failure-focused excerpt:"
+      grep -n -E '(^ERROR([[:space:]]|:)|no tests ran|[0-9]+ deselected in)' "$LOG_FILE" | tail -20
+      echo
+      echo "Full log: $LOG_FILE"
+      STATUS=1
+    elif [[ "$HAS_FAIL" -eq 0 && "$HAS_PASS" -eq 1 ]]; then
       echo "Tests passed. Full runner output suppressed to save context."
       grep -hE '(^|[[:space:]])[0-9]+ passed' "$LOG_FILE" | tail -1
       echo "Full log: $LOG_FILE"

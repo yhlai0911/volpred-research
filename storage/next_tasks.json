@@ -45613,13 +45613,10 @@
     "description": "已直接重現並讀到判定式。hook 用一行 grep 決定通過與否，把 `no tests ran` 和 `N passed` 並列為通過條件（alternation 的第二支就是 `(no tests ran)`）。\n\n重現：`uv run python -m pytest tests/definitely_does_not_exist.py -q` → 畫面顯示 「Tests passed.」，實際日誌是 `no tests ran in 0.30s` + `ERROR: file or directory not found`。\n\n本班（hourly-slot-1-bc31c978）就中過一次：跑 tests/test_run_agent_job.py（該檔根本不存在）拿到 Tests passed，差點把它當成驗證通過寫進回報。\n\n嚴重性：這是驗證儀器本身的 bug。任何 agent 打錯測試檔名、或測試檔被移走／改名，都會拿到綠燈並據以宣稱「已驗證」—— 正是 CLAUDE.md 最在意的假宣告，而且 hook 讓它看起來有機械背書，比沒有 hook 更危險。\n\n諷刺的是該檔 line 28 的註解寫明這段就是為了「避免把真正的 pytest 失敗誤報成 Tests passed」，但 `(no tests ran)` 這個 alternation 又把同一類錯誤放了回來。\n\n修法：把 `no tests ran` 從通過條件移除，改成獨立的 WARN/FAIL 分支（收集到 0 個測試本來就不是通過）；並考慮改認 pytest 自己的 exit code（5 = no tests collected、4 = usage error）而非只 grep 文字。\n\n未自行修改：該 hook 位於 ~/.claude（user-global，影響所有專案，不在本 repo），動老闆的全域驗證儀器前先請示。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-20T05:40:07.073428+00:00",
     "created_by": "hourly-slot-1-bc31c9780e6849e0b3e323e2575ea3b9",
-    "claimed_by": "codex-failover-slot-2-061ef3538e234774a5c9af7049d14102",
-    "claimed_at": "2026-07-23T00:10:20.880891+00:00",
-    "claim_session_id": "5b4a740836d8",
     "status_history": [
       {
         "ts": "2026-07-23T00:10:20.880907+00:00",
@@ -45632,9 +45629,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover-slot-2-061ef3538e234774a5c9af7049d14102"
+      },
+      {
+        "ts": "2026-07-23T00:12:58.463873+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-2-061ef3538e234774a5c9af7049d14102"
       }
     ],
-    "started_at": "2026-07-23T00:10:21.826471+00:00"
+    "started_at": "2026-07-23T00:10:21.826471+00:00",
+    "completed_at": "2026-07-23T00:12:58.463855+00:00",
+    "result": "Fixed pytest compact-hook false greens: zero collected/deselected tests now fail even when a pipeline masks pytest exit status; ERROR: usage markers are recognized; positive pass summaries remain accepted. Verified bash syntax and 27 related tests passed."
   },
   {
     "id": "assign_24ebe308",
