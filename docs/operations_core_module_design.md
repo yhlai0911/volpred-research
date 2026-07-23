@@ -613,9 +613,11 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   capability／attestation、claim owner／timestamps／expiry、parent、deadline、
   blocked reason 與 terminal disposition（含 row `created_at`／`updated_at` 及 current
   claim 的 `started_at`）。
-  Projection row count／SHA 由 payload 重算。Manifest 以 canonical JSON 綁定 raw
+  Projection schema 必須精確等於 production compatibility contract
+  `next-tasks-read-projection.v1`；未知 schema 即使產生相同 payload 也拒絕。
+  Row count／SHA 由 payload 重算。Manifest v2 以 canonical JSON 綁定 raw
   legacy snapshot、canonical assessment、derived import report、validated projection
-  與 owner-state 五個 SHA-256 identity；assessment 額外綁定 canonical receipt-set
+  schema 與 owner-state 五個 SHA-256 identity；assessment 額外綁定 canonical receipt-set
   digest 與最後 snapshot identity，最後一筆必須 exact-match 本次三來源 cutover
   snapshot。Importer 已保存但 Coordinator projection 無法表示的 dispatch lane、
   preferred／target agent、fallback policy、dreaming 或 timestamp 會造成 parity fail，

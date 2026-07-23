@@ -206,9 +206,13 @@ def test_preflight_derives_manifest_from_raw_evidence(
 
     manifest = _prepare(tmp_path, legacy_bytes=raw)
 
-    assert manifest.schema_version == "work-owner-cutover-manifest.v1"
+    assert manifest.schema_version == "work-owner-cutover-manifest.v2"
     assert manifest.legacy_row_count == 1
     assert manifest.coordinator_row_count == 1
+    assert (
+        manifest.projection_schema_version
+        == "next-tasks-read-projection.v1"
+    )
     assert manifest.legacy_snapshot_sha256 == hashlib.sha256(raw).hexdigest()
     assert len(manifest.sha256) == 64
 
@@ -339,6 +343,21 @@ def test_preflight_rejects_forged_projection_metadata(
         match="coordinator projection metadata does not match payload",
     ):
         _prepare(tmp_path, projection=forged)
+
+
+def test_preflight_rejects_unknown_projection_schema(
+    tmp_path: Path,
+) -> None:
+    projection = replace(
+        project_legacy_next_tasks(_staged_snapshot()),
+        schema_version="next-tasks-read-projection.v999",
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="unsupported coordinator projection schema",
+    ):
+        _prepare(tmp_path, projection=projection)
 
 
 def test_preflight_rejects_projection_dimension_drift(

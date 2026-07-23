@@ -12,7 +12,7 @@ from .work import WorkEventView, WorkItemView, WorkSnapshot
 from .work.legacy import LegacySnapshotImporter, LegacySnapshots
 
 
-_SCHEMA_VERSION = "next-tasks-read-projection.v1"
+NEXT_TASKS_PROJECTION_SCHEMA_VERSION = "next-tasks-read-projection.v1"
 
 
 @dataclass(frozen=True)
@@ -190,7 +190,7 @@ def project_legacy_next_tasks(
         separators=(",", ":"),
     ).encode("utf-8")
     return LegacyNextTasksProjection(
-        schema_version=_SCHEMA_VERSION,
+        schema_version=NEXT_TASKS_PROJECTION_SCHEMA_VERSION,
         row_count=len(rows),
         sha256=hashlib.sha256(payload).hexdigest(),
         _payload=payload,
@@ -199,5 +199,6 @@ def project_legacy_next_tasks(
 
 __all__ = [
     "LegacyNextTasksProjection",
+    "NEXT_TASKS_PROJECTION_SCHEMA_VERSION",
     "project_legacy_next_tasks",
 ]

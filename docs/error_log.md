@@ -1144,6 +1144,30 @@ status。
 DB/filesystem CAS ownership transaction、unique-owner 下游回讀與 rollback rehearsal，
 所以 Issue 整體仍為 **contained**。
 
+### 2026-07-24 — Cutover manifest 未綁定 projection schema identity
+
+**症狀與物證**：`prepare_work_ownership_cutover()` 只重算 staged projection 的
+payload SHA／row count，沒有驗證 `schema_version`，manifest 也沒有保存該 identity。
+Public RED regression 把 production projection 以 `dataclasses.replace()` 改成未知
+`next-tasks-read-projection.v999`，舊實作仍產生有效 manifest。這代表未來不相容的
+projection contract 只要碰巧輸出相同 bytes，就能跨過 ownership preflight。
+
+**根因層級與底層修復**：這是 evidence identity 契約缺口，不是 payload 對帳錯誤。
+Production projection module 現在公開唯一 schema constant；preflight 在讀 payload
+前要求 exact-match，未知 schema fail closed。Cutover manifest 升為 v2，並把
+`projection_schema_version` 與 projection SHA 一起納入 canonical manifest hash，
+使 transaction caller 無法把「內容相同」誤當成「相容性契約相同」。
+
+**回歸、回讀與制度化**：未知 schema case 已先 RED 後 GREEN；preflight 全套 16
+tests 通過，manifest regression 同時核對 v2 與 production projection schema identity。
+Canonical architecture、operations-core module design 與 improvement status 均已同步。
+Live owner status 會在提交前再次只讀回讀，本切片不執行 cutover 或 task-pool mutation。
+
+**狀態**：此 projection-schema evidence gap 已完成底層 seam、回歸與制度化，
+為 **root_cause_fixed_and_verified**；Issue #9 仍缺七日 live receipts、正式
+DB/filesystem CAS ownership transaction、unique-owner 下游回讀與 rollback rehearsal，
+所以 Issue 整體仍為 **contained**。
+
 ### 2026-07-24 — SMTP acceptance 仍可被誤當成通知已送達 — contained
 
 **症狀與根因層級**：Effect Delivery 已有 durable request／outbox／settlement，但沒有

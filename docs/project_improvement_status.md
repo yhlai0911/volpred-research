@@ -80,11 +80,13 @@ trusted wall clock 重跑 canonical 七日 assessment，並從同一 owner-state
 unique-owner mode 與 CAS SHA；queue path 固定為 repo canonical，paired state 由 queue
 唯一衍生並在 shared lock 內取樣。Caller 三來源 mappings 先 canonicalize 一次並重建
 private snapshot，後續對帳不再重讀 mutable caller rows。Raw legacy bytes 由 seam 自行 hash、decode 與 import，
-projection metadata 則從 payload 重算。Legacy import 與 staged Coordinator projection
+projection schema 必須精確等於 production `next-tasks-read-projection.v1`，未知
+schema 不可只靠相同 payload bytes 冒充相容；row count／SHA 則從 payload 重算。
+Legacy import 與 staged Coordinator projection
 逐 identity 比對 row count、priority、claim ownership／started timestamp、parent、
 deadline、policy、row created／updated timestamp 與 terminal disposition。通過後的
-immutable manifest 綁定
-raw legacy snapshot、assessment、import report、projection 與 owner state SHA-256。
+immutable manifest v2 綁定
+raw legacy snapshot、assessment、import report、projection schema／SHA 與 owner state SHA-256。
 Assessment 另帶 receipt-set digest 與最後 snapshot identity，必須與本次完整 cutover
 snapshot 一致；Coordinator 無法表示的 dispatch policy 會 fail closed。
 上游 shadow replay producer 同步改為入口單次 freeze；ledger hash、兩側 selector 與

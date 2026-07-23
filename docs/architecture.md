@@ -72,9 +72,11 @@
 > 並重建 importer report。只有 import 無 reconciliation issue，且 staged projection 的 row
 > identity／priority／claim ownership／parent／deadline／terminal disposition 與
 > import 完全一致時才產生 immutable、hash-addressed cutover manifest。Projection
-> row count／SHA 也由 decoded payload 重算，不信任 caller metadata。Manifest
+> schema 必須精確等於 production `next-tasks-read-projection.v1`；未知 schema
+> 即使 payload bytes 相同也 fail closed。Row count／SHA 由 decoded payload 重算，
+> 不信任 caller metadata。Manifest v2
 > 同時綁定 raw legacy snapshot SHA、assessment SHA、import report SHA、projection
-> SHA 與兩側 row count；assessment 的 receipt-set digest 與最後 snapshot identity
+> schema／SHA 與兩側 row count；assessment 的 receipt-set digest 與最後 snapshot identity
 > 必須等於本次完整三來源 cutover snapshot。即使兩側 active claim 欄位完全一致，
 > `claimed`／`running` legacy row 仍不能產生 manifest：legacy worker 持有的 lease
 > token 不在 compatibility projection 中，ownership transaction 無法無損移交該寫入權，

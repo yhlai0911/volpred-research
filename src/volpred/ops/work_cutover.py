@@ -16,7 +16,10 @@ from .work.legacy import (
     LegacyWorkCandidate,
     ReconciliationReport,
 )
-from .work_projection import LegacyNextTasksProjection
+from .work_projection import (
+    NEXT_TASKS_PROJECTION_SCHEMA_VERSION,
+    LegacyNextTasksProjection,
+)
 from .work_shadow_assessment import (
     MAX_OBSERVATION_GAP,
     REQUIRED_OBSERVATION_WINDOW,
@@ -32,7 +35,7 @@ from .task_pool_mode import (
 )
 
 
-_SCHEMA_VERSION = "work-owner-cutover-manifest.v1"
+_SCHEMA_VERSION = "work-owner-cutover-manifest.v2"
 
 
 def _canonical_bytes(value: Any) -> bytes:
@@ -149,6 +152,7 @@ class WorkOwnershipCutoverManifest:
     legacy_snapshot_sha256: str
     assessment_sha256: str
     import_report_sha256: str
+    projection_schema_version: str
     projection_sha256: str
     sha256: str
 
@@ -161,6 +165,7 @@ class WorkOwnershipCutoverManifest:
             "legacy_snapshot_sha256": self.legacy_snapshot_sha256,
             "assessment_sha256": self.assessment_sha256,
             "import_report_sha256": self.import_report_sha256,
+            "projection_schema_version": self.projection_schema_version,
             "projection_sha256": self.projection_sha256,
             "sha256": self.sha256,
         }
@@ -215,6 +220,14 @@ def prepare_work_ownership_cutover(
         raise ValueError(
             "shadow ledger does not end at the cutover snapshot"
         )
+    if (
+        projection.schema_version
+        != NEXT_TASKS_PROJECTION_SCHEMA_VERSION
+    ):
+        raise ValueError(
+            "unsupported coordinator projection schema: "
+            f"{projection.schema_version}"
+        )
     projection_rows = projection.read()
     projection_payload = _canonical_bytes(projection_rows)
     projection_sha256 = _sha256(projection_payload)
@@ -255,6 +268,7 @@ def prepare_work_ownership_cutover(
         "legacy_snapshot_sha256": _sha256(legacy_next_tasks_bytes),
         "assessment_sha256": assessment_sha256,
         "import_report_sha256": import_report_sha256,
+        "projection_schema_version": projection.schema_version,
         "projection_sha256": projection_sha256,
     }
     return WorkOwnershipCutoverManifest(
