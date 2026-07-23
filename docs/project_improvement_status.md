@@ -23,7 +23,9 @@ FORCE RLS、專用低權限 function definer、具名 mutation functions、worke
 parent／deadline、requester、created／updated 與 blocked reason。外部測試 DSN 有
 localhost／hostaddr／專用 DB／opt-in 防線；CI 固定使用 PostgreSQL 17 且缺少
 integration backend 時 fail closed。
-Submit C legacy snapshot importer 目前為 **contained（尚未提交，不宣稱結案）**：
+Submit C legacy snapshot importer 已達
+**`root_cause_fixed_and_verified`**（implementation commit `5ddb5b0d1`；47 scoped
+tests；Spec／Standards 雙軸複審無 P1／P2）：
 三套來源只讀映射、公開 migration façade、
 內容雜湊綁定的 payload reference、structured reconciliation、duplicate ID／idempotency、
 missing parent／simultaneous claim／invalid lifecycle／unknown schema／policy／public effect

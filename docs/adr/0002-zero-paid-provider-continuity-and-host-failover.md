@@ -23,4 +23,3 @@ AI 執行只允許既有 OAuth／桌面訂閱內含額度，**不得**啟用 API
 - 所有付費型憑證與路由必須在設定驗證、啟動與每次派工三層 fail closed。
 - Supabase／lease control plane 不可達時不得產生正式 commit 或外部效果，以避免 split brain。
 - 換機不再以「程式能啟動」為完成，必須以 parity manifest、shadow receipts、租約切換與回滾演練證明。
-

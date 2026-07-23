@@ -28,4 +28,3 @@ VolPred 採用建於既有 Supabase PostgreSQL 上的 **Python 模組化單體�
 - Supabase 暫時不可用時，正式協調寫入與外部效果 fail closed；已隔離的純計算可繼續，稍後再提交成果。
 - 既有 ops master 仍負責接管前的可靠性修復；本 ADR 不把其已完成成果作廢。
 - 需要新增 schema migration、相容 adapter、outbox worker、lease fencing 與 failure-injection 測試。
-

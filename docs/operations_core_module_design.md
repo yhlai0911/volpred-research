@@ -309,7 +309,8 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
 - read-only 解析三套來源，輸出 canonical candidate 與 reconciliation report。
 - 對未知狀態、重複 ID、丟失 parent、同時 claim、無法映射的 public effect 一律 fail closed。
 - `--dry-run` 是唯一模式；不修改 Supabase、JSON 或 task status。
-- **2026-07-23 shadow implementation candidate（contained，尚未提交）**：
+- **2026-07-23 Submit C = `root_cause_fixed_and_verified`**（implementation commit
+  `5ddb5b0d1`；47 scoped tests；Spec／Standards 雙軸複審無 P1／P2）：
   `LegacySnapshotImporter` 只接收 caller
   明確提供的 `next_tasks`、TaskRecord 與 exported `ops_jobs` snapshots，不自行連線
   Supabase 或讀 live source；輸出含 canonical candidate、原狀態、claim／terminal trace、
