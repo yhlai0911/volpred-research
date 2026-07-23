@@ -658,10 +658,17 @@ def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
                 raise TaskPoolAdmissionClosed(
                     "canonical next_tasks queue root is not a list"
                 )
-            from volpred.ops.task_pool_mode import enforce_task_pool_write
+            from volpred.ops.task_pool_mode import (
+                enforce_task_pool_write,
+                task_pool_mode_path,
+            )
 
             enforce_task_pool_write(
-                state_path=TASK_POOL_MODE_PATH,
+                state_path=(
+                    TASK_POOL_MODE_PATH
+                    if TASK_POOL_MODE_PATH != _DEFAULT_TASK_POOL_MODE_PATH
+                    else task_pool_mode_path(CANONICAL_NEXT_TASKS)
+                ),
                 existing_tasks=existing_tasks,
                 proposed_tasks=tasks,
             )
@@ -815,9 +822,13 @@ def _legacy_priority_to_p(legacy: int) -> int:
 
 #: 只有寫進**正牌**佇列才准叫醒 supervisor（測試/暫存佇列不得觸發真實派工）。
 CANONICAL_NEXT_TASKS = Path(__file__).resolve().parents[3] / "storage" / "next_tasks.json"
-TASK_POOL_MODE_PATH = (
+_DEFAULT_TASK_POOL_MODE_PATH = (
     Path(__file__).resolve().parents[3] / "storage" / "ops" / "task_pool_mode.json"
 )
+# Explicit override seam for callers/tests that need a non-standard layout.
+# Otherwise the mode receipt follows CANONICAL_NEXT_TASKS, so rebinding a queue
+# to an isolated storage root cannot accidentally read the live repo's mode.
+TASK_POOL_MODE_PATH = _DEFAULT_TASK_POOL_MODE_PATH
 
 
 def _warn_if_over_pending_cap(record: dict[str, Any], tasks: list[Any]) -> None:

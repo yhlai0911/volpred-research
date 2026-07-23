@@ -407,7 +407,9 @@ def _render_roadmap_coverage():
         return ""
 
     counts = rep["coverage_counts"]
-    live, missing = counts.get("live", 0), counts.get("no_task", 0) + counts.get("dangling", 0)
+    live = counts.get("live", 0)
+    suspended = counts.get("pool_suspended", 0)
+    missing = counts.get("no_task", 0) + counts.get("dangling", 0)
     age = rep.get("doc_age_days")
     tone = "#b91c1c" if (missing or (age is not None and age > 14)) else "#0a8a3a"
 
@@ -416,6 +418,7 @@ def _render_roadmap_coverage():
         label = {
             "live": ("進行中", "#0a8a3a"),
             "parked": ("已擱置", "#6b7280"),
+            "pool_suspended": ("direct mode 暫停入池", "#6b7280"),
             "closed": ("已結案（doc 待更新）", "#6b7280"),
             "no_task": ("未開工", "#b91c1c"),
             "dangling": ("task 已消失", "#b91c1c"),
@@ -431,6 +434,7 @@ def _render_roadmap_coverage():
         f"<div style='border-left:4px solid {tone};padding:8px 12px;margin:8px 0;background:#fafbfc'>"
         f"<div class='small'><strong>Roadmap 對帳</strong>（doc 更新於 {_esc(rep['doc_updated'])}，"
         f"{_esc(age)} 天前）：{live} 項有 backing task，{missing} 項未開工。"
+        f"{suspended} 項因 direct execution 暫停入池。"
         f"來源 <code>scripts/audit_roadmap_coverage.py</code> — 文字宣稱無法蓋過 pool 真實狀態。</div>"
         f"<table style='width:100%;margin-top:6px'>{''.join(rows)}</table></div>"
     )

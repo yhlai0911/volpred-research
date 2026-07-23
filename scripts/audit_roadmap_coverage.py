@@ -27,12 +27,19 @@ import fcntl
 import json
 import re
 import sys
+from dataclasses import asdict
 from datetime import date, datetime
 from pathlib import Path
+
+from volpred.ops.task_pool_mode import (
+    TaskPoolMode,
+    load_task_pool_mode_evidence,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DOC = PROJECT_ROOT / "docs" / "boss_direction_recommendations.md"
 NEXT_TASKS = PROJECT_ROOT / "storage" / "next_tasks.json"
+TASK_POOL_MODE = PROJECT_ROOT / "storage" / "ops" / "task_pool_mode.json"
 
 # An item is "live" if a human/agent could still pick it up.
 OPEN_STATUSES = {"pending", "claimed", "in_progress"}
@@ -97,7 +104,13 @@ def parse_doc(text: str) -> tuple[date | None, list[dict]]:
     return updated, items
 
 
-def resolve(items: list[dict], pool: dict[str, dict], today: date) -> list[dict]:
+def resolve(
+    items: list[dict],
+    pool: dict[str, dict],
+    today: date,
+    *,
+    direct_execution: bool = False,
+) -> list[dict]:
     """Attach the real pool status to each item and classify the coverage."""
     resolved = []
     for item in items:
@@ -107,7 +120,10 @@ def resolve(items: list[dict], pool: dict[str, dict], today: date) -> list[dict]
         if item["task_id"] is None:
             coverage = "no_task"
         elif task is None:
-            coverage = "dangling"  # doc points at a task id that no longer exists
+            # Direct execution intentionally removes legacy queue rows after an
+            # exact-byte backup. A marker-bound item is therefore suspended from
+            # the queue, not silently lost. `task:none` remains a real gap.
+            coverage = "pool_suspended" if direct_execution else "dangling"
         elif status in OPEN_STATUSES:
             coverage = "live"
         elif status in PARKED_STATUSES:
@@ -119,13 +135,57 @@ def resolve(items: list[dict], pool: dict[str, dict], today: date) -> list[dict]
     return resolved
 
 
+def _execution_context() -> dict:
+    """Read and validate the receipt that changes roadmap coverage semantics."""
+    if not TASK_POOL_MODE.exists():
+        return {
+            "enabled": False,
+            "mode": "queued_execution",
+            "state_sha256": None,
+        }
+
+    evidence = load_task_pool_mode_evidence(TASK_POOL_MODE)
+    mode: TaskPoolMode = evidence.mode
+    context = {
+        **asdict(mode),
+        "state_sha256": evidence.sha256,
+    }
+    if mode.enabled and mode.mode == "direct_execution":
+        complete_backup_receipt = (
+            isinstance(mode.backup_path, str)
+            and bool(mode.backup_path)
+            and isinstance(mode.backup_sha256, str)
+            and re.fullmatch(r"[0-9a-f]{64}", mode.backup_sha256) is not None
+            and isinstance(mode.backup_bytes, int)
+            and mode.backup_bytes > 0
+            and isinstance(mode.backup_task_count, int)
+            and mode.backup_task_count > 0
+        )
+        if not complete_backup_receipt:
+            raise ValueError(
+                "direct-execution mode lacks a complete backup receipt; "
+                "roadmap coverage cannot be suspended safely"
+            )
+    return context
+
+
 def audit(today: date | None = None) -> dict:
     today = today or date.today()
     if not DOC.exists():
         return {"ok": False, "error": f"missing {DOC.relative_to(PROJECT_ROOT)}", "items": [], "findings": []}
 
+    execution = _execution_context()
+    direct_execution = (
+        execution["enabled"] is True
+        and execution["mode"] == "direct_execution"
+    )
     updated, items = parse_doc(DOC.read_text(encoding="utf-8"))
-    resolved = resolve(items, _load_pool(), today)
+    resolved = resolve(
+        items,
+        _load_pool(),
+        today,
+        direct_execution=direct_execution,
+    )
 
     findings = []
     age_days = (today - updated).days if updated else None
@@ -170,6 +230,7 @@ def audit(today: date | None = None) -> dict:
         "ok": not findings,
         "doc_updated": updated.isoformat() if updated else None,
         "doc_age_days": age_days,
+        "execution": execution,
         "items": resolved,
         "coverage_counts": counts,
         "findings": findings,
@@ -180,9 +241,17 @@ def _render(report: dict) -> str:
     if report.get("error"):
         return f"ERROR: {report['error']}"
 
-    icon = {"live": "OK  ", "parked": "PARK", "no_task": "MISS", "dangling": "DANG", "closed": "DONE"}
+    icon = {
+        "live": "OK  ",
+        "parked": "PARK",
+        "pool_suspended": "HOLD",
+        "no_task": "MISS",
+        "dangling": "DANG",
+        "closed": "DONE",
+    }
     lines = [
         f"Roadmap coverage -- doc updated {report['doc_updated']} ({report['doc_age_days']}d ago)",
+        f"  execution mode: {report['execution']['mode']}",
         f"  {report['coverage_counts']}",
         "",
     ]

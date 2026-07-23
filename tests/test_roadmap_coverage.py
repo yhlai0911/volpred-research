@@ -8,13 +8,17 @@ nothing could have noticed, because prose has no status field.
 
 from __future__ import annotations
 
+import json
 import sys
 from datetime import date
 from pathlib import Path
 
+import pytest
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
+import audit_roadmap_coverage as roadmap  # noqa: E402
 from audit_roadmap_coverage import DOC, audit, parse_doc, resolve  # noqa: E402
 
 
@@ -49,6 +53,50 @@ def test_dangling_task_id_is_not_reported_as_live():
     """A doc pointing at a deleted task is a gap, not coverage."""
     items = [{"rid": "x", "task_id": "gone_123", "priority": "P1", "section": "s", "text": "t"}]
     assert resolve(items, {}, date(2026, 7, 18))[0]["coverage"] == "dangling"
+
+
+def test_direct_mode_suspends_bound_rows_but_not_task_none():
+    items = [
+        {
+            "rid": "bound",
+            "task_id": "removed",
+            "priority": "P1",
+            "section": "s",
+            "text": "t",
+        },
+        {
+            "rid": "never-bound",
+            "task_id": None,
+            "priority": "P1",
+            "section": "s",
+            "text": "t",
+        },
+    ]
+
+    resolved = resolve(
+        items,
+        {},
+        date(2026, 7, 18),
+        direct_execution=True,
+    )
+
+    assert resolved[0]["coverage"] == "pool_suspended"
+    assert resolved[1]["coverage"] == "no_task"
+
+
+def test_direct_mode_requires_a_complete_backup_receipt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    state = tmp_path / "task_pool_mode.json"
+    state.write_text(
+        json.dumps({"enabled": True, "mode": "direct_execution"}) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(roadmap, "TASK_POOL_MODE", state)
+
+    with pytest.raises(ValueError, match="complete backup receipt"):
+        roadmap._execution_context()
 
 
 def test_closed_task_flags_doc_for_update():
