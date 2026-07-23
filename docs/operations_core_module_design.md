@@ -174,9 +174,28 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
 - adapter 只把 process exit 0 視為候選成功；其後回讀 commit object，驗證 direct
   parent、exact-path diff 與每個 committed blob hash，再產生 immutable
   `commit-actuation.v1` receipt。既有 unrelated index／working-tree 狀態維持不變。
-- 這仍是 shadow implementation：尚未接到 `ChangeDelivery.land`，也尚未實作 program
-  commit 10 的 WorkLease／Primary Authority fencing、持久化 receipt 或 live caller，
-  因此不取得正式 commit ownership。
+- program commit 09 本身仍是 shadow implementation：當時尚未接到
+  `ChangeDelivery.land`、WorkLease／Primary Authority fencing、持久化 receipt 或 live
+  caller，因此不取得正式 commit ownership；actuator-side fencing 的後續狀態見下一節。
+
+### 2026-07-24 Commit authority fencing checkpoint
+
+- program commit 10 的 actuator-side interface contract 已完成：每個
+  `CommitActuation` 都必須帶 WorkItem id／version、目前 WorkLease token、Primary
+  Authority fencing token 與 `commit-worker:` 身分；缺少任一欄位都在 Git writer 前
+  fail closed。
+- private actuator 會把 proposal、WorkItem、兩個 token、repository、HEAD、exact
+  paths／content hashes、message 與 actor 做 canonical JSON SHA-256，交由注入的
+  `CommitAuthority.authorize()` 同時回讀兩個 canonical fence。grant 必須精確回應同一
+  request hash；stale token、authority unavailable、malformed／mismatched grant 均不會
+  啟動 writer transaction。
+- raw tokens 不會傳入 Git writer argv 或寫入成功 receipt；receipt 只保存
+  authority-request hash、WorkLease reference 與 Primary Authority reference，並仍須
+  通過 commit object／parent／exact paths／blob hashes read-back 才成立。
+- 這完成的是 program commit 10 的 stale-token rejection seam，不是 live authority
+  service。Postgres Primary Authority adapter、durable DeliveryReceipt、
+  `ChangeDelivery.land`、network-partition failure injection 與正式 caller 仍未完成；
+  step 34 的 acquire／renew／demote workflow 前不得宣稱取得 commit ownership。
 
 ## 6. Effect Delivery
 

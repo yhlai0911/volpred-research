@@ -11,12 +11,56 @@ import pytest
 from volpred.ops.delivery import ContentHash
 from volpred.ops.delivery._git_actuator import (
     CommitActuation,
+    CommitAuthorityGrant,
+    CommitAuthorityRequest,
     CommitActuatorBlocked,
     GitCommitActuator,
 )
 
 
 NOW = datetime(2026, 7, 23, 16, 30, tzinfo=timezone.utc)
+
+
+class _Authority:
+    def __init__(
+        self,
+        *,
+        work_lease_token: str = "work-lease-current",
+        primary_fencing_token: str = "primary-fence-current",
+    ) -> None:
+        self._work_lease_token = work_lease_token
+        self._primary_fencing_token = primary_fencing_token
+        self.requests: list[CommitAuthorityRequest] = []
+
+    def authorize(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant:
+        self.requests.append(request)
+        if request.work_lease_token != self._work_lease_token:
+            raise CommitActuatorBlocked("stale WorkLease token")
+        if request.primary_fencing_token != self._primary_fencing_token:
+            raise CommitActuatorBlocked("stale Primary Authority fencing token")
+        return CommitAuthorityGrant(
+            request_sha256=request.request_sha256,
+            work_lease_ref="work-lease:work-1:v7",
+            primary_authority_ref="primary-authority:epoch-42",
+        )
+
+
+class _MalformedGrantAuthority(_Authority):
+    def authorize(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant:
+        return CommitAuthorityGrant(
+            request_sha256=request.request_sha256,
+            work_lease_ref="",
+            primary_authority_ref="primary-authority:epoch-42",
+        )
+
+
+class _MismatchedGrantAuthority(_Authority):
+    def authorize(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant:
+        return CommitAuthorityGrant(
+            request_sha256="0" * 64,
+            work_lease_ref="work-lease:work-1:v7",
+            primary_authority_ref="primary-authority:epoch-42",
+        )
 
 
 def _git(repo: Path, *args: str) -> str:
@@ -49,6 +93,10 @@ def _hash(path: Path) -> str:
 def _command(repo: Path, expected_head: str) -> CommitActuation:
     return CommitActuation(
         proposal_sha256="a" * 64,
+        work_item_id="work-1",
+        work_item_version=7,
+        work_lease_token="work-lease-current",
+        primary_fencing_token="primary-fence-current",
         repository=str(repo),
         expected_head=expected_head,
         exact_paths=("new.txt", "tracked.txt"),
@@ -61,8 +109,11 @@ def _command(repo: Path, expected_head: str) -> CommitActuation:
     )
 
 
-def _actuator() -> GitCommitActuator:
-    return GitCommitActuator(clock=lambda: NOW)
+def _actuator(authority: _Authority | None = None) -> GitCommitActuator:
+    return GitCommitActuator(
+        clock=lambda: NOW,
+        authority=authority or _Authority(),
+    )
 
 
 def test_actuator_lands_and_reads_back_exact_changeset(
@@ -76,6 +127,11 @@ def test_actuator_lands_and_reads_back_exact_changeset(
 
     assert receipt.schema_version == "commit-actuation.v1"
     assert receipt.proposal_sha256 == "a" * 64
+    assert receipt.work_item_id == "work-1"
+    assert receipt.work_item_version == 7
+    assert len(receipt.authority_request_sha256) == 64
+    assert receipt.work_lease_ref == "work-lease:work-1:v7"
+    assert receipt.primary_authority_ref == "primary-authority:epoch-42"
     assert receipt.parent_sha == base_commit
     assert receipt.commit_sha == _git(repo, "rev-parse", "HEAD")
     assert receipt.exact_paths == ("new.txt", "tracked.txt")
@@ -134,6 +190,69 @@ def test_actuator_rejects_stale_head_before_touching_index(
     assert _git(repo, "diff", "--cached", "--name-only") == ""
 
 
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("work_lease_token", "work-lease-stale", "stale WorkLease token"),
+        (
+            "primary_fencing_token",
+            "primary-fence-stale",
+            "stale Primary Authority fencing token",
+        ),
+    ],
+)
+def test_actuator_rejects_stale_authority_before_touching_git_writer(
+    repository: tuple[Path, str],
+    field: str,
+    value: str,
+    message: str,
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    before_status = _git(repo, "status", "--porcelain=v1", "--untracked-files=all")
+    authority = _Authority()
+    command = replace(_command(repo, base_commit), **{field: value})
+
+    with pytest.raises(CommitActuatorBlocked, match=message):
+        _actuator(authority).commit(command)
+
+    assert len(authority.requests) == 1
+    assert _git(repo, "rev-parse", "HEAD") == base_commit
+    assert _git(repo, "status", "--porcelain=v1", "--untracked-files=all") == before_status
+    assert _git(repo, "diff", "--cached", "--name-only") == ""
+
+
+def test_actuator_rejects_malformed_authority_grant_before_touching_git_writer(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    before_status = _git(repo, "status", "--porcelain=v1", "--untracked-files=all")
+
+    with pytest.raises(CommitActuatorBlocked, match="invalid grant"):
+        _actuator(_MalformedGrantAuthority()).commit(_command(repo, base_commit))
+
+    assert _git(repo, "rev-parse", "HEAD") == base_commit
+    assert _git(repo, "status", "--porcelain=v1", "--untracked-files=all") == before_status
+    assert _git(repo, "diff", "--cached", "--name-only") == ""
+
+
+def test_actuator_rejects_grant_for_a_different_write_intent(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+
+    with pytest.raises(CommitActuatorBlocked, match="requested write intent"):
+        _actuator(_MismatchedGrantAuthority()).commit(_command(repo, base_commit))
+
+    assert _git(repo, "rev-parse", "HEAD") == base_commit
+    assert _git(repo, "diff", "--cached", "--name-only") == ""
+
+
 def test_actuator_rejects_content_drift_and_restores_index(
     repository: tuple[Path, str],
 ) -> None:
@@ -164,6 +283,10 @@ def test_actuator_rejects_writer_success_without_new_commit(
     repo, base_commit = repository
     command = CommitActuation(
         proposal_sha256="a" * 64,
+        work_item_id="work-1",
+        work_item_version=7,
+        work_lease_token="work-lease-current",
+        primary_fencing_token="primary-fence-current",
         repository=str(repo),
         expected_head=base_commit,
         exact_paths=("tracked.txt",),

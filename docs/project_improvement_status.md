@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（Issue #9 pre-cutover projection contract）**
+Last updated: **2026-07-24（commit actuator authority fencing contract）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -75,6 +75,15 @@ approval 與 terminal disposition。duplicate identity、缺失／模糊 lifecyc
 及不相容 provenance 都 fail closed。此 module 沒有 canonical writer 或 apply 模式，
 尚未接管 live enqueue／claim／complete，也沒有七日 receipts 或正式 rollback rehearsal；
 所以 Issue #9 仍維持 `contained`，不可由 interface complete 推論 live owner 已切換。
+同日完成 platform program commit 10 的 actuator-side authority fencing contract：
+`CommitActuation` 強制綁定 WorkItem id／version、WorkLease token、Primary Authority
+fencing token 與 commit-worker identity；完整 write intent 以 canonical SHA-256 交由
+注入的 authority interface 回讀，stale token、authority unavailable 與不完整／錯綁
+grant 都在 Git writer 前 fail closed。成功 receipt 只保留 request hash 與兩個 authority
+reference，不保存 raw token，且沿用 commit object／parent／exact paths／blob hashes
+read-back。此 checkpoint 尚未提供 live Postgres authority adapter、
+`ChangeDelivery.land`、durable receipt 或正式 caller，故不構成 commit ownership
+cutover；主控租約 acquire／renew／demote 仍屬 program step 34。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

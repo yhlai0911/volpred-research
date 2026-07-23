@@ -61,6 +61,15 @@
 > claim、complete caller 或完成 live rollback rehearsal；因此 current owner 與上方
 > direct-execution containment 不變。
 
+> **Change Delivery commit-authority contract（2026-07-24，shadow）**
+> private `GitCommitActuator` 在呼叫 canonical Git writer 前，必須以完整 write-intent
+> SHA-256 同時取得有效 WorkLease 與 Primary Authority grant；stale token、authority
+> unavailable、grant 與 intent 不符皆 fail closed。Git argv 與 receipt 都不保存 raw
+> token，receipt 只保留 request hash 與兩個 authority reference，之後仍回讀 commit
+> parent、exact paths 與 blob hashes。這只是 program commit 10 的 actuator-side
+> interface；尚無 live Postgres authority adapter、`ChangeDelivery.land`、durable
+> receipt 或正式 caller，因此不改變目前 Git writer ownership。
+
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。
 > **實際控制面 = 5 層並存**（非單純 v12 單線程）：

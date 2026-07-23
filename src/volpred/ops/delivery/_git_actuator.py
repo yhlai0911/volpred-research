@@ -1,10 +1,10 @@
 """Private adapter from Change Delivery to the canonical Git writer.
 
-This module does not grant landing authority.  It only translates an already
-authorized, materialized exact-path commit request into the existing
-``scripts/git_writer_lock.py commit`` transaction and verifies the resulting
-commit object.  WorkLease and Primary Authority fencing remain the responsibility
-of the later Change Delivery landing service.
+This module does not grant landing authority.  It asks an injected authority
+adapter to verify the current WorkLease and Primary Authority fencing token,
+then translates the authorized, materialized exact-path request into the
+existing ``scripts/git_writer_lock.py commit`` transaction and verifies the
+resulting commit object.
 """
 
 from __future__ import annotations
@@ -12,10 +12,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 import hashlib
+import json
 from pathlib import Path
 import subprocess
 import sys
-from typing import Callable
+from typing import Callable, Protocol
 
 from . import (
     ContentHash,
@@ -35,6 +36,10 @@ _DEFAULT_WRITER_CLI = (
 @dataclass(frozen=True)
 class CommitActuation:
     proposal_sha256: str
+    work_item_id: str
+    work_item_version: int
+    work_lease_token: str
+    primary_fencing_token: str
     repository: str
     expected_head: str
     exact_paths: tuple[str, ...]
@@ -47,6 +52,11 @@ class CommitActuation:
 class CommitActuationReceipt:
     schema_version: str
     proposal_sha256: str
+    work_item_id: str
+    work_item_version: int
+    authority_request_sha256: str
+    work_lease_ref: str
+    primary_authority_ref: str
     commit_sha: str
     parent_sha: str
     exact_paths: tuple[str, ...]
@@ -67,6 +77,35 @@ class CommitActuatorBlocked(CommitActuatorError):
     """The canonical writer rejected the request before a verified commit."""
 
 
+@dataclass(frozen=True)
+class CommitAuthorityRequest:
+    request_sha256: str
+    proposal_sha256: str
+    work_item_id: str
+    work_item_version: int
+    work_lease_token: str
+    primary_fencing_token: str
+    repository: str
+    expected_head: str
+    exact_paths: tuple[str, ...]
+    content_hashes: tuple[ContentHash, ...]
+    message: str
+    actor: str
+
+
+@dataclass(frozen=True)
+class CommitAuthorityGrant:
+    request_sha256: str
+    work_lease_ref: str
+    primary_authority_ref: str
+
+
+class CommitAuthority(Protocol):
+    """Verify both delivery fences against canonical coordination state."""
+
+    def authorize(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant: ...
+
+
 class GitCommitActuator:
     """Invoke and read back the existing exact-path Git writer transaction."""
 
@@ -74,11 +113,13 @@ class GitCommitActuator:
         self,
         *,
         clock: Callable[[], datetime],
+        authority: CommitAuthority,
         writer_cli: Path = _DEFAULT_WRITER_CLI,
         python_executable: str = sys.executable,
         timeout_s: float = 120.0,
     ) -> None:
         self._clock = clock
+        self._authority = authority
         self._writer_cli = writer_cli.resolve()
         self._python_executable = python_executable
         self._timeout_s = timeout_s
@@ -109,6 +150,20 @@ class GitCommitActuator:
                 ["--expected-content-hash", f"{item.path}={item.sha256}"]
             )
         argv.extend(["--", *normalized.exact_paths])
+
+        authority_request = _authority_request(normalized)
+        try:
+            authority_grant = self._authority.authorize(authority_request)
+        except CommitActuatorError:
+            raise
+        except Exception as exc:
+            raise CommitActuatorBlocked(
+                "commit authority could not authorize the request"
+            ) from exc
+        authority_grant = _validate_authority_grant(
+            authority_grant,
+            request=authority_request,
+        )
 
         try:
             proc = subprocess.run(
@@ -181,6 +236,11 @@ class GitCommitActuator:
         return CommitActuationReceipt(
             schema_version=_RECEIPT_SCHEMA,
             proposal_sha256=normalized.proposal_sha256,
+            work_item_id=normalized.work_item_id,
+            work_item_version=normalized.work_item_version,
+            authority_request_sha256=authority_request.request_sha256,
+            work_lease_ref=authority_grant.work_lease_ref,
+            primary_authority_ref=authority_grant.primary_authority_ref,
             commit_sha=commit_sha,
             parent_sha=parent_sha,
             exact_paths=normalized.exact_paths,
@@ -201,6 +261,17 @@ def _normalize_command(command: CommitActuation) -> CommitActuation:
         raise ValueError("expected_head must be a lowercase Git object id")
     if _SHA256.fullmatch(command.proposal_sha256) is None:
         raise ValueError("proposal_sha256 must be 64 lowercase hexadecimal characters")
+    work_item_id = _required_text(command.work_item_id, field="work_item_id")
+    if command.work_item_version <= 0:
+        raise ValueError("work_item_version must be positive")
+    work_lease_token = _required_text(
+        command.work_lease_token,
+        field="work_lease_token",
+    )
+    primary_fencing_token = _required_text(
+        command.primary_fencing_token,
+        field="primary_fencing_token",
+    )
 
     paths = tuple(sorted(_normalize_exact_path(path) for path in command.exact_paths))
     if not paths or len(paths) != len(set(paths)):
@@ -216,15 +287,92 @@ def _normalize_command(command: CommitActuation) -> CommitActuation:
     if set(hashes) != set(paths):
         raise ValueError("content hashes must exactly match commit actuator paths")
 
+    actor = _required_text(command.actor, field="commit actor")
+    if not actor.startswith("commit-worker:"):
+        raise ValueError("commit actor must use the commit-worker identity")
+
     return CommitActuation(
         proposal_sha256=command.proposal_sha256,
+        work_item_id=work_item_id,
+        work_item_version=command.work_item_version,
+        work_lease_token=work_lease_token,
+        primary_fencing_token=primary_fencing_token,
         repository=str(repository),
         expected_head=command.expected_head,
         exact_paths=paths,
         content_hashes=tuple(hashes[path] for path in paths),
         message=_required_text(command.message, field="commit message"),
-        actor=_required_text(command.actor, field="commit actor"),
+        actor=actor,
     )
+
+
+def _authority_request(command: CommitActuation) -> CommitAuthorityRequest:
+    payload = {
+        "schema_version": "commit-authority-request.v1",
+        "proposal_sha256": command.proposal_sha256,
+        "work_item_id": command.work_item_id,
+        "work_item_version": command.work_item_version,
+        "work_lease_token": command.work_lease_token,
+        "primary_fencing_token": command.primary_fencing_token,
+        "repository": command.repository,
+        "expected_head": command.expected_head,
+        "exact_paths": list(command.exact_paths),
+        "content_hashes": [
+            {"path": item.path, "sha256": item.sha256}
+            for item in command.content_hashes
+        ],
+        "message": command.message,
+        "actor": command.actor,
+    }
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return CommitAuthorityRequest(
+        request_sha256=hashlib.sha256(encoded).hexdigest(),
+        proposal_sha256=command.proposal_sha256,
+        work_item_id=command.work_item_id,
+        work_item_version=command.work_item_version,
+        work_lease_token=command.work_lease_token,
+        primary_fencing_token=command.primary_fencing_token,
+        repository=command.repository,
+        expected_head=command.expected_head,
+        exact_paths=command.exact_paths,
+        content_hashes=command.content_hashes,
+        message=command.message,
+        actor=command.actor,
+    )
+
+
+def _validate_authority_grant(
+    grant: CommitAuthorityGrant,
+    *,
+    request: CommitAuthorityRequest,
+) -> CommitAuthorityGrant:
+    try:
+        if grant.request_sha256 != request.request_sha256:
+            raise CommitActuatorBlocked(
+                "commit authority grant does not match the requested write intent"
+            )
+        return CommitAuthorityGrant(
+            request_sha256=grant.request_sha256,
+            work_lease_ref=_required_text(
+                grant.work_lease_ref,
+                field="authority WorkLease reference",
+            ),
+            primary_authority_ref=_required_text(
+                grant.primary_authority_ref,
+                field="Primary Authority reference",
+            ),
+        )
+    except CommitActuatorBlocked:
+        raise
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise CommitActuatorBlocked(
+            "commit authority returned an invalid grant"
+        ) from exc
 
 
 def _git_text(repository: Path, *args: str) -> str:
@@ -259,6 +407,9 @@ def _git_bytes(repository: Path, *args: str) -> bytes:
 __all__ = [
     "CommitActuation",
     "CommitActuationReceipt",
+    "CommitAuthority",
+    "CommitAuthorityGrant",
+    "CommitAuthorityRequest",
     "CommitActuatorBlocked",
     "CommitActuatorBusy",
     "CommitActuatorError",
