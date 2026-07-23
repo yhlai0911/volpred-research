@@ -7,6 +7,7 @@ observation window is complete; it never reads or mutates the live queue.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -50,6 +51,9 @@ class ShadowObservationAssessment:
     required_window_seconds: int = 0
     max_gap_seconds: int = 0
     max_observed_gap_seconds: int | None = None
+    receipt_set_sha256: str | None = None
+    latest_snapshot_sha256: str | None = None
+    latest_snapshot_source_counts: dict[str, int] | None = None
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -70,6 +74,13 @@ class ShadowObservationAssessment:
             "required_window_seconds": self.required_window_seconds,
             "max_gap_seconds": self.max_gap_seconds,
             "max_observed_gap_seconds": self.max_observed_gap_seconds,
+            "receipt_set_sha256": self.receipt_set_sha256,
+            "latest_snapshot_sha256": self.latest_snapshot_sha256,
+            "latest_snapshot_source_counts": (
+                None
+                if self.latest_snapshot_source_counts is None
+                else dict(self.latest_snapshot_source_counts)
+            ),
         }
 
 
@@ -209,6 +220,14 @@ def assess_shadow_observation_directory(
     recorded_at = tuple(item[0] for item in timed_receipts)
     observed_at = tuple(item[1] for item in timed_receipts)
     receipts = [item[2] for item in timed_receipts]
+    receipt_set_sha256 = hashlib.sha256(
+        json.dumps(
+            receipts,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
     covered = {
         dimension["name"]
         for receipt in receipts
@@ -339,6 +358,15 @@ def assess_shadow_observation_directory(
         max_gap_seconds=int(max_gap.total_seconds()),
         max_observed_gap_seconds=(
             int(max(gaps).total_seconds()) if gaps else None
+        ),
+        receipt_set_sha256=receipt_set_sha256,
+        latest_snapshot_sha256=(
+            receipts[-1]["snapshot"]["sha256"] if receipts else None
+        ),
+        latest_snapshot_source_counts=(
+            dict(receipts[-1]["snapshot"]["source_counts"])
+            if receipts
+            else None
         ),
     )
 

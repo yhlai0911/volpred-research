@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import fcntl
 import hashlib
 import json
 from pathlib import Path
@@ -21,7 +22,11 @@ from .work_shadow_assessment import (
     REQUIRED_OBSERVATION_WINDOW,
     assess_shadow_observation_directory,
 )
-from .task_pool_mode import load_task_pool_mode_evidence
+from .work_shadow_replay import identify_legacy_snapshots
+from .task_pool_mode import (
+    load_task_pool_mode_evidence,
+    task_pool_mode_path,
+)
 
 
 _SCHEMA_VERSION = "work-owner-cutover-manifest.v1"
@@ -53,6 +58,10 @@ def _candidate_identity(
         "title": request.title,
         "priority": request.priority,
         "source": request.source,
+        "legacy_source": candidate.legacy_source,
+        "source_classification": candidate.source_classification,
+        "created_at": candidate.created_at,
+        "updated_at": candidate.updated_at,
         "required_capabilities": sorted(request.required_capabilities),
         "required_attestations": sorted(request.required_attestations),
         "risk": request.risk,
@@ -66,6 +75,13 @@ def _candidate_identity(
         "finished_at": candidate.finished_at,
         "result_summary": candidate.result_summary,
         "blocked_reason": candidate.blocked_reason,
+        "dispatch_lane": candidate.dispatch_lane,
+        "preferred_agent": candidate.preferred_agent,
+        "target_agent": candidate.target_agent,
+        "fallback_allowed": candidate.fallback_allowed,
+        "ref_event_job_id": candidate.ref_event_job_id,
+        "dreaming": candidate.dreaming,
+        "requester_ref": request.requester_ref,
     }
 
 
@@ -102,6 +118,10 @@ def _cutover_time() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _canonical_queue_path() -> Path:
+    return Path(__file__).resolve().parents[3] / "storage" / "next_tasks.json"
+
+
 @dataclass(frozen=True)
 class WorkOwnershipCutoverManifest:
     """Immutable identity binding for a later compare-and-set transaction."""
@@ -133,24 +153,30 @@ class WorkOwnershipCutoverManifest:
 def prepare_work_ownership_cutover(
     *,
     observation_directory: Path,
-    queue_owner_state_path: Path,
-    legacy_next_tasks_bytes: bytes,
     legacy_snapshots: LegacySnapshots,
     projection: LegacyNextTasksProjection,
 ) -> WorkOwnershipCutoverManifest:
     """Derive a cutover identity from raw evidence without mutating state."""
 
-    owner = load_task_pool_mode_evidence(queue_owner_state_path)
-    assessment = assess_shadow_observation_directory(
-        observation_directory,
-        assessed_at=_cutover_time(),
-        queue_owner_mode=owner.mode.mode,
-        queue_owner_gate_enabled=owner.mode.enabled,
-        queue_owner_state_path=owner.state_path,
-        queue_owner_state_sha256=owner.sha256,
-        required_window=REQUIRED_OBSERVATION_WINDOW,
-        max_gap=MAX_OBSERVATION_GAP,
-    )
+    queue_path = _canonical_queue_path().resolve()
+    state_path = task_pool_mode_path(queue_path)
+    with queue_path.open("rb") as queue_handle:
+        fcntl.flock(queue_handle.fileno(), fcntl.LOCK_SH)
+        try:
+            legacy_next_tasks_bytes = queue_handle.read()
+            owner = load_task_pool_mode_evidence(state_path)
+            assessment = assess_shadow_observation_directory(
+                observation_directory,
+                assessed_at=_cutover_time(),
+                queue_owner_mode=owner.mode.mode,
+                queue_owner_gate_enabled=owner.mode.enabled,
+                queue_owner_state_path=owner.state_path,
+                queue_owner_state_sha256=owner.sha256,
+                required_window=REQUIRED_OBSERVATION_WINDOW,
+                max_gap=MAX_OBSERVATION_GAP,
+            )
+        finally:
+            fcntl.flock(queue_handle.fileno(), fcntl.LOCK_UN)
     if not assessment.ready_for_cutover:
         raise ValueError("shadow assessment is not ready for cutover")
     raw_next_tasks = _decode_next_tasks(legacy_next_tasks_bytes)
@@ -163,6 +189,15 @@ def prepare_work_ownership_cutover(
     )
     if not import_report.ready:
         raise ValueError("legacy import is not ready for cutover")
+    current_snapshot = identify_legacy_snapshots(legacy_snapshots)
+    if (
+        assessment.latest_snapshot_sha256 != current_snapshot.sha256
+        or assessment.latest_snapshot_source_counts
+        != current_snapshot.source_counts
+    ):
+        raise ValueError(
+            "shadow ledger does not end at the cutover snapshot"
+        )
     projection_rows = projection.read()
     projection_payload = _canonical_bytes(projection_rows)
     projection_sha256 = _sha256(projection_payload)

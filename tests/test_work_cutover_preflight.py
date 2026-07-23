@@ -13,6 +13,7 @@ from volpred.ops.work import WorkEventView, WorkItemView, WorkSnapshot
 from volpred.ops.work.legacy import LegacySnapshots
 from volpred.ops.work_cutover import prepare_work_ownership_cutover
 from volpred.ops.work_projection import project_legacy_next_tasks
+from volpred.ops.work_shadow_replay import identify_legacy_snapshots
 
 
 START = datetime(2026, 7, 16, 12, 0, tzinfo=timezone.utc)
@@ -27,8 +28,16 @@ REQUIRED_DIMENSIONS = (
 
 
 @pytest.fixture(autouse=True)
-def fixed_preflight_clock(monkeypatch: pytest.MonkeyPatch) -> None:
+def fixed_preflight_clock(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
     monkeypatch.setattr(work_cutover, "_cutover_time", lambda: FIXED_NOW)
+    monkeypatch.setattr(
+        work_cutover,
+        "_canonical_queue_path",
+        lambda: tmp_path / "next_tasks.json",
+    )
 
 
 def _legacy_row() -> dict[str, object]:
@@ -84,13 +93,15 @@ def _staged_snapshot() -> WorkSnapshot:
 def _write_observations(
     directory: Path,
     *,
+    snapshots: LegacySnapshots,
     count: int = 8,
     start: datetime = START,
 ) -> None:
     directory.mkdir(parents=True, exist_ok=True)
+    identity = identify_legacy_snapshots(snapshots)
     for index in range(count):
         observed_at = start + timedelta(days=index)
-        snapshot_sha = f"{index + 1:064x}"
+        snapshot_sha = identity.sha256
         receipt = {
             "schema_version": "work-shadow-replay.v3",
             "observation_id": f"scheduled_{index:02d}",
@@ -99,12 +110,8 @@ def _write_observations(
             "selection_scope": "next_tasks",
             "snapshot": {
                 "sha256": snapshot_sha,
-                "byte_count": 100 + index,
-                "source_counts": {
-                    "next_tasks": 1,
-                    "task_records": 0,
-                    "ops_jobs": 0,
-                },
+                "byte_count": identity.byte_count,
+                "source_counts": identity.source_counts,
             },
             "legacy_selection": {
                 "policy": "legacy",
@@ -148,8 +155,16 @@ def _write_observations(
         )
 
 
-def _state_path(tmp_path: Path, *, enabled: bool = False) -> Path:
-    path = tmp_path / "task_pool_mode.json"
+def _write_canonical_queue(
+    tmp_path: Path,
+    payload: bytes,
+    *,
+    enabled: bool = False,
+) -> None:
+    queue_path = tmp_path / "next_tasks.json"
+    queue_path.write_bytes(payload)
+    path = tmp_path / "ops" / "task_pool_mode.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(
             {
@@ -162,7 +177,6 @@ def _state_path(tmp_path: Path, *, enabled: bool = False) -> Path:
         ),
         encoding="utf-8",
     )
-    return path
 
 
 def _prepare(
@@ -173,15 +187,14 @@ def _prepare(
     projection=None,
 ):
     rows = legacy_rows or (_legacy_row(),)
+    snapshots = LegacySnapshots(next_tasks=rows)
+    raw = legacy_bytes if legacy_bytes is not None else _legacy_bytes(*rows)
+    _write_canonical_queue(tmp_path, raw)
     observations = tmp_path / "observations"
-    _write_observations(observations)
+    _write_observations(observations, snapshots=snapshots)
     return prepare_work_ownership_cutover(
         observation_directory=observations,
-        queue_owner_state_path=_state_path(tmp_path),
-        legacy_next_tasks_bytes=(
-            legacy_bytes if legacy_bytes is not None else _legacy_bytes(*rows)
-        ),
-        legacy_snapshots=LegacySnapshots(next_tasks=rows),
+        legacy_snapshots=snapshots,
         projection=projection or project_legacy_next_tasks(_staged_snapshot()),
     )
 
@@ -204,7 +217,9 @@ def test_preflight_rejects_incomplete_raw_observation_ledger(
     tmp_path: Path,
 ) -> None:
     observations = tmp_path / "observations"
-    _write_observations(observations, count=1)
+    snapshots = LegacySnapshots(next_tasks=(_legacy_row(),))
+    _write_canonical_queue(tmp_path, _legacy_bytes(_legacy_row()))
+    _write_observations(observations, snapshots=snapshots, count=1)
 
     with pytest.raises(
         ValueError,
@@ -212,9 +227,7 @@ def test_preflight_rejects_incomplete_raw_observation_ledger(
     ):
         prepare_work_ownership_cutover(
             observation_directory=observations,
-            queue_owner_state_path=_state_path(tmp_path),
-            legacy_next_tasks_bytes=_legacy_bytes(_legacy_row()),
-            legacy_snapshots=LegacySnapshots(next_tasks=(_legacy_row(),)),
+            legacy_snapshots=snapshots,
             projection=project_legacy_next_tasks(_staged_snapshot()),
         )
 
@@ -223,8 +236,11 @@ def test_preflight_uses_current_time_to_reject_a_stale_ledger(
     tmp_path: Path,
 ) -> None:
     observations = tmp_path / "observations"
+    snapshots = LegacySnapshots(next_tasks=(_legacy_row(),))
+    _write_canonical_queue(tmp_path, _legacy_bytes(_legacy_row()))
     _write_observations(
         observations,
+        snapshots=snapshots,
         start=datetime(2020, 1, 1, tzinfo=timezone.utc),
     )
 
@@ -234,9 +250,7 @@ def test_preflight_uses_current_time_to_reject_a_stale_ledger(
     ):
         prepare_work_ownership_cutover(
             observation_directory=observations,
-            queue_owner_state_path=_state_path(tmp_path),
-            legacy_next_tasks_bytes=_legacy_bytes(_legacy_row()),
-            legacy_snapshots=LegacySnapshots(next_tasks=(_legacy_row(),)),
+            legacy_snapshots=snapshots,
             projection=project_legacy_next_tasks(_staged_snapshot()),
         )
 

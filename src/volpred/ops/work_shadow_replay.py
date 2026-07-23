@@ -276,6 +276,23 @@ class ShadowReplayLedger:
         }
 
 
+def identify_legacy_snapshots(
+    snapshots: LegacySnapshots,
+) -> ShadowSnapshotIdentity:
+    """Return the canonical identity used by shadow replay receipts."""
+
+    snapshot_bytes = _canonical_snapshot_bytes(snapshots)
+    return ShadowSnapshotIdentity(
+        sha256=hashlib.sha256(snapshot_bytes).hexdigest(),
+        byte_count=len(snapshot_bytes),
+        source_counts={
+            "next_tasks": len(snapshots.next_tasks),
+            "task_records": len(snapshots.task_records),
+            "ops_jobs": len(snapshots.ops_jobs),
+        },
+    )
+
+
 def replay_legacy_selection(
     snapshots: LegacySnapshots,
     *,
@@ -286,15 +303,7 @@ def replay_legacy_selection(
     """Compare both policies over one hash-bound, caller-supplied snapshot."""
     observed_at = _aware_utc(observed_at)
     snapshot_bytes = _canonical_snapshot_bytes(snapshots)
-    snapshot = ShadowSnapshotIdentity(
-        sha256=hashlib.sha256(snapshot_bytes).hexdigest(),
-        byte_count=len(snapshot_bytes),
-        source_counts={
-            "next_tasks": len(snapshots.next_tasks),
-            "task_records": len(snapshots.task_records),
-            "ops_jobs": len(snapshots.ops_jobs),
-        },
-    )
+    snapshot = identify_legacy_snapshots(snapshots)
     immutable_snapshots = _snapshots_from_canonical_bytes(snapshot_bytes)
     report = preview_legacy_snapshots(immutable_snapshots)
     raw_next_tasks = tuple(
@@ -1722,5 +1731,6 @@ __all__ = [
     "ShadowSelectionDifference",
     "ShadowSelectionView",
     "ShadowSnapshotIdentity",
+    "identify_legacy_snapshots",
     "replay_legacy_selection",
 ]
