@@ -156,7 +156,10 @@ def test_unexplained_selector_drift_blocks_cutover(tmp_path: Path) -> None:
     )
 
     assert report.ready_for_cutover is False
-    assert report.reason_codes == ("blocking_selection_difference",)
+    assert report.reason_codes == (
+        "selection_evidence_mismatch",
+        "blocking_selection_difference",
+    )
 
 
 def test_simultaneous_queue_owner_evidence_blocks_cutover(
@@ -505,7 +508,10 @@ def test_each_receipt_must_reconcile_its_own_queue_row_count(
     )
 
     assert report.ready_for_cutover is False
-    assert report.reason_codes == ("receipt_row_count_mismatch",)
+    assert report.reason_codes == (
+        "receipt_row_count_mismatch",
+        "selection_evidence_mismatch",
+    )
 
 
 def test_each_candidate_must_carry_every_required_dimension(
@@ -707,3 +713,149 @@ def test_backdated_replay_clock_cannot_fake_seven_recorded_days(
         "observation_window_too_short",
         "replay_clock_not_live",
     )
+
+
+def test_selection_difference_must_match_selector_views(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    forged_path = observations / "scheduled_04.json"
+    forged = json.loads(forged_path.read_text(encoding="utf-8"))
+    snapshot_sha = forged["snapshot"]["sha256"]
+    forged["selection_difference"] = {
+        "legacy_selected_candidate_ref": "ghost:A",
+        "coordinator_selected_candidate_ref": "ghost:B",
+        "classification": "policy_change",
+        "classification_reason_code": "coordinator_ranking_contract",
+        "evidence_refs": [
+            "contract://work-selection/selection-outcome",
+            "contract://work-selection/priority",
+            f"snapshot://sha256/{snapshot_sha}",
+            (
+                "oracle://work-selection/"
+                "coordinator_ranking_contract"
+            ),
+        ],
+    }
+    forged_path.write_text(json.dumps(forged), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("selection_evidence_mismatch",)
+
+
+def test_changed_selector_views_require_a_difference_receipt(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    missing_path = observations / "scheduled_04.json"
+    missing = json.loads(missing_path.read_text(encoding="utf-8"))
+    missing["coordinator_selection"]["selected_candidate_ref"] = None
+    missing["coordinator_selection"]["eligible_candidate_refs"] = []
+    missing_path.write_text(json.dumps(missing), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("selection_evidence_mismatch",)
+
+
+def test_winner_change_cannot_borrow_unrelated_candidate_policy(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    borrowed_path = observations / "scheduled_04.json"
+    borrowed = json.loads(borrowed_path.read_text(encoding="utf-8"))
+    snapshot_sha = borrowed["snapshot"]["sha256"]
+    original = borrowed["comparisons"][0]
+    second = json.loads(json.dumps(original))
+    second["candidate_ref"] = "next_tasks:task-2"
+    third = json.loads(json.dumps(original))
+    third["candidate_ref"] = "next_tasks:task-3"
+    claim_dimension = third["dimensions"][1]
+    claim_dimension["matches"] = False
+    claim_dimension["classification"] = "policy_change"
+    claim_dimension["classification_reason_code"] = (
+        "coordinator_inline_lease_contract"
+    )
+    claim_dimension["legacy_reason_codes"] = ["eligible"]
+    claim_dimension["coordinator_reason_codes"] = ["live_claim"]
+    claim_dimension["evidence_refs"] = [
+        "next_tasks:task-3#claim_ownership",
+        "contract://work-selection/claim-ownership",
+        f"snapshot://sha256/{snapshot_sha}",
+        (
+            "oracle://work-selection/"
+            "coordinator_inline_lease_contract"
+        ),
+    ]
+    borrowed["snapshot"]["source_counts"]["next_tasks"] = 3
+    borrowed["comparisons"] = [original, second, third]
+    borrowed["legacy_selection"]["eligible_candidate_refs"] = [
+        "next_tasks:task-1",
+        "next_tasks:task-2",
+        "next_tasks:task-3",
+    ]
+    borrowed["coordinator_selection"]["selected_candidate_ref"] = (
+        "next_tasks:task-2"
+    )
+    borrowed["coordinator_selection"]["eligible_candidate_refs"] = [
+        "next_tasks:task-1",
+        "next_tasks:task-2",
+        "next_tasks:task-3",
+    ]
+    borrowed["selection_difference"] = {
+        "legacy_selected_candidate_ref": "next_tasks:task-1",
+        "coordinator_selected_candidate_ref": "next_tasks:task-2",
+        "classification": "policy_change",
+        "classification_reason_code": (
+            "coordinator_inline_lease_contract"
+        ),
+        "evidence_refs": [
+            "contract://work-selection/selection-outcome",
+            *claim_dimension["evidence_refs"],
+        ],
+    }
+    borrowed_path.write_text(json.dumps(borrowed), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("unregistered_policy_change",)

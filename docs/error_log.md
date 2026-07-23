@@ -897,11 +897,15 @@ queue row count、candidate identity 與五個必要 dimensions；`policy_change
 candidate／dimension、snapshot、contract 與 oracle evidence refs，且完整 legacy /
 Coordinator reason sets 必須符合 `work_shadow_replay.is_registered_policy_change()`
 同一條 oracle rule 的 prerequisites，不能只借用已登錄的 reason-code 名稱。
+selection difference 必須與 legacy／Coordinator selection views 精確一致；selected /
+eligible refs 都要存在於 comparisons，非 ranking reason 只能取自實際兩個 winner，
+不能借用未被選中 candidate 的合法差異。
 所有 early failure 統一走單一 report constructor，避免欄位漂移。
 
 **回歸與結案界線**：新增 caller spoof、future time、單日 row/dimension 缺口、
 duplicate candidate、backdated replay clock、mode/SHA 單讀競態與
-forged/registered policy-change prerequisites cases；shadow assessment／
+forged/registered policy-change prerequisites、ghost winner、missing difference
+與 unrelated-candidate borrowed reason cases；shadow assessment／
 replay、direct-mode、claim 與 handoff targeted suites 通過。live mode 仍是
 `direct_execution`，沒有七日 soak、CAS cutover、唯讀 legacy projection 或 rollback
 rehearsal，所以 Issue #9 仍為 **contained**；待七日真實 receipts 與第二輪 Matt review

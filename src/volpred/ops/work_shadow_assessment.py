@@ -285,6 +285,11 @@ def assess_shadow_observation_directory(
     ):
         reasons.append("candidate_dimension_incomplete")
     if any(
+        not _selection_evidence_is_consistent(receipt)
+        for receipt in receipts
+    ):
+        reasons.append("selection_evidence_mismatch")
+    if any(
         isinstance(receipt.get("selection_difference"), dict)
         and receipt["selection_difference"].get("classification")
         != "policy_change"
@@ -397,6 +402,24 @@ def _receipt_shape_is_valid(receipt: dict[str, Any]) -> bool:
         if (
             not isinstance(selection, dict)
             or not isinstance(selection.get("snapshot_sha256"), str)
+            or (
+                selection.get("selected_candidate_ref") is not None
+                and not isinstance(
+                    selection.get("selected_candidate_ref"),
+                    str,
+                )
+            )
+            or not isinstance(
+                selection.get("eligible_candidate_refs"),
+                list,
+            )
+            or not all(
+                isinstance(reference, str) and reference
+                for reference in selection.get(
+                    "eligible_candidate_refs",
+                    [],
+                )
+            )
         ):
             return False
     comparisons = receipt.get("comparisons")
@@ -477,7 +500,7 @@ def _has_unregistered_policy_change(
 ) -> bool:
     for receipt in receipts:
         snapshot_sha256 = receipt["snapshot"]["sha256"]
-        valid_dimension_reasons: set[str] = set()
+        valid_dimension_reasons: dict[str, set[str]] = {}
         for comparison in receipt["comparisons"]:
             for dimension in comparison["dimensions"]:
                 if (
@@ -491,7 +514,10 @@ def _has_unregistered_policy_change(
                     snapshot_sha256=snapshot_sha256,
                 ):
                     return True
-                valid_dimension_reasons.add(
+                valid_dimension_reasons.setdefault(
+                    comparison["candidate_ref"],
+                    set(),
+                ).add(
                     dimension["classification_reason_code"]
                 )
         selection = receipt.get("selection_difference")
@@ -525,14 +551,59 @@ def _has_unregistered_policy_change(
             ):
                 return True
             continue
-        if reason_code not in valid_dimension_reasons:
+        selected_refs = {
+            reference
+            for reference in (
+                selection.get("legacy_selected_candidate_ref"),
+                selection.get("coordinator_selected_candidate_ref"),
+            )
+            if isinstance(reference, str)
+        }
+        if not any(
+            reason_code
+            in valid_dimension_reasons.get(reference, set())
+            for reference in selected_refs
+        ):
             return True
         if {
+            "contract://work-selection/selection-outcome",
             f"snapshot://sha256/{snapshot_sha256}",
             f"oracle://work-selection/{reason_code}",
         } - set(evidence_refs):
             return True
     return False
+
+
+def _selection_evidence_is_consistent(
+    receipt: dict[str, Any],
+) -> bool:
+    candidate_refs = {
+        comparison["candidate_ref"]
+        for comparison in receipt["comparisons"]
+    }
+    legacy = receipt["legacy_selection"]
+    coordinator = receipt["coordinator_selection"]
+    for selection in (legacy, coordinator):
+        eligible = set(selection["eligible_candidate_refs"])
+        selected = selection["selected_candidate_ref"]
+        if not eligible.issubset(candidate_refs):
+            return False
+        if selected is not None and (
+            selected not in candidate_refs or selected not in eligible
+        ):
+            return False
+    legacy_selected = legacy["selected_candidate_ref"]
+    coordinator_selected = coordinator["selected_candidate_ref"]
+    difference = receipt.get("selection_difference")
+    if legacy_selected == coordinator_selected:
+        return difference is None
+    return (
+        isinstance(difference, dict)
+        and difference.get("legacy_selected_candidate_ref")
+        == legacy_selected
+        and difference.get("coordinator_selected_candidate_ref")
+        == coordinator_selected
+    )
 
 
 __all__ = [

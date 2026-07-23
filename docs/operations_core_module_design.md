@@ -396,6 +396,9 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   priority／claim ownership／parent／deadline／terminal disposition，未來時間、
   snapshot identity drift、重複 observation、未註冊 policy oracle reason、
   reconciliation issue 或 blocking selector difference 全部 fail closed。
+  selection difference 與兩個 selector views 採 iff／exact-ref 契約，所有 selected /
+  eligible refs 必須存在於該 receipt comparisons；非 ranking policy reason 只能由
+  實際 legacy／Coordinator winner 的已驗證 mismatch dimension 提供。
   初版 `d53a705a6` 經 Matt 雙軸 review 發現 caller-declared mode、future receipt、
   cross-day dimension union 與 policy-change 字串豁免四個 gate 漏洞；第二輪又發現
   mode/SHA 雙讀競態、`observed_at` 可回填七日，以及只驗 oracle reason 名稱而未驗
