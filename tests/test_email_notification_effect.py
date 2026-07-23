@@ -20,6 +20,7 @@ from volpred.ops.delivery._email_notification import (
     EmailNotificationEffectAdapter,
     ImapSentMailReader,
 )
+from volpred.publisher import email_notifier as email_notifier_module
 from volpred.publisher.email_notifier import EmailNotifier
 
 
@@ -324,6 +325,11 @@ def test_email_notifier_threads_stable_message_id_into_transport_and_log(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(
+        email_notifier_module,
+        "_prime_project_env",
+        lambda: None,
+    )
     monkeypatch.setenv("ADMIN_NOTIFICATION_EMAILS", "owner@example.com")
     monkeypatch.setenv("EMAIL_FROM", "ops@example.com")
     monkeypatch.setenv("SMTP_HOST", "smtp.example.com")
@@ -358,6 +364,11 @@ def test_email_notifier_rejects_invalid_or_conflicting_message_identity(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(
+        email_notifier_module,
+        "_prime_project_env",
+        lambda: None,
+    )
     monkeypatch.setenv("ADMIN_NOTIFICATION_EMAILS", "owner@example.com")
     monkeypatch.setenv("EMAIL_FROM", "ops@example.com")
     monkeypatch.setenv("SMTP_HOST", "smtp.example.com")
