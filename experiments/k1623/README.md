@@ -320,14 +320,15 @@ brief 要求至少在 limitation 揭露「demeaned d̂ 的 SE 未計入斷點是
 設計：500 次重複，seed=42，burn-in 2000。DGP = ARFIMA(0, d̂, 0) + 在**估計出的斷點日期**植入
 **已擬合的分段常數 level**。
 - **Arm A**（真實）= 模擬 → Bai-Perron **重新估計**斷點 → demean → ELW
-- **Arm B**（**僅位置** oracle）= 模擬 → 在**真實斷點位置** demean → ELW
+- **Arm B**（**partition oracle**）= 模擬 → 在真實斷點 partition（**數量＋位置**）demean → ELW
 - **Arm C**（**完全 oracle**，rev3 新增，`k1623_rev3_armc_mc.py`）= 模擬 → 減去**已知的植入 level 向量**
   → ELW（斷點位置與各段 level **都不估計**；數值上等於直接對原始 ARFIMA 路徑跑 ELW）
 
 > **✅ rev3 更新（2026-07-20）— 原本的「已揭露、未修復」缺口現已量測**：
 > `k1623_rev2_mc.py:118-120` 的 Arm B 呼叫 `K.piecewise_demean(x, breaks_true)`，
-> **斷點「位置」用真值，但每段的「均值」仍是從模擬資料估出來的**（沒有用已知的植入 level 向量）。
-> 所以 Arm B **只 oracle 化了斷點位置**；A−B 只隔離「找斷點位置」的成本，
+> **斷點 partition（數量＋位置）用真值，但每段的「均值」仍是從模擬資料估出來的**
+> （沒有用已知的植入 level 向量）。
+> 所以 Arm B oracle 化的是**整個斷點 partition**；A−B 隔離 BIC 同時選數量與位置的合併成本，
 > 「估各段均值」的成本在 A、B 兩臂都存在而被差分掉。
 > rev2 當時把這個缺口列為 **DISCLOSED, NOT FIXED**（揭露但未量測、也未設上界）。
 > **rev3 加入 Arm C 後，該項已從「未量測」變成「已量測」**：`B−C = −0.043 至 −0.022`（見下表）。
@@ -490,7 +491,7 @@ A−B 欄與凍結的 `k1623_rev2_mc_results.json` → `claim_corrections_rev3.c
 | §6.3 全部（ratio / t / p / BH / Bonferroni / 反轉） | rev2 | `k1623_rev2_results.json` → `dm_comparisons[]`、`loss_function_sign_reversal[]` |
 | §6.4 表 A「d̂」「總偏誤」、表 B「漸近 SE」「MC sd」「低估倍數」、回收率 | MC | `k1623_rev2_mc_results.json` → `per_asset` |
 | §6.4 表 A「A−B」欄 | MC（rev3 由凍結 arm means **計算**，非重跑；與 Arm C 那輪重跑值**逐位元相同**） | `k1623_rev2_mc_results.json` → `claim_corrections_rev3.corrected_attribution` |
-| §6.4 表 A「B−C」「A−C」「C−d̂」、表 B「f1/f2/f3」「主導因子」、finding 2 全部 | **Arm C**（rev3 新增，重跑三臂） | **`k1623_rev3_armc_results.json`** → `per_asset.*.{bias,sd}_decomposition`、`summary` |
+| §6.4 表 A「B−C」「A−C」「C−d̂」、表 B「f1/f2/f3」、通道點估與 dominance 未識別聲明 | **Arm C**（rev3 新增，重跑三臂） | **`k1623_rev3_armc_results.json`** → `per_asset.*.{bias,sd}_decomposition`、`summary` |
 | §0 撤回表、§7 limitations | rev2 | `k1623_rev2_results.json` → `retracted_claims[]`、`residual_limitations[]` |
 
 **所以正確的說法是：每個 README 數字都能在上表指定的那一份 artifact 裡對上 —— 但不是全部都在 rev2 JSON 裡。**

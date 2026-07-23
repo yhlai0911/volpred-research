@@ -42,8 +42,8 @@
         "README.md:137",
         "README.md:144",
         "README.md:180",
-        "README.md:455",
-        "README.md:549",
+        "README.md:456",
+        "README.md:550",
         "k1623_rev2.py:533",
         "k1623_rev2.py:687",
         "k1623_rev2_results.json:54",
@@ -64,7 +64,7 @@
         "README.md:41",
         "README.md:42",
         "README.md:284",
-        "README.md:546"
+        "README.md:547"
       ],
       "unqualified_hits": [],
       "allowlisted": [],
@@ -78,7 +78,7 @@
       "pattern": "所有數字不變|所有預測值不變|forecasts unchanged",
       "hits": [
         "README.md:176",
-        "README.md:512"
+        "README.md:513"
       ],
       "unqualified_hits": [],
       "allowlisted": [],
@@ -93,8 +93,8 @@
       "hits": [
         "README.md:234",
         "README.md:268",
-        "README.md:512",
-        "README.md:548",
+        "README.md:513",
+        "README.md:549",
         "k1623_rev2.py:537",
         "k1623_rev2.py:598",
         "k1623_rev2.py:691",
@@ -113,8 +113,8 @@
       "kind": "qualified",
       "pattern": "-0\\.085 to -0\\.027|−0\\.085 到 −0\\.027|0\\.085 至 .?0\\.027",
       "hits": [
-        "README.md:392",
-        "README.md:514",
+        "README.md:393",
+        "README.md:515",
         "k1623_rev2_mc_results.json:180",
         "k1623_rev2_mc_results.json:202",
         "k1623_rev3_patch_mc_artifact.py:103"
@@ -136,9 +136,9 @@
       "pattern": "break DATES|斷點.{0,4}日期",
       "hits": [
         "README.md:320",
-        "README.md:407",
-        "README.md:409",
-        "README.md:433",
+        "README.md:408",
+        "README.md:410",
+        "README.md:434",
         "k1623_rev2.py:645",
         "k1623_rev2.py:736",
         "k1623_rev2_mc.py:278",
@@ -235,7 +235,7 @@
       "kind": "qualified",
       "pattern": "每一個 README 數字都可在 JSON 逐項對上|每一個 README 數字都可在 rev2 JSON",
       "hits": [
-        "README.md:481"
+        "README.md:482"
       ],
       "unqualified_hits": [],
       "allowlisted": [],
@@ -246,7 +246,7 @@
       "rule_id": "R4-partition-channel-name",
       "blocker": "R4-B1",
       "kind": "forbidden",
-      "pattern": "break_location_(?:estimation_)?effect|f3_break_location|sd_factor_3_break_location|斷點定位\\s*\\(A[−-]B\\)|f3\\s+斷點定位",
+      "pattern": "break_location_(?:estimation_)?effect|f3_break_location|sd_factor_3_break_location|斷點定位\\s*\\(A[−-]B\\)|f3\\s+斷點定位|僅位置.{0,10}oracle|只\\s*oracle\\s*化.{0,10}斷點位置|A[−-]B\\s*只隔離.{0,20}(?:斷點位置|找斷點位置)",
       "hits": [],
       "unqualified_hits": [],
       "allowlisted": [],
@@ -257,7 +257,7 @@
       "rule_id": "R4-no-dominant-classification",
       "blocker": "R4-B2",
       "kind": "forbidden",
-      "pattern": "dominant_sd_factor_per_asset|逐資產主導因子|主導因子\\s*\\|",
+      "pattern": "dominant_sd_factor_per_asset|逐資產主導因子|主導因子\\s*\\||「主導因子」",
       "hits": [],
       "unqualified_hits": [],
       "allowlisted": [],

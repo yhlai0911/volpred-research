@@ -135,12 +135,14 @@ RULES = [
      "README numbers live across three artifacts, not one."),
     ("R4-partition-channel-name", "R4-B1", "forbidden",
      r"break_location_(?:estimation_)?effect|f3_break_location|"
-     r"sd_factor_3_break_location|斷點定位\s*\(A[−-]B\)|f3\s+斷點定位",
+     r"sd_factor_3_break_location|斷點定位\s*\(A[−-]B\)|f3\s+斷點定位|"
+     r"僅位置.{0,10}oracle|只\s*oracle\s*化.{0,10}斷點位置|"
+     r"A[−-]B\s*只隔離.{0,20}(?:斷點位置|找斷點位置)",
      (),
      "A-B mixes BIC break-count selection and break-location estimation; active channel names "
      "must say break-partition selection."),
     ("R4-no-dominant-classification", "R4-B2", "forbidden",
-     r"dominant_sd_factor_per_asset|逐資產主導因子|主導因子\s*\|",
+     r"dominant_sd_factor_per_asset|逐資產主導因子|主導因子\s*\||「主導因子」",
      (),
      "At 500 reps, per-asset dominant-channel classifications are not identified."),
     ("R4-dominance-false", "R4-B2", "required",
