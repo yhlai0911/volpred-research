@@ -70,6 +70,17 @@
 > interface；尚無 live Postgres authority adapter、`ChangeDelivery.land`、durable
 > receipt 或正式 caller，因此不改變目前 Git writer ownership。
 
+> **Effect Delivery request-identity contract（2026-07-24，shadow）**
+> `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
+> 每個 intent 必須綁定 WorkItem id／version、effect kind、target、payload reference
+> 與 SHA-256、risk、requester，以及 typed downstream acknowledgement expectation；
+> normalized payload 另綁成 canonical SHA-256。同一 idempotency key 的等價／並發
+> replay 只 materialize 一個 EffectRequest，任何欄位漂移皆 fail closed。這只是
+> program commit 11 的 in-process contract；尚未連接 PostgreSQL transaction、
+> WorkItem + outbox atomic write、effect-worker fencing、provider adapter、retry 或
+> downstream read-back，因此不會產生外部效果，也不改變現行 publisher／notification
+> ownership。
+
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。
 > **實際控制面 = 5 層並存**（非單純 v12 單線程）：

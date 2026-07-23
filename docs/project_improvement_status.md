@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（commit actuator authority fencing contract）**
+Last updated: **2026-07-24（EffectRequest idempotency contract）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -84,6 +84,15 @@ reference，不保存 raw token，且沿用 commit object／parent／exact paths
 read-back。此 checkpoint 尚未提供 live Postgres authority adapter、
 `ChangeDelivery.land`、durable receipt 或正式 caller，故不構成 commit ownership
 cutover；主控租約 acquire／renew／demote 仍屬 program step 34。
+同日完成 platform program commit 11 的 shadow EffectRequest identity contract：
+`EffectDelivery.request()` 將 WorkItem id／version、effect kind、target、payload
+reference + SHA-256、risk、requester 與 typed acknowledgement expectation 綁入
+canonical request digest；等價 replay 回傳同一 immutable view，同 key 不同 payload
+fail closed，並發 replay 只 materialize 一筆。117 個 delivery scoped tests 通過，其中
+含 32 路 concurrency 與 64 組 payload-bound replay property cases。此 checkpoint
+尚未建立 program commit 12 的 PostgreSQL store／transactional outbox，也沒有
+effect-worker fencing、provider delivery、retry／dead letter 或 downstream read-back，
+因此不會產生外部效果，現行 publisher／notification ownership 不變。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

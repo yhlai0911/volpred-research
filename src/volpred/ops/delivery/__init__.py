@@ -1,9 +1,10 @@
-"""Shadow Change Delivery interface.
+"""Shadow Change and Effect Delivery interfaces.
 
-This first vertical slice owns immutable ChangeSet proposal validation. It is
-deliberately disconnected from the live Git writer: proposing a ChangeSet is a
-read-only operation, while landing one remains behind the later commit-worker
-and Primary Authority gates described in ``operations_core_module_design.md``.
+The current slices own immutable ChangeSet proposal validation and
+payload-bound EffectRequest identity. They remain disconnected from live Git
+and external providers: landing, outbox delivery, and downstream effects stay
+behind later worker and Primary Authority gates described in
+``operations_core_module_design.md``.
 """
 
 from __future__ import annotations
@@ -17,6 +18,14 @@ import re
 import subprocess
 from threading import RLock
 from typing import Callable
+
+from ._effect import (
+    AcknowledgementExpectation,
+    EffectDelivery,
+    EffectRequest,
+    EffectRequestConflict,
+    EffectView,
+)
 
 
 _GIT_OBJECT_ID = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})")
@@ -404,10 +413,15 @@ def _validate_workspace(proposal: ChangeSetProposal) -> None:
 
 
 __all__ = [
+    "AcknowledgementExpectation",
     "ChangeDelivery",
     "ChangeSetConflict",
     "ChangeSetProposal",
     "ChangeSetView",
     "CheckEvidence",
     "ContentHash",
+    "EffectDelivery",
+    "EffectRequest",
+    "EffectRequestConflict",
+    "EffectView",
 ]

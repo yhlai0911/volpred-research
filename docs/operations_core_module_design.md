@@ -216,6 +216,21 @@ class EffectDelivery:
 
 Implementation 隱藏 retry、backoff、dead letter、provider-specific request、下游 read-back 與 reconcile。每個 true external system有 production adapter 與 fake adapter；不存在一個無型別的 `execute(action, payload)`。
 
+### 2026-07-24 EffectRequest idempotency checkpoint
+
+- program commit 11 已建立 shadow `EffectDelivery.request()`／`inspect()` external
+  interface。`EffectRequest` 強制追溯 WorkItem id／version，並明確保存 effect kind、
+  target reference、payload reference + SHA-256、`safe | sensitive | destructive`
+  risk、requester 與 typed acknowledgement kind／read-back target。
+- normalized request 的每個語意欄位都進入 canonical JSON SHA-256。同一 idempotency
+  key 的等價 replay 回傳原始 immutable `EffectView`；不同 payload 拒絕。in-process
+  lock 讓 32 路 concurrent replay 仍只呼叫一次 id factory；64 組不同 intent 的
+  payload-bound replay property cases 另行覆蓋 identity。
+- 此 checkpoint 不包含 program commit 12 的 durable store／transactional outbox。
+  `request` 尚未與 WorkItem 在同一 PostgreSQL transaction 寫入，也沒有 `deliver`、
+  effect-worker fencing、provider adapter、retry／dead letter 或 acknowledgement
+  read-back；因此它不產生外部效果，也不構成 Effect Delivery ownership cutover。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam
