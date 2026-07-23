@@ -43681,10 +43681,30 @@
     "title": "K1257/K1258：posterior/drop 機器可讀語意欄位 + 重複 diagnostics 合併 + Codex round 2 hash-bound 認證",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "description": "承 k1257_k1258_realign_doc_remediation。剩餘放行最小條件 3 與 5 後半，需動程式碼+重跑，故不與 doc-only 修正同批：\n(3) 兩支結果加 absorbing_dropped_models / ever_invalid_models / 逐模型 final_weight_status；K1258 補 posterior_semantics 與 floor-revival 語意；合併重複的 invalid_forecast_days 與 dropped_model_days（k1257_bma_volatility.py:576 同分支同步加一，確實完全重複）→ 後者改名 drop_events / posterior_excluded_days。\n(5) claim-surface bytes 定版後跑 Codex round 2，產生 hash-bound review_verdict.json 讓 experiment_gates.py 的 review-certification gate 過關。verdict 檔 schema 一律用 `uv run python scripts/experiment_gates.py verdict-template` 產生，禁手抄（2026-07-14 k1709 schema drift 教訓）。\n注意：Codex CONDITIONAL PASS 已獨立重算過 parquet replay，數字全部吻合；重跑後若 headline 有變即為迴歸，須停下查。",
-    "created_at": "2026-07-19T23:10:04.358676+00:00"
+    "created_at": "2026-07-19T23:10:04.358676+00:00",
+    "claimed_by": "codex-failover-slot-1-c685add67d8040a5b6e1e2c952871c9e",
+    "claimed_at": "2026-07-23T11:08:54.750093+00:00",
+    "claim_session_id": "c21c264d3fa5",
+    "status_history": [
+      {
+        "ts": "2026-07-23T11:08:54.750100+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-c685add67d8040a5b6e1e2c952871c9e"
+      },
+      {
+        "ts": "2026-07-23T11:08:55.004127+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-c685add67d8040a5b6e1e2c952871c9e"
+      }
+    ],
+    "started_at": "2026-07-23T11:08:55.004113+00:00",
+    "compute_job_id": "k1257-k1258-semantics-rerun-20260723",
+    "result": "dispatched to compute job k1257-k1258-semantics-rerun-20260723; awaiting PHASE A collection"
   },
   {
     "id": "assign_e7643d81",
